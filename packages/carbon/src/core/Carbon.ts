@@ -75,7 +75,7 @@ export class Carbon extends EventEmitter {
 	}
 
 	get tr(): Transaction {
-		return Transaction.create(this, this.tm, this.pm);
+		return Transaction.create(this, this.tm, this.pm, this.sm);
 	}
 
 

@@ -47,6 +47,9 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
       } else {
         editor.store.delete(node);
       }
+      return () => {
+        editor.store.delete(node);
+      }
     }, [editor, node]);
 
     return (
@@ -69,10 +72,6 @@ export const CarbonElement = forwardRef(InnerElement);
 
 export const CarbonText = (props: RendererProps) => {
   const { node } = props;
-
-  if (!node.marks.size) {
-    return <>{node.textContent}</>
-  }
 
   return (
     <CarbonElement node={node} tag="span">

@@ -22,9 +22,13 @@ export class SelectAction implements Action {
 		this.origin = origin;
 	}
 
-	execute(tr: Transaction): ActionResult<any> {
-		throw new Error("Method not implemented.");
+	execute(tr: Transaction): ActionResult {
+		const { before, after, origin } = this;
+		tr.onSelect(before, after, origin);
+
+		return ActionResult.withValue('done')
 	}
+
 	inverse(): Action {
 		throw new Error("Method not implemented.");
 	}

@@ -64,10 +64,7 @@ export class Point {
 	}
 
 	toString() {
-		const {nodeId, at} = this;
-		return classString(this)({
-			nodeId,
-			at,
-		})
+		const {nodeId, at, offset} = this;
+		return classString(this)(`${nodeId.toString()}/${at}/${offset}`)
 	}
 }

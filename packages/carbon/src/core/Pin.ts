@@ -83,7 +83,7 @@ export class Pin {
 		this.offset = offset;
 	}
 
-	private transform(): Optional<Pin> {
+	up(): Optional<Pin> {
 		const { node, offset } = this;
 		if (node.isBlock) return this;
 
@@ -105,6 +105,26 @@ export class Pin {
 		return Pin.create(parent, distance);
 	}
 
+	down() {
+		const { node, offset } = this;
+		if (offset === 0 && node.isEmpty || node.isInline) {
+			return this.clone()
+		}
+
+		let distance = offset;
+		let pin: Optional<Pin>
+		node?.children.some(n => {
+			if (distance <= n.focusSize) {
+				pin = Pin.create(n, distance)
+				return true
+			}
+			distance -= n.focusSize;
+			return false
+		})
+
+		return pin;
+	}
+
 	// check if pin is before the provided pin
 	isBefore(of: Pin): boolean {
 		if (this.node.eq(of.node)) {
@@ -120,7 +140,6 @@ export class Pin {
 		}
 		return this.node.after(of.node);
 	}
-
 
 	// check if pin is at the start of the provided node
 	isAtStartOfNode(node: Node): boolean {
@@ -153,7 +172,8 @@ export class Pin {
 
 	// move the pin by distance through focusable nodes
 	moveBy(distance: number): Optional<Pin> {
-		return distance >= 0 ? this.moveForwardBy(distance) : this.moveBackwardBy(-distance);
+		const down = this.down()
+		return distance >= 0 ? down.moveForwardBy(distance)?.up() : down.moveBackwardBy(-distance)?.up();
 	}
 
 	// each step can be considered as one right key press
@@ -161,7 +181,7 @@ export class Pin {
 	private moveForwardBy(distance: number): Optional<Pin> {
 		// console.log('Pin.moveForwardBy', this.toString(),distance);
 		if (distance === 0) {
-			return this.transform()
+			return this.clone()
 		}
 
 		let { node, offset } = this;
@@ -192,16 +212,16 @@ export class Pin {
 		}
 
 		if (!curr) {
-			return Pin.create(prev, prev.size).transform();
+			return Pin.create(prev, prev.size);
 		}
 
-		return Pin.create(curr, distance).transform();
+		return Pin.create(curr, distance);
 	}
 
 	// each step can be considered as one left key press
 	private moveBackwardBy(distance: number): Optional<Pin> {
 		if (distance === 0) {
-			return this.transform();
+			return this.clone()
 		}
 
 		let { node, offset } = this;
@@ -231,15 +251,18 @@ export class Pin {
 		// console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);
 
 		if (!curr) {
-			return Pin.create(prev, 0).transform();
+			return Pin.create(prev, 0);
 		}
 
-		return Pin.create(curr, curr.size - distance).transform();
+		return Pin.create(curr, curr.size - distance);
 	}
-
 
 	eq(other: Pin) {
 		return this.node.eq(other.node) && this.offset === other.offset
+	}
+
+	clone() {
+		return new Pin(this.node, this.offset);
 	}
 
 	toJSON() {
@@ -247,9 +270,7 @@ export class Pin {
 	}
 
 	toString() {
-		return classString(this)({
-			nodeId: this.node.id.toString(),
-			offset: this.offset
-		})
+		const {node, offset} = this
+		return classString(this)(`${node.id.actorId}#${node.id.clock}/${offset}`)
 	}
 }

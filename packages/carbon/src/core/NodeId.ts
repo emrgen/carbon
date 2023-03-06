@@ -44,7 +44,7 @@ export class NodeId {
 
 	toString() {
 		const {actorId, clock} = this;
-		return classString(this)({actorId, clock})
+		return `${actorId}#${clock}`
 	}
 
 	toJSON() {

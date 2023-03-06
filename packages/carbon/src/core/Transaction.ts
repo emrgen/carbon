@@ -17,6 +17,7 @@ import { PointedSelection } from './PointedSelection';
 import { NodeId } from './NodeId';
 import { NodeName } from './types';
 import { SelectAction } from './actions/Select';
+import { SelectionManager } from './SelectionManager';
 
 export class TransactionError {
 	commandId: number;
@@ -65,8 +66,8 @@ export class Transaction {
 		return this.state.runtime;
 	}
 
-	static create(carbon: Carbon, tm: TransactionManager, pm: PluginManager) {
-		return new Transaction(carbon, tm, pm)
+	static create(carbon: Carbon, tm: TransactionManager, pm: PluginManager, sm: SelectionManager) {
+		return new Transaction(carbon, tm, pm, sm)
 	}
 
 	static __join(...trs: Optional<Transaction>[]): Transaction {
@@ -84,7 +85,12 @@ export class Transaction {
 		return tr
 	}
 
-	constructor(readonly app: Carbon, private readonly tm: TransactionManager, private readonly pm: PluginManager) {
+	constructor(
+		readonly app: Carbon,
+		private readonly tm: TransactionManager,
+		private readonly pm: PluginManager,
+		private readonly sm: SelectionManager
+	) {
 		this.id = getId();
 	}
 
@@ -105,6 +111,10 @@ export class Transaction {
 		const sel = last(this.selections)?.clone() ?? this.state.selection.unpin();
 		// console.debug(p14('%c[debug]'), 'color:magenta','editor.selection', sel.toString());
 		return sel
+	}
+
+	onSelect(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+		this.sm.onSelect(before, after, origin);
 	}
 
 	select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
@@ -203,12 +213,13 @@ export class Transaction {
 			} else {
 				console.group('Transaction');
 			}
+
 			for (const action of this.actions) {
 				console.log(p14('%c[command]'), "color:white", action.toString());
 
-				const undo = action.execute(this);
-				if (!undo.ok) {
-					this.error = new TransactionError(action.id, undo.error!);
+				const { ok, error  } = action.execute(this);
+				if (!ok) {
+					this.error = new TransactionError(action.id, error!);
 				}
 
 				if (this.error) {
@@ -222,12 +233,12 @@ export class Transaction {
 			// const onlySelectionChanged = this.commands.every(c => c instanceof SelectCommand)
 			// if (!onlySelectionChanged) {
 
-			this.committed = true;
 
 			// normalize after transaction command
 			// this way the merge will happen before the final selection
 
 			this.normalizeNodes();
+			this.committed = true;
 			// console.log(this.editor.doc.textContent);
 			return true;
 		} catch (error) {

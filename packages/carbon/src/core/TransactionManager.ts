@@ -5,11 +5,13 @@ import { Transaction } from "./Transaction";
 import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
 import { EventsOut } from './Event';
+import { PointedSelection } from './PointedSelection';
+import { ActionOrigin } from './actions/types';
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];
 
-	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager) {}
+	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager) { }
 
 	private get state() {
 		return this.app.state;
@@ -32,45 +34,18 @@ export class TransactionManager {
 	}
 
 	private processTransactions() {
-		const {app: editor, pm} = this
+		const { app, pm } = this
 		// allow transactions to run only when there is no pending selection events
 		// normalizer transactions are allowed to commit even with pending selection events
 		while (this.transactions.length && (!this.runtime.selectEvents.length || this.transactions[0].isNormalizer)) {
 			const tr = this.transactions.shift();
-			// console.log(tr)
+			console.log(tr)
 			if (tr?.commit()) {
 				pm.onTransaction(tr);
-				editor.emit(EventsOut.transaction, tr);
+				app.emit(EventsOut.transaction, tr);
 				this.updateTransactionEffects(tr);
 			}
 		}
-
-		// if (!this.runtime.selectEvents.length) {
-		// 	let length = this.transactions.length
-		// 	// if tr.commit add pending selection stop the loop
-		// 	while (length--) {
-		// 		const tr = this.transactions.shift();
-		// 		if (tr?.commit()) {
-		// 			this.commitState();
-		// 			pm.onTransaction(tr);
-		// 			editor.emit('transaction', tr);
-		// 		}
-		// 	}
-		// 	if (this.runtime.selectEvents.length) {
-		// 		// editor.ticks.forEach(fn => fn());
-		// 		// editor.ticks = [];
-		// 	}
-		// 	// console.log(this.pendingNormalizeIds);
-		// } else {
-		// 	while (this.transactions.length && this.transactions[0].isNormalizer) {
-		// 		const tr = this.transactions.shift();
-		// 		if (tr?.commit()) {
-		// 			this.commitState();
-		// 			pm.onTransaction(tr);
-		// 			editor.emit('transaction', tr)
-		// 		}
-		// 	}
-		// }
 	}
 
 	private updateTransactionEffects(tr: Transaction) {

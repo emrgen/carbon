@@ -5,11 +5,11 @@ import { Pin } from './Pin';
 import { PointedSelection } from './PointedSelection';
 import { constrain } from '../utils/constrain';
 import { NodeStore } from './NodeStore';
+import { DomSelection } from './Range';
 
 export class PinnedSelection {
 	tail: Pin;
 	head: Pin;
-
 
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
 		const domSelection = window.getSelection();
@@ -25,7 +25,7 @@ export class PinnedSelection {
 
 		let anchorNode = store.resolve(anchorEl);
 		let focusNode = store.resolve(focusEl);
-		// console.log(anchorEl, anchorNode);
+		// console.log(anchorEl, anchorNode, anchorOffset);
 		// console.log(anchorNode);
 		// console.log(focusNode);
 
@@ -48,8 +48,8 @@ export class PinnedSelection {
 		// if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
 		// if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
 
-		let tail = Pin.fromDom(anchorNode, anchorOffset);
-		let head = Pin.fromDom(focusNode, focusOffset);
+		let tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
+		let head = Pin.fromDom(focusNode, focusOffset)?.up();
 		// console.log(tail?.toString(), head?.toString());
 
 		if (!tail || !head) {
@@ -63,6 +63,7 @@ export class PinnedSelection {
 
 		return selection;
 	}
+
 	static default(doc: Node): PinnedSelection {
 		const pin = Pin.default(doc);
 		return PinnedSelection.create(pin, pin);
@@ -100,6 +101,169 @@ export class PinnedSelection {
 	get isForward(): boolean {
 		const { tail, head } = this
 		return head.isAfter(tail);
+	}
+
+	syncDom(store: NodeStore) {
+		try {
+			const domSelection = this.intoDomSelection(store);
+			if (!domSelection) {
+				console.log(p14('%c[error]'), 'color:red', 'failed to map selection to dom');
+				return
+			}
+
+			const {
+				anchorNode,
+				anchorOffset,
+				focusNode,
+				focusOffset
+			} = domSelection
+
+			// let node = anchorNode
+			// while (node = node?.parentElement) {
+			// 	console.log(node)
+			// }
+
+			// console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
+
+			// Ref: https://stackoverflow.com/a/779785/4556425
+			// https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
+			var selection = window.getSelection();
+			selection?.setBaseAndExtent(
+				anchorNode,
+				anchorOffset,
+				focusNode,
+				focusOffset
+			);
+			const domSel = PinnedSelection.fromDom(store)?.intoDomSelection(store);
+			console.assert(domSel?.anchorNode === domSelection.anchorNode, 'failed to sync anchorNode')
+			console.assert(domSel?.focusNode === domSelection.focusNode, 'failed to sync focusNode')
+			console.assert(domSel?.anchorOffset === domSelection.anchorOffset, 'failed to sync anchor offset')
+			console.assert(domSel?.focusOffset === domSelection.focusOffset, 'failed to sync focus offset')
+			console.log('Selection.syncDom:', this.toString())
+		} catch (err) {
+			console.error(err);
+		}
+	}
+
+	intoDomSelection(store: NodeStore): Optional<DomSelection> {
+		const { head, tail } = this;
+		// console.log('Selection.intoDomSelection', range?.toString());
+		// console.debug(p14('%c[DEBUG]'), 'color:magenta', p30('intoDomSelection'), range.toString());
+
+		const focus = head.down();
+		const anchor = tail.down();
+
+		if (!focus || !anchor) return
+
+		let anchorNode: any = store.element(anchor.node.id);
+		let focusNode: any = store.element(focus.node.id);
+		if (!anchorNode || !focusNode) {
+			console.log(p14('%c[error]'), 'color:red', 'anchor/focus not not found');
+			return
+		}
+		let tailOffset = anchor.offset
+		let headOffset = focus.offset
+
+		// console.log(headOffset, head.node.id.toString(), tail.isAtEnd);
+		// console.log(tailOffset, headOffset);
+
+		// if (tail.isAtEnd && tail.node.isAtom && tail.node.type.groupsNames.includes('emoji')) {
+		// 	console.log('updating tail offset');
+		// 	tailOffset = 11
+		// }
+		// if (head.isAtEnd && head.node.isAtom && head.node.type.groupsNames.includes('emoji')) {
+		// 	console.log('updating head offset');
+		// 	headOffset = 11
+		// }
+
+		// console.log('nativeSelection', anchorNode.id.toString(), anchorNode);
+		// console.log(focusNode.firstChild?.firstChild ?? focusNode.firstChild ?? focusNode, headOffset);
+		// console.log(anchorNode.firstChild?.firstChild ?? anchorNode.firstChild ?? anchorNode, tailOffset);
+
+		if (tail.node.isBlock && tail.node.isAtom) {
+			anchorNode = anchorNode
+		} else {
+			anchorNode = anchorNode.firstChild ?? anchorNode
+		}
+		if (head.node.isBlock && head.node.isAtom) {
+			focusNode = focusNode
+		} else {
+			focusNode = focusNode.firstChild ?? focusNode
+		}
+
+		// find focusable dom nodes
+		return {
+			// NOTE: need to find focusable node. all HTML elements are not focusable
+			// anchorNode: anchorNode.firstChild?.firstChild ?? anchorNode.firstChild ?? anchorNode,
+			// focusNode: focusNode.firstChild?.firstChild ?? focusNode.firstChild ?? focusNode,
+			anchorNode: anchorNode,
+			focusNode: focusNode,
+			anchorOffset: tailOffset,
+			focusOffset: headOffset,
+		}
+	}
+
+	collapseToHead(): PinnedSelection {
+		const { head, } = this
+		return PinnedSelection.create(head, head);
+	}
+
+	collapseToTail(): PinnedSelection {
+		const { tail } = this
+		return PinnedSelection.create(tail, tail);
+	}
+
+	moveEnd(distance: number): Optional<PinnedSelection> {
+		return this.isForward
+			? this.moveHead(distance)
+			: this.moveTail(distance)
+	}
+
+	moveStart(distance: number): Optional<PinnedSelection> {
+		return this.isBackward
+			? this.moveHead(distance)
+			: this.moveTail(distance)
+	}
+
+	moveBy(distance: number): Optional<PinnedSelection> {
+		return this.moveHead(distance)?.moveTail(distance);
+	}
+
+	moveTail(distance: number): Optional<PinnedSelection> {
+		let { tail, head } = this
+		const anchor = tail.moveBy(distance) as any
+		if (!anchor || !tail) return
+		return PinnedSelection.create(anchor, head);
+	}
+
+	moveHead(distance: number): Optional<PinnedSelection> {
+		let { tail, head } = this
+		const focus = head.moveBy(distance) as any
+		if (!focus || !head) return
+		return PinnedSelection.create(tail, focus);
+	}
+
+	commonNode(): Optional<Node> {
+		const { head, tail } = this
+		return head.node.commonNode(tail.node);
+	}
+
+	normalize(): PinnedSelection {
+		const { head, tail } = this
+		if (this.isForward) return this;
+		return PinnedSelection.create(head, tail);
+	}
+
+	collapseToStart(): PinnedSelection {
+		return this.isForward
+			? this.collapseToTail()
+			: this.collapseToHead()
+	}
+
+	collapseToEnd(): PinnedSelection {
+		return this.isBackward
+			? this.collapseToTail()
+			: this.collapseToHead()
 	}
 
 	unpin(): PointedSelection {

@@ -12,7 +12,7 @@ export class SelectionPlugin extends AfterPlugin {
 	on(): EventHandlerMap {
 		return {
 			selectionchange: (event: EventContext<Event>) => {
-				// console.log(p14('[event]'), 'selectionchange');
+				console.log(p14('[event]'), 'selectionchange');
 				// helper code block to detect errant selectionchange effect
 				count++;
 				setTimeout(() => {
@@ -24,7 +24,7 @@ export class SelectionPlugin extends AfterPlugin {
 				}
 
 				const { app, selection: after } = event;
-				// console.log(after.toString());
+				console.log(after.toString());
 
 				const { selection: before } = app;
 				if (before.isInvalid) {
@@ -42,7 +42,7 @@ export class SelectionPlugin extends AfterPlugin {
 				}
 
 				// console.log('SelectionPlugin.selectionchanged',before.toJSON(),after.toJSON());
-				// console.log(p14('%c[create]'),'color:green', 'select transaction');
+				console.log(p14('%c[create]'),'color:green', 'select transaction');
 				app.tr
 					.select(after)
 					.dispatch()

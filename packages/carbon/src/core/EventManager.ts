@@ -78,7 +78,7 @@ export class EventManager {
 			return
 		}
 
-		// console.log('changing selection....', editor.selection.toString(), selection.toString())
+		// console.log('changing selection....', app.selection.toString(), selection.toString())
 		// start node corresponds to focus point in DOM
 		const node = selection.start.node;
 		if (!node) {
@@ -96,7 +96,7 @@ export class EventManager {
 		});
 
 		if (type == EventsIn.selectionchange || selectionChangedUsingKeys(event)) {
-			console.groupCollapsed('onEvent:', event.type);
+			console.group('onEvent:', event.type);
 		} else {
 			console.group('onEvent:', event.type);
 		}

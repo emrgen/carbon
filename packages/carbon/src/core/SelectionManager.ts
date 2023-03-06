@@ -99,7 +99,7 @@ export class SelectionManager {
 			return
 		}
 
-		const { app: editor } = this;
+		const { app } = this;
 		const { selection } = this.state;
 		if (this.state.prevSelection?.eq(selection) && this.state.selectionOrigin === ActionOrigin.DomSelectionChange) {
 			console.log('skipped: unchanged selection sync', this.state.selectionOrigin);
@@ -108,12 +108,12 @@ export class SelectionManager {
 
 		if (selection.isInvalid) {
 			console.warn('skipped invalid selection sync');
-			editor.element?.blur()
+			app.element?.blur()
 			this.state.selectionSynced = true;
 			return
 		}
 
-		// selection.syncDom(editor);
+		selection.syncDom(app.store);
 		this.state.selectionSynced = true;
 	}
 
