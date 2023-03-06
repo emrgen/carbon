@@ -70,9 +70,6 @@ export const CarbonElement = forwardRef(InnerElement);
 export const CarbonText = (props: RendererProps) => {
   const { node } = props;
 
-  console.log(node.id, node)
-
-
   if (!node.marks.size) {
     return <>{node.textContent}</>
   }

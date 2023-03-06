@@ -4,6 +4,7 @@ import { CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps } fro
 export const NestableComp = (props: RendererProps) => {
   const { node, placeholder } = props;
   const ref = useRef(null);
+
   // const { listeners } = useDragDropRectSelect({ node, ref });
 
   return (
