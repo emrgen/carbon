@@ -1,0 +1,49 @@
+.carbon-app
+	// position absolute
+	position relative
+	width: 100%
+	padding: 0
+	outline none
+	// overflow: auto;
+	white-space: pre-wrap;
+
+.carbon-app-content
+	padding: 100px 50px
+
+[data-name=document]
+	position relative
+	outline none
+	padding: 20px 100px
+	outline: 2px dashed blue;
+	.document-content
+		max-width: 700px
+		margin: 0 auto;
+
+[data-name=document] > [data-type="content"] > [data-name="title"]
+	font-size: 36px
+
+[data-name=h1] > [data-type="content"]
+	font-size: 26px
+[data-name=h2] > [data-type="content"]
+	font-size: 24px
+[data-name=h3] > [data-type="content"]
+	font-size: 18px
+[data-name=h4] > [data-type="content"]
+	font-size: 16px
+
+[data-name=section]
+[data-name=bulletedList]
+[data-name=numberedList]
+[data-name=taskList]
+[data-name=collapsibleList]
+[data-name=h1]
+[data-name=h2]
+	> [data-type=children]
+		padding-left 30px
+	position relative
+	line-height: 30px
+	[data-type="content"]
+		margin: 2px 2px
+		display: flex
+		[data-name=paragraph]
+			flex 1

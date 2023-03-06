@@ -1,0 +1,25 @@
+import { useEffect } from "react";
+import { throttle } from "lodash";
+import { useCarbon } from '../hooks/useCarbon';
+import { EventsIn } from "../core/Event";
+
+export const useSelectionChange = () => {
+	const app = useCarbon();
+
+	useEffect(() => {
+		const onSelectionChange = throttle((event: Event) => {
+			app.onEvent(EventsIn.selectionchange, event)
+		}, 0);
+
+		const onSelectionStart = (event: Event) => {
+			app.onEvent(EventsIn.selectstart, event)
+		}
+
+		document.addEventListener(EventsIn.selectionchange, onSelectionChange);
+		document.addEventListener(EventsIn.selectstart, onSelectionStart);
+		return () => {
+			document.removeEventListener(EventsIn.selectionchange, onSelectionChange);
+			document.removeEventListener(EventsIn.selectstart, onSelectionStart);
+		}
+	}, [app])
+}
