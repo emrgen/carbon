@@ -11,6 +11,7 @@ export class TitlePlugin extends NodePlugin {
 	spec(): NodeSpec {
 		return {
 			content: 'inline*',
+			focusable: true,
 			attrs: {
 				html: {
 					suppressContentEditableWarning: true,

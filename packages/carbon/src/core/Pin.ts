@@ -24,27 +24,26 @@ export class Pin {
 		if (!point.isWithin) return
 		const node = store.get(point.nodeId);
 		if (!node || !node.type.isTextBlock) return;
-		const {offset} = point;
+		const { offset } = point;
 		if (node.focusSize < offset) return;
 		return Pin.create(node, offset);
 	}
 
 	static fromDom(node: Node, offset: number): Optional<Pin> {
-		if (!node.isSelectable) return
+		if (!node.isFocusable) return
 		const pin = Pin.toStartOf(node)
 		if (node.isEmpty) {
 			return pin;
 		}
-		// console.log('Pin.fromDom', pin);
+
 		return pin?.moveBy(offset);
 	}
-
 
 	static toStartOf(node: Node): Optional<Pin> {
 		if (node.isEmpty || node.isAtom) {
 			return Pin.create(node.find(n => n.isLeaf)!, 0);
 		}
-		const target = node.find(n => n.isFocusable || n.hasFocusable, {order: 'post'});
+		const target = node.find(n => n.isFocusable, { order: 'post' });
 		if (!target) return null;
 
 		return Pin.create(target, 0);
@@ -52,7 +51,7 @@ export class Pin {
 
 	static toEndOf(node: Node): Optional<Pin> {
 		if (node.isEmpty) {
-			const target = node.find(n => n.isFocusable || n.hasFocusable, { order: 'post', direction: 'backward' })!
+			const target = node.find(n => n.isFocusable, { order: 'post', direction: 'backward' })!
 			if (!target) return null
 			return Pin.create(target, 0);
 		}
@@ -63,7 +62,7 @@ export class Pin {
 		if (child.isEmpty) {
 			return Pin.create(child, 0);
 		}
-		
+
 		return Pin.create(child, child.focusSize);
 	}
 
@@ -71,6 +70,7 @@ export class Pin {
 		if (!node.isFocusable && !node.hasFocusable) {
 			throw new Error(`node is not focusable: ${node.name}`);
 		}
+
 		if (node.focusSize < offset) {
 			throw new Error(`node: ${node.name} does not have the provided offset: ${offset}`);
 		}
@@ -83,6 +83,27 @@ export class Pin {
 		this.offset = offset;
 	}
 
+	private transform(): Optional<Pin> {
+		const { node, offset } = this;
+		if (node.isBlock) return this;
+
+		const { parent } = node;
+		if (!parent) {
+			return
+		}
+
+		let distance = 0
+		parent?.children.some(n => {
+			if (n.eq(node)) {
+				distance += offset
+				return true
+			}
+			distance += n.focusSize;
+			return false
+		})
+
+		return Pin.create(parent, distance);
+	}
 
 	// check if pin is before the provided pin
 	isBefore(of: Pin): boolean {
@@ -131,85 +152,89 @@ export class Pin {
 	}
 
 	// move the pin by distance through focusable nodes
-	moveBy(distance: number): Pin {
+	moveBy(distance: number): Optional<Pin> {
 		return distance >= 0 ? this.moveForwardBy(distance) : this.moveBackwardBy(-distance);
 	}
 
-	// each step can be concidered as one right key press
+	// each step can be considered as one right key press
 	// tries to move as much as possible
-	private moveForwardBy(distance: number): Pin {
-		return this
+	private moveForwardBy(distance: number): Optional<Pin> {
 		// console.log('Pin.moveForwardBy', this.toString(),distance);
-		// if (distance === 0) return this.clone();
-		// let { node, offset } = this;
-		// distance = offset + distance; //+ (node.isEmpty ? 1 : 0);
-		// let prev: Node = node;
-		// let curr: Optional<Node> = node;
-		// let currSize: number = 0;
-		// // console.log(node.id);
-		// // console.log('start pos', curr.id.toString(), offset, distance);
+		if (distance === 0) {
+			return this.transform()
+		}
 
-		// while (prev && curr) {
-		// 	if (!prev.closestBlock.eq(curr.closestBlock)) {
-		// 		distance -= 1;
-		// 	}
-		// 	// console.log('=>',curr.id.toString(), curr.size, distance);
+		let { node, offset } = this;
+		distance = offset + distance; //+ (node.isEmpty ? 1 : 0);
+		let prev: Node = node;
+		let curr: Optional<Node> = node;
+		let currSize: number = 0;
+		// console.log(node.id);
+		// console.log('start pos', curr.id.toString(), offset, distance);
 
-		// 	currSize = curr.size;
-		// 	// console.log(focusSize, curr.id, curr.name);
-		// 	if (distance <= currSize) {
-		// 		// console.log(curr.id, curr.focusSize, offset);
-		// 		break;
-		// 	}
-		// 	// if curr is Empty it will have -
-		// 	distance -= currSize;
-		// 	// console.log(curr.id.key, curr.focusSize);
-		// 	prev = curr;
-		// 	curr = curr.next(n => n.isFocusable);
-		// }
+		while (prev && curr) {
+			if (!prev.closestBlock.eq(curr.closestBlock)) {
+				distance -= 1;
+			}
+			// console.log('=>',curr.id.toString(), curr.size, distance);
 
-		// if (!curr) {
-		// 	return Pin.create(prev, prev.size);
-		// }
+			currSize = curr.size;
+			// console.log(focusSize, curr.id, curr.name);
+			if (distance <= currSize) {
+				// console.log(curr.id, curr.focusSize, offset);
+				break;
+			}
+			// if curr is Empty it will have -
+			distance -= currSize;
+			// console.log(curr.id.key, curr.focusSize);
+			prev = curr;
+			curr = curr.next(n => n.isFocusable);
+		}
 
-		// return Pin.create(curr, distance);
+		if (!curr) {
+			return Pin.create(prev, prev.size).transform();
+		}
+
+		return Pin.create(curr, distance).transform();
 	}
 
-	// each step can be concidered as one left key press
-	private moveBackwardBy(distance: number): Pin {
-		return this
-		// if (distance === 0) return this.clone();
-		// let { node, offset } = this;
-		// distance = node.size - offset + distance;
-		// let prev: Node = node;
-		// let curr: Optional<Node> = node;
-		// let currSize: number = 0;
-		// while (prev && curr) {
-		// 	if (!prev.closestBlock.eq(curr.closestBlock)) {
-		// 		distance -= 1;
-		// 	}
-		// 	// console.log('=>', curr.id.toString(), curr.size, distance);
+	// each step can be considered as one left key press
+	private moveBackwardBy(distance: number): Optional<Pin> {
+		if (distance === 0) {
+			return this.transform();
+		}
 
-		// 	currSize = curr.size;
-		// 	// console.log(focusSize, curr.id, curr.name);
-		// 	if (distance <= currSize) {
-		// 		// console.log(curr.id, curr.focusSize, offset);
-		// 		break;
-		// 	}
-		// 	// if curr is Empty it will have -
-		// 	distance -= currSize;
-		// 	// console.log(curr.id.key, curr.focusSize);
-		// 	prev = curr;
-		// 	curr = curr.prev(n => n.isFocusable);
-		// }
+		let { node, offset } = this;
+		distance = node.size - offset + distance;
+		let prev: Node = node;
+		let curr: Optional<Node> = node;
+		let currSize: number = 0;
+		while (prev && curr) {
+			if (!prev.closestBlock.eq(curr.closestBlock)) {
+				distance -= 1;
+			}
+			// console.log('=>', curr.id.toString(), curr.size, distance);
 
-		// // console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);
+			currSize = curr.size;
+			// console.log(focusSize, curr.id, curr.name);
+			if (distance <= currSize) {
+				// console.log(curr.id, curr.focusSize, offset);
+				break;
+			}
+			// if curr is Empty it will have -
+			distance -= currSize;
+			// console.log(curr.id.key, curr.focusSize);
+			prev = curr;
+			curr = curr.prev(n => n.isFocusable);
+		}
 
-		// if (!curr) {
-		// 	return Pin.create(prev, 0);
-		// }
+		// console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);
 
-		// return Pin.create(curr, curr.size - distance);
+		if (!curr) {
+			return Pin.create(prev, 0).transform();
+		}
+
+		return Pin.create(curr, curr.size - distance).transform();
 	}
 
 

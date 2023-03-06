@@ -12,12 +12,13 @@ import {
   CarbonContent,
   useCreateCarbon,
   CarbonChangeContext,
+  extensionPresets,
 } from "@emrgen/carbon-core";
 
 const data = node("document", [
-  title([text("section 1")]),
+  title([text("Document Title")]),
   section([
-    title([text("section 1")]),
+    title([text("sect"), text("ion 1")]),
     section([title([text("section 2")])]),
     section([title([text("section 3")])]),
   ]),
@@ -27,7 +28,7 @@ const data = node("document", [
 const actor = new Actor(1, 0);
 
 export default function Dev() {
-  const app = useCreateCarbon(actor, data, [blockPresets]);
+  const app = useCreateCarbon(actor, data, [extensionPresets, blockPresets]);
 
   console.log(app.content)
 

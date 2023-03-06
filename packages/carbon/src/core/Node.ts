@@ -164,14 +164,14 @@ export class Node extends EventEmitter {
 	// focus steps count within the node
 	// start and end locations are within the node
 	get focusSize(): number {
-		// if (this.isAtom) return this.attrs.node?.size ?? 1
-		if (this.isEmpty || this.isInlineAtom) return 1;
-		if (this.isBlockAtom) return 0;
-		if (this.isFocusable || this.isInline) return this.size;
+		if (this.isInlineAtom) return this.attrs.node?.size ?? 1
+		// if (this.isEmpty || this.isInlineAtom) return 1;
+		// if (this.isBlockAtom) return 0;
+		if (this.isText) return this.textContent.length;
 
 		let focusSize = 0;
 		this.preorder(n => {
-			if (n.isFocusable || n.isInline) {
+			if (n.isInline) {
 				focusSize += n.focusSize;
 			} else if (n.hasFocusable) {
 				// block jump takes 1 focus step
@@ -185,15 +185,20 @@ export class Node extends EventEmitter {
 
 	// focus can be within the node, including any descendants node
 	get hasFocusable() {
-		if (!this.isBlock) return false;
-		if (this.isFocusable) return true;
-		// console.log(this.isAtom || this.isEmpty, this.children.map(n => n.isFocusable), this.name, this.id.key);
-		return this.isEmpty || this.find(n => n.isFocusable);
+		if (this.isBlock && this.isFocusable && this.isEmpty) return true;
+		return this.find(n => {
+			if (n.eq(this)) return false;
+			return n.isFocusable
+		});
+	}
+
+	get isTextBlock() {
+		return this.type.isTextBlock;
 	}
 
 	// focus can be within the node(ex: text node), excluding any child node
 	get isFocusable(): boolean {
-		return (this.isEmpty || !!this.type.isFocusable) && this.isSelectable && !this.isCollapseHidden;
+		return ((this.isTextBlock && this.isEmpty) || !!this.type.isFocusable) && !this.isCollapseHidden;
 	}
 
 	// a node that avoids to have a focus moved in by arrow keys

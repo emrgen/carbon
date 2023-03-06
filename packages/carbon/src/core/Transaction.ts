@@ -16,6 +16,7 @@ import { PinnedSelection } from './PinnedSelection';
 import { PointedSelection } from './PointedSelection';
 import { NodeId } from './NodeId';
 import { NodeName } from './types';
+import { SelectAction } from './actions/Select';
 
 export class TransactionError {
 	commandId: number;
@@ -110,8 +111,8 @@ export class Transaction {
 		const after = selection.unpin();
 		// console.log('Transaction.select', after.toString(), this.selection.toString());
 
-		// this.add(SelectCommand.create(this.selection, after, origin));
-		// this.selections.push(after.clone());
+		this.add(SelectAction.create(this.selection, after, origin));
+		this.selections.push(after.clone());
 
 		return this;
 	}

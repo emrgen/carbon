@@ -1,5 +1,5 @@
 import { Optional } from '@emrgen/types';
-import { p14, p30 } from './Logger';
+import { classString, p14, p30 } from './Logger';
 import { Node } from './Node';
 import { Pin } from './Pin';
 import { PointedSelection } from './PointedSelection';
@@ -33,15 +33,20 @@ export class PinnedSelection {
 			console.warn(p14('%c[error]'), 'color:red', 'Editor.resolveNode failed');
 			return
 		}
+		// console.log(anchorNode, anchorNode.isFocusable)
 
-		if (!anchorNode.isSelectable || !focusNode.isSelectable) {
-			console.warn(p14('%c[info]'), 'color:pink', 'target nodes skips focus', anchorNode.name, focusNode.name);
+		if (!anchorNode.hasFocusable && !anchorNode.isFocusable) {
+			console.warn(p14('%c[info]'), 'color:pink', 'anchorNode skips focus', anchorNode.name, focusNode.name);
+		}
+
+		if (!focusNode.hasFocusable && !focusNode.isFocusable) {
+			console.warn(p14('%c[info]'), 'color:pink', 'focusNode skips focus', anchorNode.name, focusNode.name);
 			return
 		}
 
-		console.info(p14('%c[info]'), 'color:pink', p30('fromDom:beforeOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
-		if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
-		if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
+		// console.info(p14('%c[info]'), 'color:pink', p30('fromDom:beforeOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
+		// if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
+		// if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
 
 		let tail = Pin.fromDom(anchorNode, anchorOffset);
 		let head = Pin.fromDom(focusNode, focusOffset);
@@ -54,7 +59,6 @@ export class PinnedSelection {
 
 		// console.info(p14('%c[info]'), 'color:pink', p30('fromDom:afterOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
 		const selection = PinnedSelection.create(tail, head);
-
 		// console.log(p14('%c[info]'), 'color:pink', p30('fromDom:Selection'), selection.toString());
 
 		return selection;
@@ -106,6 +110,13 @@ export class PinnedSelection {
 
 	eq(other: PinnedSelection) {
 		return this.tail.eq(other.tail) && this.head.eq(other.head);
+	}
+
+	toString() {
+		return classString(this)({
+			tail: this.tail.toString(),
+			head: this.head.toString()
+		})
 	}
 
 }

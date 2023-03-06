@@ -13,7 +13,7 @@ import { Carbon } from '../core/Carbon';
 
 export const createCarbon = (actor: Actor, json: NodeJSON, extensions: Extension[] = []) => {
 	const plugins = flatten(extensions.map(e => e.plugins));
-	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers));
+	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
 	const renderer = CarbonRenderer.create(renderers, CarbonDefaultNode)
 
 	const pm = new PluginManager(plugins);

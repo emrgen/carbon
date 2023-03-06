@@ -1,15 +1,19 @@
 import { Optional } from '@emrgen/types';
-import { Actor } from './Actor';
+import { Actor, VirtualActor } from './Actor';
 import { Node } from './Node';
 import { NodeId } from './NodeId';
 import { Schema } from './Schema';
 import { BlockContent, InlineContent } from './NodeContent';
 
 export class SchemaFactory {
-	constructor(readonly actor: Actor) { }
+	virtualActor: Actor;
+
+	constructor(readonly actor: Actor) {
+		this.virtualActor = VirtualActor.default();
+	}
 
 	createNode(json: any, schema: Schema): Optional<Node> {
-		const { actor } = this;
+		const { actor, virtualActor } = this;
 		const { name, content: contentNodes = [], text } = json;
 		const type = schema.type(name);
 		if (!type) {
@@ -17,7 +21,7 @@ export class SchemaFactory {
 		}
 
 		if (name === 'text') {
-			const id = NodeId.default();
+			const id = virtualActor.generateNodeId();
 			const content = InlineContent.create(text);
 			return Node.create({ id, type, content });
 		} else {

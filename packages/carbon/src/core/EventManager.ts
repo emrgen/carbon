@@ -35,12 +35,13 @@ export class EventManager {
 	constructor(readonly app: Carbon, readonly pm: PluginManager) { }
 
 	onEvent(type: EventsIn, event: Event) {
+
 		const { app } = this;
 		// without focus the editor does not process any event
 		if (!app.enabled) {
 			if (type === EventsIn.selectstart) {
 				event.preventDefault();
-				// console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'editor is disabled for events');
+				console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'editor is disabled for events');
 			}
 			// console.log('ignored event', type);
 			return

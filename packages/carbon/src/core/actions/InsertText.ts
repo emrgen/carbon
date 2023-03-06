@@ -1,7 +1,7 @@
 import { Point } from "../Point";
 import { Transaction } from "../Transaction";
 import { ActionOrigin, ActionType } from "./types";
-import { generateCommandId } from './utils';
+import { generateActionId } from './utils';
 import { Action } from './types';
 import { RemoveText } from './RemoveText';
 
@@ -10,7 +10,7 @@ export class InsertText implements Action{
 	type: ActionType;
 
 	constructor(readonly at: Point, readonly text: string, readonly origin: ActionOrigin) {
-		this.id = generateCommandId();
+		this.id = generateActionId();
 		this.type = ActionType.insertText;
 	}
 

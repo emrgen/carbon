@@ -17,6 +17,7 @@ import { TransactionManager } from './TransactionManager';
 import { Commands } from '@emrgen/carbon';
 import { EventsIn } from './Event';
 import { Node } from 'core/Node';
+import { Transaction } from './Transaction';
 
 export class Carbon extends EventEmitter {
 	private pm: PluginManager;
@@ -73,9 +74,9 @@ export class Carbon extends EventEmitter {
 		return this.sm.focused;
 	}
 
-	// get tr(): Transaction {
-	// 	return Transaction.create(this, this.tm, this.pm);
-	// }
+	get tr(): Transaction {
+		return Transaction.create(this, this.tm, this.pm);
+	}
 
 
 	get element(): Optional<HTMLElement> {

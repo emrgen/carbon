@@ -11,8 +11,6 @@ export const useCarbonChange = () => useContext(InternalCarbonChangeContext);
 export const CarbonChangeContext = (props) => {
   const app = useCarbon();
 
-  console.log(app)
-
   return (
     <InternalCarbonChangeContext.Provider value={app.change}>
       {props.children}
