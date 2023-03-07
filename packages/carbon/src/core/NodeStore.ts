@@ -2,7 +2,7 @@ import { Optional } from "@emrgen/types";
 import BTree from "sorted-btree";
 import { NodeBTree } from './BTree';
 import { NodeId } from './NodeId';
-import { Node } from 'core/Node';
+import { Node } from '../core/Node';
 
 export class NodeStore {
 	private deletedNodeMap: BTree<NodeId, Node> = new NodeBTree();

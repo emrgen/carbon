@@ -18,6 +18,7 @@ import { NodeId } from './NodeId';
 import { NodeName } from './types';
 import { SelectAction } from './actions/Select';
 import { SelectionManager } from './SelectionManager';
+import { InsertText } from './actions/InsertText';
 
 export class TransactionError {
 	commandId: number;
@@ -129,6 +130,11 @@ export class Transaction {
 
 	insert(at: Point, nodes: Node | Node[], origin = this.origin): Transaction {
 		// this.add(InsertCommand.create(at, Fragment.from(flatten([nodes])), origin));
+		return this;
+	}
+
+	insertText(at: Point, text: Node, origin = this.origin): Transaction {
+		this.add(InsertText.create(at, text, origin));
 		return this;
 	}
 

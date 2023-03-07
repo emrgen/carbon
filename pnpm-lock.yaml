@@ -52,12 +52,10 @@ importers:
       react-dom: 18.2.0
       tsconfig: workspace:*
       typescript: ^4.5.3
-      ui: workspace:*
     dependencies:
       next: 13.2.3_6m24vuloj5ihw4zc5lbsktc4fu
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      ui: link:../../packages/ui
     devDependencies:
       '@babel/core': 7.21.0
       '@types/node': 17.0.45
@@ -84,7 +82,6 @@ importers:
       stylus: ^0.59.0
       tsconfig: workspace:*
       typescript: ^4.5.3
-      ui: workspace:*
     dependencies:
       '@emrgen/carbon-blocks': link:../../packages/blocks
       '@emrgen/carbon-core': link:../../packages/carbon
@@ -92,7 +89,6 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       stylus: 0.59.0
-      ui: link:../../packages/ui
     devDependencies:
       '@babel/core': 7.21.0
       '@types/node': 17.0.45
@@ -106,6 +102,7 @@ importers:
   packages/blocks:
     specifiers:
       '@emrgen/carbon-core': workspace:*
+      '@emrgen/types': ^0.0.2
       '@types/react': ^18.0.17
       '@types/react-dom': ^18.0.6
       eslint: ^7.32.0
@@ -115,6 +112,7 @@ importers:
       typescript: ^4.5.2
     dependencies:
       '@emrgen/carbon-core': link:../carbon
+      '@emrgen/types': 0.0.2
     devDependencies:
       '@types/react': 18.0.28
       '@types/react-dom': 18.0.11
@@ -269,24 +267,6 @@ importers:
 
   packages/tsconfig:
     specifiers: {}
-
-  packages/ui:
-    specifiers:
-      '@types/react': ^18.0.17
-      '@types/react-dom': ^18.0.6
-      eslint: ^7.32.0
-      eslint-config-custom: workspace:*
-      react: ^18.2.0
-      tsconfig: workspace:*
-      typescript: ^4.5.2
-    devDependencies:
-      '@types/react': 18.0.28
-      '@types/react-dom': 18.0.11
-      eslint: 7.32.0
-      eslint-config-custom: link:../eslint-config-custom
-      react: 18.2.0
-      tsconfig: link:../tsconfig
-      typescript: 4.9.5
 
 packages:
 
@@ -514,7 +494,6 @@ packages:
 
   /@emrgen/types/0.0.2:
     resolution: {integrity: sha512-YAaDY5OWJn0fuEpv3WwIqr6hoG90mkHwitlO28i/DcncOqN1rSgLRX+R/4rJm/D9QirA9GiEiIksO6rywUVhBQ==, tarball: download/@emrgen/types/0.0.2/b29c24283c757d0a5d6365b4f0b77d123e5f1560}
-    dev: true
 
   /@esbuild/android-arm/0.16.17:
     resolution: {integrity: sha512-N9x1CMXVhtWEAMS7pNNONyA14f71VPQN9Cnavj1XQh6T7bskqiLLrSca4O0Vr8Wdcga943eThxnVp3JLnBMYtw==}

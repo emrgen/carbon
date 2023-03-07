@@ -1,7 +1,8 @@
+import { Optional } from '@emrgen/types';
 import { findIndex, flatten } from 'lodash';
 
 import { Fragment } from './Fragment';
-import { Node, NodeProps } from './Node';
+import { Node } from './Node';
 
 export interface NodeContent {
 	size: number;
@@ -10,6 +11,8 @@ export interface NodeContent {
 
 	withParent(parent: Node): NodeContent;
 
+	replace(node: Node, fragment: Fragment): NodeContent;
+	append(fragment: Fragment): NodeContent;
 	insert(fragment: Fragment, offset: number): NodeContent;
 	insertBefore(fragment: Fragment, node: Node): NodeContent;
 	insertAfter(fragment: Fragment, node: Node): NodeContent;
@@ -59,7 +62,23 @@ export class BlockContent implements NodeContent {
 	}
 
 	insert(fragment: Fragment, offset: number): NodeContent {
-		throw new Error("");
+		return this
+	}
+
+	append(fragment: Fragment): NodeContent {
+		return BlockContent.create([...this.nodes, ...fragment.nodes])
+	}
+
+	replace(node: Node, fragment: Fragment): NodeContent {
+		const nodes = this.nodes.map(n => {
+			if (n.eq(node)) {
+				return fragment.nodes;
+			} else {
+				return n;
+			}
+		});
+
+		return BlockContent.create(flatten(nodes));
 	}
 
 	insertBefore(fragment: Fragment, node: Node): NodeContent {
@@ -147,7 +166,11 @@ export class InlineContent implements  NodeContent {
 		return this;
 	}
 
-	replace(old: Node, by: Node) {
+	append(fragment: Fragment): NodeContent {
+		throw new Error("Not implemented");
+	}
+
+	replace(node: Node, fragment: Fragment): NodeContent {
 		throw new Error("Not implemented");
 	}
 

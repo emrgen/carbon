@@ -8,7 +8,7 @@ import { ContentMatch } from './ContentMatch';
 import { classString } from './Logger';
 import { Mark, MarkSet } from './Mark';
 import { NodeAttrs } from './NodeAttrs';
-import { NodeContent } from './NodeContent';
+import { BlockContent, NodeContent } from './NodeContent';
 import { NodeData } from './NodeData';
 import { NodeId } from './NodeId';
 import { NodeType } from './NodeType';
@@ -567,11 +567,14 @@ export class Node extends EventEmitter {
 		return nodes;
 	}
 
-	consolidate() {
-		console.log('Consolidating', this.name, this)
+	replace(node: Node, fragment: Fragment) {
+		this.content = this.content.replace(node, fragment).withParent(this)
+		this.markUpdated();
 	}
 
-	insert(fragment: Fragment, offset: number) {
+	// @mutates
+	append(fragment: Fragment) {
+		this.content = this.content.append(fragment).withParent(this);
 		this.markUpdated();
 	}
 

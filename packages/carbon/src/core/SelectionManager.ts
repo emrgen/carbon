@@ -118,7 +118,7 @@ export class SelectionManager {
 	}
 
 	commitSelection() {
-		const { app: editor } = this
+		const { app } = this
 		const event = last(this.runtime.selectEvents);
 		if (!event) {
 			return
@@ -126,7 +126,7 @@ export class SelectionManager {
 		this.runtime.selectEvents = [];
 
 		const { after } = event;
-		const selection = after.pin(editor)
+		const selection = after.pin(app.store)
 		if (!selection) {
 			console.error(p12('%c[error]'), 'color:red', 'commitSelection', 'failed to get next selection');
 			return

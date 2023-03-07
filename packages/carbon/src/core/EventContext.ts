@@ -1,7 +1,7 @@
-import { Carbon } from "core/Carbon";
-import { EventsIn } from "core/Event";
-import { Node } from "core/Node";
-import { PinnedSelection } from "core/PinnedSelection";
+import { Carbon } from "../core/Carbon";
+import { EventsIn } from "../core/Event";
+import { Node } from "../core/Node";
+import { PinnedSelection } from "../core/PinnedSelection";
 
 export enum EventOrigin {
 	dom,

@@ -24,7 +24,7 @@ export interface EventHandler {
 
 export type NodeWatcher = (node: Node) => void
 
-export type EventHandlerFn = (ctx: EventContext<any>) => void
+export type EventHandlerFn = (ctx: EventContext<Event>) => void
 export type EventHandlerMap = Partial<EventHandler>;
 export type InputRules = Array<InputRule>
 

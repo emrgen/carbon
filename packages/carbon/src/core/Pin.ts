@@ -17,6 +17,21 @@ export class Pin {
 		return Point.toWithin(this.node.id, this.offset);
 	}
 
+	get isBefore() {
+		if (this.node.isEmpty) return false
+		return !this.node.isEmpty && this.offset === 0
+	}
+
+	get isWithin() {
+		if (this.node.isEmpty) return true
+		return 0 < this.offset && this.offset < this.node.focusSize;
+	}
+
+	get isAfter() {
+		if (this.node.isEmpty) return false
+		return this.offset === this.node.focusSize
+	}
+
 	static default(node: Node): Pin {
 		return new Pin(node, -10);
 	}
@@ -79,6 +94,10 @@ export class Pin {
 		return new Pin(node, offset);
 	}
 
+	static future(node: Node, offset: number) {
+		return new Pin(node, offset);
+	}
+
 	private constructor(node: Node, offset: number) {
 		this.node = node;
 		this.offset = offset;
@@ -127,7 +146,7 @@ export class Pin {
 	}
 
 	// check if pin is before the provided pin
-	isBefore(of: Pin): boolean {
+	isBeforeOf(of: Pin): boolean {
 		if (this.node.eq(of.node)) {
 			return this.offset < of.offset;
 		}
@@ -135,7 +154,7 @@ export class Pin {
 	}
 
 	// check if pin is after the provided pin
-	isAfter(of: Pin): boolean {
+	isAfterOf(of: Pin): boolean {
 		if (this.node.eq(of.node)) {
 			return this.offset > of.offset;
 		}

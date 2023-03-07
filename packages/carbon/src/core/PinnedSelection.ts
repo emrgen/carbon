@@ -69,6 +69,10 @@ export class PinnedSelection {
 		return PinnedSelection.create(pin, pin);
 	}
 
+	static fromPin(pin: Pin): PinnedSelection {
+		return PinnedSelection.create(pin, pin);
+	}
+
 	static create(tail: Pin, head: Pin): PinnedSelection {
 		return new PinnedSelection(tail, head);
 	}
@@ -100,7 +104,7 @@ export class PinnedSelection {
 
 	get isForward(): boolean {
 		const { tail, head } = this
-		return head.isAfter(tail);
+		return head.isAfterOf(tail);
 	}
 
 	syncDom(store: NodeStore) {

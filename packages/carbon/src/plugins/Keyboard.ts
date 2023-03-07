@@ -143,8 +143,6 @@ export class KeyboardPlugin extends AfterPlugin {
 			return
 		}
 
-
-
 		// if (head.isAtEndOfNode(node)) {
 		// 	const prevNode = node.next(n => {
 		// 		return !n.isSelectable || n.isFocusable
