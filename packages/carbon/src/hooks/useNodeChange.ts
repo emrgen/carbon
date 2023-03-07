@@ -23,7 +23,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 		return () => {
 			change.unsubscribe(node.id, NodeChangeType.update, onChange);
 		}
-	}, [change, node.id]);
+	}, [change, node.id, node.version, watched]);
 
 	useEffect(() => {
 		change.mounted(watched)

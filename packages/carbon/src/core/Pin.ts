@@ -1,9 +1,10 @@
-import { Optional, Predicate } from '@emrgen/types';
+import { Optional, Predicate, With } from '@emrgen/types';
 import { classString } from './Logger';
 import { Node } from './Node';
 import { NodeStore } from './NodeStore';
 import { Point } from './Point';
 import { constrain } from '../utils/constrain';
+import { Maps } from './types';
 
 export class Pin {
 	node: Node;
@@ -30,6 +31,25 @@ export class Pin {
 	get isAfter() {
 		if (this.node.isEmpty) return false
 		return this.offset === this.node.focusSize
+	}
+
+	get leftAlign(): Pin {
+		const { prevSibling } = this.node;
+		if (!this.node.isEmpty && this.offset === 0 && prevSibling?.isFocusable) {
+			return Pin.toEndOf(prevSibling)!
+		} else {
+			return this;
+		}
+	}
+
+	//
+	get rightAlign(): Pin {
+		const { nextSibling } = this.node;
+		if (!this.node.isEmpty && this.offset === this.node.focusSize && nextSibling?.isFocusable) {
+			return Pin.toStartOf(nextSibling)!
+		} else {
+			return this;
+		}
 	}
 
 	static default(node: Node): Pin {
@@ -277,6 +297,10 @@ export class Pin {
 
 		distance = constrain(curr.focusSize - distance, 0, curr.focusSize)
 		return Pin.create(curr, distance);
+	}
+
+	map<B>(fn: Maps<Pin, B>) {
+		return fn(this)
 	}
 
 	eq(other: Pin) {

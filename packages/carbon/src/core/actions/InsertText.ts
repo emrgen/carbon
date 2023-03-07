@@ -45,14 +45,18 @@ export class InsertText implements Action{
 		console.log('inserting text', this.text);
 
 		if (pin.isBefore) {
-			parent?.insertBefore(fragment, node);
+			// parent?.insertBefore(fragment, node);
+			const { textContent } = node;
+			node.content.updateText(text.textContent + textContent)
 			// console.log(parent.textContent);
 			tr.updated(parent);
 			return ActionResult.withValue('done');
 		}
 
 		if (pin.isAfter) {
-			parent?.insertAfter(fragment, node);
+			const { textContent } = node;
+			node.content.updateText(textContent+ text.textContent)
+			// parent?.insertAfter(fragment, node);
 			tr.updated(parent);
 			return ActionResult.withValue('done');
 		}
@@ -63,12 +67,17 @@ export class InsertText implements Action{
 				tr.updated(node);
 			} else {
 				const {textContent} = node;
-				const replacement = schema.text(
-					textContent.slice(0, offset) + text.textContent + textContent.slice(offset)
-				)
-				const fragment = Fragment.fromNode(replacement!);
-				parent.replace(node, fragment);
-				console.log(parent.textContent, fragment.nodes.map(n => n.textContent));
+				// if the current text style match just insert into existing text
+				const updatedText = textContent.slice(0, offset) + text.textContent + textContent.slice(offset)
+				// console.log(updatedText);
+
+				node.content.updateText(updatedText)
+				// const replacement = schema.text(
+				// 	textContent.slice(0, offset) + text.textContent + textContent.slice(offset)
+				// )
+				// const fragment = Fragment.fromNode(replacement!);
+				// parent.replace(node, fragment);
+				// console.log(parent.textContent, fragment.nodes.map(n => n.textContent));
 
 				tr.updated(parent);
 			}

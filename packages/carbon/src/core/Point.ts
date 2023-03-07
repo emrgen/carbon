@@ -1,5 +1,6 @@
 import { NodeId } from './NodeId';
 import { classString } from './Logger';
+import { Maps } from './types';
 
 enum PointAt {
 	Before = 0,
@@ -41,11 +42,11 @@ export class Point {
 		return new Point(nodeId, 2);
 	}
 
-	static toWithin(nodeId: NodeId, offset: number) {
+	static toWithin(nodeId: NodeId, offset: number = 0) {
 		return new Point(nodeId, 1, offset);
 	}
 
-	static create(nodeId: NodeId, at: PointAt, offset: number = -1) {
+	static create(nodeId: NodeId, at: PointAt, offset: number = 0) {
 		return new Point(nodeId, at, offset);
 	}
 
@@ -53,6 +54,10 @@ export class Point {
 		this.nodeId = nodeId;
 		this.at = at;
 		this.offset = offset;
+	}
+
+	map<B>(fn: Maps<Point, B>) {
+		return fn(this)
 	}
 
 	eq(other: Point) {

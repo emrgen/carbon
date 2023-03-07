@@ -32,40 +32,40 @@ const mapName = (name, parentName?: string) => {
 }
 
 const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => {
-    const { tag: Element = "div", node, children, custom } = props;
-    const { key, name, attrs, data, version } = node;
-    const editor = useCarbon();
-    const ref = useRef(null);
+  const { tag: Element = "div", node, children, custom } = props;
+  const { key, name, attrs, data, version } = node;
+  const editor = useCarbon();
+  const ref = useRef(null);
 
-    // connect ref
-    // https://t.ly/H4By
-    useImperativeHandle(forwardedRef, () => ref.current);
+  // connect ref
+  // https://t.ly/H4By
+  useImperativeHandle(forwardedRef, () => ref.current);
 
-    useEffect(() => {
-      if (ref.current) {
-        editor.store.register(node, ref.current);
-      } else {
-        editor.store.delete(node);
-      }
-      return () => {
-        editor.store.delete(node);
-      }
-    }, [editor, node]);
+  useEffect(() => {
+    if (ref.current) {
+      editor.store.register(node, ref.current);
+    } else {
+      editor.store.delete(node);
+    }
+    return () => {
+      editor.store.delete(node);
+    };
+  }, [editor, node]);
 
-    return (
-      <Element
-        ref={ref}
-        data-name={name}
-        data-node-key={key + `(${node.renderVersion}/${node.updateVersion})`}
-        data-version={version}
-        // data-size={node.size}
-        {...attrs.html}
-        {...custom}
-      >
-        {children}
-      </Element>
-    );
-  }
+  return (
+    <Element
+      ref={ref}
+      data-name={name}
+      data-node-key={key + `(${node.renderVersion}/${node.updateVersion})`}
+      data-version={version}
+      // data-size={node.size}
+      {...attrs.html}
+      {...custom}
+    >
+      {children}
+    </Element>
+  );
+}
 
 
 export const CarbonElement = forwardRef(InnerElement);
@@ -74,7 +74,7 @@ export const CarbonText = (props: RendererProps) => {
   const { node } = props;
 
   return (
-    <CarbonElement node={node} tag="span">
+    <CarbonElement node={node} tag="span" custom={{ spellCheck: "true" }}>
       {node.textContent}
     </CarbonElement>
   );
@@ -128,7 +128,11 @@ export const CarbonDefaultNode = (props: RendererProps) => {
 export const CarbonNodeContent = (props: RendererProps) => {
   const { node, placeholder, beforeContent, custom } = props;
   const { children = [] } = node;
-  if (!children.length) null;
+
+  if (!children.length) {
+    return null;
+  }
+
 
   return (
     <div data-type="content" {...custom}>

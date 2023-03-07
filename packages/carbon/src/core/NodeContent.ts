@@ -18,6 +18,8 @@ export interface NodeContent {
 	insertAfter(fragment: Fragment, node: Node): NodeContent;
 	remove(node: Node, start?: number, end?: number): boolean;
 
+	updateText(text: string);
+
 	view(container: Node[]): NodeContent;
 	clone(): NodeContent;
 	toJSON(): any;
@@ -108,6 +110,10 @@ export class BlockContent implements NodeContent {
 
 	destroy() {}
 
+	updateText(text: string) {
+		throw new Error("Not implemented");
+	}
+
 	clone(): BlockContent {
 		return BlockContent.create(this.nodes);
 	}
@@ -188,6 +194,10 @@ export class InlineContent implements  NodeContent {
 
 	remove(node: Node): boolean {
 		return false
+	}
+
+	updateText(text: string) {
+		this.text = text;
 	}
 
 	view(): NodeContent {

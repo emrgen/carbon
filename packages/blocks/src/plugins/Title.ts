@@ -34,15 +34,22 @@ export class TitlePlugin extends NodePlugin {
 		return {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				ctx.event.preventDefault();
-				const { app, event } = ctx;
+				// ctx.event.preventDefault();
+				const { app, event, node } = ctx;
 				const { selection, schema } = app;
 				if (selection.isCollapsed) {
 					const { head } = selection;
 					// @ts-ignore
 					const { data } = event;
-					const node = schema.text(data)
+					const node = schema.text(data);
 					const pin = Pin.future(head.node, head.offset + 1);
+					console.log(head.point.toString(),pin.toString(), head.offset);
+
+					//
+					if (ctx.node.isEmpty) {
+						ctx.event.preventDefault();
+					}
+
 					app.tr
 						.insertText(head.point, node!)
 						.select(PinnedSelection.fromPin(pin))

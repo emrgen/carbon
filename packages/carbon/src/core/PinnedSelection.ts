@@ -280,6 +280,10 @@ export class PinnedSelection {
 		return this.tail.eq(other.tail) && this.head.eq(other.head);
 	}
 
+	clone() {
+		return PinnedSelection.create(this.tail.clone(), this.head.clone());
+	}
+
 	toString() {
 		return classString(this)({
 			tail: this.tail.toString(),
