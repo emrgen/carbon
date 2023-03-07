@@ -5,9 +5,9 @@ import { Transaction } from '../core/Transaction';
 import { EventHandlerMap } from '../core/types';
 
 let count = 0
-export class SelectionPlugin extends AfterPlugin {
+export class SelectionChangePlugin extends AfterPlugin {
 
-	name = 'syncSelection'
+	name = 'selectionChange'
 
 	on(): EventHandlerMap {
 		return {

@@ -55,12 +55,12 @@ export class EventContext<T extends Event> {
 		this.node = node;
 	}
 
-	prevent() {
+	preventDefault() {
 		this.prevented = true;
 		return this;
 	}
 
-	stop() {
+	stopPropagation() {
 		this.stopped = true;
 		return this;
 	}

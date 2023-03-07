@@ -1,10 +1,10 @@
 import { Extension } from '../core/Extension';
 import { KeyboardPlugin } from './Keyboard';
-import { SelectionPlugin } from './Selection';
+import { SelectionChangePlugin } from './SelectionChange';
 
 export const extensionPresets: Extension = {
 	plugins: [
-		new SelectionPlugin(),
+		new SelectionChangePlugin(),
 		new KeyboardPlugin(),
 	],
 }

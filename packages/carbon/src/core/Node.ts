@@ -169,22 +169,16 @@ export class Node extends EventEmitter {
 		// if (this.isBlockAtom) return 0;
 		if (this.isText) return this.textContent.length;
 
-		let focusSize = 0;
-		this.preorder(n => {
-			if (n.isInline) {
-				focusSize += n.focusSize;
-			} else if (n.hasFocusable) {
-				// block jump takes 1 focus step
-				focusSize += 1
-			}
-			return false
-		});
+		const focusSize = this.children.reduce((fs, n) => {
+			return fs + n.focusSize;
+		}, 0);
 
 		return focusSize;
 	}
 
 	// focus can be within the node, including any descendants node
 	get hasFocusable() {
+		if (!this.isBlock) return false;
 		if (this.isBlock && this.isFocusable && this.isEmpty) return true;
 		return this.find(n => {
 			if (n.eq(this)) return false;

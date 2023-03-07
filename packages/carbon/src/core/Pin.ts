@@ -3,6 +3,7 @@ import { classString } from './Logger';
 import { Node } from './Node';
 import { NodeStore } from './NodeStore';
 import { Point } from './Point';
+import { constrain } from '../utils/constrain';
 
 export class Pin {
 	node: Node;
@@ -143,7 +144,7 @@ export class Pin {
 
 	// check if pin is at the start of the provided node
 	isAtStartOfNode(node: Node): boolean {
-		const first = node.find(n => n.isFocusable, { order: 'post' });
+		const first = node.find(n => n.hasFocusable, { order: 'post' });
 		if (!first) return false;
 		// console.log(first.toString(), this.toString());
 		return Pin.create(first, 0).eq(this);
@@ -151,9 +152,9 @@ export class Pin {
 
 	// check if pin is at the end of the provide node
 	isAtEndOfNode(node: Node): boolean {
-		const last = node.find(n => n.isFocusable, { direction: 'backward', order: 'post' });
+		const last = node.find(n => n.hasFocusable, { direction: 'backward', order: 'post' });
 		if (!last) return false;
-		return Pin.create(last, last.size).eq(this);
+		return Pin.create(last, last.focusSize).eq(this);
 	}
 
 	// move the pin to the start of next matching node
@@ -173,7 +174,7 @@ export class Pin {
 	// move the pin by distance through focusable nodes
 	moveBy(distance: number): Optional<Pin> {
 		const down = this.down()
-		return distance >= 0 ? down.moveForwardBy(distance)?.up() : down.moveBackwardBy(-distance)?.up();
+		return distance >= 0 ? down?.moveForwardBy(distance)?.up() : down?.moveBackwardBy(-distance)?.up();
 	}
 
 	// each step can be considered as one right key press
@@ -198,7 +199,7 @@ export class Pin {
 			}
 			// console.log('=>',curr.id.toString(), curr.size, distance);
 
-			currSize = curr.size;
+			currSize = curr.focusSize;
 			// console.log(focusSize, curr.id, curr.name);
 			if (distance <= currSize) {
 				// console.log(curr.id, curr.focusSize, offset);
@@ -215,6 +216,7 @@ export class Pin {
 			return Pin.create(prev, prev.size);
 		}
 
+		distance = constrain(distance, 0, curr.focusSize);
 		return Pin.create(curr, distance);
 	}
 
@@ -235,7 +237,7 @@ export class Pin {
 			}
 			// console.log('=>', curr.id.toString(), curr.size, distance);
 
-			currSize = curr.size;
+			currSize = curr.focusSize;
 			// console.log(focusSize, curr.id, curr.name);
 			if (distance <= currSize) {
 				// console.log(curr.id, curr.focusSize, offset);
@@ -254,7 +256,8 @@ export class Pin {
 			return Pin.create(prev, 0);
 		}
 
-		return Pin.create(curr, curr.size - distance);
+		distance = constrain(curr.focusSize - distance, 0, curr.focusSize)
+		return Pin.create(curr, distance);
 	}
 
 	eq(other: Pin) {

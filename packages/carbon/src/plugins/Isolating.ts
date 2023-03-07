@@ -1,0 +1,123 @@
+// prevent default inputs from key press
+import { EventHandlerMap } from '../core/types';
+import { AfterPlugin } from '../core/Plugin';
+import { EventContext } from '../core/EventContext';
+
+export const createIsolatingPlugin = () => {
+	new IsolatingPlugin()
+}
+
+// handle caret movement around isolating nodes
+export class IsolatingPlugin extends AfterPlugin {
+
+	name = 'isolating';
+
+	// needs to be more than KeyboardPrevent.priority
+	priority = 10**4 + 600;
+
+	keydown(): EventHandlerMap {
+		return {
+			left: (e: EventContext<KeyboardEvent>) => {
+				if (!e.selection.isCollapsed) {
+					e.app.tr.select(e.selection.collapseToStart())
+					return
+				}
+				this.preventAtStart(e)
+			},
+			right: (e: EventContext<KeyboardEvent>) => {
+				if (!e.selection.isCollapsed) {
+					e.app.tr.select(e.selection.collapseToEnd())
+					return
+				}
+				this.preventAtEnd(e)
+			},
+			shiftLeft: e => {
+				this.preventAtStart(e)
+			},
+			shiftRight: e => {
+				this.preventAtEnd(e)
+			},
+			backspace: e => {
+				this.preventAtStartCollapsed(e)
+			},
+			delete: e => {
+				this.preventAtEndCollapsed(e)
+			},
+			shiftBackspace: e => {
+
+				this.preventAtStart(e)
+			},
+			shiftDelete: e => {
+				this.preventAtEnd(e)
+			},
+		}
+	}
+
+	collapseToHead(e) {
+		
+	}
+
+	preventAtStart(e) {
+		if (this.isAtStart(e)) {
+			this.prevent(e)
+		}
+	}
+	preventAtStartCollapsed(e) {
+		if (this.isAtStart(e) && this.isCollapsed(e)) {
+			this.prevent(e)
+		}
+	}
+	preventAtStartExpanded(e) {
+		if (this.isAtStart(e) && !this.isCollapsed(e)) {
+			this.prevent(e)
+		}
+	}
+	preventAtEnd(e) {
+		if (this.isAtEnd(e)) {
+			this.prevent(e)
+		}
+	}
+	preventAtEndCollapsed(e) {
+		if (this.isAtEnd(e) && this.isCollapsed(e)) {
+			this.prevent(e)
+		}
+	}
+	preventAtEndExpanded(e) {
+		if (this.isAtEnd(e) && !this.isCollapsed(e)) {
+			this.prevent(e)
+		}
+	}
+	isCollapsed(e) {
+		return e.app.selection.isCollapsed
+	}
+	prevent(e) {
+		e.event.stopPropagation()
+		e.event.preventDefault()
+		e.preventDefault()
+		e.stopPropagation()
+	}
+
+	isAtStart(e) {
+		const { app } = e;
+		const isolating = this.isolatingNode(e)
+		if (!isolating) return false
+		const ret = app.selection.head.isAtStartOfNode(isolating)
+		return ret
+	}
+
+	isAtEnd(e) {
+		const { app } = e;
+		const isolating = this.isolatingNode(e)
+		if (!isolating) return false
+		const ret = app.selection.head.isAtEndOfNode(isolating)
+		return ret
+	}
+
+	isolatingNode(e) {
+		const { app } = e;
+		const { selection } = app;
+		const { head } = selection;
+		return head.node.closest(n => n.isIsolating);
+	}
+
+}

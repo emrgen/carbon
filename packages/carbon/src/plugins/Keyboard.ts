@@ -2,6 +2,8 @@ import { EventHandlerMap } from "../core/types";
 import { p14 } from "../core/Logger";
 import { AfterPlugin, BeforePlugin, CarbonPlugin } from '../core/Plugin';
 import { EventContext } from "../core/EventContext";
+import { SelectionCommands } from "./SelectionCommands";
+import { IsolatingPlugin } from "./Isolating";
 
 // handles general keyboard events
 // node specific cases are handles in node specific plugin
@@ -15,7 +17,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		return {
 			selectstart: (ctx: EventContext<KeyboardEvent>) => {
 				// console.log(event)
-				// event.preventDomDefault();
+				// ctx.event.preventDefault();
 			},
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
 				const { node, event } = ctx;
@@ -30,12 +32,12 @@ export class KeyboardPlugin extends AfterPlugin {
 
 	plugins(): CarbonPlugin[] {
 		return [
-			// new SelectionCommands(),
+			new SelectionCommands(),
+			new IsolatingPlugin(),
 			// new TransformCommands(),
 			// new KeyboardPrevent(),
 		]
 	}
-
 
 	keydown(): EventHandlerMap {
 		return {
@@ -45,7 +47,7 @@ export class KeyboardPlugin extends AfterPlugin {
 				event.preventDefault();
 
 				if (!selection.isCollapsed) {
-					// cmd.selection.collapseToTail()
+					cmd.selection.collapseToTail()
 					return
 				}
 
@@ -55,11 +57,11 @@ export class KeyboardPlugin extends AfterPlugin {
 
 			right: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event } = ctx;
-				const { selection, cmd } = app;
 				event.preventDefault();
+				const { selection, cmd } = app;
 
 				if (!selection.isCollapsed) {
-					// cmd.selection.collapseToHead()
+					cmd.selection.collapseToHead()
 					return
 				}
 
@@ -68,33 +70,29 @@ export class KeyboardPlugin extends AfterPlugin {
 				app.tr.select(after!).dispatch()
 			},
 
-			// 'shift+right': (ctx: EventContext<KeyboardEvent>) => {
-			// 	event.preventDomDefault();
-			// 	const { editor } = event;
-			// 	const { selection: before, tr } = editor;
-			// 	if (before.head.isAtDocEnd) {
-			// 		event.stopPropagation();
-			// 		return
-			// 	}
+			'shift+right': (ctx: EventContext<KeyboardEvent>) => {
+				const { app, event } = ctx;
+				event.preventDefault();
+				const { selection } = app;
 
-			// 	const after = before.moveHead(1);
-			// 	tr.select(after!).dispatch();
-			// },
+				const after = selection.moveHead(1);
+				app.tr.select(after!).dispatch();
+			},
 
-			// 'shift+left': (event: EditorEvent<KeyboardEvent>) => {
-			// 	event.preventDomDefault();
-			// 	const { editor } = event;
-			// 	const { selection: before, tr } = editor;
+			'shift+left': (ctx: EventContext<KeyboardEvent>) => {
+				const { app, event } = ctx;
+				event.preventDefault();
+				const { selection } = app;
 
-			// 	const after = before.moveHead(-1);
-			// 	tr.select(after!).dispatch();
-			// },
+				const after = selection.moveHead(-1);
+				app.tr.select(after!).dispatch();
+			},
 
-			// 'shift+delete': (event) => this.delete(event),
-			// delete: (event) => this.delete(event),
+			delete: (event) => this.delete(event),
+			shiftDelete: (event) => this.delete(event),
 
-			// 'shift+backspace': e => this.backspace(e),
-			// backspace: e => this.backspace(e),
+			backspace: e => this.backspace(e),
+			shiftBackspace: e => this.backspace(e),
 
 			// 'shift+enter': e => this.enter(e),
 			// enter: e => this.enter(e),
@@ -129,46 +127,53 @@ export class KeyboardPlugin extends AfterPlugin {
 	// 	cmd.transform.split(splitBlock, selection.head)?.dispatch()
 	// }
 
-	// delete(event: EditorEvent<KeyboardEvent>) {
-	// 	event.preventDomDefault();
-	// 	event.preventDefault();
-	// 	const { editor, node } = event;
+	delete(ctx: EventContext<KeyboardEvent>) {
+		ctx.preventDefault();
+		ctx.event.preventDefault();
+		ctx.event.stopPropagation();
 
-	// 	const { selection } = editor;
-	// 	const { isCollapsed, head } = selection;
-	// 	if (!isCollapsed) {
-	// 		event.stopPropagation();
-	// 		editor.cmd.transform.delete()?.dispatch()
-	// 		return
-	// 	}
+		const {event} = ctx;
+		const { app, node } = ctx;
+		const { selection } = app;
 
-	// 	if (head.isAtEndOfNode(node)) {
-	// 		const prevNode = node.next(n => {
-	// 			return !n.isSelectable || n.isFocusable
-	// 		})
-	// 		// console.log(prevNode?.name, prevNode?.isSelectable);
-	// 		if (prevNode && !prevNode?.isSelectable) {
-	// 			return
-	// 		}
-	// 	}
+		const { isCollapsed, head } = selection;
+		console.log('xxx');
+		if (!isCollapsed) {
+			// app.cmd.transform.delete()?.dispatch()
+			return
+		}
 
-	// 	event.stopPropagation()
-	// 	console.log('Keyboard.backspace', selection.moveStart(1)?.toString());
-	// 	// editor.cmd.transform.delete(selection.moveStart(1)!)?.dispatch()
-	// }
 
-	// backspace(event: EditorEvent<KeyboardEvent>) {
-	// 	event.preventDomDefault();
-	// 	event.preventDefault();
-	// 	const { editor, node } = event;
 
-	// 	const { selection } = editor;
-	// 	const {isCollapsed, head} = selection;
-	// 	if (!isCollapsed) {
-	// 		event.stopPropagation();
-	// 		editor.cmd.transform.delete()?.dispatch()
-	// 		return
-	// 	}
+		// if (head.isAtEndOfNode(node)) {
+		// 	const prevNode = node.next(n => {
+		// 		return !n.isSelectable || n.isFocusable
+		// 	})
+		// 	// console.log(prevNode?.name, prevNode?.isSelectable);
+		// 	if (prevNode && !prevNode?.isSelectable) {
+		// 		return
+		// 	}
+		// }
+
+
+		event.stopPropagation()
+		console.log('Keyboard.backspace', selection.moveStart(1)?.toString());
+		// editor.cmd.transform.delete(selection.moveStart(1)!)?.dispatch()
+	}
+
+	backspace(ctx: EventContext<KeyboardEvent>) {
+		ctx.preventDefault();
+		ctx.event.preventDefault();
+		ctx.event.stopPropagation();
+
+		const { event } = ctx;
+		const { app, node } = ctx;
+		const { selection } = app;
+		const {isCollapsed, head} = selection;
+		if (!isCollapsed) {
+			// app.cmd.transform.delete()?.dispatch()
+			return
+		}
 
 	// 	if (head.isAtStartOfNode(node)) {
 	// 		const prevNode = node.prev(n => {
@@ -212,82 +217,5 @@ export class KeyboardPlugin extends AfterPlugin {
 
 	// 	console.log('Keyboard.backspace',deleteSel.toString());
 	// 	editor.cmd.transform.delete(deleteSel)?.dispatch()
-	// }
-}
-
-
-// prevent default inputs from key press
-export class KeyboardPrevent extends BeforePlugin {
-	name = 'preventDefaultKey';
-
-	priority = 10**4 + 500;
-
-	on(): EventHandlerMap {
-		return {
-			beforeInput: (ctx) => {
-				ctx.event.preventDefault()
-			},
-		}
 	}
-
-	keydown(): EventHandlerMap {
-		return {
-			// tab: e => e.event.preventDefault(),
-			// left: e => this.reachedStart(e, true),
-			// right: e => this.reachedEnd(e, true),
-			// up: e => this.reachedStart(e),
-			// down: e => this.reachedEnd(e),
-			// // 'shift+left': e => this.reachedStart(e, true),
-			// // 'shift+right': e => this.reachedEnd(e, true),
-			// 'shift+up': e => this.reachedStart(e),
-			// 'shift+down': e => this.reachedEnd(e),
-		// 	backspace: event => {
-		// 		event.preventDefault();
-		// 		event.preventDefault();
-		// 		const { editor } = event;
-		// 		const { isCollapsed, head } = editor.selection;
-		// 		if (!isCollapsed) return
-
-		// 		if (head.isAtStartOfNode(editor.content)) {
-		// 			event.stopPropagation()
-		// 			return
-		// 		}
-		// 	},
-		// 	delete: event => {
-		// 		event.preventDomDefault();
-		// 		event.preventDefault();
-		// 		const { editor  } = event;
-		// 		const { isCollapsed, head } = editor.selection;
-		// 		if (!isCollapsed) return
-
-		// 		if (head.isAtEndOfNode(editor.content)) {
-		// 			event.stopPropagation()
-		// 			return
-		// 		}
-		// 	}
-		}
-	}
-
-	// reachedStart(event: EditorEvent<Event>, isCollapsed = false) {
-		// const {editor} = event;
-		// const {selection} = editor;
-		// if (selection.head.isAtDocStart && selection.isCollapsed === isCollapsed) {
-		// 	if (editor.element) {
-		// 		editor.element.scrollTop = 0;
-		// 	}
-		// 	event.preventDomDefault();
-		// 	event.stopPropagation();
-		// 	return
-		// }
-	// }
-
-	// reachedEnd(event: EditorEvent<Event>, isCollapsed = false) {
-	// 	const { editor } = event;
-	// 	const { selection } = editor;
-	// 	if (selection.head.isAtDocEnd && selection.isCollapsed === isCollapsed) {
-	// 		event.preventDomDefault();
-	// 		event.stopPropagation();
-	// 		return
-	// 	}
-	// }
 }
