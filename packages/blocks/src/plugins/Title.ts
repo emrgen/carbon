@@ -1,5 +1,5 @@
 
-import { CarbonPlugin, EventContext, EventHandlerMap, NodePlugin, NodeSpec } from '@emrgen/carbon-core';
+import { CarbonPlugin, EventContext, EventHandlerMap, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, Transaction } from '@emrgen/carbon-core';
 import { TextPlugin } from './Text';
 
 export class TitlePlugin extends NodePlugin {
@@ -35,8 +35,20 @@ export class TitlePlugin extends NodePlugin {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
 				ctx.event.preventDefault();
-				const { app } = ctx;
-				const { selection, schema, cmd } = app;
+				const { app, event } = ctx;
+				const { selection, schema } = app;
+				if (selection.isCollapsed) {
+					const { head } = selection;
+					// @ts-ignore
+					const { data } = event;
+					const node = schema.text(data)
+					const pin = Pin.future(head.node, head.offset + 1);
+					app.tr
+						.insertText(head.point, node!)
+						.select(PinnedSelection.fromPin(pin))
+						.dispatch();
+
+				}
 
 				// let tr: Optional<Transaction>
 				// let at: Optional<Point>
@@ -45,8 +57,8 @@ export class TitlePlugin extends NodePlugin {
 				// 	at = tr?.selection?.head;
 				// 	tr = tr?.pop()
 				// } else {
-				// 	tr = editor.tr
-				// 	at = selection.head.point
+				// 	tr = app.tr;
+				// 	at = selection.head.point;
 				// }
 
 				// const textNode = schema.text(data);
