@@ -4,12 +4,15 @@ import { NestableComp } from './renderers/Nestable';
 import { Section } from './plugins/Section';
 import { DocumentComp } from './renderers/Document';
 import { DocPlugin } from './plugins/Document';
+import { Header } from './plugins/Header';
 
-import './style.styl'
+import './style.styl';
 
 export const blockPresets: Extension = {
 	plugins: [
 		new Section(),
+		new Header(),
+		new DocPlugin(),
 		new DocPlugin(),
 	],
 	renderers: [
@@ -17,5 +20,9 @@ export const blockPresets: Extension = {
 		Renderer.create('text', CarbonText),
 		Renderer.create('title', CarbonNode),
 		Renderer.create('section', NestableComp),
+		Renderer.create('h1', NestableComp),
+		Renderer.create('h2', NestableComp),
+		Renderer.create('h3', NestableComp),
+		Renderer.create('h4', NestableComp),
 	]
 }

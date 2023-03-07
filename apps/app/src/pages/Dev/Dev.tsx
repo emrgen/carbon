@@ -23,6 +23,11 @@ const data = node("document", [
     section([title([text("section 3")])]),
   ]),
   section([title([text("section 3")])]),
+  node('h1',[title([text("section 3")])]),
+  node('h2',[title([text("section 3")])]),
+  node('h3',[title([text("section 3")])]),
+  node('h4',[title([text("section 3")])]),
+  section([title([text("section 3")])]),
 ]);
 
 const actor = new Actor(1, 0);
