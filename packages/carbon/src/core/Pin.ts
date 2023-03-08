@@ -18,6 +18,14 @@ export class Pin {
 		return Point.toWithin(this.node.id, this.offset);
 	}
 
+	get isAtStart(): boolean {
+		return this.offset === 0;
+	}
+
+	get isAtEnd(): boolean {
+		return this.offset === this.node.focusSize;
+	}
+
 	get isBefore() {
 		if (this.node.isEmpty) return false
 		return !this.node.isEmpty && this.offset === 0

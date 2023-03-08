@@ -118,7 +118,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		const { app, node } = ctx;
 		const { selection, cmd } = app;
 		if (!selection.isCollapsed) {
-			cmd.transform.delete()?.dispatch()
+			cmd.transform.delete()?.dispatch();
 			return
 		}
 

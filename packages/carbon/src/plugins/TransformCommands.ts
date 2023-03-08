@@ -16,9 +16,12 @@ import { NodeName } from '../core/types';
 import { PinnedSelection } from '../core/PinnedSelection';
 import { Carbon } from '../core/Carbon';
 import { PointedSelection } from '../core/PointedSelection';
-import { ActionOrigin } from '../core/actions/types';
+import { Action, ActionOrigin } from '../core/actions/types';
 import { takeUntil } from '../utils/array';
 import { NodeId } from '../core/NodeId';
+import { RemoveText } from '../core/actions/RemoveText';
+import { MoveAction } from '../core/actions/MoveAction';
+import { InsertNodes } from '../core/actions/InsertNodes';
 
 export interface SplitOpts {
 	rootType?: NodeType;
@@ -190,7 +193,6 @@ export class TransformCommands extends BeforePlugin {
 		opts = merge({ side: 'bottom', pos: 'out', rootType: splitBlock.type }, opts);
 
 		const { selection, tr } = app;
-		const { node } = pin
 
 		const isAtBlockStart = pin.isAtStartOfNode(splitBlock);
 		if (isAtBlockStart) {
@@ -227,117 +229,126 @@ export class TransformCommands extends BeforePlugin {
 			return tr;
 		}
 
-	// 	// as the cursor is within the split block
-	// 	// need more involved splitting
-	// 	// clone all nodes after the cursor up to the splitBlock
-	// 	const [splittedNode] = splitNodeAtPin(pin, app);
-	// 	const cloneBlocks = takeUntil(node.chain, n => n.eq(splitBlock)).reverse();
+		// as the cursor is within the split block
+		// need more involved splitting
+		// clone all nodes after the cursor up to the splitBlock
+		// const [splittedNode] = splitNodeAtPin(pin, app);
+		const { node } = pin.down()!;
+		const cloneBlocks = takeUntil(node.chain, n => n.eq(splitBlock)).reverse();
 
-	// 	// depending on option
-	// 	// split can insert node inside or outside the splitBlock
-	// 	const rootInsertPoint = opts.pos === 'out'
-	// 		? Point.toAfter(splitBlock)
-	// 		: Point.toAfter(first(cloneBlocks)!);
-	// 	// recursively clone and insert all right child after splitNode clone
-	// 	const rootNode = opts.rootType?.create([]);
-	// 	// console.log(rootNode?.name);
+		// depending on option
+		// split can insert node inside or outside the splitBlock
+		const rootInsertPoint = opts.pos === 'out'
+			? Point.toAfter(splitBlock.id)
+			: Point.toAfter(first(cloneBlocks)?.id!);
+		// recursively clone and insert all right child after splitNode clone
+		const rootNode = opts.rootType?.create([]);
+		// console.log(rootNode?.name);
 
-	// 	if (!rootNode) {
-	// 		console.error('failed to create root node of type', opts.rootType?.name)
-	// 		return
-	// 	}
+		if (!rootNode) {
+			console.error('failed to create root node of type', opts.rootType?.name)
+			return
+		}
 
-	// 	let parentBlock = rootNode;
-	// 	const insertCommands: Command[] = [];
-	// 	const moveCommands: Command[] = [];
-	// 	const maxDepth = cloneBlocks.length - 1;
-	// 	let focusPoint: Optional<Point> = null;
+		let parentBlock = rootNode;
+		const insertCommands: Action[] = [];
+		const moveCommands: Action[] = [];
+		const removeCommands: Action[] = [];
+		const maxDepth = cloneBlocks.length - 1;
+		let focusPoint: Optional<Point> = null;
 
-	// 	// descend and clone nodes
-	// 	cloneBlocks.forEach((splitNode, index) => {
-	// 		if (index < maxDepth) {
-	// 			// non leaf node
-	// 			const firstNode = splitNode.type.create([]);
-	// 			if (!firstNode) {
-	// 				console.warn('failed to create firstNode of type', splitNode.type?.name)
-	// 				return
-	// 			}
-	// 			const slice = Fragment.from([firstNode]);
-	// 			parentBlock.append(slice);
-	// 			// move the split node next siblings to root node
-	// 			// only if spit pos === 'out'
-	// 			if (opts?.pos === 'out') {
-	// 				const moveNodes = splitNode.nextSiblings.filter(n => !n.isDeleted && !n.isCollapseHidden);
+		console.log(cloneBlocks);
 
-	// 				// moveNodes.some(n => {
-	// 				// 	const point = Pin.toStartOf(n)?.point;
-	// 				// 	if (point) {
-	// 				// 		focusPoint = point;
-	// 				// 		return true;
-	// 				// 	}
-	// 				// });
 
-	// 				if (moveNodes.length) {
-	// 					let at = Point.toAfter(firstNode);
-	// 					moveCommands.push(...this.moveNodeCommands(at, moveNodes));
-	// 				}
-	// 			}
-	// 		} else {
-	// 			// leaf node is reached
-	// 			console.log('last node', splittedNode.id.key);
-	// 			let moveNodes: Node[] = [];
-	// 			if (pin.isAtStart) {
-	// 				moveNodes = [splittedNode, ...splittedNode.nextSiblings];
-	// 			} else {
-	// 				moveNodes = splittedNode.nextSiblings;
-	// 			}
+	// descend and clone nodes
+		cloneBlocks.forEach((splitNode, index) => {
+			if (index < maxDepth) {
+				// non leaf node
+				const firstNode = splitNode.type.create([]);
+				if (!firstNode) {
+					console.warn('failed to create firstNode of type', splitNode.type?.name)
+					return
+				}
+				const slice = Fragment.from([firstNode]);
+				parentBlock.append(slice);
+				// move the split node next siblings to root node
+				// only if spit pos === 'out'
+				if (opts?.pos === 'out') {
+					const moveNodes = splitNode.nextSiblings.filter(n => !n.isCollapseHidden);
 
-	// 			moveNodes = moveNodes.filter(n => !n.isDeleted);
+					if (moveNodes.length) {
+						let at = Point.toAfter(firstNode.id);
+						moveCommands.push(...this.moveNodeCommands(at, moveNodes));
+					}
+				}
+			} else {
+				// leaf node is reached
+				// console.log('last node', splittedNode.id.key);
+				let at = Point.toWithin(parentBlock?.id!)
 
-	// 			// moveNodes.some(n => {
-	// 			// 	const point = Pin.toStartOf(n)?.point;
-	// 			// 	if (point) {
-	// 			// 		focusPoint = point;
-	// 			// 		return true;
-	// 			// 	}
-	// 			// });
+				const downPin = pin.down()!;
+				if (downPin.isWithin) {
+					const {node, offset} = pin;
+					const {textContent} = node;
+					console.log('split text....', textContent);
+					const removeTextNode = app.schema.text(textContent.slice(offset))
+					const insertTextNode = app.schema.text(textContent.slice(offset))
+					removeCommands.push(RemoveText.create(pin.point, removeTextNode!));
+					insertCommands.push(InsertNodes.create(at, Fragment.fromNode(insertTextNode!)));
+				}
 
-	// 			if (moveNodes.length) {
-	// 				let at = Point.toWithin(parentBlock!)
-	// 				moveCommands.push(...this.moveNodeCommands(at, moveNodes));
-	// 			}
-	// 		}
+				// if (downPin.isAfter) {
+				// 	moveNodes = downPin.node.nextSiblings;
+				// }
+				// if (downPin.isBefore) {
+				// 	moveNodes = [downPin.node, ...downPin.node.nextSiblings];
+				// }
 
-	// 		// parent must have at least one child
-	// 		// so firstChild can't be null
-	// 		parentBlock = parentBlock.firstChild!
-	// 	});
+				// if (moveNodes.length) {
+				// 	let at = Point.toWithin(parentBlock?.id!)
+				// 	moveCommands.push(...this.moveNodeCommands(at, moveNodes));
+				// }
+			}
+
+			// parent must have at least one child
+			// so firstChild can't be null
+			parentBlock = parentBlock.firstChild!
+		});
 
 	// 	// console.log(rootNode?.descendants().map(n => n.id.key));
-	// 	focusPoint = Point.toWithin(rootNode)
-	// 	console.log('insert node', rootNode?.name);
-	// 	console.log('move command count', moveCommands.length);
+		focusPoint = Pin.toStartOf(rootNode)?.point
+		console.log('insert node', rootNode?.name, rootNode);
+		console.log('move command count', moveCommands.length);
 
-	// 	app.tr
-	// 		.insert(rootInsertPoint, rootNode!)
-	// 		.add(moveCommands)
-	// 		// .add(insertCommands)
-	// 		// .add(DeleteCommand.create(deleteSet.toArray()))
-	// 		.select(Selection.fromPoint(focusPoint!))
-	// 		.dispatch();
-	// }
+		console.log(focusPoint?.toString())
+
+		app.tr
+			.insert(rootInsertPoint, rootNode!)
+			.add(moveCommands)
+			.add(removeCommands)
+			.add(insertCommands)
+			.select(PointedSelection.fromPoint(focusPoint!))
+			.dispatch();
+	}
 
 	// generates move commands for adjacent nodes
-	// private moveNodeCommands(at: Point, nodes: Node[]): MoveCommand[] {
-	// 	const commands: MoveCommand[] = [];
-	// 	let to = at;
-	// 	nodes.forEach(moveNode => {
-	// 		// console.log('moveNode', moveNode.id.key, to.toString());
-	// 		commands.push(MoveCommand.create(to, moveNode.id));
-	// 		to = Point.toAfter(moveNode)
-	// 	})
+	private moveNodeCommands(at: Point, nodes: Node[]): MoveAction[] {
+		const commands: MoveAction[] = [];
+		let to = at;
+		let from: Optional<Point> = null;
+		nodes.forEach(moveNode => {
+			if (moveNode.prevSibling) {
+				from = Point.toAfter(moveNode.prevSibling.id);
+			} else {
+				from = Point.toWithin(moveNode.parent?.id!, 0);
+			}
 
-	// 	return commands
+			// console.log('moveNode', moveNode.id.key, to.toString());
+			commands.push(MoveAction.create(to, from, moveNode.id));
+			to = Point.toAfter(moveNode.id)
+		})
+
+		return commands
 	}
 
 	// remove node from doc

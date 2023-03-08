@@ -1,7 +1,7 @@
-import { Action } from 'core/actions/types';
+import { Action } from './types';
 import { Transaction } from 'core/Transaction';
 import { Point } from '../Point';
-import { ActionOrigin } from 'core/actions/types';
+import { ActionOrigin } from './types';
 import { Fragment } from '../Fragment';
 import { generateActionId } from './utils';
 import { ActionResult } from './Result';
@@ -11,7 +11,7 @@ import { classString } from '../Logger';
 export class InsertNodes implements Action{
 	id: number;
 
-	static create(at: Point, fragment: Fragment, origin: ActionOrigin) {
+	static create(at: Point, fragment: Fragment, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new InsertNodes(at, fragment, origin);
 	}
 
@@ -33,6 +33,8 @@ export class InsertNodes implements Action{
 			return ActionResult.withError('failed to find target parent from: ' + at.toString())
 		}
 
+		console.log(at.toString())
+
 		const done = () => {
 			fragment.forAll(n => app.store.put(n));
 			tr.updated(parent);
@@ -51,7 +53,7 @@ export class InsertNodes implements Action{
 		}
 
 		if (at.isWithin) {
-			parent.append(fragment);
+			target.append(fragment);
 			return done()
 		}
 
