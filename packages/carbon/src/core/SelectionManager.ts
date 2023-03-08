@@ -126,6 +126,7 @@ export class SelectionManager {
 		this.runtime.selectEvents = [];
 
 		const { after } = event;
+		console.log(after.toString())
 		const selection = after.pin(app.store)
 		if (!selection) {
 			console.error(p12('%c[error]'), 'color:red', 'commitSelection', 'failed to get next selection');

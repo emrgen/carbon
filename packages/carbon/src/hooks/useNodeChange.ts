@@ -5,6 +5,7 @@ import { Node } from 'core/Node';
 
 interface UseNodeChangeProps {
 	node: Node,
+	onChange?()
 }
 
 export const useNodeChange = (props: UseNodeChangeProps) => {
@@ -17,13 +18,13 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 		const onChange = (value: Node) => {
 			setVersion(value.version);
 			setWatched(value);
-			// console.log("updated", node.id.toString(), node.version, watched === value);
+			console.log("updated", node.id.toString(), node.version, watched === value);
 		};
 		change.subscribe(node.id, NodeChangeType.update, onChange);
 		return () => {
 			change.unsubscribe(node.id, NodeChangeType.update, onChange);
 		}
-	}, [change, node.id, node.version, watched]);
+	}, [change, node.id, node.version, props, watched]);
 
 	useEffect(() => {
 		change.mounted(watched)

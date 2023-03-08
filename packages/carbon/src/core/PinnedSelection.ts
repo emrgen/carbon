@@ -110,6 +110,7 @@ export class PinnedSelection {
 	syncDom(store: NodeStore) {
 		try {
 			const domSelection = this.intoDomSelection(store);
+			console.log(domSelection);
 			if (!domSelection) {
 				console.log(p14('%c[error]'), 'color:red', 'failed to map selection to dom');
 				return

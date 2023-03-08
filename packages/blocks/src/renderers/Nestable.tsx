@@ -6,6 +6,7 @@ export const NestableComp = (props: RendererProps) => {
   const ref = useRef(null);
 
   // const { listeners } = useDragDropRectSelect({ node, ref });
+  // console.log(node.textContent);
 
   return (
     <CarbonBlock node={node} ref={ref}>

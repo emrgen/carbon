@@ -1,6 +1,7 @@
 import {
   ForwardedRef,
   forwardRef,
+  memo,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -67,15 +68,35 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   );
 }
 
+export const CarbonElement = memo(forwardRef(InnerElement));
 
-export const CarbonElement = forwardRef(InnerElement);
+export const RawText = memo(function TT(props: RendererProps) {
+  const {node} = props
+  const ref = useRef(document.createTextNode(node.textContent));
+  // const {node} = useNodeChange(props);
+  return <>{ref.current}</>
+})
 
 export const CarbonText = (props: RendererProps) => {
   const { node } = props;
+  // const {node} = useNodeChange(props);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  // useEffect(() => {
+  //   if (node.isEmpty) {
+
+  //   }
+  //   if (!node.isEmpty && ref.current && ref.current.textContent !== node.textContent) {
+
+  //     ref.current.textContent = node.textContent;
+  //   }
+  // })
 
   return (
-    <CarbonElement node={node} tag="span" custom={{ spellCheck: "true" }}>
+    <CarbonElement node={node} tag="span">
+      {/* {node.isEmpty ? <JustEmpty/> : node.textContent} */}
       {node.textContent}
+      {/* <RawText node={node}/> */}
     </CarbonElement>
   );
 };
@@ -89,7 +110,7 @@ const InnerCarbonBlock = (props: RendererProps, ref) => {
   );
 }
 
-export const CarbonBlock = forwardRef(InnerCarbonBlock);
+export const CarbonBlock = memo(forwardRef(InnerCarbonBlock));
 
 export const CarbonChildren = (props: RendererProps) => {
   const { node } = props;
@@ -104,6 +125,7 @@ export const CarbonChildren = (props: RendererProps) => {
 
 export const CarbonNode = (props: RendererProps) => {
   const app = useCarbon();
+  // const {node} = props;
   const { node } = useNodeChange(props);
 
   const RegisteredComponent = app.component(node.name);

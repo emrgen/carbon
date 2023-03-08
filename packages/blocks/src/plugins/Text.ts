@@ -9,6 +9,13 @@ export class TextPlugin extends NodePlugin {
 			inline: true,
 			selectable: true,
 			focusable: true,
+			attrs: {
+				html: {
+					spellCheck: false,
+					contentEditable: true,
+					suppressContentEditableWarning: true,
+				}
+			}
 		}
 	}
 }

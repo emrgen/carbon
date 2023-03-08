@@ -5,7 +5,7 @@ import { Fragment } from './Fragment';
 import { MarkSet } from './Mark';
 import { Node } from './Node';
 import { NodeSpec, Schema } from './Schema';
-import { HTMLAttrs, NodeAttrs, NodeName } from './types';
+import { HTMLAttrs, NodeName } from './types';
 
 export type Attrs = { readonly [attr: string]: any }
 
@@ -38,7 +38,7 @@ export class NodeType {
 	groupsNames: readonly string[];
 
 	attrs: {
-		node: NodeAttrs;
+		node: Record<string, any>;
 		html: HTMLAttrs;
 	};
 

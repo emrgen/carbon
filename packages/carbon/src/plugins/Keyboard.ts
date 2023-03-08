@@ -4,6 +4,7 @@ import { AfterPlugin, BeforePlugin, CarbonPlugin } from '../core/Plugin';
 import { EventContext } from "../core/EventContext";
 import { SelectionCommands } from "./SelectionCommands";
 import { IsolatingPlugin } from "./Isolating";
+import { TransformCommands } from "./TransformCommands";
 
 // handles general keyboard events
 // node specific cases are handles in node specific plugin
@@ -34,7 +35,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		return [
 			new SelectionCommands(),
 			new IsolatingPlugin(),
-			// new TransformCommands(),
+			new TransformCommands(),
 			// new KeyboardPrevent(),
 		]
 	}
@@ -94,8 +95,8 @@ export class KeyboardPlugin extends AfterPlugin {
 			backspace: e => this.backspace(e),
 			shiftBackspace: e => this.backspace(e),
 
-			// 'shift+enter': e => this.enter(e),
-			// enter: e => this.enter(e),
+			'shift+enter': e => this.enter(e),
+			enter: e => this.enter(e),
 
 			// 'cmd+a': (event: EditorEvent<KeyboardEvent>) => {
 			// 	event.preventDomDefault();
@@ -110,22 +111,24 @@ export class KeyboardPlugin extends AfterPlugin {
 	}
 
 	// handles enter event
-	// enter(ctx: EventContext<KeyboardEvent>) {
-	// 	console.log('Enter event...');
+	enter(ctx: EventContext<KeyboardEvent>) {
+		console.log('Enter event...');
 
-	// 	event.preventDomDefault();
-	// 	const { editor, node } = event;
-	// 	const { selection, cmd } = editor;
-	// 	if (!selection.isCollapsed) {
-	// 		cmd.transform.delete()?.dispatch()
-	// 		return
-	// 	}
+		ctx.event.preventDefault();
+		const { app, node } = ctx;
+		const { selection, cmd } = app;
+		if (!selection.isCollapsed) {
+			cmd.transform.delete()?.dispatch()
+			return
+		}
 
-	// 	const splitBlock = node.closest(n => n.canSplit);
-	// 	if (!splitBlock) return
-
-	// 	cmd.transform.split(splitBlock, selection.head)?.dispatch()
-	// }
+		// const splitBlock = node.closest(n => n.canSplit);
+		const splitBlock = node.closest(n => n.groups.includes('nestable'));
+		if (!splitBlock) return
+		console.log('split section....');
+		
+		cmd.transform.split(splitBlock, selection.head)?.dispatch()
+	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {
 		ctx.preventDefault();

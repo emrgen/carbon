@@ -34,7 +34,8 @@ export class TitlePlugin extends NodePlugin {
 		return {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				// ctx.event.preventDefault();
+				ctx.event.stopPropagation();
+				ctx.event.preventDefault();
 				const { app, event, node } = ctx;
 				const { selection, schema } = app;
 				if (selection.isCollapsed) {
@@ -43,7 +44,9 @@ export class TitlePlugin extends NodePlugin {
 					const { data } = event;
 					const node = schema.text(data);
 					const pin = Pin.future(head.node, head.offset + 1);
-					console.log(head.point.toString(),pin.toString(), head.offset);
+					const after = PinnedSelection.fromPin(pin);
+					// console.log(head.point.toString(),pin.toString(), head.offset);
+					console.log(after.toString())
 
 					//
 					if (ctx.node.isEmpty) {
@@ -52,7 +55,7 @@ export class TitlePlugin extends NodePlugin {
 
 					app.tr
 						.insertText(head.point, node!)
-						.select(PinnedSelection.fromPin(pin))
+						.select(after)
 						.dispatch();
 
 				}
@@ -78,6 +81,9 @@ export class TitlePlugin extends NodePlugin {
 				// tr?.insert(at!, textNode)
 				// 	.select(after)
 				// 	.dispatch();
+			},
+			keyDown: (ctx) => {
+				// ctx.event.preventDefault()
 			},
 			input: (event) => {
 				// console.log('onInput', event);

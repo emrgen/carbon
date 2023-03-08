@@ -18,6 +18,7 @@ import { Carbon } from '../core/Carbon';
 import { PointedSelection } from '../core/PointedSelection';
 import { ActionOrigin } from '../core/actions/types';
 import { takeUntil } from '../utils/array';
+import { NodeId } from '../core/NodeId';
 
 export interface SplitOpts {
 	rootType?: NodeType;
@@ -59,7 +60,7 @@ export class TransformCommands extends BeforePlugin {
 			insert: this.insert,
 			remove: this.remove,
 			move: this.move,
-			delete: this.delete,
+			// delete: this.delete,
 			split: this.split,
 			wrap: this.wrap,
 			unwrap: this.unwrap,
@@ -195,7 +196,7 @@ export class TransformCommands extends BeforePlugin {
 		if (isAtBlockStart) {
 			// console.log('isAtBlockStart');
 			// TODO: insert default empty node of splitBlock.type
-			const emptyBlock = opts.rootType?.create([app.schema.node('paragraph', {})!]);
+			const emptyBlock = opts.rootType?.create([app.schema.node('title', {})!]);
 			if (!emptyBlock) {
 				console.error('failed to create emptyBlock of type', opts.rootType?.name)
 				return
@@ -212,12 +213,12 @@ export class TransformCommands extends BeforePlugin {
 		if (isAtBlockEnd) {
 			// console.log('isAtBlockEnd');
 			// TODO: insert default empty node of splitBlock.type
-			const emptyBlock = opts.rootType?.create([app.schema.node('paragraph', {})!]);
+			const emptyBlock = opts.rootType?.create([app.schema.node('title', {})!]);
 			if (!emptyBlock) {
 				console.error('failed to create emptyBlock of type', opts.rootType?.name)
 				return
 			}
-			const insertPoint = Point.toAfter(splitBlock);
+			const insertPoint = Point.toAfter(splitBlock.id);
 			const after = PinnedSelection.fromPin(Pin.toStartOf(emptyBlock)!);
 			console.log(after.toString());
 			tr
@@ -226,117 +227,117 @@ export class TransformCommands extends BeforePlugin {
 			return tr;
 		}
 
-		// as the cursor is within the split block
-		// need more involved splitting
-		// clone all nodes after the cursor up to the splitBlock
-		const [splittedNode] = splitNodeAtPin(pin, app);
-		const cloneBlocks = takeUntil(node.chain, n => n.eq(splitBlock)).reverse();
+	// 	// as the cursor is within the split block
+	// 	// need more involved splitting
+	// 	// clone all nodes after the cursor up to the splitBlock
+	// 	const [splittedNode] = splitNodeAtPin(pin, app);
+	// 	const cloneBlocks = takeUntil(node.chain, n => n.eq(splitBlock)).reverse();
 
-		// depending on option
-		// split can insert node inside or outside the splitBlock
-		const rootInsertPoint = opts.pos === 'out'
-			? Point.toAfter(splitBlock)
-			: Point.toAfter(first(cloneBlocks)!);
-		// recursively clone and insert all right child after splitNode clone
-		const rootNode = opts.rootType?.create([]);
-		// console.log(rootNode?.name);
+	// 	// depending on option
+	// 	// split can insert node inside or outside the splitBlock
+	// 	const rootInsertPoint = opts.pos === 'out'
+	// 		? Point.toAfter(splitBlock)
+	// 		: Point.toAfter(first(cloneBlocks)!);
+	// 	// recursively clone and insert all right child after splitNode clone
+	// 	const rootNode = opts.rootType?.create([]);
+	// 	// console.log(rootNode?.name);
 
-		if (!rootNode) {
-			console.error('failed to create root node of type', opts.rootType?.name)
-			return
-		}
+	// 	if (!rootNode) {
+	// 		console.error('failed to create root node of type', opts.rootType?.name)
+	// 		return
+	// 	}
 
-		let parentBlock = rootNode;
-		const insertCommands: Command[] = [];
-		const moveCommands: Command[] = [];
-		const maxDepth = cloneBlocks.length - 1;
-		let focusPoint: Optional<Point> = null;
+	// 	let parentBlock = rootNode;
+	// 	const insertCommands: Command[] = [];
+	// 	const moveCommands: Command[] = [];
+	// 	const maxDepth = cloneBlocks.length - 1;
+	// 	let focusPoint: Optional<Point> = null;
 
-		// descend and clone nodes
-		cloneBlocks.forEach((splitNode, index) => {
-			if (index < maxDepth) {
-				// non leaf node
-				const firstNode = splitNode.type.create([]);
-				if (!firstNode) {
-					console.warn('failed to create firstNode of type', splitNode.type?.name)
-					return
-				}
-				const slice = Fragment.from([firstNode]);
-				parentBlock.append(slice);
-				// move the split node next siblings to root node
-				// only if spit pos === 'out'
-				if (opts?.pos === 'out') {
-					const moveNodes = splitNode.nextSiblings.filter(n => !n.isDeleted && !n.isCollapseHidden);
+	// 	// descend and clone nodes
+	// 	cloneBlocks.forEach((splitNode, index) => {
+	// 		if (index < maxDepth) {
+	// 			// non leaf node
+	// 			const firstNode = splitNode.type.create([]);
+	// 			if (!firstNode) {
+	// 				console.warn('failed to create firstNode of type', splitNode.type?.name)
+	// 				return
+	// 			}
+	// 			const slice = Fragment.from([firstNode]);
+	// 			parentBlock.append(slice);
+	// 			// move the split node next siblings to root node
+	// 			// only if spit pos === 'out'
+	// 			if (opts?.pos === 'out') {
+	// 				const moveNodes = splitNode.nextSiblings.filter(n => !n.isDeleted && !n.isCollapseHidden);
 
-					// moveNodes.some(n => {
-					// 	const point = Pin.toStartOf(n)?.point;
-					// 	if (point) {
-					// 		focusPoint = point;
-					// 		return true;
-					// 	}
-					// });
+	// 				// moveNodes.some(n => {
+	// 				// 	const point = Pin.toStartOf(n)?.point;
+	// 				// 	if (point) {
+	// 				// 		focusPoint = point;
+	// 				// 		return true;
+	// 				// 	}
+	// 				// });
 
-					if (moveNodes.length) {
-						let at = Point.toAfter(firstNode);
-						moveCommands.push(...this.moveNodeCommands(at, moveNodes));
-					}
-				}
-			} else {
-				// leaf node is reached
-				console.log('last node', splittedNode.id.key);
-				let moveNodes: Node[] = [];
-				if (pin.isAtStart) {
-					moveNodes = [splittedNode, ...splittedNode.nextSiblings];
-				} else {
-					moveNodes = splittedNode.nextSiblings;
-				}
+	// 				if (moveNodes.length) {
+	// 					let at = Point.toAfter(firstNode);
+	// 					moveCommands.push(...this.moveNodeCommands(at, moveNodes));
+	// 				}
+	// 			}
+	// 		} else {
+	// 			// leaf node is reached
+	// 			console.log('last node', splittedNode.id.key);
+	// 			let moveNodes: Node[] = [];
+	// 			if (pin.isAtStart) {
+	// 				moveNodes = [splittedNode, ...splittedNode.nextSiblings];
+	// 			} else {
+	// 				moveNodes = splittedNode.nextSiblings;
+	// 			}
 
-				moveNodes = moveNodes.filter(n => !n.isDeleted);
+	// 			moveNodes = moveNodes.filter(n => !n.isDeleted);
 
-				// moveNodes.some(n => {
-				// 	const point = Pin.toStartOf(n)?.point;
-				// 	if (point) {
-				// 		focusPoint = point;
-				// 		return true;
-				// 	}
-				// });
+	// 			// moveNodes.some(n => {
+	// 			// 	const point = Pin.toStartOf(n)?.point;
+	// 			// 	if (point) {
+	// 			// 		focusPoint = point;
+	// 			// 		return true;
+	// 			// 	}
+	// 			// });
 
-				if (moveNodes.length) {
-					let at = Point.toWithin(parentBlock!)
-					moveCommands.push(...this.moveNodeCommands(at, moveNodes));
-				}
-			}
+	// 			if (moveNodes.length) {
+	// 				let at = Point.toWithin(parentBlock!)
+	// 				moveCommands.push(...this.moveNodeCommands(at, moveNodes));
+	// 			}
+	// 		}
 
-			// parent must have at least one child
-			// so firstChild can't be null
-			parentBlock = parentBlock.firstChild!
-		});
+	// 		// parent must have at least one child
+	// 		// so firstChild can't be null
+	// 		parentBlock = parentBlock.firstChild!
+	// 	});
 
-		// console.log(rootNode?.descendants().map(n => n.id.key));
-		focusPoint = Point.toWithin(rootNode)
-		console.log('insert node', rootNode?.name);
-		console.log('move command count', moveCommands.length);
+	// 	// console.log(rootNode?.descendants().map(n => n.id.key));
+	// 	focusPoint = Point.toWithin(rootNode)
+	// 	console.log('insert node', rootNode?.name);
+	// 	console.log('move command count', moveCommands.length);
 
-		app.tr
-			.insert(rootInsertPoint, rootNode!)
-			.add(moveCommands)
-			// .add(insertCommands)
-			// .add(DeleteCommand.create(deleteSet.toArray()))
-			.select(Selection.fromPoint(focusPoint!))
-			.dispatch();
-	}
+	// 	app.tr
+	// 		.insert(rootInsertPoint, rootNode!)
+	// 		.add(moveCommands)
+	// 		// .add(insertCommands)
+	// 		// .add(DeleteCommand.create(deleteSet.toArray()))
+	// 		.select(Selection.fromPoint(focusPoint!))
+	// 		.dispatch();
+	// }
 
 	// generates move commands for adjacent nodes
-	private moveNodeCommands(at: Point, nodes: Node[]): MoveCommand[] {
-		const commands: MoveCommand[] = [];
-		let to = at;
-		nodes.forEach(moveNode => {
-			// console.log('moveNode', moveNode.id.key, to.toString());
-			commands.push(MoveCommand.create(to, moveNode.id));
-			to = Point.toAfter(moveNode)
-		})
+	// private moveNodeCommands(at: Point, nodes: Node[]): MoveCommand[] {
+	// 	const commands: MoveCommand[] = [];
+	// 	let to = at;
+	// 	nodes.forEach(moveNode => {
+	// 		// console.log('moveNode', moveNode.id.key, to.toString());
+	// 		commands.push(MoveCommand.create(to, moveNode.id));
+	// 		to = Point.toAfter(moveNode)
+	// 	})
 
-		return commands
+	// 	return commands
 	}
 
 	// remove node from doc
@@ -350,259 +351,259 @@ export class TransformCommands extends BeforePlugin {
 	// 2. tail/head block: immediate children of commonNode and parent of tail/head node
 	// 3. tail/head node.
 	// delete nodes within selection
-	delete(app: Carbon, selection: PinnedSelection = app.selection): Optional<Transaction> {
+	// delete(app: Carbon, selection: PinnedSelection = app.selection): Optional<Transaction> {
 
-		// console.log(selection.toJSON());
-		// console.log(p14('%c[delete]'), 'color:green', 'selection');
+	// 	// console.log(selection.toJSON());
+	// 	// console.log(p14('%c[delete]'), 'color:green', 'selection');
 
-		const { tr } = app;
-		const pinnedSelection = selection;
-		console.log(selection.toString());
+	// 	const { tr } = app;
+	// 	const pinnedSelection = selection;
+	// 	console.log(selection.toString());
 
-		const deleteSet = this.selectedIds(app, selection);
-		console.log('Delete size', deleteSet.size, deleteSet.toArray().map(n => n.toString()));
+	// 	const deleteSet = this.selectedIds(app, selection);
+	// 	console.log('Delete size', deleteSet.size, deleteSet.toArray().map(n => n.toString()));
 
-		const { start: start, end: end } = pinnedSelection;
-		const headNode = end.node;
-		const tailNode = start.node;
-		if (!headNode || !tailNode) {
-			console.log(p14('%c[failed]'), 'color:red', 'head/tail node not found');
-			return
-		}
+	// 	const { start: start, end: end } = pinnedSelection;
+	// 	const headNode = end.node;
+	// 	const tailNode = start.node;
+	// 	if (!headNode || !tailNode) {
+	// 		console.log(p14('%c[failed]'), 'color:red', 'head/tail node not found');
+	// 		return
+	// 	}
 
-		// console.log(headNode.id.key, tailNode.id.key);
-		const [startBlock, endBlock] = blocksBelowCommonNode(tailNode, headNode);
+	// 	// console.log(headNode.id.key, tailNode.id.key);
+	// 	const [startBlock, endBlock] = blocksBelowCommonNode(tailNode, headNode);
 
-		// console.log('$$$$', prev, next, commonChainLen, chain);
-		if (!startBlock || !endBlock) {
-			console.log(p14('%c[failed]'), 'color:red', 'merge nodes are not found');
-			return
-		}
+	// 	// console.log('$$$$', prev, next, commonChainLen, chain);
+	// 	if (!startBlock || !endBlock) {
+	// 		console.log(p14('%c[failed]'), 'color:red', 'merge nodes are not found');
+	// 		return
+	// 	}
 
-		const commonNode = startBlock === endBlock ? startBlock : startBlock?.parent;
-		if (!commonNode) {
-			console.log(p14('%c[failed]'), 'color:red', 'common node not found, should not reach!');
-			return
-		}
+	// 	const commonNode = startBlock === endBlock ? startBlock : startBlock?.parent;
+	// 	if (!commonNode) {
+	// 		console.log(p14('%c[failed]'), 'color:red', 'common node not found, should not reach!');
+	// 		return
+	// 	}
 
-		//
-		if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-			const point = Point.toWithin(commonNode);
-			const after = Selection.fromPoint(point);
-			// console.log(tr.editor.origin);
+	// 	//
+	// 	if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+	// 		const point = Point.toWithin(commonNode);
+	// 		const after = Selection.fromPoint(point);
+	// 		// console.log(tr.editor.origin);
 
-			tr
-				.add(DeleteCommand.create(commonNode.children.map(ch => ch.id.clone())))
-				.select(after.clone())
-			return tr;
-		}
+	// 		tr
+	// 			.add(DeleteCommand.create(commonNode.children.map(ch => ch.id.clone())))
+	// 			.select(after.clone())
+	// 		return tr;
+	// 	}
 
-		// * startBlock !== endBlock
-		if (!startBlock.eq(endBlock)) {
-			return this.deleteAcrossBlock(editor, start, end, startBlock, endBlock, deleteSet);
-		}
+	// 	// * startBlock !== endBlock
+	// 	if (!startBlock.eq(endBlock)) {
+	// 		return this.deleteAcrossBlock(editor, start, end, startBlock, endBlock, deleteSet);
+	// 	}
 
-		// * startBlock === endBlock
-		if (startBlock.eq(endBlock)) {
-			return this.deleteWithinBlock(editor, start, end, startBlock, endBlock, deleteSet);
-		}
-	}
+	// 	// * startBlock === endBlock
+	// 	if (startBlock.eq(endBlock)) {
+	// 		return this.deleteWithinBlock(editor, start, end, startBlock, endBlock, deleteSet);
+	// 	}
+	// }
 
-	private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, tailBlock: Node, headBlock: Node, deleteSet = emptyDeleteSet): Optional<Transaction> {
-		const { tr } = app;
-		// all delete nodes are within same block
-		console.log(p14('%c[info]'), 'color:pink', 'Transform.deleteWithinBlock');
-		let point: Optional<Point>;
-		// console.log(Pin.toStartOf(tailBlock)?.toString(), tail.toString());
-		// console.log('tail', Pin.toStartOf(tailBlock)?.toString(), tail.toString());
-		// console.log(Pin.toStartOf(tailBlock)?.eq(tail));
-		console.log(start.toString(), end.toString());
+	// private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, tailBlock: Node, headBlock: Node, deleteSet = emptyDeleteSet): Optional<Transaction> {
+	// 	const { tr } = app;
+	// 	// all delete nodes are within same block
+	// 	console.log(p14('%c[info]'), 'color:pink', 'Transform.deleteWithinBlock');
+	// 	let point: Optional<Point>;
+	// 	// console.log(Pin.toStartOf(tailBlock)?.toString(), tail.toString());
+	// 	// console.log('tail', Pin.toStartOf(tailBlock)?.toString(), tail.toString());
+	// 	// console.log(Pin.toStartOf(tailBlock)?.eq(tail));
+	// 	console.log(start.toString(), end.toString());
 
 
-		// TODO: we are free to decide how we want to put the final cursor position
-		if (Pin.toStartOf(tailBlock)?.eq(start)) {
-			point = Point.toWithin(tailBlock.id);
-		} else {
-			point = start.leftAlign.point;
-		}
-		console.log(point.toString());
+	// 	// TODO: we are free to decide how we want to put the final cursor position
+	// 	if (Pin.toStartOf(tailBlock)?.eq(start)) {
+	// 		point = Point.toWithin(tailBlock.id);
+	// 	} else {
+	// 		point = start.leftAlign.point;
+	// 	}
+	// 	console.log(point.toString());
 
-		//
-		if (!point || point.isDefault) {
-			console.error(p14('%c[failed]'), 'color:red', 'failed to find selection point');
-			return
-		}
+	// 	//
+	// 	if (!point || point.isDefault) {
+	// 		console.error(p14('%c[failed]'), 'color:red', 'failed to find selection point');
+	// 		return
+	// 	}
 
-		const after = Selection.fromPoint(point);
-		tr
-			.add(DeleteCommand.create(deleteSet.toArray()))
-			.select(after);
-		return tr;
-	}
+	// 	const after = Selection.fromPoint(point);
+	// 	tr
+	// 		.add(DeleteCommand.create(deleteSet.toArray()))
+	// 		.select(after);
+	// 	return tr;
+	// }
 
-	// may merge blocks after delete
-	private deleteAcrossBlock(editor: Editor, tail: Pin, head: Pin, tailBlock: Node, headBlock: Node, deleteSet: BSet<ID> = emptyDeleteSet): Optional<Transaction> {
-		const { tr } = editor;
-		const startNode = tail.node;
-		const endNode = head.node;
+	// // may merge blocks after delete
+	// private deleteAcrossBlock(editor: Editor, tail: Pin, head: Pin, tailBlock: Node, headBlock: Node, deleteSet: BSet<ID> = emptyDeleteSet): Optional<Transaction> {
+	// 	const { tr } = editor;
+	// 	const startNode = tail.node;
+	// 	const endNode = head.node;
 
-		console.log('_____MERGE NODES_____', deleteSet.toArray().map(n => n.toString()));
+	// 	console.log('_____MERGE NODES_____', deleteSet.toArray().map(n => n.toString()));
 
-		const { parent: commonNode } = tailBlock;
-		if (!commonNode) {
-			console.log('cant merge without commonNode');
-			return
-		}
+	// 	const { parent: commonNode } = tailBlock;
+	// 	if (!commonNode) {
+	// 		console.log('cant merge without commonNode');
+	// 		return
+	// 	}
 
-		let startParent = startNode.isEmpty ? startNode : startNode.parent;
-		let endParent = endNode?.isEmpty ? endNode : endNode.parent;
-		if (!startParent || !endParent) {
-			console.log('start/end parent not found for merging node');
-			return
-		}
-		let startParentRef = startParent
-		let endParentRef = endParent
-		let startDepth = startParent.depth - commonNode.depth;
-		let endDepth = endParent.depth - commonNode.depth;
-		const commonDepth = Math.min(startDepth, endDepth) + 1;
+	// 	let startParent = startNode.isEmpty ? startNode : startNode.parent;
+	// 	let endParent = endNode?.isEmpty ? endNode : endNode.parent;
+	// 	if (!startParent || !endParent) {
+	// 		console.log('start/end parent not found for merging node');
+	// 		return
+	// 	}
+	// 	let startParentRef = startParent
+	// 	let endParentRef = endParent
+	// 	let startDepth = startParent.depth - commonNode.depth;
+	// 	let endDepth = endParent.depth - commonNode.depth;
+	// 	const commonDepth = Math.min(startDepth, endDepth) + 1;
 
-		const insertCommands: Command[] = [];
-		const moveCommands: Command[] = [];
+	// 	const insertCommands: Command[] = [];
+	// 	const moveCommands: Command[] = [];
 
-		// console.log(commonDepth, startDepth, endDepth);
+	// 	// console.log(commonDepth, startDepth, endDepth);
 
-		let point: Optional<Point> = this.findCursorPosAfterDelete(startParent, endParent, deleteSet);
-		if (!point) {
-			console.log('failed to find collapse point');
-			return
-		}
+	// 	let point: Optional<Point> = this.findCursorPosAfterDelete(startParent, endParent, deleteSet);
+	// 	if (!point) {
+	// 		console.log('failed to find collapse point');
+	// 		return
+	// 	}
 
-		// merge node as if startNode and endNode are at same depth
-		const handleUptoSameDepth = () => {
-			// headBlock node would be deleted anyway
-			// deleteSet.add(headBlock.id);
+	// 	// merge node as if startNode and endNode are at same depth
+	// 	const handleUptoSameDepth = () => {
+	// 		// headBlock node would be deleted anyway
+	// 		// deleteSet.add(headBlock.id);
 
-			let lastInsertedNodeId: Optional<ID>;
-			let mergeDepth = commonDepth - 1;
-			console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
-			deleteSet.forEach(d => console.log(d.toString()))
+	// 		let lastInsertedNodeId: Optional<ID>;
+	// 		let mergeDepth = commonDepth - 1;
+	// 		console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
+	// 		deleteSet.forEach(d => console.log(d.toString()))
 
-			// move endParent children to startParent
-			while (startParent && endParent && mergeDepth--) {
-				// destination point for move
-				let to: Optional<Point>;
-				if (startParent.isCollapsed) {
-					to = Point.toAfter(startParent);
-				} else {
-					to = startParent?.size ? Point.toAfter(startParent?.lastChild!) : Point.toWithin(startParent);
-					// console.log('DDDDDDD', startParent.id.key, startParent.name);
-				}
+	// 		// move endParent children to startParent
+	// 		while (startParent && endParent && mergeDepth--) {
+	// 			// destination point for move
+	// 			let to: Optional<Point>;
+	// 			if (startParent.isCollapsed) {
+	// 				to = Point.toAfter(startParent);
+	// 			} else {
+	// 				to = startParent?.size ? Point.toAfter(startParent?.lastChild!) : Point.toWithin(startParent);
+	// 				// console.log('DDDDDDD', startParent.id.key, startParent.name);
+	// 			}
 
-				// move children
-				const moveNodes = endParent?.children.filter(ch => !deleteSet.has(ch.id)) ?? [];
-				if (moveNodes.length) {
-					console.log('moving nodes...', moveNodes.length, to.toString());
+	// 			// move children
+	// 			const moveNodes = endParent?.children.filter(ch => !deleteSet.has(ch.id)) ?? [];
+	// 			if (moveNodes.length) {
+	// 				console.log('moving nodes...', moveNodes.length, to.toString());
 
-					// moveNodes.forEach(n => {
-					// 	console.log('___move nodes___', to?.toString(), n.id.key, n.textContent);
-					// });
-					moveCommands.push(...this.moveNodeCommands(to, moveNodes));
-				}
+	// 				// moveNodes.forEach(n => {
+	// 				// 	console.log('___move nodes___', to?.toString(), n.id.key, n.textContent);
+	// 				// });
+	// 				moveCommands.push(...this.moveNodeCommands(to, moveNodes));
+	// 			}
 
-				// endParent children will be moved to startParent
-				deleteSet.add(endParent?.id!);
+	// 			// endParent children will be moved to startParent
+	// 			deleteSet.add(endParent?.id!);
 
-				lastInsertedNodeId = startParent.id
-				startParent = startParent?.parent;
-				endParent = endParent?.parent;
+	// 			lastInsertedNodeId = startParent.id
+	// 			startParent = startParent?.parent;
+	// 			endParent = endParent?.parent;
 
-			};
+	// 		};
 
-			return lastInsertedNodeId;
-		}
+	// 		return lastInsertedNodeId;
+	// 	}
 
-		// case 1
-		// prev & next have same merge depth and are in perfect match for merge
-		// content of endBlock goes into startBlock
-		if (startDepth === endDepth) {
-			console.log('CASE: merge same depth blocks');
-			console.log('Selection point', point.toString());
+	// 	// case 1
+	// 	// prev & next have same merge depth and are in perfect match for merge
+	// 	// content of endBlock goes into startBlock
+	// 	if (startDepth === endDepth) {
+	// 		console.log('CASE: merge same depth blocks');
+	// 		console.log('Selection point', point.toString());
 
-			handleUptoSameDepth();
-			// NOTE: when the tail-head selects startParent and endParent entirely
-			// old selection point will not exists after the delete
-			// need to update the new selection point explicitly
-			// (maybe we can do better in the future)
-			if (startParentRef != endParentRef && tail.isAtStartOfNode(startParentRef) && head.isAtEndOfNode(endParentRef)) {
-				point = Point.toWithin(startParentRef)
-			}
-			tr
-				.add(moveCommands)
-				// .add(insertCommands)
-				.add(DeleteCommand.create(deleteSet.toArray()))
-				.select(Selection.fromPoint(point))
-			return tr
-		}
+	// 		handleUptoSameDepth();
+	// 		// NOTE: when the tail-head selects startParent and endParent entirely
+	// 		// old selection point will not exists after the delete
+	// 		// need to update the new selection point explicitly
+	// 		// (maybe we can do better in the future)
+	// 		if (startParentRef != endParentRef && tail.isAtStartOfNode(startParentRef) && head.isAtEndOfNode(endParentRef)) {
+	// 			point = Point.toWithin(startParentRef)
+	// 		}
+	// 		tr
+	// 			.add(moveCommands)
+	// 			// .add(insertCommands)
+	// 			.add(DeleteCommand.create(deleteSet.toArray()))
+	// 			.select(Selection.fromPoint(point))
+	// 		return tr
+	// 	}
 
-		// case 2
-		// partial match where prev has more depth than next
-		if (startDepth > endDepth) {
-			console.log('CASE: startBlock.depth > endBlock.depth');
-			handleUptoSameDepth();
-			tr
-				.add(moveCommands)
-				// .add(insertCommands)
-				.add(DeleteCommand.create(deleteSet.toArray()))
-				.select(Selection.fromPoint(point))
-			return tr
-		}
+	// 	// case 2
+	// 	// partial match where prev has more depth than next
+	// 	if (startDepth > endDepth) {
+	// 		console.log('CASE: startBlock.depth > endBlock.depth');
+	// 		handleUptoSameDepth();
+	// 		tr
+	// 			.add(moveCommands)
+	// 			// .add(insertCommands)
+	// 			.add(DeleteCommand.create(deleteSet.toArray()))
+	// 			.select(Selection.fromPoint(point))
+	// 		return tr
+	// 	}
 
-		// case 3
-		// partial match where startBlock has more depth than endBlock
-		if (startDepth < endDepth) {
-			console.log('CASE: startBlock.depth < endBlock.depth');
-			const lastInsertedNodeId = handleUptoSameDepth();
-			// let at = lastInsertedNodeId!
-			// console.log('+==================+');
-			// console.log(startParent.id.key, endParent.id.key);
+	// 	// case 3
+	// 	// partial match where startBlock has more depth than endBlock
+	// 	if (startDepth < endDepth) {
+	// 		console.log('CASE: startBlock.depth < endBlock.depth');
+	// 		const lastInsertedNodeId = handleUptoSameDepth();
+	// 		// let at = lastInsertedNodeId!
+	// 		// console.log('+==================+');
+	// 		// console.log(startParent.id.key, endParent.id.key);
 
-			let prevLastInsertedChildID: Optional<ID>;
-			// move endNodes remaining children after startParent
-			// NOTE: this create the effect of moving endParents non content children
-			// {
-			// 	const moveNodes = endParent.children.filter(n => !deleteSet.has(n.id))
-			// 	if (moveNodes.length) {
-			// 		const at = Point.toAfter(lastInsertedNodeId ?? startParent!);
-			// 		moveCommands.push(...this.moveNodeCommands(at, moveNodes));
-			// 		prevLastInsertedChildID = last(moveNodes)?.id
-			// 	}
-			// 	deleteSet.add(endParent.id);
-			// 	endParent = endParent.parent;
-			// }
+	// 		let prevLastInsertedChildID: Optional<ID>;
+	// 		// move endNodes remaining children after startParent
+	// 		// NOTE: this create the effect of moving endParents non content children
+	// 		// {
+	// 		// 	const moveNodes = endParent.children.filter(n => !deleteSet.has(n.id))
+	// 		// 	if (moveNodes.length) {
+	// 		// 		const at = Point.toAfter(lastInsertedNodeId ?? startParent!);
+	// 		// 		moveCommands.push(...this.moveNodeCommands(at, moveNodes));
+	// 		// 		prevLastInsertedChildID = last(moveNodes)?.id
+	// 		// 	}
+	// 		// 	deleteSet.add(endParent.id);
+	// 		// 	endParent = endParent.parent;
+	// 		// }
 
-			let at = Point.toAfter(prevLastInsertedChildID ?? lastInsertedNodeId ?? startParent)
-			// console.log(tailBlock.depth, endParent?.depth);
+	// 		let at = Point.toAfter(prevLastInsertedChildID ?? lastInsertedNodeId ?? startParent)
+	// 		// console.log(tailBlock.depth, endParent?.depth);
 
-			// unwrap
-			while (endParent && tailBlock.depth <= endParent?.depth) {
-				const moveNodes = endParent.children.filter(n => !deleteSet.has(n.id))
-				if (moveNodes.length) {
-					moveCommands.push(...this.moveNodeCommands(at, moveNodes));
-					at = Point.toAfter(last(moveNodes)!);
-				}
+	// 		// unwrap
+	// 		while (endParent && tailBlock.depth <= endParent?.depth) {
+	// 			const moveNodes = endParent.children.filter(n => !deleteSet.has(n.id))
+	// 			if (moveNodes.length) {
+	// 				moveCommands.push(...this.moveNodeCommands(at, moveNodes));
+	// 				at = Point.toAfter(last(moveNodes)!);
+	// 			}
 
-				deleteSet.add(endParent.id);
-				endParent = endParent.parent;
-			}
+	// 			deleteSet.add(endParent.id);
+	// 			endParent = endParent.parent;
+	// 		}
 
-			tr
-				.add(moveCommands)
-				// .add(insertCommands)
-				.add(DeleteCommand.create(deleteSet.toArray()))
-				.select(Selection.fromPoint(point))
-			return tr
-		}
-	}
+	// 		tr
+	// 			.add(moveCommands)
+	// 			// .add(insertCommands)
+	// 			.add(DeleteCommand.create(deleteSet.toArray()))
+	// 			.select(Selection.fromPoint(point))
+	// 		return tr
+	// 	}
+	// }
 
 	private findCursorPosAfterDelete(startBlock: Node, endBlock: Node, deleteSet: NodeIdSet): Optional<Point> {
 		{
@@ -631,7 +632,7 @@ export class TransformCommands extends BeforePlugin {
 		const { start, end } = selection;
 		// console.log(selection.isCollapsed, selection.isForward, start.node.id.key);
 
-		const collectId = (...ids: ID[]) => {
+		const collectId = (...ids: NodeId[]) => {
 			// console.log(ids);
 			each(ids, id => selectedIds.add(id));
 		}

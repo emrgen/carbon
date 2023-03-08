@@ -16,6 +16,8 @@ export class NodeTopicEmitter<T> {
 		// if (!listeners) {
 		// 	console.log(event, node.id.toString(), this.subscribers.get(event)?.get(node.id));
 		// }
+		console.log(listeners);
+
 		listeners?.forEach(cb => cb(node));
 	}
 

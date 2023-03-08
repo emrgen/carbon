@@ -165,6 +165,7 @@ export class Node extends EventEmitter {
 	// start and end locations are within the node
 	get focusSize(): number {
 		if (this.isInlineAtom) return this.attrs.node?.size ?? 1
+		// if (this.isEmpty && this.isInline) return 1
 		// if (this.isEmpty || this.isInlineAtom) return 1;
 		// if (this.isBlockAtom) return 0;
 		if (this.isText) return this.textContent.length;
@@ -301,7 +302,7 @@ export class Node extends EventEmitter {
 
 	get isEmpty(): boolean {
 		if (this.isInlineAtom) return false;
-		if (this.isInline || this.textContent) return false;
+		if (this.isInline) return !this.textContent;
 		return this.children.every(n => n.isEmpty);
 	}
 
@@ -595,6 +596,11 @@ export class Node extends EventEmitter {
 		this.content.remove(node, start, end);
 		this.markUpdated();
 		// console.log('removed', this.root?.version, this.root?.name, this.root?.test_key, this.root?.updatedChildren)
+	}
+
+	updateText(text: string) {
+		this.content.updateText(text)
+		this.markUpdated()
 	}
 
 	// @mutates
