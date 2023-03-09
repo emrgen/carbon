@@ -7,6 +7,7 @@ import { DocPlugin } from './plugins/Document';
 import { Header } from './plugins/Header';
 
 import './style.styl';
+import { ListKeyboardPlugin } from './plugins/ListKeyboard';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -14,6 +15,7 @@ export const blockPresets: Extension = {
 		new Header(),
 		new DocPlugin(),
 		new DocPlugin(),
+		new ListKeyboardPlugin(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),

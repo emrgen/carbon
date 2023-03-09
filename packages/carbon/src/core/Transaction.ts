@@ -20,6 +20,7 @@ import { SelectAction } from './actions/Select';
 import { SelectionManager } from './SelectionManager';
 import { InsertText } from './actions/InsertText';
 import { InsertNodes } from './actions/InsertNodes';
+import { ChangeName } from './actions/ChangeName';
 
 export class TransactionError {
 	commandId: number;
@@ -150,7 +151,7 @@ export class Transaction {
 	}
 
 	change(id: NodeId, from: NodeName, to: NodeName, origin = this.origin): Transaction {
-		// this.add(new ChangeTypeCommand(id, from, to, origin));
+		this.add(new ChangeName(id, from, to, origin));
 		return this;
 	}
 

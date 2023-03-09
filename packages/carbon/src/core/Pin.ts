@@ -90,7 +90,7 @@ export class Pin {
 		const target = node.find(n => n.isFocusable, { order: 'post' });
 		if (!target) return null;
 
-		return Pin.create(target, 0);
+		return Pin.create(target, 0).up();
 	}
 
 	static toEndOf(node: Node): Optional<Pin> {
@@ -107,7 +107,7 @@ export class Pin {
 			return Pin.create(child, 0);
 		}
 
-		return Pin.create(child, child.focusSize);
+		return Pin.create(child, child.focusSize).up();
 	}
 
 	static create(node: Node, offset: number) {
