@@ -789,14 +789,27 @@ export class TransformCommands extends BeforePlugin {
 
 			}
 
-			if (startPin.isAtStart) {
-				actions.push(RemoveText.create(start.point, startPin.node.clone()))
+			if (endPin.isAtEnd) {
+				const pin = Pin.toStartOf(endPin.node);
+				console.log(pin)
+				actions.push(RemoveText.create(pin?.point!, endPin.node.clone()))
+			} if (endPin.isWithin) {
+				const textNode = app.schema.text(endPin.node.textContent.slice(0, endPin.offset))
+				actions.push(RemoveText.create(Pin.toStartOf(endPin.node)?.point!, textNode!))
 			}
 
-			if (startPin.isWithin) {
+			const removeSiblings = takeUntil(startPin.node.nextSiblings, n => n.eq(endPin.node));
+			removeSiblings.forEach(n => {
+				actions.push(RemoveNode.create(nodeLocation(n)!, n.id));
+			});
+
+			if (startPin.isAtStart) {
+				actions.push(RemoveText.create(start.point, startPin.node.clone()))
+			} else if (startPin.isWithin) {
 				const textNode = app.schema.text(startPin.node.textContent.slice(startPin.offset))
 				actions.push(RemoveText.create(start.point, textNode!))
 			}
+
 		})
 
 		return actions;

@@ -44,7 +44,7 @@ export class Pin {
 	get leftAlign(): Pin {
 		const { prevSibling } = this.node;
 		if (!this.node.isEmpty && this.offset === 0 && prevSibling?.isFocusable) {
-			return Pin.toEndOf(prevSibling)!
+			return Pin.create(prevSibling, prevSibling.focusSize);
 		} else {
 			return this;
 		}
@@ -54,7 +54,7 @@ export class Pin {
 	get rightAlign(): Pin {
 		const { nextSibling } = this.node;
 		if (!this.node.isEmpty && this.offset === this.node.focusSize && nextSibling?.isFocusable) {
-			return Pin.toStartOf(nextSibling)!
+			return Pin.create(nextSibling, 0);
 		} else {
 			return this;
 		}

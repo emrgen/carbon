@@ -29,9 +29,9 @@ export class RemoveText implements Action{
 			return ActionResult.withError('failed to get delete pin')
 		}
 
-		const { node: target, offset } = pin.down()!;
+		const { node: target, offset } = pin.down()!.rightAlign;
 
-		console.log('REMOVE NODE', target.textContent, offset, node.textContent);
+		console.log('REMOVE NODE', at.toString(), target.id.toString(), target.textContent, offset, node.textContent);
 
 		const {textContent} = target;
 		const updatedTextContent = textContent.slice(0, offset) + textContent.slice(offset + node.textContent.length)

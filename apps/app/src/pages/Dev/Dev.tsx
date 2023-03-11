@@ -18,7 +18,11 @@ import {
 const data = node("document", [
   title([text("Document Title")]),
   section([title([])]),
-  section([title([text("sect"), text("ion 1"),]),]),
+  section([title([
+    text("sect"),
+    text("ABC"),
+    text("ion 1"),
+  ]),]),
   section([
     title([text("section 1"),]),
     section([title([text("section 2")])]),
