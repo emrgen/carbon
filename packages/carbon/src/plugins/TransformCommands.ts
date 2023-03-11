@@ -22,6 +22,8 @@ import { NodeId } from '../core/NodeId';
 import { RemoveText } from '../core/actions/RemoveText';
 import { MoveAction } from '../core/actions/MoveAction';
 import { InsertNodes } from '../core/actions/InsertNodes';
+import { RemoveNode } from '../core/actions/RemoveNode';
+import { nodeLocation } from '../utils/location';
 
 export interface SplitOpts {
 	rootType?: NodeType;
@@ -277,7 +279,9 @@ export class TransformCommands extends BeforePlugin {
 					const moveNodes = splitNode.nextSiblings.filter(n => !n.isCollapseHidden);
 
 					if (moveNodes.length) {
+
 						let at = Point.toAfter(firstNode.id);
+						console.log('move to ..', firstNode.id.toString(), at.toString());
 						moveCommands.push(...this.moveNodeCommands(at, moveNodes));
 					}
 				}
@@ -288,26 +292,49 @@ export class TransformCommands extends BeforePlugin {
 
 				const downPin = pin.down()!;
 				if (downPin.isWithin) {
-					const {node, offset} = pin;
+					const { node, offset } = downPin;
+					const {nextSiblings} = node;
 					const {textContent} = node;
 					console.log('split text....', textContent);
-					const removeTextNode = app.schema.text(textContent.slice(offset))
-					const insertTextNode = app.schema.text(textContent.slice(offset))
+					const removeTextNode = app.schema.text(textContent.slice(offset));
 					removeCommands.push(RemoveText.create(pin.point, removeTextNode!));
+					if (nextSiblings.length) {
+						removeCommands.push(...this.removeNodeCommands(nextSiblings));
+					}
+					// console.log(node.nextSiblings, node.textContent, node.name);
+
+					const insertTextNode = app.schema.text(textContent.slice(offset));
 					insertCommands.push(InsertNodes.create(at, Fragment.fromNode(insertTextNode!)));
+					if (nextSiblings.length) {
+						insertCommands.push(InsertNodes.create(at, Fragment.from(nextSiblings)))
+					}
 				}
 
-				// if (downPin.isAfter) {
-				// 	moveNodes = downPin.node.nextSiblings;
-				// }
-				// if (downPin.isBefore) {
-				// 	moveNodes = [downPin.node, ...downPin.node.nextSiblings];
-				// }
+				if (downPin.isAfter) {
+					const { node, offset } = downPin;
+					const { nextSiblings } = node;
+					if (nextSiblings.length) {
+						removeCommands.push(...this.removeNodeCommands(nextSiblings));
+					}
+					if (nextSiblings.length) {
+						insertCommands.push(InsertNodes.create(at, Fragment.from(nextSiblings)))
+					}
+				}
 
-				// if (moveNodes.length) {
-				// 	let at = Point.toWithin(parentBlock?.id!)
-				// 	moveCommands.push(...this.moveNodeCommands(at, moveNodes));
-				// }
+				if (downPin.isBefore) {
+					const { node } = downPin;
+					const { nextSiblings, textContent } = node;
+					removeCommands.push(RemoveText.create(pin.point, node));
+					if (nextSiblings.length) {
+						removeCommands.push(...this.removeNodeCommands(nextSiblings));
+					}
+
+					const insertTextNode = app.schema.text(textContent);
+					removeCommands.push(InsertNodes.create(pin.point, Fragment.fromNode(insertTextNode!)));
+					if (nextSiblings.length) {
+						insertCommands.push(InsertNodes.create(at, Fragment.from(nextSiblings)))
+					}
+				}
 			}
 
 			// parent must have at least one child
@@ -315,12 +342,13 @@ export class TransformCommands extends BeforePlugin {
 			parentBlock = parentBlock.firstChild!
 		});
 
-	// 	// console.log(rootNode?.descendants().map(n => n.id.key));
+		// console.log(rootNode?.descendants().map(n => n.id.key));
 		focusPoint = Pin.toStartOf(rootNode)?.point
 		console.log('insert node', rootNode?.name, rootNode);
 		console.log('move command count', moveCommands.length);
+		console.log('remove command count', removeCommands.length);
 
-		console.log(focusPoint?.toString())
+		console.log(focusPoint?.toString(), rootNode.textContent)
 
 		app.tr
 			.insert(rootInsertPoint, rootNode!)
@@ -335,20 +363,32 @@ export class TransformCommands extends BeforePlugin {
 	private moveNodeCommands(at: Point, nodes: Node[]): MoveAction[] {
 		const commands: MoveAction[] = [];
 		let to = at;
-		let from: Optional<Point> = null;
 		nodes.forEach(moveNode => {
-			if (moveNode.prevSibling) {
-				from = Point.toAfter(moveNode.prevSibling.id);
-			} else {
-				from = Point.toWithin(moveNode.parent?.id!, 0);
-			}
-
 			// console.log('moveNode', moveNode.id.key, to.toString());
-			commands.push(MoveAction.create(to, from, moveNode.id));
+			commands.push(MoveAction.create(nodeLocation(moveNode)!, to, moveNode.id));
 			to = Point.toAfter(moveNode.id)
 		})
 
-		return commands
+		return commands;
+	}
+
+	// generates insert commands for adjacent nodes
+	private insertNodeCommands(at: Point, nodes: Node[]): InsertNodes[] {
+		const commands: InsertNodes[] = [];
+		commands.push(InsertNodes.create(at, Fragment.from(nodes)));
+
+		return commands;
+	}
+
+	private removeNodeCommands(nodes: Node[]): RemoveNode[] {
+		const removeNodeCommands: RemoveNode[] = [];
+		nodes.forEach(node => {
+			removeNodeCommands.push(RemoveNode.create(nodeLocation(node)!, node.id));
+		})
+
+		console.log(removeNodeCommands);
+
+		return removeNodeCommands;
 	}
 
 	// remove node from doc

@@ -34,3 +34,5 @@ export class ActionResult<T = any> {
 		return this.value as T
 	}
 }
+
+export const NULL_ACTION_RESULT = ActionResult.withValue('done');

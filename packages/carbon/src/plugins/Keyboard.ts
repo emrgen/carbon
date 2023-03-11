@@ -23,7 +23,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
 				const { node, event } = ctx;
 				if(node.isAtom) {
-					event.preventDefault()
+					// event.preventDefault()
 					return
 				}
 				// console.log(p14('%c[insert]'), 'color:green', 'text node by keypress');

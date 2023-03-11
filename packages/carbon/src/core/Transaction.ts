@@ -73,21 +73,6 @@ export class Transaction {
 		return new Transaction(carbon, tm, pm, sm)
 	}
 
-	static __join(...trs: Optional<Transaction>[]): Transaction {
-		if (trs.length === 0) {
-			throw new Error("Cant join empty transactions");
-		}
-		if (trs.some(t => t === undefined)) {
-			throw new Error("Transaction can not be undefined");
-		}
-		const tr = first(trs) as Transaction
-		trs.slice(1).forEach(from => {
-			tr.merge(from!);
-		});
-
-		return tr
-	}
-
 	constructor(
 		readonly app: Carbon,
 		private readonly tm: TransactionManager,
@@ -135,8 +120,8 @@ export class Transaction {
 		return this;
 	}
 
-	insertText(at: Point, text: Node, origin = this.origin): Transaction {
-		this.add(InsertText.create(at, text, origin));
+	insertText(at: Point, text: Node, native: boolean, origin = this.origin): Transaction {
+		this.add(InsertText.create(at, text, native, origin));
 		return this;
 	}
 

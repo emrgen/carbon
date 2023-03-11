@@ -32,6 +32,7 @@ export class RemoveText implements Action{
 		const { node: target, offset } = pin.down()!;
 
 		target.updateText(target.textContent.slice(0, offset));
+		tr.updated(target);
 		tr.updated(target.parent!);
 		console.log('removing text...', offset, pin.offset);
 

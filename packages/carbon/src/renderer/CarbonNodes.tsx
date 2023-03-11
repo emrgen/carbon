@@ -4,11 +4,12 @@ import {
   memo,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState
 } from "react";
 import { RendererProps } from "../core/Renderer";
-import { useNodeChange } from "../hooks/useNodeChange";
+import { useNodeChange, useTextChange } from "../hooks/useNodeChange";
 import { useCarbon } from '../hooks/useCarbon';
 
 export default function JustEmpty() {
@@ -73,33 +74,21 @@ export const CarbonElement = memo(forwardRef(InnerElement));
 export const RawText = memo(function TT(props: RendererProps) {
   const {node} = props
   const ref = useRef(document.createTextNode(node.textContent));
-  // const {node} = useNodeChange(props);
   return <>{ref.current}</>
 })
 
-export const CarbonText = (props: RendererProps) => {
+const InnerCarbonText = (props: RendererProps) => {
   const { node } = props;
-  // const {node} = useNodeChange(props);
   const ref = useRef<HTMLSpanElement>(null);
 
-  // useEffect(() => {
-  //   if (node.isEmpty) {
-
-  //   }
-  //   if (!node.isEmpty && ref.current && ref.current.textContent !== node.textContent) {
-
-  //     ref.current.textContent = node.textContent;
-  //   }
-  // })
-
   return (
-    <CarbonElement node={node} tag="span">
-      {/* {node.isEmpty ? <JustEmpty/> : node.textContent} */}
+    <CarbonElement node={node} tag="span" ref={ref}>
       {node.textContent}
-      {/* <RawText node={node}/> */}
     </CarbonElement>
   );
 };
+
+export const CarbonText = (InnerCarbonText);
 
 const InnerCarbonBlock = (props: RendererProps, ref) => {
   const { node, children, custom } = props;
@@ -125,7 +114,6 @@ export const CarbonChildren = (props: RendererProps) => {
 
 export const CarbonNode = (props: RendererProps) => {
   const app = useCarbon();
-  // const {node} = props;
   const { node } = useNodeChange(props);
 
   const RegisteredComponent = app.component(node.name);

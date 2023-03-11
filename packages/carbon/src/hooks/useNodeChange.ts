@@ -3,6 +3,36 @@ import { useCarbonChange } from "./useCarbonChange";
 import { NodeChangeType } from "../core/ChangeManager";
 import { Node } from 'core/Node';
 
+interface UseTextChangeProps {
+	node: Node,
+	onChange(node: Node)
+}
+
+export const useTextChange = (props: UseTextChangeProps) => {
+	const { node } = props;
+	const change = useCarbonChange();
+	// const [watched, setWatched] = useState(node);
+
+	useEffect(() => {
+		const onChange = (value: Node) => {
+			props.onChange(value);
+			// change.mounted(value);
+			// setWatched(value);
+			// console.log("updated", node.id.toString(), node.version, watched === value);
+		};
+
+		change.subscribe(node.id, NodeChangeType.update, onChange);
+		return () => {
+			change.unsubscribe(node.id, NodeChangeType.update, onChange);
+		}
+	}, [change, node.id, node.version, props]);
+
+	return {
+		// node: watched,
+		change,
+	};
+};
+
 interface UseNodeChangeProps {
 	node: Node,
 	onChange?()
@@ -16,6 +46,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 
 	useEffect(() => {
 		const onChange = (value: Node) => {
+			props.onChange?.()
 			setVersion(value.version);
 			setWatched(value);
 			console.log("updated", node.id.toString(), node.version, watched === value);

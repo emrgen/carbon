@@ -128,10 +128,10 @@ enum NodeLayout {
 export interface NodeSpec {
 	name?: string;
 	content?: string;
-	marks?: string
-	group?: string
-	inline?: boolean
-	atom?: boolean
+	marks?: string;
+	group?: string;
+	inline?: boolean;
+	atom?: boolean;
 	tag?: string;
 	options?: boolean;
 	collapsable?: boolean
@@ -147,20 +147,20 @@ export interface NodeSpec {
 	// sandbox act as a divider of all interaction with other node
 	// sandbox also act as the edge of the interactions
 	sandbox?: boolean;
-	code?: boolean
-	whitespace?: "pre" | "normal"
-	definingAsContext?: boolean
-	definingForContent?: boolean
-	defining?: boolean
-	isolating?: boolean
-	insertBefore?: boolean
-	insertAfter?: boolean
+	code?: boolean;
+	whitespace?: "pre" | "normal";
+	definingAsContext?: boolean;
+	definingForContent?: boolean;
+	defining?: boolean;
+	isolating?: boolean;
+	insertBefore?: boolean;
+	insertAfter?: boolean;
 	info?: NodeInfo;
 	attrs?: {
-		node?: Record<string, any>,
-		html?: Record<string, any>,
+		node?: Record<string, any>;
+		html?: Record<string, any>;
 	}
-	[key: string]: any
+	[key: string]: any;
 }
 
 export interface NodeInfo {

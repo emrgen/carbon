@@ -14,17 +14,17 @@ export class InsertText implements Action{
 	id: number;
 	type: ActionType;
 
-	static create(at: Point, text: Node, origin: ActionOrigin) {
-		return new InsertText(at, text, origin);
+	static create(at: Point, text: Node, native: boolean, origin: ActionOrigin) {
+		return new InsertText(at, text, native, origin);
 	}
 
-	constructor(readonly at: Point, readonly text: Node, readonly origin: ActionOrigin) {
+	constructor(readonly at: Point, readonly text: Node, readonly native: boolean, readonly origin: ActionOrigin) {
 		this.id = generateActionId();
 		this.type = ActionType.insertText;
 	}
 
 	execute(tr: Transaction): ActionResult {
-		const {at, text} = this;
+		const {at, text, native} = this;
 		const {app} = tr;
 		const {schema} = app;
 
@@ -47,27 +47,35 @@ export class InsertText implements Action{
 		if (pin.isBefore) {
 			const { textContent } = node;
 			node.updateText(text.textContent + textContent);
-			tr.updated(node);
+			if (!native) {
+				tr.updated(node);
+			}
 			return ActionResult.withValue('done');
 		}
 
 		if (pin.isAfter) {
 			const { textContent } = node;
 			node.updateText(textContent + text.textContent);
-			tr.updated(node);
+			if (!native) {
+				tr.updated(node);
+			}
 			return ActionResult.withValue('done');
 		}
 
 		if (pin.isWithin) {
 			if (node.isBlock) {
 				node.append(fragment)
-				tr.updated(node);
+				if (!native) {
+					tr.updated(node);
+				}
 			} else {
 				const {textContent} = node;
 				// if the current text style match just insert into existing text
 				const updatedText = textContent.slice(0, offset) + text.textContent + textContent.slice(offset);
 				node.updateText(updatedText);
-				tr.updated(node);
+				if (!native) {
+					tr.updated(node);
+				}
 			}
 
 			return ActionResult.withValue('done');

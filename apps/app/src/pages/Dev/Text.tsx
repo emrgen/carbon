@@ -7,7 +7,8 @@ export default function Text() {
 		e.preventDefault()
 		const {data} = e;
 		console.log(data)
-		setText(text + data)
+		// setText(text + data)
+    e.target.innerHTML = e.target.textContent + data
 	}
 
 	return (
