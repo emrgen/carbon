@@ -172,7 +172,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		const { selection } = app;
 		const {isCollapsed, head} = selection;
 		if (!isCollapsed) {
-			// app.cmd.transform.delete()?.dispatch()
+			app.cmd.transform.delete(app.selection, true)?.dispatch()
 			return
 		}
 

@@ -42,7 +42,7 @@ declare module '@emrgen/carbon' {
 			insert(node: Node, ref: Node, opts?: InsertPos): Optional<Transaction>;
 			remove(node: Node): Optional<Transaction>;
 			move(node: Node, to: Point): Optional<Transaction>;
-			delete(selection?: PinnedSelection): Optional<Transaction>;
+			delete(selection?: PinnedSelection, merge?: boolean): Optional<Transaction>;
 			split(node: Node, pin: Pin, opts?: SplitOpts): Optional<Transaction>;
 			wrap(node: Node, name: NodeName): Optional<Transaction>;
 			unwrap(node: Node): Optional<Transaction>;
@@ -65,7 +65,7 @@ export class TransformCommands extends BeforePlugin {
 			insert: this.insert,
 			remove: this.remove,
 			move: this.move,
-			// delete: this.delete,
+			delete: this.delete,
 			split: this.split,
 			wrap: this.wrap,
 			unwrap: this.unwrap,
@@ -151,8 +151,8 @@ export class TransformCommands extends BeforePlugin {
 
 		tr
 			.insert(Point.toAfter(node.id), wrapper)
-			// .add(DeleteCommand.create([node.id]))
-			// .select(Selection.fromPoint(at))
+		// .add(DeleteCommand.create([node.id]))
+		// .select(Selection.fromPoint(at))
 		return tr;
 	}
 
@@ -166,7 +166,7 @@ export class TransformCommands extends BeforePlugin {
 		const focus = node.find(n => n.type.isTextBlock) ?? node;
 		tr
 			.move(at, node.id)
-			// .select(PointedSelection.within(focus))
+		// .select(PointedSelection.within(focus))
 		return tr;
 	}
 
@@ -262,7 +262,7 @@ export class TransformCommands extends BeforePlugin {
 		console.log(cloneBlocks);
 
 
-	// descend and clone nodes
+		// descend and clone nodes
 		cloneBlocks.forEach((splitNode, index) => {
 			if (index < maxDepth) {
 				// non leaf node
@@ -293,8 +293,8 @@ export class TransformCommands extends BeforePlugin {
 				const downPin = pin.down()!;
 				if (downPin.isWithin) {
 					const { node, offset } = downPin;
-					const {nextSiblings} = node;
-					const {textContent} = node;
+					const { nextSiblings } = node;
+					const { textContent } = node;
 					console.log('split text....', textContent);
 					const removeTextNode = app.schema.text(textContent.slice(offset));
 					removeCommands.push(RemoveText.create(pin.point, removeTextNode!));
@@ -672,6 +672,48 @@ export class TransformCommands extends BeforePlugin {
 		}
 
 		return Point.toWithin(startBlock.id);
+	}
+
+	// ref: https://www.notion.so/fastype-6858ec35e5e04e919b9dc5b3a37f6c85
+	// the delete logic works based on the following entities
+	// 1. commonNode
+	// 2. tail/head block: immediate children of commonNode and parent of tail/head node
+	// 3. tail/head node.
+	// delete nodes within selection
+	delete(app: Carbon, selection: PinnedSelection = app.selection, merge = false): Optional<Transaction> {
+		console.log(selection.toString());
+		const { start, end } = selection;
+		const headNode = end.node;
+		const tailNode = start.node;
+		if (!headNode || !tailNode) {
+			console.log(p14('%c[failed]'), 'color:red', 'head/tail node not found');
+			return
+		}
+
+		const [startBlock, endBlock] = blocksBelowCommonNode(tailNode, headNode);
+		const commonNode = startBlock === endBlock ? startBlock : startBlock?.parent;
+		if (!commonNode) {
+			console.log(p14('%c[failed]'), 'color:red', 'common node not found, should not reach!');
+			return
+		}
+
+		console.log(commonNode)
+
+		if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+			const { tr } = app;
+			const point = Point.toWithin(commonNode.id);
+			const after = PointedSelection.fromPoint(point);
+			// console.log(tr.editor.origin);
+
+			tr
+				.add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
+				.select(after.clone())
+			return tr;
+		}
+
+		// const deleteSet = this.selectedIds(editor, selection);
+
+		return null
 	}
 
 	// * NOTE: this methods is kept public for testing

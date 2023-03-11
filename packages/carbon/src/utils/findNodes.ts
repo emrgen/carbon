@@ -1,9 +1,9 @@
-import { Editor } from '../core/Editor';
 import { Node } from '../core/Node';
 import { Point } from '../core/Point';
 import { zip } from 'lodash';
+import { NodeStore } from '../core/NodeStore';
 
-export function nodesBetweenPoints(tail: Point, head: Point, editor: Editor): Node[] {
+export function nodesBetweenPoints(tail: Point, head: Point, store: NodeStore): Node[] {
 	const nodes = [];
 
 	return nodes;
