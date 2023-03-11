@@ -1,5 +1,5 @@
 
-import { CarbonPlugin, EventContext, EventHandlerMap, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, Transaction } from '@emrgen/carbon-core';
+import { CarbonPlugin, EventContext, EventHandlerMap, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, Transaction, TransformCommands } from '@emrgen/carbon-core';
 import { TextPlugin } from './Text';
 
 export class TitlePlugin extends NodePlugin {
@@ -38,49 +38,40 @@ export class TitlePlugin extends NodePlugin {
 				// ctx.event.preventDefault();
 				const { app, event, node } = ctx;
 				const { selection, schema } = app;
-				if (selection.isCollapsed) {
-					const { head } = selection;
-					// @ts-ignore
-					const { data } = event;
-					const node = schema.text(data);
-					const pin = Pin.future(head.node, head.offset + 1);
-					const after = PinnedSelection.fromPin(pin);
+				const { head } = selection;
+				// @ts-ignore
+				const { data } = event;
+				const textNode = schema.text(data);
+				if (!textNode) {
+					console.error('failed to create text node');
+					return
+				}
+				const pin = Pin.future(head.node, head.offset + 1);
+				const after = PinnedSelection.fromPin(pin);
 
+				if (!selection.isCollapsed) {
+					ctx.event.preventDefault();
+					const tr = app.cmd.transform.delete();
+					tr.insertText(head.point, textNode!);
+					tr.select(after);
+					tr.dispatch();
+					return
+				}
+
+				if (selection.isCollapsed) {
 					const native = !ctx.node.isEmpty;
 					if (!native) {
 						ctx.event.preventDefault();
 					}
 
 					const {tr} = app;
-					tr.insertText(head.point, node!, native);
+					tr.insertText(head.point, textNode!, native);
 					if (!native) {
 						tr.select(after);
 					}
 					tr.dispatch();
 
 				}
-
-				// let tr: Optional<Transaction>
-				// let at: Optional<Point>
-				// if (selection.isExpanded) {
-				// 	tr = cmd.transform.delete(selection)
-				// 	at = tr?.selection?.head;
-				// 	tr = tr?.pop()
-				// } else {
-				// 	tr = app.tr;
-				// 	at = selection.head.point;
-				// }
-
-				// const textNode = schema.text(data);
-				// if (!textNode) {
-				// 	console.error('failed to create text node');
-				// 	return
-				// }
-
-				// const after = Selection.after(textNode)
-				// tr?.insert(at!, textNode)
-				// 	.select(after)
-				// 	.dispatch();
 			},
 			keyDown: (ctx) => {
 				// ctx.event.preventDefault()

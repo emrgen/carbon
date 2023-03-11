@@ -10,3 +10,5 @@ export const extensionPresets: Extension = {
 		new KeyboardPlugin(),
 	],
 }
+
+export * from './TransformCommands'

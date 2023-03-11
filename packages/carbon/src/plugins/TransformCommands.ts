@@ -24,6 +24,8 @@ import { MoveAction } from '../core/actions/MoveAction';
 import { InsertNodes } from '../core/actions/InsertNodes';
 import { RemoveNode } from '../core/actions/RemoveNode';
 import { nodeLocation } from '../utils/location';
+import { SelectionInfo } from '../core/DeleteGroup';
+import { Range } from '../core/Range';
 
 export interface SplitOpts {
 	rootType?: NodeType;
@@ -31,7 +33,7 @@ export interface SplitOpts {
 	pos?: 'out' | 'in';
 }
 
-const emptyDeleteSet = new NodeIdSet();
+// const emptyDeleteSet = new NodeIdSet();
 
 type InsertPos = 'before' | 'after' | 'prepend' | 'append';
 
@@ -691,6 +693,11 @@ export class TransformCommands extends BeforePlugin {
 		}
 
 		const [startBlock, endBlock] = blocksBelowCommonNode(tailNode, headNode);
+		if (!startBlock || !endBlock) {
+			console.log(p14('%c[failed]'), 'color:red', 'merge nodes are not found');
+			return
+		}
+
 		const commonNode = startBlock === endBlock ? startBlock : startBlock?.parent;
 		if (!commonNode) {
 			console.log(p14('%c[failed]'), 'color:red', 'common node not found, should not reach!');
@@ -711,64 +718,118 @@ export class TransformCommands extends BeforePlugin {
 			return tr;
 		}
 
-		// const deleteSet = this.selectedIds(editor, selection);
+		const deleteGroup = this.selectionInfo(app, selection);
 
+		// * startBlock === endBlock
+		if (startBlock.eq(endBlock)) {
+			return this.deleteWithinBlock(app, start, end, startBlock, endBlock, deleteGroup);
+		}
 		return null
 	}
 
-	// * NOTE: this methods is kept public for testing
+	private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, tailBlock: Node, headBlock: Node, deleteGroup: SelectionInfo = SelectionInfo.default()): Optional<Transaction> {
+		let point: Optional<Point>;
+		// TODO: we are free to decide how we want to put the final cursor position
+		if (Pin.toStartOf(tailBlock)?.eq(start)) {
+			point = Point.toWithin(tailBlock.id,);
+		} else {
+			point = start.leftAlign.point;
+		}
+
+		if (!point || point.isDefault) {
+			console.error(p14('%c[failed]'), 'color:red', 'failed to find selection point');
+			return
+		}
+
+		console.log(deleteGroup);
+		
+		const after = PointedSelection.fromPoint(point);
+		const {tr} = app;
+		tr.add(this.deleteGroupCommands(app, deleteGroup))
+		tr.select(after)
+
+		return tr
+	}
+
+	private deleteGroupCommands(app: Carbon, deleteGroup: SelectionInfo): Action[] {
+		const actions: Action[] = [];
+
+		// each(deleteGroup.ids.toArray(), id => {
+
+		// })
+
+		each(deleteGroup.range, range => {
+			const {start, end} = range;
+			const startPin = start.down();
+			const endPin = end.down();
+			if (!startPin || !endPin) {
+				throw new Error("Failed to get pin from range");
+			}
+
+			if (startPin.node.eq(endPin.node)) {
+				if (startPin.isAtStart && endPin.isAtEnd) {
+					actions.push(RemoveText.create(start.point, startPin.node.clone()));
+					return
+				}
+				if (startPin.isAtStart) {
+					const textNode = app.schema.text(startPin.node.textContent.slice(0, endPin.offset))
+					actions.push(RemoveText.create(start.point, textNode!));
+					return
+				}
+				if (endPin.isAtEnd) {
+					const textNode = app.schema.text(startPin.node.textContent.slice(startPin.offset))
+					actions.push(RemoveText.create(start.point, textNode!));
+					return
+				}
+				console.log('@@@@@@@@@');
+				
+				const textNode = app.schema.text(startPin.node.textContent.slice(startPin.offset, endPin.offset))
+				actions.push(RemoveText.create(start.point, textNode!));
+				return
+
+			}
+
+			if (startPin.isAtStart) {
+				actions.push(RemoveText.create(start.point, startPin.node.clone()))
+			}
+
+			if (startPin.isWithin) {
+				const textNode = app.schema.text(startPin.node.textContent.slice(startPin.offset))
+				actions.push(RemoveText.create(start.point, textNode!))
+			}
+		})
+
+		return actions;
+	}
+
+
 	// find node ids to delete for provided selection
 	// think of the case what needs to happen when delete is pressed with some selection
-	selectedIds(app: Carbon, selection: PinnedSelection): NodeIdSet {
-		const selectedIds = new NodeIdSet();
+	private selectionInfo(app: Carbon, selection: PinnedSelection): SelectionInfo {
+		const selectedGroup = new SelectionInfo();
 		// console.log('###', selection.toJSON());
 		const { start, end } = selection;
 		// console.log(selection.isCollapsed, selection.isForward, start.node.id.key);
 
 		const collectId = (...ids: NodeId[]) => {
 			// console.log(ids);
-			each(ids, id => selectedIds.add(id));
+			// each(ids, id => selectedGroup.add(id));
 		}
-		const collectedIds = () => selectedIds;
+		const collectedInfo = () => selectedGroup;
 
 		// console.log('###', normalSelection.toJSON());
 
 		// TODO: check if this is unnecessary
-		if (selection.isCollapsed) {
-			if (start.node?.isAtom) {
-				collectId(start.node.id);
-			}
-			return collectedIds();
-		}
 
 		const startPoint = start.point;
 		const endPoint = end.point;
 
-		// split at head
-		let splitEndNode: Optional<Node> = app.store.get(endPoint.nodeId);
-
-		if (!splitEndNode) {
-			console.log('failed to find head node');
-			return selectedIds
-		}
-		splitNodeAtOffset(splitEndNode, end.offset, app);
-
-		// split at tail
-		let splitStartNode: Optional<Node> = app.store.get(startPoint.nodeId);
-		// console.log(headNode?.name, tailNode?.name);
-		// console.log('before split', tailNode?.name, tailNode?.id.toString(), start.offset);
-		if (!splitStartNode) {
-			console.log('failed to find head node');
-			return selectedIds
-		}
-		splitNodeAtOffset(splitStartNode, start.offset, app);
-
-		splitStartNode = app.store.get(startPoint.nodeId);
-		splitEndNode = app.store.get(endPoint.nodeId);
+		let splitStartNode = app.store.get(startPoint.nodeId);
+		let splitEndNode = app.store.get(endPoint.nodeId);
 		// console.log('after split', tailNode?.id.toString());
 		if (!splitStartNode || !splitEndNode) {
 			console.log('failed to find head/tail node');
-			return collectedIds();
+			return collectedInfo();
 		}
 
 		// console.log(tailNode.id.key, headNode.id.key, start.toString(), end.toString());
@@ -782,61 +843,42 @@ export class TransformCommands extends BeforePlugin {
 		let endNode: Optional<Node>;
 
 		const startInfo = {
-			atStart: start.offset === 0,
-			atEnd: splitStartNode.nextSiblings.length === 0,
-			atMid: start.offset === 0 && splitStartNode.nextSiblings.length === 0,
+			atStart: start.isAtStart,
+			atEnd: start.isAtEnd,
+			atMid: start.isWithin,
 			isEmpty: splitStartNode.isEmpty,
 		}
+
 		const endInfo = {
-			atStart: end.offset === 0,
-			atEnd: splitEndNode.nextSiblings.length === 0,
-			atMid: end.offset === 0 && splitEndNode.nextSiblings.length === 0,
+			atStart: end.isAtStart,
+			atEnd: end.isAtEnd,
+			atMid: end.isWithin,
 			isEmpty: splitEndNode.isEmpty,
 		}
 
-		// if (startInfo.atEnd && endInfo.atStart && splitStartNode.next()?.eq(splitEndNode)) {
-		// 	return selectedIds;
-		// }
+		if (splitStartNode.eq(splitEndNode)) {
+			selectedGroup.addRange(Range.create(start, end))
+			return collectedInfo()
+		}
 
 		// adjust startNode as the first delete node
-		if (startInfo.isEmpty || startInfo.atStart) {
-			startNode = splitStartNode;
-		} else {
-			startNode = splitStartNode.next();
-		}
+		// if (startInfo.isEmpty || startInfo.atStart) {
+		// 	startNode = splitStartNode;
+		// } else {
+		// }
+		startNode = splitStartNode.next();
 
 		// adjust endNode as the last delete node
-		if (endInfo.isEmpty || !endInfo.atStart) {
-			endNode = splitEndNode;
-		} else {
-			endNode = splitEndNode.prev();
-		}
-
-		// if tail node is atom, include it
-		// if (tailNode.isEmpty) {
-		// 	startNode = tailNode;
+		// if (endInfo.isEmpty || !endInfo.atStart) {
+		// 	endNode = splitEndNode;
 		// } else {
-		// 	if (start.offset === 0) {
-		// 		startNode = tailNode;
-		// 	} else {
-		// 		startNode = tailNode.next();
-		// 	}
 		// }
 
-		// if head node is empty, include it
-		// if(headNode.isEmpty) {
-		// 	endNode = headNode;
-		// } else {
-		// 	if (end.offset > 0) {
-		// 		endNode = headNode;
-		// 	} else {
-		// 		endNode = headNode.prev();
-		// 	}
-		// }
+		endNode = splitEndNode.prev();
 
 		if (!startNode || !endNode) {
 			console.log(p14('%c[failed]'), 'color:red', 'start/end node not found');
-			return collectedIds();
+			return collectedInfo();
 		}
 		// if startNode and endNode are same no need to check further
 		if (startNode === endNode || startNode.eq(endNode)) {
@@ -844,7 +886,7 @@ export class TransformCommands extends BeforePlugin {
 			if (!startNode.isEmpty) {
 				collectId(startNode.id);
 			}
-			return collectedIds();
+			return collectedInfo();
 		}
 
 		// console.log(startNode?.name, startNode.id.toString());
@@ -852,7 +894,7 @@ export class TransformCommands extends BeforePlugin {
 		// handle undefined situation
 		if (!startNode.parent || !endNode.parent) {
 			console.log(p14('%c[failed]'), 'color:red', 'start/end node parent not found');
-			return collectedIds();
+			return collectedInfo();
 		}
 
 		// console.log(startNode, endNode);
@@ -861,7 +903,7 @@ export class TransformCommands extends BeforePlugin {
 		// handle undefined situation
 		if (startNode.after(endNode)) {
 			console.log(p14('%c[error]'), 'color:red', 'NEEDS INVESTIGATION');
-			return collectedIds();
+			return collectedInfo();
 		}
 		// console.log(startNode.textContent, endNode.textContent);
 
@@ -878,7 +920,7 @@ export class TransformCommands extends BeforePlugin {
 				return !!endNode?.eq(n);
 			});
 
-			return collectedIds();
+			return collectedInfo();
 		}
 
 		// ----------------------
@@ -940,7 +982,7 @@ export class TransformCommands extends BeforePlugin {
 			return n.eq(endNode!);
 		}, { direction: 'forward', order: 'post' });
 
-		return collectedIds();
+		return collectedInfo();
 	}
 
 }
