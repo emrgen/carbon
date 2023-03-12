@@ -1,6 +1,15 @@
+import {
+	CarbonPlugin,
+	EventContext,
+	EventHandlerMap,
+	NodePlugin,
+	NodeSpec,
+	Pin,
+	PinnedSelection,
+	TransformCommands,
+} from "@emrgen/carbon-core";
 
-import { CarbonPlugin, EventContext, EventHandlerMap, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, Transaction, TransformCommands } from '@emrgen/carbon-core';
-import { TextPlugin } from './Text';
+import { TextPlugin } from "./Text";
 
 export class TitlePlugin extends NodePlugin {
 
@@ -37,7 +46,7 @@ export class TitlePlugin extends NodePlugin {
 				// ctx.event.stopPropagation();
 				// ctx.event.preventDefault();
 				const { app, event, node } = ctx;
-				const { selection, schema } = app;
+				const { selection, schema, cmd } = app;
 				const { head } = selection;
 				// @ts-ignore
 				const { data } = event;
@@ -51,10 +60,13 @@ export class TitlePlugin extends NodePlugin {
 
 				if (!selection.isCollapsed) {
 					ctx.event.preventDefault();
-					const tr = app.cmd.transform.delete();
-					tr.insertText(head.point, textNode!);
-					tr.select(after);
-					tr.dispatch();
+
+					// cmd.nestable.
+
+					const tr = cmd.transform.delete();
+					tr?.insertText(head.point, textNode!);
+					tr?.select(after);
+					tr?.dispatch();
 					return
 				}
 
@@ -64,7 +76,7 @@ export class TitlePlugin extends NodePlugin {
 						ctx.event.preventDefault();
 					}
 
-					const {tr} = app;
+					const { tr } = app;
 					tr.insertText(head.point, textNode!, native);
 					if (!native) {
 						tr.select(after);

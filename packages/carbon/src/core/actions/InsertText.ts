@@ -28,8 +28,6 @@ export class InsertText implements Action{
 		const {app} = tr;
 		const {schema} = app;
 
-		console.log(at.toString());
-
 		const pin = Pin.fromPoint(at, tr.app.store)?.down();
 		if (!pin) {
 			return ActionResult.withError('failed to find pin from: ' + at.toString());

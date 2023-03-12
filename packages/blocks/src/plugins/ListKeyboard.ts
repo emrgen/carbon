@@ -21,7 +21,7 @@ export class ListKeyboardPlugin extends AfterPlugin {
 				console.log(listNode?.id.toString(), listNode?.name);
 				const atStart = Pin.toStartOf(listNode)?.eq(selection.head);
 				console.log(atStart, Pin.toStartOf(listNode), selection.head);
-				
+
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);
 
@@ -50,7 +50,6 @@ export class ListKeyboardPlugin extends AfterPlugin {
 				}
 
 				console.log('should pull the last node');
-
 			},
 			// 'shift+backspace': (event: EditorEvent<KeyboardEvent>) => {
 			// 	const { editor, node } = event;

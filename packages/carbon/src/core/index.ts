@@ -1,5 +1,5 @@
 export * from './Carbon'
-export * from './Plugin'
+export * from './CarbonPlugin'
 export * from './Transaction'
 export * from './ChangeManager'
 export * from './PluginManager'

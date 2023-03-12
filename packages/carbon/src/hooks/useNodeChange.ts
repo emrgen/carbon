@@ -42,6 +42,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 	const {node} = props;
 	const change = useCarbonChange();
 	const [watched, setWatched] = useState(node);
+	// this will force the ui update 
 	const [version, setVersion] = useState(node.version);
 
 	useEffect(() => {
@@ -49,7 +50,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 			props.onChange?.()
 			setVersion(value.version);
 			setWatched(value);
-			console.log("updated", node.id.toString(), node.version, watched === value);
+			// console.log("updated", node.id.toString(), node.version, watched === value);
 		};
 		change.subscribe(node.id, NodeChangeType.update, onChange);
 		return () => {

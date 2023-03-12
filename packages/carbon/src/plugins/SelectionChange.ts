@@ -1,6 +1,6 @@
 import { EventContext } from '../core/EventContext';
 import { p12, p14 } from '../core/Logger';
-import { AfterPlugin } from '../core/Plugin';
+import { AfterPlugin } from '../core/CarbonPlugin';
 import { Transaction } from '../core/Transaction';
 import { EventHandlerMap } from '../core/types';
 

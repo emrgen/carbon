@@ -1,6 +1,6 @@
 import { EventHandlerMap } from "../core/types";
 import { p14 } from "../core/Logger";
-import { AfterPlugin, BeforePlugin, CarbonPlugin } from '../core/Plugin';
+import { AfterPlugin, BeforePlugin, CarbonPlugin } from '../core/CarbonPlugin';
 import { EventContext } from "../core/EventContext";
 import { SelectionCommands } from "./SelectionCommands";
 import { IsolatingPlugin } from "./Isolating";
@@ -126,7 +126,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		const splitBlock = node.closest(n => n.groups.includes('nestable'));
 		if (!splitBlock) return
 		console.log('split section....');
-		
+
 		cmd.transform.split(splitBlock, selection.head)?.dispatch()
 	}
 

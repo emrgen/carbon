@@ -26,11 +26,11 @@ export class Renderer {
 export class CarbonRenderer {
   name = "carbonRenderer";
   renderers: Map<string, RenderComponent>;
-  fallback: NodeRenderer;
+  fallback: RenderComponent;
 
   static create(
-    renderers: NodeRenderer[],
-    fallback: NodeRenderer
+    renderers: Renderer[],
+    fallback: RenderComponent
   ): CarbonRenderer {
     const rendererMap = new Map<string, RenderComponent>();
     renderers.forEach((r) => {
@@ -40,7 +40,7 @@ export class CarbonRenderer {
     return new CarbonRenderer(rendererMap, fallback);
   }
 
-  constructor(renderers: Map<string, RenderComponent>, fallback: NodeRenderer) {
+  constructor(renderers: Map<string, RenderComponent>, fallback: RenderComponent) {
     this.renderers = renderers;
     this.fallback = fallback;
   }

@@ -1,14 +1,13 @@
-import { BeforePlugin } from '../core/Plugin';
-import { Carbon } from '../core/Carbon';
+import { BeforePlugin, Carbon } from "../core";
 
-declare module '@emrgen/carbon' {
-	interface Commands {
-		selection: {
-			collapseToTail(): void;
-			collapseToHead(): void;
-		}
-	}
-}
+// declare global {
+// 	interface CarbonCommands {
+// 		selection: {
+// 			collapseToTail(): void;
+// 			collapseToHead(): void;
+// 		}
+// 	}
+// }
 
 export class SelectionCommands extends BeforePlugin {
 
@@ -29,6 +28,7 @@ export class SelectionCommands extends BeforePlugin {
 
 	collapseToHead(app: Carbon) {
 		const { selection, tr } = app;
+		// const dr = app.cmd.transform.delete()
 		const normalized = selection.normalize();
 		tr.select(normalized.collapseToHead()).commit();
 	}

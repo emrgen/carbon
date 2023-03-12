@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { throttle } from "lodash";
-import { useCarbon } from '../hooks/useCarbon';
+import { useCarbon } from './useCarbon';
 import { EventsIn } from "../core/Event";
 
 export const useSelectionChange = () => {

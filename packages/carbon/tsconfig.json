@@ -5,6 +5,6 @@
     "baseUrl": "src",
     "lib": ["dom", "dom.iterable", "esnext"],
   },
-  "include": [".", "src/core/actions/.ts"],
+  "include": ["."],
   "exclude": ["dist", "build", "node_modules"]
 }

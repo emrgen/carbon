@@ -1,7 +1,7 @@
 import { each, first, flatten, identity, isArray, last } from 'lodash';
 
 import { Optional } from '@emrgen/types';
-import { p14 } from '../core/Logger';
+import { p14 } from './Logger';
 import { BSet, NodeIdSet } from './BSet';
 import { Fragment } from './Fragment';
 import { Mark } from './Mark';
@@ -120,7 +120,7 @@ export class Transaction {
 		return this;
 	}
 
-	insertText(at: Point, text: Node, native: boolean, origin = this.origin): Transaction {
+	insertText(at: Point, text: Node, native: boolean = false, origin = this.origin): Transaction {
 		this.add(InsertText.create(at, text, native, origin));
 		return this;
 	}

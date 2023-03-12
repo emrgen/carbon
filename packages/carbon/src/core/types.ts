@@ -1,7 +1,13 @@
 import { Bound, Optional } from '@emrgen/types';
-import { EventContext } from 'core/EventContext';
-import { Node } from 'core/Node';
-import { InputRule } from 'core/Rules';
+import { EventContext } from './EventContext';
+import { Node } from './Node';
+import { InputRule } from './Rules';
+
+export interface CarbonCommands {}
+
+// declare global {
+// 	export interface CarbonCommands {  }
+// }
 
 export interface EventHandler {
 	click: EventHandlerFn;
@@ -21,9 +27,7 @@ export interface EventHandler {
 
 	[key: string]: EventHandlerFn;
 }
-
 export type NodeWatcher = (node: Node) => void
-
 export type EventHandlerFn = (ctx: EventContext<any>) => void
 export type EventHandlerMap = Partial<EventHandler>;
 export type InputRules = Array<InputRule>
@@ -48,3 +52,4 @@ export interface NodeJSON extends Record<string, any> {
 
 export const yes = () => true;
 export const no = () => false;
+

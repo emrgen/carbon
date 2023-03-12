@@ -28,7 +28,7 @@ const actor = new Actor(1, 0)
 
 export default function Test() {
 	const app = useCreateCarbon(actor, data, [blockPresets])
-	
+
 	// console.log(app.content)
 
 	return (

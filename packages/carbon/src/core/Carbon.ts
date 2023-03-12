@@ -1,34 +1,32 @@
 
-import { Extension } from './Extension';
-import { NodeJSON } from './types';
-import { EventEmitter } from 'events';
-import { CarbonRenderer } from './Renderer';
-import { PluginManager } from './PluginManager';
-import { PinnedSelection } from './PinnedSelection';
-import { CarbonState } from './CarbonState';
-import { NodeStore } from './NodeStore';
-import { Schema } from './Schema';
-import { EventManager } from './EventManager';
 import { Optional } from '@emrgen/types';
-import { querySelector } from '../utils/domElement';
-import { SelectionManager } from './SelectionManager';
-import { ChangeManager } from './ChangeManager';
-import { TransactionManager } from './TransactionManager';
-import { Commands } from '@emrgen/carbon';
-import { EventsIn } from './Event';
 import { Node } from 'core/Node';
+import { EventEmitter } from 'events';
+import { querySelector } from '../utils/domElement';
+import { CarbonState } from './CarbonState';
+import { ChangeManager } from './ChangeManager';
+import { EventsIn } from './Event';
+import { EventManager } from './EventManager';
+import { NodeStore } from './NodeStore';
+import { PinnedSelection } from './PinnedSelection';
+import { PluginManager } from './PluginManager';
+import { CarbonRenderer } from './Renderer';
+import { Schema } from './Schema';
+import { SelectionManager } from './SelectionManager';
 import { Transaction } from './Transaction';
+import { TransactionManager } from './TransactionManager';
+import { CarbonCommands } from "./types";
 
 export class Carbon extends EventEmitter {
-	private pm: PluginManager;
-	private em: EventManager;
-	private sm: SelectionManager;
-	private rm: CarbonRenderer;
-	private tm: TransactionManager;
+	private readonly pm: PluginManager;
+	private readonly em: EventManager;
+	private readonly sm: SelectionManager;
+	private readonly rm: CarbonRenderer;
+	private readonly tm: TransactionManager;
 
 	schema: Schema;
 	state: CarbonState;
-	cmd: Commands;
+	cmd: CarbonCommands;
 	change: ChangeManager;
 
 	enabled: boolean;
@@ -85,13 +83,13 @@ export class Carbon extends EventEmitter {
 	}
 
 	get portal(): Optional<HTMLElement> {
-		this._portal = this._portal ?? querySelector('.editor > .portal') as any ?? null
+		this._portal = this._portal ?? querySelector('.editor > .portal') as any ?? null;
 		return this._portal;
 	}
 
 	get contentElement(): Optional<HTMLElement> {
 		this._contentElement = this._contentElement ?? document.getElementsByClassName('.editor > .editor-content')?.[0] as any ?? null;
-		return this._contentElement
+		return this._contentElement;
 	}
 
 	enable() {

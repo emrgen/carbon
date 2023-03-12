@@ -1,11 +1,11 @@
 import { Optional } from '@emrgen/types';
-import { Commands } from '@emrgen/carbon';
+import { CarbonCommands } from "./types";
 
 import { isKeyHotkey } from 'is-hotkey';
 import { camelCase, each, keys, reduce, some, sortBy, uniqBy, values, snakeCase, entries } from 'lodash';
 import { Schema } from './Schema';
 import { EventContext } from "./EventContext";
-import { PluginType, CarbonPlugin } from './Plugin';
+import { PluginType, CarbonPlugin } from './CarbonPlugin';
 import { Carbon } from './Carbon';
 import { Node } from './Node';
 import { Transaction } from './Transaction';
@@ -60,7 +60,7 @@ export class PluginManager {
 	}
 
 	// collect plugin commands
-	commands(app: Carbon): Commands {
+	commands(app: Carbon): CarbonCommands {
 		const commands: Record<string, Function> = this.plugins.reduce((commands, p) => {
 
 			const pluginCommands = reduce(p.commands(), (o, fn, name) => {

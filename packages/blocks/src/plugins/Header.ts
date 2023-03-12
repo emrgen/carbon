@@ -1,6 +1,5 @@
 
 import { AfterPlugin, CarbonPlugin, NodePlugin, Node, NodeSpec, EventHandlerMap, EventContext } from '@emrgen/carbon-core';
-import { isNestableNode } from '../utils';
 
 export class Header extends AfterPlugin {
 	name = 'header';

@@ -11,13 +11,8 @@ export class NodeTopicEmitter<T> {
 	private subscribers: Map<T, BTree<NodeId, Set<NodeWatcher>>> = new Map();
 
 	publish(event: T, node: Node) {
-		const listeners = this.subscribers.get(event)?.get(node.id)
-		// console.log(event, node.id.toString(), this.subscribers.get(event)?.get(node.id));
-		// if (!listeners) {
-		// 	console.log(event, node.id.toString(), this.subscribers.get(event)?.get(node.id));
-		// }
-		console.log(listeners);
-
+		const listeners = this.subscribers.get(event)?.get(node.id);
+		// console.log(listeners);
 		listeners?.forEach(cb => cb(node));
 	}
 

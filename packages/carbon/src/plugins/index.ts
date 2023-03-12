@@ -1,4 +1,4 @@
-import { Extension } from '../core/Extension';
+import { Extension } from "../core";
 import { KeyboardPlugin } from './Keyboard';
 import { SelectionChangePlugin } from './SelectionChange';
 import { TransformCommands } from './TransformCommands';
