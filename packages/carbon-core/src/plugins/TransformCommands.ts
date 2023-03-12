@@ -8,21 +8,21 @@ import { RemoveNode } from "../core/actions/RemoveNode";
 import { RemoveText } from "../core/actions/RemoveText";
 import { Action, ActionOrigin } from "../core/actions/types";
 import { NodeIdSet } from "../core/BSet";
-import { Carbon } from "../core";
+import { Carbon } from "../core/Carbon";
 import { SelectionInfo } from "../core/DeleteGroup";
-import { Fragment } from "../core";
+import { Fragment } from "../core/Fragment";
 import { p14 } from "../core/Logger";
-import { Node } from "../core";
+import { Node } from "../core/Node";
 import { NodeId } from "../core/NodeId";
 import { NodeType } from "../core/NodeType";
-import { Pin } from "../core";
+import { Pin } from "../core/Pin";
 import { PinnedSelection } from "../core";
-import { BeforePlugin } from "../core";
-import { Point } from "../core";
-import { PointedSelection } from "../core";
+import { BeforePlugin } from "../core/CarbonPlugin";
+import { Point } from "../core/Point";
+import { PointedSelection } from "../core/PointedSelection";
 import { Range } from "../core/Range";
-import { Transaction } from "../core";
-import { NodeName } from "../core";
+import { Transaction } from "../core/Transaction";
+import { NodeName } from "../core/types";
 import { takeUntil } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { nodeLocation } from "../utils/location";
@@ -37,7 +37,6 @@ export interface SplitOpts {
 
 export type InsertPos = "before" | "after" | "prepend" | "append";
 
-// @ts-ignore
 declare module '@emrgen/carbon-core' {
   export interface CarbonCommands {
     transform: {

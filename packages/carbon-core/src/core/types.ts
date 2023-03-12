@@ -5,8 +5,8 @@ import { InputRule } from './Rules';
 
 export interface CarbonCommands {}
 
-// declare global {
-// 	export interface CarbonCommands {  }
+// declare module '@emrgen/carbon-core' {
+// 	export interface CarbonCommands {}
 // }
 
 export interface EventHandler {

@@ -1,13 +1,14 @@
-import { BeforePlugin, Carbon } from "../core";
+import { Carbon } from "../core/Carbon";
+import { BeforePlugin} from "../core/CarbonPlugin";
 
-// declare global {
-// 	interface CarbonCommands {
-// 		selection: {
-// 			collapseToTail(): void;
-// 			collapseToHead(): void;
-// 		}
-// 	}
-// }
+declare module '@emrgen/carbon-core' {
+	interface CarbonCommands {
+		selection: {
+			collapseToTail(): void;
+			collapseToHead(): void;
+		}
+	}
+}
 
 export class SelectionCommands extends BeforePlugin {
 

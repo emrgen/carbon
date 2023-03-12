@@ -3,14 +3,11 @@ import {
   forwardRef,
   memo,
   useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useRef,
-  useState
+  useImperativeHandle, useRef
 } from "react";
 import { RendererProps } from "../core/Renderer";
-import { useNodeChange, useTextChange } from "../hooks/useNodeChange";
 import { useCarbon } from '../hooks/useCarbon';
+import { useNodeChange } from "../hooks/useNodeChange";
 
 export default function JustEmpty() {
   return <span>&shy;</span>;
@@ -134,7 +131,7 @@ export const CarbonDefaultNode = (props: RendererProps) => {
     </Component>
   );
 };
-
+ 
 export const CarbonNodeContent = (props: RendererProps) => {
   const { node, placeholder, beforeContent, custom } = props;
   const { children = [] } = node;

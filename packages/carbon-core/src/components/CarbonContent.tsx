@@ -34,7 +34,7 @@ export function CarbonContent() {
       <div className="carbon-app-content" {...listeners}>
         <CarbonNode node={editor.content} />
       </div>
- 
+
       {/* helper portal for the app */}
       <div
         className={"portal"}

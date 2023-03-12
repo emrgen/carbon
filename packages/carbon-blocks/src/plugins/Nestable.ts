@@ -1,10 +1,10 @@
-import { CommandPlugin, Transaction } from "@emrgen/carbon-core";
+import { CommandPlugin, Transaction, EventContext } from '@emrgen/carbon-core';
 import { Optional } from '@emrgen/types';
 
 declare module '@emrgen/carbon-core' {
 	interface CarbonCommands {
 		nestable: {
-			handleEnterInVariant(event): Optional<Transaction>;
+			handleEnterInVariant(ctx: EventContext<Event>): Optional<Transaction>;
 		}
 	}
 }

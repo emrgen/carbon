@@ -41,6 +41,8 @@ const actor = new Actor(1, 0);
 export default function Dev() {
   const app = useCreateCarbon(actor, data, [extensionPresets, blockPresets]);
 
+  // @ts-ignore
+  window.app = app
   // console.log(app.content)
 
   return (

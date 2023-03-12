@@ -61,8 +61,6 @@ export class TitlePlugin extends NodePlugin {
 				if (!selection.isCollapsed) {
 					ctx.event.preventDefault();
 
-					// cmd.nestable.
-
 					const tr = cmd.transform.delete();
 					tr?.insertText(head.point, textNode!);
 					tr?.select(after);

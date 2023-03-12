@@ -20,6 +20,10 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-blocks": "workspace:*",
+    "@emrgen/types": "^0.0.2"
+  },
   "packageManager": "pnpm@7.28.0"
 }

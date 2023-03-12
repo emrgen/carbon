@@ -15,7 +15,14 @@
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,
-    "module": "commonjs"
+    "module": "commonjs",
+    "paths": {
+      "@emrgen/*": [
+        "packages/*/src"
+      ]
+    }
   },
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
