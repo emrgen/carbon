@@ -201,22 +201,19 @@ export class KeyboardPlugin extends AfterPlugin {
 	// 		return
 	// 	}
 
-	// 	const deleteSel = selection.moveStart(-1);
-	// 	if (!deleteSel) return
+		const deleteSel = selection.moveStart(-1);
+		if (!deleteSel) return
 
-	// 	// find lowest empty that can be deleted without violating the parent schema
-	// 	const list = node.closest(isListNode)
-	// 	if (list?.isEmpty && selection.head.isAtStartOfNode(list)) {
-	// 		editor.tr
-	// 			.add(DeleteCommand.create([list.id]))
-	// 			.select(deleteSel.collapseToHead())
-	// 			.dispatch()
-	// 		return
-	// 	}
+		// find lowest empty that can be deleted without violating the parent schema
+		// const list = node.closest(isListNode)
+
+		// const tr = app.cmd.transform.delete(deleteSel);
+		// tr?.select(deleteSel.collapseToHead()).dispatch()
+		// 	return
 
 	// 	// check if deleteSel head and tail are merge compatible
 
 	// 	console.log('Keyboard.backspace',deleteSel.toString());
-	// 	editor.cmd.transform.delete(deleteSel)?.dispatch()
+		app.cmd.transform.delete(deleteSel)?.dispatch()
 	}
 }

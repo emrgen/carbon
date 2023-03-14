@@ -553,6 +553,8 @@ export class TransformCommands extends BeforePlugin {
       return lastInsertedNodeId
     }
 
+    const after = PinnedSelection.fromPin(start)
+
     // case 1
     // prev & next have same merge depth and are in perfect match for merge
     // content of endBlock goes into startBlock
@@ -563,11 +565,12 @@ export class TransformCommands extends BeforePlugin {
 
       const deleteActions = this.deleteGroupCommands(app, deleteGroup);
       console.log(deleteActions, moveCommands)
+
       tr
         .add(moveCommands)
         .add(deleteActions)
         .add(insertCommands)
-        .select(app.selection.collapseToStart())
+        .select(after)
       return tr
     }
 
@@ -581,7 +584,7 @@ export class TransformCommands extends BeforePlugin {
         .add(moveCommands)
         .add(deleteActions)
         .add(insertCommands)
-        .select(app.selection.collapseToStart())
+        .select(after)
       return tr
     }
 
@@ -614,7 +617,7 @@ export class TransformCommands extends BeforePlugin {
         .add(moveCommands)
         .add(deleteActions)
         .add(insertCommands)
-        .select(app.selection.collapseToStart())
+        .select(after)
 
       return tr
     }
