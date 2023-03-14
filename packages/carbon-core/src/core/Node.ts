@@ -502,7 +502,7 @@ export class Node extends EventEmitter {
 		return found;
 	}
 
-	prev(fn: Predicate<Node> = yes, opts: TraverseOptions = {}): Optional<Node> {
+	prev(fn: Predicate<Node> = yes, opts: TraverseOptions = {}, gotoParent = true): Optional<Node> {
 		opts = merge({ order: 'post', direction: 'backward' }, opts)
 		const sibling = this.prevSibling;
 		let found: Optional<Node> = null;
@@ -511,14 +511,14 @@ export class Node extends EventEmitter {
 
 		return (
 			found
-			|| sibling?.prev(fn, opts)
-			|| this.parent?.prev(fn, opts)
+			|| sibling?.prev(fn, opts, false)
+			|| (gotoParent ? this.parent?.prev(fn, opts, gotoParent) : null)
 		);
 	}
 
 	// check if next siblings' tree can fulfill predicate
 	// otherwise try parent next
-	next(fn: Predicate<Node> = yes, opts: TraverseOptions = {}): Optional<Node> {
+	next(fn: Predicate<Node> = yes, opts: TraverseOptions = {}, gotoParent = true): Optional<Node> {
 		opts = merge({ order: 'post', direction: 'forward' }, opts);
 
 		const sibling = this.nextSibling;
@@ -528,8 +528,8 @@ export class Node extends EventEmitter {
 
 		return (
 			found
-			|| sibling?.next(fn, opts)
-			|| this.parent?.next(fn, opts)
+			|| sibling?.next(fn, opts, false)
+			|| (gotoParent ? this.parent?.next(fn, opts, gotoParent) : null)
 		);
 	}
 

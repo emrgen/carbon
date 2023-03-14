@@ -199,6 +199,8 @@ export class Transaction {
 			return false;
 		}
 
+		if (this.actions.length === 0) return false
+
 		// const prevDocVersion = editor.doc?.updateCount;
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {

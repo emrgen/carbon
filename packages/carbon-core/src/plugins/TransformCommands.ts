@@ -722,14 +722,19 @@ export class TransformCommands extends BeforePlugin {
 
     const deleteGroup = this.selectionInfo(app, selection);
 
+    if (!startBlock.eq(endBlock)) {
+      return this.deleteAcrossBlock(app, start, end, startBlock, endBlock, deleteGroup);
+    }
+
     // * startBlock === endBlock
     if (startBlock.eq(endBlock)) {
       return this.deleteWithinBlock(app, start, end, startBlock, endBlock, deleteGroup);
     }
+
     return null;
   }
 
-  private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, tailBlock: Node, headBlock: Node, deleteGroup: SelectionInfo = SelectionInfo.default()): Optional<Transaction> {
+  private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, tailBlock: Node, headBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
     let point: Optional<Point>;
     // TODO: we are free to decide how we want to put the final cursor position
     if (Pin.toStartOf(tailBlock)?.eq(start)) {
@@ -753,12 +758,69 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
+  private deleteAcrossBlock(app: Carbon, tail: Pin, head: Pin, tailBlock: Node, headBlock: Node, deleteGroup: SelectionInfo) {
+    const { tr } = app;
+    const startNode = tail.node;
+    const endNode = head.node;
+
+    const { parent: commonNode } = tailBlock;
+    if (!commonNode) {
+      console.log('cant merge without commonNode');
+      return
+    }
+
+    let startParent = startNode.isEmpty ? startNode : startNode.parent;
+    let endParent = endNode?.isEmpty ? endNode : endNode.parent;
+    if (!startParent || !endParent) {
+      console.log('start/end parent not found for merging node');
+      return
+    }
+    let startParentRef = startParent
+    let endParentRef = endParent
+    let startDepth = startParent.depth - commonNode.depth;
+    let endDepth = endParent.depth - commonNode.depth;
+    const commonDepth = Math.min(startDepth, endDepth) + 1;
+
+    const insertCommands: Action[] = [];
+    const moveCommands: Action[] = [];
+
+
+    // merge node as if startNode and endNode are at same depth
+    const handleUptoSameDepth = () => {}
+
+
+    // case 1
+    // prev & next have same merge depth and are in perfect match for merge
+    // content of endBlock goes into startBlock
+    if (startDepth === endDepth) {
+      console.log('CASE: merge same depth blocks');
+      // console.log('Selection point', point.toString());
+
+      handleUptoSameDepth();
+
+      const deleteActions = this.deleteGroupCommands(app, deleteGroup);
+      console.log(deleteActions, moveCommands)
+      tr
+        .add(moveCommands)
+        // .add(insertCommands)
+        .add(deleteActions)
+        .select(app.selection.collapseToStart())
+      return tr
+    }
+
+    return null
+  }
+
   private deleteGroupCommands(app: Carbon, deleteGroup: SelectionInfo): Action[] {
     const actions: Action[] = [];
 
-    // each(deleteGroup.ids.toArray(), id => {
-
-    // })
+    each(deleteGroup.ids.toArray(), id => {
+      const node = app.store.get(id);
+      if (!node) {
+        throw new Error("Failed to get node for id");
+      }
+      actions.push(RemoveNode.create(nodeLocation(node)!, id))
+    })
 
     each(deleteGroup.range, range => {
       const { start, end } = range;
@@ -827,8 +889,7 @@ export class TransformCommands extends BeforePlugin {
     // console.log(selection.isCollapsed, selection.isForward, start.node.id.key);
 
     const collectId = (...ids: NodeId[]) => {
-      // console.log(ids);
-      // each(ids, id => selectedGroup.add(id));
+      each(ids, id => selectedGroup.addId(id));
     };
     const collectedInfo = () => selectedGroup;
 
@@ -839,10 +900,10 @@ export class TransformCommands extends BeforePlugin {
     const startPoint = start.point;
     const endPoint = end.point;
 
-    let splitStartNode = app.store.get(startPoint.nodeId);
-    let splitEndNode = app.store.get(endPoint.nodeId);
+    let startBlock = app.store.get(startPoint.nodeId);
+    let endBlock = app.store.get(endPoint.nodeId);
     // console.log('after split', tailNode?.id.toString());
-    if (!splitStartNode || !splitEndNode) {
+    if (!startBlock || !endBlock) {
       console.log("failed to find head/tail node");
       return collectedInfo();
     }
@@ -854,24 +915,24 @@ export class TransformCommands extends BeforePlugin {
     // console.log(tailNode, headNode);
 
     // * NOTE: selectedIds range is [startNode, endNode]
-    let startNode: Optional<Node>;
-    let endNode: Optional<Node>;
+    let startRemoveBlock: Optional<Node>;
+    let endRemoveBlock: Optional<Node>;
 
     const startInfo = {
       atStart: start.isAtStart,
       atEnd: start.isAtEnd,
       atMid: start.isWithin,
-      isEmpty: splitStartNode.isEmpty
+      isEmpty: startBlock.isEmpty
     };
 
     const endInfo = {
       atStart: end.isAtStart,
       atEnd: end.isAtEnd,
       atMid: end.isWithin,
-      isEmpty: splitEndNode.isEmpty
+      isEmpty: endBlock.isEmpty
     };
 
-    if (splitStartNode.eq(splitEndNode)) {
+    if (startBlock.eq(endBlock)) {
       selectedGroup.addRange(Range.create(start, end));
       return collectedInfo();
     }
@@ -881,59 +942,66 @@ export class TransformCommands extends BeforePlugin {
     // 	startNode = splitStartNode;
     // } else {
     // }
-    startNode = splitStartNode.next();
 
-    // adjust endNode as the last delete node
-    // if (endInfo.isEmpty || !endInfo.atStart) {
-    // 	endNode = splitEndNode;
-    // } else {
-    // }
+    if (!startInfo.isEmpty) {
+      // selectedGroup.addRange(Range.create(start.clone(), Pin.create(start.node, start.node.focusSize)));
+    }
+    startRemoveBlock = startBlock.next();
 
-    endNode = splitEndNode.prev();
+    if (!endInfo.isEmpty) {
+      // selectedGroup.addRange(Range.create(Pin.create(end.node, 0), end.clone()));
+    }
+    endRemoveBlock = endBlock.prev();
 
-    if (!startNode || !endNode) {
+    if (!startRemoveBlock || !endRemoveBlock) {
       console.log(p14("%c[failed]"), "color:red", "start/end node not found");
       return collectedInfo();
     }
+    console.log('xxxxxxxxxx');
     // if startNode and endNode are same no need to check further
-    if (startNode === endNode || startNode.eq(endNode)) {
+    if (startRemoveBlock === endRemoveBlock || startRemoveBlock.eq(endRemoveBlock)) {
       // NOTE: fixes issue #20
-      if (!startNode.isEmpty) {
-        collectId(startNode.id);
+      if (!startRemoveBlock.isEmpty) {
+        console.log('xxxxxxxxxx', startRemoveBlock);
+        collectId(startRemoveBlock.id);
       }
       return collectedInfo();
     }
 
     // console.log(startNode?.name, startNode.id.toString());
-
+    console.log('xxxxxxxxxx');
     // handle undefined situation
-    if (!startNode.parent || !endNode.parent) {
+    if (!startRemoveBlock.parent || !endRemoveBlock.parent) {
       console.log(p14("%c[failed]"), "color:red", "start/end node parent not found");
       return collectedInfo();
     }
 
     // console.log(startNode, endNode);
     // console.log(startNode.textContent, endNode.textContent);
-
+    console.log('xxxxxxxxxx');
     // handle undefined situation
-    if (startNode.after(endNode)) {
+    // one possible reason for this case is start and end are in adjacent siblings
+    if (startRemoveBlock.after(endRemoveBlock)) {
+
       console.log(p14("%c[error]"), "color:red", "NEEDS INVESTIGATION");
       return collectedInfo();
     }
-    // console.log(startNode.textContent, endNode.textContent);
+    console.log('xxxxxxxxxx');
+    console.log(startRemoveBlock.textContent, endRemoveBlock.textContent);
 
     // console.log(p14('%c[debug]'), 'color:magenta', 'startNode/endNode', startNode.id.toString(), endNode.id.toString());
-    const [prev, next] = blocksBelowCommonNode(splitStartNode, splitEndNode);
+    const [prev, next] = blocksBelowCommonNode(startBlock, endBlock);
+    console.log('xxxxxxxxxx');
 
     // if startNode and endNode are siblings, then collect them and their in-between siblings
-    if (startNode.parent === endNode.parent || startNode.parent.eq(endNode.parent)) {
-      collectId(startNode.id, endNode.id);
-      startNode.walk(n => {
+    if (startRemoveBlock.parent.eq(endRemoveBlock.parent)) {
+      startRemoveBlock.walk(n => {
         if (!n.isCollapseHidden) {
           collectId(n.id);
         }
-        return !!endNode?.eq(n);
+        return !!endRemoveBlock?.eq(n);
       });
+      
 
       return collectedInfo();
     }
@@ -948,53 +1016,46 @@ export class TransformCommands extends BeforePlugin {
     }).forEach(n => {
       collectId(n.id);
     });
-    console.log(">>> prev.find", prev?.id.toString(), startNode.id.toString());
+
+    // console.log(">>> prev.find", prev?.id.toString(), startBlock.id.toString());
     // TODO: if n is collapseHidden shouldn't we return false
     prev?.find(n => {
-      console.log(">>> start.node", start.node.toString());
-      // if start is at the end of tailNode.parent then
-      // tailNode will be possibly merged with headNode
-      if (start.isAtEndOfNode(splitStartNode?.parent!)) {
-        if (n.eq(splitStartNode!)) {
-          return true;
-        }
-        if (!n.isCollapseHidden) {
-          collectId(n.id);
-        }
-        console.log("prevBlock.prev", n.toString());
-        return false;
+      if (!n.isBlock) {
+        return false
+      }
+
+      if (n.eq(startBlock!)) {
+        return true
       }
 
       // exclude hidden nodes by skipping collection
       if (!n.isCollapseHidden) {
         collectId(n.id);
       }
-      console.log("prevBlock.prev", n.toString());
-      return n.eq(startNode!);
+
+      // console.log("prevBlock.prev", n.toString());
+      return false
     }, { direction: "backward", order: "post" });
     // console.log('deleteIds', selectedIds.map(n => n.toString()));
 
-    console.log(">>> next.find", next?.id.toString());
+    // console.log(">>> next.find", next?.id.toString());
     // TODO: if n is collapseHidden shouldn't we return false
     next?.find(n => {
-      // if end is at the start of headNode.parent then
-      // endNode is moved to other block because of
-      if (end.isAtStartOfNode(splitEndNode?.parent!)) {
-        if (n.eq(splitEndNode!)) {
-          return true;
-        }
-        if (!n.isCollapseHidden) {
-          collectId(n.id);
-        }
-        console.log("prevBlock.prev", n.toString());
-        return false;
+      if (!n.isBlock) {
+        return false
       }
 
+      if (n.eq(endBlock!)) {
+        return true
+      }
+
+      // exclude hidden nodes by skipping collection
       if (!n.isCollapseHidden) {
         collectId(n.id);
       }
-      // return false
-      return n.eq(endNode!);
+
+      // console.log("prevBlock.prev", n.toString());
+      return false
     }, { direction: "forward", order: "post" });
 
     return collectedInfo();

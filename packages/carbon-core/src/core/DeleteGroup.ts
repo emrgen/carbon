@@ -1,5 +1,6 @@
 import { NodeIdSet } from "./BSet";
 import { Range } from './Range';
+import { NodeId } from './NodeId';
 
 export class SelectionInfo {
 	ids: NodeIdSet = new NodeIdSet();
@@ -11,5 +12,9 @@ export class SelectionInfo {
 
 	addRange(range: Range) {
 		this.range.push(range)
+	}
+
+	addId(id: NodeId) {
+		this.ids.add(id);
 	}
 }
