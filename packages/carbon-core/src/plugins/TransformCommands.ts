@@ -734,11 +734,11 @@ export class TransformCommands extends BeforePlugin {
     return null;
   }
 
-  private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, tailBlock: Node, headBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
+  private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
     let point: Optional<Point>;
     // TODO: we are free to decide how we want to put the final cursor position
-    if (Pin.toStartOf(tailBlock)?.eq(start)) {
-      point = Point.toWithin(tailBlock.id);
+    if (Pin.toStartOf(startBlock)?.eq(start)) {
+      point = Point.toWithin(startBlock.id);
     } else {
       point = start.leftAlign.point;
     }
@@ -758,10 +758,10 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  private deleteAcrossBlock(app: Carbon, tail: Pin, head: Pin, tailBlock: Node, headBlock: Node, deleteGroup: SelectionInfo) {
+  private deleteAcrossBlock(app: Carbon, start: Pin, end: Pin, tailBlock: Node, headBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
     const { tr } = app;
-    const startNode = tail.node;
-    const endNode = head.node;
+    let startBlock: Optional<Node> = start.node;
+    let endBlock: Optional<Node> = end.node;
 
     const { parent: commonNode } = tailBlock;
     if (!commonNode) {
@@ -769,16 +769,13 @@ export class TransformCommands extends BeforePlugin {
       return
     }
 
-    let startParent = startNode.isEmpty ? startNode : startNode.parent;
-    let endParent = endNode?.isEmpty ? endNode : endNode.parent;
-    if (!startParent || !endParent) {
+    if (!startBlock || !endBlock) {
       console.log('start/end parent not found for merging node');
       return
     }
-    let startParentRef = startParent
-    let endParentRef = endParent
-    let startDepth = startParent.depth - commonNode.depth;
-    let endDepth = endParent.depth - commonNode.depth;
+
+    let startDepth = startBlock.depth - commonNode.depth;
+    let endDepth = endBlock.depth - commonNode.depth;
     const commonDepth = Math.min(startDepth, endDepth) + 1;
 
     const insertCommands: Action[] = [];
@@ -786,8 +783,51 @@ export class TransformCommands extends BeforePlugin {
 
 
     // merge node as if startNode and endNode are at same depth
-    const handleUptoSameDepth = () => {}
+    const handleUptoSameDepth = () => {
+      let lastInsertedNodeId: Optional<NodeId>;
+      let mergeDepth = commonDepth - 1;
+      console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
 
+      // move endParent children to startParent
+      while (startBlock && endBlock && mergeDepth--) {
+        // destination point for move
+        let to: Optional<Point>;
+
+        if (startBlock.isCollapsed) {
+          to = Point.toAfter(startBlock.id);
+        } else {
+          to = startBlock?.size ? Point.toAfter(startBlock?.lastChild?.id!) : Point.toWithin(startBlock.id);
+        }
+
+        if (startBlock?.isTextBlock && endBlock?.isTextBlock) {
+          if (!end.isAtEnd) {
+            const downPin = end.down();
+            if (!downPin) {
+              throw new Error("Failed to get down pin");
+            }
+            const textContent= downPin.node.textContent.slice(downPin.offset);
+            const textNode = app.schema.text(textContent)!;
+            const siblings = downPin.node.nextSiblings.map(n => n.clone());
+            insertCommands.push(...this.insertNodeCommands(start.point, [textNode, ...siblings]))
+          }
+          console.log('merge start and end block');
+        } else {
+          // move children
+          const moveNodes = endBlock?.children.filter(ch => !deleteGroup.has(ch.id)) ?? [];
+          if (moveNodes.length) {
+            console.log('moving nodes...', moveNodes.length, to.toString());
+            moveCommands.push(...this.moveNodeCommands(to, moveNodes));
+          }
+        }
+
+        // endParent children will be moved to startParent
+        deleteGroup.addId(endBlock?.id!);
+
+        lastInsertedNodeId = startBlock.id
+        startBlock = startBlock?.parent;
+        endBlock = endBlock?.parent;
+      }
+    }
 
     // case 1
     // prev & next have same merge depth and are in perfect match for merge
@@ -802,8 +842,8 @@ export class TransformCommands extends BeforePlugin {
       console.log(deleteActions, moveCommands)
       tr
         .add(moveCommands)
-        // .add(insertCommands)
         .add(deleteActions)
+        .add(insertCommands)
         .select(app.selection.collapseToStart())
       return tr
     }
@@ -944,12 +984,12 @@ export class TransformCommands extends BeforePlugin {
     // }
 
     if (!startInfo.isEmpty) {
-      // selectedGroup.addRange(Range.create(start.clone(), Pin.create(start.node, start.node.focusSize)));
+      selectedGroup.addRange(Range.create(start.clone(), Pin.create(start.node, start.node.focusSize)));
     }
     startRemoveBlock = startBlock.next();
 
     if (!endInfo.isEmpty) {
-      // selectedGroup.addRange(Range.create(Pin.create(end.node, 0), end.clone()));
+      selectedGroup.addRange(Range.create(Pin.create(end.node, 0), end.clone()));
     }
     endRemoveBlock = endBlock.prev();
 
@@ -969,7 +1009,6 @@ export class TransformCommands extends BeforePlugin {
     }
 
     // console.log(startNode?.name, startNode.id.toString());
-    console.log('xxxxxxxxxx');
     // handle undefined situation
     if (!startRemoveBlock.parent || !endRemoveBlock.parent) {
       console.log(p14("%c[failed]"), "color:red", "start/end node parent not found");
@@ -978,20 +1017,18 @@ export class TransformCommands extends BeforePlugin {
 
     // console.log(startNode, endNode);
     // console.log(startNode.textContent, endNode.textContent);
-    console.log('xxxxxxxxxx');
+
     // handle undefined situation
     // one possible reason for this case is start and end are in adjacent siblings
     if (startRemoveBlock.after(endRemoveBlock)) {
-
       console.log(p14("%c[error]"), "color:red", "NEEDS INVESTIGATION");
       return collectedInfo();
     }
-    console.log('xxxxxxxxxx');
+
     console.log(startRemoveBlock.textContent, endRemoveBlock.textContent);
 
     // console.log(p14('%c[debug]'), 'color:magenta', 'startNode/endNode', startNode.id.toString(), endNode.id.toString());
     const [prev, next] = blocksBelowCommonNode(startBlock, endBlock);
-    console.log('xxxxxxxxxx');
 
     // if startNode and endNode are siblings, then collect them and their in-between siblings
     if (startRemoveBlock.parent.eq(endRemoveBlock.parent)) {

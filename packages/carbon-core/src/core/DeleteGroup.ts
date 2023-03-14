@@ -17,4 +17,8 @@ export class SelectionInfo {
 	addId(id: NodeId) {
 		this.ids.add(id);
 	}
+
+	has(id: NodeId) {
+		return this.ids.has(id);
+	}
 }

@@ -1,5 +1,5 @@
 export type VNode = any;
-import { Node } from 'core/Node';
+import { Node } from './Node';
 
 export type RenderComponent = (props: RendererProps) => VNode;
 

@@ -37,7 +37,7 @@ export class RemoveText implements Action{
 		const updatedTextContent = textContent.slice(0, offset) + textContent.slice(offset + node.textContent.length)
 		target.updateText(updatedTextContent);
 		tr.updated(target);
-		// tr.updated(target.parent!);
+		tr.updated(target.parent!);
 		console.log('removing text...', offset, pin.offset);
 
 		return ActionResult.withValue('done')

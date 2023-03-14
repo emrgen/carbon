@@ -76,11 +76,10 @@ export const RawText = memo(function TT(props: RendererProps) {
 
 const InnerCarbonText = (props: RendererProps) => {
   const { node } = props;
-  const ref = useRef<HTMLSpanElement>(null);
 
   return (
-    <CarbonElement node={node} tag="span" ref={ref}>
-      {node.textContent}
+    <CarbonElement node={node} tag="span">
+      {node.isEmpty ? <CarbonEmpty node={node}/> :node.textContent}
     </CarbonElement>
   );
 };
@@ -131,7 +130,7 @@ export const CarbonDefaultNode = (props: RendererProps) => {
     </Component>
   );
 };
- 
+
 export const CarbonNodeContent = (props: RendererProps) => {
   const { node, placeholder, beforeContent, custom } = props;
   const { children = [] } = node;
@@ -139,7 +138,6 @@ export const CarbonNodeContent = (props: RendererProps) => {
   if (!children.length) {
     return null;
   }
-
 
   return (
     <div data-type="content" {...custom}>
