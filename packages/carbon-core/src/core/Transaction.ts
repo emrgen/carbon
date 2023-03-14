@@ -21,6 +21,8 @@ import { SelectionManager } from './SelectionManager';
 import { InsertText } from './actions/InsertText';
 import { InsertNodes } from './actions/InsertNodes';
 import { ChangeName } from './actions/ChangeName';
+import { MoveAction } from './actions/MoveAction';
+import { RemoveNode } from './actions/RemoveNode';
 
 export class TransactionError {
 	commandId: number;
@@ -125,13 +127,13 @@ export class Transaction {
 		return this;
 	}
 
-	remove(ids: NodeId | NodeId[], origin = this.origin): Transaction {
-		// this.add(DeleteCommand.create(flatten([ids]).map(i => i.intoId()), [], origin));
+	remove(at: Point, id: NodeId, origin = this.origin): Transaction {
+		this.add(RemoveNode.create(at, id, origin));
 		return this;
 	}
 
-	move(to: Point, id: NodeId, origin = this.origin): Transaction {
-		// this.add(MoveCommand.create(to, id, origin));
+	move(from: Point, to: Point, id: NodeId, origin = this.origin): Transaction {
+		this.add(MoveAction.create(from, to, id, origin));
 		return this;
 	}
 

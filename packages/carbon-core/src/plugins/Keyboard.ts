@@ -22,7 +22,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			},
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
 				const { node, event } = ctx;
-				if(node.isAtom) {
+				if (node.isAtom) {
 					// event.preventDefault()
 					return
 				}
@@ -127,7 +127,9 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (!splitBlock) return
 		console.log('split section....');
 
-		cmd.transform.split(splitBlock, selection.head)?.dispatch()
+		cmd.transform
+			.split(splitBlock, selection.head, { rootType: app.schema.type('section') })
+			?.dispatch()
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {
@@ -135,7 +137,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		ctx.event.preventDefault();
 		ctx.event.stopPropagation();
 
-		const {event} = ctx;
+		const { event } = ctx;
 		const { app, node } = ctx;
 		const { selection } = app;
 
@@ -170,36 +172,36 @@ export class KeyboardPlugin extends AfterPlugin {
 		const { event } = ctx;
 		const { app, node } = ctx;
 		const { selection } = app;
-		const {isCollapsed, head} = selection;
+		const { isCollapsed, head } = selection;
 		if (!isCollapsed) {
 			app.cmd.transform.delete(app.selection, true)?.dispatch()
 			return
 		}
 
-	// 	if (head.isAtStartOfNode(node)) {
-	// 		const prevNode = node.prev(n => {
-	// 			return !n.isSelectable || n.isFocusable
-	// 		})
-	// 		// console.log(prevNode?.name, prevNode?.isSelectable);
-	// 		if (prevNode && !prevNode?.isSelectable) {
-	// 			return
-	// 		}
-	// 	}
+		// 	if (head.isAtStartOfNode(node)) {
+		// 		const prevNode = node.prev(n => {
+		// 			return !n.isSelectable || n.isFocusable
+		// 		})
+		// 		// console.log(prevNode?.name, prevNode?.isSelectable);
+		// 		if (prevNode && !prevNode?.isSelectable) {
+		// 			return
+		// 		}
+		// 	}
 
-	// 	event.stopPropagation()
-	// 	if (node.isBlockAtom) {
-	// 		const found = node.chain.reverse().find(n => n.isBlockAtom)
-	// 		if (!found) return
-	// 		// final caret position can be above or below
-	// 		const beforeSel = selection.moveStart(-1);
-	// 		if (beforeSel) {
-	// 			editor.tr
-	// 				.add(DeleteCommand.create([node.id]))
-	// 				.select(beforeSel.collapseToHead())
-	// 				.dispatch()
-	// 		}
-	// 		return
-	// 	}
+		// 	event.stopPropagation()
+		// 	if (node.isBlockAtom) {
+		// 		const found = node.chain.reverse().find(n => n.isBlockAtom)
+		// 		if (!found) return
+		// 		// final caret position can be above or below
+		// 		const beforeSel = selection.moveStart(-1);
+		// 		if (beforeSel) {
+		// 			editor.tr
+		// 				.add(DeleteCommand.create([node.id]))
+		// 				.select(beforeSel.collapseToHead())
+		// 				.dispatch()
+		// 		}
+		// 		return
+		// 	}
 
 		const deleteSel = selection.moveStart(-1);
 		if (!deleteSel) return
@@ -211,9 +213,9 @@ export class KeyboardPlugin extends AfterPlugin {
 		// tr?.select(deleteSel.collapseToHead()).dispatch()
 		// 	return
 
-	// 	// check if deleteSel head and tail are merge compatible
+		// 	// check if deleteSel head and tail are merge compatible
 
-	// 	console.log('Keyboard.backspace',deleteSel.toString());
+		// 	console.log('Keyboard.backspace',deleteSel.toString());
 		app.cmd.transform.delete(deleteSel)?.dispatch()
 	}
 }

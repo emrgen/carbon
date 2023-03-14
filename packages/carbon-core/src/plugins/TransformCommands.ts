@@ -129,8 +129,9 @@ export class TransformCommands extends BeforePlugin {
 
   move(app: Carbon, node: Node, to: Point): Optional<Transaction> {
     const { tr, selection } = app;
+    const from = nodeLocation(node);
     tr
-      .move(to, node.id)
+      .move(from!, to, node.id)
       // as the node is moved selection stays same
       .select(selection, ActionOrigin.UserInput);
     return tr;
@@ -165,10 +166,13 @@ export class TransformCommands extends BeforePlugin {
     if (!parent) return;
     const at = Point.toAfter(parent.id);
 
+    console.log('XX');
+
     const focus = node.find(n => n.type.isTextBlock) ?? node;
+    const from = nodeLocation(node)
     tr
-      .move(at, node.id);
-    // .select(PointedSelection.within(focus))
+      .move(from!, at, node.id)
+      .select(app.selection.collapseToStart())
     return tr;
   }
 
