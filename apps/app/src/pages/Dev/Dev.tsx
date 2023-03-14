@@ -21,14 +21,19 @@ const data = node("document", [
   section([title([text("sect"), text("ABC"), text("ion 1")])]),
   section([
     title([text("section 1")]),
-    section([title([text("section 2")])]),
-    section([title([text("section 3")])]),
+    section([title([text("section 1.1")])]),
+    section([title([text("section 1.2")])]),
   ]),
   section([
-    title([text("section 1")]),
+    title([text("section 2")]),
     section([
-      title([text("section 2")]),
-      section([title([text("section 3")])]),
+      title([text("section 2.1")]),
+      section([title([text("section 2.1.1")])]),
+      section([
+        title([text("section 2.1.2")]),
+        section([title([text("section 2.1.2.1")])]),
+        section([title([text("section 2.1.2.2")])]),
+      ]),
     ]),
   ]),
   section([title([text("section 3")])]),
