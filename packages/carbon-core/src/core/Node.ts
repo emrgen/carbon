@@ -8,7 +8,7 @@ import { ContentMatch } from './ContentMatch';
 import { classString } from './Logger';
 import { Mark, MarkSet } from './Mark';
 import { NodeAttrs } from './NodeAttrs';
-import { BlockContent, NodeContent } from './NodeContent';
+import { BlockContent, InlineContent, NodeContent } from './NodeContent';
 import { NodeData } from './NodeData';
 import { NodeId } from './NodeId';
 import { NodeType } from './NodeType';
@@ -99,15 +99,12 @@ export class Node extends EventEmitter {
 	syncMarks() { }
 
 	get key() {
-		const { id } = this;
-		const { actorId, clock } = id;
-		return `${actorId}:${clock}`;
+		return this.id.id
 	}
 
 	get version() {
 		const { id, updateVersion } = this;
-		const { actorId, clock, } = id;
-		return `${actorId}:${clock}(${updateVersion})`;
+		return `${id.id}(${updateVersion})`;
 	}
 
 	get placeholder() {
@@ -601,6 +598,11 @@ export class Node extends EventEmitter {
 	updateText(text: string) {
 		this.content.updateText(text)
 		this.markUpdated()
+	}
+
+	updateContent(content: NodeContent) {
+		this.content = content.withParent(this);
+		this.markUpdated();
 	}
 
 	// @mutates

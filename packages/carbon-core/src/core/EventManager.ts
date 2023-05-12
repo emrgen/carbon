@@ -34,6 +34,10 @@ export class EventManager {
 
 	constructor(readonly app: Carbon, readonly pm: PluginManager) { }
 
+	onCustomEvent(event: any, ...args): boolean {
+		return false
+	}
+
 	onEvent(type: EventsIn, event: Event) {
 
 		const { app } = this;
@@ -82,7 +86,7 @@ export class EventManager {
 		// start node corresponds to focus point in DOM
 		const node = selection.start.node;
 		if (!node) {
-			console.error(p12('%c[invalid]'), 'color:grey', 'node not found for event for selection', selection?.toJSON(), type);
+			console.error(p12('%c[invalid]'), 'color:grey', 'node not found for event for selection', selection?.toString(), type);
 			return
 		}
 
@@ -93,6 +97,7 @@ export class EventManager {
 			app: this.app,
 			node,
 			selection: selection,
+			origin: this.runtime.origin,
 		});
 
 		if (type == EventsIn.selectionchange || selectionChangedUsingKeys(event)) {
@@ -108,7 +113,7 @@ export class EventManager {
 		// this.afterEvent(editorEvent);
 	}
 
-	clickTimer: any = null
+	// clickTimer: any = null
 	// beforeEvent(type: EventsIn, event: Event): EventsIn {
 	// 	const { app } = this;
 	// 	const { selection } = app;
@@ -173,7 +178,8 @@ export class EventManager {
 	// 	return type;
 	// }
 
-	updateFocusPlaceholder(before?: PinnedSelection, after?: PinnedSelection,) {
+	// update placeholder visibility for the focus node
+	private updateFocusPlaceholder(before?: PinnedSelection, after?: PinnedSelection,) {
 		let isUpdated = false
 		if (after?.isCollapsed || !after) {
 			const prevNode = before?.head.node;
@@ -227,10 +233,5 @@ export class EventManager {
 				break;
 		}
 	}
-
-	onCustomEvent(type: EventsIn, event: any, ...args): boolean {
-		return false
-	}
-
 
 }

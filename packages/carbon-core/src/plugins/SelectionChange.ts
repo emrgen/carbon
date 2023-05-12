@@ -1,10 +1,11 @@
 import { EventContext } from '../core/EventContext';
 import { p12, p14 } from '../core/Logger';
 import { AfterPlugin } from '../core/CarbonPlugin';
-import { Transaction } from '../core/Transaction';
 import { EventHandlerMap } from '../core/types';
 
 let count = 0
+
+// handles selection change events and dispatches a transaction to update the app state
 export class SelectionChangePlugin extends AfterPlugin {
 
 	name = 'selectionChange'
@@ -47,7 +48,6 @@ export class SelectionChangePlugin extends AfterPlugin {
 					.select(after)
 					.dispatch()
 			},
-
 		}
 	}
 

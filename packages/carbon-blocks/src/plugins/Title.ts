@@ -19,6 +19,7 @@ export class TitlePlugin extends NodePlugin {
 
 	spec(): NodeSpec {
 		return {
+			group: 'split',
 			content: 'inline*',
 			focusable: true,
 			attrs: {

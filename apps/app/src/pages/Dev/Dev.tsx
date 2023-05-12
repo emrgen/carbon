@@ -7,7 +7,6 @@ import {
 } from "@emrgen/carbon-blocks";
 
 import {
-  Actor,
   CarbonContext,
   CarbonContent,
   useCreateCarbon,
@@ -44,10 +43,9 @@ const data = node("document", [
   section([title([text("section 3")])]),
 ]);
 
-const actor = new Actor(1, 0);
 
 export default function Dev() {
-  const app = useCreateCarbon(actor, data, [extensionPresets, blockPresets]);
+  const app = useCreateCarbon(data, [extensionPresets, blockPresets]);
 
   // @ts-ignore
   window.app = app

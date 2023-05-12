@@ -1,4 +1,4 @@
-import { Transaction } from "core/Transaction";
+import { Transaction } from "../Transaction";
 import { ActionResult } from "./Result";
 import { Action, ActionOrigin } from "./types";
 import { PointedSelection } from '../PointedSelection';

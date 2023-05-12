@@ -3,7 +3,6 @@ import { CarbonCommands } from "./types";
 
 import { isKeyHotkey } from 'is-hotkey';
 import { camelCase, each, keys, reduce, some, sortBy, uniqBy, values, snakeCase, entries } from 'lodash';
-import { Schema } from './Schema';
 import { EventContext } from "./EventContext";
 import { PluginType, CarbonPlugin } from './CarbonPlugin';
 import { Carbon } from './Carbon';
@@ -20,6 +19,7 @@ export class PluginManager {
 	private readonly before: CarbonPlugin[];
 	private readonly nodes: Record<string, CarbonPlugin>;
 
+	// all events that are handled by plugins
 	events: Set<EventsIn>;
 
 	get plugins() {
@@ -126,9 +126,7 @@ export class PluginManager {
 			node?.chain.some(n => {
 				// console.log(n.name, event.type, node?.chain.length);
 				event.changeNode(n);
-				// event.node = n
 				this.nodePlugin(n.name)?.on()[camelCase(event.type)]?.(event);
-				// console.log(event.stopped);
 				return event.stopped;
 			});
 		}

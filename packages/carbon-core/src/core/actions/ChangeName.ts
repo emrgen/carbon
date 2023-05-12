@@ -1,14 +1,10 @@
-import { Action } from './types';
-import { Transaction } from 'core/Transaction';
-import { Point } from '../Point';
-import { ActionOrigin } from './types';
-import { Fragment } from '../Fragment';
-import { generateActionId } from './utils';
-import { ActionResult } from './Result';
-import { Pin } from '../Pin';
 import { classString } from '../Logger';
-import { NodeName } from '../types';
 import { NodeId } from '../NodeId';
+import { Transaction } from '../Transaction';
+import { NodeName } from '../types';
+import { ActionResult } from './Result';
+import { Action, ActionOrigin } from './types';
+import { generateActionId } from './utils';
 
 export class ChangeName implements Action{
 	id: number;

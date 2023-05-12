@@ -1,4 +1,4 @@
-import { Point } from "core/Point";
+import { Point } from "../Point";
 import { Transaction } from "../Transaction";
 import { ActionResult } from "./Result";
 import { Action, ActionOrigin, ActionType } from "./types";
@@ -8,6 +8,7 @@ import { classString } from '../Logger';
 import { Node } from '../Node';
 import { Pin } from '../Pin';
 
+// action to remove text from a node
 export class RemoveText implements Action{
 	id: number;
 	type: ActionType;
@@ -45,7 +46,7 @@ export class RemoveText implements Action{
 
 	inverse(): Action {
 		const { at, node, origin } = this;
-		return InsertText.create(at, node, origin);
+		return InsertText.create(at, node, false, origin);
 	}
 
 	toString() {

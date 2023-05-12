@@ -38,11 +38,12 @@ interface UseNodeChangeProps {
 	onChange?()
 }
 
+// start watching for the node change
 export const useNodeChange = (props: UseNodeChangeProps) => {
 	const {node} = props;
 	const change = useCarbonChange();
 	const [watched, setWatched] = useState(node);
-	// this will force the ui update 
+	// this will force the ui update
 	const [version, setVersion] = useState(node.version);
 
 	useEffect(() => {
@@ -68,7 +69,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 	};
 };
 
-// start watching for the node change
+// start watching for the node state change
 export const useNodeStateChange = (props: UseNodeChangeProps) => {
 	const { node } = props;
 	const change = useCarbonChange();

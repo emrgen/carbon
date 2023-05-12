@@ -123,6 +123,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		}
 
 		// const splitBlock = node.closest(n => n.canSplit);
+		node.chain.forEach(n => console.log(n.name, n.groups));
 		const splitBlock = node.closest(n => n.groups.includes('nestable'));
 		if (!splitBlock) return
 		console.log('split section....');

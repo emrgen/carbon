@@ -18,26 +18,31 @@ interface EventContextProps<T> {
 	selection: PinnedSelection;
 }
 
+//
 export class EventContext<T extends Event> {
-	origin: EventOrigin;
-	type: EventsIn;
-	event: T;
 
-	app: Carbon;
-	selection: PinnedSelection;
+	readonly app: Carbon;
+	readonly selection: PinnedSelection;
+	readonly target: Node
+
+	readonly origin: EventOrigin;
+	readonly type: EventsIn;
+	readonly event: T;
+
 	node: Node;
 
 	stopped: boolean = false;
 	prevented: boolean = false
 
-	static create<T extends Event>(props: Omit<EventContextProps<T>, 'origin'>) {
+	// create a new event context
+	static create<T extends Event>(props: EventContextProps<T>) {
 		return new EventContext({
 			...props,
-			origin: EventOrigin.dom,
 		});
 	}
 
-	static fromContext<T extends Event>(event: EventContext<T>, opts = {}) {
+	// create a new event context from an existing one
+	static fromContext<T extends Event>(event: EventContext<T>, opts: Partial<EventContextProps<T>> = {}) {
 		return EventContext.create({...event, ...opts})
 	}
 
@@ -47,10 +52,12 @@ export class EventContext<T extends Event> {
 		this.type = type;
 		this.app = app;
 		this.node = node;
+		this.target = node
 		this.event = event;
 		this.selection = selection;
 	}
 
+	// updateCommandOrigin(type: EventsIn, event: Event) {
 	changeNode(node: Node) {
 		this.node = node;
 	}

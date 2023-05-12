@@ -1,11 +1,11 @@
 import { Optional } from '@emrgen/types';
-import { Carbon } from 'core/Carbon';
-import { CarbonState } from 'core/CarbonState';
-import { Decoration } from 'core/Decoration';
-import { Node } from 'core/Node';
-import { NodeSpec } from 'core/Schema';
-import { Transaction } from 'core/Transaction';
-import { EventHandlerMap, InputRules, PluginName } from 'core/types';
+import { Carbon } from './Carbon';
+import { CarbonState } from './CarbonState';
+import { Decoration } from './Decoration';
+import { Node } from './Node';
+import { NodeSpec } from './Schema';
+import { Transaction } from './Transaction';
+import { EventHandlerMap, InputRules, PluginName } from './types';
 import { Action } from "./actions/types";
 
 export enum PluginType {

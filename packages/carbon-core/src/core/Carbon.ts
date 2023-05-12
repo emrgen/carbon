@@ -1,6 +1,6 @@
 
 import { Optional } from '@emrgen/types';
-import { Node } from 'core/Node';
+import { Node } from './Node';
 import { EventEmitter } from 'events';
 import { querySelector } from '../utils/domElement';
 import { CarbonState } from './CarbonState';
@@ -10,7 +10,7 @@ import { EventManager } from './EventManager';
 import { NodeStore } from './NodeStore';
 import { PinnedSelection } from './PinnedSelection';
 import { PluginManager } from './PluginManager';
-import { CarbonRenderer } from './Renderer';
+import { RenderManager } from './Renderer';
 import { Schema } from './Schema';
 import { SelectionManager } from './SelectionManager';
 import { Transaction } from './Transaction';
@@ -21,7 +21,7 @@ export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
 	private readonly em: EventManager;
 	private readonly sm: SelectionManager;
-	private readonly rm: CarbonRenderer;
+	private readonly rm: RenderManager;
 	private readonly tm: TransactionManager;
 
 	schema: Schema;
@@ -35,20 +35,20 @@ export class Carbon extends EventEmitter {
 	_portal: any;
 	_contentElement: any;
 
-	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: CarbonRenderer) {
+	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
 
 		this.pm = pm;
-		this.em = new EventManager(this, pm);
-		this.sm = new SelectionManager(this);
-		this.tm = new TransactionManager(this, pm, this.sm);
-
 		this.rm = renderer;
 		this.schema = schema;
-		this.cmd = pm.commands(this);
 		this.state = CarbonState.create(new NodeStore(), content, PinnedSelection.default(content));
-		this.change = new ChangeManager(this.state, this.sm, this.tm)
 
+		this.sm = new SelectionManager(this);
+		this.em = new EventManager(this, pm);
+		this.tm = new TransactionManager(this, pm, this.sm);
+		this.change = new ChangeManager(this.state, this.sm, this.tm);
+
+		this.cmd = pm.commands(this);
 		this.enabled = true;
 	}
 
@@ -76,7 +76,6 @@ export class Carbon extends EventEmitter {
 		return Transaction.create(this, this.tm, this.pm, this.sm);
 	}
 
-
 	get element(): Optional<HTMLElement> {
 		this._element = this._element ?? this.store.element(this.content.id);
 		return this._element;
@@ -92,20 +91,25 @@ export class Carbon extends EventEmitter {
 		return this._contentElement;
 	}
 
+	// all events are emitted through this method
+	onEvent(type: EventsIn, event: Event) {
+		if (type === EventsIn.custom) {
+			this.em.onCustomEvent(event);
+		} else {
+			this.em.onEvent(type, event);
+		}
+	}
+
+	component(name: string) {
+		return this.rm.component(name)
+	}
+
 	enable() {
 		this.enabled = true;
 	}
 
 	disable() {
 		this.enabled = false;
-	}
-
-	onEvent(type: EventsIn, event: Event) {
-		this.em.onEvent(type, event);
-	}
-
-	component(name: string) {
-		return this.rm.component(name)
 	}
 }
 

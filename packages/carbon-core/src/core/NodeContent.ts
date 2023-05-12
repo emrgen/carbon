@@ -3,6 +3,7 @@ import { findIndex, flatten } from 'lodash';
 
 import { Fragment } from './Fragment';
 import { Node } from './Node';
+import { Schema } from './Schema';
 
 export interface NodeContent {
 	size: number;
@@ -194,6 +195,10 @@ export class InlineContent implements  NodeContent {
 
 	remove(node: Node): boolean {
 		return false
+	}
+
+	split(offset: number): [NodeContent, NodeContent] {
+		return [this, this]
 	}
 
 	updateText(text: string) {

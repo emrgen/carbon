@@ -7,7 +7,6 @@ import {
 } from "@emrgen/carbon-blocks";
 
 import {
-  Actor,
   CarbonContext,
   CarbonContent,
   useCreateCarbon,
@@ -24,10 +23,8 @@ const data = node("doc", [
 	section([title([text("section 3")]),]),
 ]);
 
-const actor = new Actor(1, 0)
-
 export default function Test() {
-	const app = useCreateCarbon(actor, data, [blockPresets])
+	const app = useCreateCarbon( data, [blockPresets])
 
 	// console.log(app.content)
 

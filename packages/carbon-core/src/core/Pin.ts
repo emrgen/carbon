@@ -5,9 +5,13 @@ import { NodeStore } from './NodeStore';
 import { Point } from './Point';
 import { constrain } from '../utils/constrain';
 import { Maps } from './types';
+import { NodeContent } from './NodeContent';
 
+// materialized pin is a pin that is not a reference to a i
 export class Pin {
+	// focus node
 	node: Node;
+	// focus offset
 	offset: number;
 
 	get isInvalid() {
@@ -112,6 +116,7 @@ export class Pin {
 
 	static create(node: Node, offset: number) {
 		if (!node.isFocusable && !node.hasFocusable) {
+			console.log('create pin', node.name, offset, node)
 			throw new Error(`node is not focusable: ${node.name}`);
 		}
 
@@ -122,6 +127,7 @@ export class Pin {
 		return new Pin(node, offset);
 	}
 
+	// 
 	static future(node: Node, offset: number) {
 		return new Pin(node, offset);
 	}
@@ -131,6 +137,7 @@ export class Pin {
 		this.offset = offset;
 	}
 
+	// lift pin to the parent
 	up(): Optional<Pin> {
 		const { node, offset } = this;
 		if (node.isBlock) return this;
@@ -153,6 +160,7 @@ export class Pin {
 		return Pin.create(parent, distance);
 	}
 
+	// push pin down to the proper child
 	down() {
 		const { node, offset } = this;
 		if (offset === 0 && node.isEmpty || node.isInline) {
@@ -171,6 +179,12 @@ export class Pin {
 		})
 
 		return pin;
+	}
+
+	// splits the node at the pin offset
+	splitContent(): [NodeContent, NodeContent] {
+		const { node, offset } = this;
+		return node.splitContent(offset);
 	}
 
 	// check if pin is before the provided pin
@@ -325,6 +339,6 @@ export class Pin {
 
 	toString() {
 		const {node, offset} = this
-		return classString(this)(`${node.id.actorId}#${node.id.clock}/${offset}`)
+		return classString(this)(`${node.id.toString()}/${offset}`)
 	}
 }

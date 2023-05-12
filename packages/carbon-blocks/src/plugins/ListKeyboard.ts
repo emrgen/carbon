@@ -100,7 +100,7 @@ export class ListKeyboardPlugin extends AfterPlugin {
 			enter: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, node } = ctx;
 				const { selection, cmd, schema, tr } = app;
-				const { start } = selection
+				const { start } = selection;
 				if (!selection.isCollapsed) {
 					return
 				}
@@ -120,7 +120,7 @@ export class ListKeyboardPlugin extends AfterPlugin {
 				// }
 
 				if (listNode.name !== 'section') {
-					ctx.event.preventDefault()
+					ctx.event.preventDefault();
 					ctx.event.stopPropagation();
 					// this.changeToDefaultList(event, listNode)
 					return
@@ -133,7 +133,7 @@ export class ListKeyboardPlugin extends AfterPlugin {
 					return
 				}
 			},
-			// // push the
+			// push the
 			tab: (ctx: EventContext<KeyboardEvent>) => {
 				ctx.event.preventDefault();
 				const { app, node } = ctx;

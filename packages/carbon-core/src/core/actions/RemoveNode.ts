@@ -5,6 +5,7 @@ import { ActionResult } from './Result';
 import { Transaction } from '../Transaction';
 import { generateActionId } from './utils';
 
+// action to remove a node by id
 export class RemoveNode implements Action {
 	id: number;
 	type: ActionType;

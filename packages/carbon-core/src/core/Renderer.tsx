@@ -23,21 +23,22 @@ export class Renderer {
   }
 }
 
-export class CarbonRenderer {
-  name = "carbonRenderer";
+export class RenderManager {
+  name = "renderManager";
+
   renderers: Map<string, RenderComponent>;
   fallback: RenderComponent;
 
   static create(
     renderers: Renderer[],
     fallback: RenderComponent
-  ): CarbonRenderer {
+  ): RenderManager {
     const rendererMap = new Map<string, RenderComponent>();
     renderers.forEach((r) => {
       rendererMap.set(r.name, r.component);
     });
 
-    return new CarbonRenderer(rendererMap, fallback);
+    return new RenderManager(rendererMap, fallback);
   }
 
   constructor(renderers: Map<string, RenderComponent>, fallback: RenderComponent) {

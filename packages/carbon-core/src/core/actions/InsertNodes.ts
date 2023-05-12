@@ -1,5 +1,5 @@
 import { Action } from './types';
-import { Transaction } from 'core/Transaction';
+import { Transaction } from '../Transaction';
 import { Point } from '../Point';
 import { ActionOrigin } from './types';
 import { Fragment } from '../Fragment';

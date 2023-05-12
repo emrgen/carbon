@@ -11,11 +11,13 @@ export enum NodeChangeType {
 	state = 'state',
 }
 
-// syncs ui with the editor state
+/**
+ * Syncs the editor state with the UI
+ */
 export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	constructor(readonly state: CarbonState, readonly sm: SelectionManager, readonly tm: TransactionManager) {
-		super()
+		super();
 	}
 
 	private get store() {

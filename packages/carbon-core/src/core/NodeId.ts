@@ -1,63 +1,54 @@
 import { Optional } from "@emrgen/types";
 import { classString } from "./Logger";
+import { v4 as uuidv4 } from 'uuid';
+
+
+const defaultId = uuidv4().replace(/[0-9a-z]/g, '0');
 
 export class NodeId {
-	actorId: number;
-	clock: number;
-
 	get isDefault() {
-		return this.clock === -10;
+		return defaultId === this.id;
 	}
 
-	static deserialize(token: string): Optional<NodeId> {
-		const [t1, t2] = token.split('#');
-		const actorId = parseInt(t1);
-		const clock = parseInt(t2);
-		if (isNaN(actorId) || isNaN(clock)) return
-		return new NodeId(actorId, clock);
+	static deserialize(id: string): Optional<NodeId> {
+		return new NodeId(id);
 	}
 
 	static default() {
-		return new NodeId(0, -10)
+		return new NodeId(defaultId)
 	}
 
-	static create(actorId: number, clock: number) {
-		return new NodeId(actorId, clock);
+	static create(id: string) {
+		return new NodeId(id);
 	}
 
-	private constructor(actorId: number, clock: number) {
-		this.actorId = actorId;
-		this.clock = clock;
-	}
+	private constructor(readonly id: string) {}
 
 	eq(other: NodeId) {
 		return this.comp(other) === 0;
 	}
 
 	comp(other: NodeId) {
-		return this.actorId === other.actorId ? this.clock - other.clock : this.actorId - other.actorId;
+		return this.id.localeCompare(other.id)
 	}
 
 	clone() {
-		return NodeId.create(this.actorId, this.clock)
+		return NodeId.create(this.id)
 	}
 
 	toString() {
-		const {actorId, clock} = this;
-		return `${actorId}#${clock}`
+		return this.id
 	}
 
 	toJSON() {
-		const { actorId, clock } = this;
+		const { id } = this;
 		return {
-			actorId,
-			clock,
+			id
 		}
 	}
 
 	serialize() {
-		const { actorId, clock } = this;
-		return `${actorId}#${clock}`
+		return this.id
 	}
 }
 

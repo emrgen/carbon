@@ -44,7 +44,6 @@ export class IsolatingPlugin extends AfterPlugin {
         this.preventAtEndCollapsed(e);
       },
       shiftBackspace: e => {
-
         this.preventAtStart(e);
       },
       shiftDelete: e => {

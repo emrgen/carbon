@@ -8,6 +8,7 @@ enum PointAt {
 	After = 2,
 }
 
+// point is a relative offset position within a node
 export class Point {
 	nodeId: NodeId;
 

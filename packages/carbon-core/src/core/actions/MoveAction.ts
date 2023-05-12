@@ -1,5 +1,5 @@
-import { NodeId } from "core/NodeId";
-import { Transaction } from "core/Transaction";
+import { NodeId } from "../NodeId";
+import { Transaction } from "../Transaction";
 import { ActionResult, NULL_ACTION_RESULT } from "./Result";
 import { Action, ActionOrigin } from "./types";
 import { Point } from '../Point';

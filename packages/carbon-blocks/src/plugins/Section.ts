@@ -7,7 +7,7 @@ export class Section extends NodePlugin {
 
 	spec(): NodeSpec {
 		return {
-			group: 'content nestable',
+			group: 'content nestable split',
 			content: 'title content*',
 			selectable: true,
 			draggable: true,

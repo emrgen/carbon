@@ -1,6 +1,7 @@
 import { Optional } from "@emrgen/types";
 import { CommandError } from "./Error";
 
+// acts as a wrapper for the result of an action
 export class ActionResult<T = any> {
 	value: Optional<T>;
 	error: Optional<CommandError>;
@@ -35,4 +36,5 @@ export class ActionResult<T = any> {
 	}
 }
 
+// this is a special ActionResult that is used to indicate that an action has no effect
 export const NULL_ACTION_RESULT = ActionResult.withValue('done');

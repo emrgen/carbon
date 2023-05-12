@@ -31,7 +31,7 @@ export function CarbonContent() {
 
   return (
     <>
-      <div className="carbon-app-content" {...listeners}>
+      <div className="carbon-content" {...listeners}>
         <CarbonNode node={editor.content} />
       </div>
 

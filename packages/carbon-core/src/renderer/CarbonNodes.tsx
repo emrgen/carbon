@@ -9,17 +9,17 @@ import { RendererProps } from "../core/Renderer";
 import { useCarbon } from '../hooks/useCarbon';
 import { useNodeChange } from "../hooks/useNodeChange";
 
-export default function JustEmpty() {
+export const JustEmpty = () => {
   return <span>&shy;</span>;
 }
 
+//
 export const CarbonEmpty = (props: RendererProps) => {
   const { node } = props;
   return <JustEmpty key={node.key + "empty"} />;
 };
 
-const mapName = (name, parentName?: string) => {
-
+const mapName = (name: string, parentName?: string) => {
   if (name === 'title') {
     if (!parentName) {
       throw new Error("Title must have a parent");
@@ -68,24 +68,26 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
 
 export const CarbonElement = memo(forwardRef(InnerElement));
 
-export const RawText = memo(function TT(props: RendererProps) {
-  const {node} = props
+export const RawText = memo(function RT(props: RendererProps) {
+  const { node } = props
   const ref = useRef(document.createTextNode(node.textContent));
   return <>{ref.current}</>
-})
+});
 
+// render text node with span
 const InnerCarbonText = (props: RendererProps) => {
   const { node } = props;
 
   return (
     <CarbonElement node={node} tag="span">
-      {node.isEmpty ? <CarbonEmpty node={node}/> :node.textContent}
+      {node.isEmpty ? <CarbonEmpty node={node}/> : node.textContent}
     </CarbonElement>
   );
 };
 
 export const CarbonText = (InnerCarbonText);
 
+// render block node with div
 const InnerCarbonBlock = (props: RendererProps, ref) => {
   const { node, children, custom } = props;
   return (
@@ -97,6 +99,7 @@ const InnerCarbonBlock = (props: RendererProps, ref) => {
 
 export const CarbonBlock = memo(forwardRef(InnerCarbonBlock));
 
+// render children of a node
 export const CarbonChildren = (props: RendererProps) => {
   const { node } = props;
 
@@ -108,11 +111,16 @@ export const CarbonChildren = (props: RendererProps) => {
   return <>{children}</>;
 };
 
+// render node by name
 export const CarbonNode = (props: RendererProps) => {
   const app = useCarbon();
   const { node } = useNodeChange(props);
 
   const RegisteredComponent = app.component(node.name);
+  if (RegisteredComponent && RegisteredComponent === CarbonNode) {
+    console.warn(`${node.name} is registered as CarbonNode, this will fall back to CarbonDefaultNode`)
+  }
+
   if (RegisteredComponent && RegisteredComponent !== CarbonNode) {
     return <RegisteredComponent node={node} />;
   }
@@ -120,6 +128,7 @@ export const CarbonNode = (props: RendererProps) => {
   return <CarbonDefaultNode node={node} />;
 }
 
+// default node for carbon editor with text and block
 export const CarbonDefaultNode = (props: RendererProps) => {
   const { node } = props;
 
@@ -131,6 +140,7 @@ export const CarbonDefaultNode = (props: RendererProps) => {
   );
 };
 
+// render first node a content
 export const CarbonNodeContent = (props: RendererProps) => {
   const { node, placeholder, beforeContent, custom } = props;
   const { children = [] } = node;
@@ -147,6 +157,7 @@ export const CarbonNodeContent = (props: RendererProps) => {
   );
 };
 
+// render children except first node
 export const CarbonNodeChildren = (props: RendererProps) => {
   const { node } = props;
   if (node.children.length < 2) return null;
