@@ -11,6 +11,8 @@ export const generateTextId = () => {
 	return String(++nodeId)
 }
 
+let blockId = 0
 export const generateBlockId = () => {
-	return uuidv4();
+	return 'b' + String(++nodeId)
+	// return uuidv4();
 }

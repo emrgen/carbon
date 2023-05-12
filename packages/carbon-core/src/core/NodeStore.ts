@@ -1,13 +1,11 @@
 import { Optional } from "@emrgen/types";
-import BTree from "sorted-btree";
-import { NodeBTree } from './BTree';
 import { NodeId } from './NodeId';
 import { Node } from './Node';
 
 export class NodeStore {
-	private deletedNodeMap: BTree<NodeId, Node> = new NodeBTree();
-	private nodeMap: BTree<NodeId, Node> = new NodeBTree();
-	private elementMap: BTree<NodeId, HTMLElement> = new NodeBTree();
+	private deletedNodeMap: Map<string, Node> = new Map();
+	private nodeMap: Map<string, Node> = new Map();
+	private elementMap: Map<string, HTMLElement> = new Map();
 	private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
 
 	nodes() {
@@ -32,7 +30,7 @@ export class NodeStore {
 	get(entry: NodeId | HTMLElement): Optional<Node> {
 		const nodeId = (entry as NodeId)
 		if (nodeId) {
-			return this.nodeMap.get(nodeId) ?? this.deletedNodeMap.get(nodeId);
+			return this.nodeMap.get(nodeId.id) ?? this.deletedNodeMap.get(nodeId.id);
 		} else {
 			return this.elementToNodeMap.get(entry as HTMLElement);
 		}
@@ -40,13 +38,13 @@ export class NodeStore {
 
 	put(node: Node) {
 		// console.log('put node', node.id.toString(), node.childrenVersion)
-		this.deletedNodeMap.delete(node.id);
-		this.nodeMap.delete(node.id);
-		this.nodeMap.set(node.id, node);
+		this.deletedNodeMap.delete(node.id.id);
+		this.nodeMap.delete(node.id.id);
+		this.nodeMap.set(node.id.id, node);
 	}
 
 	element(nodeId: NodeId): Optional<HTMLElement> {
-		return this.elementMap.get(nodeId)
+		return this.elementMap.get(nodeId.id)
 	}
 
 	// connect the node to the rendered HTML element
@@ -55,7 +53,8 @@ export class NodeStore {
 			console.error(`Registering empty dom node for ${node.id.toString()}`)
 			return
 		}
-		const { id} = node
+		const { id: nodeId } = node
+		const { id } = nodeId
 		// remove old reference first
 		// other part of the id will eventually be added while rendering
 		this.delete(node)
@@ -65,7 +64,8 @@ export class NodeStore {
 	}
 
 	delete(node: Node) {
-		const { id } = node
+		const { id: nodeId } = node
+		const { id } = nodeId
 		const el = this.elementMap.get(id);
 		if (el) {
 			this.elementToNodeMap.delete(el)
@@ -77,7 +77,8 @@ export class NodeStore {
 	}
 
 	deleted(nodeId: NodeId): Optional<Node> {
-		return this.deletedNodeMap.get(nodeId);
+		const { id } = nodeId
+		return this.deletedNodeMap.get(id);
 	}
 
 	resolve(el: any): Optional<Node> {

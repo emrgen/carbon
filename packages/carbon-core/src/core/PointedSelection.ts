@@ -37,6 +37,7 @@ export class PointedSelection {
 		const focus = Pin.fromPoint(head, store);
 		const anchor = Pin.fromPoint(tail, store);
 		if (!focus || !anchor) {
+			console.warn('Selection.pin: invalid selection', this.toString(), head.toString(), store.get(head.nodeId)	);
 			return
 		}
 

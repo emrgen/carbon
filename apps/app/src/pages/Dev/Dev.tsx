@@ -15,7 +15,7 @@ import {
 } from "@emrgen/carbon-core";
 
 const data = node("document", [
-  title([text("Document Title")]),
+  title([text("Document "), text("title"), text(" 1")]),
   section([title([])]),
   section([title([text("sect"), text("ABC"), text("ion 1")])]),
   section([

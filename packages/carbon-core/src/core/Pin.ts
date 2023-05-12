@@ -71,9 +71,16 @@ export class Pin {
 	static fromPoint(point: Point, store: NodeStore): Optional<Pin> {
 		if (!point.isWithin) return
 		const node = store.get(point.nodeId);
-		if (!node || !node.type.isTextBlock) return;
+		if (!node || !node.type.isTextBlock) {
+			console.warn('Pin.fromPoint: invalid node', point.toString(), node?.toString());
+			return;
+		}
 		const { offset } = point;
-		if (node.focusSize < offset) return;
+		if (node.focusSize < offset) {
+			console.warn('Pin.fromPoint: invalid offset', node.toString(), offset, point.toString());
+			return;
+		}
+
 		return Pin.create(node, offset);
 	}
 

@@ -33,8 +33,6 @@ export class InsertNodes implements Action{
 			return ActionResult.withError('failed to find target parent from: ' + at.toString())
 		}
 
-		console.log(at.toString())
-
 		const done = () => {
 			fragment.forAll(n => app.store.put(n));
 			tr.updated(parent);

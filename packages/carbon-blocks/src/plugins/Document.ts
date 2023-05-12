@@ -1,4 +1,5 @@
-import { CarbonPlugin, EventContext, EventHandler, EventHandlerMap, NodeSpec, Pin } from '@emrgen/carbon-core';
+import { CarbonPlugin, EventContext, EventHandler, EventHandlerMap, NodeSpec, Pin, PinnedSelection, Point, PointedSelection } from '@emrgen/carbon-core';
+import { splitTextBlock } from '@emrgen/carbon-core';
 
 
 export class DocPlugin extends CarbonPlugin {
@@ -7,7 +8,8 @@ export class DocPlugin extends CarbonPlugin {
 
 	spec(): NodeSpec {
 		return {
-			content: 'content*',
+			group: 'split',
+			content: 'title content*',
 			selectable: true,
 			isolating: true,
 			sandbox: true,
@@ -29,29 +31,49 @@ export class DocPlugin extends CarbonPlugin {
 
 	keydown(): EventHandlerMap {
 		return {
+			// on enter split without merge
 			enter: (ctx: EventContext<KeyboardEvent>) => {
 				console.log('enter doc');
-				const { app, node, target, selection } = ctx;
-				const { schema } = app;
-				if (node.child(0)?.eq(target)) {
-					console.log('inserting section');
-				}
-				// const para = schema.node('paragraph');
-				// const cmd = TransformCommands.insert(target, para);
-				// ctx.dispatch(cmd);
-				// ctx.dispatch(TransformCommands.select(target));
-				// ctx.event.preventDefault();
-				// ctx.event.stopPropagation();
+				const { app, node, selection } = ctx;
+				const {start, end} = selection;
+				const title = node.child(0);
+				if (title && start.node.eq(title) && end.node.eq(title)) {
+					ctx.event.preventDefault();
+					ctx.stopPropagation();
 
-				// const { head } = selection;
-				// const pin = Pin.future(head.node, head.offset);
-				// const after = PinnedSelection.fromPin(pin);
-				// const para = schema.node('paragraph');
-				// const cmd = InsertCommand.create(after, para);
-				// ctx.dispatch(cmd);
-				// ctx.dispatch(SelectCommand.create(after));
-				// ctx.event.preventDefault();
-				// ctx.event.stopPropagation();
+					// const tr = app.cmd.transform.delete()!;
+
+					const [leftContent, middleContent, rightContent] = splitTextBlock(start, end, app);
+
+					console.log(leftContent, middleContent, rightContent);
+
+					const json = {
+						name: 'section',
+						content: [
+							{
+								name: 'title',
+								content: rightContent.children.map(c => c.toJSON())
+							}
+						]
+					}
+
+					const section = app.schema.nodeFromJSON(json);
+					if (!section) {
+						throw Error('failed to create section');
+					}
+
+					const at = Point.toAfter(title.id);
+					const focusPoint = Pin.toStartOf(section!);
+					const after = PinnedSelection.fromPin(focusPoint!);
+
+					app.tr
+						.setContent(title.id, leftContent)
+						.insert(at, section!)
+						.select(after)
+						.dispatch();
+
+					// console.log('split document title');
+				}
 			}
 		}
 	}

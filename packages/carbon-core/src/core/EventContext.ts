@@ -23,6 +23,8 @@ export class EventContext<T extends Event> {
 
 	readonly app: Carbon;
 	readonly selection: PinnedSelection;
+	// target is the node that the event was dispatched to
+	// its always text block node
 	readonly target: Node
 
 	readonly origin: EventOrigin;

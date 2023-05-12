@@ -26,8 +26,8 @@ import { NodeName } from "../core/types";
 import { takeUntil } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { nodeLocation } from "../utils/location";
-import { splitTextBlockAtPin } from "../utils/split";
 import { SetContent } from "../core/actions/SetContent";
+import { splitTextBlock } from "../utils/split";
 
 export interface SplitOpts {
   rootType?: NodeType;
@@ -44,7 +44,7 @@ declare module '@emrgen/carbon-core' {
       remove(node: Node): Optional<Transaction>;
       move(node: Node, to: Point): Optional<Transaction>;
       delete(selection?: PinnedSelection, merge?: boolean): Optional<Transaction>;
-      split(node: Node, pin: Pin, opts?: SplitOpts): Optional<Transaction>;
+      split(node: Node, selection?: PinnedSelection, opts?: SplitOpts): Optional<Transaction>;
       wrap(node: Node, name: NodeName): Optional<Transaction>;
       unwrap(node: Node): Optional<Transaction>;
       change(node: Node, name: NodeName): Optional<Transaction>;
@@ -199,10 +199,31 @@ export class TransformCommands extends BeforePlugin {
   // 2. pin is at end of the splitBlock
   // 3. pin is within the splitBlock
   // TODO: check if schema is violated by the split
-  split(app: Carbon, splitBlock: Node, pin: Pin, opts?: SplitOpts): Optional<Transaction> {
+  split(app: Carbon, splitBlock: Node, selection: PinnedSelection = app.selection, opts?: SplitOpts): Optional<Transaction> {
     opts = merge({ side: "bottom", pos: "out", rootType: splitBlock.type }, opts);
 
-    const { selection, tr } = app;
+    if (selection.isCollapsed) {
+      return this.splitAtPin(app, splitBlock, selection.start, opts);
+    } else {
+      return this.deleteAndSplit(app, splitBlock, selection.start, opts);
+    }
+  }
+
+  private deleteAndSplit(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
+    const { tr, selection } = app;
+    const { start, end } = selection;
+    const isAtBlockStart = pin.isAtStartOfNode(splitBlock);
+    const isAtBlockEnd = pin.isAtEndOfNode(splitBlock);
+
+    if (isAtBlockStart) {
+      // console.log('isAtBlockStart');
+    }
+
+    return undefined
+  }
+
+  private splitAtPin(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
+    const { tr, selection } = app;
 
     const isAtBlockStart = pin.isAtStartOfNode(splitBlock);
     if (isAtBlockStart) {
@@ -296,7 +317,7 @@ export class TransformCommands extends BeforePlugin {
         // leaf node is reached
         // console.log('last node', splittedNode.id.key);
         // console.log(pin.node.name, );
-        const [leftContent, rightContent] = splitTextBlockAtPin(pin, app);
+        const [leftContent, _, rightContent] = splitTextBlock(pin, pin, app);
         console.log(pin.node.name, leftContent, rightContent);
         setContentCommands.push(SetContent.create(pin.node.id, leftContent));
         setContentCommands.push(SetContent.create(parentBlock.id, rightContent));
@@ -317,12 +338,12 @@ export class TransformCommands extends BeforePlugin {
 
     console.log(focusPoint?.toString(), rootNode.textContent);
 
-    app.tr
+    console.log("insert point", rootNode?.name, rootNode);
+    return app.tr
       .insert(rootInsertPoint, rootNode!)
       .add(moveCommands)
       .add(setContentCommands)
       .select(PointedSelection.fromPoint(focusPoint!))
-      .dispatch();
   }
 
   // generates move commands for adjacent nodes

@@ -1,3 +1,4 @@
+import { classString } from "../Logger";
 import { NodeContent } from "../NodeContent";
 import { NodeId } from "../NodeId";
 import { Point } from "../Point";
@@ -28,6 +29,9 @@ export class SetContent implements Action {
     }
 
     node?.updateContent(content);
+    node.forAll(n => {
+      app.store.put(n);
+    });
     tr.updated(node);
 
     return ActionResult.withValue('done')
@@ -35,5 +39,10 @@ export class SetContent implements Action {
 
   inverse(): Action {
     throw new Error("Method not implemented.");
+  }
+
+  toString() {
+    const { nodeId, content } = this
+    return classString(this)([nodeId, content.children.map(n => n.textContent)]);
   }
 }

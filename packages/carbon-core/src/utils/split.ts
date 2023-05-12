@@ -4,7 +4,7 @@
 // import { Fragment } from '../core/Fragment';
 // import { Node } from '../core/Node';
 
-import { Carbon, Node, Pin } from "../core";
+import { Carbon, Node, Pin, PinnedSelection } from "../core";
 import { BlockContent, NodeContent } from "../core/NodeContent";
 import { takeAfter, takeBefore, takeUntil } from "./array";
 
@@ -33,31 +33,82 @@ import { takeAfter, takeBefore, takeUntil } from "./array";
 // 	return insertNodes
 // }
 
-export function splitTextBlockAtPin(pin: Pin, app: Carbon): [NodeContent, NodeContent] {
-  const downPin = pin.down()!;
-  const beforeNodes: Node[] = downPin.node.prevSiblings.map(n => n.clone());
-  const afterNodes: Node[] = downPin.node.nextSiblings.map(n => n.clone());
+export function splitTextBlock(start: Pin, end: Pin, app: Carbon): NodeContent[] {
+  const startPin = start.down()!;
+  const endPin = end.down()!;
+  const beforeNodes: Node[] = startPin.node.prevSiblings.map(n => n.clone());
+  const middleNodes: Node[] = takeBefore(startPin.node.prevSiblings.map(n => n.clone()), n => n.eq(endPin.node))
+  const afterNodes: Node[] = endPin.node.nextSiblings.map(n => n.clone());
 
-  if (downPin.isWithin) {
-    const { node, offset } = downPin;
-    const { textContent } = node;
+  const ret = () => [beforeNodes, middleNodes, afterNodes].map(nodes => BlockContent.create(nodes));
 
-    console.log("split text....", textContent);
-    const leftTextNode = app.schema.text(textContent.slice(0, offset));
-    const rightTextNode = app.schema.text(textContent.slice(offset));
-    beforeNodes.push(leftTextNode!);
-    afterNodes.unshift(rightTextNode!);
+  if (startPin.eq(endPin)) {
+    if (startPin.isWithin) {
+      const { node, offset } = startPin;
+      const { textContent } = node;
+
+      console.log("split text....", textContent);
+      const leftTextNode = app.schema.text(textContent.slice(0, offset));
+      const rightTextNode = app.schema.text(textContent.slice(offset));
+      beforeNodes.push(leftTextNode!);
+      afterNodes.unshift(rightTextNode!);
+    }
+
+    if (startPin.isAfter) {
+      const { node } = startPin;
+      beforeNodes.push(node.clone());
+    }
+
+    if (startPin.isBefore) {
+      const { node } = startPin;
+      afterNodes.unshift(node.clone());
+    }
+
+    return ret();
+  } else {
+    // console.log(beforeNodes, middleNodes, afterNodes);
+    if (startPin.isWithin) {
+      const { node, offset } = startPin;
+      const { textContent } = node;
+
+      console.log("split text....", textContent);
+      const leftTextNode = app.schema.text(textContent.slice(0, offset));
+      const rightTextNode = app.schema.text(textContent.slice(offset));
+      beforeNodes.push(leftTextNode!);
+      middleNodes.unshift(rightTextNode!);
+    }
+
+    if (startPin.isAfter) {
+      const { node } = startPin;
+      beforeNodes.push(node.clone());
+    }
+
+    if (startPin.isBefore) {
+      const { node } = startPin;
+      middleNodes.unshift(node.clone());
+    }
+
+    if (endPin.isWithin) {
+      const { node, offset } = endPin;
+      const { textContent } = node;
+
+      console.log("split text....", textContent);
+      const leftTextNode = app.schema.text(textContent.slice(0, offset));
+      const rightTextNode = app.schema.text(textContent.slice(offset));
+      middleNodes.push(leftTextNode!);
+      afterNodes.unshift(rightTextNode!);
+    }
+
+    if (endPin.isAfter) {
+      const { node } = endPin;
+      middleNodes.push(node.clone());
+    }
+
+    if (endPin.isBefore) {
+      const { node } = endPin;
+      afterNodes.unshift(node.clone());
+    }
+
+    return ret();
   }
-
-  if (downPin.isAfter) {
-    const { node } = downPin;
-    beforeNodes.push(node.clone());
-  }
-
-  if (downPin.isBefore) {
-    const { node } = downPin;
-    afterNodes.unshift(node.clone());
-  }
-
-  return [BlockContent.create(beforeNodes), BlockContent.create(afterNodes)];
 }

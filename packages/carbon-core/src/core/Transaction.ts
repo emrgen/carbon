@@ -23,6 +23,8 @@ import { InsertNodes } from './actions/InsertNodes';
 import { ChangeName } from './actions/ChangeName';
 import { MoveAction } from './actions/MoveAction';
 import { RemoveNode } from './actions/RemoveNode';
+import { SetContent } from './actions/SetContent';
+import { NodeContent } from './NodeContent';
 
 export class TransactionError {
 	commandId: number;
@@ -114,6 +116,11 @@ export class Transaction {
 		this.add(SelectAction.create(this.selection, after, origin));
 		this.selections.push(after.clone());
 
+		return this;
+	}
+
+	setContent(id: NodeId, content: NodeContent, origin = this.origin): Transaction {
+		this.add(SetContent.create(id, content, origin));
 		return this;
 	}
 

@@ -3,11 +3,11 @@ import { each, last } from 'lodash';
 import { BSet, NodeIdSet } from './BSet';
 import { ActionOrigin } from './actions/types';
 import { DecorationStore } from './DecorationStore';
-import { SelectionEvent } from './EventContext';
 import { Node } from './Node';
 import { NodeId } from './NodeId';
 import { NodeStore } from './NodeStore';
 import { PinnedSelection } from './PinnedSelection';
+import { SelectionEvent } from './SelectionEvent';
 
 export class CarbonRuntimeState {
 	// pending

@@ -117,20 +117,38 @@ export class KeyboardPlugin extends AfterPlugin {
 		ctx.event.preventDefault();
 		const { app, node } = ctx;
 		const { selection, cmd } = app;
-		if (!selection.isCollapsed) {
-			cmd.transform.delete()?.dispatch();
-			return
-		}
+		const {start, end} = selection
+		let tr = app.tr;
 
 		// const splitBlock = node.closest(n => n.canSplit);
 		node.chain.forEach(n => console.log(n.name, n.groups));
 		const splitBlock = node.closest(n => n.groups.includes('nestable'));
-		if (!splitBlock) return
+
+		if (!selection.isCollapsed) {
+			// cmd.transform.delete()?.dispatch();
+		}
+
+		if (!splitBlock) {
+			// tr.dispatch();
+			console.log('no split block');
+			return
+		}
 		console.log('split section....');
 
 		cmd.transform
-			.split(splitBlock, selection.head, { rootType: app.schema.type('section') })
-			?.dispatch()
+			.split(splitBlock, selection, { rootType: app.schema.type('section') })?.dispatch();
+		// console.log('###',split);
+
+		// tr.dispatch()
+		// split?.dispatch()
+		// if (!selection.isCollapsed) {
+		// 	console.log('xxx');
+
+		// 	// cmd.transform.delete(selection)?.dispatch();
+		// }
+		// tr.dispatch()
+		// tr.merge(split!).dispatch()
+		// split?.dispatch()
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {

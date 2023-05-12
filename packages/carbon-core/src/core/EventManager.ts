@@ -1,5 +1,5 @@
 import { Carbon } from "./Carbon";
-import { EventContext } from "./EventContext";
+import { EventContext, EventOrigin } from "./EventContext";
 import { PluginManager } from "./PluginManager";
 import { isKeyHotkey, isHotkey } from 'is-hotkey';
 import { PinnedSelection } from "./PinnedSelection";
@@ -97,7 +97,7 @@ export class EventManager {
 			app: this.app,
 			node,
 			selection: selection,
-			origin: this.runtime.origin,
+			origin: EventOrigin.dom,
 		});
 
 		if (type == EventsIn.selectionchange || selectionChangedUsingKeys(event)) {

@@ -5,6 +5,7 @@ import { ActionOrigin } from './actions/types';
 import { PointedSelection } from './PointedSelection';
 import { SelectionEvent } from './SelectionEvent';
 import { EventsOut } from './Event';
+import { Optional } from '@emrgen/types';
 
 export class SelectionManager {
 	focused = false;
@@ -119,14 +120,13 @@ export class SelectionManager {
 
 	commitSelection() {
 		const { app } = this
-		const event = last(this.runtime.selectEvents);
+		const event = last(this.runtime.selectEvents) as Optional<SelectionEvent>;
 		if (!event) {
 			return
 		}
 		this.runtime.selectEvents = [];
 
 		const { after } = event;
-		console.log(after.toString())
 		const selection = after.pin(app.store)
 		if (!selection) {
 			console.error(p12('%c[error]'), 'color:red', 'commitSelection', 'failed to get next selection');
