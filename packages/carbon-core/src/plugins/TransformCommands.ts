@@ -35,6 +35,10 @@ export interface SplitOpts {
   pos?: "out" | "in";
 }
 
+export interface DeleteOpts {
+  merge?: boolean;
+}
+
 export type InsertPos = "before" | "after" | "prepend" | "append";
 
 declare module '@emrgen/carbon-core' {
@@ -43,7 +47,7 @@ declare module '@emrgen/carbon-core' {
       insert(node: Node, ref: Node, opts?: InsertPos): Optional<Transaction>;
       remove(node: Node): Optional<Transaction>;
       move(node: Node, to: Point): Optional<Transaction>;
-      delete(selection?: PinnedSelection, merge?: boolean): Optional<Transaction>;
+      delete(selection?: PinnedSelection): Optional<Transaction>;
       split(node: Node, selection?: PinnedSelection, opts?: SplitOpts): Optional<Transaction>;
       wrap(node: Node, name: NodeName): Optional<Transaction>;
       unwrap(node: Node): Optional<Transaction>;
@@ -205,21 +209,124 @@ export class TransformCommands extends BeforePlugin {
     if (selection.isCollapsed) {
       return this.splitAtPin(app, splitBlock, selection.start, opts);
     } else {
-      return this.deleteAndSplit(app, splitBlock, selection.start, opts);
+      return this.splitByRange(app, splitBlock, selection, opts);
     }
   }
 
-  private deleteAndSplit(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
-    const { tr, selection } = app;
+  private splitByRange(app: Carbon, splitBlock: Node, selection: PinnedSelection, opts: SplitOpts): Optional<Transaction> {
     const { start, end } = selection;
-    const isAtBlockStart = pin.isAtStartOfNode(splitBlock);
-    const isAtBlockEnd = pin.isAtEndOfNode(splitBlock);
-
-    if (isAtBlockStart) {
-      // console.log('isAtBlockStart');
+    const headNode = end.node;
+    const tailNode = start.node;
+    if (!headNode || !tailNode) {
+      console.log(p14("%c[failed]"), "color:red", "head/tail node not found");
+      return;
     }
 
-    return undefined
+    const [startBlock, endBlock] = blocksBelowCommonNode(tailNode, headNode);
+    if (!startBlock || !endBlock) {
+      console.log(p14("%c[failed]"), "color:red", "merge nodes are not found");
+      return;
+    }
+
+    const commonNode = startBlock === endBlock ? startBlock : startBlock?.parent;
+    if (!commonNode) {
+      console.log(p14("%c[failed]"), "color:red", "common node not found, should not reach!");
+      return;
+    }
+
+    console.log(commonNode);
+
+    if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+      const { tr } = app;
+      const point = Point.toWithin(commonNode.id);
+      // console.log(tr.editor.origin);
+
+      const json = {
+        name: splitBlock.name,
+        content: [
+          {
+            name: 'title',
+            content: [
+              {
+                name: 'text',
+                text: ''
+              }
+            ]
+          }
+        ]
+      }
+
+      const section = app.schema.nodeFromJSON(json);
+      if (!section) {
+        throw Error('failed to create section');
+      }
+
+      const at = Point.toBefore(splitBlock.id);
+      const focusPoint = Pin.toStartOf(splitBlock);
+      const after = PinnedSelection.fromPin(focusPoint!);
+
+      console.log(after.toString());
+
+      tr
+        .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
+        .insert(at, section!)
+        .select(after);
+
+      return tr;
+    }
+
+    const deleteGroup = this.selectionInfo(app, selection);
+
+    // * startBlock !== endBlock
+    if (!startBlock.eq(endBlock)) {
+      return this.splitByRangeAcrossBlock(app, splitBlock, start, end, startBlock, endBlock, deleteGroup);
+    }
+
+    // * startBlock === endBlock
+    if (startBlock.eq(endBlock)) {
+      return this.splitByRangeWithinBlock(app, splitBlock, start, end, startBlock, endBlock, deleteGroup);
+    }
+
+    return null
+  }
+
+  private splitByRangeWithinBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
+    const { tr } = app;
+
+    const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
+
+    const json = {
+      name: splitBlock.name,
+      content: [
+        {
+          name: 'title',
+          content: leftContent.children.map(c => c.toJSON())
+        }
+      ]
+    }
+
+    const section = app.schema.nodeFromJSON(json);
+    if (!section) {
+      throw Error('failed to create section');
+    }
+
+    const at = Point.toBefore(splitBlock.id);
+    const focusPoint = Pin.toStartOf(startBlock!);
+    const after = PinnedSelection.fromPin(focusPoint!);
+
+    app.tr
+      .setContent(startBlock.id, rightContent)
+      .insert(at, section!)
+      .select(after)
+      .dispatch();
+
+    return null
+  }
+
+  private splitByRangeAcrossBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
+    const { tr } = app;
+
+    return null
   }
 
   private splitAtPin(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
@@ -389,11 +496,13 @@ export class TransformCommands extends BeforePlugin {
   // 2. tail/head block: immediate children of commonNode and parent of tail/head node
   // 3. tail/head node.
   // delete nodes within selection
-  delete(app: Carbon, selection: PinnedSelection = app.selection, merge = false): Optional<Transaction> {
+  delete(app: Carbon, selection: PinnedSelection = app.selection): Optional<Transaction> {
     console.log(selection.toString());
     const { start, end } = selection;
+
     const headNode = end.node;
     const tailNode = start.node;
+
     if (!headNode || !tailNode) {
       console.log(p14("%c[failed]"), "color:red", "head/tail node not found");
       return;
@@ -486,7 +595,6 @@ export class TransformCommands extends BeforePlugin {
 
     const insertCommands: Action[] = [];
     const moveCommands: Action[] = [];
-
 
     // merge node as if startNode and endNode are at same depth
     const handleUptoSameDepth = () => {

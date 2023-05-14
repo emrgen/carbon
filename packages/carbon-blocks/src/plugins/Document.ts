@@ -43,9 +43,9 @@ export class DocPlugin extends CarbonPlugin {
 
 					// const tr = app.cmd.transform.delete()!;
 
-					const [leftContent, middleContent, rightContent] = splitTextBlock(start, end, app);
+					const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
 
-					console.log(leftContent, middleContent, rightContent);
+					console.log(leftContent, rightContent);
 
 					const json = {
 						name: 'section',
@@ -71,8 +71,6 @@ export class DocPlugin extends CarbonPlugin {
 						.insert(at, section!)
 						.select(after)
 						.dispatch();
-
-					// console.log('split document title');
 				}
 			}
 		}
