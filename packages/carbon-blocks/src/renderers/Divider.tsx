@@ -1,8 +1,6 @@
 import {
   CarbonBlock,
   CarbonNodeContent,
-  Pin,
-  PinnedSelection,
   RendererProps,
   useCarbon,
   useSelectionHalo
@@ -26,9 +24,12 @@ export default function DividerComp(props: RendererProps) {
         onClick: handleClick,
       }}
     >
-      <div className="divider" contentEditable="false" suppressContentEditableWarning>
-        <span />
-      </div>
+      <div
+        className="divider"
+        contentEditable="false"
+        suppressContentEditableWarning
+      ></div>
+      <span />
       <CarbonNodeContent node={node} />
       {SelectionHalo}
     </CarbonBlock>

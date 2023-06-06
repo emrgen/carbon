@@ -1,4 +1,4 @@
-import { NodePlugin, NodeSpec, CarbonPlugin, EventHandler, skipKeyEvent } from '@emrgen/carbon-core';
+import { NodePlugin, NodeSpec, EventHandler, skipKeyEvent } from '@emrgen/carbon-core';
 
 export class Divider extends NodePlugin {
 

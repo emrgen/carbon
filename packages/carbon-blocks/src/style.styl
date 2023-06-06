@@ -1,4 +1,4 @@
-$selectionHaloColor = rgba(55, 53, 47, 0.16)
+$selectionHaloColor = #accef78d
 
 .carbon-app
 	font-family: Arial, Helvetica, sans-serif
@@ -45,7 +45,7 @@ $selectionHaloColor = rgba(55, 53, 47, 0.16)
 [data-name=h4]
 	padding: 1px 0
 	margin 1px 0
-	background pink
+	background rgba(168, 225, 255, 0.316)
 	> [data-type=children]
 		padding-left 30px
 	position relative
@@ -72,10 +72,11 @@ span {
 	cursor default
 	height: 17px
 	margin-bottom: 1px
+	caret-color: transparent;
 	.divider
 		position relative
 		top: 8px
-		border-bottom: 1px solid rgba(55, 53, 47, 0.16)
+		border-bottom: 1px solid rgba(55, 53, 47, 0.184)
 
 .carbon-selection-halo
 	position absolute
@@ -84,3 +85,4 @@ span {
 	top 0
 	left 0
 	background: $selectionHaloColor
+	border-radius: 2px

@@ -16,6 +16,7 @@ import { SelectionManager } from './SelectionManager';
 import { Transaction } from './Transaction';
 import { TransactionManager } from './TransactionManager';
 import { CarbonCommands } from "./types";
+import { NodeSelection } from './NodeSelection';
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -58,6 +59,10 @@ export class Carbon extends EventEmitter {
 
 	get selection(): PinnedSelection {
 		return this.state.selection;
+	}
+
+	get nodeSelection(): NodeSelection {
+		return this.state.nodeSelection;
 	}
 
 	get store() {

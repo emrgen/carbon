@@ -277,13 +277,13 @@ console.log('xxxxxxx');
 
 	up(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
-		const { state, store } = app;
-		const { selectedNodeIds } = state;
-		if (selectedNodeIds.size === 0) return
+		const { nodeSelection } = app;
+		if (nodeSelection.isEmpty) return
+
 		const textBlock = node?.prev(n => n.isFocusable);
 		if (!textBlock) return
 
-		// focus next text block
+		// focus prev text block
 		{
 			ctx.event.preventDefault();
 			const sel = PinnedSelection.fromPin(Pin.toEndOf(textBlock)!);
@@ -294,9 +294,9 @@ console.log('xxxxxxx');
 
 	down(ctx: EventContext<KeyboardEvent>) {
 		const {app, node} = ctx;
-		const {state, store} = app;
-		const {selectedNodeIds} = state;
-		if (selectedNodeIds.size === 0) return
+		const { nodeSelection } = app;
+		if (nodeSelection.isEmpty) return
+
 		const textBlock = node?.next(n => n.isFocusable);
 		if (!textBlock) return
 

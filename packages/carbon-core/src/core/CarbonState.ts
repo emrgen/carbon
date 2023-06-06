@@ -8,6 +8,7 @@ import { NodeId } from './NodeId';
 import { NodeStore } from './NodeStore';
 import { PinnedSelection } from './PinnedSelection';
 import { SelectionEvent } from './SelectionEvent';
+import { NodeSelection } from './NodeSelection';
 
 export class CarbonRuntimeState {
 	// pending
@@ -81,6 +82,10 @@ export class CarbonState {
 
 	get isNodeStateDirty() {
 		return this.runtime.selectedNodeIds.size || this.runtime.activatedNodeIds.size;
+	}
+
+	get nodeSelection() {
+		return new NodeSelection(this.store, this.selectedNodeIds);
 	}
 
 	static create(store: NodeStore, content: Node, selection: PinnedSelection) {
