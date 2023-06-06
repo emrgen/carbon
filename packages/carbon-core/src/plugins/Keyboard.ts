@@ -6,7 +6,7 @@ import { SelectionCommands } from "./SelectionCommands";
 import { IsolatingPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
-import { last } from "lodash";
+import { first, last } from "lodash";
 import { Node, Pin, PinnedSelection } from "../core";
 import { node } from "@emrgen/carbon-blocks";
 
@@ -48,12 +48,24 @@ export class KeyboardPlugin extends AfterPlugin {
 		return {
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
-				const { selection, cmd, state } = app;
+				const { selection, cmd, state, nodeSelection } = app;
 				const {selectedNodeIds} = state
 				event.preventDefault();
 
-				if (selectedNodeIds.size) {
-					const focusNode = node.prev(n => n.isFocusable);
+				// nodes selection is visible using halo
+				if (nodeSelection.size) {
+					const { nodes } = nodeSelection;
+					const firstNode = first(nodes)!;
+					if (firstNode.hasFocusable) {
+						const focusNode = firstNode.find(n => n.isFocusable, { direction: 'forward' })
+						const pin = Pin.toStartOf(focusNode!)
+						app.tr
+							.select(PinnedSelection.fromPin(pin!))
+							.selectNodes([])
+							.dispatch();
+						return
+					}
+					const focusNode = firstNode.prev(n => n.isFocusable);
 					const pin = Pin.toEndOf(focusNode!)
 					app.tr
 						.select(PinnedSelection.fromPin(pin!))
@@ -61,9 +73,6 @@ export class KeyboardPlugin extends AfterPlugin {
 						.dispatch();
 					return
 				}
-
-				console.log('xxxxxxxxx');
-				
 
 				if (!selection.isCollapsed) {
 					cmd.selection.collapseToTail()
@@ -77,12 +86,23 @@ export class KeyboardPlugin extends AfterPlugin {
 			right: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection, cmd, state } = app;
-				const { selectedNodeIds } = state;
+				const { selection, cmd, state, nodeSelection } = app;
 
-				if (selectedNodeIds.size) {
-					const focusNode = node.next(n => n.isFocusable);
-					const pin = Pin.toEndOf(focusNode!)
+				// nodes selection is visible using halo
+				if (nodeSelection.size) {
+					const lastNode = last(nodeSelection.nodes)!;
+					if (lastNode.hasFocusable) {
+						const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
+						const pin = Pin.toEndOf(focusNode!)
+						app.tr
+							.select(PinnedSelection.fromPin(pin!))
+							.selectNodes([])
+							.dispatch();
+						return
+					}
+
+					const focusNode = lastNode.next(n => n.isFocusable);
+					const pin = Pin.toStartOf(focusNode!)
 					app.tr
 						.select(PinnedSelection.fromPin(pin!))
 						.selectNodes([])
@@ -139,6 +159,9 @@ export class KeyboardPlugin extends AfterPlugin {
 				app.tr.select(after!).dispatch();
 			},
 
+			shiftUp: e => this.shiftUp(e),
+			shiftDown: e => this.shiftDown(e),
+
 			delete: (event) => this.delete(event),
 			shiftDelete: (event) => this.delete(event),
 
@@ -162,6 +185,42 @@ export class KeyboardPlugin extends AfterPlugin {
 			// 	tr.select(after).dispatch();
 			// }
 		}
+	}
+
+	shiftUp(ctx: EventContext<KeyboardEvent>) {
+		const { app, node } = ctx;
+		const { nodeSelection } = app;
+		console.log('xxxxx');
+		
+		if (nodeSelection.isEmpty) return
+
+		const {nodes} = nodeSelection;
+		const firstNode = nodes[0] as Node;
+		const block = prevContainerBlock(firstNode);
+		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
+		if (!block) return
+
+		ctx.event.preventDefault();
+		app.tr
+			.selectNodes([...nodes.map(n => n.id), block.id])
+			.dispatch();
+	}
+
+	shiftDown(ctx: EventContext<KeyboardEvent>) {
+		const { app, node } = ctx;
+		const { nodeSelection } = app;
+		if (nodeSelection.isEmpty) return
+
+		const { nodes } = nodeSelection;
+		const firstNode = last(nodes) as Node;
+		const block = firstNode?.next(n => n.isContainerBlock, { order: 'pre' });
+		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
+		if (!block) return
+
+		ctx.event.preventDefault();
+		app.tr
+			.selectNodes([...nodes.map(n => n.id), block.id])
+			.dispatch();
 	}
 
 	// handles enter event
@@ -303,6 +362,14 @@ console.log('xxxxxxx');
 		if (nodeSelection.isEmpty) return
 
 		ctx.event.preventDefault();
+
+		if (nodeSelection.size > 1) {
+			const { nodes } = nodeSelection
+			const lastNode = first(nodes);
+			app.tr.selectNodes([lastNode.id]).dispatch()
+			return
+		}
+
 		const block = prevContainerBlock(node)
 		if (!block || block.isRoot) return
 
@@ -313,8 +380,15 @@ console.log('xxxxxxx');
 		const {app, node} = ctx;
 		const { nodeSelection } = app;
 		if (nodeSelection.isEmpty) return
-
 		ctx.event.preventDefault();
+
+		if (nodeSelection.size > 1) {
+			const {nodes} = nodeSelection
+			const lastNode = last(nodes);
+			app.tr.selectNodes([lastNode.id]).dispatch()
+			return
+		}
+
 		const block = nextContainerBlock(node)
 		if (!block) return
 		console.log(block);

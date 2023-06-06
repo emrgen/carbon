@@ -5,6 +5,7 @@ import { Transaction } from "../Transaction";
 import { ActionResult, NULL_ACTION_RESULT } from "./Result";
 import { Action, ActionOrigin, ActionType } from "./types";
 import { generateActionId } from "./utils";
+import { NodeIdSet } from '../BSet';
 
 
 export class SelectNodesAction implements Action {
@@ -23,7 +24,9 @@ export class SelectNodesAction implements Action {
     this.type = ActionType.selectNodes;
     this.id = generateActionId();
     this.origin = origin;
-    this.nodeIds = nodeIds;
+    const ids = new NodeIdSet();
+    nodeIds.forEach(id => ids.add(id));
+    this.nodeIds = ids.toArray();
   }
 
   execute(tr: Transaction): ActionResult {
