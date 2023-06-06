@@ -6,5 +6,6 @@ export * from './renderer';
 export * from './core/types'
 
 export * from './utils/split'
+export * from './utils/key'
 
 

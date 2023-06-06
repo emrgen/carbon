@@ -115,6 +115,11 @@ export class Node extends EventEmitter {
 		return this.type.canSplit
 	}
 
+	// nodes that are not allowed to merge with any other node
+	get canMerge() {
+		return !this.type.isIsolating && !this.isAtom;
+	}
+
 	get isDirty() {
 		return this.renderVersion < this.updateVersion
 	}
@@ -124,11 +129,11 @@ export class Node extends EventEmitter {
 	}
 
 	get isActive() {
-		return this.data.state?.active;
+		return this.data.state.active;
 	}
 
 	get isSelected() {
-		return this.data.state?.selected;
+		return this.data.state.selected;
 	}
 
 	get size(): number {
@@ -617,6 +622,7 @@ export class Node extends EventEmitter {
 		this.markUpdated();
 	}
 
+	
 	// @mutates
 	updateData(data: Record<string, any>) {
 		this.data.update(data);

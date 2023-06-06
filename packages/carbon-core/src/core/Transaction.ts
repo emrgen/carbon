@@ -25,6 +25,7 @@ import { MoveAction } from './actions/MoveAction';
 import { RemoveNode } from './actions/RemoveNode';
 import { SetContent } from './actions/SetContent';
 import { NodeContent } from './NodeContent';
+import { SelectNodesAction } from './actions/SelectNodes';
 
 export class TransactionError {
 	commandId: number;
@@ -105,6 +106,10 @@ export class Transaction {
 		return sel
 	}
 
+	get cmd() {
+		return this.app.cmd;
+	}
+
 	onSelect(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		this.sm.onSelect(before, after, origin);
 	}
@@ -169,7 +174,7 @@ export class Transaction {
 		if (this.state.activatedNodeIds.size) {
 			// this.add(ActivateNodeCommand.create([], origin));
 		}
-		// this.add(SelectNodesCommand.create(ids, origin));
+		this.add(SelectNodesAction.create(ids, origin));
 		return this
 	}
 

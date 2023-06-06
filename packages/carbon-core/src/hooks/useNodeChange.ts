@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCarbonChange } from "./useCarbonChange";
 import { NodeChangeType } from "../core/ChangeManager";
-import { Node } from 'core/Node';
+import { Node } from '../core/Node';
 
 interface UseTextChangeProps {
 	node: Node,
@@ -80,7 +80,7 @@ export const useNodeStateChange = (props: UseNodeChangeProps) => {
 		const onChange = (value: Node) => {
 			setIsActive(!!value.isActive);
 			setIsSelected(!!value.isSelected);
-			// console.log('state changed', node.id.toString(), !!value.data._state?.active, !!value.data._state?.selected);
+			console.log('state changed', node.id.toString(), !!value.data._state?.active, !!value.data._state?.selected);
 		};
 
 		change.subscribe(node.id, NodeChangeType.state, onChange);

@@ -10,7 +10,7 @@ import { Pin } from '../Pin';
 import { Fragment } from "../Fragment";
 import { Node } from '../Node';
 
-export class InsertText implements Action{
+export class InsertText implements Action {
 	id: number;
 	type: ActionType;
 

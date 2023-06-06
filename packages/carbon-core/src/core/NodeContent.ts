@@ -1,9 +1,7 @@
-import { Optional } from '@emrgen/types';
 import { findIndex, flatten } from 'lodash';
 
 import { Fragment } from './Fragment';
 import { Node } from './Node';
-import { Schema } from './Schema';
 
 export interface NodeContent {
 	size: number;
@@ -19,7 +17,7 @@ export interface NodeContent {
 	insertAfter(fragment: Fragment, node: Node): NodeContent;
 	remove(node: Node, start?: number, end?: number): boolean;
 
-	updateText(text: string);
+	updateText(text: string): void;
 
 	view(container: Node[]): NodeContent;
 	clone(): NodeContent;

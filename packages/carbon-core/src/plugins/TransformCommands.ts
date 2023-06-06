@@ -9,7 +9,7 @@ import { RemoveText } from "../core/actions/RemoveText";
 import { Action, ActionOrigin } from "../core/actions/types";
 import { NodeIdSet } from "../core/BSet";
 import { Carbon } from "../core/Carbon";
-import { SelectionInfo } from "../core/DeleteGroup";
+import { SelectionPatch } from "../core/DeleteGroup";
 import { Fragment } from "../core/Fragment";
 import { p14 } from "../core/Logger";
 import { Node } from "../core/Node";
@@ -23,7 +23,7 @@ import { PointedSelection } from "../core/PointedSelection";
 import { Range } from "../core/Range";
 import { Transaction } from "../core/Transaction";
 import { NodeName } from "../core/types";
-import { takeUntil } from "../utils/array";
+import { takeBefore, takeUntil } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { nodeLocation } from "../utils/location";
 import { SetContent } from "../core/actions/SetContent";
@@ -134,6 +134,7 @@ export class TransformCommands extends BeforePlugin {
   }
 
   move(app: Carbon, node: Node, to: Point): Optional<Transaction> {
+
     const { tr, selection } = app;
     const from = nodeLocation(node);
     tr
@@ -290,7 +291,7 @@ export class TransformCommands extends BeforePlugin {
     return null
   }
 
-  private splitByRangeWithinBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
+  private splitByRangeWithinBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const { tr } = app;
 
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
@@ -323,10 +324,16 @@ export class TransformCommands extends BeforePlugin {
     return null
   }
 
-  private splitByRangeAcrossBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
+  private splitByRangeAcrossBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const { tr } = app;
+    console.log(deleteGroup.ids.toArray());
+    console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
 
-    return null
+    // startBlock and endBlock are at same level
+
+    // tr.add(this.deleteGroupCommands(app, deleteGroup));
+
+    return tr;
   }
 
   private splitAtPin(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
@@ -520,7 +527,7 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    console.log(commonNode);
+    // console.log(commonNode);
 
     if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
       const { tr } = app;
@@ -549,7 +556,7 @@ export class TransformCommands extends BeforePlugin {
     return null;
   }
 
-  private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
+  private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     let point: Optional<Point>;
     // TODO: we are free to decide how we want to put the final cursor position
     if (Pin.toStartOf(startBlock)?.eq(start)) {
@@ -573,7 +580,7 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  private deleteAcrossBlock(app: Carbon, start: Pin, end: Pin, tailBlock: Node, headBlock: Node, deleteGroup: SelectionInfo): Optional<Transaction> {
+  private deleteAcrossBlock(app: Carbon, start: Pin, end: Pin, tailBlock: Node, headBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const { tr } = app;
     let startBlock: Optional<Node> = start.node;
     let endBlock: Optional<Node> = end.node;
@@ -602,7 +609,7 @@ export class TransformCommands extends BeforePlugin {
       let mergeDepth = commonDepth;
       console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
       console.log('merge depth', mergeDepth);
-      
+
       // move endParent children to startParent
       while (startBlock && endBlock && --mergeDepth) {
         // destination point for move
@@ -614,6 +621,7 @@ export class TransformCommands extends BeforePlugin {
           to = startBlock?.size ? Point.toAfter(startBlock?.lastChild?.id!) : Point.toWithin(startBlock.id);
         }
 
+        // must be equal, otherwise we can not merge the nodes
         if (startBlock?.isTextBlock && endBlock?.isTextBlock) {
           if (!end.isAtEnd) {
             const downPin = end.down();
@@ -644,7 +652,7 @@ export class TransformCommands extends BeforePlugin {
       }
 
       return lastInsertedNodeId
-    }
+    } // handleUptoSameDepth
 
     const after = PinnedSelection.fromPin(start)
 
@@ -719,7 +727,7 @@ export class TransformCommands extends BeforePlugin {
     return null
   }
 
-  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionInfo): Action[] {
+  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch): Action[] {
     const actions: Action[] = [];
 
     each(deleteGroup.ids.toArray(), id => {
@@ -790,8 +798,8 @@ export class TransformCommands extends BeforePlugin {
 
   // find node ids to delete for provided selection
   // think of the case what needs to happen when delete is pressed with some selection
-  private selectionInfo(app: Carbon, selection: PinnedSelection): SelectionInfo {
-    const selectedGroup = new SelectionInfo();
+  private selectionInfo(app: Carbon, selection: PinnedSelection): SelectionPatch {
+    const selectedGroup = new SelectionPatch();
     // console.log('###', selection.toJSON());
     const { start, end } = selection;
     // console.log(selection.isCollapsed, selection.isForward, start.node.id.key);
@@ -841,7 +849,11 @@ export class TransformCommands extends BeforePlugin {
     };
 
     if (startBlock.eq(endBlock)) {
-      selectedGroup.addRange(Range.create(start, end));
+      if (startBlock.isTextBlock) {
+        selectedGroup.addRange(Range.create(start, end));
+      } else if (startBlock.type.isAtom) {
+        collectId(startBlock.id);
+      }
       return collectedInfo();
     }
 
@@ -851,13 +863,19 @@ export class TransformCommands extends BeforePlugin {
     // } else {
     // }
 
-    if (!startInfo.isEmpty) {
+    // delete text range from startNode
+    if (startBlock.isTextBlock && !startInfo.isEmpty) {
       selectedGroup.addRange(Range.create(start.clone(), Pin.create(start.node, start.node.focusSize)));
+    } else if (startBlock.type.isAtom) {
+      collectId(startBlock.id);
     }
     startRemoveBlock = startBlock.next();
 
-    if (!endInfo.isEmpty) {
+    // delete text range from endNode
+    if (endBlock.isTextBlock && !endInfo.isEmpty) {
       selectedGroup.addRange(Range.create(Pin.create(end.node, 0), end.clone()));
+    } else if (endBlock.type.isAtom) {
+      collectId(endBlock.id);
     }
     endRemoveBlock = endBlock.prev();
 
@@ -920,7 +938,7 @@ export class TransformCommands extends BeforePlugin {
     // ----------------------
 
     // collect nodes between `prev` and `next` node
-    takeUntil(prev?.nextSiblings ?? [], n => {
+    takeBefore(prev?.nextSiblings ?? [], n => {
       return n.eq(next);
     }).forEach(n => {
       collectId(n.id);
@@ -945,6 +963,10 @@ export class TransformCommands extends BeforePlugin {
       // console.log("prevBlock.prev", n.toString());
       return false
     }, { direction: "backward", order: "post" });
+
+    // console.log(selectedGroup.ids.map(n => n.toString()), endBlock.id.toString());
+
+
     // console.log('deleteIds', selectedIds.map(n => n.toString()));
 
     // console.log(">>> next.find", next?.id.toString());
@@ -967,7 +989,7 @@ export class TransformCommands extends BeforePlugin {
       }
 
       return false
-    }, { direction: "forward", order: "pre" });
+    }, { direction: "forward", order: "post" });
 
     return collectedInfo();
   }

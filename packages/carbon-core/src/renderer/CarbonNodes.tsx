@@ -3,7 +3,7 @@ import {
   forwardRef,
   memo,
   useEffect,
-  useImperativeHandle, useRef
+  useImperativeHandle, useMemo, useRef, useState
 } from "react";
 import { RendererProps } from "../core/Renderer";
 import { useCarbon } from '../hooks/useCarbon';
@@ -51,11 +51,11 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     };
   }, [editor, node]);
 
+
   return (
     <Element
       ref={ref}
       data-name={name}
-      data-node-key={key + `(${node.renderVersion}/${node.updateVersion})`}
       data-version={version}
       // data-size={node.size}
       {...attrs.html}
@@ -66,7 +66,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   );
 }
 
-export const CarbonElement = memo(forwardRef(InnerElement));
+export const CarbonElement = (forwardRef(InnerElement));
 
 export const RawText = memo(function RT(props: RendererProps) {
   const { node } = props
@@ -76,11 +76,21 @@ export const RawText = memo(function RT(props: RendererProps) {
 
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
-  const { node } = props;
+  const { node, version } = useNodeChange(props);
+  // useEffect(() => {
+  //   console.log(
+  //     "InnerCarbonText",
+  //     node.parent?.version,
+  //     node.version,
+  //     node.textContent
+  //   );
+  // }, [node, version]);
+
+  // console.log('InnerCarbonText', node.parent?.version, node.version,node.textContent);
 
   return (
     <CarbonElement node={node} tag="span">
-      {node.isEmpty ? <CarbonEmpty node={node}/> : node.textContent}
+      <>{node.isEmpty ? <CarbonEmpty node={node}/> : node.textContent}</>
     </CarbonElement>
   );
 };

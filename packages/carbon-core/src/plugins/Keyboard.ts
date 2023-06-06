@@ -5,6 +5,9 @@ import { EventContext } from "../core/EventContext";
 import { SelectionCommands } from "./SelectionCommands";
 import { IsolatingPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
+import { skipKeyEvent } from "../utils/key";
+import { last } from "lodash";
+import { Node, Pin, PinnedSelection } from "../core";
 
 // handles general keyboard events
 // node specific cases are handles in node specific plugin
@@ -43,9 +46,23 @@ export class KeyboardPlugin extends AfterPlugin {
 	keydown(): EventHandlerMap {
 		return {
 			left: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event } = ctx;
-				const { selection, cmd } = app;
+				const { app, event, node } = ctx;
+				const { selection, cmd, state } = app;
+				const {selectedNodeIds} = state
 				event.preventDefault();
+
+				if (selectedNodeIds.size) {
+					const focusNode = node.prev(n => n.isFocusable);
+					const pin = Pin.toEndOf(focusNode!)
+					app.tr
+						.select(PinnedSelection.fromPin(pin!))
+						.selectNodes([])
+						.dispatch();
+					return
+				}
+
+				console.log('xxxxxxxxx');
+				
 
 				if (!selection.isCollapsed) {
 					cmd.selection.collapseToTail()
@@ -57,9 +74,20 @@ export class KeyboardPlugin extends AfterPlugin {
 			},
 
 			right: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event } = ctx;
+				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection, cmd } = app;
+				const { selection, cmd, state } = app;
+				const { selectedNodeIds } = state;
+
+				if (selectedNodeIds.size) {
+					const focusNode = node.next(n => n.isFocusable);
+					const pin = Pin.toEndOf(focusNode!)
+					app.tr
+						.select(PinnedSelection.fromPin(pin!))
+						.selectNodes([])
+						.dispatch();
+					return
+				}
 
 				if (!selection.isCollapsed) {
 					cmd.selection.collapseToHead()
@@ -94,9 +122,13 @@ export class KeyboardPlugin extends AfterPlugin {
 
 			backspace: e => this.backspace(e),
 			shiftBackspace: e => this.backspace(e),
+			ctrlBackspace: skipKeyEvent,
+			cmdBackspace: skipKeyEvent,
 
 			'shift+enter': e => this.enter(e),
 			enter: e => this.enter(e),
+			up: e => this.up(e),
+			down : e => this.down(e),
 
 			// 'cmd+a': (event: EditorEvent<KeyboardEvent>) => {
 			// 	event.preventDomDefault();
@@ -155,6 +187,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		ctx.preventDefault();
 		ctx.event.preventDefault();
 		ctx.event.stopPropagation();
+console.log('xxxxxxx');
 
 		const { event } = ctx;
 		const { app, node } = ctx;
@@ -163,7 +196,9 @@ export class KeyboardPlugin extends AfterPlugin {
 		const { isCollapsed, head } = selection;
 		console.log('xxx');
 		if (!isCollapsed) {
-			// app.cmd.transform.delete()?.dispatch()
+			console.log('pppp');
+			
+			app.cmd.transform.delete()?.dispatch()
 			return
 		}
 
@@ -190,9 +225,11 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		const { event } = ctx;
 		const { app, node } = ctx;
-		const { selection } = app;
+		const { selection, state } = app;
+		const {selectedNodeIds} = state;
+
 		const { isCollapsed, head } = selection;
-		if (!isCollapsed) {
+		if (!isCollapsed || selectedNodeIds.size > 0) {
 			app.cmd.transform.delete(app.selection)?.dispatch()
 			return
 		}
@@ -236,5 +273,39 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		// 	console.log('Keyboard.backspace',deleteSel.toString());
 		app.cmd.transform.delete(deleteSel)?.dispatch()
+	}
+
+	up(ctx: EventContext<KeyboardEvent>) {
+		const { app, node } = ctx;
+		const { state, store } = app;
+		const { selectedNodeIds } = state;
+		if (selectedNodeIds.size === 0) return
+		const textBlock = node?.prev(n => n.isFocusable);
+		if (!textBlock) return
+
+		// focus next text block
+		{
+			ctx.event.preventDefault();
+			const sel = PinnedSelection.fromPin(Pin.toEndOf(textBlock)!);
+			const tr = app.tr.select(sel);
+			tr.dispatch();
+		}
+	}
+
+	down(ctx: EventContext<KeyboardEvent>) {
+		const {app, node} = ctx;
+		const {state, store} = app;
+		const {selectedNodeIds} = state;
+		if (selectedNodeIds.size === 0) return
+		const textBlock = node?.next(n => n.isFocusable);
+		if (!textBlock) return
+
+		// focus next text block
+		{
+			ctx.event.preventDefault();
+			const sel = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
+			const tr = app.tr.select(sel);
+			tr.dispatch();
+		}
 	}
 }

@@ -8,10 +8,13 @@ import { Header } from './plugins/Header';
 
 import './style.styl';
 import { ListKeyboardPlugin } from './plugins/ListKeyboard';
+import DividerComp from './renderers/Divider';
+import { Divider } from './plugins/Divider';
 
 export const blockPresets: Extension = {
 	plugins: [
 		new Section(),
+		new Divider(),
 		new Header(),
 		new DocPlugin(),
 		new DocPlugin(),
@@ -26,5 +29,6 @@ export const blockPresets: Extension = {
 		Renderer.create('section', NestableComp),
 		Renderer.create('title', CarbonNode),
 		Renderer.create('text', CarbonText),
+		Renderer.create('divider', DividerComp),
 	]
 }

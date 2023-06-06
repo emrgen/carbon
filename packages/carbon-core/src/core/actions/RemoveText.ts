@@ -24,8 +24,8 @@ export class RemoveText implements Action{
 
 	execute(tr: Transaction): ActionResult {
 		const { at, node } = this;
-		const {app} = tr;
-		const pin = Pin.fromPoint(at, app.store)
+		const { app } = tr;
+		const pin = Pin.fromPoint(at, app.store);
 		if (!pin) {
 			return ActionResult.withError('failed to get delete pin')
 		}
@@ -34,12 +34,14 @@ export class RemoveText implements Action{
 
 		console.log('REMOVE NODE', at.toString(), target.id.toString(), target.textContent, offset, node.textContent);
 
-		const {textContent} = target;
+		const { textContent } = target;
 		const updatedTextContent = textContent.slice(0, offset) + textContent.slice(offset + node.textContent.length)
 		target.updateText(updatedTextContent);
 		tr.updated(target);
 		tr.updated(target.parent!);
 		console.log('removing text...', offset, pin.offset);
+		console.log('updated text', target.version, textContent, updatedTextContent, target);
+
 
 		return ActionResult.withValue('done')
 	}

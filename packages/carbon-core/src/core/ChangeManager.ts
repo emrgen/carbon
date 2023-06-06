@@ -91,6 +91,9 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		this.state.runtime.selectedNodeIds.clear();
 		this.state.runtime.activatedNodeIds.clear();
 
+		console.log(dirtyNodes.map(n => n.data));
+
+
 		each(dirtyNodes, n => this.publish(NodeChangeType.state, n));
 	}
 

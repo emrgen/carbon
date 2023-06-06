@@ -1,13 +1,20 @@
 import { NodeIdSet } from "./BSet";
 import { Range } from './Range';
 import { NodeId } from './NodeId';
+import { CarbonState } from "./CarbonState";
 
-export class SelectionInfo {
+export class SelectionPatch {
 	ids: NodeIdSet = new NodeIdSet();
 	range: Range[] = [];
 
+	static fromState(state: CarbonState) {
+		let patch = new SelectionPatch();
+
+		return patch;
+	}
+
 	static default() {
-		return new SelectionInfo();
+		return new SelectionPatch();
 	}
 
 	addRange(range: Range) {

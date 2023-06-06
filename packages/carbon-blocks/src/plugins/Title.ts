@@ -48,7 +48,7 @@ export class TitlePlugin extends NodePlugin {
 				// ctx.event.preventDefault();
 				const { app, event, node } = ctx;
 				const { selection, schema, cmd } = app;
-				const { head } = selection;
+				const { head, start } = selection;
 				// @ts-ignore
 				const { data } = event;
 				const textNode = schema.text(data);
@@ -56,21 +56,25 @@ export class TitlePlugin extends NodePlugin {
 					console.error('failed to create text node');
 					return
 				}
-				const pin = Pin.future(head.node, head.offset + 1);
+
+				//
+				const pin = Pin.future(start.node, start.offset + 1);
 				const after = PinnedSelection.fromPin(pin);
 
 				if (!selection.isCollapsed) {
 					ctx.event.preventDefault();
 
-					const tr = cmd.transform.delete();
-					tr?.insertText(head.point, textNode!);
+					const tr = cmd.transform.delete()?.pop();
+					// TODO: if the selection is not valid after the delete don't insert
+					tr?.insertText(start.point, textNode!);
 					tr?.select(after);
 					tr?.dispatch();
 					return
 				}
 
 				if (selection.isCollapsed) {
-					const native = !ctx.node.isEmpty;
+					// TODO: handle native input to avoid text flickering on input
+					const native = false//!ctx.node.isEmpty;
 					if (!native) {
 						ctx.event.preventDefault();
 					}
@@ -84,15 +88,15 @@ export class TitlePlugin extends NodePlugin {
 
 				}
 			},
+			input(ctx: EventContext<InputEvent>) {
+				console.log('input', ctx.event);
+			},
 			keyDown: (ctx) => {
 				// ctx.event.preventDefault()
 			},
 			keyUp: (ctx) => {
 				ctx.event.preventDefault()
 			},
-			input: (event) => {
-				// console.log('onInput', event);
-			}
 		}
 	}
 

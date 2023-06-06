@@ -7,6 +7,7 @@ import { Node } from "./Node";
 import { ActionOrigin } from "./actions/types";
 import { EventsIn } from "./Event";
 import { p12, p14, pad } from "./Logger";
+import { last } from "lodash";
 
 const selectionKeys: string[] = [
 	'left',
@@ -62,6 +63,25 @@ export class EventManager {
 			return
 		}
 
+
+		if (type !== EventsIn.selectionchange && app.state.selectedNodeIds.size > 0) {
+			console.log('selected nodes', app.state.selectedNodeIds);
+			const lastNode = last(app.state.selectedNodeIds.map(id => app.store.get(id))) as Node;
+			this.updateCommandOrigin(type, event);
+
+			// TODO: check if this can be optimized
+			const editorEvent = EventContext.create({
+				type,
+				event,
+				app: this.app,
+				node: lastNode,
+				selection: PinnedSelection.default(app.content),
+				origin: EventOrigin.dom,
+			});
+			this.pm.onEvent(editorEvent);
+			return
+		}
+
 		// console.debug(p14('%c[debug]'),'color:magenta', 'Editor.currentSelection', this.selection.toString(),);
 		const selection = PinnedSelection.fromDom(app.store);
 		console.log(pad(`%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`, 100), 'background:#ffcc006e');
@@ -79,7 +99,7 @@ export class EventManager {
 		// new dom selection is same as exiting editor.selection
 		if (type === EventsIn.selectionchange && app.selection.eq(selection)) {
 			console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'selection change');
-			return
+			// return
 		}
 
 		// console.log('changing selection....', app.selection.toString(), selection.toString())
