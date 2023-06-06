@@ -8,6 +8,7 @@ import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
 import { last } from "lodash";
 import { Node, Pin, PinnedSelection } from "../core";
+import { node } from "@emrgen/carbon-blocks";
 
 // handles general keyboard events
 // node specific cases are handles in node specific plugin
@@ -99,19 +100,40 @@ export class KeyboardPlugin extends AfterPlugin {
 				app.tr.select(after!).dispatch()
 			},
 
-			'shift+right': (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event } = ctx;
+			shiftRight: (ctx: EventContext<KeyboardEvent>) => {
+				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection } = app;
+				const { selection, nodeSelection } = app;
+				if (!nodeSelection.isEmpty) {
+					if (nodeSelection.size > 1) {
+						console.log("TODO: select first top level node");
+						return
+					}
+
+					const block = node.find(n => !n.eq(node) && n.isContainerBlock)
+					if (!block) return
+					app.tr.selectNodes([block.id]).dispatch();
+					return
+				}
 
 				const after = selection.moveHead(1);
 				app.tr.select(after!).dispatch();
 			},
 
-			'shift+left': (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event } = ctx;
+			shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
+				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection } = app;
+				const { selection, nodeSelection } = app;
+				if (!nodeSelection.isEmpty) {
+					if (nodeSelection.size > 1) {
+						console.log("TODO: select first top level node");
+						return
+					}
+					const {parent} = node;
+					if (parent?.isRoot) return
+					app.tr.selectNodes([parent!.id]).dispatch();
+					return
+				}
 
 				const after = selection.moveHead(-1);
 				app.tr.select(after!).dispatch();
@@ -125,7 +147,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			ctrlBackspace: skipKeyEvent,
 			cmdBackspace: skipKeyEvent,
 
-			'shift+enter': e => this.enter(e),
+			shiftEnter: e => this.enter(e),
 			enter: e => this.enter(e),
 			up: e => this.up(e),
 			down : e => this.down(e),

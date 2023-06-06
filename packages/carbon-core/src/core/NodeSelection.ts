@@ -14,6 +14,10 @@ export class NodeSelection {
     return this.nodeIds.size === 0;
   }
 
+  get size() {
+    return this.nodeIds.size
+  }
+
   constructor(store: NodeStore, nodeIds: NodeIdSet,) {
     this.nodeIds = nodeIds;
     this.store = store;
