@@ -280,16 +280,11 @@ console.log('xxxxxxx');
 		const { nodeSelection } = app;
 		if (nodeSelection.isEmpty) return
 
-		const textBlock = node?.prev(n => n.isFocusable);
-		if (!textBlock) return
+		ctx.event.preventDefault();
+		const block = prevContainerBlock(node)
+		if (!block || block.isRoot) return
 
-		// focus prev text block
-		{
-			ctx.event.preventDefault();
-			const sel = PinnedSelection.fromPin(Pin.toEndOf(textBlock)!);
-			const tr = app.tr.select(sel);
-			tr.dispatch();
-		}
+		app.tr.selectNodes([block.id]).dispatch()
 	}
 
 	down(ctx: EventContext<KeyboardEvent>) {
@@ -297,15 +292,21 @@ console.log('xxxxxxx');
 		const { nodeSelection } = app;
 		if (nodeSelection.isEmpty) return
 
-		const textBlock = node?.next(n => n.isFocusable);
-		if (!textBlock) return
+		ctx.event.preventDefault();
+		const block = nextContainerBlock(node)
+		if (!block) return
+		console.log(block);
 
-		// focus next text block
-		{
-			ctx.event.preventDefault();
-			const sel = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
-			const tr = app.tr.select(sel);
-			tr.dispatch();
-		}
+		app.tr.selectNodes([block.id]).dispatch()
 	}
 }
+
+const prevContainerBlock = (node: Node)=> {
+	return node?.prev(n => n.isContainerBlock);
+}
+
+const nextContainerBlock = node => {
+	return node.find(n => !n.eq(node) && n.isContainerBlock, { order: 'pre' }) ?? node?.next(n => n.isContainerBlock, { order: 'pre' });
+}
+
+

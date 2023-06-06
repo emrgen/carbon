@@ -343,6 +343,10 @@ export class Node extends EventEmitter {
 		return this.children.length === 0;
 	}
 
+	get isContainerBlock(): boolean {
+		return this.type.isBlock && !this.type.isTextBlock
+	}
+
 	get isBlock(): boolean {
 		return this.type.isBlock
 	}
@@ -510,10 +514,12 @@ export class Node extends EventEmitter {
 		let found: Optional<Node> = null;
 		const collect: Predicate<Node> = node => !!(fn(node) && (found = node));
 		(opts.order == 'pre' ? sibling?.preorder(collect, opts) : sibling?.postorder(collect, opts))
+		const firstChild = this.index === 0;
 
 		return (
 			found
 			|| sibling?.prev(fn, opts, false)
+			|| (firstChild && this.parent && fn(this.parent) ? this.parent : null)
 			|| (gotoParent ? this.parent?.prev(fn, opts, gotoParent) : null)
 		);
 	}
@@ -528,9 +534,12 @@ export class Node extends EventEmitter {
 		const collect: Predicate<Node> = node => !!(fn(node) && (found = node));
 		(opts.order == 'pre' ? sibling?.preorder(collect, opts) : sibling?.postorder(collect, opts))
 
+		const lastChild = this.index + 1 === this.parent?.size;
+
 		return (
 			found
 			|| sibling?.next(fn, opts, false)
+			// || (lastChild && this.parent && fn(this.parent) ? this.parent : null)
 			|| (gotoParent ? this.parent?.next(fn, opts, gotoParent) : null)
 		);
 	}
