@@ -198,7 +198,7 @@ export class Node extends EventEmitter {
 		return ((this.isTextBlock && this.isEmpty) || !!this.type.isFocusable) && !this.isCollapseHidden;
 	}
 
-	// a node that avoids to have a focus moved in by arrow keys
+	// a node that does not avoids to have a focus moved in by arrow keys
 	get isSelectable() {
 		const nonSelectable = this.chain.find(n => !(n.type.isSelectable || n.isActive));
 		// console.log(nonSelectable);
@@ -508,6 +508,7 @@ export class Node extends EventEmitter {
 		return found;
 	}
 
+	// NOTE: the parent chain is not searched for the next node
 	prev(fn: Predicate<Node> = yes, opts: TraverseOptions = {}, gotoParent = true): Optional<Node> {
 		opts = merge({ order: 'post', direction: 'backward' }, opts)
 		const sibling = this.prevSibling;
@@ -519,11 +520,12 @@ export class Node extends EventEmitter {
 		return (
 			found
 			|| sibling?.prev(fn, opts, false)
-			|| (firstChild && this.parent && fn(this.parent) ? this.parent : null)
+			// || (firstChild && this.parent && fn(this.parent) ? this.parent : null)
 			|| (gotoParent ? this.parent?.prev(fn, opts, gotoParent) : null)
 		);
 	}
 
+	// NOTE: the parent chain is not searched for the next node
 	// check if next siblings' tree can fulfill predicate
 	// otherwise try parent next
 	next(fn: Predicate<Node> = yes, opts: TraverseOptions = {}, gotoParent = true): Optional<Node> {

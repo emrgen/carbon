@@ -1,5 +1,5 @@
 
-import { each, first, last, merge } from "lodash";
+import { each, first, last, merge, reverse } from "lodash";
 
 import { Optional } from "@emrgen/types";
 import { InsertNodes } from "../core/actions/InsertNodes";
@@ -28,6 +28,7 @@ import { blocksBelowCommonNode } from "../utils/findNodes";
 import { nodeLocation } from "../utils/location";
 import { SetContent } from "../core/actions/SetContent";
 import { splitTextBlock } from "../utils/split";
+import { NodeSelection } from "../core/NodeSelection";
 
 export interface SplitOpts {
   rootType?: NodeType;
@@ -48,6 +49,7 @@ declare module '@emrgen/carbon-core' {
       remove(node: Node): Optional<Transaction>;
       move(node: Node, to: Point): Optional<Transaction>;
       delete(selection?: PinnedSelection): Optional<Transaction>;
+      deleteNodes(nodeSelection?: NodeSelection): Optional<Transaction>;
       split(node: Node, selection?: PinnedSelection, opts?: SplitOpts): Optional<Transaction>;
       wrap(node: Node, name: NodeName): Optional<Transaction>;
       unwrap(node: Node): Optional<Transaction>;
@@ -71,6 +73,7 @@ export class TransformCommands extends BeforePlugin {
       remove: this.remove,
       move: this.move,
       delete: this.delete,
+      deleteNodes: this.deleteNodes,
       split: this.split,
       wrap: this.wrap,
       unwrap: this.unwrap,
@@ -497,6 +500,37 @@ export class TransformCommands extends BeforePlugin {
     return app.tr.remove(nodeLocation(node)!, node.id)
   }
 
+  // delete
+  deleteNodes(app: Carbon, nodeSelection: NodeSelection = app.nodeSelection): Optional<Transaction> {
+    const deleteActions: Action[] = [];
+    const { nodes } = nodeSelection;
+    reverse(nodes).forEach(node => {
+      deleteActions.push(RemoveNode.create(nodeLocation(node)!, node.id));
+    });
+    const firstNode = first(nodes)!;
+    const lastNode = last(nodes)!;
+    let selection: Optional<PinnedSelection> = undefined;
+
+    const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
+    if (focusNode) {
+      selection = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+    }
+
+    if (!selection) {
+      const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
+      if (focusNode) {
+        selection = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+      }
+    }
+
+    const tr = app.tr
+      .add(deleteActions)
+    if (selection) {
+      tr.select(selection);
+    }
+    return tr;
+  }
+
   // ref: https://www.notion.so/fastype-6858ec35e5e04e919b9dc5b3a37f6c85
   // the delete logic works based on the following entities
   // 1. commonNode
@@ -628,7 +662,7 @@ export class TransformCommands extends BeforePlugin {
             if (!downPin) {
               throw new Error("Failed to get down pin");
             }
-            const textContent= downPin.node.textContent.slice(downPin.offset);
+            const textContent = downPin.node.textContent.slice(downPin.offset);
             const textNode = app.schema.text(textContent)!;
             const siblings = downPin.node.nextSiblings.map(n => n.clone());
             insertCommands.push(...this.insertNodeCommands(start.point, [textNode, ...siblings]))
@@ -932,7 +966,7 @@ export class TransformCommands extends BeforePlugin {
       return collectedInfo();
     }
 
-    
+
     // ----------------------
     // THIS IS THE MAIN LOGIC
     // ----------------------

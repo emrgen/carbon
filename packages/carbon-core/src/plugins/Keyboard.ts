@@ -6,9 +6,13 @@ import { SelectionCommands } from "./SelectionCommands";
 import { IsolatingPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
-import { first, last } from "lodash";
+import { first, last, reverse } from "lodash";
 import { Node, Pin, PinnedSelection } from "../core";
 import { node } from "@emrgen/carbon-blocks";
+import { Action } from "../core/actions/types";
+import { RemoveNode } from "../core/actions/RemoveNode";
+import { nodeLocation } from "../utils/location";
+import { Optional } from '@emrgen/types';
 
 // handles general keyboard events
 // node specific cases are handles in node specific plugin
@@ -251,7 +255,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			const {nodes} = nodeSelection;
 			console.log(nodes.map(n => n.id.toString()));
 			
-			nodes.some(n => {
+			const done = nodes.some(n => {
 				const textBlock = n.find(n => n.isTextBlock);
 
 				if (textBlock) {
@@ -263,6 +267,10 @@ export class KeyboardPlugin extends AfterPlugin {
 					return true
 				}
 			})
+
+			if (!done) {
+				tr.selectNodes([]).dispatch();
+			}
 
 			return
 		}
@@ -302,18 +310,25 @@ export class KeyboardPlugin extends AfterPlugin {
 		ctx.preventDefault();
 		ctx.event.preventDefault();
 		ctx.event.stopPropagation();
-console.log('xxxxxxx');
+
+		console.log('xxxxxxx');
 
 		const { event } = ctx;
 		const { app, node } = ctx;
-		const { selection } = app;
+		const { selection, cmd, nodeSelection } = app;
+
+		// delete node selection if any
+		if (!nodeSelection.isEmpty) {
+			cmd.transform.deleteNodes(nodeSelection)?.dispatch();
+			return
+		}
 
 		const { isCollapsed, head } = selection;
 		console.log('xxx');
 		if (!isCollapsed) {
 			console.log('pppp');
-			
-			app.cmd.transform.delete()?.dispatch()
+
+			cmd.transform.delete()?.dispatch()
 			return
 		}
 
@@ -330,7 +345,7 @@ console.log('xxxxxxx');
 
 		event.stopPropagation()
 		console.log('Keyboard.backspace', selection.moveStart(1)?.toString());
-		// editor.cmd.transform.delete(selection.moveStart(1)!)?.dispatch()
+		cmd.transform.delete(selection.moveStart(1)!)?.dispatch()
 	}
 
 	backspace(ctx: EventContext<KeyboardEvent>) {
@@ -349,15 +364,15 @@ console.log('xxxxxxx');
 			return
 		}
 
-		// 	if (head.isAtStartOfNode(node)) {
-		// 		const prevNode = node.prev(n => {
-		// 			return !n.isSelectable || n.isFocusable
-		// 		})
-		// 		// console.log(prevNode?.name, prevNode?.isSelectable);
-		// 		if (prevNode && !prevNode?.isSelectable) {
-		// 			return
-		// 		}
+		// if (head.isAtStartOfNode(node)) {
+		// 	const prevNode = node.prev(n => {
+		// 		return !n.isSelectable || n.isFocusable
+		// 	})
+		// 	// console.log(prevNode?.name, prevNode?.isSelectable);
+		// 	if (prevNode && !prevNode?.isSelectable) {
+		// 		return
 		// 	}
+		// }
 
 		// 	event.stopPropagation()
 		// 	if (node.isBlockAtom) {
@@ -374,8 +389,11 @@ console.log('xxxxxxx');
 		// 		return
 		// 	}
 
-		const deleteSel = selection.moveStart(-1);
+		const deleteSel = selection.moveStart(-2);
 		if (!deleteSel) return
+
+		console.log('xxx', selection.toString(), deleteSel.toString());
+		
 
 		// find lowest empty that can be deleted without violating the parent schema
 		// const list = node.closest(isListNode)
@@ -418,7 +436,7 @@ console.log('xxxxxxx');
 
 		if (nodeSelection.size > 1) {
 			const {nodes} = nodeSelection
-			const lastNode = last(nodes);
+			const lastNode = last(nodes) as Node;
 			app.tr.selectNodes([lastNode.id]).dispatch()
 			return
 		}
@@ -432,11 +450,26 @@ console.log('xxxxxxx');
 }
 
 const prevContainerBlock = (node: Node)=> {
-	return node?.prev(n => n.isContainerBlock);
+	const block = node.chain.find(n => n.isContainerBlock) as Node;
+	const { prevSibling } = block
+	if (prevSibling?.isContainerBlock) {
+		const childContainer = prevSibling.find(n => {
+			return !n.eq(prevSibling) && n.isContainerBlock}, { order: 'pre', direction: 'backward'
+		})
+
+		return childContainer ?? prevSibling;
+	}
+
+	if (block.parent?.isContainerBlock) {
+		return node.parent
+	}
+
+	return block?.prev(n => n.isContainerBlock);
 }
 
 const nextContainerBlock = node => {
-	return node.find(n => !n.eq(node) && n.isContainerBlock, { order: 'pre' }) ?? node?.next(n => n.isContainerBlock, { order: 'pre' });
+	const block = node.chain.find(n => n.isContainerBlock);
+	return block.find(n => !n.eq(block) && n.isContainerBlock, { order: 'pre' }) ?? block?.next(n => n.isContainerBlock, { order: 'pre' });
 }
 
 
