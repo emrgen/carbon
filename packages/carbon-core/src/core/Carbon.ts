@@ -109,6 +109,14 @@ export class Carbon extends EventEmitter {
 		return this.rm.component(name)
 	}
 
+	blur() {
+		this.sm.blur();
+	}
+
+	focus() {
+		this.sm.focus();
+	}
+
 	enable() {
 		this.enabled = true;
 	}

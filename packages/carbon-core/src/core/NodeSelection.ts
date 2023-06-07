@@ -7,7 +7,7 @@ export class NodeSelection {
   store: NodeStore
   nodeIds: NodeIdSet;
 
-  get nodes() {
+  get nodes(): Node[] {
     const nodes: any[] = this.nodeIds.map(id => {
       const node = this.store.get(id);
       return {

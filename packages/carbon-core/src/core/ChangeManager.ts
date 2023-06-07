@@ -93,7 +93,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 		console.log(dirtyNodes.map(n => n.data));
 
-
 		each(dirtyNodes, n => this.publish(NodeChangeType.state, n));
 	}
 

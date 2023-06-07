@@ -40,7 +40,6 @@ export class EventManager {
 	}
 
 	onEvent(type: EventsIn, event: Event) {
-
 		const { app } = this;
 		// without focus the editor does not process any event
 		if (!app.enabled) {

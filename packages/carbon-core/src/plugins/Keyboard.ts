@@ -46,6 +46,19 @@ export class KeyboardPlugin extends AfterPlugin {
 
 	keydown(): EventHandlerMap {
 		return {
+			esc: (ctx: EventContext<KeyboardEvent>) => {
+				const { app, event, node } = ctx;
+				const { selection, nodeSelection } = app
+				if (nodeSelection.size) {
+					app.tr.selectNodes([]).dispatch();
+					app.blur()
+					return
+				}
+
+				const block = node.chain.find(n => n.isContainerBlock);
+				if (!block) return
+				app.tr.selectNodes([block.id]).dispatch();
+			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				const { selection, cmd, state, nodeSelection } = app;
@@ -229,9 +242,30 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		ctx.event.preventDefault();
 		const { app, node } = ctx;
-		const { selection, cmd } = app;
+		const { selection, cmd, nodeSelection } = app;
 		const {start, end} = selection
 		let tr = app.tr;
+
+		if (!nodeSelection.isEmpty) {
+			console.log('node selection...');
+			const {nodes} = nodeSelection;
+			console.log(nodes.map(n => n.id.toString()));
+			
+			nodes.some(n => {
+				const textBlock = n.find(n => n.isTextBlock);
+
+				if (textBlock) {
+					const pin = Pin.toEndOf(textBlock)!
+					tr
+						.selectNodes([])
+						.select(PinnedSelection.fromPin(pin))
+						.dispatch();
+					return true
+				}
+			})
+
+			return
+		}
 
 		// const splitBlock = node.closest(n => n.canSplit);
 		node.chain.forEach(n => console.log(n.name, n.groups));
