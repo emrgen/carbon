@@ -29,7 +29,7 @@ export default function DividerComp(props: RendererProps) {
         contentEditable="false"
         suppressContentEditableWarning
       ></div>
-      <span />
+      {/* <span /> */}
       <CarbonNodeContent node={node} />
       {SelectionHalo}
     </CarbonBlock>

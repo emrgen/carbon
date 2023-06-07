@@ -35,13 +35,31 @@ export class PinnedSelection {
 		}
 		// console.log(anchorNode, anchorNode.isFocusable)
 
+		// NOTE: anchorNode is always valid
 		if (!anchorNode.hasFocusable && !anchorNode.isFocusable) {
 			console.warn(p14('%c[info]'), 'color:pink', 'anchorNode skips focus', anchorNode.name, focusNode.name);
+			return
 		}
 
+		// NOTE: keep the focusNode on valid focusable node
 		if (!focusNode.hasFocusable && !focusNode.isFocusable) {
-			console.warn(p14('%c[info]'), 'color:pink', 'focusNode skips focus', anchorNode.name, focusNode.name);
-			return
+			// if focusNode is not focusable, then find focusable node that is closest to anchorNode
+			if (focusNode.after(anchorNode)) {
+				focusNode = focusNode.prev(n => n.isFocusable);
+				if (focusNode) {
+					focusOffset = focusNode.size;
+				} else {
+					console.error('should not reach here');
+				}
+			} else {
+				focusNode = focusNode.next(n => n.isFocusable);
+				if (focusNode) {
+					focusOffset = 0
+				} else {
+					console.error('should not reach here');
+				}
+			}
+			// console.warn(p14('%c[info]'), 'color:pink', 'focusNode skips focus', anchorNode.name, focusNode.name);
 		}
 
 		// console.info(p14('%c[info]'), 'color:pink', p30('fromDom:beforeOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);

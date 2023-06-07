@@ -500,7 +500,7 @@ export class Node extends EventEmitter {
 		}
 	}
 
-	find(fn: Predicate<Node>, opts?: TraverseOptions): Optional<Node> {
+	find(fn: Predicate<Node>, opts?: Partial<TraverseOptions>): Optional<Node> {
 		let found: Optional<Node> = null;
 		opts = merge({ order: 'pre', direction: 'forward', skip: noop }, opts)
 		// eslint-disable-next-line no-return-assign

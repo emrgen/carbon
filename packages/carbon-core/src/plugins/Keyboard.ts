@@ -54,8 +54,8 @@ export class KeyboardPlugin extends AfterPlugin {
 				const { app, event, node } = ctx;
 				const { selection, nodeSelection } = app
 				if (nodeSelection.size) {
-					app.tr.selectNodes([]).dispatch();
-					app.blur()
+					// app.tr.selectNodes([]).dispatch();
+					// app.blur()
 					return
 				}
 
@@ -332,15 +332,15 @@ export class KeyboardPlugin extends AfterPlugin {
 			return
 		}
 
-		// if (head.isAtEndOfNode(node)) {
-		// 	const prevNode = node.next(n => {
-		// 		return !n.isSelectable || n.isFocusable
-		// 	})
-		// 	// console.log(prevNode?.name, prevNode?.isSelectable);
-		// 	if (prevNode && !prevNode?.isSelectable) {
-		// 		return
-		// 	}
-		// }
+		if (head.isAtEndOfNode(node)) {
+			const { start } = selection;
+			const textBlock = start.node.chain.find(n => n.isTextBlock)
+			const nextTextBlock = textBlock?.next(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
+			if (!nextTextBlock || !textBlock) return
+
+			cmd.transform.merge(textBlock, nextTextBlock)?.dispatch();
+			return
+		}
 
 
 		event.stopPropagation()
@@ -362,7 +362,6 @@ export class KeyboardPlugin extends AfterPlugin {
 		console.log('xxxxxxxxxxxx');
 		if (!nodeSelection.isEmpty) {
 			cmd.transform.deleteNodes(nodeSelection)?.dispatch();
-			
 			return
 		}
 
@@ -449,8 +448,8 @@ const prevContainerBlock = (node: Node)=> {
 	const { prevSibling } = block
 	if (prevSibling?.isContainerBlock) {
 		const childContainer = prevSibling.find(n => {
-			return !n.eq(prevSibling) && n.isContainerBlock}, { order: 'pre', direction: 'backward'
-		})
+			return !n.eq(prevSibling) && n.isContainerBlock
+		}, { order: 'pre', direction: 'backward' })
 
 		return childContainer ?? prevSibling;
 	}

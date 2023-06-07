@@ -335,13 +335,38 @@ export class TransformCommands extends BeforePlugin {
     console.log(deleteGroup.ids.toArray());
     console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
 
+    // CASE 1
     // startBlock and endBlock are at same level
+    const startDepth = startBlock.depth;
+    const endDepth = endBlock.depth;
+    if (startDepth === endDepth) {
+      console.log('CASE: startBlock.depth === endBlock.depth');
+      tr.add(this.deleteGroupCommands(app, deleteGroup));
 
-    // tr.add(this.deleteGroupCommands(app, deleteGroup));
+      const after = PinnedSelection.fromPin(start);
+      tr.select(after);
+      
+      return tr;
+    }
+
+    // CASE 2
+    // partial match where startBlock has more depth than endBlock.
+    if (startDepth < endDepth) {
+      console.log('CASE: startBlock.depth > endBlock.depth');
+    }
+
+    // CASE 3
+    // partial match where startBlock has more depth than endBlock.
+    if (startDepth > endDepth) {
+      console.log('CASE: startBlock.depth < endBlock.depth');
+    }
+
+    tr.add(this.deleteGroupCommands(app, deleteGroup));
 
     return tr;
   }
 
+  // split the splitBlock at a specific pin location
   private splitAtPin(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
     const { tr, selection } = app;
 
@@ -527,7 +552,6 @@ export class TransformCommands extends BeforePlugin {
     }
 
     console.log('XXX',selection, nodes.map(n => n.id.toString()));
-
 
     const tr = app.tr
       .add(deleteActions)

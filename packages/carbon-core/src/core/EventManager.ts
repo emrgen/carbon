@@ -83,6 +83,8 @@ export class EventManager {
 			return
 		}
 
+
+
 		// console.debug(p14('%c[debug]'),'color:magenta', 'Editor.currentSelection', this.selection.toString(),);
 		const selection = PinnedSelection.fromDom(app.store);
 		console.log(pad(`%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`, 100), 'background:#ffcc006e');
