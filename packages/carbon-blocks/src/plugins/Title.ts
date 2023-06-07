@@ -89,7 +89,7 @@ export class TitlePlugin extends NodePlugin {
 				}
 			},
 			input(ctx: EventContext<InputEvent>) {
-				console.log('input', ctx.event);
+				// console.log('input', ctx.event);
 			},
 			keyDown: (ctx) => {
 				// ctx.event.preventDefault()

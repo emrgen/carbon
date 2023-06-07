@@ -16,6 +16,9 @@ export class NodeSelection {
       }
     });
 
+    console.log(nodes);
+    
+
     nodes.sort((a, b) => {
       const aPath = a.path;
       const bPath = b.path;
@@ -39,6 +42,8 @@ export class NodeSelection {
 
       return 0;
     });
+    console.log(nodes.map(n => n.node.id.toString()));
+    
 
 
     return nodes.map(n => n.node)

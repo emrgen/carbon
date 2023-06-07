@@ -29,6 +29,7 @@ import { nodeLocation } from "../utils/location";
 import { SetContent } from "../core/actions/SetContent";
 import { splitTextBlock } from "../utils/split";
 import { NodeSelection } from "../core/NodeSelection";
+import { InsertText } from "../core/actions/InsertText";
 
 export interface SplitOpts {
   rootType?: NodeType;
@@ -55,6 +56,7 @@ declare module '@emrgen/carbon-core' {
       unwrap(node: Node): Optional<Transaction>;
       change(node: Node, name: NodeName): Optional<Transaction>;
       update(node: Node, attrs: Record<string, any>): Optional<Transaction>;
+      merge(prev: Node, next: Node): Optional<Transaction>;
     };
   }
 }
@@ -78,7 +80,8 @@ export class TransformCommands extends BeforePlugin {
       wrap: this.wrap,
       unwrap: this.unwrap,
       change: this.change,
-      update: this.update
+      update: this.update,
+      merge: this.merge,
     };
   }
 
@@ -504,7 +507,7 @@ export class TransformCommands extends BeforePlugin {
   deleteNodes(app: Carbon, nodeSelection: NodeSelection = app.nodeSelection): Optional<Transaction> {
     const deleteActions: Action[] = [];
     const { nodes } = nodeSelection;
-    reverse(nodes).forEach(node => {
+    reverse(nodes.slice()).forEach(node => {
       deleteActions.push(RemoveNode.create(nodeLocation(node)!, node.id));
     });
     const firstNode = first(nodes)!;
@@ -522,6 +525,9 @@ export class TransformCommands extends BeforePlugin {
         selection = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
       }
     }
+
+    console.log('XXX',selection, nodes.map(n => n.id.toString()));
+
 
     const tr = app.tr
       .add(deleteActions)
@@ -632,11 +638,14 @@ export class TransformCommands extends BeforePlugin {
 
     let startDepth = startBlock.depth - commonNode.depth;
     let endDepth = endBlock.depth - commonNode.depth;
+
+    // as the depth is zero based need to add 1
     const commonDepth = Math.min(startDepth, endDepth) + 1;
 
     const insertCommands: Action[] = [];
     const moveCommands: Action[] = [];
 
+    // the core of the delete logic
     // merge node as if startNode and endNode are at same depth
     const handleUptoSameDepth = () => {
       let lastInsertedNodeId: Optional<NodeId>;
@@ -655,7 +664,7 @@ export class TransformCommands extends BeforePlugin {
           to = startBlock?.size ? Point.toAfter(startBlock?.lastChild?.id!) : Point.toWithin(startBlock.id);
         }
 
-        // must be equal, otherwise we can not merge the nodes
+        // must be equal, otherwise the blocks can not be merged
         if (startBlock?.isTextBlock && endBlock?.isTextBlock) {
           if (!end.isAtEnd) {
             const downPin = end.down();
@@ -690,9 +699,9 @@ export class TransformCommands extends BeforePlugin {
 
     const after = PinnedSelection.fromPin(start)
 
-    // case 1
-    // prev & next have same merge depth and are in perfect match for merge
-    // content of endBlock goes into startBlock
+    // CASE 1
+    // prev & next have same merge depth and are in perfect match for merge.
+    // content of endBlock goes into startBlock.
     if (startDepth === endDepth) {
       console.log('CASE: merge same depth blocks');
 
@@ -709,8 +718,8 @@ export class TransformCommands extends BeforePlugin {
       return tr
     }
 
-    // case 2
-    // partial match where prev has more depth than next
+    // CASE 2
+    // partial match where startBlock has more depth than endBlock.
     if (startDepth > endDepth) {
       console.log('CASE: startBlock.depth > endBlock.depth');
       handleUptoSameDepth();
@@ -723,8 +732,8 @@ export class TransformCommands extends BeforePlugin {
       return tr
     }
 
-    // case 3
-    // partial match where startBlock has more depth than endBlock
+    // CASE 3
+    // partial match where startBlock has less depth than endBlock.
     if (startDepth < endDepth) {
       console.log('CASE: startBlock.depth < endBlock.depth');
       const lastInsertedNodeId = handleUptoSameDepth();
@@ -1026,6 +1035,36 @@ export class TransformCommands extends BeforePlugin {
     }, { direction: "forward", order: "post" });
 
     return collectedInfo();
+  }
+
+  // merge two nodes
+  merge(app: Carbon, prev: Node, next: Node): Optional<Transaction> {
+    const actions: Action[] = [];
+    // check if prev and next can be merged
+
+    const after = PinnedSelection.fromPin(Pin.toEndOf(prev)!);
+
+    // merge text blocks
+    if (prev.isTextBlock && next.isTextBlock) {
+      const textNode = app.schema.text(next.textContent)!;
+      actions.push(...this.insertNodeCommands(Pin.toEndOf(prev)?.point!, [textNode]))
+      actions.push(...this.removeNodeCommands([next]))
+    } else {
+
+    }
+
+    // merge children
+    const at = Point.toAfter(prev.id);
+    const { nextSiblings = []} = next
+    if (nextSiblings.length){
+      actions.push(...this.moveNodeCommands(at, nextSiblings))
+    }
+
+    actions.push(RemoveNode.create(nodeLocation(next.parent!)!, next.parent!.id))
+
+    app.tr.add(actions).select(after).dispatch();
+
+    return
   }
 
 }

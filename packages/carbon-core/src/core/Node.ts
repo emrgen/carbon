@@ -1,4 +1,4 @@
-import { cloneDeep, findIndex, first, last, merge, reverse } from 'lodash';
+import { cloneDeep, findIndex, first, last, merge, noop, reverse } from 'lodash';
 import { Fragment } from './Fragment';
 
 import { Optional, Predicate, With } from '@emrgen/types';
@@ -15,8 +15,9 @@ import { NodeType } from './NodeType';
 import { NodeJSON, yes } from './types';
 
 export type TraverseOptions = {
-	order?: 'pre' | 'post';
-	direction?: 'forward' | 'backward';
+	order: 'pre' | 'post';
+	direction: 'forward' | 'backward';
+	skip: Predicate<Node>;
 }
 
 export interface NodeCreateProps {
@@ -291,6 +292,7 @@ export class Node extends EventEmitter {
 		return this.chain.slice(1);
 	}
 
+	// root node has depth zero
 	get depth(): number {
 		let depth = 0;
 		let node: Optional<Node> = this;
@@ -489,7 +491,7 @@ export class Node extends EventEmitter {
 		return nodes;
 	}
 
-	each(fn: With<Node>, opts: TraverseOptions = {}): void {
+	each(fn: With<Node>, opts: Partial<TraverseOptions> = {}): void {
 		const { direction = 'forward' } = opts
 		if (direction === 'forward') {
 			this.children.forEach(c => fn(c));
@@ -500,7 +502,7 @@ export class Node extends EventEmitter {
 
 	find(fn: Predicate<Node>, opts?: TraverseOptions): Optional<Node> {
 		let found: Optional<Node> = null;
-		opts = merge({ order: 'pre', direction: 'forward' }, opts)
+		opts = merge({ order: 'pre', direction: 'forward', skip: noop }, opts)
 		// eslint-disable-next-line no-return-assign
 		const collect: Predicate<Node> = node => !!(fn(node) && (found = node));
 
@@ -509,45 +511,45 @@ export class Node extends EventEmitter {
 	}
 
 	// NOTE: the parent chain is not searched for the next node
-	prev(fn: Predicate<Node> = yes, opts: TraverseOptions = {}, gotoParent = true): Optional<Node> {
-		opts = merge({ order: 'post', direction: 'backward' }, opts)
+	prev(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
+		const options = merge({ order: 'post', direction: 'backward', skip: noop }, opts) as TraverseOptions;
 		const sibling = this.prevSibling;
 		let found: Optional<Node> = null;
 		const collect: Predicate<Node> = node => !!(fn(node) && (found = node));
-		(opts.order == 'pre' ? sibling?.preorder(collect, opts) : sibling?.postorder(collect, opts))
-		const firstChild = this.index === 0;
+		if (sibling && !options.skip(sibling)) {
+			(options.order == 'pre' ? sibling?.preorder(collect, options) : sibling?.postorder(collect, options))
+		}
 
 		return (
 			found
-			|| sibling?.prev(fn, opts, false)
-			// || (firstChild && this.parent && fn(this.parent) ? this.parent : null)
-			|| (gotoParent ? this.parent?.prev(fn, opts, gotoParent) : null)
+			|| sibling?.prev(fn, options, false)
+			|| (gotoParent ? this.parent?.prev(fn, options, gotoParent) : null)
 		);
 	}
 
 	// NOTE: the parent chain is not searched for the next node
 	// check if next siblings' tree can fulfill predicate
 	// otherwise try parent next
-	next(fn: Predicate<Node> = yes, opts: TraverseOptions = {}, gotoParent = true): Optional<Node> {
-		opts = merge({ order: 'post', direction: 'forward' }, opts);
+	next(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
+		const options = merge({ order: 'post', direction: 'forward', skip: noop }, opts) as TraverseOptions;
 
 		const sibling = this.nextSibling;
 		let found: Optional<Node> = null;
 		const collect: Predicate<Node> = node => !!(fn(node) && (found = node));
-		(opts.order == 'pre' ? sibling?.preorder(collect, opts) : sibling?.postorder(collect, opts))
-
-		const lastChild = this.index + 1 === this.parent?.size;
+		if (sibling && !options.skip(sibling)) {
+			(options.order == 'pre' ? sibling?.preorder(collect, options) : sibling?.postorder(collect, options))
+		}
 
 		return (
 			found
-			|| sibling?.next(fn, opts, false)
+			|| sibling?.next(fn, options, false)
 			// || (lastChild && this.parent && fn(this.parent) ? this.parent : null)
-			|| (gotoParent ? this.parent?.next(fn, opts, gotoParent) : null)
+			|| (gotoParent ? this.parent?.next(fn, options, gotoParent) : null)
 		);
 	}
 
 	// walk preorder, traverse order: node -> children -> ...
-	walk(fn: Predicate<Node> = yes, opts: TraverseOptions = {}): boolean {
+	walk(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}): boolean {
 		const { order = 'pre', direction = 'forward' } = opts;
 		const done = order == 'pre' ? this.preorder(fn, opts) : this.postorder(fn, opts);
 
@@ -555,7 +557,7 @@ export class Node extends EventEmitter {
 		return done || (direction === 'forward' ? !!this.next(fn, opts) : !!this.prev(fn, opts));
 	}
 
-	preorder(fn: Predicate<Node> = yes, opts: TraverseOptions = {}): boolean {
+	preorder(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}): boolean {
 		const { direction = 'forward' } = opts;
 		const { children } = this;
 
@@ -564,7 +566,7 @@ export class Node extends EventEmitter {
 			: fn(this) || children.slice().reverse().some(ch => ch.preorder(fn, opts))
 	}
 
-	postorder(fn: Predicate<Node>, opts: TraverseOptions = {}): boolean {
+	postorder(fn: Predicate<Node>, opts: Partial<TraverseOptions> = {}): boolean {
 		const { direction = 'forward' } = opts;
 		const { children } = this;
 

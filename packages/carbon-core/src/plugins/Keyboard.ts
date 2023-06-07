@@ -355,24 +355,32 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		const { event } = ctx;
 		const { app, node } = ctx;
-		const { selection, state } = app;
-		const {selectedNodeIds} = state;
+		const { selection, state, cmd, nodeSelection } = app;
 
 		const { isCollapsed, head } = selection;
-		if (!isCollapsed || selectedNodeIds.size > 0) {
-			app.cmd.transform.delete(app.selection)?.dispatch()
+		// delete node selection if any
+		console.log('xxxxxxxxxxxx');
+		if (!nodeSelection.isEmpty) {
+			cmd.transform.deleteNodes(nodeSelection)?.dispatch();
+			
 			return
 		}
 
-		// if (head.isAtStartOfNode(node)) {
-		// 	const prevNode = node.prev(n => {
-		// 		return !n.isSelectable || n.isFocusable
-		// 	})
-		// 	// console.log(prevNode?.name, prevNode?.isSelectable);
-		// 	if (prevNode && !prevNode?.isSelectable) {
-		// 		return
-		// 	}
-		// }
+		if (!isCollapsed) {
+			cmd.transform.delete(app.selection)?.dispatch();
+			return
+		}
+
+		if (head.isAtStartOfNode(node)) {
+			const { start } = selection;
+			const textBlock = start.node.chain.find(n =>  n.isTextBlock)
+			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
+			if (!prevTextBlock || !textBlock) return
+
+			cmd.transform.merge(prevTextBlock, textBlock)?.dispatch();
+			console.log('merge text block', prevTextBlock.name, textBlock.name);
+			return
+		}
 
 		// 	event.stopPropagation()
 		// 	if (node.isBlockAtom) {
@@ -389,23 +397,10 @@ export class KeyboardPlugin extends AfterPlugin {
 		// 		return
 		// 	}
 
-		const deleteSel = selection.moveStart(-2);
-		if (!deleteSel) return
-
-		console.log('xxx', selection.toString(), deleteSel.toString());
-		
-
-		// find lowest empty that can be deleted without violating the parent schema
-		// const list = node.closest(isListNode)
-
-		// const tr = app.cmd.transform.delete(deleteSel);
-		// tr?.select(deleteSel.collapseToHead()).dispatch()
-		// 	return
-
-		// 	// check if deleteSel head and tail are merge compatible
-
 		// 	console.log('Keyboard.backspace',deleteSel.toString());
-		app.cmd.transform.delete(deleteSel)?.dispatch()
+		const deleteSel = selection.moveStart(-1)
+		if (!deleteSel) return
+		cmd.transform.delete(deleteSel)?.dispatch()
 	}
 
 	up(ctx: EventContext<KeyboardEvent>) {

@@ -11,6 +11,8 @@ export class ListKeyboardPlugin extends AfterPlugin {
 		return {
 			backspace: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, node } = ctx;
+				if (node.isIsolating) return;
+
 				const { selection, tr, cmd } = app;
 				if (!selection.isCollapsed) {
 					return
@@ -54,7 +56,7 @@ export class ListKeyboardPlugin extends AfterPlugin {
 
 				console.log('should pull the last node');
 			},
-			'shift+backspace': (ctx: EventContext<KeyboardEvent>) => {
+			shiftBackspace: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, node } = ctx;
 				const { selection, cmd, tr } = app;
 				const listNode = node.closest(isNestableNode);
