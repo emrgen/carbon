@@ -1,5 +1,5 @@
 
-import { each, first, last, merge, reverse } from "lodash";
+import { each, first, flatten, last, merge, reverse } from "lodash";
 
 import { Optional } from "@emrgen/types";
 import { InsertNodes } from "../core/actions/InsertNodes";
@@ -286,7 +286,7 @@ export class TransformCommands extends BeforePlugin {
 
     // * startBlock !== endBlock
     if (!startBlock.eq(endBlock)) {
-      return this.splitByRangeAcrossBlock(app, splitBlock, start, end, startBlock, endBlock, deleteGroup);
+      return this.splitByRangeAcrossBlock(app, splitBlock, start, end, deleteGroup);
     }
 
     // * startBlock === endBlock
@@ -330,10 +330,14 @@ export class TransformCommands extends BeforePlugin {
     return null
   }
 
-  private splitByRangeAcrossBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+  private splitByRangeAcrossBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, deleteGroup: SelectionPatch): Optional<Transaction> {
     const { tr } = app;
     console.log(deleteGroup.ids.toArray());
     console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
+
+    const startBlock = start.node.chain.find(n => n.isContainerBlock) as Node;
+    const endBlock = end.node.chain.find(n => n.isContainerBlock) as Node;
+    console.log(startBlock, endBlock);
 
     // CASE 1
     // startBlock and endBlock are at same level
@@ -343,25 +347,62 @@ export class TransformCommands extends BeforePlugin {
       console.log('CASE: startBlock.depth === endBlock.depth');
       tr.add(this.deleteGroupCommands(app, deleteGroup));
 
-      const after = PinnedSelection.fromPin(start);
+      // startBlock and endBlock are siblings so no need to move endBlock and endBlock's next siblings
+      if (startBlock.nextSiblings?.some(n => n.eq(endBlock))) {
+        const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
+        tr.select(after);
+        return tr
+      }
+
+      tr.move(nodeLocation(endBlock)!, Point.toAfter(startBlock.id)!, endBlock.id)
+      const lastChild = last(endBlock.children) as Node;
+      if (!lastChild) {
+        console.error('lastChild not found, container block should have at least one child');
+      }
+      const at = Point.toAfter(lastChild.id);
+      tr.add(this.moveNodeCommands(at, endBlock.nextSiblings))
+      const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
       tr.select(after);
-      
+
       return tr;
+    }
+
+    const [prevBlock, nextBlock] = blocksBelowCommonNode(startBlock, endBlock);
+    if (!prevBlock || !nextBlock) {
+      return
     }
 
     // CASE 2
     // partial match where startBlock has more depth than endBlock.
     if (startDepth < endDepth) {
       console.log('CASE: startBlock.depth > endBlock.depth');
+      tr.add(this.deleteGroupCommands(app, deleteGroup));
+
+      tr.move(nodeLocation(endBlock)!, Point.toAfter(startBlock.id)!, endBlock.id)
+      const lastChild = last(endBlock.children) as Node;
+      if (!lastChild) {
+        console.error('lastChild not found, container block should have at least one child');
+      }
+      const at = Point.toAfter(lastChild.id);
+      tr.add(this.moveNodeCommands(at, endBlock.nextSiblings))
+      const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
+      tr.select(after);
+
+      return tr;
     }
 
     // CASE 3
     // partial match where startBlock has more depth than endBlock.
     if (startDepth > endDepth) {
       console.log('CASE: startBlock.depth < endBlock.depth');
-    }
+      tr.add(this.deleteGroupCommands(app, deleteGroup));
 
-    tr.add(this.deleteGroupCommands(app, deleteGroup));
+      tr.move(nodeLocation(endBlock)!, Point.toAfter(startBlock.id)!, endBlock.id)
+      const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
+      tr.select(after);
+
+      return tr;
+    }
 
     return tr;
   }
@@ -512,9 +553,9 @@ export class TransformCommands extends BeforePlugin {
     return commands;
   }
 
-  private removeNodeCommands(nodes: Node[]): RemoveNode[] {
+  private removeNodeCommands(nodes: Node | Node[]): RemoveNode[] {
     const removeNodeCommands: RemoveNode[] = [];
-    nodes.forEach(node => {
+    flatten([nodes]).forEach(node => {
       removeNodeCommands.push(RemoveNode.create(nodeLocation(node)!, node.id));
     });
 

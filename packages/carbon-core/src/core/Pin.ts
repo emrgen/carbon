@@ -7,12 +7,19 @@ import { constrain } from '../utils/constrain';
 import { Maps } from './types';
 import { NodeContent } from './NodeContent';
 
+enum PinReference {
+	front = 'front',
+	back = 'back',
+}
+
 // materialized pin is a pin that is not a reference to a i
 export class Pin {
 	// focus node
 	node: Node;
 	// focus offset
 	offset: number;
+	//
+	ref: PinReference;
 
 	get isInvalid() {
 		return this.offset === -10;
@@ -134,14 +141,15 @@ export class Pin {
 		return new Pin(node, offset);
 	}
 
-	// 
-	static future(node: Node, offset: number) {
-		return new Pin(node, offset);
+	//
+	static future(node: Node, offset: number, ref: PinReference): Pin {
+		return new Pin(node, offset, ref);
 	}
 
-	private constructor(node: Node, offset: number) {
+	private constructor(node: Node, offset: number, ref: PinReference = PinReference.front) {
 		this.node = node;
 		this.offset = offset;
+		this.ref = ref;
 	}
 
 	// lift pin to the parent
@@ -186,12 +194,6 @@ export class Pin {
 		})
 
 		return pin;
-	}
-
-	// splits the node at the pin offset
-	splitContent(): [NodeContent, NodeContent] {
-		const { node, offset } = this;
-		return node.splitContent(offset);
 	}
 
 	// check if pin is before the provided pin
