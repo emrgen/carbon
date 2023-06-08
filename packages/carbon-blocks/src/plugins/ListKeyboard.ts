@@ -1,4 +1,4 @@
-import { AfterPlugin, EventContext, EventHandlerMap, Pin, Point, PointedSelection } from "@emrgen/carbon-core";
+import { AfterPlugin, EventContext, EventHandlerMap, Pin, PinnedSelection, Point, PointedSelection } from "@emrgen/carbon-core";
 import { isNestableNode } from '../utils';
 
 export class ListKeyboardPlugin extends AfterPlugin {
@@ -36,11 +36,13 @@ export class ListKeyboardPlugin extends AfterPlugin {
 						?? listNode.find(n => n.isBlock) ?? listNode;
 					tr
 						.change(listNode.id, listNode.name, 'section')
-						// .select(PointedSelection.within(focusNode))
+						.select(PinnedSelection.fromPin(selection.head))
 						.dispatch();
 					return
 				}
 
+				console.log('CCCCCCCCC');
+				
 				if (!parentList || parentList.depth > listNode.depth - 1) return
 
 				// pull up
@@ -107,6 +109,8 @@ export class ListKeyboardPlugin extends AfterPlugin {
 					return
 				}
 
+				console.log('--------------->');
+
 				const listNode = node.closest(isNestableNode);
 				if (!listNode) return
 				if (!listNode.isEmpty) return
@@ -131,6 +135,9 @@ export class ListKeyboardPlugin extends AfterPlugin {
 				if (!nextSibling) {
 					ctx.event.preventDefault();
 					ctx.event.stopPropagation();
+					ctx.stopPropagation();
+					console.log('xxxxxx');
+					
 					cmd.transform.unwrap(listNode)?.dispatch();
 					return
 				}

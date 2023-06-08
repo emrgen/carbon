@@ -23,6 +23,7 @@ export class NodeKey {
 // Editor delegates event processing to plugin
 export abstract class CarbonPlugin {
 
+	// lower priority plugins will be processed first
 	priority: number = 0;
 
 	type: PluginType = PluginType.Node;

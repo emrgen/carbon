@@ -16,7 +16,7 @@ export class CollapsibleList extends NodePlugin {
       dragHandle: true,
       rectSelectable: true,
       info: {
-        title: 'Divider',
+        title: 'Collapsible',
       },
       attrs: {
         html: {
@@ -43,7 +43,7 @@ export class CollapsibleList extends NodePlugin {
 
           const isAtBlockStart = start.isAtStartOfNode(node);
 
-
+          // insert section before node
           if(isAtBlockStart) {
             const json = {
               name: 'section',

@@ -4,15 +4,19 @@ import {
   CarbonNodeChildren,
   CarbonNodeContent,
   RendererProps,
+  useNodeStateChange,
+  useSelectionHalo,
 } from "@emrgen/carbon-core";
 
 export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
+  const {SelectionHalo} = useSelectionHalo(props);
 
   const beforeContent = (
     <div
       className="carbon-collapsible__control"
       contentEditable="false"
+      suppressContentEditableWarning
       onMouseDown={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -31,6 +35,7 @@ export default function CollapsibleListComp(props: RendererProps) {
         // custom={{ contentEditable: true }}
       />
       <CarbonNodeChildren node={node} />
+      {SelectionHalo}
     </CarbonBlock>
   );
 }

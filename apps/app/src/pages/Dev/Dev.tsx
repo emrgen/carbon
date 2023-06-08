@@ -20,6 +20,8 @@ const data = node("document", [
   section([title([])]),
   section([title([text("sect"), text("ABC"), text("ion 1")])]),
   node("divider"),
+  section([title([])]),
+  section([title([])]),
   node("collapsible", [
     title([text("I'm a collapsible")]),
     section([title([text("section 1")])]),

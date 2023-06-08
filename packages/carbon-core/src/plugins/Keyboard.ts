@@ -8,11 +8,6 @@ import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
 import { first, last, reverse } from "lodash";
 import { Node, Pin, PinnedSelection } from "../core";
-import { node } from "@emrgen/carbon-blocks";
-import { Action } from "../core/actions/types";
-import { RemoveNode } from "../core/actions/RemoveNode";
-import { nodeLocation } from "../utils/location";
-import { Optional } from '@emrgen/types';
 
 // handles general keyboard events
 // node specific cases are handles in node specific plugin
@@ -341,7 +336,8 @@ export class KeyboardPlugin extends AfterPlugin {
 		ctx.preventDefault();
 		ctx.event.preventDefault();
 		ctx.event.stopPropagation();
-
+		console.log('-----------');
+		
 		const { event } = ctx;
 		const { app, node } = ctx;
 		const { selection, state, cmd, nodeSelection } = app;

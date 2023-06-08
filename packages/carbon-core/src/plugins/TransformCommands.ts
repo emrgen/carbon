@@ -1110,7 +1110,8 @@ export class TransformCommands extends BeforePlugin {
   merge(app: Carbon, prev: Node, next: Node): Optional<Transaction> {
     const actions: Action[] = [];
     // check if prev and next can be merged
-
+    console.log('xxxxxx',prev, next);
+    
     const after = PinnedSelection.fromPin(Pin.toEndOf(prev)!);
 
     // merge text blocks
