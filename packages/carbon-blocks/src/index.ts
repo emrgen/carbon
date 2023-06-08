@@ -10,6 +10,7 @@ import './style.styl';
 import { ListKeyboardPlugin } from './plugins/ListKeyboard';
 import DividerComp from './renderers/Divider';
 import { Divider } from './plugins/Divider';
+import TitleComp from './renderers/TitleComp';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -27,7 +28,7 @@ export const blockPresets: Extension = {
 		Renderer.create('h3', NestableComp),
 		Renderer.create('h4', NestableComp),
 		Renderer.create('section', NestableComp),
-		Renderer.create('title', CarbonNode),
+		Renderer.create('title', TitleComp),
 		Renderer.create('text', CarbonText),
 		Renderer.create('divider', DividerComp),
 	]

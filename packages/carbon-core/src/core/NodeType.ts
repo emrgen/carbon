@@ -129,6 +129,10 @@ export class NodeType {
 		return this.spec.collapsible;
 	}
 
+	get isContainer() {
+		return !!this.spec.container;
+	}
+
 	get canSplit() {
 		return false;
 		// return [...listNames, 'title'].includes(this.name);

@@ -38,11 +38,31 @@ export class PinnedSelection {
 		// NOTE: anchorNode is always valid
 		if (!anchorNode.hasFocusable && !anchorNode.isFocusable) {
 			console.warn(p14('%c[info]'), 'color:pink', 'anchorNode skips focus', anchorNode.name, focusNode.name);
-			return
+			if (anchorNode.after(focusNode)) {
+				anchorNode = anchorNode.prev(n => n.isFocusable);
+				if (anchorNode) {
+					anchorOffset = anchorNode.size;
+				} else {
+					console.error('should not reach here');
+				}
+			} else {
+				anchorNode = anchorNode.next(n => n.isFocusable);
+				if (focusNode) {
+					anchorOffset = anchorNode?.focusSize ?? 0
+				} else {
+					console.error('should not reach here');
+				}
+			}
+		}
+
+		if (!anchorNode) {
+			console.error(p14('%c[error]'), 'color:red', 'anchorNode not found');
+			return null;
 		}
 
 		// NOTE: keep the focusNode on valid focusable node
 		if (!focusNode.hasFocusable && !focusNode.isFocusable) {
+			console.warn(p14('%c[info]'), 'color:pink', 'focusNode skips focus', anchorNode.name, focusNode.name);
 			// if focusNode is not focusable, then find focusable node that is closest to anchorNode
 			if (focusNode.after(anchorNode)) {
 				focusNode = focusNode.prev(n => n.isFocusable);
@@ -59,7 +79,6 @@ export class PinnedSelection {
 					console.error('should not reach here');
 				}
 			}
-			// console.warn(p14('%c[info]'), 'color:pink', 'focusNode skips focus', anchorNode.name, focusNode.name);
 		}
 
 		// console.info(p14('%c[info]'), 'color:pink', p30('fromDom:beforeOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);

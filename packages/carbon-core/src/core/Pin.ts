@@ -142,7 +142,7 @@ export class Pin {
 	}
 
 	//
-	static future(node: Node, offset: number, ref: PinReference): Pin {
+	static future(node: Node, offset: number, ref: PinReference = PinReference.front): Pin {
 		return new Pin(node, offset, ref);
 	}
 

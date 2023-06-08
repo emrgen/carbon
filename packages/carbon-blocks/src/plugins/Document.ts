@@ -11,6 +11,7 @@ export class DocPlugin extends CarbonPlugin {
 			group: 'split',
 			content: 'title content*',
 			selectable: true,
+			container: true,
 			isolating: true,
 			sandbox: true,
 			attrs: {
@@ -37,6 +38,7 @@ export class DocPlugin extends CarbonPlugin {
 				const { app, node, selection } = ctx;
 				const {start, end} = selection;
 				const title = node.child(0);
+				// start and end are within document title node
 				if (title && start.node.eq(title) && end.node.eq(title)) {
 					ctx.event.preventDefault();
 					ctx.stopPropagation();

@@ -134,6 +134,7 @@ export interface NodeSpec {
 	atom?: boolean;
 	tag?: string;
 	options?: boolean;
+	container?: boolean
 	collapsable?: boolean
 	selectable?: boolean
 	rectSelectable?: boolean

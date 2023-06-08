@@ -16,16 +16,22 @@ import {
 
 const data = node("document", [
   title([text("Carbon "), text("document"), text(" title")]),
-  node('divider'),
+  node("divider"),
   section([title([])]),
   section([title([text("sect"), text("ABC"), text("ion 1")])]),
-  node('divider'),
+  node("divider"),
   section([
     title([text("section 1")]),
     section([title([text("section 1.1")])]),
-    section([title([text("section 1.2")])]),
+    section([
+      title([text("section 1.2")]),
+      section([
+        title([text("section 1.2.1")]),
+        section([title([text("section 1.2.1.1")])]),
+      ]),
+    ]),
   ]),
-  node('divider'),
+  node("divider"),
   section([
     title([text("section 2")]),
     section([
