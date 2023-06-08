@@ -35,6 +35,7 @@ $selectionHaloColor = #accef78d
 	font-size: 16px
 
 [data-name=section]
+[data-name=collapsible]
 [data-name=bulletedList]
 [data-name=numberedList]
 [data-name=taskList]
@@ -51,7 +52,8 @@ $selectionHaloColor = #accef78d
 	position relative
 	line-height: 30px
 	[data-type="content"]
-		margin: 2px 2px
+		margin: 0px 2px
+		// padding: 0 2px
 		display: flex
 		[data-name=title]
 			-webkit-user-modify: read-write;
@@ -91,3 +93,23 @@ span {
 
 [data-selected=true]
 	caret-color: transparent;
+
+.carbon-collapsible__control
+	user-select: none
+	position absolute
+	left 0
+	top 1px
+	font-size: 12px
+	padding-left 4px
+	cursor: pointer
+	// background #aaa
+
+[data-name=collapsible]
+	> [data-type=children]
+		padding-left 0px
+	padding-left: 30px
+	.carbon-collapsible__control
+		left 4px
+		width 16px
+		height: 30px
+

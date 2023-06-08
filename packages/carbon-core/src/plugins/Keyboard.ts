@@ -245,9 +245,10 @@ export class KeyboardPlugin extends AfterPlugin {
 		console.log('Enter event...');
 
 		ctx.event.preventDefault();
-		const { app, node } = ctx;
+		const { app } = ctx;
 		const { selection, cmd, nodeSelection } = app;
 		const {start, end} = selection
+		const {node} = start;
 		let tr = app.tr;
 
 		if (!nodeSelection.isEmpty) {
@@ -277,7 +278,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		// const splitBlock = node.closest(n => n.canSplit);
 		node.chain.forEach(n => console.log(n.name, n.groups));
-		const splitBlock = node.closest(n => n.groups.includes('nestable'));
+		const splitBlock = node.closest(n => n.groups.includes('split'));
 
 		if (!selection.isCollapsed) {
 			// cmd.transform.delete()?.dispatch();
@@ -292,18 +293,6 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		cmd.transform
 			.split(splitBlock, selection, { rootType: app.schema.type('section') })?.dispatch();
-		// console.log('###',split);
-
-		// tr.dispatch()
-		// split?.dispatch()
-		// if (!selection.isCollapsed) {
-		// 	console.log('xxx');
-
-		// 	// cmd.transform.delete(selection)?.dispatch();
-		// }
-		// tr.dispatch()
-		// tr.merge(split!).dispatch()
-		// split?.dispatch()
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {

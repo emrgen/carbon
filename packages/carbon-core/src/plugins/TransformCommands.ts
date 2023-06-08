@@ -29,7 +29,6 @@ import { nodeLocation } from "../utils/location";
 import { SetContent } from "../core/actions/SetContent";
 import { splitTextBlock } from "../utils/split";
 import { NodeSelection } from "../core/NodeSelection";
-import { InsertText } from "../core/actions/InsertText";
 
 export interface SplitOpts {
   rootType?: NodeType;
@@ -178,8 +177,6 @@ export class TransformCommands extends BeforePlugin {
     const { parent } = node;
     if (!parent) return;
     const at = Point.toAfter(parent.id);
-
-    console.log('XX');
 
     const focus = node.find(n => n.type.isTextBlock) ?? node;
     const from = nodeLocation(node)
@@ -335,9 +332,15 @@ export class TransformCommands extends BeforePlugin {
     console.log(deleteGroup.ids.toArray());
     console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
 
-    const startBlock = start.node.chain.find(n => n.isContainerBlock) as Node;
-    const endBlock = end.node.chain.find(n => n.isContainerBlock) as Node;
+    const startBlock = start.node.closest(n => n.isContainerBlock) as Node;
+    const endBlock = end.node.closest(n => n.isContainerBlock) as Node;
     console.log(startBlock, endBlock);
+
+    if (startBlock.type.isContainer) {
+      console.log('CASE: startBlock.type.isContainer');
+
+      return tr;
+    }
 
     // CASE 1
     // startBlock and endBlock are at same level
@@ -420,6 +423,7 @@ export class TransformCommands extends BeforePlugin {
         console.error("failed to create emptyBlock of type", opts.rootType?.name);
         return;
       }
+
       const insertPoint = Point.toBefore(splitBlock.id);
       const after = selection.clone();
       tr
@@ -444,6 +448,10 @@ export class TransformCommands extends BeforePlugin {
         .insert(insertPoint, emptyBlock)
         .select(after);
       return tr;
+    }
+
+    if (splitBlock.type.isContainer) {
+      return tr
     }
 
     // as the cursor is within the split block
@@ -475,7 +483,7 @@ export class TransformCommands extends BeforePlugin {
     const maxDepth = cloneBlocks.length - 1;
     let focusPoint: Optional<Point> = null;
 
-    console.log(cloneBlocks);
+    console.log('xxxx',cloneBlocks);
 
 
     // descend and clone nodes

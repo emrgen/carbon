@@ -152,7 +152,7 @@ export const CarbonDefaultNode = (props: RendererProps) => {
 
 // render first node a content
 export const CarbonNodeContent = (props: RendererProps) => {
-  const { node, placeholder, beforeContent, custom } = props;
+  const { node, placeholder, beforeContent, custom, wrapper } = props;
   const { children = [] } = node;
 
   if (!children.length) {
@@ -160,9 +160,9 @@ export const CarbonNodeContent = (props: RendererProps) => {
   }
 
   return (
-    <div data-type="content" {...custom}>
+    <div data-type="content" {...wrapper}>
       {beforeContent}
-      <CarbonNode node={children[0]} />
+      <CarbonNode node={children[0]} custom={custom} />
     </div>
   );
 };

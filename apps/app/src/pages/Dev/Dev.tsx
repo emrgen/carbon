@@ -20,6 +20,10 @@ const data = node("document", [
   section([title([])]),
   section([title([text("sect"), text("ABC"), text("ion 1")])]),
   node("divider"),
+  node("collapsible", [
+    title([text("I'm a collapsible")]),
+    section([title([text("section 1")])]),
+  ]),
   section([
     title([text("section 1")]),
     section([title([text("section 1.1")])]),
@@ -55,6 +59,7 @@ const data = node("document", [
 
 export default function Dev() {
   const app = useCreateCarbon(data, [extensionPresets, blockPresets]);
+  console.log(app.schema.nodes);
 
   // @ts-ignore
   window.app = app

@@ -92,7 +92,14 @@ export class Pin {
 	}
 
 	static fromDom(node: Node, offset: number): Optional<Pin> {
-		if (!node.isFocusable) return
+		if (!node.isFocusable) {
+			if (offset === 0) {
+				node = node.find(n => n.isFocusable) as Node;
+				if (!node) return
+			} else {
+				return
+			}
+		}
 		const pin = Pin.toStartOf(node)
 		if (node.isEmpty) {
 			return pin;
