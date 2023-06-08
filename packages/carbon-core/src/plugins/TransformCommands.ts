@@ -450,10 +450,6 @@ export class TransformCommands extends BeforePlugin {
       return tr;
     }
 
-    if (splitBlock.type.isContainer) {
-      return tr
-    }
-
     // as the cursor is within the split block
     // need more involved splitting
     // clone all nodes after the cursor up to the splitBlock
