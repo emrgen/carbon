@@ -237,46 +237,59 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    console.log(commonNode);
+    console.log('XX', commonNode.name, commonNode.id.toString());
 
-    if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-      const { tr } = app;
-      const point = Point.toWithin(commonNode.id);
-      // console.log(tr.editor.origin);
+    // if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+    //   const { tr } = app;
+    //   const blockJson = {
+    //     name: splitBlock.name,
+    //     content: [
+    //       {
+    //         name: 'title',
+    //         content: []
+    //       }
+    //     ]
+    //   }
 
-      const json = {
-        name: splitBlock.name,
-        content: [
-          {
-            name: 'title',
-            content: [
-              {
-                name: 'text',
-                text: ''
-              }
-            ]
-          }
-        ]
-      }
+    //   const block = app.schema.nodeFromJSON(blockJson);
+    //   if (!block) {
+    //     throw Error('failed to create block');
+    //   }
 
-      const section = app.schema.nodeFromJSON(json);
-      if (!section) {
-        throw Error('failed to create section');
-      }
+    //   const at = Point.toBefore(splitBlock.id);
 
-      const at = Point.toBefore(splitBlock.id);
-      const focusPoint = Pin.toStartOf(splitBlock);
-      const after = PinnedSelection.fromPin(focusPoint!);
-
-      console.log(after.toString());
-
-      tr
-        .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
-        .insert(at, section!)
-        .select(after);
-
-      return tr;
-    }
+    //   if (commonNode.isContainerBlock) {
+    //     const splitBlockJson = {
+    //       name: splitBlock.type.splitName,
+    //       content: [
+    //         {
+    //           name: 'title',
+    //           content: []
+    //         }
+    //       ]
+    //     }
+    //     const afterBlock = app.schema.nodeFromJSON(splitBlockJson);
+    //     if (!afterBlock) {
+    //       throw Error('failed to create splitBlock');
+    //     }
+    //     const focusPoint = Pin.toStartOf(afterBlock);
+    //     const after = PinnedSelection.fromPin(focusPoint!);
+    //     const insertAt = commonNode.type.isContainer ? Point.toAfter(commonNode.firstChild!.id) : Point.toAfter(commonNode.id);
+    //     tr
+    //       .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
+    //       .insert(at, block!)
+    //       // .insert(insertAt, afterBlock!)
+    //       // .select(after);
+    //   } else {
+    //     const focusPoint = Pin.toStartOf(splitBlock);
+    //     const after = PinnedSelection.fromPin(focusPoint!);
+    //     tr
+    //       .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
+    //       .insert(at, block!)
+    //       .select(after);
+    //   }
+    //   return tr;
+    // }
 
     const deleteGroup = this.selectionInfo(app, selection);
 
@@ -688,6 +701,8 @@ export class TransformCommands extends BeforePlugin {
   delete(app: Carbon, selection: PinnedSelection = app.selection): Optional<Transaction> {
     console.log(selection.toString());
     const { start, end } = selection;
+    const deleteGroup = this.selectionInfo(app, selection);
+    const { tr } = app;
 
     const headNode = end.node;
     const tailNode = start.node;
@@ -697,33 +712,51 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
+    if (headNode.eq(tailNode)) {
+      tr.add(this.deleteGroupCommands(app, deleteGroup));
+      tr.select(selection.collapseToStart());
+      return tr
+    }
+
     const [startBlock, endBlock] = blocksBelowCommonNode(tailNode, headNode);
     if (!startBlock || !endBlock) {
       console.log(p14("%c[failed]"), "color:red", "merge nodes are not found");
       return;
     }
 
-    const commonNode = startBlock === endBlock ? startBlock : startBlock?.parent;
+    const commonNode = startBlock.commonNode(endBlock);
     if (!commonNode) {
       console.log(p14("%c[failed]"), "color:red", "common node not found, should not reach!");
       return;
     }
-
     // console.log(commonNode);
 
     if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-      const { tr } = app;
+
       const point = Point.toWithin(commonNode.id);
-      const after = PointedSelection.fromPoint(point);
-      // console.log(tr.editor.origin);
+      const json = {
+        name: commonNode.name,
+        content: [
+          {
+            name: 'title',
+            content: []
+          }
+        ]
+      }
+      const block = app.schema.nodeFromJSON(json);
+      if (!block) {
+        console.log(p14("%c[failed]"), "color:red", "block not found");
+        return;
+      }
+
+      const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
 
       tr
-        .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
-        .select(after.clone());
+        .insert(Point.toAfter(commonNode.id), block)
+        .remove(nodeLocation(commonNode)!, commonNode.id)
+        .select(after);
       return tr;
     }
-
-    const deleteGroup = this.selectionInfo(app, selection);
 
     // * startBlock !== endBlock
     if (!startBlock.eq(endBlock)) {
@@ -918,7 +951,7 @@ export class TransformCommands extends BeforePlugin {
         endBlock = endBlock.parent;
       }
       console.log(deleteGroup.ids.toArray().map(id => id.toString()));
-      
+
       const deleteActions = this.deleteGroupCommands(app, deleteGroup);
 
       tr
@@ -1264,7 +1297,7 @@ export class TransformCommands extends BeforePlugin {
     actions.push(RemoveNode.create(nodeLocation(next.parent!)!, next.parent!.id))
 
     console.log('Selection', after.toString());
-    
+
     app.tr.add(actions).select(after).dispatch();
 
     return
