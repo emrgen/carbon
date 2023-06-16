@@ -27,9 +27,13 @@ export class NodeStore {
 		this.elementToNodeMap = new WeakMap();
 	}
 
+	getById(id: string): Optional<Node> {
+		return this.nodeMap.get(id)
+	}
+
 	get(entry: NodeId | HTMLElement): Optional<Node> {
-		const nodeId = (entry as NodeId)
-		if (nodeId) {
+		const nodeId = entry
+		if (nodeId instanceof NodeId) {
 			return this.nodeMap.get(nodeId.id) ?? this.deletedNodeMap.get(nodeId.id);
 		} else {
 			return this.elementToNodeMap.get(entry as HTMLElement);
@@ -37,7 +41,7 @@ export class NodeStore {
 	}
 
 	put(node: Node) {
-		// console.log('put node', node.id.toString(), node.childrenVersion)
+		// console.log('put node', node.id.toString());
 		this.deletedNodeMap.delete(node.id.id);
 		this.nodeMap.delete(node.id.id);
 		this.nodeMap.set(node.id.id, node);
@@ -58,6 +62,7 @@ export class NodeStore {
 		// remove old reference first
 		// other part of the id will eventually be added while rendering
 		this.delete(node)
+		// console.log('register node', node.id.toString());
 		this.nodeMap.set(id, node);
 		this.elementMap.set(id, el);
 		this.elementToNodeMap.set(el, node);

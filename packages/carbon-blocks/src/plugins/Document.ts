@@ -1,5 +1,13 @@
-import { CarbonPlugin, EventContext, EventHandler, EventHandlerMap, NodeSpec, Pin, PinnedSelection, Point, PointedSelection } from '@emrgen/carbon-core';
-import { splitTextBlock } from '@emrgen/carbon-core';
+import {
+	CarbonPlugin,
+	EventContext,
+	EventHandlerMap,
+	NodeSpec,
+	Pin,
+	PinnedSelection,
+	Point,
+	splitTextBlock
+} from '@emrgen/carbon-core';
 
 
 export class DocPlugin extends CarbonPlugin {
@@ -8,8 +16,10 @@ export class DocPlugin extends CarbonPlugin {
 
 	spec(): NodeSpec {
 		return {
-			group: 'split',
+			group: '',
 			content: 'title content*',
+			splits: true,
+			splitName: 'section',
 			selectable: true,
 			container: true,
 			isolating: true,
@@ -33,10 +43,10 @@ export class DocPlugin extends CarbonPlugin {
 	keydown(): EventHandlerMap {
 		return {
 			// on enter split without merge
-			enter: (ctx: EventContext<KeyboardEvent>) => {
+			_enter: (ctx: EventContext<KeyboardEvent>) => {
 				console.log('enter doc');
 				const { app, node, selection } = ctx;
-				const {start, end} = selection;
+				const { start, end } = selection;
 				const title = node.child(0);
 				// start and end are within document title node
 				if (title && start.node.eq(title) && end.node.eq(title)) {

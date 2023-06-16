@@ -133,6 +133,14 @@ export class NodeType {
 		return !!this.spec.container;
 	}
 
+	get splits() {
+		return !!this.spec.splits
+	}
+
+	get splitName() {
+		return this.spec.splitName ?? 'section';
+	}
+
 	get canSplit() {
 		return false;
 		// return [...listNames, 'title'].includes(this.name);

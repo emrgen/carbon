@@ -5,6 +5,7 @@ import { Action, ActionOrigin } from "./types";
 import { Point } from '../Point';
 import { generateActionId } from './utils';
 import { Fragment } from '../Fragment';
+import { classString } from "../Logger";
 
 export class MoveAction implements Action {
 	id: number;
@@ -43,7 +44,11 @@ export class MoveAction implements Action {
 
 		const fragment = Fragment.fromNode(moveNode);
 
+		console.log("MOVE: move node", moveNode, "to", to.toString(), target);
+
 		if (to.isBefore) {
+			console.log('vvvvvvvvvvvvvv');
+
 			target.append(fragment);
 			fragment.forAll(n => app.store.put(n));
 			parent.insertBefore(fragment, target);
@@ -52,9 +57,15 @@ export class MoveAction implements Action {
 		}
 
 		if (to.isAfter) {
+			// if (target.nextSibling?.eq(fragment.child(0))) {
+			// 	return NULL_ACTION_RESULT
+			// }
+			fragment.forAll(n => console.log(n.id.toString()));
 			// console.log('move after', to.toString(),)
 			parent.insertAfter(fragment, target);
-			fragment.forAll(n => app.store.put(n));
+			fragment.forAll(n => {
+				app.store.put(n);
+			});
 			tr.updated(parent);
 			return NULL_ACTION_RESULT;
 		}
@@ -71,5 +82,9 @@ export class MoveAction implements Action {
 
 	inverse(): Action {
 		throw new Error("Method not implemented.");
+	}
+
+	toString() {
+		return classString(this)({from: this.from.toString(), to: this.to.toString(), nodeId: this.nodeId.toString()})
 	}
 }

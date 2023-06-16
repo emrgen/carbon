@@ -246,11 +246,12 @@ export class KeyboardPlugin extends AfterPlugin {
 		const {node} = start;
 		let tr = app.tr;
 
+		// put the cursor at the end of the first text block
 		if (!nodeSelection.isEmpty) {
 			console.log('node selection...');
 			const {nodes} = nodeSelection;
 			console.log(nodes.map(n => n.id.toString()));
-			
+
 			const done = nodes.some(n => {
 				const textBlock = n.find(n => n.isTextBlock);
 
@@ -273,18 +274,12 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		// const splitBlock = node.closest(n => n.canSplit);
 		node.chain.forEach(n => console.log(n.name, n.groups));
-		const splitBlock = node.closest(n => n.groups.includes('split'));
-
-		if (!selection.isCollapsed) {
-			// cmd.transform.delete()?.dispatch();
-		}
-
+		const splitBlock = node.closest(n => n.type.splits);
 		if (!splitBlock) {
-			// tr.dispatch();
-			console.log('no split block');
+			console.log('no split block in the chain', node.chain.map(n => n.name));
 			return
 		}
-		console.log('split section....');
+		console.log(`splitting block: ${splitBlock.name}`);
 
 		cmd.transform
 			.split(splitBlock, selection, { rootType: app.schema.type('section') })?.dispatch();
@@ -344,7 +339,6 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		const { isCollapsed, head } = selection;
 		// delete node selection if any
-		console.log('xxxxxxxxxxxx');
 		if (!nodeSelection.isEmpty) {
 			cmd.transform.deleteNodes(nodeSelection)?.dispatch();
 			return
@@ -355,14 +349,15 @@ export class KeyboardPlugin extends AfterPlugin {
 			return
 		}
 
+		console.log('xxxxxxxxxxxx');
 		if (head.isAtStartOfNode(node)) {
 			const { start } = selection;
 			const textBlock = start.node.chain.find(n =>  n.isTextBlock)
 			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
 			if (!prevTextBlock || !textBlock) return
 
-			cmd.transform.merge(prevTextBlock, textBlock)?.dispatch();
 			console.log('merge text block', prevTextBlock.name, textBlock.name);
+			cmd.transform.merge(prevTextBlock, textBlock)?.dispatch();
 			return
 		}
 
@@ -396,7 +391,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		if (nodeSelection.size > 1) {
 			const { nodes } = nodeSelection
-			const lastNode = first(nodes);
+			const lastNode = first(nodes) as Node;
 			app.tr.selectNodes([lastNode.id]).dispatch()
 			return
 		}

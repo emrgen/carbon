@@ -127,6 +127,8 @@ enum NodeLayout {
 
 export interface NodeSpec {
 	name?: string;
+	splits?: boolean;
+	splitName?: string;
 	content?: string;
 	marks?: string;
 	group?: string;

@@ -7,7 +7,6 @@ import { MoveAction } from "../core/actions/MoveAction";
 import { RemoveNode } from "../core/actions/RemoveNode";
 import { RemoveText } from "../core/actions/RemoveText";
 import { Action, ActionOrigin } from "../core/actions/types";
-import { NodeIdSet } from "../core/BSet";
 import { Carbon } from "../core/Carbon";
 import { SelectionPatch } from "../core/DeleteGroup";
 import { Fragment } from "../core/Fragment";
@@ -295,8 +294,6 @@ export class TransformCommands extends BeforePlugin {
   }
 
   private splitByRangeWithinBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
-    const { tr } = app;
-
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
 
     const json = {
@@ -334,21 +331,93 @@ export class TransformCommands extends BeforePlugin {
 
     const startBlock = start.node.closest(n => n.isContainerBlock) as Node;
     const endBlock = end.node.closest(n => n.isContainerBlock) as Node;
+    const startDepth = startBlock.depth;
+    const endDepth = endBlock.depth;
     console.log(startBlock, endBlock);
 
     if (startBlock.type.isContainer) {
       console.log('CASE: startBlock.type.isContainer');
+      const title = startBlock.child(0);
+      if (!title) {
+        console.error('title not found, should not reach!');
+        return null
+      }
+
+      if (startBlock.isCollapsed) {
+        console.log('CASE: startBlock.isCollapsed');
+        // tr.add(this.deleteGroupCommands(app, deleteGroup));
+        // tr.move(nodeLocation(endBlock)!, Point.toAfter(startBlock.id)!, endBlock.id)
+        // const lastChild = last(endBlock.children) as Node;
+        // if (!lastChild) {
+        //   console.log('CASE: !lastChild');
+        // }
+      } else {
+        console.log('CASE: !startBlock.isCollapsed');
+
+        // CASE 1: startBlock.depth === endBlock.depth
+        if (startDepth === endDepth) {
+          // startBlock and endBlock are siblings so no need to move endBlock and endBlock's next siblings
+          if (startBlock.nextSiblings?.some(n => n.eq(endBlock))) {
+            tr.add(this.deleteGroupCommands(app, deleteGroup));
+            const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
+            const at = Point.toAfter(title.id);
+            tr.move(nodeLocation(endBlock)!, at, endBlock.id);
+            tr.change(endBlock.id, endBlock.name, startBlock.type.splitName);
+            tr.add(this.moveNodeCommands(Point.toAfter(endBlock.id), endBlock.children.slice(1)))
+            tr.select(after);
+            return tr
+          }
+
+          // tr.move(nodeLocation(endBlock)!, Point.toAfter(title.id)!, endBlock.id)
+          // const at = Point.toAfter(endBlock.id);
+          // tr.add(this.moveNodeCommands(at, endBlock.children.slice(1)))
+          const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
+          tr.select(after);
+          return tr
+        }
+
+        // CASE 2
+        // partial match where startBlock has less depth than endBlock.
+        if (startDepth < endDepth) {
+
+          console.log('CASE: startBlock.depth < endBlock.depth');
+          tr.add(this.deleteGroupCommands(app, deleteGroup));
+
+          tr.move(nodeLocation(endBlock)!, Point.toAfter(title.id)!, endBlock.id)
+          tr.change(endBlock.id, endBlock.name, startBlock.type.splitName);
+          tr.add(this.moveNodeCommands(Point.toAfter(endBlock.id), endBlock.children.slice(1)))
+          const at = Point.toAfter(startBlock.id);
+          tr.add(this.moveNodeCommands(at, endBlock.nextSiblings))
+          const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
+          tr.select(after, ActionOrigin.UserInput);
+
+          return tr
+        }
+
+        // CASE 3
+        // partial match where startBlock has more depth than endBlock.
+        if (startDepth > endDepth) {
+          console.log('CASE: startBlock.depth > endBlock.depth XXXXXXX');
+          tr.add(this.deleteGroupCommands(app, deleteGroup));
+          tr.move(nodeLocation(endBlock)!, Point.toAfter(title.id)!, endBlock.id)
+          tr.change(endBlock.id, endBlock.name, startBlock.type.splitName);
+          tr.add(this.moveNodeCommands(Point.toAfter(endBlock.id), endBlock.children.slice(1)))
+          const at = Point.toAfter(startBlock.id);
+          tr.add(this.moveNodeCommands(at, endBlock.nextSiblings))
+          const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
+          tr.select(after);
+        }
+      }
 
       return tr;
     }
 
     // CASE 1
     // startBlock and endBlock are at same level
-    const startDepth = startBlock.depth;
-    const endDepth = endBlock.depth;
     if (startDepth === endDepth) {
       console.log('CASE: startBlock.depth === endBlock.depth');
       tr.add(this.deleteGroupCommands(app, deleteGroup));
+      tr.change(endBlock.id, endBlock.name, startBlock.type.splitName);
 
       // startBlock and endBlock are siblings so no need to move endBlock and endBlock's next siblings
       if (startBlock.nextSiblings?.some(n => n.eq(endBlock))) {
@@ -378,10 +447,12 @@ export class TransformCommands extends BeforePlugin {
     // CASE 2
     // partial match where startBlock has more depth than endBlock.
     if (startDepth < endDepth) {
-      console.log('CASE: startBlock.depth > endBlock.depth');
+      console.log('CASE: startBlock.depth < endBlock.depth');
       tr.add(this.deleteGroupCommands(app, deleteGroup));
+      tr.change(endBlock.id, endBlock.name, startBlock.type.splitName);
 
       tr.move(nodeLocation(endBlock)!, Point.toAfter(startBlock.id)!, endBlock.id)
+
       const lastChild = last(endBlock.children) as Node;
       if (!lastChild) {
         console.error('lastChild not found, container block should have at least one child');
@@ -397,10 +468,12 @@ export class TransformCommands extends BeforePlugin {
     // CASE 3
     // partial match where startBlock has more depth than endBlock.
     if (startDepth > endDepth) {
-      console.log('CASE: startBlock.depth < endBlock.depth');
+      console.log('CASE: startBlock.depth > endBlock.depth');
       tr.add(this.deleteGroupCommands(app, deleteGroup));
+      tr.change(endBlock.id, endBlock.name, startBlock.type.splitName);
 
       tr.move(nodeLocation(endBlock)!, Point.toAfter(startBlock.id)!, endBlock.id)
+
       const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
       tr.select(after);
 
@@ -479,7 +552,7 @@ export class TransformCommands extends BeforePlugin {
     const maxDepth = cloneBlocks.length - 1;
     let focusPoint: Optional<Point> = null;
 
-    console.log('xxxx',cloneBlocks);
+    console.log('xxxx', cloneBlocks);
 
 
     // descend and clone nodes
@@ -519,7 +592,7 @@ export class TransformCommands extends BeforePlugin {
     });
 
     // console.log(rootNode?.descendants().map(n => n.id.key));
-    console.log(rootNode.textContent);
+    console.log(rootNode.textContent, 'xxxxx', rootInsertPoint.toString());
 
     focusPoint = Pin.toStartOf(rootNode)?.point;
     console.log("insert node", rootNode?.name, rootNode);
@@ -573,7 +646,7 @@ export class TransformCommands extends BeforePlugin {
     return app.tr.remove(nodeLocation(node)!, node.id)
   }
 
-  // delete
+  // delete selected nodes
   deleteNodes(app: Carbon, nodeSelection: NodeSelection = app.nodeSelection): Optional<Transaction> {
     const deleteActions: Action[] = [];
     const { nodes } = nodeSelection;
@@ -596,7 +669,7 @@ export class TransformCommands extends BeforePlugin {
       }
     }
 
-    console.log('XXX',selection, nodes.map(n => n.id.toString()));
+    console.log('XXX', selection, nodes.map(n => n.id.toString()));
 
     const tr = app.tr
       .add(deleteActions)
@@ -742,7 +815,7 @@ export class TransformCommands extends BeforePlugin {
             }
             const textContent = downPin.node.textContent.slice(downPin.offset);
             const textNode = app.schema.text(textContent)!;
-            const siblings = downPin.node.nextSiblings.map(n => n.clone());
+            const siblings = downPin.node.nextSiblings.map(n => n.clone()).filter(n => !deleteGroup.has(n.id));
             insertCommands.push(...this.insertNodeCommands(start.point, [textNode, ...siblings]))
           }
           console.log('merge start and end block');
@@ -793,6 +866,7 @@ export class TransformCommands extends BeforePlugin {
       console.log('CASE: startBlock.depth > endBlock.depth');
       handleUptoSameDepth();
       const deleteActions = this.deleteGroupCommands(app, deleteGroup);
+
       tr
         .add(moveCommands)
         .add(deleteActions)
@@ -805,9 +879,29 @@ export class TransformCommands extends BeforePlugin {
     // partial match where startBlock has less depth than endBlock.
     if (startDepth < endDepth) {
       console.log('CASE: startBlock.depth < endBlock.depth');
+      console.log('+==================+');
+      console.log(startBlock.id.toString());
+      const startContainer = startBlock.chain.find(n => n.isContainerBlock);
+      const endContainer = endBlock.chain.find(n => n.isContainerBlock);
+      if (startContainer?.type.isContainer && endContainer?.parents.some(p => p.id === startContainer?.id)) {
+        handleUptoSameDepth();
+        console.log('endContainer is child of startContainer');
+        const deleteActions = this.deleteGroupCommands(app, deleteGroup);
+        const at = Point.toAfter(startBlock.child(0)!.id);
+        console.log(at.toString(), endBlock.textContent);
+        deleteActions.push(RemoveNode.create(nodeLocation(endBlock)!, endBlock.id));
+
+        moveCommands.push(...this.moveNodeCommands(at, endBlock.children.slice(1)));
+
+        tr
+          .add(moveCommands)
+          .add(insertCommands)
+          .add(deleteActions)
+          .select(after)
+        return tr
+      }
+
       const lastInsertedNodeId = handleUptoSameDepth();
-      // console.log('+==================+');
-      // console.log(startBlock.id.toString());
 
       // move endNodes remaining children after startParent
       // NOTE: this create the effect of moving endParents non content children
@@ -823,10 +917,11 @@ export class TransformCommands extends BeforePlugin {
         deleteGroup.addId(endBlock.id);
         endBlock = endBlock.parent;
       }
+      console.log(deleteGroup.ids.toArray().map(id => id.toString()));
+      
       const deleteActions = this.deleteGroupCommands(app, deleteGroup);
 
       tr
-        .add(moveCommands)
         .add(moveCommands)
         .add(deleteActions)
         .add(insertCommands)
@@ -860,7 +955,7 @@ export class TransformCommands extends BeforePlugin {
 
       if (startPin.node.eq(endPin.node)) {
         if (startPin.isAtStart && endPin.isAtEnd) {
-          actions.push(RemoveText.create(start.point, startPin.node.clone()));
+          actions.push(RemoveNode.create(nodeLocation(startPin.node)!, startPin.node.id));
           return;
         }
         if (startPin.isAtStart) {
@@ -873,7 +968,7 @@ export class TransformCommands extends BeforePlugin {
           actions.push(RemoveText.create(start.point, textNode!));
           return;
         }
-        console.log("@@@@@@@@@");
+        // console.log("@@@@@@@@@");
 
         const textNode = app.schema.text(startPin.node.textContent.slice(startPin.offset, endPin.offset));
         actions.push(RemoveText.create(start.point, textNode!));
@@ -1016,6 +1111,32 @@ export class TransformCommands extends BeforePlugin {
     // console.log(startNode, endNode);
     // console.log(startNode.textContent, endNode.textContent);
 
+    const startContainer = startBlock.closest(n => n.isContainerBlock)
+    const endContainer = endBlock.closest(n => n.isContainerBlock)
+
+    if (!startContainer || !endContainer) {
+      console.log(p14("%c[failed]"), "color:red", "start/end node container not found");
+      return collectedInfo();
+    }
+
+    // endContainer is child of startContainer
+    if (endContainer.parents.some(p => p.eq(startContainer!))) {
+      console.log(p14("%c[failed]"), "color:red", "endNode is child of startNode", selectedGroup.ids.size, selectedGroup);
+
+      // TODO: check if this can be simplified with comments below
+      startBlock.next(n => {
+        if (n.eq(endBlock!)) {
+          return true;
+        }
+        if (n.isBlock) {
+          selectedGroup.addId(n.id);
+        }
+        return false;
+      })
+
+      return collectedInfo();
+    }
+
     // handle undefined situation
     // one possible reason for this case is start and end are in adjacent siblings
     if (startRemoveBlock.after(endRemoveBlock)) {
@@ -1110,14 +1231,22 @@ export class TransformCommands extends BeforePlugin {
   merge(app: Carbon, prev: Node, next: Node): Optional<Transaction> {
     const actions: Action[] = [];
     // check if prev and next can be merged
-    console.log('xxxxxx',prev, next);
-    
+    // console.log('xxxxxx',prev, next, prev.isEmpty);
+
     const after = PinnedSelection.fromPin(Pin.toEndOf(prev)!);
 
     // merge text blocks
+    // TODO: need to test intensively for edge cases
     if (prev.isTextBlock && next.isTextBlock) {
-      const textNode = app.schema.text(next.textContent)!;
-      actions.push(...this.insertNodeCommands(Pin.toEndOf(prev)?.point!, [textNode]))
+      // NOTE: if next is empty, it will create a empty text node
+      // empty text node will cause issue in `mergeTextNodes`
+      // NOTE: empty text node are not valid in carbon
+      if (next.textContent) {
+        const textNode = app.schema.text(next.textContent)!;
+        const at = prev.isVoid ? Point.toWithin(prev.id) : Point.toAfter(prev.lastChild?.id!);
+        // console.log(at);
+        actions.push(...this.insertNodeCommands(at!, [textNode]))
+      }
       actions.push(...this.removeNodeCommands([next]))
     } else {
 
@@ -1125,13 +1254,17 @@ export class TransformCommands extends BeforePlugin {
 
     // merge children
     const at = Point.toAfter(prev.id);
-    const { nextSiblings = []} = next
-    if (nextSiblings.length){
+    const { nextSiblings = [] } = next
+    if (nextSiblings.length) {
       actions.push(...this.moveNodeCommands(at, nextSiblings))
     }
 
+    // console.log(next.parent?.id.toString(), next.id.toString());
+
     actions.push(RemoveNode.create(nodeLocation(next.parent!)!, next.parent!.id))
 
+    console.log('Selection', after.toString());
+    
     app.tr.add(actions).select(after).dispatch();
 
     return

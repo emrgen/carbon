@@ -21,6 +21,8 @@ export class Heading extends NodePlugin {
 		return {
 			group: 'content nestable heading',
 			content: 'title content*',
+			splits: true,
+			splitName: 'section',
 			selectable: true,
 			draggable: true,
 			dragHandle: true,

@@ -109,8 +109,6 @@ export class ListKeyboardPlugin extends AfterPlugin {
 					return
 				}
 
-				console.log('--------------->');
-
 				const listNode = node.closest(isNestableNode);
 				if (!listNode) return
 				if (!listNode.isEmpty) return

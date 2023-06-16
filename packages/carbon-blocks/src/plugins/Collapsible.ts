@@ -10,6 +10,8 @@ export class CollapsibleList extends NodePlugin {
     return {
       group: 'content nestable',
       content: 'title content*',
+      splits: true,
+      splitName: 'section',
       container: true,
       selectable: true,
       draggable: true,

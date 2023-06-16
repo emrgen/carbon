@@ -1,6 +1,6 @@
 import { Point } from "../Point";
 import { Transaction } from "../Transaction";
-import { ActionResult } from "./Result";
+import { ActionResult, NULL_ACTION_RESULT } from "./Result";
 import { Action, ActionOrigin, ActionType } from "./types";
 import { generateActionId } from './utils';
 import { InsertText } from './InsertText';
@@ -36,6 +36,13 @@ export class RemoveText implements Action{
 
 		const { textContent } = target;
 		const updatedTextContent = textContent.slice(0, offset) + textContent.slice(offset + node.textContent.length)
+		// if the text updated content is empty, remove the node
+		// TODO: reimplement this using better logic
+		if (updatedTextContent === '') {
+			target.parent?.remove(target);
+			tr.updated(target.parent!);
+			return NULL_ACTION_RESULT
+		}
 		target.updateText(updatedTextContent);
 		tr.updated(target);
 		tr.updated(target.parent!);

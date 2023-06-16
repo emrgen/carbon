@@ -171,7 +171,7 @@ export class InlineContent implements  NodeContent {
 		return this;
 	}
 
-	append(fragment: Fragment): NodeContent {
+	append(fragment: Fragment): NodeContent {		
 		throw new Error("Not implemented");
 	}
 

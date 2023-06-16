@@ -51,6 +51,7 @@ export class InsertNodes implements Action{
 		}
 
 		if (at.isWithin) {
+			console.log(target, fragment);
 			target.append(fragment);
 			return done()
 		}

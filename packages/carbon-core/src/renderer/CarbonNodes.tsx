@@ -40,6 +40,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   // https://t.ly/H4By
   useImperativeHandle(forwardedRef, () => ref.current);
 
+  // NOTE: should register node when node is created and updated
   useEffect(() => {
     if (ref.current) {
       editor.store.register(node, ref.current);
@@ -49,7 +50,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     return () => {
       editor.store.delete(node);
     };
-  }, [editor, node]);
+  }, [editor, node, version]);
 
 
   return (
