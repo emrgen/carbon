@@ -11,6 +11,7 @@ interface SchemaSpec {
 	nodes: Record<NodeName, NodeSpec>;
 }
 
+// ref: prosemirror-model/src/schema.js
 export class Schema {
 	nodes: Record<NodeName, NodeType>;
 	marks: Record<NodeName, MarkType>;
@@ -40,7 +41,11 @@ export class Schema {
 				}
 
 				nodeType.contentMatch = contextExprCache[contentExpr];
-				nodeType.inlineContent = nodeType.contentMatch.inlineContent
+				nodeType.inlineContent = nodeType.contentMatch.inlineContent;
+			} else {
+				console.log('empty content match for', nodeName);
+				nodeType.contentMatch = ContentMatch.empty;
+				nodeType.inlineContent = false;
 			}
 
 			if (markExpr) { }

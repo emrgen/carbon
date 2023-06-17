@@ -55,7 +55,7 @@ export class KeyboardPlugin extends AfterPlugin {
 				}
 
 				const block = node.chain.find(n => n.isContainerBlock);
-				if (!block) return
+				if (!block || !block.type.spec.rectSelectable) return
 				app.tr.selectNodes([block.id]).dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
@@ -298,7 +298,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		// delete node selection if any
 		if (!nodeSelection.isEmpty) {
-			cmd.transform.deleteNodes(nodeSelection)?.dispatch();
+			cmd.transform.deleteNodes(nodeSelection, {fall: 'after'})?.dispatch();
 			return
 		}
 
@@ -340,7 +340,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		const { isCollapsed, head } = selection;
 		// delete node selection if any
 		if (!nodeSelection.isEmpty) {
-			cmd.transform.deleteNodes(nodeSelection)?.dispatch();
+			cmd.transform.deleteNodes(nodeSelection, {fall: 'before'})?.dispatch();
 			return
 		}
 

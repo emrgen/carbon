@@ -5,7 +5,7 @@ import { Fragment } from './Fragment';
 import { MarkSet } from './Mark';
 import { Node } from './Node';
 import { NodeSpec, Schema } from './Schema';
-import { HTMLAttrs, NodeName } from './types';
+import { HTMLAttrs, NodeJSON, NodeName } from './types';
 
 export type Attrs = { readonly [attr: string]: any }
 
@@ -69,7 +69,7 @@ export class NodeType {
 	// spec: spec of the NodeType
 	constructor(readonly name: NodeName, readonly schema: Schema, readonly spec: NodeSpec) {
 		this.groupsNames = specGroups(name, spec);
-		this.attrs = merge({node: {}, html: {}}, spec.attrs ?? {});
+		this.attrs = merge({ node: {}, html: {} }, spec.attrs ?? {});
 
 		this.isBlock = !(spec.inline || name == "text")
 		this.isText = name == "text";
@@ -113,7 +113,7 @@ export class NodeType {
 		return parents
 	}
 
-	get Tag () {
+	get Tag() {
 		return this.spec.tag ?? 'div';
 	}
 
@@ -159,7 +159,7 @@ export class NodeType {
 	}
 
 	get isAtom() {
-		return this.isLeaf || !!this.spec.atom;
+		return !!this.spec.atom;
 	}
 
 	get isIsolating() {
@@ -187,7 +187,7 @@ export class NodeType {
 	}
 
 	get isLeaf() {
-		return this.contentMatch == ContentMatch.empty;
+		return this.contentMatch == ContentMatch.empty
 	}
 
 	hasRequiredAttrs() {
@@ -196,12 +196,41 @@ export class NodeType {
 	}
 
 	// create a default node based on schema
-	createDefault(): Optional<Node> {
-		return
-	}
+	default(): Optional<Node> {
+		console.log(this.name);
+		
+		if (this.isText) {
+			return this.schema.text('');
+		}
 
-	eq(other: NodeType) {
-		return this.name === other.name;
+		const blockJson: NodeJSON = {
+			name: this.name,
+			content: []
+		}
+		let { contentMatch } = this
+		if (contentMatch.validEnd) {
+			return this.schema.nodeFromJSON(blockJson)
+		}
+
+		while (contentMatch) {
+			let { next: nextEdges, defaultType, validEnd } = contentMatch
+			if (validEnd || !nextEdges) {
+				break
+			}
+			if (defaultType) {
+				blockJson.content.push(defaultType.default() as Node)
+			}
+			contentMatch = nextEdges[0].next
+		}
+
+		console.log(blockJson);
+
+		const node = this.schema.nodeFromJSON(blockJson)
+		if (!node) {
+			throw new Error('node is null')
+		}
+
+		return node
 	}
 
 	create(content: Node[] | string): Optional<Node> {
@@ -209,6 +238,10 @@ export class NodeType {
 			return this.schema.text(content as string);
 		}
 		return this.schema.node(this.name, { content: content as Node[] });
+	}
+
+	eq(other: NodeType) {
+		return this.name === other.name;
 	}
 
 	//

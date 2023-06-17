@@ -37,6 +37,7 @@ export interface SplitOpts {
 
 export interface DeleteOpts {
   merge?: boolean;
+  fall?: 'after' | 'before';
 }
 
 export type InsertPos = "before" | "after" | "prepend" | "append";
@@ -48,7 +49,7 @@ declare module '@emrgen/carbon-core' {
       remove(node: Node): Optional<Transaction>;
       move(node: Node, to: Point): Optional<Transaction>;
       delete(selection?: PinnedSelection): Optional<Transaction>;
-      deleteNodes(nodeSelection?: NodeSelection): Optional<Transaction>;
+      deleteNodes(nodeSelection?: NodeSelection, opts?: DeleteOpts): Optional<Transaction>;
       split(node: Node, selection?: PinnedSelection, opts?: SplitOpts): Optional<Transaction>;
       wrap(node: Node, name: NodeName): Optional<Transaction>;
       unwrap(node: Node): Optional<Transaction>;
@@ -231,7 +232,7 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    const commonNode = startBlock === endBlock ? startBlock : startBlock?.parent;
+    const commonNode = startBlock.commonNode(endBlock);
     if (!commonNode) {
       console.log(p14("%c[failed]"), "color:red", "common node not found, should not reach!");
       return;
@@ -239,57 +240,57 @@ export class TransformCommands extends BeforePlugin {
 
     console.log('XX', commonNode.name, commonNode.id.toString());
 
-    // if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-    //   const { tr } = app;
-    //   const blockJson = {
-    //     name: splitBlock.name,
-    //     content: [
-    //       {
-    //         name: 'title',
-    //         content: []
-    //       }
-    //     ]
-    //   }
+    if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+      const { tr } = app;
+      const blockJson = {
+        name: splitBlock.name,
+        content: [
+          {
+            name: 'title',
+            content: []
+          }
+        ]
+      }
 
-    //   const block = app.schema.nodeFromJSON(blockJson);
-    //   if (!block) {
-    //     throw Error('failed to create block');
-    //   }
+      const block = app.schema.nodeFromJSON(blockJson);
+      if (!block) {
+        throw Error('failed to create block');
+      }
 
-    //   const at = Point.toBefore(splitBlock.id);
+      const at = Point.toBefore(splitBlock.id);
 
-    //   if (commonNode.isContainerBlock) {
-    //     const splitBlockJson = {
-    //       name: splitBlock.type.splitName,
-    //       content: [
-    //         {
-    //           name: 'title',
-    //           content: []
-    //         }
-    //       ]
-    //     }
-    //     const afterBlock = app.schema.nodeFromJSON(splitBlockJson);
-    //     if (!afterBlock) {
-    //       throw Error('failed to create splitBlock');
-    //     }
-    //     const focusPoint = Pin.toStartOf(afterBlock);
-    //     const after = PinnedSelection.fromPin(focusPoint!);
-    //     const insertAt = commonNode.type.isContainer ? Point.toAfter(commonNode.firstChild!.id) : Point.toAfter(commonNode.id);
-    //     tr
-    //       .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
-    //       .insert(at, block!)
-    //       // .insert(insertAt, afterBlock!)
-    //       // .select(after);
-    //   } else {
-    //     const focusPoint = Pin.toStartOf(splitBlock);
-    //     const after = PinnedSelection.fromPin(focusPoint!);
-    //     tr
-    //       .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
-    //       .insert(at, block!)
-    //       .select(after);
-    //   }
-    //   return tr;
-    // }
+      if (commonNode.isContainerBlock) {
+        const splitBlockJson = {
+          name: splitBlock.type.splitName,
+          content: [
+            {
+              name: 'title',
+              content: []
+            }
+          ]
+        }
+        const afterBlock = app.schema.nodeFromJSON(splitBlockJson);
+        if (!afterBlock) {
+          throw Error('failed to create splitBlock');
+        }
+        const focusPoint = Pin.toStartOf(afterBlock);
+        const after = PinnedSelection.fromPin(focusPoint!);
+        const insertAt = commonNode.type.isContainer ? Point.toAfter(commonNode.firstChild!.id) : Point.toAfter(commonNode.id);
+        tr
+          .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
+          .insert(at, block!)
+          // .insert(insertAt, afterBlock!)
+          // .select(after);
+      } else {
+        const focusPoint = Pin.toStartOf(splitBlock);
+        const after = PinnedSelection.fromPin(focusPoint!);
+        tr
+          .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
+          .insert(at, block!)
+          .select(after);
+      }
+      return tr;
+    }
 
     const deleteGroup = this.selectionInfo(app, selection);
 
@@ -660,7 +661,8 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // delete selected nodes
-  deleteNodes(app: Carbon, nodeSelection: NodeSelection = app.nodeSelection): Optional<Transaction> {
+  deleteNodes(app: Carbon, nodeSelection: NodeSelection = app.nodeSelection, opts?: DeleteOpts): Optional<Transaction> {
+    const { fall = 'after'} = opts;
     const deleteActions: Action[] = [];
     const { nodes } = nodeSelection;
     reverse(nodes.slice()).forEach(node => {
@@ -670,6 +672,7 @@ export class TransformCommands extends BeforePlugin {
     const lastNode = last(nodes)!;
     let selection: Optional<PinnedSelection> = undefined;
 
+    if (fall === 'after') {
     const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
     if (focusNode) {
       selection = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
@@ -679,6 +682,19 @@ export class TransformCommands extends BeforePlugin {
       const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
       if (focusNode) {
         selection = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+      }
+    }
+    } else {
+      const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
+      if (focusNode) {
+        selection = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+      }
+
+      if (!selection) {
+        const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
+        if (focusNode) {
+          selection = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+        }
       }
     }
 
@@ -718,6 +734,7 @@ export class TransformCommands extends BeforePlugin {
       return tr
     }
 
+    // startBlock and endBlock are container blocks of tailNode and headNode
     const [startBlock, endBlock] = blocksBelowCommonNode(tailNode, headNode);
     if (!startBlock || !endBlock) {
       console.log(p14("%c[failed]"), "color:red", "merge nodes are not found");
@@ -732,18 +749,7 @@ export class TransformCommands extends BeforePlugin {
     // console.log(commonNode);
 
     if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-
-      const point = Point.toWithin(commonNode.id);
-      const json = {
-        name: commonNode.name,
-        content: [
-          {
-            name: 'title',
-            content: []
-          }
-        ]
-      }
-      const block = app.schema.nodeFromJSON(json);
+      const block = commonNode.type.default();
       if (!block) {
         console.log(p14("%c[failed]"), "color:red", "block not found");
         return;
