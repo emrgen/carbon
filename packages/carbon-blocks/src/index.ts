@@ -13,6 +13,8 @@ import { Divider } from './plugins/Divider';
 import TitleComp from './renderers/TitleComp';
 import { CollapsibleList } from './plugins/Collapsible';
 import CollapsibleListComp from './renderers/Collapsible';
+import { BulletedListComp } from './renderers/BulletedList';
+import { BulletedList } from './plugins/BulletedList';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -23,6 +25,7 @@ export const blockPresets: Extension = {
 		new DocPlugin(),
 		new ListKeyboardPlugin(),
 		new CollapsibleList(),
+		new BulletedList(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -35,5 +38,6 @@ export const blockPresets: Extension = {
 		Renderer.create('text', CarbonText),
 		Renderer.create('divider', DividerComp),
 		Renderer.create('collapsible', CollapsibleListComp),
+		Renderer.create('bulletedList', BulletedListComp),
 	]
 }

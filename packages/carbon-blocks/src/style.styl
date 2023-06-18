@@ -113,3 +113,16 @@ span {
 		width 16px
 		height: 30px
 
+[data-name=bulletedList]
+	> [data-type=children]
+		padding-left 0px
+	padding-left: 30px
+	> [data-type=content]
+			&:after
+				position absolute
+				content '●'
+				left: 13px
+				top 0
+				user-select: none
+				pointer-events: none
+				font-size: 0.8em

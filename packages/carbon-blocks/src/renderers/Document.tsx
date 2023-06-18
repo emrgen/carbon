@@ -7,6 +7,7 @@ import {
   CarbonNodeContent,
   RendererProps,
 } from "@emrgen/carbon-core";
+import CarbonLink from "./CarbonLink";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
@@ -18,6 +19,7 @@ export const DocumentComp = (props: RendererProps) => {
   // 	selectionSurface,
   // 	dndRegion
   // ));
+
 
   // console.log(connectors)
   return (

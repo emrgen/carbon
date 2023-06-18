@@ -26,6 +26,9 @@ const data = node("document", [
     title([text("I'm a collapsible")]),
     section([title([text("section 1")])]),
   ]),
+  node('bulletedList', [
+    title([text("section 1")]),
+  ]),
   section([
     title([text("section 1")]),
     section([title([text("section 1.1")])]),
@@ -38,6 +41,7 @@ const data = node("document", [
     ]),
   ]),
   node("divider"),
+  // node("link"),
   section([
     title([text("section 2")]),
     section([

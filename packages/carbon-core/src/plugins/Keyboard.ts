@@ -281,8 +281,14 @@ export class KeyboardPlugin extends AfterPlugin {
 		}
 		console.log(`splitting block: ${splitBlock.name}`);
 
+		const rootType = app.schema.type(splitBlock.type.splitName)
+		if (!rootType) {
+			console.warn('failed to split: ' + splitBlock.name);
+			return
+		}
+
 		cmd.transform
-			.split(splitBlock, selection, { rootType: app.schema.type('section') })?.dispatch();
+			.split(splitBlock, selection, { rootType })?.dispatch();
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {
