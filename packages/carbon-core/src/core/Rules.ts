@@ -1,6 +1,8 @@
 import { EventContext } from "./EventContext"
 import { Node } from "./Node"
 
+export type InputHandler = (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => void;
+
 export interface ChangeRule {
   execute(ctx: EventContext<KeyboardEvent>, text: string,): boolean
   merge(rule: ChangeRule): ChangeRule
@@ -25,9 +27,9 @@ export class ChangeRules implements ChangeRule {
 export class InputRule implements ChangeRule {
   regex: RegExp;
 
-  handler: (ctx: EventContext<KeyboardEvent>) => void;
+  handler: InputHandler;
 
-  constructor(regex: RegExp, handler: (ctx: EventContext<KeyboardEvent>) => void) {
+  constructor(regex: RegExp, handler: InputHandler) {
     this.regex = regex;
     this.handler = handler;
   }
@@ -36,7 +38,7 @@ export class InputRule implements ChangeRule {
     console.info('[matching]', text, this.regex, this.regex.test(text));
 
     if (this.regex.test(text)) {
-      this.handler(ctx);
+      this.handler(ctx, this.regex, text);
       return true
     }
     return false

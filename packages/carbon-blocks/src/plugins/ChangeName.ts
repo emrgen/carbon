@@ -1,22 +1,34 @@
-import { Action, BeforeInputRuleHandler, BeforePlugin, EventContext, EventHandler, InputRule, MoveAction, Pin, PinnedSelection, Point, nodeLocation } from "@emrgen/carbon-core";
-import { isConvertible, isNestableNode } from "../utils";
+import {
+  Action,
+  BeforeInputRuleHandler,
+  BeforePlugin,
+  EventContext,
+  EventHandler,
+  InputRule,
+  MoveAction,
+  Pin,
+  PinnedSelection,
+  Point,
+  nodeLocation
+} from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
+import { isConvertible } from "../utils";
 
 export class ChangeName extends BeforePlugin {
   name = 'changeName';
 
   inputRules = new BeforeInputRuleHandler([
-    //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberedList', 2)),
-    //   // new InputRule(/^-\t(.)*/, this.tryChangeType('tabbedList', 2)),
-    new InputRule(/^-\s(.)*/, this.tryChangeType('bulletedList', 1, ['nestable'])),
-    new InputRule(/^>\s(.)*/, this.tryChangeType('collapsible', 1, ['nestable'])),
-    new InputRule(/^---(.)*/, this.tryChangeIntoDivider('divider', 2, ['nestable'])),
+    //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberedList')),
+    //   new InputRule(/^-\t(.)*/, this.tryChangeType('tabbedList')),
+    new InputRule(/^(-\s)(.)*/, this.tryChangeType('bulletedList', ['nestable'])),
+    new InputRule(/^(>\s)(.)*/, this.tryChangeType('collapsible', ['nestable'])),
+    new InputRule(/^(---)(.)*/, this.tryChangeIntoDivider('divider', ['nestable'])),
   ])
 
   on(): Partial<EventHandler> {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-        const { app, node, event } = ctx;
+        const { node } = ctx;
         const block = node.closest(n => n.isContainerBlock)!;
 
         if (!isConvertible(block)) return
@@ -27,8 +39,8 @@ export class ChangeName extends BeforePlugin {
     };
   }
 
-  tryChangeType(type: string, offset: number, groups: string[]) {
-    return (ctx: EventContext<KeyboardEvent>) => {
+  tryChangeType(type: string, groups: string[]) {
+    return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;
       const block = node.closest(n => n.isContainerBlock)!;
@@ -40,16 +52,23 @@ export class ChangeName extends BeforePlugin {
       ctx.stopPropagation();
 
       const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
+
+      const match = text.match(regex);
+      if (match === null) {
+        console.error('failed to match regex', regex, text);
+        return
+      }
+
       tr
-        .removeText(Pin.toStartOf(block)?.point!, app.schema.text(block.textContent.slice(0, offset))!)
+        .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
         .change(block.id, block.name, type)
         .select(after)
         .dispatch()
     }
   }
 
-  tryChangeIntoDivider(type: string, offset: number, groups: string[]) {
-    return (ctx: EventContext<KeyboardEvent>) => {
+  tryChangeIntoDivider(type: string, groups: string[]) {
+    return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;
       const block = node.closest(n => n.isContainerBlock)!;
@@ -73,8 +92,14 @@ export class ChangeName extends BeforePlugin {
         moveActions.push(MoveAction.create(nodeLocation(n)!, at, n.id));
       });
 
+      const match = text.match(regex);
+      if (match === null) {
+        console.error('failed to match regex', regex, text);
+        return
+      }
+
       tr
-        .removeText(Pin.toStartOf(block)?.point!, app.schema.text(block.textContent.slice(0, offset))!)
+        .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
         .insert(Point.toAfter(block.prevSibling!.id), divider)
         .change(block.id, block.name, block.type.splitName)
         .add(moveActions)
