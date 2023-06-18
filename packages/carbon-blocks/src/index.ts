@@ -15,6 +15,7 @@ import { CollapsibleList } from './plugins/Collapsible';
 import CollapsibleListComp from './renderers/Collapsible';
 import { BulletedListComp } from './renderers/BulletedList';
 import { BulletedList } from './plugins/BulletedList';
+import { ChangeName } from './plugins/ChangeName';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -26,6 +27,7 @@ export const blockPresets: Extension = {
 		new ListKeyboardPlugin(),
 		new CollapsibleList(),
 		new BulletedList(),
+		new ChangeName(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),

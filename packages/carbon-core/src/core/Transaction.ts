@@ -26,6 +26,7 @@ import { RemoveNode } from './actions/RemoveNode';
 import { SetContent } from './actions/SetContent';
 import { NodeContent } from './NodeContent';
 import { SelectNodesAction } from './actions/SelectNodes';
+import { RemoveText } from './actions';
 
 export class TransactionError {
 	commandId: number;
@@ -141,6 +142,11 @@ export class Transaction {
 
 	remove(at: Point, id: NodeId, origin = this.origin): Transaction {
 		this.add(RemoveNode.create(at, id, origin));
+		return this;
+	}
+
+	removeText(at: Point, textNode: Node, origin = this.origin): Transaction {
+		this.add(RemoveText.create(at, textNode, origin));
 		return this;
 	}
 
