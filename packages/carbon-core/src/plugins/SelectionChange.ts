@@ -4,6 +4,7 @@ import { AfterPlugin } from '../core/CarbonPlugin';
 import { EventHandlerMap } from '../core/types';
 import { CarbonState } from '../core/CarbonState';
 import { Decoration } from '../core/Decoration';
+import { ActionOrigin } from '../core';
 
 let count = 0
 
@@ -14,8 +15,8 @@ export class SelectionChangePlugin extends AfterPlugin {
 
 	on(): EventHandlerMap {
 		return {
-			selectionchange: (event: EventContext<Event>) => {
-				console.log(p14('[event]'), 'selectionchange');
+			selectionchange: (ctx: EventContext<Event>) => {
+				console.log(p14('[event]'), 'selectionchange', ctx.event);
 				// helper code block to detect errant selectionchange effect
 				count++;
 				setTimeout(() => {
@@ -26,7 +27,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 					return
 				}
 
-				const { app, selection: after } = event;
+				const { app, selection: after } = ctx;
 				console.log(after.toString());
 
 				const { selection: before } = app;

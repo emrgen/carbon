@@ -47,7 +47,7 @@ export class PluginManager {
 			.reduce((o, p) => ({ ...o, [p.name]: p }), {});
 
 		// console.log(keys(this.nodes).length, this.nodes)
-		const events = flattened.reduce((es, p) => es.concat(keys(p.on()) as EventsIn[]), [] as EventsIn[])
+		const events = flattened.reduce((es, p) => es.concat(keys(p.on()).map(k => camelCase(k)) as EventsIn[]), [] as EventsIn[])
 		this.events = new Set(events.concat([EventsIn.keyDown]));
 	}
 

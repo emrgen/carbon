@@ -151,7 +151,7 @@ export interface NodeSpec {
 	layout?: NodeLayout;
 	// node is a embedded element
 	// it can be a video, audio, external app
-	embed?: boolean;
+	embedded?: boolean;
 	// sandbox act as a divider of all interaction with other node
 	// sandbox also act as the edge of the interactions
 	sandbox?: boolean;

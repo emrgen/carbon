@@ -16,7 +16,13 @@ export const BulletedListComp = (props: RendererProps) => {
 
   const beforeContent = useMemo(() => {
     return (
-      <label contentEditable="false" suppressContentEditableWarning></label>
+      <label
+        contentEditable="false"
+        suppressContentEditableWarning
+        className="carbon-bulletedList__label"
+      >
+        ●
+      </label>
     );
   }, []);
 

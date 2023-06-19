@@ -286,7 +286,9 @@ export class Pin {
 			distance -= currSize;
 			// console.log(curr.id.key, curr.focusSize);
 			prev = curr;
-			curr = curr.next(n => n.isFocusable);
+			curr = curr.next(n => n.isFocusable, {
+				skip: n => n.isIsolating
+			});
 		}
 
 		if (!curr) {
@@ -324,7 +326,9 @@ export class Pin {
 			distance -= currSize;
 			// console.log(curr.id.key, curr.focusSize);
 			prev = curr;
-			curr = curr.prev(n => n.isFocusable);
+			curr = curr.prev(n => n.isFocusable, {
+				skip: n => n.isIsolating,
+			});
 		}
 
 		// console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);

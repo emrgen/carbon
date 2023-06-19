@@ -7,3 +7,4 @@ export const isNestableNode = (node: Node) => {
 export const isConvertible = (node: Node) => {
 	return (!node.isRoot && isNestableNode(node))
 }
+

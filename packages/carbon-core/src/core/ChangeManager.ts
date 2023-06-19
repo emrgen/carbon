@@ -34,7 +34,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	update() {
 		if (this.state.isContentDirty) {
 			this.updateContent();
-			// console.log('update content');
+			console.log('update content');
 			return
 		}
 

@@ -26,9 +26,8 @@ const data = node("document", [
     title([text("I'm a collapsible")]),
     section([title([text("section 1")])]),
   ]),
-  node('bulletedList', [
-    title([text("section 1")]),
-  ]),
+  node("bulletedList", [title([text("section 1")])]),
+  node("equation", [title([text(`(x+1)^2 = x^2 + 2x + 1`)])]),
   section([
     title([text("section 1")]),
     section([title([text("section 1.1")])]),

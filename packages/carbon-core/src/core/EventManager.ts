@@ -41,7 +41,7 @@ export class EventManager {
 
 	onEvent(type: EventsIn, event: Event) {
 		const { app } = this;
-		// console.log(event);
+		// console.log(type, event);
 		
 		// without focus the editor does not process any event
 		if (!app.enabled) {
@@ -82,8 +82,6 @@ export class EventManager {
 			this.pm.onEvent(editorEvent);
 			return
 		}
-
-
 
 		// console.debug(p14('%c[debug]'),'color:magenta', 'Editor.currentSelection', this.selection.toString(),);
 		const selection = PinnedSelection.fromDom(app.store);

@@ -6,11 +6,11 @@ export enum EventsIn {
 	keyUp = 'keyUp',
 	keyDown = 'keyDown',
 
-	mouseDown = 'mouse-down',
-	mouseUp = 'mouse-up',
-	mouseMove = 'mouse-move',
-	mouseOver = 'mouse-over',
-	mouseOut = 'mouse-out',
+	mouseDown = 'mouseDown',
+	mouseUp = 'mouseUp',
+	mouseMove = 'mouseMove',
+	mouseOver = 'mouseOver',
+	mouseOut = 'mouseOut',
 	scroll = 'scroll',
 
 	blur = 'blur',

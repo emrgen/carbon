@@ -21,6 +21,7 @@ export class Section extends NodePlugin {
 			attrs: {
 				html: {
 					placeholder: 'Type / for commands',
+					// contentEditable: false,
 					suppressContentEditableWarning: true,
 				}
 			}

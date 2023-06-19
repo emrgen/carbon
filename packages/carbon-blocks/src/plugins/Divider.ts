@@ -7,6 +7,7 @@ export class Divider extends NodePlugin {
   spec(): NodeSpec {
     return {
       group: 'content nestable',
+      atom: true,
       isolating: true,
       selectable: true,
       draggable: true,

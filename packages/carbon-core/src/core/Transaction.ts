@@ -25,8 +25,9 @@ import { MoveAction } from './actions/MoveAction';
 import { RemoveNode } from './actions/RemoveNode';
 import { SetContent } from './actions/SetContent';
 import { NodeContent } from './NodeContent';
-import { SelectNodesAction } from './actions/SelectNodes';
+import { SelectNodes } from './actions/SelectNodes';
 import { RemoveText } from './actions';
+import { ActivateNodes } from './actions/ActivateNodes';
 
 export class TransactionError {
 	commandId: number;
@@ -180,15 +181,25 @@ export class Transaction {
 		if (this.state.activatedNodeIds.size) {
 			// this.add(ActivateNodeCommand.create([], origin));
 		}
-		this.add(SelectNodesAction.create(ids, origin));
+		this.add(SelectNodes.create(ids, origin));
 		return this
 	}
 
 	// only selected nodes can be activated
 	// first select and then activate nodes
 	activateNodes(ids: NodeId[], origin = this.origin): Transaction {
-		// this.add(SelectNodesCommand.create(ids, origin));
-		// this.add(ActivateNodeCommand.create(ids, origin));
+		this.add(SelectNodes.create(ids, origin));
+		this.add(ActivateNodes.create(ids, origin));
+		return this
+	}
+
+	forceRender(ids: NodeId[], origin = this.origin): Transaction {
+		ids.forEach(id => {
+			this.state.store.get(id)?.markUpdated();
+			this.updatedIds.add(id)
+			this.state.runtime.updatedNodeIds.add(id);
+		});
+
 		return this
 	}
 
@@ -219,7 +230,7 @@ export class Transaction {
 			return false;
 		}
 
-		if (this.actions.length === 0) return false
+		if (this.actions.length === 0 && this.updatedIds.size === 0) return false
 
 		// const prevDocVersion = editor.doc?.updateCount;
 		try {

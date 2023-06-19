@@ -16,6 +16,8 @@ import CollapsibleListComp from './renderers/Collapsible';
 import { BulletedListComp } from './renderers/BulletedList';
 import { BulletedList } from './plugins/BulletedList';
 import { ChangeName } from './plugins/ChangeName';
+import { Equation } from './plugins/Equation';
+import { EquationComp } from './renderers/Equation';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -28,6 +30,7 @@ export const blockPresets: Extension = {
 		new CollapsibleList(),
 		new BulletedList(),
 		new ChangeName(),
+		new Equation(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -41,5 +44,6 @@ export const blockPresets: Extension = {
 		Renderer.create('divider', DividerComp),
 		Renderer.create('collapsible', CollapsibleListComp),
 		Renderer.create('bulletedList', BulletedListComp),
+		Renderer.create('equation', EquationComp),
 	]
 }

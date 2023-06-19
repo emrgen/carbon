@@ -1,4 +1,4 @@
-import { EventHandlerMap } from "../core/types";
+import { EventHandler, EventHandlerMap } from "../core/types";
 import { p14 } from "../core/Logger";
 import { AfterPlugin, BeforePlugin, CarbonPlugin } from '../core/CarbonPlugin';
 import { EventContext } from "../core/EventContext";
@@ -8,20 +8,46 @@ import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
 import { first, last, reverse } from "lodash";
 import { Node, Pin, PinnedSelection } from "../core";
+import { hasParent, nodePath } from "../utils/node";
+
+export class KeyboardBeforePlugin extends BeforePlugin {
+
+	name = 'keyboardBefore'
+
+	on(): Partial<EventHandler> {
+		return {
+			mouseDown: (ctx: EventContext<MouseEvent>) => {
+				const {app, node} = ctx;
+				const {selection} = app;
+				const {start, end} = selection;
+				const isolating = start.node.find(n => n.isIsolating);
+				if (!isolating) {
+					return
+				}
+
+				if (hasParent(node, isolating)) {
+					return
+				}
+
+			}
+		}
+	}
+}
 
 // handles general keyboard events
 // node specific cases are handles in node specific plugin
-export class KeyboardPlugin extends AfterPlugin {
+export class KeyboardAfterPlugin extends AfterPlugin {
 
-	name = 'keyboard'
+	name = 'keyboardAfter'
 
 	priority = 10001;
 
 	on(): EventHandlerMap {
 		return {
 			selectstart: (ctx: EventContext<KeyboardEvent>) => {
-				// console.log(event)
+				console.log('xxxxxxxxxxxxxxxxxxxxxx', ctx.event)
 				// ctx.event.preventDefault();
+				// ctx.event.stopPropagation();
 			},
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
 				const { node, event } = ctx;

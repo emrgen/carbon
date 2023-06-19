@@ -8,7 +8,7 @@ import { generateActionId } from "./utils";
 import { NodeIdSet } from '../BSet';
 
 
-export class SelectNodes implements Action {
+export class ActivateNodes implements Action {
   type: ActionType;
   id: number;
   origin: ActionOrigin;
@@ -17,7 +17,7 @@ export class SelectNodes implements Action {
   static fromJSON(json) { }
 
   static create(nodeIds: NodeId[], origin: ActionOrigin) {
-    return new SelectNodes(nodeIds, origin);
+    return new ActivateNodes(nodeIds, origin);
   }
 
   constructor(nodeIds: NodeId[], origin: ActionOrigin) {
@@ -31,22 +31,22 @@ export class SelectNodes implements Action {
 
   execute(tr: Transaction): ActionResult {
     const { app } = tr;
-    const {store, state} = app;
+    const { store, state } = app;
     const { selectedNodeIds } = state;
-    const beforeSelectedNodes = selectedNodeIds.map(id => store.get(id)) as Node[];
+    const beforeActivatedNodes = selectedNodeIds.map(id => store.get(id)) as Node[];
 
-    const afterSelectedNodes = this.nodeIds.map(id => store.get(id)) as Node[];
-    beforeSelectedNodes.filter(n => n.isSelected).forEach(n => {
-      n.updateData({ state: { selected: false } });
+    const afterActivatedNodes = this.nodeIds.map(id => store.get(id)) as Node[];
+    beforeActivatedNodes.filter(n => n.isActive).forEach(n => {
+      n.updateData({ state: { active: false } });
     });
-    afterSelectedNodes.forEach(n => {
-      n.updateData({ state: { selected: true } });
+    afterActivatedNodes.forEach(n => {
+      n.updateData({ state: { active: true } });
     });
 
-    console.log(afterSelectedNodes.map(n => n.id.toString()));
+    console.log(afterActivatedNodes.map(n => n.id.toString()));
 
-    tr.selected(...beforeSelectedNodes);
-    tr.selected(...afterSelectedNodes);
+    tr.selected(...beforeActivatedNodes);
+    tr.selected(...afterActivatedNodes);
     return NULL_ACTION_RESULT
   }
 

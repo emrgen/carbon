@@ -22,8 +22,8 @@ export class CollapsibleList extends NodePlugin {
       },
       attrs: {
         html: {
-          suppressContentEditableWarning: true,
           // contentEditable: false,
+          suppressContentEditableWarning: true,
         }
       }
     }

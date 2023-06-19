@@ -56,16 +56,13 @@ $selectionHaloColor = #accef78d
 		// padding: 0 2px
 		display: flex
 		[data-name=title]
-			-webkit-user-modify: read-write;
 			flex 1
-
 
 --webkit::spelling-error {
   color: teal!important;
 }
 
 span {
-	-webkit-user-modify: read-write;
 	white-space: pre-wrap;
 	word-break: break-word;
 }
@@ -116,13 +113,63 @@ span {
 [data-name=bulletedList]
 	> [data-type=children]
 		padding-left 0px
-	padding-left: 30px
+	// padding-left: 30px
+	// > [data-type=content]
+	// 		&:after
+	// 			position absolute
+	// 			content '●'
+	// 			left: 13px
+	// 			top 0
+	// 			user-select: none
+	// 			pointer-events: none
+	// 			font-size: 0.8em
+	.carbon-bulletedList__label
+		padding 0 10px
+
+[data-name=equation]
+	position relative
+	background #eee
+	padding: 16px
+	margin-top 2px
+	display: flex
+	// justify-content: center
+	outline: none
+	> [data-type=equation-content]
+		display: block
+		user-select: none
+		// text-align: center
+		width: 100%
+		> *
+			user-select: none
 	> [data-type=content]
-			&:after
-				position absolute
-				content '●'
-				left: 13px
-				top 0
-				user-select: none
-				pointer-events: none
-				font-size: 0.8em
+		position absolute
+		width: 260px
+		min-height: 100px
+		top calc(100% + 6px)
+		// left 50%
+		padding: 16px
+		background #fff
+		z-index: 1
+		box-shadow: 0 0 10px rgba(0,0,0,0.2)
+		border-radius: 4px
+
+	.equation-cover
+		position absolute
+		width 100%
+		height 100%
+		top 0
+		left 0
+		cursor pointer
+	.carbon-selection-halo[data-active=true]
+		background: transparent
+
+.katex
+	display: block
+	text-align: center
+	white-space: nowrap
+	.katex-html
+		display: block
+		position relative
+
+// [data-content-editable="false"]
+// 	-webkit-user-modify: read-only;

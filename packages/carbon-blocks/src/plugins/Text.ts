@@ -12,7 +12,7 @@ export class TextPlugin extends NodePlugin {
 			attrs: {
 				html: {
 					spellCheck: true,
-					contentEditable: true,
+					// contentEditable: true,
 					suppressContentEditableWarning: true,
 				}
 			}

@@ -5,7 +5,7 @@ import { Pin } from './Pin';
 import { PointedSelection } from './PointedSelection';
 import { constrain } from '../utils/constrain';
 import { NodeStore } from './NodeStore';
-import { DomSelection } from './Range';
+import { DomSelection, Range } from './Range';
 
 export class PinnedSelection {
 	tail: Pin;
@@ -117,6 +117,10 @@ export class PinnedSelection {
 	constructor(tail: Pin, head: Pin) {
 		this.tail = tail;
 		this.head = head;
+	}
+
+	get range(): Range {
+		return Range.create(this.start, this.end);
 	}
 
 	get isInvalid() {

@@ -10,7 +10,7 @@ import {
 
 export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
-  const {SelectionHalo} = useSelectionHalo(props);
+  const { SelectionHalo } = useSelectionHalo(props);
 
   const beforeContent = (
     <div
@@ -34,7 +34,9 @@ export default function CollapsibleListComp(props: RendererProps) {
         // wrapper={{ contentEditable: false }}
         // custom={{ contentEditable: true }}
       />
+
       <CarbonNodeChildren node={node} />
+
       {SelectionHalo}
     </CarbonBlock>
   );

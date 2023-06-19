@@ -51,7 +51,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 			props.onChange?.()
 			setVersion(value.version);
 			setWatched(value);
-			// console.log("updated", node.id.toString(), node.version, watched === value);
+			console.log("updated", node.id.toString(), node.version, watched === value);
 		};
 		change.subscribe(node.id, NodeChangeType.update, onChange);
 		return () => {
@@ -80,7 +80,7 @@ export const useNodeStateChange = (props: UseNodeChangeProps) => {
 		const onChange = (value: Node) => {
 			setIsActive(!!value.isActive);
 			setIsSelected(!!value.isSelected);
-			console.log('state changed', node.id.toString(), !!value.data._state?.active, !!value.data._state?.selected);
+			console.log('state changed', node.id.toString(), !!value.data.state?.active, !!value.data.state?.selected);
 		};
 
 		change.subscribe(node.id, NodeChangeType.state, onChange);
