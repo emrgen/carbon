@@ -112,8 +112,7 @@ span {
 
 [data-name=bulletedList]
 	> [data-type=children]
-		padding-left 0px
-	// padding-left: 30px
+		padding-left: 30px
 	// > [data-type=content]
 	// 		&:after
 	// 			position absolute
@@ -173,3 +172,13 @@ span {
 
 // [data-content-editable="false"]
 // 	-webkit-user-modify: read-only;
+
+[data-name="title"]
+	position relative
+	&:after
+		position absolute
+		content attr(placeholder)
+		left 0
+		top 0
+		pointer-events: none
+		opacity: 0.2

@@ -125,7 +125,7 @@ export const CarbonChildren = (props: RendererProps) => {
 // render node by name
 export const CarbonNode = (props: RendererProps) => {
   const app = useCarbon();
-  const { node } = useNodeChange(props);
+  const { node, version } = useNodeChange(props);
 
   const RegisteredComponent = app.component(node.name);
   if (RegisteredComponent && RegisteredComponent === CarbonNode) {
@@ -133,10 +133,10 @@ export const CarbonNode = (props: RendererProps) => {
   }
 
   if (RegisteredComponent && RegisteredComponent !== CarbonNode) {
-    return <RegisteredComponent node={node} />;
+    return <RegisteredComponent {...props} version={version} />;
   }
 
-  return <CarbonDefaultNode node={node} />;
+  return <CarbonDefaultNode {...props} version={version} />;
 }
 
 // default node for carbon editor with text and block

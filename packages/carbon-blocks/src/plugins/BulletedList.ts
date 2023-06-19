@@ -10,6 +10,13 @@ export class BulletedList extends Section {
       splitName: 'bulletedList',
       info: {
         title: 'List'
+      },
+      attrs: {
+        html: {
+          placeholder: 'List',
+          // contentEditable: false,
+          suppressContentEditableWarning: true,
+        }
       }
     }
   }

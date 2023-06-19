@@ -24,7 +24,7 @@ export const DocumentComp = (props: RendererProps) => {
   // console.log(connectors)
   return (
     <CarbonBlock node={node} ref={ref}>
-      <CarbonNodeContent node={node} />
+      <CarbonNodeContent node={node} custom={{placeholder: 'Untitled'}}/>
       <CarbonNodeChildren node={node} />
     </CarbonBlock>
   );
