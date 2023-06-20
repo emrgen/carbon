@@ -26,11 +26,17 @@ $selectionHaloColor = #accef78d
 	font-size: 36px
 
 [data-name=h1] > [data-type="content"]
-	font-size: 26px
+	font-size: 30px
+	padding-top: 30px
+	padding-bottom: 12px
 [data-name=h2] > [data-type="content"]
 	font-size: 24px
+	padding-top: 24px
+	padding-bottom: 10px
 [data-name=h3] > [data-type="content"]
-	font-size: 18px
+	font-size: 20px
+	padding-top: 20px
+	padding-bottom: 10px
 [data-name=h4] > [data-type="content"]
 	font-size: 16px
 
@@ -44,6 +50,7 @@ $selectionHaloColor = #accef78d
 [data-name=h2]
 [data-name=h3]
 [data-name=h4]
+	// padding-left: 10px
 	// padding: 1px 0
 	margin-top 2px
 	background rgba(168, 225, 255, 0.316)
@@ -52,7 +59,7 @@ $selectionHaloColor = #accef78d
 	position relative
 	line-height: 30px
 	[data-type="content"]
-		margin-left: 2px
+		padding-left: 2px
 		// padding: 0 2px
 		display: flex
 		[data-name=title]
@@ -112,18 +119,23 @@ span {
 
 [data-name=bulletedList]
 	> [data-type=children]
-		padding-left: 30px
-	// > [data-type=content]
-	// 		&:after
-	// 			position absolute
-	// 			content '●'
-	// 			left: 13px
-	// 			top 0
-	// 			user-select: none
-	// 			pointer-events: none
-	// 			font-size: 0.8em
+		padding-left 0px
+	padding-left: 30px
 	.carbon-bulletedList__label
 		padding 0 10px
+		user-select: none
+		position absolute
+		left 0
+
+[data-name=numberedList]
+	> [data-type=children]
+		padding-left 0px
+	padding-left: 30px
+	.carbon-numberedList__label
+		padding 0 10px
+		user-select: none
+		position absolute
+		left 0
 
 [data-name=equation]
 	position relative
@@ -182,3 +194,15 @@ span {
 		top 0
 		pointer-events: none
 		opacity: 0.2
+
+[data-name="hstack"]
+	display: flex
+	> div
+		flex 1
+
+[data-name="hstack"]
+	background: $selectionHaloColor
+[data-name="stack"]
+	padding-left 10px
+	&:first-child
+		padding-left 0px

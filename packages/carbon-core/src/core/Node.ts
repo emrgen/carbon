@@ -626,6 +626,16 @@ export class Node extends EventEmitter {
 	// @mutates
 	changeType(type: NodeType) {
 		this.type = type;
+		this.attrs = new NodeAttrs({
+			html: {
+				...this.attrs.html,
+				...type.attrs.html,
+			},
+			node: {
+				...type.attrs.node,
+				...this.attrs.node,
+			}
+		});
 		this.markUpdated();
 	}
 

@@ -6,7 +6,7 @@ import { Node } from './Node';
 import { NodeSpec } from './Schema';
 import { Transaction } from './Transaction';
 import { EventHandlerMap, InputRules, PluginName } from './types';
-import { Action } from "./actions/types";
+import { CarbonAction } from "./actions/types";
 
 export enum PluginType {
 	Node,
@@ -69,7 +69,7 @@ export abstract class CarbonPlugin {
 	}
 
 	// normalize the node based on schema
-	normalize(node: Node, state: CarbonState): Optional<Action> { return undefined }
+	normalize(node: Node, state: CarbonState): CarbonAction[] { return [] }
 
 	// node lifecycle hooks
 	mounted(editor: Carbon, node: Node) { }

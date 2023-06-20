@@ -3,12 +3,12 @@ import { Node } from "../Node";
 import { NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { ActionResult, NULL_ACTION_RESULT } from "./Result";
-import { Action, ActionOrigin, ActionType } from "./types";
+import { CarbonAction, ActionOrigin, ActionType } from "./types";
 import { generateActionId } from "./utils";
 import { NodeIdSet } from '../BSet';
 
 
-export class SelectNodes implements Action {
+export class SelectNodes implements CarbonAction {
   type: ActionType;
   id: number;
   origin: ActionOrigin;
@@ -50,7 +50,7 @@ export class SelectNodes implements Action {
     return NULL_ACTION_RESULT
   }
 
-  inverse(): Action {
+  inverse(): CarbonAction {
     throw new Error("Method not implemented.");
   }
 

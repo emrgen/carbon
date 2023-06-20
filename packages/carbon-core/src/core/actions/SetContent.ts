@@ -4,10 +4,10 @@ import { NodeId } from "../NodeId";
 import { Point } from "../Point";
 import { Transaction } from "../Transaction";
 import { ActionResult, NULL_ACTION_RESULT } from "./Result";
-import { Action, ActionOrigin } from "./types";
+import { CarbonAction, ActionOrigin } from "./types";
 import { generateActionId } from "./utils";
 
-export class SetContent implements Action {
+export class SetContent implements CarbonAction {
   id: number;
   origin: ActionOrigin;
 
@@ -37,7 +37,7 @@ export class SetContent implements Action {
     return ActionResult.withValue('done')
   }
 
-  inverse(): Action {
+  inverse(): CarbonAction {
     throw new Error("Method not implemented.");
   }
 

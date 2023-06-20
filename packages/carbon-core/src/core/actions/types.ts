@@ -1,11 +1,11 @@
 import { Transaction } from "../Transaction"
 import { ActionResult } from './Result';
 
-export interface Action {
+export interface CarbonAction {
 	id: number;
 	origin: ActionOrigin;
 	execute(tr: Transaction): ActionResult;
-	inverse(): Action
+	inverse(): CarbonAction
 }
 
 export enum ActionOrigin {

@@ -1,11 +1,11 @@
 import { Transaction } from "../Transaction";
 import { ActionResult } from "./Result";
-import { Action, ActionOrigin } from "./types";
+import { CarbonAction, ActionOrigin } from "./types";
 import { PointedSelection } from '../PointedSelection';
 import { generateActionId } from "./utils";
 import { classString } from '../Logger';
 
-export class SelectAction implements Action {
+export class SelectAction implements CarbonAction {
 	id: number;
 	origin: ActionOrigin;
 	before: PointedSelection;
@@ -29,7 +29,7 @@ export class SelectAction implements Action {
 		return ActionResult.withValue('done')
 	}
 
-	inverse(): Action {
+	inverse(): CarbonAction {
 		throw new Error("Method not implemented.");
 	}
 

@@ -19,6 +19,9 @@ export class Section extends NodePlugin {
 				title: 'Section',
 			},
 			attrs: {
+				node: {
+					focusPlaceholder: 'Section',
+				},
 				html: {
 					placeholder: 'Section',
 					// contentEditable: false,

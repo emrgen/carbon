@@ -1,7 +1,7 @@
 import { Point } from "../Point";
 import { Transaction } from "../Transaction";
 import { ActionResult, NULL_ACTION_RESULT } from "./Result";
-import { Action, ActionOrigin, ActionType } from "./types";
+import { CarbonAction, ActionOrigin, ActionType } from "./types";
 import { generateActionId } from './utils';
 import { InsertText } from './InsertText';
 import { classString } from '../Logger';
@@ -9,7 +9,7 @@ import { Node } from '../Node';
 import { Pin } from '../Pin';
 
 // action to remove text from a node
-export class RemoveText implements Action{
+export class RemoveText implements CarbonAction{
 	id: number;
 	type: ActionType;
 
@@ -53,7 +53,7 @@ export class RemoveText implements Action{
 		return ActionResult.withValue('done')
 	}
 
-	inverse(): Action {
+	inverse(): CarbonAction {
 		const { at, node, origin } = this;
 		return InsertText.create(at, node, false, origin);
 	}

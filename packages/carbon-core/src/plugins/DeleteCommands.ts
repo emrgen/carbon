@@ -6,7 +6,7 @@ import { InsertNodes } from "../core/actions/InsertNodes";
 import { MoveAction } from "../core/actions/MoveAction";
 import { RemoveNode } from "../core/actions/RemoveNode";
 import { RemoveText } from "../core/actions/RemoveText";
-import { Action, ActionOrigin } from "../core/actions/types";
+import { CarbonAction, ActionOrigin } from "../core/actions/types";
 import { NodeIdSet } from "../core/BSet";
 import { Carbon } from "../core/Carbon";
 import { SelectionPatch } from "../core/DeleteGroup";

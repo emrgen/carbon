@@ -1,4 +1,4 @@
-import { Action, ActionOrigin, ActionType } from "./types";
+import { CarbonAction, ActionOrigin, ActionType } from "./types";
 import { Point } from '../Point';
 import { NodeId } from '../NodeId';
 import { ActionResult } from './Result';
@@ -6,7 +6,7 @@ import { Transaction } from '../Transaction';
 import { generateActionId } from './utils';
 
 // action to remove a node by id
-export class RemoveNode implements Action {
+export class RemoveNode implements CarbonAction {
 	id: number;
 	type: ActionType;
 
@@ -29,11 +29,12 @@ export class RemoveNode implements Action {
 
 		target.parent?.remove(target);
 		tr.updated(target.parent!);
+		tr.normalize(target.parent!);
 		return ActionResult.withValue('done')
 	}
 
 
-	inverse(): Action {
+	inverse(): CarbonAction {
 		throw new Error("Method not implemented.");
 	}
 

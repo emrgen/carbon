@@ -2,7 +2,7 @@ import { Point } from "../Point";
 import { Transaction } from "../Transaction";
 import { ActionOrigin, ActionType } from "./types";
 import { generateActionId } from './utils';
-import { Action } from './types';
+import { CarbonAction } from './types';
 import { RemoveText } from './RemoveText';
 import { ActionResult } from './Result';
 import { classString } from '../Logger';
@@ -10,7 +10,7 @@ import { Pin } from '../Pin';
 import { Fragment } from "../Fragment";
 import { Node } from '../Node';
 
-export class InsertText implements Action {
+export class InsertText implements CarbonAction {
 	id: number;
 	type: ActionType;
 
@@ -82,7 +82,7 @@ export class InsertText implements Action {
 		return ActionResult.withValue('done');
 	}
 
-	inverse(): Action {
+	inverse(): CarbonAction {
 		const {at, text, origin} = this;
 		return RemoveText.create(at, text, origin);
 	}

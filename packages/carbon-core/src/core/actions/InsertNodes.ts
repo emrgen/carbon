@@ -1,4 +1,4 @@
-import { Action } from './types';
+import { CarbonAction } from './types';
 import { Transaction } from '../Transaction';
 import { Point } from '../Point';
 import { ActionOrigin } from './types';
@@ -8,7 +8,7 @@ import { ActionResult } from './Result';
 import { Pin } from '../Pin';
 import { classString } from '../Logger';
 
-export class InsertNodes implements Action{
+export class InsertNodes implements CarbonAction{
 	id: number;
 
 	static create(at: Point, fragment: Fragment, origin: ActionOrigin = ActionOrigin.UserInput) {
@@ -59,7 +59,7 @@ export class InsertNodes implements Action{
 		return ActionResult.withError('failed to insert fragment')
 	}
 
-	inverse(): Action {
+	inverse(): CarbonAction {
 		throw new Error("Not implemented");
 
 	}

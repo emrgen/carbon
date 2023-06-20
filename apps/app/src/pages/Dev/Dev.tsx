@@ -17,6 +17,11 @@ import {
 const data = node("document", [
   title([text("Carbon "), text("document"), text(" title")]),
   node("divider"),
+  node("hstack", [
+    node("stack", [section([title([text("section 1")])])]),
+    node("stack", [section([title([text("section 2")])])]),
+    node("stack", [section([title([text("section 3")])])]),
+  ]),
   section([title([])]),
   section([title([text("sect"), text("ABC"), text("ion 1")])]),
   node("divider"),
@@ -28,10 +33,10 @@ const data = node("document", [
   ]),
   node("bulletedList", [title([text("section 1")])]),
   node("equation", [title([text(`(x+1)^2 = x^2 + 2x + 1`)])]),
-  section([
+  node("numberedList", [
     title([text("section 1")]),
-    section([title([text("section 1.1")])]),
-    section([
+    node("numberedList", [title([text("section 1.1")])]),
+    node("numberedList", [
       title([text("section 1.2")]),
       section([
         title([text("section 1.2.1")]),
@@ -61,13 +66,12 @@ const data = node("document", [
   section([title([text("section 3")])]),
 ]);
 
-
 export default function Dev() {
   const app = useCreateCarbon(data, [extensionPresets, blockPresets]);
   console.log(app.schema.nodes);
 
   // @ts-ignore
-  window.app = app
+  window.app = app;
   // console.log(app.content)
 
   return (

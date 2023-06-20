@@ -11,7 +11,7 @@ import { Point } from './Point';
 import { TransactionManager } from './TransactionManager';
 import { CommandError } from './actions/Error';
 import { Carbon } from './Carbon';
-import { Action, ActionOrigin } from './actions/types';
+import { CarbonAction, ActionOrigin } from './actions/types';
 import { PinnedSelection } from './PinnedSelection';
 import { PointedSelection } from './PointedSelection';
 import { NodeId } from './NodeId';
@@ -52,8 +52,8 @@ export class Transaction {
 
 	isNormalizer: boolean = false;
 
-	private actions: Action[] = [];
-	private undoActions: Action[] = [];
+	private actions: CarbonAction[] = [];
+	private undoActions: CarbonAction[] = [];
 	private error: Optional<TransactionError>;
 	private cancelled: boolean = false;
 	private committed: boolean = false;
@@ -208,8 +208,8 @@ export class Transaction {
 	}
 
 	// adds command to transaction
-	add(action: Action | Action[]) {
-		let actions: Action[] = [];
+	add(action: CarbonAction | CarbonAction[]) {
+		let actions: CarbonAction[] = [];
 		if (isArray(action)) {
 			actions = action
 		} else {
@@ -282,9 +282,8 @@ export class Transaction {
 		const nodes = ids
 			.map(id => this.app.store.get(id))
 			.filter(identity);
-		const commands = nodes
-			.map(n => n && this.pm.normalize(n, this.app))
-			.filter(identity) as Action[];
+		const commands = flatten(nodes
+			.map(n => n && this.pm.normalize(n, this.app))).filter(identity) as CarbonAction[]
 
 		// console.log('normalize', commands)
 		this.actions.push(...commands);

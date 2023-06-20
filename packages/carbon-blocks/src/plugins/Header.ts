@@ -31,7 +31,12 @@ export class Heading extends NodePlugin {
 				title: `Heading ${this.level}`,
 			},
 			attrs: {
-				html: {placeholder: `Heading ${this.level}`},
+				node: {
+					emptyPlaceholder: `Heading ${this.level}`
+				},
+				html: {
+					placeholder: `Heading ${this.level}`
+				},
 			}
 		}
 	}

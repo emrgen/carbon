@@ -1,5 +1,11 @@
-import React, { useRef } from 'react';
-import { CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useSelectionHalo } from '@emrgen/carbon-core';
+import React, { useRef } from "react";
+import {
+  CarbonBlock,
+  CarbonNodeChildren,
+  CarbonNodeContent,
+  RendererProps,
+  useSelectionHalo,
+} from "@emrgen/carbon-core";
 
 export const NestableComp = (props: RendererProps) => {
   const { node, placeholder } = props;
@@ -8,14 +14,11 @@ export const NestableComp = (props: RendererProps) => {
 
   // const { listeners } = useDragDropRectSelect({ node, ref });
   // console.log(node.textContent);
-// console.log(attributes);
+  // console.log(attributes);
 
   return (
-    <CarbonBlock node={node} ref={ref} custom={{...attributes}}>
-      <CarbonNodeContent
-        node={node}
-        placeholder={placeholder ?? (node.isEmpty && node.placeholder)}
-      />
+    <CarbonBlock node={node} ref={ref} custom={{ ...attributes }}>
+      <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
       {SelectionHalo}
     </CarbonBlock>

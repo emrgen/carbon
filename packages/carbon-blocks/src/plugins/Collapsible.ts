@@ -21,6 +21,9 @@ export class CollapsibleList extends NodePlugin {
         title: 'Collapsible',
       },
       attrs: {
+        node: {
+          emptyPlaceholder: 'Collapsible',
+        },
         html: {
           // contentEditable: false,
           suppressContentEditableWarning: true,

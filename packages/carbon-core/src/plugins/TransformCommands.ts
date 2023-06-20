@@ -6,7 +6,7 @@ import { InsertNodes } from "../core/actions/InsertNodes";
 import { MoveAction } from "../core/actions/MoveAction";
 import { RemoveNode } from "../core/actions/RemoveNode";
 import { RemoveText } from "../core/actions/RemoveText";
-import { Action, ActionOrigin } from "../core/actions/types";
+import { CarbonAction, ActionOrigin } from "../core/actions/types";
 import { Carbon } from "../core/Carbon";
 import { SelectionPatch } from "../core/DeleteGroup";
 import { Fragment } from "../core/Fragment";
@@ -559,10 +559,10 @@ export class TransformCommands extends BeforePlugin {
     }
 
     let parentBlock = rootNode;
-    const insertCommands: Action[] = [];
-    const moveCommands: Action[] = [];
-    const removeCommands: Action[] = [];
-    const setContentCommands: Action[] = [];
+    const insertCommands: CarbonAction[] = [];
+    const moveCommands: CarbonAction[] = [];
+    const removeCommands: CarbonAction[] = [];
+    const setContentCommands: CarbonAction[] = [];
     const maxDepth = cloneBlocks.length - 1;
     let focusPoint: Optional<Point> = null;
 
@@ -663,7 +663,7 @@ export class TransformCommands extends BeforePlugin {
   // delete selected nodes
   deleteNodes(app: Carbon, nodeSelection: NodeSelection = app.nodeSelection, opts?: DeleteOpts): Optional<Transaction> {
     const { fall = 'after'} = opts;
-    const deleteActions: Action[] = [];
+    const deleteActions: CarbonAction[] = [];
     const { nodes } = nodeSelection;
     reverse(nodes.slice()).forEach(node => {
       deleteActions.push(RemoveNode.create(nodeLocation(node)!, node.id));
@@ -823,8 +823,8 @@ export class TransformCommands extends BeforePlugin {
     // as the depth is zero based need to add 1
     const commonDepth = Math.min(startDepth, endDepth) + 1;
 
-    const insertCommands: Action[] = [];
-    const moveCommands: Action[] = [];
+    const insertCommands: CarbonAction[] = [];
+    const moveCommands: CarbonAction[] = [];
 
     // the core of the delete logic
     // merge node as if startNode and endNode are at same depth
@@ -973,8 +973,8 @@ export class TransformCommands extends BeforePlugin {
     return null
   }
 
-  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch): Action[] {
-    const actions: Action[] = [];
+  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch): CarbonAction[] {
+    const actions: CarbonAction[] = [];
 
     each(deleteGroup.ids.toArray(), id => {
       const node = app.store.get(id);
@@ -1268,7 +1268,7 @@ export class TransformCommands extends BeforePlugin {
 
   // merge two nodes
   merge(app: Carbon, prev: Node, next: Node): Optional<Transaction> {
-    const actions: Action[] = [];
+    const actions: CarbonAction[] = [];
     // check if prev and next can be merged
     // console.log('xxxxxx',prev, next, prev.isEmpty);
 

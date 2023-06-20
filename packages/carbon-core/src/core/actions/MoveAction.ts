@@ -1,13 +1,13 @@
 import { NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { ActionResult, NULL_ACTION_RESULT } from "./Result";
-import { Action, ActionOrigin } from "./types";
+import { CarbonAction, ActionOrigin } from "./types";
 import { Point } from '../Point';
 import { generateActionId } from './utils';
 import { Fragment } from '../Fragment';
 import { classString } from "../Logger";
 
-export class MoveAction implements Action {
+export class MoveAction implements CarbonAction {
 	id: number;
 	origin: ActionOrigin;
 
@@ -38,6 +38,9 @@ export class MoveAction implements Action {
 		}
 
 		tr.updated(moveNode.parent!);
+		tr.normalize(moveNode.parent!);
+		console.log('xxxxxxx');
+		
 		moveNode.parent?.remove(moveNode);
 
 		moveNode.forAll(n => app.store.delete(n));
@@ -80,7 +83,7 @@ export class MoveAction implements Action {
 		return ActionResult.withError('Failed to move node')
 	}
 
-	inverse(): Action {
+	inverse(): CarbonAction {
 		throw new Error("Method not implemented.");
 	}
 

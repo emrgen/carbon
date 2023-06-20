@@ -18,6 +18,10 @@ import { BulletedList } from './plugins/BulletedList';
 import { ChangeName } from './plugins/ChangeName';
 import { Equation } from './plugins/Equation';
 import { EquationComp } from './renderers/Equation';
+import { NumberedListComp } from './renderers/NumberedList';
+import { NumberedList } from './plugins/NumberedList';
+import { HStack, Stack } from './plugins/HStack';
+import { HStackComp } from './renderers/HStackComp';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -29,8 +33,11 @@ export const blockPresets: Extension = {
 		new ListKeyboardPlugin(),
 		new CollapsibleList(),
 		new BulletedList(),
+		new NumberedList(),
 		new ChangeName(),
 		new Equation(),
+		new HStack(),
+		new Stack(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -44,6 +51,9 @@ export const blockPresets: Extension = {
 		Renderer.create('divider', DividerComp),
 		Renderer.create('collapsible', CollapsibleListComp),
 		Renderer.create('bulletedList', BulletedListComp),
+		Renderer.create('numberedList', NumberedListComp),
 		Renderer.create('equation', EquationComp),
+		Renderer.create('hstack', HStackComp),
+		Renderer.create('stack', CarbonNode),
 	]
 }

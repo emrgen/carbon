@@ -1,5 +1,5 @@
 import {
-  Action,
+  CarbonAction,
   BeforeInputRuleHandler,
   BeforePlugin,
   EventContext,
@@ -89,7 +89,7 @@ export class ChangeName extends BeforePlugin {
       }
 
       const at = Point.toAfter(block.id);
-      const moveActions: Action[] = []
+      const moveActions: CarbonAction[] = []
       reverse(block.children.slice(1)).forEach(n => {
         moveActions.push(MoveAction.create(nodeLocation(n)!, at, n.id));
       });

@@ -3,10 +3,10 @@ import { NodeId } from '../NodeId';
 import { Transaction } from '../Transaction';
 import { NodeName } from '../types';
 import { ActionResult } from './Result';
-import { Action, ActionOrigin } from './types';
+import { CarbonAction, ActionOrigin } from './types';
 import { generateActionId } from './utils';
 
-export class ChangeName implements Action{
+export class ChangeName implements CarbonAction{
 	id: number;
 
 	static create(nodeId: NodeId, from: NodeName, to: NodeName,  origin: ActionOrigin = ActionOrigin.UserInput) {
@@ -32,7 +32,7 @@ export class ChangeName implements Action{
 		return ActionResult.withValue('done');
 	}
 
-	inverse(): Action {
+	inverse(): CarbonAction {
 		throw new Error("Not implemented");
 
 	}

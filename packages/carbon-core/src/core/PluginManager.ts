@@ -9,7 +9,7 @@ import { Carbon } from './Carbon';
 import { Node } from './Node';
 import { Transaction } from './Transaction';
 import { EventHandlerMap, NodeName } from './types';
-import { Action } from './actions/types';
+import { CarbonAction } from './actions/types';
 import { EventsIn } from './Event';
 import { SelectionEvent } from './SelectionEvent';
 
@@ -203,20 +203,20 @@ export class PluginManager {
 		// each(this.after, p => p.transaction(tr));
 	}
 
-	normalize(node: Node, app: Carbon): Optional<Action> {
-		// some(this.before, p => p.normalize(node, editor));
-		let command: Optional<Action>;
+	normalize(node: Node, app: Carbon): CarbonAction[] {
+		for (const p of this.before) {
+			const actions = p.normalize(node, app.state);
+			if (actions.length) return actions;
+		}
 
-		some(this.nodes, (p, name) => {
-			if (name === node.name) {
-				// command = p.normalize(node, app)
-				return true
-			}
-			return false
-		})
+		const actions = this.nodes[node.name]?.normalize(node, app.state);
+		if (actions.length) return actions;
 
-		// some(this.after, p => p.normalize(node, editor));
-		return command;
+		for (const p of this.after) {
+			const actions = p.normalize(node, app.state);
+			if (actions.length) return actions;
+		}
+		return []
 	}
 
 	private nodePlugin(name: NodeName): Optional<CarbonPlugin> {
