@@ -8,6 +8,7 @@ import {
 import { RendererProps } from "../core/Renderer";
 import { useCarbon } from '../hooks/useCarbon';
 import { useNodeChange } from "../hooks/useNodeChange";
+import { preventAndStop } from '../utils/event';
 
 export const JustEmpty = () => {
   return <span>&shy;</span>;
@@ -78,20 +79,26 @@ export const RawText = memo(function RT(props: RendererProps) {
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
   const { node, version } = useNodeChange(props);
-  // useEffect(() => {
-  //   console.log(
-  //     "InnerCarbonText",
-  //     node.parent?.version,
-  //     node.version,
-  //     node.textContent
-  //   );
-  // }, [node, version]);
 
   // console.log('InnerCarbonText', node.parent?.version, node.version,node.textContent);
+  const handleClick = (e) => {
+    preventAndStop(e)
+    window.location.href = node.attrs.node.link;
+  }
+
+  if (node.attrs.node.link) {
+    return (
+      <a href={node.attrs.node.link} onClick={handleClick}>
+        <CarbonElement node={node} tag="span">
+          <>{node.isEmpty ? <CarbonEmpty node={node} /> : node.textContent}</>
+        </CarbonElement>
+      </a>
+    );
+  }
 
   return (
     <CarbonElement node={node} tag="span">
-      <>{node.isEmpty ? <CarbonEmpty node={node}/> : node.textContent}</>
+      <>{node.isEmpty ? <CarbonEmpty node={node} /> : node.textContent}</>
     </CarbonElement>
   );
 };

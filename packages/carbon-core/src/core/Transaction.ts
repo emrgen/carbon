@@ -1,4 +1,4 @@
-import { each, first, flatten, identity, isArray, last } from 'lodash';
+import { each, first, flatten, identity, isArray, last, sortBy } from 'lodash';
 
 import { Optional } from '@emrgen/types';
 import { p14 } from './Logger';
@@ -28,6 +28,8 @@ import { NodeContent } from './NodeContent';
 import { SelectNodes } from './actions/SelectNodes';
 import { RemoveText } from './actions';
 import { ActivateNodes } from './actions/ActivateNodes';
+import { UpdateAttrs } from './actions/UpdateAttrs';
+import { NodeAttrs } from './NodeAttrs';
 
 export class TransactionError {
 	commandId: number;
@@ -166,13 +168,15 @@ export class Transaction {
 		return this;
 	}
 
-	updateAttrs(id: NodeId, attrs: Record<string, any>, origin = this.origin): Transaction {
-		// this.add(UpdateAttrsCommand.create(id, attrs, origin))
+	updateAttrs(id: NodeId, attrs: Partial<NodeAttrs>, origin = this.origin): Transaction {
+		console.log('xxxx');
+		
+		this.add(UpdateAttrs.create(id, attrs, origin))
 		return this;
 	}
 
 	updateData(id: NodeId, data: Record<string, any>, origin = this.origin): Transaction {
-		// this.add(UpdateDataCommand.create(id, data, origin))
+		// this.add(UpdateData.create(id, data, origin))
 		return this;
 	}
 
@@ -278,18 +282,17 @@ export class Transaction {
 	// can generate further transaction
 	private normalizeNodes() {
 		const ids = this.normalizeIds.toArray();
+
 		if (!ids.length) return []
 		const nodes = ids
 			.map(id => this.app.store.get(id))
-			.filter(identity);
-		const commands = flatten(nodes
-			.map(n => n && this.pm.normalize(n, this.app))).filter(identity) as CarbonAction[]
-
-		// console.log('normalize', commands)
-		this.actions.push(...commands);
-		for (const command of commands) {
-			command.execute(this);
-		}
+			.filter(identity) as Node[];
+		const sortedNodes = sortBy(nodes, n => -n.depth);
+		const commands = sortedNodes
+			.map(n => n && this.pm.normalize(n, this.app).forEach(action => {
+				this.actions.push(action);
+				action.execute(this)
+			}))
 	}
 
 	private abort(message: string) {

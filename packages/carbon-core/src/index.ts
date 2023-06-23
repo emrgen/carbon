@@ -10,5 +10,6 @@ export * from './utils/split'
 export * from './utils/key'
 export * from './utils/location'
 export * from './utils/node'
+export * from './utils/event'
 
 

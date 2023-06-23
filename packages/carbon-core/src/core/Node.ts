@@ -640,8 +640,8 @@ export class Node extends EventEmitter {
 	}
 
 	// @mutates
-	updateProps(props: Record<string, any>) {
-		this.attrs.update(props);
+	updateAttrs(props: Record<string, any>) {
+		this.attrs = this.attrs.update(props);
 		this.markUpdated();
 	}
 

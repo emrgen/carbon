@@ -1,6 +1,7 @@
-export const text = (text: string = '') => ({
+export const text = (text: string = '', attrs = {}) => ({
 	name: 'text',
 	text,
+	attrs,
 });
 
 export const node = (name: string, content: any[] = [], attrs = {}) => ({

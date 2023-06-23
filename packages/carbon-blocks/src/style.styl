@@ -44,7 +44,7 @@ $selectionHaloColor = #accef78d
 [data-name=collapsible]
 [data-name=bulletedList]
 [data-name=numberedList]
-[data-name=taskList]
+[data-name=checkedList]
 [data-name=collapsibleList]
 [data-name=h1]
 [data-name=h2]
@@ -127,10 +127,29 @@ span {
 		position absolute
 		left 0
 
-[data-name=numberedList]
+[data-name=checkedList]
+	position relative
 	> [data-type=children]
 		padding-left 0px
 	padding-left: 30px
+	.carbon-checkedList__control
+		padding-right: 4px
+		padding-left 2px
+		user-select: none
+		position absolute
+		left 0
+		input
+			height: 18px
+			width: 18px
+			margin-top 6px
+			// vertical-align: middle
+
+
+
+[data-name=numberedList]
+	> [data-type=children]
+		padding-left 0px
+	padding-left: 32px
 	.carbon-numberedList__label
 		padding 0 10px
 		user-select: none
@@ -206,3 +225,27 @@ span {
 	padding-left 10px
 	&:first-child
 		padding-left 0px
+
+[data-name="title"] a
+	cursor pointer
+
+[data-name="image"]
+
+	position relative
+	display: flex
+	.image-container
+		margin: 10px 0
+		width 50%
+		position relative
+		cursor: pointer
+	img
+		width 100%
+
+.carbon-portal
+	position absolute
+	top: 0
+	left: 0
+	width: 100%
+	height 100%
+	// background #000
+

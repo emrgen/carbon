@@ -3,6 +3,7 @@ import { useCarbon } from '../hooks/useCarbon';
 import { useEventListeners } from "../hooks/useEventHandlers";
 import { useSelectionChange } from "../hooks/useSelectionChange";
 import { CarbonNode } from '../renderer/CarbonNodes';
+import CarbonPortal from "./CarbonPortal";
 
 // listen for dom event
 const events: EventsIn[] = [
@@ -36,11 +37,7 @@ export function CarbonContent() {
       </div>
 
       {/* helper portal for the app */}
-      <div
-        className={"portal"}
-        contentEditable="false"
-        suppressContentEditableWarning
-      ></div>
+      <CarbonPortal/>
     </>
   );
 }

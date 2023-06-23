@@ -10,8 +10,8 @@ export class NodeAttrs {
 	}
 
 	update(attrs: Record<string, any>) {
-		const { html, node } = attrs;
-		this.html = merge(cloneDeep(this.html), html);
-		this.node = merge(cloneDeep(this.node), node);
+		const html = merge(cloneDeep(this.html), attrs.html);
+		const node = merge(cloneDeep(this.node), attrs.node);
+		return new NodeAttrs({ html, node });
 	}
 }

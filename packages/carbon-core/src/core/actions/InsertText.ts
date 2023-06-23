@@ -9,6 +9,7 @@ import { classString } from '../Logger';
 import { Pin } from '../Pin';
 import { Fragment } from "../Fragment";
 import { Node } from '../Node';
+import { isEqual } from 'lodash';
 
 export class InsertText implements CarbonAction {
 	id: number;
@@ -24,17 +25,17 @@ export class InsertText implements CarbonAction {
 	}
 
 	execute(tr: Transaction): ActionResult {
-		const {at, text, native} = this;
-		const {app} = tr;
-		const {schema} = app;
+		const { at, text, native } = this;
+		const { app } = tr;
+		const { schema } = app;
 
 		const pin = Pin.fromPoint(at, tr.app.store)?.down();
 		if (!pin) {
 			return ActionResult.withError('failed to find pin from: ' + at.toString());
 		}
 
-		const {node, offset} = pin;
-		const {parent} = node;
+		const { node, offset } = pin;
+		const { parent } = node;
 		const fragment = Fragment.fromNode(text);
 		if (!parent) {
 			return ActionResult.withError('failed to find pin from: ' + at.toString());
@@ -42,21 +43,36 @@ export class InsertText implements CarbonAction {
 
 		console.log('inserting text', this.text);
 
+		console.log('xxxxxxxxxxxxxxx', pin, pin.isBefore, pin.isAfter, pin.isWithin);
+
 		if (pin.isBefore) {
 			const { textContent } = node;
-			node.updateText(text.textContent + textContent);
-			if (!native) {
-				tr.updated(node);
+			// if the current text style match just insert into existing text
+			if (isEqual(node.attrs, text.attrs)) {
+				node.updateText(text.textContent + textContent);
+				if (!native) {
+					tr.updated(node);
+				}
+			} else {
+				node.parent?.insertAfter(Fragment.fromNode(text), node);
+				tr.updated(node.parent!);
 			}
 			return ActionResult.withValue('done');
 		}
 
 		if (pin.isAfter) {
 			const { textContent } = node;
-			node.updateText(textContent + text.textContent);
-			if (!native) {
-				tr.updated(node);
+			// if the current text style match just insert into existing text
+			if (isEqual(node.attrs, text.attrs)) {
+				node.updateText(textContent + text.textContent);
+				if (!native) {
+					tr.updated(node);
+				}
+			} else {
+				node.parent?.insertAfter(Fragment.fromNode(text), node);
+				tr.updated(node.parent!);
 			}
+
 			return ActionResult.withValue('done');
 		}
 
@@ -67,7 +83,7 @@ export class InsertText implements CarbonAction {
 					tr.updated(node);
 				}
 			} else {
-				const {textContent} = node;
+				const { textContent } = node;
 				// if the current text style match just insert into existing text
 				const updatedText = textContent.slice(0, offset) + text.textContent + textContent.slice(offset);
 				node.updateText(updatedText);
@@ -83,12 +99,12 @@ export class InsertText implements CarbonAction {
 	}
 
 	inverse(): CarbonAction {
-		const {at, text, origin} = this;
+		const { at, text, origin } = this;
 		return RemoveText.create(at, text, origin);
 	}
 
 	toString() {
-		const {at, text, origin} = this
+		const { at, text, origin } = this
 		return classString(this)({
 			at: at.toString(),
 			text,

@@ -29,11 +29,12 @@ export enum ActionType {
 	removeText = 'removeText',
 
 	mark = 'mark',
-	attrs = 'attrs',
 	data = 'data',
 
 	selectNodes = 'selectNodes',
 	activateNodes = 'activateNodes',
+
+	updateAttrs = 'updateAttrs',
 
 	null = 'null',
 	custom = 'custom',

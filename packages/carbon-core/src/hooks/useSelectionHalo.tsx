@@ -7,6 +7,7 @@ interface UseSelectionHaloProps {
   className?: string;
 }
 
+// creates a selection halo around the selected node
 export const useSelectionHalo = (props: UseSelectionHaloProps) => {
 	const { node, className } = props;
 	const {isSelected, attributes} = useNodeStateChange(props)

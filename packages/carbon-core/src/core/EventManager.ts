@@ -209,7 +209,7 @@ export class EventManager {
 
 			if (before?.isCollapsed && prevNode?.type.isTextBlock || prevNode?.isVoid) {
 				isUpdated = true
-				prevNode.updateProps({
+				prevNode.updateAttrs({
 					html: {
 						'data-focused': 'false'
 					}
@@ -218,7 +218,7 @@ export class EventManager {
 
 			if (!currNode?.type.isTextBlock || !currNode?.isVoid) return isUpdated
 			isUpdated = true
-			currNode.updateProps({
+			currNode.updateAttrs({
 				html: {
 					'data-focused': 'true'
 				}

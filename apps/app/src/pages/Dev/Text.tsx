@@ -18,7 +18,7 @@ export default function Text() {
       suppressContentEditableWarning
       onBeforeInput={onBeforeInput}
     >
-      <span >{text}</span>
+      <span>{text}</span>
     </div>
   );
 }

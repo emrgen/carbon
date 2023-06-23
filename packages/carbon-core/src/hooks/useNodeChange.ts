@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useCarbonChange } from "./useCarbonChange";
 import { NodeChangeType } from "../core/ChangeManager";
 import { Node } from '../core/Node';
+import { NodeAttrs } from "../core/NodeAttrs";
 
 interface UseTextChangeProps {
 	node: Node,
@@ -110,4 +111,29 @@ export const useNodeStateChange = (props: UseNodeChangeProps) => {
 		isNormal: !isActive && !isSelected,
 		attributes,
 	};
+};
+
+
+// start watching for the node state change
+export const useNodeAttrs = (props: UseNodeChangeProps) => {
+	const { node } = props;
+	const change = useCarbonChange();
+	const [attrs, setAttrs] = useState<NodeAttrs>(new NodeAttrs(node.attrs));
+
+	useEffect(() => {
+		const onChange = (value: Node) => {
+			setAttrs(value.attrs);
+		};
+
+		change.subscribe(node.id, NodeChangeType.update, onChange);
+		return () => {
+			change.unsubscribe(node.id, NodeChangeType.update, onChange);
+		}
+	}, [change, node]);
+
+	useEffect(() => {
+		change.mounted(node);
+	}, [node, change]);
+
+	return attrs;
 };
