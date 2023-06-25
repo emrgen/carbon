@@ -1,4 +1,4 @@
-import { PinnedSelection, splitTextBlock } from "@emrgen/carbon-core";
+import { Node, PinnedSelection, splitTextBlock } from "@emrgen/carbon-core";
 import { Pin, Point } from "@emrgen/carbon-core";
 import { EventContext, EventHandler, NodePlugin, NodeSpec, skipKeyEvent } from "@emrgen/carbon-core";
 
@@ -49,7 +49,7 @@ export class CollapsibleList extends NodePlugin {
           const isAtBlockStart = start.isAtStartOfNode(node);
 
           // insert section before node
-          if(isAtBlockStart) {
+          if (isAtBlockStart) {
             const json = {
               name: 'section',
               content: [
@@ -102,6 +102,11 @@ export class CollapsibleList extends NodePlugin {
         }
       }
     }
+  }
+
+  serialize(node: Node): string {
+    const tick = node.attrs.node.isChecked ? 'x' : ' ';
+    return `- ` + node.textContent || '';
   }
 
 }

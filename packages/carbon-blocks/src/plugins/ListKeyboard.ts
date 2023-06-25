@@ -42,7 +42,7 @@ export class ListKeyboardPlugin extends AfterPlugin {
 				}
 
 				console.log('CCCCCCCCC');
-				
+
 				if (!parentList || parentList.depth > listNode.depth - 1) return
 
 				// pull up
@@ -74,37 +74,36 @@ export class ListKeyboardPlugin extends AfterPlugin {
 					return
 				}
 
-			// 	if (!nextSibling) {
-			// 		event.preventDomDefault().stopPropagation();
-			// 		cmd.transform.unwrap(listNode)?.dispatch()
-			// 		return
-			// 	}
+				// 	if (!nextSibling) {
+				// 		event.preventDomDefault().stopPropagation();
+				// 		cmd.transform.unwrap(listNode)?.dispatch()
+				// 		return
+				// 	}
 
-			// 	// move next sibling inside the pulled node
-			// 	if (nextSibling && isListNode(listNode.parent!)) {
-			// 		event.preventDomDefault();
-			// 		event.stopPropagation();
-			// 		const { parent } = listNode;
-			// 		if (!parent) return
-			// 		const at = Point.toAfter(parent);
+				// 	// move next sibling inside the pulled node
+				// 	if (nextSibling && isListNode(listNode.parent!)) {
+				// 		event.preventDomDefault();
+				// 		event.stopPropagation();
+				// 		const { parent } = listNode;
+				// 		if (!parent) return
+				// 		const at = Point.toAfter(parent);
 
-			// 		// move next consume nextSiblings
-			// 		const to = Point.toAfter(listNode.lastChild!)
-			// 		listNode.nextSiblings.forEach(n => {
-			// 			tr.add(MoveCommand.create(to, n.id));
-			// 		})
+				// 		// move next consume nextSiblings
+				// 		const to = Point.toAfter(listNode.lastChild!)
+				// 		listNode.nextSiblings.forEach(n => {
+				// 			tr.add(MoveCommand.create(to, n.id));
+				// 		})
 
-			// 		tr.move(at, listNode.id)
-			// 			.select(Selection.within(listNode))
+				// 		tr.move(at, listNode.id)
+				// 			.select(Selection.within(listNode))
 
-			// 		tr.dispatch();
-			// 		return
-			// 	}
+				// 		tr.dispatch();
+				// 		return
+				// 	}
 			},
 			enter: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, node } = ctx;
 				const { selection, cmd, schema, tr } = app;
-				const { start } = selection;
 				if (!selection.isCollapsed) {
 					return
 				}
@@ -113,29 +112,37 @@ export class ListKeyboardPlugin extends AfterPlugin {
 				if (!listNode) return
 				if (!listNode.isEmpty) return
 				const atStart = selection.head.isAtStartOfNode(listNode);
+
+
 				if (!atStart) return
 				const nextSibling = listNode.nextSibling;
-			// 	const parentList = listNode.parents.find(isListNode);
+				// 	const parentList = listNode.parents.find(isListNode);
 				// FIXME: second check is not tested
 				// the case might occur when the listNode is within another list but at a distance more than 2
 				// if (!parentList || parentList.depth > listNode.depth - 1) {
 				// 	console.log('parentList is not found');
 				// 	return
 				// }
-
+				console.log('XXXXXXX');
 				if (listNode.name !== 'section') {
 					ctx.event.preventDefault();
 					ctx.event.stopPropagation();
-					// this.changeToDefaultList(event, listNode)
+					ctx.stopPropagation();
+					tr
+						.change(listNode.id, listNode.name, 'section')
+						.select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
+						.dispatch();
 					return
 				}
+
+				console.log('xxx', nextSibling);
 
 				if (!nextSibling) {
 					ctx.event.preventDefault();
 					ctx.event.stopPropagation();
 					ctx.stopPropagation();
 					console.log('xxxxxx');
-					
+
 					cmd.transform.unwrap(listNode)?.dispatch();
 					return
 				}

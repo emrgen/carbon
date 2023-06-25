@@ -6,7 +6,7 @@ export class Image extends NodePlugin {
 
   spec(): NodeSpec {
     return {
-      group: 'content nestable',
+      group: 'content',
       atom: true,
       isolating: true,
       selectable: true,

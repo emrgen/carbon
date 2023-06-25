@@ -13,6 +13,10 @@ export enum EventsIn {
 	mouseOut = 'mouseOut',
 	scroll = 'scroll',
 
+	copy = 'copy',
+	cut = 'cut',
+	paste = 'paste',
+
 	blur = 'blur',
 	focus = 'focus',
 

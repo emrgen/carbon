@@ -7,8 +7,83 @@ import { IsolatingPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
 import { first, last, reverse } from "lodash";
-import { Node, Pin, PinnedSelection } from "../core";
+import { Carbon, Node, Pin, PinnedSelection, Transaction } from "../core";
 import { hasParent, nodePath } from "../utils/node";
+import { CommandPlugin } from '@emrgen/carbon-core';
+import { Optional } from '@emrgen/types';
+
+
+declare module '@emrgen/carbon-core' {
+	export interface CarbonCommands {
+		keyboard: {
+			backspace(ctx: EventContext<KeyboardEvent>): Optional<Transaction>;
+		};
+	}
+}
+
+export class KeyboardPlugin extends BeforePlugin {
+	name = 'keyboard';
+
+	commands(): Record<string, Function> {
+		return {
+			backspace: this.backspace,
+		}
+	}
+
+	backspace(app: Carbon, ctx: EventContext<KeyboardEvent>) {
+		ctx.preventDefault();
+		ctx.event.preventDefault();
+		ctx.event.stopPropagation();
+		console.log('-----------');
+
+		const { node } = ctx;
+		const { selection, state, cmd, nodeSelection } = app;
+
+		const { isCollapsed, head } = selection;
+		// delete node selection if any
+		if (!nodeSelection.isEmpty) {
+			cmd.transform.deleteNodes(nodeSelection, { fall: 'before' })?.dispatch();
+			return
+		}
+
+		if (!isCollapsed) {
+			cmd.transform.delete(app.selection)?.dispatch();
+			return
+		}
+
+		console.log('xxxxxxxxxxxx');
+		if (head.isAtStartOfNode(node)) {
+			const { start } = selection;
+			const textBlock = start.node.chain.find(n => n.isTextBlock)
+			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
+			if (!prevTextBlock || !textBlock) return
+
+			console.log('merge text block', prevTextBlock.name, textBlock.name);
+			cmd.transform.merge(prevTextBlock, textBlock)?.dispatch();
+			return
+		}
+
+		// 	event.stopPropagation()
+		// 	if (node.isBlockAtom) {
+		// 		const found = node.chain.reverse().find(n => n.isBlockAtom)
+		// 		if (!found) return
+		// 		// final caret position can be above or below
+		// 		const beforeSel = selection.moveStart(-1);
+		// 		if (beforeSel) {
+		// 			editor.tr
+		// 				.add(DeleteCommand.create([node.id]))
+		// 				.select(beforeSel.collapseToHead())
+		// 				.dispatch()
+		// 		}
+		// 		return
+		// 	}
+
+		// 	console.log('Keyboard.backspace',deleteSel.toString());
+		const deleteSel = selection.moveStart(-1)
+		if (!deleteSel) return
+		cmd.transform.delete(deleteSel)?.dispatch()
+	}
+}
 
 export class KeyboardBeforePlugin extends BeforePlugin {
 
@@ -66,6 +141,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			new IsolatingPlugin(),
 			new TransformCommands(),
 			// new KeyboardPrevent(),
+			new KeyboardPlugin(),
 		]
 	}
 
@@ -203,8 +279,11 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			delete: (event) => this.delete(event),
 			shiftDelete: (event) => this.delete(event),
 
-			backspace: e => this.backspace(e),
-			shiftBackspace: e => this.backspace(e),
+			backspace: e => {
+				console.log(e.app);
+				e.app.cmd.keyboard.backspace(e)?.dispatch()
+			},
+			shiftBackspace: e => e.app.cmd.keyboard.backspace(e)?.dispatch(),
 			ctrlBackspace: skipKeyEvent,
 			cmdBackspace: skipKeyEvent,
 
@@ -357,61 +436,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		event.stopPropagation()
 		console.log('Keyboard.backspace', selection.moveStart(1)?.toString());
 		cmd.transform.delete(selection.moveStart(1)!)?.dispatch()
-	}
-
-	backspace(ctx: EventContext<KeyboardEvent>) {
-		ctx.preventDefault();
-		ctx.event.preventDefault();
-		ctx.event.stopPropagation();
-		console.log('-----------');
-		
-		const { event } = ctx;
-		const { app, node } = ctx;
-		const { selection, state, cmd, nodeSelection } = app;
-
-		const { isCollapsed, head } = selection;
-		// delete node selection if any
-		if (!nodeSelection.isEmpty) {
-			cmd.transform.deleteNodes(nodeSelection, {fall: 'before'})?.dispatch();
-			return
-		}
-
-		if (!isCollapsed) {
-			cmd.transform.delete(app.selection)?.dispatch();
-			return
-		}
-
-		console.log('xxxxxxxxxxxx');
-		if (head.isAtStartOfNode(node)) {
-			const { start } = selection;
-			const textBlock = start.node.chain.find(n =>  n.isTextBlock)
-			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
-			if (!prevTextBlock || !textBlock) return
-
-			console.log('merge text block', prevTextBlock.name, textBlock.name);
-			cmd.transform.merge(prevTextBlock, textBlock)?.dispatch();
-			return
-		}
-
-		// 	event.stopPropagation()
-		// 	if (node.isBlockAtom) {
-		// 		const found = node.chain.reverse().find(n => n.isBlockAtom)
-		// 		if (!found) return
-		// 		// final caret position can be above or below
-		// 		const beforeSel = selection.moveStart(-1);
-		// 		if (beforeSel) {
-		// 			editor.tr
-		// 				.add(DeleteCommand.create([node.id]))
-		// 				.select(beforeSel.collapseToHead())
-		// 				.dispatch()
-		// 		}
-		// 		return
-		// 	}
-
-		// 	console.log('Keyboard.backspace',deleteSel.toString());
-		const deleteSel = selection.moveStart(-1)
-		if (!deleteSel) return
-		cmd.transform.delete(deleteSel)?.dispatch()
 	}
 
 	up(ctx: EventContext<KeyboardEvent>) {

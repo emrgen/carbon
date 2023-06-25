@@ -20,6 +20,9 @@ const events: EventsIn[] = [
   EventsIn.scroll,
   EventsIn.blur,
   EventsIn.focus,
+  EventsIn.copy,
+  EventsIn.cut,
+  EventsIn.paste,
 ];
 
 // all editor content is rendered inside this component

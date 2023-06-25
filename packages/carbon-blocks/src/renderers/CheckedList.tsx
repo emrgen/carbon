@@ -33,18 +33,18 @@ export default function CheckedListComp(props: RendererProps) {
   );
 
   const beforeContent = useMemo(() => {
-    console.log(attrs.node.isChecked);
-
     return (
       <div
         className="carbon-checkedList__control"
         contentEditable="false"
         suppressContentEditableWarning
+        onMouseDown={preventAndStop}
+        onInput={preventAndStop}
       >
         <input type="checkbox" onChange={handleClick} />
       </div>
     );
-  }, [handleClick, attrs]);
+  }, [handleClick]);
 
   return (
     <CarbonBlock {...props}>

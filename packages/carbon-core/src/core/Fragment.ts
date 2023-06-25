@@ -13,6 +13,10 @@ export class Fragment {
 		return new Fragment(nodes);
 	}
 
+	get isEmpty() {
+		return this.content.length === 0
+	}
+
 	get nodes(): Node[] {
 		return this.content
 	}

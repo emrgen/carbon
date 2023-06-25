@@ -632,8 +632,8 @@ export class Node extends EventEmitter {
 				...type.attrs.html,
 			},
 			node: {
-				...type.attrs.node,
 				...this.attrs.node,
+				...type.attrs.node,
 			}
 		});
 		this.markUpdated();

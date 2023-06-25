@@ -1,4 +1,4 @@
-import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
+import { CarbonPlugin, Node, NodeSpec } from "@emrgen/carbon-core";
 import { Section } from "./Section";
 
 export class CheckedList extends Section {
@@ -22,5 +22,10 @@ export class CheckedList extends Section {
         }
       }
     }
+  }
+
+  serialize(node: Node): string {
+    const tick = node.attrs.node.isChecked ? 'x' : ' ';
+    return `- [${tick}] ` + node.textContent || '';
   }
 }

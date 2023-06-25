@@ -1,4 +1,4 @@
-import { NodePlugin, NodeSpec, CarbonPlugin } from '@emrgen/carbon-core';
+import { NodePlugin, NodeSpec, CarbonPlugin, Node } from '@emrgen/carbon-core';
 import { TitlePlugin } from './Title';
 
 export class Section extends NodePlugin {
@@ -21,6 +21,7 @@ export class Section extends NodePlugin {
 			attrs: {
 				node: {
 					focusPlaceholder: 'Section',
+					emptyPlaceholder: '',
 				},
 				html: {
 					placeholder: 'Section',
@@ -37,6 +38,9 @@ export class Section extends NodePlugin {
 		]
 	}
 
+	serialize(node: Node): string {
+		return node.textContent || '';
+	}
 }
 
 

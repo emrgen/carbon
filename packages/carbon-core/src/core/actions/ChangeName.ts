@@ -28,7 +28,7 @@ export class ChangeName implements CarbonAction{
 		const type = tr.app.schema.type(to)
 		target.changeType(type)
 		tr.updated(target);
-
+		
 		return ActionResult.withValue('done');
 	}
 

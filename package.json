@@ -10,7 +10,9 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "cloc-src": "cloc --exclude-dir=node_modules,dist,mongo-data-4.4,yarn.lock,package.json,package-lock.json .",
+    "cloc-dist": "cloc --match-d=/dist/ ."
   },
   "devDependencies": {
     "eslint-config-custom": "workspace:*",

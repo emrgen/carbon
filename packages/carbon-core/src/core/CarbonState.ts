@@ -9,6 +9,7 @@ import { NodeStore } from './NodeStore';
 import { PinnedSelection } from './PinnedSelection';
 import { SelectionEvent } from './SelectionEvent';
 import { NodeSelection } from './NodeSelection';
+import { CarbonClipboard } from './CarbonClipboard';
 
 export class CarbonRuntimeState {
 	// pending
@@ -23,6 +24,8 @@ export class CarbonRuntimeState {
 	deletedNodeIds: NodeIdSet = new NodeIdSet();
 	// activeMarks: string = '';
 	origin: ActionOrigin = ActionOrigin.Unknown;
+
+	clipboard: CarbonClipboard = CarbonClipboard.default();
 
 	get isDirty() {
 		return this.updatedNodeIds.size;

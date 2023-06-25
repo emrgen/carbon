@@ -5,6 +5,7 @@ import {
   text,
   title,
 } from "@emrgen/carbon-blocks";
+import CarbonPortal from "@emrgen/carbon-core/src/components/CarbonPortal";
 
 import {
   CarbonContext,
@@ -13,7 +14,6 @@ import {
   CarbonChangeContext,
   extensionPresets,
 } from "@emrgen/carbon-core";
-import CarbonPortal from "@emrgen/carbon-core/src/components/CarbonPortal";
 
 const data = node("document", [
   title([text("Carbon "), text("document"), text(" title")]),
@@ -102,7 +102,7 @@ const data = node("document", [
 
 export default function Dev() {
   const app = useCreateCarbon(data, [extensionPresets, blockPresets]);
-  console.log(app.schema.nodes);
+  // console.log(app.schema.nodes);
 
   // @ts-ignore
   window.app = app;

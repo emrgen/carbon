@@ -18,6 +18,7 @@ const defaultEvents: EventsIn[] = [
 	EventsIn.scroll,
 	EventsIn.blur,
 	EventsIn.focus,
+	EventsIn.paste,
 ];
 
 

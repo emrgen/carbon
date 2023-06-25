@@ -223,6 +223,10 @@ export class PluginManager {
 		return this.nodes[name];
 	}
 
+	serialize(node: Node): string {
+		return this.nodePlugin(node.name)?.serialize(node) ?? '';
+	}
+
 	private filter(plugins: CarbonPlugin[], type: PluginType) {
 		return plugins.filter(p => p.type === type);
 	}

@@ -6,7 +6,9 @@ import {
 } from "@emrgen/carbon-core";
 
 export default function TitleComp(props: RendererProps) {
-  const { node, version } = props;
+  const { node } = props;
+
+  // console.log('TitleComp', props);
 
   const custom = node.isEmpty
     ? {

@@ -43,7 +43,7 @@ export class Schema {
 				nodeType.contentMatch = contextExprCache[contentExpr];
 				nodeType.inlineContent = nodeType.contentMatch.inlineContent;
 			} else {
-				console.log('empty content match for', nodeName);
+				// console.log('empty content match for', nodeName);
 				nodeType.contentMatch = ContentMatch.empty;
 				nodeType.inlineContent = false;
 			}

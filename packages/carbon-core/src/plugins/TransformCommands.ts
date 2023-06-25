@@ -56,6 +56,7 @@ declare module '@emrgen/carbon-core' {
       change(node: Node, name: NodeName): Optional<Transaction>;
       update(node: Node, attrs: Record<string, any>): Optional<Transaction>;
       merge(prev: Node, next: Node): Optional<Transaction>;
+      merge(prev: Node, next: Node): Optional<Transaction>;
     };
   }
 }
