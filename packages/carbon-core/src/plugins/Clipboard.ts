@@ -57,39 +57,45 @@ export class ClipboardPlugin extends BeforePlugin {
 
         if (!app.state.runtime.clipboard.isEmpty) {
           const { fragment } = app.state.runtime.clipboard;
-          const { nodes } = fragment;
-
-          // if the selection is not empty, we need to paste the nodes after the last node
-          if (!nodeSelection.isEmpty) {
-            const lastNode = last(nodeSelection.nodes) as Node
-            let focusNode: Optional<Node> = null;
-            reverse(nodes.slice()).some(n => {
-              return n.find(n => {
-                if (n.isTextBlock) {
-                  focusNode = n;
-                  return true;
-                }
-                return false;
-              })
-            });
-
-
-            const tr = app.tr.insert(Point.toAfter(lastNode.id), nodes)
-            if (focusNode) {
-              tr.select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
-            }
-            tr.dispatch();
-            return
-          }
-
           app.cmd.transform.paste(selection, fragment)?.dispatch()
-          return
+        } else {
+
         }
+        console.log('paste', app.state.runtime.clipboard.isEmpty, nodeSelection.isEmpty);
+        // if (!app.state.runtime.clipboard.isEmpty) {
+        //   const { fragment } = app.state.runtime.clipboard;
+        //   const { nodes } = fragment;
+
+        //   // if the selection is not empty, we need to paste the nodes after the last node
+        //   if (!nodeSelection.isEmpty) {
+        //     const lastNode = last(nodeSelection.nodes) as Node
+        //     let focusNode: Optional<Node> = null;
+        //     reverse(nodes.slice()).some(n => {
+        //       return n.find(n => {
+        //         if (n.isTextBlock) {
+        //           focusNode = n;
+        //           return true;
+        //         }
+        //         return false;
+        //       })
+        //     });
+
+        //     const tr = app.tr.insert(Point.toAfter(lastNode.id), nodes)
+        //     if (focusNode) {
+        //       tr.select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
+        //     }
+        //     tr.dispatch();
+        //     return
+        //   }
+
+        //   app.cmd.transform.paste(selection, fragment)?.dispatch()
+        //   return
+        // }
 
         // create a fragment from the clipboard data
-        const deserialized = event.clipboardData.getData('text/plain').split('\n\n').map(s => app.deserialize(s));
-        const fragment = Fragment.from(deserialized);
-        app.cmd.transform.paste(selection, fragment)?.dispatch()
+        // const deserialized = event.clipboardData.getData('text/plain').split('\n\n').map(s => app.deserialize(s));
+        // const fragment = Fragment.from(deserialized);
+        // app.cmd.transform.paste(selection, fragment)?.dispatch()
 
         console.log('paste', app.state.runtime.clipboard.fragment.nodes);
 
@@ -99,11 +105,12 @@ export class ClipboardPlugin extends BeforePlugin {
   }
 
   fragment(app: Carbon): Fragment {
-
     const { selection, nodeSelection } = app;
+    console.log(nodeSelection.size);
+
     if (nodeSelection.size) {
       const { nodes } = nodeSelection;
-      return Fragment.from(nodes.map(n => app.schema.cloneWithId(n)));
+      return Fragment.from(nodes.map(n => app.schema.cloneWithId(n)), true);
     }
 
     const { start, end } = selection;
@@ -175,44 +182,59 @@ export class ClipboardPlugin extends BeforePlugin {
       direction: 'backward',
     });
 
-    if (start.isAtEndOfNode(startPin.node)) {
-      deleteGroup.addId(startPin.node.id);
-    } else {
-      deleteGroup.addRange(Range.create(Pin.future(startPin.node, 0), startPin));
-    }
+    // if the start and end cursor covers a node title entirely, we need to keep the title
+    if (start.node !== end.node || !(start.isAtStartOfNode(start.node) && end.isAtEndOfNode(end.node))) {
+      if (start.isAtStartOfNode(start.node)) {
+        start.node.children.forEach(n => deleteGroup.addId(n.id));
+      } else {
+        deleteGroup.addRange(Range.create(Pin.toStartOf(start.node)!, start));
+      }
 
-    if (end.isAtStartOfNode(endPin.node)) {
-      deleteGroup.addId(endPin.node.id);
-    } else {
-      deleteGroup.addRange(Range.create(endPin, Pin.future(endPin.node, endPin.node.size)));
+      if (end.isAtEndOfNode(end.node)) {
+        start.node.children.forEach(n => deleteGroup.addId(n.id));
+      } else {
+        deleteGroup.addRange(Range.create(end, Pin.toEndOf(end.node)!,));
+      }
     }
-
     // console.log('xxx', rootNode.textContent);
 
     // console.log(deleteGroup.ids.map(id => id.toString()));
-    // console.log(deleteGroup.ranges);
+    console.log(deleteGroup.ranges);
     deleteGroup.ranges.reverse()
 
+    // remove the nodes outside the selection
     rootNode.walk(n => {
       if (n === rootNode) return false;
-      if (deleteGroup.has(n.id)) {
-        n.parent?.remove(n)
-      }
-
+      if (!n.isTextBlock) return false;
       deleteGroup.ranges.forEach(r => {
-        // console.log(r.start.node, n);
+
+        console.log(n.textContent);
         if (r.start.node.eq(n)) {
-          if (r.end.offset === n.size) {
+          if (r.end.offset === n.focusSize) {
             // console.log(r, n.textContent, n.textContent.slice(0, r.start.offset));
-            n.updateContent(InlineContent.create(n.textContent.slice(0, r.start.offset)))
+            const textNode = app.schema.text(n.textContent.slice(0, r.start.offset));
+            // console.log('XX',textNode);
+            n.updateContent(BlockContent.create([textNode!]))
           } else if (r.start.offset === 0) {
-            n.updateContent(InlineContent.create(n.textContent.slice(r.end.offset)))
+            const textNode = app.schema.text(n.textContent.slice(r.end.offset));
+            n.updateContent(BlockContent.create([textNode!]))
           }
 
           deleteGroup.removeRange(r);
         }
       });
 
+      return false;
+    })
+
+    // remove nodes outside the selection
+    rootNode.walk(n => {
+      if (n === rootNode) return false;
+      if (n.isTextBlock) return false;
+
+      if (deleteGroup.has(n.id)) {
+        n.parent?.remove(n)
+      }
       return false;
     })
 
@@ -223,8 +245,6 @@ export class ClipboardPlugin extends BeforePlugin {
       }
       return false;
     });
-
-    console.log(rootNode.children.length);
 
     // remove nodes and content outside the selection
     return Fragment.from(rootNode.children.map(n => app.schema.cloneWithId(n)));

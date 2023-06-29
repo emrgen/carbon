@@ -13,6 +13,7 @@ import {
   extensionPresets,
   useCreateCarbon,
 } from "@emrgen/carbon-core";
+import { useEffect } from "react";
 
 const data = node("document", [
   title([text("Carbon "), text("document"), text(" title")]),
@@ -119,6 +120,10 @@ export default function Dev() {
   // @ts-ignore
   window.app = app;
   // console.log(app.content)
+
+  useEffect(() => {
+    app.focus();
+  }, [app]);
 
   return (
     <CarbonContext app={app}>

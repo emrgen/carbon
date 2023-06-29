@@ -66,6 +66,7 @@ export class Transaction {
 	private selectedIds = new NodeIdSet();
 	private activatedIds = new NodeIdSet();
 
+
 	get origin() {
 		return this.app.runtime.origin;
 	}

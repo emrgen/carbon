@@ -15,7 +15,7 @@ import { Node } from "../core/Node";
 import { NodeId } from "../core/NodeId";
 import { NodeType } from "../core/NodeType";
 import { Pin } from "../core/Pin";
-import { PinnedSelection } from "../core";
+import { BlockContent, InlineContent, PinnedSelection } from "../core";
 import { BeforePlugin } from "../core/CarbonPlugin";
 import { Point } from "../core/Point";
 import { PointedSelection } from "../core/PointedSelection";
@@ -142,10 +142,108 @@ export class TransformCommands extends BeforePlugin {
   }
 
   paste(app: Carbon, selection: PinnedSelection, fragment: Fragment): Optional<Transaction> {
-    const { tr } = app;
-    console.log('xxxxxx', fragment.nodes);
-    
-    return tr
+    if (fragment.isEmpty) {
+      return;
+    }
+    const {nodeSelection} = app
+    const { nodes } = fragment;
+
+    console.log(nodes);
+
+    // if the selection is not empty, we need to paste the nodes after the last node
+    if (!nodeSelection.isEmpty) {
+      const lastNode = last(nodeSelection.nodes) as Node
+      let focusNode: Optional<Node> = null;
+      reverse(nodes.slice()).some(n => {
+        return n.find(n => {
+          if (n.isTextBlock) {
+            focusNode = n;
+            return true;
+          }
+          return false;
+        })
+      });
+
+      const tr = app.tr.insert(Point.toAfter(lastNode.id), nodes)
+      if (focusNode) {
+        tr.select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
+      }
+      return tr
+    }
+
+    if (fragment.nodeSelection) {
+      const tr = selection.isCollapsed ? app.tr : this.delete(app, selection);
+      if (!tr) {
+        console.log('failed to delete');
+        return;
+      }
+
+      const { selection: after } = tr;
+      // pop the select action
+      tr.pop();
+
+      const at = Point.toAfter(after.head.nodeId);
+
+      tr.insert(at, fragment.nodes);
+      return tr;
+    }
+
+    const {start, end} = selection;
+    const {node: startNode} = start;
+    const {node: endNode} = end;
+    const startTitle = first(nodes)?.find(n => n.isTextBlock, {order: 'post'});
+    const endTitle = last(nodes)?.find(n => n.isTextBlock, { order: 'post', direction: 'backward' });
+    if (!startTitle || !endTitle) {
+      console.error('no title found');
+      return;
+    }
+
+    // if selection is within same title
+    if (start.node === end.node) {
+      const { tr } = app;
+      // if selection is collapsed and at the end of the title
+      if (start.isAtEndOfNode(start.node)) {
+        console.log('insert at the end of the title', startTitle, endTitle);
+        if (startTitle.eq(endTitle)) {
+          const textContent = startNode.textContent + startTitle.textContent;
+          const textNode = app.schema.text(textContent);
+          tr
+            .setContent(start.node.id, BlockContent.create([textNode!]))
+            .select(PinnedSelection.fromPin(Pin.future(start.node!, textContent.length)!));
+
+          return tr;
+        } else {
+          console.log('insert at the end of the title, but not the same title');
+
+        }
+      } else if (start.isAtStartOfNode(start.node)) {
+        console.log('insert at the start of the title');
+        if (startTitle.eq(endTitle)) {
+          const textContent = startTitle.textContent + startNode.textContent;
+          const textNode = app.schema.text(textContent);
+          const after = PinnedSelection.fromPin(Pin.future(start.node!, startTitle.textContent.length)!);
+          tr
+            .setContent(start.node.id, BlockContent.create([textNode!]))
+            .select(after);
+
+          return tr;
+        }
+      } else {
+        console.log('insert within the title');
+        if (startTitle.eq(endTitle)) {
+          const textBeforeCursor = startNode.textContent.slice(0, start.offset) + startTitle.textContent
+          const textContent = textBeforeCursor + startNode.textContent.slice(end.offset);
+          const textNode = app.schema.text(textContent);
+          const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
+          tr
+            .setContent(start.node.id, BlockContent.create([textNode!]))
+            .select(after);
+
+          return tr;
+        }
+      }
+    }
+
   }
 
   move(app: Carbon, node: Node, to: Point): Optional<Transaction> {
@@ -725,7 +823,7 @@ export class TransformCommands extends BeforePlugin {
   // delete nodes within selection
   delete(app: Carbon, selection: PinnedSelection = app.selection): Optional<Transaction> {
     if (selection.isCollapsed) {
-      return;
+      return app.tr;
     }
 
     console.log(selection.toString());

@@ -9,8 +9,8 @@ export class Fragment {
 		return Fragment.from([node]);
 	}
 
-	static from(nodes: Node[]): Fragment {
-		return new Fragment(nodes);
+	static from(nodes: Node[], nodeSelection = false): Fragment {
+		return new Fragment(nodes, nodeSelection);
 	}
 
 	static empty = new Fragment([]);
@@ -31,7 +31,7 @@ export class Fragment {
 		return this.nodes.length
 	}
 
-	constructor(readonly content: Node[]) {}
+	constructor(readonly content: Node[], readonly nodeSelection = false) {}
 
 	child(index: number) {
 		return this.nodes[index]

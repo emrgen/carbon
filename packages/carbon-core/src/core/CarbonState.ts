@@ -165,7 +165,7 @@ export class CarbonState {
 				this.unselectedNodeIds.add(id);
 			}
 		});
-		
+
 		this.runtime.activatedNodeIds.forEach(id => {
 			if (store.get(id)?.isActive) {
 				this.activatedNodeIds.add(id);
