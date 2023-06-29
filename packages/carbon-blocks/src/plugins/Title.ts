@@ -97,6 +97,9 @@ export class TitlePlugin extends NodePlugin {
 			keyUp: (ctx) => {
 				ctx.event.preventDefault()
 			},
+			dragStart(ctx: EventContext<DragEvent>) {
+				ctx.event.preventDefault()
+			}
 		}
 	}
 

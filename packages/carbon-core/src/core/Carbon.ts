@@ -15,7 +15,7 @@ import { Schema } from './Schema';
 import { SelectionManager } from './SelectionManager';
 import { Transaction } from './Transaction';
 import { TransactionManager } from './TransactionManager';
-import { CarbonCommands } from "./types";
+import { CarbonCommands, SerializedNode } from "./types";
 import { NodeSelection } from './NodeSelection';
 
 export class Carbon extends EventEmitter {
@@ -109,8 +109,12 @@ export class Carbon extends EventEmitter {
 		return this.rm.component(name)
 	}
 
-	serialize(node: Node) {
-		return this.pm.serialize(node);
+	serialize(node: Node): SerializedNode {
+		return this.pm.serialize(this, node);
+	}
+
+	deserialize(serialized: string): Node[] {
+		return this.pm.deserialize(this, serialized);
 	}
 
 	blur() {

@@ -2,6 +2,7 @@ import { Node } from '../core/Node';
 import { Point } from '../core/Point';
 import { zip } from 'lodash';
 import { NodeStore } from '../core/NodeStore';
+import { Optional } from '@emrgen/types';
 
 export function nodesBetweenPoints(tail: Point, head: Point, store: NodeStore): Node[] {
 	const nodes = [];
@@ -20,7 +21,7 @@ export function blocksBelowCommonNode(startNode: Node, endNode: Node) {
 		// ensures prev/next always exists
 		if (chain.length === index + 1) return true;
 		return !prev?.eq(next!)
-	}) ?? [];
+	}) ?? [] as Optional<Node>[];
 
 	return [prev, next];
 }

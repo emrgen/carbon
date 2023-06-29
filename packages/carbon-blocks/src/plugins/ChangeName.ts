@@ -19,7 +19,7 @@ export class ChangeName extends BeforePlugin {
 
   inputRules = new BeforeInputRuleHandler([
     //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberedList')),
-    new InputRule(/^(\[\]\s)(.)*/, this.tryChangeType('checkedList', ['nestable'])),
+    new InputRule(/^(\[\]\s)(.)*/, this.tryChangeType('todo', ['nestable'])),
     new InputRule(/^(#\s)(.)*/, this.tryChangeType('h1', ['nestable'])),
     new InputRule(/^(##\s)(.)*/, this.tryChangeType('h2', ['nestable'])),
     new InputRule(/^(###\s)(.)*/, this.tryChangeType('h3', ['nestable'])),

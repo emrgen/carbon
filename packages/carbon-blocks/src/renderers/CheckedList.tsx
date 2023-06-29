@@ -11,7 +11,7 @@ import {
   useSelectionHalo,
 } from "@emrgen/carbon-core";
 
-export default function CheckedListComp(props: RendererProps) {
+export default function TodoComp(props: RendererProps) {
   const { node } = props;
   const { SelectionHalo } = useSelectionHalo(props);
   const app = useCarbon();
@@ -35,7 +35,7 @@ export default function CheckedListComp(props: RendererProps) {
   const beforeContent = useMemo(() => {
     return (
       <div
-        className="carbon-checkedList__control"
+        className="carbon-todo__control"
         contentEditable="false"
         suppressContentEditableWarning
         onMouseDown={preventAndStop}

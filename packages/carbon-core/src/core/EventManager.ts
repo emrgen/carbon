@@ -67,6 +67,8 @@ export class EventManager {
 
 		if (type !== EventsIn.selectionchange && app.state.selectedNodeIds.size > 0) {
 			console.log('selected nodes', app.state.selectedNodeIds);
+			console.log(type, event);
+			
 			const lastNode = last(app.state.selectedNodeIds.map(id => app.store.get(id))) as Node;
 			this.updateCommandOrigin(type, event);
 

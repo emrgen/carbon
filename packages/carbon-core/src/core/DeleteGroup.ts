@@ -5,7 +5,7 @@ import { CarbonState } from "./CarbonState";
 
 export class SelectionPatch {
 	ids: NodeIdSet = new NodeIdSet();
-	range: Range[] = [];
+	ranges: Range[] = [];
 
 	static fromState(state: CarbonState) {
 		let patch = new SelectionPatch();
@@ -18,7 +18,11 @@ export class SelectionPatch {
 	}
 
 	addRange(range: Range) {
-		this.range.push(range)
+		this.ranges.push(range)
+	}
+
+	removeRange(range: Range) {
+		this.ranges = this.ranges.filter(r => r !== range);
 	}
 
 	addId(id: NodeId) {

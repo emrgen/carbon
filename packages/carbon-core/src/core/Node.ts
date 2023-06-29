@@ -607,8 +607,8 @@ export class Node extends EventEmitter {
 	}
 
 	// @mutates
-	remove(node: Node, start?: number, end?: number) {
-		this.content.remove(node, start, end);
+	remove(node: Node) {
+		this.content.remove(node);
 		this.markUpdated();
 		// console.log('removed', this.root?.version, this.root?.name, this.root?.test_key, this.root?.updatedChildren)
 	}

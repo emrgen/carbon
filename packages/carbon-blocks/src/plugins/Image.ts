@@ -1,4 +1,4 @@
-import { NodePlugin, NodeSpec, EventHandler, skipKeyEvent } from '@emrgen/carbon-core';
+import { NodePlugin, NodeSpec, EventHandler, skipKeyEvent, Node, SerializedNode, Carbon } from '@emrgen/carbon-core';
 
 export class Image extends NodePlugin {
 
@@ -28,6 +28,15 @@ export class Image extends NodePlugin {
   keydown(): Partial<EventHandler> {
     return {
       tab: skipKeyEvent
+    }
+  }
+
+  serialize(app: Carbon, node: Node): SerializedNode {
+    return {
+      name: node.name,
+      title: `![](${node.attrs.node.src})`,
+      content: [],
+      isNested: false,
     }
   }
 

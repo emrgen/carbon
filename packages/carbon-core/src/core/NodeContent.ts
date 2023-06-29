@@ -15,7 +15,7 @@ export interface NodeContent {
 	insert(fragment: Fragment, offset: number): NodeContent;
 	insertBefore(fragment: Fragment, node: Node): NodeContent;
 	insertAfter(fragment: Fragment, node: Node): NodeContent;
-	remove(node: Node, start?: number, end?: number): boolean;
+	remove(node: Node): boolean;
 
 	updateText(text: string): void;
 
@@ -114,7 +114,7 @@ export class BlockContent implements NodeContent {
 	}
 
 	clone(): BlockContent {
-		return BlockContent.create(this.nodes);
+		return BlockContent.create(this.nodes.map(n => n.clone()));
 	}
 
 	toJSON() {

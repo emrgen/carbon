@@ -24,8 +24,8 @@ import { HStack, Stack } from './plugins/HStack';
 import { HStackComp } from './renderers/HStackComp';
 import { Image } from './plugins/Image';
 import ImageComp from './renderers/ImageComp';
-import { CheckedList } from './plugins/CheckedList';
-import CheckedListComp from './renderers/CheckedList';
+import { Todo } from './plugins/Todo';
+import TodoComp from './renderers/CheckedList';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -43,7 +43,7 @@ export const blockPresets: Extension = {
 		new HStack(),
 		new Stack(),
 		new Image(),
-		new CheckedList(),
+		new Todo(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -62,6 +62,6 @@ export const blockPresets: Extension = {
 		Renderer.create('hstack', HStackComp),
 		Renderer.create('stack', CarbonNode),
 		Renderer.create('image', ImageComp),
-		Renderer.create('checkedList', CheckedListComp),
+		Renderer.create('todo', TodoComp),
 	]
 }

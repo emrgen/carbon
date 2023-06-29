@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   CarbonBlock,
   CarbonChildren,
@@ -10,13 +10,23 @@ export default function TitleComp(props: RendererProps) {
 
   // console.log('TitleComp', props);
 
+  const onMouseDown = useCallback((e) => {
+    // e.preventDefault();
+  },[])
+
   const custom = node.isEmpty
     ? {
+        onMouseDown,
         ...props.custom,
         placeholder:
-          props.custom?.placeholder ?? node.parent?.attrs.node.emptyPlaceholder ?? (node.parent?.attrs.node.showPlaceholder ? node.parent?.attrs.node.focusPlaceholder : '' ) ?? "",
+          props.custom?.placeholder ??
+          node.parent?.attrs.node.emptyPlaceholder ??
+          (node.parent?.attrs.node.showPlaceholder
+            ? node.parent?.attrs.node.focusPlaceholder
+            : "") ??
+          "",
       }
-    : {};
+    : { onMouseDown };
 
 
   return (

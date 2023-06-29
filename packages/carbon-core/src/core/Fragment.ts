@@ -13,6 +13,8 @@ export class Fragment {
 		return new Fragment(nodes);
 	}
 
+	static empty = new Fragment([]);
+
 	get isEmpty() {
 		return this.content.length === 0
 	}

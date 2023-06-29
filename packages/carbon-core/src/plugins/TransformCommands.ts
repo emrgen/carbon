@@ -57,6 +57,7 @@ declare module '@emrgen/carbon-core' {
       update(node: Node, attrs: Record<string, any>): Optional<Transaction>;
       merge(prev: Node, next: Node): Optional<Transaction>;
       merge(prev: Node, next: Node): Optional<Transaction>;
+      paste(selection: PinnedSelection, fragment: Fragment): Optional<Transaction>;
     };
   }
 }
@@ -72,6 +73,7 @@ export class TransformCommands extends BeforePlugin {
   commands() {
     return {
       insert: this.insert,
+      paste: this.paste,
       remove: this.remove,
       move: this.move,
       delete: this.delete,
@@ -139,8 +141,14 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  move(app: Carbon, node: Node, to: Point): Optional<Transaction> {
+  paste(app: Carbon, selection: PinnedSelection, fragment: Fragment): Optional<Transaction> {
+    const { tr } = app;
+    console.log('xxxxxx', fragment.nodes);
+    
+    return tr
+  }
 
+  move(app: Carbon, node: Node, to: Point): Optional<Transaction> {
     const { tr, selection } = app;
     const from = nodeLocation(node);
     tr
@@ -280,8 +288,8 @@ export class TransformCommands extends BeforePlugin {
         tr
           .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
           .insert(at, block!)
-          // .insert(insertAt, afterBlock!)
-          // .select(after);
+        // .insert(insertAt, afterBlock!)
+        // .select(after);
       } else {
         const focusPoint = Pin.toStartOf(splitBlock);
         const after = PinnedSelection.fromPin(focusPoint!);
@@ -662,8 +670,8 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // delete selected nodes
-  deleteNodes(app: Carbon, nodeSelection: NodeSelection = app.nodeSelection, opts?: DeleteOpts): Optional<Transaction> {
-    const { fall = 'after'} = opts;
+  deleteNodes(app: Carbon, nodeSelection: NodeSelection = app.nodeSelection, opts: DeleteOpts = {}): Optional<Transaction> {
+    const { fall = 'after' } = opts;
     const deleteActions: CarbonAction[] = [];
     const { nodes } = nodeSelection;
     reverse(nodes.slice()).forEach(node => {
@@ -674,17 +682,17 @@ export class TransformCommands extends BeforePlugin {
     let selection: Optional<PinnedSelection> = undefined;
 
     if (fall === 'after') {
-    const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
-    if (focusNode) {
-      selection = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
-    }
-
-    if (!selection) {
-      const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
+      const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
       if (focusNode) {
-        selection = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+        selection = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
       }
-    }
+
+      if (!selection) {
+        const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
+        if (focusNode) {
+          selection = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+        }
+      }
     } else {
       const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
       if (focusNode) {
@@ -716,6 +724,10 @@ export class TransformCommands extends BeforePlugin {
   // 3. tail/head node.
   // delete nodes within selection
   delete(app: Carbon, selection: PinnedSelection = app.selection): Optional<Transaction> {
+    if (selection.isCollapsed) {
+      return;
+    }
+
     console.log(selection.toString());
     const { start, end } = selection;
     const deleteGroup = this.selectionInfo(app, selection);
@@ -985,7 +997,7 @@ export class TransformCommands extends BeforePlugin {
       actions.push(RemoveNode.create(nodeLocation(node)!, id))
     })
 
-    each(deleteGroup.range, range => {
+    each(deleteGroup.ranges, range => {
       const { start, end } = range;
       const startPin = start.down();
       const endPin = end.down();

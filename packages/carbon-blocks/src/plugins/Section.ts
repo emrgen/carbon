@@ -1,4 +1,4 @@
-import { NodePlugin, NodeSpec, CarbonPlugin, Node } from '@emrgen/carbon-core';
+import { Carbon, CarbonPlugin, Node, NodePlugin, NodeSpec, SerializedNode } from '@emrgen/carbon-core';
 import { TitlePlugin } from './Title';
 
 export class Section extends NodePlugin {
@@ -38,8 +38,16 @@ export class Section extends NodePlugin {
 		]
 	}
 
-	serialize(node: Node): string {
-		return node.textContent || '';
+	serialize(app: Carbon, node: Node): SerializedNode {
+		const contentNode = node.child(0);
+		return {
+			name: node.name,
+			title: contentNode?.textContent ?? '',
+			content: node.children.slice(1).map(n => app.serialize(n)),
+
+			isNested: true,
+			unwrap: contentNode?.isEmpty ?? false,
+		}
 	}
 }
 

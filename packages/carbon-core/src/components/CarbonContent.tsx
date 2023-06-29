@@ -17,6 +17,7 @@ const events: EventsIn[] = [
   EventsIn.mouseOver,
   EventsIn.mouseOut,
   EventsIn.mouseUp,
+  EventsIn.dragStart,
   EventsIn.scroll,
   EventsIn.blur,
   EventsIn.focus,
@@ -40,7 +41,7 @@ export function CarbonContent() {
       </div>
 
       {/* helper portal for the app */}
-      <CarbonPortal/>
+      {/* <CarbonPortal/> */}
     </>
   );
 }

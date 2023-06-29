@@ -1,6 +1,4 @@
-import { Node, PinnedSelection, splitTextBlock } from "@emrgen/carbon-core";
-import { Pin, Point } from "@emrgen/carbon-core";
-import { EventContext, EventHandler, NodePlugin, NodeSpec, skipKeyEvent } from "@emrgen/carbon-core";
+import { Carbon, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, splitTextBlock } from "@emrgen/carbon-core";
 
 export class CollapsibleList extends NodePlugin {
 
@@ -104,9 +102,12 @@ export class CollapsibleList extends NodePlugin {
     }
   }
 
-  serialize(node: Node): string {
-    const tick = node.attrs.node.isChecked ? 'x' : ' ';
-    return `- ` + node.textContent || '';
+  serialize(app: Carbon, node: Node): SerializedNode {
+    return {
+      name: node.name,
+      title: node.child(0)?.textContent ?? '',
+      content: node.children.slice(1).map(n => app.serialize(n)),
+    }
   }
 
 }

@@ -1,5 +1,5 @@
 import { Optional } from '@emrgen/types';
-import { CarbonCommands } from "./types";
+import { CarbonCommands, SerializedNode } from "./types";
 
 import { isKeyHotkey } from 'is-hotkey';
 import { camelCase, each, keys, reduce, some, sortBy, uniqBy, values, snakeCase, entries } from 'lodash';
@@ -223,8 +223,13 @@ export class PluginManager {
 		return this.nodes[name];
 	}
 
-	serialize(node: Node): string {
-		return this.nodePlugin(node.name)?.serialize(node) ?? '';
+	serialize(app: Carbon, node: Node): SerializedNode {
+		return this.nodePlugin(node.name)?.serialize(app, node) ?? '';
+	}
+
+	deserialize(app: Carbon, serialized: string): Node[] {
+		// return this.nodePlugin(node.name)?.serialize(app, node) ?? '';
+		return []
 	}
 
 	private filter(plugins: CarbonPlugin[], type: PluginType) {

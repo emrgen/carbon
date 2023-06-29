@@ -26,4 +26,18 @@ export class SchemaFactory {
 			return Node.create({ id, type, content, attrs });
 		}
 	}
+
+	cloneWithId(node: Node): Node {
+		const clone = node.clone();
+		clone.forAll(n => {
+			if (n.name === 'text') {
+				n.id = NodeId.create(generateTextId());
+			} else {
+				n.id = NodeId.create(generateBlockId());
+			}
+		});
+
+		clone.parent = null;
+		return clone;
+	}
 }

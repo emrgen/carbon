@@ -54,3 +54,15 @@ export interface NodeJSON extends Record<string, any> {
 export const yes = () => true;
 export const no = () => false;
 
+export type SerializedNode = {
+	name: string;
+	title: string;
+	content: SerializedNode[]
+	prefix?: string;
+	suffix?: string;
+
+	unwrap?: boolean;
+	isNested?: boolean;
+	isEmpty?: boolean;
+	isVoid?: boolean;
+}

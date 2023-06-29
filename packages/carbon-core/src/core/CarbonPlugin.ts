@@ -5,7 +5,7 @@ import { Decoration } from './Decoration';
 import { Node } from './Node';
 import { NodeSpec } from './Schema';
 import { Transaction } from './Transaction';
-import { EventHandlerMap, InputRules, PluginName } from './types';
+import { EventHandlerMap, InputRules, PluginName, Serialized } from './types';
 import { CarbonAction } from "./actions/types";
 
 export enum PluginType {
@@ -53,14 +53,6 @@ export abstract class CarbonPlugin {
 		return {}
 	}
 
-	input(): InputRules {
-		return []
-	}
-
-	paste(): EventHandlerMap {
-		return {}
-	}
-
 	transaction(tr: Transaction) { }
 
 	// return decorations that will be applied on the view
@@ -78,8 +70,8 @@ export abstract class CarbonPlugin {
 
 
 	// serialize the node into a copy string
-	serialize(node: Node): string {
-		return ''
+	serialize(app: Carbon, node: Node): Serialized {
+		return []
 	}
 
 	// deserialize the copy string into a Node

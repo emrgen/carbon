@@ -7,7 +7,7 @@ export class CarbonClipboard {
     return new CarbonClipboard();
   }
 
-  isEmpty() {
+  get isEmpty() {
     return this.fragment.isEmpty;
   }
 

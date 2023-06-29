@@ -5,20 +5,32 @@ import {
   text,
   title,
 } from "@emrgen/carbon-blocks";
-import CarbonPortal from "@emrgen/carbon-core/src/components/CarbonPortal";
 
 import {
-  CarbonContext,
-  CarbonContent,
-  useCreateCarbon,
   CarbonChangeContext,
+  CarbonContent,
+  CarbonContext,
   extensionPresets,
+  useCreateCarbon,
 } from "@emrgen/carbon-core";
 
 const data = node("document", [
   title([text("Carbon "), text("document"), text(" title")]),
   node("divider"),
-  node("checkedList", [title([text("section 1")])], {}),
+  node("todo", [title([text("section 1")])], {}),
+  node(
+    "section",
+    [
+      title([text("section 1")]),
+      node(
+        "todo",
+        [title([text("section 1")]), section([title([text("section")])])],
+        {}
+      ),
+    ],
+    {}
+  ),
+
   node("image", [], {
     node: {
       src: "https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9780123820365/files/images/F000124f12-68-9780123820365.jpg",

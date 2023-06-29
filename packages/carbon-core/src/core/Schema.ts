@@ -70,6 +70,10 @@ export class Schema {
 		return this.nodeFromJSON({ name, ...json })
 	}
 
+	cloneWithId(node: Node): Node {
+		return this.factory.cloneWithId(node);
+	}
+
 	// create node from json
 	nodeFromJSON(json: any): Optional<Node> {
 		if (json instanceof Node) {

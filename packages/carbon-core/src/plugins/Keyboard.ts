@@ -120,7 +120,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 	on(): EventHandlerMap {
 		return {
 			selectstart: (ctx: EventContext<KeyboardEvent>) => {
-				console.log('xxxxxxxxxxxxxxxxxxxxxx', ctx.event)
+				// console.log('xxxxxxxxxxxxxxxxxxxxxx', ctx.event)
 				// ctx.event.preventDefault();
 				// ctx.event.stopPropagation();
 			},
