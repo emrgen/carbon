@@ -18,6 +18,20 @@ import { useEffect } from "react";
 const data = node("document", [
   title([text("Carbon "), text("document"), text(" title")]),
   node("divider"),
+
+  node("section", [
+    title([text("section 1")]),
+    node("section", [
+      title([text("section 1.1")]),
+      node("section", [
+        title([text("section 1.1.1")]),
+        node("section", [title([text("section 1.1.1.1")])]),
+        node("section", [title([text("section 1.1.1.2")])]),
+      ]),
+      node("section", [title([text("section 1.1.2")])]),
+    ]),
+    node("section", [title([text("section 1.2")])]),
+  ]),
   node("todo", [title([text("section 1")])], {}),
   node(
     "section",

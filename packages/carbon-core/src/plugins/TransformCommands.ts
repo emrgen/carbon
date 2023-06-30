@@ -1,5 +1,5 @@
 
-import { each, first, flatten, last, merge, reverse } from "lodash";
+import { after, each, first, flatten, last, merge, reverse } from "lodash";
 
 import { Optional } from "@emrgen/types";
 import { InsertNodes } from "../core/actions/InsertNodes";
@@ -28,6 +28,7 @@ import { nodeLocation } from "../utils/location";
 import { SetContent } from "../core/actions/SetContent";
 import { splitTextBlock } from "../utils/split";
 import { NodeSelection } from "../core/NodeSelection";
+import { Slice } from "../core/Slice";
 
 export interface SplitOpts {
   rootType?: NodeType;
@@ -57,7 +58,7 @@ declare module '@emrgen/carbon-core' {
       update(node: Node, attrs: Record<string, any>): Optional<Transaction>;
       merge(prev: Node, next: Node): Optional<Transaction>;
       merge(prev: Node, next: Node): Optional<Transaction>;
-      paste(selection: PinnedSelection, fragment: Fragment): Optional<Transaction>;
+      paste(selection: PinnedSelection, slice: Slice): Optional<Transaction>;
     };
   }
 }
@@ -141,14 +142,14 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  paste(app: Carbon, selection: PinnedSelection, fragment: Fragment): Optional<Transaction> {
-    if (fragment.isEmpty) {
+  paste(app: Carbon, selection: PinnedSelection, slice: Slice): Optional<Transaction> {
+    if (slice.isEmpty) {
       return;
     }
-    const {nodeSelection} = app
-    const { nodes } = fragment;
+    const { nodeSelection } = app
+    const { nodes } = slice;
 
-    console.log(nodes);
+    console.log('xxx', nodes);
 
     // if the selection is not empty, we need to paste the nodes after the last node
     if (!nodeSelection.isEmpty) {
@@ -171,7 +172,7 @@ export class TransformCommands extends BeforePlugin {
       return tr
     }
 
-    if (fragment.nodeSelection) {
+    if (slice.isBlockSelection) {
       const tr = selection.isCollapsed ? app.tr : this.delete(app, selection);
       if (!tr) {
         console.log('failed to delete');
@@ -184,22 +185,24 @@ export class TransformCommands extends BeforePlugin {
 
       const at = Point.toAfter(after.head.nodeId);
 
-      tr.insert(at, fragment.nodes);
+      tr.insert(at, slice.nodes);
       return tr;
     }
 
-    const {start, end} = selection;
-    const {node: startNode} = start;
-    const {node: endNode} = end;
-    const startTitle = first(nodes)?.find(n => n.isTextBlock, {order: 'post'});
-    const endTitle = last(nodes)?.find(n => n.isTextBlock, { order: 'post', direction: 'backward' });
+    const { start, end } = selection;
+    const { node: startNode } = start;
+    const { node: endNode } = end;
+    const { start: startTitle, end: endTitle } = slice
     if (!startTitle || !endTitle) {
       console.error('no title found');
       return;
     }
 
+    console.log(startTitle.chain.map(n => n.type.name));
+    
+
     // if selection is within same title
-    if (start.node === end.node) {
+    if (selection.isCollapsed && start.node === end.node) {
       const { tr } = app;
       // if selection is collapsed and at the end of the title
       if (start.isAtEndOfNode(start.node)) {
@@ -207,14 +210,44 @@ export class TransformCommands extends BeforePlugin {
         if (startTitle.eq(endTitle)) {
           const textContent = startNode.textContent + startTitle.textContent;
           const textNode = app.schema.text(textContent);
+
           tr
             .setContent(start.node.id, BlockContent.create([textNode!]))
             .select(PinnedSelection.fromPin(Pin.future(start.node!, textContent.length)!));
 
           return tr;
         } else {
-          console.log('insert at the end of the title, but not the same title');
+          // console.log('startTitle', startTitle,nodes);
 
+          const textContent = startNode.textContent + startTitle.textContent;
+          const textNode = app.schema.text(textContent);
+
+          tr
+            .setContent(start.node.id, BlockContent.create([textNode!]))
+
+          let beforeNode: Optional<Node> = start.node;
+          let afterNode: Optional<Node> = startTitle;
+          // move upwards until we
+          while (beforeNode && afterNode && !beforeNode?.parent?.isRoot) {
+            // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
+            tr.insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings)
+            beforeNode = beforeNode.parent
+            afterNode = afterNode.parent
+          }
+
+          // NOTE: slice.nodes has parent node with name 'document'
+          while (beforeNode && afterNode && afterNode.name !== 'document') {
+            // console.log('afterNode', afterNode);
+            if (afterNode.nextSiblings.length) {
+              tr.insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings)
+              beforeNode = last(afterNode.nextSiblings)
+            }
+            afterNode = afterNode.parent
+          }
+
+          tr.select(PinnedSelection.fromPin(Pin.toEndOf(endTitle)!));
+
+          return tr;
         }
       } else if (start.isAtStartOfNode(start.node)) {
         console.log('insert at the start of the title');

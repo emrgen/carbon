@@ -378,6 +378,17 @@ export class Node extends EventEmitter {
 		console.log(fragment)
 		return this.parent?.type.contentMatch.matchFragment(fragment)
 	}
+
+	// return a child node at given path
+	atPath(path: number[]): Optional<Node> {
+		let node: Optional<Node> = this;
+		for (let i = 0, len = path.length; i < len && node; i++) {
+			node = node.child(path[i])
+		}
+
+		return node;
+	}
+
 	//
 	setParent(parent: Optional<Node>) {
 		this.parent = parent;

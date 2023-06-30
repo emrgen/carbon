@@ -7,6 +7,7 @@ import { Range } from "../core/Range";
 import { NodeId } from "../core/NodeId";
 import { last, reverse } from 'lodash';
 import { Optional } from '@emrgen/types';
+import { Slice } from "../core/Slice";
 
 export class ClipboardPlugin extends BeforePlugin {
   name = "clipboard";
@@ -16,19 +17,16 @@ export class ClipboardPlugin extends BeforePlugin {
       cut: (ctx: EventContext<any>) => {
         const { event, app } = ctx
         preventAndStop(event);
-        const fragment = this.fragment(app);
-        // if (fragment.isEmpty) {
-        //   return
-        // }
+        const slice = this.slice(app);
+        if (!slice.isEmpty) {
+          const serialized = slice.nodes.map(n => app.serialize(n))
+          console.log('Serialized =>', serialized);
+          event.clipboardData.setData('text/plain', serialized);
 
-        // const serialized = fragment.nodes.map(n => app.serialize(n)).join('\n\n')
-        // console.log('Serialized =>', serialized);
-        // event.clipboardData.setData('text/plain', serialized);
+          console.log(slice.nodes.map(n => n.textContent));
 
-        // // TODO: sanitize the fragment, remove all ids and references to the old document
-        // // keep external references to images, links, etc
-        // app.state.runtime.clipboard.setFragment(fragment);
-
+          app.state.runtime.clipboard.setSlice(slice);
+        }
         // delete the selection
         app.cmd.keyboard.backspace(ctx)?.dispatch();
       },
@@ -36,17 +34,17 @@ export class ClipboardPlugin extends BeforePlugin {
         const { event, app } = ctx
         preventAndStop(event);
         console.log('copy', event);
-        const fragment = this.fragment(app);
-        console.log('fragment', fragment);
+        const slice = this.slice(app);
+        console.log('fragment', slice);
 
-        if (!fragment.isEmpty) {
-          const serialized = fragment.nodes.map(n => app.serialize(n))
+        if (!slice.isEmpty) {
+          const serialized = slice.nodes.map(n => app.serialize(n))
           console.log('Serialized =>', serialized);
           event.clipboardData.setData('text/plain', serialized);
 
-          console.log(fragment.nodes.map(n => n.textContent));
+          console.log(slice.nodes.map(n => n.textContent));
 
-          app.state.runtime.clipboard.setFragment(fragment);
+          app.state.runtime.clipboard.setSlice(slice);
           return
         }
       },
@@ -56,61 +54,23 @@ export class ClipboardPlugin extends BeforePlugin {
         const { nodeSelection, selection } = app
 
         if (!app.state.runtime.clipboard.isEmpty) {
-          const { fragment } = app.state.runtime.clipboard;
-          app.cmd.transform.paste(selection, fragment)?.dispatch()
+          const { slice } = app.state.runtime.clipboard;
+          app.cmd.transform.paste(selection, slice)?.dispatch()
         } else {
 
         }
-        console.log('paste', app.state.runtime.clipboard.isEmpty, nodeSelection.isEmpty);
-        // if (!app.state.runtime.clipboard.isEmpty) {
-        //   const { fragment } = app.state.runtime.clipboard;
-        //   const { nodes } = fragment;
-
-        //   // if the selection is not empty, we need to paste the nodes after the last node
-        //   if (!nodeSelection.isEmpty) {
-        //     const lastNode = last(nodeSelection.nodes) as Node
-        //     let focusNode: Optional<Node> = null;
-        //     reverse(nodes.slice()).some(n => {
-        //       return n.find(n => {
-        //         if (n.isTextBlock) {
-        //           focusNode = n;
-        //           return true;
-        //         }
-        //         return false;
-        //       })
-        //     });
-
-        //     const tr = app.tr.insert(Point.toAfter(lastNode.id), nodes)
-        //     if (focusNode) {
-        //       tr.select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
-        //     }
-        //     tr.dispatch();
-        //     return
-        //   }
-
-        //   app.cmd.transform.paste(selection, fragment)?.dispatch()
-        //   return
-        // }
-
-        // create a fragment from the clipboard data
-        // const deserialized = event.clipboardData.getData('text/plain').split('\n\n').map(s => app.deserialize(s));
-        // const fragment = Fragment.from(deserialized);
-        // app.cmd.transform.paste(selection, fragment)?.dispatch()
-
-        console.log('paste', app.state.runtime.clipboard.fragment.nodes);
-
-        // console.log('paste', event);
+        console.log('paste', app.state.runtime.clipboard.slice.nodes);
       }
     };
   }
 
-  fragment(app: Carbon): Fragment {
+  slice(app: Carbon): Slice {
     const { selection, nodeSelection } = app;
     console.log(nodeSelection.size);
 
     if (nodeSelection.size) {
       const { nodes } = nodeSelection;
-      return Fragment.from(nodes.map(n => app.schema.cloneWithId(n)), true);
+      return Slice.from(nodes.map(n => app.schema.cloneWithId(n)));
     }
 
     const { start, end } = selection;
@@ -120,7 +80,7 @@ export class ClipboardPlugin extends BeforePlugin {
 
 
     if (!startNode || !endNode) {
-      return Fragment.empty;
+      return Slice.empty;
     }
 
     if (startNode.isTextBlock) {
@@ -128,7 +88,7 @@ export class ClipboardPlugin extends BeforePlugin {
     }
 
     if (!startNode || !endNode) {
-      return Fragment.empty;
+      return Slice.empty;
     }
 
     const nodes = startNode === endNode
@@ -149,7 +109,7 @@ export class ClipboardPlugin extends BeforePlugin {
     const endPin = end.down();
 
     if (!startPin || !endPin) {
-      return Fragment.empty;
+      return Slice.empty;
     }
 
     rootNode.find(n => {
@@ -246,7 +206,31 @@ export class ClipboardPlugin extends BeforePlugin {
       return false;
     });
 
+    let startPath: number[] = [];
+    let endPath: number[] = [];
+    rootNode.forAll(n => {
+      if (n.eq(start.node)) {
+        startPath = n.path
+      }
+      if (n.eq(end.node)) {
+        endPath = n.path
+      }
+    })
+
+    const children = rootNode.children.map(n => app.schema.cloneWithId(n));
+    rootNode.updateContent(BlockContent.create(children));
+
+    const startSliceNode = rootNode.atPath(startPath);
+    const endSliceNode = rootNode.atPath(endPath);
+
+    if (!startSliceNode || !endSliceNode) {
+      throw Error('failed to get start and end slice node')
+    }
+
+    console.log(startSliceNode.chain.map(n => n.type.name).join(' > '));
+    
+
     // remove nodes and content outside the selection
-    return Fragment.from(rootNode.children.map(n => app.schema.cloneWithId(n)));
+    return Slice.create(rootNode.children, startSliceNode, endSliceNode);
   }
 }

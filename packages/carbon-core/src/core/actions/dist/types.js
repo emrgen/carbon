@@ -1,0 +1,30 @@
+"use strict";
+exports.__esModule = true;
+exports.ActionType = exports.ActionOrigin = void 0;
+var ActionOrigin;
+(function (ActionOrigin) {
+    ActionOrigin["Unknown"] = "Unknown";
+    ActionOrigin["Normalizer"] = "Normalizer";
+    ActionOrigin["UserInput"] = "UserInput";
+    ActionOrigin["UserSelectionChange"] = "UserSelectionChange";
+    ActionOrigin["DomSelectionChange"] = "DomSelectionChange";
+    ActionOrigin["System"] = "System";
+    ActionOrigin["Runtime"] = "Runtime";
+})(ActionOrigin = exports.ActionOrigin || (exports.ActionOrigin = {}));
+var ActionType;
+(function (ActionType) {
+    ActionType["change"] = "change";
+    ActionType["move"] = "move";
+    ActionType["select"] = "select";
+    ActionType["insertNode"] = "insertNode";
+    ActionType["removeNode"] = "removeNode";
+    ActionType["insertText"] = "insertText";
+    ActionType["removeText"] = "removeText";
+    ActionType["mark"] = "mark";
+    ActionType["data"] = "data";
+    ActionType["selectNodes"] = "selectNodes";
+    ActionType["activateNodes"] = "activateNodes";
+    ActionType["updateAttrs"] = "updateAttrs";
+    ActionType["null"] = "null";
+    ActionType["custom"] = "custom";
+})(ActionType = exports.ActionType || (exports.ActionType = {}));

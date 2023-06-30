@@ -1,26 +1,27 @@
 import { Fragment } from "./Fragment";
+import { Slice } from "./Slice";
 
 export class CarbonClipboard {
-  fragment: Fragment;
+  slice: Slice;
 
   static default() {
     return new CarbonClipboard();
   }
 
   get isEmpty() {
-    return this.fragment.isEmpty;
+    return this.slice.isEmpty;
   }
 
   constructor() {
-    this.fragment = Fragment.from([]);
+    this.slice = Slice.empty
   }
 
-  setFragment(fragment: Fragment) {
-    this.fragment = fragment;
+  setSlice(slice: Slice) {
+    this.slice = slice;
   }
 
   clear() {
-    this.fragment = Fragment.from([]);
+    this.slice = Slice.empty;
   }
 
 }
