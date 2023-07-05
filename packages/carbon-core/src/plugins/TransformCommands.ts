@@ -1,5 +1,5 @@
 
-import { after, each, first, flatten, identity, last, merge, reverse, sortBy } from "lodash";
+import { each, first, flatten, identity, last, merge, reverse, sortBy } from "lodash";
 
 import { Optional } from "@emrgen/types";
 import { InsertNodes } from "../core/actions/InsertNodes";
@@ -29,8 +29,6 @@ import { SetContent } from "../core/actions/SetContent";
 import { splitTextBlock } from "../utils/split";
 import { BlockSelection } from "../core/NodeSelection";
 import { Slice } from "../core/Slice";
-import { nodeLocation } from '@emrgen/carbon-core';
-import { CarbonAction } from '@emrgen/carbon-core';
 import { NodeIdSet } from "../core/BSet";
 import { ChangeName } from "../core/actions/ChangeName";
 
@@ -403,7 +401,7 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    const [startBlock, endBlock] = blocksBelowCommonNode(startTextBlock.parent!, endTextBlock.parent!);
+    const [startBlock, endBlock] = blocksBelowCommonNode(startTextBlock, endTextBlock);
     if (!startBlock || !endBlock) {
       console.log(p14("%c[failed]"), "color:red", "merge nodes are not found");
       return;
@@ -502,6 +500,8 @@ export class TransformCommands extends BeforePlugin {
     const { tr } = app;
     // console.log(deleteGroup.ids.toArray());
     // console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
+    console.log(startTopBlock.name);
+
     const { parent: commonNode } = startTopBlock;
     if (!commonNode) {
       console.error('cant merge without commonNode');
@@ -516,9 +516,11 @@ export class TransformCommands extends BeforePlugin {
     const endBlock = endTextBlock.parent!;
     let startDepth = startBlock.depth - commonNode.depth;
     let endDepth = endBlock.depth - commonNode.depth;
-    const commonDepth = Math.min(startDepth, endDepth);
+    let commonDepth = Math.min(startDepth, endDepth);
+    if (startBlock.isCollapsible) {
+      commonDepth += 1;
+    }
     console.log(commonDepth, commonNode.depth, startDepth, endDepth);
-
 
     // console.log(startBlock, endBlock);
     // console.log(startBlock);
@@ -533,15 +535,16 @@ export class TransformCommands extends BeforePlugin {
     const splitUptoSameDepth = () => {
       let lastInsertedNodeId = endBlock.id;
       let mergeDepth = commonDepth;
-      console.log('splitUptoSameDepth', mergeDepth, startContainer?.isCollapsible);
+      console.log('splitUptoSameDepth', mergeDepth, startBlock?.isCollapsible);
 
-      let to: Optional<Point> = Point.toAfter(startContainer!.id);
-      if (startContainer!.isCollapsible) {
-        to = Point.toAfter(startContainer?.firstChild?.id!)
+      let to: Optional<Point> = Point.toAfter(startBlock!.id);
+      if (startBlock!.isCollapsible) {
+        to = Point.toAfter(startBlock?.firstChild?.id!)
       }
-
-      if (startContainer!.type.splitName !== endContainer!.type.name) {
-        changeActions.push(ChangeName.create(endContainer!.id, endContainer!.name, startContainer!.type.splitName));
+      console.log(startBlock!.type.splitName, endBlock!.name);
+      
+      if (startBlock!.type.splitName !== endBlock!.name) {
+        changeActions.push(ChangeName.create(endBlock!.id, endBlock!.name, startBlock!.type.splitName));
       }
 
       // * move nodes from endContainer to startContainer
@@ -549,7 +552,6 @@ export class TransformCommands extends BeforePlugin {
         if (endContainer.eq(endBlock)) {
           moveActions.push(...this.moveNodeCommands(to, endContainer));
           to = Point.toAfter(endContainer.id);
-          console.log('######');
 
           ignoreMove.add(endContainer.id);
         } else {
@@ -568,8 +570,6 @@ export class TransformCommands extends BeforePlugin {
         startContainer = startContainer.parent!;
         endContainer = endContainer.parent!;
         mergeDepth -= 1
-
-        // if (startCon)
       }
       console.log('CASE: splitUptoSameDepth', mergeDepth);
 
@@ -633,8 +633,8 @@ export class TransformCommands extends BeforePlugin {
         endContainer = endContainer.parent;
       }
 
-      console.log(after.toString());
-      
+      console.log(changeActions);
+
       tr
         .add(changeActions)
         .add(moveActions)
@@ -1027,8 +1027,6 @@ export class TransformCommands extends BeforePlugin {
     // console.log(selection.toString());
     const { start, end } = selection;
     const deleteGroup = this.selectionInfo(app, selection);
-
-
     const endTextBlock = end.node;
     const startTextBlock = start.node;
 
@@ -1117,6 +1115,7 @@ export class TransformCommands extends BeforePlugin {
     const { tr } = app;
     const startTextBlock = start.node;
     const endTextBlock = end.node;
+    console.log('xxxxxxxxxxx', startBlock.name);
 
     const { parent: commonNode } = startBlock;
     if (!commonNode) {
