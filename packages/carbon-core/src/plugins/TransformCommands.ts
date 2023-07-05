@@ -401,23 +401,20 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    const [startBlock, endBlock] = blocksBelowCommonNode(startTextBlock!, endTextBlock!);
+    const [startNode, endNode] = blocksBelowCommonNode(startTextBlock!, endTextBlock!);
     // console.log([startBlock?.id.toString(), endBlock?.id.toString()],startBlock?.parent?.eq(endBlock?.parent));
 
-    if (!startBlock || !endBlock) {
+    // startNode and endNode can be textBlock or containerBlock
+    if (!startNode || !endNode) {
       console.log(p14("%c[failed]"), "color:red", "merge nodes are not found");
       return;
     }
 
-    console.log('XXX', startBlock.id.toString(), endBlock.id.toString(), startBlock);
-
-    const commonNode = startBlock.commonNode(endBlock);
+    const commonNode = startNode.commonNode(endNode);
     if (!commonNode) {
       console.log(p14("%c[failed]"), "color:red", "common node not found, should not reach!");
       return;
     }
-
-    console.log('XX', commonNode.name, commonNode.id.toString());
 
     if (start.isAtStartOfNode(commonNode!) && end.isAtEndOfNode(commonNode)) {
       const { tr } = app;
@@ -458,12 +455,12 @@ export class TransformCommands extends BeforePlugin {
 
     // * startBlock !== endBlock
     if (!startTextBlock.eq(endTextBlock)) {
-      return this.splitByRangeAcrossBlocks(app, splitBlock, start, end, startBlock, endBlock, deleteGroup);
+      return this.splitByRangeAcrossBlocks(app, splitBlock, start, end, startNode, endNode, deleteGroup);
     }
 
     // * startBlock === endBlock
     if (startTextBlock.eq(endTextBlock)) {
-      return this.splitByRangeWithinTextBlock(app, splitBlock, start, end, startBlock, endBlock, deleteGroup);
+      return this.splitByRangeWithinTextBlock(app, splitBlock, start, end, startNode, endNode, deleteGroup);
     }
 
     return null

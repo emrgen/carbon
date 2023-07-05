@@ -68,10 +68,21 @@ export class CollapsibleList extends NodePlugin {
 
   split(app: Carbon, selection: PinnedSelection): Optional<Transaction> {
     const {start, end} = selection;
-    const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
     const title = start.node;
-    console.log(leftContent, rightContent);
+    const splitBlock = title.parent!;
 
+    if (start.isAtStartOfNode(title)) {
+      const section = app.schema.type(splitBlock.type.splitName).default();
+      const at = Point.toAfter(title.parent!.prevSibling!.id);
+      const focusPoint = Pin.toStartOf(title!);
+      const after = PinnedSelection.fromPin(focusPoint!);
+
+      return app.tr
+        .insert(at, section!)
+        .select(after)
+    }
+
+    const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
     const json = {
       name: 'section',
       content: [
