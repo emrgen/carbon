@@ -111,6 +111,7 @@ export class Transaction {
 		return sel
 	}
 
+	// this will allow command chaining
 	get cmd() {
 		return this.app.cmd;
 	}

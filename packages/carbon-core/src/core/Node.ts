@@ -88,7 +88,7 @@ export class Node extends EventEmitter {
 		this.content = content.withParent(this)
 		this.marks = marks;
 		this.attrs = new NodeAttrs(merge(cloneDeep(type.attrs), attrs));
-		this.data = new NodeData();
+		this.data = new NodeData(merge(cloneDeep(type.data), data));
 
 		this.renderVersion = renderVersion;
 		this.updateVersion = updateVersion;
@@ -639,13 +639,24 @@ export class Node extends EventEmitter {
 		this.type = type;
 		this.attrs = new NodeAttrs({
 			html: {
-				...this.attrs.html,
 				...type.attrs.html,
+				...this.attrs.html,
 			},
 			node: {
-				...this.attrs.node,
 				...type.attrs.node,
+				...this.attrs.node,
 			}
+		});
+		this.data = new NodeData({
+			html: {
+				...type.data.html,
+				...this.data.html,
+			},
+			node: {
+				...type.data.node,
+				...this.data.node,
+			},
+			state: this.data.state,
 		});
 		this.markUpdated();
 	}

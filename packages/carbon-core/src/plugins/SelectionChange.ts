@@ -48,7 +48,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 				// console.log('SelectionPlugin.selectionchanged',before.toJSON(),after.toJSON());
 				console.log(p14('%c[create]'), 'color:green', 'select transaction');
 				const { tr } = app;
-				if (!app.nodeSelection.isEmpty) {
+				if (!app.blockSelection.isEmpty) {
 					tr.selectNodes([]);
 				}
 				tr

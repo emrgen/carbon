@@ -39,19 +39,16 @@ export class MoveAction implements CarbonAction {
 
 		tr.updated(moveNode.parent!);
 		tr.normalize(moveNode.parent!);
-		console.log('xxxxxxx');
-		
+
 		moveNode.parent?.remove(moveNode);
 
 		moveNode.forAll(n => app.store.delete(n));
 
 		const fragment = Fragment.fromNode(moveNode);
 
-		console.log("MOVE: move node", moveNode, "to", to.toString(), target);
+		// console.log("MOVE: move node", moveNode, "to", to.toString(), target);
 
 		if (to.isBefore) {
-			console.log('vvvvvvvvvvvvvv');
-
 			target.append(fragment);
 			fragment.forAll(n => app.store.put(n));
 			parent.insertBefore(fragment, target);
@@ -63,7 +60,7 @@ export class MoveAction implements CarbonAction {
 			// if (target.nextSibling?.eq(fragment.child(0))) {
 			// 	return NULL_ACTION_RESULT
 			// }
-			fragment.forAll(n => console.log(n.id.toString()));
+			// fragment.forAll(n => console.log(n.id.toString()));
 			// console.log('move after', to.toString(),)
 			parent.insertAfter(fragment, target);
 			fragment.forAll(n => {

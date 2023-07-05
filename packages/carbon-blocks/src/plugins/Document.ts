@@ -21,13 +21,18 @@ export class DocPlugin extends CarbonPlugin {
 			splits: true,
 			splitName: 'section',
 			selectable: true,
-			container: true,
+			collapsible: true,
 			isolating: true,
 			sandbox: true,
 			attrs: {
 				html: {
 					contentEditable: true,
 					suppressContentEditableWarning: true,
+				}
+			},
+			data: {
+				node: {
+					expanded: false,
 				}
 			}
 		}
@@ -43,46 +48,13 @@ export class DocPlugin extends CarbonPlugin {
 	keydown(): EventHandlerMap {
 		return {
 			// on enter split without merge
-			_enter: (ctx: EventContext<KeyboardEvent>) => {
-				console.log('enter doc');
-				const { app, node, selection } = ctx;
-				const { start, end } = selection;
-				const title = node.child(0);
-				// start and end are within document title node
-				if (title && start.node.eq(title) && end.node.eq(title)) {
+			enter: (ctx: EventContext<KeyboardEvent>) => {
+				const { app, selection } = ctx;
+				console.log('[Enter] doc');
+				if (selection.inSameNode ) {
 					ctx.event.preventDefault();
 					ctx.stopPropagation();
-
-					// const tr = app.cmd.transform.delete()!;
-
-					const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
-
-					console.log(leftContent, rightContent);
-
-					const json = {
-						name: 'section',
-						content: [
-							{
-								name: 'title',
-								content: rightContent.children.map(c => c.toJSON())
-							}
-						]
-					}
-
-					const section = app.schema.nodeFromJSON(json);
-					if (!section) {
-						throw Error('failed to create section');
-					}
-
-					const at = Point.toAfter(title.id);
-					const focusPoint = Pin.toStartOf(section!);
-					const after = PinnedSelection.fromPin(focusPoint!);
-
-					app.tr
-						.setContent(title.id, leftContent)
-						.insert(at, section!)
-						.select(after)
-						.dispatch();
+					app.cmd.collapsible.split(selection)?.dispatch();
 				}
 			}
 		}

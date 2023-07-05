@@ -1,4 +1,13 @@
-import { Carbon, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, splitTextBlock } from "@emrgen/carbon-core";
+import { Carbon, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, Transaction, splitTextBlock } from "@emrgen/carbon-core";
+import { Optional } from '@emrgen/types';
+
+declare module '@emrgen/carbon-core' {
+  interface CarbonCommands {
+    collapsible: {
+      split(selection: PinnedSelection): Optional<Transaction>;
+    }
+  }
+}
 
 export class CollapsibleList extends NodePlugin {
 
@@ -10,7 +19,8 @@ export class CollapsibleList extends NodePlugin {
       content: 'title content*',
       splits: true,
       splitName: 'section',
-      container: true,
+      collapsible: true,
+      collapsed: false,
       selectable: true,
       draggable: true,
       dragHandle: true,
@@ -26,7 +36,18 @@ export class CollapsibleList extends NodePlugin {
           // contentEditable: false,
           suppressContentEditableWarning: true,
         }
+      },
+      data: {
+        node: {
+          expanded: true,
+        }
       }
+    }
+  }
+
+  commands(): Record<string, Function> {
+    return {
+      split: this.split,
     }
   }
 
@@ -34,72 +55,46 @@ export class CollapsibleList extends NodePlugin {
     return {
       // tab: skipKeyEvent
       enter(ctx: EventContext<KeyboardEvent>) {
-        const { app, node, selection } = ctx;
-        const { start, end } = selection;
-        const title = node.child(0);
-        // start and end are within document title node
-        if (title && start.node.eq(title) && end.node.eq(title)) {
+        const { app, selection } = ctx;
+        console.log('[Enter] collapsible');
+        if (selection.inSameNode) {
           ctx.event.preventDefault();
           ctx.stopPropagation();
-
-          const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
-
-          const isAtBlockStart = start.isAtStartOfNode(node);
-
-          // insert section before node
-          if (isAtBlockStart) {
-            const json = {
-              name: 'section',
-              content: [
-                {
-                  name: 'title',
-                  content: []
-                }
-              ]
-            }
-
-            const section = app.schema.nodeFromJSON(json);
-            if (!section) {
-              throw Error('failed to create section');
-            }
-
-            const at = Point.toAfter(node.prevSibling?.id!)
-
-            app.tr
-              .setContent(title.id, rightContent)
-              .insert(at, section!)
-              .select(PinnedSelection.fromPin(Pin.toStartOf(node!)!))
-              .dispatch();
-            return
-          }
-
-          const json = {
-            name: 'section',
-            content: [
-              {
-                name: 'title',
-                content: rightContent.children.map(c => c.toJSON())
-              }
-            ]
-          }
-
-          const section = app.schema.nodeFromJSON(json);
-          if (!section) {
-            throw Error('failed to create section');
-          }
-
-          const at = Point.toAfter(title.id);
-          const focusPoint = Pin.toStartOf(section!);
-          const after = PinnedSelection.fromPin(focusPoint!);
-
-          app.tr
-            .setContent(title.id, leftContent)
-            .insert(at, section!)
-            .select(after)
-            .dispatch();
+          app.cmd.collapsible.split(selection)?.dispatch();
         }
       }
     }
+  }
+
+  split(app: Carbon, selection: PinnedSelection): Optional<Transaction> {
+    const {start, end} = selection;
+    const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
+    const title = start.node;
+    console.log(leftContent, rightContent);
+
+    const json = {
+      name: 'section',
+      content: [
+        {
+          name: 'title',
+          content: rightContent.children.map(c => c.toJSON())
+        }
+      ]
+    }
+
+    const section = app.schema.nodeFromJSON(json);
+    if (!section) {
+      throw Error('failed to create section');
+    }
+
+    const at = Point.toAfter(title.id);
+    const focusPoint = Pin.toStartOf(section!);
+    const after = PinnedSelection.fromPin(focusPoint!);
+
+    return app.tr
+      .setContent(title.id, leftContent)
+      .insert(at, section!)
+      .select(after)
   }
 
   serialize(app: Carbon, node: Node): SerializedNode {

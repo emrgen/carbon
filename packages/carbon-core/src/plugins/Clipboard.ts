@@ -51,7 +51,7 @@ export class ClipboardPlugin extends BeforePlugin {
       paste: (ctx: EventContext<any>) => {
         const { event, app } = ctx
         preventAndStop(event);
-        const { nodeSelection, selection } = app
+        const { blockSelection: nodeSelection, selection } = app
 
         if (!app.state.runtime.clipboard.isEmpty) {
           const { slice } = app.state.runtime.clipboard;
@@ -65,11 +65,11 @@ export class ClipboardPlugin extends BeforePlugin {
   }
 
   slice(app: Carbon): Slice {
-    const { selection, nodeSelection } = app;
+    const { selection, blockSelection: nodeSelection } = app;
     console.log(nodeSelection.size);
 
     if (nodeSelection.size) {
-      const { nodes } = nodeSelection;
+      const { blocks: nodes } = nodeSelection;
       return Slice.from(nodes.map(n => app.schema.cloneWithId(n)));
     }
 

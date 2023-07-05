@@ -16,7 +16,7 @@ import { SelectionManager } from './SelectionManager';
 import { Transaction } from './Transaction';
 import { TransactionManager } from './TransactionManager';
 import { CarbonCommands, SerializedNode } from "./types";
-import { NodeSelection } from './NodeSelection';
+import { BlockSelection } from './NodeSelection';
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -61,7 +61,7 @@ export class Carbon extends EventEmitter {
 		return this.state.selection;
 	}
 
-	get nodeSelection(): NodeSelection {
+	get blockSelection(): BlockSelection {
 		return this.state.nodeSelection;
 	}
 

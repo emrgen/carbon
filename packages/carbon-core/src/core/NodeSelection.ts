@@ -1,14 +1,15 @@
-import { reverse, sortBy } from "lodash";
 import { NodeIdSet } from "./BSet";
 import { Node } from "./Node";
 import { NodeStore } from "./NodeStore";
 
-export class NodeSelection {
+//
+export class BlockSelection {
+  //
   store: NodeStore
   nodeIds: NodeIdSet;
 
-  get nodes(): Node[] {
-    const nodes: any[] = this.nodeIds.map(id => {
+  get blocks(): Node[] {
+    const blocks: any[] = this.nodeIds.map(id => {
       const node = this.store.get(id);
       return {
         node,
@@ -16,10 +17,7 @@ export class NodeSelection {
       }
     });
 
-    console.log(nodes);
-    
-
-    nodes.sort((a, b) => {
+    blocks.sort((a, b) => {
       const aPath = a.path;
       const bPath = b.path;
       for (let i = 0, size = Math.min(aPath.length, bPath.length); i < size; i++) {
@@ -42,11 +40,8 @@ export class NodeSelection {
 
       return 0;
     });
-    console.log(nodes.map(n => n.node.id.toString()));
-    
 
-
-    return nodes.map(n => n.node)
+    return blocks.map(n => n.node)
   }
 
   get isEmpty() {

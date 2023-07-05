@@ -9,7 +9,7 @@ export const nodeLocation = (node: Node): Optional<Point> => {
 
 	const {parent} = node;
 	if (!parent) {
-		return null
+		throw new Error('nodeLocation: node has no parent')
 	}
 
 	return Point.toWithin(parent.id, 0);

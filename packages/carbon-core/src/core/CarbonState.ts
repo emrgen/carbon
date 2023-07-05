@@ -8,7 +8,7 @@ import { NodeId } from './NodeId';
 import { NodeStore } from './NodeStore';
 import { PinnedSelection } from './PinnedSelection';
 import { SelectionEvent } from './SelectionEvent';
-import { NodeSelection } from './NodeSelection';
+import { BlockSelection } from './NodeSelection';
 import { CarbonClipboard } from './CarbonClipboard';
 
 export class CarbonRuntimeState {
@@ -88,7 +88,7 @@ export class CarbonState {
 	}
 
 	get nodeSelection() {
-		return new NodeSelection(this.store, this.selectedNodeIds);
+		return new BlockSelection(this.store, this.selectedNodeIds);
 	}
 
 	static create(store: NodeStore, content: Node, selection: PinnedSelection) {

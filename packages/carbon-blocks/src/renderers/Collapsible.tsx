@@ -11,7 +11,8 @@ import {
 export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
   const { SelectionHalo } = useSelectionHalo(props);
-
+  console.log('xxx', node);
+  
   const beforeContent = (
     <div
       className="carbon-collapsible__control"
@@ -22,7 +23,7 @@ export default function CollapsibleListComp(props: RendererProps) {
         e.stopPropagation();
       }}
     >
-      {node.data.node?.isExpanded ? "▼" : "▶"}
+      {node.data.node?.expanded ? "▼" : "▶"}
     </div>
   );
 

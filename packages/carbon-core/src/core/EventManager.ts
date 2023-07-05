@@ -68,7 +68,7 @@ export class EventManager {
 		if (type !== EventsIn.selectionchange && app.state.selectedNodeIds.size > 0) {
 			// console.log('selected nodes', app.state.selectedNodeIds);
 			// console.log(type, event);
-			
+
 			const lastNode = last(app.state.selectedNodeIds.map(id => app.store.get(id))) as Node;
 			this.updateCommandOrigin(type, event);
 
@@ -87,7 +87,9 @@ export class EventManager {
 
 		// console.debug(p14('%c[debug]'),'color:magenta', 'Editor.currentSelection', this.selection.toString(),);
 		const selection = PinnedSelection.fromDom(app.store);
-		console.log(pad(`%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`, 100), 'background:#ffcc006e');
+		if (['selectionchange'].includes(type)) {
+			console.log(pad(`%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`, 100), 'background:#ffcc006e');
+		}
 		// editor cannot process event without active selection
 		if (!selection) {
 			console.error(p12('%c[invalid]'), 'color:grey', `${type}: event with empty selection`);
@@ -123,13 +125,20 @@ export class EventManager {
 			origin: EventOrigin.dom,
 		});
 
-		if (type == EventsIn.selectionchange || selectionChangedUsingKeys(event)) {
-			console.group('onEvent:', event.type);
+		if ([
+			EventsIn.selectionchange,
+			EventsIn.selectstart,
+			EventsIn.mouseDown,
+			EventsIn.keyUp,
+		].includes(type) || selectionChangedUsingKeys(event)
+		) {
+			console.groupCollapsed('onEvent:', event.type);
 		} else {
 			console.group('onEvent:', event.type);
 		}
 
 		this.pm.onEvent(editorEvent);
+
 
 		console.groupEnd()
 

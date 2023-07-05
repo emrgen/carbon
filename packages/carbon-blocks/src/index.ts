@@ -26,6 +26,7 @@ import { Image } from './plugins/Image';
 import ImageComp from './renderers/ImageComp';
 import { Todo } from './plugins/Todo';
 import TodoComp from './renderers/CheckedList';
+import { NestablePlugin } from './plugins';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -34,7 +35,7 @@ export const blockPresets: Extension = {
 		new Header(),
 		new DocPlugin(),
 		new DocPlugin(),
-		new ListKeyboardPlugin(),
+		new NestablePlugin(),
 		new CollapsibleList(),
 		new BulletedList(),
 		new NumberedList(),

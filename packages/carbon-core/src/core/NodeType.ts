@@ -6,6 +6,7 @@ import { MarkSet } from './Mark';
 import { Node } from './Node';
 import { NodeSpec, Schema } from './Schema';
 import { HTMLAttrs, NodeJSON, NodeName } from './types';
+import { NodeData } from './NodeData';
 
 export type Attrs = { readonly [attr: string]: any }
 
@@ -42,6 +43,11 @@ export class NodeType {
 		html: HTMLAttrs;
 	};
 
+	data: {
+		node: Record<string, any>;
+		html: Record<string, any>;
+	}
+
 	/// True if this node type has inline content.
 	inlineContent!: boolean
 	/// True if this is a block type
@@ -70,6 +76,7 @@ export class NodeType {
 	constructor(readonly name: NodeName, readonly schema: Schema, readonly spec: NodeSpec) {
 		this.groupsNames = specGroups(name, spec);
 		this.attrs = merge({ node: {}, html: {} }, spec.attrs ?? {});
+		this.data = merge({ node: {}, html: {}, state: {} }, spec.data ?? {});
 
 		this.isBlock = !(spec.inline || name == "text")
 		this.isText = name == "text";
@@ -197,7 +204,7 @@ export class NodeType {
 
 	// create a default node based on schema
 	default(): Optional<Node> {
-		console.log(this.name);
+		// console.log(this.name);
 		
 		if (this.isText) {
 			return this.schema.text('');

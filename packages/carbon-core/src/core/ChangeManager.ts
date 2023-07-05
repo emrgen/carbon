@@ -75,8 +75,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			updatedNodeIds.add(n.id);
 		})
 
-		// console.log(updatedNodes);
-		
+		console.log('publish', updatedNodes.map(n => n.id.toString()));
 		each(updatedNodes, n => this.publish(NodeChangeType.update, n));
 		console.groupEnd()
 	}

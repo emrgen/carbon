@@ -4,6 +4,7 @@ import { NodeId } from '../NodeId';
 import { ActionResult } from './Result';
 import { Transaction } from '../Transaction';
 import { generateActionId } from './utils';
+import { classString } from "../Logger";
 
 // action to remove a node by id
 export class RemoveNode implements CarbonAction {
@@ -36,6 +37,11 @@ export class RemoveNode implements CarbonAction {
 
 	inverse(): CarbonAction {
 		throw new Error("Method not implemented.");
+	}
+
+	toString() {
+		const {at, nodeId} = this
+		return classString(this)({at, nodeId});
 	}
 
 }

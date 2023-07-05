@@ -5,7 +5,7 @@ export class NodeData {
 	html: Record<string, any>;
 	node: Record<string, any>;
 
-	constructor(state = {active: false, selected: false}, html = {}, node = {}) {
+	constructor({state = {active: false, selected: false}, html = {}, node = {}}) {
 		this.state = state;
 		this.html = html;
 		this.node = node;

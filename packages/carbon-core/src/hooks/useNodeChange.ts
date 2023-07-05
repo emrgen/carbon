@@ -52,7 +52,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 			props.onChange?.()
 			setVersion(value.version);
 			setWatched(value);
-			console.log("updated", node.id.toString(), node.version, watched === value);
+			// console.log("updated", node.id.toString(), node.version, watched === value);
 		};
 		change.subscribe(node.id, NodeChangeType.update, onChange);
 		return () => {

@@ -10,6 +10,7 @@ import { DomSelection, Range } from './Range';
 export class PinnedSelection {
 	tail: Pin;
 	head: Pin;
+	nodes: Node[];
 
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
 		const domSelection = window.getSelection();
@@ -114,9 +115,10 @@ export class PinnedSelection {
 		return new PinnedSelection(tail, head);
 	}
 
-	constructor(tail: Pin, head: Pin) {
+	constructor(tail: Pin, head: Pin, nodes: Node[] = []) {
 		this.tail = tail;
 		this.head = head;
+		this.nodes = nodes;
 	}
 
 	get range(): Range {
@@ -129,6 +131,10 @@ export class PinnedSelection {
 
 	get isCollapsed() {
 		return this.tail.eq(this.head);
+	}
+
+	get inSameNode() {
+		return this.tail.node.eq(this.head.node);
 	}
 
 	get start(): Pin {

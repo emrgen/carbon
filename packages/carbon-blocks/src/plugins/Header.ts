@@ -52,18 +52,6 @@ export class Heading extends NodePlugin {
 	}
 
 	keydown(): Partial<EventHandlerMap> {
-		return {
-			// enter: (ctx: EventContext<KeyboardEvent>) => {
-			// 	const {app, event} = ctx;
-			// 	const {isCollapsed, head} = app.selection;
-			// 	if (!isCollapsed) return
-			// 	const list = head.node.closest(isNestableNode)!;
-
-			// 	if (!Heading.isHeading(list)) return
-			// 	console.log(list);
-
-			// 	app.cmd.nestable.handleEnterInVariant(event)
-			// }
-		}
+		return {}
 	}
 }

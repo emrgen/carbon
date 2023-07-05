@@ -34,10 +34,9 @@ export class KeyboardPlugin extends BeforePlugin {
 		ctx.preventDefault();
 		ctx.event.preventDefault();
 		ctx.event.stopPropagation();
-		console.log('-----------');
 
 		const { node } = ctx;
-		const { selection, state, cmd, nodeSelection } = app;
+		const { selection, state, cmd, blockSelection: nodeSelection } = app;
 
 		const { isCollapsed, head } = selection;
 		// delete node selection if any
@@ -91,7 +90,7 @@ export class KeyboardBeforePlugin extends BeforePlugin {
 
 	on(): Partial<EventHandler> {
 		return {
-			mouseDown: (ctx: EventContext<MouseEvent>) => {
+			_mouseDown: (ctx: EventContext<MouseEvent>) => {
 				const {app, node} = ctx;
 				const {selection} = app;
 				const {start, end} = selection;
@@ -149,7 +148,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		return {
 			esc: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
-				const { selection, nodeSelection } = app
+				const { selection, blockSelection: nodeSelection } = app
 				if (nodeSelection.size) {
 					// app.tr.selectNodes([]).dispatch();
 					// app.blur()
@@ -162,13 +161,13 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
-				const { selection, cmd, state, nodeSelection } = app;
+				const { selection, cmd, state, blockSelection: nodeSelection } = app;
 				const {selectedNodeIds} = state
 				event.preventDefault();
 
 				// nodes selection is visible using halo
 				if (nodeSelection.size) {
-					const { nodes } = nodeSelection;
+					const { blocks: nodes } = nodeSelection;
 					const firstNode = first(nodes)!;
 					if (firstNode.hasFocusable) {
 						const focusNode = firstNode.find(n => n.isFocusable, { direction: 'forward' })
@@ -200,11 +199,11 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			right: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection, cmd, state, nodeSelection } = app;
+				const { selection, cmd, state, blockSelection: nodeSelection } = app;
 
 				// nodes selection is visible using halo
 				if (nodeSelection.size) {
-					const lastNode = last(nodeSelection.nodes)!;
+					const lastNode = last(nodeSelection.blocks)!;
 					if (lastNode.hasFocusable) {
 						const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
 						const pin = Pin.toEndOf(focusNode!)
@@ -237,7 +236,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			shiftRight: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection, nodeSelection } = app;
+				const { selection, blockSelection: nodeSelection } = app;
 				if (!nodeSelection.isEmpty) {
 					if (nodeSelection.size > 1) {
 						console.log("TODO: select first top level node");
@@ -257,7 +256,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection, nodeSelection } = app;
+				const { selection, blockSelection: nodeSelection } = app;
 				if (!nodeSelection.isEmpty) {
 					if (nodeSelection.size > 1) {
 						console.log("TODO: select first top level node");
@@ -306,12 +305,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	shiftUp(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
-		const { nodeSelection } = app;
+		const { blockSelection: nodeSelection } = app;
 		console.log('xxxxx');
 		
 		if (nodeSelection.isEmpty) return
 
-		const {nodes} = nodeSelection;
+		const {blocks: nodes} = nodeSelection;
 		const firstNode = nodes[0] as Node;
 		const block = prevContainerBlock(firstNode);
 		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
@@ -325,10 +324,10 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	shiftDown(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
-		const { nodeSelection } = app;
+		const { blockSelection: nodeSelection } = app;
 		if (nodeSelection.isEmpty) return
 
-		const { nodes } = nodeSelection;
+		const { blocks: nodes } = nodeSelection;
 		const firstNode = last(nodes) as Node;
 		const block = firstNode?.next(n => n.isContainerBlock, { order: 'pre' });
 		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
@@ -346,15 +345,15 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		ctx.event.preventDefault();
 		const { app } = ctx;
-		const { selection, cmd, nodeSelection } = app;
+		const { selection, cmd, blockSelection } = app;
 		const {start, end} = selection
 		const {node} = start;
 		let tr = app.tr;
 
 		// put the cursor at the end of the first text block
-		if (!nodeSelection.isEmpty) {
+		if (!blockSelection.isEmpty) {
 			console.log('node selection...');
-			const {nodes} = nodeSelection;
+			const {blocks: nodes} = blockSelection;
 			console.log(nodes.map(n => n.id.toString()));
 
 			const done = nodes.some(n => {
@@ -378,7 +377,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		}
 
 		// const splitBlock = node.closest(n => n.canSplit);
-		node.chain.forEach(n => console.log(n.name, n.groups));
+		// node.chain.forEach(n => console.log(n.name, n.groups));
 		const splitBlock = node.closest(n => n.type.splits);
 		if (!splitBlock) {
 			console.log('no split block in the chain', node.chain.map(n => n.name));
@@ -386,14 +385,14 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		}
 		console.log(`splitting block: ${splitBlock.name}`);
 
-		const rootType = app.schema.type(splitBlock.type.splitName)
-		if (!rootType) {
+		const splitType = app.schema.type(splitBlock.type.splitName)
+		if (!splitType) {
 			console.warn('failed to split: ' + splitBlock.name);
 			return
 		}
 
 		cmd.transform
-			.split(splitBlock, selection, { rootType })?.dispatch();
+			.split(splitBlock, selection, { splitType })?.dispatch();
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {
@@ -405,7 +404,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		const { event } = ctx;
 		const { app, node } = ctx;
-		const { selection, cmd, nodeSelection } = app;
+		const { selection, cmd, blockSelection: nodeSelection } = app;
 
 		// delete node selection if any
 		if (!nodeSelection.isEmpty) {
@@ -440,13 +439,13 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	up(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
-		const { nodeSelection } = app;
+		const { blockSelection: nodeSelection } = app;
 		if (nodeSelection.isEmpty) return
 
 		ctx.event.preventDefault();
 
 		if (nodeSelection.size > 1) {
-			const { nodes } = nodeSelection
+			const { blocks: nodes } = nodeSelection
 			const lastNode = first(nodes) as Node;
 			app.tr.selectNodes([lastNode.id]).dispatch()
 			return
@@ -460,12 +459,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	down(ctx: EventContext<KeyboardEvent>) {
 		const {app, node} = ctx;
-		const { nodeSelection } = app;
+		const { blockSelection: nodeSelection } = app;
 		if (nodeSelection.isEmpty) return
 		ctx.event.preventDefault();
 
 		if (nodeSelection.size > 1) {
-			const {nodes} = nodeSelection
+			const {blocks: nodes} = nodeSelection
 			const lastNode = last(nodes) as Node;
 			app.tr.selectNodes([lastNode.id]).dispatch()
 			return

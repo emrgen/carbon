@@ -2,6 +2,7 @@ import { NodeIdSet } from "./BSet";
 import { Range } from './Range';
 import { NodeId } from './NodeId';
 import { CarbonState } from "./CarbonState";
+import { sortBy } from 'lodash';
 
 export class SelectionPatch {
 	ids: NodeIdSet = new NodeIdSet();
@@ -29,7 +30,12 @@ export class SelectionPatch {
 		this.ids.add(id);
 	}
 
+	removeId(id: NodeId) {
+		this.ids.remove(id);
+	}
+
 	has(id: NodeId) {
 		return this.ids.has(id);
 	}
+
 }

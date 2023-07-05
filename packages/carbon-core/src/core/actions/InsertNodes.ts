@@ -65,11 +65,10 @@ export class InsertNodes implements CarbonAction{
 	}
 
 	toString() {
-		// const { at, text, origin } = this
+		const { at, fragment } = this
 		return classString(this)({
-		// 	at: at.toString(),
-		// 	text,
-		// 	origin,
+			at: at.toString(),
+			nodes: fragment.nodes.map(n => n.id.toString())
 		})
 	}
 }

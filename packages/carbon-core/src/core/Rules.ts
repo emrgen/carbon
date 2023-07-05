@@ -35,7 +35,7 @@ export class InputRule implements ChangeRule {
   }
 
   execute(ctx: EventContext<KeyboardEvent>, text: string,): boolean {
-    console.info('[matching]', text, this.regex, this.regex.test(text));
+    // console.info('[matching]', text, this.regex, this.regex.test(text));
 
     if (this.regex.test(text)) {
       this.handler(ctx, this.regex, text);
@@ -57,7 +57,7 @@ export class BeforeInputRuleHandler {
     const { selection } = app;
     if (!selection.isCollapsed) return false;
     const { head } = selection;
-    console.log('before input', node.id.toString(), node.textContent);
+    // console.log('before input', node.id.toString(), node.textContent);
     
     let text = '';
     if (node.isEmpty) {
@@ -67,7 +67,7 @@ export class BeforeInputRuleHandler {
       text = textContent.slice(0, head.offset) + (event as any).data + textContent.slice(head.offset);
     }
 
-    console.log(`"${text}"`, node.id.toString(), node.textContent);
+    // console.log(`"${text}"`, node.id.toString(), node.textContent);
     const done = this.rules.some(rule => rule.execute(ctx, text))
     return done;
   }

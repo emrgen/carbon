@@ -11,7 +11,6 @@ const defaultEvents: EventsIn[] = [
 	EventsIn.keyDown,
 	EventsIn.click,
 	EventsIn.mouseDown,
-	EventsIn.mouseDown,
 	EventsIn.mouseOver,
 	EventsIn.mouseOut,
 	EventsIn.mouseUp,
