@@ -233,7 +233,7 @@ export class Node extends EventEmitter {
 	}
 
 	get isCollapsed() {
-		return !!this.attrs.node.collapsed
+		return !!this.data.node.collapsed
 	}
 
 	get children() {
@@ -674,7 +674,7 @@ export class Node extends EventEmitter {
 	
 	// @mutates
 	updateData(data: Record<string, any>) {
-		this.data.update(data);
+		this.data = this.data.update(data);
 		this.markUpdated()
 	}
 

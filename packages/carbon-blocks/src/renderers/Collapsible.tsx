@@ -17,17 +17,27 @@ export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
   const { SelectionHalo } = useSelectionHalo(props);
   const app = useCarbon();
+  const isCollapsed = node.isCollapsed;
   console.log("xxx", node);
 
   const handleInsert = useCallback(() => {
-    const section = app.schema.type('section').default()!;
+    const section = app.schema.type("section").default()!;
     const at = Point.toAfter(node.child(0)!.id);
 
     app.tr
       .insert(at, section)
-      .select(PinnedSelection.fromPin(Pin.toStartOf(section)!), ActionOrigin.UserInput)
+      .select(
+        PinnedSelection.fromPin(Pin.toStartOf(section)!),
+        ActionOrigin.UserInput
+      )
       .dispatch();
   }, [app.schema, app.tr, node]);
+
+  const handleToggle = useCallback(() => {
+    app.tr
+      .updateData(node.id, { node: { collapsed: !isCollapsed } })
+      .dispatch();
+  }, [app.tr, node, isCollapsed]);
 
   const beforeContent = (
     <div
@@ -38,31 +48,31 @@ export default function CollapsibleListComp(props: RendererProps) {
         e.preventDefault();
         e.stopPropagation();
       }}
+      onClick={handleToggle}
     >
-      {node.data.node?.expanded ? "▼" : "▶"}
+      {!isCollapsed ? "▼" : "▶"}
     </div>
   );
 
   return (
     <CarbonBlock {...props}>
-      <CarbonNodeContent
-        node={node}
-        beforeContent={beforeContent}
-        // wrapper={{ contentEditable: false }}
-        // custom={{ contentEditable: true }}
-      />
+      <CarbonNodeContent node={node} beforeContent={beforeContent} />
 
-      {node.size > 1 ? (
-        <CarbonNodeChildren node={node} />
-      ) : (
-        <div
-          className="collapsible-empty-content"
-          contentEditable="false"
-          suppressContentEditableWarning
-          onClick={handleInsert}
-        >
-          Click to insert.
-        </div>
+      {!isCollapsed && (
+        <>
+          {node.size > 1 ? (
+            <CarbonNodeChildren node={node} />
+          ) : (
+            <div
+              className="collapsible-empty-content"
+              contentEditable="false"
+              suppressContentEditableWarning
+              onClick={handleInsert}
+            >
+              Click to insert.
+            </div>
+          )}
+        </>
       )}
 
       {SelectionHalo}

@@ -32,7 +32,7 @@ export class DocPlugin extends CarbonPlugin {
 			},
 			data: {
 				node: {
-					expanded: false,
+					collapsed: false,
 				}
 			}
 		}

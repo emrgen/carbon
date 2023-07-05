@@ -7,19 +7,20 @@ import { CarbonAction, ActionOrigin, ActionType } from "./types";
 import { generateActionId } from "./utils";
 import { NodeIdSet } from '../BSet';
 import { NodeAttrs } from '../NodeAttrs';
+import { NodeData } from "../NodeData";
 
 
-export class UpdateAttrs implements CarbonAction {
+export class UpdateData implements CarbonAction {
   type: ActionType;
   id: number;
 
   static fromJSON(json) { }
 
-  static create(nodeId: NodeId, attrs: Partial<NodeAttrs>, origin: ActionOrigin) {
-    return new UpdateAttrs(nodeId, attrs, origin);
+  static create(nodeId: NodeId, data: Partial<NodeData>, origin: ActionOrigin) {
+    return new UpdateData(nodeId, data, origin);
   }
 
-  constructor(readonly nodeId: NodeId, readonly attrs: Partial<NodeAttrs>, readonly origin: ActionOrigin) {
+  constructor(readonly nodeId: NodeId, readonly data: Partial<NodeData>, readonly origin: ActionOrigin) {
     this.type = ActionType.updateAttrs;
     this.id = generateActionId();
   }
@@ -34,7 +35,7 @@ export class UpdateAttrs implements CarbonAction {
       return NULL_ACTION_RESULT
     }
 
-    node.updateAttrs(this.attrs);
+    node.updateData(this.data);
     tr.updated(node);
 
     return NULL_ACTION_RESULT

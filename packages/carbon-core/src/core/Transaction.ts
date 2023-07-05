@@ -30,6 +30,7 @@ import { RemoveText } from './actions';
 import { ActivateNodes } from './actions/ActivateNodes';
 import { UpdateAttrs } from './actions/UpdateAttrs';
 import { NodeAttrs } from './NodeAttrs';
+import { UpdateData } from './actions/UpdateData';
 
 export class TransactionError {
 	commandId: number;
@@ -178,7 +179,7 @@ export class Transaction {
 	}
 
 	updateData(id: NodeId, data: Record<string, any>, origin = this.origin): Transaction {
-		// this.add(UpdateData.create(id, data, origin))
+		this.add(UpdateData.create(id, data, origin))
 		return this;
 	}
 

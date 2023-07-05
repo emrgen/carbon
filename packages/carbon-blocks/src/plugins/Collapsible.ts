@@ -20,7 +20,6 @@ export class CollapsibleList extends NodePlugin {
       splits: true,
       splitName: 'section',
       collapsible: true,
-      collapsed: false,
       selectable: true,
       draggable: true,
       dragHandle: true,
@@ -39,7 +38,7 @@ export class CollapsibleList extends NodePlugin {
       },
       data: {
         node: {
-          expanded: true,
+          collapsed: false,
         }
       }
     }
@@ -98,7 +97,9 @@ export class CollapsibleList extends NodePlugin {
       throw Error('failed to create section');
     }
 
-    const at = Point.toAfter(title.id);
+    const at = splitBlock.isCollapsed
+      ? Point.toAfter(splitBlock.id)
+      : Point.toAfter(title.id);
     const focusPoint = Pin.toStartOf(section!);
     const after = PinnedSelection.fromPin(focusPoint!);
 

@@ -7,10 +7,11 @@ import { IsolatingPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
 import { first, last, reverse } from "lodash";
-import { Carbon, Node, Pin, PinnedSelection, Transaction } from "../core";
+import { BlockContent, Carbon, InlineContent, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
 import { hasParent, nodePath } from "../utils/node";
 import { CommandPlugin } from '@emrgen/carbon-core';
 import { Optional } from '@emrgen/types';
+import { nodeLocation } from '../utils/location';
 
 
 declare module '@emrgen/carbon-core' {
@@ -56,6 +57,32 @@ export class KeyboardPlugin extends BeforePlugin {
 			const textBlock = start.node.chain.find(n => n.isTextBlock)
 			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
 			if (!prevTextBlock || !textBlock) return
+			console.log(prevTextBlock.parent);
+			
+			if (prevTextBlock.isCollapseHidden) {
+				const prevVisibleBlock = prevTextBlock.closest(n => !n.isCollapseHidden)!;
+				const prevVisibleTextBlock = prevVisibleBlock?.child(0)!
+				console.log(prevTextBlock, prevVisibleTextBlock);
+
+				if (!prevVisibleTextBlock) return
+				const after = PinnedSelection.fromPin(Pin.create(prevVisibleTextBlock, prevVisibleTextBlock.textContent.length));
+				const textContent = prevVisibleTextBlock.textContent + textBlock.textContent;
+				const textNode = app.schema.text(textContent)!;
+				const content = BlockContent.create([textNode]);
+
+				const at = Point.toAfter(prevVisibleBlock.id);
+				const moveActions = textBlock?.nextSiblings.slice().reverse().map(n => {
+					return MoveAction.create(nodeLocation(n)!, at, n.id)
+				})
+				app.tr
+					.setContent(prevVisibleTextBlock.id, content)
+					.add(moveActions)
+					.remove(nodeLocation(textBlock.parent!)!, textBlock.parent!.id)
+					.select(after)
+					.dispatch();
+
+				return
+			}
 
 			console.log('merge text block', prevTextBlock.name, textBlock.name);
 			cmd.transform.merge(prevTextBlock, textBlock)?.dispatch();

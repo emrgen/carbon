@@ -11,11 +11,12 @@ export class NodeData {
 		this.node = node;
 	}
 
-	update(data: Record<string, any>) {
-		const { state, html, node } = data;
-		this.state = merge(cloneDeep(this.state), state)
-		this.html = merge(cloneDeep(this.html), html);
-		this.node = merge(cloneDeep(this.node), node);
+	update(data: Partial<NodeData>) {
+		const state = merge(cloneDeep(this.state), data.state)
+		const html = merge(cloneDeep(this.html), data.html);
+		const node = merge(cloneDeep(this.node), data.node);
+
+		return new NodeData({state, html, node});
 	}
 
 }
