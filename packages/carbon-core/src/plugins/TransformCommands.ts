@@ -396,14 +396,14 @@ export class TransformCommands extends BeforePlugin {
 
   private splitByRange(app: Carbon, splitBlock: Node, selection: PinnedSelection, opts: SplitOpts): Optional<Transaction> {
     const { start, end } = selection;
-    const headNode = end.node;
-    const tailNode = start.node;
-    if (!headNode || !tailNode) {
+    const startTextBlock = start.node;
+    const endTextBlock = end.node;
+    if (!endTextBlock || !startTextBlock) {
       console.log(p14("%c[failed]"), "color:red", "head/tail node not found");
       return;
     }
 
-    const [startBlock, endBlock] = blocksBelowCommonNode(tailNode, headNode);
+    const [startBlock, endBlock] = blocksBelowCommonNode(startTextBlock.parent!, endTextBlock.parent!);
     if (!startBlock || !endBlock) {
       console.log(p14("%c[failed]"), "color:red", "merge nodes are not found");
       return;
@@ -417,50 +417,30 @@ export class TransformCommands extends BeforePlugin {
 
     console.log('XX', commonNode.name, commonNode.id.toString());
 
-    if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+    if (start.isAtStartOfNode(commonNode!) && end.isAtEndOfNode(commonNode)) {
       const { tr } = app;
-      const blockJson = {
-        name: splitBlock.name,
-        content: [
-          {
-            name: 'title',
-            content: []
-          }
-        ]
-      }
-
-      const block = app.schema.nodeFromJSON(blockJson);
+      const block = splitBlock.type.default();
       if (!block) {
         throw Error('failed to create block');
       }
 
-      const at = Point.toBefore(splitBlock.id);
+      const at = Point.toAfter(splitBlock.prevSibling!.id);
 
       if (commonNode.isContainerBlock) {
-        const splitBlockJson = {
-          name: splitBlock.type.splitName,
-          content: [
-            {
-              name: 'title',
-              content: []
-            }
-          ]
-        }
-        const afterBlock = app.schema.nodeFromJSON(splitBlockJson);
+        const afterBlock = app.schema.type(splitBlock.type.splitName)?.default()
         if (!afterBlock) {
           throw Error('failed to create splitBlock');
         }
+
         const focusPoint = Pin.toStartOf(afterBlock);
         const after = PinnedSelection.fromPin(focusPoint!);
-        const insertAt = commonNode.isCollapsible ? Point.toAfter(commonNode.firstChild!.id) : Point.toAfter(commonNode.id);
+        const insertAt = Point.toAfter(block.id);
+
         tr
           .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
           .insert(at, block!)
-        // .insert(insertAt, afterBlock!)
-        // .select(after);
-
-        console.log('xxxxxxxxxxx');
-
+          .insert(insertAt, afterBlock!)
+          .select(after);
       } else {
         const focusPoint = Pin.toStartOf(splitBlock);
         const after = PinnedSelection.fromPin(focusPoint!);
@@ -475,19 +455,19 @@ export class TransformCommands extends BeforePlugin {
     const deleteGroup = this.selectionInfo(app, selection);
 
     // * startBlock !== endBlock
-    if (!startBlock.eq(endBlock)) {
+    if (!startTextBlock.eq(endTextBlock)) {
       return this.splitByRangeAcrossBlocks(app, splitBlock, start, end, startBlock, endBlock, deleteGroup);
     }
 
     // * startBlock === endBlock
-    if (startBlock.eq(endBlock)) {
-      return this.splitByRangeWithinBlock(app, splitBlock, start, end, startBlock, endBlock, deleteGroup);
+    if (startTextBlock.eq(endTextBlock)) {
+      return this.splitByRangeWithinTextBlock(app, splitBlock, start, end, startBlock, endBlock, deleteGroup);
     }
 
     return null
   }
 
-  private splitByRangeWithinBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+  private splitByRangeWithinTextBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
 
     const json = {
@@ -495,7 +475,7 @@ export class TransformCommands extends BeforePlugin {
       content: [
         {
           name: 'title',
-          content: leftContent.children.map(c => c.toJSON())
+          content: rightContent.children.map(c => c.toJSON())
         }
       ]
     }
@@ -505,12 +485,12 @@ export class TransformCommands extends BeforePlugin {
       throw Error('failed to create section');
     }
 
-    const at = Point.toBefore(splitBlock.id);
-    const focusPoint = Pin.toStartOf(startBlock!);
+    const at = Point.toAfter(splitBlock.id);
+    const focusPoint = Pin.toStartOf(section!);
     const after = PinnedSelection.fromPin(focusPoint!);
 
     app.tr
-      .setContent(startBlock.id, rightContent)
+      .setContent(start.node.id, leftContent)
       .insert(at, section!)
       .select(after)
       .dispatch();
@@ -522,15 +502,23 @@ export class TransformCommands extends BeforePlugin {
     const { tr } = app;
     // console.log(deleteGroup.ids.toArray());
     // console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
+    const { parent: commonNode } = startTopBlock;
+    if (!commonNode) {
+      console.error('cant merge without commonNode');
+      return
+    }
+
+    console.log('commonNode', commonNode.name, commonNode.id.toString(), startTopBlock, endTopBlock);
 
     const startTextBlock = start.node;
     const endTextBlock = end.node;
     const startBlock = startTextBlock.parent!;
     const endBlock = endTextBlock.parent!;
-    const commonNode = startTopBlock.commonNode(endTopBlock);
     let startDepth = startBlock.depth - commonNode.depth;
     let endDepth = endBlock.depth - commonNode.depth;
     const commonDepth = Math.min(startDepth, endDepth);
+    console.log(commonDepth, commonNode.depth, startDepth, endDepth);
+
 
     // console.log(startBlock, endBlock);
     // console.log(startBlock);
@@ -543,9 +531,9 @@ export class TransformCommands extends BeforePlugin {
     let ignoreMove = new NodeIdSet()
 
     const splitUptoSameDepth = () => {
-      let lastInsertedNodeId = endTopBlock.id;
+      let lastInsertedNodeId = endBlock.id;
       let mergeDepth = commonDepth;
-      console.log('splitUptoSameDepth', mergeDepth);
+      console.log('splitUptoSameDepth', mergeDepth, startContainer?.isCollapsible);
 
       let to: Optional<Point> = Point.toAfter(startContainer!.id);
       if (startContainer!.isCollapsible) {
@@ -557,10 +545,11 @@ export class TransformCommands extends BeforePlugin {
       }
 
       // * move nodes from endContainer to startContainer
-      while (startContainer && endContainer && mergeDepth && !startContainer.isCollapsible) {
+      while (startContainer && endContainer && mergeDepth) {
         if (endContainer.eq(endBlock)) {
           moveActions.push(...this.moveNodeCommands(to, endContainer));
           to = Point.toAfter(endContainer.id);
+          console.log('######');
 
           ignoreMove.add(endContainer.id);
         } else {
@@ -579,6 +568,8 @@ export class TransformCommands extends BeforePlugin {
         startContainer = startContainer.parent!;
         endContainer = endContainer.parent!;
         mergeDepth -= 1
+
+        // if (startCon)
       }
       console.log('CASE: splitUptoSameDepth', mergeDepth);
 
@@ -635,7 +626,7 @@ export class TransformCommands extends BeforePlugin {
 
         if (moveNodes.length) {
           // moveActions.push(...this.moveNodeCommands(at, moveNodes));
-          at = Point.toAfter(last(moveNodes)!.id);
+          // at = Point.toAfter(last(moveNodes)!.id);
         }
 
         deleteGroup.addId(endContainer.id);
