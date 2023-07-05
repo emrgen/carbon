@@ -30,6 +30,14 @@ export class SelectionPatch {
 		this.ids.add(id);
 	}
 
+	addIds(ids: NodeId | NodeId[]) {
+		if (Array.isArray(ids)) {
+			ids.forEach(id => this.ids.add(id));
+		} else {
+			this.ids.add(ids);
+		}
+	}
+
 	removeId(id: NodeId) {
 		this.ids.remove(id);
 	}

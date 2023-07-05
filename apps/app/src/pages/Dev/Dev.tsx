@@ -18,7 +18,20 @@ import { useEffect } from "react";
 const data = node("document", [
   title([text("Carbon "), text("document"), text(" title")]),
   node("divider"),
-
+  node("collapsible", [
+    title([text("section 0")]),
+    node("section", [title([text("section 0.1")])]),
+  ]),
+  node("section", [
+    title([text("section 0")]),
+    node("section", [
+      title([text("section 0.1")]),
+      node("section", [
+        title([text("section 0.1.1")]),
+        node("section", [title([text("section 0.1.1.1")])]),
+      ]),
+    ]),
+  ]),
   node("section", [
     title([text("section 1")]),
     node("section", [
