@@ -72,8 +72,9 @@ export class KeyboardPlugin extends BeforePlugin {
 
 				const at = Point.toAfter(prevVisibleBlock.id);
 				const moveActions = textBlock?.nextSiblings.slice().reverse().map(n => {
-					return MoveAction.create(nodeLocation(n)!, at, n.id)
-				})
+					return MoveAction.create(nodeLocation(n)!, at, n.id);
+				});
+
 				app.tr
 					.setContent(prevVisibleTextBlock.id, content)
 					.add(moveActions)

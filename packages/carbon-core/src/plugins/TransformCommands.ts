@@ -536,8 +536,8 @@ export class TransformCommands extends BeforePlugin {
       console.log('splitUptoSameDepth', mergeDepth);
 
       let to: Optional<Point> = Point.toAfter(startBlock!.id);
-      if (startBlock!.isCollapsible) {
-        to = Point.toAfter(startBlock?.firstChild?.id!)
+      if (startBlock!.isCollapsible && !startBlock.isCollapsed) {
+        to = Point.toAfter(startBlock?.firstChild?.id!);
       }
       // console.log(startBlock!.type.splitName, endBlock!.name);
 
@@ -547,10 +547,15 @@ export class TransformCommands extends BeforePlugin {
 
       // * move nodes from endContainer to startContainer
       while (startContainer && endContainer && mergeDepth) {
+        // move endBlock to after startBlock
         if (endContainer.eq(endBlock)) {
           moveActions.push(...this.moveNodeCommands(to, endContainer));
-
           to = Point.toAfter(endContainer.id);
+          if (startBlock.isCollapsible && !startBlock.isCollapsed) {
+            const moveNodes = endContainer.children.slice(1)
+            moveActions.push(...this.moveNodeCommands(to, moveNodes));
+          }
+
           lastInsertedNodeId = endContainer.lastChild!.id
           ignoreMove.add(endContainer.id);
         } else {
@@ -574,7 +579,7 @@ export class TransformCommands extends BeforePlugin {
         mergeDepth -= 1
       }
 
-      return lastInsertedNodeId
+      return lastInsertedNodeId;
     }
 
     if (startDepth === endDepth) {
@@ -612,7 +617,7 @@ export class TransformCommands extends BeforePlugin {
       const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
 
       let at = Point.toAfter(lastInsertedNodeId ?? startContainer!.id);
-      if (startTopNode.isCollapsible) {
+      if (startTopNode.isCollapsible && !startTopNode.isCollapsed) {
         at = Point.toAfter(startTopNode.id)
       }
 
@@ -638,6 +643,7 @@ export class TransformCommands extends BeforePlugin {
           }
         }
       } else {
+
         while (endContainer && startTopNode!.depth <= endContainer.depth) {
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
           if (moveNodes.length) {

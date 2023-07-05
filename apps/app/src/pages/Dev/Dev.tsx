@@ -21,7 +21,7 @@ const data = node("document", [
   node("collapsible", [
     title([text("section 0")]),
     node("section", [title([text("section 0.1")])]),
-  ]),
+  ], {}, { node: { collapsed: true } }),
   node("section", [
     title([text("section 0")]),
     node("section", [

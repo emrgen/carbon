@@ -9,7 +9,6 @@ import {
   Point,
   RendererProps,
   useCarbon,
-  useNodeStateChange,
   useSelectionHalo,
 } from "@emrgen/carbon-core";
 
@@ -18,8 +17,8 @@ export default function CollapsibleListComp(props: RendererProps) {
   const { SelectionHalo } = useSelectionHalo(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
-  console.log("xxx", node);
 
+  // insert a new section as child of this collapsible
   const handleInsert = useCallback(() => {
     const section = app.schema.type("section").default()!;
     const at = Point.toAfter(node.child(0)!.id);
@@ -33,6 +32,7 @@ export default function CollapsibleListComp(props: RendererProps) {
       .dispatch();
   }, [app.schema, app.tr, node]);
 
+  // toggle collapsed state
   const handleToggle = useCallback(() => {
     app.tr
       .updateData(node.id, { node: { collapsed: !isCollapsed } })
@@ -50,7 +50,7 @@ export default function CollapsibleListComp(props: RendererProps) {
       }}
       onClick={handleToggle}
     >
-      {!isCollapsed ? "▼" : "▶"}
+      {isCollapsed ? "▶" : "▼"}
     </div>
   );
 
