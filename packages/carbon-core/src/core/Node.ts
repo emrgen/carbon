@@ -389,8 +389,8 @@ export class Node extends EventEmitter {
 		return node;
 	}
 
-	ancestor(node: Node): boolean {
-		return this.parents.includes(node);
+	ancestor(parent: Node): boolean {
+		return this.parents.includes(parent);
 	}
 
 	//

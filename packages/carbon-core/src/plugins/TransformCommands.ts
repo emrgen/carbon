@@ -401,11 +401,15 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    const [startBlock, endBlock] = blocksBelowCommonNode(startTextBlock, endTextBlock);
+    const [startBlock, endBlock] = blocksBelowCommonNode(startTextBlock!, endTextBlock!);
+    // console.log([startBlock?.id.toString(), endBlock?.id.toString()],startBlock?.parent?.eq(endBlock?.parent));
+
     if (!startBlock || !endBlock) {
       console.log(p14("%c[failed]"), "color:red", "merge nodes are not found");
       return;
     }
+
+    console.log('XXX', startBlock.id.toString(), endBlock.id.toString(), startBlock);
 
     const commonNode = startBlock.commonNode(endBlock);
     if (!commonNode) {
@@ -496,19 +500,18 @@ export class TransformCommands extends BeforePlugin {
     return null
   }
 
-  private splitByRangeAcrossBlocks(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startTopBlock: Node, endTopBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+  private splitByRangeAcrossBlocks(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startTopNode: Node, endTopNode: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const { tr } = app;
     // console.log(deleteGroup.ids.toArray());
     // console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
-    console.log(startTopBlock.name);
 
-    const { parent: commonNode } = startTopBlock;
+    const { parent: commonNode } = startTopNode;
     if (!commonNode) {
       console.error('cant merge without commonNode');
       return
     }
 
-    console.log('commonNode', commonNode.name, commonNode.id.toString(), startTopBlock, endTopBlock);
+    // console.log('commonNode', commonNode.name, commonNode.id.toString(), startTopNode, endTopNode);
 
     const startTextBlock = start.node;
     const endTextBlock = end.node;
@@ -517,14 +520,12 @@ export class TransformCommands extends BeforePlugin {
     let startDepth = startBlock.depth - commonNode.depth;
     let endDepth = endBlock.depth - commonNode.depth;
     let commonDepth = Math.min(startDepth, endDepth);
-    if (startBlock.isCollapsible) {
+    const isWithinSameNode = endBlock.ancestor(startBlock)
+    if (isWithinSameNode) {
       commonDepth += 1;
     }
-    console.log(commonDepth, commonNode.depth, startDepth, endDepth);
 
-    // console.log(startBlock, endBlock);
-    // console.log(startBlock);
-
+    console.log(commonDepth, startDepth, endDepth, commonNode.depth);
     const moveActions: CarbonAction[] = []
     const insertActions: CarbonAction[] = []
     const changeActions: CarbonAction[] = []
@@ -535,14 +536,14 @@ export class TransformCommands extends BeforePlugin {
     const splitUptoSameDepth = () => {
       let lastInsertedNodeId = endBlock.id;
       let mergeDepth = commonDepth;
-      console.log('splitUptoSameDepth', mergeDepth, startBlock?.isCollapsible);
+      console.log('splitUptoSameDepth', mergeDepth);
 
       let to: Optional<Point> = Point.toAfter(startBlock!.id);
       if (startBlock!.isCollapsible) {
         to = Point.toAfter(startBlock?.firstChild?.id!)
       }
-      console.log(startBlock!.type.splitName, endBlock!.name);
-      
+      // console.log(startBlock!.type.splitName, endBlock!.name);
+
       if (startBlock!.type.splitName !== endBlock!.name) {
         changeActions.push(ChangeName.create(endBlock!.id, endBlock!.name, startBlock!.type.splitName));
       }
@@ -551,27 +552,30 @@ export class TransformCommands extends BeforePlugin {
       while (startContainer && endContainer && mergeDepth) {
         if (endContainer.eq(endBlock)) {
           moveActions.push(...this.moveNodeCommands(to, endContainer));
-          to = Point.toAfter(endContainer.id);
 
+          to = Point.toAfter(endContainer.id);
+          lastInsertedNodeId = endContainer.lastChild!.id
           ignoreMove.add(endContainer.id);
         } else {
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
           if (moveNodes.length) {
-            console.log('moving nodes...', moveNodes.length, to.toString());
+            // console.log('moving nodes...', moveNodes.length, to.toString());
             moveActions.push(...this.moveNodeCommands(to, moveNodes));
+            lastInsertedNodeId = last(moveNodes)!.id;
           }
-          to = Point.toAfter(startContainer.id);
 
-          console.log('Delete NodeId', endContainer.name, endContainer.id.toString());
+          to = Point.toAfter(startContainer.id);
+          // console.log('Delete NodeId', endContainer.name, endContainer.id.toString());
           deleteGroup.addId(endContainer.id)
         }
 
-        lastInsertedNodeId = endContainer.id;
+        if (!isWithinSameNode) {
+          lastInsertedNodeId = endContainer.id;
+        }
         startContainer = startContainer.parent!;
         endContainer = endContainer.parent!;
         mergeDepth -= 1
       }
-      console.log('CASE: splitUptoSameDepth', mergeDepth);
 
       return lastInsertedNodeId
     }
@@ -608,193 +612,55 @@ export class TransformCommands extends BeforePlugin {
     if (startDepth < endDepth) {
       console.log('CASE: startDepth < endDepth');
       const lastInsertedNodeId = splitUptoSameDepth();
-      const deleteActions = this.deleteGroupCommands(app, deleteGroup);
       const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
 
       let at = Point.toAfter(lastInsertedNodeId ?? startContainer!.id);
-      if (startTopBlock.isCollapsible) {
-        at = Point.toAfter(startTopBlock.id)
+      if (startTopNode.isCollapsible) {
+        at = Point.toAfter(startTopNode.id)
       }
 
-      console.log('startBlock.depth', startTopBlock.depth, 'endContainer.depth', endContainer?.depth);
-      console.log(endContainer, startTopBlock, lastInsertedNodeId.toString());
-      
-      while (endContainer && startTopBlock.depth <= endContainer.depth) {
-        console.log('startBlock.depth', startTopBlock.depth, 'endContainer.depth', endContainer?.depth, endContainer.id.toString());
-        const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
-        console.log(endContainer, moveNodes.map(n => n.id.toString()));
+      // console.log('startBlock.depth', startTopNode.depth, 'endContainer.depth', endContainer?.depth);
+      // console.log(endContainer, startTopNode, lastInsertedNodeId.toString());
 
-        if (moveNodes.length) {
-          // moveActions.push(...this.moveNodeCommands(at, moveNodes));
-          // at = Point.toAfter(last(moveNodes)!.id);
+      if (endBlock.ancestor(startBlock)) {
+        while (endContainer && startTopNode!.depth <= endContainer.depth) {
+          const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
+          if (moveNodes.length) {
+            moveActions.push(...this.moveNodeCommands(at, moveNodes));
+            at = Point.toAfter(last(moveNodes)!.id);
+          }
+
+          deleteGroup.addId(endContainer.id);
+          endContainer = endContainer.parent;
         }
 
-        deleteGroup.addId(endContainer.id);
-        endContainer = endContainer.parent;
+        if (!startBlock.isCollapsible) {
+          const moveNodes = startBlock?.children.slice(1).filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
+          if (moveNodes.length) {
+            moveActions.push(...this.moveNodeCommands(at, moveNodes));
+          }
+        }
+      } else {
+        while (endContainer && startTopNode!.depth <= endContainer.depth) {
+          const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
+          if (moveNodes.length) {
+            moveActions.push(...this.moveNodeCommands(at, moveNodes));
+            at = Point.toAfter(last(moveNodes)!.id);
+          }
+
+          deleteGroup.addId(endContainer.id);
+          endContainer = endContainer.parent;
+        }
       }
 
-      console.log(changeActions);
+      console.log('start block', startTopNode.depth, endContainer?.depth, startTopNode);
+      const deleteActions = this.deleteGroupCommands(app, deleteGroup);
 
       tr
         .add(changeActions)
         .add(moveActions)
         .add(deleteActions)
         .select(after)
-
-      return tr;
-    }
-
-    if (startTopBlock.isCollapsible) {
-      console.log('CASE: startBlock.isCollapsible');
-      const title = startTopBlock.child(0);
-      if (!title) {
-        console.error('title not found, should not reach!');
-        return null
-      }
-
-      if (startTopBlock.isCollapsed) {
-        console.log('CASE: startBlock.isCollapsed');
-        // tr.add(this.deleteGroupCommands(app, deleteGroup));
-        // tr.move(nodeLocation(endBlock)!, Point.toAfter(startBlock.id)!, endBlock.id)
-        // const lastChild = last(endBlock.children) as Node;
-        // if (!lastChild) {
-        //   console.log('CASE: !lastChild');
-        // }
-      } else {
-        console.log('CASE: !startBlock.isCollapsed');
-
-        // CASE 1: startBlock.depth === endBlock.depth
-        if (startDepth === endDepth) {
-          // startBlock and endBlock are siblings so no need to move endBlock and endBlock's next siblings
-          if (startTopBlock.nextSiblings?.some(n => n.eq(endTopBlock))) {
-            tr.add(this.deleteGroupCommands(app, deleteGroup));
-            const after = PinnedSelection.fromPin(Pin.toStartOf(endTopBlock)!);
-            const at = Point.toAfter(title.id);
-            tr.move(nodeLocation(endTopBlock)!, at, endTopBlock.id);
-            tr.change(endTopBlock.id, endTopBlock.name, startTopBlock.type.splitName);
-            tr.add(this.moveNodeCommands(Point.toAfter(endTopBlock.id), endTopBlock.children.slice(1)))
-            tr.select(after);
-            return tr
-          }
-
-          // tr.move(nodeLocation(endBlock)!, Point.toAfter(title.id)!, endBlock.id)
-          // const at = Point.toAfter(endBlock.id);
-          // tr.add(this.moveNodeCommands(at, endBlock.children.slice(1)))
-          const after = PinnedSelection.fromPin(Pin.toStartOf(endTopBlock)!);
-          tr.select(after);
-          return tr
-        }
-
-        // CASE 2
-        // partial match where startBlock has less depth than endBlock.
-        if (startDepth < endDepth) {
-          console.log('CASE: startBlock.depth < endBlock.depth');
-          tr.add(this.deleteGroupCommands(app, deleteGroup));
-
-          tr.move(nodeLocation(endTopBlock)!, Point.toAfter(title.id)!, endTopBlock.id)
-          tr.change(endTopBlock.id, endTopBlock.name, startTopBlock.type.splitName);
-          tr.add(this.moveNodeCommands(Point.toAfter(endTopBlock.id), endTopBlock.children.slice(1)))
-          const at = Point.toAfter(startTopBlock.id);
-          tr.add(this.moveNodeCommands(at, endTopBlock.nextSiblings))
-          const after = PinnedSelection.fromPin(Pin.toStartOf(endTopBlock)!);
-          tr.select(after, ActionOrigin.UserInput);
-
-          return tr
-        }
-
-        // CASE 3
-        // partial match where startBlock has more depth than endBlock.
-        if (startDepth > endDepth) {
-          console.log('CASE: startBlock.depth > endBlock.depth XXXXXXX');
-          tr.add(this.deleteGroupCommands(app, deleteGroup));
-          tr.move(nodeLocation(endTopBlock)!, Point.toAfter(title.id)!, endTopBlock.id)
-          tr.change(endTopBlock.id, endTopBlock.name, startTopBlock.type.splitName);
-          tr.add(this.moveNodeCommands(Point.toAfter(endTopBlock.id), endTopBlock.children.slice(1)))
-          const at = Point.toAfter(startTopBlock.id);
-          tr.add(this.moveNodeCommands(at, endTopBlock.nextSiblings))
-          const after = PinnedSelection.fromPin(Pin.toStartOf(endTopBlock)!);
-          tr.select(after);
-        }
-      }
-
-      return tr;
-    }
-
-    // CASE 1
-    // startBlock and endBlock are at same level
-    if (startDepth === endDepth) {
-      console.log('CASE: startBlock.depth === endBlock.depth');
-      tr.add(this.deleteGroupCommands(app, deleteGroup));
-      tr.change(endTopBlock.id, endTopBlock.name, startTopBlock.type.splitName);
-
-      // startBlock and endBlock are siblings so no need to move endBlock and endBlock's next siblings
-      if (startTopBlock.nextSiblings?.some(n => n.eq(endTopBlock))) {
-        const after = PinnedSelection.fromPin(Pin.toStartOf(endTopBlock)!);
-        tr.select(after);
-        return tr
-      }
-
-      tr.move(nodeLocation(endTopBlock)!, Point.toAfter(startTopBlock.id)!, endTopBlock.id)
-      const lastChild = last(endTopBlock.children) as Node;
-      if (!lastChild) {
-        console.error('lastChild not found, container block should have at least one child');
-      }
-      const at = Point.toAfter(lastChild.id);
-      tr.add(this.moveNodeCommands(at, endTopBlock.nextSiblings))
-      const after = PinnedSelection.fromPin(Pin.toStartOf(endTopBlock)!);
-      tr.select(after);
-
-      return tr;
-    }
-
-
-
-    // CASE 2
-    // partial match where startBlock has more depth than endBlock.
-    if (startDepth < endDepth) {
-      console.log('CASE: startBlock.depth < endBlock.depth', deleteGroup.ids.toArray());
-
-      // change type only if required
-      if (endTopBlock.type !== startTopBlock.type) {
-        tr.change(endTopBlock.id, endTopBlock.name, startTopBlock.type.splitName);
-      }
-
-      const to = Point.toAfter(startTopBlock.id)!
-      tr.move(nodeLocation(endTopBlock)!, to, endTopBlock.id)
-      // NOTE: endBlock will always have at least one child
-
-      // check if endBlock is
-      let at = endTopBlock.ancestor(startTopBlock)
-        ? Point.toAfter(endTopBlock.lastChild!.id)
-        : Point.toAfter(endTopBlock.id);
-
-      let endBlockRef: Optional<Node> = endTopBlock;
-      while (endBlockRef && endBlockRef.depth > startTopBlock.depth) {
-        if (endBlockRef.nextSiblings.length) {
-          tr.add(this.moveNodeCommands(at, endBlockRef.nextSiblings))
-          at = Point.toAfter(last(endBlockRef.nextSiblings)!.id);
-        }
-        endBlockRef = endBlockRef.parent;
-      }
-
-      tr.add(this.deleteGroupCommands(app, deleteGroup));
-      const after = PinnedSelection.fromPin(Pin.toStartOf(endTopBlock)!);
-      tr.select(after);
-
-      return tr;
-    }
-
-    // CASE 2
-    // partial match where startBlock has more depth than endBlock.
-    if (startDepth > endDepth) {
-      console.log('CASE: startBlock.depth > endBlock.depth');
-      tr.add(this.deleteGroupCommands(app, deleteGroup));
-      tr.change(endTopBlock.id, endTopBlock.name, startTopBlock.type.splitName);
-
-      tr.move(nodeLocation(endTopBlock)!, Point.toAfter(startTopBlock.id)!, endTopBlock.id)
-
-      const after = PinnedSelection.fromPin(Pin.toStartOf(endTopBlock)!);
-      tr.select(after);
 
       return tr;
     }
