@@ -56,7 +56,7 @@ export const no = () => false;
 
 export type SerializedNode = {
 	name: string;
-	title: string;
+	title?: string;
 	content: SerializedNode[]
 	prefix?: string;
 	suffix?: string;

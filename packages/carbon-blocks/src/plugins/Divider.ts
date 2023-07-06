@@ -1,4 +1,4 @@
-import { NodePlugin, NodeSpec, EventHandler, skipKeyEvent } from '@emrgen/carbon-core';
+import { NodePlugin, NodeSpec, EventHandler, skipKeyEvent, Carbon, SerializedNode, Node } from '@emrgen/carbon-core';
 
 export class Divider extends NodePlugin {
 
@@ -28,6 +28,14 @@ export class Divider extends NodePlugin {
   keydown(): Partial<EventHandler> {
     return {
       tab: skipKeyEvent
+    }
+  }
+
+  serialize(app: Carbon, node: Node): SerializedNode {
+    return {
+      name: node.name,
+      content: [],
+      isNested: false,
     }
   }
 

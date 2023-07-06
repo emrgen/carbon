@@ -80,9 +80,7 @@ export class DocPlugin extends CarbonPlugin {
 		const contentNode = node.child(0);
 		return {
 			name: node.name,
-			title: contentNode?.textContent ?? '',
-			content: node.children.slice(1).map(n => app.serialize(n)),
-
+			content: node.children.map(n => app.serialize(n)),
 			isNested: true,
 			unwrap: contentNode?.isEmpty ?? false,
 		}

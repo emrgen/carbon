@@ -23,7 +23,7 @@ export class ClipboardPlugin extends BeforePlugin {
           console.log('Serialized =>', serialized);
           event.clipboardData.setData('text/plain', serialized);
 
-          console.log(slice.root.children.map(n => n.textContent));
+          // console.log(slice.root.children.map(n => n.textContent));
 
           app.state.runtime.clipboard.setSlice(slice);
         }
@@ -75,9 +75,9 @@ export class ClipboardPlugin extends BeforePlugin {
         node.updateData({ state: { selected: false } })
         return node
       })
-      
+
       const rootNode = Node.create({
-        type: app.schema.type('document'),
+        type: app.schema.type('slice'),
         content: BlockContent.create(cloned),
         id: NodeId.create(String(Math.random())),
       });
@@ -87,7 +87,7 @@ export class ClipboardPlugin extends BeforePlugin {
     }
 
     const { start, end } = selection;
-    let [startNode, endNode] = blocksBelowCommonNode(start.node, end.node);
+    let [startNode, endNode] = blocksBelowCommonNode(start.node.parent!, end.node.parent!);
     if (!startNode || !endNode) {
       return Slice.empty;
     }
@@ -109,7 +109,7 @@ export class ClipboardPlugin extends BeforePlugin {
     console.log('cloned', cloned.map(n => n.name));
 
     const rootNode = Node.create({
-      type: app.schema.type('document'),
+      type: app.schema.type('slice'),
       content: BlockContent.create(cloned),
       id: NodeId.create(String(Math.random())),
     });
@@ -218,14 +218,6 @@ export class ClipboardPlugin extends BeforePlugin {
       return false;
     })
 
-    // rootNode.find(n => {
-    //   if (n.eq(startNode!)) {
-    //     n.changeType(app.schema.type('section'));
-    //     return true;
-    //   }
-    //   return false;
-    // });
-
     let startPath: number[] = [];
     let endPath: number[] = [];
     rootNode.forAll(n => {
@@ -237,7 +229,7 @@ export class ClipboardPlugin extends BeforePlugin {
       }
     })
 
-    console.log('xxx', rootNode.textContent);
+    console.log('xxx', rootNode);
 
     const children = rootNode.children.map(n => app.schema.cloneWithId(n));
     rootNode.updateContent(BlockContent.create(children));
@@ -250,7 +242,7 @@ export class ClipboardPlugin extends BeforePlugin {
     }
 
     console.log(startSliceNode.chain.map(n => n.type.name).join(' > '));
-    console.log(rootNode.children);
+    console.log('rootNode.children', rootNode.children);
     console.log(startSliceNode.textContent, endSliceNode.textContent);
 
     // remove nodes and content outside the selection

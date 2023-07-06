@@ -200,108 +200,11 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    console.log(startTitle.chain.map(n => n.type.name), slice.nodes);
+    console.log(startTitle.chain.map(n => n.type.name));
 
     // if selection is within same title
-    if (selection.isCollapsed && start.node === end.node) {
+    if (selection.isCollapsed) {
       const { tr } = app;
-      // if selection is collapsed and at the end of the title
-      if (start.isAtEndOfNode(start.node)) {
-        console.log('insert at the end of the title', startTitle, endTitle);
-        if (startTitle.eq(endTitle)) {
-          const textContent = startNode.textContent + startTitle.textContent;
-          const textNode = app.schema.text(textContent);
-
-          tr
-            .setContent(start.node.id, BlockContent.create([textNode!]))
-            .select(PinnedSelection.fromPin(Pin.future(start.node!, textContent.length)!));
-
-          return tr;
-        } else {
-          // console.log('startTitle', startTitle,nodes);
-
-          const textContent = startNode.textContent + startTitle.textContent;
-          const textNode = app.schema.text(textContent);
-          console.log(startTitle, );
-          
-          tr
-            .setContent(start.node.id, BlockContent.create([textNode!]))
-          return tr
-
-          let beforeNode: Optional<Node> = start.node;
-          let afterNode: Optional<Node> = startTitle;
-          // move upwards until we
-          while (beforeNode && afterNode && !beforeNode?.parent?.isRoot) {
-            // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
-            tr.insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings)
-            beforeNode = beforeNode.parent
-            afterNode = afterNode.parent
-          }
-
-          // NOTE: slice.nodes has parent node with name 'document'
-          while (beforeNode && afterNode && afterNode.name !== 'document') {
-            // console.log('afterNode', afterNode);
-            if (afterNode.nextSiblings.length) {
-              tr.insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings)
-              beforeNode = last(afterNode.nextSiblings)
-            }
-            afterNode = afterNode.parent
-          }
-
-          tr.select(PinnedSelection.fromPin(Pin.toEndOf(endTitle)!));
-
-          return tr;
-        }
-      }
-
-      if (start.isAtStartOfNode(start.node)) {
-        console.log('insert at the start of the title');
-        if (startTitle.eq(endTitle)) {
-          const textContent = startTitle.textContent + startNode.textContent;
-          const textNode = app.schema.text(textContent);
-          const after = PinnedSelection.fromPin(Pin.future(start.node!, startTitle.textContent.length)!);
-          tr
-            .setContent(start.node.id, BlockContent.create([textNode!]))
-            .select(after);
-
-          return tr;
-        } else {
-          const textContent = startTitle.textContent;
-          const textNode = app.schema.text(textContent);
-
-          tr
-            .setContent(start.node.id, BlockContent.create([textNode!]))
-
-          let beforeNode: Optional<Node> = start.node;
-          let afterNode: Optional<Node> = startTitle;
-          // move upwards until we
-          while (beforeNode && afterNode && !beforeNode?.parent?.isRoot) {
-            // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
-            tr.insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings)
-            beforeNode = beforeNode.parent
-            afterNode = afterNode.parent
-          }
-
-          // NOTE: slice.nodes has parent node with name 'document'
-          while (beforeNode && afterNode && afterNode.name !== 'document') {
-            // console.log('afterNode', afterNode);
-            if (afterNode.nextSiblings.length) {
-              tr.insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings)
-              beforeNode = last(afterNode.nextSiblings)
-            }
-            afterNode = afterNode.parent
-          }
-
-          const endTitleText = endTitle.textContent + startNode.textContent;
-          const endTitleTextNode = app.schema.text(endTitleText);
-          tr
-            .setContent(endTitle.id, BlockContent.create([endTitleTextNode!]))
-          tr.select(PinnedSelection.fromPin(Pin.future(endTitle, endTitleText.length)!));
-
-          return tr;
-        }
-      }
-      console.log('insert within the title');
       if (startTitle.eq(endTitle)) {
         const textBeforeCursor = startNode.textContent.slice(0, start.offset) + startTitle.textContent
         const textContent = textBeforeCursor + startNode.textContent.slice(end.offset);
@@ -310,6 +213,41 @@ export class TransformCommands extends BeforePlugin {
         tr
           .setContent(start.node.id, BlockContent.create([textNode!]))
           .select(after);
+
+        return tr;
+      } else {
+        const startTitleText = startNode.textContent.slice(0, start.offset) + startTitle.textContent;
+        const startTitleTextNode = app.schema.text(startTitleText)!;
+
+        tr
+          .setContent(start.node.id, BlockContent.create([startTitleTextNode!]))
+
+        let beforeNode: Optional<Node> = start.node;
+        let afterNode: Optional<Node> = startTitle;
+        // move upwards until we find a collapsible node
+        while (beforeNode && afterNode && !beforeNode.parent?.isCollapsible) {
+          // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
+          if (afterNode.nextSiblings.length) {
+            tr.insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings)
+          }
+          beforeNode = beforeNode.parent
+          afterNode = afterNode.parent
+        }
+
+        // NOTE: slice.nodes has parent node with name 'document'
+        while (beforeNode && afterNode && afterNode.name !== 'document') {
+          // console.log('afterNode', afterNode);
+          if (afterNode.nextSiblings.length) {
+            tr.insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings)
+            beforeNode = last(afterNode.nextSiblings)
+          }
+          afterNode = afterNode.parent
+        }
+
+        const endTitleText = endTitle.textContent + startNode.textContent.slice(end.offset);
+        const endTitleTextNode = app.schema.text(endTitleText)!;
+        tr.setContent(endTitle.id, BlockContent.create([endTitleTextNode!]))
+        tr.select(PinnedSelection.fromPin(Pin.future(endTitle, endTitle.textContent.length)!));
 
         return tr;
       }
