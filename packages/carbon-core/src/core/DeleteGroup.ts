@@ -19,7 +19,9 @@ export class SelectionPatch {
 	}
 
 	addRange(range: Range) {
-		this.ranges.push(range)
+		if (!range.isCollapsed) {
+			this.ranges.push(range)
+		}
 	}
 
 	removeRange(range: Range) {

@@ -16,6 +16,10 @@ export class Range {
 		return new Range({start,  end});
 	}
 
+	get isCollapsed() {
+		return this.start.eq(this.end);
+	}
+
 	constructor(props: RangeProps) {
 		const {start, end} = props
 		this.start = start;

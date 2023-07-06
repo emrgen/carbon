@@ -3,24 +3,29 @@ import { first, last } from 'lodash';
 
 export class Slice {
 
-  static empty = new Slice([], null!, null!);
+  static empty = new Slice(null!, null!, null!);
 
   get isBlockSelection () {
     return this.start?.isContainerBlock && this.end?.isContainerBlock
   }
 
   get isEmpty() {
-    return this.nodes.length === 0  || this === Slice.empty;
+    return this === Slice.empty;
   }
 
-  static from(nodes: Node[]) {
-    return new Slice(nodes, first(nodes)!, last(nodes)!)
+  get nodes() {
+    return this.root?.children ?? [];
   }
 
-
-  static create(nodes: Node[], start: Node, end: Node) {
-    return new Slice(nodes, start, end);
+  static from(node: Node) {
+    const start = node.find(n => n.isTextBlock, { direction: 'forward', order: 'post' });
+    const end = node.find(n => n.isTextBlock, { direction: 'backward', order: 'post' });
+    return new Slice(node, start!, end!)
   }
 
-  constructor(readonly nodes: Node[], readonly start: Node, readonly end: Node) {}
+  static create(node: Node, start: Node, end: Node) {
+    return new Slice(node, start, end);
+  }
+
+  constructor(readonly root: Node, readonly start: Node, readonly end: Node) {}
 }

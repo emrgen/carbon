@@ -149,7 +149,7 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
     const { blockSelection: nodeSelection } = app
-    const { nodes } = slice;
+    const { root, nodes } = slice;
 
     console.log('xxx', nodes);
 
@@ -194,14 +194,13 @@ export class TransformCommands extends BeforePlugin {
     const { start, end } = selection;
     const { node: startNode } = start;
     const { node: endNode } = end;
-    const { start: startTitle, end: endTitle } = slice
+    const { start: startTitle, end: endTitle } = slice;
     if (!startTitle || !endTitle) {
       console.error('no title found');
       return;
     }
 
-    console.log(startTitle.chain.map(n => n.type.name));
-
+    console.log(startTitle.chain.map(n => n.type.name), slice.nodes);
 
     // if selection is within same title
     if (selection.isCollapsed && start.node === end.node) {
@@ -223,9 +222,11 @@ export class TransformCommands extends BeforePlugin {
 
           const textContent = startNode.textContent + startTitle.textContent;
           const textNode = app.schema.text(textContent);
-
+          console.log(startTitle, );
+          
           tr
             .setContent(start.node.id, BlockContent.create([textNode!]))
+          return tr
 
           let beforeNode: Optional<Node> = start.node;
           let afterNode: Optional<Node> = startTitle;
@@ -251,7 +252,9 @@ export class TransformCommands extends BeforePlugin {
 
           return tr;
         }
-      } else if (start.isAtStartOfNode(start.node)) {
+      }
+
+      if (start.isAtStartOfNode(start.node)) {
         console.log('insert at the start of the title');
         if (startTitle.eq(endTitle)) {
           const textContent = startTitle.textContent + startNode.textContent;
@@ -297,22 +300,20 @@ export class TransformCommands extends BeforePlugin {
 
           return tr;
         }
-      } else {
-        console.log('insert within the title');
-        if (startTitle.eq(endTitle)) {
-          const textBeforeCursor = startNode.textContent.slice(0, start.offset) + startTitle.textContent
-          const textContent = textBeforeCursor + startNode.textContent.slice(end.offset);
-          const textNode = app.schema.text(textContent);
-          const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
-          tr
-            .setContent(start.node.id, BlockContent.create([textNode!]))
-            .select(after);
+      }
+      console.log('insert within the title');
+      if (startTitle.eq(endTitle)) {
+        const textBeforeCursor = startNode.textContent.slice(0, start.offset) + startTitle.textContent
+        const textContent = textBeforeCursor + startNode.textContent.slice(end.offset);
+        const textNode = app.schema.text(textContent);
+        const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
+        tr
+          .setContent(start.node.id, BlockContent.create([textNode!]))
+          .select(after);
 
-          return tr;
-        }
+        return tr;
       }
     }
-
   }
 
   move(app: Carbon, nodes: Node | Node[], to: Point): Optional<Transaction> {
@@ -1414,8 +1415,6 @@ export class TransformCommands extends BeforePlugin {
     }, { direction: "backward", order: "post" });
 
     // console.log(selectedGroup.ids.map(n => n.toString()), endBlock.id.toString());
-
-
     // console.log('deleteIds', selectedIds.map(n => n.toString()));
 
     // console.log(">>> next.find", next?.id.toString());

@@ -83,13 +83,14 @@ export class CollapsibleList extends NodePlugin {
 
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
     const json = {
-      name: 'section',
+      name: splitBlock.isCollapsed ? splitBlock.name : splitBlock.type.splitName,
+      data: { node: { collapsed: splitBlock.isCollapsed } } ,
       content: [
         {
           name: 'title',
           content: rightContent.children.map(c => c.toJSON())
         }
-      ]
+      ],
     }
 
     const section = app.schema.nodeFromJSON(json);

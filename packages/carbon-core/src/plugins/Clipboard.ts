@@ -5,7 +5,7 @@ import { takeUpto } from '../utils/array';
 import { SelectionPatch } from "../core/DeleteGroup";
 import { Range } from "../core/Range";
 import { NodeId } from "../core/NodeId";
-import { last, reverse } from 'lodash';
+import { last, reverse, first } from 'lodash';
 import { Optional } from '@emrgen/types';
 import { Slice } from "../core/Slice";
 
@@ -19,11 +19,11 @@ export class ClipboardPlugin extends BeforePlugin {
         preventAndStop(event);
         const slice = this.slice(app);
         if (!slice.isEmpty) {
-          const serialized = slice.nodes.map(n => app.serialize(n))
+          const serialized = app.serialize(slice.root)
           console.log('Serialized =>', serialized);
           event.clipboardData.setData('text/plain', serialized);
 
-          console.log(slice.nodes.map(n => n.textContent));
+          console.log(slice.root.children.map(n => n.textContent));
 
           app.state.runtime.clipboard.setSlice(slice);
         }
@@ -38,11 +38,11 @@ export class ClipboardPlugin extends BeforePlugin {
         console.log('fragment', slice);
 
         if (!slice.isEmpty) {
-          const serialized = slice.nodes.map(n => app.serialize(n))
+          const serialized = app.serialize(slice.root)
           console.log('Serialized =>', serialized);
           event.clipboardData.setData('text/plain', serialized);
 
-          console.log(slice.nodes.map(n => n.textContent));
+          console.log(slice.root.children.map(n => n.textContent));
 
           app.state.runtime.clipboard.setSlice(slice);
           return
@@ -59,7 +59,7 @@ export class ClipboardPlugin extends BeforePlugin {
         } else {
 
         }
-        console.log('paste', app.state.runtime.clipboard.slice.nodes);
+        console.log('paste', app.state.runtime.clipboard.slice.root);
       }
     };
   }
@@ -69,24 +69,34 @@ export class ClipboardPlugin extends BeforePlugin {
     console.log(nodeSelection.size);
 
     if (nodeSelection.size) {
-      const { blocks: nodes } = nodeSelection;
-      return Slice.from(nodes.map(n => app.schema.cloneWithId(n)));
+      const { blocks } = nodeSelection;
+      const cloned = blocks.map(n => {
+        const node = app.schema.cloneWithId(n)
+        node.updateData({ state: { selected: false } })
+        return node
+      })
+      
+      const rootNode = Node.create({
+        type: app.schema.type('document'),
+        content: BlockContent.create(cloned),
+        id: NodeId.create(String(Math.random())),
+      });
+      const first = rootNode.firstChild!;
+      const last = rootNode.lastChild!;
+      return Slice.create(rootNode, first, last);
     }
 
     const { start, end } = selection;
     let [startNode, endNode] = blocksBelowCommonNode(start.node, end.node);
-
-    console.log(startNode, endNode);
-
-
     if (!startNode || !endNode) {
       return Slice.empty;
     }
+    // console.log(startNode.id.toString(), endNode.id.toString());
+    // console.log(startNode, endNode);
 
-    if (startNode.isTextBlock) {
+    if (startNode.isTextBlock && startNode.eq(endNode)) {
       startNode = endNode = startNode.parent;
     }
-
     if (!startNode || !endNode) {
       return Slice.empty;
     }
@@ -96,6 +106,7 @@ export class ClipboardPlugin extends BeforePlugin {
       (startNode?.parent?.children.slice(startNode.index, endNode.index + 1) ?? [])
 
     const cloned = nodes.map(n => n.clone());
+    console.log('cloned', cloned.map(n => n.name));
 
     const rootNode = Node.create({
       type: app.schema.type('document'),
@@ -103,6 +114,7 @@ export class ClipboardPlugin extends BeforePlugin {
       id: NodeId.create(String(Math.random())),
     });
     rootNode.content.withParent(rootNode);
+    console.log('rootNode', rootNode);
 
     const deleteGroup = new SelectionPatch()
     const startPin = start.down();
@@ -113,7 +125,11 @@ export class ClipboardPlugin extends BeforePlugin {
     }
 
     rootNode.find(n => {
+      console.log(n.name, n.textContent);
+
       if (startPin.node.eq(n)) {
+        console.log('xxxx');
+
         return true;
       }
       if (n.isContainerBlock) {
@@ -143,20 +159,24 @@ export class ClipboardPlugin extends BeforePlugin {
     });
 
     // if the start and end cursor covers a node title entirely, we need to keep the title
-    if (start.node !== end.node || !(start.isAtStartOfNode(start.node) && end.isAtEndOfNode(end.node))) {
-      if (start.isAtStartOfNode(start.node)) {
-        start.node.children.forEach(n => deleteGroup.addId(n.id));
-      } else {
-        deleteGroup.addRange(Range.create(Pin.toStartOf(start.node)!, start));
-      }
+    // if (!(start.isAtStart && end.isAtEnd)) {
+    // delete range is before start pin
+    // if (start.isAtEndOfNode(start.node)) {
+    //   start.node.children.forEach(n => deleteGroup.addId(n.id));
+    // } else {
+    //   deleteGroup.addRange(Range.create(Pin.toStartOf(start.node)!, start));
+    // }
 
-      if (end.isAtEndOfNode(end.node)) {
-        start.node.children.forEach(n => deleteGroup.addId(n.id));
-      } else {
-        deleteGroup.addRange(Range.create(end, Pin.toEndOf(end.node)!,));
-      }
-    }
-    // console.log('xxx', rootNode.textContent);
+    // delete range is after end pin
+    // if (end.isAtStartOfNode(end.node)) {
+    //   start.node.children.forEach(n => deleteGroup.addId(n.id));
+    // } else {
+    //   deleteGroup.addRange(Range.create(end, Pin.toEndOf(end.node)!,));
+    // }
+
+    deleteGroup.addRange(Range.create(Pin.toStartOf(start.node)!, start));
+    deleteGroup.addRange(Range.create(end, Pin.toEndOf(end.node)!,));
+    // }
 
     // console.log(deleteGroup.ids.map(id => id.toString()));
     console.log(deleteGroup.ranges);
@@ -198,13 +218,13 @@ export class ClipboardPlugin extends BeforePlugin {
       return false;
     })
 
-    rootNode.find(n => {
-      if (n.eq(startNode!)) {
-        n.changeType(app.schema.type('section'));
-        return true;
-      }
-      return false;
-    });
+    // rootNode.find(n => {
+    //   if (n.eq(startNode!)) {
+    //     n.changeType(app.schema.type('section'));
+    //     return true;
+    //   }
+    //   return false;
+    // });
 
     let startPath: number[] = [];
     let endPath: number[] = [];
@@ -217,6 +237,8 @@ export class ClipboardPlugin extends BeforePlugin {
       }
     })
 
+    console.log('xxx', rootNode.textContent);
+
     const children = rootNode.children.map(n => app.schema.cloneWithId(n));
     rootNode.updateContent(BlockContent.create(children));
 
@@ -228,9 +250,10 @@ export class ClipboardPlugin extends BeforePlugin {
     }
 
     console.log(startSliceNode.chain.map(n => n.type.name).join(' > '));
-    
+    console.log(rootNode.children);
+    console.log(startSliceNode.textContent, endSliceNode.textContent);
 
     // remove nodes and content outside the selection
-    return Slice.create(rootNode.children, startSliceNode, endSliceNode);
+    return Slice.create(rootNode, startSliceNode, endSliceNode);
   }
 }

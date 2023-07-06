@@ -1,11 +1,14 @@
 import {
+	Carbon,
 	CarbonPlugin,
 	EventContext,
 	EventHandlerMap,
+	Node,
 	NodeSpec,
 	Pin,
 	PinnedSelection,
 	Point,
+	SerializedNode,
 	splitTextBlock
 } from '@emrgen/carbon-core';
 
@@ -72,5 +75,17 @@ export class DocPlugin extends CarbonPlugin {
 
 	// 	return undefined
 	// }
+
+	serialize(app: Carbon, node: Node): SerializedNode {
+		const contentNode = node.child(0);
+		return {
+			name: node.name,
+			title: contentNode?.textContent ?? '',
+			content: node.children.slice(1).map(n => app.serialize(n)),
+
+			isNested: true,
+			unwrap: contentNode?.isEmpty ?? false,
+		}
+	}
 
 }
