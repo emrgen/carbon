@@ -1,5 +1,5 @@
 
-import { Optional } from '@emrgen/types';
+import { Maps, Optional, With } from '@emrgen/types';
 import { Node } from './Node';
 import { EventEmitter } from 'events';
 import { querySelector } from '../utils/domElement';
@@ -17,6 +17,7 @@ import { Transaction } from './Transaction';
 import { TransactionManager } from './TransactionManager';
 import { CarbonCommands, SerializedNode } from "./types";
 import { BlockSelection } from './NodeSelection';
+import { first } from 'lodash';
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -35,6 +36,7 @@ export class Carbon extends EventEmitter {
 	_element: any;
 	_portal: any;
 	_contentElement: any;
+	_ticks: Maps<Carbon, Optional<Transaction>>[];
 
 	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
@@ -51,6 +53,7 @@ export class Carbon extends EventEmitter {
 
 		this.cmd = pm.commands(this);
 		this.enabled = true;
+		this._ticks = [];
 	}
 
 	get content(): Node {
@@ -131,6 +134,24 @@ export class Carbon extends EventEmitter {
 
 	disable() {
 		this.enabled = false;
+	}
+
+	cleanTicks() {
+		this._ticks = [];
+	}
+	
+	nextTick(cb) {
+		this._ticks.push(cb);
+	}
+
+	processTick() {
+		if (this._ticks.length) {
+			const tick = first(this._ticks);
+			this._ticks = this._ticks.slice(1);
+			tick?.(this)?.dispatch();
+			return true;
+		}
+		return false;
 	}
 }
 

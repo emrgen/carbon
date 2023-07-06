@@ -148,10 +148,12 @@ export class TransformCommands extends BeforePlugin {
     if (slice.isEmpty) {
       return;
     }
-    const { blockSelection: nodeSelection } = app
-    const { root, nodes } = slice;
 
-    console.log('xxx', nodes);
+    const sliceClone = slice.clone(app);
+    const { blockSelection: nodeSelection } = app
+    const { root, nodes } = sliceClone;
+
+    console.log('xxx', nodes.map(n => n.id.toString()), root.id.toString());
 
     // if the selection is not empty, we need to paste the nodes after the last node
     if (!nodeSelection.isEmpty) {
@@ -164,7 +166,7 @@ export class TransformCommands extends BeforePlugin {
             return true;
           }
           return false;
-        })
+        }, { order: 'post', direction: 'backward' })
       });
 
       const tr = app.tr.insert(Point.toAfter(lastNode.id), nodes)
@@ -174,7 +176,7 @@ export class TransformCommands extends BeforePlugin {
       return tr
     }
 
-    if (slice.isBlockSelection) {
+    if (sliceClone.isBlockSelection) {
       const tr = selection.isCollapsed ? app.tr : this.delete(app, selection);
       if (!tr) {
         console.log('failed to delete');
@@ -187,24 +189,23 @@ export class TransformCommands extends BeforePlugin {
 
       const at = Point.toAfter(after.head.nodeId);
 
-      tr.insert(at, slice.nodes);
+      tr.insert(at, sliceClone.nodes);
       return tr;
     }
 
     const { start, end } = selection;
     const { node: startNode } = start;
     const { node: endNode } = end;
-    const { start: startTitle, end: endTitle } = slice;
+    const { start: startTitle, end: endTitle } = sliceClone;
     if (!startTitle || !endTitle) {
       console.error('no title found');
       return;
     }
 
     console.log(startTitle.chain.map(n => n.type.name));
-
+    const { tr } = app;
     // if selection is within same title
     if (selection.isCollapsed) {
-      const { tr } = app;
       if (startTitle.eq(endTitle)) {
         const textBeforeCursor = startNode.textContent.slice(0, start.offset) + startTitle.textContent
         const textContent = textBeforeCursor + startNode.textContent.slice(end.offset);
@@ -247,11 +248,20 @@ export class TransformCommands extends BeforePlugin {
         const endTitleText = endTitle.textContent + startNode.textContent.slice(end.offset);
         const endTitleTextNode = app.schema.text(endTitleText)!;
         tr.setContent(endTitle.id, BlockContent.create([endTitleTextNode!]))
-        tr.select(PinnedSelection.fromPin(Pin.future(endTitle, endTitle.textContent.length)!));
+        const after = PinnedSelection.fromPin(Pin.future(endTitle, endTitle.textContent.length)!);
+        tr.select(after, ActionOrigin.UserInput);
+        console.log(endTitleText, after.toString());
 
         return tr;
       }
     }
+
+    const after = selection.collapseToStart();
+    // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
+    app.cmd.transform.delete(selection)?.next((carbon) => {
+      // console.log('DELETED', carbon.selection.toString());
+      return this.paste(carbon, after, slice);
+    })?.dispatch();
   }
 
   move(app: Carbon, nodes: Node | Node[], to: Point): Optional<Transaction> {

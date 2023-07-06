@@ -96,7 +96,7 @@ export class SelectionManager {
 		}
 
 		if (this.state.selectionSynced) {
-			console.log('skipped: selection already synced', this.state.selectionOrigin)
+			console.log('skipped: selection already synced', this.state.selectionOrigin, this.state.selection.toString()	);
 			return
 		}
 
@@ -118,6 +118,7 @@ export class SelectionManager {
 		this.state.selectionSynced = true;
 	}
 
+	// updates selection state from pending selection events
 	commitSelection() {
 		const { app } = this
 		const event = last(this.runtime.selectEvents) as Optional<SelectionEvent>;
@@ -134,6 +135,12 @@ export class SelectionManager {
 		}
 
 		this.state.updateSelection(selection, event.origin);
-		this.app.emit(EventsOut.selectionchanged, selection);
+		// if nothing was processed, emit selection changed to sync the dom
+		if (!this.app.processTick()) {
+			this.app.emit(EventsOut.selectionchanged, selection);
+		}
+	}
+
+	onSyncSelection() {
 	}
 }

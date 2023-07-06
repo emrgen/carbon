@@ -1,6 +1,6 @@
 import { each, first, flatten, identity, isArray, last, sortBy } from 'lodash';
 
-import { Optional } from '@emrgen/types';
+import { Optional, With } from '@emrgen/types';
 import { p14 } from './Logger';
 import { BSet, NodeIdSet } from './BSet';
 import { Fragment } from './Fragment';
@@ -312,6 +312,7 @@ export class Transaction {
 
 		console.log(p14('%c[error]'), 'color:red', error.message, '-> rolling back transaction');
 		// rollback transaction changes
+		this.app.cleanTicks();
 		// put the cursor at the right place
 	}
 
@@ -379,4 +380,8 @@ export class Transaction {
 		return this;
 	}
 
+	next(cb: With<Carbon>) {
+		this.app.nextTick(cb);
+		return this;
+	}
 }
