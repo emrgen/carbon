@@ -518,6 +518,9 @@ export class TransformCommands extends BeforePlugin {
     let endDepth = endBlock.depth - commonNode.depth;
     let commonDepth = Math.min(startDepth, endDepth);
     const isWithinSameNode = endBlock.ancestor(startBlock)
+
+    // when endNode is within startNode, the commonDepth is zero
+    // so we need to increase the commonDepth by 1
     if (isWithinSameNode) {
       commonDepth += 1;
     }
@@ -533,13 +536,12 @@ export class TransformCommands extends BeforePlugin {
     const splitUptoSameDepth = () => {
       let lastInsertedNodeId = endBlock.id;
       let mergeDepth = commonDepth;
-      console.log('splitUptoSameDepth', mergeDepth);
+      // console.log('splitUptoSameDepth', mergeDepth);
 
       let to: Optional<Point> = Point.toAfter(startBlock!.id);
       if (startBlock!.isCollapsible && !startBlock.isCollapsed) {
         to = Point.toAfter(startBlock?.firstChild?.id!);
       }
-      // console.log(startBlock!.type.splitName, endBlock!.name);
 
       if (startBlock!.type.splitName !== endBlock!.name) {
         changeActions.push(ChangeName.create(endBlock!.id, endBlock!.name, startBlock!.type.splitName));
@@ -643,7 +645,6 @@ export class TransformCommands extends BeforePlugin {
           }
         }
       } else {
-
         while (endContainer && startTopNode!.depth <= endContainer.depth) {
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
           if (moveNodes.length) {
@@ -1371,9 +1372,9 @@ export class TransformCommands extends BeforePlugin {
           return false;
         }
 
-        if (!n.isCollapseHidden) {
-          collectId(n.id);
-        }
+        // if (!n.isCollapseHidden) {
+        collectId(n.id);
+        // }
         return !!endBlock?.eq(n);
       });
 
@@ -1404,9 +1405,9 @@ export class TransformCommands extends BeforePlugin {
       }
 
       // exclude hidden nodes by skipping collection
-      if (!n.isCollapseHidden) {
-        collectId(n.id);
-      }
+      // if (!n.isCollapseHidden) {
+      collectId(n.id);
+      // }
 
       // console.log("prevBlock.prev", n.toString());
       return false

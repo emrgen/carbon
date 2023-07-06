@@ -17,7 +17,7 @@ export const NestableComp = (props: RendererProps) => {
   // console.log(attributes);
 
   return (
-    <CarbonBlock node={node} ref={ref} custom={{ ...attributes }}>
+    <CarbonBlock node={node} ref={ref} custom={{ ...attributes, }}>
       <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
       {SelectionHalo}

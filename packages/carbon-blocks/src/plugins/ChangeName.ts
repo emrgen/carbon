@@ -65,7 +65,11 @@ export class ChangeName extends BeforePlugin {
       tr
         .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
         .change(block.id, block.name, type)
-        .select(after)
+      // expand collapsed block
+      if (block.isCollapsed) {
+        tr.updateData(block.id, { node: { collapsed: false } });
+      }
+      tr.select(after)
         .dispatch()
     }
   }

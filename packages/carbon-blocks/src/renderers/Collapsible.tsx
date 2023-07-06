@@ -55,24 +55,20 @@ export default function CollapsibleListComp(props: RendererProps) {
   );
 
   return (
-    <CarbonBlock {...props}>
+    <CarbonBlock {...props} custom={{ "data-collapsed": isCollapsed }}>
       <CarbonNodeContent node={node} beforeContent={beforeContent} />
 
-      {!isCollapsed && (
-        <>
-          {node.size > 1 ? (
-            <CarbonNodeChildren node={node} />
-          ) : (
-            <div
-              className="collapsible-empty-content"
-              contentEditable="false"
-              suppressContentEditableWarning
-              onClick={handleInsert}
-            >
-              Click to insert.
-            </div>
-          )}
-        </>
+      {node.size > 1 ? (
+        <CarbonNodeChildren node={node} />
+      ) : (
+        <div
+          className="collapsible-empty-content"
+          contentEditable="false"
+          suppressContentEditableWarning
+          onClick={handleInsert}
+        >
+          Click to insert.
+        </div>
       )}
 
       {SelectionHalo}
