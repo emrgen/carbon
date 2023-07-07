@@ -97,7 +97,7 @@ export class SelectionManager {
 			return
 		}
 
-		if (this.state.selectionSynced) {
+		if (this.state.selectionUpdated) {
 			console.log('skipped: selection already synced', this.state.selectionOrigin, this.state.selection.toString()	);
 			return
 		}
@@ -112,12 +112,12 @@ export class SelectionManager {
 		if (selection.isInvalid) {
 			console.warn('skipped invalid selection sync');
 			app.element?.blur()
-			this.state.selectionSynced = true;
+			this.state.selectionUpdated = true;
 			return
 		}
 
 		selection.syncDom(app.store);
-		this.state.selectionSynced = true;
+		this.state.selectionUpdated = true;
 	}
 
 	// updates selection state from pending selection events

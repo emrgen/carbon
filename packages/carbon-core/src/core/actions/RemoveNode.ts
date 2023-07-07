@@ -7,6 +7,7 @@ import { generateActionId } from './utils';
 import { classString } from "../Logger";
 import { Optional } from '@emrgen/types';
 import { Node } from "../Node";
+import { InsertNode } from "./InsertNodes";
 
 // action to remove a node by id
 export class RemoveNode implements CarbonAction {
@@ -38,9 +39,9 @@ export class RemoveNode implements CarbonAction {
 		return ActionResult.withValue('done')
 	}
 
-
 	inverse(): CarbonAction {
-		throw new Error("Method not implemented.");
+		const { at, node } = this;
+		return InsertNode.create(at, node!, ActionOrigin.UserInput);
 	}
 
 	toString() {

@@ -69,7 +69,7 @@ export class MoveAction implements CarbonAction {
 	}
 
 	inverse(): CarbonAction {
-		throw new Error("Method not implemented.");
+		return new MoveAction(this.to, this.from, this.nodeId, this.origin);
 	}
 
 	toString() {

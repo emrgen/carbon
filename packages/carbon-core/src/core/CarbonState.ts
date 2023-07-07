@@ -67,7 +67,7 @@ export class CarbonState {
 
 	prevSelection?: PinnedSelection;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
-	selectionSynced: boolean;
+	selectionUpdated: boolean;
 
 	private dirty = false;
 
@@ -80,7 +80,7 @@ export class CarbonState {
 	}
 
 	get isSelectionDirty() {
-		return !this.selectionSynced;
+		return !this.selectionUpdated;
 	}
 
 	get isNodeStateDirty() {
@@ -118,7 +118,7 @@ export class CarbonState {
 		this.unselectedNodeIds = new NodeIdSet();
 
 		this.dirty = false;
-		this.selectionSynced = false;
+		this.selectionUpdated = false;
 	}
 
 
@@ -149,7 +149,7 @@ export class CarbonState {
 		this.selectionOrigin = origin;
 
 		// console.log('selection updated', selectionSynced);
-		this.selectionSynced = selectionSynced;
+		this.selectionUpdated = selectionSynced;
 	}
 
 	updateNodeState() {

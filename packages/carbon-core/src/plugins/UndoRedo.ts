@@ -30,7 +30,7 @@ export class UndoPlugin extends AfterPlugin {
   }
 
   transaction(tr: Transaction): void {
-    if (tr.record && !tr.selectionOnly) {
+    if (tr.record && !tr.selectionOnly || this.undoStack.length === 0) {
       this.undoStack.push(tr);
     } else {
       console.log('skip transaction', tr);
