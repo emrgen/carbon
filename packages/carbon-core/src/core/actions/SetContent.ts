@@ -1,34 +1,36 @@
 import { classString } from "../Logger";
 import { NodeContent } from "../NodeContent";
 import { NodeId } from "../NodeId";
-import { Point } from "../Point";
 import { Transaction } from "../Transaction";
-import { ActionResult, NULL_ACTION_RESULT } from "./Result";
-import { CarbonAction, ActionOrigin } from "./types";
+import { ActionResult } from "./Result";
+import { ActionOrigin, CarbonAction } from "./types";
 import { generateActionId } from "./utils";
+import { Optional } from '@emrgen/types';
 
 export class SetContent implements CarbonAction {
   id: number;
   origin: ActionOrigin;
+  before: Optional<NodeContent>;
 
-  static create(nodeId: NodeId, content: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContent(nodeId, content, origin)
+  static create(nodeId: NodeId, after: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
+    return new SetContent(nodeId, after, origin)
   }
 
-  constructor(readonly nodeId: NodeId, readonly content: NodeContent, origin: ActionOrigin) {
+  constructor(readonly nodeId: NodeId, readonly after: NodeContent, origin: ActionOrigin) {
     this.id = generateActionId()
     this.origin = origin;
   }
 
   execute(tr: Transaction): ActionResult<any> {
     const {app,} = tr
-    const {nodeId, content} = this
+    const {nodeId, after} = this
     const node = app.store.get(nodeId);
     if (!node) {
       return ActionResult.withError(`Node ${nodeId} not found`);
     }
 
-    node?.updateContent(content);
+    this.before = node.content.clone();
+    node?.updateContent(after);
     node.forAll(n => {
       app.store.put(n);
     });
@@ -38,11 +40,18 @@ export class SetContent implements CarbonAction {
   }
 
   inverse(): CarbonAction {
-    throw new Error("Method not implemented.");
+    if (!this.before) {
+      throw new Error("Cannot invert action without before state");
+    }
+
+    const action = SetContent.create(this.nodeId, this.before, this.origin)
+    action.before = this.after
+
+    return action
   }
 
   toString() {
-    const { nodeId, content } = this
-    return classString(this)([nodeId, content.children.map(n => n.textContent)]);
+    const { nodeId, after } = this
+    return classString(this)([nodeId, after.children.map(n => n.textContent)]);
   }
 }

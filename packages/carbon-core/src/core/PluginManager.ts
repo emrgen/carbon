@@ -144,8 +144,7 @@ export class PluginManager {
 			if (keyDownEvent.stopped) return
 			const handlers = p.keydown()
 			const handler = entries(handlers).find(([key]) => {
-				// console.log(snakeCase(key).replace('_', '+'));
-				return isKeyHotkey(snakeCase(key).replace('_', '+'))(keyDownEvent.event);
+				return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event);
 			})
 			handler?.[1]?.(keyDownEvent)
 		})
@@ -156,7 +155,7 @@ export class PluginManager {
 				this.nodePlugin(n.name)?.keydown()[keyDownEvent.type]?.(keyDownEvent);
 				const handlers = (this.nodePlugin(n.type.name)?.keydown() ?? {}) as EventHandlerMap;
 				const handler = entries(handlers).find(([key]) => {
-					return isKeyHotkey(snakeCase(key).replace('_', '+'))(keyDownEvent.event)
+					return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
 				});
 				handler?.[1]?.(keyDownEvent)
 				return keyDownEvent.stopped
@@ -168,7 +167,7 @@ export class PluginManager {
 		some(this.after, (p: CarbonPlugin) => {
 			const handlers = p.keydown()
 			const handler = entries(handlers).find(([key]) => {
-				return isKeyHotkey(snakeCase(key).replace('_', '+'))(keyDownEvent.event)
+				return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
 			});
 			handler?.[1]?.(keyDownEvent)
 			return keyDownEvent.stopped
@@ -199,8 +198,8 @@ export class PluginManager {
 	}
 
 	onTransaction(tr: Transaction) {
-		// each(this.before, p => p.transaction(tr));
-		// each(this.after, p => p.transaction(tr));
+		each(this.before, p => p.transaction(tr));
+		each(this.after, p => p.transaction(tr));
 	}
 
 	normalize(node: Node, app: Carbon): CarbonAction[] {

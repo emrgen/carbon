@@ -24,7 +24,7 @@ export class Section extends NodePlugin {
 					emptyPlaceholder: '',
 				},
 				html: {
-					placeholder: 'Section',
+					// placeholder: 'Section',
 					// contentEditable: false,
 					suppressContentEditableWarning: true,
 				}

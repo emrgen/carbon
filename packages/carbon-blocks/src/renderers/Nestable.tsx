@@ -15,9 +15,10 @@ export const NestableComp = (props: RendererProps) => {
   // const { listeners } = useDragDropRectSelect({ node, ref });
   // console.log(node.textContent);
   // console.log(attributes);
+  // console.log(node.attrs.node.emptyPlaceholder, node.name);
 
   return (
-    <CarbonBlock node={node} ref={ref} custom={{ ...attributes, }}>
+    <CarbonBlock node={node} ref={ref} custom={{ ...attributes }}>
       <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
       {SelectionHalo}

@@ -1,36 +1,35 @@
-import { each, first, flatten, identity, isArray, last, sortBy } from 'lodash';
+import { each, flatten, identity, isArray, last, sortBy } from 'lodash';
 
 import { Optional, With } from '@emrgen/types';
+import { NodeIdSet } from './BSet';
+import { Carbon } from './Carbon';
 import { p14 } from './Logger';
-import { BSet, NodeIdSet } from './BSet';
-import { Fragment } from './Fragment';
 import { Mark } from './Mark';
 import { Node } from './Node';
+import { NodeAttrs } from './NodeAttrs';
+import { NodeContent } from './NodeContent';
+import { NodeId } from './NodeId';
+import { PinnedSelection } from './PinnedSelection';
 import { PluginManager } from './PluginManager';
 import { Point } from './Point';
-import { TransactionManager } from './TransactionManager';
-import { CommandError } from './actions/Error';
-import { Carbon } from './Carbon';
-import { CarbonAction, ActionOrigin } from './actions/types';
-import { PinnedSelection } from './PinnedSelection';
 import { PointedSelection } from './PointedSelection';
-import { NodeId } from './NodeId';
-import { NodeName } from './types';
-import { SelectAction } from './actions/Select';
 import { SelectionManager } from './SelectionManager';
-import { InsertText } from './actions/InsertText';
-import { InsertNodes } from './actions/InsertNodes';
-import { ChangeName } from './actions/ChangeName';
-import { MoveAction } from './actions/MoveAction';
-import { RemoveNode } from './actions/RemoveNode';
-import { SetContent } from './actions/SetContent';
-import { NodeContent } from './NodeContent';
-import { SelectNodes } from './actions/SelectNodes';
+import { TransactionManager } from './TransactionManager';
 import { RemoveText } from './actions';
 import { ActivateNodes } from './actions/ActivateNodes';
+import { ChangeName } from './actions/ChangeName';
+import { CommandError } from './actions/Error';
+import { InsertNode } from './actions/InsertNodes';
+import { InsertText } from './actions/InsertText';
+import { MoveAction } from './actions/MoveAction';
+import { RemoveNode } from './actions/RemoveNode';
+import { SelectAction } from './actions/Select';
+import { SelectNodes } from './actions/SelectNodes';
+import { SetContent } from './actions/SetContent';
 import { UpdateAttrs } from './actions/UpdateAttrs';
-import { NodeAttrs } from './NodeAttrs';
 import { UpdateData } from './actions/UpdateData';
+import { ActionOrigin, CarbonAction } from './actions/types';
+import { NodeName } from './types';
 
 export class TransactionError {
 	commandId: number;
@@ -54,6 +53,9 @@ export class Transaction {
 	id: number;
 
 	isNormalizer: boolean = false;
+	timestamp: number = Date.now();
+	onTick: boolean = false;
+	record: boolean = true;
 
 	private actions: CarbonAction[] = [];
 	private undoActions: CarbonAction[] = [];
@@ -61,12 +63,11 @@ export class Transaction {
 	private cancelled: boolean = false;
 	private committed: boolean = false;
 
-	private selections: PointedSelection[] = [];
+	// private selections: PointedSelection[] = [];
 	private normalizeIds = new NodeIdSet();
 	private updatedIds = new NodeIdSet();
 	private selectedIds = new NodeIdSet();
 	private activatedIds = new NodeIdSet();
-
 
 	get origin() {
 		return this.app.runtime.origin;
@@ -78,6 +79,10 @@ export class Transaction {
 
 	private get runtime() {
 		return this.state.runtime;
+	}
+
+	get selectionOnly() {
+		return this.actions.every(a => a instanceof SelectAction);
 	}
 
 	static create(carbon: Carbon, tm: TransactionManager, pm: PluginManager, sm: SelectionManager) {
@@ -105,6 +110,12 @@ export class Transaction {
 		return !!this.selectedIds.size || !!this.activatedIds.size;
 	}
 
+	get selections() {
+		const selectActions = this.actions.filter(a => a instanceof SelectAction) as SelectAction[];
+		// console.log('Transaction.selections', this.id, selectActions.length, selectActions.map(a => a.after.toString()));
+		return selectActions.map(a => a.after);
+	}
+
 	// returns final selection
 	get selection(): PointedSelection {
 		const sel = last(this.selections)?.clone() ?? this.state.selection.unpin();
@@ -124,20 +135,20 @@ export class Transaction {
 	select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
 		const after = selection.unpin();
 		// console.log('Transaction.select', after.toString(), this.selection.toString());
-
 		this.add(SelectAction.create(this.selection, after, origin));
-		this.selections.push(after.clone());
-
 		return this;
 	}
 
-	setContent(id: NodeId, content: NodeContent, origin = this.origin): Transaction {
-		this.add(SetContent.create(id, content, origin));
+	setContent(id: NodeId, after: NodeContent, origin = this.origin): Transaction {
+		this.add(SetContent.create(id, after, origin));
 		return this;
 	}
 
 	insert(at: Point, nodes: Node | Node[], origin = this.origin): Transaction {
-		this.add(InsertNodes.create(at, Fragment.from(flatten([nodes])), origin));
+		const insertNodes = isArray(nodes) ? nodes : [nodes];
+		insertNodes.slice().reverse().forEach(node => {
+			this.add(InsertNode.create(at, node, origin))
+		});
 		return this;
 	}
 
@@ -383,5 +394,16 @@ export class Transaction {
 	next(cb: With<Carbon>) {
 		this.app.nextTick(cb);
 		return this;
+	}
+
+	// create an inverse transaction
+	inverse() {
+		const {tr} = this.app;
+		tr.record = false
+		const actions = this.actions.map(c => c.inverse());
+		actions.reverse();
+		tr.add(actions.slice(-1));
+		tr.add(actions.slice(0, -1));
+		return tr;
 	}
 }

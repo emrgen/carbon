@@ -1,13 +1,10 @@
-import { BeforePlugin, BlockContent, Carbon, EventContext, EventHandler, EventHandlerMap, Fragment, InlineContent, Node, Pin, PinnedSelection, Point, no } from "../core";
-import { preventAndStop } from "../utils/event";
-import { blocksBelowCommonNode, nodesBetweenPoints } from "../utils/findNodes";
-import { takeUpto } from '../utils/array';
+import { BeforePlugin, BlockContent, Carbon, EventContext, EventHandlerMap, Node, Pin } from "../core";
 import { SelectionPatch } from "../core/DeleteGroup";
-import { Range } from "../core/Range";
 import { NodeId } from "../core/NodeId";
-import { last, reverse, first } from 'lodash';
-import { Optional } from '@emrgen/types';
+import { Range } from "../core/Range";
 import { Slice } from "../core/Slice";
+import { preventAndStop } from "../utils/event";
+import { blocksBelowCommonNode } from "../utils/findNodes";
 
 export class ClipboardPlugin extends BeforePlugin {
   name = "clipboard";
@@ -35,7 +32,7 @@ export class ClipboardPlugin extends BeforePlugin {
         preventAndStop(event);
         console.log('copy', event);
         const slice = this.slice(app);
-        console.log('fragment', slice);
+        console.log('slice', slice);
 
         if (!slice.isEmpty) {
           const serialized = app.serialize(slice.root)

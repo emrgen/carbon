@@ -20,7 +20,8 @@ export const NumberedListComp = (props: RendererProps) => {
     if (node.prevSibling?.name === "numberedList") {
       return getListNumber(node.prevSibling) + 1;
     }
-    return 1;
+
+    return node.data.node.listNumber ?? 1;
   };
 
   const beforeContent = (

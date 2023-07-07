@@ -1,6 +1,5 @@
 import { findIndex, flatten } from 'lodash';
 
-import { Fragment } from './Fragment';
 import { Node } from './Node';
 
 export interface NodeContent {
@@ -10,11 +9,11 @@ export interface NodeContent {
 
 	withParent(parent: Node): NodeContent;
 
-	replace(node: Node, fragment: Fragment): NodeContent;
-	append(fragment: Fragment): NodeContent;
-	insert(fragment: Fragment, offset: number): NodeContent;
-	insertBefore(fragment: Fragment, node: Node): NodeContent;
-	insertAfter(fragment: Fragment, node: Node): NodeContent;
+	replace(node: Node, by: Node): NodeContent;
+	append(node: Node): NodeContent;
+	insert(node: Node, offset: number): NodeContent;
+	insertBefore(before: Node, node: Node): NodeContent;
+	insertAfter(after: Node, node: Node): NodeContent;
 	remove(node: Node): boolean;
 
 	updateText(text: string): void;
@@ -62,37 +61,33 @@ export class BlockContent implements NodeContent {
 		});
 	}
 
-	insert(fragment: Fragment, offset: number): NodeContent {
+	insert(node: Node, offset: number): NodeContent {
 		return this
 	}
 
-	append(fragment: Fragment): NodeContent {
-		return BlockContent.create([...this.nodes, ...fragment.nodes])
+	append(node: Node): NodeContent {
+		return BlockContent.create([...this.nodes, node])
 	}
 
-	replace(node: Node, fragment: Fragment): NodeContent {
+	replace(node: Node, by: Node): NodeContent {
 		const nodes = this.nodes.map(n => {
-			if (n.eq(node)) {
-				return fragment.nodes;
-			} else {
-				return n;
-			}
+			return n.eq(node) ? by : n;
 		});
 
-		return BlockContent.create(flatten(nodes));
+		return BlockContent.create(nodes);
 	}
 
-	insertBefore(fragment: Fragment, node: Node): NodeContent {
+	insertBefore(before: Node, node: Node): NodeContent {
 		const {nodes} = this
-		const index = this.indexOf(node);
-		const content = flatten([nodes.slice(0, index), fragment.nodes, nodes.slice(index)]);
+		const index = this.indexOf(after);
+		const content = flatten([nodes.slice(0, index), node, nodes.slice(index)]);
 		return BlockContent.create(content)
 	}
 
-	insertAfter(fragment: Fragment, node: Node): NodeContent {
+	insertAfter(after: Node, node: Node): NodeContent {
 		const { nodes } = this;
-		const index = this.indexOf(node);
-		const content = flatten([nodes.slice(0, index+1), fragment.nodes, nodes.slice(index+1)]);
+		const index = this.indexOf(after);
+		const content = flatten([nodes.slice(0, index + 1), node, nodes.slice(index+1)]);
 		return BlockContent.create(content)
 	}
 
@@ -171,23 +166,23 @@ export class InlineContent implements  NodeContent {
 		return this;
 	}
 
-	append(fragment: Fragment): NodeContent {		
+	append(node: Node): NodeContent {
 		throw new Error("Not implemented");
 	}
 
-	replace(node: Node, fragment: Fragment): NodeContent {
+	replace(node: Node, by: Node): NodeContent {
 		throw new Error("Not implemented");
 	}
 
-	insert(fragment: Fragment, offset: number): NodeContent {
+	insert(node: Node, offset: number): NodeContent {
 		throw new Error("Not implemented");
 	}
 
-	insertBefore(fragment: Fragment, node: Node): NodeContent {
+	insertBefore(before: Node, after: Node): NodeContent {
 		throw new Error("Not implemented");
 	}
 
-	insertAfter(fragment: Fragment, node: Node): NodeContent {
+	insertAfter(before: Node, after: Node): NodeContent {
 		throw new Error("Not implemented");
 	}
 

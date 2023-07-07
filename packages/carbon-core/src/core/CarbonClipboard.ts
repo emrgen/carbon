@@ -1,4 +1,3 @@
-import { Fragment } from "./Fragment";
 import { Slice } from "./Slice";
 
 export class CarbonClipboard {

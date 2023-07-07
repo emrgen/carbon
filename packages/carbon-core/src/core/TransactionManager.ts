@@ -76,6 +76,7 @@ export class TransactionManager {
 	}
 
 	private commitSelection() {
+		// console.log('commitSelection', this.state.selection.toString());
 		this.sm.commitSelection();
 		this.app.emit(EventsOut.selectionchanged, this.state.selection);
 	}

@@ -130,6 +130,7 @@ export class EventManager {
 			EventsIn.selectstart,
 			EventsIn.mouseDown,
 			EventsIn.keyUp,
+			EventsIn.beforeinput,
 		].includes(type) || selectionChangedUsingKeys(event)
 		) {
 			console.groupCollapsed('onEvent:', event.type);

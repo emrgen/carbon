@@ -105,7 +105,7 @@ export class CollapsibleList extends NodePlugin {
     const after = PinnedSelection.fromPin(focusPoint!);
 
     return app.tr
-      .setContent(title.id, leftContent)
+      .setContent(title.id, leftContent, title.content)
       .insert(at, section!)
       .select(after)
   }

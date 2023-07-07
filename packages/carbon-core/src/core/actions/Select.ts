@@ -30,11 +30,11 @@ export class SelectAction implements CarbonAction {
 	}
 
 	inverse(): CarbonAction {
-		throw new Error("Method not implemented.");
+		return SelectAction.create(this.after, this.before, this.origin)
 	}
 
 	toString() {
 		const {after, before} = this
-		return classString(this)([after, before]);
+		return classString(this)([before, after]);
 	}
 }

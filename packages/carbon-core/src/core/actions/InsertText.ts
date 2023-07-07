@@ -7,7 +7,6 @@ import { RemoveText } from './RemoveText';
 import { ActionResult } from './Result';
 import { classString } from '../Logger';
 import { Pin } from '../Pin';
-import { Fragment } from "../Fragment";
 import { Node } from '../Node';
 import { isEqual } from 'lodash';
 
@@ -36,7 +35,6 @@ export class InsertText implements CarbonAction {
 
 		const { node, offset } = pin;
 		const { parent } = node;
-		const fragment = Fragment.fromNode(text);
 		if (!parent) {
 			return ActionResult.withError('failed to find pin from: ' + at.toString());
 		}
@@ -54,7 +52,7 @@ export class InsertText implements CarbonAction {
 					tr.updated(node);
 				}
 			} else {
-				node.parent?.insertAfter(Fragment.fromNode(text), node);
+				node.parent?.insertAfter(node, text);
 				tr.updated(node.parent!);
 			}
 			return ActionResult.withValue('done');
@@ -69,7 +67,7 @@ export class InsertText implements CarbonAction {
 					tr.updated(node);
 				}
 			} else {
-				node.parent?.insertAfter(Fragment.fromNode(text), node);
+				node.parent?.insertAfter(node, text);
 				tr.updated(node.parent!);
 			}
 
@@ -78,7 +76,7 @@ export class InsertText implements CarbonAction {
 
 		if (pin.isWithin) {
 			if (node.isBlock) {
-				node.append(fragment)
+				node.append(text)
 				if (!native) {
 					tr.updated(node);
 				}

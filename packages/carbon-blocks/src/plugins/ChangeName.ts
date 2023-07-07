@@ -13,6 +13,7 @@ import {
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
+import { NodeData } from "packages/carbon-core/src/core/NodeData";
 
 export class ChangeName extends BeforePlugin {
   name = 'changeName';
@@ -24,6 +25,7 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(##\s)(.)*/, this.tryChangeType('h2', ['nestable'])),
     new InputRule(/^(###\s)(.)*/, this.tryChangeType('h3', ['nestable'])),
     new InputRule(/^(-\s)(.)*/, this.tryChangeType('bulletedList', ['nestable'])),
+    new InputRule(/^([0-9]+\.\s)(.)*/, this.tryChangeType('numberedList', ['nestable'])),
     new InputRule(/^(>\s)(.)*/, this.tryChangeType('collapsible', ['nestable'])),
     new InputRule(/^(---)(.)*/, this.tryChangeIntoDivider('divider', ['nestable'])),
   ])
@@ -42,7 +44,7 @@ export class ChangeName extends BeforePlugin {
     };
   }
 
-  tryChangeType(type: string, groups: string[]) {
+  tryChangeType(type: string, groups: string[], data: Partial<NodeData> = {}) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;
@@ -62,9 +64,17 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
+      if (type === 'numberedList') {
+        tr.updateData(block.id, {
+          node: {
+            listNumber: parseInt(match[1].slice(0, -2)) ?? 1
+          }
+        })
+      }
+
       tr
         .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
-        .change(block.id, block.name, type)
+      tr.change(block.id, block.name, type)
       // expand collapsed block
       if (block.isCollapsed) {
         tr.updateData(block.id, { node: { collapsed: false } });

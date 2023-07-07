@@ -38,6 +38,7 @@ export class SelectionManager {
 	// used by commands to inform editor of a selection change
 	// the selection might be queued
 	onSelect(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+		console.log('onSelect', before.toString(), after.toString(), origin, this.enabled);
 		if (!this.enabled) {
 			return
 		}
@@ -64,11 +65,12 @@ export class SelectionManager {
 			}
 		} else {
 			const event = SelectionEvent.create(before, after, origin);
+			console.log('pushing selection event', event);
 			this.runtime.selectEvents.push(event);
 		}
 	}
 
-	//
+	// syncs selection with app state
 	private onSelectionChange(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		const { state } = this;
 		if (before.eq(after) && origin !== ActionOrigin.UserInput && origin !== ActionOrigin.Normalizer && origin !== ActionOrigin.UserSelectionChange) {

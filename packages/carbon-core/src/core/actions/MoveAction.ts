@@ -4,7 +4,6 @@ import { ActionResult, NULL_ACTION_RESULT } from "./Result";
 import { CarbonAction, ActionOrigin } from "./types";
 import { Point } from '../Point';
 import { generateActionId } from './utils';
-import { Fragment } from '../Fragment';
 import { classString } from "../Logger";
 
 export class MoveAction implements CarbonAction {
@@ -41,38 +40,27 @@ export class MoveAction implements CarbonAction {
 		tr.normalize(moveNode.parent!);
 
 		moveNode.parent?.remove(moveNode);
-
 		moveNode.forAll(n => app.store.delete(n));
-
-		const fragment = Fragment.fromNode(moveNode);
 
 		// console.log("MOVE: move node", moveNode, "to", to.toString(), target);
 
 		if (to.isBefore) {
-			target.append(fragment);
-			fragment.forAll(n => app.store.put(n));
-			parent.insertBefore(fragment, target);
+			parent.insertBefore(target, moveNode);
+			app.store.put(moveNode);
 			tr.updated(parent);
 			return NULL_ACTION_RESULT;
 		}
 
 		if (to.isAfter) {
-			// if (target.nextSibling?.eq(fragment.child(0))) {
-			// 	return NULL_ACTION_RESULT
-			// }
-			// fragment.forAll(n => console.log(n.id.toString()));
-			// console.log('move after', to.toString(),)
-			parent.insertAfter(fragment, target);
-			fragment.forAll(n => {
-				app.store.put(n);
-			});
+			parent.insertAfter(target, moveNode, );
+			app.store.put(moveNode);
 			tr.updated(parent);
 			return NULL_ACTION_RESULT;
 		}
 
 		if (to.isWithin) {
-			target.append(fragment);
-			fragment.forAll(n => app.store.put(n));
+			target.append(moveNode);
+			app.store.put(moveNode);
 			tr.updated(target);
 			return NULL_ACTION_RESULT;
 		}

@@ -1,36 +1,35 @@
 
-import { each, first, flatten, identity, last, merge, reverse, sortBy } from "lodash";
+import { each, first, flatten, last, merge, reverse, sortBy } from "lodash";
 
 import { Optional } from "@emrgen/types";
-import { InsertNodes } from "../core/actions/InsertNodes";
-import { MoveAction } from "../core/actions/MoveAction";
-import { RemoveNode } from "../core/actions/RemoveNode";
-import { RemoveText } from "../core/actions/RemoveText";
-import { CarbonAction, ActionOrigin } from "../core/actions/types";
+import { BlockContent, PinnedSelection } from "../core";
+import { NodeIdSet } from "../core/BSet";
 import { Carbon } from "../core/Carbon";
+import { BeforePlugin } from "../core/CarbonPlugin";
 import { SelectionPatch } from "../core/DeleteGroup";
-import { Fragment } from "../core/Fragment";
 import { p14 } from "../core/Logger";
 import { Node } from "../core/Node";
 import { NodeId } from "../core/NodeId";
+import { BlockSelection } from "../core/NodeSelection";
 import { NodeType } from "../core/NodeType";
 import { Pin } from "../core/Pin";
-import { BlockContent, InlineContent, PinnedSelection } from "../core";
-import { BeforePlugin } from "../core/CarbonPlugin";
 import { Point } from "../core/Point";
 import { PointedSelection } from "../core/PointedSelection";
 import { Range } from "../core/Range";
+import { Slice } from "../core/Slice";
 import { Transaction } from "../core/Transaction";
-import { NodeName, yes } from "../core/types";
+import { ChangeName } from "../core/actions/ChangeName";
+import { InsertNode } from "../core/actions/InsertNodes";
+import { MoveAction } from "../core/actions/MoveAction";
+import { RemoveNode } from "../core/actions/RemoveNode";
+import { RemoveText } from "../core/actions/RemoveText";
+import { SetContent } from "../core/actions/SetContent";
+import { ActionOrigin, CarbonAction } from "../core/actions/types";
+import { NodeName } from "../core/types";
 import { takeBefore, takeUntil } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { nodeLocation } from "../utils/location";
-import { SetContent } from "../core/actions/SetContent";
 import { splitTextBlock } from "../utils/split";
-import { BlockSelection } from "../core/NodeSelection";
-import { Slice } from "../core/Slice";
-import { NodeIdSet } from "../core/BSet";
-import { ChangeName } from "../core/actions/ChangeName";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -251,7 +250,7 @@ export class TransformCommands extends BeforePlugin {
         if (start.node.parent?.isCollapsed) {
           tr.updateData(start.node.parent.id, { node:{ collapsed: false }});
         }
-        tr.setContent(endTitle.id, BlockContent.create([endTitleTextNode!]))
+        tr.setContent(endTitle.id, BlockContent.create([endTitleTextNode!]), )
         const after = PinnedSelection.fromPin(Pin.future(endTitle, endTitle.textContent.length)!);
         tr.select(after, ActionOrigin.UserInput);
         console.log(endTitleText, after.toString());
@@ -442,7 +441,7 @@ export class TransformCommands extends BeforePlugin {
     const after = PinnedSelection.fromPin(focusPoint!);
 
     app.tr
-      .setContent(start.node.id, leftContent)
+      .setContent(start.node.id, leftContent, start.node.content)
       .insert(at, section!)
       .select(after)
       .dispatch();
@@ -654,8 +653,6 @@ export class TransformCommands extends BeforePlugin {
         return;
       }
 
-      console.log('XXX', emptyBlock, splitType);
-
       const insertPoint = Point.toAfter(splitBlock.id);
       const after = PinnedSelection.fromPin(Pin.toStartOf(emptyBlock)!);
       console.log(after.toString());
@@ -705,8 +702,7 @@ export class TransformCommands extends BeforePlugin {
           console.warn("failed to create firstNode of type", splitNode.type?.name);
           return;
         }
-        const slice = Fragment.from([firstNode]);
-        parentBlock.append(slice);
+        parentBlock.append(firstNode);
         // move the split node next siblings to root node
         // only if spit pos === 'out'
         if (opts?.pos === "out") {
@@ -765,11 +761,10 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // generates insert commands for adjacent nodes
-  private insertNodeCommands(at: Point, nodes: Node[]): InsertNodes[] {
-    const commands: InsertNodes[] = [];
-    commands.push(InsertNodes.create(at, Fragment.from(nodes)));
-
-    return commands;
+  private insertNodeCommands(at: Point, nodes: Node[]): InsertNode[] {
+    return nodes.slice().reverse().map(node => {
+      return InsertNode.create(at, node)
+    });
   }
 
   private removeNodeCommands(nodes: Node | Node[]): RemoveNode[] {

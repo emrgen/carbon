@@ -5,11 +5,14 @@ import { ActionResult } from './Result';
 import { Transaction } from '../Transaction';
 import { generateActionId } from './utils';
 import { classString } from "../Logger";
+import { Optional } from '@emrgen/types';
+import { Node } from "../Node";
 
 // action to remove a node by id
 export class RemoveNode implements CarbonAction {
 	id: number;
 	type: ActionType;
+	node: Optional<Node>;
 
 	static create(at: Point, nodeId: NodeId, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new RemoveNode(at, nodeId, origin);
@@ -28,6 +31,7 @@ export class RemoveNode implements CarbonAction {
 			return ActionResult.withError('')
 		}
 
+		this.node = target.clone();
 		target.parent?.remove(target);
 		tr.updated(target.parent!);
 		tr.normalize(target.parent!);

@@ -1,4 +1,4 @@
-import { Carbon, Fragment, Node, SerializedNode } from "@emrgen/carbon-core";
+import { Carbon,  Node, SerializedNode } from "@emrgen/carbon-core";
 import { isString } from 'lodash';
 
 // export const serializeNestableNode = (app: Carbon, node: Node, prefix = '', suffix = ''): SerializedNode => {

@@ -147,6 +147,8 @@ export class CarbonState {
 		this.prevSelection = this.selection;
 		this.selection = after;
 		this.selectionOrigin = origin;
+
+		// console.log('selection updated', selectionSynced);
 		this.selectionSynced = selectionSynced;
 	}
 

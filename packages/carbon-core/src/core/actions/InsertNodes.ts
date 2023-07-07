@@ -2,25 +2,26 @@ import { CarbonAction } from './types';
 import { Transaction } from '../Transaction';
 import { Point } from '../Point';
 import { ActionOrigin } from './types';
-import { Fragment } from '../Fragment';
 import { generateActionId } from './utils';
 import { ActionResult } from './Result';
 import { Pin } from '../Pin';
 import { classString } from '../Logger';
+import { RemoveNode } from './RemoveNode';
+import { Node } from '../Node';
 
-export class InsertNodes implements CarbonAction{
+export class InsertNode implements CarbonAction{
 	id: number;
 
-	static create(at: Point, fragment: Fragment, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new InsertNodes(at, fragment, origin);
+	static create(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
+		return new InsertNode(at, node, origin);
 	}
 
-	constructor(readonly at: Point, readonly fragment: Fragment, readonly origin: ActionOrigin) {
+	constructor(readonly at: Point, readonly node: Node, readonly origin: ActionOrigin) {
 		this.id = generateActionId();
 	}
 
 	execute(tr: Transaction): ActionResult {
-		const { at, fragment } = this;
+		const { at, node } = this;
 		const {app}=tr;
 		const target = app.store.get(at.nodeId);
 		// const pin = Pin.fromPoint(at, tr.app.store);
@@ -34,25 +35,29 @@ export class InsertNodes implements CarbonAction{
 		}
 
 		const done = () => {
-			fragment.forAll(n => app.store.put(n));
+			node.forAll(n => {
+				app.store.put(n);
+			})
+
 			tr.updated(parent);
 			return ActionResult.withValue('done');
 		}
 
 		if (at.isBefore) {
 			// console.log('inserting text before', fragment);
-			parent.insertBefore( fragment, target);
+			parent.insertBefore( target, node);
 			return done()
 		}
 
 		if (at.isAfter) {
-			parent.insertAfter(fragment, target);
+			console.log('xxxxx', node);
+			parent.insertAfter( target, node);
 			return done()
 		}
 
 		if (at.isWithin) {
-			console.log(target, fragment);
-			target.append(fragment);
+			console.log(target, node);
+			target.append(node);
 			return done()
 		}
 
@@ -60,15 +65,19 @@ export class InsertNodes implements CarbonAction{
 	}
 
 	inverse(): CarbonAction {
-		throw new Error("Not implemented");
-
+		const { at, node } = this
+		const action = RemoveNode.create(at, node.id, this.origin)
+		// action.node = node.clone();
+		return action;
 	}
 
 	toString() {
-		const { at, fragment } = this
+		const { at, node } = this;
+		console.log();
+		
 		return classString(this)({
 			at: at.toString(),
-			nodes: fragment.nodes.map(n => n.id.toString())
+			nodes: node.id.toString(),
 		})
 	}
 }

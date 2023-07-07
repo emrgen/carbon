@@ -375,7 +375,6 @@ export class Node extends EventEmitter {
 
 	get nextMatchType(): Optional<ContentMatch> {
 		const fragment = Fragment.from(takeUpto(this.parent?.children ?? [], n => n === this));
-		console.log(fragment)
 		return this.parent?.type.contentMatch.matchFragment(fragment)
 	}
 
@@ -598,26 +597,26 @@ export class Node extends EventEmitter {
 		return nodes;
 	}
 
-	replace(node: Node, fragment: Fragment) {
-		this.content = this.content.replace(node, fragment).withParent(this)
+	replace(node: Node, by: Node) {
+		this.content = this.content.replace(node, by).withParent(this)
 		this.markUpdated();
 	}
 
 	// @mutates
-	append(fragment: Fragment) {
-		this.content = this.content.append(fragment).withParent(this);
+	append(node: Node) {
+		this.content = this.content.append(node).withParent(this);
 		this.markUpdated();
 	}
 
 	// @mutates
-	insertBefore(fragment: Fragment, node: Node) {
-		this.content = this.content.insertBefore(fragment, node).withParent(this)
+	insertBefore(before: Node, node: Node) {
+		this.content = this.content.insertBefore(before, node).withParent(this)
 		this.markUpdated();
 	}
 
 	// @mutates
-	insertAfter(fragment: Fragment, node: Node) {
-		this.content = this.content.insertAfter(fragment, node).withParent(this)
+	insertAfter(after: Node, node: Node) {
+		this.content = this.content.insertAfter(after, node).withParent(this)
 		this.markUpdated();
 	}
 

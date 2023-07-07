@@ -148,7 +148,11 @@ export class Carbon extends EventEmitter {
 		if (this._ticks.length) {
 			const tick = first(this._ticks);
 			this._ticks = this._ticks.slice(1);
-			tick?.(this)?.dispatch();
+			const tr = tick?.(this);
+			if (tr) {
+				tr.onTick = true;
+				tr.dispatch();
+			}
 			return true;
 		}
 		return false;

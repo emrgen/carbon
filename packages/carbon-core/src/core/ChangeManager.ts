@@ -53,13 +53,12 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	mounted(node: Node) {
 		this.state.runtime.updatedNodeIds.remove(node.id);
-		// console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
+		console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
 
 		if (this.isContentSynced && this.state.isSelectionDirty) {
 			this.updateSelection();
 		}
 	}
-
 
 	private updateContent() {
 		console.group('syncing:  content');
