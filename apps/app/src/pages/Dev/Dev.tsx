@@ -19,10 +19,7 @@ const data = node("document", [
   title([text("Carbon "), text("document"), text(" title")]),
   node("divider"),
   node("quote", [
-    title([text("section 1")]),
-    node("section", [
-      title([text("section 1.1")]),
-    ]),
+    title([text("I am a quote!")]),
   ]),
   node(
     "collapsible",

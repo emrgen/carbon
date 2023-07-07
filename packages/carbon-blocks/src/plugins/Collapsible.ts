@@ -52,6 +52,27 @@ export class CollapsibleList extends NodePlugin {
 
   keydown(): Partial<EventHandler> {
     return {
+      'ctrl_shift_e': (ctx: EventContext<KeyboardEvent>) => {
+        const { node, app } = ctx;
+        if (node.name === 'document') {
+          return;
+        }
+        ctx.event.preventDefault();
+        ctx.stopPropagation();
+
+        app.tr.updateData(node.id, { node: { collapsed: false } }).dispatch();
+      },
+
+      'ctrl_shift_c': (ctx: EventContext<KeyboardEvent>) => {
+        const { node, app } = ctx;
+        if (node.name === 'document') {
+          return;
+        }
+        ctx.event.preventDefault();
+        ctx.stopPropagation();
+
+        app.tr.updateData(node.id, { node: { collapsed: true } }).dispatch();
+      },
       // tab: skipKeyEvent
       enter(ctx: EventContext<KeyboardEvent>) {
         const { app, selection, node } = ctx;
@@ -66,7 +87,7 @@ export class CollapsibleList extends NodePlugin {
   }
 
   split(app: Carbon, selection: PinnedSelection): Optional<Transaction> {
-    const {start, end} = selection;
+    const { start, end } = selection;
     const title = start.node;
     const splitBlock = title.parent!;
 
@@ -84,7 +105,7 @@ export class CollapsibleList extends NodePlugin {
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
     const json = {
       name: splitBlock.isCollapsed ? splitBlock.name : splitBlock.type.splitName,
-      data: { node: { collapsed: splitBlock.isCollapsed } } ,
+      data: { node: { collapsed: splitBlock.isCollapsed } },
       content: [
         {
           name: 'title',
