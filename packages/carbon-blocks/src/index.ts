@@ -27,6 +27,8 @@ import ImageComp from './renderers/ImageComp';
 import { Todo } from './plugins/Todo';
 import TodoComp from './renderers/CheckedList';
 import { NestablePlugin } from './plugins';
+import { Quote } from './plugins/Quote';
+import { QuoteComp } from './renderers/Quote';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -45,6 +47,7 @@ export const blockPresets: Extension = {
 		new Stack(),
 		new Image(),
 		new Todo(),
+		new Quote(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -64,5 +67,6 @@ export const blockPresets: Extension = {
 		Renderer.create('stack', CarbonNode),
 		Renderer.create('image', ImageComp),
 		Renderer.create('todo', TodoComp),
+		Renderer.create('quote', QuoteComp),
 	]
 }

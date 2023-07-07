@@ -63,7 +63,11 @@ export class SelectNodes implements CarbonAction {
   }
 
   toJSON() {
-    throw new Error("Method not implemented.");
+    return {
+      type: this.type,
+      id: this.id,
+      ids: this.nodeIds.map(id => id.toString()),
+    }
   }
 
 }

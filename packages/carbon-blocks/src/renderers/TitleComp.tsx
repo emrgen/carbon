@@ -18,13 +18,13 @@ export default function TitleComp(props: RendererProps) {
     ? {
         onMouseDown,
         ...props.custom,
-        placeholder:
-          props.custom?.placeholder ??
-          node.parent?.attrs.node.emptyPlaceholder ??
-          (node.parent?.attrs.node.showPlaceholder
-            ? node.parent?.attrs.node.focusPlaceholder
-            : "") ??
-          "",
+        // placeholder:
+        //   props.custom?.placeholder ??
+        //   node.parent?.attrs.node.emptyPlaceholder ??
+        //   (node.parent?.attrs.node.showPlaceholder
+        //     ? node.parent?.attrs.node.focusPlaceholder
+        //     : "") ??
+        //   "",
       }
     : { onMouseDown };
 

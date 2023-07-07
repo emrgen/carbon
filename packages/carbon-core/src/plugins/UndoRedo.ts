@@ -1,5 +1,6 @@
 import { EventContext, EventHandler, Transaction } from '../core';
 import { AfterPlugin } from '../core/CarbonPlugin';
+import { last } from 'lodash';
 
 export class UndoPlugin extends AfterPlugin {
   name = 'undoPlugin';
@@ -7,11 +8,50 @@ export class UndoPlugin extends AfterPlugin {
   undoStack: Transaction[] = [];
   redoStack: Transaction[] = [];
 
+  takeTransactions(stack: Transaction[], timeSpan = 3000): Transaction[] {
+    const lastTransaction = last(stack)!;
+    const present = lastTransaction.timestamp;
+    const past = present - timeSpan;
+    const transactions: Transaction[] = [];
+
+    stack.slice().reverse().some(tr => {
+      if (!tr.textInsertOnly && transactions.length > 0) {
+        return true;
+      }
+
+      if (tr.timestamp > past || !tr.textInsertOnly) {
+        stack.pop();
+        transactions.unshift(tr);
+        return false;
+      } else {
+        return true;
+      }
+    })
+
+    return transactions;
+  }
+
+  undo(transactions: Transaction[]): void {
+    const inverse = transactions.map(tr => tr.inverse());
+    this.redoStack.push(...inverse);
+    inverse.forEach(tr => tr.dispatch());
+  }
+
+  redo(transactions: Transaction[]): void {
+    const inverse = transactions.map(tr => tr.inverse());
+    this.undoStack.push(...inverse);
+    inverse.forEach(tr => tr.dispatch());
+  }
+
   keydown(): Partial<EventHandler> {
     return {
       'cmd_z': (ctx: EventContext<Event>) => {
         ctx.event.preventDefault();
         if (this.undoStack.length === 0) return
+
+        // const undoTransactions = this.takeTransactions(this.undoStack);
+        // console.log('undo', undoTransactions, this.undoStack.map(tr => tr.timestamp));
+        // this.undo(undoTransactions);
 
         const tr = this.undoStack.pop()!
         const inverse = tr.inverse()

@@ -17,7 +17,7 @@ export class Todo extends Section {
           isChecked: false,
         },
         html: {
-          placeholder: 'To-do',
+          // placeholder: 'To-do',
           suppressContentEditableWarning: true,
         }
       }

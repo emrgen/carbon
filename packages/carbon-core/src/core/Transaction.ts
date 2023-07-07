@@ -81,7 +81,11 @@ export class Transaction {
 	}
 
 	get textInsertOnly() {
-		return this.actions.every(a => a instanceof InsertText);
+		return this.actions.every(a => a instanceof InsertText || a instanceof SelectAction);
+	}
+
+	get textRemoveOnly() {
+		return this.actions.every(a => a instanceof RemoveText || a instanceof SelectAction);
 	}
 
 	get selectionOnly() {

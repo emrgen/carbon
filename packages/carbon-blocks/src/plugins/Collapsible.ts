@@ -56,7 +56,7 @@ export class CollapsibleList extends NodePlugin {
       enter(ctx: EventContext<KeyboardEvent>) {
         const { app, selection, node } = ctx;
         console.log('[Enter] collapsible');
-        if (selection.inSameNode && selection.start.node.parent?.eq(node)) {
+        if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
           ctx.event.preventDefault();
           ctx.stopPropagation();
           app.cmd.collapsible.split(selection)?.dispatch();
@@ -105,7 +105,7 @@ export class CollapsibleList extends NodePlugin {
     const after = PinnedSelection.fromPin(focusPoint!);
 
     return app.tr
-      .setContent(title.id, leftContent, title.content)
+      .setContent(title.id, leftContent)
       .insert(at, section!)
       .select(after)
   }
