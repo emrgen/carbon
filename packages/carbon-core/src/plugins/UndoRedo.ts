@@ -15,23 +15,29 @@ export class UndoPlugin extends AfterPlugin {
 
         const tr = this.undoStack.pop()!
         const inverse = tr.inverse()
-
-        console.log('undo', tr, inverse);
-
-        // console.log('isSelectionDirty', ctx.app.state.isSelectionDirty, );
+        console.log('tr', tr);
+        console.log('undo', inverse);
         this.redoStack.push(inverse)
         inverse.dispatch();
-        // console.log('isSelectionDirty', ctx.app.state.isSelectionDirty,);
       },
       'cmd_shift_z': (ctx: EventContext<Event>) => {
-        console.log('cmd_shift_z', ctx);
+        ctx.event.preventDefault();
+        if (this.redoStack.length === 0) return
+
+        const tr = this.redoStack.pop()!
+        const inverse = tr.inverse()
+        console.log('tr',  tr);
+        console.log('redo',  inverse);
+        this.undoStack.push(inverse)
+        inverse.dispatch();
       },
     };
   }
 
   transaction(tr: Transaction): void {
-    if (tr.record && !tr.selectionOnly || this.undoStack.length === 0) {
+    if (tr.record && !tr.selectionOnly) {
       this.undoStack.push(tr);
+      this.redoStack = [];
     } else {
       console.log('skip transaction', tr);
     }

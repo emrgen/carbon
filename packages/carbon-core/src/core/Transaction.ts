@@ -19,7 +19,7 @@ import { RemoveText } from './actions';
 import { ActivateNodes } from './actions/ActivateNodes';
 import { ChangeName } from './actions/ChangeName';
 import { CommandError } from './actions/Error';
-import { InsertNode } from './actions/InsertNodes';
+import { InsertNode } from './actions/InsertNode';
 import { InsertText } from './actions/InsertText';
 import { MoveAction } from './actions/MoveAction';
 import { RemoveNode } from './actions/RemoveNode';
@@ -30,6 +30,7 @@ import { UpdateAttrs } from './actions/UpdateAttrs';
 import { UpdateData } from './actions/UpdateData';
 import { ActionOrigin, CarbonAction } from './actions/types';
 import { NodeName } from './types';
+import { insertNodesActions } from '../utils/action';
 
 export class TransactionError {
 	commandId: number;
@@ -58,12 +59,10 @@ export class Transaction {
 	record: boolean = true;
 
 	private actions: CarbonAction[] = [];
-	private undoActions: CarbonAction[] = [];
 	private error: Optional<TransactionError>;
 	private cancelled: boolean = false;
 	private committed: boolean = false;
 
-	// private selections: PointedSelection[] = [];
 	private normalizeIds = new NodeIdSet();
 	private updatedIds = new NodeIdSet();
 	private selectedIds = new NodeIdSet();
@@ -79,6 +78,10 @@ export class Transaction {
 
 	private get runtime() {
 		return this.state.runtime;
+	}
+
+	get textInsertOnly() {
+		return this.actions.every(a => a instanceof InsertText);
 	}
 
 	get selectionOnly() {
@@ -110,7 +113,7 @@ export class Transaction {
 		return !!this.selectedIds.size || !!this.activatedIds.size;
 	}
 
-	get selections() {
+	private get selections() {
 		const selectActions = this.actions.filter(a => a instanceof SelectAction) as SelectAction[];
 		// console.log('Transaction.selections', this.id, selectActions.length, selectActions.map(a => a.after.toString()));
 		return selectActions.map(a => a.after);
@@ -146,9 +149,7 @@ export class Transaction {
 
 	insert(at: Point, nodes: Node | Node[], origin = this.origin): Transaction {
 		const insertNodes = isArray(nodes) ? nodes : [nodes];
-		insertNodes.slice().reverse().forEach(node => {
-			this.add(InsertNode.create(at, node, origin))
-		});
+		this.add(insertNodesActions(at, insertNodes, origin));
 		return this;
 	}
 
@@ -402,8 +403,8 @@ export class Transaction {
 		tr.record = false
 		const actions = this.actions.map(c => c.inverse());
 		actions.reverse();
-		tr.add(actions.slice(-1));
 		tr.add(actions.slice(0, -1));
+		tr.add(actions.slice(-1));
 		return tr;
 	}
 }

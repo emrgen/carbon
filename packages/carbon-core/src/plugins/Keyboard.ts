@@ -76,7 +76,7 @@ export class KeyboardPlugin extends BeforePlugin {
 				});
 
 				app.tr
-					.setContent(prevVisibleTextBlock.id, content, prevVisibleTextBlock.content)
+					.setContent(prevVisibleTextBlock.id, content)
 					.add(moveActions)
 					.remove(nodeLocation(textBlock.parent!)!, textBlock.parent!.id)
 					.select(after)

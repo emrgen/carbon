@@ -34,16 +34,16 @@ export class ChangeName implements CarbonAction{
 	}
 
 	inverse(): CarbonAction {
-		throw new Error("Not implemented");
-
+		const { nodeId, from, to } = this;
+		return ChangeName.create(nodeId, to, from, ActionOrigin.UserInput);
 	}
 
 	toString() {
-		// const { at, text, origin } = this
+		const { from, to, nodeId } = this;
 		return classString(this)({
-		// 	at: at.toString(),
-		// 	text,
-		// 	origin,
+			nodeId,
+			from,
+			to,
 		})
 	}
 }

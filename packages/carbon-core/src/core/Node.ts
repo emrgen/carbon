@@ -1,4 +1,4 @@
-import { cloneDeep, findIndex, first, last, merge, noop, reverse } from 'lodash';
+import { cloneDeep, findIndex, first, flatten, last, merge, noop, reverse } from 'lodash';
 import { Fragment } from './Fragment';
 
 import { Optional, Predicate, With } from '@emrgen/types';
@@ -381,7 +381,7 @@ export class Node extends EventEmitter {
 	// return a child node at given path
 	atPath(path: number[]): Optional<Node> {
 		let node: Optional<Node> = this;
-		for (let i = 0, len = path.length; i < len && node; i++) {
+		for (let i = 0, len = path.length;i < len && node;i++) {
 			node = node.child(path[i])
 		}
 
@@ -603,20 +603,20 @@ export class Node extends EventEmitter {
 	}
 
 	// @mutates
-	append(node: Node) {
-		this.content = this.content.append(node).withParent(this);
+	append(nodes: Node | Node[]) {
+		this.content = this.content.append(flatten([nodes])).withParent(this);
 		this.markUpdated();
 	}
 
 	// @mutates
-	insertBefore(before: Node, node: Node) {
-		this.content = this.content.insertBefore(before, node).withParent(this)
+	insertBefore(before: Node, nodes: Node | Node[]) {
+		this.content = this.content.insertBefore(before, flatten([nodes])).withParent(this)
 		this.markUpdated();
 	}
 
 	// @mutates
-	insertAfter(after: Node, node: Node) {
-		this.content = this.content.insertAfter(after, node).withParent(this)
+	insertAfter(after: Node, nodes: Node | Node[]) {
+		this.content = this.content.insertAfter(after, flatten([nodes]) as Node[]).withParent(this)
 		this.markUpdated();
 	}
 
@@ -670,7 +670,7 @@ export class Node extends EventEmitter {
 		this.markUpdated();
 	}
 
-	
+
 	// @mutates
 	updateData(data: Record<string, any>) {
 		this.data = this.data.update(data);

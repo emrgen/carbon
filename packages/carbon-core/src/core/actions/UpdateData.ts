@@ -8,11 +8,13 @@ import { generateActionId } from "./utils";
 import { NodeIdSet } from '../BSet';
 import { NodeAttrs } from '../NodeAttrs';
 import { NodeData } from "../NodeData";
+import { Optional } from '@emrgen/types';
 
 
 export class UpdateData implements CarbonAction {
   type: ActionType;
   id: number;
+  prevData: Optional<NodeData>;
 
   static fromJSON(json) { }
 
@@ -35,6 +37,7 @@ export class UpdateData implements CarbonAction {
       return NULL_ACTION_RESULT
     }
 
+    this.prevData = node.data;
     node.updateData(this.data);
     tr.updated(node);
 
@@ -42,7 +45,8 @@ export class UpdateData implements CarbonAction {
   }
 
   inverse(): CarbonAction {
-    throw new Error("Method not implemented.");
+    const { nodeId, prevData } = this;
+    return UpdateData.create(nodeId, prevData!, ActionOrigin.UserInput);
   }
 
   toString() {

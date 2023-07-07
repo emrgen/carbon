@@ -10,10 +10,10 @@ export interface NodeContent {
 	withParent(parent: Node): NodeContent;
 
 	replace(node: Node, by: Node): NodeContent;
-	append(node: Node): NodeContent;
+	append(node: Node[]): NodeContent;
 	insert(node: Node, offset: number): NodeContent;
-	insertBefore(before: Node, node: Node): NodeContent;
-	insertAfter(after: Node, node: Node): NodeContent;
+	insertBefore(before: Node, node: Node[]): NodeContent;
+	insertAfter(after: Node, node: Node[]): NodeContent;
 	remove(node: Node): boolean;
 
 	updateText(text: string): void;
@@ -65,8 +65,8 @@ export class BlockContent implements NodeContent {
 		return this
 	}
 
-	append(node: Node): NodeContent {
-		return BlockContent.create([...this.nodes, node])
+	append(nodes: Node[]): NodeContent {
+		return BlockContent.create([...this.nodes, ...nodes])
 	}
 
 	replace(node: Node, by: Node): NodeContent {
@@ -77,17 +77,17 @@ export class BlockContent implements NodeContent {
 		return BlockContent.create(nodes);
 	}
 
-	insertBefore(before: Node, node: Node): NodeContent {
-		const {nodes} = this
-		const index = this.indexOf(after);
-		const content = flatten([nodes.slice(0, index), node, nodes.slice(index)]);
+	insertBefore(before: Node, nodes: Node[]): NodeContent {
+		const {children} = this
+		const index = this.indexOf(before);
+		const content = flatten([children.slice(0, index), nodes, children.slice(index)]);
 		return BlockContent.create(content)
 	}
 
-	insertAfter(after: Node, node: Node): NodeContent {
-		const { nodes } = this;
+	insertAfter(after: Node, nodes: Node[]): NodeContent {
+		const { children } = this;
 		const index = this.indexOf(after);
-		const content = flatten([nodes.slice(0, index + 1), node, nodes.slice(index+1)]);
+		const content = flatten([children.slice(0, index + 1), nodes, children.slice(index+1)]);
 		return BlockContent.create(content)
 	}
 
@@ -166,7 +166,7 @@ export class InlineContent implements  NodeContent {
 		return this;
 	}
 
-	append(node: Node): NodeContent {
+	append(nodes: Node[]): NodeContent {
 		throw new Error("Not implemented");
 	}
 
@@ -178,11 +178,11 @@ export class InlineContent implements  NodeContent {
 		throw new Error("Not implemented");
 	}
 
-	insertBefore(before: Node, after: Node): NodeContent {
+	insertBefore(before: Node, nodes: Node[]): NodeContent {
 		throw new Error("Not implemented");
 	}
 
-	insertAfter(before: Node, after: Node): NodeContent {
+	insertAfter(after: Node, nodes: Node[]): NodeContent {
 		throw new Error("Not implemented");
 	}
 

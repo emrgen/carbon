@@ -7,11 +7,13 @@ import { CarbonAction, ActionOrigin, ActionType } from "./types";
 import { generateActionId } from "./utils";
 import { NodeIdSet } from '../BSet';
 import { NodeAttrs } from '../NodeAttrs';
+import { Optional } from '@emrgen/types';
 
 
 export class UpdateAttrs implements CarbonAction {
   type: ActionType;
   id: number;
+  prevAttrs: Optional<NodeAttrs>;
 
   static fromJSON(json) { }
 
@@ -34,6 +36,7 @@ export class UpdateAttrs implements CarbonAction {
       return NULL_ACTION_RESULT
     }
 
+    this.prevAttrs = node.attrs;
     node.updateAttrs(this.attrs);
     tr.updated(node);
 
@@ -41,7 +44,8 @@ export class UpdateAttrs implements CarbonAction {
   }
 
   inverse(): CarbonAction {
-    throw new Error("Method not implemented.");
+    const { nodeId, prevAttrs } = this;
+    return UpdateAttrs.create(nodeId, prevAttrs!, ActionOrigin.UserInput);
   }
 
   toString() {

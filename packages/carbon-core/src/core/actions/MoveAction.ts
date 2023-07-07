@@ -5,23 +5,28 @@ import { CarbonAction, ActionOrigin } from "./types";
 import { Point } from '../Point';
 import { generateActionId } from './utils';
 import { classString } from "../Logger";
+import { Node } from "../Node";
 
 export class MoveAction implements CarbonAction {
 	id: number;
 	origin: ActionOrigin;
 
 	static create(from: Point, to: Point, nodeId: NodeId, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new MoveAction(from, to, nodeId, origin)
+		return new MoveAction(from, to, [nodeId], origin)
 	}
 
-	constructor(readonly from: Point, readonly to: Point, readonly nodeId: NodeId, origin: ActionOrigin) {
+	static fromIds(from: Point, to: Point, nodeIds: NodeId[], origin: ActionOrigin = ActionOrigin.UserInput) {
+		return new MoveAction(from, to, nodeIds, origin)
+	}
+
+	constructor(readonly from: Point, readonly to: Point, readonly nodeIds: NodeId[], origin: ActionOrigin) {
 		this.id = generateActionId()
 		this.origin = origin;
 	}
 
 	execute(tr: Transaction): ActionResult<any> {
-		const {app} = tr;
-		const {to, nodeId} = this;
+		const { app } = tr;
+		const { to, nodeIds } = this;
 		const target = app.store.get(to.nodeId);
 		if (!target) {
 			return ActionResult.withError('Failed to get target node');
@@ -31,36 +36,40 @@ export class MoveAction implements CarbonAction {
 		if (!parent) {
 			return ActionResult.withError('Failed to get target parent node');
 		}
-		const moveNode = app.store.get(nodeId);
-		if (!moveNode) {
-			return ActionResult.withError('failed to find node from id: ' + nodeId.toString())
+		const moveNodes = nodeIds.map(id => app.store.get(id)) as Node[];
+		if (!moveNodes?.length) {
+			return ActionResult.withError('failed to find node from id: ' + nodeIds.map(id => id.toString()))
 		}
 
-		tr.updated(moveNode.parent!);
-		tr.normalize(moveNode.parent!);
+		const moveNode = moveNodes[0];
+		const oldParent = moveNode!.parent!;
+		tr.updated(oldParent);
+		tr.normalize(oldParent);
 
-		moveNode.parent?.remove(moveNode);
-		moveNode.forAll(n => app.store.delete(n));
+		moveNodes.forEach(n => {
+			oldParent?.remove(n);
+			app.store.delete(n);
+		})
 
 		// console.log("MOVE: move node", moveNode, "to", to.toString(), target);
 
 		if (to.isBefore) {
-			parent.insertBefore(target, moveNode);
-			app.store.put(moveNode);
+			parent.insertBefore(target, moveNodes);
+			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(parent);
 			return NULL_ACTION_RESULT;
 		}
 
 		if (to.isAfter) {
-			parent.insertAfter(target, moveNode, );
-			app.store.put(moveNode);
+			parent.insertAfter(target, moveNodes);
+			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(parent);
 			return NULL_ACTION_RESULT;
 		}
 
 		if (to.isWithin) {
-			target.append(moveNode);
-			app.store.put(moveNode);
+			target.append(moveNodes);
+			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(target);
 			return NULL_ACTION_RESULT;
 		}
@@ -69,10 +78,16 @@ export class MoveAction implements CarbonAction {
 	}
 
 	inverse(): CarbonAction {
-		return new MoveAction(this.to, this.from, this.nodeId, this.origin);
+		const { from, to, nodeIds } = this;
+		return MoveAction.fromIds(to, from, nodeIds, this.origin);
 	}
 
 	toString() {
-		return classString(this)({from: this.from.toString(), to: this.to.toString(), nodeId: this.nodeId.toString()})
+		const { from, to, nodeIds } = this;
+		return classString(this)({
+			from: from.toString(),
+			to: to.toString(),
+			nodeIds: nodeIds.map(id => id.toString())
+		})
 	}
 }

@@ -98,7 +98,7 @@ export class InsertText implements CarbonAction {
 
 	inverse(): CarbonAction {
 		const { at, text, origin } = this;
-		return RemoveText.create(at, text, origin);
+		return RemoveText.create(at, text.clone(), origin);
 	}
 
 	toString() {

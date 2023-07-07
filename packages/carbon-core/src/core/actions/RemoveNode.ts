@@ -7,7 +7,7 @@ import { generateActionId } from './utils';
 import { classString } from "../Logger";
 import { Optional } from '@emrgen/types';
 import { Node } from "../Node";
-import { InsertNode } from "./InsertNodes";
+import { InsertNode } from "./InsertNode";
 
 // action to remove a node by id
 export class RemoveNode implements CarbonAction {

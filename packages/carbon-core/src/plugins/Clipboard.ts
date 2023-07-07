@@ -20,8 +20,6 @@ export class ClipboardPlugin extends BeforePlugin {
           console.log('Serialized =>', serialized);
           event.clipboardData.setData('text/plain', serialized);
 
-          // console.log(slice.root.children.map(n => n.textContent));
-
           app.state.runtime.clipboard.setSlice(slice);
         }
         // delete the selection

@@ -67,7 +67,7 @@ export class InsertNode implements CarbonAction{
 	inverse(): CarbonAction {
 		const { at, node } = this
 		const action = RemoveNode.create(at, node.id, this.origin)
-		// action.node = node.clone();
+		action.node = node.clone();
 		return action;
 	}
 

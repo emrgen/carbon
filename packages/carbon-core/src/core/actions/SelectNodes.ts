@@ -13,6 +13,7 @@ export class SelectNodes implements CarbonAction {
   id: number;
   origin: ActionOrigin;
   nodeIds: NodeId[];
+  prevNodeIds: NodeId[] = [];
 
   static fromJSON(json) { }
 
@@ -33,6 +34,9 @@ export class SelectNodes implements CarbonAction {
     const { app } = tr;
     const {store, state} = app;
     const { selectedNodeIds } = state;
+
+    this.prevNodeIds = app.blockSelection.nodeIds.toArray()
+
     const beforeSelectedNodes = selectedNodeIds.map(id => store.get(id)) as Node[];
 
     const afterSelectedNodes = this.nodeIds.map(id => store.get(id)) as Node[];
@@ -51,7 +55,7 @@ export class SelectNodes implements CarbonAction {
   }
 
   inverse(): CarbonAction {
-    throw new Error("Method not implemented.");
+    return new SelectNodes(this.prevNodeIds, this.origin);
   }
 
   toString() {
