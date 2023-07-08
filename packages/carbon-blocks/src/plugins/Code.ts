@@ -1,4 +1,4 @@
-import { BeforePlugin, CarbonPlugin, EventContext, EventHandler, EventHandlerMap, NodeSpec } from "@emrgen/carbon-core";
+import { BeforePlugin, CarbonPlugin, EventContext, EventHandler, EventHandlerMap, NodeSpec, Slice, preventAndStop } from "@emrgen/carbon-core";
 
 export class Code extends CarbonPlugin {
   name = 'code';
@@ -20,7 +20,7 @@ export class Code extends CarbonPlugin {
         node: {
           focusPlaceholder: 'Code',
           emptyPlaceholder: '',
-          tag: 'code',
+          // tag: 'code',
         },
         html: {
           suppressContentEditableWarning: true,
@@ -35,6 +35,27 @@ export class Code extends CarbonPlugin {
     ]
   }
 
+  on(): Partial<EventHandler> {
+    return {
+      paste: (ctx: EventContext<ClipboardEvent>) => {
+        const { event, app } = ctx
+        preventAndStop(event);
+        ctx.stopPropagation();
+        const { selection, blockSelection } = app
+
+        if (!app.state.runtime.clipboard.isEmpty) {
+          const { slice } = app.state.runtime.clipboard;
+          const textContent = slice.root.textContent;
+          console.log('textContent', textContent);
+          // Slice.create(slice.root, slice.start, slice.end);
+          app.cmd.transform.paste(selection, blockSelection, slice)?.dispatch()
+        } else {
+
+        }
+      }
+    }
+  }
+
   keydown(): Partial<EventHandler> {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
@@ -43,7 +64,7 @@ export class Code extends CarbonPlugin {
         const { app, node } = ctx;
         const { selection } = app;
 
-        app.cmd.transform.insertText(selection, '\r\n')?.dispatch();
+        app.cmd.transform.insertText(selection, '\n')?.dispatch();
       },
 
       tab: (ctx: EventContext<KeyboardEvent>) => {

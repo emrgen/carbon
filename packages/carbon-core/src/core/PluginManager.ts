@@ -142,6 +142,8 @@ export class PluginManager {
 
 		each(this.before, (p: CarbonPlugin) => {
 			if (keyDownEvent.stopped) return
+			console.log('executing', p.name);
+
 			const handlers = p.keydown()
 			const handler = entries(handlers).find(([key]) => {
 				return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event);

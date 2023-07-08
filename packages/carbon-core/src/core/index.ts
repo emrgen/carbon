@@ -18,5 +18,6 @@ export * from './Rules'
 export * from './actions'
 export * from './NodeContent'
 export * from './CarbonState'
+export * from './Slice'
 export * from './types'
 

@@ -1,4 +1,4 @@
-import { AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Pin, PinnedSelection, Point, PointedSelection, Transaction, nodeLocation } from "@emrgen/carbon-core";
+import { AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Pin, PinnedSelection, Point, PointedSelection, Transaction, nodeLocation, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
 import { isNestableNode } from '../utils';
 import { reverse } from 'lodash';
 import { Optional } from '@emrgen/types';
@@ -74,9 +74,7 @@ keydown(): EventHandlerMap {
 
 			// change to section
 			if (listNode.name !== 'section') {
-				ctx.event.preventDefault()
-				ctx.event.stopPropagation()
-				ctx.stopPropagation();
+				preventAndStopCtx(ctx);
 				const focusNode = listNode.find(n => n.type.isTextBlock)
 					?? listNode.find(n => n.isBlock) ?? listNode;
 				tr
@@ -86,17 +84,12 @@ keydown(): EventHandlerMap {
 				return
 			}
 
-			console.log('CCCCCCCCC');
-
 			if (!parentList || parentList.depth > listNode.depth - 1) return
 
 			// pull up
 			const nextSibling = listNode.nextSibling;
 			if (!nextSibling) {
-				console.log('xxxxxxxxx')
-				ctx.event.preventDefault()
-				ctx.event.stopPropagation();
-				ctx.stopPropagation();
+				preventAndStopCtx(ctx);
 				cmd.transform.unwrap(listNode)?.dispatch()
 				return
 			}
@@ -157,21 +150,10 @@ keydown(): EventHandlerMap {
 			if (!listNode) return
 			if (!listNode.isEmpty) return
 			const atStart = selection.head.isAtStartOfNode(listNode);
-
 			if (!atStart) return
-			const nextSibling = listNode.nextSibling;
-			// 	const parentList = listNode.parents.find(isListNode);
-			// FIXME: second check is not tested
-			// the case might occur when the listNode is within another list but at a distance more than 2
-			// if (!parentList || parentList.depth > listNode.depth - 1) {
-			// 	console.log('parentList is not found');
-			// 	return
-			// }
-			console.log('XXXXXXX');
+
 			if (listNode.name !== 'section') {
-				ctx.event.preventDefault();
-				ctx.event.stopPropagation();
-				ctx.stopPropagation();
+				preventAndStopCtx(ctx);
 				tr
 					.change(listNode.id, listNode.name, 'section')
 					.select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
@@ -179,21 +161,16 @@ keydown(): EventHandlerMap {
 				return
 			}
 
-			console.log('xxx', nextSibling);
-
-			if (!nextSibling) {
-				ctx.event.preventDefault();
-				ctx.event.stopPropagation();
-				ctx.stopPropagation();
-				console.log('xxxxxx');
-
+			const nextSibling = listNode.nextSibling;
+			if (!nextSibling && !listNode.parent?.isCollapsible) {
+				preventAndStopCtx(ctx);
 				cmd.transform.unwrap(listNode)?.dispatch();
 				return
 			}
 		},
 		// push the
 		tab: (ctx: EventContext<KeyboardEvent>) => {
-			ctx.event.preventDefault();
+			preventAndStopCtx(ctx);
 			const { app, node } = ctx;
 			console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
 

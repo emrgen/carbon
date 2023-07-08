@@ -1,10 +1,11 @@
-import { Carbon, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, Transaction, splitTextBlock } from "@emrgen/carbon-core";
+import { BeforePlugin, Carbon, CarbonPlugin, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, Transaction, preventAndStopCtx, splitTextBlock } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 declare module '@emrgen/carbon-core' {
   interface CarbonCommands {
     collapsible: {
       split(selection: PinnedSelection): Optional<Transaction>;
+      enter(selection: PinnedSelection): Optional<Transaction>;
     }
   }
 }
@@ -47,7 +48,14 @@ export class CollapsibleList extends NodePlugin {
   commands(): Record<string, Function> {
     return {
       split: this.split,
+      enter: this.enter,
     }
+  }
+
+  plugins(): CarbonPlugin[] {
+    return [
+
+    ]
   }
 
   keydown(): Partial<EventHandler> {
@@ -91,7 +99,7 @@ export class CollapsibleList extends NodePlugin {
     const title = start.node;
     const splitBlock = title.parent!;
 
-    if (start.isAtStartOfNode(title)) {
+    if (selection.isCollapsed && start.isAtStartOfNode(title)) {
       const section = app.schema.type(splitBlock.type.splitName).default();
       const at = Point.toAfter(title.parent!.prevSibling!.id);
       const focusPoint = Pin.toStartOf(title!);
@@ -131,6 +139,11 @@ export class CollapsibleList extends NodePlugin {
       .select(after)
   }
 
+  enter(app: Carbon, selection: PinnedSelection): Optional<Transaction> {
+    console.log('[Enter] collapsible');
+    return
+  }
+
   serialize(app: Carbon, node: Node): SerializedNode {
     return {
       name: node.name,
@@ -139,4 +152,41 @@ export class CollapsibleList extends NodePlugin {
     }
   }
 
+}
+
+class CollapsibleBeforePlugin extends BeforePlugin {
+
+  name = 'collapsibleBefore';
+
+  keydown(): Partial<EventHandler> {
+    return {
+      enter: (ctx: EventContext<KeyboardEvent>) => {
+        const { app, selection, node } = ctx;
+        const {start, end} = selection;
+        if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
+          preventAndStopCtx(ctx);
+          // app.cmd.collapsible.split(selection)?.dispatch();
+        }
+      },
+      backspace: (ctx: EventContext<KeyboardEvent>) => {
+        const { app, selection, node } = ctx;
+        const { start, end } = selection;
+        console.log('[Backspace] collapsible', node.name);
+
+        if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
+          preventAndStopCtx(ctx);
+          console.log('[Backspace] collapsible');
+          // app.cmd.collapsible.split(selection)?.dispatch();
+        }
+      },
+      delete: (ctx: EventContext<KeyboardEvent>) => {
+        const { app, selection, node } = ctx;
+        const { start, end } = selection;
+        if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
+          preventAndStopCtx(ctx);
+          // app.cmd.collapsible.split(selection)?.dispatch();
+        }
+      }
+    }
+  }
 }

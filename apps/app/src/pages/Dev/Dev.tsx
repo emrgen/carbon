@@ -18,9 +18,7 @@ import { useEffect } from "react";
 const data = node("document", [
   title([text("Carbon "), text("document")]),
   node("divider"),
-  node("code", [title([text(`function print() {
-
-}`)])]),
+  node("code", [title([text(`function print() { console.log("hello world") }`)])]),
   node("callout", [title([text("I am a callout!")])]),
   node("quote", [title([text("I am a quote!")])]),
   node(

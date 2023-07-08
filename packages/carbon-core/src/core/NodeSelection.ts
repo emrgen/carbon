@@ -8,6 +8,10 @@ export class BlockSelection {
   store: NodeStore
   nodeIds: NodeIdSet;
 
+  static empty(store: NodeStore) {
+    return new BlockSelection(store, NodeIdSet.empty);
+  }
+
   get blocks(): Node[] {
     const blocks: any[] = this.nodeIds.map(id => {
       const node = this.store.get(id);

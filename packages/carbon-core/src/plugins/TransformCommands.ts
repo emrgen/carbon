@@ -60,7 +60,7 @@ declare module '@emrgen/carbon-core' {
       change(node: Node, name: NodeName): Optional<Transaction>;
       update(node: Node, attrs: Record<string, any>): Optional<Transaction>;
       merge(prev: Node, next: Node): Optional<Transaction>;
-      paste(selection: PinnedSelection, slice: Slice): Optional<Transaction>;
+      paste(selection: PinnedSelection, blockSelection: BlockSelection, slice: Slice): Optional<Transaction>;
     };
   }
 }
@@ -147,8 +147,6 @@ export class TransformCommands extends BeforePlugin {
 
   private insertText(app: Carbon, selection: PinnedSelection, text: string, opts = "after"): Optional<Transaction> {
     const {cmd } = app;
-    console.log('xxxxxxxx');
-    
     const updateTitleText = (app: Carbon) => {
       const { tr } = app;
       const { schema, selection } = app;
@@ -184,20 +182,19 @@ export class TransformCommands extends BeforePlugin {
     }
   }
 
-  private paste(app: Carbon, selection: PinnedSelection, slice: Slice): Optional<Transaction> {
+  private paste(app: Carbon, selection: PinnedSelection, blockSelection: BlockSelection, slice: Slice): Optional<Transaction> {
     if (slice.isEmpty) {
       return;
     }
 
     const sliceClone = slice.clone(app);
-    const { blockSelection: nodeSelection } = app
     const { root, nodes } = sliceClone;
 
     console.log('xxx', nodes.map(n => n.id.toString()), root.id.toString());
 
     // if the selection is not empty, we need to paste the nodes after the last node
-    if (!nodeSelection.isEmpty) {
-      const lastNode = last(nodeSelection.blocks) as Node
+    if (!blockSelection.isEmpty) {
+      const lastNode = last(blockSelection.blocks) as Node
       let focusNode: Optional<Node> = null;
       reverse(nodes.slice()).some(n => {
         return n.find(n => {
@@ -296,7 +293,7 @@ export class TransformCommands extends BeforePlugin {
     // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
     app.cmd.transform.delete(selection)?.next((carbon) => {
       // console.log('DELETED', carbon.selection.toString());
-      return this.paste(carbon, after, slice);
+      return this.paste(carbon, after, BlockSelection.empty(app.store), slice);
     })?.dispatch();
   }
 
@@ -403,6 +400,22 @@ export class TransformCommands extends BeforePlugin {
 
     if (start.isAtStartOfNode(commonNode!) && end.isAtEndOfNode(commonNode)) {
       const { tr } = app;
+      if (commonNode.isCollapsible) {
+        const textBlock = commonNode.child(0)!
+        const at = Point.toAfter(textBlock.id);
+        const block = app.schema.type(textBlock.type.splitName)?.default()
+        if (!block) {
+          throw Error('failed to create block');
+        }
+
+        tr.setContent(textBlock.id, BlockContent.create([]));
+        tr.add(removeNodesActions(commonNode.children.slice(1)));
+        tr.insert(at, block);
+        tr.select(PinnedSelection.fromPin(Pin.toStartOf(block)!));
+
+        return tr
+      }
+
       const block = splitBlock.type.default();
       if (!block) {
         throw Error('failed to create block');
@@ -783,6 +796,7 @@ export class TransformCommands extends BeforePlugin {
   private moveNodeCommands(to: Point, nodes: Node | Node[]): MoveAction[] {
     const commands: MoveAction[] = [];
     const moveNodes = flatten([nodes]);
+    if (!moveNodes.length) return commands;
     const from = nodeLocation(first(moveNodes)!)!;
     // console.log('moveNode', moveNode.id.key, to.toString());
     commands.push(MoveAction.fromIds(from!, to, moveNodes.map(n => n.id)));
@@ -797,14 +811,15 @@ export class TransformCommands extends BeforePlugin {
   }
 
   private removeNodeCommands(nodes: Node | Node[]): RemoveNode[] {
-    const removeNodeCommands: RemoveNode[] = [];
-    flatten([nodes]).forEach(node => {
-      removeNodeCommands.push(RemoveNode.create(nodeLocation(node)!, node.id));
+    const commands: RemoveNode[] = [];
+    const removeNodes = flatten([nodes])
+    if (!removeNodes.length) return commands;
+
+    removeNodes.forEach(node => {
+      commands.push(RemoveNode.create(nodeLocation(node)!, node.id));
     });
 
-    console.log(removeNodeCommands);
-
-    return removeNodeCommands;
+    return commands;
   }
 
   // remove node from doc
@@ -906,13 +921,29 @@ export class TransformCommands extends BeforePlugin {
     // commonNode is selected
     // replace commonNode with default block
     if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+      const { tr } = app;
+
+      if (commonNode.isCollapsible) {
+        const textBlock = commonNode.child(0)!
+        const at = Point.toAfter(textBlock.id);
+        const block = app.schema.type(textBlock.type.splitName)?.default()
+        if (!block) {
+          throw Error('failed to create block');
+        }
+
+        tr.setContent(textBlock.id, BlockContent.create([]));
+        tr.add(removeNodesActions(commonNode.children.slice(1)));
+        tr.select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
+
+        return tr
+      }
+
       const block = commonNode.type.default();
       if (!block) {
         console.log(p14("%c[failed]"), "color:red", "block not found");
         return;
       }
 
-      const { tr } = app;
 
       const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
       tr

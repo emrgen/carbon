@@ -9,6 +9,7 @@ import {
 	PinnedSelection,
 	Point,
 	SerializedNode,
+	preventAndStopCtx,
 	splitTextBlock
 } from '@emrgen/carbon-core';
 
@@ -55,10 +56,17 @@ export class DocPlugin extends CarbonPlugin {
 				const { app, selection, node } = ctx;
 				console.log('[Enter] doc');
 				if (selection.inSameNode && selection.start.node.parent?.eq(node)) {
-					ctx.event.preventDefault();
-					ctx.stopPropagation();
+					preventAndStopCtx(ctx);
 					app.cmd.collapsible.split(selection)?.dispatch();
+					return
 				}
+
+				const {start, end} = selection;
+				// if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
+				// 	preventAndStopCtx(ctx);
+				// 	app.cmd.collapsible.enter(selection)?.dispatch();
+				// 	return
+				// }
 			}
 		}
 	}

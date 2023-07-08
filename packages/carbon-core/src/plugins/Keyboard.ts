@@ -22,7 +22,7 @@ declare module '@emrgen/carbon-core' {
 	}
 }
 
-export class KeyboardPlugin extends BeforePlugin {
+export class KeyboardCommandPlugin extends BeforePlugin {
 	name = 'keyboard';
 
 	commands(): Record<string, Function> {
@@ -168,7 +168,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			new IsolatingPlugin(),
 			new TransformCommands(),
 			// new KeyboardPrevent(),
-			new KeyboardPlugin(),
+			new KeyboardCommandPlugin(),
 		]
 	}
 

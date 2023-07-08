@@ -1,4 +1,4 @@
-import { BeforePlugin, BlockContent, Carbon, EventContext, EventHandlerMap, Node, Pin } from "../core";
+import { AfterPlugin, BeforePlugin, BlockContent, Carbon, EventContext, EventHandlerMap, Node, Pin } from "../core";
 import { SelectionPatch } from "../core/DeleteGroup";
 import { NodeId } from "../core/NodeId";
 import { Range } from "../core/Range";
@@ -6,7 +6,7 @@ import { Slice } from "../core/Slice";
 import { preventAndStop } from "../utils/event";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 
-export class ClipboardPlugin extends BeforePlugin {
+export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
 
   on(): EventHandlerMap {
@@ -46,11 +46,11 @@ export class ClipboardPlugin extends BeforePlugin {
       paste: (ctx: EventContext<any>) => {
         const { event, app } = ctx
         preventAndStop(event);
-        const { blockSelection: nodeSelection, selection } = app
+        const { selection, blockSelection } = app
 
         if (!app.state.runtime.clipboard.isEmpty) {
           const { slice } = app.state.runtime.clipboard;
-          app.cmd.transform.paste(selection, slice)?.dispatch()
+          app.cmd.transform.paste(selection, blockSelection, slice)?.dispatch()
         } else {
 
         }
