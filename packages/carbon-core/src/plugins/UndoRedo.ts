@@ -1,4 +1,4 @@
-import { EventContext, EventHandler, Transaction } from '../core';
+import { EventContext, EventHandler, Transaction, TransactionType } from '../core';
 import { AfterPlugin } from '../core/CarbonPlugin';
 import { last } from 'lodash';
 
@@ -75,8 +75,8 @@ export class UndoPlugin extends AfterPlugin {
   }
 
   transaction(tr: Transaction): void {
-    window.tr = tr;
-    if (tr.record && !tr.selectionOnly) {
+    // window.tr = tr;
+    if (tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
       this.undoStack.push(tr);
       this.redoStack = [];
     } else {

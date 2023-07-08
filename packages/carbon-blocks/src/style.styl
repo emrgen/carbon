@@ -61,10 +61,10 @@ $selectionHaloColor = #accef78d
 	> [data-type=children]
 		padding-left 30px
 	position relative
-	line-height: 30px
+	line-height: 26px
 	[data-type="content"]
 		// padding-left: 2px
-		// padding: 0 2px
+		padding: 2px 0px
 		display: flex
 		[data-name=title]
 			flex 1
@@ -287,3 +287,21 @@ span {
 	margin: 10px 0
 	background: #eee
 	border-radius: 4px
+
+[data-name=docLink]
+	position relative
+	cursor pointer
+	padding: 0 4px
+	margin-top 2px
+	&:hover
+		background: #eee
+		border-radius: 4px
+	[data-type="content"]
+		padding: 2px 0px
+		line-height: 26px
+		display: flex
+		gap 6px
+		[data-name=title]
+			font-weight: 500
+			span
+				border-bottom: 2px solid #ddd

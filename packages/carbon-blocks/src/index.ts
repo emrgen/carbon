@@ -33,6 +33,8 @@ import { CalloutComp } from './renderers/Callout';
 import { Callout } from './plugins/Callout';
 import { CodeComp } from './renderers/Code';
 import { Code } from './plugins/Code';
+import { DocLink } from './plugins/DocLink';
+import { DocLinkComp } from './renderers/DocLink';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -54,6 +56,7 @@ export const blockPresets: Extension = {
 		new Quote(),
 		new Callout(),
 		new Code(),
+		new DocLink(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -76,5 +79,6 @@ export const blockPresets: Extension = {
 		Renderer.create('quote', QuoteComp),
 		Renderer.create('callout', CalloutComp),
 		Renderer.create('code', CodeComp),
+		Renderer.create('docLink', DocLinkComp),
 	]
 }

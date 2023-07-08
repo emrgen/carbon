@@ -8,10 +8,15 @@ export interface CarbonAction {
 	inverse(): CarbonAction
 }
 
+export enum TransactionType {
+	OneWay = 'OneWay',
+	TwoWay = 'TwoWay',
+}
+
 export enum ActionOrigin {
 	Unknown = 'Unknown',
 	Normalizer = 'Normalizer', // command originated during normalization phase, these commands will not have any undo companion
-	UserInput = 'UserInput', // selection at the end of a user input
+	UserInput = 'UserInput', // selection at the end of a user input, the selection will be synced after dom update
 	UserSelectionChange = 'UserSelectionChange', // explicit user selection using arrow keys
 	DomSelectionChange = 'DomSelectionChange', // implicit user selection by up/down/mouse
 	System = 'System', // system generated commands (ex. undo)

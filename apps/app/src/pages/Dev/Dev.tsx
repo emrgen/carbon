@@ -30,6 +30,7 @@ const data = node("document", [
     {},
     { node: { collapsed: true } }
   ),
+  node("docLink", [title([text("Link to doc")])]),
   node("section", [
     title([text("section 0")]),
     node("section", [

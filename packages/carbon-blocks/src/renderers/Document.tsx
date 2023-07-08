@@ -29,37 +29,37 @@ export const DocumentComp = (props: RendererProps) => {
   const onClick = (e) => {
     const { bottom } = ref.current!.getBoundingClientRect() ?? {};
     const { pageY } = e;
-    if (pageY > bottom - 200) {
-      e.stopPropagation();
-      e.preventDefault();
-      const { lastChild } = node;
+    // if (pageY > bottom - 200) {
+    //   e.stopPropagation();
+    //   e.preventDefault();
+    //   const { lastChild } = node;
 
-      if (lastChild?.isContainerBlock && lastChild?.isEmpty) {
-        const after = PinnedSelection.fromPin(Pin.toStartOf(lastChild)!);
-        if (app.selection.eq(after)) return;
+    //   if (lastChild?.isContainerBlock && lastChild?.isEmpty) {
+    //     const after = PinnedSelection.fromPin(Pin.toStartOf(lastChild)!);
+    //     if (app.selection.eq(after)) return;
 
-        app.tr.select(after).dispatch();
-        return;
-      }
+    //     app.tr.select(after).dispatch();
+    //     return;
+    //   }
 
-      const block = app.schema.type("section")?.default();
-      if (!block) return;
-      const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
-      const at = Point.toAfter(lastChild!.id);
-      app.tr
-        .insert(at, block)
-        .select(after, ActionOrigin.UserInput)
-        .dispatch();
-    }
+    //   const block = app.schema.type("section")?.default();
+    //   if (!block) return;
+    //   const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
+    //   const at = Point.toAfter(lastChild!.id);
+    //   app.tr
+    //     .insert(at, block)
+    //     .select(after, ActionOrigin.UserInput)
+    //     .dispatch();
+    // }
   };
 
   const onMouseDown = (e) => {
     const { bottom } = ref.current!.getBoundingClientRect() ?? {};
     const { pageY } = e;
-    if (pageY > bottom - 200) {
-      e.stopPropagation();
-      e.preventDefault();
-    }
+    // if (pageY > bottom - 200) {
+    //   e.stopPropagation();
+    //   e.preventDefault();
+    // }
   }
 
   // console.log(connectors)

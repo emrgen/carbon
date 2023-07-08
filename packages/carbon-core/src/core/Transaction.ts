@@ -15,7 +15,7 @@ import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
 import { TransactionManager } from './TransactionManager';
-import { RemoveText } from './actions';
+import { RemoveText, TransactionType } from './actions';
 import { ActivateNodes } from './actions/ActivateNodes';
 import { ChangeName } from './actions/ChangeName';
 import { CommandError } from './actions/Error';
@@ -52,11 +52,11 @@ const getId = () => _id++
 
 export class Transaction {
 	id: number;
+	type: TransactionType = TransactionType.TwoWay;
 
 	isNormalizer: boolean = false;
 	timestamp: number = Date.now();
 	onTick: boolean = false;
-	record: boolean = true;
 
 	private actions: CarbonAction[] = [];
 	private error: Optional<TransactionError>;
@@ -404,7 +404,7 @@ export class Transaction {
 	// create an inverse transaction
 	inverse() {
 		const {tr} = this.app;
-		tr.record = false;
+		tr.type = TransactionType.OneWay;
 		const actions = this.actions.map(c => c.inverse());
 		// actions.reverse();
 		tr.add(actions.slice(0, -1).reverse());
