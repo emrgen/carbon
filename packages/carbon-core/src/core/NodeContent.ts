@@ -10,7 +10,8 @@ export interface NodeContent {
 	withParent(parent: Node): NodeContent;
 
 	replace(node: Node, by: Node): NodeContent;
-	append(node: Node[]): NodeContent;
+	prepend(nodes: Node[]): NodeContent;
+	append(nodes: Node[]): NodeContent;
 	insert(node: Node, offset: number): NodeContent;
 	insertBefore(before: Node, node: Node[]): NodeContent;
 	insertAfter(after: Node, node: Node[]): NodeContent;
@@ -67,6 +68,10 @@ export class BlockContent implements NodeContent {
 
 	insert(node: Node, offset: number): NodeContent {
 		return this
+	}
+
+	prepend(nodes: Node[]): NodeContent {
+		return BlockContent.create([...nodes,...this.nodes, ])
 	}
 
 	append(nodes: Node[]): NodeContent {
@@ -168,6 +173,10 @@ export class InlineContent implements  NodeContent {
 
 	withParent(parent: Node): NodeContent {
 		return this;
+	}
+
+	prepend(nodes: Node[]): NodeContent {
+		throw new Error("Not implemented");
 	}
 
 	append(nodes: Node[]): NodeContent {

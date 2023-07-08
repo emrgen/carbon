@@ -603,6 +603,12 @@ export class Node extends EventEmitter {
 	}
 
 	// @mutates
+	prepend(nodes: Node | Node[]) {
+		this.content = this.content.prepend(flatten([nodes])).withParent(this);
+		this.markUpdated();
+	}
+
+	// @mutates
 	append(nodes: Node | Node[]) {
 		this.content = this.content.append(flatten([nodes])).withParent(this);
 		this.markUpdated();

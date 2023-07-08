@@ -18,7 +18,13 @@ import { useEffect } from "react";
 const data = node("document", [
   title([text("Carbon "), text("document")]),
   node("divider"),
-  node("code", [title([text(`function print() { console.log("hello world") }`)])]),
+  node("hstack", [
+    node("stack", [section([title([text("section 1")])])]),
+    node("stack", [section([title([text("section 2")])])]),
+  ]),
+  node("code", [
+    title([text(`function print() { console.log("hello world") }`)]),
+  ]),
   node("callout", [title([text("I am a callout!")])]),
   node("quote", [title([text("I am a quote!")])]),
   node(
@@ -30,7 +36,7 @@ const data = node("document", [
     {},
     { node: { collapsed: true } }
   ),
-  node("docLink", [title([text("Link to doc")])]),
+  // node("docLink", [title([text("Link to doc")])]),
   node("section", [
     title([text("section 0")]),
     node("section", [
@@ -91,10 +97,7 @@ const data = node("document", [
   //   node("stack", [section([title([text("section 2")])])]),
   //   node("stack", [section([title([text("section 3")])])]),
   // ]),
-  // node("hstack", [
-  //   node("stack", [section([title([text("section 1")])])]),
-  //   node("stack", [section([title([text("section 2")])])]),
-  // ]),
+
   // node("hstack", [
   //   node("stack", [section([title([text("section 1")])])]),
   //   node("stack", [section([title([text("section 2")])])]),

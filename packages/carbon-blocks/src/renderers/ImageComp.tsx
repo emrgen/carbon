@@ -36,7 +36,6 @@ export default function ImageComp(props: RendererProps) {
     <CarbonBlock {...props} custom={{ ...attributes }}>
       <div className="image-container" onClick={handleClick} ref={ref}>
         <img src={node.attrs.node.src} alt="" />
-        <div>&shy;</div>
         {SelectionHalo}
       </div>
     </CarbonBlock>

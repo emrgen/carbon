@@ -679,7 +679,8 @@ export class TransformCommands extends BeforePlugin {
   private splitAtPin(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
     const { tr, selection } = app;
     const { splitType = app.schema.type('section') } = opts;
-
+    console.log(splitBlock.name, splitBlock.id.toString());
+    
     const isAtBlockStart = pin.isAtStartOfNode(splitBlock);
     if (isAtBlockStart) {
       const emptyBlock = splitType.default();
@@ -688,7 +689,10 @@ export class TransformCommands extends BeforePlugin {
         return;
       }
 
-      const insertPoint = Point.toAfter(splitBlock.prevSibling!.id);
+      const insertPoint = splitBlock.prevSibling
+        ? Point.toAfter(splitBlock.prevSibling!.id)
+        : Point.toWithin(splitBlock.parent!.id)
+
       const after = selection.clone();
       tr
         .insert(insertPoint, emptyBlock!)

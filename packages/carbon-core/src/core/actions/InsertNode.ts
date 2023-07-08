@@ -57,7 +57,7 @@ export class InsertNode implements CarbonAction{
 
 		if (at.isWithin) {
 			console.log(target, node);
-			target.append(node);
+			target.prepend(node);
 			return done()
 		}
 

@@ -27,6 +27,7 @@ export class Stack extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       content: "content+",
+      collapsible: true,
     }
   }
 
