@@ -35,6 +35,8 @@ import { CodeComp } from './renderers/Code';
 import { Code } from './plugins/Code';
 import { DocLink } from './plugins/DocLink';
 import { DocLinkComp } from './renderers/DocLink';
+import { Table } from './plugins/Table';
+import { ColumnComp, RowComp, TableComp } from './renderers/Table';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -57,6 +59,7 @@ export const blockPresets: Extension = {
 		new Callout(),
 		new Code(),
 		new DocLink(),
+		new Table(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -80,5 +83,8 @@ export const blockPresets: Extension = {
 		Renderer.create('callout', CalloutComp),
 		Renderer.create('code', CodeComp),
 		Renderer.create('docLink', DocLinkComp),
+		Renderer.create('table', TableComp),
+		Renderer.create('row', RowComp),
+		Renderer.create('column', ColumnComp),
 	]
 }

@@ -22,10 +22,20 @@ const data = node("document", [
     node("stack", [section([title([text("section 1")])])]),
     node("stack", [section([title([text("section 2")])])]),
   ]),
-  node("code", [
-    title([text(`function print() { console.log("hello world") }`)]),
-  ]),
+  // node("code", [
+  //   title([text(`function print() { console.log("hello world") }`)]),
+  // ]),
   node("callout", [title([text("I am a callout!")])]),
+  node("table", [
+    node("row", [
+      node("column", [title([text("column 1.1")])]),
+      node("column", [title([text("column 1.2")])]),
+    ]),
+    node("row", [
+      node("column", [title([text("column 2.1")])]),
+      node("column", [title([text("column 2.2")])]),
+    ]),
+  ]),
   node("quote", [title([text("I am a quote!")])]),
   node(
     "collapsible",
