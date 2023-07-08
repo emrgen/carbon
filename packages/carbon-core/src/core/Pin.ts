@@ -159,7 +159,7 @@ export class Pin {
 		this.ref = ref;
 	}
 
-	// lift pin to the parent
+	// lift pin to the parent (possibly to the text block)
 	up(): Optional<Pin> {
 		const { node, offset } = this;
 		if (node.isBlock) return this;

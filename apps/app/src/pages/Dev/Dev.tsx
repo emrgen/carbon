@@ -16,11 +16,13 @@ import {
 import { useEffect } from "react";
 
 const data = node("document", [
-  title([text("Carbon "), text("document"), text(" title")]),
+  title([text("Carbon "), text("document")]),
   node("divider"),
-  node("quote", [
-    title([text("I am a quote!")]),
-  ]),
+  node("code", [title([text(`function print() {
+
+}`)])]),
+  node("callout", [title([text("I am a callout!")])]),
+  node("quote", [title([text("I am a quote!")])]),
   node(
     "collapsible",
     [

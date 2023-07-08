@@ -49,6 +49,7 @@ declare module '@emrgen/carbon-core' {
   export interface CarbonCommands {
     transform: {
       insert(node: Node, ref: Node, opts?: InsertPos): Optional<Transaction>;
+      insertText(selection: PinnedSelection, text: string, opts?: InsertPos): Optional<Transaction>;
       remove(node: Node): Optional<Transaction>;
       move(nodes: Node | Node[], to: Point): Optional<Transaction>;
       delete(selection?: PinnedSelection): Optional<Transaction>;
@@ -75,6 +76,7 @@ export class TransformCommands extends BeforePlugin {
   commands() {
     return {
       insert: this.insert,
+      insertText: this.insertText,
       paste: this.paste,
       remove: this.remove,
       move: this.move,
@@ -143,7 +145,46 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  paste(app: Carbon, selection: PinnedSelection, slice: Slice): Optional<Transaction> {
+  private insertText(app: Carbon, selection: PinnedSelection, text: string, opts = "after"): Optional<Transaction> {
+    const {cmd } = app;
+    console.log('xxxxxxxx');
+    
+    const updateTitleText = (app: Carbon) => {
+      const { tr } = app;
+      const { schema, selection } = app;
+      const { head, start } = selection;
+      const title = head.node;
+      const pin = Pin.future(start.node, start.offset + text.length);
+      const after = PinnedSelection.fromPin(pin);
+      const textContent = title.textContent.slice(0, start.offset) + text + title.textContent.slice(start.offset);
+      const textNode = schema.text(textContent)!;
+      if (!textNode) {
+        console.error('failed to create text node');
+        return tr
+      }
+
+      tr.setContent(title.id, BlockContent.create([textNode]));
+      tr.select(after);
+      return tr;
+    }
+
+    if (!selection.isCollapsed) {
+      return cmd.transform.delete()?.next(carbon => {
+        return updateTitleText(carbon);
+      })
+    }
+
+    if (selection.isCollapsed) {
+      // TODO: handle native input to avoid text flickering on input
+      // const native = false//!ctx.node.isEmpty;
+      // if (!native) {
+      // 	ctx.event.preventDefault();
+      // }
+      return updateTitleText(app);
+    }
+  }
+
+  private paste(app: Carbon, selection: PinnedSelection, slice: Slice): Optional<Transaction> {
     if (slice.isEmpty) {
       return;
     }
@@ -259,7 +300,7 @@ export class TransformCommands extends BeforePlugin {
     })?.dispatch();
   }
 
-  move(app: Carbon, nodes: Node | Node[], to: Point): Optional<Transaction> {
+  private move(app: Carbon, nodes: Node | Node[], to: Point): Optional<Transaction> {
     const moveNodes = Array.isArray(nodes) ? nodes.slice().reverse() : [nodes];
     const { tr } = app;
     moveNodes.forEach(n => {

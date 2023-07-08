@@ -29,6 +29,10 @@ import TodoComp from './renderers/CheckedList';
 import { NestablePlugin } from './plugins';
 import { Quote } from './plugins/Quote';
 import { QuoteComp } from './renderers/Quote';
+import { CalloutComp } from './renderers/Callout';
+import { Callout } from './plugins/Callout';
+import { CodeComp } from './renderers/Code';
+import { Code } from './plugins/Code';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -48,6 +52,8 @@ export const blockPresets: Extension = {
 		new Image(),
 		new Todo(),
 		new Quote(),
+		new Callout(),
+		new Code(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -68,5 +74,7 @@ export const blockPresets: Extension = {
 		Renderer.create('image', ImageComp),
 		Renderer.create('todo', TodoComp),
 		Renderer.create('quote', QuoteComp),
+		Renderer.create('callout', CalloutComp),
+		Renderer.create('code', CodeComp),
 	]
 }

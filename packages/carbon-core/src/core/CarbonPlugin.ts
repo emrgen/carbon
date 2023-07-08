@@ -5,7 +5,7 @@ import { Decoration } from './Decoration';
 import { Node } from './Node';
 import { NodeSpec } from './Schema';
 import { Transaction } from './Transaction';
-import { EventHandlerMap, InputRules, PluginName, Serialized } from './types';
+import { EventHandlerMap, InputRules, PluginName, SerializedNode } from './types';
 import { CarbonAction } from "./actions/types";
 
 export enum PluginType {
@@ -70,8 +70,8 @@ export abstract class CarbonPlugin {
 
 
 	// serialize the node into a copy string
-	serialize(app: Carbon, node: Node): Serialized {
-		return []
+	serialize(app: Carbon, node: Node): SerializedNode {
+		return {} as SerializedNode;
 	}
 
 	// deserialize the copy string into a Node

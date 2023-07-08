@@ -82,6 +82,11 @@ export class PinnedSelection {
 			}
 		}
 
+		if (!focusNode) {
+			console.error(p14('%c[error]'), 'color:red', 'focusNode not found');
+			return null;
+		}
+
 		// console.info(p14('%c[info]'), 'color:pink', p30('fromDom:beforeOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
 		// if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
 		// if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }

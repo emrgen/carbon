@@ -109,7 +109,7 @@ export const CarbonText = (InnerCarbonText);
 const InnerCarbonBlock = (props: RendererProps, ref) => {
   const { node, children, custom } = props;
   return (
-    <CarbonElement node={node} tag="div" ref={ref} custom={custom}>
+    <CarbonElement node={node} tag={node.attrs.node.tag ?? "div"} ref={ref} custom={custom}>
       {children}
     </CarbonElement>
   );

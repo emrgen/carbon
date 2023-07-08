@@ -22,8 +22,11 @@ $selectionHaloColor = #accef78d
 		max-width: 700px
 		margin: 0 auto;
 
+[data-name=document] > [data-type="content"]
+	padding: 20px 0 10px 0
 [data-name=document] > [data-type="content"] > [data-name="title"]
-	font-size: 36px
+	font-size: 40px
+	font-weight: bold
 
 [data-name=h1] > [data-type="content"]
 	font-size: 30px
@@ -268,3 +271,18 @@ span {
 	padding: 6px 16px
 	margin: 10px 0
 	border-left: 3px solid #555
+
+[data-name=callout]
+	position relative
+	padding: 20px 20px
+	margin: 10px 0
+	background: #FBF3DB
+	border-radius: 4px
+
+[data-name=code]
+	display: block
+	position relative
+	padding: 20px 20px
+	margin: 10px 0
+	background: #eee
+	border-radius: 4px

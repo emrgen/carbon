@@ -9,7 +9,8 @@ import {
   Pin,
   PinnedSelection,
   Point,
-  nodeLocation
+  nodeLocation,
+  moveNodesAction
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
@@ -27,7 +28,9 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(-\s)(.)*/, this.tryChangeType('bulletedList', ['nestable'])),
     new InputRule(/^([0-9]+\.\s)(.)*/, this.tryChangeType('numberedList', ['nestable'])),
     new InputRule(/^(\|\s)(.)*/, this.tryChangeType('quote', ['nestable'])),
+    new InputRule(/^(>>\s)(.)*/, this.tryChangeType('callout', ['nestable'])),
     new InputRule(/^(>\s)(.)*/, this.tryChangeType('collapsible', ['nestable'])),
+    new InputRule(/^(```)(.)*/, this.tryChangeIntoCode('code', ['nestable'])),
     new InputRule(/^(---)(.)*/, this.tryChangeIntoDivider('divider', ['nestable'])),
   ])
 
@@ -82,6 +85,38 @@ export class ChangeName extends BeforePlugin {
       }
       tr.select(after)
         .dispatch()
+    }
+  }
+
+  tryChangeIntoCode(type: string, groups: string[], data: Partial<NodeData> = {}) {
+    return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
+      const { node, app } = ctx;
+      const { tr, selection } = app;
+      const block = node.closest(n => n.isContainerBlock)!;
+      if (!isConvertible(block)) return
+
+      console.log('tryChangeIntoCode', ctx.node.textContent, type);
+
+      ctx.event.preventDefault();
+      ctx.stopPropagation();
+
+      const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
+
+      const match = text.match(regex);
+      if (match === null) {
+        console.error('failed to match regex', regex, text);
+        return
+      }
+
+      tr.removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
+      const to = Point.toAfter(block.id);
+      const moveNodes = block.children.slice(1);
+      if (moveNodes.length) {
+        tr.add(moveNodesAction(to, moveNodes));
+      }
+      tr.change(block.id, block.name, type)
+      tr.select(after)
+      tr.dispatch()
     }
   }
 

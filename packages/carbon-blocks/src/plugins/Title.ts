@@ -48,50 +48,14 @@ export class TitlePlugin extends NodePlugin {
 		return {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
+				ctx.event.preventDefault();
+				ctx.stopPropagation();
+
 				const { app, event } = ctx;
-				const { selection, cmd } = app;
+				const { selection } = app;
 				// @ts-ignore
 				const { data } = event;
-
-				const updateTitleText = (app: Carbon) => {
-					const { tr } = app;
-					const { selection, schema, cmd } = app;
-					const { head, start } = selection;
-					const title = head.node
-					const pin = Pin.future(start.node, start.offset + 1);
-					const after = PinnedSelection.fromPin(pin);
-					const textContent = title.textContent.slice(0, start.offset) + data + title.textContent.slice(start.offset);
-					const textNode = schema.text(textContent)!;
-					if (!textNode) {
-						console.error('failed to create text node');
-						return
-					}
-
-					tr.setContent(head.node.id, BlockContent.create([textNode]));
-					tr.select(after);
-					tr.dispatch();
-				}
-
-				if (!selection.isCollapsed) {
-					ctx.event.preventDefault();
-					ctx.stopPropagation();
-
-					cmd.transform.delete()?.next(carbon => {
-						updateTitleText(carbon);
-					}).dispatch();
-					return
-				}
-
-				if (selection.isCollapsed) {
-					ctx.event.preventDefault();
-					ctx.stopPropagation();
-					// TODO: handle native input to avoid text flickering on input
-					// const native = false//!ctx.node.isEmpty;
-					// if (!native) {
-					// 	ctx.event.preventDefault();
-					// }
-					updateTitleText(app);
-				}
+				app.cmd.transform.insertText(selection, data)?.dispatch();
 			},
 			input(ctx: EventContext<InputEvent>) {
 				// console.log('input', ctx.event);

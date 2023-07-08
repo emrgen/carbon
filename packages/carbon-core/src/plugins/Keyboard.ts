@@ -58,7 +58,7 @@ export class KeyboardPlugin extends BeforePlugin {
 			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
 			if (!prevTextBlock || !textBlock) return
 			console.log(prevTextBlock.parent);
-			
+
 			if (prevTextBlock.isCollapseHidden) {
 				const prevVisibleBlock = prevTextBlock.closest(n => !n.isCollapseHidden)!;
 				const prevVisibleTextBlock = prevVisibleBlock?.child(0)!
@@ -118,7 +118,7 @@ export class KeyboardBeforePlugin extends BeforePlugin {
 
 	on(): Partial<EventHandler> {
 		return {
-			_mouseDown: (ctx: EventContext<MouseEvent>) => {
+			$mouseDown: (ctx: EventContext<MouseEvent>) => {
 				const {app, node} = ctx;
 				const {selection} = app;
 				const {start, end} = selection;
