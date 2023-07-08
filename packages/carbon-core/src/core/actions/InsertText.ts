@@ -104,7 +104,7 @@ export class InsertText implements CarbonAction {
 	toString() {
 		const { at, text, origin } = this
 		return classString(this)({
-			at: at.toString(),
+			at,
 			text,
 			origin,
 		})

@@ -1,4 +1,5 @@
 import {
+	BlockContent,
 	Carbon,
 	CarbonPlugin,
 	EventContext,
@@ -47,48 +48,49 @@ export class TitlePlugin extends NodePlugin {
 		return {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				// ctx.event.stopPropagation();
-				// ctx.event.preventDefault();
-				const { app, event, node } = ctx;
-				const { selection, schema, cmd } = app;
-				const { head, start } = selection;
+				const { app, event } = ctx;
+				const { selection, cmd } = app;
 				// @ts-ignore
 				const { data } = event;
-				const textNode = schema.text(data);
-				if (!textNode) {
-					console.error('failed to create text node');
-					return
-				}
 
-				//
-				const pin = Pin.future(start.node, start.offset + 1);
-				const after = PinnedSelection.fromPin(pin);
+				const updateTitleText = (app: Carbon) => {
+					const { tr } = app;
+					const { selection, schema, cmd } = app;
+					const { head, start } = selection;
+					const title = head.node
+					const pin = Pin.future(start.node, start.offset + 1);
+					const after = PinnedSelection.fromPin(pin);
+					const textContent = title.textContent.slice(0, start.offset) + data + title.textContent.slice(start.offset);
+					const textNode = schema.text(textContent)!;
+					if (!textNode) {
+						console.error('failed to create text node');
+						return
+					}
+
+					tr.setContent(head.node.id, BlockContent.create([textNode]));
+					tr.select(after);
+					tr.dispatch();
+				}
 
 				if (!selection.isCollapsed) {
 					ctx.event.preventDefault();
+					ctx.stopPropagation();
 
-					const tr = cmd.transform.delete()?.pop();
-					// TODO: if the selection is not valid after the delete don't insert
-					tr?.insertText(start.point, textNode!);
-					tr?.select(after);
-					tr?.dispatch();
+					cmd.transform.delete()?.next(carbon => {
+						updateTitleText(carbon);
+					}).dispatch();
 					return
 				}
 
 				if (selection.isCollapsed) {
+					ctx.event.preventDefault();
+					ctx.stopPropagation();
 					// TODO: handle native input to avoid text flickering on input
-					const native = false//!ctx.node.isEmpty;
-					if (!native) {
-						ctx.event.preventDefault();
-					}
-
-					const { tr } = app;
-					tr.insertText(head.point, textNode!, native);
-					if (!native) {
-						tr.select(after);
-					}
-					tr.dispatch();
-
+					// const native = false//!ctx.node.isEmpty;
+					// if (!native) {
+					// 	ctx.event.preventDefault();
+					// }
+					updateTitleText(app);
 				}
 			},
 			input(ctx: EventContext<InputEvent>) {
@@ -160,6 +162,7 @@ export class TitlePlugin extends NodePlugin {
 
 	// 	return decorations;
 	// }
+
 	serialize(app: Carbon, node: Node): SerializedNode {
 		const contentNode = node.child(0);
 		return {

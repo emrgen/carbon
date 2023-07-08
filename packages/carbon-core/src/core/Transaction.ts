@@ -404,10 +404,10 @@ export class Transaction {
 	// create an inverse transaction
 	inverse() {
 		const {tr} = this.app;
-		tr.record = false
+		tr.record = false;
 		const actions = this.actions.map(c => c.inverse());
-		actions.reverse();
-		tr.add(actions.slice(0, -1));
+		// actions.reverse();
+		tr.add(actions.slice(0, -1).reverse());
 		tr.add(actions.slice(-1));
 		return tr;
 	}

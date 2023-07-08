@@ -75,6 +75,7 @@ export class UndoPlugin extends AfterPlugin {
   }
 
   transaction(tr: Transaction): void {
+    window.tr = tr;
     if (tr.record && !tr.selectionOnly) {
       this.undoStack.push(tr);
       this.redoStack = [];
