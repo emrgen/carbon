@@ -256,10 +256,13 @@ span {
 .collapsible-empty-content
 	user-select: none
 	color #aaa
-	background: #eee
+	// background: #eee
 	cursor: pointer
 	line-height: 32px
 	padding 0 6px
+	border-radius: 4px
+	&:hover
+		background: #eee
 
 [data-name="collapsible"][data-collapsed="true"]
 	.collapsible-empty-content,
@@ -306,10 +309,54 @@ span {
 				border-bottom: 2px solid #ddd
 
 [data-name=table]
+	position relative
+	margin-bottom: 36px
+	.add_table__row
+		position absolute
+		background: #eee
+		height: 20px
+		border-radius: 4px
+		margin-top 4px
+		cursor: pointer
+	.add_table__columns
+		top: 0
+		position absolute
+		background: #eee
+		width: 20px
+		border-radius: 4px
+		margin-left 4px
+		cursor: pointer
+	.add_table__row, .add_table__columns
+		// opacity 0
+		transition: opacity 0.2s
+		&:after
+			content: "+"
+			position: absolute
+			top: 50%
+			left: 50%
+			transform: translate(-50%, -50%)
+			font-size: 16px
+			color: #555
+			transition: opacity 0.2s
+	// &:hover
+	// 	.add_table__row, .add_table__columns
+	// 		background: #ddd
+	// 		opacity: 0.8
+	.update_table__row
+		position absolute
+		background: #eee
+		height: 20px
+		width: 16px
+		left: 0
+		top: 50%
+		transform: translate(-50%, -50%)
+		cursor: pointer
+		border-radius: 4px
 	table
 		border-collapse: collapse;
 		border-spacing 0;
 		[data-name=row]
+			position relative
 			outline: none
 			border-top: 1px solid #ddd;
 			vertical-align top
@@ -319,7 +366,7 @@ span {
 				text-align: left;
 				outline: none
 				padding: 7px 9px
-				// line-height: 20px
+				line-height: 22px
 				border-left: 1px solid #ddd
 				&:last-child
 					border-right: 1px solid #ddd

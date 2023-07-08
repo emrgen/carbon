@@ -40,7 +40,6 @@ export class Row extends CarbonPlugin {
     return {
       group: 'content',
       content: "column+",
-      // isolating: true,
       draggable: true,
       dragHandle: true,
       rectSelectable: true,
@@ -90,6 +89,35 @@ export class Column extends CarbonPlugin {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
+      },
+      shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
+        const { node, app } = ctx;
+        const { selection } = app;
+        if (!selection.isCollapsed && selection.start.isAtStartOfNode(node)) {
+          preventAndStopCtx(ctx);
+          
+        }
+      },
+      shiftRight: (ctx: EventContext<KeyboardEvent>) => {
+        const { node, app } = ctx;
+        const { selection } = app;
+        if (!selection.isCollapsed && selection.end.isAtEndOfNode(node)) {
+          preventAndStopCtx(ctx);
+        }
+      },
+      backspace: (ctx: EventContext<KeyboardEvent>) => {
+        const { node, app } = ctx;
+        const { selection } = app;
+        if (selection.isCollapsed && selection.start.isAtStartOfNode(node)) {
+          preventAndStopCtx(ctx);
+        }
+      },
+      delete: (ctx: EventContext<KeyboardEvent>) => {
+        const { node, app } = ctx;
+        const { selection } = app;
+        if (selection.isCollapsed && selection.end.isAtEndOfNode(node)) {
+          preventAndStopCtx(ctx);
+        }
       }
     }
   }
