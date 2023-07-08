@@ -90,7 +90,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		this.state.runtime.selectedNodeIds.clear();
 		this.state.runtime.activatedNodeIds.clear();
 
-		console.log(dirtyNodes.map(n => n.data));
+		// console.log(dirtyNodes.map(n => n.data));
 
 		each(dirtyNodes, n => this.publish(NodeChangeType.state, n));
 	}
@@ -103,7 +103,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		// if (this.state.runtime.selectedNodeIds.size) {
 		// 	this.updateNodeState()
 		// }
-		console.group('syncing: selection');
+		console.groupCollapsed('syncing: selection');
 		this.sm.syncSelection();
 		// process pending transactions
 		this.tm.dispatch();

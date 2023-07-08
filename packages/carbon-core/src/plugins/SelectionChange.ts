@@ -56,7 +56,6 @@ export class SelectionChangePlugin extends AfterPlugin {
 					.dispatch()
 			},
 			selectstart: (ctx: EventContext<Event>) => {
-				// console.log(p14('[event]'), 'selectstart', ctx.event);
 				const {app} = ctx;
 				if (app.state.selectedNodeIds.size) {
 					app.tr.selectNodes([]).dispatch();

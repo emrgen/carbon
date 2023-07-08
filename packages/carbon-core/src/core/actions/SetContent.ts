@@ -13,12 +13,17 @@ export class SetContent implements CarbonAction {
   before: Optional<NodeContent>;
 
   static create(nodeId: NodeId, after: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContent(nodeId, after, origin)
+    return new SetContent(nodeId, after, null, origin)
   }
 
-  constructor(readonly nodeId: NodeId, readonly after: NodeContent, origin: ActionOrigin) {
+  static withContent(nodeId: NodeId, after: NodeContent, before: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
+    return new SetContent(nodeId, after, before, origin)
+  }
+
+  constructor(readonly nodeId: NodeId, readonly after: NodeContent,  before: Optional<NodeContent>, origin: ActionOrigin) {
     this.id = generateActionId()
     this.origin = origin;
+    this.before = before;
   }
 
   execute(tr: Transaction): ActionResult<any> {
@@ -29,7 +34,9 @@ export class SetContent implements CarbonAction {
       return ActionResult.withError(`Node ${nodeId} not found`);
     }
 
-    this.before = node.content.clone();
+    if (this.before === null) {
+      this.before = node.content.clone();
+    }
     node?.updateContent(after);
     node.forAll(n => {
       app.store.put(n);

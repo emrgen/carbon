@@ -60,13 +60,6 @@ export class DocPlugin extends CarbonPlugin {
 					app.cmd.collapsible.split(selection)?.dispatch();
 					return
 				}
-
-				const {start, end} = selection;
-				// if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
-				// 	preventAndStopCtx(ctx);
-				// 	app.cmd.collapsible.enter(selection)?.dispatch();
-				// 	return
-				// }
 			}
 		}
 	}

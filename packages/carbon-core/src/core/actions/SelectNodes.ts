@@ -47,7 +47,7 @@ export class SelectNodes implements CarbonAction {
       n.updateData({ state: { selected: true } });
     });
 
-    console.log(afterSelectedNodes.map(n => n.id.toString()));
+    // console.log(afterSelectedNodes.map(n => n.id.toString()));
 
     tr.selected(...beforeSelectedNodes);
     tr.selected(...afterSelectedNodes);

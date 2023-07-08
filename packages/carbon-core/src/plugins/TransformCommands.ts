@@ -50,6 +50,7 @@ declare module '@emrgen/carbon-core' {
     transform: {
       insert(node: Node, ref: Node, opts?: InsertPos): Optional<Transaction>;
       insertText(selection: PinnedSelection, text: string, opts?: InsertPos): Optional<Transaction>;
+      deleteText(pin: Pin, text: string, opts?: InsertPos): Optional<Transaction>;
       remove(node: Node): Optional<Transaction>;
       move(nodes: Node | Node[], to: Point): Optional<Transaction>;
       delete(selection?: PinnedSelection): Optional<Transaction>;
@@ -77,6 +78,7 @@ export class TransformCommands extends BeforePlugin {
     return {
       insert: this.insert,
       insertText: this.insertText,
+      deleteText: this.deleteText,
       paste: this.paste,
       remove: this.remove,
       move: this.move,
@@ -416,14 +418,13 @@ export class TransformCommands extends BeforePlugin {
         return tr
       }
 
-      const block = splitBlock.type.default();
-      if (!block) {
-        throw Error('failed to create block');
-      }
-
-      const at = Point.toAfter(splitBlock.prevSibling!.id);
+      const at = Point.toAfter(splitBlock!.id);
 
       if (commonNode.isContainerBlock) {
+        const block = splitBlock.type.default();
+        if (!block) {
+          throw Error('failed to create block');
+        }
         const afterBlock = app.schema.type(splitBlock.type.splitName)?.default()
         if (!afterBlock) {
           throw Error('failed to create splitBlock');
@@ -439,7 +440,11 @@ export class TransformCommands extends BeforePlugin {
           .insert(insertAt, afterBlock!)
           .select(after);
       } else {
-        const focusPoint = Pin.toStartOf(splitBlock);
+        const block = app.schema.type(splitBlock.type.splitName)?.default()
+        if (!block) {
+          throw Error('failed to create block');
+        }
+        const focusPoint = Pin.toStartOf(block);
         const after = PinnedSelection.fromPin(focusPoint!);
         tr
           .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
@@ -993,7 +998,7 @@ export class TransformCommands extends BeforePlugin {
     const { tr } = app;
     const startTextBlock = start.node;
     const endTextBlock = end.node;
-    console.log('xxxxxxxxxxx', startTopBlock.name);
+    // console.log('xxxxxxxxxxx', startTopBlock.name);
 
     const { parent: commonNode } = startTopBlock;
     if (!commonNode) {
@@ -1042,7 +1047,7 @@ export class TransformCommands extends BeforePlugin {
         if (startContainer?.isTextBlock && endContainer?.isTextBlock) {
           const textContent = startTextBlock.textContent.slice(0, start.offset) + endTextBlock.textContent.slice(end.offset);
           const textNode = app.schema.text(textContent)!;
-          insertCommands.push(SetContent.create(startContainer.id, BlockContent.create([textNode])));
+          insertCommands.push(SetContent.withContent(startContainer.id, BlockContent.create([textNode]), startContainer.content));
 
           console.log('merge start and end block');
         } else {
@@ -1155,67 +1160,39 @@ export class TransformCommands extends BeforePlugin {
       }
     });
 
-    each(deleteGroup.ids.toArray(), id => {
-      const node = app.store.get(id);
-      if (!node) {
+    // delete nodes with higher index first
+    sortBy(deleteGroup.ids.toArray().map(id => app.store.get(id)), n => -(n?.index ?? 0)).forEach(n => {
+      if (!n) {
         throw new Error("Failed to get node for id");
       }
-      actions.push(RemoveNode.create(nodeLocation(node)!, id))
+      actions.push(RemoveNode.create(nodeLocation(n)!, n.id))
     })
 
     each(deleteGroup.ranges, range => {
       const { start, end } = range;
-      const startPin = start.down();
-      const endPin = end.down();
-      if (!startPin || !endPin) {
-        throw new Error("Failed to get pin from range");
-      }
+      const {node} = start;
 
-      if (startPin.node.eq(endPin.node)) {
-        if (startPin.isAtStart && endPin.isAtEnd) {
-          actions.push(RemoveNode.create(nodeLocation(startPin.node)!, startPin.node.id));
+      if (start.node.eq(end.node)) {
+        if (node.chain.some(n => deleteGroup.has(n.id))) {
+          return
+        }
+
+        if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node) && !node.isVoid) {
+          actions.push(...this.removeNodeCommands(node.children));
           return;
         }
-        if (startPin.isAtStart) {
-          const textNode = app.schema.text(startPin.node.textContent.slice(0, endPin.offset));
-          actions.push(RemoveText.create(start.point, textNode!));
-          return;
-        }
-        if (endPin.isAtEnd) {
-          const textNode = app.schema.text(startPin.node.textContent.slice(startPin.offset));
-          actions.push(RemoveText.create(start.point, textNode!));
-          return;
-        }
-        // console.log("@@@@@@@@@");
 
-        const textNode = app.schema.text(startPin.node.textContent.slice(startPin.offset, endPin.offset));
-        actions.push(RemoveText.create(start.point, textNode!));
-        return;
+        const textContent = node.textContent.slice(0, start.offset) + node.textContent.slice(end.offset);
+        const textNode = app.schema.text(textContent);
+        actions.push(SetContent.create(node.id, BlockContent.create(textNode!)));
       }
-
-      if (endPin.isAtEnd) {
-        const pin = Pin.toStartOf(endPin.node);
-        console.log(pin);
-        actions.push(RemoveText.create(pin?.point!, endPin.node.clone()));
-      }
-      if (endPin.isWithin) {
-        const textNode = app.schema.text(endPin.node.textContent.slice(0, endPin.offset));
-        actions.push(RemoveText.create(Pin.toStartOf(endPin.node)?.point!, textNode!));
-      }
-
-      const removeSiblings = takeUntil(startPin.node.nextSiblings, n => n.eq(endPin.node));
-      actions.push(...removeNodesActions(removeSiblings))
-
-      if (startPin.isAtStart) {
-        actions.push(RemoveText.create(start.point, startPin.node.clone()));
-      } else if (startPin.isWithin) {
-        const textNode = app.schema.text(startPin.node.textContent.slice(startPin.offset));
-        actions.push(RemoveText.create(start.point, textNode!));
-      }
-
     });
 
     return actions;
+  }
+
+  private deleteText(app: Carbon, pin: Pin, text: string): Optional<Transaction> {
+    return null;
   }
 
   // find node ids to delete for provided selection
