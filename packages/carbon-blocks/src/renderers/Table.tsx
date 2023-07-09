@@ -73,18 +73,18 @@ export const TableComp = (props: RendererProps) => {
             {/* {SelectionHalo} */}
           </tbody>
         </table>
-        <div
+        {!!width && <div
           className="add_table__row"
           style={{ width: width + "px" }}
           onClick={handleAddRow}
           onMouseDown={preventAndStop}
-        />
-        <div
+        />}
+        {!!height && <div
           className="add_table__columns"
           style={{ height: height + "px", left: width + "px" }}
           onClick={handleAddColumns}
           onMouseDown={preventAndStop}
-        />
+        />}
       </TableContext.Provider>
     </CarbonBlock>
   );

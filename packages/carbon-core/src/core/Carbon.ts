@@ -33,9 +33,9 @@ export class Carbon extends EventEmitter {
 
 	enabled: boolean;
 
-	_element: any;
-	_portal: any;
-	_contentElement: any;
+	_element: Optional<HTMLElement>;
+	_portal: Optional<HTMLElement>;
+	_contentElement: Optional<HTMLElement>;
 	_ticks: Maps<Carbon, Optional<Transaction>>[];
 
 	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
@@ -150,7 +150,7 @@ export class Carbon extends EventEmitter {
 			this._ticks = this._ticks.slice(1);
 			const tr = tick?.(this);
 			if (tr) {
-				tr.onTick = true;				
+				tr.onTick = true;
 				tr.dispatch();
 			}
 			return true;

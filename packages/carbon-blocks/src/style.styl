@@ -13,6 +13,13 @@ $selectionHaloColor = #accef78d
 .carbon-content
 	padding: 100px 50px
 
+.carbon-park-cursor
+	position absolute
+	left: 50%
+	transform: translateX(-50%)
+	z-index: 100
+	// position relative
+
 [data-name=document]
 	position relative
 	outline none
@@ -274,13 +281,17 @@ span {
 	padding: 6px 16px
 	margin: 10px 0
 	border-left: 3px solid #555
+	[data-type="content"]
+		line-height: 26px
 
 [data-name=callout]
 	position relative
 	padding: 20px 20px
 	margin: 10px 0
 	background: #FBF3DB
+	border: 2px solid #f4d999
 	border-radius: 4px
+	line-height: 26px
 
 [data-name=code]
 	display: block
@@ -371,3 +382,8 @@ span {
 				border-left: 1px solid #ddd
 				&:last-child
 					border-right: 1px solid #ddd
+
+[data-hide-cursor=true]
+	caret-color: transparent
+	::selection
+		background: transparent

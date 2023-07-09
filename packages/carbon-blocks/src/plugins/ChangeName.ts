@@ -10,7 +10,8 @@ import {
   PinnedSelection,
   Point,
   nodeLocation,
-  moveNodesAction
+  moveNodesAction,
+  insertBeforeAction
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
@@ -154,7 +155,7 @@ export class ChangeName extends BeforePlugin {
 
       tr
         .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
-        .insert(Point.toAfter(block.prevSibling!.id), divider)
+        .add(insertBeforeAction(block, divider))
         .change(block.id, block.name, block.type.splitName)
         .add(moveActions)
         .select(after)

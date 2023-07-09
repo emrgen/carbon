@@ -1,4 +1,5 @@
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep, merge, reduce } from 'lodash';
+import { removeEmpty } from '../utils/object';
 
 export class NodeAttrs {
 	html: Record<string, any> = {};
@@ -10,8 +11,12 @@ export class NodeAttrs {
 	}
 
 	update(attrs: Record<string, any>) {
-		const html = merge(cloneDeep(this.html), attrs.html);
+		const html = merge(cloneDeep(this.html), attrs.html)
+
 		const node = merge(cloneDeep(this.node), attrs.node);
-		return new NodeAttrs({ html, node });
+		return new NodeAttrs({
+			html: removeEmpty(html),
+			node: removeEmpty(node),
+		});
 	}
 }

@@ -129,7 +129,7 @@ export class EventManager {
 			EventsIn.selectionchange,
 			EventsIn.selectstart,
 			EventsIn.mouseDown,
-			// EventsIn.keyDown,
+			EventsIn.keyDown,
 			EventsIn.keyUp,
 			EventsIn.beforeinput,
 		].includes(type) || selectionChangedUsingKeys(event)

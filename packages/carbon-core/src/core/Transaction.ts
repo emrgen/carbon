@@ -72,6 +72,14 @@ export class Transaction {
 		return this.app.runtime.origin;
 	}
 
+	get actionsList(): CarbonAction[] {
+		return this.actions;
+	}
+
+	get size() {
+		return this.actions.length;
+	}
+
 	private get state() {
 		return this.app.state;
 	}
@@ -81,7 +89,7 @@ export class Transaction {
 	}
 
 	get textInsertOnly() {
-		return this.actions.every(a => a instanceof InsertText || a instanceof SelectAction);
+		return this.actions.every(a => a instanceof SetContent || a instanceof SelectAction);
 	}
 
 	get textRemoveOnly() {
@@ -373,6 +381,12 @@ export class Transaction {
 		});
 	}
 
+	hideCursor(...nodes: Node[]) {
+		each(nodes, n => {
+			this.runtime.hideCursorNodeIds.add(n.id);
+		});
+	}
+
 	selected(...nodes: Node[]) {
 		// console.log('Transaction.selected', nodes.map(n => n.id.toString()));
 		each(nodes, n => {
@@ -402,12 +416,7 @@ export class Transaction {
 	}
 
 	pop() {
-		const cmd = this.actions.pop();
-		// if popped command is selection command restore previous selection
-		// if (cmd instanceof SelectCommand) {
-		// 	this.selections.pop()
-		// }
-		return this;
+		return this.actions.pop();
 	}
 
 	next(cb: With<Carbon>) {

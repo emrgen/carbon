@@ -32,7 +32,7 @@ export class SelectNodes implements CarbonAction {
 
   execute(tr: Transaction): ActionResult {
     const { app } = tr;
-    const {store, state} = app;
+    const { store, state } = app;
     const { selectedNodeIds } = state;
 
     this.prevNodeIds = app.blockSelection.nodeIds.toArray()
@@ -47,8 +47,40 @@ export class SelectNodes implements CarbonAction {
       n.updateData({ state: { selected: true } });
     });
 
-    // console.log(afterSelectedNodes.map(n => n.id.toString()));
+    const { selection } = app
 
+    // if blockSelection is non empty hide cursor and text selection
+    if (afterSelectedNodes.length !== 0) {
+      const { start, end } = selection;
+      const nodes: Node[] = [];
+      selection.start.node.walk(n => {
+        nodes.push(n);
+        if (n.eq(end.node)) {
+          return true
+        }
+        return false
+      })
+      nodes.forEach(n => {
+        n?.updateAttrs({ html: { 'data-hide-cursor': true } });
+        tr.updated(n!);
+      })
+      nodes.forEach(n => {
+        app.runtime.hideCursorNodeIds.add(n.id);
+      });
+    } else {
+      app.runtime.hideCursorNodeIds.forEach(id => {
+        const node = app.store.get(id);
+        console.log('XXX', node);
+        if (!node) return
+
+        node.updateAttrs({ html: { 'data-hide-cursor': false } });
+        tr.updated(node);
+      });
+      app.runtime.hideCursorNodeIds.clear();
+    }
+
+
+    // console.log(afterSelectedNodes.map(n => n.id.toString()));
     tr.selected(...beforeSelectedNodes);
     tr.selected(...afterSelectedNodes);
     return NULL_ACTION_RESULT

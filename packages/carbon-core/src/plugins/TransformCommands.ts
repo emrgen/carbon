@@ -30,7 +30,7 @@ import { takeBefore, takeUntil } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { nodeLocation } from "../utils/location";
 import { splitTextBlock } from "../utils/split";
-import { moveNodesAction, removeNodesActions } from "../utils/action";
+import { insertBeforeAction, moveNodesAction, removeNodesActions } from "../utils/action";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -689,13 +689,9 @@ export class TransformCommands extends BeforePlugin {
         return;
       }
 
-      const insertPoint = splitBlock.prevSibling
-        ? Point.toAfter(splitBlock.prevSibling!.id)
-        : Point.toWithin(splitBlock.parent!.id)
-
       const after = selection.clone();
       tr
-        .insert(insertPoint, emptyBlock!)
+        .add(insertBeforeAction(splitBlock, emptyBlock))
         .select(after);
       return tr;
     }

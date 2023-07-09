@@ -1,9 +1,11 @@
 import { EventsIn } from "../core/Event";
+import { useCarbonChange } from "../hooks";
 import { useCarbon } from '../hooks/useCarbon';
 import { useEventListeners } from "../hooks/useEventHandlers";
 import { useSelectionChange } from "../hooks/useSelectionChange";
 import { CarbonNode } from '../renderer/CarbonNodes';
 import CarbonPortal from "./CarbonPortal";
+import { useEffect, useRef } from 'react';
 
 // listen for dom event
 const events: EventsIn[] = [
@@ -29,7 +31,9 @@ const events: EventsIn[] = [
 // all editor content is rendered inside this component
 // events captured from this component is processed in Editor
 export function CarbonContent() {
-  const editor = useCarbon();
+  const app = useCarbon();
+  const change = useCarbonChange();
+  const parkCursorRef = useRef<HTMLInputElement>(null);
 
   useSelectionChange();
   const listeners = useEventListeners(events);
@@ -37,9 +41,8 @@ export function CarbonContent() {
   return (
     <>
       <div className="carbon-content" {...listeners}>
-        <CarbonNode node={editor.content} />
+        <CarbonNode node={app.content} />
       </div>
-
       {/* helper portal for the app */}
       {/* <CarbonPortal/> */}
     </>

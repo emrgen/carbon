@@ -41,6 +41,7 @@ export enum EventsOut {
 	change = 'change',
 	viewupdated = 'view:updated',
 	selectionchanged = 'selection:changed',
+	blockSelection = 'block:selection',
 	contentchanged = 'content:changed',
 	nodestatechanged = 'nodestatechanged',
 	transaction = 'transaction',

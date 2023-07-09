@@ -46,6 +46,10 @@ export class SetContent implements CarbonAction {
     return ActionResult.withValue('done')
   }
 
+  updatesSameNode(other: SetContent): boolean {
+    return this.nodeId.eq(other.nodeId);
+  }
+
   inverse(): CarbonAction {
     if (!this.before) {
       throw new Error("Cannot invert action without before state");

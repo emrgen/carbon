@@ -5,6 +5,7 @@ import { Node } from "./Node";
 import { NodeTopicEmitter } from './NodeEmitter';
 import { SelectionManager } from './SelectionManager';
 import { TransactionManager } from './TransactionManager';
+import { EventsOut } from './Event';
 
 export enum NodeChangeType {
 	update = 'update',
@@ -34,12 +35,16 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	update() {
 		if (this.state.isContentDirty) {
 			this.updateContent();
-			console.log('update content');
+			if (this.state.isNodeStateDirty) {
+				console.log('update node states');
+				this.updateNodeState();
+			}
+			console.log('update content', this.state.isNodeStateDirty);
 			return
 		}
 
 		if (this.state.isNodeStateDirty) {
-			// console.log('update node states');
+			console.log('update node states');
 			this.updateNodeState();
 			return
 		}
@@ -93,6 +98,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		// console.log(dirtyNodes.map(n => n.data));
 
 		each(dirtyNodes, n => this.publish(NodeChangeType.state, n));
+		// this.emit(EventsOut.blockSelection);
 	}
 
 	private updateSelection() {

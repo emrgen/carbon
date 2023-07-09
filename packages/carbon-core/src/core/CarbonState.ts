@@ -16,6 +16,8 @@ export class CarbonRuntimeState {
 	selectEvents: SelectionEvent[] = [];
 	// content updated node ids
 	updatedNodeIds: NodeIdSet = new NodeIdSet();
+	// cursor is hidden in these nodes
+	hideCursorNodeIds: NodeIdSet = new NodeIdSet();
 	// selected node ids
 	selectedNodeIds: NodeIdSet = new NodeIdSet();
 	// activated node ids

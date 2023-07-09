@@ -21,6 +21,7 @@ export class BlockSelection {
       }
     });
 
+    // Sort by path
     blocks.sort((a, b) => {
       const aPath = a.path;
       const bPath = b.path;

@@ -4,15 +4,16 @@ import { NodeBTree } from './BTree';
 import { Node } from "./Node";
 import { NodeId, NodeIdComparator } from './NodeId';
 import { NodeWatcher } from "./types";
+import { EventEmitter } from 'events';
 
 // handles events by executing registered callbacks
-export class NodeTopicEmitter<E> {
+export class NodeTopicEmitter<E> extends EventEmitter {
 
 	private subscribers: Map<E, BTree<NodeId, Set<NodeWatcher>>> = new Map();
 
 	publish(event: E, node: Node) {
 		// console.log('publish', event, node.id,node.version, node.textContent);
-		
+
 		const listeners = this.subscribers.get(event)?.get(node.id);
 		// console.log(listeners);
 		listeners?.forEach(cb => cb(node));

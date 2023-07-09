@@ -1,6 +1,8 @@
-import { EventContext, EventHandler, Transaction, TransactionType } from '../core';
+import { EventContext, EventHandler, SelectAction, Transaction, TransactionType } from '../core';
 import { AfterPlugin } from '../core/CarbonPlugin';
-import { last } from 'lodash';
+import { first, last } from 'lodash';
+import { Optional } from '@emrgen/types';
+import { SetContent } from '../core/actions/SetContent';
 
 export class UndoPlugin extends AfterPlugin {
   name = 'undoPlugin';
@@ -66,8 +68,8 @@ export class UndoPlugin extends AfterPlugin {
 
         const tr = this.redoStack.pop()!
         const inverse = tr.inverse()
-        console.log('tr',  tr);
-        console.log('redo',  inverse);
+        console.log('tr', tr);
+        console.log('redo', inverse);
         this.undoStack.push(inverse)
         inverse.dispatch();
       },
@@ -77,6 +79,29 @@ export class UndoPlugin extends AfterPlugin {
   transaction(tr: Transaction): void {
     // window.tr = tr;
     if (tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
+      const lastTransaction = last(this.undoStack);
+      const current = Date.now();
+      let prevTr: Optional<Transaction> = null;
+      // if (lastTransaction) {
+
+      // console.log('XXXX',lastTransaction, lastTransaction.textInsertOnly, (current - lastTransaction?.timestamp) < 3000);
+
+      //   if (lastTransaction.textInsertOnly && (current - lastTransaction.timestamp) < 3000) {
+      //     const prevTr = this.undoStack.pop();
+      //     if (prevTr) {
+      //       const setTargetId = first(prevTr.insertActions).nodeId
+      //       const setAction = SetContent.withContent(setTargetId, first(prevTr.insertActions)!.after!, first(tr.insertActions)!.before!,);
+      //       const selectAction = SelectAction.create(last(prevTr.insertActions)!.after!, last(tr.insertActions)!.before!, last(tr.insertActions)!.origin!);
+      //       console.log('>>>>>>>',selectAction);
+
+      //       // const newTr = tr.app.tr.add(setAction).add(selectAction);
+      //       // this.undoStack.push(newTr);
+      //     } else {
+      //       this.undoStack.push(tr);
+      //     }
+      //   }
+      // } else {
+      // }
       this.undoStack.push(tr);
       this.redoStack = [];
     } else {
