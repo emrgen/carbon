@@ -1,4 +1,4 @@
-import { CarbonAction, CarbonPlugin, NodeSpec, CarbonState, Node, RemoveNode, nodeLocation } from "@emrgen/carbon-core";
+import { CarbonAction, CarbonPlugin, NodeSpec, CarbonState, Node, RemoveNode, nodeLocation, Point, moveNodesAction, SelectAction } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 export class HStack extends CarbonPlugin {
@@ -7,6 +7,7 @@ export class HStack extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       content: "stack stack+",
+      replaceName: 'section',
     }
   }
 
@@ -15,6 +16,16 @@ export class HStack extends CarbonPlugin {
     // check if stack schema is correct
     if (node.isVoid) {
       return [RemoveNode.create(nodeLocation(node)!, node.id)];
+    }
+
+    if (node.size == 1) {
+      console.log('Unpack all children');
+      const children = node.child(0)?.children;
+      const at = Point.toAfter(node.prevSibling!.id)
+      return [
+        moveNodesAction(at, children!),
+        RemoveNode.create(nodeLocation(node)!, node.id)
+      ]
     }
 
     return [];

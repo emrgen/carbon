@@ -947,12 +947,11 @@ export class TransformCommands extends BeforePlugin {
         return tr
       }
 
-      const block = commonNode.type.default();
+      const block = app.schema.type(commonNode.type.replaceName)?.default();
       if (!block) {
         console.log(p14("%c[failed]"), "color:red", "block not found");
         return;
       }
-
 
       const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
       tr

@@ -1,4 +1,4 @@
-import { Carbon, CarbonPlugin, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
+import { Carbon, CarbonPlugin, EventContext, EventHandler, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
 import { Section } from "./Section";
 
 export class Todo extends Section {
@@ -21,6 +21,25 @@ export class Todo extends Section {
           suppressContentEditableWarning: true,
         }
       }
+    }
+  }
+
+  keydown(): Partial<EventHandler> {
+    return {
+      // toggle checkbox
+      'ctrl_shift_t': (ctx: EventContext<KeyboardEvent>) => {
+        const { node, app } = ctx;
+        const { selection } = app;
+        if (selection.head.node.parent?.eq(node)) {
+          app.tr
+            .updateAttrs(node.id, {
+              node: {
+                isChecked: !node.attrs.node.isChecked,
+              },
+            })
+            .dispatch();
+        }
+      },
     }
   }
 

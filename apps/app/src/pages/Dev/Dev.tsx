@@ -18,6 +18,7 @@ import { useEffect } from "react";
 const data = node("document", [
   title([text("Carbon "), text("document")]),
   node("divider"),
+  node("section", [title([text("section 1")])]),
   node("hstack", [
     node("stack", [section([title([text("section 1")])])]),
     node("stack", [section([title([text("section 2")])])]),

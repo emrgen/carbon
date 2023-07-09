@@ -189,7 +189,7 @@ export class Transaction {
 
 	updateAttrs(id: NodeId, attrs: Partial<NodeAttrs>, origin = this.origin): Transaction {
 		console.log('xxxx');
-		
+
 		this.add(UpdateAttrs.create(id, attrs, origin))
 		return this;
 	}
@@ -266,7 +266,7 @@ export class Transaction {
 			for (const action of this.actions) {
 				console.log(p14('%c[command]'), "color:white", action.toString());
 
-				const { ok, error  } = action.execute(this);
+				const { ok, error } = action.execute(this);
 				if (!ok) {
 					this.error = new TransactionError(action.id, error!);
 				}
@@ -302,16 +302,30 @@ export class Transaction {
 	private normalizeNodes() {
 		const ids = this.normalizeIds.toArray();
 
+		this.normalizeIds.clear();
+
 		if (!ids.length) return []
 		const nodes = ids
 			.map(id => this.app.store.get(id))
 			.filter(identity) as Node[];
 		const sortedNodes = sortBy(nodes, n => -n.depth);
-		const commands = sortedNodes
+		sortedNodes
 			.map(n => n && this.pm.normalize(n, this.app).forEach(action => {
-				this.actions.push(action);
+				if (last(this.actions) instanceof SelectAction) {
+					this.actions = [
+						...this.actions.slice(0, -1),
+						action,
+						...this.actions.slice(-1),
+					]
+				} else {
+					this.actions.push(action)
+				}
+				// console.log(action);
+
 				action.execute(this)
 			}))
+
+		// this.normalizeNodes();
 	}
 
 	private abort(message: string) {
@@ -403,7 +417,7 @@ export class Transaction {
 
 	// create an inverse transaction
 	inverse() {
-		const {tr} = this.app;
+		const { tr } = this.app;
 		tr.type = TransactionType.OneWay;
 		const actions = this.actions.map(c => c.inverse());
 		// actions.reverse();

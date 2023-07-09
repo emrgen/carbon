@@ -41,10 +41,14 @@ export default function TodoComp(props: RendererProps) {
         onMouseDown={preventAndStop}
         onInput={preventAndStop}
       >
-        <input type="checkbox" onChange={handleClick} />
+        <input
+          type="checkbox"
+          onChange={handleClick}
+          checked={node.attrs.node.isChecked}
+        />
       </div>
     );
-  }, [handleClick]);
+  }, [handleClick, node.attrs]);
 
   return (
     <CarbonBlock {...props}>

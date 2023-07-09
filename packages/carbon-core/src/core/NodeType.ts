@@ -148,6 +148,10 @@ export class NodeType {
 		return this.spec.splitName ?? 'section';
 	}
 
+	get replaceName() {
+		return this.spec.replaceName ?? this.name;
+	}
+
 	get canSplit() {
 		return false;
 		// return [...listNames, 'title'].includes(this.name);
