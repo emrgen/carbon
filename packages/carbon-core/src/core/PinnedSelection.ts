@@ -36,7 +36,7 @@ export class PinnedSelection {
 		}
 		// console.log(anchorNode, anchorNode.isFocusable)
 
-		// NOTE: anchorNode is always valid
+		// NOTE: anchorNode is always valid and pointed to a focusable node
 		if (!anchorNode.hasFocusable && !anchorNode.isFocusable) {
 			console.warn(p14('%c[info]'), 'color:pink', 'anchorNode skips focus', anchorNode.name, focusNode.name);
 			if (anchorNode.after(focusNode)) {
@@ -61,7 +61,7 @@ export class PinnedSelection {
 			return null;
 		}
 
-		// NOTE: keep the focusNode on valid focusable node
+		// NOTE: focusNode is always valid and pointed to a focusable node
 		if (!focusNode.hasFocusable && !focusNode.isFocusable) {
 			console.warn(p14('%c[info]'), 'color:pink', 'focusNode skips focus', anchorNode.name, focusNode.name);
 			// if focusNode is not focusable, then find focusable node that is closest to anchorNode

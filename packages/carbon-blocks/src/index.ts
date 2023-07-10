@@ -7,7 +7,6 @@ import { DocPlugin } from './plugins/Document';
 import { Header } from './plugins/Header';
 
 import './style.styl';
-import { ListKeyboardPlugin } from './plugins/ListKeyboard';
 import DividerComp from './renderers/Divider';
 import { Divider } from './plugins/Divider';
 import TitleComp from './renderers/TitleComp';
@@ -80,7 +79,7 @@ export const blockPresets: Extension = {
 		Renderer.create('numberedList', NumberedListComp),
 		Renderer.create('equation', EquationComp),
 		Renderer.create('hstack', HStackComp),
-		Renderer.create('stack', CarbonNode),
+		Renderer.create('stack', HStackComp),
 		Renderer.create('image', ImageComp),
 		Renderer.create('todo', TodoComp),
 		Renderer.create('quote', QuoteComp),

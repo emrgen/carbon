@@ -12,7 +12,7 @@ import { BlockContent, InlineContent, NodeContent } from './NodeContent';
 import { NodeData } from './NodeData';
 import { NodeId } from './NodeId';
 import { NodeType } from './NodeType';
-import { NodeJSON, yes } from './types';
+import { NodeEncoder, NodeJSON, yes } from './types';
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -732,6 +732,10 @@ export class Node extends EventEmitter {
 			name: type.name,
 			...content.toJSON(),
 		}
+	}
+
+	encode<T>(encoder: NodeEncoder<T>) {
+		return encoder.encode(this);
 	}
 
 	viewJSON() {

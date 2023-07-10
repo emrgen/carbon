@@ -2,6 +2,8 @@ import { Bound, Optional } from '@emrgen/types';
 import { EventContext } from './EventContext';
 import { Node } from './Node';
 import { InputRule } from './Rules';
+import { JSONNode } from './types';
+import { Carbon } from './Carbon';
 
 export interface CarbonCommands {}
 
@@ -65,4 +67,23 @@ export type SerializedNode = {
 	isNested?: boolean;
 	isEmpty?: boolean;
 	isVoid?: boolean;
+}
+
+export type EncodedNode<T> = T;
+
+export interface JSONNode {
+	id: string;
+	name: string;
+	content?: JSONNode[];
+	text?: string;
+	attrs?: Record<string, any>;
+	data?: Record<string, any>;
+}
+
+export type MarkdownNode = string;
+
+// encode/decode node to/from JSON
+export interface NodeEncoder<T> {
+	encode(node: Node): EncodedNode<T>;
+	decode(app: Carbon, node: EncodedNode<T>): Optional<Node>;
 }
