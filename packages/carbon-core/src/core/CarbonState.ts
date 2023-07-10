@@ -146,7 +146,7 @@ export class CarbonState {
 		this.selection = after;
 		this.selectionOrigin = origin;
 
-		console.log('selection is dirty', isSelectionDirty);
+		// console.log('selection is dirty', isSelectionDirty);
 		this.isSelectionDirty = isSelectionDirty;
 	}
 

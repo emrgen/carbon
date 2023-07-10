@@ -11,7 +11,7 @@ export class Table extends CarbonPlugin {
       draggable: true,
       dragHandle: true,
       rectSelectable: true,
-
+      blockSelectable: true,
       attrs: {
         node: {
 
@@ -69,7 +69,6 @@ export class Column extends CarbonPlugin {
       draggable: true,
       dragHandle: true,
       rectSelectable: true,
-
       attrs: {
         node: {
           tag: 'td',
@@ -95,7 +94,7 @@ export class Column extends CarbonPlugin {
         const { selection } = app;
         if (!selection.isCollapsed && selection.start.isAtStartOfNode(node)) {
           preventAndStopCtx(ctx);
-          
+
         }
       },
       shiftRight: (ctx: EventContext<KeyboardEvent>) => {

@@ -46,6 +46,11 @@ export class BlockSelection {
       return 0;
     });
 
+    if (blocks.length === 0) {
+      console.error('No blocks found in selection', this.nodeIds.map(id => id.toString()));
+      return [];
+    }
+
     return blocks.map(n => n.node)
   }
 

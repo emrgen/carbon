@@ -21,7 +21,7 @@ export const TableComp = (props: RendererProps) => {
   const tableRef = useRef<HTMLTableElement>(null);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
-  const { attributes, SelectionHalo } = useSelectionHalo(props);
+  const { attributes, SelectionHalo, isSelected } = useSelectionHalo(props);
 
   useEffect(() => {
     if (!tableRef.current) return;
@@ -70,21 +70,25 @@ export const TableComp = (props: RendererProps) => {
         <table ref={tableRef}>
           <tbody>
             <CarbonChildren node={node} />
-            {/* {SelectionHalo} */}
           </tbody>
         </table>
-        {!!width && <div
-          className="add_table__row"
-          style={{ width: width + "px" }}
-          onClick={handleAddRow}
-          onMouseDown={preventAndStop}
-        />}
-        {!!height && <div
-          className="add_table__columns"
-          style={{ height: height + "px", left: width + "px" }}
-          onClick={handleAddColumns}
-          onMouseDown={preventAndStop}
-        />}
+        {isSelected && <div className="carbon-halo-container" style={{width: width + 'px', height: height + 'px'}} >{SelectionHalo}</div>}
+        {!!width && (
+          <div
+            className="add_table__row"
+            style={{ width: width + "px" }}
+            onClick={handleAddRow}
+            onMouseDown={preventAndStop}
+          />
+        )}
+        {!!height && (
+          <div
+            className="add_table__columns"
+            style={{ height: height + "px", left: width + "px" }}
+            onClick={handleAddColumns}
+            onMouseDown={preventAndStop}
+          />
+        )}
       </TableContext.Provider>
     </CarbonBlock>
   );

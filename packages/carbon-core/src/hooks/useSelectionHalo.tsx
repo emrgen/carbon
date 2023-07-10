@@ -29,5 +29,6 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
 	return {
     SelectionHalo,
     attributes,
+    isSelected,
   };
 }

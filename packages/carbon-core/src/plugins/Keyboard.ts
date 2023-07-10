@@ -9,9 +9,10 @@ import { skipKeyEvent } from "../utils/key";
 import { first, last, reverse } from "lodash";
 import { BlockContent, Carbon, InlineContent, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
 import { hasParent, nodePath } from "../utils/node";
-import { CommandPlugin } from '@emrgen/carbon-core';
+import { CommandPlugin, insertAfterAction } from '@emrgen/carbon-core';
 import { Optional } from '@emrgen/types';
 import { nodeLocation } from '../utils/location';
+import { BlockSelection } from "../core/NodeSelection";
 
 
 declare module '@emrgen/carbon-core' {
@@ -183,35 +184,19 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 					return
 				}
 
-				const block = node.chain.find(n => n.isContainerBlock);
-				if (!block || !block.type.spec.rectSelectable) return
+				const block = node.chain.find(n => n.isBlockSelectable);
+				if (!block) return
 				app.tr.selectNodes([block.id]).dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
-				const { selection, cmd, state, blockSelection: nodeSelection } = app;
+				const { selection, cmd, state, blockSelection } = app;
 				const { selectedNodeIds } = state
 				event.preventDefault();
 
 				// nodes selection is visible using halo
-				if (nodeSelection.size) {
-					const { blocks: nodes } = nodeSelection;
-					const firstNode = first(nodes)!;
-					if (firstNode.hasFocusable) {
-						const focusNode = firstNode.find(n => n.isFocusable, { direction: 'forward' })
-						const pin = Pin.toStartOf(focusNode!)
-						app.tr
-							.select(PinnedSelection.fromPin(pin!))
-							.selectNodes([])
-							.dispatch();
-						return
-					}
-					const focusNode = firstNode.prev(n => n.isFocusable);
-					const pin = Pin.toEndOf(focusNode!)
-					app.tr
-						.select(PinnedSelection.fromPin(pin!))
-						.selectNodes([])
-						.dispatch();
+				if (blockSelection.size) {
+					this.collapseSelectionBeforeBlockSelection(app, blockSelection);
 					return
 				}
 
@@ -224,6 +209,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				app.tr.select(after!).dispatch();
 			},
 
+
 			right: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				event.preventDefault();
@@ -231,23 +217,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 				// nodes selection is visible using halo
 				if (nodeSelection.size) {
-					const lastNode = last(nodeSelection.blocks)!;
-					if (lastNode.hasFocusable) {
-						const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
-						const pin = Pin.toEndOf(focusNode!)
-						app.tr
-							.select(PinnedSelection.fromPin(pin!))
-							.selectNodes([])
-							.dispatch();
-						return
-					}
-
-					const focusNode = lastNode.next(n => n.isFocusable);
-					const pin = Pin.toStartOf(focusNode!)
-					app.tr
-						.select(PinnedSelection.fromPin(pin!))
-						.selectNodes([])
-						.dispatch();
+					this.collapseSelectionAfterBlockSelection(app, nodeSelection);
 					return
 				}
 
@@ -331,6 +301,48 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		}
 	}
 
+	collapseSelectionBeforeBlockSelection(app: Carbon, blockSelection: BlockSelection) {
+		const { blocks: nodes } = blockSelection;
+		const firstNode = first(nodes)!;
+		if (firstNode.hasFocusable) {
+			const focusNode = firstNode.find(n => n.isFocusable, { direction: 'forward' })
+			const pin = Pin.toStartOf(focusNode!)
+			app.tr
+				.select(PinnedSelection.fromPin(pin!))
+				.selectNodes([])
+				.dispatch();
+			return
+		}
+		const focusNode = firstNode.prev(n => n.isFocusable);
+		const pin = Pin.toEndOf(focusNode!)
+		app.tr
+			.select(PinnedSelection.fromPin(pin!))
+			.selectNodes([])
+			.dispatch();
+		return
+	}
+
+	collapseSelectionAfterBlockSelection(app: Carbon, blockSelection: BlockSelection) {
+		const lastNode = last(blockSelection.blocks)!;
+		if (lastNode.hasFocusable) {
+			const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
+			const pin = Pin.toEndOf(focusNode!)
+			app.tr
+				.select(PinnedSelection.fromPin(pin!))
+				.selectNodes([])
+				.dispatch();
+			return
+		}
+
+		const focusNode = lastNode.next(n => n.isFocusable);
+		const pin = Pin.toStartOf(focusNode!)
+		app.tr
+			.select(PinnedSelection.fromPin(pin!))
+			.selectNodes([])
+			.dispatch();
+	}
+
+
 	shiftUp(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
 		const { blockSelection: nodeSelection } = app;
@@ -340,8 +352,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		const { blocks: nodes } = nodeSelection;
 		const firstNode = nodes[0] as Node;
-		const block = prevContainerBlock(firstNode);
-		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
+		const block = prevBlockSelectable(firstNode);
+		// console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
 		if (!block) return
 
 		ctx.event.preventDefault();
@@ -357,7 +369,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		const { blocks: nodes } = nodeSelection;
 		const firstNode = last(nodes) as Node;
-		const block = firstNode?.next(n => n.isContainerBlock, { order: 'pre' });
+		const block = nextBlockSelectable(firstNode)
 		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
 		if (!block) return
 
@@ -372,6 +384,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		console.log('Enter event...');
 
 		ctx.event.preventDefault();
+		ctx.stopPropagation();
 		const { app } = ctx;
 		const { selection, cmd, blockSelection } = app;
 		const { start, end } = selection
@@ -387,11 +400,25 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			const done = nodes.some(n => {
 				const textBlock = n.find(n => n.isTextBlock);
 
+				// if there is a text block, put the cursor at the end of the text block
 				if (textBlock) {
 					const pin = Pin.toEndOf(textBlock)!
 					tr
 						.selectNodes([])
 						.select(PinnedSelection.fromPin(pin))
+						.dispatch();
+					return true
+				} else {
+					// if there is no text block, insert a new section after the last block
+					const lastBlock = last(nodes) as Node;
+					const section = app.schema.type('section')?.default();
+					if (!section) return false
+
+					const after = PinnedSelection.fromPin(Pin.toStartOf(section)!)!;
+					tr
+						.selectNodes([])
+						.add(insertAfterAction(lastBlock, section))
+						.select(after)
 						.dispatch();
 					return true
 				}
@@ -479,7 +506,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			return
 		}
 
-		const block = prevContainerBlock(node)
+		const block = prevBlockSelectable(node)
 		if (!block || block.isDocument) return
 
 		app.tr.selectNodes([block.id]).dispatch()
@@ -498,37 +525,37 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			return
 		}
 
-		const block = nextContainerBlock(node)
+		const block = nextBlockSelectable(node)
+		console.log('nextContainerBlock', block);
 		if (!block) return
-		console.log(block);
 
 		app.tr.selectNodes([block.id]).dispatch()
 	}
 }
 
-const prevContainerBlock = (node: Node) => {
+const prevBlockSelectable = (node: Node) => {
 	const block = node.chain.find(n => n.isContainerBlock) as Node;
 	const { prevSibling } = block
 	if (prevSibling?.isContainerBlock) {
 		const childContainer = prevSibling.find(n => {
-			return !n.eq(prevSibling) && !n.isCollapseHidden && n.isContainerBlock
+			return !n.eq(prevSibling) && !n.isCollapseHidden && n.isBlockSelectable
 		}, { order: 'post', direction: 'backward' })
 
 		return childContainer ?? prevSibling;
 	}
 
-	if (block.parent?.isContainerBlock) {
+	if (block.parent?.isBlockSelectable) {
 		return node.parent
 	}
 
-	return block?.prev(n => n.isContainerBlock);
+	return block?.prev(n => n.isBlockSelectable);
 }
 
-const nextContainerBlock = node => {
-	const block = node.chain.find(n => n.isContainerBlock);
-	return block.find(n => {
-		return !n.eq(block) && !n.isCollapseHidden && n.isContainerBlock
-	}, { order: 'pre' }) ?? block?.next(n => n.isContainerBlock, { order: 'pre' });
+const nextBlockSelectable = node => {
+	const block = node.chain.find(n => n.isBlockSelectable);
+	return block?.find(n => {
+		return !n.eq(block) && !n.isCollapseHidden && n.isBlockSelectable
+	}, { order: 'pre' }) ?? block?.next(n => n.isBlockSelectable, { order: 'pre' });
 }
 
 

@@ -15,6 +15,7 @@ export class Section extends NodePlugin {
 			draggable: true,
 			dragHandle: true,
 			rectSelectable: true,
+			blockSelectable: true,
 			info: {
 				title: 'Section',
 			},

@@ -13,6 +13,7 @@ export class Callout extends CarbonPlugin {
       draggable: true,
       dragHandle: true,
       rectSelectable: true,
+      blockSelectable: true,
       info: {
         title: 'Callout',
       },

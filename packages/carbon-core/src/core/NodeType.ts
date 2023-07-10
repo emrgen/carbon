@@ -144,6 +144,10 @@ export class NodeType {
 		return !!this.spec.document;
 	}
 
+	get isBlockSelectable() {
+		return !!this.spec.blockSelectable;
+	}
+
 	get splits() {
 		return !!this.spec.splits
 	}

@@ -207,6 +207,10 @@ export class Node extends EventEmitter {
 		return !nonSelectable
 	}
 
+	get isBlockSelectable() {
+		return this.isBlock && this.type.isBlockSelectable
+	}
+
 	// if content node i.e. first child is treated as content node
 	// check if parent is collapse hidden
 	get isCollapseHidden() {
