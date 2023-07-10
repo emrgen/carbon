@@ -96,11 +96,6 @@ export class EventManager {
 			return
 		}
 
-		// console.log('###', editor.selection.toString(), selection.toString(), editor.selection, selection);
-		if (this.updateFocusPlaceholder(this.state.prevSelection, selection) && type === EventsIn.selectionchange) {
-			// this.changedContent()
-		}
-
 		// new dom selection is same as exiting editor.selection
 		if (type === EventsIn.selectionchange && app.selection.eq(selection)) {
 			console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'selection change');
@@ -126,7 +121,7 @@ export class EventManager {
 		});
 
 		if ([
-			EventsIn.selectionchange,
+			// EventsIn.selectionchange,
 			EventsIn.selectstart,
 			EventsIn.mouseDown,
 			EventsIn.keyDown,
@@ -211,36 +206,7 @@ export class EventManager {
 
 	// 	return type;
 	// }
-
-	// update placeholder visibility for the focus node
-	private updateFocusPlaceholder(before?: PinnedSelection, after?: PinnedSelection,) {
-		let isUpdated = false
-		if (after?.isCollapsed || !after) {
-			const prevNode = before?.head.node;
-			const currNode = after?.head.node
-			if (currNode && prevNode?.eq(currNode)) return
-
-			if (before?.isCollapsed && prevNode?.type.isTextBlock || prevNode?.isVoid) {
-				isUpdated = true
-				prevNode.updateAttrs({
-					html: {
-						'data-focused': 'false'
-					}
-				})
-			}
-
-			if (!currNode?.type.isTextBlock || !currNode?.isVoid) return isUpdated
-			isUpdated = true
-			currNode.updateAttrs({
-				html: {
-					'data-focused': 'true'
-				}
-			})
-		}
-
-		return isUpdated
-	}
-
+	
 	// afterEvent(event: EditorEvent<Event>) {
 	// 	const { type } = event;
 	// 	if (type === EventsIn.mouseUp) {

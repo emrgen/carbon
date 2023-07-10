@@ -22,9 +22,9 @@ export class Section extends NodePlugin {
 				node: {
 					focusPlaceholder: 'Section',
 					emptyPlaceholder: '',
+					// placeholder: 'Section',
 				},
 				html: {
-					// placeholder: 'Section',
 					// contentEditable: false,
 					suppressContentEditableWarning: true,
 				}

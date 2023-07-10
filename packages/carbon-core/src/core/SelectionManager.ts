@@ -6,6 +6,7 @@ import { PointedSelection } from './PointedSelection';
 import { SelectionEvent } from './SelectionEvent';
 import { EventsOut } from './Event';
 import { Optional } from '@emrgen/types';
+import { PinnedSelection } from './PinnedSelection';
 
 export class SelectionManager {
 	focused = false;
@@ -38,7 +39,7 @@ export class SelectionManager {
 	// used by commands to inform editor of a selection change
 	// the selection might be queued
 	onSelect(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
-		console.log('onSelect', before.toString(), after.toString(), origin, this.enabled);
+		// console.log('onSelect', before.toString(), after.toString(), origin, this.enabled);
 		if (!this.enabled) {
 			return
 		}
@@ -53,7 +54,7 @@ export class SelectionManager {
 		// });
 
 		// console.log('Editor.onSelect', after.toString(), this.runtime.selectEvents.length);
-		console.debug('Editor.onSelect', after.toString(), 'pendingSelection', origin);
+		// console.debug('Editor.onSelect', after.toString(), 'pendingSelection', origin);
 		if ([ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
 			if (app.runtime.selectEvents.length === 0) {
 				// this.selectedNodesIds.clear();
@@ -85,8 +86,10 @@ export class SelectionManager {
 		}
 
 		// console.log('synced selection from origin', origin)
-		this.state.updateSelection(selection, origin, origin === ActionOrigin.DomSelectionChange);
-		this.app.emit(EventsOut.selectionchanged, selection);
+		this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange);
+		// console.log('###', editor.selection.toString(), selection.toString(), editor.selection, selection);
+		this.updateFocusPlaceholder(this.state.prevSelection, selection);
+		this.app.emit(EventsOut.selectionChanged, selection);
 		this.app.change.update();
 	}
 
@@ -97,7 +100,7 @@ export class SelectionManager {
 			return
 		}
 
-		if (this.state.selectionUpdated) {
+		if (!this.state.isSelectionDirty) {
 			console.log('skipped: selection already synced', this.state.selectionOrigin, this.state.selection.toString()	);
 			return
 		}
@@ -112,12 +115,12 @@ export class SelectionManager {
 		if (selection.isInvalid) {
 			console.warn('skipped invalid selection sync');
 			app.element?.blur()
-			this.state.selectionUpdated = true;
+			this.state.isSelectionDirty = false;
 			return
 		}
 
 		selection.syncDom(app.store);
-		this.state.selectionUpdated = true;
+		this.state.isSelectionDirty = false;
 	}
 
 	// updates selection state from pending selection events
@@ -137,12 +140,47 @@ export class SelectionManager {
 		}
 
 		this.state.updateSelection(selection, event.origin);
+		this.updateFocusPlaceholder(this.state.prevSelection, selection);
 		// if nothing was processed, emit selection changed to sync the dom
 		if (!this.app.processTick()) {
-			this.app.emit(EventsOut.selectionchanged, selection);
+			this.app.emit(EventsOut.selectionChanged, selection);
 		}
 	}
 
 	onSyncSelection() {
 	}
+
+	// update placeholder visibility for the focus node
+	private updateFocusPlaceholder(before?: PinnedSelection, after?: PinnedSelection,) {
+		return
+		if (after?.isCollapsed || !after) {
+			const prevNode = before?.head.node.closest(n => n.isContainerBlock);
+			const currNode = after?.head.node.closest(n => n.isContainerBlock);
+			if (currNode && prevNode?.eq(currNode)) return
+
+			if (before?.isCollapsed && prevNode && prevNode?.firstChild?.isEmpty) {
+				prevNode.updateAttrs({
+					html: {
+						'data-focused': 'false',
+						placeholder: prevNode.attrs.node.emptyPlaceholder ?? ''
+					},
+				})
+				this.runtime.updatedNodeIds.add(prevNode.id)
+			}
+
+			if (!currNode?.firstChild?.isEmpty) {
+				return
+			}
+			currNode.updateAttrs({
+				html: {
+					'data-focused': 'true',
+					placeholder: currNode.attrs.node.focusPlaceholder || 'Type "/" for commands'
+				},
+			})
+			this.runtime.updatedNodeIds.add(currNode.id)
+		}
+
+	}
+
+
 }

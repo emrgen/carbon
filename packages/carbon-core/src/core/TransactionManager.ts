@@ -5,8 +5,6 @@ import { Transaction } from "./Transaction";
 import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
 import { EventsOut } from './Event';
-import { PointedSelection } from './PointedSelection';
-import { ActionOrigin } from './actions/types';
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];
@@ -39,8 +37,9 @@ export class TransactionManager {
 		// normalizer transactions are allowed to commit even with pending selection events
 		while (this.transactions.length && (!this.runtime.selectEvents.length || this.transactions[0].isNormalizer)) {
 			const tr = this.transactions.shift();
-			console.log(tr)
+			console.log('Commit', tr)
 			if (tr?.commit()) {
+				// transaction should me made read-only after commit
 				pm.onTransaction(tr);
 				app.emit(EventsOut.transaction, tr);
 				this.updateTransactionEffects(tr);
@@ -61,24 +60,25 @@ export class TransactionManager {
 			this.commitSelection();
 		}
 
+		// update dom to reflect the state changes
 		this.app.change.update();
 		this.app.emit(EventsOut.change, this.state);
 	}
 
 	private commitContent() {
 		this.state.updateContent();
-		this.app.emit(EventsOut.contentchanged, this.state.content);
+		this.app.emit(EventsOut.contentChanged, this.state.content);
 	}
 
 	private commitNodeStates() {
 		this.state.updateNodeState();
-		this.app.emit(EventsOut.nodestatechanged, this.state);
+		this.app.emit(EventsOut.nodeStateChanged, this.state);
 	}
 
 	private commitSelection() {
 		// console.log('commitSelection', this.state.selection.toString());
 		this.sm.commitSelection();
-		this.app.emit(EventsOut.selectionchanged, this.state.selection);
+		this.app.emit(EventsOut.selectionChanged, this.state.selection);
 	}
 
 	private updateDecorations() {

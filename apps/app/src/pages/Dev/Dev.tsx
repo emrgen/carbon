@@ -178,6 +178,26 @@ export default function Dev() {
   return (
     <CarbonContext app={app}>
       <CarbonChangeContext>
+        <div className="carbon-header">
+          <div
+            className="carbon-control"
+            onClick={() => app.cmd.insert.node("section")?.dispatch()}
+          >
+            Text
+          </div>
+          <div
+            className="carbon-control"
+            onClick={() => app.cmd.insert.node("divider")?.dispatch()}
+          >
+            Divider
+          </div>
+          <div
+            className="carbon-control"
+            onClick={() => app.cmd.change.into("bulletedList")?.dispatch()}
+          >
+            Bullet
+          </div>
+        </div>
         <CarbonContent />
       </CarbonChangeContext>
     </CarbonContext>

@@ -37,6 +37,8 @@ import { DocLink } from './plugins/DocLink';
 import { DocLinkComp } from './renderers/DocLink';
 import { Table } from './plugins/Table';
 import { ColumnComp, RowComp, TableComp } from './renderers/Table';
+import { Insert } from './plugins/Inserter';
+import { Change } from './plugins/Change';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -60,6 +62,8 @@ export const blockPresets: Extension = {
 		new Code(),
 		new DocLink(),
 		new Table(),
+		new Insert(),
+		new Change(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),

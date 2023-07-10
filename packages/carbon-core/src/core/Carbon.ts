@@ -49,7 +49,7 @@ export class Carbon extends EventEmitter {
 		this.sm = new SelectionManager(this);
 		this.em = new EventManager(this, pm);
 		this.tm = new TransactionManager(this, pm, this.sm);
-		this.change = new ChangeManager(this.state, this.sm, this.tm);
+		this.change = new ChangeManager(this, this.state, this.sm, this.tm);
 
 		this.cmd = pm.commands(this);
 		this.enabled = true;

@@ -149,7 +149,6 @@ export class Transaction {
 
 	select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
 		const after = selection.unpin();
-		// console.log('Transaction.select', after.toString(), this.selection.toString());
 		this.add(SelectAction.create(this.selection, after, origin));
 		return this;
 	}

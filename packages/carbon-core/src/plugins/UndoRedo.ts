@@ -105,7 +105,7 @@ export class UndoPlugin extends AfterPlugin {
       this.undoStack.push(tr);
       this.redoStack = [];
     } else {
-      console.log('skip transaction', tr);
+      // console.log('skip transaction', tr);
     }
   }
 }

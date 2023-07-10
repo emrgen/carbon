@@ -39,11 +39,13 @@ export enum EventsIn {
 export enum EventsOut {
 	updateView = 'update:view',
 	change = 'change',
-	viewupdated = 'view:updated',
-	selectionchanged = 'selection:changed',
+	viewUpdated = 'view:updated',
+	selectionChanged = 'selection:changed',
 	blockSelection = 'block:selection',
-	contentchanged = 'content:changed',
-	nodestatechanged = 'nodestatechanged',
+	contentChanged = 'content:changed',
+	nodeStateChanged = 'node:state:changed',
+	selectionUpdated = 'selection:updated',
+	contentUpdated = 'content:updated',
 	transaction = 'transaction',
 	mounted = 'mounted',
 }

@@ -1,6 +1,7 @@
 import { each, identity } from 'lodash';
 import { NodeIdSet } from './BSet';
 import { CarbonState } from './CarbonState';
+import { Carbon } from './Carbon';
 import { Node } from "./Node";
 import { NodeTopicEmitter } from './NodeEmitter';
 import { SelectionManager } from './SelectionManager';
@@ -13,11 +14,16 @@ export enum NodeChangeType {
 }
 
 /**
- * Syncs the editor state with the UI
+ * Syncs the editor state (iow content and selection) with the UI
  */
 export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
-	constructor(readonly state: CarbonState, readonly sm: SelectionManager, readonly tm: TransactionManager) {
+	constructor(
+		private readonly app: Carbon,
+		private readonly state: CarbonState,
+		private readonly sm: SelectionManager,
+		private readonly tm: TransactionManager
+	) {
 		super();
 	}
 
@@ -35,23 +41,23 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	update() {
 		if (this.state.isContentDirty) {
 			this.updateContent();
+			// console.log('updating content');
 			if (this.state.isNodeStateDirty) {
-				console.log('update node states');
+				// console.log('updating states');
 				this.updateNodeState();
 			}
-			console.log('update content', this.state.isNodeStateDirty);
 			return
 		}
 
 		if (this.state.isNodeStateDirty) {
-			console.log('update node states');
+			// console.log('updating states');
 			this.updateNodeState();
 			return
 		}
 
 		if (this.state.isSelectionDirty) {
+			// console.log('updating selection');
 			this.updateSelection()
-			// console.log('update selection');
 			return
 		}
 	}
@@ -59,6 +65,9 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	mounted(node: Node) {
 		this.state.runtime.updatedNodeIds.remove(node.id);
 		// console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
+		if (this.isContentSynced) {
+			this.app.emit(EventsOut.selectionUpdated, this.state.content);
+		}
 		if (this.isContentSynced && this.state.isSelectionDirty) {
 			this.updateSelection();
 		}
@@ -70,7 +79,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		const { updatedNodeIds } = this.state.runtime;
 		const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
 
-		// find remove nodes if ancestor is present in the updateNodes
+		// remove nodes if ancestor is present in the updateNodes
+		// this is needed to avoid updating the same node twice
 		updatedNodes.forEach(n => {
 			updatedNodeIds.remove(n.id);
 			if (n.closest(p => updatedNodeIds.has(p.id))) {
@@ -95,10 +105,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		this.state.runtime.selectedNodeIds.clear();
 		this.state.runtime.activatedNodeIds.clear();
 
-		// console.log(dirtyNodes.map(n => n.data));
-
 		each(dirtyNodes, n => this.publish(NodeChangeType.state, n));
-		// this.emit(EventsOut.blockSelection);
 	}
 
 	private updateSelection() {
@@ -106,11 +113,11 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			throw new Error("Trying to sync selection with dirty content");
 			return
 		}
-		// if (this.state.runtime.selectedNodeIds.size) {
-		// 	this.updateNodeState()
-		// }
+
 		console.groupCollapsed('syncing: selection');
 		this.sm.syncSelection();
+		this.app.emit(EventsOut.selectionUpdated, this.state.selection);
+
 		// process pending transactions
 		this.tm.dispatch();
 		console.groupEnd();
