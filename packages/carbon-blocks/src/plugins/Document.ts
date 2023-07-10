@@ -28,6 +28,7 @@ export class DocPlugin extends CarbonPlugin {
 			collapsible: true,
 			isolating: true,
 			sandbox: true,
+			document: true,
 			attrs: {
 				html: {
 					contentEditable: true,

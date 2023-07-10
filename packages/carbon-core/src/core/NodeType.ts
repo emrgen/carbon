@@ -140,6 +140,10 @@ export class NodeType {
 		return !!this.spec.container;
 	}
 
+	get isDocument() {
+		return !!this.spec.document;
+	}
+
 	get splits() {
 		return !!this.spec.splits
 	}

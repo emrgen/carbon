@@ -1,4 +1,4 @@
-import { BeforePlugin, Carbon, CarbonPlugin, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, Transaction, insertBeforeAction, preventAndStopCtx, splitTextBlock } from "@emrgen/carbon-core";
+import { BeforePlugin, BlockContent, Carbon, CarbonPlugin, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, Transaction, insertAfterAction, insertBeforeAction, preventAndStopCtx, splitTextBlock } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 declare module '@emrgen/carbon-core' {
@@ -103,6 +103,16 @@ export class CollapsibleList extends NodePlugin {
       const section = app.schema.type(splitBlock.type.splitName).default();
       const focusPoint = Pin.toStartOf(title!);
       const after = PinnedSelection.fromPin(focusPoint!);
+
+      if (title.parent?.isDocument) {
+        section?.child(0)?.updateContent(BlockContent.create(app.schema.cloneWithId(title)));
+        const focusPoint = Pin.toStartOf(section!);
+        const after = PinnedSelection.fromPin(focusPoint!);
+        return app.tr
+          .setContent(title.id, BlockContent.create([]))
+          .add(insertAfterAction(title, section!))
+          .select(after)
+      }
 
       return app.tr
         .add(insertBeforeAction(title.parent!, section!))

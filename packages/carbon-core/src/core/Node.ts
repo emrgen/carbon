@@ -337,6 +337,10 @@ export class Node extends EventEmitter {
 		return !this.parent;
 	}
 
+	get isDocument(): boolean {
+		return !!this.type.isDocument;
+	}
+
 	get isInline(): boolean {
 		return this.type.isInline
 	}
@@ -359,6 +363,10 @@ export class Node extends EventEmitter {
 
 	get isCollapsible() {
 		return this.type.isCollapsible
+	}
+
+	get isSandbox() {
+		return this.type.isSandbox
 	}
 
 	get groups(): readonly string[] {

@@ -5,6 +5,6 @@ export const isNestableNode = (node: Node) => {
 }
 
 export const isConvertible = (node: Node) => {
-	return (!node.isRoot && isNestableNode(node))
+	return (!node.isDocument && isNestableNode(node))
 }
 

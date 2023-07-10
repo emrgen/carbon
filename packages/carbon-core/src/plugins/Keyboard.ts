@@ -119,9 +119,9 @@ export class KeyboardBeforePlugin extends BeforePlugin {
 	on(): Partial<EventHandler> {
 		return {
 			$mouseDown: (ctx: EventContext<MouseEvent>) => {
-				const {app, node} = ctx;
-				const {selection} = app;
-				const {start, end} = selection;
+				const { app, node } = ctx;
+				const { selection } = app;
+				const { start, end } = selection;
 				const isolating = start.node.find(n => n.isIsolating);
 				if (!isolating) {
 					return
@@ -190,7 +190,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				const { selection, cmd, state, blockSelection: nodeSelection } = app;
-				const {selectedNodeIds} = state
+				const { selectedNodeIds } = state
 				event.preventDefault();
 
 				// nodes selection is visible using halo
@@ -290,8 +290,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 						console.log("TODO: select first top level node");
 						return
 					}
-					const {parent} = node;
-					if (parent?.isRoot) return
+					const { parent } = node;
+					if (parent?.isSandbox) return
 					app.tr.selectNodes([parent!.id]).dispatch();
 					return
 				}
@@ -317,7 +317,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			shiftEnter: e => this.enter(e),
 			enter: e => this.enter(e),
 			up: e => this.up(e),
-			down : e => this.down(e),
+			down: e => this.down(e),
 
 			// 'cmd+a': (event: EditorEvent<KeyboardEvent>) => {
 			// 	event.preventDomDefault();
@@ -335,10 +335,10 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		const { app, node } = ctx;
 		const { blockSelection: nodeSelection } = app;
 		console.log('xxxxx');
-		
+
 		if (nodeSelection.isEmpty) return
 
-		const {blocks: nodes} = nodeSelection;
+		const { blocks: nodes } = nodeSelection;
 		const firstNode = nodes[0] as Node;
 		const block = prevContainerBlock(firstNode);
 		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
@@ -374,14 +374,14 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		ctx.event.preventDefault();
 		const { app } = ctx;
 		const { selection, cmd, blockSelection } = app;
-		const {start, end} = selection
-		const {node} = start;
+		const { start, end } = selection
+		const { node } = start;
 		let tr = app.tr;
 
 		// put the cursor at the end of the first text block
 		if (!blockSelection.isEmpty) {
 			console.log('node selection...');
-			const {blocks: nodes} = blockSelection;
+			const { blocks: nodes } = blockSelection;
 			console.log(nodes.map(n => n.id.toString()));
 
 			const done = nodes.some(n => {
@@ -436,7 +436,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		// delete node selection if any
 		if (!nodeSelection.isEmpty) {
-			cmd.transform.deleteNodes(nodeSelection, {fall: 'after'})?.dispatch();
+			cmd.transform.deleteNodes(nodeSelection, { fall: 'after' })?.dispatch();
 			return
 		}
 
@@ -480,19 +480,19 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		}
 
 		const block = prevContainerBlock(node)
-		if (!block || block.isRoot) return
+		if (!block || block.isDocument) return
 
 		app.tr.selectNodes([block.id]).dispatch()
 	}
 
 	down(ctx: EventContext<KeyboardEvent>) {
-		const {app, node} = ctx;
+		const { app, node } = ctx;
 		const { blockSelection: nodeSelection } = app;
 		if (nodeSelection.isEmpty) return
 		ctx.event.preventDefault();
 
 		if (nodeSelection.size > 1) {
-			const {blocks: nodes} = nodeSelection
+			const { blocks: nodes } = nodeSelection
 			const lastNode = last(nodes) as Node;
 			app.tr.selectNodes([lastNode.id]).dispatch()
 			return
@@ -506,13 +506,13 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 	}
 }
 
-const prevContainerBlock = (node: Node)=> {
+const prevContainerBlock = (node: Node) => {
 	const block = node.chain.find(n => n.isContainerBlock) as Node;
 	const { prevSibling } = block
 	if (prevSibling?.isContainerBlock) {
 		const childContainer = prevSibling.find(n => {
-			return !n.eq(prevSibling) && n.isContainerBlock
-		}, { order: 'pre', direction: 'backward' })
+			return !n.eq(prevSibling) && !n.isCollapseHidden && n.isContainerBlock
+		}, { order: 'post', direction: 'backward' })
 
 		return childContainer ?? prevSibling;
 	}
@@ -526,7 +526,9 @@ const prevContainerBlock = (node: Node)=> {
 
 const nextContainerBlock = node => {
 	const block = node.chain.find(n => n.isContainerBlock);
-	return block.find(n => !n.eq(block) && n.isContainerBlock, { order: 'pre' }) ?? block?.next(n => n.isContainerBlock, { order: 'pre' });
+	return block.find(n => {
+		return !n.eq(block) && !n.isCollapseHidden && n.isContainerBlock
+	}, { order: 'pre' }) ?? block?.next(n => n.isContainerBlock, { order: 'pre' });
 }
 
 

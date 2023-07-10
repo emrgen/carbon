@@ -122,10 +122,10 @@ export class EventManager {
 
 		if ([
 			// EventsIn.selectionchange,
-			EventsIn.selectstart,
-			EventsIn.mouseDown,
-			EventsIn.keyDown,
-			EventsIn.keyUp,
+			// EventsIn.selectstart,
+			// EventsIn.mouseDown,
+			// EventsIn.keyDown,
+			// EventsIn.keyUp,
 			EventsIn.beforeinput,
 		].includes(type) || selectionChangedUsingKeys(event)
 		) {
@@ -206,7 +206,7 @@ export class EventManager {
 
 	// 	return type;
 	// }
-	
+
 	// afterEvent(event: EditorEvent<Event>) {
 	// 	const { type } = event;
 	// 	if (type === EventsIn.mouseUp) {

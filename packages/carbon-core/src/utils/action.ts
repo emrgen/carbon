@@ -17,8 +17,6 @@ export const insertNodesActions = (at: Point, nodes: Node[], origin: ActionOrigi
   return actions;
 }
 
-
-
 export const removeNodesActions = (nodes: Node[], origin: ActionOrigin = ActionOrigin.UserInput) => {
   const actions: CarbonAction[] = [];
   nodes.slice().reverse().forEach(n => {
@@ -30,5 +28,10 @@ export const removeNodesActions = (nodes: Node[], origin: ActionOrigin = ActionO
 
 export const insertBeforeAction = (before: Node, node: Node,  origin: ActionOrigin = ActionOrigin.UserInput) => {
   const at = before.prevSibling ? Point.toAfter(before.prevSibling!.id) : Point.toWithin(before.parent!.id);
+  return InsertNode.create(at, node, origin);
+}
+
+export const insertAfterAction = (after: Node, node: Node,  origin: ActionOrigin = ActionOrigin.UserInput) => {
+  const at = Point.toAfter(after!.id)
   return InsertNode.create(at, node, origin);
 }
