@@ -5,6 +5,7 @@ export * from './plugins';
 export * from './renderer';
 export * from './core/types'
 export * from './core/actions'
+export * from './core/Event'
 
 export * from './utils/split'
 export * from './utils/key'

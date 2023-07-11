@@ -24,13 +24,19 @@ export class CarbonRuntimeState {
 	activatedNodeIds: NodeIdSet = new NodeIdSet();
 	// deleted node ids
 	deletedNodeIds: NodeIdSet = new NodeIdSet();
+	// open node id
+	openNodeIds: NodeIdSet = new NodeIdSet();
 	// activeMarks: string = '';
 	origin: ActionOrigin = ActionOrigin.Unknown;
 
 	clipboard: CarbonClipboard = CarbonClipboard.default();
 
-	get isDirty() {
+	get isContentDirty() {
 		return this.updatedNodeIds.size;
+	}
+
+	get isNodeStateDirty() {
+		return this.selectedNodeIds.size || this.activatedNodeIds.size || this.openNodeIds.size;
 	}
 
 	get selectEvent(): Optional<SelectionEvent> {
@@ -66,6 +72,8 @@ export class CarbonState {
 	unselectedNodeIds: NodeIdSet;
 	activatedNodeIds: NodeIdSet;
 	deactivatedNodeIds: NodeIdSet;
+	openNodeIds: NodeIdSet
+	closeNodeIds: NodeIdSet
 
 	prevSelection?: PinnedSelection;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
@@ -78,11 +86,11 @@ export class CarbonState {
 	}
 
 	get isContentDirty() {
-		return this.runtime.isDirty || this.decorations.size;
+		return this.runtime.isContentDirty || this.decorations.size;
 	}
 
 	get isNodeStateDirty() {
-		return this.runtime.selectedNodeIds.size || this.runtime.activatedNodeIds.size;
+		return this.runtime.selectedNodeIds.size || this.runtime.activatedNodeIds.size || this.runtime.openNodeIds.size;
 	}
 
 	get nodeSelection() {
@@ -114,6 +122,8 @@ export class CarbonState {
 		this.activatedNodeIds = activatedNodeIds;
 		this.deactivatedNodeIds = new NodeIdSet();
 		this.unselectedNodeIds = new NodeIdSet();
+		this.openNodeIds = new NodeIdSet();
+		this.closeNodeIds = new NodeIdSet();
 
 		this.dirty = false;
 		this.isSelectionDirty = true;
@@ -151,7 +161,7 @@ export class CarbonState {
 	}
 
 	updateNodeState() {
-		if (!this.runtime.activatedNodeIds.size && !this.runtime.selectedNodeIds.size) return
+		if (!this.runtime.isNodeStateDirty) return
 		const { store } = this;
 		this.selectedNodeIds.clear();
 		this.unselectedNodeIds.clear();
@@ -173,6 +183,15 @@ export class CarbonState {
 				this.deactivatedNodeIds.add(id);
 			}
 		});
+		
+		this.runtime.openNodeIds.forEach(id => {
+			if (store.get(id)?.isOpen) {
+				this.openNodeIds.add(id);
+			} else {
+				this.closeNodeIds.add(id);
+			}
+		});
+
 	}
 
 	updateContent() {

@@ -156,6 +156,9 @@ importers:
       '@emrgen/types':
         specifier: ^0.0.2
         version: 0.0.2
+      '@react-icons/all-files':
+        specifier: ^4.1.0
+        version: 4.1.0(react@18.2.0)
       '@types/katex':
         specifier: ^0.16.0
         version: 0.16.0
@@ -171,6 +174,9 @@ importers:
       prismjs:
         specifier: ^1.29.0
         version: 1.29.0
+      react-icons:
+        specifier: ^4.10.1
+        version: 4.10.1(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.0.17
@@ -1028,6 +1034,14 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
+    dev: false
+
+  /@react-icons/all-files@4.1.0(react@18.2.0):
+    resolution: {integrity: sha512-hxBI2UOuVaI3O/BhQfhtb4kcGn9ft12RWAFVMUeNjqqhLsHvFtzIkFaptBJpFDANTKoDfdVoHTKZDlwKCACbMQ==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /@remix-run/router@1.3.3:
@@ -2848,6 +2862,14 @@ packages:
       loose-envify: 1.4.0
       react: 18.2.0
       scheduler: 0.23.0
+    dev: false
+
+  /react-icons@4.10.1(react@18.2.0):
+    resolution: {integrity: sha512-/ngzDP/77tlCfqthiiGNZeYFACw85fUjZtLbedmJ5DTlNDIwETxhwBzdOJ21zj4iJdvc0J3y7yOsX3PpxAJzrw==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react-is@16.13.1:

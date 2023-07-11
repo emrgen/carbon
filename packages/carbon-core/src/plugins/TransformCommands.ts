@@ -169,7 +169,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     if (!selection.isCollapsed) {
-      return cmd.transform.delete()?.next(carbon => {
+      return cmd.transform.delete()?.then(carbon => {
         return updateTitleText(carbon);
       })
     }
@@ -293,7 +293,7 @@ export class TransformCommands extends BeforePlugin {
 
     const after = selection.collapseToStart();
     // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
-    app.cmd.transform.delete(selection)?.next((carbon) => {
+    app.cmd.transform.delete(selection)?.then((carbon) => {
       // console.log('DELETED', carbon.selection.toString());
       return this.paste(carbon, after, BlockSelection.empty(app.store), slice);
     })?.dispatch();

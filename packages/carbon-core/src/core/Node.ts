@@ -90,11 +90,6 @@ export class Node extends EventEmitter {
 		this.attrs = new NodeAttrs(merge(cloneDeep(type.attrs), attrs));
 		this.data = new NodeData(merge(cloneDeep(type.data), data));
 
-		if (type.name ==='fileTreeItem') {
-			console.log('XX', this.data, data);
-			
-		}
-
 		this.renderVersion = renderVersion;
 		this.updateVersion = updateVersion;
 	}
@@ -140,6 +135,10 @@ export class Node extends EventEmitter {
 
 	get isSelected() {
 		return this.data.state.selected;
+	}
+
+	get isOpen() {
+		return this.data.state.open;
 	}
 
 	get size(): number {

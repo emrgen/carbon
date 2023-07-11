@@ -46,6 +46,8 @@ export enum EventsOut {
 	nodeStateChanged = 'node:state:changed',
 	selectionUpdated = 'selection:updated',
 	contentUpdated = 'content:updated',
+	nodeStateUpdated = 'node:state:updated',
 	transaction = 'transaction',
 	mounted = 'mounted',
+	nodeInserted = 'nodeInserted',
 }

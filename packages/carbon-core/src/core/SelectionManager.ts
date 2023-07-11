@@ -127,7 +127,10 @@ export class SelectionManager {
 	commitSelection() {
 		const { app } = this
 		const event = last(this.runtime.selectEvents) as Optional<SelectionEvent>;
+		console.log('XXX');
+		
 		if (!event) {
+			!this.app.processTick()
 			return
 		}
 		this.runtime.selectEvents = [];
@@ -140,11 +143,10 @@ export class SelectionManager {
 		}
 
 		this.state.updateSelection(selection, event.origin);
+		this.app.emit(EventsOut.selectionChanged, selection);
 		this.updateFocusPlaceholder(this.state.prevSelection, selection);
 		// if nothing was processed, emit selection changed to sync the dom
-		if (!this.app.processTick()) {
-			this.app.emit(EventsOut.selectionChanged, selection);
-		}
+		this.app.processTick()
 	}
 
 	onSyncSelection() {

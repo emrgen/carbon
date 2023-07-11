@@ -44,7 +44,6 @@ export function CarbonContent() {
         <CarbonNode node={app.content} />
       </div>
       {/* helper portal for the app */}
-      {/* <CarbonPortal/> */}
     </>
   );
 }

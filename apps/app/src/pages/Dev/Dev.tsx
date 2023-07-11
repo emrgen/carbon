@@ -1,4 +1,5 @@
 import {
+  BlockEvent,
   blockPresets,
   node,
   section,
@@ -10,6 +11,7 @@ import {
   CarbonChangeContext,
   CarbonContent,
   CarbonContext,
+  CarbonModal,
   extensionPresets,
   useCreateCarbon,
 } from "@emrgen/carbon-core";
@@ -182,6 +184,7 @@ const data = node("carbon", [
 
 export default function Dev() {
   const app = useCreateCarbon(data, [extensionPresets, blockPresets]);
+
   // console.log(app.schema.nodes);
 
   // @ts-ignore
@@ -195,7 +198,7 @@ export default function Dev() {
   return (
     <CarbonContext app={app}>
       <CarbonChangeContext>
-        <div className="carbon-header">
+        {/* <div className="carbon-header">
           <div
             className="carbon-control"
             onClick={() => app.cmd.insert.node("section")?.dispatch()}
@@ -214,7 +217,7 @@ export default function Dev() {
           >
             Bullet
           </div>
-        </div>
+        </div> */}
         <CarbonContent />
       </CarbonChangeContext>
     </CarbonContext>

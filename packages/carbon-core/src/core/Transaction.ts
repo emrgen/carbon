@@ -31,6 +31,8 @@ import { UpdateData } from './actions/UpdateData';
 import { ActionOrigin, CarbonAction } from './actions/types';
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
+import { OpenDocument } from './actions/OpenDocument';
+import { CloseDocument } from './actions/CloseDocument';
 
 export class TransactionError {
 	commandId: number;
@@ -67,6 +69,7 @@ export class Transaction {
 	private updatedIds = new NodeIdSet();
 	private selectedIds = new NodeIdSet();
 	private activatedIds = new NodeIdSet();
+	private openNodeIds = new NodeIdSet();
 
 	get origin() {
 		return this.app.runtime.origin;
@@ -122,7 +125,7 @@ export class Transaction {
 	}
 
 	get updatesNodeState() {
-		return !!this.selectedIds.size || !!this.activatedIds.size;
+		return !!this.selectedIds.size || !!this.activatedIds.size || this.openNodeIds.size;
 	}
 
 	private get selections() {
@@ -206,6 +209,16 @@ export class Transaction {
 		return this;
 	}
 
+	open(id: NodeId,  origin = this.origin): Transaction {
+		this.add(OpenDocument.create(id, origin));
+		return this;
+	}
+
+	close(id: NodeId,  origin = this.origin): Transaction {
+		this.add(CloseDocument.create(id, origin));
+		return this;
+	}
+
 	// deactivate any active node before node selection
 	selectNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
 		ids = isArray(ids) ? ids : [ids];
@@ -255,6 +268,7 @@ export class Transaction {
 	dispatch(isNormalizer: boolean = false) {
 		this.isNormalizer = isNormalizer
 		this.tm.dispatch(this);
+		return this;
 	}
 
 	commit(): boolean {
@@ -404,6 +418,13 @@ export class Transaction {
 		})
 	}
 
+	opened(...nodes: Node[]) {
+		each(nodes, n => {
+		this.runtime.openNodeIds.add(n.id)
+		this.openNodeIds.add(n.id)
+		})
+	}
+
 	// merge transactions
 	// * Note: current transaction is mutated
 	merge(tr: Transaction) {
@@ -416,11 +437,36 @@ export class Transaction {
 		return this;
 	}
 
+	// extend transaction with other transaction
+	extend(other: Transaction) {
+		other.actions.forEach(action => {
+			this.actions.push(action);
+		})
+
+		// other.activatedIds.forEach(id => {
+		// 	this.activatedIds.add(id);
+		// })
+
+		// other.selectedIds.forEach(id => {
+		// 	this.selectedIds.add(id);
+		// })
+
+		// other.openNodeIds.forEach(id => {
+		// 	this.openNodeIds.add(id);
+		// })
+
+		// other.updatedIds.forEach(id => {
+		// 	this.updatedIds.add(id);
+		// });
+
+		return this;
+	}
+
 	pop() {
 		return this.actions.pop();
 	}
 
-	next(cb: With<Carbon>) {
+	then(cb: With<Carbon>) {
 		this.app.nextTick(cb);
 		return this;
 	}

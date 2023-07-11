@@ -41,7 +41,7 @@ interface UseNodeChangeProps {
 
 // start watching for the node change
 export const useNodeChange = (props: UseNodeChangeProps) => {
-	const {node} = props;
+	const { node } = props;
 	const change = useCarbonChange();
 	const [watched, setWatched] = useState(node);
 	// this will force the ui update
@@ -61,7 +61,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 	}, [change, node.id, node.version, props, watched]);
 
 	useEffect(() => {
-		change.mounted(watched)
+		change.mounted(watched, NodeChangeType.update)
 	}, [change, version, watched]);
 
 	return {
@@ -74,6 +74,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 export const useNodeStateChange = (props: UseNodeChangeProps) => {
 	const { node } = props;
 	const change = useCarbonChange();
+	const [isOpen, setIsOpen] = useState(!!node.isOpen);
 	const [isActive, setIsActive] = useState(!!node.isActive);
 	const [isSelected, setIsSelected] = useState(!!node.isSelected);
 
@@ -81,7 +82,8 @@ export const useNodeStateChange = (props: UseNodeChangeProps) => {
 		const onChange = (value: Node) => {
 			setIsActive(!!value.isActive);
 			setIsSelected(!!value.isSelected);
-			console.log('state changed', node.id.toString(), !!value.data.state?.active, !!value.data.state?.selected);
+			setIsOpen(!!value.isOpen);
+			// console.log('state changed', node.id.toString(), !!value.data.state?.active, !!value.data.state?.selected, !!value.data.state?.open);
 		};
 
 		change.subscribe(node.id, NodeChangeType.state, onChange);
@@ -90,9 +92,10 @@ export const useNodeStateChange = (props: UseNodeChangeProps) => {
 		}
 	}, [change, node]);
 
+	// inform the change manager that this node is mounted
 	useEffect(() => {
-		change.mounted(node);
-	}, [node, isActive, isSelected, change]);
+		change.mounted(node, NodeChangeType.state);
+	}, [node, isActive, isSelected, isOpen, change]);
 
 	const attributes = useMemo(() => {
 		const ret = {}
@@ -102,12 +105,18 @@ export const useNodeStateChange = (props: UseNodeChangeProps) => {
 		if (isActive) {
 			ret["data-active"] = true
 		}
+		if (isOpen) {
+			ret["data-open"] = true
+		}
+		// console.log('attributes', ret);
+		
 		return ret
-	},[isActive, isSelected]);
+	}, [isActive, isSelected, isOpen]);
 
 	return {
 		isActive,
 		isSelected,
+		isOpen,
 		isNormal: !isActive && !isSelected,
 		attributes,
 	};
@@ -132,7 +141,7 @@ export const useNodeAttrs = (props: UseNodeChangeProps) => {
 	}, [change, node]);
 
 	useEffect(() => {
-		change.mounted(node);
+		change.mounted(node, NodeChangeType.update);
 	}, [node, change]);
 
 	return attrs;

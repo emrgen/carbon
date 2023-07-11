@@ -60,14 +60,18 @@ export const FileTreeItemComp = (props: RendererProps) => {
     [app, node]
   );
 
-  const handleOpenDocument = useCallback(() => {
-    app.tr
-      .open(node.id)
-      .then(() => {
-        return () => app.emit(BlockEvent.openDocument, { node });
-      })
-      .dispatch();
-  }, [app, node]);
+  const handleOpenDocument = useCallback(
+    (e) => {
+      preventAndStop(e);
+      app.tr
+        .open(node.id)
+        .then(() => {
+          return () => app.emit(BlockEvent.openDocument, { node });
+        })
+        .dispatch();
+    },
+    [app, node]
+  );
 
   const beforeContent = useMemo(() => {
     return (
@@ -115,13 +119,14 @@ export const FileTreeItemComp = (props: RendererProps) => {
         />
       )}
       {node.isEmpty && (
-        <div
-          data-type="content"
-          // onClick={() => console.log("XXXXX")}
-          onMouseDown={stop}
-        >
+        <div data-type="content" onMouseDown={stop}>
           {beforeContent}
-          <div data-name="title" {...node.attrs.html}>
+          <div
+            data-name="title"
+            {...node.attrs.html}
+            onClick={handleOpenDocument}
+            onMouseDown={stop}
+          >
             <span>Untitled</span>
           </div>
         </div>

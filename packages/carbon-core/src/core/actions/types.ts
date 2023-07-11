@@ -40,6 +40,7 @@ export enum ActionType {
 	activateNodes = 'activateNodes',
 
 	updateAttrs = 'updateAttrs',
+	openDocument = 'openDocument',
 
 	null = 'null',
 	custom = 'custom',

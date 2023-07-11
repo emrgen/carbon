@@ -35,6 +35,10 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		return !this.state.runtime.updatedNodeIds.size;
 	}
 
+	private get isStateSynced() {
+		return !this.state.runtime.isNodeStateDirty
+	}
+
 	// 1. sync the doc
 	// 2. sync the selection
 	// 3. sync the node state
@@ -62,14 +66,34 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		}
 	}
 
-	mounted(node: Node) {
-		this.state.runtime.updatedNodeIds.remove(node.id);
+	mounted(node: Node, changeType: NodeChangeType) {
+		if (changeType === NodeChangeType.update) {
+			this.state.runtime.updatedNodeIds.remove(node.id);
+		}
+
+		// if (changeType === NodeChangeType.state) {
+		// 	this.state.runtime.selectedNodeIds.remove(node.id);
+		// 	this.state.runtime.activatedNodeIds.remove(node.id);
+		// 	this.state.runtime.openNodeIds.remove(node.id);
+		// }
+
 		// console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
 		if (this.isContentSynced) {
-			this.app.emit(EventsOut.selectionUpdated, this.state.content);
+			this.app.emit(EventsOut.contentUpdated, this.state.content);
 		}
-		if (this.isContentSynced && this.state.isSelectionDirty) {
-			this.updateSelection();
+
+		if (this.isStateSynced) {
+			this.app.emit(EventsOut.nodeStateUpdated, this.state);
+		}
+
+		// console.log('--------', this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
+		if (this.isContentSynced) {
+			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
+			if (this.state.isSelectionDirty) {
+				this.updateSelection();
+			} else {
+				this.app.processTick();
+			}
 		}
 	}
 
@@ -97,13 +121,24 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	// 
 	private updateNodeState() {
-		const { selectedNodeIds, unselectedNodeIds, activatedNodeIds, deactivatedNodeIds } = this.state;
+		const { selectedNodeIds, unselectedNodeIds, activatedNodeIds, deactivatedNodeIds, openNodeIds, closeNodeIds } = this.state;
 		const dirtyNodesIds = new NodeIdSet();
-		dirtyNodesIds.extend(selectedNodeIds, unselectedNodeIds, activatedNodeIds, deactivatedNodeIds);
+		dirtyNodesIds.extend(
+			selectedNodeIds,
+			unselectedNodeIds,
+			activatedNodeIds,
+			deactivatedNodeIds,
+			openNodeIds,
+			closeNodeIds
+		);
+
 		const dirtyNodes = dirtyNodesIds.map(n => this.store.get(n)).filter(identity) as Node[];
 
 		this.state.runtime.selectedNodeIds.clear();
 		this.state.runtime.activatedNodeIds.clear();
+		this.state.runtime.openNodeIds.clear();
+
+		console.log('publish', dirtyNodes.map(n => n.id.toString()), openNodeIds.size);
 
 		each(dirtyNodes, n => this.publish(NodeChangeType.state, n));
 	}

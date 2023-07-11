@@ -152,7 +152,7 @@ export const CarbonDefaultNode = (props: RendererProps) => {
 
   const Component = node.isText ? CarbonText : CarbonBlock;
   return (
-    <Component node={node}>
+    <Component {...props}>
       <CarbonChildren node={node} />
     </Component>
   );

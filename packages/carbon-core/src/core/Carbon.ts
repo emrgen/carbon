@@ -17,7 +17,7 @@ import { Transaction } from './Transaction';
 import { TransactionManager } from './TransactionManager';
 import { CarbonCommands, SerializedNode } from "./types";
 import { BlockSelection } from './NodeSelection';
-import { first } from 'lodash';
+import { first, isFunction } from 'lodash';
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -36,7 +36,7 @@ export class Carbon extends EventEmitter {
 	_element: Optional<HTMLElement>;
 	_portal: Optional<HTMLElement>;
 	_contentElement: Optional<HTMLElement>;
-	_ticks: Maps<Carbon, Optional<Transaction>>[];
+	ticks: Maps<Carbon, Optional<Transaction>>[];
 
 	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
@@ -53,7 +53,7 @@ export class Carbon extends EventEmitter {
 
 		this.cmd = pm.commands(this);
 		this.enabled = true;
-		this._ticks = [];
+		this.ticks = [];
 	}
 
 	get content(): Node {
@@ -85,12 +85,12 @@ export class Carbon extends EventEmitter {
 	}
 
 	get element(): Optional<HTMLElement> {
-		this._element = this._element ?? this.store.element(this.content.id);
+		this._element = this._element ?? this.store.element(this.content.id)?.querySelector("[contenteditable=true]")
 		return this._element;
 	}
 
 	get portal(): Optional<HTMLElement> {
-		this._portal = this._portal ?? querySelector('.editor > .portal') as any ?? null;
+		this._portal = this._portal ?? querySelector('.carbon-app > .carbon-portal') as any ?? null;
 		return this._portal;
 	}
 
@@ -141,21 +141,25 @@ export class Carbon extends EventEmitter {
 	}
 
 	cleanTicks() {
-		this._ticks = [];
+		this.ticks = [];
 	}
 	
 	nextTick(cb) {
-		this._ticks.push(cb);
+		this.ticks.push(cb);
 	}
 
 	processTick() {
-		if (this._ticks.length) {
-			const tick = first(this._ticks);
-			this._ticks = this._ticks.slice(1);
+		if (this.ticks.length) {
+			const tick = first(this.ticks);
+			this.ticks = this.ticks.slice(1);
 			const tr = tick?.(this);
-			if (tr) {
+			if (!tr) return
+			if (tr instanceof Transaction) {
 				tr.onTick = true;
 				tr.dispatch();
+			} else if (isFunction(tr)) {
+				(tr as Function)(this);
+				return true;
 			}
 			return true;
 		}
