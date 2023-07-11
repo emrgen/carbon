@@ -148,7 +148,7 @@ export class TransformCommands extends BeforePlugin {
   }
 
   private insertText(app: Carbon, selection: PinnedSelection, text: string, native = false): Optional<Transaction> {
-    const {cmd } = app;
+    const { cmd } = app;
     const updateTitleText = (app: Carbon) => {
       const { tr } = app;
       const { schema, selection } = app;
@@ -679,8 +679,8 @@ export class TransformCommands extends BeforePlugin {
   private splitAtPin(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
     const { tr, selection } = app;
     const { splitType = app.schema.type('section') } = opts;
-    console.log(splitBlock.name, splitBlock.id.toString());
-    
+    // console.log(splitBlock.name, splitBlock.id.toString());
+
     const isAtBlockStart = pin.isAtStartOfNode(splitBlock);
     if (isAtBlockStart) {
       const emptyBlock = splitType.default();
@@ -761,7 +761,7 @@ export class TransformCommands extends BeforePlugin {
           if (moveNodes.length) {
             let at = Point.toAfter(firstNode.id);
             // console.log("move to ..", firstNode.id.toString(), at.toString());
-            moveCommands.push(moveNodesAction(at, moveNodes ));
+            moveCommands.push(moveNodesAction(at, moveNodes));
           }
         }
       } else {
@@ -834,8 +834,6 @@ export class TransformCommands extends BeforePlugin {
 
   // delete selected nodes
   deleteNodes(app: Carbon, selection: BlockSelection = app.blockSelection, opts: DeleteOpts = {}): Optional<Transaction> {
-    console.log('XXX');
-    
     const { fall = 'after' } = opts;
     const deleteActions: CarbonAction[] = [];
     const { blocks } = selection;
@@ -872,9 +870,10 @@ export class TransformCommands extends BeforePlugin {
       }
     }
 
-    console.log('XXX', selection, blocks.map(n => n.id.toString()));
+    // console.log('XXX', selection, blocks.map(n => n.id.toString()));
 
     const tr = app.tr
+      .selectNodes([])
       .add(deleteActions)
     if (after) {
       tr.select(after, ActionOrigin.UserInput);
@@ -1171,7 +1170,7 @@ export class TransformCommands extends BeforePlugin {
 
     each(deleteGroup.ranges, range => {
       const { start, end } = range;
-      const {node} = start;
+      const { node } = start;
 
       if (start.node.eq(end.node)) {
         if (node.chain.some(n => deleteGroup.has(n.id))) {
@@ -1459,7 +1458,7 @@ export class TransformCommands extends BeforePlugin {
     return app.tr
       .add(moveActions)
       .add(removeActions)
-      .add(insertActions )
+      .add(insertActions)
       .select(after);
   }
 

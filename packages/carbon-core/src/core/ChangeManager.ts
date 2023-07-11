@@ -88,11 +88,11 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			this.app.emit(EventsOut.nodeStateUpdated, this.state);
 		}
 
-		console.log('--------', this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
+		// console.log('--------', this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
 		if (this.isContentSynced) {
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
 			if (this.state.isSelectionDirty) {
-				// this.updateSelection();
+				this.updateSelection();
 			} else {
 				this.app.processTick();
 			}
@@ -150,6 +150,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			throw new Error("Trying to sync selection with dirty content");
 			return
 		}
+
+		// this.app.enable();
 
 		console.group('syncing: selection');
 		this.sm.syncSelection();

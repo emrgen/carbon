@@ -54,7 +54,6 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 			return
 		}
 
-		console.log('xxxxxxxxxxxx');
 		if (head.isAtStartOfNode(node)) {
 			const { start } = selection;
 			const textBlock = start.node.chain.find(n => n.isTextBlock)
