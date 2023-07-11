@@ -72,6 +72,18 @@ export class NestablePlugin extends AfterPlugin {
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);
 
+				if (listNode.attrs.html['data-as']) {
+					preventAndStopCtx(ctx);
+					tr
+						.updateAttrs(listNode.id, {
+							html: {
+								'data-as': ''
+							}
+						}).select(selection)
+						.dispatch();
+					return
+				}
+
 				// change to section
 				if (listNode.name !== 'section') {
 					preventAndStopCtx(ctx);

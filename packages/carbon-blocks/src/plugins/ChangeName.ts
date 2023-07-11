@@ -23,9 +23,9 @@ export class ChangeName extends BeforePlugin {
   inputRules = new BeforeInputRuleHandler([
     //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberedList')),
     new InputRule(/^(\[\]\s)(.)*/, this.tryChangeType('todo', ['nestable'])),
-    new InputRule(/^(#\s)(.)*/, this.tryChangeType('h1', ['nestable'])),
-    new InputRule(/^(##\s)(.)*/, this.tryChangeType('h2', ['nestable'])),
-    new InputRule(/^(###\s)(.)*/, this.tryChangeType('h3', ['nestable'])),
+    new InputRule(/^(#\s)(.)*/, this.tryChangeAttrs('h1', ['nestable'])),
+    new InputRule(/^(##\s)(.)*/, this.tryChangeAttrs('h2', ['nestable'])),
+    new InputRule(/^(###\s)(.)*/, this.tryChangeAttrs('h3', ['nestable'])),
     new InputRule(/^(-\s)(.)*/, this.tryChangeType('bulletedList', ['nestable'])),
     new InputRule(/^(\*\s)(.)*/, this.tryChangeType('bulletedList', ['nestable'])),
     new InputRule(/^([0-9]+\.\s)(.)*/, this.tryChangeType('numberedList', ['nestable'])),
@@ -48,6 +48,46 @@ export class ChangeName extends BeforePlugin {
         }
       },
     };
+  }
+
+  tryChangeAttrs(type: string, groups: string[], data: Partial<NodeData> = {}) {
+    return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
+      const { node, app } = ctx;
+      const { tr, selection } = app;
+      const block = node.closest(n => n.isContainerBlock)!;
+      if (!isConvertible(block)) return
+
+      console.log('tryChangeAttrs', ctx.node.textContent, type);
+
+      ctx.event.preventDefault();
+      ctx.stopPropagation();
+
+      const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
+
+      const match = text.match(regex);
+      if (match === null) {
+        console.error('failed to match regex', regex, text);
+        return
+      }
+
+      tr.updateData(block.id, {
+        node: {
+          ...data,
+          ...block.data.node,
+        }
+      })
+
+      tr
+        .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
+      tr.updateAttrs(block.id, {
+        html: {
+          'data-as': type,
+        }
+      })
+      tr.select(after);
+      tr.dispatch();
+      // expand collapsed block
+    }
   }
 
   tryChangeType(type: string, groups: string[], data: Partial<NodeData> = {}) {

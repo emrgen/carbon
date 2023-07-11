@@ -77,8 +77,11 @@ $quoteColor = #555
 [data-name=todo]
 [data-name=collapsibleList]
 [data-name=h1]
+[data-as=h1]
 [data-name=h2]
+[data-as=h2]
 [data-name=h3]
+[data-as=h3]
 [data-name=h4]
 	// padding-left: 10px
 	// padding: 1px 0
@@ -105,19 +108,27 @@ $quoteColor = #555
 	font-size: 40px
 	font-weight: bold
 
-[data-name=h1] > [data-type="content"]
+[data-name=h1] > [data-type="content"],
+[data-as=h1] > [data-type="content"]
 	font-size: 30px
 	padding-top: 30px
 	padding-bottom: 10px
-[data-name=h2] > [data-type="content"]
+	line-height: 40px
+
+[data-name=h2] > [data-type="content"],
+[data-as=h2] > [data-type="content"]
 	font-size: 24px
 	padding-top: 24px
 	padding-bottom: 2px
-[data-name=h3] > [data-type="content"]
+[data-name=h3] > [data-type="content"],
+[data-as=h3] > [data-type="content"]
 	font-size: 20px
 	padding-top: 20px
 	padding-bottom: 2px
-[data-name=h4] > [data-type="content"]
+	line-height: 30px
+
+[data-name=h4] > [data-type="content"],
+[data-as=h4] > [data-type="content"]
 	font-size: 16px
 
 
@@ -325,8 +336,12 @@ span {
 	padding: 6px 16px
 	margin: 10px 0
 	border-left: 3px solid $quoteColor
-	[data-type="content"]
-		line-height: 26px
+	// [data-type="content"]
+	// 	line-height: 26px
+	&[data-as] > [data-type=content]
+		padding-top 0
+	&[data-as] > [data-type=children]
+		padding-left 0
 
 [data-name=callout]
 	position relative
@@ -336,6 +351,10 @@ span {
 	border: 2px solid #f4d999
 	border-radius: 4px
 	line-height: 26px
+	&[data-as] > [data-type=content]
+		padding-top 0
+	&[data-as] > [data-type=children]
+		padding-left 0
 
 [data-name=code]
 	display: block
