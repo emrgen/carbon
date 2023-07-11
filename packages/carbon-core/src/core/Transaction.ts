@@ -207,9 +207,10 @@ export class Transaction {
 	}
 
 	// deactivate any active node before node selection
-	selectNodes(ids: NodeId[], origin = this.origin): Transaction {
+	selectNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
+		ids = isArray(ids) ? ids : [ids];
 		if (this.state.activatedNodeIds.size) {
-			// this.add(ActivateNodeCommand.create([], origin));
+			this.add(ActivateNodes.create([], origin));
 		}
 		this.add(SelectNodes.create(ids, origin));
 		return this
@@ -217,7 +218,8 @@ export class Transaction {
 
 	// only selected nodes can be activated
 	// first select and then activate nodes
-	activateNodes(ids: NodeId[], origin = this.origin): Transaction {
+	activateNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
+		ids = isArray(ids) ? ids : [ids];
 		this.add(SelectNodes.create(ids, origin));
 		this.add(ActivateNodes.create(ids, origin));
 		return this
@@ -395,7 +397,7 @@ export class Transaction {
 	}
 
 	activated(...nodes: Node[]) {
-		// console.log('Transaction.activated', nodes.map(n => n.id.toString()));
+		console.log('Transaction.activated', nodes.map(n => n.id.toString()));
 		each(nodes, n => {
 			this.activatedIds.add(n.id);
 			this.runtime.activatedNodeIds.add(n.id);

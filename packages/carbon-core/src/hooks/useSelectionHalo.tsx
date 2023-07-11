@@ -10,7 +10,7 @@ interface UseSelectionHaloProps {
 // creates a selection halo around the selected node
 export const useSelectionHalo = (props: UseSelectionHaloProps) => {
 	const { node, className } = props;
-	const {isSelected, attributes} = useNodeStateChange(props)
+	const { isSelected, isActive, attributes } = useNodeStateChange(props);
 
 	const SelectionHalo = useMemo(() => {
     return (
@@ -30,5 +30,6 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
     SelectionHalo,
     attributes,
     isSelected,
+    isActive,
   };
 }

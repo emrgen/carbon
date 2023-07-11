@@ -38,13 +38,17 @@ import { Table } from './plugins/Table';
 import { ColumnComp, RowComp, TableComp } from './renderers/Table';
 import { Insert } from './plugins/Inserter';
 import { Change } from './plugins/Change';
+import { Carbon } from './plugins/Carbon';
+import { CarbonComp } from './renderers/Carbon';
+import { FileTree } from './plugins/FileTree';
+import { FileTreeComp } from './renderers/FileTree';
+import { FileTreeItemComp } from './renderers/FileTreeItem';
 
 export const blockPresets: Extension = {
 	plugins: [
 		new Section(),
 		new Divider(),
 		new Header(),
-		new DocPlugin(),
 		new DocPlugin(),
 		new NestablePlugin(),
 		new CollapsibleList(),
@@ -63,6 +67,8 @@ export const blockPresets: Extension = {
 		new Table(),
 		new Insert(),
 		new Change(),
+		new Carbon(),
+		new FileTree(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -89,5 +95,8 @@ export const blockPresets: Extension = {
 		Renderer.create('table', TableComp),
 		Renderer.create('row', RowComp),
 		Renderer.create('column', ColumnComp),
+		Renderer.create('carbon', CarbonComp),
+		Renderer.create('fileTree', FileTreeComp),
+		Renderer.create('fileTreeItem', FileTreeItemComp),
 	]
 }

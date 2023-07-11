@@ -120,20 +120,24 @@ export class EventManager {
 			origin: EventOrigin.dom,
 		});
 
-		if ([
-			EventsIn.selectionchange,
-			EventsIn.selectstart,
-			EventsIn.mouseDown,
-			EventsIn.keyDown,
-			EventsIn.keyUp,
-			EventsIn.beforeinput,
-		].includes(type) || selectionChangedUsingKeys(event)
-		) {
-			console.groupCollapsed('onEvent:', event.type);
-		} else {
-			console.group('onEvent:', event.type);
-		}
 
+		if (type !== EventsIn.keyDown) {
+
+			if ([
+				EventsIn.mouseDown,
+				// EventsIn.selectionchange,
+				// EventsIn.selectstart,
+				// EventsIn.keyDown,
+				// EventsIn.keyUp,
+				// EventsIn.input,
+				// EventsIn.beforeinput,
+			].includes(type) || selectionChangedUsingKeys(event)
+			) {
+				console.groupCollapsed('onEvent:', event.type);
+			} else {
+				console.group('onEvent:', event.type);
+			}
+		}
 		this.pm.onEvent(editorEvent);
 
 

@@ -3,7 +3,6 @@ import { classString, p14, p30 } from './Logger';
 import { Node } from './Node';
 import { Pin } from './Pin';
 import { PointedSelection } from './PointedSelection';
-import { constrain } from '../utils/constrain';
 import { NodeStore } from './NodeStore';
 import { DomSelection, Range } from './Range';
 
@@ -12,6 +11,7 @@ export class PinnedSelection {
 	head: Pin;
 	nodes: Node[];
 
+	// map dom selection to editor selection
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
 		const domSelection = window.getSelection();
 		// console.log(domSelection);

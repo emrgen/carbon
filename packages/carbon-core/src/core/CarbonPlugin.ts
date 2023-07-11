@@ -79,6 +79,11 @@ export abstract class CarbonPlugin {
 		return null;
 	}
 
+	// sanitize the node before putting into clipboard
+	sanitize(node: Node): Optional<Node> {
+		return null;
+	}
+
 	// experimental
 	// subscribe(editor:Editor) { }
 	// unsubscribe(editor:Editor) { }

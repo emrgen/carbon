@@ -2,7 +2,6 @@ import { Bound, Optional } from '@emrgen/types';
 import { EventContext } from './EventContext';
 import { Node } from './Node';
 import { InputRule } from './Rules';
-import { JSONNode } from './types';
 import { Carbon } from './Carbon';
 
 export interface CarbonCommands {}

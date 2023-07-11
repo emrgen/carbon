@@ -38,6 +38,8 @@ export class UpdateData implements CarbonAction {
     }
 
     this.prevData = node.data;
+    console.log('-->');
+    
     node.updateData(this.data);
     tr.updated(node);
 

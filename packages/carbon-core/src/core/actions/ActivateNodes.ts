@@ -43,10 +43,10 @@ export class ActivateNodes implements CarbonAction {
       n.updateData({ state: { active: true } });
     });
 
-    console.log(afterActivatedNodes.map(n => n.id.toString()));
+    // console.log(afterActivatedNodes.map(n => n.id.toString()));
 
-    tr.selected(...beforeActivatedNodes);
-    tr.selected(...afterActivatedNodes);
+    tr.activated(...beforeActivatedNodes);
+    tr.activated(...afterActivatedNodes);
     return NULL_ACTION_RESULT
   }
 

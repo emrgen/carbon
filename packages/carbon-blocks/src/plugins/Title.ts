@@ -11,10 +11,12 @@ import {
 	PinnedSelection,
 	SerializedNode,
 	TransformCommands,
+	preventAndStopCtx,
 } from "@emrgen/carbon-core";
 
 import { TextPlugin } from "./Text";
 
+// title is a block content that can be used as a title for a block
 export class TitlePlugin extends NodePlugin {
 
 	name = 'title';
@@ -48,28 +50,34 @@ export class TitlePlugin extends NodePlugin {
 		return {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				ctx.event.preventDefault();
-				ctx.stopPropagation();
-
-				const { app, event } = ctx;
-				const { selection } = app;
-				// @ts-ignore
-				const { data } = event;
-				app.cmd.transform.insertText(selection, data)?.dispatch();
+				// ctx.event.preventDefault();
+				this.onTextInsert(ctx);
 			},
-			input(ctx: EventContext<InputEvent>) {
+			input: (ctx: EventContext<KeyboardEvent>) => {
 				// console.log('input', ctx.event);
+
 			},
-			keyDown: (ctx) => {
-				// ctx.event.preventDefault()
-			},
-			keyUp: (ctx) => {
-				ctx.event.preventDefault()
-			},
+			// keyDown: (ctx) => {
+			//  ctx.event.preventDefault()
+			// },
+			// keyUp: (ctx) => {
+			// 	ctx.event.preventDefault()
+			// },
 			dragStart(ctx: EventContext<DragEvent>) {
 				ctx.event.preventDefault()
 			}
 		}
+	}
+
+	onTextInsert(ctx: EventContext<KeyboardEvent>) {
+		preventAndStopCtx(ctx);
+
+		const { app, event } = ctx;
+		const { selection } = app;
+		// @ts-ignore
+		const { data } = event.nativeEvent;
+
+		app.cmd.transform.insertText(selection, data)?.dispatch();
 	}
 
 	// decoration(state: CarbonState): Decoration[] {

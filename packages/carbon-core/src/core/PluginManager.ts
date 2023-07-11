@@ -105,10 +105,10 @@ export class PluginManager {
 		}
 
 		// simulate onInput event as Event.defaultPrevent() on beforeInput event stops dom onInput Event trigger
-		if (event.type === 'keyUp') {
-			const afterEvent = EventContext.fromContext(event, { type: EventsIn.input })
-			this.handleEvent(afterEvent)
-		}
+		// if (event.type === 'keyUp') {
+		// 	const afterEvent = EventContext.fromContext(event, { type: EventsIn.input })
+		// 	this.handleEvent(afterEvent)
+		// }
 
 		// console.log(event.type, event);
 		this.handleEvent(event)
@@ -223,7 +223,7 @@ export class PluginManager {
 	}
 
 	serialize(app: Carbon, node: Node): SerializedNode {
-		return this.nodePlugin(node.name)?.serialize(app, node) ?? '';
+		return this.nodePlugin(node.name)?.serialize(app, node);
 	}
 
 	deserialize(app: Carbon, serialized: string): Node[] {

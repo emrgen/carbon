@@ -90,6 +90,11 @@ export class Node extends EventEmitter {
 		this.attrs = new NodeAttrs(merge(cloneDeep(type.attrs), attrs));
 		this.data = new NodeData(merge(cloneDeep(type.data), data));
 
+		if (type.name ==='fileTreeItem') {
+			console.log('XX', this.data, data);
+			
+		}
+
 		this.renderVersion = renderVersion;
 		this.updateVersion = updateVersion;
 	}
