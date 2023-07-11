@@ -22,11 +22,11 @@ const data = node("carbon", [
     node(
       "fileTreeItem",
       [
-        title([text("section 1")]),
+        title([text("Sunt amet mollit cupidatat non elit labore dolore qui.")]),
         node("fileTreeItem", [title([text("section 1")])]),
         node("fileTreeItem", [title([text("section 1")])]),
       ],
-      {},
+      {}
       // { node: { collapsed: false }, state: { selected: true } }
     ),
     node("fileTreeItem", [title([text("section 1")])]),
@@ -36,6 +36,27 @@ const data = node("carbon", [
   node("document", [
     title([text("Carbon "), text("document")]),
     node("divider"),
+
+    node("tab", [
+      node("tabTitles", [
+        node("tabTitle", [title([text("tab 1")])], {node: {link: "tab1"}}),
+        node("tabTitle", [title([text("tab 2")])]),
+        node("tabTitle", [title([text("tab 3")])]),
+      ]),
+
+      node("tabContent", [
+        section([title([text("tab 1 content")])]),
+      ], {node: {link: "tab1"}}),
+
+      // node("tabItem", [
+      //   section([title([text("tab 2")])]),
+      // ]),
+
+      // node("tabItem", [
+      //   section([title([text("tab 3")])]),
+      // ]),
+    ]),
+
     node("section", [title([text("section 1")])]),
     node("hstack", [
       node("stack", [section([title([text("section 1")])])]),

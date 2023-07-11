@@ -71,19 +71,12 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			this.state.runtime.updatedNodeIds.remove(node.id);
 		}
 
-		if (changeType === NodeChangeType.state) {
-			console.log('mounted', node.id.toString());
-
-		// 	this.state.runtime.selectedNodeIds.remove(node.id);
-		// 	this.state.runtime.activatedNodeIds.remove(node.id);
-		// 	this.state.runtime.openNodeIds.remove(node.id);
-		}
-
 		// console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
 		if (this.isContentSynced) {
 			this.app.emit(EventsOut.contentUpdated, this.state.content);
 		}
 
+		// FIXME: this is a hack, may not indicate the correct state of updated nodes
 		if (this.isStateSynced) {
 			this.app.emit(EventsOut.nodeStateUpdated, this.state);
 		}

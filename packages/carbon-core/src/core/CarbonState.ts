@@ -45,7 +45,7 @@ export class CarbonRuntimeState {
 
 	addSelectEvent(event: SelectionEvent) {
 		this.selectEvents.push(event);
-	}
+	} 
 }
 
 

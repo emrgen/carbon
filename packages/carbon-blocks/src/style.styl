@@ -204,10 +204,14 @@ span {
 		user-select: none
 		position absolute
 		left 0
+		display: flex
+		align-items: center
+		height 100%
+
 		input
 			height: 18px
 			width: 18px
-			margin-top 6px
+			// margin-top 6px
 			&:hover
 				cursor: pointer
 			// vertical-align: middle
@@ -340,6 +344,7 @@ span {
 	// 	line-height: 26px
 	&[data-as] > [data-type=content]
 		padding-top 0
+		padding-bottom: 0
 	&[data-as] > [data-type=children]
 		padding-left 0
 
@@ -353,6 +358,7 @@ span {
 	line-height: 26px
 	&[data-as] > [data-type=content]
 		padding-top 0
+		padding-bottom: 0
 	&[data-as] > [data-type=children]
 		padding-left 0
 
@@ -488,12 +494,10 @@ span {
 			color: #666
 			cursor pointer
 			user-select: none
-			// background #000
 			overflow: hidden
 			justify-content: flex-start
 			align-items: flex-start
 			span
-				// display: flex
 				display: inline-block
 				left: 0
 				white-space: nowrap;
@@ -550,3 +554,49 @@ span {
 	height: 100%
 	width 100%
 	background red
+
+[data-name=tab]
+	margin: 10px 0px
+	.carbon-tab-titles
+		display: flex
+		gap 10px
+		border-bottom: 1px solid #ddd
+		padding: 0 10px
+		justify-items: center
+	[data-name="tabTitle"]
+		padding: 6px 10px
+		border-top-left-radius: 4px
+		border-top-right-radius: 4px
+		cursor: pointer
+		&.active,
+		&:hover
+			background: #eee
+		&[data-active=true]
+			background: #ddd
+	.carbon-tab-item-content
+		padding: 10px 20px
+		border-radius: 4px
+		// border: 1px solid #ddd
+	.carbon-add-tab-item
+		display: flex
+		align-items: center
+	.carbon-add-tab-item-button
+		width 24px
+		height: 24px
+		cursor pointer
+		display: flex
+		align-items: center
+		justify-content: center
+		border-radius: 4px
+		&:hover
+			background: #eee
+	.add-tab-content
+		color: #aaa
+		padding: 10px 10px
+		cursor pointer
+		user-select: none
+		&:hover
+			background: #eee
+
+[contenteditable]
+	outline: none

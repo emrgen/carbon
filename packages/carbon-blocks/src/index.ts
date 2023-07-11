@@ -1,5 +1,5 @@
 export * from './create'
-import { CarbonText, Extension, Renderer, CarbonNode } from '@emrgen/carbon-core';
+import { CarbonText, Extension, Renderer, CarbonNode, CarbonBlock } from '@emrgen/carbon-core';
 import { NestableComp } from './renderers/Nestable';
 import { Section } from './plugins/Section';
 import { DocumentComp } from './renderers/Document';
@@ -43,6 +43,8 @@ import { CarbonComp } from './renderers/Carbon';
 import { FileTree } from './plugins/FileTree';
 import { FileTreeComp } from './renderers/FileTree';
 import { FileTreeItemComp } from './renderers/FileTreeItem';
+import { Tab } from './plugins/Tab';
+import { TabComp, TabItemComp, TextTitleComp, TabTitlesComp } from './renderers/TabComp';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -69,6 +71,7 @@ export const blockPresets: Extension = {
 		new Change(),
 		new Carbon(),
 		new FileTree(),
+		new Tab(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -98,6 +101,10 @@ export const blockPresets: Extension = {
 		Renderer.create('carbon', CarbonComp),
 		Renderer.create('fileTree', FileTreeComp),
 		Renderer.create('fileTreeItem', FileTreeItemComp),
+		Renderer.create('tab', TabComp),
+		Renderer.create('tabContent', TabItemComp),
+		Renderer.create('tabTitles', TabTitlesComp),
+		Renderer.create('tabTitle', TextTitleComp),
 	]
 }
 

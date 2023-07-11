@@ -99,7 +99,7 @@ export class EventManager {
 		// new dom selection is same as exiting editor.selection
 		if (type === EventsIn.selectionchange && app.selection.eq(selection)) {
 			console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'selection change');
-			// return
+			return
 		}
 
 		// console.log('changing selection....', app.selection.toString(), selection.toString())
