@@ -11,6 +11,10 @@ import {
   useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-core";
+import {
+  MdOutlineKeyboardArrowDown,
+  MdOutlineKeyboardArrowRight,
+} from "react-icons/md";
 
 export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
@@ -50,7 +54,11 @@ export default function CollapsibleListComp(props: RendererProps) {
       }}
       onClick={handleToggle}
     >
-      {isCollapsed ? "▶" : "▼"}
+      {isCollapsed ? (
+        <MdOutlineKeyboardArrowRight />
+      ) : (
+        <MdOutlineKeyboardArrowDown />
+      )}
     </div>
   );
 

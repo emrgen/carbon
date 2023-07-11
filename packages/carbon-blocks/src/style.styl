@@ -1,15 +1,35 @@
 $selectionHaloColor = #accef78d
+$quoteColor = #555
+
+#root
+	position absolute
+	width 100%
+	height: 100%
+	// background #eee
 
 .carbon-app
 	font-family: Arial, Helvetica, sans-serif
-	// position absolute
-	position relative
+	position absolute
+	// position relative
 	// width: 100%
-	padding: 0
+	// padding: 0
 	outline none
 	// overflow: auto;
 	white-space: pre-wrap;
-	padding: 100px 50px
+	height: 100%
+	width 100%
+	// padding: 50px 0px
+	// overflow: hidden
+
+.carbon-content
+	position absolute
+	height: 100%
+	width 100%
+	// overflow: auto;
+	// padding: 0px 50px
+
+[data-name=document]
+	overflow: auto;
 
 // .carbon-content
 .carbon-header
@@ -23,7 +43,7 @@ $selectionHaloColor = #accef78d
 	gap 4px
 	z-index: 1
 	margin-bottom: 12px
-	outline: 2px dashed blue;
+	// outline: 2px dashed blue;
 	.carbon-control
 		// background #000
 		padding 4px
@@ -42,7 +62,8 @@ $selectionHaloColor = #accef78d
 [data-name=document]
 	position relative
 	outline none
-	padding: 20px 100px
+	margin: 10px 0px
+	padding: 60px 100px
 	outline: 2px dashed blue;
 	padding-bottom 200px
 	.document-content
@@ -134,10 +155,12 @@ span {
 	// position absolute
 	left 0
 	top 1px
-	font-size: 12px
-	padding-top 2px
+	// font-size: 12px
+	// padding-top 4px
 	padding-left 5px
 	cursor: pointer
+	font-size: 20px
+	line-height: 26px
 
 [data-name=collapsible]
 	> [data-type=children]
@@ -146,7 +169,8 @@ span {
 	.carbon-collapsible__control
 		left 4px
 		width 22px
-		height: 30px
+		display: flex
+		align-items: center
 
 [data-name=bulletedList]
 	> [data-type=children]
@@ -300,7 +324,7 @@ span {
 	position relative
 	padding: 6px 16px
 	margin: 10px 0
-	border-left: 3px solid #555
+	border-left: 3px solid $quoteColor
 	[data-type="content"]
 		line-height: 26px
 
@@ -420,11 +444,13 @@ span {
 		overflow: auto
 
 [data-name=fileTree]
-	width 180px
+	width 200px
 	height: 500px
 	background #fafafa
 	outline: 2px dashed blue;
 	padding: 10px 10px
+	margin: 10px 00px 0px 10px
+	padding-top 90px
 
 [data-name=fileTreeItem]
 	&> [data-type=children]
@@ -434,14 +460,27 @@ span {
 		line-height: 26px
 		position relative
 		display: flex
-		gap 4px
 		align-items: center
+		gap 4px
 		[data-name=title]
 			flex 1
+			display: flex
 			color: #666
 			cursor pointer
 			user-select: none
+			// background #000
+			overflow: hidden
+			justify-content: flex-start
+			align-items: flex-start
+			span
+				// display: flex
+				display: inline-block
+				left: 0
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				overflow: hidden;
 		.carbon-collapsible__control
+			// margin-top: 3px
 			color: #aaa
 			width 20px
 			height: 20px
@@ -449,7 +488,7 @@ span {
 			align-items: center
 			justify-content: center
 			padding 0
-			padding-top 2px
+			// padding-top 2px
 			&:hover
 				background: #eee
 				color #666
@@ -468,14 +507,26 @@ span {
 			user-select: none
 			border-radius: 4px
 			color: #aaa
+			opacity 0
+			font-size: 14px
 			&:hover
 				background: #eee
 				color #666
+	&>[data-type=content]:hover
+		.add-child-file
+			opacity 1
 	.carbon-collapsible__empty
 		padding-left 24px
-		color: #aaa
+		color: #ccc
 		font-size: 14px
 		line-height: 26px
+		user-select: none
 
-	&[data-selected=true] > [data-type=content] > [data-name=title]
+	&[data-open=true] > [data-type=content] > [data-name=title]
 		color: #000!important
+
+.carbon-overlay
+	position absolute
+	height: 100%
+	width 100%
+	background red

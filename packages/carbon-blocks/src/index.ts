@@ -100,3 +100,6 @@ export const blockPresets: Extension = {
 		Renderer.create('fileTreeItem', FileTreeItemComp),
 	]
 }
+
+
+export * from './events'

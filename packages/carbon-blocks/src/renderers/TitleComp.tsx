@@ -22,7 +22,7 @@ export default function TitleComp(props: RendererProps) {
           props.custom?.placeholder ??
           node.parent?.attrs.node.placeholder ?? "",
       }
-    : { onMouseDown };
+    : { onMouseDown, ...props.custom, placeholder: "" };
 
 
   return (
