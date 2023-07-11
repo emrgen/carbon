@@ -49,7 +49,7 @@ declare module '@emrgen/carbon-core' {
   export interface CarbonCommands {
     transform: {
       insert(node: Node, ref: Node, opts?: InsertPos): Optional<Transaction>;
-      insertText(selection: PinnedSelection, text: string, opts?: InsertPos): Optional<Transaction>;
+      insertText(selection: PinnedSelection, text: string, native?: boolean): Optional<Transaction>;
       deleteText(pin: Pin, text: string, opts?: InsertPos): Optional<Transaction>;
       remove(node: Node): Optional<Transaction>;
       move(nodes: Node | Node[], to: Point): Optional<Transaction>;
@@ -147,7 +147,7 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  private insertText(app: Carbon, selection: PinnedSelection, text: string, opts = "after"): Optional<Transaction> {
+  private insertText(app: Carbon, selection: PinnedSelection, text: string, native = false): Optional<Transaction> {
     const {cmd } = app;
     const updateTitleText = (app: Carbon) => {
       const { tr } = app;
@@ -163,7 +163,7 @@ export class TransformCommands extends BeforePlugin {
         return tr
       }
 
-      tr.setContent(title.id, BlockContent.create([textNode]));
+      tr.add(SetContent.fromNative(title.id, BlockContent.create([textNode]), native));
       tr.select(after);
       return tr;
     }
@@ -834,6 +834,8 @@ export class TransformCommands extends BeforePlugin {
 
   // delete selected nodes
   deleteNodes(app: Carbon, selection: BlockSelection = app.blockSelection, opts: DeleteOpts = {}): Optional<Transaction> {
+    console.log('XXX');
+    
     const { fall = 'after' } = opts;
     const deleteActions: CarbonAction[] = [];
     const { blocks } = selection;
@@ -850,7 +852,7 @@ export class TransformCommands extends BeforePlugin {
         after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
       }
 
-      if (!selection) {
+      if (!after) {
         const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
         if (focusNode) {
           after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
@@ -862,7 +864,7 @@ export class TransformCommands extends BeforePlugin {
         after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
       }
 
-      if (!selection) {
+      if (!after) {
         const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
         if (focusNode) {
           after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
@@ -875,7 +877,7 @@ export class TransformCommands extends BeforePlugin {
     const tr = app.tr
       .add(deleteActions)
     if (after) {
-      tr.select(after);
+      tr.select(after, ActionOrigin.UserInput);
     }
     return tr;
   }

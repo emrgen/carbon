@@ -71,11 +71,13 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			this.state.runtime.updatedNodeIds.remove(node.id);
 		}
 
-		// if (changeType === NodeChangeType.state) {
+		if (changeType === NodeChangeType.state) {
+			console.log('mounted', node.id.toString());
+
 		// 	this.state.runtime.selectedNodeIds.remove(node.id);
 		// 	this.state.runtime.activatedNodeIds.remove(node.id);
 		// 	this.state.runtime.openNodeIds.remove(node.id);
-		// }
+		}
 
 		// console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
 		if (this.isContentSynced) {
@@ -86,11 +88,11 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			this.app.emit(EventsOut.nodeStateUpdated, this.state);
 		}
 
-		// console.log('--------', this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
+		console.log('--------', this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
 		if (this.isContentSynced) {
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
 			if (this.state.isSelectionDirty) {
-				this.updateSelection();
+				// this.updateSelection();
 			} else {
 				this.app.processTick();
 			}
@@ -149,7 +151,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			return
 		}
 
-		console.groupCollapsed('syncing: selection');
+		console.group('syncing: selection');
 		this.sm.syncSelection();
 		this.app.emit(EventsOut.selectionUpdated, this.state.selection);
 

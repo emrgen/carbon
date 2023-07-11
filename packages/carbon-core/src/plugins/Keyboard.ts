@@ -41,6 +41,8 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 		const { selection, state, cmd, blockSelection: nodeSelection } = app;
 
 		const { isCollapsed, head } = selection;
+		console.log('XXX');
+		
 		// delete node selection if any
 		if (!nodeSelection.isEmpty) {
 			cmd.transform.deleteNodes(nodeSelection, { fall: 'before' })?.dispatch();

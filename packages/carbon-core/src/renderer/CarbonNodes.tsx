@@ -58,7 +58,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     <Element
       ref={ref}
       data-name={name}
-      // data-version={version}
+      data-version={version}
       // data-size={node.size}
       {...attrs.html}
       {...custom}

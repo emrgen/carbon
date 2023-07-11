@@ -196,7 +196,7 @@ export class PinnedSelection {
 			console.assert(domSel?.focusNode === domSelection.focusNode, 'failed to sync focusNode')
 			console.assert(domSel?.anchorOffset === domSelection.anchorOffset, 'failed to sync anchor offset')
 			console.assert(domSel?.focusOffset === domSelection.focusOffset, 'failed to sync focus offset')
-			console.log('Selection.syncDom:', this.toString())
+			console.log('Selection.syncDom:', this.toString(), domSel)
 		} catch (err) {
 			console.error(err);
 		}

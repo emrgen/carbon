@@ -167,6 +167,9 @@ export class CarbonState {
 		this.unselectedNodeIds.clear();
 		this.deactivatedNodeIds.clear();
 		this.activatedNodeIds.clear();
+		this.activatedNodeIds.clear();
+		this.openNodeIds.clear();
+		this.closeNodeIds.clear();
 
 		this.runtime.selectedNodeIds.forEach(id => {
 			if (store.get(id)?.isSelected) {

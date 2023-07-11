@@ -32,21 +32,27 @@ export class IsolatingPlugin extends AfterPlugin {
         this.preventAtEnd(e);
       },
       shiftLeft: e => {
+        if (e.app.blockSelection.size) return
         this.preventAtStart(e);
       },
       shiftRight: e => {
+        if (e.app.blockSelection.size) return
         this.preventAtEnd(e);
       },
       backspace: e => {
+        if (e.app.blockSelection.size) return
         this.preventAtStartCollapsed(e);
       },
       delete: e => {
+        if (e.app.blockSelection.size) return
         this.preventAtEndCollapsed(e);
       },
       shiftBackspace: e => {
+        if (e.app.blockSelection.size) return
         this.preventAtStart(e);
       },
       shiftDelete: e => {
+        if (e.app.blockSelection.size) return
         this.preventAtEnd(e);
       }
     };
@@ -63,6 +69,8 @@ export class IsolatingPlugin extends AfterPlugin {
   }
 
   preventAtStartCollapsed(e) {
+    console.log('XXX');
+    
     if (this.isAtStart(e) && this.isCollapsed(e)) {
       this.prevent(e);
     }

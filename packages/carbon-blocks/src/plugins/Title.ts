@@ -76,7 +76,7 @@ export class TitlePlugin extends NodePlugin {
 		// @ts-ignore
 		const { data } = event.nativeEvent;
 
-		app.cmd.transform.insertText(selection, data)?.dispatch();
+		app.cmd.transform.insertText(selection, data, false)?.dispatch();
 	}
 
 	// decoration(state: CarbonState): Decoration[] {

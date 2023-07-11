@@ -13,14 +13,18 @@ export class SetContent implements CarbonAction {
   before: Optional<NodeContent>;
 
   static create(nodeId: NodeId, after: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContent(nodeId, after, null, origin)
+    return new SetContent(nodeId, after, null, false, origin)
   }
 
   static withContent(nodeId: NodeId, after: NodeContent, before: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContent(nodeId, after, before, origin)
+    return new SetContent(nodeId, after, before, false, origin)
   }
 
-  constructor(readonly nodeId: NodeId, readonly after: NodeContent,  before: Optional<NodeContent>, origin: ActionOrigin) {
+  static fromNative(nodeId: NodeId, after: NodeContent, native: boolean, origin: ActionOrigin = ActionOrigin.UserInput) {
+    return new SetContent(nodeId, after, null, native, origin)
+  }
+
+  constructor(readonly nodeId: NodeId, readonly after: NodeContent, before: Optional<NodeContent>, readonly native: boolean, origin: ActionOrigin) {
     this.id = generateActionId()
     this.origin = origin;
     this.before = before;
@@ -41,7 +45,10 @@ export class SetContent implements CarbonAction {
     node.forAll(n => {
       app.store.put(n);
     });
-    tr.updated(node);
+
+    if (!this.native) {
+      tr.updated(node);
+    }
 
     return ActionResult.withValue('done')
   }

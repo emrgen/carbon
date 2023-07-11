@@ -11,7 +11,7 @@ export class TextPlugin extends NodePlugin {
 			focusable: true,
 			attrs: {
 				html: {
-					spellCheck: false,
+					spellCheck: true,
 					// contentEditable: true,
 					suppressContentEditableWarning: true,
 				}

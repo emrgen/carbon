@@ -49,7 +49,7 @@ export class EventManager {
 				event.preventDefault();
 				console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'editor is disabled for events');
 			}
-			// console.log('ignored event', type);
+			console.log('ignored event', type);
 			return
 		}
 
