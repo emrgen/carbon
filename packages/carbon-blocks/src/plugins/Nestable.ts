@@ -87,8 +87,6 @@ export class NestablePlugin extends AfterPlugin {
 				// change to section
 				if (listNode.name !== 'section') {
 					preventAndStopCtx(ctx);
-					const focusNode = listNode.find(n => n.type.isTextBlock)
-						?? listNode.find(n => n.isBlock) ?? listNode;
 					tr
 						.change(listNode.id, listNode.name, 'section')
 						.select(PinnedSelection.fromPin(selection.head))
@@ -153,16 +151,29 @@ export class NestablePlugin extends AfterPlugin {
 			},
 			enter: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, node } = ctx;
-				const { selection, cmd, schema, tr } = app;
+				const { selection, cmd,  tr } = app;
 				if (!selection.isCollapsed) {
 					return
 				}
 
+				// when the cursor is at start of the empty node
 				const listNode = node.closest(isNestableNode);
 				if (!listNode) return
 				if (!listNode.isEmpty) return
 				const atStart = selection.head.isAtStartOfNode(listNode);
 				if (!atStart) return
+
+				if (listNode.attrs.html['data-as']) {
+					preventAndStopCtx(ctx);
+					tr
+						.updateAttrs(listNode.id, {
+							html: {
+								'data-as': ''
+							}
+						}).select(selection)
+						.dispatch();
+					return
+				}
 
 				if (listNode.name !== 'section') {
 					preventAndStopCtx(ctx);
@@ -174,6 +185,7 @@ export class NestablePlugin extends AfterPlugin {
 				}
 
 				const nextSibling = listNode.nextSibling;
+				// if parent is collapsible the listNode should be not unwrapped
 				if (!nextSibling && !listNode.parent?.isCollapsible) {
 					preventAndStopCtx(ctx);
 					cmd.transform.unwrap(listNode)?.dispatch();
