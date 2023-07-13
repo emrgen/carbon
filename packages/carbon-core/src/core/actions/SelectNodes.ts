@@ -70,7 +70,6 @@ export class SelectNodes implements CarbonAction {
     } else {
       app.runtime.hideCursorNodeIds.forEach(id => {
         const node = app.store.get(id);
-        console.log('XXX', node);
         if (!node) return
 
         node.updateAttrs({ html: { 'data-hide-cursor': false } });

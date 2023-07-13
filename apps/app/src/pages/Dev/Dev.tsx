@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import {
   BlockEvent,
   blockPresets,
@@ -15,7 +17,8 @@ import {
   extensionPresets,
   useCreateCarbon,
 } from "@emrgen/carbon-core";
-import { useEffect } from "react";
+
+import {DndContext} from "@emrgen/carbon-dragon";
 
 const data = node("carbon", [
   node("fileTree", [
@@ -210,6 +213,7 @@ export default function Dev() {
   return (
     <CarbonContext app={app}>
       <CarbonChangeContext>
+        <DndContext>
         {/* <div className="carbon-header">
           <div
             className="carbon-control"
@@ -231,6 +235,7 @@ export default function Dev() {
           </div>
         </div> */}
         <CarbonContent />
+        </DndContext>
       </CarbonChangeContext>
     </CarbonContext>
   );

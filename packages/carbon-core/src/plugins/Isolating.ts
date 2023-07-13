@@ -69,8 +69,6 @@ export class IsolatingPlugin extends AfterPlugin {
   }
 
   preventAtStartCollapsed(e) {
-    console.log('XXX');
-    
     if (this.isAtStart(e) && this.isCollapsed(e)) {
       this.prevent(e);
     }

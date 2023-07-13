@@ -333,9 +333,6 @@ export class Pin {
 
 		// console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);
 
-		console.log('xxx', prev);
-		
-
 		if (!curr) {
 			return Pin.create(prev, 0);
 		}

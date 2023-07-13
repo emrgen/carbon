@@ -9,7 +9,7 @@ import { skipKeyEvent } from "../utils/key";
 import { first, last, reverse } from "lodash";
 import { BlockContent, Carbon, InlineContent, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
 import { hasParent, nodePath } from "../utils/node";
-import { CommandPlugin, insertAfterAction } from '@emrgen/carbon-core';
+import { CommandPlugin, insertAfterAction, preventAndStopCtx } from '@emrgen/carbon-core';
 import { Optional } from '@emrgen/types';
 import { nodeLocation } from '../utils/location';
 import { BlockSelection } from "../core/NodeSelection";
@@ -41,7 +41,6 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 		const { selection, state, cmd, blockSelection: nodeSelection } = app;
 
 		const { isCollapsed, head } = selection;
-		console.log('XXX');
 		
 		// delete node selection if any
 		if (!nodeSelection.isEmpty) {
@@ -133,6 +132,11 @@ export class KeyboardBeforePlugin extends BeforePlugin {
 					return
 				}
 
+			},
+			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
+				if (ctx.app.blockSelection.size) {
+					preventAndStopCtx(ctx);
+				}
 			}
 		}
 	}
@@ -469,7 +473,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		}
 
 		const { isCollapsed, head } = selection;
-		console.log('xxx');
 		if (!isCollapsed) {
 			console.log('pppp');
 

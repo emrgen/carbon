@@ -13,6 +13,7 @@ import {
 } from "@emrgen/carbon-core";
 import CarbonLink from "./CarbonLink";
 import { Point } from "@emrgen/carbon-core";
+import regexp from "emoji-regex";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;

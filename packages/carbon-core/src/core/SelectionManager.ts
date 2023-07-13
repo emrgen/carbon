@@ -130,7 +130,6 @@ export class SelectionManager {
 	commitSelection() {
 		const { app } = this
 		const event = last(this.runtime.selectEvents) as Optional<SelectionEvent>;
-		console.log('XXX');
 		
 		if (!event) {
 			!this.app.processTick()

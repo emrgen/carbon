@@ -192,7 +192,7 @@ export class TransformCommands extends BeforePlugin {
     const sliceClone = slice.clone(app);
     const { root, nodes } = sliceClone;
 
-    console.log('xxx', nodes.map(n => n.id.toString()), root.id.toString());
+    // console.log('xxx', nodes.map(n => n.id.toString()), root.id.toString());
 
     // if the selection is not empty, we need to paste the nodes after the last node
     if (!blockSelection.isEmpty) {
