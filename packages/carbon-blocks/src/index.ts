@@ -7,6 +7,7 @@ import { DocPlugin } from './plugins/Document';
 import { Header } from './plugins/Header';
 
 import './style.styl';
+import './dnd.styl';
 import DividerComp from './renderers/Divider';
 import { Divider } from './plugins/Divider';
 import TitleComp from './renderers/TitleComp';

@@ -1,6 +1,7 @@
 import { MutableRefObject, useCallback, useEffect, useState } from "react";
 import { useDndContext } from "./useDndContext";
 import { useNodeChange, Node } from "@emrgen/carbon-core";
+import { getEventPosition } from "../core/utils";
 
 export interface UseFastDraggableProps {
   node: Node;
@@ -58,22 +59,13 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       // console.log("mouse down", ref.current, event.target);
       if (isDisabled) return;
       if (ref.current !== event.target) return;
+      dnd.onMouseDown(node)
       // console.log(ref.current, event.target)
       let isDragging = false;
-      const getPosition = (from, to) => {
-        const { clientX: startX, clientY: startY } = from;
-        const { clientX: endX, clientY: endY } = to;
-        return {
-          startX,
-          startY,
-          endX,
-          endY,
-          deltaX: endX - startX,
-          deltaY: endY - startY,
-        };
-      };
 
       const activatorEvent = event;
+      
+
 
       const onMouseUp = (event) => {
         if (isDragging) {
@@ -82,17 +74,18 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
             event,
             node,
             id,
-            position: getPosition(activatorEvent, event),
+            position: getEventPosition(activatorEvent, event),
           });
         }
 
         isDragging = false;
+        dnd.onMouseUp(node);
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
       };
 
       const onMouseMove = (event) => {
-        const position = getPosition(activatorEvent, event);
+        const position = getEventPosition(activatorEvent, event);
         if (!isDragging) {
           if (
             Math.pow(position.deltaX, 2) + Math.pow(position.deltaY, 2) >
@@ -104,7 +97,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
               event,
               node,
               id,
-              position: getPosition(activatorEvent, activatorEvent),
+              position: getEventPosition(activatorEvent, activatorEvent),
             });
           }
 
@@ -129,11 +122,11 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
           event,
           node,
           id,
-          position: getPosition(activatorEvent, activatorEvent),
+          position: getEventPosition(activatorEvent, activatorEvent),
         });
       }
     },
-    [isDisabled]
+    [distance, dnd, id, isDisabled, node, ref]
   );
 
   return {

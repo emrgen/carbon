@@ -27,6 +27,10 @@ export class R3Tree<T> {
     })
   }
 
+  get size() {
+    return this.tree.all().length
+  }
+
   put(entry: R3TreeEntry<T>) {
     this.cache.clear();
     this.tree.insert(entry);

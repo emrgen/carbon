@@ -5,35 +5,35 @@ import { createPortal } from "react-dom";
 import { RectSelectAreaId } from "../constants";
 import { useDndMonitor } from "../hooks/useDndMonitor";
 import { useDragRect } from "../hooks/useDragRect";
-import { useRectSelectorContext } from "../hooks/useRectSelector";
-import { DndEvent } from '../types';
+import { useRectSelector } from "../hooks/useRectSelector";
+import { DndEvent } from "../types";
 
 export const RectSelectController = () => {
   const app = useCarbon();
-  const rectSelector = useRectSelectorContext();
+  const rectSelector = useRectSelector();
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
     overlay: true,
   });
 
-  const onTransaction = useCallback((tr: Transaction) => {
-    if (tr.updatesContent) {
-      rectSelector.isDirty = true;
-    }
-  },[rectSelector]);
-
   useEffect(() => {
+    const onTransaction = (tr: Transaction) => {
+      rectSelector.onTransaction(tr);
+    };
     app.on("transaction", onTransaction);
     return () => {
       app.off("transaction", onTransaction);
-    }
-  },[app, onTransaction])
-
-  const onDragStart = useCallback((e: DndEvent) => {
-    if (e.id === RectSelectAreaId) {
-      rectSelector.onDragStart(e);
-      app.disable();
-    }
+    };
   }, [app, rectSelector]);
+
+  const onDragStart = useCallback(
+    (e: DndEvent) => {
+      if (e.id === RectSelectAreaId) {
+        rectSelector.onDragStart(e);
+        // app.disable();
+      }
+    },
+    [rectSelector]
+  );
 
   // select nodes based on the drag rect
   const onDragMove = useMemo(() => {
@@ -44,22 +44,25 @@ export const RectSelectController = () => {
         onDragRectProgress(e);
         rectSelector.onDragMove(e);
       }
-    }, 10)
-},[onDragRectProgress, rectSelector])
+    }, 10);
+  }, [onDragRectProgress, rectSelector]);
 
-  const onDragEnd = useCallback((e: DndEvent) => {
-    if (e.id === RectSelectAreaId) {
-      rectSelector.onDragEnd(e);
-      app.enable();
-      onDragRectStop(e);
-    }
-  }, [app, onDragRectStop, rectSelector]);
+  const onDragEnd = useCallback(
+    (e: DndEvent) => {
+      if (e.id === RectSelectAreaId) {
+        rectSelector.onDragEnd(e);
+        app.enable();
+        onDragRectStop(e);
+      }
+    },
+    [app, onDragRectStop, rectSelector]
+  );
 
   useDndMonitor({
     onDragStart,
     onDragMove,
-    onDragEnd
-  })
+    onDragEnd,
+  });
 
   return <>{createPortal(<>{DragRectComp}</>, document.body)}</>;
-}
+};

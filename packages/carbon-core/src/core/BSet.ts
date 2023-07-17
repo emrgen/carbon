@@ -2,6 +2,7 @@ import { each } from 'lodash';
 import BTree from 'sorted-btree';
 import { NodeId, NodeIdComparator } from './NodeId';
 import { Carbon } from './Carbon';
+import { Maps, With } from './types';
 
 // A Btree based set
 export class BSet<K> {
@@ -73,7 +74,7 @@ export class BSet<K> {
 		return this.tree.has(entry)
 	}
 
-	map(fn) {
+	map<V>(fn: Maps<K, V>) {
 		return this.toArray().map(fn)
 	}
 

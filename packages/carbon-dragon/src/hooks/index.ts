@@ -14,3 +14,4 @@ export * from './useFlatConnector';
 export * from './useRectSelectable';
 export * from './useRectSelectionSurface';
 export * from './useRectSelector';
+export * from './useDragDropRectSelect';

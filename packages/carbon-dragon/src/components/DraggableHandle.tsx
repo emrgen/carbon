@@ -5,18 +5,22 @@ import { createPortal } from "react-dom";
 import { useDndMonitor } from "../hooks/useDndMonitor";
 import { useDraggableHandle } from "../hooks/useDraggable";
 import { useDragRect } from "../hooks/useDragRect";
-import { Node } from "@emrgen/carbon-core";
+import { Node, useCarbon } from "@emrgen/carbon-core";
 import { DndEvent } from "../types";
+import { HiOutlinePlus } from 'react-icons/hi';
+import { PiDotsSixVerticalBold } from 'react-icons/pi';
 
 export interface FastDragHandleProps {
   node: Optional<Node>;
   style: any;
 }
 
-export const CarbonDragHandleId = "fast-drag-handle";
+export const CarbonDragHandleId = "carbon-drag-handle";
 
-export default function DraggableHandle(props: FastDragHandleProps) {
+export function DraggableHandle(props: FastDragHandleProps) {
   const { node, style } = props;
+
+  const app = useCarbon();
 
   const ref = useRef(null);
   const { listeners } = useDraggableHandle({
@@ -56,15 +60,24 @@ export default function DraggableHandle(props: FastDragHandleProps) {
     onDragEnd,
   });
 
+  const handleAddNode = () => {
+    if (!node) return;
+    app.cmd.insert.after(node, 'section')?.dispatch();
+  }
+
   return (
     <div
-      className="carbon-drag-handle"
+      className="carbon-node-handle"
       data-target={node?.name}
       data-drag-handle={node?.type.dragHandle}
       style={style}
-      {...listeners}
-      ref={ref}
     >
+      <div className="carbon-add-handle" onClick={handleAddNode}>
+        <HiOutlinePlus />
+      </div>
+      <div className="carbon-drag-handle" ref={ref} {...listeners}>
+        <PiDotsSixVerticalBold />
+      </div>
       {createPortal(<>{DragRectComp}</>, document.body)}
     </div>
   );

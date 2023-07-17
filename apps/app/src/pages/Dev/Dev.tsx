@@ -18,7 +18,7 @@ import {
   useCreateCarbon,
 } from "@emrgen/carbon-core";
 
-import {DndContext} from "@emrgen/carbon-dragon";
+import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
 
 const data = node("carbon", [
   node("fileTree", [
@@ -51,109 +51,109 @@ const data = node("carbon", [
     //   ], {node: {link: "tab1"}}),
     // ]),
 
-    node("section", [title([text("section 1")])]),
-    node("hstack", [
-      node("stack", [section([title([text("section 1")])])]),
-      node("stack", [section([title([text("section 2")])])]),
-    ]),
-    // node("code", [
-    //   title([text(`function print() { console.log("hello world") }`)]),
+    // node("section", [title([text("section 1")])]),
+    // node("hstack", [
+    //   node("stack", [section([title([text("section 1")])])]),
+    //   node("stack", [section([title([text("section 2")])])]),
     // ]),
-    node("callout", [title([text("I am a callout!")])]),
-    node("table", [
-      node("row", [
-        node("column", [title([text("column 1.1")])]),
-        node("column", [title([text("column 1.2")])]),
-      ]),
-      node("row", [
-        node("column", [title([text("column 2.1")])]),
-        node("column", [title([text("column 2.2")])]),
-      ]),
-    ]),
-    node("quote", [title([text("I am a quote!")])]),
-    node(
-      "collapsible",
-      [
-        title([text("collapsible 0")]),
-        node("section", [title([text("section 0.1")])]),
-      ],
-      {},
-      { node: { collapsed: true } }
-    ),
-    // node("docLink", [title([text("Link to doc")])]),
-    node("section", [
-      title([text("section 0")]),
-      node("section", [
-        title([text("section 0.1")]),
-        node("section", [
-          title([text("section 0.1.1")]),
-          node("section", [title([text("section 0.1.1.1")])]),
-        ]),
-      ]),
-    ]),
-    node("section", [
-      title([text("section 1")]),
-      node("section", [
-        title([text("section 1.1")]),
-        node("section", [
-          title([text("section 1.1.1")]),
-          node("section", [title([text("section 1.1.1.1")])]),
-          node("section", [title([text("section 1.1.1.2")])]),
-        ]),
-        node("section", [title([text("section 1.1.2")])]),
-      ]),
-      node("section", [title([text("section 1.2")])]),
-    ]),
-    node("todo", [title([text("section 1")])], {}),
-    node(
-      "section",
-      [
-        title([text("section 1")]),
-        node(
-          "todo",
-          [title([text("section 1")]), section([title([text("section")])])],
-          {}
-        ),
-      ],
-      {}
-    ),
+    // // node("code", [
+    // //   title([text(`function print() { console.log("hello world") }`)]),
+    // // ]),
+    // node("callout", [title([text("I am a callout!")])]),
+    // node("table", [
+    //   node("row", [
+    //     node("column", [title([text("column 1.1")])]),
+    //     node("column", [title([text("column 1.2")])]),
+    //   ]),
+    //   node("row", [
+    //     node("column", [title([text("column 2.1")])]),
+    //     node("column", [title([text("column 2.2")])]),
+    //   ]),
+    // ]),
+    // node("quote", [title([text("I am a quote!")])]),
+    // node(
+    //   "collapsible",
+    //   [
+    //     title([text("collapsible 0")]),
+    //     node("section", [title([text("section 0.1")])]),
+    //   ],
+    //   {},
+    //   { node: { collapsed: true } }
+    // ),
+    // // node("docLink", [title([text("Link to doc")])]),
+    // node("section", [
+    //   title([text("section 0")]),
+    //   node("section", [
+    //     title([text("section 0.1")]),
+    //     node("section", [
+    //       title([text("section 0.1.1")]),
+    //       node("section", [title([text("section 0.1.1.1")])]),
+    //     ]),
+    //   ]),
+    // ]),
+    // node("section", [
+    //   title([text("section 1")]),
+    //   node("section", [
+    //     title([text("section 1.1")]),
+    //     node("section", [
+    //       title([text("section 1.1.1")]),
+    //       node("section", [title([text("section 1.1.1.1")])]),
+    //       node("section", [title([text("section 1.1.1.2")])]),
+    //     ]),
+    //     node("section", [title([text("section 1.1.2")])]),
+    //   ]),
+    //   node("section", [title([text("section 1.2")])]),
+    // ]),
+    // node("todo", [title([text("section 1")])], {}),
+    // node(
+    //   "section",
+    //   [
+    //     title([text("section 1")]),
+    //     node(
+    //       "todo",
+    //       [title([text("section 1")]), section([title([text("section")])])],
+    //       {}
+    //     ),
+    //   ],
+    //   {}
+    // ),
 
-    node("image", [], {
-      node: {
-        src: "https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9780123820365/files/images/F000124f12-68-9780123820365.jpg",
-        align: "center",
-      },
-      html: {
-        style: { justifyContent: "center" },
-      },
-    }),
-    node("image", [], {
-      node: {
-        src: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb",
-        align: "center",
-      },
-      html: {
-        style: { justifyContent: "end" },
-      },
-    }),
+    // node("image", [], {
+    //   node: {
+    //     src: "https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9780123820365/files/images/F000124f12-68-9780123820365.jpg",
+    //     align: "center",
+    //   },
+    //   html: {
+    //     style: { justifyContent: "center" },
+    //   },
+    // }),
+    // node("image", [], {
+    //   node: {
+    //     src: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb",
+    //     align: "center",
+    //   },
+    //   html: {
+    //     style: { justifyContent: "end" },
+    //   },
+    // }),
     // node("hstack", [
     //   node("stack", [section([title([text("section 1")])])]),
     //   node("stack", [section([title([text("section 2")])])]),
     //   node("stack", [section([title([text("section 3")])])]),
     // ]),
 
-    // node("hstack", [
-    //   node("stack", [section([title([text("section 1")])])]),
-    //   node("stack", [section([title([text("section 2")])])]),
-    // ]),
-    // section([title([])]),
-    section([
-      title([
-        text("sect"),
-        text("ABC", { node: { link: "http://localhost:5173/" } }),
-        text("ion 1"),
-      ]),
+    node("hstack", [
+      node("stack", [section([title([text("section 1")])])]),
+      node("stack", [section([title([text("section 2")])])]),
     ]),
+    section([title([])]),
+    // section([
+    //   title([
+    //     text("sect"),
+    //     text("ABC", { node: { link: "http://localhost:5173/" } }),
+    //     text("ion 1"),
+    //   ]),
+    // ]),
     // node("divider"),
     // section([title([])]),
     // section([title([])]),
@@ -214,7 +214,7 @@ export default function Dev() {
     <CarbonContext app={app}>
       <CarbonChangeContext>
         <DndContext>
-        {/* <div className="carbon-header">
+          {/* <div className="carbon-header">
           <div
             className="carbon-control"
             onClick={() => app.cmd.insert.node("section")?.dispatch()}
@@ -234,7 +234,9 @@ export default function Dev() {
             Bullet
           </div>
         </div> */}
-        <CarbonContent />
+          <RectSelectContext>
+            <CarbonContent />
+          </RectSelectContext>
         </DndContext>
       </CarbonChangeContext>
     </CarbonContext>

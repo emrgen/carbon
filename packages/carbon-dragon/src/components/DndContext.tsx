@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dnd } from "../core/Dnd";
 import { DndContextProvider } from "../hooks/useDndContext";
-import DndController from "./DndController";
+import {DndController} from "./DndController";
 import { useCarbon } from "@emrgen/carbon-core";
 
 // manages node drag drop context

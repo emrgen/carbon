@@ -26,6 +26,7 @@
     "@types/lodash": "^4.14.191",
     "lru-cache": "^10.0.0",
     "rbush": "^3.0.1",
-    "rbush-3d": "^0.0.4"
+    "rbush-3d": "^0.0.4",
+    "react-icons": "^4.10.1"
   }
 }

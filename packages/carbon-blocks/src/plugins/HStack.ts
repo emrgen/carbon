@@ -8,6 +8,7 @@ export class HStack extends CarbonPlugin {
     return {
       content: "stack stack+",
       replaceName: 'section',
+      // rectSelectable: true,
     }
   }
 

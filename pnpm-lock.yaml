@@ -159,6 +159,9 @@ importers:
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
+      '@emrgen/carbon-dragon':
+        specifier: workspace:*
+        version: link:../carbon-dragon
       '@emrgen/types':
         specifier: ^0.0.2
         version: 0.0.2
@@ -275,6 +278,9 @@ importers:
       rbush-3d:
         specifier: ^0.0.4
         version: 0.0.4
+      react-icons:
+        specifier: ^4.10.1
+        version: 4.10.1(react@18.2.0)
     devDependencies:
       '@emrgen/types':
         specifier: ^0.0.2
@@ -360,49 +366,6 @@ importers:
         version: link:../tsconfig
       typescript:
         specifier: ^4.9.5
-        version: 4.9.5
-
-  packages/dragon:
-    dependencies:
-      '@types/lodash':
-        specifier: ^4.14.191
-        version: 4.14.191
-    devDependencies:
-      '@emrgen/types':
-        specifier: ^0.0.2
-        version: 0.0.2
-      '@types/react':
-        specifier: ^18.0.17
-        version: 18.0.28
-      '@types/react-dom':
-        specifier: ^18.0.6
-        version: 18.0.11
-      eslint:
-        specifier: ^7.32.0
-        version: 7.32.0
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      events:
-        specifier: ^3.3.0
-        version: 3.3.0
-      is-hotkey:
-        specifier: ^0.2.0
-        version: 0.2.0
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      sorted-btree:
-        specifier: ^1.8.0
-        version: 1.8.1
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
-      typescript:
-        specifier: ^4.5.2
         version: 4.9.5
 
   packages/eslint-config-custom:

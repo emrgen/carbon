@@ -2,6 +2,7 @@ import { Optional, RawPoint } from "@emrgen/types";
 import { useCallback, useState } from "react";
 import { boundFromPoints, pointsFromFastDndEvent } from "../core/utils";
 import { DndEvent } from "../types";
+import { prevent, preventAndStop } from "@emrgen/carbon-core";
 
 const { min, max, abs } = Math;
 interface UseDragRectProps {
@@ -30,10 +31,13 @@ export const useDragRect = (props?: UseDragRectProps) => {
           {overlay && (
             <div
               style={dragRect ?? {}}
-              className="fast-rect-selector"
+              className="carbon-rect-selector"
               onMouseUp={stop}
             />
           )}
+
+          <div className="carbon-drag-overlay" onMouseMove={prevent}/>
+          
           {cursorPos && (
             <div
               style={{ left: cursorPoint?.x ?? 0, top: cursorPoint?.y ?? 0 }}

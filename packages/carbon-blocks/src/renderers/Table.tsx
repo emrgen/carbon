@@ -9,6 +9,7 @@ import {
   useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-core";
+import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 const TableContext = createContext<Node>(null!);
@@ -16,12 +17,20 @@ const useTable = () => useContext(TableContext);
 
 export const TableComp = (props: RendererProps) => {
   const { node } = props;
-  const app = useCarbon();
+
   const ref = useRef<HTMLElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
+
+  const app = useCarbon();
+
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
-  const { attributes, SelectionHalo, isSelected } = useSelectionHalo(props);
+
+  const selection = useSelectionHalo(props);
+  const dragDropRect = useDragDropRectSelect({ node, ref });
+  const connectors = useConnectorsToProps(
+    useCombineConnectors(dragDropRect, selection)
+  );
 
   useEffect(() => {
     if (!tableRef.current) return;
@@ -65,14 +74,21 @@ export const TableComp = (props: RendererProps) => {
   };
 
   return (
-    <CarbonBlock node={node} ref={ref} custom={{ ...attributes }}>
+    <CarbonBlock node={node} ref={ref} custom={connectors}>
       <TableContext.Provider value={node}>
         <table ref={tableRef}>
           <tbody>
             <CarbonChildren node={node} />
           </tbody>
         </table>
-        {isSelected && <div className="carbon-halo-container" style={{width: width + 'px', height: height + 'px'}} >{SelectionHalo}</div>}
+        {selection.isSelected && (
+          <div
+            className="carbon-halo-container"
+            style={{ width: width + "px", height: height + "px" }}
+          >
+            {selection.SelectionHalo}
+          </div>
+        )}
         {!!width && (
           <div
             className="add_table__row"

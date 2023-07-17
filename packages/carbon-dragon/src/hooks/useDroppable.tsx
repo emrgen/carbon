@@ -9,15 +9,15 @@ export interface FastDroppableProps {
 
 export const useDroppable = (props: FastDroppableProps) => {
   const { node, ref } = props;
-  const fastDnd = useDndContext();
+  const dnd = useDndContext();
   const { version } = useNodeChange(props);
 
   useEffect(() => {
     if (ref.current) {
-      fastDnd.onMountDroppable(node, ref.current);
+      dnd.onMountDroppable(node, ref.current);
       return () => {
-        fastDnd.onUnmountDraggable(node);
+        dnd.onUnmountDraggable(node);
       };
     }
-  }, [fastDnd, node, ref, version]);
+  }, [dnd, node, ref, version]);
 };

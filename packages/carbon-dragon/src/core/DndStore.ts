@@ -10,6 +10,10 @@ export class DndNodeStore {
 	private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
 	private rtree: NodeR3Tree = new NodeR3Tree();
 
+	get size() {
+		return this.rtree.all().length
+	}
+
 	collides(box: BBox): Node[] {
 		return this.rtree.searchNodes(box);
 	}

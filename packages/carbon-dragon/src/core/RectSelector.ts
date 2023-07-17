@@ -2,14 +2,16 @@ import { Optional } from '@emrgen/types';
 import EventEmitter from "events";
 import { last, sortBy, throttle } from "lodash";
 import { DndNodeStore } from "./DndStore";
-import { boundFromFastDndEvent } from "./utils";
-import { ActionOrigin, BSet, Carbon, Node, NodeComparator, NodeId } from '@emrgen/carbon-core';
+import { boundFromFastDndEvent, getEventPosition } from "./utils";
+import { ActionOrigin, BSet, Carbon, Node, NodeComparator, NodeId, Pin, PinnedSelection, Transaction } from '@emrgen/carbon-core';
 import { DndEvent } from '../types';
 
 export class RectSelector extends EventEmitter {
 	selectables: DndNodeStore = new DndNodeStore();
+	focusable: DndNodeStore = new DndNodeStore();
 	selected: BSet<Node> = new BSet(NodeComparator);
 	region: Optional<HTMLElement>;
+	downEvent: Optional<MouseEvent>
 	isDirty = true;
 	disabled = false;
 
@@ -23,22 +25,33 @@ export class RectSelector extends EventEmitter {
 		this.onUnmountRectSelectable = this.onUnmountRectSelectable.bind(this)
 	}
 
-	onMouseDown(e: MouseEvent) {
-		const { app: editor } = this
+	onTransaction(tr: Transaction) {
+		if (tr.updatesContent) {
+			this.isDirty = true;
+		}
+	}
+
+	onMouseDown(e: MouseEvent, node: Node) {
+		const { app } = this
 		// console.log(this.region === e.target, editor.state.selectedNodeIds.size)
+		this.downEvent = e;
 		if (this.region === e.target) {
-			if (editor.state.selectedNodeIds.size) {
-				editor.tr
-					.selectNodes([])
-					.dispatch();
+			if (app.state.selectedNodeIds.size) {
+				app.tr.selectNodes([]).dispatch()
 			}
 		}
+		this.emit('mouse:down', e, node)
+	}
+
+	onMouseUp(e: MouseEvent, node: Node) {
+		this.emit('mouse:up', e, node)
+		// console.log('onMouseUp', e, nodes);
 	}
 
 	onDragStart(e: DndEvent) {
 		// this.locked = true
 		this.emit('drag:start:selector', e);
-		this.app.blur();
+		// this.app.blur();
 		if (this.isDirty) {
 			this.selectables.refresh();
 			this.isDirty = false;
@@ -51,6 +64,7 @@ export class RectSelector extends EventEmitter {
 		this.emit('drag:move:selector', e);
 		const { app: editor, selectables } = this;
 		const { selectedNodeIds } = editor.state;
+
 		const collides = selectables.collides(
 			boundFromFastDndEvent(e)
 		);
@@ -95,6 +109,8 @@ export class RectSelector extends EventEmitter {
 		const selectedIds = selectedMap.toArray().map((n) => n.id)
 		if (this.noSelectionChange(selectedIds)) return
 		const { tr } = editor;
+		console.log('@@@@@@@@2');
+
 		tr.selectNodes(selectedIds, ActionOrigin.UserSelectionChange).dispatch();
 	}
 
@@ -104,6 +120,9 @@ export class RectSelector extends EventEmitter {
 
 	onDragEnd(e) {
 		this.emit('drag:end:selector', e);
+		const { selected, app } = this;
+		console.log('selected', selected.size);
+
 		// this.editor.focus()
 		console.log('onDragEnd', e.node.name)
 	}
@@ -115,4 +134,6 @@ export class RectSelector extends EventEmitter {
 	onUnmountRectSelectable(node) {
 		this.selectables.delete(node);
 	}
+
+	onMountFocusable() {}
 }

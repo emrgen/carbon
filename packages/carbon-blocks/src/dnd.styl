@@ -1,0 +1,179 @@
+
+.drag-cursor-overlay
+	position absolute
+	width 100%
+	height: 100%
+	background: rgba(255, 0, 0, 0.01)
+	// cursor: none
+	// cursor grabbing
+	user-select: none
+	z-index: 999999999
+
+.carbon-rect-selector
+	position absolute
+	box-shadow: 0 0 0 1px #555
+	background: rgba(51, 51, 51, 0.1)
+	user-select: none
+	pointer-events: none
+	z-index: 9999
+
+.carbon-drag-overlay
+	position absolute
+	width 100%
+	height: 100%
+	background: rgba(245, 118, 118, 0.8)
+
+.drag-handle-hint
+	position absolute
+	background: rgba(245, 118, 118, 0.8)
+	width 10px
+	height 10px
+	transform: translate(-50%, -50%)
+
+.droppable-rect
+	position absolute
+	box-shadow: inset 0 0 0 3px rgb(42, 51, 171)
+	pointer-events: none
+	background: transparent
+
+.draggable-rect
+	position absolute
+	box-shadow: inset 0px 0px 0 2px rgb(211, 46, 128)
+	pointer-events: none
+	background: transparent
+
+[data-name=title]
+	position relative
+
+[data-name=h1]
+[data-name=h2]
+[data-name=h3]
+[data-name=h4]
+[data-name=section]
+[data-name=bulletedList]
+[data-name=numberedList]
+	// position relative
+	&:after
+		position: absolute
+		content: attr(data-node-key)
+		top 1px
+		right 0
+		padding 0 10px
+		font-size 13px
+&[data-name=doc]:after
+&[data-name=paragraph]:after
+	position: absolute
+	content: attr(data-node-key)
+	top 1px
+	right 100px
+	padding 0 10px
+	font-size 13px
+	// width 100px
+	// height: 10px
+
+[data-name=doc]
+	caret-color teal
+
+.carbon-rect-select-area
+	// position absolute
+	padding: 0 20px
+	height: 100%
+	width: 100%
+	top: 0
+	left: 0
+	// background rgb(0, 128, 128)
+	z-index -1
+
+.carbon-dnd-portal
+	position absolute
+	left: 0
+	top: 0
+	// width 100%
+	// height: 100%
+	// background: rgba(30, 112, 255, 0.161)
+
+.carbon-node-handle
+	position absolute
+	user-select: none
+	display: flex
+	gap: 3px
+	transform: translate(-4px, 0px)
+	// flex-direction: row-reverse
+	.carbon-add-handle
+		cursor: pointer
+		width 24px
+		height: 24px
+		border-radius: 4px
+		display: flex
+		align-items: center
+		justify-content: center
+		color #aaa
+		&:hover
+			background: #ddd
+			color #555
+		&:active
+			background: #ccc
+			color #444
+		svg
+			pointer-events: none
+			
+	.carbon-drag-handle
+		cursor: grab
+		width 20px
+		height: 24px
+		transition: opacity 0.3s
+		border-radius: 4px
+		display: flex
+		align-items: center
+		justify-content: center
+		color #aaa
+		font-size: 20px
+		&:hover
+			background: #ddd
+			color #555
+		&:active
+			background: #ccc
+			color #444
+		svg
+			pointer-events: none
+.carbon-drag-overlay
+	position absolute
+	width 100%
+	height: 100%
+	cursor grabbing
+	user-select: none
+	background: rgba(255, 0, 0, 0.094)
+	z-index 999999999
+
+
+$selection-color = hsla(213, 82%, 82%, 0.5)
+// [data-selected=true]
+// 	position relative
+// 	background: $selection-color
+// 	box-shadow: 0 0 0 -3px #fff
+// 	.node-selected
+// 		background-color: transparent;
+
+[data-name=text]
+	white-space: pre-wrap;
+	word-break: break-word;
+
+.fast-selection-halo
+	position absolute
+	top: 0
+	left 0
+	width: 100%
+	height: 100%
+	background: $selection-color
+	opacity: 0.6
+	border-radius: 4px
+	pointer-events: none
+
+[data-name=h1] > [data-type="content"]
+	font-size: 26px
+[data-name=h2] > [data-type="content"]
+	font-size: 24px
+[data-name=h3] > [data-type="content"]
+	font-size: 18px
+[data-name=h4] > [data-type="content"]
+	font-size: 16px

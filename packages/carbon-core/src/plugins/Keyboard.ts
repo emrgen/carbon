@@ -9,10 +9,11 @@ import { skipKeyEvent } from "../utils/key";
 import { first, last, reverse } from "lodash";
 import { BlockContent, Carbon, InlineContent, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
 import { hasParent, nodePath } from "../utils/node";
-import { CommandPlugin, insertAfterAction, preventAndStopCtx } from '@emrgen/carbon-core';
+import { CommandPlugin, insertAfterAction, preventAndStopCtx, Node } from '@emrgen/carbon-core';
 import { Optional } from '@emrgen/types';
 import { nodeLocation } from '../utils/location';
 import { BlockSelection } from "../core/NodeSelection";
+import { Optional } from '@emrgen/types';
 
 
 declare module '@emrgen/carbon-core' {
@@ -556,10 +557,17 @@ const prevBlockSelectable = (node: Node) => {
 }
 
 const nextBlockSelectable = node => {
-	const block = node.chain.find(n => n.isBlockSelectable);
-	return block?.find(n => {
+	const block: Optional<Node> = node.chain.find(n => n.isBlockSelectable);
+	const found = block?.find(n => {
 		return !n.eq(block) && !n.isCollapseHidden && n.isBlockSelectable
-	}, { order: 'pre' }) ?? block?.next(n => n.isBlockSelectable, { order: 'pre' });
+	}, { order: 'pre' })
+
+	if (found) return found;
+
+	console.log('xxxxxx', block?.id.toString());
+	
+
+	return block?.next(n => n.isBlockSelectable, { order: 'pre' });
 }
 
 

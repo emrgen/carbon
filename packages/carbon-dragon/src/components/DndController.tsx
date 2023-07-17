@@ -3,11 +3,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDndContext } from "../hooks/useDndContext";
 import { DndEvent, RectStyle } from "../types";
-import DraggableHandle from "./DraggableHandle";
-import { Node, NodeId, Transaction, prevent, useCarbon } from "@emrgen/carbon-core";
+import {
+  Node,
+  NodeId,
+  Transaction,
+  prevent,
+  useCarbon,
+} from "@emrgen/carbon-core";
 import { elementBound } from "../core/utils";
+import { DraggableHandle } from "./DraggableHandle";
 
-export default function DndController() {
+export function DndController() {
   const app = useCarbon();
   const dnd = useDndContext();
   const portalRef = useRef(null);
@@ -16,8 +22,10 @@ export default function DndController() {
   const [showDragHandle, setShowDragHandle] = useState(false);
   const [dragHandlePosition, setDragHandlePosition] =
     useState<Optional<RectStyle>>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [draggedNode, setDraggedNode] = useState<Optional<Node>>(null);
+  const [isDragging, setIsDragging] = useState(dnd.isDragging);
+  const [draggedNode, setDraggedNode] = useState<Optional<Node>>(
+    dnd.draggedNode
+  );
 
   useEffect(() => {
     if (portalRef.current) {
@@ -32,33 +40,36 @@ export default function DndController() {
 
   const onMouseIn = useCallback(
     (node: Node) => {
-      if (!node.type.isDraggable || dragHandleNode?.eq(node)) return;
+      if (!node.type.isDraggable || dragHandleNode?.eq(node) || dnd.isMouseDown) return;
       const el = app.store.element(node.id);
       if (!portalPosition) return;
       if (!el) return;
       const region = dnd.region;
       if (!region) return;
+
       const bound = elementBound(el);
+      console.log(el, bound, portalPosition);
       if (node.type.dragHandle) {
         // console.log("onMouseIn", node.id.toString(), bound);
         setDragHandlePosition({
-          left: bound.left - portalPosition.x - 20,
+          left: bound.left - portalPosition.x - 50,
           top: bound.top - portalPosition.y + 4,
-          width: 20,
+          width: 50,
           height: 20,
         });
       } else {
-        setDragHandlePosition({
-          left: bound.left - portalPosition.x,
-          top: bound.top - portalPosition.y,
-          width: bound.right - bound.left - 100,
-          height: bound.bottom - bound.top,
-        });
+        // setDragHandlePosition({
+        //   left: bound.left - portalPosition.x - 20,
+        //   top: bound.top - portalPosition.y,
+        //   width: bound.right - bound.left - 100,
+        //   height: bound.bottom - bound.top,
+        // });
       }
       setShowDragHandle(true);
       setDragHandleNode(node);
+
     },
-    [dragHandleNode, app.store, portalPosition, dnd.region]
+    [dragHandleNode, dnd.isMouseDown, dnd.region, app.store, portalPosition]
   );
 
   const resetDragHandle = useCallback(() => {
@@ -100,13 +111,18 @@ export default function DndController() {
     [resetDragHandle]
   );
 
-  const onTransaction = useCallback((tr: Transaction) => {
-    if (tr.updatesContent) {
-      // console.log("updated content");
-      dnd.isDirty = true;
-      resetDragHandle();
-    }
-  }, [dnd, resetDragHandle]);
+  const onTransaction = useCallback(
+    (tr: Transaction) => {
+      if (tr.updatesContent) {
+        // console.log("updated content");
+        dnd.isDirty = true;
+        console.log(tr);
+
+        resetDragHandle();
+      }
+    },
+    [dnd, resetDragHandle]
+  );
 
   const onEditorMouseOver = useCallback((e) => {
     // setShowDragHandle(true);
@@ -162,6 +178,7 @@ export default function DndController() {
   // console.log(dragHandleOpacity, !isDragging, dragHandleNode, showDragHandle);
   // console.log(isDragging)
   return (
+    <>
     <div className="carbon-dnd-portal" ref={portalRef}>
       {dragHandleNode && (
         <DraggableHandle
@@ -174,14 +191,13 @@ export default function DndController() {
         />
       )}
 
-      {isDragging &&
-        createPortal(
-          <div
-            className={"carbon-drag-overlay " + draggedNode?.name ?? ""}
-            onMouseMove={prevent}
-          ></div>,
-          document.body
-        )}
     </div>
+      {/* {isDragging && (
+        <div
+          className={"carbon-drag-overlay " + draggedNode?.name ?? ""}
+          onMouseMove={prevent}
+        ></div>
+      )} */}
+    </>
   );
 }

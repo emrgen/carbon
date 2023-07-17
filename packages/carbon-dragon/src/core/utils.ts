@@ -3,6 +3,19 @@ import { DndEvent } from '../types';
 
 const { min, max, abs } = Math;
 
+export const getEventPosition = (from: MouseEvent, to: MouseEvent) => {
+  const { clientX: startX, clientY: startY } = from;
+  const { clientX: endX, clientY: endY } = to;
+  return {
+    startX,
+    startY,
+    endX,
+    endY,
+    deltaX: endX - startX,
+    deltaY: endY - startY,
+  };
+}
+
 // sort bounds by top, then left
 export function boundSorter(a: Bound, b: Bound) {
   return a.top - b.top || a.left - b.left;
@@ -56,13 +69,13 @@ export const boxFromPoints = (p1: RawPoint, p2: RawPoint) => {
 }
 
 // find box from dnd event
-export const boundFromFastDndEvent = (event: DndEvent) => {
+export const boundFromFastDndEvent = (event: Pick<DndEvent, 'position'>) => {
   const {sp, ep} = pointsFromFastDndEvent(event)
   return boxFromPoints(sp, ep)
 }
 
 // find points from dnd event
-export const pointsFromFastDndEvent = (event: DndEvent) => {
+export const pointsFromFastDndEvent = (event: Pick<DndEvent, 'position'>) => {
   const {startX, startY, endX, endY} = event.position
   return {
     sp: { x: startX, y: startY },

@@ -13,6 +13,9 @@ export class Dnd extends EventEmitter {
 	portal: Optional<HTMLElement>;
 	region: Optional<HTMLElement>;
 	isDirty = true;
+	isDragging: boolean = false;
+	draggedNode: Optional<Node>;
+	isMouseDown: any;
 
 	constructor(readonly app: Carbon) {
 		super();
@@ -25,7 +28,16 @@ export class Dnd extends EventEmitter {
 		this.onDragEnd = this.onDragEnd.bind(this)
 		this.onMouseMove = throttle(this.onMouseMove.bind(this), 0)
 		this.onMouseOver = this.onMouseOver.bind(this)
-		this.onMouseOver = this.onMouseOver.bind(this)
+		this.onMouseDown = this.onMouseDown.bind(this)
+		this.onMouseUp = this.onMouseUp.bind(this)
+	}
+
+	onMouseDown(node: Node) {
+		this.isMouseDown = true
+	}
+
+	onMouseUp(node: Node) {
+		this.isMouseDown = false;
 	}
 
 	onMountDraggable(node: Node, el: HTMLElement) {
@@ -47,6 +59,8 @@ export class Dnd extends EventEmitter {
 	onDragStart(e: DndEvent) {
 		// console.log('drag-start');
 		this.emit('drag:start', e);
+		this.isDragging = true;
+		this.draggedNode = e.node;
 	}
 
 	onDragMove(e: DndEvent) {
@@ -56,6 +70,8 @@ export class Dnd extends EventEmitter {
 
 	onDragEnd(e: DndEvent) {
 		// console.log('drag-end');
+		this.isDragging = false;
+		this.draggedNode = null;
 		this.emit('drag:end', e)
 	}
 

@@ -1,5 +1,6 @@
 import { NodeIdSet } from "./BSet";
 import { Node } from "./Node";
+import { NodeId } from "./NodeId";
 import { NodeStore } from "./NodeStore";
 
 //
@@ -65,6 +66,10 @@ export class BlockSelection {
   constructor(store: NodeStore, nodeIds: NodeIdSet,) {
     this.nodeIds = nodeIds;
     this.store = store;
+  }
+
+  has(id: NodeId) {
+    return this.nodeIds.has(id);
   }
 
 }

@@ -146,6 +146,8 @@ export class Transaction {
 		return this.app.cmd;
 	}
 
+	actionsa() {}
+
 	onSelect(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		this.sm.onSelect(before, after, origin);
 	}

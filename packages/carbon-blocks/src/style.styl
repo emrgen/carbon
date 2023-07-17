@@ -1,3 +1,5 @@
+// @import url('./dnd.styl');
+
 $selectionHaloColor = #accef78d
 $quoteColor = #555
 $lineHeight = 26px
@@ -31,6 +33,10 @@ $lineHeight = 26px
 
 [data-name=document]
 	overflow: auto;
+	// [data-type=children]
+	// 	display: flex
+	// 	flex-direction: column
+	// 	gap: 2px
 
 // .carbon-content
 .carbon-header
@@ -148,7 +154,10 @@ span {
 	.divider
 		position relative
 		top: 7px
-		border-bottom: 1px solid rgba(55, 53, 47, 0.184)
+		height: 2px
+		width: 100%
+		background: #eee
+		// border-bottom: 1px solid rgba(55, 53, 47, 0.184)
 
 .carbon-selection-halo
 	position absolute
@@ -290,6 +299,7 @@ span {
 [data-name="hstack"]
 	display: flex
 	padding: 10px 0
+	// position relative
 	> div
 		flex 1
 
@@ -297,6 +307,9 @@ span {
 	padding-left 10px
 	&:first-child
 		padding-left 0px
+	// display: flex
+	// flex-direction: column
+	// gap 2px
 
 [data-name="title"] a
 	cursor pointer
@@ -456,10 +469,12 @@ span {
 				&:last-child
 					border-right: 1px solid #ddd
 
-// [data-hide-cursor=true]
-// 	caret-color: transparent
-// 	::selection
-// 		background: transparent
+// [data-hide-cursor=true],
+.carbon-rect-select.rect-active
+	caret-color: transparent
+	user-select: none
+	::selection
+		background: transparent
 
 .carbon-halo-container
 	position absolute
@@ -467,6 +482,7 @@ span {
 
 [data-name=carbon]
 	display: flex
+	padding: 10px
 	gap 10px
 	[data-name=document]
 		flex 1
@@ -478,7 +494,7 @@ span {
 	background #fafafa
 	outline: 2px dashed blue;
 	padding: 10px 10px
-	margin: 10px 00px 0px 10px
+	// margin: 10px 00px 0px 10px
 	padding-top 90px
 
 [data-name=fileTreeItem]

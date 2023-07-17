@@ -1,5 +1,5 @@
 import { MutableRefObject, useEffect } from "react";
-import { useRectSelectorContext } from "./useRectSelector";
+import { useRectSelector } from "./useRectSelector";
 import { Node, useNodeChange } from "@emrgen/carbon-core";
 
 interface UseFastSelectableProps {
@@ -10,7 +10,7 @@ interface UseFastSelectableProps {
 // registers rect-selectable
 export const useRectSelectable = (props: UseFastSelectableProps) => {
 	const {node, ref} = props;
-	const rectSelector = useRectSelectorContext();
+	const rectSelector = useRectSelector();
 	const { version } = useNodeChange(props);
 
 	useEffect(() => {
