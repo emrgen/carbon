@@ -36,7 +36,7 @@ export const useDragRect = (props?: UseDragRectProps) => {
             />
           )}
 
-          <div className="carbon-drag-overlay" onMouseMove={prevent}/>
+          <div className="carbon-drag-overlay" onMouseMove={prevent} />
           
           {cursorPos && (
             <div

@@ -1,0 +1,19 @@
+# 1. EventManager should handle all editor events
+
+Date: 2023-07-21
+
+## Status
+
+Accepted
+
+## Context
+
+Editor is changes the document. The changes are driven by the user initiated events.
+
+## Decision
+
+A dedicated event manager can help to create a goto logical point which handles events.
+
+## Consequences
+
+All events can be tracked and examined before processing.

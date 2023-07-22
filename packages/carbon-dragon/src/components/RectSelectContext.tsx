@@ -3,11 +3,12 @@ import { RectSelector } from "../core/RectSelector";
 import { RectSelectorContext } from "../hooks/useRectSelector";
 import { RectSelectController } from "./RectSelectController";
 import { Transaction, useCarbon } from "@emrgen/carbon-core";
-import { createPortal } from 'react-dom';
+import { createPortal } from "react-dom";
 import { useDndMonitor, useDragRect } from "../hooks";
 import { DndEvent } from "../types";
 import { RectSelectAreaId } from "../constants";
-import { throttle } from 'lodash';
+import { throttle } from "lodash";
+import { CarbonDragHandleId } from "./DraggableHandle";
 
 export function RectSelectContext(props) {
   const app = useCarbon();
@@ -17,6 +18,7 @@ export function RectSelectContext(props) {
   });
 
   const [isSelecting, setIsSelecting] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     const onTransaction = (tr: Transaction) => {
@@ -33,6 +35,10 @@ export function RectSelectContext(props) {
       if (e.id === RectSelectAreaId) {
         rectSelector.onDragStart(e);
         // app.disable();
+      }
+
+      if (e.id === CarbonDragHandleId) {
+        setIsDragging(true);
       }
     },
     [rectSelector]
@@ -54,11 +60,15 @@ export function RectSelectContext(props) {
     (e: DndEvent) => {
       if (e.id === RectSelectAreaId) {
         rectSelector.onDragEnd(e);
-        app.enable();
+        // app.enable();
         onDragRectStop(e);
       }
+
+      if (e.id === CarbonDragHandleId) {
+        setIsDragging(false);
+      }
     },
-    [app, onDragRectStop, rectSelector]
+    [onDragRectStop, rectSelector]
   );
 
   useDndMonitor({
@@ -71,7 +81,10 @@ export function RectSelectContext(props) {
     const onMouseDown = (e) => {
       setIsSelecting(true);
     };
+
     const onMouseUp = (e) => {
+      // if there is a block selection, keep the rect-select active
+      if (app.blockSelection.size) return;
       setIsSelecting(false);
     };
 
@@ -82,11 +95,17 @@ export function RectSelectContext(props) {
       rectSelector.off("mouse:down", onMouseDown);
       rectSelector.off("mouse:up", onMouseUp);
     };
-  }, [rectSelector]);
+  }, [app.blockSelection.size, rectSelector]);
 
   return (
     <RectSelectorContext value={rectSelector}>
-      <div className={"carbon-rect-select " + (isSelecting ? 'rect-active' : '')}>
+      <div
+        className={
+          "carbon-rect-select" +
+          (isSelecting ? " rect-active" : "") +
+          (isDragging ? " rect-dragging" : "")
+        }
+      >
         {props.children}
         {/* <RectSelectController /> */}
       </div>

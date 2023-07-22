@@ -32,13 +32,7 @@ export class Dnd extends EventEmitter {
 		this.onMouseUp = this.onMouseUp.bind(this)
 	}
 
-	onMouseDown(node: Node) {
-		this.isMouseDown = true
-	}
 
-	onMouseUp(node: Node) {
-		this.isMouseDown = false;
-	}
 
 	onMountDraggable(node: Node, el: HTMLElement) {
 		this.draggables.register(node, el);
@@ -54,6 +48,16 @@ export class Dnd extends EventEmitter {
 
 	onUnmountDroppable(node: Node) {
 		this.droppables.delete(node);
+	}
+
+	onMouseDown(node: Node, event) {
+		this.isMouseDown = true;
+		this.emit('mouse:down', node, event);
+	}
+
+	onMouseUp(node: Node, event, isDragging: boolean) {
+		this.isMouseDown = false;
+		this.emit('mouse:up', node, event, isDragging);
 	}
 
 	onDragStart(e: DndEvent) {

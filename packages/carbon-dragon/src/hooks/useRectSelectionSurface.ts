@@ -31,7 +31,7 @@ export const useRectSelectionSurface = (props: UseRectSelectionSurfaceProps) => 
 		rectSelector.onMouseDown(e, node);
 		listeners.onMouseDown(e);
 
-		console.group('disabled: editor')
+		// console.group('disabled: editor')
 		// app.disable();
 	}, [node, listeners, rectSelector, ref]);
 

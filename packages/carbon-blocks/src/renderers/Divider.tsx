@@ -23,14 +23,24 @@ export default function DividerComp(props: RendererProps) {
   const handleClick = useCallback(e => {
     e.preventDefault();
     e.stopPropagation();
+    if (app.blockSelection && app.blockSelection.has(node.id)) return
+    // if (app.blockSelection)
     app.tr.selectNodes([node.id]).dispatch();
-  },[app.tr, node.id])
+  },[app.blockSelection, app.tr, node.id])
+
+  const handleMouseDown = useCallback(e => {
+    if (app.blockSelection && app.blockSelection.has(node.id)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  },[app.blockSelection, node.id])
 
   return (
     <CarbonBlock
       node={node}
       custom={{
         onClick: handleClick,
+        onMouseDown: handleMouseDown,
         ...connectors,
       }}
       ref={ref}

@@ -59,13 +59,11 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       // console.log("mouse down", ref.current, event.target);
       if (isDisabled) return;
       if (ref.current !== event.target) return;
-      dnd.onMouseDown(node)
+      dnd.onMouseDown(node, event)
       // console.log(ref.current, event.target)
       let isDragging = false;
 
       const activatorEvent = event;
-      
-
 
       const onMouseUp = (event) => {
         if (isDragging) {
@@ -78,8 +76,8 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
           });
         }
 
+        dnd.onMouseUp(node, event, isDragging);
         isDragging = false;
-        dnd.onMouseUp(node);
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
       };

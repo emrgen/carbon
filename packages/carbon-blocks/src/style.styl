@@ -272,8 +272,6 @@ span {
 		top 0
 		left 0
 		cursor pointer
-	.carbon-selection-halo[data-active=true]
-		background: transparent
 
 .katex
 	display: block
@@ -299,6 +297,7 @@ span {
 [data-name="hstack"]
 	display: flex
 	padding: 10px 0
+	gap 50px
 	// position relative
 	> div
 		flex 1
@@ -475,6 +474,9 @@ span {
 	user-select: none
 	::selection
 		background: transparent
+.carbon-rect-select.rect-dragging
+	.carbon-selection-halo[data-selected=true]
+		background: transparent!important
 
 .carbon-halo-container
 	position absolute
