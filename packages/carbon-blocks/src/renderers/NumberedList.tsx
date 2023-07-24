@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -7,14 +7,19 @@ import {
   useSelectionHalo,
   Node,
 } from "@emrgen/carbon-core";
+import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
 
 export const NumberedListComp = (props: RendererProps) => {
   const { node, version } = props;
-  const { SelectionHalo } = useSelectionHalo(props);
 
-  // const ref = useRef(null);
-  // const { listeners } = useDragDropRectSelect({ node, ref });
 
+  const ref = useRef(null);
+
+  const selection = useSelectionHalo(props);
+  const dragDropRect = useDragDropRectSelect({ node, ref });
+  const connectors = useConnectorsToProps(
+    useCombineConnectors(dragDropRect, selection)
+  );
   // watch the parent version for list number calculation
   const getListNumber = (node: Node): number => {
     if (node.prevSibling?.name === "numberedList") {
@@ -35,10 +40,10 @@ export const NumberedListComp = (props: RendererProps) => {
   );
 
   return (
-    <CarbonBlock {...props}>
+    <CarbonBlock {...props} custom={connectors} ref={ref}>
       <CarbonNodeContent node={node} beforeContent={beforeContent} />
       <CarbonNodeChildren node={node} />
-      {SelectionHalo}
+      {selection.SelectionHalo}
     </CarbonBlock>
   );
 };

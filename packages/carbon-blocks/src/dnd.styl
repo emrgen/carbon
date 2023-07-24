@@ -97,7 +97,6 @@
 	user-select: none
 	display: flex
 	gap: 3px
-	transform: translate(-4px, 0px)
 	// flex-direction: row-reverse
 	.carbon-add-handle
 		cursor: pointer
@@ -145,6 +144,20 @@
 	background: rgba(255, 0, 0, 0.094)
 	z-index 999999999
 
+.carbon-node-handle[data-target=section]
+	transform: translate(-4px, 0px)
+
+.carbon-node-handle[data-as=h1]
+	transform: translate(-4px, 34px)
+
+.carbon-node-handle[data-as=h2]
+	transform: translate(-4px, 20px)
+
+.carbon-node-handle[data-as=h3]
+	transform: translate(-4px, 18px)
+
+.carbon-node-handle[data-as=h4]
+	transform: translate(-4px, 18px)
 
 $selection-color = hsla(213, 82%, 82%, 0.5)
 // [data-selected=true]

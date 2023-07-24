@@ -12,7 +12,7 @@ Editor is changes the document. The changes are driven by the user initiated eve
 
 ## Decision
 
-A dedicated event manager can help to create a goto logical point which handles events.
+A dedicated event manager can help to create a goto logical point where events are handled.
 
 ## Consequences
 

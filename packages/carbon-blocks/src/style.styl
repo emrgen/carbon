@@ -106,6 +106,14 @@ $lineHeight = 26px
 		[data-name=title]
 			flex 1
 
+[data-name=numberedList][data-as=h1]
+	[data-type=content]
+		padding-left: 20px
+
+[data-name=numberedList][data-as=h2]
+	[data-type=content]
+		padding-left: 12px
+
 --webkit::spelling-error {
   color: teal!important;
 }
@@ -495,11 +503,15 @@ span {
 	height: 500px
 	background #fafafa
 	outline: 2px dashed blue;
-	padding: 10px 10px
+	padding: 10px 4px
 	// margin: 10px 00px 0px 10px
 	padding-top 90px
 
 [data-name=fileTreeItem]
+	border-radius: 4px
+	padding: 0px 4px
+	&:hover
+		background: #eee
 	&> [data-type=children]
 		padding-left: 20px
 	&>[data-type=content]
@@ -533,9 +545,10 @@ span {
 			align-items: center
 			justify-content: center
 			padding 0
+			border-radius: 4px
 			// padding-top 2px
 			&:hover
-				background: #eee
+				background: #ddd
 				color #666
 		.add-child-file
 			position absolute
@@ -555,7 +568,7 @@ span {
 			opacity 0
 			font-size: 14px
 			&:hover
-				background: #eee
+				background: #ddd
 				color #666
 	&>[data-type=content]:hover
 		.add-child-file

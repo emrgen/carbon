@@ -121,6 +121,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     <div
       className="carbon-node-handle"
       data-target={node?.name}
+      data-as={node?.attrs.html["data-as"]}
       data-drag-handle={node?.type.dragHandle}
       style={style}
     >
