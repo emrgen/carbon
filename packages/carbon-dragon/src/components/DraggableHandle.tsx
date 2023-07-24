@@ -47,7 +47,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
   const onDragStart = useCallback((e: DndEvent) => {
     if (e.id === CarbonDragHandleId) {
-      e.event.stopPropagation();
+      // e.event.stopPropagation();
       // app.tr.selectNodes([])?.dispatch();
     }
   }, []);
@@ -72,10 +72,13 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
   const onMouseUp = useCallback((node, event, isDragging) => {
     console.log("onMouseUp", node, event, isDragging);
+    // app.focus();
     if (isDragging) {
       event.stopPropagation();
       event.preventDefault();
     } else {
+      // event.stopPropagation();
+      // event.preventDefault();
       if (node) {
         app.tr.selectNodes(node.id)?.dispatch();
       }
@@ -132,7 +135,8 @@ export function DraggableHandle(props: FastDragHandleProps) {
       >
         <HiOutlinePlus />
       </div>
-      <div className="carbon-drag-handle" ref={ref} {...listeners}>
+      <div className="carbon-drag-handle" ref={ref} {...listeners} onKeyDown={e => console.log(e)}
+    >
         <PiDotsSixVerticalBold />
       </div>
       {createPortal(<>{DragRectComp}</>, document.body)}

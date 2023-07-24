@@ -111,3 +111,4 @@ export const blockPresets: Extension = {
 
 
 export * from './events'
+// export * from './components'

@@ -13,6 +13,7 @@ import {
   CarbonChangeContext,
   CarbonContent,
   CarbonContext,
+  CarbonEvents,
   CarbonModal,
   extensionPresets,
   useCreateCarbon,
@@ -212,33 +213,15 @@ export default function Dev() {
 
   return (
     <CarbonContext app={app}>
+      <CarbonEvents>
       <CarbonChangeContext>
         <DndContext>
-          {/* <div className="carbon-header">
-          <div
-            className="carbon-control"
-            onClick={() => app.cmd.insert.node("section")?.dispatch()}
-          >
-            Text
-          </div>
-          <div
-            className="carbon-control"
-            onClick={() => app.cmd.insert.node("divider")?.dispatch()}
-          >
-            Divider
-          </div>
-          <div
-            className="carbon-control"
-            onClick={() => app.cmd.change.into("bulletedList")?.dispatch()}
-          >
-            Bullet
-          </div>
-        </div> */}
           <RectSelectContext>
             <CarbonContent />
           </RectSelectContext>
         </DndContext>
       </CarbonChangeContext>
+      </CarbonEvents>
     </CarbonContext>
   );
 }

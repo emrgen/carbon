@@ -23,6 +23,12 @@ export function RectSelectContext(props) {
   useEffect(() => {
     const onTransaction = (tr: Transaction) => {
       rectSelector.onTransaction(tr);
+      // console.log("transaction", tr, app.blockSelection.size);
+      if (app.blockSelection.size) {
+        setIsSelecting(true);
+      } else {
+        setIsSelecting(false);
+      }
     };
     app.on("transaction", onTransaction);
     return () => {

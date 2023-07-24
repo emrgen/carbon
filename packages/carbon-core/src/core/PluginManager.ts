@@ -140,6 +140,8 @@ export class PluginManager {
 		const keyDownEvent = <EventContext<any>>EventContext.fromContext(event)
 		const { node } = keyDownEvent
 
+		// console.log('onKeyDown', event);
+		
 		each(this.before, (p: CarbonPlugin) => {
 			if (keyDownEvent.stopped) return
 			const handlers = p.keydown()

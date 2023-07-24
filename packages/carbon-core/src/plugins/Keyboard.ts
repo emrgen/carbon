@@ -9,8 +9,7 @@ import { skipKeyEvent } from "../utils/key";
 import { first, last, reverse } from "lodash";
 import { BlockContent, Carbon, InlineContent, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
 import { hasParent, nodePath } from "../utils/node";
-import { CommandPlugin, insertAfterAction, preventAndStopCtx, Node } from '@emrgen/carbon-core';
-import { Optional } from '@emrgen/types';
+import { CommandPlugin, insertAfterAction, preventAndStopCtx } from '@emrgen/carbon-core';
 import { nodeLocation } from '../utils/location';
 import { BlockSelection } from "../core/NodeSelection";
 import { Optional } from '@emrgen/types';
@@ -195,6 +194,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				app.tr.selectNodes([block.id]).dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
+				console.log('XXXX');
+				
 				const { app, event, node } = ctx;
 				const { selection, cmd, state, blockSelection } = app;
 				const { selectedNodeIds } = state
@@ -352,15 +353,18 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 	shiftUp(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
 		const { blockSelection: nodeSelection } = app;
-		console.log('xxxxx');
 
 		if (nodeSelection.isEmpty) return
 
 		const { blocks: nodes } = nodeSelection;
 		const firstNode = nodes[0] as Node;
 		const block = prevBlockSelectable(firstNode);
-		// console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
-		if (!block) return
+		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
+		if (!block) {
+			ctx.event.preventDefault()
+			ctx.stopPropagation()
+			return
+		}
 
 		ctx.event.preventDefault();
 		app.tr

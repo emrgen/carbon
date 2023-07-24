@@ -48,7 +48,7 @@ export function DndController() {
       if (!region) return;
 
       const bound = elementBound(el);
-      console.log(el, bound, portalPosition);
+      // console.log(el, bound, portalPosition);
       if (node.type.dragHandle) {
         // console.log("onMouseIn", node.id.toString(), bound);
         setDragHandlePosition({

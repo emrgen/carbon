@@ -16,6 +16,7 @@ export class IsolatingPlugin extends AfterPlugin {
   keydown(): EventHandlerMap {
     return {
       left: (e: EventContext<KeyboardEvent>) => {
+        if (e.app.blockSelection.size) return
         // let a = e.app.cmd.transform.delete()
 
         if (!e.selection.isCollapsed) {

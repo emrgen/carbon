@@ -39,9 +39,9 @@ export class TransactionManager {
 			const tr = this.transactions.shift();
 			console.log('Commit', tr)
 			if (tr?.commit()) {
-				// transaction should me made read-only after commit
+				// TODO: transaction should me made read-only after commit
 				pm.onTransaction(tr);
-				app.emit(EventsOut.transaction, tr);
+				// app.emit(EventsOut.transaction, tr);
 				this.updateTransactionEffects(tr);
 			}
 		}
@@ -61,7 +61,7 @@ export class TransactionManager {
 		}
 
 		// update dom to reflect the state changes
-		this.app.change.update();
+		this.app.change.update(tr);
 		this.app.emit(EventsOut.change, this.state);
 	}
 

@@ -1,6 +1,6 @@
 import { MutableRefObject, useCallback, useEffect, useState } from "react";
 import { useDndContext } from "./useDndContext";
-import { useNodeChange, Node } from "@emrgen/carbon-core";
+import { useNodeChange, Node, stop, preventAndStop } from "@emrgen/carbon-core";
 import { getEventPosition } from "../core/utils";
 
 export interface UseFastDraggableProps {
@@ -55,7 +55,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 
   const onMouseDown = useCallback(
     (event) => {
-      // stop(event)
+      preventAndStop(event)
       // console.log("mouse down", ref.current, event.target);
       if (isDisabled) return;
       if (ref.current !== event.target) return;

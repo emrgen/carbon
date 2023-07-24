@@ -7,6 +7,7 @@ import { NodeTopicEmitter } from './NodeEmitter';
 import { SelectionManager } from './SelectionManager';
 import { TransactionManager } from './TransactionManager';
 import { EventsOut } from './Event';
+import { Transaction } from './Transaction';
 
 export enum NodeChangeType {
 	update = 'update',
@@ -17,6 +18,8 @@ export enum NodeChangeType {
  * Syncs the editor state (iow content and selection) with the UI
  */
 export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
+
+	readonly transactions: Transaction[] = []
 
 	constructor(
 		private readonly app: Carbon,
@@ -42,7 +45,9 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	// 1. sync the doc
 	// 2. sync the selection
 	// 3. sync the node state
-	update() {
+	update(tr: Transaction) {
+		this.transactions.push(tr);
+
 		if (this.state.isContentDirty) {
 			this.updateContent();
 			// console.log('updating content');
@@ -86,9 +91,18 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
 			if (this.state.isSelectionDirty) {
 				this.updateSelection();
+				this.onTransaction();
 			} else {
+				this.onTransaction();
 				this.app.processTick();
 			}
+		}
+	}
+
+	private onTransaction() {
+		const tr = this.transactions.shift()
+		if (tr) {
+			this.app.emit(EventsOut.transaction, tr)
 		}
 	}
 

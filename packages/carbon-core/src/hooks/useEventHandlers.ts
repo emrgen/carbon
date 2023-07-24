@@ -29,6 +29,8 @@ export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 			(o, eventType) => ({
 				...o,
 				[camelCase(`on-${eventType}`)]: (event: Event) => {
+					// console.log('xxx', eventType, event);
+
 					app.onEvent(eventType, event);
 				},
 			}),

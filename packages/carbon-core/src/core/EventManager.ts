@@ -81,6 +81,7 @@ export class EventManager {
 				selection: PinnedSelection.default(app.content),
 				origin: EventOrigin.dom,
 			});
+
 			this.pm.onEvent(editorEvent);
 			return
 		}
@@ -102,7 +103,7 @@ export class EventManager {
 			return
 		}
 
-		// console.log('changing selection....', app.selection.toString(), selection.toString())
+		console.log('changing selection....', app.selection.toString(), selection.toString())
 		// start node corresponds to focus point in DOM
 		const node = selection.start.node;
 		if (!node) {
