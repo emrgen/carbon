@@ -18,9 +18,11 @@ export class DndNodeStore {
 		return this.rtree.searchNodes(box);
 	}
 
-	refresh() {
+	refresh(scrollTop: number, scrollLeft: number) {
+		this.rtree.clear();
 		this.entries().forEach(e => {
-			this.rtree.add(e.node, elementBound(e.el!))
+			// console.warn('refresh', e.node.id.toString(), e.el, elementBound(e.el!).top);
+			this.rtree.add(e.node, elementBound(e.el!, {left: scrollLeft, top: scrollTop}))
 		})
 	}
 

@@ -5,6 +5,7 @@ import {
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent,
+  EventsIn,
   Node,
   Pin,
   PinnedSelection,
@@ -41,15 +42,17 @@ export const DocumentComp = (props: RendererProps) => {
     console.log(bound, e, e.clientY, bound.bottom);
 
     if (e.clientY > bound.bottom) {
-      if (lastChild.isContainerBlock && !lastChild.isAtom && lastChild.isEmpty) {
-        const textBlock = lastChild.find(n => n.isTextBlock);
+      if (
+        lastChild.isContainerBlock &&
+        !lastChild.isAtom &&
+        lastChild.isEmpty
+      ) {
+        const textBlock = lastChild.find((n) => n.isTextBlock);
         if (textBlock) {
           const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
           if (after.eq(app.selection)) return;
           prevent(e);
-           app.tr
-             .select(after, ActionOrigin.UserInput)
-             .dispatch();
+          app.tr.select(after, ActionOrigin.UserInput).dispatch();
         }
         return;
       }
@@ -67,13 +70,18 @@ export const DocumentComp = (props: RendererProps) => {
   };
 
   return (
-    <CarbonBlock
-      node={node}
-      ref={ref}
-      custom={{ ...connectors, onMouseUp: handleClick }}
+    <div
+      className="document-wrapper"
+      onScroll={(e) => app.onEvent(EventsIn.scroll, e as any)}
     >
-      <CarbonNodeContent node={node} placeholder={"Untitled"} />
-      <CarbonNodeChildren node={node} />
-    </CarbonBlock>
+      <CarbonBlock
+        node={node}
+        ref={ref}
+        custom={{ ...connectors, onMouseUp: handleClick }}
+      >
+        <CarbonNodeContent node={node} placeholder={"Untitled"} />
+        <CarbonNodeChildren node={node} />
+      </CarbonBlock>
+    </div>
   );
 };

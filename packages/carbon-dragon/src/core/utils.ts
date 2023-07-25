@@ -1,4 +1,4 @@
-import { Bound, RawPoint } from '@emrgen/types';
+import { BBox, Bound, RawPoint } from '@emrgen/types';
 import { DndEvent } from '../types';
 
 const { min, max, abs } = Math;
@@ -22,8 +22,14 @@ export function boundSorter(a: Bound, b: Bound) {
 }
 
 // find the bound of an element
-export function elementBound(el: HTMLElement): Bound {
-  const { left, right, top, bottom } = el.getBoundingClientRect();
+export function elementBound(el: HTMLElement, adjust = {left: 0, top: 0}): Bound {
+  let { left, right, top, bottom } = el.getBoundingClientRect();
+  
+  left += adjust.left;
+  right += adjust.left;
+  top += adjust.top;
+  bottom += adjust.top;
+
   return {
     left, right, top, bottom,
     maxX: right,
@@ -56,7 +62,7 @@ export const DefaultBound = {
 }
 
 // find box from two points
-export const boxFromPoints = (p1: RawPoint, p2: RawPoint) => {
+export const boxFromPoints = (p1: RawPoint, p2: RawPoint): BBox => {
   const { x: sx, y: sy } = p1;
   const { x: ex, y: ey } = p2;
 
@@ -80,5 +86,16 @@ export const pointsFromFastDndEvent = (event: Pick<DndEvent, 'position'>) => {
   return {
     sp: { x: startX, y: startY },
     ep: { x: endX, y: endY },
+  }
+}
+
+
+export const adjustBox = (box: BBox, adjust = { left: 0, top: 0 }): BBox => {
+  const { minX, minY, maxX, maxY } = box;
+  return {
+    minX: minX + adjust.left,
+    minY: minY + adjust.top,
+    maxX: maxX + adjust.left,
+    maxY: maxY + adjust.top,
   }
 }

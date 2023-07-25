@@ -24,12 +24,20 @@ export const useDraggable = (props: UseFastDraggableProps) => {
   }, [dnd, node, ref, version]);
 
   const onMouseMove = useCallback((e) => {
-    dnd.onMouseOver(node, e);
+    dnd.onMouseMove(node, e);
   }, [dnd, node]);
+
+  const onMouseOut = useCallback(
+    (e) => {
+      dnd.onMouseOut(node, e);
+    },
+    [dnd, node]
+  );
 
   return {
     listeners: {
       onMouseMove,
+      // onMouseOut,
     },
     attributes: {},
   };
@@ -55,7 +63,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 
   const onMouseDown = useCallback(
     (event) => {
-      preventAndStop(event)
+      // preventAndStop(event)
       // console.log("mouse down", ref.current, event.target);
       if (isDisabled) return;
       if (ref.current !== event.target) return;
@@ -66,17 +74,18 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       const activatorEvent = event;
 
       const onMouseUp = (event) => {
+        const dndEvent = {
+          activatorEvent,
+          event,
+          node,
+          id,
+          position: getEventPosition(activatorEvent, event),
+        };
         if (isDragging) {
-          dnd.onDragEnd({
-            activatorEvent,
-            event,
-            node,
-            id,
-            position: getEventPosition(activatorEvent, event),
-          });
+          dnd.onDragEnd(dndEvent);
         }
 
-        dnd.onMouseUp(node, event, isDragging);
+        dnd.onMouseUp(node, dndEvent, isDragging);
         isDragging = false;
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);

@@ -105,6 +105,9 @@ export class Carbon extends EventEmitter {
 
 	// all events are emitted through this method
 	onEvent(type: EventsIn, event: Event) {
+
+		this.emit(type, event);
+
 		if (type === EventsIn.custom) {
 			this.em.onCustomEvent(event);
 		} else {

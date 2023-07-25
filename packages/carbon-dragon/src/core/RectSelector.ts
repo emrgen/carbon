@@ -2,7 +2,7 @@ import { Optional } from '@emrgen/types';
 import EventEmitter from "events";
 import { last, sortBy, throttle } from "lodash";
 import { DndNodeStore } from "./DndStore";
-import { boundFromFastDndEvent, getEventPosition } from "./utils";
+import { adjustBox, boundFromFastDndEvent, getEventPosition } from "./utils";
 import { ActionOrigin, BSet, Carbon, Node, NodeComparator, NodeId, Pin, PinnedSelection, Transaction } from '@emrgen/carbon-core';
 import { DndEvent } from '../types';
 
@@ -12,7 +12,7 @@ export class RectSelector extends EventEmitter {
 	selected: BSet<Node> = new BSet(NodeComparator);
 	region: Optional<HTMLElement>;
 	downEvent: Optional<MouseEvent>
-	isDirty = true;
+	private isDirty = true;
 	disabled = false;
 
 	constructor(readonly app: Carbon) {
@@ -49,24 +49,57 @@ export class RectSelector extends EventEmitter {
 	}
 
 	onDragStart(e: DndEvent) {
+		const { app } = this
+		const { node } = e
 		// this.locked = true
 		this.emit('drag:start:selector', e);
 		// this.app.blur();
 		if (this.isDirty) {
-			this.selectables.refresh();
+			const document = node.chain.find(n => n.isDocument);
+			if (!document) {
+				return;
+			}
+
+			const doc = app.store.element(document!.id);
+			const docParent = doc?.parentNode as HTMLElement;
+
+			if (!docParent) {
+				return;
+			}
+
+			const { scrollTop, scrollLeft } = docParent;
+
+			this.selectables.refresh(scrollTop, scrollLeft);
 			this.isDirty = false;
 			console.log('FastRectSelector initialized')
 		}
 		console.log('onDragStart', e.node.name)
 	}
 
-	onDragMove(e) {
+	onDragMove(e: DndEvent) {
 		this.emit('drag:move:selector', e);
+		const { node } = e;
+		const { app } = this;
+		const document = node.chain.find(n => n.isDocument);
+		if (!document) {
+			return;
+		}
+
+		const doc = app.store.element(document!.id);
+		const docParent = doc?.parentNode as HTMLElement;
+
+		if (!docParent) {
+			return;
+		}
+
+		const { scrollTop, scrollLeft } = docParent;
+
+		
 		const { app: editor, selectables } = this;
 		const { selectedNodeIds } = editor.state;
 
 		const collides = selectables.collides(
-			boundFromFastDndEvent(e)
+			adjustBox(boundFromFastDndEvent(e), { left: scrollLeft, top: scrollTop })
 		);
 
 		if (collides.length === 0 && selectedNodeIds.size === 0) return
@@ -135,5 +168,5 @@ export class RectSelector extends EventEmitter {
 		this.selectables.delete(node);
 	}
 
-	onMountFocusable() {}
+	onMountFocusable() { }
 }

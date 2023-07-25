@@ -7,7 +7,7 @@ interface FastDndMonitor {
 	onDragMove?(e: DndEvent);
 	onDragEnd?(e: DndEvent);
 	onMouseDown?(node: Node, e: MouseEvent);
-	onMouseUp?(node: Node, e: MouseEvent, isDragging: boolean);
+	onMouseUp?(node: Node, e: DndEvent, isDragging: boolean);
 }
 
 // register drag event listeners

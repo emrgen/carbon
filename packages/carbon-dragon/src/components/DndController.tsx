@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useDndContext } from "../hooks/useDndContext";
 import { DndEvent, RectStyle } from "../types";
 import {
+  EventsIn,
   Node,
   NodeId,
   Transaction,
@@ -26,6 +27,20 @@ export function DndController() {
   const [draggedNode, setDraggedNode] = useState<Optional<Node>>(
     dnd.draggedNode
   );
+
+  // listen to scroll event to reset drag handle
+  useEffect(() => {
+    const handleScroll = () => {
+      setDragHandleNode(null);
+      dnd.isDirty = true;
+      dnd.draggedNodeId = null;
+    }
+
+    app.on(EventsIn.scroll, handleScroll)
+    return () => {
+      app.off(EventsIn.scroll, handleScroll)
+    }
+  }, [app, dnd]);
 
   useEffect(() => {
     if (portalRef.current) {
@@ -148,7 +163,7 @@ export function DndController() {
       app.off("transaction", onTransaction);
       app.off("keyDown", onKeyDown);
       dnd.off("mouse:in", onMouseIn);
-      dnd.on("mouse:out", onMouseOut);
+      dnd.off("mouse:out", onMouseOut);
       dnd.off("drag:start", onDragStart);
       dnd.off("drag:end", onDragEnd);
       dnd.off("hide:drag:handle", resetDragHandle);

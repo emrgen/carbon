@@ -94,33 +94,62 @@ const data = node("carbon", [
     //     ]),
     //   ]),
     // ]),
-    // node("section", [
-    //   title([text("section 1")]),
-    //   node("section", [
-    //     title([text("section 1.1")]),
-    //     node("section", [
-    //       title([text("section 1.1.1")]),
-    //       node("section", [title([text("section 1.1.1.1")])]),
-    //       node("section", [title([text("section 1.1.1.2")])]),
-    //     ]),
-    //     node("section", [title([text("section 1.1.2")])]),
-    //   ]),
-    //   node("section", [title([text("section 1.2")])]),
-    // ]),
-    // node("todo", [title([text("section 1")])], {}),
-    // node(
-    //   "section",
-    //   [
-    //     title([text("section 1")]),
-    //     node(
-    //       "todo",
-    //       [title([text("section 1")]), section([title([text("section")])])],
-    //       {}
-    //     ),
-    //   ],
-    //   {}
-    // ),
+    node("section", [
+      title([text("section 1")]),
+      node("section", [
+        title([text("section 1.1")]),
+        node("section", [
+          title([text("section 1.1.1")]),
+          node("section", [title([text("section 1.1.1.1")])]),
+          node("section", [title([text("section 1.1.1.2")])]),
+        ]),
+        node("section", [title([text("section 1.1.2")])]),
+      ]),
+      node("section", [title([text("section 1.2")])]),
+    ]),
+    node("todo", [title([text("section 1")])], {}),
+    node(
+      "section",
+      [
+        title([text("section 1")]),
+        node(
+          "todo",
+          [title([text("section 1")]), section([title([text("section")])])],
+          {}
+        ),
+      ],
+      {}
+    ),
 
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
+    node("section", [title([text("section 1.2")])]),
     // node("image", [], {
     //   node: {
     //     src: "https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9780123820365/files/images/F000124f12-68-9780123820365.jpg",

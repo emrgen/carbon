@@ -55,7 +55,7 @@ export class Dnd extends EventEmitter {
 		this.emit('mouse:down', node, event);
 	}
 
-	onMouseUp(node: Node, event, isDragging: boolean) {
+	onMouseUp(node: Node, event: DndEvent, isDragging: boolean) {
 		this.isMouseDown = false;
 		this.emit('mouse:up', node, event, isDragging);
 	}
@@ -80,25 +80,50 @@ export class Dnd extends EventEmitter {
 	}
 
 	onMouseOver(node: Node, e: MouseEvent) {
+		// console.log('XXX');
 		this.showDragHandle(node, e);
 	}
 
 	// start showing drag handles on hover on draggable
 	onMouseMove(node: Node, e: MouseEvent) {
+		// console.log('XXX');
 		this.showDragHandle(node, e);
 	}
 
+	// start showing drag handles on hover on draggable
+	onMouseOut(node: Node, e: MouseEvent) {
+		// console.log('XXX', 'mouse out');
+		// this.hideDragHandle(node, e);
+	}
+
 	private showDragHandle(node: Node, e: MouseEvent) {
+		const { app, draggables, draggedNodeId } = this
+		const document = node.chain.find(n => n.isDocument);
+		if (!document) {
+			return;
+		}
+
+		const doc = app.store.element(document!.id);
+		const docParent = doc?.parentNode as HTMLElement;
+
+		if (!docParent) {
+			return;
+		}
+
+		const {scrollTop, scrollLeft } = docParent;
+
 		// console.log('mouse move', e)
 		if (this.isDirty) {
 			// console.log('update draggable');
-			this.draggables.refresh();
-			this.droppables.refresh();
+			this.draggables.refresh(scrollTop, scrollLeft);
+			this.droppables.refresh(scrollTop, scrollLeft);
 			this.isDirty = false;
 		}
 
-		const { app: editor, draggables, draggedNodeId } = this
-		const { clientX: x, clientY: y } = e;
+		const { clientX: x, clientY } = e;
+
+		const y = clientY + scrollTop
+
 		// console.log(x, y);
 		const bound1 = { minX: x + 90, minY: y - 1, maxX: x + 100, maxY: y + 1 };
 		const bound2 = { minX: x - 2, minY: y - 1, maxX: x + 2, maxY: y + 1 };
@@ -113,7 +138,7 @@ export class Dnd extends EventEmitter {
 		}
 
 		// console.log(hit)
-		// console.log(hit.map(n => n.depth))
+		// console.log(hit.map(n => n.id.toString()))
 		if (hit.length == 0) {
 			this.resetDraggedNode()
 			return;
@@ -137,6 +162,10 @@ export class Dnd extends EventEmitter {
 		}
 		this.emit('mouse:in', node)
 		this.draggedNodeId = node.id;
+	}
+
+	private hideDragHandle(node: Node, e: MouseEvent) {
+		// this.resetDraggedNode()
 	}
 
 	private resetDraggedNode() {

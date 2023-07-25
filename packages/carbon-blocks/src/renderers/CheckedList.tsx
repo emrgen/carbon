@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -10,12 +10,19 @@ import {
   useNodeStateChange,
   useSelectionHalo,
 } from "@emrgen/carbon-core";
+import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
 
 export default function TodoComp(props: RendererProps) {
   const { node } = props;
-  const { SelectionHalo } = useSelectionHalo(props);
   const app = useCarbon();
   const attrs = useNodeAttrs(props);
+  const ref = useRef(null);
+
+  const selection = useSelectionHalo(props);
+  const dragDropRect = useDragDropRectSelect({ node, ref });
+  const connectors = useConnectorsToProps(
+    useCombineConnectors(dragDropRect, selection)
+  );
 
   const handleClick = useCallback(
     (e) => {
@@ -51,14 +58,14 @@ export default function TodoComp(props: RendererProps) {
   }, [handleClick, node.attrs]);
 
   return (
-    <CarbonBlock {...props}>
+    <CarbonBlock {...props} ref={ref} custom={connectors}>
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
         placeholder={node.isEmpty ? "Todo" : ''}
       />
       <CarbonNodeChildren node={node} />
-      {SelectionHalo}
+      {selection.SelectionHalo}
     </CarbonBlock>
   );
 }
