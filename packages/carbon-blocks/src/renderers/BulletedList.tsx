@@ -38,7 +38,7 @@ export const BulletedListComp = (props: RendererProps) => {
         node={node}
         beforeContent={beforeContent}
         // wrapper={{ contentEditable: false }}
-        // custom={{ contentEditable: true }}
+        placeholder={'List'}
       />
       <CarbonNodeChildren node={node} />
       {SelectionHalo}

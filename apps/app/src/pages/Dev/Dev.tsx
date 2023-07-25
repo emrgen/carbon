@@ -22,21 +22,21 @@ import {
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
 
 const data = node("carbon", [
-  node("fileTree", [
-    node(
-      "fileTreeItem",
-      [
-        title([text("Sunt amet mollit cupidatat non elit labore dolore qui.")]),
-        node("fileTreeItem", [title([text("section 1")])]),
-        node("fileTreeItem", [title([text("section 1")])]),
-      ],
-      {}
-      // { node: { collapsed: false }, state: { selected: true } }
-    ),
-    node("fileTreeItem", [title([text("section 1")])]),
-    node("fileTreeItem", [title([text("section 1")])]),
-    node("fileTreeItem", [title([text("section 1")])]),
-  ]),
+  // node("fileTree", [
+  //   node(
+  //     "fileTreeItem",
+  //     [
+  //       title([text("Sunt amet mollit cupidatat non elit labore dolore qui.")]),
+  //       node("fileTreeItem", [title([text("section 1")])]),
+  //       node("fileTreeItem", [title([text("section 1")])]),
+  //     ],
+  //     {}
+  //     // { node: { collapsed: false }, state: { selected: true } }
+  //   ),
+  //   node("fileTreeItem", [title([text("section 1")])]),
+  //   node("fileTreeItem", [title([text("section 1")])]),
+  //   node("fileTreeItem", [title([text("section 1")])]),
+  // ]),
   node("document", [
     title([text("Carbon "), text("document")]),
     node("divider"),

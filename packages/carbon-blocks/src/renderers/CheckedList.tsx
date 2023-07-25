@@ -52,7 +52,11 @@ export default function TodoComp(props: RendererProps) {
 
   return (
     <CarbonBlock {...props}>
-      <CarbonNodeContent node={node} beforeContent={beforeContent} />
+      <CarbonNodeContent
+        node={node}
+        beforeContent={beforeContent}
+        placeholder={node.isEmpty ? "Todo" : ''}
+      />
       <CarbonNodeChildren node={node} />
       {SelectionHalo}
     </CarbonBlock>

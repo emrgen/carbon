@@ -28,7 +28,7 @@ export const NestableComp = (props: RendererProps) => {
       <CarbonNodeContent
         node={node}
         placeholder={
-          placeholder ?? (node.isEmpty ? node.attrs.node.emptyPlaceholder : '')
+          (node.isEmpty ? placeholder : '')
         }
       />
       <CarbonNodeChildren node={node} />

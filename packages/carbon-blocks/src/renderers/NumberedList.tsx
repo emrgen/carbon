@@ -41,7 +41,11 @@ export const NumberedListComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock {...props} custom={connectors} ref={ref}>
-      <CarbonNodeContent node={node} beforeContent={beforeContent} />
+      <CarbonNodeContent
+        node={node}
+        beforeContent={beforeContent}
+        placeholder={node.isEmpty ? "List" : ""}
+      />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}
     </CarbonBlock>

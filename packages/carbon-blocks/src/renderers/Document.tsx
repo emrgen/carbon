@@ -41,8 +41,19 @@ export const DocumentComp = (props: RendererProps) => {
     console.log(bound, e, e.clientY, bound.bottom);
 
     if (e.clientY > bound.bottom) {
+      if (lastChild.isContainerBlock && !lastChild.isAtom && lastChild.isEmpty) {
+        const textBlock = lastChild.find(n => n.isTextBlock);
+        if (textBlock) {
+          const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
+          if (after.eq(app.selection)) return;
+          prevent(e);
+           app.tr
+             .select(after, ActionOrigin.UserInput)
+             .dispatch();
+        }
+        return;
+      }
       prevent(e);
-      if (lastChild.isContainerBlock && !lastChild.isAtom && lastChild.isEmpty) return;
       console.log("add new child");
       const at = Point.toAfter(lastChild.id);
       const section = app.schema.type("section").default();

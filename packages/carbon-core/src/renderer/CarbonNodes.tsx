@@ -167,6 +167,8 @@ export const CarbonNodeContent = (props: RendererProps) => {
     return null;
   }
 
+  console.log(placeholder);
+  
   return (
     <div data-type="content" {...wrapper}>
       {beforeContent}
