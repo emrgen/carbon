@@ -72,7 +72,7 @@ export const DocumentComp = (props: RendererProps) => {
       ref={ref}
       custom={{ ...connectors, onMouseUp: handleClick }}
     >
-      <CarbonNodeContent node={node} custom={{ placeholder: "Untitled" }} />
+      <CarbonNodeContent node={node} placeholder={"Untitled"} />
       <CarbonNodeChildren node={node} />
     </CarbonBlock>
   );

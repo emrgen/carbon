@@ -58,7 +58,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     <Element
       ref={ref}
       data-name={name}
-      data-version={version}
+      // data-version={version}
       // data-size={node.size}
       {...attrs.html}
       {...custom}
@@ -167,8 +167,6 @@ export const CarbonNodeContent = (props: RendererProps) => {
     return null;
   }
 
-  console.log(placeholder);
-  
   return (
     <div data-type="content" {...wrapper}>
       {beforeContent}

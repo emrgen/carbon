@@ -145,6 +145,7 @@ export interface NodeSpec {
 	atom?: boolean;
 	tag?: string;
 	options?: boolean;
+	// the node can be treated as a standalone document
 	document?: boolean;
 	collapsible?: boolean
 	selectable?: boolean

@@ -72,6 +72,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	}
 
 	mounted(node: Node, changeType: NodeChangeType) {
+		// keep track of the pending node updates
 		if (changeType === NodeChangeType.update) {
 			this.state.runtime.updatedNodeIds.remove(node.id);
 		}
@@ -81,12 +82,13 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			this.app.emit(EventsOut.contentUpdated, this.state.content);
 		}
 
-		// FIXME: this is a hack, may not indicate the correct state of updated nodes
+		// FIXME: this is a unreliable hack, may not indicate the correct state of updated nodes
 		if (this.isStateSynced) {
 			this.app.emit(EventsOut.nodeStateUpdated, this.state);
 		}
 
 		// console.log('--------', this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
+		// sync the selection if the content is synced
 		if (this.isContentSynced) {
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
 			if (this.state.isSelectionDirty) {

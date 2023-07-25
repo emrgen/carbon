@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 
+import { RecoilRoot } from "recoil";
+
 import {
   BlockEvent,
   blockPresets,
@@ -18,8 +20,8 @@ import {
   extensionPresets,
   useCreateCarbon,
 } from "@emrgen/carbon-core";
-
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
+import { BlockMenu, carbonUtilPlugins } from "@emrgen/carbon-utils";
 
 const data = node("carbon", [
   // node("fileTree", [
@@ -199,7 +201,11 @@ const data = node("carbon", [
 ]);
 
 export default function Dev() {
-  const app = useCreateCarbon(data, [extensionPresets, blockPresets]);
+  const app = useCreateCarbon(data, [
+    extensionPresets,
+    blockPresets,
+    carbonUtilPlugins,
+  ]);
 
   // console.log(app.schema.nodes);
 
@@ -213,15 +219,18 @@ export default function Dev() {
 
   return (
     <CarbonContext app={app}>
-      <CarbonEvents>
-      <CarbonChangeContext>
-        <DndContext>
-          <RectSelectContext>
-            <CarbonContent />
-          </RectSelectContext>
-        </DndContext>
-      </CarbonChangeContext>
-      </CarbonEvents>
+      <RecoilRoot>
+        <CarbonEvents>
+          <CarbonChangeContext>
+            <DndContext>
+              <RectSelectContext>
+                <BlockMenu/>
+                <CarbonContent />
+              </RectSelectContext>
+            </DndContext>
+          </CarbonChangeContext>
+        </CarbonEvents>
+      </RecoilRoot>
     </CarbonContext>
   );
 }

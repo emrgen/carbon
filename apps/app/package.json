@@ -11,12 +11,14 @@
   },
   "dependencies": {
     "@emrgen/carbon-blocks": "workspace:*",
+    "@emrgen/carbon-utils": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/types": "^0.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.2",
+    "recoil": "^0.7.7",
     "tailwindcss": "^3.1.8"
   },
   "devDependencies": {

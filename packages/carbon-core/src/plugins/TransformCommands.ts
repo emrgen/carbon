@@ -23,7 +23,7 @@ import { InsertNode } from "../core/actions/InsertNode";
 import { MoveAction } from "../core/actions/MoveAction";
 import { RemoveNode } from "../core/actions/RemoveNode";
 import { RemoveText } from "../core/actions/RemoveText";
-import { SetContent } from "../core/actions/SetContent";
+import { SetContentAction } from "../core/actions/SetContent";
 import { ActionOrigin, CarbonAction } from "../core/actions/types";
 import { NodeName } from "../core/types";
 import { takeBefore, takeUntil } from "../utils/array";
@@ -163,7 +163,7 @@ export class TransformCommands extends BeforePlugin {
         return tr
       }
 
-      tr.add(SetContent.fromNative(title.id, BlockContent.create([textNode]), native));
+      tr.add(SetContentAction.fromNative(title.id, BlockContent.create([textNode]), native));
       tr.select(after);
       return tr;
     }
@@ -770,8 +770,8 @@ export class TransformCommands extends BeforePlugin {
         // console.log(pin.node.name, );
         const [leftContent, _, rightContent] = splitTextBlock(pin, pin, app);
         console.log(pin.node.name, leftContent, rightContent);
-        setContentCommands.push(SetContent.create(pin.node.id, leftContent));
-        setContentCommands.push(SetContent.create(parentBlock.id, rightContent));
+        setContentCommands.push(SetContentAction.create(pin.node.id, leftContent));
+        setContentCommands.push(SetContentAction.create(parentBlock.id, rightContent));
       }
 
       // parent must have at least one child
@@ -1047,7 +1047,7 @@ export class TransformCommands extends BeforePlugin {
         if (startContainer?.isTextBlock && endContainer?.isTextBlock) {
           const textContent = startTextBlock.textContent.slice(0, start.offset) + endTextBlock.textContent.slice(end.offset);
           const textNode = app.schema.text(textContent)!;
-          insertCommands.push(SetContent.withContent(startContainer.id, BlockContent.create([textNode]), startContainer.content));
+          insertCommands.push(SetContentAction.withContent(startContainer.id, BlockContent.create([textNode]), startContainer.content));
 
           console.log('merge start and end block');
         } else {
@@ -1184,7 +1184,7 @@ export class TransformCommands extends BeforePlugin {
 
         const textContent = node.textContent.slice(0, start.offset) + node.textContent.slice(end.offset);
         const textNode = app.schema.text(textContent);
-        actions.push(SetContent.create(node.id, BlockContent.create(textNode!)));
+        actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)));
       }
     });
 

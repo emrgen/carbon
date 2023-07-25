@@ -30,6 +30,10 @@ export abstract class CarbonPlugin {
 
 	name: PluginName = '';
 
+	init(app: Carbon) {}
+
+	destroy(app: Carbon) {}
+
 	spec(): NodeSpec {
 		return {}
 	}

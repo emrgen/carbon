@@ -7,21 +7,21 @@ import { ActionOrigin, CarbonAction } from "./types";
 import { generateActionId } from "./utils";
 import { Optional } from '@emrgen/types';
 
-export class SetContent implements CarbonAction {
+export class SetContentAction implements CarbonAction {
   id: number;
   origin: ActionOrigin;
   before: Optional<NodeContent>;
 
   static create(nodeId: NodeId, after: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContent(nodeId, after, null, false, origin)
+    return new SetContentAction(nodeId, after, null, false, origin)
   }
 
   static withContent(nodeId: NodeId, after: NodeContent, before: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContent(nodeId, after, before, false, origin)
+    return new SetContentAction(nodeId, after, before, false, origin)
   }
 
   static fromNative(nodeId: NodeId, after: NodeContent, native: boolean, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContent(nodeId, after, null, native, origin)
+    return new SetContentAction(nodeId, after, null, native, origin)
   }
 
   constructor(readonly nodeId: NodeId, readonly after: NodeContent, before: Optional<NodeContent>, readonly native: boolean, origin: ActionOrigin) {
@@ -53,7 +53,13 @@ export class SetContent implements CarbonAction {
     return ActionResult.withValue('done')
   }
 
-  updatesSameNode(other: SetContent): boolean {
+  merge(other: SetContentAction): SetContentAction {
+    console.log('####', this.before);
+    
+    return SetContentAction.withContent(this.nodeId, other.after, this.before!, this.origin)
+  }
+
+  updatesSameNode(other: SetContentAction): boolean {
     return this.nodeId.eq(other.nodeId);
   }
 
@@ -62,7 +68,7 @@ export class SetContent implements CarbonAction {
       throw new Error("Cannot invert action without before state");
     }
 
-    const action = SetContent.create(this.nodeId, this.before, this.origin)
+    const action = SetContentAction.create(this.nodeId, this.before, this.origin)
     action.before = this.after
 
     return action

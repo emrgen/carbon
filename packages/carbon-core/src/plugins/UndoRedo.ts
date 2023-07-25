@@ -2,7 +2,7 @@ import { EventContext, EventHandler, SelectAction, Transaction, TransactionType 
 import { AfterPlugin } from '../core/CarbonPlugin';
 import { first, last } from 'lodash';
 import { Optional } from '@emrgen/types';
-import { SetContent } from '../core/actions/SetContent';
+import { SetContentAction } from '../core/actions/SetContent';
 
 export class UndoPlugin extends AfterPlugin {
   name = 'undoPlugin';
@@ -70,7 +70,7 @@ export class UndoPlugin extends AfterPlugin {
         const inverse = tr.inverse()
         console.log('tr', tr);
         console.log('redo', inverse);
-        this.undoStack.push(inverse)
+        this.undoStack.push(inverse);
         inverse.dispatch();
       },
     };
@@ -81,31 +81,23 @@ export class UndoPlugin extends AfterPlugin {
     if (tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
       const lastTransaction = last(this.undoStack);
       const current = Date.now();
-      let prevTr: Optional<Transaction> = null;
       // if (lastTransaction) {
 
       // console.log('XXXX',lastTransaction, lastTransaction.textInsertOnly, (current - lastTransaction?.timestamp) < 3000);
 
-      //   if (lastTransaction.textInsertOnly && (current - lastTransaction.timestamp) < 3000) {
-      //     const prevTr = this.undoStack.pop();
-      //     if (prevTr) {
-      //       const setTargetId = first(prevTr.insertActions).nodeId
-      //       const setAction = SetContent.withContent(setTargetId, first(prevTr.insertActions)!.after!, first(tr.insertActions)!.before!,);
-      //       const selectAction = SelectAction.create(last(prevTr.insertActions)!.after!, last(tr.insertActions)!.before!, last(tr.insertActions)!.origin!);
-      //       console.log('>>>>>>>',selectAction);
+      // merge text insert only transactions within 500ms
+      if (!tr.readOnly && lastTransaction?.textInsertOnly && tr.textInsertOnly && (current - lastTransaction.timestamp) < 500) {
+        // merge prev and current transaction
+        // const undoTr = lastTransaction.merge(tr);
+        // this.undoStack.pop()
+        this.undoStack.push(tr);
+      } else {
+        this.undoStack.push(tr);
+      }
 
-      //       // const newTr = tr.app.tr.add(setAction).add(selectAction);
-      //       // this.undoStack.push(newTr);
-      //     } else {
-      //       this.undoStack.push(tr);
-      //     }
-      //   }
-      // } else {
-      // }
-      this.undoStack.push(tr);
       this.redoStack = [];
     } else {
-      // console.log('skip transaction', tr);
+      // console.log('skip transaction undo', tr);
     }
   }
 }

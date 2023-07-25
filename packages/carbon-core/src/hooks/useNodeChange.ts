@@ -36,7 +36,7 @@ export const useTextChange = (props: UseTextChangeProps) => {
 
 interface UseNodeChangeProps {
 	node: Node,
-	onChange?()
+	onChange?(node: Node)
 }
 
 // start watching for the node change
@@ -49,7 +49,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 
 	useEffect(() => {
 		const onChange = (value: Node) => {
-			props.onChange?.()
+			props.onChange?.(value);
 			setVersion(value.version);
 			setWatched(value);
 			// console.log("updated", node.id.toString(), node.version, watched === value);

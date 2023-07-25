@@ -29,6 +29,10 @@ export class SelectAction implements CarbonAction {
 		return ActionResult.withValue('done')
 	}
 
+	merge(other: SelectAction) {
+		return SelectAction.create(this.before, other.after, this.origin);
+	}
+
 	inverse(): CarbonAction {
 		return SelectAction.create(this.after, this.before, this.origin)
 	}

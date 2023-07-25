@@ -41,6 +41,7 @@ export class Carbon extends EventEmitter {
 	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
 
+
 		this.pm = pm;
 		this.rm = renderer;
 		this.schema = schema;
@@ -54,6 +55,9 @@ export class Carbon extends EventEmitter {
 		this.cmd = pm.commands(this);
 		this.enabled = true;
 		this.ticks = [];
+
+		// init plugins
+		pm.plugins.forEach(p => p.init(this));
 	}
 
 	get content(): Node {

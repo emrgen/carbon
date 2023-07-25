@@ -1,4 +1,4 @@
-import { each, flatten, identity, isArray, last, sortBy } from 'lodash';
+import { each, first, flatten, identity, isArray, last, sortBy, merge } from 'lodash';
 
 import { Optional, With } from '@emrgen/types';
 import { NodeIdSet } from './BSet';
@@ -25,7 +25,7 @@ import { MoveAction } from './actions/MoveAction';
 import { RemoveNode } from './actions/RemoveNode';
 import { SelectAction } from './actions/Select';
 import { SelectNodes } from './actions/SelectNodes';
-import { SetContent } from './actions/SetContent';
+import { SetContentAction } from './actions/SetContent';
 import { UpdateAttrs } from './actions/UpdateAttrs';
 import { UpdateData } from './actions/UpdateData';
 import { ActionOrigin, CarbonAction } from './actions/types';
@@ -64,12 +64,13 @@ export class Transaction {
 	private error: Optional<TransactionError>;
 	private cancelled: boolean = false;
 	private committed: boolean = false;
-
+	
 	private normalizeIds = new NodeIdSet();
 	private updatedIds = new NodeIdSet();
 	private selectedIds = new NodeIdSet();
 	private activatedIds = new NodeIdSet();
 	private openNodeIds = new NodeIdSet();
+	readOnly = false;
 
 	get origin() {
 		return this.app.runtime.origin;
@@ -92,7 +93,7 @@ export class Transaction {
 	}
 
 	get textInsertOnly() {
-		return this.actions.every(a => a instanceof SetContent || a instanceof SelectAction);
+		return this.actions.every(a => a instanceof SetContentAction || a instanceof SelectAction);
 	}
 
 	get textRemoveOnly() {
@@ -159,7 +160,7 @@ export class Transaction {
 	}
 
 	setContent(id: NodeId, after: NodeContent, origin = this.origin): Transaction {
-		this.add(SetContent.create(id, after, origin));
+		this.add(SetContentAction.create(id, after, origin));
 		return this;
 	}
 
@@ -428,15 +429,30 @@ export class Transaction {
 	}
 
 	// merge transactions
-	// * Note: current transaction is mutated
-	merge(tr: Transaction) {
+	merge(other: Transaction) {
+		const {actions} = this;
+		const {actions: otherActions} = other;
+		if (this.textInsertOnly && other.textInsertOnly) {
+			const { tr } = this.app
+			const thisSetContentAction = first(actions) as SetContentAction
+			const otherSetContentAction = first(actions) as SetContentAction
+
+			const thisSelectAction = last(actions) as SelectAction
+			const otherSelectAction = last(actions) as SelectAction
+			console.log('XXXX', this, other);
+
+			tr
+				.add(thisSetContentAction.merge(otherSetContentAction))
+				.add(thisSelectAction.merge(otherSelectAction))
+			return tr
+		}
 		// if (last(this.actions) instanceof SelectCommand) {
 		// 	this.pop()
 		// }
 
-		this.actions.push(...tr.actions);
-		this.selections.push(...tr.selections);
-		return this;
+		// this.actions.push(...tr.actions);
+		// this.selections.push(...tr.selections);
+		return other;
 	}
 
 	// extend transaction with other transaction
@@ -476,7 +492,10 @@ export class Transaction {
 	// create an inverse transaction
 	inverse() {
 		const { tr } = this.app;
+
+		tr.readOnly = true;
 		tr.type = TransactionType.OneWay;
+
 		const actions = this.actions.map(c => c.inverse());
 		// actions.reverse();
 		tr.add(actions.slice(0, -1).reverse());

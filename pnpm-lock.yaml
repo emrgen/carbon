@@ -39,6 +39,9 @@ importers:
       '@emrgen/carbon-dragon':
         specifier: workspace:*
         version: link:../../packages/carbon-dragon
+      '@emrgen/carbon-utils':
+        specifier: workspace:*
+        version: link:../../packages/carbon-utils
       '@emrgen/types':
         specifier: ^0.0.2
         version: 0.0.2
@@ -51,6 +54,9 @@ importers:
       react-router-dom:
         specifier: ^6.8.2
         version: 6.8.2(react-dom@18.2.0)(react@18.2.0)
+      recoil:
+        specifier: ^0.7.7
+        version: 0.7.7(react-dom@18.2.0)(react@18.2.0)
       tailwindcss:
         specifier: ^3.1.8
         version: 3.2.7(postcss@8.4.21)
@@ -189,6 +195,9 @@ importers:
       react-icons:
         specifier: ^4.10.1
         version: 4.10.1(react@18.2.0)
+      recoil:
+        specifier: ^0.7.7
+        version: 0.7.7(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.0.17
@@ -361,6 +370,67 @@ importers:
       sorted-btree:
         specifier: ^1.8.0
         version: 1.8.1
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
+  packages/carbon-utils:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/carbon-dragon':
+        specifier: workspace:*
+        version: link:../carbon-dragon
+      '@react-icons/all-files':
+        specifier: ^4.1.0
+        version: 4.1.0(react@18.2.0)
+      '@types/katex':
+        specifier: ^0.16.0
+        version: 0.16.0
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.14.191
+      emoji-regex:
+        specifier: ^10.2.1
+        version: 10.2.1
+      katex:
+        specifier: ^0.16.7
+        version: 0.16.7
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      prismjs:
+        specifier: ^1.29.0
+        version: 1.29.0
+      react-icons:
+        specifier: ^4.10.1
+        version: 4.10.1(react@18.2.0)
+      recoil:
+        specifier: ^0.7.7
+        version: 0.7.7(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@emrgen/types':
+        specifier: ^0.0.2
+        version: 0.0.2
+      '@types/react':
+        specifier: ^18.0.17
+        version: 18.0.28
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.0.11
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -2273,6 +2343,10 @@ packages:
       get-intrinsic: 1.2.0
     dev: false
 
+  /hamt_plus@1.0.2:
+    resolution: {integrity: sha512-t2JXKaehnMb9paaYA7J0BX8QQAY8lwfQ9Gjf4pg/mk4krt+cmwmU652HOoWonf+7+EQV97ARPMhhVgU1ra2GhA==}
+    dev: false
+
   /has-bigints@1.0.2:
     resolution: {integrity: sha512-tSvCKtBr9lkF0Ex0aQiP9N+OpV4zi2r/Nee5VkRDbaqv35RLYMzbwQfFSZZH0kR+Rd6302UJZ2p/bJCEoR3VoQ==}
     dev: false
@@ -3044,6 +3118,23 @@ packages:
     engines: {node: '>=8.10.0'}
     dependencies:
       picomatch: 2.3.1
+    dev: false
+
+  /recoil@0.7.7(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-8Og5KPQW9LwC577Vc7Ug2P0vQshkv1y3zG3tSSkWMqkWSwHmE+by06L8JtnGocjW6gcCvfwB3YtrJG6/tWivNQ==}
+    peerDependencies:
+      react: '>=16.13.1'
+      react-dom: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+    dependencies:
+      hamt_plus: 1.0.2
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /regenerator-runtime@0.13.11:
