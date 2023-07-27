@@ -121,7 +121,7 @@ export class SheetRenderer {
     this.columnHeaderGfx.lineTo(sheetWidth, cellHeight);
 
     let lineLeft = 50 + left
-    for (let i = 0;i < 100;i++) {
+    for (let i = 0; i < 100; i++) {
       this.columnHeaderGfx.moveTo(lineLeft, 0);
       this.columnHeaderGfx.lineTo(lineLeft, cellHeight);
 

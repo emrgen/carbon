@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { RecoilRoot } from "recoil";
 
@@ -17,7 +17,10 @@ import {
   CarbonContext,
   CarbonEvents,
   CarbonModal,
+  CarbonState,
+  createCarbon,
   extensionPresets,
+  useCreateCachedCarbon,
   useCreateCarbon,
 } from "@emrgen/carbon-core";
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
@@ -201,14 +204,14 @@ const data = node("carbon", [
   ]),
 ]);
 
-export default function Dev() {
-  const app = useCreateCarbon(data, [
+const extensions = [
     extensionPresets,
     blockPresets,
     carbonUtilPlugins,
-  ]);
+]
 
-  // console.log(app.schema.nodes);
+export default function Dev() {
+  const app = useCreateCachedCarbon(data, extensions)
 
   return (
     <CarbonAppDocument app={app}/>

@@ -339,6 +339,15 @@ export class PinnedSelection {
 		return PinnedSelection.create(this.tail.clone(), this.head.clone());
 	}
 
+
+	toJSON() {
+		return {
+			tail: this.tail.toJSON(),
+			head: this.head.toJSON(),
+			nodes: this.nodes.map(node => node.id.toJSON()),
+		}
+	}
+
 	toString() {
 		return classString(this)({
 			tail: this.tail.toString(),

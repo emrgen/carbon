@@ -1,5 +1,5 @@
 import { flatten } from 'lodash';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Extension } from "../core/Extension";
 import { PluginManager } from '../core/PluginManager';
 import { RenderManager, Renderer } from "../core/Renderer";
@@ -8,6 +8,7 @@ import { SchemaFactory } from '../core/SchemaFactory';
 import { NodeJSON } from "../core/types";
 import { CarbonDefaultNode } from "../renderer";
 import { Carbon } from '../core/Carbon';
+import { CarbonState } from '../core';
 
 
 export const createCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
@@ -35,3 +36,29 @@ export const useCreateCarbon = (json: NodeJSON, extensions: Extension[] = []) =>
 
 	return app;
 }
+
+export const useCreateCachedCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
+	const [app] = useState(() => {
+		const savedDoc = localStorage.getItem('carbon:content');
+		if (savedDoc) {
+			return createCarbon(JSON.parse(savedDoc), extensions);
+		}
+
+		return createCarbon(json, extensions);
+	});
+
+	useEffect(() => {
+		const onChange = (state: CarbonState) => {
+			localStorage.setItem('carbon:content', JSON.stringify(state.content.toJSON()));
+			localStorage.setItem('carbon:selection', JSON.stringify(state.selection.toJSON()))
+		}
+		app.on('change', onChange);
+
+		return () => {
+			app.off('change', onChange);
+		}
+	}, [app]);
+
+	return app;
+}
+
