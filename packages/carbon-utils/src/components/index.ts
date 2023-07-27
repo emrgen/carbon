@@ -1,1 +1,2 @@
-export * from './BlockMenu'
+export * from './BlockMenu';
+export * from './CarbonAppDocument';

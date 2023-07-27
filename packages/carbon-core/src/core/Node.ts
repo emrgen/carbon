@@ -668,8 +668,8 @@ export class Node extends EventEmitter {
 				...this.attrs.html,
 			},
 			node: {
-				...type.attrs.node,
 				...this.attrs.node,
+				...type.attrs.node,
 			}
 		});
 		this.data = new NodeData({

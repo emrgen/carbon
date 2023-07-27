@@ -1,9 +1,7 @@
 import {
   CarbonBlock,
   CarbonChildren,
-  CarbonPlugin,
   RendererProps,
-  CarbonPortal,
 } from "@emrgen/carbon-core";
 
 export const CarbonComp = (props: RendererProps) => {

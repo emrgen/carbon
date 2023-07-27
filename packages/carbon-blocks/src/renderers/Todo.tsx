@@ -11,6 +11,7 @@ import {
   useSelectionHalo,
 } from "@emrgen/carbon-core";
 import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
+import { usePlaceholder } from "../hooks/usePlaceholder";
 
 export default function TodoComp(props: RendererProps) {
   const { node } = props;
@@ -23,6 +24,8 @@ export default function TodoComp(props: RendererProps) {
   const connectors = useConnectorsToProps(
     useCombineConnectors(dragDropRect, selection)
   );
+
+  const placeholder = usePlaceholder(node);
 
   const handleClick = useCallback(
     (e) => {
@@ -62,7 +65,7 @@ export default function TodoComp(props: RendererProps) {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
-        placeholder={node.isEmpty ? "Todo" : ''}
+        custom={placeholder}
       />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}

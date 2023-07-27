@@ -8,18 +8,18 @@ import {
   Node,
 } from "@emrgen/carbon-core";
 import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
+import { usePlaceholder } from "../hooks/usePlaceholder";
 
 export const NumberedListComp = (props: RendererProps) => {
-  const { node, version } = props;
-
-
+  const { node } = props;
   const ref = useRef(null);
-
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
   const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection)
+    useCombineConnectors(dragDropRect, selection),
   );
+  const placeholder = usePlaceholder(node);
+
   // watch the parent version for list number calculation
   const getListNumber = (node: Node): number => {
     if (node.prevSibling?.name === "numberedList") {
@@ -44,7 +44,7 @@ export const NumberedListComp = (props: RendererProps) => {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
-        placeholder={node.isEmpty ? "List" : ""}
+        custom={placeholder}
       />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}

@@ -1,3 +1,5 @@
+import { useMemo, useRef } from "react";
+
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -5,8 +7,12 @@ import {
   RendererProps,
   useSelectionHalo,
 } from "@emrgen/carbon-core";
-import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
-import React, { useMemo, useRef } from "react";
+import {
+  useCombineConnectors,
+  useConnectorsToProps,
+  useDragDropRectSelect,
+} from "@emrgen/carbon-dragon";
+import { usePlaceholder } from "../hooks/usePlaceholder";
 
 export const BulletedListComp = (props: RendererProps) => {
   const { node } = props;
@@ -19,6 +25,8 @@ export const BulletedListComp = (props: RendererProps) => {
   const connectors = useConnectorsToProps(
     useCombineConnectors(dragDropRect, selection)
   );
+
+  const placeholder = usePlaceholder(node);
 
   const beforeContent = useMemo(() => {
     return (
@@ -37,8 +45,7 @@ export const BulletedListComp = (props: RendererProps) => {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
-        // wrapper={{ contentEditable: false }}
-        placeholder={'List'}
+        custom={placeholder}
       />
       <CarbonNodeChildren node={node} />
       {SelectionHalo}

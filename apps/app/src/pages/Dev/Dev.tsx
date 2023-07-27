@@ -21,7 +21,7 @@ import {
   useCreateCarbon,
 } from "@emrgen/carbon-core";
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
-import { BlockMenu, carbonUtilPlugins } from "@emrgen/carbon-utils";
+import { BlockMenu, CarbonAppDocument, carbonUtilPlugins } from "@emrgen/carbon-utils";
 
 const data = node("carbon", [
   // node("fileTree", [
@@ -238,28 +238,7 @@ export default function Dev() {
 
   // console.log(app.schema.nodes);
 
-  // @ts-ignore
-  window.app = app;
-  // console.log(app.content)
-
-  useEffect(() => {
-    app.focus();
-  }, [app]);
-
   return (
-    <CarbonContext app={app}>
-      <RecoilRoot>
-        <CarbonEvents>
-          <CarbonChangeContext>
-            <DndContext>
-              <RectSelectContext>
-                <BlockMenu/>
-                <CarbonContent />
-              </RectSelectContext>
-            </DndContext>
-          </CarbonChangeContext>
-        </CarbonEvents>
-      </RecoilRoot>
-    </CarbonContext>
-  );
+    <CarbonAppDocument app={app}/>
+  )
 }

@@ -32,8 +32,6 @@ export class Dnd extends EventEmitter {
 		this.onMouseUp = this.onMouseUp.bind(this)
 	}
 
-
-
 	onMountDraggable(node: Node, el: HTMLElement) {
 		this.draggables.register(node, el);
 	}
@@ -112,7 +110,7 @@ export class Dnd extends EventEmitter {
 
 		const {scrollTop, scrollLeft } = docParent;
 
-		// console.log('mouse move', e)
+		// console.warn('mouse in', node.id.toString())
 		if (this.isDirty) {
 			// console.log('update draggable');
 			this.draggables.refresh(scrollTop, scrollLeft);
@@ -138,7 +136,7 @@ export class Dnd extends EventEmitter {
 		}
 
 		// console.log(hit)
-		// console.log(hit.map(n => n.id.toString()))
+		// console.warn(hit.map(n => n.id.toString()), this.draggables.has(node))
 		if (hit.length == 0) {
 			this.resetDraggedNode()
 			return;
@@ -165,7 +163,7 @@ export class Dnd extends EventEmitter {
 	}
 
 	private hideDragHandle(node: Node, e: MouseEvent) {
-		// this.resetDraggedNode()
+		this.resetDraggedNode()
 	}
 
 	private resetDraggedNode() {

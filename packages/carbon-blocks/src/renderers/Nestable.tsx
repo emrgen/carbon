@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -10,10 +12,10 @@ import {
   useConnectorsToProps,
   useDragDropRectSelect,
 } from "@emrgen/carbon-dragon";
-import { useRef } from "react";
+import { usePlaceholder } from "../hooks/usePlaceholder";
 
 export const NestableComp = (props: RendererProps) => {
-  const { node, placeholder } = props;
+  const { node } = props;
 
   const ref = useRef(null);
 
@@ -23,14 +25,12 @@ export const NestableComp = (props: RendererProps) => {
     useCombineConnectors(dragDropRect, selection)
   );
 
+  const placeholder = usePlaceholder(node);
+
+
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
-      <CarbonNodeContent
-        node={node}
-        placeholder={
-          (node.isEmpty ? placeholder : '')
-        }
-      />
+      <CarbonNodeContent node={node} custom={placeholder} />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}
     </CarbonBlock>

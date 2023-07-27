@@ -25,7 +25,7 @@ import { HStackComp } from './renderers/HStackComp';
 import { Image } from './plugins/Image';
 import ImageComp from './renderers/ImageComp';
 import { Todo } from './plugins/Todo';
-import TodoComp from './renderers/CheckedList';
+import TodoComp from './renderers/Todo';
 import { NestablePlugin } from './plugins';
 import { Quote } from './plugins/Quote';
 import { QuoteComp } from './renderers/Quote';

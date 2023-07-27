@@ -37,6 +37,7 @@ export class TabContent extends CarbonPlugin {
       attrs: {
         html: {
           contentEditable: true,
+          suppressContentEditableWarning: true,
         }
       }
     }
@@ -71,6 +72,7 @@ export class TabTitle extends CarbonPlugin {
       attrs: {
         html: {
           contentEditable: false,
+          suppressContentEditableWarning: true,
         }
       }
     }

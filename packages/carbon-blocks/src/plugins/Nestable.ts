@@ -207,7 +207,14 @@ export class NestablePlugin extends AfterPlugin {
 
 				// move listNode to previous listNode
 				if (selection.isCollapsed) {
-					app.cmd.nestable.wrap(listNode, prevNode)?.dispatch();
+					if (listNode.size > 1) {
+						const at = Point.toAfter(prevNode.id);
+						app.cmd
+							.transform.move(listNode.children.slice(1), at)
+							?.dispatch();
+					} else {
+						app.cmd.nestable.wrap(listNode, prevNode)?.dispatch();
+					}
 				} else {
 				}
 			},

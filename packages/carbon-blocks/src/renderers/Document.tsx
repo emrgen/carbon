@@ -19,6 +19,7 @@ import {
   useCombineConnectors,
   useConnectorsToProps,
   useDndRegion,
+  useNonDraggable,
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon";
 
@@ -28,9 +29,10 @@ export const DocumentComp = (props: RendererProps) => {
 
   const ref = useRef<HTMLElement>(null);
   const dndRegion = useDndRegion({ node, ref });
+  const nonDraggable = useNonDraggable({ node, ref });
   const selectionSurface = useRectSelectionSurface({ node, ref });
   const connectors = useConnectorsToProps(
-    useCombineConnectors(selectionSurface, dndRegion)
+    useCombineConnectors(selectionSurface, dndRegion, nonDraggable)
   );
 
   const handleClick = (e: React.MouseEvent) => {

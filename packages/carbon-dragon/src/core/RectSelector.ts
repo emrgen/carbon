@@ -1,6 +1,6 @@
 import { Optional } from '@emrgen/types';
 import EventEmitter from "events";
-import { last, sortBy, throttle } from "lodash";
+import { first, identity, last, sortBy, throttle, uniq } from "lodash";
 import { DndNodeStore } from "./DndStore";
 import { adjustBox, boundFromFastDndEvent, getEventPosition } from "./utils";
 import { ActionOrigin, BSet, Carbon, Node, NodeComparator, NodeId, Pin, PinnedSelection, Transaction } from '@emrgen/carbon-core';
@@ -32,25 +32,25 @@ export class RectSelector extends EventEmitter {
 	}
 
 	onMouseDown(e: MouseEvent, node: Node) {
-		const { app } = this
+		const { app } = this;
 		// console.log(this.region === e.target, editor.state.selectedNodeIds.size)
 		this.downEvent = e;
 		if (this.region === e.target) {
 			if (app.state.selectedNodeIds.size) {
-				app.tr.selectNodes([]).dispatch()
+				app.tr.selectNodes([]).dispatch();
 			}
 		}
-		this.emit('mouse:down', e, node)
+		this.emit('mouse:down', e, node);
 	}
 
 	onMouseUp(e: MouseEvent, node: Node) {
-		this.emit('mouse:up', e, node)
+		this.emit('mouse:up', e, node);
 		// console.log('onMouseUp', e, nodes);
 	}
 
 	onDragStart(e: DndEvent) {
-		const { app } = this
-		const { node } = e
+		const { app } = this;
+		const { node } = e;
 		// this.locked = true
 		this.emit('drag:start:selector', e);
 		// this.app.blur();
@@ -76,10 +76,12 @@ export class RectSelector extends EventEmitter {
 		console.log('onDragStart', e.node.name)
 	}
 
+	// select nodes colliding with the selection box
 	onDragMove(e: DndEvent) {
+
 		this.emit('drag:move:selector', e);
 		const { node } = e;
-		const { app } = this;
+		const { app, selectables } = this;
 		const document = node.chain.find(n => n.isDocument);
 		if (!document) {
 			return;
@@ -94,9 +96,7 @@ export class RectSelector extends EventEmitter {
 
 		const { scrollTop, scrollLeft } = docParent;
 
-		
-		const { app: editor, selectables } = this;
-		const { selectedNodeIds } = editor.state;
+		const { selectedNodeIds } = app.state;
 
 		const collides = selectables.collides(
 			adjustBox(boundFromFastDndEvent(e), { left: scrollLeft, top: scrollTop })
@@ -106,12 +106,27 @@ export class RectSelector extends EventEmitter {
 
 		if (!collides.length) {
 			if (this.noSelectionChange([])) return
-			const { tr } = editor;
+			const { tr } = app;
 			tr.selectNodes([]).dispatch();
 			return;
 		}
 
 		const ordered = sortBy(collides, (n) => n.depth);
+
+		// select lowest sibling
+		const minDepthNode = last(ordered)! as Node;
+		const topLevelNodes = ordered.filter((n) => n.depth === minDepthNode.depth);
+		const topLevelNodeParents = uniq(topLevelNodes.map((n) => {
+			return n.parent ? n.parent.id.toString() : '';
+		}).filter(identity));
+
+		if (topLevelNodeParents.length === 1) {
+			const ids = topLevelNodes.map((n) => n.id);
+			if (this.noSelectionChange(ids)) return
+			app.tr.selectNodes(ids, ActionOrigin.UserSelectionChange).dispatch();
+			return
+		}
+
 		// console.log('selected', ordered.length)
 
 		const selectedMap = new BSet(NodeComparator);
@@ -126,7 +141,7 @@ export class RectSelector extends EventEmitter {
 
 		if (selectedMap.sub(parentMap).size == 0) {
 			if (this.noSelectionChange([lowestNode.id])) return
-			const { tr } = editor;
+			const { tr } = app;
 			tr.selectNodes([lowestNode.id]).dispatch();
 			return;
 		}
@@ -141,9 +156,7 @@ export class RectSelector extends EventEmitter {
 		// select all nodes start from higher level
 		const selectedIds = selectedMap.toArray().map((n) => n.id)
 		if (this.noSelectionChange(selectedIds)) return
-		const { tr } = editor;
-		console.log('@@@@@@@@2');
-
+		const { tr } = app;
 		tr.selectNodes(selectedIds, ActionOrigin.UserSelectionChange).dispatch();
 	}
 

@@ -4,6 +4,7 @@ import { NodeR3Tree } from './NodeR3Tree';
 import { elementBound } from "./utils";
 import { Node, NodeId, NodeIdComparator } from "@emrgen/carbon-core";
 
+// store for nodes and their rendered HTML elements with collision detection
 export class DndNodeStore {
 	private nodeMap: BTree<NodeId, Node> = new BTree(undefined, NodeIdComparator);
 	private elementMap: BTree<NodeId, HTMLElement> = new BTree(undefined, NodeIdComparator);
@@ -58,6 +59,9 @@ export class DndNodeStore {
 		this.nodeMap.set(node.id, node);
 	}
 
+	has(node: Node): boolean {
+		return !!this.nodeMap.has(node.id);
+	}
 
 	// connect the node to the rendered HTML element
 	register(node: Node, el: HTMLElement) {

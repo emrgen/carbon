@@ -27,9 +27,10 @@ export const useDraggable = (props: UseFastDraggableProps) => {
     dnd.onMouseMove(node, e);
   }, [dnd, node]);
 
-  const onMouseOut = useCallback(
+  const onMouseOver = useCallback(
     (e) => {
-      dnd.onMouseOut(node, e);
+      console.warn("onMouseOver", e.target, e.currentTarget);
+      dnd.onMouseOver(node, e);
     },
     [dnd, node]
   );
@@ -37,7 +38,7 @@ export const useDraggable = (props: UseFastDraggableProps) => {
   return {
     listeners: {
       onMouseMove,
-      // onMouseOut,
+      onMouseOver,
     },
     attributes: {},
   };
