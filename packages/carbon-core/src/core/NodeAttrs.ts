@@ -19,4 +19,11 @@ export class NodeAttrs {
 			node: removeEmpty(node),
 		});
 	}
+
+	toJSON() {
+		return {
+			html: this.html,
+			node: this.node,
+		};
+	}
 }

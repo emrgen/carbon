@@ -19,4 +19,12 @@ export class NodeData {
 		return new NodeData({ state, html, node });
 	}
 
+	toJSON() {
+		return {
+			state: this.state,
+			html: this.html,
+			node: this.node,
+		};
+	}
+
 }

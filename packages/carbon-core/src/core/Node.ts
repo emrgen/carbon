@@ -729,12 +729,14 @@ export class Node extends EventEmitter {
 	}
 
 	toJSON() {
-		const { id, type, content } = this;
+		const { id, type, content, attrs, data } = this;
 
 		return {
 			id: id.toString(),
 			name: type.name,
 			...content.toJSON(),
+			attrs: attrs.toJSON(),
+			data: data.toJSON(),
 		}
 	}
 
