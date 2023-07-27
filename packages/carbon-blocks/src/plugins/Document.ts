@@ -33,6 +33,9 @@ export class DocPlugin extends CarbonPlugin {
 				html: {
 					contentEditable: true,
 					suppressContentEditableWarning: true,
+				},
+				node: {
+					emptyPlaceholder: 'Untitled',
 				}
 			},
 			data: {

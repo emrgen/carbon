@@ -13,3 +13,10 @@ body, .root {
 .App {
   height: 100%;
 }
+
+.carbon-sheet-wrapper {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  /* background: mediumaquamarine; */
+}

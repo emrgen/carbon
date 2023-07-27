@@ -131,8 +131,6 @@ export function DndController() {
       if (tr.updatesContent) {
         // console.log("updated content");
         dnd.isDirty = true;
-        console.log(tr);
-
         resetDragHandle();
       }
     },

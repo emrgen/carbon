@@ -32,7 +32,7 @@ export function CarbonAppDocument(props: CarbonAppDocumentProps) {
           <CarbonChangeContext>
             <DndContext>
               <RectSelectContext>
-                <BlockMenu />
+                {/* <BlockMenu /> */}
                 <CarbonContent />
               </RectSelectContext>
             </DndContext>

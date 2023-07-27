@@ -110,9 +110,9 @@ export class Transaction {
 
 	constructor(
 		readonly app: Carbon,
-		private readonly tm: TransactionManager,
-		private readonly pm: PluginManager,
-		private readonly sm: SelectionManager
+		protected readonly tm: TransactionManager,
+		protected readonly pm: PluginManager,
+		protected readonly sm: SelectionManager
 	) {
 		this.id = getId();
 	}
@@ -147,52 +147,42 @@ export class Transaction {
 		return this.app.cmd;
 	}
 
-	actionsa() {}
-
 	onSelect(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		this.sm.onSelect(before, after, origin);
 	}
 
 	select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
 		const after = selection.unpin();
-		this.add(SelectAction.create(this.selection, after, origin));
-		return this;
+		return this.add(SelectAction.create(this.selection, after, origin));
 	}
 
 	setContent(id: NodeId, after: NodeContent, origin = this.origin): Transaction {
-		this.add(SetContentAction.create(id, after, origin));
-		return this;
+		return this.add(SetContentAction.create(id, after, origin));
 	}
 
 	insert(at: Point, nodes: Node | Node[], origin = this.origin): Transaction {
 		const insertNodes = isArray(nodes) ? nodes : [nodes];
-		this.add(insertNodesActions(at, insertNodes, origin));
-		return this;
+		return this.add(insertNodesActions(at, insertNodes, origin));
 	}
 
 	insertText(at: Point, text: Node, native: boolean = false, origin = this.origin): Transaction {
-		this.add(InsertText.create(at, text, native, origin));
-		return this;
+		return this.add(InsertText.create(at, text, native, origin));
 	}
 
 	remove(at: Point, id: NodeId, origin = this.origin): Transaction {
-		this.add(RemoveNode.create(at, id, origin));
-		return this;
+		return this.add(RemoveNode.create(at, id, origin));
 	}
 
 	removeText(at: Point, textNode: Node, origin = this.origin): Transaction {
-		this.add(RemoveText.create(at, textNode, origin));
-		return this;
+		return this.add(RemoveText.create(at, textNode, origin));
 	}
 
 	move(from: Point, to: Point, id: NodeId, origin = this.origin): Transaction {
-		this.add(MoveAction.create(from, to, id, origin));
-		return this;
+		return this.add(MoveAction.create(from, to, id, origin));
 	}
 
 	change(id: NodeId, from: NodeName, to: NodeName, origin = this.origin): Transaction {
-		this.add(new ChangeName(id, from, to, origin));
-		return this;
+		return this.add(new ChangeName(id, from, to, origin));
 	}
 
 	mark(start: Point, end: Point, mark: Mark, origin = this.origin): Transaction {
@@ -201,8 +191,6 @@ export class Transaction {
 	}
 
 	updateAttrs(id: NodeId, attrs: Partial<NodeAttrs>, origin = this.origin): Transaction {
-		console.log('xxxx');
-
 		this.add(UpdateAttrs.create(id, attrs, origin))
 		return this;
 	}
@@ -256,7 +244,7 @@ export class Transaction {
 	}
 
 	// adds command to transaction
-	add(action: CarbonAction | CarbonAction[]) {
+	add(action: CarbonAction | CarbonAction[]): Transaction {
 		let actions: CarbonAction[] = [];
 		if (isArray(action)) {
 			actions = action
@@ -264,11 +252,16 @@ export class Transaction {
 			actions = [action]
 		}
 
-		actions.forEach(c => this.actions.push(c));
+		actions.forEach(c => this.addAction(c));
+
 		return this;
 	}
 
-	dispatch(isNormalizer: boolean = false) {
+	private addAction(action: CarbonAction) {
+		this.actions.push(action);
+	}
+
+	dispatch(isNormalizer: boolean = false): Transaction {
 		this.isNormalizer = isNormalizer
 		this.tm.dispatch(this);
 		return this;

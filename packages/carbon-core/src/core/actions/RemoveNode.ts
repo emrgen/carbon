@@ -28,13 +28,23 @@ export class RemoveNode implements CarbonAction {
 		const { at, nodeId } = this;
 		const {app} = tr;
 		const target = app.store.get(nodeId);
+		const parent = target?.parent;
 		if (!target) {
 			return ActionResult.withError('')
 		}
 
 		this.node = target.clone();
-		target.parent?.remove(target);
+		parent?.remove(target);
+
 		tr.updated(target.parent!);
+
+		// when the parent is empty, we need to update the parent's parent to update the parent appearance like placeholder
+		if (parent?.isEmpty) {
+			// console.error('empty node', parent, parent?.name);
+			tr.updated(parent);
+			tr.updated(parent?.parent!);
+		}
+
 		tr.normalize(target.parent!);
 		return ActionResult.withValue('done')
 	}

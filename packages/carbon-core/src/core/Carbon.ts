@@ -18,6 +18,8 @@ import { TransactionManager } from './TransactionManager';
 import { CarbonCommands, SerializedNode } from "./types";
 import { BlockSelection } from './NodeSelection';
 import { first, isFunction } from 'lodash';
+import { CarbonCommandChain } from './CarbonCommandChain';
+import { MessageBus } from './MessageBus';
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -26,9 +28,13 @@ export class Carbon extends EventEmitter {
 	private readonly rm: RenderManager;
 	private readonly tm: TransactionManager;
 
+	// for external application use
+	bus: MessageBus = new MessageBus();
+
 	schema: Schema;
 	state: CarbonState;
 	cmd: CarbonCommands;
+	chain: CarbonCommandChain;
 	change: ChangeManager;
 
 	enabled: boolean;
@@ -41,7 +47,6 @@ export class Carbon extends EventEmitter {
 	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
 
-
 		this.pm = pm;
 		this.rm = renderer;
 		this.schema = schema;
@@ -53,6 +58,8 @@ export class Carbon extends EventEmitter {
 		this.change = new ChangeManager(this, this.state, this.sm, this.tm);
 
 		this.cmd = pm.commands(this);
+		this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
+
 		this.enabled = true;
 		this.ticks = [];
 
@@ -85,6 +92,7 @@ export class Carbon extends EventEmitter {
 	}
 
 	get tr(): Transaction {
+		// if (this.chain.active) return this.chain;
 		return Transaction.create(this, this.tm, this.pm, this.sm);
 	}
 

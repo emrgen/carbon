@@ -184,6 +184,20 @@ export class TransformCommands extends BeforePlugin {
     }
   }
 
+  private findFocusNode(nodes: Node[]): Optional<Node> {
+    let focusNode: Optional<Node> = null;
+    reverse(nodes.slice()).some(n => {
+      return n.find(n => {
+        if (n.isTextBlock) {
+          focusNode = n;
+          return true;
+        }
+        return false;
+      }, { order: 'post', direction: 'backward' })
+    });
+    return focusNode;
+  }
+
   private paste(app: Carbon, selection: PinnedSelection, blockSelection: BlockSelection, slice: Slice): Optional<Transaction> {
     if (slice.isEmpty) {
       return;
@@ -197,17 +211,7 @@ export class TransformCommands extends BeforePlugin {
     // if the selection is not empty, we need to paste the nodes after the last node
     if (!blockSelection.isEmpty) {
       const lastNode = last(blockSelection.blocks) as Node
-      let focusNode: Optional<Node> = null;
-      reverse(nodes.slice()).some(n => {
-        return n.find(n => {
-          if (n.isTextBlock) {
-            focusNode = n;
-            return true;
-          }
-          return false;
-        }, { order: 'post', direction: 'backward' })
-      });
-
+      const focusNode = this.findFocusNode(nodes);
       const tr = app.tr.insert(Point.toAfter(lastNode.id), nodes)
       if (focusNode) {
         tr.select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
@@ -219,14 +223,35 @@ export class TransformCommands extends BeforePlugin {
     // TODO: make the selection a block selection and hide cursor
     if (sliceClone.isBlockSelection) {
       const { tr } = app;
-      const at = Point.toAfter(selection.tail.node.id);
-      tr.insert(at, sliceClone.nodes);
+      const { tail } = selection;
+      const {parent} = tail.node;
+      if (!parent) {
+        console.error('no parent found');
+        return;
+      }
+
+      if (parent.isEmpty) {
+        const prevNode = parent?.prevSibling!
+        const at = Point.toAfter(prevNode.id);
+        const focusNode = this.findFocusNode(nodes);
+        tr
+          .insert(at, sliceClone.nodes)
+          .remove(nodeLocation(parent)!, parent.id)
+          // .select(PinnedSelection.fromPin(Pin.toEndOf(prevNode)!));
+          // .selectNodes(sliceClone.nodes.map(n => n.id))
+        if (focusNode) {
+          tr.select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
+        }
+      } else {
+        const at = Point.toAfter(parent.id);
+        tr.insert(at, sliceClone.nodes);
+      }
+
       return tr;
     }
 
     const { start, end } = selection;
     const { node: startNode } = start;
-    const { node: endNode } = end;
     const { start: startTitle, end: endTitle } = sliceClone;
     if (!startTitle || !endTitle) {
       console.error('no title found');

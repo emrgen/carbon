@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 
 import {
   ActionOrigin,
@@ -22,6 +22,7 @@ import {
   useNonDraggable,
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon";
+import { usePlaceholder } from "../hooks/usePlaceholder";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
@@ -35,7 +36,9 @@ export const DocumentComp = (props: RendererProps) => {
     useCombineConnectors(selectionSurface, dndRegion, nonDraggable)
   );
 
-  const handleClick = (e: React.MouseEvent) => {
+  const placeholder = usePlaceholder(node);
+
+  const handleClick = useCallback((e: React.MouseEvent) => {
     const lastChild = node.lastChild as Node;
     const lastElement = app.store.element(lastChild?.id!);
     if (!lastChild) return;
@@ -69,7 +72,7 @@ export const DocumentComp = (props: RendererProps) => {
         .select(after, ActionOrigin.UserInput)
         .dispatch();
     }
-  };
+  },[node.lastChild, app.store, app.schema, app.tr, app.selection]);
 
   return (
     <div
@@ -81,7 +84,7 @@ export const DocumentComp = (props: RendererProps) => {
         ref={ref}
         custom={{ ...connectors, onMouseUp: handleClick }}
       >
-        <CarbonNodeContent node={node} placeholder={"Untitled"} />
+        <CarbonNodeContent node={node} custom={placeholder}/>
         <CarbonNodeChildren node={node} />
       </CarbonBlock>
     </div>

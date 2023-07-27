@@ -14,6 +14,7 @@
     "@emrgen/carbon-utils": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
+    "@emrgen/carbon-sheet": "workspace:*",
     "@emrgen/types": "^0.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
