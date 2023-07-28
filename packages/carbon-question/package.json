@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-test",
+  "name": "@emrgen/carbon-question",
   "version": "0.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

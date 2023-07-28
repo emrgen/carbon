@@ -106,9 +106,12 @@ export const blockPresets: Extension = {
 		Renderer.create('tabContent', TabItemComp),
 		Renderer.create('tabTitles', TabTitlesComp),
 		Renderer.create('tabTitle', TextTitleComp),
+		Renderer.create('tagsAttr', () => 1),
 	]
 }
 
 
 export * from './events'
-// export * from './components'
+export * from './renderers'
+export * from './plugins'
+export * from './hooks'

@@ -1,13 +1,15 @@
 import EventEmitter from "events";
+import { Node } from "./Node";
+import { NodeId } from "./NodeId";
 
-interface MessageFormat {
+export interface CarbonMessageFormat {
   type: string;
-  source: string;
-  dest: string;
+  source: NodeId;
+  dest: NodeId;
   data: any;
 }
 
-export class MessageBus extends EventEmitter {
+export class CarbonMessageBus extends EventEmitter {
   addressListeners: EventEmitter;
 
   constructor() {
@@ -15,16 +17,25 @@ export class MessageBus extends EventEmitter {
     this.addressListeners = new EventEmitter();
   }
 
-  send(address: string, data: any) {
-    this.addressListeners.emit(address, data);
+  send(from: NodeId, to: NodeId, msg: Omit<CarbonMessageFormat, "source" | "dest">) {
+    // prevent sending messages to self
+    if (from.eq(to)) return;
+
+    const payload = {
+      ...msg,
+      source: from.id,
+      dest: to.id,
+    };
+
+    this.addressListeners.emit(to.toString(), payload);
   }
 
-  onAddress(address: string, callback: (msg: MessageFormat) => void) {
-    this.addressListeners.on(address, callback);
+  subscribe(nodeId: NodeId, callback: (msg: CarbonMessageFormat) => void) {
+    this.addressListeners.on(nodeId.toString(), callback);
   }
 
-  offAddress(address: string, callback: (msg: MessageFormat) => void) {
-    this.addressListeners.off(address, callback);
+  unsubscribe(nodeId: NodeId, callback: (msg: CarbonMessageFormat) => void) {
+    this.addressListeners.off(nodeId.toString(), callback);
   }
 
 }

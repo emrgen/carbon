@@ -19,7 +19,7 @@ import { CarbonCommands, SerializedNode } from "./types";
 import { BlockSelection } from './NodeSelection';
 import { first, isFunction } from 'lodash';
 import { CarbonCommandChain } from './CarbonCommandChain';
-import { MessageBus } from './MessageBus';
+import { CarbonMessageBus } from './MessageBus';
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -29,7 +29,7 @@ export class Carbon extends EventEmitter {
 	private readonly tm: TransactionManager;
 
 	// for external application use
-	bus: MessageBus = new MessageBus();
+	bus: CarbonMessageBus = new CarbonMessageBus();
 
 	schema: Schema;
 	state: CarbonState;

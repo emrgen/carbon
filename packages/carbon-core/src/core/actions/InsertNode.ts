@@ -50,7 +50,6 @@ export class InsertNode implements CarbonAction{
 		}
 
 		if (at.isAfter) {
-			console.log('xxxxx', node);
 			parent.insertAfter( target, node);
 			return done()
 		}
@@ -74,7 +73,7 @@ export class InsertNode implements CarbonAction{
 	toString() {
 		const { at, node } = this;
 		console.log();
-		
+
 		return classString(this)({
 			at: at.toString(),
 			nodes: node.id.toString(),

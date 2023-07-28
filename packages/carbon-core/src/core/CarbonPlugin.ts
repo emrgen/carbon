@@ -7,6 +7,8 @@ import { NodeSpec } from './Schema';
 import { Transaction } from './Transaction';
 import { EventHandlerMap, InputRules, PluginName, SerializedNode } from './types';
 import { CarbonAction } from "./actions/types";
+import EventEmitter from 'events';
+import { CarbonMessageBus, CarbonMessageFormat } from './MessageBus';
 
 export enum PluginType {
 	Node,
@@ -86,6 +88,11 @@ export abstract class CarbonPlugin {
 	// sanitize the node before putting into clipboard
 	sanitize(node: Node): Optional<Node> {
 		return null;
+	}
+
+	onReceive(app: Carbon, msg: CarbonMessageFormat) {
+		const { source, dest } = msg;
+		if (source.eq(dest)) return true;
 	}
 
 	// experimental

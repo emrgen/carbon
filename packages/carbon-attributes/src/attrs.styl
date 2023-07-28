@@ -1,0 +1,51 @@
+
+.carbon-document-attrs
+	background: #f4f4f4
+	padding: 16px 10px
+
+.carbon-attrs
+	display flex
+	font-size: 14px
+	gap: 10px
+
+.carbon-attrs-name
+	display flex
+	align-items: center
+	justify-content: center
+	padding: 2px 4px
+	border-radius: 4px
+	// background: #ddd
+
+	&>span
+		display: inline-block
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+
+.carbon-attrs-values
+	display flex
+	gap 6px
+	font-size: 14px
+
+	.carbon-tag-attr
+		display: flex
+		align-items: center
+		justify-content: center
+		padding: 2px 4px
+		border-radius: 4px
+		background: rgba(0, 128, 128, 0.178)
+		cursor pointer
+		&:hover
+			background: #ccc
+		&>span
+			display: inline-block
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			overflow: hidden;
+		&>input
+			width 100%
+			border: none
+			outline: none
+			background: transparent
+			&:focus
+				background: #ddd
