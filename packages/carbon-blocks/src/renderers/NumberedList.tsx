@@ -26,7 +26,7 @@ export const NumberedListComp = (props: RendererProps) => {
       return getListNumber(node.prevSibling) + 1;
     }
 
-    return node.data.node.listNumber ?? 1;
+    return node.attrs.node.listNumber ?? 1;
   };
 
   const beforeContent = (

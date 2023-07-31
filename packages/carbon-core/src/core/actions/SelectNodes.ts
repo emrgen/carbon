@@ -41,10 +41,10 @@ export class SelectNodes implements CarbonAction {
 
     const afterSelectedNodes = this.nodeIds.map(id => store.get(id)) as Node[];
     beforeSelectedNodes.filter(n => n.isSelected).forEach(n => {
-      n.updateData({ state: { selected: false } });
+      n.updateState({  selected: false } );
     });
     afterSelectedNodes.forEach(n => {
-      n.updateData({ state: { selected: true } });
+      n.updateState({ selected: true });
     });
 
     const { selection } = app

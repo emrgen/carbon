@@ -51,10 +51,11 @@ export class TitlePlugin extends NodePlugin {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
 				// ctx.event.preventDefault();
+				this.onTextInsert(ctx);
 			},
 			input: (ctx: EventContext<KeyboardEvent>) => {
 				// console.log('input', ctx.event);
-				this.onTextInsert(ctx);
+				// this.onTextInsert(ctx);
 			},
 			// keyDown: (ctx) => {
 			//  ctx.event.preventDefault()
@@ -74,9 +75,10 @@ export class TitlePlugin extends NodePlugin {
 		const { app, event } = ctx;
 		const { selection } = app;
 		// @ts-ignore
-		const { data } = event.nativeEvent;
+		const { data, key } = event.nativeEvent;
+		console.log(data ?? key);
 
-		app.cmd.transform.insertText(selection, data, false)?.dispatch();
+		app.cmd.transform.insertText(selection, data ?? key, false)?.dispatch();
 	}
 
 	// decoration(state: CarbonState): Decoration[] {

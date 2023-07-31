@@ -36,10 +36,10 @@ export class OpenDocument implements CarbonAction {
         const afterOpenedNodes = this.nodeIds.map(id => store.get(id)) as Node[];
 
         beforeOpenedNodes.filter(n => n.isOpen).forEach(n => {
-            n.updateData({ state: { open: false } });
+            n.updateState({ open: false });
         });
         afterOpenedNodes.forEach(n => {
-            n.updateData({ state: { open: true } });
+            n.updateState({ open: true });
         });
 
         tr.opened(...beforeOpenedNodes);

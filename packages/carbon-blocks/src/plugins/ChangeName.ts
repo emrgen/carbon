@@ -70,13 +70,6 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      tr.updateData(block.id, {
-        node: {
-          ...data,
-          ...block.data.node,
-        }
-      })
-
       tr
         .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
       tr.updateAttrs(block.id, {
@@ -111,7 +104,7 @@ export class ChangeName extends BeforePlugin {
       }
 
       if (type === 'numberedList') {
-        tr.updateData(block.id, {
+        tr.updateAttrs(block.id, {
           node: {
             listNumber: parseInt(match[1].slice(0, -2)) ?? 1
           }
@@ -123,7 +116,7 @@ export class ChangeName extends BeforePlugin {
       tr.change(block.id, block.name, type)
       // expand collapsed block
       if (block.isCollapsed) {
-        tr.updateData(block.id, { node: { collapsed: false } });
+        tr.updateAttrs(block.id, { node: { collapsed: false } });
       }
       tr.select(after)
         .dispatch()

@@ -1,15 +1,15 @@
-export const text = (text: string = '', attrs = {}, data = {}) => ({
+export const text = (text: string = '', attrs = {}, state = {}) => ({
 	name: 'text',
 	text,
 	attrs,
-	data,
+	state,
 });
 
-export const node = (name: string, content: any[] = [], attrs = {}, data = {}) => ({
+export const node = (name: string, content: any[] = [], attrs = {}, state = {}) => ({
 	name,
 	content,
 	attrs,
-	data,
+	state,
 });
 
 export const title = (content: any[] = []) => ({
@@ -22,9 +22,9 @@ export const section = (content: any[] = []) => ({
 	content,
 });
 
-export const para = (content: any[] = [], attrs = {}, data = {}) => ({
+export const para = (content: any[] = [], attrs = {}, state = {}) => ({
 	name: 'paragraph',
 	content,
 	attrs,
-	data,
+	state,
 });

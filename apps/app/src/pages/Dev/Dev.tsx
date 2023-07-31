@@ -18,13 +18,20 @@ import {
   CarbonEvents,
   CarbonModal,
   CarbonState,
+  Extension,
+  Renderer,
+  RendererProps,
   createCarbon,
   extensionPresets,
   useCreateCachedCarbon,
   useCreateCarbon,
 } from "@emrgen/carbon-core";
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
-import { BlockMenu, CarbonAppDocument, carbonUtilPlugins } from "@emrgen/carbon-utils";
+import {
+  BlockMenu,
+  CarbonAppDocument,
+  carbonUtilPlugins,
+} from "@emrgen/carbon-utils";
 
 const data = node("carbon", [
   // node("fileTree", [
@@ -124,16 +131,16 @@ const data = node("carbon", [
     //   {}
     // ),
 
-    node("section", [title([text("section 1.2")])]),
-    // node("image", [], {
-    //   node: {
-    //     src: "https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9780123820365/files/images/F000124f12-68-9780123820365.jpg",
-    //     align: "center",
-    //   },
-    //   html: {
-    //     style: { justifyContent: "center" },
-    //   },
-    // }),
+    // node("section", [title([text("section 1.2")])]),
+    node("image", [], {
+      node: {
+        src: "https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9780123820365/files/images/F000124f12-68-9780123820365.jpg",
+        align: "center",
+      },
+      html: {
+        style: { justifyContent: "center" },
+      },
+    }),
     // node("image", [], {
     //   node: {
     //     src: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb",
@@ -149,10 +156,10 @@ const data = node("carbon", [
     //   node("stack", [section([title([text("section 3")])])]),
     // ]),
 
-    node("hstack", [
-      node("stack", [section([title([text("section 1")])])]),
-      node("stack", [section([title([text("section 2")])])]),
-    ]),
+    // node("hstack", [
+    //   node("stack", [section([title([text("section 1")])])]),
+    //   node("stack", [section([title([text("section 2")])])]),
+    // ]),
     section([title([])]),
     // section([
     //   title([
@@ -204,16 +211,27 @@ const data = node("carbon", [
   ]),
 ]);
 
+const ImageComp = (props: RendererProps) => {
+  return (
+    <div contentEditable="false" suppressContentEditableWarning>
+      Image
+    </div>
+  );
+};
+
+const extensions1: Extension = {
+  renderers: [Renderer.create("image", ImageComp)],
+};
+
 const extensions = [
-    extensionPresets,
-    blockPresets,
-    carbonUtilPlugins,
-]
+  extensionPresets,
+  blockPresets,
+  carbonUtilPlugins,
+  // extensions1,
+];
 
 export default function Dev() {
-  const app = useCreateCachedCarbon(data, extensions)
+  const app = useCreateCarbon(data, extensions);
 
-  return (
-    <CarbonAppDocument app={app}/>
-  )
+  return <CarbonAppDocument app={app} />;
 }

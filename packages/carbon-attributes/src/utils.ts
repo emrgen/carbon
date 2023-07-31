@@ -1,9 +1,9 @@
 import { Node } from "@emrgen/carbon-core";
 
-export const hasAttrs = (node: Node) => {
-  return (node.data.node.attrs ?? []).length > 0;
+export const hasProps = (node: Node) => {
+  return !(node.attrs.node.props === undefined || node.attrs.node.props === null)
 };
 
-export const nodeAttrs = (node: Node) => {
-  return (node.data.node.attrs ?? [])
+export const nodeProps = (node: Node) => {
+  return (node.attrs.node.props ?? [])
 };

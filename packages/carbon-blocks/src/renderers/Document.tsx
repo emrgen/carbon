@@ -25,8 +25,8 @@ import {
 } from "@emrgen/carbon-dragon";
 import { usePlaceholder } from "../hooks/usePlaceholder";
 import { renderAttr } from "../components/renderAttrs";
-import { hasAttrs, nodeAttrs } from "../../../carbon-attributes/src/utils";
-import { CarbonAttributes } from "@emrgen/carbon-attributes";
+import { hasProps, nodeAttrs } from "../../../carbon-attributes/src/utils";
+import { CarbonProps } from "@emrgen/carbon-attributes";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
@@ -92,7 +92,7 @@ export const DocumentComp = (props: RendererProps) => {
         custom={{ ...connectors, onMouseUp: handleClick }}
       >
         <CarbonNodeContent node={node} custom={placeholder} />
-        <CarbonAttributes node={node} />
+        <CarbonProps node={node} />
         <CarbonNodeChildren node={node} />
       </CarbonBlock>
     </div>

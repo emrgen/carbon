@@ -7,22 +7,22 @@ import { CarbonAction, ActionOrigin, ActionType } from "./types";
 import { generateActionId } from "./utils";
 import { NodeIdSet } from '../BSet';
 import { NodeAttrs } from '../NodeAttrs';
-import { NodeData } from "../NodeData";
 import { Optional } from '@emrgen/types';
+import { NodeState } from '../NodeState';
 
 
 export class UpdateData implements CarbonAction {
   type: ActionType;
   id: number;
-  prevData: Optional<NodeData>;
+  prevState: Optional<NodeState>;
 
   static fromJSON(json) { }
 
-  static create(nodeId: NodeId, data: Partial<NodeData>, origin: ActionOrigin) {
-    return new UpdateData(nodeId, data, origin);
+  static create(nodeId: NodeId, state: Partial<NodeState>, origin: ActionOrigin) {
+    return new UpdateData(nodeId, state, origin);
   }
 
-  constructor(readonly nodeId: NodeId, readonly data: Partial<NodeData>, readonly origin: ActionOrigin) {
+  constructor(readonly nodeId: NodeId, readonly state: Partial<NodeState>, readonly origin: ActionOrigin) {
     this.type = ActionType.updateAttrs;
     this.id = generateActionId();
   }
@@ -37,18 +37,18 @@ export class UpdateData implements CarbonAction {
       return NULL_ACTION_RESULT
     }
 
-    this.prevData = node.data;
+    this.prevState = node.state;
     console.log('-->');
-    
-    node.updateData(this.data);
+
+    node.updateState(this.state);
     tr.updated(node);
 
     return NULL_ACTION_RESULT
   }
 
   inverse(): CarbonAction {
-    const { nodeId, prevData } = this;
-    return UpdateData.create(nodeId, prevData!, ActionOrigin.UserInput);
+    const { nodeId, prevState } = this;
+    return UpdateData.create(nodeId, prevState!, ActionOrigin.UserInput);
   }
 
   toString() {

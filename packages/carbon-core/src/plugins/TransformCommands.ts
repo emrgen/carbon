@@ -150,6 +150,8 @@ export class TransformCommands extends BeforePlugin {
   private insertText(app: Carbon, selection: PinnedSelection, text: string, native = false): Optional<Transaction> {
     const { cmd } = app;
     const updateTitleText = (app: Carbon) => {
+      console.log('insertText', text);
+      
       const { tr } = app;
       const { schema, selection } = app;
       const { head, start } = selection;
@@ -169,9 +171,10 @@ export class TransformCommands extends BeforePlugin {
     }
 
     if (!selection.isCollapsed) {
-      return cmd.transform.delete()?.then(carbon => {
+      return cmd.transform.delete(selection)?.then(carbon => {
         return updateTitleText(carbon);
       })
+    return
     }
 
     if (selection.isCollapsed) {
@@ -224,7 +227,7 @@ export class TransformCommands extends BeforePlugin {
     if (sliceClone.isBlockSelection) {
       const { tr } = app;
       const { tail } = selection;
-      const {parent} = tail.node;
+      const { parent } = tail.node;
       if (!parent) {
         console.error('no parent found');
         return;
@@ -237,8 +240,8 @@ export class TransformCommands extends BeforePlugin {
         tr
           .insert(at, sliceClone.nodes)
           .remove(nodeLocation(parent)!, parent.id)
-          // .select(PinnedSelection.fromPin(Pin.toEndOf(prevNode)!));
-          // .selectNodes(sliceClone.nodes.map(n => n.id))
+        // .select(PinnedSelection.fromPin(Pin.toEndOf(prevNode)!));
+        // .selectNodes(sliceClone.nodes.map(n => n.id))
         if (focusNode) {
           tr.select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
         }

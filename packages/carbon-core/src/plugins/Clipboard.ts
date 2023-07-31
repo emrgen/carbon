@@ -67,7 +67,7 @@ export class ClipboardPlugin extends AfterPlugin {
       const { blocks } = nodeSelection;
       const cloned = blocks.map(n => {
         const node = app.schema.cloneWithId(n)
-        node.updateData({ state: { selected: false } })
+        node.updateState({ selected: false })
         return node
       })
 

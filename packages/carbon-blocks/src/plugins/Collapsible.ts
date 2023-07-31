@@ -32,17 +32,13 @@ export class CollapsibleList extends NodePlugin {
       attrs: {
         node: {
           emptyPlaceholder: 'Collapsible',
+          collapsed: false,
         },
         html: {
           // contentEditable: false,
           suppressContentEditableWarning: true,
         }
       },
-      data: {
-        node: {
-          collapsed: false,
-        }
-      }
     }
   }
 

@@ -11,17 +11,15 @@ const data = node("carbon", [
       title([text("Carbon "), text("document")]),
       node("divider"),
       node("section", [title([text("section 1.2")])]),
-      // node("questionAnswer", [title([text("Question")])]),
     ],
-    {},
     {
       node: {
-        attrs: [
-          {
-            name: "tags",
-            value: ["question", "answer", "note"],
-          },
-        ],
+        // props: [
+        //   {
+        //     name: "tags",
+        //     value: ["question", "answer", "note"],
+        //   },
+        // ],
       },
     }
   ),

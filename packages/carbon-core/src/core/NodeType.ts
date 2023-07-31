@@ -43,10 +43,7 @@ export class NodeType {
 		html: HTMLAttrs;
 	};
 
-	data: {
-		node: Record<string, any>;
-		html: Record<string, any>;
-	}
+	state: Record<string, any>;
 
 	/// True if this node type has inline content.
 	inlineContent!: boolean
@@ -76,7 +73,7 @@ export class NodeType {
 	constructor(readonly name: NodeName, readonly schema: Schema, readonly spec: NodeSpec) {
 		this.groupsNames = specGroups(name, spec);
 		this.attrs = merge({ node: {}, html: {} }, spec.attrs ?? {});
-		this.data = merge({ node: {}, html: {}, state: {} }, spec.data ?? {});
+		this.state = spec.state ?? {};
 
 		this.isBlock = !(spec.inline || name == "text")
 		this.isText = name == "text";
@@ -217,7 +214,7 @@ export class NodeType {
 	// create a default node based on schema
 	default(): Optional<Node> {
 		// console.log(this.name);
-		
+
 		if (this.isText) {
 			return this.schema.text('');
 		}

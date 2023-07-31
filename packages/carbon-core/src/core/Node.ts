@@ -13,6 +13,7 @@ import { NodeData } from './NodeData';
 import { NodeId } from './NodeId';
 import { NodeType } from './NodeType';
 import { NodeEncoder, NodeJSON, yes } from './types';
+import { NodeState } from './NodeState';
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -26,8 +27,8 @@ export interface NodeCreateProps {
 	content: NodeContent;
 
 	marks?: MarkSet;
-	data?: NodeData;
 	attrs?: NodeAttrs;
+	state?: NodeState;
 
 	renderVersion?: number;
 	updateVersion?: number;
@@ -49,7 +50,7 @@ export class Node extends EventEmitter {
 
 	marks: MarkSet;
 	attrs: NodeAttrs;
-	data: NodeData;
+	state: NodeState;
 
 	renderVersion = 0;
 	updateVersion = 0;
@@ -78,7 +79,7 @@ export class Node extends EventEmitter {
 			content,
 			marks = MarkSet.empty(),
 			attrs = {},
-			data = {},
+			state = {},
 			renderVersion = 0,
 			updateVersion = 0
 		} = object;
@@ -88,7 +89,7 @@ export class Node extends EventEmitter {
 		this.content = content.withParent(this)
 		this.marks = marks;
 		this.attrs = new NodeAttrs(merge(cloneDeep(type.attrs), attrs));
-		this.data = new NodeData(merge(cloneDeep(type.data), data));
+		this.state = new NodeState(merge(cloneDeep(type.state), state));
 
 		this.renderVersion = renderVersion;
 		this.updateVersion = updateVersion;
@@ -130,15 +131,15 @@ export class Node extends EventEmitter {
 	}
 
 	get isActive() {
-		return this.data.state.active;
+		return this.state.active;
 	}
 
 	get isSelected() {
-		return this.data.state.selected;
+		return this.state.selected;
 	}
 
 	get isOpen() {
-		return this.data.state.open;
+		return this.state.open;
 	}
 
 	get size(): number {
@@ -241,7 +242,7 @@ export class Node extends EventEmitter {
 	}
 
 	get isCollapsed() {
-		return !!this.data.node.collapsed
+		return !!this.attrs.node.collapsed;
 	}
 
 	get children() {
@@ -672,30 +673,23 @@ export class Node extends EventEmitter {
 				...type.attrs.node,
 			}
 		});
-		this.data = new NodeData({
-			html: {
-				...type.data.html,
-				...this.data.html,
-			},
-			node: {
-				...type.data.node,
-				...this.data.node,
-			},
-			state: this.data.state,
+		this.state = new NodeState({
+			...this.type.state,
+			...this.state,
 		});
 		this.markUpdated();
 	}
 
 	// @mutates
-	updateAttrs(props: Record<string, any>) {
+	updateAttrs(props: Partial<NodeAttrs>) {
 		this.attrs = this.attrs.update(props);
 		this.markUpdated();
 	}
 
 
 	// @mutates
-	updateData(data: Record<string, any>) {
-		this.data = this.data.update(data);
+	updateState(state: Partial<NodeState>) {
+		this.state = this.state.update(state);
 		this.markUpdated()
 	}
 
@@ -729,14 +723,14 @@ export class Node extends EventEmitter {
 	}
 
 	toJSON() {
-		const { id, type, content, attrs, data } = this;
+		const { id, type, content, attrs, state } = this;
 
 		return {
 			id: id.toString(),
 			name: type.name,
 			...content.toJSON(),
 			attrs: attrs.toJSON(),
-			data: data.toJSON(),
+			state: state.toJSON(),
 		}
 	}
 
@@ -745,11 +739,11 @@ export class Node extends EventEmitter {
 	}
 
 	viewJSON() {
-		const { id, type, data, attrs, textContent } = this;
+		const { id, type, state, attrs, textContent } = this;
 		return {
 			id,
 			type,
-			data,
+			state,
 			attrs,
 			children: this.children.map(n => n.viewJSON()),
 			text: this.isText ? this.textContent : ''
@@ -757,13 +751,13 @@ export class Node extends EventEmitter {
 	}
 
 	clone() {
-		const { id, type, content, attrs, data, marks, renderVersion, updateVersion } = this;
+		const { id, type, content, attrs, state, marks, renderVersion, updateVersion } = this;
 		const cloned = Node.create({
 			id,
 			type,
 			content: content.clone(),
 			attrs,
-			data,
+			state,
 			marks,
 			renderVersion,
 			updateVersion

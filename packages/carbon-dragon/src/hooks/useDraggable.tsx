@@ -123,7 +123,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
 
-      if (distance == 0) {
+      if (distance === 0) {
         isDragging = true;
         dnd.onDragStart({
           activatorEvent,

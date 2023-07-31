@@ -1,14 +1,14 @@
 import React from "react";
 
 import { RendererProps, preventAndStop, useCarbon } from "@emrgen/carbon-core";
-import { hasAttrs, nodeAttrs } from "../utils";
-import CarbonAttribute from "./CarbonAttribute";
+import { hasProps, nodeProps } from "../utils";
+import CarbonProp from "./CarbonAttribute";
 
-export function CarbonAttributes(props: RendererProps) {
+export function CarbonProps(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
 
-  if (!hasAttrs(node)) return null;
+  if (!hasProps(node)) return null;
 
   return (
     <div
@@ -21,28 +21,10 @@ export function CarbonAttributes(props: RendererProps) {
       }}
       onMouseUp={preventAndStop}
     >
-      {nodeAttrs(node).map((attr) => {
-        return <CarbonAttribute node={node} attr={attr} key={attr.name} />;
+      {nodeProps(node).map((prop) => {
+        return <CarbonProp node={node} prop={prop} key={prop.name} />;
       })}
+      <div className="carbon-add-prop"> &nbsp;+&nbsp; Add Property</div>
     </div>
   );
 }
-
-// {
-//   hasAttrs(node) && (
-//     <div
-//       className="carbon-document-attrs"
-//       contentEditable={false}
-//       suppressContentEditableWarning
-//       onMouseDown={(e) => {
-//         preventAndStop(e);
-//         app.blur();
-//       }}
-//       onMouseUp={preventAndStop}
-//     >
-//       {nodeAttrs(node).map((attr) => {
-//         return renderAttr(node, attr);
-//       })}
-//     </div>
-//   );
-// }

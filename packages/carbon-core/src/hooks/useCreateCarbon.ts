@@ -12,7 +12,7 @@ import { CarbonState } from '../core';
 
 
 export const createCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
-	const plugins = flatten(extensions.map(e => e.plugins));
+	const plugins = flatten(extensions.map(e => e.plugins ?? []));
 	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
 	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
 
