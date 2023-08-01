@@ -21,6 +21,7 @@ export class Section extends NodePlugin {
 				title: 'Text',
 				description: 'Just start typing to create a new section',
 				icon: 'section',
+				tags: ['text', 'section']
 			},
 			attrs: {
 				node: {

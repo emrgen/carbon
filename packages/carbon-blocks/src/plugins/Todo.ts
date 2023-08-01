@@ -12,6 +12,7 @@ export class Todo extends Section {
         title: 'To-do List',
         description: 'Create a to-do list',
         icon: 'todo',
+        tags: ['to-do list', 'todo', 'checkbox', 'checklist']
       },
       attrs: {
         node: {

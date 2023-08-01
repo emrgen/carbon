@@ -9,6 +9,7 @@ export class Callout extends CarbonPlugin {
       content: 'title content*',
       splits: true,
       splitName: 'section',
+      insert: true,
       selectable: true,
       draggable: true,
       dragHandle: true,
@@ -16,6 +17,8 @@ export class Callout extends CarbonPlugin {
       blockSelectable: true,
       info: {
         title: 'Callout',
+        description: 'Write a callout',
+        icon: 'callout'
       },
       attrs: {
         node: {

@@ -9,6 +9,7 @@ export class Quote extends CarbonPlugin {
       content: 'title content*',
       splits: true,
       splitName: 'section',
+      insert: true,
       selectable: true,
       draggable: true,
       dragHandle: true,
@@ -16,6 +17,9 @@ export class Quote extends CarbonPlugin {
       blockSelectable: true,
       info: {
         title: 'Quote',
+        description: 'Write a quote',
+        icon: 'quote',
+        tags: ['quote', 'blockquote', 'q', 'cite', 'quotation', 'epigraph']
       },
       attrs: {
         node: {

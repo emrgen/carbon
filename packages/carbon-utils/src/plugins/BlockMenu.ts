@@ -2,7 +2,7 @@ import { BeforePlugin, Carbon, EventContext, EventHandler, Node, preventAndStopC
 import { BlockMenuCmd } from "../types";
 import { Optional } from '@emrgen/types';
 
-const BlockMenuRegex = /^\/([a-zA-Z])*$/;
+const BlockMenuRegex = /^\/([a-zA-Z0-9\s])*$/;
 
 export class BlockMenuPlugin extends BeforePlugin {
 
@@ -33,6 +33,7 @@ export class BlockMenuPlugin extends BeforePlugin {
       },
       'enter': (ctx: EventContext<KeyboardEvent>) => {
         if (this.state.visible) {
+          console.log('xxxxxx enter', ctx.node.id.toString(), this.state.visible);
           preventAndStopCtx(ctx);
           ctx.app.emit(BlockMenuCmd.select);
         }
@@ -40,11 +41,8 @@ export class BlockMenuPlugin extends BeforePlugin {
       'esc': (ctx: EventContext<KeyboardEvent>) => {
         if (this.state.visible) {
           preventAndStopCtx(ctx);
-          const {checked} = this.state;
-          checked.set(ctx.node.id.toString(), true);
-          this.setState({ checked });
-
-          ctx.app.emit(BlockMenuCmd.hide);
+          const { node, app } = ctx;
+          this.onHide(app, node, true);
         }
       }
     }
@@ -54,8 +52,9 @@ export class BlockMenuPlugin extends BeforePlugin {
     return {
       keyUp: this.onKeyUp.bind(this),
       mouseDown: (ctx: EventContext<MouseEvent>) => {
+        const {node, app} = ctx;
         if (this.state.visible) {
-          ctx.app.emit(BlockMenuCmd.hide);
+          this.onHide(app, node, true);
         }
       },
     }
@@ -66,18 +65,20 @@ export class BlockMenuPlugin extends BeforePlugin {
     const { selection } = app;
     const {checked} = this.state;
 
+    console.log('onKeyUp', node.textContent, ctx.node.id.toString(), checked.get(ctx.node.id.toString()), node.isEmpty);
+
     if (node.isEmpty) {
-      checked.set(ctx.node.id.toString(), false);
-      this.setState({ checked });
+      this.onHide(app, node, false);
       return;
     }
 
     if (checked.get(node.id.toString())) {
+      console.log('node is checked', checked.get(ctx.node.id.toString()));
       return;
     }
 
     if (!selection.isCollapsed || !node.isTextBlock || !selection.start.isAtEndOfNode(node) || !BlockMenuRegex.test(node.textContent)) {
-      app.emit(BlockMenuCmd.hide, node);
+      this.onHide(app, node, this.state.visible);
       return
     }
     const el = app.store.element(node.id);
@@ -87,6 +88,16 @@ export class BlockMenuPlugin extends BeforePlugin {
       return;
     }
 
+    console.log('show menu');
+    
     app.emit(BlockMenuCmd.show, node, el);
   }
+
+  onHide(app: Carbon, node: Node, isChecked = true) {
+    const {checked} = this.state;
+    checked.set(node.id.toString(), isChecked);
+    this.setState({ checked, visible: false });
+    app.emit(BlockMenuCmd.hide, node);
+  }
+
 }

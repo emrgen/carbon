@@ -12,6 +12,7 @@ export class BulletedList extends Section {
         title: 'Bulleted List',
         description: 'Create a bulleted list',
         icon: 'bulletedList',
+        tags: ['bulleted list', 'unordered list', 'list', 'ul', 'unordered']
       },
       attrs: {
         node: {

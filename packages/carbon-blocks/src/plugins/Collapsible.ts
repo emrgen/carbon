@@ -20,6 +20,7 @@ export class ToggleList extends NodePlugin {
       content: 'title content*',
       splits: true,
       splitName: 'section',
+      insert: true,
       collapsible: true,
       selectable: true,
       draggable: true,
@@ -28,6 +29,9 @@ export class ToggleList extends NodePlugin {
       blockSelectable: true,
       info: {
         title: 'Toggle List',
+        description: 'Create a toggle list',
+        icon: 'toggleList',
+        tags: ['toggle list', 'toggle', 'collapsible']
       },
       attrs: {
         node: {
