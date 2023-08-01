@@ -11,7 +11,7 @@ import './dnd.styl';
 import DividerComp from './renderers/Divider';
 import { Divider } from './plugins/Divider';
 import TitleComp from './renderers/TitleComp';
-import { CollapsibleList } from './plugins/Collapsible';
+import { ToggleList } from './plugins/Collapsible';
 import CollapsibleListComp from './renderers/Collapsible';
 import { BulletedListComp } from './renderers/BulletedList';
 import { BulletedList } from './plugins/BulletedList';
@@ -54,7 +54,7 @@ export const blockPresets: Extension = {
 		new Header(),
 		new DocPlugin(),
 		new NestablePlugin(),
-		new CollapsibleList(),
+		new ToggleList(),
 		new BulletedList(),
 		new NumberedList(),
 		new ChangeName(),

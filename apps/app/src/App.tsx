@@ -6,6 +6,8 @@ import Sheet from "./carbon/Sheet";
 import { Question } from "./carbon/Question";
 import { FastEditor } from "./fastype/FastEditor";
 
+import './fastype/fastype.styl'
+
 function App() {
   return (
     <Router>

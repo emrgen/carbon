@@ -1,17 +1,22 @@
-import { useRef, useCallback } from "react";
 import {
   CarbonBlock,
   CarbonNodeContent,
   RendererProps,
+  preventAndStop,
   useCarbon,
-  useSelectionHalo
+  useSelectionHalo,
 } from "@emrgen/carbon-core";
-import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
+import {
+  useCombineConnectors,
+  useConnectorsToProps,
+  useDragDropRectSelect,
+} from "@emrgen/carbon-dragon";
+import { useCallback, useRef } from "react";
 
 export default function DividerComp(props: RendererProps) {
   const app = useCarbon();
-  const {node} = props;
-2
+  const { node } = props;
+  2;
   const ref = useRef(null);
 
   const selection = useSelectionHalo(props);
@@ -20,20 +25,25 @@ export default function DividerComp(props: RendererProps) {
     useCombineConnectors(dragDropRect, selection)
   );
 
-  const handleClick = useCallback(e => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (app.blockSelection && app.blockSelection.has(node.id)) return
-    // if (app.blockSelection)
-    app.tr.selectNodes([node.id]).dispatch();
-  },[app.blockSelection, app.tr, node.id])
+  const handleClick = useCallback(
+    (e) => {
+      preventAndStop(e);
+      // avoid selection if block is already selected
+      if (app.blockSelection && app.blockSelection.has(node.id)) return;
+      app.tr.selectNodes([node.id]).dispatch();
+    },
+    [app.blockSelection, app.tr, node.id]
+  );
 
-  const handleMouseDown = useCallback(e => {
-    if (app.blockSelection && app.blockSelection.has(node.id)) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  },[app.blockSelection, node.id])
+  const handleMouseDown = useCallback(
+    (e) => {
+      if (app.blockSelection && app.blockSelection.has(node.id)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    },
+    [app.blockSelection, node.id]
+  );
 
   return (
     <CarbonBlock

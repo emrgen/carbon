@@ -15,12 +15,14 @@ import {
   MdOutlineKeyboardArrowDown,
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
+import { usePlaceholder } from "../hooks";
 
 export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
   const { SelectionHalo } = useSelectionHalo(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
+  const placeholder = usePlaceholder(node);
 
   // insert a new section as child of this collapsible
   const handleInsert = useCallback(() => {
@@ -38,10 +40,14 @@ export default function CollapsibleListComp(props: RendererProps) {
 
   // toggle collapsed state
   const handleToggle = useCallback(() => {
-    app.tr
-      .updateData(node.id, { node: { collapsed: !isCollapsed } })
-      .dispatch();
-  }, [app.tr, node, isCollapsed]);
+    const {tr} = app;
+    tr
+      .updateAttrs(node.id, { node: { collapsed: !isCollapsed } })
+    if (!isCollapsed) {
+      tr.select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
+    }
+    tr.dispatch();
+  }, [app, node, isCollapsed]);
 
   const beforeContent = (
     <div
@@ -64,7 +70,7 @@ export default function CollapsibleListComp(props: RendererProps) {
 
   return (
     <CarbonBlock {...props} custom={{ "data-collapsed": isCollapsed }}>
-      <CarbonNodeContent node={node} beforeContent={beforeContent} />
+      <CarbonNodeContent node={node} beforeContent={beforeContent} custom={placeholder}/>
 
       {node.size > 1 ? (
         <CarbonNodeChildren node={node} />

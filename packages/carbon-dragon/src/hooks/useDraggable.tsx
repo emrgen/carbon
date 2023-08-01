@@ -29,7 +29,7 @@ export const useDraggable = (props: UseFastDraggableProps) => {
 
   const onMouseOver = useCallback(
     (e) => {
-      console.warn("onMouseOver", e.target, e.currentTarget);
+      // console.warn("onMouseOver", e.target, e.currentTarget);
       dnd.onMouseOver(node, e);
     },
     [dnd, node]

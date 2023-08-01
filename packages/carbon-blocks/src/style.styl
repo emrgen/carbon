@@ -201,14 +201,18 @@ span {
 	line-height: $lineHeight
 
 [data-name=collapsible]
+	> [data-type=content] > [data-name=title]
+		margin-left 8px
 	> [data-type=children]
-		padding-left 28px
-	padding-left: 2px
+		padding-left 30px
+	padding-left: 0px
 	.carbon-collapsible__control
 		left 4px
 		width 22px
 		display: flex
-		// align-items: center
+		line-height: $lineHeight
+		align-items: center
+		// background: #eee
 
 [data-name=bulletedList]
 	> [data-type=children]
@@ -226,15 +230,13 @@ span {
 		padding-left 0px
 	padding-left: 30px
 	.carbon-todo__control
-		padding-right: 4px
-		padding-left 2px
-		user-select: none
+		display: flex
 		position absolute
 		left 0
-		display: flex
-		align-items: flex-start
-		padding-top 2px
-		// height 100%
+		align-items: center
+		height $lineHeight
+		user-select: none
+		padding-left 7px
 
 		input
 			height: 18px
@@ -693,3 +695,12 @@ span {
 		&:hover
 		&[data-active=true]
 			background: #ddd
+
+[data-name="callout"][data-as=h1]
+[data-name="callout"][data-as=h2],
+[data-name="callout"][data-as=h3],
+[data-name="quote"][data-as=h1],
+[data-name="quote"][data-as=h2],
+[data-name="quote"][data-as=h3]
+	> [data-type=content]
+		margin-top 0

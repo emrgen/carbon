@@ -20,7 +20,7 @@ export class Divider extends NodePlugin {
       attrs: {
         html: {
           suppressContentEditableWarning: true,
-          // contentEditable: false,
+          contentEditable: false,
         }
       }
     }

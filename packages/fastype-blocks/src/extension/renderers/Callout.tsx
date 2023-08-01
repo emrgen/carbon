@@ -1,3 +1,4 @@
+import { NestableComp, usePlaceholder } from "@emrgen/carbon-blocks";
 import { useRef } from "react";
 
 import {
@@ -12,9 +13,10 @@ import {
   useConnectorsToProps,
   useDragDropRectSelect,
 } from "@emrgen/carbon-dragon";
-import { usePlaceholder } from "../hooks/usePlaceholder";
 
-export const NestableComp = (props: RendererProps) => {
+export const CalloutComp = NestableComp;
+
+export const Callout = (props: RendererProps) => {
   const { node } = props;
 
   const ref = useRef(null);

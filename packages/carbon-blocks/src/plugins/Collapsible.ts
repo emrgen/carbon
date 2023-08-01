@@ -10,7 +10,7 @@ declare module '@emrgen/carbon-core' {
   }
 }
 
-export class CollapsibleList extends NodePlugin {
+export class ToggleList extends NodePlugin {
 
   name = 'collapsible';
 
@@ -27,11 +27,11 @@ export class CollapsibleList extends NodePlugin {
       rectSelectable: true,
       blockSelectable: true,
       info: {
-        title: 'Collapsible',
+        title: 'Toggle List',
       },
       attrs: {
         node: {
-          emptyPlaceholder: 'Collapsible',
+          emptyPlaceholder: 'Toggle',
           collapsed: false,
         },
         html: {
