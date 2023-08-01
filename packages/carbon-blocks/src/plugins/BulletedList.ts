@@ -9,7 +9,9 @@ export class BulletedList extends Section {
       ...super.spec(),
       splitName: 'bulletedList',
       info: {
-        title: 'List'
+        title: 'Bulleted List',
+        description: 'Create a bulleted list',
+        icon: 'bulletedList',
       },
       attrs: {
         node: {

@@ -21,5 +21,6 @@ export * from './NodeContent'
 export * from './CarbonState'
 export * from './Slice'
 export * from './NodeId'
+export * from './NodeType'
 export * from './types'
 

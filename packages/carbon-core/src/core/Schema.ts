@@ -155,6 +155,7 @@ export interface NodeSpec {
 	dragHandle?: boolean;
 	blockSelectable?: boolean;
 	layout?: NodeLayout;
+	insert?: boolean;
 	// node is a embedded element
 	// it can be a video, audio, external app
 	embedded?: boolean;
@@ -170,6 +171,7 @@ export interface NodeSpec {
 	insertBefore?: boolean;
 	insertAfter?: boolean;
 	info?: NodeInfo;
+
 	attrs?: {
 		node?: Record<string, any>;
 		html?: Record<string, any>;

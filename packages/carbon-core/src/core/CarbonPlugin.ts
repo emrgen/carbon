@@ -32,7 +32,19 @@ export abstract class CarbonPlugin {
 
 	name: PluginName = '';
 
-	init(app: Carbon) {}
+	private app: Optional<Carbon>;
+
+	init(app: Carbon) {
+		this.app = app;
+	}
+
+	get state () {
+		return this.app?.state.get(this.name);
+	}
+
+	setState (state: any) {
+		this.app?.state.set(this.name, state);
+	}
 
 	destroy(app: Carbon) {}
 

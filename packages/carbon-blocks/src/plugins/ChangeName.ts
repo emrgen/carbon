@@ -26,6 +26,8 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(#\s)(.)*/, this.tryChangeAttrs('h1', ['nestable'])),
     new InputRule(/^(##\s)(.)*/, this.tryChangeAttrs('h2', ['nestable'])),
     new InputRule(/^(###\s)(.)*/, this.tryChangeAttrs('h3', ['nestable'])),
+    new InputRule(/^(####\s)(.)*/, this.tryChangeAttrs('h4', ['nestable'])),
+
     new InputRule(/^(-\s)(.)*/, this.tryChangeType('bulletedList', ['nestable'])),
     new InputRule(/^(\*\s)(.)*/, this.tryChangeType('bulletedList', ['nestable'])),
     new InputRule(/^([0-9]+\.\s)(.)*/, this.tryChangeType('numberedList', ['nestable'])),
@@ -34,6 +36,7 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(>\s)(.)*/, this.tryChangeType('collapsible', ['nestable'])),
     new InputRule(/^(```)(.)*/, this.tryChangeIntoCode('code', ['nestable'])),
     new InputRule(/^(---)(.)*/, this.tryChangeIntoDivider('divider', ['nestable'])),
+    new InputRule(/^(\*\*\*\s)(.)*/, this.tryChangeIntoDivider('separator', ['nestable'])),
   ])
 
   on(): Partial<EventHandler> {
@@ -50,14 +53,19 @@ export class ChangeName extends BeforePlugin {
     };
   }
 
-  tryChangeAttrs(type: string, groups: string[], data: Partial<NodeData> = {}) {
+  tryChangeAttrs(name: string, groups: string[], data: Partial<NodeData> = {}) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;
       const block = node.closest(n => n.isContainerBlock)!;
       if (!isConvertible(block)) return
 
-      console.log('tryChangeAttrs', ctx.node.textContent, type);
+      if (app.schema.nodes[name] === undefined) {
+        console.error('node type not found', name);
+        return
+      }
+
+      console.log('tryChangeAttrs', ctx.node.textContent, name);
 
       ctx.event.preventDefault();
       ctx.stopPropagation();
@@ -74,7 +82,7 @@ export class ChangeName extends BeforePlugin {
         .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
       tr.updateAttrs(block.id, {
         html: {
-          'data-as': type,
+          'data-as': name,
         }
       })
       tr.select(after);
@@ -155,20 +163,20 @@ export class ChangeName extends BeforePlugin {
     }
   }
 
-  tryChangeIntoDivider(type: string, groups: string[]) {
+  tryChangeIntoDivider(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;
       const block = node.closest(n => n.isContainerBlock)!;
       if (!isConvertible(block)) return
 
-      console.log('tryChangeType', ctx.node.textContent, type);
+      console.log('tryChangeType', ctx.node.textContent, name);
 
       ctx.event.preventDefault();
       ctx.stopPropagation();
 
       const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
-      const divider = app.schema.type('divider').default();
+      const divider = app.schema.type(name).default();
       if (!divider) {
         console.error('failed to create divider node');
         return

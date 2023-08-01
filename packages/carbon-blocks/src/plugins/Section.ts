@@ -16,8 +16,11 @@ export class Section extends NodePlugin {
 			dragHandle: true,
 			rectSelectable: true,
 			blockSelectable: true,
+			insert: true,
 			info: {
-				title: 'Section',
+				title: 'Text',
+				description: 'Just start typing to create a new section',
+				icon: 'section',
 			},
 			attrs: {
 				node: {

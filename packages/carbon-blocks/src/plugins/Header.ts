@@ -17,10 +17,23 @@ export class Heading extends NodePlugin {
 		return node.groups.includes('heading')
 	}
 
+
+	description() {
+		const { level } = this;
+		switch (level) {
+			case 1: return 'Create a large heading';
+			case 2: return 'Create a medium heading';
+			case 3: return 'Create a small heading';
+			case 4: return 'Create a tiny heading';
+			default: return 'Create a heading';
+		}
+	}
+
 	spec(): NodeSpec {
 		return {
 			group: 'content nestable heading',
 			content: 'title content*',
+			insert: true,
 			splits: true,
 			splitName: 'section',
 			selectable: true,
@@ -29,6 +42,8 @@ export class Heading extends NodePlugin {
 			rectSelectable: true,
 			info: {
 				title: `Heading ${this.level}`,
+				description: this.description(),
+				icon: 'h' + this.level,
 			},
 			attrs: {
 				node: {

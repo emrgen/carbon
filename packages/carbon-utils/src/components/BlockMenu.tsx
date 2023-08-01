@@ -4,6 +4,8 @@ import { BlockMenuCmd } from "../types";
 import { activeBlockMenuTarget, activeBlockMenuTargetText } from "../atoms";
 import { useRecoilState } from "recoil";
 
+const BlockNameRegex = /^\/(.*)$/;
+
 export function BlockMenu() {
   const app = useCarbon();
   const [target, setTarget] = useRecoilState(activeBlockMenuTarget);

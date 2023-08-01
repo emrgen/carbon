@@ -51,8 +51,13 @@ export default function ImageComp(props: RendererProps) {
     [app]
   );
 
+  const onClick = useCallback((e) => {
+    preventAndStop(e);
+    app.tr.selectNodes([]).dispatch();
+  },[app.tr]);
+
   return (
-    <CarbonBlock {...props} custom={{ ...attributes }}>
+    <CarbonBlock {...props} custom={{ ...attributes, onClick, }}>
       <div className="image-container" onClick={handleClick} ref={ref}>
         <img src={node.attrs.node.src} alt="" />
         {isSelected && (

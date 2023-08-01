@@ -80,12 +80,15 @@ export function DraggableHandle(props: FastDragHandleProps) {
         e.event.preventDefault();
       } else {
         if (node) {
+          app.focus();
           app.tr
-            .select(
-              PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
-              ActionOrigin.UserInput
-            )
             .selectNodes(node.id)
+            .then((app) => {
+              return app.tr.select(
+                PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
+                ActionOrigin.UserInput
+              );
+            })
             ?.dispatch();
         }
       }

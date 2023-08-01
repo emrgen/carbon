@@ -20,6 +20,7 @@ import { BlockSelection } from './NodeSelection';
 import { first, isFunction } from 'lodash';
 import { CarbonCommandChain } from './CarbonCommandChain';
 import { CarbonMessageBus } from './MessageBus';
+import { CarbonPlugin } from './CarbonPlugin';
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -67,6 +68,10 @@ export class Carbon extends EventEmitter {
 		pm.plugins.forEach(p => p.init(this));
 	}
 
+	plugin(name: string): Optional<CarbonPlugin> {
+		return this.pm.plugin(name);
+	}
+
 	get content(): Node {
 		return this.state.content;
 	}
@@ -112,7 +117,7 @@ export class Carbon extends EventEmitter {
 	}
 
 	// all events are emitted through this method
-	onEvent(type: EventsIn, event: Event) {
+	onEvent(type: EventsIn, event: any) {
 		// emit event to external application
 		this.emit(type, event);
 

@@ -13,7 +13,7 @@ import {
 } from "@emrgen/carbon-dragon";
 import { useCallback, useRef } from "react";
 
-export default function DividerComp(props: RendererProps) {
+export function SeparatorComp(props: RendererProps) {
   const app = useCarbon();
   const { node } = props;
   2;
@@ -56,12 +56,10 @@ export default function DividerComp(props: RendererProps) {
       ref={ref}
     >
       <div
-        className="divider"
+        className="fastype-separator"
         contentEditable="false"
         suppressContentEditableWarning
-      ></div>
-      {/* <span /> */}
-      {/* <CarbonNodeContent node={node} /> */}
+      >***</div>
       {selection.SelectionHalo}
     </CarbonBlock>
   );

@@ -1,5 +1,5 @@
 import { Optional } from '@emrgen/types';
-import { each, last } from 'lodash';
+import { each, last, merge, cloneDeep } from 'lodash';
 import { BSet, NodeIdSet } from './BSet';
 import { ActionOrigin } from './actions/types';
 import { DecorationStore } from './DecorationStore';
@@ -79,6 +79,8 @@ export class CarbonState {
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
 	isSelectionDirty: boolean;
 
+	kvStore: Map<string, any> = new Map();
+
 	private dirty = false;
 
 	get isDirty() {
@@ -127,6 +129,17 @@ export class CarbonState {
 
 		this.dirty = false;
 		this.isSelectionDirty = true;
+	}
+
+
+
+	get(key: string) {
+		return this.kvStore.get(key);
+	}
+
+	set(key: string, value: any) {
+		const prev = this.kvStore.get(key);
+		this.kvStore.set(key, merge(cloneDeep(prev), value));
 	}
 
 

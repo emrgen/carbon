@@ -9,7 +9,9 @@ export class Todo extends Section {
       ...super.spec(),
       splitName: 'todo',
       info: {
-        title: 'Task'
+        title: 'To-do List',
+        description: 'Create a to-do list',
+        icon: 'todo',
       },
       attrs: {
         node: {

@@ -38,11 +38,6 @@ export class DocPlugin extends CarbonPlugin {
 					emptyPlaceholder: 'Untitled',
 				}
 			},
-			data: {
-				node: {
-					collapsed: false,
-				}
-			}
 		}
 	}
 

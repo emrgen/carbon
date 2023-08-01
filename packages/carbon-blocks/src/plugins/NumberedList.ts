@@ -9,7 +9,9 @@ export class NumberedList extends Section {
       ...super.spec(),
       splitName: 'numberedList',
       info: {
-        title: 'List'
+        title: 'Numbered List',
+        description: 'Create a numbered list',
+        icon: 'numberedList',
       },
       attrs: {
         node: {
