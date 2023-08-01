@@ -52,11 +52,7 @@ export const DocumentComp = (props: RendererProps) => {
       console.log(bound, e, e.clientY, bound.bottom);
 
       if (e.clientY > bound.bottom) {
-        if (
-          lastChild.isContainerBlock &&
-          !lastChild.isAtom &&
-          lastChild.isEmpty
-        ) {
+        if (lastChild.name === "section" && lastChild.isEmpty) {
           const textBlock = lastChild.find((n) => n.isTextBlock);
           if (textBlock) {
             const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);

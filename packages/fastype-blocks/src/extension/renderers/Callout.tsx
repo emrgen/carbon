@@ -5,7 +5,11 @@ import {
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent,
+  Pin,
+  PinnedSelection,
   RendererProps,
+  preventAndStop,
+  useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-core";
 import {
@@ -13,11 +17,14 @@ import {
   useConnectorsToProps,
   useDragDropRectSelect,
 } from "@emrgen/carbon-dragon";
-
-export const CalloutComp = NestableComp;
+import { Emoji } from "emoji-picker-react";
+import { IconButton, useDisclosure } from "@chakra-ui/react";
+import { EmojiPicker } from "@emrgen/fastype-utils";
 
 export const Callout = (props: RendererProps) => {
   const { node } = props;
+  const app = useCarbon();
+  const { isOpen, onClose, onOpen } = useDisclosure();
 
   const ref = useRef(null);
 
@@ -29,9 +36,59 @@ export const Callout = (props: RendererProps) => {
 
   const placeholder = usePlaceholder(node);
 
+  const showEmojiPicker = (e) => {
+    preventAndStop(e);
+    console.log("showEmojiPicker");
+    onOpen();
+  };
+
+  const onSelectEmoji = (emoji) => {
+    console.log("onSelectEmoji", emoji);
+    // node.attrs.node.emoji = emoji.unified;
+    app.tr
+      .updateAttrs(node.id, { node: { emoji: emoji.unified } })
+      .select(PinnedSelection.fromPin(Pin.toStartOf(node)!)!)
+      .dispatch();
+    onClose();
+  };
+
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
-      <CarbonNodeContent node={node} custom={placeholder} />
+      <CarbonNodeContent
+        node={node}
+        custom={placeholder}
+        beforeContent={
+          <div
+            className="fastype-callout-icon"
+            onMouseDown={preventAndStop}
+            onMouseUp={preventAndStop}
+            contentEditable={false}
+            suppressContentEditableWarning
+          >
+            <IconButton
+              bg={"transparent"}
+              size={"xs"}
+              aria-label="Search database"
+              icon={
+                <Emoji
+                  unified={node.attrs.node.emoji ?? "26a0-fe0f"}
+                  size={18}
+                />
+              }
+              onClick={showEmojiPicker}
+            />
+            {isOpen && (
+              <EmojiPicker
+                isOpen={isOpen}
+                onClose={onClose}
+                onSelect={onSelectEmoji}
+              >
+                <div></div>
+              </EmojiPicker>
+            )}
+          </div>
+        }
+      />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}
     </CarbonBlock>
