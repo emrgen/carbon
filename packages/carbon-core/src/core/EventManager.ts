@@ -43,16 +43,6 @@ export class EventManager {
 		const { app } = this;
 		// console.log(type, event);
 
-		// without focus the editor does not process any event
-		if (!app.enabled) {
-			if (type === EventsIn.selectstart) {
-				event.preventDefault();
-				console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'editor is disabled for events');
-			}
-			console.log('ignored event', type);
-			return
-		}
-
 		// type = this.beforeEvent(type, event);
 		// if (type === EventsIn.noop) {
 		// 	return
@@ -61,6 +51,16 @@ export class EventManager {
 		// check if editor handles the event
 		if (!this.pm.events.has(type)) {
 			// console.log(this.pm.events, type, 'event is not handled');
+			return
+		}
+
+		// without focus the editor does not process any event
+		if (!app.enabled) {
+			if (type === EventsIn.selectstart) {
+				// event.preventDefault();
+				console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'editor is disabled for events');
+			}
+			console.log('app: disabled', ' ignored event', type);
 			return
 		}
 

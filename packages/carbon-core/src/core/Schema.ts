@@ -176,6 +176,15 @@ export interface NodeSpec {
 		node?: Record<string, any>;
 		html?: Record<string, any>;
 	}
+	state?: {
+		open?: boolean;
+		active?: boolean;
+		selected?: boolean;
+		focused?: boolean;
+		hovered?: boolean;
+
+		[key: string]: any;
+	}
 	[key: string]: any;
 }
 

@@ -9,7 +9,6 @@ import {
   CarbonEvents,
 } from "@emrgen/carbon-core";
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
-import { BlockMenu } from "./BlockMenu";
 
 interface CarbonAppDocumentProps {
   app: Carbon;

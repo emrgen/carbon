@@ -90,7 +90,7 @@ export class BlockMenuPlugin extends BeforePlugin {
     }
 
     console.log('show menu');
-    
+
     app.emit(BlockMenuCmd.show, node, el);
   }
 

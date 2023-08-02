@@ -12,7 +12,7 @@ export class NumberedList extends Section {
         title: 'Numbered List',
         description: 'Create a numbered list',
         icon: 'numberedList',
-        tags: ['numbered list', 'ordered list', 'ol', 'ordered']
+        tags: ['numbered list', 'ordered list', 'ol', 'ordered', 'list', 'numbered']
       },
       attrs: {
         node: {

@@ -33,7 +33,7 @@ const mapName = (name: string, parentName?: string) => {
 
 const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => {
   const { tag: Element = "div", node, children, custom } = props;
-  const { key, name, attrs, data, version } = node;
+  const { key, name, attrs, version } = node;
   const editor = useCarbon();
   const ref = useRef(null);
 

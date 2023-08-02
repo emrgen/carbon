@@ -1,5 +1,15 @@
-import { Carbon, CarbonPlugin, Node, NodePlugin, NodeSpec, SerializedNode } from '@emrgen/carbon-core';
+import { Carbon, CarbonPlugin, Node, NodePlugin, NodeSpec, SerializedNode, Transaction } from '@emrgen/carbon-core';
+import { Optional } from '@emrgen/types';
+
 import { TitlePlugin } from './Title';
+
+declare module '@emrgen/carbon-core' {
+	export interface CarbonCommands {
+		section: {
+			insert: (after: Node) => Optional<Transaction>,
+		}
+	}
+}
 
 export class Section extends NodePlugin {
 
@@ -21,7 +31,7 @@ export class Section extends NodePlugin {
 				title: 'Text',
 				description: 'Just start typing to create a new section',
 				icon: 'section',
-				tags: ['text', 'section']
+				tags: ['text', 'section', 'paragraph', 'p']
 			},
 			attrs: {
 				node: {
@@ -33,6 +43,12 @@ export class Section extends NodePlugin {
 					suppressContentEditableWarning: true,
 				}
 			}
+		}
+	}
+
+	commands(): Record<string, Function> {
+		return {
+			insert: this.insert.bind(this),
 		}
 	}
 
@@ -52,6 +68,10 @@ export class Section extends NodePlugin {
 			isNested: true,
 			unwrap: contentNode?.isEmpty ?? false,
 		}
+	}
+
+	insert(app: Carbon, after: Node) {
+
 	}
 }
 

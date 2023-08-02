@@ -105,12 +105,11 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
   const handleAddNode = (e) => {
     preventAndStop(e);
-    if (!node) return;
-    if (node.isEmpty) {
-      if (node.isAtom && node.nextSibling?.isEmpty) {
-        return;
-      }
 
+
+    if (!node) return;
+
+    if (node.isEmpty && !node.isAtom && !node.nextSibling?.isEmpty) {
       const title = node.find((n) => n.isTextBlock);
       if (node.isContainerBlock && title) {
         const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
@@ -127,6 +126,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
       return;
     }
+
     app.cmd.insert.after(node, "section")?.dispatch();
   };
 

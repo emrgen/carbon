@@ -3,6 +3,8 @@ import { TodoComp } from "./renderers/Todo";
 import { Callout } from "./renderers/Callout";
 import {SeparatorComp} from "./renderers/Separator";
 import { Separator } from "./plugins/Separator";
+import { VideoComp } from "./renderers/Video";
+import { ImageComp } from "./renderers/Image";
 
 export const fastypeBlocks: Extension = {
   plugins: [
@@ -11,7 +13,9 @@ export const fastypeBlocks: Extension = {
   renderers: [
     Renderer.create('todo', TodoComp),
     Renderer.create('callout', Callout),
-    Renderer.create('separator', SeparatorComp)
+    Renderer.create('separator', SeparatorComp),
+    Renderer.create('video', VideoComp),
+    Renderer.create('image', ImageComp),
   ]
 }
 

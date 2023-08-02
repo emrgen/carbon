@@ -20,3 +20,31 @@
   padding-top 18px
   padding-bottom 10px
   letter-spacing: 0.4em
+
+.video-container
+  display: flex
+  // border: 1px solid #ccc
+  max-width: 800px
+  min-width: 200px
+  justify-content: center
+
+.video-container
+  .video-controls
+    opacity 0
+  &:hover
+    .video-controls
+      opacity: 1
+      transition: opacity 0.3s ease-in-out
+
+.image-container
+  .image-controls
+    opacity 0
+  &:hover
+    .image-controls
+      opacity: 1
+      transition: opacity 0.3s ease-in-out
+
+.video-overlay
+  background: #eee
+  width 100%
+  cursor pointer

@@ -49,7 +49,7 @@ export const DocumentComp = (props: RendererProps) => {
       if (!lastChild) return;
       const bound = lastElement?.getBoundingClientRect();
       if (!bound) return;
-      console.log(bound, e, e.clientY, bound.bottom);
+      // console.log(bound, e, e.clientY, bound.bottom);
 
       if (e.clientY > bound.bottom) {
         if (lastChild.name === "section" && lastChild.isEmpty) {

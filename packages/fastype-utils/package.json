@@ -27,7 +27,9 @@
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
     "prismjs": "^1.29.0",
+    "react-detectable-overflow": "^0.7.1",
     "react-icons": "^4.10.1",
+    "react-player": "^2.12.0",
     "recoil": "^0.7.7"
   },
   "devDependencies": {

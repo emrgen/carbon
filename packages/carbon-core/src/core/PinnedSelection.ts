@@ -162,7 +162,7 @@ export class PinnedSelection {
 	syncDom(store: NodeStore) {
 		try {
 			const domSelection = this.intoDomSelection(store);
-			console.log(domSelection);
+			console.log('Selection.syncDom:', domSelection);
 			if (!domSelection) {
 				console.log(p14('%c[error]'), 'color:red', 'failed to map selection to dom');
 				return
@@ -196,7 +196,7 @@ export class PinnedSelection {
 			console.assert(domSel?.focusNode === domSelection.focusNode, 'failed to sync focusNode')
 			console.assert(domSel?.anchorOffset === domSelection.anchorOffset, 'failed to sync anchor offset')
 			console.assert(domSel?.focusOffset === domSelection.focusOffset, 'failed to sync focus offset')
-			console.log('Selection.syncDom:', this.toString(), domSel)
+			// console.log('Selection.syncDom:', this.toString(), domSel)
 		} catch (err) {
 			console.error(err);
 		}

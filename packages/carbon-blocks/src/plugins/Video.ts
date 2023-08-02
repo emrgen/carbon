@@ -1,8 +1,8 @@
 import { NodePlugin, NodeSpec, EventHandler, skipKeyEvent, Node, SerializedNode, Carbon } from '@emrgen/carbon-core';
 
-export class Image extends NodePlugin {
+export class Video extends NodePlugin {
 
-  name = 'image';
+  name = 'video';
 
   spec(): NodeSpec {
     return {
@@ -16,16 +16,19 @@ export class Image extends NodePlugin {
       rectSelectable: true,
       blockSelectable: true,
       info: {
-        title: 'Image',
-        description: 'Insert an image',
-        icon: 'image',
-        tags: ['image', 'photo', 'picture'],
+        title: 'Video',
+        description: 'Insert a video',
+        icon: 'video',
+        tags: ['video', 'movie', 'film'],
       },
       attrs: {
         html: {
           suppressContentEditableWarning: true,
           contentEditable: false,
-        }
+        },
+      },
+      state: {
+        focused: true,
       }
     }
   }

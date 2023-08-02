@@ -8,8 +8,10 @@ import {
   BlockContent,
   PinnedSelection,
   Pin,
+  Point,
 } from "@emrgen/carbon-core";
 import { blockIcons, useBlockMenu } from "@emrgen/carbon-utils";
+import { useOverflowDetector } from "react-detectable-overflow";
 
 import {
   HStack,
@@ -93,15 +95,20 @@ export function BlockMenu(props: BlockMenuProps) {
   const handleSelect = useCallback(
     (type: NodeType) => {
       setShow(false);
-      if (node) {
-        app.tr
-          .change(node?.id, node?.name, type.name)
-          .setContent(node.child(0)!.id, BlockContent.create([]))
-          .select(PinnedSelection.fromPin(Pin.future(node.child(0)!, 0)!)!)
-          .dispatch();
+      if (!node) return;
+
+      const { tr } = app;
+      tr.change(node?.id, node?.name, type.name).setContent(
+        node.child(0)!.id,
+        BlockContent.create([])
+      );
+      if (!type.isAtom && node.child(0)?.find((n) => n.hasFocusable)) {
+        tr.select(PinnedSelection.fromPin(Pin.future(node.child(0)!, 0)!)!);
       }
+
+      tr.dispatch();
     },
-    [app.tr, node]
+    [app, node]
   );
 
   const onSelect = useCallback(
@@ -117,9 +124,11 @@ export function BlockMenu(props: BlockMenuProps) {
   const onScroll = useCallback(
     (direction) => {
       if (direction === "up") {
-        setActiveIndex((i) => (i > 0 ? i - 1 : blocks.length - 1));
+        setActiveIndex((i) => (i > 0 ? i - 1 : 0));
       } else {
-        setActiveIndex((i) => (i < blocks.length - 1 ? i + 1 : 0));
+        setActiveIndex((i) =>
+          i < blocks.length - 1 ? i + 1 : blocks.length - 1
+        );
       }
     },
     [blocks.length]
@@ -136,7 +145,7 @@ export function BlockMenu(props: BlockMenuProps) {
           style={position}
           boxShadow={"0 2px 12px 0 #ddd"}
           borderRadius={4}
-          maxH={200}
+          maxH={300}
           pos={"fixed"}
           bg={"white"}
           onMouseDown={preventAndStop}
@@ -157,14 +166,45 @@ export function BlockMenu(props: BlockMenuProps) {
 
 const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
   const [scrolled, setScrolled] = useState(false);
+  const [scrollTop, setScrollTop] = useState(0);
+
+  const ref = React.useRef<HTMLDivElement>(null);
+  const listRef = React.useRef<HTMLUListElement>(null);
+
+  // check if the active block is visible
+  // otherwise scroll to it
+  useEffect(() => {
+    if (!ref.current) return;
+    if (!listRef.current) return;
+    const active = listRef.current.children[activeIndex];
+    if (!active) return;
+
+    const { top, bottom } = active.getBoundingClientRect();
+    const { top: parentTop, bottom: parentBottom } =
+      ref.current.getBoundingClientRect();
+
+    if (top < parentTop) {
+      setScrollTop((s) => s - (parentTop - top) - 4);
+    } else if (bottom > parentBottom) {
+      setScrollTop((s) => s - (parentBottom - bottom) + 4);
+    }
+  }, [activeIndex]);
+
+  // scroll to show the active block
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.scrollTop = scrollTop;
+  }, [scrollTop]);
+
   return (
     <Box
+      ref={ref}
       overflow={"auto"}
       onScroll={() => {
         setScrolled(true);
       }}
     >
-      <List px={2} py={2} minW={"360px"}>
+      <List ref={listRef} px={2} py={2} w={"300px"}>
         {blocks.map((b, index) => {
           return (
             <ListItem
@@ -183,21 +223,31 @@ const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
               _active={{ bg: "#ddd" }}
               bg={activeIndex === index ? "#eee" : "#fff"}
               p={1}
+              pos="relative"
             >
               <HStack>
                 <Square
                   size={12}
                   borderRadius={4}
-                  border={"1px solid #eee"}
+                  border={
+                    index === activeIndex ? "1px solid #ddd" : "1px solid #eee"
+                  }
                   bg={"#fff"}
                   fontSize={20}
                   color={"#555"}
                 >
                   {blockIcons[b.name] ?? ""}
                 </Square>
-                <Stack spacing={0}>
+                <Stack spacing={0} flex={1} overflow={"hidden"}>
                   <Text>{b.spec.info.title}</Text>
-                  <Text fontSize={13}>{b.spec.info.description}</Text>
+                  <Text
+                    fontSize={13}
+                    overflow={"hidden"}
+                    whiteSpace={"nowrap"}
+                    textOverflow={"ellipsis"}
+                  >
+                    {b.spec.info.description}
+                  </Text>
                 </Stack>
               </HStack>
             </ListItem>

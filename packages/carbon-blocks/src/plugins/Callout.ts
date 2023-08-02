@@ -18,7 +18,8 @@ export class Callout extends CarbonPlugin {
       info: {
         title: 'Callout',
         description: 'Write a callout',
-        icon: 'callout'
+        icon: 'callout',
+        tags: ['callout', "side note", ]
       },
       attrs: {
         node: {

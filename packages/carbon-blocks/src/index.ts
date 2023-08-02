@@ -46,6 +46,8 @@ import { FileTreeComp } from './renderers/FileTree';
 import { FileTreeItemComp } from './renderers/FileTreeItem';
 import { Tab } from './plugins/Tab';
 import { TabComp, TabItemComp, TextTitleComp, TabTitlesComp } from './renderers/TabComp';
+import { VideoComp } from './renderers/Video';
+import { Video } from './plugins/Video';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -62,6 +64,7 @@ export const blockPresets: Extension = {
 		new HStack(),
 		new Stack(),
 		new Image(),
+		new Video(),
 		new Todo(),
 		new Quote(),
 		new Callout(),
@@ -91,6 +94,7 @@ export const blockPresets: Extension = {
 		Renderer.create('hstack', HStackComp),
 		Renderer.create('stack', HStackComp),
 		Renderer.create('image', ImageComp),
+		Renderer.create('video', VideoComp),
 		Renderer.create('todo', TodoComp),
 		Renderer.create('quote', QuoteComp),
 		Renderer.create('callout', CalloutComp),

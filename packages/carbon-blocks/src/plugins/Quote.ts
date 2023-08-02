@@ -19,7 +19,7 @@ export class Quote extends CarbonPlugin {
         title: 'Quote',
         description: 'Write a quote',
         icon: 'quote',
-        tags: ['quote', 'blockquote', 'q', 'cite', 'quotation', 'epigraph']
+        tags: ['quote', 'blockquote', 'q', 'cite', 'quotation', 'epigraph', 'excerpt', 'citation']
       },
       attrs: {
         node: {

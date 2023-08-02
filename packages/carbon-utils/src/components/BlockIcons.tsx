@@ -6,6 +6,8 @@ import { FcTodoList } from "react-icons/fc"
 import { IoToggleOutline } from "react-icons/io5"
 import { MdFormatQuote } from "react-icons/md"
 import { TbSection } from "react-icons/tb"
+import { AiOutlinePicture } from "react-icons/ai"
+import { RxVideo } from "react-icons/rx"
 
 export const blockIcons = {
   section: <PiTextAaBold />,
@@ -19,4 +21,6 @@ export const blockIcons = {
   h4: <PiTextHFourBold />,
   quote: <MdFormatQuote />,
   callout: <TbSection />,
+  image: <AiOutlinePicture />,
+  video: <RxVideo />,
 };

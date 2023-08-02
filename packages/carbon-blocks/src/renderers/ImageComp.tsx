@@ -10,12 +10,18 @@ import {
 
 import { HiMiniBars3BottomLeft, HiMiniBars3BottomRight } from "react-icons/hi2";
 import { LuAlignCenter } from "react-icons/lu";
+import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
 
 export default function ImageComp(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
-  const { SelectionHalo, attributes, isSelected } = useSelectionHalo(props);
   const ref = useRef<HTMLDivElement>(null);
+
+  const selection = useSelectionHalo(props);
+  const dragDropRect = useDragDropRectSelect({ node, ref });
+  const connectors = useConnectorsToProps(
+    useCombineConnectors(dragDropRect, selection)
+  );
 
   const handleClick = (e) => {
     preventAndStop(e);
@@ -57,10 +63,11 @@ export default function ImageComp(props: RendererProps) {
   },[app.tr]);
 
   return (
-    <CarbonBlock {...props} custom={{ ...attributes, onClick, }}>
-      <div className="image-container" onClick={handleClick} ref={ref}>
+    <CarbonBlock {...props} custom={{ ...connectors, onClick }} ref={ref}>
+      <div className="image-container" onClick={handleClick}>
+        {!node.attrs.node.src && <div className="image-overlay">Image</div>}
         <img src={node.attrs.node.src} alt="" />
-        {isSelected && (
+        {selection.isSelected && (
           <div className="image-align-controls">
             <div
               className="align-left"
@@ -85,7 +92,7 @@ export default function ImageComp(props: RendererProps) {
             </div>
           </div>
         )}
-        {SelectionHalo}
+        {selection.SelectionHalo}
       </div>
     </CarbonBlock>
   );

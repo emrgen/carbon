@@ -31,7 +31,7 @@ export class ToggleList extends NodePlugin {
         title: 'Toggle List',
         description: 'Create a toggle list',
         icon: 'toggleList',
-        tags: ['toggle list', 'toggle', 'collapsible']
+        tags: ['toggle list', 'toggle', 'collapsible', 'list']
       },
       attrs: {
         node: {

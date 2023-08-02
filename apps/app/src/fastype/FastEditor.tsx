@@ -41,7 +41,13 @@ const data = {
             src: "https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9780123820365/files/images/F000124f12-68-9780123820365.jpg",
           },
           html: {
-            style: { justifyContent: "center" },
+            // style: { justifyContent: "center" },
+          },
+        }),
+        node("video", [], {
+          node: {
+            url: "https://www.youtube.com/watch?v=yFswDJPvtPY&rel=0",
+            provider: 'youtube',
           },
         }),
         // node("separator"),

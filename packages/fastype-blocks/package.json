@@ -21,11 +21,13 @@
     "@types/lodash": "^4.14.191",
     "emoji-picker-react": "^4.4.10",
     "emoji-regex": "^10.2.1",
+    "formik": "^2.4.3",
     "framer-motion": "^10.15.0",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
     "prismjs": "^1.29.0",
     "react-icons": "^4.10.1",
+    "react-player": "^2.12.0",
     "recoil": "^0.7.7"
   },
   "devDependencies": {
