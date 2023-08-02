@@ -1,10 +1,17 @@
-import { Node } from '@emrgen/carbon-core';
+import { Node, useCarbon } from '@emrgen/carbon-core';
 import { useEffect, useState } from 'react';
 
 export const usePlaceholder = (node: Node) => {
+  const app = useCarbon();
+
   if (node.firstChild?.isEmpty && node.attrs.node.emptyPlaceholder) {
     return {
       'placeholder':  node.attrs.node.emptyPlaceholder ?? '',
+    };
+  } else if (node.firstChild?.isEmpty && node.attrs.html['data-as']){
+    const type = app.schema.nodes[node.attrs.html['data-as']];
+    return {
+      'placeholder': type.attrs.node.emptyPlaceholder ?? '',
     };
   } else {
     return {};

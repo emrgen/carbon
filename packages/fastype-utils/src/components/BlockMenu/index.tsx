@@ -41,6 +41,7 @@ export function BlockMenu(props: BlockMenuProps) {
   const ref = React.useRef<HTMLDivElement>(null);
   const plugin = app.plugin("blockMenu");
 
+  // filter blocks by search text
   const blocks = useMemo(() => {
     return values(app.schema.nodes)
       .filter((n) => n.spec.insert)
@@ -55,6 +56,7 @@ export function BlockMenu(props: BlockMenuProps) {
       });
   }, [app.schema.nodes, node, searchText]);
 
+  // reset active index when blocks change
   useEffect(() => {
     setActiveIndex(0);
   }, [blocks]);
@@ -135,7 +137,6 @@ export function BlockMenu(props: BlockMenuProps) {
           boxShadow={"0 2px 12px 0 #ddd"}
           borderRadius={4}
           maxH={200}
-          overflow={"auto"}
           pos={"fixed"}
           bg={"white"}
           onMouseDown={preventAndStop}
@@ -146,7 +147,7 @@ export function BlockMenu(props: BlockMenuProps) {
             onSelect={handleSelect}
             blocks={blocks}
             activeIndex={activeIndex}
-            onMouseOver={setActiveIndex}
+            onSelectIndex={setActiveIndex}
           />
         </Stack>
       )}
@@ -154,40 +155,55 @@ export function BlockMenu(props: BlockMenuProps) {
   );
 }
 
-const BlockList = ({ onSelect, blocks, activeIndex, onMouseOver }) => {
+const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
+  const [scrolled, setScrolled] = useState(false);
   return (
-    <List px={2} py={2} minW={"360px"}>
-      {blocks.map((b, index) => {
-        return (
-          <ListItem
-            onClick={() => onSelect(b)}
-            onMouseOver={() => onMouseOver(index)}
-            key={b.name}
-            cursor={"pointer"}
-            _hover={{ bg: "#eee" }}
-            _active={{ bg: "#ddd" }}
-            bg={activeIndex === index ? "#eee" : "#fff"}
-            p={1}
-          >
-            <HStack>
-              <Square
-                size={12}
-                borderRadius={4}
-                border={"1px solid #eee"}
-                bg={"#fff"}
-                fontSize={20}
-                color={"#555"}
-              >
-                {blockIcons[b.name] ?? ""}
-              </Square>
-              <Stack spacing={0}>
-                <Text>{b.spec.info.title}</Text>
-                <Text fontSize={13}>{b.spec.info.description}</Text>
-              </Stack>
-            </HStack>
-          </ListItem>
-        );
-      })}
-    </List>
+    <Box
+      overflow={"auto"}
+      onScroll={() => {
+        setScrolled(true);
+      }}
+    >
+      <List px={2} py={2} minW={"360px"}>
+        {blocks.map((b, index) => {
+          return (
+            <ListItem
+              onClick={() => onSelect(b)}
+              onMouseMove={() => {
+                onSelectIndex(index);
+              }}
+              onMouseOver={() => {
+                if (scrolled) {
+                  onSelectIndex(index);
+                }
+              }}
+              key={b.name}
+              cursor={"pointer"}
+              // _hover={{ bg: "#eee" }}
+              _active={{ bg: "#ddd" }}
+              bg={activeIndex === index ? "#eee" : "#fff"}
+              p={1}
+            >
+              <HStack>
+                <Square
+                  size={12}
+                  borderRadius={4}
+                  border={"1px solid #eee"}
+                  bg={"#fff"}
+                  fontSize={20}
+                  color={"#555"}
+                >
+                  {blockIcons[b.name] ?? ""}
+                </Square>
+                <Stack spacing={0}>
+                  <Text>{b.spec.info.title}</Text>
+                  <Text fontSize={13}>{b.spec.info.description}</Text>
+                </Stack>
+              </HStack>
+            </ListItem>
+          );
+        })}
+      </List>
+    </Box>
   );
 };

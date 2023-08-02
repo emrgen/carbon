@@ -51,6 +51,7 @@ export class BlockMenuPlugin extends BeforePlugin {
   on(): Partial<EventHandler> {
     return {
       keyUp: this.onKeyUp.bind(this),
+      // hide block menu on mouse down outside of the menu
       mouseDown: (ctx: EventContext<MouseEvent>) => {
         const {node, app} = ctx;
         if (this.state.visible) {
