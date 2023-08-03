@@ -21,6 +21,7 @@
   padding-bottom 10px
   letter-spacing: 0.4em
 
+.image-container
 .video-container
   display: flex
   // border: 1px solid #ccc
@@ -31,6 +32,7 @@
 .video-container
   .video-controls
     opacity 0
+    z-index: 10
   &:hover
     .video-controls
       opacity: 1
@@ -39,12 +41,17 @@
 .image-container
   .image-controls
     opacity 0
+    z-index: 10
   &:hover
     .image-controls
       opacity: 1
       transition: opacity 0.3s ease-in-out
 
+.image-overlay,
 .video-overlay
   background: #eee
   width 100%
   cursor pointer
+
+.carbon-overlay
+  background: #eeeeee13

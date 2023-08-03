@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Form, Formik } from "formik";
 
-import { throttle } from "lodash";
+import { set, throttle } from "lodash";
 import ReactPlayer from "react-player";
 import {
   Box,
@@ -12,6 +12,8 @@ import {
   Input,
   Popover,
   PopoverContent,
+  Skeleton,
+  Spinner,
   Square,
   Stack,
   Text,
@@ -44,14 +46,13 @@ export function VideoComp(props: RendererProps) {
   const updater = useDisclosure();
   useFastypeOverlay(updater);
 
-  console.log(node.attrs.node.url);
-
   const ref = useRef<any>(null);
   const containerRef = useRef<any>(null);
   const [height, setHeight] = useState(100);
   const { html, node: video } = node.attrs;
   const { provider, src } = video;
   const dimensions = useDimensions(containerRef, true);
+  const [ready, setReady] = useState(false);
 
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
@@ -65,7 +66,6 @@ export function VideoComp(props: RendererProps) {
     setHeight(width * (9 / 16));
     // console.log(ref.current.offsetWidth);
   }, [dimensions]);
-  console.log("XX", dimensions);
 
   const onClick = useCallback(
     (e) => {
@@ -74,11 +74,6 @@ export function VideoComp(props: RendererProps) {
     },
     [app.tr]
   );
-
-  const handleUpdateUrl = useCallback(() => {
-    console.log("handleUpdateUrl");
-    updater.onClose();
-  }, [updater]);
 
   return (
     <>
@@ -137,14 +132,13 @@ export function VideoComp(props: RendererProps) {
                         name="url"
                         onChange={props.handleChange}
                       />
-                      {props.values.url}
                       <Button
                         colorScheme="blue"
                         size="sm"
                         type="submit"
-                        onClick={stop}
                         onMouseDown={stop}
-                        // isLoading={props.isSubmitting}
+                        onClick={stop}
+                        isLoading={props.isSubmitting}
                       >
                         Update
                       </Button>
@@ -157,67 +151,88 @@ export function VideoComp(props: RendererProps) {
         )}
 
         <Box className="video-container" pos={"relative"} ref={containerRef}>
-          {!video.url && (
-            <Flex
-              className="video-overlay"
-              onClick={() => {
-                updater.onOpen();
-              }}
-            >
-              <Square
-                size={12}
-                borderRadius={4}
-                // border={"1px solid #ddd"}
-                // bg={"#fff"}
-                fontSize={26}
-                color={"#aaa"}
-              >
-                <RxVideo />
-              </Square>
-              <Text>Click to add video</Text>
-            </Flex>
-          )}
-          {video.url && (
-            <>
+          <Box w='full'>
+            {!video.url && (
               <Flex
-                className="video-controls"
-                pos={"absolute"}
-                top={0}
-                right={0}
-                mr={1}
-                mt={1}
-              >
-                <IconButton
-                  colorScheme={"facebook"}
-                  size={"sm"}
-                  aria-label="Search database"
-                  icon={<TbStatusChange />}
-                  onClick={(e) => {
-                    preventAndStop(e);
-                    updater.onOpen();
-                  }}
-                />
-              </Flex>
-              <ReactPlayer
-                url={video.url}
-                controls
-                width={html.width ?? "100%"}
-                height={height}
-                // get the length of the video
-                onDuration={(duration) => console.log("onDuration", duration)}
-                // onProgress={throttle(
-                //   (progress) => console.log("onProgress", progress),
-                //   1000
-                // )}
-                config={{
-                  youtube: {
-                    playerVars: {},
-                  },
+                className="video-overlay"
+                onClick={() => {
+                  updater.onOpen();
                 }}
-              />
-            </>
-          )}
-          {selection.SelectionHalo}
+              >
+                <Square
+                  size={12}
+                  borderRadius={4}
+                  // border={"1px solid #ddd"}
+                  // bg={"#fff"}
+                  fontSize={26}
+                  color={"#aaa"}
+                >
+                  <RxVideo />
+                </Square>
+                <Text>Click to add video</Text>
+              </Flex>
+            )}
+            {video.url && (
+              <Box pos={"relative"} paddingTop={"56.25%"}>
+                <Box pos={"absolute"} top={0} w="full" h="full" bg="#eee">
+                  <Flex
+                    className="video-controls"
+                    pos={"absolute"}
+                    top={0}
+                    right={0}
+                    mr={1}
+                    mt={1}
+                  >
+                    <IconButton
+                      colorScheme={"facebook"}
+                      size={"sm"}
+                      aria-label="Search database"
+                      icon={<TbStatusChange />}
+                      onClick={(e) => {
+                        preventAndStop(e);
+                        updater.onOpen();
+                      }}
+                    />
+                  </Flex>
+
+                  <ReactPlayer
+                    onReady={() => {
+                      setReady(true);
+                    }}
+                    url={video.url}
+                    controls
+                    width={"100%"}
+                    height={"100%"}
+                    // get the length of the video
+                    onDuration={(duration) =>
+                      console.log("onDuration", duration)
+                    }
+                    // onProgress={throttle(
+                    //   (progress) => console.log("onProgress", progress),
+                    //   1000
+                    // )}
+                    config={{
+                      youtube: {
+                        playerVars: {},
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
+            )}
+            <Spinner
+              pos={"absolute"}
+              bottom={0}
+              right={0}
+              zIndex={10}
+              // bg={"#eee"}
+              size="sm"
+              m={2}
+              color="#555"
+              display={video.url ? (ready ? "none" : "block") : "none"}
+            />
+            {selection.SelectionHalo}
+          </Box>
         </Box>
       </CarbonBlock>
     </>

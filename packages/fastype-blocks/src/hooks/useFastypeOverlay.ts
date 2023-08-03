@@ -2,12 +2,14 @@ import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-core"
 import { useEffect } from 'react';
 import {
   useDisclosure,
-  UseDisclosureReturn
+  UseDisclosureReturn,
+  usePrevious
 } from "@chakra-ui/react";
 
 export const useFastypeOverlay = (disclosure: UseDisclosureReturn) => {
   const { overlay, showOverlay, hideOverlay } = useCarbonOverlay();
   const app = useCarbon();
+  const isOpen = usePrevious(disclosure.isOpen);
 
   useEffect(() => {
     const onClick = (e) => {
@@ -21,14 +23,18 @@ export const useFastypeOverlay = (disclosure: UseDisclosureReturn) => {
   }, [overlay, disclosure]);
 
   useEffect(() => {
-    if (disclosure.isOpen) {
-      showOverlay()
-      app.disable()
-    } else {
+    if (isOpen && !disclosure.isOpen) {
+      console.log("close");
       hideOverlay()
       app.enable()
     }
-  }, [disclosure.isOpen, hideOverlay, showOverlay, app]);
+
+    if (!isOpen && disclosure.isOpen) {
+      console.log("open");
+      showOverlay()
+      app.disable()
+    }
+  }, [disclosure.isOpen, hideOverlay, showOverlay, app, isOpen]);
 
   return overlay;
 };
