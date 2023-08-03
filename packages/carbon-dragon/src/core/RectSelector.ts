@@ -78,7 +78,6 @@ export class RectSelector extends EventEmitter {
 
 	// select nodes colliding with the selection box
 	onDragMove(e: DndEvent) {
-
 		this.emit('drag:move:selector', e);
 		const { node } = e;
 		const { app, selectables } = this;

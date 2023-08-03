@@ -26,6 +26,7 @@ export const CarbonDragHandleId = "carbon-drag-handle";
 
 export function DraggableHandle(props: FastDragHandleProps) {
   const { node, style } = props;
+  const [show, setShow] = useState(false);
 
   const app = useCarbon();
 
@@ -43,6 +44,29 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
     overlay: true,
   });
+
+  useEffect(() => {
+    const onTransaction = (tr) => {
+      setShow(false);
+    };
+    app.on("transaction", onTransaction);
+    return () => {
+      app.off("transaction", onTransaction);
+    };
+  }, [app]);
+
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      // if (e.target !== ref.current) {
+        setShow(true);
+      // }
+    }
+
+    window.addEventListener("mousemove", onMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+    };
+  }, []);
 
   const onDragStart = useCallback((e: DndEvent) => {
     if (e.id === CarbonDragHandleId) {
@@ -106,7 +130,6 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const handleAddNode = (e) => {
     preventAndStop(e);
 
-
     if (!node) return;
 
     if (node.isEmpty && !node.isAtom && !node.nextSibling?.isEmpty) {
@@ -119,7 +142,13 @@ export function DraggableHandle(props: FastDragHandleProps) {
       }
     }
 
-    if (node.nextSibling?.isEmpty && !node.nextSibling?.isAtom) {
+    if (
+      node.nextSibling &&
+      node.nextSibling?.isEmpty &&
+      !node.nextSibling?.isAtom
+    ) {
+      console.log("node.nextSibling", node.nextSibling);
+
       const after = PinnedSelection.fromPin(Pin.toStartOf(node.nextSibling)!);
       if (app.selection.eq(after)) return;
       app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
@@ -133,10 +162,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
   return (
     <div
       className="carbon-node-handle"
-      data-target={node?.name}
-      data-as={node?.attrs.html["data-as"]}
+      data-target-name={node?.name}
+      data-target-as={node?.attrs.html["data-as"]}
       data-drag-handle={node?.type.dragHandle}
-      style={style}
+      style={{ ...style, display: show ? "flex" : "none" }}
     >
       <div
         className="carbon-add-handle"

@@ -59,6 +59,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
       ref={ref}
       data-name={name}
       data-version={version}
+      // data-attrs-name={attrs.node.name ?? ''}
       // data-size={node.size}
       {...attrs.html}
       {...custom}
@@ -134,7 +135,7 @@ export const CarbonNode = (props: RendererProps) => {
   const app = useCarbon();
   const { node, version } = useNodeChange(props);
 
-  const RegisteredComponent = app.component(node.name);
+  const RegisteredComponent = app.component(node.attrs.node.name ?? node.name);
   if (RegisteredComponent && RegisteredComponent === CarbonNode) {
     console.warn(`${node.name} is registered as CarbonNode, this will fall back to CarbonDefaultNode`)
   }

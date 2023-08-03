@@ -2,6 +2,7 @@ import { MutableRefObject, useCallback, useEffect, useState } from "react";
 import { useDndContext } from "./useDndContext";
 import { useNodeChange, Node, stop, preventAndStop } from "@emrgen/carbon-core";
 import { getEventPosition } from "../core/utils";
+import { DndEvent } from "../types";
 
 export interface UseFastDraggableProps {
   node: Node;
@@ -50,12 +51,15 @@ export interface UseDraggableHandleProps extends UseFastDraggableProps {
   activationConstraint?: {
     distance?: number;
   };
+  onStart?(state: any, position: DndEvent["position"]): void;
 }
 
 export const useDraggableHandle = (props: UseDraggableHandleProps) => {
-  const { id, node, disabled, ref, activationConstraint = {} } = props;
+  const { id, node, disabled, ref, activationConstraint = {}, onStart } = props;
   const { distance = 0 } = activationConstraint;
   const [isDisabled, setIsDisabled] = useState(disabled);
+  const [state, setState] = useState({});
+
   useEffect(() => {
     setIsDisabled(disabled);
   }, [disabled, node]);
@@ -64,6 +68,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 
   const onMouseDown = useCallback(
     (event) => {
+      let initState = {}
       // preventAndStop(event)
       // console.log("mouse down", ref.current, event.target);
       if (isDisabled) return;
@@ -79,7 +84,8 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
           activatorEvent,
           event,
           node,
-          id,
+          id: id ?? node.id,
+          state: initState,
           position: getEventPosition(activatorEvent, event),
         };
         if (isDragging) {
@@ -104,7 +110,8 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
               activatorEvent,
               event,
               node,
-              id,
+              id: id ?? node.id,
+              state: initState,
               position: getEventPosition(activatorEvent, activatorEvent),
             });
           }
@@ -115,7 +122,8 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
             activatorEvent,
             event,
             node,
-            id,
+            id: id ?? node.id,
+            state: initState,
             position,
           });
         }
@@ -125,16 +133,19 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 
       if (distance === 0) {
         isDragging = true;
+        const position = getEventPosition(activatorEvent, activatorEvent);
+        initState = onStart?.(event, position) ?? {};
         dnd.onDragStart({
           activatorEvent,
           event,
           node,
-          id,
-          position: getEventPosition(activatorEvent, activatorEvent),
+          id: id ?? node.id,
+          position,
+          state: initState,
         });
       }
     },
-    [distance, dnd, id, isDisabled, node, ref]
+    [distance, dnd, id, isDisabled, node, onStart, ref]
   );
 
   return {

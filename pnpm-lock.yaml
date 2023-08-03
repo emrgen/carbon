@@ -678,6 +678,9 @@ importers:
       '@emrgen/carbon-utils':
         specifier: workspace:*
         version: link:../carbon-utils
+      '@emrgen/fastype-interact':
+        specifier: workspace:*
+        version: link:../fastype-interact
       '@emrgen/fastype-utils':
         specifier: workspace:*
         version: link:../fastype-utils
@@ -805,6 +808,106 @@ importers:
       react-icons:
         specifier: ^4.10.1
         version: 4.10.1(react@18.2.0)
+      recoil:
+        specifier: ^0.7.7
+        version: 0.7.7(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@emrgen/types':
+        specifier: ^0.0.2
+        version: 0.0.2
+      '@types/react':
+        specifier: ^18.0.17
+        version: 18.0.28
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.0.11
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
+  packages/fastype-interact:
+    dependencies:
+      '@chakra-ui/react':
+        specifier: ^2.8.0
+        version: 2.8.0(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.0.28)(framer-motion@10.15.0)(react-dom@18.2.0)(react@18.2.0)
+      '@emoji-mart/data':
+        specifier: ^1.1.2
+        version: 1.1.2
+      '@emoji-mart/react':
+        specifier: ^1.1.1
+        version: 1.1.1(emoji-mart@5.5.2)(react@18.2.0)
+      '@emotion/react':
+        specifier: ^11.11.1
+        version: 11.11.1(@types/react@18.0.28)(react@18.2.0)
+      '@emotion/styled':
+        specifier: ^11.11.0
+        version: 11.11.0(@emotion/react@11.11.1)(@types/react@18.0.28)(react@18.2.0)
+      '@emrgen/carbon-blocks':
+        specifier: workspace:*
+        version: link:../carbon-blocks
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/carbon-dragon':
+        specifier: workspace:*
+        version: link:../carbon-dragon
+      '@emrgen/carbon-utils':
+        specifier: workspace:*
+        version: link:../carbon-utils
+      '@react-icons/all-files':
+        specifier: ^4.1.0
+        version: 4.1.0(react@18.2.0)
+      '@types/katex':
+        specifier: ^0.16.0
+        version: 0.16.0
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.14.191
+      emoji-mart:
+        specifier: ^5.5.2
+        version: 5.5.2
+      emoji-picker-react:
+        specifier: ^4.4.10
+        version: 4.4.10(react@18.2.0)
+      emoji-regex:
+        specifier: ^10.2.1
+        version: 10.2.1
+      framer-motion:
+        specifier: ^10.15.0
+        version: 10.15.0(react-dom@18.2.0)(react@18.2.0)
+      katex:
+        specifier: ^0.16.7
+        version: 0.16.7
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      prismjs:
+        specifier: ^1.29.0
+        version: 1.29.0
+      react-detectable-overflow:
+        specifier: ^0.7.1
+        version: 0.7.1(react-dom@18.2.0)(react@18.2.0)
+      react-icons:
+        specifier: ^4.10.1
+        version: 4.10.1(react@18.2.0)
+      react-player:
+        specifier: ^2.12.0
+        version: 2.12.0(react@18.2.0)
+      react-use-dimensions:
+        specifier: ^1.2.1
+        version: 1.2.1(@types/react@18.0.28)(react@18.2.0)(typescript@4.9.5)
       recoil:
         specifier: ^0.7.7
         version: 0.7.7(react-dom@18.2.0)(react@18.2.0)
@@ -5587,6 +5690,18 @@ packages:
       invariant: 2.2.4
       react: 18.2.0
       tslib: 2.5.0
+    dev: false
+
+  /react-use-dimensions@1.2.1(@types/react@18.0.28)(react@18.2.0)(typescript@4.9.5):
+    resolution: {integrity: sha512-XL+Rup9Hosxx3Ap9xpyQMbVwuUa4BSqiOjfBb2zDuGs4uv2FesFV+m8Z/huRx2BNptMd9ARPqFuSNA62zhCozg==}
+    peerDependencies:
+      '@types/react': ^16.8.20
+      react: ^16.8.x
+      typescript: ^3.5.2
+    dependencies:
+      '@types/react': 18.0.28
+      react: 18.2.0
+      typescript: 4.9.5
     dev: false
 
   /react@18.2.0:

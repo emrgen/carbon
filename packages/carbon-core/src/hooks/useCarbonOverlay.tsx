@@ -5,7 +5,7 @@ import EventEmitter from "events";
 const InnerCarbonOverlayContext = createContext<{
   ref: RefObject<HTMLDivElement>;
   overlay: EventEmitter;
-  showOverlay();
+  showOverlay(id?: string);
   hideOverlay();
 }>({} as any);
 
@@ -13,19 +13,27 @@ export const CarbonOverlayContext = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [emitter] = useState(() => new EventEmitter());
+  const [id, setId] = useState('');
 
   return (
     <InnerCarbonOverlayContext.Provider
       value={{
         ref,
         overlay: emitter,
-        showOverlay: () => setShowOverlay(true),
-        hideOverlay: () => setShowOverlay(false),
+        showOverlay: (id?: string) => {
+          setId(id ?? '');
+          setShowOverlay(true)
+        },
+        hideOverlay: () => {
+          setId('');
+          setShowOverlay(false)
+        },
       }}
     >
       {showOverlay && (
         <div
           className="carbon-overlay"
+          data-id={id}
           ref={ref}
           style={{
             opacity: showOverlay ? 1 : 0,

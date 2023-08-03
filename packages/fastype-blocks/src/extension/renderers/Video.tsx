@@ -39,6 +39,7 @@ import {
 import { TbStatusChange } from "react-icons/tb";
 import { useFastypeOverlay } from "../../hooks/useFastypeOverlay";
 import { RxVideo } from "react-icons/rx";
+import { MediaView } from "@emrgen/fastype-interact";
 
 export function VideoComp(props: RendererProps) {
   const { node } = props;
@@ -93,7 +94,12 @@ export function VideoComp(props: RendererProps) {
               p={4}
               zIndex={1000}
               onBeforeInput={stop}
-              onKeyUp={stop}
+              onKeyUp={(e) => {
+                stop(e);
+                if (e.key === "Escape") {
+                  updater.onClose();
+                }
+              }}
               onKeyDown={stop}
             >
               <Formik
@@ -130,6 +136,7 @@ export function VideoComp(props: RendererProps) {
                         size="sm"
                         id="url"
                         name="url"
+                        autoComplete="off"
                         onChange={props.handleChange}
                       />
                       <Button
@@ -150,90 +157,96 @@ export function VideoComp(props: RendererProps) {
           </>
         )}
 
-        <Box className="video-container" pos={"relative"} ref={containerRef}>
-          <Box w='full'>
-            {!video.url && (
-              <Flex
-                className="video-overlay"
-                onClick={() => {
-                  updater.onOpen();
-                }}
-              >
-                <Square
-                  size={12}
-                  borderRadius={4}
-                  // border={"1px solid #ddd"}
-                  // bg={"#fff"}
-                  fontSize={26}
-                  color={"#aaa"}
+        <MediaView node={node} enable={ready} aspectRatio={9 / 16}>
+          <Box
+            className="video-container"
+            pos={"relative"}
+            ref={containerRef}
+            bg={ready ? "" : "#eee"}
+            h={node.attrs.node.url && !ready ? "100%" : "auto"}
+          >
+            <Box w="full">
+              {!video.url && (
+                <Flex
+                  className="video-overlay"
+                  onClick={() => {
+                    updater.onOpen();
+                  }}
                 >
-                  <RxVideo />
-                </Square>
-                <Text>Click to add video</Text>
-              </Flex>
-            )}
-            {video.url && (
-              <Box pos={"relative"} paddingTop={"56.25%"}>
-                <Box pos={"absolute"} top={0} w="full" h="full" bg="#eee">
-                  <Flex
-                    className="video-controls"
-                    pos={"absolute"}
-                    top={0}
-                    right={0}
-                    mr={1}
-                    mt={1}
+                  <Square
+                    size={12}
+                    borderRadius={4}
+                    fontSize={26}
+                    color={"#aaa"}
                   >
-                    <IconButton
-                      colorScheme={"facebook"}
-                      size={"sm"}
-                      aria-label="Search database"
-                      icon={<TbStatusChange />}
-                      onClick={(e) => {
-                        preventAndStop(e);
-                        updater.onOpen();
+                    <RxVideo />
+                  </Square>
+                  <Text>Click to add video</Text>
+                </Flex>
+              )}
+              {video.url && (
+                <Box pos={"relative"} paddingTop={"56.25%"}>
+                  <Box pos={"absolute"} top={0} w="full" h="full" bg="#eee">
+                    <Flex
+                      className="video-controls"
+                      pos={"absolute"}
+                      top={0}
+                      right={0}
+                      mr={1}
+                      mt={1}
+                    >
+                      <IconButton
+                        colorScheme={"facebook"}
+                        size={"sm"}
+                        aria-label="Search database"
+                        icon={<TbStatusChange />}
+                        onClick={(e) => {
+                          preventAndStop(e);
+                          updater.onOpen();
+                        }}
+                      />
+                    </Flex>
+
+                    <ReactPlayer
+                      onReady={() => {
+                        setReady(true);
+                      }}
+                      url={video.url}
+                      controls
+                      width={"100%"}
+                      height={"100%"}
+                      // get the length of the video
+                      onDuration={(duration) =>
+                        console.log("onDuration", duration)
+                      }
+                      // onProgress={throttle(
+                      //   (progress) => console.log("onProgress", progress),
+                      //   1000
+                      // )}
+                      config={{
+                        youtube: {
+                          playerVars: {},
+                        },
                       }}
                     />
-                  </Flex>
-
-                  <ReactPlayer
-                    onReady={() => {
-                      setReady(true);
-                    }}
-                    url={video.url}
-                    controls
-                    width={"100%"}
-                    height={"100%"}
-                    // get the length of the video
-                    onDuration={(duration) =>
-                      console.log("onDuration", duration)
-                    }
-                    // onProgress={throttle(
-                    //   (progress) => console.log("onProgress", progress),
-                    //   1000
-                    // )}
-                    config={{
-                      youtube: {
-                        playerVars: {},
-                      },
-                    }}
-                  />
+                  </Box>
                 </Box>
-              </Box>
-            )}
-            <Spinner
-              pos={"absolute"}
-              bottom={0}
-              right={0}
-              zIndex={10}
-              // bg={"#eee"}
-              size="sm"
-              m={2}
-              color="#555"
-              display={video.url ? (ready ? "none" : "block") : "none"}
-            />
-            {selection.SelectionHalo}
+              )}
+              <Spinner
+                pos={"absolute"}
+                bottom={0}
+                right={0}
+                zIndex={10}
+                // bg={"#eee"}
+                size="sm"
+                m={2}
+                color="#555"
+                display={video.url ? (ready ? "none" : "block") : "none"}
+              />
+              {selection.SelectionHalo}
+            </Box>
           </Box>
-        </Box>
+        </MediaView>
       </CarbonBlock>
     </>
   );

@@ -10,6 +10,7 @@ import {
   Transaction,
   prevent,
   useCarbon,
+  useCarbonOverlay,
 } from "@emrgen/carbon-core";
 import { elementBound } from "../core/utils";
 import { DraggableHandle } from "./DraggableHandle";
@@ -27,6 +28,7 @@ export function DndController() {
   const [draggedNode, setDraggedNode] = useState<Optional<Node>>(
     dnd.draggedNode
   );
+  const { showOverlay, hideOverlay } = useCarbonOverlay();
 
   // listen to scroll event to reset drag handle
   useEffect(() => {
@@ -114,16 +116,20 @@ export function DndController() {
       setIsDragging(true);
       setDraggedNode(e.node);
       setShowDragHandle(true);
+      app.disable()
       dnd.draggedNodeId = e.node.id;
+      showOverlay(e.id.toString());
     },
-    [dnd]
+    [app, dnd, showOverlay]
   );
 
   const onDragEnd = useCallback(
     (e: DndEvent) => {
       resetDragHandle();
+      app.enable()
+      hideOverlay();
     },
-    [resetDragHandle]
+    [resetDragHandle, app, hideOverlay]
   );
 
   const onTransaction = useCallback(

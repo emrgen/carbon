@@ -12,5 +12,6 @@ export * from './utils/location'
 export * from './utils/node'
 export * from './utils/event'
 export * from './utils/action'
+export * from './utils/constrain'
 
 export * from './core/BSet'

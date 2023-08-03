@@ -15,11 +15,16 @@ export interface NodeConnector {
 	attributes?: Record<string, any>;
 }
 
+interface ToString {
+	toString(): string;
+}
+
 export interface DndEvent {
 	activatorEvent: MouseEvent,
 	event: MouseEvent,
 	node: Node,
-	id: any,
+	id: ToString,
+	state?: any;
 	position: {
 		startX: number,
 		startY: number,

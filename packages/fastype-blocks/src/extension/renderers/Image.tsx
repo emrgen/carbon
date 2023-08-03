@@ -2,10 +2,11 @@ import {
   CarbonBlock,
   RendererProps,
   preventAndStop,
+  stop,
   useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-core";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 
 import {
@@ -32,6 +33,7 @@ import { LuAlignCenter } from "react-icons/lu";
 import { RxImage } from "react-icons/rx";
 import { TbStatusChange } from "react-icons/tb";
 import { useFastypeOverlay } from "../../hooks/useFastypeOverlay";
+import { MediaView } from "@emrgen/fastype-interact";
 
 export function ImageComp(props: RendererProps) {
   const { node } = props;
@@ -40,6 +42,7 @@ export function ImageComp(props: RendererProps) {
   const [ready, setReady] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<any>(null);
   const updater = useDisclosure();
   useFastypeOverlay(updater);
 
@@ -48,6 +51,10 @@ export function ImageComp(props: RendererProps) {
   const connectors = useConnectorsToProps(
     useCombineConnectors(dragDropRect, selection)
   );
+
+  useEffect(() => {
+    console.log("image", imageRef.current);
+  }, [imageRef]);
 
   const handleClick = (e) => {
     preventAndStop(e);
@@ -111,7 +118,12 @@ export function ImageComp(props: RendererProps) {
               p={4}
               zIndex={1000}
               onBeforeInput={stop}
-              onKeyUp={stop}
+              onKeyUp={(e) => {
+                stop(e);
+                if (e.key === "Escape") {
+                  updater.onClose();
+                }
+              }}
               onKeyDown={stop}
             >
               <Formik
@@ -148,6 +160,7 @@ export function ImageComp(props: RendererProps) {
                         size="sm"
                         id="src"
                         name="src"
+                        autoComplete="off"
                         onChange={props.handleChange}
                       />
                       <Button
@@ -167,106 +180,85 @@ export function ImageComp(props: RendererProps) {
             </Box>
           </>
         )}
-
-        <Box
-          className="image-container"
-          pos={"relative"}
-          onClick={handleClick}
-          bg="#eee"
-        >
-          <>
-            {!image.src && (
-              <Flex
-                className="video-overlay"
-                onClick={() => {
-                  updater.onOpen();
-                }}
-              >
-                <Square
-                  size={12}
-                  borderRadius={4}
-                  // border={"1px solid #ddd"}
-                  // bg={"#fff"}
-                  fontSize={26}
-                  color={"#aaa"}
-                >
-                  <RxImage />
-                </Square>
-                <Text>Click to add image</Text>
-              </Flex>
-            )}
-            {image.src && (
-              <>
+        <MediaView node={node} enable={ready}>
+          <Box
+            className="image-container"
+            pos={"relative"}
+            onClick={handleClick}
+            bg={ready ? "" : "#eee"}
+            h={node.attrs.node.src && !ready ? '100%' : 'auto'}
+          >
+            <>
+              {!image.src && (
                 <Flex
-                  className="image-controls"
-                  pos={"absolute"}
-                  top={0}
-                  right={0}
-                  mr={1}
-                  mt={1}
-                >
-                  <IconButton
-                    colorScheme={"facebook"}
-                    size={"sm"}
-                    aria-label="Search database"
-                    icon={<TbStatusChange />}
-                    onMouseDown={preventAndStop}
-                    onClick={(e) => {
-                      preventAndStop(e);
-                      updater.onOpen();
-                    }}
-                  />
-                </Flex>
-
-                <LazyLoadImage
-                  src={node.attrs.node.src}
-                  alt=""
-                  onLoad={() => {
-                    setReady(true);
+                  className="video-overlay"
+                  onClick={() => {
+                    updater.onOpen();
                   }}
-                  placeholder={<Center color='#aaa'>Image loading...</Center>}
-                />
-                {/* {selection.isSelected && (
-                <div className="image-align-controls">
-                  <div
-                    className="align-left"
-                    onClick={alignImage("start")}
-                    onMouseDown={preventAndStop}
+                >
+                  <Square
+                    size={12}
+                    borderRadius={4}
+                    // border={"1px solid #ddd"}
+                    // bg={"#fff"}
+                    fontSize={26}
+                    color={"#aaa"}
                   >
-                    <HiMiniBars3BottomLeft />
-                  </div>
-                  <div
-                    className="align-center"
-                    onClick={alignImage("center")}
-                    onMouseDown={preventAndStop}
+                    <RxImage />
+                  </Square>
+                  <Text>Click to add image</Text>
+                </Flex>
+              )}
+              {image.src && (
+                <>
+                  <Flex
+                    className="image-controls"
+                    pos={"absolute"}
+                    top={0}
+                    right={0}
+                    mr={1}
+                    mt={1}
                   >
-                    <LuAlignCenter />
-                  </div>
-                  <div
-                    className="align-right"
-                    onClick={alignImage("end")}
-                    onMouseDown={preventAndStop}
-                  >
-                    <HiMiniBars3BottomRight />
-                  </div>
-                </div>
-              )} */}
-                <Spinner
-                  pos={"absolute"}
-                  bottom={0}
-                  right={0}
-                  zIndex={10}
-                  // bg={"#eee"}
-                  size="sm"
-                  m={2}
-                  color="#555"
-                  display={image.src ? (ready ? "none" : "block") : "none"}
-                />
-                {selection.SelectionHalo}
-              </>
-            )}
-          </>
-        </Box>
+                    <IconButton
+                      colorScheme={"facebook"}
+                      size={"sm"}
+                      aria-label="Search database"
+                      icon={<TbStatusChange />}
+                      onMouseDown={preventAndStop}
+                      onClick={(e) => {
+                        preventAndStop(e);
+                        updater.onOpen();
+                      }}
+                    />
+                  </Flex>
+
+                  <LazyLoadImage
+                    ref={imageRef}
+                    src={node.attrs.node.src}
+                    alt=""
+                    onLoad={(e) => {
+                      setReady(true);
+                      console.log(e);
+                    }}
+                    placeholder={<Center color="#aaa">Image loading...</Center>}
+                  />
+
+                  <Spinner
+                    pos={"absolute"}
+                    bottom={0}
+                    right={0}
+                    zIndex={10}
+                    size="sm"
+                    m={2}
+                    color="#555"
+                    display={image.src ? (ready ? "none" : "block") : "none"}
+                  />
+                </>
+              )}
+            </>
+            {selection.SelectionHalo}
+          </Box>
+        </MediaView>
       </CarbonBlock>
     </>
   );
