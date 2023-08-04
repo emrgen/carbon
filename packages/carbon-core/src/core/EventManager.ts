@@ -99,7 +99,7 @@ export class EventManager {
 
 		// new dom selection is same as exiting editor.selection
 		if (type === EventsIn.selectionchange && app.selection.eq(selection)) {
-			console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'selection change');
+			console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
 			return
 		}
 
@@ -136,7 +136,7 @@ export class EventManager {
 			) {
 				console.groupCollapsed('onEvent:', event.type);
 			} else {
-				console.group('onEvent:', event.type);
+				console.groupCollapsed('onEvent:', event.type);
 			}
 		}
 		this.pm.onEvent(editorEvent);

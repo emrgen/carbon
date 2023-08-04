@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 
 export const useFastypeOverlay = (disclosure: UseDisclosureReturn) => {
-  const { overlay, showOverlay, hideOverlay } = useCarbonOverlay();
+  const { overlay, showOverlay, hideOverlay, ref } = useCarbonOverlay();
   const app = useCarbon();
   const isOpen = usePrevious(disclosure.isOpen);
 
@@ -36,5 +36,8 @@ export const useFastypeOverlay = (disclosure: UseDisclosureReturn) => {
     }
   }, [disclosure.isOpen, hideOverlay, showOverlay, app, isOpen]);
 
-  return overlay;
+  return {
+    overlay,
+    ref
+  }
 };

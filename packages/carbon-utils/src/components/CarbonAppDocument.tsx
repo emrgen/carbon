@@ -1,4 +1,4 @@
-import { Carbon } from "@emrgen/carbon-core";
+import { Carbon, CarbonOverlayContext } from "@emrgen/carbon-core";
 import { useEffect } from "react";
 import { RecoilRoot } from "recoil";
 
@@ -22,22 +22,25 @@ export function CarbonAppDocument(props: CarbonAppDocumentProps) {
 
   useEffect(() => {
     app.focus();
+    app.emit("app:mounted");
   }, [app]);
 
   return (
     <CarbonContext app={app}>
-      <RecoilRoot>
-        <CarbonEvents>
-          <CarbonChangeContext>
-            <DndContext>
-              <RectSelectContext>
-                {/* <BlockMenu /> */}
-                <CarbonContent />
-              </RectSelectContext>
-            </DndContext>
-          </CarbonChangeContext>
-        </CarbonEvents>
-      </RecoilRoot>
+      <CarbonOverlayContext>
+        <DndContext>
+          <RecoilRoot>
+            <CarbonEvents>
+              <CarbonChangeContext>
+                <RectSelectContext>
+                  {/* <BlockMenu /> */}
+                  <CarbonContent />
+                </RectSelectContext>
+              </CarbonChangeContext>
+            </CarbonEvents>
+          </RecoilRoot>
+        </DndContext>
+      </CarbonOverlayContext>
     </CarbonContext>
   );
 }

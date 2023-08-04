@@ -173,6 +173,7 @@ export class RectSelector extends EventEmitter {
 	}
 
 	onMountRectSelectable(node, el) {
+		// console.log('onMountRectSelectable', node.name, node.id.toString());
 		this.selectables.register(node, el)
 	}
 

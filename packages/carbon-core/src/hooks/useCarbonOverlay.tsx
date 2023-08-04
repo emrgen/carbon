@@ -21,33 +21,31 @@ export const CarbonOverlayContext = ({ children }) => {
         ref,
         overlay: emitter,
         showOverlay: (id?: string) => {
-          setId(id ?? '');
-          setShowOverlay(true)
+          setId(id ?? "");
+          setShowOverlay(true);
         },
         hideOverlay: () => {
-          setId('');
-          setShowOverlay(false)
+          setId("");
+          setShowOverlay(false);
         },
       }}
     >
-      {showOverlay && (
-        <div
-          className="carbon-overlay"
-          data-id={id}
-          ref={ref}
-          style={{
-            opacity: showOverlay ? 1 : 0,
-            zIndex: showOverlay ? 100 : -100,
-          }}
-          // onMouseDown={preventAndStop}
-          onClick={(e) => {
-            preventAndStop(e);
-            setShowOverlay(false);
-            emitter.emit("click", e);
-          }}
-        />
-      )}
       {children}
+      <div
+        className="carbon-overlay"
+        data-id={id}
+        ref={ref}
+        style={{
+          opacity: showOverlay ? 1 : 0,
+          zIndex: showOverlay ? 100 : -100,
+        }}
+        // onMouseDown={preventAndStop}
+        onClick={(e) => {
+          preventAndStop(e);
+          setShowOverlay(false);
+          emitter.emit("click", e);
+        }}
+      ></div>
     </InnerCarbonOverlayContext.Provider>
   );
 };

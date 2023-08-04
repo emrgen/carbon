@@ -279,7 +279,7 @@ export class Transaction {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
 				console.groupCollapsed('Transaction (runtime)');
 			} else {
-				console.group('Transaction');
+				console.groupCollapsed('Transaction');
 			}
 
 			for (const action of this.actions) {

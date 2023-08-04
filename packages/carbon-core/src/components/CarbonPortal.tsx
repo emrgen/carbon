@@ -55,7 +55,6 @@ export function CarbonPortal(props) {
       <div
         className="carbon-overlay"
         ref={ref}
-        
       />
     </>
   );

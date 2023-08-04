@@ -7,9 +7,7 @@ const InnerCarbonContext = createContext<Carbon>(null!);
 export const CarbonContext = ({ app, children }) => {
   return (
     <InnerCarbonContext.Provider value={app}>
-      <CarbonOverlayContext>
-        <div className="carbon-app" >{children}</div>
-      </CarbonOverlayContext>
+      <div className="carbon-app" >{children}</div>
     </InnerCarbonContext.Provider>
   );
 };

@@ -25,11 +25,12 @@ import {
 } from "@emrgen/carbon-dragon";
 import { usePlaceholder } from "../hooks/usePlaceholder";
 import { renderAttr } from "../components/renderAttrs";
-import { hasProps, nodeAttrs } from "../../../carbon-attributes/src/utils";
 import { CarbonProps } from "@emrgen/carbon-attributes";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
+  const { picture = {} } = node.attrs.node;
+
   const app = useCarbon();
 
   const ref = useRef<HTMLElement>(null);
@@ -82,6 +83,16 @@ export const DocumentComp = (props: RendererProps) => {
       className="document-wrapper"
       onScroll={(e) => app.onEvent(EventsIn.scroll, e as any)}
     >
+      {/* {picture.src && (
+        <div className="carbon-document-picture">
+          <div className="carbon-document-picture-overlay">
+            <img src={picture.src} alt="document picture" />
+          </div>
+        </div>
+      )}
+      {!picture.src && (
+          <div className="carbon-document-empty-picture"/>
+        )} */}
       <CarbonBlock
         node={node}
         ref={ref}

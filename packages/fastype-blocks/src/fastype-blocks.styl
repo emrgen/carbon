@@ -13,6 +13,7 @@
 [data-name=separator]
   position relative
   margin-top 2px
+  user-select: none
 .fastype-separator
   display: flex
   align-items: center
@@ -25,12 +26,13 @@
 .video-container
   display: flex
   // border: 1px solid #ccc
-  max-width: 800px
+  // max-width: 800px
   min-height: 60px
   // min-width: 200px
   justify-content: center
+  align-items: center
 
-.video-container
+[data-name=video]
   .video-controls
     opacity 0
     z-index: 10
@@ -39,7 +41,7 @@
       opacity: 1
       transition: opacity 0.3s ease-in-out
 
-.image-container
+[data-name=image]
   .image-controls
     opacity 0
     z-index: 10
@@ -52,8 +54,9 @@
 .video-overlay
   background: #eee
   width 100%
+  height: inherit
   cursor pointer
 
 .carbon-overlay
   background: #eeeeee13
-  background: rgba(255, 0, 0, 0.378)
+  background: rgba(10, 10, 10, 0.2)

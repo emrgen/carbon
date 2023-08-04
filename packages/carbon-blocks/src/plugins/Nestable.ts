@@ -65,9 +65,9 @@ export class NestablePlugin extends AfterPlugin {
 
 				const listNode = node.closest(isNestableNode);
 				if (!listNode) return
-				console.log(listNode?.id.toString(), listNode?.name);
+				// console.log(listNode?.id.toString(), listNode?.name);
 				const atStart = Pin.toStartOf(listNode)?.eq(selection.head);
-				console.log(atStart, Pin.toStartOf(listNode), selection.head);
+				// console.log(atStart, Pin.toStartOf(listNode), selection.head);
 
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);

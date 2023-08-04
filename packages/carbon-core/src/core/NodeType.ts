@@ -239,8 +239,6 @@ export class NodeType {
 			contentMatch = nextEdges[0].next
 		}
 
-		console.log(blockJson);
-
 		const node = this.schema.nodeFromJSON(blockJson)
 		if (!node) {
 			throw new Error('node is null')

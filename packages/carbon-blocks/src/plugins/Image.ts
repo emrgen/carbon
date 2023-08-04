@@ -25,6 +25,9 @@ export class Image extends NodePlugin {
         html: {
           suppressContentEditableWarning: true,
           contentEditable: false,
+        },
+        node: {
+          justiFyContent: 'center',
         }
       }
     }

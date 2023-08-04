@@ -95,6 +95,8 @@ export class Dnd extends EventEmitter {
 	}
 
 	private showDragHandle(node: Node, e: MouseEvent) {
+		// console.log('show drag handle', node.id.toString());
+		
 		const { app, draggables, draggedNodeId } = this
 		const document = node.chain.find(n => n.isDocument);
 		if (!document) {
