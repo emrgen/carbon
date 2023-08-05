@@ -14,7 +14,7 @@ export class HStack extends CarbonPlugin {
 
   normalize(node: Node, state: CarbonState): CarbonAction[] {
     console.log('Normalize ', node.name,);
-    // check if stack schema is correct
+    // TODO: check if stack schema is correct
     if (node.isVoid) {
       return [RemoveNode.create(nodeLocation(node)!, node.id)];
     }

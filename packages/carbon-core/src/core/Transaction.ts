@@ -33,6 +33,7 @@ import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
 import { OpenDocument } from './actions/OpenDocument';
 import { CloseDocument } from './actions/CloseDocument';
+import { TransactionDo } from './TransactionDo';
 
 export class TransactionError {
 	commandId: number;
@@ -64,7 +65,7 @@ export class Transaction {
 	private error: Optional<TransactionError>;
 	private cancelled: boolean = false;
 	private committed: boolean = false;
-	
+
 	private normalizeIds = new NodeIdSet();
 	private updatedIds = new NodeIdSet();
 	private selectedIds = new NodeIdSet();
@@ -115,6 +116,10 @@ export class Transaction {
 		protected readonly sm: SelectionManager
 	) {
 		this.id = getId();
+	}
+
+	get do() {
+		return new TransactionDo(this.actions);
 	}
 
 	get updatesContent() {

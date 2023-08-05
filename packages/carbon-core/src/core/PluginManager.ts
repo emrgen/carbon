@@ -204,6 +204,7 @@ export class PluginManager {
 		each(this.after, p => p.transaction(tr));
 	}
 
+	// normalize node as per the schema
 	normalize(node: Node, app: Carbon): CarbonAction[] {
 		for (const p of this.before) {
 			const actions = p.normalize(node, app.state);
