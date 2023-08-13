@@ -29,7 +29,7 @@ import {
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
 import {
   BlockMenu,
-  CarbonAppDocument,
+  CarbonApp,
   carbonUtilPlugins,
 } from "@emrgen/carbon-utils";
 
@@ -233,5 +233,5 @@ const extensions = [
 export default function Dev() {
   const app = useCreateCarbon(data, extensions);
 
-  return <CarbonAppDocument app={app} />;
+  return <CarbonApp app={app} />;
 }

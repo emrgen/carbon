@@ -2,7 +2,7 @@ import { blockPresets, node, text, title } from "@emrgen/carbon-blocks";
 
 import { extensionPresets, useCreateCarbon } from "@emrgen/carbon-core";
 import { questionExtension } from "@emrgen/carbon-question";
-import { CarbonAppDocument, carbonUtilPlugins } from "@emrgen/carbon-utils";
+import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
 
 const data = node("carbon", [
   node(
@@ -35,5 +35,5 @@ const extensions = [
 export function Question() {
   const app = useCreateCarbon(data, extensions);
 
-  return <CarbonAppDocument app={app} />;
+  return <CarbonApp app={app} />;
 }

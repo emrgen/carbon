@@ -48,6 +48,8 @@ import { Tab } from './plugins/Tab';
 import { TabComp, TabItemComp, TextTitleComp, TabTitlesComp } from './renderers/TabComp';
 import { VideoComp } from './renderers/Video';
 import { Video } from './plugins/Video';
+import { Content } from './plugins/Content';
+import { ContentComp } from './renderers/Content';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -76,6 +78,7 @@ export const blockPresets: Extension = {
 		new Carbon(),
 		new FileTree(),
 		new Tab(),
+		new Content(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -111,6 +114,7 @@ export const blockPresets: Extension = {
 		Renderer.create('tabTitles', TabTitlesComp),
 		Renderer.create('tabTitle', TextTitleComp),
 		Renderer.create('tagsAttr', () => 1),
+		Renderer.create('content', ContentComp),
 	]
 }
 

@@ -8,6 +8,7 @@ import { MdFormatQuote } from "react-icons/md"
 import { TbSection } from "react-icons/tb"
 import { AiOutlinePicture } from "react-icons/ai"
 import { RxVideo } from "react-icons/rx"
+import { VscListSelection } from "react-icons/vsc"
 
 export const blockIcons = {
   section: <PiTextAaBold />,
@@ -23,4 +24,5 @@ export const blockIcons = {
   callout: <TbSection />,
   image: <AiOutlinePicture />,
   video: <RxVideo />,
+  content: <VscListSelection />,
 };

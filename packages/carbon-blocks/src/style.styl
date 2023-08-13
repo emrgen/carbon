@@ -89,10 +89,9 @@ $lineHeight = 26px
 	position relative
 	outline none
 	padding: 0px 50px
-	// overflow: auto;
 	outline: 2px dashed blue;
 	padding-bottom 200px
-	height: 100%
+	// min-height: 100%
 	.document-content
 		max-width: 700px
 		margin: 0 auto;
@@ -156,7 +155,7 @@ $lineHeight = 26px
 
 [data-name=document] > [data-type="content"],
 [data-as=document] > [data-type="content"]
-	padding: 40px 0 10px 0
+	padding: 40px 0 0 0
 
 [data-name=document] > [data-type="content"] > [data-name="title"],
 [data-as=document] > [data-type="content"] > [data-name="title"]
@@ -772,3 +771,10 @@ span {
 
 .carbon-document-empty-picture
 	height 80px
+
+[data-name=content]
+	position relative
+	padding: 10px 0
+
+.empty-content-text
+	color: #aaa

@@ -19,7 +19,6 @@ import { usePlaceholder } from "@emrgen/carbon-blocks";
 
 import { Checkbox } from "@chakra-ui/react";
 
-
 export function TodoComp(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
@@ -58,7 +57,11 @@ export function TodoComp(props: RendererProps) {
         onMouseDown={preventAndStop}
         onInput={preventAndStop}
       >
-        <Checkbox checked={node.attrs.node.isChecked} onChange={handleClick} />
+        <Checkbox
+          defaultChecked={node.attrs.node.isChecked}
+          checked={node.attrs.node.isChecked}
+          onChange={handleClick}
+        />
       </div>
     );
   }, [handleClick, node.attrs]);

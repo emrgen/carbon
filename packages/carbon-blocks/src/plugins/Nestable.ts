@@ -77,8 +77,8 @@ export class NestablePlugin extends AfterPlugin {
 					tr
 						.updateAttrs(listNode.id, {
 							html: {
-								'data-as': ''
-							}
+								'data-as': '',
+							},
 						}).select(selection)
 						.dispatch();
 					return

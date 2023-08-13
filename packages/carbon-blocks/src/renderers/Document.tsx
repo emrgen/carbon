@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import {
   ActionOrigin,
@@ -26,6 +26,7 @@ import {
 import { usePlaceholder } from "../hooks/usePlaceholder";
 import { renderAttr } from "../components/renderAttrs";
 import { CarbonProps } from "@emrgen/carbon-attributes";
+import { DocumentContext } from "../hooks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
@@ -40,6 +41,10 @@ export const DocumentComp = (props: RendererProps) => {
   const connectors = useConnectorsToProps(
     useCombineConnectors(selectionSurface, dndRegion, nonDraggable)
   );
+
+  useEffect(() => {
+    app.emit('document:mounted', node)
+  }, [app, node])
 
   const placeholder = usePlaceholder(node);
 
@@ -79,11 +84,12 @@ export const DocumentComp = (props: RendererProps) => {
   );
 
   return (
-    <div
-      className="document-wrapper"
-      onScroll={(e) => app.onEvent(EventsIn.scroll, e as any)}
-    >
-      {/* {picture.src && (
+    <DocumentContext document={node}>
+      <div
+        className="document-wrapper"
+        onScroll={(e) => app.onEvent(EventsIn.scroll, e as any)}
+      >
+        {/* {picture.src && (
         <div className="carbon-document-picture">
           <div className="carbon-document-picture-overlay">
             <img src={picture.src} alt="document picture" />
@@ -93,15 +99,16 @@ export const DocumentComp = (props: RendererProps) => {
       {!picture.src && (
           <div className="carbon-document-empty-picture"/>
         )} */}
-      <CarbonBlock
-        node={node}
-        ref={ref}
-        custom={{ ...connectors, onMouseUp: handleClick }}
-      >
-        <CarbonNodeContent node={node} custom={placeholder} />
-        <CarbonProps node={node} />
-        <CarbonNodeChildren node={node} />
-      </CarbonBlock>
-    </div>
+        <CarbonBlock
+          node={node}
+          ref={ref}
+          custom={{ ...connectors, onMouseUp: handleClick }}
+        >
+          <CarbonNodeContent node={node} custom={placeholder} />
+          <CarbonProps node={node} />
+          <CarbonNodeChildren node={node} />
+        </CarbonBlock>
+      </div>
+    </DocumentContext>
   );
 };

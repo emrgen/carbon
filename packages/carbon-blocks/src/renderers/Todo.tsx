@@ -42,6 +42,7 @@ export default function TodoComp(props: RendererProps) {
     [app.tr, node.id, attrs]
   );
 
+
   const beforeContent = useMemo(() => {
     return (
       <div

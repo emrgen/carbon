@@ -2,7 +2,7 @@ import React from "react";
 import { ChakraProvider } from "@chakra-ui/react";
 import { TrBus } from "../core/TrBus";
 import { Carbon } from "@emrgen/carbon-core";
-import { CarbonAppDocument, OverlayProvider } from "@emrgen/carbon-utils";
+import { CarbonApp, OverlayProvider } from "@emrgen/carbon-utils";
 import { BlockMenu, PorterOverlay } from "@emrgen/fastype-utils";
 
 export interface FastypeProps {
@@ -14,7 +14,7 @@ export function Fastype(props: FastypeProps) {
 
   return (
     <ChakraProvider>
-        <CarbonAppDocument app={app} />
+        <CarbonApp app={app} />
         <BlockMenu app={app} />
       {/* <PorterOverlay/> */}
     </ChakraProvider>

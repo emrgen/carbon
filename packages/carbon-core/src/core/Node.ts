@@ -29,6 +29,7 @@ export interface NodeCreateProps {
 	marks?: MarkSet;
 	attrs?: NodeAttrs;
 	state?: NodeState;
+	meta?: Record<string, any>;
 
 	renderVersion?: number;
 	updateVersion?: number;
@@ -51,6 +52,9 @@ export class Node extends EventEmitter {
 	marks: MarkSet;
 	attrs: NodeAttrs;
 	state: NodeState;
+
+	// meta is used for storing data like version, cerate time, last update time, etc.
+	meta: Record<string, any> = {};
 
 	renderVersion = 0;
 	updateVersion = 0;
@@ -80,6 +84,7 @@ export class Node extends EventEmitter {
 			marks = MarkSet.empty(),
 			attrs = {},
 			state = {},
+			meta = {},
 			renderVersion = 0,
 			updateVersion = 0
 		} = object;
@@ -88,8 +93,10 @@ export class Node extends EventEmitter {
 		this.type = type;
 		this.content = content.withParent(this)
 		this.marks = marks;
+
 		this.attrs = new NodeAttrs(merge(cloneDeep(type.attrs), attrs));
 		this.state = new NodeState(merge(cloneDeep(type.state), state));
+		this.meta = meta;
 
 		this.renderVersion = renderVersion;
 		this.updateVersion = updateVersion;

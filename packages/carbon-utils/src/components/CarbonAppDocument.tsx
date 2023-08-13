@@ -14,7 +14,7 @@ interface CarbonAppDocumentProps {
   app: Carbon;
 }
 
-export function CarbonAppDocument(props: CarbonAppDocumentProps) {
+export function CarbonApp(props: CarbonAppDocumentProps) {
   const { app } = props;
   // @ts-ignore
   window.app = app;
