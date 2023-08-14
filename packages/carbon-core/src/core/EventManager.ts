@@ -93,6 +93,7 @@ export class EventManager {
 		}
 		// editor cannot process event without active selection
 		if (!selection) {
+			event.preventDefault();
 			console.error(p12('%c[invalid]'), 'color:grey', `${type}: event with empty selection`);
 			return
 		}

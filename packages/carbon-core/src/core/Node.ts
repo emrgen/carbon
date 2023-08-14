@@ -195,6 +195,7 @@ export class Node extends EventEmitter {
 	// focus can be within the node, including any descendants node
 	get hasFocusable() {
 		if (!this.isBlock) return false;
+		if (this.isAtom) return false;
 		if (this.isBlock && this.isFocusable && this.isEmpty) return true;
 		return this.find(n => {
 			if (n.eq(this)) return false;
@@ -208,6 +209,7 @@ export class Node extends EventEmitter {
 
 	// focus can be within the node(ex: text node), excluding any child node
 	get isFocusable(): boolean {
+		if (this.parents.some(n => n.isAtom)) return false;
 		return ((this.isTextBlock && this.isEmpty) || !!this.type.isFocusable) && !this.isCollapseHidden;
 	}
 

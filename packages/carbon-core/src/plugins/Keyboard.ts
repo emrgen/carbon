@@ -7,7 +7,7 @@ import { IsolatingPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
 import { first, last, reverse } from "lodash";
-import { BlockContent, Carbon, InlineContent, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
+import { ActionOrigin, BlockContent, Carbon, InlineContent, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
 import { hasParent, nodePath } from "../utils/node";
 import { CommandPlugin, insertAfterAction, preventAndStopCtx } from '@emrgen/carbon-core';
 import { nodeLocation } from '../utils/location';
@@ -41,7 +41,7 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 		const { selection, state, cmd, blockSelection: nodeSelection } = app;
 
 		const { isCollapsed, head } = selection;
-		
+
 		// delete node selection if any
 		if (!nodeSelection.isEmpty) {
 			cmd.transform.deleteNodes(nodeSelection, { fall: 'before' })?.dispatch();
@@ -195,7 +195,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				console.log('XXXX');
-				
+
 				const { app, event, node } = ctx;
 				const { selection, cmd, state, blockSelection } = app;
 				const { selectedNodeIds } = state
@@ -406,10 +406,9 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			console.log('node selection...');
 			const { blocks: nodes } = blockSelection;
 			console.log(nodes.map(n => n.id.toString()));
-
-			const done = nodes.some(n => {
-				const textBlock = n.find(n => n.isTextBlock);
-
+			const lastNode = last(nodes) as Node;
+			if (lastNode.hasFocusable) {
+				const textBlock = lastNode.find(n => n.isFocusable);
 				// if there is a text block, put the cursor at the end of the text block
 				if (textBlock) {
 					const pin = Pin.toEndOf(textBlock)!
@@ -418,25 +417,33 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 						.select(PinnedSelection.fromPin(pin))
 						.dispatch();
 					return true
-				} else {
-					// if there is no text block, insert a new section after the last block
-					const lastBlock = last(nodes) as Node;
-					const section = app.schema.type('section')?.default();
-					if (!section) return false
+				}
+			}
 
-					const after = PinnedSelection.fromPin(Pin.toStartOf(section)!)!;
+			const done = lastNode.nextSiblings.some(n => {
+				if (n.hasFocusable) {
+					const focusable = n.find(n => n.isFocusable);
+					const pin = Pin.toStartOf(focusable!)!
 					tr
 						.selectNodes([])
-						.add(insertAfterAction(lastBlock, section))
-						.select(after)
+						.select(PinnedSelection.fromPin(pin))
 						.dispatch();
 					return true
 				}
-			})
+			});
+			if (done) return true
 
-			if (!done) {
-				tr.selectNodes([]).dispatch();
-			}
+			console.log('no text block...');
+			const lastBlock = last(nodes) as Node;
+			const section = app.schema.type('section')?.default();
+			if (!section) return false
+
+			const after = PinnedSelection.fromPin(Pin.toStartOf(section)!)!;
+			tr
+				.selectNodes([])
+				.add(insertAfterAction(lastBlock, section))
+				.select(after, ActionOrigin.UserInput)
+				.dispatch();
 
 			return
 		}
@@ -577,7 +584,7 @@ const nextBlockSelectable = node => {
 	if (found) return found;
 
 	console.log('xxxxxx', block?.id.toString());
-	
+
 
 	return block?.next(n => n.isBlockSelectable, { order: 'pre' });
 }

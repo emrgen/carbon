@@ -102,7 +102,9 @@ export function BlockMenu(props: BlockMenuProps) {
         node.child(0)!.id,
         BlockContent.create([])
       );
-      if (!type.isAtom && node.child(0)?.find((n) => n.hasFocusable)) {
+      if (type.isAtom && type.isBlock) {
+        tr.selectNodes(node.id);
+      } else if (!type.isAtom && node.child(0)?.find((n) => n.hasFocusable)) {
         tr.select(PinnedSelection.fromPin(Pin.future(node.child(0)!, 0)!)!);
       }
 
