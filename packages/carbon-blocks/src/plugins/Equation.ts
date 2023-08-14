@@ -5,13 +5,22 @@ export class Equation extends CarbonPlugin {
 
   spec(): NodeSpec {
     return {
+      group: 'content',
       content: 'title',
-      sandbox: true,
+      atom: true,
       isolating: true,
       selectable: true,
       draggable: true,
       dragHandle: true,
       rectSelectable: true,
+      blockSelectable: true,
+      insert: true,
+      info: {
+        title: 'Equation',
+        description: 'Scientific equation ',
+        icon: 'equation',
+        tags: ['equation', 'math', 'latex', 'formula', 'mathjax', 'katex', 'mathml', 'mathematics', 'maths', 'mathematical']
+      },
       attrs: {
         html: {
           contentEditable: false,

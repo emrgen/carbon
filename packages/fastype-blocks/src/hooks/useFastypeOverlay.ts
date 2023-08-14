@@ -1,4 +1,4 @@
-import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-core"
+import { Node, useCarbon, useCarbonOverlay } from "@emrgen/carbon-core"
 import { useEffect } from 'react';
 import {
   useDisclosure,
@@ -6,10 +6,16 @@ import {
   usePrevious
 } from "@chakra-ui/react";
 
-export const useFastypeOverlay = (disclosure: UseDisclosureReturn) => {
-  const { overlay, showOverlay, hideOverlay, ref } = useCarbonOverlay();
+export const useFastypeOverlay = (disclosure: UseDisclosureReturn, node?: Node) => {
+  const { overlay, showOverlay, hideOverlay, ref, setNode } = useCarbonOverlay();
   const app = useCarbon();
   const isOpen = usePrevious(disclosure.isOpen);
+
+  useEffect(() => {
+    if (node) {
+      setNode(node);
+    }
+  }, [node, setNode]);
 
   useEffect(() => {
     const onClick = (e) => {
@@ -26,6 +32,7 @@ export const useFastypeOverlay = (disclosure: UseDisclosureReturn) => {
     if (isOpen && !disclosure.isOpen) {
       console.log("close");
       hideOverlay()
+      setNode(null)
       app.enable()
     }
 
@@ -33,8 +40,9 @@ export const useFastypeOverlay = (disclosure: UseDisclosureReturn) => {
       console.log("open");
       showOverlay()
       app.disable()
+      setNode(node);
     }
-  }, [disclosure.isOpen, hideOverlay, showOverlay, app, isOpen]);
+  }, [disclosure.isOpen, hideOverlay, showOverlay, app, isOpen, node, setNode]);
 
   return {
     overlay,

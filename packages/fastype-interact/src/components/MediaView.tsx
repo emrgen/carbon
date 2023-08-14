@@ -5,7 +5,6 @@ import {
   constrain,
   stop,
   useCarbon,
-  useCarbonOverlay,
 } from "@emrgen/carbon-core";
 import {
   DndEvent,
@@ -152,7 +151,7 @@ export function MediaView(props: MediaViewProps) {
     <Flex
       // top={0}
       position={"relative"}
-      height={height ? height + "px" : node.attrs.node.height + "px" ?? "60px"}
+      height={height ? height + "px" : node.attrs.node.height ? node.attrs.node.height + "px" : "60px"}
       width={width ? width + "px" : "full"}
       justifyContent={node.attrs.node.justifyContent ?? "center"}
       transition={"width 0.3s, height 0.3s"}

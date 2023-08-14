@@ -1,9 +1,13 @@
 import { RefObject, createContext, useContext, useRef, useState } from "react";
 import { preventAndStop } from "../utils/event";
 import EventEmitter from "events";
+import { Node } from "../core";
+import { Optional } from '@emrgen/types';
 
 const InnerCarbonOverlayContext = createContext<{
   ref: RefObject<HTMLDivElement>;
+  node: Optional<Node>;
+  setNode(node: Optional<Node>)
   overlay: EventEmitter;
   showOverlay(id?: string);
   hideOverlay();
@@ -14,11 +18,14 @@ export const CarbonOverlayContext = ({ children }) => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [emitter] = useState(() => new EventEmitter());
   const [id, setId] = useState('');
+  const [node, setNode] = useState<Optional<Node>>(null);
 
   return (
     <InnerCarbonOverlayContext.Provider
       value={{
         ref,
+        node,
+        setNode,
         overlay: emitter,
         showOverlay: (id?: string) => {
           setId(id ?? "");
@@ -30,9 +37,9 @@ export const CarbonOverlayContext = ({ children }) => {
         },
       }}
     >
-      {children}
       <div
         className="carbon-overlay"
+        data-target={node?.name ?? ''}
         data-id={id}
         ref={ref}
         style={{
@@ -46,6 +53,7 @@ export const CarbonOverlayContext = ({ children }) => {
           emitter.emit("click", e);
         }}
       ></div>
+      {children}
     </InnerCarbonOverlayContext.Provider>
   );
 };

@@ -5,6 +5,7 @@ import {SeparatorComp} from "./renderers/Separator";
 import { Separator } from "./plugins/Separator";
 import { VideoComp } from "./renderers/Video";
 import { ImageComp } from "./renderers/Image";
+import { EquationComp } from "./renderers/Equation";
 
 export const fastypeBlocks: Extension = {
   plugins: [
@@ -16,6 +17,7 @@ export const fastypeBlocks: Extension = {
     Renderer.create('separator', SeparatorComp),
     Renderer.create('video', VideoComp),
     Renderer.create('image', ImageComp),
+    Renderer.create('equation', EquationComp),
   ]
 }
 

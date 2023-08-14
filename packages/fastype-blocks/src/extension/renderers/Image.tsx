@@ -183,6 +183,15 @@ export function ImageComp(props: RendererProps) {
                     autoComplete="off"
                     onChange={props.handleChange}
                   />
+                  <Input
+                    autoFocus
+                    placeholder="Image URL"
+                    size="sm"
+                    id="src"
+                    name="src"
+                    autoComplete="off"
+                    // onChange={props.handleChange}
+                  />
                   <Button
                     colorScheme="blue"
                     size="sm"
@@ -271,6 +280,7 @@ export function ImageComp(props: RendererProps) {
                   className="image-overlay"
                   onClick={(e) => {
                     stop(e);
+                    app.tr.selectNodes([node.id]).dispatch();
                     updater.onOpen();
                   }}
                 >

@@ -2,7 +2,7 @@ import React from "react";
 
 import { Fastype } from "@emrgen/fastype-core";
 import { extensionPresets, useCreateCachedCarbon, useCreateCarbon } from "@emrgen/carbon-core";
-import { blockPresets, node } from "@emrgen/carbon-blocks";
+import { blockPresets, node, text, title } from "@emrgen/carbon-blocks";
 import { carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { fastypeBlocks } from "@emrgen/fastype-blocks";
 
@@ -35,6 +35,7 @@ const data = {
         {
           name: "divider",
         },
+        node("equation", [title([text(`(x+1)^2 = x^2 + 2x + 1 + \\alpha + \\beta`)])]),
         // {
         //   name: "content",
         // },
@@ -62,6 +63,6 @@ const data = {
 };
 
 export function FastEditor() {
-  const app = useCreateCachedCarbon(data, extensions);
+  const app = useCreateCarbon(data, extensions);
   return <Fastype app={app} />;
 }
