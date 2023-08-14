@@ -1,10 +1,15 @@
 import {
   CarbonBlock,
+  Point,
   RendererProps,
   preventAndStop,
   stop,
   useCarbon,
   useSelectionHalo,
+  Node,
+  PinnedSelection,
+  Pin,
+  ActionOrigin,
 } from "@emrgen/carbon-core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
@@ -21,7 +26,7 @@ import {
   Square,
   Stack,
   Text,
-  useDisclosure
+  useDisclosure,
 } from "@chakra-ui/react";
 import {
   useCombineConnectors,
@@ -40,6 +45,7 @@ export function ImageComp(props: RendererProps) {
   const { node: image } = node.attrs;
   const app = useCarbon();
   const [ready, setReady] = useState(false);
+  const [caption, setCaption] = useState(node.attrs.node.caption ?? "");
 
   const ref = useRef<HTMLDivElement>(null);
   const boundRef = useRef<HTMLDivElement>(null);
@@ -105,11 +111,13 @@ export function ImageComp(props: RendererProps) {
     const { left, top, width, height } =
       boundRef.current?.getBoundingClientRect();
 
+    // console.log("updatePopover", left, top, width, height);
+
     return createPortal(
       <Box
         pos={"absolute"}
-        w={width + 'px'}
-        h={height + 'px'}
+        w={width + "px"}
+        h={height + "px"}
         left={left}
         top={top}
         zIndex={1000}
@@ -196,19 +204,19 @@ export function ImageComp(props: RendererProps) {
     );
   }, [app.tr, node.id, boundRef, overlayRef, updater]);
 
-  console.log('XXX', imageRef.current);
-
   useEffect(() => {
     if (!imageRef.current) return;
     const { width, height } = imageRef.current;
     setAspectRatio(height / width);
 
     if (!node.attrs.node.height) {
-      app.tr.updateAttrs(node.id, {
-        node: {
-          height: height,
-        },
-      }).dispatch();
+      app.tr
+        .updateAttrs(node.id, {
+          node: {
+            height: height,
+          },
+        })
+        .dispatch();
     }
   }, [app.tr, imageRef, node.attrs.node.height, node.id]);
 
@@ -291,7 +299,7 @@ export function ImageComp(props: RendererProps) {
                     }}
                     placeholder={<Center color="#aaa">Image loading...</Center>}
                   />
-                  <Image
+                  {/* <Image
                     src={node.attrs.node.src}
                     alt=""
                     className="fastype-hidden-image"
@@ -299,7 +307,7 @@ export function ImageComp(props: RendererProps) {
                     boxShadow={ready ? "0 0 0px 20px red" : ""}
                     // opacity={"0"}
                     ref={imageRef}
-                  />
+                  /> */}
                   <Spinner
                     pos={"absolute"}
                     bottom={0}
@@ -316,6 +324,58 @@ export function ImageComp(props: RendererProps) {
             {selection.SelectionHalo}
           </Box>
         </MediaView>
+        {/* {caption && (
+          <Input
+            value={node.attrs.node.caption}
+            px={1}
+            color="#999"
+            onMouseDown={stop}
+            onKeyDown={(e) => {
+              stop(e);
+              if (e.key === "Enter") {
+                e.preventDefault();
+                app.enable()
+                const section = app.schema.nodes.section.default();
+                if (!section) return;
+                app.tr
+                  .insert(Point.toAfter(node.id), section)
+                  .select(
+                    PinnedSelection.fromPin(Pin.toStartOf(section)!),
+                    ActionOrigin.UserInput
+                  )
+                  .dispatch();
+              }
+            }}
+            onKeyUp={stop}
+            onFocus={() => app.disable()}
+            onBlur={(e) => {
+              app.enable()
+              setCaption(!!e.target.value)
+            }}
+            outline={"none"}
+            border={"none"}
+            boxShadow={"none"}
+            placeholder="Caption"
+            size={"sm"}
+            _active={{
+              border: "none",
+              boxShadow: "none",
+            }}
+            _focus={{
+              border: "none",
+              boxShadow: "none",
+            }}
+            onChange={(e) => {
+              app.tr
+                .updateAttrs(node.id, {
+                  node: {
+                    caption: e.target.value,
+                  },
+                })
+                .dispatch();
+            }}
+          />
+        )} */}
       </CarbonBlock>
     </>
   );

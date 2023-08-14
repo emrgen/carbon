@@ -151,7 +151,7 @@ export class TransformCommands extends BeforePlugin {
     const { cmd } = app;
     const updateTitleText = (app: Carbon) => {
       console.log('insertText', text);
-      
+
       const { tr } = app;
       const { schema, selection } = app;
       const { head, start } = selection;
@@ -174,7 +174,7 @@ export class TransformCommands extends BeforePlugin {
       return cmd.transform.delete(selection)?.then(carbon => {
         return updateTitleText(carbon);
       })
-    return
+      return
     }
 
     if (selection.isCollapsed) {
@@ -226,7 +226,7 @@ export class TransformCommands extends BeforePlugin {
     // TODO: make the selection a block selection and hide cursor
     if (sliceClone.isBlockSelection) {
       const { tr } = app;
-      const { tail } = selection;
+      const { head, tail } = selection;
       const { parent } = tail.node;
       if (!parent) {
         console.error('no parent found');
@@ -246,8 +246,13 @@ export class TransformCommands extends BeforePlugin {
           tr.select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
         }
       } else {
-        const at = Point.toAfter(parent.id);
-        tr.insert(at, sliceClone.nodes);
+        if (head.eq(tail) && head.isAtStartOfNode(parent)) {
+          const at = Point.toAfter(parent?.prevSibling!.id);
+          tr.insert(at, sliceClone.nodes);
+        } else {
+          const at = Point.toAfter(parent.id);
+          tr.insert(at, sliceClone.nodes);
+        }
       }
 
       return tr;

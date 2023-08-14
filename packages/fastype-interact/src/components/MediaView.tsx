@@ -122,7 +122,9 @@ export function MediaView(props: MediaViewProps) {
           100,
           aspectRatio * width
         );
-        setHeight(nh);
+        if (nh / width < aspectRatio) {
+          setHeight(nh);
+        }
       }
     },
     [aspectRatio, documentWidth, initialSize, node.id]
