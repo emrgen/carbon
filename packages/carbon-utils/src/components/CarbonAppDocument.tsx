@@ -1,5 +1,5 @@
 import { Carbon, CarbonOverlayContext } from "@emrgen/carbon-core";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { RecoilRoot } from "recoil";
 
 import {
@@ -19,11 +19,17 @@ export function CarbonApp(props: CarbonAppDocumentProps) {
   // @ts-ignore
   window.app = app;
   // console.log(app.content)
-
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     app.focus();
     app.emit("app:mounted");
   }, [app]);
+
+  useEffect(() => {
+    if (ref.current) {
+      app.setCursorRest(ref.current);
+    }
+  }, [app, ref]);
 
   return (
     <CarbonContext app={app}>
@@ -31,6 +37,12 @@ export function CarbonApp(props: CarbonAppDocumentProps) {
         <DndContext>
           <RecoilRoot>
             <CarbonEvents>
+              <div
+                ref={ref}
+                className="carbon-app-cursor-rest"
+                contentEditable={true}
+                suppressContentEditableWarning
+              ></div>
               <CarbonChangeContext>
                 <RectSelectContext>
                   {/* <BlockMenu /> */}

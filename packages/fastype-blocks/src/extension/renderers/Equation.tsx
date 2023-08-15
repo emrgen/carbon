@@ -67,7 +67,8 @@ export const EquationComp = (props: RendererProps) => {
     },
     onClose: () => {
       app.enable();
-      app.focus();
+      app._cursorRest?.focus()
+      // app.focus();
       app.tr
         .updateAttrs(node.id, {
           node: {
@@ -218,7 +219,11 @@ export const EquationComp = (props: RendererProps) => {
                 });
               }}
             />
-            {!!error && !node.child(0)?.isEmpty && <Box fontSize={'xs'} p={2} color={'red.400'} bg="#eee">{error}</Box>}
+            {!!error && !node.child(0)?.isEmpty && (
+              <Box fontSize={"xs"} p={2} color={"red.400"} bg="#eee">
+                {error}
+              </Box>
+            )}
           </Stack>
         ) : null}
       </>,
@@ -280,7 +285,6 @@ export const EquationContent = (props: EquationContentProps) => {
       });
       onError("");
       console.log("rendered", node.textContent);
-      
     } catch (e) {
       if (e instanceof katex.ParseError) {
         onError(e.message);
@@ -292,18 +296,27 @@ export const EquationContent = (props: EquationContentProps) => {
 
   return (
     <CarbonBlock node={node} custom={{ "data-name": "equation-wrapper" }}>
-      {
-        <Box
-          data-type="equation-content"
-          ref={eqRef}
-          p={2}
-          opacity={error ? 0 : 1}
-          minH={"50px"}
-        />
-      }
+      <Box
+        data-type="equation-content"
+        ref={eqRef}
+        p={2}
+        opacity={error ? 0 : 1}
+        minH={"50px"}
+      />
       {error && (
-        <Center h="full" bg="#eee" pos="absolute" w="full" left={0}>
-          <Text>{error}</Text>
+        <Center
+          h="full"
+          bg="#eee"
+          pos="absolute"
+          w="full"
+          left={0}
+          overflow={"hidden"}
+        >
+          <Text fontSize={"sm"}>
+            {error.split("\n")?.length > 1
+              ? error.split("\n")[0] + "..."
+              : error}
+          </Text>
         </Center>
       )}
     </CarbonBlock>

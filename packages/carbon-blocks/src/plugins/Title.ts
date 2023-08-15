@@ -71,7 +71,6 @@ export class TitlePlugin extends NodePlugin {
 
 	onTextInsert(ctx: EventContext<KeyboardEvent>) {
 		preventAndStopCtx(ctx);
-
 		const { app, event } = ctx;
 		const { selection } = app;
 		// @ts-ignore

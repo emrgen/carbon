@@ -40,6 +40,13 @@ const data = {
             text("\\begin{matrix}\n1 & 2 & 3\\\\\na & b & c\n\\end{matrix}"),
           ]),
         ]),
+        node("code", [
+          title([
+            text(String.raw`function name() {
+  console.log("hello world");
+}`),
+          ]),
+        ]),
 
         // {
         //   name: "content",

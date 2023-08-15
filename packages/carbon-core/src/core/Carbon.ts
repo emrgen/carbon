@@ -43,6 +43,7 @@ export class Carbon extends EventEmitter {
 	_element: Optional<HTMLElement>;
 	_portal: Optional<HTMLElement>;
 	_contentElement: Optional<HTMLElement>;
+	_cursorRest: Optional<HTMLDivElement>;
 	ticks: Maps<Carbon, Optional<Transaction>>[];
 
 	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
@@ -162,6 +163,10 @@ export class Carbon extends EventEmitter {
 
 	disable() {
 		this.enabled = false;
+	}
+
+	setCursorRest(div: HTMLDivElement) {
+		this._cursorRest = div;
 	}
 
 	cleanTicks() {

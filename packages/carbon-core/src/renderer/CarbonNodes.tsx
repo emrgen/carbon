@@ -99,7 +99,13 @@ const InnerCarbonText = (props: RendererProps) => {
 
   return (
     <CarbonElement node={node} tag="span">
-      <>{node.isEmpty ? <CarbonEmpty node={node} /> : node.textContent}</>
+      <>
+        {node.isEmpty ? (
+          <CarbonEmpty node={node} />
+        ) : (
+          node.textContent
+        )}
+      </>
     </CarbonElement>
   );
 };
@@ -108,9 +114,9 @@ export const CarbonText = (InnerCarbonText);
 
 // render block node with div
 const InnerCarbonBlock = (props: RendererProps, ref) => {
-  const { node, children, custom } = props;
+  const { node, children, custom, tag = 'div' } = props;
   return (
-    <CarbonElement node={node} tag={node.attrs.node.tag ?? "div"} ref={ref} custom={custom}>
+    <CarbonElement node={node} tag={node.attrs.node.tag ?? tag} ref={ref} custom={custom}>
       {children}
     </CarbonElement>
   );

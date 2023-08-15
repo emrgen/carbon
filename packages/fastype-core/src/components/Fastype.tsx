@@ -2,7 +2,7 @@ import React from "react";
 import { ChakraProvider } from "@chakra-ui/react";
 import { TrBus } from "../core/TrBus";
 import { Carbon } from "@emrgen/carbon-core";
-import { CarbonApp, OverlayProvider } from "@emrgen/carbon-utils";
+import { CarbonApp,  } from "@emrgen/carbon-utils";
 import { BlockMenu, PorterOverlay } from "@emrgen/fastype-utils";
 
 export interface FastypeProps {

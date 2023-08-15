@@ -16,7 +16,6 @@ import { usePlaceholder } from "../hooks/usePlaceholder";
 
 export const NestableComp = (props: RendererProps) => {
   const { node } = props;
-
   const ref = useRef(null);
 
   const selection = useSelectionHalo(props);
