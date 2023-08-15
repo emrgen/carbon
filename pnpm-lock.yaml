@@ -1002,6 +1002,9 @@ importers:
       framer-motion:
         specifier: ^10.15.0
         version: 10.15.0(react-dom@18.2.0)(react@18.2.0)
+      is-hotkey:
+        specifier: ^0.2.0
+        version: 0.2.0
       katex:
         specifier: ^0.16.7
         version: 0.16.7
@@ -5161,7 +5164,6 @@ packages:
 
   /is-hotkey@0.2.0:
     resolution: {integrity: sha512-UknnZK4RakDmTgz4PI1wIph5yxSs/mvChWs9ifnlXsKuXgWmOkY/hAE0H/k2MIqH0RlRye0i1oC07MCRSD28Mw==}
-    dev: true
 
   /is-map@2.0.2:
     resolution: {integrity: sha512-cOZFQQozTha1f4MxLFzlgKYPTyj26picdZTx82hbc/Xf4K/tZOOXSCkMvU4pKioRXGDLJRn0GM7Upe7kR721yg==}

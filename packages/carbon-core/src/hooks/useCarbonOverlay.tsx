@@ -49,10 +49,10 @@ export const CarbonOverlayContext = ({ children }) => {
         }}
         onMouseDown={(e) => {
           downRef.current = e.target;
+          preventAndStop(e);
         }}
         onClick={(e) => {
           preventAndStop(e);
-          console.log(e.target, downRef.current);
           if (downRef.current !== e.target) return;
           downRef.current = null
           setShowOverlay(false);

@@ -22,15 +22,19 @@ import {
   Pin,
   ActionOrigin,
   Point,
+  Node,
+  CarbonChildren,
 } from "@emrgen/carbon-core";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import { node } from "@emrgen/carbon-blocks";
 import {
   Box,
+  Center,
   HStack,
   Input,
   Square,
+  Stack,
   Text,
   Textarea,
   useDisclosure,
@@ -44,14 +48,15 @@ import {
 import { useFastypeOverlay } from "../../hooks/useFastypeOverlay";
 import { createPortal } from "react-dom";
 import { Optional } from "@emrgen/types";
-import { TbMathXDivideY2 } from 'react-icons/tb';
+import { TbMathXDivideY2 } from "react-icons/tb";
 import ResizeTextarea from "react-textarea-autosize";
+import { isHotkey, isKeyHotkey } from "is-hotkey";
 
 export const EquationComp = (props: RendererProps) => {
   const { node, version } = props;
   const app = useCarbon();
   const ref = useRef<Optional<HTMLDivElement>>(null);
-  const eqRef = useRef(null);
+  const [error, setError] = useState("");
 
   const updater = useDisclosure();
   const { ref: overlayRef } = useFastypeOverlay({
@@ -63,14 +68,14 @@ export const EquationComp = (props: RendererProps) => {
     onClose: () => {
       app.enable();
       app.focus();
-       app.tr
-         .updateAttrs(node.id, {
-           node: {
-             isEditing: false,
-           },
-         })
-         .dispatch();
-    }
+      app.tr
+        .updateAttrs(node.id, {
+          node: {
+            isEditing: false,
+          },
+        })
+        .dispatch();
+    },
   });
 
   const selection = useSelectionHalo(props);
@@ -88,23 +93,19 @@ export const EquationComp = (props: RendererProps) => {
     }
   }, [node.attrs.node, updater]);
 
-  useEffect(() => {
-    if (!eqRef.current) return;
-    katex.render(node.textContent, eqRef.current, {
-      output: "mathml",
-    });
-  }, [node, node.version]);
-
   const handleClick = useCallback(
     (e) => {
       stop(e);
       // avoid selection if block is already selected
       // if (app.blockSelection && app.blockSelection.has(node.id)) return;
-      app.tr.selectNodes([node.id]).updateAttrs(node.id, {
-        node: {
-          isEditing: true,
-        }
-      }).dispatch();
+      app.tr
+        .selectNodes([node.id])
+        .updateAttrs(node.id, {
+          node: {
+            isEditing: true,
+          },
+        })
+        .dispatch();
     },
     [app.tr, node.id]
   );
@@ -147,7 +148,7 @@ export const EquationComp = (props: RendererProps) => {
     return createPortal(
       <>
         {updater.isOpen ? (
-          <Box
+          <Stack
             pos={"absolute"}
             w={width / 2 + "px"}
             left={left + width / 2 + "px"}
@@ -159,15 +160,23 @@ export const EquationComp = (props: RendererProps) => {
             borderRadius={4}
             contentEditable={false}
             suppressContentEditableWarning
+            onMouseDown={stop}
+            onMouseUp={stop}
+            onClick={stop}
+            spacing={0}
+            boxShadow={"0 2px 8px 0px #aaa"}
+            overflow={"hidden"}
           >
             <Textarea
               defaultValue={node.child(0)?.textContent}
+              placeholder="c = \\pm\\sqrt{a^2 + b^2}"
               _focus={{
                 outline: "none",
-                boxShadow: "0 2px 8px 0px #aaa",
+                boxShadow: "none",
                 border: "none",
               }}
-              boxShadow={"0 2px 8px 0px #aaa"}
+              // textColor={node.child(0)?.textContent ? "black" : "red"}
+              borderRadius={0}
               px={2}
               display={"block"}
               fontFamily={"mono"}
@@ -184,7 +193,10 @@ export const EquationComp = (props: RendererProps) => {
                 e.target.select();
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === "Escape") {
+                if (
+                  (isKeyHotkey("enter", e) && !isKeyHotkey("shift+enter", e)) ||
+                  e.key === "Escape"
+                ) {
                   preventAndStop(e);
                   app.tr
                     .updateAttrs(node.id, {
@@ -195,13 +207,24 @@ export const EquationComp = (props: RendererProps) => {
                     .dispatch();
                 }
               }}
+              onChange={(e) => {
+                preventAndStop(e);
+                const title = node.child(0) as Node;
+                const text = app.schema.text(e.target.value)!;
+                app.enable(() => {
+                  app.tr
+                    .setContent(title.id, BlockContent.create(text))
+                    .dispatch();
+                });
+              }}
             />
-          </Box>
+            {!!error && !node.child(0)?.isEmpty && <Box fontSize={'xs'} p={2} color={'red.400'} bg="#eee">{error}</Box>}
+          </Stack>
         ) : null}
       </>,
       overlayRef.current
     );
-  }, [app, node, overlayRef, updater]);
+  }, [app, node, overlayRef, updater, error]);
 
   return (
     <CarbonBlock
@@ -215,9 +238,8 @@ export const EquationComp = (props: RendererProps) => {
       }}
     >
       {updatePopover}
-      {!node.child(0)?.isEmpty && (
-        <Box data-type="equation-content" ref={eqRef} p={4} />
-      )}
+      {/* <CarbonNodeContent node={node} /> */}
+      <EquationContent node={node.child(0)!} error={error} onError={setError} />
       {node.child(0)?.isEmpty && (
         <HStack
           w="full"
@@ -225,20 +247,65 @@ export const EquationComp = (props: RendererProps) => {
           color={"#aaa"}
           spacing={0}
           bg={"#eee"}
-          minH={"60px"}
+          // minH={"6px"}
         >
-          <Square
-            size={12}
-            borderRadius={4}
-            fontSize={26}
-            color={"#aaa"}
-          >
+          <Square size={12} borderRadius={4} fontSize={26} color={"#aaa"}>
             <TbMathXDivideY2 />
           </Square>
           <Text>Click to add equation</Text>
         </HStack>
       )}
+
       {selection.SelectionHalo}
+    </CarbonBlock>
+  );
+};
+
+interface EquationContentProps extends RendererProps {
+  onError(msg: string): void;
+  error: string;
+}
+
+export const EquationContent = (props: EquationContentProps) => {
+  const { onError, error } = props;
+  const { node, version } = useNodeChange(props);
+  const eqRef = useRef(null);
+
+  useEffect(() => {
+    if (!eqRef.current) return;
+
+    try {
+      katex.render(node.textContent, eqRef.current, {
+        output: "mathml",
+      });
+      onError("");
+      console.log("rendered", node.textContent);
+      
+    } catch (e) {
+      if (e instanceof katex.ParseError) {
+        onError(e.message);
+      }
+    }
+  }, [node, version, onError]);
+
+  if (node.textContent === "") return null;
+
+  return (
+    <CarbonBlock node={node} custom={{ "data-name": "equation-wrapper" }}>
+      {
+        <Box
+          data-type="equation-content"
+          ref={eqRef}
+          p={2}
+          opacity={error ? 0 : 1}
+          minH={"50px"}
+        />
+      }
+      {error && (
+        <Center h="full" bg="#eee" pos="absolute" w="full" left={0}>
+          <Text>{error}</Text>
+        </Center>
+      )}
     </CarbonBlock>
   );
 };

@@ -37,10 +37,7 @@ const data = {
         },
         node("equation", [
           title([
-            text(String.raw`\begin{matrix}
-1 & 2 & 3\\
-a & b & c
-\end{matrix}`),
+            text("\\begin{matrix}\n1 & 2 & 3\\\\\na & b & c\n\\end{matrix}"),
           ]),
         ]),
 

@@ -51,7 +51,10 @@ export function ImageComp(props: RendererProps) {
   const boundRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const updater = useDisclosure();
-  const { ref: overlayRef } = useFastypeOverlay(updater);
+  const { ref: overlayRef } = useFastypeOverlay({
+    disclosure: updater,
+    node,
+  });
 
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });

@@ -225,7 +225,7 @@ export class PluginManager {
 		return this.nodes[name];
 	}
 
-	serialize(app: Carbon, node: Node): SerializedNode {
+	serialize(app: Carbon, node: Node): Optional<SerializedNode> {
 		return this.nodePlugin(node.name)?.serialize(app, node);
 	}
 

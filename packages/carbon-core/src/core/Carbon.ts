@@ -136,7 +136,7 @@ export class Carbon extends EventEmitter {
 	// 	return this.pm.serialize(this, node);
 	// }
 
-	serialize(node: Node): SerializedNode {
+	serialize(node: Node): Optional<SerializedNode> {
 		return this.pm.serialize(this, node);
 	}
 
@@ -152,8 +152,12 @@ export class Carbon extends EventEmitter {
 		this.sm.focus();
 	}
 
-	enable() {
+	enable(fn?: Function) {
 		this.enabled = true;
+		if (fn) {
+			fn();
+			this.disable()
+		}
 	}
 
 	disable() {
