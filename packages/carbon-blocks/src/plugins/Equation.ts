@@ -1,4 +1,4 @@
-import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
+import { CarbonPlugin, EventContext, EventHandler, NodeSpec, preventAndStopCtx } from "@emrgen/carbon-core";
 
 export class Equation extends CarbonPlugin {
   name = "equation";
@@ -27,6 +27,18 @@ export class Equation extends CarbonPlugin {
           suppressContentEditableWarning: true,
           'data-content-editable': false,
         }
+      }
+    }
+  }
+
+  keydown(): Partial<EventHandler> {
+    return {
+      enter: (ctx: EventContext<KeyboardEvent>) => {
+        const { app, node } = ctx;
+        preventAndStopCtx(ctx);
+        app.tr
+          .updateAttrs(node, { node: { isEditing: !node.attrs.node.isEditing } })
+          .dispatch();
       }
     }
   }

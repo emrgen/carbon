@@ -404,6 +404,10 @@ export class Node extends EventEmitter {
 		return this.parent?.type.contentMatch.matchFragment(fragment)
 	}
 
+	intoNodeId() {
+		return this.id;
+	}
+
 	// return a child node at given path
 	atPath(path: number[]): Optional<Node> {
 		let node: Optional<Node> = this;

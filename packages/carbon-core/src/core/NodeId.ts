@@ -5,6 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 const defaultId = uuidv4().replace(/[0-9a-z]/g, '0');
 
+export interface IntoNodeId {
+	intoNodeId(): NodeId;
+}
+
 export class NodeId {
 	get isDefault() {
 		return defaultId === this.id;
@@ -23,6 +27,10 @@ export class NodeId {
 	}
 
 	private constructor(readonly id: string) {}
+
+	intoNodeId() {
+		return this;
+	}
 
 	eq(other: NodeId) {
 		return this.comp(other) === 0;

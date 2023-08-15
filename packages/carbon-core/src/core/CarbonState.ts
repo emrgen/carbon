@@ -10,8 +10,9 @@ import { PinnedSelection } from './PinnedSelection';
 import { SelectionEvent } from './SelectionEvent';
 import { BlockSelection } from './NodeSelection';
 import { CarbonClipboard } from './CarbonClipboard';
+import EventEmitter from 'events';
 
-export class CarbonRuntimeState {
+export class CarbonRuntimeState extends EventEmitter {
 	// pending
 	selectEvents: SelectionEvent[] = [];
 	// content updated node ids
@@ -31,6 +32,12 @@ export class CarbonRuntimeState {
 
 	clipboard: CarbonClipboard = CarbonClipboard.default();
 
+	kvStore: Map<string, any> = new Map();
+
+	constructor() {
+		super();
+	}
+
 	get isContentDirty() {
 		return this.updatedNodeIds.size;
 	}
@@ -41,6 +48,15 @@ export class CarbonRuntimeState {
 
 	get selectEvent(): Optional<SelectionEvent> {
 		return last(this.selectEvents)
+	}
+
+	get(key: string) {
+		return this.kvStore.get(key);
+	}
+
+	set(key: string, value: any) {
+		const prev = this.kvStore.get(key);
+		this.kvStore.set(key, merge(cloneDeep(prev), value));
 	}
 
 	addSelectEvent(event: SelectionEvent) {
@@ -61,7 +77,7 @@ interface CarbonStateProps {
 }
 
 
-export class CarbonState {
+export class CarbonState extends EventEmitter {
 	decorations: DecorationStore;
 	runtime: CarbonRuntimeState;
 	content: Node;
@@ -104,6 +120,7 @@ export class CarbonState {
 	}
 
 	constructor(props: CarbonStateProps) {
+		super();
 		const {
 			store,
 			content,
@@ -131,8 +148,6 @@ export class CarbonState {
 		this.isSelectionDirty = true;
 	}
 
-
-
 	get(key: string) {
 		return this.kvStore.get(key);
 	}
@@ -141,7 +156,6 @@ export class CarbonState {
 		const prev = this.kvStore.get(key);
 		this.kvStore.set(key, merge(cloneDeep(prev), value));
 	}
-
 
 	init() {
 		this.store.reset();
@@ -171,6 +185,7 @@ export class CarbonState {
 
 		// console.log('selection is dirty', isSelectionDirty);
 		this.isSelectionDirty = isSelectionDirty;
+		this.emit('change:selection', this.selection, this.prevSelection, this.selectionOrigin);
 	}
 
 	updateNodeState() {
@@ -208,6 +223,8 @@ export class CarbonState {
 			}
 		});
 
+		this.runtime.emit('change', this.runtime);
+
 	}
 
 	updateContent() {
@@ -219,6 +236,8 @@ export class CarbonState {
 			// console.log('new node', n.id.toString(), n.childrenVersion)
 			this.store.put(n);
 		});
+
+		this.emit('change:content', this.content);
 	}
 
 	clone() {

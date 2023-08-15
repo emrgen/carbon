@@ -1,6 +1,6 @@
 import { classString } from "../Logger";
 import { Node } from "../Node";
-import { NodeId } from "../NodeId";
+import { IntoNodeId, NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { ActionResult, NULL_ACTION_RESULT } from "./Result";
 import { CarbonAction, ActionOrigin, ActionType } from "./types";
@@ -11,17 +11,19 @@ import { Optional } from '@emrgen/types';
 
 
 export class UpdateAttrs implements CarbonAction {
-  type: ActionType;
-  id: number;
-  prevAttrs: Optional<NodeAttrs>;
+  readonly type: ActionType;
+  readonly id: number;
+  readonly prevAttrs: Optional<NodeAttrs>;
+  readonly nodeId: NodeId;
 
   static fromJSON(json) { }
 
-  static create(nodeId: NodeId, attrs: Partial<NodeAttrs>, origin: ActionOrigin) {
-    return new UpdateAttrs(nodeId, attrs, origin);
+  static create(nodeRef: IntoNodeId, attrs: Partial<NodeAttrs>, origin: ActionOrigin) {
+    return new UpdateAttrs(nodeRef, attrs, origin);
   }
 
-  constructor(readonly nodeId: NodeId, readonly attrs: Partial<NodeAttrs>, readonly origin: ActionOrigin) {
+  constructor(nodeRef: IntoNodeId, readonly attrs: Partial<NodeAttrs>, readonly origin: ActionOrigin) {
+    this.nodeId = nodeRef.intoNodeId()
     this.type = ActionType.updateAttrs;
     this.id = generateActionId();
   }

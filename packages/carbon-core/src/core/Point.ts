@@ -1,4 +1,4 @@
-import { NodeId } from './NodeId';
+import { IntoNodeId, NodeId } from './NodeId';
 import { classString } from './Logger';
 import { Maps } from './types';
 
@@ -34,25 +34,25 @@ export class Point {
 		return this.at === PointAt.After;
 	}
 
-	static toBefore(nodeId: NodeId) {
+	static toBefore(nodeId: IntoNodeId) {
 		return new Point(nodeId, 0);
 	}
 
 	// point to after the id
-	static toAfter(nodeId: NodeId) {
+	static toAfter(nodeId: IntoNodeId) {
 		return new Point(nodeId, 2);
 	}
 
-	static toWithin(nodeId: NodeId, offset: number = 0) {
+	static toWithin(nodeId: IntoNodeId, offset: number = 0) {
 		return new Point(nodeId, 1, offset);
 	}
 
-	static create(nodeId: NodeId, at: PointAt, offset: number = 0) {
+	static create(nodeId: IntoNodeId, at: PointAt, offset: number = 0) {
 		return new Point(nodeId, at, offset);
 	}
 
-	constructor(nodeId: NodeId, at: PointAt, offset: number = -1) {
-		this.nodeId = nodeId;
+	constructor(nodeId: IntoNodeId, at: PointAt, offset: number = -1) {
+		this.nodeId = nodeId.intoNodeId();
 		this.at = at;
 		this.offset = offset;
 	}

@@ -8,7 +8,7 @@ import { Mark } from './Mark';
 import { Node } from './Node';
 import { NodeAttrs } from './NodeAttrs';
 import { NodeContent } from './NodeContent';
-import { NodeId } from './NodeId';
+import { IntoNodeId, NodeId } from './NodeId';
 import { PinnedSelection } from './PinnedSelection';
 import { PluginManager } from './PluginManager';
 import { Point } from './Point';
@@ -195,17 +195,17 @@ export class Transaction {
 		return this;
 	}
 
-	updateAttrs(id: NodeId, attrs: Partial<NodeAttrs>, origin = this.origin): Transaction {
-		this.add(UpdateAttrs.create(id, attrs, origin))
+	updateAttrs(nodeRef: IntoNodeId, attrs: Partial<NodeAttrs>, origin = this.origin): Transaction {
+		this.add(UpdateAttrs.create(nodeRef, attrs, origin))
 		return this;
 	}
 
-	updateData(id: NodeId, data: Record<string, any>, origin = this.origin): Transaction {
-		this.add(UpdateData.create(id, data, origin))
+	updateData(nodeRef: IntoNodeId, data: Record<string, any>, origin = this.origin): Transaction {
+		this.add(UpdateData.create(nodeRef, data, origin))
 		return this;
 	}
 
-	open(id: NodeId,  origin = this.origin): Transaction {
+	open(id: NodeId, origin = this.origin): Transaction {
 		this.add(OpenDocument.create(id, origin));
 		return this;
 	}

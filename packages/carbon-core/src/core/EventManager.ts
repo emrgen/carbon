@@ -139,6 +139,8 @@ export class EventManager {
 			} else {
 				console.groupCollapsed('onEvent:', event.type);
 			}
+		} else {
+			// console.log('onEvent:', event);
 		}
 		this.pm.onEvent(editorEvent);
 

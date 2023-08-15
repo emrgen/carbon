@@ -18,6 +18,10 @@ import {
   BlockContent,
   preventAndStop,
   stop,
+  PinnedSelection,
+  Pin,
+  ActionOrigin,
+  Point,
 } from "@emrgen/carbon-core";
 import katex from "katex";
 import "katex/dist/katex.min.css";
@@ -40,23 +44,48 @@ import {
 import { useFastypeOverlay } from "../../hooks/useFastypeOverlay";
 import { createPortal } from "react-dom";
 import { Optional } from "@emrgen/types";
+import { TbMathXDivideY2 } from 'react-icons/tb';
 
 export const EquationComp = (props: RendererProps) => {
   const { node, version } = props;
-  const { SelectionHalo } = useSelectionHalo(props);
-  const { isActive } = useNodeStateChange(props);
   const app = useCarbon();
   const ref = useRef<Optional<HTMLDivElement>>(null);
   const eqRef = useRef(null);
 
   const updater = useDisclosure();
-  const { ref: overlayRef } = useFastypeOverlay(updater, node);
+  const { ref: overlayRef } = useFastypeOverlay({
+    disclosure: updater,
+    node,
+    onOpen: () => {
+      app.disable();
+    },
+    onClose: () => {
+      app.enable();
+      app.focus();
+       app.tr
+         .updateAttrs(node.id, {
+           node: {
+             isEditing: false,
+           },
+         })
+         .dispatch();
+    }
+  });
 
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
   const connectors = useConnectorsToProps(
     useCombineConnectors(dragDropRect, selection)
   );
+
+  useEffect(() => {
+    const { isEditing } = node.attrs.node;
+    if (isEditing) {
+      updater.onOpen();
+    } else {
+      updater.onClose();
+    }
+  }, [node.attrs.node, updater]);
 
   useEffect(() => {
     if (!eqRef.current) return;
@@ -67,13 +96,16 @@ export const EquationComp = (props: RendererProps) => {
 
   const handleClick = useCallback(
     (e) => {
-      updater.onOpen();
       stop(e);
       // avoid selection if block is already selected
-      if (app.blockSelection && app.blockSelection.has(node.id)) return;
-      app.tr.selectNodes([node.id]).dispatch();
+      // if (app.blockSelection && app.blockSelection.has(node.id)) return;
+      app.tr.selectNodes([node.id]).updateAttrs(node.id, {
+        node: {
+          isEditing: true,
+        }
+      }).dispatch();
     },
-    [app.blockSelection, app.tr, node.id, updater]
+    [app.tr, node.id]
   );
 
   const handleMouseDown = useCallback(
@@ -105,7 +137,7 @@ export const EquationComp = (props: RendererProps) => {
   };
 
   const updatePopover = useMemo(() => {
-    console.log(overlayRef, ref);
+    // console.log(overlayRef, ref);
 
     if (!overlayRef.current) return null;
     if (!ref.current) return null;
@@ -123,27 +155,38 @@ export const EquationComp = (props: RendererProps) => {
             zIndex={10000}
             bg={"#fff"}
             m={0}
-            // onMouseDown={stop}
-            // onMouseUp={stop}
             borderRadius={4}
             contentEditable={false}
             suppressContentEditableWarning
-            // onBeforeInput={stop}
           >
-            <Input
-          defaultValue={node.child(0)?.textContent}
-          // onFocus={() => app.disable()}
-          // onBlur={() => app.enable()}
-          border={'none'}
-          autoFocus
-        />
-            asdas asd asd
+            <Textarea
+              defaultValue={node.child(0)?.textContent}
+              _focus={{ outline: "none", boxShadow: "0 2px 8px 0px #aaa", border: "none" }}
+              border={"none"}
+              autoFocus={true}
+              onFocus={(e) => {
+                preventAndStop(e);
+                e.target.select();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  preventAndStop(e);
+                  app.tr
+                    .updateAttrs(node.id, {
+                      node: {
+                        isEditing: false,
+                      },
+                    })
+                    .dispatch();
+                }
+              }}
+            />
           </Box>
         ) : null}
       </>,
       overlayRef.current
     );
-  }, [node, overlayRef, updater.isOpen]);
+  }, [app, node, overlayRef, updater]);
 
   return (
     <CarbonBlock
@@ -171,23 +214,14 @@ export const EquationComp = (props: RendererProps) => {
           <Square
             size={12}
             borderRadius={4}
-            // border={"1px solid #ddd"}
-            // bg={"#fff"}
             fontSize={26}
             color={"#aaa"}
           >
-            <RxImage />
+            <TbMathXDivideY2 />
           </Square>
           <Text>Click to add equation</Text>
         </HStack>
       )}
-      {/* <div
-        className="equation-cover"
-        onMouseDown={handleMouseDown}
-        onClick={handleOnClick}
-      /> */}
-      {/* show editable text area */}
-      {/* <CarbonNodeContent node={node} wrapper={{ contentEditable: true }} /> */}
       {selection.SelectionHalo}
     </CarbonBlock>
   );
