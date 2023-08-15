@@ -45,6 +45,7 @@ import { useFastypeOverlay } from "../../hooks/useFastypeOverlay";
 import { createPortal } from "react-dom";
 import { Optional } from "@emrgen/types";
 import { TbMathXDivideY2 } from 'react-icons/tb';
+import ResizeTextarea from "react-textarea-autosize";
 
 export const EquationComp = (props: RendererProps) => {
   const { node, version } = props;
@@ -161,15 +162,29 @@ export const EquationComp = (props: RendererProps) => {
           >
             <Textarea
               defaultValue={node.child(0)?.textContent}
-              _focus={{ outline: "none", boxShadow: "0 2px 8px 0px #aaa", border: "none" }}
+              _focus={{
+                outline: "none",
+                boxShadow: "0 2px 8px 0px #aaa",
+                border: "none",
+              }}
+              boxShadow={"0 2px 8px 0px #aaa"}
+              px={2}
+              display={"block"}
+              fontFamily={"mono"}
+              fontSize={"sm"}
+              letterSpacing={"tighter"}
               border={"none"}
               autoFocus={true}
+              overflow="hidden"
+              minRows={1}
+              as={ResizeTextarea}
+              resize={"none"}
               onFocus={(e) => {
                 preventAndStop(e);
                 e.target.select();
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" || e.key === "Escape") {
                   preventAndStop(e);
                   app.tr
                     .updateAttrs(node.id, {
@@ -195,6 +210,7 @@ export const EquationComp = (props: RendererProps) => {
       custom={{
         onClick: handleClick,
         onMouseDown: handleMouseDown,
+        onKeyDown: stop,
         ...connectors,
       }}
     >

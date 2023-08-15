@@ -15,8 +15,8 @@
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/carbon-utils": "workspace:*",
-    "@emrgen/fastype-utils": "workspace:*",
     "@emrgen/fastype-interact": "workspace:*",
+    "@emrgen/fastype-utils": "workspace:*",
     "@react-icons/all-files": "^4.1.0",
     "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",
@@ -30,6 +30,7 @@
     "react-icons": "^4.10.1",
     "react-lazy-load-image-component": "^1.6.0",
     "react-player": "^2.12.0",
+    "react-textarea-autosize": "^8.5.2",
     "recoil": "^0.7.7"
   },
   "devDependencies": {

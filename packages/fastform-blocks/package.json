@@ -20,6 +20,7 @@
     "@react-icons/all-files": "^4.1.0",
     "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",
+    "autosize": "^6.0.1",
     "emoji-mart": "^5.5.2",
     "emoji-picker-react": "^4.4.10",
     "emoji-regex": "^10.2.1",
@@ -30,6 +31,7 @@
     "react-detectable-overflow": "^0.7.1",
     "react-icons": "^4.10.1",
     "react-player": "^2.12.0",
+    "react-textarea-autosize": "^8.5.2",
     "recoil": "^0.7.7"
   },
   "devDependencies": {

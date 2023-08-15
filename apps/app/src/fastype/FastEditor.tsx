@@ -35,7 +35,15 @@ const data = {
         {
           name: "divider",
         },
-        node("equation", [title([text(`(x+1)^2 = x^2 + 2x + 1 + \\alpha + \\beta`)])]),
+        node("equation", [
+          title([
+            text(String.raw`\begin{matrix}
+1 & 2 & 3\\
+a & b & c
+\end{matrix}`),
+          ]),
+        ]),
+
         // {
         //   name: "content",
         // },
