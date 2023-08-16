@@ -103,14 +103,16 @@ const CodeContent = (props: RendererProps) => {
           p={0}
           display={"block"}
           border={"none"}
-          autoFocus={true}
           overflow="hidden"
           as={ResizeTextarea}
           resize={"none"}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
           onChange={handleOnChange}
-          onFocus={() => app.disable()}
+          onFocus={() => {
+            app.tr.selectNodes([]).dispatch();
+            app.disable()
+          }}
           onBlur={() => app.enable()}
         />
       </Box>

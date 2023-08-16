@@ -25,7 +25,7 @@ import {
   Node,
   CarbonChildren,
 } from "@emrgen/carbon-core";
-import katex from "katex";
+// import katex from "katex";
 import "katex/dist/katex.min.css";
 import { node } from "@emrgen/carbon-blocks";
 import {
@@ -67,8 +67,7 @@ export const EquationComp = (props: RendererProps) => {
     },
     onClose: () => {
       app.enable();
-      app._cursorRest?.focus()
-      // app.focus();
+      app.parkCursor();
       app.tr
         .updateAttrs(node.id, {
           node: {
@@ -284,7 +283,7 @@ export const EquationContent = (props: EquationContentProps) => {
         output: "mathml",
       });
       onError("");
-      console.log("rendered", node.textContent);
+      // console.log("rendered", node.textContent);
     } catch (e) {
       if (e instanceof katex.ParseError) {
         onError(e.message);

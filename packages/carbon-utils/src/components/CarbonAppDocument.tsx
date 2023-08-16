@@ -1,4 +1,4 @@
-import { Carbon, CarbonOverlayContext } from "@emrgen/carbon-core";
+import { Carbon, CarbonOverlayContext, preventAndStop } from "@emrgen/carbon-core";
 import { useEffect, useRef } from "react";
 import { RecoilRoot } from "recoil";
 
@@ -42,6 +42,8 @@ export function CarbonApp(props: CarbonAppDocumentProps) {
                 className="carbon-app-cursor-rest"
                 contentEditable={true}
                 suppressContentEditableWarning
+                // onKeyDown={preventAndStop}
+                // onKeyUp={preventAndStop}
               ></div>
               <CarbonChangeContext>
                 <RectSelectContext>

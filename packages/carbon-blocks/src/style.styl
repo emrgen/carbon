@@ -166,29 +166,31 @@ $lineHeight = 26px
 [data-as=h3]
 [data-as=h4]
 	margin: 0
+	&> [data-type="content"] > [data-name="title"]
+		font-weight: bold
 
 [data-name=h1] > [data-type="content"],
 [data-as=h1] > [data-type="content"]
-	font-size: 30px
+	font-size: 32px
 	margin-top: 30px
 	margin-bottom: 2px
 	line-height: 40px
 
 [data-name=h2] > [data-type="content"],
 [data-as=h2] > [data-type="content"]
-	font-size: 24px
+	font-size: 26px
 	margin-top: 24px
 	margin-bottom: 2px
 [data-name=h3] > [data-type="content"],
 [data-as=h3] > [data-type="content"]
-	font-size: 20px
+	font-size: 22px
 	margin-top: 20px
 	margin-bottom: 2px
 	line-height: 30px
 
 [data-name=h4] > [data-type="content"],
 [data-as=h4] > [data-type="content"]
-	font-size: 16px
+	font-size: 18px
 	margin-top: 16px
 	margin-bottom: 2px
 	line-height: 30px
@@ -796,4 +798,7 @@ $lineHeight = 26px
 	min-height: 150px
 	outline: none
 	// height: 100%
+
+.carbon-app-cursor-rest
+	height: 0
 

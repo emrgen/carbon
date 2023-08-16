@@ -37,7 +37,8 @@ const data = {
         },
         node("equation", [
           title([
-            text("\\begin{matrix}\n1 & 2 & 3\\\\\na & b & c\n\\end{matrix}"),
+            // text("\\begin{matrix}\n1 & 2 & 3\\\\\na & b & c\n\\end{matrix}"),
+            text(String.raw`\ce{CO2 + C -> 2 CO}`),
           ]),
         ]),
         node("code", [

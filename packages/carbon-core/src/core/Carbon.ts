@@ -155,6 +155,8 @@ export class Carbon extends EventEmitter {
 
 	enable(fn?: Function) {
 		this.enabled = true;
+		console.log('enable');
+		
 		if (fn) {
 			fn();
 			this.disable()
@@ -162,11 +164,17 @@ export class Carbon extends EventEmitter {
 	}
 
 	disable() {
+		console.log('disable');
+		
 		this.enabled = false;
 	}
 
 	setCursorRest(div: HTMLDivElement) {
 		this._cursorRest = div;
+	}
+
+	parkCursor() {
+		this._cursorRest?.focus();
 	}
 
 	cleanTicks() {
