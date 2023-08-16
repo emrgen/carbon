@@ -16,8 +16,12 @@ export class Code extends CarbonPlugin {
       dragHandle: true,
       rectSelectable: true,
       blockSelectable: true,
+      insert: true,
       info: {
         title: 'Code',
+        description: 'Insert a code block',
+        icon: 'code',
+        tags: ['code', 'block'],
       },
       attrs: {
         node: {

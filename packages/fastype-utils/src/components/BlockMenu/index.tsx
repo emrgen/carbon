@@ -101,7 +101,7 @@ export function BlockMenu(props: BlockMenuProps) {
       tr.change(node?.id, node?.name, type.name).setContent(
         node.child(0)!.id,
         BlockContent.create([])
-      );
+      ).updateAttrs(node.id, { node: { typeChanged: true } });
       if (type.isAtom && type.isBlock) {
         tr.selectNodes(node.id);
       } else if (!type.isAtom && node.child(0)?.find((n) => n.hasFocusable)) {

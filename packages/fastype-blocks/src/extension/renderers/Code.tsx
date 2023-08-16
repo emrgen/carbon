@@ -1,5 +1,5 @@
 import { Box, Textarea } from "@chakra-ui/react";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import ResizeTextarea from "react-textarea-autosize";
 import styles from "styles.module.css";
@@ -43,6 +43,18 @@ export const CodeComp = (props: RendererProps) => {
 const CodeContent = (props: RendererProps) => {
   const { node, version } = useNodeChange(props);
   const app = useCarbon();
+  const refText= useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!node.parent) return
+    if (node.parent.attrs.node.typeChanged) {
+      console.log("focus");
+      app.tr
+        .updateAttrs(node.parent.id, { node: { typeChanged: false } })
+        .dispatch();
+      refText.current?.focus();
+    }
+  }, [app, node, version]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     stop(e);
@@ -91,6 +103,7 @@ const CodeContent = (props: RendererProps) => {
       </Box>
       <Box pos={"absolute"} top={0} left={0} w="full">
         <Textarea
+          ref={refText}
           className="fastype-code-textarea"
           defaultValue={node?.textContent}
           placeholder="Write code here..."
@@ -100,7 +113,6 @@ const CodeContent = (props: RendererProps) => {
             border: "none",
           }}
           borderRadius={0}
-          p={0}
           display={"block"}
           border={"none"}
           overflow="hidden"
@@ -111,7 +123,7 @@ const CodeContent = (props: RendererProps) => {
           onChange={handleOnChange}
           onFocus={() => {
             app.tr.selectNodes([]).dispatch();
-            app.disable()
+            app.disable();
           }}
           onBlur={() => app.enable()}
         />
