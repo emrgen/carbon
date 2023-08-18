@@ -1,4 +1,4 @@
-import { BeforePlugin, BlockContent, Carbon, CarbonPlugin, EventContext, EventHandler, EventHandlerMap, NodeSpec, Pin, PinnedSelection, SetContentAction, Slice, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
+import { ActionOrigin, BeforePlugin, BlockContent, Carbon, CarbonPlugin, EventContext, EventHandler, EventHandlerMap, NodeSpec, Pin, PinnedSelection, SetContentAction, Slice, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
 import prism, { Token, TokenStream } from 'prismjs';
 import { flatten, flattenDeep } from 'lodash';
 
@@ -21,7 +21,7 @@ export class Code extends CarbonPlugin {
         title: 'Code',
         description: 'Insert a code block',
         icon: 'code',
-        tags: ['code', 'block'],
+        tags: ['code', 'codeblock', 'pre', 'source'],
       },
       attrs: {
         node: {
@@ -69,7 +69,13 @@ export class Code extends CarbonPlugin {
         preventAndStopCtx(ctx);
         const { app, node } = ctx;
         const { selection } = app;
-        // app.cmd.transform.insertText(selection, '\n')?.dispatch();
+        if (app.blockSelection.size === 1) {
+          console.log('blockSelection', app.blockSelection);
+          
+          preventAndStopCtx(ctx);
+          app.tr.selectNodes([]).dispatch();
+          node.child(0)?.emit('focus', node.child(0)!)
+        }
       },
 
       tab: (ctx: EventContext<KeyboardEvent>) => {
@@ -126,7 +132,9 @@ export class BeforeCodePlugin extends BeforePlugin {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
         const { app, event, node } = ctx;
-        if (app.blockSelection.size) return
+        if (app.blockSelection.size) {
+          return
+        }
 
         const withinCode = node.parents.find(n => n.name === 'code');
         if (!withinCode) return

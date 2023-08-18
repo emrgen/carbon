@@ -58,9 +58,9 @@ export function DraggableHandle(props: FastDragHandleProps) {
   useEffect(() => {
     const onMouseMove = (e) => {
       // if (e.target !== ref.current) {
-        setShow(true);
+      setShow(true);
       // }
-    }
+    };
 
     window.addEventListener("mousemove", onMouseMove);
     return () => {
@@ -104,7 +104,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         e.event.preventDefault();
       } else {
         if (node) {
-          app.focus();
+          app.parkCursor();
           app.tr
             .selectNodes(node.id)
             .then((app) => {
@@ -137,7 +137,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (node.isContainerBlock && title) {
         const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
         if (app.selection.eq(after)) return;
-        app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
+        app.tr
+          .selectNodes([])
+          .select(after, ActionOrigin.UserInput)
+          ?.dispatch();
         return;
       }
     }
@@ -147,16 +150,14 @@ export function DraggableHandle(props: FastDragHandleProps) {
       node.nextSibling?.isEmpty &&
       !node.nextSibling?.isAtom
     ) {
-      console.log("node.nextSibling", node.nextSibling);
-
       const after = PinnedSelection.fromPin(Pin.toStartOf(node.nextSibling)!);
       if (app.selection.eq(after)) return;
-      app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
-
+      app.tr.selectNodes([]).select(after, ActionOrigin.UserInput)?.dispatch();
       return;
     }
 
-    app.cmd.insert.after(node, "section")?.dispatch();
+    app.cmd.insert.after(node, "section")?.selectNodes([])
+      ?.dispatch();
   };
 
   return (

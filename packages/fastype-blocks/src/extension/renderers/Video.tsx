@@ -40,7 +40,10 @@ export function VideoComp(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
   const updater = useDisclosure();
-  const { ref: overlayRef } = useFastypeOverlay(updater);
+  const { ref: overlayRef } = useFastypeOverlay({
+    disclosure: updater,
+    node,
+  });
 
   const boundRef = useRef<any>(null);
   const ref = useRef<any>(null);
@@ -77,15 +80,9 @@ export function VideoComp(props: RendererProps) {
     if (!boundRef.current) return null;
     const { left, top, width, height } =
       boundRef.current?.getBoundingClientRect();
-
+    const { node: video } = node.attrs;
     return createPortal(
-      <Box
-        pos={"absolute"}
-        w={width}
-        h={height}
-        left={left}
-        top={top}
-      >
+      <Box pos={"absolute"} w={width} h={height} left={left} top={top}>
         <Box
           contentEditable={false}
           suppressContentEditableWarning
@@ -109,7 +106,7 @@ export function VideoComp(props: RendererProps) {
         >
           <Formik
             initialValues={{
-              url: "",
+              url: video.url,
             }}
             onSubmit={(values, actions) => {
               const { url } = values;
@@ -133,7 +130,7 @@ export function VideoComp(props: RendererProps) {
               }, 1000);
             }}
           >
-            {(props) => (
+            {({ values, handleChange, isSubmitting }) => (
               <Form>
                 <Stack w={300} spacing={4}>
                   <Input
@@ -143,7 +140,8 @@ export function VideoComp(props: RendererProps) {
                     id="url"
                     name="url"
                     autoComplete="off"
-                    onChange={props.handleChange}
+                    defaultValue={values.url}
+                    onChange={handleChange}
                   />
                   <Button
                     colorScheme="blue"
@@ -151,7 +149,7 @@ export function VideoComp(props: RendererProps) {
                     type="submit"
                     onMouseDown={stop}
                     onClick={stop}
-                    isLoading={props.isSubmitting}
+                    isLoading={isSubmitting}
                   >
                     Update
                   </Button>
@@ -163,7 +161,7 @@ export function VideoComp(props: RendererProps) {
       </Box>,
       overlayRef.current
     );
-  }, [app.tr, node.id, overlayRef, boundRef, updater]);
+  }, [overlayRef, node.attrs, node.id, updater, app.tr]);
 
   return (
     <CarbonBlock {...props} custom={{ ...connectors, onClick }} ref={ref}>
@@ -174,7 +172,6 @@ export function VideoComp(props: RendererProps) {
           node={node}
           enable={ready}
           aspectRatio={9 / 16}
-          // boundedComponent={}
         >
           <Flex
             pos="absolute"

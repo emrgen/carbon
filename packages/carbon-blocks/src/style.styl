@@ -90,7 +90,7 @@ $lineHeight = 26px
 	outline none
 	padding: 0px 50px
 	padding-bottom 200px
-	// overflow: hidden
+	overflow: inherit
 	.document-content
 		max-width: 700px
 		margin: 0 auto;
@@ -164,9 +164,13 @@ $lineHeight = 26px
 	font-weight: bold
 
 [data-as=h1],
-[data-as=h2]
-[data-as=h3]
-[data-as=h4]
+[data-as=h2],
+[data-as=h3],
+[data-as=h4],
+[data-name=h1],
+[data-name=h2],
+[data-name=h3],
+[data-name=h4]
 	margin: 0
 	&> [data-type="content"] > [data-name="title"]
 		font-weight: bold
@@ -568,9 +572,8 @@ $lineHeight = 26px
 	padding: 10px
 	gap 10px
 	[data-name=document],
-	[data-as=document],
+	[data-as=document]
 		flex 1
-		overflow: auto
 
 [data-name=fileTree]
 	width 200px

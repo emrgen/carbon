@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useRef } from "react";
 
 import { Fastype } from "@emrgen/fastype-core";
-import { extensionPresets, useCreateCachedCarbon, useCreateCarbon } from "@emrgen/carbon-core";
+import {
+  extensionPresets,
+  useCreateCachedCarbon,
+  useCreateCarbon,
+} from "@emrgen/carbon-core";
 import { blockPresets, node, text, title } from "@emrgen/carbon-blocks";
 import { carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { fastypeBlocks } from "@emrgen/fastype-blocks";
+import Editor, { DiffEditor, useMonaco, loader } from "@monaco-editor/react";
+import { Box, Spinner } from "@chakra-ui/react";
 
 const extensions = [
   extensionPresets,
@@ -76,6 +82,42 @@ const data = {
 };
 
 export function FastEditor() {
-  const app = useCreateCarbon(data, extensions);
-  return <Fastype app={app} />;
+  const app = useCreateCachedCarbon(data, extensions);
+
+  const editorRef = useRef(null);
+
+  const handleEditorDidMount = (editor, monaco) => {
+    editorRef.current = editor;
+    console.log(editor);
+  }
+
+  const handleOnChange = (value, event) => {
+    console.log(value);
+  }
+
+  return (
+    <Box h="full" className="fast-editor" w="600px">
+      {/* <Editor
+        height="60vh"
+        onMount={handleEditorDidMount}
+        onChange={handleOnChange}
+        language="typescript"
+        // theme="github-light"
+        options={{
+          lineNumbers: "off",
+          minimap: {
+            enabled: false,
+          },
+          renderLineHighlight: "none",
+          scrollbar: {
+            vertical: "hidden",
+            horizontal: "hidden",
+          },
+        }}
+        defaultValue={String.raw`console.log('done');`}
+        loading={<Spinner />}
+      /> */}
+      <Fastype app={app} />
+    </Box>
+  );
 }

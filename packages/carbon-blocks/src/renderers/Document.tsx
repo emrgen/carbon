@@ -43,8 +43,8 @@ export const DocumentComp = (props: RendererProps) => {
   );
 
   useEffect(() => {
-    app.emit('document:mounted', node)
-  }, [app, node])
+    app.emit("document:mounted", node);
+  }, [app, node]);
 
   const placeholder = usePlaceholder(node);
 
@@ -102,7 +102,11 @@ export const DocumentComp = (props: RendererProps) => {
         <CarbonBlock
           node={node}
           ref={ref}
-          custom={{ ...connectors, onMouseUp: handleClick }}
+          custom={{
+            ...connectors,
+            onMouseUp: handleClick,
+            onScroll: (e) => app.onEvent(EventsIn.scroll, e as any),
+          }}
         >
           <CarbonNodeContent node={node} custom={placeholder} />
           <CarbonProps node={node} />

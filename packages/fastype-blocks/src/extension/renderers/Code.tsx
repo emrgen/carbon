@@ -43,10 +43,10 @@ export const CodeComp = (props: RendererProps) => {
 const CodeContent = (props: RendererProps) => {
   const { node, version } = useNodeChange(props);
   const app = useCarbon();
-  const refText= useRef<HTMLTextAreaElement>(null);
+  const refText = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!node.parent) return
+    if (!node.parent) return;
     if (node.parent.attrs.node.typeChanged) {
       console.log("focus");
       app.tr
@@ -56,8 +56,23 @@ const CodeContent = (props: RendererProps) => {
     }
   }, [app, node, version]);
 
+  useEffect(() => {
+    const onFocus = () => {
+      const element = refText.current;
+      if (!element) return;
+      console.log("focus");
+      element.focus();
+      element.setSelectionRange(element.value.length, element.value.length);
+    };
+
+    node.on("focus", onFocus);
+    return () => {
+      node.off("focus", onFocus);
+    };
+  }, [node, refText]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    stop(e);
+    // stop(e);
     if (e.key == "Tab") {
       e.preventDefault();
     }
@@ -66,6 +81,12 @@ const CodeContent = (props: RendererProps) => {
       if (app.blockSelection.size > 0) {
         e.preventDefault();
       }
+    }
+
+    if (e.key == "Escape") {
+      stop(e);
+      app.parkCursor();
+      app.tr.selectNodes([node.parent!.id]).dispatch();
     }
   };
 
