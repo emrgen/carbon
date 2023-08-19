@@ -13,5 +13,6 @@ export * from './utils/node'
 export * from './utils/event'
 export * from './utils/action'
 export * from './utils/constrain'
+export * from './utils/htmlAttrs'
 
 export * from './core/BSet'

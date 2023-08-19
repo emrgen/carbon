@@ -6,7 +6,13 @@ import {
   useCreateCachedCarbon,
   useCreateCarbon,
 } from "@emrgen/carbon-core";
-import { blockPresets, node, text, title } from "@emrgen/carbon-blocks";
+import {
+  blockPresets,
+  node,
+  section,
+  text,
+  title,
+} from "@emrgen/carbon-blocks";
 import { carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { fastypeBlocks } from "@emrgen/fastype-blocks";
 import Editor, { DiffEditor, useMonaco, loader } from "@monaco-editor/react";
@@ -41,19 +47,26 @@ const data = {
         {
           name: "divider",
         },
-        node("equation", [
+        section([
           title([
-            // text("\\begin{matrix}\n1 & 2 & 3\\\\\na & b & c\n\\end{matrix}"),
-            text(String.raw`\ce{CO2 + C -> 2 CO}`),
+            text("I am "),
+            text("carbon", { node: { marks: { bold: true } } }),
+            text(" editor"),
           ]),
         ]),
-        node("code", [
-          title([
-            text(String.raw`function name() {
-  console.log("hello world");
-}`),
-          ]),
-        ]),
+        //         node("equation", [
+        //           title([
+        //             // text("\\begin{matrix}\n1 & 2 & 3\\\\\na & b & c\n\\end{matrix}"),
+        //             text(String.raw`\ce{CO2 + C -> 2 CO}`),
+        //           ]),
+        //         ]),
+        //         node("code", [
+        //           title([
+        //             text(String.raw`function name() {
+        //   console.log("hello world");
+        // }`),
+        //           ]),
+        //         ]),
 
         // {
         //   name: "content",
@@ -82,18 +95,18 @@ const data = {
 };
 
 export function FastEditor() {
-  const app = useCreateCachedCarbon(data, extensions);
+  const app = useCreateCarbon(data, extensions);
 
   const editorRef = useRef(null);
 
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
     console.log(editor);
-  }
+  };
 
   const handleOnChange = (value, event) => {
     console.log(value);
-  }
+  };
 
   return (
     <Box h="full" className="fast-editor" w="600px">

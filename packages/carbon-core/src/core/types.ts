@@ -1,4 +1,4 @@
-import { Bound, Optional } from '@emrgen/types';
+import { Bound, BoundRect, Optional } from '@emrgen/types';
 import { EventContext } from './EventContext';
 import { Node } from './Node';
 import { InputRule } from './Rules';
@@ -54,6 +54,11 @@ export interface NodeJSON extends Record<string, any> {
 
 export const yes = () => true;
 export const no = () => false;
+
+export interface SelectionBounds {
+	head: Optional<DOMRect>;
+	tail: Optional<DOMRect>;
+}
 
 export type SerializedNode = {
 	name: string;

@@ -2,12 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-body, .root {
+html, body, .root {
   margin: 0;
   padding: 0;
   position: absolute;
   height: 100%;
   width: 100%;
+  overflow: hidden;
 }
 
 .App {

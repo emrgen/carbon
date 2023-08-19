@@ -48,8 +48,23 @@ export const DocumentComp = (props: RendererProps) => {
 
   const placeholder = usePlaceholder(node);
 
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+          const lastChild = node.lastChild as Node;
+      const lastElement = app.store.element(lastChild?.id!);
+      if (!lastChild) return;
+      const bound = lastElement?.getBoundingClientRect();
+      if (!bound) return;
+
+      if (e.clientY > bound.bottom) {
+        app.emit('document:cursor:hide');
+        // preventAndStop(e);
+      }
+  },[node.lastChild, app])
+
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
+      app.emit("document:cursor:show");
+
       const lastChild = node.lastChild as Node;
       const lastElement = app.store.element(lastChild?.id!);
       if (!lastChild) return;
@@ -80,7 +95,7 @@ export const DocumentComp = (props: RendererProps) => {
           .dispatch();
       }
     },
-    [node.lastChild, app.store, app.schema, app.tr, app.selection]
+    [app, node.lastChild]
   );
 
   return (
@@ -105,7 +120,10 @@ export const DocumentComp = (props: RendererProps) => {
           custom={{
             ...connectors,
             onMouseUp: handleClick,
-            onScroll: (e) => app.onEvent(EventsIn.scroll, e as any),
+            // onMouseDown: handleMouseDown,
+            onScroll: (e) => app.emit(EventsIn.scroll, e as any),
+            onBlur: (e) => app.emit('document:blur', e as any),
+            onFocus: (e) => app.emit('document:focus', e as any),
           }}
         >
           <CarbonNodeContent node={node} custom={placeholder} />

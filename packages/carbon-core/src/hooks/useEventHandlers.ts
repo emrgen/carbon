@@ -1,5 +1,5 @@
 import { camelCase } from "lodash";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useCarbon } from './useCarbon';
 import { EventsIn } from '../core/Event';
 
@@ -37,6 +37,18 @@ export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 			{}
 		);
 	}, [app, events]);
+
+	useEffect(() => {
+		const onWindowResize = () => {
+			app.emit('document:resize');
+			app.emit('app:resize');
+		};
+
+		window.addEventListener('resize', onWindowResize);
+		return () => {
+			window.removeEventListener('resize', onWindowResize);
+		}
+	},[app])
 
 	return handlers;
 }

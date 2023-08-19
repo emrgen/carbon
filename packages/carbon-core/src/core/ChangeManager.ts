@@ -67,9 +67,17 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		}
 
 		if (this.state.isSelectionDirty) {
-			// console.log('updating selection');
+			console.log('updating selection');
 			this.updateSelection()
 			return
+		}
+
+		// the transaction did not update anything but we still need to publish it
+		if (tr) {
+			if (tr.updatesSelection) {
+				this.app.emit(EventsOut.selectionUpdated, this.app.selection);
+			}
+			this.app.emit(EventsOut.transaction, tr);
 		}
 	}
 
@@ -165,6 +173,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		// this.app.enable();
 
 		console.groupCollapsed('syncing: selection');
+		console.log('xxxxxxx');
+		
 		this.sm.syncSelection();
 		this.app.emit(EventsOut.selectionUpdated, this.state.selection);
 

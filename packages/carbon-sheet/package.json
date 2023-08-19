@@ -12,6 +12,7 @@
     "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",
     "emoji-regex": "^10.2.1",
+    "events": "^3.3.0",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
     "pixi.js": "^7.2.4",

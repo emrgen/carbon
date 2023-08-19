@@ -1,10 +1,13 @@
-import { Optional } from '@emrgen/types';
+import { Bound, BoundRect, Optional } from '@emrgen/types';
 import { classString, p14, p30 } from './Logger';
 import { Node } from './Node';
 import { Pin } from './Pin';
 import { PointedSelection } from './PointedSelection';
 import { NodeStore } from './NodeStore';
 import { DomSelection, Range } from './Range';
+import { SelectionBounds } from './types';
+
+
 
 export class PinnedSelection {
 	tail: Pin;
@@ -158,6 +161,40 @@ export class PinnedSelection {
 		const { tail, head } = this
 		return head.isAfterOf(tail);
 	}
+
+	bounds(store: NodeStore): SelectionBounds {
+		const { head } = this;
+		const selection = window.getSelection();
+		if (!selection) {
+			console.error('Selection.cursorPosition: selection is null');
+			return {head: null, tail: null}
+		}
+		if (this.isCollapsed && head.node.isEmpty && head.node.isBlock) {
+			const el = store.element(head.node.id);
+			const rect = (el?.childNodes[0] as HTMLSpanElement)?.getBoundingClientRect();
+			return { head: rect, tail: rect }
+		}
+		// console.log(selection, selection.rangeCount);
+		
+		if (selection.rangeCount !== 0) {
+			const endRange = selection.getRangeAt(0).cloneRange();
+			endRange.collapse();
+			const startRange = selection.getRangeAt(0).cloneRange();
+			startRange.collapse(true);
+			console.log(endRange, startRange.getClientRects());
+			
+			return this.isForward ? {
+				head: endRange.getClientRects()[0],
+				tail: startRange.getClientRects()[0],
+			} : {
+				head: startRange.getClientRects()[0],
+				tail: endRange.getClientRects()[0],
+			}
+		}
+
+		return { head: null, tail: null }
+	}
+
 
 	syncDom(store: NodeStore) {
 		try {

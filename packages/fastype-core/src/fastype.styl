@@ -1,0 +1,27 @@
+.fastype-cursor
+  position absolute
+  user-select: none
+  pointer-events: none
+  background: #aaaa
+  width: 2px
+  &.hidden
+    display: none
+
+.fastype-cursor--focused
+  background: black
+
+.fastype-cursor--blinking
+  animation: fastype-cursor-blink 1.2s infinite;
+
+
+// animate cursor blink
+@keyframes fastype-cursor-blink
+  0%
+    opacity: 1
+  50%
+    opacity: 0
+  100%
+    opacity: 1
+
+[data-name=document]
+  caret-color: transparent

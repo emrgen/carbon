@@ -1,1 +1,3 @@
-export * from './components'
+import './fastype.styl';
+
+export * from './components';

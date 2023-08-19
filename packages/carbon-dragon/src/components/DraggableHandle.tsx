@@ -131,8 +131,11 @@ export function DraggableHandle(props: FastDragHandleProps) {
     preventAndStop(e);
 
     if (!node) return;
+    app.enable();
+    app.focus()
+    const { nextSibling: nextBlock } = node;
 
-    if (node.isEmpty && !node.isAtom && !node.nextSibling?.isEmpty) {
+    if (node.isEmpty && !node.isAtom && !nextBlock?.isEmpty) {
       const title = node.find((n) => n.isTextBlock);
       if (node.isContainerBlock && title) {
         const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
@@ -145,12 +148,9 @@ export function DraggableHandle(props: FastDragHandleProps) {
       }
     }
 
-    if (
-      node.nextSibling &&
-      node.nextSibling?.isEmpty &&
-      !node.nextSibling?.isAtom
-    ) {
-      const after = PinnedSelection.fromPin(Pin.toStartOf(node.nextSibling)!);
+
+    if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
+      const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
       if (app.selection.eq(after)) return;
       app.tr.selectNodes([]).select(after, ActionOrigin.UserInput)?.dispatch();
       return;

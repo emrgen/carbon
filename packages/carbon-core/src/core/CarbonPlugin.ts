@@ -32,7 +32,7 @@ export abstract class CarbonPlugin {
 
 	name: PluginName = '';
 
-	private app: Optional<Carbon>;
+	protected app: Optional<Carbon>;
 
 	init(app: Carbon) {
 		this.app = app;
