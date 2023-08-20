@@ -49,39 +49,39 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		if (tr) {
 			this.transactions.push(tr);
 		}
+		const { isContentDirty, isNodeStateDirty, isSelectionDirty } = this.state
 
-		if (this.state.isContentDirty) {
+		if (!isContentDirty && !isNodeStateDirty && !isSelectionDirty) {
+
+			return
+		}
+		console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
+
+		if (isContentDirty) {
 			this.updateContent();
 			// console.log('updating content');
-			if (this.state.isNodeStateDirty) {
+			if (isNodeStateDirty) {
 				// console.log('updating states');
 				this.updateNodeState();
 			}
 			return
 		}
 
-		if (this.state.isNodeStateDirty) {
+		if (isNodeStateDirty) {
 			// console.log('updating states');
 			this.updateNodeState();
 			return
 		}
 
-		if (this.state.isSelectionDirty) {
-			console.log('updating selection');
+		if (isSelectionDirty) {
+			// console.log('updating selection');
 			this.updateSelection()
-			return
-		}
-
-		// the transaction did not update anything but we still need to publish it
-		if (tr) {
-			if (tr.updatesSelection) {
-				this.app.emit(EventsOut.selectionUpdated, this.app.selection);
-			}
-			this.app.emit(EventsOut.transaction, tr);
 		}
 	}
 
 	mounted(node: Node, changeType: NodeChangeType) {
+		// console.log('mounted', node.id.toString(), changeType);
+
 		// keep track of the pending node updates
 		if (changeType === NodeChangeType.update) {
 			this.state.runtime.updatedNodeIds.remove(node.id);
@@ -99,6 +99,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 		// console.log('--------', this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
 		// sync the selection if the content is synced
+		// console.log(this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), this.isStateSynced, this.state.isSelectionDirty);
+
 		if (this.isContentSynced) {
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
 			if (this.state.isSelectionDirty) {
@@ -113,6 +115,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	private onTransaction() {
 		const tr = this.transactions.shift()
+		// console.log('transaction', tr);
 		if (tr) {
 			this.app.emit(EventsOut.transaction, tr)
 		}
@@ -129,14 +132,16 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		updatedNodes.forEach(n => {
 			updatedNodeIds.remove(n.id);
 			if (n.closest(p => updatedNodeIds.has(p.id))) {
-				this.state.runtime.updatedNodeIds.remove(n.id);
 				return
 			}
 			updatedNodeIds.add(n.id);
 		})
 
 		console.log('publish', updatedNodes.map(n => n.id.toString()));
-		each(updatedNodes, n => this.publish(NodeChangeType.update, n));
+
+		updatedNodes
+			.filter(n => updatedNodeIds.has(n.id))
+			.forEach( n => this.publish(NodeChangeType.update, n));
 		console.groupEnd()
 	}
 
@@ -167,14 +172,11 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	private updateSelection() {
 		if (!this.isContentSynced) {
 			throw new Error("Trying to sync selection with dirty content");
-			return
 		}
-
 		// this.app.enable();
 
 		console.groupCollapsed('syncing: selection');
-		console.log('xxxxxxx');
-		
+
 		this.sm.syncSelection();
 		this.app.emit(EventsOut.selectionUpdated, this.state.selection);
 

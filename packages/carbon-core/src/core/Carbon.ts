@@ -43,7 +43,7 @@ export class Carbon extends EventEmitter {
 	_element: Optional<HTMLElement>;
 	_portal: Optional<HTMLElement>;
 	_contentElement: Optional<HTMLElement>;
-	_cursorRest: Optional<HTMLDivElement>;
+	private cursorParkingElement: Optional<HTMLDivElement>;
 	ticks: Maps<Carbon, Optional<Transaction>>[];
 
 	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
@@ -122,6 +122,17 @@ export class Carbon extends EventEmitter {
 		// emit event to external application
 		this.emit(type, event);
 
+		if (type === EventsIn.selectionchange) {
+			const selection = window.getSelection();
+			if (selection) {
+				const { anchorNode, focusNode } = selection;
+				if (anchorNode === this.cursorParkingElement && focusNode === this.cursorParkingElement) {
+					console.log('selectionchange: cursorRest');
+					return
+				}
+			}
+		}
+
 		if (type === EventsIn.custom) {
 			this.em.onCustomEvent(event);
 		} else {
@@ -170,11 +181,11 @@ export class Carbon extends EventEmitter {
 	}
 
 	setCursorRest(div: HTMLDivElement) {
-		this._cursorRest = div;
+		this.cursorParkingElement = div;
 	}
 
 	parkCursor() {
-		this._cursorRest?.focus();
+		this.cursorParkingElement?.focus();
 	}
 
 	cleanTicks() {

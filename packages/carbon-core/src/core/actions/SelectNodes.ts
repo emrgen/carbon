@@ -53,31 +53,30 @@ export class SelectNodes implements CarbonAction {
     if (afterSelectedNodes.length !== 0) {
       const { start, end } = selection;
       const nodes: Node[] = [];
-      selection.start.node.walk(n => {
-        nodes.push(n);
-        if (n.eq(end.node)) {
-          return true
-        }
-        return false
-      })
-      nodes.forEach(n => {
-        n?.updateAttrs({ html: { 'data-hide-cursor': true } });
-        tr.updated(n!);
-      })
-      nodes.forEach(n => {
-        app.runtime.hideCursorNodeIds.add(n.id);
-      });
+      // selection.start.node.walk(n => {
+      //   nodes.push(n);
+      //   if (n.eq(end.node)) {
+      //     return true
+      //   }
+      //   return false
+      // })
+      // nodes.forEach(n => {
+      //   // n?.updateAttrs({ html: { 'data-hide-cursor': true } });
+      //   tr.updated(n!);
+      // })
+      // nodes.forEach(n => {
+      //   app.runtime.hideCursorNodeIds.add(n.id);
+      // });
     } else {
-      app.runtime.hideCursorNodeIds.forEach(id => {
-        const node = app.store.get(id);
-        if (!node) return
+      // app.runtime.hideCursorNodeIds.forEach(id => {
+      //   const node = app.store.get(id);
+      //   if (!node) return
 
-        node.updateAttrs({ html: { 'data-hide-cursor': false } });
-        tr.updated(node);
-      });
-      app.runtime.hideCursorNodeIds.clear();
+      //   node.updateAttrs({ html: { 'data-hide-cursor': false } });
+      //   tr.updated(node);
+      // });
+      // app.runtime.hideCursorNodeIds.clear();
     }
-
 
     // console.log(afterSelectedNodes.map(n => n.id.toString()));
     tr.selected(...beforeSelectedNodes);

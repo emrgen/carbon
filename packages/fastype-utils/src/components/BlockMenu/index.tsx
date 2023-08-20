@@ -103,10 +103,13 @@ export function BlockMenu(props: BlockMenuProps) {
         BlockContent.create([])
       ).updateAttrs(node.id, { node: { typeChanged: true } });
       if (type.isAtom && type.isBlock) {
+        app.parkCursor();
         tr.selectNodes(node.id);
       } else if (!type.isAtom && node.child(0)?.find((n) => n.hasFocusable)) {
         tr.select(PinnedSelection.fromPin(Pin.future(node.child(0)!, 0)!)!);
       }
+
+      // console.log(window.getSelection());
 
       tr.dispatch();
     },

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Box, ChakraProvider } from "@chakra-ui/react";
 import { TrBus } from "../core/TrBus";
 import {
@@ -30,6 +30,20 @@ export const FastypeCursor = (props: CustomCursorProps) => {
     height: 0,
   });
 
+  const updateCursorPosition = useCallback(() => {
+      const { head } = app.selection.bounds(app.store);
+      if (!head) return;
+      const { x, y, width, height } = head;
+      setBound((style) => {
+        return {
+          ...style,
+          left: x - 1,
+          top: y,
+          height: height,
+        };
+      });
+    }, [app, setBound]);
+
   useEffect(() => {
     const timeouts: any[] = [];
     const onTransaction = (tr: Transaction) => {
@@ -42,21 +56,9 @@ export const FastypeCursor = (props: CustomCursorProps) => {
         removeClass(cursor, `hidden`);
       }
 
-      if (!tr.updatesSelection) return
+      // if (!tr.updatesSelection) return
+      updateCursorPosition();
 
-      const { head } = app.selection.bounds(app.store);
-      if (!head) return;
-      const { x, y, width, height } = head;
-      // console.log("head", head);
-      // const height = el.getS
-      setBound((style) => {
-        return {
-          ...style,
-          left: x - 1,
-          top: y,
-          height: height,
-        };
-      });
       removeClass(cursor, blinkClass);
       while (timeouts.length) {
         clearTimeout(timeouts.pop());
@@ -71,10 +73,12 @@ export const FastypeCursor = (props: CustomCursorProps) => {
     };
 
     app.on(EventsOut.transaction, onTransaction);
+    app.on(EventsOut.selectionUpdated, onTransaction);
     return () => {
       app.off(EventsOut.transaction, onTransaction);
+      app.off(EventsOut.selectionUpdated, onTransaction);
     };
-  }, [app, ref]);
+  }, [app, ref, updateCursorPosition]);
 
   useEffect(() => {
     const cursor = ref.current;
@@ -117,23 +121,16 @@ export const FastypeCursor = (props: CustomCursorProps) => {
 
   useEffect(() => {
     const onScroll = (e) => {
-      const { head } = app.selection.bounds(app.store);
-      if (!head) return;
-      const { x, y, height } = head;
-      setBound((style) => {
-        return {
-          ...style,
-          left: x - 1,
-          top: y,
-          height: height,
-        };
-      });
+      updateCursorPosition();
     };
+
     app.on("scroll", onScroll);
+    window.addEventListener("resize", updateCursorPosition);
     return () => {
       app.off("scroll", onScroll);
+      window.removeEventListener("resize", updateCursorPosition);
     };
-  }, [app]);
+  }, [app, updateCursorPosition]);
 
   return (
     <Box

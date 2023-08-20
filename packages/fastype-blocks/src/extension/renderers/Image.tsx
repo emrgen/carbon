@@ -62,7 +62,7 @@ export function ImageComp(props: RendererProps) {
     useCombineConnectors(dragDropRect, selection)
   );
 
-  const [aspectRatio, setAspectRatio] = useState(0.681944444);
+  const [aspectRatio, setAspectRatio] = useState(9 / 16);
 
   const handleClick = (e) => {
     preventAndStop(e);

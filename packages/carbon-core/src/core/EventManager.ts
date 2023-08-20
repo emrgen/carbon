@@ -64,7 +64,6 @@ export class EventManager {
 			return
 		}
 
-
 		if (type !== EventsIn.selectionchange && app.state.selectedNodeIds.size > 0) {
 			// console.log('selected nodes', app.state.selectedNodeIds);
 			// console.log(type, event);

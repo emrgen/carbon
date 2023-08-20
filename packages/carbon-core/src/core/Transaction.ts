@@ -238,7 +238,7 @@ export class Transaction {
 		ids.forEach(id => {
 			this.state.store.get(id)?.markUpdated();
 			this.updatedIds.add(id)
-			this.state.runtime.updatedNodeIds.add(id);
+			// this.state.runtime.updatedNodeIds.add(id);
 		});
 
 		return this
@@ -382,6 +382,7 @@ export class Transaction {
 	}
 
 	updated(...nodes: Node[]) {
+		// console.log(new Error().stack);
 		// console.log('pending updates', nodes.map(n => n.id.toString()));
 		each(nodes, n => {
 			this.updatedIds.add(n.id);
@@ -397,11 +398,11 @@ export class Transaction {
 		});
 	}
 
-	hideCursor(...nodes: Node[]) {
-		each(nodes, n => {
-			this.runtime.hideCursorNodeIds.add(n.id);
-		});
-	}
+	// hideCursor(...nodes: Node[]) {
+	// 	each(nodes, n => {
+	// 		this.runtime.hideCursorNodeIds.add(n.id);
+	// 	});
+	// }
 
 	selected(...nodes: Node[]) {
 		// console.log('Transaction.selected', nodes.map(n => n.id.toString()));
@@ -412,7 +413,7 @@ export class Transaction {
 	}
 
 	activated(...nodes: Node[]) {
-		console.log('Transaction.activated', nodes.map(n => n.id.toString()));
+		// console.log('Transaction.activated', nodes.map(n => n.id.toString()));
 		each(nodes, n => {
 			this.activatedIds.add(n.id);
 			this.runtime.activatedNodeIds.add(n.id);

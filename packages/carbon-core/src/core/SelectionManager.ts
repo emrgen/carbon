@@ -54,7 +54,7 @@ export class SelectionManager {
 		// });
 
 		// console.log('Editor.onSelect', after.toString(), this.runtime.selectEvents.length);
-		// console.debug('Editor.onSelect', after.toString(), 'pendingSelection', origin);
+		// console.log('Editor.onSelect', after.toString(), 'pendingSelection', origin);
 		if ([ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
 			if (app.runtime.selectEvents.length === 0) {
 				// this.selectedNodesIds.clear();
@@ -87,10 +87,11 @@ export class SelectionManager {
 
 		// console.log('synced selection from origin', origin)
 		this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange);
-		// console.log('###', editor.selection.toString(), selection.toString(), editor.selection, selection);
+		// console.log('###', this.app.selection.toString(), selection.toString());
 		this.updateFocusPlaceholder(this.state.prevSelection, selection);
 		this.app.emit(EventsOut.selectionChanged, selection);
 		this.app.change.update();
+		this.app.emit(EventsOut.selectionUpdated, this.state);
 	}
 
 	// syncs DOM selection with Editor's internal selection state
