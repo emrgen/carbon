@@ -20,4 +20,10 @@ export const useDroppable = (props: FastDroppableProps) => {
       };
     }
   }, [dnd, node, ref, version]);
+
+  useEffect(() => {
+    if (node.children.some((n) => n.type.isDraggable)) {
+      dnd.onUpdated(node);
+    }
+  }, [version, node, dnd]);
 };

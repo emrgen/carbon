@@ -1070,9 +1070,7 @@ export class TransformCommands extends BeforePlugin {
       while (startContainer && endContainer && mergeDepth) {
         console.log('mergeDepth', mergeDepth);
 
-        // destination point for move
         // let to: Optional<Point> = Point.toAfter(startContainer.id);
-        let to = Point.toAfter(startContainer?.lastChild?.id!)
         // if (startContainer.isCollapsible) {
         // }
 
@@ -1084,6 +1082,8 @@ export class TransformCommands extends BeforePlugin {
 
           console.log('merge start and end block');
         } else {
+          // move endContainer children to the end of startContainer
+          let to = Point.toAfter(startContainer?.lastChild?.id!)
           // move undeleted children
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id)) ?? [];
           if (moveNodes.length) {

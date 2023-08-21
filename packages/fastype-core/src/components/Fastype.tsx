@@ -16,7 +16,7 @@ export function Fastype(props: FastypeProps) {
   return (
     <ChakraProvider>
       <CarbonApp app={app} />
-      <FastypeCursor app={app} />
+      {/* <FastypeCursor app={app} /> */}
       <BlockMenu app={app} />
       {/* <PorterOverlay/> */}
     </ChakraProvider>

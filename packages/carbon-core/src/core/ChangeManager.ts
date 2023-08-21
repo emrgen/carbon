@@ -50,12 +50,11 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			this.transactions.push(tr);
 		}
 		const { isContentDirty, isNodeStateDirty, isSelectionDirty } = this.state
-
+		// console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
+		// if nothing is dirty, then there is nothing to do
 		if (!isContentDirty && !isNodeStateDirty && !isSelectionDirty) {
-
 			return
 		}
-		console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
 
 		if (isContentDirty) {
 			this.updateContent();

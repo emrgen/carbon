@@ -2,14 +2,16 @@ import { useCallback, useEffect } from "react";
 import { useDndContext } from "./useDndContext";
 import { extend } from 'lodash';
 import { UseFastDraggableProps } from "./useDraggable";
+import { useNodeChange } from "@emrgen/carbon-core";
 
-interface UseFastDndRegionProps extends UseFastDraggableProps {}
+interface UseFastDndRegionProps extends UseFastDraggableProps { }
 
 // create a event listener for the target node
 export const useDndRegion = (props: UseFastDndRegionProps) => {
-	const {node, ref} = props;
+	const { node, ref } = props;
 
 	const dnd = useDndContext();
+	const { version } = useNodeChange(props);
 
 	const onMouseMove = useCallback((e) => {
 		if (e.target === dnd.region) {
@@ -20,6 +22,12 @@ export const useDndRegion = (props: UseFastDndRegionProps) => {
 	useEffect(() => {
 		dnd.region = ref.current;
 	}, [dnd, ref]);
+
+	useEffect(() => {
+		if (node.children.some(n => n.type.isDraggable)) {
+			dnd.onUpdated(node);
+		}
+	}, [version, node, dnd]);
 
 	return {
 		listeners: {

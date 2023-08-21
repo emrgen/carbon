@@ -19,6 +19,7 @@ export class Dnd extends EventEmitter {
 
 	constructor(readonly app: Carbon) {
 		super();
+		this.onUpdated = this.onUpdated.bind(this)
 		this.onMountDraggable = this.onMountDraggable.bind(this)
 		this.onUnmountDraggable = this.onUnmountDraggable.bind(this)
 		this.onMountDroppable = this.onMountDroppable.bind(this)
@@ -30,6 +31,10 @@ export class Dnd extends EventEmitter {
 		this.onMouseOver = this.onMouseOver.bind(this)
 		this.onMouseDown = this.onMouseDown.bind(this)
 		this.onMouseUp = this.onMouseUp.bind(this)
+	}
+
+	onUpdated(node: Node) {
+		this.isDirty = true;
 	}
 
 	onMountDraggable(node: Node, el: HTMLElement) {
@@ -112,7 +117,7 @@ export class Dnd extends EventEmitter {
 
 		const {scrollTop, scrollLeft } = docParent;
 
-		// console.warn('mouse in', node.id.toString())
+		// console.warn('mouse in', node.id.toString(), this.isDirty)
 		if (this.isDirty) {
 			// console.log('update draggable');
 			this.draggables.refresh(scrollTop, scrollLeft);
