@@ -50,6 +50,7 @@ import { VideoComp } from './renderers/Video';
 import { Video } from './plugins/Video';
 import { Content } from './plugins/Content';
 import { ContentComp } from './renderers/Content';
+import { HeaderComp } from './renderers/Header';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -82,10 +83,10 @@ export const blockPresets: Extension = {
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
-		Renderer.create('h1', NestableComp),
-		Renderer.create('h2', NestableComp),
-		Renderer.create('h3', NestableComp),
-		Renderer.create('h4', NestableComp),
+		Renderer.create('h1', HeaderComp),
+		Renderer.create('h2', HeaderComp),
+		Renderer.create('h3', HeaderComp),
+		Renderer.create('h4', HeaderComp),
 		Renderer.create('section', NestableComp),
 		Renderer.create('title', TitleComp),
 		Renderer.create('text', CarbonText),

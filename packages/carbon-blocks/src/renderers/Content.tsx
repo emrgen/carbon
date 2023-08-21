@@ -37,43 +37,54 @@ export function ContentComp(props: RendererProps) {
       const stack: any[] = [];
 
       if (tr.updatesContent) {
-        app.content.find(n => n.isDocument)?.children.forEach((node) => {
-          const as = node.attrs.html["data-as"] ?? "";
-          const type: Optional<NodeType> = app.schema.nodes[as];
-          if (
-            node.type.groups.includes("heading") ||
-            type?.groups.includes("heading")
-          ) {
-            console.log('node', node);
-            
-            const level = parseInt(
-              as ? as.slice(-1) : node.type.name.slice(-1)
-            );
-            console.log("level", level);
-            stack.push({ text: node.child(0)?.textContent, depth: level });
-          }
-        });
+        app.content
+          .find((n) => n.isDocument)
+          ?.children.forEach((node) => {
+            const as = node.attrs.html["data-as"] ?? "";
+            const type: Optional<NodeType> = app.schema.nodes[as];
+            if (
+              node.type.groups.includes("heading") ||
+              type?.groups.includes("heading")
+            ) {
+              console.log("node", node);
+
+              const level = parseInt(
+                as ? as.slice(-1) : node.type.name.slice(-1)
+              );
+              console.log("level", level);
+              stack.push({ text: node.child(0)?.textContent, depth: level, id: node.id.toString() });
+            }
+          });
 
         if (stack.length > 0) {
           console.log("stack", stack);
           const root: any = {
             name: "section",
-          }
+            attrs: {
+              node: { tag: "a" },
+              html: { href: ""}
+            },
+          };
 
           stack.forEach((item: any, index) => {
             if (index === 0) {
               root.content = [
-                title([{ name: "text", text: item.text }])
-              ]
+                title([{ name: "text", text: item.text || "Untitled" }]),
+              ];
+              root.attrs.html.href = '#' + item.id
             } else {
               root.content.push({
                 name: "section",
                 content: [title([{ name: "text", text: item.text }])],
+                attrs: {
+                  node: { tag: "a" },
+                  html: { href: '#' + item.id }
+                },
               });
             }
-          })
+          });
 
-          console.log('root', root);
+          console.log("root", root);
           setContent(app.schema.nodeFromJSON(root)!);
         } else {
           setContent(null);

@@ -83,6 +83,7 @@ export class ChangeName extends BeforePlugin {
       tr.updateAttrs(block.id, {
         html: {
           'data-as': name,
+          id: block.key,
         },
         // node: {
         //   name,
