@@ -1,4 +1,4 @@
-import { each, identity } from 'lodash';
+import { each, first, identity } from 'lodash';
 import { NodeIdSet } from './BSet';
 import { CarbonState } from './CarbonState';
 import { Carbon } from './Carbon';
@@ -49,8 +49,10 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		if (tr) {
 			this.transactions.push(tr);
 		}
-		const { isContentDirty, isNodeStateDirty, isSelectionDirty } = this.state
-		// console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
+		const { isContentDirty, isNodeStateDirty, isSelectionDirty } = this.state;
+
+		console.log('updating transaction effect', tr);
+		console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
 		// if nothing is dirty, then there is nothing to do
 		if (!isContentDirty && !isNodeStateDirty && !isSelectionDirty) {
 			return
@@ -74,7 +76,9 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 		if (isSelectionDirty) {
 			// console.log('updating selection');
-			this.updateSelection()
+			this.updateSelection(() => {
+				this.onTransaction();
+			})
 		}
 	}
 
@@ -96,25 +100,28 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			this.app.emit(EventsOut.nodeStateUpdated, this.state);
 		}
 
-		// console.log('--------', this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
+		// console.log('--------', node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
 		// sync the selection if the content is synced
 		// console.log(this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), this.isStateSynced, this.state.isSelectionDirty);
 
 		if (this.isContentSynced) {
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
 			if (this.state.isSelectionDirty) {
-				this.updateSelection();
-				this.onTransaction();
+				// console.log('updating selection', first(this.transactions));
+				this.updateSelection(() => {
+					this.onTransaction();
+				});
 			} else {
 				this.onTransaction();
 				this.app.processTick();
+				// console.log('process tick');
 			}
 		}
 	}
 
 	private onTransaction() {
 		const tr = this.transactions.shift()
-		// console.log('transaction', tr);
+		// console.log('EventOut.transaction', tr);
 		if (tr) {
 			this.app.emit(EventsOut.transaction, tr)
 		}
@@ -168,7 +175,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		each(dirtyNodes, n => this.publish(NodeChangeType.state, n));
 	}
 
-	private updateSelection() {
+	private updateSelection(cb: Function) {
 		if (!this.isContentSynced) {
 			throw new Error("Trying to sync selection with dirty content");
 		}
@@ -178,6 +185,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 		this.sm.syncSelection();
 		this.app.emit(EventsOut.selectionUpdated, this.state.selection);
+		cb();
 
 		// process pending transactions
 		this.tm.dispatch();

@@ -41,7 +41,7 @@ export class TransactionManager {
 			if (tr?.commit()) {
 				// TODO: transaction should me made read-only after commit
 				pm.onTransaction(tr);
-				// app.emit(EventsOut.transaction, tr);
+				app.emit(EventsOut.transactionCommit, tr);
 				this.updateTransactionEffects(tr);
 			}
 		}

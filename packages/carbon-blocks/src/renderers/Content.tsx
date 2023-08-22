@@ -1,6 +1,7 @@
 import {
   CarbonBlock,
   CarbonNode,
+  EventsOut,
   Node,
   NodeType,
   RendererProps,
@@ -15,9 +16,25 @@ import {
   useConnectorsToProps,
   useDragDropRectSelect,
 } from "@emrgen/carbon-dragon";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Optional } from "@emrgen/types";
 import { title } from "../create";
+import { last } from "lodash";
+
+const createContent = (id: string, content?: string) => {
+  return {
+    name: "section",
+    attrs: {
+      node: { tag: "a" },
+      html: { href: '#' + id },
+    },
+    content: [title([{ name: "text", text: content || "Untitled" }])],
+  };
+};
+
+const appendContent = (parent: any, child: any) => {
+  parent.content.push(child);
+};
 
 export function ContentComp(props: RendererProps) {
   const { node } = props;
@@ -32,71 +49,78 @@ export function ContentComp(props: RendererProps) {
 
   const [content, setContent] = useState<Optional<Node>>(null);
 
+  const updateContent = useCallback(() => {
+    const stack: { text: string; depth: number; id: string }[] = [];
+    const levels: { node: any; depth: number }[] = [];
+    const stackNode = {
+      name: "stack",
+      content: [],
+    };
+    app.content
+      .find((n) => n.isDocument)
+      ?.children.forEach((node) => {
+        const as = node.attrs.html["data-as"] ?? "";
+        const type: Optional<NodeType> = app.schema.nodes[as];
+        if (
+          node.type.groups.includes("heading") ||
+          type?.groups.includes("heading")
+        ) {
+          console.log("node", node);
+
+          const level = parseInt(as ? as.slice(-1) : node.type.name.slice(-1));
+          console.log("level", level);
+          stack.push({
+            text: node.child(0)?.textContent ?? "Untitled",
+            depth: level,
+            id: node.id.toString(),
+          });
+        }
+      });
+
+    // console.log(stack.map(s => s.depth));
+    if (stack.length > 0) {
+      stack.forEach((item, index) => {
+        const content = createContent(item.id, item.text);
+        if (index === 0) {
+          appendContent(stackNode, content);
+        } else {
+          while (levels.length && last(levels)!.depth >= item.depth) {
+            levels.pop();
+          }
+
+          if (levels.length) {
+            appendContent(last(levels)!.node, content);
+          } else {
+            appendContent(stackNode, content);
+          }
+        }
+
+        levels.push({ node: content, depth: item.depth });
+      });
+
+      // console.log("stackNode", stackNode);
+      setContent(app.schema.nodeFromJSON(stackNode)!);
+    } else {
+      setContent(null);
+    }
+  }, [app.content, app.schema]);
+
   useEffect(() => {
     const onTransaction = (tr: Transaction) => {
-      const stack: any[] = [];
-
       if (tr.updatesContent) {
-        app.content
-          .find((n) => n.isDocument)
-          ?.children.forEach((node) => {
-            const as = node.attrs.html["data-as"] ?? "";
-            const type: Optional<NodeType> = app.schema.nodes[as];
-            if (
-              node.type.groups.includes("heading") ||
-              type?.groups.includes("heading")
-            ) {
-              console.log("node", node);
-
-              const level = parseInt(
-                as ? as.slice(-1) : node.type.name.slice(-1)
-              );
-              console.log("level", level);
-              stack.push({ text: node.child(0)?.textContent, depth: level, id: node.id.toString() });
-            }
-          });
-
-        if (stack.length > 0) {
-          console.log("stack", stack);
-          const root: any = {
-            name: "section",
-            attrs: {
-              node: { tag: "a" },
-              html: { href: ""}
-            },
-          };
-
-          stack.forEach((item: any, index) => {
-            if (index === 0) {
-              root.content = [
-                title([{ name: "text", text: item.text || "Untitled" }]),
-              ];
-              root.attrs.html.href = '#' + item.id
-            } else {
-              root.content.push({
-                name: "section",
-                content: [title([{ name: "text", text: item.text }])],
-                attrs: {
-                  node: { tag: "a" },
-                  html: { href: '#' + item.id }
-                },
-              });
-            }
-          });
-
-          console.log("root", root);
-          setContent(app.schema.nodeFromJSON(root)!);
-        } else {
-          setContent(null);
-        }
+        updateContent();
       }
     };
-    app.on("transaction", onTransaction);
 
+    app.on(EventsOut.transactionCommit, onTransaction);
     return () => {
-      app.off("transaction", onTransaction);
+      app.off(EventsOut.transactionCommit, onTransaction);
     };
-  }, [app]);
+  }, [app, updateContent]);
+
+  useEffect(() => {
+    updateContent();
+  }, [updateContent]);
 
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
