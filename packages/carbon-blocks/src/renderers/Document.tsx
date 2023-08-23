@@ -106,11 +106,17 @@ export const DocumentComp = (props: RendererProps) => {
       if (!el) return;
       const { head } = app.selection.bounds(app.store);
       if (!head) return;
-      const { bottom } = head;
+      const { bottom,  top } = head;
       // console.log(bottom, el.offsetHeight, el.scrollHeight, el.scrollTop);
+
+      if (top < 100) {
+        el.scrollTop = el.scrollTop + top - 100
+        return;
+      }
+
       if (bottom > el.offsetHeight - 100) {
-        // console.log('scroll to bottom');
         el.scrollTop = el.scrollTop + bottom - el.offsetHeight + 100
+        return;
       }
     }
     app.on("transaction", onTransaction);
