@@ -98,10 +98,9 @@ export function BlockMenu(props: BlockMenuProps) {
       if (!node) return;
 
       const { tr } = app;
-      tr.change(node?.id, node?.name, type.name).setContent(
-        node.child(0)!.id,
-        BlockContent.create([])
-      ).updateAttrs(node.id, { node: { typeChanged: true } });
+      tr.updateAttrs(node.id, { node: { typeChanged: true }, html: { 'data-as': type.name } })
+        .change(node?.id, node?.name, type.name)
+        .setContent(node.child(0)!.id, BlockContent.create([]));
       if (type.isAtom && type.isBlock) {
         app.parkCursor();
         tr.selectNodes(node.id);

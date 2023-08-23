@@ -3,6 +3,7 @@ import {
 	Carbon,
 	CarbonPlugin,
 	EventContext,
+	EventHandler,
 	EventHandlerMap,
 	Node,
 	NodePlugin,
@@ -65,6 +66,21 @@ export class TitlePlugin extends NodePlugin {
 			// },
 			dragStart(ctx: EventContext<DragEvent>) {
 				ctx.event.preventDefault()
+			}
+		}
+	}
+
+	keydown(): Partial<EventHandler> {
+		return {
+			shiftEnter: (ctx: EventContext<KeyboardEvent>) => {
+				const { app, selection } = ctx;
+				const { blockSelection } = app;
+				if (!blockSelection.isEmpty) return
+
+				if (selection.isCollapsed) {
+					preventAndStopCtx(ctx);
+					app.cmd.transform.insertText(selection, `\n`, false)?.dispatch();
+				}
 			}
 		}
 	}

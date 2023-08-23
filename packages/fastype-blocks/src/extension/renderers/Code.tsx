@@ -5,9 +5,13 @@ import ResizeTextarea from "react-textarea-autosize";
 import styles from "styles.module.css";
 
 import {
+  ActionOrigin,
   BlockContent,
   CarbonBlock,
+  Pin,
+  PinnedSelection,
   RendererProps,
+  preventAndStop,
   stop,
   useCarbon,
   useNodeChange,
@@ -22,6 +26,7 @@ import {
 
 export const CodeComp = (props: RendererProps) => {
   const { node } = props;
+  const app = useCarbon();
   const ref = useRef(null);
 
   const selection = useSelectionHalo(props);
@@ -87,6 +92,30 @@ const CodeContent = (props: RendererProps) => {
       stop(e);
       app.parkCursor();
       app.tr.selectNodes([node.parent!.id]).dispatch();
+    }
+
+    // if back spaced at the beginning of the line
+    // convert to section
+    if (e.key == "Backspace") {
+      const textarea = e.target as HTMLTextAreaElement;
+      const { selectionStart, selectionEnd } = textarea;
+      const parent = node.parent!;
+
+      if (selectionStart == 0 && selectionEnd == 0) {
+        preventAndStop(e);
+        // NOTE: when the text area is removed in section the onBlur is not called.
+        // so we need to enable the editor here.
+        app.enable();
+
+        const { tr } = app;
+        tr.change(parent.id, parent.name, "section");
+        tr.updateAttrs(parent.id, { node: { typeChanged: true } });
+        tr.select(
+          PinnedSelection.fromPin(Pin.toStartOf(parent)!),
+          ActionOrigin.UserInput
+        );
+        tr.dispatch();
+      }
     }
   };
 

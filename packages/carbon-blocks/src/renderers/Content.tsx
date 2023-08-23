@@ -56,16 +56,28 @@ export function ContentComp(props: RendererProps) {
       name: "stack",
       content: [],
     };
+    // const names = app.content
+    //   .find((n) => n.isDocument)
+    //   ?.children.map((n) => n.type.groups);
+    //   console.log("names", names);
+
     app.content
       .find((n) => n.isDocument)
       ?.children.forEach((node) => {
         const as = node.attrs.html["data-as"] ?? "";
         const type: Optional<NodeType> = app.schema.nodes[as];
+
         if (
           node.type.groups.includes("heading") ||
           type?.groups.includes("heading")
         ) {
-          console.log("node", node);
+          // console.log(
+          //   "node",
+          //   node.name,
+          //   node.type.groups.includes("heading"),
+          //     type?.groups.includes("heading"),
+          //     type
+          // );
 
           const level = parseInt(as ? as.slice(-1) : node.type.name.slice(-1));
           console.log("level", level);
@@ -76,6 +88,9 @@ export function ContentComp(props: RendererProps) {
           });
         }
       });
+
+      // console.log(stack);
+
 
     // console.log(stack.map(s => s.depth));
     if (stack.length > 0) {
@@ -104,6 +119,9 @@ export function ContentComp(props: RendererProps) {
       setContent(null);
     }
   }, [app.content, app.schema]);
+
+  console.log(content);
+  
 
   useEffect(() => {
     const onTransaction = (tr: Transaction) => {

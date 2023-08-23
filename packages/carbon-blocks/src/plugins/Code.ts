@@ -71,7 +71,7 @@ export class Code extends CarbonPlugin {
         const { selection } = app;
         if (app.blockSelection.size === 1) {
           console.log('blockSelection', app.blockSelection);
-          
+
           preventAndStopCtx(ctx);
           app.tr.selectNodes([]).dispatch();
           node.child(0)?.emit('focus', node.child(0)!)

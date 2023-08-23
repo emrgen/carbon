@@ -66,7 +66,7 @@ export class BlockMenuPlugin extends BeforePlugin {
     const { selection } = app;
     const {checked} = this.state;
 
-    console.log('onKeyUp', node.textContent, ctx.node.id.toString(), checked.get(ctx.node.id.toString()), node.isEmpty);
+    // console.log('onKeyUp', node.textContent, ctx.node.id.toString(), checked.get(ctx.node.id.toString()), node.isEmpty);
 
     if (node.isEmpty) {
       this.onHide(app, node, false);
@@ -90,7 +90,6 @@ export class BlockMenuPlugin extends BeforePlugin {
     }
 
     console.log('show menu');
-
     app.emit(BlockMenuCmd.show, node, el);
   }
 

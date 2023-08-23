@@ -71,8 +71,10 @@ export class NestablePlugin extends AfterPlugin {
 
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);
-
-				if (listNode.attrs.html['data-as']) {
+				const as = listNode.attrs.html['data-as'];
+				// if listNode is not rendered as the listNode.name
+				// remove the data-as attribute
+				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
 					tr
 						.updateAttrs(listNode.id, {

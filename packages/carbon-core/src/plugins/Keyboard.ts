@@ -33,6 +33,8 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 	}
 
 	backspace(app: Carbon, ctx: EventContext<KeyboardEvent>) {
+		console.log('xxxxxxx');
+		
 		ctx.preventDefault();
 		ctx.event.preventDefault();
 		ctx.event.stopPropagation();
@@ -284,7 +286,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			shiftDelete: (event) => this.delete(event),
 
 			backspace: e => {
-				console.log(e.app);
+				console.log('XXX',e.app);
 				e.app.cmd.keyboard.backspace(e)?.dispatch()
 			},
 			shiftBackspace: e => e.app.cmd.keyboard.backspace(e)?.dispatch(),
@@ -358,7 +360,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		const { blocks: nodes } = nodeSelection;
 		const firstNode = nodes[0] as Node;
-		const block = prevBlockSelectable(firstNode);
+		const block = prevSelectableBlock(firstNode);
 		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
 		if (!block) {
 			ctx.event.preventDefault()
@@ -374,12 +376,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	shiftDown(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
-		const { blockSelection: nodeSelection } = app;
-		if (nodeSelection.isEmpty) return
+		const { blockSelection } = app;
+		if (blockSelection.isEmpty) return
 
-		const { blocks: nodes } = nodeSelection;
+		const { blocks: nodes } = blockSelection;
 		const firstNode = last(nodes) as Node;
-		const block = nextBlockSelectable(firstNode)
+		const block = nextSelectableBlock(firstNode)
 		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
 		if (!block) return
 
@@ -530,7 +532,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			return
 		}
 
-		const block = prevBlockSelectable(node)
+		const block = prevSelectableBlock(node)
 		if (!block || block.isDocument) return
 
 		app.tr.selectNodes([block.id]).dispatch()
@@ -549,7 +551,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			return
 		}
 
-		const block = nextBlockSelectable(node)
+		const block = nextSelectableBlock(node)
 		console.log('nextContainerBlock', block);
 		if (!block) return
 
@@ -557,7 +559,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 	}
 }
 
-const prevBlockSelectable = (node: Node) => {
+const prevSelectableBlock = (node: Node) => {
 	const block = node.chain.find(n => n.isContainerBlock) as Node;
 	const { prevSibling } = block
 	if (prevSibling?.isContainerBlock) {
@@ -575,7 +577,7 @@ const prevBlockSelectable = (node: Node) => {
 	return block?.prev(n => n.isBlockSelectable);
 }
 
-const nextBlockSelectable = node => {
+const nextSelectableBlock = node => {
 	const block: Optional<Node> = node.chain.find(n => n.isBlockSelectable);
 	const found = block?.find(n => {
 		return !n.eq(block) && !n.isCollapseHidden && n.isBlockSelectable

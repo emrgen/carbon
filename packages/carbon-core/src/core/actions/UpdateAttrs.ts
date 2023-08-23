@@ -13,7 +13,7 @@ import { Optional } from '@emrgen/types';
 export class UpdateAttrs implements CarbonAction {
   readonly type: ActionType;
   readonly id: number;
-  readonly prevAttrs: Optional<NodeAttrs>;
+  private prevAttrs: Optional<NodeAttrs>;
   readonly nodeId: NodeId;
 
   static fromJSON(json) { }
@@ -42,7 +42,7 @@ export class UpdateAttrs implements CarbonAction {
     node.updateAttrs(this.attrs);
     tr.updated(node);
 
-    return NULL_ACTION_RESULT
+    return NULL_ACTION_RESULT;
   }
 
   inverse(): CarbonAction {
