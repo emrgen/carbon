@@ -35,6 +35,7 @@ export const DocumentComp = (props: RendererProps) => {
   const app = useCarbon();
 
   const ref = useRef<HTMLElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const dndRegion = useDndRegion({ node, ref });
   const nonDraggable = useNonDraggable({ node, ref });
   const selectionSurface = useRectSelectionSurface({ node, ref });
@@ -98,11 +99,35 @@ export const DocumentComp = (props: RendererProps) => {
     [app, node.lastChild]
   );
 
+  // scroll to bottom on transaction if cursor is below the screen
+  useEffect(() => {
+    const onTransaction = (tr: any) => {
+      const el = ref.current;
+      if (!el) return;
+      const { head } = app.selection.bounds(app.store);
+      if (!head) return;
+      const { bottom } = head;
+      // console.log(bottom, el.offsetHeight, el.scrollHeight, el.scrollTop);
+      if (bottom > el.offsetHeight - 100) {
+        // console.log('scroll to bottom');
+        el.scrollTop = el.scrollTop + bottom - el.offsetHeight + 100
+      }
+    }
+    app.on("transaction", onTransaction);
+    return () => {
+      app.off("transaction", onTransaction);
+    };
+  }, [app, ref]);
+
   return (
     <DocumentContext document={node}>
       <div
         className="document-wrapper"
-        onScroll={(e) => app.onEvent(EventsIn.scroll, e as any)}
+        ref={wrapperRef}
+        onScroll={(e) => {
+          console.log(e);
+          app.onEvent(EventsIn.scroll, e as any)
+        }}
       >
         {/* {picture.src && (
         <div className="carbon-document-picture">
@@ -121,7 +146,11 @@ export const DocumentComp = (props: RendererProps) => {
             ...connectors,
             onMouseUp: handleClick,
             // onMouseDown: handleMouseDown,
-            onScroll: (e) => app.emit(EventsIn.scroll, e as any),
+            onScroll: (e) => {
+              console.log(e.target.scrollTop);
+              
+              app.emit(EventsIn.scroll, e as any)
+            },
             onBlur: (e) => app.emit('document:blur', e as any),
             onFocus: (e) => app.emit('document:focus', e as any),
           }}
