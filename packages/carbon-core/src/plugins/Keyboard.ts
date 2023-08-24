@@ -286,7 +286,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			shiftDelete: (event) => this.delete(event),
 
 			backspace: e => {
-				console.log('XXX',e.app);
 				e.app.cmd.keyboard.backspace(e)?.dispatch()
 			},
 			shiftBackspace: e => e.app.cmd.keyboard.backspace(e)?.dispatch(),

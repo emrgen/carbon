@@ -7,6 +7,7 @@ import {
   CarbonNodeChildren,
   CarbonNodeContent,
   EventsIn,
+  EventsOut,
   Node,
   Pin,
   PinnedSelection,
@@ -85,7 +86,7 @@ export const DocumentComp = (props: RendererProps) => {
           return;
         }
         prevent(e);
-        console.log("add new child");
+        // console.log("add new child");
         const at = Point.toAfter(lastChild.id);
         const section = app.schema.type("section").default();
         if (!section) return;
@@ -119,9 +120,9 @@ export const DocumentComp = (props: RendererProps) => {
         return;
       }
     }
-    app.on("transaction", onTransaction);
+    app.on(EventsOut.selectionUpdated, onTransaction);
     return () => {
-      app.off("transaction", onTransaction);
+      app.off(EventsOut.selectionUpdated, onTransaction);
     };
   }, [app, ref]);
 
@@ -154,7 +155,6 @@ export const DocumentComp = (props: RendererProps) => {
             // onMouseDown: handleMouseDown,
             onScroll: (e) => {
               console.log(e.target.scrollTop);
-              
               app.emit(EventsIn.scroll, e as any)
             },
             onBlur: (e) => app.emit('document:blur', e as any),

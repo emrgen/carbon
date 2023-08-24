@@ -144,6 +144,8 @@ export class EventManager {
 		this.pm.onEvent(editorEvent);
 
 
+		console.log(console.group.toString());
+
 		console.groupEnd()
 
 		// this.afterEvent(editorEvent);

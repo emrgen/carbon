@@ -10,7 +10,7 @@ declare module '@emrgen/carbon-core' {
   }
 }
 
-export class ToggleList extends NodePlugin {
+export class Collapsible extends NodePlugin {
 
   name = 'collapsible';
 
@@ -87,8 +87,7 @@ export class ToggleList extends NodePlugin {
         const { app, selection, node } = ctx;
         console.log('[Enter] collapsible');
         if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
-          ctx.event.preventDefault();
-          ctx.stopPropagation();
+          preventAndStopCtx(ctx);
           app.cmd.collapsible.split(selection)?.dispatch();
         }
       }

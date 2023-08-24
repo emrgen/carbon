@@ -160,12 +160,13 @@ export class NestablePlugin extends AfterPlugin {
 
 				// when the cursor is at start of the empty node
 				const listNode = node.closest(isNestableNode);
+				console.log(listNode?.id.toString(), listNode?.name);
 				if (!listNode) return
 				if (!listNode.isEmpty) return
 				const atStart = selection.head.isAtStartOfNode(listNode);
 				if (!atStart) return
 
-				if (listNode.attrs.html['data-as']) {
+				if (listNode.attrs.html['data-as'] !== listNode.name) {
 					preventAndStopCtx(ctx);
 					tr
 						.updateAttrs(listNode.id, {
@@ -178,6 +179,8 @@ export class NestablePlugin extends AfterPlugin {
 				}
 
 				if (listNode.name !== 'section') {
+					console.log(`enter on node: ${listNode.name} => ${listNode.id.toString()}`, isNestableNode(listNode));
+
 					preventAndStopCtx(ctx);
 					tr
 						.change(listNode.id, listNode.name, 'section')

@@ -11,7 +11,7 @@ import './dnd.styl';
 import DividerComp from './renderers/Divider';
 import { Divider } from './plugins/Divider';
 import TitleComp from './renderers/TitleComp';
-import { ToggleList } from './plugins/Collapsible';
+import { Collapsible } from './plugins/Collapsible';
 import CollapsibleListComp from './renderers/Collapsible';
 import { BulletedListComp } from './renderers/BulletedList';
 import { BulletedList } from './plugins/BulletedList';
@@ -51,6 +51,8 @@ import { Video } from './plugins/Video';
 import { Content } from './plugins/Content';
 import { ContentComp } from './renderers/Content';
 import { HeaderComp } from './renderers/Header';
+import FrameComp from './renderers/Frame';
+import { Frame } from './plugins/Frame';
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -59,7 +61,7 @@ export const blockPresets: Extension = {
 		new Header(),
 		new DocPlugin(),
 		new NestablePlugin(),
-		new ToggleList(),
+		new Collapsible(),
 		new BulletedList(),
 		new NumberedList(),
 		new ChangeName(),
@@ -80,6 +82,7 @@ export const blockPresets: Extension = {
 		new FileTree(),
 		new Tab(),
 		new Content(),
+		new Frame(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),
@@ -116,6 +119,7 @@ export const blockPresets: Extension = {
 		Renderer.create('tabTitle', TextTitleComp),
 		Renderer.create('tagsAttr', () => 1),
 		Renderer.create('content', ContentComp),
+		Renderer.create('frame', FrameComp),
 	]
 }
 

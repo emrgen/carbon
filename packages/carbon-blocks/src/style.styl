@@ -339,8 +339,6 @@ span[data-name=text] {
 			box-shadow: 0 0 10px rgba(0,0,0,0.2)
 			border-radius: 4px
 
-
-
 .katex
 	display: block
 	text-align: center
@@ -361,6 +359,10 @@ span[data-name=text] {
 		top 0
 		pointer-events: none
 		opacity: 0.2
+
+[data-name=section] > [data-type=content] > [data-name=title]
+	&:after
+		content: none
 
 [data-name="hstack"]
 	display: flex
@@ -821,3 +823,15 @@ a
 	color: #999!important
 	text-decoration: none
 	text-decoration: underline!important
+
+
+[data-name=frame]
+	position relative
+	background #eee
+	padding: 10px
+	margin: 10px 0
+	border-radius: 4px
+	// font-size: 13px
+	// line-height: 26px
+	> [data-type=content]
+		font-size: 13px

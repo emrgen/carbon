@@ -91,8 +91,7 @@ export class TitlePlugin extends NodePlugin {
 		const { selection } = app;
 		// @ts-ignore
 		const { data, key } = event.nativeEvent;
-		console.log(data ?? key);
-
+		// console.log(data ?? key);
 		app.cmd.transform.insertText(selection, data ?? key, false)?.dispatch();
 	}
 

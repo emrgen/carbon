@@ -1,16 +1,13 @@
-import React from "react"
-import { PiTextAaBold, PiTextHFourBold, PiTextHOneBold, PiTextHThreeBold, PiTextHTwoBold } from "react-icons/pi"
-import { TbListNumbers } from "react-icons/tb"
-import { PiListBulletsBold } from "react-icons/pi"
+import { AiOutlinePicture } from "react-icons/ai"
+import { BsCodeSquare } from "react-icons/bs"
 import { FcTodoList } from "react-icons/fc"
 import { IoToggleOutline } from "react-icons/io5"
+import { LuFrame } from "react-icons/lu"
 import { MdFormatQuote } from "react-icons/md"
-import { TbSection } from "react-icons/tb"
-import { AiOutlinePicture } from "react-icons/ai"
+import { PiListBulletsBold, PiTextAaBold, PiTextHFourBold, PiTextHOneBold, PiTextHThreeBold, PiTextHTwoBold } from "react-icons/pi"
 import { RxVideo } from "react-icons/rx"
+import { TbListNumbers, TbMathXDivideY2, TbSection } from "react-icons/tb"
 import { VscListSelection } from "react-icons/vsc"
-import { TbMathXDivideY2 } from "react-icons/tb"
-import { BsCodeSquare } from "react-icons/bs"
 
 export const blockIcons = {
   section: <PiTextAaBold />,
@@ -29,4 +26,5 @@ export const blockIcons = {
   content: <VscListSelection />,
   equation: <TbMathXDivideY2 />,
   code: <BsCodeSquare />,
+  frame: <LuFrame />,
 };

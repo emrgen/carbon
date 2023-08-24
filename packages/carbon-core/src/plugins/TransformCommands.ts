@@ -1486,7 +1486,7 @@ export class TransformCommands extends BeforePlugin {
 
     removeActions.push(RemoveNode.create(nodeLocation(next.parent!)!, next.parent!.id))
 
-    console.log('Selection', after.toString());
+    // console.log('Selection', after.toString());
 
     return app.tr
       .add(moveActions)

@@ -10,11 +10,11 @@ import {
 } from "@emrgen/carbon-core";
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
 
-interface CarbonAppDocumentProps {
+interface CarbonAppProps {
   app: Carbon;
 }
 
-export function CarbonApp(props: CarbonAppDocumentProps) {
+export function CarbonApp(props: CarbonAppProps) {
   const { app } = props;
   // @ts-ignore
   window.app = app;

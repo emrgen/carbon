@@ -31,6 +31,7 @@ export class DocPlugin extends CarbonPlugin {
 			document: true,
 			attrs: {
 				html: {
+					spellCheck: false,
 					contentEditable: true,
 					suppressContentEditableWarning: true,
 				},
