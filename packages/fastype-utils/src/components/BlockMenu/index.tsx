@@ -24,7 +24,7 @@ import {
   Flex,
   Box,
 } from "@chakra-ui/react";
-import { first, values, xorBy } from "lodash";
+import { first, sortBy, values, xorBy } from "lodash";
 import { node } from "@emrgen/carbon-blocks";
 import { Optional } from "@emrgen/types";
 
@@ -45,7 +45,7 @@ export function BlockMenu(props: BlockMenuProps) {
 
   // filter blocks by search text
   const blocks = useMemo(() => {
-    return values(app.schema.nodes)
+    const blocks = values(app.schema.nodes)
       .filter((n) => n.spec.insert)
       .filter((b) => {
         const nameMatch = b.spec?.info?.title
@@ -55,7 +55,8 @@ export function BlockMenu(props: BlockMenuProps) {
           tag.toLowerCase().includes(searchText.toLowerCase())
         );
         return (tagMatch || nameMatch) && b.name !== node?.name;
-      });
+      })
+      return sortBy(blocks, 'spec.info.order', 'spec.info.title');
   }, [app.schema.nodes, node, searchText]);
 
   // reset active index when blocks change
@@ -98,9 +99,12 @@ export function BlockMenu(props: BlockMenuProps) {
       if (!node) return;
 
       const { tr } = app;
-      tr.updateAttrs(node.id, { node: { typeChanged: true }, html: { 'data-as': type.name } })
-        .change(node?.id, node?.name, type.name)
-        .setContent(node.child(0)!.id, BlockContent.create([]));
+      tr.change(node?.id, node?.name, type.name)
+      tr.setContent(node.child(0)!.id, BlockContent.create([]));
+      tr.updateAttrs(node.id, {
+        node: { typeChanged: true },
+        // html: { "data-as": type.name },
+      });
       if (type.isAtom && type.isBlock) {
         app.parkCursor();
         tr.selectNodes(node.id);
@@ -200,6 +204,8 @@ const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
     ref.current.scrollTop = scrollTop;
   }, [scrollTop]);
 
+  console.log(blocks.map(b => b.name));
+  
   return (
     <Box
       ref={ref}

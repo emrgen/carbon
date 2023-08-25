@@ -126,7 +126,7 @@ export class ChangeName extends BeforePlugin {
       tr
         .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
       tr.change(block.id, block.name, type)
-      tr.updateAttrs(block.id, { node: { typeChanged: true }, html: { 'data-as': type } });
+      tr.updateAttrs(block.id, { node: { typeChanged: true },});
       // expand collapsed block
       if (block.isCollapsed) {
         tr.updateAttrs(block.id, { node: { collapsed: false } });
@@ -163,7 +163,7 @@ export class ChangeName extends BeforePlugin {
         tr.add(moveNodesAction(to, moveNodes));
       }
       tr.change(block.id, block.name, type)
-      tr.updateAttrs(block.id, { node: { typeChanged: true }, html: { 'data-as': type } });
+      tr.updateAttrs(block.id, { node: { typeChanged: true },  });
       tr.select(after)
       tr.dispatch()
     }
@@ -204,7 +204,7 @@ export class ChangeName extends BeforePlugin {
         .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
         .add(insertBeforeAction(block, divider))
         .change(block.id, block.name, block.type.splitName)
-        .updateAttrs(block.id, { node: { typeChanged: true }, html: { 'data-as': name } })
+        .updateAttrs(block.id, { node: { typeChanged: true } })
         .add(moveActions)
         .select(after)
         .dispatch()

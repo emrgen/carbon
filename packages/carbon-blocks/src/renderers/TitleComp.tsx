@@ -19,11 +19,23 @@ export default function TitleComp(props: RendererProps) {
     // e.preventDefault();
   },[])
 
+  const { parent } = node;
+
+  const as = parent?.attrs.html["data-as"];
+  console.log(
+    "XX",
+    parent?.id.toString(),
+    as,
+    app.schema.nodes[as]?.spec.attrs?.node?.emptyPlaceholder
+  );
+  
+
   const custom = node.isEmpty
     ? {
         onMouseDown,
         ...props.custom,
         placeholder:
+          app.schema.nodes[as]?.spec.attrs?.node?.emptyPlaceholder ??
           props.custom?.placeholder ??
           node.parent?.attrs.node.placeholder ?? "",
       }

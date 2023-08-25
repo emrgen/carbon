@@ -166,7 +166,9 @@ export class NestablePlugin extends AfterPlugin {
 				const atStart = selection.head.isAtStartOfNode(listNode);
 				if (!atStart) return
 
-				if (listNode.attrs.html['data-as'] !== listNode.name) {
+				const as = listNode.attrs.html['data-as'];
+				console.log('data-as', as);
+				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
 					tr
 						.updateAttrs(listNode.id, {
@@ -184,6 +186,7 @@ export class NestablePlugin extends AfterPlugin {
 					preventAndStopCtx(ctx);
 					tr
 						.change(listNode.id, listNode.name, 'section')
+
 						.select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
 						.dispatch();
 					return

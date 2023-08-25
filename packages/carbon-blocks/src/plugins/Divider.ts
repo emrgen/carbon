@@ -14,8 +14,13 @@ export class Divider extends NodePlugin {
       dragHandle: true,
       rectSelectable: true,
       blockSelectable: true,
+      insert: true,
       info: {
         title: 'Divider',
+        description: 'A horizontal line to separate content',
+        icon: 'divider',
+        tags: ['divider', 'line', 'horizontal line'],
+        order: 10
       },
       attrs: {
         html: {

@@ -44,7 +44,8 @@ export class Heading extends NodePlugin {
 				title: `Heading ${this.level}`,
 				description: this.description(),
 				icon: 'h' + this.level,
-				tags: ['heading', 'h' + this.level]
+				tags: ['heading', 'h' + this.level],
+				order: 2,
 			},
 			attrs: {
 				node: {

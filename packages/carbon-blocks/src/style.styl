@@ -360,9 +360,13 @@ span[data-name=text] {
 		pointer-events: none
 		opacity: 0.2
 
-[data-name=section] > [data-type=content] > [data-name=title]
-	&:after
-		content: none
+// [data-name=section] > [data-type=content] > [data-name=title]
+// 	&:after
+// 		display: none
+
+// [data-as] > [data-type=content] > [data-name=title]
+// 	&:after
+// 		display: normal !important
 
 [data-name="hstack"]
 	display: flex
@@ -833,5 +837,5 @@ a
 	border-radius: 4px
 	// font-size: 13px
 	// line-height: 26px
-	> [data-type=content]
-		font-size: 13px
+	// > [data-type=content]
+	// 	font-size: 13px

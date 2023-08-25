@@ -8,7 +8,7 @@ export class Content extends CarbonPlugin {
       group: 'content',
       content: '',
       atom: true,
-      insert: true,
+      // insert: true,
       isolating: true,
       draggable: true,
       dragHandle: true,

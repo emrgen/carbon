@@ -193,4 +193,5 @@ export interface NodeInfo {
 	description?: string;
 	icon?: string;
 	tags?: string[];
+	order?: number;
 }

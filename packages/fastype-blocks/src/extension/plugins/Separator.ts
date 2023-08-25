@@ -14,8 +14,13 @@ export class Separator extends CarbonPlugin {
       dragHandle: true,
       rectSelectable: true,
       blockSelectable: true,
+      insert: true,
       info: {
-        title: 'Divider',
+        title: 'Separator',
+        description: 'A horizontal line to separate content',
+        icon: 'separator',
+        tags: ['separator', "dots", "stars", 'horizontal separator'],
+        order: 10
       },
       attrs: {
         html: {

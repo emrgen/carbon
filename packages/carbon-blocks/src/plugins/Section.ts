@@ -31,7 +31,8 @@ export class Section extends NodePlugin {
 				title: 'Text',
 				description: 'Just start typing to create a new section',
 				icon: 'section',
-				tags: ['text', 'section', 'paragraph', 'p']
+				tags: ['text', 'section', 'paragraph', 'p'],
+				order: 1,
 			},
 			attrs: {
 				node: {
