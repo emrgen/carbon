@@ -11,6 +11,7 @@ import { Carbon } from '../core/Carbon';
 import { CarbonState } from '../core';
 
 
+// create carbon app with extensions
 export const createCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
 	const plugins = flatten(extensions.map(e => e.plugins ?? []));
 	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
@@ -29,6 +30,7 @@ export const createCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
 }
 
 
+// create carbon app with extensions
 export const useCreateCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
 	const [app] = useState(() => {
 		return createCarbon(json, extensions)
@@ -37,6 +39,7 @@ export const useCreateCarbon = (json: NodeJSON, extensions: Extension[] = []) =>
 	return app;
 }
 
+// create carbon app with extensions and save to local storage
 export const useCreateCachedCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
 	const [app] = useState(() => {
 		const savedDoc = localStorage.getItem('carbon:content');

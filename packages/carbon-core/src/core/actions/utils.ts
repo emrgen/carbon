@@ -5,14 +5,15 @@ export const generateActionId = () => {
 	return ++cmd
 }
 
-let nodeId = 0
+
+let textId = 0
 
 export const generateTextId = () => {
-	return String(++nodeId)
+	return String(++textId)
 }
 
 let blockId = 0
 export const generateBlockId = () => {
-	return 'b' + String(++nodeId)
+	return 'b' + String(++blockId)
 	// return uuidv4();
 }

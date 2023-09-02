@@ -56,15 +56,27 @@
 	// position relative
 	&:after
 		position: absolute
-		content: attr(data-node-key)
+		content: attr(data-id)
+		line-height: inherit
 		top 1px
-		right 0
+		right 50px
 		padding 0 10px
 		font-size 13px
+	[data-name=title]
+		&:before
+			position: absolute
+			content: attr(data-id)
+			line-height: inherit
+			top -2px
+			right 0px
+			padding 0 10px
+			font-size 13px
+			color: #aaa
+
 &[data-name=doc]:after
 &[data-name=paragraph]:after
 	position: absolute
-	content: attr(data-node-key)
+	content: attr(data-id)
 	top 1px
 	right 100px
 	padding 0 10px

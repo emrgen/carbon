@@ -49,6 +49,10 @@ export type HTMLAttrs = Record<string, any>
 export type BoundCalculator = () => Bound
 
 export interface NodeJSON extends Record<string, any> {
+	name: string;
+	id?: string;
+	content?: NodeJSON[];
+	text?: string;
 	attrs?: Record<string, any>;
 };
 

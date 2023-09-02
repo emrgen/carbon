@@ -44,21 +44,21 @@ const data = {
             },
           ],
         },
-        {
-          name: "divider",
-        },
-        section([
-          title([
-            text("I am "),
-            text("carbon", { node: { marks: { bold: true } } }),
-            text(" editor"),
-          ]),
-        ]),
-        node("frame", [
-          title([
-            text("I am a frame title"),
-          ]),
-        ]),
+        // {
+        //   name: "divider",
+        // },
+        // section([
+        //   title([
+        //     text("I am "),
+        //     text("carbon", { node: { marks: { bold: true } } }),
+        //     text(" editor"),
+        //   ]),
+        // ]),
+        // node("frame", [
+        //   title([
+        //     text("I am a frame title"),
+        //   ]),
+        // ]),
         //         node("equation", [
         //           title([
         //             // text("\\begin{matrix}\n1 & 2 & 3\\\\\na & b & c\n\\end{matrix}"),

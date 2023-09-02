@@ -47,7 +47,6 @@ export function CarbonApp(props: CarbonAppProps) {
               ></div>
               <CarbonChangeContext>
                 <RectSelectContext>
-                  {/* <BlockMenu /> */}
                   <CarbonContent />
                 </RectSelectContext>
               </CarbonChangeContext>
