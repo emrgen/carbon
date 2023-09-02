@@ -142,10 +142,7 @@ export class EventManager {
 			// console.log('onEvent:', event);
 		}
 		this.pm.onEvent(editorEvent);
-
-
-		console.log(console.group.toString());
-
+		
 		console.groupEnd()
 
 		// this.afterEvent(editorEvent);
@@ -236,6 +233,7 @@ export class EventManager {
 				return
 			case EventsIn.beforeinput:
 			case EventsIn.keyDown:
+			case EventsIn.paste:
 				this.runtime.origin = ActionOrigin.UserInput;
 				return
 			default:

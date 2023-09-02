@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { RectSelector } from "../core/RectSelector";
 import { RectSelectorContext } from "../hooks/useRectSelector";
-import { RectSelectController } from "./RectSelectController";
 import { Transaction, useCarbon } from "@emrgen/carbon-core";
 import { createPortal } from "react-dom";
 import { useDndMonitor, useDragRect } from "../hooks";
