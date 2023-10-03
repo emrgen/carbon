@@ -1287,6 +1287,7 @@ export class TransformCommands extends BeforePlugin {
       if (startBlock.isTextBlock) {
         selectedGroup.addRange(Range.create(start, end));
       } else if (startBlock.type.isAtom) {
+        // is it required???
         collectId(startBlock.id);
       }
       return collectedInfo();
@@ -1386,7 +1387,6 @@ export class TransformCommands extends BeforePlugin {
 
       return collectedInfo();
     }
-
 
     // ----------------------
     // THIS IS THE MAIN LOGIC

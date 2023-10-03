@@ -16,6 +16,7 @@ import {
 import { DndEvent } from "../types";
 import { HiOutlinePlus } from "react-icons/hi";
 import { PiDotsSixVerticalBold } from "react-icons/pi";
+import { useDndContext } from "../hooks";
 
 export interface FastDragHandleProps {
   node: Optional<Node>;
@@ -27,6 +28,9 @@ export const CarbonDragHandleId = "carbon-drag-handle";
 export function DraggableHandle(props: FastDragHandleProps) {
   const { node, style } = props;
   const [show, setShow] = useState(false);
+  const [showDropHint, setShowDropHint] = useState(false);
+
+  const dnd = useDndContext();
 
   const app = useCarbon();
 
@@ -75,13 +79,44 @@ export function DraggableHandle(props: FastDragHandleProps) {
     }
   }, []);
 
+  const insertAfterNode = useCallback(
+    (e: DndEvent) => {
+      const { node } = e;
+      const { clientX: x, clientY: y } = e.event;
+      const bound = {
+        minX: x,
+        minY: y,
+        maxX: x,
+        maxY: y,
+      };
+
+      const hits = dnd.droppables.collides(bound);
+
+      if (!hits.length) return;
+      const target = hits[0];
+      if (target.id.eq(node.id)) {
+        // hide drop hint
+        setShowDropHint(false);
+        return;
+      }
+
+      console.log(
+        "hits",
+        hits.map((h) => h.id.toString())
+      );
+      setShowDropHint(true);
+    },
+    [dnd.droppables]
+  );
+
   const onDragMove = useCallback(
     (e: DndEvent) => {
       if (e.id === CarbonDragHandleId) {
         onDragRectProgress(e);
+        insertAfterNode(e);
       }
     },
-    [onDragRectProgress]
+    [insertAfterNode, onDragRectProgress]
   );
 
   const onDragEnd = useCallback(
@@ -132,7 +167,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
     if (!node) return;
     app.enable();
-    app.focus()
+    app.focus();
     const { nextSibling: nextBlock } = node;
 
     if (node.isEmpty && !node.isAtom && !nextBlock?.isEmpty) {
@@ -148,7 +183,6 @@ export function DraggableHandle(props: FastDragHandleProps) {
       }
     }
 
-
     if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
       const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
       if (app.selection.eq(after)) return;
@@ -156,8 +190,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       return;
     }
 
-    app.cmd.insert.after(node, "section")?.selectNodes([])
-      ?.dispatch();
+    app.cmd.insert.after(node, "section")?.selectNodes([])?.dispatch();
   };
 
   return (
@@ -184,6 +217,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
         <PiDotsSixVerticalBold />
       </div>
       {createPortal(<>{DragRectComp}</>, document.body)}
+      {createPortal(
+        <>
+          <div className="carbon-drop-hint" style={{ display: showDropHint ? 'flex': 'none' }}/>
+        </>,
+        document.body
+      )}
     </div>
   );
 }

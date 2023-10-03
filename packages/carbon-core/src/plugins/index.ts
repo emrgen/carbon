@@ -4,7 +4,7 @@ import { KeyboardAfterPlugin, KeyboardBeforePlugin } from './Keyboard';
 import { SelectionChangePlugin } from './SelectionChange';
 import { SlicePlugin } from "./Slice";
 import { TransformCommands } from './TransformCommands';
-import { UndoPlugin } from "./UndoRedo";
+import { HistoryPlugin } from "./History";
 
 export const extensionPresets: Extension = {
 	plugins: [
@@ -14,7 +14,7 @@ export const extensionPresets: Extension = {
 		new KeyboardBeforePlugin(),
 		new ClipboardPlugin(),
 		new SlicePlugin(),
-		new UndoPlugin(),
+		new HistoryPlugin(),
 	],
 }
 

@@ -20,6 +20,23 @@ export function RectSelectContext(props) {
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
+    const onHideCursor = () => {
+      setIsSelecting(true);
+    }
+    const onShowCursor = () => {
+      setIsSelecting(false);
+    }
+
+    app.on("document:cursor:hide", onHideCursor);
+    app.on("document:cursor:show", onShowCursor);
+
+    return () => {
+      app.off("document:cursor:hide", onHideCursor);
+      app.off("document:cursor:show", onShowCursor);
+    };
+  }, [app]);
+
+  useEffect(() => {
     const onTransaction = (tr: Transaction) => {
       rectSelector.onTransaction(tr);
       // console.log("transaction", tr, app.blockSelection.size);

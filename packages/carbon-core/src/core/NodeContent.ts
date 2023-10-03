@@ -71,7 +71,7 @@ export class BlockContent implements NodeContent {
 	}
 
 	prepend(nodes: Node[]): NodeContent {
-		return BlockContent.create([...nodes,...this.nodes, ])
+		return BlockContent.create([...nodes, ...this.nodes,])
 	}
 
 	append(nodes: Node[]): NodeContent {
@@ -87,7 +87,7 @@ export class BlockContent implements NodeContent {
 	}
 
 	insertBefore(before: Node, nodes: Node[]): NodeContent {
-		const {children} = this
+		const { children } = this
 		const index = this.indexOf(before);
 		const content = flatten([children.slice(0, index), nodes, children.slice(index)]);
 		return BlockContent.create(content)
@@ -96,22 +96,22 @@ export class BlockContent implements NodeContent {
 	insertAfter(after: Node, nodes: Node[]): NodeContent {
 		const { children } = this;
 		const index = this.indexOf(after);
-		const content = flatten([children.slice(0, index + 1), nodes, children.slice(index+1)]);
+		const content = flatten([children.slice(0, index + 1), nodes, children.slice(index + 1)]);
 		return BlockContent.create(content)
 	}
 
 	remove(node: Node): boolean {
-		const {nodes} = this
+		const { nodes } = this;
 		const found = nodes.find(n => n.eq(node));
-		this.nodes = nodes.filter(n => n !== found);
+		this.nodes = nodes.filter(n => !n.eq(node));
 		return !!found;
 	}
 
 	view(container: Node[]): NodeContent {
-		return BlockContent.create(this.nodes.map(n => n.view(container)))
+		return BlockContent.create(this.nodes.map(n => n.view(container)));
 	}
 
-	destroy() {}
+	destroy() { }
 
 	updateText(text: string) {
 		throw new Error("Not implemented");
@@ -132,7 +132,7 @@ interface TextContentProps {
 	text: string
 }
 
-export class InlineContent implements  NodeContent {
+export class InlineContent implements NodeContent {
 	text: string
 
 	get children(): Node[] {
@@ -152,7 +152,7 @@ export class InlineContent implements  NodeContent {
 	}
 
 	static create(text: string) {
-		return InlineContent.fromProps({text})
+		return InlineContent.fromProps({ text })
 	}
 
 	static fromProps(props: TextContentProps) {
@@ -219,7 +219,7 @@ export class InlineContent implements  NodeContent {
 		return InlineContent.create(this.text);
 	}
 
-	destroy() {}
+	destroy() { }
 
 	toJSON() {
 		return {

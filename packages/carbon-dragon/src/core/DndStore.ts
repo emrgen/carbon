@@ -12,7 +12,7 @@ export class DndNodeStore {
 	private rtree: NodeR3Tree = new NodeR3Tree();
 
 	get size() {
-		return this.rtree.all().length
+		return this.rtree.all().length;
 	}
 
 	collides(box: BBox): Node[] {
@@ -23,16 +23,16 @@ export class DndNodeStore {
 		this.rtree.clear();
 		this.entries().forEach(e => {
 			// console.warn('refresh', e.node.id.toString(), e.el, elementBound(e.el!).top);
-			this.rtree.add(e.node, elementBound(e.el!, {left: scrollLeft, top: scrollTop}))
+			this.rtree.add(e.node, elementBound(e.el!, {left: scrollLeft, top: scrollTop}));
 		})
 	}
 
 	private entries() {
-		return this.nodes().map(n => ({ node: n, el: this.element(n.id) }))
+		return this.nodes().map(n => ({ node: n, el: this.element(n.id) }));
 	}
 
 	private nodes() {
-		return Array.from(this.nodeMap.values())
+		return Array.from(this.nodeMap.values());
 	}
 
 	private element(id: NodeId): Optional<HTMLElement> {
@@ -66,10 +66,10 @@ export class DndNodeStore {
 	// connect the node to the rendered HTML element
 	register(node: Node, el: HTMLElement) {
 		if (!el) {
-			console.error(`Registering empty dom node for ${node.id.toString()}`)
+			console.error(`Registering empty dom node for ${node.id.toString()}`);
 			return
 		}
-		const { id } = node
+		const { id } = node;
 		// remove old reference first
 		// other part of the id will eventually be added while rendering
 		this.delete(node)
@@ -78,15 +78,16 @@ export class DndNodeStore {
 		this.elementToNodeMap.set(el, node);
 	}
 
+	// remove the node and related element,  from the store
 	delete(node: Node) {
-		const { id } = node
+		const { id } = node;
 		const el = this.elementMap.get(id);
 		if (el) {
-			this.elementToNodeMap.delete(el)
+			this.elementToNodeMap.delete(el);
 		}
 
-		this.nodeMap.delete(id)
-		this.elementMap.delete(id)
+		this.nodeMap.delete(id);
+		this.elementMap.delete(id);
 		this.rtree.remove(node);
 	}
 

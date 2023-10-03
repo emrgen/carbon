@@ -16,7 +16,7 @@ export const useDroppable = (props: FastDroppableProps) => {
     if (ref.current) {
       dnd.onMountDroppable(node, ref.current);
       return () => {
-        dnd.onUnmountDraggable(node);
+        dnd.onUnmountDroppable(node);
       };
     }
   }, [dnd, node, ref, version]);

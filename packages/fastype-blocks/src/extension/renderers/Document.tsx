@@ -21,6 +21,7 @@ import {
   useCombineConnectors,
   useConnectorsToProps,
   useDndRegion,
+  useDroppable,
   useNonDraggable,
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon";
@@ -34,6 +35,9 @@ export const DocumentComp = (props: RendererProps) => {
 
   const ref = useRef<HTMLElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useDroppable({ node, ref });
+
   const dndRegion = useDndRegion({ node, ref });
   const nonDraggable = useNonDraggable({ node, ref });
   const selectionSurface = useRectSelectionSurface({ node, ref });
@@ -57,10 +61,12 @@ export const DocumentComp = (props: RendererProps) => {
 
       if (e.clientY > bound.bottom) {
         app.emit("document:cursor:hide");
-        // preventAndStop(e);
+        preventAndStop(e);
       }
+
+      connectors.onMouseDown(e);
     },
-    [node.lastChild, app]
+    [node.lastChild, app, connectors]
   );
 
   const handleClick = useCallback(
@@ -152,7 +158,7 @@ export const DocumentComp = (props: RendererProps) => {
           custom={{
             ...connectors,
             onMouseUp: handleClick,
-            // onMouseDown: handleMouseDown,
+            onMouseDown: handleMouseDown,
             onScroll: (e) => {
               console.log(e.target.scrollTop);
               app.emit(EventsIn.scroll, e as any);

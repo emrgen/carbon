@@ -6,15 +6,19 @@ import { Carbon, Node, NodeId } from '@emrgen/carbon-core';
 import { DndEvent } from '../types';
 
 export class Dnd extends EventEmitter {
+	// nodes that can be dragged
 	draggables: DndNodeStore = new DndNodeStore();
+	// nodes that can be dropped on
 	droppables: DndNodeStore = new DndNodeStore();
 
 	draggedNodeId: Optional<NodeId>;
+	draggedNode: Optional<Node>;
+
 	portal: Optional<HTMLElement>;
 	region: Optional<HTMLElement>;
+
 	isDirty = true;
 	isDragging: boolean = false;
-	draggedNode: Optional<Node>;
 	isMouseDown: any;
 
 	constructor(readonly app: Carbon) {

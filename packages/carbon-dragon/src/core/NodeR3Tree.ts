@@ -21,8 +21,8 @@ export class NodeR3Tree {
 	// add node with depth as z value
 	add(node: Node, bound: R2BBox) {
 		this.remove(node);
-		// console.log(node)
-		const depth = node.depth
+		// nodes at lower depth should be at the top
+		const depth = node.depth;
 		this.rtree.put({
 			...bound,
 			minZ: depth,

@@ -1,11 +1,9 @@
-import { EventContext, EventHandler, SelectAction, Transaction, TransactionType } from '../core';
+import { EventContext, EventHandler, Transaction, TransactionType } from '../core';
 import { AfterPlugin } from '../core/CarbonPlugin';
-import { first, last } from 'lodash';
-import { Optional } from '@emrgen/types';
-import { SetContentAction } from '../core/actions/SetContent';
+import { last } from 'lodash';
 
-export class UndoPlugin extends AfterPlugin {
-  name = 'undoPlugin';
+export class HistoryPlugin extends AfterPlugin {
+  name = 'history';
 
   undoStack: Transaction[] = [];
   redoStack: Transaction[] = [];
