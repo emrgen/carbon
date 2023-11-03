@@ -322,6 +322,7 @@ export class Transaction {
 		}
 	}
 
+	// NOTE: normalize can generate further transaction
 	// can generate further transaction
 	private normalizeNodes() {
 		const ids = this.normalizeIds.toArray();
@@ -346,7 +347,7 @@ export class Transaction {
 				}
 				// console.log(action);
 
-				action.execute(this)
+				action.execute(this);
 			}))
 
 		// this.normalizeNodes();

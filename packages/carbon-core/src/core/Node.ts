@@ -1,4 +1,4 @@
-import { cloneDeep, findIndex, first, flatten, last, merge, noop, reverse } from 'lodash';
+import { cloneDeep, findIndex, first, flatten, isEmpty, last, merge, noop, reverse } from 'lodash';
 import { Fragment } from './Fragment';
 
 import { Optional, Predicate, With } from '@emrgen/types';
@@ -14,6 +14,7 @@ import { NodeId } from './NodeId';
 import { NodeType } from './NodeType';
 import { NodeEncoder, NodeJSON, yes } from './types';
 import { NodeState } from './NodeState';
+import { removeEmpty } from '../utils/object';
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -38,7 +39,38 @@ export interface NodeCreateProps {
 let key = 0
 const nextKey = () => key++
 
-export type NodeView = Node;
+export interface NodeView {
+	id: NodeId;
+	type: NodeType;
+	version: string;
+	isOpen: boolean;
+	isActive: boolean;
+	isSelected: boolean;
+	isCollapsed: boolean;
+	isFocusable: boolean;
+	isSelectable: boolean;
+	isBlockSelectable: boolean;
+	// isCollapsedHidden: boolean;
+	isVoid: boolean;
+	isInline: boolean;
+	isInlineAtom: boolean;
+	isBlockAtom: boolean;
+	isAtom: boolean;
+	isText: boolean;
+	isTextBlock: boolean;
+	isContentNode: boolean;
+	isContainerBlock: boolean;
+	isEmbedding: boolean;
+	isLeaf: boolean;
+	isRoot: boolean;
+	isDocument: boolean;
+	isDirty: boolean;
+	isEmpty: boolean;
+	isSandbox: boolean;
+	isIsolating: boolean;
+	isCollapsible: boolean;
+	children: NodeView[];
+}
 
 export class Node extends EventEmitter {
 	// used for testing/debugging
@@ -718,6 +750,7 @@ export class Node extends EventEmitter {
 		// this.marks?.remove(mark);
 	}
 
+	// @mutates
 	markUpdated() {
 		this.chain.forEach(n => {
 			n.updateVersion++
@@ -736,14 +769,17 @@ export class Node extends EventEmitter {
 	}
 
 	toJSON() {
-		const { id, type, content, attrs, state } = this;
-
-		return {
+		const { id, type, content } = this;
+		const json = ({
 			id: id.toString(),
 			name: type.name,
-			...content.toJSON(),
-			attrs: attrs.toJSON(),
-			state: state.toJSON(),
+			attrs: this.attrs.toJSON(),
+			state: this.state.toJSON(),
+		});
+
+		return {
+			...json,
+			...content.toJSON()
 		}
 	}
 

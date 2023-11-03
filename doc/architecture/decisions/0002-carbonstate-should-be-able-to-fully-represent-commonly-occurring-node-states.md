@@ -8,7 +8,7 @@ Accepted
 
 ## Context
 
-Node states are repetitive for cases. Moving these states to the CarbonState either inside runtime or within the node attrs/state will allow to create more consistent implementation.
+Node states are repetitive for many cases. Moving these states to the CarbonState either inside runtime or within the node attrs/state will allow to create more consistent implementation.
 
 For custom runtime states (which does not need sync) we should use specific state management libraries.
 

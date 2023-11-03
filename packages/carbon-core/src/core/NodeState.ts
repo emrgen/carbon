@@ -24,6 +24,11 @@ export class NodeState {
 		return new NodeState(newState);
 	}
 
+	remove(state: Partial<NodeState>) {
+		const newState = merge(cloneDeep(this.state), state)
+		return new NodeState(newState);
+	}
+
 	toJSON() {
 		return {
 			state: this.state,

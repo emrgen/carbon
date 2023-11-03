@@ -108,6 +108,7 @@ export const DocumentComp = (props: RendererProps) => {
 
   // scroll to bottom on transaction if cursor is below the screen
   useEffect(() => {
+    const bottomPadding = 40;
     const onTransaction = (tr: any) => {
       const el = ref.current;
       if (!el) return;
@@ -116,13 +117,13 @@ export const DocumentComp = (props: RendererProps) => {
       const { bottom, top } = head;
       // console.log(bottom, el.offsetHeight, el.scrollHeight, el.scrollTop);
 
-      if (top < 100) {
-        el.scrollTop = el.scrollTop + top - 100;
+      if (top < bottomPadding) {
+        el.scrollTop = el.scrollTop + top - bottomPadding;
         return;
       }
 
-      if (bottom > el.offsetHeight - 100) {
-        el.scrollTop = el.scrollTop + bottom - el.offsetHeight + 100;
+      if (bottom > el.offsetHeight - bottomPadding) {
+        el.scrollTop = el.scrollTop + bottom - el.offsetHeight + bottomPadding;
         return;
       }
     };
@@ -160,7 +161,7 @@ export const DocumentComp = (props: RendererProps) => {
             onMouseUp: handleClick,
             onMouseDown: handleMouseDown,
             onScroll: (e) => {
-              console.log(e.target.scrollTop);
+              // console.log(e.target.scrollTop);
               app.emit(EventsIn.scroll, e as any);
             },
             onBlur: (e) => app.emit("document:blur", e as any),

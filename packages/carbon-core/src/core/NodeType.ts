@@ -1,5 +1,5 @@
 import { Optional } from '@emrgen/types';
-import { each, merge } from 'lodash';
+import { each, isArray, isEmpty, merge } from 'lodash';
 import { ContentMatch } from './ContentMatch';
 import { Fragment } from './Fragment';
 import { MarkSet } from './Mark';
@@ -130,7 +130,7 @@ export class NodeType {
 	}
 
 	get isCollapsible() {
-		return this.spec.collapsible;
+		return !!this.spec.collapsible;
 	}
 
 	get isContainer() {
@@ -233,7 +233,7 @@ export class NodeType {
 			if (validEnd || !nextEdges) {
 				break
 			}
-			if (defaultType) {
+			if (defaultType && isArray(blockJson.content)) {
 				blockJson.content.push(defaultType.default() as Node)
 			}
 			contentMatch = nextEdges[0].next

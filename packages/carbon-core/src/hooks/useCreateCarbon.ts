@@ -1,4 +1,4 @@
-import { flatten } from 'lodash';
+import { flatten, throttle } from 'lodash';
 import { useEffect, useState } from "react";
 import { Extension } from "../core/Extension";
 import { PluginManager } from '../core/PluginManager';
@@ -39,21 +39,51 @@ export const useCreateCarbon = (json: NodeJSON, extensions: Extension[] = []) =>
 	return app;
 }
 
+// const saveDoc = throttle((state: CarbonState) => {
+// 	fetch('http://localhost:3123/block/c2dfbdcc-d7e5-43c2-a55b-aa26b19840c1/content', {
+// 		method: 'POST',
+// 		headers: {
+// 			'Content-Type': 'application/json'
+// 		},
+// 		body: JSON.stringify({ body: state.content.toJSON() })
+// 	})
+// }, 5000)
+
+// const loadDoc = async () => {
+// 	const response = await fetch('http://localhost:3123/block/c2dfbdcc-d7e5-43c2-a55b-aa26b19840c1/content');
+// 	const data = await response.json();
+// 	return data;
+// }
+
 // create carbon app with extensions and save to local storage
 export const useCreateCachedCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
-	const [app] = useState(() => {
+	const [isLoaded, setIsLoaded] = useState(false);
+	const [app, setApp] = useState(() => {
 		const savedDoc = localStorage.getItem('carbon:content');
 		if (savedDoc) {
+
 			return createCarbon(JSON.parse(savedDoc), extensions);
 		}
 
 		return createCarbon(json, extensions);
 	});
 
+	// useEffect(() => {
+	// 	if (isLoaded) return
+	// 	loadDoc().then((doc) => {
+	// 		const content = JSON.parse(doc).body
+	// 		if (content) {
+	// 			setApp(createCarbon(content, extensions))
+	// 			setIsLoaded(true)
+	// 		}
+	// 	})
+	// }, [app, extensions, isLoaded])
+
 	useEffect(() => {
 		const onChange = (state: CarbonState) => {
 			localStorage.setItem('carbon:content', JSON.stringify(state.content.toJSON()));
 			localStorage.setItem('carbon:selection', JSON.stringify(state.selection.toJSON()))
+			// saveDoc(state);
 		}
 		app.on('change', onChange);
 
