@@ -238,6 +238,11 @@ export class Transaction {
 		return this
 	}
 
+	oneWay(): Transaction {
+		this.type = TransactionType.OneWay;
+		return this;
+	}
+
 	cancel() {
 		this.cancelled = true;
 	}

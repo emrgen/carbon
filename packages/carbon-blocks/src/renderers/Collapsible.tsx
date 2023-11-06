@@ -46,6 +46,7 @@ export default function CollapsibleListComp(props: RendererProps) {
     if (!isCollapsed) {
       tr.select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
     }
+    tr.oneWay()
     tr.dispatch();
   }, [app, node, isCollapsed]);
 
