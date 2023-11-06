@@ -40,7 +40,7 @@ export class NestablePlugin extends AfterPlugin {
 		const { tr } = app;
 		tr?.move(nodeLocation(node)!, to, node.id);
 		if (parent.isCollapsed) {
-			tr?.updateData(parent.id, { node: { collapsed: false } })
+			tr?.updateAttrs(parent.id, { node: { collapsed: false } })
 		}
 		tr?.select(app.selection.clone());
 
@@ -88,11 +88,16 @@ export class NestablePlugin extends AfterPlugin {
 
 				// change to section
 				if (listNode.name !== 'section') {
+
+
 					preventAndStopCtx(ctx);
+					if (listNode.isCollapsed) {
+						tr.updateAttrs(listNode.id, { node: { collapsed: false } })
+					}
 					tr
 						.change(listNode.id, listNode.name, 'section')
 						.select(PinnedSelection.fromPin(selection.head))
-						.dispatch();
+					tr.dispatch();
 					return
 				}
 

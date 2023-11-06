@@ -33,11 +33,7 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 	}
 
 	backspace(app: Carbon, ctx: EventContext<KeyboardEvent>) {
-		console.log('xxxxxxx');
-		
-		ctx.preventDefault();
-		ctx.event.preventDefault();
-		ctx.event.stopPropagation();
+		preventAndStopCtx(ctx);
 
 		const { node } = ctx;
 		const { selection, state, cmd, blockSelection: nodeSelection } = app;
@@ -196,8 +192,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				app.tr.selectNodes([block.id]).dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
-				console.log('XXXX');
-
 				const { app, event, node } = ctx;
 				const { selection, cmd, state, blockSelection } = app;
 				const { selectedNodeIds } = state
@@ -481,8 +475,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		ctx.event.preventDefault();
 		ctx.event.stopPropagation();
 
-		console.log('xxxxxxx');
-
 		const { event } = ctx;
 		const { app, node } = ctx;
 		const { selection, cmd, blockSelection: nodeSelection } = app;
@@ -583,9 +575,6 @@ const nextSelectableBlock = node => {
 	}, { order: 'pre' })
 
 	if (found) return found;
-
-	console.log('xxxxxx', block?.id.toString());
-
 
 	return block?.next(n => n.isBlockSelectable, { order: 'pre' });
 }

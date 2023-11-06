@@ -38,8 +38,6 @@ export class SetContentAction implements CarbonAction {
       return ActionResult.withError(`Node ${nodeId} not found`);
     }
 
-    console.log('xxxx', this.before);
-    
     // if (this.before === null || this.before === undefined) {
     this.before = node.content.clone();
     // }

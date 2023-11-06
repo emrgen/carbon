@@ -38,7 +38,7 @@ export const FileTreeItemComp = (props: RendererProps) => {
 
   const handleToggle = useCallback(() => {
     app.tr
-      .updateData(node.id, { node: { collapsed: !isCollapsed } })
+      .updateAttrs(node.id, { node: { collapsed: !isCollapsed } })
       .dispatch();
   }, [app.tr, node, isCollapsed]);
 
@@ -50,7 +50,7 @@ export const FileTreeItemComp = (props: RendererProps) => {
       const at = Point.toAfter(node.child(0)!.id);
       app.tr
         .insert(at, item)
-        .updateData(node.id, { node: { collapsed: false } })
+        .updateAttrs(node.id, { node: { collapsed: false } })
         .open(item.id)
         .then(() => {
           return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });

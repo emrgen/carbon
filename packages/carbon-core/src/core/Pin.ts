@@ -286,7 +286,10 @@ export class Pin {
 			distance -= currSize;
 			// console.log(curr.id.key, curr.focusSize);
 			prev = curr;
-			curr = curr.next(n => n.isFocusable, {
+
+			curr = curr.next(n => {
+				return n.isFocusable
+			}, {
 				skip: n => n.isIsolating
 			});
 		}

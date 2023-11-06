@@ -13,6 +13,7 @@ import { InsertNode } from "./InsertNode";
 export class RemoveNode implements CarbonAction {
 	id: number;
 	type: ActionType;
+	// TODO: better to store the node json instead of the node itself
 	node: Optional<Node>;
 
 	static create(at: Point, nodeId: NodeId, origin: ActionOrigin = ActionOrigin.UserInput) {
@@ -25,7 +26,7 @@ export class RemoveNode implements CarbonAction {
 	}
 
 	execute(tr: Transaction): ActionResult {
-		const { at, nodeId } = this;
+		const { nodeId } = this;
 		const {app} = tr;
 		const target = app.store.get(nodeId);
 		const parent = target?.parent;
@@ -38,6 +39,7 @@ export class RemoveNode implements CarbonAction {
 
 		tr.updated(target.parent!);
 
+		// NOTE:
 		// when the parent is empty, we need to update the parent's parent to update the parent appearance like placeholder
 		if (parent?.isEmpty) {
 			// console.error('empty node', parent, parent?.name);

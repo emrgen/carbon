@@ -134,9 +134,9 @@ export class EventManager {
 				// EventsIn.beforeinput,
 			].includes(type) || selectionChangedUsingKeys(event)
 			) {
-				console.groupCollapsed('onEvent:', event.type);
+				// console.groupCollapsed('onEvent:', event.type);
 			} else {
-				console.groupCollapsed('onEvent:', event.type);
+				console.group('onEvent:', event.type);
 			}
 		} else {
 			// console.log('onEvent:', event);

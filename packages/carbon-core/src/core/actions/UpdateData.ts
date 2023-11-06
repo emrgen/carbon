@@ -11,7 +11,8 @@ import { Optional } from '@emrgen/types';
 import { NodeState } from '../NodeState';
 
 
-export class UpdateData implements CarbonAction {
+// TODO: remove this class
+export class __UpdateData implements CarbonAction {
   type: ActionType;
   id: number;
   prevState: Optional<NodeState>;
@@ -20,7 +21,7 @@ export class UpdateData implements CarbonAction {
   static fromJSON(json) { }
 
   static create(nodeId: IntoNodeId, state: Partial<NodeState>, origin: ActionOrigin) {
-    return new UpdateData(nodeId, state, origin);
+    return new __UpdateData(nodeId, state, origin);
   }
 
   constructor(nodeId: IntoNodeId, readonly state: Partial<NodeState>, readonly origin: ActionOrigin) {
@@ -50,7 +51,7 @@ export class UpdateData implements CarbonAction {
 
   inverse(): CarbonAction {
     const { nodeId, prevState } = this;
-    return UpdateData.create(nodeId, prevState!, ActionOrigin.UserInput);
+    return __UpdateData.create(nodeId, prevState!, ActionOrigin.UserInput);
   }
 
   toString() {

@@ -313,7 +313,7 @@ export class TransformCommands extends BeforePlugin {
         const endTitleText = endTitle.textContent + startNode.textContent.slice(end.offset);
         const endTitleTextNode = app.schema.text(endTitleText)!;
         if (start.node.parent?.isCollapsed) {
-          tr.updateData(start.node.parent.id, { node: { collapsed: false } });
+          tr.updateAttrs(start.node.parent.id, { node: { collapsed: false } });
         }
         tr.setContent(endTitle.id, BlockContent.create([endTitleTextNode!]),)
         const after = PinnedSelection.fromPin(Pin.future(endTitle, endTitle.textContent.length)!);
@@ -1063,7 +1063,7 @@ export class TransformCommands extends BeforePlugin {
 
       // open
       if (startBlock?.isCollapsed) {
-        tr.updateData(startBlock.id, { node: { collapsed: false } });
+        tr.updateAttrs(startBlock.id, { node: { collapsed: false } });
       }
 
       // move endParent children to startParent

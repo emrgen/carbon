@@ -41,8 +41,6 @@ export class InsertText implements CarbonAction {
 
 		console.log('inserting text', this.text);
 
-		console.log('xxxxxxxxxxxxxxx', pin, pin.isBefore, pin.isAfter, pin.isWithin);
-
 		if (pin.isBefore) {
 			const { textContent } = node;
 			// if the current text style match just insert into existing text

@@ -16,12 +16,13 @@ export class SelectAction implements CarbonAction {
 	}
 
 	constructor(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
-		this.id = generateActionId()
+		this.id = generateActionId();
 		this.before = before;
 		this.after = after;
 		this.origin = origin;
 	}
 
+	// this will update the carbon selection state or schedule a selection change after the ui update
 	execute(tr: Transaction): ActionResult {
 		const { before, after, origin } = this;
 		tr.onSelect(before, after, origin);

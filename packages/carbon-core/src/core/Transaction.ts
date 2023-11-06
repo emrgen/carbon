@@ -27,7 +27,6 @@ import { SelectAction } from './actions/Select';
 import { SelectNodes } from './actions/SelectNodes';
 import { SetContentAction } from './actions/SetContent';
 import { UpdateAttrs } from './actions/UpdateAttrs';
-import { UpdateData } from './actions/UpdateData';
 import { ActionOrigin, CarbonAction } from './actions/types';
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
@@ -197,11 +196,6 @@ export class Transaction {
 
 	updateAttrs(nodeRef: IntoNodeId, attrs: Partial<NodeAttrs>, origin = this.origin): Transaction {
 		this.add(UpdateAttrs.create(nodeRef, attrs, origin))
-		return this;
-	}
-
-	updateData(nodeRef: IntoNodeId, data: Record<string, any>, origin = this.origin): Transaction {
-		this.add(UpdateData.create(nodeRef, data, origin))
 		return this;
 	}
 
@@ -439,7 +433,6 @@ export class Transaction {
 
 			const thisSelectAction = last(actions) as SelectAction
 			const otherSelectAction = last(actions) as SelectAction
-			console.log('XXXX', this, other);
 
 			tr
 				.add(thisSetContentAction.merge(otherSetContentAction))

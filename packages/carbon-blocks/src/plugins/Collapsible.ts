@@ -70,7 +70,7 @@ export class Collapsible extends NodePlugin {
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        app.tr.updateData(node.id, { node: { collapsed: false } }).dispatch();
+        app.tr.updateAttrs(node.id, { node: { collapsed: false } }).dispatch();
       },
 
       'ctrl_shift_c': (ctx: EventContext<KeyboardEvent>) => {
@@ -81,7 +81,7 @@ export class Collapsible extends NodePlugin {
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        app.tr.updateData(node.id, { node: { collapsed: true } }).dispatch();
+        app.tr.updateAttrs(node.id, { node: { collapsed: true } }).dispatch();
       },
       // tab: skipKeyEvent
       enter(ctx: EventContext<KeyboardEvent>) {
@@ -123,7 +123,7 @@ export class Collapsible extends NodePlugin {
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
     const json = {
       name: splitBlock.isCollapsed ? splitBlock.name : splitBlock.type.splitName,
-      data: { node: { collapsed: splitBlock.isCollapsed } },
+      attrs: { node: { collapsed: splitBlock.isCollapsed } },
       content: [
         {
           name: 'title',
