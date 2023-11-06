@@ -22,5 +22,6 @@ export * from './CarbonState'
 export * from './Slice'
 export * from './NodeId'
 export * from './NodeType'
+export * from './TransactionTree'
 export * from './types'
 

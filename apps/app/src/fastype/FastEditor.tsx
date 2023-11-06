@@ -17,6 +17,7 @@ import { carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { fastypeBlocks } from "@emrgen/fastype-blocks";
 import Editor, { DiffEditor, useMonaco, loader } from "@monaco-editor/react";
 import { Box, Spinner } from "@chakra-ui/react";
+import TimeTravel from "./TimeTravel";
 
 const extensions = [
   extensionPresets,
@@ -136,6 +137,9 @@ export function FastEditor() {
         loading={<Spinner />}
       /> */}
       <Fastype app={app} />
+      <Box pos='absolute' left={0} top={0} p={4} w='500px' h='full' overflow={'auto'}>
+        <TimeTravel app={app}/>
+      </Box>
     </Box>
   );
 }

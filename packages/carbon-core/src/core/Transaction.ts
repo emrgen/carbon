@@ -499,4 +499,13 @@ export class Transaction {
 		tr.add(actions.slice(-1));
 		return tr;
 	}
+
+	filter(fn: (action: CarbonAction) => boolean) {
+		const {tr} = this.app;
+		this.actions.filter(fn).forEach(action => {
+			tr.add(action);
+		});
+
+		return tr;
+	}
 }

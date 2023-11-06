@@ -1,12 +1,14 @@
 import { EventContext, EventHandler, Transaction, TransactionType } from '../core';
 import { AfterPlugin } from '../core/CarbonPlugin';
 import { last } from 'lodash';
+import { TransactionTree } from '../core/TransactionTree';
 
 export class HistoryPlugin extends AfterPlugin {
   name = 'history';
 
   undoStack: Transaction[] = [];
   redoStack: Transaction[] = [];
+
 
   takeTransactions(stack: Transaction[], timeSpan = 3000): Transaction[] {
     const lastTransaction = last(stack)!;
@@ -59,6 +61,8 @@ export class HistoryPlugin extends AfterPlugin {
         console.log('undo', inverse);
         this.redoStack.push(inverse)
         inverse.dispatch();
+
+        ctx.app.emit('history.undo', tr);
       },
       'cmd_shift_z': (ctx: EventContext<Event>) => {
         ctx.event.preventDefault();
@@ -70,6 +74,8 @@ export class HistoryPlugin extends AfterPlugin {
         console.log('redo', inverse);
         this.undoStack.push(inverse);
         inverse.dispatch();
+
+        ctx.app.emit('history.redo', tr);
       },
     };
   }

@@ -5,6 +5,7 @@ import { SelectionChangePlugin } from './SelectionChange';
 import { SlicePlugin } from "./Slice";
 import { TransformCommands } from './TransformCommands';
 import { HistoryPlugin } from "./History";
+import { TimeTravelPlugin } from "./TimeTravel";
 
 export const extensionPresets: Extension = {
 	plugins: [
@@ -14,7 +15,8 @@ export const extensionPresets: Extension = {
 		new KeyboardBeforePlugin(),
 		new ClipboardPlugin(),
 		new SlicePlugin(),
-		new HistoryPlugin(),
+		// new HistoryPlugin(),
+		new TimeTravelPlugin(),
 	],
 }
 
