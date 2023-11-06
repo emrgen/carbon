@@ -88,6 +88,7 @@ export class CarbonState extends EventEmitter {
 	unselectedNodeIds: NodeIdSet;
 	activatedNodeIds: NodeIdSet;
 	deactivatedNodeIds: NodeIdSet;
+	
 	openNodeIds: NodeIdSet
 	closeNodeIds: NodeIdSet
 

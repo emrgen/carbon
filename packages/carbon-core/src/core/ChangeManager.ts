@@ -135,6 +135,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 		// remove nodes if ancestor is present in the updateNodes
 		// this is needed to avoid updating the same node twice
+		// as updating(rendering) the ancestor will update the descendants as well
 		updatedNodes.forEach(n => {
 			updatedNodeIds.remove(n.id);
 			if (n.closest(p => updatedNodeIds.has(p.id))) {

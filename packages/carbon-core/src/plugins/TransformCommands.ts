@@ -142,7 +142,7 @@ export class TransformCommands extends BeforePlugin {
   private append(app: Carbon, node: Node, parent: Node): Optional<Transaction> {
     const { tr } = app;
     const { lastChild } = parent;
-    const at = lastChild ? Point.toAfter(lastChild?.id) : Point.toWithin(parent?.id!, 0);
+    const at = lastChild ? Point.toAfter(lastChild?.id) : Point.toStart(parent?.id!, 0);
     tr.insert(at, node);
     return tr;
   }
@@ -1008,7 +1008,7 @@ export class TransformCommands extends BeforePlugin {
     let point: Optional<Point>;
     // TODO: we are free to decide how we want to put the final cursor position
     if (start.isAtStartOfNode(startTopBlock)) {
-      point = Point.toWithin(startTopBlock.id);
+      point = Point.toStart(startTopBlock.id);
     } else {
       point = start.leftAlign.point;
     }
@@ -1467,7 +1467,7 @@ export class TransformCommands extends BeforePlugin {
       // NOTE: empty text node are not valid in carbon
       if (next.textContent) {
         const textNode = app.schema.text(next.textContent)!;
-        const at = prev.isVoid ? Point.toWithin(prev.id) : Point.toAfter(prev.lastChild?.id!);
+        const at = prev.isVoid ? Point.toStart(prev.id) : Point.toAfter(prev.lastChild?.id!);
         // console.log(at);
         insertActions.push(...this.insertNodeCommands(at!, [textNode]))
       }

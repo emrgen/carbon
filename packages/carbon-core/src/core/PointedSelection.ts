@@ -14,8 +14,8 @@ export class PointedSelection {
 		return this.head.isDefault || this.tail.isDefault;
 	}
 
-	static within(nodeId: NodeId, offset: number = 0) {
-		return PointedSelection.fromPoint(Point.toWithin(nodeId, offset))
+	static atStart(nodeId: NodeId, offset: number = 0) {
+		return PointedSelection.fromPoint(Point.toStart(nodeId, offset))
 	}
 
 	static fromPoint(point: Point): PointedSelection {

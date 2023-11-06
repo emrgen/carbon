@@ -15,8 +15,8 @@ export class Span {
 	}
 
 	static create(nodeId: NodeId, startOffset: number, endOffset: number): Span {
-		const start = Point.toWithin(nodeId, startOffset)
-		const end = Point.toWithin(nodeId, endOffset)
+		const start = Point.toStart(nodeId, startOffset)
+		const end = Point.toStart(nodeId, endOffset)
 		return new Span(start, end)
 	}
 

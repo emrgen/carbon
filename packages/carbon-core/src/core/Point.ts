@@ -3,9 +3,10 @@ import { classString } from './Logger';
 import { Maps } from './types';
 
 enum PointAt {
-	Before = 0,
-	Within = 1,
+	Start = 0,
+	Before = 1,
 	After = 2,
+	End = 3,
 }
 
 // point is a relative offset position within a node
@@ -22,8 +23,12 @@ export class Point {
 		return this.nodeId.isDefault
 	}
 
-	get isWithin(): boolean {
-		return this.at === PointAt.Within;
+	get isStart(): boolean {
+		return this.at === PointAt.Start;
+	}
+
+	get isEnd(): boolean {
+		return this.at === PointAt.End;
 	}
 
 	get isBefore(): boolean {
@@ -34,17 +39,23 @@ export class Point {
 		return this.at === PointAt.After;
 	}
 
+	// point to before start of the node children
+	static toStart(nodeId: IntoNodeId, offset: number = 0) {
+		return new Point(nodeId, PointAt.Start, offset);
+	}
+
 	static toBefore(nodeId: IntoNodeId) {
-		return new Point(nodeId, 0);
+		return new Point(nodeId, PointAt.Before);
 	}
 
 	// point to after the id
 	static toAfter(nodeId: IntoNodeId) {
-		return new Point(nodeId, 2);
+		return new Point(nodeId, PointAt.After);
 	}
 
-	static toWithin(nodeId: IntoNodeId, offset: number = 0) {
-		return new Point(nodeId, 1, offset);
+	// point to after end of the node children
+	static toEnd(nodeId: IntoNodeId, offset: number) {
+		return new Point(nodeId, PointAt.End, offset);
 	}
 
 	static create(nodeId: IntoNodeId, at: PointAt, offset: number = 0) {

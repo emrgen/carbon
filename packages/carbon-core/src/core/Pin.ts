@@ -26,7 +26,7 @@ export class Pin {
 	}
 
 	get point(): Point {
-		return Point.toWithin(this.node.id, this.offset);
+		return Point.toStart(this.node.id, this.offset);
 	}
 
 	get isAtStart(): boolean {
@@ -76,7 +76,7 @@ export class Pin {
 	}
 
 	static fromPoint(point: Point, store: NodeStore): Optional<Pin> {
-		if (!point.isWithin) return
+		if (!point.isStart) return
 		const node = store.get(point.nodeId);
 		if (!node || !node.type.isTextBlock) {
 			console.warn('Pin.fromPoint: invalid node', point.toString(), node?.toString());

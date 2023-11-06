@@ -170,12 +170,12 @@ export class Transaction {
 		return this.add(insertNodesActions(at, insertNodes, origin));
 	}
 
-	insertText(at: Point, text: Node, native: boolean = false, origin = this.origin): Transaction {
-		return this.add(InsertText.create(at, text, native, origin));
-	}
-
 	remove(at: Point, id: NodeId, origin = this.origin): Transaction {
 		return this.add(RemoveNode.create(at, id, origin));
+	}
+
+	insertText(at: Point, text: Node, native: boolean = false, origin = this.origin): Transaction {
+		return this.add(InsertText.create(at, text, native, origin));
 	}
 
 	removeText(at: Point, textNode: Node, origin = this.origin): Transaction {
@@ -491,13 +491,12 @@ export class Transaction {
 
 	// create an inverse transaction
 	inverse() {
-		const { tr } = this.app;
+		const { tr, schema } = this.app;
 
 		tr.readOnly = true;
 		tr.type = TransactionType.OneWay;
 
-		const actions = this.actions.map(c => c.inverse());
-		// actions.reverse();
+		const actions = this.actions.map(c => c.inverse(tr));
 		tr.add(actions.slice(0, -1).reverse());
 		tr.add(actions.slice(-1));
 		return tr;

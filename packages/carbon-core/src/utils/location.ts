@@ -12,5 +12,5 @@ export const nodeLocation = (node: Node): Optional<Point> => {
 		throw new Error('nodeLocation: node has no parent')
 	}
 
-	return Point.toWithin(parent.id, 0);
+	return Point.toStart(parent.id, 0);
 }

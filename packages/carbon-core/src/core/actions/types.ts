@@ -1,3 +1,5 @@
+import { Carbon } from "../Carbon";
+import { Schema } from "../Schema";
 import { Transaction } from "../Transaction"
 import { ActionResult } from './Result';
 
@@ -5,7 +7,7 @@ export interface CarbonAction {
 	id: number;
 	origin: ActionOrigin;
 	execute(tr: Transaction): ActionResult;
-	inverse(): CarbonAction
+	inverse(tr: Transaction): CarbonAction
 }
 
 export enum TransactionType {

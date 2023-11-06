@@ -9,8 +9,9 @@ import { classString } from '../Logger';
 import { RemoveNode } from './RemoveNode';
 import { Node } from '../Node';
 
-export class InsertNode implements CarbonAction{
+export class InsertNode implements CarbonAction {
 	id: number;
+	nodeJson: any;
 
 	static create(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new InsertNode(at, node, origin);
@@ -18,13 +19,14 @@ export class InsertNode implements CarbonAction{
 
 	constructor(readonly at: Point, readonly node: Node, readonly origin: ActionOrigin) {
 		this.id = generateActionId();
+		this.nodeJson = node.toJSON();
 	}
 
 	execute(tr: Transaction): ActionResult {
 		const { at, node } = this;
 		const {app}=tr;
 		const target = app.store.get(at.nodeId);
-		// const pin = Pin.fromPoint(at, tr.app.store);
+
 		if (!target) {
 			return ActionResult.withError('failed to find target from: ' + at.toString())
 		}
@@ -43,28 +45,31 @@ export class InsertNode implements CarbonAction{
 			return ActionResult.withValue('done');
 		}
 
+		if (at.isStart) {
+			target.prepend(node);
+			return done()
+		}
+
 		if (at.isBefore) {
-			// console.log('inserting text before', fragment);
-			parent.insertBefore( target, node);
+			parent.insertBefore(target, node);
 			return done()
 		}
 
 		if (at.isAfter) {
-			parent.insertAfter( target, node);
+			parent.insertAfter(target, node);
 			return done()
 		}
 
-		if (at.isWithin) {
-			console.log(target, node);
-			target.prepend(node);
-			return done()
+		if (at.isEnd) {
+			throw new Error('not implemented');
 		}
 
 		return ActionResult.withError('failed to insert fragment')
 	}
 
-	inverse(): CarbonAction {
-		const { at, node } = this
+	inverse(tr: Transaction): CarbonAction {
+		const { at, node, nodeJson } = this;
+		// TODO: check if nodeJson and node should be the same
 		const action = RemoveNode.create(at, node.id, this.origin)
 		action.node = node.clone();
 		return action;

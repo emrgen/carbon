@@ -234,7 +234,7 @@ export class NodeType {
 				break
 			}
 			if (defaultType && isArray(blockJson.content)) {
-				blockJson.content.push(defaultType.default() as Node)
+				blockJson.content.push(defaultType.default()?.toJSON())
 			}
 			contentMatch = nextEdges[0].next
 		}
