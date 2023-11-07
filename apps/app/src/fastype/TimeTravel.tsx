@@ -1,7 +1,7 @@
 import { Carbon, SelectAction, TransactionNode, TransactionTree } from '@emrgen/carbon-core';
 import React, { useCallback, useEffect } from 'react'
 import treeify from 'object-treeify';
-import { Box, Flex, HStack, Stack, Textarea } from '@chakra-ui/react';
+import { Box, Center, Flex, HStack, Stack, Textarea } from "@chakra-ui/react";
 
 export interface TimeTravelProps {
   app: Carbon;
@@ -72,9 +72,9 @@ export default function TimeTravel(props: TimeTravelProps) {
 
   return (
     <TimeTravelContext.Provider value={{current, onTravel}}>
-    <Stack h='full' w='full' pos={'absolute'} overflow={'auto'}>
-      <Box>TimeTravel</Box>
-      <Box>{current}</Box>
+    <Stack h='full' w='full' pos={'absolute'} overflow={'auto'} px={2} pb={4}>
+      <Center>TimeTravel</Center>
+      <Box fontSize={'xs'}>Current tid: <b>{current}</b></Box>
       {/* <Box fontSize={'2xs'}><pre>{tree}</pre></Box> */}
       <Box fontSize={'xs'}>
         {tree?.root && <TransactionNodeComp node={tree.root} />}
@@ -102,14 +102,16 @@ const TransactionNodeComp = (props) => {
 
   const handleTravelTo = useCallback(() => {
     onTravel(node.transaction.id);
-  }, [])
+  }, [node.transaction.id, onTravel])
 
   return (
-    <Stack spacing={0} >
+    <Stack spacing={0} justify={'flex-start'} className={'group'}>
       <Box>
         <Flex
         display={'inline'}
-        p={1}
+        mr={'4px'}
+        p={'2px'}
+        px={'3px'}
         boxShadow={node.transaction.id == current ? '0 0 0 2px red': ''}
         onClick={handleTravelTo} cursor={'pointer'}
         _hover={{
@@ -120,17 +122,17 @@ const TransactionNodeComp = (props) => {
         </Flex>
       </Box>
       {hasChildren && <>
-        <Stack spacing={0} pos='relative'>
+        <HStack spacing={0} pos='relative' align={'start'}>
           {node.children.map((child, index) => {
             return (
               <HStack align={'start'} key={child.transaction.id}>
                 {/* <Box ml={'6px'} h='full' w={'1px'} position={'absolute'} bg={'#555'} top={0}/> */}
-                <Box transform={'translateX(6px)'} pl={'2px'}>-</Box>
+                {/*<Box transform={'translateX(6px)'} pl={'2px'}>-</Box>*/}
                 <TransactionNodeComp node={child} selfIndex={index} lastIndex={node.children.length-1}/>
               </HStack>
             )
           })}
-        </Stack>
+        </HStack>
       </>}
     </Stack>
   )
