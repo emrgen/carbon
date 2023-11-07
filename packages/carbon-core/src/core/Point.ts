@@ -5,8 +5,9 @@ import { Maps } from './types';
 enum PointAt {
 	Start = 0,
 	Before = 1,
-	After = 2,
-	End = 3,
+	Inside = 2,
+	After = 3,
+	End = 4,
 }
 
 // point is a relative offset position within a node

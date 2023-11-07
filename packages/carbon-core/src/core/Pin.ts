@@ -52,6 +52,7 @@ export class Pin {
 		return this.offset === this.node.focusSize
 	}
 
+	// align pin to the left when it is in the middle of the two text blocks
 	get leftAlign(): Pin {
 		const { prevSibling } = this.node;
 		if (!this.node.isEmpty && this.offset === 0 && prevSibling?.isFocusable) {
@@ -61,7 +62,7 @@ export class Pin {
 		}
 	}
 
-	//
+	// align pin to the right when it is in the middle of the two text blocks
 	get rightAlign(): Pin {
 		const { nextSibling } = this.node;
 		if (!this.node.isEmpty && this.offset === this.node.focusSize && nextSibling?.isFocusable) {

@@ -19,6 +19,7 @@ import { removeEmpty } from '../utils/object';
 export type TraverseOptions = {
 	order: 'pre' | 'post';
 	direction: 'forward' | 'backward';
+	gotoParent: boolean;
 	skip: Predicate<Node>;
 }
 
