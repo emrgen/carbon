@@ -249,15 +249,7 @@ export class Transaction {
 
 	// adds command to transaction
 	add(action: CarbonAction | CarbonAction[]): Transaction {
-		let actions: CarbonAction[] = [];
-		if (isArray(action)) {
-			actions = action
-		} else {
-			actions = [action]
-		}
-
-		actions.forEach(c => this.addAction(c));
-
+		flatten([action]).forEach(c => this.addAction(c));
 		return this;
 	}
 

@@ -30,6 +30,12 @@ export class SelectAction implements CarbonAction {
 		return ActionResult.withValue('done')
 	}
 
+	collapseToHead(): CarbonAction {
+		const {after} = this;
+		after.tail = after.head;
+		return SelectAction.create(this.before, after, this.origin);
+	}
+
 	merge(other: SelectAction) {
 		return SelectAction.create(this.before, other.after, this.origin);
 	}

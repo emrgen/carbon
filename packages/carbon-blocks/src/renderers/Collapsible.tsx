@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import {
   ActionOrigin,
   CarbonBlock,
@@ -16,6 +16,7 @@ import {
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
 import { usePlaceholder } from "../hooks";
+import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
 
 export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
@@ -23,6 +24,14 @@ export default function CollapsibleListComp(props: RendererProps) {
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
   const placeholder = usePlaceholder(node);
+
+  const ref = useRef(null);
+
+  const selection = useSelectionHalo(props);
+  const dragDropRect = useDragDropRectSelect({ node, ref });
+  const connectors = useConnectorsToProps(
+    useCombineConnectors(dragDropRect, selection)
+  );
 
   // insert a new section as child of this collapsible
   const handleInsert = useCallback(() => {
@@ -70,8 +79,16 @@ export default function CollapsibleListComp(props: RendererProps) {
   );
 
   return (
-    <CarbonBlock {...props} custom={{ "data-collapsed": isCollapsed }}>
-      <CarbonNodeContent node={node} beforeContent={beforeContent} custom={placeholder}/>
+    <CarbonBlock
+      {...props}
+      custom={{ "data-collapsed": isCollapsed, ...connectors }}
+      ref={ref}
+    >
+      <CarbonNodeContent
+        node={node}
+        beforeContent={beforeContent}
+        custom={placeholder}
+      />
 
       {node.size > 1 ? (
         <CarbonNodeChildren node={node} />

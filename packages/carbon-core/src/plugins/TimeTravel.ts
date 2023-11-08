@@ -18,10 +18,20 @@ export class TimeTravelPlugin extends AfterPlugin {
         ctx.event.preventDefault();
         const tr = this.transactionTree.prev();
         if (!tr) return;
-        const backwardTr = tr.inverse().filter(x => !(x instanceof SelectAction));
+        const backwardTr = tr.inverse()//.filter(x => !(x instanceof SelectAction));
+
+        // const action = backwardTr.pop();
+        // if (action) {
+        //   if ((action instanceof SelectAction)) {
+        //     backwardTr.add((action as SelectAction).collapseToHead());
+        //   } else {
+        //     backwardTr.add(action);
+        //   }
+        // }
+
 
         console.log(backwardTr);
-        
+
 
         // const action = inverse.pop();
         // if (!(action instanceof SelectAction)) {
@@ -38,11 +48,15 @@ export class TimeTravelPlugin extends AfterPlugin {
         const tr = this.transactionTree.next();
         if (!tr) return;
 
-        const forwardTr = tr.filter(x => !(x instanceof SelectAction));
+        const forwardTr = tr//.filter(x => !(x instanceof SelectAction));
 
-        // const action = tr.pop();
-        // if (!(action instanceof SelectAction)) {
-        //   tr.add(action!);
+        // const action = forwardTr.pop();
+        // if (action) {
+        //   if (action instanceof SelectAction) {
+        //     forwardTr.add((action as SelectAction).collapseToHead());
+        //   } else {
+        //     forwardTr.add(action);
+        //   }
         // }
 
         forwardTr.readOnly = true;

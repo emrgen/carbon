@@ -174,8 +174,10 @@ test('add toggle list in document', async ({ page }) => {
   await page.keyboard.type("after toggle content");
 
   const docContent = await getDocContent(page);
+  await page.click('.carbon-collapsible__control');
 
   expect(docContent).toBe("Doc title\n- this is a toggle list\n toggle content\n more toggle content\nafter toggle content");
+  expect(await page.isVisible('.carbon-collapsible__content')).toBe(false);
 })
 
 test('add header in document', async ({ page }) => {
