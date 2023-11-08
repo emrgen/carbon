@@ -50,8 +50,8 @@ const data = node("carbon", [
   //   node("fileTreeItem", [title([text("section 1")])]),
   // ]),
   node("document", [
-    title([text("Carbon "), text("document")]),
-    node("divider"),
+    title(),
+    // node("divider"),
 
     // node("tab", [
     //   node("tabTitles", [
@@ -132,15 +132,15 @@ const data = node("carbon", [
     // ),
 
     // node("section", [title([text("section 1.2")])]),
-    node("image", [], {
-      node: {
-        src: "https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9780123820365/files/images/F000124f12-68-9780123820365.jpg",
-        align: "center",
-      },
-      html: {
-        style: { justifyContent: "center" },
-      },
-    }),
+    // node("image", [], {
+    //   node: {
+    //     src: "https://learning.oreilly.com/api/v2/epubs/urn:orm:book:9780123820365/files/images/F000124f12-68-9780123820365.jpg",
+    //     align: "center",
+    //   },
+    //   html: {
+    //     style: { justifyContent: "center" },
+    //   },
+    // }),
     // node("image", [], {
     //   node: {
     //     src: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb",
@@ -160,7 +160,6 @@ const data = node("carbon", [
     //   node("stack", [section([title([text("section 1")])])]),
     //   node("stack", [section([title([text("section 2")])])]),
     // ]),
-    section([title([])]),
     // section([
     //   title([
     //     text("sect"),
@@ -232,6 +231,7 @@ const extensions = [
 
 export default function Dev() {
   const app = useCreateCarbon(data, extensions);
+
 
   return <CarbonApp app={app} />;
 }

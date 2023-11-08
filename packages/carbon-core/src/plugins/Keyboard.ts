@@ -447,8 +447,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		const nonSplit = node.closest(n => n.isContainerBlock && !n.type.splits);
 
 		if (nonSplit && splitBlock && nonSplit.depth > splitBlock.depth) {
-			ctx.event.preventDefault();
-			ctx.event.stopPropagation();
+			preventAndStopCtx(ctx);
 			return
 		}
 
@@ -464,9 +463,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			return
 		}
 
-		console.log(splitType);
-		// cmd.transform
-		// 	.split(splitBlock, selection, { splitType })?.dispatch();
+		cmd.transform
+			.split(splitBlock, selection, { splitType })?.dispatch();
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 import {
   ActionOrigin,
@@ -32,6 +32,8 @@ import { DocumentContext } from "../hooks";
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
   const { picture = {} } = node.attrs.node;
+
+  console.error("DocumentComp", node.attrs.node);
 
   const app = useCarbon();
 
@@ -160,6 +162,7 @@ export const DocumentComp = (props: RendererProps) => {
             },
             onBlur: (e) => app.emit('document:blur', e as any),
             onFocus: (e) => app.emit('document:focus', e as any),
+            className: 'carbon-document',
           }}
         >
           <CarbonNodeContent node={node} custom={placeholder} />

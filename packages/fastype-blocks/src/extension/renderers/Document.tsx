@@ -166,6 +166,7 @@ export const DocumentComp = (props: RendererProps) => {
             },
             onBlur: (e) => app.emit("document:blur", e as any),
             onFocus: (e) => app.emit("document:focus", e as any),
+            className: 'fastype-document',
           }}
         >
           <CarbonNodeContent node={node} custom={placeholder} />
