@@ -65,11 +65,23 @@ export class Section extends NodePlugin {
 
 		let ret = contentNode?.textContent;
 
-		if (childrenNodes.length) {
-			ret += '\n' + childrenNodes.map(n => app.serialize(n)).join('');
+		// TODO: This is a hack to get the correct heading level
+		switch (node.attrs.html['data-as']) {
+			case 'h1':
+				ret = '# ' + ret;
+				break
+			case 'h2':
+				ret = '## ' + ret;
+				break
+			case 'h3':
+				ret = '### ' + ret;
+				break
+			case 'h4':
+				ret = '#### ' + ret;
+				break
 		}
 
-		return ret ?? ''
+		return ret + app.cmd.nestable.serializeChildren(node)
 	}
 
 	insert(app: Carbon, after: Node) {

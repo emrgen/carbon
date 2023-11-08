@@ -7,13 +7,15 @@ declare global {
   }
 }
 
-test("add title to the document", async ({ page }) => {
+test.beforeEach(async ({ page }, testInfo) => {
+  console.log(`Running ${testInfo.title}`);
   await page.goto("http://localhost:5173");
-
   await focusDocTitle(page);
+});
+
+test("add title to the document", async ({ page }) => {
   await page.keyboard.type("Hello World!");
   await page.keyboard.press("Enter");
-
 
   const textContent = await page.evaluate(() => {
     const app = window.app;
@@ -33,9 +35,6 @@ test("add title to the document", async ({ page }) => {
 });
 
 test("add number list to the document", async ({ page }) => {
-  await page.goto("http://localhost:5173");
-
-  await focusDocTitle(page);
   await page.keyboard.type("Hello World!");
   await page.keyboard.press("Enter");
 
@@ -63,9 +62,6 @@ test("add number list to the document", async ({ page }) => {
 });
 
 test("add bullet list to the document", async ({ page }) => {
-  await page.goto("http://localhost:5173");
-
-  await focusDocTitle(page);
   await page.keyboard.type("Hello World!");
   await page.keyboard.press("Enter");
 
@@ -93,9 +89,6 @@ test("add bullet list to the document", async ({ page }) => {
 });
 
 test("add nested number list to the document", async ({ page }) => {
-  await page.goto("http://localhost:5173");
-
-  await focusDocTitle(page);
   await page.keyboard.type("Hello World!");
   await page.keyboard.press("Enter");
 
@@ -118,9 +111,6 @@ test("add nested number list to the document", async ({ page }) => {
 });
 
 test("add nested bullet list to the document", async ({ page }) => {
-  await page.goto("http://localhost:5173");
-
-  await focusDocTitle(page);
   await page.keyboard.type("Hello World!");
   await page.keyboard.press("Enter");
 
@@ -138,9 +128,6 @@ test("add nested bullet list to the document", async ({ page }) => {
 });
 
 test('add callout into document', async ({ page }) => {
-  await page.goto("http://localhost:5173");
-
-  await focusDocTitle(page);
   await page.keyboard.type("Doc title");
   await page.keyboard.press("Enter");
 
@@ -156,6 +143,19 @@ test('add callout into document', async ({ page }) => {
   const docContent2 = await getDocContent(page);
 
   expect(docContent2).toBe("Doc title\nthis is a callout\n callout content");
+});
+
+test('add header in document', async ({ page }) => {
+  await page.keyboard.type("Doc title");
+  await page.keyboard.press("Enter");
+
+  await page.keyboard.type("# this is a header");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("header content");
+  await page.keyboard.press("Tab");
+
+  const docContent = await getDocContent(page);
+  expect(docContent).toBe("Doc title\n# this is a header\n header content");
 })
 
 const getDocContent =  async (page: Page) => {

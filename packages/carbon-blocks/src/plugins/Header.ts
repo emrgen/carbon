@@ -1,5 +1,15 @@
 
-import { AfterPlugin, CarbonPlugin, NodePlugin, Node, NodeSpec, EventHandlerMap, EventContext } from '@emrgen/carbon-core';
+import {
+	AfterPlugin,
+	CarbonPlugin,
+	NodePlugin,
+	Node,
+	NodeSpec,
+	EventHandlerMap,
+	EventContext,
+	Carbon, SerializedNode
+} from "@emrgen/carbon-core";
+import { node } from "@emrgen/carbon-blocks";
 
 export class Header extends AfterPlugin {
 	name = 'header';
@@ -16,7 +26,6 @@ export class Heading extends NodePlugin {
 	static isHeading(node: Node) {
 		return node.groups.includes('heading')
 	}
-
 
 	description() {
 		const { level } = this;
@@ -70,5 +79,9 @@ export class Heading extends NodePlugin {
 
 	keydown(): Partial<EventHandlerMap> {
 		return {}
+	}
+
+	serialize(app: Carbon, node: Node): SerializedNode {
+		return '#'.repeat(this.level) + 'X' + app.serialize(node.child(0)!) + app.cmd.nestable.serializeChildren(node)
 	}
 }
