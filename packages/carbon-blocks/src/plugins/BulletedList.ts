@@ -29,12 +29,8 @@ export class BulletedList extends Section {
 
   serialize(app: Carbon, node: Node): SerializedNode {
     const contentNode = node.child(0);
-    const childrenNodes = node.children.slice(1);
     let ret = `- ${contentNode ? app.serialize(contentNode) : ''}`;
-
-    if (childrenNodes.length) {
-      ret += '\n' + childrenNodes.map(n => app.serialize(n)).join('\n');
-    }
+    ret += app.cmd.nestable.serializeChildren(node);
 
     return ret
   }

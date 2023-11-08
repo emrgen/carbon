@@ -1,4 +1,4 @@
-import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
+import { Carbon, CarbonPlugin, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
 
 export class Callout extends CarbonPlugin {
   name = 'callout';
@@ -31,6 +31,14 @@ export class Callout extends CarbonPlugin {
         }
       }
     }
+  }
+
+  serialize(app: Carbon, node: Node): SerializedNode {
+    const contentNode = node.child(0);
+
+    let ret = `${contentNode ? app.serialize(contentNode) : ''}`;
+    ret += app.cmd.nestable.serializeChildren(node);
+    return ret
   }
 
 }

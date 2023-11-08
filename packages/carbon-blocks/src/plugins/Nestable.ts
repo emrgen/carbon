@@ -24,6 +24,7 @@ declare module '@emrgen/carbon-core' {
 		nestable: {
 			wrap(node: Node, parent: Node): Optional<Transaction>;
 			unwrap(node: Node): Optional<Transaction>;
+			serializeChildren(node: Node): string;
 		}
 	}
 }
@@ -38,7 +39,7 @@ export class NestablePlugin extends AfterPlugin {
 		return {
 			wrap: this.wrap,
 			unwrap: this.unwrap,
-			serialize: this.serialize,
+			serializeChildren: this.serializeChildren,
 		}
 	}
 
@@ -250,4 +251,9 @@ export class NestablePlugin extends AfterPlugin {
 		}
 	}
 
+	serializeChildren(app: Carbon, node: Node): string {
+		const children = node.children.slice(1);
+		if (!children.length) return ''
+		return '\n' + children.map(n => app.serialize(n)).map(a => ` ${a}`).join('\n')
+	}
 }

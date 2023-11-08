@@ -1,15 +1,6 @@
-import {
-  Carbon,
-  CarbonPlugin, DeleteOpts, InsertPos,
-  Node, NodeName,
-  NodeSpec, Pin,
-  PinnedSelection, Point,
-  SerializedNode, Slice, SplitOpts,
-  Transaction
-} from "@emrgen/carbon-core";
+import { Carbon, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
 import { Section } from "./Section";
-import { takeBefore, takeUpto } from "@emrgen/carbon-core/src/utils/array";
-import { Optional } from "@emrgen/types";
+import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
 
 
 declare module '@emrgen/carbon-core' {
@@ -60,13 +51,9 @@ export class NumberedList extends Section {
 
   serialize(app: Carbon, node: Node): SerializedNode {
     const contentNode = node.child(0);
+
     let ret = `${this.listNumber(app, node)}. ${contentNode ? app.serialize(contentNode) : ''}`;
-
-    const childrenNodes = node.children.slice(1);
-    if (childrenNodes.length) {
-      ret += '\n' + childrenNodes.map(n => app.serialize(n)).map(a => ` ${a ?? ''}`).join('\n');
-    }
-
+    ret += app.cmd.nestable.serializeChildren(node);
     return ret
   }
 }
