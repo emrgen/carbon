@@ -66,7 +66,7 @@ export class TitlePlugin extends NodePlugin {
 			// },
 			dragStart(ctx: EventContext<DragEvent>) {
 				ctx.event.preventDefault()
-			}
+			},
 		}
 	}
 

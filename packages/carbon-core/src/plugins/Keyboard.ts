@@ -387,14 +387,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 	// handles enter event
 	enter(ctx: EventContext<KeyboardEvent>) {
 		console.log('Enter event...');
+		preventAndStopCtx(ctx);
 
-		ctx.event.preventDefault();
-		ctx.stopPropagation();
 		const { app } = ctx;
 		const { selection, cmd, blockSelection } = app;
 		const { start, end } = selection
 		const { node } = start;
-		let tr = app.tr;
 
 		// put the cursor at the end of the first text block
 		if (!blockSelection.isEmpty) {
@@ -407,7 +405,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				// if there is a text block, put the cursor at the end of the text block
 				if (textBlock) {
 					const pin = Pin.toEndOf(textBlock)!
-					tr
+					app.tr
 						.selectNodes([])
 						.select(PinnedSelection.fromPin(pin))
 						.dispatch();
@@ -419,7 +417,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				if (n.hasFocusable) {
 					const focusable = n.find(n => n.isFocusable);
 					const pin = Pin.toStartOf(focusable!)!
-					tr
+					app.tr
 						.selectNodes([])
 						.select(PinnedSelection.fromPin(pin))
 						.dispatch();
@@ -434,7 +432,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			if (!section) return false
 
 			const after = PinnedSelection.fromPin(Pin.toStartOf(section)!)!;
-			tr
+			app.tr
 				.selectNodes([])
 				.add(insertAfterAction(lastBlock, section))
 				.select(after, ActionOrigin.UserInput)
@@ -448,11 +446,11 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		const splitBlock = node.closest(n => n.type.splits);
 		const nonSplit = node.closest(n => n.isContainerBlock && !n.type.splits);
 
-		// if (nonSplit && splitBlock && nonSplit.depth > splitBlock.depth) {
-		// 	ctx.event.preventDefault();
-		// 	ctx.event.stopPropagation();
-		// 	return
-		// }
+		if (nonSplit && splitBlock && nonSplit.depth > splitBlock.depth) {
+			ctx.event.preventDefault();
+			ctx.event.stopPropagation();
+			return
+		}
 
 		if (!splitBlock) {
 			console.log('no split block in the chain', node.chain.map(n => n.name));
@@ -466,8 +464,9 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			return
 		}
 
-		cmd.transform
-			.split(splitBlock, selection, { splitType })?.dispatch();
+		console.log(splitType);
+		// cmd.transform
+		// 	.split(splitBlock, selection, { splitType })?.dispatch();
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {

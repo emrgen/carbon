@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
-  await page.goto('http://localhost:5173/');
+test('click on document', async ({ page }) => {
+  await page.goto('http://localhost:5173/fastype');
 
-  await page.locator('.document-wrapper').first().click();
-  
+  await page.click('.document-wrapper');
 });

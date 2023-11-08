@@ -12,7 +12,6 @@ declare module '@emrgen/carbon-core' {
 	}
 }
 
-
 export class NestablePlugin extends AfterPlugin {
 
 	name = 'nestable'
@@ -165,14 +164,13 @@ export class NestablePlugin extends AfterPlugin {
 
 				// when the cursor is at start of the empty node
 				const listNode = node.closest(isNestableNode);
-				console.log(listNode?.id.toString(), listNode?.name);
+				// console.log(listNode?.id.toString(), listNode?.name);
 				if (!listNode) return
 				if (!listNode.isEmpty) return
 				const atStart = selection.head.isAtStartOfNode(listNode);
 				if (!atStart) return
 
 				const as = listNode.attrs.html['data-as'];
-				console.log('data-as', as);
 				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
 					tr

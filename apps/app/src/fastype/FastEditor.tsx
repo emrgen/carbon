@@ -137,9 +137,9 @@ export function FastEditor() {
         loading={<Spinner />}
       /> */}
       <Fastype app={app} />
-      <Box pos='absolute' left={0} top={0} py={2} px={0} w='500px' h='full' >
-        <TimeTravel app={app}/>
-      </Box>
+      {/*<Box pos='absolute' left={0} top={0} py={2} px={0} w='500px' h='full' >*/}
+      {/*  <TimeTravel app={app}/>*/}
+      {/*</Box>*/}
     </Box>
   );
 }
