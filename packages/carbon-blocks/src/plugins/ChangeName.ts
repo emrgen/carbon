@@ -11,7 +11,7 @@ import {
   Point,
   nodeLocation,
   moveNodesAction,
-  insertBeforeAction
+  insertBeforeAction, preventAndStopCtx
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
@@ -103,8 +103,7 @@ export class ChangeName extends BeforePlugin {
 
       console.log('tryChangeType', ctx.node.textContent, type);
 
-      ctx.event.preventDefault();
-      ctx.stopPropagation();
+      preventAndStopCtx(ctx);
 
       const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
 
@@ -115,11 +114,15 @@ export class ChangeName extends BeforePlugin {
       }
 
       if (type === 'numberedList') {
-        tr.updateAttrs(block.id, {
-          node: {
-            listNumber: parseInt(match[1].slice(0, -2)) ?? 1
-          }
-        })
+        const listNumber = app.cmd.numberedList.listNumber(block);
+        const inputNumber = parseInt(match[1].slice(0, -2));
+         if (listNumber != inputNumber) {
+           tr.updateAttrs(block.id, {
+             node: {
+               listNumber: parseInt(match[1].slice(0, -2)) ?? 1
+             }
+           })
+         }
       }
 
       tr
@@ -141,14 +144,11 @@ export class ChangeName extends BeforePlugin {
       const { tr, selection } = app;
       const block = node.closest(n => n.isContainerBlock)!;
       if (!isConvertible(block)) return
-
       console.log('tryChangeIntoCode', ctx.node.textContent, type);
 
-      ctx.event.preventDefault();
-      ctx.stopPropagation();
+      preventAndStopCtx(ctx)
 
       const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
-
       const match = text.match(regex);
       if (match === null) {
         console.error('failed to match regex', regex, text);

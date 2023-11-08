@@ -1,5 +1,5 @@
 
-import { Maps, Optional, With } from '@emrgen/types';
+import { Optional, With } from "@emrgen/types";
 import { Node } from './Node';
 import { EventEmitter } from 'events';
 import { querySelector } from '../utils/domElement';
@@ -15,7 +15,7 @@ import { Schema } from './Schema';
 import { SelectionManager } from './SelectionManager';
 import { Transaction } from './Transaction';
 import { TransactionManager } from './TransactionManager';
-import { CarbonCommands, SerializedNode } from "./types";
+import { CarbonCommands, Maps, SerializedNode } from "./types";
 import { BlockSelection } from './NodeSelection';
 import { first, isFunction } from 'lodash';
 import { CarbonCommandChain } from './CarbonCommandChain';
@@ -167,7 +167,7 @@ export class Carbon extends EventEmitter {
 	enable(fn?: Function) {
 		this.enabled = true;
 		console.log('enable');
-		
+
 		if (fn) {
 			fn();
 			this.disable()
@@ -176,7 +176,7 @@ export class Carbon extends EventEmitter {
 
 	disable() {
 		console.log('disable');
-		
+
 		this.enabled = false;
 	}
 
@@ -191,7 +191,7 @@ export class Carbon extends EventEmitter {
 	cleanTicks() {
 		this.ticks = [];
 	}
-	
+
 	nextTick(cb) {
 		this.ticks.push(cb);
 	}

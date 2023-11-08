@@ -1,58 +1,59 @@
-export * from './create'
-import { CarbonText, Extension, Renderer, CarbonNode, CarbonBlock } from '@emrgen/carbon-core';
-import { NestableComp } from './renderers/Nestable';
-import { Section } from './plugins/Section';
-import { DocumentComp } from './renderers/Document';
-import { DocPlugin } from './plugins/Document';
-import { Header } from './plugins/Header';
+import { CarbonRoot } from "./plugins/CarbonRoot";
 
-import './style.styl';
-import './dnd.styl';
-import DividerComp from './renderers/Divider';
-import { Divider } from './plugins/Divider';
-import TitleComp from './renderers/TitleComp';
-import { Collapsible } from './plugins/Collapsible';
-import CollapsibleListComp from './renderers/Collapsible';
-import { BulletedListComp } from './renderers/BulletedList';
-import { BulletedList } from './plugins/BulletedList';
-import { ChangeName } from './plugins/ChangeName';
-import { Equation } from './plugins/Equation';
-import { EquationComp } from './renderers/Equation';
-import { NumberedListComp } from './renderers/NumberedList';
-import { NumberedList } from './plugins/NumberedList';
-import { HStack, Stack } from './plugins/HStack';
-import { HStackComp } from './renderers/HStackComp';
-import { Image } from './plugins/Image';
-import ImageComp from './renderers/ImageComp';
-import { Todo } from './plugins/Todo';
-import TodoComp from './renderers/Todo';
-import { NestablePlugin } from './plugins';
-import { Quote } from './plugins/Quote';
-import { QuoteComp } from './renderers/Quote';
-import { CalloutComp } from './renderers/Callout';
-import { Callout } from './plugins/Callout';
-import { CodeComp } from './renderers/Code';
-import { Code } from './plugins/Code';
-import { DocLink } from './plugins/DocLink';
-import { DocLinkComp } from './renderers/DocLink';
-import { Table } from './plugins/Table';
-import { ColumnComp, RowComp, TableComp } from './renderers/Table';
-import { Insert } from './plugins/Inserter';
-import { Change } from './plugins/Change';
-import { Carbon } from './plugins/Carbon';
-import { CarbonComp } from './renderers/Carbon';
-import { FileTree } from './plugins/FileTree';
-import { FileTreeComp } from './renderers/FileTree';
-import { FileTreeItemComp } from './renderers/FileTreeItem';
-import { Tab } from './plugins/Tab';
-import { TabComp, TabItemComp, TextTitleComp, TabTitlesComp } from './renderers/TabComp';
-import { VideoComp } from './renderers/Video';
-import { Video } from './plugins/Video';
-import { Content } from './plugins/Content';
-import { ContentComp } from './renderers/Content';
-import { HeaderComp } from './renderers/Header';
-import FrameComp from './renderers/Frame';
-import { Frame } from './plugins/Frame';
+export * from "./create"
+import { CarbonText, Extension, Renderer } from "@emrgen/carbon-core";
+import { NestableComp } from "./renderers";
+import { Section } from "./plugins";
+import { DocumentComp } from "./renderers";
+import { DocPlugin } from "./plugins";
+import { Header } from "./plugins/Header";
+
+import "./style.styl";
+import "./dnd.styl";
+import DividerComp from "./renderers/Divider";
+import { Divider } from "./plugins/Divider";
+import TitleComp from "./renderers/TitleComp";
+import { Collapsible } from "./plugins/Collapsible";
+import CollapsibleListComp from "./renderers/Collapsible";
+import { BulletedListComp } from "./renderers/BulletedList";
+import { BulletedList } from "./plugins/BulletedList";
+import { ChangeName } from "./plugins/ChangeName";
+import { Equation } from "./plugins/Equation";
+import { EquationComp } from "./renderers/Equation";
+import { NumberedListComp } from "./renderers/NumberedList";
+import { NumberedList } from "./plugins/NumberedList";
+import { HStack, Stack } from "./plugins/HStack";
+import { HStackComp } from "./renderers/HStackComp";
+import { Image } from "./plugins/Image";
+import ImageComp from "./renderers/ImageComp";
+import { Todo } from "./plugins/Todo";
+import TodoComp from "./renderers/Todo";
+import { NestablePlugin } from "./plugins";
+import { Quote } from "./plugins/Quote";
+import { QuoteComp } from "./renderers/Quote";
+import { CalloutComp } from "./renderers/Callout";
+import { Callout } from "./plugins/Callout";
+import { CodeComp } from "./renderers/Code";
+import { Code } from "./plugins/Code";
+import { DocLink } from "./plugins/DocLink";
+import { DocLinkComp } from "./renderers/DocLink";
+import { Table } from "./plugins/Table";
+import { ColumnComp, RowComp, TableComp } from "./renderers/Table";
+import { Insert } from "./plugins/Inserter";
+import { Change } from "./plugins/Change";
+import { CarbonComp } from "./renderers/Carbon";
+import { FileTree } from "./plugins/FileTree";
+import { FileTreeComp } from "./renderers/FileTree";
+import { FileTreeItemComp } from "./renderers/FileTreeItem";
+import { Tab } from "./plugins/Tab";
+import { TabComp, TabItemComp, TabTitlesComp, TextTitleComp } from "./renderers/TabComp";
+import { VideoComp } from "./renderers/Video";
+import { Video } from "./plugins/Video";
+import { Content } from "./plugins/Content";
+import { ContentComp } from "./renderers/Content";
+import { HeaderComp } from "./renderers/Header";
+import FrameComp from "./renderers/Frame";
+import { Frame } from "./plugins/Frame";
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -78,7 +79,7 @@ export const blockPresets: Extension = {
 		new Table(),
 		new Insert(),
 		new Change(),
-		new Carbon(),
+		new CarbonRoot(),
 		new FileTree(),
 		new Tab(),
 		new Content(),

@@ -1,7 +1,23 @@
-import { AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Pin, PinnedSelection, Point, PointedSelection, Transaction, nodeLocation, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
+import {
+	AfterPlugin,
+	Carbon,
+	EventContext,
+	EventHandlerMap,
+	Node,
+	Pin,
+	PinnedSelection,
+	Point,
+	PointedSelection,
+	Transaction,
+	nodeLocation,
+	preventAndStop,
+	preventAndStopCtx,
+	SerializedNode
+} from "@emrgen/carbon-core";
 import { isNestableNode } from '../utils';
 import { reverse } from 'lodash';
 import { Optional } from '@emrgen/types';
+import { node } from "@emrgen/carbon-blocks";
 
 declare module '@emrgen/carbon-core' {
 	interface CarbonCommands {
@@ -22,6 +38,7 @@ export class NestablePlugin extends AfterPlugin {
 		return {
 			wrap: this.wrap,
 			unwrap: this.unwrap,
+			serialize: this.serialize,
 		}
 	}
 
@@ -232,4 +249,5 @@ export class NestablePlugin extends AfterPlugin {
 			},
 		}
 	}
+
 }

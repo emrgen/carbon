@@ -1,4 +1,4 @@
-import { NodePlugin, NodeSpec } from '@emrgen/carbon-core';
+import { Carbon, Node, NodePlugin, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
 
 export class TextPlugin extends NodePlugin {
 
@@ -17,5 +17,9 @@ export class TextPlugin extends NodePlugin {
 				}
 			}
 		}
+	}
+
+	serialize(app: Carbon, node: Node): SerializedNode {
+		return node.textContent ?? ''
 	}
 }

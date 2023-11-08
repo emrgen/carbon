@@ -36,7 +36,7 @@ export type InputRules = Array<InputRule>
 
 export type Nullable<T> = T | null;
 export type Predicate<T> = (a: T) => boolean
-export type With<T> = (a: T, ...args) => void
+export type With<T> = (a: T, ...args: any) => void
 export type Returns<T> = () => T
 export type Maps<A, B> = (a: A) => B;
 export type MayReturn<T> = () => Optional<T>
@@ -64,11 +64,7 @@ export interface SelectionBounds {
 	tail: Optional<DOMRect>;
 }
 
-export type SerializedNode = {
-	name: string;
-	title?: string;
-	content: SerializedNode[]
-}
+export type SerializedNode = string;
 
 export type EncodedNode<T> = T;
 

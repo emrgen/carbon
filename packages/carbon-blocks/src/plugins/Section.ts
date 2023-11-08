@@ -61,11 +61,15 @@ export class Section extends NodePlugin {
 
 	serialize(app: Carbon, node: Node): SerializedNode {
 		const contentNode = node.child(0);
-		return {
-			name: node.name,
-			title: contentNode?.textContent ?? '',
-			content: node.children.slice(1).map(n => app.serialize(n)) as SerializedNode[]
+		const childrenNodes = node.children.slice(1);
+
+		let ret = contentNode?.textContent;
+
+		if (childrenNodes.length) {
+			ret += '\n' + childrenNodes.map(n => app.serialize(n)).join('');
 		}
+
+		return ret ?? ''
 	}
 
 	insert(app: Carbon, after: Node) {

@@ -1,4 +1,4 @@
-import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
+import { Carbon, CarbonPlugin, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
 import { Section } from "./Section";
 
 export class BulletedList extends Section {
@@ -21,10 +21,21 @@ export class BulletedList extends Section {
         },
         html: {
           placeholder: 'List',
-          // contentEditable: false,
           suppressContentEditableWarning: true,
         }
       }
     }
+  }
+
+  serialize(app: Carbon, node: Node): SerializedNode {
+    const contentNode = node.child(0);
+    const childrenNodes = node.children.slice(1);
+    let ret = `- ${contentNode ? app.serialize(contentNode) : ''}`;
+
+    if (childrenNodes.length) {
+      ret += '\n' + childrenNodes.map(n => app.serialize(n)).join('\n');
+    }
+
+    return ret
   }
 }

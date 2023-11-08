@@ -381,7 +381,7 @@ export class Node extends EventEmitter {
 	}
 
 	get textContent(): string {
-		return this.content.textContent
+		return this.content.textContent;
 	}
 
 	get isRoot(): boolean {
@@ -389,7 +389,7 @@ export class Node extends EventEmitter {
 	}
 
 	get isDocument(): boolean {
-		return !!this.type.isDocument;
+		return this.type.isDocument;
 	}
 
 	get isInline(): boolean {
