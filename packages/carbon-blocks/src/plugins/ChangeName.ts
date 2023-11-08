@@ -15,7 +15,6 @@ import {
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
-import { NodeData } from "packages/carbon-core/src/core/NodeData";
 
 export class ChangeName extends BeforePlugin {
   name = 'changeName';
@@ -53,7 +52,7 @@ export class ChangeName extends BeforePlugin {
     };
   }
 
-  tryChangeAttrs(name: string, groups: string[], data: Partial<NodeData> = {}) {
+  tryChangeAttrs(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;
@@ -95,7 +94,7 @@ export class ChangeName extends BeforePlugin {
     }
   }
 
-  tryChangeType(type: string, groups: string[], data: Partial<NodeData> = {}) {
+  tryChangeType(type: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;
@@ -136,7 +135,7 @@ export class ChangeName extends BeforePlugin {
     }
   }
 
-  tryChangeIntoCode(type: string, groups: string[], data: Partial<NodeData> = {}) {
+  tryChangeIntoCode(type: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;

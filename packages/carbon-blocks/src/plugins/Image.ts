@@ -44,7 +44,6 @@ export class Image extends NodePlugin {
       name: node.name,
       title: `![](${node.attrs.node.src})`,
       content: [],
-      isNested: false,
     }
   }
 

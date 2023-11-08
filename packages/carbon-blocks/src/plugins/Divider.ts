@@ -41,7 +41,6 @@ export class Divider extends NodePlugin {
     return {
       name: node.name,
       content: [],
-      isNested: false,
     }
   }
 

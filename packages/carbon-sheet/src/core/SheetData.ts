@@ -9,13 +9,13 @@ export class Cell {
   private data: string;
   private format: string;
 
-  get row() {
-    // return cellAddrToIndex(this.address);
-  }
+  // get row() {
+  //   // return cellAddrToIndex(this.address);
+  // }
 
-  get column() {
-    // return cellAddrToIndex(this.address);
-  }
+  // get column() {
+  //   // return cellAddrToIndex(this.address);
+  // }
 
   constructor(address: string, data: string = '', format: string = 'text') {
     this.address = address;

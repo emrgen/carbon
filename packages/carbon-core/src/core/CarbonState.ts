@@ -231,7 +231,7 @@ export class CarbonState extends EventEmitter {
 	updateContent() {
 		if (!this.content.isDirty) return
 		const nodes: Node[] = [];
-		this.content = this.content.view(nodes);
+		// this.content = this.content.view(nodes);
 		// console.log('document id', this.content.childrenVersion)
 		nodes.forEach(n => {
 			// console.log('new node', n.id.toString(), n.childrenVersion)

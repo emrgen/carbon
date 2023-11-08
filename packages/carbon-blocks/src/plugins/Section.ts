@@ -64,10 +64,7 @@ export class Section extends NodePlugin {
 		return {
 			name: node.name,
 			title: contentNode?.textContent ?? '',
-			content: node.children.slice(1).map(n => app.serialize(n)),
-
-			isNested: true,
-			unwrap: contentNode?.isEmpty ?? false,
+			content: node.children.slice(1).map(n => app.serialize(n)) as SerializedNode[]
 		}
 	}
 

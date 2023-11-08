@@ -52,12 +52,8 @@ export class Todo extends Section {
     const contentNode = node.child(0);
     return {
       name: node.name,
-      prefix: `- [${tick}] `,
       title: contentNode?.textContent ?? '',
-      content: node.children.slice(1).map(n => app.serialize(n)),
-
-      unwrap: contentNode?.isEmpty ?? false,
-      isNested: true
+      content: node.children.slice(1).map(n => app.serialize(n)) as SerializedNode[]
     }
 
   }

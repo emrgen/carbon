@@ -68,13 +68,6 @@ export type SerializedNode = {
 	name: string;
 	title?: string;
 	content: SerializedNode[]
-	prefix?: string;
-	suffix?: string;
-
-	unwrap?: boolean;
-	isNested?: boolean;
-	isEmpty?: boolean;
-	isVoid?: boolean;
 }
 
 export type EncodedNode<T> = T;

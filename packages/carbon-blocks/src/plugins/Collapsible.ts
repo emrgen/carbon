@@ -1,5 +1,6 @@
 import { BeforePlugin, BlockContent, Carbon, CarbonPlugin, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, Transaction, insertAfterAction, insertBeforeAction, preventAndStopCtx, splitTextBlock } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
+import { identity } from 'lodash';
 
 declare module '@emrgen/carbon-core' {
   interface CarbonCommands {
@@ -158,7 +159,7 @@ export class Collapsible extends NodePlugin {
     return {
       name: node.name,
       title: node.child(0)?.textContent ?? '',
-      content: node.children.slice(1).map(n => app.serialize(n)),
+      content: node.children.slice(1).map(n => app.serialize(n)).filter(identity) as SerializedNode[] ?? [],
     }
   }
 

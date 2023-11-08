@@ -25,9 +25,8 @@ import {
   Node,
   CarbonChildren,
 } from "@emrgen/carbon-core";
-// import katex from "katex";
+import katex from "katex";
 import "katex/dist/katex.min.css";
-import { node } from "@emrgen/carbon-blocks";
 import {
   Box,
   Center,

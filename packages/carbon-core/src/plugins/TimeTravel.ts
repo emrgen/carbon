@@ -29,7 +29,6 @@ export class TimeTravelPlugin extends AfterPlugin {
         // }
 
         backwardTr.readOnly = true;
-        backwardTr.travelling = true
         backwardTr.dispatch();
 
         this.app?.emit('timeTravel', this.transactionTree);
@@ -47,7 +46,6 @@ export class TimeTravelPlugin extends AfterPlugin {
         // }
 
         forwardTr.readOnly = true;
-        forwardTr.forwardTr = true
         forwardTr.dispatch();
 
         this.app?.emit('timeTravel', this.transactionTree);
@@ -56,7 +54,7 @@ export class TimeTravelPlugin extends AfterPlugin {
   }
 
   transaction(tr: Transaction): void {
-    if (!tr.travelling && !tr.readOnly && tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
+    if (!tr.readOnly && tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
       this.transactionTree.add(tr)
       this.app?.emit('timeTravel', this.transactionTree);
     }

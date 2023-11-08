@@ -108,7 +108,7 @@ export class BlockContent implements NodeContent {
 	}
 
 	view(container: Node[]): NodeContent {
-		return BlockContent.create(this.nodes.map(n => n.view(container)));
+		return BlockContent.create(this.nodes);
 	}
 
 	destroy() { }
