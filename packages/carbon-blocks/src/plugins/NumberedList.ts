@@ -64,7 +64,7 @@ export class NumberedList extends Section {
 
     const childrenNodes = node.children.slice(1);
     if (childrenNodes.length) {
-      ret += '\n' + childrenNodes.map(n => app.serialize(n)).join('\n ');
+      ret += '\n' + childrenNodes.map(n => app.serialize(n)).map(a => ` ${a ?? ''}`).join('\n');
     }
 
     return ret

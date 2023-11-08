@@ -100,19 +100,19 @@ await page.goto('http://localhost:5173');
   await page.keyboard.type('1. first item');
   await page.keyboard.press('Enter');
 
-  await page.keyboard.type('1. second item');
+  await page.keyboard.type('1. first item child 1');
   await page.keyboard.press('Tab');
-  // await page.keyboard.press('Enter');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('first item child 2');
 
-  // const docContent = await page.evaluate(() => {
-  //   const app = window.app;
-  //   const doc = app.content.find((n) => n.isDocument);
-  //
-  //   return app.serialize(doc!);
-  // });
-  //
-  // expect(docContent).toBe('Hello World!\n1. first item\n2. second item\n');
+  const docContent = await page.evaluate(() => {
+    const app = window.app;
+    const doc = app.content.find((n) => n.isDocument);
 
+    return app.serialize(doc!);
+  });
+
+  expect(docContent).toBe('Hello World!\n1. first item\n 1. first item child 1\n 2. first item child 2');
 })
 
 export const focusDocTitle = async (page) => {
