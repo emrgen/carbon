@@ -156,11 +156,7 @@ export class Collapsible extends NodePlugin {
   }
 
   serialize(app: Carbon, node: Node): SerializedNode {
-    return {
-      name: node.name,
-      title: node.child(0)?.textContent ?? '',
-      content: node.children.slice(1).map(n => app.serialize(n)).filter(identity) as SerializedNode[] ?? [],
-    }
+    return `- ${app.serialize(node.child(0)!)}` + app.cmd.nestable.serializeChildren(node);
   }
 
 }

@@ -127,6 +127,21 @@ test("add nested bullet list to the document", async ({ page }) => {
   expect(docContent).toBe("Hello World!\n- first item\n - first item child 1\n - first item child 2");
 });
 
+test('add todo in document', async ({ page }) => {
+  await page.keyboard.type("Doc title");
+  await page.keyboard.press("Enter");
+
+  await page.keyboard.type("[] this is a todo");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("another todo");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("yet another todo");
+
+  const docContent = await getDocContent(page);
+
+  expect(docContent).toBe("Doc title\n[] this is a todo\n[] another todo\n[] yet another todo");
+})
+
 test('add callout into document', async ({ page }) => {
   await page.keyboard.type("Doc title");
   await page.keyboard.press("Enter");
@@ -144,6 +159,24 @@ test('add callout into document', async ({ page }) => {
 
   expect(docContent2).toBe("Doc title\nthis is a callout\n callout content");
 });
+
+test('add toggle list in document', async ({ page }) => {
+  await page.keyboard.type("Doc title");
+  await page.keyboard.press("Enter");
+
+  await page.keyboard.type("> this is a toggle list");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("toggle content");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("more toggle content");
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Backspace");
+  await page.keyboard.type("after toggle content");
+
+  const docContent = await getDocContent(page);
+
+  expect(docContent).toBe("Doc title\n- this is a toggle list\n toggle content\n more toggle content\nafter toggle content");
+})
 
 test('add header in document', async ({ page }) => {
   await page.keyboard.type("Doc title");
