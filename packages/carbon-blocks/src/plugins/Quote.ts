@@ -1,4 +1,4 @@
-import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
+import { Carbon, CarbonPlugin, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
 
 export class Quote extends CarbonPlugin {
   name = 'quote';
@@ -33,4 +33,8 @@ export class Quote extends CarbonPlugin {
     }
   }
 
+  serialize(app: Carbon, node: Node): SerializedNode {
+    const content = node.child(0)!
+    return `| ${app.serialize(content)}${app.cmd.nestable.serializeChildren(node)}`;
+  }
 }

@@ -155,3 +155,21 @@ test('add header in document', async ({ page }) => {
   const docContent = await getDocContent(page);
   expect(docContent).toBe("Doc title\n# this is a header\n header content");
 })
+
+test('add quote in document', async ({ page }) => {
+  const carbonPage = new CarbonPage(page);
+  await page.keyboard.type("| this is a quote");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("quote content");
+  await page.keyboard.press("Tab");
+
+  const docContent = await getDocContent(page);
+  expect(docContent).toBe("Doc title\n| this is a quote\n quote content");
+
+  await carbonPage.enter();
+  await carbonPage.enter();
+  await carbonPage.type('after the quote');
+
+  const docContent2 = await getDocContent(page);
+  expect(docContent2).toBe("Doc title\n| this is a quote\n quote content\nafter the quote");
+})
