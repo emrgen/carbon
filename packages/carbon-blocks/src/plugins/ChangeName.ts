@@ -11,10 +11,11 @@ import {
   Point,
   nodeLocation,
   moveNodesAction,
-  insertBeforeAction, preventAndStopCtx, BlockContent
+  insertBeforeAction, preventAndStopCtx, BlockContent, SetContentAction
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
+import { TitleContent } from "./TitleContent";
 
 export class ChangeName extends BeforePlugin {
   name = 'changeName';
@@ -126,11 +127,16 @@ export class ChangeName extends BeforePlugin {
       }
 
       const titleNode = block.child(0)!;
-      const title = titleNode.textContent.slice(match[1].length);
+      // const titleContent = TitleContent.from(titleNode);
+      // const before = titleContent.insert(match[1].length,);
+      // const after = titleContent.remove(0, match[1].length);
+
+      const title = titleNode.textContent.slice(match[1].length-1);
       const textNode = app.schema.text(title)!
       const content = BlockContent.create(textNode);
 
-      tr.setContent(titleNode!.id, content);
+      const action = SetContentAction.withContent(titleNode.id, content, content);
+      tr.add(action)
       tr.change(block.id, block.name, type)
       tr.updateAttrs(block.id, { node: { typeChanged: true },});
       // expand collapsed block

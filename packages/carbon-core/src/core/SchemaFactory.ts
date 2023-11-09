@@ -9,9 +9,7 @@ import {  generateBlockId, generateTextId } from './actions/utils';
 export class SchemaFactory {
 
 	static blockId() {
-		const blockId = generateBlockId();
-		// console.warn('generateBlockId', blockId);
-		return blockId;
+		return generateBlockId();
 	}
 
 	static textId() {
@@ -19,7 +17,7 @@ export class SchemaFactory {
 	}
 
 	createNode(json: any, schema: Schema): Optional<Node> {
-		const { name, content: contentNodes = [], text, attrs = {} } = json;
+		const { id, name, content: contentNodes = [], text, attrs = {} } = json;
 		const type = schema.type(name);
 		if (!type) {
 			throw new Error(`Node Plugin is not registered ${name}`);
@@ -27,13 +25,13 @@ export class SchemaFactory {
 
 		if (name === 'text') {
 			const content = InlineContent.create(text);
-			const id = NodeId.create(SchemaFactory.textId());
-			return Node.create({ id, type, content, attrs });
+			const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(SchemaFactory.textId());
+			return Node.create({ id: nodeId, type, content, attrs });
 		} else {
-			const id = NodeId.create(SchemaFactory.blockId());
 			const nodes = contentNodes.map(n => schema.nodeFromJSON(n));
 			const content = BlockContent.create(nodes);
-			return Node.create({ id, type, content, attrs });
+			const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(SchemaFactory.blockId());
+			return Node.create({ id: nodeId, type, content, attrs });
 		}
 	}
 

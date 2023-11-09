@@ -23,9 +23,11 @@ export class InsertNode implements CarbonAction {
 	}
 
 	execute(tr: Transaction): ActionResult {
-		const { at, node } = this;
+		const { at, nodeJson } = this;
 		const {app}=tr;
 		const target = app.store.get(at.nodeId);
+
+		const node = app.schema.nodeFromJSON(nodeJson)!;
 
 		if (!target) {
 			return ActionResult.withError('failed to find target from: ' + at.toString())
@@ -71,7 +73,7 @@ export class InsertNode implements CarbonAction {
 		const { at, node, nodeJson } = this;
 		// TODO: check if nodeJson and node should be the same
 		const action = RemoveNode.create(at, node.id, this.origin)
-		action.node = node.clone();
+		// action.node = tr.app.schema.nodeFromJSON(nodeJson)!;
 		return action;
 	}
 

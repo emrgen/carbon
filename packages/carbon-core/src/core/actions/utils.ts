@@ -14,6 +14,6 @@ export const generateTextId = () => {
 
 let blockId = 0
 export const generateBlockId = () => {
-	return 'b' + String(++blockId)
-	// return uuidv4();
+	// return 'b' + String(++blockId)
+	return uuidv4().slice(-10)
 }

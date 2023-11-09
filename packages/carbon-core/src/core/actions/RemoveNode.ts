@@ -8,13 +8,14 @@ import { classString } from "../Logger";
 import { Optional } from '@emrgen/types';
 import { Node } from "../Node";
 import { InsertNode } from "./InsertNode";
+import { NodeJSON } from "../types";
 
 // action to remove a node by id
 export class RemoveNode implements CarbonAction {
 	id: number;
 	type: ActionType;
 	// TODO: better to store the node json instead of the node itself
-	node: Optional<Node>;
+	node: Optional<NodeJSON>;
 
 	static create(at: Point, nodeId: NodeId, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new RemoveNode(at, nodeId, origin);
@@ -34,7 +35,7 @@ export class RemoveNode implements CarbonAction {
 			return ActionResult.withError('')
 		}
 
-		this.node = target.clone();
+		this.node = target.toJSON();
 		parent?.remove(target);
 
 		tr.updated(target.parent!);
@@ -51,9 +52,10 @@ export class RemoveNode implements CarbonAction {
 		return ActionResult.withValue('done')
 	}
 
-	inverse(): CarbonAction {
+	inverse(tr: Transaction): CarbonAction {
 		const { at, node } = this;
-		return InsertNode.create(at, node!, ActionOrigin.UserInput);
+		const remove = tr.app.schema.nodeFromJSON(node!);
+		return InsertNode.create(at, remove!, ActionOrigin.UserInput);
 	}
 
 	toString() {

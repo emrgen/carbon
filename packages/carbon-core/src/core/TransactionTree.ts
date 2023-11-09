@@ -17,6 +17,17 @@ export class TransactionTree {
   current: Optional<TransactionNode>;
   trMap: Map<number, TransactionNode> = new Map();
 
+  constructor() {
+    this.root = {
+      parent: null,
+      transaction: null as any,
+      children: [],
+      depth: 0
+    } as unknown as TransactionNode;
+
+    this.current = null;
+  }
+
   moveTo(trId: number) {
     const from = this.current;
     const to = this.trMap.get(trId);
