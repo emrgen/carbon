@@ -1464,10 +1464,18 @@ export class TransformCommands extends BeforePlugin {
       // empty text node will cause issue in `mergeTextNodes`
       // NOTE: empty text node are not valid in carbon
       if (next.textContent) {
-        const textNode = app.schema.text(next.textContent)!;
-        const at = prev.isVoid ? Point.toStart(prev.id) : Point.toAfter(prev.lastChild?.id!);
-        console.log(at.toString(), prev.toJSON());
-        insertActions.push(...this.insertNodeCommands(at!, [textNode]))
+        if (prev.isVoid) {
+          const textNode = app.schema.text(next.textContent)!;
+          insertActions.push(InsertNode.create(Point.toStart(prev.id), textNode));
+        } else {
+          const textContent = prev.textContent + next.textContent;
+          const textNode = app.schema.text(textContent)!;
+          insertActions.push(SetContentAction.create(prev.id, BlockContent.create([textNode])));
+        }
+        
+        // const at = prev.isVoid ? Point.toStart(prev.id) : Point.toAfter(prev.lastChild?.id!);
+        // console.log(at.toString(), prev.toJSON());
+        // insertActions.push(...this.insertNodeCommands(at!, [textNode]))
       }
     } else {
 

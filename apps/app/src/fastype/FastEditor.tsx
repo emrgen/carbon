@@ -16,8 +16,10 @@ import {
 import { carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { fastypeBlocks } from "@emrgen/fastype-blocks";
 import Editor, { DiffEditor, useMonaco, loader } from "@monaco-editor/react";
-import { Box, Spinner } from "@chakra-ui/react";
+import { Box, Spinner, Stack } from "@chakra-ui/react";
 import TimeTravel from "./TimeTravel";
+import { json } from "stream/consumers";
+import FastTree from "./FastTree";
 
 const extensions = [
   extensionPresets,
@@ -115,7 +117,7 @@ export function FastEditor() {
   };
 
   return (
-    <Box h="full" className="fast-editor" w="600px">
+    <Stack h="full" className="fast-editor" w="full">
       {/* <Editor
         height="60vh"
         onMount={handleEditorDidMount}
@@ -140,6 +142,9 @@ export function FastEditor() {
       {/*<Box pos='absolute' left={0} top={0} py={2} px={0} w='200px' h='full'>*/}
       {/*  <TimeTravel app={app}/>*/}
       {/*</Box>*/}
-    </Box>
+      <Box h='300px' bg={'#eee'} margin={'0 auto'} w='740px'>
+        <FastTree app={app} />
+      </Box>
+    </Stack>
   );
 }
