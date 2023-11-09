@@ -19,7 +19,7 @@ export class RemoveText implements CarbonAction{
 
 	constructor(readonly at: Point, readonly node: Node, readonly origin: ActionOrigin) {
 		this.id = generateActionId();
-		this.type = ActionType.insertText;
+		this.type = ActionType.removeText;
 	}
 
 	execute(tr: Transaction): ActionResult {

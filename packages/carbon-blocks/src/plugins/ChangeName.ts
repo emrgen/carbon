@@ -11,7 +11,7 @@ import {
   Point,
   nodeLocation,
   moveNodesAction,
-  insertBeforeAction, preventAndStopCtx
+  insertBeforeAction, preventAndStopCtx, BlockContent
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
@@ -77,8 +77,8 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      tr
-        .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
+      // tr
+      //   .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
       tr.updateAttrs(block.id, {
         html: {
           'data-as': name,
@@ -125,8 +125,12 @@ export class ChangeName extends BeforePlugin {
          }
       }
 
-      tr
-        .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
+      const titleNode = block.child(0)!;
+      const title = titleNode.textContent.slice(match[1].length);
+      const textNode = app.schema.text(title)!
+      const content = BlockContent.create(textNode);
+
+      tr.setContent(titleNode!.id, content);
       tr.change(block.id, block.name, type)
       tr.updateAttrs(block.id, { node: { typeChanged: true },});
       // expand collapsed block

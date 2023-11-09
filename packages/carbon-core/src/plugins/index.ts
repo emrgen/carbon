@@ -15,8 +15,8 @@ export const extensionPresets: Extension = {
 		new KeyboardBeforePlugin(),
 		new ClipboardPlugin(),
 		new SlicePlugin(),
-		new HistoryPlugin(),
-		// new TimeTravelPlugin(),
+		// new HistoryPlugin(),
+		new TimeTravelPlugin(),
 	],
 }
 
