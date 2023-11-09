@@ -1,15 +1,14 @@
 import { EventHandler, EventHandlerMap } from "../core/types";
-import { p14 } from "../core/Logger";
 import { AfterPlugin, BeforePlugin, CarbonPlugin } from '../core/CarbonPlugin';
 import { EventContext } from "../core/EventContext";
 import { SelectionCommands } from "./SelectionCommands";
 import { IsolatingPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
-import { first, last, reverse } from "lodash";
-import { ActionOrigin, BlockContent, Carbon, InlineContent, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
-import { hasParent, nodePath } from "../utils/node";
-import { CommandPlugin, insertAfterAction, preventAndStopCtx } from '@emrgen/carbon-core';
+import { first, last,  } from "lodash";
+import { ActionOrigin, BlockContent, Carbon, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
+import { hasParent, } from "../utils/node";
+import {  insertAfterAction, preventAndStopCtx } from '@emrgen/carbon-core';
 import { nodeLocation } from '../utils/location';
 import { BlockSelection } from "../core/NodeSelection";
 import { Optional } from '@emrgen/types';
@@ -56,8 +55,6 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 			const textBlock = start.node.chain.find(n => n.isTextBlock)
 			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
 			if (!prevTextBlock || !textBlock) return
-			console.log(prevTextBlock.parent);
-
 			if (prevTextBlock.isCollapseHidden) {
 				const prevVisibleBlock = prevTextBlock.closest(n => !n.isCollapseHidden)!;
 				const prevVisibleTextBlock = prevVisibleBlock?.child(0)!

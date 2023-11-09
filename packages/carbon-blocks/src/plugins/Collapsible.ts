@@ -110,8 +110,6 @@ export class Collapsible extends NodePlugin {
         const sectionTitle = app.schema.cloneWithId(title);
         section?.replace(section?.child(0)!, sectionTitle);
 
-        console.log(section?.toJSON());
-
         const focusPoint = Pin.toStartOf(section!);
         const after = PinnedSelection.fromPin(focusPoint!);
         return app.tr

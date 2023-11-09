@@ -1466,7 +1466,7 @@ export class TransformCommands extends BeforePlugin {
       if (next.textContent) {
         const textNode = app.schema.text(next.textContent)!;
         const at = prev.isVoid ? Point.toStart(prev.id) : Point.toAfter(prev.lastChild?.id!);
-        // console.log(at);
+        console.log(at.toString(), prev.toJSON());
         insertActions.push(...this.insertNodeCommands(at!, [textNode]))
       }
     } else {

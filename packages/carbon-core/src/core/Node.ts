@@ -12,7 +12,7 @@ import { BlockContent, InlineContent, NodeContent } from './NodeContent';
 import { NodeData } from './NodeData';
 import { NodeId } from './NodeId';
 import { NodeType } from './NodeType';
-import { NodeEncoder, NodeJSON, yes } from './types';
+import { no, NodeEncoder, NodeJSON, yes } from "./types";
 import { NodeState } from './NodeState';
 import { removeEmpty } from '../utils/object';
 
@@ -590,6 +590,8 @@ export class Node extends EventEmitter {
 	// NOTE: the parent chain is not searched for the next node
 	prev(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
 		const options = merge({ order: 'post', direction: 'backward', skip: noop }, opts) as TraverseOptions;
+		if (options.skip(this)) return
+
 		const sibling = this.prevSibling;
 		let found: Optional<Node> = null;
 		const collect: Predicate<Node> = node => !!(fn(node) && (found = node));
@@ -609,6 +611,7 @@ export class Node extends EventEmitter {
 	// otherwise try parent next
 	next(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
 		const options = merge({ order: 'post', direction: 'forward', skip: noop }, opts) as TraverseOptions;
+		if (options.skip(this)) return
 
 		const sibling = this.nextSibling;
 		let found: Optional<Node> = null;
@@ -635,18 +638,20 @@ export class Node extends EventEmitter {
 	}
 
 	preorder(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}): boolean {
-		const { direction = 'forward' } = opts;
-		const { children } = this;
+		const { direction = 'forward', skip = no } = opts;
+		if (skip(this)) return false
 
+		const { children } = this;
 		return direction === 'forward'
 			? fn(this) || children.some(n => n.preorder(fn, opts))
 			: fn(this) || children.slice().reverse().some(ch => ch.preorder(fn, opts))
 	}
 
 	postorder(fn: Predicate<Node>, opts: Partial<TraverseOptions> = {}): boolean {
-		const { direction = 'forward' } = opts;
-		const { children } = this;
+		const { direction = 'forward', skip = no } = opts;
+		if (skip(this)) return false
 
+		const { children } = this;
 		return direction === 'forward'
 			? children.some(n => n.postorder(fn, opts)) || fn(this)
 			: children.slice().reverse().some(ch => ch.postorder(fn, opts)) || fn(this)

@@ -27,7 +27,6 @@ export class Code extends CarbonPlugin {
         node: {
           focusPlaceholder: 'Code',
           emptyPlaceholder: '',
-          // tag: 'code',
         },
         html: {
           suppressContentEditableWarning: true,
