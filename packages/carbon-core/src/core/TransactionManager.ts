@@ -37,7 +37,7 @@ export class TransactionManager {
 		// normalizer transactions are allowed to commit even with pending selection events
 		while (this.transactions.length && (!this.runtime.selectEvents.length || this.transactions[0].isNormalizer)) {
 			const tr = this.transactions.shift();
-			console.log('Commit', tr)
+			// console.log('Commit', tr)
 			if (tr?.commit()) {
 				// TODO: transaction should me made read-only after commit
 				pm.onTransaction(tr);

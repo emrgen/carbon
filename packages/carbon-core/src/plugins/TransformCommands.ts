@@ -174,7 +174,6 @@ export class TransformCommands extends BeforePlugin {
       return cmd.transform.delete(selection)?.then(carbon => {
         return updateTitleText(carbon);
       })
-      return
     }
 
     if (selection.isCollapsed) {

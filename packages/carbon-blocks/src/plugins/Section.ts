@@ -1,7 +1,17 @@
-import { Carbon, CarbonPlugin, Node, NodePlugin, NodeSpec, SerializedNode, Transaction } from '@emrgen/carbon-core';
+import {
+	Carbon, CarbonAction,
+	CarbonPlugin,
+	CarbonState,
+	Node,
+	NodePlugin,
+	NodeSpec,
+	SerializedNode,
+	Transaction
+} from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 import { TitlePlugin } from './Title';
+import { node } from "@emrgen/carbon-blocks";
 
 declare module '@emrgen/carbon-core' {
 	export interface CarbonCommands {
@@ -61,7 +71,6 @@ export class Section extends NodePlugin {
 
 	serialize(app: Carbon, node: Node): SerializedNode {
 		const contentNode = node.child(0);
-		const childrenNodes = node.children.slice(1);
 
 		let ret = contentNode?.textContent;
 
@@ -86,6 +95,11 @@ export class Section extends NodePlugin {
 
 	insert(app: Carbon, after: Node) {
 
+	}
+
+	normalize(node: Node, state: CarbonState): CarbonAction[] {
+		console.log('normalize section', node.children.length);
+		return []
 	}
 }
 

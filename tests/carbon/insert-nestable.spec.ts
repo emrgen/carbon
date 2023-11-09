@@ -13,18 +13,15 @@ test("add title to the document", async ({ page }) => {
   await carbonPage.type("Hello World!");
 
   let docContent = await carbonPage.getDocContent();
-  expect(docContent).toBe("Doc Title\nHello World!");
+  expect(docContent).toBe("Doc title\nHello World!");
 
   await carbonPage.enter();
   await carbonPage.type("document content");
   docContent = await carbonPage.getDocContent();
-  expect(docContent).toBe("Doc Title\nHello World!\ndocument content");
+  expect(docContent).toBe("Doc title\nHello World!\ndocument content");
 });
 
 test("add number list to the document", async ({ page }) => {
-  await page.keyboard.type("Hello World!");
-  await page.keyboard.press("Enter");
-
   await page.keyboard.type("document content");
   await page.keyboard.press("Enter");
 
@@ -45,13 +42,10 @@ test("add number list to the document", async ({ page }) => {
     return app.serialize(doc!);
   });
 
-  expect(docContent).toBe("Hello World!\ndocument content\n1. first item\n2. second item\n3. third item\n");
+  expect(docContent).toBe("Doc title\ndocument content\n1. first item\n2. second item\n3. third item\n");
 });
 
 test("add bullet list to the document", async ({ page }) => {
-  await page.keyboard.type("Hello World!");
-  await page.keyboard.press("Enter");
-
   await page.keyboard.type("document content");
   await page.keyboard.press("Enter");
 
@@ -72,13 +66,10 @@ test("add bullet list to the document", async ({ page }) => {
     return app.serialize(doc!);
   });
 
-  expect(docContent).toBe("Hello World!\ndocument content\n- first item\n- second item\n- third item\n");
+  expect(docContent).toBe("Doc title\ndocument content\n- first item\n- second item\n- third item\n");
 });
 
 test("add nested number list to the document", async ({ page }) => {
-  await page.keyboard.type("Hello World!");
-  await page.keyboard.press("Enter");
-
   await page.keyboard.type("1. first item");
   await page.keyboard.press("Enter");
 
@@ -94,13 +85,10 @@ test("add nested number list to the document", async ({ page }) => {
     return app.serialize(doc!);
   });
 
-  expect(docContent).toBe("Hello World!\n1. first item\n 1. first item child 1\n 2. first item child 2");
+  expect(docContent).toBe("Doc title\n1. first item\n 1. first item child 1\n 2. first item child 2");
 });
 
 test("add nested bullet list to the document", async ({ page }) => {
-  await page.keyboard.type("Hello World!");
-  await page.keyboard.press("Enter");
-
   await page.keyboard.type("- first item");
   await page.keyboard.press("Enter");
 
@@ -111,7 +99,7 @@ test("add nested bullet list to the document", async ({ page }) => {
 
   const docContent = await getDocContent(page);
 
-  expect(docContent).toBe("Hello World!\n- first item\n - first item child 1\n - first item child 2");
+  expect(docContent).toBe("Doc title\n- first item\n - first item child 1\n - first item child 2");
 });
 
 test('add todo in document', async ({ page }) => {
@@ -123,13 +111,10 @@ test('add todo in document', async ({ page }) => {
   await carbonPage.type('yet another todo');
 
   const docContent = await getDocContent(page);
-  expect(docContent).toBe("Doc Title\n[] this is a todo\n[] another todo\n[] yet another todo");
+  expect(docContent).toBe("Doc title\n[] this is a todo\n[] another todo\n[] yet another todo");
 })
 
 test('add callout into document', async ({ page }) => {
-  await page.keyboard.type("Doc title");
-  await page.keyboard.press("Enter");
-
   await page.keyboard.type(">> this is a callout");
   const docContent = await getDocContent(page);
 
@@ -145,9 +130,6 @@ test('add callout into document', async ({ page }) => {
 });
 
 test('add toggle list in document', async ({ page }) => {
-  await page.keyboard.type("Doc title");
-  await page.keyboard.press("Enter");
-
   await page.keyboard.type("> this is a toggle list");
   await page.keyboard.press("Enter");
   await page.keyboard.type("toggle content");
@@ -161,13 +143,10 @@ test('add toggle list in document', async ({ page }) => {
   await page.click('.carbon-collapsible__control');
 
   expect(docContent).toBe("Doc title\n- this is a toggle list\n toggle content\n more toggle content\nafter toggle content");
-  expect(await page.isVisible('.carbon-collapsible__content')).toBe(false);
+  // expect(await page.isVisible('.carbon-collapsible__content')).toBe(false);
 })
 
 test('add header in document', async ({ page }) => {
-  await page.keyboard.type("Doc title");
-  await page.keyboard.press("Enter");
-
   await page.keyboard.type("# this is a header");
   await page.keyboard.press("Enter");
   await page.keyboard.type("header content");

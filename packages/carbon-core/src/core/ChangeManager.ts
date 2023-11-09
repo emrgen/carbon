@@ -144,7 +144,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			updatedNodeIds.add(n.id);
 		})
 
-		console.log('publish', updatedNodes.map(n => n.id.toString()));
+		// console.log('publish', updatedNodes.map(n => n.id.toString()));
 
 		updatedNodes
 			.filter(n => updatedNodeIds.has(n.id))
@@ -152,7 +152,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		console.groupEnd()
 	}
 
-	// 
+	//
 	private updateNodeState() {
 		const { selectedNodeIds, unselectedNodeIds, activatedNodeIds, deactivatedNodeIds, openNodeIds, closeNodeIds } = this.state;
 		const dirtyNodesIds = new NodeIdSet();
@@ -171,7 +171,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		this.state.runtime.activatedNodeIds.clear();
 		this.state.runtime.openNodeIds.clear();
 
-		console.log('publish', dirtyNodes.map(n => n.id.toString()), openNodeIds.size);
+		// console.log('publish', dirtyNodes.map(n => n.id.toString()), openNodeIds.size);
 
 		each(dirtyNodes, n => this.publish(NodeChangeType.state, n));
 	}

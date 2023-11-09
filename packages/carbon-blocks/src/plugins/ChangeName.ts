@@ -78,8 +78,15 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      // tr
-      //   .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
+      const titleNode = block.child(0)!;
+      const title = titleNode.textContent.slice(match[1].length - 1);
+      console.warn('title', title, match);
+      const textNode = app.schema.text(title)!
+      const content = BlockContent.create(textNode);
+
+      const action = SetContentAction.withContent(titleNode.id, content, content);
+      tr.add(action)
+
       tr.updateAttrs(block.id, {
         html: {
           'data-as': name,
@@ -131,12 +138,14 @@ export class ChangeName extends BeforePlugin {
       // const before = titleContent.insert(match[1].length,);
       // const after = titleContent.remove(0, match[1].length);
 
-      const title = titleNode.textContent.slice(match[1].length-1);
+      const title = titleNode.textContent.slice(match[1].length - 1);
+      console.warn('title', title, match);
       const textNode = app.schema.text(title)!
       const content = BlockContent.create(textNode);
 
       const action = SetContentAction.withContent(titleNode.id, content, content);
       tr.add(action)
+
       tr.change(block.id, block.name, type)
       tr.updateAttrs(block.id, { node: { typeChanged: true },});
       // expand collapsed block
@@ -165,7 +174,6 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      tr.removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
       const to = Point.toAfter(block.id);
       const moveNodes = block.children.slice(1);
       if (moveNodes.length) {

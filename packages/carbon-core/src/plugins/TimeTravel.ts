@@ -20,14 +20,14 @@ export class TimeTravelPlugin extends AfterPlugin {
         if (!tr) return;
         const backwardTr = tr.inverse()//.filter(x => !(x instanceof SelectAction));
 
-        // const action = backwardTr.pop();
-        // if (action) {
-        //   if ((action instanceof SelectAction)) {
-        //     backwardTr.add((action as SelectAction).collapseToHead());
-        //   } else {
-        //     backwardTr.add(action);
-        //   }
-        // }
+        const action = backwardTr.pop()
+        if (action) {
+          if ((action instanceof SelectAction)) {
+            backwardTr.add((action as SelectAction).collapseToHead());
+          } else {
+            backwardTr.add(action);
+          }
+        }
 
 
         backwardTr.readOnly = true;
@@ -42,14 +42,14 @@ export class TimeTravelPlugin extends AfterPlugin {
 
         const forwardTr = tr//.filter(x => !(x instanceof SelectAction));
 
-        // const action = forwardTr.pop();
-        // if (action) {
-        //   if (action instanceof SelectAction) {
-        //     forwardTr.add((action as SelectAction).collapseToHead());
-        //   } else {
-        //     forwardTr.add(action);
-        //   }
-        // }
+        const action = forwardTr.pop();
+        if (action) {
+          if (action instanceof SelectAction) {
+            forwardTr.add((action as SelectAction).collapseToHead());
+          } else {
+            forwardTr.add(action);
+          }
+        }
 
         forwardTr.readOnly = true;
         forwardTr.dispatch();

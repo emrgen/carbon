@@ -26,7 +26,7 @@ export class CarbonPage {
 
   async init() {
     await this.open();
-    await this.addTitle("Doc Title");
+    await this.addTitle("Doc title");
     await this.enter();
   }
 

@@ -122,28 +122,32 @@ export class EventManager {
 		});
 
 
+		let groupOpen = false;
 		if (type !== EventsIn.keyDown) {
-
 			if ([
 				EventsIn.mouseDown,
 				// EventsIn.selectionchange,
 				// EventsIn.selectstart,
 				// EventsIn.keyDown,
-				// EventsIn.keyUp,
+				EventsIn.keyUp,
 				// EventsIn.input,
 				// EventsIn.beforeinput,
 			].includes(type) || selectionChangedUsingKeys(event)
 			) {
 				// console.groupCollapsed('onEvent:', event.type);
+				// groupOpen = true;
 			} else {
-				console.group('onEvent:', event.type);
+				console.groupCollapsed('onEvent:', event.type);
+				groupOpen = true;
 			}
 		} else {
 			// console.log('onEvent:', event);
 		}
 		this.pm.onEvent(editorEvent);
-		
-		console.groupEnd()
+
+		if (groupOpen) {
+			console.groupEnd();
+		}
 
 		// this.afterEvent(editorEvent);
 	}

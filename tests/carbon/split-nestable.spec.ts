@@ -44,5 +44,5 @@ test("add multilevel bullet list to the document", async ({ page }) => {
 
   const docContent = await carbonPage.getDocContent();
 
-  expect(docContent).toBe('Doc Title\n- First item\n - Second item\n  - Third item')
+  expect(docContent).toBe('Doc title\n- First item\n - Second item\n  - Third item')
 });
