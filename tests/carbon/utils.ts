@@ -1,0 +1,94 @@
+import { Page } from "@playwright/test";
+
+import { Carbon } from "@emrgen/carbon-core";
+declare global {
+  interface Window {
+    app: Carbon;
+  }
+}
+
+
+export const getDocContent =  async (page: Page) => {
+  return await page.evaluate(() => {
+    const app = window.app;
+    const doc = app.content.find((n) => n.isDocument);
+
+    return app.serialize(doc!);
+  });
+}
+
+export const focusDocTitle = async (page: Page) => {
+  await page.click('.carbon-document > [data-type=content]');
+}
+
+export class CarbonPage {
+  constructor(public page: Page) {}
+
+  async init() {
+    await this.open();
+    await this.addTitle("Doc Title");
+    await this.enter();
+  }
+
+  async open() {
+    await this.page.goto("http://localhost:5173");
+  }
+
+  async addTitle(text: string) {
+    await this.focusDocTitle();
+    await this.page.keyboard.type(text);
+  }
+
+  async focusDocTitle() {
+    await this.page.click('.carbon-document > [data-type=content]');
+  }
+
+  async getDocContent() {
+    return await this.page.evaluate(() => {
+      const app = window.app;
+      const doc = app.content.find((n) => n.isDocument);
+
+      return app.serialize(doc!);
+    });
+  }
+
+  async enter() {
+    await this.page.keyboard.press("Enter");
+  }
+
+  async tab() {
+    await this.page.keyboard.press("Tab");
+  }
+
+  async type(text: string) {
+    await this.page.keyboard.type(text);
+  }
+
+  async press(key: string) {
+    await this.page.keyboard.press(key);
+  }
+
+  async  arrowRight(count = 1) {
+    for (let i = 0; i < count; i++) {
+      await this.page.keyboard.press("ArrowRight");
+    }
+  }
+
+  async arrowLeft(count = 1) {
+    for (let i = 0; i < count; i++) {
+      await this.page.keyboard.press("ArrowLeft");
+    }
+  }
+
+  async insertBulletList(text: string) {
+    await this.page.keyboard.type(`- ${text}`);
+  }
+
+  async insertNumberedList(text: string) {
+    await this.page.keyboard.type(`1. ${text}`);
+  }
+
+  async insertTodo (text: string) {
+    await this.page.keyboard.type(`[] ${text}`);
+  }
+}

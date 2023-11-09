@@ -18,6 +18,7 @@ import { isNestableNode } from '../utils';
 import { reverse } from 'lodash';
 import { Optional } from '@emrgen/types';
 import { node } from "@emrgen/carbon-blocks";
+import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
 
 declare module '@emrgen/carbon-core' {
 	interface CarbonCommands {
@@ -253,7 +254,8 @@ export class NestablePlugin extends AfterPlugin {
 
 	serializeChildren(app: Carbon, node: Node): string {
 		const children = node.children.slice(1);
+		const depth = takeBefore(node.parents, n => !isNestableNode(n)).length + 1;
 		if (!children.length) return ''
-		return '\n' + children.map(n => app.serialize(n)).map(a => ` ${a}`).join('\n')
+		return '\n' + children.map(n => app.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
 	}
 }

@@ -1,37 +1,24 @@
 import { expect, Page, test } from "@playwright/test";
 import { Carbon } from "@emrgen/carbon-core";
-
-declare global {
-  interface Window {
-    app: Carbon;
-  }
-}
+import { CarbonPage, focusDocTitle, getDocContent } from "./utils";
 
 test.beforeEach(async ({ page }, testInfo) => {
   console.log(`Running ${testInfo.title}`);
-  await page.goto("http://localhost:5173");
-  await focusDocTitle(page);
+  const carbonPage = new CarbonPage(page);
+  await carbonPage.init();
 });
 
 test("add title to the document", async ({ page }) => {
-  await page.keyboard.type("Hello World!");
-  await page.keyboard.press("Enter");
+  const carbonPage = new CarbonPage(page);
+  await carbonPage.type("Hello World!");
 
-  const textContent = await page.evaluate(() => {
-    const app = window.app;
-    return app.content.textContent;
-  });
+  let docContent = await carbonPage.getDocContent();
+  expect(docContent).toBe("Doc Title\nHello World!");
 
-  expect(textContent).toBe("Hello World!");
-
-  await page.keyboard.type("document content");
-
-  const docContent = await page.evaluate(() => {
-    const app = window.app;
-    return app.content.textContent;
-  });
-
-  expect(docContent).toBe("Hello World!document content");
+  await carbonPage.enter();
+  await carbonPage.type("document content");
+  docContent = await carbonPage.getDocContent();
+  expect(docContent).toBe("Doc Title\nHello World!\ndocument content");
 });
 
 test("add number list to the document", async ({ page }) => {
@@ -128,18 +115,15 @@ test("add nested bullet list to the document", async ({ page }) => {
 });
 
 test('add todo in document', async ({ page }) => {
-  await page.keyboard.type("Doc title");
-  await page.keyboard.press("Enter");
-
-  await page.keyboard.type("[] this is a todo");
-  await page.keyboard.press("Enter");
-  await page.keyboard.type("another todo");
-  await page.keyboard.press("Enter");
-  await page.keyboard.type("yet another todo");
+  const carbonPage = new CarbonPage(page);
+  await carbonPage.insertTodo('this is a todo');
+  await carbonPage.enter();
+  await carbonPage.type('another todo');
+  await carbonPage.enter();
+  await carbonPage.type('yet another todo');
 
   const docContent = await getDocContent(page);
-
-  expect(docContent).toBe("Doc title\n[] this is a todo\n[] another todo\n[] yet another todo");
+  expect(docContent).toBe("Doc Title\n[] this is a todo\n[] another todo\n[] yet another todo");
 })
 
 test('add callout into document', async ({ page }) => {
@@ -192,16 +176,3 @@ test('add header in document', async ({ page }) => {
   const docContent = await getDocContent(page);
   expect(docContent).toBe("Doc title\n# this is a header\n header content");
 })
-
-const getDocContent =  async (page: Page) => {
-  return await page.evaluate(() => {
-    const app = window.app;
-    const doc = app.content.find((n) => n.isDocument);
-
-    return app.serialize(doc!);
-  });
-}
-
-const focusDocTitle = async (page: Page) => {
-  await page.click('.carbon-document > [data-type=content]');
-}

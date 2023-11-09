@@ -30,14 +30,6 @@ export class TimeTravelPlugin extends AfterPlugin {
         // }
 
 
-        console.log(backwardTr);
-
-
-        // const action = inverse.pop();
-        // if (!(action instanceof SelectAction)) {
-        //   tr.add(action!);
-        // }
-
         backwardTr.readOnly = true;
         backwardTr.dispatch();
 
