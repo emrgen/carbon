@@ -164,12 +164,12 @@ test('add quote in document', async ({ page }) => {
   await page.keyboard.press("Tab");
 
   const docContent = await getDocContent(page);
-  expect(docContent).toBe("Doc title\n| this is a quote\n quote content");
+  expect(docContent).toBe("Doc title\n> this is a quote\n quote content");
 
   await carbonPage.enter();
   await carbonPage.enter();
   await carbonPage.type('after the quote');
 
   const docContent2 = await getDocContent(page);
-  expect(docContent2).toBe("Doc title\n| this is a quote\n quote content\nafter the quote");
-})
+  expect(docContent2).toBe("Doc title\n> this is a quote\n quote content\nafter the quote");
+});

@@ -99,6 +99,7 @@ export class Section extends NodePlugin {
 
 	normalize(node: Node, state: CarbonState): CarbonAction[] {
 		console.log('normalize section', node.children.length);
+		console.warn('normalize section', node.children.length);
 		return []
 	}
 }

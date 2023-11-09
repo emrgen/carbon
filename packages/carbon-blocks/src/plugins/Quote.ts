@@ -35,6 +35,6 @@ export class Quote extends CarbonPlugin {
 
   serialize(app: Carbon, node: Node): SerializedNode {
     const content = node.child(0)!
-    return `| ${app.serialize(content)}${app.cmd.nestable.serializeChildren(node)}`;
+    return `> ${app.serialize(content)}${app.cmd.nestable.serializeChildren(node)}`;
   }
 }
