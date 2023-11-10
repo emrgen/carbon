@@ -33,7 +33,7 @@ export class BlockMenuPlugin extends BeforePlugin {
       },
       'enter': (ctx: EventContext<KeyboardEvent>) => {
         if (this.state.visible) {
-          console.log('xxxxxx enter', ctx.node.id.toString(), this.state.visible);
+          console.log('enter', ctx.node.id.toString(), this.state.visible);
           preventAndStopCtx(ctx);
           ctx.app.emit(BlockMenuCmd.select);
         }
@@ -51,7 +51,7 @@ export class BlockMenuPlugin extends BeforePlugin {
   on(): Partial<EventHandler> {
     return {
       keyUp: this.onKeyUp.bind(this),
-      // hide block menu on mouse down outside of the menu
+      // hide block menu on mouse down outside the menu
       mouseDown: (ctx: EventContext<MouseEvent>) => {
         const {node, app} = ctx;
         if (this.state.visible) {

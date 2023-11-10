@@ -60,7 +60,7 @@ export default function FastTree(props: FastTreeProps) {
 
   return (
     <Box h={'full'} overflow={'auto'} p={0}>
-      <Textarea value={state} h='full' fontSize={'xs'}/>
+      <Textarea value={state} h='full' fontSize={'xs'} onChange={() => {}}/>
     </Box>
   )
 }

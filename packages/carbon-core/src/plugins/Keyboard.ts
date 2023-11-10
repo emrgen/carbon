@@ -54,7 +54,10 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 			const { start } = selection;
 			const textBlock = start.node.chain.find(n => n.isTextBlock)
 			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
-			if (!prevTextBlock || !textBlock) return
+			if (!prevTextBlock || !textBlock) {
+				console.log('no prev text block found');
+				return
+			}
 			if (prevTextBlock.isCollapseHidden) {
 				const prevVisibleBlock = prevTextBlock.closest(n => !n.isCollapseHidden)!;
 				const prevVisibleTextBlock = prevVisibleBlock?.child(0)!

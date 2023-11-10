@@ -20,6 +20,8 @@
     "@react-icons/all-files": "^4.1.0",
     "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",
+    "@uiw/react-codemirror": "^4.21.20",
+    "codemirror": "^6.0.1",
     "emoji-picker-react": "^4.4.10",
     "emoji-regex": "^10.2.1",
     "formik": "^2.4.3",

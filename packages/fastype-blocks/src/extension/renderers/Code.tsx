@@ -2,7 +2,6 @@ import { Box, Textarea } from "@chakra-ui/react";
 import React, { useEffect, useRef } from "react";
 
 import ResizeTextarea from "react-textarea-autosize";
-import styles from "styles.module.css";
 
 import {
   ActionOrigin,
@@ -23,6 +22,9 @@ import {
   useConnectorsToProps,
   useDragDropRectSelect,
 } from "@emrgen/carbon-dragon";
+import ReactCodeMirror from "@uiw/react-codemirror";
+// import 'codemirror/keymap/sublime';
+// import 'codemirror/theme/monokai.css';
 
 export const CodeComp = (props: RendererProps) => {
   const { node } = props;
@@ -44,6 +46,37 @@ export const CodeComp = (props: RendererProps) => {
     </CarbonBlock>
   );
 };
+
+
+const CodeContentMirror = (props: RendererProps) => {
+  const { node, version } = useNodeChange(props);
+  const app = useCarbon();
+
+  console.log(node.textContent);
+
+  return <ReactCodeMirror
+    value={node.textContent!}
+    options={{
+      // theme: 'monokai',
+      // keyMap: 'sublime',
+      // mode: 'jsx',
+      language: 'go',
+    }}
+    onFocus={() => {
+      app.tr.selectNodes([]).dispatch();
+      app.disable();
+    }}
+    onBlur={() => app.enable()}
+    onChange={(value) => {
+      app.enable(() => {
+        const text = app.schema.text(value)!;
+        app.tr.setContent(node.id, BlockContent.create([text])).dispatch();
+      });
+    }}
+  />
+
+}
+
 
 const CodeContent = (props: RendererProps) => {
   const { node, version } = useNodeChange(props);
@@ -140,7 +173,8 @@ const CodeContent = (props: RendererProps) => {
             <pre className="fastype-pre" style={style}>
               <code className="fastype-code">
                 {tokens.map((line, i) => (
-                  <span key={i} {...getLineProps({ line })}>
+                    <span key={i} {...getLineProps({ line })}>
+                    {/*<span className='line-number'>{i + 1}.</span>*/}
                     {line.map((token, key) => (
                       <span key={key} {...getTokenProps({ token })} />
                     ))}
@@ -151,7 +185,7 @@ const CodeContent = (props: RendererProps) => {
           )}
         </Highlight>
       </Box>
-      <Box pos={"absolute"} top={0} left={0} w="full">
+      <Box pos={"absolute"} top={0} left={10} w="full">
         <Textarea
           ref={refText}
           className="fastype-code-textarea"

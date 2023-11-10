@@ -590,7 +590,7 @@ export class Node extends EventEmitter {
 	// NOTE: the parent chain is not searched for the next node
 	prev(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
 		const options = merge({ order: 'post', direction: 'backward', skip: noop }, opts) as TraverseOptions;
-		if (options.skip(this)) return
+		// if (options.skip(this)) return
 
 		const sibling = this.prevSibling;
 		let found: Optional<Node> = null;
@@ -611,7 +611,7 @@ export class Node extends EventEmitter {
 	// otherwise try parent next
 	next(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
 		const options = merge({ order: 'post', direction: 'forward', skip: noop }, opts) as TraverseOptions;
-		if (options.skip(this)) return
+		// if (options.skip(this)) return
 
 		const sibling = this.nextSibling;
 		let found: Optional<Node> = null;
