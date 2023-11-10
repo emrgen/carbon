@@ -14,6 +14,9 @@ export class TextPlugin extends NodePlugin {
 					// spellCheck: true,
 					// contentEditable: true,
 					suppressContentEditableWarning: true,
+				},
+				node:{
+					// link: '#'
 				}
 			}
 		}

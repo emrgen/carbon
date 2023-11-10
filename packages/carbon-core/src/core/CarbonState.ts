@@ -34,6 +34,8 @@ export class CarbonRuntimeState extends EventEmitter {
 
 	kvStore: Map<string, any> = new Map();
 
+	marks: string[] = [];
+
 	constructor() {
 		super();
 	}
@@ -61,7 +63,7 @@ export class CarbonRuntimeState extends EventEmitter {
 
 	addSelectEvent(event: SelectionEvent) {
 		this.selectEvents.push(event);
-	} 
+	}
 }
 
 
@@ -88,7 +90,7 @@ export class CarbonState extends EventEmitter {
 	unselectedNodeIds: NodeIdSet;
 	activatedNodeIds: NodeIdSet;
 	deactivatedNodeIds: NodeIdSet;
-	
+
 	openNodeIds: NodeIdSet
 	closeNodeIds: NodeIdSet
 
@@ -215,7 +217,7 @@ export class CarbonState extends EventEmitter {
 				this.deactivatedNodeIds.add(id);
 			}
 		});
-		
+
 		this.runtime.openNodeIds.forEach(id => {
 			if (store.get(id)?.isOpen) {
 				this.openNodeIds.add(id);
