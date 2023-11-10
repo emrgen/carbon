@@ -1,4 +1,4 @@
-import { flatten, throttle } from 'lodash';
+import { flatten } from 'lodash';
 import { useEffect, useState } from "react";
 import { Extension } from "../core/Extension";
 import { PluginManager } from '../core/PluginManager';

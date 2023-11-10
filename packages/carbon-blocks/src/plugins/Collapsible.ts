@@ -1,6 +1,7 @@
 import { BeforePlugin, BlockContent, Carbon, CarbonPlugin, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, Transaction, insertAfterAction, insertBeforeAction, preventAndStopCtx, splitTextBlock } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 import { identity } from 'lodash';
+import { NestablePlugin } from "./Nestable";
 
 declare module '@emrgen/carbon-core' {
   interface CarbonCommands {
@@ -91,6 +92,15 @@ export class Collapsible extends NodePlugin {
         if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
           preventAndStopCtx(ctx);
           app.cmd.collapsible.split(selection)?.dispatch();
+        }
+      },
+      backspace: (ctx: EventContext<KeyboardEvent>) => {
+        const { app, selection, node } = ctx;
+        if (selection.isCollapsed && selection.head.isAtStartOfNode(node)) {
+          if (node.child(0)?.isEmpty) {
+            preventAndStopCtx(ctx);
+            app.cmd.transform.change(node, 'section')?.dispatch();
+          }
         }
       }
     }

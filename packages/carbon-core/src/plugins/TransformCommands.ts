@@ -55,11 +55,13 @@ declare module '@emrgen/carbon-core' {
       move(nodes: Node | Node[], to: Point): Optional<Transaction>;
       delete(selection?: PinnedSelection): Optional<Transaction>;
       deleteNodes(nodeSelection?: BlockSelection, opts?: DeleteOpts): Optional<Transaction>;
+      // HOTTEST
       split(node: Node, selection?: PinnedSelection, opts?: SplitOpts): Optional<Transaction>;
       wrap(node: Node, name: NodeName): Optional<Transaction>;
       unwrap(node: Node): Optional<Transaction>;
       change(node: Node, name: NodeName): Optional<Transaction>;
       update(node: Node, attrs: Record<string, any>): Optional<Transaction>;
+      // HOT
       merge(prev: Node, next: Node): Optional<Transaction>;
       paste(selection: PinnedSelection, blockSelection: BlockSelection, slice: Slice): Optional<Transaction>;
     };
@@ -392,11 +394,6 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  // split the splitBlock at pin location
-  // three cases to consider
-  // 1. pin is at start of the splitBlock
-  // 2. pin is at end of the splitBlock
-  // 3. pin is within the splitBlock
   // TODO: check if schema is violated by the split
   split(app: Carbon, splitBlock: Node, selection: PinnedSelection = app.selection, opts?: SplitOpts): Optional<Transaction> {
     opts = merge({ side: "bottom", pos: "out", rootType: splitBlock.type }, opts);
@@ -718,6 +715,10 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // split the splitBlock at a specific pin location
+  // three cases to consider
+  // 1. pin is at start of the splitBlock
+  // 2. pin is at end of the splitBlock
+  // 3. pin is within the splitBlock
   private splitAtPin(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
     const { tr, selection } = app;
     const { splitType = app.schema.type('section') } = opts;

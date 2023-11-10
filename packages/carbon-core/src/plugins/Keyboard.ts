@@ -80,11 +80,13 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 					.remove(nodeLocation(textBlock.parent!)!, textBlock.parent!.id)
 					.select(after)
 					.dispatch();
-
+				console.log('DXDX');
+				
 				return
 			}
 
 			console.log('merge text block', prevTextBlock.name, textBlock.name);
+			// HOT
 			cmd.transform.merge(prevTextBlock, textBlock)?.dispatch();
 			return
 		}
@@ -178,6 +180,9 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	keydown(): EventHandlerMap {
 		return {
+			cmd_b: preventAndStopCtx,
+			cmd_i: preventAndStopCtx,
+			cmd_u: preventAndStopCtx,
 			esc: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				const { selection, blockSelection: nodeSelection } = app

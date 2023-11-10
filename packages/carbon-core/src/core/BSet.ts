@@ -2,7 +2,7 @@ import { each } from 'lodash';
 import BTree from 'sorted-btree';
 import { NodeId, NodeIdComparator } from './NodeId';
 import { Carbon } from './Carbon';
-import { Maps, With } from './types';
+import { Maps } from './types';
 
 // A Btree based set
 export class BSet<K> {

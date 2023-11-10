@@ -106,8 +106,6 @@ export class NestablePlugin extends AfterPlugin {
 
 				// change to section
 				if (listNode.name !== 'section') {
-
-
 					preventAndStopCtx(ctx);
 					if (listNode.isCollapsed) {
 						tr.updateAttrs(listNode.id, { node: { collapsed: false } })

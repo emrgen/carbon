@@ -7,9 +7,9 @@ interface FastTreeProps {
 }
 
 const intoTree = (content: Node) => {
-  let root = 'root';
+  let root = '';
 
-  root += "\n  └ " + processNode(content, 1, [1]);
+  root += processNode(content, 1, [1]);
 
   return root
 }
@@ -18,7 +18,7 @@ const processNode = (node: Node, depth = 0, count = [1]) => {
   let result = '';
 
   if (node.name === 'text') {
-    result += `${count[0]} text ` + `"${node.textContent}"`
+    result += `(${count[0]}) text ` + `"${node.textContent}"`
   } else {
     result += `(${count[0]}) ` + node.name
   }
@@ -59,8 +59,16 @@ export default function FastTree(props: FastTreeProps) {
   }, [app])
 
   return (
-    <Box h={'full'} overflow={'auto'} p={0}>
-      <Textarea value={state} h='full' fontSize={'xs'} onChange={() => {}}/>
+    <Box h={"full"} overflow={"auto"} p={0}>
+      <Textarea
+        value={state}
+        h="full"
+        minH={"full"}
+        fontSize={"xs"}
+        p={1}
+        onChange={() => {}}
+        resize={'none'}
+      />
     </Box>
-  )
+  );
 }
