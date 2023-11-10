@@ -35,8 +35,9 @@ export class BSet<K> {
 		this.tree.clear()
 	}
 
-	add(entry: K) {
-		this.tree.set(entry, entry);
+	add(entry: K[] | K) {
+		const entries = Array.isArray(entry) ? entry : [entry];
+		entries.forEach(e => this.tree.set(e, e));
 		return this
 	}
 

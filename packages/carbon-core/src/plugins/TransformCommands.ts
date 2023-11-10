@@ -560,7 +560,8 @@ export class TransformCommands extends BeforePlugin {
       commonDepth += 1;
     }
 
-    console.log(commonDepth, startDepth, endDepth, commonNode.depth);
+    // console.log(commonDepth, startDepth, endDepth, commonNode.depth);
+    const moveNodeIds = new NodeIdSet();
     const moveActions: CarbonAction[] = []
     const insertActions: CarbonAction[] = []
     const changeActions: CarbonAction[] = []
@@ -586,11 +587,14 @@ export class TransformCommands extends BeforePlugin {
       while (startContainer && endContainer && mergeDepth) {
         // move endBlock to after startBlock
         if (endContainer.eq(endBlock)) {
+          console.log('merging lowest levels', endBlock.id.toString());
           moveActions.push(...this.moveNodeCommands(to, endContainer));
+
           to = Point.toAfter(endContainer.id);
           if (startBlock.isCollapsible && !startBlock.isCollapsed) {
             const moveNodes = endContainer.children.slice(1)
             moveActions.push(...this.moveNodeCommands(to, moveNodes));
+            moveNodeIds.add(moveNodes.map(n => n.id));
           }
 
           lastInsertedNodeId = endContainer.lastChild!.id
@@ -601,6 +605,7 @@ export class TransformCommands extends BeforePlugin {
             // console.log('moving nodes...', moveNodes.length, to.toString());
             moveActions.push(...this.moveNodeCommands(to, moveNodes));
             lastInsertedNodeId = last(moveNodes)!.id;
+            moveNodeIds.add(moveNodes.map(n => n.id));
           }
 
           to = Point.toAfter(startContainer.id);
@@ -664,9 +669,11 @@ export class TransformCommands extends BeforePlugin {
       if (endBlock.ancestor(startBlock)) {
         while (endContainer && startTopNode!.depth <= endContainer.depth) {
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
+          console.log('moveNodes', endContainer.id.toString(), moveNodes.length, moveNodes.map(n => n.id.toString()));
           if (moveNodes.length) {
             moveActions.push(...this.moveNodeCommands(at, moveNodes));
             at = Point.toAfter(last(moveNodes)!.id);
+            moveNodeIds.add(moveNodes.map(n => n.id));
           }
 
           deleteGroup.addId(endContainer.id);
@@ -677,6 +684,7 @@ export class TransformCommands extends BeforePlugin {
           const moveNodes = startBlock?.children.slice(1).filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
           if (moveNodes.length) {
             moveActions.push(...this.moveNodeCommands(at, moveNodes));
+            moveNodeIds.add(moveNodes.map(n => n.id));
           }
         }
       } else {
@@ -693,7 +701,9 @@ export class TransformCommands extends BeforePlugin {
       }
 
       console.log('start block', startTopNode.depth, endContainer?.depth, startTopNode);
-      const deleteActions = this.deleteGroupCommands(app, deleteGroup);
+      const deleteActions = this.deleteGroupCommands(app, deleteGroup, moveNodeIds);
+
+      console.log('deleteActions', deleteActions);
 
       tr
         .add(changeActions)
@@ -1182,7 +1192,7 @@ export class TransformCommands extends BeforePlugin {
     return null
   }
 
-  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch): CarbonAction[] {
+  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch, moveNodeIds = new NodeIdSet()): CarbonAction[] {
     const actions: CarbonAction[] = [];
 
     sortBy(deleteGroup.ids.toArray().map(id => app.store.get(id)), n => -(n?.depth ?? 0)).forEach(n => {
@@ -1204,7 +1214,8 @@ export class TransformCommands extends BeforePlugin {
       const { node } = start;
 
       if (start.node.eq(end.node)) {
-        if (node.chain.some(n => deleteGroup.has(n.id))) {
+        // TODO: maybe we don't need this check
+        if (node.chain.some(n => deleteGroup.has(n.id)) && !node.chain.every(n => !moveNodeIds.has(n.id))) {
           return
         }
 
@@ -1472,7 +1483,7 @@ export class TransformCommands extends BeforePlugin {
           const textNode = app.schema.text(textContent)!;
           insertActions.push(SetContentAction.create(prev.id, BlockContent.create([textNode])));
         }
-        
+
         // const at = prev.isVoid ? Point.toStart(prev.id) : Point.toAfter(prev.lastChild?.id!);
         // console.log(at.toString(), prev.toJSON());
         // insertActions.push(...this.insertNodeCommands(at!, [textNode]))
