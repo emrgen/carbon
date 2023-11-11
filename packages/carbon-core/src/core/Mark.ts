@@ -1,9 +1,19 @@
-import { each, isArray, keys, values } from 'lodash';
+import { each, isArray, isEmpty, keys, values } from 'lodash';
 
+interface User {
+	id: string;
+	name: string;
+}
+
+interface MarkProps {
+	color?: string;
+	url?: string;
+	user?: User;
+}
 
 export class Mark {
 	type: string;
-	color?: string;
+	props?: MarkProps;
 
 	static bold(): Mark {
 		return new Mark('bold');
@@ -17,21 +27,46 @@ export class Mark {
 		return new Mark('underline');
 	}
 
+	static code(): Mark {
+		return new Mark('code');
+	}
+
+	static subscript(): Mark {
+		return new Mark('subscript');
+	}
+
+	static superscript(): Mark {
+		return new Mark('superscript');
+	}
+
+	static hashtag(): Mark {
+		return new Mark('hashtag');
+	}
+
+	static mention(): Mark {
+		return new Mark('mention');
+	}
+
 	static strike(): Mark {
 		return new Mark('strike');
 	}
 
+	static link(url: string): Mark {
+		return new Mark('link', { url });
+	}
+
+
 	static color(color: string): Mark {
-		return new Mark('color');
+		return new Mark('color', { color });
 	}
 
 	static background(color: string): Mark {
-		return new Mark('bg');
+		return new Mark('background', { color });
 	}
 
-	constructor(type: string, color?: string) {
+	constructor(type: string, props: MarkProps = {}) {
 		this.type = type;
-		this.color = color;
+		this.props = props;
 	}
 
 	toString() {
@@ -39,10 +74,10 @@ export class Mark {
 	}
 
 	toJSON() {
-		const { type, color } = this;
+		const { type, props } = this;
 		const ret: any = { type };
-		if (this.color) {
-			ret.color = color;
+		if (!isEmpty(props)) {
+			ret.props = props;
 		}
 
 		return ret;

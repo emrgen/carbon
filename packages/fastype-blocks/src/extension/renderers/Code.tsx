@@ -185,7 +185,7 @@ const CodeContent = (props: RendererProps) => {
           )}
         </Highlight>
       </Box>
-      <Box pos={"absolute"} top={0} left={10} w="full">
+      <Box pos={"absolute"} top={0} left={0} w="full">
         <Textarea
           ref={refText}
           className="fastype-code-textarea"

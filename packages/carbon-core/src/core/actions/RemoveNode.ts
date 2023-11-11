@@ -30,13 +30,14 @@ export class RemoveNode implements CarbonAction {
 		const { nodeId } = this;
 		const {app} = tr;
 		const target = app.store.get(nodeId);
-		const parent = target?.parent;
 		if (!target) {
 			return ActionResult.withError('')
 		}
 
+		const parent = target?.parent;
 		this.node = target.toJSON();
 		parent?.remove(target);
+		app.store.delete(target);
 
 		tr.updated(target.parent!);
 

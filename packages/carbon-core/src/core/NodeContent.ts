@@ -1,6 +1,7 @@
 import { findIndex, flatten } from 'lodash';
 
 import { Node } from './Node';
+import { classString } from './Logger';
 
 export interface NodeContent {
 	size: number;

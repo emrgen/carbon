@@ -82,7 +82,7 @@ export const blockPresets: Extension = {
 		new CarbonRoot(),
 		new FileTree(),
 		new Tab(),
-		new Content(),
+		// new Content(),
 		new Frame(),
 	],
 	renderers: [

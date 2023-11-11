@@ -1,7 +1,7 @@
 import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
 
 export class Content extends CarbonPlugin {
-  name = 'content';
+  name = 'pageContent';
 
   spec(): NodeSpec {
     return {

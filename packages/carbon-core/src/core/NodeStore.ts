@@ -32,7 +32,7 @@ export class NodeStore {
 	}
 
 	get(entry: NodeId | HTMLElement): Optional<Node> {
-		const nodeId = entry
+		const nodeId = entry;
 		if (nodeId instanceof NodeId) {
 			return this.nodeMap.get(nodeId.id) ?? this.deletedNodeMap.get(nodeId.id);
 		} else {

@@ -35,6 +35,7 @@ export interface NodeCreateProps {
 
 	renderVersion?: number;
 	updateVersion?: number;
+	deleted?: number;
 }
 
 let key = 0
@@ -92,6 +93,8 @@ export class Node extends EventEmitter {
 	renderVersion = 0;
 	updateVersion = 0;
 
+	deleted = 0;
+
 	static removeId(json: NodeJSON) {
 		const { id, text = '', content = [], ...rest } = json
 		if (text) {
@@ -119,7 +122,8 @@ export class Node extends EventEmitter {
 			state = {},
 			meta = {},
 			renderVersion = 0,
-			updateVersion = 0
+			updateVersion = 0,
+			deleted = 0,
 		} = object;
 		this.test_key = nextKey()
 		this.id = id;
@@ -133,6 +137,7 @@ export class Node extends EventEmitter {
 
 		this.renderVersion = renderVersion;
 		this.updateVersion = updateVersion;
+		this.deleted = deleted;
 	}
 
 	syncChildren() { }
@@ -435,6 +440,10 @@ export class Node extends EventEmitter {
 	get nextMatchType(): Optional<ContentMatch> {
 		const fragment = Fragment.from(takeUpto(this.parent?.children ?? [], n => n === this));
 		return this.parent?.type.contentMatch.matchFragment(fragment)
+	}
+
+	setDeleteFlag(flag: boolean) {
+		this.deleted = Date.now()
 	}
 
 	intoNodeId() {
