@@ -25,21 +25,28 @@ export class InsertNode implements CarbonAction {
 	execute(tr: Transaction): ActionResult {
 		const { at, nodeJson } = this;
 		const {app}=tr;
-		const target = app.store.get(at.nodeId);
+		const refNode = app.store.get(at.nodeId);
 
 		const node = app.schema.nodeFromJSON(nodeJson)!;
 
-		if (!target) {
+		if (!refNode) {
 			return ActionResult.withError('failed to find target from: ' + at.toString())
 		}
 
-		const {parent} = target;
+		if (refNode.deleted) {
+			node.delete();
+			app.store.delete(node)
+			return ActionResult.withError('ref node already deleted, by transaction from other site');
+		}
+
+		const {parent} = refNode;
 		if (!parent) {
 			return ActionResult.withError('failed to find target parent from: ' + at.toString())
 		}
 
 		const done = () => {
 			node.forAll(n => {
+				node.undelete();
 				app.store.put(n);
 			})
 
@@ -48,17 +55,17 @@ export class InsertNode implements CarbonAction {
 		}
 
 		if (at.isStart) {
-			target.prepend(node);
+			refNode.prepend(node);
 			return done()
 		}
 
 		if (at.isBefore) {
-			parent.insertBefore(target, node);
+			parent.insertBefore(refNode, node);
 			return done()
 		}
 
 		if (at.isAfter) {
-			parent.insertAfter(target, node);
+			parent.insertAfter(refNode, node);
 			return done()
 		}
 

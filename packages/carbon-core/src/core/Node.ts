@@ -1,20 +1,18 @@
-import { cloneDeep, findIndex, first, flatten, isEmpty, last, merge, noop, reverse } from 'lodash';
-import { Fragment } from './Fragment';
+import { cloneDeep, findIndex, first, flatten, last, merge, noop, reverse } from "lodash";
+import { Fragment } from "./Fragment";
 
-import { Optional, Predicate, With } from '@emrgen/types';
-import { EventEmitter } from 'events';
-import { takeUpto } from '../utils/array';
-import { ContentMatch } from './ContentMatch';
-import { classString } from './Logger';
-import { Mark, MarkSet } from './Mark';
-import { NodeAttrs } from './NodeAttrs';
-import { BlockContent, InlineContent, NodeContent } from './NodeContent';
-import { NodeData } from './NodeData';
-import { NodeId } from './NodeId';
-import { NodeType } from './NodeType';
+import { Optional, Predicate, With } from "@emrgen/types";
+import { EventEmitter } from "events";
+import { takeUpto } from "../utils/array";
+import { ContentMatch } from "./ContentMatch";
+import { classString } from "./Logger";
+import { Mark, MarkSet } from "./Mark";
+import { NodeAttrs } from "./NodeAttrs";
+import { NodeContent } from "./NodeContent";
+import { NodeId } from "./NodeId";
+import { NodeType } from "./NodeType";
 import { no, NodeEncoder, NodeJSON, yes } from "./types";
-import { NodeState } from './NodeState';
-import { removeEmpty } from '../utils/object';
+import { NodeState } from "./NodeState";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -35,7 +33,7 @@ export interface NodeCreateProps {
 
 	renderVersion?: number;
 	updateVersion?: number;
-	deleted?: number;
+	deleted?: boolean;
 }
 
 let key = 0
@@ -93,7 +91,7 @@ export class Node extends EventEmitter {
 	renderVersion = 0;
 	updateVersion = 0;
 
-	deleted = 0;
+	deleted = false;
 
 	static removeId(json: NodeJSON) {
 		const { id, text = '', content = [], ...rest } = json
@@ -123,7 +121,7 @@ export class Node extends EventEmitter {
 			meta = {},
 			renderVersion = 0,
 			updateVersion = 0,
-			deleted = 0,
+			deleted = false,
 		} = object;
 		this.test_key = nextKey()
 		this.id = id;
@@ -140,11 +138,6 @@ export class Node extends EventEmitter {
 		this.deleted = deleted;
 	}
 
-	syncChildren() { }
-	syncAttrs() { }
-	syncData() { }
-	syncMarks() { }
-
 	get key() {
 		return this.id.id
 	}
@@ -156,10 +149,6 @@ export class Node extends EventEmitter {
 
 	get placeholder() {
 		return this.type.attrs.html.placeholder
-	}
-
-	get canSplit() {
-		return this.type.canSplit
 	}
 
 	// nodes that are not allowed to merge with any other node
@@ -223,11 +212,10 @@ export class Node extends EventEmitter {
 		// if (this.isBlockAtom) return 0;
 		if (this.isText) return this.textContent.length;
 
-		const focusSize = this.children.reduce((fs, n) => {
+		// focus size is the sum of focus size of all children
+		return this.children.reduce((fs, n) => {
 			return fs + n.focusSize;
 		}, 0);
-
-		return focusSize;
 	}
 
 	// focus can be within the node, including any descendants node
@@ -248,10 +236,10 @@ export class Node extends EventEmitter {
 	// focus can be within the node(ex: text node), excluding any child node
 	get isFocusable(): boolean {
 		if (this.parents.some(n => n.isAtom)) return false;
-		return ((this.isTextBlock && this.isEmpty) || !!this.type.isFocusable) && !this.isCollapseHidden;
+		return ((this.isTextBlock && this.isEmpty) || this.type.isFocusable) && !this.isCollapseHidden;
 	}
 
-	// a node that does not avoids to have a focus moved in by arrow keys
+	// a node that does not avoid to have a focus moved in by arrow keys
 	get isSelectable() {
 		const nonSelectable = this.chain.find(n => !(n.type.isSelectable || n.isActive));
 		// console.log(nonSelectable);
@@ -282,10 +270,6 @@ export class Node extends EventEmitter {
 
 	get isContentNode(): boolean {
 		return this.index == 0
-	}
-
-	get isProxy(): boolean {
-		return false
 	}
 
 	get isCollapsed() {
@@ -442,12 +426,12 @@ export class Node extends EventEmitter {
 		return this.parent?.type.contentMatch.matchFragment(fragment)
 	}
 
-	setDeleteFlag(flag: boolean) {
-		this.deleted = Date.now()
+	delete() {
+		this.deleted = true;
 	}
 
-	intoNodeId() {
-		return this.id;
+	undelete() {
+		this.deleted = false;
 	}
 
 	// return a child node at given path
@@ -471,10 +455,6 @@ export class Node extends EventEmitter {
 
 	closest(fn: Predicate<Node>): Optional<Node> {
 		return this.chain.find(fn);
-	}
-
-	sizeOf(fn: Predicate<Node>): number {
-		return this.descendants(fn).reduce((s, n) => s + n.size, 0);
 	}
 
 	// return true if `this` Node is after `other` Node
@@ -516,10 +496,6 @@ export class Node extends EventEmitter {
 		return this.children[index];
 	}
 
-	childAfter(pos: number): void { }
-
-	childBefore(pos: number): void { }
-
 	commonNode(node: Node): Node {
 		if (this.eq(node)) {
 			return this;
@@ -541,21 +517,6 @@ export class Node extends EventEmitter {
 
 	comply(fn: Predicate<Node>): boolean {
 		return false;
-	}
-
-	cut(from: number, to: number): Node[] {
-		// const nodes = this.slice(from, to);
-
-		// this.content = [
-		// 	...this.children.slice(0, from),
-		// 	...this.children.slice(to),
-		// ];
-
-		// if (isString(nodes)) {
-		// 	return [];
-		// }
-
-		return [];
 	}
 
 	forAll(fn: With<Node>): void {
@@ -754,15 +715,15 @@ export class Node extends EventEmitter {
 	}
 
 	// @mutates
-	addMark(mark: Mark, start: number, end: number) {
-		// this.marks?.add(mark);
-		// this.markUpdated();
+	addMark(mark: Mark) {
+		this.marks?.add(mark);
+		this.markUpdated();
 	}
 
 	// @mutates
-	removeMark(mark: Mark, start: number, end: number) {
-		// this.markUpdated();
-		// this.marks?.remove(mark);
+	removeMark(mark: Mark) {
+		this.marks?.remove(mark);
+		this.markUpdated();
 	}
 
 	// @mutates

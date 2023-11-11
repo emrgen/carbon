@@ -41,10 +41,23 @@ export class NodeStore {
 	}
 
 	put(node: Node) {
+		if (node.deleted) {
+			this.deletedNodeMap.delete(node.id.id);
+			this.nodeMap.delete(node.id.id);
+		} else {
+			this.deletedNodeMap.delete(node.id.id);
+			this.nodeMap.set(node.id.id, node);
+		}
 		// console.log('put node', node.id.toString());
-		this.deletedNodeMap.delete(node.id.id);
-		this.nodeMap.delete(node.id.id);
-		this.nodeMap.set(node.id.id, node);
+	}
+
+	update(node: Node) {
+		if (node.deleted) {
+			this.delete(node);
+		} else {
+			this.deletedNodeMap.delete(node.id.id);
+			this.nodeMap.set(node.id.id, node);
+		}
 	}
 
 	element(nodeId: NodeId): Optional<HTMLElement> {

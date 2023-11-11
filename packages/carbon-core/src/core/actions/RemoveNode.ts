@@ -34,9 +34,18 @@ export class RemoveNode implements CarbonAction {
 			return ActionResult.withError('')
 		}
 
+		if (target.deleted) {
+			return ActionResult.withValue('node already deleted, by transaction from other site');
+		}
+
 		const parent = target?.parent;
+		if (!parent) {
+			return ActionResult.withError('remove node has no parent');
+		}
+
 		this.node = target.toJSON();
 		parent?.remove(target);
+		target.delete();
 		app.store.delete(target);
 
 		tr.updated(target.parent!);
