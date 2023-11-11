@@ -36,4 +36,8 @@ export class Separator extends CarbonPlugin {
       tab: skipKeyEvent
     }
   }
+
+  serialize(): string {
+    return '***'
+  }
 }

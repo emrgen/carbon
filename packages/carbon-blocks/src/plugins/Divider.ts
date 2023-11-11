@@ -38,10 +38,7 @@ export class Divider extends NodePlugin {
   }
 
   serialize(app: Carbon, node: Node): SerializedNode {
-    return {
-      name: node.name,
-      content: [],
-    }
+    return '---'
   }
 
 }
