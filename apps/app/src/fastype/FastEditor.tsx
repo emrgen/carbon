@@ -117,7 +117,7 @@ export function FastEditor() {
   };
 
   return (
-    <Stack h="full" className="fast-editor" w="full">
+    <Stack h="full"  w="full">
       {/* <Editor
         height="60vh"
         onMount={handleEditorDidMount}
@@ -138,7 +138,9 @@ export function FastEditor() {
         defaultValue={String.raw`console.log('done');`}
         loading={<Spinner />}
       /> */}
-      <Fastype app={app} />
+      <Stack className="fast-editor" flex={1} >
+        <Fastype app={app} />
+      </Stack>
       {/*<Box pos='absolute' left={0} top={0} py={2} px={0} w='200px' h='full'>*/}
       {/*  <TimeTravel app={app}/>*/}
       {/*</Box>*/}

@@ -30,12 +30,23 @@ export class MoveAction implements CarbonAction {
 	execute(tr: Transaction): ActionResult<any> {
 		const { app } = tr;
 		const { to, nodeIds } = this;
-		const target = app.store.get(to.nodeId);
-		if (!target) {
+		const refNode = app.store.get(to.nodeId);
+		if (!refNode) {
 			return ActionResult.withError('Failed to get target node');
 		}
 
-		const { parent } = target;
+		if (refNode.deleted) {
+			const moveNodes = nodeIds.map(id => app.store.get(id)) as Node[];
+			// move the node to delete store
+			moveNodes.forEach(n => {
+				n.delete();
+				app.store.delete(n)
+			});
+
+			return ActionResult.withError('ref node already deleted by transaction from other site');
+		}
+
+		const { parent } = refNode;
 		if (!parent) {
 			return ActionResult.withError('Failed to get target parent node');
 		}
@@ -53,35 +64,36 @@ export class MoveAction implements CarbonAction {
 		moveNodes.forEach(n => {
 			oldParent?.remove(n);
 			app.store.delete(n);
+			n.undelete();
 		})
 
 		// console.log("MOVE: move node", moveNode, "to", to.toString(), target);
 
 		if (to.isStart) {
-			target.prepend(moveNodes);
+			refNode.prepend(moveNodes);
 			moveNodes.forEach(n => app.store.delete(n))
-			tr.updated(target);
+			tr.updated(refNode);
 			return NULL_ACTION_RESULT;
 		}
 
 		if (to.isBefore) {
-			parent.insertBefore(target, moveNodes);
+			parent.insertBefore(refNode, moveNodes);
 			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(parent);
 			return NULL_ACTION_RESULT;
 		}
 
 		if (to.isAfter) {
-			parent.insertAfter(target, moveNodes);
+			parent.insertAfter(refNode, moveNodes);
 			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(parent);
 			return NULL_ACTION_RESULT;
 		}
 
 		if (to.isEnd) {
-			target.append(moveNodes);
+			refNode.append(moveNodes);
 			moveNodes.forEach(n => app.store.delete(n))
-			tr.updated(target);
+			tr.updated(refNode);
 			return NULL_ACTION_RESULT;
 		}
 
