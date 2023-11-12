@@ -87,6 +87,7 @@ export class NestablePlugin extends AfterPlugin {
 				const atStart = Pin.toStartOf(listNode)?.eq(selection.head);
 				// console.log(atStart, Pin.toStartOf(listNode), selection.head);
 
+				console.log('asdasfa', atStart, selection.head, Pin.toStartOf(listNode));
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);
 				const as = listNode.attrs.html['data-as'];

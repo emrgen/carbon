@@ -138,13 +138,19 @@ export class ChangeName extends BeforePlugin {
       // const before = titleContent.insert(match[1].length,);
       // const after = titleContent.remove(0, match[1].length);
 
-      const title = titleNode.textContent.slice(match[1].length - 1);
-      console.warn('title', title, match);
-      const textNode = app.schema.text(title)!
-      const content = BlockContent.create(textNode);
+      if (match[1] === titleNode.textContent + ' ') {
+        const action = SetContentAction.create(titleNode.id,BlockContent.empty());
+        tr.add(action);
+      } else {
+        const title = titleNode.textContent.slice(match[1].length - 1);
+        console.warn('title', title, match);
+        const textNode = app.schema.text(title)!
+        const content = BlockContent.create(textNode);
 
-      const action = SetContentAction.withContent(titleNode.id, content, content);
-      tr.add(action)
+        const action = SetContentAction.withContent(titleNode.id, content, content);
+        tr.add(action);
+      }
+
 
       tr.change(block.id, block.name, type)
       tr.updateAttrs(block.id, { node: { typeChanged: true },});

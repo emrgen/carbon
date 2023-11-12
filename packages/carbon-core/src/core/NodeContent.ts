@@ -36,6 +36,10 @@ export class BlockContent implements NodeContent {
 		return this.nodes;
 	}
 
+	static empty(): BlockContent {
+		return BlockContent.create([])
+	}
+
 	static create(nodes: Node | Node[]) {
 		if (!Array.isArray(nodes)) {
 			return new BlockContent({ nodes: [nodes] });
