@@ -1,7 +1,6 @@
 import { findIndex, flatten } from 'lodash';
 
 import { Node } from './Node';
-import { classString } from './Logger';
 import { Optional } from "@emrgen/types";
 
 export interface NodeContent {
@@ -75,7 +74,9 @@ export class BlockContent implements NodeContent {
 	}
 
 	insert(node: Node, offset: number): NodeContent {
-		return this
+		const { children } = this;
+		const content = flatten([children.slice(0, offset), node, children.slice(offset)]);
+		return BlockContent.create(content)
 	}
 
 	prepend(nodes: Node[]): NodeContent {

@@ -289,3 +289,5 @@ export class NodeType {
 	// }
 
 }
+
+export class MarkType {}

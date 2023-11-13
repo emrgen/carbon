@@ -44,7 +44,7 @@ export class TextBlock {
   }
 
   // @mutation
-  insertInline(node: Node, offset: number) {
+  insert(node: Node, offset: number) {
     if (!node.isInline) {
       throw new Error('node is not inline');
     }
@@ -63,8 +63,10 @@ export class TextBlock {
     if (!found) return;
 
     // split the content and insert the inline node in the relevant node
-    const group = this.splitContent(offset).map(content => content.children).filter(n => n.length > 0);
-    const nodes = flatten(group);
+    const nodes = this.split(offset).reduce((acc, curr) => {
+      return curr.size === 0 ? acc : [...acc, ...curr.children];
+    }, [] as Node[]);
+
 
     this.node.replace(found, nodes);
     // normalize the content
@@ -116,15 +118,7 @@ export class TextBlock {
     return this
   }
 
-  split(offset: number): [TextBlock, TextBlock] {
-    const [left, right] = this.splitContent(offset);
-    return [
-      new TextBlock(node(left)),
-      new TextBlock(node(right))
-    ];
-  }
-
-  private splitContent(offset: number): [NodeContent, NodeContent] {
+  split(offset: number): [NodeContent, NodeContent] {
     return this.node.content.split(offset);
   }
 

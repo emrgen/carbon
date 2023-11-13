@@ -448,7 +448,7 @@ export class Node extends EventEmitter {
 		return this.parents.includes(parent);
 	}
 
-	//
+	// @mutates
 	setParent(parent: Optional<Node>) {
 		this.parent = parent;
 	}

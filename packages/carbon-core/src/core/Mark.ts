@@ -1,11 +1,11 @@
 import { each, isArray, isEmpty, isEqual, keys, values } from "lodash";
 
-interface User {
+export interface User {
 	id: string;
 	name: string;
 }
 
-interface MarkProps {
+export interface MarkProps {
 	color?: string;
 	url?: string;
 	user?: User;
