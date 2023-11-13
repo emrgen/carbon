@@ -2,6 +2,7 @@ import { findIndex, flatten } from 'lodash';
 
 import { Node } from './Node';
 import { classString } from './Logger';
+import { Optional } from "@emrgen/types";
 
 export interface NodeContent {
 	size: number;
@@ -10,13 +11,15 @@ export interface NodeContent {
 
 	withParent(parent: Node): NodeContent;
 
-	replace(node: Node, by: Node): NodeContent;
+	replace(node: Node, by: Node[]): NodeContent;
 	prepend(nodes: Node[]): NodeContent;
 	append(nodes: Node[]): NodeContent;
 	insert(node: Node, offset: number): NodeContent;
 	insertBefore(before: Node, node: Node[]): NodeContent;
 	insertAfter(after: Node, node: Node[]): NodeContent;
 	remove(node: Node): boolean;
+	tryMerge(other: NodeContent): Optional<NodeContent>;
+	split(offset: number): [NodeContent, NodeContent];
 
 	updateText(text: string): void;
 
@@ -83,10 +86,10 @@ export class BlockContent implements NodeContent {
 		return BlockContent.create([...this.nodes, ...nodes])
 	}
 
-	replace(node: Node, by: Node): NodeContent {
-		const nodes = this.nodes.map(n => {
+	replace(node: Node, by: Node[]): NodeContent {
+		const nodes = flatten(this.nodes.map(n => {
 			return n.eq(node) ? by : n;
-		});
+		}));
 
 		return BlockContent.create(nodes);
 	}
@@ -110,6 +113,22 @@ export class BlockContent implements NodeContent {
 		const found = nodes.find(n => n.eq(node));
 		this.nodes = nodes.filter(n => !n.eq(node));
 		return !!found;
+	}
+
+	tryMerge(other: NodeContent): Optional<NodeContent> {
+		if (other instanceof BlockContent) {
+			return BlockContent.create([...this.nodes, ...other.nodes]);
+		}
+
+		return null;
+	}
+
+	split(offset: number): [NodeContent, NodeContent] {
+		const { nodes } = this;
+		const left = nodes.slice(0, offset);
+		const right = nodes.slice(offset);
+
+		return [BlockContent.create(left), BlockContent.create(right)];
 	}
 
 	view(container: Node[]): NodeContent {
@@ -173,7 +192,7 @@ export class InlineContent implements NodeContent {
 	// }
 
 	destroyShallow() {
-		throw new Error('Method not implemented.');
+		throw new Error('Method not implemented for InlineContent');
 	}
 
 	withParent(parent: Node): NodeContent {
@@ -181,35 +200,46 @@ export class InlineContent implements NodeContent {
 	}
 
 	prepend(nodes: Node[]): NodeContent {
-		throw new Error("Not implemented");
+		throw new Error("Not implemented for InlineContent");
 	}
 
 	append(nodes: Node[]): NodeContent {
-		throw new Error("Not implemented");
+		throw new Error("Not implemented for InlineContent");
 	}
 
-	replace(node: Node, by: Node): NodeContent {
-		throw new Error("Not implemented");
+	replace(node: Node, by: Node[]): NodeContent {
+		throw new Error("Not implemented for InlineContent");
 	}
 
 	insert(node: Node, offset: number): NodeContent {
-		throw new Error("Not implemented");
+		throw new Error("Not implemented for InlineContent");
 	}
 
 	insertBefore(before: Node, nodes: Node[]): NodeContent {
-		throw new Error("Not implemented");
+		throw new Error("Not implemented for InlineContent");
 	}
 
 	insertAfter(after: Node, nodes: Node[]): NodeContent {
-		throw new Error("Not implemented");
+		throw new Error("Not implemented for InlineContent");
 	}
 
 	remove(node: Node): boolean {
 		return false
 	}
 
+	tryMerge(other: NodeContent): Optional<NodeContent> {
+		if (other instanceof InlineContent) {
+			return InlineContent.create(this.text + other.text);
+		}
+
+		return null;
+	}
+
 	split(offset: number): [NodeContent, NodeContent] {
-		return [this, this]
+		const left = InlineContent.create(this.text.slice(0, offset));
+		const right = InlineContent.create(this.text.slice(offset));
+
+		return [left, right];
 	}
 
 	updateText(text: string) {

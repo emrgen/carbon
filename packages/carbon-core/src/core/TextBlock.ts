@@ -1,71 +1,138 @@
 import { classString } from "./Logger";
 import { Mark, MarkSet } from "./Mark";
 import { Node } from "./Node";
-import { InlineContent } from "./NodeContent";
+import { BlockContent, InlineContent, NodeContent } from "./NodeContent";
 import { node } from '@emrgen/carbon-blocks';
 import { Optional } from '@emrgen/types';
+import { flatten, identity, reduce } from "lodash";
 
 // utility class for text blocks
 // title is a text block
 // a text block contains inline children like text, links, hashtags, mentions, etc
 // when you type in a text block, you are typing in the inline content
 // when merging text blocks, you are merging the inline content along with the content marks
-export class TextBlock extends Node {
-
-  static fromParent(node: Node): Optional<TextBlock> {
-    const textBlock = node.child(0);
-    if (textBlock && textBlock.isTextBlock) {
-      return new TextBlock(textBlock);
-    }
-  }
+export class TextBlock {
+  private node: Node;
 
   static from(node: Node) {
     return new TextBlock(node.clone());
   }
 
   constructor(node: Node) {
-    super(node);
+    if (!node.isTextBlock) {
+      throw new Error('can not create text block from non text block node');
+    }
+
+    this.node = node;
   }
 
   get textContent() {
-    return this.content.textContent;
+    return this.node.textContent;
   }
 
   intoContent() {
-    return this.content;
+    return this.node.content;
   }
 
+  // @mutation
   addMark(mark: Mark, start: number, end: number) {
-
+    // split the content and add the mark in the relevant node
   }
 
+  // @mutation
   removeMark(mark: Mark, start: number, end: number) {
-
   }
 
-  insertText(text: string, start: number, marks?: MarkSet) {}
+  // @mutation
+  insertInline(node: Node, offset: number) {
+    if (!node.isInline) {
+      throw new Error('node is not inline');
+    }
 
-  merge(other: TextBlock): TextBlock {
+    if (offset <= 0) {
+      this.node.content.prepend([node]);
+      return;
+    }
+
+    if (offset >= this.node.focusSize) {
+      this.node.content.append([node]);
+      return;
+    }
+
+    const found = this.find(offset);
+    if (!found) return;
+
+    // split the content and insert the inline node in the relevant node
+    const group = this.splitContent(offset).map(content => content.children).filter(n => n.length > 0);
+    const nodes = flatten(group);
+
+    this.node.replace(found, nodes);
+    // normalize the content
+    this.normalize();
+  }
+
+  //
+  private find(offset: number): Optional<Node> {
+     for (const node of this.node.content.children) {
+      if (node.isInline) {
+        if (offset === node.focusSize) return node;
+
+        if (offset > node.focusSize) {
+          offset -= node.focusSize;
+        } else {
+          return node;
+        }
+      }
+    }
+  }
+
+  tryMerge(other: TextBlock): Optional<TextBlock> {
+    const node = this.node.tryMerge(other.node);
+    if (!node) {
+      return null;
+    }
+
+    return new TextBlock(node);
+  }
+
+  private normalize(): TextBlock {
+    const nodes = reduce(this.node.children, (acc, curr) => {
+      if (acc.length === 0) {
+        return [curr]
+      }
+
+      const prev = acc[acc.length - 1];
+
+      const newNode = prev.tryMerge(curr);
+      if (!newNode) {
+        return [...acc, curr]
+      }
+
+      return [...acc.slice(0, -1), newNode];
+    }, [] as Node[]);
+
+    this.node.content = BlockContent.create(nodes);
+
     return this
   }
 
   split(offset: number): [TextBlock, TextBlock] {
-    return [this, this]
+    const [left, right] = this.splitContent(offset);
+    return [
+      new TextBlock(node(left)),
+      new TextBlock(node(right))
+    ];
+  }
+
+  private splitContent(offset: number): [NodeContent, NodeContent] {
+    return this.node.content.split(offset);
   }
 
   toJSON() {
-    return {
-      ...super.toJSON(),
-      type: 'text-block'
-    }
+    return this.node.toJSON();
   }
 
   toString(): string {
-    return classString(this)({
-      id: this.id.toString(),
-      name: this.type.name,
-      marks: this.marks.toString(),
-      content: this.content.toJSON(),
-    })
+    return classString(this)(this.node.toJSON())
   }
 }
