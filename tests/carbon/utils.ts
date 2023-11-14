@@ -1,6 +1,7 @@
 import { Page } from "@playwright/test";
 
 import { Carbon } from "@emrgen/carbon-core";
+import * as timers from "timers";
 declare global {
   interface Window {
     app: Carbon;
@@ -68,6 +69,16 @@ export class CarbonPage {
     await this.page.keyboard.press(key);
   }
 
+  async repeat(key: string, times = 1, press = false) {
+    for (let i = 0; i< times; i++) {
+      if (press) {
+        await this.page.keyboard.press(key);
+      } else {
+        await this.page.keyboard.type(key);
+      }
+    }
+  }
+
   async  arrowRight(count = 1) {
     for (let i = 0; i < count; i++) {
       await this.page.keyboard.press("ArrowRight");
@@ -92,3 +103,4 @@ export class CarbonPage {
     await this.page.keyboard.type(`[] ${text}`);
   }
 }
+

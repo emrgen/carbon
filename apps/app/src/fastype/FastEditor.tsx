@@ -36,16 +36,7 @@ const data = {
       content: [
         {
           name: "title",
-          content: [
-            {
-              name: "text",
-              text: "Carbon ",
-            },
-            {
-              name: "text",
-              text: "document",
-            },
-          ],
+          content: [],
         },
         // {
         //   name: "divider",
@@ -103,7 +94,7 @@ const data = {
 };
 
 export function FastEditor() {
-  const app = useCreateCachedCarbon(data, extensions);
+  const app = useCreateCarbon(data, extensions);
 
   const editorRef = useRef(null);
 

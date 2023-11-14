@@ -32,6 +32,7 @@ import {
   CarbonApp,
   carbonUtilPlugins,
 } from "@emrgen/carbon-utils";
+import { Stack } from "@chakra-ui/react";
 
 const data = node("carbon", [
   // node("fileTree", [
@@ -233,5 +234,5 @@ export default function Dev() {
   const app = useCreateCarbon(data, extensions);
 
 
-  return <CarbonApp app={app} />;
+  return <div className={'carbon-app-container'}><CarbonApp app={app} /></div>;
 }
