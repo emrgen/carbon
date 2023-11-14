@@ -149,7 +149,9 @@ export class Pin {
 		return new Pin(node, offset);
 	}
 
-	//
+	// NOTE: use it very cautiously and sparingly
+	// use it when you want to create a pin that is points to a location which is will exist in the future
+	// for example when you want to create a pin to the end of the node that is not created yet
 	static future(node: Node, offset: number, ref: PinReference = PinReference.front): Pin {
 		return new Pin(node, offset, ref);
 	}

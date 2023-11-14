@@ -135,9 +135,9 @@ export function FastEditor() {
       {/*<Box pos='absolute' left={0} top={0} py={2} px={0} w='200px' h='full'>*/}
       {/*  <TimeTravel app={app}/>*/}
       {/*</Box>*/}
-      <Box h='300px' bg={'#eee'} margin={'0 auto'} w='740px'>
+      {/* <Box h='300px' bg={'#eee'} margin={'0 auto'} w='740px'>
         <FastTree app={app} />
-      </Box>
+      </Box> */}
     </Stack>
   );
 }
