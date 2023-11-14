@@ -22,7 +22,6 @@ import { ChangeName } from "../core/actions/ChangeName";
 import { InsertNode } from "../core/actions/InsertNode";
 import { MoveAction } from "../core/actions/MoveAction";
 import { RemoveNode } from "../core/actions/RemoveNode";
-import { RemoveText } from "../core/actions/RemoveText";
 import { SetContentAction } from "../core/actions/SetContent";
 import { ActionOrigin, CarbonAction } from "../core/actions/types";
 import { NodeName } from "../core/types";
