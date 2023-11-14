@@ -1,11 +1,11 @@
 import { Optional } from '@emrgen/types';
 import { each } from 'lodash';
 import { ContentMatch } from './ContentMatch';
-import { MarkType } from './MarkType';
 import { Node } from './Node';
-import { NodeType } from './NodeType';
+import { MarkType, NodeType } from "./NodeType";
 import { SchemaFactory } from './SchemaFactory';
-import { NodeName } from './types';
+import { NodeIdFactory, NodeName } from "./types";
+import { Mark, MarkProps } from "./Mark";
 
 interface SchemaSpec {
 	nodes: Record<NodeName, NodeSpec>;
@@ -70,17 +70,21 @@ export class Schema {
 		return this.nodeFromJSON({ name, ...json })
 	}
 
+	mark(name: string, props?: MarkProps): Mark {
+		return new Mark(name, props);
+	}
+
 	cloneWithId(node: Node): Node {
 		return this.factory.cloneWithId(node);
 	}
 
 	// create node from json
-	nodeFromJSON(json: any): Optional<Node> {
+	nodeFromJSON(json: any, nodeIdFactory?: NodeIdFactory): Optional<Node> {
 		if (json instanceof Node) {
 			return json;
 		}
 
-		return this.factory.createNode(json, this);
+		return this.factory.createNode(json, this, nodeIdFactory);
 
 		// const { name, id, text = '', content = [], attrs = {}, target = '' } = json ?? {};
 		// const type = this.type(name);

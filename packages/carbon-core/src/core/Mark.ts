@@ -1,11 +1,11 @@
-import { each, isArray, isEmpty, keys, values } from 'lodash';
+import { each, isArray, isEmpty, isEqual, keys, values } from "lodash";
 
-interface User {
+export interface User {
 	id: string;
 	name: string;
 }
 
-interface MarkProps {
+export interface MarkProps {
 	color?: string;
 	url?: string;
 	user?: User;
@@ -69,6 +69,10 @@ export class Mark {
 		this.props = props;
 	}
 
+	eq(other: Mark) {
+		return this.type === other.type && isEqual(this.props, other.props)
+	}
+
 	toString() {
 		return JSON.stringify(this.toJSON());
 	}
@@ -117,6 +121,17 @@ export class MarkSet {
 
 	forEach(fn: (value: Mark, index: number, array: Mark[]) => void) {
 		values(this.marks).forEach(fn)
+	}
+
+	eq(other: MarkSet) {
+		if (this.size !== other.size) return false;
+		const types = keys(this.marks);
+
+		return types.every(k => {
+			const otherMark = other.marks[k];
+			const thisMark = this.marks[k];
+			return otherMark && thisMark && thisMark.eq(otherMark);
+		})
 	}
 
 	toJSON() {

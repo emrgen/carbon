@@ -448,7 +448,7 @@ export class Node extends EventEmitter {
 		return this.parents.includes(parent);
 	}
 
-	//
+	// @mutates
 	setParent(parent: Optional<Node>) {
 		this.parent = parent;
 	}
@@ -635,8 +635,8 @@ export class Node extends EventEmitter {
 		return nodes;
 	}
 
-	replace(node: Node, by: Node) {
-		this.content = this.content.replace(node, by).withParent(this)
+	replace(node: Node, by: Node | Node[]) {
+		this.content = this.content.replace(node, flatten([by])).withParent(this)
 		this.markUpdated();
 	}
 
@@ -716,13 +716,30 @@ export class Node extends EventEmitter {
 
 	// @mutates
 	addMark(mark: Mark) {
-		this.marks?.add(mark);
+		this.marks.add(mark);
 		this.markUpdated();
 	}
 
 	// @mutates
+	tryMerge(other: Node): Optional<Node> {
+		// TODO: use more general merge compatibility check
+		if (this.type !== other.type) return null;
+		if (!this.marks.eq(other.marks)) return null;
+
+		const merged = this.content.tryMerge(other.content);
+
+		if (!merged) return null;
+
+		this.updateContent(merged);
+	}
+
+	compatible(other: Node) {
+		throw new Error('not implemented')
+	}
+
+	// @mutates
 	removeMark(mark: Mark) {
-		this.marks?.remove(mark);
+		this.marks.remove(mark);
 		this.markUpdated();
 	}
 

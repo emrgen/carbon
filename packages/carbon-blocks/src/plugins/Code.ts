@@ -103,7 +103,6 @@ export class Code extends CarbonPlugin {
       // }
     }
   }
-
 }
 
 export class BeforeCodePlugin extends BeforePlugin {

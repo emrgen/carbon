@@ -6,6 +6,11 @@ import { Carbon } from './Carbon';
 
 export interface CarbonCommands {}
 
+export interface NodeIdFactory {
+	blockId(): string;
+	textId(): string;
+}
+
 // declare module '@emrgen/carbon-core' {
 // 	export interface CarbonCommands {}
 // }
