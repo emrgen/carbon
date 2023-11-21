@@ -258,7 +258,9 @@ export class Transaction {
 	}
 
 	dispatch(isNormalizer: boolean = false): Transaction {
-		this.isNormalizer = isNormalizer
+		// IMPORTANT
+		// TODO: check if transaction changes violates the schema
+		this.isNormalizer = isNormalizer;
 		this.tm.dispatch(this);
 		return this;
 	}

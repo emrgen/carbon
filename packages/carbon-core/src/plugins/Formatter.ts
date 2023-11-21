@@ -1,5 +1,6 @@
 import { Carbon, CarbonPlugin, Transaction } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { MarkSet } from "../core/Mark";
 
 
 // add formatter commands to the CarbonCommands interface
@@ -16,13 +17,14 @@ declare module '@emrgen/carbon-core' {
       superscript: (node: Node, start: number, end: number) => Optional<Transaction>;
       color: (node: Node, start: number, end: number, color: string) => Optional<Transaction>;
       background: (node: Node, start: number, end: number, color: string) => Optional<Transaction>;
+      activeMarks: () => MarkSet;
     }
   }
 }
 
 export class FormatterPlugin extends CarbonPlugin {
 
-  name = 'formatter'
+  name = 'formatter';
 
   commands(): Record<string, Function> {
     return {
@@ -36,7 +38,12 @@ export class FormatterPlugin extends CarbonPlugin {
       superscript: this.superscript,
       color: this.color,
       background: this.background,
+      activeMarks: this.activeMarks
     }
+  }
+
+  // a list of marks that are currently active
+  activeMarks(app: Carbon) {
   }
 
   bold(app: Carbon) {
