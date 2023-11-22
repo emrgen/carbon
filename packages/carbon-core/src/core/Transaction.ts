@@ -377,6 +377,7 @@ export class Transaction {
 		// console.log(new Error().stack);
 		// console.log('pending updates', nodes.map(n => n.id.toString()));
 		each(nodes, n => {
+			console.log('updated node', n.id.toString());
 			this.updatedIds.add(n.id);
 			this.runtime.updatedNodeIds.add(n.id);
 			// all the parent draggables are updated also

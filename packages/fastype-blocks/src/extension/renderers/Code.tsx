@@ -23,8 +23,7 @@ import {
   useDragDropRectSelect,
 } from "@emrgen/carbon-dragon";
 import ReactCodeMirror from "@uiw/react-codemirror";
-// import 'codemirror/keymap/sublime';
-// import 'codemirror/theme/monokai.css';
+
 
 export const CodeComp = (props: RendererProps) => {
   const { node } = props;
