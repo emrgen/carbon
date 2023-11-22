@@ -33,8 +33,6 @@ export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
   const { picture = {} } = node.attrs.node;
 
-  console.error("DocumentComp", node.attrs.node);
-
   const app = useCarbon();
 
   const ref = useRef<HTMLElement>(null);
