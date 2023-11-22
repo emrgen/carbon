@@ -1,6 +1,5 @@
 import { Optional, RawPoint } from "@emrgen/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useDndContext } from "../hooks/useDndContext";
 import { DndEvent, RectStyle } from "../types";
 import {
@@ -57,14 +56,15 @@ export function DndController() {
 
   const onMouseIn = useCallback(
     (node: Node) => {
+      if (!portalPosition) return;
       if (!node.type.isDraggable || dragHandleNode?.eq(node) || dnd.isMouseDown) return;
       const el = app.store.element(node.id);
-      if (!portalPosition) return;
       if (!el) return;
+
       const region = dnd.region;
       if (!region) return;
-
       const bound = elementBound(el);
+
       // console.log(el, bound, portalPosition);
       if (node.type.dragHandle) {
         // console.log("onMouseIn", node.id.toString(), bound);
@@ -134,13 +134,13 @@ export function DndController() {
 
   const onTransaction = useCallback(
     (tr: Transaction) => {
+      console.log(tr.updatesContent, tr);
       if (tr.updatesContent) {
-        // console.log("updated content");
-        dnd.isDirty = true;
+        console.log("updated content");
         resetDragHandle();
       }
     },
-    [dnd, resetDragHandle]
+    [resetDragHandle]
   );
 
   const onEditorMouseOver = useCallback((e) => {

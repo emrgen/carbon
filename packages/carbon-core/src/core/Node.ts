@@ -2,17 +2,17 @@ import { cloneDeep, findIndex, first, flatten, last, merge, noop, reverse } from
 import { Fragment } from "./Fragment";
 
 import { Optional, Predicate, With } from "@emrgen/types";
-import { EventEmitter } from "events";
 import { takeUpto } from "../utils/array";
 import { ContentMatch } from "./ContentMatch";
 import { classString } from "./Logger";
 import { Mark, MarkSet } from "./Mark";
 import { NodeAttrs } from "./NodeAttrs";
 import { NodeContent } from "./NodeContent";
-import { NodeId } from "./NodeId";
+import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeType } from "./NodeType";
 import { no, NodeEncoder, NodeJSON, yes } from "./types";
 import { NodeState } from "./NodeState";
+import EventEmitter from "events";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -72,7 +72,7 @@ export interface NodeView {
 	children: NodeView[];
 }
 
-export class Node extends EventEmitter {
+export class Node extends EventEmitter implements IntoNodeId {
 	// used for testing/debugging
 	test_key: number;
 
@@ -424,6 +424,10 @@ export class Node extends EventEmitter {
 	get nextMatchType(): Optional<ContentMatch> {
 		const fragment = Fragment.from(takeUpto(this.parent?.children ?? [], n => n === this));
 		return this.parent?.type.contentMatch.matchFragment(fragment)
+	}
+
+	intoNodeId(): NodeId {
+		return this.id;
 	}
 
 	delete() {
@@ -814,6 +818,8 @@ export class Node extends EventEmitter {
 	view(container: Node[] = []): NodeView {
 		return this
 	}
+
+
 
 }
 

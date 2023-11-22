@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/former-core",
+  "name": "@emrgen/fastform-core",
   "version": "0.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

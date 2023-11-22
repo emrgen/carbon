@@ -9,7 +9,7 @@ export interface IntoNodeId {
 	intoNodeId(): NodeId;
 }
 
-export class NodeId {
+export class NodeId implements IntoNodeId {
 	get isDefault() {
 		return defaultId === this.id;
 	}

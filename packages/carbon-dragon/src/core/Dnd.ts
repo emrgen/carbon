@@ -103,9 +103,8 @@ export class Dnd extends EventEmitter {
 		// this.hideDragHandle(node, e);
 	}
 
-	private showDragHandle(node: Node, e: MouseEvent) {
+	refresh(node: Node) {
 		// console.log('show drag handle', node.id.toString());
-		
 		const { app, draggables, draggedNodeId } = this
 		const document = node.chain.find(n => n.isDocument);
 		if (!document) {
@@ -123,14 +122,26 @@ export class Dnd extends EventEmitter {
 
 		// console.warn('mouse in', node.id.toString(), this.isDirty)
 		if (this.isDirty) {
-			// console.log('update draggable');
+			// console.log('update draggable', this.draggables);
 			this.draggables.refresh(scrollTop, scrollLeft);
 			this.droppables.refresh(scrollTop, scrollLeft);
 			this.isDirty = false;
 		}
 
-		const { clientX: x, clientY } = e;
+		return {
+			scrollTop,
+			scrollLeft,
+		}
+	}
 
+	private showDragHandle(node: Node, e: MouseEvent) {
+		// console.log('show drag handle', node.id.toString());
+		const { app, draggables, draggedNodeId } = this;
+		const scrollPos = this.refresh(node);
+		if (!scrollPos) return;
+		const { scrollTop, scrollLeft } = scrollPos;
+
+		const { clientX: x, clientY } = e;
 		const y = clientY + scrollTop
 
 		// console.log(x, y);

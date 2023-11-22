@@ -1,6 +1,5 @@
 import { Optional } from "@emrgen/types";
-import { useCombineListeners } from "../hooks/useCombineListeners";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDndMonitor } from "../hooks/useDndMonitor";
 import { useDraggableHandle } from "../hooks/useDraggable";
@@ -8,15 +7,18 @@ import { useDragRect } from "../hooks/useDragRect";
 import {
   ActionOrigin,
   Node,
+  nodeLocation,
   Pin,
   PinnedSelection,
+  Point,
   preventAndStop,
-  useCarbon,
+  useCarbon
 } from "@emrgen/carbon-core";
 import { DndEvent } from "../types";
 import { HiOutlinePlus } from "react-icons/hi";
 import { PiDotsSixVerticalBold } from "react-icons/pi";
 import { useDndContext } from "../hooks";
+import { elementBound } from "../core/utils";
 
 export interface FastDragHandleProps {
   node: Optional<Node>;
@@ -79,9 +81,8 @@ export function DraggableHandle(props: FastDragHandleProps) {
     }
   }, []);
 
-  const insertAfterNode = useCallback(
+  const findHitNode = useCallback(
     (e: DndEvent) => {
-      const { node } = e;
       const { clientX: x, clientY: y } = e.event;
       const bound = {
         minX: x,
@@ -91,48 +92,90 @@ export function DraggableHandle(props: FastDragHandleProps) {
       };
 
       const hits = dnd.droppables.collides(bound);
+      return hits[0];
+    },
+    [dnd.droppables]
+  );
 
-      if (!hits.length) return;
-      const target = hits[0];
-      if (target.id.eq(node.id)) {
+  const onDragOverNode = useCallback(
+    (e: DndEvent) => {
+      const { node } = e;
+      const hitNode = findHitNode(e)
+      if (!hitNode) return;
+      if (hitNode?.id.eq(node.id)) {
         // hide drop hint
         setShowDropHint(false);
         return;
       }
 
-      console.log(
-        "hits",
-        hits.map((h) => h.id.toString())
-      );
+      if (hitNode.isDocument) return
+      console.log("hits", hitNode?.id.toString());
       setShowDropHint(true);
     },
-    [dnd.droppables]
+    [findHitNode]
+  );
+
+  const onDropNode = useCallback(
+    (e: DndEvent) => {
+      const { node } = e;
+      const hitNode = findHitNode(e)
+      if (!hitNode) return;
+      if (hitNode.isDocument) return
+      if (hitNode?.id.eq(node.id)) {
+        // hide drop hint
+        setShowDropHint(false);
+        return;
+      }
+
+      console.log("dropped on", hitNode?.id.toString());
+      // TODO: check if hitNode is a container and drop node is accepted at the drop position
+      // check if hit node is within the drop node (this is not allowed)
+      const isChildren = hitNode.chain.some((n) => n.eq(node));
+      if (isChildren) {
+        console.warn("cannot drop on children");
+        return;
+      }
+
+      // setShowDropHint(false);
+      const from = nodeLocation(node)!;
+      let to = Point.toAfter(hitNode);
+      const hitElement = app.store.element(hitNode.firstChild!.id!);
+      const {top, bottom} = elementBound(hitElement!);
+      if (e.event.clientY < top + (bottom - top) / 2) {
+        to = Point.toBefore(hitNode);
+      }
+
+      app.enable(() => {
+        app.tr.move(from, to, node.id)?.dispatch();
+      })
+    },
+    [app, findHitNode]
   );
 
   const onDragMove = useCallback(
     (e: DndEvent) => {
       if (e.id === CarbonDragHandleId) {
         onDragRectProgress(e);
-        insertAfterNode(e);
+        onDragOverNode(e);
       }
     },
-    [insertAfterNode, onDragRectProgress]
+    [onDragOverNode, onDragRectProgress]
   );
 
   const onDragEnd = useCallback(
     (e: DndEvent) => {
       if (e.id === CarbonDragHandleId) {
         onDragRectStop(e);
+        onDropNode(e);
       }
     },
-    [onDragRectStop]
+    [onDragRectStop, onDropNode]
   );
 
   const onMouseUp = useCallback(
-    (node, e: DndEvent, isDragging) => {
+    (node: Node, e: DndEvent, isDragging: boolean) => {
       if (e.id !== CarbonDragHandleId) return;
 
-      console.log("onMouseUp", node, event, isDragging);
       // app.focus();
       if (isDragging) {
         e.event.stopPropagation();
@@ -159,7 +202,6 @@ export function DraggableHandle(props: FastDragHandleProps) {
     onDragStart,
     onDragMove,
     onDragEnd,
-    onMouseUp,
   });
 
   const handleAddNode = (e) => {
@@ -217,12 +259,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
         <PiDotsSixVerticalBold />
       </div>
       {createPortal(<>{DragRectComp}</>, document.body)}
-      {createPortal(
-        <>
-          <div className="carbon-drop-hint" style={{ display: showDropHint ? 'flex': 'none' }}/>
-        </>,
-        document.body
-      )}
+      {/*{createPortal(*/}
+      {/*  <>*/}
+      {/*    <div className="carbon-drop-hint" style={{ display: showDropHint ? 'flex': 'none' }}/>*/}
+      {/*  </>,*/}
+      {/*  document.body*/}
+      {/*)}*/}
     </div>
   );
 }

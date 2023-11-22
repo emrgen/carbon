@@ -258,7 +258,9 @@ export class Transaction {
 	}
 
 	dispatch(isNormalizer: boolean = false): Transaction {
-		this.isNormalizer = isNormalizer
+		// IMPORTANT
+		// TODO: check if transaction changes violates the schema
+		this.isNormalizer = isNormalizer;
 		this.tm.dispatch(this);
 		return this;
 	}
@@ -377,6 +379,7 @@ export class Transaction {
 		// console.log(new Error().stack);
 		// console.log('pending updates', nodes.map(n => n.id.toString()));
 		each(nodes, n => {
+			console.log('updated node', n.id.toString());
 			this.updatedIds.add(n.id);
 			this.runtime.updatedNodeIds.add(n.id);
 			// all the parent draggables are updated also

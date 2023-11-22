@@ -7,17 +7,12 @@ import {
 	Pin,
 	PinnedSelection,
 	Point,
-	PointedSelection,
 	Transaction,
 	nodeLocation,
-	preventAndStop,
 	preventAndStopCtx,
-	SerializedNode
 } from "@emrgen/carbon-core";
 import { isNestableNode } from '../utils';
-import { reverse } from 'lodash';
 import { Optional } from '@emrgen/types';
-import { node } from "@emrgen/carbon-blocks";
 import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
 
 declare module '@emrgen/carbon-core' {
@@ -65,7 +60,7 @@ export class NestablePlugin extends AfterPlugin {
 		return tr
 	}
 
-	unwrap(app: Carbon, node: Node): Transaction {
+	unwrap(app: Carbon, _node: Node): Transaction {
 		const { tr } = app;
 		return tr
 	}
@@ -87,7 +82,6 @@ export class NestablePlugin extends AfterPlugin {
 				const atStart = Pin.toStartOf(listNode)?.eq(selection.head);
 				// console.log(atStart, Pin.toStartOf(listNode), selection.head);
 
-				console.log('asdasfa', atStart, selection.head, Pin.toStartOf(listNode));
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);
 				const as = listNode.attrs.html['data-as'];
@@ -132,7 +126,7 @@ export class NestablePlugin extends AfterPlugin {
 			},
 			shiftBackspace: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, node } = ctx;
-				const { selection, cmd, tr } = app;
+				const { selection} = app;
 				const listNode = node.closest(isNestableNode);
 				// console.log(rootListNode, listNode);
 				if (!listNode) return
@@ -227,7 +221,7 @@ export class NestablePlugin extends AfterPlugin {
 				const { app, node } = ctx;
 				console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
 
-				const { selection, tr } = app;
+				const { selection} = app;
 				const container = selection.start.node.closest(n => n.isContainerBlock);
 				const listNode = isNestableNode(container!) ? container : undefined;
 				if (!listNode) return
@@ -253,7 +247,7 @@ export class NestablePlugin extends AfterPlugin {
 
 	serializeChildren(app: Carbon, node: Node): string {
 		const children = node.children.slice(1);
-		const depth = takeBefore(node.parents, n => !isNestableNode(n)).length + 1;
+		const depth = takeBefore(node.parents, (n: Node) => !isNestableNode(n)).length + 1;
 		if (!children.length) return ''
 		return '\n' + children.map(n => app.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
 	}

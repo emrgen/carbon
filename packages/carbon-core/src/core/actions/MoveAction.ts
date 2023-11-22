@@ -61,15 +61,22 @@ export class MoveAction implements CarbonAction {
 		tr.updated(oldParent);
 		tr.normalize(oldParent);
 
-		moveNodes.forEach(n => {
-			oldParent?.remove(n);
-			app.store.delete(n);
-			n.undelete();
-		})
+		const removeFromOldParent = () => {
+			moveNodes.forEach(n => {
+				oldParent?.remove(n);
+				// TODO: why deleting this node causes undefined behavior for move action? the register does not work properly
+				// HACK: we need to delete the node from store, but we can't do it here because it will cause above issue
+
+				// app.store.delete(n);
+				tr.updated(n);
+				n.undelete();
+			})
+		}
 
 		// console.log("MOVE: move node", moveNode, "to", to.toString(), target);
 
 		if (to.isStart) {
+			removeFromOldParent();
 			refNode.prepend(moveNodes);
 			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(refNode);
@@ -77,6 +84,7 @@ export class MoveAction implements CarbonAction {
 		}
 
 		if (to.isBefore) {
+			removeFromOldParent();
 			parent.insertBefore(refNode, moveNodes);
 			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(parent);
@@ -84,13 +92,14 @@ export class MoveAction implements CarbonAction {
 		}
 
 		if (to.isAfter) {
+			removeFromOldParent();
 			parent.insertAfter(refNode, moveNodes);
-			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(parent);
 			return NULL_ACTION_RESULT;
 		}
 
 		if (to.isEnd) {
+			removeFromOldParent();
 			refNode.append(moveNodes);
 			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(refNode);

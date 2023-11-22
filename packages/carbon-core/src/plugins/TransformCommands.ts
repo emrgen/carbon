@@ -22,7 +22,6 @@ import { ChangeName } from "../core/actions/ChangeName";
 import { InsertNode } from "../core/actions/InsertNode";
 import { MoveAction } from "../core/actions/MoveAction";
 import { RemoveNode } from "../core/actions/RemoveNode";
-import { RemoveText } from "../core/actions/RemoveText";
 import { SetContentAction } from "../core/actions/SetContent";
 import { ActionOrigin, CarbonAction } from "../core/actions/types";
 import { NodeName } from "../core/types";
@@ -78,6 +77,8 @@ export class TransformCommands extends BeforePlugin {
 
   commands() {
     return {
+      merge: this.merge,
+      split: this.split,
       insert: this.insert,
       insertText: this.insertText,
       deleteText: this.deleteText,
@@ -86,12 +87,10 @@ export class TransformCommands extends BeforePlugin {
       move: this.move,
       delete: this.delete,
       deleteNodes: this.deleteNodes,
-      split: this.split,
       wrap: this.wrap,
       unwrap: this.unwrap,
       change: this.change,
       update: this.update,
-      merge: this.merge,
     };
   }
 
@@ -371,11 +370,12 @@ export class TransformCommands extends BeforePlugin {
     if (!parent) return;
     const at = Point.toAfter(parent.id);
 
-    const focus = node.find(n => n.type.isTextBlock) ?? node;
-    const from = nodeLocation(node)
+    const after = app.selection.collapseToStart();
+    const from = nodeLocation(node);
     tr
       .move(from!, at, node.id)
-      .select(app.selection.collapseToStart())
+      .select(after);
+
     return tr;
   }
 
