@@ -89,6 +89,7 @@ export class Collapsible extends NodePlugin {
       enter(ctx: EventContext<KeyboardEvent>) {
         const { app, selection, node } = ctx;
         console.log('[Enter] collapsible');
+        // if selection is within the collapsible node title split the collapsible node
         if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
           preventAndStopCtx(ctx);
           app.cmd.collapsible.split(selection)?.dispatch();

@@ -94,7 +94,7 @@ const data = {
 };
 
 export function FastEditor() {
-  const app = useCreateCarbon(data, extensions);
+  const app = useCreateCachedCarbon(data, extensions);
 
   const editorRef = useRef(null);
 
