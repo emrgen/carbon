@@ -114,7 +114,11 @@ export function DraggableHandle(props: FastDragHandleProps) {
         if (e.event.clientY < top + (bottom - top) / 2) {
           to = Point.toBefore(hitNode);
         } else {
-          if (e.event.clientX > elBound.left + 30 && isNestableNode(hitNode)) {
+          const hasChildren = true//hitNode.size > 1;
+          if (
+            hasChildren && e.event.clientX > elBound.left + 30 &&
+            isNestableNode(hitNode)
+          ) {
             to = Point.toAfter(firstChild?.id!);
           } else {
             to = Point.toAfter(hitNode);
@@ -159,25 +163,39 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
       const hitElement = app.store.element(to.nodeId);
 
-      const { top, bottom, left, right, x, y } = elementBound(hitElement!);
+      let { top, bottom, left, right, x, y } = elementBound(hitElement!);
       const width = right - left;
       const height = bottom - top;
       const offset = !to.nodeId.eq(hitNode.id) && hitNode.name == 'section' ? 30 : 0;
 
       if (to.isBefore) {
         console.log(x, y);
+        const beforeNode = hitNode.prevSibling;
+        const beforeElement = app.store.element(beforeNode?.id!);
+        if (beforeElement) {
+          const { bottom: beforeBottom = top } = elementBound(beforeElement!);
+          top = top - (top - beforeBottom) / 2
+        }
         setDropHintStyle({
-          top: top - 1,
+          top,
           left: left + offset,
-          width,
-          height: 2,
+          width: width - offset,
         });
       } else {
+        const afterElement = hitElement?.nextSibling as Optional<HTMLElement>;
+        if (afterElement) {
+          const { top: afterTop = bottom } = elementBound(afterElement);
+          bottom = bottom + (afterTop - bottom) / 2
+        }
+
+        if (!to.nodeId.eq(hitNode.id)) {
+          bottom = bottom + 1;
+        }
+
         setDropHintStyle({
-          top: bottom + 1,
+          top: bottom,
           left: left + offset,
-          width,
-          height: 2,
+          width: width - offset,
         });
       }
 

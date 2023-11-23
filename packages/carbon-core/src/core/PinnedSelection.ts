@@ -254,6 +254,7 @@ export class PinnedSelection {
 		
 		// console.log(anchorNode, focusNode, anchor.node.id.toString(), focus.node.id.toString());
 		if (!anchorNode || !focusNode) {
+			console.log(p14('%c[error]'), 'color:red', this.toString());
 			console.log(p14('%c[error]'), 'color:red', 'anchor/focus not not found');
 			return
 		}

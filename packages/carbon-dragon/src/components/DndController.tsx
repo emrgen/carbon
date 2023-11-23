@@ -134,7 +134,7 @@ export function DndController() {
 
   const onTransaction = useCallback(
     (tr: Transaction) => {
-      console.log(tr.updatesContent, tr);
+      // console.log(tr.updatesContent, tr);
       if (tr.updatesContent) {
         console.log("updated content");
         resetDragHandle();
