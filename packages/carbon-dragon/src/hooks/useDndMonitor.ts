@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDndContext } from './useDndContext';
 import { DndEvent } from '../types';
+import { Node } from "@emrgen/carbon-core";
 
 interface FastDndMonitor {
 	onDragStart?(e: DndEvent);

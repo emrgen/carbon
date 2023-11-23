@@ -202,6 +202,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     onDragStart,
     onDragMove,
     onDragEnd,
+    onMouseUp,
   });
 
   const handleAddNode = (e) => {
