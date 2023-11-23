@@ -89,10 +89,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
     (e: DndEvent) => {
       const { clientX: x, clientY: y } = e.event;
       const bound = {
-        minX: x,
-        minY: y,
-        maxX: x,
-        maxY: y
+        minX: x - 5,
+        minY: y - 5,
+        maxX: x + 5,
+        maxY: y + 5,
       };
 
       const hits = dnd.droppables.collides(bound);
@@ -272,7 +272,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
     onDragStart,
     onDragMove,
     onDragEnd,
-    onMouseUp
+    onMouseUp,
+    options: {
+      throttle: 100,
+    }
   });
 
   const handleAddNode = (e) => {

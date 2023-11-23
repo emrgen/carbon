@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDndContext } from './useDndContext';
 import { DndEvent } from '../types';
 import { Node } from "@emrgen/carbon-core";
+import { throttle } from 'lodash';
 
 interface FastDndMonitor {
 	onDragStart?(e: DndEvent);
@@ -9,20 +10,23 @@ interface FastDndMonitor {
 	onDragEnd?(e: DndEvent);
 	onMouseDown?(node: Node, e: MouseEvent);
 	onMouseUp?(node: Node, e: DndEvent, isDragging: boolean);
+	options?: {
+		throttle: number
+	}
 }
 
 // register drag event listeners
 export const useDndMonitor = (props: FastDndMonitor) => {
 	const dnd = useDndContext()
-	const {onDragStart, onDragMove, onDragEnd, onMouseDown, onMouseUp} = props;
+	const { onDragStart, onDragMove, onDragEnd, onMouseDown, onMouseUp, options} = props;
 
 	useEffect(() => {
 		const handleDragStart = e => {
 			onDragStart?.(e)
 		}
-		const handleDragMove = e => {
+		const handleDragMove = throttle(e => {
 			onDragMove?.(e)
-		}
+		}, options?.throttle ?? 0)
 		const handleDragEnd = e => {
 			onDragEnd?.(e)
 		}
