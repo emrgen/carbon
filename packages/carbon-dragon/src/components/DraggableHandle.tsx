@@ -31,6 +31,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const { node, style } = props;
   const [show, setShow] = useState(false);
   const [showDropHint, setShowDropHint] = useState(false);
+  const [dropHintStyle, setDropHintStyle] = useState({} as any);
 
   const dnd = useDndContext();
 
@@ -43,12 +44,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
     disabled: !node,
     ref,
     activationConstraint: {
-      distance: 4,
-    },
+      distance: 4
+    }
   });
 
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
-    overlay: true,
+    overlay: true
   });
 
   useEffect(() => {
@@ -88,7 +89,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         minX: x,
         minY: y,
         maxX: x,
-        maxY: y,
+        maxY: y
       };
 
       const hits = dnd.droppables.collides(bound);
@@ -97,10 +98,24 @@ export function DraggableHandle(props: FastDragHandleProps) {
     [dnd.droppables]
   );
 
+  const findDropPosition = useCallback(
+    (e: DndEvent, hitNode: Node) => {
+      let to = Point.toAfter(hitNode);
+      const hitElement = app.store.element(hitNode.firstChild!.id!);
+      const { top, bottom } = elementBound(hitElement!);
+      if (e.event.clientY < top + (bottom - top) / 2) {
+        to = Point.toBefore(hitNode);
+      }
+
+      return to;
+    },
+    [app.store]
+  );
+
   const onDragOverNode = useCallback(
     (e: DndEvent) => {
       const { node } = e;
-      const hitNode = findHitNode(e)
+      const hitNode = findHitNode(e);
       if (!hitNode) return;
       if (hitNode?.id.eq(node.id)) {
         // hide drop hint
@@ -108,19 +123,43 @@ export function DraggableHandle(props: FastDragHandleProps) {
         return;
       }
 
-      if (hitNode.isDocument) return
+      if (hitNode.isDocument) return;
       console.log("hits", hitNode?.id.toString());
+      // calculate drop hint position
+      const to = findDropPosition(e, hitNode);
+      const hitElement = app.store.element(to.nodeId);
+      const { top, bottom, left, right, x, y } = elementBound(hitElement!);
+      const width = right - left;
+      const height = bottom - top;
+
+      if (to.isBefore) {
+        console.log(x, y);
+        setDropHintStyle({
+          top: top,
+          left: left,
+          width,
+          height: 2,
+        });
+      } else {
+        setDropHintStyle({
+          top: bottom,
+          left: left,
+          width,
+          height: 2,
+        });
+      }
+
       setShowDropHint(true);
     },
-    [findHitNode]
+    [app.store, findDropPosition, findHitNode]
   );
 
   const onDropNode = useCallback(
     (e: DndEvent) => {
       const { node } = e;
-      const hitNode = findHitNode(e)
+      const hitNode = findHitNode(e);
       if (!hitNode) return;
-      if (hitNode.isDocument) return
+      if (hitNode.isDocument) return;
       if (hitNode?.id.eq(node.id)) {
         // hide drop hint
         setShowDropHint(false);
@@ -138,18 +177,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
       // setShowDropHint(false);
       const from = nodeLocation(node)!;
-      let to = Point.toAfter(hitNode);
-      const hitElement = app.store.element(hitNode.firstChild!.id!);
-      const {top, bottom} = elementBound(hitElement!);
-      if (e.event.clientY < top + (bottom - top) / 2) {
-        to = Point.toBefore(hitNode);
-      }
-
+      const to = findDropPosition(e, hitNode);
       app.enable(() => {
         app.tr.move(from, to, node.id)?.dispatch();
-      })
+      });
     },
-    [app, findHitNode]
+    [app, findDropPosition, findHitNode]
   );
 
   const onDragMove = useCallback(
@@ -202,7 +235,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     onDragStart,
     onDragMove,
     onDragEnd,
-    onMouseUp,
+    onMouseUp
   });
 
   const handleAddNode = (e) => {
@@ -260,12 +293,13 @@ export function DraggableHandle(props: FastDragHandleProps) {
         <PiDotsSixVerticalBold />
       </div>
       {createPortal(<>{DragRectComp}</>, document.body)}
-      {/*{createPortal(*/}
-      {/*  <>*/}
-      {/*    <div className="carbon-drop-hint" style={{ display: showDropHint ? 'flex': 'none' }}/>*/}
-      {/*  </>,*/}
-      {/*  document.body*/}
-      {/*)}*/}
+      {createPortal(
+        <>
+          <div className="carbon-drop-hint"
+               style={{ display: showDropHint ? "flex" : "none", ...dropHintStyle, position: "absolute" }} />
+        </>,
+        document.body
+      )}
     </div>
   );
 }
