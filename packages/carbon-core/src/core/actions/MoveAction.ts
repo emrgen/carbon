@@ -86,7 +86,6 @@ export class MoveAction implements CarbonAction {
 		if (to.isBefore) {
 			removeFromOldParent();
 			parent.insertBefore(refNode, moveNodes);
-			moveNodes.forEach(n => app.store.delete(n))
 			tr.updated(parent);
 			return NULL_ACTION_RESULT;
 		}

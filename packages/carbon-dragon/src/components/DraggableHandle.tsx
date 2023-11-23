@@ -19,6 +19,7 @@ import { HiOutlinePlus } from "react-icons/hi";
 import { PiDotsSixVerticalBold } from "react-icons/pi";
 import { useDndContext } from "../hooks";
 import { elementBound } from "../core/utils";
+import { isNestableNode } from "@emrgen/carbon-blocks";
 
 export interface FastDragHandleProps {
   node: Optional<Node>;
@@ -31,6 +32,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const { node, style } = props;
   const [show, setShow] = useState(false);
   const [showDropHint, setShowDropHint] = useState(false);
+  const [dropHintStyle, setDropHintStyle] = useState({} as any);
 
   const dnd = useDndContext();
 
@@ -43,12 +45,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
     disabled: !node,
     ref,
     activationConstraint: {
-      distance: 4,
-    },
+      distance: 4
+    }
   });
 
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
-    overlay: true,
+    overlay: true
   });
 
   useEffect(() => {
@@ -77,9 +79,11 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const onDragStart = useCallback((e: DndEvent) => {
     if (e.id === CarbonDragHandleId) {
       // e.event.stopPropagation();
-      // app.tr.selectNodes([])?.dispatch();
+      app.enable(() => {
+        app.tr.selectNodes([])?.dispatch();
+      });
     }
-  }, []);
+  }, [app]);
 
   const findHitNode = useCallback(
     (e: DndEvent) => {
@@ -88,7 +92,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         minX: x,
         minY: y,
         maxX: x,
-        maxY: y,
+        maxY: y
       };
 
       const hits = dnd.droppables.collides(bound);
@@ -97,33 +101,101 @@ export function DraggableHandle(props: FastDragHandleProps) {
     [dnd.droppables]
   );
 
+  const findDropPosition = useCallback(
+    (e: DndEvent, hitNode: Node): Optional<Point> => {
+      const firstChild = hitNode.firstChild;
+      const hitTitleElement = app.store.element(firstChild!.id!);
+      const hitElement = app.store.element(hitNode!.id!);
+      const { top, bottom } = elementBound(hitTitleElement!);
+      const elBound = elementBound(hitElement!);
+
+      let to: Optional<Point> = null;
+      if (e.event.clientY < bottom) {
+        if (e.event.clientY < top + (bottom - top) / 2) {
+          to = Point.toBefore(hitNode);
+        } else {
+          if (e.event.clientX > elBound.left + 30 && isNestableNode(hitNode)) {
+            to = Point.toAfter(firstChild?.id!);
+          } else {
+            to = Point.toAfter(hitNode);
+          }
+        }
+      } else {
+        to = Point.toAfter(hitNode);
+      }
+
+      return to;
+    },
+    [app.store]
+  );
+
   const onDragOverNode = useCallback(
     (e: DndEvent) => {
       const { node } = e;
-      const hitNode = findHitNode(e)
-      if (!hitNode) return;
+      const hitNode = findHitNode(e);
+      console.log("hit node", hitNode?.id.toString());
+      setShowDropHint(false);
+      if (!hitNode) {
+        return;
+      }
       if (hitNode?.id.eq(node.id)) {
-        // hide drop hint
-        setShowDropHint(false);
         return;
       }
 
-      if (hitNode.isDocument) return
-      console.log("hits", hitNode?.id.toString());
+      if (hitNode.isDocument) {
+        return;
+      }
+      const isChildren = hitNode.chain.some((n) => n.eq(node));
+      if (isChildren) {
+        return;
+      }
+
+      // console.log("hits", hitNode?.id.toString());
+      const to = findDropPosition(e, hitNode);
+      const from = nodeLocation(node)!;
+      if (!to || from.eq(to) || to.isBefore && hitNode.prevSibling?.id.eq(node.id)) {
+        return;
+      }
+
+      const hitElement = app.store.element(to.nodeId);
+
+      const { top, bottom, left, right, x, y } = elementBound(hitElement!);
+      const width = right - left;
+      const height = bottom - top;
+      const offset = !to.nodeId.eq(hitNode.id) && hitNode.name == 'section' ? 30 : 0;
+
+      if (to.isBefore) {
+        console.log(x, y);
+        setDropHintStyle({
+          top: top - 1,
+          left: left + offset,
+          width,
+          height: 2,
+        });
+      } else {
+        setDropHintStyle({
+          top: bottom + 1,
+          left: left + offset,
+          width,
+          height: 2,
+        });
+      }
+
       setShowDropHint(true);
     },
-    [findHitNode]
+    [app.store, findDropPosition, findHitNode]
   );
 
   const onDropNode = useCallback(
     (e: DndEvent) => {
       const { node } = e;
-      const hitNode = findHitNode(e)
+      const hitNode = findHitNode(e);
+      setShowDropHint(false);
+
       if (!hitNode) return;
-      if (hitNode.isDocument) return
+      if (hitNode.isDocument) return;
       if (hitNode?.id.eq(node.id)) {
         // hide drop hint
-        setShowDropHint(false);
         return;
       }
 
@@ -138,18 +210,16 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
       // setShowDropHint(false);
       const from = nodeLocation(node)!;
-      let to = Point.toAfter(hitNode);
-      const hitElement = app.store.element(hitNode.firstChild!.id!);
-      const {top, bottom} = elementBound(hitElement!);
-      if (e.event.clientY < top + (bottom - top) / 2) {
-        to = Point.toBefore(hitNode);
+      const to = findDropPosition(e, hitNode);
+      if (!to || from.eq(to) || to.isBefore && hitNode.prevSibling?.id.eq(node.id)) {
+        return;
       }
 
       app.enable(() => {
-        app.tr.move(from, to, node.id)?.dispatch();
-      })
+        app.tr.move(from, to, node.id).selectNodes(node.id)?.dispatch();
+      });
     },
-    [app, findHitNode]
+    [app, findDropPosition, findHitNode]
   );
 
   const onDragMove = useCallback(
@@ -202,7 +272,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     onDragStart,
     onDragMove,
     onDragEnd,
-    onMouseUp,
+    onMouseUp
   });
 
   const handleAddNode = (e) => {
@@ -260,12 +330,13 @@ export function DraggableHandle(props: FastDragHandleProps) {
         <PiDotsSixVerticalBold />
       </div>
       {createPortal(<>{DragRectComp}</>, document.body)}
-      {/*{createPortal(*/}
-      {/*  <>*/}
-      {/*    <div className="carbon-drop-hint" style={{ display: showDropHint ? 'flex': 'none' }}/>*/}
-      {/*  </>,*/}
-      {/*  document.body*/}
-      {/*)}*/}
+      {createPortal(
+        <>
+          <div className="carbon-drop-hint"
+               style={{ display: showDropHint ? "flex" : "none", ...dropHintStyle, position: "absolute" }} />
+        </>,
+        document.body
+      )}
     </div>
   );
 }
