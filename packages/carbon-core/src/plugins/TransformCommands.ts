@@ -913,7 +913,8 @@ export class TransformCommands extends BeforePlugin {
     }
 
     // console.log('XXX', selection, blocks.map(n => n.id.toString()));
-
+    // console.log('XXX', after?.toString());
+    
     const tr = app.tr
       .selectNodes([])
       .add(deleteActions)

@@ -35,6 +35,14 @@ const preventDefaultEvents = {
 			return true;
 		}
 
+		if (e.key === 'input') {
+			return true;
+		}
+
+		if (e.key === 'beforeInput') {
+			return true;
+		}
+
 		return false;
 	},
 };

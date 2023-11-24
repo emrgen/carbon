@@ -34,7 +34,7 @@ export class NodeStore {
 	get(entry: NodeId | HTMLElement): Optional<Node> {
 		const nodeId = entry;
 		if (nodeId instanceof NodeId) {
-			return this.nodeMap.get(nodeId.id) ?? this.deletedNodeMap.get(nodeId.id);
+			return this.nodeMap.get(nodeId.id) //?? this.deletedNodeMap.get(nodeId.id);
 		} else {
 			return this.elementToNodeMap.get(entry as HTMLElement);
 		}
@@ -42,7 +42,7 @@ export class NodeStore {
 
 	put(node: Node) {
 		if (node.deleted) {
-			this.deletedNodeMap.delete(node.id.id);
+			this.deletedNodeMap.set(node.id.id, node);
 			this.nodeMap.delete(node.id.id);
 		} else {
 			this.deletedNodeMap.delete(node.id.id);
@@ -80,17 +80,18 @@ export class NodeStore {
 	}
 
 	// connect the node to the rendered HTML element
-	register(node: Node, el: HTMLElement) {
+	register(node: Node, el: Optional<HTMLElement>) {
 		if (!el) {
 			console.error(`Registering empty dom node for ${node.id.toString()}`)
 			return
 		}
-		const { id: nodeId } = node
-		const { id } = nodeId
+		const { id: nodeId } = node;
+		const { id } = nodeId;
 		// remove old reference first
 		// other part of the id will eventually be added while rendering
-		this.delete(node)
+		this.delete(node);
 		// console.log('register node', node.id.toString());
+		this.deletedNodeMap.delete(id);
 		this.nodeMap.set(id, node);
 		this.elementMap.set(id, el);
 		this.elementToNodeMap.set(el, node);
@@ -98,7 +99,6 @@ export class NodeStore {
 
 	delete(node: Node) {
 		// console.log('delete node', node.id.toString());
-		
 		const { id: nodeId } = node
 		const { id } = nodeId
 		const el = this.elementMap.get(id);
@@ -111,10 +111,10 @@ export class NodeStore {
 		this.deletedNodeMap.set(id, node);
 	}
 
-	deleted(nodeId: NodeId): Optional<Node> {
-		const { id } = nodeId
-		return this.deletedNodeMap.get(id);
-	}
+	// deleted(nodeId: NodeId): Optional<Node> {
+	// 	const { id } = nodeId
+	// 	return this.deletedNodeMap.get(id);
+	// }
 
 	resolve(el: any): Optional<Node> {
 		if (!el) return

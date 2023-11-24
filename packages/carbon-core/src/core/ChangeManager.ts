@@ -129,7 +129,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	}
 
 	private updateContent() {
-		console.groupCollapsed('syncing:  content');
+		console.group('syncing:  content');
 		// console.group('syncing: content')
 		const { updatedNodeIds } = this.state.runtime;
 		const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
@@ -186,7 +186,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		}
 		// this.app.enable();
 
-		console.groupCollapsed('syncing: selection');
+		console.group('syncing: selection');
 
 		this.sm.syncSelection();
 		this.app.emit(EventsOut.selectionUpdated, this.state.selection);
