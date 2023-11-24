@@ -5,7 +5,7 @@ import { EventEmitter } from 'events';
 import { querySelector } from '../utils/domElement';
 import { CarbonState } from './CarbonState';
 import { ChangeManager } from './ChangeManager';
-import { EventsIn } from './Event';
+import { EventsIn, EventsOut } from './Event';
 import { EventManager } from './EventManager';
 import { NodeStore } from './NodeStore';
 import { PinnedSelection } from './PinnedSelection';
@@ -41,6 +41,7 @@ export class Carbon extends EventEmitter {
 
 	enabled: boolean;
 	dragging: boolean;
+	ready: boolean;
 
 	_element: Optional<HTMLElement>;
 	_portal: Optional<HTMLElement>;
@@ -66,6 +67,7 @@ export class Carbon extends EventEmitter {
 
 		this.enabled = true;
 		this.dragging = false;
+		this.ready = false;
 		this.ticks = [];
 
 		// init plugins
@@ -74,6 +76,11 @@ export class Carbon extends EventEmitter {
 
 	plugin(name: string): Optional<CarbonPlugin> {
 		return this.pm.plugin(name);
+	}
+
+	mounted() {
+		this.ready = true;
+		this.emit(EventsOut.mounted);
 	}
 
 	get content(): Node {

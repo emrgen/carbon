@@ -178,12 +178,15 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	}
 
 	private updateSelection(cb: Function) {
+		if (!this.app.ready) {
+			return
+		}
 		if (!this.isContentSynced) {
 			throw new Error("Trying to sync selection with dirty content");
 		}
 		// this.app.enable();
 
-		console.group('syncing: selection');
+		console.groupCollapsed('syncing: selection');
 
 		this.sm.syncSelection();
 		this.app.emit(EventsOut.selectionUpdated, this.state.selection);

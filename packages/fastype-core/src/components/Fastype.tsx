@@ -5,6 +5,7 @@ import {
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { BlockMenu } from "@emrgen/fastype-utils";
 import { FastypeCursor } from "./FastypeCursor";
+import { useEffect } from 'react';
 
 export interface FastypeProps {
   app: Carbon;
@@ -12,6 +13,10 @@ export interface FastypeProps {
 
 export function Fastype(props: FastypeProps) {
   const { app } = props;
+
+  useEffect(() => {
+    app.mounted()
+  }, [app]);
 
   return (
     <ChakraProvider>

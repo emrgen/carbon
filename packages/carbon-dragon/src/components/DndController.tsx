@@ -71,7 +71,7 @@ export function DndController() {
         setDragHandlePosition({
           left: bound.left - portalPosition.x - 50,
           top: bound.top - portalPosition.y + 4,
-          width: 50,
+          width: 0,
           height: 20,
         });
       } else {

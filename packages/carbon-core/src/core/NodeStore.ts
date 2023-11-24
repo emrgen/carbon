@@ -60,8 +60,23 @@ export class NodeStore {
 		}
 	}
 
+	// get the rendered HTML element for the node
 	element(nodeId: NodeId): Optional<HTMLElement> {
-		return this.elementMap.get(nodeId.id)
+		const el = this.elementMap.get(nodeId.id)
+		if (el) {
+			return el
+		}
+
+		// expensive operation but should be called when the node is not in the store yet
+		const domEl = document.querySelector(`[data-id="${nodeId.toString()}"]`) as HTMLElement;
+		const node = this.get(nodeId);
+		if (domEl && node) {
+			this.register(node, domEl);
+		}
+
+		console.error(`NodeStore.element: element not found for ${nodeId.toString()}`);
+
+		return domEl;
 	}
 
 	// connect the node to the rendered HTML element
@@ -75,7 +90,7 @@ export class NodeStore {
 		// remove old reference first
 		// other part of the id will eventually be added while rendering
 		this.delete(node)
-		console.log('register node', node.id.toString());
+		// console.log('register node', node.id.toString());
 		this.nodeMap.set(id, node);
 		this.elementMap.set(id, el);
 		this.elementToNodeMap.set(el, node);
