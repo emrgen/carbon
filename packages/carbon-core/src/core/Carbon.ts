@@ -29,6 +29,7 @@ export class Carbon extends EventEmitter {
 	private readonly rm: RenderManager;
 	private readonly tm: TransactionManager;
 
+
 	// for external application use
 	bus: CarbonMessageBus = new CarbonMessageBus();
 
@@ -39,6 +40,7 @@ export class Carbon extends EventEmitter {
 	change: ChangeManager;
 
 	enabled: boolean;
+	dragging: boolean;
 
 	_element: Optional<HTMLElement>;
 	_portal: Optional<HTMLElement>;
@@ -63,6 +65,7 @@ export class Carbon extends EventEmitter {
 		this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
 
 		this.enabled = true;
+		this.dragging = false;
 		this.ticks = [];
 
 		// init plugins

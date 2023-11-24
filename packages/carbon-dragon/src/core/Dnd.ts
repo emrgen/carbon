@@ -70,6 +70,7 @@ export class Dnd extends EventEmitter {
 	onDragStart(e: DndEvent) {
 		// console.log('drag-start');
 		this.emit('drag:start', e);
+		this.app.dragging = true
 		this.isDragging = true;
 		this.draggedNode = e.node;
 	}
@@ -81,6 +82,7 @@ export class Dnd extends EventEmitter {
 
 	onDragEnd(e: DndEvent) {
 		// console.log('drag-end');
+		this.app.dragging = false;
 		this.isDragging = false;
 		this.draggedNode = null;
 		this.emit('drag:end', e)

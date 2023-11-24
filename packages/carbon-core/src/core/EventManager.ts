@@ -8,6 +8,7 @@ import { ActionOrigin } from "./actions/types";
 import { EventsIn } from "./Event";
 import { p12, p14, pad } from "./Logger";
 import { last } from "lodash";
+import { preventAndStop } from "../utils/event";
 
 const selectionKeys: string[] = [
 	'left',
@@ -57,15 +58,21 @@ export class EventManager {
 		// without focus the editor does not process any event
 		if (!app.enabled) {
 			if (type === EventsIn.selectstart) {
-				// event.preventDefault();
+				event.preventDefault();
 				console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'editor is disabled for events');
 			}
 			console.log('app: disabled', ' ignored event', type);
 			return
 		}
 
+		if (type == EventsIn.selectstart && app.dragging) {
+			console.log('select start', app.dragging);
+			preventAndStop(event);
+			return
+		}
+
 		if (type !== EventsIn.selectionchange && app.state.selectedNodeIds.size > 0) {
-			console.log('selected nodes', app.state.selectedNodeIds);
+			// console.log('selected nodes', app.state.selectedNodeIds);
 			// console.log(type, event);
 
 			const lastNode = last(app.state.selectedNodeIds.map(id => app.store.get(id))) as Node;
@@ -81,9 +88,7 @@ export class EventManager {
 				origin: EventOrigin.dom,
 			});
 
-			console.log('onEvent', editorEvent);
-			
-
+			// console.log('onEvent', editorEvent);
 			this.pm.onEvent(editorEvent);
 			return
 		}

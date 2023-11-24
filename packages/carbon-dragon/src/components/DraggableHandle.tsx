@@ -45,12 +45,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
     disabled: !node,
     ref,
     activationConstraint: {
-      distance: 4
+      distance: 2
     }
   });
 
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
-    overlay: true
+    overlay: false
   });
 
   useEffect(() => {
@@ -280,21 +280,13 @@ export function DraggableHandle(props: FastDragHandleProps) {
         e.event.preventDefault();
       } else {
         if (node) {
-          const after = PinnedSelection.fromPin(Pin.toStartOf(node)!);
           app.parkCursor();
           app.tr
-            .select(
-              PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
-              ActionOrigin.NoSync
-            )
+            // .select(
+            //   PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
+            //   ActionOrigin.NoSync
+            // )
             .selectNodes(node.id)
-
-            // .then((app) => {
-            //   return app.tr.select(
-            //     PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
-            //     ActionOrigin.UserInput
-            //   );
-            // })
             ?.dispatch();
         }
       }

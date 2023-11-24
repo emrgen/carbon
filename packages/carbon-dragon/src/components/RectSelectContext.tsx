@@ -22,8 +22,11 @@ export function RectSelectContext(props) {
   useEffect(() => {
     const onHideCursor = () => {
       setIsSelecting(true);
+      console.log('hide cursor');
+
     }
     const onShowCursor = () => {
+      console.log("show cursor");
       setIsSelecting(false);
     }
 
@@ -43,9 +46,12 @@ export function RectSelectContext(props) {
       if (app.blockSelection.size) {
         setIsSelecting(true);
       } else {
-        setIsSelecting(false);
+        if (!tr.app.dragging) {
+          setIsSelecting(false);
+        }
       }
     };
+
     app.on("transaction", onTransaction);
     return () => {
       app.off("transaction", onTransaction);
@@ -56,7 +62,7 @@ export function RectSelectContext(props) {
     (e: DndEvent) => {
       if (e.id === RectSelectAreaId) {
         rectSelector.onDragStart(e);
-        // app.disable();
+        setIsSelecting(true);
       }
 
       if (e.id === CarbonDragHandleId) {
@@ -84,13 +90,16 @@ export function RectSelectContext(props) {
         rectSelector.onDragEnd(e);
         // app.enable();
         onDragRectStop(e);
+        if (!app.blockSelection.size) {
+          setIsSelecting(false);
+        }
       }
 
       if (e.id === CarbonDragHandleId) {
         setIsDragging(false);
       }
     },
-    [onDragRectStop, rectSelector]
+    [app.blockSelection.size, onDragRectStop, rectSelector]
   );
 
   useDndMonitor({
@@ -107,7 +116,7 @@ export function RectSelectContext(props) {
     const onMouseUp = (e) => {
       // if there is a block selection, keep the rect-select active
       if (app.blockSelection.size) return;
-      setIsSelecting(false);
+      // setIsSelecting(false);
     };
 
     rectSelector.on("mouse:down", onMouseDown);
