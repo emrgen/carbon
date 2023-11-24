@@ -65,7 +65,7 @@ export class EventManager {
 		}
 
 		if (type !== EventsIn.selectionchange && app.state.selectedNodeIds.size > 0) {
-			// console.log('selected nodes', app.state.selectedNodeIds);
+			console.log('selected nodes', app.state.selectedNodeIds);
 			// console.log(type, event);
 
 			const lastNode = last(app.state.selectedNodeIds.map(id => app.store.get(id))) as Node;
@@ -80,6 +80,9 @@ export class EventManager {
 				selection: PinnedSelection.default(app.content),
 				origin: EventOrigin.dom,
 			});
+
+			console.log('onEvent', editorEvent);
+			
 
 			this.pm.onEvent(editorEvent);
 			return

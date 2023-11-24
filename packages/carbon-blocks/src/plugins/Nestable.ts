@@ -222,8 +222,14 @@ export class NestablePlugin extends AfterPlugin {
 				console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
 
 				const { selection} = app;
-				const container = selection.start.node.closest(n => n.isContainerBlock);
+				const container = node.closest(n => n.isContainerBlock);
+				console.log(container?.name, node.name, node.type.isBlock && !node.type.isTextBlock);
+				console.log(node.chain.map(n => n.name).join(' > '));
+				
+
 				const listNode = isNestableNode(container!) ? container : undefined;
+				console.log(listNode);
+				
 				if (!listNode) return
 				const prevNode = listNode.prevSibling;
 				if (!prevNode || !isNestableNode(prevNode)) return
@@ -238,6 +244,8 @@ export class NestablePlugin extends AfterPlugin {
 					// 		?.dispatch();
 					// } else {
 					// }
+					console.log('move listNode to previous listNode');
+
 					app.cmd.nestable.wrap(listNode, prevNode)?.dispatch();
 				} else {
 				}

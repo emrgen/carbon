@@ -75,7 +75,7 @@ export class NodeStore {
 		// remove old reference first
 		// other part of the id will eventually be added while rendering
 		this.delete(node)
-		// console.log('register node', node.id.toString());
+		console.log('register node', node.id.toString());
 		this.nodeMap.set(id, node);
 		this.elementMap.set(id, el);
 		this.elementToNodeMap.set(el, node);

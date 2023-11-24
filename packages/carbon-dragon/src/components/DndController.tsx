@@ -116,7 +116,7 @@ export function DndController() {
       setIsDragging(true);
       setDraggedNode(e.node);
       setShowDragHandle(true);
-      app.disable()
+      app.disable();
       dnd.draggedNodeId = e.node.id;
       showOverlay(e.id.toString());
     },
@@ -126,7 +126,7 @@ export function DndController() {
   const onDragEnd = useCallback(
     (e: DndEvent) => {
       resetDragHandle();
-      app.enable()
+      app.enable();
       hideOverlay();
     },
     [resetDragHandle, app, hideOverlay]

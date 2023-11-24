@@ -44,7 +44,7 @@ export class SelectionManager {
 			return
 		}
 
-		const { app } = this
+		const { app } = this;
 		// const { head, tail } = after.pin(editor)!;
 		// const selectedNodes = this.state.selectedNodeIds.map(id => this.store.get(id)) as Node[];
 		// selectedNodes.forEach((n) => {
@@ -86,7 +86,7 @@ export class SelectionManager {
 		}
 
 		// console.log('synced selection from origin', origin)
-		this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange);
+		this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange && origin !== ActionOrigin.NoSync);
 		// console.log('###', this.app.selection.toString(), selection.toString());
 		this.updateFocusPlaceholder(this.state.prevSelection, selection);
 		this.app.emit(EventsOut.selectionChanged, selection);

@@ -234,7 +234,17 @@ export function DraggableHandle(props: FastDragHandleProps) {
       }
 
       app.enable(() => {
-        app.tr.move(from, to, node.id).selectNodes(node.id)?.dispatch();
+        app.parkCursor();
+
+        const {tr} = app;
+                tr.move(from, to, node.id).selectNodes(node.id);
+        const focusable = node.find((n) => n.isFocusable);
+        if (!focusable) {
+          const after = PinnedSelection.fromPin(Pin.toStartOf(focusable!)!);
+          tr.select(after, ActionOrigin.NoSync);
+        }
+
+        tr?.dispatch();
       });
     },
     [app, findDropPosition, findHitNode]
@@ -270,15 +280,21 @@ export function DraggableHandle(props: FastDragHandleProps) {
         e.event.preventDefault();
       } else {
         if (node) {
+          const after = PinnedSelection.fromPin(Pin.toStartOf(node)!);
           app.parkCursor();
           app.tr
+            .select(
+              PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
+              ActionOrigin.NoSync
+            )
             .selectNodes(node.id)
-            .then((app) => {
-              return app.tr.select(
-                PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
-                ActionOrigin.UserInput
-              );
-            })
+
+            // .then((app) => {
+            //   return app.tr.select(
+            //     PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
+            //     ActionOrigin.UserInput
+            //   );
+            // })
             ?.dispatch();
         }
       }
@@ -286,17 +302,39 @@ export function DraggableHandle(props: FastDragHandleProps) {
     [app]
   );
 
+  const onMouseDown = useCallback(
+    (node: Node, e) => {
+      if (e.id !== CarbonDragHandleId) return;
+      // app.focus();
+      // app.parkCursor();
+      // app.tr
+      //   .select(
+      //     PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
+      //     ActionOrigin.NoSync
+      //   )
+      //   .then((app) => {
+      //     return app.tr.select(
+      //       PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
+      //       ActionOrigin.UserInput
+      //     );
+      //   })
+      //   .dispatch();
+    },
+    []
+  );
+
   useDndMonitor({
     onDragStart,
     onDragMove,
     onDragEnd,
     onMouseUp,
+    onMouseDown,
     options: {
       throttle: 100,
     }
   });
 
-  const handleAddNode = (e) => {
+  const handleInsertNode = (e) => {
     preventAndStop(e);
 
     if (!node) return;
@@ -337,7 +375,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     >
       <div
         className="carbon-add-handle"
-        onClick={handleAddNode}
+        onClick={handleInsertNode}
         onMouseDown={preventAndStop}
       >
         <HiOutlinePlus />

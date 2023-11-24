@@ -8,8 +8,8 @@ interface FastDndMonitor {
 	onDragStart?(e: DndEvent);
 	onDragMove?(e: DndEvent);
 	onDragEnd?(e: DndEvent);
-	onMouseDown?(node: Node, e: MouseEvent);
-	onMouseUp?(node: Node, e: DndEvent, isDragging: boolean);
+	onMouseDown?(node: Node, e: MouseEvent): void;
+	onMouseUp?(node: Node, e: DndEvent, isDragging: boolean): void;
 	options?: {
 		throttle: number
 	}

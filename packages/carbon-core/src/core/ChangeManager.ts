@@ -8,6 +8,7 @@ import { SelectionManager } from './SelectionManager';
 import { TransactionManager } from './TransactionManager';
 import { EventsOut } from './Event';
 import { Transaction } from './Transaction';
+import { ActionOrigin } from './actions';
 
 export enum NodeChangeType {
 	update = 'update',
