@@ -275,9 +275,9 @@ export class Transaction {
 		// const prevDocVersion = editor.doc?.updateCount;
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
-				console.groupCollapsed('Transaction (runtime)');
+				console.group('Transaction (runtime)');
 			} else {
-				console.groupCollapsed('Transaction');
+				console.group('Transaction');
 			}
 
 			for (const action of this.actions) {

@@ -9,7 +9,7 @@ export const generateActionId = () => {
 let textId = 0
 
 export const generateTextId = () => {
-	return String(++textId)
+	return uuidv4().slice(-10)
 }
 
 let blockId = 0
