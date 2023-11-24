@@ -183,7 +183,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		}
 		// this.app.enable();
 
-		console.groupCollapsed('syncing: selection');
+		console.group('syncing: selection');
 
 		this.sm.syncSelection();
 		this.app.emit(EventsOut.selectionUpdated, this.state.selection);

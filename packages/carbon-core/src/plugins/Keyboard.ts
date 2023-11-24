@@ -376,14 +376,15 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		const { app, node } = ctx;
 		const { blockSelection } = app;
 		if (blockSelection.isEmpty) return
+		ctx.event.preventDefault();
 
 		const { blocks: nodes } = blockSelection;
 		const firstNode = last(nodes) as Node;
 		const block = nextSelectableBlock(firstNode)
-		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
-		if (!block) return
+		if (!block) {
+			return
+		}
 
-		ctx.event.preventDefault();
 		app.tr
 			.selectNodes([...nodes.map(n => n.id), block.id])
 			.dispatch();
@@ -544,7 +545,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			return
 		}
 
-		const block = nextSelectableBlock(node)
+		const block = nextSelectableBlock(node, true)
 		console.log('nextContainerBlock', block);
 		if (!block) return
 
@@ -552,7 +553,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 	}
 }
 
-const prevSelectableBlock = (node: Node) => {
+const prevSelectableBlock = (node: Node, within = false) => {
 	const block = node.chain.find(n => n.isContainerBlock) as Node;
 	const { prevSibling } = block
 	if (prevSibling?.isContainerBlock) {
@@ -570,15 +571,17 @@ const prevSelectableBlock = (node: Node) => {
 	return block?.prev(n => n.isBlockSelectable);
 }
 
-const nextSelectableBlock = node => {
-	const block: Optional<Node> = node.chain.find(n => n.isBlockSelectable);
-	const found = block?.find(n => {
-		return !n.eq(block) && !n.isCollapseHidden && n.isBlockSelectable
-	}, { order: 'pre' })
+const nextSelectableBlock = (node: Node, within = false) => {
+	if (within) {
+		const block: Optional<Node> = node.chain.find(n => n.isBlockSelectable);
+		const found = block?.find(n => {
+			return !n.eq(block) && !n.isCollapseHidden && n.isBlockSelectable
+		}, { order: 'pre' })
 
-	if (found) return found;
+		if (found) return found;
+	}
 
-	return block?.next(n => n.isBlockSelectable, { order: 'pre' });
+	return node?.next(n => n.isBlockSelectable, { order: 'pre' });
 }
 
 

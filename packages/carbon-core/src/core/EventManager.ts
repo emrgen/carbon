@@ -129,6 +129,7 @@ export class EventManager {
 			origin: EventOrigin.dom,
 		});
 
+		this.pm.onEvent(editorEvent);
 
 		let groupOpen = false;
 		if (type !== EventsIn.keyDown) {
@@ -145,13 +146,12 @@ export class EventManager {
 				// console.groupCollapsed('onEvent:', event.type);
 				// groupOpen = true;
 			} else {
-				console.groupCollapsed('onEvent:', event.type);
+				console.groupCollapsed('onEvent:', event.type, editorEvent);
 				groupOpen = true;
 			}
 		} else {
 			// console.log('onEvent:', event);
 		}
-		this.pm.onEvent(editorEvent);
 
 		if (groupOpen) {
 			console.groupEnd();

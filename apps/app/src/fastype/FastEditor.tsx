@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import { Fastype } from "@emrgen/fastype-core";
 import {
+  Transaction,
   extensionPresets,
   useCreateCachedCarbon,
   useCreateCarbon,
@@ -106,6 +107,21 @@ export function FastEditor() {
   const handleOnChange = (value, event) => {
     console.log(value);
   };
+
+  useEffect(() => {
+    const onTransaction = (tr: Transaction) => {
+      const nodes = tr.app.content.descendants();
+      const els = nodes.map((n) => ({id: n.id.toString(), el: tr.app.store.element(n.id)}));
+      if (els.some((n) => !n.el)) {
+        console.error("missing node", els);
+      }
+    }
+
+    app.on("transaction", onTransaction);
+    return () => {
+      app.off("transaction", onTransaction);
+    };
+  }, [app]);
 
   return (
     <Stack h="full"  w="full">

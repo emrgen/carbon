@@ -20,6 +20,25 @@ const defaultEvents: EventsIn[] = [
 	EventsIn.paste,
 ];
 
+// prevent default for some events
+const preventDefaultEvents = {
+	[EventsIn.keyDown]: (e) => {
+		if (e.key === 'Enter') {
+			return true;
+		}
+
+		if (e.key === 'Backspace') {
+			return true;
+		}
+
+		if (e.key === 'Delete') {
+			return true;
+		}
+
+		return false;
+	},
+};
+
 
 export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 	const app = useCarbon();
@@ -30,6 +49,9 @@ export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 				...o,
 				[camelCase(`on-${eventType}`)]: (event: Event) => {
 					// console.log('xxx', eventType, event);
+					if (preventDefaultEvents[eventType]?.(event)) {
+						event.preventDefault();
+					}
 
 					app.onEvent(eventType, event);
 				},

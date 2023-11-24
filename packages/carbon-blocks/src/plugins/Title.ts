@@ -51,12 +51,11 @@ export class TitlePlugin extends NodePlugin {
 		return {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				// ctx.event.preventDefault();
 				this.onTextInsert(ctx);
 			},
 			input: (ctx: EventContext<KeyboardEvent>) => {
-				// console.log('input', ctx.event);
-				// this.onTextInsert(ctx);
+				console.log('input', ctx.event);
+				preventAndStopCtx(ctx);
 			},
 			// keyDown: (ctx) => {
 			//  ctx.event.preventDefault()

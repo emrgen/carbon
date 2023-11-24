@@ -8,6 +8,7 @@ import { generateActionId } from "./utils";
 import { NodeIdSet } from '../BSet';
 import { NodeAttrs } from '../NodeAttrs';
 import { Optional } from '@emrgen/types';
+import { cloneDeep } from 'lodash';
 
 
 export class UpdateAttrs implements CarbonAction {
@@ -38,7 +39,7 @@ export class UpdateAttrs implements CarbonAction {
       return NULL_ACTION_RESULT
     }
 
-    this.prevAttrs = node.attrs;
+    this.prevAttrs = cloneDeep(node.attrs);
     node.updateAttrs(this.attrs);
     tr.updated(node);
 

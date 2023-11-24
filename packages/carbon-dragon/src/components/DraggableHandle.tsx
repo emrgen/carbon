@@ -90,9 +90,9 @@ export function DraggableHandle(props: FastDragHandleProps) {
       const { clientX: x, clientY: y } = e.event;
       const bound = {
         minX: x - 5,
-        minY: y - 5,
+        minY: y - 10,
         maxX: x + 5,
-        maxY: y + 5,
+        maxY: y + 10,
       };
 
       const hits = dnd.droppables.collides(bound);
@@ -238,9 +238,9 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
         const {tr} = app;
                 tr.move(from, to, node.id).selectNodes(node.id);
-        const focusable = node.find((n) => n.isFocusable);
-        if (!focusable) {
-          const after = PinnedSelection.fromPin(Pin.toStartOf(focusable!)!);
+        const textBlock = node.find((n) => n.isTextBlock);
+        if (textBlock) {
+          const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock!)!);
           tr.select(after, ActionOrigin.NoSync);
         }
 

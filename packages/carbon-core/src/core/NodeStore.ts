@@ -82,6 +82,8 @@ export class NodeStore {
 	}
 
 	delete(node: Node) {
+		// console.log('delete node', node.id.toString());
+		
 		const { id: nodeId } = node
 		const { id } = nodeId
 		const el = this.elementMap.get(id);

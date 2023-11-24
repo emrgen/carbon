@@ -15,8 +15,8 @@ export class NodeAttrs {
 
 		const node = merge(cloneDeep(this.node), attrs.node);
 		return new NodeAttrs({
-			html: removeEmpty(html),
-			node: removeEmpty(node),
+			html,
+			node,
 		});
 	}
 
