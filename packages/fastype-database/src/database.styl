@@ -1,0 +1,23 @@
+[data-name=board]
+  position relative
+  margin 10px 0
+  [data-type=content] [data-name=title]
+    font-size 24px
+    font-weight bold
+
+.board-columns
+  display flex
+  width: 100%;
+  overflow auto
+  > [data-type="children"]
+    display flex
+    width: 100%;
+    gap 14px
+[data-name=boardColumn]
+  min-width 320px
+  background: #eee;
+  min-height 300px
+  [data-type=content] [data-name=title]
+    font-size 18px
+    font-weight bold
+    padding 10px

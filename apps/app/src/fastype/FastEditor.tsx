@@ -16,7 +16,7 @@ import {
 } from "@emrgen/carbon-blocks";
 import { carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { fastypeBlocks } from "@emrgen/fastype-blocks";
-import Editor, { DiffEditor, useMonaco, loader } from "@monaco-editor/react";
+import { fastypeDatabase } from "@emrgen/fastype-database";
 import { Box, Spinner, Stack } from "@chakra-ui/react";
 import TimeTravel from "./TimeTravel";
 import { json } from "stream/consumers";
@@ -27,6 +27,7 @@ const extensions = [
   blockPresets,
   carbonUtilPlugins,
   fastypeBlocks,
+  fastypeDatabase,
 ];
 
 const data = {

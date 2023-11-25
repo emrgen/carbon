@@ -52,6 +52,10 @@ export abstract class CarbonPlugin {
 		return {}
 	}
 
+	default(app: Carbon): Optional<Node> {
+		return null;
+	}
+
 	// returned commands will be
 	commands(): Record<string, Function> {
 		return {}

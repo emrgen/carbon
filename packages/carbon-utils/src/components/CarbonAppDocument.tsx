@@ -22,7 +22,7 @@ export function CarbonApp(props: CarbonAppProps) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     app.focus();
-    app.emit("app:mounted");
+    app.mounted()
   }, [app]);
 
   useEffect(() => {
