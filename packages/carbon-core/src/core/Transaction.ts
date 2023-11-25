@@ -70,6 +70,8 @@ export class Transaction {
 	private selectedIds = new NodeIdSet();
 	private activatedIds = new NodeIdSet();
 	private openNodeIds = new NodeIdSet();
+	private deletedIds = new NodeIdSet();
+
 	readOnly = false;
 
 	get origin() {
@@ -377,8 +379,9 @@ export class Transaction {
 
 	updated(...nodes: Node[]) {
 		// console.log(new Error().stack);
-		// console.log('pending updates', nodes.map(n => n.id.toString()));
+		console.log('pending updates', nodes.map(n => n.id.toString()));
 		each(nodes, n => {
+			if (this.runtime.deletedNodeIds.has(n.id)) return;
 			console.log('updated node', n.id.toString());
 			this.updatedIds.add(n.id);
 			this.runtime.updatedNodeIds.add(n.id);
@@ -391,6 +394,15 @@ export class Transaction {
 			// 	draggable = draggable.parent;
 			// }
 		});
+	}
+
+	deleted(...nodes: Node[]) {
+		each(nodes, n => {
+			this.runtime.deletedNodeIds.add(n.id);
+			this.deletedIds.add(n.id);
+			this.runtime.updatedNodeIds.remove(n.id);
+			this.updatedIds.remove(n.id);
+		})
 	}
 
 	// hideCursor(...nodes: Node[]) {

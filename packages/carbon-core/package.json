@@ -12,7 +12,7 @@
     "directory": "packages/carbon-core"
   },
   "devDependencies": {
-    "@emrgen/types": "^0.0.2",
+    "@emrgen/types": "workspace:*",
     "@types/events": "^3.0.0",
     "@types/lodash": "^4.14.191",
     "@types/react": "^18.0.17",

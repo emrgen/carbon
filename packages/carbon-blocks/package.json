@@ -12,7 +12,7 @@
     "@emrgen/carbon-attributes": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
-    "@emrgen/types": "^0.0.2",
+    "@emrgen/types": "workspace:*",
     "@react-icons/all-files": "^4.1.0",
     "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",

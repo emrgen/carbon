@@ -48,12 +48,13 @@ export class RemoveNode implements CarbonAction {
 		target.delete();
 		app.store.delete(target);
 
+		tr.deleted(target);
 		tr.updated(parent!);
 
 		// NOTE:
 		// when the parent is empty, we need to update the parent's parent to update the parent appearance like placeholder
 		if (parent?.isEmpty) {
-			// console.error('empty node', parent, parent?.name);
+			console.log('removing empty node', parent.id.toString(), parent?.name);
 			tr.updated(parent?.parent!);
 		}
 
