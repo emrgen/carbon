@@ -332,8 +332,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
     if (!node) return;
     app.enable();
     app.focus();
-    const { nextSibling: nextBlock } = node;
+    if (e.shiftKey) {
+      app.cmd.insert.before(node, "section")?.selectNodes([])?.dispatch();
+      return;
+    }
 
+    const { nextSibling: nextBlock } = node;
     if (node.isEmpty && !node.isAtom && !nextBlock?.isEmpty) {
       const title = node.find((n) => n.isTextBlock);
       if (node.isContainerBlock && title) {

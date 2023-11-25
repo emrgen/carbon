@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-question",
+  "name": "@emrgen/carbon-flash",
   "version": "0.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

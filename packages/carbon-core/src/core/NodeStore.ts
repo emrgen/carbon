@@ -75,7 +75,6 @@ export class NodeStore {
 		}
 
 		console.error(`NodeStore.element: element not found for ${nodeId.toString()}`);
-
 		return domEl;
 	}
 
