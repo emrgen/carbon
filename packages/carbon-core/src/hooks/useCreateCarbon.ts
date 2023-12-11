@@ -12,28 +12,29 @@ import { CarbonState } from '../core';
 
 
 // create carbon app with extensions
-export const createCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
+export const createCarbon = (name: string, json: NodeJSON, extensions: Extension[] = []) => {
 	const plugins = flatten(extensions.map(e => e.plugins ?? []));
 	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
 	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
 
 	const pm = new PluginManager(plugins);
 	const {specs} = pm;
-	const schema = new Schema(specs, new SchemaFactory());
-
+	const schema = new Schema(specs, new SchemaFactory(name));
 	const content = schema.nodeFromJSON(json);
+
+
 	if (!content) {
 		throw new Error("Failed to parse app content");
 	}
 
-	return new Carbon(content, schema, pm, renderer)
+	return new Carbon(name, content, schema, pm, renderer)
 }
 
 
 // create carbon app with extensions
-export const useCreateCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
+export const useCreateCarbon = (name: string, json: NodeJSON, extensions: Extension[] = []) => {
 	const [app] = useState(() => {
-		return createCarbon(json, extensions)
+		return createCarbon(name, json, extensions)
 	})
 
 	return app;
@@ -56,16 +57,16 @@ export const useCreateCarbon = (json: NodeJSON, extensions: Extension[] = []) =>
 // }
 
 // create carbon app with extensions and save to local storage
-export const useCreateCachedCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
+export const useCreateCachedCarbon = (name: string, json: NodeJSON, extensions: Extension[] = []) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [app, setApp] = useState(() => {
 		const savedDoc = localStorage.getItem('carbon:content');
 		if (savedDoc) {
 
-			return createCarbon(JSON.parse(savedDoc), extensions);
+			return createCarbon(name, JSON.parse(savedDoc), extensions);
 		}
 
-		return createCarbon(json, extensions);
+		return createCarbon(name, json, extensions);
 	});
 
 	// useEffect(() => {

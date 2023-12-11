@@ -1,4 +1,4 @@
-import { cloneDeep, findIndex, first, flatten, last, merge, noop, reverse } from "lodash";
+import { cloneDeep, findIndex, first, flatten, isEmpty, last, merge, noop, reverse } from "lodash";
 import { Fragment } from "./Fragment";
 
 import { Optional, Predicate, With } from "@emrgen/types";
@@ -13,6 +13,7 @@ import { NodeType } from "./NodeType";
 import { no, NodeEncoder, NodeJSON, yes } from "./types";
 import { NodeState } from "./NodeState";
 import EventEmitter from "events";
+import { StateScope } from "./StateScope";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -22,6 +23,8 @@ export type TraverseOptions = {
 }
 
 export interface NodeCreateProps {
+	scope?: string;
+	parentId?: NodeId;
 	id: NodeId;
 	type: NodeType;
 	content: NodeContent;
@@ -76,10 +79,12 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// used for testing/debugging
 	test_key: number;
 
+	scope: string;
+	parentId: Optional<NodeId>;
 	id: NodeId;
 	type: NodeType;
+
 	content: NodeContent;
-	parent: Optional<Node>;
 
 	marks: MarkSet;
 	attrs: NodeAttrs;
@@ -112,6 +117,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 	constructor(object: NodeCreateProps) {
 		super();
 		const {
+			scope = '',
+			parentId,
 			id,
 			type,
 			content,
@@ -124,9 +131,11 @@ export class Node extends EventEmitter implements IntoNodeId {
 			deleted = false,
 		} = object;
 		this.test_key = nextKey()
+		this.scope = scope;
+		this.parentId = parentId;
 		this.id = id;
 		this.type = type;
-		this.content = content.withParent(this)
+		this.content = content.setParentId(this.id);
 		this.marks = marks;
 
 		this.attrs = new NodeAttrs(merge(cloneDeep(type.attrs), attrs));
@@ -136,6 +145,11 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.renderVersion = renderVersion;
 		this.updateVersion = updateVersion;
 		this.deleted = deleted;
+	}
+
+	get parent() {
+		const map = StateScope.get(this.scope)
+		return map.get(this.parentId!)
 	}
 
 	get key() {
@@ -453,8 +467,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	// @mutates
-	setParent(parent: Optional<Node>) {
-		this.parent = parent;
+	setParentId(parentId: Optional<NodeId>) {
+		this.parentId = parentId;
 	}
 
 	closest(fn: Predicate<Node>): Optional<Node> {
@@ -640,31 +654,31 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	replace(node: Node, by: Node | Node[]) {
-		this.content = this.content.replace(node, flatten([by])).withParent(this)
+		this.content = this.content.replace(node, flatten([by])).setParentId(this.id)
 		this.markUpdated();
 	}
 
 	// @mutates
 	prepend(nodes: Node | Node[]) {
-		this.content = this.content.prepend(flatten([nodes])).withParent(this);
+		// this.content = this.content.prepend(flatten([nodes])).withParent(this);
 		this.markUpdated();
 	}
 
 	// @mutates
 	append(nodes: Node | Node[]) {
-		this.content = this.content.append(flatten([nodes])).withParent(this);
+		// this.content = this.content.append(flatten([nodes])).withParent(this);
 		this.markUpdated();
 	}
 
 	// @mutates
 	insertBefore(before: Node, nodes: Node | Node[]) {
-		this.content = this.content.insertBefore(before, flatten([nodes])).withParent(this)
+		// this.content = this.content.insertBefore(before, flatten([nodes])).withParent(this)
 		this.markUpdated();
 	}
 
 	// @mutates
 	insertAfter(after: Node, nodes: Node | Node[]) {
-		this.content = this.content.insertAfter(after, flatten([nodes]) as Node[]).withParent(this)
+		// this.content = this.content.insertAfter(after, flatten([nodes]) as Node[]).withParent(this)
 		this.markUpdated();
 	}
 
@@ -681,7 +695,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	updateContent(content: NodeContent) {
-		this.content = content.withParent(this);
+		// this.content = content.withParent(this);
 		this.markUpdated();
 	}
 
@@ -767,12 +781,20 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	toJSON() {
 		const { id, type, content } = this;
-		const json = ({
+		const json: any = ({
 			id: id.toString(),
 			name: type.name,
-			attrs: this.attrs.toJSON(),
-			state: this.state.toJSON(),
 		});
+
+		const attrs = this.attrs.toJSON();
+		const state = this.state.toJSON();
+		if (!isEmpty(attrs)) {
+			json.attrs = attrs;
+		}
+
+		if (!isEmpty(state)) {
+			json.state = state;
+		}
 
 		return {
 			...json,
@@ -796,6 +818,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		}
 	}
 
+	// creates a mutable copy of the node
 	clone() {
 		const { id, type, content, attrs, state, marks, renderVersion, updateVersion } = this;
 		const cloned = Node.create({
@@ -809,7 +832,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 			updateVersion
 		});
 
-		cloned.setParent(this.parent)
+		cloned.setParentId(this.parent)
 
 		return cloned;
 	}
@@ -819,8 +842,9 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return this
 	}
 
-
-
+	freeze() {
+		Object.freeze(this)
+	}
 }
 
 export function NodeComparator(a: Node, b: Node): number {

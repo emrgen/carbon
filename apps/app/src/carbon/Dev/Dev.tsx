@@ -51,7 +51,7 @@ const data = node("carbon", [
   //   node("fileTreeItem", [title([text("section 1")])]),
   // ]),
   node("document", [
-    title(),
+    title([text("I am a frame title")]),
     // node("divider"),
 
     // node("tab", [
@@ -65,7 +65,7 @@ const data = node("carbon", [
     //   ], {node: {link: "tab1"}}),
     // ]),
 
-    // node("section", [title([text("section 1")])]),
+    node("section", [title([text("section 1")])]),
     // node("hstack", [
     //   node("stack", [section([title([text("section 1")])])]),
     //   node("stack", [section([title([text("section 2")])])]),
@@ -95,16 +95,16 @@ const data = node("carbon", [
     //   { node: { collapsed: true } }
     // ),
     // // node("docLink", [title([text("Link to doc")])]),
-    // node("section", [
-    //   title([text("section 0")]),
-    //   node("section", [
-    //     title([text("section 0.1")]),
-    //     node("section", [
-    //       title([text("section 0.1.1")]),
-    //       node("section", [title([text("section 0.1.1.1")])]),
-    //     ]),
-    //   ]),
-    // ]),
+    node("section", [
+      title([text("section 0")]),
+      node("section", [
+        title([text("section 0.1")]),
+        node("section", [
+          title([text("section 0.1.1")]),
+          node("section", [title([text("section 0.1.1.1")])]),
+        ]),
+      ]),
+    ]),
     // node("section", [
     //   title([text("section 1")]),
     //   node("section", [
@@ -231,7 +231,7 @@ const extensions = [
 ];
 
 export default function Dev() {
-  const app = useCreateCarbon(data, extensions);
+  const app = useCreateCarbon('dev',data, extensions);
 
 
   return <div className={'carbon-app-container'}><CarbonApp app={app} /></div>;

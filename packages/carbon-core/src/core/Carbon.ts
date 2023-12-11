@@ -21,6 +21,7 @@ import { first, isFunction } from 'lodash';
 import { CarbonCommandChain } from './CarbonCommandChain';
 import { CarbonMessageBus } from './MessageBus';
 import { CarbonPlugin } from './CarbonPlugin';
+import { StateScope } from "./StateScope";
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -49,13 +50,14 @@ export class Carbon extends EventEmitter {
 	private cursorParkingElement: Optional<HTMLDivElement>;
 	ticks: Maps<Carbon, Optional<Transaction>>[];
 
-	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
+	constructor(name: string, content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
 
 		this.pm = pm;
 		this.rm = renderer;
 		this.schema = schema;
-		this.state = CarbonState.create(new NodeStore(), content, PinnedSelection.default(content));
+		this.state = CarbonState.create(name, new NodeStore(), content, PinnedSelection.default(content));
+		StateScope.set(name, this.state.nodeMap);
 
 		this.sm = new SelectionManager(this);
 		this.em = new EventManager(this, pm);

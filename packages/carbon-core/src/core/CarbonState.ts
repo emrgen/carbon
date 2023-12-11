@@ -1,16 +1,17 @@
 import { Optional } from '@emrgen/types';
-import { each, last, merge, cloneDeep } from 'lodash';
-import { BSet, NodeIdSet } from './BSet';
+import { last, merge, cloneDeep } from 'lodash';
+import { NodeIdSet } from './BSet';
 import { ActionOrigin } from './actions/types';
 import { DecorationStore } from './DecorationStore';
 import { Node } from './Node';
-import { NodeId } from './NodeId';
 import { NodeStore } from './NodeStore';
 import { PinnedSelection } from './PinnedSelection';
 import { SelectionEvent } from './SelectionEvent';
 import { BlockSelection } from './NodeSelection';
 import { CarbonClipboard } from './CarbonClipboard';
 import EventEmitter from 'events';
+import { NodeMap } from './NodeMap';
+import { StateChanges } from './NodeChange';
 
 export class CarbonRuntimeState extends EventEmitter {
 	// pending
@@ -68,8 +69,11 @@ export class CarbonRuntimeState extends EventEmitter {
 
 
 interface CarbonStateProps {
+	name: string;
 	content: Node;
 	selection: PinnedSelection;
+	nodeMap?: NodeMap;
+	changes?: StateChanges;
 	store: NodeStore;
 
 	decorations?: DecorationStore;
@@ -80,10 +84,15 @@ interface CarbonStateProps {
 
 
 export class CarbonState extends EventEmitter {
-	decorations: DecorationStore;
-	runtime: CarbonRuntimeState;
+	name: string;
 	content: Node;
 	selection: PinnedSelection;
+	nodeMap: NodeMap;
+
+	decorations: DecorationStore;
+	changes: StateChanges;
+	runtime: CarbonRuntimeState;
+
 	store: NodeStore;
 
 	selectedNodeIds: NodeIdSet;
@@ -102,6 +111,7 @@ export class CarbonState extends EventEmitter {
 
 	private dirty = false;
 
+
 	get isDirty() {
 		return this.dirty || true
 	}
@@ -118,25 +128,31 @@ export class CarbonState extends EventEmitter {
 		return new BlockSelection(this.store, this.selectedNodeIds);
 	}
 
-	static create(store: NodeStore, content: Node, selection: PinnedSelection) {
-		return new CarbonState({ store, content, selection })
+	static create(name: string, store: NodeStore, content: Node, selection: PinnedSelection) {
+		return new CarbonState({ store, content, selection, name })
 	}
 
 	constructor(props: CarbonStateProps) {
 		super();
 		const {
+			name,
 			store,
 			content,
 			selection,
+			nodeMap = new NodeMap(),
+			changes = new StateChanges(),
 			runtime = new CarbonRuntimeState(),
 			decorations = new DecorationStore(),
 			selectedNodeIds = new NodeIdSet(),
 			activatedNodeIds = new NodeIdSet(),
 		} = props;
 
+		this.name = name;
 		this.content = content;
 		this.selection = selection;
 		this.decorations = decorations;
+		this.nodeMap = nodeMap;
+		this.changes = changes;
 		this.runtime = runtime;
 		this.store = store;
 
@@ -244,6 +260,31 @@ export class CarbonState extends EventEmitter {
 	}
 
 	clone() {
-		return CarbonState.create(this.store, this.content, this.selection);
+		return CarbonState.create(this.name, this.store, this.content, this.selection);
+	}
+
+	produce(fn: (state: CarbonStateDraft) => void) {
+		const draft = new CarbonStateDraft(this);
+		try {
+			fn(draft);
+			const state = draft.commit();
+			return state;
+		} catch (e) {
+			console.error(e);
+			return this;
+		}
+	}
+}
+
+class CarbonStateDraft {
+	state: CarbonState;
+
+	constructor(state: CarbonState) {
+		this.state = state;
+	}
+
+	// turn the draft into a new state
+	commit() {
+		return this.state;
 	}
 }

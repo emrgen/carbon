@@ -7,7 +7,7 @@ import { Maps } from './types';
 // A Btree based set
 export class BSet<K> {
 
-	private tree: BTree<K, K>;
+	protected tree: BTree<K, K>;
 
 	compare?: (a: K, b: K) => number;
 
@@ -93,6 +93,27 @@ export class BSet<K> {
 		return ret
 	}
 
+	freeze() {
+		this.add = () => { throw new Error('Cannot add to a frozen set') }
+		this.remove = () => { throw new Error('Cannot remove from a frozen set') }
+		this.deleteKeys = () => { throw new Error('Cannot delete from a frozen set') }
+		this.clear = () => { throw new Error('Cannot clear a frozen set') }
+		this.extend = () => { throw new Error('Cannot extend a frozen set') }
+
+		Object.defineProperties(this, {
+			add: { writable: false },
+			remove: { writable: false },
+			deleteKeys: { writable: false },
+			clear: { writable: false },
+			extend: { writable: false },
+			compare: { writable: false },
+			tree: { writable: false }
+		})
+
+
+		return this;
+	}
+
 }
 
 // Set of deleted Item IDs
@@ -122,6 +143,7 @@ export class DeleteSet extends BSet<NodeId> {
 
 export class NodeIdSet extends BSet<NodeId> {
 	static empty = new NodeIdSet();
+
 	constructor() {
 		super(NodeIdComparator)
 	}

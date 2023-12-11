@@ -21,6 +21,7 @@ import { Box, Spinner, Stack } from "@chakra-ui/react";
 import TimeTravel from "./TimeTravel";
 import { json } from "stream/consumers";
 import FastTree from "./FastTree";
+import { cloneDeep } from 'lodash';
 
 const extensions = [
   extensionPresets,
@@ -38,18 +39,18 @@ const data = {
       content: [
         {
           name: "title",
-          content: [],
+          content: [text("I am a frame title")],
         },
         // {
         //   name: "divider",
         // },
-        // section([
-        //   title([
-        //     text("I am "),
-        //     text("carbon", { node: { marks: { bold: true } } }),
-        //     text(" editor"),
-        //   ]),
-        // ]),
+        section([
+          title([
+            text("I am "),
+            text("carbon", { node: { marks: { bold: true } } }),
+            text(" editor"),
+          ]),
+        ]),
         // node("frame", [
         //   title([
         //     text("I am a frame title"),
@@ -95,8 +96,10 @@ const data = {
   ],
 };
 
-export function FastEditor() {
-  const app = useCreateCachedCarbon(data, extensions);
+  console.log(data);
+
+export function FastEditor({ name = "carbon" }) {
+  const app = useCreateCarbon(name, Object.freeze(cloneDeep(data)), extensions);
 
   const editorRef = useRef(null);
 

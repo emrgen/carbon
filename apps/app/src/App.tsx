@@ -16,7 +16,7 @@ function App() {
         <Route path="/text" element={<Text />} />
         <Route path="/sheet" element={<Sheet />} />
         <Route path="/question" element={<Question />} />
-        <Route path="/fastype" element={<FastEditor />} />
+        <Route path="/fastype" element={<FastEditor name='fastype-test'/>} />
         {/* <Route path="/test" element={<Test />} /> */}
       </Routes>
     </Router>

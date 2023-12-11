@@ -24,7 +24,7 @@ const data = node("doc", [
 ]);
 
 export default function Test() {
-	const app = useCreateCarbon( data, [blockPresets])
+	const app = useCreateCarbon( 'test', data, [blockPresets])
 
 	// console.log(app.content)
 

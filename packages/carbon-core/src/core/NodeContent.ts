@@ -2,13 +2,14 @@ import { findIndex, flatten } from 'lodash';
 
 import { Node } from './Node';
 import { Optional } from "@emrgen/types";
+import { NodeId } from './NodeId';
 
 export interface NodeContent {
 	size: number;
 	children: Node[];
 	textContent: string;
 
-	withParent(parent: Node): NodeContent;
+	setParentId(parentId: NodeId): NodeContent;
 
 	replace(node: Node, by: Node[]): NodeContent;
 	prepend(nodes: Node[]): NodeContent;
@@ -62,8 +63,8 @@ export class BlockContent implements NodeContent {
 		return this.children.reduce((text, node) => text + node.textContent, '');
 	}
 
-	withParent(parent: Node): NodeContent {
-		this.nodes.forEach(n => n.setParent(parent));
+	setParentId(parentId: NodeId): NodeContent {
+		this.nodes.forEach(n => n.setParentId(parentId));
 		return this;
 	}
 
@@ -148,7 +149,7 @@ export class BlockContent implements NodeContent {
 
 	toJSON() {
 		return {
-			content: this.nodes.map(n => n.toJSON())
+			children: this.nodes.map(n => n.toJSON())
 		}
 	}
 }
@@ -196,7 +197,7 @@ export class InlineContent implements NodeContent {
 		throw new Error('Method not implemented for InlineContent');
 	}
 
-	withParent(parent: Node): NodeContent {
+	setParentId(parentId: NodeId): NodeContent {
 		return this;
 	}
 

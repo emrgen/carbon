@@ -10,6 +10,7 @@ import { NodeIdFactory } from "@emrgen/carbon-core";
 
 
 export class SchemaFactory {
+	scope: string;
 
 	static blockId() {
 		return generateBlockId();
@@ -19,7 +20,12 @@ export class SchemaFactory {
 		return generateTextId();
 	}
 
+	constructor(scope: string) {
+		this.scope = scope;
+	}
+
 	createNode(json: any, schema: Schema, nodeIdFactory: NodeIdFactory = SchemaFactory): Optional<Node> {
+		const { scope } = this;
 		const { id, name, content: contentNodes = [], text, attrs = {} } = json;
 		const type = schema.type(name);
 		if (!type) {
@@ -29,12 +35,12 @@ export class SchemaFactory {
 		if (name === 'text') {
 			const content = InlineContent.create(text);
 			const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(nodeIdFactory.textId());
-			return Node.create({ id: nodeId, type, content, attrs });
+			return Node.create({ id: nodeId, type, content, attrs, scope });
 		} else {
 			const nodes = contentNodes.map(n => schema.nodeFromJSON(n));
 			const content = BlockContent.create(nodes);
 			const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(nodeIdFactory.blockId());
-			return Node.create({ id: nodeId, type, content, attrs });
+			return Node.create({ id: nodeId, type, content, attrs, scope });
 		}
 	}
 
@@ -49,7 +55,7 @@ export class SchemaFactory {
 			}
 		});
 
-		clone.parent = null;
+		clone.parentId = null;
 		return clone;
 	}
 }
