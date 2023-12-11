@@ -6,6 +6,7 @@ import { NodeStore } from './NodeStore';
 import { Pin } from './Pin';
 import { classString } from './Logger';
 import { ActionOrigin } from './actions';
+import { NodeMap } from './NodeMap';
 
 export class PointedSelection {
 	tail: Point;
@@ -24,17 +25,18 @@ export class PointedSelection {
 		return PointedSelection.create(point, point);
 	}
 
-	static create(tail: Point, head: Point): PointedSelection {
-		return new PointedSelection(tail, head);
+	static create(tail: Point, head: Point, origin = ActionOrigin.Unknown): PointedSelection {
+		return new PointedSelection(tail, head, origin);
 	}
 
-	constructor(tail: Point, head: Point) {
+	constructor(tail: Point, head: Point, origin: ActionOrigin = ActionOrigin.Unknown) {
 		this.tail = tail;
 		this.head = head;
+		this.origin = origin;
 	}
 
-	pin(store: NodeStore): Optional<PinnedSelection> {
-		const { tail, head } = this;
+	pin(store: NodeMap): Optional<PinnedSelection> {
+		const { tail, head, origin } = this;
 		// console.log('Selection.pin', head.toString());
 		const focus = Pin.fromPoint(head, store);
 		const anchor = Pin.fromPoint(tail, store);
@@ -43,7 +45,7 @@ export class PointedSelection {
 			return
 		}
 
-		return PinnedSelection.create(anchor, focus);
+		return PinnedSelection.create(anchor, focus, origin);
 	}
 
 	eq(other: PointedSelection): boolean {
@@ -51,6 +53,11 @@ export class PointedSelection {
 	}
 
 	unpin() {
+		return this
+	}
+
+	freeze() {
+		Object.freeze(this);
 		return this
 	}
 

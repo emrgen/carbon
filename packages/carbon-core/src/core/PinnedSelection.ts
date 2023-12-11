@@ -1,4 +1,4 @@
-import { Bound, BoundRect, Optional } from '@emrgen/types';
+import { Optional } from '@emrgen/types';
 import { classString, p14, p30 } from './Logger';
 import { Node } from './Node';
 import { Pin } from './Pin';
@@ -6,6 +6,7 @@ import { PointedSelection } from './PointedSelection';
 import { NodeStore } from './NodeStore';
 import { DomSelection, Range } from './Range';
 import { SelectionBounds } from './types';
+import { ActionOrigin } from './actions';
 
 
 
@@ -13,6 +14,7 @@ export class PinnedSelection {
 	tail: Pin;
 	head: Pin;
 	nodes: Node[];
+	origin: ActionOrigin = ActionOrigin.Unknown;
 
 	// map dom selection to editor selection
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
@@ -37,7 +39,6 @@ export class PinnedSelection {
 			console.warn(p14('%c[error]'), 'color:red', 'Editor.resolveNode failed');
 			return
 		}
-		// console.log(anchorNode, anchorNode.isFocusable)
 
 		// NOTE: anchorNode is always valid and pointed to a focusable node
 		if (!anchorNode.hasFocusable && !anchorNode.isFocusable) {
@@ -105,7 +106,7 @@ export class PinnedSelection {
 
 		// console.info(p14('%c[info]'), 'color:pink', p30('fromDom:afterOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
 		const selection = PinnedSelection.create(tail, head);
-		console.log(p14('%c[info]'), 'color:pink', p30('fromDom:Selection'), selection.toString());
+		// console.log(p14('%c[info]'), 'color:pink', p30('fromDom:Selection'), selection.toString());
 
 		return selection;
 	}
@@ -119,11 +120,11 @@ export class PinnedSelection {
 		return PinnedSelection.create(pin, pin);
 	}
 
-	static create(tail: Pin, head: Pin): PinnedSelection {
-		return new PinnedSelection(tail, head);
+	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
+		return new PinnedSelection(tail, head, [], origin);
 	}
 
-	constructor(tail: Pin, head: Pin, nodes: Node[] = []) {
+	constructor(tail: Pin, head: Pin, nodes: Node[] = [], origin = ActionOrigin.Unknown) {
 		this.tail = tail;
 		this.head = head;
 		this.nodes = nodes;
@@ -348,7 +349,7 @@ export class PinnedSelection {
 	normalize(): PinnedSelection {
 		const { head, tail } = this
 		if (this.isForward) return this;
-		return PinnedSelection.create(head, tail);
+		return PinnedSelection.create(head, tail, this.origin);
 	}
 
 	collapseToStart(): PinnedSelection {
@@ -364,9 +365,9 @@ export class PinnedSelection {
 	}
 
 	unpin(): PointedSelection {
-		const { tail, head } = this
-		// console.log('Selection.unpin', tail.toString());
-		return PointedSelection.create(tail.point, head.point);
+		const { tail, head, origin } = this
+		console.log('Selection.unpin', tail.toString());
+		return PointedSelection.create(tail.point, head.point, origin);
 	}
 
 	eq(other: PinnedSelection) {

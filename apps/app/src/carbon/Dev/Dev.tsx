@@ -33,6 +33,7 @@ import {
   carbonUtilPlugins,
 } from "@emrgen/carbon-utils";
 import { Stack } from "@chakra-ui/react";
+import SelectionTracker from "../../SelectionTracker";
 
 const data = node("carbon", [
   // node("fileTree", [
@@ -234,5 +235,11 @@ export default function Dev() {
   const app = useCreateCarbon('dev',data, extensions);
 
 
-  return <div className={'carbon-app-container'}><CarbonApp app={app} /></div>;
+  return (
+    <div className={'carbon-app-container'}>
+      <CarbonApp app={app}>
+        <SelectionTracker />
+      </CarbonApp>
+    </div>
+  );
 }

@@ -109,7 +109,6 @@ export class CarbonState extends EventEmitter {
 
 	prevSelection?: PinnedSelection;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
-	isSelectionDirty: boolean;
 
 	private dirty = false;
 
@@ -168,7 +167,17 @@ export class CarbonState extends EventEmitter {
 		this.closeNodeIds = new NodeIdSet();
 
 		this.dirty = false;
-		this.isSelectionDirty = true;
+		// this.isSelectionDirty = true;
+	}
+
+	get depth() {
+		let depth = 0;
+		let node: Optional<CarbonState> = this;
+		while (node.previous) {
+			depth++;
+			node = node.previous;
+		}
+		return depth;
 	}
 
 	init() {
@@ -198,7 +207,7 @@ export class CarbonState extends EventEmitter {
 		this.selectionOrigin = origin;
 
 		// console.log('selection is dirty', isSelectionDirty);
-		this.isSelectionDirty = isSelectionDirty;
+		// this.isSelectionDirty = isSelectionDirty;
 		this.emit('change:selection', this.selection, this.prevSelection, this.selectionOrigin);
 	}
 
@@ -254,15 +263,37 @@ export class CarbonState extends EventEmitter {
 		this.emit('change:content', this.content);
 	}
 
-	clone() {
-		return CarbonState.create(this.scope, this.store, this.content, this.selection, this.nodeMap);
+	clone(depth: number = 2) {
+		if (depth === 0) return null
+		const { scope, store, content, selection, changes, nodeMap } = this;
+		if (!this.previous) {
+			return new CarbonState({
+				scope,
+				store,
+				content,
+				selection,
+				changes,
+				nodeMap,
+			})
+		}
+
+		const previous = this.previous.clone(depth - 1);
+		return new CarbonState({
+			scope,
+			store,
+			content,
+			selection,
+			changes,
+			nodeMap,
+			previous,
+		})
 	}
 
 	produce(fn: (state: CarbonStateDraft) => void): CarbonState {
 		const draft = new CarbonStateDraft(this);
 		try {
 			fn(draft);
-			const state = draft.prepare().commit();
+			const state = draft.prepare().commit(4);
 			draft.dispose();
 			return state;
 		} catch (e) {
@@ -270,5 +301,23 @@ export class CarbonState extends EventEmitter {
 			draft.dispose();
 			return this;
 		}
+	}
+
+	freeze() {
+		this.changes.freeze();
+		this.selectedNodeIds.freeze();
+		this.unselectedNodeIds.freeze();
+		this.activatedNodeIds.freeze();
+		this.deactivatedNodeIds.freeze();
+		this.openNodeIds.freeze();
+		this.closeNodeIds.freeze();
+		this.nodeMap.freeze();
+		this.content.freeze();
+		this.selection.freeze();
+		this.prevSelection?.freeze();
+
+		Object.freeze(this);
+
+		return this;
 	}
 }

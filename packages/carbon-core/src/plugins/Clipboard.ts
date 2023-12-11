@@ -104,9 +104,9 @@ export class ClipboardPlugin extends AfterPlugin {
     console.log('cloned', cloned.map(n => n.name));
 
     const root = Node.create({
+      id: NodeId.create(String(Math.random())),
       type: app.schema.type('slice'),
       content: BlockContent.create(cloned),
-      id: NodeId.create(String(Math.random())),
     });
     root.content.setParentId(root.id);
     console.log('rootNode', root);
@@ -123,8 +123,6 @@ export class ClipboardPlugin extends AfterPlugin {
       console.log(n.name, n.textContent);
 
       if (startPin.node.eq(n)) {
-        console.log('xxxx');
-
         return true;
       }
       if (n.isContainerBlock) {

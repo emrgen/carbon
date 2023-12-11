@@ -99,6 +99,7 @@ const data = {
   console.log(data);
 
 export function FastEditor({ name = "carbon" }) {
+
   const app = useCreateCarbon(name, Object.freeze(cloneDeep(data)), extensions);
 
   const editorRef = useRef(null);

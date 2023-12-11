@@ -5,11 +5,14 @@ import { StateChanges } from "./NodeChange";
 import { NodeId } from "./NodeId";
 import { NodeMap } from "./NodeMap";
 import { PinnedSelection } from "./PinnedSelection";
+import { NodeContent } from "./NodeContent";
+import { SelectionEvent } from "./SelectionEvent";
+import { PointedSelection } from "./PointedSelection";
 
 export class CarbonStateDraft {
   state: CarbonState;
   nodeMap: NodeMap;
-  selection: PinnedSelection;
+  selection: PointedSelection;
   changes: StateChanges = new StateChanges();
 
   private drafting = true;
@@ -17,7 +20,7 @@ export class CarbonStateDraft {
   constructor(state: CarbonState) {
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
-    this.selection = state.selection
+    this.selection = state.selection.unpin();
   }
 
   get(id: NodeId): Optional<Node> {
@@ -25,27 +28,51 @@ export class CarbonStateDraft {
   }
 
   // turn the draft into a new state
-  commit() {
+  commit(depth: number) {
     const { state, selection, changes, nodeMap} = this;
     selection.freeze();
     changes.freeze();
     nodeMap.freeze();
 
+    const pinnedSelection = selection.pin(this.nodeMap);
+    if (!pinnedSelection) {
+      throw new Error("Cannot commit draft with invalid selection");
+    }
+
+    console.log('xxxxxxxx', pinnedSelection);
+    
+
     return new CarbonState({
-      previous: state,
+      previous: state.clone(depth - 1),
       scope: state.scope,
       store: state.store,
       content: state.content,
       runtime: state.runtime,
-      selection,
+      selection: pinnedSelection,
       nodeMap,
       changes,
-    });
+    }).freeze();
   }
 
   // prepare the draft for commit
   prepare() {
     return this;
+  }
+
+  updateContent(node: Node, content: NodeContent) {
+    if (!this.drafting) {
+      throw new Error("Cannot update content on a draft that is already committed");
+    }
+
+    if (node.freezed) {
+      const clone = node.clone(false);
+      clone.updateContent(content);
+      this.nodeMap.set(node.id, clone);
+    } else {
+      node.updateContent(content);
+    }
+
+    this.changes.updated.add(node.id);
   }
 
   prepend(parent: Node, node: Node) {
@@ -60,6 +87,8 @@ export class CarbonStateDraft {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
+    console.log("append", parent, node);
+
     this.changes.inserted.add(node.id);
     this.nodeMap.set(node.id, node);
   }
@@ -88,19 +117,20 @@ export class CarbonStateDraft {
     this.nodeMap.set(node.id, null);
   }
 
-  addPendingSelection(selection: PinnedSelection) {
+  updateSelection(selection: PointedSelection) {
+    if (!this.drafting) {
+      throw new Error("Cannot update selection on a draft that is already committed");
+    }
+
+    this.selection = selection;
+    this.changes.selection = selection;
+  }
+
+  _addPendingSelection(selection: PinnedSelection) {
     if (!this.drafting) {
       throw new Error("Cannot add pending selection to a draft that is already committed");
     }
     this.changes.pendingSelections.push(selection);
-  }
-
-  updateSelection(selection: PinnedSelection) {
-    if (!this.drafting) {
-      throw new Error("Cannot update selection on a draft that is already committed");
-    }
-    this.selection = selection;
-    this.changes.selection = selection;
   }
 
   dispose() {

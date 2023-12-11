@@ -94,24 +94,19 @@ export class BSet<K> {
 	}
 
 	freeze() {
-		this.add = () => { throw new Error('Cannot add to a frozen set') }
-		this.remove = () => { throw new Error('Cannot remove from a frozen set') }
-		this.deleteKeys = () => { throw new Error('Cannot delete from a frozen set') }
-		this.clear = () => { throw new Error('Cannot clear a frozen set') }
-		this.extend = () => { throw new Error('Cannot extend a frozen set') }
+		// this.add = () => { throw new Error('Cannot add to a frozen set') }
+		// this.remove = () => { throw new Error('Cannot remove from a frozen set') }
+		// this.deleteKeys = () => { throw new Error('Cannot delete from a frozen set') }
+		// this.clear = () => { throw new Error('Cannot clear a frozen set') }
+		// this.extend = () => { throw new Error('Cannot extend a frozen set') }
 
-		Object.defineProperties(this, {
-			add: { writable: false },
-			remove: { writable: false },
-			deleteKeys: { writable: false },
-			clear: { writable: false },
-			extend: { writable: false },
-			compare: { writable: false },
-			tree: { writable: false }
-		})
-
+		Object.freeze(this);
 
 		return this;
+	}
+
+	toJSON(): any {
+		return this.toArray()
 	}
 
 }
@@ -139,6 +134,10 @@ export class DeleteSet extends BSet<NodeId> {
 		return set
 	}
 
+	toJSON() {
+		return this.toArray().map(id => id.toString())
+	}
+
 }
 
 export class NodeIdSet extends BSet<NodeId> {
@@ -146,5 +145,9 @@ export class NodeIdSet extends BSet<NodeId> {
 
 	constructor() {
 		super(NodeIdComparator)
+	}
+
+	toJSON() {
+		return this.toArray().map(id => id.toString())
 	}
 }

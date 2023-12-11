@@ -24,7 +24,7 @@ export type TraverseOptions = {
 
 export interface NodeCreateProps {
 	scope?: string;
-	parentId?: NodeId;
+	parentId?: Optional<NodeId>;
 	id: NodeId;
 	type: NodeType;
 	content: NodeContent;
@@ -820,20 +820,20 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	// creates a mutable copy of the node
-	clone() {
-		const { id, type, content, attrs, state, marks, renderVersion, updateVersion } = this;
+	clone(shallow = false) {
+		const { scope, parentId, id, type, content, attrs, state, marks, renderVersion, updateVersion } = this;
 		const cloned = Node.create({
+			scope,
+			parentId,
 			id,
 			type,
-			content: content.clone(),
+			content: shallow ? content : content.clone(),
 			attrs,
 			state,
 			marks,
 			renderVersion,
 			updateVersion
 		});
-
-		cloned.setParentId(this.parent)
 
 		return cloned;
 	}
@@ -843,7 +843,11 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return this
 	}
 
+	freezed = false
+	// @mutates
 	freeze() {
+		if(this.freezed) return this
+		this.freezed = true
 		Object.freeze(this)
 		return this;
 	}

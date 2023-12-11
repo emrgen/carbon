@@ -8,6 +8,7 @@ import { TransactionManager } from './TransactionManager';
 import { EventsOut } from './Event';
 import { Transaction } from './Transaction';
 import { StateChanges } from './NodeChange';
+import { PluginManager } from './PluginManager';
 
 export enum NodeChangeType {
 	update = 'update',
@@ -25,7 +26,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	constructor(
 		private readonly app: Carbon,
 		private readonly sm: SelectionManager,
-		private readonly tm: TransactionManager
+		private readonly tm: TransactionManager,
+		private readonly pm: PluginManager
 	) {
 		super();
 		this.changes = app.state.changes.clone();
@@ -36,7 +38,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	}
 
 	private get store() {
-		return this.state.store;
+		return this.state.nodeMap;
 	}
 
 	private get isContentSynced() {
@@ -50,10 +52,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	// 1. sync the doc
 	// 2. sync the selection
 	// 3. sync the node state
-	update() {
-		// if (tr) {
-		// 	this.transactions.push(tr);
-		// }
+	update(tr: Transaction) {
+		this.transactions.push(tr);
 		const { isContentDirty, isNodeStateDirty, isSelectionDirty } = this.state.changes;
 
 		// console.log('updating transaction effect', tr);
@@ -63,8 +63,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			return
 		}
 
-		console.log('==============');
-		
 		if (isContentDirty) {
 			console.log(isSelectionDirty, isNodeStateDirty);
 			this.updateContent();
@@ -115,7 +113,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		// console.log('mounted', this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
 		if (this.isContentSynced) {
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
-			if (this.state.isSelectionDirty) {
+			if (this.state.changes.isSelectionDirty) {
 				// console.log('updating selection', first(this.transactions));
 				this.updateSelection(() => {
 					this.onTransaction();
@@ -130,9 +128,10 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	private onTransaction() {
 		const tr = this.transactions.shift()
-		// console.log('EventOut.transaction', tr);
 		if (tr) {
-			this.app.emit(EventsOut.transaction, tr)
+			this.pm.onTransaction(tr);
+			this.app.emit(EventsOut.transaction, tr);
+			this.app.emit(EventsOut.changed, this.state);
 		}
 	}
 

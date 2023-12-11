@@ -6,6 +6,7 @@ import { Point } from './Point';
 import { constrain } from '../utils/constrain';
 import { Maps } from './types';
 import { NodeContent } from './NodeContent';
+import { NodeMap } from './NodeMap';
 
 enum PinReference {
 	front = 'front',
@@ -76,7 +77,7 @@ export class Pin {
 		return new Pin(node, -10);
 	}
 
-	static fromPoint(point: Point, store: NodeStore): Optional<Pin> {
+	static fromPoint(point: Point, store: NodeMap): Optional<Pin> {
 		if (!point.isStart) return
 		const node = store.get(point.nodeId);
 		if (!node || !node.type.isTextBlock) {

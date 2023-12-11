@@ -12,10 +12,11 @@ import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
 
 interface CarbonAppProps {
   app: Carbon;
+  children?: React.ReactNode;
 }
 
 export function CarbonApp(props: CarbonAppProps) {
-  const { app } = props;
+  const { app, children } = props;
   // @ts-ignore
   window.app = app;
   // console.log(app.content)
@@ -48,6 +49,7 @@ export function CarbonApp(props: CarbonAppProps) {
               <CarbonChangeContext>
                 <RectSelectContext>
                   <CarbonContent />
+                  {children}
                 </RectSelectContext>
               </CarbonChangeContext>
             </CarbonEvents>

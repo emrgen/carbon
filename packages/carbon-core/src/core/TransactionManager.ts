@@ -10,7 +10,7 @@ import { CarbonState } from './CarbonState';
 export class TransactionManager {
 	private transactions: Transaction[] = [];
 
-	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager, readonly updateState: (state: CarbonState) => void) { }
+	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager, readonly updateState: (state: CarbonState, tr: Transaction) => void) { }
 
 	private get state() {
 		return this.app.state;
@@ -33,25 +33,24 @@ export class TransactionManager {
 	}
 
 	private processTransactions() {
-		const { app, pm } = this
+		const { app, state } = this
+
 		// allow transactions to run only when there is no pending selection events
 		// normalizer transactions are allowed to commit even with pending selection events
-		while (this.transactions.length && (!this.runtime.selectEvents.length || this.transactions[0].isNormalizer)) {
+		while (this.transactions.length) {
 			const tr = this.transactions.shift();
 			if (!tr) continue;
+
 			console.log('Commit', tr)
+
+			// produce a new state from the current state
 			const state = app.state.produce(draft => {
 				tr.prepare();
 				tr.commit(draft);
-				// TODO: transaction should me made read-only after commit
-				// tr.freeze();
-
-				// pm.onTransaction(tr);
-				// app.emit(EventsOut.transactionCommit, tr);
 				// this.updateTransactionEffects(tr);
 			});
 
-			this.updateState(state)
+			this.updateState(state, tr);
 		}
 	}
 

@@ -21,3 +21,10 @@ html, body, .root {
   position: absolute;
   /* background: mediumaquamarine; */
 }
+
+.carbon-selection-tracker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 12px;
+}

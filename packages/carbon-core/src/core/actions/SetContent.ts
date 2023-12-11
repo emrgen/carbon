@@ -6,6 +6,7 @@ import { ActionResult } from "./Result";
 import { ActionOrigin, CarbonAction } from "./types";
 import { generateActionId } from "./utils";
 import { Optional } from '@emrgen/types';
+import { CarbonStateDraft } from '../CarbonStateDraft';
 
 export class SetContentAction implements CarbonAction {
   id: number;
@@ -30,13 +31,15 @@ export class SetContentAction implements CarbonAction {
     this.before = before;
   }
 
-  execute(tr: Transaction): ActionResult<any> {
+  execute(tr: Transaction, draft: CarbonStateDraft): ActionResult<any> {
     const {app,} = tr
     const {nodeId, after} = this
-    const node = app.store.get(nodeId);
+    const node = draft.get(nodeId);
     if (!node) {
       return ActionResult.withError(`Node ${nodeId} not found`);
     }
+
+    draft.updateContent(node, after);
 
     // if (this.before === null || this.before === undefined) {
     this.before = node.content.clone();
@@ -46,10 +49,6 @@ export class SetContentAction implements CarbonAction {
     node.forAll(n => {
       app.store.put(n);
     });
-
-    if (!this.native) {
-      tr.updated(node);
-    }
 
     // for first time we need to update parent to update the parent appearance like placeholder
     if (wasEmptyBefore) {

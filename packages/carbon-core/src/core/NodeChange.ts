@@ -1,6 +1,8 @@
 import { Optional } from "@emrgen/types";
 import { NodeIdSet } from "./BSet";
 import { PinnedSelection } from "./PinnedSelection";
+import { SelectionEvent } from "./SelectionEvent";
+import { PointedSelection } from "./PointedSelection";
 
 export class StateChanges {
   inserted: NodeIdSet = new NodeIdSet();
@@ -14,7 +16,7 @@ export class StateChanges {
   updatedProps: NodeIdSet = new NodeIdSet();
   updatedMarks: NodeIdSet = new NodeIdSet();
   updatedStyles: NodeIdSet = new NodeIdSet();
-  selection: Optional<PinnedSelection> = null;
+  selection: Optional<PointedSelection> = null;
   pendingSelections: PinnedSelection[] = [];
 
   diff(other: StateChanges): StateChanges {
@@ -94,9 +96,25 @@ export class StateChanges {
     clone.updatedMarks = this.updatedMarks.clone();
     clone.updatedStyles = this.updatedStyles.clone();
     clone.selection = this.selection;
-    clone.pendingSelections = this.pendingSelections.slice();
 
     return clone;
+  }
+
+  toJSON() {
+    return {
+      inserted: this.inserted.toJSON(),
+      updated: this.updated.toJSON(),
+      deleted: this.deleted.toJSON(),
+      moved: this.moved.toJSON(),
+      selected: this.selected.toJSON(),
+      activated: this.activated.toJSON(),
+      opened: this.opened.toJSON(),
+      clipboard: this.clipboard.toJSON(),
+      updatedProps: this.updatedProps.toJSON(),
+      updatedMarks: this.updatedMarks.toJSON(),
+      updatedStyles: this.updatedStyles.toJSON(),
+      selection: this.selection?.toJSON(),
+    }
   }
 
 }

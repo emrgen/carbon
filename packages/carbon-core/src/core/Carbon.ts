@@ -67,11 +67,11 @@ export class Carbon extends EventEmitter {
 		this.sm = new SelectionManager(this);
 		this.em = new EventManager(this, pm);
 
-		this.tm = new TransactionManager(this, pm, this.sm, (state: CarbonState) => {
-			this.updateState(state);
+		this.tm = new TransactionManager(this, pm, this.sm, (state, tr) => {
+			this.updateState(state, tr);
 		});
 
-		this.change = new ChangeManager(this, this.sm, this.tm);
+		this.change = new ChangeManager(this, this.sm, this.tm, pm);
 
 		this.cmd = pm.commands(this);
 		this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
@@ -161,24 +161,26 @@ export class Carbon extends EventEmitter {
 		}
 	}
 
-	private updateState(state: CarbonState) {
-		if (this.state === state) return
+	private updateState(state: CarbonState, tr: Transaction) {
+		if (!state.changes.isDirty) {
+			console.warn('new state is not dirty');
+			return
+		}
+		if (this.state === state) {
+			console.warn('new state is the same as current');
+			return
+		}
 
 		// keep three previous states
-		let count = 3;
-		let prev: Optional<CarbonState> = this.state;
-		while (--count) {
-			prev = prev.previous;
-			if (!prev) break;
-		}
 
-		if (prev) {
-			prev.previous = null;
-		}
 
 		this.state = state;
-		console.log(this.state.changes);
-		this.change.update();
+		StateScope.set(state.scope, state.nodeMap);
+
+		console.log(this.state.changes.toJSON());
+
+		this.emit(EventsOut.transactionCommit, tr);
+		this.change.update(tr);
 	}
 
 	component(name: string) {
