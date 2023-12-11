@@ -696,8 +696,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	updateContent(content: NodeContent) {
-		// this.content = content.withParent(this);
-		this.markUpdated();
+		this.content = content.setParentId(this.id);
 	}
 
 	// @mutates

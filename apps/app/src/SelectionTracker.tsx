@@ -13,8 +13,6 @@ export default function SelectionTracker() {
 
   useEffect(() => {
     const onChange = (state: CarbonState) => {
-      console.log("xxxxxx", state);
-
       const selections: PinnedSelection[] = [];
       let curr: Optional<CarbonState> = state;
       let depth = 0
@@ -24,8 +22,6 @@ export default function SelectionTracker() {
         depth += 1
       }
 
-      console.log(depth);
-      
       setSelections(selections);
     };
 
@@ -34,8 +30,6 @@ export default function SelectionTracker() {
       app.off(EventsOut.changed, onChange);
     };
   }, [app]);
-
-  console.log(selections);
 
   return (
     <div className="carbon-selection-tracker">

@@ -39,9 +39,6 @@ export class CarbonStateDraft {
       throw new Error("Cannot commit draft with invalid selection");
     }
 
-    console.log('xxxxxxxx', pinnedSelection);
-    
-
     return new CarbonState({
       previous: state.clone(depth - 1),
       scope: state.scope,
@@ -64,14 +61,14 @@ export class CarbonStateDraft {
       throw new Error("Cannot update content on a draft that is already committed");
     }
 
-    if (node.freezed) {
-      const clone = node.clone(false);
-      clone.updateContent(content);
-      this.nodeMap.set(node.id, clone);
-    } else {
-      node.updateContent(content);
+    let parent: Optional<Node> = this.nodeMap.has(node.id) ? this.nodeMap.get(node.parentId!) : node.clone(true);
+    if (!parent) {
+      throw new Error("Cannot update content of a node that does not exist");
     }
 
+    parent.updateContent(content);
+
+    this.nodeMap.set(parent.id, parent);
     this.changes.updated.add(node.id);
   }
 

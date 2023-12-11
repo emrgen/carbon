@@ -21,7 +21,7 @@ export enum NodeChangeType {
 export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	readonly transactions: Transaction[] = []
-	changes: StateChanges;
+	changes: StateChanges = new StateChanges();
 
 	constructor(
 		private readonly app: Carbon,
@@ -30,7 +30,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		private readonly pm: PluginManager
 	) {
 		super();
-		this.changes = app.state.changes.clone();
 	}
 
 	private get state() {
@@ -62,6 +61,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		if (!isContentDirty && !isNodeStateDirty && !isSelectionDirty) {
 			return
 		}
+
+		this.changes = this.state.changes.clone();
 
 		if (isContentDirty) {
 			console.log(isSelectionDirty, isNodeStateDirty);
@@ -138,8 +139,10 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	private updateContent() {
 		console.group('syncing:  content');
 		// console.group('syncing: content')
-		const { updatedNodeIds } = this.state.runtime;
+		const updatedNodeIds = this.changes.updated
 		const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
+
+		console.log('updatedNodes', updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
 
 		// remove nodes if ancestor is present in the updateNodes
 		// this is needed to avoid updating the same node twice

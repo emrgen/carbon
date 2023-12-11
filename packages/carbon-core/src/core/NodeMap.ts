@@ -15,6 +15,16 @@ export class NodeMap {
     this._parent = parent || null;
   }
 
+  forEach(fn: (id: NodeId, node: Optional<Node>) => void, deep = false) {
+    this._map.forEach((k, v) => {
+      fn(k, v);
+    });
+    
+    if (deep && this._parent) {
+      this._parent.forEach(fn, deep);
+    }
+  }
+
   get(key: NodeId) {
     return this._map.get(key) || this._parent?.get(key);
   }
@@ -24,7 +34,11 @@ export class NodeMap {
   }
 
   has(key: NodeId) {
-    return this._map.has(key) || this._parent?.has(key);
+    return this._map.has(key);
+  }
+
+  hasDeep(key: NodeId) {
+    return this._map.has(key) || this._parent?.hasDeep(key);
   }
 
   delete(key: NodeId) {

@@ -366,7 +366,6 @@ export class PinnedSelection {
 
 	unpin(): PointedSelection {
 		const { tail, head, origin } = this
-		console.log('Selection.unpin', tail.toString());
 		return PointedSelection.create(tail.point, head.point, origin);
 	}
 
