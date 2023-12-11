@@ -7,6 +7,7 @@ import { SelectionEvent } from './SelectionEvent';
 import { EventsOut } from './Event';
 import { Optional } from '@emrgen/types';
 import { PinnedSelection } from './PinnedSelection';
+import { CarbonStateDraft } from './CarbonState';
 
 export class SelectionManager {
 	focused = false;
@@ -38,7 +39,7 @@ export class SelectionManager {
 	// syncs selection with dom depending on `origin`
 	// used by commands to inform editor of a selection change
 	// the selection might be queued
-	onSelect(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+	onSelect(draft: CarbonStateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		// console.log('onSelect', before.toString(), after.toString(), origin, this.enabled);
 		if (!this.enabled) {
 			return
@@ -58,7 +59,7 @@ export class SelectionManager {
 		if ([ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
 			if (app.runtime.selectEvents.length === 0) {
 				// this.selectedNodesIds.clear();
-				this.onSelectionChange(before, after, origin)
+				this.onSelectionChange(draft, before, after, origin)
 				// this.selectedNodesChanged()
 				// this.pm.onSelect(event);
 			} else {
@@ -72,7 +73,7 @@ export class SelectionManager {
 	}
 
 	// syncs selection with app state
-	private onSelectionChange(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+	private onSelectionChange(draft: CarbonStateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		const { state } = this;
 		if (before.eq(after) && origin !== ActionOrigin.UserInput && origin !== ActionOrigin.Normalizer && origin !== ActionOrigin.UserSelectionChange) {
 			console.info(p14('%c[info]'), 'color:pink', 'before and after selection same', before.toJSON(), after.toJSON());
@@ -85,13 +86,15 @@ export class SelectionManager {
 			return
 		}
 
+
+		draft.updateSelection(selection);
+
 		// console.log('synced selection from origin', origin)
 		this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange && origin !== ActionOrigin.NoSync);
 		// console.log('###', this.app.selection.toString(), selection.toString());
-		this.updateFocusPlaceholder(this.state.prevSelection, selection);
-		this.app.emit(EventsOut.selectionChanged, selection);
-		this.app.change.update();
-		this.app.emit(EventsOut.selectionUpdated, this.state);
+		// this.updateFocusPlaceholder(this.state.prevSelection, selection);
+		// this.app.change.update();
+		// this.app.emit(EventsOut.selectionUpdated, this.state);
 	}
 
 	// syncs DOM selection with Editor's internal selection state

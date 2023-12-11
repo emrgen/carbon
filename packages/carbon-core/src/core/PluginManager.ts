@@ -12,6 +12,7 @@ import { EventHandlerMap, NodeName } from './types';
 import { CarbonAction } from './actions/types';
 import { EventsIn } from './Event';
 import { SelectionEvent } from './SelectionEvent';
+import { CarbonState } from './CarbonState';
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -205,17 +206,17 @@ export class PluginManager {
 	}
 
 	// normalize node as per the schema
-	normalize(node: Node, app: Carbon): CarbonAction[] {
+	normalize(node: Node): CarbonAction[] {
 		for (const p of this.before) {
-			const actions = p.normalize(node, app.state);
+			const actions = p.normalize(node);
 			if (actions.length) return actions;
 		}
 
-		const actions = this.nodes[node.name]?.normalize(node, app.state);
+		const actions = this.nodes[node.name]?.normalize(node);
 		if (actions.length) return actions;
 
 		for (const p of this.after) {
-			const actions = p.normalize(node, app.state);
+			const actions = p.normalize(node);
 			if (actions.length) return actions;
 		}
 		return []

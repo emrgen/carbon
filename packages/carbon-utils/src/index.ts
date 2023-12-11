@@ -8,6 +8,6 @@ export * from './types'
 
 export const carbonUtilPlugins: Extension = {
   plugins: [
-    new BlockMenuPlugin(),
+    // new BlockMenuPlugin(),
   ]
 }

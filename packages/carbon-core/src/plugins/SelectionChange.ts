@@ -32,7 +32,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 
 				const { selection: before } = app;
 				if (before.isInvalid) {
-					console.warn(p12('%c[invalid]'), 'color:red', 'before selection is invalid');
+					console.warn(p12('%c[invalid]'), 'color:red', 'before selection is invalid', app.ready);
 				}
 
 				if (after.isInvalid) {

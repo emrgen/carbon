@@ -39,11 +39,11 @@ export abstract class CarbonPlugin {
 	}
 
 	get state () {
-		return this.app?.state.get(this.name);
+		return this.app?.get(this.name);
 	}
 
 	setState (state: any) {
-		this.app?.state.set(this.name, state);
+		this.app?.set(this.name, state);
 	}
 
 	destroy(app: Carbon) {}
@@ -83,7 +83,7 @@ export abstract class CarbonPlugin {
 	}
 
 	// normalize the node based on schema
-	normalize(node: Node, state: CarbonState): CarbonAction[] { return [] }
+	normalize(node: Node): CarbonAction[] { return [] }
 
 	// node lifecycle hooks
 	mounted(editor: Carbon, node: Node) { }

@@ -1,4 +1,4 @@
-import { each, first, flatten, identity, isArray, last, sortBy, merge } from 'lodash';
+import { each, first, flatten, identity, isArray, last, sortBy, merge, isEmpty } from 'lodash';
 
 import { Optional, With } from '@emrgen/types';
 import { NodeIdSet } from './BSet';
@@ -33,6 +33,7 @@ import { insertNodesActions } from '../utils/action';
 import { OpenDocument } from './actions/OpenDocument';
 import { CloseDocument } from './actions/CloseDocument';
 import { TransactionDo } from './TransactionDo';
+import { CarbonStateDraft } from './CarbonStateDraft';
 
 export class TransactionError {
 	commandId: number;
@@ -153,12 +154,13 @@ export class Transaction {
 		return this.app.cmd;
 	}
 
-	onSelect(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
-		this.sm.onSelect(before, after, origin);
+	onSelect(draft:CarbonStateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+		this.sm.onSelect(draft, before, after, origin);
 	}
 
 	select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
 		const after = selection.unpin();
+		after.origin = origin;
 		return this.add(SelectAction.create(this.selection, after, origin));
 	}
 
@@ -259,6 +261,7 @@ export class Transaction {
 		this.actions.push(action);
 	}
 
+	// TODO: transaction should be immutable before dispatch
 	dispatch(isNormalizer: boolean = false): Transaction {
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema
@@ -267,14 +270,14 @@ export class Transaction {
 		return this;
 	}
 
-	commit(): boolean {
-		if (this.cancelled) {
-			return false;
-		}
+	// prepare transaction for commit
+	// check if schema is violated by the transaction and try to normalize or throw error
+	prepare() {}
 
-		if (this.actions.length === 0 && this.updatedIds.size === 0) return false
-
+	commit(draft: CarbonStateDraft) {
+		if (this.actions.length === 0) return
 		// const prevDocVersion = editor.doc?.updateCount;
+		
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
 				console.group('Transaction (runtime)');
@@ -284,20 +287,10 @@ export class Transaction {
 
 			for (const action of this.actions) {
 				console.log(p14('%c[command]'), "color:white", action.toString());
-
-				const { ok, error } = action.execute(this);
-				if (!ok) {
-					this.error = new TransactionError(action.id, error!);
-				}
-
-				if (this.error) {
-					this.rollback();
-				}
-
-				// this.undoCommands.push(undo.unwrap());
+				action.execute(this, draft);
 			}
-			console.groupEnd();
 
+			console.groupEnd();
 			// const onlySelectionChanged = this.commands.every(c => c instanceof SelectCommand)
 			// if (!onlySelectionChanged) {
 
@@ -305,21 +298,17 @@ export class Transaction {
 			// normalize after transaction command
 			// this way the merge will happen before the final selection
 
-			this.normalizeNodes();
-			this.committed = true;
+			// this.normalizeNodes(draft);
 			// console.log(this.editor.doc.textContent);
-			return true;
 		} catch (error) {
 			console.groupEnd()
-			console.error(error);
-			this.rollback();
-			return false;
+			throw Error('transaction error');
 		}
 	}
 
 	// NOTE: normalize can generate further transaction
 	// can generate further transaction
-	private normalizeNodes() {
+	private normalizeNodes(draft: CarbonStateDraft) {
 		const ids = this.normalizeIds.toArray();
 
 		this.normalizeIds.clear();
@@ -329,23 +318,26 @@ export class Transaction {
 			.map(id => this.app.store.get(id))
 			.filter(identity) as Node[];
 		const sortedNodes = sortBy(nodes, n => -n.depth);
-		sortedNodes
-			.map(n => n && this.pm.normalize(n, this.app).forEach(action => {
-				if (last(this.actions) instanceof SelectAction) {
-					this.actions = [
-						...this.actions.slice(0, -1),
-						action,
-						...this.actions.slice(-1),
-					]
-				} else {
-					this.actions.push(action)
-				}
-				// console.log(action);
+		const actions = flatten(sortedNodes.map(n => n && this.pm.normalize(n)));
 
-				action.execute(this);
-			}))
+		for (const action of flatten(actions)) {
+			if (isEmpty(action)) {
+				throw Error('normalize action is empty');
+			}
 
-		// this.normalizeNodes();
+			if (last(this.actions) instanceof SelectAction) {
+				this.actions = [
+					...this.actions.slice(0, -1),
+					action,
+					...this.actions.slice(-1),
+				]
+			} else {
+				this.actions.push(action)
+			}
+
+			// console.log(action);
+			action.execute(this, draft);
+		}
 	}
 
 	private abort(message: string) {

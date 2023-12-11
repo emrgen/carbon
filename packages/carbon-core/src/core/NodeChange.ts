@@ -1,4 +1,6 @@
+import { Optional } from "@emrgen/types";
 import { NodeIdSet } from "./BSet";
+import { PinnedSelection } from "./PinnedSelection";
 
 export class StateChanges {
   inserted: NodeIdSet = new NodeIdSet();
@@ -12,6 +14,8 @@ export class StateChanges {
   updatedProps: NodeIdSet = new NodeIdSet();
   updatedMarks: NodeIdSet = new NodeIdSet();
   updatedStyles: NodeIdSet = new NodeIdSet();
+  selection: Optional<PinnedSelection> = null;
+  pendingSelections: PinnedSelection[] = [];
 
   diff(other: StateChanges): StateChanges {
     const diff = new StateChanges();
@@ -27,7 +31,7 @@ export class StateChanges {
   }
 
   get isDirty() {
-    return this.isContentDirty || this.isNodeStateDirty || this.isClipboardDirty || this.isPropsDirty || this.isMarksDirty || this.isStylesDirty;
+    return this.isContentDirty || this.isNodeStateDirty || this.isClipboardDirty || this.isPropsDirty || this.isMarksDirty || this.isStylesDirty || this.isSelectionDirty;
   }
 
   get isContentDirty() {
@@ -36,6 +40,10 @@ export class StateChanges {
 
   get isNodeStateDirty() {
       return this.selected.size || this.activated.size || this.opened.size;
+  }
+
+  get isSelectionDirty() {
+    return !!this.selection;
   }
 
   get isClipboardDirty() {
@@ -68,6 +76,27 @@ export class StateChanges {
     this.updatedStyles.freeze();
 
     Object.freeze(this);
+
+    return this;
+  }
+
+  clone() {
+    const clone = new StateChanges();
+    clone.inserted = this.inserted.clone();
+    clone.updated = this.updated.clone();
+    clone.deleted = this.deleted.clone();
+    clone.moved = this.moved.clone();
+    clone.selected = this.selected.clone();
+    clone.activated = this.activated.clone();
+    clone.opened = this.opened.clone();
+    clone.clipboard = this.clipboard.clone();
+    clone.updatedProps = this.updatedProps.clone();
+    clone.updatedMarks = this.updatedMarks.clone();
+    clone.updatedStyles = this.updatedStyles.clone();
+    clone.selection = this.selection;
+    clone.pendingSelections = this.pendingSelections.slice();
+
+    return clone;
   }
 
 }

@@ -108,7 +108,7 @@ export class ClipboardPlugin extends AfterPlugin {
       content: BlockContent.create(cloned),
       id: NodeId.create(String(Math.random())),
     });
-    root.content.withParent(root);
+    root.content.setParentId(root.id);
     console.log('rootNode', root);
 
     const deleteGroup = new SelectionPatch()

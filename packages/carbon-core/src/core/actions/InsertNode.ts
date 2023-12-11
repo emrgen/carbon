@@ -8,6 +8,7 @@ import { Pin } from '../Pin';
 import { classString } from '../Logger';
 import { RemoveNode } from './RemoveNode';
 import { Node } from '../Node';
+import { CarbonStateDraft } from '../CarbonStateDraft';
 
 export class InsertNode implements CarbonAction {
 	id: number;
@@ -22,58 +23,56 @@ export class InsertNode implements CarbonAction {
 		this.nodeJson = node.toJSON();
 	}
 
-	execute(tr: Transaction): ActionResult {
+	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { at, nodeJson } = this;
 		const {app}=tr;
-		const refNode = app.store.get(at.nodeId);
-
+		const refNode = draft.get(at.nodeId);
 		const node = app.schema.nodeFromJSON(nodeJson)!;
 
 		if (!refNode) {
-			return ActionResult.withError('failed to find target from: ' + at.toString())
+			throw new Error('failed to find target node from: ' + at.toString())
 		}
 
-		if (refNode.deleted) {
-			node.delete();
-			app.store.delete(node)
-			return ActionResult.withError('ref node already deleted, by transaction from other site');
-		}
+		// if (refNode.deleted) {
+		// 	node.delete();
+		// 	app.store.delete(node)
+		// 	return ActionResult.withError('ref node already deleted, by transaction from other site');
+		// }
 
 		const {parent} = refNode;
 		if (!parent) {
 			return ActionResult.withError('failed to find target parent from: ' + at.toString())
 		}
 
-		const done = () => {
-			node.forAll(n => {
-				node.undelete();
-				app.store.put(n);
-			})
+		// const done = () => {
+		// 	node.forAll(n => {
+		// 		node.undelete();
+		// 		app.store.put(n);
+		// 	})
 
-			tr.updated(parent);
-			return ActionResult.withValue('done');
-		}
+		// 	tr.updated(parent);
+		// }
 
 		if (at.isStart) {
-			refNode.prepend(node);
-			return done()
+			draft.prepend(refNode, node);
+			return
 		}
 
 		if (at.isBefore) {
-			parent.insertBefore(refNode, node);
-			return done()
+			draft.insertBefore(refNode, node);
+			return
 		}
 
 		if (at.isAfter) {
-			parent.insertAfter(refNode, node);
-			return done()
+			draft.insertAfter(refNode, node);
+			return
 		}
 
 		if (at.isEnd) {
-			throw new Error('not implemented');
+			draft.append(refNode, node);
 		}
 
-		return ActionResult.withError('failed to insert fragment')
+		throw new Error('should not reach here');
 	}
 
 	inverse(tr: Transaction): CarbonAction {

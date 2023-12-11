@@ -1,6 +1,5 @@
-import { each, first, identity } from 'lodash';
+import { each, identity } from 'lodash';
 import { NodeIdSet } from './BSet';
-import { CarbonState } from './CarbonState';
 import { Carbon } from './Carbon';
 import { Node } from "./Node";
 import { NodeTopicEmitter } from './NodeEmitter';
@@ -8,7 +7,7 @@ import { SelectionManager } from './SelectionManager';
 import { TransactionManager } from './TransactionManager';
 import { EventsOut } from './Event';
 import { Transaction } from './Transaction';
-import { ActionOrigin } from './actions';
+import { StateChanges } from './NodeChange';
 
 export enum NodeChangeType {
 	update = 'update',
@@ -21,14 +20,19 @@ export enum NodeChangeType {
 export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	readonly transactions: Transaction[] = []
+	changes: StateChanges;
 
 	constructor(
 		private readonly app: Carbon,
-		private readonly state: CarbonState,
 		private readonly sm: SelectionManager,
 		private readonly tm: TransactionManager
 	) {
 		super();
+		this.changes = app.state.changes.clone();
+	}
+
+	private get state() {
+		return this.app.state;
 	}
 
 	private get store() {
@@ -36,7 +40,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	}
 
 	private get isContentSynced() {
-		return !this.state.runtime.updatedNodeIds.size;
+		return !this.changes.isContentDirty
 	}
 
 	private get isStateSynced() {
@@ -46,11 +50,11 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	// 1. sync the doc
 	// 2. sync the selection
 	// 3. sync the node state
-	update(tr?: Transaction) {
-		if (tr) {
-			this.transactions.push(tr);
-		}
-		const { isContentDirty, isNodeStateDirty, isSelectionDirty } = this.state;
+	update() {
+		// if (tr) {
+		// 	this.transactions.push(tr);
+		// }
+		const { isContentDirty, isNodeStateDirty, isSelectionDirty } = this.state.changes;
 
 		// console.log('updating transaction effect', tr);
 		// console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
@@ -59,6 +63,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			return
 		}
 
+		console.log('==============');
+		
 		if (isContentDirty) {
 			console.log(isSelectionDirty, isNodeStateDirty);
 			this.updateContent();
@@ -77,7 +83,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		}
 
 		if (isSelectionDirty) {
-			// console.log('updating selection');
+			console.log('updating selection');
 			this.updateSelection(() => {
 				this.onTransaction();
 			})
@@ -145,7 +151,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 				return
 			}
 			updatedNodeIds.add(n.id);
-		})
+		});
 
 		// console.log('publish', updatedNodes.map(n => n.id.toString()));
 
@@ -180,9 +186,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	}
 
 	private updateSelection(cb: Function) {
-
 		if (!this.app.ready) {
-			console.log('app not ready');
+			// console.log('app not ready');
 			return
 		}
 

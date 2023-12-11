@@ -5,11 +5,12 @@ import { Transaction } from "./Transaction";
 import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
 import { EventsOut } from './Event';
+import { CarbonState } from './CarbonState';
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];
 
-	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager) { }
+	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager, readonly updateState: (state: CarbonState) => void) { }
 
 	private get state() {
 		return this.app.state;
@@ -37,33 +38,39 @@ export class TransactionManager {
 		// normalizer transactions are allowed to commit even with pending selection events
 		while (this.transactions.length && (!this.runtime.selectEvents.length || this.transactions[0].isNormalizer)) {
 			const tr = this.transactions.shift();
+			if (!tr) continue;
 			console.log('Commit', tr)
-			if (tr?.commit()) {
+			const state = app.state.produce(draft => {
+				tr.prepare();
+				tr.commit(draft);
 				// TODO: transaction should me made read-only after commit
-				pm.onTransaction(tr);
-				app.emit(EventsOut.transactionCommit, tr);
-				this.updateTransactionEffects(tr);
-			}
+				// tr.freeze();
+
+				// pm.onTransaction(tr);
+				// app.emit(EventsOut.transactionCommit, tr);
+				// this.updateTransactionEffects(tr);
+			});
+
+			this.updateState(state)
 		}
 	}
 
-	private updateTransactionEffects(tr: Transaction) {
-		if (tr.updatesContent) {
-			this.commitContent();
-		}
+	// private updateTransactionEffects(tr: Transaction) {
+	// 	if (tr.updatesContent) {
+	// 		this.commitContent();
+	// 	}
 
-		if (tr.updatesNodeState) {
-			this.commitNodeStates();
-		}
+	// 	if (tr.updatesNodeState) {
+	// 		this.commitNodeStates();
+	// 	}
 
-		if (tr.updatesSelection) {
-			this.commitSelection();
-		}
+	// 	if (tr.updatesSelection) {
+	// 		this.commitSelection();
+	// 	}
 
-		// update dom to reflect the state changes
-		this.app.change.update(tr);
-		this.app.emit(EventsOut.change, this.state);
-	}
+	// 	// update dom to reflect the state changes
+	// 	this.app.emit(EventsOut.change, this.state);
+	// }
 
 	private commitContent() {
 		this.state.updateContent();

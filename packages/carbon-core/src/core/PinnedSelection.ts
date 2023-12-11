@@ -96,7 +96,7 @@ export class PinnedSelection {
 
 		let tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
 		let head = Pin.fromDom(focusNode, focusOffset)?.up();
-		// console.log(tail?.toString(), head?.toString());
+		console.log(tail?.toString(), head?.toString());
 
 		if (!tail || !head) {
 			console.warn(p14('%c[error]'), 'color:red', 'Pin.fromDom failed');
@@ -105,7 +105,7 @@ export class PinnedSelection {
 
 		// console.info(p14('%c[info]'), 'color:pink', p30('fromDom:afterOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
 		const selection = PinnedSelection.create(tail, head);
-		// console.log(p14('%c[info]'), 'color:pink', p30('fromDom:Selection'), selection.toString());
+		console.log(p14('%c[info]'), 'color:pink', p30('fromDom:Selection'), selection.toString());
 
 		return selection;
 	}
@@ -391,6 +391,11 @@ export class PinnedSelection {
 			tail: this.tail.toString(),
 			head: this.head.toString()
 		})
+	}
+
+	freeze() {
+		Object.freeze(this);
+		return this;
 	}
 
 }

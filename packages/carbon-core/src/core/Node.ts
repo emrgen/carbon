@@ -148,7 +148,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get parent() {
-		const map = StateScope.get(this.scope)
+		const map = StateScope.get(this.scope);
+		if (!this.parentId) return null;
 		return map.get(this.parentId!)
 	}
 
@@ -844,6 +845,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	freeze() {
 		Object.freeze(this)
+		return this;
 	}
 }
 

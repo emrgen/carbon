@@ -12,6 +12,7 @@ import { CarbonClipboard } from './CarbonClipboard';
 import EventEmitter from 'events';
 import { NodeMap } from './NodeMap';
 import { StateChanges } from './NodeChange';
+import { CarbonStateDraft } from './CarbonStateDraft';
 
 export class CarbonRuntimeState extends EventEmitter {
 	// pending
@@ -69,10 +70,11 @@ export class CarbonRuntimeState extends EventEmitter {
 
 
 interface CarbonStateProps {
-	name: string;
+	previous?: CarbonState;
+	scope: string;
 	content: Node;
 	selection: PinnedSelection;
-	nodeMap?: NodeMap;
+	nodeMap: NodeMap;
 	changes?: StateChanges;
 	store: NodeStore;
 
@@ -84,7 +86,9 @@ interface CarbonStateProps {
 
 
 export class CarbonState extends EventEmitter {
-	name: string;
+	previous: Optional<CarbonState>;
+
+	scope: string;
 	content: Node;
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
@@ -107,8 +111,6 @@ export class CarbonState extends EventEmitter {
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
 	isSelectionDirty: boolean;
 
-	kvStore: Map<string, any> = new Map();
-
 	private dirty = false;
 
 
@@ -128,18 +130,19 @@ export class CarbonState extends EventEmitter {
 		return new BlockSelection(this.store, this.selectedNodeIds);
 	}
 
-	static create(name: string, store: NodeStore, content: Node, selection: PinnedSelection) {
-		return new CarbonState({ store, content, selection, name })
+	static create(scope: string, store: NodeStore, content: Node, selection: PinnedSelection, nodeMap: NodeMap) {
+		return new CarbonState({ store, content, selection, scope, nodeMap })
 	}
 
 	constructor(props: CarbonStateProps) {
 		super();
 		const {
-			name,
+			scope,
+			previous,
 			store,
 			content,
 			selection,
-			nodeMap = new NodeMap(),
+			nodeMap,
 			changes = new StateChanges(),
 			runtime = new CarbonRuntimeState(),
 			decorations = new DecorationStore(),
@@ -147,7 +150,8 @@ export class CarbonState extends EventEmitter {
 			activatedNodeIds = new NodeIdSet(),
 		} = props;
 
-		this.name = name;
+		this.previous = previous;
+		this.scope = scope;
 		this.content = content;
 		this.selection = selection;
 		this.decorations = decorations;
@@ -165,15 +169,6 @@ export class CarbonState extends EventEmitter {
 
 		this.dirty = false;
 		this.isSelectionDirty = true;
-	}
-
-	get(key: string) {
-		return this.kvStore.get(key);
-	}
-
-	set(key: string, value: any) {
-		const prev = this.kvStore.get(key);
-		this.kvStore.set(key, merge(cloneDeep(prev), value));
 	}
 
 	init() {
@@ -260,31 +255,20 @@ export class CarbonState extends EventEmitter {
 	}
 
 	clone() {
-		return CarbonState.create(this.name, this.store, this.content, this.selection);
+		return CarbonState.create(this.scope, this.store, this.content, this.selection, this.nodeMap);
 	}
 
-	produce(fn: (state: CarbonStateDraft) => void) {
+	produce(fn: (state: CarbonStateDraft) => void): CarbonState {
 		const draft = new CarbonStateDraft(this);
 		try {
 			fn(draft);
-			const state = draft.commit();
+			const state = draft.prepare().commit();
+			draft.dispose();
 			return state;
 		} catch (e) {
 			console.error(e);
+			draft.dispose();
 			return this;
 		}
-	}
-}
-
-class CarbonStateDraft {
-	state: CarbonState;
-
-	constructor(state: CarbonState) {
-		this.state = state;
-	}
-
-	// turn the draft into a new state
-	commit() {
-		return this.state;
 	}
 }

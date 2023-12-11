@@ -95,16 +95,16 @@ const data = node("carbon", [
     //   { node: { collapsed: true } }
     // ),
     // // node("docLink", [title([text("Link to doc")])]),
-    node("section", [
-      title([text("section 0")]),
-      node("section", [
-        title([text("section 0.1")]),
-        node("section", [
-          title([text("section 0.1.1")]),
-          node("section", [title([text("section 0.1.1.1")])]),
-        ]),
-      ]),
-    ]),
+    // node("section", [
+    //   title([text("section 0")]),
+    //   node("section", [
+    //     title([text("section 0.1")]),
+    //     node("section", [
+    //       title([text("section 0.1.1")]),
+    //       node("section", [title([text("section 0.1.1.1")])]),
+    //     ]),
+    //   ]),
+    // ]),
     // node("section", [
     //   title([text("section 1")]),
     //   node("section", [
@@ -119,18 +119,18 @@ const data = node("carbon", [
     //   node("section", [title([text("section 1.2")])]),
     // ]),
     // node("todo", [title([text("section 1")])], {}),
-    // node(
-    //   "section",
-    //   [
-    //     title([text("section 1")]),
-    //     node(
-    //       "todo",
-    //       [title([text("section 1")]), section([title([text("section")])])],
-    //       {}
-    //     ),
-    //   ],
-    //   {}
-    // ),
+    node(
+      "section",
+      [
+        title([text("section 1")]),
+        node(
+          "todo",
+          [title([text("section 1")]), section([title([text("section")])])],
+          {}
+        ),
+      ],
+      {}
+    ),
 
     // node("section", [title([text("section 1.2")])]),
     // node("image", [], {

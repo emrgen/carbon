@@ -26,7 +26,6 @@ export class MoveAction implements CarbonAction {
 		this.origin = origin;
 	}
 
-	//
 	execute(tr: Transaction): ActionResult<any> {
 		const { app } = tr;
 		const { to, nodeIds } = this;

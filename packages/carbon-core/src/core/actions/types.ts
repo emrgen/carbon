@@ -1,12 +1,11 @@
-import { Carbon } from "../Carbon";
-import { Schema } from "../Schema";
+import { CarbonStateDraft } from "../CarbonStateDraft";
 import { Transaction } from "../Transaction"
 import { ActionResult } from './Result';
 
 export interface CarbonAction {
 	id: number;
 	origin: ActionOrigin;
-	execute(tr: Transaction): ActionResult;
+	execute(tr: Transaction, draft: CarbonStateDraft);
 	inverse(tr: Transaction): CarbonAction
 }
 

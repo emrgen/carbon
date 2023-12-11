@@ -5,10 +5,12 @@ import { PinnedSelection } from './PinnedSelection';
 import { NodeStore } from './NodeStore';
 import { Pin } from './Pin';
 import { classString } from './Logger';
+import { ActionOrigin } from './actions';
 
 export class PointedSelection {
 	tail: Point;
 	head: Point;
+	origin: ActionOrigin = ActionOrigin.Unknown;
 
 	get isInvalid() {
 		return this.head.isDefault || this.tail.isDefault;

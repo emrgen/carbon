@@ -17,11 +17,12 @@ import { Transaction } from './Transaction';
 import { TransactionManager } from './TransactionManager';
 import { CarbonCommands, Maps, SerializedNode } from "./types";
 import { BlockSelection } from './NodeSelection';
-import { first, isFunction } from 'lodash';
+import { cloneDeep, first, isFunction, merge } from 'lodash';
 import { CarbonCommandChain } from './CarbonCommandChain';
 import { CarbonMessageBus } from './MessageBus';
 import { CarbonPlugin } from './CarbonPlugin';
 import { StateScope } from "./StateScope";
+import { NodeMap } from "./NodeMap";
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -33,6 +34,7 @@ export class Carbon extends EventEmitter {
 
 	// for external application use
 	bus: CarbonMessageBus = new CarbonMessageBus();
+	kvStore: Map<string, any> = new Map();
 
 	schema: Schema;
 	state: CarbonState;
@@ -56,13 +58,20 @@ export class Carbon extends EventEmitter {
 		this.pm = pm;
 		this.rm = renderer;
 		this.schema = schema;
-		this.state = CarbonState.create(name, new NodeStore(), content, PinnedSelection.default(content));
+
+		const map = new NodeMap();
+		content.forAll(n => map.set(n.id, n));
+		this.state = CarbonState.create(name, new NodeStore(), content, PinnedSelection.default(content), map);
 		StateScope.set(name, this.state.nodeMap);
 
 		this.sm = new SelectionManager(this);
 		this.em = new EventManager(this, pm);
-		this.tm = new TransactionManager(this, pm, this.sm);
-		this.change = new ChangeManager(this, this.state, this.sm, this.tm);
+
+		this.tm = new TransactionManager(this, pm, this.sm, (state: CarbonState) => {
+			this.updateState(state);
+		});
+
+		this.change = new ChangeManager(this, this.sm, this.tm);
 
 		this.cmd = pm.commands(this);
 		this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
@@ -152,6 +161,26 @@ export class Carbon extends EventEmitter {
 		}
 	}
 
+	private updateState(state: CarbonState) {
+		if (this.state === state) return
+
+		// keep three previous states
+		let count = 3;
+		let prev: Optional<CarbonState> = this.state;
+		while (--count) {
+			prev = prev.previous;
+			if (!prev) break;
+		}
+
+		if (prev) {
+			prev.previous = null;
+		}
+
+		this.state = state;
+		console.log(this.state.changes);
+		this.change.update();
+	}
+
 	component(name: string) {
 		return this.rm.component(name)
 	}
@@ -206,6 +235,15 @@ export class Carbon extends EventEmitter {
 
 	nextTick(cb) {
 		this.ticks.push(cb);
+	}
+
+	get(key: string) {
+		return this.kvStore.get(key);
+	}
+
+	set(key: string, value: any) {
+		const prev = this.kvStore.get(key);
+		this.kvStore.set(key, merge(cloneDeep(prev), value));
 	}
 
 	processTick() {
