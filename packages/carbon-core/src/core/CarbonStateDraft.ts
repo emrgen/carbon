@@ -68,6 +68,16 @@ export class CarbonStateDraft {
 
   // prepare the draft for commit
   prepare() {
+    if (!this.drafting) {
+      throw new Error("Cannot prepare a draft that is already committed");
+    }
+
+    // remove deleted nodes from changed list
+    // this will prevent from trying to render deleted nodes
+    this.changes.deleted.forEach(id => {
+      this.changes.changed.remove(id);
+    });
+
     const changed: NodeDepthEntry[] = this.changes.changed.toArray().map(id => {
       const node = this.nodeMap.get(id)!;
       const depth = this.nodeMap.parents(node).length;
@@ -130,9 +140,26 @@ export class CarbonStateDraft {
       throw new Error("Cannot update content on a draft that is already committed");
     }
 
+    let isEmpty = content.size === 0;
     this.mutable(nodeId, node => {
+      isEmpty = isEmpty || node.content.size === 0;
+      node.children.forEach(child => {
+        this.nodeMap.delete(child.id);
+      });
       node.updateContent(content);
     });
+
+    // if the content is/ws empty, we need to trigger parent render to render placeholder
+    if (isEmpty) {
+      const parent = this.nodeMap.parent(nodeId);
+      if (!parent) {
+        throw Error('parent not found');
+      }
+      // console.log('triggering parent render', parent.id.toString());
+
+      this.changes.changed.add(parent.id);
+    }
+
     console.log('inserting content', nodeId.toString(), content.size);
     content.children.forEach(child => {
       console.log(child.id.toString(), child.parentId?.toString(), child.frozen);
@@ -198,6 +225,7 @@ export class CarbonStateDraft {
       });
     } else {
       this.changes.moved.add(node.id);
+      this.nodeMap.set(node.id, node);
     }
 
     switch (at.at) {
@@ -289,11 +317,21 @@ export class CarbonStateDraft {
       throw new Error("Cannot remove node that does not have a parent");
     }
 
-    this.mutable(parentId, parent => parent.remove(node));
+    this.mutable(parentId, parent => {
+      parent.remove(node);
+      // NOTE: if the parent is empty, we need to trigger parent render to render placeholder
+      if (parent.isEmpty && parent.parentId) {
+        this.mutable(parent.parentId, parent => {
+          this.changes.changed.add(parent.id);
+        })
+      }
+    });
 
     this.changes.changed.add(parentId);
     node.forAll(n => {
+      console.log('removing node', n.id.toString(), n.name);
       this.changes.deleted.add(n.id);
+      this.changes.changed.remove(n.id);
     });
   }
 

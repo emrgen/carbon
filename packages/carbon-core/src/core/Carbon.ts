@@ -64,7 +64,7 @@ export class Carbon extends EventEmitter {
 		this.state = CarbonState.create(name, content, PinnedSelection.default(content), map);
 		StateScope.set(name, this.state.nodeMap);
 
-		this.store = new NodeStore(this.state)
+		this.store = new NodeStore(this);
 
 		this.sm = new SelectionManager(this);
 		this.em = new EventManager(this, pm);

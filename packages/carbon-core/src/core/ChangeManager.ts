@@ -104,6 +104,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	mounted(node: Node, changeType: NodeChangeType) {
 		if (!this.changes.changed.has(node.id)) {
+			console.log('mounted node not dirty', node.id.toString(), changeType);
 			return
 		}
 

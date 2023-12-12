@@ -1268,7 +1268,7 @@ export class TransformCommands extends BeforePlugin {
     let endBlock = app.store.get(endPoint.nodeId);
     // console.log('after split', tailNode?.id.toString());
     if (!startBlock || !endBlock) {
-      console.log("failed to find head/tail node");
+      console.log("failed to find head/tail node", startPoint.nodeId.toString(), endPoint.nodeId.toString());
       return collectedInfo();
     }
 

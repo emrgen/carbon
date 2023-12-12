@@ -5,7 +5,7 @@ import { Schema } from './Schema';
 import { BlockContent, InlineContent } from './NodeContent';
 
 import {  generateBlockId, generateTextId } from './actions/utils';
-import { NodeIdFactory } from "@emrgen/carbon-core";
+import { deepCloneMap, NodeIdFactory } from "@emrgen/carbon-core";
 
 
 
@@ -46,7 +46,7 @@ export class SchemaFactory {
 
 	// clone node with new id
 	cloneWithId(node: Node): Node {
-		const clone = node.clone();
+		const clone = node.clone(deepCloneMap);
 		clone.forAll(n => {
 			if (n.name === 'text') {
 				n.id = NodeId.create(SchemaFactory.textId());

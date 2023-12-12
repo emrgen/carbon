@@ -10,7 +10,7 @@ import { RemoveNode } from './RemoveNode';
 import { Node } from '../Node';
 import { CarbonStateDraft } from '../CarbonStateDraft';
 import { identity } from "lodash";
-import { deepClonerFn } from "@emrgen/carbon-core";
+import { deepCloneMap } from "@emrgen/carbon-core";
 
 export class InsertNode implements CarbonAction {
 	id: number;
@@ -48,7 +48,7 @@ export class InsertNode implements CarbonAction {
 			throw new Error('failed to find parent node from: ' + at.toString())
 		}
 
-		const clone = node.clone(deepClonerFn);
+		const clone = node.clone(deepCloneMap);
 		draft.insert(at, clone, 'create');
 	}
 

@@ -2,17 +2,18 @@ import { Optional } from "@emrgen/types";
 import { NodeId } from './NodeId';
 import { Node } from './Node';
 import { CarbonState } from "./CarbonState";
+import { Carbon } from "@emrgen/carbon-core";
 
 export class NodeStore {
 	// private deletedNodeMap: Map<string, Node> = new Map();
 	private elementMap: Map<string, HTMLElement> = new Map();
 	private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
 
-	constructor(private readonly state: CarbonState) {
+	constructor(private readonly app: Carbon) {
 	}
 
 	get nodeMap() {
-		return this.state.nodeMap;
+		return this.app.state.nodeMap;
 	}
 
 	// nodes() {
@@ -87,7 +88,7 @@ export class NodeStore {
 	// connect the node to the rendered HTML element
 	register(node: Node, el: Optional<HTMLElement>) {
 		// console.log('register node', node.id.toString(), el);
-		
+
 		if (!el) {
 			console.error(`Registering empty dom node for ${node.id.toString()}`)
 			return
