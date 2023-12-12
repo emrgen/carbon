@@ -101,31 +101,31 @@ export const DocumentComp = (props: RendererProps) => {
   );
 
   // scroll to bottom on transaction if cursor is below the screen
-  useEffect(() => {
-    const paddingBottom = 40;
-    const onTransaction = (tr: any) => {
-      const el = ref.current;
-      if (!el) return;
-      const { head } = app.selection.bounds(app.store);
-      if (!head) return;
-      const { bottom,  top } = head;
-      // console.log(bottom, el.offsetHeight, el.scrollHeight, el.scrollTop);
+  // useEffect(() => {
+  //   const paddingBottom = 40;
+  //   const onTransaction = (tr: any) => {
+  //     const el = ref.current;
+  //     if (!el) return;
+  //     const { head } = app.selection.bounds(app.store);
+  //     if (!head) return;
+  //     const { bottom,  top } = head;
+  //     // console.log(bottom, el.offsetHeight, el.scrollHeight, el.scrollTop);
 
-      if (top < paddingBottom) {
-        el.scrollTop = el.scrollTop + top - paddingBottom;
-        return;
-      }
+  //     if (top < paddingBottom) {
+  //       el.scrollTop = el.scrollTop + top - paddingBottom;
+  //       return;
+  //     }
 
-      if (bottom > el.offsetHeight - paddingBottom) {
-        el.scrollTop = el.scrollTop + bottom - el.offsetHeight + paddingBottom;
-        return;
-      }
-    }
-    app.on(EventsOut.selectionUpdated, onTransaction);
-    return () => {
-      app.off(EventsOut.selectionUpdated, onTransaction);
-    };
-  }, [app, ref]);
+  //     if (bottom > el.offsetHeight - paddingBottom) {
+  //       el.scrollTop = el.scrollTop + bottom - el.offsetHeight + paddingBottom;
+  //       return;
+  //     }
+  //   }
+  //   app.on(EventsOut.selectionUpdated, onTransaction);
+  //   return () => {
+  //     app.off(EventsOut.selectionUpdated, onTransaction);
+  //   };
+  // }, [app, ref]);
 
   return (
     <DocumentContext document={node}>

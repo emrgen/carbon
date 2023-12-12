@@ -42,31 +42,31 @@ interface UseNodeChangeProps {
 // start watching for the node change
 export const useNodeChange = (props: UseNodeChangeProps) => {
 	const { node } = props;
+	const {id: nodeId} = node;
 	const change = useCarbonChange();
 	const [watched, setWatched] = useState(node);
 	// this will force the ui update
-	const [version, setVersion] = useState(node.version);
+	// const [version, setVersion] = useState(node.version);
 
 	useEffect(() => {
 		const onChange = (value: Node) => {
-			props.onChange?.(value);
-			setVersion(value.version);
 			setWatched(value);
-			// console.log("updated", node.id.toString(), node.version, watched === value);
+			// console.log(value.version, node.version, value.id.toString(), value.textContent);
+			// console.log("node changed", node.id.toString(),  watched === value, value.textContent, value.version);
 		};
 		change.subscribe(node.id, NodeChangeType.update, onChange);
 		return () => {
 			change.unsubscribe(node.id, NodeChangeType.update, onChange);
 		}
-	}, [change, node.id, node.version, props, watched]);
+	}, [change, node]);
 
 	useEffect(() => {
-		change.mounted(watched, NodeChangeType.update)
-	}, [change, version, watched]);
+		change.mounted(watched.id, NodeChangeType.update)
+	}, [change, watched]);
 
 	return {
 		node: watched,
-		version: version,
+		change,
 	};
 };
 
@@ -93,9 +93,9 @@ export const useNodeStateChange = (props: UseNodeChangeProps) => {
 	}, [change, node]);
 
 	// inform the change manager that this node is mounted
-	useEffect(() => {
-		change.mounted(node, NodeChangeType.state);
-	}, [node, isActive, isSelected, isOpen, change]);
+	// useEffect(() => {
+	// 	change.mounted(node, NodeChangeType.state);
+	// }, [node, isActive, isSelected, isOpen, change]);
 
 	const attributes = useMemo(() => {
 		const ret = {}
@@ -141,7 +141,7 @@ export const useNodeAttrs = (props: UseNodeChangeProps) => {
 	}, [change, node]);
 
 	useEffect(() => {
-		change.mounted(node, NodeChangeType.update);
+		// change.mounted(node, NodeChangeType.update);
 	}, [node, change]);
 
 	return attrs;

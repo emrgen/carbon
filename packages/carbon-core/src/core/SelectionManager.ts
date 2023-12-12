@@ -102,7 +102,6 @@ export class SelectionManager {
 	// this must be called after the dom is updated
 	syncSelection() {
 		// console.log('syncSelection', this.state.selectionOrigin, this.state.selection.toString()	);
-		
 		if (!this.enabled) {
 			console.log('skipped: selection sync disabled');
 			return

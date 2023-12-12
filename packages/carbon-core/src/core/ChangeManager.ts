@@ -9,6 +9,7 @@ import { EventsOut } from './Event';
 import { Transaction } from './Transaction';
 import { StateChanges } from './NodeChange';
 import { PluginManager } from './PluginManager';
+import { NodeId } from './NodeId';
 
 export enum NodeChangeType {
 	update = 'update',
@@ -44,6 +45,14 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		return !this.changes.isContentDirty
 	}
 
+	private get isContentDirty() {
+		return this.changes.isContentDirty
+	}
+
+	private get isSelectionDirty() {
+		return this.changes.isSelectionDirty
+	}
+
 	private get isStateSynced() {
 		return !this.state.runtime.isNodeStateDirty
 	}
@@ -62,7 +71,11 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			return
 		}
 
-		this.changes = this.state.changes.clone();
+		if (isContentDirty) {
+			this.changes.changed.clear();
+			this.changes = this.state.changes.clone();
+		}
+		console.log('update', this.changes.changed.size, this.changes.changed.toArray().map(n => n.toString()));
 
 		if (isContentDirty) {
 			console.log(isSelectionDirty, isNodeStateDirty);
@@ -89,12 +102,19 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		}
 	}
 
-	mounted(node: Node, changeType: NodeChangeType) {
+	mounted(nodeId: NodeId, changeType: NodeChangeType) {
+		if (!this.changes.changed.has(nodeId)) {
+			return
+		}
+
 		// console.log('mounted', node.id.toString(), changeType);
 
 		// keep track of the pending node updates
 		if (changeType === NodeChangeType.update) {
-			this.state.runtime.updatedNodeIds.remove(node.id);
+		  console.log('mounted', nodeId.toString(), changeType, this.changes.changed.size, this.changes.changed.toArray().map(n => n.toString()));
+			// console.log('mounting', node.id.toString(), this.changes.changed.size);
+
+			this.changes.changed.remove(nodeId);
 		}
 
 		// console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
@@ -113,15 +133,16 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 		// console.log('mounted', this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
 		if (this.isContentSynced) {
+			console.log('content synced updating selection', this.state.selection, nodeId.toString());
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
-			if (this.state.changes.isSelectionDirty) {
+			if (this.isSelectionDirty) {
 				// console.log('updating selection', first(this.transactions));
 				this.updateSelection(() => {
 					this.onTransaction();
 				});
 			} else {
 				this.onTransaction();
-				this.app.processTick();
+				// this.app.processTick();
 				// console.log('process tick');
 			}
 		}
@@ -139,7 +160,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	private updateContent() {
 		console.group('syncing:  content');
 		// console.group('syncing: content')
-		const updatedNodeIds = this.changes.updated
+		const updatedNodeIds = this.changes.changed;
 		const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
 
 		console.log('updatedNodes', updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
@@ -155,7 +176,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			updatedNodeIds.add(n.id);
 		});
 
-		// console.log('publish', updatedNodes.map(n => n.id.toString()));
+		console.log('publish', updatedNodes.map(n => n.id.toString()));
 
 		updatedNodes
 			.filter(n => updatedNodeIds.has(n.id))
@@ -194,12 +215,12 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		}
 
 		if (!this.isContentSynced) {
-			throw new Error("Trying to sync selection with dirty content");
+			// throw new Error("Trying to sync selection with dirty content");
 		}
 		// this.app.enable();
 
-		console.log('syncing selection', this.state.selection);
-		console.group('syncing: selection');
+		// console.log('syncing selection', this.state.selection);
+		// console.group('syncing: selection');
 
 
 		this.sm.syncSelection();
@@ -207,8 +228,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		cb();
 
 		// process pending transactions
-		this.tm.dispatch();
-		console.groupEnd();
+		// this.tm.dispatch();
+		// console.groupEnd();
 	}
 
 }

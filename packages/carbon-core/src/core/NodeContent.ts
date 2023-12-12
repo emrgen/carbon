@@ -1,8 +1,9 @@
-import { findIndex, flatten } from 'lodash';
+import { findIndex, flatten, identity } from 'lodash';
 
 import { Node } from './Node';
 import { Optional } from "@emrgen/types";
 import { NodeId } from './NodeId';
+import { Maps, With } from './types';
 
 export interface NodeContent {
 	size: number;
@@ -24,7 +25,7 @@ export interface NodeContent {
 	updateText(text: string): void;
 
 	view(container: Node[]): NodeContent;
-	clone(): NodeContent;
+	clone(map: Maps<Node, Optional<Node>>): NodeContent;
 	toJSON(): any;
 }
 
@@ -143,8 +144,9 @@ export class BlockContent implements NodeContent {
 		throw new Error("Not implemented");
 	}
 
-	clone(): BlockContent {
-		return BlockContent.create(this.nodes.map(n => n.clone()));
+	clone(map: Maps<Node, Optional<Node>> = identity): BlockContent {
+		const children = this.nodes.map(n => map(n)).filter(identity) as Node[];
+		return BlockContent.create(children);
 	}
 
 	toJSON() {

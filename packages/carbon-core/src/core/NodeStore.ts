@@ -1,64 +1,70 @@
 import { Optional } from "@emrgen/types";
 import { NodeId } from './NodeId';
 import { Node } from './Node';
+import { CarbonState } from "./CarbonState";
 
 export class NodeStore {
-	private deletedNodeMap: Map<string, Node> = new Map();
-	private nodeMap: Map<string, Node> = new Map();
+	// private deletedNodeMap: Map<string, Node> = new Map();
 	private elementMap: Map<string, HTMLElement> = new Map();
 	private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
 
-	nodes() {
-		return Array.from(this.nodeMap.values());
+	constructor(private readonly state: CarbonState) {
 	}
+
+	get nodeMap() {
+		return this.state.nodeMap;
+	}
+
+	// nodes() {
+	// 	return Array.from(this.nodeMap);
+	// }
 
 	elements() {
 		return Array.from(this.elementMap.values());
 	}
 
-	entries() {
-		return this.nodes().map(n => [n, this.element(n.id)]);
-	}
+	// entries() {
+	// 	return this.nodes().map(n => [n, this.element(n.id)]);
+	// }
 
 	reset() {
-		this.deletedNodeMap.clear()
-		this.nodeMap.clear()
+		// this.deletedNodeMap.clear()
+		// this.nodeMap.clear()
 		this.elementMap.clear()
 		this.elementToNodeMap = new WeakMap();
 	}
 
-	getById(id: string): Optional<Node> {
+	getById(id: NodeId): Optional<Node> {
 		return this.nodeMap.get(id)
 	}
 
 	get(entry: NodeId | HTMLElement): Optional<Node> {
 		const nodeId = entry;
 		if (nodeId instanceof NodeId) {
-			return this.nodeMap.get(nodeId.id) //?? this.deletedNodeMap.get(nodeId.id);
+			return this.nodeMap.get(nodeId) //?? this.deletedNodeMap.get(nodeId.id);
 		} else {
 			return this.elementToNodeMap.get(entry as HTMLElement);
 		}
 	}
 
-	put(node: Node) {
-		if (node.deleted) {
-			this.deletedNodeMap.set(node.id.id, node);
-			this.nodeMap.delete(node.id.id);
-		} else {
-			this.deletedNodeMap.delete(node.id.id);
-			this.nodeMap.set(node.id.id, node);
-		}
-		// console.log('put node', node.id.toString());
-	}
+	// put(node: Node) {
+	// 	if (node.deleted) {
+	// 		this.deletedNodeMap.set(node.id.id, node);
+	// 		this.nodeMap.delete(node.id.id);
+	// 	} else {
+	// 		this.deletedNodeMap.delete(node.id.id);
+	// 		this.nodeMap.set(node.id.id, node);
+	// 	}
+	// 	// console.log('put node', node.id.toString());
+	// }
 
-	update(node: Node) {
-		if (node.deleted) {
-			this.delete(node);
-		} else {
-			this.deletedNodeMap.delete(node.id.id);
-			this.nodeMap.set(node.id.id, node);
-		}
-	}
+	// update(node: Node) {
+	// 	if (node.deleted) {
+	// 		this.delete(node);
+	// 	} else {
+	// 		this.nodeMap.set(node.id.id, node);
+	// 	}
+	// }
 
 	// get the rendered HTML element for the node
 	element(nodeId: NodeId): Optional<HTMLElement> {
@@ -80,6 +86,8 @@ export class NodeStore {
 
 	// connect the node to the rendered HTML element
 	register(node: Node, el: Optional<HTMLElement>) {
+		console.log('register node', node.id.toString(), el);
+		
 		if (!el) {
 			console.error(`Registering empty dom node for ${node.id.toString()}`)
 			return
@@ -90,24 +98,20 @@ export class NodeStore {
 		// other part of the id will eventually be added while rendering
 		this.delete(node);
 		// console.log('register node', node.id.toString());
-		this.deletedNodeMap.delete(id);
-		this.nodeMap.set(id, node);
+		// this.deletedNodeMap.delete(id);
 		this.elementMap.set(id, el);
 		this.elementToNodeMap.set(el, node);
 	}
 
-	delete(node: Node) {
+	delete(from: Node | NodeId) {
 		// console.log('delete node', node.id.toString());
-		const { id: nodeId } = node
-		const { id } = nodeId
+		const id = (from instanceof Node ? from.id : from).toString();
 		const el = this.elementMap.get(id);
 		if (el) {
 			this.elementToNodeMap.delete(el)
 		}
 
-		this.nodeMap.delete(id)
 		this.elementMap.delete(id)
-		this.deletedNodeMap.set(id, node);
 	}
 
 	// deleted(nodeId: NodeId): Optional<Node> {

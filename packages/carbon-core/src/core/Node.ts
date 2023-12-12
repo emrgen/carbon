@@ -1,4 +1,4 @@
-import { cloneDeep, findIndex, first, flatten, isEmpty, last, merge, noop, reverse } from "lodash";
+import { cloneDeep, findIndex, first, flatten, identity, isEmpty, last, merge, noop, reverse } from "lodash";
 import { Fragment } from "./Fragment";
 
 import { Optional, Predicate, With } from "@emrgen/types";
@@ -34,8 +34,7 @@ export interface NodeCreateProps {
 	state?: NodeState;
 	meta?: Record<string, any>;
 
-	renderVersion?: number;
-	updateVersion?: number;
+	version?: number;
 	deleted?: boolean;
 }
 
@@ -93,8 +92,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// meta is used for storing data like version, cerate time, last update time, etc.
 	meta: Record<string, any> = {};
 
-	renderVersion = 0;
-	updateVersion = 0;
+	version: number;
 
 	deleted = false;
 
@@ -126,8 +124,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 			attrs = {},
 			state = {},
 			meta = {},
-			renderVersion = 0,
-			updateVersion = 0,
+			version = 0,
 			deleted = false,
 		} = object;
 		this.test_key = nextKey()
@@ -142,8 +139,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.state = new NodeState(merge(cloneDeep(type.state), state));
 		this.meta = meta;
 
-		this.renderVersion = renderVersion;
-		this.updateVersion = updateVersion;
+		this.version = version;
 		this.deleted = deleted;
 	}
 
@@ -157,11 +153,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return this.id.id
 	}
 
-	get version() {
-		const { id, updateVersion } = this;
-		return `${id.id}(${updateVersion})`;
-	}
-
 	get placeholder() {
 		return this.type.attrs.html.placeholder
 	}
@@ -169,10 +160,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// nodes that are not allowed to merge with any other node
 	get canMerge() {
 		return !this.type.isIsolating && !this.isAtom;
-	}
-
-	get isDirty() {
-		return this.renderVersion < this.updateVersion
 	}
 
 	get name() {
@@ -654,45 +641,39 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return nodes;
 	}
 
+	// @mutates
 	replace(node: Node, by: Node | Node[]) {
 		this.content = this.content.replace(node, flatten([by])).setParentId(this.id)
-		this.markUpdated();
 	}
 
 	// @mutates
 	prepend(nodes: Node | Node[]) {
-		// this.content = this.content.prepend(flatten([nodes])).withParent(this);
-		this.markUpdated();
+		this.content = this.content.prepend(flatten([nodes])).setParentId(this.id);
 	}
 
 	// @mutates
 	append(nodes: Node | Node[]) {
-		// this.content = this.content.append(flatten([nodes])).withParent(this);
-		this.markUpdated();
+		this.content = this.content.append(flatten([nodes])).setParentId(this.id);
 	}
 
 	// @mutates
 	insertBefore(before: Node, nodes: Node | Node[]) {
-		// this.content = this.content.insertBefore(before, flatten([nodes])).withParent(this)
-		this.markUpdated();
+		this.content = this.content.insertBefore(before, flatten([nodes])).setParentId(this.id);
 	}
 
 	// @mutates
 	insertAfter(after: Node, nodes: Node | Node[]) {
-		// this.content = this.content.insertAfter(after, flatten([nodes]) as Node[]).withParent(this)
-		this.markUpdated();
+		this.content = this.content.insertAfter(after, flatten([nodes]) as Node[]).setParentId(this.id);
 	}
 
 	// @mutates
 	remove(node: Node) {
 		this.content.remove(node);
-		this.markUpdated();
 		// console.log('removed', this.root?.version, this.root?.name, this.root?.test_key, this.root?.updatedChildren)
 	}
 
 	updateText(text: string) {
 		this.content.updateText(text)
-		this.markUpdated()
 	}
 
 	updateContent(content: NodeContent) {
@@ -716,26 +697,22 @@ export class Node extends EventEmitter implements IntoNodeId {
 			...this.type.state,
 			...this.state,
 		});
-		this.markUpdated();
 	}
 
 	// @mutates
 	updateAttrs(props: Partial<NodeAttrs>) {
 		this.attrs = this.attrs.update(props);
-		this.markUpdated();
 	}
 
 
 	// @mutates
 	updateState(state: Partial<NodeState>) {
 		this.state = this.state.update(state);
-		this.markUpdated()
 	}
 
 	// @mutates
 	addMark(mark: Mark) {
 		this.marks.add(mark);
-		this.markUpdated();
 	}
 
 	// @mutates
@@ -758,15 +735,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// @mutates
 	removeMark(mark: Mark) {
 		this.marks.remove(mark);
-		this.markUpdated();
 	}
 
-	// @mutates
-	markUpdated() {
-		this.chain.forEach(n => {
-			n.updateVersion++
-		});
-	}
 
 	eq(node: Node): boolean {
 		return this.id.eq(node.id);
@@ -819,28 +789,27 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	// creates a mutable copy of the node
-	clone(shallow = false) {
-		const { scope, parentId, id, type, content, attrs, state, marks, renderVersion, updateVersion } = this;
+	clone(map: (node: Node) => Optional<Node> = identity): Node {
+		const { scope, parentId, id, type, content, attrs, state, marks, version } = this;
 		const cloned = Node.create({
 			scope,
 			parentId,
 			id,
 			type,
-			content: shallow ? content : content.clone(),
+			content: content.clone(map),
 			attrs,
 			state,
 			marks,
-			renderVersion,
-			updateVersion
+			version: version + 1,
 		});
 
 		return cloned;
 	}
 
 	// view act as a immutable node tree reference
-	view(container: Node[] = []): NodeView {
-		return this
-	}
+	// view(container: Node[] = []): NodeView {
+	// 	return this
+	// }
 
 	freezed = false
 	// @mutates

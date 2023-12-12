@@ -5,6 +5,7 @@ import { NodeId } from "./NodeId";
 
 export class NodeMap {
   private _map: NodeBTree = new NodeBTree();
+  private _deleted: NodeBTree = new NodeBTree();
   private _parent: NodeMap | null = null;
 
   static from(map: NodeMap) {
@@ -16,20 +17,24 @@ export class NodeMap {
   }
 
   forEach(fn: (id: NodeId, node: Optional<Node>) => void, deep = false) {
-    this._map.forEach((k, v) => {
+    this._map.forEach((v, k) => {
       fn(k, v);
     });
-    
+
     if (deep && this._parent) {
       this._parent.forEach(fn, deep);
     }
+
+    this._deleted.forEach((v, k) => {
+      fn(k, null);
+    });
   }
 
-  get(key: NodeId) {
+  get(key: NodeId): Optional<Node> {
     return this._map.get(key) || this._parent?.get(key);
   }
 
-  set(key: NodeId, value: any) {
+  set(key: NodeId, value: Node) {
     this._map.set(key, value);
   }
 
@@ -41,13 +46,30 @@ export class NodeMap {
     return this._map.has(key) || this._parent?.hasDeep(key);
   }
 
+  deleted(id: NodeId) {
+    return this._deleted.has(id);
+  }
+
   delete(key: NodeId) {
+    this._deleted.set(key, this._map.get(key)!);
     this._map.delete(key);
   }
 
   parent(from: NodeId | Node): Optional<Node> {
     let node = from instanceof Node ? from : this.get(from);
     return node && node.parentId && this.get(node.parentId);
+  }
+
+  parents(from: NodeId | Node): Node[] {
+    let node = from instanceof Node ? from : this.get(from);
+    let ret: Node[] = [];
+    while (node) {
+      node = this.parent(node)!;
+      if (node) {
+        ret.push(node);
+      }
+    }
+    return ret;
   }
 
   freeze() {

@@ -26,9 +26,10 @@ export class InsertNode implements CarbonAction {
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { at, nodeJson } = this;
 		const {app}=tr;
-		const refNode = draft.get(at.nodeId);
+
 		const node = app.schema.nodeFromJSON(nodeJson)!;
 
+		const refNode = draft.get(at.nodeId);
 		if (!refNode) {
 			throw new Error('failed to find target node from: ' + at.toString())
 		}
@@ -54,22 +55,23 @@ export class InsertNode implements CarbonAction {
 		// }
 
 		if (at.isStart) {
-			draft.prepend(refNode, node);
+			draft.prepend(at.nodeId, node);
 			return
 		}
 
 		if (at.isBefore) {
-			draft.insertBefore(refNode, node);
+			draft.insertBefore(at.nodeId, node);
 			return
 		}
 
 		if (at.isAfter) {
-			draft.insertAfter(refNode, node);
+			draft.insertAfter(at.nodeId, node);
 			return
 		}
 
 		if (at.isEnd) {
-			draft.append(refNode, node);
+			draft.append(at.nodeId, node);
+			return
 		}
 
 		throw new Error('should not reach here');

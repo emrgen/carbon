@@ -2,6 +2,7 @@ import {
   ForwardedRef,
   forwardRef,
   memo,
+  use,
   useEffect,
   useImperativeHandle, useMemo, useRef, useState
 } from "react";
@@ -9,6 +10,7 @@ import { RendererProps } from "../core/Renderer";
 import { useCarbon } from '../hooks/useCarbon';
 import { useNodeChange } from "../hooks/useNodeChange";
 import { preventAndStop } from '../utils/event';
+import { usePrevious } from "@uidotdev/usehooks";
 
 export const JustEmpty = () => {
   return <span>&shy;</span>;
@@ -51,14 +53,13 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     return () => {
       editor.store.delete(node);
     };
-  }, [editor, node, version]);
-
+  }, [editor, node]);
 
   return (
     <Element
       ref={ref}
       data-name={name}
-      // data-version={version}
+      data-version={version}
       data-id={node.key}
       // data-attrs-name={attrs.node.name ?? ''}
       // data-size={node.size}
@@ -70,7 +71,9 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   );
 }
 
-export const CarbonElement = (forwardRef(InnerElement));
+export const CarbonElement = memo(forwardRef(InnerElement), (prev, next) => {
+  return prev.node.version === next.node.version;
+});
 
 export const RawText = memo(function RT(props: RendererProps) {
   const { node } = props
@@ -80,7 +83,8 @@ export const RawText = memo(function RT(props: RendererProps) {
 
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
-  const { node, version } = useNodeChange(props);
+  const {node} = props;
+  // const { node } = useNodeChange(props);
 
   // console.log('InnerCarbonText', node.parent?.version, node.version,node.textContent);
   const handleClick = (e) => {
@@ -111,7 +115,9 @@ const InnerCarbonText = (props: RendererProps) => {
   );
 };
 
-export const CarbonText = (InnerCarbonText);
+export const CarbonText = memo(InnerCarbonText, (prev, next) => {
+  return prev.node.version === next.node.version;
+});
 
 // render block node with div
 const InnerCarbonBlock = (props: RendererProps, ref) => {
@@ -123,7 +129,9 @@ const InnerCarbonBlock = (props: RendererProps, ref) => {
   );
 }
 
-export const CarbonBlock = memo(forwardRef(InnerCarbonBlock));
+export const CarbonBlock = memo(forwardRef(InnerCarbonBlock), (prev, next) => {
+  return prev.node.version === next.node.version;
+});
 
 // render children of a node
 export const CarbonChildren = (props: RendererProps) => {
@@ -140,7 +148,11 @@ export const CarbonChildren = (props: RendererProps) => {
 // render node by name
 export const CarbonNode = (props: RendererProps) => {
   const app = useCarbon();
-  const { node, version } = useNodeChange(props);
+  const { node } = useNodeChange(props);
+
+  // useEffect(() => {
+  //   console.log('CarbonNode', node.name, node.id.toString(), node.toJSON());
+  // })
 
   const RegisteredComponent = app.component(node.attrs.node.name ?? node.name);
   if (RegisteredComponent && RegisteredComponent === CarbonNode) {
@@ -148,10 +160,10 @@ export const CarbonNode = (props: RendererProps) => {
   }
 
   if (RegisteredComponent && RegisteredComponent !== CarbonNode) {
-    return <RegisteredComponent {...props} version={version} />;
+    return <RegisteredComponent {...props} node={node} />;
   }
 
-  return <CarbonDefaultNode {...props} version={version} />;
+  return <CarbonDefaultNode {...props} node={node} />;
 }
 
 // default node for carbon editor with text and block
@@ -170,6 +182,12 @@ export const CarbonDefaultNode = (props: RendererProps) => {
 export const CarbonNodeContent = (props: RendererProps) => {
   const { node, beforeContent, custom, wrapper } = props;
   const { children = [] } = node;
+
+  useEffect(() => {
+    return () => {
+      console.log('CarbonNodeContent unmount', node.name, node.id.toString(), node.toJSON());
+    }
+  },[node])
 
   if (!children.length) {
     return null;

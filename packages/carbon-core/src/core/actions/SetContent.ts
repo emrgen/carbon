@@ -46,9 +46,9 @@ export class SetContentAction implements CarbonAction {
     // }
     const wasEmptyBefore = node.isEmpty;
     node?.updateContent(after);
-    node.forAll(n => {
-      app.store.put(n);
-    });
+    // node.forAll(n => {
+    //   app.store.put(n);
+    // });
 
     // for first time we need to update parent to update the parent appearance like placeholder
     if (wasEmptyBefore) {

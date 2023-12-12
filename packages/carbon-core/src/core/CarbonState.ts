@@ -4,7 +4,6 @@ import { NodeIdSet } from './BSet';
 import { ActionOrigin } from './actions/types';
 import { DecorationStore } from './DecorationStore';
 import { Node } from './Node';
-import { NodeStore } from './NodeStore';
 import { PinnedSelection } from './PinnedSelection';
 import { SelectionEvent } from './SelectionEvent';
 import { BlockSelection } from './NodeSelection';
@@ -70,13 +69,12 @@ export class CarbonRuntimeState extends EventEmitter {
 
 
 interface CarbonStateProps {
-	previous?: CarbonState;
 	scope: string;
+	previous?: CarbonState;
 	content: Node;
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
 	changes?: StateChanges;
-	store: NodeStore;
 
 	decorations?: DecorationStore;
 	selectedNodeIds?: NodeIdSet;
@@ -97,8 +95,6 @@ export class CarbonState extends EventEmitter {
 	changes: StateChanges;
 	runtime: CarbonRuntimeState;
 
-	store: NodeStore;
-
 	selectedNodeIds: NodeIdSet;
 	unselectedNodeIds: NodeIdSet;
 	activatedNodeIds: NodeIdSet;
@@ -107,7 +103,6 @@ export class CarbonState extends EventEmitter {
 	openNodeIds: NodeIdSet
 	closeNodeIds: NodeIdSet
 
-	prevSelection?: PinnedSelection;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
 
 	private dirty = false;
@@ -126,11 +121,11 @@ export class CarbonState extends EventEmitter {
 	}
 
 	get nodeSelection() {
-		return new BlockSelection(this.store, this.selectedNodeIds);
+		return new BlockSelection(this.nodeMap, this.selectedNodeIds);
 	}
 
-	static create(scope: string, store: NodeStore, content: Node, selection: PinnedSelection, nodeMap: NodeMap) {
-		return new CarbonState({ store, content, selection, scope, nodeMap })
+	static create(scope: string, content: Node, selection: PinnedSelection, nodeMap: NodeMap) {
+		return new CarbonState({ content, selection, scope, nodeMap })
 	}
 
 	constructor(props: CarbonStateProps) {
@@ -138,7 +133,6 @@ export class CarbonState extends EventEmitter {
 		const {
 			scope,
 			previous,
-			store,
 			content,
 			selection,
 			nodeMap,
@@ -157,7 +151,6 @@ export class CarbonState extends EventEmitter {
 		this.nodeMap = nodeMap;
 		this.changes = changes;
 		this.runtime = runtime;
-		this.store = store;
 
 		this.selectedNodeIds = selectedNodeIds;
 		this.activatedNodeIds = activatedNodeIds;
@@ -181,11 +174,10 @@ export class CarbonState extends EventEmitter {
 	}
 
 	init() {
-		this.store.reset();
-		this.content.forAll(n => {
-			this.store.put(n);
-			this.runtime.updatedNodeIds.add(n.id);
-		});
+		// this.content.forAll(n => {
+		// 	this.store.put(n);
+		// 	this.runtime.updatedNodeIds.add(n.id);
+		// });
 	}
 
 	markDirty() {
@@ -201,15 +193,14 @@ export class CarbonState extends EventEmitter {
 		this.init();
 	}
 
-	updateSelection(after: PinnedSelection, origin: ActionOrigin, isSelectionDirty = true) {
-		this.prevSelection = this.selection;
-		this.selection = after;
-		this.selectionOrigin = origin;
+	// updateSelection(after: PinnedSelection, origin: ActionOrigin, isSelectionDirty = true) {
+	// 	this.selection = after;
+	// 	this.selectionOrigin = origin;
 
-		// console.log('selection is dirty', isSelectionDirty);
-		// this.isSelectionDirty = isSelectionDirty;
-		this.emit('change:selection', this.selection, this.prevSelection, this.selectionOrigin);
-	}
+	// 	// console.log('selection is dirty', isSelectionDirty);
+	// 	// this.isSelectionDirty = isSelectionDirty;
+	// 	this.emit('change:selection', this.selection, this.prevSelection, this.selectionOrigin);
+	// }
 
 	updateNodeState() {
 		if (!this.runtime.isNodeStateDirty) return
@@ -257,7 +248,7 @@ export class CarbonState extends EventEmitter {
 		// console.log('document id', this.content.childrenVersion)
 		nodes.forEach(n => {
 			// console.log('new node', n.id.toString(), n.childrenVersion)
-			this.store.put(n);
+			// this.store.put(n);
 		});
 
 		this.emit('change:content', this.content);
@@ -265,11 +256,10 @@ export class CarbonState extends EventEmitter {
 
 	clone(depth: number = 2) {
 		if (depth === 0) return null
-		const { scope, store, content, selection, changes, nodeMap } = this;
+		const { scope, content, selection, changes, nodeMap } = this;
 		if (!this.previous) {
 			return new CarbonState({
 				scope,
-				store,
 				content,
 				selection,
 				changes,
@@ -280,7 +270,6 @@ export class CarbonState extends EventEmitter {
 		const previous = this.previous.clone(depth - 1);
 		return new CarbonState({
 			scope,
-			store,
 			content,
 			selection,
 			changes,
@@ -314,7 +303,6 @@ export class CarbonState extends EventEmitter {
 		this.nodeMap.freeze();
 		this.content.freeze();
 		this.selection.freeze();
-		this.prevSelection?.freeze();
 
 		Object.freeze(this);
 

@@ -9,6 +9,7 @@ import { Optional } from '@emrgen/types';
 import { Node } from "../Node";
 import { InsertNode } from "./InsertNode";
 import { NodeJSON } from "../types";
+import { CarbonStateDraft } from "../CarbonStateDraft";
 
 // action to remove a node by id
 export class RemoveNode implements CarbonAction {
@@ -26,39 +27,37 @@ export class RemoveNode implements CarbonAction {
 		this.type = ActionType.insertText;
 	}
 
-	execute(tr: Transaction): ActionResult {
+	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { nodeId } = this;
 		const {app} = tr;
-		const target = app.store.get(nodeId);
+		const target = draft.get(nodeId);
 		if (!target) {
-			return ActionResult.withError('')
+			throw new Error('failed to find target node from: ' + nodeId.toString())
 		}
 
-		if (target.deleted) {
-			return ActionResult.withValue('node already deleted, by transaction from other site');
-		}
-
-		const parent = target?.parent;
+		const parent = draft.parent(nodeId);
 		if (!parent) {
-			return ActionResult.withError('remove node has no parent');
+			throw new Error('failed to find target parent from: ' + nodeId.toString())
 		}
 
-		this.node = target.toJSON();
-		parent?.remove(target);
-		target.delete();
-		app.store.delete(target);
+		draft.remove(nodeId);
 
-		tr.deleted(target);
-		tr.updated(parent!);
+		// this.node = target.toJSON();
+		// parent?.remove(target);
+		// target.delete();
+		// app.store.delete(target);
 
-		// NOTE:
-		// when the parent is empty, we need to update the parent's parent to update the parent appearance like placeholder
-		if (parent?.isEmpty) {
-			console.log('removing empty node', parent.id.toString(), parent?.name);
-			tr.updated(parent?.parent!);
-		}
+		// tr.deleted(target);
+		// tr.updated(parent!);
 
-		tr.normalize(target.parent!);
+		// // NOTE:
+		// // when the parent is empty, we need to update the parent's parent to update the parent appearance like placeholder
+		// if (parent?.isEmpty) {
+		// 	console.log('removing empty node', parent.id.toString(), parent?.name);
+		// 	tr.updated(parent?.parent!);
+		// }
+
+		// tr.normalize(target.parent!);
 		return ActionResult.withValue('done')
 	}
 

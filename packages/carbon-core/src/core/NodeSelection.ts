@@ -1,21 +1,21 @@
 import { NodeIdSet } from "./BSet";
 import { Node } from "./Node";
 import { NodeId } from "./NodeId";
-import { NodeStore } from "./NodeStore";
+import { NodeMap } from "./NodeMap";
 
 //
 export class BlockSelection {
   //
-  store: NodeStore
+  map: NodeMap
   nodeIds: NodeIdSet;
 
-  static empty(store: NodeStore) {
-    return new BlockSelection(store, NodeIdSet.empty);
+  static empty(map: NodeMap) {
+    return new BlockSelection(map, NodeIdSet.empty);
   }
 
   get blocks(): Node[] {
     const blocks: any[] = this.nodeIds.map(id => {
-      const node = this.store.get(id);
+      const node = this.map.get(id);
       return {
         node,
         path: (node?.path ?? [])
@@ -63,9 +63,9 @@ export class BlockSelection {
     return this.nodeIds.size
   }
 
-  constructor(store: NodeStore, nodeIds: NodeIdSet,) {
+  constructor(map: NodeMap, nodeIds: NodeIdSet) {
     this.nodeIds = nodeIds;
-    this.store = store;
+    this.map = map;
   }
 
   has(id: NodeId) {

@@ -36,7 +36,7 @@ export default function SelectionTracker() {
       {selections.map((s, i) => {
         return (
           <div className="carbon-selection-tracker__item" key={i}>
-            {s.toString()}
+            {`${i}: tail: ${s.tail.node.id.toString()}/${s.tail.offset} => head: ${s.head.node.id.toString()}/${s.head.offset}`}
           </div>
         );
       })}

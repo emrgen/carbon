@@ -5,6 +5,7 @@ import { SelectionEvent } from "./SelectionEvent";
 import { PointedSelection } from "./PointedSelection";
 
 export class StateChanges {
+  changed: NodeIdSet = new NodeIdSet();
   inserted: NodeIdSet = new NodeIdSet();
   updated: NodeIdSet = new NodeIdSet();
   deleted: NodeIdSet = new NodeIdSet();
@@ -25,6 +26,7 @@ export class StateChanges {
     diff.updated = this.updated;
     diff.deleted = this.deleted;
     diff.moved = this.moved;
+    diff.changed = this.changed.sub(other.changed);
     diff.selected = this.selected.sub(other.selected);
     diff.activated = this.activated.sub(other.activated);
     diff.opened = this.opened.sub(other.opened);
@@ -33,19 +35,19 @@ export class StateChanges {
   }
 
   get isDirty() {
-    return this.isContentDirty || this.isNodeStateDirty || this.isClipboardDirty || this.isPropsDirty || this.isMarksDirty || this.isStylesDirty || this.isSelectionDirty;
+    return this.isContentDirty || this.isSelectionDirty;
   }
 
   get isContentDirty() {
-    return this.inserted.size || this.updated.size || this.deleted.size || this.moved.size;
-  }
-
-  get isNodeStateDirty() {
-      return this.selected.size || this.activated.size || this.opened.size;
+    return this.changed.size
   }
 
   get isSelectionDirty() {
     return !!this.selection;
+  }
+
+  get isNodeStateDirty() {
+      return this.selected.size || this.activated.size || this.opened.size;
   }
 
   get isClipboardDirty() {
@@ -65,6 +67,7 @@ export class StateChanges {
   }
 
   freeze() {
+    this.changed.freeze();
     this.inserted.freeze();
     this.updated.freeze();
     this.deleted.freeze();
@@ -84,6 +87,7 @@ export class StateChanges {
 
   clone() {
     const clone = new StateChanges();
+    clone.changed = this.changed.clone();
     clone.inserted = this.inserted.clone();
     clone.updated = this.updated.clone();
     clone.deleted = this.deleted.clone();
@@ -102,6 +106,7 @@ export class StateChanges {
 
   toJSON() {
     return {
+      changed: this.changed.toJSON(),
       inserted: this.inserted.toJSON(),
       updated: this.updated.toJSON(),
       deleted: this.deleted.toJSON(),

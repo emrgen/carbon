@@ -1,4 +1,3 @@
-
 import { Optional, With } from "@emrgen/types";
 import { Node } from './Node';
 import { EventEmitter } from 'events';
@@ -38,6 +37,7 @@ export class Carbon extends EventEmitter {
 
 	schema: Schema;
 	state: CarbonState;
+	store: NodeStore;
 	cmd: CarbonCommands;
 	chain: CarbonCommandChain;
 	change: ChangeManager;
@@ -61,8 +61,10 @@ export class Carbon extends EventEmitter {
 
 		const map = new NodeMap();
 		content.forAll(n => map.set(n.id, n));
-		this.state = CarbonState.create(name, new NodeStore(), content, PinnedSelection.default(content), map);
+		this.state = CarbonState.create(name, content, PinnedSelection.default(content), map);
 		StateScope.set(name, this.state.nodeMap);
+
+		this.store = new NodeStore(this.state)
 
 		this.sm = new SelectionManager(this);
 		this.em = new EventManager(this, pm);
@@ -104,10 +106,6 @@ export class Carbon extends EventEmitter {
 
 	get blockSelection(): BlockSelection {
 		return this.state.nodeSelection;
-	}
-
-	get store() {
-		return this.state.store;
 	}
 
 	get runtime() {
@@ -177,7 +175,7 @@ export class Carbon extends EventEmitter {
 		this.state = state;
 		StateScope.set(state.scope, state.nodeMap);
 
-		console.log(this.state.changes.toJSON());
+		// console.log(this.state.changes.toJSON());
 
 		this.emit(EventsOut.transactionCommit, tr);
 		this.change.update(tr);

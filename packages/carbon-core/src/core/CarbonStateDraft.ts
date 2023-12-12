@@ -8,6 +8,8 @@ import { PinnedSelection } from "./PinnedSelection";
 import { NodeContent } from "./NodeContent";
 import { SelectionEvent } from "./SelectionEvent";
 import { PointedSelection } from "./PointedSelection";
+import { sortBy, zip } from 'lodash';
+import BTree from 'sorted-btree';
 
 export class CarbonStateDraft {
   state: CarbonState;
@@ -27,33 +29,105 @@ export class CarbonStateDraft {
     return this.nodeMap.get(id);
   }
 
+  parent(from: NodeId | Node): Optional<Node> {
+    return this.nodeMap.parent(from);
+  }
+
   // turn the draft into a new state
   commit(depth: number) {
-    const { state, selection, changes, nodeMap} = this;
-    selection.freeze();
+    const { state, changes, nodeMap} = this;
+    this.selection.freeze();
     changes.freeze();
     nodeMap.freeze();
 
-    const pinnedSelection = selection.pin(this.nodeMap);
-    if (!pinnedSelection) {
+    const selection = this.selection.pin(this.nodeMap);
+    if (!selection) {
       throw new Error("Cannot commit draft with invalid selection");
     }
 
-    return new CarbonState({
+    const content = this.nodeMap.get(this.state.content.id)
+    if (!content) {
+      throw new Error("Cannot commit draft with invalid content");
+    }
+
+    const newState = new CarbonState({
       previous: state.clone(depth - 1),
       scope: state.scope,
-      store: state.store,
-      content: state.content,
+      content,
       runtime: state.runtime,
-      selection: pinnedSelection,
+      selection,
       nodeMap,
       changes,
-    }).freeze();
+    });
+
+    return newState.freeze();
   }
 
   // prepare the draft for commit
   prepare() {
+    const changed: NodeDepthEntry[] = this.changes.changed.toArray().map(id => {
+      const node = this.nodeMap.get(id)!;
+      const depth = this.nodeMap.parents(node).length;
+      return {
+        node,
+        depth
+      }
+    });
+
+    console.log('prepare', changed.length, changed.map(n => n.node.id.toString()));
+
+    changed.sort(NodeDepthComparator);
+
+    const process: Node[] = [];
+    while (changed.length > 0) {
+      // console.log('processing changes', changed.length);
+      let prev = changed.shift()!;
+      let next: Optional<NodeDepthEntry> = null;
+      process.push(prev.node);
+      const depth = prev.depth;
+      while (changed.length > 0 && changed[0].depth === prev.depth) {
+        next = changed.shift()!;
+        if (next.node.parentId && prev.node.parentId && !next.node.parentId.eq(prev.node.parentId)) {
+          process.push(next.node);
+          prev = next;
+        }
+      }
+
+      while (process.length > 0) {
+        const node = process.pop()!;
+        console.log('processing node', node.id.toString(), node.name);
+        const parent = this.nodeMap.parent(node);
+        if (parent) {
+          const clone = parent.clone(n => {
+            if (this.nodeMap.deleted(n.id)) {
+              return null;
+            } else {
+              return this.nodeMap.get(n.id);
+            }
+          });
+          this.nodeMap.set(parent.id, clone);
+          changed.unshift({
+            node: clone,
+            depth: depth - 1
+          });
+        }
+      }
+    }
+
     return this;
+  }
+
+  private mutable(id: NodeId, fn: (node: Node) => void) {
+    const node = this.nodeMap.get(id);
+    if (!node) {
+      throw new Error("Cannot mutate node that does not exist");
+    }
+
+    const mutable = this.nodeMap.has(id) ? node : node.clone();
+    fn(mutable);
+    this.nodeMap.set(id, mutable);
+
+    return mutable;
   }
 
   updateContent(node: Node, content: NodeContent) {
@@ -61,57 +135,124 @@ export class CarbonStateDraft {
       throw new Error("Cannot update content on a draft that is already committed");
     }
 
-    let parent: Optional<Node> = this.nodeMap.has(node.id) ? this.nodeMap.get(node.parentId!) : node.clone(true);
-    if (!parent) {
-      throw new Error("Cannot update content of a node that does not exist");
-    }
+    this.mutable(node.id, node => node.updateContent(content));
+    content.children.forEach(child => {
+      this.nodeMap.set(child.id, child);
+      // this.changes.changed.add(child.id);
+    })
 
-    parent.updateContent(content);
+    // if (content.size === 0) {
+    //   const parent = this.nodeMap.get(node.parentId!);
+    //   this.changes.changed.add(parent!.id);
+    // } else {
+    // }
+    this.changes.changed.add(node.id);
 
-    this.nodeMap.set(parent.id, parent);
     this.changes.updated.add(node.id);
   }
 
-  prepend(parent: Node, node: Node) {
+  prepend(parentId, node: Node) {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
+
+    this.mutable(parentId, parent => parent.prepend(node));
+
+    this.changes.changed.add(parentId);
     this.changes.inserted.add(node.id);
     this.nodeMap.set(node.id, node);
   }
 
-  append(parent: Node, node: Node) {
+  append(parentId: NodeId, node: Node) {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
-    console.log("append", parent, node);
 
+    this.mutable(parentId, parent => parent.append(node));
+
+    this.changes.changed.add(parentId);
     this.changes.inserted.add(node.id);
     this.nodeMap.set(node.id, node);
   }
 
-  insertBefore(refNode: Node, node: Node) {
+  insertBefore(refId: NodeId, node: Node) {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
+
+    const refNode = this.nodeMap.get(refId);
+    if (!refNode) {
+      throw new Error("Cannot insert node before a node that does not exist");
+    }
+
+    const parentId = refNode.parentId;
+    if (!parentId) {
+      throw new Error("Cannot insert node before a node that does not have a parent");
+    }
+
+    const parent = this.nodeMap.get(parentId);
+    if (!parent) {
+      throw new Error("Cannot insert node before a node that does not have a parent");
+    }
+
+    this.mutable(parentId, parent => parent.insertBefore(refNode, node));
+
+    this.changes.changed.add(refNode.id);
     this.changes.inserted.add(node.id);
     this.nodeMap.set(node.id, node);
   }
 
-  insertAfter(refNode: Node, node: Node) {
+  insertAfter(refId: NodeId, node: Node) {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
+
+    const refNode = this.nodeMap.get(refId);
+    if (!refNode) {
+      throw new Error("Cannot insert node before a node that does not exist");
+    }
+
+    const parentId = refNode.parentId;
+    if (!parentId) {
+      throw new Error("Cannot insert node before a node that does not have a parent");
+    }
+
+    const parent = this.nodeMap.get(parentId);
+    if (!parent) {
+      throw new Error("Cannot insert node before a node that does not have a parent");
+    }
+
+    this.mutable(parentId, parent => parent.insertAfter(refNode, node));
+
+    this.changes.changed.add(parentId);
+    node.forAll(n => {
+      this.changes.changed.add(n.id);
+      this.nodeMap.set(n.id, n);
+    });
+
     this.changes.inserted.add(node.id);
-    this.nodeMap.set(node.id, node);
   }
 
-  remove(node: Node) {
+  remove(nodeId: NodeId) {
     if (!this.drafting) {
       throw new Error("Cannot remove node from a draft that is already committed");
     }
+
+    const node = this.nodeMap.get(nodeId);
+    if (!node) {
+      throw new Error("Cannot remove node that does not exist");
+    }
+
+    const parentId = node.parentId;
+    if (!parentId) {
+      throw new Error("Cannot remove node that does not have a parent");
+    }
+
+    this.mutable(parentId, parent => parent.remove(node));
+
+    this.changes.changed.add(parentId);
     this.changes.deleted.add(node.id);
-    this.nodeMap.set(node.id, null);
+    this.nodeMap.delete(node.id);
   }
 
   updateSelection(selection: PointedSelection) {
@@ -133,4 +274,32 @@ export class CarbonStateDraft {
   dispose() {
     this.drafting = false;
   }
+}
+
+
+interface NodeDepthEntry {
+  node: Node;
+  depth: number;
+}
+
+const NodeDepthComparator = (a: NodeDepthEntry, b: NodeDepthEntry) => {
+  if (!a.node.parentId) {
+    return -1;
+  }
+
+  if (!b.node.parentId) {
+    return 1;
+  }
+
+  if (a.depth === b.depth) {
+    if (a.node.parentId === b.node.parentId) {
+      return a.node.id.comp(b.node.id);
+    } else if (a.node.parentId && b.node.parentId) {
+      return a.node.parentId.comp(b.node.parentId);
+    } else {
+      return 0;
+    }
+  }
+
+  return a.depth - b.depth;
 }
