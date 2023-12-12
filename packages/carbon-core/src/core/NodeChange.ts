@@ -4,6 +4,7 @@ import { PinnedSelection } from "./PinnedSelection";
 import { PointedSelection } from "./PointedSelection";
 
 export class StateChanges {
+  render: NodeIdSet = new NodeIdSet();
   changed: NodeIdSet = new NodeIdSet();
   renamed: NodeIdSet = new NodeIdSet();
   inserted: NodeIdSet = new NodeIdSet();
@@ -22,6 +23,7 @@ export class StateChanges {
 
   diff(other: StateChanges): StateChanges {
     const diff = new StateChanges();
+    diff.render = this.render;
     diff.changed = this.changed;
     diff.inserted = this.inserted;
     diff.updated = this.updated;
@@ -68,6 +70,7 @@ export class StateChanges {
   }
 
   freeze() {
+    this.render.freeze();
     this.renamed.freeze();
     this.changed.freeze();
     this.inserted.freeze();
@@ -89,6 +92,7 @@ export class StateChanges {
 
   clone() {
     const clone = new StateChanges();
+    clone.render = this.render.clone();
     clone.renamed = this.renamed.clone();
     clone.changed = this.changed.clone();
     clone.inserted = this.inserted.clone();

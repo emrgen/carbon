@@ -181,6 +181,7 @@ export class CarbonStateDraft {
 
     this.mutable(parentId, parent => parent.prepend(node));
 
+    this.changes.render.add(parentId);
     this.changes.changed.add(parentId);
     this.changes.inserted.add(node.id);
     this.nodeMap.set(node.id, node);
@@ -193,6 +194,7 @@ export class CarbonStateDraft {
 
     this.mutable(parentId, parent => parent.append(node));
 
+    this.changes.render.add(parentId);
     this.changes.changed.add(parentId);
     this.changes.inserted.add(node.id);
     this.nodeMap.set(node.id, node);
@@ -220,7 +222,8 @@ export class CarbonStateDraft {
 
     this.mutable(parentId, parent => parent.insertBefore(refNode, node));
 
-    this.changes.changed.add(refNode.id);
+    this.changes.render.add(parentId);
+    this.changes.changed.add(parentId);
     this.changes.inserted.add(node.id);
     this.nodeMap.set(node.id, node);
   }
@@ -247,13 +250,13 @@ export class CarbonStateDraft {
 
     this.mutable(parentId, parent => parent.insertAfter(refNode, node));
 
+    this.changes.render.add(parentId);
     this.changes.changed.add(parentId);
     node.forAll(n => {
-      // this.changes.changed.add(n.id);
+      this.changes.changed.add(parentId);
+      this.changes.inserted.add(n.id);
       this.nodeMap.set(n.id, n);
     });
-
-    this.changes.inserted.add(node.id);
   }
 
   remove(nodeId: NodeId) {
