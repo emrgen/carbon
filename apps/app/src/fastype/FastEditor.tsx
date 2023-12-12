@@ -36,10 +36,10 @@ const data = {
   content: [
     {
       name: "document",
-      content: [
+      children: [
         {
           name: "title",
-          content: [text("I am a frame title")],
+          children: [text("I am a frame title")],
         },
         // {
         //   name: "divider",

@@ -17,7 +17,7 @@ export class TransactionManager {
 	}
 
 	private get store() {
-		return this.app.state.store;
+		return this.app.store;
 	}
 
 	private get runtime() {
@@ -77,7 +77,7 @@ export class TransactionManager {
 	}
 
 	private commitNodeStates() {
-		this.state.updateNodeState();
+		// this.state.updateNodeState();
 		this.app.emit(EventsOut.nodeStateChanged, this.state);
 	}
 

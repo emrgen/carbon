@@ -9,6 +9,7 @@ import { classString } from '../Logger';
 import { RemoveNode } from './RemoveNode';
 import { Node } from '../Node';
 import { CarbonStateDraft } from '../CarbonStateDraft';
+import { identity } from "lodash";
 
 export class InsertNode implements CarbonAction {
 	id: number;
@@ -26,8 +27,9 @@ export class InsertNode implements CarbonAction {
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { at, nodeJson } = this;
 		const {app}=tr;
-
+		console.log('xxx', nodeJson);
 		const node = app.schema.nodeFromJSON(nodeJson)!;
+		console.log('node', node);
 
 		const refNode = draft.get(at.nodeId);
 		if (!refNode) {
@@ -45,7 +47,8 @@ export class InsertNode implements CarbonAction {
 			return ActionResult.withError('failed to find target parent from: ' + at.toString())
 		}
 
-		draft.insert(at, node);
+		const clone = node.clone(identity);
+		draft.insert(at, clone, 'create');
 	}
 
 	inverse(tr: Transaction): CarbonAction {

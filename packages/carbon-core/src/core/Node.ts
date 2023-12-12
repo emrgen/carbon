@@ -25,6 +25,7 @@ export type TraverseOptions = {
 export interface NodeCreateProps {
 	scope?: string;
 	parentId?: Optional<NodeId>;
+	parent?: Optional<Node>;
 	id: NodeId;
 	type: NodeType;
 	content: NodeContent;
@@ -80,11 +81,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	scope: string;
 	parentId: Optional<NodeId>;
+	_parent: Optional<Node>;
 	id: NodeId;
 	type: NodeType;
-
 	content: NodeContent;
-
 	marks: MarkSet;
 	attrs: NodeAttrs;
 	state: NodeState;
@@ -117,6 +117,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		const {
 			scope = '',
 			parentId,
+			parent,
 			id,
 			type,
 			content,
@@ -130,9 +131,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.test_key = nextKey()
 		this.scope = scope;
 		this.parentId = parentId;
+		this._parent = parent;
 		this.id = id;
 		this.type = type;
-		this.content = content.setParentId(this.id);
+		this.content = content.setParentId(this.id).setParent(this)
 		this.marks = marks;
 
 		this.attrs = new NodeAttrs(merge(cloneDeep(type.attrs), attrs));
@@ -144,6 +146,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get parent() {
+		if (!this.frozen) return this._parent;
 		const map = StateScope.get(this.scope);
 		if (!this.parentId) return null;
 		return map.get(this.parentId!)
@@ -456,7 +459,13 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// @mutates
 	setParentId(parentId: Optional<NodeId>) {
+		if (this.frozen) return;
 		this.parentId = parentId;
+	}
+
+	setParent(parent: Node) {
+		if (this.frozen) return
+		this._parent = parent;
 	}
 
 	closest(fn: Predicate<Node>): Optional<Node> {
@@ -647,36 +656,45 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	// @mutates
-	prepend(nodes: Node | Node[]) {
-		const list = flatten([nodes]);
-		list.forEach(n => n.setParentId(this.id));
-		this.content = this.content.prepend(list).setParentId(this.id);
+	prepend(node: Node) {
+		if (node.frozen) {
+			throw Error('cannot insert immutable node:' + node.id.toString())
+		}
+		node.parentId = this.id;
+		this.content = this.content.prepend([node]);
 	}
 
 	// @mutates
-	append(nodes: Node | Node[]) {
-		const list = flatten([nodes]);
-		list.forEach(n => n.setParentId(this.id));
-		this.content = this.content.append(list);
+	append(node: Node) {
+		if (node.frozen) {
+			throw Error('cannot insert immutable node:' + node.id.toString())
+		}
+		node.parentId = this.id;
+		this.content = this.content.append([node]);
 	}
 
 	// @mutates
-	insertBefore(before: Node, nodes: Node | Node[]) {
-		const list = flatten([nodes]);
-		list.forEach(n => n.setParentId(this.id));
-		this.content = this.content.insertBefore(before, list);
+	insertBefore(before: Node, node: Node) {
+		if (node.frozen) {
+			throw Error('cannot insert immutable node:' + node.id.toString())
+		}
+		node.parentId = this.id;
+		this.content = this.content.insertBefore(before, [node]);
 	}
 
 	// @mutates
-	insertAfter(after: Node, nodes: Node | Node[]) {
-		const list = flatten([nodes]);
-		list.forEach(n => n.setParentId(this.id));
-		this.content = this.content.insertAfter(after,list);
+	insertAfter(after: Node, node: Node) {
+		if (node.frozen) {
+			throw Error('cannot insert immutable node:' + node.id.toString())
+		}
+		node.parentId = this.id;
+		this.content = this.content.insertAfter(after, [node]);
 	}
 
 	// @mutates
 	remove(node: Node) {
 		this.content.remove(node);
+		node.parentId = null;
 		// console.log('removed', this.root?.version, this.root?.name, this.root?.test_key, this.root?.updatedChildren)
 	}
 
@@ -804,7 +822,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 			parentId,
 			id,
 			type,
-			content: content.clone(map),
+			content: content.clone(map).setParent(this).setParentId(this.id),
 			attrs,
 			state,
 			marks,
@@ -819,11 +837,16 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// 	return this
 	// }
 
-	freezed = false
+	frozen = false
 	// @mutates
 	freeze() {
-		if(this.freezed) return this
-		this.freezed = true
+		if(this.frozen) return this
+		this.frozen = true
+
+		// unlink from parent when freezing
+		this._parent = null;
+		this.content.freeze();
+
 		Object.freeze(this)
 		return this;
 	}

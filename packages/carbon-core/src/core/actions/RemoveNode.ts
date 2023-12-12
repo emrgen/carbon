@@ -22,14 +22,13 @@ export class RemoveNode implements CarbonAction {
 		return new RemoveNode(at, nodeId, origin);
 	}
 
-	constructor(readonly at: Point, readonly nodeId: NodeId, readonly origin: ActionOrigin) {
+	constructor(readonly from: Point, readonly nodeId: NodeId, readonly origin: ActionOrigin) {
 		this.id = generateActionId();
 		this.type = ActionType.insertText;
 	}
 
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { nodeId } = this;
-		const {app} = tr;
 		const target = draft.get(nodeId);
 		if (!target) {
 			throw new Error('failed to find target node from: ' + nodeId.toString())
@@ -62,14 +61,14 @@ export class RemoveNode implements CarbonAction {
 	}
 
 	inverse(tr: Transaction): CarbonAction {
-		const { at, node } = this;
+		const { from, node } = this;
 		const remove = tr.app.schema.nodeFromJSON(node!);
-		return InsertNode.create(at, remove!, ActionOrigin.UserInput);
+		return InsertNode.create(from, remove!, ActionOrigin.UserInput);
 	}
 
 	toString() {
-		const {at, nodeId} = this
-		return classString(this)({at, nodeId});
+		const {from, nodeId} = this
+		return classString(this)({from: from, nodeId});
 	}
 
 }

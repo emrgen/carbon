@@ -23,12 +23,12 @@ export class InsertText implements CarbonAction {
 		this.type = ActionType.insertText;
 	}
 
-	execute(tr: Transaction): ActionResult {
+	execute(tr: Transaction) {
 		const { at, text, native } = this;
 		const { app } = tr;
 		const { schema } = app;
 
-		const pin = Pin.fromPoint(at, tr.app.store)?.down();
+		const pin = Pin.fromPoint(at, tr.app.state.nodeMap)?.down();
 		if (!pin) {
 			return ActionResult.withError('failed to find pin from: ' + at.toString());
 		}

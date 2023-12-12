@@ -95,8 +95,9 @@ export class PinnedSelection {
 		// if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
 		// if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
 
-		let tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
-		let head = Pin.fromDom(focusNode, focusOffset)?.up();
+		console.log(anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
+		const tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
+		const head = Pin.fromDom(focusNode, focusOffset)?.up();
 		console.log(tail?.toString(), head?.toString());
 
 		if (!tail || !head) {
@@ -176,14 +177,14 @@ export class PinnedSelection {
 			return { head: rect, tail: rect }
 		}
 		// console.log(selection, selection.rangeCount);
-		
+
 		if (selection.rangeCount !== 0) {
 			const endRange = selection.getRangeAt(0).cloneRange();
 			endRange.collapse();
 			const startRange = selection.getRangeAt(0).cloneRange();
 			startRange.collapse(true);
 			console.log(endRange, startRange.getClientRects());
-			
+
 			return this.isForward ? {
 				head: endRange.getClientRects()[0],
 				tail: startRange.getClientRects()[0],
@@ -229,7 +230,9 @@ export class PinnedSelection {
 				focusNode,
 				focusOffset
 			);
-			const domSel = PinnedSelection.fromDom(store)?.intoDomSelection(store);
+			const pinnedSelection = PinnedSelection.fromDom(store);
+			console.log(pinnedSelection?.toString());
+			const domSel = pinnedSelection?.intoDomSelection(store);
 			console.assert(domSel?.anchorNode === domSelection.anchorNode, 'failed to sync anchorNode')
 			console.assert(domSel?.focusNode === domSelection.focusNode, 'failed to sync focusNode')
 			console.assert(domSel?.anchorOffset === domSelection.anchorOffset, 'failed to sync anchor offset')
@@ -252,7 +255,7 @@ export class PinnedSelection {
 
 		let anchorNode: any = store.element(anchor.node.id);
 		let focusNode: any = store.element(focus.node.id);
-		
+
 		// console.log(anchorNode, focusNode, anchor.node.id.toString(), focus.node.id.toString());
 		if (!anchorNode || !focusNode) {
 			console.log(p14('%c[error]'), 'color:red', this.toString());

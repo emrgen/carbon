@@ -1,4 +1,4 @@
-import { AfterPlugin, BeforePlugin, BlockContent, Carbon, EventContext, EventHandlerMap, Node, Pin } from "../core";
+import { AfterPlugin, BlockContent, Carbon, EventContext, EventHandlerMap, Node, Pin } from "../core";
 import { SelectionPatch } from "../core/DeleteGroup";
 import { NodeId } from "../core/NodeId";
 import { Range } from "../core/Range";

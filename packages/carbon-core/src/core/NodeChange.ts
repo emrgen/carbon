@@ -4,7 +4,9 @@ import { PinnedSelection } from "./PinnedSelection";
 import { PointedSelection } from "./PointedSelection";
 
 export class StateChanges {
+  // this nodes will be rendered
   render: NodeIdSet = new NodeIdSet();
+  // changed nodes will be rebuild
   changed: NodeIdSet = new NodeIdSet();
   renamed: NodeIdSet = new NodeIdSet();
   inserted: NodeIdSet = new NodeIdSet();

@@ -7,6 +7,7 @@ import { constrain } from '../utils/constrain';
 import { Maps } from './types';
 import { NodeContent } from './NodeContent';
 import { NodeMap } from './NodeMap';
+import { StateScope } from "./StateScope";
 
 enum PinReference {
 	front = 'front',
@@ -170,6 +171,9 @@ export class Pin {
 
 		const { parent } = node;
 		if (!parent) {
+			const map = StateScope.get(node.scope)
+			console.log(map);
+			throw Error('Pin.up: node does not have a parent' + node.id.toString());
 			return
 		}
 

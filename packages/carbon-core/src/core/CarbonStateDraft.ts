@@ -110,6 +110,9 @@ export class CarbonStateDraft {
               return this.nodeMap.get(n.id);
             }
           });
+          clone.children.forEach(n => {
+            n.freeze();
+          })
           this.nodeMap.set(parent.id, clone);
           changed.unshift({
             node: clone,
@@ -122,20 +125,6 @@ export class CarbonStateDraft {
     return this;
   }
 
-  private mutable(id: NodeId, fn: (node: Node) => void) {
-    const node = this.nodeMap.get(id);
-    if (!node) {
-      throw new Error("Cannot mutate node that does not exist");
-    }
-    // console.log('mutable', );
-    
-    const mutable = this.nodeMap.has(id) ? node : node.clone();
-    fn(mutable);
-    this.nodeMap.set(id, mutable);
-
-    return mutable;
-  }
-
   updateContent(nodeId: NodeId, content: NodeContent) {
     if (!this.drafting) {
       throw new Error("Cannot update content on a draft that is already committed");
@@ -144,7 +133,9 @@ export class CarbonStateDraft {
     this.mutable(nodeId, node => {
       node.updateContent(content);
     });
+    console.log('inserting content', nodeId.toString(), content.size);
     content.children.forEach(child => {
+      console.log(child.id.toString(), child.parentId?.toString(), child.frozen);
       this.nodeMap.set(child.id, child);
       // this.changes.changed.add(child.id);
     })
@@ -159,7 +150,56 @@ export class CarbonStateDraft {
     this.changes.updated.add(nodeId);
   }
 
-  insert(at: Point, node: Node) {
+  move(to: Point, node: Node) {
+    if (!this.drafting) {
+      throw new Error("Cannot move node to a draft that is already committed");
+    }
+
+    if (node.frozen) {
+      throw Error('cannot insert immutable node, it must be at least mutable at top level');
+    }
+
+    this.changes.moved.add(node.id);
+    if (!this.get(node.id)) {
+      throw Error('move node not found in state map')
+    }
+
+    const {parentId} = node;
+    if (!parentId) {
+      throw Error('move node does not have parent id')
+    }
+
+    const oldParent = this.get(parentId);
+    if (!oldParent) {
+      throw Error('move node does not have old parent')
+    }
+
+    this.changes.changed.add(parentId);
+    this.mutable(parentId, parent => parent.remove(node));
+
+    this.insert(to, node, 'move');
+  }
+
+  insert(at: Point, node: Node, type : 'create' | 'move' = 'create') {
+    if (!this.drafting) {
+      throw new Error("Cannot insert node to a draft that is already committed");
+    }
+
+    if (node.frozen) {
+      throw Error('cannot insert immutable node, it must be at least mutable at top level');
+    }
+
+    if (type === 'create') {
+      this.changes.inserted.add(node.id);
+      console.log('children', node);
+      node.forAll(n => {
+        console.log('inserting node', n.id.toString(), n.name);
+        this.nodeMap.set(n.id, n);
+      });
+    } else {
+      this.changes.moved.add(node.id);
+    }
+
     switch (at.at) {
       case PointAt.After:
         return this.insertAfter(at.nodeId, node);
@@ -175,36 +215,18 @@ export class CarbonStateDraft {
   }
 
   private prepend(parentId: NodeId, node: Node) {
-    if (!this.drafting) {
-      throw new Error("Cannot insert node to a draft that is already committed");
-    }
-
     this.mutable(parentId, parent => parent.prepend(node));
-
     this.changes.render.add(parentId);
     this.changes.changed.add(parentId);
-    this.changes.inserted.add(node.id);
-    this.nodeMap.set(node.id, node);
   }
 
   private append(parentId: NodeId, node: Node) {
-    if (!this.drafting) {
-      throw new Error("Cannot insert node to a draft that is already committed");
-    }
-
     this.mutable(parentId, parent => parent.append(node));
-
     this.changes.render.add(parentId);
     this.changes.changed.add(parentId);
-    this.changes.inserted.add(node.id);
-    this.nodeMap.set(node.id, node);
   }
 
   private insertBefore(refId: NodeId, node: Node) {
-    if (!this.drafting) {
-      throw new Error("Cannot insert node to a draft that is already committed");
-    }
-
     const refNode = this.nodeMap.get(refId);
     if (!refNode) {
       throw new Error("Cannot insert node before a node that does not exist");
@@ -224,15 +246,9 @@ export class CarbonStateDraft {
 
     this.changes.render.add(parentId);
     this.changes.changed.add(parentId);
-    this.changes.inserted.add(node.id);
-    this.nodeMap.set(node.id, node);
   }
 
   private insertAfter(refId: NodeId, node: Node) {
-    if (!this.drafting) {
-      throw new Error("Cannot insert node to a draft that is already committed");
-    }
-
     const refNode = this.nodeMap.get(refId);
     if (!refNode) {
       throw new Error("Cannot insert node before a node that does not exist");
@@ -252,11 +268,6 @@ export class CarbonStateDraft {
 
     this.changes.render.add(parentId);
     this.changes.changed.add(parentId);
-    node.forAll(n => {
-      this.changes.changed.add(parentId);
-      this.changes.inserted.add(n.id);
-      this.nodeMap.set(n.id, n);
-    });
   }
 
   remove(nodeId: NodeId) {
@@ -277,8 +288,9 @@ export class CarbonStateDraft {
     this.mutable(parentId, parent => parent.remove(node));
 
     this.changes.changed.add(parentId);
-    this.changes.deleted.add(node.id);
-    this.nodeMap.delete(node.id);
+    node.forAll(n => {
+      this.changes.deleted.add(n.id);
+    });
   }
 
   changeName(nodeId: NodeId, type: NodeType) {
@@ -310,6 +322,20 @@ export class CarbonStateDraft {
 
     this.selection = selection;
     this.changes.selection = selection;
+  }
+
+  private mutable(id: NodeId, fn: (node: Node) => void) {
+    const node = this.nodeMap.get(id);
+    if (!node) {
+      throw new Error("Cannot mutate node that does not exist");
+    }
+    // console.log('mutable', );
+
+    const mutable = this.nodeMap.has(id) ? node : node.clone();
+    fn(mutable);
+    this.nodeMap.set(id, mutable);
+
+    return mutable;
   }
 
   _addPendingSelection(selection: PinnedSelection) {

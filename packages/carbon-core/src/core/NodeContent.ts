@@ -11,7 +11,7 @@ export interface NodeContent {
 	textContent: string;
 
 	setParentId(parentId: NodeId): NodeContent;
-
+	setParent(parent: Node): NodeContent;
 	replace(node: Node, by: Node[]): NodeContent;
 	prepend(nodes: Node[]): NodeContent;
 	append(nodes: Node[]): NodeContent;
@@ -26,6 +26,7 @@ export interface NodeContent {
 
 	view(container: Node[]): NodeContent;
 	clone(map: Maps<Node, Optional<Node>>): NodeContent;
+	freeze(): NodeContent;
 	toJSON(): any;
 }
 
@@ -35,6 +36,7 @@ interface BlockContentProps {
 
 export class BlockContent implements NodeContent {
 	nodes: Node[]
+	frozen: boolean = false
 
 	get children(): Node[] {
 		return this.nodes;
@@ -66,6 +68,12 @@ export class BlockContent implements NodeContent {
 
 	setParentId(parentId: NodeId): NodeContent {
 		this.nodes.forEach(n => n.setParentId(parentId));
+		return this;
+	}
+
+	setParent(parent: Node): NodeContent {
+		if (this.frozen) return this
+		this.nodes.forEach(n => n.setParent(parent));
 		return this;
 	}
 
@@ -144,6 +152,14 @@ export class BlockContent implements NodeContent {
 		throw new Error("Not implemented");
 	}
 
+	freeze() {
+		if (this.frozen) return this;
+		this.frozen = true;
+		this.nodes.forEach(n => n.freeze());
+		Object.freeze(this)
+		return this;
+	}
+
 	clone(map: Maps<Node, Optional<Node>> = identity): BlockContent {
 		const children = this.nodes.map(n => map(n)).filter(identity) as Node[];
 		return BlockContent.create(children);
@@ -161,7 +177,8 @@ interface TextContentProps {
 }
 
 export class InlineContent implements NodeContent {
-	text: string
+	text: string;
+	frozen: boolean = false;
 
 	get children(): Node[] {
 		return []
@@ -200,6 +217,10 @@ export class InlineContent implements NodeContent {
 	}
 
 	setParentId(parentId: NodeId): NodeContent {
+		return this;
+	}
+
+	setParent(parent: Node): NodeContent {
 		return this;
 	}
 
@@ -252,6 +273,13 @@ export class InlineContent implements NodeContent {
 
 	view(): NodeContent {
 		return this
+	}
+
+	freeze() {
+		if (this.frozen) return this;
+		this.frozen = true;
+		Object.freeze(this)
+		return this;
 	}
 
 	clone(): InlineContent {

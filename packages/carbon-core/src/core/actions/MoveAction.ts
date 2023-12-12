@@ -7,6 +7,7 @@ import { generateActionId } from './utils';
 import { classString } from "../Logger";
 import { Node } from "../Node";
 import { CarbonStateDraft } from "../CarbonStateDraft";
+import { identity } from "lodash";
 
 // a node can be moved to a new location, relative to another node
 // the node can be moved before, after, or inside the target node at start or end
@@ -41,15 +42,17 @@ export class MoveAction implements CarbonAction {
 			throw new Error('Failed to get ref node: ' + to.nodeId.toString());
 		}
 
+		draft.move(to, node.clone())
+
 		// remove from old location
-		draft.remove(node.id);
+		// draft.remove(node.id);
 
 		// take deep clone of the node
-		const cloner = (n: Node) => n.clone(cloner);
-		const clone = node.clone(cloner)
+		// const cloner = (n: Node) => n.clone(cloner);
+		// const clone = node.clone(cloner)
 
 		// insert into new location
-		draft.insert(to, clone);
+		// draft.insert(to, clone);
 
 		// if (refNode.deleted) {
 		// 	const moveNodes = nodeIds.map(id => app.store.get(id)) as Node[];

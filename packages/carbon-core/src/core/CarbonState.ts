@@ -203,55 +203,53 @@ export class CarbonState extends EventEmitter {
 	// }
 
 	updateNodeState() {
-		if (!this.runtime.isNodeStateDirty) return
-		const { store } = this;
-		this.selectedNodeIds.clear();
-		this.unselectedNodeIds.clear();
-		this.deactivatedNodeIds.clear();
-		this.activatedNodeIds.clear();
-		this.activatedNodeIds.clear();
-		this.openNodeIds.clear();
-		this.closeNodeIds.clear();
-
-		this.runtime.selectedNodeIds.forEach(id => {
-			if (store.get(id)?.isSelected) {
-				this.selectedNodeIds.add(id);
-			} else {
-				this.unselectedNodeIds.add(id);
-			}
-		});
-
-		this.runtime.activatedNodeIds.forEach(id => {
-			if (store.get(id)?.isActive) {
-				this.activatedNodeIds.add(id);
-			} else {
-				this.deactivatedNodeIds.add(id);
-			}
-		});
-
-		this.runtime.openNodeIds.forEach(id => {
-			if (store.get(id)?.isOpen) {
-				this.openNodeIds.add(id);
-			} else {
-				this.closeNodeIds.add(id);
-			}
-		});
-
-		this.runtime.emit('change', this.runtime);
-
+		// if (!this.runtime.isNodeStateDirty) return
+		// this.selectedNodeIds.clear();
+		// this.unselectedNodeIds.clear();
+		// this.deactivatedNodeIds.clear();
+		// this.activatedNodeIds.clear();
+		// this.activatedNodeIds.clear();
+		// this.openNodeIds.clear();
+		// this.closeNodeIds.clear();
+		//
+		// this.runtime.selectedNodeIds.forEach(id => {
+		// 	if (store.get(id)?.isSelected) {
+		// 		this.selectedNodeIds.add(id);
+		// 	} else {
+		// 		this.unselectedNodeIds.add(id);
+		// 	}
+		// });
+		//
+		// this.runtime.activatedNodeIds.forEach(id => {
+		// 	if (store.get(id)?.isActive) {
+		// 		this.activatedNodeIds.add(id);
+		// 	} else {
+		// 		this.deactivatedNodeIds.add(id);
+		// 	}
+		// });
+		//
+		// this.runtime.openNodeIds.forEach(id => {
+		// 	if (store.get(id)?.isOpen) {
+		// 		this.openNodeIds.add(id);
+		// 	} else {
+		// 		this.closeNodeIds.add(id);
+		// 	}
+		// });
+		//
+		// this.runtime.emit('change', this.runtime);
 	}
 
 	updateContent() {
-		if (!this.content.isDirty) return
-		const nodes: Node[] = [];
-		// this.content = this.content.view(nodes);
-		// console.log('document id', this.content.childrenVersion)
-		nodes.forEach(n => {
-			// console.log('new node', n.id.toString(), n.childrenVersion)
-			// this.store.put(n);
-		});
-
-		this.emit('change:content', this.content);
+		// if (!this.content.isDirty) return
+		// const nodes: Node[] = [];
+		// // this.content = this.content.view(nodes);
+		// // console.log('document id', this.content.childrenVersion)
+		// nodes.forEach(n => {
+		// 	// console.log('new node', n.id.toString(), n.childrenVersion)
+		// 	// this.store.put(n);
+		// });
+		//
+		// this.emit('change:content', this.content);
 	}
 
 	clone(depth: number = 2) {
@@ -293,7 +291,9 @@ export class CarbonState extends EventEmitter {
 	}
 
 	freeze() {
+		// remove all explicit parent links and freeze
 		this.changes.freeze();
+
 		this.selectedNodeIds.freeze();
 		this.unselectedNodeIds.freeze();
 		this.activatedNodeIds.freeze();
