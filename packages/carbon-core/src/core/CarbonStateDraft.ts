@@ -10,6 +10,8 @@ import { SelectionEvent } from "./SelectionEvent";
 import { PointedSelection } from "./PointedSelection";
 import { sortBy, zip } from 'lodash';
 import BTree from 'sorted-btree';
+import { NodeType } from "./NodeType";
+import { NodeAttrs } from "./NodeAttrs";
 
 export class CarbonStateDraft {
   state: CarbonState;
@@ -84,10 +86,12 @@ export class CarbonStateDraft {
       let prev = changed.shift()!;
       let next: Optional<NodeDepthEntry> = null;
       process.push(prev.node);
+      // console.log('taking node', prev.node.id.toString(), prev.node.name, prev.depth);
       const depth = prev.depth;
       while (changed.length > 0 && changed[0].depth === prev.depth) {
         next = changed.shift()!;
         if (next.node.parentId && prev.node.parentId && !next.node.parentId.eq(prev.node.parentId)) {
+          // console.log('taking node', next.node.id.toString(), next.node.name, next.depth);
           process.push(next.node);
           prev = next;
         }
@@ -95,7 +99,7 @@ export class CarbonStateDraft {
 
       while (process.length > 0) {
         const node = process.pop()!;
-        console.log('processing node', node.id.toString(), node.name);
+        // console.log('processing node', node.id.toString(), node.name);
         const parent = this.nodeMap.parent(node);
         if (parent) {
           const clone = parent.clone(n => {
@@ -122,7 +126,8 @@ export class CarbonStateDraft {
     if (!node) {
       throw new Error("Cannot mutate node that does not exist");
     }
-
+    // console.log('mutable', );
+    
     const mutable = this.nodeMap.has(id) ? node : node.clone();
     fn(mutable);
     this.nodeMap.set(id, mutable);
@@ -130,12 +135,14 @@ export class CarbonStateDraft {
     return mutable;
   }
 
-  updateContent(node: Node, content: NodeContent) {
+  updateContent(nodeId: NodeId, content: NodeContent) {
     if (!this.drafting) {
       throw new Error("Cannot update content on a draft that is already committed");
     }
 
-    this.mutable(node.id, node => node.updateContent(content));
+    this.mutable(nodeId, node => {
+      node.updateContent(content);
+    });
     content.children.forEach(child => {
       this.nodeMap.set(child.id, child);
       // this.changes.changed.add(child.id);
@@ -146,9 +153,9 @@ export class CarbonStateDraft {
     //   this.changes.changed.add(parent!.id);
     // } else {
     // }
-    this.changes.changed.add(node.id);
 
-    this.changes.updated.add(node.id);
+    this.changes.changed.add(nodeId);
+    this.changes.updated.add(nodeId);
   }
 
   prepend(parentId, node: Node) {
@@ -253,6 +260,28 @@ export class CarbonStateDraft {
     this.changes.changed.add(parentId);
     this.changes.deleted.add(node.id);
     this.nodeMap.delete(node.id);
+  }
+
+  changeName(nodeId: NodeId, type: NodeType) {
+    if (!this.drafting) {
+      throw new Error("Cannot change name on a draft that is already committed");
+    }
+
+    this.mutable(nodeId, node => node.changeType(type));
+
+    this.changes.changed.add(nodeId);
+    this.changes.renamed.add(nodeId);
+  }
+
+  updateAttrs(nodeId: NodeId, attrs: Partial<NodeAttrs>) {
+    if (!this.drafting) {
+      throw new Error("Cannot change name on a draft that is already committed");
+    }
+
+    this.mutable(nodeId, node => node.updateAttrs(attrs));
+
+    this.changes.changed.add(nodeId);
+    this.changes.updated.add(nodeId);
   }
 
   updateSelection(selection: PointedSelection) {

@@ -86,7 +86,7 @@ export class NodeStore {
 
 	// connect the node to the rendered HTML element
 	register(node: Node, el: Optional<HTMLElement>) {
-		console.log('register node', node.id.toString(), el);
+		// console.log('register node', node.id.toString(), el);
 		
 		if (!el) {
 			console.error(`Registering empty dom node for ${node.id.toString()}`)

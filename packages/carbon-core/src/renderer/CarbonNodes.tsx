@@ -183,20 +183,32 @@ export const CarbonNodeContent = (props: RendererProps) => {
   const { node, beforeContent, custom, wrapper } = props;
   const { children = [] } = node;
 
+  const content = useMemo(() => {
+    if (!children.length) {
+      return null;
+    }
+
+    return children[0];
+  },[children])
+  
   useEffect(() => {
     return () => {
       console.log('CarbonNodeContent unmount', node.name, node.id.toString(), node.toJSON());
     }
   },[node])
 
-  if (!children.length) {
+  if (!content) {
     return null;
   }
 
   return (
     <div data-type="content" {...wrapper}>
       {beforeContent}
-      <CarbonNode node={children[0]} custom={custom} />
+      <CarbonNode
+        node={content}
+        custom={custom}
+        key={content.key}
+      />
     </div>
   );
 };

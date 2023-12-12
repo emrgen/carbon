@@ -31,7 +31,7 @@ export class SetContentAction implements CarbonAction {
     this.before = before;
   }
 
-  execute(tr: Transaction, draft: CarbonStateDraft): ActionResult<any> {
+  execute(tr: Transaction, draft: CarbonStateDraft) {
     const {app,} = tr
     const {nodeId, after} = this
     const node = draft.get(nodeId);
@@ -39,23 +39,22 @@ export class SetContentAction implements CarbonAction {
       return ActionResult.withError(`Node ${nodeId} not found`);
     }
 
-    draft.updateContent(node, after);
+    draft.updateContent(nodeId, after);
 
     // if (this.before === null || this.before === undefined) {
-    this.before = node.content.clone();
-    // }
-    const wasEmptyBefore = node.isEmpty;
-    node?.updateContent(after);
+    const a = (b) => b.clone(a)
+    this.before = node.content.clone(a);
+
+    // const wasEmptyBefore = node.isEmpty;
+    // node?.updateContent(after);
     // node.forAll(n => {
     //   app.store.put(n);
     // });
 
     // for first time we need to update parent to update the parent appearance like placeholder
-    if (wasEmptyBefore) {
-      tr.updated(node.parent!);
-    }
-
-    return ActionResult.withValue('done')
+    // if (wasEmptyBefore) {
+    //   tr.updated(node.parent!);
+    // }
   }
 
   merge(other: SetContentAction): SetContentAction {

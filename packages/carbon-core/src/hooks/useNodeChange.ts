@@ -52,16 +52,16 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 		const onChange = (value: Node) => {
 			setWatched(value);
 			// console.log(value.version, node.version, value.id.toString(), value.textContent);
-			// console.log("node changed", node.id.toString(),  watched === value, value.textContent, value.version);
+			console.log("node changed", value.name, watched.id.toString(),  watched === value, value.textContent, value.version);
 		};
-		change.subscribe(node.id, NodeChangeType.update, onChange);
+		change.subscribe(watched.id, NodeChangeType.update, onChange);
 		return () => {
-			change.unsubscribe(node.id, NodeChangeType.update, onChange);
+			change.unsubscribe(watched.id, NodeChangeType.update, onChange);
 		}
-	}, [change, node]);
+	}, [change, watched]);
 
 	useEffect(() => {
-		change.mounted(watched.id, NodeChangeType.update)
+		change.mounted(watched, NodeChangeType.update)
 	}, [change, watched]);
 
 	return {

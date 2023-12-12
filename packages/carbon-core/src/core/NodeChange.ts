@@ -1,11 +1,11 @@
 import { Optional } from "@emrgen/types";
 import { NodeIdSet } from "./BSet";
 import { PinnedSelection } from "./PinnedSelection";
-import { SelectionEvent } from "./SelectionEvent";
 import { PointedSelection } from "./PointedSelection";
 
 export class StateChanges {
   changed: NodeIdSet = new NodeIdSet();
+  renamed: NodeIdSet = new NodeIdSet();
   inserted: NodeIdSet = new NodeIdSet();
   updated: NodeIdSet = new NodeIdSet();
   deleted: NodeIdSet = new NodeIdSet();
@@ -22,6 +22,7 @@ export class StateChanges {
 
   diff(other: StateChanges): StateChanges {
     const diff = new StateChanges();
+    diff.changed = this.changed;
     diff.inserted = this.inserted;
     diff.updated = this.updated;
     diff.deleted = this.deleted;
@@ -67,6 +68,7 @@ export class StateChanges {
   }
 
   freeze() {
+    this.renamed.freeze();
     this.changed.freeze();
     this.inserted.freeze();
     this.updated.freeze();
@@ -87,6 +89,7 @@ export class StateChanges {
 
   clone() {
     const clone = new StateChanges();
+    clone.renamed = this.renamed.clone();
     clone.changed = this.changed.clone();
     clone.inserted = this.inserted.clone();
     clone.updated = this.updated.clone();
@@ -106,6 +109,7 @@ export class StateChanges {
 
   toJSON() {
     return {
+      renamed: this.renamed.toJSON(),
       changed: this.changed.toJSON(),
       inserted: this.inserted.toJSON(),
       updated: this.updated.toJSON(),

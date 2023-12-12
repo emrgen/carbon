@@ -5,6 +5,7 @@ import { NodeName } from '../types';
 import { ActionResult } from './Result';
 import { CarbonAction, ActionOrigin } from './types';
 import { generateActionId } from './utils';
+import { CarbonStateDraft } from '../CarbonStateDraft';
 
 export class ChangeName implements CarbonAction{
 	id: number;
@@ -17,20 +18,20 @@ export class ChangeName implements CarbonAction{
 		this.id = generateActionId();
 	}
 
-	execute(tr: Transaction): ActionResult {
+	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { nodeId, to } = this;
-		const {app}=tr;
-		const target = app.store.get(nodeId);
+		const { app }=tr;
+		const target = draft.get(nodeId);
 		if (!target) {
-			return ActionResult.withError('failed to find target from: ' + nodeId.toString())
+			throw new Error('failed to find node for: ' + nodeId)
 		}
 
-		const type = tr.app.schema.type(to)
-		target.changeType(type)
-		// tr.updated(target);
-		tr.updated(target.parent!);
+		const type = tr.app.schema.type(to);
+		if (!type) {
+			throw new Error('failed to find type for: ' + to)
+		}
 
-		return ActionResult.withValue('done');
+		draft.changeName(nodeId, type);
 	}
 
 	inverse(): CarbonAction {

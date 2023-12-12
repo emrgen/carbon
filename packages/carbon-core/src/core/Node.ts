@@ -150,7 +150,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get key() {
-		return this.id.id
+		return `${this.id.id}/${this.version}`
 	}
 
 	get placeholder() {

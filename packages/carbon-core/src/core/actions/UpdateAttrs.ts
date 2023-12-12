@@ -9,6 +9,7 @@ import { NodeIdSet } from '../BSet';
 import { NodeAttrs } from '../NodeAttrs';
 import { Optional } from '@emrgen/types';
 import { cloneDeep } from 'lodash';
+import { CarbonStateDraft } from "../CarbonStateDraft";
 
 
 export class UpdateAttrs implements CarbonAction {
@@ -29,19 +30,16 @@ export class UpdateAttrs implements CarbonAction {
     this.id = generateActionId();
   }
 
-  execute(tr: Transaction): ActionResult {
+  execute(tr: Transaction, draft: CarbonStateDraft) {
     const { app } = tr;
-    const { store, state } = app;
     const { nodeId } = this;
-    const node = store.get(nodeId)
+    const node = draft.get(nodeId)
     if (!node) {
-      console.warn('node not found', nodeId);
-      return NULL_ACTION_RESULT
+      throw Error('')
     }
 
     this.prevAttrs = cloneDeep(node.attrs);
-    node.updateAttrs(this.attrs);
-    tr.updated(node);
+    draft.updateAttrs(nodeId, this.attrs);
 
     return NULL_ACTION_RESULT;
   }

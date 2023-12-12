@@ -15,7 +15,6 @@ import {
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
-import { TitleContent } from "./TitleContent";
 
 export class ChangeName extends BeforePlugin {
   name = 'changeName';
