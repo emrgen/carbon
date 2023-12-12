@@ -138,10 +138,10 @@ export class Collapsible extends NodePlugin {
     const json = {
       name: splitBlock.isCollapsed ? splitBlock.name : splitBlock.type.splitName,
       attrs: { node: { collapsed: splitBlock.isCollapsed } },
-      content: [
+      children: [
         {
           name: 'title',
-          content: rightContent.children.map(c => c.toJSON())
+          children: rightContent.children.map(c => c.toJSON())
         }
       ],
     }

@@ -73,6 +73,8 @@ export type SerializedNode = string;
 
 export type EncodedNode<T> = T;
 
+export const deepClonerFn = (node: Node) => node.clone(deepClonerFn);
+
 export interface JSONNode {
 	id: string;
 	name: string;

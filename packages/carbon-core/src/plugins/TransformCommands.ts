@@ -349,7 +349,7 @@ export class TransformCommands extends BeforePlugin {
   // wrap node within parent of type `name`
   wrap(app: Carbon, node: Node, name: NodeName): Optional<Transaction> {
     const { tr } = app;
-    const wrapper = app.schema.node(name, { content: [node.clone()] });
+    const wrapper = app.schema.node(name, { children: [node.clone()] });
     if (!wrapper) return;
     const at = Pin.toStartOf(wrapper)?.point;
     if (!at) {
@@ -503,10 +503,10 @@ export class TransformCommands extends BeforePlugin {
 
     const json = {
       name: splitBlock.name,
-      content: [
+      children: [
         {
           name: 'title',
-          content: rightContent.children.map(c => c.toJSON())
+          children: rightContent.children.map(c => c.toJSON())
         }
       ]
     }
@@ -916,7 +916,7 @@ export class TransformCommands extends BeforePlugin {
 
     // console.log('XXX', selection, blocks.map(n => n.id.toString()));
     // console.log('XXX', after?.toString());
-    
+
     const tr = app.tr
       .selectNodes([])
       .add(deleteActions)

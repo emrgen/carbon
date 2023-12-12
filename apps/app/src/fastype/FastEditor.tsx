@@ -33,7 +33,7 @@ const extensions = [
 
 const data = {
   name: "carbon",
-  content: [
+  children: [
     {
       name: "document",
       children: [

@@ -67,13 +67,17 @@ export class BlockContent implements NodeContent {
 	}
 
 	setParentId(parentId: NodeId): NodeContent {
+		// if (this.frozen) return this
 		this.nodes.forEach(n => n.setParentId(parentId));
 		return this;
 	}
 
 	setParent(parent: Node): NodeContent {
 		if (this.frozen) return this
-		this.nodes.forEach(n => n.setParent(parent));
+		this.nodes.forEach(n => {
+			n.setParent(parent);
+			n.setParentId(parent.id);
+		});
 		return this;
 	}
 

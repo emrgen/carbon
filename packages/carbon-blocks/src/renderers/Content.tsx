@@ -54,7 +54,7 @@ export function ContentComp(props: RendererProps) {
     const levels: { node: any; depth: number }[] = [];
     const stackNode = {
       name: "stack",
-      content: [],
+      children: [],
     };
     // const names = app.content
     //   .find((n) => n.isDocument)
@@ -121,7 +121,7 @@ export function ContentComp(props: RendererProps) {
   }, [app.content, app.schema]);
 
   console.log(content);
-  
+
 
   useEffect(() => {
     const onTransaction = (tr: Transaction) => {

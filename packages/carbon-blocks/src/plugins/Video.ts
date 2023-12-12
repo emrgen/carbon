@@ -43,7 +43,7 @@ export class Video extends NodePlugin {
     return {
       name: node.name,
       title: `![](${node.attrs.node.src})`,
-      content: [],
+      children: [],
     }
   }
 

@@ -130,7 +130,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		} = object;
 		this.test_key = nextKey()
 		this.scope = scope;
-		this.parentId = parentId;
+		this.parentId = parentId ?? parent?.id;
 		this._parent = parent;
 		this.id = id;
 		this.type = type;

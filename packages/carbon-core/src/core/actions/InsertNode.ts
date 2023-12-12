@@ -10,6 +10,7 @@ import { RemoveNode } from './RemoveNode';
 import { Node } from '../Node';
 import { CarbonStateDraft } from '../CarbonStateDraft';
 import { identity } from "lodash";
+import { deepClonerFn } from "@emrgen/carbon-core";
 
 export class InsertNode implements CarbonAction {
 	id: number;
@@ -42,12 +43,12 @@ export class InsertNode implements CarbonAction {
 		// 	return ActionResult.withError('ref node already deleted, by transaction from other site');
 		// }
 
-		const {parent} = refNode;
+		const parent = draft.parent(refNode.id)
 		if (!parent) {
-			return ActionResult.withError('failed to find target parent from: ' + at.toString())
+			throw new Error('failed to find parent node from: ' + at.toString())
 		}
 
-		const clone = node.clone(identity);
+		const clone = node.clone(deepClonerFn);
 		draft.insert(at, clone, 'create');
 	}
 
