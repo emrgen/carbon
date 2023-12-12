@@ -45,44 +45,13 @@ export class InsertNode implements CarbonAction {
 			return ActionResult.withError('failed to find target parent from: ' + at.toString())
 		}
 
-		// const done = () => {
-		// 	node.forAll(n => {
-		// 		node.undelete();
-		// 		app.store.put(n);
-		// 	})
-
-		// 	tr.updated(parent);
-		// }
-
-		if (at.isStart) {
-			draft.prepend(at.nodeId, node);
-			return
-		}
-
-		if (at.isBefore) {
-			draft.insertBefore(at.nodeId, node);
-			return
-		}
-
-		if (at.isAfter) {
-			draft.insertAfter(at.nodeId, node);
-			return
-		}
-
-		if (at.isEnd) {
-			draft.append(at.nodeId, node);
-			return
-		}
-
-		throw new Error('should not reach here');
+		draft.insert(at, node);
 	}
 
 	inverse(tr: Transaction): CarbonAction {
 		const { at, node, nodeJson } = this;
 		// TODO: check if nodeJson and node should be the same
-		const action = RemoveNode.create(at, node.id, this.origin)
-		// action.node = tr.app.schema.nodeFromJSON(nodeJson)!;
-		return action;
+		return RemoveNode.create(at, node.id, this.origin)
 	}
 
 	toString() {

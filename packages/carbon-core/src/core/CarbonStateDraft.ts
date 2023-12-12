@@ -12,6 +12,7 @@ import { sortBy, zip } from 'lodash';
 import BTree from 'sorted-btree';
 import { NodeType } from "./NodeType";
 import { NodeAttrs } from "./NodeAttrs";
+import { Point, PointAt } from "./Point";
 
 export class CarbonStateDraft {
   state: CarbonState;
@@ -158,7 +159,22 @@ export class CarbonStateDraft {
     this.changes.updated.add(nodeId);
   }
 
-  prepend(parentId, node: Node) {
+  insert(at: Point, node: Node) {
+    switch (at.at) {
+      case PointAt.After:
+        return this.insertAfter(at.nodeId, node);
+      case PointAt.Before:
+        return this.insertBefore(at.nodeId, node);
+      case PointAt.Start:
+        return this.prepend(at.nodeId, node);
+      case PointAt.End:
+        return this.append(at.nodeId, node);
+    }
+
+    throw new Error("Invalid insertion point");
+  }
+
+  private prepend(parentId: NodeId, node: Node) {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
@@ -170,7 +186,7 @@ export class CarbonStateDraft {
     this.nodeMap.set(node.id, node);
   }
 
-  append(parentId: NodeId, node: Node) {
+  private append(parentId: NodeId, node: Node) {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
@@ -182,7 +198,7 @@ export class CarbonStateDraft {
     this.nodeMap.set(node.id, node);
   }
 
-  insertBefore(refId: NodeId, node: Node) {
+  private insertBefore(refId: NodeId, node: Node) {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
@@ -209,7 +225,7 @@ export class CarbonStateDraft {
     this.nodeMap.set(node.id, node);
   }
 
-  insertAfter(refId: NodeId, node: Node) {
+  private insertAfter(refId: NodeId, node: Node) {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
@@ -233,7 +249,7 @@ export class CarbonStateDraft {
 
     this.changes.changed.add(parentId);
     node.forAll(n => {
-      this.changes.changed.add(n.id);
+      // this.changes.changed.add(n.id);
       this.nodeMap.set(n.id, n);
     });
 

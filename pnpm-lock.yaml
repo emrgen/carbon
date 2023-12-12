@@ -15,8 +15,8 @@ importers:
         specifier: workspace:*
         version: link:packages/carbon-core
       '@emrgen/types':
-        specifier: ^0.0.2
-        version: 0.0.2
+        specifier: workspace:*
+        version: link:packages/types
     devDependencies:
       '@playwright/test':
         specifier: ^1.39.0
@@ -87,6 +87,9 @@ importers:
       framer-motion:
         specifier: ^10.15.0
         version: 10.15.0(react-dom@18.2.0)(react@18.2.0)
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       object-treeify:
         specifier: ^4.0.1
         version: 4.0.1
@@ -3218,10 +3221,6 @@ packages:
 
   /@emotion/weak-memoize@0.3.1:
     resolution: {integrity: sha512-EsBwpc7hBUJWAsNPBmJy4hxWx12v6bshQsldrVmjxJoc3isbxhOrF2IcCpaXxfvq03NwkI7sbsOLXbYuqF/8Ww==}
-    dev: false
-
-  /@emrgen/types@0.0.2:
-    resolution: {integrity: sha512-YAaDY5OWJn0fuEpv3WwIqr6hoG90mkHwitlO28i/DcncOqN1rSgLRX+R/4rJm/D9QirA9GiEiIksO6rywUVhBQ==, tarball: https://npm.pkg.github.com/download/@emrgen/types/0.0.2/b29c24283c757d0a5d6365b4f0b77d123e5f1560}
     dev: false
 
   /@esbuild/android-arm64@0.16.17:

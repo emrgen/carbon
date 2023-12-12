@@ -28,7 +28,7 @@
   "dependencies": {
     "@emrgen/carbon-blocks": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
-    "@emrgen/types": "^0.0.2"
+    "@emrgen/types": "workspace:*"
   },
   "packageManager": "pnpm@7.28.0"
 }

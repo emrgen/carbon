@@ -2,7 +2,7 @@ import { IntoNodeId, NodeId } from './NodeId';
 import { classString } from './Logger';
 import { Maps } from './types';
 
-enum PointAt {
+export enum PointAt {
 	Start = 0,
 	Before = 1,
 	Inside = 2,
@@ -15,7 +15,7 @@ export class Point {
 	nodeId: NodeId;
 
 	// points at before|within|after
-	private at: PointAt;
+	at: PointAt;
 
 	// valid when point is within a node
 	offset: number;

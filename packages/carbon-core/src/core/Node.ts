@@ -648,22 +648,30 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// @mutates
 	prepend(nodes: Node | Node[]) {
-		this.content = this.content.prepend(flatten([nodes])).setParentId(this.id);
+		const list = flatten([nodes]);
+		list.forEach(n => n.setParentId(this.id));
+		this.content = this.content.prepend(list).setParentId(this.id);
 	}
 
 	// @mutates
 	append(nodes: Node | Node[]) {
-		this.content = this.content.append(flatten([nodes])).setParentId(this.id);
+		const list = flatten([nodes]);
+		list.forEach(n => n.setParentId(this.id));
+		this.content = this.content.append(list);
 	}
 
 	// @mutates
 	insertBefore(before: Node, nodes: Node | Node[]) {
-		this.content = this.content.insertBefore(before, flatten([nodes])).setParentId(this.id);
+		const list = flatten([nodes]);
+		list.forEach(n => n.setParentId(this.id));
+		this.content = this.content.insertBefore(before, list);
 	}
 
 	// @mutates
 	insertAfter(after: Node, nodes: Node | Node[]) {
-		this.content = this.content.insertAfter(after, flatten([nodes]) as Node[]).setParentId(this.id);
+		const list = flatten([nodes]);
+		list.forEach(n => n.setParentId(this.id));
+		this.content = this.content.insertAfter(after,list);
 	}
 
 	// @mutates

@@ -328,7 +328,7 @@ export class TransformCommands extends BeforePlugin {
     // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
     app.cmd.transform.delete(selection)?.then((carbon) => {
       // console.log('DELETED', carbon.selection.toString());
-      return this.paste(carbon, after, BlockSelection.empty(app.store), slice);
+      // return this.paste(carbon, after, BlockSelection.empty(app.store), slice);
     })?.dispatch();
   }
 
@@ -844,9 +844,11 @@ export class TransformCommands extends BeforePlugin {
     const commands: MoveAction[] = [];
     const moveNodes = flatten([nodes]);
     if (!moveNodes.length) return commands;
-    const from = nodeLocation(first(moveNodes)!)!;
-    // console.log('moveNode', moveNode.id.key, to.toString());
-    commands.push(MoveAction.fromIds(from!, to, moveNodes.map(n => n.id)));
+    reverse(moveNodes.slice()).forEach(node => {
+      const from = nodeLocation(node)!;
+      // console.log('moveNode', moveNode.id.key, to.toString());
+      commands.push(MoveAction.create(from!, to, node.id));
+    })
     return commands;
   }
 
