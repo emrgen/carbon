@@ -270,13 +270,17 @@ export class CarbonStateDraft {
     this.changes.changed.add(parentId);
   }
 
-  remove(nodeId: NodeId) {
+  remove(node: Node) {
     if (!this.drafting) {
       throw new Error("Cannot remove node from a draft that is already committed");
     }
 
-    const node = this.nodeMap.get(nodeId);
-    if (!node) {
+    if (node.frozen) {
+      throw Error('cannot remove immutable node, it must be at least mutable at top level');
+    }
+
+    const target = this.nodeMap.get(node.id);
+    if (!target) {
       throw new Error("Cannot remove node that does not exist");
     }
 

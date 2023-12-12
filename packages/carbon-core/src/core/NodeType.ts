@@ -221,7 +221,7 @@ export class NodeType {
 
 		const blockJson: NodeJSON = {
 			name: this.name,
-			content: []
+			children: []
 		}
 		let { contentMatch } = this
 		if (contentMatch.validEnd) {
@@ -233,8 +233,8 @@ export class NodeType {
 			if (validEnd || !nextEdges) {
 				break
 			}
-			if (defaultType && isArray(blockJson.content)) {
-				blockJson.content.push(defaultType.default()?.toJSON())
+			if (defaultType && isArray(blockJson.children)) {
+				blockJson.children.push(defaultType.default()?.toJSON())
 			}
 			contentMatch = nextEdges[0].next
 		}
@@ -244,6 +244,7 @@ export class NodeType {
 			throw new Error('node is null')
 		}
 
+		console.log('X node', blockJson);
 		return node
 	}
 

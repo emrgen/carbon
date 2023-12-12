@@ -29,8 +29,8 @@ export class RemoveNode implements CarbonAction {
 
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { nodeId } = this;
-		const target = draft.get(nodeId);
-		if (!target) {
+		const node = draft.get(nodeId);
+		if (!node) {
 			throw new Error('failed to find target node from: ' + nodeId.toString())
 		}
 
@@ -39,7 +39,7 @@ export class RemoveNode implements CarbonAction {
 			throw new Error('failed to find target parent from: ' + nodeId.toString())
 		}
 
-		draft.remove(nodeId);
+		draft.remove(node.clone());
 
 		// this.node = target.toJSON();
 		// parent?.remove(target);
