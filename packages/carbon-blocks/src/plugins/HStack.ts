@@ -12,7 +12,7 @@ export class HStack extends CarbonPlugin {
     }
   }
 
-  normalize(node: Node, state: CarbonState): CarbonAction[] {
+  normalize(node: Node): CarbonAction[] {
     console.log('Normalize ', node.name,);
     // TODO: check if stack schema is correct
     if (node.isVoid) {
@@ -43,7 +43,7 @@ export class Stack extends CarbonPlugin {
     }
   }
 
-  normalize(node: Node, state: CarbonState): CarbonAction[] {
+  normalize(node: Node): CarbonAction[] {
     console.log('Normalize ', node.name, );
     // check if stack schema is correct
     if (node.isVoid) {

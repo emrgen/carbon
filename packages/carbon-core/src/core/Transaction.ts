@@ -49,7 +49,6 @@ export class TransactionError {
 	}
 }
 
-
 let _id = 0
 const getId = () => _id++
 
@@ -232,15 +231,15 @@ export class Transaction {
 		return this
 	}
 
-	forceRender(ids: NodeId[], origin = this.origin): Transaction {
-		ids.forEach(id => {
-			this.state.store.get(id)?.markUpdated();
-			this.updatedIds.add(id)
-			// this.state.runtime.updatedNodeIds.add(id);
-		});
-
-		return this
-	}
+	// forceRender(ids: NodeId[], origin = this.origin): Transaction {
+	// 	ids.forEach(id => {
+	// 		this.state.store.get(id)?.markUpdated();
+	// 		this.updatedIds.add(id)
+	// 		// this.state.runtime.updatedNodeIds.add(id);
+	// 	});
+	//
+	// 	return this
+	// }
 
 	oneWay(): Transaction {
 		this.type = TransactionType.OneWay;
@@ -277,7 +276,7 @@ export class Transaction {
 	commit(draft: CarbonStateDraft) {
 		if (this.actions.length === 0) return
 		// const prevDocVersion = editor.doc?.updateCount;
-		
+
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
 				console.group('Transaction (runtime)');

@@ -144,7 +144,6 @@ export class CarbonStateDraft {
     }
 
     let isEmpty = false;
-    console.log('updating content', nodeId.toString(), content.size);
     this.mutable(nodeId, node => {
       isEmpty = node.isEmpty;
       node.children.forEach(child => {
@@ -159,8 +158,7 @@ export class CarbonStateDraft {
       if (!parent) {
         throw Error('parent not found');
       }
-      console.log('triggering parent render', parent.id.toString());
-
+      // console.log('triggering parent render', parent.id.toString());
       this.changes.changed.add(parent.id);
     }
 

@@ -39,6 +39,7 @@ export class RemoveNode implements CarbonAction {
 			throw new Error('failed to find target parent from: ' + nodeId.toString())
 		}
 
+		this.node = node.toJSON();
 		draft.remove(node.clone());
 
 		// this.node = target.toJSON();

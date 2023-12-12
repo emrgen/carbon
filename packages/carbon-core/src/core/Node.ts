@@ -14,6 +14,8 @@ import { no, NodeEncoder, NodeJSON, yes } from "./types";
 import { NodeState } from "./NodeState";
 import EventEmitter from "events";
 import { StateScope } from "./StateScope";
+import { NodeBTree } from "./BTree";
+import { NodeLinks } from "./NodeLinks";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -29,6 +31,8 @@ export interface NodeCreateProps {
 	id: NodeId;
 	type: NodeType;
 	content: NodeContent;
+	linkName?: string;
+	links?: NodeLinks;
 
 	marks?: MarkSet;
 	attrs?: NodeAttrs;
@@ -85,6 +89,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 	id: NodeId;
 	type: NodeType;
 	content: NodeContent;
+	linkName: string;
+	links: NodeLinks;
 	marks: MarkSet;
 	attrs: NodeAttrs;
 	state: NodeState;
@@ -121,6 +127,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 			id,
 			type,
 			content,
+			links = new NodeLinks(),
+			linkName = '',
 			marks = MarkSet.empty(),
 			attrs = {},
 			state = {},
@@ -135,6 +143,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.id = id;
 		this.type = type;
 		this.content = content.setParentId(this.id).setParent(this)
+		this.linkName = linkName;
+		this.links = links
 		this.marks = marks;
 
 		this.attrs = new NodeAttrs(merge(cloneDeep(type.attrs), attrs));
@@ -167,6 +177,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	get name() {
 		return this.type.name;
+	}
+
+	get isLinked() {
+		return !!this.linkName && this.parentId;
 	}
 
 	get isActive() {
@@ -655,6 +669,21 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.content = this.content.replace(node, flatten([by])).setParentId(this.id)
 	}
 
+	link(name: string, node: Node) {
+		if (this.frozen) {
+			throw Error('cannot link immutable node:' + node.id.toString())
+		}
+
+		this.links.link(name, node)
+	}
+
+	unlink(name: string): Optional<Node> {
+		if (this.frozen) {
+			throw Error('cannot unlink immutable, link:' + name)
+		}
+		return this.links.unlink(name)
+	}
+
 	// @mutates
 	prepend(node: Node) {
 		if (node.frozen) {
@@ -816,13 +845,16 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// creates a mutable copy of the node
 	clone(map: (node: Node) => Optional<Node> = identity): Node {
-		const { scope, parentId, id, type, content, attrs, state, marks, version } = this;
+		const { scope, parentId, id, type, content, links, attrs, state, marks, version } = this;
+		// const links = new Map(this.links);
+
 		const cloned = Node.create({
 			scope,
 			parentId,
 			id,
 			type,
 			content: content.clone(map).setParent(this).setParentId(this.id),
+			links,
 			attrs,
 			state,
 			marks,
