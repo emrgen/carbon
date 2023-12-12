@@ -1,4 +1,4 @@
-import { CarbonAction, CarbonPlugin, NodeSpec, CarbonState, Node, RemoveNode, nodeLocation, Point, moveNodesAction, SelectAction } from "@emrgen/carbon-core";
+import { CarbonAction, CarbonPlugin, NodeSpec, CarbonState, Node, RemoveNode, nodeLocation, Point, moveNodesActions, SelectAction } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 export class HStack extends CarbonPlugin {
@@ -24,7 +24,7 @@ export class HStack extends CarbonPlugin {
       const children = node.child(0)?.children;
       const at = Point.toAfter(node.prevSibling!.id)
       return [
-        moveNodesAction(at, children!),
+        ...moveNodesActions(at, children!),
         RemoveNode.create(nodeLocation(node)!, node.id)
       ]
     }

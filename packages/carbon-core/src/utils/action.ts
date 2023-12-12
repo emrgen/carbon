@@ -2,9 +2,18 @@ import { ActionOrigin, CarbonAction, MoveAction, Node, Point, RemoveNode } from 
 import { InsertNode } from "../core/actions/InsertNode";
 import { nodeLocation } from "./location";
 
-export const moveNodesAction = (to: Point, nodes: Node[], origin: ActionOrigin = ActionOrigin.UserInput) => {
-  const from = nodeLocation(nodes[0]!)!;
-  return new MoveAction(from, to, nodes.map(n => n.id), origin)
+export const moveNodesActions = (to: Point, nodes: Node[], origin: ActionOrigin = ActionOrigin.UserInput) => {
+  const actions: CarbonAction[] = [];
+  nodes.slice().reverse().forEach(n => {
+    const from = nodeLocation(n);
+    if (!from) {
+      throw new Error('Node has no location');
+    }
+
+    actions.push(MoveAction.create(from, to, n.id, origin));
+  });
+
+  return actions
 }
 
 

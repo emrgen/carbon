@@ -38,8 +38,11 @@ export class CarbonStateDraft {
 
   // turn the draft into a new state
   commit(depth: number) {
-    const { state, changes, nodeMap} = this;
+    const { state, changes } = this;
     this.selection.freeze();
+
+    const nodeMap = this.nodeMap.isEmpty ? state.nodeMap : this.nodeMap;
+    nodeMap.freeze();
     changes.freeze();
     nodeMap.freeze();
 
@@ -140,9 +143,10 @@ export class CarbonStateDraft {
       throw new Error("Cannot update content on a draft that is already committed");
     }
 
-    let isEmpty = content.size === 0;
+    let isEmpty = false;
+    console.log('updating content', nodeId.toString(), content.size);
     this.mutable(nodeId, node => {
-      isEmpty = isEmpty || node.content.size === 0;
+      isEmpty = node.isEmpty;
       node.children.forEach(child => {
         this.nodeMap.delete(child.id);
       });
@@ -155,7 +159,7 @@ export class CarbonStateDraft {
       if (!parent) {
         throw Error('parent not found');
       }
-      // console.log('triggering parent render', parent.id.toString());
+      console.log('triggering parent render', parent.id.toString());
 
       this.changes.changed.add(parent.id);
     }

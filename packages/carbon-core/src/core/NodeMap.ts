@@ -16,6 +16,13 @@ export class NodeMap {
     this._parent = parent || null;
   }
 
+  get isEmpty() {
+    return this._map.isEmpty;
+  }
+  get isEmptyDeep() {
+    return this._map.isEmpty && (!this._parent || this._parent.isEmptyDeep);
+  }
+
   forEach(fn: (id: NodeId, node: Optional<Node>) => void, deep = false) {
     this._map.forEach((v, k) => {
       fn(k, v);

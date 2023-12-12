@@ -24,7 +24,7 @@ import {
   createCarbon,
   extensionPresets,
   useCreateCachedCarbon,
-  useCreateCarbon,
+  useCreateCarbon, NodeMap, NodeId
 } from "@emrgen/carbon-core";
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
 import {
@@ -233,7 +233,6 @@ const extensions = [
 
 export default function Dev() {
   const app = useCreateCarbon('dev',data, extensions);
-
 
   return (
     <div className={'carbon-app-container'}>

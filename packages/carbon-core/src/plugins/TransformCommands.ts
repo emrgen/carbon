@@ -29,7 +29,7 @@ import { takeBefore, takeUntil } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { nodeLocation } from "../utils/location";
 import { splitTextBlock } from "../utils/split";
-import { insertBeforeAction, moveNodesAction, removeNodesActions } from "../utils/action";
+import { insertBeforeAction, moveNodesActions, removeNodesActions } from "../utils/action";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -803,7 +803,7 @@ export class TransformCommands extends BeforePlugin {
           if (moveNodes.length) {
             let at = Point.toAfter(firstNode.id);
             // console.log("move to ..", firstNode.id.toString(), at.toString());
-            moveCommands.push(moveNodesAction(at, moveNodes));
+            moveCommands.push(...moveNodesActions(at, moveNodes));
           }
         }
       } else {
@@ -1500,7 +1500,7 @@ export class TransformCommands extends BeforePlugin {
     const at = Point.toAfter(prev.id);
     const { nextSiblings = [] } = next
     if (nextSiblings.length) {
-      moveActions.push(moveNodesAction(at, nextSiblings))
+      moveActions.push(...moveNodesActions(at, nextSiblings))
     }
 
     // console.log(next.parent?.id.toString(), next.id.toString());

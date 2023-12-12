@@ -10,7 +10,7 @@ import {
   PinnedSelection,
   Point,
   nodeLocation,
-  moveNodesAction,
+  moveNodesActions,
   insertBeforeAction, preventAndStopCtx, BlockContent, SetContentAction
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
@@ -182,7 +182,7 @@ export class ChangeName extends BeforePlugin {
       const to = Point.toAfter(block.id);
       const moveNodes = block.children.slice(1);
       if (moveNodes.length) {
-        tr.add(moveNodesAction(to, moveNodes));
+        tr.add(moveNodesActions(to, moveNodes));
       }
       tr.change(block.id, block.name, type)
       tr.updateAttrs(block.id, { node: { typeChanged: true },  });
