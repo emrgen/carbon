@@ -77,14 +77,17 @@ export class NestablePlugin extends AfterPlugin {
 				}
 
 				const listNode = node.closest(isNestableNode);
+				console.log(listNode);
 				if (!listNode) return
-				// console.log(listNode?.id.toString(), listNode?.name);
-				const atStart = Pin.toStartOf(listNode)?.eq(selection.head);
-				// console.log(atStart, Pin.toStartOf(listNode), selection.head);
+				const head = selection.head.down();
+
+				// console.log(listNode?.id.toString(), listNode?.name, head.toString(), Pin.toStartOf(listNode)?.toJSON());
+				const atStart = Pin.toStartOf(listNode)?.eq(head);
+				// console.log(atStart, Pin.toStartOf(listNode), head);
 
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);
-				const as = listNode.attrs.html['data-as'];
+				const as = listNode.attrs.get('html.data-as')
 				// if listNode is not rendered as the listNode.name
 				// remove the data-as attribute
 				if (as && as !== listNode.name) {
@@ -182,7 +185,7 @@ export class NestablePlugin extends AfterPlugin {
 				const atStart = selection.head.isAtStartOfNode(listNode);
 				if (!atStart) return
 
-				const as = listNode.attrs.html['data-as'];
+				const as = listNode.attrs.get('html.data-as')
 				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
 					tr
@@ -225,11 +228,11 @@ export class NestablePlugin extends AfterPlugin {
 				const container = node.closest(n => n.isContainerBlock);
 				console.log(container?.name, node.name, node.type.isBlock && !node.type.isTextBlock);
 				console.log(node.chain.map(n => n.name).join(' > '));
-				
+
 
 				const listNode = isNestableNode(container!) ? container : undefined;
 				console.log(listNode);
-				
+
 				if (!listNode) return
 				const prevNode = listNode.prevSibling;
 				if (!prevNode || !isNestableNode(prevNode)) return

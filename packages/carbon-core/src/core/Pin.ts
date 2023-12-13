@@ -193,12 +193,12 @@ export class Pin {
 	// push pin down to the proper child
 	down() {
 		const { node, offset } = this;
-		if (offset === 0 && node.isEmpty || node.isInline) {
+		if (offset === 0 && node.isVoid || node.isInline) {
 			return this.clone()
 		}
 
 		let distance = offset;
-		let pin: Optional<Pin>
+		let pin: Pin = this.clone();
 		node?.children.some(n => {
 			if (distance <= n.focusSize) {
 				pin = Pin.create(n, distance)

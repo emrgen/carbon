@@ -1,29 +1,58 @@
-import { cloneDeep, merge, reduce } from 'lodash';
+import { cloneDeep, each, merge, reduce, set, get } from "lodash";
 import { removeEmpty } from '../utils/object';
 
-export class NodeAttrs {
-	html: Record<string, any> = {};
-	node: Record<string, any> = {};
+export type NodeAttrsJSON = Record<string, any>
 
-	constructor(attrs: Record<string, any>) {
-		this.html = attrs.html ?? {};
-		this.node = attrs.node ?? {};
+export class NodeAttrs {
+	private attrs: Record<string, any> = {};
+
+	static empty() {
+		return new NodeAttrs({});
 	}
 
-	update(attrs: Record<string, any>) {
-		const html = merge(cloneDeep(this.html), attrs.html)
+	static fromJSON(attrs: NodeAttrsJSON) {
+		if (attrs instanceof NodeAttrs) {
+			return attrs;
+		}
 
-		const node = merge(cloneDeep(this.node), attrs.node);
-		return new NodeAttrs({
-			html,
-			node,
+		return new NodeAttrs(attrs);
+	}
+
+	get(id: string) {
+		return get(this.attrs, id);
+	}
+
+	get html() {
+		return this.attrs.html;
+	}
+
+	get node() {
+		return this.attrs.node;
+	}
+
+	constructor(attrs: NodeAttrsJSON) {
+		each(attrs, (value, key) => {
+			set(this.attrs, key, value);
+		})
+	}
+
+	update(attrs: NodeAttrsJSON) {
+		const newAttrs = new NodeAttrs(this.toJSON());
+		each(attrs, (value, key) => {
+			set(newAttrs.attrs, key, value);
 		});
+		return newAttrs;
+	}
+
+	freeze() {
+		Object.freeze(this);
+	}
+
+	clone() {
+		return new NodeAttrs(this.toJSON());
 	}
 
 	toJSON() {
-		return {
-			html: this.html,
-			node: this.node,
-		};
+		return cloneDeep(this.attrs)
 	}
 }

@@ -9,6 +9,7 @@ import { classString } from '../Logger';
 import { Pin } from '../Pin';
 import { Node } from '../Node';
 import { isEqual } from 'lodash';
+import { CarbonStateDraft } from "../CarbonStateDraft";
 
 export class InsertText implements CarbonAction {
 	id: number;
@@ -23,7 +24,7 @@ export class InsertText implements CarbonAction {
 		this.type = ActionType.insertText;
 	}
 
-	execute(tr: Transaction) {
+	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { at, text, native } = this;
 		const { app } = tr;
 		const { schema } = app;
@@ -90,8 +91,6 @@ export class InsertText implements CarbonAction {
 
 			return ActionResult.withValue('done');
 		}
-
-		return ActionResult.withValue('done');
 	}
 
 	inverse(): CarbonAction {

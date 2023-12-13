@@ -38,7 +38,7 @@ export class Todo extends Section {
           app.tr
             .updateAttrs(node.id, {
               node: {
-                isChecked: !node.attrs.node.isChecked,
+                isChecked: !node.attrs.get('node.isChecked'),
               },
             })
             .dispatch();

@@ -4,14 +4,15 @@ import { useEffect, useState } from 'react';
 export const usePlaceholder = (node: Node) => {
   const app = useCarbon();
 
+  const dataAs = node.attrs.get('html.data-as');
   if (node.firstChild?.isEmpty && node.attrs.node.emptyPlaceholder) {
     return {
       'placeholder':  node.attrs.node.emptyPlaceholder ?? '',
     };
-  } else if (node.firstChild?.isEmpty && node.attrs.html['data-as']){
-    const type = app.schema.nodes[node.attrs.html['data-as']];
+  } else if (node.firstChild?.isEmpty && dataAs){
+    const type = app.schema.nodes[dataAs];
     return {
-      'placeholder': type.attrs.node.emptyPlaceholder ?? '',
+      'placeholder': type?.attrs.node.emptyPlaceholder ?? '',
     };
   } else {
     return {};

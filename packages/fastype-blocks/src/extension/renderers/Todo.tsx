@@ -40,7 +40,7 @@ export function TodoComp(props: RendererProps) {
       app.tr
         .updateAttrs(node.id, {
           node: {
-            isChecked: !attrs.node.isChecked,
+            isChecked: !attrs.get('node.isChecked'),
           },
         })
         .dispatch();

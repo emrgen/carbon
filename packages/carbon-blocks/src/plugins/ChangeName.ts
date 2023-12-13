@@ -143,11 +143,16 @@ export class ChangeName extends BeforePlugin {
       } else {
         const title = titleNode.textContent.slice(match[1].length - 1);
         console.warn('title', title, match);
-        const textNode = app.schema.text(title)!
-        const content = BlockContent.create(textNode);
+        if (title === '') {
+          const action = SetContentAction.create(titleNode.id,BlockContent.empty());
+          tr.add(action);
+        } else {
+          const textNode = app.schema.text(title)!
+          const content = BlockContent.create(textNode);
 
-        const action = SetContentAction.withContent(titleNode.id, content, content);
-        tr.add(action);
+          const action = SetContentAction.withContent(titleNode.id, content, content);
+          tr.add(action);
+        }
       }
 
 
@@ -222,8 +227,10 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      tr
-        .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
+      const content = BlockContent.empty()
+
+      tr.setContent(block.firstChild!.id, content)
+        // .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
         .add(insertBeforeAction(block, divider))
         .change(block.id, block.name, block.type.splitName)
         .updateAttrs(block.id, { node: { typeChanged: true } })

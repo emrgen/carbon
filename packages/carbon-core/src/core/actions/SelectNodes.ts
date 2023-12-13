@@ -6,6 +6,7 @@ import { ActionResult, NULL_ACTION_RESULT } from "./Result";
 import { CarbonAction, ActionOrigin, ActionType } from "./types";
 import { generateActionId } from "./utils";
 import { NodeIdSet } from '../BSet';
+import { CarbonStateDraft } from "../CarbonStateDraft";
 
 
 export class SelectNodes implements CarbonAction {
@@ -30,7 +31,7 @@ export class SelectNodes implements CarbonAction {
     this.nodeIds = ids.toArray();
   }
 
-  execute(tr: Transaction): ActionResult {
+  execute(tr: Transaction, draft: CarbonStateDraft) {
     const { app } = tr;
     const { store, state } = app;
     const { selectedNodeIds } = state;
@@ -79,9 +80,8 @@ export class SelectNodes implements CarbonAction {
     }
 
     // console.log(afterSelectedNodes.map(n => n.id.toString()));
-    tr.selected(...beforeSelectedNodes);
-    tr.selected(...afterSelectedNodes);
-    return NULL_ACTION_RESULT
+    // tr.selected(...beforeSelectedNodes);
+    // tr.selected(...afterSelectedNodes);
   }
 
   inverse(): CarbonAction {

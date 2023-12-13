@@ -38,11 +38,9 @@ import { CarbonStateDraft } from './CarbonStateDraft';
 export class TransactionError {
 	commandId: number;
 	error: CommandError;
-
 	get message() {
 		return this.error.message
 	}
-
 	constructor(commandId: number, error: CommandError) {
 		this.commandId = commandId;
 		this.error = error;
@@ -55,16 +53,13 @@ const getId = () => _id++
 export class Transaction {
 	id: number;
 	type: TransactionType = TransactionType.TwoWay;
-
 	isNormalizer: boolean = false;
 	timestamp: number = Date.now();
 	onTick: boolean = false;
-
 	private actions: CarbonAction[] = [];
 	private error: Optional<TransactionError>;
 	private cancelled: boolean = false;
 	private committed: boolean = false;
-
 	private normalizeIds = new NodeIdSet();
 	private updatedIds = new NodeIdSet();
 	private selectedIds = new NodeIdSet();

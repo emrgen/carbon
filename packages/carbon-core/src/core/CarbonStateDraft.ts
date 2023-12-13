@@ -13,6 +13,7 @@ import BTree from 'sorted-btree';
 import { NodeType } from "./NodeType";
 import { NodeAttrs } from "./NodeAttrs";
 import { Point, PointAt } from "./Point";
+import { NodeState } from "./NodeState";
 
 export class CarbonStateDraft {
   state: CarbonState;
@@ -247,13 +248,11 @@ export class CarbonStateDraft {
   private prepend(parentId: NodeId, node: Node) {
     this.mutable(parentId, parent => parent.prepend(node));
     this.changes.render.add(parentId);
-    this.changes.changed.add(parentId);
   }
 
   private append(parentId: NodeId, node: Node) {
     this.mutable(parentId, parent => parent.append(node));
     this.changes.render.add(parentId);
-    this.changes.changed.add(parentId);
   }
 
   private insertBefore(refId: NodeId, node: Node) {
@@ -275,7 +274,6 @@ export class CarbonStateDraft {
     this.mutable(parentId, parent => parent.insertBefore(refNode, node));
 
     this.changes.render.add(parentId);
-    this.changes.changed.add(parentId);
   }
 
   private insertAfter(refId: NodeId, node: Node) {
@@ -297,7 +295,6 @@ export class CarbonStateDraft {
     this.mutable(parentId, parent => parent.insertAfter(refNode, node));
 
     this.changes.render.add(parentId);
-    this.changes.changed.add(parentId);
   }
 
   remove(node: Node) {
@@ -323,13 +320,10 @@ export class CarbonStateDraft {
       parent.remove(node);
       // NOTE: if the parent is empty, we need to trigger parent render to render placeholder
       if (parent.isEmpty && parent.parentId) {
-        this.mutable(parent.parentId, parent => {
-          this.changes.changed.add(parent.id);
-        })
+        this.mutable(parent.parentId)
       }
     });
 
-    this.changes.changed.add(parentId);
     node.forAll(n => {
       console.log('removing node', n.id.toString(), n.name);
       this.changes.deleted.add(n.id);
@@ -342,9 +336,18 @@ export class CarbonStateDraft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
-    this.mutable(nodeId, node => node.changeType(type));
+    this.mutable(nodeId, node => {
+      node.changeType(type);
 
-    this.changes.changed.add(nodeId);
+      if (node.isEmpty) {
+        // force render of all descendants if the node is empty
+        node.descendants().forEach(n => {
+          this.mutable(n.id)
+        });
+      }
+    });
+
+
     this.changes.renamed.add(nodeId);
   }
 
@@ -353,7 +356,25 @@ export class CarbonStateDraft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
-    this.mutable(nodeId, node => node.updateAttrs(attrs));
+    this.mutable(nodeId, node => {
+      node.updateAttrs(attrs);
+      if (node.isEmpty) {
+        // force render of all descendants if the node is empty
+        node.descendants().forEach(n => {
+          this.mutable(n.id)
+        });
+      }
+    });
+
+    this.changes.updated.add(nodeId);
+  }
+
+  updateState(nodeId: NodeId, state: NodeState) {
+    if (!this.drafting) {
+      throw new Error("Cannot change name on a draft that is already committed");
+    }
+
+    this.mutable(nodeId, node => node.updateState(state));
 
     this.changes.changed.add(nodeId);
     this.changes.updated.add(nodeId);
@@ -368,7 +389,7 @@ export class CarbonStateDraft {
     this.changes.selection = selection;
   }
 
-  private mutable(id: NodeId, fn: (node: Node) => void) {
+  private mutable(id: NodeId, fn?: (node: Node) => void) {
     const node = this.nodeMap.get(id);
     if (!node) {
       throw new Error("Cannot mutate node that does not exist");
@@ -376,7 +397,9 @@ export class CarbonStateDraft {
     // console.log('mutable', );
 
     const mutable = this.nodeMap.has(id) ? node : node.clone();
-    fn(mutable);
+    fn?.(mutable);
+
+    this.changes.changed.add(id);
     this.nodeMap.set(id, mutable);
 
     return mutable;

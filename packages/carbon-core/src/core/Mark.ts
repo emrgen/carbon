@@ -99,6 +99,8 @@ export class MarkSet {
 		return new MarkSet([]);
 	}
 
+
+
 	constructor(marks: Mark[] = []) {
 		each(marks, m => this.add(m));
 	}

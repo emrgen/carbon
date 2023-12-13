@@ -1,38 +1,56 @@
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep, each, merge } from "lodash";
+
+export interface NodeStateJSON {
+	active?: boolean;
+	selected?: boolean;
+	open?: boolean;
+}
 
 export class NodeState {
-	state: Record<string, any>;
+	active: boolean;
+	selected: boolean;
+	open: boolean;
 
-	get active () {
-		return this.state.active;
+	static empty() {
+		return new NodeState({});
 	}
 
-	get selected() {
-		return this.state.selected;
+	static fromJSON(state: NodeStateJSON) {
+		if (state instanceof NodeState) {
+			return state;
+		}
+
+		return new NodeState(state);
 	}
 
-	get open() {
-		return this.state.open;
+	constructor(state?: NodeStateJSON) {
+		this.active = !!state?.active
+		this.selected = !!state?.selected
+		this.open = !!state?.open
 	}
 
-	constructor(state: Record<string, any>) {
-		this.state = state;
+	update(state: NodeStateJSON): NodeState {
+		const newState = this.clone();
+		each(state, (value, key) => {
+			newState[key] = value;
+		});
+
+		return newState;
 	}
 
-	update(state: Partial<NodeState>) {
-		const newState = merge(cloneDeep(this.state), state)
-		return new NodeState(newState);
+	clone() {
+		return new NodeState(this.toJSON());
 	}
 
-	remove(state: Partial<NodeState>) {
-		const newState = merge(cloneDeep(this.state), state)
-		return new NodeState(newState);
+	freeze() {
+		Object.freeze(this);
 	}
 
 	toJSON() {
 		return {
-			state: this.state,
-		};
+			active: this.active,
+			selected: this.selected,
+			open: this.open
+		}
 	}
-
 }

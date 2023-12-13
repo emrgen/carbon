@@ -75,7 +75,7 @@ export class Section extends NodePlugin {
 		let ret = contentNode?.textContent;
 
 		// TODO: This is a hack to get the correct heading level
-		switch (node.attrs.html['data-as']) {
+		switch (node.attrs.get('html.data-as')) {
 			case 'h1':
 				ret = '# ' + ret;
 				break
@@ -97,11 +97,11 @@ export class Section extends NodePlugin {
 
 	}
 
-	normalize(node: Node, state: CarbonState): CarbonAction[] {
-		console.log('normalize section', node.children.length);
-		console.warn('normalize section', node.children.length);
-		return []
-	}
+	// normalize(node: Node, state: CarbonState): CarbonAction[] {
+	// 	console.log('normalize section', node.children.length);
+	// 	console.warn('normalize section', node.children.length);
+	// 	return []
+	// }
 }
 
 

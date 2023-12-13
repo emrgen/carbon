@@ -6,12 +6,12 @@ import { takeUpto } from "../utils/array";
 import { ContentMatch } from "./ContentMatch";
 import { classString } from "./Logger";
 import { Mark, MarkSet } from "./Mark";
-import { NodeAttrs } from "./NodeAttrs";
+import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { NodeContent } from "./NodeContent";
 import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeType } from "./NodeType";
 import { no, NodeEncoder, NodeJSON, yes } from "./types";
-import { NodeState } from "./NodeState";
+import { NodeState, NodeStateJSON } from "./NodeState";
 import EventEmitter from "events";
 import { StateScope } from "./StateScope";
 import { NodeBTree } from "./BTree";
@@ -33,12 +33,10 @@ export interface NodeCreateProps {
 	content: NodeContent;
 	linkName?: string;
 	links?: NodeLinks;
-
 	marks?: MarkSet;
 	attrs?: NodeAttrs;
 	state?: NodeState;
 	meta?: Record<string, any>;
-
 	version?: number;
 	deleted?: boolean;
 }
@@ -118,7 +116,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return new Node(object)
 	}
 
-	constructor(object: NodeCreateProps) {
+	private constructor(object: NodeCreateProps) {
 		super();
 		const {
 			scope = '',
@@ -130,8 +128,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 			links = new NodeLinks(),
 			linkName = '',
 			marks = MarkSet.empty(),
-			attrs = {},
-			state = {},
+			attrs = NodeAttrs.fromJSON(type.attrs),
+			state = NodeState.fromJSON(type.state),
 			meta = {},
 			version = 0,
 			deleted = false,
@@ -147,8 +145,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.links = links
 		this.marks = marks;
 
-		this.attrs = new NodeAttrs(merge(cloneDeep(type.attrs), attrs));
-		this.state = new NodeState(merge(cloneDeep(type.state), state));
+		this.attrs = attrs,
+		this.state = state;
 		this.meta = meta;
 
 		this.version = version;
@@ -225,7 +223,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// focus steps count within the node
 	// start and end locations are within the node
 	get focusSize(): number {
-		if (this.isInlineAtom) return this.attrs.node?.size ?? 1
+		if (this.isInlineAtom) return this.attrs.get('size') ?? 1
 		// if (this.isEmpty && this.isInline) return 1
 		// if (this.isEmpty || this.isInlineAtom) return 1;
 		// if (this.isBlockAtom) return 0;
@@ -292,7 +290,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get isCollapsed() {
-		return !!this.attrs.node.collapsed;
+		return !!this.attrs.get('node.collapsed');
 	}
 
 	get children() {
@@ -737,31 +735,24 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// @mutates
 	changeType(type: NodeType) {
+		if (this.frozen) {
+			throw Error('cannot change type of immutable node:' + this.id.toString())
+		}
+
 		this.type = type;
-		this.attrs = new NodeAttrs({
-			html: {
-				...type.attrs.html,
-				...this.attrs.html,
-			},
-			node: {
-				...this.attrs.node,
-				...type.attrs.node,
-			}
-		});
-		this.state = new NodeState({
-			...this.type.state,
-			...this.state,
-		});
+		this.attrs = new NodeAttrs(type.attrs);
+		this.state = new NodeState(type.state);
 	}
 
 	// @mutates
-	updateAttrs(props: Partial<NodeAttrs>) {
+	updateAttrs(props: NodeAttrsJSON) {
+		console.log('updateAttrs', props);
 		this.attrs = this.attrs.update(props);
+		console.log(this.attrs);
 	}
 
-
 	// @mutates
-	updateState(state: Partial<NodeState>) {
+	updateState(state: NodeStateJSON) {
 		this.state = this.state.update(state);
 	}
 
