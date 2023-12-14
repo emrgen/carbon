@@ -46,6 +46,8 @@ export class NodeAttrs {
 
 	freeze() {
 		Object.freeze(this);
+		Object.freeze(this.attrs);
+		return this;
 	}
 
 	clone() {

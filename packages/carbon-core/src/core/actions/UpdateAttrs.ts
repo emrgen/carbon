@@ -35,13 +35,11 @@ export class UpdateAttrs implements CarbonAction {
     const { nodeId } = this;
     const node = draft.get(nodeId)
     if (!node) {
-      throw Error('')
+      throw Error('update attrs: node not found')
     }
 
-    this.prevAttrs = cloneDeep(node.attrs);
+    this.prevAttrs = node.attrs.clone().freeze();
     draft.updateAttrs(nodeId, this.attrs);
-
-    return NULL_ACTION_RESULT;
   }
 
   inverse(): CarbonAction {
