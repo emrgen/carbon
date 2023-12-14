@@ -160,8 +160,8 @@ export class Transaction {
 		return this.add(SelectAction.create(this.selection, after, origin));
 	}
 
-	setContent(id: NodeId, after: NodeContent, origin = this.origin): Transaction {
-		return this.add(SetContentAction.create(id, after, origin));
+	setContent(nodeRef: IntoNodeId, after: NodeContent, origin = this.origin): Transaction {
+		return this.add(SetContentAction.create(nodeRef, after, origin));
 	}
 
 	insert(at: Point, nodes: Node | Node[], origin = this.origin): Transaction {

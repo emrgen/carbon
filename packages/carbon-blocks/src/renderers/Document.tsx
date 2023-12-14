@@ -25,7 +25,6 @@ import {
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon";
 import { usePlaceholder } from "../hooks/usePlaceholder";
-import { renderAttr } from "../components/renderAttrs";
 import { CarbonProps } from "@emrgen/carbon-attributes";
 import { DocumentContext } from "../hooks";
 
@@ -75,6 +74,7 @@ export const DocumentComp = (props: RendererProps) => {
       // console.log(bound, e, e.clientY, bound.bottom);
 
       if (e.clientY > bound.bottom) {
+        console.log(lastChild.isEmpty, lastChild.id.toString(), lastChild.textContent);
         if (lastChild.name === "section" && lastChild.isEmpty) {
           const textBlock = lastChild.find((n) => n.isTextBlock);
           if (textBlock) {
@@ -86,7 +86,7 @@ export const DocumentComp = (props: RendererProps) => {
           return;
         }
         prevent(e);
-        // console.log("add new child");
+        console.log("add new child");
         const at = Point.toAfter(lastChild.id);
         const section = app.schema.type("section").default();
         if (!section) return;
@@ -97,7 +97,7 @@ export const DocumentComp = (props: RendererProps) => {
           .dispatch();
       }
     },
-    [app, node.lastChild]
+    [app, node]
   );
 
   // scroll to bottom on transaction if cursor is below the screen

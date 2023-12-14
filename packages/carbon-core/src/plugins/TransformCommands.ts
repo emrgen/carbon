@@ -464,7 +464,7 @@ export class TransformCommands extends BeforePlugin {
         const insertAt = Point.toAfter(block.id);
 
         tr
-          .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
+          .add(commonNode.children.map(ch => RemoveNode.fromNode(nodeLocation(ch)!, ch)))
           .insert(at, block!)
           .insert(insertAt, afterBlock!)
           .select(after);
@@ -476,7 +476,7 @@ export class TransformCommands extends BeforePlugin {
         const focusPoint = Pin.toStartOf(block);
         const after = PinnedSelection.fromPin(focusPoint!);
         tr
-          .add(commonNode.children.map(ch => RemoveNode.create(nodeLocation(ch)!, ch.id)))
+          .add(commonNode.children.map(ch => RemoveNode.fromNode(nodeLocation(ch)!, ch)))
           .insert(at, block!)
           .select(after);
       }
@@ -855,7 +855,7 @@ export class TransformCommands extends BeforePlugin {
   // generates insert commands for adjacent nodes
   private insertNodeCommands(at: Point, nodes: Node[]): InsertNode[] {
     return nodes.slice().reverse().map(node => {
-      return InsertNode.create(at, node)
+      return InsertNode.fromNode(at, node)
     });
   }
 
@@ -865,7 +865,7 @@ export class TransformCommands extends BeforePlugin {
     if (!removeNodes.length) return commands;
 
     removeNodes.forEach(node => {
-      commands.push(RemoveNode.create(nodeLocation(node)!, node.id));
+      commands.push(RemoveNode.fromNode(nodeLocation(node)!, node));
     });
 
     return commands;
@@ -873,7 +873,7 @@ export class TransformCommands extends BeforePlugin {
 
   // remove node from doc
   remove(app: Carbon, node: Node): Optional<Transaction> {
-    return app.tr.remove(nodeLocation(node)!, node.id)
+    return app.tr.remove(nodeLocation(node)!, node)
   }
 
   // delete selected nodes
@@ -882,7 +882,7 @@ export class TransformCommands extends BeforePlugin {
     const deleteActions: CarbonAction[] = [];
     const { blocks } = selection;
     reverse(blocks.slice()).forEach(node => {
-      deleteActions.push(RemoveNode.create(nodeLocation(node)!, node.id));
+      deleteActions.push(RemoveNode.fromNode(nodeLocation(node)!, node));
     });
     const firstNode = first(blocks)!;
     const lastNode = last(blocks)!;
@@ -998,7 +998,7 @@ export class TransformCommands extends BeforePlugin {
       const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
       tr
         .insert(Point.toAfter(commonNode.id), block)
-        .remove(nodeLocation(commonNode)!, commonNode.id)
+        .remove(nodeLocation(commonNode)!, commonNode)
         .select(after);
       return tr;
     }
@@ -1210,7 +1210,7 @@ export class TransformCommands extends BeforePlugin {
       if (!n) {
         throw new Error("Failed to get node for id");
       }
-      actions.push(RemoveNode.create(nodeLocation(n)!, n.id))
+      actions.push(RemoveNode.fromNode(nodeLocation(n)!, n))
     })
 
     each(deleteGroup.ranges, range => {
@@ -1481,7 +1481,7 @@ export class TransformCommands extends BeforePlugin {
       if (next.textContent) {
         if (prev.isVoid) {
           const textNode = app.schema.text(next.textContent)!;
-          insertActions.push(InsertNode.create(Point.toStart(prev.id), textNode));
+          insertActions.push(InsertNode.fromNode(Point.toStart(prev.id), textNode));
         } else {
           const textContent = prev.textContent + next.textContent;
           const textNode = app.schema.text(textContent)!;
@@ -1505,7 +1505,7 @@ export class TransformCommands extends BeforePlugin {
 
     // console.log(next.parent?.id.toString(), next.id.toString());
 
-    removeActions.push(RemoveNode.create(nodeLocation(next.parent!)!, next.parent!.id))
+    removeActions.push(RemoveNode.fromNode(nodeLocation(next.parent!)!, next.parent!))
 
     // console.log('Selection', after.toString());
 

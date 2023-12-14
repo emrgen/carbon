@@ -113,7 +113,7 @@ export class EventManager {
 
 		// console.log('changing selection....', app.selection.toString(), selection.toString())
 		// start node corresponds to focus point in DOM
-		const node = selection.start.node;
+		const node = selection.start.down().node;
 		if (!node) {
 			console.error(p12('%c[invalid]'), 'color:grey', 'node not found for event for selection', selection?.toString(), type);
 			return

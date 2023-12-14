@@ -182,7 +182,6 @@ export class CarbonStateDraft {
     // } else {
     // }
 
-    this.changes.changed.add(nodeId);
     this.changes.updated.add(nodeId);
   }
 

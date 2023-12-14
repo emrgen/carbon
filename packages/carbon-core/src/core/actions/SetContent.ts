@@ -1,6 +1,6 @@
 import { classString } from "../Logger";
 import { NodeContent } from "../NodeContent";
-import { NodeId } from "../NodeId";
+import { IntoNodeId, NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { ActionResult } from "./Result";
 import { ActionOrigin, CarbonAction } from "./types";
@@ -13,8 +13,8 @@ export class SetContentAction implements CarbonAction {
   origin: ActionOrigin;
   before: Optional<NodeContent>;
 
-  static create(nodeId: NodeId, after: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContentAction(nodeId, after, null, false, origin)
+  static create(nodeRef: IntoNodeId, after: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
+    return new SetContentAction(nodeRef.intoNodeId(), after, null, false, origin)
   }
 
   static withContent(nodeId: NodeId, after: NodeContent, before: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {

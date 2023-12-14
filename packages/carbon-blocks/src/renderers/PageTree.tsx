@@ -7,29 +7,31 @@ import {
   RendererProps,
   useCarbon
 } from "@emrgen/carbon-core";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+const CollapsibleTitle = (props: RendererProps) => {
+  const { node } = props;
+}
 
 export const PageTreeComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
-  
-  const handleToggleCollapse = useCallback(() => {
-    const isCollapsed = node.attrs.get('node.collapsed', false);
-    app.tr.updateAttrs(node, {'node.collapsed': !isCollapsed}).dispatch();
-  },[app.tr, node]);
 
-  useEffect(() => {
-    console.log('PageTreeComp mounted');
-  }, [handleToggleCollapse]);
+  // while the pageTree is collapsed, we don't want to re-render the children
+  const isCollapsed = useRef(node.attrs.get('node.collapsed', false));
+
+  const handleToggleCollapse = useCallback(() => {
+    isCollapsed.current = !isCollapsed.current;
+    app.tr.updateAttrs(node, {'node.collapsed': isCollapsed.current}).dispatch();
+  },[app.tr, isCollapsed, node]);
+
 
   const firstChild = node.child(0);
-  console.log(node.version, node.frozen);
   if (firstChild?.name === 'title') {
-    const isCollapsed = node.attrs.get('node.collapsed');
     return (
       <CarbonBlock node={node} custom={{onMouseDown: preventAndStop}}>
-        <CarbonNodeContent key={node.version} node={node} custom={{onClick: handleToggleCollapse}}/>
-        {!isCollapsed && <CarbonNodeChildren node={node}/>}
+        <CarbonNodeContent node={node} custom={{onClick: handleToggleCollapse}}/>
+        {!isCollapsed.current && <CarbonNodeChildren node={node}/>}
       </CarbonBlock>
     );
   }
