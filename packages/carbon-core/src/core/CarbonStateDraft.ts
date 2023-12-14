@@ -14,6 +14,7 @@ import { NodeType } from "./NodeType";
 import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { Point, PointAt } from "./Point";
 import { NodeState, NodeStateJSON } from "./NodeState";
+import { takeUpto } from "../utils/array";
 
 export class CarbonStateDraft {
   state: CarbonState;
@@ -161,12 +162,8 @@ export class CarbonStateDraft {
 
     // if the content is/ws empty, we need to trigger parent render to render placeholder
     if (isEmpty) {
-      const parent = this.nodeMap.parent(nodeId);
-      if (!parent) {
-        throw Error('parent not found');
-      }
-      // console.log('triggering parent render', parent.id.toString());
-      this.changes.changed.add(parent.id);
+      const parents = this.nodeMap.parents(nodeId);
+      takeUpto(parents, n => n.isContainerBlock).forEach(n => this.mutable(n.id))
     }
 
     console.log('inserting content', nodeId.toString(), content.size);

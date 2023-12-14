@@ -1,14 +1,14 @@
 import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
 
-export class PageContent extends CarbonPlugin {
-  name = 'pageContent';
+export class BlockContent extends CarbonPlugin {
+  name = 'blockContent';
 
   spec(): NodeSpec {
     return {
       group: 'content',
       content: '',
       atom: true,
-      // insert: true,
+      insert: true,
       isolating: true,
       draggable: true,
       dragHandle: true,
@@ -16,9 +16,9 @@ export class PageContent extends CarbonPlugin {
       blockSelectable: true,
       info: {
         title: 'Content',
-        description: 'Insert a page content',
+        description: 'Insert a block content',
         icon: 'content',
-        tags: ['content']
+        tags: ['content', 'page content', 'block content']
       },
       attrs: {
         html:{
@@ -29,3 +29,4 @@ export class PageContent extends CarbonPlugin {
     }
   }
 }
+

@@ -52,8 +52,8 @@ import { Video } from "./plugins/Video";
 import { HeaderComp } from "./renderers/Header";
 import FrameComp from "./renderers/Frame";
 import { Frame } from "./plugins/Frame";
-import { PageContent } from "./plugins/PageContent";
-import { PageContentComp } from "./renderers/PageContent";
+import { BlockContent } from "./plugins/BlockContent";
+import { BlockContentComp } from "./renderers/BlockContent";
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -81,9 +81,9 @@ export const blockPresets: Extension = {
 		new Change(),
 		new CarbonRoot(),
 		new PageTree(),
-		new PageContent(),
+		new BlockContent(),
 		new Tab(),
-		new PageContent(),
+		new BlockContent(),
 		new Frame(),
 	],
 	renderers: [
@@ -120,9 +120,8 @@ export const blockPresets: Extension = {
 		Renderer.create('tabTitles', TabTitlesComp),
 		Renderer.create('tabTitle', TextTitleComp),
 		Renderer.create('tagsAttr', () => 1),
-		Renderer.create('content', PageContentComp),
 		Renderer.create('frame', FrameComp),
-		Renderer.create('pageContent', PageContentComp),
+		Renderer.create('blockContent', BlockContentComp),
 	]
 }
 

@@ -38,7 +38,7 @@ import SelectionTracker from "../../SelectionTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
-    // node("divider"),
+    node("blockContent"),
 
     // node("tab", [
     //   node("tabTitles", [

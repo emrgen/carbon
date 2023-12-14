@@ -15,6 +15,9 @@ export class StateChanges {
   moved: NodeIdSet = new NodeIdSet();
 
   state: NodeIdSet = new NodeIdSet();
+  selected: NodeIdSet = new NodeIdSet();
+  activated: NodeIdSet = new NodeIdSet();
+  opened: NodeIdSet = new NodeIdSet();
   attrs: NodeIdSet = new NodeIdSet();
 
   clipboard: NodeIdSet = new NodeIdSet();
@@ -34,6 +37,12 @@ export class StateChanges {
     diff.moved = this.moved;
     diff.changed = this.changed;
     diff.state = this.state;
+    diff.selected = this.selected;
+    diff.activated = this.activated;
+    diff.opened = this.opened;
+    diff.attrs = this.attrs;
+    diff.clipboard = this.clipboard;
+    diff.updatedProps = this.updatedProps;
 
 
     return diff;
@@ -80,6 +89,9 @@ export class StateChanges {
     this.deleted.freeze();
     this.moved.freeze();
     this.state.freeze();
+    this.selected.freeze();
+    this.activated.freeze();
+    this.opened.freeze();
     this.attrs.freeze();
     this.clipboard.freeze();
     this.updatedProps.freeze();
@@ -120,6 +132,9 @@ export class StateChanges {
       deleted: this.deleted.toJSON(),
       moved: this.moved.toJSON(),
       state: this.state.toJSON(),
+      selected: this.selected.toJSON(),
+      activated: this.activated.toJSON(),
+      opened: this.opened.toJSON(),
       attrs: this.attrs.toJSON(),
       clipboard: this.clipboard.toJSON(),
       updatedProps: this.updatedProps.toJSON(),

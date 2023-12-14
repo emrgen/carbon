@@ -214,18 +214,39 @@ export class Transaction {
 		return this;
 	}
 
-	// deactivate any active node before node selection
+	// previously selected nodes will be deselected
+	// previously active nodes will be deactivated
 	selectNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
 		ids = isArray(ids) ? ids : [ids];
-		if (this.state.activatedNodeIds.size) {
-			this.add(ActivateNodes.create([], origin));
-		}
-		this.add(SelectNodes.create(ids, origin));
+
+		// deselect previously activated nodes
+		const prevActivatedIds = this.state.changes.state
+			.map(id => this.state.nodeMap.get(id))
+			.filter(n => n?.state.activated).map(n => n?.id).filter(identity) as NodeId[]
+
+		prevActivatedIds.forEach(id => {
+			this.updateState(id, { activated: false }, origin)
+		})
+
+		// deselect previously selected but now not selected nodes and select new nodes
+		const selectedIds = new NodeIdSet(ids)
+		const deselectedIds = this.state.changes.state
+			.map(id => this.state.nodeMap.get(id))
+			.filter(n => n?.state.selected && !selectedIds.has(n.id)).map(n => n?.id).filter(identity) as NodeId[]
+
+		deselectedIds.forEach(id => {
+			this.updateState(id, { selected: false }, origin)
+		})
+
+		selectedIds.forEach(id => {
+			this.updateState(id, { selected: true }, origin)
+		})
+
 		return this
 	}
 
-	// only selected nodes can be activated
-	// first select and then activate nodes
+	// previously active nodes will be deactivated and deselected
+	// new nodes will be selected and activated
 	activateNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
 		ids = isArray(ids) ? ids : [ids];
 		this.add(SelectNodes.create(ids, origin));

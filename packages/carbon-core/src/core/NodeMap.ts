@@ -1,4 +1,4 @@
-import { Optional } from "@emrgen/types";
+import { Optional, Predicate, With } from "@emrgen/types";
 import { NodeBTree } from "./BTree";
 import { Node } from "./Node";
 import { NodeId } from "./NodeId";
@@ -65,6 +65,25 @@ export class NodeMap {
   parent(from: NodeId | Node): Optional<Node> {
     let node = from instanceof Node ? from : this.get(from);
     return node && node.parentId && this.get(node.parentId);
+  }
+
+  closest(from: NodeId, fn: Predicate<Node>): Optional<Node> {
+    let node = this.get(from);
+    while (node) {
+      if (fn(node)) return node;
+      node = this.parent(node)
+    }
+  }
+
+  chain(from: NodeId | Node): Node[] {
+    let node = from instanceof Node ? from : this.get(from);
+    const nodes: Node[] = [];
+    while (node) {
+      nodes.push(node)
+      node = this.parent(node.id);
+    }
+
+    return nodes;
   }
 
   parents(from: NodeId | Node): Node[] {
