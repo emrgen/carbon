@@ -56,19 +56,20 @@ const data = node("carbon", [
       node(
         "pageTreeItem",
         [
-          title([text("Sunt amet mollit cupidatat non elit labore dolore qui.")]),
-          node("pageTreeItem", [title([text("section 1")])]),
-          node("pageTreeItem", [title([text("section 1")])]),
+          title([text("Physics")]),
+          node("pageTreeItem", [title([text("Thermodynamics")])]),
+          node("pageTreeItem", [title([text("Electromagnetism")])]),
         ],
         {}
         // { node: { collapsed: false }, state: { selected: true } }
       ),
-      node("pageTreeItem", [title([text("section 1")])]),
-      node("pageTreeItem", [title([text("section 1")])]),
-      node("pageTreeItem", [title([text("section 1")])]),
+      node("pageTreeItem", [title([text("Mathematics")])]),
+      node("pageTreeItem", [title([text("Chemistry")])]),
+      node("pageTreeItem", [title([text("Economics")])]),
     ]),
 
-    node("section", [title([text("section 1")])]),
+    node("section", [title([text("Phycology")])]),
+
     // node("hstack", [
     //   node("stack", [section([title([text("section 1")])])]),
     //   node("stack", [section([title([text("section 2")])])]),

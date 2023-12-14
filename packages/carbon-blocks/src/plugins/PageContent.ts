@@ -1,6 +1,6 @@
 import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
 
-export class Content extends CarbonPlugin {
+export class PageContent extends CarbonPlugin {
   name = 'pageContent';
 
   spec(): NodeSpec {

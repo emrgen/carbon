@@ -9,7 +9,7 @@ import {
   extensionPresets,
   useCarbon,
   useCreateCarbon,
-  useSelectionHalo,
+  useSelectionHalo, CarbonState
 } from "@emrgen/carbon-core";
 import {
   useCombineConnectors,
@@ -36,7 +36,7 @@ const appendContent = (parent: any, child: any) => {
   parent.content.push(child);
 };
 
-export function ContentComp(props: RendererProps) {
+export function PageContentComp(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
   const ref = useRef(null);
@@ -49,7 +49,7 @@ export function ContentComp(props: RendererProps) {
 
   const [content, setContent] = useState<Optional<Node>>(null);
 
-  const updateContent = useCallback(() => {
+  const updateContent = useCallback((content: Node) => {
     const stack: { text: string; depth: number; id: string }[] = [];
     const levels: { node: any; depth: number }[] = [];
     const stackNode = {
@@ -61,7 +61,7 @@ export function ContentComp(props: RendererProps) {
     //   ?.children.map((n) => n.type.groups);
     //   console.log("names", names);
 
-    app.content
+    content
       .find((n) => n.isDocument)
       ?.children.forEach((node) => {
         const as = node.attrs.html["data-as"] ?? "";
@@ -124,20 +124,25 @@ export function ContentComp(props: RendererProps) {
 
 
   useEffect(() => {
-    const onTransaction = (tr: Transaction) => {
-      if (tr.updatesContent) {
-        updateContent();
+    const onChange = (state: CarbonState) => {
+      if (state.changes.isContentDirty) {
+        const parent = node.parent;
+        if (!parent) return
+        if (state.changes.changed.has(parent?.id))
+        updateContent(parent);
       }
     };
 
-    app.on(EventsOut.transactionCommit, onTransaction);
+    app.on(EventsOut.changed, onChange);
     return () => {
-      app.off(EventsOut.transactionCommit, onTransaction);
+      app.off(EventsOut.changed, onChange);
     };
   }, [app, updateContent]);
 
   useEffect(() => {
-    updateContent();
+    const parent = node.parent
+    if (!parent) return
+    updateContent(parent);
   }, [updateContent]);
 
   return (
