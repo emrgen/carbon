@@ -588,14 +588,17 @@ span[data-name=text] {
 
 [data-name=pageTree]
 	font-size 15px
-	padding-top 10px
+	padding 10px 0
 	background #fafafa
-	outline: 2px dashed blue;
+	border: 2px dashed blue;
 	[data-name=title]:before
 		display none
+	[data-type=children]
+		padding-top 4px
+
 [data-name=pageTree] > [data-type=content]
 	font-size 13px
-	margin 0 10px 4px
+	margin 0 10px
 	display flex
 	[data-name=title]
 		line-height 14px

@@ -8,12 +8,9 @@ import { DomSelection, Range } from './Range';
 import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
 
-
-
 export class PinnedSelection {
 	tail: Pin;
 	head: Pin;
-	nodes: Node[];
 	origin: ActionOrigin = ActionOrigin.Unknown;
 
 	// map dom selection to editor selection
@@ -122,13 +119,12 @@ export class PinnedSelection {
 	}
 
 	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
-		return new PinnedSelection(tail, head, [], origin);
+		return new PinnedSelection(tail, head,  origin);
 	}
 
-	constructor(tail: Pin, head: Pin, nodes: Node[] = [], origin = ActionOrigin.Unknown) {
+	constructor(tail: Pin, head: Pin, origin = ActionOrigin.Unknown) {
 		this.tail = tail;
 		this.head = head;
-		this.nodes = nodes;
 	}
 
 	get range(): Range {
@@ -385,7 +381,6 @@ export class PinnedSelection {
 		return {
 			tail: this.tail.toJSON(),
 			head: this.head.toJSON(),
-			nodes: this.nodes.map(node => node.id.toJSON()),
 		}
 	}
 
