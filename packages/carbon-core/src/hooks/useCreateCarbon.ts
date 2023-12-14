@@ -10,9 +10,12 @@ import { CarbonDefaultNode } from "../renderer";
 import { Carbon } from '../core/Carbon';
 import { CarbonState } from '../core';
 
+export interface InitNodeJSON extends Omit<NodeJSON, 'id'> {
+	id?: string;
+}
 
 // create carbon app with extensions
-export const createCarbon = (name: string, json: NodeJSON, extensions: Extension[] = []) => {
+export const createCarbon = (name: string, json: InitNodeJSON, extensions: Extension[] = []) => {
 	const plugins = flatten(extensions.map(e => e.plugins ?? []));
 	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
 	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
@@ -31,8 +34,10 @@ export const createCarbon = (name: string, json: NodeJSON, extensions: Extension
 }
 
 
+
+
 // create carbon app with extensions
-export const useCreateCarbon = (name: string, json: NodeJSON, extensions: Extension[] = []) => {
+export const useCreateCarbon = (name: string, json: InitNodeJSON, extensions: Extension[] = []) => {
 	const [app] = useState(() => {
 		return createCarbon(name, json, extensions)
 	})
@@ -57,7 +62,7 @@ export const useCreateCarbon = (name: string, json: NodeJSON, extensions: Extens
 // }
 
 // create carbon app with extensions and save to local storage
-export const useCreateCachedCarbon = (name: string, json: NodeJSON, extensions: Extension[] = []) => {
+export const useCreateCachedCarbon = (name: string, json: InitNodeJSON, extensions: Extension[] = []) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [app, setApp] = useState(() => {
 		const savedDoc = localStorage.getItem('carbon:content');

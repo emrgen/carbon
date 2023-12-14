@@ -3,11 +3,11 @@ import { classString } from './Logger';
 import { Maps } from './types';
 
 export enum PointAt {
-	Start = 0,
-	Before = 1,
-	Inside = 2,
-	After = 3,
-	End = 4,
+	Start = 'start',
+	Before = 'before',
+	Inside = 'inside',
+	After = 'after',
+	End = 'end'
 }
 
 // point is a relative offset position within a node

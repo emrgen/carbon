@@ -42,9 +42,9 @@ import { ColumnComp, RowComp, TableComp } from "./renderers/Table";
 import { Insert } from "./plugins/Inserter";
 import { Change } from "./plugins/Change";
 import { CarbonComp } from "./renderers/Carbon";
-import { FileTree } from "./plugins/FileTree";
-import { FileTreeComp } from "./renderers/FileTree";
-import { FileTreeItemComp } from "./renderers/FileTreeItem";
+import { PageTree } from "./plugins/PageTree";
+import { PageTreeComp } from "./renderers/PageTree";
+import { PageTreeItemComp } from "./renderers/PageTreeItem";
 import { Tab } from "./plugins/Tab";
 import { TabComp, TabItemComp, TabTitlesComp, TextTitleComp } from "./renderers/TabComp";
 import { VideoComp } from "./renderers/Video";
@@ -80,7 +80,7 @@ export const blockPresets: Extension = {
 		new Insert(),
 		new Change(),
 		new CarbonRoot(),
-		new FileTree(),
+		new PageTree(),
 		new Tab(),
 		// new Content(),
 		new Frame(),
@@ -112,8 +112,8 @@ export const blockPresets: Extension = {
 		Renderer.create('row', RowComp),
 		Renderer.create('column', ColumnComp),
 		Renderer.create('carbon', CarbonComp),
-		Renderer.create('fileTree', FileTreeComp),
-		Renderer.create('fileTreeItem', FileTreeItemComp),
+		Renderer.create('pageTree', PageTreeComp),
+		Renderer.create('pageTreeItem', PageTreeItemComp),
 		Renderer.create('tab', TabComp),
 		Renderer.create('tabContent', TabItemComp),
 		Renderer.create('tabTitles', TabTitlesComp),

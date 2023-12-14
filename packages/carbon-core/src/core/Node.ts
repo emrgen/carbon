@@ -746,9 +746,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// @mutates
 	updateAttrs(props: NodeAttrsJSON) {
-		console.log('updateAttrs', props);
 		this.attrs = this.attrs.update(props);
-		console.log(this.attrs);
 	}
 
 	// @mutates

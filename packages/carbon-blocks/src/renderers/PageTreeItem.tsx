@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   ActionOrigin,
   CarbonNodeChildren,
@@ -14,7 +14,7 @@ import {
   RendererProps,
   EventsOut,
   stop,
-  useNodeStateChange, Node
+  useNodeStateChange, Node, PointedSelection
 } from "@emrgen/carbon-core";
 
 import { BlockEvent } from "../events";
@@ -23,10 +23,11 @@ import {
   MdOutlineKeyboardArrowDown,
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
+import { PageTreeItemName, PageTreeName } from "../plugins/PageTree";
+import { usePrevious } from "@uidotdev/usehooks";
 
-export const FileTreeItemComp = (props: RendererProps) => {
+export const PageTreeItemComp = (props: RendererProps) => {
   const { node, placeholder } = props;
-  //  const ref = useRef(null);
   const { stateAttrs, isOpened } = useNodeStateChange(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
@@ -46,15 +47,21 @@ export const FileTreeItemComp = (props: RendererProps) => {
   const handleInsert = useCallback(
     (e) => {
       preventAndStop(e);
-      const item = app.schema.type("fileTreeItem").default()!;
+
+      const item = app.schema.type(PageTreeItemName).default({
+        state: {
+          opened: true,
+        }
+      })!;
+      item.updateState({ opened: true })
       const at = Point.toAfter(node.child(0)!.id);
+      console.log(item, at);
       app.tr
-        .insert(at, item)
         .updateAttrs(node.id, { node: { collapsed: false } })
-        .open(item.id)
-        .then(() => {
-          return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });
-        })
+        .insert(at, item)
+        // .then(() => {
+        //   return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });
+        // })
         .dispatch();
     },
     [app, node]
@@ -65,14 +72,14 @@ export const FileTreeItemComp = (props: RendererProps) => {
       preventAndStop(e);
       const {state, tr} = app;
 
-      const getFileTree = (n: Node) => n.closest(n => n.type.name === 'fileTree');
+      const getFileTree = (n: Node) => n.closest(n => n.type.name === PageTreeName);
 
       const fileTree = getFileTree(node);
       if (!fileTree) return;
 
       // find all opened file tree items with the same file tree
       const openFileTreeItems = state.changes.state.nodes(state.nodeMap)
-        .filter(n => n.type.name === node.type.name && getFileTree(n)?.eq(fileTree))
+        .filter(n => n.type.name === node.type.name)
         .filter(n => n.state.opened);
 
       // close all other opened file tree items
@@ -82,7 +89,7 @@ export const FileTreeItemComp = (props: RendererProps) => {
         openFileTreeItems.forEach(n => {
           tr.updateState(n.id, {
             opened: false,
-          });
+          })
         })
       }
 
@@ -97,8 +104,6 @@ export const FileTreeItemComp = (props: RendererProps) => {
     },
     [app, node]
   );
-
-  console.log('xxxxxxxxxxxxxxx', node.id.toString(), node.state.toJSON());
 
   const beforeContent = useMemo(() => {
     return (
@@ -135,7 +140,7 @@ export const FileTreeItemComp = (props: RendererProps) => {
       node={node}
       custom={{
         ...stateAttrs,
-        onMouseDown: stop,
+        // onMouseDown: stop,
       }}
     >
       {!node.isEmpty && (

@@ -51,20 +51,21 @@ const data = node("carbon", [
     //   ], {node: {link: "tab1"}}),
     // ]),
 
-    node("fileTree", [
+    node("pageTree", [
+      title([text("Private")]),
       node(
-        "fileTreeItem",
+        "pageTreeItem",
         [
           title([text("Sunt amet mollit cupidatat non elit labore dolore qui.")]),
-          node("fileTreeItem", [title([text("section 1")])]),
-          node("fileTreeItem", [title([text("section 1")])]),
+          node("pageTreeItem", [title([text("section 1")])]),
+          node("pageTreeItem", [title([text("section 1")])]),
         ],
         {}
         // { node: { collapsed: false }, state: { selected: true } }
       ),
-      node("fileTreeItem", [title([text("section 1")])]),
-      node("fileTreeItem", [title([text("section 1")])]),
-      node("fileTreeItem", [title([text("section 1")])]),
+      node("pageTreeItem", [title([text("section 1")])]),
+      node("pageTreeItem", [title([text("section 1")])]),
+      node("pageTreeItem", [title([text("section 1")])]),
     ]),
 
     node("section", [title([text("section 1")])]),
@@ -233,7 +234,7 @@ const extensions = [
 ];
 
 export default function Dev() {
-  const app = useCreateCarbon('dev',data, extensions);
+  const app = useCreateCarbon('dev', data, extensions);
 
   return (
     <div className={'carbon-app-container'}>

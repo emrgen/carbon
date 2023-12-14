@@ -295,6 +295,9 @@ importers:
       '@types/prismjs':
         specifier: ^1.26.0
         version: 1.26.0
+      '@uidotdev/usehooks':
+        specifier: ^2.4.1
+        version: 2.4.1(react-dom@18.2.0)(react@18.2.0)
       emoji-regex:
         specifier: ^10.2.1
         version: 10.2.1

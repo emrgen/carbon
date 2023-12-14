@@ -7,6 +7,9 @@ import { Node } from './Node';
 import { NodeSpec, Schema } from './Schema';
 import { HTMLAttrs, NodeJSON, NodeName } from './types';
 import { NodeData } from './NodeData';
+import { NodeAttrsJSON } from "./NodeAttrs";
+import { NodeStateJSON } from "./NodeState";
+import { InitNodeJSON } from "@emrgen/carbon-core";
 
 export type Attrs = { readonly [attr: string]: any }
 
@@ -33,6 +36,11 @@ const defaultSpec: NodeSpec = {
 	// content: '',
 	// marks: '',
 	// inline: false,
+}
+
+interface DefaultParams {
+	attrs?: NodeAttrsJSON,
+	state?: NodeStateJSON,
 }
 
 export class NodeType {
@@ -212,14 +220,14 @@ export class NodeType {
 	}
 
 	// create a default node based on schema
-	default(): Optional<Node> {
+	default(params: DefaultParams = {}): Optional<Node> {
 		// console.log(this.name);
 
 		if (this.isText) {
 			return this.schema.text('');
 		}
 
-		const blockJson: NodeJSON = {
+		const blockJson: InitNodeJSON = {
 			name: this.name,
 			children: []
 		}

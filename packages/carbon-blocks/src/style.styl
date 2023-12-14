@@ -586,20 +586,32 @@ span[data-name=text] {
 	[data-as=document]
 		flex 1
 
-[data-name=fileTree]
-	//width 200px
-	height: 500px
+[data-name=pageTree]
+	padding-top 10px
+	//height: 500px
 	background #fafafa
 	outline: 2px dashed blue;
-	padding: 10px 4px
-	// margin: 10px 00px 0px 10px
-	padding-top 90px
+	//padding-top 90px
+	[data-name=title]:before
+		display none
+[data-name=pageTree] > [data-type=content]
+	font-size 13px
+	margin 0 10px
+	display flex
+	[data-name=title]
+		line-height 14px
+		padding: 2px 4px
+		font-weight bold
+		color #aaa
+		&:hover
+			background: #eee;
+			color #555
+			border-radius 4px
+			cursor pointer
 
-[data-name=fileTreeItem]
+[data-name=pageTreeItem]
 	border-radius: 4px
-	padding-left: 4px
-	&:hover
-		background: #eee
+	padding: 0 4px
 	&> [data-type=children]
 		padding-left: 20px
 	&>[data-type=content]
@@ -607,7 +619,10 @@ span[data-name=text] {
 		line-height: $lineHeight
 		display: flex
 		align-items: center
+		padding-left: 4px;
 		gap 4px
+		&:hover
+			background: #eee
 		[data-name=title]
 			flex 1
 			display: flex
@@ -641,7 +656,7 @@ span[data-name=text] {
 			position absolute
 			z-index: 1
 			top: 50%
-			right: 0
+			right: 4px
 			width: 20px
 			height: 20px
 			transform: translate(0%, -50%)

@@ -18,8 +18,8 @@ export class NodeAttrs {
 		return new NodeAttrs(attrs);
 	}
 
-	get(id: string) {
-		return get(this.attrs, id);
+	get(id: string, defaultValue?: any) {
+		return get(this.attrs, id, defaultValue);
 	}
 
 	get html() {

@@ -91,7 +91,7 @@ export class CarbonStateDraft {
       }
     });
 
-    console.log('prepare', changed.length, changed.map(n => n.node.id.toString()));
+    // console.log('prepare', changed.length, changed.map(n => n.node.id.toString()));
     // nodes with truthy states need to be added to the new state list
     this.state.changes.state.nodes(this.state.nodeMap).filter(n => {
       return !isEmpty(n.state.normalize())

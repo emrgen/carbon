@@ -75,10 +75,9 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			this.changes.changed.clear();
 			this.changes = this.state.changes.clone();
 		}
-		console.log('update', this.changes.changed.size, this.changes.changed.toArray().map(n => n.toString()));
+		// console.log('update', this.changes.changed.size, this.changes.changed.toArray().map(n => n.toString()));
 
 		if (isContentDirty) {
-			console.log(isSelectionDirty);
 			this.updateContent();
 			return
 		}
@@ -93,7 +92,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	mounted(node: Node, changeType: NodeChangeType) {
 		if (!this.changes.changed.has(node.id)) {
-			console.log('mounted node not dirty', node.id.toString(), changeType);
+			// console.log('mounted node not dirty', node.id.toString(), changeType);
 			return
 		}
 
@@ -101,9 +100,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 		// keep track of the pending node updates
 		if (changeType === NodeChangeType.update) {
-		  console.log('mounted', node.id.toString(), changeType, this.changes.changed.size, this.changes.changed.toArray().map(n => n.toString()), node.textContent, node);
-			// console.log('mounting', node.id.toString(), this.changes.changed.size);
-
+		  // console.log('mounted', node.id.toString(), changeType, this.changes.changed.size, this.changes.changed.toArray().map(n => n.toString()), node.textContent, node);
 			this.changes.changed.remove(node.id);
 		}
 
@@ -117,23 +114,19 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			this.app.emit(EventsOut.nodeStateUpdated, this.state);
 		}
 
-		// console.log('--------', node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
 		// sync the selection if the content is synced
-		// console.log(this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), this.isStateSynced, this.state.isSelectionDirty);
-
 		// console.log('mounted', this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
 		if (this.isContentSynced) {
-			console.log('content synced updating selection', this.state.selection, node.id.toString());
+			console.log('content synced');
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
 			if (this.isSelectionDirty) {
-				// console.log('updating selection', first(this.transactions));
+				// console.log('selection syncing', first(this.transactions));
 				this.updateSelection(() => {
 					this.onTransaction();
 				});
 			} else {
 				this.onTransaction();
 				// this.app.processTick();
-				// console.log('process tick');
 			}
 		}
 	}
