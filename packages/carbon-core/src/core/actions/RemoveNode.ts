@@ -15,14 +15,16 @@ import { CarbonStateDraft } from "../CarbonStateDraft";
 export class RemoveNode implements CarbonAction {
 	id: number;
 	type: ActionType;
-	// TODO: better to store the node json instead of the node itself
-	node: Optional<NodeJSON>;
 
-	static create(at: Point, nodeId: NodeId, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new RemoveNode(at, nodeId, origin);
+	static fromNode(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
+		return new RemoveNode(at, node.id, node.toJSON(), origin);
 	}
 
-	constructor(readonly from: Point, readonly nodeId: NodeId, readonly origin: ActionOrigin) {
+	static create(at: Point, nodeId: NodeId, node: NodeJSON, origin: ActionOrigin = ActionOrigin.UserInput) {
+		return new RemoveNode(at, nodeId, node, origin);
+	}
+
+	private constructor(readonly from: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {
 		this.id = generateActionId();
 		this.type = ActionType.insertText;
 	}
@@ -39,7 +41,6 @@ export class RemoveNode implements CarbonAction {
 			throw new Error('failed to find target parent from: ' + nodeId.toString())
 		}
 
-		this.node = node.toJSON();
 		draft.remove(node.clone());
 
 		// this.node = target.toJSON();
@@ -61,10 +62,9 @@ export class RemoveNode implements CarbonAction {
 		return ActionResult.withValue('done')
 	}
 
-	inverse(tr: Transaction): CarbonAction {
-		const { from, node } = this;
-		const remove = tr.app.schema.nodeFromJSON(node!);
-		return InsertNode.create(from, remove!, ActionOrigin.UserInput);
+	inverse(): CarbonAction {
+		const { from, nodeId, node } = this;
+		return InsertNode.create(from, nodeId, node!, ActionOrigin.UserInput);
 	}
 
 	toString() {

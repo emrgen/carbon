@@ -6,7 +6,7 @@ import { Carbon } from './Carbon';
 import { p14 } from './Logger';
 import { Mark } from './Mark';
 import { Node } from './Node';
-import { NodeAttrs } from './NodeAttrs';
+import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { NodeContent } from './NodeContent';
 import { IntoNodeId, NodeId } from './NodeId';
 import { PinnedSelection } from './PinnedSelection';
@@ -34,6 +34,8 @@ import { OpenDocument } from './actions/OpenDocument';
 import { CloseDocument } from './actions/CloseDocument';
 import { TransactionDo } from './TransactionDo';
 import { CarbonStateDraft } from './CarbonStateDraft';
+import { NodeStateJSON } from "./NodeState";
+import { UpdateState } from "./actions/UpdateState";
 
 export class TransactionError {
 	commandId: number;
@@ -167,8 +169,8 @@ export class Transaction {
 		return this.add(insertNodesActions(at, insertNodes, origin));
 	}
 
-	remove(at: Point, id: NodeId, origin = this.origin): Transaction {
-		return this.add(RemoveNode.create(at, id, origin));
+	remove(at: Point, node: Node, origin = this.origin): Transaction {
+		return this.add(RemoveNode.fromNode(at, node, origin));
 	}
 
 	insertText(at: Point, text: Node, native: boolean = false, origin = this.origin): Transaction {
@@ -192,8 +194,13 @@ export class Transaction {
 		return this;
 	}
 
-	updateAttrs(nodeRef: IntoNodeId, attrs: Partial<NodeAttrs>, origin = this.origin): Transaction {
+	updateAttrs(nodeRef: IntoNodeId, attrs: Partial<NodeAttrsJSON>, origin = this.origin): Transaction {
 		this.add(UpdateAttrs.create(nodeRef, attrs, origin))
+		return this;
+	}
+
+	updateState(id: NodeId, state: Partial<NodeStateJSON>, origin = this.origin): Transaction {
+		this.add(UpdateState.create(id, state, origin))
 		return this;
 	}
 
@@ -488,7 +495,7 @@ export class Transaction {
 		tr.readOnly = true;
 		tr.type = TransactionType.OneWay;
 
-		const actions = this.actions.map(c => c.inverse(tr));
+		const actions = this.actions.map(c => c.inverse());
 		tr.add(actions.slice(0, -1).reverse());
 		tr.add(actions.slice(-1));
 		return tr;

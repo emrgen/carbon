@@ -37,10 +37,10 @@ export class ActivateNodes implements CarbonAction {
 
     const afterActivatedNodes = this.nodeIds.map(id => store.get(id)) as Node[];
     beforeActivatedNodes.filter(n => n.isActive).forEach(n => {
-      n.updateState({ active: false });
+      n.updateState({ activated: false });
     });
     afterActivatedNodes.forEach(n => {
-      n.updateState({ active: true });
+      n.updateState({ activated: true });
     });
 
     // console.log(afterActivatedNodes.map(n => n.id.toString()));

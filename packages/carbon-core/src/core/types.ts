@@ -55,11 +55,11 @@ export type BoundCalculator = () => Bound
 
 export interface NodeJSON extends Record<string, any> {
 	name: string;
-	id?: string;
-	content?: NodeJSON[];
+	id: string;
+	children?: NodeJSON[];
 	text?: string;
 	attrs?: Record<string, any>;
-};
+}
 
 export const yes = () => true;
 export const no = () => false;

@@ -128,8 +128,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 			links = new NodeLinks(),
 			linkName = '',
 			marks = MarkSet.empty(),
-			attrs = NodeAttrs.fromJSON(type.attrs),
-			state = NodeState.fromJSON(type.state),
+			attrs = NodeAttrs.from(type.attrs),
+			state = NodeState.from(type.state),
 			meta = {},
 			version = 0,
 			deleted = false,
@@ -182,7 +182,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get isActive() {
-		return this.state.active;
+		return this.state.activated;
 	}
 
 	get isSelected() {
@@ -190,7 +190,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get isOpen() {
-		return this.state.open;
+		return this.state.opened;
 	}
 
 	get size(): number {

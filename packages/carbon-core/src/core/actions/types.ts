@@ -6,7 +6,7 @@ export interface CarbonAction {
 	id: number;
 	origin: ActionOrigin;
 	execute(tr: Transaction, draft: CarbonStateDraft);
-	inverse(tr: Transaction): CarbonAction
+	inverse(origin?: ActionOrigin): CarbonAction
 }
 
 export enum TransactionType {

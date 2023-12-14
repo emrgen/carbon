@@ -78,19 +78,8 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		console.log('update', this.changes.changed.size, this.changes.changed.toArray().map(n => n.toString()));
 
 		if (isContentDirty) {
-			console.log(isSelectionDirty, isNodeStateDirty);
+			console.log(isSelectionDirty);
 			this.updateContent();
-			// console.log('updating content');
-			if (isNodeStateDirty) {
-				// console.log('updating states');
-				this.updateNodeState();
-			}
-			return
-		}
-
-		if (isNodeStateDirty) {
-			// console.log('updating states');
-			this.updateNodeState();
 			return
 		}
 
@@ -183,30 +172,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			.filter(n => updatedNodeIds.has(n.id))
 			.forEach( n => this.publish(NodeChangeType.update, n));
 		console.groupEnd()
-	}
-
-	//
-	private updateNodeState() {
-		const { selectedNodeIds, unselectedNodeIds, activatedNodeIds, deactivatedNodeIds, openNodeIds, closeNodeIds } = this.state;
-		const dirtyNodesIds = new NodeIdSet();
-		dirtyNodesIds.extend(
-			selectedNodeIds,
-			unselectedNodeIds,
-			activatedNodeIds,
-			deactivatedNodeIds,
-			openNodeIds,
-			closeNodeIds
-		);
-
-		const dirtyNodes = dirtyNodesIds.map(n => this.store.get(n)).filter(identity) as Node[];
-
-		this.state.runtime.selectedNodeIds.clear();
-		this.state.runtime.activatedNodeIds.clear();
-		this.state.runtime.openNodeIds.clear();
-
-		// console.log('publish', dirtyNodes.map(n => n.id.toString()), openNodeIds.size);
-
-		each(dirtyNodes, n => this.publish(NodeChangeType.state, n));
 	}
 
 	private updateSelection(cb: Function) {

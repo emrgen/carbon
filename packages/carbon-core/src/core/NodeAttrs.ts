@@ -10,7 +10,7 @@ export class NodeAttrs {
 		return new NodeAttrs({});
 	}
 
-	static fromJSON(attrs: NodeAttrsJSON) {
+	static from(attrs: NodeAttrsJSON | NodeAttrs) {
 		if (attrs instanceof NodeAttrs) {
 			return attrs;
 		}

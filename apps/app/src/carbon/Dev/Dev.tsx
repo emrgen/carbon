@@ -36,21 +36,6 @@ import { Stack } from "@chakra-ui/react";
 import SelectionTracker from "../../SelectionTracker";
 
 const data = node("carbon", [
-  // node("fileTree", [
-  //   node(
-  //     "fileTreeItem",
-  //     [
-  //       title([text("Sunt amet mollit cupidatat non elit labore dolore qui.")]),
-  //       node("fileTreeItem", [title([text("section 1")])]),
-  //       node("fileTreeItem", [title([text("section 1")])]),
-  //     ],
-  //     {}
-  //     // { node: { collapsed: false }, state: { selected: true } }
-  //   ),
-  //   node("fileTreeItem", [title([text("section 1")])]),
-  //   node("fileTreeItem", [title([text("section 1")])]),
-  //   node("fileTreeItem", [title([text("section 1")])]),
-  // ]),
   node("document", [
     title([text("I am a frame title")]),
     // node("divider"),
@@ -65,6 +50,22 @@ const data = node("carbon", [
     //     section([title([text("tab 1 content")])]),
     //   ], {node: {link: "tab1"}}),
     // ]),
+
+    node("fileTree", [
+      node(
+        "fileTreeItem",
+        [
+          title([text("Sunt amet mollit cupidatat non elit labore dolore qui.")]),
+          node("fileTreeItem", [title([text("section 1")])]),
+          node("fileTreeItem", [title([text("section 1")])]),
+        ],
+        {}
+        // { node: { collapsed: false }, state: { selected: true } }
+      ),
+      node("fileTreeItem", [title([text("section 1")])]),
+      node("fileTreeItem", [title([text("section 1")])]),
+      node("fileTreeItem", [title([text("section 1")])]),
+    ]),
 
     node("section", [title([text("section 1")])]),
     // node("hstack", [

@@ -14,7 +14,7 @@ import {
   RendererProps,
   EventsOut,
   stop,
-  useNodeStateChange,
+  useNodeStateChange, Node
 } from "@emrgen/carbon-core";
 
 import { BlockEvent } from "../events";
@@ -27,7 +27,7 @@ import {
 export const FileTreeItemComp = (props: RendererProps) => {
   const { node, placeholder } = props;
   //  const ref = useRef(null);
-  const { attributes, isOpen } = useNodeStateChange(props);
+  const { stateAttrs, isOpened } = useNodeStateChange(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
 
@@ -63,8 +63,33 @@ export const FileTreeItemComp = (props: RendererProps) => {
   const handleOpenDocument = useCallback(
     (e) => {
       preventAndStop(e);
-      app.tr
-        .open(node.id)
+      const {state, tr} = app;
+
+      const getFileTree = (n: Node) => n.closest(n => n.type.name === 'fileTree');
+
+      const fileTree = getFileTree(node);
+      if (!fileTree) return;
+
+      // find all opened file tree items with the same file tree
+      const openFileTreeItems = state.changes.state.nodes(state.nodeMap)
+        .filter(n => n.type.name === node.type.name && getFileTree(n)?.eq(fileTree))
+        .filter(n => n.state.opened);
+
+      // close all other opened file tree items
+      if (openFileTreeItems.length > 0) {
+        if (openFileTreeItems[0].id === node.id) return;
+
+        openFileTreeItems.forEach(n => {
+          tr.updateState(n.id, {
+            opened: false,
+          });
+        })
+      }
+
+      tr
+        .updateState(node.id, {
+          opened: true,
+        })
         .then(() => {
           return () => app.emit(BlockEvent.openDocument, { node });
         })
@@ -72,6 +97,8 @@ export const FileTreeItemComp = (props: RendererProps) => {
     },
     [app, node]
   );
+
+  console.log('xxxxxxxxxxxxxxx', node.id.toString(), node.state.toJSON());
 
   const beforeContent = useMemo(() => {
     return (
@@ -107,7 +134,7 @@ export const FileTreeItemComp = (props: RendererProps) => {
     <CarbonBlock
       node={node}
       custom={{
-        ...attributes,
+        ...stateAttrs,
         onMouseDown: stop,
       }}
     >
@@ -123,7 +150,6 @@ export const FileTreeItemComp = (props: RendererProps) => {
           {beforeContent}
           <div
             data-name="title"
-            {...node.attrs.html}
             onClick={handleOpenDocument}
             onMouseDown={stop}
           >

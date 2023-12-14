@@ -1,8 +1,11 @@
-import { each } from 'lodash';
+import { each, identity } from "lodash";
 import BTree from 'sorted-btree';
 import { NodeId, NodeIdComparator } from './NodeId';
 import { Carbon } from './Carbon';
 import { Maps } from './types';
+import { NodeMap } from "./NodeMap";
+import { Node } from "./Node";
+import { K } from "vitest/dist/reporters-5f784f42";
 
 // A Btree based set
 export class BSet<K> {
@@ -145,6 +148,16 @@ export class NodeIdSet extends BSet<NodeId> {
 
 	constructor() {
 		super(NodeIdComparator)
+	}
+
+	nodes(nodeMap: NodeMap) {
+		return (this.toArray().map(id => nodeMap.get(id)).filter(identity) ?? []) as unknown as Node[];
+	}
+
+	clone():NodeIdSet {
+		const ret = new NodeIdSet();
+		this.forEach(e => ret.add(e));
+		return ret;
 	}
 
 	toJSON() {

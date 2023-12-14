@@ -38,10 +38,10 @@ export class CloseDocument implements CarbonAction {
         const afterOpenedNodes = nodeIds.map(id => store.get(id)) as Node[];
 
         beforeOpenedNodes.filter(n => n.isOpen).forEach(n => {
-            n.updateState({ open: false });
+            n.updateState({ opened: false });
         });
         afterOpenedNodes.forEach(n => {
-            n.updateState({ open: false });
+            n.updateState({ opened: false });
         });
 
         tr.opened(...beforeOpenedNodes);

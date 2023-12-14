@@ -12,6 +12,7 @@ export class FileTree extends CarbonPlugin {
       attrs: {
         html: {
           suppressContentEditableWarning: true,
+          contentEditable: false,
         }
       }
     }
@@ -36,6 +37,7 @@ export class FileTreeItem extends CarbonPlugin {
       attrs: {
         html: {
           suppressContentEditableWarning: true,
+          contentEditable: false,
         },
         node: {
           collapsed: true

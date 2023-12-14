@@ -1,21 +1,21 @@
 import { cloneDeep, each, merge } from "lodash";
 
 export interface NodeStateJSON {
-	active?: boolean;
+	activated?: boolean;
 	selected?: boolean;
-	open?: boolean;
+	opened?: boolean;
 }
 
 export class NodeState {
-	active: boolean;
+	activated: boolean;
 	selected: boolean;
-	open: boolean;
+	opened: boolean;
 
 	static empty() {
 		return new NodeState({});
 	}
 
-	static fromJSON(state: NodeStateJSON) {
+	static from(state: NodeStateJSON | NodeState) {
 		if (state instanceof NodeState) {
 			return state;
 		}
@@ -24,9 +24,9 @@ export class NodeState {
 	}
 
 	constructor(state?: NodeStateJSON) {
-		this.active = !!state?.active
+		this.activated = !!state?.activated
 		this.selected = !!state?.selected
-		this.open = !!state?.open
+		this.opened = !!state?.opened
 	}
 
 	update(state: NodeStateJSON): NodeState {
@@ -46,11 +46,26 @@ export class NodeState {
 		Object.freeze(this);
 	}
 
+	normalize(): Partial<NodeStateJSON> {
+		const state = {}
+		if (this.activated) {
+			state['activated'] = true;
+		}
+		if (this.selected) {
+			state['selected'] = true;
+		}
+		if (this.opened) {
+			state['opened'] = true;
+		}
+
+		return state;
+	}
+
 	toJSON() {
 		return {
-			active: this.active,
+			active: this.activated,
 			selected: this.selected,
-			open: this.open
+			open: this.opened
 		}
 	}
 }

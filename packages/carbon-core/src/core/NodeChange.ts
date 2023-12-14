@@ -6,16 +6,17 @@ import { PointedSelection } from "./PointedSelection";
 export class StateChanges {
   // this nodes will be rendered
   render: NodeIdSet = new NodeIdSet();
-  // changed nodes will be rebuild
+  // changed nodes will be rebuilt
   changed: NodeIdSet = new NodeIdSet();
   renamed: NodeIdSet = new NodeIdSet();
   inserted: NodeIdSet = new NodeIdSet();
   updated: NodeIdSet = new NodeIdSet();
   deleted: NodeIdSet = new NodeIdSet();
   moved: NodeIdSet = new NodeIdSet();
-  selected: NodeIdSet = new NodeIdSet();
-  activated: NodeIdSet = new NodeIdSet();
-  opened: NodeIdSet = new NodeIdSet();
+
+  state: NodeIdSet = new NodeIdSet();
+  attrs: NodeIdSet = new NodeIdSet();
+
   clipboard: NodeIdSet = new NodeIdSet();
   updatedProps: NodeIdSet = new NodeIdSet();
   updatedMarks: NodeIdSet = new NodeIdSet();
@@ -31,10 +32,9 @@ export class StateChanges {
     diff.updated = this.updated;
     diff.deleted = this.deleted;
     diff.moved = this.moved;
-    diff.changed = this.changed.sub(other.changed);
-    diff.selected = this.selected.sub(other.selected);
-    diff.activated = this.activated.sub(other.activated);
-    diff.opened = this.opened.sub(other.opened);
+    diff.changed = this.changed;
+    diff.state = this.state;
+
 
     return diff;
   }
@@ -52,7 +52,7 @@ export class StateChanges {
   }
 
   get isNodeStateDirty() {
-      return this.selected.size || this.activated.size || this.opened.size;
+      return this.state.size;
   }
 
   get isClipboardDirty() {
@@ -79,9 +79,8 @@ export class StateChanges {
     this.updated.freeze();
     this.deleted.freeze();
     this.moved.freeze();
-    this.selected.freeze();
-    this.activated.freeze();
-    this.opened.freeze();
+    this.state.freeze();
+    this.attrs.freeze();
     this.clipboard.freeze();
     this.updatedProps.freeze();
     this.updatedMarks.freeze();
@@ -101,9 +100,8 @@ export class StateChanges {
     clone.updated = this.updated.clone();
     clone.deleted = this.deleted.clone();
     clone.moved = this.moved.clone();
-    clone.selected = this.selected.clone();
-    clone.activated = this.activated.clone();
-    clone.opened = this.opened.clone();
+    clone.state = this.state.clone();
+    clone.attrs = this.attrs.clone();
     clone.clipboard = this.clipboard.clone();
     clone.updatedProps = this.updatedProps.clone();
     clone.updatedMarks = this.updatedMarks.clone();
@@ -121,9 +119,8 @@ export class StateChanges {
       updated: this.updated.toJSON(),
       deleted: this.deleted.toJSON(),
       moved: this.moved.toJSON(),
-      selected: this.selected.toJSON(),
-      activated: this.activated.toJSON(),
-      opened: this.opened.toJSON(),
+      state: this.state.toJSON(),
+      attrs: this.attrs.toJSON(),
       clipboard: this.clipboard.toJSON(),
       updatedProps: this.updatedProps.toJSON(),
       updatedMarks: this.updatedMarks.toJSON(),

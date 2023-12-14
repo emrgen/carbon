@@ -276,6 +276,7 @@ export class CarbonState extends EventEmitter {
 		})
 	}
 
+	// try to create a new state or fail and return the previous state
 	produce(fn: (state: CarbonStateDraft) => void): CarbonState {
 		const draft = new CarbonStateDraft(this);
 		try {

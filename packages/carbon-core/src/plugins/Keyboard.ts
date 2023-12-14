@@ -77,7 +77,7 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 				app.tr
 					.setContent(prevVisibleTextBlock.id, content)
 					.add(moveActions)
-					.remove(nodeLocation(textBlock.parent!)!, textBlock.parent!.id)
+					.remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
 					.select(after)
 					.dispatch();
 				console.log('DXDX');

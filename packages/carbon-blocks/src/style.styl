@@ -587,7 +587,7 @@ span[data-name=text] {
 		flex 1
 
 [data-name=fileTree]
-	width 200px
+	//width 200px
 	height: 500px
 	background #fafafa
 	outline: 2px dashed blue;
@@ -597,7 +597,7 @@ span[data-name=text] {
 
 [data-name=fileTreeItem]
 	border-radius: 4px
-	padding: 0px 4px
+	padding-left: 4px
 	&:hover
 		background: #eee
 	&> [data-type=children]
@@ -605,7 +605,6 @@ span[data-name=text] {
 	&>[data-type=content]
 		position relative
 		line-height: $lineHeight
-		position relative
 		display: flex
 		align-items: center
 		gap 4px
@@ -668,7 +667,7 @@ span[data-name=text] {
 		line-height: $lineHeight
 		user-select: none
 
-	&[data-open=true] > [data-type=content] > [data-name=title]
+	&[data-opened=true] > [data-type=content] > [data-name=title]
 		color: #000!important
 
 .carbon-overlay

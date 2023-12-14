@@ -8,12 +8,12 @@ import { PinnedSelection } from "./PinnedSelection";
 import { NodeContent } from "./NodeContent";
 import { SelectionEvent } from "./SelectionEvent";
 import { PointedSelection } from "./PointedSelection";
-import { sortBy, zip } from 'lodash';
+import { isEmpty, sortBy, zip } from "lodash";
 import BTree from 'sorted-btree';
 import { NodeType } from "./NodeType";
-import { NodeAttrs } from "./NodeAttrs";
+import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { Point, PointAt } from "./Point";
-import { NodeState } from "./NodeState";
+import { NodeState, NodeStateJSON } from "./NodeState";
 
 export class CarbonStateDraft {
   state: CarbonState;
@@ -92,6 +92,12 @@ export class CarbonStateDraft {
     });
 
     console.log('prepare', changed.length, changed.map(n => n.node.id.toString()));
+    // nodes with truthy states need to be added to the new state list
+    this.state.changes.state.nodes(this.state.nodeMap).filter(n => {
+      return !isEmpty(n.state.normalize())
+    }).forEach(n => {
+      this.changes.state.add(n.id)
+    })
 
     changed.sort(NodeDepthComparator);
 
@@ -351,7 +357,7 @@ export class CarbonStateDraft {
     this.changes.renamed.add(nodeId);
   }
 
-  updateAttrs(nodeId: NodeId, attrs: Partial<NodeAttrs>) {
+  updateAttrs(nodeId: NodeId, attrs: Partial<NodeAttrsJSON>) {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }
@@ -366,18 +372,25 @@ export class CarbonStateDraft {
       }
     });
 
-    this.changes.updated.add(nodeId);
+    this.changes.attrs.add(nodeId);
   }
 
-  updateState(nodeId: NodeId, state: NodeState) {
+  updateState(nodeId: NodeId, state: NodeStateJSON) {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
-    this.mutable(nodeId, node => node.updateState(state));
+    this.mutable(nodeId, node => {
+      node.updateState(state)
+      if (node.isEmpty) {
+        // force render of all descendants if the node is empty
+        node.descendants().forEach(n => {
+          this.mutable(n.id)
+        });
+      }
+    });
 
-    this.changes.changed.add(nodeId);
-    this.changes.updated.add(nodeId);
+    this.changes.state.add(nodeId);
   }
 
   updateSelection(selection: PointedSelection) {
@@ -389,12 +402,12 @@ export class CarbonStateDraft {
     this.changes.selection = selection;
   }
 
+  // creates a mutable copy of a node and adds it to the draft changes
   private mutable(id: NodeId, fn?: (node: Node) => void) {
     const node = this.nodeMap.get(id);
     if (!node) {
       throw new Error("Cannot mutate node that does not exist");
     }
-    // console.log('mutable', );
 
     const mutable = this.nodeMap.has(id) ? node : node.clone();
     fn?.(mutable);
@@ -403,13 +416,6 @@ export class CarbonStateDraft {
     this.nodeMap.set(id, mutable);
 
     return mutable;
-  }
-
-  _addPendingSelection(selection: PinnedSelection) {
-    if (!this.drafting) {
-      throw new Error("Cannot add pending selection to a draft that is already committed");
-    }
-    this.changes.pendingSelections.push(selection);
   }
 
   dispose() {

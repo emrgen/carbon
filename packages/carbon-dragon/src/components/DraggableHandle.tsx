@@ -365,7 +365,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     <div
       className="carbon-node-handle"
       data-target-name={node?.name}
-      data-target-as={node?.attrs.html["data-as"]}
+      data-target-as={node?.attrs.get('html.data-as')}
       data-drag-handle={node?.type.dragHandle}
       style={{ ...style, display: show ? "flex" : "none" }}
     >

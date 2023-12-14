@@ -73,52 +73,33 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 // start watching for the node state change
 export const useNodeStateChange = (props: UseNodeChangeProps) => {
 	const { node } = props;
-	const change = useCarbonChange();
-	const [isOpen, setIsOpen] = useState(!!node.isOpen);
-	const [isActive, setIsActive] = useState(!!node.isActive);
-	const [isSelected, setIsSelected] = useState(!!node.isSelected);
 
-	useEffect(() => {
-		const onChange = (value: Node) => {
-			setIsActive(!!value.isActive);
-			setIsSelected(!!value.isSelected);
-			setIsOpen(!!value.isOpen);
-			// console.log('state changed', node.id.toString(), !!value.data.state?.active, !!value.data.state?.selected, !!value.data.state?.open);
-		};
+	const state = useMemo(() => {
+		return node.state.normalize();
+	}, [node.state]);
 
-		change.subscribe(node.id, NodeChangeType.state, onChange);
-		return () => {
-			change.unsubscribe(node.id, NodeChangeType.state, onChange);
+	const stateAttrs = useMemo(() => {
+		const attrs = {};
+		const state = node.state;
+		if (state.activated) {
+			attrs['data-activated'] = true;
 		}
-	}, [change, node]);
+		if (state.selected) {
+			attrs['data-selected'] = true;
+		}
+		if (state.opened) {
+			attrs['data-opened'] = true;
+		}
 
-	// inform the change manager that this node is mounted
-	// useEffect(() => {
-	// 	change.mounted(node, NodeChangeType.state);
-	// }, [node, isActive, isSelected, isOpen, change]);
-
-	const attributes = useMemo(() => {
-		const ret = {}
-		if (isSelected) {
-			ret["data-selected"] = true
-		}
-		if (isActive) {
-			ret["data-active"] = true
-		}
-		if (isOpen) {
-			ret["data-open"] = true
-		}
-		// console.log('attributes', ret);
-		
-		return ret
-	}, [isActive, isSelected, isOpen]);
+		return attrs;
+	},[node.state]);
 
 	return {
-		isActive,
-		isSelected,
-		isOpen,
-		isNormal: !isActive && !isSelected,
-		attributes,
+		isActive: state.activated,
+		isSelected: state.selected,
+		isOpened: state.opened,
+		state,
+		stateAttrs,
 	};
 };
 
