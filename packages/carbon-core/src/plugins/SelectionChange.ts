@@ -49,17 +49,15 @@ export class SelectionChangePlugin extends AfterPlugin {
 				console.log(p14('%c[create]'), 'color:green', 'select transaction');
 				const { tr } = app;
 
-				if (!app.state.changes.selected.size) {
-					tr.selectNodes([]);
-				}
 				tr
 					.select(after)
 					.dispatch()
 			},
 			selectstart: (ctx: EventContext<Event>) => {
 				const {app} = ctx;
-				if (app.state.selectedNodeIds.size) {
-					app.tr.selectNodes([]).dispatch();
+				const {blockSelection} = app;
+				if (blockSelection.size) {
+					app.tr.deselectNodes(blockSelection.blockIds).dispatch();
 				}
 			},
 		}

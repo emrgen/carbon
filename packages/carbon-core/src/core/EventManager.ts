@@ -21,6 +21,7 @@ const selectionChangedUsingKeys = (event) => {
 	return selectionKeys.some(k => isKeyHotkey(k)(event as any))
 }
 
+// EventManager is responsible for handling all dom/custom events and dispatching them to plugins
 export class EventManager {
 
 	event?: EventContext<Event>;
@@ -71,11 +72,7 @@ export class EventManager {
 			return
 		}
 
-		console.log(type, app.state.changes.selected.size);
 		if (type !== EventsIn.selectionchange && app.state.changes.selected.size > 0) {
-			// console.log('selected nodes', app.state.selectedNodeIds);
-			// console.log(type, event);
-
 			const lastNode = last(app.state.changes.selected.map(id => app.store.get(id))) as Node;
 			this.updateCommandOrigin(type, event);
 
@@ -89,19 +86,16 @@ export class EventManager {
 				origin: EventOrigin.dom,
 			});
 
-			// console.log('onEvent', editorEvent);
 			this.pm.onEvent(editorEvent);
 			return
 		}
 
-		// console.debug(p14('%c[debug]'),'color:magenta', 'Editor.currentSelection', this.selection.toString(),);
 		const selection = PinnedSelection.fromDom(app.store);
 		if (['selectionchange'].includes(type)) {
 			console.log(pad(`%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`, 100), 'background:#ffcc006e');
 		}
 		// editor cannot process event without active selection
 		if (!selection) {
-			// event.preventDefault();
 			console.error(p12('%c[invalid]'), 'color:grey', `${type}: event with empty selection`);
 			return
 		}
@@ -112,7 +106,6 @@ export class EventManager {
 			return
 		}
 
-		// console.log('changing selection....', app.selection.toString(), selection.toString())
 		// start node corresponds to focus point in DOM
 		const node = selection.start.down().node;
 		if (!node) {

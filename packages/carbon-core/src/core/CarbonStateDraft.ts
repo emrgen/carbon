@@ -16,6 +16,8 @@ import { Point, PointAt } from "./Point";
 import { NodeState, NodeStateJSON } from "./NodeState";
 import { takeUpto } from "../utils/array";
 
+// NOTE: it is internal to the state and should not be used outside of it
+// represents a draft of a state, used to prepare a new state before commit
 export class CarbonStateDraft {
   state: CarbonState;
   nodeMap: NodeMap;
@@ -101,6 +103,7 @@ export class CarbonStateDraft {
 
     // update state changes to reflect the new state
     this.changes.state.nodes(this.nodeMap).forEach(n => {
+      console.log('state change', n.id.toString(), n.name, n.state.normalize());
       const state = n.state.normalize();
       if (state.activated) {
         this.changes.activated.add(n.id);

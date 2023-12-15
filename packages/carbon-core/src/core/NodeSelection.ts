@@ -5,12 +5,15 @@ import { NodeMap } from "./NodeMap";
 
 //
 export class BlockSelection {
-  //
-  map: NodeMap
-  nodeIds: NodeIdSet;
+  private readonly map: NodeMap
+  private readonly nodeIds: NodeIdSet;
 
   static empty(map: NodeMap) {
     return new BlockSelection(map, NodeIdSet.empty);
+  }
+
+  get blockIds(): NodeId[] {
+    return this.nodeIds.toArray()
   }
 
   get blocks(): Node[] {

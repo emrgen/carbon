@@ -91,15 +91,6 @@ export class Carbon extends EventEmitter {
 		pm.plugins.forEach(p => p.init(this));
 	}
 
-	plugin(name: string): Optional<CarbonPlugin> {
-		return this.pm.plugin(name);
-	}
-
-	mounted() {
-		this.ready = true;
-		this.emit(EventsOut.mounted);
-	}
-
 	get content(): Node {
 		return this.state.content;
 	}
@@ -116,11 +107,6 @@ export class Carbon extends EventEmitter {
 		return this.sm.focused;
 	}
 
-	get tr(): Transaction {
-		// if (this.chain.active) return this.chain;
-		return Transaction.create(this, this.tm, this.pm, this.sm);
-	}
-
 	get element(): Optional<HTMLElement> {
 		this._element = this._element ?? this.store.element(this.content.id)?.querySelector("[contenteditable=true]")
 		return this._element;
@@ -134,6 +120,21 @@ export class Carbon extends EventEmitter {
 	get contentElement(): Optional<HTMLElement> {
 		this._contentElement = this._contentElement ?? document.getElementsByClassName('.editor > .editor-content')?.[0] as any ?? null;
 		return this._contentElement;
+	}
+
+	// create a new transaction
+	get tr(): Transaction {
+		// if (this.chain.active) return this.chain;
+		return Transaction.create(this, this.tm, this.pm, this.sm);
+	}
+
+	plugin(name: string): Optional<CarbonPlugin> {
+		return this.pm.plugin(name);
+	}
+
+	mounted() {
+		this.ready = true;
+		this.emit(EventsOut.mounted);
 	}
 
 	// all events are emitted through this method

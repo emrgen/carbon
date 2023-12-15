@@ -13,11 +13,10 @@ import { NodeId } from './NodeId';
 
 export enum NodeChangeType {
 	update = 'update',
-	state = 'state',
 }
 
 /**
- * Syncs the editor state (iow content and selection) with the UI
+ * Syncs the editor state with the UI
  */
 export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
@@ -111,7 +110,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			console.log('content synced');
 			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
 			if (this.isSelectionDirty) {
-				// console.log('selection syncing', first(this.transactions));
 				this.updateSelection(() => {
 					this.onTransaction();
 				});
@@ -164,14 +162,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 			return
 		}
 
-		if (!this.isContentSynced) {
-			// throw new Error("Trying to sync selection with dirty content");
-		}
 		// this.app.enable();
-
-		// console.log('syncing selection', this.state.selection);
-		// console.group('syncing: selection');
-
 
 		this.sm.syncSelection();
 		this.app.emit(EventsOut.selectionUpdated, this.state.selection);

@@ -1,15 +1,17 @@
-import { cloneDeep, each, merge } from "lodash";
+import { cloneDeep, each, merge, get } from "lodash";
 
-export interface NodeStateJSON {
+
+export interface NodeStateJSON extends Record<string, boolean|undefined> {
 	activated?: boolean;
 	selected?: boolean;
 	opened?: boolean;
 }
 
+// extendable node state, with different states for different nodes
+// for example, a node can be selected, activated, opened, etc
+// for other states, you can use it as a key-value store
 export class NodeState {
-	activated: boolean;
-	selected: boolean;
-	opened: boolean;
+	private readonly state: Record<string, any>
 
 	static empty() {
 		return new NodeState({});
@@ -24,18 +26,35 @@ export class NodeState {
 	}
 
 	constructor(state?: NodeStateJSON) {
-		this.activated = !!state?.activated
-		this.selected = !!state?.selected
-		this.opened = !!state?.opened
+		this.state = state ? cloneDeep(state) : {};
+	}
+
+	get activated() {
+		return this.state.activated;
+	}
+
+	get selected() {
+		return this.state.selected;
+	}
+
+	get opened() {
+		return this.state.opened;
+	}
+
+	get(key: string, defaultValue: boolean = false) {
+		return get(this.state, key, defaultValue);
 	}
 
 	update(state: NodeStateJSON): NodeState {
-		const newState = this.clone();
 		each(state, (value, key) => {
-			newState[key] = value;
+			if (value === undefined) {
+				delete this.state[key];
+			} else {
+				this.state[key] = value;
+			}
 		});
 
-		return newState;
+		return this;
 	}
 
 	clone() {
@@ -44,28 +63,27 @@ export class NodeState {
 
 	freeze() {
 		Object.freeze(this);
+		Object.freeze(this.state);
 	}
 
 	normalize(): Partial<NodeStateJSON> {
 		const state = {}
-		if (this.activated) {
-			state['activated'] = true;
-		}
-		if (this.selected) {
-			state['selected'] = true;
-		}
-		if (this.opened) {
-			state['opened'] = true;
-		}
+
+		each(this.state, (value, key) => {
+			if (value) {
+				state[key] = value;
+			}
+		});
 
 		return state;
 	}
 
 	toJSON() {
-		return {
-			active: this.activated,
-			selected: this.selected,
-			open: this.opened
-		}
+		const state = {}
+		each(this.state, (value, key) => {
+			state[key] = value;
+		});
+
+		return state;
 	}
 }

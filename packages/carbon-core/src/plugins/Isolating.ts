@@ -41,7 +41,7 @@ export class IsolatingPlugin extends AfterPlugin {
         this.preventAtEnd(e);
       },
       backspace: e => {
-        if (e.app.state.changes.selected.size) return
+        if (e.app.blockSelection.size) return
         this.preventAtStartCollapsed(e);
       },
       delete: e => {

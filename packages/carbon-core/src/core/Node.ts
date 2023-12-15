@@ -844,8 +844,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 			type,
 			content: content.clone(map).setParent(this).setParentId(this.id),
 			links,
-			attrs,
-			state,
+			attrs: attrs.clone(),
+			state: state.clone(),
 			marks,
 			version: version + 1,
 		});
@@ -867,6 +867,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 		// unlink from parent when freezing
 		this._parent = null;
 		this.content.freeze();
+		this.attrs.freeze();
+		this.state.freeze();
 
 		Object.freeze(this)
 		return this;

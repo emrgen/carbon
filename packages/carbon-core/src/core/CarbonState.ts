@@ -31,23 +31,14 @@ export class CarbonState extends EventEmitter {
 	scope: string;
 	content: Node;
 	selection: PinnedSelection;
+	blockSelection: BlockSelection;
 	nodeMap: NodeMap;
 	decorations: DecorationStore;
 	changes: StateChanges;
-	selectedNodeIds: NodeIdSet;
-	unselectedNodeIds: NodeIdSet;
-	activatedNodeIds: NodeIdSet;
-	deactivatedNodeIds: NodeIdSet;
-	openNodeIds: NodeIdSet
-	closeNodeIds: NodeIdSet
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
 
 	static create(scope: string, content: Node, selection: PinnedSelection, nodeMap: NodeMap) {
 		return new CarbonState({ content, selection, scope, nodeMap })
-	}
-
-	get blockSelection() {
-		return new BlockSelection(this.nodeMap, this.selectedNodeIds);
 	}
 
 	constructor(props: CarbonStateProps) {
@@ -60,8 +51,6 @@ export class CarbonState extends EventEmitter {
 			nodeMap,
 			changes = new StateChanges(),
 			decorations = new DecorationStore(),
-			selectedNodeIds = new NodeIdSet(),
-			activatedNodeIds = new NodeIdSet(),
 		} = props;
 
 		this.previous = previous;
@@ -71,13 +60,7 @@ export class CarbonState extends EventEmitter {
 		this.decorations = decorations;
 		this.nodeMap = nodeMap;
 		this.changes = changes;
-
-		this.selectedNodeIds = selectedNodeIds;
-		this.activatedNodeIds = activatedNodeIds;
-		this.deactivatedNodeIds = new NodeIdSet();
-		this.unselectedNodeIds = new NodeIdSet();
-		this.openNodeIds = new NodeIdSet();
-		this.closeNodeIds = new NodeIdSet();
+		this.blockSelection = new BlockSelection(nodeMap, changes.selected);
 	}
 
 	get depth() {
@@ -144,13 +127,6 @@ export class CarbonState extends EventEmitter {
 	freeze() {
 		// remove all explicit parent links and freeze
 		this.changes.freeze();
-
-		this.selectedNodeIds.freeze();
-		this.unselectedNodeIds.freeze();
-		this.activatedNodeIds.freeze();
-		this.deactivatedNodeIds.freeze();
-		this.openNodeIds.freeze();
-		this.closeNodeIds.freeze();
 		this.nodeMap.freeze();
 		this.content.freeze();
 		this.selection.freeze();

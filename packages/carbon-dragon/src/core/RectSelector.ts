@@ -36,8 +36,9 @@ export class RectSelector extends EventEmitter {
 		// console.log(this.region === e.target, editor.state.selectedNodeIds.size)
 		this.downEvent = e;
 		if (this.region === e.target) {
-			if (app.state.selectedNodeIds.size) {
-				app.tr.selectNodes([]).dispatch();
+			const blockSelection = app.state.blockSelection;
+			if (blockSelection.size) {
+				app.tr.selectNodes(blockSelection.blockIds).dispatch();
 			}
 		}
 		this.emit('mouse:down', e, node);
@@ -95,13 +96,11 @@ export class RectSelector extends EventEmitter {
 
 		const { scrollTop, scrollLeft } = docParent;
 
-		const { selectedNodeIds } = app.state;
-
 		const collides = selectables.collides(
 			adjustBox(boundFromFastDndEvent(e), { left: scrollLeft, top: scrollTop })
 		);
 
-		if (collides.length === 0 && selectedNodeIds.size === 0) return
+		if (collides.length === 0 && app.blockSelection.size === 0) return
 
 		if (!collides.length) {
 			if (this.noSelectionChange([])) return
@@ -160,7 +159,8 @@ export class RectSelector extends EventEmitter {
 	}
 
 	noSelectionChange(ids: NodeId[]) {
-		return ids.length === this.app.state.selectedNodeIds.size && ids.every(id => this.app.state.selectedNodeIds.has(id))
+		const blockSelection = this.app.state.blockSelection;
+		return ids.length === blockSelection.size && ids.every(id => blockSelection.has(id))
 	}
 
 	onDragEnd(e) {
