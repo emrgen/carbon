@@ -13,61 +13,6 @@ import { NodeMap } from './NodeMap';
 import { StateChanges } from './NodeChange';
 import { CarbonStateDraft } from './CarbonStateDraft';
 
-export class CarbonRuntimeState extends EventEmitter {
-	// pending
-	selectEvents: SelectionEvent[] = [];
-	// content updated node ids
-	updatedNodeIds: NodeIdSet = new NodeIdSet();
-	// cursor is hidden in these nodes
-	hideCursorNodeIds: NodeIdSet = new NodeIdSet();
-	// selected node ids
-	selectedNodeIds: NodeIdSet = new NodeIdSet();
-	// activated node ids
-	activatedNodeIds: NodeIdSet = new NodeIdSet();
-	// deleted node ids
-	deletedNodeIds: NodeIdSet = new NodeIdSet();
-	// open node id
-	openNodeIds: NodeIdSet = new NodeIdSet();
-	// activeMarks: string = '';
-	origin: ActionOrigin = ActionOrigin.Unknown;
-
-	clipboard: CarbonClipboard = CarbonClipboard.default();
-
-	kvStore: Map<string, any> = new Map();
-
-	marks: string[] = [];
-
-	constructor() {
-		super();
-	}
-
-	get isContentDirty() {
-		return this.updatedNodeIds.size;
-	}
-
-	get isNodeStateDirty() {
-		return this.selectedNodeIds.size || this.activatedNodeIds.size || this.openNodeIds.size;
-	}
-
-	get selectEvent(): Optional<SelectionEvent> {
-		return last(this.selectEvents)
-	}
-
-	get(key: string) {
-		return this.kvStore.get(key);
-	}
-
-	set(key: string, value: any) {
-		const prev = this.kvStore.get(key);
-		this.kvStore.set(key, merge(cloneDeep(prev), value));
-	}
-
-	addSelectEvent(event: SelectionEvent) {
-		this.selectEvents.push(event);
-	}
-}
-
-
 interface CarbonStateProps {
 	scope: string;
 	previous?: CarbonState;
@@ -75,57 +20,34 @@ interface CarbonStateProps {
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
 	changes?: StateChanges;
-
 	decorations?: DecorationStore;
 	selectedNodeIds?: NodeIdSet;
 	activatedNodeIds?: NodeIdSet;
-	runtime?: CarbonRuntimeState
 }
 
 
 export class CarbonState extends EventEmitter {
 	previous: Optional<CarbonState>;
-
 	scope: string;
 	content: Node;
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
-
 	decorations: DecorationStore;
 	changes: StateChanges;
-	runtime: CarbonRuntimeState;
-
 	selectedNodeIds: NodeIdSet;
 	unselectedNodeIds: NodeIdSet;
 	activatedNodeIds: NodeIdSet;
 	deactivatedNodeIds: NodeIdSet;
-
 	openNodeIds: NodeIdSet
 	closeNodeIds: NodeIdSet
-
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
-
-	private dirty = false;
-
-
-	get isDirty() {
-		return this.dirty || true
-	}
-
-	get isContentDirty() {
-		return this.runtime.isContentDirty || this.decorations.size;
-	}
-
-	get isNodeStateDirty() {
-		return this.runtime.selectedNodeIds.size || this.runtime.activatedNodeIds.size || this.runtime.openNodeIds.size;
-	}
-
-	get nodeSelection() {
-		return new BlockSelection(this.nodeMap, this.selectedNodeIds);
-	}
 
 	static create(scope: string, content: Node, selection: PinnedSelection, nodeMap: NodeMap) {
 		return new CarbonState({ content, selection, scope, nodeMap })
+	}
+
+	get blockSelection() {
+		return new BlockSelection(this.nodeMap, this.selectedNodeIds);
 	}
 
 	constructor(props: CarbonStateProps) {
@@ -137,7 +59,6 @@ export class CarbonState extends EventEmitter {
 			selection,
 			nodeMap,
 			changes = new StateChanges(),
-			runtime = new CarbonRuntimeState(),
 			decorations = new DecorationStore(),
 			selectedNodeIds = new NodeIdSet(),
 			activatedNodeIds = new NodeIdSet(),
@@ -150,7 +71,6 @@ export class CarbonState extends EventEmitter {
 		this.decorations = decorations;
 		this.nodeMap = nodeMap;
 		this.changes = changes;
-		this.runtime = runtime;
 
 		this.selectedNodeIds = selectedNodeIds;
 		this.activatedNodeIds = activatedNodeIds;
@@ -158,9 +78,6 @@ export class CarbonState extends EventEmitter {
 		this.unselectedNodeIds = new NodeIdSet();
 		this.openNodeIds = new NodeIdSet();
 		this.closeNodeIds = new NodeIdSet();
-
-		this.dirty = false;
-		// this.isSelectionDirty = true;
 	}
 
 	get depth() {
@@ -180,76 +97,9 @@ export class CarbonState extends EventEmitter {
 		// });
 	}
 
-	markDirty() {
-		this.dirty = true;
-	}
-
-	markClean() {
-		this.dirty = false;
-	}
-
 	setContent(content: Node) {
 		this.content = content;
 		this.init();
-	}
-
-	// updateSelection(after: PinnedSelection, origin: ActionOrigin, isSelectionDirty = true) {
-	// 	this.selection = after;
-	// 	this.selectionOrigin = origin;
-
-	// 	// console.log('selection is dirty', isSelectionDirty);
-	// 	// this.isSelectionDirty = isSelectionDirty;
-	// 	this.emit('change:selection', this.selection, this.prevSelection, this.selectionOrigin);
-	// }
-
-	updateNodeState() {
-		// if (!this.runtime.isNodeStateDirty) return
-		// this.selectedNodeIds.clear();
-		// this.unselectedNodeIds.clear();
-		// this.deactivatedNodeIds.clear();
-		// this.activatedNodeIds.clear();
-		// this.activatedNodeIds.clear();
-		// this.openNodeIds.clear();
-		// this.closeNodeIds.clear();
-		//
-		// this.runtime.selectedNodeIds.forEach(id => {
-		// 	if (store.get(id)?.isSelected) {
-		// 		this.selectedNodeIds.add(id);
-		// 	} else {
-		// 		this.unselectedNodeIds.add(id);
-		// 	}
-		// });
-		//
-		// this.runtime.activatedNodeIds.forEach(id => {
-		// 	if (store.get(id)?.isActive) {
-		// 		this.activatedNodeIds.add(id);
-		// 	} else {
-		// 		this.deactivatedNodeIds.add(id);
-		// 	}
-		// });
-		//
-		// this.runtime.openNodeIds.forEach(id => {
-		// 	if (store.get(id)?.isOpen) {
-		// 		this.openNodeIds.add(id);
-		// 	} else {
-		// 		this.closeNodeIds.add(id);
-		// 	}
-		// });
-		//
-		// this.runtime.emit('change', this.runtime);
-	}
-
-	updateContent() {
-		// if (!this.content.isDirty) return
-		// const nodes: Node[] = [];
-		// // this.content = this.content.view(nodes);
-		// // console.log('document id', this.content.childrenVersion)
-		// nodes.forEach(n => {
-		// 	// console.log('new node', n.id.toString(), n.childrenVersion)
-		// 	// this.store.put(n);
-		// });
-		//
-		// this.emit('change:content', this.content);
 	}
 
 	clone(depth: number = 2) {

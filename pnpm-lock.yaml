@@ -48,6 +48,9 @@ importers:
       '@emrgen/carbon-blocks':
         specifier: workspace:*
         version: link:../../packages/carbon-blocks
+      '@emrgen/carbon-blocktree':
+        specifier: workspace:*
+        version: link:../../packages/carbon-blocktree
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../../packages/carbon-core
@@ -332,6 +335,28 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
+  packages/carbon-blocktree:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+    devDependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig

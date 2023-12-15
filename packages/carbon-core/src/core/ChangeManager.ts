@@ -53,10 +53,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		return this.changes.isSelectionDirty
 	}
 
-	private get isStateSynced() {
-		return !this.state.runtime.isNodeStateDirty
-	}
-
 	// 1. sync the doc
 	// 2. sync the selection
 	// 3. sync the node state
@@ -107,11 +103,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		// console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
 		if (this.isContentSynced) {
 			this.app.emit(EventsOut.contentUpdated, this.state.content);
-		}
-
-		// FIXME: this is a unreliable hack, may not indicate the correct state of updated nodes
-		if (this.isStateSynced) {
-			this.app.emit(EventsOut.nodeStateUpdated, this.state);
 		}
 
 		// sync the selection if the content is synced

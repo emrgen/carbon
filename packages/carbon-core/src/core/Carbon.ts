@@ -22,6 +22,7 @@ import { CarbonMessageBus } from './MessageBus';
 import { CarbonPlugin } from './CarbonPlugin';
 import { StateScope } from "./StateScope";
 import { NodeMap } from "./NodeMap";
+import { CarbonRuntime } from "./Runtime";
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -37,6 +38,7 @@ export class Carbon extends EventEmitter {
 
 	schema: Schema;
 	state: CarbonState;
+	runtime: CarbonRuntime;
 	store: NodeStore;
 	cmd: CarbonCommands;
 	chain: CarbonCommandChain;
@@ -63,6 +65,7 @@ export class Carbon extends EventEmitter {
 		content.forAll(n => map.set(n.id, n));
 		this.state = CarbonState.create(name, content, PinnedSelection.default(content), map);
 		StateScope.set(name, this.state.nodeMap);
+		this.runtime = new CarbonRuntime();
 
 		this.store = new NodeStore(this);
 
@@ -82,6 +85,7 @@ export class Carbon extends EventEmitter {
 		this.dragging = false;
 		this.ready = false;
 		this.ticks = [];
+
 
 		// init plugins
 		pm.plugins.forEach(p => p.init(this));
@@ -105,11 +109,7 @@ export class Carbon extends EventEmitter {
 	}
 
 	get blockSelection(): BlockSelection {
-		return this.state.nodeSelection;
-	}
-
-	get runtime() {
-		return this.state.runtime;
+		return this.state.blockSelection;
 	}
 
 	get focused() {

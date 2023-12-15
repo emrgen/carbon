@@ -26,13 +26,12 @@ import {
   useCreateCachedCarbon,
   useCreateCarbon, NodeMap, NodeId
 } from "@emrgen/carbon-core";
-import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
 import {
   BlockMenu,
   CarbonApp,
   carbonUtilPlugins,
 } from "@emrgen/carbon-utils";
-import { Stack } from "@chakra-ui/react";
+import {BlockTree} from "@emrgen/carbon-blocktree";
 import SelectionTracker from "../../SelectionTracker";
 
 const data = node("carbon", [
@@ -231,6 +230,9 @@ const extensions = [
   extensionPresets,
   blockPresets,
   carbonUtilPlugins,
+  {plugins: [
+    new BlockTree(),
+    ]}
   // extensions1,
 ];
 

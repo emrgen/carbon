@@ -590,7 +590,7 @@ span[data-name=text] {
 	font-size 15px
 	padding 10px 0
 	background #fafafa
-	border: 2px dashed blue;
+	border: 2px dashed blue
 	[data-name=title]:before
 		display none
 	[data-type=children]
@@ -642,7 +642,6 @@ span[data-name=text] {
 				text-overflow: ellipsis;
 				overflow: hidden;
 		.carbon-collapsible__control
-			// margin-top: 3px
 			color: #aaa
 			width 20px
 			height: 20px
@@ -651,7 +650,12 @@ span[data-name=text] {
 			justify-content: center
 			padding 0
 			border-radius: 4px
-			// padding-top 2px
+			.page-tree-open-close-icon
+				transition transform 0.2s
+			&.collapsed > .page-tree-open-close-icon
+				transform: rotate(0deg)
+			&.expanded > .page-tree-open-close-icon
+				transform: rotate(90deg)
 			&:hover
 				background: #ddd
 				color #666
@@ -694,8 +698,6 @@ span[data-name=text] {
 	width 100%
 	top 0
 	left: 0
-	// background rgba(229, 229, 229, 0.465)
-	// z-index: 10
 
 [data-name=tab]
 	margin: 10px 0px
@@ -718,7 +720,6 @@ span[data-name=text] {
 	.carbon-tab-item-content
 		padding: 10px 20px
 		border-radius: 4px
-		// border: 1px solid #ddd
 	.carbon-add-tab-item
 		display: flex
 		align-items: center

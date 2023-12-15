@@ -65,7 +65,6 @@ export class Transaction {
 	private normalizeIds = new NodeIdSet();
 	private updatedIds = new NodeIdSet();
 	private selectedIds = new NodeIdSet();
-	private activatedIds = new NodeIdSet();
 	private openNodeIds = new NodeIdSet();
 	private deletedIds = new NodeIdSet();
 
@@ -126,10 +125,6 @@ export class Transaction {
 
 	get updatesSelection() {
 		return !!this.selections.length
-	}
-
-	get updatesNodeState() {
-		return !!this.selectedIds.size || !!this.activatedIds.size || this.openNodeIds.size;
 	}
 
 	private get selections() {
@@ -437,7 +432,6 @@ export class Transaction {
 	activated(...nodes: Node[]) {
 		// console.log('Transaction.activated', nodes.map(n => n.id.toString()));
 		each(nodes, n => {
-			this.activatedIds.add(n.id);
 			this.runtime.activatedNodeIds.add(n.id);
 		})
 	}

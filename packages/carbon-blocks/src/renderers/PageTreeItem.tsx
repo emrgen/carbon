@@ -109,7 +109,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
     return (
       <>
         <div
-          className="carbon-collapsible__control"
+          className={"carbon-collapsible__control" + (isCollapsed ? " collapsed" : " expanded")}
           contentEditable="false"
           suppressContentEditableWarning
           onMouseDown={(e) => {
@@ -118,11 +118,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
           }}
           onClick={handleToggle}
         >
-          {isCollapsed ? (
-            <MdOutlineKeyboardArrowRight />
-          ) : (
-            <MdOutlineKeyboardArrowDown />
-          )}
+          <MdOutlineKeyboardArrowRight className={'page-tree-open-close-icon'}/>
         </div>
         <div
           className="add-child-file"

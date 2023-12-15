@@ -31,7 +31,7 @@ export class EventManager {
 	}
 
 	get runtime() {
-		return this.app.state.runtime;
+		return this.app.runtime;
 	}
 
 	constructor(readonly app: Carbon, readonly pm: PluginManager) { }
