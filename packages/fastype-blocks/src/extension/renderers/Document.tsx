@@ -92,7 +92,6 @@ export const DocumentComp = (props: RendererProps) => {
           return;
         }
         prevent(e);
-        // console.log("add new child");
         const at = Point.toAfter(lastChild.id);
         const section = app.schema.type("section").default();
         if (!section) return;

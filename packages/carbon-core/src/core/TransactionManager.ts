@@ -71,22 +71,6 @@ export class TransactionManager {
 	// 	this.app.emit(EventsOut.change, this.state);
 	// }
 
-	private commitContent() {
-		this.state.updateContent();
-		this.app.emit(EventsOut.contentChanged, this.state.content);
-	}
-
-	private commitNodeStates() {
-		// this.state.updateNodeState();
-		this.app.emit(EventsOut.nodeStateChanged, this.state);
-	}
-
-	private commitSelection() {
-		// console.log('commitSelection', this.state.selection.toString());
-		this.sm.commitSelection();
-		this.app.emit(EventsOut.selectionChanged, this.state.selection);
-	}
-
 	private updateDecorations() {
 		// console.log('######', this.state.decorations.size);
 		// if (!this.state.decorations.length && !this.s)

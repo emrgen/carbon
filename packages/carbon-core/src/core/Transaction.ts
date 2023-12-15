@@ -87,7 +87,7 @@ export class Transaction {
 	}
 
 	private get runtime() {
-		return this.state.runtime;
+		return this.app.runtime;
 	}
 
 	get textInsertOnly() {
@@ -212,40 +212,38 @@ export class Transaction {
 	// previously selected nodes will be deselected
 	// previously active nodes will be deactivated
 	selectNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
-		ids = isArray(ids) ? ids : [ids];
-
-		// deselect previously activated nodes
-		const prevActivatedIds = this.state.changes.state
-			.map(id => this.state.nodeMap.get(id))
-			.filter(n => n?.state.activated).map(n => n?.id).filter(identity) as NodeId[]
-
-		prevActivatedIds.forEach(id => {
-			this.updateState(id, { activated: false }, origin)
-		})
-
-		// deselect previously selected but now not selected nodes and select new nodes
-		const selectedIds = new NodeIdSet(ids)
-		const deselectedIds = this.state.changes.state
-			.map(id => this.state.nodeMap.get(id))
-			.filter(n => n?.state.selected && !selectedIds.has(n.id)).map(n => n?.id).filter(identity) as NodeId[]
-
-		deselectedIds.forEach(id => {
-			this.updateState(id, { selected: false }, origin)
-		})
-
-		selectedIds.forEach(id => {
+		const selectIds = isArray(ids) ? ids : [ids];
+		selectIds.forEach(id => {
 			this.updateState(id, { selected: true }, origin)
 		})
 
 		return this
 	}
 
-	// previously active nodes will be deactivated and deselected
-	// new nodes will be selected and activated
+	deselectNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
+		const selectIds = isArray(ids) ? ids : [ids];
+		selectIds.forEach(id => {
+			this.updateState(id, { selected: false }, origin)
+		})
+
+		return this
+	}
+
 	activateNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
-		ids = isArray(ids) ? ids : [ids];
-		this.add(SelectNodes.create(ids, origin));
-		this.add(ActivateNodes.create(ids, origin));
+		const activateIds = isArray(ids) ? ids : [ids];
+		activateIds.forEach(id => {
+			this.updateState(id, { activated: true }, origin)
+		})
+
+		return this
+	}
+
+	deactivateNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
+		const activateIds = isArray(ids) ? ids : [ids];
+		activateIds.forEach(id => {
+			this.updateState(id, { activated: false }, origin)
+		})
+
 		return this
 	}
 
@@ -358,24 +356,6 @@ export class Transaction {
 		}
 	}
 
-	private abort(message: string) {
-		console.log(p14('%c[abort]'), 'color:red', 'transaction, error:', message);
-		this.cancelled = true;
-	}
-
-	private rollback() {
-		const { error } = this
-		if (!error) {
-			console.info(p14('%c[info]'), 'color:red', 'transaction aborted without error');
-			return
-		}
-
-		console.log(p14('%c[error]'), 'color:red', error.message, '-> rolling back transaction');
-		// rollback transaction changes
-		this.app.cleanTicks();
-		// put the cursor at the right place
-	}
-
 	// addSelection(selection: Selection) {
 	// 	this.selections.push(selection);
 	// }
@@ -387,61 +367,11 @@ export class Transaction {
 		}));
 	}
 
-	updated(...nodes: Node[]) {
-		// console.log(new Error().stack);
-		console.log('pending updates', nodes.map(n => n.id.toString()));
-		each(nodes, n => {
-			if (this.runtime.deletedNodeIds.has(n.id)) return;
-			console.log('updated node', n.id.toString());
-			this.updatedIds.add(n.id);
-			this.runtime.updatedNodeIds.add(n.id);
-			// all the parent draggables are updated also
-			// may be on blur render all can be better approach
-			// let draggable: Optional<Node> = n;
-			// while (draggable = draggable?.closest(p => p.type.isDraggable || p.type.isSandbox)!) {
-			// 	if (draggable.type.isSandbox) break
-			// 	this.runtime.updatedNodeIds.add(draggable.id)
-			// 	draggable = draggable.parent;
-			// }
-		});
-	}
-
-	deleted(...nodes: Node[]) {
-		each(nodes, n => {
-			this.runtime.deletedNodeIds.add(n.id);
-			this.deletedIds.add(n.id);
-			this.runtime.updatedNodeIds.remove(n.id);
-			this.updatedIds.remove(n.id);
-		})
-	}
-
 	// hideCursor(...nodes: Node[]) {
 	// 	each(nodes, n => {
 	// 		this.runtime.hideCursorNodeIds.add(n.id);
 	// 	});
 	// }
-
-	selected(...nodes: Node[]) {
-		// console.log('Transaction.selected', nodes.map(n => n.id.toString()));
-		each(nodes, n => {
-			this.selectedIds.add(n.id);
-			this.runtime.selectedNodeIds.add(n.id);
-		})
-	}
-
-	activated(...nodes: Node[]) {
-		// console.log('Transaction.activated', nodes.map(n => n.id.toString()));
-		each(nodes, n => {
-			this.runtime.activatedNodeIds.add(n.id);
-		})
-	}
-
-	opened(...nodes: Node[]) {
-		each(nodes, n => {
-		this.runtime.openNodeIds.add(n.id)
-		this.openNodeIds.add(n.id)
-		})
-	}
 
 	// merge transactions
 	merge(other: Transaction) {

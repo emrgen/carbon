@@ -142,15 +142,21 @@ export class PluginManager {
 		const { node } = keyDownEvent
 
 		// console.log('onKeyDown', event);
-		
+
+		console.groupCollapsed('onKeyDown', event)
 		each(this.before, (p: CarbonPlugin) => {
 			if (keyDownEvent.stopped) return
 			const handlers = p.keydown()
 			const handler = entries(handlers).find(([key]) => {
 				return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event);
 			})
+			if (handler) {
+				console.log('before', p.name, handler[0], handler[1]);
+			}
 			handler?.[1]?.(keyDownEvent)
 		})
+
+
 
 		if (!keyDownEvent.stopped) {
 			node?.chain.some(n => {
@@ -160,6 +166,9 @@ export class PluginManager {
 				const handler = entries(handlers).find(([key]) => {
 					return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
 				});
+				if (handler) {
+					console.log('node', n.name, handler[0], handler[1]);
+				}
 				handler?.[1]?.(keyDownEvent)
 				return keyDownEvent.stopped
 			});
@@ -172,9 +181,16 @@ export class PluginManager {
 			const handler = entries(handlers).find(([key]) => {
 				return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
 			});
+
+			if (handler) {
+				console.log('after', p.name, handler[0], handler[1]);
+			}
+
 			handler?.[1]?.(keyDownEvent)
 			return keyDownEvent.stopped
 		})
+
+		console.groupEnd()
 	}
 
 	// onSelect(event: SelectionEvent) {

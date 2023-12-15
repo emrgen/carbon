@@ -49,15 +49,15 @@ export class Code extends CarbonPlugin {
         ctx.stopPropagation();
         const { selection, blockSelection } = app
 
-        if (!app.state.runtime.clipboard.isEmpty) {
-          const { slice } = app.state.runtime.clipboard;
-          const textContent = slice.root.textContent;
-          console.log('textContent', textContent);
-          // Slice.create(slice.root, slice.start, slice.end);
-          app.cmd.transform.paste(selection, blockSelection, slice)?.dispatch()
-        } else {
-
-        }
+        // if (!app.state.runtime.clipboard.isEmpty) {
+        //   const { slice } = app.state.runtime.clipboard;
+        //   const textContent = slice.root.textContent;
+        //   console.log('textContent', textContent);
+        //   // Slice.create(slice.root, slice.start, slice.end);
+        //   app.cmd.transform.paste(selection, blockSelection, slice)?.dispatch()
+        // } else {
+        //
+        // }
       }
     }
   }

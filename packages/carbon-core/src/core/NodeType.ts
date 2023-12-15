@@ -252,7 +252,6 @@ export class NodeType {
 			throw new Error('node is null')
 		}
 
-		console.log('X node', blockJson);
 		return node
 	}
 

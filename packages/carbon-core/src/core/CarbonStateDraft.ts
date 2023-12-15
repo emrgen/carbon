@@ -62,7 +62,6 @@ export class CarbonStateDraft {
       previous: state.clone(depth - 1),
       scope: state.scope,
       content,
-      runtime: state.runtime,
       selection,
       nodeMap,
       changes,
@@ -98,6 +97,20 @@ export class CarbonStateDraft {
       return !isEmpty(n.state.normalize())
     }).forEach(n => {
       this.changes.state.add(n.id)
+    });
+
+    // update state changes to reflect the new state
+    this.changes.state.nodes(this.nodeMap).forEach(n => {
+      const state = n.state.normalize();
+      if (state.activated) {
+        this.changes.activated.add(n.id);
+      }
+      if (state.selected) {
+        this.changes.selected.add(n.id);
+      }
+      if (state.opened) {
+        this.changes.opened.add(n.id);
+      }
     })
 
     changed.sort(NodeDepthComparator);

@@ -11,6 +11,7 @@ import { ActionOrigin } from './actions';
 export class PinnedSelection {
 	tail: Pin;
 	head: Pin;
+	nodes: Node[] = [];
 	origin: ActionOrigin = ActionOrigin.Unknown;
 
 	// map dom selection to editor selection
@@ -95,7 +96,7 @@ export class PinnedSelection {
 		// console.log(anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
 		const tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
 		const head = Pin.fromDom(focusNode, focusOffset)?.up();
-		console.log(tail?.toString(), head?.toString());
+		// console.log(tail?.toString(), head?.toString());
 
 		if (!tail || !head) {
 			console.warn(p14('%c[error]'), 'color:red', 'Pin.fromDom failed');
@@ -118,11 +119,15 @@ export class PinnedSelection {
 		return PinnedSelection.create(pin, pin);
 	}
 
+	// static fromNodes(nodes: Node[]): PinnedSelection {
+	// 	return new PinnedSelection();
+	// }
+
 	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
-		return new PinnedSelection(tail, head,  origin);
+		return new PinnedSelection(tail, head, [],  origin);
 	}
 
-	constructor(tail: Pin, head: Pin, origin = ActionOrigin.Unknown) {
+	constructor(tail: Pin, head: Pin, nodes: Node[], origin = ActionOrigin.Unknown) {
 		this.tail = tail;
 		this.head = head;
 	}
@@ -197,7 +202,7 @@ export class PinnedSelection {
 	syncDom(store: NodeStore) {
 		try {
 			const domSelection = this.intoDomSelection(store);
-			console.log('Selection.syncDom:', domSelection);
+			// console.log('Selection.syncDom:', domSelection);
 			if (!domSelection) {
 				console.log(p14('%c[error]'), 'color:red', 'failed to map selection to dom');
 				return
@@ -375,8 +380,6 @@ export class PinnedSelection {
 	clone() {
 		return PinnedSelection.create(this.tail.clone(), this.head.clone());
 	}
-
-
 	toJSON() {
 		return {
 			tail: this.tail.toJSON(),

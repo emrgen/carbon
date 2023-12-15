@@ -71,11 +71,12 @@ export class EventManager {
 			return
 		}
 
-		if (type !== EventsIn.selectionchange && app.state.selectedNodeIds.size > 0) {
+		console.log(type, app.state.changes.selected.size);
+		if (type !== EventsIn.selectionchange && app.state.changes.selected.size > 0) {
 			// console.log('selected nodes', app.state.selectedNodeIds);
 			// console.log(type, event);
 
-			const lastNode = last(app.state.selectedNodeIds.map(id => app.store.get(id))) as Node;
+			const lastNode = last(app.state.changes.selected.map(id => app.store.get(id))) as Node;
 			this.updateCommandOrigin(type, event);
 
 			// TODO: check if this can be optimized
@@ -142,10 +143,10 @@ export class EventManager {
 				// EventsIn.beforeinput,
 			].includes(type) || selectionChangedUsingKeys(event)
 			) {
-				// console.groupCollapsed('onEvent:', event.type);
-				// groupOpen = true;
+				console.groupCollapsed('onEvent:', event.type);
+				groupOpen = true;
 			} else {
-				console.group('onEvent:', event.type, editorEvent);
+				console.groupCollapsed('onEvent:', event.type, editorEvent);
 				groupOpen = true;
 			}
 		} else {

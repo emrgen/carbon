@@ -71,8 +71,8 @@ export class NestablePlugin extends AfterPlugin {
 				const { app, node } = ctx;
 				if (node.isIsolating) return;
 
-				const { selection, tr, cmd } = app;
-				if (!selection.isCollapsed) {
+				const { selection, tr, cmd, state } = app;
+				if (!selection.isCollapsed || state.changes.selected.size) {
 					return
 				}
 

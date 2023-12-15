@@ -42,32 +42,18 @@ export class SelectionManager {
 	onSelect(draft: CarbonStateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		// console.log('onSelect', before.toString(), after.toString(), origin, this.enabled);
 		if (!this.enabled) {
+			console.log('skipped: app selection disabled');
 			return
 		}
 
 		const { app } = this;
-		// const { head, tail } = after.pin(editor)!;
-		// const selectedNodes = this.state.selectedNodeIds.map(id => this.store.get(id)) as Node[];
-		// selectedNodes.forEach((n) => {
-		// 	if (n.isActive) return
-		// 	n.updateData({ _state: { selected: false } });
-		// 	this.state.runtime.selectedNodeIds.add(n.id);
-		// });
 
-		// console.log('Editor.onSelect', after.toString(), this.runtime.selectEvents.length);
 		// console.log('Editor.onSelect', after.toString(), 'pendingSelection', origin);
 		if ([ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
-			// if (app.runtime.selectEvents.length === 0) {
-				// this.selectedNodesIds.clear();
-				this.onSelectionChange(draft, before, after, origin)
-				// this.selectedNodesChanged()
-				// this.pm.onSelect(event);
-			// } else {
-				// console.error('skipped the selection', after.toString(), before.toString());
-			// }
+			this.onSelectionChange(draft, before, after, origin)
 		} else {
 			const event = SelectionEvent.create(before, after, origin);
-			console.log('pushing selection event', event);
+			// console.log('pushing selection event', event);
 			draft.updateSelection(after);
 		}
 	}
@@ -87,9 +73,7 @@ export class SelectionManager {
 			return
 		}
 
-
 		draft.updateSelection(after);
-
 		// console.log('synced selection from origin', origin)
 		// this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange && origin !== ActionOrigin.NoSync);
 		// console.log('###', this.app.selection.toString(), selection.toString());
@@ -122,40 +106,10 @@ export class SelectionManager {
 		if (selection.isInvalid) {
 			console.warn('skipped invalid selection sync');
 			app.element?.blur()
-			// this.state.isSelectionDirty = false;
 			return
 		}
 
 		selection.syncDom(app.store);
-		// this.state.isSelectionDirty = false;
-	}
-
-	// updates selection state from pending selection events
-	commitSelection() {
-		const { app } = this
-		const event = last(this.runtime.selectEvents) as Optional<SelectionEvent>;
-
-		if (!event) {
-			!this.app.processTick()
-			return
-		}
-		this.runtime.selectEvents = [];
-
-		const { after } = event;
-		const selection = after.pin(app.state.nodeMap)
-		if (!selection) {
-			console.error(p12('%c[error]'), 'color:red', 'commitSelection', 'failed to get next selection');
-			return
-		}
-
-		// this.state.updateSelection(selection, event.origin);
-		this.app.emit(EventsOut.selectionChanged, selection);
-		// this.updateFocusPlaceholder(this.state.previous?.selection, selection);
-		// if nothing was processed, emit selection changed to sync the dom
-		this.app.processTick()
-	}
-
-	onSyncSelection() {
 	}
 
 	// update placeholder visibility for the focus node
@@ -188,6 +142,4 @@ export class SelectionManager {
 		// }
 
 	}
-
-
 }

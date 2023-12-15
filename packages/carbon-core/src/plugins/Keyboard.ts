@@ -35,13 +35,13 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 		preventAndStopCtx(ctx);
 
 		const { node } = ctx;
-		const { selection, state, cmd, blockSelection: nodeSelection } = app;
+		const { selection, state, cmd, blockSelection } = app;
 
 		const { isCollapsed, head } = selection;
 
 		// delete node selection if any
-		if (!nodeSelection.isEmpty) {
-			cmd.transform.deleteNodes(nodeSelection, { fall: 'before' })?.dispatch();
+		if (!blockSelection.isEmpty) {
+			cmd.transform.deleteNodes(blockSelection, { fall: 'before' })?.dispatch();
 			return
 		}
 
@@ -81,7 +81,7 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 					.select(after)
 					.dispatch();
 				console.log('DXDX');
-				
+
 				return
 			}
 
