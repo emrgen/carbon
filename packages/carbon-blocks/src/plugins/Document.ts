@@ -13,7 +13,6 @@ import {
 	splitTextBlock
 } from '@emrgen/carbon-core';
 
-
 export class DocPlugin extends CarbonPlugin {
 
 	name = 'document';

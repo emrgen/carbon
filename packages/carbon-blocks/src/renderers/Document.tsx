@@ -3,18 +3,15 @@ import React, { useCallback, useEffect, useRef } from "react";
 import {
   ActionOrigin,
   CarbonBlock,
-  CarbonNode,
   CarbonNodeChildren,
   CarbonNodeContent,
   EventsIn,
-  EventsOut,
   Node,
   Pin,
   PinnedSelection,
   Point,
   RendererProps,
   prevent,
-  preventAndStop,
   useCarbon,
 } from "@emrgen/carbon-core";
 import {
@@ -65,16 +62,16 @@ export const DocumentComp = (props: RendererProps) => {
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       app.emit("document:cursor:show");
-
-      const lastChild = node.lastChild as Node;
-      const lastElement = app.store.element(lastChild?.id!);
+      const lastChildId = node.lastChild?.id;
+      if (!lastChildId) return;
+      const lastElement = app.store.element(lastChildId);
+      const lastChild = app.store.get(lastChildId);
       if (!lastChild) return;
       const bound = lastElement?.getBoundingClientRect();
       if (!bound) return;
       // console.log(bound, e, e.clientY, bound.bottom);
 
       if (e.clientY > bound.bottom) {
-        console.log(lastChild.isEmpty, lastChild.id.toString(), lastChild.textContent);
         if (lastChild.name === "section" && lastChild.isEmpty) {
           const textBlock = lastChild.find((n) => n.isTextBlock);
           if (textBlock) {
@@ -133,7 +130,6 @@ export const DocumentComp = (props: RendererProps) => {
         className="document-wrapper"
         ref={wrapperRef}
         onScroll={(e) => {
-          console.log(e);
           app.onEvent(EventsIn.scroll, e as any)
         }}
       >
