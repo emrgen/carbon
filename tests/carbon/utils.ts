@@ -32,7 +32,7 @@ export class CarbonPage {
   }
 
   async open() {
-    await this.page.goto("http://localhost:5173");
+    await this.page.goto("http://localhost:5173/test");
   }
 
   async addTitle(text: string) {
