@@ -48,7 +48,7 @@ export class StateChanges {
   }
 
   get isDirty() {
-    return this.isContentDirty || this.isSelectionDirty;
+    return this.isContentDirty || this.isSelectionDirty
   }
 
   get isContentDirty() {
@@ -61,6 +61,10 @@ export class StateChanges {
 
   get isNodeStateDirty() {
       return this.state.size;
+  }
+
+  get isLocalStateDirty() {
+      return this.moved.size || this.deleted.size || this.inserted.size || this.updated.size || this.renamed.size || this.attrs.size;
   }
 
   get isClipboardDirty() {

@@ -17,13 +17,29 @@ import {
 } from "@emrgen/carbon-core";
 import { DndEvent } from '../types';
 
-export class RectSelector extends EventEmitter {
-	selectables: DndNodeStore = new DndNodeStore();
-	focusable: DndNodeStore = new DndNodeStore();
-	selected: BSet<Node> = new BSet(NodeComparator);
+// Events emitted by RectSelector
+export enum RectSelectorEvent {
+	MouseDown = 'mouse:down',
+	MouseUp = 'mouse:up',
+	DragStart = 'drag:start:rect-selector',
+	DragMove = 'drag:move:rect-selector',
+	DragEnd = 'drag:end:rect-selector',
+}
+
+// RectSelect is a selection manager that uses a rectangular selection box
+// this manages many nested selection sub-systems such as:
+// - selection within a document
+// - selection within a canvas
+// - selection within a node in a canvas (the rect selection box is drawn inside the node)
+export class RectSelect extends EventEmitter {
+	private selectables: DndNodeStore = new DndNodeStore();
+	private focusable: DndNodeStore = new DndNodeStore();
+	private selected: BSet<Node> = new BSet(NodeComparator);
 	region: Optional<HTMLElement>;
-	downEvent: Optional<MouseEvent>
-	private isDirty = true;
+	private downEvent: Optional<MouseEvent>;
+	// initially marked as dirty to force a refresh on first mouse down
+	private isDirty: boolean = true;
+	private isSelecting: boolean = false;
 	disabled = false;
 
 	constructor(readonly app: Carbon) {
@@ -36,10 +52,8 @@ export class RectSelector extends EventEmitter {
 		this.onUnmountRectSelectable = this.onUnmountRectSelectable.bind(this)
 	}
 
-	onTransaction(tr: Transaction) {
-		if (tr.updatesContent) {
-			this.isDirty = true;
-		}
+	markDirty() {
+		this.isDirty = true;
 	}
 
 	onMouseDown(e: MouseEvent, node: Node) {
@@ -47,23 +61,25 @@ export class RectSelector extends EventEmitter {
 		// console.log(this.region === e.target, editor.state.selectedNodeIds.size)
 		this.downEvent = e;
 		if (this.region === e.target) {
-			// if (blockSelection.size) {
-			// 	app.tr.selectNodes(blockSelection.blockIds).dispatch();
-			// }
+			const {selection} = app.state;
+			if (selection.isBlock) {
+				this.selectNodes([]);
+			}
 		}
-		this.emit('mouse:down', e, node);
+		this.emit(RectSelectorEvent.MouseDown, e, node);
 	}
 
 	onMouseUp(e: MouseEvent, node: Node) {
-		this.emit('mouse:up', e, node);
-		// console.log('onMouseUp', e, nodes);
+		this.emit(RectSelectorEvent.MouseUp, e, node);
 	}
 
 	onDragStart(e: DndEvent) {
 		const { app } = this;
 		const { node } = e;
 		// this.locked = true
-		this.emit('drag:start:selector', e);
+		this.emit(RectSelectorEvent.DragStart, e);
+		this.isSelecting = true;
+
 		// this.app.blur();
 		if (this.isDirty) {
 			const document = node.chain.find(n => n.isDocument);
@@ -80,7 +96,7 @@ export class RectSelector extends EventEmitter {
 
 			const { scrollTop, scrollLeft } = docParent;
 
-			this.selectables.refresh(scrollTop, scrollLeft);
+			// this.selectables.refresh(scrollTop, scrollLeft);
 			this.isDirty = false;
 			console.log('FastRectSelector initialized')
 		}
@@ -89,13 +105,15 @@ export class RectSelector extends EventEmitter {
 
 	// select nodes colliding with the selection box
 	onDragMove(e: DndEvent) {
-		this.emit('drag:move:selector', e);
+		this.emit(RectSelectorEvent.DragMove, e);
+
 		const { node } = e;
 		const { app, selectables } = this;
-		const {selection} = app.state;
-		// can not move block while inline selection is active
-		if (selection.isInline) return;
-
+		// const {selection} = app.state;
+		// // can not move block while inline selection is active
+		// console.log(selection.isInline);
+		// if (selection.isInline) return;
+		console.log('current selection',app.selection.nodes.map(n => n.id));
 		const document = node.chain.find(n => n.isDocument);
 		if (!document) {
 			return;
@@ -109,19 +127,27 @@ export class RectSelector extends EventEmitter {
 		}
 
 		const { scrollTop, scrollLeft } = docParent;
-
+		console.log(selectables.size);
 		const collides = selectables.collides(
 			adjustBox(boundFromFastDndEvent(e), { left: scrollLeft, top: scrollTop })
 		);
 
-		if (collides.length === 0) return
+		console.log('1 xxxxxxxxxxxxxx');
+		if (collides.length === 0) {
+			if (this.noSelectionChange([])) return
+			this.selectNodes([]);
+			return
+		}
 
+		console.log('2 xxxxxxxxxxxxxx');
 		if (!collides.length) {
 			if (this.noSelectionChange([])) return
 			const { tr } = app;
-			tr.selectNodes([]).dispatch();
+			this.selectNodes([]);
 			return;
 		}
+
+		console.log('3 xxxxxxxxxxxxxx', collides.length);
 
 		const ordered = sortBy(collides, (n) => n.depth);
 
@@ -133,13 +159,17 @@ export class RectSelector extends EventEmitter {
 		}).filter(identity));
 
 		if (topLevelNodeParents.length === 1) {
+			console.log('xx');
 			const ids = topLevelNodes.map((n) => n.id);
-			if (this.noSelectionChange(ids)) return
-			app.tr.selectNodes(ids, ActionOrigin.UserSelectionChange).dispatch();
+			if (this.noSelectionChange(ids)) {
+				console.log('no selection change', ids.map(id => id.toString()), app.selection.nodes.map(n => n.id.toString()));
+				return
+			}
+			this.selectNodes(ids);
 			return
 		}
 
-		// console.log('selected', ordered.length)
+		console.log('4 xxxxxxxxxxxxxx');
 
 		const selectedMap = new BSet(NodeComparator);
 		const parentMap = new BSet(NodeComparator);
@@ -154,7 +184,7 @@ export class RectSelector extends EventEmitter {
 		if (selectedMap.sub(parentMap).size == 0) {
 			if (this.noSelectionChange([lowestNode.id])) return
 			const { tr } = app;
-			tr.selectNodes([lowestNode.id]).dispatch();
+			this.selectNodes([lowestNode.id]);
 			return;
 		}
 
@@ -168,31 +198,43 @@ export class RectSelector extends EventEmitter {
 		// select all nodes start from higher level
 		const selectedIds = selectedMap.toArray().map((n) => n.id)
 		if (this.noSelectionChange(selectedIds)) return
-		const { tr } = app;
-		tr.selectNodes(selectedIds, ActionOrigin.UserSelectionChange).dispatch();
+		this.selectNodes(selectedIds);
 	}
 
-	noSelectionChange(ids: NodeId[]) {
+	selectNodes(ids: NodeId[], origin: ActionOrigin = ActionOrigin.UserSelectionChange) {
+		const { app } = this;
+		const { selection } = app.state;
+		if (this.noSelectionChange(ids)) return
+		const { tr } = app;
+		tr.deselectNodes(selection.nodes).selectNodes(ids, origin).dispatch();
+	}
+
+	private noSelectionChange(ids: NodeId[]) {
 		const map = new NodeIdSet(ids)
 		const {nodes} = this.app.selection
 		return ids.length === nodes.length && nodes.every(n => map.has(n.id))
 	}
 
 	onDragEnd(e: DndEvent) {
-		this.emit('drag:end:selector', e);
 		const { selected, app } = this;
 		console.log('selected', selected.size);
 
 		// this.editor.focus()
 		console.log('onDragEnd', e.node.name)
+		this.isSelecting = false;
+		this.emit(RectSelectorEvent.DragEnd, e);
 	}
 
 	onMountRectSelectable(node: Node, el: HTMLElement) {
-		// console.log('onMountRectSelectable', node.name, node.id.toString());
-		this.selectables.register(node, el)
+		// if (this.isSelecting) return
+		console.log('->', node.name, node.id.toString(), el);
+		this.selectables.register(node, el);
+		// console.log(this.selectables.size);
 	}
 
 	onUnmountRectSelectable(node: Node) {
+		// if (this.isSelecting) return
+		console.log('<-', node.name, node.id.toString());
 		this.selectables.delete(node);
 	}
 

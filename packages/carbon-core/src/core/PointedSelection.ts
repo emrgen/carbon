@@ -86,7 +86,7 @@ export class PointedSelection {
 	}
 
 	toJSON() {
-		const { tail, head } = this;
-		return { tail: tail.toString(), head: head.toString() };
+		const { tail, head, nodeIds } = this;
+		return { tail: tail.toString(), head: head.toString(), nodeIds: nodeIds.map(id => id.toString()) };
 	}
 }

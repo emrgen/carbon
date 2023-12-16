@@ -78,7 +78,7 @@ export const useNodeStateChange = (props: UseNodeChangeProps) => {
 		return node.state.normalize();
 	}, [node.state]);
 
-	const stateAttrs = useMemo(() => {
+	const attributes = useMemo(() => {
 		const attrs = {};
 		const state = node.state;
 		if (state.activated) {
@@ -99,7 +99,7 @@ export const useNodeStateChange = (props: UseNodeChangeProps) => {
 		isSelected: state.selected,
 		isOpened: state.opened,
 		state,
-		stateAttrs,
+		attributes,
 	};
 };
 

@@ -53,7 +53,7 @@ export class SelectionManager {
 			this.onSelectionChange(draft, before, after, origin)
 		} else {
 			const event = SelectionEvent.create(before, after, origin);
-			// console.log('pushing selection event', event);
+			console.log('pushing selection event', event);
 			draft.updateSelection(after);
 		}
 	}
@@ -74,7 +74,7 @@ export class SelectionManager {
 		}
 
 		draft.updateSelection(after);
-		// console.log('synced selection from origin', origin)
+		console.log('synced selection from origin', origin)
 		// this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange && origin !== ActionOrigin.NoSync);
 		// console.log('###', this.app.selection.toString(), selection.toString());
 		// this.updateFocusPlaceholder(this.state.prevSelection, selection);
@@ -99,7 +99,7 @@ export class SelectionManager {
 		const { app } = this;
 		const { selection } = this.state;
 		if (this.state.previous?.selection?.eq(selection) && selection.origin === ActionOrigin.DomSelectionChange) {
-			console.log('skipped: unchanged selection sync', selection.origin, selection.toString());
+			console.debug('skipped: unchanged selection sync', selection.origin, selection.toString());
 			return
 		}
 

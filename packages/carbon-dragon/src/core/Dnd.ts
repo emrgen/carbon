@@ -125,8 +125,8 @@ export class Dnd extends EventEmitter {
 		// console.warn('mouse in', node.id.toString(), this.isDirty)
 		if (this.isDirty) {
 			// console.log('update draggable', this.draggables);
-			this.draggables.refresh(scrollTop, scrollLeft);
-			this.droppables.refresh(scrollTop, scrollLeft);
+			// this.draggables.refresh(scrollTop, scrollLeft);
+			// this.droppables.refresh(scrollTop, scrollLeft);
 			this.isDirty = false;
 		}
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RectSelector } from "../core/RectSelector";
+import { RectSelect } from "../core/RectSelect";
 import { RectSelectorContext } from "../hooks/useRectSelector";
-import { Transaction, useCarbon } from "@emrgen/carbon-core";
+import { Carbon, CarbonState, EventsOut, RendererProps, Transaction, useCarbon } from "@emrgen/carbon-core";
 import { createPortal } from "react-dom";
 import { useDndMonitor, useDragRect } from "../hooks";
 import { DndEvent } from "../types";
@@ -9,9 +9,10 @@ import { RectSelectAreaId } from "../constants";
 import { throttle } from "lodash";
 import { CarbonDragHandleId } from "./DraggableHandle";
 
-export function RectSelectContext(props) {
+export function RectSelectContext(props: RendererProps) {
+  const { node } = props;
   const app = useCarbon();
-  const [rectSelector] = useState(() => new RectSelector(app));
+  const [rectSelector] = useState(() => new RectSelect(app));
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
     overlay: true,
   });
@@ -19,42 +20,17 @@ export function RectSelectContext(props) {
   const [isSelecting, setIsSelecting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
+  // mark the rect-selector dirty when the content changes
   useEffect(() => {
-    const onHideCursor = () => {
-      setIsSelecting(true);
-      console.log('hide cursor');
-
-    }
-    const onShowCursor = () => {
-      console.log("show cursor");
-      setIsSelecting(false);
-    }
-
-    app.on("document:cursor:hide", onHideCursor);
-    app.on("document:cursor:show", onShowCursor);
-
-    return () => {
-      app.off("document:cursor:hide", onHideCursor);
-      app.off("document:cursor:show", onShowCursor);
-    };
-  }, [app]);
-
-  useEffect(() => {
-    const onTransaction = (tr: Transaction) => {
-      rectSelector.onTransaction(tr);
-      // console.log("transaction", tr, app.blockSelection.size);
-      if (app.selection.isBlock) {
-        setIsSelecting(true);
-      } else {
-        if (!tr.app.dragging) {
-          setIsSelecting(false);
-        }
+    const onChanged = (state: CarbonState) => {
+      if (state.changes.isLocalStateDirty) {
+        rectSelector.markDirty();
       }
     };
 
-    app.on("transaction", onTransaction);
+    app.on(EventsOut.changed, onChanged);
     return () => {
-      app.off("transaction", onTransaction);
+      app.off(EventsOut.changed, onChanged);
     };
   }, [app, rectSelector]);
 
@@ -127,6 +103,27 @@ export function RectSelectContext(props) {
       rectSelector.off("mouse:up", onMouseUp);
     };
   }, [app.selection, rectSelector]);
+
+
+  useEffect(() => {
+    const onHideCursor = () => {
+      setIsSelecting(true);
+      console.log('hide cursor');
+
+    }
+    const onShowCursor = () => {
+      console.log("show cursor");
+      setIsSelecting(false);
+    }
+
+    app.on("document:cursor:hide", onHideCursor);
+    app.on("document:cursor:show", onShowCursor);
+
+    return () => {
+      app.off("document:cursor:hide", onHideCursor);
+      app.off("document:cursor:show", onShowCursor);
+    };
+  }, [app]);
 
   return (
     <RectSelectorContext value={rectSelector}>

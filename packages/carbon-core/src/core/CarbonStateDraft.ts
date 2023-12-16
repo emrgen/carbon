@@ -70,18 +70,31 @@ export class CarbonStateDraft {
     // create a new selection based on the new node map using the draft selection
     const selection = ((selection: PointedSelection) => {
       if (this.changes.selected.size) {
-        const nodes = this.changes.selected.nodes(this.nodeMap);
+        const nodes = this.changes.selected.nodes(this.nodeMap)
         if (nodes.length !== this.changes.selected.size) {
           throw new Error("Cannot commit draft with invalid selection");
         }
 
+        console.log(nodes.map(n => n.id.toString()));
         return PinnedSelection.fromNodes(nodes, this.origin);
       }
+
+      if (selection.isBlock) {
+        const ret = PointedSelection.create(selection.tail, selection.head, this.origin)
+        console.log(ret);
+        if (!ret) {
+          throw new Error("Cannot commit draft with invalid selection");
+        }
+
+        return ret;
+      }
+
+      console.log('no block selection', selection.toJSON());
+
       const ret = selection.pin(this.nodeMap);
       if (!ret) {
         throw new Error("Cannot commit draft with invalid selection");
       }
-
       return ret;
     })(this.selection);
 
@@ -95,6 +108,8 @@ export class CarbonStateDraft {
 
     this.changes.selection = after.unpin();
     changes.freeze();
+
+    console.log('xx', after.nodes.map(n => n.id.toString()));
 
     const newState = new CarbonState({
       previous: state.clone(depth - 1),
@@ -139,7 +154,7 @@ export class CarbonStateDraft {
 
     // update state changes to reflect the new state
     this.changes.state.nodes(this.nodeMap).forEach(n => {
-      console.log('state change', n.id.toString(), n.name, n.state.normalize());
+      console.debug('state change', n.id.toString(), n.name, n.state.normalize());
       const state = n.state.normalize();
       if (state.activated) {
         this.changes.activated.add(n.id);
@@ -428,14 +443,22 @@ export class CarbonStateDraft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
+    console.log('update state', nodeId.toString(), state.selected);
+
     if (state.selected) {
       this.changes.selected.add(nodeId);
+    } else if (state.selected === false) {
+      this.changes.selected.remove(nodeId);
     }
     if (state.activated) {
       this.changes.activated.add(nodeId);
+    } else if (state.activated === false) {
+      this.changes.activated.remove(nodeId);
     }
     if (state.opened) {
       this.changes.opened.add(nodeId);
+    } else if (state.opened === false) {
+      this.changes.opened.remove(nodeId);
     }
 
     this.mutable(nodeId, node => {

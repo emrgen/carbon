@@ -28,7 +28,7 @@ import { usePrevious } from "@uidotdev/usehooks";
 
 export const PageTreeItemComp = (props: RendererProps) => {
   const { node, placeholder } = props;
-  const { stateAttrs, isOpened } = useNodeStateChange(props);
+  const { attributes, isOpened } = useNodeStateChange(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
 
@@ -131,7 +131,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
     <CarbonBlock
       node={node}
       custom={{
-        ...stateAttrs,
+        ...attributes,
       }}
     >
       {!node.isEmpty && (

@@ -253,6 +253,10 @@ export class Transaction {
 
 	// TODO: transaction should be immutable before dispatch
 	dispatch(isNormalizer: boolean = false): Transaction {
+		if (this.actions.length === 0) {
+			console.warn('skipped: empty transaction')
+			return this;
+		}
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema
 		this.isNormalizer = isNormalizer;
@@ -270,30 +274,23 @@ export class Transaction {
 
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
-				console.group('Transaction (runtime)');
+				console.groupCollapsed('Commit (runtime)');
 			} else {
-				console.group('Transaction');
+				console.groupCollapsed('Commit', this);
 			}
 
 			for (const action of this.actions) {
 				console.log(p14('%c[command]'), "color:white", action.toString());
 				action.execute(this, draft);
 			}
-
-			console.groupEnd();
-			// const onlySelectionChanged = this.commands.every(c => c instanceof SelectCommand)
-			// if (!onlySelectionChanged) {
-
-
 			// normalize after transaction command
 			// this way the merge will happen before the final selection
-
 			// this.normalizeNodes(draft);
-			// console.log(this.editor.doc.textContent);
 		} catch (error) {
-			console.groupEnd()
 			console.error(error);
 			throw Error('transaction error');
+		} finally {
+			console.groupEnd()
 		}
 	}
 

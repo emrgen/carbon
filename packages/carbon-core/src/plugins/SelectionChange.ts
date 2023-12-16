@@ -43,7 +43,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 				}
 
 				// console.log('SelectionPlugin.selectionchanged',before.toJSON(),after.toJSON());
-				console.log(p14('%c[create]'), 'color:green', 'select transaction');
+				console.debug(p14('%c[create]'), 'color:green', 'select transaction');
 				const { tr } = app;
 
 				tr

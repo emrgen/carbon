@@ -7,6 +7,6 @@ export class BlockTree extends AfterPlugin {
   redoStack: Transaction[] = [];
 
   transaction(tr: Transaction) {
-    console.log('-------->', );
+    // console.('-------->', );
   }
 }

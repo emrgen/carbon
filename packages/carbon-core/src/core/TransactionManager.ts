@@ -40,9 +40,6 @@ export class TransactionManager {
 		while (this.transactions.length) {
 			const tr = this.transactions.shift();
 			if (!tr) continue;
-
-			console.log('Commit', tr)
-
 			// produce a new state from the current state
 			const state = app.state.produce(app.runtime.origin, draft => {
 				tr.prepare();

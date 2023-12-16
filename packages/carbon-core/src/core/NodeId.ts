@@ -1,7 +1,4 @@
 import { Optional } from "@emrgen/types";
-import { classString } from "./Logger";
-import { v4 as uuidv4 } from 'uuid';
-
 
 const defaultId = '0000000000';
 

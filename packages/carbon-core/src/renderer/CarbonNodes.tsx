@@ -62,7 +62,6 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
       data-version={version}
       data-id={node.key}
       // data-attrs-name={attrs.node.name ?? ''}
-      // data-size={node.size}
       {...attrs.html}
       {...custom}
     >

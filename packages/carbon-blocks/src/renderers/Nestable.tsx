@@ -12,7 +12,7 @@ import {
   useConnectorsToProps,
   useDragDropRectSelect,
 } from "@emrgen/carbon-dragon";
-import { usePlaceholder } from "../hooks/usePlaceholder";
+import { usePlaceholder } from "@emrgen/carbon-blocks";
 
 export const NestableComp = (props: RendererProps) => {
   const { node } = props;
