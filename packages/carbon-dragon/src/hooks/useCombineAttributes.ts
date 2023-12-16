@@ -1,10 +1,8 @@
-
-import { each } from 'lodash';
-import { useMemo } from 'react';
-import { last } from 'lodash';
+import { each, last } from "lodash";
+import { useMemo } from "react";
 
 export const useCombineAttributes = (...attributes: Record<string, any>[]): Record<string, any> => {
-	const result = useMemo(() => {
+	return useMemo(() => {
 		const listenersMap: Record<string, any[]> = {};
 		each(attributes, group => {
 			each(group, (value, key) => {
@@ -22,7 +20,5 @@ export const useCombineAttributes = (...attributes: Record<string, any>[]): Reco
 			}
 		})
 		return result;
-	},[attributes])
-
-	return result;
+	}, [attributes]);
 }

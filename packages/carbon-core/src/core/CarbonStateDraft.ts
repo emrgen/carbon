@@ -8,7 +8,7 @@ import { PinnedSelection } from "./PinnedSelection";
 import { NodeContent } from "./NodeContent";
 import { SelectionEvent } from "./SelectionEvent";
 import { PointedSelection } from "./PointedSelection";
-import { isEmpty, sortBy, zip } from "lodash";
+import { identity, isEmpty, sortBy, values, zip } from "lodash";
 import BTree from 'sorted-btree';
 import { NodeType } from "./NodeType";
 import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
@@ -33,6 +33,22 @@ export class CarbonStateDraft {
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
     this.selection = state.selection.unpin();
+    state.changes.state.nodes(state.nodeMap).forEach(n => {
+      const state = n.state.normalize();
+      if (state.activated) {
+        this.changes.activated.add(n.id);
+      }
+      if (state.selected) {
+        this.changes.selected.add(n.id);
+      }
+      if (state.opened) {
+        this.changes.opened.add(n.id);
+      }
+
+      if (values(state).some(identity)) {
+        this.changes.state.add(n.id);
+      }
+    })
   }
 
   get(id: NodeId): Optional<Node> {
@@ -71,17 +87,18 @@ export class CarbonStateDraft {
       return ret;
     })(this.selection);
 
-
     const content = this.nodeMap.get(this.state.content.id)
     if (!content) {
       throw new Error("Cannot commit draft with invalid content");
     }
 
+    console.log(selection.eq(this.state.selection), selection.toJSON(), this.state.selection.toJSON());
+    const after = selection.eq(this.state.selection) ? this.state.selection : selection;
     const newState = new CarbonState({
       previous: state.clone(depth - 1),
       scope: state.scope,
       content,
-      selection: selection.eq(state.selection) ? state.selection : selection,
+      selection: after,
       nodeMap,
       changes,
     });

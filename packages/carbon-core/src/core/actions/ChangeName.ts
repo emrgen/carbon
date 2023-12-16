@@ -2,7 +2,6 @@ import { classString } from '../Logger';
 import { NodeId } from '../NodeId';
 import { Transaction } from '../Transaction';
 import { NodeName } from '../types';
-import { ActionResult } from './Result';
 import { CarbonAction, ActionOrigin } from './types';
 import { generateActionId } from './utils';
 import { CarbonStateDraft } from '../CarbonStateDraft';

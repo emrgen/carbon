@@ -12,7 +12,7 @@ export const useActiveNodeEditable = (props: UseActiveEditable) => {
 	const {node} = props;
 	const active = useActiveNode(props);
 	const app = useCarbon();
-	const attributes = useCombineAttributes(active.attributes, {
+	const attributes = useCombineAttributes(active.activeAttrs, {
 		contentEditable: active.isActive
 	})
 

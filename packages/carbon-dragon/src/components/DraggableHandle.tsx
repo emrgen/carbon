@@ -5,7 +5,7 @@ import { useDndMonitor } from "../hooks/useDndMonitor";
 import { useDraggableHandle } from "../hooks/useDraggable";
 import { useDragRect } from "../hooks/useDragRect";
 import {
-  ActionOrigin,
+  ActionOrigin, CarbonState,
   Node,
   nodeLocation,
   Pin,
@@ -80,7 +80,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     if (e.id === CarbonDragHandleId) {
       // e.event.stopPropagation();
       app.enable(() => {
-        app.tr.selectNodes([])?.dispatch();
+        app.tr.deselectNodes(app.selection.nodes)?.dispatch();
       });
     }
   }, [app]);
@@ -276,16 +276,13 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
       // app.focus();
       if (isDragging) {
-        e.event.stopPropagation();
-        e.event.preventDefault();
+        preventAndStop(e.event);
       } else {
         if (node) {
           app.parkCursor();
+          console.log('---------', app.selection.nodes.map(n => n.id.toString()+':'+n.state.selected));
           app.tr
-            // .select(
-            //   PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
-            //   ActionOrigin.NoSync
-            // )
+            .deselectNodes(app.selection.nodes)
             .selectNodes(node.id)
             ?.dispatch();
         }
@@ -293,6 +290,20 @@ export function DraggableHandle(props: FastDragHandleProps) {
     },
     [app]
   );
+
+  useEffect(() => {
+    const onChange = (state: CarbonState) => {
+      console.log('>>>', state.changes.state.size);
+      if (state.selection.nodes.length > 0) {
+        console.log('--------->>>', state.selection.nodes.map(n => n.id.toString()+':'+n.state.selected));
+      }
+    }
+
+    app.on('changed', onChange);
+    return () => {
+      app.off('changed', onChange);
+    }
+  }, [app]);
 
   const onMouseDown = useCallback(
     (node: Node, e) => {

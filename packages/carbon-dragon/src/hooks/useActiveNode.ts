@@ -7,12 +7,12 @@ interface UseFastActiveProps {
 
 export const useActiveNode = (props: UseFastActiveProps) => {
 	const {node} = props;
-	const {isActive, isSelected, attributes} = useNodeStateChange(props);
+	const {isActive, isSelected, stateAttrs} = useNodeStateChange(props);
 	const app = useCarbon();
 
 	const listeners = useMemo(() => {
 		const onMouseDown = (e) => {
-			if (!app.state.selectedNodeIds.has(node.id)){
+			if (!app.state.changes.activated.has(node.id)){
 				app.disable()
 				app.tr.selectNodes([node.id]).dispatch();
 			}
@@ -30,10 +30,17 @@ export const useActiveNode = (props: UseFastActiveProps) => {
 		}
 	}, [app, node.id, isActive]);
 
+	const activeAttrs = useMemo(() => {
+		if (!isActive) return {}
+		return {
+			'data-active': true,
+		}
+	},[isActive])
+
 	return {
 		isActive,
 		isSelected,
 		listeners,
-		attributes
+		activeAttrs,
 	}
 }

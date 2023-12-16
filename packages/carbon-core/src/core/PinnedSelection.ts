@@ -8,6 +8,7 @@ import { DomSelection, Range } from './Range';
 import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
 import { sortNodes } from "@emrgen/carbon-core";
+import { isEmpty, isEqual, isEqualWith } from "lodash";
 
 export class PinnedSelection {
 
@@ -286,14 +287,10 @@ export class PinnedSelection {
 		// console.log(focusNode.firstChild?.firstChild ?? focusNode.firstChild ?? focusNode, headOffset);
 		// console.log(anchorNode.firstChild?.firstChild ?? anchorNode.firstChild ?? anchorNode, tailOffset);
 
-		if (tail.node.isBlock && tail.node.isAtom) {
-			anchorNode = anchorNode
-		} else {
+		if (!tail.node.isBlock || !tail.node.isAtom) {
 			anchorNode = anchorNode.firstChild ?? anchorNode
 		}
-		if (head.node.isBlock && head.node.isAtom) {
-			focusNode = focusNode
-		} else {
+	  if (!head.node.isBlock || !head.node.isAtom) {
 			focusNode = focusNode.firstChild ?? focusNode
 		}
 
@@ -381,7 +378,9 @@ export class PinnedSelection {
 	}
 
 	eq(other: PinnedSelection) {
-		return this.tail.eq(other.tail) && this.head.eq(other.head);
+		if (this.nodes.length !== other.nodes.length) return false;
+		return this.tail.eq(other.tail) && this.head.eq(other.head) && this.origin === other.origin
+			&& this.nodes.every((n, i) => n.eq(other.nodes[i]));
 	}
 
 	clone() {

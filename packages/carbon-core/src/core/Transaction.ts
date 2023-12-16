@@ -202,21 +202,12 @@ export class Transaction {
 		return this;
 	}
 
-	open(id: NodeId, origin = this.origin): Transaction {
-		this.add(OpenDocument.create(id, origin));
-		return this;
-	}
-
-	close(id: NodeId,  origin = this.origin): Transaction {
-		this.add(CloseDocument.create(id, origin));
-		return this;
-	}
-
 	// previously selected nodes will be deselected
 	// previously active nodes will be deactivated
 	selectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		selectIds.forEach(id => {
+			console.log('xxx selecting', id.toString());
 			this.updateState(id, { selected: true }, origin)
 		})
 
@@ -226,10 +217,11 @@ export class Transaction {
 	deselectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		selectIds.forEach(id => {
+			console.log('xxx deselecting', id.toString());
 			this.updateState(id, { selected: false }, origin)
 		})
 
-		return this
+		return this;
 	}
 
 	activateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
@@ -238,7 +230,7 @@ export class Transaction {
 			this.updateState(id, { activated: true }, origin)
 		})
 
-		return this
+		return this;
 	}
 
 	deactivateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
