@@ -9,6 +9,7 @@ import { EventHandlerMap, InputRules, PluginName, SerializedNode } from './types
 import { CarbonAction } from "./actions/types";
 import EventEmitter from 'events';
 import { CarbonMessageBus, CarbonMessageFormat } from './MessageBus';
+import { PluginNetwork } from "./PluginNetwork";
 
 export enum PluginType {
 	Node,
@@ -32,18 +33,19 @@ export abstract class CarbonPlugin {
 
 	name: PluginName = '';
 
-	protected app: Optional<Carbon>;
+	// @ts-ignore
+	pnw: PluginNetwork;
 
-	init(app: Carbon) {
-		this.app = app;
+	init(nw: PluginNetwork) {
+		this.pnw = nw;
 	}
 
 	get state () {
-		return this.app?.get(this.name);
+		return this.pnw?.get(this.name);
 	}
 
 	setState (state: any) {
-		this.app?.set(this.name, state);
+		this.pnw?.set(this.name, state);
 	}
 
 	destroy(app: Carbon) {}

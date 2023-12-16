@@ -13,12 +13,14 @@ import { CarbonAction } from './actions/types';
 import { EventsIn } from './Event';
 import { SelectionEvent } from './SelectionEvent';
 import { CarbonState } from './CarbonState';
+import { PluginNetwork } from "./PluginNetwork";
 
 // handles events by executing proper plugin
 export class PluginManager {
 	private readonly after: CarbonPlugin[];
 	private readonly before: CarbonPlugin[];
 	private readonly nodes: Record<string, CarbonPlugin>;
+	private pn: PluginNetwork;
 
 	// all events that are handled by plugins
 	events: Set<EventsIn>;
@@ -50,6 +52,8 @@ export class PluginManager {
 		// console.log(keys(this.nodes).length, this.nodes)
 		const events = flattened.reduce((es, p) => es.concat(keys(p.on()).map(k => camelCase(k)) as EventsIn[]), [] as EventsIn[])
 		this.events = new Set(events.concat([EventsIn.keyDown]));
+
+		this.pn = new PluginNetwork(this.nodes);
 	}
 
 	private flatten(plugins: CarbonPlugin[]): CarbonPlugin[] {

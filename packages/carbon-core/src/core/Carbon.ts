@@ -33,7 +33,6 @@ export class Carbon extends EventEmitter {
 
 	// for external application use
 	bus: CarbonMessageBus = new CarbonMessageBus();
-	kvStore: Map<string, any> = new Map();
 
 	schema: Schema;
 	state: CarbonState;
@@ -82,9 +81,6 @@ export class Carbon extends EventEmitter {
 		this.dragging = false;
 		this.ready = false;
 		this.ticks = [];
-
-		// init plugins
-		pm.plugins.forEach(p => p.init(this));
 	}
 
 	get content(): Node {
@@ -210,7 +206,6 @@ export class Carbon extends EventEmitter {
 
 	disable() {
 		console.log('disable');
-
 		this.enabled = false;
 	}
 
@@ -230,14 +225,7 @@ export class Carbon extends EventEmitter {
 		this.ticks.push(cb);
 	}
 
-	get(key: string) {
-		return this.kvStore.get(key);
-	}
 
-	set(key: string, value: any) {
-		const prev = this.kvStore.get(key);
-		this.kvStore.set(key, merge(cloneDeep(prev), value));
-	}
 
 	processTick() {
 		if (this.ticks.length) {

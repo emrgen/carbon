@@ -62,7 +62,10 @@ export class PointedSelection {
 	}
 
 	eq(other: PointedSelection): boolean {
-		return this.tail.eq(other.tail) && this.head.eq(other.head);
+		if (this.nodeIds.length === other.nodeIds.length) {
+			return false;
+		}
+		return this.tail.eq(other.tail) && this.head.eq(other.head) && this.nodeIds.every((id, i) => id.eq(other.nodeIds[i]));
 	}
 
 	unpin(): PointedSelection {

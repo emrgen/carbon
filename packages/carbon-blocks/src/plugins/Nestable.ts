@@ -18,7 +18,7 @@ import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
 declare module '@emrgen/carbon-core' {
 	interface CarbonCommands {
 		nestable: {
-			wrap(node: Node, parent: Node): Optional<Transaction>;
+			wrap(node: Node): Optional<Transaction>;
 			unwrap(node: Node): Optional<Transaction>;
 			serializeChildren(node: Node): string;
 		}
@@ -40,26 +40,25 @@ export class NestablePlugin extends AfterPlugin {
 	}
 
 	// wrap node within a parent node
-	wrap(app: Carbon, node: Node, parent: Node): Optional<Transaction> {
-		const prevSibling = parent.lastChild!
-		const to = Point.toAfter(prevSibling.id);
-		// if (prevNode.isCollapsible) {
-		// 	prevNode.updateAttrs({
-		// 		collapsed: false
-		// 	})
-		// }
+	// TODO: add support for wrapping multiple nodes
+	wrap(app: Carbon, node: Node): Optional<Transaction> {
+		const prevNode = node.prevSibling;
+		if (!prevNode || !isNestableNode(prevNode)) return
 
-		// const tr = app.cmd.transform.move([...node.children.slice(1), ], to)
+		const prevSibling = prevNode.lastChild!
+		const to = Point.toAfter(prevSibling.id);
+
 		const { tr } = app;
 		tr?.move(nodeLocation(node)!, to, node.id);
-		if (parent.isCollapsed) {
-			tr?.updateAttrs(parent.id, { node: { collapsed: false } })
+		if (prevNode.isCollapsed) {
+			tr?.updateAttrs(prevNode.id, { node: { collapsed: false } })
 		}
 		tr?.select(app.selection.clone());
 
 		return tr
 	}
 
+	// TODO: add support for unwrapping multiple nodes
 	unwrap(app: Carbon, node: Node): Optional<Transaction> {
 		const {parent} = node;
 		if (!isNestableNode(parent!)) return
@@ -95,7 +94,8 @@ export class NestablePlugin extends AfterPlugin {
 				const listNode = node.closest(isNestableNode);
 				console.log(listNode);
 				if (!listNode) return
-				const head = selection.head.node.isEmpty ? selection.head.down() : selection.head
+				const head = selection.head.node.isEmpty ? selection.head.down() : selection.head;
+				if (!head) return
 				console.log('--------');
 				// console.log(listNode?.id.toString(), listNode?.name, head.toString(), Pin.toStartOf(listNode)?.toJSON());
 				const atStart = Pin.toStartOf(listNode)?.eq(head);
@@ -131,8 +131,6 @@ export class NestablePlugin extends AfterPlugin {
 					return
 				}
 
-				console.log('--------');
-
 				if (!parentList || parentList.depth > listNode.depth - 1) return
 
 				// pull up
@@ -160,33 +158,6 @@ export class NestablePlugin extends AfterPlugin {
 					ctx.event.stopPropagation();
 					return
 				}
-
-				// 	if (!nextSibling) {
-				// 		event.preventDomDefault().stopPropagation();
-				// 		cmd.transform.unwrap(listNode)?.dispatch()
-				// 		return
-				// 	}
-
-				// 	// move next sibling inside the pulled node
-				// 	if (nextSibling && isListNode(listNode.parent!)) {
-				// 		event.preventDomDefault();
-				// 		event.stopPropagation();
-				// 		const { parent } = listNode;
-				// 		if (!parent) return
-				// 		const at = Point.toAfter(parent);
-
-				// 		// move next consume nextSiblings
-				// 		const to = Point.toAfter(listNode.lastChild!)
-				// 		listNode.nextSiblings.forEach(n => {
-				// 			tr.add(MoveCommand.create(to, n.id));
-				// 		})
-
-				// 		tr.move(at, listNode.id)
-				// 			.select(Selection.within(listNode))
-
-				// 		tr.dispatch();
-				// 		return
-				// 	}
 			},
 			enter: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, node } = ctx;
@@ -197,7 +168,6 @@ export class NestablePlugin extends AfterPlugin {
 
 				// when the cursor is at start of the empty node
 				const listNode = node.closest(isNestableNode);
-				// console.log(listNode?.id.toString(), listNode?.name);
 				if (!listNode) return
 				if (!listNode.isEmpty) return
 				const atStart = selection.head.isAtStartOfNode(listNode);
@@ -240,6 +210,7 @@ export class NestablePlugin extends AfterPlugin {
 			tab: (ctx: EventContext<KeyboardEvent>) => {
 				preventAndStopCtx(ctx);
 				const { app, node } = ctx;
+				const { selection } = app;
 				console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
 
 				const container = node.closest(n => n.isContainerBlock);
@@ -251,16 +222,23 @@ export class NestablePlugin extends AfterPlugin {
 				const prevNode = listNode.prevSibling;
 				if (!prevNode || !isNestableNode(prevNode)) return
 
-				app.cmd.nestable.wrap(listNode, prevNode)?.dispatch();
+				if (selection.nodes.length > 1) {
+					return
+				}
+				app.cmd.nestable.wrap(listNode)?.dispatch();
 			},
 			shiftTab: (ctx: EventContext<KeyboardEvent>) => {
 				preventAndStopCtx(ctx);
 				const { app, node } = ctx;
+				const { selection } = app;
 				const listNode = node.closest(isNestableNode);
 				if (!listNode) return
 				const {parent} = listNode;
 				if (!parent || !isNestableNode(parent)) return
 
+				if (selection.nodes.length > 1) {
+					return
+				}
 
 				app.cmd.nestable.unwrap(listNode)?.dispatch();
 			}

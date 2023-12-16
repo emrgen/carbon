@@ -20,7 +20,7 @@ export class BulletedList extends Section {
           emptyPlaceholder: 'List',
         },
         html: {
-          placeholder: 'List',
+          // placeholder: 'List',
           suppressContentEditableWarning: true,
         }
       }

@@ -31,16 +31,13 @@ export class NodeAttrs {
 	}
 
 	constructor(attrs: NodeAttrsJSON) {
-		each(attrs, (value, key) => {
-			set(this.attrs, key, value);
-		})
+		this.attrs = merge(this.attrs, attrs);
+		console.log('x',this.attrs, attrs);
 	}
 
 	update(attrs: NodeAttrsJSON) {
-		const newAttrs = new NodeAttrs(this.toJSON());
-		each(attrs, (value, key) => {
-			set(newAttrs.attrs, key, value);
-		});
+		const newAttrs = new NodeAttrs(attrs);
+		console.log(newAttrs.attrs);
 		return newAttrs;
 	}
 

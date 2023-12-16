@@ -122,7 +122,7 @@ export const CarbonText = memo(InnerCarbonText, (prev, next) => {
 const InnerCarbonBlock = (props: RendererProps, ref) => {
   const { node, children, custom, tag = 'div' } = props;
   return (
-    <CarbonElement node={node} tag={node.attrs.node.tag ?? tag} ref={ref} custom={custom}>
+    <CarbonElement node={node} tag={node.attrs.node?.tag ?? tag} ref={ref} custom={custom}>
       {children}
     </CarbonElement>
   );
@@ -153,7 +153,7 @@ export const CarbonNode = (props: RendererProps) => {
   //   console.log('CarbonNode', node.name, node.id.toString(), node.toJSON());
   // })
 
-  const RegisteredComponent = app.component(node.attrs.node.name ?? node.name);
+  const RegisteredComponent = app.component(node.attrs.node?.name ?? node.name);
   if (RegisteredComponent && RegisteredComponent === CarbonNode) {
     console.warn(`${node.name} is registered as CarbonNode, this will fall back to CarbonDefaultNode`)
   }
@@ -190,10 +190,12 @@ export const CarbonNodeContent = (props: RendererProps) => {
 
     return children[0];
   },[node])
-  
+
   if (!content) {
     return null;
   }
+
+  console.log(node.version, node.id.toString(), node.firstChild?.attrs.toJSON());
 
   return (
     <div data-type="content" {...wrapper}>

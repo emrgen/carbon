@@ -383,7 +383,7 @@ export class PinnedSelection {
 
 	eq(other: PinnedSelection) {
 		if (this.nodes.length !== other.nodes.length) return false;
-		return this.tail.eq(other.tail) && this.head.eq(other.head) && this.origin === other.origin
+		return this.tail.eq(other.tail) && this.head.eq(other.head)
 			&& this.nodes.every((n, i) => n.eq(other.nodes[i]));
 	}
 

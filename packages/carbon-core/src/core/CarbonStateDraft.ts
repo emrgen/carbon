@@ -227,13 +227,19 @@ export class CarbonStateDraft {
       node.children.forEach(child => {
         this.nodeMap.delete(child.id);
       });
+      // node.updateAttrs({
+      //   html: {
+      //     placeholder: node.type.spec.attrs?.node?.emptyPlaceholder ?? ''
+      //   }
+      // })
+      console.log(node.attrs.toJSON());
       node.updateContent(content);
     });
 
     // if the content is/ws empty, we need to trigger parent render to render placeholder
     if (isEmpty) {
       const parents = this.nodeMap.parents(nodeId);
-      takeUpto(parents, n => n.isContainerBlock).forEach(n => this.mutable(n.id))
+      // takeUpto(parents, n => n.isContainerBlock).forEach(n => this.mutable(n.id))
     }
 
     console.log('inserting content', nodeId.toString(), content.size);
@@ -410,6 +416,16 @@ export class CarbonStateDraft {
 
     this.mutable(nodeId, node => {
       node.changeType(type);
+
+      // if (node.isEmpty) {
+      //   this.mutable(node.firstChild?.id!, (n) => {
+      //     n.updateAttrs({
+      //       html: {
+      //         placeholder: 'xxx'
+      //       }
+      //     })
+      //   })
+      // }
 
       if (node.isEmpty) {
         // force render of all descendants if the node is empty
