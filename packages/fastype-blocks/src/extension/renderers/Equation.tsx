@@ -111,11 +111,12 @@ export const EquationComp = (props: RendererProps) => {
 
   const handleMouseDown = useCallback(
     (e) => {
-      if (app.blockSelection && app.blockSelection.has(node.id)) {
+      const { selection } = app;
+      if (selection.isBlock && selection.nodes.some(n => n.id.eq(node.id))) {
         stop(e);
       }
     },
-    [app.blockSelection, node.id]
+    [app, node.id]
   );
 
   const handleOnClick = (e: React.MouseEvent) => {
@@ -271,7 +272,7 @@ interface EquationContentProps extends RendererProps {
 
 export const EquationContent = (props: EquationContentProps) => {
   const { onError, error } = props;
-  const { node, version } = useNodeChange(props);
+  const { node, version } = props;
   const eqRef = useRef(null);
 
   useEffect(() => {

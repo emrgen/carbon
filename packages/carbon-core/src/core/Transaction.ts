@@ -15,10 +15,9 @@ import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
 import { TransactionManager } from "@emrgen/carbon-core";
-import { RemoveText, TransactionType } from './actions';
+import { TransactionType } from './actions';
 import { ChangeName } from './actions/ChangeName';
 import { CommandError } from './actions/Error';
-import { InsertText } from './actions/InsertText';
 import { MoveAction } from "@emrgen/carbon-core";
 import { RemoveNode } from "@emrgen/carbon-core";
 import { SelectAction } from './actions/Select';
@@ -27,9 +26,6 @@ import { UpdateAttrs } from './actions/UpdateAttrs';
 import { ActionOrigin, CarbonAction } from './actions/types';
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
-import { OpenDocument } from './actions/OpenDocument';
-import { CloseDocument } from './actions/CloseDocument';
-import { TransactionDo } from './TransactionDo';
 import { CarbonStateDraft } from './CarbonStateDraft';
 import { NodeStateJSON } from "./NodeState";
 import { UpdateState } from "./actions/UpdateState";
@@ -86,9 +82,6 @@ export class Transaction {
 		return this.actions.every(a => a instanceof SetContentAction || a instanceof SelectAction);
 	}
 
-	get textRemoveOnly() {
-		return this.actions.every(a => a instanceof RemoveText || a instanceof SelectAction);
-	}
 
 	get selectionOnly() {
 		return this.actions.every(a => a instanceof SelectAction);
@@ -105,10 +98,6 @@ export class Transaction {
 		protected readonly sm: SelectionManager
 	) {
 		this.id = getId();
-	}
-
-	get do() {
-		return new TransactionDo(this.actions);
 	}
 
 	get updatesContent() {
@@ -169,14 +158,6 @@ export class Transaction {
 		// }
 
 		return this.add(RemoveNode.fromNode(at, node, origin));
-	}
-
-	insertText(at: Point, text: Node, native: boolean = false, origin = this.origin): Transaction {
-		return this.add(InsertText.create(at, text, native, origin));
-	}
-
-	removeText(at: Point, textNode: Node, origin = this.origin): Transaction {
-		return this.add(RemoveText.create(at, textNode, origin));
 	}
 
 	move(from: Point, to: Point, id: NodeId, origin = this.origin): Transaction {
