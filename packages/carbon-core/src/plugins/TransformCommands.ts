@@ -149,7 +149,7 @@ export class TransformCommands extends BeforePlugin {
   private insertText(app: Carbon, selection: PinnedSelection, text: string, native = false): Optional<Transaction> {
     const { cmd } = app;
     const updateTitleText = (app: Carbon) => {
-      console.log('insertText', text);
+      // console.log('insertText', text);
 
       const { tr } = app;
       const { schema, selection } = app;
@@ -747,7 +747,7 @@ export class TransformCommands extends BeforePlugin {
 
       const insertPoint = Point.toAfter(splitBlock.id);
       const after = PinnedSelection.fromPin(Pin.toStartOf(emptyBlock)!);
-      console.log(after.toString());
+
       tr
         .insert(insertPoint, emptyBlock)
         .select(after);

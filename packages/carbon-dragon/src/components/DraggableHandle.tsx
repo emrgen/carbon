@@ -280,7 +280,6 @@ export function DraggableHandle(props: FastDragHandleProps) {
       } else {
         if (node) {
           app.parkCursor();
-          console.log('---------', app.selection.nodes.map(n => n.id.toString()+':'+n.state.selected));
           app.tr
             .deselectNodes(app.selection.nodes)
             .selectNodes(node.id)
@@ -290,20 +289,6 @@ export function DraggableHandle(props: FastDragHandleProps) {
     },
     [app]
   );
-
-  useEffect(() => {
-    const onChange = (state: CarbonState) => {
-      console.log('>>>', state.changes.state.size);
-      if (state.selection.nodes.length > 0) {
-        console.log('--------->>>', state.selection.nodes.map(n => n.id.toString()+':'+n.state.selected));
-      }
-    }
-
-    app.on('changed', onChange);
-    return () => {
-      app.off('changed', onChange);
-    }
-  }, [app]);
 
   const onMouseDown = useCallback(
     (node: Node, e) => {

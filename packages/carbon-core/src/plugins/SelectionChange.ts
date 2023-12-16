@@ -14,7 +14,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 	on(): EventHandlerMap {
 		return {
 			selectionchange: (ctx: EventContext<Event>) => {
-				console.log(p14('[event]'), 'selectionchange', ctx.event);
+				// console.log(p14('[event]'), 'selectionchange', ctx.event);
 				// helper code block to detect errant selectionchange effect
 				count++;
 				setTimeout(() => {
@@ -26,7 +26,6 @@ export class SelectionChangePlugin extends AfterPlugin {
 				}
 
 				const { app, selection: after } = ctx;
-				console.log(after.toString());
 
 				const { selection: before } = app;
 				if (before.isInvalid) {

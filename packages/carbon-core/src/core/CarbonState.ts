@@ -32,8 +32,12 @@ export class CarbonState extends EventEmitter {
 	changes: StateChanges;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
 
-	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: NodeMap) {
-		return new CarbonState({ content, selection, scope, nodeMap })
+	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap?: NodeMap) {
+		const map = nodeMap ?? new NodeMap();
+		if (!nodeMap) {
+			content.forAll(n => map.set(n.id, n));
+		}
+		return new CarbonState({ content, selection, scope, nodeMap: map })
 	}
 
 	constructor(props: CarbonStateProps) {

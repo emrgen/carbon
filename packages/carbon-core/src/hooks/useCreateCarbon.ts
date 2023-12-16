@@ -8,7 +8,7 @@ import { SchemaFactory } from '../core/SchemaFactory';
 import { NodeJSON } from "../core/types";
 import { CarbonDefaultNode } from "../renderer";
 import { Carbon } from '../core/Carbon';
-import { CarbonState } from '../core';
+import { CarbonState, PinnedSelection } from "../core";
 
 export interface InitNodeJSON extends Omit<NodeJSON, 'id'> {
 	id?: string;
@@ -20,6 +20,7 @@ export const createCarbon = (name: string, json: InitNodeJSON, extensions: Exten
 	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
 	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
 
+	// the carbon state is scoped to this symbol
 	const scope = Symbol(name);
 
 	const pm = new PluginManager(plugins);
@@ -32,11 +33,9 @@ export const createCarbon = (name: string, json: InitNodeJSON, extensions: Exten
 		throw new Error("Failed to parse app content");
 	}
 
-	return new Carbon(scope, content, schema, pm, renderer)
+	const state = CarbonState.create(scope, content, PinnedSelection.IDENTITY);
+	return new Carbon(state, schema, pm, renderer)
 }
-
-
-
 
 // create carbon app with extensions
 export const useCreateCarbon = (name: string, json: InitNodeJSON, extensions: Extension[] = []) => {
@@ -45,6 +44,18 @@ export const useCreateCarbon = (name: string, json: InitNodeJSON, extensions: Ex
 	})
 
 	return app;
+}
+
+export const useCreateCarbonFromState = (state: CarbonState, extensions: Extension[] = []) => {
+	const plugins = flatten(extensions.map(e => e.plugins ?? []));
+	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
+	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
+
+	const pm = new PluginManager(plugins);
+	const {specs} = pm;
+	const schema = new Schema(specs, new SchemaFactory(state.scope));
+
+	return new Carbon(state, schema, pm, renderer)
 }
 
 // const saveDoc = throttle((state: CarbonState) => {
@@ -93,10 +104,10 @@ export const useCreateCachedCarbon = (name: string, json: InitNodeJSON, extensio
 			localStorage.setItem('carbon:selection', JSON.stringify(state.selection.toJSON()))
 			// saveDoc(state);
 		}
-		app.on('change', onChange);
+		app.on('changed', onChange);
 
 		return () => {
-			app.off('change', onChange);
+			app.off('changed', onChange);
 		}
 	}, [app]);
 

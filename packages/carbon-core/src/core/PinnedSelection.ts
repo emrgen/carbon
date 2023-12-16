@@ -237,7 +237,6 @@ export class PinnedSelection {
 				focusOffset
 			);
 			const pinnedSelection = PinnedSelection.fromDom(store);
-			console.log(pinnedSelection?.toString());
 			const domSel = pinnedSelection?.intoDomSelection(store);
 			console.assert(domSel?.anchorNode === domSelection.anchorNode, 'failed to sync anchorNode')
 			console.assert(domSel?.focusNode === domSelection.focusNode, 'failed to sync focusNode')

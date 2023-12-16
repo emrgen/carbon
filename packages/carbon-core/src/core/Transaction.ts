@@ -188,7 +188,6 @@ export class Transaction {
 	selectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		selectIds.forEach(id => {
-			console.log('xxx selecting', id.toString());
 			this.updateState(id, { selected: true }, origin)
 		})
 

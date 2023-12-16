@@ -48,11 +48,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
     (e) => {
       preventAndStop(e);
 
-      const item = app.schema.type(PageTreeItemName).default({
-        state: {
-          opened: true,
-        }
-      })!;
+      const item = app.schema.type(PageTreeItemName).default()!;
       item.updateState({ opened: true })
       const at = Point.toAfter(node.child(0)!.id);
       console.log(item, at);
@@ -136,7 +132,6 @@ export const PageTreeItemComp = (props: RendererProps) => {
       node={node}
       custom={{
         ...stateAttrs,
-        // onMouseDown: stop,
       }}
     >
       {!node.isEmpty && (

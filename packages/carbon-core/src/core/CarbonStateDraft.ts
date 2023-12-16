@@ -66,8 +66,6 @@ export class CarbonStateDraft {
 
     const nodeMap = this.nodeMap.isEmpty ? state.nodeMap : this.nodeMap;
     nodeMap.freeze();
-    changes.freeze();
-    nodeMap.freeze();
 
     // create a new selection based on the new node map using the draft selection
     const selection = ((selection: PointedSelection) => {
@@ -92,8 +90,12 @@ export class CarbonStateDraft {
       throw new Error("Cannot commit draft with invalid content");
     }
 
-    console.log(selection.eq(this.state.selection), selection.toJSON(), this.state.selection.toJSON());
+    // console.log(selection.eq(this.state.selection), selection.toJSON(), this.state.selection.toJSON());
     const after = selection.eq(this.state.selection) ? this.state.selection : selection;
+
+    this.changes.selection = after.unpin();
+    changes.freeze();
+
     const newState = new CarbonState({
       previous: state.clone(depth - 1),
       scope: state.scope,

@@ -26,7 +26,6 @@ export class StateChanges {
   updatedMarks: NodeIdSet = new NodeIdSet();
   updatedStyles: NodeIdSet = new NodeIdSet();
   selection: Optional<PointedSelection> = null;
-  pendingSelections: PinnedSelection[] = [];
 
   diff(other: StateChanges): StateChanges {
     const diff = new StateChanges();
@@ -45,7 +44,6 @@ export class StateChanges {
     diff.clipboard = this.clipboard;
     diff.updatedProps = this.updatedProps;
 
-
     return diff;
   }
 
@@ -58,7 +56,7 @@ export class StateChanges {
   }
 
   get isSelectionDirty() {
-    return !!this.selection;
+    return !!this.selection?.isInline
   }
 
   get isNodeStateDirty() {

@@ -24,17 +24,16 @@ export class SelectAction implements CarbonAction {
 	}
 
 	// this will update the carbon selection state or schedule a selection change after the ui update
-	execute(tr: Transaction, draft: CarbonStateDraft): ActionResult {
+	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { before, after, origin } = this;
-		console.log('SelectAction.execute', after, before);
 		tr.onSelect(draft, before, after, origin);
-
-		return ActionResult.withValue('done')
 	}
 
+	// FIXME: this is a hack to make undo/redo work with selection
+	// commented out some code for future reference. may need to uncomment it for some reason
 	collapseToHead(): CarbonAction {
 		const {after} = this;
-		after.tail = after.head;
+		// after.tail = after.head;
 		return SelectAction.create(this.before, after, this.origin);
 	}
 

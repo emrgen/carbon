@@ -1,24 +1,24 @@
-import { Optional, With } from "@emrgen/types";
-import { Node } from './Node';
-import { EventEmitter } from 'events';
-import { querySelector } from '../utils/domElement';
-import { CarbonState } from './CarbonState';
-import { ChangeManager } from './ChangeManager';
-import { EventsIn, EventsOut } from './Event';
-import { EventManager } from './EventManager';
-import { NodeStore } from './NodeStore';
-import { PinnedSelection } from './PinnedSelection';
-import { PluginManager } from './PluginManager';
-import { RenderManager } from './Renderer';
-import { Schema } from './Schema';
-import { SelectionManager } from './SelectionManager';
-import { Transaction } from './Transaction';
-import { TransactionManager } from './TransactionManager';
+import { Optional } from "@emrgen/types";
+import { Node } from "./Node";
+import { EventEmitter } from "events";
+import { querySelector } from "../utils/domElement";
+import { CarbonState } from "./CarbonState";
+import { ChangeManager } from "./ChangeManager";
+import { EventsIn, EventsOut } from "./Event";
+import { EventManager } from "./EventManager";
+import { NodeStore } from "./NodeStore";
+import { PinnedSelection } from "./PinnedSelection";
+import { PluginManager } from "./PluginManager";
+import { RenderManager } from "./Renderer";
+import { Schema } from "./Schema";
+import { SelectionManager } from "./SelectionManager";
+import { Transaction } from "./Transaction";
+import { TransactionManager } from "./TransactionManager";
 import { CarbonCommands, Maps, SerializedNode } from "./types";
-import { cloneDeep, first, isFunction, merge } from 'lodash';
-import { CarbonCommandChain } from './CarbonCommandChain';
-import { CarbonMessageBus } from './MessageBus';
-import { CarbonPlugin } from './CarbonPlugin';
+import { cloneDeep, first, isFunction, merge } from "lodash";
+import { CarbonCommandChain } from "./CarbonCommandChain";
+import { CarbonMessageBus } from "./MessageBus";
+import { CarbonPlugin } from "./CarbonPlugin";
 import { StateScope } from "./StateScope";
 import { NodeMap } from "./NodeMap";
 import { CarbonRuntime } from "./Runtime";
@@ -53,17 +53,15 @@ export class Carbon extends EventEmitter {
 	private cursorParkingElement: Optional<HTMLDivElement>;
 	ticks: Maps<Carbon, Optional<Transaction>>[];
 
-	constructor(scope: Symbol, content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
+	constructor(state: CarbonState, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
 
 		this.pm = pm;
 		this.rm = renderer;
 		this.schema = schema;
 
-		const map = new NodeMap();
-		content.forAll(n => map.set(n.id, n));
-		this.state = CarbonState.create(scope, content, PinnedSelection.IDENTITY, map);
-		StateScope.set(scope, this.state.nodeMap);
+		this.state = state;
+		StateScope.set(this.state.scope, this.state.nodeMap);
 		this.runtime = new CarbonRuntime();
 
 		this.store = new NodeStore(this);
