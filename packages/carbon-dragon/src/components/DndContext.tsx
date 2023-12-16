@@ -20,7 +20,7 @@ export const DndContext = (props) => {
         const nodes = app.state.changes.changed.nodes(state.nodeMap);
         const ancestor = sortBy(nodes, n => n.depth).pop();
         if (ancestor) {
-          console.log('refresh: refreshing dnd bounds');
+          // console.log('refresh: refreshing dnd bounds');
           dnd.refresh(ancestor);
         }
       }

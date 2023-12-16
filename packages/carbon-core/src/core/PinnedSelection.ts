@@ -8,7 +8,7 @@ import { DomSelection, Range } from './Range';
 import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
 import { sortNodes } from "@emrgen/carbon-core";
-import { isEmpty, isEqual, isEqualWith } from "lodash";
+import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 
 export class PinnedSelection {
 
@@ -118,8 +118,8 @@ export class PinnedSelection {
 		return PinnedSelection.create(pin, pin);
 	}
 
-	static fromNodes(nodes: Node[], origin = ActionOrigin.Unknown): PinnedSelection {
-		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, sortNodes(nodes, 'path'), origin);
+	static fromNodes(nodes: Node | Node[], origin = ActionOrigin.Unknown): PinnedSelection {
+		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, sortNodes(flatten([nodes]), 'path'), origin);
 	}
 
 	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
@@ -205,6 +205,11 @@ export class PinnedSelection {
 
 
 	syncDom(store: NodeStore) {
+		// if (this.isInvalid) {
+		// 	console.warn('skipped invalid selection sync');
+		// 	return
+		// }
+
 		try {
 			const domSelection = this.intoDomSelection(store);
 			// console.log('Selection.syncDom:', domSelection);
@@ -383,8 +388,9 @@ export class PinnedSelection {
 	}
 
 	clone() {
-		return PinnedSelection.create(this.tail.clone(), this.head.clone());
+		return new PinnedSelection(this.tail.clone(), this.head.clone(), this.nodes.map(n => n.clone()), this.origin);
 	}
+
 	toJSON() {
 		return {
 			tail: this.tail.toJSON(),

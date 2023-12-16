@@ -132,22 +132,18 @@ export class RectSelect extends EventEmitter {
 			adjustBox(boundFromFastDndEvent(e), { left: scrollLeft, top: scrollTop })
 		);
 
-		console.log('1 xxxxxxxxxxxxxx');
 		if (collides.length === 0) {
 			if (this.noSelectionChange([])) return
 			this.selectNodes([]);
 			return
 		}
 
-		console.log('2 xxxxxxxxxxxxxx');
 		if (!collides.length) {
 			if (this.noSelectionChange([])) return
 			const { tr } = app;
 			this.selectNodes([]);
 			return;
 		}
-
-		console.log('3 xxxxxxxxxxxxxx', collides.length);
 
 		const ordered = sortBy(collides, (n) => n.depth);
 
@@ -168,8 +164,6 @@ export class RectSelect extends EventEmitter {
 			this.selectNodes(ids);
 			return
 		}
-
-		console.log('4 xxxxxxxxxxxxxx');
 
 		const selectedMap = new BSet(NodeComparator);
 		const parentMap = new BSet(NodeComparator);
@@ -227,14 +221,14 @@ export class RectSelect extends EventEmitter {
 
 	onMountRectSelectable(node: Node, el: HTMLElement) {
 		// if (this.isSelecting) return
-		console.log('->', node.name, node.id.toString(), el);
+		// console.log('->', node.name, node.id.toString(), el);
 		this.selectables.register(node, el);
 		// console.log(this.selectables.size);
 	}
 
 	onUnmountRectSelectable(node: Node) {
 		// if (this.isSelecting) return
-		console.log('<-', node.name, node.id.toString());
+		// console.log('<-', node.name, node.id.toString());
 		this.selectables.delete(node);
 	}
 

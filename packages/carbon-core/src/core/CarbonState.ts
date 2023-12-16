@@ -14,11 +14,10 @@ interface CarbonStateProps {
 	previous?: CarbonState;
 	content: Node;
 	selection: PinnedSelection;
+	parkedSelection: Optional<PinnedSelection>;
 	nodeMap: NodeMap;
 	changes?: StateChanges;
 	decorations?: DecorationStore;
-	selectedNodeIds?: NodeIdSet;
-	activatedNodeIds?: NodeIdSet;
 }
 
 
@@ -31,10 +30,11 @@ export class CarbonState extends EventEmitter {
 	decorations: DecorationStore;
 	changes: StateChanges;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
+	parkedSelection: Optional<PinnedSelection> = null;
 
 	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap?: NodeMap) {
 		const map = nodeMap ?? new NodeMap();
-		const state = new CarbonState({ content, selection, scope, nodeMap: map });
+		const state = new CarbonState({ content, selection, scope, nodeMap: map, parkedSelection: null });
 		if (!nodeMap) {
 			content.forAll(n => {
 				map.set(n.id, n)
@@ -55,6 +55,7 @@ export class CarbonState extends EventEmitter {
 			nodeMap,
 			changes = new StateChanges(),
 			decorations = new DecorationStore(),
+			parkedSelection = null,
 		} = props;
 
 		this.previous = previous;
@@ -64,6 +65,7 @@ export class CarbonState extends EventEmitter {
 		this.decorations = decorations;
 		this.nodeMap = nodeMap;
 		this.changes = changes;
+		this.parkedSelection = parkedSelection;
 	}
 
 	get depth() {
@@ -90,7 +92,7 @@ export class CarbonState extends EventEmitter {
 
 	clone(depth: number = 2) {
 		if (depth === 0) return null
-		const { scope, content, selection, changes, nodeMap } = this;
+		const { scope, content, selection, changes, nodeMap, parkedSelection } = this;
 		if (!this.previous) {
 			return new CarbonState({
 				scope,
@@ -98,6 +100,7 @@ export class CarbonState extends EventEmitter {
 				selection,
 				changes,
 				nodeMap,
+				parkedSelection
 			})
 		}
 
@@ -109,6 +112,7 @@ export class CarbonState extends EventEmitter {
 			changes,
 			nodeMap,
 			previous,
+			parkedSelection,
 		})
 	}
 

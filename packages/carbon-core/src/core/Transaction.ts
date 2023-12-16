@@ -132,7 +132,17 @@ export class Transaction {
 
 	select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
 		const after = selection.unpin();
+
+		// if selection is block selection, deselect previous block selection and select new block selection
+		if (selection.isBlock) {
+			this.deselectNodes(this.state.selection.nodes, origin).selectNodes(after.nodeIds, origin);
+			return this;
+		}
+
 		after.origin = origin;
+		if (this.state.selection.isBlock) {
+			this.deselectNodes(this.state.selection.nodes, origin);
+		}
 		return this.add(SelectAction.create(this.selection, after, origin));
 	}
 

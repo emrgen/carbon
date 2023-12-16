@@ -23,7 +23,7 @@ export class CarbonStateDraft {
   origin: ActionOrigin;
   state: CarbonState;
   nodeMap: NodeMap;
-  selection: PointedSelection;
+  selection?: PointedSelection;
   changes: StateChanges = new StateChanges();
 
   private drafting = true;
@@ -32,7 +32,7 @@ export class CarbonStateDraft {
     this.origin = origin;
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
-    this.selection = state.selection.unpin();
+    // this.selection = state.selection.unpin();
     state.changes.state.nodes(state.nodeMap).forEach(n => {
       const state = n.state.normalize();
       if (state.activated) {
@@ -62,40 +62,39 @@ export class CarbonStateDraft {
   // turn the draft into a new state
   commit(depth: number): CarbonState {
     const { state, changes } = this;
-    this.selection.freeze();
+    console.log('commit', this.selection);
+    this.selection?.freeze();
 
     const nodeMap = this.nodeMap.isEmpty ? state.nodeMap : this.nodeMap;
     nodeMap.freeze();
 
     // create a new selection based on the new node map using the draft selection
-    const selection = ((selection: PointedSelection) => {
+    const selection = ((selection?: PointedSelection) => {
       if (this.changes.selected.size) {
         const nodes = this.changes.selected.nodes(this.nodeMap)
         if (nodes.length !== this.changes.selected.size) {
           throw new Error("Cannot commit draft with invalid selection");
         }
 
-        console.log(nodes.map(n => n.id.toString()));
         return PinnedSelection.fromNodes(nodes, this.origin);
       }
 
-      if (selection.isBlock) {
-        const ret = PointedSelection.create(selection.tail, selection.head, this.origin)
-        console.log(ret);
+      console.log('no block selection', selection?.toJSON());
+
+      if (selection) {
+        const ret = selection.pin(this.nodeMap);
         if (!ret) {
           throw new Error("Cannot commit draft with invalid selection");
         }
-
         return ret;
       }
 
-      console.log('no block selection', selection.toJSON());
 
-      const ret = selection.pin(this.nodeMap);
-      if (!ret) {
-        throw new Error("Cannot commit draft with invalid selection");
+      if (this.state.parkedSelection) {
+        return this.state.parkedSelection
       }
-      return ret;
+
+      return this.state.selection;
     })(this.selection);
 
     const content = this.nodeMap.get(this.state.content.id)
@@ -103,13 +102,16 @@ export class CarbonStateDraft {
       throw new Error("Cannot commit draft with invalid content");
     }
 
-    // console.log(selection.eq(this.state.selection), selection.toJSON(), this.state.selection.toJSON());
     const after = selection.eq(this.state.selection) ? this.state.selection : selection;
+    let parkedSelection: Optional<PinnedSelection>;
+    if (after.isInline || this.state.parkedSelection?.eq(selection)){
+      parkedSelection = null;
+    } else {
+      parkedSelection = after.isBlock && state.selection.isInline ? state.selection : state.parkedSelection;
+    }
 
     this.changes.selection = after.unpin();
     changes.freeze();
-
-    console.log('xx', after.nodes.map(n => n.id.toString()));
 
     const newState = new CarbonState({
       previous: state.clone(depth - 1),
@@ -118,6 +120,7 @@ export class CarbonStateDraft {
       selection: after,
       nodeMap,
       changes,
+      parkedSelection,
     });
 
     return newState.freeze();
@@ -478,7 +481,7 @@ export class CarbonStateDraft {
     if (!this.drafting) {
       throw new Error("Cannot update selection on a draft that is already committed");
     }
-
+    console.log('update selection', selection.toString());
     this.selection = selection;
     this.changes.selection = selection;
   }

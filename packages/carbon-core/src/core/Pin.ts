@@ -119,7 +119,7 @@ export class Pin {
 
 
 	get isInvalid() {
-		return this.offset === -10;
+		return this.eq(Pin.IDENTITY)
 	}
 
 	get point(): Point {

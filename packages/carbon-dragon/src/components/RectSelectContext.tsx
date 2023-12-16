@@ -19,6 +19,7 @@ export function RectSelectContext(props: RendererProps) {
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isBlockSelection, setIsBlockSelection] = useState(false);
 
   // mark the rect-selector dirty when the content changes
   useEffect(() => {
@@ -26,6 +27,7 @@ export function RectSelectContext(props: RendererProps) {
       if (state.changes.isLocalStateDirty) {
         rectSelector.markDirty();
       }
+      setIsBlockSelection(state.selection.isBlock)
     };
 
     app.on(EventsOut.changed, onChanged);
@@ -66,9 +68,7 @@ export function RectSelectContext(props: RendererProps) {
         rectSelector.onDragEnd(e);
         // app.enable();
         onDragRectStop(e);
-        if (!app.selection.isBlock) {
-          setIsSelecting(false);
-        }
+        setIsSelecting(false);
       }
 
       if (e.id === CarbonDragHandleId) {
@@ -131,7 +131,8 @@ export function RectSelectContext(props: RendererProps) {
         className={
           "carbon-rect-select" +
           (isSelecting ? " rect-active" : "") +
-          (isDragging ? " rect-dragging" : "")
+          (isDragging ? " rect-dragging" : "") +
+          (isBlockSelection ? " rect-block-selection" : "")
         }
       >
         {props.children}

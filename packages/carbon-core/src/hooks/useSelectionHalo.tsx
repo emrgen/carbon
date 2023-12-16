@@ -13,9 +13,10 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
 	const { isSelected, isActive, attributes } = useNodeStateChange(props);
 
 	const SelectionHalo = useMemo(() => {
+    const parentSelected = node.parents.some((parent) => parent.state.selected);
     return (
       <>
-        {isSelected && (
+        {!parentSelected && isSelected && (
           <div
             className={`carbon-selection-halo ${className ?? ""}`}
             data-target={node.name}
@@ -24,7 +25,7 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
         )}
       </>
     );
-  }, [className, isSelected, node.name]);
+  }, [className, isSelected, node]);
 
 	return {
     SelectionHalo,

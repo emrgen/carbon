@@ -1,4 +1,4 @@
-import { ActionOrigin, CarbonAction, MoveAction, Node, Point, RemoveNode } from "../core"
+import { ActionOrigin, CarbonAction, MoveAction, Node, NodeId, Point, RemoveNode } from "../core";
 import { InsertNode } from "../core/actions/InsertNode";
 import { nodeLocation } from "./location";
 

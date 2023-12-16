@@ -146,7 +146,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 	on(): EventHandlerMap {
 		return {
 			selectstart: (ctx: EventContext<KeyboardEvent>) => {
-				// console.log('xxxxxxxxxxxxxxxxxxxxxx', ctx.event)
 				// ctx.event.preventDefault();
 				// ctx.event.stopPropagation();
 			},
@@ -192,19 +191,23 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				const { selection, cmd, state } = app;
-				event.preventDefault();
 
 				// nodes selection is visible using halo
 				if (selection.isBlock) {
+					preventAndStopCtx(ctx)
+					console.log('block selection...');
 					this.collapseSelectionBefore(app, selection.nodes);
 					return
 				}
 
 				if (!selection.isCollapsed) {
+					preventAndStopCtx(ctx)
 					cmd.selection.collapseToTail()
 					return
 				}
 
+
+				preventAndStopCtx(ctx)
 				const after = selection.moveBy(-1)
 				app.tr.select(after!).dispatch();
 			},
@@ -217,15 +220,18 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 				// nodes selection is visible using halo
 				if (selection.isBlock) {
+					preventAndStopCtx(ctx)
 					this.collapseSelectionAfter(app, selection.nodes);
 					return
 				}
 
 				if (!selection.isCollapsed) {
+					preventAndStopCtx(ctx)
 					cmd.selection.collapseToHead()
 					return
 				}
 
+				preventAndStopCtx(ctx)
 				const after = selection.moveBy(1);
 				console.log('#>', after?.toString());
 				app.tr.select(after!).dispatch()
@@ -243,7 +249,9 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 					const block = node.find(n => !n.eq(node) && n.isContainerBlock)
 					if (!block) return
-					app.tr.selectNodes([block.id]).dispatch();
+					app.tr
+						.deselectNodes(app.selection.nodes)
+						.selectNodes([block.id]).dispatch();
 					return
 				}
 
@@ -263,7 +271,9 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 					const { parent } = node;
 					if (parent?.isSandbox) return
-					app.tr.selectNodes([parent!.id]).dispatch();
+					app.tr
+						.deselectNodes(app.selection.nodes)
+						.selectNodes([parent!.id]).dispatch();
 					return
 				}
 
@@ -306,17 +316,17 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		if (firstNode.hasFocusable) {
 			const focusNode = firstNode.find(n => n.isFocusable, { direction: 'forward' })
 			const pin = Pin.toStartOf(focusNode!)
+			console.log('pin', pin?.toString());
 			app.tr
 				.select(PinnedSelection.fromPin(pin!))
-				.selectNodes([])
 				.dispatch();
 			return
 		}
+
 		const focusNode = firstNode.prev(n => n.isFocusable);
 		const pin = Pin.toEndOf(focusNode!)
 		app.tr
 			.select(PinnedSelection.fromPin(pin!))
-			.selectNodes([])
 			.dispatch();
 		return
 	}
@@ -328,7 +338,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			const pin = Pin.toEndOf(focusNode!)
 			app.tr
 				.select(PinnedSelection.fromPin(pin!))
-				.selectNodes([])
 				.dispatch();
 			return
 		}
@@ -337,7 +346,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		const pin = Pin.toStartOf(focusNode!)
 		app.tr
 			.select(PinnedSelection.fromPin(pin!))
-			.selectNodes([])
 			.dispatch();
 	}
 
@@ -347,21 +355,22 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		const { selection } = app;
 
 		if (selection.isInline) return
-		preventAndStop(ctx);
+		preventAndStopCtx(ctx);
 
 		const { nodes } = selection;
 		const firstNode = nodes[0] as Node;
 		const block = prevSelectableBlock(firstNode);
 		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
 		if (!block) {
-			ctx.event.preventDefault()
-			ctx.stopPropagation()
+			// ctx.event.preventDefault()
+			// ctx.stopPropagation()
 			return
 		}
 
-		ctx.event.preventDefault();
+		// ctx.event.preventDefault();
+		const after = PinnedSelection.fromNodes([...nodes, block]);
 		app.tr
-			.selectNodes([...nodes.map(n => n.id), block.id])
+			.select(after)
 			.dispatch();
 	}
 
@@ -369,16 +378,22 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		const { app, node } = ctx;
 		const { selection } = app;
 		if (selection.isInline) return
-		preventAndStop(ctx);
+		preventAndStopCtx(ctx);
+
 		const { nodes } = selection;
 		const firstNode = last(nodes) as Node;
 		const block = nextSelectableBlock(firstNode)
 		if (!block) {
+			// ctx.event.preventDefault()
+			// ctx.stopPropagation()
 			return
 		}
 
+		// ctx.event.preventDefault();
+		const after = PinnedSelection.fromNodes([...nodes, block]);
 		app.tr
-			.selectNodes([...nodes.map(n => n.id), block.id])
+			.deselectNodes(app.selection.nodes)
+			.select(after)
 			.dispatch();
 	}
 
@@ -511,14 +526,16 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		const {nodes } = selection;
 		if (nodes.length > 1) {
 			const lastNode = first(nodes) as Node;
-			app.tr.selectNodes([lastNode.id]).dispatch()
+			const after = PinnedSelection.fromNodes(lastNode);
+			app.tr.select(after).dispatch()
 			return
 		}
 
 		const block = prevSelectableBlock(node)
 		if (!block || block.isDocument) return
 
-		app.tr.selectNodes([block.id]).dispatch()
+		const after = PinnedSelection.fromNodes(block);
+		app.tr.select(after).dispatch()
 	}
 
 	down(ctx: EventContext<KeyboardEvent>) {
@@ -530,7 +547,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		const {nodes } = selection;
 		if (nodes.length > 1) {
 			const lastNode = last(nodes) as Node;
-			app.tr.selectNodes([lastNode.id]).dispatch()
+			const after = PinnedSelection.fromNodes(lastNode);
+			app.tr.select(after).dispatch()
 			return
 		}
 
@@ -538,7 +556,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		console.log('nextContainerBlock', block);
 		if (!block) return
 
-		app.tr.selectNodes([block.id]).dispatch()
+		const after = PinnedSelection.fromNodes(block);
+		app.tr.select(after).dispatch()
 	}
 }
 

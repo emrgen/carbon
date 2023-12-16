@@ -75,7 +75,7 @@ export class PointedSelection {
 	}
 
 	clone() {
-		return PointedSelection.create(this.tail.clone(), this.head.clone());
+		return new PointedSelection(this.tail.clone(), this.head.clone(), this.nodeIds.map(id => id.clone()), this.origin);
 	}
 
 	toString() {

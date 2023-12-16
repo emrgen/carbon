@@ -9,7 +9,7 @@ import {
 	Point,
 	Transaction,
 	nodeLocation,
-	preventAndStopCtx,
+	preventAndStopCtx, moveNodesActions
 } from "@emrgen/carbon-core";
 import { isNestableNode } from '../utils';
 import { Optional } from '@emrgen/types';
@@ -60,8 +60,24 @@ export class NestablePlugin extends AfterPlugin {
 		return tr
 	}
 
-	unwrap(app: Carbon, _node: Node): Transaction {
+	unwrap(app: Carbon, node: Node): Optional<Transaction> {
+		const {parent} = node;
+		if (!isNestableNode(parent!)) return
+
+		// move node after the parent
+		const to = Point.toAfter(parent!.id)
+		// consume the next siblings
+		const {nextSiblings} = node;
+		const lastChild = node.lastChild;
+		const moveAt = Point.toAfter(lastChild?.id ?? node.id);
+
 		const { tr } = app;
+
+		tr
+			.move(nodeLocation(node)!, to, node.id)
+			.add(moveNodesActions(moveAt, nextSiblings))
+			.select(app.selection.clone());
+
 		return tr
 	}
 
@@ -226,35 +242,28 @@ export class NestablePlugin extends AfterPlugin {
 				const { app, node } = ctx;
 				console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
 
-				const { selection} = app;
 				const container = node.closest(n => n.isContainerBlock);
 				console.log(container?.name, node.name, node.type.isBlock && !node.type.isTextBlock);
 				console.log(node.chain.map(n => n.name).join(' > '));
 
-
 				const listNode = isNestableNode(container!) ? container : undefined;
-				console.log(listNode);
-
 				if (!listNode) return
 				const prevNode = listNode.prevSibling;
 				if (!prevNode || !isNestableNode(prevNode)) return
 
-				// move listNode to previous listNode
-				if (selection.isCollapsed) {
-					// if (listNode.size > 1) {
-					// 	const at = Point.toAfter(prevNode.id);
-					// 	app.chain.cmd
-					// 		.transform.move(listNode.children.slice(1), at)
-					// 		?.cmd.nestable.wrap(listNode, prevNode)
-					// 		?.dispatch();
-					// } else {
-					// }
-					console.log('move listNode to previous listNode');
-
-					app.cmd.nestable.wrap(listNode, prevNode)?.dispatch();
-				} else {
-				}
+				app.cmd.nestable.wrap(listNode, prevNode)?.dispatch();
 			},
+			shiftTab: (ctx: EventContext<KeyboardEvent>) => {
+				preventAndStopCtx(ctx);
+				const { app, node } = ctx;
+				const listNode = node.closest(isNestableNode);
+				if (!listNode) return
+				const {parent} = listNode;
+				if (!parent || !isNestableNode(parent)) return
+
+
+				app.cmd.nestable.unwrap(listNode)?.dispatch();
+			}
 		}
 	}
 
