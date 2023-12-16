@@ -14,7 +14,7 @@ import { StateChanges } from './NodeChange';
 import { CarbonStateDraft } from './CarbonStateDraft';
 
 interface CarbonStateProps {
-	scope: string;
+	scope: Symbol;
 	previous?: CarbonState;
 	content: Node;
 	selection: PinnedSelection;
@@ -28,7 +28,7 @@ interface CarbonStateProps {
 
 export class CarbonState extends EventEmitter {
 	previous: Optional<CarbonState>;
-	scope: string;
+	scope: Symbol;
 	content: Node;
 	selection: PinnedSelection;
 	blockSelection: BlockSelection;
@@ -37,7 +37,7 @@ export class CarbonState extends EventEmitter {
 	changes: StateChanges;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
 
-	static create(scope: string, content: Node, selection: PinnedSelection, nodeMap: NodeMap) {
+	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: NodeMap) {
 		return new CarbonState({ content, selection, scope, nodeMap })
 	}
 
@@ -110,8 +110,8 @@ export class CarbonState extends EventEmitter {
 	}
 
 	// try to create a new state or fail and return the previous state
-	produce(fn: (state: CarbonStateDraft) => void): CarbonState {
-		const draft = new CarbonStateDraft(this);
+	produce(origin: ActionOrigin, fn: (state: CarbonStateDraft) => void): CarbonState {
+		const draft = new CarbonStateDraft(this, origin);
 		try {
 			fn(draft);
 			const state = draft.prepare().commit(4);

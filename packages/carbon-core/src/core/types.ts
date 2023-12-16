@@ -4,6 +4,8 @@ import { Node } from './Node';
 import { InputRule } from './Rules';
 import { Carbon } from './Carbon';
 
+export const IDENTITY_SCOPE = Symbol('identity');
+
 export interface CarbonCommands {}
 
 export interface NodeIdFactory {

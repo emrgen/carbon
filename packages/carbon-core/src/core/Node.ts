@@ -7,10 +7,10 @@ import { ContentMatch } from "./ContentMatch";
 import { classString } from "./Logger";
 import { Mark, MarkSet } from "./Mark";
 import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
-import { NodeContent } from "./NodeContent";
+import { BlockContent, NodeContent } from "./NodeContent";
 import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeType } from "./NodeType";
-import { no, NodeEncoder, NodeJSON, yes } from "./types";
+import { IDENTITY_SCOPE, no, NodeEncoder, NodeJSON, yes } from "./types";
 import { NodeState, NodeStateJSON } from "./NodeState";
 import EventEmitter from "events";
 import { StateScope } from "./StateScope";
@@ -26,7 +26,7 @@ export type TraverseOptions = {
 }
 
 export interface NodeCreateProps {
-	scope?: string;
+	scope?: Symbol;
 	parentId?: Optional<NodeId>;
 	parent?: Optional<Node>;
 	id: NodeId;
@@ -82,7 +82,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// used for testing/debugging
 	test_key: number;
 
-	scope: string;
+	scope: Symbol;
 	parentId: Optional<NodeId>;
 	_parent: Optional<Node>;
 	id: NodeId;
@@ -100,6 +100,12 @@ export class Node extends EventEmitter implements IntoNodeId {
 	version: number;
 
 	deleted = false;
+
+	static IDENTITY = new Node({
+		id: NodeId.IDENTITY,
+		type: NodeType.IDENTITY,
+		content: BlockContent.empty(),
+	})
 
 	static removeId(json: NodeJSON) {
 		const { id, text = '', content = [], ...rest } = json
@@ -120,7 +126,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	private constructor(object: NodeCreateProps) {
 		super();
 		const {
-			scope = '',
+			scope = IDENTITY_SCOPE,
 			parentId,
 			parent,
 			id,
@@ -844,7 +850,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		const { scope, parentId, id, type, content, links, attrs, state, marks, version } = this;
 		// const links = new Map(this.links);
 
-		const cloned = Node.create({
+		const clone = Node.create({
 			scope,
 			parentId,
 			id,
@@ -857,7 +863,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 			version: version + 1,
 		});
 
-		return cloned;
+		return clone;
 	}
 
 	// view act as a immutable node tree reference

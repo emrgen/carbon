@@ -15,10 +15,12 @@ import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { Point, PointAt } from "./Point";
 import { NodeState, NodeStateJSON } from "./NodeState";
 import { takeUpto } from "../utils/array";
+import { ActionOrigin } from "@emrgen/carbon-core";
 
 // NOTE: it is internal to the state and should not be used outside of it
 // represents a draft of a state, used to prepare a new state before commit
 export class CarbonStateDraft {
+  origin: ActionOrigin;
   state: CarbonState;
   nodeMap: NodeMap;
   selection: PointedSelection;
@@ -26,7 +28,8 @@ export class CarbonStateDraft {
 
   private drafting = true;
 
-  constructor(state: CarbonState) {
+  constructor(state: CarbonState, origin: ActionOrigin) {
+    this.origin = origin;
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
     this.selection = state.selection.unpin();
@@ -50,10 +53,24 @@ export class CarbonStateDraft {
     changes.freeze();
     nodeMap.freeze();
 
-    const selection = this.selection.pin(this.nodeMap);
-    if (!selection) {
-      throw new Error("Cannot commit draft with invalid selection");
-    }
+    // create a new selection based on the new node map using the draft selection
+    const selection = ((selection: PointedSelection) => {
+      if (this.changes.selected.size) {
+        const nodes = this.changes.selected.nodes(this.nodeMap);
+        if (nodes.length !== this.changes.selected.size) {
+          throw new Error("Cannot commit draft with invalid selection");
+        }
+
+        return PinnedSelection.fromNodes(nodes, );
+      }
+      const ret = selection.pin(this.nodeMap);
+      if (!ret) {
+        throw new Error("Cannot commit draft with invalid selection");
+      }
+
+      return ret;
+    })(this.selection);
+
 
     const content = this.nodeMap.get(this.state.content.id)
     if (!content) {
@@ -64,7 +81,7 @@ export class CarbonStateDraft {
       previous: state.clone(depth - 1),
       scope: state.scope,
       content,
-      selection,
+      selection: selection.eq(state.selection) ? state.selection : selection,
       nodeMap,
       changes,
     });

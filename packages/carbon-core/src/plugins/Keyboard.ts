@@ -198,7 +198,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				const { selection, cmd, state, blockSelection } = app;
-				const { selectedNodeIds } = state
 				event.preventDefault();
 
 				// nodes selection is visible using halo

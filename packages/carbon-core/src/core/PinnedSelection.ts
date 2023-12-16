@@ -9,11 +9,6 @@ import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
 
 export class PinnedSelection {
-	tail: Pin;
-	head: Pin;
-	nodes: Node[] = [];
-	origin: ActionOrigin = ActionOrigin.Unknown;
-
 	// map dom selection to editor selection
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
 		const domSelection = window.getSelection();
@@ -119,17 +114,23 @@ export class PinnedSelection {
 		return PinnedSelection.create(pin, pin);
 	}
 
-	// static fromNodes(nodes: Node[]): PinnedSelection {
-	// 	return new PinnedSelection();
-	// }
+	static fromNodes(nodes: Node[], origin = ActionOrigin.Unknown): PinnedSelection {
+		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, nodes, origin);
+	}
 
 	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
 		return new PinnedSelection(tail, head, [],  origin);
 	}
 
-	constructor(tail: Pin, head: Pin, nodes: Node[], origin = ActionOrigin.Unknown) {
-		this.tail = tail;
-		this.head = head;
+	constructor(readonly tail: Pin, readonly head: Pin, readonly nodes: Node[], readonly origin = ActionOrigin.Unknown) {
+	}
+
+	get isBlock() {
+		return this.nodes.length !== 0;
+	}
+
+	get isInline() {
+		return this.nodes.length === 0;
 	}
 
 	get range(): Range {

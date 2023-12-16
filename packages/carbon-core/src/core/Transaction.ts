@@ -142,8 +142,7 @@ export class Transaction {
 	}
 
 	select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
-		const after = selection.unpin();
-		after.origin = origin;
+		const after = selection.unpin(origin);
 		return this.add(SelectAction.create(this.selection, after, origin));
 	}
 
@@ -266,7 +265,7 @@ export class Transaction {
 	}
 
 	cancel() {
-		this.cancelled = true;
+		// this.cancelled = true;
 	}
 
 	// adds command to transaction

@@ -38,6 +38,14 @@ const defaultSpec: NodeSpec = {
 	// inline: false,
 }
 
+const IDENTITY_NODE_SPEC: NodeSpec = {
+	attrs: {},
+	group: '',
+	content: '',
+	marks: '',
+	inline: false,
+}
+
 interface DefaultParams {
 	attrs?: NodeAttrsJSON,
 	state?: NodeStateJSON,
@@ -65,6 +73,8 @@ export class NodeType {
 	markSet: MarkSet;
 
 	contents: NodeName[];
+
+	static IDENTITY = new NodeType('identity', {} as Schema, IDENTITY_NODE_SPEC);
 
 	static compile(specs: Record<NodeName, NodeSpec>, schema: Schema) {
 		const nodes = {};

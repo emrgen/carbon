@@ -13,7 +13,7 @@ import { NodeState } from "./NodeState";
 
 
 export class SchemaFactory {
-	scope: string;
+	scope: Symbol;
 
 	static blockId() {
 		return generateBlockId();
@@ -23,7 +23,7 @@ export class SchemaFactory {
 		return generateTextId();
 	}
 
-	constructor(scope: string) {
+	constructor(scope: Symbol) {
 		this.scope = scope;
 	}
 

@@ -44,7 +44,7 @@ export class TransactionManager {
 			console.log('Commit', tr)
 
 			// produce a new state from the current state
-			const state = app.state.produce(draft => {
+			const state = app.state.produce(app.runtime.origin, draft => {
 				tr.prepare();
 				tr.commit(draft);
 				// this.updateTransactionEffects(tr);

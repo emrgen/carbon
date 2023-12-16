@@ -54,7 +54,7 @@ export class Carbon extends EventEmitter {
 	private cursorParkingElement: Optional<HTMLDivElement>;
 	ticks: Maps<Carbon, Optional<Transaction>>[];
 
-	constructor(name: string, content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
+	constructor(scope: Symbol, content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
 
 		this.pm = pm;
@@ -63,8 +63,8 @@ export class Carbon extends EventEmitter {
 
 		const map = new NodeMap();
 		content.forAll(n => map.set(n.id, n));
-		this.state = CarbonState.create(name, content, PinnedSelection.default(content), map);
-		StateScope.set(name, this.state.nodeMap);
+		this.state = CarbonState.create(scope, content, PinnedSelection.default(content), map);
+		StateScope.set(scope, this.state.nodeMap);
 		this.runtime = new CarbonRuntime();
 
 		this.store = new NodeStore(this);

@@ -20,6 +20,8 @@ export class Point {
 	// valid when point is within a node
 	offset: number;
 
+	static IDENTITY = new Point(NodeId.IDENTITY, PointAt.Inside, 0);
+
 	get isDefault() {
 		return this.nodeId.isDefault
 	}

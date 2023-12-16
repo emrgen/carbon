@@ -14,12 +14,10 @@ export const DndContext = (props) => {
 
   const onChange = useCallback(
     (state: CarbonState) => {
-      console.log('xxxxxxxxxxxxxxx', state.changes.isContentDirty);
       if (state.changes.isContentDirty) {
         dnd.isDirty = true;
         // console.log('update dnd context');
-        const {updatedNodeIds} = app.state.runtime;
-        const nodes = updatedNodeIds.map(id => app.store.get(id)).filter(n => n) as Node[];
+        const nodes = app.state.changes.changed.nodes(state.nodeMap);
         const ancestor = sortBy(nodes, n => n.depth).pop();
         if (ancestor) {
           console.log('refresh: refreshing dnd bounds');
@@ -27,7 +25,7 @@ export const DndContext = (props) => {
         }
       }
     },
-    [app.state.runtime, app.store, dnd]
+    [app.state.changes.changed, dnd]
   );
 
   useEffect(() => {

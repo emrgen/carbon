@@ -3,15 +3,18 @@ import { classString } from "./Logger";
 import { v4 as uuidv4 } from 'uuid';
 
 
-const defaultId = uuidv4().replace(/[0-9a-z]/g, '0');
+const defaultId = '0000000000';
 
 export interface IntoNodeId {
 	intoNodeId(): NodeId;
 }
 
 export class NodeId implements IntoNodeId {
+
+	static IDENTITY = new NodeId(defaultId);
+
 	get isDefault() {
-		return defaultId === this.id;
+		return this === NodeId.IDENTITY;
 	}
 
 	static deserialize(id: string): Optional<NodeId> {
@@ -19,7 +22,7 @@ export class NodeId implements IntoNodeId {
 	}
 
 	static default() {
-		return new NodeId(defaultId)
+		return NodeId.IDENTITY;
 	}
 
 	static create(id: string) {

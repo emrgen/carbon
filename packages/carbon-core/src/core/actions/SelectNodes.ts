@@ -34,9 +34,8 @@ export class SelectNodes implements CarbonAction {
   execute(tr: Transaction, draft: CarbonStateDraft) {
     const { app } = tr;
     const { store, state } = app;
-    const { selectedNodeIds } = state;
 
-    this.prevNodeIds = app.blockSelection.nodeIds.toArray()
+    this.prevNodeIds = state.selection.nodeIds;
 
     const beforeSelectedNodes = selectedNodeIds.map(id => store.get(id)) as Node[];
 

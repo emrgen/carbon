@@ -20,9 +20,11 @@ export const createCarbon = (name: string, json: InitNodeJSON, extensions: Exten
 	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
 	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
 
+	const scope = Symbol(name);
+
 	const pm = new PluginManager(plugins);
 	const {specs} = pm;
-	const schema = new Schema(specs, new SchemaFactory(name));
+	const schema = new Schema(specs, new SchemaFactory(scope));
 	const content = schema.nodeFromJSON(json);
 
 
@@ -30,7 +32,7 @@ export const createCarbon = (name: string, json: InitNodeJSON, extensions: Exten
 		throw new Error("Failed to parse app content");
 	}
 
-	return new Carbon(name, content, schema, pm, renderer)
+	return new Carbon(scope, content, schema, pm, renderer)
 }
 
 

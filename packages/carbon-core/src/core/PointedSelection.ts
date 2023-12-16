@@ -1,18 +1,13 @@
-import { Point } from './Point';
-import { NodeId } from './NodeId';
-import { Optional } from '@emrgen/types';
-import { PinnedSelection } from './PinnedSelection';
-import { NodeStore } from './NodeStore';
-import { Pin } from './Pin';
-import { classString } from './Logger';
-import { ActionOrigin } from './actions';
-import { NodeMap } from './NodeMap';
+import { Point } from "./Point";
+import { NodeId } from "./NodeId";
+import { Optional } from "@emrgen/types";
+import { PinnedSelection } from "./PinnedSelection";
+import { Pin } from "./Pin";
+import { classString } from "./Logger";
+import { ActionOrigin } from "./actions";
+import { NodeMap } from "./NodeMap";
 
 export class PointedSelection {
-	tail: Point;
-	head: Point;
-	origin: ActionOrigin = ActionOrigin.Unknown;
-
 	get isInvalid() {
 		return this.head.isDefault || this.tail.isDefault;
 	}
@@ -25,14 +20,23 @@ export class PointedSelection {
 		return PointedSelection.create(point, point);
 	}
 
-	static create(tail: Point, head: Point, origin = ActionOrigin.Unknown): PointedSelection {
-		return new PointedSelection(tail, head, origin);
+	static fromNodes(nodeIds: NodeId[], origin: ActionOrigin = ActionOrigin.Unknown) {
+		return new PointedSelection(Point.IDENTITY, Point.IDENTITY, nodeIds, origin);
 	}
 
-	constructor(tail: Point, head: Point, origin: ActionOrigin = ActionOrigin.Unknown) {
-		this.tail = tail;
-		this.head = head;
-		this.origin = origin;
+	static create(tail: Point, head: Point, origin = ActionOrigin.Unknown): PointedSelection {
+		return new PointedSelection(tail, head, [], origin);
+	}
+
+	constructor(readonly tail: Point, readonly head: Point, readonly nodeIds: NodeId[], public origin: ActionOrigin = ActionOrigin.Unknown) {
+	}
+
+	get isBlock() {
+		return this.nodeIds.length > 0;
+	}
+
+	get isInline() {
+		return this.nodeIds.length === 0
 	}
 
 	pin(store: NodeMap): Optional<PinnedSelection> {
@@ -52,8 +56,10 @@ export class PointedSelection {
 		return this.tail.eq(other.tail) && this.head.eq(other.head);
 	}
 
-	unpin() {
-		return this
+	unpin(origin: ActionOrigin = ActionOrigin.Unknown): PointedSelection {
+		const clone = this.clone()
+		clone.origin = origin;
+		return clone;
 	}
 
 	freeze() {

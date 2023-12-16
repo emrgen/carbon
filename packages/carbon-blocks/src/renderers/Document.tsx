@@ -3,18 +3,17 @@ import React, { useCallback, useEffect, useRef } from "react";
 import {
   ActionOrigin,
   CarbonBlock,
-  CarbonNode,
   CarbonNodeChildren,
   CarbonNodeContent,
   EventsIn,
-  EventsOut,
   Node,
   Pin,
   PinnedSelection,
   Point,
-  RendererProps,
   prevent,
-  useCarbon,
+  preventAndStop,
+  RendererProps,
+  useCarbon
 } from "@emrgen/carbon-core";
 import {
   useCombineConnectors,

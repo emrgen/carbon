@@ -14,6 +14,8 @@ enum PinReference {
 	back = 'back',
 }
 
+export const IDENTITY_OFFSET = -10;
+
 // materialized pin is a pin that is not a reference to a i
 export class Pin {
 	// focus node
@@ -22,6 +24,8 @@ export class Pin {
 	offset: number;
 	//
 	ref: PinReference;
+
+	static IDENTITY = new Pin(Node.IDENTITY, IDENTITY_OFFSET);
 
 	get isInvalid() {
 		return this.offset === -10;
