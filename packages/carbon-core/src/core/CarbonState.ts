@@ -1,13 +1,9 @@
 import { Optional } from '@emrgen/types';
-import { last, merge, cloneDeep } from 'lodash';
 import { NodeIdSet } from './BSet';
 import { ActionOrigin } from './actions/types';
 import { DecorationStore } from './DecorationStore';
 import { Node } from './Node';
 import { PinnedSelection } from './PinnedSelection';
-import { SelectionEvent } from './SelectionEvent';
-import { BlockSelection } from './NodeSelection';
-import { CarbonClipboard } from './CarbonClipboard';
 import EventEmitter from 'events';
 import { NodeMap } from './NodeMap';
 import { StateChanges } from './NodeChange';
@@ -31,7 +27,6 @@ export class CarbonState extends EventEmitter {
 	scope: Symbol;
 	content: Node;
 	selection: PinnedSelection;
-	blockSelection: BlockSelection;
 	nodeMap: NodeMap;
 	decorations: DecorationStore;
 	changes: StateChanges;
@@ -60,7 +55,6 @@ export class CarbonState extends EventEmitter {
 		this.decorations = decorations;
 		this.nodeMap = nodeMap;
 		this.changes = changes;
-		this.blockSelection = new BlockSelection(nodeMap, changes.selected);
 	}
 
 	get depth() {

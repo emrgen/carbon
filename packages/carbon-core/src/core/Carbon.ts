@@ -15,7 +15,6 @@ import { SelectionManager } from './SelectionManager';
 import { Transaction } from './Transaction';
 import { TransactionManager } from './TransactionManager';
 import { CarbonCommands, Maps, SerializedNode } from "./types";
-import { BlockSelection } from './NodeSelection';
 import { cloneDeep, first, isFunction, merge } from 'lodash';
 import { CarbonCommandChain } from './CarbonCommandChain';
 import { CarbonMessageBus } from './MessageBus';
@@ -96,10 +95,6 @@ export class Carbon extends EventEmitter {
 
 	get selection(): PinnedSelection {
 		return this.state.selection;
-	}
-
-	get blockSelection(): BlockSelection {
-		return this.state.blockSelection;
 	}
 
 	get focused() {

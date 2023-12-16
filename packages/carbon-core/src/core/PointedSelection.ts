@@ -6,6 +6,7 @@ import { Pin } from "./Pin";
 import { classString } from "./Logger";
 import { ActionOrigin } from "./actions";
 import { NodeMap } from "./NodeMap";
+import { Node } from "@emrgen/carbon-core";
 
 export class PointedSelection {
 	get isInvalid() {
@@ -42,13 +43,21 @@ export class PointedSelection {
 	pin(store: NodeMap): Optional<PinnedSelection> {
 		const { tail, head, origin } = this;
 		// console.log('Selection.pin', head.toString());
+
+		if (this.isBlock) {
+			const nodes = (this.nodeIds.map(id => store.get(id)).filter(n => n) ?? []) as unknown as Node[];
+			if (nodes.length !== this.nodeIds.length) {
+				throw new Error('Selection.pin: invalid selection');
+			}
+			return PinnedSelection.fromNodes(nodes, origin)
+		}
+
 		const focus = Pin.fromPoint(head, store);
 		const anchor = Pin.fromPoint(tail, store);
 		if (!focus || !anchor) {
 			console.warn('Selection.pin: invalid selection', this.toString(), head.toString(), store.get(head.nodeId)	);
 			return
 		}
-
 		return PinnedSelection.create(anchor, focus, origin);
 	}
 
@@ -56,10 +65,8 @@ export class PointedSelection {
 		return this.tail.eq(other.tail) && this.head.eq(other.head);
 	}
 
-	unpin(origin: ActionOrigin = ActionOrigin.Unknown): PointedSelection {
-		const clone = this.clone()
-		clone.origin = origin;
-		return clone;
+	unpin(): PointedSelection {
+		return this.clone()
 	}
 
 	freeze() {

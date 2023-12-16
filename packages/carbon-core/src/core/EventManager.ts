@@ -136,10 +136,10 @@ export class EventManager {
 				// EventsIn.beforeinput,
 			].includes(type) || selectionChangedUsingKeys(event)
 			) {
-				console.groupCollapsed('onEvent:', event.type);
+				// console.groupCollapsed('onEvent:', event.type);
 				groupOpen = true;
 			} else {
-				console.groupCollapsed('onEvent:', event.type, editorEvent);
+				// console.groupCollapsed('onEvent:', event.type, editorEvent);
 				groupOpen = true;
 			}
 		} else {
@@ -148,7 +148,7 @@ export class EventManager {
 
 		this.pm.onEvent(editorEvent);
 		if (groupOpen) {
-			console.groupEnd();
+			// console.groupEnd();
 		}
 
 		// this.afterEvent(editorEvent);

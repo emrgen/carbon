@@ -55,9 +55,9 @@ export class SelectionChangePlugin extends AfterPlugin {
 			},
 			selectstart: (ctx: EventContext<Event>) => {
 				const {app} = ctx;
-				const {blockSelection} = app;
-				if (blockSelection.size) {
-					app.tr.deselectNodes(blockSelection.blockIds).dispatch();
+				const {selection} = app;
+				if (selection.isBlock) {
+					app.tr.deselectNodes(selection.nodes).dispatch();
 				}
 			},
 		}

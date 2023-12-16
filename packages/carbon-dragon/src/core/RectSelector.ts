@@ -3,7 +3,18 @@ import EventEmitter from "events";
 import { first, identity, last, sortBy, throttle, uniq } from "lodash";
 import { DndNodeStore } from "./DndStore";
 import { adjustBox, boundFromFastDndEvent, getEventPosition } from "./utils";
-import { ActionOrigin, BSet, Carbon, Node, NodeComparator, NodeId, Pin, PinnedSelection, Transaction } from '@emrgen/carbon-core';
+import {
+	ActionOrigin,
+	BSet,
+	Carbon,
+	Node,
+	NodeComparator,
+	NodeId,
+	NodeIdSet,
+	Pin,
+	PinnedSelection,
+	Transaction
+} from "@emrgen/carbon-core";
 import { DndEvent } from '../types';
 
 export class RectSelector extends EventEmitter {
@@ -36,10 +47,10 @@ export class RectSelector extends EventEmitter {
 		// console.log(this.region === e.target, editor.state.selectedNodeIds.size)
 		this.downEvent = e;
 		if (this.region === e.target) {
-			const blockSelection = app.state.blockSelection;
-			if (blockSelection.size) {
-				app.tr.selectNodes(blockSelection.blockIds).dispatch();
-			}
+			// const blockSelection = app.state.blockSelection;
+			// if (blockSelection.size) {
+			// 	app.tr.selectNodes(blockSelection.blockIds).dispatch();
+			// }
 		}
 		this.emit('mouse:down', e, node);
 	}
@@ -82,6 +93,10 @@ export class RectSelector extends EventEmitter {
 		this.emit('drag:move:selector', e);
 		const { node } = e;
 		const { app, selectables } = this;
+		const {selection} = app.state;
+		// can not move block while inline selection is active
+		if (selection.isInline) return;
+
 		const document = node.chain.find(n => n.isDocument);
 		if (!document) {
 			return;
@@ -100,7 +115,7 @@ export class RectSelector extends EventEmitter {
 			adjustBox(boundFromFastDndEvent(e), { left: scrollLeft, top: scrollTop })
 		);
 
-		if (collides.length === 0 && app.blockSelection.size === 0) return
+		if (collides.length === 0) return
 
 		if (!collides.length) {
 			if (this.noSelectionChange([])) return
@@ -159,11 +174,12 @@ export class RectSelector extends EventEmitter {
 	}
 
 	noSelectionChange(ids: NodeId[]) {
-		const blockSelection = this.app.state.blockSelection;
-		return ids.length === blockSelection.size && ids.every(id => blockSelection.has(id))
+		const map = new NodeIdSet(ids)
+		const {nodes} = this.app.selection
+		return ids.length === nodes.length && nodes.every(n => map.has(n.id))
 	}
 
-	onDragEnd(e) {
+	onDragEnd(e: DndEvent) {
 		this.emit('drag:end:selector', e);
 		const { selected, app } = this;
 		console.log('selected', selected.size);
@@ -172,12 +188,12 @@ export class RectSelector extends EventEmitter {
 		console.log('onDragEnd', e.node.name)
 	}
 
-	onMountRectSelectable(node, el) {
+	onMountRectSelectable(node: Node, el: HTMLElement) {
 		// console.log('onMountRectSelectable', node.name, node.id.toString());
 		this.selectables.register(node, el)
 	}
 
-	onUnmountRectSelectable(node) {
+	onUnmountRectSelectable(node: Node) {
 		this.selectables.delete(node);
 	}
 

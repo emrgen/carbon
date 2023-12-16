@@ -44,7 +44,7 @@ export class CarbonStateDraft {
   }
 
   // turn the draft into a new state
-  commit(depth: number) {
+  commit(depth: number): CarbonState {
     const { state, changes } = this;
     this.selection.freeze();
 
@@ -61,7 +61,7 @@ export class CarbonStateDraft {
           throw new Error("Cannot commit draft with invalid selection");
         }
 
-        return PinnedSelection.fromNodes(nodes, );
+        return PinnedSelection.fromNodes(nodes, this.origin);
       }
       const ret = selection.pin(this.nodeMap);
       if (!ret) {

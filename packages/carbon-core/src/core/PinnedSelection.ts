@@ -7,6 +7,7 @@ import { NodeStore } from './NodeStore';
 import { DomSelection, Range } from './Range';
 import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
+import { sortNodes } from "@emrgen/carbon-core";
 
 export class PinnedSelection {
 	// map dom selection to editor selection
@@ -115,14 +116,14 @@ export class PinnedSelection {
 	}
 
 	static fromNodes(nodes: Node[], origin = ActionOrigin.Unknown): PinnedSelection {
-		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, nodes, origin);
+		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, sortNodes(nodes, 'path'), origin);
 	}
 
 	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
 		return new PinnedSelection(tail, head, [],  origin);
 	}
 
-	constructor(readonly tail: Pin, readonly head: Pin, readonly nodes: Node[], readonly origin = ActionOrigin.Unknown) {
+	private constructor(readonly tail: Pin, readonly head: Pin, readonly nodes: Node[], readonly origin = ActionOrigin.Unknown) {
 	}
 
 	get isBlock() {
@@ -370,7 +371,10 @@ export class PinnedSelection {
 	}
 
 	unpin(): PointedSelection {
-		const { tail, head, origin } = this
+		const { tail, head, nodes, origin } = this;
+		if (this.isBlock) {
+			return PointedSelection.fromNodes(nodes.map(n => n.id), origin)
+		}
 		return PointedSelection.create(tail.point, head.point, origin);
 	}
 

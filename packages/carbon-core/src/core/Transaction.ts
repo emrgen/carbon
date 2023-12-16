@@ -142,7 +142,8 @@ export class Transaction {
 	}
 
 	select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
-		const after = selection.unpin(origin);
+		const after = selection.unpin();
+		after.origin = origin;
 		return this.add(SelectAction.create(this.selection, after, origin));
 	}
 
@@ -213,8 +214,8 @@ export class Transaction {
 
 	// previously selected nodes will be deselected
 	// previously active nodes will be deactivated
-	selectNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
-		const selectIds = isArray(ids) ? ids : [ids];
+	selectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		selectIds.forEach(id => {
 			this.updateState(id, { selected: true }, origin)
 		})
@@ -222,8 +223,8 @@ export class Transaction {
 		return this
 	}
 
-	deselectNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
-		const selectIds = isArray(ids) ? ids : [ids];
+	deselectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		selectIds.forEach(id => {
 			this.updateState(id, { selected: false }, origin)
 		})
@@ -231,8 +232,8 @@ export class Transaction {
 		return this
 	}
 
-	activateNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
-		const activateIds = isArray(ids) ? ids : [ids];
+	activateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		activateIds.forEach(id => {
 			this.updateState(id, { activated: true }, origin)
 		})
@@ -240,8 +241,8 @@ export class Transaction {
 		return this
 	}
 
-	deactivateNodes(ids: NodeId | NodeId[], origin = this.origin): Transaction {
-		const activateIds = isArray(ids) ? ids : [ids];
+	deactivateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		activateIds.forEach(id => {
 			this.updateState(id, { activated: false }, origin)
 		})

@@ -55,9 +55,7 @@ declare module '@emrgen/carbon-core' {
       deleteText(pin: Pin, text: string, opts?: InsertPos): Optional<Transaction>;
       remove(node: Node): Optional<Transaction>;
       move(nodes: Node | Node[], to: Point): Optional<Transaction>;
-      delete(selection?: PinnedSelection): Optional<Transaction>;
-      deleteNodes(nodeSelection?: BlockSelection, opts?: DeleteOpts): Optional<Transaction>;
-      // HOTTEST
+      delete(selection?: PinnedSelection, opts?: DeleteOpts): Optional<Transaction>;
       split(node: Node, selection?: PinnedSelection, opts?: SplitOpts): Optional<Transaction>;
       wrap(node: Node, name: NodeName): Optional<Transaction>;
       unwrap(node: Node): Optional<Transaction>;
@@ -89,7 +87,6 @@ export class TransformCommands extends BeforePlugin {
       remove: this.remove,
       move: this.move,
       delete: this.delete,
-      deleteNodes: this.deleteNodes,
       wrap: this.wrap,
       unwrap: this.unwrap,
       change: this.change,
@@ -880,15 +877,14 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // delete selected nodes
-  deleteNodes(app: Carbon, selection: BlockSelection = app.blockSelection, opts: DeleteOpts = {}): Optional<Transaction> {
+  private deleteNodes(app: Carbon, nodes: Node[], opts: DeleteOpts = {}): Optional<Transaction> {
     const { fall = 'after' } = opts;
     const deleteActions: CarbonAction[] = [];
-    const { blocks } = selection;
-    reverse(blocks.slice()).forEach(node => {
+    reverse(nodes.slice()).forEach(node => {
       deleteActions.push(RemoveNode.fromNode(nodeLocation(node)!, node));
     });
-    const firstNode = first(blocks)!;
-    const lastNode = last(blocks)!;
+    const firstNode = first(nodes)!;
+    const lastNode = last(nodes)!;
     let after: Optional<PinnedSelection> = undefined;
 
     if (fall === 'after') {
@@ -935,7 +931,11 @@ export class TransformCommands extends BeforePlugin {
   // 2. tail/head block: immediate children of commonNode and parent of tail/head node
   // 3. tail/head node.
   // delete nodes within selection
-  delete(app: Carbon, selection: PinnedSelection = app.selection): Optional<Transaction> {
+  delete(app: Carbon, selection: PinnedSelection = app.selection, opts?: DeleteOpts): Optional<Transaction> {
+    if (selection.isBlock) {
+      return this.deleteNodes(app, selection.nodes, opts);
+    }
+
     if (selection.isCollapsed) {
       return app.tr;
     }

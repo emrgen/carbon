@@ -47,7 +47,7 @@ export class Code extends CarbonPlugin {
         const { event, app } = ctx
         preventAndStop(event);
         ctx.stopPropagation();
-        const { selection, blockSelection } = app
+        const { selection } = app
 
         // if (!app.state.runtime.clipboard.isEmpty) {
         //   const { slice } = app.state.runtime.clipboard;
@@ -68,13 +68,13 @@ export class Code extends CarbonPlugin {
         preventAndStopCtx(ctx);
         const { app, node } = ctx;
         const { selection } = app;
-        if (app.blockSelection.size === 1) {
-          console.log('blockSelection', app.blockSelection);
-
-          preventAndStopCtx(ctx);
-          app.tr.selectNodes([]).dispatch();
-          node.child(0)?.emit('focus', node.child(0)!)
-        }
+        // if (selection.isBlock === 1) {
+        //   console.log('blockSelection', app.blockSelection);
+        //
+        //   preventAndStopCtx(ctx);
+        //   app.tr.selectNodes([]).dispatch();
+        //   node.child(0)?.emit('focus', node.child(0)!)
+        // }
       },
 
       tab: (ctx: EventContext<KeyboardEvent>) => {
@@ -130,7 +130,7 @@ export class BeforeCodePlugin extends BeforePlugin {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
         const { app, event, node } = ctx;
-        if (app.blockSelection.size) {
+        if (app.selection.isBlock) {
           return
         }
 

@@ -8,9 +8,8 @@ import { skipKeyEvent } from "../utils/key";
 import { first, last,  } from "lodash";
 import { ActionOrigin, BlockContent, Carbon, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
 import { hasParent, } from "../utils/node";
-import {  insertAfterAction, preventAndStopCtx } from '@emrgen/carbon-core';
+import { insertAfterAction, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
 import { nodeLocation } from '../utils/location';
-import { BlockSelection } from "../core/NodeSelection";
 import { Optional } from '@emrgen/types';
 
 
@@ -35,18 +34,13 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 		preventAndStopCtx(ctx);
 
 		const { node } = ctx;
-		const { selection, state, cmd, blockSelection } = app;
+		const { selection, state, cmd } = app;
 
-		const { isCollapsed, head } = selection;
+		const { head } = selection;
 
 		// delete node selection if any
-		if (!blockSelection.isEmpty) {
-			cmd.transform.deleteNodes(blockSelection, { fall: 'before' })?.dispatch();
-			return
-		}
-
-		if (!isCollapsed) {
-			cmd.transform.delete(app.selection)?.dispatch();
+		if (!selection.isCollapsed || selection.isBlock) {
+			cmd.transform.delete(selection, { fall: 'before' })?.dispatch();
 			return
 		}
 
@@ -133,7 +127,7 @@ export class KeyboardBeforePlugin extends BeforePlugin {
 
 			},
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				if (ctx.app.blockSelection.size) {
+				if (ctx.app.selection.isBlock) {
 					preventAndStopCtx(ctx);
 				}
 			}
@@ -184,8 +178,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			cmd_u: preventAndStopCtx,
 			esc: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
-				const { selection, blockSelection: nodeSelection } = app
-				if (nodeSelection.size) {
+				const { selection } = app
+				if (selection.isBlock) {
 					// app.tr.selectNodes([]).dispatch();
 					// app.blur()
 					return
@@ -197,12 +191,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
-				const { selection, cmd, state, blockSelection } = app;
+				const { selection, cmd, state } = app;
 				event.preventDefault();
 
 				// nodes selection is visible using halo
-				if (blockSelection.size) {
-					this.collapseSelectionBeforeBlockSelection(app, blockSelection);
+				if (selection.isBlock) {
+					this.collapseSelectionBefore(app, selection.nodes);
 					return
 				}
 
@@ -219,11 +213,11 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			right: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection, cmd, state, blockSelection: nodeSelection } = app;
+				const { selection, cmd, state } = app;
 
 				// nodes selection is visible using halo
-				if (nodeSelection.size) {
-					this.collapseSelectionAfterBlockSelection(app, nodeSelection);
+				if (selection.isBlock) {
+					this.collapseSelectionAfter(app, selection.nodes);
 					return
 				}
 
@@ -240,9 +234,9 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			shiftRight: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection, blockSelection: nodeSelection } = app;
-				if (!nodeSelection.isEmpty) {
-					if (nodeSelection.size > 1) {
+				const { selection } = app;
+				if (!selection.isBlock) {
+					if (selection.nodes.length > 1) {
 						console.log("TODO: select first top level node");
 						return
 					}
@@ -260,12 +254,13 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
 				event.preventDefault();
-				const { selection, blockSelection: nodeSelection } = app;
-				if (!nodeSelection.isEmpty) {
-					if (nodeSelection.size > 1) {
+				const { selection } = app;
+				if (!selection.isBlock) {
+					if (selection.nodes.length > 1) {
 						console.log("TODO: select first top level node");
 						return
 					}
+
 					const { parent } = node;
 					if (parent?.isSandbox) return
 					app.tr.selectNodes([parent!.id]).dispatch();
@@ -306,8 +301,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		}
 	}
 
-	collapseSelectionBeforeBlockSelection(app: Carbon, blockSelection: BlockSelection) {
-		const { blocks: nodes } = blockSelection;
+	collapseSelectionBefore(app: Carbon, nodes: Node[]) {
 		const firstNode = first(nodes)!;
 		if (firstNode.hasFocusable) {
 			const focusNode = firstNode.find(n => n.isFocusable, { direction: 'forward' })
@@ -327,8 +321,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		return
 	}
 
-	collapseSelectionAfterBlockSelection(app: Carbon, blockSelection: BlockSelection) {
-		const lastNode = last(blockSelection.blocks)!;
+	collapseSelectionAfter(app: Carbon, nodes: Node[]) {
+		const lastNode = last(nodes)!;
 		if (lastNode.hasFocusable) {
 			const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
 			const pin = Pin.toEndOf(focusNode!)
@@ -350,11 +344,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	shiftUp(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
-		const { blockSelection: nodeSelection } = app;
+		const { selection } = app;
 
-		if (nodeSelection.isEmpty) return
+		if (selection.isInline) return
+		preventAndStop(ctx);
 
-		const { blocks: nodes } = nodeSelection;
+		const { nodes } = selection;
 		const firstNode = nodes[0] as Node;
 		const block = prevSelectableBlock(firstNode);
 		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
@@ -372,11 +367,10 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	shiftDown(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
-		const { blockSelection } = app;
-		if (blockSelection.isEmpty) return
-		ctx.event.preventDefault();
-
-		const { blocks: nodes } = blockSelection;
+		const { selection } = app;
+		if (selection.isInline) return
+		preventAndStop(ctx);
+		const { nodes } = selection;
 		const firstNode = last(nodes) as Node;
 		const block = nextSelectableBlock(firstNode)
 		if (!block) {
@@ -394,14 +388,14 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		preventAndStopCtx(ctx);
 
 		const { app } = ctx;
-		const { selection, cmd, blockSelection } = app;
+		const { selection, cmd } = app;
 		const { start, end } = selection
 		const { node } = start;
 
 		// put the cursor at the end of the first text block
-		if (!blockSelection.isEmpty) {
+		if (selection.isBlock) {
 			console.log('node selection...');
-			const { blocks: nodes } = blockSelection;
+			const { nodes } = selection;
 			console.log(nodes.map(n => n.id.toString()));
 			const lastNode = last(nodes) as Node;
 			if (lastNode.hasFocusable) {
@@ -478,18 +472,16 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		const { event } = ctx;
 		const { app, node } = ctx;
-		const { selection, cmd, blockSelection: nodeSelection } = app;
+		const { selection, cmd } = app;
 
 		// delete node selection if any
-		if (!nodeSelection.isEmpty) {
-			cmd.transform.deleteNodes(nodeSelection, { fall: 'after' })?.dispatch();
+		if (selection.isBlock) {
+			cmd.transform.delete(selection, { fall: 'after' })?.dispatch();
 			return
 		}
 
 		const { isCollapsed, head } = selection;
 		if (!isCollapsed) {
-			console.log('pppp');
-
 			cmd.transform.delete()?.dispatch()
 			return
 		}
@@ -512,13 +504,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	up(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
-		const { blockSelection: nodeSelection } = app;
-		if (nodeSelection.isEmpty) return
+		const { selection } = app;
+		if (selection.isInline) return
+		preventAndStopCtx(ctx);
 
-		ctx.event.preventDefault();
-
-		if (nodeSelection.size > 1) {
-			const { blocks: nodes } = nodeSelection
+		const {nodes } = selection;
+		if (nodes.length > 1) {
 			const lastNode = first(nodes) as Node;
 			app.tr.selectNodes([lastNode.id]).dispatch()
 			return
@@ -532,12 +523,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 	down(ctx: EventContext<KeyboardEvent>) {
 		const { app, node } = ctx;
-		const { blockSelection: nodeSelection } = app;
-		if (nodeSelection.isEmpty) return
-		ctx.event.preventDefault();
+		const { selection } = app;
+		if (selection.isInline) return
+		preventAndStopCtx(ctx)
 
-		if (nodeSelection.size > 1) {
-			const { blocks: nodes } = nodeSelection
+		const {nodes } = selection;
+		if (nodes.length > 1) {
 			const lastNode = last(nodes) as Node;
 			app.tr.selectNodes([lastNode.id]).dispatch()
 			return

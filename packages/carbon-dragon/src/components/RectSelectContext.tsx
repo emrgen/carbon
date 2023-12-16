@@ -43,7 +43,7 @@ export function RectSelectContext(props) {
     const onTransaction = (tr: Transaction) => {
       rectSelector.onTransaction(tr);
       // console.log("transaction", tr, app.blockSelection.size);
-      if (app.blockSelection.size) {
+      if (app.selection.isBlock) {
         setIsSelecting(true);
       } else {
         if (!tr.app.dragging) {
@@ -90,7 +90,7 @@ export function RectSelectContext(props) {
         rectSelector.onDragEnd(e);
         // app.enable();
         onDragRectStop(e);
-        if (!app.blockSelection.size) {
+        if (!app.selection.isBlock) {
           setIsSelecting(false);
         }
       }
@@ -99,7 +99,7 @@ export function RectSelectContext(props) {
         setIsDragging(false);
       }
     },
-    [app.blockSelection.size, onDragRectStop, rectSelector]
+    [app.selection, onDragRectStop, rectSelector]
   );
 
   useDndMonitor({
@@ -115,7 +115,7 @@ export function RectSelectContext(props) {
 
     const onMouseUp = (e) => {
       // if there is a block selection, keep the rect-select active
-      if (app.blockSelection.size) return;
+      if (app.selection.isBlock) return;
       // setIsSelecting(false);
     };
 
@@ -126,7 +126,7 @@ export function RectSelectContext(props) {
       rectSelector.off("mouse:down", onMouseDown);
       rectSelector.off("mouse:up", onMouseUp);
     };
-  }, [app.blockSelection.size, rectSelector]);
+  }, [app.selection, rectSelector]);
 
   return (
     <RectSelectorContext value={rectSelector}>
