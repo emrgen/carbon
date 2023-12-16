@@ -79,11 +79,11 @@ export class NestablePlugin extends AfterPlugin {
 				const listNode = node.closest(isNestableNode);
 				console.log(listNode);
 				if (!listNode) return
-				const head = selection.head.down();
-
+				const head = selection.head.node.isEmpty ? selection.head.down() : selection.head
+				console.log('--------');
 				// console.log(listNode?.id.toString(), listNode?.name, head.toString(), Pin.toStartOf(listNode)?.toJSON());
 				const atStart = Pin.toStartOf(listNode)?.eq(head);
-				// console.log(atStart, Pin.toStartOf(listNode), head);
+				// console.log(atStart, Pin.toStartOf(listNode)?.node.name, head.node.name);
 
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);
@@ -101,7 +101,7 @@ export class NestablePlugin extends AfterPlugin {
 						.dispatch();
 					return
 				}
-
+				console.log('--------');
 				// change to section
 				if (listNode.name !== 'section') {
 					preventAndStopCtx(ctx);
@@ -114,6 +114,8 @@ export class NestablePlugin extends AfterPlugin {
 					tr.dispatch();
 					return
 				}
+
+				console.log('--------');
 
 				if (!parentList || parentList.depth > listNode.depth - 1) return
 

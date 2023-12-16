@@ -392,6 +392,16 @@ export class CarbonStateDraft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
+    if (state.selected) {
+      this.changes.selected.add(nodeId);
+    }
+    if (state.activated) {
+      this.changes.activated.add(nodeId);
+    }
+    if (state.opened) {
+      this.changes.opened.add(nodeId);
+    }
+
     this.mutable(nodeId, node => {
       node.updateState(state)
       if (node.isEmpty) {

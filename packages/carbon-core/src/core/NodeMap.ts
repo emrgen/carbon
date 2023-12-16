@@ -12,6 +12,12 @@ export class NodeMap {
     return new NodeMap(map);
   }
 
+  static fromNodes(nodes: Node[]) {
+    const map = new NodeMap();
+    nodes.forEach(n => map.set(n.id, n));
+    return map;
+  }
+
   constructor(parent?: NodeMap) {
     this._parent = parent || null;
   }

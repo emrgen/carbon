@@ -10,3 +10,6 @@ export const hasParent = (node: Node, parent: Node) => {
   return node.chain.some(n => n.eq(parent));
 }
 
+export const sortNodesByPosition = (nodes: Node[]) => {
+  const paths = nodes.map(n => n.chain.map(n => n.index));
+}

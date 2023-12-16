@@ -12,6 +12,8 @@ export class PageTree extends CarbonPlugin {
       group: '',
       content: 'title pageTreeItem*',
       focusable: true,
+      isolating: true,
+      atom: true,
       attrs: {
         html: {
           suppressContentEditableWarning: true,

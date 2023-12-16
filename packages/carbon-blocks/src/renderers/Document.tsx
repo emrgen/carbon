@@ -3,9 +3,11 @@ import React, { useCallback, useEffect, useRef } from "react";
 import {
   ActionOrigin,
   CarbonBlock,
+  CarbonNode,
   CarbonNodeChildren,
   CarbonNodeContent,
   EventsIn,
+  EventsOut,
   Node,
   Pin,
   PinnedSelection,
@@ -19,26 +21,24 @@ import {
   useConnectorsToProps,
   useDndRegion,
   useNonDraggable,
-  useRectSelectionSurface,
+  useRectSelectionSurface
 } from "@emrgen/carbon-dragon";
-import { usePlaceholder } from "../hooks/usePlaceholder";
 import { CarbonProps } from "@emrgen/carbon-attributes";
-import { DocumentContext } from "../hooks";
+import { DocumentContext, usePlaceholder } from "../hooks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
   const { picture = {} } = node.attrs.node;
 
   const app = useCarbon();
+  const {store} = app;
 
   const ref = useRef<HTMLElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dndRegion = useDndRegion({ node, ref });
   const nonDraggable = useNonDraggable({ node, ref });
   const selectionSurface = useRectSelectionSurface({ node, ref });
-  const connectors = useConnectorsToProps(
-    useCombineConnectors(selectionSurface, dndRegion, nonDraggable)
-  );
+
 
   useEffect(() => {
     app.emit("document:mounted", node);
@@ -47,17 +47,25 @@ export const DocumentComp = (props: RendererProps) => {
   const placeholder = usePlaceholder(node);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-          const lastChild = node.lastChild as Node;
-      const lastElement = app.store.element(lastChild?.id!);
-      if (!lastChild) return;
-      const bound = lastElement?.getBoundingClientRect();
-      if (!bound) return;
+    const lastChild = node.lastChild as Node;
+    const lastElement = app.store.element(lastChild?.id!);
+    if (!lastChild) return;
+    const bound = lastElement?.getBoundingClientRect();
+    if (!bound) return;
 
-      if (e.clientY > bound.bottom) {
-        app.emit('document:cursor:hide');
-        // preventAndStop(e);
+    if (e.clientY > bound.bottom) {
+      app.emit("document:cursor:hide");
+      preventAndStop(e);
+    }
+  }, [node.lastChild, app]);
+
+  const connectors = useConnectorsToProps(
+    useCombineConnectors({
+      listeners: {
+        onMouseDown: handleMouseDown
       }
-  },[node.lastChild, app])
+    }, selectionSurface, dndRegion, nonDraggable)
+  );
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {

@@ -31,7 +31,7 @@ export class Dnd extends EventEmitter {
 		this.onDragStart = this.onDragStart.bind(this)
 		this.onDragMove = this.onDragMove.bind(this)
 		this.onDragEnd = this.onDragEnd.bind(this)
-		this.onMouseMove = throttle(this.onMouseMove.bind(this), 0)
+		this.onMouseMove = throttle(this.onMouseMove.bind(this), 0) // throttled mouse move handler
 		this.onMouseOver = this.onMouseOver.bind(this)
 		this.onMouseDown = this.onMouseDown.bind(this)
 		this.onMouseUp = this.onMouseUp.bind(this)

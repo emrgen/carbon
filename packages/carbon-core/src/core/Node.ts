@@ -16,6 +16,7 @@ import EventEmitter from "events";
 import { StateScope } from "./StateScope";
 import { NodeBTree } from "./BTree";
 import { NodeLinks } from "./NodeLinks";
+import { NODE_CACHE_INDEX } from "./CarbonCache";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -380,10 +381,16 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get index(): number {
-		const { children = [] } = this.parent || {};
-		return findIndex(children as Node[], n => {
-			return this.id.comp(n.id) === 0
-		});
+		const parent = this.parent;
+		if (!parent) return -1
+
+		const key = `${parent.id.toString()}/${this.id.toString()}`
+		return NODE_CACHE_INDEX.get(key, () => {
+			const { children = [] } = parent;
+			return findIndex(children as Node[], n => {
+				return this.id.comp(n.id) === 0
+			});
+		})
 	}
 
 	get textContent(): string {

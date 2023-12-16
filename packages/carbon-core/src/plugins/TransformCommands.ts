@@ -1,11 +1,19 @@
-
 import { each, first, flatten, last, merge, reverse, sortBy } from "lodash";
 
 import { Optional } from "@emrgen/types";
-import { BlockContent, PinnedSelection } from "../core";
-import { NodeIdSet } from "../core/BSet";
-import { Carbon } from "../core/Carbon";
-import { BeforePlugin } from "../core/CarbonPlugin";
+import {
+  NodeIdSet,
+  Carbon,
+  ActionOrigin,
+  BeforePlugin,
+  CarbonAction,
+  MoveAction,
+  PointedSelection,
+  RemoveNode,
+  SetContentAction,
+  BlockContent,
+  PinnedSelection
+} from "@emrgen/carbon-core";
 import { SelectionPatch } from "../core/DeleteGroup";
 import { p14 } from "../core/Logger";
 import { Node } from "../core/Node";
@@ -14,16 +22,11 @@ import { BlockSelection } from "../core/NodeSelection";
 import { NodeType } from "../core/NodeType";
 import { Pin } from "../core/Pin";
 import { Point } from "../core/Point";
-import { PointedSelection } from "../core/PointedSelection";
 import { Range } from "../core/Range";
 import { Slice } from "../core/Slice";
 import { Transaction } from "../core/Transaction";
 import { ChangeName } from "../core/actions/ChangeName";
 import { InsertNode } from "../core/actions/InsertNode";
-import { MoveAction } from "../core/actions/MoveAction";
-import { RemoveNode } from "../core/actions/RemoveNode";
-import { SetContentAction } from "../core/actions/SetContent";
-import { ActionOrigin, CarbonAction } from "../core/actions/types";
 import { NodeName } from "../core/types";
 import { takeBefore, takeUntil } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";

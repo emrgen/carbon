@@ -1,4 +1,4 @@
-import { each, first, flatten, identity, isArray, last, sortBy, merge, isEmpty } from 'lodash';
+import { first, flatten, identity, isArray, last, sortBy, merge, isEmpty } from 'lodash';
 
 import { Optional, With } from '@emrgen/types';
 import { NodeIdSet } from './BSet';
@@ -6,7 +6,7 @@ import { Carbon } from './Carbon';
 import { p14 } from './Logger';
 import { Mark } from './Mark';
 import { Node } from './Node';
-import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
+import { NodeAttrsJSON } from "./NodeAttrs";
 import { NodeContent } from './NodeContent';
 import { IntoNodeId, NodeId } from './NodeId';
 import { PinnedSelection } from './PinnedSelection';
@@ -14,18 +14,15 @@ import { PluginManager } from './PluginManager';
 import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
-import { TransactionManager } from './TransactionManager';
+import { TransactionManager } from "@emrgen/carbon-core";
 import { RemoveText, TransactionType } from './actions';
-import { ActivateNodes } from './actions/ActivateNodes';
 import { ChangeName } from './actions/ChangeName';
 import { CommandError } from './actions/Error';
-import { InsertNode } from './actions/InsertNode';
 import { InsertText } from './actions/InsertText';
-import { MoveAction } from './actions/MoveAction';
-import { RemoveNode } from './actions/RemoveNode';
+import { MoveAction } from "@emrgen/carbon-core";
+import { RemoveNode } from "@emrgen/carbon-core";
 import { SelectAction } from './actions/Select';
-import { SelectNodes } from './actions/SelectNodes';
-import { SetContentAction } from './actions/SetContent';
+import { SetContentAction } from "@emrgen/carbon-core";
 import { UpdateAttrs } from './actions/UpdateAttrs';
 import { ActionOrigin, CarbonAction } from './actions/types';
 import { NodeName } from './types';
@@ -60,13 +57,8 @@ export class Transaction {
 	onTick: boolean = false;
 	private actions: CarbonAction[] = [];
 	private error: Optional<TransactionError>;
-	private cancelled: boolean = false;
-	private committed: boolean = false;
 	private normalizeIds = new NodeIdSet();
 	private updatedIds = new NodeIdSet();
-	private selectedIds = new NodeIdSet();
-	private openNodeIds = new NodeIdSet();
-	private deletedIds = new NodeIdSet();
 
 	readOnly = false;
 
@@ -165,6 +157,17 @@ export class Transaction {
 	}
 
 	remove(at: Point, node: Node, origin = this.origin): Transaction {
+		const state = node.state;
+		// if (state.activated) {
+		// 	this.updateState(node.id, { activated: false }, origin);
+		// }
+		// if (state.selected) {
+		// 	this.updateState(node.id, { selected: false }, origin);
+		// }
+		// if (state.opened) {
+		// 	this.updateState(node.id, { opened: false }, origin)
+		// }
+
 		return this.add(RemoveNode.fromNode(at, node, origin));
 	}
 

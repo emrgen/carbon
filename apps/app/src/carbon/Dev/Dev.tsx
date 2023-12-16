@@ -37,7 +37,7 @@ import SelectionTracker from "../../SelectionTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
-    node("blockContent"),
+    // node("blockContent"),
 
     // node("tab", [
     //   node("tabTitles", [
@@ -50,22 +50,22 @@ const data = node("carbon", [
     //   ], {node: {link: "tab1"}}),
     // ]),
 
-    node("pageTree", [
-      title([text("Private")]),
-      node(
-        "pageTreeItem",
-        [
-          title([text("Physics")]),
-          node("pageTreeItem", [title([text("Thermodynamics")])]),
-          node("pageTreeItem", [title([text("Electromagnetism")])]),
-        ],
-        {}
-        // { node: { collapsed: false }, state: { selected: true } }
-      ),
-      node("pageTreeItem", [title([text("Mathematics")])]),
-      node("pageTreeItem", [title([text("Chemistry")])]),
-      node("pageTreeItem", [title([text("Economics")])]),
-    ]),
+    // node("pageTree", [
+    //   title([text("Private")]),
+    //   node(
+    //     "pageTreeItem",
+    //     [
+    //       title([text("Physics")]),
+    //       node("pageTreeItem", [title([text("Thermodynamics")])]),
+    //       node("pageTreeItem", [title([text("Electromagnetism")])]),
+    //     ],
+    //     {}
+    //     // { node: { collapsed: false }, state: { selected: true } }
+    //   ),
+    //   node("pageTreeItem", [title([text("Mathematics")])]),
+    //   node("pageTreeItem", [title([text("Chemistry")])]),
+    //   node("pageTreeItem", [title([text("Economics")])]),
+    // ]),
 
     node("section", [title([text("Phycology")])]),
 

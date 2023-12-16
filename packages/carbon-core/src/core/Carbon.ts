@@ -86,7 +86,6 @@ export class Carbon extends EventEmitter {
 		this.ready = false;
 		this.ticks = [];
 
-
 		// init plugins
 		pm.plugins.forEach(p => p.init(this));
 	}

@@ -80,7 +80,6 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 					.remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
 					.select(after)
 					.dispatch();
-				console.log('DXDX');
 
 				return
 			}
