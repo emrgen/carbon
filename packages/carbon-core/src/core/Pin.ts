@@ -14,7 +14,7 @@ enum PinReference {
 	back = 'back',
 }
 
-export const IDENTITY_OFFSET = -10;
+export const IDENTITY_OFFSET = -1;
 
 // materialized pin is a pin that is not a reference to a i
 export class Pin {
@@ -27,59 +27,8 @@ export class Pin {
 
 	static IDENTITY = new Pin(Node.IDENTITY, IDENTITY_OFFSET);
 
-	get isInvalid() {
-		return this.offset === -10;
-	}
-
-	get point(): Point {
-		return Point.toStart(this.node.id, this.offset);
-	}
-
-	get isAtStart(): boolean {
-		return this.offset === 0;
-	}
-
-	get isAtEnd(): boolean {
-		return this.offset === this.node.focusSize;
-	}
-
-	get isBefore() {
-		if (this.node.isEmpty) return false
-		return !this.node.isEmpty && this.offset === 0
-	}
-
-	get isWithin() {
-		if (this.node.isEmpty) return true
-		return 0 < this.offset && this.offset < this.node.focusSize;
-	}
-
-	get isAfter() {
-		if (this.node.isEmpty) return false
-		return this.offset === this.node.focusSize
-	}
-
-	// align pin to the left when it is in the middle of the two text blocks
-	get leftAlign(): Pin {
-		const { prevSibling } = this.node;
-		if (!this.node.isEmpty && this.offset === 0 && prevSibling?.isFocusable) {
-			return Pin.create(prevSibling, prevSibling.focusSize);
-		} else {
-			return this;
-		}
-	}
-
-	// align pin to the right when it is in the middle of the two text blocks
-	get rightAlign(): Pin {
-		const { nextSibling } = this.node;
-		if (!this.node.isEmpty && this.offset === this.node.focusSize && nextSibling?.isFocusable) {
-			return Pin.create(nextSibling, 0);
-		} else {
-			return this;
-		}
-	}
-
-	static default(node: Node): Pin {
-		return new Pin(node, -10);
+	static identity(): Pin {
+		return Pin.IDENTITY
 	}
 
 	static fromPoint(point: Point, store: NodeMap): Optional<Pin> {
@@ -166,6 +115,58 @@ export class Pin {
 		this.node = node;
 		this.offset = offset;
 		this.ref = ref;
+	}
+
+
+	get isInvalid() {
+		return this.offset === -10;
+	}
+
+	get point(): Point {
+		return Point.toStart(this.node.id, this.offset);
+	}
+
+	get isAtStart(): boolean {
+		return this.offset === 0;
+	}
+
+	get isAtEnd(): boolean {
+		return this.offset === this.node.focusSize;
+	}
+
+	get isBefore() {
+		if (this.node.isEmpty) return false
+		return !this.node.isEmpty && this.offset === 0
+	}
+
+	get isWithin() {
+		if (this.node.isEmpty) return true
+		return 0 < this.offset && this.offset < this.node.focusSize;
+	}
+
+	get isAfter() {
+		if (this.node.isEmpty) return false
+		return this.offset === this.node.focusSize
+	}
+
+	// align pin to the left when it is in the middle of the two text blocks
+	get leftAlign(): Pin {
+		const { prevSibling } = this.node;
+		if (!this.node.isEmpty && this.offset === 0 && prevSibling?.isFocusable) {
+			return Pin.create(prevSibling, prevSibling.focusSize);
+		} else {
+			return this;
+		}
+	}
+
+	// align pin to the right when it is in the middle of the two text blocks
+	get rightAlign(): Pin {
+		const { nextSibling } = this.node;
+		if (!this.node.isEmpty && this.offset === this.node.focusSize && nextSibling?.isFocusable) {
+			return Pin.create(nextSibling, 0);
+		} else {
+			return this;
+		}
 	}
 
 	// lift pin to the parent (possibly to the text block)

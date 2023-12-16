@@ -1,21 +1,14 @@
 import { Optional } from '@emrgen/types';
-import { each, isArray, isEmpty, merge } from 'lodash';
+import { each, isArray,  merge } from 'lodash';
 import { ContentMatch } from './ContentMatch';
 import { Fragment } from './Fragment';
 import { MarkSet } from './Mark';
 import { Node } from './Node';
 import { NodeSpec, Schema } from './Schema';
-import { HTMLAttrs, NodeJSON, NodeName } from './types';
-import { NodeData } from './NodeData';
+import { HTMLAttrs,  NodeName } from './types';
 import { NodeAttrsJSON } from "./NodeAttrs";
 import { NodeStateJSON } from "./NodeState";
 import { InitNodeJSON } from "@emrgen/carbon-core";
-
-export type Attrs = { readonly [attr: string]: any }
-
-const defaultAttrs: NodeSpec = {
-
-}
 
 const specGroups = (name: string, spec: NodeSpec) => {
 	const groups = new Set(spec.group ? spec.group.split(" ") : []);
@@ -26,16 +19,6 @@ const specGroups = (name: string, spec: NodeSpec) => {
 		groups.add('inline');
 	}
 	return Array.from(groups);
-}
-
-const defaultSpec: NodeSpec = {
-	// collapsable: false,
-	// selectable: true,
-	// atom: false,
-	// group: '',
-	// content: '',
-	// marks: '',
-	// inline: false,
 }
 
 const IDENTITY_NODE_SPEC: NodeSpec = {
@@ -230,9 +213,7 @@ export class NodeType {
 	}
 
 	// create a default node based on schema
-	default(params: DefaultParams = {}): Optional<Node> {
-		// console.log(this.name);
-
+	default(): Optional<Node> {
 		if (this.isText) {
 			return this.schema.text('');
 		}

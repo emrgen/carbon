@@ -4,7 +4,7 @@ export class CarbonCache {
   constructor() {
     this.cache = new Map();
     setInterval(() => {
-      console.log('cache hit count', this.hitCount);
+      // console.log('cache hit count', this.hitCount);
       this.hitCount = 0;
     }, 1000 * 5);
 
@@ -16,7 +16,7 @@ export class CarbonCache {
   get<T>(key: string, fn?: () => T, expire?: number): T {
     const value = this.cache.get(key);
     if (value !== undefined) {
-      console.log('cache hit', key, value);
+      // console.log('cache hit', key, value);
       this.hitCount++;
       return value;
     }

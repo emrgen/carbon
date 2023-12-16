@@ -62,7 +62,7 @@ export class Carbon extends EventEmitter {
 
 		const map = new NodeMap();
 		content.forAll(n => map.set(n.id, n));
-		this.state = CarbonState.create(scope, content, PinnedSelection.default(content), map);
+		this.state = CarbonState.create(scope, content, PinnedSelection.IDENTITY, map);
 		StateScope.set(scope, this.state.nodeMap);
 		this.runtime = new CarbonRuntime();
 

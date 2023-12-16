@@ -235,7 +235,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				const { app, event, node } = ctx;
 				event.preventDefault();
 				const { selection } = app;
-				if (!selection.isBlock) {
+				if (selection.isBlock) {
 					if (selection.nodes.length > 1) {
 						console.log("TODO: select first top level node");
 						return
@@ -255,8 +255,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				const { app, event, node } = ctx;
 				event.preventDefault();
 				const { selection } = app;
-				if (!selection.isBlock) {
-					if (selection.nodes.length > 1) {
+				if (selection.isBlock) {
+					if (selection.nodes.length) {
 						console.log("TODO: select first top level node");
 						return
 					}

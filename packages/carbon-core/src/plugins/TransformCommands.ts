@@ -18,7 +18,6 @@ import { SelectionPatch } from "../core/DeleteGroup";
 import { p14 } from "../core/Logger";
 import { Node } from "../core/Node";
 import { NodeId } from "../core/NodeId";
-import { BlockSelection } from "../core/NodeSelection";
 import { NodeType } from "../core/NodeType";
 import { Pin } from "../core/Pin";
 import { Point } from "../core/Point";
@@ -61,9 +60,8 @@ declare module '@emrgen/carbon-core' {
       unwrap(node: Node): Optional<Transaction>;
       change(node: Node, name: NodeName): Optional<Transaction>;
       update(node: Node, attrs: Record<string, any>): Optional<Transaction>;
-      // HOT
       merge(prev: Node, next: Node): Optional<Transaction>;
-      paste(selection: PinnedSelection, blockSelection: BlockSelection, slice: Slice): Optional<Transaction>;
+      paste(selection: PinnedSelection, slice: Slice): Optional<Transaction>;
     };
   }
 }
@@ -201,19 +199,20 @@ export class TransformCommands extends BeforePlugin {
     return focusNode;
   }
 
-  private paste(app: Carbon, selection: PinnedSelection, blockSelection: BlockSelection, slice: Slice): Optional<Transaction> {
+  private paste(app: Carbon, selection: PinnedSelection, slice: Slice): Optional<Transaction> {
     if (slice.isEmpty) {
       return;
     }
 
-    const sliceClone = slice.clone(app);
+    const sliceClone = slice.clone();
     const { root, nodes } = sliceClone;
 
     // console.log('xxx', nodes.map(n => n.id.toString()), root.id.toString());
 
     // if the selection is not empty, we need to paste the nodes after the last node
-    if (!blockSelection.isEmpty) {
-      const lastNode = last(blockSelection.blocks) as Node
+    if (selection.isBlock) {
+      const {nodes} = selection
+      const lastNode = last(selection.nodes) as Node
       const focusNode = this.findFocusNode(nodes);
       const tr = app.tr.insert(Point.toAfter(lastNode.id), nodes)
       if (focusNode) {

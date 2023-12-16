@@ -20,7 +20,7 @@ export class ClipboardPlugin extends AfterPlugin {
           console.log('Serialized =>', serialized);
           event.clipboardData.setData('text/plain', serialized);
 
-          app.state.runtime.clipboard.setSlice(slice);
+          app.state.changes.clipboard = slice;
         }
         // delete the selection
         app.cmd.keyboard.backspace(ctx)?.dispatch();
@@ -39,33 +39,31 @@ export class ClipboardPlugin extends AfterPlugin {
 
           console.log(slice.root.children.map(n => n.textContent));
 
-          app.state.runtime.clipboard.setSlice(slice);
+          app.runtime.clipboard = slice;
           return
         }
       },
       paste: (ctx: EventContext<any>) => {
         const { event, app } = ctx
         preventAndStop(event);
-        const { selection, blockSelection } = app
+        const { selection } = app
 
-        if (!app.state.runtime.clipboard.isEmpty) {
-          const { slice } = app.state.runtime.clipboard;
-          app.cmd.transform.paste(selection, blockSelection, slice)?.dispatch()
+        if (!app.state.changes.clipboard.isEmpty) {
+          const slice = app.state.changes.clipboard;
+          app.cmd.transform.paste(selection, slice)?.dispatch()
         } else {
 
         }
-        console.log('paste', app.state.runtime.clipboard.slice.root);
+        console.log('paste', app.runtime.clipboard.root);
       }
     };
   }
 
   slice(app: Carbon): Slice {
-    const { selection, blockSelection: nodeSelection } = app;
-    console.log(nodeSelection.size);
-
-    if (nodeSelection.size) {
-      const { blocks } = nodeSelection;
-      const cloned = blocks.map(n => {
+    const { selection,  } = app;
+    if (selection.isBlock) {
+      const { nodes } = selection;
+      const cloned = nodes.map(n => {
         const node = app.schema.cloneWithId(n)
         node.updateState({ selected: false })
         return node

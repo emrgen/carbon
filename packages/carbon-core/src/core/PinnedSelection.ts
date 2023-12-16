@@ -10,6 +10,13 @@ import { ActionOrigin } from './actions';
 import { sortNodes } from "@emrgen/carbon-core";
 
 export class PinnedSelection {
+
+	static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
+
+	static identity(): PinnedSelection {
+		return PinnedSelection.IDENTITY
+	}
+
 	// map dom selection to editor selection
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
 		const domSelection = window.getSelection();
@@ -104,11 +111,6 @@ export class PinnedSelection {
 		// console.log(p14('%c[info]'), 'color:pink', p30('fromDom:Selection'), selection.toString());
 
 		return selection;
-	}
-
-	static default(doc: Node): PinnedSelection {
-		const pin = Pin.default(doc);
-		return PinnedSelection.create(pin, pin);
 	}
 
 	static fromPin(pin: Pin): PinnedSelection {

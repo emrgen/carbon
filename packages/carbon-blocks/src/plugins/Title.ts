@@ -73,8 +73,7 @@ export class TitlePlugin extends NodePlugin {
 		return {
 			shiftEnter: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, selection } = ctx;
-				const { blockSelection } = app;
-				if (!blockSelection.isEmpty) return
+				if (selection.isBlock) return
 
 				if (selection.isCollapsed) {
 					preventAndStopCtx(ctx);

@@ -82,7 +82,7 @@ export class EventManager {
 				event,
 				app: this.app,
 				node: lastNode,
-				selection: PinnedSelection.default(app.content),
+				selection: PinnedSelection.identity(),
 				origin: EventOrigin.dom,
 			});
 

@@ -47,7 +47,6 @@ export class RectSelector extends EventEmitter {
 		// console.log(this.region === e.target, editor.state.selectedNodeIds.size)
 		this.downEvent = e;
 		if (this.region === e.target) {
-			// const blockSelection = app.state.blockSelection;
 			// if (blockSelection.size) {
 			// 	app.tr.selectNodes(blockSelection.blockIds).dispatch();
 			// }

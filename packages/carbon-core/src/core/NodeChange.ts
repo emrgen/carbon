@@ -2,6 +2,7 @@ import { Optional } from "@emrgen/types";
 import { NodeIdSet } from "./BSet";
 import { PinnedSelection } from "./PinnedSelection";
 import { PointedSelection } from "./PointedSelection";
+import { Slice } from "@emrgen/carbon-core";
 
 export class StateChanges {
   // this nodes will be rendered
@@ -20,7 +21,7 @@ export class StateChanges {
   opened: NodeIdSet = new NodeIdSet();
   attrs: NodeIdSet = new NodeIdSet();
 
-  clipboard: NodeIdSet = new NodeIdSet();
+  clipboard: Slice = Slice.empty;
   updatedProps: NodeIdSet = new NodeIdSet();
   updatedMarks: NodeIdSet = new NodeIdSet();
   updatedStyles: NodeIdSet = new NodeIdSet();
@@ -65,7 +66,7 @@ export class StateChanges {
   }
 
   get isClipboardDirty() {
-    return this.clipboard.size
+    return this.clipboard.isEmpty
   }
 
   get isPropsDirty() {
