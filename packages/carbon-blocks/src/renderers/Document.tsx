@@ -22,12 +22,11 @@ import {
   useNonDraggable,
   useRectSelectionSurface
 } from "@emrgen/carbon-dragon";
-import { CarbonProps } from "@emrgen/carbon-attributes";
-import { DocumentContext, usePlaceholder } from "../hooks";
+import { DocumentContext } from "../hooks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
-  const { picture = {} } = node.attrs.node;
+  // const  = node.props.get("document");
 
   const app = useCarbon();
   const {store} = app;
@@ -42,8 +41,6 @@ export const DocumentComp = (props: RendererProps) => {
   useEffect(() => {
     app.emit("document:mounted", node);
   }, [app, node]);
-
-  const placeholder = usePlaceholder(node);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     const lastChild = node.lastChild as Node;
@@ -165,8 +162,8 @@ export const DocumentComp = (props: RendererProps) => {
             className: 'carbon-document',
           }}
         >
-          <CarbonNodeContent node={node} custom={placeholder} />
-          <CarbonProps node={node} />
+          <CarbonNodeContent node={node} />
+          {/*<CarbonProps node={node} />*/}
           <CarbonNodeChildren node={node} />
         </CarbonBlock>
       </div>

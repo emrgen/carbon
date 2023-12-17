@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   ActionOrigin,
   CarbonBlock,
-  CarbonNode,
   CarbonNodeChildren,
   CarbonNodeContent,
   EventsIn,
@@ -25,11 +24,11 @@ import {
   useNonDraggable,
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon";
-import { DocumentContext, usePlaceholder } from "@emrgen/carbon-blocks";
+import { DocumentContext } from "@emrgen/carbon-blocks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
-  const { picture = {} } = node.attrs.node;
+  // const { picture = {} } = node.properties.node;
 
   const app = useCarbon();
 
@@ -48,8 +47,6 @@ export const DocumentComp = (props: RendererProps) => {
   useEffect(() => {
     app.emit("document:mounted", node);
   }, [app, node]);
-
-  const placeholder = usePlaceholder(node);
 
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
@@ -132,7 +129,7 @@ export const DocumentComp = (props: RendererProps) => {
     };
   }, [app, ref]);
 
-  console.log(node.attrs);
+  console.log(node.properties);
 
   return (
     <DocumentContext document={node}>
@@ -168,7 +165,7 @@ export const DocumentComp = (props: RendererProps) => {
             className: 'fastype-document',
           }}
         >
-          <CarbonNodeContent node={node} custom={placeholder} />
+          <CarbonNodeContent node={node} />
           <CarbonNodeChildren node={node} />
         </CarbonBlock>
       </div>

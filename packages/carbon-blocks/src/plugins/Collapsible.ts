@@ -1,4 +1,24 @@
-import { BeforePlugin, BlockContent, Carbon, CarbonPlugin, EventContext, EventHandler, Node, NodePlugin, NodeSpec, Pin, PinnedSelection, Point, SerializedNode, Transaction, insertAfterAction, insertBeforeAction, preventAndStopCtx, splitTextBlock } from "@emrgen/carbon-core";
+import {
+  BeforePlugin,
+  BlockContent,
+  Carbon,
+  CarbonPlugin,
+  EventContext,
+  EventHandler,
+  Node,
+  NodePlugin,
+  NodeSpec,
+  Pin,
+  PinnedSelection,
+  Point,
+  SerializedNode,
+  Transaction,
+  insertAfterAction,
+  insertBeforeAction,
+  preventAndStopCtx,
+  splitTextBlock,
+  PlaceholderPath
+} from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 import { identity } from 'lodash';
 import { NestablePlugin } from "./Nestable";
@@ -36,16 +56,16 @@ export class Collapsible extends NodePlugin {
         tags: ['toggle list', 'toggle', 'collapsible', 'list'],
         order: 6,
       },
-      attrs: {
-        node: {
-          placeholder: 'Toggle',
-          collapsed: false,
-        },
-        html: {
-          // contentEditable: false,
-          suppressContentEditableWarning: true,
-        }
-      },
+      // attrs: {
+      //   node: {
+      //     placeholder: 'Toggle',
+      //     collapsed: false,
+      //   },
+      //   html: {
+      //     // contentEditable: false,
+      //     suppressContentEditableWarning: true,
+      //   }
+      // },
     }
   }
 
@@ -72,7 +92,7 @@ export class Collapsible extends NodePlugin {
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        app.tr.updateAttrs(node.id, { node: { collapsed: false } }).dispatch();
+        app.tr.updateProps(node.id, { node: { collapsed: false } }).dispatch();
       },
 
       'ctrl_shift_c': (ctx: EventContext<KeyboardEvent>) => {
@@ -83,7 +103,7 @@ export class Collapsible extends NodePlugin {
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        app.tr.updateAttrs(node.id, { node: { collapsed: true } }).dispatch();
+        app.tr.updateProps(node.id, { node: { collapsed: true } }).dispatch();
       },
       // tab: skipKeyEvent
       enter(ctx: EventContext<KeyboardEvent>) {
@@ -103,9 +123,7 @@ export class Collapsible extends NodePlugin {
 
             const tr = app.cmd.transform.change(node, 'section');
             if (node.firstChild?.isEmpty) {
-              tr?.updateAttrs(node.firstChild.id, {
-                html: {placeholder: ''}
-              })
+              tr?.updateProps(node.firstChild.id, { [PlaceholderPath]: '' })
             }
             tr?.dispatch();
           }
@@ -144,7 +162,7 @@ export class Collapsible extends NodePlugin {
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
     const json = {
       name: splitBlock.isCollapsed ? splitBlock.name : splitBlock.type.splitName,
-      attrs: { node: { collapsed: splitBlock.isCollapsed } },
+      props: { 'remote/': { collapsed: splitBlock.isCollapsed } },
       children: [
         {
           name: 'title',

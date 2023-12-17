@@ -1,5 +1,5 @@
-import { ActionOrigin, CarbonAction, MoveAction, Node, NodeId, Point, RemoveNode } from "../core";
-import { InsertNode } from "../core/actions/InsertNode";
+import { ActionOrigin, CarbonAction, MoveNodeAction, Node, NodeId, Point, RemoveNodeAction } from "../core";
+import { InsertNodeAction } from "../core/actions/InsertNodeAction";
 import { nodeLocation } from "./location";
 
 export const moveNodesActions = (to: Point, nodes: Node[], origin: ActionOrigin = ActionOrigin.UserInput) => {
@@ -10,7 +10,7 @@ export const moveNodesActions = (to: Point, nodes: Node[], origin: ActionOrigin 
       throw new Error('Node has no location');
     }
 
-    actions.push(MoveAction.create(from, to, n.id, origin));
+    actions.push(MoveNodeAction.create(from, to, n.id, origin));
   });
 
   return actions
@@ -20,7 +20,7 @@ export const moveNodesActions = (to: Point, nodes: Node[], origin: ActionOrigin 
 export const insertNodesActions = (at: Point, nodes: Node[], origin: ActionOrigin = ActionOrigin.UserInput) => {
   const actions: CarbonAction[] = [];
   nodes.slice().reverse().forEach(node => {
-    actions.push(InsertNode.fromNode(at, node, origin))
+    actions.push(InsertNodeAction.fromNode(at, node, origin))
   });
 
   return actions;
@@ -29,7 +29,7 @@ export const insertNodesActions = (at: Point, nodes: Node[], origin: ActionOrigi
 export const removeNodesActions = (nodes: Node[], origin: ActionOrigin = ActionOrigin.UserInput) => {
   const actions: CarbonAction[] = [];
   nodes.slice().reverse().forEach(n => {
-    actions.push(RemoveNode.fromNode(nodeLocation(n)!, n, origin));
+    actions.push(RemoveNodeAction.fromNode(nodeLocation(n)!, n, origin));
   });
 
   return actions;
@@ -37,10 +37,10 @@ export const removeNodesActions = (nodes: Node[], origin: ActionOrigin = ActionO
 
 export const insertBeforeAction = (before: Node, node: Node,  origin: ActionOrigin = ActionOrigin.UserInput) => {
   const at = before.prevSibling ? Point.toAfter(before.prevSibling!.id) : Point.toStart(before.parent!.id);
-  return InsertNode.fromNode(at, node, origin);
+  return InsertNodeAction.fromNode(at, node, origin);
 }
 
 export const insertAfterAction = (after: Node, node: Node,  origin: ActionOrigin = ActionOrigin.UserInput) => {
   const at = Point.toAfter(after!.id)
-  return InsertNode.fromNode(at, node, origin);
+  return InsertNodeAction.fromNode(at, node, origin);
 }

@@ -52,19 +52,19 @@ export function BlockContentComp(props: RendererProps) {
 
   const updateContent = useCallback((content: Node) => {
 
-    const getHeaderType = (node: Node): Optional<NodeType> => {
-      const { type } = node;
-      const as = node.attrs.html["data-as"] ?? "";
-      const asType = type.schema.nodes[as];
-      if (type.groups.includes("heading")) {
-        return type
-      }
-      if (asType?.groups.includes("heading")) {
-        return asType
-      }
-
-      return null
-    }
+    // const getHeaderType = (node: Node): Optional<NodeType> => {
+    //   const { type } = node;
+    //   const as = node.properties.html["data-as"] ?? "";
+    //   const asType = type.schema.nodes[as];
+    //   if (type.groups.includes("heading")) {
+    //     return type
+    //   }
+    //   if (asType?.groups.includes("heading")) {
+    //     return asType
+    //   }
+    //
+    //   return null
+    // }
 
     // const traverse = (node: Node, content: InitNodeJSON) => {
     //   if (isHeaderNode(node)) {

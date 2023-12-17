@@ -9,6 +9,7 @@ import { HTMLAttrs,  NodeName } from './types';
 import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { NodeState, NodeStateJSON } from "./NodeState";
 import { InitNodeJSON } from "@emrgen/carbon-core";
+import { NodeProps, NodePropsJson } from "./NodeProps";
 
 const specGroups = (name: string, spec: NodeSpec) => {
 	const groups = new Set(spec.group ? spec.group.split(" ") : []);
@@ -37,9 +38,7 @@ interface DefaultParams {
 export class NodeType {
 	groupsNames: readonly string[];
 
-	attrs: NodeAttrs;
-
-	state: NodeState;
+	props: NodeProps;
 
 	/// True if this node type has inline content.
 	inlineContent!: boolean
@@ -70,8 +69,7 @@ export class NodeType {
 	// spec: spec of the NodeType
 	constructor(readonly name: NodeName, readonly schema: Schema, readonly spec: NodeSpec) {
 		this.groupsNames = specGroups(name, spec);
-		this.attrs = NodeAttrs.from(spec.attrs ?? {});
-		this.state = NodeState.from(spec.state ?? {});
+		this.props = NodeProps.fromJSON(spec.props ?? {});
 
 		this.isBlock = !(spec.inline || name == "text")
 		this.isText = name == "text";
@@ -217,7 +215,7 @@ export class NodeType {
 
 		const blockJson: InitNodeJSON = {
 			name: this.name,
-			children: []
+			children: [],
 		}
 		let { contentMatch } = this
 		if (contentMatch.validEnd) {

@@ -20,10 +20,12 @@ export class BlockContent extends CarbonPlugin {
         icon: 'content',
         tags: ['content', 'page content', 'block content']
       },
-      attrs: {
-        html:{
-          contentEditable: false,
-          suppressContentEditableWarning: true,
+      props: {
+        local:{
+          html: {
+            contentEditable: false,
+            suppressContentEditableWarning: true,
+          }
         }
       }
     }

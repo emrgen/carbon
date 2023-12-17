@@ -3,19 +3,15 @@ import { NodeId } from '../NodeId';
 import { Transaction } from '../Transaction';
 import { NodeName } from '../types';
 import { CarbonAction, ActionOrigin } from './types';
-import { generateActionId } from './utils';
 import { CarbonStateDraft } from '../CarbonStateDraft';
 
-export class ChangeName implements CarbonAction{
-	id: number;
+export class ChangeNameAction implements CarbonAction{
 
 	static create(nodeId: NodeId, from: NodeName, to: NodeName,  origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new ChangeName(nodeId, from, to, origin);
+		return new ChangeNameAction(nodeId, from, to, origin);
 	}
 
-	constructor(readonly nodeId: NodeId, readonly from: string, readonly to: string,readonly origin: ActionOrigin) {
-		this.id = generateActionId();
-	}
+	constructor(readonly nodeId: NodeId, readonly from: string, readonly to: string, readonly origin: ActionOrigin) {}
 
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { nodeId, to } = this;
@@ -35,7 +31,7 @@ export class ChangeName implements CarbonAction{
 
 	inverse(): CarbonAction {
 		const { nodeId, from, to } = this;
-		return ChangeName.create(nodeId, to, from, ActionOrigin.UserInput);
+		return ChangeNameAction.create(nodeId, to, from, ActionOrigin.UserInput);
 	}
 
 	toString() {

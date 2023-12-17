@@ -51,7 +51,7 @@ export class NestablePlugin extends AfterPlugin {
 		const { tr } = app;
 		tr?.move(nodeLocation(node)!, to, node.id);
 		if (prevNode.isCollapsed) {
-			tr?.updateAttrs(prevNode.id, { node: { collapsed: false } })
+			tr?.updateProps(prevNode.id, { node: { collapsed: false } })
 		}
 		tr?.select(app.selection.clone());
 
@@ -104,13 +104,13 @@ export class NestablePlugin extends AfterPlugin {
 
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);
-				const as = listNode.attrs.get('html.data-as')
+				const as = listNode.properties.get('html.data-as')
 				// if listNode is not rendered as the listNode.name
 				// remove the data-as attribute
 				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
 					tr
-						.updateAttrs(listNode.id, {
+						.updateProps(listNode.id, {
 							html: {
 								'data-as': '',
 								placeholder: '',
@@ -128,10 +128,10 @@ export class NestablePlugin extends AfterPlugin {
 
 					preventAndStopCtx(ctx);
 					if (listNode.isCollapsed) {
-						tr.updateAttrs(listNode.id, { node: { collapsed: false } })
+						tr.updateProps(listNode.id, { node: { collapsed: false } })
 					}
 
-					tr.updateAttrs(listNode.firstChild?.id!, { html:{placeholder: ''} })
+					tr.updateProps(listNode.firstChild?.id!, { html:{placeholder: ''} })
 					tr
 						.change(listNode.id, listNode.name, 'section')
 						.select(PinnedSelection.fromPin(selection.head))
@@ -181,11 +181,11 @@ export class NestablePlugin extends AfterPlugin {
 				const atStart = selection.head.isAtStartOfNode(listNode);
 				if (!atStart) return
 
-				const as = listNode.attrs.get('html.data-as')
+				const as = listNode.properties.get('html.data-as')
 				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
 					tr
-						.updateAttrs(listNode.id, {
+						.updateProps(listNode.id, {
 							html: {
 								'data-as': ''
 							}

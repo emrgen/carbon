@@ -1,32 +1,19 @@
 import { NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
-import { ActionResult, NULL_ACTION_RESULT } from "./Result";
 import { CarbonAction, ActionOrigin } from "./types";
 import { Point } from '../Point';
-import { generateActionId } from './utils';
 import { classString } from "../Logger";
-import { Node } from "../Node";
 import { CarbonStateDraft } from "../CarbonStateDraft";
-import { identity } from "lodash";
 
 // a node can be moved to a new location, relative to another node
 // the node can be moved before, after, or inside the target node at start or end
-export class MoveAction implements CarbonAction {
-	id: number;
-	origin: ActionOrigin;
+export class MoveNodeAction implements CarbonAction {
 
 	static create(from: Point, to: Point, nodeId: NodeId, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new MoveAction(from, to, nodeId, origin)
+		return new MoveNodeAction(from, to, nodeId, origin)
 	}
 
-	// static fromIds(from: Point, to: Point, nodeIds: NodeId[], origin: ActionOrigin = ActionOrigin.UserInput) {
-	// 	return new MoveAction(from, to, nodeIds, origin)
-	// }
-
-	constructor(readonly from: Point, readonly to: Point, readonly nodeId: NodeId, origin: ActionOrigin) {
-		this.id = generateActionId();
-		this.origin = origin;
-	}
+	constructor(readonly from: Point, readonly to: Point, readonly nodeId: NodeId, readonly origin: ActionOrigin) {}
 
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { app } = tr;
@@ -128,7 +115,7 @@ export class MoveAction implements CarbonAction {
 
 	inverse(): CarbonAction {
 		const { from, to, nodeId } = this;
-		return MoveAction.create(to, from, nodeId, this.origin);
+		return MoveNodeAction.create(to, from, nodeId, this.origin);
 	}
 
 	toString() {

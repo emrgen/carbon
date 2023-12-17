@@ -6,3 +6,7 @@ export * from './useSelectionHalo'
 export * from './useEventHandlers'
 export * from './useSelectionChange'
 export * from './useCarbonOverlay'
+export * from './useNodeActivated'
+export * from './useNodeSelected';
+export * from './useNodeOpened';
+export * from './useNodeState';

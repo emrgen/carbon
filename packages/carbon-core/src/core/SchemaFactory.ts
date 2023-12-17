@@ -4,23 +4,21 @@ import { NodeId } from './NodeId';
 import { Schema } from './Schema';
 import { BlockContent, InlineContent } from './NodeContent';
 
-import {  generateBlockId, generateTextId } from './actions/utils';
 import { deepCloneMap, NodeIdFactory } from "@emrgen/carbon-core";
-import { cloneDeep, isEmpty, merge } from "lodash";
-import { NodeAttrs } from "./NodeAttrs";
-import { NodeState } from "./NodeState";
-
+import { isEmpty } from "lodash";
+import { NodeProps } from "./NodeProps";
+import { v4 as uuidv4 } from 'uuid';
 
 
 export class SchemaFactory {
 	scope: Symbol;
 
 	static blockId() {
-		return generateBlockId();
+		return uuidv4().slice(-10)
 	}
 
 	static textId() {
-		return generateTextId();
+		return uuidv4().slice(-10)
 	}
 
 	constructor(scope: Symbol) {
@@ -35,18 +33,17 @@ export class SchemaFactory {
 			throw new Error(`Node Plugin is not registered ${name}`);
 		}
 
-		const attrs = isEmpty(json.attrs) ? NodeAttrs.from(type.attrs) : NodeAttrs.from(merge(cloneDeep(type.attrs), json.attrs));
-		const state = isEmpty(json.state) ? NodeState.from(type.state) : NodeState.from(merge(cloneDeep(type.state), json.state));
+		const properties = isEmpty(json.attrs) ? type.props : type.props.merge(NodeProps.fromJSON(json.props));
 
 		if (name === 'text') {
 			const content = InlineContent.create(text);
 			const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(nodeIdFactory.textId());
-			return Node.create({ id: nodeId, type, content, attrs, state, scope });
+			return Node.create({ id: nodeId, type, content, properties, scope });
 		} else {
 			const nodes = children.map(n => schema.nodeFromJSON(n));
 			const content = BlockContent.create(nodes);
 			const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(nodeIdFactory.blockId());
-			return Node.create({ id: nodeId, type, content, attrs, state, scope });
+			return Node.create({ id: nodeId, type, content, properties, scope });
 		}
 	}
 

@@ -23,10 +23,12 @@ export class Code extends CarbonPlugin {
         icon: 'code',
         tags: ['code', 'codeblock', 'pre', 'source'],
       },
-      attrs: {
-        node: {
-          focusPlaceholder: 'Code',
-          emptyPlaceholder: '',
+      props: {
+        local: {
+          placeholder: {
+            empty: '',
+            focused: ''
+          },
         },
         html: {
           suppressContentEditableWarning: true,
@@ -180,30 +182,30 @@ export class BeforeCodePlugin extends BeforePlugin {
           } else if (content instanceof Token) {
             return intoTextNode(content);
           } else if (typeof content === 'string') {
-            return schema.text(content, {
-              attrs: {
-                html: {
-                  [`className`]: `token ${type}`,
-                }
-              }
-            });
+            // return schema.text(content, {
+            //   attrs: {
+            //     html: {
+            //       [`className`]: `token ${type}`,
+            //     }
+            //   }
+            // });
           }
         } else if (Array.isArray(token)) {
           return flatten(token).map(intoTextNode);
         } else {
-          return schema.text(token, {
-            attrs: {
-              html: {
-                [`className`]: `token`,
-              }
-            }
-          });
+          // return schema.text(token, {
+          //   attrs: {
+          //     html: {
+          //       [`className`]: `token`,
+          //     }
+          //   }
+          // });
         }
       };
 
       const textNodes = flattenDeep(flattenDeep(tokens).map(intoTextNode));
 
-      tr.add(SetContentAction.fromNative(title.id, BlockContent.create(textNodes), false));
+      tr.add(SetContentAction.create(title.id, BlockContent.create(textNodes)));
       tr.select(after);
       return tr;
 

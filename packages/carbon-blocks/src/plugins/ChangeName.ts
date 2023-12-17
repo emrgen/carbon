@@ -5,7 +5,7 @@ import {
   EventContext,
   EventHandler,
   InputRule,
-  MoveAction,
+  MoveNodeAction,
   Pin,
   PinnedSelection,
   Point,
@@ -22,10 +22,10 @@ export class ChangeName extends BeforePlugin {
   inputRules = new BeforeInputRuleHandler([
     //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberedList')),
     new InputRule(/^(\[\]\s)(.)*/, this.tryChangeName('todo', ['nestable'])),
-    new InputRule(/^(#\s)(.)*/, this.tryChangeAttrs('h1', ['nestable'])),
-    new InputRule(/^(##\s)(.)*/, this.tryChangeAttrs('h2', ['nestable'])),
-    new InputRule(/^(###\s)(.)*/, this.tryChangeAttrs('h3', ['nestable'])),
-    new InputRule(/^(####\s)(.)*/, this.tryChangeAttrs('h4', ['nestable'])),
+    new InputRule(/^(#\s)(.)*/, this.tryChangeName('h1', ['nestable'])),
+    new InputRule(/^(##\s)(.)*/, this.tryChangeName('h2', ['nestable'])),
+    new InputRule(/^(###\s)(.)*/, this.tryChangeName('h3', ['nestable'])),
+    new InputRule(/^(####\s)(.)*/, this.tryChangeName('h4', ['nestable'])),
 
     new InputRule(/^(-\s)(.)*/, this.tryChangeName('bulletedList', ['nestable'])),
     new InputRule(/^(\*\s)(.)*/, this.tryChangeName('bulletedList', ['nestable'])),
@@ -52,7 +52,7 @@ export class ChangeName extends BeforePlugin {
     };
   }
 
-  tryChangeAttrs(name: string, groups: string[]) {
+  __tryChangeAttrs(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;
@@ -63,8 +63,6 @@ export class ChangeName extends BeforePlugin {
         console.error('node type not found', name);
         return
       }
-
-      console.log('tryChangeAttrs', ctx.node.textContent, name);
 
       ctx.event.preventDefault();
       ctx.stopPropagation();
@@ -86,7 +84,7 @@ export class ChangeName extends BeforePlugin {
       const action = SetContentAction.withContent(titleNode.id, content, content);
       tr.add(action)
 
-      tr.updateAttrs(block.id, {
+      tr.updateProps(block.id, {
         html: {
           'data-as': name,
           'data-group': '',
@@ -130,7 +128,7 @@ export class ChangeName extends BeforePlugin {
         const listNumber = app.cmd.numberedList.listNumber(block);
         const inputNumber = parseInt(match[1].slice(0, -2));
          if (listNumber != inputNumber) {
-           tr.updateAttrs(block.id, {
+           tr.updateProps(block.id, {
              node: {
                listNumber: parseInt(match[1].slice(0, -2)) ?? 1
              }
@@ -147,7 +145,7 @@ export class ChangeName extends BeforePlugin {
         const action = SetContentAction.create(titleNode.id,BlockContent.empty());
         tr.add(action);
         const placeholder = type.spec.attrs?.node?.placeholder ?? ''
-        tr.updateAttrs(titleNode.id, {
+        tr.updateProps(titleNode.id, {
           html: { placeholder }
         })
       } else {
@@ -167,10 +165,10 @@ export class ChangeName extends BeforePlugin {
 
 
       tr.change(block.id, block.name, name)
-      tr.updateAttrs(block.id, { node: { typeChanged: true },});
+      tr.updateProps(block.id, { node: { typeChanged: true },});
       // expand collapsed block
       if (block.isCollapsed) {
-        tr.updateAttrs(block.id, { node: { collapsed: false } });
+        tr.updateProps(block.id, { node: { collapsed: false } });
       }
       tr.select(after)
         .dispatch()
@@ -200,7 +198,7 @@ export class ChangeName extends BeforePlugin {
         tr.add(moveNodesActions(to, moveNodes));
       }
       tr.change(block.id, block.name, type)
-      tr.updateAttrs(block.id, { node: { typeChanged: true },  });
+      tr.updateProps(block.id, { node: { typeChanged: true },  });
       tr.select(after)
       tr.dispatch()
     }
@@ -228,7 +226,7 @@ export class ChangeName extends BeforePlugin {
       const at = Point.toAfter(block.id);
       const moveActions: CarbonAction[] = []
       reverse(block.children.slice(1)).forEach(n => {
-        moveActions.push(MoveAction.create(nodeLocation(n)!, at, n.id));
+        moveActions.push(MoveNodeAction.create(nodeLocation(n)!, at, n.id));
       });
 
       const match = text.match(regex);
@@ -243,7 +241,7 @@ export class ChangeName extends BeforePlugin {
         // .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
         .add(insertBeforeAction(block, divider))
         .change(block.id, block.name, block.type.splitName)
-        .updateAttrs(block.id, { node: { typeChanged: true } })
+        .updateProps(block.id, { node: { typeChanged: true } })
         .add(moveActions)
         .select(after)
         .dispatch()

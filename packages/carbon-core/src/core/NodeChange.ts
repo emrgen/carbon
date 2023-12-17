@@ -19,7 +19,7 @@ export class StateChanges {
   selected: NodeIdSet = new NodeIdSet();
   activated: NodeIdSet = new NodeIdSet();
   opened: NodeIdSet = new NodeIdSet();
-  attrs: NodeIdSet = new NodeIdSet();
+  props: NodeIdSet = new NodeIdSet();
 
   clipboard: Slice = Slice.empty;
   updatedProps: NodeIdSet = new NodeIdSet();
@@ -40,7 +40,7 @@ export class StateChanges {
     diff.selected = this.selected;
     diff.activated = this.activated;
     diff.opened = this.opened;
-    diff.attrs = this.attrs;
+    diff.props = this.props;
     diff.clipboard = this.clipboard;
     diff.updatedProps = this.updatedProps;
 
@@ -64,7 +64,7 @@ export class StateChanges {
   }
 
   get isLocalStateDirty() {
-      return this.moved.size || this.deleted.size || this.inserted.size || this.updated.size || this.renamed.size || this.attrs.size;
+      return this.moved.size || this.deleted.size || this.inserted.size || this.updated.size || this.renamed.size || this.props.size;
   }
 
   get isClipboardDirty() {
@@ -95,7 +95,7 @@ export class StateChanges {
     this.selected.freeze();
     this.activated.freeze();
     this.opened.freeze();
-    this.attrs.freeze();
+    this.props.freeze();
     this.clipboard.freeze();
     this.updatedProps.freeze();
     this.updatedMarks.freeze();
@@ -116,7 +116,7 @@ export class StateChanges {
     clone.deleted = this.deleted.clone();
     clone.moved = this.moved.clone();
     clone.state = this.state.clone();
-    clone.attrs = this.attrs.clone();
+    clone.props = this.props.clone();
     clone.clipboard = this.clipboard.clone();
     clone.updatedProps = this.updatedProps.clone();
     clone.updatedMarks = this.updatedMarks.clone();
@@ -138,7 +138,7 @@ export class StateChanges {
       selected: this.selected.toJSON(),
       activated: this.activated.toJSON(),
       opened: this.opened.toJSON(),
-      attrs: this.attrs.toJSON(),
+      attrs: this.props.toJSON(),
       clipboard: this.clipboard.toJSON(),
       updatedProps: this.updatedProps.toJSON(),
       updatedMarks: this.updatedMarks.toJSON(),

@@ -3,36 +3,13 @@ import { useCarbonChange } from "./useCarbonChange";
 import { NodeChangeType } from "../core/ChangeManager";
 import { Node } from '../core/Node';
 import { NodeAttrs } from "../core/NodeAttrs";
+import { identity } from "lodash";
+import { useNodeActivated, useNodeOpened, useNodeSelected } from "@emrgen/carbon-core";
 
 interface UseTextChangeProps {
 	node: Node,
 	onChange(node: Node)
 }
-
-export const useTextChange = (props: UseTextChangeProps) => {
-	const { node } = props;
-	const change = useCarbonChange();
-	// const [watched, setWatched] = useState(node);
-
-	useEffect(() => {
-		const onChange = (value: Node) => {
-			props.onChange(value);
-			// change.mounted(value);
-			// setWatched(value);
-			// console.log("updated", node.id.toString(), node.version, watched === value);
-		};
-
-		change.subscribe(node.id, NodeChangeType.update, onChange);
-		return () => {
-			change.unsubscribe(node.id, NodeChangeType.update, onChange);
-		}
-	}, [change, node.id, node.version, props]);
-
-	return {
-		// node: watched,
-		change,
-	};
-};
 
 interface UseNodeChangeProps {
 	node: Node,
@@ -70,60 +47,5 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 	};
 };
 
-// start watching for the node state change
-export const useNodeStateChange = (props: UseNodeChangeProps) => {
-	const { node } = props;
 
-	const state = useMemo(() => {
-		return node.state.normalize();
-	}, [node.state]);
-
-	const attributes = useMemo(() => {
-		const attrs = {};
-		const state = node.state;
-		if (state.activated) {
-			attrs['data-activated'] = true;
-		}
-		if (state.selected) {
-			attrs['data-selected'] = true;
-		}
-		if (state.opened) {
-			attrs['data-opened'] = true;
-		}
-
-		return attrs;
-	},[node.state]);
-
-	return {
-		isActive: state.activated,
-		isSelected: state.selected,
-		isOpened: state.opened,
-		state,
-		attributes,
-	};
-};
-
-
-// start watching for the node state change
-export const useNodeAttrs = (props: UseNodeChangeProps) => {
-	const { node } = props;
-	const change = useCarbonChange();
-	const [attrs, setAttrs] = useState<NodeAttrs>(new NodeAttrs(node.attrs));
-
-	useEffect(() => {
-		const onChange = (value: Node) => {
-			setAttrs(value.attrs);
-		};
-
-		change.subscribe(node.id, NodeChangeType.update, onChange);
-		return () => {
-			change.unsubscribe(node.id, NodeChangeType.update, onChange);
-		}
-	}, [change, node]);
-
-	useEffect(() => {
-		// change.mounted(node, NodeChangeType.update);
-	}, [node, change]);
-
-	return attrs;
-};
+// const useNodeSelected = (props: UseNodeChangeProps) => {

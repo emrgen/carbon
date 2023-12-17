@@ -1,4 +1,5 @@
 import { CarbonPlugin, EventContext, EventHandlerMap, NodeSpec, preventAndStopCtx } from "@emrgen/carbon-core";
+import { OpenedPath } from "@emrgen/carbon-core/src/core/NodeProps";
 
 export const PageTreeName = 'pageTree';
 export const PageTreeItemName = 'pageTreeItem';
@@ -59,7 +60,9 @@ export class PageTreeItem extends CarbonPlugin {
         const {parent} = target;
         // if this node is the closest pageTreeItem node to the target, then mark it closed
         if (parent?.name === this.name && target.closest(n => n.name === this.name)?.eq(node)) {
-          ctx.app.tr.updateState(node.id, {opened: false});
+          ctx.app.tr.updateProps(node.id, {
+            [OpenedPath]: false
+          });
         }
       }
     }

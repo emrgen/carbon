@@ -21,13 +21,15 @@ export class Callout extends CarbonPlugin {
         icon: 'callout',
         tags: ['callout', "side note", ]
       },
-      attrs: {
-        node: {
-          focusPlaceholder: 'Callout',
-          placeholder: 'Callout',
-        },
-        html: {
-          suppressContentEditableWarning: true,
+      props: {
+        local: {
+          placeholder: {
+            empty: 'Callout',
+            focus: 'Callout'
+          },
+          html: {
+            suppressContentEditableWarning: true,
+          }
         }
       }
     }

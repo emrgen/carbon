@@ -28,15 +28,17 @@ export class DocPlugin extends CarbonPlugin {
 			isolating: true,
 			sandbox: true,
 			document: true,
-			attrs: {
-				html: {
-					spellCheck: false,
-					contentEditable: true,
-					suppressContentEditableWarning: true,
+			props: {
+				local: {
+					html: {
+						spellCheck: false,
+						contentEditable: true,
+						suppressContentEditableWarning: true,
+					},
+					placeholder: {
+						empty: 'Untitled',
+					}
 				},
-				node: {
-					placeholder: 'Untitled',
-				}
 			},
 		}
 	}

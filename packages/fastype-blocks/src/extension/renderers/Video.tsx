@@ -49,7 +49,7 @@ export function VideoComp(props: RendererProps) {
   const ref = useRef<any>(null);
   const containerRef = useRef<any>(null);
   const [height, setHeight] = useState(100);
-  const { html, node: video } = node.attrs;
+  const { html, node: video } = node.properties;
   const { provider, src } = video;
   const dimensions = useDimensions(containerRef, true);
   const [ready, setReady] = useState(false);
@@ -80,7 +80,7 @@ export function VideoComp(props: RendererProps) {
     if (!boundRef.current) return null;
     const { left, top, width, height } =
       boundRef.current?.getBoundingClientRect();
-    const { node: video } = node.attrs;
+    const { node: video } = node.properties;
     return createPortal(
       <Box pos={"absolute"} w={width} h={height} left={left} top={top}>
         <Box
@@ -120,7 +120,7 @@ export function VideoComp(props: RendererProps) {
                 updater.onClose();
                 actions.setSubmitting(false);
                 app.tr
-                  .updateAttrs(node.id, {
+                  .updateProps(node.id, {
                     node: {
                       url: values.url,
                       height: boundRef.current?.offsetWidth * (9 / 16),
@@ -161,7 +161,7 @@ export function VideoComp(props: RendererProps) {
       </Box>,
       overlayRef.current
     );
-  }, [overlayRef, node.attrs, node.id, updater, app.tr]);
+  }, [overlayRef, node.properties, node.id, updater, app.tr]);
 
   return (
     <CarbonBlock {...props} custom={{ ...connectors, onClick }} ref={ref}>

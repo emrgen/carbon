@@ -25,4 +25,5 @@ export * from './NodeType'
 export * from './TransactionTree'
 export * from './NodeMap'
 export * from './types'
+export * from './NodeProps'
 

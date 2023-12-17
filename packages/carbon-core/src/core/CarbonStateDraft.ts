@@ -7,13 +7,19 @@ import { NodeMap } from "./NodeMap";
 import { PinnedSelection } from "./PinnedSelection";
 import { NodeContent } from "./NodeContent";
 import { PointedSelection } from "./PointedSelection";
-import { identity, isEmpty, sortBy, values, zip } from "lodash";
 import { NodeType } from "./NodeType";
-import {  NodeAttrsJSON } from "./NodeAttrs";
 import { Point, PointAt } from "./Point";
 import {  NodeStateJSON } from "./NodeState";
 import { ActionOrigin } from "@emrgen/carbon-core";
 import { nodePlaceholder } from "../utils/attrs";
+import {
+  ActivatedPath,
+  EmptyPlaceholderPath,
+  NodeProps,
+  NodePropsJson,
+  PlaceholderPath,
+  SelectedPath
+} from "./NodeProps";
 
 // NOTE: it is internal to the state and should not be used outside of it
 // represents a draft of a state, used to prepare a new state before commit
@@ -31,22 +37,22 @@ export class CarbonStateDraft {
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
     // this.selection = state.selection.unpin();
-    state.changes.state.nodes(state.nodeMap).forEach(n => {
-      const state = n.state.normalize();
-      if (state.activated) {
-        this.changes.activated.add(n.id);
-      }
-      if (state.selected) {
-        this.changes.selected.add(n.id);
-      }
-      if (state.opened) {
-        this.changes.opened.add(n.id);
-      }
-
-      if (values(state).some(identity)) {
-        this.changes.state.add(n.id);
-      }
-    })
+    // state.changes.state.nodes(state.nodeMap).forEach(n => {
+    //   const state = n.state.normalize();
+    //   if (state.activated) {
+    //     this.changes.activated.add(n.id);
+    //   }
+    //   if (state.selected) {
+    //     this.changes.selected.add(n.id);
+    //   }
+    //   if (state.opened) {
+    //     this.changes.opened.add(n.id);
+    //   }
+    //
+    //   if (values(state).some(identity)) {
+    //     this.changes.state.add(n.id);
+    //   }
+    // })
   }
 
   get(id: NodeId): Optional<Node> {
@@ -147,26 +153,26 @@ export class CarbonStateDraft {
 
     // console.log('prepare', changed.length, changed.map(n => n.node.id.toString()));
     // nodes with truthy states need to be added to the new state list
-    this.state.changes.state.nodes(this.state.nodeMap).filter(n => {
-      return !isEmpty(n.state.normalize())
-    }).forEach(n => {
-      this.changes.state.add(n.id)
-    });
-
-    // update state changes to reflect the new state
-    this.changes.state.nodes(this.nodeMap).forEach(n => {
-      console.debug('state change', n.id.toString(), n.name, n.state.normalize());
-      const state = n.state.normalize();
-      if (state.activated) {
-        this.changes.activated.add(n.id);
-      }
-      if (state.selected) {
-        this.changes.selected.add(n.id);
-      }
-      if (state.opened) {
-        this.changes.opened.add(n.id);
-      }
-    })
+    // this.state.changes.state.nodes(this.state.nodeMap).filter(n => {
+    //   return !isEmpty(n.state.normalize())
+    // }).forEach(n => {
+    //   this.changes.state.add(n.id)
+    // });
+    //
+    // // update state changes to reflect the new state
+    // this.changes.state.nodes(this.nodeMap).forEach(n => {
+    //   console.debug('state change', n.id.toString(), n.name, n.state.normalize());
+    //   const state = n.state.normalize();
+    //   if (state.activated) {
+    //     this.changes.activated.add(n.id);
+    //   }
+    //   if (state.selected) {
+    //     this.changes.selected.add(n.id);
+    //   }
+    //   if (state.opened) {
+    //     this.changes.opened.add(n.id);
+    //   }
+    // })
 
     changed.sort(NodeDepthComparator);
 
@@ -225,19 +231,10 @@ export class CarbonStateDraft {
       });
 
       if (node.isTextBlock) {
-        if (content.isEmpty) {
-          node.updateAttrs({
-            html:{
-              placeholder: nodePlaceholder(this.nodeMap.parent(node)),
-            }
-          })
-        } else {
-          node.updateAttrs({
-            html:{
-              placeholder: '',
-            }
-          })
-        }
+        const placeholder = content.isEmpty ? nodePlaceholder(this.nodeMap.parent(node)) : '';
+        node.updateProps({
+          [EmptyPlaceholderPath]: placeholder,
+        })
       } else if (node.name === 'text') {
 
       }
@@ -392,11 +389,8 @@ export class CarbonStateDraft {
     this.mutable(parentId, parent => {
       parent.remove(node);
       if (parent.isTextBlock && parent.isEmpty) {
-        console.log('xxxxxxxx', parent, parent.parent);
-        parent.updateAttrs({
-          html: {
-            placeholder: nodePlaceholder(this.nodeMap.parent(parent)),
-          }
+        parent.updateProps({
+          [PlaceholderPath]: nodePlaceholder(this.nodeMap.parent(parent)),
         })
       }
       // NOTE: if the parent is empty, we need to trigger parent render to render placeholder
@@ -425,58 +419,46 @@ export class CarbonStateDraft {
     this.changes.renamed.add(nodeId);
   }
 
-  updateAttrs(nodeId: NodeId, attrs: Partial<NodeAttrsJSON>) {
+  updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
-    this.mutable(nodeId, node => {
-      node.updateAttrs(attrs);
-    });
+    const nodeProps = NodeProps.fromJSON(props);
+    const selected = nodeProps.get(SelectedPath);
+    const activated = nodeProps.get(ActivatedPath);
+    const opened = nodeProps.get(SelectedPath);
 
-    this.changes.attrs.add(nodeId);
-  }
-
-  updateState(nodeId: NodeId, state: NodeStateJSON) {
-    if (!this.drafting) {
-      throw new Error("Cannot change name on a draft that is already committed");
-    }
-
-    console.log('update state', nodeId.toString(), state.selected);
-
-    if (state.selected) {
+    if (selected) {
       this.changes.selected.add(nodeId);
-    } else if (state.selected === false) {
+    } else if (selected === false) {
       this.changes.selected.remove(nodeId);
     }
-    if (state.activated) {
+
+    if (activated) {
       this.changes.activated.add(nodeId);
-    } else if (state.activated === false) {
+    } else if (activated === false) {
       this.changes.activated.remove(nodeId);
     }
-    if (state.opened) {
+
+    if (opened) {
       this.changes.opened.add(nodeId);
-    } else if (state.opened === false) {
+    } else if (opened === false) {
       this.changes.opened.remove(nodeId);
     }
 
     this.mutable(nodeId, node => {
-      node.updateState(state)
-      if (node.isEmpty) {
-        // force render of all descendants if the node is empty
-        node.descendants().forEach(n => {
-          this.mutable(n.id)
-        });
-      }
+      node.updateProps(props);
     });
 
-    this.changes.state.add(nodeId);
+    this.changes.props.add(nodeId);
   }
 
   updateSelection(selection: PointedSelection) {
     if (!this.drafting) {
       throw new Error("Cannot update selection on a draft that is already committed");
     }
+    
     console.log('update selection', selection.toString());
     this.selection = selection;
     this.changes.selection = selection;

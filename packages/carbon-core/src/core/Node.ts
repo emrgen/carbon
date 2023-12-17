@@ -1,4 +1,4 @@
-import { cloneDeep, findIndex, first, flatten, identity, isEmpty, last, merge, noop, reverse } from "lodash";
+import { findIndex, first, flatten, identity, isEmpty, last, merge, noop, reverse } from "lodash";
 import { Fragment } from "./Fragment";
 
 import { Optional, Predicate, With } from "@emrgen/types";
@@ -6,17 +6,15 @@ import { takeUpto } from "../utils/array";
 import { ContentMatch } from "./ContentMatch";
 import { classString } from "./Logger";
 import { Mark, MarkSet } from "./Mark";
-import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { BlockContent, NodeContent } from "./NodeContent";
 import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeType } from "./NodeType";
 import { IDENTITY_SCOPE, no, NodeEncoder, NodeJSON, yes } from "./types";
-import { NodeState, NodeStateJSON } from "./NodeState";
 import EventEmitter from "events";
 import { StateScope } from "./StateScope";
-import { NodeBTree } from "./BTree";
 import { NodeLinks } from "./NodeLinks";
 import { NODE_CACHE_INDEX } from "./CarbonCache";
+import { ActivatedPath, NodeProps, NodePropsJson, OpenedPath, SelectedPath } from "./NodeProps";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -34,9 +32,8 @@ export interface NodeCreateProps {
 	content: NodeContent;
 	linkName?: string;
 	links?: NodeLinks;
+	properties?: NodeProps;
 	marks?: MarkSet;
-	attrs?: NodeAttrs;
-	state?: NodeState;
 	meta?: Record<string, any>;
 	version?: number;
 	deleted?: boolean;
@@ -91,8 +88,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 	linkName: string;
 	links: NodeLinks;
 	marks: MarkSet;
-	attrs: NodeAttrs;
-	state: NodeState;
+	properties: NodeProps;
+
 
 	// meta is used for storing data like version, cerate time, last update time, etc.
 	meta: Record<string, any> = {};
@@ -105,6 +102,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		id: NodeId.IDENTITY,
 		type: NodeType.IDENTITY,
 		content: BlockContent.empty(),
+		properties: NodeProps.empty(),
 	})
 
 	static removeId(json: NodeJSON) {
@@ -135,8 +133,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 			links = new NodeLinks(),
 			linkName = '',
 			marks = MarkSet.empty(),
-			attrs = NodeAttrs.empty(),
-			state = NodeState.from(type.state),
+			properties = type.props,
 			meta = {},
 			version = 0,
 			deleted = false,
@@ -152,8 +149,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.links = links
 		this.marks = marks;
 
-		this.attrs = attrs;
-		this.state = state;
+		this.properties = properties;
 		this.meta = meta;
 
 		this.version = version;
@@ -171,10 +167,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return `${this.id.id}/${this.version}`
 	}
 
-	get placeholder() {
-		return this.type.attrs.html.placeholder
-	}
-
 	// nodes that are not allowed to merge with any other node
 	get canMerge() {
 		return !this.type.isIsolating && !this.isAtom;
@@ -189,15 +181,15 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get isActive() {
-		return this.state.activated;
+		return this.properties.get(ActivatedPath);
 	}
 
 	get isSelected() {
-		return this.state.selected;
+		return this.properties.get(SelectedPath);
 	}
 
 	get isOpen() {
-		return this.state.opened;
+		return this.properties.get(OpenedPath);
 	}
 
 	get size(): number {
@@ -230,7 +222,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// focus steps count within the node
 	// start and end locations are within the node
 	get focusSize(): number {
-		if (this.isInlineAtom) return this.attrs.get('size') ?? 1
+		if (this.isInlineAtom) return this.properties.get('size') ?? 1
 		// if (this.isEmpty && this.isInline) return 1
 		// if (this.isEmpty || this.isInlineAtom) return 1;
 		// if (this.isBlockAtom) return 0;
@@ -297,7 +289,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get isCollapsed() {
-		return !!this.attrs.get('node.collapsed');
+		return !!this.properties.get('node.collapsed');
 	}
 
 	get children() {
@@ -738,10 +730,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 		// console.log('removed', this.root?.version, this.root?.name, this.root?.test_key, this.root?.updatedChildren)
 	}
 
-	updateText(text: string) {
-		this.content.updateText(text)
-	}
-
 	updateContent(content: NodeContent) {
 		this.content = content.setParentId(this.id);
 	}
@@ -752,20 +740,14 @@ export class Node extends EventEmitter implements IntoNodeId {
 			throw Error('cannot change type of immutable node:' + this.id.toString())
 		}
 
-		this.attrs = type.attrs.merge(this.attrs.diff(type.attrs));
-		this.state = type.state.merge(this.state.diff(type.state));
+		this.properties = this.properties.merge(type.props)
 		this.type = type;
 	}
 
 	// @mutates
-	updateAttrs(props: NodeAttrsJSON) {
-		console.log('updating attrs', this.id.toString(), props);
-		this.attrs = this.attrs.update(props);
-	}
-
-	// @mutates
-	updateState(state: NodeStateJSON) {
-		this.state = this.state.update(state);
+	updateProps(props: NodePropsJson) {
+		console.log('updating props', this.id.toString(), props);
+		this.properties = this.properties.update(props);
 	}
 
 	// @mutates
@@ -814,14 +796,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 			name: type.name,
 		});
 
-		const attrs = this.attrs.toJSON();
-		const state = this.state.toJSON();
-		if (!isEmpty(attrs)) {
-			json.attrs = attrs;
-		}
+		const props = this.properties.toJSON();
 
-		if (!isEmpty(state)) {
-			json.state = state;
+		if (!isEmpty(props)) {
+			json.props = props;
 		}
 
 		return {
@@ -834,21 +812,9 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return encoder.encode(this);
 	}
 
-	viewJSON() {
-		const { id, type, state, attrs, textContent } = this;
-		return {
-			id,
-			type,
-			state,
-			attrs,
-			children: this.children.map(n => n.viewJSON()),
-			text: this.isText ? this.textContent : ''
-		}
-	}
-
 	// creates a mutable copy of the node
 	clone(map: (node: Node) => Optional<Node> = identity): Node {
-		const { scope, parentId, id, type, content, links, attrs, state, marks, version } = this;
+		const { scope, parentId, id, type, content, links, properties, marks, version } = this;
 		// const links = new Map(this.links);
 
 		const clone = Node.create({
@@ -858,8 +824,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 			type,
 			content: content.clone(map).setParent(this).setParentId(this.id),
 			links,
-			attrs: attrs.clone(),
-			state: state.clone(),
+			properties: properties.clone(),
 			marks,
 			version: version + 1,
 		});
@@ -881,8 +846,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		// unlink from parent when freezing
 		this._parent = null;
 		this.content.freeze();
-		this.attrs.freeze();
-		this.state.freeze();
+		this.properties.freeze();
 
 		Object.freeze(this)
 		return this;

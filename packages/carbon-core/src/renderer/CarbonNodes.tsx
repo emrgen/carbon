@@ -11,6 +11,7 @@ import { useCarbon } from '../hooks/useCarbon';
 import { useNodeChange } from "../hooks/useNodeChange";
 import { preventAndStop } from '../utils/event';
 import { usePrevious } from "@uidotdev/usehooks";
+import { LocalHtmlAttrPath, NamePath, TagPath } from "../core/NodeProps";
 
 export const JustEmpty = () => {
   return <span>&shy;</span>;
@@ -35,9 +36,16 @@ const mapName = (name: string, parentName?: string) => {
 
 const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => {
   const { tag: Element = "div", node, children, custom } = props;
-  const { key, name, attrs, version } = node;
+  const { key, name, version } = node;
   const editor = useCarbon();
   const ref = useRef(null);
+
+  const attributes = useMemo(() => {
+    return {
+      ...custom,
+      ...node.properties.prefix(LocalHtmlAttrPath) ?? {}
+    }
+  },[custom])
 
   // connect ref
   // https://t.ly/H4By
@@ -60,10 +68,8 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
       ref={ref}
       data-name={name}
       data-version={version}
-      data-id={node.key}
-      // data-attrs-name={attrs.node.name ?? ''}
-      {...attrs.html}
-      {...custom}
+      data-id={key}
+      {...attributes}
     >
       {children}
     </Element>
@@ -83,23 +89,6 @@ export const RawText = memo(function RT(props: RendererProps) {
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
   const {node} = props;
-  // const { node } = useNodeChange(props);
-
-  // console.log('InnerCarbonText', node.parent?.version, node.version,node.textContent);
-  const handleClick = (e) => {
-    preventAndStop(e)
-    window.location.href = node.attrs.node.link;
-  }
-
-  if (node.attrs.node.link) {
-    return (
-      <a href={node.attrs.node.link} onClick={handleClick}>
-        <CarbonElement node={node} tag="span">
-          <>{node.isEmpty ? <CarbonEmpty node={node} /> : node.textContent}</>
-        </CarbonElement>
-      </a>
-    );
-  }
 
   return (
     <CarbonElement node={node} tag="span">
@@ -120,9 +109,14 @@ export const CarbonText = memo(InnerCarbonText, (prev, next) => {
 
 // render block node with div
 const InnerCarbonBlock = (props: RendererProps, ref) => {
-  const { node, children, custom, tag = 'div' } = props;
+  const { node, children, custom } = props;
+
+  const tag = useMemo(() => {
+    return props.tag ?? node.properties.get(TagPath) ?? 'div';
+  },[props.tag, node.properties]);
+
   return (
-    <CarbonElement node={node} tag={node.attrs.node?.tag ?? tag} ref={ref} custom={custom}>
+    <CarbonElement node={node} tag={tag} ref={ref} custom={custom}>
       {children}
     </CarbonElement>
   );
@@ -153,7 +147,11 @@ export const CarbonNode = (props: RendererProps) => {
   //   console.log('CarbonNode', node.name, node.id.toString(), node.toJSON());
   // })
 
-  const RegisteredComponent = app.component(node.attrs.node?.name ?? node.name);
+  const name = useMemo(() => {
+    return (node.properties.get(NamePath) ?? node.name) as string;
+  },[node.name, node.properties]);
+
+  const RegisteredComponent = app.component(name);
   if (RegisteredComponent && RegisteredComponent === CarbonNode) {
     console.warn(`${node.name} is registered as CarbonNode, this will fall back to CarbonDefaultNode`)
   }

@@ -1,9 +1,7 @@
 import { CarbonStateDraft } from "../CarbonStateDraft";
 import { Transaction } from "../Transaction"
-import { ActionResult } from './Result';
 
 export interface CarbonAction {
-	id: number;
 	origin: ActionOrigin;
 	execute(tr: Transaction, draft: CarbonStateDraft);
 	inverse(origin?: ActionOrigin): CarbonAction
@@ -26,24 +24,11 @@ export enum ActionOrigin {
 }
 
 export enum ActionType {
-	change = 'change',
 	move = 'move',
 	select = 'select',
-
-	insertNode = 'insertNode',
-	removeNode = 'removeNode',
-	insertText = 'insertText',
-	removeText = 'removeText',
-
+	insert = 'insert',
+	remove = 'remove',
 	mark = 'mark',
-	data = 'data',
-
-	selectNodes = 'selectNodes',
-	activateNodes = 'activateNodes',
-
-	updateAttrs = 'updateAttrs',
-	openDocument = 'openDocument',
-
-	null = 'null',
-	custom = 'custom',
+	props = 'props',
+	content = 'content',
 }

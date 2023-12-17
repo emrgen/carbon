@@ -2,69 +2,41 @@ import { classString } from "../Logger";
 import { NodeContent } from "../NodeContent";
 import { IntoNodeId, NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
-import { ActionResult } from "./Result";
 import { ActionOrigin, CarbonAction } from "./types";
-import { generateActionId } from "./utils";
 import { Optional } from '@emrgen/types';
 import { CarbonStateDraft } from '../CarbonStateDraft';
 
 export class SetContentAction implements CarbonAction {
-  id: number;
-  origin: ActionOrigin;
   before: Optional<NodeContent>;
 
   static create(nodeRef: IntoNodeId, after: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContentAction(nodeRef.intoNodeId(), after, null, false, origin)
+    return new SetContentAction(nodeRef.intoNodeId(), after, null, origin)
   }
 
   static withContent(nodeId: NodeId, after: NodeContent, before: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContentAction(nodeId, after, before, false, origin)
+    return new SetContentAction(nodeId, after, before, origin)
   }
 
-  static fromNative(nodeId: NodeId, after: NodeContent, native: boolean, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContentAction(nodeId, after, null, native, origin)
-  }
-
-  constructor(readonly nodeId: NodeId, readonly after: NodeContent, before: Optional<NodeContent>, readonly native: boolean, origin: ActionOrigin) {
-    this.id = generateActionId()
-    this.origin = origin;
-    this.before = before;
-  }
+  constructor(readonly nodeId: NodeId, readonly after: NodeContent, before: Optional<NodeContent>, readonly origin: ActionOrigin) {}
 
   execute(tr: Transaction, draft: CarbonStateDraft) {
     const {app,} = tr
     const {nodeId, after} = this
     const node = draft.get(nodeId);
     if (!node) {
-      return ActionResult.withError(`Node ${nodeId} not found`);
+      throw new Error('failed to find target node from: ' + nodeId.toString())
     }
 
     draft.updateContent(nodeId, after);
 
-    // if (this.before === null || this.before === undefined) {
     const a = (b) => b.clone(a)
     this.before = node.content.clone(a);
-
-    // const wasEmptyBefore = node.isEmpty;
-    // node?.updateContent(after);
-    // node.forAll(n => {
-    //   app.store.put(n);
-    // });
-
-    // for first time we need to update parent to update the parent appearance like placeholder
-    // if (wasEmptyBefore) {
-    //   tr.updated(node.parent!);
-    // }
   }
 
   merge(other: SetContentAction): SetContentAction {
     console.log('####', this.before);
-    
-    return SetContentAction.withContent(this.nodeId, other.after, this.before!, this.origin)
-  }
 
-  updatesSameNode(other: SetContentAction): boolean {
-    return this.nodeId.eq(other.nodeId);
+    return SetContentAction.withContent(this.nodeId, other.after, this.before!, this.origin)
   }
 
   inverse(): CarbonAction {

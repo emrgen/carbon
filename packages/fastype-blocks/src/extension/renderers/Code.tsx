@@ -83,10 +83,10 @@ const CodeContent = (props: RendererProps) => {
 
   useEffect(() => {
     if (!node.parent) return;
-    if (node.parent.attrs.node.typeChanged) {
+    if (node.parent.properties.node.typeChanged) {
       console.log("focus");
       app.tr
-        .updateAttrs(node.parent.id, { node: { typeChanged: false } })
+        .updateProps(node.parent.id, { node: { typeChanged: false } })
         .dispatch();
       refText.current?.focus();
     }
@@ -140,7 +140,7 @@ const CodeContent = (props: RendererProps) => {
 
         const { tr } = app;
         tr.change(parent.id, parent.name, "section");
-        tr.updateAttrs(parent.id, { node: { typeChanged: true } });
+        tr.updateProps(parent.id, { node: { typeChanged: true } });
         tr.select(
           PinnedSelection.fromPin(Pin.toStartOf(parent)!),
           ActionOrigin.UserInput

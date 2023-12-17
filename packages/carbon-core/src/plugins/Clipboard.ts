@@ -5,6 +5,7 @@ import { Range } from "../core/Range";
 import { Slice } from "../core/Slice";
 import { preventAndStop } from "../utils/event";
 import { blocksBelowCommonNode } from "../utils/findNodes";
+import { SelectedPath } from "../core/NodeProps";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
@@ -65,7 +66,7 @@ export class ClipboardPlugin extends AfterPlugin {
       const { nodes } = selection;
       const cloned = nodes.map(n => {
         const node = app.schema.cloneWithId(n)
-        node.updateState({ selected: false })
+        node.updateProps({ [SelectedPath]: false })
         return node
       })
 
@@ -74,6 +75,7 @@ export class ClipboardPlugin extends AfterPlugin {
         content: BlockContent.create(cloned),
         id: NodeId.create(String(Math.random())),
       });
+
       const first = rootNode.firstChild!;
       const last = rootNode.lastChild!;
       return Slice.create(rootNode, first, last);

@@ -28,8 +28,8 @@ export function MediaView(props: MediaViewProps) {
   const app = useCarbon();
   const ref = useRef<HTMLDivElement>(null);
   const [initialSize, setInitialSize] = useState({ width: 0, height: 0 });
-  const [width, setWidth] = useState(node.attrs.node.width ?? 0);
-  const [height, setHeight] = useState(node.attrs.node.height ?? 0);
+  const [width, setWidth] = useState(node.properties.node.width ?? 0);
+  const [height, setHeight] = useState(node.properties.node.height ?? 0);
   const [documentWidth, setDocumentWidth] = useState(0);
 
   const [opacity, setOpacity] = React.useState(0);
@@ -60,7 +60,7 @@ export function MediaView(props: MediaViewProps) {
     const docEl = app.store.element(document.id);
     if (!docEl) return;
     const parentWidth = docEl.offsetWidth ?? 0;
-    
+
     setDocumentWidth(parentWidth);
   },[app.store, node.parents])
 
@@ -102,7 +102,7 @@ export function MediaView(props: MediaViewProps) {
       const dx = roundInOffset(2 * deltaX, 50);
       const dy = roundInOffset(deltaY, 50);
       // console.log("dx", dx, "dy", dy, documentWidth);
-      
+
       if (e.id === "media-left-resizer") {
         const nw = constrain(roundInOffset(width - dx, 50), 100, documentWidth);
         setWidth(nw);
@@ -133,7 +133,7 @@ export function MediaView(props: MediaViewProps) {
     (e: DndEvent) => {
       if (!node.id.eq(e.node.id)) return;
       app.tr
-        .updateAttrs(node.id, {
+        .updateProps(node.id, {
           node: { width, height },
         })
         .dispatch();
@@ -151,9 +151,9 @@ export function MediaView(props: MediaViewProps) {
     <Flex
       // top={0}
       position={"relative"}
-      height={height ? height + "px" : node.attrs.node.height ? node.attrs.node.height + "px" : "60px"}
+      height={height ? height + "px" : node.properties.node.height ? node.properties.node.height + "px" : "60px"}
       width={width ? width + "px" : "full"}
-      justifyContent={node.attrs.node.justifyContent ?? "center"}
+      justifyContent={node.properties.node.justifyContent ?? "center"}
       transition={"width 0.3s, height 0.3s"}
       // bg="red"
     >

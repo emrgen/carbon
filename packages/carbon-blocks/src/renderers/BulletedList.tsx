@@ -12,7 +12,6 @@ import {
   useConnectorsToProps,
   useDragDropRectSelect,
 } from "@emrgen/carbon-dragon";
-import { usePlaceholder } from "../hooks/usePlaceholder";
 
 export const BulletedListComp = (props: RendererProps) => {
   const { node } = props;

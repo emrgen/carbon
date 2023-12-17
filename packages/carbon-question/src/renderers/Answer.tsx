@@ -1,4 +1,3 @@
-import { usePlaceholder } from "@emrgen/carbon-blocks";
 import {
   Carbon,
   CarbonBlock,
@@ -10,11 +9,10 @@ import React from "react";
 
 export function QuestionAnswerComp(props: RendererProps) {
   const { node } = props;
-  const placeholder = usePlaceholder(node);
-  
+
   return (
     <CarbonBlock node={node}>
-      <CarbonNodeContent node={node} custom={placeholder}/>
+      <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node}/>
     </CarbonBlock>
   );

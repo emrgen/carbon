@@ -1,45 +1,33 @@
 import { useCallback, useEffect, useMemo } from "react";
 import {
-  ActionOrigin,
   CarbonNodeChildren,
-  Pin,
-  PinnedSelection,
   Point,
   preventAndStop,
   useCarbon,
-  useSelectionHalo,
   CarbonBlock,
-  CarbonChildren,
   CarbonNodeContent,
   RendererProps,
-  EventsOut,
   stop,
-  useNodeStateChange, Node, PointedSelection
+  Node, useNodeActivated
 } from "@emrgen/carbon-core";
 
 import { BlockEvent } from "../events";
 import { HiOutlinePlus } from "react-icons/hi";
 import {
-  MdOutlineKeyboardArrowDown,
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
 import { PageTreeItemName, PageTreeName } from "../plugins/PageTree";
-import { usePrevious } from "@uidotdev/usehooks";
+import { OpenedPath } from "@emrgen/carbon-core/src/core/NodeProps";
 
 export const PageTreeItemComp = (props: RendererProps) => {
-  const { node, placeholder } = props;
-  const { attributes, isOpened } = useNodeStateChange(props);
+  const { node } = props;
+  const activated = useNodeActivated(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
 
-  // const { listeners } = useDragDropRectSelect({ node, ref });
-  // console.log(node.textContent);
-  // console.log(attributes, isOpen);
-  // console.log(node.attrs.node.emptyPlaceholder, node.name);
-
   const handleToggle = useCallback(() => {
     app.tr
-      .updateAttrs(node.id, { node: { collapsed: !isCollapsed } })
+      .updateProps(node.id, { node: { collapsed: !isCollapsed } })
       .dispatch();
   }, [app.tr, node, isCollapsed]);
 
@@ -49,11 +37,15 @@ export const PageTreeItemComp = (props: RendererProps) => {
       preventAndStop(e);
 
       const item = app.schema.type(PageTreeItemName).default()!;
-      item.updateState({ opened: true })
+
+      item.updateProps({
+        [OpenedPath]: true,
+      });
+
       const at = Point.toAfter(node.child(0)!.id);
       console.log(item, at);
       app.tr
-        .updateAttrs(node.id, { node: { collapsed: false } })
+        .updateProps(node.id, { node: { collapsed: false } })
         .insert(at, item)
         // .then(() => {
         //   return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });
@@ -74,24 +66,24 @@ export const PageTreeItemComp = (props: RendererProps) => {
       if (!fileTree) return;
 
       // find all opened file tree items with the same file tree
-      const openFileTreeItems = state.changes.state.nodes(state.nodeMap)
+      const openFileTreeItems = state.changes.props.nodes(state.nodeMap)
         .filter(n => n.type.name === node.type.name)
-        .filter(n => n.state.opened);
+        .filter(n => n.isOpen);
 
       // close all other opened file tree items
       if (openFileTreeItems.length > 0) {
         if (openFileTreeItems[0].id === node.id) return;
 
         openFileTreeItems.forEach(n => {
-          tr.updateState(n.id, {
-            opened: false,
+          tr.updateProps(n.id, {
+            [OpenedPath]: false,
           })
         })
       }
 
       tr
-        .updateState(node.id, {
-          opened: true,
+        .updateProps(node.id, {
+          [OpenedPath]: true,
         })
         .then(() => {
           return () => app.emit(BlockEvent.openDocument, { node });
@@ -131,7 +123,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
     <CarbonBlock
       node={node}
       custom={{
-        ...attributes,
+        ...activated.attributes,
       }}
     >
       {!node.isEmpty && (

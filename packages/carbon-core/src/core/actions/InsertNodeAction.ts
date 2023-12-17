@@ -2,28 +2,23 @@ import { CarbonAction } from './types';
 import { Transaction } from '../Transaction';
 import { Point } from '../Point';
 import { ActionOrigin } from './types';
-import { generateActionId } from './utils';
 import { classString } from '../Logger';
-import { RemoveNode } from './RemoveNode';
+import { RemoveNodeAction } from './RemoveNodeAction';
 import { Node } from '../Node';
 import { CarbonStateDraft } from '../CarbonStateDraft';
 import { deepCloneMap, NodeJSON } from "../types";
 import { NodeId } from "../NodeId";
 
-export class InsertNode implements CarbonAction {
-	id: number;
-
+export class InsertNodeAction implements CarbonAction {
 	static fromNode(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new InsertNode(at, node.id, node.toJSON(), origin);
+		return new InsertNodeAction(at, node.id, node.toJSON(), origin);
 	}
 
 	static create(at: Point, id: NodeId, node: NodeJSON, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new InsertNode(at, id, node, origin);
+		return new InsertNodeAction(at, id, node, origin);
 	}
 
-	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {
-		this.id = generateActionId();
-	}
+	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {}
 
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { at, node: json } = this;
@@ -55,7 +50,7 @@ export class InsertNode implements CarbonAction {
 	inverse(): CarbonAction {
 		const { at, nodeId, node: json,  } = this;
 		// TODO: check if nodeJson and node should be the same
-		return RemoveNode.create(at, nodeId, json, this.origin)
+		return RemoveNodeAction.create(at, nodeId, json, this.origin)
 	}
 
 	toString() {

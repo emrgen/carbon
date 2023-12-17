@@ -42,10 +42,10 @@ import { useFastypeOverlay } from "../../hooks/useFastypeOverlay";
 
 export function ImageComp(props: RendererProps) {
   const { node } = props;
-  const { node: image } = node.attrs;
+  const { node: image } = node.properties;
   const app = useCarbon();
   const [ready, setReady] = useState(false);
-  const [caption, setCaption] = useState(node.attrs.node.caption ?? "");
+  const [caption, setCaption] = useState(node.properties.node.caption ?? "");
 
   const ref = useRef<HTMLDivElement>(null);
   const boundRef = useRef<HTMLDivElement>(null);
@@ -84,7 +84,7 @@ export function ImageComp(props: RendererProps) {
         app.selection.nodes
           .filter((n) => n.name === "image")
           .forEach(({ id }) => {
-            tr.updateAttrs(id, {
+            tr.updateProps(id, {
               html: {
                 style: {
                   justifyContent: align,
@@ -163,7 +163,7 @@ export function ImageComp(props: RendererProps) {
                 updater.onClose();
                 actions.setSubmitting(false);
                 app.tr
-                  .updateAttrs(node.id, {
+                  .updateProps(node.id, {
                     node: {
                       src: values.src,
                       // height:
@@ -221,16 +221,16 @@ export function ImageComp(props: RendererProps) {
     const { width, height } = imageRef.current;
     setAspectRatio(height / width);
 
-    if (!node.attrs.node.height) {
+    if (!node.properties.node.height) {
       app.tr
-        .updateAttrs(node.id, {
+        .updateProps(node.id, {
           node: {
             height: height,
           },
         })
         .dispatch();
     }
-  }, [app.tr, imageRef, node.attrs.node.height, node.id]);
+  }, [app.tr, imageRef, node.properties.node.height, node.id]);
 
   return (
     <>
@@ -273,7 +273,7 @@ export function ImageComp(props: RendererProps) {
             pos={"relative"}
             onClick={handleClick}
             bg={ready ? "" : "#eee"}
-            h={node.attrs.node.src && !ready ? "100%" : "auto"}
+            h={node.properties.node.src && !ready ? "100%" : "auto"}
             // boxShadow={ready ? "0 0 0px 20px red" : ""}
           >
             <>
@@ -304,7 +304,7 @@ export function ImageComp(props: RendererProps) {
               {image.src && (
                 <>
                   <LazyLoadImage
-                    src={node.attrs.node.src}
+                    src={node.properties.node.src}
                     alt=""
                     onLoad={(e) => {
                       setReady(true);

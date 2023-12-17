@@ -15,32 +15,17 @@ import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
 import { TransactionManager } from "@emrgen/carbon-core";
-import { TransactionType } from './actions';
-import { ChangeName } from './actions/ChangeName';
-import { CommandError } from './actions/Error';
-import { MoveAction } from "@emrgen/carbon-core";
-import { RemoveNode } from "@emrgen/carbon-core";
-import { SelectAction } from './actions/Select';
-import { SetContentAction } from "@emrgen/carbon-core";
-import { UpdateAttrs } from './actions/UpdateAttrs';
-import { ActionOrigin, CarbonAction } from './actions/types';
+import { ChangeNameAction } from './actions/ChangeNameAction';
+import { UpdatePropsAction } from './actions/UpdatePropsAction';
+import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
 import { CarbonStateDraft } from './CarbonStateDraft';
-import { NodeStateJSON } from "./NodeState";
-import { UpdateState } from "./actions/UpdateState";
-
-export class TransactionError {
-	commandId: number;
-	error: CommandError;
-	get message() {
-		return this.error.message
-	}
-	constructor(commandId: number, error: CommandError) {
-		this.commandId = commandId;
-		this.error = error;
-	}
-}
+import { ActivatedPath, OpenedPath, SelectedPath } from "./NodeProps";
+import { SetContentAction } from "./actions/SetContentAction";
+import { SelectAction } from "./actions/SelectAction";
+import { RemoveNodeAction } from "./actions/RemoveNodeAction";
+import { MoveNodeAction } from "./actions/MoveNodeAction";
 
 let _id = 0
 const getId = () => _id++
@@ -52,7 +37,6 @@ export class Transaction {
 	timestamp: number = Date.now();
 	onTick: boolean = false;
 	private actions: CarbonAction[] = [];
-	private error: Optional<TransactionError>;
 	private normalizeIds = new NodeIdSet();
 	private updatedIds = new NodeIdSet();
 
@@ -156,26 +140,29 @@ export class Transaction {
 	}
 
 	remove(at: Point, node: Node, origin = this.origin): Transaction {
-		const state = node.state;
-		// if (state.activated) {
-		// 	this.updateState(node.id, { activated: false }, origin);
-		// }
-		// if (state.selected) {
-		// 	this.updateState(node.id, { selected: false }, origin);
-		// }
-		// if (state.opened) {
-		// 	this.updateState(node.id, { opened: false }, origin)
-		// }
+		const props = node.properties
+		const selected = props.get(SelectedPath);
+		const activated = props.get(ActivatedPath);
+		const opened = props.get(OpenedPath);
+		if (activated) {
+			this.updateProps(node.id, { [ActivatedPath]: false }, origin);
+		}
+		if (selected) {
+			this.updateProps(node.id, { [SelectedPath]: false }, origin);
+		}
+		if (opened) {
+			this.updateProps(node.id, { [OpenedPath]: false }, origin)
+		}
 
-		return this.add(RemoveNode.fromNode(at, node, origin));
+		return this.add(RemoveNodeAction.fromNode(at, node, origin));
 	}
 
 	move(from: Point, to: Point, id: NodeId, origin = this.origin): Transaction {
-		return this.add(MoveAction.create(from, to, id, origin));
+		return this.add(MoveNodeAction.create(from, to, id, origin));
 	}
 
 	change(id: NodeId, from: NodeName, to: NodeName, origin = this.origin): Transaction {
-		return this.add(new ChangeName(id, from, to, origin));
+		return this.add(new ChangeNameAction(id, from, to, origin));
 	}
 
 	mark(start: Point, end: Point, mark: Mark, origin = this.origin): Transaction {
@@ -183,13 +170,8 @@ export class Transaction {
 		return this;
 	}
 
-	updateAttrs(nodeRef: IntoNodeId, attrs: Partial<NodeAttrsJSON>, origin = this.origin): Transaction {
-		this.add(UpdateAttrs.create(nodeRef, attrs, origin))
-		return this;
-	}
-
-	updateState(id: NodeId, state: Partial<NodeStateJSON>, origin = this.origin): Transaction {
-		this.add(UpdateState.create(id, state, origin))
+	updateProps(nodeRef: IntoNodeId, attrs: Partial<NodeAttrsJSON>, origin = this.origin): Transaction {
+		this.add(UpdatePropsAction.create(nodeRef, attrs, origin))
 		return this;
 	}
 
@@ -198,7 +180,7 @@ export class Transaction {
 	selectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		selectIds.forEach(id => {
-			this.updateState(id, { selected: true }, origin)
+			this.updateProps(id, { [SelectedPath]: true }, origin)
 		})
 
 		return this
@@ -208,7 +190,7 @@ export class Transaction {
 		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		selectIds.forEach(id => {
 			console.log('xxx deselecting', id.toString());
-			this.updateState(id, { selected: false }, origin)
+			this.updateProps(id, { [SelectedPath]: false }, origin)
 		})
 
 		return this;
@@ -217,7 +199,7 @@ export class Transaction {
 	activateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		activateIds.forEach(id => {
-			this.updateState(id, { activated: true }, origin)
+			this.updateProps(id, { [ActivatedPath]: true }, origin)
 		})
 
 		return this;
@@ -226,21 +208,11 @@ export class Transaction {
 	deactivateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		activateIds.forEach(id => {
-			this.updateState(id, { activated: false }, origin)
+			this.updateProps(id, { [ActivatedPath]: false }, origin)
 		})
 
 		return this
 	}
-
-	// forceRender(ids: NodeId[], origin = this.origin): Transaction {
-	// 	ids.forEach(id => {
-	// 		this.state.store.get(id)?.markUpdated();
-	// 		this.updatedIds.add(id)
-	// 		// this.state.runtime.updatedNodeIds.add(id);
-	// 	});
-	//
-	// 	return this
-	// }
 
 	oneWay(): Transaction {
 		this.type = TransactionType.OneWay;
@@ -284,9 +256,9 @@ export class Transaction {
 
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
-				console.groupCollapsed('Commit (runtime)');
+				console.group('Commit (runtime)');
 			} else {
-				console.groupCollapsed('Commit', this);
+				console.group('Commit', this);
 			}
 
 			for (const action of this.actions) {
@@ -338,9 +310,6 @@ export class Transaction {
 		}
 	}
 
-	// addSelection(selection: Selection) {
-	// 	this.selections.push(selection);
-	// }
 
 	// normalize the updated nodes in this transaction
 	normalize(...nodes: Node[]) {
@@ -348,12 +317,6 @@ export class Transaction {
 			this.normalizeIds.add(n.id);
 		}));
 	}
-
-	// hideCursor(...nodes: Node[]) {
-	// 	each(nodes, n => {
-	// 		this.runtime.hideCursorNodeIds.add(n.id);
-	// 	});
-	// }
 
 	// merge transactions
 	merge(other: Transaction) {

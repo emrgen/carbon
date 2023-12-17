@@ -6,17 +6,14 @@ import {
   RendererProps,
   preventAndStop,
   useCarbon,
-  useNodeAttrs,
-  useNodeStateChange,
   useSelectionHalo,
 } from "@emrgen/carbon-core";
 import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
-import { usePlaceholder } from "../hooks/usePlaceholder";
+import { CheckedPath } from "@emrgen/carbon-core/src/core/NodeProps";
 
 export default function TodoComp(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
-  const attrs = useNodeAttrs(props);
   const ref = useRef(null);
 
   const selection = useSelectionHalo(props);
@@ -25,20 +22,24 @@ export default function TodoComp(props: RendererProps) {
     useCombineConnectors(dragDropRect, selection)
   );
 
+  const isChecked = useMemo(() => {
+    return !!node.properties.get(CheckedPath);
+  },[node.properties])
+
 
   const handleClick = useCallback(
     (e) => {
       e.stopPropagation();
 
       app.tr
-        .updateAttrs(node.id, {
+        .updateProps(node.id, {
           node: {
-            checked: !attrs.get('node.checked'),
+            checked: !isChecked,
           },
         })
         .dispatch();
     },
-    [app.tr, node.id, attrs]
+    [app.tr, node.id, isChecked]
   );
 
 
@@ -54,11 +55,11 @@ export default function TodoComp(props: RendererProps) {
         <input
           type="checkbox"
           onChange={handleClick}
-          checked={node.attrs.node.isChecked}
+          checked={isChecked}
         />
       </div>
     );
-  }, [handleClick, node.attrs]);
+  }, [handleClick, node.properties]);
 
   return (
     <CarbonBlock {...props} ref={ref} custom={connectors}>

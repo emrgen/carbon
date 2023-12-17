@@ -44,13 +44,14 @@ export class Section extends NodePlugin {
 				tags: ['text', 'section', 'paragraph', 'p'],
 				order: 1,
 			},
-			attrs: {
-				node: {
-					focusPlaceholder: 'Section',
-					emptyPlaceholder: '',
+			props: {
+				local: {
+					placeholder: {
+						empty: '',
+						focused: 'Section'
+					},
 				},
 				html: {
-					// contentEditable: false,
 					suppressContentEditableWarning: true,
 				}
 			}
@@ -75,7 +76,7 @@ export class Section extends NodePlugin {
 		let ret = contentNode?.textContent;
 
 		// TODO: This is a hack to get the correct heading level
-		switch (node.attrs.get('html.data-as')) {
+		switch (node.properties.get('html.data-as')) {
 			case 'h1':
 				ret = '# ' + ret;
 				break

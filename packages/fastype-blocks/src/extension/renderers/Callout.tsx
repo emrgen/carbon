@@ -1,5 +1,4 @@
-import { NestableComp, usePlaceholder } from "@emrgen/carbon-blocks";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 
 import {
   CarbonBlock,
@@ -11,6 +10,7 @@ import {
   preventAndStop,
   useCarbon,
   useSelectionHalo,
+  EmojiPath,
 } from "@emrgen/carbon-core";
 import {
   useCombineConnectors,
@@ -34,7 +34,6 @@ export const Callout = (props: RendererProps) => {
     useCombineConnectors(dragDropRect, selection)
   );
 
-  const placeholder = usePlaceholder(node);
 
   const showEmojiPicker = (e) => {
     preventAndStop(e);
@@ -46,17 +45,20 @@ export const Callout = (props: RendererProps) => {
     console.log("onSelectEmoji", emoji);
     // node.attrs.node.emoji = emoji.unified;
     app.tr
-      .updateAttrs(node.id, { node: { emoji: emoji.unified } })
+      .updateProps(node.id, { node: { emoji: emoji.unified } })
       .select(PinnedSelection.fromPin(Pin.toStartOf(node)!)!)
       .dispatch();
     onClose();
   };
 
+  const emoji = useMemo(() => {
+    return node.properties.get<string>(EmojiPath) ?? "26a0-fe0f";
+  },[node.properties])
+
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
       <CarbonNodeContent
         node={node}
-        custom={placeholder}
         beforeContent={
           <div
             className="fastype-callout-icon"
@@ -71,7 +73,7 @@ export const Callout = (props: RendererProps) => {
               aria-label="Search database"
               icon={
                 <Emoji
-                  unified={node.attrs.node.emoji ?? "26a0-fe0f"}
+                  unified={emoji}
                   size={18}
                 />
               }

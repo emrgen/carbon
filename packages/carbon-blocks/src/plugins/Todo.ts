@@ -36,9 +36,9 @@ export class Todo extends Section {
         const { selection } = app;
         if (selection.head.node.parent?.eq(node)) {
           app.tr
-            .updateAttrs(node.id, {
+            .updateProps(node.id, {
               node: {
-                checked: !node.attrs.get('node.checked'),
+                checked: !node.properties.get('node.checked'),
               },
             })
             .dispatch();
@@ -48,7 +48,7 @@ export class Todo extends Section {
   }
 
   serialize(app: Carbon, node: Node): SerializedNode {
-    const prefix = node.attrs.node?.isChecked ? ['x'] : '[]';
+    const prefix = node.properties.node?.isChecked ? ['x'] : '[]';
     return `${prefix} ${app.serialize(node.child(0)!)}` + app.cmd.nestable.serializeChildren(node);
   }
 }

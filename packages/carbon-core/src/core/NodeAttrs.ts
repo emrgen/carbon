@@ -4,7 +4,7 @@ import { removeEmpty } from '../utils/object';
 export type NodeAttrsJSON = Record<string, any>
 
 export class NodeAttrs {
-	private attrs: Record<string, any> = {};
+	private readonly attrs: Record<string, any> = {};
 
 	static empty() {
 		return new NodeAttrs({});

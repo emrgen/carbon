@@ -53,7 +53,7 @@ export const TableComp = (props: RendererProps) => {
     const row = app.schema.type("row").create(columns)!;
     app.tr
       .insert(at, row)
-      .updateAttrs(node.id, { node: { rows: node.size + 1 } })
+      .updateProps(node.id, { node: { rows: node.size + 1 } })
       .dispatch();
   };
 
@@ -69,7 +69,7 @@ export const TableComp = (props: RendererProps) => {
       tr.insert(at, column);
     });
 
-    tr.updateAttrs(node.id, { node: { columns: row.size + 1 } });
+    tr.updateProps(node.id, { node: { columns: row.size + 1 } });
     tr.dispatch();
   };
 

@@ -35,11 +35,11 @@ export const TabComp = (props: RendererProps) => {
     setActiveTabId(tabTitle.id);
     const tabContent = node.children.find(
       (n) =>
-        tabTitle?.attrs?.node?.link && n.attrs?.node?.link ===
-        tabTitle?.attrs?.node?.link
+        tabTitle?.properties?.node?.link && n.properties?.node?.link ===
+        tabTitle?.properties?.node?.link
     );
     console.log("tabContent", tabContent);
-    
+
     setActiveTab(tabContent);
   },[node.children]);
 

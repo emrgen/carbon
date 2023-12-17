@@ -49,7 +49,7 @@ export default function CollapsibleListComp(props: RendererProps) {
   const handleToggle = useCallback(() => {
     const {tr} = app;
     tr
-      .updateAttrs(node.id, { node: { collapsed: !isCollapsed } })
+      .updateProps(node.id, { node: { collapsed: !isCollapsed } })
     if (!isCollapsed) {
       tr.select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
     }

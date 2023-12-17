@@ -6,7 +6,7 @@ import { IsolatingPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
 import { first, last,  } from "lodash";
-import { ActionOrigin, BlockContent, Carbon, MoveAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
+import { ActionOrigin, BlockContent, Carbon, MoveNodeAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
 import { hasParent, } from "../utils/node";
 import { insertAfterAction, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
 import { nodeLocation } from '../utils/location';
@@ -65,7 +65,7 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 
 				const at = Point.toAfter(prevVisibleBlock.id);
 				const moveActions = textBlock?.nextSiblings.slice().reverse().map(n => {
-					return MoveAction.create(nodeLocation(n)!, at, n.id);
+					return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
 				});
 
 				app.tr

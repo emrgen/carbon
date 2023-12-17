@@ -18,11 +18,11 @@ export const PageTreeComp = (props: RendererProps) => {
   const app = useCarbon();
 
   // while the pageTree is collapsed, we don't want to re-render the children
-  const isCollapsed = useRef(node.attrs.get('node.collapsed', false));
+  const isCollapsed = useRef(node.properties.get('node.collapsed', false));
 
   const handleToggleCollapse = useCallback(() => {
     isCollapsed.current = !isCollapsed.current;
-    app.tr.updateAttrs(node, {'node.collapsed': isCollapsed.current}).dispatch();
+    app.tr.updateProps(node, {'node.collapsed': isCollapsed.current}).dispatch();
   },[app.tr, isCollapsed, node]);
 
 

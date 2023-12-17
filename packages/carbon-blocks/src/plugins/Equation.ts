@@ -37,7 +37,7 @@ export class Equation extends CarbonPlugin {
         const { app, node } = ctx;
         preventAndStopCtx(ctx);
         app.tr
-          .updateAttrs(node, { node: { isEditing: !node.attrs.node.isEditing } })
+          .updateProps(node, { node: { isEditing: !node.properties.node.isEditing } })
           .dispatch();
       }
     }
