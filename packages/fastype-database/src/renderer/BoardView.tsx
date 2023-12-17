@@ -22,7 +22,7 @@ export const BoardViewComp = (props: RendererProps) => {
   );
 
   const placeholder = usePlaceholder(node);
-  console.log(placeholder, node.firstChild?.isEmpty, node.attrs.node.emptyPlaceholder);
+  // console.log(placeholder, node.firstChild?.isEmpty, node.attrs.node.emptyPlaceholder);
 
   const hasContent = useMemo(() => node.size > 1, [node]);
 

@@ -26,8 +26,6 @@ export const BulletedListComp = (props: RendererProps) => {
     useCombineConnectors(dragDropRect, selection)
   );
 
-  const placeholder = usePlaceholder(node);
-
   const beforeContent = useMemo(() => {
     return (
       <div
@@ -45,7 +43,6 @@ export const BulletedListComp = (props: RendererProps) => {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
-        // custom={placeholder}
       />
       <CarbonNodeChildren node={node} />
       {SelectionHalo}

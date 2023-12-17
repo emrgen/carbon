@@ -113,12 +113,16 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (e.event.clientY < bottom) {
         if (e.event.clientY < top + (bottom - top) / 2) {
           to = Point.toBefore(hitNode);
+          // if (dnd.accepts(hitNode, to)) {
+          //   return to;
+          // }
         } else {
           const hasChildren = true//hitNode.size > 1;
           if (
             hasChildren && e.event.clientX > elBound.left + 30 &&
             isNestableNode(hitNode)
           ) {
+
             to = Point.toAfter(firstChild?.id!);
           } else {
             to = Point.toAfter(hitNode);
@@ -157,9 +161,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
       // console.log("hits", hitNode?.id.toString());
       const to = findDropPosition(e, hitNode);
       const from = nodeLocation(node)!;
-      if (!to || from.eq(to) || to.isBefore && hitNode.prevSibling?.id.eq(node.id)) {
-        return;
-      }
+      if (!to) return
+      // if (!to || from.eq(to) || to.isBefore && hitNode.prevSibling?.id.eq(node.id)) {
+      //   return;
+      // }
 
       const hitElement = app.store.element(to.nodeId);
 

@@ -164,7 +164,7 @@ export class TransformCommands extends BeforePlugin {
         return tr
       }
 
-      tr.add(SetContentAction.fromNative(title.id, BlockContent.create([textNode]), native));
+      tr.add(SetContentAction.create(title.id, BlockContent.create([textNode])));
       tr.select(after);
       return tr;
     }
@@ -1231,8 +1231,12 @@ export class TransformCommands extends BeforePlugin {
         }
 
         const textContent = node.textContent.slice(0, start.offset) + node.textContent.slice(end.offset);
-        const textNode = app.schema.text(textContent);
-        actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)));
+        // if (textContent === '') {
+        //   actions.push(SetContentAction.create(node.id, BlockContent.empty()))
+        // } else {
+          const textNode = app.schema.text(textContent);
+          actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)));
+        // }
       }
     });
 

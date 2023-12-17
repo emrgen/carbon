@@ -17,8 +17,8 @@ export class Todo extends Section {
       },
       attrs: {
         node: {
-          emptyPlaceholder: 'To-do',
-          isChecked: false,
+          placeholder: 'To-do',
+          checked: false,
         },
         html: {
           // placeholder: 'To-do',
@@ -38,7 +38,7 @@ export class Todo extends Section {
           app.tr
             .updateAttrs(node.id, {
               node: {
-                isChecked: !node.attrs.get('node.isChecked'),
+                checked: !node.attrs.get('node.checked'),
               },
             })
             .dispatch();

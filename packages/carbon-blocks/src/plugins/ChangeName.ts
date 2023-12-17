@@ -21,18 +21,18 @@ export class ChangeName extends BeforePlugin {
 
   inputRules = new BeforeInputRuleHandler([
     //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberedList')),
-    new InputRule(/^(\[\]\s)(.)*/, this.tryChangeType('todo', ['nestable'])),
+    new InputRule(/^(\[\]\s)(.)*/, this.tryChangeName('todo', ['nestable'])),
     new InputRule(/^(#\s)(.)*/, this.tryChangeAttrs('h1', ['nestable'])),
     new InputRule(/^(##\s)(.)*/, this.tryChangeAttrs('h2', ['nestable'])),
     new InputRule(/^(###\s)(.)*/, this.tryChangeAttrs('h3', ['nestable'])),
     new InputRule(/^(####\s)(.)*/, this.tryChangeAttrs('h4', ['nestable'])),
 
-    new InputRule(/^(-\s)(.)*/, this.tryChangeType('bulletedList', ['nestable'])),
-    new InputRule(/^(\*\s)(.)*/, this.tryChangeType('bulletedList', ['nestable'])),
-    new InputRule(/^([0-9]+\.\s)(.)*/, this.tryChangeType('numberedList', ['nestable'])),
-    new InputRule(/^(\|\s)(.)*/, this.tryChangeType('quote', ['nestable'])),
-    new InputRule(/^(>>\s)(.)*/, this.tryChangeType('callout', ['nestable'])),
-    new InputRule(/^(>\s)(.)*/, this.tryChangeType('collapsible', ['nestable'])),
+    new InputRule(/^(-\s)(.)*/, this.tryChangeName('bulletedList', ['nestable'])),
+    new InputRule(/^(\*\s)(.)*/, this.tryChangeName('bulletedList', ['nestable'])),
+    new InputRule(/^([0-9]+\.\s)(.)*/, this.tryChangeName('numberedList', ['nestable'])),
+    new InputRule(/^(\|\s)(.)*/, this.tryChangeName('quote', ['nestable'])),
+    new InputRule(/^(>>\s)(.)*/, this.tryChangeName('callout', ['nestable'])),
+    new InputRule(/^(>\s)(.)*/, this.tryChangeName('collapsible', ['nestable'])),
     new InputRule(/^(```)(.)*/, this.tryChangeIntoCode('code', ['nestable'])),
     new InputRule(/^(---)(.)*/, this.tryChangeIntoDivider('divider', ['nestable'])),
     new InputRule(/^(\*\*\*\s)(.)*/, this.tryChangeIntoDivider('separator', ['nestable'])),
@@ -102,14 +102,19 @@ export class ChangeName extends BeforePlugin {
     }
   }
 
-  tryChangeType(type: string, groups: string[]) {
+  tryChangeName(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app } = ctx;
       const { tr, selection } = app;
       const block = node.closest(n => n.isContainerBlock)!;
       if (!isConvertible(block)) return
 
-      console.log('tryChangeType', ctx.node.textContent, type);
+      const type = app.schema.type(name);
+      if (!type) {
+        throw Error('change name does not exists: ' + name)
+      }
+
+      console.log('tryChangeType', ctx.node.textContent, name);
 
       preventAndStopCtx(ctx);
 
@@ -121,7 +126,7 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      if (type === 'numberedList') {
+      if (name === 'numberedList') {
         const listNumber = app.cmd.numberedList.listNumber(block);
         const inputNumber = parseInt(match[1].slice(0, -2));
          if (listNumber != inputNumber) {
@@ -141,6 +146,10 @@ export class ChangeName extends BeforePlugin {
       if (match[1] === titleNode.textContent + ' ') {
         const action = SetContentAction.create(titleNode.id,BlockContent.empty());
         tr.add(action);
+        const placeholder = type.spec.attrs?.node?.placeholder ?? ''
+        tr.updateAttrs(titleNode.id, {
+          html: { placeholder }
+        })
       } else {
         const title = titleNode.textContent.slice(match[1].length - 1);
         console.warn('title', title, match);
@@ -157,7 +166,7 @@ export class ChangeName extends BeforePlugin {
       }
 
 
-      tr.change(block.id, block.name, type)
+      tr.change(block.id, block.name, name)
       tr.updateAttrs(block.id, { node: { typeChanged: true },});
       // expand collapsed block
       if (block.isCollapsed) {

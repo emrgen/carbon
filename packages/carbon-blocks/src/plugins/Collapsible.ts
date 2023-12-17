@@ -38,7 +38,7 @@ export class Collapsible extends NodePlugin {
       },
       attrs: {
         node: {
-          emptyPlaceholder: 'Toggle',
+          placeholder: 'Toggle',
           collapsed: false,
         },
         html: {
@@ -100,7 +100,14 @@ export class Collapsible extends NodePlugin {
         if (selection.isCollapsed && selection.head.isAtStartOfNode(node)) {
           if (node.child(0)?.isEmpty) {
             preventAndStopCtx(ctx);
-            app.cmd.transform.change(node, 'section')?.dispatch();
+
+            const tr = app.cmd.transform.change(node, 'section');
+            if (node.firstChild?.isEmpty) {
+              tr?.updateAttrs(node.firstChild.id, {
+                html: {placeholder: ''}
+              })
+            }
+            tr?.dispatch();
           }
         }
       }

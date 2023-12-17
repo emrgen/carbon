@@ -14,7 +14,7 @@ import {
   text,
   title,
 } from "@emrgen/carbon-blocks";
-import { carbonUtilPlugins } from "@emrgen/carbon-utils";
+import { BlockMenu, carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { fastypeBlocks } from "@emrgen/fastype-blocks";
 import { fastypeDatabase } from "@emrgen/fastype-database";
 import { Box, Spinner, Stack } from "@chakra-ui/react";
@@ -112,45 +112,29 @@ export function FastEditor({ name = "carbon" }) {
   };
 
   useEffect(() => {
-    const onTransaction = (tr: Transaction) => {
-      const nodes = tr.app.content.descendants();
-      const els = nodes.map((n) => ({id: n.id.toString(), el: tr.app.store.element(n.id)}));
-      if (els.some((n) => !n.el)) {
-        console.error("missing node", els);
-      }
-    }
-
-    app.on("transaction", onTransaction);
-    return () => {
-      app.off("transaction", onTransaction);
-    };
+  //   const onTransaction = (tr: Transaction) => {
+  //     const nodes = tr.app.content.descendants();
+  //     const els = nodes.map((n) => ({id: n.id.toString(), el: tr.app.store.element(n.id)}));
+  //     if (els.some((n) => !n.el)) {
+  //       console.error("missing node", els);
+  //     }
+  //   }
+  //
+  //   app.on("transaction", onTransaction);
+  //   return () => {
+  //     app.off("transaction", onTransaction);
+  //   };
   }, [app]);
 
   return (
     <Stack h="full"  w="full">
-      {/* <Editor
-        height="60vh"
-        onMount={handleEditorDidMount}
-        onChange={handleOnChange}
-        language="typescript"
-        // theme="github-light"
-        options={{
-          lineNumbers: "off",
-          minimap: {
-            enabled: false,
-          },
-          renderLineHighlight: "none",
-          scrollbar: {
-            vertical: "hidden",
-            horizontal: "hidden",
-          },
-        }}
-        defaultValue={String.raw`console.log('done');`}
-        loading={<Spinner />}
-      /> */}
       <Stack className="fast-editor" flex={1} >
-        <Fastype app={app} />
+        <Fastype app={app}>
+          {/* <FastypeCursor app={app} /> */}
+          <BlockMenu />
+        </Fastype>
       </Stack>
+
       {/*<Box pos='absolute' left={0} top={0} py={2} px={0} w='200px' h='full'>*/}
       {/*  <TimeTravel app={app}/>*/}
       {/*</Box>*/}

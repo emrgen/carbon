@@ -24,7 +24,7 @@ export class Callout extends CarbonPlugin {
       attrs: {
         node: {
           focusPlaceholder: 'Callout',
-          emptyPlaceholder: '',
+          placeholder: 'Callout',
         },
         html: {
           suppressContentEditableWarning: true,

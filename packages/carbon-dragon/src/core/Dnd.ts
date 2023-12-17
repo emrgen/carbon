@@ -2,8 +2,10 @@ import { Optional } from '@emrgen/types';
 import EventEmitter from "events";
 import { throttle } from "lodash";
 import { DndNodeStore } from "./DndStore";
-import { Carbon, Node, NodeId } from '@emrgen/carbon-core';
+import { Carbon, Node, NodeId, Point } from "@emrgen/carbon-core";
 import { DndEvent } from '../types';
+
+type Acceptor = (receiver: Node, child: Node, at: Point) => boolean
 
 export class Dnd extends EventEmitter {
 	// nodes that can be dragged
@@ -20,6 +22,8 @@ export class Dnd extends EventEmitter {
 	isDirty = true;
 	isDragging: boolean = false;
 	isMouseDown: any;
+
+	// accceptor: Acceptor = (receiver, child, at) => {}
 
 	constructor(readonly app: Carbon) {
 		super();

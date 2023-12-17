@@ -1,4 +1,4 @@
-import { cloneDeep, each, merge, get } from "lodash";
+import { cloneDeep, each, merge, get, reduce } from "lodash";
 
 
 export interface NodeStateJSON extends Record<string, boolean|undefined> {
@@ -55,6 +55,22 @@ export class NodeState {
 		});
 
 		return this;
+	}
+
+	merge(state: NodeState): NodeState {
+		const clone = this.clone()
+		return clone.update(state.state);
+	}
+
+	diff(state: NodeState): NodeState {
+		const diff = reduce(state.state, (result, value, key) => {
+			if (this.state[key] !== value) {
+				result[key] = value;
+			}
+			return result;
+		}, {});
+
+		return new NodeState(diff);
 	}
 
 	clone() {

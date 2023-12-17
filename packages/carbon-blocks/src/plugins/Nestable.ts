@@ -83,6 +83,7 @@ export class NestablePlugin extends AfterPlugin {
 	keydown(): EventHandlerMap {
 		return {
 			backspace: (ctx: EventContext<KeyboardEvent>) => {
+
 				const { app, node } = ctx;
 				if (node.isIsolating) return;
 
@@ -96,7 +97,7 @@ export class NestablePlugin extends AfterPlugin {
 				if (!listNode) return
 				const head = selection.head.node.isEmpty ? selection.head.down() : selection.head;
 				if (!head) return
-				console.log('--------');
+
 				// console.log(listNode?.id.toString(), listNode?.name, head.toString(), Pin.toStartOf(listNode)?.toJSON());
 				const atStart = Pin.toStartOf(listNode)?.eq(head);
 				// console.log(atStart, Pin.toStartOf(listNode)?.node.name, head.node.name);
@@ -112,18 +113,25 @@ export class NestablePlugin extends AfterPlugin {
 						.updateAttrs(listNode.id, {
 							html: {
 								'data-as': '',
+								placeholder: '',
 							},
-						}).select(selection)
+						})
+						.select(selection)
 						.dispatch();
 					return
 				}
+
 				console.log('--------');
 				// change to section
 				if (listNode.name !== 'section') {
+					console.debug('xxxxxxxxx');
+
 					preventAndStopCtx(ctx);
 					if (listNode.isCollapsed) {
 						tr.updateAttrs(listNode.id, { node: { collapsed: false } })
 					}
+
+					tr.updateAttrs(listNode.firstChild?.id!, { html:{placeholder: ''} })
 					tr
 						.change(listNode.id, listNode.name, 'section')
 						.select(PinnedSelection.fromPin(selection.head))

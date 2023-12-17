@@ -9,7 +9,7 @@ export interface NodeContent {
 	size: number;
 	children: Node[];
 	textContent: string;
-
+	isEmpty: boolean;
 	setParentId(parentId: NodeId): NodeContent;
 	setParent(parent: Node): NodeContent;
 	replace(node: Node, by: Node[]): NodeContent;
@@ -56,6 +56,10 @@ export class BlockContent implements NodeContent {
 
 	constructor(props: BlockContentProps) {
 		this.nodes = props.nodes
+	}
+
+	get isEmpty() {
+		return this.size == 0 || this.children.every(n => n.isEmpty)
 	}
 
 	get size(): number {
@@ -183,6 +187,10 @@ interface TextContentProps {
 export class InlineContent implements NodeContent {
 	text: string;
 	frozen: boolean = false;
+
+	get isEmpty() {
+		return !this.text
+	}
 
 	get children(): Node[] {
 		return []

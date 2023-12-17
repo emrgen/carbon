@@ -25,7 +25,6 @@ export default function TodoComp(props: RendererProps) {
     useCombineConnectors(dragDropRect, selection)
   );
 
-  const placeholder = usePlaceholder(node);
 
   const handleClick = useCallback(
     (e) => {
@@ -34,7 +33,7 @@ export default function TodoComp(props: RendererProps) {
       app.tr
         .updateAttrs(node.id, {
           node: {
-            isChecked: !attrs.get('node.isChecked'),
+            checked: !attrs.get('node.checked'),
           },
         })
         .dispatch();
@@ -66,7 +65,6 @@ export default function TodoComp(props: RendererProps) {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
-        custom={placeholder}
       />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}

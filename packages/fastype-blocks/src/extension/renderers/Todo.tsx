@@ -40,7 +40,7 @@ export function TodoComp(props: RendererProps) {
       app.tr
         .updateAttrs(node.id, {
           node: {
-            isChecked: !attrs.get('node.isChecked'),
+            checked: !attrs.get('node.checked'),
           },
         })
         .dispatch();
@@ -58,8 +58,8 @@ export function TodoComp(props: RendererProps) {
         onInput={preventAndStop}
       >
         <Checkbox
-          defaultChecked={node.attrs.node.isChecked}
-          checked={node.attrs.node.isChecked}
+          defaultChecked={node.attrs.node.checked}
+          checked={node.attrs.node.checked}
           onChange={handleClick}
         />
       </div>

@@ -9,24 +9,14 @@ import { cloneDeep, merge } from "lodash";
 // message should not create a dependency between plugins
 // message should be a request and response
 // message should carry the plugin name and node id to avoid confusion and track the message path
-export class PluginNetwork extends EventEmitter {
-  kvStore: Map<string, any> = new Map();
+export class PluginEmitter extends EventEmitter {
   plugins: Map<string, CarbonPlugin> = new Map();
 
-  get(key: string) {
-    return this.kvStore.get(key);
-  }
-
-  set(key: string, value: any) {
-    const prev = this.kvStore.get(key);
-    this.kvStore.set(key, merge(cloneDeep(prev), value));
-  }
-
-  constructor(plugins: Record<string, CarbonPlugin>) {
+  constructor() {
     super();
-    Object.entries(plugins).forEach(([name, plugin]) => {
-      this.plugins.set(name, plugin);
-      this.kvStore.set(name, {});
-    });
+  }
+
+  register(plugin: CarbonPlugin) {
+    this.plugins.set(plugin.name, plugin);
   }
 }

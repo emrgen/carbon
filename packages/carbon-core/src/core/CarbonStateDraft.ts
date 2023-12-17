@@ -6,16 +6,14 @@ import { NodeId } from "./NodeId";
 import { NodeMap } from "./NodeMap";
 import { PinnedSelection } from "./PinnedSelection";
 import { NodeContent } from "./NodeContent";
-import { SelectionEvent } from "./SelectionEvent";
 import { PointedSelection } from "./PointedSelection";
 import { identity, isEmpty, sortBy, values, zip } from "lodash";
-import BTree from 'sorted-btree';
 import { NodeType } from "./NodeType";
-import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
+import {  NodeAttrsJSON } from "./NodeAttrs";
 import { Point, PointAt } from "./Point";
-import { NodeState, NodeStateJSON } from "./NodeState";
-import { takeUpto } from "../utils/array";
+import {  NodeStateJSON } from "./NodeState";
 import { ActionOrigin } from "@emrgen/carbon-core";
+import { nodePlaceholder } from "../utils/attrs";
 
 // NOTE: it is internal to the state and should not be used outside of it
 // represents a draft of a state, used to prepare a new state before commit
@@ -221,39 +219,36 @@ export class CarbonStateDraft {
       throw new Error("Cannot update content on a draft that is already committed");
     }
 
-    let isEmpty = false;
     this.mutable(nodeId, node => {
-      isEmpty = node.isEmpty;
       node.children.forEach(child => {
         this.nodeMap.delete(child.id);
       });
-      // node.updateAttrs({
-      //   html: {
-      //     placeholder: node.type.spec.attrs?.node?.emptyPlaceholder ?? ''
-      //   }
-      // })
-      console.log(node.attrs.toJSON());
+
+      if (node.isTextBlock) {
+        if (content.isEmpty) {
+          node.updateAttrs({
+            html:{
+              placeholder: nodePlaceholder(this.nodeMap.parent(node)),
+            }
+          })
+        } else {
+          node.updateAttrs({
+            html:{
+              placeholder: '',
+            }
+          })
+        }
+      } else if (node.name === 'text') {
+
+      }
+
       node.updateContent(content);
     });
 
-    // if the content is/ws empty, we need to trigger parent render to render placeholder
-    if (isEmpty) {
-      const parents = this.nodeMap.parents(nodeId);
-      // takeUpto(parents, n => n.isContainerBlock).forEach(n => this.mutable(n.id))
-    }
-
-    console.log('inserting content', nodeId.toString(), content.size);
+    // console.log('inserting content', nodeId.toString(), content.size);
     content.children.forEach(child => {
-      console.log(child.id.toString(), child.parentId?.toString(), child.frozen);
       this.nodeMap.set(child.id, child);
-      // this.changes.changed.add(child.id);
     })
-
-    // if (content.size === 0) {
-    //   const parent = this.nodeMap.get(node.parentId!);
-    //   this.changes.changed.add(parent!.id);
-    // } else {
-    // }
 
     this.changes.updated.add(nodeId);
   }
@@ -396,6 +391,14 @@ export class CarbonStateDraft {
 
     this.mutable(parentId, parent => {
       parent.remove(node);
+      if (parent.isTextBlock && parent.isEmpty) {
+        console.log('xxxxxxxx', parent, parent.parent);
+        parent.updateAttrs({
+          html: {
+            placeholder: nodePlaceholder(this.nodeMap.parent(parent)),
+          }
+        })
+      }
       // NOTE: if the parent is empty, we need to trigger parent render to render placeholder
       if (parent.isEmpty && parent.parentId) {
         this.mutable(parent.parentId)
@@ -416,23 +419,6 @@ export class CarbonStateDraft {
 
     this.mutable(nodeId, node => {
       node.changeType(type);
-
-      // if (node.isEmpty) {
-      //   this.mutable(node.firstChild?.id!, (n) => {
-      //     n.updateAttrs({
-      //       html: {
-      //         placeholder: 'xxx'
-      //       }
-      //     })
-      //   })
-      // }
-
-      if (node.isEmpty) {
-        // force render of all descendants if the node is empty
-        node.descendants().forEach(n => {
-          this.mutable(n.id)
-        });
-      }
     });
 
 
@@ -446,12 +432,6 @@ export class CarbonStateDraft {
 
     this.mutable(nodeId, node => {
       node.updateAttrs(attrs);
-      if (node.isEmpty) {
-        // force render of all descendants if the node is empty
-        node.descendants().forEach(n => {
-          this.mutable(n.id)
-        });
-      }
     });
 
     this.changes.attrs.add(nodeId);

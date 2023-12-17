@@ -18,7 +18,6 @@ export const NumberedListComp = (props: RendererProps) => {
   const connectors = useConnectorsToProps(
     useCombineConnectors(dragDropRect, selection),
   );
-  const placeholder = usePlaceholder(node);
 
   // watch the parent version for list number calculation
   const getListNumber = (node: Node): number => {
@@ -44,7 +43,6 @@ export const NumberedListComp = (props: RendererProps) => {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
-        custom={placeholder}
       />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}

@@ -6,8 +6,8 @@ import { MarkSet } from './Mark';
 import { Node } from './Node';
 import { NodeSpec, Schema } from './Schema';
 import { HTMLAttrs,  NodeName } from './types';
-import { NodeAttrsJSON } from "./NodeAttrs";
-import { NodeStateJSON } from "./NodeState";
+import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
+import { NodeState, NodeStateJSON } from "./NodeState";
 import { InitNodeJSON } from "@emrgen/carbon-core";
 
 const specGroups = (name: string, spec: NodeSpec) => {
@@ -37,12 +37,9 @@ interface DefaultParams {
 export class NodeType {
 	groupsNames: readonly string[];
 
-	attrs: {
-		node: Record<string, any>;
-		html: HTMLAttrs;
-	};
+	attrs: NodeAttrs;
 
-	state: Record<string, any>;
+	state: NodeState;
 
 	/// True if this node type has inline content.
 	inlineContent!: boolean
@@ -73,8 +70,8 @@ export class NodeType {
 	// spec: spec of the NodeType
 	constructor(readonly name: NodeName, readonly schema: Schema, readonly spec: NodeSpec) {
 		this.groupsNames = specGroups(name, spec);
-		this.attrs = merge({ node: {}, html: {} }, spec.attrs ?? {});
-		this.state = spec.state ?? {};
+		this.attrs = NodeAttrs.from(spec.attrs ?? {});
+		this.state = NodeState.from(spec.state ?? {});
 
 		this.isBlock = !(spec.inline || name == "text")
 		this.isText = name == "text";

@@ -5,11 +5,12 @@ import { Decoration } from './Decoration';
 import { Node } from './Node';
 import { NodeSpec } from './Schema';
 import { Transaction } from './Transaction';
-import { EventHandlerMap, InputRules, PluginName, SerializedNode } from './types';
+import { EventHandlerMap, InputRules, PluginName, SerializedNode } from "./types";
 import { CarbonAction } from "./actions/types";
 import EventEmitter from 'events';
 import { CarbonMessageBus, CarbonMessageFormat } from './MessageBus';
-import { PluginNetwork } from "./PluginNetwork";
+import { PluginEmitter } from "./PluginEmitter";
+import { PluginState } from "./PluginState";
 
 export enum PluginType {
 	Node,
@@ -34,18 +35,13 @@ export abstract class CarbonPlugin {
 	name: PluginName = '';
 
 	// @ts-ignore
-	pnw: PluginNetwork;
+	protected bus: PluginEmitter;
+	// @ts-ignore
+	protected state: PluginState;
 
-	init(nw: PluginNetwork) {
-		this.pnw = nw;
-	}
-
-	get state () {
-		return this.pnw?.get(this.name);
-	}
-
-	setState (state: any) {
-		this.pnw?.set(this.name, state);
+	init(bus: PluginEmitter, state: PluginState) {
+		this.bus = bus;
+		this.state = state;
 	}
 
 	destroy(app: Carbon) {}

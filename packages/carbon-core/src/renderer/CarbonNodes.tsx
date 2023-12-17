@@ -195,7 +195,7 @@ export const CarbonNodeContent = (props: RendererProps) => {
     return null;
   }
 
-  console.log(node.version, node.id.toString(), node.firstChild?.attrs.toJSON());
+  // console.log(node.version, node.id.toString(), node.firstChild?.attrs.toJSON());
 
   return (
     <div data-type="content" {...wrapper}>

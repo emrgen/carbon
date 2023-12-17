@@ -6,7 +6,7 @@ import { BlockContent, InlineContent } from './NodeContent';
 
 import {  generateBlockId, generateTextId } from './actions/utils';
 import { deepCloneMap, NodeIdFactory } from "@emrgen/carbon-core";
-import { isEmpty } from "lodash";
+import { cloneDeep, isEmpty, merge } from "lodash";
 import { NodeAttrs } from "./NodeAttrs";
 import { NodeState } from "./NodeState";
 
@@ -35,8 +35,8 @@ export class SchemaFactory {
 			throw new Error(`Node Plugin is not registered ${name}`);
 		}
 
-		const attrs = isEmpty(json.attrs) ? NodeAttrs.from(type.attrs) : NodeAttrs.from(json.attrs);
-		const state = isEmpty(json.state) ? NodeState.from(type.state) : NodeState.from(json.state);
+		const attrs = isEmpty(json.attrs) ? NodeAttrs.from(type.attrs) : NodeAttrs.from(merge(cloneDeep(type.attrs), json.attrs));
+		const state = isEmpty(json.state) ? NodeState.from(type.state) : NodeState.from(merge(cloneDeep(type.state), json.state));
 
 		if (name === 'text') {
 			const content = InlineContent.create(text);

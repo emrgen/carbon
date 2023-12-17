@@ -11,7 +11,6 @@ export const usePlaceholder = (node: Node) => {
   useEffect(() => {
     const dataAs = node.attrs.get('html.data-as');
     const placeholder = node.attrs.get('node.emptyPlaceholder') ?? '';
-    console.log('xxxxx', node.firstChild?.isEmpty, placeholder);
     if (node.firstChild?.isEmpty && placeholder) {
       setAttributes({
         'placeholder':  placeholder,
@@ -26,7 +25,7 @@ export const usePlaceholder = (node: Node) => {
       setAttributes({})
     }
 
-    console.log('node.attrs.node.emptyPlaceholder', node.attrs, node.id.toString(), node.name);
+    // console.log('node.attrs.node.emptyPlaceholder', node.attrs, node.id.toString(), node.name);
   }, [node]);
 
   // const [attributes, setAttributes] = useState<Record<string, string>>({});

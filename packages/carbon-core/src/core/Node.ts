@@ -135,7 +135,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 			links = new NodeLinks(),
 			linkName = '',
 			marks = MarkSet.empty(),
-			attrs = NodeAttrs.from(type.attrs),
+			attrs = NodeAttrs.empty(),
 			state = NodeState.from(type.state),
 			meta = {},
 			version = 0,
@@ -152,7 +152,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.links = links
 		this.marks = marks;
 
-		this.attrs = attrs,
+		this.attrs = attrs;
 		this.state = state;
 		this.meta = meta;
 
@@ -752,13 +752,14 @@ export class Node extends EventEmitter implements IntoNodeId {
 			throw Error('cannot change type of immutable node:' + this.id.toString())
 		}
 
+		this.attrs = type.attrs.merge(this.attrs.diff(type.attrs));
+		this.state = type.state.merge(this.state.diff(type.state));
 		this.type = type;
-		this.attrs = new NodeAttrs(type.attrs);
-		this.state = new NodeState(type.state);
 	}
 
 	// @mutates
 	updateAttrs(props: NodeAttrsJSON) {
+		console.log('updating attrs', this.id.toString(), props);
 		this.attrs = this.attrs.update(props);
 	}
 

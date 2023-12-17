@@ -31,14 +31,26 @@ export class NodeAttrs {
 	}
 
 	constructor(attrs: NodeAttrsJSON) {
-		this.attrs = merge(this.attrs, attrs);
-		console.log('x',this.attrs, attrs);
+		this.attrs = attrs;
 	}
 
 	update(attrs: NodeAttrsJSON) {
-		const newAttrs = new NodeAttrs(attrs);
-		console.log(newAttrs.attrs);
-		return newAttrs;
+		return new NodeAttrs(merge(this.attrs, attrs))
+	}
+
+	merge(attrs: NodeAttrs) {
+		return new NodeAttrs(merge(this.attrs, attrs.attrs))
+	}
+
+	diff(attrs: NodeAttrs) {
+		const diff = reduce(attrs.attrs, (result, value, key) => {
+			if (this.attrs[key] !== value) {
+				result[key] = value;
+			}
+			return result;
+		}, {});
+
+		return new NodeAttrs(diff);
 	}
 
 	freeze() {

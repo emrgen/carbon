@@ -15,7 +15,6 @@ import {
   MdOutlineKeyboardArrowDown,
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
-import { usePlaceholder } from "../hooks";
 import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
 
 export default function CollapsibleListComp(props: RendererProps) {
@@ -23,7 +22,6 @@ export default function CollapsibleListComp(props: RendererProps) {
   const { SelectionHalo } = useSelectionHalo(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
-  const placeholder = usePlaceholder(node);
 
   const ref = useRef(null);
 
@@ -87,7 +85,6 @@ export default function CollapsibleListComp(props: RendererProps) {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
-        custom={placeholder}
       />
 
       {node.size > 1 ? (

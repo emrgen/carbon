@@ -22,6 +22,8 @@ import { CarbonPlugin } from "./CarbonPlugin";
 import { StateScope } from "./StateScope";
 import { NodeMap } from "./NodeMap";
 import { CarbonRuntime } from "./Runtime";
+import { PluginEmitter } from "./PluginEmitter";
+import { PluginStates } from "./PluginState";
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -32,14 +34,15 @@ export class Carbon extends EventEmitter {
 
 
 	// for external application use
-	bus: CarbonMessageBus = new CarbonMessageBus();
+	private readonly pluginBus: PluginEmitter;
+	private readonly pluginStates: PluginStates;
 
 	schema: Schema;
-	state: CarbonState;
+	state: CarbonState; // immutable state
 	runtime: CarbonRuntime;
 	store: NodeStore;
 	cmd: CarbonCommands;
-	chain: CarbonCommandChain;
+	// chain: CarbonCommandChain;
 	change: ChangeManager;
 
 	enabled: boolean;
@@ -75,12 +78,21 @@ export class Carbon extends EventEmitter {
 		this.change = new ChangeManager(this, this.sm, this.tm, pm);
 
 		this.cmd = pm.commands(this);
-		this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
+		// this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
 
 		this.enabled = true;
 		this.dragging = false;
 		this.ready = false;
 		this.ticks = [];
+
+		this.pluginBus = new PluginEmitter();
+		this.pluginStates = new PluginStates();
+
+		this.pm.plugins.forEach(p => {
+			this.pluginBus.register(p);
+			const state = this.pluginStates.register(p);
+			p.init(this.pluginBus, state);
+		})
 	}
 
 	get content(): Node {
