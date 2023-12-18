@@ -41,11 +41,12 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   const ref = useRef(null);
 
   const attributes = useMemo(() => {
+    console.log(node.id.toString(), node.name, node.properties.prefix(LocalHtmlAttrPath));
     return {
       ...custom,
       ...node.properties.prefix(LocalHtmlAttrPath) ?? {}
     }
-  },[custom])
+  },[custom, node])
 
   // connect ref
   // https://t.ly/H4By
@@ -192,8 +193,6 @@ export const CarbonNodeContent = (props: RendererProps) => {
   if (!content) {
     return null;
   }
-
-  // console.log(node.version, node.id.toString(), node.firstChild?.attrs.toJSON());
 
   return (
     <div data-type="content" {...wrapper}>

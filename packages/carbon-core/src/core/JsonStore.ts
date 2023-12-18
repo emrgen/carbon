@@ -137,7 +137,7 @@ export class JsonStore {
       path = path.split("/");
     }
 
-    if (value === undefined || value === null) {
+    if (value === undefined || value === null || value === "") {
       this.store.delete(JsonStore.PATCH_CACHE.get(path));
       return
     }
@@ -174,8 +174,8 @@ export class JsonStore {
   diff(other: JsonStore) {
     const diff = new JsonStore();
     for (const [key, value] of this.store) {
-      if (!other.has(key)) {
-        diff.set(key, value);
+      if (!other.store.has(key)) {
+        diff.store.set(key, value);
       }
     }
 
@@ -198,6 +198,15 @@ export class JsonStore {
     }
 
     return JsonStore.keyValueToJson(result);
+  }
+
+  toKV() {
+    const result: Record<string, any> = {};
+    for (const [key, value] of this.store) {
+      result[JsonStore.PATCH_CACHE.path(key)] = value;
+    }
+
+    return result;
   }
 }
 

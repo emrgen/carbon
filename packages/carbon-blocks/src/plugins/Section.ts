@@ -48,7 +48,7 @@ export class Section extends NodePlugin {
 				local: {
 					placeholder: {
 						empty: '',
-						focused: 'Section'
+						focused: 'Press / for commands'
 					},
 				},
 				html: {

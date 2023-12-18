@@ -30,14 +30,15 @@ export class DocPlugin extends CarbonPlugin {
 			document: true,
 			props: {
 				local: {
+					placeholder: {
+						empty: 'Untitled',
+						focused: 'Untitled',
+					},
 					html: {
 						spellCheck: false,
 						contentEditable: true,
 						suppressContentEditableWarning: true,
 					},
-					placeholder: {
-						empty: 'Untitled',
-					}
 				},
 			},
 		}

@@ -23,7 +23,6 @@ export class UpdatePropsAction implements CarbonAction {
     }
 
     this.prevProps = node.properties.toJSON();
-    console.log('update props', this.prevProps, this.props);
     draft.updateProps(nodeId, this.props);
   }
 

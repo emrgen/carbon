@@ -56,12 +56,15 @@ export class Heading extends NodePlugin {
 				tags: ['heading', 'h' + this.level],
 				order: 2,
 			},
-			attrs: {
-				node: {
-					emptyPlaceholder: `Heading ${this.level}`
-				},
-				html: {
-					placeholder: `Heading ${this.level}`
+			props: {
+				local: {
+					placeholder: {
+						empty: `Heading ${this.level}`,
+						focused: `Heading ${this.level}`,
+					},
+					html: {
+						suppressContentEditableWarning: true,
+					}
 				},
 			}
 		}

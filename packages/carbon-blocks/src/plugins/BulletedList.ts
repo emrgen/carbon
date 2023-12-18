@@ -17,7 +17,10 @@ export class BulletedList extends Section {
       },
       props: {
         local: {
-          placeholder: 'List',
+          placeholder: {
+            empty: 'List',
+            focused: 'Press / for commands',
+          },
           html: {
             suppressContentEditableWarning: true,
           }

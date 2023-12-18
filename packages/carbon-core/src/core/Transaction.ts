@@ -255,9 +255,9 @@ export class Transaction {
 
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
-				console.groupCollapsed('Commit (runtime)');
+				console.group('Commit (runtime)');
 			} else {
-				console.groupCollapsed('Commit', this);
+				console.group('Commit', this);
 			}
 
 			for (const action of this.actions) {

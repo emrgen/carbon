@@ -11,7 +11,7 @@ import {
   Point,
   nodeLocation,
   moveNodesActions,
-  insertBeforeAction, preventAndStopCtx, BlockContent, SetContentAction
+  insertBeforeAction, preventAndStopCtx, BlockContent, SetContentAction, PlaceholderPath, EmptyPlaceholderPath
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
@@ -146,7 +146,7 @@ export class ChangeName extends BeforePlugin {
         tr.add(action);
         const placeholder = type.spec.attrs?.node?.placeholder ?? ''
         tr.updateProps(titleNode.id, {
-          html: { placeholder }
+          [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
         })
       } else {
         const title = titleNode.textContent.slice(match[1].length - 1);

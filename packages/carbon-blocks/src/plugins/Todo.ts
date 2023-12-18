@@ -15,14 +15,20 @@ export class Todo extends Section {
         tags: ['to-do list', 'todo', 'checkbox', 'checklist'],
         order: 5,
       },
-      attrs: {
-        node: {
-          placeholder: 'To-do',
-          checked: false,
+      props: {
+        local: {
+          placeholder: {
+            empty:'To-do',
+            focused: 'Press / for commands',
+          },
+          html: {
+            suppressContentEditableWarning: true,
+          }
         },
-        html: {
-          // placeholder: 'To-do',
-          suppressContentEditableWarning: true,
+        remote:{
+          state: {
+            checked: false
+          }
         }
       }
     }

@@ -54,6 +54,10 @@ export class PointedSelection {
 		return !this.isBlock;
 	}
 
+	get isCollapsed() {
+		return this.tail.eq(this.head);
+	}
+
 	pin(store: NodeMap): Optional<PinnedSelection> {
 		if (this.isNull) {
 			return PinnedSelection.NULL;

@@ -10,7 +10,7 @@ import { PointedSelection } from "./PointedSelection";
 import { NodeType } from "./NodeType";
 import { Point, PointAt } from "./Point";
 import {  NodeStateJSON } from "./NodeState";
-import { ActionOrigin, NodeIdSet, OpenedPath } from "@emrgen/carbon-core";
+import { ActionOrigin, FocusedPlaceholderPath, NodeIdSet, OpenedPath } from "@emrgen/carbon-core";
 import { nodePlaceholder } from "../utils/attrs";
 import {
   ActivatedPath,
@@ -54,7 +54,7 @@ export class CarbonStateDraft {
     const { state, changes, selection } = this;
 
     const nodeMap = this.nodeMap.isEmpty ? state.nodeMap : this.nodeMap;
-    nodeMap.freeze();
+
     const content = this.nodeMap.get(this.state.content.id)
     if (!content) {
       throw new Error("Cannot commit draft with invalid content");
@@ -71,6 +71,7 @@ export class CarbonStateDraft {
     }
 
     changes.freeze();
+    nodeMap.freeze();
 
     const newState = new CarbonState({
       previous: state.clone(depth - 1),
@@ -163,9 +164,8 @@ export class CarbonStateDraft {
       });
 
       if (node.isTextBlock) {
-        const placeholder = content.isEmpty ? nodePlaceholder(this.nodeMap.parent(node)) : '';
         node.updateProps({
-          [EmptyPlaceholderPath]: placeholder,
+          [PlaceholderPath]: content.isEmpty? this.nodeMap.parent(node)?.properties.get<string>(EmptyPlaceholderPath) ?? '' : '',
         })
       } else if (node.name === 'text') {
 
@@ -309,14 +309,20 @@ export class CarbonStateDraft {
     this.mutable(parentId, parent => {
       parent.remove(node);
       if (parent.isTextBlock && parent.isEmpty) {
+        console.log('parent is empty', parent.id.toString(), parent.name, this.nodeMap.parent(parent)?.properties.get<string>(EmptyPlaceholderPath) ?? '');
+        const gparent = this.nodeMap.parent(parent);
+        const placeholder =gparent?.properties.get<string>(EmptyPlaceholderPath) ?? ''
         parent.updateProps({
-          [PlaceholderPath]: nodePlaceholder(this.nodeMap.parent(parent)),
+          [PlaceholderPath]: placeholder,
         })
+
+        console.log(gparent?.name, gparent?.id.toString());
       }
     });
 
+    // console.log(this.nodeMap.get(parentId)?.properties.toJSON());
+
     node.forAll(n => {
-      console.log('removing node', n.id.toString(), n.name);
       this.removed.add(n.id);
     });
   }
@@ -328,6 +334,13 @@ export class CarbonStateDraft {
 
     this.mutable(nodeId, node => {
       node.changeType(type);
+      if (node.isContainerBlock && node.firstChild?.isEmpty) {
+        this.mutable(node.firstChild.id, child => {
+          child.updateProps({
+            [PlaceholderPath]: type.props.get<string>(EmptyPlaceholderPath) ?? '',
+          })
+        })
+      }
     });
   }
 
@@ -336,9 +349,13 @@ export class CarbonStateDraft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
+    console.log('before update props', this.nodeMap.get(nodeId)?.properties.toKV());
+
     this.mutable(nodeId, node => {
       node.updateProps(props);
     });
+
+    console.log('after update props', this.nodeMap.get(nodeId)?.properties.toKV());
   }
 
   updateSelection(selection: PointedSelection) {
@@ -348,6 +365,43 @@ export class CarbonStateDraft {
 
     console.log('update selection', selection.toString());
     this.selection = selection;
+
+    if (this.state.selection.isInline && this.state.selection.isCollapsed) {
+      const { head } = this.state.selection.unpin();
+      const node = this.nodeMap.get(head.nodeId);
+      if (!node) {
+        throw new Error("Cannot update selection on a draft that is already committed");
+      }
+
+      if (node.isEmpty) {
+        this.mutable(head.nodeId, node => {
+          const parent = this.nodeMap.parent(node);
+          if (!parent) return
+          node.updateProps({
+            [PlaceholderPath]: parent.properties.get<string>(EmptyPlaceholderPath) ?? '',
+          })
+        })
+      }
+    }
+
+    // update focus placeholder if needed
+    if (selection.isCollapsed && selection.isInline) {
+      const { head } = selection;
+      const node = this.nodeMap.get(head.nodeId);
+      if (!node) {
+        throw new Error("Cannot update selection on a draft that is already committed");
+      }
+
+      if (node.isEmpty) {
+        this.mutable(head.nodeId, node => {
+          const parent = this.nodeMap.parent(node);
+          if (!parent) return
+          node.updateProps({
+            [PlaceholderPath]: parent.properties.get<string>(FocusedPlaceholderPath) ?? '',
+          })
+        })
+      }
+    }
   }
 
   // creates a mutable copy of a node and adds it to the draft changes

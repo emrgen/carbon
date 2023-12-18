@@ -138,6 +138,19 @@ const extensions = [
 export default function Dev() {
   const app = useCreateCarbon('dev', data, extensions);
 
+  useEffect(() => {
+    const onChange = (state: CarbonState) => {
+      state.content.forAll((node) => {
+        console.log(node.id.toString(), node.name, node.properties.toKV());
+      });
+    }
+
+    app.on("changed", onChange);
+    return () => {
+      app.off("changed", onChange);
+    }
+  }, [app]);
+
   return (
     <div className={'carbon-app-container'}>
       <CarbonApp app={app}>
