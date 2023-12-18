@@ -3,72 +3,73 @@ import React, { useCallback, useEffect, useRef } from "react";
 import {
   ActionOrigin,
   CarbonBlock,
-  CarbonNode,
   CarbonNodeChildren,
   CarbonNodeContent,
   EventsIn,
-  EventsOut,
   Node,
   Pin,
   PinnedSelection,
   Point,
-  RendererProps,
   prevent,
   preventAndStop,
-  useCarbon,
+  RendererProps,
+  useCarbon
 } from "@emrgen/carbon-core";
 import {
   useCombineConnectors,
   useConnectorsToProps,
   useDndRegion,
   useNonDraggable,
-  useRectSelectionSurface,
+  useRectSelectionSurface
 } from "@emrgen/carbon-dragon";
-import { usePlaceholder } from "../hooks/usePlaceholder";
-import { renderAttr } from "../components/renderAttrs";
-import { CarbonProps } from "@emrgen/carbon-attributes";
 import { DocumentContext } from "../hooks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
-  const { picture = {} } = node.attrs.node;
+  // const  = node.props.get("document");
 
   const app = useCarbon();
+  const {store} = app;
 
   const ref = useRef<HTMLElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dndRegion = useDndRegion({ node, ref });
   const nonDraggable = useNonDraggable({ node, ref });
   const selectionSurface = useRectSelectionSurface({ node, ref });
-  const connectors = useConnectorsToProps(
-    useCombineConnectors(selectionSurface, dndRegion, nonDraggable)
-  );
+
 
   useEffect(() => {
     app.emit("document:mounted", node);
   }, [app, node]);
 
-  const placeholder = usePlaceholder(node);
-
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-          const lastChild = node.lastChild as Node;
-      const lastElement = app.store.element(lastChild?.id!);
-      if (!lastChild) return;
-      const bound = lastElement?.getBoundingClientRect();
-      if (!bound) return;
+    const lastChild = node.lastChild as Node;
+    const lastElement = app.store.element(lastChild?.id!);
+    if (!lastChild) return;
+    const bound = lastElement?.getBoundingClientRect();
+    if (!bound) return;
 
-      if (e.clientY > bound.bottom) {
-        app.emit('document:cursor:hide');
-        // preventAndStop(e);
+    if (e.clientY > bound.bottom) {
+      app.emit("document:cursor:hide");
+      preventAndStop(e);
+    }
+  }, [node.lastChild, app]);
+
+  const connectors = useConnectorsToProps(
+    useCombineConnectors({
+      listeners: {
+        onMouseDown: handleMouseDown
       }
-  },[node.lastChild, app])
+    }, selectionSurface, dndRegion, nonDraggable)
+  );
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       app.emit("document:cursor:show");
-
-      const lastChild = node.lastChild as Node;
-      const lastElement = app.store.element(lastChild?.id!);
+      const lastChildId = node.lastChild?.id;
+      if (!lastChildId) return;
+      const lastElement = app.store.element(lastChildId);
+      const lastChild = app.store.get(lastChildId);
       if (!lastChild) return;
       const bound = lastElement?.getBoundingClientRect();
       if (!bound) return;
@@ -86,7 +87,6 @@ export const DocumentComp = (props: RendererProps) => {
           return;
         }
         prevent(e);
-        // console.log("add new child");
         const at = Point.toAfter(lastChild.id);
         const section = app.schema.type("section").default();
         if (!section) return;
@@ -97,35 +97,35 @@ export const DocumentComp = (props: RendererProps) => {
           .dispatch();
       }
     },
-    [app, node.lastChild]
+    [app, node]
   );
 
   // scroll to bottom on transaction if cursor is below the screen
-  useEffect(() => {
-    const paddingBottom = 40;
-    const onTransaction = (tr: any) => {
-      const el = ref.current;
-      if (!el) return;
-      const { head } = app.selection.bounds(app.store);
-      if (!head) return;
-      const { bottom,  top } = head;
-      // console.log(bottom, el.offsetHeight, el.scrollHeight, el.scrollTop);
+  // useEffect(() => {
+  //   const paddingBottom = 40;
+  //   const onTransaction = (tr: any) => {
+  //     const el = ref.current;
+  //     if (!el) return;
+  //     const { head } = app.selection.bounds(app.store);
+  //     if (!head) return;
+  //     const { bottom,  top } = head;
+  //     // console.log(bottom, el.offsetHeight, el.scrollHeight, el.scrollTop);
 
-      if (top < paddingBottom) {
-        el.scrollTop = el.scrollTop + top - paddingBottom;
-        return;
-      }
+  //     if (top < paddingBottom) {
+  //       el.scrollTop = el.scrollTop + top - paddingBottom;
+  //       return;
+  //     }
 
-      if (bottom > el.offsetHeight - paddingBottom) {
-        el.scrollTop = el.scrollTop + bottom - el.offsetHeight + paddingBottom;
-        return;
-      }
-    }
-    app.on(EventsOut.selectionUpdated, onTransaction);
-    return () => {
-      app.off(EventsOut.selectionUpdated, onTransaction);
-    };
-  }, [app, ref]);
+  //     if (bottom > el.offsetHeight - paddingBottom) {
+  //       el.scrollTop = el.scrollTop + bottom - el.offsetHeight + paddingBottom;
+  //       return;
+  //     }
+  //   }
+  //   app.on(EventsOut.selectionUpdated, onTransaction);
+  //   return () => {
+  //     app.off(EventsOut.selectionUpdated, onTransaction);
+  //   };
+  // }, [app, ref]);
 
   return (
     <DocumentContext document={node}>
@@ -133,7 +133,6 @@ export const DocumentComp = (props: RendererProps) => {
         className="document-wrapper"
         ref={wrapperRef}
         onScroll={(e) => {
-          console.log(e);
           app.onEvent(EventsIn.scroll, e as any)
         }}
       >
@@ -163,8 +162,8 @@ export const DocumentComp = (props: RendererProps) => {
             className: 'carbon-document',
           }}
         >
-          <CarbonNodeContent node={node} custom={placeholder} />
-          <CarbonProps node={node} />
+          <CarbonNodeContent node={node} />
+          {/*<CarbonProps node={node} />*/}
           <CarbonNodeChildren node={node} />
         </CarbonBlock>
       </div>

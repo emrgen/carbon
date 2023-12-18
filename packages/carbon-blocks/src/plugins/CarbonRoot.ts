@@ -10,9 +10,11 @@ export class CarbonRoot extends CarbonPlugin {
       // group: '',
       // content: 'carbon',
       // focusable: true,
-      attrs: {
-        html: {
-          suppressContentEditableWarning: true,
+      props: {
+        local: {
+          html: {
+            suppressContentEditableWarning: true,
+          }
         }
       }
     }

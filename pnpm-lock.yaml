@@ -15,8 +15,8 @@ importers:
         specifier: workspace:*
         version: link:packages/carbon-core
       '@emrgen/types':
-        specifier: ^0.0.2
-        version: 0.0.2
+        specifier: workspace:*
+        version: link:packages/types
     devDependencies:
       '@playwright/test':
         specifier: ^1.39.0
@@ -48,6 +48,9 @@ importers:
       '@emrgen/carbon-blocks':
         specifier: workspace:*
         version: link:../../packages/carbon-blocks
+      '@emrgen/carbon-blocktree':
+        specifier: workspace:*
+        version: link:../../packages/carbon-blocktree
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../../packages/carbon-core
@@ -78,9 +81,18 @@ importers:
       '@monaco-editor/react':
         specifier: ^4.5.1
         version: 4.5.1(monaco-editor@0.41.0)(react-dom@18.2.0)(react@18.2.0)
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.14.191
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
       framer-motion:
         specifier: ^10.15.0
         version: 10.15.0(react-dom@18.2.0)(react@18.2.0)
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       object-treeify:
         specifier: ^4.0.1
         version: 4.0.1
@@ -286,6 +298,9 @@ importers:
       '@types/prismjs':
         specifier: ^1.26.0
         version: 1.26.0
+      '@uidotdev/usehooks':
+        specifier: ^2.4.1
+        version: 2.4.1(react-dom@18.2.0)(react@18.2.0)
       emoji-regex:
         specifier: ^10.2.1
         version: 10.2.1
@@ -327,8 +342,33 @@ importers:
         specifier: ^4.9.5
         version: 4.9.5
 
+  packages/carbon-blocktree:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+    devDependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
   packages/carbon-core:
     dependencies:
+      '@uidotdev/usehooks':
+        specifier: ^2.4.1
+        version: 2.4.1(react-dom@18.2.0)(react@18.2.0)
       uuid:
         specifier: ^9.0.0
         version: 9.0.0
@@ -3211,10 +3251,6 @@ packages:
     resolution: {integrity: sha512-EsBwpc7hBUJWAsNPBmJy4hxWx12v6bshQsldrVmjxJoc3isbxhOrF2IcCpaXxfvq03NwkI7sbsOLXbYuqF/8Ww==}
     dev: false
 
-  /@emrgen/types@0.0.2:
-    resolution: {integrity: sha512-YAaDY5OWJn0fuEpv3WwIqr6hoG90mkHwitlO28i/DcncOqN1rSgLRX+R/4rJm/D9QirA9GiEiIksO6rywUVhBQ==, tarball: https://npm.pkg.github.com/download/@emrgen/types/0.0.2/b29c24283c757d0a5d6365b4f0b77d123e5f1560}
-    dev: false
-
   /@esbuild/android-arm64@0.16.17:
     resolution: {integrity: sha512-MIGl6p5sc3RDTLLkYL1MyL8BMRN4tLMRCn+yRJJmEDvYZ2M7tmAf80hx1kbNEUX2KJ50RRtxZ4JHLvCfuB6kBg==}
     engines: {node: '>=12'}
@@ -4091,6 +4127,12 @@ packages:
     resolution: {integrity: sha512-hz+S3nV6Mym5xPbT9fnO8dDhBFQguMYpY0Ipxv06JMi1ORgnEM4M1ymWDUhUNer3ElLmT583opRo4RzxKmh9jw==}
     dev: false
 
+  /@types/lodash-es@4.17.12:
+    resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
+    dependencies:
+      '@types/lodash': 4.14.191
+    dev: false
+
   /@types/lodash.mergewith@4.6.7:
     resolution: {integrity: sha512-3m+lkO5CLRRYU0fhGRp7zbsGi6+BZj0uTVSwvcKU+nSlhjA9/QRNfuSGnD2mX6hQA7ZbmcCkzk5h4ZYGOtk14A==}
     dependencies:
@@ -4211,6 +4253,17 @@ packages:
     dependencies:
       '@typescript-eslint/types': 5.54.0
       eslint-visitor-keys: 3.3.0
+    dev: false
+
+  /@uidotdev/usehooks@2.4.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-1I+RwWyS+kdv3Mv0Vmc+p0dPYH0DTRAo04HLyXReYBL9AeseDWUJyi4THuksBJcu9F0Pih69Ak150VDnqbVnXg==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /@uiw/codemirror-extensions-basic-setup@4.21.20(@codemirror/autocomplete@6.11.0)(@codemirror/commands@6.3.0)(@codemirror/language@6.9.2)(@codemirror/lint@6.4.2)(@codemirror/search@6.5.4)(@codemirror/state@6.3.1)(@codemirror/view@6.22.0):

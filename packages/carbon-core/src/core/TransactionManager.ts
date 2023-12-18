@@ -5,18 +5,19 @@ import { Transaction } from "./Transaction";
 import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
 import { EventsOut } from './Event';
+import { CarbonState } from './CarbonState';
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];
 
-	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager) { }
+	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager, readonly updateState: (state: CarbonState, tr: Transaction) => void) { }
 
 	private get state() {
 		return this.app.state;
 	}
 
 	private get store() {
-		return this.app.state.store;
+		return this.app.store;
 	}
 
 	private get runtime() {
@@ -32,54 +33,40 @@ export class TransactionManager {
 	}
 
 	private processTransactions() {
-		const { app, pm } = this
+		const { app, state } = this
+
 		// allow transactions to run only when there is no pending selection events
 		// normalizer transactions are allowed to commit even with pending selection events
-		while (this.transactions.length && (!this.runtime.selectEvents.length || this.transactions[0].isNormalizer)) {
+		while (this.transactions.length) {
 			const tr = this.transactions.shift();
-			console.log('Commit', tr)
-			if (tr?.commit()) {
-				// TODO: transaction should me made read-only after commit
-				pm.onTransaction(tr);
-				app.emit(EventsOut.transactionCommit, tr);
-				this.updateTransactionEffects(tr);
-			}
+			if (!tr) continue;
+			// produce a new state from the current state
+			const state = app.state.produce(app.runtime.origin, draft => {
+				tr.prepare();
+				tr.commit(draft);
+				// this.updateTransactionEffects(tr);
+			});
+
+			this.updateState(state, tr);
 		}
 	}
 
-	private updateTransactionEffects(tr: Transaction) {
-		if (tr.updatesContent) {
-			this.commitContent();
-		}
+	// private updateTransactionEffects(tr: Transaction) {
+	// 	if (tr.updatesContent) {
+	// 		this.commitContent();
+	// 	}
 
-		if (tr.updatesNodeState) {
-			this.commitNodeStates();
-		}
+	// 	if (tr.updatesNodeState) {
+	// 		this.commitNodeStates();
+	// 	}
 
-		if (tr.updatesSelection) {
-			this.commitSelection();
-		}
+	// 	if (tr.updatesSelection) {
+	// 		this.commitSelection();
+	// 	}
 
-		// update dom to reflect the state changes
-		this.app.change.update(tr);
-		this.app.emit(EventsOut.change, this.state);
-	}
-
-	private commitContent() {
-		this.state.updateContent();
-		this.app.emit(EventsOut.contentChanged, this.state.content);
-	}
-
-	private commitNodeStates() {
-		this.state.updateNodeState();
-		this.app.emit(EventsOut.nodeStateChanged, this.state);
-	}
-
-	private commitSelection() {
-		// console.log('commitSelection', this.state.selection.toString());
-		this.sm.commitSelection();
-		this.app.emit(EventsOut.selectionChanged, this.state.selection);
-	}
+	// 	// update dom to reflect the state changes
+	// 	this.app.emit(EventsOut.change, this.state);
+	// }
 
 	private updateDecorations() {
 		// console.log('######', this.state.decorations.size);

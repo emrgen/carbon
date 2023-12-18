@@ -1,17 +1,21 @@
-import { Point } from './Point';
-import { NodeId } from './NodeId';
-import { Optional } from '@emrgen/types';
-import { PinnedSelection } from './PinnedSelection';
-import { NodeStore } from './NodeStore';
-import { Pin } from './Pin';
-import { classString } from './Logger';
+import { Point } from "./Point";
+import { NodeId } from "./NodeId";
+import { Optional } from "@emrgen/types";
+import { PinnedSelection } from "./PinnedSelection";
+import { Pin } from "./Pin";
+import { classString } from "./Logger";
+import { ActionOrigin } from "./actions";
+import { NodeMap } from "./NodeMap";
+import { Node } from "@emrgen/carbon-core";
 
 export class PointedSelection {
-	tail: Point;
-	head: Point;
+
+	static NUll = new PointedSelection(Point.NULL, Point.NULL, []);
+
+	static IDENTITY = new PointedSelection(Point.IDENTITY, Point.IDENTITY, []);
 
 	get isInvalid() {
-		return this.head.isDefault || this.tail.isDefault;
+		return this.head.isNull || this.tail.isNull;
 	}
 
 	static atStart(nodeId: NodeId, offset: number = 0) {
@@ -22,41 +26,88 @@ export class PointedSelection {
 		return PointedSelection.create(point, point);
 	}
 
-	static create(tail: Point, head: Point): PointedSelection {
-		return new PointedSelection(tail, head);
+	static fromNodes(nodeIds: NodeId[], origin: ActionOrigin = ActionOrigin.Unknown) {
+		return new PointedSelection(Point.IDENTITY, Point.IDENTITY, nodeIds, origin);
 	}
 
-	constructor(tail: Point, head: Point) {
-		this.tail = tail;
-		this.head = head;
+	static create(tail: Point, head: Point, origin = ActionOrigin.Unknown): PointedSelection {
+		return new PointedSelection(tail, head, [], origin);
 	}
 
-	pin(store: NodeStore): Optional<PinnedSelection> {
-		const { tail, head } = this;
+	constructor(readonly tail: Point, readonly head: Point, readonly nodeIds: NodeId[], public origin: ActionOrigin = ActionOrigin.Unknown) {
+	}
+
+	get isIdentity() {
+		return this.eq(PointedSelection.IDENTITY);
+	}
+
+	get isNull() {
+		return this.eq(PointedSelection.NUll);
+	}
+
+	get isBlock() {
+		// console.log('PointedSelection.isBlock', this.nodeIds.length, this.eq(PointedSelection.IDENTITY));
+		return this.nodeIds.length !== 0 || this.eq(PointedSelection.IDENTITY);
+	}
+
+	get isInline() {
+		return !this.isBlock;
+	}
+
+	get isCollapsed() {
+		return this.tail.eq(this.head);
+	}
+
+	pin(store: NodeMap): Optional<PinnedSelection> {
+		if (this.isNull) {
+			return PinnedSelection.NULL;
+		}
+
+		const { tail, head, origin } = this;
 		// console.log('Selection.pin', head.toString());
+
+		if (this.isBlock) {
+			const nodes = (this.nodeIds.map(id => store.get(id)).filter(n => n) ?? []) as unknown as Node[];
+			if (nodes.length !== this.nodeIds.length) {
+				throw new Error('Selection.pin: invalid selection');
+			}
+			return PinnedSelection.fromNodes(nodes, origin)
+		}
+
 		const focus = Pin.fromPoint(head, store);
 		const anchor = Pin.fromPoint(tail, store);
 		if (!focus || !anchor) {
 			console.warn('Selection.pin: invalid selection', this.toString(), head.toString(), store.get(head.nodeId)	);
 			return
 		}
-
-		return PinnedSelection.create(anchor, focus);
+		return PinnedSelection.create(anchor, focus, origin);
 	}
 
 	eq(other: PointedSelection): boolean {
-		return this.tail.eq(other.tail) && this.head.eq(other.head);
+		if (this.nodeIds.length !== other.nodeIds.length) {
+			return false;
+		}
+		return this.tail.eq(other.tail) && this.head.eq(other.head) && this.nodeIds.every((id, i) => id.eq(other.nodeIds[i]));
 	}
 
-	unpin() {
+	unpin(): PointedSelection {
+		return this.clone()
+	}
+
+	freeze() {
+		Object.freeze(this);
 		return this
 	}
 
 	clone() {
-		return PointedSelection.create(this.tail.clone(), this.head.clone());
+		return new PointedSelection(this.tail.clone(), this.head.clone(), this.nodeIds.map(id => id.clone()), this.origin);
 	}
 
 	toString() {
+		if (this.isBlock) {
+			return classString(this)(this.nodeIds.map(id => id.toString()));
+		}
+
 		return classString(this)({
 			tail: this.tail.toString(),
 			head: this.head.toString()
@@ -64,7 +115,12 @@ export class PointedSelection {
 	}
 
 	toJSON() {
-		const { tail, head } = this;
-		return { tail: tail.toString(), head: head.toString() };
+		const { tail, head, nodeIds } = this;
+
+		if (this.isBlock) {
+			return { nodeIds: nodeIds.map(id => id.toString()) };
+		}
+
+		return { tail: tail.toString(), head: head.toString() }
 	}
 }

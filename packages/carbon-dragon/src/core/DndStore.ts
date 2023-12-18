@@ -60,7 +60,7 @@ export class DndNodeStore {
 	}
 
 	has(node: Node): boolean {
-		return !!this.nodeMap.has(node.id);
+		return this.nodeMap.has(node.id);
 	}
 
 	// connect the node to the rendered HTML element
@@ -76,6 +76,7 @@ export class DndNodeStore {
 		this.nodeMap.set(id, node);
 		this.elementMap.set(id, el);
 		this.elementToNodeMap.set(el, node);
+		this.rtree.add(node, elementBound(el));
 	}
 
 	// remove the node and related element,  from the store

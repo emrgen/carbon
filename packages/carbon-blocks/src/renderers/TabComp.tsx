@@ -21,26 +21,26 @@ const TableContext = createContext<{
   activeTabId: NodeId;
 }>({
   onSelect: (id) => {},
-  activeTabId: NodeId.default(),
+  activeTabId: NodeId.IDENTITY,
 });
 
 export const TabComp = (props: RendererProps) => {
   const { node } = props;
 
-  const [activeTabId, setActiveTabId] = useState(NodeId.default());
+  const [activeTabId, setActiveTabId] = useState(NodeId.IDENTITY);
   const [activeTab, setActiveTab] = useState<Optional<Node>>(null);
 
   const onSelect = useCallback((tabTitle: Node) => {
-    // console.log("onSelect", tabTitle.id);
-    setActiveTabId(tabTitle.id);
-    const tabContent = node.children.find(
-      (n) =>
-        tabTitle?.attrs?.node?.link && n.attrs?.node?.link ===
-        tabTitle?.attrs?.node?.link
-    );
-    console.log("tabContent", tabContent);
-    
-    setActiveTab(tabContent);
+    // // console.log("onSelect", tabTitle.id);
+    // setActiveTabId(tabTitle.id);
+    // const tabContent = node.children.find(
+    //   (n) =>
+    //     tabTitle?.properties?.node?.link && n.properties?.node?.link ===
+    //     tabTitle?.properties?.node?.link
+    // );
+    // console.log("tabContent", tabContent);
+    //
+    // setActiveTab(tabContent);
   },[node.children]);
 
   useEffect(() => {

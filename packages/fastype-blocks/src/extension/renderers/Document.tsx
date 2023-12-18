@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef } from "react";
 import {
   ActionOrigin,
   CarbonBlock,
-  CarbonNode,
   CarbonNodeChildren,
   CarbonNodeContent,
   EventsIn,
@@ -25,11 +24,11 @@ import {
   useNonDraggable,
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon";
-import { DocumentContext, usePlaceholder } from "@emrgen/carbon-blocks";
+import { DocumentContext } from "@emrgen/carbon-blocks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
-  const { picture = {} } = node.attrs.node;
+  // const { picture = {} } = node.properties.node;
 
   const app = useCarbon();
 
@@ -49,10 +48,8 @@ export const DocumentComp = (props: RendererProps) => {
     app.emit("document:mounted", node);
   }, [app, node]);
 
-  const placeholder = usePlaceholder(node);
-
   const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+    (e: MouseEvent) => {
       const lastChild = node.lastChild as Node;
       const lastElement = app.store.element(lastChild?.id!);
       if (!lastChild) return;
@@ -70,7 +67,7 @@ export const DocumentComp = (props: RendererProps) => {
   );
 
   const handleClick = useCallback(
-    (e: React.MouseEvent) => {
+    (e: MouseEvent) => {
       app.emit("document:cursor:show");
 
       const lastChild = node.lastChild as Node;
@@ -92,7 +89,6 @@ export const DocumentComp = (props: RendererProps) => {
           return;
         }
         prevent(e);
-        // console.log("add new child");
         const at = Point.toAfter(lastChild.id);
         const section = app.schema.type("section").default();
         if (!section) return;
@@ -133,13 +129,14 @@ export const DocumentComp = (props: RendererProps) => {
     };
   }, [app, ref]);
 
+  console.log(node.properties);
+
   return (
     <DocumentContext document={node}>
       <div
         className="document-wrapper"
         ref={wrapperRef}
         onScroll={(e) => {
-          console.log(e);
           app.onEvent(EventsIn.scroll, e as any);
         }}
       >
@@ -158,18 +155,17 @@ export const DocumentComp = (props: RendererProps) => {
           ref={ref}
           custom={{
             ...connectors,
-            onMouseUp: handleClick,
+            // onMouseUp: handleClick,
             onMouseDown: handleMouseDown,
-            onScroll: (e) => {
-              // console.log(e.target.scrollTop);
-              app.emit(EventsIn.scroll, e as any);
-            },
+            // onScroll: (e) => {
+            //   app.emit(EventsIn.scroll, e as any);
+            // },
             onBlur: (e) => app.emit("document:blur", e as any),
             onFocus: (e) => app.emit("document:focus", e as any),
             className: 'fastype-document',
           }}
         >
-          <CarbonNodeContent node={node} custom={placeholder} />
+          <CarbonNodeContent node={node} />
           <CarbonNodeChildren node={node} />
         </CarbonBlock>
       </div>

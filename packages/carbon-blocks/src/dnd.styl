@@ -9,7 +9,7 @@
 	user-select: none
 	z-index: 999999999
 
-.carbon-rect-selector
+.carbon-selector
 	position absolute
 	box-shadow: 0 0 0 1px #555
 	background: rgba(51, 51, 51, 0.1)
@@ -55,13 +55,14 @@
 [data-name=bulletedList]
 [data-name=numberedList]
 [data-name=todo]
-	// position relative
+[data-name=pageTree]
+[data-name=pageTreeItem]
 	&:after
 		position: absolute
 		content: attr(data-id)
 		line-height: inherit
 		top 1px
-		right 0px
+		right 0
 		padding 0 10px
 		font-size 12px
 	[data-name=title]
@@ -70,7 +71,7 @@
 			content: attr(data-id)
 			line-height: inherit
 			top 12px
-			right 0px
+			right 0
 			padding 0 10px
 			font-size 12px
 			color: #aaa

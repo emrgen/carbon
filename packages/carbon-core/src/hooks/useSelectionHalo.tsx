@@ -1,6 +1,7 @@
 import { Node } from "../core";
-import { useNodeStateChange } from "./useNodeChange";
 import { useMemo } from 'react';
+import { SelectedPath } from "../core/NodeProps";
+import { useNodeState } from "@emrgen/carbon-core";
 
 interface UseSelectionHaloProps {
   node: Node;
@@ -10,21 +11,22 @@ interface UseSelectionHaloProps {
 // creates a selection halo around the selected node
 export const useSelectionHalo = (props: UseSelectionHaloProps) => {
 	const { node, className } = props;
-	const { isSelected, isActive, attributes } = useNodeStateChange(props);
+	const { isSelected, isActive, attributes } = useNodeState(props);
 
 	const SelectionHalo = useMemo(() => {
+    const parentSelected = node.parents.some((parent) => parent.properties.get(SelectedPath));
+
     return (
       <>
-        {isSelected && (
+        {!parentSelected && isSelected && (
           <div
             className={`carbon-selection-halo ${className ?? ""}`}
             data-target={node.name}
-            data-selected={isSelected}
           />
         )}
       </>
     );
-  }, [className, isSelected, node.name]);
+  }, [className, isSelected, node]);
 
 	return {
     SelectionHalo,

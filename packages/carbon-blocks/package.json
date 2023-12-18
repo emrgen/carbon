@@ -17,6 +17,7 @@
     "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",
     "@types/prismjs": "^1.26.0",
+    "@uidotdev/usehooks": "^2.4.1",
     "emoji-regex": "^10.2.1",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",

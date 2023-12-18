@@ -38,12 +38,9 @@ export enum EventsIn {
 // Outgoing Event types from the Editor
 export enum EventsOut {
 	updateView = 'update:view',
-	change = 'change',
+	changed = 'changed',
 	viewUpdated = 'view:updated',
 	selectionChanged = 'selection:changed',
-	blockSelection = 'block:selection',
-	contentChanged = 'content:changed',
-	nodeStateChanged = 'node:state:changed',
 	selectionUpdated = 'selection:updated',
 	contentUpdated = 'content:updated',
 	nodeStateUpdated = 'node:state:updated',

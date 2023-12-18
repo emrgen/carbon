@@ -234,6 +234,16 @@ span[data-name=text] {
 	background: $selectionHaloColor
 	border-radius: 2px
 	pointer-events: none
+	//animation halo-animation 0.1s ease-in forwards
+
+@keyframes halo-animation {
+	0% {
+		opacity: 0
+	}
+	100% {
+		opacity: 1
+	}
+}
 
 [data-selected=true]
 	caret-color: transparent;
@@ -560,17 +570,17 @@ span[data-name=text] {
 					border-right: 1px solid #ddd
 
 // [data-hide-cursor=true],
-.carbon-rect-select,
+.carbon-selection,
 .carbon-app-events
 	width 100%
 	height 100%
 	overflow: hidden
-.carbon-rect-select.rect-active
+.carbon-selection.carbon-selecting,
+.carbon-selection.block-selection
 	caret-color: transparent
 	user-select: none
 	::selection
 		background: transparent
-.carbon-rect-select.rect-dragging
 	.carbon-selection-halo[data-selected=true]
 		background: transparent!important
 
@@ -586,29 +596,46 @@ span[data-name=text] {
 	[data-as=document]
 		flex 1
 
-[data-name=fileTree]
-	width 200px
-	height: 500px
+[data-name=pageTree]
+	margin 10px 0
+	font-size 15px
+	padding 10px 0
 	background #fafafa
-	outline: 2px dashed blue;
-	padding: 10px 4px
-	// margin: 10px 00px 0px 10px
-	padding-top 90px
+	border: 2px dashed blue
+	[data-name=title]:before
+		display none
+	[data-type=children]
+		padding-top 4px
 
-[data-name=fileTreeItem]
+[data-name=pageTree] > [data-type=content]
+	font-size 13px
+	margin 0 10px
+	display flex
+	[data-name=title]
+		line-height 14px
+		padding: 2px 4px
+		font-weight bold
+		color #aaa
+		&:hover
+			background: #eee;
+			color #555
+			border-radius 4px
+			cursor pointer
+
+[data-name=pageTreeItem]
 	border-radius: 4px
-	padding: 0px 4px
-	&:hover
-		background: #eee
+	padding: 0 4px
 	&> [data-type=children]
 		padding-left: 20px
 	&>[data-type=content]
 		position relative
 		line-height: $lineHeight
-		position relative
 		display: flex
 		align-items: center
+		padding-left: 4px;
 		gap 4px
+		&:hover
+			background: #eee
 		[data-name=title]
 			flex 1
 			display: flex
@@ -618,6 +645,7 @@ span[data-name=text] {
 			overflow: hidden
 			justify-content: flex-start
 			align-items: flex-start
+			line-height 28px
 			span
 				display: inline-block
 				left: 0
@@ -625,7 +653,6 @@ span[data-name=text] {
 				text-overflow: ellipsis;
 				overflow: hidden;
 		.carbon-collapsible__control
-			// margin-top: 3px
 			color: #aaa
 			width 20px
 			height: 20px
@@ -634,7 +661,12 @@ span[data-name=text] {
 			justify-content: center
 			padding 0
 			border-radius: 4px
-			// padding-top 2px
+			.page-tree-open-close-icon
+				transition transform 0.2s
+			&.collapsed > .page-tree-open-close-icon
+				transform: rotate(0deg)
+			&.expanded > .page-tree-open-close-icon
+				transform: rotate(90deg)
 			&:hover
 				background: #ddd
 				color #666
@@ -642,7 +674,7 @@ span[data-name=text] {
 			position absolute
 			z-index: 1
 			top: 50%
-			right: 0
+			right: 4px
 			width: 20px
 			height: 20px
 			transform: translate(0%, -50%)
@@ -668,7 +700,7 @@ span[data-name=text] {
 		line-height: $lineHeight
 		user-select: none
 
-	&[data-open=true] > [data-type=content] > [data-name=title]
+	&[data-opened=true] > [data-type=content] > [data-name=title]
 		color: #000!important
 
 .carbon-overlay
@@ -677,8 +709,6 @@ span[data-name=text] {
 	width 100%
 	top 0
 	left: 0
-	// background rgba(229, 229, 229, 0.465)
-	// z-index: 10
 
 [data-name=tab]
 	margin: 10px 0px
@@ -701,7 +731,6 @@ span[data-name=text] {
 	.carbon-tab-item-content
 		padding: 10px 20px
 		border-radius: 4px
-		// border: 1px solid #ddd
 	.carbon-add-tab-item
 		display: flex
 		align-items: center

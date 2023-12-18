@@ -11,7 +11,6 @@ export const useDndRegion = (props: UseFastDndRegionProps) => {
 	const { node, ref } = props;
 
 	const dnd = useDndContext();
-	const { version } = useNodeChange(props);
 
 	const onMouseMove = useCallback((e) => {
 		if (e.target === dnd.region) {
@@ -27,7 +26,7 @@ export const useDndRegion = (props: UseFastDndRegionProps) => {
 		if (node.children.some(n => n.type.isDraggable)) {
 			dnd.onUpdated(node);
 		}
-	}, [version, node, dnd]);
+	}, [node, dnd]);
 
 	return {
 		listeners: {

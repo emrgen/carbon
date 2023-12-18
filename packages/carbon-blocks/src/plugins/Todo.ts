@@ -15,14 +15,20 @@ export class Todo extends Section {
         tags: ['to-do list', 'todo', 'checkbox', 'checklist'],
         order: 5,
       },
-      attrs: {
-        node: {
-          emptyPlaceholder: 'To-do',
-          isChecked: false,
+      props: {
+        local: {
+          placeholder: {
+            empty:'To-do',
+            focused: 'Press / for commands',
+          },
+          html: {
+            suppressContentEditableWarning: true,
+          }
         },
-        html: {
-          // placeholder: 'To-do',
-          suppressContentEditableWarning: true,
+        remote:{
+          state: {
+            checked: false
+          }
         }
       }
     }
@@ -36,9 +42,9 @@ export class Todo extends Section {
         const { selection } = app;
         if (selection.head.node.parent?.eq(node)) {
           app.tr
-            .updateAttrs(node.id, {
+            .updateProps(node.id, {
               node: {
-                isChecked: !node.attrs.node.isChecked,
+                checked: !node.properties.get('node.checked'),
               },
             })
             .dispatch();
@@ -48,7 +54,7 @@ export class Todo extends Section {
   }
 
   serialize(app: Carbon, node: Node): SerializedNode {
-    const prefix = node.attrs.node?.isChecked ? ['x'] : '[]';
+    const prefix = node.properties.node?.isChecked ? ['x'] : '[]';
     return `${prefix} ${app.serialize(node.child(0)!)}` + app.cmd.nestable.serializeChildren(node);
   }
 }

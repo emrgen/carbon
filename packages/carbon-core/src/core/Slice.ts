@@ -11,14 +11,18 @@ export class Slice {
   }
 
   get isEmpty() {
-    return this === Slice.empty;
+    return this === Slice.empty || !this.root;
   }
 
   get nodes() {
     return this.root?.children ?? [];
   }
 
-  clone(app: Carbon) {
+  clone() {
+    if (this.isEmpty) {
+      return Slice.empty;
+    }
+
     let startPath: number[] = [];
     let endPath: number[] = [];
     const {root, start, end} = this
@@ -31,7 +35,7 @@ export class Slice {
       }
     })
 
-    const cloned = app.schema.cloneWithId(root);
+    const cloned = root.type.schema.cloneWithId(root);
     const startNode = cloned.atPath(startPath)!;
     const endNode = cloned.atPath(endPath)!;
     
@@ -49,4 +53,17 @@ export class Slice {
   }
 
   constructor(readonly root: Node, readonly start: Node, readonly end: Node) {}
+
+  freeze() {
+    Object.freeze(this);
+    Object.freeze(this.root);
+  }
+
+  toJSON() {
+    return {
+      root: this.root.toJSON(),
+      start: this.start.toJSON(),
+      end: this.end.toJSON(),
+    };
+  }
 }

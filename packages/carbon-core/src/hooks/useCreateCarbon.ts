@@ -8,35 +8,54 @@ import { SchemaFactory } from '../core/SchemaFactory';
 import { NodeJSON } from "../core/types";
 import { CarbonDefaultNode } from "../renderer";
 import { Carbon } from '../core/Carbon';
-import { CarbonState } from '../core';
+import { CarbonState, PinnedSelection } from "../core";
 
+export interface InitNodeJSON extends Omit<NodeJSON, 'id'> {
+	id?: string;
+}
 
 // create carbon app with extensions
-export const createCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
+export const createCarbon = (name: string, json: InitNodeJSON, extensions: Extension[] = []) => {
+	const plugins = flatten(extensions.map(e => e.plugins ?? []));
+	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
+	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
+
+	// the carbon state is scoped to this symbol
+	const scope = Symbol(name);
+
+	const pm = new PluginManager(plugins);
+	const {specs} = pm;
+	const schema = new Schema(specs, new SchemaFactory(scope));
+	const content = schema.nodeFromJSON(json);
+
+
+	if (!content) {
+		throw new Error("Failed to parse app content");
+	}
+
+	const state = CarbonState.create(scope, content, PinnedSelection.IDENTITY);
+	return new Carbon(state, schema, pm, renderer)
+}
+
+// create carbon app with extensions
+export const useCreateCarbon = (name: string, json: InitNodeJSON, extensions: Extension[] = []) => {
+	const [app] = useState(() => {
+		return createCarbon(name, json, extensions)
+	})
+
+	return app;
+}
+
+export const useCreateCarbonFromState = (state: CarbonState, extensions: Extension[] = []) => {
 	const plugins = flatten(extensions.map(e => e.plugins ?? []));
 	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
 	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
 
 	const pm = new PluginManager(plugins);
 	const {specs} = pm;
-	const schema = new Schema(specs, new SchemaFactory());
+	const schema = new Schema(specs, new SchemaFactory(state.scope));
 
-	const content = schema.nodeFromJSON(json);
-	if (!content) {
-		throw new Error("Failed to parse app content");
-	}
-
-	return new Carbon(content, schema, pm, renderer)
-}
-
-
-// create carbon app with extensions
-export const useCreateCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
-	const [app] = useState(() => {
-		return createCarbon(json, extensions)
-	})
-
-	return app;
+	return new Carbon(state, schema, pm, renderer)
 }
 
 // const saveDoc = throttle((state: CarbonState) => {
@@ -56,16 +75,16 @@ export const useCreateCarbon = (json: NodeJSON, extensions: Extension[] = []) =>
 // }
 
 // create carbon app with extensions and save to local storage
-export const useCreateCachedCarbon = (json: NodeJSON, extensions: Extension[] = []) => {
+export const useCreateCachedCarbon = (name: string, json: InitNodeJSON, extensions: Extension[] = []) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [app, setApp] = useState(() => {
 		const savedDoc = localStorage.getItem('carbon:content');
 		if (savedDoc) {
 
-			return createCarbon(JSON.parse(savedDoc), extensions);
+			return createCarbon(name, JSON.parse(savedDoc), extensions);
 		}
 
-		return createCarbon(json, extensions);
+		return createCarbon(name, json, extensions);
 	});
 
 	// useEffect(() => {
@@ -85,10 +104,10 @@ export const useCreateCachedCarbon = (json: NodeJSON, extensions: Extension[] = 
 			localStorage.setItem('carbon:selection', JSON.stringify(state.selection.toJSON()))
 			// saveDoc(state);
 		}
-		app.on('change', onChange);
+		app.on('changed', onChange);
 
 		return () => {
-			app.off('change', onChange);
+			app.off('changed', onChange);
 		}
 	}, [app]);
 

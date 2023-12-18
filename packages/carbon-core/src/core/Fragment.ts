@@ -3,7 +3,7 @@ import { each } from 'lodash';
 import { NodeId } from "./NodeId";
 import { With } from "@emrgen/types";
 
-// a list of nodes
+// a slice of adjacent nodes
 export class Fragment {
 	static fromNode(node: Node): Fragment {
 		return Fragment.from([node]);

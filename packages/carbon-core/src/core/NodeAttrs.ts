@@ -1,29 +1,69 @@
-import { cloneDeep, merge, reduce } from 'lodash';
+import { cloneDeep, each, merge, reduce, set, get } from "lodash";
 import { removeEmpty } from '../utils/object';
 
-export class NodeAttrs {
-	html: Record<string, any> = {};
-	node: Record<string, any> = {};
+export type NodeAttrsJSON = Record<string, any>
 
-	constructor(attrs: Record<string, any>) {
-		this.html = attrs.html ?? {};
-		this.node = attrs.node ?? {};
+export class NodeAttrs {
+	private readonly attrs: Record<string, any> = {};
+
+	static empty() {
+		return new NodeAttrs({});
 	}
 
-	update(attrs: Record<string, any>) {
-		const html = merge(cloneDeep(this.html), attrs.html)
+	static from(attrs: NodeAttrsJSON | NodeAttrs) {
+		if (attrs instanceof NodeAttrs) {
+			return attrs;
+		}
 
-		const node = merge(cloneDeep(this.node), attrs.node);
-		return new NodeAttrs({
-			html,
-			node,
-		});
+		return new NodeAttrs(attrs);
+	}
+
+	get(id: string, defaultValue?: any) {
+		return get(this.attrs, id, defaultValue);
+	}
+
+	get html() {
+		return this.attrs.html;
+	}
+
+	get node() {
+		return this.attrs.node;
+	}
+
+	constructor(attrs: NodeAttrsJSON) {
+		this.attrs = attrs;
+	}
+
+	update(attrs: NodeAttrsJSON) {
+		return new NodeAttrs(merge(this.attrs, attrs))
+	}
+
+	merge(attrs: NodeAttrs) {
+		return new NodeAttrs(merge(this.attrs, attrs.attrs))
+	}
+
+	diff(attrs: NodeAttrs) {
+		const diff = reduce(attrs.attrs, (result, value, key) => {
+			if (this.attrs[key] !== value) {
+				result[key] = value;
+			}
+			return result;
+		}, {});
+
+		return new NodeAttrs(diff);
+	}
+
+	freeze() {
+		Object.freeze(this);
+		Object.freeze(this.attrs);
+		return this;
+	}
+
+	clone() {
+		return new NodeAttrs(this.toJSON());
 	}
 
 	toJSON() {
-		return {
-			html: this.html,
-			node: this.node,
-		};
+		return cloneDeep(this.attrs)
 	}
 }

@@ -101,7 +101,7 @@ export function BlockMenu(props: BlockMenuProps) {
       const { tr } = app;
       tr.change(node?.id, node?.name, type.name)
       tr.setContent(node.child(0)!.id, BlockContent.create([]));
-      tr.updateAttrs(node.id, {
+      tr.updateProps(node.id, {
         node: { typeChanged: true },
         // html: { "data-as": type.name },
       });
@@ -205,7 +205,7 @@ const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
   }, [scrollTop]);
 
   console.log(blocks.map(b => b.name));
-  
+
   return (
     <Box
       ref={ref}

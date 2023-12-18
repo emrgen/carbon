@@ -6,21 +6,16 @@ import {
   CarbonNodeContent,
   RendererProps,
   useCarbon,
-  useNodeChange,
-  useNodeStateChange,
   useSelectionHalo,
-  BlockContent
+  BlockContent, useNodeActivated
 } from "@emrgen/carbon-core";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 export const EquationComp = (props: RendererProps) => {
-  const { node, version } = props;
+  const { node } = props;
   const { SelectionHalo } = useSelectionHalo(props);
-  const { isActive } = useNodeStateChange(props);
   const app = useCarbon();
   const ref = useRef<any>();
-  // const [power, setPower] = useState(1)
-  // const {version} = useNodeChange(props);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -56,7 +51,7 @@ export const EquationComp = (props: RendererProps) => {
   return (
     <CarbonBlock
       {...props}
-      custom={{ "data-active": isActive, "data-content-editable-void": "true" }}
+      // custom={{ "data-active": isActive, "data-content-editable-void": "true" }}
     >
       <div data-type="equation-content" ref={ref} />
       <div

@@ -47,51 +47,50 @@ export const CodeComp = (props: RendererProps) => {
 };
 
 
-const CodeContentMirror = (props: RendererProps) => {
-  const { node, version } = useNodeChange(props);
-  const app = useCarbon();
-
-  console.log(node.textContent);
-
-  return <ReactCodeMirror
-    value={node.textContent!}
-    options={{
-      // theme: 'monokai',
-      // keyMap: 'sublime',
-      // mode: 'jsx',
-      language: 'go',
-    }}
-    onFocus={() => {
-      app.tr.selectNodes([]).dispatch();
-      app.disable();
-    }}
-    onBlur={() => app.enable()}
-    onChange={(value) => {
-      app.enable(() => {
-        const text = app.schema.text(value)!;
-        app.tr.setContent(node.id, BlockContent.create([text])).dispatch();
-      });
-    }}
-  />
-
-}
+// const CodeContentMirror = (props: RendererProps) => {
+//   const { node, version } = useNodeChange(props);
+//   const app = useCarbon();
+//
+//   console.log(node.textContent);
+//
+//   return <ReactCodeMirror
+//     value={node.textContent!}
+//     options={{
+//       // theme: 'monokai',
+//       // keyMap: 'sublime',
+//       // mode: 'jsx',
+//       language: 'go',
+//     }}
+//     onFocus={() => {
+//       app.tr.selectNodes([]).dispatch();
+//       app.disable();
+//     }}
+//     onBlur={() => app.enable()}
+//     onChange={(value) => {
+//       app.enable(() => {
+//         const text = app.schema.text(value)!;
+//         app.tr.setContent(node.id, BlockContent.create([text])).dispatch();
+//       });
+//     }}
+//   />
+// }
 
 
 const CodeContent = (props: RendererProps) => {
-  const { node, version } = useNodeChange(props);
+  const { node } = props;
   const app = useCarbon();
   const refText = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!node.parent) return;
-    if (node.parent.attrs.node.typeChanged) {
+    if (node.parent.properties.node.typeChanged) {
       console.log("focus");
       app.tr
-        .updateAttrs(node.parent.id, { node: { typeChanged: false } })
+        .updateProps(node.parent.id, { node: { typeChanged: false } })
         .dispatch();
       refText.current?.focus();
     }
-  }, [app, node, version]);
+  }, [app, node]);
 
   useEffect(() => {
     const onFocus = () => {
@@ -115,7 +114,7 @@ const CodeContent = (props: RendererProps) => {
     }
 
     if (e.key == "Enter") {
-      if (app.blockSelection.size > 0) {
+      if (app.selection.isBlock) {
         e.preventDefault();
       }
     }
@@ -141,7 +140,7 @@ const CodeContent = (props: RendererProps) => {
 
         const { tr } = app;
         tr.change(parent.id, parent.name, "section");
-        tr.updateAttrs(parent.id, { node: { typeChanged: true } });
+        tr.updateProps(parent.id, { node: { typeChanged: true } });
         tr.select(
           PinnedSelection.fromPin(Pin.toStartOf(parent)!),
           ActionOrigin.UserInput

@@ -6,11 +6,15 @@ import { Point } from './Point';
 import { constrain } from '../utils/constrain';
 import { Maps } from './types';
 import { NodeContent } from './NodeContent';
+import { NodeMap } from './NodeMap';
+import { StateScope } from "./StateScope";
 
 enum PinReference {
 	front = 'front',
 	back = 'back',
 }
+
+export const IDENTITY_OFFSET = -1;
 
 // materialized pin is a pin that is not a reference to a i
 export class Pin {
@@ -21,62 +25,19 @@ export class Pin {
 	//
 	ref: PinReference;
 
-	get isInvalid() {
-		return this.offset === -10;
+	static NULL = new Pin(Node.NULL, 0);
+
+	static IDENTITY = new Pin(Node.IDENTITY, IDENTITY_OFFSET);
+
+	get isIdentity() {
+		return this.eq(Pin.IDENTITY);
 	}
 
-	get point(): Point {
-		return Point.toStart(this.node.id, this.offset);
+	get isNull() {
+		return this.eq(Pin.NULL);
 	}
 
-	get isAtStart(): boolean {
-		return this.offset === 0;
-	}
-
-	get isAtEnd(): boolean {
-		return this.offset === this.node.focusSize;
-	}
-
-	get isBefore() {
-		if (this.node.isEmpty) return false
-		return !this.node.isEmpty && this.offset === 0
-	}
-
-	get isWithin() {
-		if (this.node.isEmpty) return true
-		return 0 < this.offset && this.offset < this.node.focusSize;
-	}
-
-	get isAfter() {
-		if (this.node.isEmpty) return false
-		return this.offset === this.node.focusSize
-	}
-
-	// align pin to the left when it is in the middle of the two text blocks
-	get leftAlign(): Pin {
-		const { prevSibling } = this.node;
-		if (!this.node.isEmpty && this.offset === 0 && prevSibling?.isFocusable) {
-			return Pin.create(prevSibling, prevSibling.focusSize);
-		} else {
-			return this;
-		}
-	}
-
-	// align pin to the right when it is in the middle of the two text blocks
-	get rightAlign(): Pin {
-		const { nextSibling } = this.node;
-		if (!this.node.isEmpty && this.offset === this.node.focusSize && nextSibling?.isFocusable) {
-			return Pin.create(nextSibling, 0);
-		} else {
-			return this;
-		}
-	}
-
-	static default(node: Node): Pin {
-		return new Pin(node, -10);
-	}
-
-	static fromPoint(point: Point, store: NodeStore): Optional<Pin> {
+	static fromPoint(point: Point, store: NodeMap): Optional<Pin> {
 		if (!point.isStart) return
 		const node = store.get(point.nodeId);
 		if (!node || !node.type.isTextBlock) {
@@ -162,6 +123,58 @@ export class Pin {
 		this.ref = ref;
 	}
 
+
+	get isInvalid() {
+		return this.eq(Pin.IDENTITY)
+	}
+
+	get point(): Point {
+		return Point.toStart(this.node.id, this.offset);
+	}
+
+	get isAtStart(): boolean {
+		return this.offset === 0;
+	}
+
+	get isAtEnd(): boolean {
+		return this.offset === this.node.focusSize;
+	}
+
+	get isBefore() {
+		if (this.node.isEmpty) return false
+		return !this.node.isEmpty && this.offset === 0
+	}
+
+	get isWithin() {
+		if (this.node.isEmpty) return true
+		return 0 < this.offset && this.offset < this.node.focusSize;
+	}
+
+	get isAfter() {
+		if (this.node.isEmpty) return false
+		return this.offset === this.node.focusSize
+	}
+
+	// align pin to the left when it is in the middle of the two text blocks
+	get leftAlign(): Pin {
+		const { prevSibling } = this.node;
+		if (!this.node.isEmpty && this.offset === 0 && prevSibling?.isFocusable) {
+			return Pin.create(prevSibling, prevSibling.focusSize);
+		} else {
+			return this;
+		}
+	}
+
+	// align pin to the right when it is in the middle of the two text blocks
+	get rightAlign(): Pin {
+		const { nextSibling } = this.node;
+		if (!this.node.isEmpty && this.offset === this.node.focusSize && nextSibling?.isFocusable) {
+			return Pin.create(nextSibling, 0);
+		} else {
+			return this;
+		}
+	}
+
 	// lift pin to the parent (possibly to the text block)
 	up(): Optional<Pin> {
 		const { node, offset } = this;
@@ -169,6 +182,9 @@ export class Pin {
 
 		const { parent } = node;
 		if (!parent) {
+			const map = StateScope.get(node.scope)
+			console.log(map);
+			throw Error('Pin.up: node does not have a parent' + node.id.toString());
 			return
 		}
 
@@ -188,12 +204,12 @@ export class Pin {
 	// push pin down to the proper child
 	down() {
 		const { node, offset } = this;
-		if (offset === 0 && node.isEmpty || node.isInline) {
+		if (offset === 0 && node.isVoid || node.isInline) {
 			return this.clone()
 		}
 
 		let distance = offset;
-		let pin: Optional<Pin>
+		let pin: Pin = this.clone();
 		node?.children.some(n => {
 			if (distance <= n.focusSize) {
 				pin = Pin.create(n, distance)

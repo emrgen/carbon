@@ -18,22 +18,29 @@ interface EventContextProps<T> {
 	selection: PinnedSelection;
 }
 
-//
+// EventContext is the context of an event that is being handled by the app and its plugins
 export class EventContext<T extends Event> {
-
 	readonly app: Carbon;
+	// selection is the selection at the time of the event not the current app state selection
 	readonly selection: PinnedSelection;
 	// target is the node that the event was dispatched to
-	// its always text block node
+	// its always text block node or a node that contains text blocks but currently empty
 	readonly target: Node
-
+	// origin is the source of the event, eg. dom or custom
 	readonly origin: EventOrigin;
+	// type is the event type
 	readonly type: EventsIn;
+	// event is the original event from the dom or custom event
 	readonly event: T;
 
+	// node is the node that the event is currently being handled on
+	// this can be different from the target node and changes
+	// during upwards event propagation along the node tree
 	node: Node;
 
+	// stopped is true if the event propagation has been stopped
 	stopped: boolean = false;
+	// prevented is true if the event default action has been prevented
 	prevented: boolean = false
 
 	// create a new event context

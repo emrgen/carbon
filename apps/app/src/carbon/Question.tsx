@@ -33,7 +33,7 @@ const extensions = [
 ];
 
 export function Question() {
-  const app = useCreateCarbon(data, extensions);
+  const app = useCreateCarbon('q',data, extensions);
 
   return <CarbonApp app={app} />;
 }

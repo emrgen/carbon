@@ -1,18 +1,15 @@
 import { Optional } from '@emrgen/types';
-import { each, isArray, isEmpty, merge } from 'lodash';
+import { each, isArray,  merge } from 'lodash';
 import { ContentMatch } from './ContentMatch';
 import { Fragment } from './Fragment';
 import { MarkSet } from './Mark';
 import { Node } from './Node';
 import { NodeSpec, Schema } from './Schema';
-import { HTMLAttrs, NodeJSON, NodeName } from './types';
-import { NodeData } from './NodeData';
-
-export type Attrs = { readonly [attr: string]: any }
-
-const defaultAttrs: NodeSpec = {
-
-}
+import { HTMLAttrs,  NodeName } from './types';
+import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
+import { NodeState, NodeStateJSON } from "./NodeState";
+import { InitNodeJSON } from "@emrgen/carbon-core";
+import { NodeProps, NodePropsJson } from "./NodeProps";
 
 const specGroups = (name: string, spec: NodeSpec) => {
 	const groups = new Set(spec.group ? spec.group.split(" ") : []);
@@ -25,25 +22,23 @@ const specGroups = (name: string, spec: NodeSpec) => {
 	return Array.from(groups);
 }
 
-const defaultSpec: NodeSpec = {
-	// collapsable: false,
-	// selectable: true,
-	// atom: false,
-	// group: '',
-	// content: '',
-	// marks: '',
-	// inline: false,
+const IDENTITY_NODE_SPEC: NodeSpec = {
+	attrs: {},
+	group: '',
+	content: '',
+	marks: '',
+	inline: false,
+}
+
+interface DefaultParams {
+	attrs?: NodeAttrsJSON,
+	state?: NodeStateJSON,
 }
 
 export class NodeType {
 	groupsNames: readonly string[];
 
-	attrs: {
-		node: Record<string, any>;
-		html: HTMLAttrs;
-	};
-
-	state: Record<string, any>;
+	props: NodeProps;
 
 	/// True if this node type has inline content.
 	inlineContent!: boolean
@@ -57,6 +52,9 @@ export class NodeType {
 	markSet: MarkSet;
 
 	contents: NodeName[];
+
+	static IDENTITY = new NodeType('identity', {} as Schema, IDENTITY_NODE_SPEC);
+	static NULL = new NodeType('null', {} as Schema, IDENTITY_NODE_SPEC);
 
 	static compile(specs: Record<NodeName, NodeSpec>, schema: Schema) {
 		const nodes = {};
@@ -72,8 +70,7 @@ export class NodeType {
 	// spec: spec of the NodeType
 	constructor(readonly name: NodeName, readonly schema: Schema, readonly spec: NodeSpec) {
 		this.groupsNames = specGroups(name, spec);
-		this.attrs = merge({ node: {}, html: {} }, spec.attrs ?? {});
-		this.state = spec.state ?? {};
+		this.props = NodeProps.fromJSON(spec.props ?? {});
 
 		this.isBlock = !(spec.inline || name == "text")
 		this.isText = name == "text";
@@ -213,15 +210,13 @@ export class NodeType {
 
 	// create a default node based on schema
 	default(): Optional<Node> {
-		// console.log(this.name);
-
 		if (this.isText) {
 			return this.schema.text('');
 		}
 
-		const blockJson: NodeJSON = {
+		const blockJson: InitNodeJSON = {
 			name: this.name,
-			content: []
+			children: [],
 		}
 		let { contentMatch } = this
 		if (contentMatch.validEnd) {
@@ -233,8 +228,8 @@ export class NodeType {
 			if (validEnd || !nextEdges) {
 				break
 			}
-			if (defaultType && isArray(blockJson.content)) {
-				blockJson.content.push(defaultType.default()?.toJSON())
+			if (defaultType && isArray(blockJson.children)) {
+				blockJson.children.push(defaultType.default()?.toJSON())
 			}
 			contentMatch = nextEdges[0].next
 		}
@@ -258,36 +253,9 @@ export class NodeType {
 		return this.name === other.name;
 	}
 
-	//
-	createAndFill() { }
-
-	// allowsMarkType(markType: MarkType) {
-	// 	return this.markSet == null || this.markSet.indexOf(markType) > -1
-	// }
-
-	// validContent(content: Fragment) {
-	// 	let result = this.contentMatch.matchFragment(content)
-	// 	if (!result || !result.validEnd) return false
-	// 	for (let i = 0;i < content.childCount;i++)
-	// 		if (!this.allowsMarks(content.child(i).marks)) return false
-	// 	return true
-	// }
-
-	checkContent(content: Fragment) {
-		// if (!this.validContent(content))
-		// 	throw new RangeError(`Invalid content for node ${this.name}: ${content.toString().slice(0, 50)}`)
+	createAndFill(): Optional<Node> {
+		return null
 	}
-
-	// allowsMarks(marks: readonly Mark[]) {
-	// 	if (this.markSet == null) return true
-	// 	for (let i = 0;i < marks.length;i++) {
-	// 		if (!this.allowsMarkType(marks[i].type)) {
-	// 			return false
-	// 		}
-	// 	}
-	// 	return true
-	// }
-
 }
 
 export class MarkType {}

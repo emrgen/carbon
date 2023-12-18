@@ -1,7 +1,7 @@
 import { ChangeManager } from "../core/ChangeManager";
 import { useCarbon } from "./useCarbon";
 import {
-  createContext, useContext
+  createContext, useContext, useEffect
 } from "react";
 
 const InternalCarbonChangeContext = createContext<ChangeManager>(null!);

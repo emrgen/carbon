@@ -5,7 +5,7 @@ import { useDndMonitor } from "../hooks/useDndMonitor";
 import { useDraggableHandle } from "../hooks/useDraggable";
 import { useDragRect } from "../hooks/useDragRect";
 import {
-  ActionOrigin,
+  ActionOrigin, CarbonState,
   Node,
   nodeLocation,
   Pin,
@@ -54,7 +54,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   });
 
   useEffect(() => {
-    const onTransaction = (tr) => {
+    const onTransaction = () => {
       setShow(false);
     };
     app.on("transaction", onTransaction);
@@ -78,9 +78,8 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
   const onDragStart = useCallback((e: DndEvent) => {
     if (e.id === CarbonDragHandleId) {
-      // e.event.stopPropagation();
       app.enable(() => {
-        app.tr.selectNodes([])?.dispatch();
+        app.tr.select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput).dispatch();
       });
     }
   }, [app]);
@@ -113,12 +112,16 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (e.event.clientY < bottom) {
         if (e.event.clientY < top + (bottom - top) / 2) {
           to = Point.toBefore(hitNode);
+          // if (dnd.accepts(hitNode, to)) {
+          //   return to;
+          // }
         } else {
           const hasChildren = true//hitNode.size > 1;
           if (
             hasChildren && e.event.clientX > elBound.left + 30 &&
             isNestableNode(hitNode)
           ) {
+
             to = Point.toAfter(firstChild?.id!);
           } else {
             to = Point.toAfter(hitNode);
@@ -157,9 +160,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
       // console.log("hits", hitNode?.id.toString());
       const to = findDropPosition(e, hitNode);
       const from = nodeLocation(node)!;
-      if (!to || from.eq(to) || to.isBefore && hitNode.prevSibling?.id.eq(node.id)) {
-        return;
-      }
+      if (!to) return
+      // if (!to || from.eq(to) || to.isBefore && hitNode.prevSibling?.id.eq(node.id)) {
+      //   return;
+      // }
 
       const hitElement = app.store.element(to.nodeId);
 
@@ -237,14 +241,11 @@ export function DraggableHandle(props: FastDragHandleProps) {
         app.parkCursor();
 
         const {tr} = app;
-                tr.move(from, to, node.id).selectNodes(node.id);
-        const textBlock = node.find((n) => n.isTextBlock);
-        if (textBlock) {
-          const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock!)!);
-          tr.select(after, ActionOrigin.NoSync);
-        }
+        const after = PinnedSelection.fromNodes(node)
 
-        tr?.dispatch();
+        tr.move(from, to, node.id).select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput);
+        tr.select(after, ActionOrigin.NoSync);
+        tr.dispatch();
       });
     },
     [app, findDropPosition, findHitNode]
@@ -273,20 +274,15 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const onMouseUp = useCallback(
     (node: Node, e: DndEvent, isDragging: boolean) => {
       if (e.id !== CarbonDragHandleId) return;
-
+      console.log('xxxx');
       // app.focus();
       if (isDragging) {
-        e.event.stopPropagation();
-        e.event.preventDefault();
+        preventAndStop(e.event);
       } else {
         if (node) {
           app.parkCursor();
           app.tr
-            // .select(
-            //   PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
-            //   ActionOrigin.NoSync
-            // )
-            .selectNodes(node.id)
+            .select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput)
             ?.dispatch();
         }
       }
@@ -330,10 +326,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
     preventAndStop(e);
 
     if (!node) return;
+
     app.enable();
     app.focus();
     if (e.shiftKey) {
-      app.cmd.insert.before(node, "section")?.selectNodes([])?.dispatch();
+      const after = PinnedSelection.fromNodes([])
+      app.cmd.insert.before(node, "section")?.dispatch();
       return;
     }
 
@@ -343,10 +341,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (node.isContainerBlock && title) {
         const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
         if (app.selection.eq(after)) return;
-        app.tr
-          .selectNodes([])
-          .select(after, ActionOrigin.UserInput)
-          ?.dispatch();
+        app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
         return;
       }
     }
@@ -354,18 +349,18 @@ export function DraggableHandle(props: FastDragHandleProps) {
     if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
       const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
       if (app.selection.eq(after)) return;
-      app.tr.selectNodes([]).select(after, ActionOrigin.UserInput)?.dispatch();
+      app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
       return;
     }
 
-    app.cmd.insert.after(node, "section")?.selectNodes([])?.dispatch();
+    app.cmd.insert.after(node, "section")?.dispatch();
   };
 
   return (
     <div
       className="carbon-node-handle"
       data-target-name={node?.name}
-      data-target-as={node?.attrs.html["data-as"]}
+      data-target-as={node?.properties.get('html.data-as')}
       data-drag-handle={node?.type.dragHandle}
       style={{ ...style, display: show ? "flex" : "none" }}
     >

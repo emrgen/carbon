@@ -9,7 +9,6 @@ export class HistoryPlugin extends AfterPlugin {
   undoStack: Transaction[] = [];
   redoStack: Transaction[] = [];
 
-
   takeTransactions(stack: Transaction[], timeSpan = 3000): Transaction[] {
     const lastTransaction = last(stack)!;
     const present = lastTransaction.timestamp;

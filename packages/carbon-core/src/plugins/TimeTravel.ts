@@ -8,10 +8,6 @@ export class TimeTravelPlugin extends AfterPlugin {
 
   transactionTree = new TransactionTree();
 
-  init(app: Carbon): void {
-    this.app = app;
-  }
-
   keydown(): Partial<EventHandler> {
     return {
       'cmd_z': (ctx: EventContext<Event>) => {
@@ -33,7 +29,7 @@ export class TimeTravelPlugin extends AfterPlugin {
         backwardTr.readOnly = true;
         backwardTr.dispatch();
 
-        this.app?.emit('timeTravel', this.transactionTree);
+        this.pnw?.emit('timeTravel', this.transactionTree);
       },
       'cmd_shift_z': (ctx: EventContext<Event>) => {
         ctx.event.preventDefault();
@@ -54,7 +50,7 @@ export class TimeTravelPlugin extends AfterPlugin {
         forwardTr.readOnly = true;
         forwardTr.dispatch();
 
-        this.app?.emit('timeTravel', this.transactionTree);
+        this.pnw?.emit('timeTravel', this.transactionTree);
       }
     }
   }
@@ -62,7 +58,7 @@ export class TimeTravelPlugin extends AfterPlugin {
   transaction(tr: Transaction): void {
     if (!tr.readOnly && tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
       this.transactionTree.add(tr)
-      this.app?.emit('timeTravel', this.transactionTree);
+      this.pnw?.emit('timeTravel', this.transactionTree);
     }
   }
 }

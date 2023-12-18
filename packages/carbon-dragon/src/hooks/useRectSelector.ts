@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
-import { RectSelector } from '../core/RectSelector';
+import { RectSelect } from '../core/RectSelect';
 
-type RectSelectContextProps = RectSelector
+type RectSelectContextProps = RectSelect
 
 const InternalRectSelectorContext = createContext<RectSelectContextProps>(null!);
 

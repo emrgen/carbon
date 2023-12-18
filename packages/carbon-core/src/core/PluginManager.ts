@@ -12,12 +12,15 @@ import { EventHandlerMap, NodeName } from './types';
 import { CarbonAction } from './actions/types';
 import { EventsIn } from './Event';
 import { SelectionEvent } from './SelectionEvent';
+import { CarbonState } from './CarbonState';
+import { PluginEmitter } from "./PluginEmitter";
 
 // handles events by executing proper plugin
 export class PluginManager {
 	private readonly after: CarbonPlugin[];
 	private readonly before: CarbonPlugin[];
 	private readonly nodes: Record<string, CarbonPlugin>;
+
 
 	// all events that are handled by plugins
 	events: Set<EventsIn>;
@@ -141,13 +144,17 @@ export class PluginManager {
 		const { node } = keyDownEvent
 
 		// console.log('onKeyDown', event);
-		
+
+		console.group('onKeyDown', event)
 		each(this.before, (p: CarbonPlugin) => {
 			if (keyDownEvent.stopped) return
 			const handlers = p.keydown()
 			const handler = entries(handlers).find(([key]) => {
 				return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event);
 			})
+			if (handler) {
+				console.log('before', p.name, handler[0], handler[1]);
+			}
 			handler?.[1]?.(keyDownEvent)
 		})
 
@@ -159,6 +166,9 @@ export class PluginManager {
 				const handler = entries(handlers).find(([key]) => {
 					return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
 				});
+				if (handler) {
+					console.log('node', n.name, handler[0], handler[1]);
+				}
 				handler?.[1]?.(keyDownEvent)
 				return keyDownEvent.stopped
 			});
@@ -171,9 +181,16 @@ export class PluginManager {
 			const handler = entries(handlers).find(([key]) => {
 				return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
 			});
+
+			if (handler) {
+				console.log('after', p.name, handler[0], handler[1]);
+			}
+
 			handler?.[1]?.(keyDownEvent)
 			return keyDownEvent.stopped
 		})
+
+		console.groupEnd()
 	}
 
 	// onSelect(event: SelectionEvent) {
@@ -205,17 +222,17 @@ export class PluginManager {
 	}
 
 	// normalize node as per the schema
-	normalize(node: Node, app: Carbon): CarbonAction[] {
+	normalize(node: Node): CarbonAction[] {
 		for (const p of this.before) {
-			const actions = p.normalize(node, app.state);
+			const actions = p.normalize(node);
 			if (actions.length) return actions;
 		}
 
-		const actions = this.nodes[node.name]?.normalize(node, app.state);
+		const actions = this.nodes[node.name]?.normalize(node);
 		if (actions.length) return actions;
 
 		for (const p of this.after) {
-			const actions = p.normalize(node, app.state);
+			const actions = p.normalize(node);
 			if (actions.length) return actions;
 		}
 		return []

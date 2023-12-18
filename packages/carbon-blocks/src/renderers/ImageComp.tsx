@@ -43,7 +43,7 @@ export default function ImageComp(props: RendererProps) {
         app.blockSelection.blocks
           .filter((n) => n.name === "image")
           .forEach(({id}) => {
-            tr.updateAttrs(id, {
+            tr.updateProps(id, {
               html: {
                 style: {
                   justifyContent: align,
@@ -65,8 +65,8 @@ export default function ImageComp(props: RendererProps) {
   return (
     <CarbonBlock {...props} custom={{ ...connectors, onClick }} ref={ref}>
       <div className="image-container" onClick={handleClick}>
-        {!node.attrs.node.src && <div className="image-overlay">Image</div>}
-        <img src={node.attrs.node.src} alt="" />
+        {!node.properties.node.src && <div className="image-overlay">Image</div>}
+        <img src={node.properties.node.src} alt="" />
         {selection.isSelected && (
           <div className="image-align-controls">
             <div

@@ -1,25 +1,27 @@
 import { Optional } from "@emrgen/types";
-import { classString } from "./Logger";
-import { v4 as uuidv4 } from 'uuid';
 
-
-const defaultId = uuidv4().replace(/[0-9a-z]/g, '0');
+const NullId = '0000000000';
+const IdentityId = '0000000001';
 
 export interface IntoNodeId {
 	intoNodeId(): NodeId;
 }
 
 export class NodeId implements IntoNodeId {
+	static NULL = new NodeId(NullId);
+
+	static IDENTITY = new NodeId(IdentityId);
+
 	get isDefault() {
-		return defaultId === this.id;
+		return this.eq(NodeId.IDENTITY);
+	}
+
+	get isNull() {
+		return this.eq(NodeId.NULL);
 	}
 
 	static deserialize(id: string): Optional<NodeId> {
 		return new NodeId(id);
-	}
-
-	static default() {
-		return new NodeId(defaultId)
 	}
 
 	static create(id: string) {

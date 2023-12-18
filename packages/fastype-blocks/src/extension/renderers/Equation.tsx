@@ -8,22 +8,13 @@ import React, {
 
 import {
   CarbonBlock,
-  CarbonNodeChildren,
-  CarbonNodeContent,
   RendererProps,
   useCarbon,
-  useNodeChange,
-  useNodeStateChange,
   useSelectionHalo,
   BlockContent,
   preventAndStop,
   stop,
-  PinnedSelection,
-  Pin,
-  ActionOrigin,
-  Point,
-  Node,
-  CarbonChildren,
+  Node, useNodeActivated
 } from "@emrgen/carbon-core";
 import katex from "katex";
 import "katex/dist/katex.min.css";
@@ -52,7 +43,7 @@ import ResizeTextarea from "react-textarea-autosize";
 import { isHotkey, isKeyHotkey } from "is-hotkey";
 
 export const EquationComp = (props: RendererProps) => {
-  const { node, version } = props;
+  const { node } = props;
   const app = useCarbon();
   const ref = useRef<Optional<HTMLDivElement>>(null);
   const [error, setError] = useState("");
@@ -68,7 +59,7 @@ export const EquationComp = (props: RendererProps) => {
       app.enable();
       app.parkCursor();
       app.tr
-        .updateAttrs(node.id, {
+        .updateProps(node.id, {
           node: {
             isEditing: false,
           },
@@ -82,15 +73,15 @@ export const EquationComp = (props: RendererProps) => {
   const connectors = useConnectorsToProps(
     useCombineConnectors(dragDropRect, selection)
   );
+  const activated = useNodeActivated(props);
 
   useEffect(() => {
-    const { isEditing } = node.attrs.node;
-    if (isEditing) {
+    if (activated.yes) {
       updater.onOpen();
     } else {
       updater.onClose();
     }
-  }, [node.attrs.node, updater]);
+  }, [activated.yes]);
 
   const handleClick = useCallback(
     (e) => {
@@ -99,7 +90,7 @@ export const EquationComp = (props: RendererProps) => {
       // if (app.blockSelection && app.blockSelection.has(node.id)) return;
       app.tr
         .selectNodes([node.id])
-        .updateAttrs(node.id, {
+        .updateProps(node.id, {
           node: {
             isEditing: true,
           },
@@ -111,11 +102,12 @@ export const EquationComp = (props: RendererProps) => {
 
   const handleMouseDown = useCallback(
     (e) => {
-      if (app.blockSelection && app.blockSelection.has(node.id)) {
+      const { selection } = app;
+      if (selection.isBlock && selection.nodes.some(n => n.id.eq(node.id))) {
         stop(e);
       }
     },
-    [app.blockSelection, node.id]
+    [app, node.id]
   );
 
   const handleOnClick = (e: React.MouseEvent) => {
@@ -198,7 +190,7 @@ export const EquationComp = (props: RendererProps) => {
                 ) {
                   preventAndStop(e);
                   app.tr
-                    .updateAttrs(node.id, {
+                    .updateProps(node.id, {
                       node: {
                         isEditing: false,
                       },
@@ -271,7 +263,7 @@ interface EquationContentProps extends RendererProps {
 
 export const EquationContent = (props: EquationContentProps) => {
   const { onError, error } = props;
-  const { node, version } = useNodeChange(props);
+  const { node, version } = props;
   const eqRef = useRef(null);
 
   useEffect(() => {

@@ -21,6 +21,7 @@ const selectionChangedUsingKeys = (event) => {
 	return selectionKeys.some(k => isKeyHotkey(k)(event as any))
 }
 
+// EventManager is responsible for handling all dom/custom events and dispatching them to plugins
 export class EventManager {
 
 	event?: EventContext<Event>;
@@ -31,7 +32,7 @@ export class EventManager {
 	}
 
 	get runtime() {
-		return this.app.state.runtime;
+		return this.app.runtime;
 	}
 
 	constructor(readonly app: Carbon, readonly pm: PluginManager) { }
@@ -71,11 +72,8 @@ export class EventManager {
 			return
 		}
 
-		if (type !== EventsIn.selectionchange && app.state.selectedNodeIds.size > 0) {
-			// console.log('selected nodes', app.state.selectedNodeIds);
-			// console.log(type, event);
-
-			const lastNode = last(app.state.selectedNodeIds.map(id => app.store.get(id))) as Node;
+		if (type !== EventsIn.selectionchange && app.state.selection.isBlock && app.selection.nodes.length) {
+			const lastNode = last(app.selection.nodes) as Node;
 			this.updateCommandOrigin(type, event);
 
 			// TODO: check if this can be optimized
@@ -84,23 +82,21 @@ export class EventManager {
 				event,
 				app: this.app,
 				node: lastNode,
-				selection: PinnedSelection.default(app.content),
+				selection: PinnedSelection.IDENTITY,
 				origin: EventOrigin.dom,
 			});
 
-			// console.log('onEvent', editorEvent);
 			this.pm.onEvent(editorEvent);
 			return
 		}
 
-		// console.debug(p14('%c[debug]'),'color:magenta', 'Editor.currentSelection', this.selection.toString(),);
 		const selection = PinnedSelection.fromDom(app.store);
 		if (['selectionchange'].includes(type)) {
 			console.log(pad(`%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`, 100), 'background:#ffcc006e');
 		}
+
 		// editor cannot process event without active selection
-		if (!selection) {
-			// event.preventDefault();
+		if (!selection || selection.isBlock && !selection.nodes.length) {
 			console.error(p12('%c[invalid]'), 'color:grey', `${type}: event with empty selection`);
 			return
 		}
@@ -111,9 +107,8 @@ export class EventManager {
 			return
 		}
 
-		// console.log('changing selection....', app.selection.toString(), selection.toString())
 		// start node corresponds to focus point in DOM
-		const node = selection.start.node;
+		const node = selection.start.down().node;
 		if (!node) {
 			console.error(p12('%c[invalid]'), 'color:grey', 'node not found for event for selection', selection?.toString(), type);
 			return
@@ -143,9 +138,9 @@ export class EventManager {
 			].includes(type) || selectionChangedUsingKeys(event)
 			) {
 				// console.groupCollapsed('onEvent:', event.type);
-				// groupOpen = true;
+				groupOpen = true;
 			} else {
-				console.group('onEvent:', event.type, editorEvent);
+				// console.groupCollapsed('onEvent:', event.type, editorEvent);
 				groupOpen = true;
 			}
 		} else {
@@ -154,7 +149,7 @@ export class EventManager {
 
 		this.pm.onEvent(editorEvent);
 		if (groupOpen) {
-			console.groupEnd();
+			// console.groupEnd();
 		}
 
 		// this.afterEvent(editorEvent);

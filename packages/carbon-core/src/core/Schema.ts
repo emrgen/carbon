@@ -176,19 +176,8 @@ export interface NodeSpec {
 	insertAfter?: boolean;
 	info?: NodeInfo;
 
-	attrs?: {
-		node?: Record<string, any>;
-		html?: Record<string, any>;
-	}
-	state?: {
-		open?: boolean;
-		active?: boolean;
-		selected?: boolean;
-		focused?: boolean;
-		hovered?: boolean;
+	props?: Record<string, any>;
 
-		[key: string]: any;
-	}
 	[key: string]: any;
 }
 

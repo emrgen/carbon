@@ -12,7 +12,6 @@ import {
   useConnectorsToProps,
   useDragDropRectSelect,
 } from "@emrgen/carbon-dragon";
-import { usePlaceholder } from "../hooks/usePlaceholder";
 
 export const NestableComp = (props: RendererProps) => {
   const { node } = props;
@@ -24,11 +23,9 @@ export const NestableComp = (props: RendererProps) => {
     useCombineConnectors(dragDropRect, selection)
   );
 
-  const placeholder = usePlaceholder(node);
-
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
-      <CarbonNodeContent node={node} custom={placeholder} />
+      <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}
     </CarbonBlock>

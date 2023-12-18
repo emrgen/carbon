@@ -1,5 +1,7 @@
 // take nodes including the one that matches the predicate
-export const takeUpto = <T>(arr: T[], fn): T[] => {
+import { Predicate } from "@emrgen/types";
+
+export const takeUpto = <T>(arr: T[], fn: Predicate<T>): T[] => {
 	const ret: T[] = []
 	arr.some(a => {
 		ret.push(a)
@@ -10,17 +12,17 @@ export const takeUpto = <T>(arr: T[], fn): T[] => {
 }
 
 // take nodes excluding the one that matches the predicate
-export const takeUntil = <T>(arr: T[], fn): T[] => {
+export const takeUntil = <T>(arr: T[], fn: Predicate<T>): T[] => {
 	return takeUpto(arr, fn).slice(0, -1);
 }
 
 // take nodes excluding the one that matches the predicate
-export const takeBefore = <T>(arr: T[], fn): T[] => {
+export const takeBefore = <T>(arr: T[], fn:Predicate<T>): T[] => {
 	return takeUntil(arr, fn);
 }
 
 // take nodes excluding the one that matches the predicate
-export const takeAfter = <T>(arr: T[], fn): T[] => {
+export const takeAfter = <T>(arr: T[], fn: Predicate<T>): T[] => {
 	const index = arr.findIndex(fn);
 	if (index === -1) {
 		return [];

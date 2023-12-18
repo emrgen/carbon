@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Dnd } from "../core/Dnd";
 import { DndContextProvider } from "../hooks/useDndContext";
 import {DndController} from "./DndController";
-import { Node, Transaction, useCarbon } from "@emrgen/carbon-core";
+import { CarbonState, EventsOut, Node, Transaction, useCarbon } from "@emrgen/carbon-core";
 import { sortBy } from "lodash";
 
 // manages node drag drop context
@@ -12,28 +12,28 @@ export const DndContext = (props) => {
   // @ts-ignore
   window.fastDnd = dnd;
 
-  const onTransaction = useCallback(
-    (tr: Transaction) => {
-      if (tr.updatesContent) {
+  const onChange = useCallback(
+    (state: CarbonState) => {
+      if (state.isContentChanged) {
         dnd.isDirty = true;
         // console.log('update dnd context');
-        const {updatedNodeIds} = app.state.runtime;
-        const nodes = updatedNodeIds.map(id => app.store.get(id)).filter(n => n) as Node[];
+        const nodes = app.state.changes.nodes(state.nodeMap);
         const ancestor = sortBy(nodes, n => n.depth).pop();
         if (ancestor) {
+          // console.log('refresh: refreshing dnd bounds');
           dnd.refresh(ancestor);
         }
       }
     },
-    [app.state.runtime, app.store, dnd]
+    [app.state.changes, dnd]
   );
 
   useEffect(() => {
-    app.on("transaction", onTransaction);
+    app.on(EventsOut.changed, onChange);
     return () => {
-      app.off("transaction", onTransaction);
+      app.off(EventsOut.changed, onChange);
     };
-  }, [app, onTransaction]);
+  }, [app, onChange]);
 
 
 

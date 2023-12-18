@@ -5,10 +5,12 @@ import { Decoration } from './Decoration';
 import { Node } from './Node';
 import { NodeSpec } from './Schema';
 import { Transaction } from './Transaction';
-import { EventHandlerMap, InputRules, PluginName, SerializedNode } from './types';
+import { EventHandlerMap, InputRules, PluginName, SerializedNode } from "./types";
 import { CarbonAction } from "./actions/types";
 import EventEmitter from 'events';
 import { CarbonMessageBus, CarbonMessageFormat } from './MessageBus';
+import { PluginEmitter } from "./PluginEmitter";
+import { PluginState } from "./PluginState";
 
 export enum PluginType {
 	Node,
@@ -32,18 +34,14 @@ export abstract class CarbonPlugin {
 
 	name: PluginName = '';
 
-	protected app: Optional<Carbon>;
+	// @ts-ignore
+	protected bus: PluginEmitter;
+	// @ts-ignore
+	protected state: PluginState;
 
-	init(app: Carbon) {
-		this.app = app;
-	}
-
-	get state () {
-		return this.app?.state.get(this.name);
-	}
-
-	setState (state: any) {
-		this.app?.state.set(this.name, state);
+	init(bus: PluginEmitter, state: PluginState) {
+		this.bus = bus;
+		this.state = state;
 	}
 
 	destroy(app: Carbon) {}
@@ -83,7 +81,7 @@ export abstract class CarbonPlugin {
 	}
 
 	// normalize the node based on schema
-	normalize(node: Node, state: CarbonState): CarbonAction[] { return [] }
+	normalize(node: Node): CarbonAction[] { return [] }
 
 	// node lifecycle hooks
 	mounted(editor: Carbon, node: Node) { }

@@ -4,6 +4,8 @@ import { Node } from './Node';
 import { InputRule } from './Rules';
 import { Carbon } from './Carbon';
 
+export const IDENTITY_SCOPE = Symbol('identity');
+
 export interface CarbonCommands {}
 
 export interface NodeIdFactory {
@@ -55,11 +57,11 @@ export type BoundCalculator = () => Bound
 
 export interface NodeJSON extends Record<string, any> {
 	name: string;
-	id?: string;
-	content?: NodeJSON[];
+	id: string;
+	children?: NodeJSON[];
 	text?: string;
 	attrs?: Record<string, any>;
-};
+}
 
 export const yes = () => true;
 export const no = () => false;
@@ -72,6 +74,8 @@ export interface SelectionBounds {
 export type SerializedNode = string;
 
 export type EncodedNode<T> = T;
+
+export const deepCloneMap = (node: Node) => node.clone(deepCloneMap);
 
 export interface JSONNode {
 	id: string;

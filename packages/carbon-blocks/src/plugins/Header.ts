@@ -56,12 +56,15 @@ export class Heading extends NodePlugin {
 				tags: ['heading', 'h' + this.level],
 				order: 2,
 			},
-			attrs: {
-				node: {
-					emptyPlaceholder: `Heading ${this.level}`
-				},
-				html: {
-					placeholder: `Heading ${this.level}`
+			props: {
+				local: {
+					placeholder: {
+						empty: `Heading ${this.level}`,
+						focused: `Heading ${this.level}`,
+					},
+					html: {
+						suppressContentEditableWarning: true,
+					}
 				},
 			}
 		}
@@ -82,6 +85,6 @@ export class Heading extends NodePlugin {
 	}
 
 	serialize(app: Carbon, node: Node): SerializedNode {
-		return '#'.repeat(this.level) + 'X' + app.serialize(node.child(0)!) + app.cmd.nestable.serializeChildren(node)
+		return '#'.repeat(this.level) + ' ' + app.serialize(node.child(0)!) + app.cmd.nestable.serializeChildren(node)
 	}
 }

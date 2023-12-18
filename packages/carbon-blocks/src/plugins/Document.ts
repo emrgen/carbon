@@ -13,7 +13,6 @@ import {
 	splitTextBlock
 } from '@emrgen/carbon-core';
 
-
 export class DocPlugin extends CarbonPlugin {
 
 	name = 'document';
@@ -29,15 +28,18 @@ export class DocPlugin extends CarbonPlugin {
 			isolating: true,
 			sandbox: true,
 			document: true,
-			attrs: {
-				html: {
-					spellCheck: false,
-					contentEditable: true,
-					suppressContentEditableWarning: true,
+			props: {
+				local: {
+					placeholder: {
+						empty: 'Untitled',
+						focused: 'Untitled',
+					},
+					html: {
+						spellCheck: false,
+						contentEditable: true,
+						suppressContentEditableWarning: true,
+					},
 				},
-				node: {
-					emptyPlaceholder: 'Untitled',
-				}
 			},
 		}
 	}

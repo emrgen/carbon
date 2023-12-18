@@ -23,10 +23,12 @@ export class Code extends CarbonPlugin {
         icon: 'code',
         tags: ['code', 'codeblock', 'pre', 'source'],
       },
-      attrs: {
-        node: {
-          focusPlaceholder: 'Code',
-          emptyPlaceholder: '',
+      props: {
+        local: {
+          placeholder: {
+            empty: '',
+            focused: ''
+          },
         },
         html: {
           suppressContentEditableWarning: true,
@@ -47,17 +49,17 @@ export class Code extends CarbonPlugin {
         const { event, app } = ctx
         preventAndStop(event);
         ctx.stopPropagation();
-        const { selection, blockSelection } = app
+        const { selection } = app
 
-        if (!app.state.runtime.clipboard.isEmpty) {
-          const { slice } = app.state.runtime.clipboard;
-          const textContent = slice.root.textContent;
-          console.log('textContent', textContent);
-          // Slice.create(slice.root, slice.start, slice.end);
-          app.cmd.transform.paste(selection, blockSelection, slice)?.dispatch()
-        } else {
-
-        }
+        // if (!app.state.runtime.clipboard.isEmpty) {
+        //   const { slice } = app.state.runtime.clipboard;
+        //   const textContent = slice.root.textContent;
+        //   console.log('textContent', textContent);
+        //   // Slice.create(slice.root, slice.start, slice.end);
+        //   app.cmd.transform.paste(selection, blockSelection, slice)?.dispatch()
+        // } else {
+        //
+        // }
       }
     }
   }
@@ -68,13 +70,13 @@ export class Code extends CarbonPlugin {
         preventAndStopCtx(ctx);
         const { app, node } = ctx;
         const { selection } = app;
-        if (app.blockSelection.size === 1) {
-          console.log('blockSelection', app.blockSelection);
-
-          preventAndStopCtx(ctx);
-          app.tr.selectNodes([]).dispatch();
-          node.child(0)?.emit('focus', node.child(0)!)
-        }
+        // if (selection.isBlock === 1) {
+        //   console.log('blockSelection', app.blockSelection);
+        //
+        //   preventAndStopCtx(ctx);
+        //   app.tr.selectNodes([]).dispatch();
+        //   node.child(0)?.emit('focus', node.child(0)!)
+        // }
       },
 
       tab: (ctx: EventContext<KeyboardEvent>) => {
@@ -130,7 +132,7 @@ export class BeforeCodePlugin extends BeforePlugin {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
         const { app, event, node } = ctx;
-        if (app.blockSelection.size) {
+        if (app.selection.isBlock) {
           return
         }
 
@@ -180,30 +182,30 @@ export class BeforeCodePlugin extends BeforePlugin {
           } else if (content instanceof Token) {
             return intoTextNode(content);
           } else if (typeof content === 'string') {
-            return schema.text(content, {
-              attrs: {
-                html: {
-                  [`className`]: `token ${type}`,
-                }
-              }
-            });
+            // return schema.text(content, {
+            //   attrs: {
+            //     html: {
+            //       [`className`]: `token ${type}`,
+            //     }
+            //   }
+            // });
           }
         } else if (Array.isArray(token)) {
           return flatten(token).map(intoTextNode);
         } else {
-          return schema.text(token, {
-            attrs: {
-              html: {
-                [`className`]: `token`,
-              }
-            }
-          });
+          // return schema.text(token, {
+          //   attrs: {
+          //     html: {
+          //       [`className`]: `token`,
+          //     }
+          //   }
+          // });
         }
       };
 
       const textNodes = flattenDeep(flattenDeep(tokens).map(intoTextNode));
 
-      tr.add(SetContentAction.fromNative(title.id, BlockContent.create(textNodes), false));
+      tr.add(SetContentAction.create(title.id, BlockContent.create(textNodes)));
       tr.select(after);
       return tr;
 

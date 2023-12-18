@@ -1,26 +1,29 @@
-
-import { Optional, With } from "@emrgen/types";
-import { Node } from './Node';
-import { EventEmitter } from 'events';
-import { querySelector } from '../utils/domElement';
-import { CarbonState } from './CarbonState';
-import { ChangeManager } from './ChangeManager';
-import { EventsIn, EventsOut } from './Event';
-import { EventManager } from './EventManager';
-import { NodeStore } from './NodeStore';
-import { PinnedSelection } from './PinnedSelection';
-import { PluginManager } from './PluginManager';
-import { RenderManager } from './Renderer';
-import { Schema } from './Schema';
-import { SelectionManager } from './SelectionManager';
-import { Transaction } from './Transaction';
-import { TransactionManager } from './TransactionManager';
+import { Optional } from "@emrgen/types";
+import { Node } from "./Node";
+import { EventEmitter } from "events";
+import { querySelector } from "../utils/domElement";
+import { CarbonState } from "./CarbonState";
+import { ChangeManager } from "./ChangeManager";
+import { EventsIn, EventsOut } from "./Event";
+import { EventManager } from "./EventManager";
+import { NodeStore } from "./NodeStore";
+import { PinnedSelection } from "./PinnedSelection";
+import { PluginManager } from "./PluginManager";
+import { RenderManager } from "./Renderer";
+import { Schema } from "./Schema";
+import { SelectionManager } from "./SelectionManager";
+import { Transaction } from "./Transaction";
+import { TransactionManager } from "./TransactionManager";
 import { CarbonCommands, Maps, SerializedNode } from "./types";
-import { BlockSelection } from './NodeSelection';
-import { first, isFunction } from 'lodash';
-import { CarbonCommandChain } from './CarbonCommandChain';
-import { CarbonMessageBus } from './MessageBus';
-import { CarbonPlugin } from './CarbonPlugin';
+import { cloneDeep, first, isFunction, merge } from "lodash";
+import { CarbonCommandChain } from "./CarbonCommandChain";
+import { CarbonMessageBus } from "./MessageBus";
+import { CarbonPlugin } from "./CarbonPlugin";
+import { StateScope } from "./StateScope";
+import { NodeMap } from "./NodeMap";
+import { CarbonRuntime } from "./Runtime";
+import { PluginEmitter } from "./PluginEmitter";
+import { PluginStates } from "./PluginState";
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -31,12 +34,15 @@ export class Carbon extends EventEmitter {
 
 
 	// for external application use
-	bus: CarbonMessageBus = new CarbonMessageBus();
+	private readonly pluginBus: PluginEmitter;
+	private readonly pluginStates: PluginStates;
 
 	schema: Schema;
-	state: CarbonState;
+	state: CarbonState; // immutable state
+	runtime: CarbonRuntime;
+	store: NodeStore;
 	cmd: CarbonCommands;
-	chain: CarbonCommandChain;
+	// chain: CarbonCommandChain;
 	change: ChangeManager;
 
 	enabled: boolean;
@@ -49,38 +55,44 @@ export class Carbon extends EventEmitter {
 	private cursorParkingElement: Optional<HTMLDivElement>;
 	ticks: Maps<Carbon, Optional<Transaction>>[];
 
-	constructor(content: Node, schema: Schema, pm: PluginManager, renderer: RenderManager) {
+	constructor(state: CarbonState, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
 
 		this.pm = pm;
 		this.rm = renderer;
 		this.schema = schema;
-		this.state = CarbonState.create(new NodeStore(), content, PinnedSelection.default(content));
+
+		this.state = state;
+		StateScope.set(this.state.scope, this.state.nodeMap);
+		this.runtime = new CarbonRuntime();
+
+		this.store = new NodeStore(this);
 
 		this.sm = new SelectionManager(this);
 		this.em = new EventManager(this, pm);
-		this.tm = new TransactionManager(this, pm, this.sm);
-		this.change = new ChangeManager(this, this.state, this.sm, this.tm);
+
+		this.tm = new TransactionManager(this, pm, this.sm, (state, tr) => {
+			this.updateState(state, tr);
+		});
+
+		this.change = new ChangeManager(this, this.sm, this.tm, pm);
 
 		this.cmd = pm.commands(this);
-		this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
+		// this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
 
 		this.enabled = true;
 		this.dragging = false;
 		this.ready = false;
 		this.ticks = [];
 
-		// init plugins
-		pm.plugins.forEach(p => p.init(this));
-	}
+		this.pluginBus = new PluginEmitter();
+		this.pluginStates = new PluginStates();
 
-	plugin(name: string): Optional<CarbonPlugin> {
-		return this.pm.plugin(name);
-	}
-
-	mounted() {
-		this.ready = true;
-		this.emit(EventsOut.mounted);
+		this.pm.plugins.forEach(p => {
+			this.pluginBus.register(p);
+			const state = this.pluginStates.register(p);
+			p.init(this.pluginBus, state);
+		})
 	}
 
 	get content(): Node {
@@ -91,25 +103,8 @@ export class Carbon extends EventEmitter {
 		return this.state.selection;
 	}
 
-	get blockSelection(): BlockSelection {
-		return this.state.nodeSelection;
-	}
-
-	get store() {
-		return this.state.store;
-	}
-
-	get runtime() {
-		return this.state.runtime;
-	}
-
 	get focused() {
 		return this.sm.focused;
-	}
-
-	get tr(): Transaction {
-		// if (this.chain.active) return this.chain;
-		return Transaction.create(this, this.tm, this.pm, this.sm);
 	}
 
 	get element(): Optional<HTMLElement> {
@@ -125,6 +120,21 @@ export class Carbon extends EventEmitter {
 	get contentElement(): Optional<HTMLElement> {
 		this._contentElement = this._contentElement ?? document.getElementsByClassName('.editor > .editor-content')?.[0] as any ?? null;
 		return this._contentElement;
+	}
+
+	// create a new transaction
+	get tr(): Transaction {
+		// if (this.chain.active) return this.chain;
+		return Transaction.create(this, this.tm, this.pm, this.sm);
+	}
+
+	plugin(name: string): Optional<CarbonPlugin> {
+		return this.pm.plugin(name);
+	}
+
+	mounted() {
+		this.ready = true;
+		this.emit(EventsOut.mounted);
 	}
 
 	// all events are emitted through this method
@@ -148,6 +158,27 @@ export class Carbon extends EventEmitter {
 		} else {
 			this.em.onEvent(type, event);
 		}
+	}
+
+	private updateState(state: CarbonState, tr: Transaction) {
+		if (!state.isContentChanged && !state.isSelectionChanged) {
+			console.warn('new state is not dirty');
+			return
+		}
+
+		if (this.state === state) {
+			console.warn('new state is the same as current');
+			return
+		}
+
+		// keep three previous states
+
+
+		this.state = state;
+		StateScope.set(state.scope, state.nodeMap);
+
+		this.emit(EventsOut.transactionCommit, tr);
+		this.change.update(tr);
 	}
 
 	component(name: string) {
@@ -186,7 +217,6 @@ export class Carbon extends EventEmitter {
 
 	disable() {
 		console.log('disable');
-
 		this.enabled = false;
 	}
 
@@ -205,6 +235,8 @@ export class Carbon extends EventEmitter {
 	nextTick(cb) {
 		this.ticks.push(cb);
 	}
+
+
 
 	processTick() {
 		if (this.ticks.length) {

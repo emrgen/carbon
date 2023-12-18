@@ -1,4 +1,4 @@
-import { Bound, BoundRect, Optional } from '@emrgen/types';
+import { Optional } from '@emrgen/types';
 import { classString, p14, p30 } from './Logger';
 import { Node } from './Node';
 import { Pin } from './Pin';
@@ -6,13 +6,16 @@ import { PointedSelection } from './PointedSelection';
 import { NodeStore } from './NodeStore';
 import { DomSelection, Range } from './Range';
 import { SelectionBounds } from './types';
-
-
+import { ActionOrigin } from './actions';
+import { sortNodes } from "@emrgen/carbon-core";
+import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 
 export class PinnedSelection {
-	tail: Pin;
-	head: Pin;
-	nodes: Node[];
+
+	static NULL = new PinnedSelection(Pin.NULL, Pin.NULL, []);
+
+	static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
+
 
 	// map dom selection to editor selection
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
@@ -37,7 +40,6 @@ export class PinnedSelection {
 			console.warn(p14('%c[error]'), 'color:red', 'Editor.resolveNode failed');
 			return
 		}
-		// console.log(anchorNode, anchorNode.isFocusable)
 
 		// NOTE: anchorNode is always valid and pointed to a focusable node
 		if (!anchorNode.hasFocusable && !anchorNode.isFocusable) {
@@ -94,8 +96,9 @@ export class PinnedSelection {
 		// if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
 		// if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
 
-		let tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
-		let head = Pin.fromDom(focusNode, focusOffset)?.up();
+		// console.log(anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
+		const tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
+		const head = Pin.fromDom(focusNode, focusOffset)?.up();
 		// console.log(tail?.toString(), head?.toString());
 
 		if (!tail || !head) {
@@ -110,23 +113,35 @@ export class PinnedSelection {
 		return selection;
 	}
 
-	static default(doc: Node): PinnedSelection {
-		const pin = Pin.default(doc);
-		return PinnedSelection.create(pin, pin);
-	}
-
 	static fromPin(pin: Pin): PinnedSelection {
 		return PinnedSelection.create(pin, pin);
 	}
 
-	static create(tail: Pin, head: Pin): PinnedSelection {
-		return new PinnedSelection(tail, head);
+	static fromNodes(nodes: Node | Node[], origin = ActionOrigin.Unknown): PinnedSelection {
+		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, sortNodes(flatten([nodes]), 'path'), origin);
 	}
 
-	constructor(tail: Pin, head: Pin, nodes: Node[] = []) {
-		this.tail = tail;
-		this.head = head;
-		this.nodes = nodes;
+	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
+		return new PinnedSelection(tail, head, [],  origin);
+	}
+
+	private constructor(readonly tail: Pin, readonly head: Pin, readonly nodes: Node[], readonly origin = ActionOrigin.Unknown) {
+	}
+
+	get isNull() {
+		return this.tail.isNull && this.head.isNull;
+	}
+
+	get isIdentity() {
+		return this.tail.isIdentity && this.head.isIdentity;
+	}
+
+	get isBlock() {
+		return this.nodes.length !== 0 || this.eq(PinnedSelection.IDENTITY);
+	}
+
+	get isInline() {
+		return !this.isNull && !this.isBlock;
 	}
 
 	get range(): Range {
@@ -134,7 +149,7 @@ export class PinnedSelection {
 	}
 
 	get isInvalid() {
-		return this.tail.isInvalid || this.head.isInvalid
+		return this.tail.isNull || this.head.isNull;
 	}
 
 	get isCollapsed() {
@@ -175,14 +190,14 @@ export class PinnedSelection {
 			return { head: rect, tail: rect }
 		}
 		// console.log(selection, selection.rangeCount);
-		
+
 		if (selection.rangeCount !== 0) {
 			const endRange = selection.getRangeAt(0).cloneRange();
 			endRange.collapse();
 			const startRange = selection.getRangeAt(0).cloneRange();
 			startRange.collapse(true);
 			console.log(endRange, startRange.getClientRects());
-			
+
 			return this.isForward ? {
 				head: endRange.getClientRects()[0],
 				tail: startRange.getClientRects()[0],
@@ -197,9 +212,14 @@ export class PinnedSelection {
 
 
 	syncDom(store: NodeStore) {
+		// if (this.isInvalid) {
+		// 	console.warn('skipped invalid selection sync');
+		// 	return
+		// }
+
 		try {
 			const domSelection = this.intoDomSelection(store);
-			console.log('Selection.syncDom:', domSelection);
+			// console.log('Selection.syncDom:', domSelection);
 			if (!domSelection) {
 				console.log(p14('%c[error]'), 'color:red', 'failed to map selection to dom');
 				return
@@ -228,7 +248,8 @@ export class PinnedSelection {
 				focusNode,
 				focusOffset
 			);
-			const domSel = PinnedSelection.fromDom(store)?.intoDomSelection(store);
+			const pinnedSelection = PinnedSelection.fromDom(store);
+			const domSel = pinnedSelection?.intoDomSelection(store);
 			console.assert(domSel?.anchorNode === domSelection.anchorNode, 'failed to sync anchorNode')
 			console.assert(domSel?.focusNode === domSelection.focusNode, 'failed to sync focusNode')
 			console.assert(domSel?.anchorOffset === domSelection.anchorOffset, 'failed to sync anchor offset')
@@ -251,7 +272,7 @@ export class PinnedSelection {
 
 		let anchorNode: any = store.element(anchor.node.id);
 		let focusNode: any = store.element(focus.node.id);
-		
+
 		// console.log(anchorNode, focusNode, anchor.node.id.toString(), focus.node.id.toString());
 		if (!anchorNode || !focusNode) {
 			console.log(p14('%c[error]'), 'color:red', this.toString());
@@ -277,14 +298,10 @@ export class PinnedSelection {
 		// console.log(focusNode.firstChild?.firstChild ?? focusNode.firstChild ?? focusNode, headOffset);
 		// console.log(anchorNode.firstChild?.firstChild ?? anchorNode.firstChild ?? anchorNode, tailOffset);
 
-		if (tail.node.isBlock && tail.node.isAtom) {
-			anchorNode = anchorNode
-		} else {
+		if (!tail.node.isBlock || !tail.node.isAtom) {
 			anchorNode = anchorNode.firstChild ?? anchorNode
 		}
-		if (head.node.isBlock && head.node.isAtom) {
-			focusNode = focusNode
-		} else {
+	  if (!head.node.isBlock || !head.node.isAtom) {
 			focusNode = focusNode.firstChild ?? focusNode
 		}
 
@@ -348,7 +365,7 @@ export class PinnedSelection {
 	normalize(): PinnedSelection {
 		const { head, tail } = this
 		if (this.isForward) return this;
-		return PinnedSelection.create(head, tail);
+		return PinnedSelection.create(head, tail, this.origin);
 	}
 
 	collapseToStart(): PinnedSelection {
@@ -364,33 +381,50 @@ export class PinnedSelection {
 	}
 
 	unpin(): PointedSelection {
-		const { tail, head } = this
-		// console.log('Selection.unpin', tail.toString());
-		return PointedSelection.create(tail.point, head.point);
+		const { tail, head, nodes, origin } = this;
+		if (this.isBlock) {
+			return PointedSelection.fromNodes(nodes.map(n => n.id), origin)
+		}
+		return PointedSelection.create(tail.point, head.point, origin);
 	}
 
 	eq(other: PinnedSelection) {
-		return this.tail.eq(other.tail) && this.head.eq(other.head);
+		if (this.nodes.length !== other.nodes.length) return false;
+		return this.tail.eq(other.tail) && this.head.eq(other.head)
+			&& this.nodes.every((n, i) => n.eq(other.nodes[i]));
 	}
 
 	clone() {
-		return PinnedSelection.create(this.tail.clone(), this.head.clone());
+		return new PinnedSelection(this.tail.clone(), this.head.clone(), this.nodes.map(n => n.clone()), this.origin);
 	}
 
-
 	toJSON() {
+		if (this.isBlock) {
+			return {
+				nodes: this.nodes.map(n => n.id.toString()),
+			}
+		}
+
 		return {
 			tail: this.tail.toJSON(),
 			head: this.head.toJSON(),
-			nodes: this.nodes.map(node => node.id.toJSON()),
 		}
 	}
 
 	toString() {
+		if (this.isBlock) {
+			return classString(this)(this.nodes.map(n => n.id.toString()));
+		}
+
 		return classString(this)({
 			tail: this.tail.toString(),
 			head: this.head.toString()
 		})
+	}
+
+	freeze() {
+		Object.freeze(this);
+		return this;
 	}
 
 }

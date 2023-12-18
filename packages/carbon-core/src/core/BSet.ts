@@ -1,13 +1,15 @@
-import { each } from 'lodash';
+import { each, identity } from "lodash";
 import BTree from 'sorted-btree';
 import { NodeId, NodeIdComparator } from './NodeId';
 import { Carbon } from './Carbon';
 import { Maps } from './types';
+import { NodeMap } from "./NodeMap";
+import { Node } from "./Node";
 
 // A Btree based set
 export class BSet<K> {
 
-	private tree: BTree<K, K>;
+	protected tree: BTree<K, K>;
 
 	compare?: (a: K, b: K) => number;
 
@@ -93,6 +95,22 @@ export class BSet<K> {
 		return ret
 	}
 
+	freeze() {
+		// this.add = () => { throw new Error('Cannot add to a frozen set') }
+		// this.remove = () => { throw new Error('Cannot remove from a frozen set') }
+		// this.deleteKeys = () => { throw new Error('Cannot delete from a frozen set') }
+		// this.clear = () => { throw new Error('Cannot clear a frozen set') }
+		// this.extend = () => { throw new Error('Cannot extend a frozen set') }
+
+		Object.freeze(this);
+
+		return this;
+	}
+
+	toJSON(): any {
+		return this.toArray()
+	}
+
 }
 
 // Set of deleted Item IDs
@@ -118,11 +136,33 @@ export class DeleteSet extends BSet<NodeId> {
 		return set
 	}
 
+	toJSON() {
+		return this.toArray().map(id => id.toString())
+	}
+
 }
 
 export class NodeIdSet extends BSet<NodeId> {
-	static empty = new NodeIdSet();
-	constructor() {
+	static empty() {
+		return new NodeIdSet();
+	}
+
+	constructor(ids: NodeId[] = []) {
 		super(NodeIdComparator)
+		this.add(ids)
+	}
+
+	nodes(nodeMap: NodeMap) {
+		return (this.toArray().map(id => nodeMap.get(id)).filter(identity) ?? []) as unknown as Node[];
+	}
+
+	clone():NodeIdSet {
+		const ret = new NodeIdSet();
+		this.forEach(e => ret.add(e));
+		return ret;
+	}
+
+	toJSON() {
+		return this.toArray().map(id => id.toString())
 	}
 }

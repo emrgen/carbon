@@ -1,10 +1,8 @@
-import { EventContext } from '../core/EventContext';
+import { EventContext, AfterPlugin } from "@emrgen/carbon-core";
 import { p12, p14 } from '../core/Logger';
-import { AfterPlugin } from '../core/CarbonPlugin';
 import { EventHandlerMap } from '../core/types';
 import { CarbonState } from '../core/CarbonState';
 import { Decoration } from '../core/Decoration';
-import { ActionOrigin } from '../core';
 
 let count = 0
 
@@ -16,7 +14,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 	on(): EventHandlerMap {
 		return {
 			selectionchange: (ctx: EventContext<Event>) => {
-				console.log(p14('[event]'), 'selectionchange', ctx.event);
+				// console.log(p14('[event]'), 'selectionchange', ctx.event);
 				// helper code block to detect errant selectionchange effect
 				count++;
 				setTimeout(() => {
@@ -28,11 +26,10 @@ export class SelectionChangePlugin extends AfterPlugin {
 				}
 
 				const { app, selection: after } = ctx;
-				console.log(after.toString());
 
 				const { selection: before } = app;
 				if (before.isInvalid) {
-					console.warn(p12('%c[invalid]'), 'color:red', 'before selection is invalid');
+					console.warn(p12('%c[invalid]'), 'color:red', 'before selection is invalid', app.ready);
 				}
 
 				if (after.isInvalid) {
@@ -46,19 +43,18 @@ export class SelectionChangePlugin extends AfterPlugin {
 				}
 
 				// console.log('SelectionPlugin.selectionchanged',before.toJSON(),after.toJSON());
-				console.log(p14('%c[create]'), 'color:green', 'select transaction');
+				console.debug(p14('%c[create]'), 'color:green', 'select transaction');
 				const { tr } = app;
-				if (!app.blockSelection.isEmpty) {
-					tr.selectNodes([]);
-				}
+
 				tr
 					.select(after)
 					.dispatch()
 			},
 			selectstart: (ctx: EventContext<Event>) => {
 				const {app} = ctx;
-				if (app.state.selectedNodeIds.size) {
-					app.tr.selectNodes([]).dispatch();
+				const {selection} = app;
+				if (selection.isBlock) {
+					// app.tr.se
 				}
 			},
 		}

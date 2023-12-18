@@ -7,6 +7,7 @@ import { Question } from "./carbon/Question";
 import { FastEditor } from "./fastype/FastEditor";
 
 import './fastype/fastype.styl'
+import TestText from "./carbon/Test/Text";
 
 function App() {
   return (
@@ -14,9 +15,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Dev />} />
         <Route path="/text" element={<Text />} />
+        <Route path="/test" element={<TestText />} />
         <Route path="/sheet" element={<Sheet />} />
         <Route path="/question" element={<Question />} />
-        <Route path="/fastype" element={<FastEditor />} />
+        <Route path="/fastype" element={<FastEditor name='fastype-test'/>} />
         {/* <Route path="/test" element={<Test />} /> */}
       </Routes>
     </Router>

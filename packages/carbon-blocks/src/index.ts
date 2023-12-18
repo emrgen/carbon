@@ -42,18 +42,18 @@ import { ColumnComp, RowComp, TableComp } from "./renderers/Table";
 import { Insert } from "./plugins/Inserter";
 import { Change } from "./plugins/Change";
 import { CarbonComp } from "./renderers/Carbon";
-import { FileTree } from "./plugins/FileTree";
-import { FileTreeComp } from "./renderers/FileTree";
-import { FileTreeItemComp } from "./renderers/FileTreeItem";
+import { PageTree } from "./plugins/PageTree";
+import { PageTreeComp } from "./renderers/PageTree";
+import { PageTreeItemComp } from "./renderers/PageTreeItem";
 import { Tab } from "./plugins/Tab";
 import { TabComp, TabItemComp, TabTitlesComp, TextTitleComp } from "./renderers/TabComp";
 import { VideoComp } from "./renderers/Video";
 import { Video } from "./plugins/Video";
-import { Content } from "./plugins/Content";
-import { ContentComp } from "./renderers/Content";
 import { HeaderComp } from "./renderers/Header";
 import FrameComp from "./renderers/Frame";
 import { Frame } from "./plugins/Frame";
+import { BlockContent } from "./plugins/BlockContent";
+import { BlockContentComp } from "./renderers/BlockContent";
 
 export const blockPresets: Extension = {
 	plugins: [
@@ -80,9 +80,10 @@ export const blockPresets: Extension = {
 		new Insert(),
 		new Change(),
 		new CarbonRoot(),
-		new FileTree(),
+		new PageTree(),
+		new BlockContent(),
 		new Tab(),
-		// new Content(),
+		new BlockContent(),
 		new Frame(),
 	],
 	renderers: [
@@ -112,15 +113,15 @@ export const blockPresets: Extension = {
 		Renderer.create('row', RowComp),
 		Renderer.create('column', ColumnComp),
 		Renderer.create('carbon', CarbonComp),
-		Renderer.create('fileTree', FileTreeComp),
-		Renderer.create('fileTreeItem', FileTreeItemComp),
+		Renderer.create('pageTree', PageTreeComp),
+		Renderer.create('pageTreeItem', PageTreeItemComp),
 		Renderer.create('tab', TabComp),
 		Renderer.create('tabContent', TabItemComp),
 		Renderer.create('tabTitles', TabTitlesComp),
 		Renderer.create('tabTitle', TextTitleComp),
 		Renderer.create('tagsAttr', () => 1),
-		Renderer.create('content', ContentComp),
 		Renderer.create('frame', FrameComp),
+		Renderer.create('blockContent', BlockContentComp),
 	]
 }
 

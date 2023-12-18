@@ -1,15 +1,17 @@
-import { findIndex, flatten } from 'lodash';
+import { findIndex, flatten, identity } from 'lodash';
 
 import { Node } from './Node';
 import { Optional } from "@emrgen/types";
+import { NodeId } from './NodeId';
+import { Maps, With } from './types';
 
 export interface NodeContent {
 	size: number;
 	children: Node[];
 	textContent: string;
-
-	withParent(parent: Node): NodeContent;
-
+	isEmpty: boolean;
+	setParentId(parentId: NodeId): NodeContent;
+	setParent(parent: Node): NodeContent;
 	replace(node: Node, by: Node[]): NodeContent;
 	prepend(nodes: Node[]): NodeContent;
 	append(nodes: Node[]): NodeContent;
@@ -23,7 +25,8 @@ export interface NodeContent {
 	updateText(text: string): void;
 
 	view(container: Node[]): NodeContent;
-	clone(): NodeContent;
+	clone(map: Maps<Node, Optional<Node>>): NodeContent;
+	freeze(): NodeContent;
 	toJSON(): any;
 }
 
@@ -33,6 +36,7 @@ interface BlockContentProps {
 
 export class BlockContent implements NodeContent {
 	nodes: Node[]
+	frozen: boolean = false
 
 	get children(): Node[] {
 		return this.nodes;
@@ -54,6 +58,10 @@ export class BlockContent implements NodeContent {
 		this.nodes = props.nodes
 	}
 
+	get isEmpty() {
+		return this.size == 0 || this.children.every(n => n.isEmpty)
+	}
+
 	get size(): number {
 		return this.children.length;
 	}
@@ -62,8 +70,18 @@ export class BlockContent implements NodeContent {
 		return this.children.reduce((text, node) => text + node.textContent, '');
 	}
 
-	withParent(parent: Node): NodeContent {
-		this.nodes.forEach(n => n.setParent(parent));
+	setParentId(parentId: NodeId): NodeContent {
+		// if (this.frozen) return this
+		this.nodes.forEach(n => n.setParentId(parentId));
+		return this;
+	}
+
+	setParent(parent: Node): NodeContent {
+		if (this.frozen) return this
+		this.nodes.forEach(n => {
+			n.setParent(parent);
+			n.setParentId(parent.id);
+		});
 		return this;
 	}
 
@@ -142,13 +160,22 @@ export class BlockContent implements NodeContent {
 		throw new Error("Not implemented");
 	}
 
-	clone(): BlockContent {
-		return BlockContent.create(this.nodes.map(n => n.clone()));
+	freeze() {
+		if (this.frozen) return this;
+		this.frozen = true;
+		this.nodes.forEach(n => n.freeze());
+		Object.freeze(this)
+		return this;
+	}
+
+	clone(map: Maps<Node, Optional<Node>> = identity): BlockContent {
+		const children = this.nodes.map(n => map(n)).filter(identity) as Node[];
+		return BlockContent.create(children);
 	}
 
 	toJSON() {
 		return {
-			content: this.nodes.map(n => n.toJSON())
+			children: this.nodes.map(n => n.toJSON())
 		}
 	}
 }
@@ -158,7 +185,12 @@ interface TextContentProps {
 }
 
 export class InlineContent implements NodeContent {
-	text: string
+	text: string;
+	frozen: boolean = false;
+
+	get isEmpty() {
+		return !this.text
+	}
 
 	get children(): Node[] {
 		return []
@@ -196,7 +228,11 @@ export class InlineContent implements NodeContent {
 		throw new Error('Method not implemented for InlineContent');
 	}
 
-	withParent(parent: Node): NodeContent {
+	setParentId(parentId: NodeId): NodeContent {
+		return this;
+	}
+
+	setParent(parent: Node): NodeContent {
 		return this;
 	}
 
@@ -249,6 +285,13 @@ export class InlineContent implements NodeContent {
 
 	view(): NodeContent {
 		return this
+	}
+
+	freeze() {
+		if (this.frozen) return this;
+		this.frozen = true;
+		Object.freeze(this)
+		return this;
 	}
 
 	clone(): InlineContent {

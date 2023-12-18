@@ -15,13 +15,15 @@ export class BulletedList extends Section {
         tags: ['bulleted list', 'unordered list', 'list', 'ul', 'unordered'],
         order: 3,
       },
-      attrs: {
-        node: {
-          emptyPlaceholder: 'List',
-        },
-        html: {
-          placeholder: 'List',
-          suppressContentEditableWarning: true,
+      props: {
+        local: {
+          placeholder: {
+            empty: 'List',
+            focused: 'Press / for commands',
+          },
+          html: {
+            suppressContentEditableWarning: true,
+          }
         }
       }
     }

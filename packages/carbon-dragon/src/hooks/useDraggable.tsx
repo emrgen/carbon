@@ -11,9 +11,7 @@ export interface UseFastDraggableProps {
 
 export const useDraggable = (props: UseFastDraggableProps) => {
   const { node, ref } = props;
-
   const dnd = useDndContext();
-  const { version } = useNodeChange(props);
 
   useEffect(() => {
     if (ref.current && node.type.isDraggable) {
@@ -22,7 +20,7 @@ export const useDraggable = (props: UseFastDraggableProps) => {
         dnd.onUnmountDraggable(node);
       };
     }
-  }, [dnd, node, ref, version]);
+  }, [dnd, node, ref]);
 
   const onMouseMove = useCallback((e) => {
     dnd.onMouseMove(node, e);

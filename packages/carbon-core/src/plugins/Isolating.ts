@@ -16,7 +16,7 @@ export class IsolatingPlugin extends AfterPlugin {
   keydown(): EventHandlerMap {
     return {
       left: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.blockSelection.size) return
+        if (e.app.selection.isBlock) return
         // let a = e.app.cmd.transform.delete()
 
         if (!e.selection.isCollapsed) {
@@ -33,27 +33,27 @@ export class IsolatingPlugin extends AfterPlugin {
         this.preventAtEnd(e);
       },
       shiftLeft: e => {
-        if (e.app.blockSelection.size) return
+        if (e.app.selection.isBlock) return
         this.preventAtStart(e);
       },
       shiftRight: e => {
-        if (e.app.blockSelection.size) return
+        if (e.app.selection.isBlock) return
         this.preventAtEnd(e);
       },
       backspace: e => {
-        if (e.app.blockSelection.size) return
+        if (e.app.selection.isBlock) return
         this.preventAtStartCollapsed(e);
       },
       delete: e => {
-        if (e.app.blockSelection.size) return
+        if (e.app.selection.isBlock) return
         this.preventAtEndCollapsed(e);
       },
       shiftBackspace: e => {
-        if (e.app.blockSelection.size) return
+        if (e.app.selection.isBlock) return
         this.preventAtStart(e);
       },
       shiftDelete: e => {
-        if (e.app.blockSelection.size) return
+        if (e.app.selection.isBlock) return
         this.preventAtEnd(e);
       }
     };

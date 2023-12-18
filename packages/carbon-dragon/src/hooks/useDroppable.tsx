@@ -10,7 +10,7 @@ export interface FastDroppableProps {
 export const useDroppable = (props: FastDroppableProps) => {
   const { node, ref } = props;
   const dnd = useDndContext();
-  const { version } = useNodeChange(props);
+  useNodeChange(props);
 
   useEffect(() => {
     if (ref.current) {
@@ -19,11 +19,11 @@ export const useDroppable = (props: FastDroppableProps) => {
         dnd.onUnmountDroppable(node);
       };
     }
-  }, [dnd, node, ref, version]);
+  }, [dnd, node, ref]);
 
   useEffect(() => {
     if (node.children.some((n) => n.type.isDraggable)) {
       dnd.onUpdated(node);
     }
-  }, [version, node, dnd]);
+  }, [node, dnd]);
 };

@@ -16,7 +16,6 @@ import { useCallback, useRef } from "react";
 export function SeparatorComp(props: RendererProps) {
   const app = useCarbon();
   const { node } = props;
-  2;
   const ref = useRef(null);
 
   const selection = useSelectionHalo(props);
@@ -29,20 +28,19 @@ export function SeparatorComp(props: RendererProps) {
     (e) => {
       preventAndStop(e);
       // avoid selection if block is already selected
-      if (app.blockSelection && app.blockSelection.has(node.id)) return;
+      if (app.selection.nodes.some(n => n.id.eq(node.id))) return;
       app.tr.selectNodes([node.id]).dispatch();
     },
-    [app.blockSelection, app.tr, node.id]
+    [app.selection.nodes, app.tr, node.id]
   );
 
   const handleMouseDown = useCallback(
     (e) => {
-      if (app.blockSelection && app.blockSelection.has(node.id)) {
-        e.preventDefault();
-        e.stopPropagation();
+      if (app.selection.nodes.some(n => n.id.eq(node.id))) {
+        preventAndStop(e);
       }
     },
-    [app.blockSelection, node.id]
+    [app.selection.nodes, node.id]
   );
 
   return (

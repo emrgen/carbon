@@ -7,7 +7,7 @@ import {
   Transaction,
   addClass,
   removeClass,
-  useCarbon,
+  useCarbon, CarbonState
 } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { BlockMenu, PorterOverlay } from "@emrgen/fastype-utils";
@@ -46,10 +46,10 @@ export const FastypeCursor = (props: CustomCursorProps) => {
 
   useEffect(() => {
     const timeouts: any[] = [];
-    const onTransaction = (tr: Transaction) => {
+    const onChange = (state: CarbonState) => {
       if (!ref.current) return;
       const cursor = ref.current;
-      if (app.blockSelection.size) {
+      if (state.selection.isBlock) {
         addClass(cursor, `hidden`);
         return
       } else {
@@ -72,11 +72,11 @@ export const FastypeCursor = (props: CustomCursorProps) => {
       timeouts.push(timeout);
     };
 
-    app.on(EventsOut.transaction, onTransaction);
-    app.on(EventsOut.selectionUpdated, onTransaction);
+    app.on(EventsOut.transaction, onChange);
+    app.on(EventsOut.selectionUpdated, onChange);
     return () => {
-      app.off(EventsOut.transaction, onTransaction);
-      app.off(EventsOut.selectionUpdated, onTransaction);
+      app.off(EventsOut.transaction, onChange);
+      app.off(EventsOut.selectionUpdated, onChange);
     };
   }, [app, ref, updateCursorPosition]);
 

@@ -8,7 +8,6 @@ import {
 } from "@emrgen/carbon-core";
 import { useCallback, useMemo, useRef } from "react";
 import { useCombineConnectors, useConnectorsToProps, useDraggable } from "@emrgen/carbon-dragon";
-import { usePlaceholder } from "@emrgen/carbon-blocks";
 import { Button, HStack, Stack } from "@chakra-ui/react";
 
 export const BoardViewColumnComp = (props: RendererProps) => {
@@ -22,9 +21,6 @@ export const BoardViewColumnComp = (props: RendererProps) => {
     useCombineConnectors(draggable, selection)
   );
 
-  const placeholder = usePlaceholder(node);
-  // console.log(placeholder, node.firstChild?.isEmpty, node.attrs.node.emptyPlaceholder);
-  //
   // const hasContent = useMemo(() => node.size > 1, [node]);
   //
   // const handleAddItem = useCallback((e) => {
@@ -36,7 +32,7 @@ export const BoardViewColumnComp = (props: RendererProps) => {
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
       <Stack spacing={4}>
-        <CarbonNodeContent node={node} custom={{...placeholder, contentEditable: true}}/>
+        <CarbonNodeContent node={node} custom={{contentEditable: true}}/>
         <Stack>
           <CarbonNodeChildren node={node}/>
         </Stack>

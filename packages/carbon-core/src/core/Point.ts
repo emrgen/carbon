@@ -2,12 +2,12 @@ import { IntoNodeId, NodeId } from './NodeId';
 import { classString } from './Logger';
 import { Maps } from './types';
 
-enum PointAt {
-	Start = 0,
-	Before = 1,
-	Inside = 2,
-	After = 3,
-	End = 4,
+export enum PointAt {
+	Start = 'start',
+	Before = 'before',
+	Inside = 'inside',
+	After = 'after',
+	End = 'end'
 }
 
 // point is a relative offset position within a node
@@ -15,13 +15,20 @@ export class Point {
 	nodeId: NodeId;
 
 	// points at before|within|after
-	private at: PointAt;
+	at: PointAt;
 
 	// valid when point is within a node
 	offset: number;
 
+	static IDENTITY = new Point(NodeId.IDENTITY, PointAt.Inside, 0);
+	static NULL = new Point(NodeId.NULL, PointAt.Inside, 0);
+
 	get isDefault() {
-		return this.nodeId.isDefault
+		return this.eq(Point.IDENTITY);
+	}
+
+	get isNull() {
+		return this.eq(Point.NULL);
 	}
 
 	get isStart(): boolean {

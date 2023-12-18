@@ -5,14 +5,15 @@ import {
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { BlockMenu } from "@emrgen/fastype-utils";
 import { FastypeCursor } from "./FastypeCursor";
-import { useEffect } from 'react';
+import { ReactNode, useEffect } from "react";
 
 export interface FastypeProps {
   app: Carbon;
+  children?: ReactNode;
 }
 
 export function Fastype(props: FastypeProps) {
-  const { app } = props;
+  const { app, children } = props;
 
   useEffect(() => {
     app.mounted()
@@ -20,9 +21,9 @@ export function Fastype(props: FastypeProps) {
 
   return (
     <ChakraProvider>
-      <CarbonApp app={app} />
-      {/* <FastypeCursor app={app} /> */}
-      <BlockMenu app={app} />
+      <CarbonApp app={app} >
+        {children}
+      </CarbonApp>
     </ChakraProvider>
   );
 }

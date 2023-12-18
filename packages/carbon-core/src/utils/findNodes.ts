@@ -11,7 +11,7 @@ export function nodesBetweenPoints(tail: Point, head: Point, store: NodeStore): 
 }
 
 // returns immediate children of commonNode
-export function blocksBelowCommonNode(startNode: Node, endNode: Node) {
+export function blocksBelowCommonNode(startNode: Node, endNode: Node): [Node, Node] {
 	// calculate dependencies
 	const tailChain = startNode.chain.filter(n => n.isBlock)
 	const headChain = endNode.chain.filter(n => n.isBlock)
@@ -23,5 +23,5 @@ export function blocksBelowCommonNode(startNode: Node, endNode: Node) {
 		return !prev?.eq(next!)
 	}) ?? [] as Optional<Node>[];
 
-	return [prev, next];
+	return [prev, next] as [Node, Node];
 }

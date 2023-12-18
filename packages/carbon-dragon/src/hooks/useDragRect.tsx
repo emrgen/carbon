@@ -31,13 +31,13 @@ export const useDragRect = (props?: UseDragRectProps) => {
           {overlay && (
             <div
               style={dragRect ?? {}}
-              className="carbon-rect-selector"
+              className="carbon-selector"
               onMouseUp={stop}
             />
           )}
 
           {/* <div className="carbon-drag-overlay" onMouseMove={prevent} /> */}
-          
+
           {cursorPos && (
             <div
               style={{ left: cursorPoint?.x ?? 0, top: cursorPoint?.y ?? 0 }}

@@ -27,7 +27,7 @@ export class NumberedList extends Section {
       },
       attrs: {
         node: {
-          emptyPlaceholder: 'List',
+          placeholder: 'List',
         },
         html: {
           placeholder: 'List',

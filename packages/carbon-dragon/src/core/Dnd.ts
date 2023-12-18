@@ -2,8 +2,10 @@ import { Optional } from '@emrgen/types';
 import EventEmitter from "events";
 import { throttle } from "lodash";
 import { DndNodeStore } from "./DndStore";
-import { Carbon, Node, NodeId } from '@emrgen/carbon-core';
+import { Carbon, Node, NodeId, Point } from "@emrgen/carbon-core";
 import { DndEvent } from '../types';
+
+type Acceptor = (receiver: Node, child: Node, at: Point) => boolean
 
 export class Dnd extends EventEmitter {
 	// nodes that can be dragged
@@ -21,6 +23,8 @@ export class Dnd extends EventEmitter {
 	isDragging: boolean = false;
 	isMouseDown: any;
 
+	// accceptor: Acceptor = (receiver, child, at) => {}
+
 	constructor(readonly app: Carbon) {
 		super();
 		this.onUpdated = this.onUpdated.bind(this)
@@ -31,7 +35,7 @@ export class Dnd extends EventEmitter {
 		this.onDragStart = this.onDragStart.bind(this)
 		this.onDragMove = this.onDragMove.bind(this)
 		this.onDragEnd = this.onDragEnd.bind(this)
-		this.onMouseMove = throttle(this.onMouseMove.bind(this), 0)
+		this.onMouseMove = throttle(this.onMouseMove.bind(this), 100) // throttled mouse move handler
 		this.onMouseOver = this.onMouseOver.bind(this)
 		this.onMouseDown = this.onMouseDown.bind(this)
 		this.onMouseUp = this.onMouseUp.bind(this)
