@@ -110,7 +110,8 @@ export class PointedSelection {
 
 		return classString(this)({
 			tail: this.tail.toString(),
-			head: this.head.toString()
+			head: this.head.toString(),
+			// origin: this.origin,
 		})
 	}
 

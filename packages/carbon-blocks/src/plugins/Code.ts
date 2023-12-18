@@ -92,7 +92,6 @@ export class Code extends CarbonPlugin {
       //   const { app, event, node } = ctx;
       //   const { selection, cmd } = app;
       //   const { start } = selection;
-      //   console.log('xxxxx');
 
       //   if (selection.isCollapsed && start.isAtStart) {
       //     ctx.event.preventDefault();

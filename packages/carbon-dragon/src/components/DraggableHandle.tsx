@@ -274,7 +274,6 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const onMouseUp = useCallback(
     (node: Node, e: DndEvent, isDragging: boolean) => {
       if (e.id !== CarbonDragHandleId) return;
-      console.log('xxxx');
       // app.focus();
       if (isDragging) {
         preventAndStop(e.event);

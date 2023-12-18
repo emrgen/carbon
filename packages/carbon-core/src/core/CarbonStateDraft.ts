@@ -39,7 +39,7 @@ export class CarbonStateDraft {
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
     this.changes = new NodeIdSet();
-    this.selection = state.selection.unpin()
+    this.selection = state.selection.unpin(origin);
   }
 
   get(id: NodeId): Optional<Node> {
@@ -375,7 +375,7 @@ export class CarbonStateDraft {
       throw new Error("Cannot update selection on a draft that is already committed");
     }
 
-    console.log('update selection', selection.toString());
+    console.log('update selection');
     this.selection = selection;
 
     if (this.state.selection.isInline && this.state.selection.isCollapsed) {

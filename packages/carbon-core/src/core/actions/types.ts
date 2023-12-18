@@ -19,7 +19,7 @@ export enum ActionOrigin {
 	NoSync = 'NoSync', // selection at the end of a user input, the selection will be synced after dom update
 	UserSelectionChange = 'UserSelectionChange', // explicit user selection using arrow keys
 	DomSelectionChange = 'DomSelectionChange', // implicit user selection by up/down/mouse
-	System = 'System', // system generated commands (ex. undo)
+	System = 'System', // system generated commands (e.g. undo/redo for history plugin)
 	Runtime = 'Runtime', // runtime commands has meaning only during runtime
 }
 

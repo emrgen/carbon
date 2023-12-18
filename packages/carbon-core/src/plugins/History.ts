@@ -1,7 +1,6 @@
-import { EventContext, EventHandler, Transaction, TransactionType } from '../core';
-import { AfterPlugin } from '../core/CarbonPlugin';
-import { last } from 'lodash';
-import { TransactionTree } from '../core/TransactionTree';
+import { ActionOrigin, EventContext, EventHandler, Transaction, TransactionType } from "../core";
+import { AfterPlugin } from "../core/CarbonPlugin";
+import { last } from "lodash";
 
 export class HistoryPlugin extends AfterPlugin {
   name = 'history';
@@ -85,8 +84,6 @@ export class HistoryPlugin extends AfterPlugin {
       const lastTransaction = last(this.undoStack);
       const current = Date.now();
       // if (lastTransaction) {
-
-      // console.log('XXXX',lastTransaction, lastTransaction.textInsertOnly, (current - lastTransaction?.timestamp) < 3000);
 
       // merge text insert only transactions within 500ms
       if (!tr.readOnly && lastTransaction?.textInsertOnly && tr.textInsertOnly && (current - lastTransaction.timestamp) < 500) {

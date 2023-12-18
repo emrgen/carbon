@@ -66,6 +66,7 @@ export class CarbonState extends EventEmitter {
 
 	get isSelectionChanged() {
 		const eq = this.previous?.selection.eq(this.selection);
+		// console.log('isSelectionChanged', eq, this.selection.origin, this.selection.toString());
 		return !(eq && this.selection.origin === ActionOrigin.DomSelectionChange);
 	}
 

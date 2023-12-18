@@ -379,7 +379,7 @@ export class Transaction {
 	}
 
 	// create an inverse transaction
-	inverse() {
+	inverse(origin?: ActionOrigin) {
 		const { tr, schema } = this.app;
 
 		tr.readOnly = true;

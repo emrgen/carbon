@@ -99,7 +99,7 @@ export class SelectionManager {
 		const { app } = this;
 		const { selection } = this.state;
 		if (this.state.previous?.selection?.eq(selection) && selection.origin === ActionOrigin.DomSelectionChange) {
-			console.debug('skipped: unchanged selection sync', selection.origin, selection.toString());
+			console.log('skipped: unchanged selection sync', selection.origin, selection.toString());
 			return
 		}
 

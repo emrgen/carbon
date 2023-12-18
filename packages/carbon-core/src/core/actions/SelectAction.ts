@@ -1,7 +1,7 @@
 import { Transaction } from "../Transaction";
-import { CarbonAction, ActionOrigin } from "./types";
-import { PointedSelection } from '../PointedSelection';
-import { classString } from '../Logger';
+import { ActionOrigin, CarbonAction } from "./types";
+import { PointedSelection } from "../PointedSelection";
+import { classString } from "../Logger";
 import { CarbonStateDraft } from "../CarbonStateDraft";
 
 export class SelectAction implements CarbonAction {
@@ -30,6 +30,8 @@ export class SelectAction implements CarbonAction {
 	}
 
 	inverse(): CarbonAction {
+		this.after.origin = ActionOrigin.System
+		this.before.origin = ActionOrigin.System
 		return SelectAction.create(this.after, this.before, this.origin)
 	}
 

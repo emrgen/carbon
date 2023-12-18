@@ -380,12 +380,12 @@ export class PinnedSelection {
 			: this.collapseToHead()
 	}
 
-	unpin(): PointedSelection {
-		const { tail, head, nodes, origin } = this;
+	unpin(origin?: ActionOrigin): PointedSelection {
+		const { tail, head, nodes } = this;
 		if (this.isBlock) {
-			return PointedSelection.fromNodes(nodes.map(n => n.id), origin)
+			return PointedSelection.fromNodes(nodes.map(n => n.id), origin ?? this.origin)
 		}
-		return PointedSelection.create(tail.point, head.point, origin);
+		return PointedSelection.create(tail.point, head.point, origin ?? this.origin);
 	}
 
 	eq(other: PinnedSelection) {
