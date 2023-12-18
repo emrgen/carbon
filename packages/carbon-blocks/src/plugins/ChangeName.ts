@@ -162,7 +162,6 @@ export class ChangeName extends BeforePlugin {
         }
       }
 
-
       tr.change(block.id, block.name, name)
       tr.updateProps(block.id, { node: { typeChanged: true },});
       // expand collapsed block

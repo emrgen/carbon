@@ -7,6 +7,7 @@ import { PinnedSelection } from "./PinnedSelection";
 import EventEmitter from "events";
 import { NodeMap } from "./NodeMap";
 import { CarbonStateDraft } from "./CarbonStateDraft";
+import { StateScope } from "./StateScope";
 
 interface CarbonStateProps {
 	scope: Symbol;
@@ -123,10 +124,13 @@ export class CarbonState extends EventEmitter {
 		const draft = new CarbonStateDraft(this, origin);
 		try {
 			fn(draft);
+			StateScope.set(this.scope, draft.nodeMap)
 			const state = draft.prepare().commit(4);
+			StateScope.set(this.scope, state.nodeMap)
 			draft.dispose();
 			return state;
 		} catch (e) {
+			StateScope.set(this.scope, this.nodeMap);
 			console.error(e);
 			draft.dispose();
 			return this;

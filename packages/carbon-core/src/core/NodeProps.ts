@@ -98,6 +98,7 @@ export const LocalHtmlAttrPath = "local/html";
 export const PlaceholderPath = "local/html/placeholder";
 export const ContenteditablePath = "local/html/contenteditable";
 export const ActivatedPath = "local/state/activated";
+export const RenderPath = "local/state/render";
 export const OpenedPath = "local/state/opened";
 export const CollapsedPath = "local/state/collapsed";
 export const HoveredPath = "local/state/hovered";

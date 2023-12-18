@@ -9,7 +9,7 @@ import {
 	Point,
 	Transaction,
 	nodeLocation,
-	preventAndStopCtx, moveNodesActions, PlaceholderPath, EmptyPlaceholderPath
+	preventAndStopCtx, moveNodesActions, PlaceholderPath, EmptyPlaceholderPath, RenderPath
 } from "@emrgen/carbon-core";
 import { isNestableNode } from '../utils';
 import { Optional } from '@emrgen/types';
@@ -49,19 +49,20 @@ export class NestablePlugin extends AfterPlugin {
 		const to = Point.toAfter(prevSibling.id);
 
 		const { tr } = app;
-		tr?.move(nodeLocation(node)!, to, node.id);
+
+		tr.move(nodeLocation(node)!, to, node.id);
 		if (prevNode.isCollapsed) {
-			tr?.updateProps(prevNode.id, { node: { collapsed: false } })
+			tr.updateProps(prevNode.id, { node: { collapsed: false } })
 		}
-		tr?.select(app.selection.clone());
+		tr.select(app.selection.clone());
 
 		return tr
 	}
 
 	// TODO: add support for unwrapping multiple nodes
 	unwrap(app: Carbon, node: Node): Optional<Transaction> {
-		const {parent} = node;
-		if (!isNestableNode(parent!)) return
+		const { parent } = node;
+		if (!parent || !isNestableNode(parent)) return
 
 		// move node after the parent
 		const to = Point.toAfter(parent!.id)
@@ -111,12 +112,6 @@ export class NestablePlugin extends AfterPlugin {
 						tr.updateProps(listNode.id, { node: { collapsed: false } })
 					}
 
-					// if (listNode.firstChild?.isEmpty) {
-					// 	tr.updateProps(listNode.firstChild?.id!, {
-					// 		[PlaceholderPath]: app.schema.type('section').props.get(EmptyPlaceholderPath)
-					// 	})
-					// }
-
 					tr
 						.change(listNode.id, listNode.name, 'section')
 						.select(PinnedSelection.fromPin(selection.head))
@@ -130,7 +125,8 @@ export class NestablePlugin extends AfterPlugin {
 				const nextSibling = listNode.nextSibling;
 				if (!nextSibling) {
 					preventAndStopCtx(ctx);
-					cmd.transform.unwrap(listNode)?.dispatch()
+					const { tr } = app;
+					cmd.nestable.unwrap(listNode)?.dispatch();
 					return
 				}
 
@@ -218,6 +214,8 @@ export class NestablePlugin extends AfterPlugin {
 				if (selection.nodes.length > 1) {
 					return
 				}
+
+				const { tr } = app;
 				app.cmd.nestable.wrap(listNode)?.dispatch();
 			},
 			shiftTab: (ctx: EventContext<KeyboardEvent>) => {

@@ -14,7 +14,7 @@ import { PluginManager } from './PluginManager';
 import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
-import { TransactionManager } from "@emrgen/carbon-core";
+import { ListNumberPath, RenderPath, TransactionManager } from "@emrgen/carbon-core";
 import { ChangeNameAction } from './actions/ChangeNameAction';
 import { UpdatePropsAction } from './actions/UpdatePropsAction';
 import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
@@ -26,6 +26,7 @@ import { SetContentAction } from "./actions/SetContentAction";
 import { SelectAction } from "./actions/SelectAction";
 import { RemoveNodeAction } from "./actions/RemoveNodeAction";
 import { MoveNodeAction } from "./actions/MoveNodeAction";
+import { isNestableNode } from "@emrgen/carbon-blocks";
 
 let _id = 0
 const getId = () => _id++

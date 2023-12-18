@@ -14,7 +14,7 @@ import {
 } from "@emrgen/carbon-dragon";
 
 export const BulletedListComp = (props: RendererProps) => {
-  const { node } = props;
+  const { node, parent } = props;
   const { SelectionHalo } = useSelectionHalo(props);
 
   const ref = useRef(null);
@@ -41,9 +41,10 @@ export const BulletedListComp = (props: RendererProps) => {
     <CarbonBlock {...props} custom={connectors} ref={ref}>
       <CarbonNodeContent
         node={node}
+        parent={parent}
         beforeContent={beforeContent}
       />
-      <CarbonNodeChildren node={node} />
+      <CarbonNodeChildren node={node} parent={parent}/>
       {SelectionHalo}
     </CarbonBlock>
   );

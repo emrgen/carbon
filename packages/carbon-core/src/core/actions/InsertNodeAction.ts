@@ -13,13 +13,10 @@ export class InsertNodeAction implements CarbonAction {
 	static fromNode(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new InsertNodeAction(at, node.id, node.toJSON(), origin);
 	}
-
 	static create(at: Point, id: NodeId, node: NodeJSON, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new InsertNodeAction(at, id, node, origin);
 	}
-
 	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {}
-
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { at, node: json } = this;
 		const {app}=tr;
@@ -31,13 +28,6 @@ export class InsertNodeAction implements CarbonAction {
 		if (!refNode) {
 			throw new Error('failed to find target node from: ' + at.toString())
 		}
-
-		// if (refNode.deleted) {
-		// 	node.delete();
-		// 	app.store.delete(node)
-		// 	return ActionResult.withError('ref node already deleted, by transaction from other site');
-		// }
-
 		const parent = draft.parent(refNode.id)
 		if (!parent) {
 			throw new Error('failed to find parent node from: ' + at.toString())

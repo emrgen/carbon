@@ -147,7 +147,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 		updatedNodes
 			.filter(n => updatedNodeIds.has(n.id))
-			.forEach( n => this.publish(NodeChangeType.update, n));
+			.forEach( n => this.publish(NodeChangeType.update, n, n.parent));
 		console.groupEnd()
 	}
 

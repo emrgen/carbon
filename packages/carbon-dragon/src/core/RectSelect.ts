@@ -127,7 +127,6 @@ export class RectSelect extends EventEmitter {
 		}
 
 		const { scrollTop, scrollLeft } = docParent;
-		console.log(selectables.size);
 		const collides = selectables.collides(
 			adjustBox(boundFromFastDndEvent(e), { left: scrollLeft, top: scrollTop })
 		);
@@ -155,10 +154,8 @@ export class RectSelect extends EventEmitter {
 		}).filter(identity));
 
 		if (topLevelNodeParents.length === 1) {
-			console.log('xx');
 			const ids = topLevelNodes.map((n) => n.id);
 			if (this.noSelectionChange(ids)) {
-				console.log('no selection change', ids.map(id => id.toString()), app.selection.nodes.map(n => n.id.toString()));
 				return
 			}
 			this.selectNodes(ids);

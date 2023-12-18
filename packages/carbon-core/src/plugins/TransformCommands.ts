@@ -7,7 +7,7 @@ import {
   BeforePlugin,
   PointedSelection,
   BlockContent,
-  PinnedSelection, SetContentAction, ActionOrigin, CarbonAction, MoveNodeAction
+  PinnedSelection, SetContentAction, ActionOrigin, CarbonAction, MoveNodeAction, RenderPath
 } from "@emrgen/carbon-core";
 import { SelectionPatch } from "../core/DeleteGroup";
 import { p14 } from "../core/Logger";
@@ -234,7 +234,7 @@ export class TransformCommands extends BeforePlugin {
         const focusNode = this.findFocusNode(nodes);
         tr
           .insert(at, sliceClone.nodes)
-          .remove(nodeLocation(parent)!, parent.id)
+          .remove(nodeLocation(parent)!, parent)
         // .select(PinnedSelection.fromPin(Pin.toEndOf(prevNode)!));
         // .selectNodes(sliceClone.nodes.map(n => n.id))
         if (focusNode) {
@@ -367,8 +367,8 @@ export class TransformCommands extends BeforePlugin {
 
     const after = app.selection.collapseToStart();
     const from = nodeLocation(node);
-    tr
-      .move(from!, at, node.id)
+
+    tr.move(from!, at, node.id)
       .select(after);
 
     return tr;
@@ -383,6 +383,11 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
     const after = PointedSelection.fromPoint(point);
+
+    node?.nextSiblings.forEach(n => {
+      tr.updateProps(n.id, { [RenderPath]: 1 + (n.properties.get<number>(RenderPath) ?? 0) });
+    })
+
     tr
       .change(node.id, node.name, name)
       .select(after);

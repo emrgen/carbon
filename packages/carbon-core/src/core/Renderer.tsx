@@ -1,9 +1,12 @@
+import { Optional } from "@emrgen/types";
+
 export type VNode = any;
 import { Node } from './Node';
 
 export type RenderComponent = (props: RendererProps) => VNode;
 
 export interface RendererProps {
+  // parent: Optional<Node>;
 	node: Node;
 	children?: any;
 	[key: string]: any;

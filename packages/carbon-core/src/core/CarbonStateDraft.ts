@@ -10,7 +10,7 @@ import { PointedSelection } from "./PointedSelection";
 import { NodeType } from "./NodeType";
 import { Point, PointAt } from "./Point";
 import {  NodeStateJSON } from "./NodeState";
-import { ActionOrigin, FocusedPlaceholderPath, NodeIdSet, OpenedPath } from "@emrgen/carbon-core";
+import { ActionOrigin, FocusedPlaceholderPath, NodeIdSet, OpenedPath, RenderPath } from "@emrgen/carbon-core";
 import { nodePlaceholder } from "../utils/attrs";
 import {
   ActivatedPath,
@@ -20,6 +20,7 @@ import {
   PlaceholderPath,
   SelectedPath
 } from "./NodeProps";
+import { StateScope } from "./StateScope";
 
 // NOTE: it is internal to the state and actions. it should not be used outside of it.
 //draft of a state is used to prepare a new state before commit
@@ -199,7 +200,10 @@ export class CarbonStateDraft {
       throw Error('move node does not have old parent')
     }
 
-    this.mutable(parentId, parent => parent.remove(node));
+    this.mutable(parentId, parent => {
+      node.nextSiblings?.forEach(ch => this.mutable(ch.id));
+      parent.remove(node)
+    });
 
     this.insert(to, node, 'move');
   }
@@ -238,7 +242,10 @@ export class CarbonStateDraft {
   }
 
   private prepend(parentId: NodeId, node: Node) {
-    this.mutable(parentId, parent => parent.prepend(node));
+    this.mutable(parentId, parent => {
+      parent.children.forEach(ch => this.mutable(ch.id));
+      parent.prepend(node)
+    });
   }
 
   private append(parentId: NodeId, node: Node) {
@@ -261,7 +268,11 @@ export class CarbonStateDraft {
       throw new Error("Cannot insert node before a node that does not have a parent");
     }
 
-    this.mutable(parentId, parent => parent.insertBefore(refNode, node));
+    this.mutable(parentId, parent => {
+      this.mutable(refNode.id);
+      refNode.nextSiblings?.forEach(ch => this.mutable(ch.id));
+      parent.insertBefore(refNode, node)
+    });
   }
 
   private insertAfter(refId: NodeId, node: Node) {
@@ -280,7 +291,10 @@ export class CarbonStateDraft {
       throw new Error("Cannot insert node before a node that does not have a parent");
     }
 
-    this.mutable(parentId, parent => parent.insertAfter(refNode, node));
+    this.mutable(parentId, parent => {
+      refNode.nextSiblings?.forEach(ch => this.mutable(ch.id));
+      parent.insertAfter(refNode, node)
+    });
   }
 
   remove(node: Node) {
@@ -304,6 +318,7 @@ export class CarbonStateDraft {
 
     this.mutable(parentId, parent => {
       parent.remove(node);
+      parent.children.forEach(ch => this.mutable(ch.id));
 
       // if parent title is empty, set placeholder from parent
       if (parent.isTextBlock && parent.isEmpty) {
@@ -312,7 +327,7 @@ export class CarbonStateDraft {
           [PlaceholderPath]: placeholder,
         })
 
-        console.log(parent.properties.toKV());
+        // console.log(parent.properties.toKV());
       }
     });
 
@@ -328,15 +343,14 @@ export class CarbonStateDraft {
 
 
     this.mutable(nodeId, node => {
-      console.log('--------------------', node.id.toString(), node.firstChild?.isEmpty, node.isContainerBlock);
       node.changeType(type);
+      node.nextSiblings?.forEach(ch => this.mutable(ch.id));
+
       if (node.isContainerBlock && node.firstChild?.isEmpty) {
         this.mutable(node.firstChild.id, child => {
           child.updateProps({
             [PlaceholderPath]: type.props.get<string>(EmptyPlaceholderPath) ?? '',
           })
-
-          console.log('--------------------', child.id.toString(), child.properties.toKV());
         })
       }
     });

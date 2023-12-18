@@ -88,13 +88,13 @@ export const RawText = memo(function RT(props: RendererProps) {
 
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
-  const {node} = props;
+  const {node, parent} = props;
 
   return (
     <CarbonElement node={node} tag="span">
       <>
         {node.isEmpty ? (
-          <CarbonEmpty node={node} />
+          <CarbonEmpty node={node} parent={parent}  />
         ) : (
           node.textContent
         )}
@@ -131,7 +131,7 @@ export const CarbonChildren = (props: RendererProps) => {
   const { node } = props;
 
   if (node.isVoid) {
-    return <CarbonEmpty node={node} />;
+    return <CarbonEmpty node={node}  />;
   }
 
   const children = node.children.map((n) => <CarbonNode node={n} key={n.key} />);
@@ -198,6 +198,7 @@ export const CarbonNodeContent = (props: RendererProps) => {
       {beforeContent}
       <CarbonNode
         node={content}
+        // parent={node}
         custom={custom}
         key={content.key}
       />
@@ -212,6 +213,7 @@ export const CarbonNodeChildren = (props: RendererProps) => {
   const children = node.children
     .slice(1)
     .map((n) => <CarbonNode node={n} key={n.key} />);
+
   return <div data-type="children">{children}</div>;
 };
 

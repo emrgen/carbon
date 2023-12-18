@@ -44,10 +44,12 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 			return
 		}
 
+		console.log('1111111', head.isAtStartOfNode(node), head, node);
 		if (head.isAtStartOfNode(node)) {
 			const { start } = selection;
 			const textBlock = start.node.chain.find(n => n.isTextBlock)
 			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
+			console.log('xxxxxxxx', prevTextBlock, textBlock);
 			if (!prevTextBlock || !textBlock) {
 				console.log('no prev text block found');
 				return

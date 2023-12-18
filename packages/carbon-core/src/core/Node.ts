@@ -163,8 +163,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.deleted = deleted;
 	}
 
-	get parent() {
-		if (!this.frozen) return this._parent;
+	get parent(): Optional<Node> {
+		if (this._parent) return this._parent;
 		const map = StateScope.get(this.scope);
 		if (!this.parentId) return null;
 		return map.get(this.parentId!)

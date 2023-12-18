@@ -7,8 +7,18 @@ import {
 	NodeSpec, PinnedSelection,
 	preventAndStopCtx,
 	SerializedNode,
-	Pin,
+	Pin, Transaction, Point, NodeName, Slice, InsertPos, DeleteOpts, SplitOpts
 } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
+
+declare module '@emrgen/carbon-core' {
+	export interface CarbonCommands {
+		text: {
+			// insertText(selection: PinnedSelection, text: string): Optional<Transaction>;
+		};
+	}
+}
+
 
 export class TextPlugin extends NodePlugin {
 
@@ -32,32 +42,34 @@ export class TextPlugin extends NodePlugin {
 		}
 	}
 
-	on(): EventHandlerMap {
+	commands(): Record<string, Function> {
 		return {
-			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				this.onTextInsert(ctx);
-			},
+			// insertText: this.insertText,
 		}
 	}
 
-	onTextInsert(ctx: EventContext<KeyboardEvent>) {
-		const { app, event, node } = ctx;
-		// console.log('onTextInsert', event, node.id.toString(), node.textContent);
-		const { selection } = app;
-		if (!selection.isCollapsed) {
-			return
-		}
-		preventAndStopCtx(ctx);
-
-		// @ts-ignore
-		const { data, key } = event.nativeEvent;
-		const {start} = selection;
-		const {offset} = start;
-
-		const text = node.textContent.slice(0, offset) + (data ?? key) + node.textContent.slice(offset);
-		const after = PinnedSelection.fromPin(Pin.future(start.node, start.offset + 1));
-		app.tr.setContent(node, InlineContent.create(text)).select(after).dispatch();
-	}
+	// on(): EventHandlerMap {
+	// 	return {
+	// 		beforeInput: (ctx: EventContext<KeyboardEvent>) => {
+	// 			const { app, node } = ctx;
+	// 			const { selection } = app;
+	// 			if (!selection.isCollapsed) {
+	// 				return
+	// 			}
+	// 			preventAndStopCtx(ctx);
+	//
+	// 			// @ts-ignore
+	// 			const { data, key } = ctx.event.nativeEvent;
+	// 			this.onTextInsert(app, node, data ?? key);
+	// 		},
+	// 	}
+	// }
+	//
+	// onTextInsert(app: Carbon, pin: Pin, text: string) {
+	// 	// const textNode = node.textContent.slice(0, offset) + (text) + node.textContent.slice(offset);
+	// 	// const after = PinnedSelection.fromPin(Pin.future(start.node, start.offset + text.length));
+	// 	// app.tr.setContent(node, InlineContent.create(textNode)).select(after).dispatch();
+	// }
 
 
 

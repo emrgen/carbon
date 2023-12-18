@@ -5,23 +5,24 @@ import { Node } from "./Node";
 import { NodeId, NodeIdComparator } from './NodeId';
 import { NodeWatcher } from "./types";
 import { EventEmitter } from 'events';
+import { Optional } from "@emrgen/types";
 
 // handles events by executing registered callbacks
 export class NodeTopicEmitter<E> extends EventEmitter {
 
 	private subscribers: Map<E, BTree<NodeId, Set<NodeWatcher>>> = new Map();
 
-	publish(event: E, node: Node) {
+	publish(event: E, node: Node, parent: Optional<Node> = undefined) {
 		// console.log('publish', event, node.id,node.version, node.textContent);
 
 		const listeners = this.subscribers.get(event)?.get(node.id);
 		// console.log(listeners);
-		listeners?.forEach(cb => cb(node));
+		listeners?.forEach(cb => cb(node, parent));
 	}
 
 	subscribe(id: NodeId, event: E, cb: NodeWatcher) {
 		if (!this.subscribers.has(event)) {
-			this.subscribers.set(event, new NodeBTree())
+			this.subscribers.set(event, new BTree(undefined, NodeIdComparator));
 		}
 		const listeners = this.subscribers.get(event)?.get(id) ?? new Set();
 		listeners.add(cb)
@@ -60,7 +61,7 @@ export class NodeEmitter {
 		if (node) {
 			const listeners = this.subscribers.get(node.id) ?? [];
 			console.log(node.name, node.id.toString(), listeners, Array.from(this.subscribers.keys()).map(n => n.toString()))
-			each(listeners, cb => cb(node));
+			// each(listeners, cb => cb(node));
 		}
 	}
 }
