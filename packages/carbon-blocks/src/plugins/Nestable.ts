@@ -9,7 +9,7 @@ import {
 	Point,
 	Transaction,
 	nodeLocation,
-	preventAndStopCtx, moveNodesActions
+	preventAndStopCtx, moveNodesActions, PlaceholderPath, EmptyPlaceholderPath
 } from "@emrgen/carbon-core";
 import { isNestableNode } from '../utils';
 import { Optional } from '@emrgen/types';
@@ -104,34 +104,19 @@ export class NestablePlugin extends AfterPlugin {
 
 				if (!atStart) return
 				const parentList = listNode.parents.find(isNestableNode);
-				const as = listNode.properties.get('html.data-as')
-				// if listNode is not rendered as the listNode.name
-				// remove the data-as attribute
-				if (as && as !== listNode.name) {
-					preventAndStopCtx(ctx);
-					tr
-						.updateProps(listNode.id, {
-							html: {
-								'data-as': '',
-								placeholder: '',
-							},
-						})
-						.select(selection)
-						.dispatch();
-					return
-				}
-
-				console.log('--------');
 				// change to section
 				if (listNode.name !== 'section') {
-					console.debug('xxxxxxxxx');
-
 					preventAndStopCtx(ctx);
 					if (listNode.isCollapsed) {
 						tr.updateProps(listNode.id, { node: { collapsed: false } })
 					}
 
-					tr.updateProps(listNode.firstChild?.id!, { html:{placeholder: ''} })
+					// if (listNode.firstChild?.isEmpty) {
+					// 	tr.updateProps(listNode.firstChild?.id!, {
+					// 		[PlaceholderPath]: app.schema.type('section').props.get(EmptyPlaceholderPath)
+					// 	})
+					// }
+
 					tr
 						.change(listNode.id, listNode.name, 'section')
 						.select(PinnedSelection.fromPin(selection.head))

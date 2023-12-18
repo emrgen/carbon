@@ -21,15 +21,15 @@ import {
   SelectedPath
 } from "./NodeProps";
 
-// NOTE: it is internal to the state and should not be used outside of it
-// represents a draft of a state, used to prepare a new state before commit
+// NOTE: it is internal to the state and actions. it should not be used outside of it.
+//draft of a state is used to prepare a new state before commit
 export class CarbonStateDraft {
   origin: ActionOrigin;
   state: CarbonState;
   nodeMap: NodeMap;
   selection: PointedSelection;
-  changes: NodeIdSet
-  removed: NodeIdSet = NodeIdSet.empty();
+  changes: NodeIdSet; // tracks changed nodes
+  removed: NodeIdSet = NodeIdSet.empty(); // tracks removed nodes
 
   private drafting = true;
 
@@ -54,14 +54,9 @@ export class CarbonStateDraft {
     const { state, changes, selection } = this;
 
     const nodeMap = this.nodeMap.isEmpty ? state.nodeMap : this.nodeMap;
-
     const content = this.nodeMap.get(this.state.content.id)
     if (!content) {
       throw new Error("Cannot commit draft with invalid content");
-    }
-
-    if (!selection) {
-      throw new Error("Cannot commit draft with invalid selection");
     }
 
     // create a new selection based on the new node map using the draft selection
@@ -86,6 +81,8 @@ export class CarbonStateDraft {
   }
 
   // prepare the draft for commit
+  // transaction updates the node map to reflect the changes
+  // prepare will create a new node map and tree with all the changes applied
   prepare() {
     if (!this.drafting) {
       throw new Error("Cannot prepare a draft that is already committed");
@@ -105,7 +102,6 @@ export class CarbonStateDraft {
         depth
       }
     });
-
 
     changed.sort(NodeDepthComparator);
 
@@ -308,19 +304,17 @@ export class CarbonStateDraft {
 
     this.mutable(parentId, parent => {
       parent.remove(node);
+
+      // if parent title is empty, set placeholder from parent
       if (parent.isTextBlock && parent.isEmpty) {
-        console.log('parent is empty', parent.id.toString(), parent.name, this.nodeMap.parent(parent)?.properties.get<string>(EmptyPlaceholderPath) ?? '');
-        const gparent = this.nodeMap.parent(parent);
-        const placeholder =gparent?.properties.get<string>(EmptyPlaceholderPath) ?? ''
+        const placeholder = this.nodeMap.parent(parent)?.properties.get<string>(EmptyPlaceholderPath) ?? ''
         parent.updateProps({
           [PlaceholderPath]: placeholder,
         })
 
-        console.log(gparent?.name, gparent?.id.toString());
+        console.log(parent.properties.toKV());
       }
     });
-
-    // console.log(this.nodeMap.get(parentId)?.properties.toJSON());
 
     node.forAll(n => {
       this.removed.add(n.id);
@@ -332,13 +326,17 @@ export class CarbonStateDraft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
+
     this.mutable(nodeId, node => {
+      console.log('--------------------', node.id.toString(), node.firstChild?.isEmpty, node.isContainerBlock);
       node.changeType(type);
       if (node.isContainerBlock && node.firstChild?.isEmpty) {
         this.mutable(node.firstChild.id, child => {
           child.updateProps({
             [PlaceholderPath]: type.props.get<string>(EmptyPlaceholderPath) ?? '',
           })
+
+          console.log('--------------------', child.id.toString(), child.properties.toKV());
         })
       }
     });
@@ -380,6 +378,8 @@ export class CarbonStateDraft {
           node.updateProps({
             [PlaceholderPath]: parent.properties.get<string>(EmptyPlaceholderPath) ?? '',
           })
+
+          console.log('xxx', parent.name, parent.id.toString(), parent.properties.get<string>(EmptyPlaceholderPath), node.properties.toKV());
         })
       }
     }

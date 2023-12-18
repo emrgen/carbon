@@ -41,7 +41,6 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   const ref = useRef(null);
 
   const attributes = useMemo(() => {
-    console.log(node.id.toString(), node.name, node.properties.prefix(LocalHtmlAttrPath));
     return {
       ...custom,
       ...node.properties.prefix(LocalHtmlAttrPath) ?? {}

@@ -25,14 +25,20 @@ export class NumberedList extends Section {
         tags: ['numbered list', 'ordered list', 'ol', 'ordered', 'list', 'numbered'],
         order: 4,
       },
-      attrs: {
-        node: {
-          placeholder: 'List',
+      props: {
+        local: {
+          placeholder: {
+            empty: 'List',
+            focused: 'Type "/" for commands',
+          },
+          html: {
+            suppressContentEditableWarning: true,
+          }
         },
-        html: {
-          placeholder: 'List',
-          // contentEditable: false,
-          suppressContentEditableWarning: true,
+        remote: {
+          state: {
+            listNumber: null,
+          }
         }
       }
     }

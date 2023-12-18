@@ -47,7 +47,9 @@ export class Section extends NodePlugin {
 			props: {
 				local: {
 					placeholder: {
-						empty: '',
+						// TODO: This is a hack to get the correct placeholder for empty section
+						// not empty placeholder is not removed from node props.
+						empty: ' ',
 						focused: 'Press / for commands'
 					},
 				},

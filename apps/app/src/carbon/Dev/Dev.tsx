@@ -141,7 +141,7 @@ export default function Dev() {
   useEffect(() => {
     const onChange = (state: CarbonState) => {
       state.content.forAll((node) => {
-        console.log(node.id.toString(), node.name, node.properties.toKV());
+        // console.log(node.id.toString(), node.name, node.properties.toKV());
       });
     }
 

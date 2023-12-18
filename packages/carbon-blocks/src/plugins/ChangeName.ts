@@ -144,7 +144,6 @@ export class ChangeName extends BeforePlugin {
       if (match[1] === titleNode.textContent + ' ') {
         const action = SetContentAction.create(titleNode.id,BlockContent.empty());
         tr.add(action);
-        const placeholder = type.spec.attrs?.node?.placeholder ?? ''
         tr.updateProps(titleNode.id, {
           [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
         })

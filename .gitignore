@@ -37,3 +37,7 @@ diamond-core
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+
+cypress.config.js
+cypress
