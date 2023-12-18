@@ -123,10 +123,11 @@ export class CarbonState extends EventEmitter {
 	produce(origin: ActionOrigin, fn: (state: CarbonStateDraft) => void): CarbonState {
 		const draft = new CarbonStateDraft(this, origin);
 		try {
-			fn(draft);
 			StateScope.set(this.scope, draft.nodeMap)
+			fn(draft);
 			const state = draft.prepare().commit(4);
-			StateScope.set(this.scope, state.nodeMap)
+			StateScope.set(this.scope, this.nodeMap)
+
 			draft.dispose();
 			return state;
 		} catch (e) {

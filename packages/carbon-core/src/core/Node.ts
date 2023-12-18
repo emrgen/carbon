@@ -90,7 +90,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 	marks: MarkSet;
 	properties: NodeProps;
 
-
 	// meta is used for storing data like version, cerate time, last update time, etc.
 	meta: Record<string, any> = {};
 
@@ -385,11 +384,13 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return this.isBlock && this.isAtom
 	}
 
+	// TODO: user IndexMapper to optimize index caching and avoid array traverse for finding index
 	get index(): number {
 		const parent = this.parent;
 		if (!parent) return -1
 
-		const key = `${parent.id.toString()}/${this.id.toString()}`
+		// NOTE: this is a performance critical code
+		const key = `${parent.key}/${this.id.toString()}`
 		return NODE_CACHE_INDEX.get(key, () => {
 			const { children = [] } = parent;
 			return findIndex(children as Node[], n => {

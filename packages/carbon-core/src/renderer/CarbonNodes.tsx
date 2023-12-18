@@ -138,8 +138,10 @@ export const CarbonChildren = (props: RendererProps) => {
   return <>{children}</>;
 };
 
+
+
 // render node by name
-export const CarbonNode = (props: RendererProps) => {
+export const InnerCarbonNode = (props: RendererProps) => {
   const app = useCarbon();
   const { node } = useNodeChange(props);
 
@@ -162,6 +164,10 @@ export const CarbonNode = (props: RendererProps) => {
 
   return <CarbonDefaultNode {...props} node={node} />;
 }
+
+export const CarbonNode = memo(InnerCarbonNode, (prev, next) => {
+  return prev.node.version === next.node.version;
+});
 
 // default node for carbon editor with text and block
 export const CarbonDefaultNode = (props: RendererProps) => {

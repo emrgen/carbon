@@ -52,6 +52,10 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	// 2. sync the selection
 	// 3. sync the node state
 	update(tr: Transaction) {
+		if (this.transactions.length) {
+			return
+		}
+
 		this.transactions.push(tr);
 		const { isContentChanged, isSelectionChanged } = this.state;
 

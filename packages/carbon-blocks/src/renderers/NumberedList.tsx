@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -11,20 +11,7 @@ import {
 import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
 import { Optional } from "@emrgen/types";
 
-// watch the parent version for list number calculation
-const getListNumber = (node: Node): number => {
-  console.log("prev", node.id.toString(), node.prevSibling?.id.toString());
-  if(node.prevSibling?.eq(node)) {
-    return -1;
-  }
-  if (node.prevSibling?.name === "numberedList") {
-
-    return getListNumber(node.prevSibling) + 1;
-  }
-
-  return node.properties.get(ListNumberPath) ?? 1;
-}
-
+// TODO: This is a hack to get the list number. May be should be stored in the node properties.
 const listNumber = (node: Node, parent: Optional<Node>): number => {
   if (!parent) {
     return 1;
@@ -54,15 +41,15 @@ export const NumberedListComp = (props: RendererProps) => {
     useCombineConnectors(dragDropRect, selection),
   );
 
-  const beforeContent = (
-    <label
+  const beforeContent = useMemo(() => {
+    return (<label
       contentEditable="false"
       suppressContentEditableWarning
       className="carbon-numberedList__label"
     >
       {listNumber(node, node.parent) + "."}
-    </label>
-  );
+    </label>)
+  },[node]);
 
   return (
     <CarbonBlock {...props} custom={connectors} ref={ref}>
