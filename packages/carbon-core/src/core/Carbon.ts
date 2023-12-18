@@ -177,8 +177,6 @@ export class Carbon extends EventEmitter {
 		this.state = state;
 		StateScope.set(state.scope, state.nodeMap);
 
-		console.log(this.state.isContentChanged);
-
 		this.emit(EventsOut.transactionCommit, tr);
 		this.change.update(tr);
 	}

@@ -136,7 +136,6 @@ const extensions = [
 ];
 
 export default function Dev() {
-  console.log(data);
   const app = useCreateCarbon('dev', data, extensions);
 
   return (

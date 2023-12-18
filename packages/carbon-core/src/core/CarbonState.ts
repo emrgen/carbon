@@ -1,13 +1,12 @@
-import { Optional } from '@emrgen/types';
-import { NodeIdSet } from './BSet';
-import { ActionOrigin } from './actions/types';
-import { DecorationStore } from './DecorationStore';
-import { Node } from './Node';
-import { PinnedSelection } from './PinnedSelection';
-import EventEmitter from 'events';
-import { NodeMap } from './NodeMap';
-import { StateChanges } from './NodeChange';
-import { CarbonStateDraft } from './CarbonStateDraft';
+import { Optional } from "@emrgen/types";
+import { NodeIdSet } from "./BSet";
+import { ActionOrigin } from "./actions/types";
+import { DecorationStore } from "./DecorationStore";
+import { Node } from "./Node";
+import { PinnedSelection } from "./PinnedSelection";
+import EventEmitter from "events";
+import { NodeMap } from "./NodeMap";
+import { CarbonStateDraft } from "./CarbonStateDraft";
 
 interface CarbonStateProps {
 	scope: Symbol;
@@ -65,7 +64,8 @@ export class CarbonState extends EventEmitter {
 	}
 
 	get isSelectionChanged() {
-		return !this.previous?.selection.eq(this.selection);
+		const eq = this.previous?.selection.eq(this.selection);
+		return !(eq && this.selection.origin === ActionOrigin.DomSelectionChange);
 	}
 
 	get isContentChanged() {

@@ -27,8 +27,9 @@ export class CarbonStateDraft {
   origin: ActionOrigin;
   state: CarbonState;
   nodeMap: NodeMap;
-  selection?: PointedSelection;
+  selection: PointedSelection;
   changes: NodeIdSet
+  removed: NodeIdSet = NodeIdSet.empty();
 
   private drafting = true;
 
@@ -37,6 +38,7 @@ export class CarbonStateDraft {
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
     this.changes = new NodeIdSet();
+    this.selection = state.selection.unpin()
   }
 
   get(id: NodeId): Optional<Node> {
@@ -61,7 +63,6 @@ export class CarbonStateDraft {
     if (!selection) {
       throw new Error("Cannot commit draft with invalid selection");
     }
-    console.log('commit', selection);
 
     // create a new selection based on the new node map using the draft selection
     const after = selection.pin(nodeMap);
@@ -70,7 +71,6 @@ export class CarbonStateDraft {
     }
 
     changes.freeze();
-    console.log('commit', changes.size, changes.toArray().map(n => n.toString()));
 
     const newState = new CarbonState({
       previous: state.clone(depth - 1),
@@ -92,9 +92,9 @@ export class CarbonStateDraft {
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
-    // this.changes.deleted.forEach(id => {
-    //   this.changes.changed.remove(id);
-    // });
+    this.removed.forEach(id => {
+      this.changes.remove(id);
+    });
 
     const changed: NodeDepthEntry[] = this.changes.toArray().map(id => {
       const node = this.nodeMap.get(id)!;
@@ -313,16 +313,11 @@ export class CarbonStateDraft {
           [PlaceholderPath]: nodePlaceholder(this.nodeMap.parent(parent)),
         })
       }
-      // NOTE: if the parent is empty, we need to trigger parent render to render placeholder
-      if (parent.isEmpty && parent.parentId) {
-        this.mutable(parent.parentId)
-      }
     });
 
     node.forAll(n => {
       console.log('removing node', n.id.toString(), n.name);
-      this.changes.remove(n.id);
-      this.changes.remove(n.id);
+      this.removed.add(n.id);
     });
   }
 

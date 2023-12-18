@@ -116,10 +116,8 @@ export class Transaction {
 		const after = selection.unpin();
 		after.origin = origin;
 
-		console.log(this.state.selection.toString());
 		// if selection is block selection, deselect previous block selection and select new block selection
 		if (this.state.selection.isBlock) {
-			console.log('reset block selection');
 			this.deselectNodes(this.state.selection.nodes, origin);
 		}
 
@@ -189,7 +187,6 @@ export class Transaction {
 
 	private deselectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
-		console.log('deselectNodes', selectIds.map(id => id.toString()));
 		selectIds.forEach(id => {
 			console.log('xxx deselecting', id.toString());
 			this.updateProps(id, { [SelectedPath]: false }, origin)
@@ -258,9 +255,9 @@ export class Transaction {
 
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
-				console.group('Commit (runtime)');
+				console.groupCollapsed('Commit (runtime)');
 			} else {
-				console.group('Commit', this);
+				console.groupCollapsed('Commit', this);
 			}
 
 			for (const action of this.actions) {

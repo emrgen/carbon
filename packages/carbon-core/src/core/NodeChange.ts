@@ -32,14 +32,6 @@ export class StateChanges {
     return this;
   }
 
-  clone() {
-    const clone = new StateChanges();
-    clone.changed = this.changed.clone();
-    clone.selection = this.selection?.clone()
-
-    return clone;
-  }
-
   toJSON() {
     return {
       changed: this.changed.toJSON(),

@@ -54,7 +54,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   });
 
   useEffect(() => {
-    const onTransaction = (tr) => {
+    const onTransaction = () => {
       setShow(false);
     };
     app.on("transaction", onTransaction);
@@ -78,9 +78,8 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
   const onDragStart = useCallback((e: DndEvent) => {
     if (e.id === CarbonDragHandleId) {
-      // e.event.stopPropagation();
       app.enable(() => {
-        app.tr.deselectNodes(app.selection.nodes)?.dispatch();
+        app.tr.select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput).dispatch();
       });
     }
   }, [app]);
@@ -242,15 +241,11 @@ export function DraggableHandle(props: FastDragHandleProps) {
         app.parkCursor();
 
         const {tr} = app;
-        tr.move(from, to, node.id)
-          .select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput);
-        const textBlock = node.find((n) => n.isTextBlock);
-        if (textBlock) {
-          const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock!)!);
-          tr.select(after, ActionOrigin.NoSync);
-        }
+        const after = PinnedSelection.fromNodes(node)
 
-        tr?.dispatch();
+        tr.move(from, to, node.id).select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput);
+        tr.select(after, ActionOrigin.NoSync);
+        tr.dispatch();
       });
     },
     [app, findDropPosition, findHitNode]
@@ -331,10 +326,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
     preventAndStop(e);
 
     if (!node) return;
+
     app.enable();
     app.focus();
     if (e.shiftKey) {
-      app.cmd.insert.before(node, "section")?.selectNodes([])?.dispatch();
+      const after = PinnedSelection.fromNodes([])
+      app.cmd.insert.before(node, "section")?.dispatch();
       return;
     }
 
@@ -344,10 +341,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (node.isContainerBlock && title) {
         const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
         if (app.selection.eq(after)) return;
-        app.tr
-          .selectNodes([])
-          .select(after, ActionOrigin.UserInput)
-          ?.dispatch();
+        app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
         return;
       }
     }
@@ -355,11 +349,11 @@ export function DraggableHandle(props: FastDragHandleProps) {
     if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
       const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
       if (app.selection.eq(after)) return;
-      app.tr.selectNodes([]).select(after, ActionOrigin.UserInput)?.dispatch();
+      app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
       return;
     }
 
-    app.cmd.insert.after(node, "section")?.selectNodes([])?.dispatch();
+    app.cmd.insert.after(node, "section")?.dispatch();
   };
 
   return (
