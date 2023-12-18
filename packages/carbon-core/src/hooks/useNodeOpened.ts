@@ -10,9 +10,13 @@ export const useNodeOpened = (props: RendererProps) => {
   },[node])
 
   const attributes = useMemo(() => {
-    return {
-      'data-open': opened ? 'true' : 'false'
+    if (opened) {
+      return {
+        'data-opened': 'true'
+      }
     }
+
+    return {};
   },[opened]);
 
   return {

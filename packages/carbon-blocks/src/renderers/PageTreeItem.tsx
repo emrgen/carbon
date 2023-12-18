@@ -8,7 +8,7 @@ import {
   CarbonNodeContent,
   RendererProps,
   stop,
-  Node, useNodeActivated
+  Node, useNodeActivated, CollapsedPath, useNodeOpened,OpenedPath
 } from "@emrgen/carbon-core";
 
 import { BlockEvent } from "../events";
@@ -17,17 +17,18 @@ import {
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
 import { PageTreeItemName, PageTreeName } from "../plugins/PageTree";
-import { OpenedPath } from "@emrgen/carbon-core/src/core/NodeProps";
+
+const getPageTree = (n: Node) => n.closest(n => n.type.name === PageTreeName);
 
 export const PageTreeItemComp = (props: RendererProps) => {
   const { node } = props;
-  const activated = useNodeActivated(props);
+  const activated = useNodeOpened(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
 
   const handleToggle = useCallback(() => {
     app.tr
-      .updateProps(node.id, { node: { collapsed: !isCollapsed } })
+      .updateProps(node.id, { [CollapsedPath]: !isCollapsed })
       .dispatch();
   }, [app.tr, node, isCollapsed]);
 
@@ -35,21 +36,25 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const handleInsert = useCallback(
     (e) => {
       preventAndStop(e);
+      const { tr, cmd } = app;
+
+      const pageTree = getPageTree(node);
+      if (!pageTree) return;
+
+      tr.add(cmd.pageTree.closeAll(pageTree));
+      tr.add(cmd.pageTreeItem.expand(node));
 
       const item = app.schema.type(PageTreeItemName).default()!;
-
       item.updateProps({
         [OpenedPath]: true,
       });
 
       const at = Point.toAfter(node.child(0)!.id);
-      console.log(item, at);
-      app.tr
-        .updateProps(node.id, { node: { collapsed: false } })
+      tr
         .insert(at, item)
-        // .then(() => {
-        //   return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });
-        // })
+        .then(() => {
+          return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });
+        })
         .dispatch();
     },
     [app, node]
@@ -58,37 +63,17 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const handleOpenDocument = useCallback(
     (e) => {
       preventAndStop(e);
-      const {state, tr} = app;
+      const {tr, cmd} = app;
 
-      const getFileTree = (n: Node) => n.closest(n => n.type.name === PageTreeName);
+      const pageTree = getPageTree(node);
+      if (!pageTree) return;
 
-      const fileTree = getFileTree(node);
-      if (!fileTree) return;
-
-      // find all opened file tree items with the same file tree
-      const openFileTreeItems = state.changes.props.nodes(state.nodeMap)
-        .filter(n => n.type.name === node.type.name)
-        .filter(n => n.isOpen);
-
-      // close all other opened file tree items
-      if (openFileTreeItems.length > 0) {
-        if (openFileTreeItems[0].id === node.id) return;
-
-        openFileTreeItems.forEach(n => {
-          tr.updateProps(n.id, {
-            [OpenedPath]: false,
-          })
-        })
-      }
-
-      tr
-        .updateProps(node.id, {
-          [OpenedPath]: true,
-        })
-        .then(() => {
-          return () => app.emit(BlockEvent.openDocument, { node });
-        })
-        .dispatch();
+      tr.add(cmd.pageTree.closeAll(pageTree))
+      tr.add(cmd.pageTreeItem.open(node))
+      tr.then(() => {
+        return () => app.emit(BlockEvent.openDocument, { node });
+      })
+      tr.dispatch();
     },
     [app, node]
   );

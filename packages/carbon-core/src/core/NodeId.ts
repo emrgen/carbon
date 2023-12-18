@@ -1,25 +1,27 @@
 import { Optional } from "@emrgen/types";
 
-const defaultId = '0000000000';
+const NullId = '0000000000';
+const IdentityId = '0000000001';
 
 export interface IntoNodeId {
 	intoNodeId(): NodeId;
 }
 
 export class NodeId implements IntoNodeId {
+	static NULL = new NodeId(NullId);
 
-	static IDENTITY = new NodeId(defaultId);
+	static IDENTITY = new NodeId(IdentityId);
 
 	get isDefault() {
-		return this === NodeId.IDENTITY;
+		return this.eq(NodeId.IDENTITY);
+	}
+
+	get isNull() {
+		return this.eq(NodeId.NULL);
 	}
 
 	static deserialize(id: string): Optional<NodeId> {
 		return new NodeId(id);
-	}
-
-	static default() {
-		return NodeId.IDENTITY;
 	}
 
 	static create(id: string) {

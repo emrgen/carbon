@@ -10,9 +10,13 @@ export const useNodeActivated = (props: RendererProps) => {
   },[node])
 
   const attributes = useMemo(() => {
-    return {
-      'data-active': activated ? 'true' : 'false'
+    if (activated) {
+      return {
+        'data-active': 'true'
+      }
     }
+
+    return {};
   },[activated]);
 
   return {

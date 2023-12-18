@@ -99,7 +99,7 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 		// 		return
 		// 	}
 
-		// 	console.log('Keyboard.backspace',deleteSel.toString());
+			// console.log('Keyboard.backspace',deleteSel.toString());
 		const deleteSel = selection.moveStart(-1)
 		if (!deleteSel) return
 		cmd.transform.delete(deleteSel)?.dispatch()
@@ -124,7 +124,6 @@ export class KeyboardBeforePlugin extends BeforePlugin {
 				if (hasParent(node, isolating)) {
 					return
 				}
-
 			},
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
 				if (ctx.app.selection.isBlock) {
@@ -186,7 +185,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 				const block = node.chain.find(n => n.isBlockSelectable);
 				if (!block) return
-				app.tr.selectNodes([block.id]).dispatch();
+				app.tr.select(PinnedSelection.fromNodes(block)).dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
@@ -249,9 +248,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 					const block = node.find(n => !n.eq(node) && n.isContainerBlock)
 					if (!block) return
-					app.tr
-						.deselectNodes(app.selection.nodes)
-						.selectNodes([block.id]).dispatch();
+					app.tr.select(PinnedSelection.fromNodes(block)).dispatch();
 					return
 				}
 
@@ -271,9 +268,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 					const { parent } = node;
 					if (parent?.isSandbox) return
-					app.tr
-						.deselectNodes(app.selection.nodes)
-						.selectNodes([parent!.id]).dispatch();
+					app.tr.select(PinnedSelection.fromNodes(parent!)).dispatch();
 					return
 				}
 
@@ -391,10 +386,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		// ctx.event.preventDefault();
 		const after = PinnedSelection.fromNodes([...nodes, block]);
-		app.tr
-			.deselectNodes(app.selection.nodes)
-			.select(after)
-			.dispatch();
+		app.tr.select(after).dispatch();
 	}
 
 	// handles enter event
@@ -418,10 +410,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				// if there is a text block, put the cursor at the end of the text block
 				if (textBlock) {
 					const pin = Pin.toEndOf(textBlock)!
-					app.tr
-						.selectNodes([])
-						.select(PinnedSelection.fromPin(pin))
-						.dispatch();
+					app.tr.select(PinnedSelection.fromPin(pin)).dispatch();
 					return true
 				}
 			}
@@ -430,13 +419,11 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				if (n.hasFocusable) {
 					const focusable = n.find(n => n.isFocusable);
 					const pin = Pin.toStartOf(focusable!)!
-					app.tr
-						.selectNodes([])
-						.select(PinnedSelection.fromPin(pin))
-						.dispatch();
+					app.tr.select(PinnedSelection.fromPin(pin)).dispatch();
 					return true
 				}
 			});
+
 			if (done) return true
 
 			console.log('no text block...');
@@ -446,7 +433,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 			const after = PinnedSelection.fromPin(Pin.toStartOf(section)!)!;
 			app.tr
-				.selectNodes([])
 				.add(insertAfterAction(lastBlock, section))
 				.select(after, ActionOrigin.UserInput)
 				.dispatch();

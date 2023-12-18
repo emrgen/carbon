@@ -12,11 +12,10 @@ import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 
 export class PinnedSelection {
 
+	static NULL = new PinnedSelection(Pin.NULL, Pin.NULL, []);
+
 	static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
 
-	static identity(): PinnedSelection {
-		return PinnedSelection.IDENTITY
-	}
 
 	// map dom selection to editor selection
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
@@ -129,12 +128,20 @@ export class PinnedSelection {
 	private constructor(readonly tail: Pin, readonly head: Pin, readonly nodes: Node[], readonly origin = ActionOrigin.Unknown) {
 	}
 
+	get isNull() {
+		return this.tail.isNull && this.head.isNull;
+	}
+
+	get isIdentity() {
+		return this.tail.isIdentity && this.head.isIdentity;
+	}
+
 	get isBlock() {
-		return this.nodes.length !== 0;
+		return this.nodes.length !== 0 || this.eq(PinnedSelection.IDENTITY);
 	}
 
 	get isInline() {
-		return this.nodes.length === 0;
+		return !this.isNull && !this.isBlock;
 	}
 
 	get range(): Range {
@@ -142,7 +149,7 @@ export class PinnedSelection {
 	}
 
 	get isInvalid() {
-		return this.tail.isInvalid || this.head.isInvalid
+		return this.tail.isNull || this.head.isNull;
 	}
 
 	get isCollapsed() {
@@ -392,6 +399,12 @@ export class PinnedSelection {
 	}
 
 	toJSON() {
+		if (this.isBlock) {
+			return {
+				nodes: this.nodes.map(n => n.id.toString()),
+			}
+		}
+
 		return {
 			tail: this.tail.toJSON(),
 			head: this.head.toJSON(),
@@ -399,6 +412,10 @@ export class PinnedSelection {
 	}
 
 	toString() {
+		if (this.isBlock) {
+			return classString(this)(this.nodes.map(n => n.id.toString()));
+		}
+
 		return classString(this)({
 			tail: this.tail.toString(),
 			head: this.head.toString()

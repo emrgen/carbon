@@ -9,11 +9,21 @@ export const useNodeState = (props: RendererProps) => {
   const { node } = props;
 
   const attributes = useMemo(() => {
-    return {
-      "data-active": activated.yes,
-      "data-selected": selected.yes,
-      "data-opened": opened.yes,
-    };
+    const attrs: any = {};
+
+    if (activated.yes) {
+      attrs['data-active'] = 'true';
+    }
+
+    if (selected.yes) {
+      attrs['data-selected'] = 'true';
+    }
+
+    if (opened.yes) {
+      attrs['data-opened'] = 'true';
+    }
+
+    return attrs;
   },[activated, selected, opened]);
 
   return {

@@ -72,8 +72,8 @@ export class EventManager {
 			return
 		}
 
-		if (type !== EventsIn.selectionchange && app.state.changes.selected.size > 0) {
-			const lastNode = last(app.state.changes.selected.map(id => app.store.get(id))) as Node;
+		if (type !== EventsIn.selectionchange && app.state.selection.isBlock && app.selection.nodes.length) {
+			const lastNode = last(app.selection.nodes) as Node;
 			this.updateCommandOrigin(type, event);
 
 			// TODO: check if this can be optimized
@@ -82,7 +82,7 @@ export class EventManager {
 				event,
 				app: this.app,
 				node: lastNode,
-				selection: PinnedSelection.identity(),
+				selection: PinnedSelection.IDENTITY,
 				origin: EventOrigin.dom,
 			});
 
@@ -94,8 +94,9 @@ export class EventManager {
 		if (['selectionchange'].includes(type)) {
 			console.log(pad(`%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`, 100), 'background:#ffcc006e');
 		}
+
 		// editor cannot process event without active selection
-		if (!selection) {
+		if (!selection || selection.isBlock && !selection.nodes.length) {
 			console.error(p12('%c[invalid]'), 'color:grey', `${type}: event with empty selection`);
 			return
 		}

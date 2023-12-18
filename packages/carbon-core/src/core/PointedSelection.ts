@@ -9,8 +9,13 @@ import { NodeMap } from "./NodeMap";
 import { Node } from "@emrgen/carbon-core";
 
 export class PointedSelection {
+
+	static NUll = new PointedSelection(Point.NULL, Point.NULL, []);
+
+	static IDENTITY = new PointedSelection(Point.IDENTITY, Point.IDENTITY, []);
+
 	get isInvalid() {
-		return this.head.isDefault || this.tail.isDefault;
+		return this.head.isNull || this.tail.isNull;
 	}
 
 	static atStart(nodeId: NodeId, offset: number = 0) {
@@ -32,15 +37,28 @@ export class PointedSelection {
 	constructor(readonly tail: Point, readonly head: Point, readonly nodeIds: NodeId[], public origin: ActionOrigin = ActionOrigin.Unknown) {
 	}
 
+	get isIdentity() {
+		return this.eq(PointedSelection.IDENTITY);
+	}
+
+	get isNull() {
+		return this.eq(PointedSelection.NUll);
+	}
+
 	get isBlock() {
-		return this.nodeIds.length > 0;
+		// console.log('PointedSelection.isBlock', this.nodeIds.length, this.eq(PointedSelection.IDENTITY));
+		return this.nodeIds.length !== 0 || this.eq(PointedSelection.IDENTITY);
 	}
 
 	get isInline() {
-		return this.nodeIds.length === 0
+		return !this.isBlock;
 	}
 
 	pin(store: NodeMap): Optional<PinnedSelection> {
+		if (this.isNull) {
+			return PinnedSelection.NULL;
+		}
+
 		const { tail, head, origin } = this;
 		// console.log('Selection.pin', head.toString());
 
@@ -62,7 +80,7 @@ export class PointedSelection {
 	}
 
 	eq(other: PointedSelection): boolean {
-		if (this.nodeIds.length === other.nodeIds.length) {
+		if (this.nodeIds.length !== other.nodeIds.length) {
 			return false;
 		}
 		return this.tail.eq(other.tail) && this.head.eq(other.head) && this.nodeIds.every((id, i) => id.eq(other.nodeIds[i]));
@@ -82,6 +100,10 @@ export class PointedSelection {
 	}
 
 	toString() {
+		if (this.isBlock) {
+			return classString(this)(this.nodeIds.map(id => id.toString()));
+		}
+
 		return classString(this)({
 			tail: this.tail.toString(),
 			head: this.head.toString()
@@ -90,6 +112,11 @@ export class PointedSelection {
 
 	toJSON() {
 		const { tail, head, nodeIds } = this;
-		return { tail: tail.toString(), head: head.toString(), nodeIds: nodeIds.map(id => id.toString()) };
+
+		if (this.isBlock) {
+			return { nodeIds: nodeIds.map(id => id.toString()) };
+		}
+
+		return { tail: tail.toString(), head: head.toString() }
 	}
 }

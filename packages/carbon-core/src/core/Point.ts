@@ -21,9 +21,14 @@ export class Point {
 	offset: number;
 
 	static IDENTITY = new Point(NodeId.IDENTITY, PointAt.Inside, 0);
+	static NULL = new Point(NodeId.NULL, PointAt.Inside, 0);
 
 	get isDefault() {
-		return this.nodeId.isDefault
+		return this.eq(Point.IDENTITY);
+	}
+
+	get isNull() {
+		return this.eq(Point.NULL);
 	}
 
 	get isStart(): boolean {

@@ -25,10 +25,16 @@ export class Pin {
 	//
 	ref: PinReference;
 
+	static NULL = new Pin(Node.NULL, 0);
+
 	static IDENTITY = new Pin(Node.IDENTITY, IDENTITY_OFFSET);
 
-	static identity(): Pin {
-		return Pin.IDENTITY
+	get isIdentity() {
+		return this.eq(Pin.IDENTITY);
+	}
+
+	get isNull() {
+		return this.eq(Pin.NULL);
 	}
 
 	static fromPoint(point: Point, store: NodeMap): Optional<Pin> {

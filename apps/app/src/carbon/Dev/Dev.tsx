@@ -24,7 +24,7 @@ import {
   createCarbon,
   extensionPresets,
   useCreateCachedCarbon,
-  useCreateCarbon, NodeMap, NodeId
+  useCreateCarbon, NodeMap, NodeId, CollapsedPath
 } from "@emrgen/carbon-core";
 import {
   BlockMenu,
@@ -50,27 +50,26 @@ const data = node("carbon", [
     //   ], {node: {link: "tab1"}}),
     // ]),
 
-    // node("pageTree", [
-    //   title([text("Favorites")]),
-    //   node(
-    //     "pageTreeItem",
-    //     [
-    //       title([text("Computer Science")]),
-    //       node("pageTreeItem", [title([text("Algorithms")])]),
-    //       node("pageTreeItem", [title([text("Data Structures")])]),
-    //       node("pageTreeItem", [title([text("Operating Systems")])]),
-    //     ],
-    //     {},
-    //     { collapsed: true }
-    //   ),
-    //   node("pageTreeItem",
-    //     [
-    //       title([text("Electrical Engineering")]),
-    //       node("pageTreeItem", [title([text("Circuits")])]),
-    //       node("pageTreeItem", [title([text("Digital Logic")])]),
-    //       node("pageTreeItem", [title([text("Microprocessors")])]),
-    //     ]),
-    // ]),
+    node("pageTree", [
+      title([text("Favorites")]),
+      node(
+        "pageTreeItem",
+        [
+          title([text("Computer Science")]),
+          node("pageTreeItem", [title([text("Algorithms")])]),
+          node("pageTreeItem", [title([text("Data Structures")])]),
+          node("pageTreeItem", [title([text("Operating Systems")])]),
+        ],
+        { [CollapsedPath]: true }
+      ),
+      node("pageTreeItem",
+        [
+          title([text("Electrical Engineering")]),
+          node("pageTreeItem", [title([text("Circuits")])]),
+          node("pageTreeItem", [title([text("Digital Logic")])]),
+          node("pageTreeItem", [title([text("Microprocessors")])]),
+        ]),
+    ]),
     //
     // node("pageTree", [
     //   title([text("Private")]),
@@ -137,6 +136,7 @@ const extensions = [
 ];
 
 export default function Dev() {
+  console.log(data);
   const app = useCreateCarbon('dev', data, extensions);
 
   return (

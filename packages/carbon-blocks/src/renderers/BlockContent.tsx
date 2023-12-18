@@ -121,13 +121,13 @@ export function BlockContentComp(props: RendererProps) {
 
   useEffect(() => {
     const onChange = (state: CarbonState) => {
-      if (state.changes.isContentDirty) {
+      if (state.isContentChanged) {
         const parentId = node.parent?.id;
         if (!parentId) return
         const parent = state.nodeMap.get(parentId)
         let childrenUpdated = false
         parent?.preorder(n => {
-          if (state.changes.changed.has(n.id)) {
+          if (state.changes.has(n.id)) {
             childrenUpdated = true
           }
           return childrenUpdated

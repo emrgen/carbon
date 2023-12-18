@@ -242,7 +242,8 @@ export function DraggableHandle(props: FastDragHandleProps) {
         app.parkCursor();
 
         const {tr} = app;
-                tr.move(from, to, node.id).selectNodes(node.id);
+        tr.move(from, to, node.id)
+          .select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput);
         const textBlock = node.find((n) => n.isTextBlock);
         if (textBlock) {
           const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock!)!);
@@ -278,7 +279,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const onMouseUp = useCallback(
     (node: Node, e: DndEvent, isDragging: boolean) => {
       if (e.id !== CarbonDragHandleId) return;
-
+      console.log('xxxx');
       // app.focus();
       if (isDragging) {
         preventAndStop(e.event);
@@ -286,8 +287,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         if (node) {
           app.parkCursor();
           app.tr
-            .deselectNodes(app.selection.nodes)
-            .selectNodes(node.id)
+            .select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput)
             ?.dispatch();
         }
       }

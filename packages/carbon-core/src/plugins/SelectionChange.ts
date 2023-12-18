@@ -54,7 +54,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 				const {app} = ctx;
 				const {selection} = app;
 				if (selection.isBlock) {
-					app.tr.deselectNodes(selection.nodes).dispatch();
+					// app.tr.se
 				}
 			},
 		}

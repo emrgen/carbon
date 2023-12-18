@@ -7,9 +7,9 @@ import {
   preventAndStop,
   useCarbon,
   useSelectionHalo,
+  CheckedPath,
 } from "@emrgen/carbon-core";
 import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
-import { CheckedPath } from "@emrgen/carbon-core/src/core/NodeProps";
 
 export default function TodoComp(props: RendererProps) {
   const { node } = props;
@@ -30,14 +30,7 @@ export default function TodoComp(props: RendererProps) {
   const handleClick = useCallback(
     (e) => {
       e.stopPropagation();
-
-      app.tr
-        .updateProps(node.id, {
-          node: {
-            checked: !isChecked,
-          },
-        })
-        .dispatch();
+      app.tr.updateProps(node.id, {[CheckedPath]: !isChecked}).dispatch();
     },
     [app.tr, node.id, isChecked]
   );

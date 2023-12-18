@@ -12,7 +12,7 @@ import {
 	NodeId,
 	NodeIdSet,
 	Pin,
-	PinnedSelection,
+	PinnedSelection, PointedSelection,
 	Transaction
 } from "@emrgen/carbon-core";
 import { DndEvent } from '../types';
@@ -196,11 +196,11 @@ export class RectSelect extends EventEmitter {
 	}
 
 	selectNodes(ids: NodeId[], origin: ActionOrigin = ActionOrigin.UserSelectionChange) {
+		console.log('selectNodes', ids.map(id => id.toString()));
 		const { app } = this;
-		const { selection } = app.state;
 		if (this.noSelectionChange(ids)) return
 		const { tr } = app;
-		tr.deselectNodes(selection.nodes).selectNodes(ids, origin).dispatch();
+		tr.select(PointedSelection.fromNodes(ids)).dispatch();
 	}
 
 	private noSelectionChange(ids: NodeId[]) {
@@ -211,7 +211,7 @@ export class RectSelect extends EventEmitter {
 
 	onDragEnd(e: DndEvent) {
 		const { selected, app } = this;
-		console.log('selected', selected.size);
+		// console.log('selected', selected.size);
 
 		// this.editor.focus()
 		console.log('onDragEnd', e.node.name)

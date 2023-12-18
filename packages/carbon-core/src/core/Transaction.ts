@@ -100,9 +100,7 @@ export class Transaction {
 
 	// returns final selection
 	get selection(): PointedSelection {
-		const sel = last(this.selections)?.clone() ?? this.state.selection.unpin();
-		// console.debug(p14('%c[debug]'), 'color:magenta','editor.selection', sel.toString());
-		return sel
+		return this.state.selection.unpin();
 	}
 
 	// this will allow command chaining
@@ -116,17 +114,19 @@ export class Transaction {
 
 	select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
 		const after = selection.unpin();
-
-		// if selection is block selection, deselect previous block selection and select new block selection
-		if (selection.isBlock) {
-			this.deselectNodes(this.state.selection.nodes, origin).selectNodes(after.nodeIds, origin);
-			return this;
-		}
-
 		after.origin = origin;
+
+		console.log(this.state.selection.toString());
+		// if selection is block selection, deselect previous block selection and select new block selection
 		if (this.state.selection.isBlock) {
+			console.log('reset block selection');
 			this.deselectNodes(this.state.selection.nodes, origin);
 		}
+
+		if (selection.isBlock) {
+			this.selectNodes(after.nodeIds, origin);
+		}
+
 		return this.add(SelectAction.create(this.selection, after, origin));
 	}
 
@@ -140,19 +140,19 @@ export class Transaction {
 	}
 
 	remove(at: Point, node: Node, origin = this.origin): Transaction {
-		const props = node.properties
-		const selected = props.get(SelectedPath);
-		const activated = props.get(ActivatedPath);
-		const opened = props.get(OpenedPath);
-		if (activated) {
-			this.updateProps(node.id, { [ActivatedPath]: false }, origin);
-		}
-		if (selected) {
-			this.updateProps(node.id, { [SelectedPath]: false }, origin);
-		}
-		if (opened) {
-			this.updateProps(node.id, { [OpenedPath]: false }, origin)
-		}
+		// const props = node.properties
+		// const selected = props.get(SelectedPath);
+		// const activated = props.get(ActivatedPath);
+		// const opened = props.get(OpenedPath);
+		// if (activated) {
+		// 	this.updateProps(node.id, { [ActivatedPath]: false }, origin);
+		// }
+		// if (selected) {
+		// 	this.updateProps(node.id, { [SelectedPath]: false }, origin);
+		// }
+		// if (opened) {
+		// 	this.updateProps(node.id, { [OpenedPath]: false }, origin)
+		// }
 
 		return this.add(RemoveNodeAction.fromNode(at, node, origin));
 	}
@@ -177,8 +177,9 @@ export class Transaction {
 
 	// previously selected nodes will be deselected
 	// previously active nodes will be deactivated
-	selectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+	private selectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		console.log('selectNodes', selectIds.map(id => id.toString()));
 		selectIds.forEach(id => {
 			this.updateProps(id, { [SelectedPath]: true }, origin)
 		})
@@ -186,8 +187,9 @@ export class Transaction {
 		return this
 	}
 
-	deselectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+	private deselectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		console.log('deselectNodes', selectIds.map(id => id.toString()));
 		selectIds.forEach(id => {
 			console.log('xxx deselecting', id.toString());
 			this.updateProps(id, { [SelectedPath]: false }, origin)
@@ -196,7 +198,7 @@ export class Transaction {
 		return this;
 	}
 
-	activateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+	private activateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		activateIds.forEach(id => {
 			this.updateProps(id, { [ActivatedPath]: true }, origin)

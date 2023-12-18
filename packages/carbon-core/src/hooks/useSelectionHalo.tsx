@@ -22,7 +22,6 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
           <div
             className={`carbon-selection-halo ${className ?? ""}`}
             data-target={node.name}
-            data-selected={isSelected}
           />
         )}
       </>

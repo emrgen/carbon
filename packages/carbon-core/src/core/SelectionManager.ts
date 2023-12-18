@@ -41,19 +41,19 @@ export class SelectionManager {
 	// the selection might be queued
 	onSelect(draft: CarbonStateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		// console.log('onSelect', before.toString(), after.toString(), origin, this.enabled);
-		if (!this.enabled) {
-			console.log('skipped: app selection disabled');
-			return
-		}
+		// if (!this.enabled) {
+		// 	// console.log('skipped: app selection disabled');
+		// 	return
+		// }
 
 		const { app } = this;
 
 		// console.log('Editor.onSelect', after.toString(), 'pendingSelection', origin);
-		if ([ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
+		if (after.isInline && [ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
 			this.onSelectionChange(draft, before, after, origin)
 		} else {
 			const event = SelectionEvent.create(before, after, origin);
-			console.log('pushing selection event', event);
+			// console.log('pushing selection event to draft for next state', event);
 			draft.updateSelection(after);
 		}
 	}
@@ -91,7 +91,7 @@ export class SelectionManager {
 			return
 		}
 
-		if (!this.state.changes.isSelectionDirty) {
+		if (!this.state.isSelectionChanged) {
 			console.log('skipped: selection already synced', this.state.selectionOrigin, this.state.selection.toString()	);
 			return
 		}

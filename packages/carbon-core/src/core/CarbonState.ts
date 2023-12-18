@@ -14,9 +14,8 @@ interface CarbonStateProps {
 	previous?: CarbonState;
 	content: Node;
 	selection: PinnedSelection;
-	parkedSelection: Optional<PinnedSelection>;
 	nodeMap: NodeMap;
-	changes?: StateChanges;
+	changes?: NodeIdSet;
 	decorations?: DecorationStore;
 }
 
@@ -28,17 +27,16 @@ export class CarbonState extends EventEmitter {
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
 	decorations: DecorationStore;
-	changes: StateChanges;
+	changes: NodeIdSet;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
-	parkedSelection: Optional<PinnedSelection> = null;
 
 	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap?: NodeMap) {
 		const map = nodeMap ?? new NodeMap();
-		const state = new CarbonState({ content, selection, scope, nodeMap: map, parkedSelection: null });
+		const state = new CarbonState({ content, selection, scope, nodeMap: map, });
 		if (!nodeMap) {
 			content.forAll(n => {
 				map.set(n.id, n)
-				state.changes.inserted.add(n.id);
+				state.changes.add(n.id);
 			});
 		}
 
@@ -53,9 +51,8 @@ export class CarbonState extends EventEmitter {
 			content,
 			selection,
 			nodeMap,
-			changes = new StateChanges(),
+			changes = NodeIdSet.empty(),
 			decorations = new DecorationStore(),
-			parkedSelection = null,
 		} = props;
 
 		this.previous = previous;
@@ -65,7 +62,14 @@ export class CarbonState extends EventEmitter {
 		this.decorations = decorations;
 		this.nodeMap = nodeMap;
 		this.changes = changes;
-		this.parkedSelection = parkedSelection;
+	}
+
+	get isSelectionChanged() {
+		return !this.previous?.selection.eq(this.selection);
+	}
+
+	get isContentChanged() {
+		return !this.previous?.content.eq(this.content) || this.previous?.content.version !== this.content.version;
 	}
 
 	get depth() {
@@ -92,7 +96,7 @@ export class CarbonState extends EventEmitter {
 
 	clone(depth: number = 2) {
 		if (depth === 0) return null
-		const { scope, content, selection, changes, nodeMap, parkedSelection } = this;
+		const { scope, content, selection, changes, nodeMap } = this;
 		if (!this.previous) {
 			return new CarbonState({
 				scope,
@@ -100,7 +104,6 @@ export class CarbonState extends EventEmitter {
 				selection,
 				changes,
 				nodeMap,
-				parkedSelection
 			})
 		}
 
@@ -112,7 +115,6 @@ export class CarbonState extends EventEmitter {
 			changes,
 			nodeMap,
 			previous,
-			parkedSelection,
 		})
 	}
 

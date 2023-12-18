@@ -45,6 +45,8 @@ export class JsonStore {
 
   protected store: Map<string, any>;
 
+  frozen = false;
+
   protected static PATCH_CACHE = new PathCache();
 
   static keyValueToJson(kv: Record<string, any>) {
@@ -127,6 +129,10 @@ export class JsonStore {
   }
 
   set(path: string[] | string, value: any) {
+    if (this.frozen) {
+      throw new Error("Cannot modify frozen JsonStore");
+    }
+
     if (typeof path === "string") {
       path = path.split("/");
     }
@@ -153,20 +159,36 @@ export class JsonStore {
   }
 
   merge(other: JsonStore) {
-    for (const [key, value] of other.store) {
-      this.store.set(key, value);
+    const result = new JsonStore();
+    for (const [key, value] of this.store) {
+      result.store.set(key, value);
     }
+
+    for (const [key, value] of other.store) {
+      result.store.set(key, value);
+    }
+
+    return result;
   }
 
   diff(other: JsonStore) {
     const diff = new JsonStore();
     for (const [key, value] of this.store) {
-      if (!other.store.has(key)) {
-        diff.store.set(key, value);
+      if (!other.has(key)) {
+        diff.set(key, value);
       }
     }
 
     return diff;
+  }
+
+  freeze() {
+    if(this.frozen) return this
+    this.frozen = true;
+
+    Object.freeze(this);
+    Object.freeze(this.store);
+    return this;
   }
 
   toJSON() {

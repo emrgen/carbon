@@ -54,6 +54,7 @@ export class NodeType {
 	contents: NodeName[];
 
 	static IDENTITY = new NodeType('identity', {} as Schema, IDENTITY_NODE_SPEC);
+	static NULL = new NodeType('null', {} as Schema, IDENTITY_NODE_SPEC);
 
 	static compile(specs: Record<NodeName, NodeSpec>, schema: Schema) {
 		const nodes = {};
@@ -252,36 +253,9 @@ export class NodeType {
 		return this.name === other.name;
 	}
 
-	//
-	createAndFill() { }
-
-	// allowsMarkType(markType: MarkType) {
-	// 	return this.markSet == null || this.markSet.indexOf(markType) > -1
-	// }
-
-	// validContent(content: Fragment) {
-	// 	let result = this.contentMatch.matchFragment(content)
-	// 	if (!result || !result.validEnd) return false
-	// 	for (let i = 0;i < content.childCount;i++)
-	// 		if (!this.allowsMarks(content.child(i).marks)) return false
-	// 	return true
-	// }
-
-	checkContent(content: Fragment) {
-		// if (!this.validContent(content))
-		// 	throw new RangeError(`Invalid content for node ${this.name}: ${content.toString().slice(0, 50)}`)
+	createAndFill(): Optional<Node> {
+		return null
 	}
-
-	// allowsMarks(marks: readonly Mark[]) {
-	// 	if (this.markSet == null) return true
-	// 	for (let i = 0;i < marks.length;i++) {
-	// 		if (!this.allowsMarkType(marks[i].type)) {
-	// 			return false
-	// 		}
-	// 	}
-	// 	return true
-	// }
-
 }
 
 export class MarkType {}

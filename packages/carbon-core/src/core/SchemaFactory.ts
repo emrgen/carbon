@@ -33,7 +33,8 @@ export class SchemaFactory {
 			throw new Error(`Node Plugin is not registered ${name}`);
 		}
 
-		const properties = isEmpty(json.attrs) ? type.props : type.props.merge(NodeProps.fromJSON(json.props));
+
+		const properties = isEmpty(json.props) ? type.props : type.props.update(json.props);
 
 		if (name === 'text') {
 			const content = InlineContent.create(text);

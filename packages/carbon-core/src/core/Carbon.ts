@@ -161,10 +161,11 @@ export class Carbon extends EventEmitter {
 	}
 
 	private updateState(state: CarbonState, tr: Transaction) {
-		if (!state.changes.isDirty) {
+		if (!state.isContentChanged && !state.isSelectionChanged) {
 			console.warn('new state is not dirty');
 			return
 		}
+
 		if (this.state === state) {
 			console.warn('new state is the same as current');
 			return
@@ -176,7 +177,7 @@ export class Carbon extends EventEmitter {
 		this.state = state;
 		StateScope.set(state.scope, state.nodeMap);
 
-		// console.log(this.state.changes.toJSON());
+		console.log(this.state.isContentChanged);
 
 		this.emit(EventsOut.transactionCommit, tr);
 		this.change.update(tr);

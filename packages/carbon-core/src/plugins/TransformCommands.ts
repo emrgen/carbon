@@ -912,7 +912,7 @@ export class TransformCommands extends BeforePlugin {
     // console.log('XXX', after?.toString());
 
     const tr = app.tr
-      .selectNodes([])
+      .select(PinnedSelection.fromNodes([]))
       .add(deleteActions)
     if (after) {
       tr.select(after, ActionOrigin.UserInput);
@@ -950,7 +950,8 @@ export class TransformCommands extends BeforePlugin {
     if (endTextBlock.eq(startTextBlock)) {
       const { tr } = app;
       tr.add(this.deleteGroupCommands(app, deleteGroup));
-      tr.select(selection.collapseToStart());
+      const after = selection.collapseToStart();
+      tr.select(after);
       return tr
     }
 

@@ -143,7 +143,9 @@ export class DeleteSet extends BSet<NodeId> {
 }
 
 export class NodeIdSet extends BSet<NodeId> {
-	static empty = new NodeIdSet();
+	static empty() {
+		return new NodeIdSet();
+	}
 
 	constructor(ids: NodeId[] = []) {
 		super(NodeIdComparator)

@@ -1,5 +1,5 @@
 import { classString } from "../Logger";
-import { NodeContent } from "../NodeContent";
+import { InlineContent, NodeContent } from "../NodeContent";
 import { IntoNodeId, NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { ActionOrigin, CarbonAction } from "./types";
@@ -52,6 +52,6 @@ export class SetContentAction implements CarbonAction {
 
   toString() {
     const { nodeId, after } = this
-    return classString(this)([nodeId, after.children.map(n => n.textContent)]);
+    return classString(this)([nodeId, after instanceof InlineContent ? after.textContent :after.children.map(n => n.textContent)]);
   }
 }

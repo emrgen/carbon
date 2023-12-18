@@ -126,3 +126,45 @@ test("nested json to kv", () => {
   expect(props2.get("a/d/e")).toBe(2);
   expect(props2.get("b/c")).toBe(3);
 });
+
+test("merge props", () => {
+  const props1 = NodeProps.fromKeyValue({
+    "a/b/c": 1,
+    "a/d/e": 2,
+    "b/c": 3,
+  });
+
+  const props2 = NodeProps.fromKeyValue({
+    "a/b/c": 4,
+    "a/d/e": 5,
+    "b/c": 6,
+  });
+
+  console.log(props1.toJSON());
+  console.log(props2.toJSON());
+  const props3 = props1.merge(props2);
+  console.log(props3.toJSON());
+  expect(props3.get("a/b/c")).toBe(4);
+  expect(props3.get("a/d/e")).toBe(5);
+  expect(props3.get("b/c")).toBe(6);
+});
+
+test("update props", () => {
+  const props1 = NodeProps.fromKeyValue({
+    "a/b/c": 1,
+    "a/d/e": 2,
+    "b/c": 3,
+  });
+
+  const props2 = props1.update({
+    "a/b/c": 4,
+    "a/d/e": 5,
+    "b/c": 6,
+    "b/d": 7,
+  });
+
+  expect(props2.get("a/b/c")).toBe(4);
+  expect(props2.get("a/d/e")).toBe(5);
+  expect(props2.get("b/c")).toBe(6);
+  expect(props2.get("b/d")).toBe(7);
+});

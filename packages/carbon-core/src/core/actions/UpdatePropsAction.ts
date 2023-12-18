@@ -16,7 +16,6 @@ export class UpdatePropsAction implements CarbonAction {
   constructor(readonly nodeId: NodeId, readonly props: Partial<NodePropsJson>, readonly origin: ActionOrigin) {}
 
   execute(tr: Transaction, draft: CarbonStateDraft) {
-    const { app } = tr;
     const { nodeId } = this;
     const node = draft.get(nodeId)
     if (!node) {
@@ -24,6 +23,7 @@ export class UpdatePropsAction implements CarbonAction {
     }
 
     this.prevProps = node.properties.toJSON();
+    console.log('update props', this.prevProps, this.props);
     draft.updateProps(nodeId, this.props);
   }
 

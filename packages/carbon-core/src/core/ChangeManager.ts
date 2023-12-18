@@ -21,7 +21,7 @@ export enum NodeChangeType {
 export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 	readonly transactions: Transaction[] = []
-	changes: StateChanges = new StateChanges();
+	changes: NodeIdSet = NodeIdSet.empty();
 
 	constructor(
 		private readonly app: Carbon,
@@ -41,15 +41,11 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	}
 
 	private get isContentSynced() {
-		return !this.changes.isContentDirty
-	}
-
-	private get isContentDirty() {
-		return this.changes.isContentDirty
+		return !this.changes.size
 	}
 
 	private get isSelectionDirty() {
-		return this.changes.isSelectionDirty
+		return this.state.isSelectionChanged;
 	}
 
 	// 1. sync the doc
@@ -57,27 +53,27 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	// 3. sync the node state
 	update(tr: Transaction) {
 		this.transactions.push(tr);
-		const { isContentDirty, isNodeStateDirty, isSelectionDirty } = this.state.changes;
+		const { isContentChanged, isSelectionChanged } = this.state;
 
 		// console.log('updating transaction effect', tr);
 		// console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
 		// if nothing is dirty, then there is nothing to do
-		if (!isContentDirty && !isNodeStateDirty && !isSelectionDirty) {
+		if (!isContentChanged && !isSelectionChanged) {
 			return
 		}
 
-		if (isContentDirty) {
-			this.changes.changed.clear();
+		if (isContentChanged) {
+			this.changes.clear();
 			this.changes = this.state.changes.clone();
 		}
-		// console.log('update', this.changes.changed.size, this.changes.changed.toArray().map(n => n.toString()));
+		console.log('update', this.changes.size, this.changes.toArray().map(n => n.toString()));
 
-		if (isContentDirty) {
+		if (isContentChanged) {
 			this.updateContent();
 			return
 		}
 
-		if (isSelectionDirty) {
+		if (isSelectionChanged) {
 			this.updateSelection(() => {
 				this.onTransaction();
 			})
@@ -85,7 +81,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	}
 
 	mounted(node: Node, changeType: NodeChangeType) {
-		if (!this.changes.changed.has(node.id)) {
+		if (!this.changes.has(node.id)) {
 			// console.log('mounted node not dirty', node.id.toString(), changeType);
 			return
 		}
@@ -95,7 +91,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 		// keep track of the pending node updates
 		if (changeType === NodeChangeType.update) {
 		  // console.log('mounted', node.id.toString(), changeType, this.changes.changed.size, this.changes.changed.toArray().map(n => n.toString()), node.textContent, node);
-			this.changes.changed.remove(node.id);
+			this.changes.remove(node.id);
 		}
 
 		// console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
@@ -131,7 +127,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	private updateContent() {
 		console.groupCollapsed('syncing:  content');
 		// console.group('syncing: content')
-		const updatedNodeIds = this.changes.changed;
+		const updatedNodeIds = this.changes;
 		const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
 
 		console.log('updatedNodes', updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
@@ -156,6 +152,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 	}
 
 	private updateSelection(cb: Function) {
+		const selection = this.state.selection;
 		console.debug('syncing: selection', this.state.selection.toJSON(), this.state.selection.isInline);
 		if (!this.app.ready) {
 			// console.log('app not ready');
@@ -164,7 +161,9 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 		// this.app.enable();
 
-		this.sm.syncSelection();
+		if (selection.isInline) {
+			this.sm.syncSelection();
+		}
 		this.app.emit(EventsOut.selectionUpdated, this.state.selection);
 		cb();
 

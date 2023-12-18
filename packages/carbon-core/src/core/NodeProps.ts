@@ -27,9 +27,17 @@ export class NodeProps extends JsonStore {
     return store;
   }
 
-  merge(other: JsonStore): NodeProps {
-    super.merge(other);
-    return this;
+  merge(other: NodeProps): NodeProps {
+    const result = new NodeProps();
+    for (const [key, value] of this.store) {
+      result.store.set(key, value);
+    }
+
+    for (const [key, value] of other.store) {
+      result.store.set(key, value);
+    }
+
+    return result;
   }
 
   diff(other: NodeProps): NodeProps {
@@ -44,11 +52,16 @@ export class NodeProps extends JsonStore {
   }
 
   update(attrs: NodePropsJson) {
+    const result = new NodeProps();
+    for (const [key, value] of this.store) {
+      result.store.set(key, value);
+    }
+
     each(JsonStore.jsonToKeyValue(attrs), (value, key) => {
-      this.store.set(key, value);
+      result.set(key, value);
     });
 
-    return this;
+    return result;
   }
 
   toJSON(): {} {
@@ -61,12 +74,19 @@ export class NodeProps extends JsonStore {
   }
 
   clone() {
-    const clone = new NodeProps();
-    clone.merge(this);
-    return clone;
+    const result = new NodeProps();
+    for (const [key, value] of this.store) {
+      result.store.set(key, value);
+    }
+
+    return result;
   }
 
   freeze() {
+    if(this.frozen) return this
+    this.frozen = true;
+
+    super.freeze();
     return this;
   }
 }
@@ -79,6 +99,7 @@ export const PlaceholderPath = "local/html/placeholder";
 export const ContenteditablePath = "local/html/contenteditable";
 export const ActivatedPath = "local/state/activated";
 export const OpenedPath = "local/state/opened";
+export const CollapsedPath = "local/state/collapsed";
 export const HoveredPath = "local/state/hovered";
 export const SelectedPath = "local/state/selected";
 export const TagPath = "plugin/tag";

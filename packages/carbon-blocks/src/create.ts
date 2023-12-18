@@ -1,15 +1,13 @@
-export const text = (text: string = '', attrs = {}, state = {}) => ({
+export const text = (text: string = '', props = {}) => ({
 	name: 'text',
 	text,
-	attrs,
-	state,
+	props,
 });
 
-export const node = (name: string, children: any[] = [], attrs = {}, state = {}) => ({
+export const node = (name: string, children: any[] = [], props = {}) => ({
 	name,
 	children,
-	attrs,
-	state,
+	props,
 });
 
 export const title = (children: any[] = []) => ({

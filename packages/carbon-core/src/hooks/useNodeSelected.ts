@@ -10,9 +10,13 @@ export const useNodeSelected = (props: RendererProps) => {
   },[node])
 
   const attributes = useMemo(() => {
-    return {
-      'data-selected': selected ? 'true' : 'false'
+    if (selected) {
+      return {
+        'data-selected': 'true'
+      }
     }
+
+    return {};
   },[selected]);
 
   return {

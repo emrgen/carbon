@@ -24,9 +24,6 @@ export function RectSelectContext(props: RendererProps) {
   // mark the rect-selector dirty when the content changes
   useEffect(() => {
     const onChanged = (state: CarbonState) => {
-      if (state.changes.isLocalStateDirty) {
-        rectSelector.markDirty();
-      }
       setIsBlockSelection(state.selection.isBlock)
     };
 
@@ -39,6 +36,7 @@ export function RectSelectContext(props: RendererProps) {
   const onDragStart = useCallback(
     (e: DndEvent) => {
       if (e.id === RectSelectAreaId) {
+        e.event.preventDefault();
         rectSelector.onDragStart(e);
         setIsSelecting(true);
       }
@@ -52,7 +50,8 @@ export function RectSelectContext(props: RendererProps) {
 
   // select nodes based on the drag rect
   const onDragMove = useMemo(() => {
-    return throttle((e: DndEvent) => {
+
+    const throttledHandler = throttle((e: DndEvent) => {
       const { id } = e;
       // make sure the origin of the event is a rect-select-area
       if (id === RectSelectAreaId) {
@@ -60,13 +59,18 @@ export function RectSelectContext(props: RendererProps) {
         rectSelector.onDragMove(e);
       }
     }, 10);
+
+    return (e: DndEvent) => {
+      e.event.preventDefault();
+      throttledHandler(e);
+    }
   }, [onDragRectProgress, rectSelector]);
 
   const onDragEnd = useCallback(
     (e: DndEvent) => {
       if (e.id === RectSelectAreaId) {
         rectSelector.onDragEnd(e);
-        // app.enable();
+        e.event.preventDefault();
         onDragRectStop(e);
         setIsSelecting(false);
       }
@@ -129,10 +133,10 @@ export function RectSelectContext(props: RendererProps) {
     <RectSelectorContext value={rectSelector}>
       <div
         className={
-          "carbon-rect-select" +
-          (isSelecting ? " rect-active" : "") +
+          "carbon-selection" +
+          (isSelecting ? " carbon-selecting" : "") +
           (isDragging ? " rect-dragging" : "") +
-          (isBlockSelection ? " rect-block-selection" : "")
+          (isBlockSelection ? " block-selection" : "")
         }
       >
         {props.children}

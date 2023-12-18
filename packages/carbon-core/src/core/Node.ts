@@ -14,7 +14,7 @@ import EventEmitter from "events";
 import { StateScope } from "./StateScope";
 import { NodeLinks } from "./NodeLinks";
 import { NODE_CACHE_INDEX } from "./CarbonCache";
-import { ActivatedPath, NodeProps, NodePropsJson, OpenedPath, SelectedPath } from "./NodeProps";
+import { ActivatedPath, CollapsedPath, NodeProps, NodePropsJson, OpenedPath, SelectedPath } from "./NodeProps";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -101,6 +101,13 @@ export class Node extends EventEmitter implements IntoNodeId {
 	static IDENTITY = new Node({
 		id: NodeId.IDENTITY,
 		type: NodeType.IDENTITY,
+		content: BlockContent.empty(),
+		properties: NodeProps.empty(),
+	})
+
+	static NULL = new Node({
+		id: NodeId.NULL,
+		type: NodeType.NULL,
 		content: BlockContent.empty(),
 		properties: NodeProps.empty(),
 	})
@@ -289,7 +296,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get isCollapsed() {
-		return !!this.properties.get('node.collapsed');
+		return !!this.properties.get(CollapsedPath)
 	}
 
 	get children() {
@@ -746,8 +753,13 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// @mutates
 	updateProps(props: NodePropsJson) {
-		console.log('updating props', this.id.toString(), props);
+		if (this.frozen) {
+			throw Error('cannot change properties of immutable node:' + this.id.toString())
+		}
+
+		// console.log('-- props', this.id.toString(), JSON.stringify(this.properties.toJSON()));
 		this.properties = this.properties.update(props);
+		// console.log('-> props', this.id.toString(), JSON.stringify(this.properties.toJSON()));
 	}
 
 	// @mutates

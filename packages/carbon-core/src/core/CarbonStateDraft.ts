@@ -10,7 +10,7 @@ import { PointedSelection } from "./PointedSelection";
 import { NodeType } from "./NodeType";
 import { Point, PointAt } from "./Point";
 import {  NodeStateJSON } from "./NodeState";
-import { ActionOrigin } from "@emrgen/carbon-core";
+import { ActionOrigin, NodeIdSet, OpenedPath } from "@emrgen/carbon-core";
 import { nodePlaceholder } from "../utils/attrs";
 import {
   ActivatedPath,
@@ -28,7 +28,7 @@ export class CarbonStateDraft {
   state: CarbonState;
   nodeMap: NodeMap;
   selection?: PointedSelection;
-  changes: StateChanges = new StateChanges();
+  changes: NodeIdSet
 
   private drafting = true;
 
@@ -36,23 +36,7 @@ export class CarbonStateDraft {
     this.origin = origin;
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
-    // this.selection = state.selection.unpin();
-    // state.changes.state.nodes(state.nodeMap).forEach(n => {
-    //   const state = n.state.normalize();
-    //   if (state.activated) {
-    //     this.changes.activated.add(n.id);
-    //   }
-    //   if (state.selected) {
-    //     this.changes.selected.add(n.id);
-    //   }
-    //   if (state.opened) {
-    //     this.changes.opened.add(n.id);
-    //   }
-    //
-    //   if (values(state).some(identity)) {
-    //     this.changes.state.add(n.id);
-    //   }
-    // })
+    this.changes = new NodeIdSet();
   }
 
   get(id: NodeId): Optional<Node> {
@@ -65,57 +49,28 @@ export class CarbonStateDraft {
 
   // turn the draft into a new state
   commit(depth: number): CarbonState {
-    const { state, changes } = this;
-    console.log('commit', this.selection);
-    this.selection?.freeze();
+    const { state, changes, selection } = this;
 
     const nodeMap = this.nodeMap.isEmpty ? state.nodeMap : this.nodeMap;
     nodeMap.freeze();
-
-    // create a new selection based on the new node map using the draft selection
-    const selection = ((selection?: PointedSelection) => {
-      if (this.changes.selected.size) {
-        const nodes = this.changes.selected.nodes(this.nodeMap)
-        if (nodes.length !== this.changes.selected.size) {
-          throw new Error("Cannot commit draft with invalid selection");
-        }
-
-        return PinnedSelection.fromNodes(nodes, this.origin);
-      }
-
-      console.log('no block selection', selection?.toJSON());
-
-      if (selection) {
-        const ret = selection.pin(this.nodeMap);
-        if (!ret) {
-          throw new Error("Cannot commit draft with invalid selection");
-        }
-        return ret;
-      }
-
-
-      if (this.state.parkedSelection) {
-        return this.state.parkedSelection
-      }
-
-      return this.state.selection;
-    })(this.selection);
-
     const content = this.nodeMap.get(this.state.content.id)
     if (!content) {
       throw new Error("Cannot commit draft with invalid content");
     }
 
-    const after = selection.eq(this.state.selection) ? this.state.selection : selection;
-    let parkedSelection: Optional<PinnedSelection>;
-    if (after.isInline || this.state.parkedSelection?.eq(selection)){
-      parkedSelection = null;
-    } else {
-      parkedSelection = after.isBlock && state.selection.isInline ? state.selection : state.parkedSelection;
+    if (!selection) {
+      throw new Error("Cannot commit draft with invalid selection");
+    }
+    console.log('commit', selection);
+
+    // create a new selection based on the new node map using the draft selection
+    const after = selection.pin(nodeMap);
+    if (!after) {
+      throw new Error("Cannot commit draft with invalid pinned selection");
     }
 
-    this.changes.selection = after.unpin();
     changes.freeze();
+    console.log('commit', changes.size, changes.toArray().map(n => n.toString()));
 
     const newState = new CarbonState({
       previous: state.clone(depth - 1),
@@ -124,7 +79,6 @@ export class CarbonStateDraft {
       selection: after,
       nodeMap,
       changes,
-      parkedSelection,
     });
 
     return newState.freeze();
@@ -138,11 +92,11 @@ export class CarbonStateDraft {
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
-    this.changes.deleted.forEach(id => {
-      this.changes.changed.remove(id);
-    });
+    // this.changes.deleted.forEach(id => {
+    //   this.changes.changed.remove(id);
+    // });
 
-    const changed: NodeDepthEntry[] = this.changes.changed.toArray().map(id => {
+    const changed: NodeDepthEntry[] = this.changes.toArray().map(id => {
       const node = this.nodeMap.get(id)!;
       const depth = this.nodeMap.parents(node).length;
       return {
@@ -151,28 +105,6 @@ export class CarbonStateDraft {
       }
     });
 
-    // console.log('prepare', changed.length, changed.map(n => n.node.id.toString()));
-    // nodes with truthy states need to be added to the new state list
-    // this.state.changes.state.nodes(this.state.nodeMap).filter(n => {
-    //   return !isEmpty(n.state.normalize())
-    // }).forEach(n => {
-    //   this.changes.state.add(n.id)
-    // });
-    //
-    // // update state changes to reflect the new state
-    // this.changes.state.nodes(this.nodeMap).forEach(n => {
-    //   console.debug('state change', n.id.toString(), n.name, n.state.normalize());
-    //   const state = n.state.normalize();
-    //   if (state.activated) {
-    //     this.changes.activated.add(n.id);
-    //   }
-    //   if (state.selected) {
-    //     this.changes.selected.add(n.id);
-    //   }
-    //   if (state.opened) {
-    //     this.changes.opened.add(n.id);
-    //   }
-    // })
 
     changed.sort(NodeDepthComparator);
 
@@ -238,7 +170,7 @@ export class CarbonStateDraft {
       } else if (node.name === 'text') {
 
       }
-
+      console.log(content);
       node.updateContent(content);
     });
 
@@ -246,8 +178,6 @@ export class CarbonStateDraft {
     content.children.forEach(child => {
       this.nodeMap.set(child.id, child);
     })
-
-    this.changes.updated.add(nodeId);
   }
 
   move(to: Point, node: Node) {
@@ -259,7 +189,6 @@ export class CarbonStateDraft {
       throw Error('cannot insert immutable node, it must be at least mutable at top level');
     }
 
-    this.changes.moved.add(node.id);
     if (!this.get(node.id)) {
       throw Error('move node not found in state map')
     }
@@ -274,7 +203,6 @@ export class CarbonStateDraft {
       throw Error('move node does not have old parent')
     }
 
-    this.changes.changed.add(parentId);
     this.mutable(parentId, parent => parent.remove(node));
 
     this.insert(to, node, 'move');
@@ -290,14 +218,12 @@ export class CarbonStateDraft {
     }
 
     if (type === 'create') {
-      this.changes.inserted.add(node.id);
       console.log('children', node);
       node.forAll(n => {
         console.log('inserting node', n.id.toString(), n.name);
         this.nodeMap.set(n.id, n);
       });
     } else {
-      this.changes.moved.add(node.id);
       this.nodeMap.set(node.id, node);
     }
 
@@ -317,12 +243,10 @@ export class CarbonStateDraft {
 
   private prepend(parentId: NodeId, node: Node) {
     this.mutable(parentId, parent => parent.prepend(node));
-    this.changes.render.add(parentId);
   }
 
   private append(parentId: NodeId, node: Node) {
     this.mutable(parentId, parent => parent.append(node));
-    this.changes.render.add(parentId);
   }
 
   private insertBefore(refId: NodeId, node: Node) {
@@ -342,8 +266,6 @@ export class CarbonStateDraft {
     }
 
     this.mutable(parentId, parent => parent.insertBefore(refNode, node));
-
-    this.changes.render.add(parentId);
   }
 
   private insertAfter(refId: NodeId, node: Node) {
@@ -363,8 +285,6 @@ export class CarbonStateDraft {
     }
 
     this.mutable(parentId, parent => parent.insertAfter(refNode, node));
-
-    this.changes.render.add(parentId);
   }
 
   remove(node: Node) {
@@ -401,8 +321,8 @@ export class CarbonStateDraft {
 
     node.forAll(n => {
       console.log('removing node', n.id.toString(), n.name);
-      this.changes.deleted.add(n.id);
-      this.changes.changed.remove(n.id);
+      this.changes.remove(n.id);
+      this.changes.remove(n.id);
     });
   }
 
@@ -414,9 +334,6 @@ export class CarbonStateDraft {
     this.mutable(nodeId, node => {
       node.changeType(type);
     });
-
-
-    this.changes.renamed.add(nodeId);
   }
 
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
@@ -424,44 +341,18 @@ export class CarbonStateDraft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
-    const nodeProps = NodeProps.fromJSON(props);
-    const selected = nodeProps.get(SelectedPath);
-    const activated = nodeProps.get(ActivatedPath);
-    const opened = nodeProps.get(SelectedPath);
-
-    if (selected) {
-      this.changes.selected.add(nodeId);
-    } else if (selected === false) {
-      this.changes.selected.remove(nodeId);
-    }
-
-    if (activated) {
-      this.changes.activated.add(nodeId);
-    } else if (activated === false) {
-      this.changes.activated.remove(nodeId);
-    }
-
-    if (opened) {
-      this.changes.opened.add(nodeId);
-    } else if (opened === false) {
-      this.changes.opened.remove(nodeId);
-    }
-
     this.mutable(nodeId, node => {
       node.updateProps(props);
     });
-
-    this.changes.props.add(nodeId);
   }
 
   updateSelection(selection: PointedSelection) {
     if (!this.drafting) {
       throw new Error("Cannot update selection on a draft that is already committed");
     }
-    
+
     console.log('update selection', selection.toString());
     this.selection = selection;
-    this.changes.selection = selection;
   }
 
   // creates a mutable copy of a node and adds it to the draft changes
@@ -474,7 +365,7 @@ export class CarbonStateDraft {
     const mutable = this.nodeMap.has(id) ? node : node.clone();
     fn?.(mutable);
 
-    this.changes.changed.add(id);
+    this.changes.add(id);
     this.nodeMap.set(id, mutable);
 
     return mutable;
