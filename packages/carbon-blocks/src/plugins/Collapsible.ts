@@ -17,7 +17,7 @@ import {
   insertBeforeAction,
   preventAndStopCtx,
   splitTextBlock,
-  PlaceholderPath
+  PlaceholderPath, CollapsedPath
 } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 import { identity } from 'lodash';
@@ -92,7 +92,9 @@ export class Collapsible extends NodePlugin {
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        app.tr.updateProps(node.id, { node: { collapsed: false } }).dispatch();
+        app.tr.updateProps(node.id, {
+          [CollapsedPath]: !node.isCollapsed,
+        }).dispatch();
       },
 
       'ctrl_shift_c': (ctx: EventContext<KeyboardEvent>) => {

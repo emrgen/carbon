@@ -3,13 +3,13 @@ import {
   ActionOrigin,
   CarbonBlock,
   CarbonNodeChildren,
-  CarbonNodeContent,
+  CarbonNodeContent, CollapsedPath,
   Pin,
   PinnedSelection,
   Point,
   RendererProps,
   useCarbon,
-  useSelectionHalo,
+  useSelectionHalo
 } from "@emrgen/carbon-core";
 import {
   MdOutlineKeyboardArrowDown,
@@ -49,7 +49,9 @@ export default function CollapsibleListComp(props: RendererProps) {
   const handleToggle = useCallback(() => {
     const {tr} = app;
     tr
-      .updateProps(node.id, { node: { collapsed: !isCollapsed } })
+      .updateProps(node.id, {
+        [CollapsedPath]: !isCollapsed,
+      })
     if (!isCollapsed) {
       tr.select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
     }
