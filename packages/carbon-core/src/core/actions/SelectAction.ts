@@ -14,6 +14,7 @@ export class SelectAction implements CarbonAction {
 	// this will update the carbon selection state or schedule a selection change after the ui update
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { before, after, origin } = this;
+		draft.updateSelection(after);
 		tr.onSelect(draft, before, after, origin);
 	}
 

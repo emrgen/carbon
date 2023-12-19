@@ -16,11 +16,12 @@ import { Optional } from '@emrgen/types';
 import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
 
 declare module '@emrgen/carbon-core' {
-	interface CarbonCommands {
+	interface Transaction {
 		nestable: {
-			wrap(node: Node): Optional<Transaction>;
-			unwrap(node: Node): Optional<Transaction>;
+			wrap(node: Node): Transaction;
+			unwrap(node: Node): Transaction;
 			serializeChildren(node: Node): string;
+			inject(encoder: () => string): void;
 		}
 	}
 }
@@ -36,31 +37,33 @@ export class NestablePlugin extends AfterPlugin {
 			wrap: this.wrap,
 			unwrap: this.unwrap,
 			serializeChildren: this.serializeChildren,
+			inject: this.inject,
 		}
+	}
+
+	inject(tr: Transaction, encoder: () => string) {
+		console.log('injecting', encoder());
 	}
 
 	// wrap node within a parent node
 	// TODO: add support for wrapping multiple nodes
-	wrap(app: Carbon, node: Node): Optional<Transaction> {
+	wrap(tr: Transaction, node: Node): Optional<Transaction> {
 		const prevNode = node.prevSibling;
 		if (!prevNode || !isNestableNode(prevNode)) return
 
 		const prevSibling = prevNode.lastChild!
 		const to = Point.toAfter(prevSibling.id);
 
-		const { tr } = app;
-
 		tr.move(nodeLocation(node)!, to, node.id);
 		if (prevNode.isCollapsed) {
 			tr.updateProps(prevNode.id, { node: { collapsed: false } })
 		}
-		tr.select(app.selection.clone());
-
+		tr.select(tr.app.selection.clone());
 		return tr
 	}
 
 	// TODO: add support for unwrapping multiple nodes
-	unwrap(app: Carbon, node: Node): Optional<Transaction> {
+	unwrap(tr: Transaction, node: Node): Optional<Transaction> {
 		const { parent } = node;
 		if (!parent || !isNestableNode(parent)) return
 
@@ -71,12 +74,10 @@ export class NestablePlugin extends AfterPlugin {
 		const lastChild = node.lastChild;
 		const moveAt = Point.toAfter(lastChild?.id ?? node.id);
 
-		const { tr } = app;
-
 		tr
 			.move(nodeLocation(node)!, to, node.id)
 			.add(moveNodesActions(moveAt, nextSiblings))
-			.select(app.selection.clone());
+			.select(tr.app.selection.clone());
 
 		return tr
 	}
@@ -84,11 +85,10 @@ export class NestablePlugin extends AfterPlugin {
 	keydown(): EventHandlerMap {
 		return {
 			backspace: (ctx: EventContext<KeyboardEvent>) => {
-
-				const { app, node } = ctx;
+				const { app, node, cmd } = ctx;
 				if (node.isIsolating) return;
 
-				const { selection, tr, cmd, state } = app;
+				const { selection } = app;
 				if (!selection.isCollapsed || selection.isBlock) {
 					return
 				}
@@ -108,13 +108,13 @@ export class NestablePlugin extends AfterPlugin {
 				if (listNode.name !== 'section') {
 					preventAndStopCtx(ctx);
 					if (listNode.isCollapsed) {
-						tr.updateProps(listNode.id, { node: { collapsed: false } })
+						cmd.updateProps(listNode.id, { node: { collapsed: false } })
 					}
 
-					tr
+					cmd
 						.change(listNode.id, listNode.name, 'section')
 						.select(PinnedSelection.fromPin(selection.head))
-					tr.dispatch();
+					cmd.dispatch();
 					return
 				}
 
@@ -124,7 +124,6 @@ export class NestablePlugin extends AfterPlugin {
 				const nextSibling = listNode.nextSibling;
 				if (!nextSibling) {
 					preventAndStopCtx(ctx);
-					const { tr } = app;
 					cmd.nestable.unwrap(listNode)?.dispatch();
 					return
 				}
@@ -148,8 +147,8 @@ export class NestablePlugin extends AfterPlugin {
 				}
 			},
 			enter: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, node } = ctx;
-				const { selection, cmd,  tr } = app;
+				const { app, node, cmd } = ctx;
+				const { selection } = app;
 				if (!selection.isCollapsed) {
 					return
 				}
@@ -164,7 +163,7 @@ export class NestablePlugin extends AfterPlugin {
 				const as = listNode.properties.get('html.data-as')
 				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
-					tr
+					cmd
 						.updateProps(listNode.id, {
 							html: {
 								'data-as': ''
@@ -178,9 +177,8 @@ export class NestablePlugin extends AfterPlugin {
 					console.log(`enter on node: ${listNode.name} => ${listNode.id.toString()}`, isNestableNode(listNode));
 
 					preventAndStopCtx(ctx);
-					tr
+					cmd
 						.change(listNode.id, listNode.name, 'section')
-
 						.select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
 						.dispatch();
 					return
@@ -197,7 +195,7 @@ export class NestablePlugin extends AfterPlugin {
 			// push the
 			tab: (ctx: EventContext<KeyboardEvent>) => {
 				preventAndStopCtx(ctx);
-				const { app, node } = ctx;
+				const { app, node, cmd } = ctx;
 				const { selection } = app;
 				console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
 
@@ -214,12 +212,11 @@ export class NestablePlugin extends AfterPlugin {
 					return
 				}
 
-				const { tr } = app;
-				app.cmd.nestable.wrap(listNode)?.dispatch();
+				cmd.nestable.wrap(listNode)?.dispatch();
 			},
 			shiftTab: (ctx: EventContext<KeyboardEvent>) => {
 				preventAndStopCtx(ctx);
-				const { app, node } = ctx;
+				const { app, node, cmd } = ctx;
 				const { selection } = app;
 				const listNode = node.closest(isNestableNode);
 				if (!listNode) return
@@ -230,7 +227,7 @@ export class NestablePlugin extends AfterPlugin {
 					return
 				}
 
-				app.cmd.nestable.unwrap(listNode)?.dispatch();
+				cmd.nestable.unwrap(listNode)?.dispatch();
 			}
 		}
 	}

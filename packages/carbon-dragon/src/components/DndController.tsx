@@ -9,7 +9,7 @@ import {
   Transaction,
   prevent,
   useCarbon,
-  useCarbonOverlay,
+  useCarbonOverlay, CarbonState
 } from "@emrgen/carbon-core";
 import { elementBound } from "../core/utils";
 import { DraggableHandle } from "./DraggableHandle";
@@ -132,11 +132,9 @@ export function DndController() {
     [resetDragHandle, app, hideOverlay]
   );
 
-  const onTransaction = useCallback(
-    (tr: Transaction) => {
-      // console.log(tr.updatesContent, tr);
-      if (tr.updatesContent) {
-        console.log("updated content");
+  const onChange = useCallback(
+    (state: CarbonState) => {
+      if (state.isContentChanged) {
         resetDragHandle();
       }
     },
@@ -154,7 +152,7 @@ export function DndController() {
   useEffect(() => {
     // editor.on(EditorEventsIn.mouseOver, onEditorMouseOver);
     // editor.on(EditorEventsIn.mouseOut, onEditorMouseOut);
-    app.on("transaction", onTransaction);
+    app.on("changed", onChange);
     app.on("keyDown", onKeyDown);
     dnd.on("mouse:in", onMouseIn);
     dnd.on("mouse:out", onMouseOut);
@@ -162,9 +160,9 @@ export function DndController() {
     dnd.on("drag:end", onDragEnd);
     dnd.on("hide:drag:handle", resetDragHandle);
     return () => {
-      app.off("mouseIn", onEditorMouseOver);
-      app.off("mouseOut", onEditorMouseOut);
-      app.off("transaction", onTransaction);
+      // app.off("mouseIn", onEditorMouseOver);
+      // app.off("mouseOut", onEditorMouseOut);
+      app.off("changed", onChange);
       app.off("keyDown", onKeyDown);
       dnd.off("mouse:in", onMouseIn);
       dnd.off("mouse:out", onMouseOut);
@@ -182,7 +180,7 @@ export function DndController() {
     onKeyDown,
     onMouseIn,
     onMouseOut,
-    onTransaction,
+    onChange,
     resetDragHandle,
   ]);
 

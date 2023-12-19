@@ -76,6 +76,7 @@ export class CarbonStateDraft {
       selection: after,
       nodeMap,
       changes,
+      counter: state.counter + 1,
     });
 
     return newState.freeze();

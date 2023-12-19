@@ -1,8 +1,8 @@
 import { Optional } from '@emrgen/types';
-import { CarbonCommands, SerializedNode } from "./types";
+import { SerializedNode } from "./types";
 
 import { isKeyHotkey } from 'is-hotkey';
-import { camelCase, each, keys, reduce, some, sortBy, uniqBy, values, snakeCase, entries } from 'lodash';
+import { camelCase, each, keys, some, sortBy, uniqBy, values, snakeCase, entries } from 'lodash';
 import { EventContext } from "./EventContext";
 import { PluginType, CarbonPlugin } from './CarbonPlugin';
 import { Carbon } from './Carbon';
@@ -11,9 +11,7 @@ import { Transaction } from './Transaction';
 import { EventHandlerMap, NodeName } from './types';
 import { CarbonAction } from './actions/types';
 import { EventsIn } from './Event';
-import { SelectionEvent } from './SelectionEvent';
-import { CarbonState } from './CarbonState';
-import { PluginEmitter } from "./PluginEmitter";
+import { CarbonCommand } from "./CarbonCommand";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -21,14 +19,10 @@ export class PluginManager {
 	private readonly before: CarbonPlugin[];
 	private readonly nodes: Record<string, CarbonPlugin>;
 
+	readonly plugins: CarbonPlugin[];
 
 	// all events that are handled by plugins
 	events: Set<EventsIn>;
-
-	get plugins() {
-		const { after, before, nodes } = this
-		return [...after, ...values(nodes), ...before];
-	}
 
 	get specs() {
 		const nodes = {};
@@ -52,6 +46,8 @@ export class PluginManager {
 		// console.log(keys(this.nodes).length, this.nodes)
 		const events = flattened.reduce((es, p) => es.concat(keys(p.on()).map(k => camelCase(k)) as EventsIn[]), [] as EventsIn[])
 		this.events = new Set(events.concat([EventsIn.keyDown]));
+
+		this.plugins = [...this.after, ...values(this.nodes), ...this.before];
 	}
 
 	private flatten(plugins: CarbonPlugin[]): CarbonPlugin[] {
@@ -63,20 +59,8 @@ export class PluginManager {
 	}
 
 	// collect plugin commands
-	commands(app: Carbon): CarbonCommands {
-		const commands: Record<string, Function> = this.plugins.reduce((commands, p) => {
-
-			const pluginCommands = reduce(p.commands(), (o, fn, name) => {
-				return {
-					...o,
-					[name]: (...args: any) => fn.bind(p)(app, ...args)
-				}
-			}, {});
-
-			return { ...commands, [p.name]: pluginCommands }
-		}, {});
-
-		return commands as any;
+	commands(): CarbonCommand {
+		return CarbonCommand.from(this.plugins);
 	}
 
 	mounted(app: Carbon, node: Node) {
@@ -197,11 +181,6 @@ export class PluginManager {
 	// 	each(this.before, p => p.select(event));
 	// 	each(this.after, p => p.select(event));
 	// }
-
-	afterRender(app: Carbon) {
-		// each(this.before, p => p.afterRender(editor));
-		// each(this.after, p => p.afterRender(editor));
-	}
 
 	decoration(app: Carbon) {
 		const { decorations } = app.state;

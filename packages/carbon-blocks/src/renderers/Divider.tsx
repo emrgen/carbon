@@ -4,7 +4,7 @@ import {
   RendererProps,
   preventAndStop,
   useCarbon,
-  useSelectionHalo,
+  useSelectionHalo, PinnedSelection, PointedSelection
 } from "@emrgen/carbon-core";
 import {
   useCombineConnectors,
@@ -26,13 +26,13 @@ export default function DividerComp(props: RendererProps) {
   );
 
   const handleClick = useCallback(
-    (e) => {
+    (e, app) => {
       preventAndStop(e);
       // avoid selection if block is already selected
       if (app.selection.nodes.some((n) => n.id.eq(node.id))) return;
-      app.tr.selectNodes([node.id]).dispatch();
+      app.cmd.select(PointedSelection.fromNodes([node.id]))
     },
-    [app.selection, app.tr, node.id]
+    [node.id]
   );
 
   const handleMouseDown = useCallback(
@@ -48,7 +48,7 @@ export default function DividerComp(props: RendererProps) {
     <CarbonBlock
       node={node}
       custom={{
-        onClick: handleClick,
+        onClick: (e) => handleClick(e, app),
         onMouseDown: handleMouseDown,
         ...connectors,
       }}

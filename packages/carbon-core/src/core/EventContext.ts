@@ -2,6 +2,7 @@ import { Carbon } from "./Carbon";
 import { EventsIn } from "./Event";
 import { Node } from "./Node";
 import { PinnedSelection } from "./PinnedSelection";
+import { Transaction } from "@emrgen/carbon-core";
 
 export enum EventOrigin {
 	dom,
@@ -12,10 +13,10 @@ interface EventContextProps<T> {
 	origin: EventOrigin;
 	type: EventsIn;
 	event: T
-
 	app: Carbon,
 	node: Node,
 	selection: PinnedSelection;
+	cmd: Transaction;
 }
 
 // EventContext is the context of an event that is being handled by the app and its plugins
@@ -44,6 +45,8 @@ export class EventContext<T extends Event> {
 	prevented: boolean = false
 
 	// create a new event context
+	cmd: Transaction;
+
 	static create<T extends Event>(props: EventContextProps<T>) {
 		return new EventContext({
 			...props,
@@ -55,8 +58,8 @@ export class EventContext<T extends Event> {
 		return EventContext.create({...event, ...opts})
 	}
 
-	constructor(props: EventContextProps<T>) {
-		const { origin, type, app, node, event, selection  } = props;
+	private constructor(props: EventContextProps<T>) {
+		const { origin, type, app, node, event, selection, cmd  } = props;
 		this.origin = origin;
 		this.type = type;
 		this.app = app;
@@ -64,6 +67,7 @@ export class EventContext<T extends Event> {
 		this.target = node
 		this.event = event;
 		this.selection = selection;
+		this.cmd = cmd;
 	}
 
 	// updateCommandOrigin(type: EventsIn, event: Event) {

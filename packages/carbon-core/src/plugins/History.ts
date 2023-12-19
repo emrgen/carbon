@@ -8,28 +8,28 @@ export class HistoryPlugin extends AfterPlugin {
   undoStack: Transaction[] = [];
   redoStack: Transaction[] = [];
 
-  takeTransactions(stack: Transaction[], timeSpan = 3000): Transaction[] {
-    const lastTransaction = last(stack)!;
-    const present = lastTransaction.timestamp;
-    const past = present - timeSpan;
-    const transactions: Transaction[] = [];
-
-    stack.slice().reverse().some(tr => {
-      if (!tr.textInsertOnly && transactions.length > 0) {
-        return true;
-      }
-
-      if (tr.timestamp > past || !tr.textInsertOnly) {
-        stack.pop();
-        transactions.unshift(tr);
-        return false;
-      } else {
-        return true;
-      }
-    })
-
-    return transactions;
-  }
+  // takeTransactions(stack: Transaction[], timeSpan = 3000): Transaction[] {
+  //   const lastTransaction = last(stack)!;
+  //   const present = lastTransaction.timestamp;
+  //   const past = present - timeSpan;
+  //   const transactions: Transaction[] = [];
+  //
+  //   stack.slice().reverse().some(tr => {
+  //     if (!tr.textInsertOnly && transactions.length > 0) {
+  //       return true;
+  //     }
+  //
+  //     if (tr.timestamp > past || !tr.textInsertOnly) {
+  //       stack.pop();
+  //       transactions.unshift(tr);
+  //       return false;
+  //     } else {
+  //       return true;
+  //     }
+  //   })
+  //
+  //   return transactions;
+  // }
 
   undo(transactions: Transaction[]): void {
     const inverse = transactions.map(tr => tr.inverse());
@@ -67,11 +67,11 @@ export class HistoryPlugin extends AfterPlugin {
         if (this.redoStack.length === 0) return
 
         const tr = this.redoStack.pop()!
-        const inverse = tr.inverse()
+        // const inverse = tr.inverse()
         console.log('tr', tr);
-        console.log('redo', inverse);
-        this.undoStack.push(inverse);
-        inverse.dispatch();
+        // console.log('redo', inverse);
+        // this.undoStack.push(inverse);
+        // inverse.dispatch();
 
         ctx.app.emit('history.redo', tr);
       },
@@ -81,20 +81,7 @@ export class HistoryPlugin extends AfterPlugin {
   transaction(tr: Transaction): void {
     // window.tr = tr;
     if (tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
-      const lastTransaction = last(this.undoStack);
-      const current = Date.now();
-      // if (lastTransaction) {
-
-      // merge text insert only transactions within 500ms
-      if (!tr.readOnly && lastTransaction?.textInsertOnly && tr.textInsertOnly && (current - lastTransaction.timestamp) < 500) {
-        // merge prev and current transaction
-        // const undoTr = lastTransaction.merge(tr);
-        // this.undoStack.pop()
-        this.undoStack.push(tr);
-      } else {
-        this.undoStack.push(tr);
-      }
-
+      this.undoStack.push(tr);
       this.redoStack = [];
     } else {
       // console.log('skip transaction undo', tr);

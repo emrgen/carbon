@@ -183,8 +183,7 @@ export class Dnd extends EventEmitter {
 	}
 
 	private setDraggedNode(node: Node) {
-		const { app: editor, draggedNodeId } = this
-		const { tr } = editor;
+		const { app, draggedNodeId } = this
 		if (draggedNodeId) {
 			this.emit('mouse:out', this.draggedNodeId);
 		}

@@ -25,7 +25,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 					return
 				}
 
-				const { app, selection: after } = ctx;
+				const { app, selection: after, cmd } = ctx;
 
 				const { selection: before } = app;
 				if (before.isInvalid) {
@@ -44,9 +44,8 @@ export class SelectionChangePlugin extends AfterPlugin {
 
 				// console.log('SelectionPlugin.selectionchanged',before.toJSON(),after.toJSON());
 				console.debug(p14('%c[create]'), 'color:green', 'select transaction');
-				const { tr } = app;
 
-				tr
+				cmd
 					.select(after)
 					.dispatch()
 			},

@@ -324,7 +324,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     app.focus();
     if (e.shiftKey) {
       const after = PinnedSelection.fromNodes([])
-      app.cmd.insert.before(node, "section")?.dispatch();
+      app.commands.insert.before(node, "section")?.dispatch();
       return;
     }
 
@@ -346,7 +346,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       return;
     }
 
-    app.cmd.insert.after(node, "section")?.dispatch();
+    app.commands.insert.after(node, "section")?.dispatch();
   };
 
   return (

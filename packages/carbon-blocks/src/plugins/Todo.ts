@@ -55,6 +55,6 @@ export class Todo extends Section {
 
   serialize(app: Carbon, node: Node): SerializedNode {
     const prefix = node.properties.node?.isChecked ? ['x'] : '[]';
-    return `${prefix} ${app.serialize(node.child(0)!)}` + app.cmd.nestable.serializeChildren(node);
+    return `${prefix} ${app.serialize(node.child(0)!)}` + app.commands.nestable.serializeChildren(node);
   }
 }

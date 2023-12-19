@@ -1,44 +1,42 @@
 import {
+  Carbon,
   CarbonBlock,
   CarbonChildren,
   CarbonNodeChildren,
-  CarbonNodeContent,
+  CarbonNodeContent, Node,
   preventAndStop,
   RendererProps,
   useCarbon
 } from "@emrgen/carbon-core";
-import { useCallback, useEffect, useRef, useState } from "react";
-
-const CollapsibleTitle = (props: RendererProps) => {
-  const { node } = props;
-}
+import { useCallback, useEffect, useMemo } from "react";
+import { usePrevious } from "@uidotdev/usehooks";
 
 export const PageTreeComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
 
-  // while the pageTree is collapsed, we don't want to re-render the children
-  const isCollapsed = useRef(node.properties.get('node.collapsed', false));
+  const handleToggleCollapse = useCallback((app: Carbon) => {
+    app.cmd.collapsible.toggle(node).dispatch();
+  },[node]);
 
-  const handleToggleCollapse = useCallback(() => {
-    isCollapsed.current = !isCollapsed.current;
-    app.tr.updateProps(node, {'node.collapsed': isCollapsed.current}).dispatch();
-  },[app.tr, isCollapsed, node]);
-
-
-  const firstChild = node.child(0);
-  if (firstChild?.name === 'title') {
-    return (
-      <CarbonBlock node={node} custom={{onMouseDown: preventAndStop}}>
-        <CarbonNodeContent node={node} custom={{onClick: handleToggleCollapse}}/>
-        {!isCollapsed.current && <CarbonNodeChildren node={node}/>}
-      </CarbonBlock>
-    );
-  }
+  const content = useMemo(() => {
+    if(node.firstChild?.name === 'title') {
+      return (
+        <>
+          <CarbonNodeContent node={node} key={node.key} custom={{onClick: () => handleToggleCollapse(app)}}/>
+          {!node.isCollapsed && <CarbonNodeChildren node={node}/>}
+        </>
+      )
+    } else {
+      return (
+        <CarbonNodeChildren node={node}/>
+      )
+    }
+  },[handleToggleCollapse, node]);
 
   return (
     <CarbonBlock node={node} custom={{onMouseDown: preventAndStop}}>
-      <CarbonChildren node={node} />
+      {content}
     </CarbonBlock>
   );
 };

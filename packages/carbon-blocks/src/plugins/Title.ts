@@ -77,7 +77,7 @@ export class TitlePlugin extends NodePlugin {
 
 				if (selection.isCollapsed) {
 					preventAndStopCtx(ctx);
-					app.cmd.transform.insertText(selection, `\n`, false)?.dispatch();
+					// app.commands.transform.insertText(selection, `\n`, false)?.dispatch();
 				}
 			}
 		}
@@ -85,12 +85,15 @@ export class TitlePlugin extends NodePlugin {
 
 	onTextInsert(ctx: EventContext<KeyboardEvent>) {
 		preventAndStopCtx(ctx);
-		const { app, event } = ctx;
+		const { app, event, cmd } = ctx;
 		const { selection } = app;
 		// @ts-ignore
 		const { data, key } = event.nativeEvent;
-		// console.log(data ?? key);
-		app.cmd.transform.insertText(selection, data ?? key, false)?.dispatch();
+		console.log('########');
+
+		cmd.transform.insertText(selection, data ?? key, false)?.dispatch()
+
+		// app.commands.transform.insertText(selection, data ?? key, false)?.dispatch();
 	}
 
 	// decoration(state: CarbonState): Decoration[] {

@@ -28,11 +28,11 @@ export default function TodoComp(props: RendererProps) {
 
 
   const handleClick = useCallback(
-    (e) => {
+    (e, app) => {
       e.stopPropagation();
-      app.tr.updateProps(node.id, {[CheckedPath]: !isChecked}).dispatch();
+      app.cmd.updateProps(node.id, {[CheckedPath]: !isChecked}).dispatch();
     },
-    [app.tr, node.id, isChecked]
+    [node.id, isChecked]
   );
 
 
@@ -47,7 +47,7 @@ export default function TodoComp(props: RendererProps) {
       >
         <input
           type="checkbox"
-          onChange={handleClick}
+          onChange={(e) => handleClick(e, app)}
           checked={isChecked}
         />
       </div>

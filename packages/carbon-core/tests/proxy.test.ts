@@ -1,22 +1,27 @@
 import { test } from "vitest";
-import { Test } from "../src/index";
 
+class Test {
+  cmd = {
+    print: () => {
+      console.log("print");
+    },
+  };
+
+  print() {
+    this.cmd.print();
+  }
+}
 
 test("proxy", () => {
   const test = new Proxy(new Test(), {
     get(target: Test, p: string | symbol, receiver: any): any {
       console.log('get', p, receiver);
-
-      if (p in target) {
-        return Reflect.get(target, p, receiver)
-      } else {
-        // @ts-ignore
-        return target.cmd[p];
-      }
     },
+    apply(target: Test, thisArg: any, argArray: any[]): any {
+      console.log('apply', argArray);
+      // return target[p](...argArray);
+    }
   });
-
-  test.print();
-  // test.run();
+  // test.print();
 
 });

@@ -17,17 +17,18 @@ export class IsolatingPlugin extends AfterPlugin {
     return {
       left: (e: EventContext<KeyboardEvent>) => {
         if (e.app.selection.isBlock) return
-        // let a = e.app.cmd.transform.delete()
 
         if (!e.selection.isCollapsed) {
-          e.app.tr.select(e.selection.collapseToStart());
+          e.cmd.select(e.selection.collapseToStart());
           return;
         }
         this.preventAtStart(e);
       },
       right: (e: EventContext<KeyboardEvent>) => {
+        if (e.app.selection.isBlock) return
+
         if (!e.selection.isCollapsed) {
-          e.app.tr.select(e.selection.collapseToEnd());
+          e.cmd.select(e.selection.collapseToEnd());
           return;
         }
         this.preventAtEnd(e);

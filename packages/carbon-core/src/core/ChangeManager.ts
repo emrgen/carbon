@@ -1,18 +1,25 @@
-import { each, identity } from 'lodash';
-import { NodeIdSet } from './BSet';
-import { Carbon } from './Carbon';
+import { each, identity } from "lodash";
+import { NodeIdSet } from "./BSet";
+import { Carbon } from "./Carbon";
 import { Node } from "./Node";
-import { NodeTopicEmitter } from './NodeEmitter';
-import { SelectionManager } from './SelectionManager';
-import { TransactionManager } from './TransactionManager';
-import { EventsOut } from './Event';
-import { Transaction } from './Transaction';
-import { StateChanges } from './NodeChange';
-import { PluginManager } from './PluginManager';
-import { NodeId } from './NodeId';
+import { NodeTopicEmitter } from "./NodeEmitter";
+import { SelectionManager } from "./SelectionManager";
+import { TransactionManager } from "./TransactionManager";
+import { EventsOut } from "./Event";
+import { Transaction } from "./Transaction";
+import { StateChanges } from "./NodeChange";
+import { PluginManager } from "./PluginManager";
+import { NodeId } from "./NodeId";
+import { ActionOrigin } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
 
 export enum NodeChangeType {
-	update = 'update',
+  update = "update",
+}
+
+interface PromiseState {
+  resolve?: Function;
+  reject?: Function;
 }
 
 /**
@@ -20,160 +27,260 @@ export enum NodeChangeType {
  */
 export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
-	readonly transactions: Transaction[] = []
-	changes: NodeIdSet = NodeIdSet.empty();
+  readonly transactions: Transaction[] = [];
+  changes: NodeIdSet = NodeIdSet.empty();
 
-	constructor(
-		private readonly app: Carbon,
-		private readonly sm: SelectionManager,
-		private readonly tm: TransactionManager,
-		private readonly pm: PluginManager
-	) {
-		super();
-	}
+  promiseState: PromiseState;
 
-	private get state() {
-		return this.app.state;
-	}
+  counter: number = 0;
 
-	private get store() {
-		return this.state.nodeMap;
-	}
+  constructor(
+    private readonly app: Carbon,
+    private readonly sm: SelectionManager,
+    private readonly tm: TransactionManager,
+    private readonly pm: PluginManager
+  ) {
+    super();
 
-	private get isContentSynced() {
-		return !this.changes.size
-	}
+    this.promiseState = {}
+  }
 
-	private get isSelectionDirty() {
-		return this.state.isSelectionChanged;
-	}
+  private get state() {
+    return this.app.state;
+  }
 
-	// 1. sync the doc
-	// 2. sync the selection
-	// 3. sync the node state
-	update(tr: Transaction) {
-		if (this.transactions.length) {
-			return
-		}
+  private get store() {
+    return this.state.nodeMap;
+  }
 
-		this.transactions.push(tr);
-		const { isContentChanged, isSelectionChanged } = this.state;
+  private get isContentSynced() {
+    return !this.changes.size;
+  }
 
-		// console.log('updating transaction effect', tr);
-		// console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
-		// if nothing is dirty, then there is nothing to do
-		if (!isContentChanged && !isSelectionChanged) {
-			return
-		}
+  private get isSelectionDirty() {
+    return this.state.isSelectionChanged;
+  }
 
-		if (isContentChanged) {
-			this.changes.clear();
-			this.changes = this.state.changes.clone();
-		}
-		if (isContentChanged) {
-			this.updateContent();
-			return
-		}
+  private promise(cb) {
+    const  promise = new Promise((res, rej) => {
+      this.promiseState.resolve = (value) => {
+        this.counter += 1
+        res(value);
+      };
 
-		if (isSelectionChanged) {
-			this.updateSelection(() => {
-				this.onTransaction();
-			})
-		}
-	}
+      this.promiseState.reject = (reason) => {
+        console.log('@@@@@@@@@@@@@@');
+        this.counter += 1
+        this.changes.clear();
+        rej(reason);
+      };
 
-	mounted(node: Node, changeType: NodeChangeType) {
-		if (!this.changes.has(node.id)) {
-			// console.log('mounted node not dirty', node.id.toString(), changeType);
-			return
-		}
+      cb();
 
-		// console.log('mounted', node.id.toString(), changeType);
+    });
 
-		// keep track of the pending node updates
-		if (changeType === NodeChangeType.update) {
-		  // console.log('mounted', node.id.toString(), changeType, this.changes.size, this.changes.toArray().map(n => n.toString()), node.textContent, node);
-			this.changes.remove(node.id);
-		}
+    return promise;
+  }
 
-		// console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
-		if (this.isContentSynced) {
-			this.app.emit(EventsOut.contentUpdated, this.state.content);
-		}
+  get stateCounter() {
+    return this.app.state.counter;
+  }
 
-		// console.log('mounted', this.changes.size, this.changes.toArray().map(n => n.toString()));
+  // 1. sync the doc
+  // 2. sync the selection
+  // 3. sync the node state
+  update(tr: Transaction, timeout: number = 1000) {
+    this.counter = this.stateCounter;
 
-		// sync the selection if the content is synced
-		// console.log('mounted', this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
-		if (this.isContentSynced) {
-			console.log('content synced, selection dirty:', this.isSelectionDirty);
-			// NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
-			if (this.isSelectionDirty) {
-				this.updateSelection(() => {
-					this.onTransaction();
-				});
-			} else {
-				this.onTransaction();
-				// this.app.processTick();
-			}
-		}
-	}
+    // return this.promise(() => {
+    //
+    //   // if dom is not updated in 1s, reject the promise and revert to the previous state
+    //   // setTimeout(() => {
+    //   //   if (this.stateCounter === this.counter) {
+    //   //     console.error("dom update promise timeout");
+    //   //     console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', timeout);
+    //   //     this.promiseState.reject?.();
+    //   //   }
+    //   // }, timeout);
 
-	private onTransaction() {
-		const tr = this.transactions.shift()
-		if (tr) {
-			this.pm.onTransaction(tr);
-			this.app.emit(EventsOut.transaction, tr);
-			this.app.emit(EventsOut.changed, this.state);
-		}
-	}
 
-	private updateContent() {
-		console.groupCollapsed('syncing:  content');
-		// console.group('syncing: content')
-		const updatedNodeIds = this.changes;
-		const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
 
-		console.log('updatedNodes', updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
+        if (this.transactions.length) {
+          this.promiseState.reject?.();
+          return;
+        }
 
-		// remove nodes if ancestor is present in the updateNodes
-		// this is needed to avoid updating the same node twice
-		// as updating(rendering) the ancestor will update the descendants as well
-		updatedNodes.forEach(n => {
-			updatedNodeIds.remove(n.id);
-			if (n.closest(p => updatedNodeIds.has(p.id))) {
-				return
-			}
-			updatedNodeIds.add(n.id);
-		});
 
-		console.log('publish', updatedNodes.map(n => n.id.toString()));
+        this.transactions.push(tr);
+        const { isContentChanged, isSelectionChanged } = this.state;
 
-		updatedNodes
-			.filter(n => updatedNodeIds.has(n.id))
-			.forEach( n => this.publish(NodeChangeType.update, n, n.parent));
-		console.groupEnd()
-	}
+        // console.log('updating transaction effect', tr);
+        // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
+        // if nothing is dirty, then there is nothing to do
+        if (!isContentChanged && !isSelectionChanged) {
+          return;
+        }
 
-	private updateSelection(cb: Function) {
-		const selection = this.state.selection;
-		console.debug('syncing: selection', this.state.selection.toJSON(), this.state.selection.isInline);
-		if (!this.app.ready) {
-			// console.log('app not ready');
-			return
-		}
+        if (isContentChanged) {
+          this.changes.clear();
+          this.changes = this.state.changes.clone();
+        }
 
-		// this.app.enable();
+        if (isContentChanged) {
+          this.updateContent();
+          return;
+        }
 
-		if (selection.isInline) {
-			this.sm.syncSelection();
-		}
-		this.app.emit(EventsOut.selectionUpdated, this.state.selection);
-		cb();
+        if (isSelectionChanged) {
+          this.updateSelection(() => {
+            this.onTransaction();
+          });
+        }
+    // });
+  }
 
-		// process pending transactions
-		// this.tm.dispatch();
-		// console.groupEnd();
-	}
+  mounted(node: Node, changeType: NodeChangeType, counter: number) {
+    // if (this.counter > this.stateCounter) {
+    //   console.log('mounted: old transaction sync still in progress', this.counter, counter);
+    //   return;
+    // }
+
+    console.log('xxxxxxxxxxxx');
+    // force the promise to timeout
+    if (!this.changes.has(node.id)) {
+      // console.log('mounted node not dirty', node.id.toString(), changeType);
+      return;
+    }
+
+    // console.log('mounted', node.id.toString(), changeType);
+
+    // keep track of the pending node updates
+    if (changeType === NodeChangeType.update) {
+      // console.log('mounted', node.id.toString(), changeType, this.changes.size, this.changes.toArray().map(n => n.toString()), node.textContent, node);
+      this.changes.remove(node.id);
+    }
+
+    // console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
+    if (this.isContentSynced) {
+      this.app.emit(EventsOut.contentUpdated, this.state.content);
+    }
+
+    // console.log('mounted', this.changes.size, this.changes.toArray().map(n => n.toString()));
+
+    // sync the selection if the content is synced
+    // console.log('mounted', this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
+    if (this.isContentSynced) {
+      console.log("content synced, selection dirty:", this.isSelectionDirty);
+      // NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
+      if (this.isSelectionDirty) {
+        this.updateSelection(() => {
+          this.onTransaction();
+        });
+      } else {
+        this.onTransaction();
+      }
+    }
+  }
+
+  private onTransaction() {
+    // this.app.processTick();
+    const tr = this.transactions.shift();
+    if (tr) {
+      this.pm.onTransaction(tr);
+      this.app.emit(EventsOut.transaction, tr);
+      this.app.emit(EventsOut.changed, this.state);
+    }
+
+    console.log('----------------');
+    this.promiseState.resolve?.();
+  }
+
+  private updateContent() {
+    // if (this.counter > this.stateCounter) {
+    //   console.log('updateContent: old transaction sync still in progress', this.stateCounter, this.counter);
+    //   return;
+    // }
+
+    console.groupCollapsed("syncing:  content");
+    // console.group('syncing: content')
+    const updatedNodeIds = this.changes;
+    const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
+
+    console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
+
+    // remove nodes if ancestor is present in the updateNodes
+    // this is needed to avoid updating the same node twice
+    // as updating(rendering) the ancestor will update the descendants as well
+    updatedNodes.forEach(n => {
+      updatedNodeIds.remove(n.id);
+      if (n.closest(p => updatedNodeIds.has(p.id))) {
+        return;
+      }
+      updatedNodeIds.add(n.id);
+    });
+
+    console.log("publish", updatedNodes.map(n => n.id.toString()));
+
+    updatedNodes
+      .filter(n => updatedNodeIds.has(n.id))
+      .forEach(n => this.publish(NodeChangeType.update, n, n.parent, this.counter));
+    console.groupEnd();
+  }
+
+  private updateSelection(cb: Function) {
+    const selection = this.state.selection;
+    console.debug("syncing: selection", this.state.selection.toJSON(), this.state.selection.isInline);
+    if (!this.app.ready) {
+      // console.log('app not ready');
+      return;
+    }
+
+    // this.app.enable();
+
+    if (selection.isInline) {
+      this.syncSelection();
+    }
+    this.app.emit(EventsOut.selectionUpdated, this.state.selection);
+    cb();
+
+    // process pending transactions
+    // this.tm.dispatch();
+    // console.groupEnd();
+  }
+
+  // syncs DOM selection with Editor's internal selection state
+  // this must be called after the dom is updated
+  private syncSelection() {
+    try {
+      // console.log('syncSelection', this.state.selectionOrigin, this.state.selection.toString()	);
+      if (!this.app.enabled) {
+        console.log("skipped: selection sync disabled");
+        return;
+      }
+
+      if (!this.state.isSelectionChanged) {
+        console.log("skipped: selection already synced", this.state.selectionOrigin, this.state.selection.toString());
+        return;
+      }
+
+      const { app } = this;
+      const { selection } = this.state;
+      if (this.state.previous?.selection?.eq(selection) && selection.origin === ActionOrigin.DomSelectionChange) {
+        console.log("skipped: unchanged selection sync", selection.origin, selection.toString());
+        return;
+      }
+
+      if (selection.isInvalid) {
+        console.warn("skipped invalid selection sync");
+        app.element?.blur();
+        return;
+      }
+
+      selection.syncDom(app.store);
+    } catch (error) {
+      this.promiseState.reject?.(error);
+    }
+  }
+
 
 }

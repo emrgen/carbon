@@ -24,7 +24,7 @@ export class ClipboardPlugin extends AfterPlugin {
           app.state.changes.clipboard = slice;
         }
         // delete the selection
-        app.cmd.keyboard.backspace(ctx)?.dispatch();
+        app.commands.keyboard.backspace(ctx)?.dispatch();
       },
       copy: (ctx: EventContext<any>) => {
         const { event, app } = ctx
@@ -51,7 +51,7 @@ export class ClipboardPlugin extends AfterPlugin {
 
         if (!app.state.changes.clipboard.isEmpty) {
           const slice = app.state.changes.clipboard;
-          app.cmd.transform.paste(selection, slice)?.dispatch()
+          app.commands.transform.paste(selection, slice)?.dispatch()
         } else {
 
         }

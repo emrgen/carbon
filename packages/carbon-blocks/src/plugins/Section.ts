@@ -33,7 +33,7 @@ export class Section extends NodePlugin {
 			splitName: 'section',
 			selectable: true,
 			draggable: true,
-			// dragHandle: true,
+			dragHandle: true,
 			rectSelectable: true,
 			blockSelectable: true,
 			insert: true,
@@ -61,9 +61,7 @@ export class Section extends NodePlugin {
 	}
 
 	commands(): Record<string, Function> {
-		return {
-			insert: this.insert.bind(this),
-		}
+		return {}
 	}
 
 	plugins(): CarbonPlugin[] {
@@ -94,10 +92,6 @@ export class Section extends NodePlugin {
 		}
 
 		return ret + app.cmd.nestable.serializeChildren(node)
-	}
-
-	insert(app: Carbon, after: Node) {
-
 	}
 
 	// normalize(node: Node, state: CarbonState): CarbonAction[] {

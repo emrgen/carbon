@@ -1,6 +1,6 @@
-import { first, flatten, identity, isArray, last, sortBy, merge, isEmpty } from 'lodash';
+import { first, flatten, identity, isArray, last, sortBy, merge, isEmpty, isFunction } from "lodash";
 
-import { Optional, With } from '@emrgen/types';
+import {  With } from '@emrgen/types';
 import { NodeIdSet } from './BSet';
 import { Carbon } from './Carbon';
 import { p14 } from './Logger';
@@ -27,36 +27,29 @@ import { SelectAction } from "./actions/SelectAction";
 import { RemoveNodeAction } from "./actions/RemoveNodeAction";
 import { MoveNodeAction } from "./actions/MoveNodeAction";
 import { isNestableNode } from "@emrgen/carbon-blocks";
+import { CarbonCommand, PluginCommand } from "./CarbonCommand";
 
 let _id = 0
-const getId = () => _id++
+const getId = () => String(_id++)
 
 declare module '@emrgen/carbon-core' {
-	export interface Transaction {
-
-	}
+	export interface Transaction {}
 }
 
-
-
 export class Transaction {
-	id: number;
-	type: TransactionType = TransactionType.TwoWay;
-	isNormalizer: boolean = false;
-	timestamp: number = Date.now();
-	onTick: boolean = false;
+	private id: string;
+	private type: TransactionType = TransactionType.TwoWay;
+	private timestamp: number = Date.now();
+	private onTick: boolean = false;
 	private actions: CarbonAction[] = [];
-	private normalizeIds = new NodeIdSet();
-	private updatedIds = new NodeIdSet();
-
+	committed: boolean = false;
 	readOnly = false;
+	get isEmpty() {
+		return this.actions.length === 0;
+	}
 
 	get origin() {
 		return this.app.runtime.origin;
-	}
-
-	get actionsList(): CarbonAction[] {
-		return this.actions;
 	}
 
 	get size() {
@@ -67,54 +60,26 @@ export class Transaction {
 		return this.app.state;
 	}
 
-	private get runtime() {
-		return this.app.runtime;
-	}
-
 	get textInsertOnly() {
 		return this.actions.every(a => a instanceof SetContentAction || a instanceof SelectAction);
 	}
-
 
 	get selectionOnly() {
 		return this.actions.every(a => a instanceof SelectAction);
 	}
 
-	static create(carbon: Carbon, tm: TransactionManager, pm: PluginManager, sm: SelectionManager) {
-		return new Transaction(carbon, tm, pm, sm)
+	static create(carbon: Carbon, cmd: CarbonCommand, tm: TransactionManager, pm: PluginManager, sm: SelectionManager) {
+		return new Transaction(carbon, cmd, tm, pm, sm)
 	}
 
 	constructor(
 		readonly app: Carbon,
+		readonly cmd: CarbonCommand,
 		protected readonly tm: TransactionManager,
 		protected readonly pm: PluginManager,
 		protected readonly sm: SelectionManager
 	) {
 		this.id = getId();
-	}
-
-	get updatesContent() {
-		return this.updatedIds.size;
-	}
-
-	get updatesSelection() {
-		return !!this.selections.length
-	}
-
-	private get selections() {
-		const selectActions = this.actions.filter(a => a instanceof SelectAction) as SelectAction[];
-		// console.log('Transaction.selections', this.id, selectActions.length, selectActions.map(a => a.after.toString()));
-		return selectActions.map(a => a.after);
-	}
-
-	// returns final selection
-	get selection(): PointedSelection {
-		return this.state.selection.unpin();
-	}
-
-	// this will allow command chaining
-	get cmd() {
-		return this.app.cmd;
 	}
 
 	onSelect(draft:CarbonStateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
@@ -134,7 +99,7 @@ export class Transaction {
 			this.selectNodes(after.nodeIds, origin);
 		}
 
-		return this.add(SelectAction.create(this.selection, after, origin));
+		return this.add(SelectAction.create(this.state.selection.unpin(), after, origin));
 	}
 
 	setContent(nodeRef: IntoNodeId, after: NodeContent, origin = this.origin): Transaction {
@@ -213,7 +178,7 @@ export class Transaction {
 		return this;
 	}
 
-	deactivateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+	private deactivateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
 		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
 		activateIds.forEach(id => {
 			this.updateProps(id, { [ActivatedPath]: false }, origin)
@@ -227,39 +192,26 @@ export class Transaction {
 		return this;
 	}
 
-	cancel() {
-		// this.cancelled = true;
-	}
-
 	// adds command to transaction
 	add(action: CarbonAction | CarbonAction[]): Transaction {
-		flatten([action]).forEach(c => this.addAction(c));
+		flatten([action]).forEach(a => this.actions.push(a));
 		return this;
 	}
 
-	private addAction(action: CarbonAction) {
-		this.actions.push(action);
-	}
-
 	// TODO: transaction should be immutable before dispatch
-	dispatch(isNormalizer: boolean = false): Transaction {
+	dispatch(): Transaction {
 		if (this.actions.length === 0) {
 			console.warn('skipped: empty transaction')
 			return this;
 		}
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema
-		this.isNormalizer = isNormalizer;
 		this.tm.dispatch(this);
 		return this;
 	}
 
-	// prepare transaction for commit
-	// check if schema is violated by the transaction and try to normalize or throw error
-	prepare() {}
-
-	commit(draft: CarbonStateDraft) {
-		if (this.actions.length === 0) return
+	commit(draft: CarbonStateDraft): Transaction {
+		if (this.actions.length === 0) return this
 		// const prevDocVersion = editor.doc?.updateCount;
 
 		try {
@@ -281,117 +233,122 @@ export class Transaction {
 			throw Error('transaction error');
 		} finally {
 			console.groupEnd()
+			this.committed = true;
+			return this;
 		}
-	}
-
-	// NOTE: normalize can generate further transaction
-	// can generate further transaction
-	private normalizeNodes(draft: CarbonStateDraft) {
-		const ids = this.normalizeIds.toArray();
-
-		this.normalizeIds.clear();
-
-		if (!ids.length) return []
-		const nodes = ids
-			.map(id => this.app.store.get(id))
-			.filter(identity) as Node[];
-		const sortedNodes = sortBy(nodes, n => -n.depth);
-		const actions = flatten(sortedNodes.map(n => n && this.pm.normalize(n)));
-
-		for (const action of flatten(actions)) {
-			if (isEmpty(action)) {
-				throw Error('normalize action is empty');
-			}
-
-			if (last(this.actions) instanceof SelectAction) {
-				this.actions = [
-					...this.actions.slice(0, -1),
-					action,
-					...this.actions.slice(-1),
-				]
-			} else {
-				this.actions.push(action)
-			}
-
-			// console.log(action);
-			action.execute(this, draft);
-		}
-	}
-
-
-	// normalize the updated nodes in this transaction
-	normalize(...nodes: Node[]) {
-		nodes.forEach(n => n.chain.forEach(n => {
-			this.normalizeIds.add(n.id);
-		}));
 	}
 
 	// merge transactions
-	merge(other: Transaction) {
-		const {actions} = this;
-		const {actions: otherActions} = other;
-		if (this.textInsertOnly && other.textInsertOnly) {
-			const { tr } = this.app
-			const thisSetContentAction = first(actions) as SetContentAction
-			const otherSetContentAction = first(actions) as SetContentAction
-
-			const thisSelectAction = last(actions) as SelectAction
-			const otherSelectAction = last(actions) as SelectAction
-
-			tr
-				.add(thisSetContentAction.merge(otherSetContentAction))
-				.add(thisSelectAction.merge(otherSelectAction))
-			return tr
-		}
-		// if (last(this.actions) instanceof SelectCommand) {
-		// 	this.pop()
-		// }
-
-		// this.actions.push(...tr.actions);
-		// this.selections.push(...tr.selections);
-		return other;
-	}
+	// merge(other: Transaction) {
+	// 	const {actions} = this;
+	// 	const {actions: otherActions} = other;
+	// 	if (this.textInsertOnly && other.textInsertOnly) {
+	// 		const { tr } = this.app
+	// 		const thisSetContentAction = first(actions) as SetContentAction
+	// 		const otherSetContentAction = first(actions) as SetContentAction
+	//
+	// 		const thisSelectAction = last(actions) as SelectAction
+	// 		const otherSelectAction = last(actions) as SelectAction
+	//
+	// 		tr
+	// 			.Add(thisSetContentAction.merge(otherSetContentAction))
+	// 			.Add(thisSelectAction.merge(otherSelectAction))
+	// 		return tr
+	// 	}
+	// 	// if (last(this.actions) instanceof SelectCommand) {
+	// 	// 	this.pop()
+	// 	// }
+	//
+	// 	// this.actions.push(...tr.actions);
+	// 	// this.selections.push(...tr.selections);
+	// 	return other;
+	// }
 
 	// extend transaction with other transaction
-	extend(other: Transaction) {
-		other.actions.forEach(action => {
-			this.actions.push(action);
-		})
+	// extend(other: Transaction) {
+	// 	other.actions.forEach(action => {
+	// 		this.actions.push(action);
+	// 	})
+	//
+	// 	return this;
+	// }
 
-		// other.activatedIds.forEach(id => {
-		// 	this.activatedIds.add(id);
-		// })
+	// pop() {
+	// 	return this.actions.pop();
+	// }
 
-		// other.selectedIds.forEach(id => {
-		// 	this.selectedIds.add(id);
-		// })
-
-		// other.openNodeIds.forEach(id => {
-		// 	this.openNodeIds.add(id);
-		// })
-
-		// other.updatedIds.forEach(id => {
-		// 	this.updatedIds.add(id);
-		// });
-
-		return this;
-	}
-
-	pop() {
-		return this.actions.pop();
-	}
-
-	then(cb: With<Carbon>) {
+	then(cb: With<Carbon>): Transaction {
 		this.app.nextTick(cb);
 		return this;
 	}
 
-	// create an inverse transaction
-	inverse(origin?: ActionOrigin) {
-		const { tr, schema } = this.app;
+	proxy(): Transaction {
+		const self = this;
+		const proxy = new Proxy(self, {
+			get: (target, prop) => {
+				const propName = prop.toString();
+				if (Reflect.has(target, prop)) {
+					if (['x'].includes(propName)) {
+						return Reflect.get(target, prop);
+					} else {
+						const part = Reflect.get(target, prop);
+						if (isFunction(part)) {
+							return (...args) => {
+								part.bind(self)(...args);
+								return proxy;
+							}
+						} else {
+							return part;
+						}
+					}
+				}
 
+				const cmd = target.cmd.command(propName);
+
+				if (cmd) {
+					return (...args) => {
+						cmd.fn(proxy, ...args)
+						return proxy;
+					}
+				}
+
+				const plugin = target.cmd.plugin(propName);
+
+				if (!plugin) {
+					throw new Error(`Plugin ${propName} not found`);
+				}
+
+				return PluginCommand.from(proxy, propName, plugin).proxy()
+			}
+		});
+
+		return proxy;
+	}
+
+	discard() {
+		this.app.committed = true;
+		Object.freeze(this.actions);
+	}
+
+	into() {
+		const { type, id, actions, origin } = this;
+		return {
+			type,
+			id,
+			actions,
+			origin,
+		}
+	}
+}
+
+export class TransactionCommit {
+	constructor(readonly type: TransactionType, readonly id: string, readonly actions: CarbonAction[], origin: ActionOrigin) {}
+
+	// create an inverse transaction
+	inverse(app: Carbon, origin?: ActionOrigin) {
+		const tr = app.cmd;
 		tr.readOnly = true;
-		tr.type = TransactionType.OneWay;
+		// tr.type = TransactionType.OneWay;
 
 		const actions = this.actions.map(c => c.inverse());
 		tr.add(actions.slice(0, -1).reverse());
@@ -400,11 +357,11 @@ export class Transaction {
 	}
 
 	filter(fn: (action: CarbonAction) => boolean) {
-		const {tr} = this.app;
-		this.actions.filter(fn).forEach(action => {
-			tr.add(action);
-		});
+		// const {tr} = this.app;
+		// this.actions.filter(fn).forEach(action => {
+		// 	tr.Add(action);
+		// });
 
-		return tr;
+		// return tr;
 	}
 }

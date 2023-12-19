@@ -17,6 +17,7 @@ interface CarbonStateProps {
 	nodeMap: NodeMap;
 	changes?: NodeIdSet;
 	decorations?: DecorationStore;
+	counter?: number;
 }
 
 
@@ -29,6 +30,8 @@ export class CarbonState extends EventEmitter {
 	decorations: DecorationStore;
 	changes: NodeIdSet;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
+
+	counter: number = 0;
 
 	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap?: NodeMap) {
 		const map = nodeMap ?? new NodeMap();
@@ -53,6 +56,7 @@ export class CarbonState extends EventEmitter {
 			nodeMap,
 			changes = NodeIdSet.empty(),
 			decorations = new DecorationStore(),
+			counter = 0
 		} = props;
 
 		this.previous = previous;
@@ -62,6 +66,7 @@ export class CarbonState extends EventEmitter {
 		this.decorations = decorations;
 		this.nodeMap = nodeMap;
 		this.changes = changes;
+		this.counter = counter;
 	}
 
 	get isSelectionChanged() {
@@ -137,6 +142,19 @@ export class CarbonState extends EventEmitter {
 			draft.dispose();
 			return this;
 		}
+	}
+
+	revert(steps = 1) {
+		let oldState = this as CarbonState;
+		while (steps > 0 && oldState.previous) {
+			oldState = oldState.previous!;
+			steps--;
+		}
+
+		const state = CarbonState.create(oldState.scope, oldState.content, oldState.selection, oldState.nodeMap);
+		state.previous = oldState;
+
+		return state.freeze();
 	}
 
 	freeze() {

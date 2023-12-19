@@ -50,21 +50,27 @@ export interface DeleteOpts {
 export type InsertPos = "before" | "after" | "prepend" | "append";
 
 declare module '@emrgen/carbon-core' {
-  export interface CarbonCommands {
+  export interface Transaction {
+
+  }
+}
+
+declare module '@emrgen/carbon-core' {
+  export interface Transaction {
     transform: {
-      insert(node: Node, ref: Node, opts?: InsertPos): Optional<Transaction>;
-      insertText(selection: PinnedSelection, text: string, native?: boolean): Optional<Transaction>;
-      deleteText(pin: Pin, text: string, opts?: InsertPos): Optional<Transaction>;
+      insert(node: Node, ref: Node, opts?: InsertPos): Transaction;
+      insertText(selection: PinnedSelection, text: string, native?: boolean): Transaction;
+      deleteText(pin: Pin, text: string, opts?: InsertPos): Transaction;
       remove(node: Node): Optional<Transaction>;
-      move(nodes: Node | Node[], to: Point): Optional<Transaction>;
-      delete(selection?: PinnedSelection, opts?: DeleteOpts): Optional<Transaction>;
-      split(node: Node, selection?: PinnedSelection, opts?: SplitOpts): Optional<Transaction>;
-      wrap(node: Node, name: NodeName): Optional<Transaction>;
+      move(nodes: Node | Node[], to: Point): Transaction;
+      delete(selection?: PinnedSelection, opts?: DeleteOpts): Transaction;
+      split(node: Node, selection?: PinnedSelection, opts?: SplitOpts): Transaction;
+      wrap(node: Node, name: NodeName): Transaction;
       unwrap(node: Node): Optional<Transaction>;
       change(node: Node, name: NodeName): Optional<Transaction>;
-      update(node: Node, attrs: Record<string, any>): Optional<Transaction>;
+      update(node: Node, attrs: Record<string, any>): Transaction;
       merge(prev: Node, next: Node): Optional<Transaction>;
-      paste(selection: PinnedSelection, slice: Slice): Optional<Transaction>;
+      paste(selection: PinnedSelection, slice: Slice): Transaction;
     };
   }
 }
@@ -97,14 +103,14 @@ export class TransformCommands extends BeforePlugin {
 
   // insert node wrt ref node
   // by default insert node after the ref node
-  insert(app: Carbon, node: Node, ref: Node, opts = "after"): Optional<Transaction> {
+  insert(tr: Transaction, node: Node, ref: Node, opts = "after") {
     switch (opts) {
       case "after":
-        return this.insertAfter(app, node, ref);
+        return this.insertAfter(tr, node, ref);
       case "before":
-        return this.insertBefore(app, node, ref);
+        return this.insertBefore(tr, node, ref);
       case "append":
-        return this.append(app, node, ref);
+        return this.append(tr, node, ref);
       default:
         throw new Error("Should not reach");
     }
@@ -114,7 +120,7 @@ export class TransformCommands extends BeforePlugin {
   // try to find a safe parking position
 
   // insert node after ref node
-  private insertAfter(app: Carbon, node: Node, ref: Node) {
+  private insertAfter(tr: Transaction, node: Node, ref: Node) {
     const at = Point.toAfter(ref.id);
     const selection = Pin.toStartOf(node)?.map(p => p.point)?.map(PointedSelection.fromPoint);
     if (!selection) {
@@ -122,7 +128,6 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    const { tr } = app;
     tr
       .insert(at, node)
       .select(selection);
@@ -130,31 +135,30 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // insert node before
-  private insertBefore(app: Carbon, node: Node, ref: Node): Optional<Transaction> {
+  private insertBefore(tr: Transaction, node: Node, ref: Node) {
     const at = Point.toBefore(ref.id);
-    const { tr, selection } = app;
+    const { selection } = tr.app;
     const after = selection.unpin();
     tr
       .insert(at, node)
       .select(after);
-
-    return tr;
   }
 
-  private append(app: Carbon, node: Node, parent: Node): Optional<Transaction> {
-    const { tr } = app;
+  private append(tr: Transaction, node: Node, parent: Node): Transaction {
     const { lastChild } = parent;
     const at = lastChild ? Point.toAfter(lastChild?.id) : Point.toStart(parent?.id!, 0);
     tr.insert(at, node);
     return tr;
   }
 
-  private insertText(app: Carbon, selection: PinnedSelection, text: string, native = false): Optional<Transaction> {
-    const { cmd } = app;
+  private insertText(tr: Transaction, selection: PinnedSelection, text: string, native = false): Transaction {
+    const { app } = tr;
+
+    if (selection.isBlock) {
+      return tr
+    }
     const updateTitleText = (app: Carbon) => {
       // console.log('insertText', text);
-
-      const { tr } = app;
       const { schema, selection } = app;
       const { head, start } = selection;
       const title = head.node;
@@ -173,7 +177,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     if (!selection.isCollapsed) {
-      return cmd.transform.delete(selection)?.then(carbon => {
+      return tr.transform.delete(selection)?.then(carbon => {
         return updateTitleText(carbon);
       })
     }
@@ -186,6 +190,8 @@ export class TransformCommands extends BeforePlugin {
       // }
       return updateTitleText(app);
     }
+
+    return tr;
   }
 
   private findFocusNode(nodes: Node[]): Optional<Node> {
@@ -202,7 +208,8 @@ export class TransformCommands extends BeforePlugin {
     return focusNode;
   }
 
-  private paste(app: Carbon, selection: PinnedSelection, slice: Slice): Optional<Transaction> {
+  private paste(tr: Transaction, selection: PinnedSelection, slice: Slice) {
+    const {app} = tr;
     if (slice.isEmpty) {
       return;
     }
@@ -217,17 +224,17 @@ export class TransformCommands extends BeforePlugin {
       const {nodes} = selection
       const lastNode = last(selection.nodes) as Node
       const focusNode = this.findFocusNode(nodes);
-      const tr = app.tr.insert(Point.toAfter(lastNode.id), nodes)
+
+      tr.insert(Point.toAfter(lastNode.id), nodes)
       if (focusNode) {
         tr.select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
       }
-      return tr
+      return
     }
 
     // we need to paste the nodes after the selection
     // TODO: make the selection a block selection and hide cursor
     if (sliceClone.isBlockSelection) {
-      const { tr } = app;
       const { head, tail } = selection;
       const { parent } = tail.node;
       if (!parent) {
@@ -269,7 +276,6 @@ export class TransformCommands extends BeforePlugin {
     }
 
     console.log(startTitle.chain.map(n => n.type.name));
-    const { tr } = app;
     // if selection is within same title
     if (selection.isCollapsed) {
       if (startTitle.eq(endTitle)) {
@@ -328,15 +334,14 @@ export class TransformCommands extends BeforePlugin {
 
     const after = selection.collapseToStart();
     // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
-    app.cmd.transform.delete(selection)?.then((carbon) => {
+    tr.transform.delete(selection)?.then((carbon) => {
       // console.log('DELETED', carbon.selection.toString());
       // return this.paste(carbon, after, BlockSelection.empty(app.store), slice);
     })?.dispatch();
   }
 
-  private move(app: Carbon, nodes: Node | Node[], to: Point): Optional<Transaction> {
+  private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {
     const moveNodes = Array.isArray(nodes) ? nodes.slice().reverse() : [nodes];
-    const { tr } = app;
     moveNodes.forEach(n => {
       tr.move(nodeLocation(n)!, to, n.id)
     });
@@ -344,13 +349,13 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // TODO: use transaction to update attrs
-  update(app: Carbon, node: Node, attrs: Record<string, any>): Optional<Transaction> {
-    return app.tr.updateProps(node.id, attrs);
+  update(tr: Transaction, node: Node, attrs: Record<string, any>): Optional<Transaction> {
+    return tr.updateProps(node.id, attrs);
   }
 
   // wrap node within parent of type `name`
-  wrap(app: Carbon, node: Node, name: NodeName): Optional<Transaction> {
-    const { tr } = app;
+  wrap(tr: Transaction, node: Node, name: NodeName): Optional<Transaction> {
+    const {app} = tr;
     const wrapper = app.schema.node(name, { children: [node.clone()] });
     if (!wrapper) return;
     const at = Pin.toStartOf(wrapper)?.point;
@@ -366,8 +371,8 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // unwrap node from parent
-  unwrap(app: Carbon, node: Node): Optional<Transaction> {
-    const { tr } = app;
+  unwrap(tr: Transaction, node: Node): Optional<Transaction> {
+    const { app } = tr;
     const { parent } = node;
     if (!parent) return;
     const at = Point.toAfter(parent.id);
@@ -382,8 +387,8 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // change the name of node
-  change(app: Carbon, node: Node, name: NodeName): Optional<Transaction> {
-    const { tr } = app;
+  change(tr: Transaction, node: Node, name: NodeName): Optional<Transaction> {
+    const {app} = tr
     const point = Pin.toStartOf(node)?.map(p => p.point);
     if (!point) {
       console.error("failed to get point for selection");
@@ -402,17 +407,18 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // TODO: check if schema is violated by the split
-  split(app: Carbon, splitBlock: Node, selection: PinnedSelection = app.selection, opts?: SplitOpts): Optional<Transaction> {
+  split(tr: Transaction, splitBlock: Node, selection: PinnedSelection = tr.app.selection, opts?: SplitOpts) {
     opts = merge({ side: "bottom", pos: "out", rootType: splitBlock.type }, opts);
 
     if (selection.isCollapsed) {
-      return this.splitAtPin(app, splitBlock, selection.start, opts);
+      return this.splitAtPin(tr, splitBlock, selection.start, opts);
     } else {
-      return this.splitByRange(app, splitBlock, selection, opts);
+      return this.splitByRange(tr, splitBlock, selection, opts);
     }
   }
 
-  private splitByRange(app: Carbon, splitBlock: Node, selection: PinnedSelection, opts: SplitOpts): Optional<Transaction> {
+  private splitByRange(tr: Transaction, splitBlock: Node, selection: PinnedSelection, opts: SplitOpts): Optional<Transaction> {
+    const { app } = tr;
     const { start, end } = selection;
     const startTextBlock = start.node;
     const endTextBlock = end.node;
@@ -437,7 +443,6 @@ export class TransformCommands extends BeforePlugin {
     }
 
     if (start.isAtStartOfNode(commonNode!) && end.isAtEndOfNode(commonNode)) {
-      const { tr } = app;
       if (commonNode.isCollapsible) {
         const textBlock = commonNode.child(0)!
         const at = Point.toAfter(textBlock.id);
@@ -450,8 +455,7 @@ export class TransformCommands extends BeforePlugin {
         tr.add(removeNodesActions(commonNode.children.slice(1)));
         tr.insert(at, block);
         tr.select(PinnedSelection.fromPin(Pin.toStartOf(block)!));
-
-        return tr
+        return
       }
 
       const at = Point.toAfter(splitBlock!.id);
@@ -480,6 +484,7 @@ export class TransformCommands extends BeforePlugin {
         if (!block) {
           throw Error('failed to create block');
         }
+
         const focusPoint = Pin.toStartOf(block);
         const after = PinnedSelection.fromPin(focusPoint!);
         tr
@@ -487,25 +492,28 @@ export class TransformCommands extends BeforePlugin {
           .insert(at, block!)
           .select(after);
       }
-      return tr;
+      return
     }
 
     const deleteGroup = this.selectionInfo(app, selection);
 
     // * startBlock !== endBlock
     if (!startTextBlock.eq(endTextBlock)) {
-      return this.splitByRangeAcrossBlocks(app, splitBlock, start, end, startNode, endNode, deleteGroup);
+      this.splitByRangeAcrossBlocks(tr, splitBlock, start, end, startNode, endNode, deleteGroup);
+      return
     }
 
     // * startBlock === endBlock
     if (startTextBlock.eq(endTextBlock)) {
-      return this.splitByRangeWithinTextBlock(app, splitBlock, start, end, startNode, endNode, deleteGroup);
+      this.splitByRangeWithinTextBlock(tr, splitBlock, start, end, startNode, endNode, deleteGroup);
+      return
     }
 
     return null
   }
 
-  private splitByRangeWithinTextBlock(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+  private splitByRangeWithinTextBlock(tr: Transaction, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+    const {app} = tr;
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
 
     const json = {
@@ -536,8 +544,8 @@ export class TransformCommands extends BeforePlugin {
     return null
   }
 
-  private splitByRangeAcrossBlocks(app: Carbon, splitBlock: Node, start: Pin, end: Pin, startTopNode: Node, endTopNode: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
-    const { tr } = app;
+  private splitByRangeAcrossBlocks(tr: Transaction, splitBlock: Node, start: Pin, end: Pin, startTopNode: Node, endTopNode: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+    const {app} = tr
     // console.log(deleteGroup.ids.toArray());
     // console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
 
@@ -726,8 +734,9 @@ export class TransformCommands extends BeforePlugin {
   // 1. pin is at start of the splitBlock
   // 2. pin is at end of the splitBlock
   // 3. pin is within the splitBlock
-  private splitAtPin(app: Carbon, splitBlock: Node, pin: Pin, opts: SplitOpts): Optional<Transaction> {
-    const { tr, selection } = app;
+  private splitAtPin(tr: Transaction, splitBlock: Node, pin: Pin, opts: SplitOpts) {
+    const { app } = tr;
+    const { selection } = app;
     const { splitType = app.schema.type('section') } = opts;
 
     const isAtBlockStart = pin.isAtStartOfNode(splitBlock);
@@ -742,7 +751,7 @@ export class TransformCommands extends BeforePlugin {
       tr
         .add(insertBeforeAction(splitBlock, emptyBlock))
         .select(after);
-      return tr;
+      return
     }
 
     const isAtBlockEnd = pin.isAtEndOfNode(splitBlock);
@@ -759,7 +768,7 @@ export class TransformCommands extends BeforePlugin {
       tr
         .insert(insertPoint, emptyBlock)
         .select(after);
-      return tr;
+      return;
     }
 
     // as the cursor is within the split block
@@ -839,7 +848,7 @@ export class TransformCommands extends BeforePlugin {
     // console.log(focusPoint?.toString(), rootNode.textContent);
 
     // console.log("insert point", rootNode?.name, rootNode);
-    return app.tr
+    tr
       .insert(rootInsertPoint, rootNode!)
       .add(moveCommands)
       .add(setContentCommands)
@@ -879,12 +888,12 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // remove node from doc
-  remove(app: Carbon, node: Node): Optional<Transaction> {
-    return app.tr.remove(nodeLocation(node)!, node)
+  remove(tr: Transaction, node: Node): Optional<Transaction> {
+    return tr.remove(nodeLocation(node)!, node)
   }
 
   // delete selected nodes
-  private deleteNodes(app: Carbon, nodes: Node[], opts: DeleteOpts = {}): Optional<Transaction> {
+  private deleteNodes(tr: Transaction, nodes: Node[], opts: DeleteOpts = {}): Optional<Transaction> {
     const { fall = 'after' } = opts;
     const deleteActions: CarbonAction[] = [];
     reverse(nodes.slice()).forEach(node => {
@@ -923,7 +932,7 @@ export class TransformCommands extends BeforePlugin {
     // console.log('XXX', selection, blocks.map(n => n.id.toString()));
     // console.log('XXX', after?.toString());
 
-    const tr = app.tr
+    tr
       .select(PinnedSelection.fromNodes([]))
       .add(deleteActions)
     if (after) {
@@ -938,13 +947,14 @@ export class TransformCommands extends BeforePlugin {
   // 2. tail/head block: immediate children of commonNode and parent of tail/head node
   // 3. tail/head node.
   // delete nodes within selection
-  delete(app: Carbon, selection: PinnedSelection = app.selection, opts?: DeleteOpts): Optional<Transaction> {
+  delete(tr: Transaction, selection: PinnedSelection = tr.app.selection, opts?: DeleteOpts): Optional<Transaction> {
+    const { app } = tr;
     if (selection.isBlock) {
-      return this.deleteNodes(app, selection.nodes, opts);
+      return this.deleteNodes(tr, selection.nodes, opts);
     }
 
     if (selection.isCollapsed) {
-      return app.tr;
+      return
     }
 
     // console.log(selection.toString());
@@ -960,7 +970,6 @@ export class TransformCommands extends BeforePlugin {
 
     // selection is within same text block
     if (endTextBlock.eq(startTextBlock)) {
-      const { tr } = app;
       tr.add(this.deleteGroupCommands(app, deleteGroup));
       const after = selection.collapseToStart();
       tr.select(after);
@@ -983,8 +992,6 @@ export class TransformCommands extends BeforePlugin {
     // commonNode is selected
     // replace commonNode with default block
     if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-      const { tr } = app;
-
       if (commonNode.isCollapsible) {
         const textBlock = commonNode.child(0)!
         const at = Point.toAfter(textBlock.id);
@@ -997,7 +1004,7 @@ export class TransformCommands extends BeforePlugin {
         tr.add(removeNodesActions(commonNode.children.slice(1)));
         tr.select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
 
-        return tr
+        return
       }
 
       const block = app.schema.type(commonNode.type.replaceName)?.default();
@@ -1021,13 +1028,14 @@ export class TransformCommands extends BeforePlugin {
 
     // * startBlock !== endBlock
     if (!startBlock.eq(endBlock)) {
-      return this.deleteAcrossBlock(app, start, end, startBlock, endBlock, deleteGroup);
+      return this.deleteAcrossBlock(tr, start, end, startBlock, endBlock, deleteGroup);
     }
 
     return null;
   }
 
-  private deleteWithinBlock(app: Carbon, start: Pin, end: Pin, startTopBlock: Node, endTopBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+  private deleteWithinBlock(tr: Transaction, start: Pin, end: Pin, startTopBlock: Node, endTopBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+    const { app } = tr;
     let point: Optional<Point>;
     // TODO: we are free to decide how we want to put the final cursor position
     if (start.isAtStartOfNode(startTopBlock)) {
@@ -1041,8 +1049,6 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    const { tr } = app;
-
     const after = PointedSelection.fromPoint(point);
     tr.add(this.deleteGroupCommands(app, deleteGroup));
     tr.select(after);
@@ -1050,8 +1056,8 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  private deleteAcrossBlock(app: Carbon, start: Pin, end: Pin, startTopBlock: Node, endTopBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
-    const { tr } = app;
+  private deleteAcrossBlock(tr: Transaction, start: Pin, end: Pin, startTopBlock: Node, endTopBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+    const { app } = tr;
     const startTextBlock = start.node;
     const endTextBlock = end.node;
     // console.log('xxxxxxxxxxx', startTopBlock.name);
@@ -1142,7 +1148,7 @@ export class TransformCommands extends BeforePlugin {
         .add(deleteActions)
         .add(insertCommands)
         .select(after)
-      return tr
+      return
     }
 
     // CASE 2
@@ -1157,7 +1163,7 @@ export class TransformCommands extends BeforePlugin {
         .add(deleteActions)
         .add(insertCommands)
         .select(after)
-      return tr
+      return
     }
 
     // CASE 3
@@ -1200,11 +1206,8 @@ export class TransformCommands extends BeforePlugin {
         .add(insertCommands)
         .select(after)
 
-      return tr
+      return
     }
-
-
-    return null
   }
 
   private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch, moveNodeIds = new NodeIdSet()): CarbonAction[] {
@@ -1476,7 +1479,8 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // merge two nodes
-  merge(app: Carbon, prev: Node, next: Node): Optional<Transaction> {
+  merge(tr: Transaction, prev: Node, next: Node) {
+    const { app } = tr;
     const actions: CarbonAction[] = [];
     // check if prev and next can be merged
     // console.log('xxxxxx',prev, next, prev.isEmpty);
@@ -1531,7 +1535,7 @@ export class TransformCommands extends BeforePlugin {
 
     // console.log('Selection', after.toString());
 
-    return app.tr
+    tr
       .add(moveActions)
       .add(removeActions)
       .add(insertActions)

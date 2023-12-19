@@ -39,13 +39,17 @@ export class TransactionManager {
 		// normalizer transactions are allowed to commit even with pending selection events
 		while (this.transactions.length) {
 			const tr = this.transactions.shift();
-			if (!tr) continue;
+			if (!tr || tr.isEmpty) {
+				app.committed = true;
+				continue;
+			}
+
 			// produce a new state from the current state
 			const state = app.state.produce(app.runtime.origin, draft => {
-				tr.prepare();
 				tr.commit(draft);
-				// this.updateTransactionEffects(tr);
 			});
+
+			app.committed = true;
 
 			this.updateState(state, tr);
 		}

@@ -4,10 +4,7 @@ import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
 
 
 declare module '@emrgen/carbon-core' {
-  export interface CarbonCommands {
-    numberedList  : {
-      listNumber(node: Node): number;
-    };
+  export interface Transaction {
   }
 }
 
@@ -46,11 +43,10 @@ export class NumberedList extends Section {
 
   commands(): Record<string, Function> {
     return {
-      listNumber: this.listNumber,
     }
   }
 
-  listNumber(app: Carbon, node: Node): number {
+  static listNumber(node: Node): number {
     const prevSiblings = takeBefore(node.prevSiblings.slice().reverse(), (n: Node) => n.name !== this.name);
     return prevSiblings.length + 1;
   }
@@ -58,8 +54,8 @@ export class NumberedList extends Section {
   serialize(app: Carbon, node: Node): SerializedNode {
     const contentNode = node.child(0);
 
-    let ret = `${this.listNumber(app, node)}. ${contentNode ? app.serialize(contentNode) : ''}`;
-    ret += app.cmd.nestable.serializeChildren(node);
+    let ret = `${NumberedList.listNumber(node)}. ${contentNode ? app.serialize(contentNode) : ''}`;
+    // ret += app.cmd.nestable.serializeChildren(node);
     return ret
   }
 }

@@ -22,10 +22,12 @@ export class Divider extends NodePlugin {
         tags: ['divider', 'line', 'horizontal line'],
         order: 10
       },
-      attrs: {
-        html: {
-          suppressContentEditableWarning: true,
-          contentEditable: false,
+      props: {
+        local: {
+          html: {
+            suppressContentEditableWarning: true,
+            contentEditable: false,
+          }
         }
       }
     }

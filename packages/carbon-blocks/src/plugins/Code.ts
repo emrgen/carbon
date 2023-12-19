@@ -82,10 +82,10 @@ export class Code extends CarbonPlugin {
       tab: (ctx: EventContext<KeyboardEvent>) => {
         ctx.event.preventDefault();
         ctx.stopPropagation();
-        const { app, node } = ctx;
+        const { app, cmd } = ctx;
         const { selection } = app;
 
-        app.cmd.transform.insertText(selection, '  ')?.dispatch();
+        cmd.transform.insertText(selection, '  ')?.dispatch();
       },
 
       // backspace: (ctx: EventContext<KeyboardEvent>) => {
@@ -152,7 +152,7 @@ export class BeforeCodePlugin extends BeforePlugin {
       return;
     }
 
-    const { selection, cmd } = app;
+    const { selection, commands } = app;
     // console.log('textBlock', textBlock);
 
     const updateTitleText = (carbon: Carbon) => {
@@ -211,7 +211,7 @@ export class BeforeCodePlugin extends BeforePlugin {
     }
 
     if (!selection.isCollapsed) {
-      cmd.transform.delete(selection)?.then(carbon => {
+      commands.transform.delete(selection)?.then(carbon => {
         return updateTitleText(carbon);
       }).dispatch();
       return

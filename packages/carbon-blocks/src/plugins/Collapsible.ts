@@ -24,10 +24,14 @@ import { identity } from 'lodash';
 import { NestablePlugin } from "./Nestable";
 
 declare module '@emrgen/carbon-core' {
-  interface CarbonCommands {
+  interface Transaction {
+    toggle(node: Node): Transaction;
     collapsible: {
-      split(selection: PinnedSelection): Optional<Transaction>;
-      enter(selection: PinnedSelection): Optional<Transaction>;
+      split(selection: PinnedSelection): Transaction;
+      enter(selection: PinnedSelection): Transaction;
+      expand(node: Node): Transaction;
+      collapse(node: Node): Transaction;
+      toggle(node: Node): Transaction;
     }
   }
 }
@@ -73,7 +77,26 @@ export class Collapsible extends NodePlugin {
     return {
       split: this.split,
       enter: this.enter,
+      expand: this.expand,
+      collapse: this.collapse,
+      toggle: this.toggle,
     }
+  }
+
+  toggle(tr: Transaction, node: Node) {
+    if (node.isCollapsed) {
+      this.expand(tr, node);
+    } else {
+      this.collapse(tr, node);
+    }
+  }
+
+  expand(tr: Transaction, node: Node) {
+    tr.updateProps(node.id, { [CollapsedPath]: false });
+  }
+
+  collapse(tr: Transaction, node: Node) {
+    tr.updateProps(node.id, { [CollapsedPath]: true });
   }
 
   plugins(): CarbonPlugin[] {
@@ -92,7 +115,7 @@ export class Collapsible extends NodePlugin {
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        app.tr.updateProps(node.id, {
+        ctx.cmd.updateProps(node.id, {
           [CollapsedPath]: !node.isCollapsed,
         }).dispatch();
       },
@@ -105,7 +128,7 @@ export class Collapsible extends NodePlugin {
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        app.tr.updateProps(node.id, { node: { collapsed: true } }).dispatch();
+        ctx.cmd.updateProps(node.id, { node: { collapsed: true } }).dispatch();
       },
       // tab: skipKeyEvent
       enter(ctx: EventContext<KeyboardEvent>) {
@@ -134,7 +157,8 @@ export class Collapsible extends NodePlugin {
     }
   }
 
-  split(app: Carbon, selection: PinnedSelection): Optional<Transaction> {
+  split(tr: Transaction, selection: PinnedSelection) {
+    const {app} = tr;
     const { start, end } = selection;
     const title = start.node;
     const splitBlock = title.parent!;
@@ -150,15 +174,17 @@ export class Collapsible extends NodePlugin {
 
         const focusPoint = Pin.toStartOf(section!);
         const after = PinnedSelection.fromPin(focusPoint!);
-        return app.tr
+        tr
           .setContent(title.id, BlockContent.create([]))
           .add(insertAfterAction(title, section!))
           .select(after)
+        return tr;
       }
 
-      return app.tr
+      tr
         .add(insertBeforeAction(title.parent!, section!))
         .select(after)
+      return tr;
     }
 
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
@@ -184,18 +210,18 @@ export class Collapsible extends NodePlugin {
     const focusPoint = Pin.toStartOf(section!);
     const after = PinnedSelection.fromPin(focusPoint!);
 
-    return app.tr
+    tr
       .setContent(title.id, leftContent)
       .insert(at, section!)
       .select(after)
   }
 
-  enter(app: Carbon, selection: PinnedSelection): Optional<Transaction> {
+  enter(tr: Transaction, selection: PinnedSelection) {
     console.log('[Enter] collapsible');
     return
   }
 
-  serialize(app: Carbon, node: Node): SerializedNode {
+  serialize(app: Carbon, node: Node) {
     return `- ${app.serialize(node.child(0)!)}` + app.cmd.nestable.serializeChildren(node);
   }
 

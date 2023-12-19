@@ -46,7 +46,8 @@ export class EventManager {
 			event: event.event,
 			node: event.node,
 			selection: app.selection,
-			origin: EventOrigin.custom
+			origin: EventOrigin.custom,
+			cmd: app.cmd,
 		})
 
 		this.pm.onEvent(ctx);
@@ -102,9 +103,17 @@ export class EventManager {
 				node: lastNode,
 				selection: PinnedSelection.IDENTITY,
 				origin: EventOrigin.dom,
+				cmd: app.cmd,
 			});
 
 			this.pm.onEvent(editorEvent);
+
+			// if the transaction is not committed, discard it
+			if (!editorEvent.cmd.committed) {
+				this.app.committed = true;
+				console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
+				return
+			}
 			return
 		}
 
@@ -126,7 +135,7 @@ export class EventManager {
 		}
 
 		// start node corresponds to focus point in DOM
-		const node = selection.start.node;
+		const node = selection.start.down().node;
 		if (!node) {
 			console.error(p12('%c[invalid]'), 'color:grey', 'node not found for event for selection', selection?.toString(), type);
 			return
@@ -140,6 +149,7 @@ export class EventManager {
 			node,
 			selection: selection,
 			origin: EventOrigin.dom,
+			cmd: app.cmd,
 		});
 
 
@@ -168,6 +178,13 @@ export class EventManager {
 		this.pm.onEvent(editorEvent);
 		if (groupOpen) {
 			// console.groupEnd();
+		}
+
+		// if the transaction is not committed, discard it
+		if (!editorEvent.cmd.committed) {
+			this.app.committed = true;
+			console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
+			return
 		}
 
 		// this.afterEvent(editorEvent);
