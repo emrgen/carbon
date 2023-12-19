@@ -42,11 +42,13 @@ export class Transaction {
 	private timestamp: number = Date.now();
 	private onTick: boolean = false;
 	private actions: CarbonAction[] = [];
+
 	committed: boolean = false;
 	readOnly = false;
 	get isEmpty() {
 		return this.actions.length === 0;
 	}
+
 
 	get origin() {
 		return this.app.runtime.origin;

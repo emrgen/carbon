@@ -10,7 +10,7 @@ import { Transaction } from "./Transaction";
 import { StateChanges } from "./NodeChange";
 import { PluginManager } from "./PluginManager";
 import { NodeId } from "./NodeId";
-import { ActionOrigin } from "@emrgen/carbon-core";
+import { ActionOrigin, CarbonState } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 
 export enum NodeChangeType {
@@ -89,9 +89,9 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
   // 1. sync the doc
   // 2. sync the selection
   // 3. sync the node state
-  update(tr: Transaction, timeout: number = 1000) {
+  update(tr: Transaction, state: CarbonState, timeout: number = 1000) {
     this.counter = this.stateCounter;
-
+    console.log('updating content version', this.state.content.version);
     // return this.promise(() => {
     //
     //   // if dom is not updated in 1s, reject the promise and revert to the previous state
@@ -106,7 +106,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
 
         if (this.transactions.length) {
-          this.promiseState.reject?.();
+          // this.promiseState.reject?.();
           return;
         }
 
@@ -123,7 +123,9 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
         if (isContentChanged) {
           this.changes.clear();
-          this.changes = this.state.changes.clone();
+          this.changes = state.changes.clone();
+          console.log(state.content.textContent.slice(0, 30));
+          console.log("changes", state.changes.toArray().map(n => n.toString()));
         }
 
         if (isContentChanged) {
@@ -192,7 +194,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
     }
 
     console.log('----------------');
-    this.promiseState.resolve?.();
+    // this.promiseState.resolve?.();
   }
 
   private updateContent() {

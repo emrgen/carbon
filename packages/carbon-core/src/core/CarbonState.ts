@@ -131,7 +131,7 @@ export class CarbonState extends EventEmitter {
 		try {
 			StateScope.set(this.scope, draft.nodeMap)
 			fn(draft);
-			const state = draft.prepare().commit(4);
+			const state = draft.prepare().commit(5);
 			StateScope.set(this.scope, this.nodeMap)
 
 			draft.dispose();
@@ -151,8 +151,9 @@ export class CarbonState extends EventEmitter {
 			steps--;
 		}
 
-		const state = CarbonState.create(oldState.scope, oldState.content, oldState.selection, oldState.nodeMap);
-		state.previous = oldState;
+		// create a new state with the same scope and content as the old state but with the old state as previous
+		const state = CarbonState.create(oldState.scope, oldState.content, oldState.selection);
+		state.previous = oldState.previous;
 
 		return state.freeze();
 	}

@@ -138,7 +138,7 @@ export class Carbon extends EventEmitter {
 		// 	throw new Error('cannot create a new command while there is a pending transaction')
 		// }
 		this.committed = false;
-		return Transaction.create(this, this.commands, this.tm, this.pm, this.sm).proxy();
+		return Transaction.create(this, this.state, this.schema, this.commands, this.tm, this.pm, this.sm).proxy();
 	}
 
 	// create a new transaction
@@ -147,7 +147,7 @@ export class Carbon extends EventEmitter {
 			throw new Error('cannot create a new transaction while there is a pending transaction')
 		}
 		this.committed = false;
-		return Transaction.create(this, this.commands, this.tm, this.pm, this.sm);
+		return Transaction.create(this, this.state, this.schema, this.commands, this.tm, this.pm, this.sm);
 	}
 
 	plugin(name: string): Optional<CarbonPlugin> {
@@ -194,15 +194,11 @@ export class Carbon extends EventEmitter {
 		}
 
 		// keep three previous states
-
-
 		this.state = state;
 		StateScope.set(state.scope, state.nodeMap);
+		this.change.update(tr, state)
 
-		this.counter += 1
 		this.emit(EventsOut.transactionCommit, tr);
-
-		this.change.update(tr)
 	}
 
 	component(name: string) {

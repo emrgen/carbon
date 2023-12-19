@@ -44,7 +44,7 @@ export const Callout = (props: RendererProps) => {
   const onSelectEmoji = (emoji) => {
     console.log("onSelectEmoji", emoji);
     // node.attrs.node.emoji = emoji.unified;
-    app.tr
+    app.cmd
       .updateProps(node.id, { node: { emoji: emoji.unified } })
       .select(PinnedSelection.fromPin(Pin.toStartOf(node)!)!)
       .dispatch();
@@ -58,38 +58,39 @@ export const Callout = (props: RendererProps) => {
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
       <CarbonNodeContent
+        key={node.key}
         node={node}
-        beforeContent={
-          <div
-            className="fastype-callout-icon"
-            onMouseDown={preventAndStop}
-            onMouseUp={preventAndStop}
-            contentEditable={false}
-            suppressContentEditableWarning
-          >
-            <IconButton
-              bg={"transparent"}
-              size={"xs"}
-              aria-label="Search database"
-              icon={
-                <Emoji
-                  unified={emoji}
-                  size={18}
-                />
-              }
-              onClick={showEmojiPicker}
-            />
-            {isOpen && (
-              <EmojiPicker
-                isOpen={isOpen}
-                onClose={onClose}
-                onSelect={onSelectEmoji}
-              >
-                <div></div>
-              </EmojiPicker>
-            )}
-          </div>
-        }
+        // beforeContent={
+        //   <div
+        //     className="fastype-callout-icon"
+        //     onMouseDown={preventAndStop}
+        //     onMouseUp={preventAndStop}
+        //     contentEditable={false}
+        //     suppressContentEditableWarning
+        //   >
+        //     <IconButton
+        //       bg={"transparent"}
+        //       size={"xs"}
+        //       aria-label="Search database"
+        //       icon={
+        //         <Emoji
+        //           unified={emoji}
+        //           size={18}
+        //         />
+        //       }
+        //       onClick={showEmojiPicker}
+        //     />
+        //     {isOpen && (
+        //       <EmojiPicker
+        //         isOpen={isOpen}
+        //         onClose={onClose}
+        //         onSelect={onSelectEmoji}
+        //       >
+        //         <div></div>
+        //       </EmojiPicker>
+        //     )}
+        //   </div>
+        // }
       />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}

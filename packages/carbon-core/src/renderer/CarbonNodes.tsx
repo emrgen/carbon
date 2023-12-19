@@ -204,9 +204,8 @@ export const CarbonNodeContent = (props: RendererProps) => {
       {beforeContent}
       <CarbonNode
         node={content}
-        // parent={node}
         custom={custom}
-        // key={content.key}
+        key={content.key}
       />
     </div>
   );

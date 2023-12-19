@@ -61,8 +61,8 @@ export class ChangeName extends BeforePlugin {
 
   tryChangeName(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
-      const { node, app } = ctx;
-      const { cmd, selection } = app;
+      const { node, app, cmd } = ctx;
+      const { selection } = app;
       const block = node.closest(n => n.isContainerBlock)!;
       if (!isConvertible(block)) return
 
@@ -104,6 +104,7 @@ export class ChangeName extends BeforePlugin {
         cmd.updateProps(titleNode.id, {
           [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
         })
+        console.log('xxxxxxxxxxx');
       } else {
         const title = titleNode.textContent.slice(match[1].length - 1);
         console.warn('title', title, match);
