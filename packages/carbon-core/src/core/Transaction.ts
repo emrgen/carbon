@@ -42,6 +42,14 @@ declare module '@emrgen/carbon-core' {
 	export interface Transaction {}
 }
 
+declare module '@emrgen/carbon-core' {
+	export interface Transaction {
+
+	}
+}
+
+
+
 export class Transaction {
 	private id: string;
 	private type: TransactionType = TransactionType.TwoWay;
