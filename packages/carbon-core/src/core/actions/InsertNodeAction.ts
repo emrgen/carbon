@@ -20,9 +20,7 @@ export class InsertNodeAction implements CarbonAction {
 	execute(tr: Transaction, draft: CarbonStateDraft) {
 		const { at, node: json } = this;
 		const {app}=tr;
-		console.log('xxx', json);
 		const node = app.schema.nodeFromJSON(json)!;
-		console.log('node', node);
 
 		const refNode = draft.get(at.nodeId);
 		if (!refNode) {

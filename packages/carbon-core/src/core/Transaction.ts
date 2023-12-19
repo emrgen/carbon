@@ -31,6 +31,14 @@ import { isNestableNode } from "@emrgen/carbon-blocks";
 let _id = 0
 const getId = () => _id++
 
+declare module '@emrgen/carbon-core' {
+	export interface Transaction {
+
+	}
+}
+
+
+
 export class Transaction {
 	id: number;
 	type: TransactionType = TransactionType.TwoWay;

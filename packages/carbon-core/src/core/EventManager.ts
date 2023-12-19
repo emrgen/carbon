@@ -1,7 +1,7 @@
 import { Carbon } from "./Carbon";
 import { EventContext, EventOrigin } from "./EventContext";
 import { PluginManager } from "./PluginManager";
-import { isKeyHotkey, isHotkey } from 'is-hotkey';
+import { isKeyHotkey } from "is-hotkey";
 import { PinnedSelection } from "./PinnedSelection";
 import { Node } from "./Node";
 import { ActionOrigin } from "./actions/types";
@@ -9,6 +9,7 @@ import { EventsIn } from "./Event";
 import { p12, p14, pad } from "./Logger";
 import { last } from "lodash";
 import { preventAndStop } from "../utils/event";
+import { CustomEvent } from "./CustomEvent";
 
 const selectionKeys: string[] = [
 	'left',
@@ -37,7 +38,19 @@ export class EventManager {
 
 	constructor(readonly app: Carbon, readonly pm: PluginManager) { }
 
-	onCustomEvent(event: any, ...args): boolean {
+	onCustomEvent(type: EventsIn, event: CustomEvent): boolean {
+		const {app, } = this
+		const ctx = EventContext.create({
+			app,
+			type,
+			event: event.event,
+			node: event.node,
+			selection: app.selection,
+			origin: EventOrigin.custom
+		})
+
+		this.pm.onEvent(ctx);
+
 		return false
 	}
 
@@ -49,6 +62,11 @@ export class EventManager {
 		// if (type === EventsIn.noop) {
 		// 	return
 		// }
+
+		if (event instanceof CustomEvent) {
+			this.onCustomEvent(type, event);
+			return
+		}
 
 		// check if editor handles the event
 		if (!this.pm.events.has(type)) {

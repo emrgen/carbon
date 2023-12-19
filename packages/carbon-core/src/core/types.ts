@@ -3,10 +3,14 @@ import { EventContext } from './EventContext';
 import { Node } from './Node';
 import { InputRule } from './Rules';
 import { Carbon } from './Carbon';
+import { Transaction } from "@emrgen/carbon-core";
 
 export const IDENTITY_SCOPE = Symbol('identity');
 
-export interface CarbonCommands {}
+export class CarbonCommands {
+	// commands: Record<string, any[]> = {}
+	// nodeCommands: Record<string, any[]> = {}
+}
 
 export interface NodeIdFactory {
 	blockId(): string;

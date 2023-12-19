@@ -1,4 +1,4 @@
-import { CarbonPlugin, EventHandler, NodeSpec, skipKeyEvent } from "@emrgen/carbon-core";
+import { Carbon, CarbonPlugin, EventHandler, NodeSpec, skipKeyEvent } from "@emrgen/carbon-core";
 
 export class Separator extends CarbonPlugin {
 
@@ -33,11 +33,12 @@ export class Separator extends CarbonPlugin {
 
   keydown(): Partial<EventHandler> {
     return {
-      tab: skipKeyEvent
+      tab: skipKeyEvent,
     }
   }
 
   serialize(): string {
     return '***'
   }
+
 }

@@ -13,6 +13,9 @@ export enum EventsIn {
 	mouseOut = 'mouseOut',
 	scroll = 'scroll',
 
+	dragDown = 'dragDown',
+	dragUp = 'dragUp',
+
 	dragStart = 'dragStart',
 	drag = 'drag',
 	dragEnd = 'dragEnd',

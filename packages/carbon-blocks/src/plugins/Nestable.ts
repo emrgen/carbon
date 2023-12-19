@@ -94,7 +94,6 @@ export class NestablePlugin extends AfterPlugin {
 				}
 
 				const listNode = node.closest(isNestableNode);
-				console.log(listNode);
 				if (!listNode) return
 				const head = selection.head.node.isEmpty ? selection.head.down() : selection.head;
 				if (!head) return
@@ -232,6 +231,14 @@ export class NestablePlugin extends AfterPlugin {
 				}
 
 				app.cmd.nestable.unwrap(listNode)?.dispatch();
+			}
+		}
+	}
+
+	on(): EventHandlerMap {
+		return {
+			dragUp: (ctx: EventContext<MouseEvent>) => {
+				console.log(ctx);
 			}
 		}
 	}

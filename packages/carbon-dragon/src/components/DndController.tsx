@@ -65,9 +65,9 @@ export function DndController() {
       if (!region) return;
       const bound = elementBound(el);
 
-      // console.log(el, bound, portalPosition);
+      console.log(node.name, node.type.dragHandle);
       if (node.type.dragHandle) {
-        // console.log("onMouseIn", node.id.toString(), bound);
+        console.log("onMouseIn", node.id.toString(), bound);
         setDragHandlePosition({
           left: bound.left - portalPosition.x - 50,
           top: bound.top - portalPosition.y + 4,
@@ -75,12 +75,12 @@ export function DndController() {
           height: 20,
         });
       } else {
-        // setDragHandlePosition({
-        //   left: bound.left - portalPosition.x - 20,
-        //   top: bound.top - portalPosition.y,
-        //   width: bound.right - bound.left - 100,
-        //   height: bound.bottom - bound.top,
-        // });
+        setDragHandlePosition({
+          left: bound.left - portalPosition.x,
+          top: bound.top - portalPosition.y,
+          width: bound.right - bound.left,
+          height: bound.bottom - bound.top,
+        });
       }
       setShowDragHandle(true);
       setDragHandleNode(node);
@@ -199,9 +199,9 @@ export function DndController() {
   return (
     <>
     <div className="carbon-dnd-portal" ref={portalRef}>
-      {dragHandleNode && (
+      {(
         <DraggableHandle
-          node={dragHandleNode}
+          node={dragHandleNode ?? Node.IDENTITY}
           style={{
             ...dragHandlePosition,
             opacity: dragHandleOpacity,

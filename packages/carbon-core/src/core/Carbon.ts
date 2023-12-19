@@ -15,15 +15,18 @@ import { SelectionManager } from "./SelectionManager";
 import { Transaction } from "./Transaction";
 import { TransactionManager } from "./TransactionManager";
 import { CarbonCommands, Maps, SerializedNode } from "./types";
-import { cloneDeep, first, isFunction, merge } from "lodash";
-import { CarbonCommandChain } from "./CarbonCommandChain";
-import { CarbonMessageBus } from "./MessageBus";
+import { first, isFunction } from "lodash";
 import { CarbonPlugin } from "./CarbonPlugin";
 import { StateScope } from "./StateScope";
-import { NodeMap } from "./NodeMap";
 import { CarbonRuntime } from "./Runtime";
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginStates } from "./PluginState";
+
+declare module '@emrgen/carbon-core' {
+	export interface Carbon {
+		print(): void;
+	}
+}
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -57,6 +60,8 @@ export class Carbon extends EventEmitter {
 
 	constructor(state: CarbonState, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
+
+		this.print();
 
 		this.pm = pm;
 		this.rm = renderer;
@@ -154,7 +159,7 @@ export class Carbon extends EventEmitter {
 		}
 
 		if (type === EventsIn.custom) {
-			this.em.onCustomEvent(event);
+			this.em.onCustomEvent(type, event);
 		} else {
 			this.em.onEvent(type, event);
 		}
@@ -256,4 +261,3 @@ export class Carbon extends EventEmitter {
 		return false;
 	}
 }
-

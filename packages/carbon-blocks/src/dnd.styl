@@ -113,7 +113,7 @@
 	user-select: none
 	display: flex
 	gap: 4px
-	background #eee
+	//background #eee
 	// flex-direction: row-reverse
 	.carbon-add-handle
 		cursor: pointer
@@ -162,7 +162,18 @@
 	background: rgba(255, 0, 0, 0.094)
 	z-index 999999999
 
+.carbon-drag-handle-cover
+	position absolute
+	width 100%
+	height: 100%
+	//cursor grabbing
+	background: rgba(100, 0, 0, 0.094)
+	user-select: none
+	z-index 999999999
+
 .carbon-node-handle[data-target-name=section]
+	//> *
+	//	display none
 	transform: translate(-4px, -1px)
 
 .carbon-node-handle[data-target-name=h1],
