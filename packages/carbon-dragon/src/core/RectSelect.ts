@@ -195,7 +195,7 @@ export class RectSelect extends EventEmitter {
 		console.log('selectNodes', ids.map(id => id.toString()));
 		const { app } = this;
 		if (this.noSelectionChange(ids)) return
-		app.cmd.select(PointedSelection.fromNodes(ids)).dispatch();
+		app.cmd.Select(PointedSelection.fromNodes(ids)).Dispatch();
 	}
 
 	private noSelectionChange(ids: NodeId[]) {

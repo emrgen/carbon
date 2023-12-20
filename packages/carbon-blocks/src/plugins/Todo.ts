@@ -42,12 +42,12 @@ export class Todo extends Section {
         const { selection } = app;
         if (selection.head.node.parent?.eq(node)) {
           app.tr
-            .updateProps(node.id, {
+            .Update(node.id, {
               node: {
                 checked: !node.properties.get('node.checked'),
               },
             })
-            .dispatch();
+            .Dispatch();
         }
       },
     }

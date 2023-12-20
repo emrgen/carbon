@@ -41,14 +41,14 @@ export class TimeTravelPlugin extends AfterPlugin {
         const action = forwardTr.pop();
         if (action) {
           if (action instanceof SelectAction) {
-            forwardTr.add((action as SelectAction).collapseToHead());
+            forwardTr.Add((action as SelectAction).collapseToHead());
           } else {
-            forwardTr.add(action);
+            forwardTr.Add(action);
           }
         }
 
         forwardTr.readOnly = true;
-        forwardTr.dispatch();
+        forwardTr.Dispatch();
 
         this.bus.emit('timeTravel', this.transactionTree);
       }

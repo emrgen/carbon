@@ -30,7 +30,7 @@ export const BoardViewComp = (props: RendererProps) => {
 
     const {tr} = app;
     const at = Point.toAfter(node.lastChild!.id);
-    tr.insert(at, column).dispatch();
+    tr.Insert(at, column).Dispatch();
   }, [app, node.lastChild]);
 
   console.log(node);

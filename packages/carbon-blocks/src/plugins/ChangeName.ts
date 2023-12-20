@@ -101,8 +101,8 @@ export class ChangeName extends BeforePlugin {
 
       if (match[1] === titleNode.textContent + ' ') {
         const action = SetContentAction.create(titleNode.id,BlockContent.empty());
-        cmd.add(action);
-        cmd.updateProps(titleNode.id, {
+        cmd.Add(action);
+        cmd.Update(titleNode.id, {
           [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
         })
       } else {
@@ -110,24 +110,24 @@ export class ChangeName extends BeforePlugin {
         console.warn('title', title, match);
         if (title === '') {
           const action = SetContentAction.create(titleNode.id,BlockContent.empty());
-          cmd.add(action);
+          cmd.Add(action);
         } else {
           const textNode = app.schema.text(title)!
           const content = BlockContent.create(textNode);
 
           const action = SetContentAction.withContent(titleNode.id, content, content);
-          cmd.add(action);
+          cmd.Add(action);
         }
       }
 
-      cmd.change(block.id, block.name, name)
-      cmd.updateProps(block.id, { node: { typeChanged: true },});
+      cmd.Change(block.id, block.name, name)
+      cmd.Update(block.id, { node: { typeChanged: true },});
       // expand collapsed block
       if (block.isCollapsed) {
-        cmd.updateProps(block.id, { node: { collapsed: false } });
+        cmd.Update(block.id, { node: { collapsed: false } });
       }
-      cmd.select(after)
-        .dispatch()
+      cmd.Select(after)
+        .Dispatch()
     }
   }
 
@@ -151,12 +151,12 @@ export class ChangeName extends BeforePlugin {
       const to = Point.toAfter(block.id);
       const moveNodes = block.children.slice(1);
       if (moveNodes.length) {
-        cmd.add(moveNodesActions(to, moveNodes));
+        cmd.Add(moveNodesActions(to, moveNodes));
       }
-      cmd.change(block.id, block.name, type)
-      cmd.updateProps(block.id, { node: { typeChanged: true },  });
-      cmd.select(after)
-      cmd.dispatch()
+      cmd.Change(block.id, block.name, type)
+      cmd.Update(block.id, { node: { typeChanged: true },  });
+      cmd.Select(after)
+      cmd.Dispatch()
     }
   }
 
@@ -193,14 +193,14 @@ export class ChangeName extends BeforePlugin {
 
       const content = BlockContent.empty()
 
-      cmd.setContent(block.firstChild!.id, content)
+      cmd.SetContent(block.firstChild!.id, content)
         // .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
-        .add(insertBeforeAction(block, divider))
-        .change(block.id, block.name, block.type.splitName)
-        .updateProps(block.id, { node: { typeChanged: true } })
-        .add(moveActions)
-        .select(after)
-        .dispatch()
+        .Add(insertBeforeAction(block, divider))
+        .Change(block.id, block.name, block.type.splitName)
+        .Update(block.id, { node: { typeChanged: true } })
+        .Add(moveActions)
+        .Select(after)
+        .Dispatch()
     }
   }
 

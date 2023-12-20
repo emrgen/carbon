@@ -32,7 +32,7 @@ export function VideoComp(props: RendererProps) {
   const onClick = useCallback(
     (e) => {
       // preventAndStop(e);
-      app.tr.selectNodes([]).dispatch();
+      app.tr.selectNodes([]).Dispatch();
     },
     [app.tr]
   );

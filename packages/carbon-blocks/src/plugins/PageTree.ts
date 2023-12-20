@@ -103,7 +103,7 @@ export class PageTreeItem extends CarbonPlugin {
   }
 
   open(tr: Transaction, node: Node): Transaction {
-    tr.add(UpdatePropsAction.create(node.id, {
+    tr.Add(UpdatePropsAction.create(node.id, {
       [OpenedPath]: true
     }, tr.origin));
 
@@ -111,19 +111,19 @@ export class PageTreeItem extends CarbonPlugin {
   }
 
   close(tr: Transaction, node: Node) {
-    tr.add(UpdatePropsAction.create(node.id, {
+    tr.Add(UpdatePropsAction.create(node.id, {
       [OpenedPath]: false
     }, tr.origin));
   }
 
   expand(tr: Transaction, node: Node) {
-    tr.add(UpdatePropsAction.create(node.id, {
+    tr.Add(UpdatePropsAction.create(node.id, {
       [CollapsedPath]: false
     }, tr.origin));
   }
 
   collapse(tr: Transaction, node: Node) {
-    tr.add(UpdatePropsAction.create(node.id, {
+    tr.Add(UpdatePropsAction.create(node.id, {
       [CollapsedPath]: true,
     }, tr.origin));
   }
@@ -136,7 +136,7 @@ export class PageTreeItem extends CarbonPlugin {
         const {parent} = target;
         // if this node is the closest pageTreeItem node to the target, then mark it closed
         if (parent?.name === this.name && target.closest(n => n.name === this.name)?.eq(node)) {
-          ctx.cmd.updateProps(node.id, {
+          ctx.cmd.Update(node.id, {
             [OpenedPath]: false
           });
         }

@@ -70,7 +70,7 @@ export function VideoComp(props: RendererProps) {
   const onClick = useCallback(
     (e) => {
       // preventAndStop(e);
-      app.tr.selectNodes([]).dispatch();
+      app.tr.selectNodes([]).Dispatch();
     },
     [app.tr]
   );
@@ -120,13 +120,13 @@ export function VideoComp(props: RendererProps) {
                 updater.onClose();
                 actions.setSubmitting(false);
                 app.tr
-                  .updateProps(node.id, {
+                  .Update(node.id, {
                     node: {
                       url: values.url,
                       height: boundRef.current?.offsetWidth * (9 / 16),
                     },
                   })
-                  .dispatch();
+                  .Dispatch();
               }, 1000);
             }}
           >

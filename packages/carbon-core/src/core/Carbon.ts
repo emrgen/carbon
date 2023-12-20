@@ -138,7 +138,7 @@ export class Carbon extends EventEmitter {
 		// 	throw new Error('cannot create a new command while there is a pending transaction')
 		// }
 		this.committed = false;
-		return Transaction.create(this, this.commands, this.tm, this.pm, this.sm).proxy();
+		return Transaction.create(this, this.commands, this.tm, this.pm, this.sm).Proxy();
 	}
 
 	// create a new transaction
@@ -264,7 +264,7 @@ export class Carbon extends EventEmitter {
 			if (!tr) return
 			if (tr instanceof Transaction) {
 				// tr.onTick = true;
-				tr.dispatch();
+				tr.Dispatch();
 			} else if (isFunction(tr)) {
 				(tr as Function)(this);
 				return true;

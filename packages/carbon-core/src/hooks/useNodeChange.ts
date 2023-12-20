@@ -24,7 +24,7 @@ interface UseNodeChangeProps {
 export const useNodeChange = (props: UseNodeChangeProps) => {
   const change = useCarbonChange();
   const [node, setNode] = useState(props.node);
-  const [counter, setCounter] = useState(0);
+  // const [counter, setCounter] = useState(0);
   // const [parent, setParent] = useState<Optional<Node>>(props.parent);
   // this will force the ui update
   // const [version, setVersion] = useState(node.version);
@@ -33,7 +33,7 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
     const onChange = (value: Node, parent: Optional<Node>, counter: number) => {
       console.log(counter);
       setNode(value);
-      setCounter(counter);
+      // setCounter(counter);
       // setParent(parent);
       // console.log(value.version, node.version, value.id.toString(), value.textContent);
       // console.log("node changed", value.name, watched.id.toString(),  watched === value, value.textContent, value.version, node.state.normalize());
@@ -46,8 +46,8 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
   }, [change, node]);
 
   useEffect(() => {
-    change.mounted(node, NodeChangeType.update, counter);
-  }, [change, counter, node]);
+    change.mounted(node, NodeChangeType.update);
+  }, [change, node]);
 
   return {
     node,

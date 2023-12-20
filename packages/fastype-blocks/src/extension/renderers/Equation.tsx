@@ -59,12 +59,12 @@ export const EquationComp = (props: RendererProps) => {
       app.enable();
       app.parkCursor();
       app.tr
-        .updateProps(node.id, {
+        .Update(node.id, {
           node: {
             isEditing: false,
           },
         })
-        .dispatch();
+        .Dispatch();
     },
   });
 
@@ -90,12 +90,12 @@ export const EquationComp = (props: RendererProps) => {
       // if (app.blockSelection && app.blockSelection.has(node.id)) return;
       app.tr
         .selectNodes([node.id])
-        .updateProps(node.id, {
+        .Update(node.id, {
           node: {
             isEditing: true,
           },
         })
-        .dispatch();
+        .Dispatch();
     },
     [app.tr, node.id]
   );
@@ -126,7 +126,7 @@ export const EquationComp = (props: RendererProps) => {
     // app.tr
     // .setContent(node.id, BlockContent.create([title!]))
     // .forceRender([node.id]).dispatch();
-    app.tr.activateNodes([node.id]).dispatch();
+    app.tr.activateNodes([node.id]).Dispatch();
   };
 
   const updatePopover = useMemo(() => {
@@ -190,12 +190,12 @@ export const EquationComp = (props: RendererProps) => {
                 ) {
                   preventAndStop(e);
                   app.tr
-                    .updateProps(node.id, {
+                    .Update(node.id, {
                       node: {
                         isEditing: false,
                       },
                     })
-                    .dispatch();
+                    .Dispatch();
                 }
               }}
               onChange={(e) => {
@@ -204,8 +204,8 @@ export const EquationComp = (props: RendererProps) => {
                 const text = app.schema.text(e.target.value)!;
                 app.enable(() => {
                   app.tr
-                    .setContent(title.id, BlockContent.create(text))
-                    .dispatch();
+                    .SetContent(title.id, BlockContent.create(text))
+                    .Dispatch();
                 });
               }}
             />

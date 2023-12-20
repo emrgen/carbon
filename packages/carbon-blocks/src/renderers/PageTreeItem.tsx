@@ -52,11 +52,11 @@ export const PageTreeItemComp = (props: RendererProps) => {
 
       const at = Point.toAfter(node.child(0)!.id);
       cmd
-        .insert(at, item)
-        .then(() => {
+        .Insert(at, item)
+        .Then(() => {
           return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });
         })
-        .dispatch();
+        .Dispatch();
     },
     [app, node]
   );

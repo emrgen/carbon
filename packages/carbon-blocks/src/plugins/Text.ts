@@ -71,7 +71,7 @@ export class TextPlugin extends NodePlugin {
 		const textContent = node.textContent.slice(0, offset) + (text) + node.textContent.slice(offset);
 		const after = PinnedSelection.fromPin(Pin.future(start.node, start.offset + text.length));
 		console.log('onTextInsert', textContent, after, node.id.toString());
-		tr.setContent(node, InlineContent.create(textContent)).select(after).dispatch();
+		tr.SetContent(node, InlineContent.create(textContent)).Select(after).Dispatch();
 	}
 
 

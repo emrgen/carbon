@@ -46,8 +46,8 @@ export class SelectionChangePlugin extends AfterPlugin {
 				console.debug(p14('%c[create]'), 'color:green', 'select transaction');
 
 				cmd
-					.select(after)
-					.dispatch()
+					.Select(after)
+					.Dispatch()
 			},
 			selectstart: (ctx: EventContext<Event>) => {
 				const {app} = ctx;

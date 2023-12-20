@@ -54,11 +54,11 @@ export class NestablePlugin extends AfterPlugin {
 		const prevSibling = prevNode.lastChild!
 		const to = Point.toAfter(prevSibling.id);
 
-		tr.move(nodeLocation(node)!, to, node.id);
+		tr.Move(nodeLocation(node)!, to, node.id);
 		if (prevNode.isCollapsed) {
-			tr.updateProps(prevNode.id, { node: { collapsed: false } })
+			tr.Update(prevNode.id, { node: { collapsed: false } })
 		}
-		tr.select(tr.app.selection.clone());
+		tr.Select(tr.app.selection.clone());
 		return tr
 	}
 
@@ -75,9 +75,9 @@ export class NestablePlugin extends AfterPlugin {
 		const moveAt = Point.toAfter(lastChild?.id ?? node.id);
 
 		tr
-			.move(nodeLocation(node)!, to, node.id)
-			.add(moveNodesActions(moveAt, nextSiblings))
-			.select(tr.app.selection.clone());
+			.Move(nodeLocation(node)!, to, node.id)
+			.Add(moveNodesActions(moveAt, nextSiblings))
+			.Select(tr.app.selection.clone());
 
 		return tr
 	}
@@ -108,13 +108,13 @@ export class NestablePlugin extends AfterPlugin {
 				if (listNode.name !== 'section') {
 					preventAndStopCtx(ctx);
 					if (listNode.isCollapsed) {
-						cmd.updateProps(listNode.id, { node: { collapsed: false } })
+						cmd.Update(listNode.id, { node: { collapsed: false } })
 					}
 
 					cmd
-						.change(listNode.id, listNode.name, 'section')
-						.select(PinnedSelection.fromPin(selection.head))
-					cmd.dispatch();
+						.Change(listNode.id, listNode.name, 'section')
+						.Select(PinnedSelection.fromPin(selection.head))
+					cmd.Dispatch();
 					return
 				}
 
@@ -164,12 +164,12 @@ export class NestablePlugin extends AfterPlugin {
 				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
 					cmd
-						.updateProps(listNode.id, {
+						.Update(listNode.id, {
 							html: {
 								'data-as': ''
 							}
-						}).select(selection)
-						.dispatch();
+						}).Select(selection)
+						.Dispatch();
 					return
 				}
 
@@ -178,9 +178,9 @@ export class NestablePlugin extends AfterPlugin {
 
 					preventAndStopCtx(ctx);
 					cmd
-						.change(listNode.id, listNode.name, 'section')
-						.select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
-						.dispatch();
+						.Change(listNode.id, listNode.name, 'section')
+						.Select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
+						.Dispatch();
 					return
 				}
 

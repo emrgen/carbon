@@ -204,8 +204,8 @@ export class BeforeCodePlugin extends BeforePlugin {
 
       const textNodes = flattenDeep(flattenDeep(tokens).map(intoTextNode));
 
-      tr.add(SetContentAction.create(title.id, BlockContent.create(textNodes)));
-      tr.select(after);
+      tr.Add(SetContentAction.create(title.id, BlockContent.create(textNodes)));
+      tr.Select(after);
       return tr;
 
     }
@@ -218,7 +218,7 @@ export class BeforeCodePlugin extends BeforePlugin {
     }
 
     if (selection.isCollapsed) {
-      updateTitleText(app).dispatch()
+      updateTitleText(app).Dispatch()
       return
     }
   }

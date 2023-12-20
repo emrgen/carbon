@@ -126,7 +126,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
     // });
   }
 
-  mounted(node: Node, changeType: NodeChangeType, counter: number) {
+  mounted(node: Node, changeType: NodeChangeType) {
     // if (this.counter > this.stateCounter) {
     //   console.log('mounted: old transaction sync still in progress', this.counter, counter);
     //   return;

@@ -16,7 +16,6 @@ export const moveNodesActions = (to: Point, nodes: Node[], origin: ActionOrigin 
   return actions
 }
 
-
 export const insertNodesActions = (at: Point, nodes: Node[], origin: ActionOrigin = ActionOrigin.UserInput) => {
   const actions: CarbonAction[] = [];
   nodes.slice().reverse().forEach(node => {

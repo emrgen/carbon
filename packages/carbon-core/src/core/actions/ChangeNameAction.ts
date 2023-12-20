@@ -26,7 +26,7 @@ export class ChangeNameAction implements CarbonAction{
 			throw new Error('failed to find type for: ' + to)
 		}
 
-		draft.changeName(nodeId, type);
+		draft.change(nodeId, type);
 	}
 
 	inverse(): CarbonAction {

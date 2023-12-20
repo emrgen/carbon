@@ -52,9 +52,9 @@ export const TableComp = (props: RendererProps) => {
     }) as Node[];
     const row = app.schema.type("row").create(columns)!;
     app.tr
-      .insert(at, row)
-      .updateProps(node.id, { node: { rows: node.size + 1 } })
-      .dispatch();
+      .Insert(at, row)
+      .Update(node.id, { node: { rows: node.size + 1 } })
+      .Dispatch();
   };
 
   const handleAddColumns = (
@@ -66,11 +66,11 @@ export const TableComp = (props: RendererProps) => {
     node.children.forEach((row) => {
       const at = Point.toAfter(row.lastChild!.id);
       const column = app.schema.type("column").default()!;
-      tr.insert(at, column);
+      tr.Insert(at, column);
     });
 
-    tr.updateProps(node.id, { node: { columns: row.size + 1 } });
-    tr.dispatch();
+    tr.Update(node.id, { node: { columns: row.size + 1 } });
+    tr.Dispatch();
   };
 
   return (

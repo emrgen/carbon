@@ -46,7 +46,7 @@ export class TransactionManager {
 
 			// produce a new state from the current state
 			const state = app.state.produce(app.runtime.origin, draft => {
-				tr.commit(draft);
+				tr.Commit(draft);
 			});
 
 			app.committed = true;

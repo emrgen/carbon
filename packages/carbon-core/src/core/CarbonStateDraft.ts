@@ -318,8 +318,8 @@ export class CarbonStateDraft {
     }
 
     this.mutable(parentId, parent => {
+      node.nextSiblings.forEach(ch => this.mutable(ch.id));
       parent.remove(node);
-      parent.children.forEach(ch => this.mutable(ch.id));
 
       // if parent title is empty, set placeholder from parent
       if (parent.isTextBlock && parent.isEmpty) {
@@ -337,7 +337,7 @@ export class CarbonStateDraft {
     });
   }
 
-  changeName(nodeId: NodeId, type: NodeType) {
+  change(nodeId: NodeId, type: NodeType) {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }

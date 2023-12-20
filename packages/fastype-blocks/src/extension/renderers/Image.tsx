@@ -73,7 +73,7 @@ export function ImageComp(props: RendererProps) {
       ref.current?.getBoundingClientRect()
     );
 
-    app.tr.selectNodes([node.id]).dispatch();
+    app.tr.selectNodes([node.id]).Dispatch();
   };
 
   const alignImage = useCallback(
@@ -84,7 +84,7 @@ export function ImageComp(props: RendererProps) {
         app.selection.nodes
           .filter((n) => n.name === "image")
           .forEach(({ id }) => {
-            tr.updateProps(id, {
+            tr.Update(id, {
               html: {
                 style: {
                   justifyContent: align,
@@ -92,7 +92,7 @@ export function ImageComp(props: RendererProps) {
               },
             });
           });
-        tr.dispatch();
+        tr.Dispatch();
       };
     },
     [app]
@@ -101,7 +101,7 @@ export function ImageComp(props: RendererProps) {
   const onClick = useCallback(
     (e) => {
       // preventAndStop(e);
-      app.tr.selectNodes([]).dispatch();
+      app.tr.selectNodes([]).Dispatch();
     },
     [app.tr]
   );
@@ -163,14 +163,14 @@ export function ImageComp(props: RendererProps) {
                 updater.onClose();
                 actions.setSubmitting(false);
                 app.tr
-                  .updateProps(node.id, {
+                  .Update(node.id, {
                     node: {
                       src: values.src,
                       // height:
                       //   boundRef.current ? boundRef.current?.offsetWidth * (9 / 16) : 200,
                     },
                   })
-                  .dispatch();
+                  .Dispatch();
               }, 1000);
             }}
           >
@@ -223,12 +223,12 @@ export function ImageComp(props: RendererProps) {
 
     if (!node.properties.node.height) {
       app.tr
-        .updateProps(node.id, {
+        .Update(node.id, {
           node: {
             height: height,
           },
         })
-        .dispatch();
+        .Dispatch();
     }
   }, [app.tr, imageRef, node.properties.node.height, node.id]);
 
@@ -283,7 +283,7 @@ export function ImageComp(props: RendererProps) {
                   className="image-overlay"
                   onClick={(e) => {
                     stop(e);
-                    app.tr.selectNodes([node.id]).dispatch();
+                    app.tr.selectNodes([node.id]).Dispatch();
                     updater.onOpen();
                   }}
                 >

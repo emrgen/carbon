@@ -99,9 +99,9 @@ export function BlockMenu(props: BlockMenuProps) {
       if (!node) return;
 
       const { tr } = app;
-      tr.change(node?.id, node?.name, type.name)
-      tr.setContent(node.child(0)!.id, BlockContent.create([]));
-      tr.updateProps(node.id, {
+      tr.Change(node?.id, node?.name, type.name)
+      tr.SetContent(node.child(0)!.id, BlockContent.create([]));
+      tr.Update(node.id, {
         node: { typeChanged: true },
         // html: { "data-as": type.name },
       });
@@ -109,12 +109,12 @@ export function BlockMenu(props: BlockMenuProps) {
         app.parkCursor();
         tr.selectNodes(node.id);
       } else if (!type.isAtom && node.child(0)?.find((n) => n.hasFocusable)) {
-        tr.select(PinnedSelection.fromPin(Pin.future(node.child(0)!, 0)!)!);
+        tr.Select(PinnedSelection.fromPin(Pin.future(node.child(0)!, 0)!)!);
       }
 
       // console.log(window.getSelection());
 
-      tr.dispatch();
+      tr.Dispatch();
     },
     [app, node]
   );

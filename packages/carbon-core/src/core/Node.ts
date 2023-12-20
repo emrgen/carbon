@@ -276,6 +276,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// if content node i.e. first child is treated as content node
 	// check if parent is collapse hidden
 	get isCollapseHidden() {
+		// only collapsed parent can hide a child node
+		// if the node is detached from the tree, it can't be collapse hidden
+		if (!this.parentId) return false;
+
 		if (!this.isContentNode && this.parent?.isCollapsed) {
 			return true
 		}
@@ -323,14 +327,21 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get nextSibling(): Optional<Node> {
+		const index = this.index;
+		if (index === -1) return null;
 		return this.parent?.children[this.index + 1];
 	}
 
 	get prevSiblings(): Node[] {
+		const index = this.index;
+		if (index === -1) return [];
 		return this.parent?.children.slice(0, this.index) ?? [];
 	}
 
 	get nextSiblings(): Node[] {
+		const index = this.index;
+		if (index === -1) return [];
+
 		return this.parent?.children.slice(this.index + 1) ?? [];
 	}
 
@@ -387,10 +398,13 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// TODO: user IndexMapper to optimize index caching and avoid array traverse for finding index
 	get index(): number {
 		const parent = this.parent;
-		if (!parent) return -1
+		if (!parent) {
+			console.warn('node has no parent', this.id.toString());
+			return -1
+		}
 
 		// NOTE: this is a performance critical code
-		const key = `${parent.key}/${this.id.toString()}`
+		const key = `${parent.key}/${this.key}`
 		return NODE_CACHE_INDEX.get(key, () => {
 			const { children = [] } = parent;
 			return findIndex(children as Node[], n => {

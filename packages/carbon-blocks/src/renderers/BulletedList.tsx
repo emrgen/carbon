@@ -43,7 +43,7 @@ export const BulletedListComp = (props: RendererProps) => {
         node={node}
         beforeContent={beforeContent}
       />
-      <CarbonNodeChildren node={node} parent={parent}/>
+      <CarbonNodeChildren node={node}/>
       {SelectionHalo}
     </CarbonBlock>
   );

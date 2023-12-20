@@ -92,11 +92,11 @@ export class Collapsible extends NodePlugin {
   }
 
   expand(tr: Transaction, node: Node) {
-    tr.updateProps(node.id, { [CollapsedPath]: false });
+    tr.Update(node.id, { [CollapsedPath]: false });
   }
 
   collapse(tr: Transaction, node: Node) {
-    tr.updateProps(node.id, { [CollapsedPath]: true });
+    tr.Update(node.id, { [CollapsedPath]: true });
   }
 
   plugins(): CarbonPlugin[] {
@@ -115,9 +115,9 @@ export class Collapsible extends NodePlugin {
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        ctx.cmd.updateProps(node.id, {
+        ctx.cmd.Update(node.id, {
           [CollapsedPath]: !node.isCollapsed,
-        }).dispatch();
+        }).Dispatch();
       },
 
       'ctrl_shift_c': (ctx: EventContext<KeyboardEvent>) => {
@@ -128,7 +128,7 @@ export class Collapsible extends NodePlugin {
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        ctx.cmd.updateProps(node.id, { node: { collapsed: true } }).dispatch();
+        ctx.cmd.Update(node.id, { node: { collapsed: true } }).Dispatch();
       },
       // tab: skipKeyEvent
       enter(ctx: EventContext<KeyboardEvent>) {
@@ -175,15 +175,15 @@ export class Collapsible extends NodePlugin {
         const focusPoint = Pin.toStartOf(section!);
         const after = PinnedSelection.fromPin(focusPoint!);
         tr
-          .setContent(title.id, BlockContent.create([]))
-          .add(insertAfterAction(title, section!))
-          .select(after)
+          .SetContent(title.id, BlockContent.create([]))
+          .Add(insertAfterAction(title, section!))
+          .Select(after)
         return tr;
       }
 
       tr
-        .add(insertBeforeAction(title.parent!, section!))
-        .select(after)
+        .Add(insertBeforeAction(title.parent!, section!))
+        .Select(after)
       return tr;
     }
 
@@ -211,9 +211,9 @@ export class Collapsible extends NodePlugin {
     const after = PinnedSelection.fromPin(focusPoint!);
 
     tr
-      .setContent(title.id, leftContent)
-      .insert(at, section!)
-      .select(after)
+      .SetContent(title.id, leftContent)
+      .Insert(at, section!)
+      .Select(after)
   }
 
   enter(tr: Transaction, selection: PinnedSelection) {

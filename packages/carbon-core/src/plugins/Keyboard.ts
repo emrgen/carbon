@@ -81,17 +81,17 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 				});
 
 				if (prevVisibleTextBlock.isEmpty && !content.isEmpty) {
-					tr.updateProps(prevVisibleTextBlock.id, {
+					tr.Update(prevVisibleTextBlock.id, {
 						[PlaceholderPath]: ''
 					})
 				}
 
 				tr
-					.setContent(prevVisibleTextBlock.id, content)
-					.add(moveActions)
-					.remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
-					.select(after)
-					.dispatch();
+					.SetContent(prevVisibleTextBlock.id, content)
+					.Add(moveActions)
+					.Remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
+					.Select(after)
+					.Dispatch();
 
 				return
 			}
@@ -202,7 +202,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 				const block = node.chain.find(n => n.isBlockSelectable);
 				if (!block) return
-				cmd.select(PinnedSelection.fromNodes(block)).dispatch();
+				cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, cmd } = ctx;
@@ -224,7 +224,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 				preventAndStopCtx(ctx)
 				const after = selection.moveBy(-1)
-				cmd.select(after!).dispatch();
+				cmd.Select(after!).Dispatch();
 			},
 
 
@@ -249,7 +249,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				preventAndStopCtx(ctx)
 				const after = selection.moveBy(1);
 				console.log('#>', after?.toString());
-				cmd.select(after!).dispatch()
+				cmd.Select(after!).Dispatch()
 			},
 
 			shiftRight: (ctx: EventContext<KeyboardEvent>) => {
@@ -265,12 +265,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 					const block = node.find(n => !n.eq(node) && n.isContainerBlock)
 					if (!block) return
-					cmd.select(PinnedSelection.fromNodes(block)).dispatch();
+					cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 					return
 				}
 
 				const after = selection.moveHead(1);
-				cmd.select(after!).dispatch();
+				cmd.Select(after!).Dispatch();
 			},
 
 			shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
@@ -286,12 +286,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 					const { parent } = node;
 					if (parent?.isSandbox) return
-					cmd.select(PinnedSelection.fromNodes(parent!)).dispatch();
+					cmd.Select(PinnedSelection.fromNodes(parent!)).Dispatch();
 					return
 				}
 
 				const after = selection.moveHead(-1);
-				cmd.select(after!).dispatch();
+				cmd.Select(after!).Dispatch();
 			},
 
 			shiftUp: e => this.shiftUp(e),
@@ -331,16 +331,16 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			const pin = Pin.toStartOf(focusNode!)
 			console.log('pin', pin?.toString());
 			tr
-				.select(PinnedSelection.fromPin(pin!))
-				.dispatch();
+				.Select(PinnedSelection.fromPin(pin!))
+				.Dispatch();
 			return
 		}
 
 		const focusNode = firstNode.prev(n => n.isFocusable);
 		const pin = Pin.toEndOf(focusNode!)
 		tr
-			.select(PinnedSelection.fromPin(pin!))
-			.dispatch();
+			.Select(PinnedSelection.fromPin(pin!))
+			.Dispatch();
 		return
 	}
 
@@ -350,16 +350,16 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
 			const pin = Pin.toEndOf(focusNode!)
 			tr
-				.select(PinnedSelection.fromPin(pin!))
-				.dispatch();
+				.Select(PinnedSelection.fromPin(pin!))
+				.Dispatch();
 			return
 		}
 
 		const focusNode = lastNode.next(n => n.isFocusable);
 		const pin = Pin.toStartOf(focusNode!)
 		tr
-			.select(PinnedSelection.fromPin(pin!))
-			.dispatch();
+			.Select(PinnedSelection.fromPin(pin!))
+			.Dispatch();
 	}
 
 
@@ -383,8 +383,8 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		// ctx.event.preventDefault();
 		const after = PinnedSelection.fromNodes([...nodes, block]);
 		cmd
-			.select(after)
-			.dispatch();
+			.Select(after)
+			.Dispatch();
 	}
 
 	shiftDown(ctx: EventContext<KeyboardEvent>) {
@@ -404,7 +404,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		// ctx.event.preventDefault();
 		const after = PinnedSelection.fromNodes([...nodes, block]);
-		cmd.select(after).dispatch();
+		cmd.Select(after).Dispatch();
 	}
 
 	// handles enter event
@@ -427,7 +427,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				// if there is a text block, put the cursor at the end of the text block
 				if (textBlock) {
 					const pin = Pin.toEndOf(textBlock)!
-					cmd.select(PinnedSelection.fromPin(pin)).dispatch();
+					cmd.Select(PinnedSelection.fromPin(pin)).Dispatch();
 					return true
 				}
 			}
@@ -436,7 +436,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				if (n.hasFocusable) {
 					const focusable = n.find(n => n.isFocusable);
 					const pin = Pin.toStartOf(focusable!)!
-					cmd.select(PinnedSelection.fromPin(pin)).dispatch();
+					cmd.Select(PinnedSelection.fromPin(pin)).Dispatch();
 					return true
 				}
 			});
@@ -450,9 +450,9 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 			const after = PinnedSelection.fromPin(Pin.toStartOf(section)!)!;
 			cmd
-				.add(insertAfterAction(lastBlock, section))
-				.select(after, ActionOrigin.UserInput)
-				.dispatch();
+				.Add(insertAfterAction(lastBlock, section))
+				.Select(after, ActionOrigin.UserInput)
+				.Dispatch();
 
 			return
 		}
@@ -530,7 +530,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		if (nodes.length > 1) {
 			const lastNode = first(nodes) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
-			cmd.select(after).dispatch()
+			cmd.Select(after).Dispatch()
 			return
 		}
 
@@ -538,7 +538,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		if (!block || block.isDocument) return
 
 		const after = PinnedSelection.fromNodes(block);
-		cmd.select(after).dispatch()
+		cmd.Select(after).Dispatch()
 	}
 
 	down(ctx: EventContext<KeyboardEvent>) {
@@ -551,7 +551,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		if (nodes.length > 1) {
 			const lastNode = last(nodes) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
-			cmd.select(after).dispatch()
+			cmd.Select(after).Dispatch()
 			return
 		}
 
@@ -560,7 +560,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		if (!block) return
 
 		const after = PinnedSelection.fromNodes(block);
-		cmd.select(after).dispatch()
+		cmd.Select(after).Dispatch()
 	}
 }
 

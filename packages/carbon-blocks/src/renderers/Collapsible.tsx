@@ -37,26 +37,26 @@ export default function CollapsibleListComp(props: RendererProps) {
     const at = Point.toAfter(node.child(0)!.id);
 
     app.tr
-      .insert(at, section)
-      .select(
+      .Insert(at, section)
+      .Select(
         PinnedSelection.fromPin(Pin.toStartOf(section)!),
         ActionOrigin.UserInput
       )
-      .dispatch();
+      .Dispatch();
   }, [app.schema, app.tr, node]);
 
   // toggle collapsed state
   const handleToggle = useCallback(() => {
     const {cmd} = app;
     cmd
-      .updateProps(node.id, {
+      .Update(node.id, {
         [CollapsedPath]: !isCollapsed,
       })
     if (!isCollapsed) {
-      cmd.select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
+      cmd.Select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
     }
-    cmd.oneWay()
-    cmd.dispatch();
+    cmd.OneWay()
+    cmd.Dispatch();
   }, [app, node, isCollapsed]);
 
   const beforeContent = (

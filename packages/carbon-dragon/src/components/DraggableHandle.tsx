@@ -84,7 +84,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     if (e.id === CarbonDragHandleId) {
       app.onEvent(EventsIn.dragStart, CustomEvent.create(EventsIn.dragStart, e.node, e.event));
       app.enable(() => {
-        app.tr.select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput).dispatch();
+        app.tr.Select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput).Dispatch();
       });
     }
   }, [app]);
@@ -248,9 +248,9 @@ export function DraggableHandle(props: FastDragHandleProps) {
         const {tr} = app;
         const after = PinnedSelection.fromNodes(node)
 
-        tr.move(from, to, node.id).select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput);
-        tr.select(after, ActionOrigin.NoSync);
-        tr.dispatch();
+        tr.Move(from, to, node.id).Select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput);
+        tr.Select(after, ActionOrigin.NoSync);
+        tr.Dispatch();
       });
     },
     [app, findDropPosition, findHitNode]
@@ -286,8 +286,8 @@ export function DraggableHandle(props: FastDragHandleProps) {
         if (node.type.dragHandle) {
           app.parkCursor();
           app.tr
-            .select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput)
-            ?.dispatch();
+            .Select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput)
+            ?.Dispatch();
         }
       }
 
@@ -334,7 +334,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (node.isContainerBlock && title) {
         const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
         if (app.selection.eq(after)) return;
-        app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
+        app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
         return;
       }
     }
@@ -342,7 +342,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
       const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
       if (app.selection.eq(after)) return;
-      app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
+      app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
       return;
     }
 

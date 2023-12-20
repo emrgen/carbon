@@ -19,7 +19,7 @@ export class IsolatingPlugin extends AfterPlugin {
         if (e.app.selection.isBlock) return
 
         if (!e.selection.isCollapsed) {
-          e.cmd.select(e.selection.collapseToStart());
+          e.cmd.Select(e.selection.collapseToStart());
           return;
         }
         this.preventAtStart(e);
@@ -28,7 +28,7 @@ export class IsolatingPlugin extends AfterPlugin {
         if (e.app.selection.isBlock) return
 
         if (!e.selection.isCollapsed) {
-          e.cmd.select(e.selection.collapseToEnd());
+          e.cmd.Select(e.selection.collapseToEnd());
           return;
         }
         this.preventAtEnd(e);

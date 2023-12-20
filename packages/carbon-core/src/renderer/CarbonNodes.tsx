@@ -205,7 +205,7 @@ export const CarbonNodeContent = (props: RendererProps) => {
       <CarbonNode
         node={content}
         custom={custom}
-        key={content.key}
+        // key={content.key}
       />
     </div>
   );

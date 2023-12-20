@@ -39,10 +39,10 @@ export class Insert extends BeforePlugin {
       at = Point.toAfter(parent.id);
     }
 
-    tr.insert(at, node)
+    tr.Insert(at, node)
     if (node.hasFocusable) {
       const after = PinnedSelection.fromPin(Pin.toStartOf(node)!)
-      tr.select(after, ActionOrigin.UserInput)
+      tr.Select(after, ActionOrigin.UserInput)
     }
 
     return tr;
@@ -70,10 +70,10 @@ export class Insert extends BeforePlugin {
 
   private insert(app: Carbon, at: Point, node: Node): Optional<Transaction> {
     const { tr } = app;
-    tr.insert(at, node)
+    tr.Insert(at, node)
     if (node.hasFocusable) {
       const after = PinnedSelection.fromPin(Pin.toStartOf(node)!)
-      tr.select(after, ActionOrigin.UserInput)
+      tr.Select(after, ActionOrigin.UserInput)
     }
 
     return tr;
