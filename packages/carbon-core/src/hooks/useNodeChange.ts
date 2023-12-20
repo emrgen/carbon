@@ -9,15 +9,11 @@ import { Optional } from "@emrgen/types";
 
 interface UseTextChangeProps {
   node: Node,
-
-  onChange(node: Node)
 }
 
 interface UseNodeChangeProps {
   // parent: Optional<Node>;
   node: Node,
-
-  onChange?(node: Node)
 }
 
 // start watching for the node change
@@ -31,17 +27,16 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
 
   useEffect(() => {
     const onChange = (value: Node, parent: Optional<Node>, counter: number) => {
-      console.log(counter);
       setNode(value);
       // setCounter(counter);
       // setParent(parent);
       // console.log(value.version, node.version, value.id.toString(), value.textContent);
-      // console.log("node changed", value.name, watched.id.toString(),  watched === value, value.textContent, value.version, node.state.normalize());
+      console.log("node changed", value.name, value.id.toString())
     };
 
-    change.on(NodeChangeType.update, node.id, onChange);
+    change.on(node.id, NodeChangeType.update, onChange);
     return () => {
-      change.off(NodeChangeType.update, node.id, onChange);
+      change.off(node.id, NodeChangeType.update, onChange);
     };
   }, [change, node]);
 

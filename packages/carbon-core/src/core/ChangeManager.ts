@@ -28,7 +28,7 @@ console.log(import.meta.env);
 /**
  * Syncs the editor state with the UI
  */
-export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
+export class ChangeManager extends NodeTopicEmitter {
 
   readonly transactions: Transaction[] = [];
   changes: NodeIdSet = NodeIdSet.empty();
@@ -64,27 +64,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
     return this.state.isSelectionChanged;
   }
 
-  private promise(cb) {
-    const  promise = new Promise((res, rej) => {
-      this.promiseState.resolve = (value) => {
-        this.counter += 1
-        res(value);
-      };
-
-      this.promiseState.reject = (reason) => {
-        console.log('@@@@@@@@@@@@@@');
-        this.counter += 1
-        this.changes.clear();
-        rej(reason);
-      };
-
-      cb();
-
-    });
-
-    return promise;
-  }
-
   get stateCounter() {
     return this.app.state.counter;
   }
@@ -114,6 +93,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
     if (isContentChanged) {
       this.changes.clear();
       this.changes = state.changes.clone();
+      console.log('xxxxxxxxxxx', this.changes.size, state.changes.size);
     }
 
     if (isContentChanged) {
@@ -135,9 +115,10 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
     //   return;
     // }
 
+    console.log(this.changes.size);
     // force the promise to timeout
     if (!this.changes.has(node.id)) {
-      // console.log('mounted node not dirty', node.id.toString(), changeType);
+      console.log('mounted node not dirty', node.id.toString(), changeType);
       return;
     }
 
@@ -145,8 +126,10 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
     // keep track of the pending node updates
     if (changeType === NodeChangeType.update) {
-      // console.log('mounted', node.id.toString(), changeType, this.changes.size, this.changes.toArray().map(n => n.toString()), node.textContent, node);
+      console.log('mounted', node.id.toString(), changeType, this.changes.size, this.changes.toArray().map(n => n.toString()), node.textContent, node);
+      console.log('before', this.changes.size, this.changes.toArray().map(n => n.toString()));
       this.changes.remove(node.id);
+      console.log('after', this.changes.size, this.changes.toArray().map(n => n.toString()));
     }
 
     // console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
@@ -184,21 +167,13 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
   }
 
   private updateContent() {
-    // if (this.counter > this.stateCounter) {
-    //   console.log('updateContent: old transaction sync still in progress', this.stateCounter, this.counter);
-    //   return;
-    // }
-
-    console.groupCollapsed("syncing:  content");
+    console.group("syncing:  content");
     // console.group('syncing: content')
     const updatedNodeIds = this.changes;
     const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
 
     console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
 
-    // remove nodes if ancestor is present in the updateNodes
-    // this is needed to avoid updating the same node twice
-    // as updating(rendering) the ancestor will update the descendants as well
     updatedNodes.forEach(n => {
       updatedNodeIds.remove(n.id);
       if (n.closest(p => updatedNodeIds.has(p.id))) {
@@ -211,7 +186,10 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
 
     updatedNodes
       .filter(n => updatedNodeIds.has(n.id))
-      .forEach(n => this.emit(NodeChangeType.update, n));
+      .forEach(n => {
+        console.log('publishing', n.id.toString());
+        this.emit(n, NodeChangeType.update)
+      });
     console.groupEnd();
   }
 

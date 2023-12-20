@@ -36,7 +36,7 @@ export class NestablePlugin extends AfterPlugin {
 		return {
 			wrap: this.wrap,
 			unwrap: this.unwrap,
-			serializeChildren: this.serializeChildren,
+			// serializeChildren: this.serializeChildren,
 			inject: this.inject,
 		}
 	}
@@ -112,7 +112,7 @@ export class NestablePlugin extends AfterPlugin {
 					}
 
 					cmd
-						.Change(listNode.id, listNode.name, 'section')
+						.Change(listNode.id, 'section')
 						.Select(PinnedSelection.fromPin(selection.head))
 					cmd.Dispatch();
 					return
@@ -178,7 +178,7 @@ export class NestablePlugin extends AfterPlugin {
 
 					preventAndStopCtx(ctx);
 					cmd
-						.Change(listNode.id, listNode.name, 'section')
+						.Change(listNode.id,  'section')
 						.Select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
 						.Dispatch();
 					return
@@ -240,10 +240,10 @@ export class NestablePlugin extends AfterPlugin {
 		}
 	}
 
-	serializeChildren(app: Carbon, node: Node): string {
-		const children = node.children.slice(1);
-		const depth = takeBefore(node.parents, (n: Node) => !isNestableNode(n)).length + 1;
-		if (!children.length) return ''
-		return '\n' + children.map(n => app.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
-	}
+	// serializeChildren(app: Carbon, node: Node): string {
+	// 	const children = node.children.slice(1);
+	// 	const depth = takeBefore(node.parents, (n: Node) => !isNestableNode(n)).length + 1;
+	// 	if (!children.length) return ''
+	// 	return '\n' + children.map(n => app.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
+	// }
 }

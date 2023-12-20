@@ -99,7 +99,7 @@ export function BlockMenu(props: BlockMenuProps) {
       if (!node) return;
 
       const { tr } = app;
-      tr.Change(node?.id, node?.name, type.name)
+      tr.Change(node?.id, type.name)
       tr.SetContent(node.child(0)!.id, BlockContent.create([]));
       tr.Update(node.id, {
         node: { typeChanged: true },

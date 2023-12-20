@@ -409,7 +409,7 @@ export class TransformCommands extends BeforePlugin {
     })
 
     tr
-      .Change(node.id, node.name, name)
+      .Change(node.id, name)
       .Select(after);
     return tr;
   }
@@ -600,7 +600,7 @@ export class TransformCommands extends BeforePlugin {
       }
 
       if (startBlock!.type.splitName !== endBlock!.name) {
-        changeActions.push(ChangeNameAction.create(endBlock!.id, endBlock!.name, startBlock!.type.splitName));
+        changeActions.push(ChangeNameAction.create(endBlock!.id, startBlock!.type.splitName));
       }
 
       // * move nodes from endContainer to startContainer

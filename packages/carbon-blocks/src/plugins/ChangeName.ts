@@ -120,7 +120,7 @@ export class ChangeName extends BeforePlugin {
         }
       }
 
-      cmd.Change(block.id, block.name, name)
+      cmd.Change(block.id, name)
       cmd.Update(block.id, { node: { typeChanged: true },});
       // expand collapsed block
       if (block.isCollapsed) {
@@ -153,7 +153,7 @@ export class ChangeName extends BeforePlugin {
       if (moveNodes.length) {
         cmd.Add(moveNodesActions(to, moveNodes));
       }
-      cmd.Change(block.id, block.name, type)
+      cmd.Change(block.id, type)
       cmd.Update(block.id, { node: { typeChanged: true },  });
       cmd.Select(after)
       cmd.Dispatch()
@@ -196,7 +196,7 @@ export class ChangeName extends BeforePlugin {
       cmd.SetContent(block.firstChild!.id, content)
         // .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
         .Add(insertBeforeAction(block, divider))
-        .Change(block.id, block.name, block.type.splitName)
+        .Change(block.id, block.type.splitName)
         .Update(block.id, { node: { typeChanged: true } })
         .Add(moveActions)
         .Select(after)
