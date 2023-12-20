@@ -1,7 +1,7 @@
 import { EventContext, AfterPlugin } from "@emrgen/carbon-core";
 import { p12, p14 } from '../core/Logger';
 import { EventHandlerMap } from '../core/types';
-import { CarbonState } from '../core/CarbonState';
+import { State } from '../core/State';
 import { Decoration } from '../core/Decoration';
 
 let count = 0
@@ -60,7 +60,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 	}
 
 	// TODO: decorate selected nodes with halo
-	decoration(state: CarbonState): Decoration[] {
+	decoration(state: State): Decoration[] {
 		return []
 	}
 

@@ -9,7 +9,7 @@ import {
   extensionPresets,
   useCarbon,
   useCreateCarbon,
-  useSelectionHalo, CarbonState, InitNodeJSON
+  useSelectionHalo, State, InitNodeJSON
 } from "@emrgen/carbon-core";
 import {
   useCombineConnectors,
@@ -120,7 +120,7 @@ export function BlockContentComp(props: RendererProps) {
 
 
   useEffect(() => {
-    const onChange = (state: CarbonState) => {
+    const onChange = (state: State) => {
       if (state.isContentChanged) {
         const parentId = node.parent?.id;
         if (!parentId) return

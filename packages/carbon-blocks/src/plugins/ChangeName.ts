@@ -86,11 +86,12 @@ export class ChangeName extends BeforePlugin {
       if (name === 'numberedList') {
         const listNumber = NumberedList.listNumber(block)
         const inputNumber = parseInt(match[1].slice(0, -2));
-         if (listNumber != inputNumber) {
-           cmd.updateProps(block.id, {
-             [ListNumberPath]: inputNumber,
-           })
-         }
+        if (listNumber != inputNumber) {
+          console.warn('TODO: listNumber', listNumber, inputNumber);
+          // cmd.updateProps(block.id, {
+          //   [ListNumberPath]: inputNumber,
+          // })
+        }
       }
 
       const titleNode = block.child(0)!;
@@ -104,7 +105,6 @@ export class ChangeName extends BeforePlugin {
         cmd.updateProps(titleNode.id, {
           [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
         })
-        console.log('xxxxxxxxxxx');
       } else {
         const title = titleNode.textContent.slice(match[1].length - 1);
         console.warn('title', title, match);

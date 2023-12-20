@@ -1,5 +1,5 @@
 import { Optional } from "@emrgen/types";
-import { CarbonState } from "./CarbonState";
+import { State } from "./State";
 import { Node } from "./Node";
 import { StateChanges } from "./NodeChange";
 import { NodeId } from "./NodeId";
@@ -26,7 +26,7 @@ import { StateScope } from "./StateScope";
 //draft of a state is used to prepare a new state before commit
 export class CarbonStateDraft {
   origin: ActionOrigin;
-  state: CarbonState;
+  state: State;
   nodeMap: NodeMap;
   selection: PointedSelection;
   changes: NodeIdSet; // tracks changed nodes
@@ -34,7 +34,7 @@ export class CarbonStateDraft {
 
   private drafting = true;
 
-  constructor(state: CarbonState, origin: ActionOrigin) {
+  constructor(state: State, origin: ActionOrigin) {
     this.origin = origin;
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
@@ -51,7 +51,7 @@ export class CarbonStateDraft {
   }
 
   // turn the draft into a new state
-  commit(depth: number): CarbonState {
+  commit(depth: number): State {
     const { state, changes, selection } = this;
 
     const nodeMap = this.nodeMap.isEmpty ? state.nodeMap : this.nodeMap;
@@ -69,7 +69,7 @@ export class CarbonStateDraft {
     changes.freeze();
     nodeMap.freeze();
 
-    const newState = new CarbonState({
+    const newState = new State({
       previous: state.clone(depth - 1),
       scope: state.scope,
       content,
@@ -393,8 +393,6 @@ export class CarbonStateDraft {
           node.updateProps({
             [PlaceholderPath]: parent.properties.get<string>(EmptyPlaceholderPath) ?? '',
           })
-
-          console.log('xxx', parent.name, parent.id.toString(), parent.properties.get<string>(EmptyPlaceholderPath), node.properties.toKV());
         })
       }
     }

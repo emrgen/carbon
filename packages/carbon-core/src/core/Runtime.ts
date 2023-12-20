@@ -1,6 +1,6 @@
 import { ActionOrigin, Slice } from "@emrgen/carbon-core";
 
-export class CarbonRuntime {
+export class Runtime {
   origin: ActionOrigin = ActionOrigin.Unknown;
   clipboard: Slice = Slice.empty;
 }

@@ -12,7 +12,7 @@ import {
 import { Optional } from "@emrgen/types";
 
 declare module '@emrgen/carbon-core' {
-	export interface CarbonCommands {
+	export interface Transaction {
 		text: {
 			// insertText(selection: PinnedSelection, text: string): Optional<Transaction>;
 		};

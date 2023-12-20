@@ -11,7 +11,7 @@ import { StateScope } from "./StateScope";
 
 interface CarbonStateProps {
 	scope: Symbol;
-	previous?: CarbonState;
+	previous?: State;
 	content: Node;
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
@@ -21,8 +21,8 @@ interface CarbonStateProps {
 }
 
 
-export class CarbonState extends EventEmitter {
-	previous: Optional<CarbonState>;
+export class State extends EventEmitter {
+	previous: Optional<State>;
 	scope: Symbol;
 	content: Node;
 	selection: PinnedSelection;
@@ -35,7 +35,7 @@ export class CarbonState extends EventEmitter {
 
 	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap?: NodeMap) {
 		const map = nodeMap ?? new NodeMap();
-		const state = new CarbonState({ content, selection, scope, nodeMap: map, });
+		const state = new State({ content, selection, scope, nodeMap: map, });
 		if (!nodeMap) {
 			content.forAll(n => {
 				map.set(n.id, n)
@@ -81,7 +81,7 @@ export class CarbonState extends EventEmitter {
 
 	get depth() {
 		let depth = 0;
-		let node: Optional<CarbonState> = this;
+		let node: Optional<State> = this;
 		while (node.previous) {
 			depth++;
 			node = node.previous;
@@ -105,7 +105,7 @@ export class CarbonState extends EventEmitter {
 		if (depth === 0) return null
 		const { scope, content, selection, changes, nodeMap } = this;
 		if (!this.previous) {
-			return new CarbonState({
+			return new State({
 				scope,
 				content,
 				selection,
@@ -115,7 +115,7 @@ export class CarbonState extends EventEmitter {
 		}
 
 		const previous = this.previous.clone(depth - 1);
-		return new CarbonState({
+		return new State({
 			scope,
 			content,
 			selection,
@@ -126,12 +126,12 @@ export class CarbonState extends EventEmitter {
 	}
 
 	// try to create a new state or fail and return the previous state
-	produce(origin: ActionOrigin, fn: (state: CarbonStateDraft) => void): CarbonState {
+	produce(origin: ActionOrigin, fn: (state: CarbonStateDraft) => void): State {
 		const draft = new CarbonStateDraft(this, origin);
 		try {
 			StateScope.set(this.scope, draft.nodeMap)
 			fn(draft);
-			const state = draft.prepare().commit(5);
+			const state = draft.prepare().commit(3);
 			StateScope.set(this.scope, this.nodeMap)
 
 			draft.dispose();
@@ -145,14 +145,14 @@ export class CarbonState extends EventEmitter {
 	}
 
 	revert(steps = 1) {
-		let oldState = this as CarbonState;
+		let oldState = this as State;
 		while (steps > 0 && oldState.previous) {
 			oldState = oldState.previous!;
 			steps--;
 		}
 
 		// create a new state with the same scope and content as the old state but with the old state as previous
-		const state = CarbonState.create(oldState.scope, oldState.content, oldState.selection);
+		const state = State.create(oldState.scope, oldState.content, oldState.selection);
 		state.previous = oldState.previous;
 
 		return state.freeze();

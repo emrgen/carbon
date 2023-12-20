@@ -12,7 +12,7 @@ import {
 } from "@emrgen/carbon-blocks";
 
 import {
-  CarbonState,
+  State,
   Extension,
   Renderer,
   RendererProps,
@@ -134,7 +134,7 @@ export default function Dev() {
   const app = useCreateCarbon('dev', data, extensions);
 
   useEffect(() => {
-    const onChange = (state: CarbonState) => {
+    const onChange = (state: State) => {
       state.content.forAll((node) => {
         // console.log(node.id.toString(), node.name, node.properties.toKV());
       });

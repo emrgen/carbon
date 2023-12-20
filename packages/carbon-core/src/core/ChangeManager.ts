@@ -10,7 +10,7 @@ import { Transaction } from "./Transaction";
 import { StateChanges } from "./NodeChange";
 import { PluginManager } from "./PluginManager";
 import { NodeId } from "./NodeId";
-import { ActionOrigin, CarbonState } from "@emrgen/carbon-core";
+import { ActionOrigin, State } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 
 export enum NodeChangeType {
@@ -89,55 +89,40 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
   // 1. sync the doc
   // 2. sync the selection
   // 3. sync the node state
-  update(tr: Transaction, state: CarbonState, timeout: number = 1000) {
+  update(tr: Transaction, state: State, timeout: number = 1000) {
     this.counter = this.stateCounter;
-    console.log('updating content version', this.state.content.version);
-    // return this.promise(() => {
-    //
-    //   // if dom is not updated in 1s, reject the promise and revert to the previous state
-    //   // setTimeout(() => {
-    //   //   if (this.stateCounter === this.counter) {
-    //   //     console.error("dom update promise timeout");
-    //   //     console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', timeout);
-    //   //     this.promiseState.reject?.();
-    //   //   }
-    //   // }, timeout);
+
+    if (this.transactions.length) {
+      // this.promiseState.reject?.();
+      return;
+    }
 
 
+    this.transactions.push(tr);
+    const { isContentChanged, isSelectionChanged } = this.state;
 
-        if (this.transactions.length) {
-          // this.promiseState.reject?.();
-          return;
-        }
+    // console.log('updating transaction effect', tr);
+    // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
+    // if nothing is dirty, then there is nothing to do
+    if (!isContentChanged && !isSelectionChanged) {
+      return;
+    }
 
+    if (isContentChanged) {
+      this.changes.clear();
+      this.changes = state.changes.clone();
+    }
 
-        this.transactions.push(tr);
-        const { isContentChanged, isSelectionChanged } = this.state;
+    if (isContentChanged) {
+      this.updateContent();
+      return;
+    }
 
-        // console.log('updating transaction effect', tr);
-        // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
-        // if nothing is dirty, then there is nothing to do
-        if (!isContentChanged && !isSelectionChanged) {
-          return;
-        }
-
-        if (isContentChanged) {
-          this.changes.clear();
-          this.changes = state.changes.clone();
-          console.log(state.content.textContent.slice(0, 30));
-          console.log("changes", state.changes.toArray().map(n => n.toString()));
-        }
-
-        if (isContentChanged) {
-          this.updateContent();
-          return;
-        }
-
-        if (isSelectionChanged) {
-          this.updateSelection(() => {
-            this.onTransaction();
-          });
-        }
+    if (isSelectionChanged) {
+      this.updateSelection(() => {
+        this.onTransaction();
+      });
+    }
     // });
   }
 
@@ -147,7 +132,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
     //   return;
     // }
 
-    console.log('xxxxxxxxxxxx');
     // force the promise to timeout
     if (!this.changes.has(node.id)) {
       // console.log('mounted node not dirty', node.id.toString(), changeType);
@@ -193,7 +177,6 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
       this.app.emit(EventsOut.changed, this.state);
     }
 
-    console.log('----------------');
     // this.promiseState.resolve?.();
   }
 

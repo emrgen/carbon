@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Dnd } from "../core/Dnd";
 import { DndContextProvider } from "../hooks/useDndContext";
 import {DndController} from "./DndController";
-import { CarbonState, EventsOut, Node, Transaction, useCarbon } from "@emrgen/carbon-core";
+import { State, EventsOut, Node, Transaction, useCarbon } from "@emrgen/carbon-core";
 import { sortBy } from "lodash";
 
 // manages node drag drop context
@@ -13,7 +13,7 @@ export const DndContext = (props) => {
   window.fastDnd = dnd;
 
   const onChange = useCallback(
-    (state: CarbonState) => {
+    (state: State) => {
       if (state.isContentChanged) {
         dnd.isDirty = true;
         // console.log('update dnd context');

@@ -1,4 +1,4 @@
-import { CarbonState, EventsOut, Transaction, useCarbon } from "@emrgen/carbon-core";
+import { State, EventsOut, Transaction, useCarbon } from "@emrgen/carbon-core";
 import { throttle } from "lodash";
 import { useCallback, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";

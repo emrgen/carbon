@@ -5,8 +5,8 @@ import { MarkSet } from "../core/Mark";
 
 // add formatter commands to the CarbonCommands interface
 declare module '@emrgen/carbon-core' {
-  export interface CarbonCommands {
-    formatter: {
+  export interface Transaction {
+    format: {
       bold: (node: Node, start: number, end: number) => Optional<Transaction>;
       italic: (node: Node, start: number, end: number) => Optional<Transaction>;
       underline: (node: Node, start: number, end: number) => Optional<Transaction>;
@@ -24,7 +24,7 @@ declare module '@emrgen/carbon-core' {
 
 export class FormatterPlugin extends CarbonPlugin {
 
-  name = 'formatter';
+  name = 'format';
 
   commands(): Record<string, Function> {
     return {

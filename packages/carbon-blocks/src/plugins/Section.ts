@@ -1,7 +1,7 @@
 import {
 	Carbon, CarbonAction,
 	CarbonPlugin,
-	CarbonState,
+	State,
 	Node,
 	NodePlugin,
 	NodeSpec,
@@ -14,7 +14,7 @@ import { TitlePlugin } from './Title';
 import { node } from "@emrgen/carbon-blocks";
 
 declare module '@emrgen/carbon-core' {
-	export interface CarbonCommands {
+	export interface Transaction {
 		section: {
 			insert: (after: Node) => Optional<Transaction>,
 		}

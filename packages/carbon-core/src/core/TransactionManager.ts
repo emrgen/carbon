@@ -5,12 +5,12 @@ import { Transaction } from "./Transaction";
 import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
 import { EventsOut } from './Event';
-import { CarbonState } from './CarbonState';
+import { State } from './State';
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];
 
-	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager, readonly updateState: (state: CarbonState, tr: Transaction) => void) { }
+	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager, readonly updateState: (state: State, tr: Transaction) => void) { }
 
 	private get state() {
 		return this.app.state;

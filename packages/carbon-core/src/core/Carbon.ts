@@ -2,7 +2,7 @@ import { Optional } from "@emrgen/types";
 import { Node } from "./Node";
 import { EventEmitter } from "events";
 import { querySelector } from "../utils/domElement";
-import { CarbonState } from "./CarbonState";
+import { State } from "./State";
 import { ChangeManager } from "./ChangeManager";
 import { EventsIn, EventsOut } from "./Event";
 import { EventManager } from "./EventManager";
@@ -18,7 +18,7 @@ import {  Maps, SerializedNode } from "./types";
 import { first, isFunction } from "lodash";
 import { CarbonPlugin } from "./CarbonPlugin";
 import { StateScope } from "./StateScope";
-import { CarbonRuntime } from "./Runtime";
+import { Runtime } from "./Runtime";
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginStates } from "./PluginState";
 import { CarbonCommand } from "./CarbonCommand";
@@ -43,8 +43,8 @@ export class Carbon extends EventEmitter {
 	private readonly commands: CarbonCommand;
 
 	schema: Schema;
-	state: CarbonState; // immutable state
-	runtime: CarbonRuntime;
+	state: State; // immutable state
+	runtime: Runtime;
 	store: NodeStore;
 
 	// chain: CarbonCommandChain;
@@ -63,7 +63,7 @@ export class Carbon extends EventEmitter {
 	committed: boolean;
 	private counter: number = 0;
 
-	constructor(state: CarbonState, schema: Schema, pm: PluginManager, renderer: RenderManager) {
+	constructor(state: State, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
 
 		this.committed = true;
@@ -74,7 +74,7 @@ export class Carbon extends EventEmitter {
 
 		this.state = state;
 		StateScope.set(this.state.scope, this.state.nodeMap);
-		this.runtime = new CarbonRuntime();
+		this.runtime = new Runtime();
 
 		this.store = new NodeStore(this);
 
@@ -138,7 +138,7 @@ export class Carbon extends EventEmitter {
 		// 	throw new Error('cannot create a new command while there is a pending transaction')
 		// }
 		this.committed = false;
-		return Transaction.create(this, this.state, this.schema, this.commands, this.tm, this.pm, this.sm).proxy();
+		return Transaction.create(this, this.commands, this.tm, this.pm, this.sm).proxy();
 	}
 
 	// create a new transaction
@@ -147,7 +147,7 @@ export class Carbon extends EventEmitter {
 			throw new Error('cannot create a new transaction while there is a pending transaction')
 		}
 		this.committed = false;
-		return Transaction.create(this, this.state, this.schema, this.commands, this.tm, this.pm, this.sm);
+		return Transaction.create(this, this.commands, this.tm, this.pm, this.sm);
 	}
 
 	plugin(name: string): Optional<CarbonPlugin> {
@@ -182,7 +182,7 @@ export class Carbon extends EventEmitter {
 		}
 	}
 
-	private updateState(state: CarbonState, tr: Transaction) {
+	private updateState(state: State, tr: Transaction) {
 		if (!state.isContentChanged && !state.isSelectionChanged) {
 			console.warn('new state is not dirty');
 			return

@@ -3,12 +3,12 @@ import { Optional } from '@emrgen/types';
 import { node } from '@emrgen/carbon-blocks';
 
 declare module '@emrgen/carbon-core' {
-  interface CarbonCommands {
-    insert: {
-      node(name: string): Optional<Transaction>;
-      before(node: Node, name: string): Optional<Transaction>;
-      after(node: Node, name: string): Optional<Transaction>;
-    }
+  interface Transaction {
+    // insert: {
+    //   node(name: string): Optional<Transaction>;
+    //   before(node: Node, name: string): Optional<Transaction>;
+    //   after(node: Node, name: string): Optional<Transaction>;
+    // }
   }
 }
 

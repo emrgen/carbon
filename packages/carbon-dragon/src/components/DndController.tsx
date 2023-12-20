@@ -9,10 +9,11 @@ import {
   Transaction,
   prevent,
   useCarbon,
-  useCarbonOverlay, CarbonState
+  useCarbonOverlay, State
 } from "@emrgen/carbon-core";
 import { elementBound } from "../core/utils";
 import { DraggableHandle } from "./DraggableHandle";
+import { throttle } from "lodash";
 
 export function DndController() {
   const app = useCarbon();
@@ -65,9 +66,9 @@ export function DndController() {
       if (!region) return;
       const bound = elementBound(el);
 
-      console.log(node.name, node.type.dragHandle);
+      // console.log(node.name, node.type.dragHandle);
       if (node.type.dragHandle) {
-        console.log("onMouseIn", node.id.toString(), bound);
+        // console.log("onMouseIn", node.id.toString(), bound);
         setDragHandlePosition({
           left: bound.left - portalPosition.x - 50,
           top: bound.top - portalPosition.y + 4,
@@ -84,12 +85,13 @@ export function DndController() {
       }
       setShowDragHandle(true);
       setDragHandleNode(node);
-
     },
     [dragHandleNode, dnd.isMouseDown, dnd.region, app.store, portalPosition]
   );
 
+  // reset drag handle
   const resetDragHandle = useCallback(() => {
+    if (!dnd.draggedNodeId) return;
     setIsDragging(false);
     setDraggedNode(null);
     setShowDragHandle(false);
@@ -117,6 +119,7 @@ export function DndController() {
       setDraggedNode(e.node);
       setShowDragHandle(true);
       app.disable();
+      console.log('----------');
       dnd.draggedNodeId = e.node.id;
       showOverlay(e.id.toString());
     },
@@ -133,13 +136,14 @@ export function DndController() {
   );
 
   const onChange = useCallback(
-    (state: CarbonState) => {
+    (state: State) => {
       if (state.isContentChanged) {
         resetDragHandle();
       }
     },
     [resetDragHandle]
   );
+
 
   const onEditorMouseOver = useCallback((e) => {
     // setShowDragHandle(true);
@@ -150,11 +154,12 @@ export function DndController() {
   }, []);
 
   useEffect(() => {
+    const thMouseIn = throttle(onMouseIn, 100);
     // editor.on(EditorEventsIn.mouseOver, onEditorMouseOver);
     // editor.on(EditorEventsIn.mouseOut, onEditorMouseOut);
     app.on("changed", onChange);
     app.on("keyDown", onKeyDown);
-    dnd.on("mouse:in", onMouseIn);
+    dnd.on("mouse:in", thMouseIn);
     dnd.on("mouse:out", onMouseOut);
     dnd.on("drag:start", onDragStart);
     dnd.on("drag:end", onDragEnd);
@@ -164,7 +169,7 @@ export function DndController() {
       // app.off("mouseOut", onEditorMouseOut);
       app.off("changed", onChange);
       app.off("keyDown", onKeyDown);
-      dnd.off("mouse:in", onMouseIn);
+      dnd.off("mouse:in", thMouseIn);
       dnd.off("mouse:out", onMouseOut);
       dnd.off("drag:start", onDragStart);
       dnd.off("drag:end", onDragEnd);

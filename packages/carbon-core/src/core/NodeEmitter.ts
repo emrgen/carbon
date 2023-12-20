@@ -60,7 +60,7 @@ export class NodeEmitter {
 	publish(node: Node) {
 		if (node) {
 			const listeners = this.subscribers.get(node.id) ?? [];
-			console.log(node.name, node.id.toString(), listeners, Array.from(this.subscribers.keys()).map(n => n.toString()))
+			// console.log(node.name, node.id.toString(), listeners, Array.from(this.subscribers.keys()).map(n => n.toString()))
 			// each(listeners, cb => cb(node));
 		}
 	}

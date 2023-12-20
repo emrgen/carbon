@@ -1,6 +1,6 @@
 import { Optional } from '@emrgen/types';
 import { Carbon } from './Carbon';
-import { CarbonState } from './CarbonState';
+import { State } from './State';
 import { Decoration } from './Decoration';
 import { Node } from './Node';
 import { NodeSpec } from './Schema';
@@ -76,7 +76,7 @@ export abstract class CarbonPlugin {
 	transaction(tr: Transaction) { }
 
 	// return decorations that will be applied on the view
-	decoration(state: CarbonState): Decoration[] {
+	decoration(state: State): Decoration[] {
 		return []
 	}
 

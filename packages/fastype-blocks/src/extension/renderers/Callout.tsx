@@ -58,39 +58,38 @@ export const Callout = (props: RendererProps) => {
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
       <CarbonNodeContent
-        key={node.key}
         node={node}
-        // beforeContent={
-        //   <div
-        //     className="fastype-callout-icon"
-        //     onMouseDown={preventAndStop}
-        //     onMouseUp={preventAndStop}
-        //     contentEditable={false}
-        //     suppressContentEditableWarning
-        //   >
-        //     <IconButton
-        //       bg={"transparent"}
-        //       size={"xs"}
-        //       aria-label="Search database"
-        //       icon={
-        //         <Emoji
-        //           unified={emoji}
-        //           size={18}
-        //         />
-        //       }
-        //       onClick={showEmojiPicker}
-        //     />
-        //     {isOpen && (
-        //       <EmojiPicker
-        //         isOpen={isOpen}
-        //         onClose={onClose}
-        //         onSelect={onSelectEmoji}
-        //       >
-        //         <div></div>
-        //       </EmojiPicker>
-        //     )}
-        //   </div>
-        // }
+        beforeContent={
+          <div
+            className="fastype-callout-icon"
+            onMouseDown={preventAndStop}
+            onMouseUp={preventAndStop}
+            contentEditable={false}
+            suppressContentEditableWarning
+          >
+            <IconButton
+              bg={"transparent"}
+              size={"xs"}
+              aria-label="Search database"
+              icon={
+                <Emoji
+                  unified={emoji}
+                  size={18}
+                />
+              }
+              onClick={showEmojiPicker}
+            />
+            {isOpen && (
+              <EmojiPicker
+                isOpen={isOpen}
+                onClose={onClose}
+                onSelect={onSelectEmoji}
+              >
+                <div></div>
+              </EmojiPicker>
+            )}
+          </div>
+        }
       />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}

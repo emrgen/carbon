@@ -178,6 +178,7 @@ export class Dnd extends EventEmitter {
 			// console.log('cancelled')
 			return;
 		}
+
 		// console.log('draggableHover', hitNode.id.toString(),);
 		this.setDraggedNode(hitNode)
 	}

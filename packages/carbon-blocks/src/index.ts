@@ -77,8 +77,6 @@ export const blockPresets: Extension = {
 		new Code(),
 		new DocLink(),
 		new Table(),
-		new Insert(),
-		new Change(),
 		new CarbonRoot(),
 		new PageTree(),
 		new BlockContent(),
