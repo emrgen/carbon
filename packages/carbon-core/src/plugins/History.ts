@@ -34,13 +34,13 @@ export class HistoryPlugin extends AfterPlugin {
   undo(transactions: Transaction[]): void {
     const inverse = transactions.map(tr => tr.inverse());
     this.redoStack.push(...inverse);
-    inverse.forEach(tr => tr.dispatch());
+    inverse.forEach(tr => tr.Dispatch());
   }
 
   redo(transactions: Transaction[]): void {
     const inverse = transactions.map(tr => tr.inverse());
     this.undoStack.push(...inverse);
-    inverse.forEach(tr => tr.dispatch());
+    inverse.forEach(tr => tr.Dispatch());
   }
 
   keydown(): Partial<EventHandler> {
@@ -58,7 +58,7 @@ export class HistoryPlugin extends AfterPlugin {
         console.log('tr', tr);
         console.log('undo', inverse);
         this.redoStack.push(inverse)
-        inverse.dispatch();
+        inverse.Dispatch();
 
         ctx.app.emit('history.undo', tr);
       },
@@ -71,7 +71,7 @@ export class HistoryPlugin extends AfterPlugin {
         console.log('tr', tr);
         // console.log('redo', inverse);
         // this.undoStack.push(inverse);
-        // inverse.dispatch();
+        // inverse.Dispatch();
 
         ctx.app.emit('history.redo', tr);
       },
@@ -79,8 +79,9 @@ export class HistoryPlugin extends AfterPlugin {
   }
 
   transaction(tr: Transaction): void {
+    const tx = tr.Into();
     // window.tr = tr;
-    if (tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
+    if (tx.type === TransactionType.TwoWay && !tr.selectionOnly) {
       this.undoStack.push(tr);
       this.redoStack = [];
     } else {
@@ -88,3 +89,5 @@ export class HistoryPlugin extends AfterPlugin {
     }
   }
 }
+
+// export class

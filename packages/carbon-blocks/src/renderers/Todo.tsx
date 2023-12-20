@@ -30,7 +30,7 @@ export default function TodoComp(props: RendererProps) {
   const handleClick = useCallback(
     (e, app) => {
       e.stopPropagation();
-      app.cmd.updateProps(node.id, {[CheckedPath]: !isChecked}).dispatch();
+      app.cmd.updateProps(node.id, {[CheckedPath]: !isChecked}).Dispatch();
     },
     [node.id, isChecked]
   );

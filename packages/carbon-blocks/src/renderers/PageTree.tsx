@@ -16,7 +16,7 @@ export const PageTreeComp = (props: RendererProps) => {
   const app = useCarbon();
 
   const handleToggleCollapse = useCallback((app: Carbon) => {
-    app.cmd.collapsible.toggle(node).dispatch();
+    app.cmd.collapsible.toggle(node).Dispatch();
   },[node]);
 
   const content = useMemo(() => {

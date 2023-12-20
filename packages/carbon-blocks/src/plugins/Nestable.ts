@@ -124,7 +124,7 @@ export class NestablePlugin extends AfterPlugin {
 				const nextSibling = listNode.nextSibling;
 				if (!nextSibling) {
 					preventAndStopCtx(ctx);
-					cmd.nestable.unwrap(listNode)?.dispatch();
+					cmd.nestable.unwrap(listNode)?.Dispatch();
 					return
 				}
 
@@ -188,7 +188,7 @@ export class NestablePlugin extends AfterPlugin {
 				// if parent is collapsible the listNode should be not unwrapped
 				if (!nextSibling && !listNode.parent?.isCollapsible) {
 					preventAndStopCtx(ctx);
-					cmd.transform.unwrap(listNode)?.dispatch();
+					cmd.transform.unwrap(listNode)?.Dispatch();
 					return
 				}
 			},
@@ -212,7 +212,7 @@ export class NestablePlugin extends AfterPlugin {
 					return
 				}
 
-				cmd.nestable.wrap(listNode)?.dispatch();
+				cmd.nestable.wrap(listNode)?.Dispatch();
 			},
 			shiftTab: (ctx: EventContext<KeyboardEvent>) => {
 				preventAndStopCtx(ctx);
@@ -227,7 +227,7 @@ export class NestablePlugin extends AfterPlugin {
 					return
 				}
 
-				cmd.nestable.unwrap(listNode)?.dispatch();
+				cmd.nestable.unwrap(listNode)?.Dispatch();
 			}
 		}
 	}

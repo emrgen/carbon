@@ -27,7 +27,7 @@ export class TimeTravelPlugin extends AfterPlugin {
 
 
         backwardTr.readOnly = true;
-        backwardTr.dispatch();
+        backwardTr.Dispatch();
 
         this.bus.emit('timeTravel', this.transactionTree);
       },

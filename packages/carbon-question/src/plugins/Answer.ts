@@ -32,7 +32,7 @@ export class QuestionAnswer extends CarbonPlugin {
         console.log('[Enter] collapsible');
         if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
           preventAndStopCtx(ctx)
-          cmd.collapsible.split(selection)?.dispatch();
+          cmd.collapsible.split(selection)?.Dispatch();
         }
       }
     }

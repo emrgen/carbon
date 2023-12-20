@@ -12,6 +12,7 @@ export interface MarkProps {
 }
 
 export class Mark {
+	// type is the name of the mark
 	type: string;
 	props?: MarkProps;
 

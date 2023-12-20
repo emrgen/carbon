@@ -1,5 +1,5 @@
 import { JsonStore } from "./JsonStore";
-import { each, get, isObject, set } from "lodash";
+import { each, set } from "lodash";
 
 export type NodePropsJson = Record<string, any>;
 
@@ -91,7 +91,7 @@ export class NodeProps extends JsonStore {
   }
 }
 
-
+// common paths for node props
 export const EmptyPlaceholderPath = "local/placeholder/empty";
 export const FocusedPlaceholderPath = "local/placeholder/focused";
 export const LocalHtmlAttrPath = "local/html";

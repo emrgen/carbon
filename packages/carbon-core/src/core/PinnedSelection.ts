@@ -10,6 +10,7 @@ import { ActionOrigin } from './actions';
 import { sortNodes } from "@emrgen/carbon-core";
 import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 
+
 export class PinnedSelection {
 
 	static NULL = new PinnedSelection(Pin.NULL, Pin.NULL, []);
@@ -152,6 +153,7 @@ export class PinnedSelection {
 		return this.tail.isNull || this.head.isNull;
 	}
 
+	// for block selection the
 	get isCollapsed() {
 		return this.tail.eq(this.head);
 	}
@@ -189,7 +191,6 @@ export class PinnedSelection {
 			const rect = (el?.childNodes[0] as HTMLSpanElement)?.getBoundingClientRect();
 			return { head: rect, tail: rect }
 		}
-		// console.log(selection, selection.rangeCount);
 
 		if (selection.rangeCount !== 0) {
 			const endRange = selection.getRangeAt(0).cloneRange();

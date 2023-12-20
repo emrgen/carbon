@@ -170,6 +170,7 @@ export class CarbonStateDraft {
       }
       console.log(content);
       node.updateContent(content);
+      console.log('xxxx',node.textContent);
     });
 
     // console.log('inserting content', nodeId.toString(), content.size);

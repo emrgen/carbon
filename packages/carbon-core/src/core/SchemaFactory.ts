@@ -9,16 +9,17 @@ import { isEmpty } from "lodash";
 import { NodeProps } from "./NodeProps";
 import { v4 as uuidv4 } from 'uuid';
 
+let counter = 0;
 
 export class SchemaFactory {
 	scope: Symbol;
 
 	static blockId() {
-		return uuidv4().slice(-10)
+		return uuidv4().slice(-10) + '[' + ++counter + ']';
 	}
 
 	static textId() {
-		return uuidv4().slice(-10)
+		return uuidv4().slice(-10) + '(' + ++counter + ')';
 	}
 
 	constructor(scope: Symbol) {

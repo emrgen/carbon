@@ -11,7 +11,6 @@ import {
   Pin,
   PinnedSelection,
   Point,
-  SerializedNode,
   Transaction,
   insertAfterAction,
   insertBeforeAction,
@@ -19,9 +18,6 @@ import {
   splitTextBlock,
   PlaceholderPath, CollapsedPath
 } from "@emrgen/carbon-core";
-import { Optional } from '@emrgen/types';
-import { identity } from 'lodash';
-import { NestablePlugin } from "./Nestable";
 
 declare module '@emrgen/carbon-core' {
   interface Transaction {
@@ -108,7 +104,7 @@ export class Collapsible extends NodePlugin {
   keydown(): Partial<EventHandler> {
     return {
       'ctrl_shift_e': (ctx: EventContext<KeyboardEvent>) => {
-        const { node, app } = ctx;
+        const { node } = ctx;
         if (node.name === 'document') {
           return;
         }
@@ -121,7 +117,7 @@ export class Collapsible extends NodePlugin {
       },
 
       'ctrl_shift_c': (ctx: EventContext<KeyboardEvent>) => {
-        const { node, app } = ctx;
+        const { node } = ctx;
         if (node.name === 'document') {
           return;
         }
@@ -137,20 +133,20 @@ export class Collapsible extends NodePlugin {
         // if selection is within the collapsible node title split the collapsible node
         if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
           preventAndStopCtx(ctx);
-          app.cmd.collapsible.split(selection)?.dispatch();
+          app.cmd.collapsible.split(selection)?.Dispatch();
         }
       },
       backspace: (ctx: EventContext<KeyboardEvent>) => {
-        const { app, selection, node } = ctx;
+        const { selection, node, cmd } = ctx;
         if (selection.isCollapsed && selection.head.isAtStartOfNode(node)) {
           if (node.child(0)?.isEmpty) {
             preventAndStopCtx(ctx);
 
-            const tr = app.cmd.transform.change(node, 'section');
+            cmd.transform.change(node, 'section');
             if (node.firstChild?.isEmpty) {
-              tr?.updateProps(node.firstChild.id, { [PlaceholderPath]: '' })
+              cmd.update(node.firstChild.id, { [PlaceholderPath]: '' })
             }
-            tr?.dispatch();
+            cmd.Dispatch();
           }
         }
       }
@@ -234,30 +230,30 @@ class CollapsibleBeforePlugin extends BeforePlugin {
   keydown(): Partial<EventHandler> {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
-        const { app, selection, node } = ctx;
+        const { selection, node } = ctx;
         const {start, end} = selection;
         if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
           preventAndStopCtx(ctx);
-          // app.cmd.collapsible.split(selection)?.dispatch();
+          // app.cmd.collapsible.split(selection)?.Dispatch();
         }
       },
       backspace: (ctx: EventContext<KeyboardEvent>) => {
-        const { app, selection, node } = ctx;
+        const { selection, node } = ctx;
         const { start, end } = selection;
         console.log('[Backspace] collapsible', node.name);
 
         if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
           preventAndStopCtx(ctx);
           console.log('[Backspace] collapsible');
-          // app.cmd.collapsible.split(selection)?.dispatch();
+          // app.cmd.collapsible.split(selection)?.Dispatch();
         }
       },
       delete: (ctx: EventContext<KeyboardEvent>) => {
-        const { app, selection, node } = ctx;
+        const { selection, node } = ctx;
         const { start, end } = selection;
         if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
           preventAndStopCtx(ctx);
-          // app.cmd.collapsible.split(selection)?.dispatch();
+          // app.cmd.collapsible.split(selection)?.Dispatch();
         }
       }
     }

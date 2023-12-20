@@ -205,7 +205,7 @@ export class Dnd extends EventEmitter {
 			// 		{ draggableHover: false },
 			// 		CommandOrigin.Runtime
 			// 	)
-			// 	.dispatch();
+			// 	.Dispatch();
 			// console.log("reset already");
 			this.emit('mouse:out', draggedNodeId)
 			this.draggedNodeId = null

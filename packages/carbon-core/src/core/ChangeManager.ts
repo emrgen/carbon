@@ -22,6 +22,9 @@ interface PromiseState {
   reject?: Function;
 }
 
+
+console.log(import.meta.env);
+
 /**
  * Syncs the editor state with the UI
  */
@@ -204,11 +207,11 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
       updatedNodeIds.add(n.id);
     });
 
-    console.log("publish", updatedNodes.map(n => n.id.toString()));
+    console.log("publish", updatedNodes.map(n => n.key));
 
     updatedNodes
       .filter(n => updatedNodeIds.has(n.id))
-      .forEach(n => this.publish(NodeChangeType.update, n, n.parent, this.counter));
+      .forEach(n => this.emit(NodeChangeType.update, n));
     console.groupEnd();
   }
 
@@ -229,7 +232,7 @@ export class ChangeManager extends NodeTopicEmitter<NodeChangeType> {
     cb();
 
     // process pending transactions
-    // this.tm.dispatch();
+    // this.tm.Dispatch();
     // console.groupEnd();
   }
 

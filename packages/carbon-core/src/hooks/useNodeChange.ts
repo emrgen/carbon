@@ -39,9 +39,9 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
       // console.log("node changed", value.name, watched.id.toString(),  watched === value, value.textContent, value.version, node.state.normalize());
     };
 
-    change.subscribe(node.id, NodeChangeType.update, onChange);
+    change.on(NodeChangeType.update, node.id, onChange);
     return () => {
-      change.unsubscribe(node.id, NodeChangeType.update, onChange);
+      change.off(NodeChangeType.update, node.id, onChange);
     };
   }, [change, node]);
 

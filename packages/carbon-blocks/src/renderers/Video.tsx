@@ -26,7 +26,7 @@ export function VideoComp(props: RendererProps) {
     //   ref.current?.getBoundingClientRect()
     // );
 
-    // app.tr.selectNodes([node.id]).dispatch();
+    // app.tr.selectNodes([node.id]).Dispatch();
   };
 
   const onClick = useCallback(

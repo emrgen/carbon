@@ -2,19 +2,23 @@ import { each, first, flatten, last, merge, reverse, sortBy } from "lodash";
 
 import { Optional } from "@emrgen/types";
 import {
-  NodeIdSet,
-  Carbon,
-  BeforePlugin,
-  PointedSelection,
-  BlockContent,
-  PinnedSelection,
-  SetContentAction,
   ActionOrigin,
+  BeforePlugin,
+  BlockContent,
+  Carbon,
   CarbonAction,
+  Format,
+  InlineContent,
+  InsertPos,
   MoveNodeAction,
-  RenderPath,
+  NodeIdSet,
+  NodePropsJson,
+  PinnedSelection,
   PlaceholderPath,
-  UpdatePropsAction, InlineContent
+  PointedSelection,
+  RenderPath,
+  SetContentAction,
+  UpdatePropsAction
 } from "@emrgen/carbon-core";
 import { SelectionPatch } from "../core/DeleteGroup";
 import { p14 } from "../core/Logger";
@@ -47,17 +51,11 @@ export interface DeleteOpts {
   fall?: 'after' | 'before';
 }
 
-export type InsertPos = "before" | "after" | "prepend" | "append";
-
-declare module '@emrgen/carbon-core' {
-  export interface Transaction {
-
-  }
-}
 
 declare module '@emrgen/carbon-core' {
   export interface Transaction {
     transform: {
+      format: (type: Format, selection?: PinnedSelection, props?: NodePropsJson) => Transaction;
       insert(node: Node, ref: Node, opts?: InsertPos): Transaction;
       insertText(selection: PinnedSelection, text: string, native?: boolean): Transaction;
       deleteText(pin: Pin, text: string, opts?: InsertPos): Transaction;
@@ -98,7 +96,17 @@ export class TransformCommands extends BeforePlugin {
       unwrap: this.unwrap,
       change: this.change,
       update: this.update,
+      format: this.format,
     };
+  }
+
+  // these are the default formats that can be applied to a node
+  format(tr: Transaction, type: Format, selection: PinnedSelection = tr.app.selection, props?: NodePropsJson) {
+    if (selection.isCollapsed) {
+      return
+    }
+
+    return tr;
   }
 
   // insert node wrt ref node
@@ -177,7 +185,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     if (!selection.isCollapsed) {
-      return tr.transform.delete(selection)?.then(carbon => {
+      return tr.transform.delete(selection)?.Then(carbon => {
         return updateTitleText(carbon);
       })
     }
@@ -334,10 +342,10 @@ export class TransformCommands extends BeforePlugin {
 
     const after = selection.collapseToStart();
     // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
-    tr.transform.delete(selection)?.then((carbon) => {
+    tr.transform.delete(selection)?.Then((carbon) => {
       // console.log('DELETED', carbon.selection.toString());
       // return this.paste(carbon, after, BlockSelection.empty(app.store), slice);
-    })?.dispatch();
+    })?.Dispatch();
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {

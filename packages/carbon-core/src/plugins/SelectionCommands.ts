@@ -24,13 +24,13 @@ export class SelectionCommands extends BeforePlugin {
 
 	collapseToTail(tr, selection) {
 		const normalized = selection.normalize();
-		tr.select(normalized.collapseToTail()).dispatch();
+		tr.select(normalized.collapseToTail()).Dispatch();
 	}
 
 	collapseToHead(tr, selection) {
 		// const dr = app.cmd.transform.delete()
 		const normalized = selection.normalize();
-		tr.select(normalized.collapseToHead()).dispatch();
+		tr.select(normalized.collapseToHead()).Dispatch();
 	}
 
 }

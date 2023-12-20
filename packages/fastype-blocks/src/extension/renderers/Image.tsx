@@ -356,7 +356,7 @@ export function ImageComp(props: RendererProps) {
                     PinnedSelection.fromPin(Pin.toStartOf(section)!),
                     ActionOrigin.UserInput
                   )
-                  .dispatch();
+                  .Dispatch();
               }
             }}
             onKeyUp={stop}
@@ -385,7 +385,7 @@ export function ImageComp(props: RendererProps) {
                     caption: e.target.value,
                   },
                 })
-                .dispatch();
+                .Dispatch();
             }}
           />
         )} */}

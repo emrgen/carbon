@@ -1,22 +1,23 @@
 import { Extension } from "../core";
 import { ClipboardPlugin } from "./Clipboard";
-import { KeyboardAfterPlugin, KeyboardBeforePlugin } from './Keyboard';
+import { KeyboardPlugin } from './Keyboard';
 import { SelectionChangePlugin } from './SelectionChange';
 import { SlicePlugin } from "./Slice";
 import { TransformCommands } from './TransformCommands';
 import { HistoryPlugin } from "./History";
-import { TimeTravelPlugin } from "./TimeTravel";
+import { FormatterPlugin } from "./Formatter";
+import { ActionPlugin } from "./Action";
 
 export const extensionPresets: Extension = {
 	plugins: [
 		new SelectionChangePlugin(),
 		new TransformCommands(),
-		new KeyboardAfterPlugin(),
-		new KeyboardBeforePlugin(),
+		new KeyboardPlugin(),
 		new ClipboardPlugin(),
 		new SlicePlugin(),
 		new HistoryPlugin(),
-		// new TimeTravelPlugin(),
+		new FormatterPlugin(),
+		new ActionPlugin(),
 	],
 }
 

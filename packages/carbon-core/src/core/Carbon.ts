@@ -209,14 +209,6 @@ export class Carbon extends EventEmitter {
 	// 	return this.pm.serialize(this, node);
 	// }
 
-	serialize(node: Node): Optional<SerializedNode> {
-		return this.pm.serialize(this, node);
-	}
-
-	deserialize(serialized: string): Node[] {
-		return this.pm.deserialize(this, serialized);
-	}
-
 	blur() {
 		this.sm.blur();
 	}

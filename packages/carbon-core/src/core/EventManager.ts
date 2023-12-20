@@ -110,7 +110,7 @@ export class EventManager {
 
 			// if the transaction is not committed, discard it
 			if (!editorEvent.cmd.committed) {
-				this.app.committed = true;
+				// this.app.committed = true;
 				console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
 				return
 			}

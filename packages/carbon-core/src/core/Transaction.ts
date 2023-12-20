@@ -42,6 +42,7 @@ export class Transaction {
 	private onTick: boolean = false;
 	private actions: CarbonAction[] = [];
 	committed: boolean = false;
+	private dispatched: boolean = false;
 	readOnly = false;
 	get isEmpty() {
 		return this.actions.length === 0;
@@ -113,8 +114,8 @@ export class Transaction {
 		return this.Add(MoveNodeAction.create(from, to, ref.intoNodeId(), origin));
 	}
 
-	Change(id: NodeId, from: NodeName, to: NodeName, origin = this.origin): Transaction {
-		return this.Add(new ChangeNameAction(id, from, to, origin));
+	Change(ref: NodeId | Node, to: NodeName, origin = this.origin): Transaction {
+		return this.Add(ChangeNameAction.create(ref.intoNodeId(), to, origin));
 	}
 
 	Mark(start: Point, end: Point, mark: Mark, origin = this.origin): Transaction {
@@ -184,6 +185,13 @@ export class Transaction {
 			console.warn('skipped: empty transaction')
 			return this;
 		}
+
+		if (this.dispatched) {
+			console.warn('skipped: transaction already dispatched')
+			return this;
+		}
+		this.dispatched = true;
+
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema
 		this.tm.dispatch(this);
@@ -192,13 +200,17 @@ export class Transaction {
 
 	Commit(draft: CarbonStateDraft): Transaction {
 		if (this.actions.length === 0) return this
+		if (this.committed) {
+			console.warn('skipped: transaction already committed')
+			return this
+		}
 		// const prevDocVersion = editor.doc?.updateCount;
 
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
 				console.group('Commit (runtime)');
 			} else {
-				console.group('Commit', this);
+				console.group('Commit', this.id, this);
 			}
 
 			for (const action of this.actions) {
@@ -251,10 +263,6 @@ export class Transaction {
 	// 	})
 	//
 	// 	return this;
-	// }
-
-	// pop() {
-	// 	return this.actions.pop();
 	// }
 
 	Then(cb: With<Carbon>): Transaction {

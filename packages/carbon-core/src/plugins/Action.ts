@@ -4,10 +4,9 @@ import {
   NodeContent, NodeId, NodeName, NodePropsJson,
   PinnedSelection, Point,
   PointedSelection,
-  Transaction
+  Transaction,
+  Mark,
 } from "@emrgen/carbon-core";
-import { Mark } from "../core/Mark";
-import { NodeAttrsJSON } from "../core/NodeAttrs";
 
 declare module '@emrgen/carbon-core' {
   export interface Transaction {
@@ -16,9 +15,9 @@ declare module '@emrgen/carbon-core' {
     insert(ref: Node | NodeId, after: NodeContent): Transaction,
     remove(at: Point, node: Node): Transaction,
     move(from: Point, to: Point, node: Node): Transaction,
-    change(node: Node, to: NodeName): Transaction,
+    change(ref: Node | NodeId, to: NodeName): Transaction,
     mark(start: Point, end: Point, mark: Mark): Transaction,
-    Update(nodeRef: IntoNodeId, attrs: Partial<NodePropsJson>): Transaction,
+    update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
     action: {
       select(selection: PinnedSelection | PointedSelection): Transaction,
       setContent(ref: Node | NodeId, after: NodeContent): Transaction,
@@ -27,7 +26,7 @@ declare module '@emrgen/carbon-core' {
       move(from: Point, to: Point, node: Node): Transaction,
       change(node: Node, to: NodeName): Transaction,
       format(start: Point, end: Point, mark: Mark): Transaction,
-      Update(nodeRef: IntoNodeId, attrs: Partial<NodePropsJson>): Transaction,
+      Update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
     }
   }
 
@@ -50,7 +49,9 @@ export class ActionPlugin extends CarbonPlugin {
     tr.SetContent(ref, after)
   }
 
-  insert(tr: Transaction, ref: Node | NodeId, : NodeContent) {}
+  insert(tr: Transaction, at: Point, nodes: Node | Node[]) {
+    tr.Insert(at, nodes);
+  }
 
   remove(tr: Transaction, at: Point, node: Node) {
     tr.Remove(at, node);
@@ -64,11 +65,11 @@ export class ActionPlugin extends CarbonPlugin {
     tr.Move(from, to, node.id);
   }
 
-  change(tr: Transaction, node: Node, to: NodeName) {
-    tr.Change(node.id, node.name, to);
+  change(tr: Transaction, ref: Node | NodeId, to: NodeName) {
+    tr.Change(ref, to);
   }
 
-  update(tr: Transaction, nodeRef: IntoNodeId, props: Partial<NodePropsJson>) {
-    tr.Update(nodeRef, props);
+  update(tr: Transaction, ref: Node | NodeId, props: Partial<NodePropsJson>) {
+    tr.Update(ref, props);
   }
 }

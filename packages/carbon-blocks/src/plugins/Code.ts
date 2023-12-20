@@ -56,7 +56,7 @@ export class Code extends CarbonPlugin {
         //   const textContent = slice.root.textContent;
         //   console.log('textContent', textContent);
         //   // Slice.create(slice.root, slice.start, slice.end);
-        //   app.cmd.transform.paste(selection, blockSelection, slice)?.dispatch()
+        //   app.cmd.transform.paste(selection, blockSelection, slice)?.Dispatch()
         // } else {
         //
         // }
@@ -74,7 +74,7 @@ export class Code extends CarbonPlugin {
         //   console.log('blockSelection', app.blockSelection);
         //
         //   preventAndStopCtx(ctx);
-        //   app.tr.selectNodes([]).dispatch();
+        //   app.tr.selectNodes([]).Dispatch();
         //   node.child(0)?.emit('focus', node.child(0)!)
         // }
       },
@@ -85,7 +85,7 @@ export class Code extends CarbonPlugin {
         const { app, cmd } = ctx;
         const { selection } = app;
 
-        cmd.transform.insertText(selection, '  ')?.dispatch();
+        cmd.transform.insertText(selection, '  ')?.Dispatch();
       },
 
       // backspace: (ctx: EventContext<KeyboardEvent>) => {
@@ -99,7 +99,7 @@ export class Code extends CarbonPlugin {
       //     app.tr
       //       .change(node.id, 'code', 'section')
       //       .select(selection)
-      //       .dispatch();
+      //       .Dispatch();
       //   }
       // }
     }
@@ -213,7 +213,7 @@ export class BeforeCodePlugin extends BeforePlugin {
     if (!selection.isCollapsed) {
       commands.transform.delete(selection)?.then(carbon => {
         return updateTitleText(carbon);
-      }).dispatch();
+      }).Dispatch();
       return
     }
 

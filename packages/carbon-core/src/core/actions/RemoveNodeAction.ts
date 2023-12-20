@@ -13,8 +13,8 @@ import { Optional } from "@emrgen/types";
 export class RemoveNodeAction implements CarbonAction {
 	private node: Optional<NodeJSON>;
 
-	static fromNode(at: Point, id: NodeId, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new RemoveNodeAction(at, id, origin);
+	static fromNode(at: Point, ref: NodeId | Node, origin: ActionOrigin = ActionOrigin.UserInput) {
+		return new RemoveNodeAction(at, ref.intoNodeId(), origin);
 	}
 
 	static create(at: Point, nodeId: NodeId, origin: ActionOrigin = ActionOrigin.UserInput) {

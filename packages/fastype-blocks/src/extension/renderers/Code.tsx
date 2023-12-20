@@ -62,14 +62,14 @@ export const CodeComp = (props: RendererProps) => {
 //       language: 'go',
 //     }}
 //     onFocus={() => {
-//       app.tr.selectNodes([]).dispatch();
+//       app.tr.selectNodes([]).Dispatch();
 //       app.disable();
 //     }}
 //     onBlur={() => app.enable()}
 //     onChange={(value) => {
 //       app.enable(() => {
 //         const text = app.schema.text(value)!;
-//         app.tr.setContent(node.id, BlockContent.create([text])).dispatch();
+//         app.tr.setContent(node.id, BlockContent.create([text])).Dispatch();
 //       });
 //     }}
 //   />

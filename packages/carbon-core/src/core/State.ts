@@ -9,7 +9,7 @@ import { NodeMap } from "./NodeMap";
 import { CarbonStateDraft } from "./CarbonStateDraft";
 import { StateScope } from "./StateScope";
 
-interface CarbonStateProps {
+interface StateProps {
 	scope: Symbol;
 	previous?: State;
 	content: Node;
@@ -19,7 +19,6 @@ interface CarbonStateProps {
 	decorations?: DecorationStore;
 	counter?: number;
 }
-
 
 export class State extends EventEmitter {
 	previous: Optional<State>;
@@ -46,7 +45,7 @@ export class State extends EventEmitter {
 		return state;
 	}
 
-	constructor(props: CarbonStateProps) {
+	constructor(props: StateProps) {
 		super();
 		const {
 			scope,

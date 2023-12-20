@@ -29,11 +29,11 @@ export class BulletedList extends Section {
     }
   }
 
-  serialize(app: Carbon, node: Node): SerializedNode {
-    const contentNode = node.child(0);
-    let ret = `- ${contentNode ? app.serialize(contentNode) : ''}`;
-    ret += app.commands.nestable.serializeChildren(node);
-
-    return ret
-  }
+  // serialize(app: Carbon, node: Node): SerializedNode {
+  //   const contentNode = node.child(0);
+  //   let ret = `- ${contentNode ? app.serialize(contentNode) : ''}`;
+  //   ret += app.commands.nestable.serializeChildren(node);
+  //
+  //   return ret
+  // }
 }

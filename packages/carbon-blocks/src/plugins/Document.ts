@@ -59,7 +59,7 @@ export class DocPlugin extends CarbonPlugin {
 				if (selection.inSameNode && selection.start.node.parent?.eq(node)) {
 					console.log('[Enter] doc');
 					preventAndStopCtx(ctx);
-					cmd.collapsible.split(selection)?.dispatch();
+					cmd.collapsible.split(selection)?.Dispatch();
 					return
 				}
 			}

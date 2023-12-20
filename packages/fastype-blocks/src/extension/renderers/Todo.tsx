@@ -42,7 +42,7 @@ export function TodoComp(props: RendererProps) {
             checked: !isChecked,
           },
         })
-        .dispatch();
+        .Dispatch();
     },
     [node.id, isChecked]
   );

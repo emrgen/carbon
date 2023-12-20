@@ -23,142 +23,27 @@ import { insertAfterAction, preventAndStop, preventAndStopCtx } from "@emrgen/ca
 import { nodeLocation } from '../utils/location';
 import { Optional } from '@emrgen/types';
 
-
 declare module '@emrgen/carbon-core' {
 	export interface Transaction {
 		keyboard: {
-			backspace(ctx: EventContext<KeyboardEvent>): Optional<Transaction>;
+			backspace(ctx: EventContext<KeyboardEvent>): Transaction;
 		};
 	}
 }
 
-export class KeyboardCommandPlugin extends BeforePlugin {
-	name = 'keyboard';
+// handles general keyboard events
+// node specific cases are handles in node specific plugin
+export class KeyboardPlugin extends AfterPlugin {
+
+	name = 'keyboard'
+
+	priority = 10001;
 
 	commands(): Record<string, Function> {
 		return {
 			backspace: this.backspace,
 		}
 	}
-
-	backspace(tr: Transaction, ctx: EventContext<KeyboardEvent>) {
-		preventAndStopCtx(ctx);
-		const {  app } = ctx;
-		const { selection } = app;
-
-		const { head } = selection;
-
-		// delete node selection if any
-		if (!selection.isCollapsed || selection.isBlock) {
-			tr.transform.delete(selection, { fall: 'before' })?.dispatch();
-			return
-		}
-
-		// console.log('1111111', head.isAtStartOfNode(node), head, node);
-		if (head.isAtStartOfNode(head.node)) {
-			const { start } = selection;
-			const textBlock = start.node.chain.find(n => n.isTextBlock)
-			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
-			if (!prevTextBlock || !textBlock) {
-				console.log('no prev text block found');
-				return
-			}
-
-			if (prevTextBlock.isCollapseHidden) {
-				const prevVisibleBlock = prevTextBlock.closest(n => !n.isCollapseHidden)!;
-				const prevVisibleTextBlock = prevVisibleBlock?.child(0)!
-				console.log(prevTextBlock, prevVisibleTextBlock);
-
-				if (!prevVisibleTextBlock) return
-				const after = PinnedSelection.fromPin(Pin.create(prevVisibleTextBlock, prevVisibleTextBlock.textContent.length));
-				const textContent = prevVisibleTextBlock.textContent + textBlock.textContent;
-				const textNode = app.schema.text(textContent)!;
-				const content = BlockContent.create([textNode]);
-
-				const at = Point.toAfter(prevVisibleBlock.id);
-				const moveActions = textBlock?.nextSiblings.slice().reverse().map(n => {
-					return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
-				});
-
-				if (prevVisibleTextBlock.isEmpty && !content.isEmpty) {
-					tr.Update(prevVisibleTextBlock.id, {
-						[PlaceholderPath]: ''
-					})
-				}
-
-				tr
-					.SetContent(prevVisibleTextBlock.id, content)
-					.Add(moveActions)
-					.Remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
-					.Select(after)
-					.Dispatch();
-
-				return
-			}
-
-			console.log('merge text block', prevTextBlock.name, textBlock.name);
-			// HOT
-			tr.transform.merge(prevTextBlock, textBlock)?.dispatch();
-			return
-		}
-
-		// 	event.stopPropagation()
-		// 	if (node.isBlockAtom) {
-		// 		const found = node.chain.reverse().find(n => n.isBlockAtom)
-		// 		if (!found) return
-		// 		// final caret position can be above or below
-		// 		const beforeSel = selection.moveStart(-1);
-		// 		if (beforeSel) {
-		// 			editor.tr
-		// 				.add(DeleteCommand.create([node.id]))
-		// 				.select(beforeSel.collapseToHead())
-		// 				.dispatch()
-		// 		}
-		// 		return
-		// 	}
-
-			// console.log('Keyboard.backspace',deleteSel.toString());
-		const deleteSel = selection.moveStart(-1)
-		if (!deleteSel) return
-		tr.transform.delete(deleteSel)?.dispatch()
-	}
-}
-
-export class KeyboardBeforePlugin extends BeforePlugin {
-
-	name = 'keyboardBefore'
-
-	on(): Partial<EventHandler> {
-		return {
-			$mouseDown: (ctx: EventContext<MouseEvent>) => {
-				const { app, node } = ctx;
-				const { selection } = app;
-				const { start, end } = selection;
-				const isolating = start.node.find(n => n.isIsolating);
-				if (!isolating) {
-					return
-				}
-
-				if (hasParent(node, isolating)) {
-					return
-				}
-			},
-			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				if (ctx.app.selection.isBlock) {
-					preventAndStopCtx(ctx);
-				}
-			}
-		}
-	}
-}
-
-// handles general keyboard events
-// node specific cases are handles in node specific plugin
-export class KeyboardAfterPlugin extends AfterPlugin {
-
-	name = 'keyboardAfter'
-
-	priority = 10001;
 
 	on(): EventHandlerMap {
 		return {
@@ -181,8 +66,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			new SelectionCommands(),
 			new IsolatingPlugin(),
 			new TransformCommands(),
-			// new KeyboardPrevent(),
-			new KeyboardCommandPlugin(),
 		]
 	}
 
@@ -195,7 +78,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				const { app, cmd, node } = ctx;
 				const { selection } = app
 				if (selection.isBlock) {
-					// app.tr.selectNodes([]).dispatch();
+					// app.tr.selectNodes([]).Dispatch();
 					// app.blur()
 					return
 				}
@@ -226,8 +109,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				const after = selection.moveBy(-1)
 				cmd.Select(after!).Dispatch();
 			},
-
-
 			right: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, cmd } = ctx;
 				event.preventDefault();
@@ -301,9 +182,9 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			shiftDelete: (event) => this.delete(event),
 
 			backspace: e => {
-				e.cmd.keyboard.backspace(e)?.dispatch()
+				this.backspace(e.cmd, e)
 			},
-			shiftBackspace: e => e.cmd.keyboard.backspace(e)?.dispatch(),
+			shiftBackspace: e => e.cmd.keyboard.backspace(e),
 			ctrlBackspace: skipKeyEvent,
 			cmdBackspace: skipKeyEvent,
 
@@ -319,9 +200,91 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			// 	if (!doc) return
 			// 	const after = Selection.aroundNode(doc);
 			// 	if (!after) return
-			// 	tr.select(after).dispatch();
+			// 	tr.select(after).Dispatch();
 			// }
 		}
+	}
+
+	backspace(tr: Transaction, ctx: EventContext<KeyboardEvent>) {
+		preventAndStopCtx(ctx);
+		const {  app } = ctx;
+		const { selection } = app;
+
+		const { head } = selection;
+
+		// delete node selection if any
+		if (!selection.isCollapsed || selection.isBlock) {
+			tr.transform.delete(selection, { fall: 'before' })?.Dispatch();
+			return
+		}
+
+		// console.log('1111111', head.isAtStartOfNode(node), head, node);
+		if (head.isAtStartOfNode(head.node)) {
+			const { start } = selection;
+			const textBlock = start.node.chain.find(n => n.isTextBlock)
+			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
+			if (!prevTextBlock || !textBlock) {
+				console.log('no prev text block found');
+				return
+			}
+
+			if (prevTextBlock.isCollapseHidden) {
+				const prevVisibleBlock = prevTextBlock.closest(n => !n.isCollapseHidden)!;
+				const prevVisibleTextBlock = prevVisibleBlock?.child(0)!
+				console.log(prevTextBlock, prevVisibleTextBlock);
+
+				if (!prevVisibleTextBlock) return
+				const after = PinnedSelection.fromPin(Pin.create(prevVisibleTextBlock, prevVisibleTextBlock.textContent.length));
+				const textContent = prevVisibleTextBlock.textContent + textBlock.textContent;
+				const textNode = app.schema.text(textContent)!;
+				const content = BlockContent.create([textNode]);
+
+				const at = Point.toAfter(prevVisibleBlock.id);
+				const moveActions = textBlock?.nextSiblings.slice().reverse().map(n => {
+					return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
+				});
+
+				if (prevVisibleTextBlock.isEmpty && !content.isEmpty) {
+					tr.Update(prevVisibleTextBlock.id, {
+						[PlaceholderPath]: ''
+					})
+				}
+
+				tr
+					.SetContent(prevVisibleTextBlock.id, content)
+					.Add(moveActions)
+					.Remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
+					.Select(after)
+					.Dispatch();
+
+				return
+			}
+
+			console.log('merge text block', prevTextBlock.name, textBlock.name);
+			// HOT
+			tr.transform.merge(prevTextBlock, textBlock)?.Dispatch();
+			return
+		}
+
+		// 	event.stopPropagation()
+		// 	if (node.isBlockAtom) {
+		// 		const found = node.chain.reverse().find(n => n.isBlockAtom)
+		// 		if (!found) return
+		// 		// final caret position can be above or below
+		// 		const beforeSel = selection.moveStart(-1);
+		// 		if (beforeSel) {
+		// 			editor.tr
+		// 				.add(DeleteCommand.create([node.id]))
+		// 				.select(beforeSel.collapseToHead())
+		// 				.Dispatch()
+		// 		}
+		// 		return
+		// 	}
+
+		// console.log('Keyboard.backspace',deleteSel.toString());
+		const deleteSel = selection.moveStart(-1)
+		if (!deleteSel) return
+		tr.transform.delete(deleteSel)?.Dispatch()
 	}
 
 	collapseSelectionBefore(tr: Transaction, nodes: Node[]) {
@@ -480,7 +443,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		}
 
 		cmd.transform
-			.split(splitBlock, selection, { splitType })?.dispatch();
+			.split(splitBlock, selection, { splitType })?.Dispatch();
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {
@@ -494,13 +457,13 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		// delete node selection if any
 		if (selection.isBlock) {
-			cmd.transform.delete(selection, { fall: 'after' })?.dispatch();
+			cmd.transform.delete(selection, { fall: 'after' })?.Dispatch();
 			return
 		}
 
 		const { isCollapsed, head } = selection;
 		if (!isCollapsed) {
-			cmd.transform.delete()?.dispatch()
+			cmd.transform.delete()?.Dispatch()
 			return
 		}
 
@@ -510,14 +473,14 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			const nextTextBlock = textBlock?.next(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
 			if (!nextTextBlock || !textBlock) return
 
-			cmd.transform.merge(textBlock, nextTextBlock)?.dispatch();
+			cmd.transform.merge(textBlock, nextTextBlock)?.Dispatch();
 			return
 		}
 
 
 		event.stopPropagation()
 		console.log('Keyboard.backspace', selection.moveStart(1)?.toString());
-		cmd.transform.delete(selection.moveStart(1)!)?.dispatch()
+		cmd.transform.delete(selection.moveStart(1)!)?.Dispatch()
 	}
 
 	up(ctx: EventContext<KeyboardEvent>) {
@@ -596,5 +559,3 @@ const nextSelectableBlock = (node: Node, within = false) => {
 
 	return node?.next(n => n.isBlockSelectable, { order: 'pre' });
 }
-
-

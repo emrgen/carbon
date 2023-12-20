@@ -13,7 +13,7 @@ export class ClipboardPlugin extends AfterPlugin {
   on(): EventHandlerMap {
     return {
       cut: (ctx: EventContext<any>) => {
-        const { event, app } = ctx
+        const { event, app, cmd } = ctx
         preventAndStop(event);
         const slice = this.slice(app);
         if (!slice.isEmpty) {
@@ -24,10 +24,10 @@ export class ClipboardPlugin extends AfterPlugin {
           app.state.changes.clipboard = slice;
         }
         // delete the selection
-        app.commands.keyboard.backspace(ctx)?.dispatch();
+        cmd.keyboard.backspace(ctx)?.Dispatch();
       },
       copy: (ctx: EventContext<any>) => {
-        const { event, app } = ctx
+        const { event, app, cmd } = ctx
         preventAndStop(event);
         console.log('copy', event);
         const slice = this.slice(app);
@@ -37,9 +37,7 @@ export class ClipboardPlugin extends AfterPlugin {
           const serialized = app.serialize(slice.root)
           console.log('Serialized =>', serialized);
           event.clipboardData.setData('text/plain', serialized);
-
           console.log(slice.root.children.map(n => n.textContent));
-
           app.runtime.clipboard = slice;
           return
         }
@@ -51,7 +49,7 @@ export class ClipboardPlugin extends AfterPlugin {
 
         if (!app.state.changes.clipboard.isEmpty) {
           const slice = app.state.changes.clipboard;
-          app.cmd.transform.paste(selection, slice)?.dispatch()
+          app.cmd.transform.paste(selection, slice)?.Dispatch()
         } else {
 
         }

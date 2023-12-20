@@ -77,7 +77,7 @@ export class TitlePlugin extends NodePlugin {
 
 				if (selection.isCollapsed) {
 					preventAndStopCtx(ctx);
-					// app.commands.transform.insertText(selection, `\n`, false)?.dispatch();
+					// app.commands.transform.insertText(selection, `\n`, false)?.Dispatch();
 				}
 			}
 		}
@@ -91,9 +91,9 @@ export class TitlePlugin extends NodePlugin {
 		const { data, key } = event.nativeEvent;
 		console.log('########');
 
-		cmd.transform.insertText(selection, data ?? key, false)?.dispatch()
+		cmd.transform.insertText(selection, data ?? key, false)?.Dispatch()
 
-		// app.commands.transform.insertText(selection, data ?? key, false)?.dispatch();
+		// app.commands.transform.insertText(selection, data ?? key, false)?.Dispatch();
 	}
 
 	// decoration(state: CarbonState): Decoration[] {
