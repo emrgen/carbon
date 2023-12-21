@@ -143,6 +143,8 @@ export class DeleteSet extends BSet<NodeId> {
 }
 
 export class NodeIdSet extends BSet<NodeId> {
+
+	static EMPTY = new NodeIdSet().freeze();
 	static empty() {
 		return new NodeIdSet();
 	}

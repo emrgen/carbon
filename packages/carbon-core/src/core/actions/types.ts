@@ -1,9 +1,9 @@
-import { CarbonStateDraft } from "../CarbonStateDraft";
+import { StateDraft } from "../StateDraft";
 import { Transaction } from "../Transaction"
 
 export interface CarbonAction {
 	origin: ActionOrigin;
-	execute(tr: Transaction, draft: CarbonStateDraft);
+	execute(tr: Transaction, draft: StateDraft);
 	inverse(origin?: ActionOrigin): CarbonAction
 }
 

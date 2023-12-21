@@ -170,7 +170,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		if (this._parent) return this._parent;
 		const map = StateScope.get(this.scope);
 		if (!this.parentId) return null;
-		return map.get(this.parentId!)
+		return map.parent(this)
 	}
 
 	get key() {
@@ -847,6 +847,12 @@ export class Node extends EventEmitter implements IntoNodeId {
 	clone(map: (node: Node) => Optional<Node> = identity): Node {
 		const { scope, parentId, id, type, content, links, properties, marks, renderVersion, contentVersion } = this;
 		// const links = new Map(this.links);
+
+		if (!this.frozen && map === identity) {
+			return this;
+		}
+
+		console.log('clone', this.name, this.id.toString());
 
 		const clone = Node.create({
 			scope,

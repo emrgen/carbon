@@ -7,7 +7,7 @@ import { Node } from "./Node";
 import { PinnedSelection } from "./PinnedSelection";
 import EventEmitter from "events";
 import { NodeMap } from "./NodeMap";
-import { CarbonStateDraft } from "./CarbonStateDraft";
+import { StateDraft } from "./StateDraft";
 import { StateScope } from "./StateScope";
 
 interface StateProps {
@@ -16,7 +16,7 @@ interface StateProps {
 	content: Node;
 	selection: PinnedSelection;
 	marks?: MarkSet;
-	nodeMap?: NodeMap;
+	nodeMap: NodeMap;
 	changes?: NodeIdSet;
 	decorations?: DecorationStore;
 	counter?: number;
@@ -28,7 +28,6 @@ export class State extends EventEmitter {
 	content: Node;
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
-	marks: MarkSet;
 	decorations: DecorationStore;
 	changes: NodeIdSet;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
@@ -57,7 +56,6 @@ export class State extends EventEmitter {
 			nodeMap,
 			changes = NodeIdSet.empty(),
 			decorations = new DecorationStore(),
-			marks = new MarkSet(),
 			counter = 0
 		} = props;
 
@@ -128,8 +126,8 @@ export class State extends EventEmitter {
 	}
 
 	// try to create a new state or fail and return the previous state
-	produce(origin: ActionOrigin, fn: (state: CarbonStateDraft) => void): State {
-		const draft = new CarbonStateDraft(this, origin);
+	produce(origin: ActionOrigin, fn: (state: StateDraft) => void): State {
+		const draft = new StateDraft(this, origin);
 		try {
 			StateScope.set(this.scope, draft.nodeMap)
 			fn(draft);

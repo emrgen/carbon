@@ -26,7 +26,7 @@ import { UpdatePropsAction } from './actions/UpdatePropsAction';
 import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
-import { CarbonStateDraft } from './CarbonStateDraft';
+import { StateDraft } from './StateDraft';
 import { ActivatedPath, OpenedPath, SelectedPath } from "./NodeProps";
 import { SetContentAction } from "./actions/SetContentAction";
 import { SelectAction } from "./actions/SelectAction";
@@ -105,7 +105,7 @@ export class Transaction {
 		});
 	}
 
-	onSelect(draft:CarbonStateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+	onSelect(draft:StateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		this.sm.onSelect(draft, before, after, origin);
 	}
 
@@ -247,7 +247,7 @@ export class Transaction {
 		return this;
 	}
 
-	Commit(draft: CarbonStateDraft): Transaction {
+	Commit(draft: StateDraft): Transaction {
 		if (this.actions.length === 0) return this
 		if (this._committed) {
 			console.warn('skipped: transaction already committed')
@@ -344,6 +344,7 @@ export class Transaction {
 
 				if (cmd) {
 					return (...args) => {
+						console.log(`2. calling ${propName}.${cmd.fn.name}`);
 						cmd.fn(proxy, ...args)
 						return proxy;
 					}

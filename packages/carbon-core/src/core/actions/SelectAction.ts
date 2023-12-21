@@ -2,7 +2,7 @@ import { Transaction } from "../Transaction";
 import { ActionOrigin, CarbonAction } from "./types";
 import { PointedSelection } from "../PointedSelection";
 import { classString } from "../Logger";
-import { CarbonStateDraft } from "../CarbonStateDraft";
+import { StateDraft } from "../StateDraft";
 
 export class SelectAction implements CarbonAction {
 	static create(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
@@ -12,7 +12,7 @@ export class SelectAction implements CarbonAction {
 	constructor(readonly before: PointedSelection, readonly after: PointedSelection, readonly origin: ActionOrigin) {}
 
 	// this will update the carbon selection state or schedule a selection change after the ui update
-	execute(tr: Transaction, draft: CarbonStateDraft) {
+	execute(tr: Transaction, draft: StateDraft) {
 		const { before, after, origin } = this;
 		// draft.updateSelection(after);
 		tr.onSelect(draft, before, after, origin);

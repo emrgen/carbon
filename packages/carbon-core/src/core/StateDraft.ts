@@ -48,13 +48,12 @@ class NodeDepthPriorityQueue {
 
 // NOTE: it is internal to the state and actions. it should not be used outside of it.
 //draft of a state is used to prepare a new state before commit
-export class CarbonStateDraft {
+export class StateDraft {
   origin: ActionOrigin;
   state: State;
   nodeMap: NodeMap;
   selection: PointedSelection;
   changes: NodeIdSet; // tracks changed nodes
-  mutables: NodeIdSet = NodeIdSet.empty(); // tracks mutable nodes
   contentChanges: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
   removed: NodeIdSet = NodeIdSet.empty(); // tracks removed nodes
 
@@ -116,12 +115,19 @@ export class CarbonStateDraft {
       throw new Error("Cannot prepare a draft that is already committed");
     }
 
+    console.log(this.removed.toArray().map(id => id.toString()));
+    console.log(this.nodeMap._deleted.toArray());
+
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
-    this.removed.forEach(id => {
-      this.changes.remove(id);
+    // this.removed.forEach(id => {
+    //   this.changes.remove(id);
+    // });
+    this.changes.toArray().forEach(id => {
+      if (this.nodeMap.deleted(id)) {
+        this.changes.remove(id);
+      }
     });
-
 
     const changed: Node[] = this.changes.toArray().map(id => this.nodeMap.get(id)).map(identity) as unknown as Node[];
     const queue = NodeDepthPriorityQueue.from(changed, "desc");
@@ -151,16 +157,25 @@ export class CarbonStateDraft {
 
     while (updateOrder.size) {
       const { node } = updateOrder.pop()!;
-      // if (!this.nodeMap.has(node.id)) {
-      const clone = node.clone(n => {
-        if (this.nodeMap.deleted(n.id)) {
-          return null;
-        } else {
-          return this.nodeMap.get(n.id);
-        }
-      });
-      this.nodeMap.set(node.id, clone);
-      // }
+      if (!this.nodeMap.has(node.id)) {
+        const clone = node.clone(n => {
+          if (this.nodeMap.deleted(n.id)) {
+            return null;
+          } else {
+            return this.nodeMap.get(n.id);
+          }
+        });
+        this.nodeMap.set(node.id, clone);
+      } else {
+        const mutable = this.nodeMap.get(node.id)!;
+        mutable.content = mutable.content.clone(n => {
+          if (this.nodeMap.deleted(n.id)) {
+            return null;
+          } else {
+            return this.nodeMap.get(n.id);
+          }
+        })
+      }
     }
 
     // in this scope all nodes are mutable
@@ -184,9 +199,10 @@ export class CarbonStateDraft {
     }
 
     this.mutable(nodeId, node => {
-      node.children.forEach(child => {
-        this.nodeMap.delete(child.id);
-      });
+      node.descendants().forEach(child => {
+        // console.log('removing content child', child.id.toString());
+        this.delete(child.id);
+      })
 
       if (node.isTextBlock) {
         node.updateProps({
@@ -197,12 +213,12 @@ export class CarbonStateDraft {
       }
       console.log(content);
       node.updateContent(content);
-      console.log("xxxx", node.textContent);
-    });
+      console.log("updated content", node.textContent);
 
-    // console.log('inserting content', nodeId.toString(), content.size);
-    content.children.forEach(child => {
-      this.nodeMap.set(child.id, child);
+      node.descendants().forEach(child => {
+        console.log('inserted content child', child.id.toString());
+        this.nodeMap.set(child.id, child);
+      })
     });
   }
 
@@ -367,7 +383,7 @@ export class CarbonStateDraft {
     });
 
     node.forAll(n => {
-      this.removed.add(n.id);
+      this.delete(n.id);
     });
   }
 
@@ -463,9 +479,13 @@ export class CarbonStateDraft {
 
     this.changes.add(id);
     this.nodeMap.set(id, mutable);
-    this.mutables.add(id);
 
     return mutable;
+  }
+
+  private delete(id: NodeId) {
+    this.nodeMap.delete(id);
+    this.removed.add(id);
   }
 
   dispose() {

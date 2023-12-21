@@ -1,7 +1,56 @@
 import { Optional, Predicate, With } from "@emrgen/types";
+import BTree from "sorted-btree";
 import { NodeBTree } from "./BTree";
 import { Node } from "./Node";
-import { NodeId } from "./NodeId";
+import { NodeId, NodeIdComparator } from "./NodeId";
+
+class NodeChainCache {
+  private _map: Map<string, number> = new Map();
+  private _parents: Map<string, Node[]> = new Map();
+  private _parent: Map<string, Optional<Node>> = new Map();
+
+  constructor() {
+    // setTimeout(() => {
+    //   this._map = new BTree(undefined, NodeIdComparator);
+    //   this._parents = new BTree(undefined, NodeIdComparator);
+    // },5000)
+  }
+
+  index(nodeId: NodeId, root: Node, fn: (nodeId: NodeId) => number) {
+    const key = nodeId.toString();
+    if (this._map.has(key)) {
+      return this._map.get(key);
+    } else {
+      const index = fn(nodeId);
+      this._map.set(key, index);
+      return index;
+    }
+  }
+
+  parent(nodeId: NodeId, root: Node, fn: (node: NodeId) => Optional<Node>) {
+    const key = nodeId.toString();
+    if (this._parent.has(key)) {
+      return this._parent.get(key);
+    } else {
+      const parent = fn(nodeId);
+      this._parent.set(key, parent);
+      return parent;
+    }
+  }
+
+  parents(nodeId: NodeId, root: Node, fn: (node: NodeId) => Node[]) {
+    const key = nodeId.toString();
+    if (this._parents.has(key)) {
+      return this._parents.get(key);
+    } else {
+      const parents = fn(nodeId);
+      this._parents.set(key, parents);
+      return parents;
+    }
+  }
+}
+
+const NODE_CHAIN_CACHE = new NodeChainCache();
 
 export class NodeMap {
   private _map: NodeBTree = new NodeBTree();
@@ -44,6 +93,12 @@ export class NodeMap {
     return this._map;
   }
 
+  forEachDeleted(fn: (id: NodeId, node: Node) => void) {
+    this._deleted.forEach((v, k) => {
+      fn(k, v);
+    });
+  }
+
   forEach(fn: (id: NodeId, node: Node) => void, deep = false) {
     const map = NodeMap.empty();
     this.collect(this, map);
@@ -74,12 +129,17 @@ export class NodeMap {
     return Array.from(map._map.keys());
   }
 
+  // tries to find the node in the map or in the parent map
   get(key: NodeId): Optional<Node> {
     return this._map.get(key) || this._parent?.get(key);
   }
 
   set(key: NodeId, value: Node) {
-    this._map.set(key, value);
+    // once deleted we can't set it back within the same map
+    // if (!this._deleted.has(key)) {
+    //   this._deleted.delete(key);
+      this._map.set(key, value);
+    // }
   }
 
   has(key: NodeId) {
@@ -95,11 +155,24 @@ export class NodeMap {
   }
 
   delete(key: NodeId) {
-    this._deleted.set(key, this._map.get(key)!);
+    console.log("deleting", key.toString(), this.get(key));
+    this._deleted.set(key, this.get(key)!);
     this._map.delete(key);
   }
 
-  parent(from: NodeId | Node): Optional<Node> {
+  indexOf(node: Node) {
+    const parent = this.parent(node);
+    const root = this.get(NodeId.ROOT);
+    if (!root) {
+      throw new Error("Root node not found");
+      return -1;
+    }
+
+    if (!parent) return -1;
+    return parent.children.indexOf(node);
+  }
+
+  parent(from: Node|NodeId): Optional<Node> {
     let node = from instanceof Node ? from : this.get(from);
     return node && node.parentId && this.get(node.parentId);
   }

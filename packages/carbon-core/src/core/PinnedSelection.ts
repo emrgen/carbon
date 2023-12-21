@@ -104,6 +104,7 @@ export class PinnedSelection {
 
 		if (!tail || !head) {
 			console.warn(p14('%c[error]'), 'color:red', 'Pin.fromDom failed');
+			// throw new Error('Pin.fromDom failed');
 			return
 		}
 

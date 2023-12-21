@@ -48,7 +48,7 @@ export class NodeTopicEmitter {
 	emit (node: Node, event: string | symbol, ...args: any[]) {
 		const listeners = this.listeners.get(event)?.get(node.id);
 		listeners?.forEach(cb => {
-			// console.log('emitting', event, node.id, cb);
+			console.log('emitting', event, node.id, cb);
 			cb(node, ...args)
 		});
 
