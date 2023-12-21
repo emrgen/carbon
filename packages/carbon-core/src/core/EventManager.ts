@@ -91,8 +91,8 @@ export class EventManager {
 			return
 		}
 
-		if (type !== EventsIn.selectionchange && app.state.selection.isBlock && app.selection.nodes.length) {
-			const lastNode = last(app.selection.nodes) as Node;
+		if (type !== EventsIn.selectionchange && app.state.selection.isBlock && app.selection.blocks.length) {
+			const lastNode = last(app.selection.blocks) as Node;
 			this.updateCommandOrigin(type, event);
 
 			// TODO: check if this can be optimized
@@ -123,7 +123,7 @@ export class EventManager {
 		}
 
 		// editor cannot process event without active selection
-		if (!selection || selection.isBlock && !selection.nodes.length) {
+		if (!selection || selection.isBlock && !selection.blocks.length) {
 			console.error(p12('%c[invalid]'), 'color:grey', `${type}: event with empty selection`);
 			return
 		}

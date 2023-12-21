@@ -61,8 +61,8 @@ export class ClipboardPlugin extends AfterPlugin {
   slice(app: Carbon): Slice {
     const { selection,  } = app;
     if (selection.isBlock) {
-      const { nodes } = selection;
-      const cloned = nodes.map(n => {
+      const { blocks } = selection;
+      const cloned = blocks.map(n => {
         const node = app.schema.cloneWithId(n)
         node.updateProps({ [SelectedPath]: false })
         return node

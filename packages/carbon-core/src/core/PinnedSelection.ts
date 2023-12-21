@@ -129,6 +129,11 @@ export class PinnedSelection {
 	private constructor(readonly tail: Pin, readonly head: Pin, readonly nodes: Node[], readonly origin = ActionOrigin.Unknown) {
 	}
 
+	get blocks(): Node[] {
+		if (this.nodes.length=== 1) return this.nodes;
+		return sortNodes(this.nodes, 'index')
+	}
+
 	get isNull() {
 		return this.tail.isNull && this.head.isNull;
 	}

@@ -229,11 +229,11 @@ export class TransformCommands extends BeforePlugin {
 
     // if the selection is not empty, we need to paste the nodes after the last node
     if (selection.isBlock) {
-      const {nodes} = selection
-      const lastNode = last(selection.nodes) as Node
-      const focusNode = this.findFocusNode(nodes);
+      const {blocks} = selection
+      const lastNode = last(selection.blocks) as Node
+      const focusNode = this.findFocusNode(blocks);
 
-      tr.Insert(Point.toAfter(lastNode.id), nodes)
+      tr.Insert(Point.toAfter(lastNode.id), blocks)
       if (focusNode) {
         tr.Select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
       }
@@ -958,7 +958,7 @@ export class TransformCommands extends BeforePlugin {
   delete(tr: Transaction, selection: PinnedSelection = tr.app.selection, opts?: DeleteOpts): Optional<Transaction> {
     const { app } = tr;
     if (selection.isBlock) {
-      return this.deleteNodes(tr, selection.nodes, opts);
+      return this.deleteNodes(tr, selection.blocks, opts);
     }
 
     if (selection.isCollapsed) {

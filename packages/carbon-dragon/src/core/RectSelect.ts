@@ -114,7 +114,7 @@ export class RectSelect extends EventEmitter {
 		// // can not move block while inline selection is active
 		// console.log(selection.isInline);
 		// if (selection.isInline) return;
-		console.log('current selection',app.selection.nodes.map(n => n.id));
+		console.log('current selection',app.selection.blocks.map(n => n.id));
 		const document = node.chain.find(n => n.isDocument);
 		if (!document) {
 			return;
@@ -200,8 +200,8 @@ export class RectSelect extends EventEmitter {
 
 	private noSelectionChange(ids: NodeId[]) {
 		const map = new NodeIdSet(ids)
-		const {nodes} = this.app.selection
-		return ids.length === nodes.length && nodes.every(n => map.has(n.id))
+		const {blocks} = this.app.selection
+		return ids.length === blocks.length && blocks.every(n => map.has(n.id))
 	}
 
 	onDragEnd(e: DndEvent) {

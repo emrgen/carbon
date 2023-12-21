@@ -11,7 +11,7 @@ export const hasParent = (node: Node, parent: Node) => {
 }
 
 export type NodeSorter = (a: Node, b: Node) => number;
-export type SortNodesBy = 'path' | 'depth' | 'type' | NodeSorter;
+export type SortNodesBy = 'path' | 'depth' | 'type' | 'index' | NodeSorter;
 const NodeNullSorter: NodeSorter = (a, b) => 0;
 
 export const sortNodes = (nodes: Node[], by: SortNodesBy = NodeNullSorter): Node[] => {
@@ -20,9 +20,33 @@ export const sortNodes = (nodes: Node[], by: SortNodesBy = NodeNullSorter): Node
       return sortNodesByPath(nodes);
     case 'depth':
       return sortNodesByDepth(nodes);
+    case 'index':
+      return sortNodesByIndex(nodes);
     default:
       return nodes.sort(by as NodeSorter);
   }
+}
+
+export const sortNodesByIndex = (nodes: Node[]): Node[] => {
+  const paths = nodes.map(n => ({
+    node: n,
+    index: n.index,
+  }));
+
+  paths.sort((a, b) => {
+    if (a.index < b.index) {
+      return -1;
+    }
+
+    if (a.index > b.index) {
+      return 1;
+    }
+
+    return 0;
+  });
+
+  return paths.map(p => p.node);
+
 }
 
 export const sortNodesByDepth = (nodes: Node[]): Node[] => {

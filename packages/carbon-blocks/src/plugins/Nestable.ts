@@ -208,7 +208,7 @@ export class NestablePlugin extends AfterPlugin {
 				const prevNode = listNode.prevSibling;
 				if (!prevNode || !isNestableNode(prevNode)) return
 
-				if (selection.nodes.length > 1) {
+				if (selection.blocks.length > 1) {
 					return
 				}
 
@@ -223,7 +223,7 @@ export class NestablePlugin extends AfterPlugin {
 				const {parent} = listNode;
 				if (!parent || !isNestableNode(parent)) return
 
-				if (selection.nodes.length > 1) {
+				if (selection.blocks.length > 1) {
 					return
 				}
 
