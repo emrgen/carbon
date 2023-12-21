@@ -3,7 +3,7 @@ import { first, flatten, identity, isArray, last, sortBy, merge, isEmpty, isFunc
 import {  With } from '@emrgen/types';
 import { Carbon } from './Carbon';
 import { p14 } from './Logger';
-import { Mark } from './Mark';
+import { Mark, MarkSet } from "./Mark";
 import { Node } from './Node';
 import { NodeAttrsJSON } from "./NodeAttrs";
 import { NodeContent } from './NodeContent';
@@ -13,7 +13,14 @@ import { PluginManager } from './PluginManager';
 import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
-import { ListNumberPath, NodeIdSet, NodePropsJson, RenderPath, TransactionManager } from "@emrgen/carbon-core";
+import {
+	ListNumberPath,
+	NodeIdSet,
+	NodePropsJson,
+	RenderPath,
+	Selection,
+	TransactionManager
+} from "@emrgen/carbon-core";
 import { ChangeNameAction } from './actions/ChangeNameAction';
 import { UpdatePropsAction } from './actions/UpdatePropsAction';
 import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
@@ -41,9 +48,18 @@ export class Transaction {
 	private timestamp: number = Date.now();
 	private onTick: boolean = false;
 	private actions: CarbonAction[] = [];
-	committed: boolean = false;
-	private dispatched: boolean = false;
-	readOnly = false;
+	private _committed: boolean = false;
+	private _dispatched: boolean = false;
+
+	private readOnly = false;
+
+	get dispatched() {
+		return this._dispatched;
+	}
+
+	get committed() {
+		return this._committed;
+	}
 
 	get origin() {
 		return this.app.runtime.origin;
@@ -51,9 +67,15 @@ export class Transaction {
 	get size() {
 		return this.actions.length;
 	}
-	private get state() {
+
+	get state() {
 		return this.app.state;
 	}
+
+	get store() {
+		return this.app.store;
+	}
+
 	get textInsertOnly() {
 		return this.actions.every(a => a instanceof SetContentAction || a instanceof SelectAction);
 	}
@@ -138,8 +160,11 @@ export class Transaction {
 		return this.Add(ChangeNameAction.create(ref.intoNodeId(), to, origin));
 	}
 
-	Mark(start: Point, end: Point, mark: Mark, origin = this.origin): Transaction {
-		// this.add(MarkCommand.create(start, end, mark, origin))
+	Format(selection: Selection, mark: Mark | MarkSet, origin = this.origin): Transaction {
+		const marks = MarkSet.from(mark);
+		// const after = selection.unpin();
+		// const marks = isArray(mark) ? mark : [mark];
+		// this.Add(MarkCommand.create(start, end, mark, origin))
 		return this;
 	}
 
@@ -195,6 +220,10 @@ export class Transaction {
 
 	// adds command to transaction
 	Add(action: CarbonAction | CarbonAction[]): Transaction {
+		if (this.dispatched)	{
+			throw new Error('can not add actions to dispatched transaction: ' + this.id);
+		}
+
 		flatten([action]).forEach(a => this.actions.push(a));
 		return this;
 	}
@@ -206,11 +235,11 @@ export class Transaction {
 			return this;
 		}
 
-		if (this.dispatched) {
+		if (this._dispatched) {
 			console.warn('skipped: transaction already dispatched')
 			return this;
 		}
-		this.dispatched = true;
+		this._dispatched = true;
 
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema
@@ -220,7 +249,7 @@ export class Transaction {
 
 	Commit(draft: CarbonStateDraft): Transaction {
 		if (this.actions.length === 0) return this
-		if (this.committed) {
+		if (this._committed) {
 			console.warn('skipped: transaction already committed')
 			return this
 		}
@@ -245,7 +274,7 @@ export class Transaction {
 			throw Error('transaction error');
 		} finally {
 			console.groupEnd()
-			this.committed = true;
+			this._committed = true;
 			return this;
 		}
 	}
@@ -339,12 +368,14 @@ export class Transaction {
 	}
 
 	Into() {
-		const { type, id, actions, origin } = this;
+		const { type, id, actions, origin, dispatched, committed } = this;
 		return {
 			type,
 			id,
 			actions,
 			origin,
+			dispatched,
+			committed,
 		}
 	}
 }
@@ -355,7 +386,7 @@ export class TransactionCommit {
 	// create an inverse transaction
 	inverse(app: Carbon, origin?: ActionOrigin) {
 		const tr = app.cmd;
-		tr.readOnly = true;
+		// tr.readOnly = true;
 		// tr.type = TransactionType.OneWay;
 
 		const actions = this.actions.map(c => c.inverse());

@@ -126,6 +126,9 @@ export class PluginCommand {
 
         // inject tr as first argument
         return (...args: any[]) => {
+          if (target.tr.dispatched) {
+            return target.tr;
+          }
           command.fn(target.tr, ...args)
           return target.tr;
         }

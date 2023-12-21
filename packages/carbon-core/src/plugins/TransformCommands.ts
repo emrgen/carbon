@@ -978,7 +978,9 @@ export class TransformCommands extends BeforePlugin {
 
     // selection is within same text block
     if (endTextBlock.eq(startTextBlock)) {
-      console.log('xxxxxxx');
+      if (import.meta.env.VITE_MODE == "dev") {
+        console.log(p14("%c[failed]"), "color:red", "selection within same text block");
+      }
       tr.Add(this.deleteGroupCommands(app, deleteGroup));
       const after = selection.collapseToStart();
       tr.Select(after);
@@ -1221,8 +1223,6 @@ export class TransformCommands extends BeforePlugin {
 
   private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch, moveNodeIds = new NodeIdSet()): CarbonAction[] {
     const actions: CarbonAction[] = [];
-
-    console.log('deleteGroup', deleteGroup.ids.toArray().map(id => id.toString()), deleteGroup.ranges.map(r => r.toString()));
 
     sortBy(deleteGroup.ids.toArray().map(id => app.store.get(id)), n => -(n?.depth ?? 0)).forEach(n => {
       if (n?.parents.some(p => deleteGroup.has(p.id))) {

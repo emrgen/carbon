@@ -1,3 +1,4 @@
+import { MarkSet } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { NodeIdSet } from "./BSet";
 import { ActionOrigin } from "./actions/types";
@@ -14,7 +15,8 @@ interface StateProps {
 	previous?: State;
 	content: Node;
 	selection: PinnedSelection;
-	nodeMap: NodeMap;
+	marks?: MarkSet;
+	nodeMap?: NodeMap;
 	changes?: NodeIdSet;
 	decorations?: DecorationStore;
 	counter?: number;
@@ -26,18 +28,18 @@ export class State extends EventEmitter {
 	content: Node;
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
+	marks: MarkSet;
 	decorations: DecorationStore;
 	changes: NodeIdSet;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
 
 	counter: number = 0;
 
-	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap?: NodeMap) {
-		const map = nodeMap ?? new NodeMap();
-		const state = new State({ content, selection, scope, nodeMap: map, });
-		if (!nodeMap) {
+	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: NodeMap = new NodeMap()) {
+		const state = new State({ content, selection, scope, nodeMap });
+		if (!nodeMap.size) {
 			content.forAll(n => {
-				map.set(n.id, n)
+				nodeMap.set(n.id, n)
 				state.changes.add(n.id);
 			});
 		}
@@ -55,6 +57,7 @@ export class State extends EventEmitter {
 			nodeMap,
 			changes = NodeIdSet.empty(),
 			decorations = new DecorationStore(),
+			marks = new MarkSet(),
 			counter = 0
 		} = props;
 

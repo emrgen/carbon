@@ -109,7 +109,7 @@ export class EventManager {
 			this.pm.onEvent(editorEvent);
 
 			// if the transaction is not committed, discard it
-			if (!editorEvent.cmd.committed) {
+			if (!editorEvent.cmd._committed) {
 				// this.app.committed = true;
 				console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
 				return
@@ -181,7 +181,7 @@ export class EventManager {
 		}
 
 		// if the transaction is not committed, discard it
-		if (!editorEvent.cmd.committed) {
+		if (!editorEvent.cmd._committed) {
 			this.app.committed = true;
 			console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
 			return

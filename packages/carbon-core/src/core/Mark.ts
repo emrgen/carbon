@@ -16,46 +16,29 @@ export class Mark {
 	type: string;
 	props?: MarkProps;
 
-	static bold(): Mark {
-		return new Mark('bold');
-	}
+	static BOLD =  new Mark('bold')
 
-	static italic(): Mark {
-		return new Mark('italic');
-	}
+	static ITALIC = new Mark('italic')
 
-	static underline(): Mark {
-		return new Mark('underline');
-	}
+	static UNDERLINE = new Mark('underline')
 
-	static code(): Mark {
-		return new Mark('code');
-	}
+	static CODE = new Mark('code')
 
-	static subscript(): Mark {
-		return new Mark('subscript');
-	}
+	static SUBSCRIPT = new Mark('subscript')
 
-	static superscript(): Mark {
-		return new Mark('superscript');
-	}
+	static SUPERSCRIPT = new Mark('superscript')
 
-	static hashtag(): Mark {
-		return new Mark('hashtag');
-	}
+	static HASHTAG = new Mark('hashtag')
 
 	static mention(): Mark {
 		return new Mark('mention');
 	}
 
-	static strike(): Mark {
-		return new Mark('strike');
-	}
+	static STRIKE = new Mark('strike')
 
 	static link(url: string): Mark {
 		return new Mark('link', { url });
 	}
-
 
 	static color(color: string): Mark {
 		return new Mark('color', { color });
@@ -92,12 +75,26 @@ export class Mark {
 export class MarkSet {
 	marks: Record<string, Mark> = {};
 
+
+
 	get size() {
 		return keys(this.marks).length;
 	}
 
 	static empty() {
 		return new MarkSet([]);
+	}
+
+	static from(marks: Mark | Mark[] | MarkSet){
+		if (marks instanceof MarkSet) {
+			return marks;
+		}
+
+		if (isArray(marks)) {
+			return new MarkSet(marks);
+		}
+
+		return new MarkSet([marks]);
 	}
 
 	constructor(marks: Mark[] = []) {

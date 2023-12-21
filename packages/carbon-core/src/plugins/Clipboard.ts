@@ -47,7 +47,7 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStop(event);
         const { selection } = app
 
-        if (!app.state.changes.clipboard.isEmpty) {
+        if (!app.state.changes.clipboard.size === 0) {
           const slice = app.state.changes.clipboard;
           app.cmd.transform.paste(selection, slice)?.Dispatch()
         } else {

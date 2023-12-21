@@ -5,7 +5,7 @@ import {
   PinnedSelection, Point,
   PointedSelection,
   Transaction,
-  Mark,
+  Mark, MarkSet, Selection
 } from "@emrgen/carbon-core";
 
 declare module '@emrgen/carbon-core' {
@@ -13,33 +13,24 @@ declare module '@emrgen/carbon-core' {
     select(selection: PinnedSelection | PointedSelection): Transaction;
     setContent(ref: Node | NodeId, after: NodeContent): Transaction;
     insert(at: Point, nodes: Node | Node[]): Transaction,
-    insertBefore(refId: Node | NodeId, nodes: Node | Node[]): Transaction,
-    insertAfter(refId: Node | NodeId, nodes: Node | Node[]): Transaction,
-    insertDefault(at: Point, name: NodeName): Transaction,
-    insertDefaultBefore(refId: Node | NodeId, name: NodeName): Transaction,
-    insertDefaultAfter(refId: Node | NodeId, name: NodeName): Transaction,
     remove(at: Point, node: Node): Transaction,
     move(from: Point, to: Point, node: Node): Transaction,
     change(ref: Node | NodeId, to: NodeName): Transaction,
-    mark(start: Point, end: Point, mark: Mark): Transaction,
+    format(tr: Transaction, selection: Selection, mark: Mark | MarkSet): Transaction,
     update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
+    dispatch(): void;
     action: {
       select(selection: PinnedSelection | PointedSelection): Transaction,
       setContent(ref: Node | NodeId, after: NodeContent): Transaction,
       insert(at: Point, nodes: Node | Node[]): Transaction,
-      insertBefore(refId: Node | NodeId, nodes: Node | Node[]): Transaction,
-      insertAfter(refId: Node | NodeId, nodes: Node | Node[]): Transaction,
-      insertDefault(at: Point, name: NodeName): Transaction,
-      insertDefaultBefore(refId: Node | NodeId, name: NodeName): Transaction,
-      insertDefaultAfter(refId: Node | NodeId, name: NodeName): Transaction,
       remove(at: Point, node: Node): Transaction,
       move(from: Point, to: Point, node: Node): Transaction,
       change(node: Node, to: NodeName): Transaction,
-      format(start: Point, end: Point, mark: Mark): Transaction,
+      format(tr: Transaction, selection: Selection, mark: Mark | MarkSet): Transaction,
       Update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
+      dispatch(): void;
     }
   }
-
 }
 
 export class ActionPlugin extends CarbonPlugin {
@@ -50,13 +41,12 @@ export class ActionPlugin extends CarbonPlugin {
       select: this.select,
       setContent: this.setContent,
       insert: this.insert,
-      insertBefore: this.insertBefore,
-      insertAfter: this.insertAfter,
-      insertDefault: this.insertDefault,
-      insertDefaultBefore: this.insertDefaultBefore,
-      insertDefaultAfter: this.insertDefaultAfter,
       remove: this.remove,
+      change: this.change,
       move: this.move,
+      update: this.update,
+      format: this.format,
+      dispatch: this.dispatch,
     }
   }
 
@@ -102,10 +92,6 @@ export class ActionPlugin extends CarbonPlugin {
     tr.Remove(at, node);
   }
 
-  mark(tr: Transaction, start: Point, end: Point, mark: Mark) {
-    tr.Mark(start, end, mark);
-  }
-
   move(tr: Transaction, from: Point, to: Point, node: Node) {
     tr.Move(from, to, node.id);
   }
@@ -116,5 +102,13 @@ export class ActionPlugin extends CarbonPlugin {
 
   update(tr: Transaction, ref: Node | NodeId, props: Partial<NodePropsJson>) {
     tr.Update(ref, props);
+  }
+
+  format(tr: Transaction, selection: Selection = tr.state.selection, mark: Mark | MarkSet) {
+    tr.Format(selection, mark);
+  }
+
+  dispatch(tr: Transaction) {
+    tr.Dispatch();
   }
 }

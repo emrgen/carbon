@@ -7,6 +7,9 @@ export class NodeMap {
   private _map: NodeBTree = new NodeBTree();
   private _deleted: NodeBTree = new NodeBTree();
   private readonly _parent: NodeMap | null = null;
+  private _frozen = false;
+
+  private _size = 0;
 
   static empty() {
     return new NodeMap();
@@ -23,14 +26,18 @@ export class NodeMap {
   }
 
   constructor(parent?: NodeMap) {
+    if (parent && !parent._frozen) {
+      throw new Error("Parent map must be frozen");
+    }
+
     this._parent = parent || null;
   }
 
-  get isEmpty() {
-    return this._map.isEmpty;
-  }
-  get isEmptyDeep() {
-    return this._map.isEmpty && (!this._parent || this._parent.isEmptyDeep);
+  get size() {
+    if (this._frozen) {
+      return this._size;
+    }
+    return this._map.size + (this._parent?.size || 0);
   }
 
   get current() {
@@ -129,7 +136,10 @@ export class NodeMap {
   }
 
   freeze() {
+    if (this._frozen) return;
+    this._frozen = true;
     this._map.freeze();
+    this._size = this._map.size + (this._parent?.size || 0);
     Object.freeze(this);
   }
 }

@@ -396,6 +396,10 @@ export class PinnedSelection {
 		return PointedSelection.create(tail.point, head.point, origin ?? this.origin);
 	}
 
+	pin(map: NodeMap): Optional<PinnedSelection> {
+		return this;
+	}
+
 	eq(other: PinnedSelection) {
 		if (this.nodes.length !== other.nodes.length) return false;
 		const set = NodeMap.fromNodes(this.nodes);

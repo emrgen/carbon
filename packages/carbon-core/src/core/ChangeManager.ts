@@ -93,7 +93,6 @@ export class ChangeManager extends NodeTopicEmitter {
     if (isContentChanged) {
       this.changes.clear();
       this.changes = state.changes.clone();
-      console.log('xxxxxxxxxxx', this.changes.size, state.changes.size);
     }
 
     if (isContentChanged) {
@@ -164,7 +163,7 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   private updateContent() {
-    console.group("syncing:  content");
+    console.groupCollapsed("syncing:  content");
     // console.group('syncing: content')
     const updatedNodeIds = this.changes;
     const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];

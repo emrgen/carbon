@@ -328,23 +328,23 @@ export function DraggableHandle(props: FastDragHandleProps) {
       return;
     }
 
-    const { nextSibling: nextBlock } = node;
-    if (node.isEmpty && !node.isAtom && !nextBlock?.isEmpty) {
-      const title = node.find((n) => n.isTextBlock);
-      if (node.isContainerBlock && title) {
-        const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
-        if (app.selection.eq(after)) return;
-        app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
-        return;
-      }
-    }
-
-    if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
-      const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
-      if (app.selection.eq(after)) return;
-      app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
-      return;
-    }
+    // const { nextSibling: nextBlock } = node;
+    // if (node.isEmpty && !node.isAtom && !nextBlock?.isEmpty) {
+    //   const title = node.find((n) => n.isTextBlock);
+    //   if (node.isContainerBlock && title) {
+    //     const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
+    //     if (app.selection.eq(after)) return;
+    //     app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
+    //     return;
+    //   }
+    // }
+    //
+    // if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
+    //   const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
+    //   if (app.selection.eq(after)) return;
+    //   app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
+    //   return;
+    // }
 
     app.cmd.inserter.after(node, "section").Dispatch();
   };
