@@ -47,7 +47,7 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStop(event);
         const { selection } = app
 
-        if (!app.state.changes.clipboard.isEmpty) {
+        if (!app.state.changes.clipboard.size === 0) {
           const slice = app.state.changes.clipboard;
           app.cmd.transform.paste(selection, slice)?.Dispatch()
         } else {
@@ -61,8 +61,8 @@ export class ClipboardPlugin extends AfterPlugin {
   slice(app: Carbon): Slice {
     const { selection,  } = app;
     if (selection.isBlock) {
-      const { nodes } = selection;
-      const cloned = nodes.map(n => {
+      const { blocks } = selection;
+      const cloned = blocks.map(n => {
         const node = app.schema.cloneWithId(n)
         node.updateProps({ [SelectedPath]: false })
         return node

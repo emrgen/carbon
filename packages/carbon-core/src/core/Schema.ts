@@ -140,6 +140,7 @@ enum DndLayout {
 
 export interface NodeSpec {
 	name?: string;
+	// TODO: splitName should be enough to check if the node is splittable
 	splits?: boolean;
 	splitName?: string;
 	content?: string;

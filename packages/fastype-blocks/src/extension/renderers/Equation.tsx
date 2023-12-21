@@ -103,7 +103,7 @@ export const EquationComp = (props: RendererProps) => {
   const handleMouseDown = useCallback(
     (e) => {
       const { selection } = app;
-      if (selection.isBlock && selection.nodes.some(n => n.id.eq(node.id))) {
+      if (selection.isBlock && selection.blocks.some(n => n.id.eq(node.id))) {
         stop(e);
       }
     },

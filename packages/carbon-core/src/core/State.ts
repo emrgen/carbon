@@ -1,3 +1,4 @@
+import { MarkSet } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { NodeIdSet } from "./BSet";
 import { ActionOrigin } from "./actions/types";
@@ -6,7 +7,7 @@ import { Node } from "./Node";
 import { PinnedSelection } from "./PinnedSelection";
 import EventEmitter from "events";
 import { NodeMap } from "./NodeMap";
-import { CarbonStateDraft } from "./CarbonStateDraft";
+import { StateDraft } from "./StateDraft";
 import { StateScope } from "./StateScope";
 
 interface StateProps {
@@ -14,6 +15,7 @@ interface StateProps {
 	previous?: State;
 	content: Node;
 	selection: PinnedSelection;
+	marks?: MarkSet;
 	nodeMap: NodeMap;
 	changes?: NodeIdSet;
 	decorations?: DecorationStore;
@@ -32,12 +34,11 @@ export class State extends EventEmitter {
 
 	counter: number = 0;
 
-	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap?: NodeMap) {
-		const map = nodeMap ?? new NodeMap();
-		const state = new State({ content, selection, scope, nodeMap: map, });
-		if (!nodeMap) {
+	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: NodeMap = new NodeMap()) {
+		const state = new State({ content, selection, scope, nodeMap });
+		if (!nodeMap.size) {
 			content.forAll(n => {
-				map.set(n.id, n)
+				nodeMap.set(n.id, n)
 				state.changes.add(n.id);
 			});
 		}
@@ -125,8 +126,8 @@ export class State extends EventEmitter {
 	}
 
 	// try to create a new state or fail and return the previous state
-	produce(origin: ActionOrigin, fn: (state: CarbonStateDraft) => void): State {
-		const draft = new CarbonStateDraft(this, origin);
+	produce(origin: ActionOrigin, fn: (state: StateDraft) => void): State {
+		const draft = new StateDraft(this, origin);
 		try {
 			StateScope.set(this.scope, draft.nodeMap)
 			fn(draft);

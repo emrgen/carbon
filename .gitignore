@@ -41,3 +41,6 @@ diamond-core
 
 cypress.config.js
 cypress
+
+.idea
+.vscode

@@ -7,7 +7,7 @@ import { NodeStore } from './NodeStore';
 import { DomSelection, Range } from './Range';
 import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
-import { sortNodes } from "@emrgen/carbon-core";
+import { NodeMap, sortNodes } from "@emrgen/carbon-core";
 import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 
 
@@ -104,6 +104,7 @@ export class PinnedSelection {
 
 		if (!tail || !head) {
 			console.warn(p14('%c[error]'), 'color:red', 'Pin.fromDom failed');
+			// throw new Error('Pin.fromDom failed');
 			return
 		}
 
@@ -119,7 +120,9 @@ export class PinnedSelection {
 	}
 
 	static fromNodes(nodes: Node | Node[], origin = ActionOrigin.Unknown): PinnedSelection {
-		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, flatten([nodes]), origin);
+		const set = NodeMap.fromNodes(flatten([nodes]));
+
+		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, set.values(), origin);
 	}
 
 	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
@@ -127,6 +130,11 @@ export class PinnedSelection {
 	}
 
 	private constructor(readonly tail: Pin, readonly head: Pin, readonly nodes: Node[], readonly origin = ActionOrigin.Unknown) {
+	}
+
+	get blocks(): Node[] {
+		if (this.nodes.length=== 1) return this.nodes;
+		return sortNodes(this.nodes, 'index')
 	}
 
 	get isNull() {
@@ -389,10 +397,16 @@ export class PinnedSelection {
 		return PointedSelection.create(tail.point, head.point, origin ?? this.origin);
 	}
 
+	pin(map: NodeMap): Optional<PinnedSelection> {
+		return this;
+	}
+
 	eq(other: PinnedSelection) {
 		if (this.nodes.length !== other.nodes.length) return false;
-		return this.tail.eq(other.tail) && this.head.eq(other.head)
-			&& this.nodes.every((n, i) => n.eq(other.nodes[i]));
+		const set = NodeMap.fromNodes(this.nodes);
+		const nodesEq = other.nodes.every(n => set.has(n.id))
+
+		return nodesEq && this.tail.eq(other.tail) && this.head.eq(other.head)
 	}
 
 	clone() {

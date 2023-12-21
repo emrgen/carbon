@@ -34,7 +34,7 @@ export const createCarbon = (name: string, json: InitNodeJSON, extensions: Exten
 	}
 
 	const state = State.create(scope, content, PinnedSelection.IDENTITY);
-	return new Carbon(state, schema, pm, renderer)
+	return new Carbon(state.freeze(), schema, pm, renderer)
 }
 
 // create carbon app with extensions
@@ -55,7 +55,7 @@ export const useCreateCarbonFromState = (state: State, extensions: Extension[] =
 	const {specs} = pm;
 	const schema = new Schema(specs, new SchemaFactory(state.scope));
 
-	return new Carbon(state, schema, pm, renderer)
+	return new Carbon(state.freeze(), schema, pm, renderer)
 }
 
 // const saveDoc = throttle((state: CarbonState) => {

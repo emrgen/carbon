@@ -1,4 +1,12 @@
-import { Carbon, CarbonPlugin, PinnedSelection, PointedSelection, Selection, Transaction } from "@emrgen/carbon-core";
+import {
+  Carbon,
+  CarbonPlugin,
+  Mark,
+  PinnedSelection,
+  PointedSelection,
+  Selection,
+  Transaction
+} from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { MarkSet } from "../core/Mark";
 
@@ -17,7 +25,7 @@ declare module '@emrgen/carbon-core' {
     color(color: string, selection: Selection): Transaction;
     background(color: string, selection: Selection): Transaction;
 
-    format: {
+    formatter: {
       bold: (selection?: Selection) => Transaction,
       italic: (selection?: Selection) => Transaction,
       underline: (selection?: Selection) => Transaction,
@@ -34,7 +42,7 @@ declare module '@emrgen/carbon-core' {
 
 export class FormatterPlugin extends CarbonPlugin {
 
-  name = 'format';
+  name = 'formatter';
 
   commands(): Record<string, Function> {
     return {
@@ -51,43 +59,44 @@ export class FormatterPlugin extends CarbonPlugin {
     }
   }
 
-  bold(tr: Transaction, selection: Selection = tr.app.selection) {
-    console.log('bold', selection.toString())
+  bold(tr: Transaction, selection = tr.app.selection) {
+    tr.action.format(selection, Mark.BOLD);
   }
 
   italic(tr: Transaction, selection: Selection = tr.app.selection) {
-    console.log('italic')
+    tr.action.format(selection, Mark.ITALIC);
   }
 
   underline(tr: Transaction, selection: Selection) {
-    console.log('underline')
+    tr.action.format(selection, Mark.UNDERLINE);
   }
 
   strike(app: Carbon, tr: Transaction, selection: Selection) {
-    console.log('strike')
+    tr.action.format(selection, Mark.STRIKE);
   }
 
   code(tr: Transaction, selection: Selection) {
-    console.log('code')
+    tr.action.format(selection, Mark.CODE);
   }
 
-  link(tr: Transaction, link: string, selection: Selection) {
-    console.log('link')
+  link(tr: Transaction, selection: Selection, link: string = '#') {
+    tr.action.format(selection, Mark.link(link));
   }
 
   subscript(tr: Transaction, selection: Selection) {
-    console.log('subscript')
+    tr.action.format(selection, Mark.SUBSCRIPT);
   }
 
   superscript(tr: Transaction, selection: Selection) {
-    console.log('superscript')
+    tr.action.format(selection, Mark.SUPERSCRIPT);
   }
 
-  color(tr: Transaction, color: string, selection: Selection) {
-    console.log('color')
+  color(tr: Transaction, selection: Selection, color = '#aaa') {
+    tr.action.format(selection, Mark.color(color));
   }
 
-  background(tr: Transaction, color: string, selection: Selection) {
-    console.log('background')
+  background(tr: Transaction, selection: Selection, color = '#eee') {
+    tr.action.format(selection, Mark.background(color));
   }
+
 }

@@ -37,7 +37,7 @@ export default function DividerComp(props: RendererProps) {
 
   const handleMouseDown = useCallback(
     (e) => {
-      if (app.selection.nodes.some((n) => n.id.eq(node.id))) {
+      if (app.selection.blocks.some((n) => n.id.eq(node.id))) {
         preventAndStop(e)
       }
     },

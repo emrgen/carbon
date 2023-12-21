@@ -5,7 +5,7 @@ import { ActionOrigin } from './types';
 import { classString } from '../Logger';
 import { RemoveNodeAction } from './RemoveNodeAction';
 import { Node } from '../Node';
-import { CarbonStateDraft } from '../CarbonStateDraft';
+import { StateDraft } from '../StateDraft';
 import { deepCloneMap, NodeJSON } from "../types";
 import { NodeId } from "../NodeId";
 
@@ -17,7 +17,7 @@ export class InsertNodeAction implements CarbonAction {
 		return new InsertNodeAction(at, id, node, origin);
 	}
 	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {}
-	execute(tr: Transaction, draft: CarbonStateDraft) {
+	execute(tr: Transaction, draft: StateDraft) {
 		const { at, node: json } = this;
 		const {app}=tr;
 		const node = app.schema.nodeFromJSON(json)!;
@@ -26,7 +26,7 @@ export class InsertNodeAction implements CarbonAction {
 		if (!refNode) {
 			throw new Error('failed to find target node from: ' + at.toString())
 		}
-		const parent = draft.parent(refNode.id)
+		const parent = draft.parent(refNode)
 		if (!parent) {
 			throw new Error('failed to find parent node from: ' + at.toString())
 		}
@@ -36,7 +36,7 @@ export class InsertNodeAction implements CarbonAction {
 	}
 
 	inverse(): CarbonAction {
-		const { at, nodeId, node: json,  } = this;
+		const { at, nodeId, node: json } = this;
 		// TODO: check if nodeJson and node should be the same
 		return RemoveNodeAction.create(at, nodeId, json, this.origin)
 	}

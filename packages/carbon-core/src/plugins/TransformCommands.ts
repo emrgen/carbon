@@ -229,11 +229,11 @@ export class TransformCommands extends BeforePlugin {
 
     // if the selection is not empty, we need to paste the nodes after the last node
     if (selection.isBlock) {
-      const {nodes} = selection
-      const lastNode = last(selection.nodes) as Node
-      const focusNode = this.findFocusNode(nodes);
+      const {blocks} = selection
+      const lastNode = last(selection.blocks) as Node
+      const focusNode = this.findFocusNode(blocks);
 
-      tr.Insert(Point.toAfter(lastNode.id), nodes)
+      tr.Insert(Point.toAfter(lastNode.id), blocks)
       if (focusNode) {
         tr.Select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
       }
@@ -958,7 +958,7 @@ export class TransformCommands extends BeforePlugin {
   delete(tr: Transaction, selection: PinnedSelection = tr.app.selection, opts?: DeleteOpts): Optional<Transaction> {
     const { app } = tr;
     if (selection.isBlock) {
-      return this.deleteNodes(tr, selection.nodes, opts);
+      return this.deleteNodes(tr, selection.blocks, opts);
     }
 
     if (selection.isCollapsed) {
@@ -978,7 +978,9 @@ export class TransformCommands extends BeforePlugin {
 
     // selection is within same text block
     if (endTextBlock.eq(startTextBlock)) {
-      console.log('xxxxxxx');
+      if (import.meta.env.VITE_MODE == "dev") {
+        console.log(p14("%c[failed]"), "color:red", "selection within same text block");
+      }
       tr.Add(this.deleteGroupCommands(app, deleteGroup));
       const after = selection.collapseToStart();
       tr.Select(after);
@@ -1093,6 +1095,7 @@ export class TransformCommands extends BeforePlugin {
     const startBlock = startTextBlock.parent!;
     const insertCommands: CarbonAction[] = [];
     const moveCommands: CarbonAction[] = [];
+    const contentUpdated = NodeIdSet.empty()
 
     const handleUptoSameDepth = () => {
       let lastInsertedNodeId: Optional<NodeId>;
@@ -1103,6 +1106,7 @@ export class TransformCommands extends BeforePlugin {
       if (startBlock?.isCollapsed) {
         tr.Update(startBlock.id, { node: { collapsed: false } });
       }
+
 
       // move endParent children to startParent
       while (startContainer && endContainer && mergeDepth) {
@@ -1117,7 +1121,7 @@ export class TransformCommands extends BeforePlugin {
           const textContent = startTextBlock.textContent.slice(0, start.offset) + endTextBlock.textContent.slice(end.offset);
           const textNode = app.schema.text(textContent)!;
           insertCommands.push(SetContentAction.withContent(startContainer.id, BlockContent.create([textNode]), startContainer.content));
-
+          contentUpdated.add(startContainer.id);
           console.log('merge start and end block');
         } else {
           // move endContainer children to the end of startContainer
@@ -1150,11 +1154,16 @@ export class TransformCommands extends BeforePlugin {
     if (startDepth === endDepth) {
       console.log('CASE: merge same depth blocks');
       handleUptoSameDepth();
-      const deleteActions = this.deleteGroupCommands(app, deleteGroup);
+
+      const deleteGroupActions = this.deleteGroupCommands(app, deleteGroup, NodeIdSet.EMPTY, contentUpdated);
+
+      console.log('deleteActions', deleteGroupActions);
+      console.log('insertCommands', insertCommands);
+      console.log('moveCommands', moveCommands);
 
       tr
         .Add(moveCommands)
-        .Add(deleteActions)
+        .Add(deleteGroupActions)
         .Add(insertCommands)
         .Select(after)
       return
@@ -1219,11 +1228,11 @@ export class TransformCommands extends BeforePlugin {
     }
   }
 
-  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch, moveNodeIds = new NodeIdSet()): CarbonAction[] {
+  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch, moveNodeIds = NodeIdSet.EMPTY, contentUpdated = NodeIdSet.EMPTY): CarbonAction[] {
     const actions: CarbonAction[] = [];
 
-    console.log('deleteGroup', deleteGroup.ids.toArray().map(id => id.toString()), deleteGroup.ranges.map(r => r.toString()));
-
+    // if a node is a child of another node in the deleteGroup, it will be implicitly removed
+    // remove it from the deleteGroup to avoid duplicate remove action
     sortBy(deleteGroup.ids.toArray().map(id => app.store.get(id)), n => -(n?.depth ?? 0)).forEach(n => {
       if (n?.parents.some(p => deleteGroup.has(p.id))) {
         deleteGroup.removeId(n.id);
@@ -1242,13 +1251,24 @@ export class TransformCommands extends BeforePlugin {
       const { start, end } = range;
       const { node } = start;
 
+      // if the node content is already updated, no need to update again
+      if (contentUpdated.has(node.id)) {
+        return
+      }
+
+      // if node is a child of another node in the deleteGroup, it will be implicitly removed
+      // no need to update the content
+      if (node.chain.some(p => deleteGroup.has(p.id))) {
+        return
+      }
+
       if (start.node.eq(end.node)) {
         // TODO: maybe we don't need this check
         if (node.chain.some(n => deleteGroup.has(n.id)) && !node.chain.every(n => !moveNodeIds.has(n.id))) {
           return
         }
 
-        // if the textBlock becomes empty after delete all text nodes
+        // NOTE: if the textBlock becomes empty after delete all text nodes
         if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node) && !node.isVoid) {
           actions.push(...this.removeNodeCommands(node.children));
           return;
@@ -1267,8 +1287,8 @@ export class TransformCommands extends BeforePlugin {
         // if (textContent === '') {
         //   actions.push(SetContentAction.create(node.id, BlockContent.empty()))
         // } else {
-          const textNode = app.schema.text(textContent);
-          actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)));
+        const textNode = app.schema.text(textContent);
+        actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)));
         // }
       }
     });

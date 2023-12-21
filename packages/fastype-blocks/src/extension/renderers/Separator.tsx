@@ -28,19 +28,19 @@ export function SeparatorComp(props: RendererProps) {
     (e) => {
       preventAndStop(e);
       // avoid selection if block is already selected
-      if (app.selection.nodes.some(n => n.id.eq(node.id))) return;
+      if (app.selection.blocks.some(n => n.id.eq(node.id))) return;
       app.tr.selectNodes([node.id]).Dispatch();
     },
-    [app.selection.nodes, app.tr, node.id]
+    [app.selection.blocks, app.tr, node.id]
   );
 
   const handleMouseDown = useCallback(
     (e) => {
-      if (app.selection.nodes.some(n => n.id.eq(node.id))) {
+      if (app.selection.blocks.some(n => n.id.eq(node.id))) {
         preventAndStop(e);
       }
     },
-    [app.selection.nodes, node.id]
+    [app.selection.blocks, node.id]
   );
 
   return (

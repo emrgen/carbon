@@ -3,7 +3,7 @@ import { first, flatten, identity, isArray, last, sortBy, merge, isEmpty, isFunc
 import {  With } from '@emrgen/types';
 import { Carbon } from './Carbon';
 import { p14 } from './Logger';
-import { Mark } from './Mark';
+import { Mark, MarkSet } from "./Mark";
 import { Node } from './Node';
 import { NodeAttrsJSON } from "./NodeAttrs";
 import { NodeContent } from './NodeContent';
@@ -13,13 +13,20 @@ import { PluginManager } from './PluginManager';
 import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
-import { ListNumberPath, NodePropsJson, RenderPath, TransactionManager } from "@emrgen/carbon-core";
+import {
+	ListNumberPath,
+	NodeIdSet,
+	NodePropsJson,
+	RenderPath,
+	Selection,
+	TransactionManager
+} from "@emrgen/carbon-core";
 import { ChangeNameAction } from './actions/ChangeNameAction';
 import { UpdatePropsAction } from './actions/UpdatePropsAction';
 import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
-import { CarbonStateDraft } from './CarbonStateDraft';
+import { StateDraft } from './StateDraft';
 import { ActivatedPath, OpenedPath, SelectedPath } from "./NodeProps";
 import { SetContentAction } from "./actions/SetContentAction";
 import { SelectAction } from "./actions/SelectAction";
@@ -41,21 +48,34 @@ export class Transaction {
 	private timestamp: number = Date.now();
 	private onTick: boolean = false;
 	private actions: CarbonAction[] = [];
-	committed: boolean = false;
-	private dispatched: boolean = false;
-	readOnly = false;
-	get isEmpty() {
-		return this.actions.length === 0;
+	private _committed: boolean = false;
+	private _dispatched: boolean = false;
+
+	private readOnly = false;
+
+	get dispatched() {
+		return this._dispatched;
 	}
+
+	get committed() {
+		return this._committed;
+	}
+
 	get origin() {
 		return this.app.runtime.origin;
 	}
 	get size() {
 		return this.actions.length;
 	}
-	private get state() {
+
+	get state() {
 		return this.app.state;
 	}
+
+	get store() {
+		return this.app.store;
+	}
+
 	get textInsertOnly() {
 		return this.actions.every(a => a instanceof SetContentAction || a instanceof SelectAction);
 	}
@@ -77,7 +97,15 @@ export class Transaction {
 		this.id = getId();
 	}
 
-	onSelect(draft:CarbonStateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+	get isEmpty() {
+		return this.actions.length === 0;
+		return this.actions.length === 0 || this.actions.filter(a => a instanceof SelectAction).every(a => {
+			const select = a as SelectAction;
+			return select.before.eq(select.after) && select.before.isBlock && select.after.isBlock;
+		});
+	}
+
+	onSelect(draft:StateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		this.sm.onSelect(draft, before, after, origin);
 	}
 
@@ -85,13 +113,27 @@ export class Transaction {
 		const after = selection.unpin();
 		after.origin = origin;
 
-		// if selection is block selection, deselect previous block selection and select new block selection
-		if (this.state.selection.isBlock) {
-			this.deselectNodes(this.state.selection.nodes, origin);
-		}
+		if (this.state.selection.isBlock && after.isBlock) {
+			const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+			const now = NodeIdSet.fromIds(after.nodeIds);
+			// find removed block selection
+			old.diff(now).forEach(id => {
+				this.deselectNodes(id, origin);
+			})
 
-		if (selection.isBlock) {
-			this.selectNodes(after.nodeIds, origin);
+			// find new block selection
+			now.diff(old).forEach(id => {
+				this.selectNodes(id, origin);
+			})
+		} else {
+			// if selection is block selection, deselect previous block selection and select new block selection
+			if (this.state.selection.isBlock) {
+				this.deselectNodes(this.state.selection.nodes, origin);
+			}
+
+			if (selection.isBlock) {
+				this.selectNodes(after.nodeIds, origin);
+			}
 		}
 
 		return this.Add(SelectAction.create(this.state.selection.unpin(), after, origin));
@@ -118,8 +160,11 @@ export class Transaction {
 		return this.Add(ChangeNameAction.create(ref.intoNodeId(), to, origin));
 	}
 
-	Mark(start: Point, end: Point, mark: Mark, origin = this.origin): Transaction {
-		// this.add(MarkCommand.create(start, end, mark, origin))
+	Format(selection: Selection, mark: Mark | MarkSet, origin = this.origin): Transaction {
+		const marks = MarkSet.from(mark);
+		// const after = selection.unpin();
+		// const marks = isArray(mark) ? mark : [mark];
+		// this.Add(MarkCommand.create(start, end, mark, origin))
 		return this;
 	}
 
@@ -175,6 +220,10 @@ export class Transaction {
 
 	// adds command to transaction
 	Add(action: CarbonAction | CarbonAction[]): Transaction {
+		if (this.dispatched)	{
+			throw new Error('can not add actions to dispatched transaction: ' + this.id);
+		}
+
 		flatten([action]).forEach(a => this.actions.push(a));
 		return this;
 	}
@@ -186,11 +235,11 @@ export class Transaction {
 			return this;
 		}
 
-		if (this.dispatched) {
+		if (this._dispatched) {
 			console.warn('skipped: transaction already dispatched')
 			return this;
 		}
-		this.dispatched = true;
+		this._dispatched = true;
 
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema
@@ -198,9 +247,9 @@ export class Transaction {
 		return this;
 	}
 
-	Commit(draft: CarbonStateDraft): Transaction {
+	Commit(draft: StateDraft): Transaction {
 		if (this.actions.length === 0) return this
-		if (this.committed) {
+		if (this._committed) {
 			console.warn('skipped: transaction already committed')
 			return this
 		}
@@ -225,7 +274,7 @@ export class Transaction {
 			throw Error('transaction error');
 		} finally {
 			console.groupEnd()
-			this.committed = true;
+			this._committed = true;
 			return this;
 		}
 	}
@@ -295,6 +344,7 @@ export class Transaction {
 
 				if (cmd) {
 					return (...args) => {
+						console.log(`2. calling ${propName}.${cmd.fn.name}`);
 						cmd.fn(proxy, ...args)
 						return proxy;
 					}
@@ -319,12 +369,14 @@ export class Transaction {
 	}
 
 	Into() {
-		const { type, id, actions, origin } = this;
+		const { type, id, actions, origin, dispatched, committed } = this;
 		return {
 			type,
 			id,
 			actions,
 			origin,
+			dispatched,
+			committed,
 		}
 	}
 }
@@ -335,7 +387,7 @@ export class TransactionCommit {
 	// create an inverse transaction
 	inverse(app: Carbon, origin?: ActionOrigin) {
 		const tr = app.cmd;
-		tr.readOnly = true;
+		// tr.readOnly = true;
 		// tr.type = TransactionType.OneWay;
 
 		const actions = this.actions.map(c => c.inverse());

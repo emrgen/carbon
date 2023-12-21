@@ -143,13 +143,42 @@ export class DeleteSet extends BSet<NodeId> {
 }
 
 export class NodeIdSet extends BSet<NodeId> {
+
+	static EMPTY = new NodeIdSet().freeze();
 	static empty() {
 		return new NodeIdSet();
+	}
+
+	static fromIds(ids: NodeId[]) {
+		return new NodeIdSet(ids);
 	}
 
 	constructor(ids: NodeId[] = []) {
 		super(NodeIdComparator)
 		this.add(ids)
+	}
+
+	diff(other: NodeIdSet): NodeIdSet {
+		const result = new NodeIdSet();
+		this.sub(other).forEach(e => result.add(e));
+		return result;
+	}
+
+	union(other: NodeIdSet): NodeIdSet {
+		const result = new NodeIdSet();
+		this.forEach(e => result.add(e));
+		other.forEach(e => result.add(e));
+		return result;
+	}
+
+	intersect(other: NodeIdSet): NodeIdSet {
+		const result = new NodeIdSet();
+		this.forEach(e => {
+			if (other.has(e)) {
+				result.add(e);
+			}
+		});
+		return result;
 	}
 
 	nodes(nodeMap: NodeMap) {

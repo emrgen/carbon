@@ -6,7 +6,7 @@ import { classString } from "../Logger";
 import { Node } from "../Node";
 import { InsertNodeAction } from "./InsertNodeAction";
 import { NodeJSON } from "../types";
-import { CarbonStateDraft } from "../CarbonStateDraft";
+import { StateDraft } from "../StateDraft";
 import { Optional } from "@emrgen/types";
 
 // action to remove a node by id
@@ -14,16 +14,18 @@ export class RemoveNodeAction implements CarbonAction {
 	private node: Optional<NodeJSON>;
 
 	static fromNode(at: Point, ref: NodeId | Node, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new RemoveNodeAction(at, ref.intoNodeId(), origin);
+		return new RemoveNodeAction(at, ref.intoNodeId(), null, origin);
 	}
 
-	static create(at: Point, nodeId: NodeId, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new RemoveNodeAction(at, nodeId, origin);
+	static create(at: Point, nodeId: NodeId, json: Optional<NodeJSON>,origin: ActionOrigin = ActionOrigin.UserInput) {
+		return new RemoveNodeAction(at, nodeId, json, origin);
 	}
 
-	private constructor(readonly from: Point, readonly nodeId: NodeId, readonly origin: ActionOrigin) {}
+	private constructor(readonly from: Point, readonly nodeId: NodeId, json: Optional<NodeJSON>, readonly origin: ActionOrigin) {
+		this.node = json;
+	}
 
-	execute(tr: Transaction, draft: CarbonStateDraft) {
+	execute(tr: Transaction, draft: StateDraft) {
 		const { nodeId } = this;
 		const node = draft.get(nodeId);
 		if (!node) {

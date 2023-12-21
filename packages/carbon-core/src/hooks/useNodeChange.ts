@@ -31,11 +31,12 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
       // setCounter(counter);
       // setParent(parent);
       // console.log(value.version, node.version, value.id.toString(), value.textContent);
-      console.log("node changed", value.name, value.id.toString(), value.textContent);
+      // console.log("node changed", value.name, value.id.toString(), value.textContent);
     };
 
     change.on(node.id, NodeChangeType.update, onChange);
     return () => {
+      // console.log('unmounting', node.id.toString());
       change.off(node.id, NodeChangeType.update, onChange);
     };
   }, [change, node]);

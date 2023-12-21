@@ -18,8 +18,7 @@ import {
 	Point,
 	Transaction
 } from "../core";
-import { hasParent, sortNodes } from "../utils/node";
-import { insertAfterAction, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
+import { insertAfterAction, preventAndStopCtx } from "@emrgen/carbon-core";
 import { nodeLocation } from '../utils/location';
 import { Optional } from '@emrgen/types';
 
@@ -95,7 +94,7 @@ export class KeyboardPlugin extends AfterPlugin {
 				if (selection.isBlock) {
 					preventAndStopCtx(ctx)
 					console.log('block selection...');
-					this.collapseSelectionBefore(cmd, selection.nodes);
+					this.collapseSelectionBefore(cmd, selection.blocks);
 					return
 				}
 
@@ -117,7 +116,7 @@ export class KeyboardPlugin extends AfterPlugin {
 				// nodes selection is visible using halo
 				if (selection.isBlock) {
 					preventAndStopCtx(ctx)
-					this.collapseSelectionAfter(cmd, selection.nodes);
+					this.collapseSelectionAfter(cmd, selection.blocks);
 					return
 				}
 
@@ -139,7 +138,7 @@ export class KeyboardPlugin extends AfterPlugin {
 				event.preventDefault();
 				const { selection } = app;
 				if (selection.isBlock) {
-					if (selection.nodes.length > 1) {
+					if (selection.blocks.length > 1) {
 						console.log("TODO: select first top level node");
 						return
 					}
@@ -160,7 +159,7 @@ export class KeyboardPlugin extends AfterPlugin {
 				event.preventDefault();
 				const { selection } = app;
 				if (selection.isBlock) {
-					if (selection.nodes.length) {
+					if (selection.blocks.length) {
 						console.log("TODO: select first top level node");
 						return
 					}
@@ -288,7 +287,7 @@ export class KeyboardPlugin extends AfterPlugin {
 	}
 
 	collapseSelectionBefore(tr: Transaction, nodes: Node[]) {
-		const firstNode = first(nodes)!;
+		const firstNode = first(nodes) as Node;
 		if (firstNode.hasFocusable) {
 			const focusNode = firstNode.find(n => n.isFocusable, { direction: 'forward' })
 			const pin = Pin.toStartOf(focusNode!)
@@ -308,7 +307,7 @@ export class KeyboardPlugin extends AfterPlugin {
 	}
 
 	collapseSelectionAfter(tr: Transaction, nodes: Node[]) {
-		const lastNode = last(nodes)!;
+		const lastNode = last(nodes) as Node;
 		if (lastNode.hasFocusable) {
 			const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
 			const pin = Pin.toEndOf(focusNode!)
@@ -333,10 +332,10 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (selection.isInline) return
 		preventAndStopCtx(ctx);
 
-		const { nodes } = selection;
-		const firstNode = nodes[0] as Node;
+		const { blocks } = selection;
+		const firstNode = first(blocks) as Node;
 		const block = prevSelectableBlock(firstNode);
-		console.log(block?.id, firstNode.id, nodes.map(n => n.id.toString()));
+		console.log(block?.id, firstNode.id, blocks.map(n => n.id.toString()));
 		if (!block) {
 			// ctx.event.preventDefault()
 			// ctx.stopPropagation()
@@ -344,7 +343,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		}
 
 		// ctx.event.preventDefault();
-		const after = PinnedSelection.fromNodes([...nodes, block]);
+		const after = PinnedSelection.fromNodes([...blocks, block]);
 		cmd
 			.Select(after)
 			.Dispatch();
@@ -356,9 +355,9 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (selection.isInline) return
 		preventAndStopCtx(ctx);
 
-		const { nodes } = selection;
-		const firstNode = last(nodes) as Node;
-		const block = nextSelectableBlock(firstNode)
+		const { blocks } = selection;
+		const lastNode = last(blocks) as Node;
+		const block = nextSelectableBlock(lastNode)
 		if (!block) {
 			// ctx.event.preventDefault()
 			// ctx.stopPropagation()
@@ -366,7 +365,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		}
 
 		// ctx.event.preventDefault();
-		const after = PinnedSelection.fromNodes([...nodes, block]);
+		const after = PinnedSelection.fromNodes([...blocks, block]);
 		cmd.Select(after).Dispatch();
 	}
 
@@ -382,9 +381,9 @@ export class KeyboardPlugin extends AfterPlugin {
 		// put the cursor at the end of the first text block
 		if (selection.isBlock) {
 			console.log('node selection...');
-			const { nodes } = selection;
-			console.log(nodes.map(n => n.id.toString()));
-			const lastNode = last(nodes) as Node;
+			const { blocks } = selection;
+			console.log(blocks.map(n => n.id.toString()));
+			const lastNode = last(blocks) as Node;
 			if (lastNode.hasFocusable) {
 				const textBlock = lastNode.find(n => n.isFocusable);
 				// if there is a text block, put the cursor at the end of the text block
@@ -407,7 +406,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			if (done) return true
 
 			console.log('no text block...');
-			const lastBlock = last(nodes) as Node;
+			const lastBlock = last(blocks) as Node;
 			const section = app.schema.type('section')?.default();
 			if (!section) return false
 
@@ -438,7 +437,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		const splitType = app.schema.type(splitBlock.type.splitName)
 		if (!splitType) {
-			console.warn('failed to split: ' + splitBlock.name);
+			console.warn('split name is missing for block: ' + splitBlock.name);
 			return
 		}
 
@@ -489,9 +488,9 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (selection.isInline) return
 		preventAndStopCtx(ctx);
 
-		const {nodes} = selection;
-		if (nodes.length > 1) {
-			const lastNode = first(sortNodes(nodes, 'path')) as Node;
+		const {blocks} = selection;
+		if (blocks.length > 1) {
+			const lastNode = first(blocks) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
 			cmd.Select(after).Dispatch()
 			return
@@ -510,9 +509,9 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (selection.isInline) return
 		preventAndStopCtx(ctx)
 
-		const {nodes } = selection;
-		if (nodes.length > 1) {
-			const lastNode = last(sortNodes(nodes, 'path')) as Node;
+		const {blocks } = selection;
+		if (blocks.length > 1) {
+			const lastNode = last(blocks) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
 			cmd.Select(after).Dispatch()
 			return

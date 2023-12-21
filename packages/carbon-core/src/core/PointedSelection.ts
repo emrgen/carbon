@@ -6,7 +6,8 @@ import { Pin } from "./Pin";
 import { classString } from "./Logger";
 import { ActionOrigin } from "./actions";
 import { NodeMap } from "./NodeMap";
-import { Node } from "@emrgen/carbon-core";
+import { Node, NodeIdSet } from "@emrgen/carbon-core";
+import { flatten } from "lodash";
 
 export class PointedSelection {
 
@@ -26,8 +27,9 @@ export class PointedSelection {
 		return PointedSelection.create(point, point);
 	}
 
-	static fromNodes(nodeIds: NodeId[], origin: ActionOrigin = ActionOrigin.Unknown) {
-		return new PointedSelection(Point.IDENTITY, Point.IDENTITY, nodeIds, origin);
+	static fromNodes(nodeIds: NodeId | NodeId[], origin: ActionOrigin = ActionOrigin.Unknown) {
+		const set = new NodeIdSet(flatten([nodeIds]) as NodeId[]);
+		return new PointedSelection(Point.IDENTITY, Point.IDENTITY, set.toArray(), origin);
 	}
 
 	static create(tail: Point, head: Point, origin = ActionOrigin.Unknown): PointedSelection {
@@ -84,10 +86,10 @@ export class PointedSelection {
 	}
 
 	eq(other: PointedSelection): boolean {
-		if (this.nodeIds.length !== other.nodeIds.length) {
-			return false;
-		}
-		return this.tail.eq(other.tail) && this.head.eq(other.head) && this.nodeIds.every((id, i) => id.eq(other.nodeIds[i]));
+		const set = new NodeIdSet(this.nodeIds);
+		const nodesEq = other.nodeIds.every(id => set.has(id));
+
+		return nodesEq && this.tail.eq(other.tail) && this.head.eq(other.head);
 	}
 
 	unpin(): PointedSelection {

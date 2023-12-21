@@ -13,7 +13,7 @@ export function CarbonProps(props: RendererProps) {
       suppressContentEditableWarning
       onMouseDown={(e) => {
         preventAndStop(e);
-        app.blur();
+        // app.blur();
       }}
       onMouseUp={preventAndStop}
     >

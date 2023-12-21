@@ -82,6 +82,7 @@ export const blockPresets: Extension = {
 		new Tab(),
 		new BlockContent(),
 		new Frame(),
+		new Insert(),
 	],
 	renderers: [
 		Renderer.create('document', DocumentComp),

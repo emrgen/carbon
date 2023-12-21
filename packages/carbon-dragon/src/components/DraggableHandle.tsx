@@ -324,29 +324,29 @@ export function DraggableHandle(props: FastDragHandleProps) {
     app.focus();
     if (e.shiftKey) {
       const after = PinnedSelection.fromNodes([])
-      app.commands.insert.before(node, "section")?.Dispatch();
+      app.cmd.inserter.before(node, "section")?.Dispatch();
       return;
     }
 
-    const { nextSibling: nextBlock } = node;
-    if (node.isEmpty && !node.isAtom && !nextBlock?.isEmpty) {
-      const title = node.find((n) => n.isTextBlock);
-      if (node.isContainerBlock && title) {
-        const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
-        if (app.selection.eq(after)) return;
-        app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
-        return;
-      }
-    }
+    // const { nextSibling: nextBlock } = node;
+    // if (node.isEmpty && !node.isAtom && !nextBlock?.isEmpty) {
+    //   const title = node.find((n) => n.isTextBlock);
+    //   if (node.isContainerBlock && title) {
+    //     const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
+    //     if (app.selection.eq(after)) return;
+    //     app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
+    //     return;
+    //   }
+    // }
+    //
+    // if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
+    //   const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
+    //   if (app.selection.eq(after)) return;
+    //   app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
+    //   return;
+    // }
 
-    if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
-      const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
-      if (app.selection.eq(after)) return;
-      app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
-      return;
-    }
-
-    app.commands.insert.after(node, "section")?.Dispatch();
+    app.cmd.inserter.after(node, "section").Dispatch();
   };
 
   return (

@@ -81,7 +81,7 @@ export function ImageComp(props: RendererProps) {
       return (e) => {
         preventAndStop(e);
         const { tr } = app;
-        app.selection.nodes
+        app.selection.blocks
           .filter((n) => n.name === "image")
           .forEach(({ id }) => {
             tr.Update(id, {

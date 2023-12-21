@@ -36,6 +36,7 @@ export class ChangeManager extends NodeTopicEmitter {
   promiseState: PromiseState;
 
   counter: number = 0;
+  private interval: any;
 
   constructor(
     private readonly app: Carbon,
@@ -93,7 +94,11 @@ export class ChangeManager extends NodeTopicEmitter {
     if (isContentChanged) {
       this.changes.clear();
       this.changes = state.changes.clone();
-      console.log('xxxxxxxxxxx', this.changes.size, state.changes.size);
+
+      this.interval = setTimeout(() => {
+        console.error("syncing: content timeout", this.changes.toArray().map(n => n.toString()));
+        this.changes.clear();
+      }, 2000)
     }
 
     if (isContentChanged) {
@@ -153,6 +158,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
   private onTransaction() {
     // this.app.processTick();
+    clearInterval(this.interval);
     const tr = this.transactions.shift();
     if (tr) {
       this.pm.onTransaction(tr);
@@ -164,7 +170,7 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   private updateContent() {
-    console.group("syncing:  content");
+    console.groupCollapsed("syncing:  content");
     // console.group('syncing: content')
     const updatedNodeIds = this.changes;
     const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
