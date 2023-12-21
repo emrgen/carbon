@@ -163,7 +163,7 @@ export class PinnedSelection {
 
 	// for block selection the
 	get isCollapsed() {
-		return this.tail.eq(this.head);
+		return this.tail.eq(this.head) && !this.isBlock;
 	}
 
 	get inSameNode() {

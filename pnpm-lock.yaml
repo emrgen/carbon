@@ -51,6 +51,9 @@ importers:
       '@emrgen/carbon-blocktree':
         specifier: workspace:*
         version: link:../../packages/carbon-blocktree
+      '@emrgen/carbon-code':
+        specifier: workspace:*
+        version: link:../../packages/carbon-code
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../../packages/carbon-core
@@ -283,6 +286,80 @@ importers:
       '@emrgen/carbon-dragon':
         specifier: workspace:*
         version: link:../carbon-dragon
+      '@uidotdev/usehooks':
+        specifier: ^2.4.1
+        version: 2.4.1(react-dom@18.2.0)(react@18.2.0)
+      katex:
+        specifier: ^0.16.7
+        version: 0.16.7
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      react-icons:
+        specifier: ^4.10.1
+        version: 4.10.1(react@18.2.0)
+    devDependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.14.191
+      '@types/react':
+        specifier: ^18.0.17
+        version: 18.0.28
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.0.11
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
+  packages/carbon-blocktree:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+    devDependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
+  packages/carbon-code:
+    dependencies:
+      '@emrgen/carbon-attributes':
+        specifier: workspace:*
+        version: link:../carbon-attributes
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/carbon-dragon':
+        specifier: workspace:*
+        version: link:../carbon-dragon
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
@@ -335,28 +412,6 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
-      typescript:
-        specifier: ^4.9.5
-        version: 4.9.5
-
-  packages/carbon-blocktree:
-    dependencies:
-      '@emrgen/carbon-core':
-        specifier: workspace:*
-        version: link:../carbon-core
-    devDependencies:
-      '@emrgen/types':
-        specifier: workspace:*
-        version: link:../types
-      eslint:
-        specifier: ^7.32.0
-        version: 7.32.0
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig

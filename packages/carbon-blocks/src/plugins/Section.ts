@@ -33,7 +33,7 @@ export class Section extends NodePlugin {
 			splitName: 'section',
 			selectable: true,
 			draggable: true,
-			// dragHandle: true,
+			dragHandle: true,
 			rectSelectable: true,
 			blockSelectable: true,
 			insert: true,

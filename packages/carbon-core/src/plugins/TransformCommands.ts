@@ -1270,7 +1270,19 @@ export class TransformCommands extends BeforePlugin {
 
         // NOTE: if the textBlock becomes empty after delete all text nodes
         if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node) && !node.isVoid) {
-          actions.push(...this.removeNodeCommands(node.children));
+          const children = node.children;
+          if (children.length===0) {
+            const textNode = app.schema.text("");
+            actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
+          } if (children.length === 1) {
+            if (!node.firstChild!.isEmpty) {
+              const textNode = app.schema.text("");
+              actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
+            }
+          } else {
+            const textNode = app.schema.text("");
+            actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
+          }
           return;
         }
 

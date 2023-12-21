@@ -217,9 +217,9 @@ export class Collapsible extends NodePlugin {
     return
   }
 
-  serialize(app: Carbon, node: Node) {
-    return `- ${app.serialize(node.child(0)!)}` + app.cmd.nestable.serializeChildren(node);
-  }
+  // serialize(app: Carbon, node: Node) {
+  //   return `- ${app.serialize(node.child(0)!)}` + app.cmd.nestable.serializeChildren(node);
+  // }
 
 }
 

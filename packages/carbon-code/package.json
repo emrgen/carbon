@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-blocks",
+  "name": "@emrgen/carbon-code",
   "version": "0.0.0",
   "type": "module",
   "main": "src/index.ts",
@@ -12,14 +12,20 @@
     "@emrgen/carbon-attributes": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
+    "@emrgen/types": "workspace:*",
+    "@react-icons/all-files": "^4.1.0",
+    "@types/katex": "^0.16.0",
+    "@types/lodash": "^4.14.191",
+    "@types/prismjs": "^1.26.0",
     "@uidotdev/usehooks": "^2.4.1",
+    "emoji-regex": "^10.2.1",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
-    "react-icons": "^4.10.1"
+    "prismjs": "^1.29.0",
+    "react-icons": "^4.10.1",
+    "recoil": "^0.7.7"
   },
   "devDependencies": {
-    "@emrgen/types": "workspace:*",
-    "@types/lodash": "^4.14.191",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",

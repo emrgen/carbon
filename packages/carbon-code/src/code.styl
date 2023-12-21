@@ -1,0 +1,42 @@
+[data-name=code]
+  font-size 14px
+  background: #F8F9FA;
+  box-shadow 0 0 0 1px #E9EAED
+  padding: 16px;
+  [data-name=section]
+    line-height 22px
+    font-family: "Source Code Pro", monospace
+    display flex
+    //background: #F8F9FA;
+  [data-name=codeLine]
+    line-height 28px
+    font-family: "Source Code Pro", monospace
+    display flex
+    [data-name=title]
+      flex 1
+
+[data-name=code]
+[data-name=codeLine]
+  position: relative;
+  &:after
+    position: absolute
+    content: attr(data-id)
+    line-height: inherit
+    top 1px
+    right 0
+    padding 0 10px
+    font-size 10px
+  [data-name=title]
+    &:before
+      position: absolute
+      content: attr(data-id)
+      line-height: inherit
+      top 12px
+      right 0
+      padding 0 10px
+      font-size 10px
+      color: #aaa
+
+.carbon-code-line-number
+  position: relative;
+  width: 20px;

@@ -115,14 +115,8 @@ export class StateDraft {
       throw new Error("Cannot prepare a draft that is already committed");
     }
 
-    console.log(this.removed.toArray().map(id => id.toString()));
-    console.log(this.nodeMap._deleted.toArray());
-
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
-    // this.removed.forEach(id => {
-    //   this.changes.remove(id);
-    // });
     this.changes.toArray().forEach(id => {
       if (this.nodeMap.deleted(id)) {
         this.changes.remove(id);

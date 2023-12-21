@@ -151,7 +151,7 @@ export class TitlePlugin extends NodePlugin {
 	// 	return decorations;
 	// }
 
-	serialize(app: Carbon, node: Node): SerializedNode {
-		return node.children.map(n => app.serialize(n)).join('');
-	}
+	// serialize(app: Carbon, node: Node): SerializedNode {
+	// 	return node.children.map(n => app.serialize(n)).join('');
+	// }
 }

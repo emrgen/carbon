@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
-import { RecoilRoot } from "recoil";
+import {RecoilRoot} from "recoil";
 
 import {
-  BlockEvent,
   blockPresets,
   node,
   section,
   text,
   title,
 } from "@emrgen/carbon-blocks";
+
+import {
+  codeExtension
+} from "@emrgen/carbon-code";
 
 import {
   State,
@@ -34,6 +37,12 @@ const data = node("carbon", [
     title([text("I am a frame title")]),
     // node("blockContent"),
 
+    node("code", [
+      node("codeLine",[ title([text("function foo() {")])]),
+      node("codeLine", [title([text("  console.log('hello world')")])]),
+      node("codeLine",[ title([text("}")])])
+    ]),
+
     // node("tab", [
     //   node("tabTitles", [
     //     node("tabTitle", [title([text("tab 1")])], {node: {link: "tab1"}}),
@@ -45,27 +54,27 @@ const data = node("carbon", [
     //   ], {node: {link: "tab1"}}),
     // ]),
 
-    node("pageTree", [
-      title([text("Favorites")]),
-      node(
-        "pageTreeItem",
-        [
-          title([text("Computer Science")]),
-          node("pageTreeItem", [title([text("Algorithms")])]),
-          node("pageTreeItem", [title([text("Data Structures")])]),
-          node("pageTreeItem", [title([text("Operating Systems")])]),
-        ],
-        { [CollapsedPath]: true }
-      ),
-      node("pageTreeItem",
-        [
-          title([text("Electrical Engineering")]),
-          node("pageTreeItem", [title([text("Circuits")])]),
-          node("pageTreeItem", [title([text("Digital Logic")])]),
-          node("pageTreeItem", [title([text("Microprocessors")])]),
-        ]),
-    ]),
-    //
+    // node("pageTree", [
+    //   title([text("Favorites")]),
+    //   node(
+    //     "pageTreeItem",
+    //     [
+    //       title([text("Computer Science")]),
+    //       node("pageTreeItem", [title([text("Algorithms")])]),
+    //       node("pageTreeItem", [title([text("Data Structures")])]),
+    //       node("pageTreeItem", [title([text("Operating Systems")])]),
+    //     ],
+    //     {[CollapsedPath]: true}
+    //   ),
+    //   node("pageTreeItem",
+    //     [
+    //       title([text("Electrical Engineering")]),
+    //       node("pageTreeItem", [title([text("Circuits")])]),
+    //       node("pageTreeItem", [title([text("Digital Logic")])]),
+    //       node("pageTreeItem", [title([text("Microprocessors")])]),
+    //     ]),
+    // ]),
+
     // node("pageTree", [
     //   title([text("Private")]),
     //   node(
@@ -127,9 +136,12 @@ const extensions = [
   extensionPresets,
   blockPresets,
   carbonUtilPlugins,
-  {plugins: [
-    new BlockTree(),
-    ]}
+  codeExtension,
+  {
+    plugins: [
+      new BlockTree(),
+    ]
+  }
   // extensions1,
 ];
 
@@ -152,7 +164,7 @@ export default function Dev() {
   return (
     <div className={'carbon-app-container'}>
       <CarbonApp app={app}>
-        <SelectionTracker />
+        <SelectionTracker/>
       </CarbonApp>
     </div>
   );
