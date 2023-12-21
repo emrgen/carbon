@@ -75,7 +75,7 @@ export class State extends EventEmitter {
 	}
 
 	get isContentChanged() {
-		return !this.previous?.content.eq(this.content) || this.previous?.content.version !== this.content.version;
+		return !this.previous?.content.eq(this.content) || this.previous?.content.renderVersion !== this.content.renderVersion;
 	}
 
 	get depth() {

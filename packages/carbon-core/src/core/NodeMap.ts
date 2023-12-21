@@ -8,6 +8,10 @@ export class NodeMap {
   private _deleted: NodeBTree = new NodeBTree();
   private _parent: NodeMap | null = null;
 
+  static empty() {
+    return new NodeMap();
+  }
+
   static from(map: NodeMap) {
     return new NodeMap(map);
   }
@@ -29,7 +33,11 @@ export class NodeMap {
     return this._map.isEmpty && (!this._parent || this._parent.isEmptyDeep);
   }
 
-  forEach(fn: (id: NodeId, node: Optional<Node>) => void, deep = false) {
+  get current() {
+    return this._map;
+  }
+
+  forEach(fn: (id: NodeId, node: Node) => void, deep = false) {
     this._map.forEach((v, k) => {
       fn(k, v);
     });
@@ -38,9 +46,9 @@ export class NodeMap {
       this._parent.forEach(fn, deep);
     }
 
-    this._deleted.forEach((v, k) => {
-      fn(k, null);
-    });
+    // this._deleted.forEach((v, k) => {
+    //   fn(k, null);
+    // });
   }
 
   get(key: NodeId): Optional<Node> {

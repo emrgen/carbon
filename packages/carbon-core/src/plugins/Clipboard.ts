@@ -10,7 +10,7 @@ import { SelectedPath } from "../core/NodeProps";
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
 
-  on(): EventHandlerMap {
+  handlers(): EventHandlerMap {
     return {
       cut: (ctx: EventContext<any>) => {
         const { event, app, cmd } = ctx

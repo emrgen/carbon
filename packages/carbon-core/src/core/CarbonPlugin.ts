@@ -65,7 +65,7 @@ export abstract class CarbonPlugin {
 	}
 
 	// return editor event handlers
-	on(): EventHandlerMap {
+	handlers(): EventHandlerMap {
 		return {}
 	}
 

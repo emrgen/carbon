@@ -14,6 +14,16 @@ export class StateScope {
     return map;
   }
 
+  // use this to temporarily override the state scope
+  static with(scope: Symbol, map: NodeMap, fn: (map: NodeMap) => void) {
+    const prev = STATE_SCOPE.get(scope);
+    STATE_SCOPE.set(scope, map);
+    fn(map);
+    if (prev) {
+      STATE_SCOPE.set(scope, prev);
+    }
+  }
+
   static set(scope: Symbol, map: NodeMap) {
     STATE_SCOPE.set(scope, map);
   }

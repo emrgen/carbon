@@ -35,7 +35,8 @@ export interface NodeCreateProps {
 	properties?: NodeProps;
 	marks?: MarkSet;
 	meta?: Record<string, any>;
-	version?: number;
+	renderVersion?: number;
+	contentVersion?: number;
 	deleted?: boolean;
 }
 
@@ -93,7 +94,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// meta is used for storing data like version, cerate time, last update time, etc.
 	meta: Record<string, any> = {};
 
-	version: number;
+	renderVersion: number;
+	contentVersion: number;
 
 	deleted = false;
 
@@ -141,7 +143,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 			marks = MarkSet.empty(),
 			properties = type.props,
 			meta = {},
-			version = 0,
+			renderVersion = 0,
+			contentVersion = 0,
 			deleted = false,
 		} = object;
 		this.test_key = nextKey()
@@ -158,7 +161,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.properties = properties;
 		this.meta = meta;
 
-		this.version = version;
+		this.renderVersion = renderVersion;
+		this.contentVersion = contentVersion;
 		this.deleted = deleted;
 	}
 
@@ -170,7 +174,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get key() {
-		return `${this.id.id}/${this.version}`
+		return `${this.id.id}/${this.renderVersion}/${this.contentVersion}`
 	}
 
 	// nodes that are not allowed to merge with any other node
@@ -749,10 +753,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 	remove(node: Node) {
 		this.content.remove(node);
 		node.parentId = null;
-		// console.log('removed', this.root?.version, this.root?.name, this.root?.test_key, this.root?.updatedChildren)
 	}
 
 	updateContent(content: NodeContent) {
+		content.version += this.content.version;
 		this.content = content.setParentId(this.id);
 	}
 
@@ -841,7 +845,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// creates a mutable copy of the node
 	clone(map: (node: Node) => Optional<Node> = identity): Node {
-		const { scope, parentId, id, type, content, links, properties, marks, version } = this;
+		const { scope, parentId, id, type, content, links, properties, marks, renderVersion, contentVersion } = this;
 		// const links = new Map(this.links);
 
 		const clone = Node.create({
@@ -853,7 +857,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 			links,
 			properties: properties.clone(),
 			marks,
-			version: version + 1,
+			renderVersion: renderVersion + 1,
+			contentVersion,
 		});
 
 		return clone;

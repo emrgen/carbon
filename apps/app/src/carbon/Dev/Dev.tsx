@@ -108,6 +108,9 @@ const data = node("carbon", [
   ]),
 ]);
 
+// @ts-ignore
+data.id = NodeId.ROOT.toString();
+
 const ImageComp = (props: RendererProps) => {
   return (
     <div contentEditable="false" suppressContentEditableWarning>

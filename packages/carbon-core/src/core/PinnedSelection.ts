@@ -119,7 +119,7 @@ export class PinnedSelection {
 	}
 
 	static fromNodes(nodes: Node | Node[], origin = ActionOrigin.Unknown): PinnedSelection {
-		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, sortNodes(flatten([nodes]), 'path'), origin);
+		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, flatten([nodes]), origin);
 	}
 
 	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {

@@ -47,7 +47,7 @@ export class TitlePlugin extends NodePlugin {
 		return {}
 	}
 
-	on(): EventHandlerMap {
+	handlers(): EventHandlerMap {
 		return {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {

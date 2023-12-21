@@ -43,7 +43,7 @@ export class Code extends CarbonPlugin {
     ]
   }
 
-  on(): Partial<EventHandler> {
+  handlers(): Partial<EventHandler> {
     return {
       paste: (ctx: EventContext<ClipboardEvent>) => {
         const { event, app } = ctx
@@ -111,7 +111,7 @@ export class BeforeCodePlugin extends BeforePlugin {
 
   // priority = 10002;
 
-  on(): EventHandlerMap {
+  handlers(): EventHandlerMap {
     return {
       // insert text node at
       beforeInput: (ctx: EventContext<any>) => {

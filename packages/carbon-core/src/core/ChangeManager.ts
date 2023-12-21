@@ -115,10 +115,9 @@ export class ChangeManager extends NodeTopicEmitter {
     //   return;
     // }
 
-    console.log(this.changes.size);
     // force the promise to timeout
     if (!this.changes.has(node.id)) {
-      console.log('mounted node not dirty', node.id.toString(), changeType);
+      // console.log('mounted node not dirty', node.id.toString(), changeType);
       return;
     }
 
@@ -126,10 +125,8 @@ export class ChangeManager extends NodeTopicEmitter {
 
     // keep track of the pending node updates
     if (changeType === NodeChangeType.update) {
-      console.log('mounted', node.id.toString(), changeType, this.changes.size, this.changes.toArray().map(n => n.toString()), node.textContent, node);
-      console.log('before', this.changes.size, this.changes.toArray().map(n => n.toString()));
+      // console.log('mounted', node.id.toString(), changeType, this.changes.size, this.changes.toArray().map(n => n.toString()), node.textContent, node);
       this.changes.remove(node.id);
-      console.log('after', this.changes.size, this.changes.toArray().map(n => n.toString()));
     }
 
     // console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
@@ -174,13 +171,13 @@ export class ChangeManager extends NodeTopicEmitter {
 
     console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
 
-    updatedNodes.forEach(n => {
-      updatedNodeIds.remove(n.id);
-      if (n.closest(p => updatedNodeIds.has(p.id))) {
-        return;
-      }
-      updatedNodeIds.add(n.id);
-    });
+    // updatedNodes.forEach(n => {
+    //   updatedNodeIds.remove(n.id);
+    //   if (n.closest(p => updatedNodeIds.has(p.id))) {
+    //     return;
+    //   }
+    //   updatedNodeIds.add(n.id);
+    // });
 
     console.log("publish", updatedNodes.map(n => n.key));
 

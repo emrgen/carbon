@@ -128,7 +128,7 @@ export class PageTreeItem extends CarbonPlugin {
     }, tr.origin));
   }
 
-  on(): EventHandlerMap {
+  handlers(): EventHandlerMap {
     return {
       blur: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);

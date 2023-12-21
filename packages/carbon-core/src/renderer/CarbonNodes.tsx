@@ -36,7 +36,7 @@ const mapName = (name: string, parentName?: string) => {
 
 const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => {
   const { tag: Element = "div", node, children, custom } = props;
-  const { key, name, version } = node;
+  const { key, name, renderVersion } = node;
   const editor = useCarbon();
   const ref = useRef(null);
 
@@ -67,7 +67,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     <Element
       ref={ref}
       data-name={name}
-      data-version={version}
+      data-version={renderVersion}
       data-id={key}
       {...attributes}
     >

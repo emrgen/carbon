@@ -4,10 +4,9 @@ import {
   CarbonNodeChildren,
   CarbonNodeContent,
   RendererProps,
-  preventAndStop,
   useCarbon,
   useSelectionHalo,
-  CheckedPath,
+  CheckedPath, stop, preventAndStop
 } from "@emrgen/carbon-core";
 import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
 
@@ -28,9 +27,8 @@ export default function TodoComp(props: RendererProps) {
 
 
   const handleClick = useCallback(
-    (e, app) => {
-      e.stopPropagation();
-      app.cmd.updateProps(node.id, {[CheckedPath]: !isChecked}).Dispatch();
+    (app) => {
+      app.cmd.switch.toggle(node);
     },
     [node.id, isChecked]
   );
@@ -47,7 +45,7 @@ export default function TodoComp(props: RendererProps) {
       >
         <input
           type="checkbox"
-          onChange={(e) => handleClick(e, app)}
+          onChange={stop(() => handleClick(app))}
           checked={isChecked}
         />
       </div>

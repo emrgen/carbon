@@ -372,6 +372,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^3.1.0
         version: 3.1.0(vite@4.1.4)
+      fastpriorityqueue:
+        specifier: ^0.7.4
+        version: 0.7.4
       uuid:
         specifier: ^9.0.0
         version: 9.0.0
@@ -5391,6 +5394,10 @@ packages:
 
   /fast-levenshtein@2.0.6:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
+
+  /fastpriorityqueue@0.7.4:
+    resolution: {integrity: sha512-u7o5oa9R7CMOHo2i8P2/T2nRg5bg/0dDegDSJVzkVkMf/A318LNnujNLfpxlJeXUdDAefrVPqsDV624vUyxNfA==}
+    dev: false
 
   /fastq@1.15.0:
     resolution: {integrity: sha512-wBrocU2LCXXa+lWBt8RoIRD89Fi8OdABODa/kEnyeyjS5aZO5/GNvI5sEINADqP/h8M29UHTHUb53sUu5Ihqdw==}

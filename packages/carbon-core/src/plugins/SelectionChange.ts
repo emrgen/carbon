@@ -11,7 +11,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 
 	name = 'selectionChange'
 
-	on(): EventHandlerMap {
+	handlers(): EventHandlerMap {
 		return {
 			selectionchange: (ctx: EventContext<Event>) => {
 				// console.log(p14('[event]'), 'selectionchange', ctx.event);

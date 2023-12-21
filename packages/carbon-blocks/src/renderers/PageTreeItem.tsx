@@ -73,7 +73,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
       app.cmd
         .pageTree.close(pageTree)
         .pageTreeItem.open(node)
-        .then(() => {
+        .Then(() => {
           return () => app.emit(BlockEvent.openDocument, { node });
         })
         .Dispatch();

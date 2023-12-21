@@ -232,7 +232,7 @@ export class NestablePlugin extends AfterPlugin {
 		}
 	}
 
-	on(): EventHandlerMap {
+	handlers(): EventHandlerMap {
 		return {
 			dragUp: (ctx: EventContext<MouseEvent>) => {
 				console.log(ctx);

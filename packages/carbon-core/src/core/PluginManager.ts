@@ -44,7 +44,7 @@ export class PluginManager {
 			.reduce((o, p) => ({ ...o, [p.name]: p }), {});
 
 		// console.log(keys(this.nodes).length, this.nodes)
-		const events = flattened.reduce((es, p) => es.concat(keys(p.on()).map(k => camelCase(k)) as EventsIn[]), [] as EventsIn[])
+		const events = flattened.reduce((es, p) => es.concat(keys(p.handlers()).map(k => camelCase(k)) as EventsIn[]), [] as EventsIn[])
 		this.events = new Set(events.concat([EventsIn.keyDown]));
 
 		this.plugins = [...this.after, ...values(this.nodes), ...this.before];
@@ -107,19 +107,19 @@ export class PluginManager {
 		if (event.stopped) return
 
 		const { node } = event
-		some(this.before, p => event.stopped || p.on()[event.type]?.(event))
+		some(this.before, p => event.stopped || p.handlers()[event.type]?.(event))
 
 		if (!event.stopped) {
 			node?.chain.some(n => {
 				// console.log(n.name, event.type, node?.chain.length);
 				event.changeNode(n);
-				this.nodePlugin(n.name)?.on()[camelCase(event.type)]?.(event);
+				this.nodePlugin(n.name)?.handlers()[camelCase(event.type)]?.(event);
 				return event.stopped;
 			});
 		}
 
 		event.changeNode(node);
-		some(this.after, p => event.stopped || p.on()[event.type]?.(event))
+		some(this.after, p => event.stopped || p.handlers()[event.type]?.(event))
 	}
 
 	// methods returned from Plugin.keydown() are executed

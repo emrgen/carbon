@@ -48,7 +48,7 @@ export class TextPlugin extends NodePlugin {
 		}
 	}
 
-	on(): EventHandlerMap {
+	handlers(): EventHandlerMap {
 		return {
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, node, cmd } = ctx;

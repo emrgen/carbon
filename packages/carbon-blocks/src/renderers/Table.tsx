@@ -37,7 +37,7 @@ export const TableComp = (props: RendererProps) => {
     setWidth(tableRef.current ? tableRef.current.offsetWidth : 0);
     setHeight(tableRef.current ? tableRef.current.offsetHeight : 0);
     // console.log('width', ref.current ? ref.current.offsetWidth : 0);
-  }, [node.version]);
+  }, [node.renderVersion]);
 
   // const { listeners } = useDragDropRectSelect({ node, ref });
   // console.log(node.textContent);

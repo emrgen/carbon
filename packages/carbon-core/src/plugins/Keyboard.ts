@@ -18,7 +18,7 @@ import {
 	Point,
 	Transaction
 } from "../core";
-import { hasParent, } from "../utils/node";
+import { hasParent, sortNodes } from "../utils/node";
 import { insertAfterAction, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
 import { nodeLocation } from '../utils/location';
 import { Optional } from '@emrgen/types';
@@ -45,7 +45,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		}
 	}
 
-	on(): EventHandlerMap {
+	handlers(): EventHandlerMap {
 		return {
 			selectstart: (ctx: EventContext<KeyboardEvent>) => {
 
@@ -491,7 +491,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		const {nodes} = selection;
 		if (nodes.length > 1) {
-			const lastNode = first(nodes) as Node;
+			const lastNode = first(sortNodes(nodes, 'path')) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
 			cmd.Select(after).Dispatch()
 			return
@@ -512,7 +512,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		const {nodes } = selection;
 		if (nodes.length > 1) {
-			const lastNode = last(nodes) as Node;
+			const lastNode = last(sortNodes(nodes, 'path')) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
 			cmd.Select(after).Dispatch()
 			return

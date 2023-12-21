@@ -45,7 +45,7 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(\*\*\*\s)(.)*/, this.tryChangeIntoDivider('separator', ['nestable'])),
   ])
 
-  on(): Partial<EventHandler> {
+  handlers(): Partial<EventHandler> {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
         const { node } = ctx;
