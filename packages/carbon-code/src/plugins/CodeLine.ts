@@ -42,6 +42,7 @@ export class CodeLine extends CarbonPlugin {
 
   keydown(): EventHandlerMap {
     return {
+      // insert a tab in the code line
       tab: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
 
@@ -64,7 +65,6 @@ class BeforeInputHandler extends BeforePlugin {
     return {
       beforeInput: this.beforeInput
     }
-
   }
 
   beforeInput(ctx: EventContext<KeyboardEvent>) {

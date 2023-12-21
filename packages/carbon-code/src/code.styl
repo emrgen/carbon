@@ -2,7 +2,7 @@
   font-size 14px
   background: #F8F9FA;
   box-shadow 0 0 0 1px #E9EAED
-  padding: 16px;
+  padding: 16px 16px 16px 0;
   [data-name=section]
     line-height 22px
     font-family: "Source Code Pro", monospace
@@ -12,6 +12,7 @@
     line-height 28px
     font-family: "Source Code Pro", monospace
     display flex
+    gap 4px
     [data-name=title]
       flex 1
 
@@ -39,4 +40,10 @@
 
 .carbon-code-line-number
   position: relative;
-  width: 20px;
+  pointer-events none
+  user-select none
+  padding-left: 10px;
+  //width: 20px;
+  .carbon-code-line-number-text
+    padding-left: 6px;
+    //text-align right
