@@ -29,7 +29,7 @@ export function SeparatorComp(props: RendererProps) {
       preventAndStop(e);
       // avoid selection if block is already selected
       if (app.selection.nodes.some(n => n.id.eq(node.id))) return;
-      app.tr.selectNodes([node.id]).dispatch();
+      app.tr.selectNodes([node.id]).Dispatch();
     },
     [app.selection.nodes, app.tr, node.id]
   );

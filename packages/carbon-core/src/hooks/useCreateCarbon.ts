@@ -8,7 +8,7 @@ import { SchemaFactory } from '../core/SchemaFactory';
 import { NodeJSON } from "../core/types";
 import { CarbonDefaultNode } from "../renderer";
 import { Carbon } from '../core/Carbon';
-import { CarbonState, PinnedSelection } from "../core";
+import { State, PinnedSelection } from "../core";
 
 export interface InitNodeJSON extends Omit<NodeJSON, 'id'> {
 	id?: string;
@@ -33,7 +33,7 @@ export const createCarbon = (name: string, json: InitNodeJSON, extensions: Exten
 		throw new Error("Failed to parse app content");
 	}
 
-	const state = CarbonState.create(scope, content, PinnedSelection.IDENTITY);
+	const state = State.create(scope, content, PinnedSelection.IDENTITY);
 	return new Carbon(state, schema, pm, renderer)
 }
 
@@ -46,7 +46,7 @@ export const useCreateCarbon = (name: string, json: InitNodeJSON, extensions: Ex
 	return app;
 }
 
-export const useCreateCarbonFromState = (state: CarbonState, extensions: Extension[] = []) => {
+export const useCreateCarbonFromState = (state: State, extensions: Extension[] = []) => {
 	const plugins = flatten(extensions.map(e => e.plugins ?? []));
 	const renderers: Renderer[] = flatten(extensions.map(e => e.renderers ?? []));
 	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
@@ -99,7 +99,7 @@ export const useCreateCachedCarbon = (name: string, json: InitNodeJSON, extensio
 	// }, [app, extensions, isLoaded])
 
 	useEffect(() => {
-		const onChange = (state: CarbonState) => {
+		const onChange = (state: State) => {
 			localStorage.setItem('carbon:content', JSON.stringify(state.content.toJSON()));
 			localStorage.setItem('carbon:selection', JSON.stringify(state.selection.toJSON()))
 			// saveDoc(state);

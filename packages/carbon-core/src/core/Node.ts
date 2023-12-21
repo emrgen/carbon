@@ -35,7 +35,8 @@ export interface NodeCreateProps {
 	properties?: NodeProps;
 	marks?: MarkSet;
 	meta?: Record<string, any>;
-	version?: number;
+	renderVersion?: number;
+	contentVersion?: number;
 	deleted?: boolean;
 }
 
@@ -93,7 +94,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// meta is used for storing data like version, cerate time, last update time, etc.
 	meta: Record<string, any> = {};
 
-	version: number;
+	renderVersion: number;
+	contentVersion: number;
 
 	deleted = false;
 
@@ -141,7 +143,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 			marks = MarkSet.empty(),
 			properties = type.props,
 			meta = {},
-			version = 0,
+			renderVersion = 0,
+			contentVersion = 0,
 			deleted = false,
 		} = object;
 		this.test_key = nextKey()
@@ -158,7 +161,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 		this.properties = properties;
 		this.meta = meta;
 
-		this.version = version;
+		this.renderVersion = renderVersion;
+		this.contentVersion = contentVersion;
 		this.deleted = deleted;
 	}
 
@@ -170,7 +174,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get key() {
-		return `${this.id.id}/${this.version}`
+		return `${this.id.id}/${this.renderVersion}/${this.contentVersion}`
 	}
 
 	// nodes that are not allowed to merge with any other node
@@ -276,6 +280,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// if content node i.e. first child is treated as content node
 	// check if parent is collapse hidden
 	get isCollapseHidden() {
+		// only collapsed parent can hide a child node
+		// if the node is detached from the tree, it can't be collapse hidden
+		if (!this.parentId) return false;
+
 		if (!this.isContentNode && this.parent?.isCollapsed) {
 			return true
 		}
@@ -323,14 +331,21 @@ export class Node extends EventEmitter implements IntoNodeId {
 	}
 
 	get nextSibling(): Optional<Node> {
+		const index = this.index;
+		if (index === -1) return null;
 		return this.parent?.children[this.index + 1];
 	}
 
 	get prevSiblings(): Node[] {
+		const index = this.index;
+		if (index === -1) return [];
 		return this.parent?.children.slice(0, this.index) ?? [];
 	}
 
 	get nextSiblings(): Node[] {
+		const index = this.index;
+		if (index === -1) return [];
+
 		return this.parent?.children.slice(this.index + 1) ?? [];
 	}
 
@@ -387,10 +402,13 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// TODO: user IndexMapper to optimize index caching and avoid array traverse for finding index
 	get index(): number {
 		const parent = this.parent;
-		if (!parent) return -1
+		if (!parent) {
+			console.warn('node has no parent', this.id.toString());
+			return -1
+		}
 
 		// NOTE: this is a performance critical code
-		const key = `${parent.key}/${this.id.toString()}`
+		const key = `${parent.key}/${this.key}`
 		return NODE_CACHE_INDEX.get(key, () => {
 			const { children = [] } = parent;
 			return findIndex(children as Node[], n => {
@@ -735,10 +753,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 	remove(node: Node) {
 		this.content.remove(node);
 		node.parentId = null;
-		// console.log('removed', this.root?.version, this.root?.name, this.root?.test_key, this.root?.updatedChildren)
 	}
 
 	updateContent(content: NodeContent) {
+		content.version += this.content.version;
 		this.content = content.setParentId(this.id);
 	}
 
@@ -827,7 +845,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// creates a mutable copy of the node
 	clone(map: (node: Node) => Optional<Node> = identity): Node {
-		const { scope, parentId, id, type, content, links, properties, marks, version } = this;
+		const { scope, parentId, id, type, content, links, properties, marks, renderVersion, contentVersion } = this;
 		// const links = new Map(this.links);
 
 		const clone = Node.create({
@@ -839,7 +857,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 			links,
 			properties: properties.clone(),
 			marks,
-			version: version + 1,
+			renderVersion: renderVersion + 1,
+			contentVersion,
 		});
 
 		return clone;

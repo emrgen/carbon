@@ -44,10 +44,10 @@ export const Callout = (props: RendererProps) => {
   const onSelectEmoji = (emoji) => {
     console.log("onSelectEmoji", emoji);
     // node.attrs.node.emoji = emoji.unified;
-    app.tr
-      .updateProps(node.id, { node: { emoji: emoji.unified } })
-      .select(PinnedSelection.fromPin(Pin.toStartOf(node)!)!)
-      .dispatch();
+    app.cmd
+      .Update(node.id, { node: { emoji: emoji.unified } })
+      .Select(PinnedSelection.fromPin(Pin.toStartOf(node)!)!)
+      .Dispatch();
     onClose();
   };
 

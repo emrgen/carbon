@@ -16,11 +16,12 @@ import { Optional } from '@emrgen/types';
 import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
 
 declare module '@emrgen/carbon-core' {
-	interface CarbonCommands {
+	interface Transaction {
 		nestable: {
-			wrap(node: Node): Optional<Transaction>;
-			unwrap(node: Node): Optional<Transaction>;
+			wrap(node: Node): Transaction;
+			unwrap(node: Node): Transaction;
 			serializeChildren(node: Node): string;
+			inject(encoder: () => string): void;
 		}
 	}
 }
@@ -35,32 +36,34 @@ export class NestablePlugin extends AfterPlugin {
 		return {
 			wrap: this.wrap,
 			unwrap: this.unwrap,
-			serializeChildren: this.serializeChildren,
+			// serializeChildren: this.serializeChildren,
+			inject: this.inject,
 		}
+	}
+
+	inject(tr: Transaction, encoder: () => string) {
+		console.log('injecting', encoder());
 	}
 
 	// wrap node within a parent node
 	// TODO: add support for wrapping multiple nodes
-	wrap(app: Carbon, node: Node): Optional<Transaction> {
+	wrap(tr: Transaction, node: Node): Optional<Transaction> {
 		const prevNode = node.prevSibling;
 		if (!prevNode || !isNestableNode(prevNode)) return
 
 		const prevSibling = prevNode.lastChild!
 		const to = Point.toAfter(prevSibling.id);
 
-		const { tr } = app;
-
-		tr.move(nodeLocation(node)!, to, node.id);
+		tr.Move(nodeLocation(node)!, to, node.id);
 		if (prevNode.isCollapsed) {
-			tr.updateProps(prevNode.id, { node: { collapsed: false } })
+			tr.Update(prevNode.id, { node: { collapsed: false } })
 		}
-		tr.select(app.selection.clone());
-
+		tr.Select(tr.app.selection.clone());
 		return tr
 	}
 
 	// TODO: add support for unwrapping multiple nodes
-	unwrap(app: Carbon, node: Node): Optional<Transaction> {
+	unwrap(tr: Transaction, node: Node): Optional<Transaction> {
 		const { parent } = node;
 		if (!parent || !isNestableNode(parent)) return
 
@@ -71,12 +74,10 @@ export class NestablePlugin extends AfterPlugin {
 		const lastChild = node.lastChild;
 		const moveAt = Point.toAfter(lastChild?.id ?? node.id);
 
-		const { tr } = app;
-
 		tr
-			.move(nodeLocation(node)!, to, node.id)
-			.add(moveNodesActions(moveAt, nextSiblings))
-			.select(app.selection.clone());
+			.Move(nodeLocation(node)!, to, node.id)
+			.Add(moveNodesActions(moveAt, nextSiblings))
+			.Select(tr.app.selection.clone());
 
 		return tr
 	}
@@ -84,17 +85,15 @@ export class NestablePlugin extends AfterPlugin {
 	keydown(): EventHandlerMap {
 		return {
 			backspace: (ctx: EventContext<KeyboardEvent>) => {
-
-				const { app, node } = ctx;
+				const { app, node, cmd } = ctx;
 				if (node.isIsolating) return;
 
-				const { selection, tr, cmd, state } = app;
+				const { selection } = app;
 				if (!selection.isCollapsed || selection.isBlock) {
 					return
 				}
 
 				const listNode = node.closest(isNestableNode);
-				console.log(listNode);
 				if (!listNode) return
 				const head = selection.head.node.isEmpty ? selection.head.down() : selection.head;
 				if (!head) return
@@ -109,13 +108,13 @@ export class NestablePlugin extends AfterPlugin {
 				if (listNode.name !== 'section') {
 					preventAndStopCtx(ctx);
 					if (listNode.isCollapsed) {
-						tr.updateProps(listNode.id, { node: { collapsed: false } })
+						cmd.Update(listNode.id, { node: { collapsed: false } })
 					}
 
-					tr
-						.change(listNode.id, listNode.name, 'section')
-						.select(PinnedSelection.fromPin(selection.head))
-					tr.dispatch();
+					cmd
+						.Change(listNode.id, 'section')
+						.Select(PinnedSelection.fromPin(selection.head))
+					cmd.Dispatch();
 					return
 				}
 
@@ -125,8 +124,7 @@ export class NestablePlugin extends AfterPlugin {
 				const nextSibling = listNode.nextSibling;
 				if (!nextSibling) {
 					preventAndStopCtx(ctx);
-					const { tr } = app;
-					cmd.nestable.unwrap(listNode)?.dispatch();
+					cmd.nestable.unwrap(listNode)?.Dispatch();
 					return
 				}
 
@@ -149,8 +147,8 @@ export class NestablePlugin extends AfterPlugin {
 				}
 			},
 			enter: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, node } = ctx;
-				const { selection, cmd,  tr } = app;
+				const { app, node, cmd } = ctx;
+				const { selection } = app;
 				if (!selection.isCollapsed) {
 					return
 				}
@@ -165,13 +163,13 @@ export class NestablePlugin extends AfterPlugin {
 				const as = listNode.properties.get('html.data-as')
 				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
-					tr
-						.updateProps(listNode.id, {
+					cmd
+						.Update(listNode.id, {
 							html: {
 								'data-as': ''
 							}
-						}).select(selection)
-						.dispatch();
+						}).Select(selection)
+						.Dispatch();
 					return
 				}
 
@@ -179,11 +177,10 @@ export class NestablePlugin extends AfterPlugin {
 					console.log(`enter on node: ${listNode.name} => ${listNode.id.toString()}`, isNestableNode(listNode));
 
 					preventAndStopCtx(ctx);
-					tr
-						.change(listNode.id, listNode.name, 'section')
-
-						.select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
-						.dispatch();
+					cmd
+						.Change(listNode.id,  'section')
+						.Select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
+						.Dispatch();
 					return
 				}
 
@@ -191,14 +188,14 @@ export class NestablePlugin extends AfterPlugin {
 				// if parent is collapsible the listNode should be not unwrapped
 				if (!nextSibling && !listNode.parent?.isCollapsible) {
 					preventAndStopCtx(ctx);
-					cmd.transform.unwrap(listNode)?.dispatch();
+					cmd.transform.unwrap(listNode)?.Dispatch();
 					return
 				}
 			},
 			// push the
 			tab: (ctx: EventContext<KeyboardEvent>) => {
 				preventAndStopCtx(ctx);
-				const { app, node } = ctx;
+				const { app, node, cmd } = ctx;
 				const { selection } = app;
 				console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
 
@@ -215,12 +212,11 @@ export class NestablePlugin extends AfterPlugin {
 					return
 				}
 
-				const { tr } = app;
-				app.cmd.nestable.wrap(listNode)?.dispatch();
+				cmd.nestable.wrap(listNode)?.Dispatch();
 			},
 			shiftTab: (ctx: EventContext<KeyboardEvent>) => {
 				preventAndStopCtx(ctx);
-				const { app, node } = ctx;
+				const { app, node, cmd } = ctx;
 				const { selection } = app;
 				const listNode = node.closest(isNestableNode);
 				if (!listNode) return
@@ -231,15 +227,23 @@ export class NestablePlugin extends AfterPlugin {
 					return
 				}
 
-				app.cmd.nestable.unwrap(listNode)?.dispatch();
+				cmd.nestable.unwrap(listNode)?.Dispatch();
 			}
 		}
 	}
 
-	serializeChildren(app: Carbon, node: Node): string {
-		const children = node.children.slice(1);
-		const depth = takeBefore(node.parents, (n: Node) => !isNestableNode(n)).length + 1;
-		if (!children.length) return ''
-		return '\n' + children.map(n => app.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
+	handlers(): EventHandlerMap {
+		return {
+			dragUp: (ctx: EventContext<MouseEvent>) => {
+				console.log(ctx);
+			}
+		}
 	}
+
+	// serializeChildren(app: Carbon, node: Node): string {
+	// 	const children = node.children.slice(1);
+	// 	const depth = takeBefore(node.parents, (n: Node) => !isNestableNode(n)).length + 1;
+	// 	if (!children.length) return ''
+	// 	return '\n' + children.map(n => app.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
+	// }
 }

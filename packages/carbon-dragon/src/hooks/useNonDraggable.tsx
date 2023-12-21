@@ -8,9 +8,8 @@ export interface UseNonDraggableProps {
 }
 
 export const useNonDraggable = (props: UseNonDraggableProps) => {
-  const { node, ref } = props;
+  const { node } = props;
   const dnd = useDndContext();
-  const { version } = useNodeChange(props);
 
   const onMouseMove = useCallback(
     (e) => {

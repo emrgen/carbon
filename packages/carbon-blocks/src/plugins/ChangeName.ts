@@ -11,10 +11,17 @@ import {
   Point,
   nodeLocation,
   moveNodesActions,
-  insertBeforeAction, preventAndStopCtx, BlockContent, SetContentAction, PlaceholderPath, EmptyPlaceholderPath
+  insertBeforeAction,
+  preventAndStopCtx,
+  BlockContent,
+  SetContentAction,
+  PlaceholderPath,
+  EmptyPlaceholderPath,
+  ListNumberPath
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
+import { NumberedList } from "./NumberedList";
 
 export class ChangeName extends BeforePlugin {
   name = 'changeName';
@@ -38,7 +45,7 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(\*\*\*\s)(.)*/, this.tryChangeIntoDivider('separator', ['nestable'])),
   ])
 
-  on(): Partial<EventHandler> {
+  handlers(): Partial<EventHandler> {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
         const { node } = ctx;
@@ -52,58 +59,10 @@ export class ChangeName extends BeforePlugin {
     };
   }
 
-  __tryChangeAttrs(name: string, groups: string[]) {
-    return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
-      const { node, app } = ctx;
-      const { tr, selection } = app;
-      const block = node.closest(n => n.isContainerBlock)!;
-      if (!isConvertible(block)) return
-
-      if (app.schema.nodes[name] === undefined) {
-        console.error('node type not found', name);
-        return
-      }
-
-      ctx.event.preventDefault();
-      ctx.stopPropagation();
-
-      const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
-
-      const match = text.match(regex);
-      if (match === null) {
-        console.error('failed to match regex', regex, text);
-        return
-      }
-
-      const titleNode = block.child(0)!;
-      const title = titleNode.textContent.slice(match[1].length - 1);
-      console.warn('title', title, match);
-      const textNode = app.schema.text(title)!
-      const content = BlockContent.create(textNode);
-
-      const action = SetContentAction.withContent(titleNode.id, content, content);
-      tr.add(action)
-
-      tr.updateProps(block.id, {
-        html: {
-          'data-as': name,
-          'data-group': '',
-          id: block.key,
-        },
-        // node: {
-        //   name,
-        // }
-      })
-      tr.select(after);
-      tr.dispatch();
-      // expand collapsed block
-    }
-  }
-
   tryChangeName(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
-      const { node, app } = ctx;
-      const { tr, selection } = app;
+      const { node, app, cmd } = ctx;
+      const { selection } = app;
       const block = node.closest(n => n.isContainerBlock)!;
       if (!isConvertible(block)) return
 
@@ -125,15 +84,14 @@ export class ChangeName extends BeforePlugin {
       }
 
       if (name === 'numberedList') {
-        const listNumber = app.cmd.numberedList.listNumber(block);
+        const listNumber = NumberedList.listNumber(block)
         const inputNumber = parseInt(match[1].slice(0, -2));
-         if (listNumber != inputNumber) {
-           tr.updateProps(block.id, {
-             node: {
-               listNumber: parseInt(match[1].slice(0, -2)) ?? 1
-             }
-           })
-         }
+        if (listNumber != inputNumber) {
+          console.warn('TODO: listNumber', listNumber, inputNumber);
+          // cmd.updateProps(block.id, {
+          //   [ListNumberPath]: inputNumber,
+          // })
+        }
       }
 
       const titleNode = block.child(0)!;
@@ -143,8 +101,8 @@ export class ChangeName extends BeforePlugin {
 
       if (match[1] === titleNode.textContent + ' ') {
         const action = SetContentAction.create(titleNode.id,BlockContent.empty());
-        tr.add(action);
-        tr.updateProps(titleNode.id, {
+        cmd.Add(action);
+        cmd.Update(titleNode.id, {
           [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
         })
       } else {
@@ -152,31 +110,31 @@ export class ChangeName extends BeforePlugin {
         console.warn('title', title, match);
         if (title === '') {
           const action = SetContentAction.create(titleNode.id,BlockContent.empty());
-          tr.add(action);
+          cmd.Add(action);
         } else {
           const textNode = app.schema.text(title)!
           const content = BlockContent.create(textNode);
 
           const action = SetContentAction.withContent(titleNode.id, content, content);
-          tr.add(action);
+          cmd.Add(action);
         }
       }
 
-      tr.change(block.id, block.name, name)
-      tr.updateProps(block.id, { node: { typeChanged: true },});
+      cmd.Change(block.id, name)
+      cmd.Update(block.id, { node: { typeChanged: true },});
       // expand collapsed block
       if (block.isCollapsed) {
-        tr.updateProps(block.id, { node: { collapsed: false } });
+        cmd.Update(block.id, { node: { collapsed: false } });
       }
-      tr.select(after)
-        .dispatch()
+      cmd.Select(after)
+        .Dispatch()
     }
   }
 
   tryChangeIntoCode(type: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
-      const { node, app } = ctx;
-      const { tr, selection } = app;
+      const { node, app, cmd } = ctx;
+      const {selection} = app;
       const block = node.closest(n => n.isContainerBlock)!;
       if (!isConvertible(block)) return
       console.log('tryChangeIntoCode', ctx.node.textContent, type);
@@ -193,19 +151,19 @@ export class ChangeName extends BeforePlugin {
       const to = Point.toAfter(block.id);
       const moveNodes = block.children.slice(1);
       if (moveNodes.length) {
-        tr.add(moveNodesActions(to, moveNodes));
+        cmd.Add(moveNodesActions(to, moveNodes));
       }
-      tr.change(block.id, block.name, type)
-      tr.updateProps(block.id, { node: { typeChanged: true },  });
-      tr.select(after)
-      tr.dispatch()
+      cmd.Change(block.id, type)
+      cmd.Update(block.id, { node: { typeChanged: true },  });
+      cmd.Select(after)
+      cmd.Dispatch()
     }
   }
 
   tryChangeIntoDivider(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
-      const { node, app } = ctx;
-      const { tr, selection } = app;
+      const { node, app, cmd } = ctx;
+      const { selection } = app;
       const block = node.closest(n => n.isContainerBlock)!;
       if (!isConvertible(block)) return
 
@@ -235,14 +193,14 @@ export class ChangeName extends BeforePlugin {
 
       const content = BlockContent.empty()
 
-      tr.setContent(block.firstChild!.id, content)
+      cmd.SetContent(block.firstChild!.id, content)
         // .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
-        .add(insertBeforeAction(block, divider))
-        .change(block.id, block.name, block.type.splitName)
-        .updateProps(block.id, { node: { typeChanged: true } })
-        .add(moveActions)
-        .select(after)
-        .dispatch()
+        .Add(insertBeforeAction(block, divider))
+        .Change(block.id, block.type.splitName)
+        .Update(block.id, { node: { typeChanged: true } })
+        .Add(moveActions)
+        .Select(after)
+        .Dispatch()
     }
   }
 

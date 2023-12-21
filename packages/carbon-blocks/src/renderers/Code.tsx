@@ -38,8 +38,8 @@ export const CodeComp = (props: RendererProps) => {
     const text = app.schema.text(value)!;
     app.enable(() => {
       app.tr
-        .setContent(node.child(0)?.id!, BlockContent.create([text]))
-        .dispatch();
+        .SetContent(node.child(0)?.id!, BlockContent.create([text]))
+        .Dispatch();
     });
   };
 

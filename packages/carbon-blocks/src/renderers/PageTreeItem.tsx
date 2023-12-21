@@ -1,21 +1,23 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import {
+  Carbon,
+  CarbonBlock,
   CarbonNodeChildren,
+  CarbonNodeContent,
+  CollapsedPath,
+  Node,
+  OpenedPath,
   Point,
   preventAndStop,
-  useCarbon,
-  CarbonBlock,
-  CarbonNodeContent,
   RendererProps,
   stop,
-  Node, useNodeActivated, CollapsedPath, useNodeOpened,OpenedPath
+  useCarbon,
+  useNodeOpened
 } from "@emrgen/carbon-core";
 
 import { BlockEvent } from "../events";
 import { HiOutlinePlus } from "react-icons/hi";
-import {
-  MdOutlineKeyboardArrowRight,
-} from "react-icons/md";
+import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { PageTreeItemName, PageTreeName } from "../plugins/PageTree";
 
 const getPageTree = (n: Node) => n.closest(n => n.type.name === PageTreeName);
@@ -26,23 +28,22 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
 
-  const handleToggle = useCallback(() => {
-    app.tr
-      .updateProps(node.id, { [CollapsedPath]: !isCollapsed })
-      .dispatch();
-  }, [app.tr, node, isCollapsed]);
+  const handleToggle = useCallback((app: Carbon) => {
+    app.cmd.toggle(node).Dispatch();
+  }, [node]);
 
   // insert a new section as child of this collapsible
   const handleInsert = useCallback(
     (e) => {
       preventAndStop(e);
-      const { tr, cmd } = app;
+      const { cmd } = app;
 
       const pageTree = getPageTree(node);
       if (!pageTree) return;
 
-      tr.add(cmd.pageTree.closeAll(pageTree));
-      tr.add(cmd.pageTreeItem.expand(node));
+      cmd
+        .pageTree.close(pageTree)
+        .pageTreeItem.expand(node);
 
       const item = app.schema.type(PageTreeItemName).default()!;
       item.updateProps({
@@ -50,12 +51,12 @@ export const PageTreeItemComp = (props: RendererProps) => {
       });
 
       const at = Point.toAfter(node.child(0)!.id);
-      tr
-        .insert(at, item)
-        .then(() => {
+      cmd
+        .Insert(at, item)
+        .Then(() => {
           return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });
         })
-        .dispatch();
+        .Dispatch();
     },
     [app, node]
   );
@@ -63,17 +64,19 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const handleOpenDocument = useCallback(
     (e) => {
       preventAndStop(e);
-      const {tr, cmd} = app;
-
       const pageTree = getPageTree(node);
-      if (!pageTree) return;
+      if (!pageTree) {
+        console.warn("page tree not found for node", node.id.toString());
+        return;
+      }
 
-      tr.add(cmd.pageTree.closeAll(pageTree))
-      tr.add(cmd.pageTreeItem.open(node))
-      tr.then(() => {
-        return () => app.emit(BlockEvent.openDocument, { node });
-      })
-      tr.dispatch();
+      app.cmd
+        .pageTree.close(pageTree)
+        .pageTreeItem.open(node)
+        .Then(() => {
+          return () => app.emit(BlockEvent.openDocument, { node });
+        })
+        .Dispatch();
     },
     [app, node]
   );
@@ -89,7 +92,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
             e.preventDefault();
             e.stopPropagation();
           }}
-          onClick={handleToggle}
+          onClick={() => handleToggle(app)}
         >
           <MdOutlineKeyboardArrowRight className={'page-tree-open-close-icon'}/>
         </div>

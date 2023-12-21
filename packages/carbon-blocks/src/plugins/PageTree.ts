@@ -1,29 +1,27 @@
 import {
-  Carbon, CarbonAction,
   CarbonPlugin, CollapsedPath,
   EventContext,
   EventHandlerMap, Node,
   NodeSpec,
   preventAndStopCtx,
-  Transaction, UpdatePropsAction
+  Transaction, UpdatePropsAction,OpenedPath
 } from "@emrgen/carbon-core";
-import { OpenedPath } from "@emrgen/carbon-core/src/core/NodeProps";
-import { Optional } from "@emrgen/types";
 
 export const PageTreeName = 'pageTree';
 export const PageTreeItemName = 'pageTreeItem';
 
 
 declare module '@emrgen/carbon-core' {
-  export interface CarbonCommands {
+  export interface Transaction {
     pageTree: {
-      closeAll(node: Node): CarbonAction[],
+      close(node: Node): Transaction,
+      toggle(node: Node): Transaction,
     },
     pageTreeItem: {
-      open(node: Node): CarbonAction[],
-      close(node: Node): CarbonAction[],
-      expand(node: Node): CarbonAction[],
-      collapse(node: Node): CarbonAction[],
+      open(node: Node): Transaction,
+      close(node: Node): Transaction,
+      expand(node: Node): Transaction,
+      collapse(node: Node): Transaction,
     }
   }
 }
@@ -52,19 +50,16 @@ export class PageTree extends CarbonPlugin {
 
   commands(): Record<string, Function> {
     return {
-      closeAll: this.closeAll,
+      close: this.closeAll,
     }
   }
 
-  closeAll(app: Carbon, node: Node): CarbonAction[] {
-    const actions: CarbonAction[] = [];
+  closeAll(tr: Transaction, node: Node) {
     node.forAll(n => {
       if (n.name === PageTreeItemName && n.isOpen) {
-        actions.push(...app.cmd.pageTreeItem.close(n));
+        tr.pageTreeItem.close(n)
       }
     })
-
-    return actions;
   }
 
   plugins(): CarbonPlugin[] {
@@ -107,39 +102,33 @@ export class PageTreeItem extends CarbonPlugin {
     }
   }
 
-  open(app: Carbon, node: Node): CarbonAction[] {
-    return [
-      UpdatePropsAction.create(node.id, {
-        [OpenedPath]: true
-      }, app.runtime.origin),
-    ]
+  open(tr: Transaction, node: Node): Transaction {
+    tr.Add(UpdatePropsAction.create(node.id, {
+      [OpenedPath]: true
+    }, tr.origin));
+
+    return tr;
   }
 
-  close(app: Carbon, node: Node): CarbonAction[] {
-    return [
-      UpdatePropsAction.create(node.id, {
-        [OpenedPath]: false
-      }, app.runtime.origin),
-    ]
+  close(tr: Transaction, node: Node) {
+    tr.Add(UpdatePropsAction.create(node.id, {
+      [OpenedPath]: false
+    }, tr.origin));
   }
 
-  expand(app: Carbon, node: Node): CarbonAction[] {
-    return [
-      UpdatePropsAction.create(node.id, {
-        [CollapsedPath]: false,
-      }, app.runtime.origin),
-    ]
+  expand(tr: Transaction, node: Node) {
+    tr.Add(UpdatePropsAction.create(node.id, {
+      [CollapsedPath]: false
+    }, tr.origin));
   }
 
-  collapse(app: Carbon, node: Node): CarbonAction[] {
-    return [
-      UpdatePropsAction.create(node.id, {
-        [CollapsedPath]: true,
-      }, app.runtime.origin),
-    ]
+  collapse(tr: Transaction, node: Node) {
+    tr.Add(UpdatePropsAction.create(node.id, {
+      [CollapsedPath]: true,
+    }, tr.origin));
   }
 
-  on(): EventHandlerMap {
+  handlers(): EventHandlerMap {
     return {
       blur: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
@@ -147,7 +136,7 @@ export class PageTreeItem extends CarbonPlugin {
         const {parent} = target;
         // if this node is the closest pageTreeItem node to the target, then mark it closed
         if (parent?.name === this.name && target.closest(n => n.name === this.name)?.eq(node)) {
-          ctx.app.tr.updateProps(node.id, {
+          ctx.cmd.Update(node.id, {
             [OpenedPath]: false
           });
         }

@@ -1,7 +1,7 @@
 import {
 	Carbon, CarbonAction,
 	CarbonPlugin,
-	CarbonState,
+	State,
 	Node,
 	NodePlugin,
 	NodeSpec,
@@ -14,7 +14,7 @@ import { TitlePlugin } from './Title';
 import { node } from "@emrgen/carbon-blocks";
 
 declare module '@emrgen/carbon-core' {
-	export interface CarbonCommands {
+	export interface Transaction {
 		section: {
 			insert: (after: Node) => Optional<Transaction>,
 		}
@@ -61,9 +61,7 @@ export class Section extends NodePlugin {
 	}
 
 	commands(): Record<string, Function> {
-		return {
-			insert: this.insert.bind(this),
-		}
+		return {}
 	}
 
 	plugins(): CarbonPlugin[] {
@@ -94,10 +92,6 @@ export class Section extends NodePlugin {
 		}
 
 		return ret + app.cmd.nestable.serializeChildren(node)
-	}
-
-	insert(app: Carbon, after: Node) {
-
 	}
 
 	// normalize(node: Node, state: CarbonState): CarbonAction[] {

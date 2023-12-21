@@ -133,10 +133,10 @@ export function MediaView(props: MediaViewProps) {
     (e: DndEvent) => {
       if (!node.id.eq(e.node.id)) return;
       app.tr
-        .updateProps(node.id, {
+        .Update(node.id, {
           node: { width, height },
         })
-        .dispatch();
+        .Dispatch();
     },
     [app.tr, height, node.id, width]
   );

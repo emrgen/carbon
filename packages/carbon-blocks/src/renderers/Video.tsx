@@ -26,13 +26,13 @@ export function VideoComp(props: RendererProps) {
     //   ref.current?.getBoundingClientRect()
     // );
 
-    // app.tr.selectNodes([node.id]).dispatch();
+    // app.tr.selectNodes([node.id]).Dispatch();
   };
 
   const onClick = useCallback(
     (e) => {
       // preventAndStop(e);
-      app.tr.selectNodes([]).dispatch();
+      // app.tr.selectNodes([]).Dispatch();
     },
     [app.tr]
   );

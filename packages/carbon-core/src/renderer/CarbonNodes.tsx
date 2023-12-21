@@ -36,7 +36,7 @@ const mapName = (name: string, parentName?: string) => {
 
 const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => {
   const { tag: Element = "div", node, children, custom } = props;
-  const { key, name, version } = node;
+  const { key, name, renderVersion } = node;
   const editor = useCarbon();
   const ref = useRef(null);
 
@@ -67,7 +67,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     <Element
       ref={ref}
       data-name={name}
-      data-version={version}
+      data-version={renderVersion}
       data-id={key}
       {...attributes}
     >
@@ -77,7 +77,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
 }
 
 export const CarbonElement = memo(forwardRef(InnerElement), (prev, next) => {
-  return prev.node.version === next.node.version;
+  return prev.node.key === next.node.key;
 });
 
 export const RawText = memo(function RT(props: RendererProps) {
@@ -104,7 +104,7 @@ const InnerCarbonText = (props: RendererProps) => {
 };
 
 export const CarbonText = memo(InnerCarbonText, (prev, next) => {
-  return prev.node.version === next.node.version;
+  return prev.node.key === next.node.key;
 });
 
 // render block node with div
@@ -123,7 +123,7 @@ const InnerCarbonBlock = (props: RendererProps, ref) => {
 }
 
 export const CarbonBlock = memo(forwardRef(InnerCarbonBlock), (prev, next) => {
-  return prev.node.version === next.node.version;
+  return prev.node.key === next.node.key;
 });
 
 // render children of a node
@@ -166,7 +166,7 @@ export const InnerCarbonNode = (props: RendererProps) => {
 }
 
 export const CarbonNode = memo(InnerCarbonNode, (prev, next) => {
-  return prev.node.version === next.node.version;
+  return prev.node.key === next.node.key;
 });
 
 // default node for carbon editor with text and block
@@ -204,7 +204,6 @@ export const CarbonNodeContent = (props: RendererProps) => {
       {beforeContent}
       <CarbonNode
         node={content}
-        // parent={node}
         custom={custom}
         key={content.key}
       />

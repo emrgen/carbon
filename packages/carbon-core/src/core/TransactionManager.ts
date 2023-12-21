@@ -5,12 +5,12 @@ import { Transaction } from "./Transaction";
 import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
 import { EventsOut } from './Event';
-import { CarbonState } from './CarbonState';
+import { State } from './State';
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];
 
-	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager, readonly updateState: (state: CarbonState, tr: Transaction) => void) { }
+	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly sm: SelectionManager, readonly updateState: (state: State, tr: Transaction) => void) { }
 
 	private get state() {
 		return this.app.state;
@@ -39,13 +39,17 @@ export class TransactionManager {
 		// normalizer transactions are allowed to commit even with pending selection events
 		while (this.transactions.length) {
 			const tr = this.transactions.shift();
-			if (!tr) continue;
+			if (!tr || tr.isEmpty) {
+				app.committed = true;
+				continue;
+			}
+
 			// produce a new state from the current state
 			const state = app.state.produce(app.runtime.origin, draft => {
-				tr.prepare();
-				tr.commit(draft);
-				// this.updateTransactionEffects(tr);
+				tr.Commit(draft);
 			});
+
+			app.committed = true;
 
 			this.updateState(state, tr);
 		}

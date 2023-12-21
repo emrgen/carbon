@@ -1,6 +1,8 @@
 export class CarbonCache {
+
   private cache: Map<string, any>;
   private hitCount: number = 0;
+
   constructor() {
     this.cache = new Map();
     setInterval(() => {

@@ -25,6 +25,7 @@ export interface DndEvent {
 	node: Node,
 	id: ToString,
 	state?: any;
+
 	position: {
 		startX: number,
 		startY: number,

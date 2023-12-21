@@ -85,6 +85,6 @@ export class Heading extends NodePlugin {
 	}
 
 	serialize(app: Carbon, node: Node): SerializedNode {
-		return '#'.repeat(this.level) + ' ' + app.serialize(node.child(0)!) + app.cmd.nestable.serializeChildren(node)
+		return '#'.repeat(this.level) + ' ' + app.serialize(node.child(0)!) + app.commands.nestable.serializeChildren(node)
 	}
 }

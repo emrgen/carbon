@@ -40,7 +40,6 @@ import { DocLinkComp } from "./renderers/DocLink";
 import { Table } from "./plugins/Table";
 import { ColumnComp, RowComp, TableComp } from "./renderers/Table";
 import { Insert } from "./plugins/Inserter";
-import { Change } from "./plugins/Change";
 import { CarbonComp } from "./renderers/Carbon";
 import { PageTree } from "./plugins/PageTree";
 import { PageTreeComp } from "./renderers/PageTree";
@@ -77,8 +76,6 @@ export const blockPresets: Extension = {
 		new Code(),
 		new DocLink(),
 		new Table(),
-		new Insert(),
-		new Change(),
 		new CarbonRoot(),
 		new PageTree(),
 		new BlockContent(),

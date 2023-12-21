@@ -1,5 +1,5 @@
 import { Optional } from "@emrgen/types";
-import { CarbonState } from "./CarbonState";
+import { State } from "./State";
 import { Node } from "./Node";
 import { StateChanges } from "./NodeChange";
 import { NodeId } from "./NodeId";
@@ -21,20 +21,59 @@ import {
   SelectedPath
 } from "./NodeProps";
 import { StateScope } from "./StateScope";
+import { NodeBTree } from "./BTree";
+import FastPriorityQueue from "fastpriorityqueue";
+import { identity } from "lodash";
+
+class NodeDepthPriorityQueue {
+  private queue: FastPriorityQueue<NodeDepthEntry>;
+
+  static from(nodes: Node[], order: 'asc' | 'desc' = 'asc') {
+    const comparator = order === 'asc' ? NodeDepthComparator : (a: NodeDepthEntry, b: NodeDepthEntry) => NodeDepthComparator(b, a);
+    const queue = new NodeDepthPriorityQueue(comparator);
+    nodes.forEach(n => {
+      const depth = n.parents.length;
+      queue.add(n, depth);
+    });
+    return queue;
+  }
+
+  constructor(comparator: ((a: NodeDepthEntry, b: NodeDepthEntry) => boolean)) {
+    this.queue = new FastPriorityQueue(comparator);
+  }
+
+  add(node: Node, depth: number) {
+    this.queue.add({node, depth});
+  }
+
+  pop() {
+    return this.queue.poll();
+  }
+
+  isEmpty() {
+    return this.queue.isEmpty();
+  }
+
+  get size() {
+    return this.queue.size;
+  }
+}
 
 // NOTE: it is internal to the state and actions. it should not be used outside of it.
 //draft of a state is used to prepare a new state before commit
 export class CarbonStateDraft {
   origin: ActionOrigin;
-  state: CarbonState;
+  state: State;
   nodeMap: NodeMap;
   selection: PointedSelection;
   changes: NodeIdSet; // tracks changed nodes
+  mutables: NodeIdSet = NodeIdSet.empty(); // tracks mutable nodes
+  contentChanges: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
   removed: NodeIdSet = NodeIdSet.empty(); // tracks removed nodes
 
   private drafting = true;
 
-  constructor(state: CarbonState, origin: ActionOrigin) {
+  constructor(state: State, origin: ActionOrigin) {
     this.origin = origin;
     this.state = state;
     this.nodeMap = NodeMap.from(state.nodeMap);
@@ -51,7 +90,7 @@ export class CarbonStateDraft {
   }
 
   // turn the draft into a new state
-  commit(depth: number): CarbonState {
+  commit(depth: number): State {
     const { state, changes, selection } = this;
 
     const nodeMap = this.nodeMap.isEmpty ? state.nodeMap : this.nodeMap;
@@ -69,13 +108,14 @@ export class CarbonStateDraft {
     changes.freeze();
     nodeMap.freeze();
 
-    const newState = new CarbonState({
+    const newState = new State({
       previous: state.clone(depth - 1),
       scope: state.scope,
       content,
       selection: after,
       nodeMap,
       changes,
+      counter: state.counter + 1,
     });
 
     return newState.freeze();
@@ -95,57 +135,58 @@ export class CarbonStateDraft {
       this.changes.remove(id);
     });
 
-    const changed: NodeDepthEntry[] = this.changes.toArray().map(id => {
-      const node = this.nodeMap.get(id)!;
-      const depth = this.nodeMap.parents(node).length;
-      return {
-        node,
-        depth
+
+    const changed: Node[] = this.changes.toArray().map(id => this.nodeMap.get(id)).map(identity) as unknown as Node[];
+    const queue = NodeDepthPriorityQueue.from(changed, 'desc');
+    const updateOrder = NodeDepthPriorityQueue.from(changed, 'desc');
+
+
+    // console.log('changed nodes',changed.map(n => `${n.node.name}: ${n.node.id.toString()}`));
+
+    // collect all mutable nodes tree created in this draft
+    const updatedNodes = this.nodeMap.current.clone()
+    const visited = NodeIdSet.empty();
+    // all nodes that are changed will be processed
+    while (queue.size) {
+      const {node, depth} = queue.pop()!;
+      if (visited.has(node.id)) {
+        continue;
       }
-    });
+      visited.add(node.id);
 
-    changed.sort(NodeDepthComparator);
-
-    const process: Node[] = [];
-    while (changed.length > 0) {
-      // console.log('processing changes', changed.length);
-      let prev = changed.shift()!;
-      let next: Optional<NodeDepthEntry> = null;
-      process.push(prev.node);
-      // console.log('taking node', prev.node.id.toString(), prev.node.name, prev.depth);
-      const depth = prev.depth;
-      while (changed.length > 0 && changed[0].depth === prev.depth) {
-        next = changed.shift()!;
-        if (next.node.parentId && prev.node.parentId && !next.node.parentId.eq(prev.node.parentId)) {
-          // console.log('taking node', next.node.id.toString(), next.node.name, next.depth);
-          process.push(next.node);
-          prev = next;
-        }
-      }
-
-      while (process.length > 0) {
-        const node = process.pop()!;
-        // console.log('processing node', node.id.toString(), node.name);
-        const parent = this.nodeMap.parent(node);
-        if (parent) {
-          const clone = parent.clone(n => {
-            if (this.nodeMap.deleted(n.id)) {
-              return null;
-            } else {
-              return this.nodeMap.get(n.id);
-            }
-          });
-          clone.children.forEach(n => {
-            n.freeze();
-          })
-          this.nodeMap.set(parent.id, clone);
-          changed.unshift({
-            node: clone,
-            depth: depth - 1
-          });
-        }
+      // console.log('processing node', node.name, node.id.toString(), depth);
+      const parent = this.nodeMap.parent(node);
+      if (parent) {
+        queue.add(parent, depth - 1);
+        updateOrder.add(parent, depth - 1);
       }
     }
+
+    while (updateOrder.size) {
+      const {node} = updateOrder.pop()!;
+      // if (!this.nodeMap.has(node.id)) {
+        const clone = node.clone(n => {
+          if (this.nodeMap.deleted(n.id)) {
+            return null;
+          } else {
+            return this.nodeMap.get(n.id);
+          }
+        })
+        this.nodeMap.set(node.id, clone);
+      // }
+    }
+
+    // in this scope all nodes are mutable
+    const dirtyContent = NodeMap.empty();
+    this.contentChanges.toArray().map(id => this.nodeMap.get(id)).map(n => n).forEach((node) => {
+      node!.chain.forEach(n => {
+        dirtyContent.set(n.id, n);
+      })
+    })
+
+    dirtyContent.forEach((id, node) => {
+      node.contentVersion += 1;
+    });
 
     return this;
   }
@@ -169,6 +210,7 @@ export class CarbonStateDraft {
       }
       console.log(content);
       node.updateContent(content);
+      console.log('xxxx',node.textContent);
     });
 
     // console.log('inserting content', nodeId.toString(), content.size);
@@ -245,11 +287,15 @@ export class CarbonStateDraft {
     this.mutable(parentId, parent => {
       parent.children.forEach(ch => this.mutable(ch.id));
       parent.prepend(node)
+      this.contentChanges.add(parent.id);
     });
   }
 
   private append(parentId: NodeId, node: Node) {
-    this.mutable(parentId, parent => parent.append(node));
+    this.mutable(parentId, parent => {
+      parent.append(node);
+      this.contentChanges.add(parent.id);
+    });
   }
 
   private insertBefore(refId: NodeId, node: Node) {
@@ -272,6 +318,7 @@ export class CarbonStateDraft {
       this.mutable(refNode.id);
       refNode.nextSiblings?.forEach(ch => this.mutable(ch.id));
       parent.insertBefore(refNode, node)
+      this.contentChanges.add(parent.id);
     });
   }
 
@@ -294,6 +341,7 @@ export class CarbonStateDraft {
     this.mutable(parentId, parent => {
       refNode.nextSiblings?.forEach(ch => this.mutable(ch.id));
       parent.insertAfter(refNode, node)
+      this.contentChanges.add(parent.id);
     });
   }
 
@@ -317,8 +365,9 @@ export class CarbonStateDraft {
     }
 
     this.mutable(parentId, parent => {
+      node.nextSiblings.forEach(ch => this.mutable(ch.id));
       parent.remove(node);
-      parent.children.forEach(ch => this.mutable(ch.id));
+      this.contentChanges.add(parent.id);
 
       // if parent title is empty, set placeholder from parent
       if (parent.isTextBlock && parent.isEmpty) {
@@ -336,7 +385,7 @@ export class CarbonStateDraft {
     });
   }
 
-  changeName(nodeId: NodeId, type: NodeType) {
+  change(nodeId: NodeId, type: NodeType) {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }
@@ -392,8 +441,6 @@ export class CarbonStateDraft {
           node.updateProps({
             [PlaceholderPath]: parent.properties.get<string>(EmptyPlaceholderPath) ?? '',
           })
-
-          console.log('xxx', parent.name, parent.id.toString(), parent.properties.get<string>(EmptyPlaceholderPath), node.properties.toKV());
         })
       }
     }
@@ -430,6 +477,7 @@ export class CarbonStateDraft {
 
     this.changes.add(id);
     this.nodeMap.set(id, mutable);
+    this.mutables.add(id);
 
     return mutable;
   }
@@ -439,7 +487,6 @@ export class CarbonStateDraft {
   }
 }
 
-
 interface NodeDepthEntry {
   node: Node;
   depth: number;
@@ -447,22 +494,22 @@ interface NodeDepthEntry {
 
 const NodeDepthComparator = (a: NodeDepthEntry, b: NodeDepthEntry) => {
   if (!a.node.parentId) {
-    return -1;
+    return true;
   }
 
   if (!b.node.parentId) {
-    return 1;
+    return false;
   }
 
   if (a.depth === b.depth) {
     if (a.node.parentId === b.node.parentId) {
-      return a.node.id.comp(b.node.id);
+      return a.node.id.comp(b.node.id) < 0;
     } else if (a.node.parentId && b.node.parentId) {
-      return a.node.parentId.comp(b.node.parentId);
+      return a.node.parentId.comp(b.node.parentId) < 0;
     } else {
-      return 0;
+      return false
     }
   }
 
-  return a.depth - b.depth;
+  return a.depth < b.depth;
 }

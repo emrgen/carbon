@@ -1,11 +1,11 @@
 import { Optional } from '@emrgen/types';
 import { Carbon } from './Carbon';
-import { CarbonState } from './CarbonState';
+import { State } from './State';
 import { Decoration } from './Decoration';
 import { Node } from './Node';
 import { NodeSpec } from './Schema';
 import { Transaction } from './Transaction';
-import { EventHandlerMap, InputRules, PluginName, SerializedNode } from "./types";
+import { EventHandlerMap, InputRules, NodeEncoder, PluginName, SerializedNode } from "./types";
 import { CarbonAction } from "./actions/types";
 import EventEmitter from 'events';
 import { CarbonMessageBus, CarbonMessageFormat } from './MessageBus';
@@ -65,7 +65,7 @@ export abstract class CarbonPlugin {
 	}
 
 	// return editor event handlers
-	on(): EventHandlerMap {
+	handlers(): EventHandlerMap {
 		return {}
 	}
 
@@ -76,7 +76,7 @@ export abstract class CarbonPlugin {
 	transaction(tr: Transaction) { }
 
 	// return decorations that will be applied on the view
-	decoration(state: CarbonState): Decoration[] {
+	decoration(state: State): Decoration[] {
 		return []
 	}
 
@@ -90,9 +90,9 @@ export abstract class CarbonPlugin {
 
 
 	// serialize the node into a copy string
-	serialize(app: Carbon, node: Node): SerializedNode {
-		return {} as SerializedNode;
-	}
+	// serialize<T>(app: Carbon, node: Node, encoder: NodeEncoder<T>) {
+	// 	return {} as SerializedNode;
+	// }
 
 	// deserialize the copy string into a Node
 	deserialize(data: string): Optional<Node> {

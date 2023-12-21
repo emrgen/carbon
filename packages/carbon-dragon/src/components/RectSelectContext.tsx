@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { RectSelect } from "../core/RectSelect";
 import { RectSelectorContext } from "../hooks/useRectSelector";
-import { Carbon, CarbonState, EventsOut, RendererProps, Transaction, useCarbon } from "@emrgen/carbon-core";
+import { Carbon, State, EventsOut, RendererProps, Transaction, useCarbon } from "@emrgen/carbon-core";
 import { createPortal } from "react-dom";
 import { useDndMonitor, useDragRect } from "../hooks";
 import { DndEvent } from "../types";
@@ -23,7 +23,7 @@ export function RectSelectContext(props: RendererProps) {
 
   // mark the rect-selector dirty when the content changes
   useEffect(() => {
-    const onChanged = (state: CarbonState) => {
+    const onChanged = (state: State) => {
       setIsBlockSelection(state.selection.isBlock)
     };
 

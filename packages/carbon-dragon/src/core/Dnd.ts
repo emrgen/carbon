@@ -5,6 +5,8 @@ import { DndNodeStore } from "./DndStore";
 import { Carbon, Node, NodeId, Point } from "@emrgen/carbon-core";
 import { DndEvent } from '../types';
 
+
+
 type Acceptor = (receiver: Node, child: Node, at: Point) => boolean
 
 export class Dnd extends EventEmitter {
@@ -176,13 +178,13 @@ export class Dnd extends EventEmitter {
 			// console.log('cancelled')
 			return;
 		}
+
 		// console.log('draggableHover', hitNode.id.toString(),);
 		this.setDraggedNode(hitNode)
 	}
 
 	private setDraggedNode(node: Node) {
-		const { app: editor, draggedNodeId } = this
-		const { tr } = editor;
+		const { app, draggedNodeId } = this
 		if (draggedNodeId) {
 			this.emit('mouse:out', this.draggedNodeId);
 		}
@@ -203,7 +205,7 @@ export class Dnd extends EventEmitter {
 			// 		{ draggableHover: false },
 			// 		CommandOrigin.Runtime
 			// 	)
-			// 	.dispatch();
+			// 	.Dispatch();
 			// console.log("reset already");
 			this.emit('mouse:out', draggedNodeId)
 			this.draggedNodeId = null

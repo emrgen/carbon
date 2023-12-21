@@ -9,19 +9,19 @@ import { NodeMap } from "./NodeMap";
 import { CarbonStateDraft } from "./CarbonStateDraft";
 import { StateScope } from "./StateScope";
 
-interface CarbonStateProps {
+interface StateProps {
 	scope: Symbol;
-	previous?: CarbonState;
+	previous?: State;
 	content: Node;
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
 	changes?: NodeIdSet;
 	decorations?: DecorationStore;
+	counter?: number;
 }
 
-
-export class CarbonState extends EventEmitter {
-	previous: Optional<CarbonState>;
+export class State extends EventEmitter {
+	previous: Optional<State>;
 	scope: Symbol;
 	content: Node;
 	selection: PinnedSelection;
@@ -30,9 +30,11 @@ export class CarbonState extends EventEmitter {
 	changes: NodeIdSet;
 	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
 
+	counter: number = 0;
+
 	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap?: NodeMap) {
 		const map = nodeMap ?? new NodeMap();
-		const state = new CarbonState({ content, selection, scope, nodeMap: map, });
+		const state = new State({ content, selection, scope, nodeMap: map, });
 		if (!nodeMap) {
 			content.forAll(n => {
 				map.set(n.id, n)
@@ -43,7 +45,7 @@ export class CarbonState extends EventEmitter {
 		return state;
 	}
 
-	constructor(props: CarbonStateProps) {
+	constructor(props: StateProps) {
 		super();
 		const {
 			scope,
@@ -53,6 +55,7 @@ export class CarbonState extends EventEmitter {
 			nodeMap,
 			changes = NodeIdSet.empty(),
 			decorations = new DecorationStore(),
+			counter = 0
 		} = props;
 
 		this.previous = previous;
@@ -62,6 +65,7 @@ export class CarbonState extends EventEmitter {
 		this.decorations = decorations;
 		this.nodeMap = nodeMap;
 		this.changes = changes;
+		this.counter = counter;
 	}
 
 	get isSelectionChanged() {
@@ -71,12 +75,12 @@ export class CarbonState extends EventEmitter {
 	}
 
 	get isContentChanged() {
-		return !this.previous?.content.eq(this.content) || this.previous?.content.version !== this.content.version;
+		return !this.previous?.content.eq(this.content) || this.previous?.content.renderVersion !== this.content.renderVersion;
 	}
 
 	get depth() {
 		let depth = 0;
-		let node: Optional<CarbonState> = this;
+		let node: Optional<State> = this;
 		while (node.previous) {
 			depth++;
 			node = node.previous;
@@ -100,7 +104,7 @@ export class CarbonState extends EventEmitter {
 		if (depth === 0) return null
 		const { scope, content, selection, changes, nodeMap } = this;
 		if (!this.previous) {
-			return new CarbonState({
+			return new State({
 				scope,
 				content,
 				selection,
@@ -110,7 +114,7 @@ export class CarbonState extends EventEmitter {
 		}
 
 		const previous = this.previous.clone(depth - 1);
-		return new CarbonState({
+		return new State({
 			scope,
 			content,
 			selection,
@@ -121,12 +125,12 @@ export class CarbonState extends EventEmitter {
 	}
 
 	// try to create a new state or fail and return the previous state
-	produce(origin: ActionOrigin, fn: (state: CarbonStateDraft) => void): CarbonState {
+	produce(origin: ActionOrigin, fn: (state: CarbonStateDraft) => void): State {
 		const draft = new CarbonStateDraft(this, origin);
 		try {
 			StateScope.set(this.scope, draft.nodeMap)
 			fn(draft);
-			const state = draft.prepare().commit(4);
+			const state = draft.prepare().commit(3);
 			StateScope.set(this.scope, this.nodeMap)
 
 			draft.dispose();
@@ -137,6 +141,20 @@ export class CarbonState extends EventEmitter {
 			draft.dispose();
 			return this;
 		}
+	}
+
+	revert(steps = 1) {
+		let oldState = this as State;
+		while (steps > 0 && oldState.previous) {
+			oldState = oldState.previous!;
+			steps--;
+		}
+
+		// create a new state with the same scope and content as the old state but with the old state as previous
+		const state = State.create(oldState.scope, oldState.content, oldState.selection);
+		state.previous = oldState.previous;
+
+		return state.freeze();
 	}
 
 	freeze() {

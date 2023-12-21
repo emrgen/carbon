@@ -1,6 +1,7 @@
 import EventEmitter from "events";
-import { CarbonPlugin } from "@emrgen/carbon-core";
+import { CarbonPlugin, NodeId } from "@emrgen/carbon-core";
 import { cloneDeep, merge } from "lodash";
+import { NodeEmitter, NodeTopicEmitter } from "./NodeEmitter";
 
 // message passing between plugins
 // TODO: this is a temporary experimental solution, we need to find a better way to do this
@@ -9,7 +10,7 @@ import { cloneDeep, merge } from "lodash";
 // message should not create a dependency between plugins
 // message should be a request and response
 // message should carry the plugin name and node id to avoid confusion and track the message path
-export class PluginEmitter extends EventEmitter {
+export class PluginEmitter extends NodeTopicEmitter {
   plugins: Map<string, CarbonPlugin> = new Map();
 
   constructor() {

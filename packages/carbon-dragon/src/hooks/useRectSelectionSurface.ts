@@ -27,11 +27,8 @@ export const useRectSelectionSurface = (props: UseRectSelectionSurfaceProps) => 
 	const onMouseDown = useCallback((e: MouseEvent) => {
 		if (ref.current !== e.target) return
 		// e.preventDefault();
-		// console.log('down');
 		rectSelector.onMouseDown(e, node);
 		listeners.onMouseDown(e);
-
-		// console.group('disabled: editor')
 		// app.disable();
 	}, [node, listeners, rectSelector, ref]);
 

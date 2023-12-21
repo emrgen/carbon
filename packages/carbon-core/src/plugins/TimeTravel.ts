@@ -19,17 +19,17 @@ export class TimeTravelPlugin extends AfterPlugin {
         const action = backwardTr.pop()
         if (action) {
           if ((action instanceof SelectAction)) {
-            backwardTr.add((action as SelectAction).collapseToHead());
+            backwardTr.Add((action as SelectAction).collapseToHead());
           } else {
-            backwardTr.add(action);
+            backwardTr.Add(action);
           }
         }
 
 
         backwardTr.readOnly = true;
-        backwardTr.dispatch();
+        backwardTr.Dispatch();
 
-        this.pnw?.emit('timeTravel', this.transactionTree);
+        this.bus.emit('timeTravel', this.transactionTree);
       },
       'cmd_shift_z': (ctx: EventContext<Event>) => {
         ctx.event.preventDefault();
@@ -41,16 +41,16 @@ export class TimeTravelPlugin extends AfterPlugin {
         const action = forwardTr.pop();
         if (action) {
           if (action instanceof SelectAction) {
-            forwardTr.add((action as SelectAction).collapseToHead());
+            forwardTr.Add((action as SelectAction).collapseToHead());
           } else {
-            forwardTr.add(action);
+            forwardTr.Add(action);
           }
         }
 
         forwardTr.readOnly = true;
-        forwardTr.dispatch();
+        forwardTr.Dispatch();
 
-        this.pnw?.emit('timeTravel', this.transactionTree);
+        this.bus.emit('timeTravel', this.transactionTree);
       }
     }
   }
@@ -58,7 +58,7 @@ export class TimeTravelPlugin extends AfterPlugin {
   transaction(tr: Transaction): void {
     if (!tr.readOnly && tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
       this.transactionTree.add(tr)
-      this.pnw?.emit('timeTravel', this.transactionTree);
+      this.bus.emit('timeTravel', this.transactionTree);
     }
   }
 }

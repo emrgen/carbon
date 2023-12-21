@@ -5,14 +5,16 @@ import { useDndMonitor } from "../hooks/useDndMonitor";
 import { useDraggableHandle } from "../hooks/useDraggable";
 import { useDragRect } from "../hooks/useDragRect";
 import {
-  ActionOrigin, CarbonState,
+  ActionOrigin,
+  EventsIn,
   Node,
   nodeLocation,
   Pin,
   PinnedSelection,
   Point,
   preventAndStop,
-  useCarbon
+  useCarbon,
+  useNodeState
 } from "@emrgen/carbon-core";
 import { DndEvent } from "../types";
 import { HiOutlinePlus } from "react-icons/hi";
@@ -20,9 +22,10 @@ import { PiDotsSixVerticalBold } from "react-icons/pi";
 import { useDndContext } from "../hooks";
 import { elementBound } from "../core/utils";
 import { isNestableNode } from "@emrgen/carbon-blocks";
+import { CustomEvent } from "@emrgen/carbon-core/src/core/CustomEvent";
 
 export interface FastDragHandleProps {
-  node: Optional<Node>;
+  node: Node;
   style: any;
 }
 
@@ -33,17 +36,18 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const [show, setShow] = useState(false);
   const [showDropHint, setShowDropHint] = useState(false);
   const [dropHintStyle, setDropHintStyle] = useState({} as any);
-
+  const {attributes} = useNodeState({node});
   const dnd = useDndContext();
 
   const app = useCarbon();
 
-  const ref = useRef(null);
+  const handleRef = useRef(null);
+
   const { listeners } = useDraggableHandle({
     id: CarbonDragHandleId,
     node: node as Node,
     disabled: !node,
-    ref,
+    ref: handleRef,
     activationConstraint: {
       distance: 2
     }
@@ -78,8 +82,9 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
   const onDragStart = useCallback((e: DndEvent) => {
     if (e.id === CarbonDragHandleId) {
+      app.onEvent(EventsIn.dragStart, CustomEvent.create(EventsIn.dragStart, e.node, e.event));
       app.enable(() => {
-        app.tr.select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput).dispatch();
+        app.tr.Select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput).Dispatch();
       });
     }
   }, [app]);
@@ -243,9 +248,9 @@ export function DraggableHandle(props: FastDragHandleProps) {
         const {tr} = app;
         const after = PinnedSelection.fromNodes(node)
 
-        tr.move(from, to, node.id).select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput);
-        tr.select(after, ActionOrigin.NoSync);
-        tr.dispatch();
+        tr.Move(from, to, node.id).Select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput);
+        tr.Select(after, ActionOrigin.NoSync);
+        tr.Dispatch();
       });
     },
     [app, findDropPosition, findHitNode]
@@ -278,13 +283,15 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (isDragging) {
         preventAndStop(e.event);
       } else {
-        if (node) {
+        if (node.type.dragHandle) {
           app.parkCursor();
           app.tr
-            .select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput)
-            ?.dispatch();
+            .Select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput)
+            ?.Dispatch();
         }
       }
+
+      app.onEvent(EventsIn.dragUp, CustomEvent.create(EventsIn.dragDown, node, e.event));
     },
     [app]
   );
@@ -292,20 +299,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const onMouseDown = useCallback(
     (node: Node, e) => {
       if (e.id !== CarbonDragHandleId) return;
-      // app.focus();
-      // app.parkCursor();
-      // app.tr
-      //   .select(
-      //     PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
-      //     ActionOrigin.NoSync
-      //   )
-      //   .then((app) => {
-      //     return app.tr.select(
-      //       PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!,
-      //       ActionOrigin.UserInput
-      //     );
-      //   })
-      //   .dispatch();
+      app.onEvent(EventsIn.dragDown, CustomEvent.create(EventsIn.dragDown, node, e.event));
     },
     []
   );
@@ -330,7 +324,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     app.focus();
     if (e.shiftKey) {
       const after = PinnedSelection.fromNodes([])
-      app.cmd.insert.before(node, "section")?.dispatch();
+      app.commands.insert.before(node, "section")?.Dispatch();
       return;
     }
 
@@ -340,7 +334,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (node.isContainerBlock && title) {
         const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
         if (app.selection.eq(after)) return;
-        app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
+        app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
         return;
       }
     }
@@ -348,21 +342,23 @@ export function DraggableHandle(props: FastDragHandleProps) {
     if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
       const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
       if (app.selection.eq(after)) return;
-      app.tr.select(after, ActionOrigin.UserInput)?.dispatch();
+      app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
       return;
     }
 
-    app.cmd.insert.after(node, "section")?.dispatch();
+    app.commands.insert.after(node, "section")?.Dispatch();
   };
 
   return (
     <div
       className="carbon-node-handle"
       data-target-name={node?.name}
-      data-target-as={node?.properties.get('html.data-as')}
       data-drag-handle={node?.type.dragHandle}
+      {...attributes}
       style={{ ...style, display: show ? "flex" : "none" }}
     >
+      {!node?.type.dragHandle && <div className="carbon-drag-handle-cover"  ref={handleRef} {...listeners} />}
+      {node?.type.dragHandle && <>
       <div
         className="carbon-add-handle"
         onClick={handleInsertNode}
@@ -372,12 +368,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
       </div>
       <div
         className="carbon-drag-handle"
-        ref={ref}
-        {...listeners}
         onKeyDown={(e) => console.log(e)}
+        ref={handleRef}
+        {...listeners}
       >
         <PiDotsSixVerticalBold />
-      </div>
+      </div></>}
       {createPortal(<>{DragRectComp}</>, document.body)}
       {createPortal(
         <>

@@ -12,7 +12,7 @@ import {
 import { Optional } from "@emrgen/types";
 
 declare module '@emrgen/carbon-core' {
-	export interface CarbonCommands {
+	export interface Transaction {
 		text: {
 			// insertText(selection: PinnedSelection, text: string): Optional<Transaction>;
 		};
@@ -48,28 +48,31 @@ export class TextPlugin extends NodePlugin {
 		}
 	}
 
-	// on(): EventHandlerMap {
-	// 	return {
-	// 		beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-	// 			const { app, node } = ctx;
-	// 			const { selection } = app;
-	// 			if (!selection.isCollapsed) {
-	// 				return
-	// 			}
-	// 			preventAndStopCtx(ctx);
-	//
-	// 			// @ts-ignore
-	// 			const { data, key } = ctx.event.nativeEvent;
-	// 			this.onTextInsert(app, node, data ?? key);
-	// 		},
-	// 	}
-	// }
-	//
-	// onTextInsert(app: Carbon, pin: Pin, text: string) {
-	// 	// const textNode = node.textContent.slice(0, offset) + (text) + node.textContent.slice(offset);
-	// 	// const after = PinnedSelection.fromPin(Pin.future(start.node, start.offset + text.length));
-	// 	// app.tr.setContent(node, InlineContent.create(textNode)).select(after).dispatch();
-	// }
+	handlers(): EventHandlerMap {
+		return {
+			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
+				const { app, node, cmd } = ctx;
+				const { selection } = app;
+				const { start, end } = selection;
+				if (!selection.isCollapsed) {
+					return
+				}
+				preventAndStopCtx(ctx);
+
+				// @ts-ignore
+				const { data, key } = ctx.event.nativeEvent;
+				this.onTextInsert(cmd, start, data ?? key);
+			},
+		}
+	}
+
+	onTextInsert(tr: Transaction, start: Pin, text: string) {
+		const { node, offset } = start.down();
+		const textContent = node.textContent.slice(0, offset) + (text) + node.textContent.slice(offset);
+		const after = PinnedSelection.fromPin(Pin.future(start.node, start.offset + text.length));
+		console.log('onTextInsert', textContent, after, node.id.toString());
+		tr.SetContent(node, InlineContent.create(textContent)).Select(after).Dispatch();
+	}
 
 
 

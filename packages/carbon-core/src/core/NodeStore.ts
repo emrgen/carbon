@@ -1,7 +1,7 @@
 import { Optional } from "@emrgen/types";
 import { NodeId } from './NodeId';
 import { Node } from './Node';
-import { CarbonState } from "./CarbonState";
+import { State } from "./State";
 import { Carbon } from "@emrgen/carbon-core";
 
 export class NodeStore {

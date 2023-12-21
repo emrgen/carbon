@@ -33,7 +33,7 @@ export function TodoComp(props: RendererProps) {
   },[node.properties])
 
   const handleClick = useCallback(
-    (e) => {
+    (e, app) => {
       e.stopPropagation();
 
       app.tr
@@ -42,9 +42,9 @@ export function TodoComp(props: RendererProps) {
             checked: !isChecked,
           },
         })
-        .dispatch();
+        .Dispatch();
     },
-    [app.tr, node.id, isChecked]
+    [node.id, isChecked]
   );
 
   const beforeContent = useMemo(() => {
@@ -59,7 +59,7 @@ export function TodoComp(props: RendererProps) {
         <Checkbox
           defaultChecked={isChecked}
           checked={isChecked}
-          onChange={handleClick}
+          onChange={(e) => handleClick(e, app)}
         />
       </div>
     );

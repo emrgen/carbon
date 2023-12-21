@@ -6,23 +6,38 @@ import { IsolatingPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
 import { skipKeyEvent } from "../utils/key";
 import { first, last,  } from "lodash";
-import { ActionOrigin, BlockContent, Carbon, MoveNodeAction, Node, Pin, PinnedSelection, Point, Transaction } from "../core";
-import { hasParent, } from "../utils/node";
+import {
+	ActionOrigin,
+	BlockContent,
+	Carbon,
+	MoveNodeAction,
+	Node,
+	Pin,
+	PinnedSelection,
+	PlaceholderPath,
+	Point,
+	Transaction
+} from "../core";
+import { hasParent, sortNodes } from "../utils/node";
 import { insertAfterAction, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
 import { nodeLocation } from '../utils/location';
 import { Optional } from '@emrgen/types';
 
-
 declare module '@emrgen/carbon-core' {
-	export interface CarbonCommands {
+	export interface Transaction {
 		keyboard: {
-			backspace(ctx: EventContext<KeyboardEvent>): Optional<Transaction>;
+			backspace(ctx: EventContext<KeyboardEvent>): Transaction;
 		};
 	}
 }
 
-export class KeyboardCommandPlugin extends BeforePlugin {
-	name = 'keyboard';
+// handles general keyboard events
+// node specific cases are handles in node specific plugin
+export class KeyboardPlugin extends AfterPlugin {
+
+	name = 'keyboard'
+
+	priority = 10001;
 
 	commands(): Record<string, Function> {
 		return {
@@ -30,125 +45,10 @@ export class KeyboardCommandPlugin extends BeforePlugin {
 		}
 	}
 
-	backspace(app: Carbon, ctx: EventContext<KeyboardEvent>) {
-		preventAndStopCtx(ctx);
-
-		const { node } = ctx;
-		const { selection, state, cmd } = app;
-
-		const { head } = selection;
-
-		// delete node selection if any
-		if (!selection.isCollapsed || selection.isBlock) {
-			cmd.transform.delete(selection, { fall: 'before' })?.dispatch();
-			return
-		}
-
-		console.log('1111111', head.isAtStartOfNode(node), head, node);
-		if (head.isAtStartOfNode(node)) {
-			const { start } = selection;
-			const textBlock = start.node.chain.find(n => n.isTextBlock)
-			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
-			console.log('xxxxxxxx', prevTextBlock, textBlock);
-			if (!prevTextBlock || !textBlock) {
-				console.log('no prev text block found');
-				return
-			}
-			if (prevTextBlock.isCollapseHidden) {
-				const prevVisibleBlock = prevTextBlock.closest(n => !n.isCollapseHidden)!;
-				const prevVisibleTextBlock = prevVisibleBlock?.child(0)!
-				console.log(prevTextBlock, prevVisibleTextBlock);
-
-				if (!prevVisibleTextBlock) return
-				const after = PinnedSelection.fromPin(Pin.create(prevVisibleTextBlock, prevVisibleTextBlock.textContent.length));
-				const textContent = prevVisibleTextBlock.textContent + textBlock.textContent;
-				const textNode = app.schema.text(textContent)!;
-				const content = BlockContent.create([textNode]);
-
-				const at = Point.toAfter(prevVisibleBlock.id);
-				const moveActions = textBlock?.nextSiblings.slice().reverse().map(n => {
-					return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
-				});
-
-				app.tr
-					.setContent(prevVisibleTextBlock.id, content)
-					.add(moveActions)
-					.remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
-					.select(after)
-					.dispatch();
-
-				return
-			}
-
-			console.log('merge text block', prevTextBlock.name, textBlock.name);
-			// HOT
-			cmd.transform.merge(prevTextBlock, textBlock)?.dispatch();
-			return
-		}
-
-		// 	event.stopPropagation()
-		// 	if (node.isBlockAtom) {
-		// 		const found = node.chain.reverse().find(n => n.isBlockAtom)
-		// 		if (!found) return
-		// 		// final caret position can be above or below
-		// 		const beforeSel = selection.moveStart(-1);
-		// 		if (beforeSel) {
-		// 			editor.tr
-		// 				.add(DeleteCommand.create([node.id]))
-		// 				.select(beforeSel.collapseToHead())
-		// 				.dispatch()
-		// 		}
-		// 		return
-		// 	}
-
-			// console.log('Keyboard.backspace',deleteSel.toString());
-		const deleteSel = selection.moveStart(-1)
-		if (!deleteSel) return
-		cmd.transform.delete(deleteSel)?.dispatch()
-	}
-}
-
-export class KeyboardBeforePlugin extends BeforePlugin {
-
-	name = 'keyboardBefore'
-
-	on(): Partial<EventHandler> {
-		return {
-			$mouseDown: (ctx: EventContext<MouseEvent>) => {
-				const { app, node } = ctx;
-				const { selection } = app;
-				const { start, end } = selection;
-				const isolating = start.node.find(n => n.isIsolating);
-				if (!isolating) {
-					return
-				}
-
-				if (hasParent(node, isolating)) {
-					return
-				}
-			},
-			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				if (ctx.app.selection.isBlock) {
-					preventAndStopCtx(ctx);
-				}
-			}
-		}
-	}
-}
-
-// handles general keyboard events
-// node specific cases are handles in node specific plugin
-export class KeyboardAfterPlugin extends AfterPlugin {
-
-	name = 'keyboardAfter'
-
-	priority = 10001;
-
-	on(): EventHandlerMap {
+	handlers(): EventHandlerMap {
 		return {
 			selectstart: (ctx: EventContext<KeyboardEvent>) => {
-				// ctx.event.preventDefault();
-				// ctx.event.stopPropagation();
+
 			},
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
 				const { node, event } = ctx;
@@ -166,8 +66,6 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			new SelectionCommands(),
 			new IsolatingPlugin(),
 			new TransformCommands(),
-			// new KeyboardPrevent(),
-			new KeyboardCommandPlugin(),
 		]
 	}
 
@@ -177,69 +75,67 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			cmd_i: preventAndStopCtx,
 			cmd_u: preventAndStopCtx,
 			esc: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event, node } = ctx;
+				const { app, cmd, node } = ctx;
 				const { selection } = app
 				if (selection.isBlock) {
-					// app.tr.selectNodes([]).dispatch();
+					// app.tr.selectNodes([]).Dispatch();
 					// app.blur()
 					return
 				}
 
 				const block = node.chain.find(n => n.isBlockSelectable);
 				if (!block) return
-				app.tr.select(PinnedSelection.fromNodes(block)).dispatch();
+				cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event, node } = ctx;
-				const { selection, cmd, state } = app;
+				const { app, cmd } = ctx;
+				const { selection } = app;
 
 				// nodes selection is visible using halo
 				if (selection.isBlock) {
 					preventAndStopCtx(ctx)
 					console.log('block selection...');
-					this.collapseSelectionBefore(app, selection.nodes);
+					this.collapseSelectionBefore(cmd, selection.nodes);
 					return
 				}
 
 				if (!selection.isCollapsed) {
 					preventAndStopCtx(ctx)
-					cmd.selection.collapseToTail()
+					cmd.selection.collapseToTail(app.selection)
 					return
 				}
 
-
 				preventAndStopCtx(ctx)
 				const after = selection.moveBy(-1)
-				app.tr.select(after!).dispatch();
+				cmd.Select(after!).Dispatch();
 			},
-
-
 			right: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event, node } = ctx;
+				const { app, event, cmd } = ctx;
 				event.preventDefault();
-				const { selection, cmd, state } = app;
+				const { selection } = app;
 
 				// nodes selection is visible using halo
 				if (selection.isBlock) {
 					preventAndStopCtx(ctx)
-					this.collapseSelectionAfter(app, selection.nodes);
+					this.collapseSelectionAfter(cmd, selection.nodes);
 					return
 				}
 
 				if (!selection.isCollapsed) {
 					preventAndStopCtx(ctx)
-					cmd.selection.collapseToHead()
+					cmd.selection.collapseToHead(app.selection)
 					return
 				}
 
 				preventAndStopCtx(ctx)
 				const after = selection.moveBy(1);
 				console.log('#>', after?.toString());
-				app.tr.select(after!).dispatch()
+				cmd.Select(after!).Dispatch()
 			},
 
 			shiftRight: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, node } = ctx;
+				const {cmd} = app;
 				event.preventDefault();
 				const { selection } = app;
 				if (selection.isBlock) {
@@ -250,16 +146,17 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 					const block = node.find(n => !n.eq(node) && n.isContainerBlock)
 					if (!block) return
-					app.tr.select(PinnedSelection.fromNodes(block)).dispatch();
+					cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 					return
 				}
 
 				const after = selection.moveHead(1);
-				app.tr.select(after!).dispatch();
+				cmd.Select(after!).Dispatch();
 			},
 
 			shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event, node } = ctx;
+				const { app, event, node, cmd } = ctx;
+
 				event.preventDefault();
 				const { selection } = app;
 				if (selection.isBlock) {
@@ -270,12 +167,12 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 					const { parent } = node;
 					if (parent?.isSandbox) return
-					app.tr.select(PinnedSelection.fromNodes(parent!)).dispatch();
+					cmd.Select(PinnedSelection.fromNodes(parent!)).Dispatch();
 					return
 				}
 
 				const after = selection.moveHead(-1);
-				app.tr.select(after!).dispatch();
+				cmd.Select(after!).Dispatch();
 			},
 
 			shiftUp: e => this.shiftUp(e),
@@ -285,9 +182,9 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			shiftDelete: (event) => this.delete(event),
 
 			backspace: e => {
-				e.app.cmd.keyboard.backspace(e)?.dispatch()
+				this.backspace(e.cmd, e)
 			},
-			shiftBackspace: e => e.app.cmd.keyboard.backspace(e)?.dispatch(),
+			shiftBackspace: e => e.cmd.keyboard.backspace(e),
 			ctrlBackspace: skipKeyEvent,
 			cmdBackspace: skipKeyEvent,
 
@@ -303,52 +200,134 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			// 	if (!doc) return
 			// 	const after = Selection.aroundNode(doc);
 			// 	if (!after) return
-			// 	tr.select(after).dispatch();
+			// 	tr.select(after).Dispatch();
 			// }
 		}
 	}
 
-	collapseSelectionBefore(app: Carbon, nodes: Node[]) {
+	backspace(tr: Transaction, ctx: EventContext<KeyboardEvent>) {
+		preventAndStopCtx(ctx);
+		const {  app } = ctx;
+		const { selection } = app;
+
+		const { head } = selection;
+
+		// delete node selection if any
+		if (!selection.isCollapsed || selection.isBlock) {
+			tr.transform.delete(selection, { fall: 'before' })?.Dispatch();
+			return
+		}
+
+		// console.log('1111111', head.isAtStartOfNode(node), head, node);
+		if (head.isAtStartOfNode(head.node)) {
+			const { start } = selection;
+			const textBlock = start.node.chain.find(n => n.isTextBlock)
+			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
+			if (!prevTextBlock || !textBlock) {
+				console.log('no prev text block found');
+				return
+			}
+
+			if (prevTextBlock.isCollapseHidden) {
+				const prevVisibleBlock = prevTextBlock.closest(n => !n.isCollapseHidden)!;
+				const prevVisibleTextBlock = prevVisibleBlock?.child(0)!
+				console.log(prevTextBlock, prevVisibleTextBlock);
+
+				if (!prevVisibleTextBlock) return
+				const after = PinnedSelection.fromPin(Pin.create(prevVisibleTextBlock, prevVisibleTextBlock.textContent.length));
+				const textContent = prevVisibleTextBlock.textContent + textBlock.textContent;
+				const textNode = app.schema.text(textContent)!;
+				const content = BlockContent.create([textNode]);
+
+				const at = Point.toAfter(prevVisibleBlock.id);
+				const moveActions = textBlock?.nextSiblings.slice().reverse().map(n => {
+					return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
+				});
+
+				if (prevVisibleTextBlock.isEmpty && !content.isEmpty) {
+					tr.Update(prevVisibleTextBlock.id, {
+						[PlaceholderPath]: ''
+					})
+				}
+
+				tr
+					.SetContent(prevVisibleTextBlock.id, content)
+					.Add(moveActions)
+					.Remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
+					.Select(after)
+					.Dispatch();
+
+				return
+			}
+
+			console.log('merge text block', prevTextBlock.name, textBlock.name);
+			// HOT
+			tr.transform.merge(prevTextBlock, textBlock)?.Dispatch();
+			return
+		}
+
+		// 	event.stopPropagation()
+		// 	if (node.isBlockAtom) {
+		// 		const found = node.chain.reverse().find(n => n.isBlockAtom)
+		// 		if (!found) return
+		// 		// final caret position can be above or below
+		// 		const beforeSel = selection.moveStart(-1);
+		// 		if (beforeSel) {
+		// 			editor.tr
+		// 				.add(DeleteCommand.create([node.id]))
+		// 				.select(beforeSel.collapseToHead())
+		// 				.Dispatch()
+		// 		}
+		// 		return
+		// 	}
+
+		// console.log('Keyboard.backspace',deleteSel.toString());
+		const deleteSel = selection.moveStart(-1)
+		if (!deleteSel) return
+		tr.transform.delete(deleteSel)?.Dispatch()
+	}
+
+	collapseSelectionBefore(tr: Transaction, nodes: Node[]) {
 		const firstNode = first(nodes)!;
 		if (firstNode.hasFocusable) {
 			const focusNode = firstNode.find(n => n.isFocusable, { direction: 'forward' })
 			const pin = Pin.toStartOf(focusNode!)
 			console.log('pin', pin?.toString());
-			app.tr
-				.select(PinnedSelection.fromPin(pin!))
-				.dispatch();
+			tr
+				.Select(PinnedSelection.fromPin(pin!))
+				.Dispatch();
 			return
 		}
 
 		const focusNode = firstNode.prev(n => n.isFocusable);
 		const pin = Pin.toEndOf(focusNode!)
-		app.tr
-			.select(PinnedSelection.fromPin(pin!))
-			.dispatch();
+		tr
+			.Select(PinnedSelection.fromPin(pin!))
+			.Dispatch();
 		return
 	}
 
-	collapseSelectionAfter(app: Carbon, nodes: Node[]) {
+	collapseSelectionAfter(tr: Transaction, nodes: Node[]) {
 		const lastNode = last(nodes)!;
 		if (lastNode.hasFocusable) {
 			const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
 			const pin = Pin.toEndOf(focusNode!)
-			app.tr
-				.select(PinnedSelection.fromPin(pin!))
-				.dispatch();
+			tr
+				.Select(PinnedSelection.fromPin(pin!))
+				.Dispatch();
 			return
 		}
 
 		const focusNode = lastNode.next(n => n.isFocusable);
 		const pin = Pin.toStartOf(focusNode!)
-		app.tr
-			.select(PinnedSelection.fromPin(pin!))
-			.dispatch();
+		tr
+			.Select(PinnedSelection.fromPin(pin!))
+			.Dispatch();
 	}
 
 
 	shiftUp(ctx: EventContext<KeyboardEvent>) {
-		const { app, node } = ctx;
+		const { app, cmd } = ctx;
 		const { selection } = app;
 
 		if (selection.isInline) return
@@ -366,13 +345,13 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		// ctx.event.preventDefault();
 		const after = PinnedSelection.fromNodes([...nodes, block]);
-		app.tr
-			.select(after)
-			.dispatch();
+		cmd
+			.Select(after)
+			.Dispatch();
 	}
 
 	shiftDown(ctx: EventContext<KeyboardEvent>) {
-		const { app, node } = ctx;
+		const { app, cmd } = ctx;
 		const { selection } = app;
 		if (selection.isInline) return
 		preventAndStopCtx(ctx);
@@ -388,16 +367,15 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 
 		// ctx.event.preventDefault();
 		const after = PinnedSelection.fromNodes([...nodes, block]);
-		app.tr.select(after).dispatch();
+		cmd.Select(after).Dispatch();
 	}
 
 	// handles enter event
 	enter(ctx: EventContext<KeyboardEvent>) {
 		console.log('Enter event...');
 		preventAndStopCtx(ctx);
-
-		const { app } = ctx;
-		const { selection, cmd } = app;
+		const { app, cmd } = ctx;
+		const { selection } = app;
 		const { start, end } = selection
 		const { node } = start;
 
@@ -412,7 +390,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				// if there is a text block, put the cursor at the end of the text block
 				if (textBlock) {
 					const pin = Pin.toEndOf(textBlock)!
-					app.tr.select(PinnedSelection.fromPin(pin)).dispatch();
+					cmd.Select(PinnedSelection.fromPin(pin)).Dispatch();
 					return true
 				}
 			}
@@ -421,7 +399,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 				if (n.hasFocusable) {
 					const focusable = n.find(n => n.isFocusable);
 					const pin = Pin.toStartOf(focusable!)!
-					app.tr.select(PinnedSelection.fromPin(pin)).dispatch();
+					cmd.Select(PinnedSelection.fromPin(pin)).Dispatch();
 					return true
 				}
 			});
@@ -434,10 +412,10 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			if (!section) return false
 
 			const after = PinnedSelection.fromPin(Pin.toStartOf(section)!)!;
-			app.tr
-				.add(insertAfterAction(lastBlock, section))
-				.select(after, ActionOrigin.UserInput)
-				.dispatch();
+			cmd
+				.Add(insertAfterAction(lastBlock, section))
+				.Select(after, ActionOrigin.UserInput)
+				.Dispatch();
 
 			return
 		}
@@ -465,7 +443,7 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		}
 
 		cmd.transform
-			.split(splitBlock, selection, { splitType })?.dispatch();
+			.split(splitBlock, selection, { splitType })?.Dispatch();
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {
@@ -473,19 +451,19 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		ctx.event.preventDefault();
 		ctx.event.stopPropagation();
 
-		const { event } = ctx;
+		const { event, cmd } = ctx;
 		const { app, node } = ctx;
-		const { selection, cmd } = app;
+		const { selection } = app;
 
 		// delete node selection if any
 		if (selection.isBlock) {
-			cmd.transform.delete(selection, { fall: 'after' })?.dispatch();
+			cmd.transform.delete(selection, { fall: 'after' })?.Dispatch();
 			return
 		}
 
 		const { isCollapsed, head } = selection;
 		if (!isCollapsed) {
-			cmd.transform.delete()?.dispatch()
+			cmd.transform.delete()?.Dispatch()
 			return
 		}
 
@@ -495,27 +473,27 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 			const nextTextBlock = textBlock?.next(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
 			if (!nextTextBlock || !textBlock) return
 
-			cmd.transform.merge(textBlock, nextTextBlock)?.dispatch();
+			cmd.transform.merge(textBlock, nextTextBlock)?.Dispatch();
 			return
 		}
 
 
 		event.stopPropagation()
 		console.log('Keyboard.backspace', selection.moveStart(1)?.toString());
-		cmd.transform.delete(selection.moveStart(1)!)?.dispatch()
+		cmd.transform.delete(selection.moveStart(1)!)?.Dispatch()
 	}
 
 	up(ctx: EventContext<KeyboardEvent>) {
-		const { app, node } = ctx;
+		const { app, node, cmd } = ctx;
 		const { selection } = app;
 		if (selection.isInline) return
 		preventAndStopCtx(ctx);
 
-		const {nodes } = selection;
+		const {nodes} = selection;
 		if (nodes.length > 1) {
-			const lastNode = first(nodes) as Node;
+			const lastNode = first(sortNodes(nodes, 'path')) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
-			app.tr.select(after).dispatch()
+			cmd.Select(after).Dispatch()
 			return
 		}
 
@@ -523,32 +501,33 @@ export class KeyboardAfterPlugin extends AfterPlugin {
 		if (!block || block.isDocument) return
 
 		const after = PinnedSelection.fromNodes(block);
-		app.tr.select(after).dispatch()
+		cmd.Select(after).Dispatch()
 	}
 
 	down(ctx: EventContext<KeyboardEvent>) {
-		const { app, node } = ctx;
+		const { app, node, cmd } = ctx;
 		const { selection } = app;
 		if (selection.isInline) return
 		preventAndStopCtx(ctx)
 
 		const {nodes } = selection;
 		if (nodes.length > 1) {
-			const lastNode = last(nodes) as Node;
+			const lastNode = last(sortNodes(nodes, 'path')) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
-			app.tr.select(after).dispatch()
+			cmd.Select(after).Dispatch()
 			return
 		}
 
 		const block = nextSelectableBlock(node, true)
-		console.log('nextContainerBlock', block);
+		// console.log('nextContainerBlock', block);
 		if (!block) return
 
 		const after = PinnedSelection.fromNodes(block);
-		app.tr.select(after).dispatch()
+		cmd.Select(after).Dispatch()
 	}
 }
 
+// find previous selectable block wrt the node
 const prevSelectableBlock = (node: Node, within = false) => {
 	const block = node.chain.find(n => n.isContainerBlock) as Node;
 	const { prevSibling } = block
@@ -567,6 +546,7 @@ const prevSelectableBlock = (node: Node, within = false) => {
 	return block?.prev(n => n.isBlockSelectable);
 }
 
+// find next selectable block wrt the node
 const nextSelectableBlock = (node: Node, within = false) => {
 	if (within) {
 		const block: Optional<Node> = node.chain.find(n => n.isBlockSelectable);
@@ -579,5 +559,3 @@ const nextSelectableBlock = (node: Node, within = false) => {
 
 	return node?.next(n => n.isBlockSelectable, { order: 'pre' });
 }
-
-

@@ -1,14 +1,14 @@
 import { NodeIdSet } from "./BSet";
 import { Range } from './Range';
 import { NodeId } from './NodeId';
-import { CarbonState } from "./CarbonState";
+import { State } from "./State";
 import { sortBy } from 'lodash';
 
 export class SelectionPatch {
 	ids: NodeIdSet = new NodeIdSet();
 	ranges: Range[] = [];
 
-	static fromState(state: CarbonState) {
+	static fromState(state: State) {
 		let patch = new SelectionPatch();
 
 		return patch;

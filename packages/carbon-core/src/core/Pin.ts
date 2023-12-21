@@ -19,6 +19,8 @@ export const IDENTITY_OFFSET = -1;
 // materialized pin is a pin that is not a reference to a i
 export class Pin {
 	// focus node
+	// mostly the node is a block node
+	// down pin is a pin that is pointing to a leaf node (eg. text node)
 	node: Node;
 	// focus offset
 	offset: number;
@@ -68,6 +70,14 @@ export class Pin {
 		}
 
 		return pin?.moveBy(offset);
+	}
+
+	static toBefore(node: Node): Pin {
+		return Pin.create(node, -1);
+	}
+
+	static toAfter(node: Node): Pin {
+		return Pin.create(node, node.size + 1);
 	}
 
 	static toStartOf(node: Node): Optional<Pin> {

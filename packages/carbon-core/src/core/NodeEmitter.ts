@@ -7,30 +7,55 @@ import { NodeWatcher } from "./types";
 import { EventEmitter } from 'events';
 import { Optional } from "@emrgen/types";
 
+const nodeIdType = (n: any) => n instanceof NodeId || n instanceof Node;
+
+export class PluginBus {
+	bus: EventEmitter = new EventEmitter();
+	nodes: NodeTopicEmitter = new NodeTopicEmitter();
+
+	on(event: string, listener: (...args: any) => void) {
+		this.bus.on(event, listener);
+	}
+
+	off(event: string, listener: (...args: any) => void) {
+		this.bus.off(event, listener);
+	}
+
+	emit(event: string, ...args: any[]) {
+		this.bus.emit(event, ...args);
+	}
+}
+
 // handles events by executing registered callbacks
-export class NodeTopicEmitter<E> extends EventEmitter {
+export class NodeTopicEmitter {
 
-	private subscribers: Map<E, BTree<NodeId, Set<NodeWatcher>>> = new Map();
+	private listeners: Map<string | symbol, BTree<NodeId, Set<NodeWatcher>>> = new Map();
 
-	publish(event: E, node: Node, parent: Optional<Node> = undefined) {
-		// console.log('publish', event, node.id,node.version, node.textContent);
-
-		const listeners = this.subscribers.get(event)?.get(node.id);
-		// console.log(listeners);
-		listeners?.forEach(cb => cb(node, parent));
-	}
-
-	subscribe(id: NodeId, event: E, cb: NodeWatcher) {
-		if (!this.subscribers.has(event)) {
-			this.subscribers.set(event, new BTree(undefined, NodeIdComparator));
+	on(id: NodeId, event: string | symbol, cb: NodeWatcher) {
+		if (!this.listeners.has(event)) {
+			this.listeners.set(event, new BTree(undefined, NodeIdComparator));
 		}
-		const listeners = this.subscribers.get(event)?.get(id) ?? new Set();
+		const listeners = this.listeners.get(event)?.get(id) ?? new Set();
 		listeners.add(cb)
-		this.subscribers.get(event)?.set(id, listeners);
+
+		this.listeners.get(event)?.set(id, listeners);
 	}
 
-	unsubscribe(id: NodeId, event: E, cb: NodeWatcher) {
-		this.subscribers.get(event)?.get(id)?.delete(cb);
+	off(id: NodeId, event: string | symbol, cb: NodeWatcher) {
+		this.listeners.get(event)?.get(id)?.delete(cb);
+	}
+
+	emit (node: Node, event: string | symbol, ...args: any[]) {
+		const listeners = this.listeners.get(event)?.get(node.id);
+		listeners?.forEach(cb => {
+			// console.log('emitting', event, node.id, cb);
+			cb(node, ...args)
+		});
+
+		// emit wildcard event
+		if (event !== '*') {
+			this.emit(node, '*', ...args);
+		}
 	}
 }
 
@@ -41,27 +66,26 @@ export class NodeEmitter {
 	subscribers: BTree<NodeId, NodeWatcher[]> = new BTree(undefined, NodeIdComparator);
 
 	// subscribe to node by id
-	subscribe(id: NodeId, cb: NodeWatcher) {
+	on(id: NodeId, cb: NodeWatcher) {
 		const listeners = this.subscribers.get(id) ?? [];
 		listeners.push(cb);
 		this.subscribers.set(id, listeners);
 		return () => {
-			this.unsubscribe(id, cb)
+			this.off(id, cb)
 		}
 	}
 
 	// unsubscribe from node by id
-	unsubscribe(id: NodeId, cb: NodeWatcher) {
+	off(id: NodeId, cb: NodeWatcher) {
 		const listeners = this.subscribers.get(id) ?? [];
 		this.subscribers.set(id, listeners.filter(w => w !== cb));
 	}
 
 	// publish updated node to all subscribers
-	publish(node: Node) {
+	emit(node: Node) {
 		if (node) {
 			const listeners = this.subscribers.get(node.id) ?? [];
-			console.log(node.name, node.id.toString(), listeners, Array.from(this.subscribers.keys()).map(n => n.toString()))
-			// each(listeners, cb => cb(node));
+			each(listeners, cb => cb(node));
 		}
 	}
 }

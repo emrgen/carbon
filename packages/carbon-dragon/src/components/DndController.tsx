@@ -9,10 +9,11 @@ import {
   Transaction,
   prevent,
   useCarbon,
-  useCarbonOverlay,
+  useCarbonOverlay, State
 } from "@emrgen/carbon-core";
 import { elementBound } from "../core/utils";
 import { DraggableHandle } from "./DraggableHandle";
+import { throttle } from "lodash";
 
 export function DndController() {
   const app = useCarbon();
@@ -65,7 +66,7 @@ export function DndController() {
       if (!region) return;
       const bound = elementBound(el);
 
-      // console.log(el, bound, portalPosition);
+      // console.log(node.name, node.type.dragHandle);
       if (node.type.dragHandle) {
         // console.log("onMouseIn", node.id.toString(), bound);
         setDragHandlePosition({
@@ -75,21 +76,22 @@ export function DndController() {
           height: 20,
         });
       } else {
-        // setDragHandlePosition({
-        //   left: bound.left - portalPosition.x - 20,
-        //   top: bound.top - portalPosition.y,
-        //   width: bound.right - bound.left - 100,
-        //   height: bound.bottom - bound.top,
-        // });
+        setDragHandlePosition({
+          left: bound.left - portalPosition.x,
+          top: bound.top - portalPosition.y,
+          width: bound.right - bound.left,
+          height: bound.bottom - bound.top,
+        });
       }
       setShowDragHandle(true);
       setDragHandleNode(node);
-
     },
     [dragHandleNode, dnd.isMouseDown, dnd.region, app.store, portalPosition]
   );
 
+  // reset drag handle
   const resetDragHandle = useCallback(() => {
+    if (!dnd.draggedNodeId) return;
     setIsDragging(false);
     setDraggedNode(null);
     setShowDragHandle(false);
@@ -117,6 +119,7 @@ export function DndController() {
       setDraggedNode(e.node);
       setShowDragHandle(true);
       app.disable();
+      console.log('----------');
       dnd.draggedNodeId = e.node.id;
       showOverlay(e.id.toString());
     },
@@ -132,16 +135,15 @@ export function DndController() {
     [resetDragHandle, app, hideOverlay]
   );
 
-  const onTransaction = useCallback(
-    (tr: Transaction) => {
-      // console.log(tr.updatesContent, tr);
-      if (tr.updatesContent) {
-        console.log("updated content");
+  const onChange = useCallback(
+    (state: State) => {
+      if (state.isContentChanged) {
         resetDragHandle();
       }
     },
     [resetDragHandle]
   );
+
 
   const onEditorMouseOver = useCallback((e) => {
     // setShowDragHandle(true);
@@ -152,21 +154,22 @@ export function DndController() {
   }, []);
 
   useEffect(() => {
+    const thMouseIn = throttle(onMouseIn, 100);
     // editor.on(EditorEventsIn.mouseOver, onEditorMouseOver);
     // editor.on(EditorEventsIn.mouseOut, onEditorMouseOut);
-    app.on("transaction", onTransaction);
+    app.on("changed", onChange);
     app.on("keyDown", onKeyDown);
-    dnd.on("mouse:in", onMouseIn);
+    dnd.on("mouse:in", thMouseIn);
     dnd.on("mouse:out", onMouseOut);
     dnd.on("drag:start", onDragStart);
     dnd.on("drag:end", onDragEnd);
     dnd.on("hide:drag:handle", resetDragHandle);
     return () => {
-      app.off("mouseIn", onEditorMouseOver);
-      app.off("mouseOut", onEditorMouseOut);
-      app.off("transaction", onTransaction);
+      // app.off("mouseIn", onEditorMouseOver);
+      // app.off("mouseOut", onEditorMouseOut);
+      app.off("changed", onChange);
       app.off("keyDown", onKeyDown);
-      dnd.off("mouse:in", onMouseIn);
+      dnd.off("mouse:in", thMouseIn);
       dnd.off("mouse:out", onMouseOut);
       dnd.off("drag:start", onDragStart);
       dnd.off("drag:end", onDragEnd);
@@ -182,7 +185,7 @@ export function DndController() {
     onKeyDown,
     onMouseIn,
     onMouseOut,
-    onTransaction,
+    onChange,
     resetDragHandle,
   ]);
 
@@ -199,9 +202,9 @@ export function DndController() {
   return (
     <>
     <div className="carbon-dnd-portal" ref={portalRef}>
-      {dragHandleNode && (
+      {(
         <DraggableHandle
-          node={dragHandleNode}
+          node={dragHandleNode ?? Node.IDENTITY}
           style={{
             ...dragHandlePosition,
             opacity: dragHandleOpacity,

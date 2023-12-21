@@ -22,7 +22,7 @@ export const EquationComp = (props: RendererProps) => {
     katex.render(node.textContent, ref.current, {
       output: "mathml",
     });
-  }, [node, node.version]);
+  }, [node, node.renderVersion]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -44,8 +44,8 @@ export const EquationComp = (props: RendererProps) => {
     // })!
     // app.tr
       // .setContent(node.id, BlockContent.create([title!]))
-      // .forceRender([node.id]).dispatch();
-    app.tr.activateNodes([node.id]).dispatch();
+      // .forceRender([node.id]).Dispatch();
+    app.tr.activateNodes([node.id]).Dispatch();
   };
 
   return (

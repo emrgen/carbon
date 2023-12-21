@@ -48,7 +48,7 @@ export default function TimeTravel(props: TimeTravelProps) {
     trs?.forEach(tr => {
       const change = tr.filter(a => !(a instanceof SelectAction))
       change.readOnly = true;
-      change.dispatch();
+      change.Dispatch();
     });
 
     app.emit('timeTravel', tree);
@@ -60,7 +60,7 @@ export default function TimeTravel(props: TimeTravelProps) {
     //   change.readOnly = true;
 
     //   const interval = setTimeout(() => {
-    //     change.dispatch();
+    //     change.Dispatch();
     //
     //   }, counter * 400);
     //   newIntervals.push(interval);

@@ -12,12 +12,7 @@ import {
 } from "@emrgen/carbon-blocks";
 
 import {
-  CarbonChangeContext,
-  CarbonContent,
-  CarbonContext,
-  CarbonEvents,
-  CarbonModal,
-  CarbonState,
+  State,
   Extension,
   Renderer,
   RendererProps,
@@ -113,6 +108,9 @@ const data = node("carbon", [
   ]),
 ]);
 
+// @ts-ignore
+data.id = NodeId.ROOT.toString();
+
 const ImageComp = (props: RendererProps) => {
   return (
     <div contentEditable="false" suppressContentEditableWarning>
@@ -139,7 +137,7 @@ export default function Dev() {
   const app = useCreateCarbon('dev', data, extensions);
 
   useEffect(() => {
-    const onChange = (state: CarbonState) => {
+    const onChange = (state: State) => {
       state.content.forAll((node) => {
         // console.log(node.id.toString(), node.name, node.properties.toKV());
       });

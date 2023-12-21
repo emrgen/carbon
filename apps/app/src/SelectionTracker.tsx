@@ -1,5 +1,5 @@
 import {
-  CarbonState,
+  State,
   EventsOut,
   PinnedSelection,
   useCarbon,
@@ -12,9 +12,9 @@ export default function SelectionTracker() {
   const [selections, setSelections] = useState<PinnedSelection[]>([]);
 
   useEffect(() => {
-    const onChange = (state: CarbonState) => {
+    const onChange = (state: State) => {
       const selections: PinnedSelection[] = [];
-      let curr: Optional<CarbonState> = state;
+      let curr: Optional<State> = state;
       let depth = 0
       while (curr) {
         selections.push(curr.selection);

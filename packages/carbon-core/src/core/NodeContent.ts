@@ -10,6 +10,8 @@ export interface NodeContent {
 	children: Node[];
 	textContent: string;
 	isEmpty: boolean;
+	version: number;
+
 	setParentId(parentId: NodeId): NodeContent;
 	setParent(parent: Node): NodeContent;
 	replace(node: Node, by: Node[]): NodeContent;
@@ -37,6 +39,8 @@ interface BlockContentProps {
 export class BlockContent implements NodeContent {
 	nodes: Node[]
 	frozen: boolean = false
+
+	version: number = 0;
 
 	get children(): Node[] {
 		return this.nodes;
@@ -93,38 +97,40 @@ export class BlockContent implements NodeContent {
 
 	insert(node: Node, offset: number): NodeContent {
 		const { children } = this;
-		const content = flatten([children.slice(0, offset), node, children.slice(offset)]);
-		return BlockContent.create(content)
+		this.nodes = flatten([children.slice(0, offset), node, children.slice(offset)]);
+		return this;
 	}
 
 	prepend(nodes: Node[]): NodeContent {
-		return BlockContent.create([...nodes, ...this.nodes,])
+		this.nodes = [...nodes, ...this.nodes];
+		return this
 	}
 
 	append(nodes: Node[]): NodeContent {
-		return BlockContent.create([...this.nodes, ...nodes])
+		this.nodes = [...this.nodes, ...nodes];
+		return this
 	}
 
 	replace(node: Node, by: Node[]): NodeContent {
-		const nodes = flatten(this.nodes.map(n => {
+		this.nodes = flatten(this.nodes.map(n => {
 			return n.eq(node) ? by : n;
 		}));
 
-		return BlockContent.create(nodes);
+		return this
 	}
 
 	insertBefore(before: Node, nodes: Node[]): NodeContent {
 		const { children } = this
 		const index = this.indexOf(before);
-		const content = flatten([children.slice(0, index), nodes, children.slice(index)]);
-		return BlockContent.create(content)
+		this.nodes = flatten([children.slice(0, index), nodes, children.slice(index)]);
+		return this
 	}
 
 	insertAfter(after: Node, nodes: Node[]): NodeContent {
 		const { children } = this;
 		const index = this.indexOf(after);
-		const content = flatten([children.slice(0, index + 1), nodes, children.slice(index + 1)]);
-		return BlockContent.create(content)
+		this.nodes = flatten([children.slice(0, index + 1), nodes, children.slice(index + 1)]);
+		return this;
 	}
 
 	remove(node: Node): boolean {
@@ -187,6 +193,7 @@ interface TextContentProps {
 export class InlineContent implements NodeContent {
 	text: string;
 	frozen: boolean = false;
+	version: number = 0;
 
 	get isEmpty() {
 		return !this.text
@@ -281,6 +288,7 @@ export class InlineContent implements NodeContent {
 
 	updateText(text: string) {
 		this.text = text;
+		this.version += 1;
 	}
 
 	view(): NodeContent {

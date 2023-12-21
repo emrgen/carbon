@@ -66,6 +66,7 @@ export class RectSelect extends EventEmitter {
 				this.selectNodes([]);
 			}
 		}
+
 		this.emit(RectSelectorEvent.MouseDown, e, node);
 	}
 
@@ -139,7 +140,6 @@ export class RectSelect extends EventEmitter {
 
 		if (!collides.length) {
 			if (this.noSelectionChange([])) return
-			const { tr } = app;
 			this.selectNodes([]);
 			return;
 		}
@@ -174,7 +174,6 @@ export class RectSelect extends EventEmitter {
 
 		if (selectedMap.sub(parentMap).size == 0) {
 			if (this.noSelectionChange([lowestNode.id])) return
-			const { tr } = app;
 			this.selectNodes([lowestNode.id]);
 			return;
 		}
@@ -196,8 +195,7 @@ export class RectSelect extends EventEmitter {
 		console.log('selectNodes', ids.map(id => id.toString()));
 		const { app } = this;
 		if (this.noSelectionChange(ids)) return
-		const { tr } = app;
-		tr.select(PointedSelection.fromNodes(ids)).dispatch();
+		app.cmd.Select(PointedSelection.fromNodes(ids)).Dispatch();
 	}
 
 	private noSelectionChange(ids: NodeId[]) {

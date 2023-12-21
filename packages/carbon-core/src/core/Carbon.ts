@@ -2,7 +2,7 @@ import { Optional } from "@emrgen/types";
 import { Node } from "./Node";
 import { EventEmitter } from "events";
 import { querySelector } from "../utils/domElement";
-import { CarbonState } from "./CarbonState";
+import { State } from "./State";
 import { ChangeManager } from "./ChangeManager";
 import { EventsIn, EventsOut } from "./Event";
 import { EventManager } from "./EventManager";
@@ -14,16 +14,20 @@ import { Schema } from "./Schema";
 import { SelectionManager } from "./SelectionManager";
 import { Transaction } from "./Transaction";
 import { TransactionManager } from "./TransactionManager";
-import { CarbonCommands, Maps, SerializedNode } from "./types";
-import { cloneDeep, first, isFunction, merge } from "lodash";
-import { CarbonCommandChain } from "./CarbonCommandChain";
-import { CarbonMessageBus } from "./MessageBus";
+import {  Maps, SerializedNode } from "./types";
+import { first, isFunction } from "lodash";
 import { CarbonPlugin } from "./CarbonPlugin";
 import { StateScope } from "./StateScope";
-import { NodeMap } from "./NodeMap";
-import { CarbonRuntime } from "./Runtime";
+import { Runtime } from "./Runtime";
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginStates } from "./PluginState";
+import { CarbonCommand } from "./CarbonCommand";
+
+declare module '@emrgen/carbon-core' {
+	export interface Carbon {
+		print(): void;
+	}
+}
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -36,12 +40,13 @@ export class Carbon extends EventEmitter {
 	// for external application use
 	private readonly pluginBus: PluginEmitter;
 	private readonly pluginStates: PluginStates;
+	private readonly commands: CarbonCommand;
 
 	schema: Schema;
-	state: CarbonState; // immutable state
-	runtime: CarbonRuntime;
+	state: State; // immutable state
+	runtime: Runtime;
 	store: NodeStore;
-	cmd: CarbonCommands;
+
 	// chain: CarbonCommandChain;
 	change: ChangeManager;
 
@@ -55,8 +60,13 @@ export class Carbon extends EventEmitter {
 	private cursorParkingElement: Optional<HTMLDivElement>;
 	ticks: Maps<Carbon, Optional<Transaction>>[];
 
-	constructor(state: CarbonState, schema: Schema, pm: PluginManager, renderer: RenderManager) {
+	committed: boolean;
+	private counter: number = 0;
+
+	constructor(state: State, schema: Schema, pm: PluginManager, renderer: RenderManager) {
 		super();
+
+		this.committed = true;
 
 		this.pm = pm;
 		this.rm = renderer;
@@ -64,7 +74,7 @@ export class Carbon extends EventEmitter {
 
 		this.state = state;
 		StateScope.set(this.state.scope, this.state.nodeMap);
-		this.runtime = new CarbonRuntime();
+		this.runtime = new Runtime();
 
 		this.store = new NodeStore(this);
 
@@ -77,7 +87,7 @@ export class Carbon extends EventEmitter {
 
 		this.change = new ChangeManager(this, this.sm, this.tm, pm);
 
-		this.cmd = pm.commands(this);
+		this.commands = pm.commands();
 		// this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
 
 		this.enabled = true;
@@ -122,10 +132,22 @@ export class Carbon extends EventEmitter {
 		return this._contentElement;
 	}
 
+	// return a proxy transaction
+	get cmd(): Transaction {
+		// if (!this.committed) {
+		// 	throw new Error('cannot create a new command while there is a pending transaction')
+		// }
+		this.committed = false;
+		return Transaction.create(this, this.commands, this.tm, this.pm, this.sm).Proxy();
+	}
+
 	// create a new transaction
 	get tr(): Transaction {
-		// if (this.chain.active) return this.chain;
-		return Transaction.create(this, this.tm, this.pm, this.sm);
+		if (!this.committed) {
+			throw new Error('cannot create a new transaction while there is a pending transaction')
+		}
+		this.committed = false;
+		return Transaction.create(this, this.commands, this.tm, this.pm, this.sm);
 	}
 
 	plugin(name: string): Optional<CarbonPlugin> {
@@ -154,13 +176,13 @@ export class Carbon extends EventEmitter {
 		}
 
 		if (type === EventsIn.custom) {
-			this.em.onCustomEvent(event);
+			this.em.onCustomEvent(type, event);
 		} else {
 			this.em.onEvent(type, event);
 		}
 	}
 
-	private updateState(state: CarbonState, tr: Transaction) {
+	private updateState(state: State, tr: Transaction) {
 		if (!state.isContentChanged && !state.isSelectionChanged) {
 			console.warn('new state is not dirty');
 			return
@@ -172,13 +194,11 @@ export class Carbon extends EventEmitter {
 		}
 
 		// keep three previous states
-
-
 		this.state = state;
 		StateScope.set(state.scope, state.nodeMap);
+		this.change.update(tr, state)
 
 		this.emit(EventsOut.transactionCommit, tr);
-		this.change.update(tr);
 	}
 
 	component(name: string) {
@@ -188,14 +208,6 @@ export class Carbon extends EventEmitter {
 	// sanitize(node: Node): SerializedNode {
 	// 	return this.pm.serialize(this, node);
 	// }
-
-	serialize(node: Node): Optional<SerializedNode> {
-		return this.pm.serialize(this, node);
-	}
-
-	deserialize(serialized: string): Node[] {
-		return this.pm.deserialize(this, serialized);
-	}
 
 	blur() {
 		this.sm.blur();
@@ -236,8 +248,6 @@ export class Carbon extends EventEmitter {
 		this.ticks.push(cb);
 	}
 
-
-
 	processTick() {
 		if (this.ticks.length) {
 			const tick = first(this.ticks);
@@ -245,8 +255,8 @@ export class Carbon extends EventEmitter {
 			const tr = tick?.(this);
 			if (!tr) return
 			if (tr instanceof Transaction) {
-				tr.onTick = true;
-				tr.dispatch();
+				// tr.onTick = true;
+				tr.Dispatch();
 			} else if (isFunction(tr)) {
 				(tr as Function)(this);
 				return true;
@@ -256,4 +266,3 @@ export class Carbon extends EventEmitter {
 		return false;
 	}
 }
-

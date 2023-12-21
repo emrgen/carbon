@@ -62,14 +62,14 @@ export const CodeComp = (props: RendererProps) => {
 //       language: 'go',
 //     }}
 //     onFocus={() => {
-//       app.tr.selectNodes([]).dispatch();
+//       app.tr.selectNodes([]).Dispatch();
 //       app.disable();
 //     }}
 //     onBlur={() => app.enable()}
 //     onChange={(value) => {
 //       app.enable(() => {
 //         const text = app.schema.text(value)!;
-//         app.tr.setContent(node.id, BlockContent.create([text])).dispatch();
+//         app.tr.setContent(node.id, BlockContent.create([text])).Dispatch();
 //       });
 //     }}
 //   />
@@ -86,8 +86,8 @@ const CodeContent = (props: RendererProps) => {
     if (node.parent.properties.node.typeChanged) {
       console.log("focus");
       app.tr
-        .updateProps(node.parent.id, { node: { typeChanged: false } })
-        .dispatch();
+        .Update(node.parent.id, { node: { typeChanged: false } })
+        .Dispatch();
       refText.current?.focus();
     }
   }, [app, node]);
@@ -122,7 +122,7 @@ const CodeContent = (props: RendererProps) => {
     if (e.key == "Escape") {
       stop(e);
       app.parkCursor();
-      app.tr.selectNodes([node.parent!.id]).dispatch();
+      app.tr.selectNodes([node.parent!.id]).Dispatch();
     }
 
     // if back spaced at the beginning of the line
@@ -139,13 +139,13 @@ const CodeContent = (props: RendererProps) => {
         app.enable();
 
         const { tr } = app;
-        tr.change(parent.id, parent.name, "section");
-        tr.updateProps(parent.id, { node: { typeChanged: true } });
-        tr.select(
+        tr.Change(parent.id, parent.name, "section");
+        tr.Update(parent.id, { node: { typeChanged: true } });
+        tr.Select(
           PinnedSelection.fromPin(Pin.toStartOf(parent)!),
           ActionOrigin.UserInput
         );
-        tr.dispatch();
+        tr.Dispatch();
       }
     }
   };
@@ -159,7 +159,7 @@ const CodeContent = (props: RendererProps) => {
     const { value } = e.target;
     const text = app.schema.text(value)!;
     app.enable(() => {
-      app.tr.setContent(node.id, BlockContent.create([text])).dispatch();
+      app.tr.SetContent(node.id, BlockContent.create([text])).Dispatch();
     });
   };
 
@@ -204,7 +204,7 @@ const CodeContent = (props: RendererProps) => {
           onKeyUp={handleKeyUp}
           onChange={handleOnChange}
           onFocus={() => {
-            app.tr.selectNodes([]).dispatch();
+            app.tr.selectNodes([]).Dispatch();
             app.disable();
           }}
           onBlur={() => app.enable()}

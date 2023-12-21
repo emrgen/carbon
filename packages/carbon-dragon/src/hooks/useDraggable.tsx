@@ -98,24 +98,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 
       const onMouseMove = (event) => {
         const position = getEventPosition(activatorEvent, event);
-        if (!isDragging) {
-          if (
-            Math.pow(position.deltaX, 2) + Math.pow(position.deltaY, 2) >
-            Math.pow(distance, 2)
-          ) {
-            isDragging = true;
-            dnd.onDragStart({
-              activatorEvent,
-              event,
-              node,
-              id: id ?? node.id,
-              state: initState,
-              position: getEventPosition(activatorEvent, activatorEvent),
-            });
-          }
-
-          return;
-        } else {
+        if (isDragging) {
           dnd.onDragMove({
             activatorEvent,
             event,
@@ -124,23 +107,37 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
             state: initState,
             position,
           });
+          return;
+        }
+
+        // check if the drag start can be activated
+        if (distance === 0) {
+          isDragging = true;
+        } else if (
+          Math.pow(position.deltaX, 2) + Math.pow(position.deltaY, 2) >
+          Math.pow(distance, 2)
+        ) {
+          isDragging = true;
+        }
+
+        if (isDragging) {
+          dnd.onDragStart({
+            activatorEvent,
+            event,
+            node,
+            id: id ?? node.id,
+            state: initState,
+            position: getEventPosition(activatorEvent, activatorEvent),
+          });
         }
       };
+
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("mouseup", onMouseUp);
 
-      if (distance === 0) {
-        isDragging = true;
-        const position = getEventPosition(activatorEvent, activatorEvent);
-        initState = onStart?.(event, position) ?? {};
-        dnd.onDragStart({
-          activatorEvent,
-          event,
-          node,
-          id: id ?? node.id,
-          position,
-          state: initState,
-        });
+      return () => {
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
       }
     },
     [distance, dnd, id, isDisabled, node, onStart, ref]

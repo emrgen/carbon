@@ -1,30 +1,40 @@
-import { Carbon, CarbonPlugin, Transaction } from "@emrgen/carbon-core";
+import { Carbon, CarbonPlugin, PinnedSelection, PointedSelection, Selection, Transaction } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { MarkSet } from "../core/Mark";
 
 
 // add formatter commands to the CarbonCommands interface
 declare module '@emrgen/carbon-core' {
-  export interface CarbonCommands {
-    formatter: {
-      bold: (node: Node, start: number, end: number) => Optional<Transaction>;
-      italic: (node: Node, start: number, end: number) => Optional<Transaction>;
-      underline: (node: Node, start: number, end: number) => Optional<Transaction>;
-      strike: (node: Node, start: number, end: number) => Optional<Transaction>;
-      code: (node: Node, start: number, end: number) => Optional<Transaction>;
-      link: (node: Node, start: number, end: number) => Optional<Transaction>;
-      subscript: (node: Node, start: number, end: number) => Optional<Transaction>;
-      superscript: (node: Node, start: number, end: number) => Optional<Transaction>;
-      color: (node: Node, start: number, end: number, color: string) => Optional<Transaction>;
-      background: (node: Node, start: number, end: number, color: string) => Optional<Transaction>;
-      activeMarks: () => MarkSet;
+  export interface Transaction {
+    bold(selection: Selection): Transaction;
+    italic(selection: Selection): Transaction;
+    underline(selection: Selection): Transaction;
+    strike(selection: Selection): Transaction;
+    code(selection: Selection): Transaction;
+    link(link: string, selection: Selection): Transaction;
+    subscript(selection: Selection): Transaction;
+    superscript(selection: Selection): Transaction;
+    color(color: string, selection: Selection): Transaction;
+    background(color: string, selection: Selection): Transaction;
+
+    format: {
+      bold: (selection?: Selection) => Transaction,
+      italic: (selection?: Selection) => Transaction,
+      underline: (selection?: Selection) => Transaction,
+      strike: (selection?: Selection) => Transaction,
+      code: (selection?: Selection) => Transaction,
+      link: (link: string, selection?: Selection) => Transaction,
+      subscript: (selection?: Selection) => Transaction,
+      superscript: (selection?: Selection) => Transaction,
+      color: (color: string, selection?: Selection) => Transaction,
+      background: (color: string, selection: Selection) => Transaction,
     }
   }
 }
 
 export class FormatterPlugin extends CarbonPlugin {
 
-  name = 'formatter';
+  name = 'format';
 
   commands(): Record<string, Function> {
     return {
@@ -38,51 +48,46 @@ export class FormatterPlugin extends CarbonPlugin {
       superscript: this.superscript,
       color: this.color,
       background: this.background,
-      activeMarks: this.activeMarks
     }
   }
 
-  // a list of marks that are currently active
-  activeMarks(app: Carbon) {
+  bold(tr: Transaction, selection: Selection = tr.app.selection) {
+    console.log('bold', selection.toString())
   }
 
-  bold(app: Carbon) {
-    console.log('bold')
-  }
-
-  italic(app: Carbon) {
+  italic(tr: Transaction, selection: Selection = tr.app.selection) {
     console.log('italic')
   }
 
-  underline(app: Carbon) {
+  underline(tr: Transaction, selection: Selection) {
     console.log('underline')
   }
 
-  strike(app: Carbon) {
+  strike(app: Carbon, tr: Transaction, selection: Selection) {
     console.log('strike')
   }
 
-  code(app: Carbon) {
+  code(tr: Transaction, selection: Selection) {
     console.log('code')
   }
 
-  link(app: Carbon) {
+  link(tr: Transaction, link: string, selection: Selection) {
     console.log('link')
   }
 
-  subscript(app: Carbon) {
+  subscript(tr: Transaction, selection: Selection) {
     console.log('subscript')
   }
 
-  superscript(app: Carbon) {
+  superscript(tr: Transaction, selection: Selection) {
     console.log('superscript')
   }
 
-  color(app: Carbon) {
+  color(tr: Transaction, color: string, selection: Selection) {
     console.log('color')
   }
 
-  background(app: Carbon) {
+  background(tr: Transaction, color: string, selection: Selection) {
     console.log('background')
   }
 }

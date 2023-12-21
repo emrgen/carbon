@@ -7,7 +7,7 @@ import {
   Transaction,
   addClass,
   removeClass,
-  useCarbon, CarbonState
+  useCarbon, State
 } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { BlockMenu, PorterOverlay } from "@emrgen/fastype-utils";
@@ -46,7 +46,7 @@ export const FastypeCursor = (props: CustomCursorProps) => {
 
   useEffect(() => {
     const timeouts: any[] = [];
-    const onChange = (state: CarbonState) => {
+    const onChange = (state: State) => {
       if (!ref.current) return;
       const cursor = ref.current;
       if (state.selection.isBlock) {

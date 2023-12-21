@@ -43,7 +43,7 @@ export class Code extends CarbonPlugin {
     ]
   }
 
-  on(): Partial<EventHandler> {
+  handlers(): Partial<EventHandler> {
     return {
       paste: (ctx: EventContext<ClipboardEvent>) => {
         const { event, app } = ctx
@@ -56,7 +56,7 @@ export class Code extends CarbonPlugin {
         //   const textContent = slice.root.textContent;
         //   console.log('textContent', textContent);
         //   // Slice.create(slice.root, slice.start, slice.end);
-        //   app.cmd.transform.paste(selection, blockSelection, slice)?.dispatch()
+        //   app.cmd.transform.paste(selection, blockSelection, slice)?.Dispatch()
         // } else {
         //
         // }
@@ -74,7 +74,7 @@ export class Code extends CarbonPlugin {
         //   console.log('blockSelection', app.blockSelection);
         //
         //   preventAndStopCtx(ctx);
-        //   app.tr.selectNodes([]).dispatch();
+        //   app.tr.selectNodes([]).Dispatch();
         //   node.child(0)?.emit('focus', node.child(0)!)
         // }
       },
@@ -82,10 +82,10 @@ export class Code extends CarbonPlugin {
       tab: (ctx: EventContext<KeyboardEvent>) => {
         ctx.event.preventDefault();
         ctx.stopPropagation();
-        const { app, node } = ctx;
+        const { app, cmd } = ctx;
         const { selection } = app;
 
-        app.cmd.transform.insertText(selection, '  ')?.dispatch();
+        cmd.transform.insertText(selection, '  ')?.Dispatch();
       },
 
       // backspace: (ctx: EventContext<KeyboardEvent>) => {
@@ -99,7 +99,7 @@ export class Code extends CarbonPlugin {
       //     app.tr
       //       .change(node.id, 'code', 'section')
       //       .select(selection)
-      //       .dispatch();
+      //       .Dispatch();
       //   }
       // }
     }
@@ -111,7 +111,7 @@ export class BeforeCodePlugin extends BeforePlugin {
 
   // priority = 10002;
 
-  on(): EventHandlerMap {
+  handlers(): EventHandlerMap {
     return {
       // insert text node at
       beforeInput: (ctx: EventContext<any>) => {
@@ -152,7 +152,7 @@ export class BeforeCodePlugin extends BeforePlugin {
       return;
     }
 
-    const { selection, cmd } = app;
+    const { selection, commands } = app;
     // console.log('textBlock', textBlock);
 
     const updateTitleText = (carbon: Carbon) => {
@@ -204,21 +204,21 @@ export class BeforeCodePlugin extends BeforePlugin {
 
       const textNodes = flattenDeep(flattenDeep(tokens).map(intoTextNode));
 
-      tr.add(SetContentAction.create(title.id, BlockContent.create(textNodes)));
-      tr.select(after);
+      tr.Add(SetContentAction.create(title.id, BlockContent.create(textNodes)));
+      tr.Select(after);
       return tr;
 
     }
 
     if (!selection.isCollapsed) {
-      cmd.transform.delete(selection)?.then(carbon => {
+      commands.transform.delete(selection)?.then(carbon => {
         return updateTitleText(carbon);
-      }).dispatch();
+      }).Dispatch();
       return
     }
 
     if (selection.isCollapsed) {
-      updateTitleText(app).dispatch()
+      updateTitleText(app).Dispatch()
       return
     }
   }

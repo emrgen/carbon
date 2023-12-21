@@ -1,4 +1,4 @@
-import { CarbonPlugin, EventContext, EventHandler, NodeSpec } from "@emrgen/carbon-core";
+import { CarbonPlugin, EventContext, EventHandler, NodeSpec, preventAndStopCtx } from "@emrgen/carbon-core";
 
 export class QuestionAnswer extends CarbonPlugin {
 
@@ -28,12 +28,11 @@ export class QuestionAnswer extends CarbonPlugin {
   keydown(): Partial<EventHandler> {
     return {
       enter(ctx: EventContext<KeyboardEvent>) {
-        const { app, selection, node } = ctx;
+        const { app, selection, node, cmd } = ctx;
         console.log('[Enter] collapsible');
         if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
-          ctx.event.preventDefault();
-          ctx.stopPropagation();
-          app.cmd.collapsible.split(selection)?.dispatch();
+          preventAndStopCtx(ctx)
+          cmd.collapsible.split(selection)?.Dispatch();
         }
       }
     }

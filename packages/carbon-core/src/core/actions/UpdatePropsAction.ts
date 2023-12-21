@@ -9,7 +9,7 @@ import { NodePropsJson } from "../NodeProps";
 export class UpdatePropsAction implements CarbonAction {
   private prevProps: Optional<NodePropsJson>;
 
-  static create(nodeRef: IntoNodeId, props: Partial<NodePropsJson>, origin: ActionOrigin) {
+  static create(nodeRef: IntoNodeId, props: Partial<NodePropsJson>, origin: ActionOrigin = ActionOrigin.UserInput) {
     return new UpdatePropsAction(nodeRef.intoNodeId(), props, origin);
   }
 

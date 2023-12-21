@@ -3,20 +3,30 @@ import { EventContext } from './EventContext';
 import { Node } from './Node';
 import { InputRule } from './Rules';
 import { Carbon } from './Carbon';
+import { CarbonPlugin, PinnedSelection, PointedSelection, Transaction } from "@emrgen/carbon-core";
+import { each, sortBy, values } from "lodash";
 
 export const IDENTITY_SCOPE = Symbol('identity');
 
-export interface CarbonCommands {}
+export enum Format {
+	bold = 'bold',
+	italic = 'italic',
+	underline = 'underline',
+	strike = 'strike',
+	code = 'code',
+	link = 'link',
+	subscript = 'subscript',
+	superscript = 'superscript',
+}
+
+export type InsertPos = "before" | "after" | "prepend" | "append";
 
 export interface NodeIdFactory {
 	blockId(): string;
 	textId(): string;
 }
 
-// declare module '@emrgen/carbon-core' {
-// 	export interface CarbonCommands {}
-// }
-
+export type Selection = PinnedSelection | PointedSelection;
 export interface EventHandler {
 	click: EventHandlerFn;
 	doubleClick: EventHandlerFn;
@@ -36,7 +46,7 @@ export interface EventHandler {
 
 	[key: string]: EventHandlerFn;
 }
-export type NodeWatcher = (node: Node, parent: Optional<Node>) => void
+export type NodeWatcher = (node: Node, ...args: any) => void
 export type EventHandlerFn = (ctx: EventContext<any>) => void
 export type EventHandlerMap = Partial<EventHandler>;
 export type InputRules = Array<InputRule>

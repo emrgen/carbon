@@ -1,4 +1,4 @@
-import { CarbonAction, CarbonPlugin, NodeSpec, CarbonState, Node, RemoveNodeAction, nodeLocation, Point, moveNodesActions, SelectAction } from "@emrgen/carbon-core";
+import { CarbonAction, CarbonPlugin, NodeSpec, State, Node, RemoveNodeAction, nodeLocation, Point, moveNodesActions, SelectAction } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 export class HStack extends CarbonPlugin {

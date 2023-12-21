@@ -4,14 +4,14 @@ import { CarbonAction } from "./actions";
 export class CarbonCommandChain extends Transaction {
   active: boolean = false;
 
-  dispatch(isNormalizer: boolean = false): Transaction {
+  Dispatch(isNormalizer: boolean = false): Transaction {
     this.app.chain = new CarbonCommandChain(this.app, this.tm, this.pm, this.sm);
-    return super.dispatch(isNormalizer);
+    return super.Dispatch(isNormalizer);
   }
 
-  add(action: CarbonAction | CarbonAction[]): Transaction {
+  Add(action: CarbonAction | CarbonAction[]): Transaction {
     this.active = true;
-    super.add(action);
+    super.Add(action);
 
     return this;
   }

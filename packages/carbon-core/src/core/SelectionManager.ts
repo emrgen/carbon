@@ -82,36 +82,6 @@ export class SelectionManager {
 		// this.app.emit(EventsOut.selectionUpdated, this.state);
 	}
 
-	// syncs DOM selection with Editor's internal selection state
-	// this must be called after the dom is updated
-	syncSelection() {
-		// console.log('syncSelection', this.state.selectionOrigin, this.state.selection.toString()	);
-		if (!this.enabled) {
-			console.log('skipped: selection sync disabled');
-			return
-		}
-
-		if (!this.state.isSelectionChanged) {
-			console.log('skipped: selection already synced', this.state.selectionOrigin, this.state.selection.toString()	);
-			return
-		}
-
-		const { app } = this;
-		const { selection } = this.state;
-		if (this.state.previous?.selection?.eq(selection) && selection.origin === ActionOrigin.DomSelectionChange) {
-			console.log('skipped: unchanged selection sync', selection.origin, selection.toString());
-			return
-		}
-
-		if (selection.isInvalid) {
-			console.warn('skipped invalid selection sync');
-			app.element?.blur()
-			return
-		}
-
-		selection.syncDom(app.store);
-	}
-
 	// update placeholder visibility for the focus node
 	private updateFocusPlaceholder(before?: PinnedSelection, after?: PinnedSelection,) {
 		// if (after?.isCollapsed || !after) {

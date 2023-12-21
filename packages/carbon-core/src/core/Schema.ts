@@ -132,7 +132,7 @@ export class Schema {
 
 }
 
-enum NodeLayout {
+enum DndLayout {
 	horizontal,
 	vertical,
 	grid,
@@ -152,13 +152,21 @@ export interface NodeSpec {
 	// the node can be treated as a standalone document
 	document?: boolean;
 	collapsible?: boolean
+	dnd?: {
+		handle?: boolean;
+		draggable?: boolean;
+		container?: boolean;
+		selectable?: boolean;
+		accepts?: (parent: Node, child: Node) => boolean;
+		region?: (parent: Node, child: Node) => boolean;
+		layout?: DndLayout;
+	},
 	selectable?: boolean
 	rectSelectable?: boolean
 	focusable?: boolean;
 	draggable?: boolean;
 	dragHandle?: boolean;
 	blockSelectable?: boolean;
-	layout?: NodeLayout;
 	insert?: boolean;
 	// node is a embedded element
 	// it can be a video, audio, external app
