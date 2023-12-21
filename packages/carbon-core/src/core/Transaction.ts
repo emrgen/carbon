@@ -13,7 +13,7 @@ import { PluginManager } from './PluginManager';
 import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
-import { ListNumberPath, NodePropsJson, RenderPath, TransactionManager } from "@emrgen/carbon-core";
+import { ListNumberPath, NodeIdSet, NodePropsJson, RenderPath, TransactionManager } from "@emrgen/carbon-core";
 import { ChangeNameAction } from './actions/ChangeNameAction';
 import { UpdatePropsAction } from './actions/UpdatePropsAction';
 import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
@@ -44,9 +44,7 @@ export class Transaction {
 	committed: boolean = false;
 	private dispatched: boolean = false;
 	readOnly = false;
-	get isEmpty() {
-		return this.actions.length === 0;
-	}
+
 	get origin() {
 		return this.app.runtime.origin;
 	}
@@ -77,6 +75,14 @@ export class Transaction {
 		this.id = getId();
 	}
 
+	get isEmpty() {
+		return this.actions.length === 0;
+		return this.actions.length === 0 || this.actions.filter(a => a instanceof SelectAction).every(a => {
+			const select = a as SelectAction;
+			return select.before.eq(select.after) && select.before.isBlock && select.after.isBlock;
+		});
+	}
+
 	onSelect(draft:CarbonStateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		this.sm.onSelect(draft, before, after, origin);
 	}
@@ -85,13 +91,27 @@ export class Transaction {
 		const after = selection.unpin();
 		after.origin = origin;
 
-		// if selection is block selection, deselect previous block selection and select new block selection
-		if (this.state.selection.isBlock) {
-			this.deselectNodes(this.state.selection.blocks, origin);
-		}
+		if (this.state.selection.isBlock && after.isBlock) {
+			const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+			const now = NodeIdSet.fromIds(after.nodeIds);
+			// find removed block selection
+			old.diff(now).forEach(id => {
+				this.deselectNodes(id, origin);
+			})
 
-		if (selection.isBlock) {
-			this.selectNodes(after.nodeIds, origin);
+			// find new block selection
+			now.diff(old).forEach(id => {
+				this.selectNodes(id, origin);
+			})
+		} else {
+			// if selection is block selection, deselect previous block selection and select new block selection
+			if (this.state.selection.isBlock) {
+				this.deselectNodes(this.state.selection.nodes, origin);
+			}
+
+			if (selection.isBlock) {
+				this.selectNodes(after.nodeIds, origin);
+			}
 		}
 
 		return this.Add(SelectAction.create(this.state.selection.unpin(), after, origin));

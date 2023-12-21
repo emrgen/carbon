@@ -56,6 +56,10 @@ export class DocPlugin extends CarbonPlugin {
 			// on enter split without merge
 			enter: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, selection, node, cmd } = ctx;
+				if (selection.isBlock) {
+					return
+				}
+
 				if (selection.inSameNode && selection.start.node.parent?.eq(node)) {
 					console.log('[Enter] doc');
 					preventAndStopCtx(ctx);
@@ -79,8 +83,8 @@ export class DocPlugin extends CarbonPlugin {
 	// 	return undefined
 	// }
 
-	serialize(app: Carbon, node: Node): SerializedNode {
-		return node.children.map(n => app.serialize(n)).join('\n');
-	}
+	// serialize(app: Carbon, node: Node): SerializedNode {
+	// 	return node.children.map(n => app.serialize(n)).join('\n');
+	// }
 
 }

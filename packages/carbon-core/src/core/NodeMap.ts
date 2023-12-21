@@ -6,7 +6,7 @@ import { NodeId } from "./NodeId";
 export class NodeMap {
   private _map: NodeBTree = new NodeBTree();
   private _deleted: NodeBTree = new NodeBTree();
-  private _parent: NodeMap | null = null;
+  private readonly _parent: NodeMap | null = null;
 
   static empty() {
     return new NodeMap();
@@ -38,17 +38,33 @@ export class NodeMap {
   }
 
   forEach(fn: (id: NodeId, node: Node) => void, deep = false) {
-    this._map.forEach((v, k) => {
+    const map = NodeMap.empty();
+    this.collect(this, map);
+    map._map.forEach((v, k) => {
       fn(k, v);
     });
+  }
 
-    if (deep && this._parent) {
-      this._parent.forEach(fn, deep);
+  private collect(map: NodeMap, collector: NodeMap) {
+    if (map._parent) {
+      this.collect(map._parent, collector);
     }
 
-    // this._deleted.forEach((v, k) => {
-    //   fn(k, null);
-    // });
+    map._map.forEach((v, k) => {
+      collector.set(k, v);
+    });
+  }
+
+  values(): Node[] {
+    const map = NodeMap.empty();
+    this.collect(this, map);
+    return Array.from(map._map.values());
+  }
+
+  ids(): NodeId[] {
+    const map = NodeMap.empty();
+    this.collect(this, map);
+    return Array.from(map._map.keys());
   }
 
   get(key: NodeId): Optional<Node> {

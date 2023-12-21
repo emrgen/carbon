@@ -1,20 +1,19 @@
 import { ActionOrigin, BeforePlugin, Carbon, Node, Pin, PinnedSelection, Point, Transaction } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
-import { node } from '@emrgen/carbon-blocks';
 
 declare module '@emrgen/carbon-core' {
   interface Transaction {
-    // insert: {
-    //   node(name: string): Optional<Transaction>;
-    //   before(node: Node, name: string): Optional<Transaction>;
-    //   after(node: Node, name: string): Optional<Transaction>;
-    // }
+    inserter: {
+      node(name: string): Transaction;
+      before(node: Node, name: string): Transaction;
+      after(node: Node, name: string): Transaction;
+    }
   }
 }
 
 
 export class Insert extends BeforePlugin {
-  name = "insert";
+  name = "inserter";
 
   commands(): Record<string, Function> {
     return {
@@ -25,7 +24,7 @@ export class Insert extends BeforePlugin {
   }
 
   // TODO: check if the node is allowed in the current context
-  node(app: Carbon, name: string): Optional<Transaction> {
+  node(app: Carbon, name: string) {
     const { selection, tr } = app;
     if (selection.isInvalid || !selection.isCollapsed) return;
 
@@ -48,28 +47,23 @@ export class Insert extends BeforePlugin {
     return tr;
   }
 
-  before(app: Carbon, node: Node, name: string): Optional<Transaction> {
-    const { tr } = app;
-
+  before(tr: Transaction, node: Node, name: string) {
     const at = Point.toBefore(node.id);
-    const block = app.schema.type(name)?.default();
+    const block = tr.app.schema.type(name)?.default();
     if (!block) return;
 
-    return this.insert(app, at, block);
+    return this.insert(tr, at, block);
   }
 
-  after(app: Carbon, node: Node, name: string): Optional<Transaction> {
-    const { tr } = app;
-
+  after(tr: Transaction, node: Node, name: string) {
     const at = Point.toAfter(node.id);
-    const block = app.schema.type(name)?.default();
+    const block = tr.app.schema.type(name)?.default();
     if (!block) return;
 
-    return this.insert(app, at, block);
+    return this.insert(tr, at, block);
   }
 
-  private insert(app: Carbon, at: Point, node: Node): Optional<Transaction> {
-    const { tr } = app;
+  private insert(tr: Transaction, at: Point, node: Node): Optional<Transaction> {
     tr.Insert(at, node)
     if (node.hasFocusable) {
       const after = PinnedSelection.fromPin(Pin.toStartOf(node)!)

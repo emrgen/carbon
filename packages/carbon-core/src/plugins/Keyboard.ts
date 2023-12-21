@@ -287,7 +287,7 @@ export class KeyboardPlugin extends AfterPlugin {
 	}
 
 	collapseSelectionBefore(tr: Transaction, nodes: Node[]) {
-		const firstNode = first(nodes)!;
+		const firstNode = first(nodes) as Node;
 		if (firstNode.hasFocusable) {
 			const focusNode = firstNode.find(n => n.isFocusable, { direction: 'forward' })
 			const pin = Pin.toStartOf(focusNode!)
@@ -307,7 +307,7 @@ export class KeyboardPlugin extends AfterPlugin {
 	}
 
 	collapseSelectionAfter(tr: Transaction, nodes: Node[]) {
-		const lastNode = last(nodes)!;
+		const lastNode = last(nodes) as Node;
 		if (lastNode.hasFocusable) {
 			const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
 			const pin = Pin.toEndOf(focusNode!)
