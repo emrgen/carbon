@@ -14,6 +14,7 @@ export class Code extends CarbonPlugin {
       group: 'content',
       content: 'codeLine+',
       isolating: true,
+      blockSelectable: true,
     }
   }
 }

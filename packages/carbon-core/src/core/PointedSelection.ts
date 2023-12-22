@@ -37,6 +37,9 @@ export class PointedSelection {
 	}
 
 	constructor(readonly tail: Point, readonly head: Point, readonly nodeIds: NodeId[], public origin: ActionOrigin = ActionOrigin.Unknown) {
+    if ((tail.isIdentity || head.isIdentity) && !tail.eq(head)) {
+      throw new Error('PointedSelection: invalid selection, one point is identity and another is not');
+    }
 	}
 
 	get isIdentity() {
@@ -49,12 +52,16 @@ export class PointedSelection {
 
 	get isBlock() {
 		// console.log('PointedSelection.isBlock', this.nodeIds.length, this.eq(PointedSelection.IDENTITY));
-		return this.eq(PointedSelection.IDENTITY);
+		return this.eq(PointedSelection.IDENTITY) && this.nodeIds.length > 0;
 	}
 
 	get isInline() {
 		return !this.isBlock;
 	}
+
+  // get isInlineBlock() {
+  //   return this.isBlock &&
+  // }
 
 	get isCollapsed() {
 		return this.tail.eq(this.head);
@@ -88,7 +95,6 @@ export class PointedSelection {
 	eq(other: PointedSelection): boolean {
 		const set = new NodeIdSet(this.nodeIds);
 		const nodesEq = other.nodeIds.every(id => set.has(id));
-    console.log('PointedSelection.eq', nodesEq, this.tail.eq(other.tail), this.head.eq(other.head));
 
 		return nodesEq && this.tail.eq(other.tail) && this.head.eq(other.head);
 	}

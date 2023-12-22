@@ -31,7 +31,7 @@ export class TabContent extends CarbonPlugin {
       group: 'content',
       content: 'content*',
       isolating: true,
-      selectable: true,
+      inlineSelectable: true,
       collapsible: true,
 
       attrs: {
@@ -67,7 +67,7 @@ export class TabTitle extends CarbonPlugin {
       group: 'content',
       content: 'section*',
       isolating: true,
-      selectable: true,
+      inlineSelectable: true,
 
       attrs: {
         html: {

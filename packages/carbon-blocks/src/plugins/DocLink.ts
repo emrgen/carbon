@@ -9,7 +9,7 @@ export class DocLink extends CarbonPlugin {
       group: 'content',
       content: 'title',
       splitName: 'section',
-      selectable: true,
+      inlineSelectable: true,
       isolating: true,
       draggable: true,
       dragHandle: true,

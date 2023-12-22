@@ -1055,7 +1055,7 @@ export class TransformCommands extends BeforePlugin {
       point = start.leftAlign.point;
     }
 
-    if (!point || point.isDefault) {
+    if (!point || point.isIdentity) {
       console.error(p14("%c[failed]"), "color:red", "failed to find selection point");
       return;
     }

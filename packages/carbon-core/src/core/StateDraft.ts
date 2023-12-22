@@ -93,6 +93,7 @@ export class StateDraft {
 
     changes.freeze();
     nodeMap.freeze();
+    after.freeze();
 
     const newState = new State({
       previous: state.clone(depth - 1),
@@ -205,7 +206,7 @@ export class StateDraft {
       } else if (node.name === "text") {
 
       }
-      console.log(content);
+      // console.log(content);
       node.updateContent(content);
       console.log("updated content", node.textContent);
 

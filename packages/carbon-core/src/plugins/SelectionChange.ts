@@ -15,7 +15,7 @@ export class SelectionChangePlugin extends AfterPlugin {
     // return {}
 
 		return {
-      mouseDown: (ctx: EventContext<Event>) => {
+      _mouseDown: (ctx: EventContext<Event>) => {
         const {selection} = ctx.app;
         if (!selection.isCollapsed) return
 

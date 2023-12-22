@@ -500,6 +500,9 @@ importers:
       fastpriorityqueue:
         specifier: ^0.7.4
         version: 0.7.4
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
       uuid:
         specifier: ^9.0.0
         version: 9.0.1

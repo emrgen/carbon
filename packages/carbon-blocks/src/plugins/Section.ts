@@ -31,7 +31,7 @@ export class Section extends NodePlugin {
 			content: 'title content*',
 			splits: true,
 			splitName: 'section',
-			selectable: true,
+			inlineSelectable: true,
 			draggable: true,
 			dragHandle: true,
 			rectSelectable: true,

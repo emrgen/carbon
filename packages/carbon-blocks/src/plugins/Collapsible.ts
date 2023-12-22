@@ -44,7 +44,7 @@ export class Collapsible extends NodePlugin {
       splitName: 'section',
       insert: true,
       collapsible: true,
-      selectable: true,
+      inlineSelectable: true,
       draggable: true,
       dragHandle: true,
       rectSelectable: true,

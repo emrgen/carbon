@@ -31,7 +31,6 @@ export const CodeLineComp = (props: RendererProps) => {
   // console.log(tokens)
 
  const handleMouseOver = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-   console.log(e)
  }
 
 

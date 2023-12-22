@@ -21,7 +21,7 @@ export class CommentEditor extends CarbonPlugin {
     return {
       group: 'content',
       content: 'content*',
-      selectable: true,
+      inlineSelectable: true,
       isolating: true,
       draggable: true,
       dragHandle: true,

@@ -12,13 +12,16 @@ import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 import {blocksBelowCommonNode} from "../utils/findNodes";
 import {takeBefore} from "../utils/array";
 
+// PinnedSelection is a selection that is pinned to start and end nodes
+// It serves three purpose
+// 1. Materialized range selection
+// 2. Materialized block selection
 
 export class PinnedSelection {
 
 	static NULL = new PinnedSelection(Pin.NULL, Pin.NULL, []);
 
 	static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
-
 
 	// map dom selection to editor selection
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
@@ -132,6 +135,9 @@ export class PinnedSelection {
 	}
 
 	private constructor(readonly tail: Pin, readonly head: Pin, readonly nodes: Node[], readonly origin = ActionOrigin.Unknown) {
+    if (tail.eq(Pin.IDENTITY) && !tail.eq(head)) {
+      throw new Error('PinnedSelection: invalid selection, one pin is identity and another is not');
+    }
 	}
 
 	get blocks(): Node[] {
@@ -144,7 +150,7 @@ export class PinnedSelection {
 
     const { start, end } = this;
     const [firstNode, lastNode] = blocksBelowCommonNode(start.node, end.node);
-    console.log('blocksBelowCommonNode', firstNode.id.toString(), lastNode.id.toString())
+		console.log('blocksBelowCommonNode', firstNode.id.toString(), lastNode.id.toString())
 
     if (firstNode.eq(lastNode)) return [];
 
@@ -162,12 +168,17 @@ export class PinnedSelection {
 
   // for selection spanning multiple blocks or a single block
 	get isBlock() {
-		return this.eq(PinnedSelection.IDENTITY);
+		return this.tail.isIdentity && this.head.isIdentity && this.nodes.length > 0;
 	}
 
 	get isInline() {
-		return !this.isNull && !this.isBlock;
+		return !this.tail.eq(Pin.IDENTITY);
 	}
+
+  // block selection that spans multiple blocks with range selection at ends
+  get isInlineBlock() {
+    return this.isInline && this.blocks.length > 0
+  }
 
 	get range(): Range {
 		return Range.create(this.start, this.end);
@@ -408,7 +419,6 @@ export class PinnedSelection {
 	unpin(origin?: ActionOrigin): PointedSelection {
 		const { tail, head, nodes } = this;
     const ids = nodes.map(n => n.id);
-    console.log(ids)
 		if (this.isBlock) {
 			return PointedSelection.fromNodes(ids, origin ?? this.origin)
 		}
@@ -424,7 +434,6 @@ export class PinnedSelection {
 		const set = NodeMap.fromNodes(this.nodes);
 		const nodesEq = other.nodes.every(n => set.has(n.id))
 
-    console.log('PinnedSelection.eq', nodesEq, this.toString(), other.toString());
 		return nodesEq && this.tail.eq(other.tail) && this.head.eq(other.head)
 	}
 

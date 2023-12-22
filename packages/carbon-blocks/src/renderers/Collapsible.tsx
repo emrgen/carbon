@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import {
-  ActionOrigin,
+  ActionOrigin, Carbon,
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent, CollapsedPath,
@@ -32,21 +32,21 @@ export default function CollapsibleListComp(props: RendererProps) {
   );
 
   // insert a new section as child of this collapsible
-  const handleInsert = useCallback(() => {
+  const handleInsert = useCallback((app: Carbon) => {
     const section = app.schema.type("section").default()!;
     const at = Point.toAfter(node.child(0)!.id);
 
-    app.tr
+    app.cmd
       .Insert(at, section)
       .Select(
         PinnedSelection.fromPin(Pin.toStartOf(section)!),
         ActionOrigin.UserInput
       )
       .Dispatch();
-  }, [app.schema, app.tr, node]);
+  }, [node]);
 
   // toggle collapsed state
-  const handleToggle = useCallback(() => {
+  const handleToggle = useCallback((app: Carbon) => {
     const {cmd} = app;
     cmd
       .Update(node.id, {
@@ -57,7 +57,7 @@ export default function CollapsibleListComp(props: RendererProps) {
     }
     cmd.OneWay()
     cmd.Dispatch();
-  }, [app, node, isCollapsed]);
+  }, [node, isCollapsed]);
 
   const beforeContent = (
     <div
@@ -68,7 +68,7 @@ export default function CollapsibleListComp(props: RendererProps) {
         e.preventDefault();
         e.stopPropagation();
       }}
-      onClick={handleToggle}
+      onClick={() => handleToggle(app)}
     >
       {isCollapsed ? (
         <MdOutlineKeyboardArrowRight />
@@ -96,7 +96,7 @@ export default function CollapsibleListComp(props: RendererProps) {
           className="collapsible-empty-content"
           contentEditable="false"
           suppressContentEditableWarning
-          onClick={handleInsert}
+          onClick={() => handleInsert(app)}
         >
           Click to insert.
         </div>

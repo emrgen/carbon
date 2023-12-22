@@ -177,6 +177,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return `${this.id.id}/${this.renderVersion}/${this.contentVersion}`
 	}
 
+  get contentKey() {
+    return `${this.id.id}/${this.contentVersion}`
+  }
+
 	// nodes that are not allowed to merge with any other node
 	get canMerge() {
 		return !this.type.isIsolating && !this.isAtom;
@@ -267,7 +271,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// a node that does not avoid to have a focus moved in by arrow keys
 	get isSelectable() {
-		const nonSelectable = this.chain.find(n => !(n.type.isSelectable || n.isActive));
+		const nonSelectable = this.chain.find(n => !(n.type.isInlineSelectable || n.isActive));
 		// console.log(nonSelectable);
 
 		return !nonSelectable
@@ -408,7 +412,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		}
 
 		// NOTE: this is a performance critical code
-		const key = `${parent.key}/${this.key}`
+		const key = `${parent.contentKey}/${this.id.toString()}`
 		return NODE_CACHE_INDEX.get(key, () => {
 			const { children = [] } = parent;
 			return findIndex(children as Node[], n => {

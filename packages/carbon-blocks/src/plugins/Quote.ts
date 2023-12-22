@@ -10,7 +10,7 @@ export class Quote extends CarbonPlugin {
       splits: true,
       splitName: 'section',
       insert: true,
-      selectable: true,
+      inlineSelectable: true,
       draggable: true,
       dragHandle: true,
       rectSelectable: true,

@@ -152,6 +152,11 @@ export interface NodeSpec {
 	options?: boolean;
 	// the node can be treated as a standalone document
 	document?: boolean;
+  inlineSelectable?: boolean
+  blockSelectable?: boolean;
+  rectSelectable?: boolean
+  // last empty children stays within on enter
+  // only backspace can unwrap the last child
 	collapsible?: boolean
 	dnd?: {
 		handle?: boolean;
@@ -162,12 +167,9 @@ export interface NodeSpec {
 		region?: (parent: Node, child: Node) => boolean;
 		layout?: DndLayout;
 	},
-	selectable?: boolean
-	rectSelectable?: boolean
 	focusable?: boolean;
 	draggable?: boolean;
 	dragHandle?: boolean;
-	blockSelectable?: boolean;
 	insert?: boolean;
 	// node is a embedded element
 	// it can be a video, audio, external app

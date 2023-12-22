@@ -511,7 +511,8 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (selection.isInline) return
 		preventAndStopCtx(ctx)
 
-		const {blocks } = selection;
+		const {blocks, nodes } = selection;
+    console.log(nodes, blocks)
 		if (blocks.length > 1) {
 			const lastNode = last(blocks) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
