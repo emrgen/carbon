@@ -1,4 +1,4 @@
-import { ActionOrigin, FocusedPlaceholderPath, NodeIdSet } from "@emrgen/carbon-core";
+import {ActionOrigin, FocusedPlaceholderPath, NodeIdSet, PinnedSelection, SelectedPath} from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import FastPriorityQueue from "fastpriorityqueue";
 import { identity } from "lodash";
@@ -11,6 +11,13 @@ import { NodeType } from "./NodeType";
 import { Point, PointAt } from "./Point";
 import { PointedSelection } from "./PointedSelection";
 import { State } from "./State";
+
+enum UpdateDependent {
+  None = 0,
+  Prev = 1,
+  Next = 2,
+  Parent = 4,
+}
 
 class NodeDepthPriorityQueue {
   private queue: FastPriorityQueue<NodeDepthEntry>;
@@ -93,6 +100,7 @@ export class StateDraft {
 
     changes.freeze();
     nodeMap.freeze();
+    after.freeze();
 
     const newState = new State({
       previous: state.clone(depth - 1),
@@ -115,15 +123,11 @@ export class StateDraft {
       throw new Error("Cannot prepare a draft that is already committed");
     }
 
-    console.log(this.removed.toArray().map(id => id.toString()));
-    console.log(this.nodeMap._deleted.toArray());
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
-    // this.removed.forEach(id => {
-    //   this.changes.remove(id);
-    // });
     this.changes.toArray().forEach(id => {
+      // console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
       if (this.nodeMap.deleted(id)) {
         this.changes.remove(id);
       }
@@ -211,7 +215,7 @@ export class StateDraft {
       } else if (node.name === "text") {
 
       }
-      console.log(content);
+      // console.log(content);
       node.updateContent(content);
       console.log("updated content", node.textContent);
 
@@ -246,7 +250,7 @@ export class StateDraft {
     }
 
     this.mutable(parentId, parent => {
-      node.nextSiblings?.forEach(ch => this.mutable(ch.id));
+      this.updateDependents(node, UpdateDependent.Next);
       parent.remove(node);
     });
 
@@ -267,9 +271,24 @@ export class StateDraft {
         console.log("inserting node", n.id.toString(), n.name);
         this.nodeMap.set(n.id, n);
       });
+
+      // set empty placeholder of inserted node if needed
+      if (node.isEmpty) {
+        const placeholder = node.properties.get<string>(EmptyPlaceholderPath) ?? "";
+        console.log('empty placeholder', placeholder, node.id.toString())
+        if (node.firstChild) {
+          this.mutable(node.firstChild.id, child => {
+            child.updateProps({
+              [PlaceholderPath]: placeholder
+            });
+          })
+        }
+      }
     } else {
       this.nodeMap.set(node.id, node);
     }
+
+
 
     switch (at.at) {
       case PointAt.After:
@@ -317,9 +336,8 @@ export class StateDraft {
     }
 
     this.mutable(parentId, parent => {
-      this.mutable(refNode.id);
-      refNode.nextSiblings?.forEach(ch => this.mutable(ch.id));
       parent.insertBefore(refNode, node);
+      this.updateDependents(node, UpdateDependent.Next);
       this.contentChanges.add(parent.id);
     });
   }
@@ -341,8 +359,8 @@ export class StateDraft {
     }
 
     this.mutable(parentId, parent => {
-      refNode.nextSiblings?.forEach(ch => this.mutable(ch.id));
       parent.insertAfter(refNode, node);
+      this.updateDependents(node, UpdateDependent.Next);
       this.contentChanges.add(parent.id);
     });
   }
@@ -367,7 +385,7 @@ export class StateDraft {
     }
 
     this.mutable(parentId, parent => {
-      node.nextSiblings.forEach(ch => this.mutable(ch.id));
+      this.updateDependents(node, UpdateDependent.Next);
       parent.remove(node);
       this.contentChanges.add(parent.id);
 
@@ -391,12 +409,10 @@ export class StateDraft {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }
-
-
     this.mutable(nodeId, node => {
       node.changeType(type);
-      node.nextSiblings?.forEach(ch => this.mutable(ch.id));
-
+      // node.nextSiblings?.forEach(ch => this.mutable(ch.id));
+      this.updateDependents(node, UpdateDependent.Next);
       if (node.isContainerBlock && node.firstChild?.isEmpty) {
         this.mutable(node.firstChild.id, child => {
           child.updateProps({
@@ -411,7 +427,9 @@ export class StateDraft {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }
-
+    if (this.nodeMap.deleted(nodeId)) {
+      return;
+    }
     // console.log('before update props', this.nodeMap.get(nodeId)?.properties.toKV());
 
     this.mutable(nodeId, node => {
@@ -426,29 +444,65 @@ export class StateDraft {
       throw new Error("Cannot update selection on a draft that is already committed");
     }
 
-    console.log("update selection");
+    console.log("update selection", selection.isInline);
     this.selection = selection;
 
-    if (this.state.selection.isInline && this.state.selection.isCollapsed) {
-      const { head } = this.state.selection.unpin();
-      const node = this.nodeMap.get(head.nodeId);
-      if (!node) {
-        throw new Error("Cannot update selection on a draft that is already committed");
-      }
+    // update selection nodes
+    if (selection.isInline) {
+      console.log('-------------------')
+      // const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+      // const after = selection.pin(this.nodeMap)!;
+      // if (after) {
+      //   const nids = after.blocks.map(n => n.id);
+      //   const now = NodeIdSet.fromIds(nids);
+      //   console.log(nids, after.nodes, after.head.node, after.tail.node)
+      //
+      //   this.selection = PointedSelection.create(selection.tail, selection.head, nids, selection.origin);
+      //
+      //   // find removed block selection
+      //   old.diff(now).forEach(id => {
+      //     this.mutable(id, node => {
+      //       node.updateProps({
+      //         [SelectedPath]: false
+      //       });
+      //     });
+      //   })
+      //
+      //   // find new block selection
+      //   now.diff(old).forEach(id => {
+      //     this.mutable(id, node => {
+      //       console.log('selected node', node.name, node.id.toString(), node.properties.toKV());
+      //       node.updateProps({
+      //         [SelectedPath]: true
+      //       });
+      //     });
+      //   })
+      // }
+    }
 
-      if (node.isEmpty) {
-        this.mutable(head.nodeId, node => {
-          const parent = this.nodeMap.parent(node);
-          if (!parent) return;
-          node.updateProps({
-            [PlaceholderPath]: parent.properties.get<string>(EmptyPlaceholderPath) ?? ""
+    // update empty placeholder if needed
+    if (this.state.selection.isInline && this.state.selection.isCollapsed) {
+      if (!this.state.selection.isIdentity) {
+        const {head} = this.state.selection.unpin();
+        const node = this.nodeMap.get(head.nodeId);
+        if (!node) {
+          throw new Error("Cannot update selection on a draft that is already committed");
+        }
+
+        if (node.isEmpty) {
+          this.mutable(head.nodeId, node => {
+            const parent = this.nodeMap.parent(node);
+            if (!parent) return;
+            node.updateProps({
+              [PlaceholderPath]: parent.properties.get<string>(EmptyPlaceholderPath) ?? ""
+            });
           });
-        });
+        }
       }
     }
 
     // update focus placeholder if needed
-    if (selection.isCollapsed && selection.isInline) {
+    if (selection.isCollapsed && selection.isInline && !selection.isIdentity) {
       const { head } = selection;
       const node = this.nodeMap.get(head.nodeId);
       if (!node) {
@@ -467,8 +521,35 @@ export class StateDraft {
     }
   }
 
+  // check and update render dependents
+  private updateDependents(node: Node, flag: number) {
+    console.log('xxxxxxxxxxxxxxxxxxx', node.id.toString(), flag)
+    if (flag & UpdateDependent.Parent && node.parent?.type.spec.depends?.child) {
+      this.mutable(node.parent.id, parent => {
+        this.updateDependents(parent, UpdateDependent.Parent);
+      })
+    }
+
+    if(flag & UpdateDependent.Prev && node.prevSibling?.type.spec.depends?.next) {
+      this.mutable(node.prevSibling.id, prev => {
+        this.updateDependents(prev, UpdateDependent.Prev);
+      })
+    }
+
+    if(flag & UpdateDependent.Next && node.nextSibling?.type.spec.depends?.prev) {
+      this.mutable(node.nextSibling.id, next => {
+        this.updateDependents(next, UpdateDependent.Next);
+      })
+    }
+  }
+
   // creates a mutable copy of a node and adds it to the draft changes
   private mutable(id: NodeId, fn?: (node: Node) => void) {
+    // can not update a deleted node
+    if (this.nodeMap.deleted(id)) {
+      return
+    }
+
     const node = this.nodeMap.get(id);
     if (!node) {
       throw new Error("Cannot mutate node that does not exist");
@@ -477,6 +558,7 @@ export class StateDraft {
     const mutable = this.nodeMap.has(id) ? node : node.clone();
     fn?.(mutable);
 
+    console.log('mutated', id.toString())
     this.changes.add(id);
     this.nodeMap.set(id, mutable);
 
@@ -486,6 +568,10 @@ export class StateDraft {
   private delete(id: NodeId) {
     this.nodeMap.delete(id);
     this.removed.add(id);
+  }
+
+  private put(id: NodeId, node: Node) {
+    this.nodeMap.set(id, node);
   }
 
   dispose() {

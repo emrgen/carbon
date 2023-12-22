@@ -183,8 +183,8 @@ export class NodeType {
 		return !!this.spec.draggable;
 	}
 
-	get isSelectable() {
-		return !!this.spec.selectable;
+	get isInlineSelectable() {
+		return !!this.spec.inlineSelectable;
 	}
 
 	get isSandbox() {

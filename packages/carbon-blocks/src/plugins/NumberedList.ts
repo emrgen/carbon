@@ -15,6 +15,9 @@ export class NumberedList extends Section {
     return {
       ...super.spec(),
       splitName: 'numberedList',
+      depends:{
+        prev: true,
+      },
       info: {
         title: 'Numbered List',
         description: 'Create a numbered list',
@@ -51,11 +54,11 @@ export class NumberedList extends Section {
     return prevSiblings.length + 1;
   }
 
-  serialize(app: Carbon, node: Node): SerializedNode {
-    const contentNode = node.child(0);
-
-    let ret = `${NumberedList.listNumber(node)}. ${contentNode ? app.serialize(contentNode) : ''}`;
-    // ret += app.cmd.nestable.serializeChildren(node);
-    return ret
-  }
+  // serialize(app: Carbon, node: Node): SerializedNode {
+  //   const contentNode = node.child(0);
+  //
+  //   let ret = `${NumberedList.listNumber(node)}. ${contentNode ? app.serialize(contentNode) : ''}`;
+  //   // ret += app.cmd.nestable.serializeChildren(node);
+  //   return ret
+  // }
 }

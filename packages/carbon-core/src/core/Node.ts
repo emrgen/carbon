@@ -19,6 +19,7 @@ import { ActivatedPath, CollapsedPath, NodeProps, NodePropsJson, OpenedPath, Sel
 export type TraverseOptions = {
 	order: 'pre' | 'post';
 	direction: 'forward' | 'backward';
+  parent?: boolean;
 	gotoParent: boolean;
 	skip: Predicate<Node>;
 }
@@ -177,6 +178,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return `${this.id.id}/${this.renderVersion}/${this.contentVersion}`
 	}
 
+  get contentKey() {
+    return `${this.id.id}/${this.contentVersion}`
+  }
+
 	// nodes that are not allowed to merge with any other node
 	get canMerge() {
 		return !this.type.isIsolating && !this.isAtom;
@@ -267,7 +272,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// a node that does not avoid to have a focus moved in by arrow keys
 	get isSelectable() {
-		const nonSelectable = this.chain.find(n => !(n.type.isSelectable || n.isActive));
+		const nonSelectable = this.chain.find(n => !(n.type.isInlineSelectable || n.isActive));
 		// console.log(nonSelectable);
 
 		return !nonSelectable
@@ -408,7 +413,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		}
 
 		// NOTE: this is a performance critical code
-		const key = `${parent.key}/${this.key}`
+		const key = `${parent.contentKey}/${this.id.toString()}`
 		return NODE_CACHE_INDEX.get(key, () => {
 			const { children = [] } = parent;
 			return findIndex(children as Node[], n => {
@@ -617,21 +622,38 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// NOTE: the parent chain is not searched for the next node
 	prev(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
-		const options = merge({ order: 'post', direction: 'backward', skip: noop }, opts) as TraverseOptions;
+		const options = merge({ order: 'post', direction: 'backward', skip: noop, parent: false }, opts) as TraverseOptions;
 		// if (options.skip(this)) return
 
 		const sibling = this.prevSibling;
 		let found: Optional<Node> = null;
 		const collect: Predicate<Node> = node => !!(fn(node) && (found = node));
+
+    // check in sibling tree
 		if (sibling && !options.skip(sibling)) {
 			(options.order == 'pre' ? sibling?.preorder(collect, options) : sibling?.postorder(collect, options))
 		}
+    if (found) return found;
 
-		return (
-			found
-			|| sibling?.prev(fn, options, false)
-			|| (gotoParent ? this.parent?.prev(fn, options, gotoParent) : null)
-		);
+    // pass the search role to prev sibling
+    found = sibling?.prev(fn, options, false);
+    if (found) return found;
+
+    // no siblings have the target, maybe we want to go above and beyond
+    if (!gotoParent || !this.parent) return null
+
+    // check if parent is the target
+    if (parent && fn(this.parent)) return this.parent;
+
+    // pass the search role to the parent
+    return this.parent.prev(fn, options, gotoParent);
+
+
+		// return (
+		// 	found
+		// 	|| sibling?.prev(fn, options, false)
+		// 	|| gotoParent ? this.parent?.prev(fn, options, gotoParent) : null
+		// );
 	}
 
 	// NOTE: the parent chain is not searched for the next node
@@ -665,6 +687,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return done || (direction === 'forward' ? !!this.next(fn, opts) : !!this.prev(fn, opts));
 	}
 
+  // fn should return true if the target node was found
 	preorder(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}): boolean {
 		const { direction = 'forward', skip = no } = opts;
 		if (skip(this)) return false

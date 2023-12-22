@@ -40,6 +40,10 @@ export class Pin {
 	}
 
 	static fromPoint(point: Point, store: NodeMap): Optional<Pin> {
+    if (point.eq(Point.IDENTITY)) {
+      return Pin.IDENTITY
+    }
+
 		if (!point.isStart) return
 		const node = store.get(point.nodeId);
 		if (!node || !node.type.isTextBlock) {
@@ -139,6 +143,9 @@ export class Pin {
 	}
 
 	get point(): Point {
+    if (this.eq(Pin.IDENTITY)) {
+      return Point.IDENTITY
+    }
 		return Point.toStart(this.node.id, this.offset);
 	}
 
@@ -378,6 +385,7 @@ export class Pin {
 	}
 
 	eq(other: Pin) {
+    // console.log('Pin.eq', this.toString(), other.toString());
 		return this.node.eq(other.node) && this.offset === other.offset
 	}
 

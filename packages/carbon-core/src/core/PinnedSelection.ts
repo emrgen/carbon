@@ -9,14 +9,19 @@ import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
 import { NodeMap, sortNodes } from "@emrgen/carbon-core";
 import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
+import {blocksBelowCommonNode} from "../utils/findNodes";
+import {takeBefore} from "../utils/array";
 
+// PinnedSelection is a selection that is pinned to start and end nodes
+// It serves three purpose
+// 1. Materialized range selection
+// 2. Materialized block selection
 
 export class PinnedSelection {
 
 	static NULL = new PinnedSelection(Pin.NULL, Pin.NULL, []);
 
 	static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
-
 
 	// map dom selection to editor selection
 	static fromDom(store: NodeStore): Optional<PinnedSelection> {
@@ -130,11 +135,27 @@ export class PinnedSelection {
 	}
 
 	private constructor(readonly tail: Pin, readonly head: Pin, readonly nodes: Node[], readonly origin = ActionOrigin.Unknown) {
+    if (tail.eq(Pin.IDENTITY) && !tail.eq(head)) {
+      throw new Error('PinnedSelection: invalid selection, one pin is identity and another is not');
+    }
 	}
 
 	get blocks(): Node[] {
-		if (this.nodes.length=== 1) return this.nodes;
-		return sortNodes(this.nodes, 'index')
+    if (this.isBlock) {
+      if (this.nodes.length=== 1) return this.nodes;
+      return sortNodes(this.nodes, 'index')
+    }
+
+    if (this.isIdentity) return [];
+
+    const { start, end } = this;
+    const [firstNode, lastNode] = blocksBelowCommonNode(start.node, end.node);
+		console.log('blocksBelowCommonNode', firstNode.id.toString(), lastNode.id.toString())
+
+    if (firstNode.eq(lastNode)) return [];
+
+    // already sorted by index
+    return takeBefore(firstNode.nextSiblings, n => n.eq(lastNode));
 	}
 
 	get isNull() {
@@ -145,13 +166,19 @@ export class PinnedSelection {
 		return this.tail.isIdentity && this.head.isIdentity;
 	}
 
+  // for selection spanning multiple blocks or a single block
 	get isBlock() {
-		return this.nodes.length !== 0 || this.eq(PinnedSelection.IDENTITY);
+		return this.tail.isIdentity && this.head.isIdentity && this.nodes.length > 0;
 	}
 
 	get isInline() {
-		return !this.isNull && !this.isBlock;
+		return !this.tail.eq(Pin.IDENTITY);
 	}
+
+  // block selection that spans multiple blocks with range selection at ends
+  get isInlineBlock() {
+    return this.isInline && this.blocks.length > 0
+  }
 
 	get range(): Range {
 		return Range.create(this.start, this.end);
@@ -163,7 +190,7 @@ export class PinnedSelection {
 
 	// for block selection the
 	get isCollapsed() {
-		return this.tail.eq(this.head);
+		return this.tail.eq(this.head) && !this.isBlock;
 	}
 
 	get inSameNode() {
@@ -391,10 +418,11 @@ export class PinnedSelection {
 
 	unpin(origin?: ActionOrigin): PointedSelection {
 		const { tail, head, nodes } = this;
+    const ids = nodes.map(n => n.id);
 		if (this.isBlock) {
-			return PointedSelection.fromNodes(nodes.map(n => n.id), origin ?? this.origin)
+			return PointedSelection.fromNodes(ids, origin ?? this.origin)
 		}
-		return PointedSelection.create(tail.point, head.point, origin ?? this.origin);
+		return PointedSelection.create(tail.point, head.point, ids, origin ?? this.origin);
 	}
 
 	pin(map: NodeMap): Optional<PinnedSelection> {
@@ -427,9 +455,9 @@ export class PinnedSelection {
 	}
 
 	toString() {
-		if (this.isBlock) {
-			return classString(this)(this.nodes.map(n => n.id.toString()));
-		}
+		// if (this.isBlock) {
+		// 	return classString(this)(this.nodes.map(n => n.id.toString()));
+		// }
 
 		return classString(this)({
 			tail: this.tail.toString(),

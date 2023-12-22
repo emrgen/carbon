@@ -9,7 +9,7 @@ export class Separator extends CarbonPlugin {
       group: 'content nestable',
       atom: true,
       isolating: true,
-      selectable: true,
+      inlineSelectable: true,
       draggable: true,
       dragHandle: true,
       rectSelectable: true,

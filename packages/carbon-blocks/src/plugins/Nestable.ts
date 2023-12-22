@@ -1,15 +1,15 @@
 import {
-	AfterPlugin,
-	Carbon,
-	EventContext,
-	EventHandlerMap,
-	Node,
-	Pin,
-	PinnedSelection,
-	Point,
-	Transaction,
-	nodeLocation,
-	preventAndStopCtx, moveNodesActions, PlaceholderPath, EmptyPlaceholderPath, RenderPath
+  AfterPlugin,
+  Carbon,
+  EventContext,
+  EventHandlerMap,
+  Node,
+  Pin,
+  PinnedSelection,
+  Point,
+  Transaction,
+  nodeLocation,
+  preventAndStopCtx, moveNodesActions, PlaceholderPath, EmptyPlaceholderPath, RenderPath, CollapsedPath
 } from "@emrgen/carbon-core";
 import { isNestableNode } from '../utils';
 import { Optional } from '@emrgen/types';
@@ -45,7 +45,8 @@ export class NestablePlugin extends AfterPlugin {
 		console.log('injecting', encoder());
 	}
 
-	// wrap node within a parent node
+	// wrap node within a previous sibling node.
+  // previous sibling node becomes the parent
 	// TODO: add support for wrapping multiple nodes
 	wrap(tr: Transaction, node: Node): Optional<Transaction> {
 		const prevNode = node.prevSibling;
@@ -56,12 +57,15 @@ export class NestablePlugin extends AfterPlugin {
 
 		tr.Move(nodeLocation(node)!, to, node.id);
 		if (prevNode.isCollapsed) {
-			tr.Update(prevNode.id, { node: { collapsed: false } })
+			tr.Update(prevNode.id, {
+        [CollapsedPath]: false
+      })
 		}
-		tr.Select(tr.app.selection.clone());
-		return tr
+		tr.Select(tr.app.selection);
 	}
 
+  // unwrap out of parent node.
+  // parent becomes prev sibling.
 	// TODO: add support for unwrapping multiple nodes
 	unwrap(tr: Transaction, node: Node): Optional<Transaction> {
 		const { parent } = node;
@@ -185,8 +189,9 @@ export class NestablePlugin extends AfterPlugin {
 				}
 
 				const nextSibling = listNode.nextSibling;
+        const {parent} = listNode
 				// if parent is collapsible the listNode should be not unwrapped
-				if (!nextSibling && !listNode.parent?.isCollapsible) {
+				if (!nextSibling && !parent?.isCollapsible && !parent?.isIsolating) {
 					preventAndStopCtx(ctx);
 					cmd.transform.unwrap(listNode)?.Dispatch();
 					return

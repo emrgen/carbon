@@ -9,7 +9,7 @@ export class Equation extends CarbonPlugin {
       content: 'title',
       atom: true,
       isolating: true,
-      selectable: true,
+      inlineSelectable: true,
       draggable: true,
       dragHandle: true,
       rectSelectable: true,

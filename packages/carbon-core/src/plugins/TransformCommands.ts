@@ -1055,7 +1055,7 @@ export class TransformCommands extends BeforePlugin {
       point = start.leftAlign.point;
     }
 
-    if (!point || point.isDefault) {
+    if (!point || point.isIdentity) {
       console.error(p14("%c[failed]"), "color:red", "failed to find selection point");
       return;
     }
@@ -1270,7 +1270,20 @@ export class TransformCommands extends BeforePlugin {
 
         // NOTE: if the textBlock becomes empty after delete all text nodes
         if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node) && !node.isVoid) {
-          actions.push(...this.removeNodeCommands(node.children));
+          actions.push(...this.removeNodeCommands(node.children))
+          // const children = node.children;
+          // if (children.length===0) {
+          //   // const textNode = app.schema.text("");
+          //   // actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
+          // } if (children.length === 1) {
+          //   if (!node.firstChild!.isEmpty) {
+          //     const textNode = app.schema.text("");
+          //     actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
+          //   }
+          // } else {
+          //   const textNode = app.schema.text("");
+          //   actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
+          // }
           return;
         }
 
@@ -1521,6 +1534,17 @@ export class TransformCommands extends BeforePlugin {
 
   // merge two nodes
   merge(tr: Transaction, prev: Node, next: Node) {
+    const prevIsolating = prev.closest(n => n.isIsolating);
+    const nextIsolating = next.closest(n => n.isIsolating);
+    console.log(prev.id.toString(), next.id.toString())
+    console.log(prevIsolating?.id.toString(), nextIsolating?.id.toString())
+    if (prevIsolating && nextIsolating) {
+      if (!prevIsolating.eq(nextIsolating)) {
+        throw new Error("can't merge isolated nodes");
+      }
+    }
+
+    console.log('xxxxxxxxxxxxxxxxxxxxxxx')
     const { app } = tr;
     const actions: CarbonAction[] = [];
     // check if prev and next can be merged
@@ -1541,9 +1565,11 @@ export class TransformCommands extends BeforePlugin {
       // NOTE: empty text node are not valid in carbon
       if (next.textContent) {
         if (prev.isVoid) {
+          console.log('111111111111111111111111111')
           const textNode = app.schema.text(next.textContent)!;
           insertActions.push(InsertNodeAction.fromNode(Point.toStart(prev.id), textNode));
         } else {
+          console.log('0000000000000000000000000000')
           const textContent = prev.textContent + next.textContent;
           const textNode = app.schema.text(textContent)!;
           insertActions.push(SetContentAction.create(prev.id, BlockContent.create([textNode])));
@@ -1558,9 +1584,10 @@ export class TransformCommands extends BeforePlugin {
         // const at = prev.isVoid ? Point.toStart(prev.id) : Point.toAfter(prev.lastChild?.id!);
         // console.log(at.toString(), prev.toJSON());
         // insertActions.push(...this.insertNodeCommands(at!, [textNode]))
+      } else {
+        // next node is empty
       }
     } else {
-
     }
 
     // merge children

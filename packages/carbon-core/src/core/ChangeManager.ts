@@ -22,9 +22,6 @@ interface PromiseState {
   reject?: Function;
 }
 
-
-console.log(import.meta.env);
-
 /**
  * Syncs the editor state with the UI
  */

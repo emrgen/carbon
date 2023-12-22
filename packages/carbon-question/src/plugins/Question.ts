@@ -10,7 +10,7 @@ export class Question extends DocPlugin {
       content: "title content* questionAnswer+",
       splits: true,
       splitName: 'section',
-      selectable: true,
+      inlineSelectable: true,
       collapsible: true,
       isolating: true,
       sandbox: true,

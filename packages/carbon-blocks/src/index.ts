@@ -73,7 +73,6 @@ export const blockPresets: Extension = {
 		new Todo(),
 		new Quote(),
 		new Callout(),
-		new Code(),
 		new DocLink(),
 		new Table(),
 		new CarbonRoot(),

@@ -9,7 +9,7 @@ export class Video extends NodePlugin {
       group: 'content',
       atom: true,
       isolating: true,
-      selectable: true,
+      inlineSelectable: true,
       draggable: true,
       dragHandle: true,
       insert: true,

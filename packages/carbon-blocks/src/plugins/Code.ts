@@ -10,7 +10,7 @@ export class Code extends CarbonPlugin {
       group: 'content',
       content: 'title',
       splitName: 'section',
-      selectable: true,
+      inlineSelectable: true,
       isolating: true,
       draggable: true,
       dragHandle: true,
@@ -111,115 +111,115 @@ export class BeforeCodePlugin extends BeforePlugin {
 
   // priority = 10002;
 
-  handlers(): EventHandlerMap {
-    return {
-      // insert text node at
-      beforeInput: (ctx: EventContext<any>) => {
-        const { app, event, node } = ctx;
-        const withinCode = node.parents.find(n => n.name === 'code');
-
-        if (!withinCode) return
-        preventAndStopCtx(ctx);
-        const { data, key } = event.nativeEvent;
-        const text = data ?? key;
-        this.insertText(ctx, text);
-      },
-    }
-  }
-
-  keydown(): Partial<EventHandler> {
-    return {
-      enter: (ctx: EventContext<KeyboardEvent>) => {
-        const { app, event, node } = ctx;
-        if (app.selection.isBlock) {
-          return
-        }
-
-        const withinCode = node.parents.find(n => n.name === 'code');
-        if (!withinCode) return
-
-        preventAndStopCtx(ctx);
-        this.insertText(ctx, '\n');
-      }
-    }
-  }
-
-  insertText(ctx: EventContext<any>, text: string) {
-    const { app, event, node } = ctx;
-    const { firstChild: textBlock } = node;
-    if (!textBlock) {
-      console.error(`textBlock not found for block ${node.id.toString()}`);
-      return;
-    }
-
-    const { selection, commands } = app;
-    // console.log('textBlock', textBlock);
-
-    const updateTitleText = (carbon: Carbon) => {
-      console.log('insertText', prism);
-
-      const { tr } = carbon;
-      const { schema, selection } = carbon;
-      const { head, start } = selection;
-      const title = head.node;
-      const pin = Pin.future(start.node, start.offset + text.length);
-      const after = PinnedSelection.fromPin(pin);
-      const textContent = title.textContent.slice(0, start.offset) + String.raw`${text}` + title.textContent.slice(start.offset);
-      const textNode = schema.text(String.raw`${textContent}`)!;
-      if (!textNode) {
-        console.error('failed to create text node');
-        return tr
-      }
-
-      const tokens = prism.tokenize(textContent, prism.languages.javascript);
-      console.log('tokens', tokens);
-      const intoTextNode = (token: TokenStream) => {
-        if (token instanceof Token) {
-          const { type, content } = token;
-          if (Array.isArray(content)) {
-            return flatten(content).map(intoTextNode);
-          } else if (content instanceof Token) {
-            return intoTextNode(content);
-          } else if (typeof content === 'string') {
-            // return schema.text(content, {
-            //   attrs: {
-            //     html: {
-            //       [`className`]: `token ${type}`,
-            //     }
-            //   }
-            // });
-          }
-        } else if (Array.isArray(token)) {
-          return flatten(token).map(intoTextNode);
-        } else {
-          // return schema.text(token, {
-          //   attrs: {
-          //     html: {
-          //       [`className`]: `token`,
-          //     }
-          //   }
-          // });
-        }
-      };
-
-      const textNodes = flattenDeep(flattenDeep(tokens).map(intoTextNode));
-
-      tr.Add(SetContentAction.create(title.id, BlockContent.create(textNodes)));
-      tr.Select(after);
-      return tr;
-
-    }
-
-    if (!selection.isCollapsed) {
-      commands.transform.delete(selection)?.then(carbon => {
-        return updateTitleText(carbon);
-      }).Dispatch();
-      return
-    }
-
-    if (selection.isCollapsed) {
-      updateTitleText(app).Dispatch()
-      return
-    }
-  }
+  // handlers(): EventHandlerMap {
+  //   return {
+  //     // insert text node at
+  //     beforeInput: (ctx: EventContext<any>) => {
+  //       const { app, event, node } = ctx;
+  //       const withinCode = node.parents.find(n => n.name === 'code');
+  //
+  //       if (!withinCode) return
+  //       preventAndStopCtx(ctx);
+  //       const { data, key } = event.nativeEvent;
+  //       const text = data ?? key;
+  //       this.insertText(ctx, text);
+  //     },
+  //   }
+  // }
+  //
+  // keydown(): Partial<EventHandler> {
+  //   return {
+  //     enter: (ctx: EventContext<KeyboardEvent>) => {
+  //       const { app, event, node } = ctx;
+  //       if (app.selection.isBlock) {
+  //         return
+  //       }
+  //
+  //       const withinCode = node.parents.find(n => n.name === 'code');
+  //       if (!withinCode) return
+  //
+  //       preventAndStopCtx(ctx);
+  //       this.insertText(ctx, '\n');
+  //     }
+  //   }
+  // }
+  //
+  // insertText(ctx: EventContext<any>, text: string) {
+  //   const { app, event, node } = ctx;
+  //   const { firstChild: textBlock } = node;
+  //   if (!textBlock) {
+  //     console.error(`textBlock not found for block ${node.id.toString()}`);
+  //     return;
+  //   }
+  //
+  //   const { selection, commands } = app;
+  //   // console.log('textBlock', textBlock);
+  //
+  //   const updateTitleText = (carbon: Carbon) => {
+  //     console.log('insertText', prism);
+  //
+  //     const { tr } = carbon;
+  //     const { schema, selection } = carbon;
+  //     const { head, start } = selection;
+  //     const title = head.node;
+  //     const pin = Pin.future(start.node, start.offset + text.length);
+  //     const after = PinnedSelection.fromPin(pin);
+  //     const textContent = title.textContent.slice(0, start.offset) + String.raw`${text}` + title.textContent.slice(start.offset);
+  //     const textNode = schema.text(String.raw`${textContent}`)!;
+  //     if (!textNode) {
+  //       console.error('failed to create text node');
+  //       return tr
+  //     }
+  //
+  //     const tokens = prism.tokenize(textContent, prism.languages.javascript);
+  //     console.log('tokens', tokens);
+  //     const intoTextNode = (token: TokenStream) => {
+  //       if (token instanceof Token) {
+  //         const { type, content } = token;
+  //         if (Array.isArray(content)) {
+  //           return flatten(content).map(intoTextNode);
+  //         } else if (content instanceof Token) {
+  //           return intoTextNode(content);
+  //         } else if (typeof content === 'string') {
+  //           // return schema.text(content, {
+  //           //   attrs: {
+  //           //     html: {
+  //           //       [`className`]: `token ${type}`,
+  //           //     }
+  //           //   }
+  //           // });
+  //         }
+  //       } else if (Array.isArray(token)) {
+  //         return flatten(token).map(intoTextNode);
+  //       } else {
+  //         // return schema.text(token, {
+  //         //   attrs: {
+  //         //     html: {
+  //         //       [`className`]: `token`,
+  //         //     }
+  //         //   }
+  //         // });
+  //       }
+  //     };
+  //
+  //     const textNodes = flattenDeep(flattenDeep(tokens).map(intoTextNode));
+  //
+  //     tr.Add(SetContentAction.create(title.id, BlockContent.create(textNodes)));
+  //     tr.Select(after);
+  //     return tr;
+  //
+  //   }
+  //
+  //   if (!selection.isCollapsed) {
+  //     commands.transform.delete(selection)?.then(carbon => {
+  //       return updateTitleText(carbon);
+  //     }).Dispatch();
+  //     return
+  //   }
+  //
+  //   if (selection.isCollapsed) {
+  //     updateTitleText(app).Dispatch()
+  //     return
+  //   }
+  // }
 }

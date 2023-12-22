@@ -42,6 +42,14 @@ declare module '@emrgen/carbon-core' {
 	export interface Transaction {}
 }
 
+declare module '@emrgen/carbon-core' {
+	export interface Transaction {
+
+	}
+}
+
+
+
 export class Transaction {
 	private id: string;
 	private type: TransactionType = TransactionType.TwoWay;
@@ -127,10 +135,9 @@ export class Transaction {
 			})
 		} else {
 			// if selection is block selection, deselect previous block selection and select new block selection
-			if (this.state.selection.isBlock) {
-				this.deselectNodes(this.state.selection.nodes, origin);
-			}
 
+      this.deselectNodes(this.state.selection.blocks, origin);
+      // console.log('00000000000000', after.nodeIds)
 			if (selection.isBlock) {
 				this.selectNodes(after.nodeIds, origin);
 			}
@@ -240,6 +247,12 @@ export class Transaction {
 			return this;
 		}
 		this._dispatched = true;
+
+    console.group('dispatching transaction')
+    this.actions.forEach(ac => {
+      console.log(ac.toString())
+    })
+    console.groupEnd();
 
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema

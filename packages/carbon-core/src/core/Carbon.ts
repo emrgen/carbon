@@ -128,7 +128,7 @@ export class Carbon extends EventEmitter {
 	}
 
 	get contentElement(): Optional<HTMLElement> {
-		this._contentElement = this._contentElement ?? document.getElementsByClassName('.editor > .editor-content')?.[0] as any ?? null;
+		this._contentElement = this._contentElement ?? document.querySelector('[data-name=carbon]') as any ?? null;
 		return this._contentElement;
 	}
 

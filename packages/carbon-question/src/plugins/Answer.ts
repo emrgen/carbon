@@ -10,7 +10,7 @@ export class QuestionAnswer extends CarbonPlugin {
       content: "title content*",
       splits: true,
       splitName: "section",
-      selectable: true,
+      inlineSelectable: true,
       isolating: true,
       sandbox: true,
       collapsible: true,

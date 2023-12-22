@@ -21,6 +21,7 @@ import {
 import { insertAfterAction, preventAndStopCtx } from "@emrgen/carbon-core";
 import { nodeLocation } from '../utils/location';
 import { Optional } from '@emrgen/types';
+import {NodeBTree} from "../core/BTree";
 
 declare module '@emrgen/carbon-core' {
 	export interface Transaction {
@@ -84,6 +85,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
 				const block = node.chain.find(n => n.isBlockSelectable);
 				if (!block) return
+
+        console.log('xxxxxxxx', block)
 				cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
@@ -335,15 +338,21 @@ export class KeyboardPlugin extends AfterPlugin {
 		const { blocks } = selection;
 		const firstNode = first(blocks) as Node;
 		const block = prevSelectableBlock(firstNode);
-		console.log(block?.id, firstNode.id, blocks.map(n => n.id.toString()));
+		// console.log(block?.id, firstNode.id, blocks.map(n => n.id.toString()));
 		if (!block) {
+      console.log('--------------')
 			// ctx.event.preventDefault()
 			// ctx.stopPropagation()
 			return
 		}
 
-		// ctx.event.preventDefault();
-		const after = PinnedSelection.fromNodes([...blocks, block]);
+		// if parent node is selected remove descendant nodes
+    const set = NodeBTree.from([block, ...blocks]);
+    set.toArray().forEach(([id, node]) => {
+      node.parents.some(n => set.has(n.id) && set.delete(node.id))
+    })
+    const nodes = set.toArray().map(([id, node]) => node);
+		const after = PinnedSelection.fromNodes(nodes);
 		cmd
 			.Select(after)
 			.Dispatch();
@@ -509,7 +518,8 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (selection.isInline) return
 		preventAndStopCtx(ctx)
 
-		const {blocks } = selection;
+		const {blocks, nodes } = selection;
+    console.log(nodes, blocks)
 		if (blocks.length > 1) {
 			const lastNode = last(blocks) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
@@ -529,20 +539,21 @@ export class KeyboardPlugin extends AfterPlugin {
 // find previous selectable block wrt the node
 const prevSelectableBlock = (node: Node, within = false) => {
 	const block = node.chain.find(n => n.isContainerBlock) as Node;
-	const { prevSibling } = block
-	if (prevSibling?.isContainerBlock) {
-		const childContainer = prevSibling.find(n => {
-			return !n.eq(prevSibling) && !n.isCollapseHidden && n.isBlockSelectable
-		}, { order: 'post', direction: 'backward' })
+	// const { prevSibling } = block
+	// if (prevSibling?.isContainerBlock) {
+	// 	const childContainer = prevSibling.find(n => {
+	// 		return !n.eq(prevSibling) && !n.isCollapseHidden && n.isBlockSelectable
+	// 	}, { order: 'post', direction: 'backward' })
+  //
+	// 	return childContainer ?? prevSibling;
+	// }
+  //
+	// if (block.parent?.isBlockSelectable) {
+	// 	return node.parent
+	// }
 
-		return childContainer ?? prevSibling;
-	}
-
-	if (block.parent?.isBlockSelectable) {
-		return node.parent
-	}
-
-	return block?.prev(n => n.isBlockSelectable);
+  console.log('check prev sibling...', block.prevSibling?.id.toString())
+	return block?.prev(n => n.isBlockSelectable, {parent: true});
 }
 
 // find next selectable block wrt the node

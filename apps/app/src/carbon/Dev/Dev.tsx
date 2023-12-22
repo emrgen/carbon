@@ -1,15 +1,19 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
-import { RecoilRoot } from "recoil";
+import {RecoilRoot} from "recoil";
 
 import {
-  BlockEvent,
   blockPresets,
   node,
   section,
   text,
   title,
 } from "@emrgen/carbon-blocks";
+
+import {codeExtension} from "@emrgen/carbon-code";
+import {
+  commentEditorExtension,
+} from "@emrgen/carbon-comment-editor";
 
 import {
   State,
@@ -32,7 +36,28 @@ import SelectionTracker from "../../SelectionTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
+
+    node("commentEditor", [
+      section([title([text('add a comment')])])
+    ]),
+
     // node("blockContent"),
+
+    section([title([text("section 1")])]),
+
+    node("code", [
+      node("codeLine",[ title([text("function foo() {")])]),
+      node("codeLine", [title([text("  console.log('hello world')")])]),
+      node("codeLine",[ title([text("}")])])
+    ]),
+
+    section([title([text("section 1")])]),
+
+    node("code", [
+      node("codeLine",[ title([text("function foo() {")])]),
+      node("codeLine", [title([text("  console.log('hello world')")])]),
+      node("codeLine",[ title([text("}")])])
+    ]),
 
     // node("tab", [
     //   node("tabTitles", [
@@ -45,27 +70,27 @@ const data = node("carbon", [
     //   ], {node: {link: "tab1"}}),
     // ]),
 
-    node("pageTree", [
-      title([text("Favorites")]),
-      node(
-        "pageTreeItem",
-        [
-          title([text("Computer Science")]),
-          node("pageTreeItem", [title([text("Algorithms")])]),
-          node("pageTreeItem", [title([text("Data Structures")])]),
-          node("pageTreeItem", [title([text("Operating Systems")])]),
-        ],
-        { [CollapsedPath]: true }
-      ),
-      node("pageTreeItem",
-        [
-          title([text("Electrical Engineering")]),
-          node("pageTreeItem", [title([text("Circuits")])]),
-          node("pageTreeItem", [title([text("Digital Logic")])]),
-          node("pageTreeItem", [title([text("Microprocessors")])]),
-        ]),
-    ]),
-    //
+    // node("pageTree", [
+    //   title([text("Favorites")]),
+    //   node(
+    //     "pageTreeItem",
+    //     [
+    //       title([text("Computer Science")]),
+    //       node("pageTreeItem", [title([text("Algorithms")])]),
+    //       node("pageTreeItem", [title([text("Data Structures")])]),
+    //       node("pageTreeItem", [title([text("Operating Systems")])]),
+    //     ],
+    //     {[CollapsedPath]: true}
+    //   ),
+    //   node("pageTreeItem",
+    //     [
+    //       title([text("Electrical Engineering")]),
+    //       node("pageTreeItem", [title([text("Circuits")])]),
+    //       node("pageTreeItem", [title([text("Digital Logic")])]),
+    //       node("pageTreeItem", [title([text("Microprocessors")])]),
+    //     ]),
+    // ]),
+
     // node("pageTree", [
     //   title([text("Private")]),
     //   node(
@@ -127,9 +152,13 @@ const extensions = [
   extensionPresets,
   blockPresets,
   carbonUtilPlugins,
-  {plugins: [
-    new BlockTree(),
-    ]}
+  commentEditorExtension,
+  codeExtension,
+  {
+    plugins: [
+      new BlockTree(),
+    ]
+  }
   // extensions1,
 ];
 
@@ -152,7 +181,7 @@ export default function Dev() {
   return (
     <div className={'carbon-app-container'}>
       <CarbonApp app={app}>
-        <SelectionTracker />
+        <SelectionTracker/>
       </CarbonApp>
     </div>
   );

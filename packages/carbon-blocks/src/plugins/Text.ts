@@ -27,7 +27,7 @@ export class TextPlugin extends NodePlugin {
 	spec(): NodeSpec {
 		return {
 			inline: true,
-			selectable: true,
+			inlineSelectable: true,
 			focusable: true,
 			attrs: {
 				html: {

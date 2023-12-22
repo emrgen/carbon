@@ -45,7 +45,7 @@ export class Heading extends NodePlugin {
 			insert: true,
 			splits: true,
 			splitName: 'section',
-			selectable: true,
+			inlineSelectable: true,
 			draggable: true,
 			dragHandle: true,
 			rectSelectable: true,
