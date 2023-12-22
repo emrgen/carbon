@@ -55,15 +55,16 @@ export class DocPlugin extends CarbonPlugin {
 		return {
 			// on enter split without merge
 			enter: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, selection, node, cmd } = ctx;
-				if (selection.isBlock) {
+				const { app, node, cmd } = ctx;
+				if (app.selection.isBlock) {
 					return
 				}
 
+        const {selection} = ctx;
 				if (selection.inSameNode && selection.start.node.parent?.eq(node)) {
 					console.log('[Enter] doc');
 					preventAndStopCtx(ctx);
-					cmd.collapsible.split(selection)?.Dispatch();
+					cmd.collapsible.split(selection).Dispatch();
 					return
 				}
 			}
