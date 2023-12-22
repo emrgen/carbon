@@ -8,7 +8,7 @@ export class Image extends NodePlugin {
     return {
       group: 'content',
       atom: true,
-      isolating: true,
+      isolate: true,
       inlineSelectable: true,
       draggable: true,
       dragHandle: true,

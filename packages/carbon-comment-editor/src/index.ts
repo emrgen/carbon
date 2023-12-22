@@ -10,6 +10,6 @@ export const commentEditorExtension: Extension = {
     new CommentEditor(),
   ],
   renderers: [
-    Renderer.create("code", CommentEditorComp),
+    Renderer.create("commentEditor", CommentEditorComp),
   ]
 }

@@ -25,7 +25,7 @@ export class DocPlugin extends CarbonPlugin {
 			splitName: 'section',
 			inlineSelectable: true,
 			collapsible: true,
-			isolating: true,
+			isolate: true,
 			sandbox: true,
 			document: true,
 			props: {

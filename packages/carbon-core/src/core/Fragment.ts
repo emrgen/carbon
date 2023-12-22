@@ -4,10 +4,18 @@ import { NodeId } from "./NodeId";
 import { With } from "@emrgen/types";
 
 // a slice of adjacent nodes
+
+
 export class Fragment {
 	static fromNode(node: Node): Fragment {
 		return Fragment.from([node]);
 	}
+
+  static EMPTY = new Fragment([]);
+
+  static default() {
+    return new Fragment([])
+  }
 
 	static from(nodes: Node[], nodeSelection = false): Fragment {
 		return new Fragment(nodes, nodeSelection);

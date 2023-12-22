@@ -9,7 +9,7 @@ export class BlockContent extends CarbonPlugin {
       content: '',
       atom: true,
       insert: true,
-      isolating: true,
+      isolate: true,
       draggable: true,
       dragHandle: true,
       rectSelectable: true,

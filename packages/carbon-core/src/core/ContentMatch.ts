@@ -78,6 +78,8 @@ export class ContentMatch {
 	/// content expression.
 	fillBefore(after: Fragment, toEnd = false, startIndex = 0): Fragment | null {
 		let seen: ContentMatch[] = [this]
+
+    // dfs to find a match
 		function search(match: ContentMatch, types: readonly NodeType[]): Fragment | null {
 			let finished = match.matchFragment(after, startIndex)
 			if (finished && (!toEnd || finished.validEnd))
@@ -96,6 +98,38 @@ export class ContentMatch {
 
 		return search(this, [])
 	}
+
+  // Try to match the given fragment, and if that fails, see if it can
+  // be made to match by inserting nodes in end of it. When
+  // successful, return a fragment of inserted nodes (which may be
+  // empty if nothing had to be inserted).
+  fillAfter(before: Fragment, startIndex = 0): Fragment | null {
+    const match = this.matchFragment(before, startIndex)
+    if (!match) {
+      return null
+    }
+
+    let seen: ContentMatch[] = [this];
+    // dfs to find a match
+    function search(match: ContentMatch, types: readonly NodeType[]): Fragment | null {
+      if (match.validEnd) {
+        return Fragment.from(types.map(tp => tp.createAndFill()!))
+      }
+
+      for (let i = 0;i < match.next.length;i++) {
+        let { type, next } = match.next[i]
+        if (!(type.isText || type.hasRequiredAttrs()) && seen.indexOf(next) == -1) {
+          seen.push(next)
+          let found = search(next, types.concat(type))
+          if (found) return found
+        }
+      }
+
+      return null
+    }
+
+    return search(match, [])
+  }
 
 	/// Find a set of wrapping node types that would allow a node of the
 	/// given type to appear at this position. The result may be empty

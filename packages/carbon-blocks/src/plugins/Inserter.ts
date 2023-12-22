@@ -7,6 +7,8 @@ declare module '@emrgen/carbon-core' {
       node(name: string): Transaction;
       before(node: Node, name: string): Transaction;
       after(node: Node, name: string): Transaction;
+      append(node: Node, name: string): Transaction;
+      prepend(node: Node, name: string): Transaction;
     }
   }
 }
@@ -20,6 +22,8 @@ export class Insert extends BeforePlugin {
       node: this.node,
       before: this.before,
       after: this.after,
+      append: this.append,
+      prepend: this.prepend,
     };
   }
 
@@ -45,6 +49,22 @@ export class Insert extends BeforePlugin {
     }
 
     return tr;
+  }
+
+  append(tr: Transaction, node: Node, name: string) {
+    const at = node.isVoid ? Point.toInside(node.id) : Point.toAfter(node.lastChild!.id);
+    const block = tr.app.schema.type(name)?.default();
+    if (!block) return;
+
+    return this.insert(tr, at, block);
+  }
+
+  prepend(tr: Transaction, node: Node, name: string) {
+    const at = node.isVoid ? Point.toInside(node.id) : Point.toBefore(node.firstChild!.id);
+    const block = tr.app.schema.type(name)?.default();
+    if (!block) return;
+
+    return this.insert(tr, at, block);
   }
 
   before(tr: Transaction, node: Node, name: string) {

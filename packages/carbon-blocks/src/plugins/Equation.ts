@@ -8,7 +8,7 @@ export class Equation extends CarbonPlugin {
       group: 'content',
       content: 'title',
       atom: true,
-      isolating: true,
+      isolate: true,
       inlineSelectable: true,
       draggable: true,
       dragHandle: true,

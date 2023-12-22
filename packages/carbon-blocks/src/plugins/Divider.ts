@@ -8,7 +8,7 @@ export class Divider extends NodePlugin {
     return {
       group: 'content nestable',
       atom: true,
-      isolating: true,
+      isolate: true,
       inlineSelectable: true,
       draggable: true,
       dragHandle: true,

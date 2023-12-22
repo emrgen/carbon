@@ -9,7 +9,7 @@ import {
   CarbonAction,
   Format,
   InlineContent,
-  InsertPos,
+  InsertPos, isIsolatedNodes,
   MoveNodeAction,
   NodeIdSet,
   NodePropsJson,
@@ -901,7 +901,20 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // delete selected nodes
-  private deleteNodes(tr: Transaction, nodes: Node[], opts: DeleteOpts = {}): Optional<Transaction> {
+  private deleteNodes(tr: Transaction, parent: Node, nodes: Node[], opts: DeleteOpts = {}): Optional<Transaction> {
+    // if parents current content is structurally same as default content, dont do anything
+    const defaultParent = parent.type.default();
+    console.log('isDefault', parent.toJSON(), defaultParent?.toJSON(), parent.id.toString(), defaultParent?.id.toString());
+    if (defaultParent && parent.eqContent(defaultParent)) {
+      return tr
+    }
+
+    // delete children while maintaining parent schema constraints
+    // find the content match for fragment before the delete nodes
+    // check if after deleting the nodes we need to insert more node to maintain schema constraints
+    // if next sibling is there after the delete nodes find fillbefore types
+    // otherwise just find
+    // create the insert node and commands
     const { fall = 'after' } = opts;
     const deleteActions: CarbonAction[] = [];
     reverse(nodes.slice()).forEach(node => {
@@ -949,6 +962,8 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
+  private
+
   // ref: https://www.notion.so/fastype-6858ec35e5e04e919b9dc5b3a37f6c85
   // the delete logic works based on the following entities
   // 1. commonNode
@@ -958,7 +973,9 @@ export class TransformCommands extends BeforePlugin {
   delete(tr: Transaction, selection: PinnedSelection = tr.app.selection, opts?: DeleteOpts): Optional<Transaction> {
     const { app } = tr;
     if (selection.isBlock) {
-      return this.deleteNodes(tr, selection.blocks, opts);
+      const { blocks } = selection;
+      const { parent } = blocks[0];
+      return this.deleteNodes(tr, parent!, blocks, opts);
     }
 
     if (selection.isCollapsed) {
@@ -1534,14 +1551,8 @@ export class TransformCommands extends BeforePlugin {
 
   // merge two nodes
   merge(tr: Transaction, prev: Node, next: Node) {
-    const prevIsolating = prev.closest(n => n.isIsolating);
-    const nextIsolating = next.closest(n => n.isIsolating);
-    console.log(prev.id.toString(), next.id.toString())
-    console.log(prevIsolating?.id.toString(), nextIsolating?.id.toString())
-    if (prevIsolating && nextIsolating) {
-      if (!prevIsolating.eq(nextIsolating)) {
-        throw new Error("can't merge isolated nodes");
-      }
+    if (isIsolatedNodes(prev, next)) {
+      throw new Error("can't merge isolated nodes");
     }
 
     console.log('xxxxxxxxxxxxxxxxxxxxxxx')

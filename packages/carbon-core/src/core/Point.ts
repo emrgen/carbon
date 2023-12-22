@@ -35,8 +35,8 @@ export class Point {
 		return this.at === PointAt.Start;
 	}
 
-	get isEnd(): boolean {
-		return this.at === PointAt.End;
+	get isWithin(): boolean {
+		return this.at === PointAt.Inside;
 	}
 
 	get isBefore(): boolean {
@@ -62,8 +62,8 @@ export class Point {
 	}
 
 	// point to after end of the node children
-	static toEnd(nodeId: IntoNodeId, offset: number) {
-		return new Point(nodeId, PointAt.End, offset);
+	static toInside(nodeId: IntoNodeId) {
+		return new Point(nodeId, PointAt.Inside);
 	}
 
 	static create(nodeId: IntoNodeId, at: PointAt, offset: number = 0) {

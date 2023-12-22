@@ -6,13 +6,10 @@ import {
   useEffect,
   useImperativeHandle, useMemo, useRef, useState
 } from "react";
-import { RendererProps } from "../core/Renderer";
-import { useCarbon } from '../hooks/useCarbon';
-import { useNodeChange } from "../hooks/useNodeChange";
-import { preventAndStop } from '../utils/event';
-import { usePrevious } from "@uidotdev/usehooks";
-import { LocalHtmlAttrPath, NamePath, TagPath } from "../core/NodeProps";
-import {initialEnv} from "@next/env";
+import {RendererProps} from "../core/Renderer";
+import {useCarbon} from '../hooks/useCarbon';
+import {useNodeChange} from "../hooks/useNodeChange";
+import {LocalHtmlAttrPath, NamePath, TagPath} from "../core/NodeProps";
 
 export const JustEmpty = () => {
   return <span>&shy;</span>;
@@ -23,11 +20,10 @@ interface CarbonPlaceholder extends RendererProps {
 }
 
 export const CarbonPlaceholder = (props: CarbonPlaceholder) => {
-  const { node , placeholder = 'Press to insert'} = props;
+  const {node, placeholder = 'Press to insert', ...rest} = props;
 
   if (node.isVoid) {
-    console.log('xxxxxxxxxxxxxxx')
-    return <div className={'carbon-empty-'}>{placeholder}</div>
+    return <div className={'carbon-empty-'} {...rest}>{placeholder}</div>
   }
 
   return null
@@ -35,8 +31,8 @@ export const CarbonPlaceholder = (props: CarbonPlaceholder) => {
 
 //
 export const CarbonEmpty = (props: RendererProps) => {
-  const { node } = props;
-  return <JustEmpty key={node.key + "empty"} />;
+  const {node} = props;
+  return <JustEmpty key={node.key + "empty"}/>;
 };
 
 const mapName = (name: string, parentName?: string) => {
@@ -51,8 +47,8 @@ const mapName = (name: string, parentName?: string) => {
 }
 
 const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => {
-  const { tag: Element = "div", node, children, custom } = props;
-  const { key, name, renderVersion } = node;
+  const {tag: Element = "div", node, children, custom} = props;
+  const {key, name, renderVersion} = node;
   const editor = useCarbon();
   const ref = useRef(null);
 
@@ -61,7 +57,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
       ...custom,
       ...node.properties.prefix(LocalHtmlAttrPath) ?? {}
     }
-  },[custom, node])
+  }, [custom, node])
 
   // connect ref
   // https://t.ly/H4By
@@ -97,7 +93,7 @@ export const CarbonElement = memo(forwardRef(InnerElement), (prev, next) => {
 });
 
 export const RawText = memo(function RT(props: RendererProps) {
-  const { node } = props
+  const {node} = props
   const ref = useRef(document.createTextNode(node.textContent));
   return <>{ref.current}</>
 });
@@ -110,7 +106,7 @@ const InnerCarbonText = (props: RendererProps) => {
     <CarbonElement node={node} tag="span">
       <>
         {node.isEmpty ? (
-          <CarbonEmpty node={node} parent={parent}  />
+          <CarbonEmpty node={node} parent={parent}/>
         ) : (
           node.textContent
         )}
@@ -125,11 +121,11 @@ export const CarbonText = memo(InnerCarbonText, (prev, next) => {
 
 // render block node with div
 const InnerCarbonBlock = (props: RendererProps, ref) => {
-  const { node, children, custom } = props;
+  const {node, children, custom} = props;
 
   const tag = useMemo(() => {
     return props.tag ?? node.properties.get(TagPath) ?? 'div';
-  },[props.tag, node.properties]);
+  }, [props.tag, node.properties]);
 
   return (
     <CarbonElement node={node} tag={tag} ref={ref} custom={custom}>
@@ -144,41 +140,48 @@ export const CarbonBlock = memo(forwardRef(InnerCarbonBlock), (prev, next) => {
 
 // render children of a node
 export const CarbonChildren = (props: RendererProps) => {
-  const { node } = props;
+  const {node} = props;
 
   if (node.isVoid) {
-    return <CarbonEmpty node={node}  />;
+    return <CarbonEmpty node={node}/>;
   }
 
-  const children = node.children.map((n) => <CarbonNode node={n} key={n.key} />);
+  const children = node.children.map((n) => <CarbonNode node={n} key={n.key}/>);
   return <>{children}</>;
 };
-
 
 
 // render node by name
 export const InnerCarbonNode = (props: RendererProps) => {
   const app = useCarbon();
-  const { node } = useNodeChange(props);
+  const {node} = useNodeChange(props);
 
   // useEffect(() => {
   //   console.log('CarbonNode', node.name, node.id.toString(), node.toJSON());
   // })
 
-  const name = useMemo(() => {
-    return (node.properties.get(NamePath) ?? node.name) as string;
-  },[node.name, node.properties]);
+  const component = useMemo(() => {
+    const name = (node.properties.get(NamePath) ?? node.name) as string;
+    const RegisteredComponent = app.component(name);
 
-  const RegisteredComponent = app.component(name);
-  if (RegisteredComponent && RegisteredComponent === CarbonNode) {
-    console.warn(`${node.name} is registered as CarbonNode, this will fall back to CarbonDefaultNode`)
+    if (RegisteredComponent) {
+      if (RegisteredComponent === CarbonNode) {
+        console.warn(`${node.name} is registered as CarbonNode, this will fall back to CarbonDefaultNode`)
+      } else {
+        return <RegisteredComponent {...props} node={node}/>;
+      }
+    }
+
+    console.warn('No component found for', node.name, 'fall back to CarbonDefaultNode')
+
+    return <CarbonDefaultNode {...props} node={node}/>;
+  }, [app, node])
+
+  if (!component) {
+    return null;
   }
 
-  if (RegisteredComponent && RegisteredComponent !== CarbonNode) {
-    return <RegisteredComponent {...props} node={node} />;
-  }
-
-  return <CarbonDefaultNode {...props} node={node} />;
+  return component;
 }
 
 export const CarbonNode = memo(InnerCarbonNode, (prev, next) => {
@@ -187,29 +190,29 @@ export const CarbonNode = memo(InnerCarbonNode, (prev, next) => {
 
 // default node for carbon editor with text and block
 export const CarbonDefaultNode = (props: RendererProps) => {
-  const { node } = props;
+  const {node} = props;
 
   const Component = node.isText ? CarbonText : CarbonBlock;
   return (
     <Component {...props}>
-      <CarbonChildren node={node} />
+      <CarbonChildren node={node}/>
     </Component>
   );
 };
 
 // render first node a content
 export const CarbonNodeContent = (props: RendererProps) => {
-  const { node, beforeContent, custom, wrapper } = props;
+  const {node, beforeContent, custom, wrapper} = props;
 
   const content = useMemo(() => {
-    const { children = [] } = node;
+    const {children = []} = node;
 
     if (!children.length) {
       return null;
     }
 
     return children[0];
-  },[node])
+  }, [node])
 
   if (!content) {
     return null;
@@ -229,11 +232,11 @@ export const CarbonNodeContent = (props: RendererProps) => {
 
 // render children except first node
 export const CarbonNodeChildren = (props: RendererProps) => {
-  const { node } = props;
+  const {node} = props;
   if (node.children.length < 2) return null;
   const children = node.children
     .slice(1)
-    .map((n) => <CarbonNode node={n} key={n.key} />);
+    .map((n) => <CarbonNode node={n} key={n.key}/>);
 
   return <div data-type="children">{children}</div>;
 };

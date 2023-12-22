@@ -39,7 +39,7 @@ export class IsolatingPlugin extends AfterPlugin {
         if (!node) return;
 
         console.log('selectstart', ctx.type, ctx);
-        const isolating = node.closest((n) => n.isIsolating);
+        const isolating = node.closest((n) => n.isIsolate);
         if (!isolating) return;
 
         // make the isolating node selectable for the duration of the mouse down
@@ -51,7 +51,7 @@ export class IsolatingPlugin extends AfterPlugin {
 
         // make all ge level isolating nodes non selectable
         app.content.preorder(n => {
-          if (n.isIsolating) {
+          if (n.isIsolate) {
             cmd.Update(n, {
               // [UserSelectPath]: 'none', // making parent user-select=none will make the target node non selectable
               [ContenteditablePath]: 'false',
@@ -65,7 +65,7 @@ export class IsolatingPlugin extends AfterPlugin {
         })
 
         // make all child isolating nodes non selectable
-        isolating.descendants(n => n.isIsolating).forEach((n) => {
+        isolating.descendants(n => n.isIsolate).forEach((n) => {
           cmd.Update(n, {
             [UserSelectPath]: 'none',
             [ContenteditablePath]: 'false',
@@ -80,7 +80,7 @@ export class IsolatingPlugin extends AfterPlugin {
           const {cmd} = app;
             // make all ge level isolating nodes non selectable
             app.content.preorder(n => {
-              if (n.isIsolating) {
+              if (n.isIsolate) {
                 cmd.Update(n, {
                   [ContenteditablePath]: 'true',
                 })
@@ -92,7 +92,7 @@ export class IsolatingPlugin extends AfterPlugin {
             })
 
             // make all child isolating nodes non selectable
-            isolating.descendants(n => n.isIsolating).forEach((n) => {
+            isolating.descendants(n => n.isIsolate).forEach((n) => {
               cmd.Update(n, {
                 [UserSelectPath]: '',
                 [ContenteditablePath]: 'true',
@@ -112,8 +112,8 @@ export class IsolatingPlugin extends AfterPlugin {
         const {start, end, head, tail} = selection;
         if (selection.isCollapsed) return;
 
-        const headIsolating = head.node.closest((n) => n.isIsolating);
-        const tailIsolating = tail.node.closest((n) => n.isIsolating);
+        const headIsolating = head.node.closest((n) => n.isIsolate);
+        const tailIsolating = tail.node.closest((n) => n.isIsolate);
         console.log(tailIsolating, headIsolating)
         if (!headIsolating && !tailIsolating) return;
 
@@ -122,7 +122,7 @@ export class IsolatingPlugin extends AfterPlugin {
           if (headIsolating.parents.some((n) => n.eq(tailIsolating))) {
             if (selection.isForward) {
               const prevFocusable = headIsolating.prev((n) => n.isFocusable, {
-                skip: n => n.isIsolating
+                skip: n => n.isIsolate
               });
               if (prevFocusable) {
                 const headPin = Pin.toEndOf(prevFocusable)!;
@@ -131,7 +131,7 @@ export class IsolatingPlugin extends AfterPlugin {
               }
             } else {
               const nextFocusable = headIsolating.next((n) => n.isFocusable, {
-                skip: n => n.isIsolating
+                skip: n => n.isIsolate
               });
               if (nextFocusable) {
                 const headPin = Pin.toStartOf(nextFocusable)!;
@@ -189,14 +189,14 @@ export class IsolatingPlugin extends AfterPlugin {
         if (!prevFocusable) return;
 
         // but only if it's not inside same isolating node as the current one
-        const isolating = head.node.closest((n) => n.isIsolating);
+        const isolating = head.node.closest((n) => n.isIsolate);
         if (isolating && !prevFocusable.parents.some((n) => n.eq(isolating))) {
           this.prevent(e);
           return;
         }
 
         // or only if the current node is inside the previous isolating node
-        const prevIsolating = prevFocusable.closest((n) => n.isIsolating);
+        const prevIsolating = prevFocusable.closest((n) => n.isIsolate);
         if (prevIsolating && !node.parents.some((n) => n.eq(prevIsolating))) {
           this.prevent(e);
           return;
@@ -212,14 +212,14 @@ export class IsolatingPlugin extends AfterPlugin {
         if (!nextFocusable) return;
 
         // but only if it's not inside same isolating node as the current one
-        const isolating = head.node.closest((n) => n.isIsolating);
+        const isolating = head.node.closest((n) => n.isIsolate);
         if (isolating && !nextFocusable.parents.some((n) => n.eq(isolating))) {
           this.prevent(e);
           return;
         }
 
         // or only if the current node is inside the next isolating node
-        const nextIsolating = nextFocusable.closest((n) => n.isIsolating);
+        const nextIsolating = nextFocusable.closest((n) => n.isIsolate);
         if (
           nextIsolating &&
           !head.node.parents.some((n) => n.eq(nextIsolating))

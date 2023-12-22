@@ -12,7 +12,7 @@ export class Question extends DocPlugin {
       splitName: 'section',
       inlineSelectable: true,
       collapsible: true,
-      isolating: true,
+      isolate: true,
       sandbox: true,
       document: true,
       attrs: {

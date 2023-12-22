@@ -16,9 +16,9 @@ export const nodeLocation = (node: Node, associate: 'before' | 'after' | 'parent
 		throw new Error('nodeLocation: node has no parent')
 	}
 
-	if (parent?.lastChild?.eq(node)) {
-		return Point.toEnd(node.parent.id, parent?.size);
-	}
+  if (parent.size == 1 || parent.firstChild?.eq(node)) {
+    return Point.toInside(parent.id);
+  }
 
-	throw new Error('nodeLocation: node is not associated with a location')
+	throw new Error('nodeLocation: node is not associated with a location' + node.id.toString())
 }
