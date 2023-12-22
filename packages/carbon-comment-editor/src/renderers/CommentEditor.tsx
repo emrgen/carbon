@@ -1,7 +1,7 @@
 import {
-  CarbonBlock,
+  CarbonBlock, CarbonEmpty,
   CarbonNodeChildren,
-  CarbonNodeContent,
+  CarbonNodeContent, CarbonPlaceholder,
   RendererProps, useSelectionHalo
 } from "@emrgen/carbon-core";
 import {useRef} from "react";
@@ -20,6 +20,7 @@ export const CommentEditorComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock {...props} ref={ref} custom={connectors}>
+      <CarbonPlaceholder node={node}/>
       <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}

@@ -12,9 +12,25 @@ import { useNodeChange } from "../hooks/useNodeChange";
 import { preventAndStop } from '../utils/event';
 import { usePrevious } from "@uidotdev/usehooks";
 import { LocalHtmlAttrPath, NamePath, TagPath } from "../core/NodeProps";
+import {initialEnv} from "@next/env";
 
 export const JustEmpty = () => {
   return <span>&shy;</span>;
+}
+
+interface CarbonPlaceholder extends RendererProps {
+  placeholder?: string;
+}
+
+export const CarbonPlaceholder = (props: CarbonPlaceholder) => {
+  const { node , placeholder = 'Press to insert'} = props;
+
+  if (node.isVoid) {
+    console.log('xxxxxxxxxxxxxxx')
+    return <div className={'carbon-empty-'}>{placeholder}</div>
+  }
+
+  return null
 }
 
 //

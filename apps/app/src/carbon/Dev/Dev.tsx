@@ -37,9 +37,9 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
-    // node("commentEditor", [
-    //   section([title([text('add a comment')])])
-    // ]),
+    node("commentEditor", [
+      section([title([text('add a comment')])])
+    ]),
 
     // node("blockContent"),
 

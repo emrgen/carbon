@@ -248,6 +248,12 @@ export class Transaction {
 		}
 		this._dispatched = true;
 
+    console.group('dispatching transaction')
+    this.actions.forEach(ac => {
+      console.log(ac.toString())
+    })
+    console.groupEnd();
+
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema
 		this.tm.dispatch(this);

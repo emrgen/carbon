@@ -116,9 +116,12 @@ export class StateDraft {
       throw new Error("Cannot prepare a draft that is already committed");
     }
 
+
+    console.log('deleted ids', this.nodeMap._deleted.toArray().map(([id]) => id.toString()));
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
     this.changes.toArray().forEach(id => {
+      console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
       if (this.nodeMap.deleted(id)) {
         this.changes.remove(id);
       }
@@ -406,7 +409,9 @@ export class StateDraft {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }
-
+    if (this.nodeMap.deleted(nodeId)) {
+      return;
+    }
     // console.log('before update props', this.nodeMap.get(nodeId)?.properties.toKV());
 
     this.mutable(nodeId, node => {
@@ -500,6 +505,11 @@ export class StateDraft {
 
   // creates a mutable copy of a node and adds it to the draft changes
   private mutable(id: NodeId, fn?: (node: Node) => void) {
+    // can not update a deleted node
+    if (this.nodeMap.deleted(id)) {
+      return
+    }
+
     const node = this.nodeMap.get(id);
     if (!node) {
       throw new Error("Cannot mutate node that does not exist");
@@ -517,6 +527,10 @@ export class StateDraft {
   private delete(id: NodeId) {
     this.nodeMap.delete(id);
     this.removed.add(id);
+  }
+
+  private put(id: NodeId, node: Node) {
+    this.nodeMap.set(id, node);
   }
 
   dispose() {

@@ -84,7 +84,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     if (e.id === CarbonDragHandleId) {
       app.onEvent(EventsIn.dragStart, CustomEvent.create(EventsIn.dragStart, e.node, e.event));
       app.enable(() => {
-        app.tr.Select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput).Dispatch();
+        app.cmd.Select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput).Dispatch();
       });
     }
   }, [app]);
@@ -285,7 +285,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       } else {
         if (node.type.dragHandle) {
           app.parkCursor();
-          app.tr
+          app.cmd
             .Select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput)
             ?.Dispatch();
         }
