@@ -135,10 +135,9 @@ export class Transaction {
 			})
 		} else {
 			// if selection is block selection, deselect previous block selection and select new block selection
-			if (this.state.selection.isBlock) {
-				this.deselectNodes(this.state.selection.nodes, origin);
-			}
 
+      this.deselectNodes(this.state.selection.blocks, origin);
+      // console.log('00000000000000', after.nodeIds)
 			if (selection.isBlock) {
 				this.selectNodes(after.nodeIds, origin);
 			}

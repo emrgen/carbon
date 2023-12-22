@@ -84,6 +84,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
 				const block = node.chain.find(n => n.isBlockSelectable);
 				if (!block) return
+
+        console.log('xxxxxxxx', block)
 				cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {

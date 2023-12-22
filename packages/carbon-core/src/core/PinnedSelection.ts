@@ -9,6 +9,8 @@ import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
 import { NodeMap, sortNodes } from "@emrgen/carbon-core";
 import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
+import {blocksBelowCommonNode} from "../utils/findNodes";
+import {takeBefore} from "../utils/array";
 
 
 export class PinnedSelection {
@@ -133,8 +135,21 @@ export class PinnedSelection {
 	}
 
 	get blocks(): Node[] {
-		if (this.nodes.length=== 1) return this.nodes;
-		return sortNodes(this.nodes, 'index')
+    if (this.isBlock) {
+      if (this.nodes.length=== 1) return this.nodes;
+      return sortNodes(this.nodes, 'index')
+    }
+
+    if (this.isIdentity) return [];
+
+    const { start, end } = this;
+    const [firstNode, lastNode] = blocksBelowCommonNode(start.node, end.node);
+    console.log('blocksBelowCommonNode', firstNode.id.toString(), lastNode.id.toString())
+
+    if (firstNode.eq(lastNode)) return [];
+
+    // already sorted by index
+    return takeBefore(firstNode.nextSiblings, n => n.eq(lastNode));
 	}
 
 	get isNull() {
@@ -145,8 +160,9 @@ export class PinnedSelection {
 		return this.tail.isIdentity && this.head.isIdentity;
 	}
 
+  // for selection spanning multiple blocks or a single block
 	get isBlock() {
-		return this.nodes.length !== 0 || this.eq(PinnedSelection.IDENTITY);
+		return this.eq(PinnedSelection.IDENTITY);
 	}
 
 	get isInline() {
@@ -391,10 +407,12 @@ export class PinnedSelection {
 
 	unpin(origin?: ActionOrigin): PointedSelection {
 		const { tail, head, nodes } = this;
+    const ids = nodes.map(n => n.id);
+    console.log(ids)
 		if (this.isBlock) {
-			return PointedSelection.fromNodes(nodes.map(n => n.id), origin ?? this.origin)
+			return PointedSelection.fromNodes(ids, origin ?? this.origin)
 		}
-		return PointedSelection.create(tail.point, head.point, origin ?? this.origin);
+		return PointedSelection.create(tail.point, head.point, ids, origin ?? this.origin);
 	}
 
 	pin(map: NodeMap): Optional<PinnedSelection> {
@@ -406,6 +424,7 @@ export class PinnedSelection {
 		const set = NodeMap.fromNodes(this.nodes);
 		const nodesEq = other.nodes.every(n => set.has(n.id))
 
+    console.log('PinnedSelection.eq', nodesEq, this.toString(), other.toString());
 		return nodesEq && this.tail.eq(other.tail) && this.head.eq(other.head)
 	}
 
@@ -427,9 +446,9 @@ export class PinnedSelection {
 	}
 
 	toString() {
-		if (this.isBlock) {
-			return classString(this)(this.nodes.map(n => n.id.toString()));
-		}
+		// if (this.isBlock) {
+		// 	return classString(this)(this.nodes.map(n => n.id.toString()));
+		// }
 
 		return classString(this)({
 			tail: this.tail.toString(),

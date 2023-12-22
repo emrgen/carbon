@@ -7,9 +7,7 @@ export const useSelectionChange = () => {
 	const app = useCarbon();
 
 	useEffect(() => {
-		const onSelectionChange = throttle((event: Event) => {
-			app.onEvent(EventsIn.selectionchange, event)
-		}, 0);
+		const onSelectionChange = (event: Event) => app.onEvent(EventsIn.selectionchange, event);
 
 		const onSelectionStart = (event: Event) => {
 			app.onEvent(EventsIn.selectstart, event)

@@ -1,9 +1,10 @@
 import {Extension, Renderer} from "@emrgen/carbon-core";
-import {CodeLine} from "./plugins/CodeLine";
+
+import "./code.styl";
 import {Code} from "./plugins/Code";
+import {CodeLine} from "./plugins/CodeLine";
 import {CodeComp} from "./renderers/Code";
 import {CodeLineComp} from "./renderers/CodeLine";
-import "./code.styl";
 
 export const codeExtension: Extension = {
   plugins: [

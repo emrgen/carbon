@@ -24,7 +24,7 @@ export class PointedSelection {
 	}
 
 	static fromPoint(point: Point): PointedSelection {
-		return PointedSelection.create(point, point);
+		return PointedSelection.create(point, point, []);
 	}
 
 	static fromNodes(nodeIds: NodeId | NodeId[], origin: ActionOrigin = ActionOrigin.Unknown) {
@@ -32,7 +32,7 @@ export class PointedSelection {
 		return new PointedSelection(Point.IDENTITY, Point.IDENTITY, set.toArray(), origin);
 	}
 
-	static create(tail: Point, head: Point, origin = ActionOrigin.Unknown): PointedSelection {
+	static create(tail: Point, head: Point, nodeIds: NodeId[] = [], origin = ActionOrigin.Unknown): PointedSelection {
 		return new PointedSelection(tail, head, [], origin);
 	}
 
@@ -49,7 +49,7 @@ export class PointedSelection {
 
 	get isBlock() {
 		// console.log('PointedSelection.isBlock', this.nodeIds.length, this.eq(PointedSelection.IDENTITY));
-		return this.nodeIds.length !== 0 || this.eq(PointedSelection.IDENTITY);
+		return this.eq(PointedSelection.IDENTITY);
 	}
 
 	get isInline() {
@@ -88,6 +88,7 @@ export class PointedSelection {
 	eq(other: PointedSelection): boolean {
 		const set = new NodeIdSet(this.nodeIds);
 		const nodesEq = other.nodeIds.every(id => set.has(id));
+    console.log('PointedSelection.eq', nodesEq, this.tail.eq(other.tail), this.head.eq(other.head));
 
 		return nodesEq && this.tail.eq(other.tail) && this.head.eq(other.head);
 	}

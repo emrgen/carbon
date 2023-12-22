@@ -3,17 +3,14 @@ import { cloneDeep, merge } from "lodash";
 
 export class PluginStates {
   states: Map<string, PluginState> = new Map();
-
-  get(name: string) {
-    return this.states.get(name);
-  }
+  common: Map<string, any> = new Map();
 
   register(plugin: CarbonPlugin) {
     if (this.states.has(plugin.name)) {
       throw new Error(`Plugin ${plugin.name} is already registered`);
     }
 
-    const state = new PluginState();
+    const state = new PluginState(this.common);
     this.states.set(plugin.name, state);
     return state;
   }
@@ -21,6 +18,12 @@ export class PluginStates {
 
 export class PluginState {
   store: Record<string, any> = {};
+  common: Map<string, any> = new Map();
+
+  constructor(props) {
+    this.common = props;
+  }
+
 
   get(key: string) {
     return this.store[key];

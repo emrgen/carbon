@@ -10,9 +10,10 @@ import {
   title,
 } from "@emrgen/carbon-blocks";
 
+import {codeExtension} from "@emrgen/carbon-code";
 import {
-  codeExtension
-} from "@emrgen/carbon-code";
+  commentEditorExtension,
+} from "@emrgen/carbon-comment-editor";
 
 import {
   State,
@@ -35,7 +36,22 @@ import SelectionTracker from "../../SelectionTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
+
+    // node("commentEditor", [
+    //   section([title([text('add a comment')])])
+    // ]),
+
     // node("blockContent"),
+
+    section([title([text("section 1")])]),
+
+    node("code", [
+      node("codeLine",[ title([text("function foo() {")])]),
+      node("codeLine", [title([text("  console.log('hello world')")])]),
+      node("codeLine",[ title([text("}")])])
+    ]),
+
+    section([title([text("section 1")])]),
 
     node("code", [
       node("codeLine",[ title([text("function foo() {")])]),
@@ -136,6 +152,7 @@ const extensions = [
   extensionPresets,
   blockPresets,
   carbonUtilPlugins,
+  commentEditorExtension,
   codeExtension,
   {
     plugins: [

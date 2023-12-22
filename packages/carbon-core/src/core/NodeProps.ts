@@ -96,8 +96,12 @@ export const EmptyPlaceholderPath = "local/placeholder/empty";
 export const FocusedPlaceholderPath = "local/placeholder/focused";
 export const LocalHtmlAttrPath = "local/html";
 export const PlaceholderPath = "local/html/placeholder";
-export const ContenteditablePath = "local/html/contenteditable";
+export const UserSelectPath = "local/html/data-user-select";
+export const SuppressContenteditableWarningPath = "local/html/suppressContentEditableWarning";
+export const ContenteditablePath = "local/html/contentEditable";
 export const ActivatedPath = "local/state/activated";
+export const LocalContenteditablePath = "local/state/contentEditable";
+
 export const RenderPath = "local/state/render";
 export const OpenedPath = "local/state/opened";
 export const CollapsedPath = "local/state/collapsed";

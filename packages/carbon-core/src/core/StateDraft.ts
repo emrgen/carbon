@@ -1,4 +1,4 @@
-import { ActionOrigin, FocusedPlaceholderPath, NodeIdSet } from "@emrgen/carbon-core";
+import {ActionOrigin, FocusedPlaceholderPath, NodeIdSet, PinnedSelection, SelectedPath} from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import FastPriorityQueue from "fastpriorityqueue";
 import { identity } from "lodash";
@@ -420,29 +420,65 @@ export class StateDraft {
       throw new Error("Cannot update selection on a draft that is already committed");
     }
 
-    console.log("update selection");
+    console.log("update selection", selection.isInline);
     this.selection = selection;
 
-    if (this.state.selection.isInline && this.state.selection.isCollapsed) {
-      const { head } = this.state.selection.unpin();
-      const node = this.nodeMap.get(head.nodeId);
-      if (!node) {
-        throw new Error("Cannot update selection on a draft that is already committed");
-      }
+    // update selection nodes
+    if (selection.isInline) {
+      console.log('-------------------')
+      // const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+      // const after = selection.pin(this.nodeMap)!;
+      // if (after) {
+      //   const nids = after.blocks.map(n => n.id);
+      //   const now = NodeIdSet.fromIds(nids);
+      //   console.log(nids, after.nodes, after.head.node, after.tail.node)
+      //
+      //   this.selection = PointedSelection.create(selection.tail, selection.head, nids, selection.origin);
+      //
+      //   // find removed block selection
+      //   old.diff(now).forEach(id => {
+      //     this.mutable(id, node => {
+      //       node.updateProps({
+      //         [SelectedPath]: false
+      //       });
+      //     });
+      //   })
+      //
+      //   // find new block selection
+      //   now.diff(old).forEach(id => {
+      //     this.mutable(id, node => {
+      //       console.log('selected node', node.name, node.id.toString(), node.properties.toKV());
+      //       node.updateProps({
+      //         [SelectedPath]: true
+      //       });
+      //     });
+      //   })
+      // }
+    }
 
-      if (node.isEmpty) {
-        this.mutable(head.nodeId, node => {
-          const parent = this.nodeMap.parent(node);
-          if (!parent) return;
-          node.updateProps({
-            [PlaceholderPath]: parent.properties.get<string>(EmptyPlaceholderPath) ?? ""
+    // update empty placeholder if needed
+    if (this.state.selection.isInline && this.state.selection.isCollapsed) {
+      if (!this.state.selection.isIdentity) {
+        const {head} = this.state.selection.unpin();
+        const node = this.nodeMap.get(head.nodeId);
+        if (!node) {
+          throw new Error("Cannot update selection on a draft that is already committed");
+        }
+
+        if (node.isEmpty) {
+          this.mutable(head.nodeId, node => {
+            const parent = this.nodeMap.parent(node);
+            if (!parent) return;
+            node.updateProps({
+              [PlaceholderPath]: parent.properties.get<string>(EmptyPlaceholderPath) ?? ""
+            });
           });
-        });
+        }
       }
     }
 
     // update focus placeholder if needed
-    if (selection.isCollapsed && selection.isInline) {
+    if (selection.isCollapsed && selection.isInline && !selection.isIdentity) {
       const { head } = selection;
       const node = this.nodeMap.get(head.nodeId);
       if (!node) {

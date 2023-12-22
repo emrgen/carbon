@@ -185,8 +185,9 @@ export class NestablePlugin extends AfterPlugin {
 				}
 
 				const nextSibling = listNode.nextSibling;
+        const {parent} = listNode
 				// if parent is collapsible the listNode should be not unwrapped
-				if (!nextSibling && !listNode.parent?.isCollapsible) {
+				if (!nextSibling && !parent?.isCollapsible && !parent?.isIsolating) {
 					preventAndStopCtx(ctx);
 					cmd.transform.unwrap(listNode)?.Dispatch();
 					return

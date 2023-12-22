@@ -665,6 +665,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return done || (direction === 'forward' ? !!this.next(fn, opts) : !!this.prev(fn, opts));
 	}
 
+  // fn should return true if the target node was found
 	preorder(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}): boolean {
 		const { direction = 'forward', skip = no } = opts;
 		if (skip(this)) return false

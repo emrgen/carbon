@@ -24,14 +24,19 @@ export const CodeLineComp = (props: RendererProps) => {
     return 0;
   },[node.parent])
 
-  const tokens = useMemo(() => {
-    return prism.tokenize(node.textContent, prism.languages.javascript);
-  },[])
+  // const tokens = useMemo(() => {
+  //   return prism.tokenize(node.textContent, prism.languages.javascript);
+  // },[])
+  //
+  // console.log(tokens)
 
-  console.log(tokens)
+ const handleMouseOver = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+   console.log(e)
+ }
+
 
   return (
-    <CarbonBlock node={node}>
+    <CarbonBlock node={node} custom={{onMouseOver: handleMouseOver}}>
 
         <div className="carbon-code-line-number" style={{paddingRight: parentSize + 'px'}} contentEditable={"false"}>
           {/*{custom.lineNumber && (<span className="carbon-code-line-number-text">*/}
