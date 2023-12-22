@@ -12,6 +12,13 @@ import { Point, PointAt } from "./Point";
 import { PointedSelection } from "./PointedSelection";
 import { State } from "./State";
 
+enum UpdateDependent {
+  None = 0,
+  Prev = 1,
+  Next = 2,
+  Parent = 4,
+}
+
 class NodeDepthPriorityQueue {
   private queue: FastPriorityQueue<NodeDepthEntry>;
 
@@ -117,11 +124,10 @@ export class StateDraft {
     }
 
 
-    console.log('deleted ids', this.nodeMap._deleted.toArray().map(([id]) => id.toString()));
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
     this.changes.toArray().forEach(id => {
-      console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
+      // console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
       if (this.nodeMap.deleted(id)) {
         this.changes.remove(id);
       }
@@ -244,7 +250,7 @@ export class StateDraft {
     }
 
     this.mutable(parentId, parent => {
-      node.nextSiblings?.forEach(ch => this.mutable(ch.id));
+      this.updateDependents(node, UpdateDependent.Next);
       parent.remove(node);
     });
 
@@ -265,9 +271,24 @@ export class StateDraft {
         console.log("inserting node", n.id.toString(), n.name);
         this.nodeMap.set(n.id, n);
       });
+
+      // set empty placeholder of inserted node if needed
+      if (node.isEmpty) {
+        const placeholder = node.properties.get<string>(EmptyPlaceholderPath) ?? "";
+        console.log('empty placeholder', placeholder, node.id.toString())
+        if (node.firstChild) {
+          this.mutable(node.firstChild.id, child => {
+            child.updateProps({
+              [PlaceholderPath]: placeholder
+            });
+          })
+        }
+      }
     } else {
       this.nodeMap.set(node.id, node);
     }
+
+
 
     switch (at.at) {
       case PointAt.After:
@@ -315,9 +336,8 @@ export class StateDraft {
     }
 
     this.mutable(parentId, parent => {
-      this.mutable(refNode.id);
-      refNode.nextSiblings?.forEach(ch => this.mutable(ch.id));
       parent.insertBefore(refNode, node);
+      this.updateDependents(node, UpdateDependent.Next);
       this.contentChanges.add(parent.id);
     });
   }
@@ -339,8 +359,8 @@ export class StateDraft {
     }
 
     this.mutable(parentId, parent => {
-      refNode.nextSiblings?.forEach(ch => this.mutable(ch.id));
       parent.insertAfter(refNode, node);
+      this.updateDependents(node, UpdateDependent.Next);
       this.contentChanges.add(parent.id);
     });
   }
@@ -365,7 +385,7 @@ export class StateDraft {
     }
 
     this.mutable(parentId, parent => {
-      node.nextSiblings.forEach(ch => this.mutable(ch.id));
+      this.updateDependents(node, UpdateDependent.Next);
       parent.remove(node);
       this.contentChanges.add(parent.id);
 
@@ -389,12 +409,10 @@ export class StateDraft {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }
-
-
     this.mutable(nodeId, node => {
       node.changeType(type);
-      node.nextSiblings?.forEach(ch => this.mutable(ch.id));
-
+      // node.nextSiblings?.forEach(ch => this.mutable(ch.id));
+      this.updateDependents(node, UpdateDependent.Next);
       if (node.isContainerBlock && node.firstChild?.isEmpty) {
         this.mutable(node.firstChild.id, child => {
           child.updateProps({
@@ -503,6 +521,28 @@ export class StateDraft {
     }
   }
 
+  // check and update render dependents
+  private updateDependents(node: Node, flag: number) {
+    console.log('xxxxxxxxxxxxxxxxxxx', node.id.toString(), flag)
+    if (flag & UpdateDependent.Parent && node.parent?.type.spec.depends?.child) {
+      this.mutable(node.parent.id, parent => {
+        this.updateDependents(parent, UpdateDependent.Parent);
+      })
+    }
+
+    if(flag & UpdateDependent.Prev && node.prevSibling?.type.spec.depends?.next) {
+      this.mutable(node.prevSibling.id, prev => {
+        this.updateDependents(prev, UpdateDependent.Prev);
+      })
+    }
+
+    if(flag & UpdateDependent.Next && node.nextSibling?.type.spec.depends?.prev) {
+      this.mutable(node.nextSibling.id, next => {
+        this.updateDependents(next, UpdateDependent.Next);
+      })
+    }
+  }
+
   // creates a mutable copy of a node and adds it to the draft changes
   private mutable(id: NodeId, fn?: (node: Node) => void) {
     // can not update a deleted node
@@ -518,6 +558,7 @@ export class StateDraft {
     const mutable = this.nodeMap.has(id) ? node : node.clone();
     fn?.(mutable);
 
+    console.log('mutated', id.toString())
     this.changes.add(id);
     this.nodeMap.set(id, mutable);
 

@@ -167,6 +167,18 @@ export interface NodeSpec {
 		region?: (parent: Node, child: Node) => boolean;
 		layout?: DndLayout;
 	},
+
+  // if the depends node content is updated, the node will be updated as well
+  depends?:{
+    prev?: boolean,
+    next?: boolean,
+    child?: boolean,
+  },
+  updates?:{
+    prev?: boolean,
+    next?: boolean,
+    children?: boolean,
+  },
 	focusable?: boolean;
 	draggable?: boolean;
 	dragHandle?: boolean;

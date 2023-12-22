@@ -135,7 +135,7 @@ export class NodeMap {
   }
 
   set(key: NodeId, value: Node) {
-    console.log('setting node map entry', key.toString())
+    // console.log('setting node map entry', key.toString())
     // once deleted we can't set it back within the same map
     this._deleted.delete(key);
     this._map.set(key, value);
