@@ -130,49 +130,54 @@ export class PluginManager {
 		// console.log('onKeyDown', event);
 
 		console.groupCollapsed('onKeyDown', event)
-		each(this.before, (p: CarbonPlugin) => {
-			if (keyDownEvent.stopped) return
-			const handlers = p.keydown()
-			const handler = entries(handlers).find(([key]) => {
-				return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event);
-			})
-			if (handler) {
-				console.log('before', p.name, handler[0], handler[1]);
-			}
-			handler?.[1]?.(keyDownEvent)
-		})
 
-		if (!keyDownEvent.stopped) {
-			node?.chain.some(n => {
-				keyDownEvent.changeNode(n);
-				this.nodePlugin(n.name)?.keydown()[keyDownEvent.type]?.(keyDownEvent);
-				const handlers = (this.nodePlugin(n.type.name)?.keydown() ?? {}) as EventHandlerMap;
-				const handler = entries(handlers).find(([key]) => {
-					return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
-				});
-				if (handler) {
-					console.log('node', n.name, handler[0], handler[1]);
-				}
-				handler?.[1]?.(keyDownEvent)
-				return keyDownEvent.stopped
-			});
-		}
+    const process = () => {
+      each(this.before, (p: CarbonPlugin) => {
+        if (keyDownEvent.stopped) return
+        const handlers = p.keydown()
+        const handler = entries(handlers).find(([key]) => {
+          return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event);
+        })
+        if (handler) {
+          console.log('before', p.name, handler[0], handler[1]);
+        }
+        handler?.[1]?.(keyDownEvent)
+      })
 
-		if (keyDownEvent.stopped) return
-		keyDownEvent.changeNode(node);
-		some(this.after, (p: CarbonPlugin) => {
-			const handlers = p.keydown()
-			const handler = entries(handlers).find(([key]) => {
-				return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
-			});
+      if (!keyDownEvent.stopped) {
+        node?.chain.some(n => {
+          keyDownEvent.changeNode(n);
+          this.nodePlugin(n.name)?.keydown()[keyDownEvent.type]?.(keyDownEvent);
+          const handlers = (this.nodePlugin(n.type.name)?.keydown() ?? {}) as EventHandlerMap;
+          const handler = entries(handlers).find(([key]) => {
+            return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
+          });
+          if (handler) {
+            console.log('node', n.name, handler[0], handler[1]);
+          }
+          handler?.[1]?.(keyDownEvent)
+          return keyDownEvent.stopped
+        });
+      }
 
-			if (handler) {
-				console.log('after', p.name, handler[0], handler[1]);
-			}
+      if (keyDownEvent.stopped) return
+      keyDownEvent.changeNode(node);
+      some(this.after, (p: CarbonPlugin) => {
+        const handlers = p.keydown()
+        const handler = entries(handlers).find(([key]) => {
+          return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
+        });
 
-			handler?.[1]?.(keyDownEvent)
-			return keyDownEvent.stopped
-		})
+        if (handler) {
+          console.log('after', p.name, handler[0], handler[1]);
+        }
+
+        handler?.[1]?.(keyDownEvent)
+        return keyDownEvent.stopped
+      })
+    };
+
+    process();
 
 		console.groupEnd()
 	}

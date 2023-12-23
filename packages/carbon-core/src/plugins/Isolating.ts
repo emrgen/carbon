@@ -325,8 +325,10 @@ export class IsolatingPlugin extends AfterPlugin {
   isAtStart(e) {
     const { app } = e;
     const isolating = this.isolatingNode(e);
+    console.log('isolating', isolating)
     if (!isolating) return false;
     const ret = app.selection.head.isAtStartOfNode(isolating);
+    console.log('isAtStart', ret)
     return ret;
   }
 
@@ -342,6 +344,6 @@ export class IsolatingPlugin extends AfterPlugin {
     const { app } = e;
     const { selection } = app;
     const { head } = selection;
-    return head.node.closest((n) => n.isIsolating);
+    return head.node.closest((n) => n.isIsolate);
   }
 }

@@ -205,6 +205,7 @@ export interface NodeSpec {
 	definingForContent?: boolean;
 	defining?: boolean;
 	isolate?: boolean;
+  isolateContent?: boolean; // isolate children from title
 	insertBefore?: boolean;
 	insertAfter?: boolean;
   // used to show block insert info

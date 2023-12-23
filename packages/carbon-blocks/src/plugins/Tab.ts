@@ -6,6 +6,7 @@ import {
   NodeSpec,
   preventAndStopCtx
 } from "@emrgen/carbon-core";
+import {IsolateChildren} from "./IsolateChildren";
 
 export class TabGroup extends CarbonPlugin {
 
@@ -14,8 +15,12 @@ export class TabGroup extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: 'content',
-      content: 'tab+',
+      content: 'tab*',
       isolate: true,
+      dragHandle: true,
+      draggable: true,
+      rectSelectable: true,
+      blockSelectable: true,
       props: {
         local:{
           html: {
@@ -44,15 +49,23 @@ export class Tab extends CarbonPlugin {
       content: 'title content*',
       isolate: true,
       collapsible: true,
+      // isolateContent: true,
+      blockSelectable: true,
       props: {
         local:{
           html: {
-            contentEditable: true,
+            contentEditable: false,
             suppressContentEditableWarning: true,
           }
         }
       }
     }
+  }
+
+  plugins(): CarbonPlugin[] {
+    return [
+      new IsolateChildren(),
+    ]
   }
 
   keydown(): EventHandlerMap {

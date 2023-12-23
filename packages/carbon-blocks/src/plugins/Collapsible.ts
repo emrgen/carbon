@@ -97,7 +97,6 @@ export class Collapsible extends NodePlugin {
 
   plugins(): CarbonPlugin[] {
     return [
-      new CollapsibleBeforePlugin(),
     ]
   }
 

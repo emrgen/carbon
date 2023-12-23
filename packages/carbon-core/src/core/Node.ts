@@ -45,39 +45,6 @@ export interface NodeCreateProps {
 let key = 0
 const nextKey = () => key++
 
-export interface NodeView {
-	id: NodeId;
-	type: NodeType;
-	version: string;
-	isOpen: boolean;
-	isActive: boolean;
-	isSelected: boolean;
-	isCollapsed: boolean;
-	isFocusable: boolean;
-	isSelectable: boolean;
-	isBlockSelectable: boolean;
-	// isCollapsedHidden: boolean;
-	isVoid: boolean;
-	isInline: boolean;
-	isInlineAtom: boolean;
-	isBlockAtom: boolean;
-	isAtom: boolean;
-	isText: boolean;
-	isTextBlock: boolean;
-	isContentNode: boolean;
-	isContainerBlock: boolean;
-	isEmbedding: boolean;
-	isLeaf: boolean;
-	isRoot: boolean;
-	isDocument: boolean;
-	isDirty: boolean;
-	isEmpty: boolean;
-	isSandbox: boolean;
-	isIsolating: boolean;
-	isCollapsible: boolean;
-	children: NodeView[];
-}
-
 export class Node extends EventEmitter implements IntoNodeId {
 	// used for testing/debugging
 	test_key: number;

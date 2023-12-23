@@ -20,10 +20,8 @@ import {
   Extension,
   Renderer,
   RendererProps,
-  createCarbon,
   extensionPresets,
-  useCreateCachedCarbon,
-  useCreateCarbon, NodeMap, NodeId, CollapsedPath, ActivatedPath, TableNamePath
+  useCreateCarbon, NodeId, ActivatedPath, TitlePath
 } from "@emrgen/carbon-core";
 import {
   BlockMenu,
@@ -39,23 +37,23 @@ const data = node("carbon", [
 
     node("tabGroup", [
       node("tab", [
-        node("title", [text("tab 1")]),
+        // node("title", [text("tab 1")]),
         section([title([text("tab 1 content")])]),
       ], {
-        [ActivatedPath]: true,
-        [TableNamePath]: "tab 11"
+        [TitlePath]: "tab 11"
       }),
       node("tab", [
-        node("title", [text("tab 2")]),
+        // node("title", [text("tab 2")]),
         section([title([text("tab 2 content")])]),
       ], {
-        [TableNamePath]: "tab 12"
+        [ActivatedPath]: true,
+        [TitlePath]: "tab 12"
       }),
       node("tab", [
-        node("title", [text("tab 3")]),
+        // node("title", [text("tab 3")]),
         section([title([text("tab 3 content")])]),
       ], {
-        [TableNamePath]: "tab 13"
+        [TitlePath]: "tab 13"
       }),
     ]),
 
