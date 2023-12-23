@@ -36,13 +36,12 @@ export const CodeLineComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node} custom={{onMouseOver: handleMouseOver}}>
-
-        <div className="carbon-code-line-number" style={{paddingRight: parentSize + 'px'}} contentEditable={"false"}>
-          {/*{custom.lineNumber && (<span className="carbon-code-line-number-text">*/}
-          {/*  {custom.lineNumber}*/}
-          {/*</span>*/}
-          {/*)}*/}
-        </div>
+      <div className="carbon-code-line-number" style={{paddingRight: parentSize + 'px'}} contentEditable={"false"} suppressContentEditableWarning={true}>
+        {custom.lineNumber && (<span className="carbon-code-line-number-text">
+          {custom.lineNumber}
+        </span>
+        )}
+      </div>
 
       <CarbonChildren node={node} />
     </CarbonBlock>

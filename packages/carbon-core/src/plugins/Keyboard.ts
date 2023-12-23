@@ -115,6 +115,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 				preventAndStopCtx(ctx)
 				const after = selection.moveBy(-1)
+        console.log('move backwards', after?.toString())
 				cmd.Select(after!).Dispatch();
 			},
 			right: (ctx: EventContext<KeyboardEvent>) => {

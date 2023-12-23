@@ -25,10 +25,10 @@ export default function CollapsibleListComp(props: RendererProps) {
 
   const ref = useRef(null);
 
-  const selection = useSelectionHalo(props);
+  const blockSelection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
   const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection)
+    useCombineConnectors(dragDropRect, blockSelection)
   );
 
   // insert a new section as child of this collapsible
@@ -47,14 +47,18 @@ export default function CollapsibleListComp(props: RendererProps) {
 
   // toggle collapsed state
   const handleToggle = useCallback((app: Carbon) => {
-    const {cmd} = app;
+    const {cmd, selection} = app;
     cmd
       .Update(node.id, {
         [CollapsedPath]: !isCollapsed,
       })
     if (!isCollapsed) {
+      // const {start, end} = selection;
+      // const startInTitle = start.node.closest(n => !!node.firstChild?.eq(n));
+      // const endInTitle = end.node.closest(n => !!node.firstChild?.eq(n));
       cmd.Select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
     }
+
     cmd.OneWay()
     cmd.Dispatch();
   }, [node, isCollapsed]);

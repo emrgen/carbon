@@ -130,7 +130,7 @@ export class RectSelect extends EventEmitter {
 		const { scrollTop, scrollLeft } = docParent;
 		const collides = selectables.collides(
 			adjustBox(boundFromFastDndEvent(e), { left: scrollLeft, top: scrollTop })
-		);
+		).filter(n => n.type.spec.rectSelectable)
 
 		if (collides.length === 0) {
 			if (this.noSelectionChange([])) return

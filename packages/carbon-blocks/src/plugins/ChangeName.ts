@@ -107,7 +107,7 @@ export class ChangeName extends BeforePlugin {
         })
       } else {
         const title = titleNode.textContent.slice(match[1].length - 1);
-        console.warn('title', title, match);
+        // console.warn('title', title, match);
         if (title === '') {
           const action = SetContentAction.create(titleNode.id,BlockContent.empty());
           cmd.Add(action);
@@ -137,26 +137,26 @@ export class ChangeName extends BeforePlugin {
       const {selection} = app;
       const block = node.closest(n => n.isContainerBlock)!;
       if (!isConvertible(block)) return
-      console.log('tryChangeIntoCode', ctx.node.textContent, type);
-
       preventAndStopCtx(ctx)
 
-      const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
-      const match = text.match(regex);
-      if (match === null) {
-        console.error('failed to match regex', regex, text);
-        return
-      }
+      console.log('tryChangeIntoCode', ctx.node.textContent, type);
 
-      const to = Point.toAfter(block.id);
-      const moveNodes = block.children.slice(1);
-      if (moveNodes.length) {
-        cmd.Add(moveNodesActions(to, moveNodes));
-      }
-      cmd.Change(block.id, type)
-      cmd.Update(block.id, { node: { typeChanged: true },  });
-      cmd.Select(after)
-      cmd.Dispatch()
+      // const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
+      // const match = text.match(regex);
+      // if (match === null) {
+      //   console.error('failed to match regex', regex, text);
+      //   return
+      // }
+      //
+      // const to = Point.toAfter(block.id);
+      // const moveNodes = block.children.slice(1);
+      // if (moveNodes.length) {
+      //   cmd.Add(moveNodesActions(to, moveNodes));
+      // }
+      // cmd.Change(block.id, type)
+      // cmd.Update(block.id, { node: { typeChanged: true },  });
+      // cmd.Select(after)
+      // cmd.Dispatch()
     }
   }
 

@@ -254,19 +254,28 @@ span[data-name=text] {
 
 .carbon-collapsible__control
 	user-select: none
-	// position absolute
 	left 0
 	top 1px
-	// font-size: 12px
-	// padding-top 4px
-	padding-left 5px
+	margin-left: 4px;
+	padding-left 0px
+	padding 0
 	cursor: pointer
-	font-size: 20px
+	font-size: 18px
 	line-height: $lineHeight
+	display flex
+	justify-content center
+	align-items center
+	border-radius 4px
+	transform scaleX(0.85)
+	&:hover
+		background: #eee;
+	transition background 0.3s
+
+
 
 [data-name=collapsible]
 	> [data-type=content] > [data-name=title]
-		margin-left 8px
+		margin-left 4px
 	> [data-type=children]
 		padding-left 30px
 	padding-left: 0px
@@ -438,7 +447,8 @@ span[data-name=text] {
 	color #aaa
 	// background: #eee
 	cursor: pointer
-	line-height: 32px
+	line-height: 26px
+	margin-left: 30px;
 	padding 0 6px
 	border-radius: 4px
 	&:hover
@@ -659,12 +669,13 @@ span[data-name=text] {
 				overflow: hidden;
 		.carbon-collapsible__control
 			color: #aaa
+			background: #000;
 			width 20px
 			height: 20px
 			display: flex
 			align-items: center
 			justify-content: center
-			padding 0
+			padding 0px
 			border-radius: 4px
 			.page-tree-open-close-icon
 				transition transform 0.2s

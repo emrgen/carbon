@@ -365,9 +365,13 @@ export class Pin {
 			distance -= currSize;
 			// console.log(curr.id.key, curr.focusSize);
 			prev = curr;
-			curr = curr.prev(n => n.isFocusable, {
+			let nextCurr = curr.prev(n => n.isFocusable, {
 				skip: n => n.isIsolate,
 			});
+
+      console.log('change curr', curr?.id.toString(), nextCurr?.id.toString());
+
+      curr = nextCurr;
 		}
 
 		// console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);
@@ -377,6 +381,7 @@ export class Pin {
 		}
 
 		distance = constrain(curr.focusSize - distance, 0, curr.focusSize)
+    console.log('xxxxxxxxx', curr.id.toString(), distance, curr.focusSize - distance, 0, curr.focusSize)
 		return Pin.create(curr, distance);
 	}
 

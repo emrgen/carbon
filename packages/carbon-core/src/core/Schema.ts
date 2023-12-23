@@ -159,13 +159,22 @@ export interface NodeSpec {
   // last empty children stays within on enter
   // only backspace can unwrap the last child
 	collapsible?: boolean
+  selection?:{
+    inline?: boolean;
+    block?: boolean;
+  },
 	dnd?: {
+    // same as drag handle
 		handle?: boolean;
 		draggable?: boolean;
 		container?: boolean;
+    // same as rect selectable
 		selectable?: boolean;
+    // by default this will be evaluated using content match
 		accepts?: (parent: Node, child: Node) => boolean;
-		region?: (parent: Node, child: Node) => boolean;
+    // returns draggable node bound
+		bound?: NodeName | ((node: Node) => Optional<Node>);
+    // drag direction constraints
 		layout?: DndLayout;
 	},
 
@@ -198,6 +207,7 @@ export interface NodeSpec {
 	isolate?: boolean;
 	insertBefore?: boolean;
 	insertAfter?: boolean;
+  // used to show block insert info
 	info?: NodeInfo;
 
 	props?: Record<string, any>;

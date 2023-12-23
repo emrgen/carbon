@@ -19,6 +19,7 @@ import { ActivatedPath, CollapsedPath, NodeProps, NodePropsJson, OpenedPath, Sel
 export type TraverseOptions = {
 	order: 'pre' | 'post';
 	direction: 'forward' | 'backward';
+  // checks parent with the predicate before moving to parent siblings
   parent?: boolean;
 	gotoParent: boolean;
 	skip: Predicate<Node>;
@@ -643,11 +644,10 @@ export class Node extends EventEmitter implements IntoNodeId {
     if (!gotoParent || !this.parent) return null
 
     // check if parent is the target
-    if (parent && fn(this.parent)) return this.parent;
+    if (options.parent && fn(this.parent)) return this.parent;
 
     // pass the search role to the parent
     return this.parent.prev(fn, options, gotoParent);
-
 
 		// return (
 		// 	found

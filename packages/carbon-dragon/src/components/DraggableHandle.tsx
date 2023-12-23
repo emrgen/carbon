@@ -6,7 +6,7 @@ import { useDraggableHandle } from "../hooks/useDraggable";
 import { useDragRect } from "../hooks/useDragRect";
 import {
   ActionOrigin,
-  EventsIn,
+  EventsIn, EventsOut,
   Node,
   nodeLocation,
   Pin,
@@ -58,12 +58,14 @@ export function DraggableHandle(props: FastDragHandleProps) {
   });
 
   useEffect(() => {
-    const onTransaction = () => {
-      setShow(false);
+    const onChange = (state) => {
+      if (state.isContentChanged) {
+        setShow(false);
+      }
     };
-    app.on("transaction", onTransaction);
+    app.on(EventsOut.changed, onChange);
     return () => {
-      app.off("transaction", onTransaction);
+      app.off(EventsOut.changed, onChange);
     };
   }, [app]);
 
@@ -91,11 +93,15 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
   const findHitNode = useCallback(
     (e: DndEvent) => {
+      const {node} = e;
       const { clientX: x, clientY: y } = e.event;
+      const el = app.store.element(node.id)
+      const belBound = elementBound(el!)
+
       const bound = {
-        minX: x - 5,
+        minX: x - 10,
         minY: y - 10,
-        maxX: x + 5,
+        maxX: x + 10,
         maxY: y + 10,
       };
 
@@ -112,10 +118,13 @@ export function DraggableHandle(props: FastDragHandleProps) {
       const hitElement = app.store.element(hitNode!.id!);
       const { top, bottom } = elementBound(hitTitleElement!);
       const elBound = elementBound(hitElement!);
+      const {clientX, clientY} = e.event;
+      const x = clientX;
+      const y = clientY;
 
       let to: Optional<Point> = null;
-      if (e.event.clientY < bottom) {
-        if (e.event.clientY < top + (bottom - top) / 2) {
+      if (y < bottom) {
+        if (y < top + (bottom - top) / 2) {
           to = Point.toBefore(hitNode);
           // if (dnd.accepts(hitNode, to)) {
           //   return to;
@@ -123,7 +132,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         } else {
           const hasChildren = true//hitNode.size > 1;
           if (
-            hasChildren && e.event.clientX > elBound.left + 30 &&
+            hasChildren && x > elBound.left + 30 &&
             isNestableNode(hitNode)
           ) {
 
@@ -176,14 +185,17 @@ export function DraggableHandle(props: FastDragHandleProps) {
       const width = right - left;
       const height = bottom - top;
       const offset = !to.nodeId.eq(hitNode.id) && hitNode.name == 'section' ? 30 : 0;
-
       if (to.isBefore) {
+        // drop before the hit node
         console.log(x, y);
         const beforeNode = hitNode.prevSibling;
-        const beforeElement = app.store.element(beforeNode?.id!);
-        if (beforeElement) {
+
+        if (beforeNode) {
+          const beforeElement = app.store.element(beforeNode?.id!);
           const { bottom: beforeBottom = top } = elementBound(beforeElement!);
           top = top - (top - beforeBottom) / 2
+        } else {
+          top = top - 1;
         }
         setDropHintStyle({
           top,
@@ -191,6 +203,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
           width: width - offset,
         });
       } else {
+        // drop after the hit node
         const afterElement = hitElement?.nextSibling as Optional<HTMLElement>;
         if (afterElement) {
           const { top: afterTop = bottom } = elementBound(afterElement);

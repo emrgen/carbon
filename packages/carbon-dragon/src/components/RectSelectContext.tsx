@@ -50,7 +50,6 @@ export function RectSelectContext(props: RendererProps) {
 
   // select nodes based on the drag rect
   const onDragMove = useMemo(() => {
-
     const throttledHandler = throttle((e: DndEvent) => {
       const { id } = e;
       // make sure the origin of the event is a rect-select-area

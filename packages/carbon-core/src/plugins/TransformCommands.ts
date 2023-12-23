@@ -1565,7 +1565,6 @@ export class TransformCommands extends BeforePlugin {
       throw new Error("can't merge isolated nodes");
     }
 
-    console.log('xxxxxxxxxxxxxxxxxxxxxxx')
     const { app } = tr;
     const actions: CarbonAction[] = [];
     // check if prev and next can be merged
