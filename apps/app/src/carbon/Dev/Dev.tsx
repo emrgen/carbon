@@ -23,7 +23,7 @@ import {
   createCarbon,
   extensionPresets,
   useCreateCachedCarbon,
-  useCreateCarbon, NodeMap, NodeId, CollapsedPath
+  useCreateCarbon, NodeMap, NodeId, CollapsedPath, ActivatedPath, TableNamePath
 } from "@emrgen/carbon-core";
 import {
   BlockMenu,
@@ -36,6 +36,28 @@ import SelectionTracker from "../../SelectionTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
+
+    node("tabGroup", [
+      node("tab", [
+        node("title", [text("tab 1")]),
+        section([title([text("tab 1 content")])]),
+      ], {
+        [ActivatedPath]: true,
+        [TableNamePath]: "tab 11"
+      }),
+      node("tab", [
+        node("title", [text("tab 2")]),
+        section([title([text("tab 2 content")])]),
+      ], {
+        [TableNamePath]: "tab 12"
+      }),
+      node("tab", [
+        node("title", [text("tab 3")]),
+        section([title([text("tab 3 content")])]),
+      ], {
+        [TableNamePath]: "tab 13"
+      }),
+    ]),
 
     node("commentEditor", [
       section([title([text('add a comment')])])
@@ -59,16 +81,7 @@ const data = node("carbon", [
       node("codeLine",[ title([text("}")])])
     ]),
 
-    // node("tab", [
-    //   node("tabTitles", [
-    //     node("tabTitle", [title([text("tab 1")])], {node: {link: "tab1"}}),
-    //     node("tabTitle", [title([text("tab 2")])]),
-    //     node("tabTitle", [title([text("tab 3")])]),
-    //   ]),
-    //   node("tabContent", [
-    //     section([title([text("tab 1 content")])]),
-    //   ], {node: {link: "tab1"}}),
-    // ]),
+
 
     // node("pageTree", [
     //   title([text("Favorites")]),

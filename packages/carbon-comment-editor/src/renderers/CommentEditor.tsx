@@ -27,7 +27,7 @@ export const CommentEditorComp = (props: RendererProps) => {
     <CarbonBlock
       {...props} ref={ref}
       custom={{
-        connectors,
+        ...connectors,
         contentEditable: !node.isVoid,
         suppressContentEditableWarning: true
       }}

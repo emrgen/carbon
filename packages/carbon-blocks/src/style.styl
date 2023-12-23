@@ -166,9 +166,9 @@ $lineHeight = 22px
 
 [data-name=document] > [data-type="content"] > [data-name="title"],
 [data-as=document] > [data-type="content"] > [data-name="title"]
-	font-size: 40px
+	font-size: 30px
 	font-weight: bold
-	line-height: 50px
+	line-height: 30px
 
 [data-as=h1],
 [data-as=h2],
@@ -313,7 +313,7 @@ span[data-name=text] {
 		padding-left 7px
 
 		input
-			height: 18px
+			height: 14px
 			width: 18px
 			// margin-top 6px
 			&:hover
@@ -461,8 +461,8 @@ span[data-name=text] {
 
 [data-name=quote]
 	position relative
-	padding: 6px 16px
-	margin: 10px 0
+	padding: 4px 10px
+	margin: 4px 0
 	border-left: 3px solid $quoteColor
 	// [data-type="content"]
 	// 	line-height: $lineHeight
@@ -474,7 +474,7 @@ span[data-name=text] {
 
 [data-name=callout]
 	position relative
-	padding: 16px 20px
+	padding: 10px 10px
 	margin: 10px 0
 	background: #FBF3DB
 	border: 2px solid #f4d999
@@ -726,47 +726,6 @@ span[data-name=text] {
 	top 0
 	left: 0
 
-[data-name=tab]
-	margin: 10px 0px
-	.carbon-tab-titles
-		display: flex
-		gap 10px
-		border-bottom: 1px solid #ddd
-		padding: 0 10px
-		justify-items: center
-	[data-name="tabTitle"]
-		padding: 6px 10px
-		border-top-left-radius: 4px
-		border-top-right-radius: 4px
-		cursor: pointer
-		&.active,
-		&:hover
-			background: #eee
-		&[data-active=true]
-			background: #ddd
-	.carbon-tab-item-content
-		padding: 10px 20px
-		border-radius: 4px
-	.carbon-add-tab-item
-		display: flex
-		align-items: center
-	.carbon-add-tab-item-button
-		width 24px
-		height: 24px
-		cursor pointer
-		display: flex
-		align-items: center
-		justify-content: center
-		border-radius: 4px
-		&:hover
-			background: #eee
-	.add-tab-content
-		color: #aaa
-		padding: 10px 10px
-		cursor pointer
-		user-select: none
-		&:hover
-			background: #eee
 
 [contenteditable]
 	outline: none
@@ -894,3 +853,79 @@ span[data-name=text] {
 	user-select: text
 [data-pointer-events="none"]
 	pointer-events: none
+
+//[data-name=tab]
+//	margin: 10px 0px
+//	.carbon-tab-titles
+//		display: flex
+//		gap 10px
+//		border-bottom: 1px solid #ddd
+//		padding: 0 10px
+//		justify-items: center
+	//[data-name="tabTitle"]
+	//	padding: 6px 10px
+	//	border-top-left-radius: 4px
+	//	border-top-right-radius: 4px
+	//	cursor: pointer
+	//	&.active,
+	//	&:hover
+	//		background: #eee
+	//	&[data-active=true]
+	//		background: #ddd
+	//.carbon-tab-item-content
+	//	padding: 10px 20px
+	//	border-radius: 4px
+	//.carbon-add-tab-item
+	//	display: flex
+	//	align-items: center
+	//.carbon-add-tab-item-button
+	//	width 24px
+	//	height: 24px
+	//	cursor pointer
+	//	display: flex
+	//	align-items: center
+	//	justify-content: center
+	//	border-radius: 4px
+	//	&:hover
+	//		background: #eee
+	//.add-tab-content
+	//	color: #aaa
+	//	padding: 10px 10px
+	//	cursor pointer
+	//	user-select: none
+	//	&:hover
+	//		background: #eee
+
+
+
+[data-name=tabGroup]
+	border-radius 4px
+	box-shadow 0 0 0 1px #eee
+	overflow: hidden
+	[data-name=tab]
+		padding 10px
+		min-height 100px
+	.carbon-tab-header
+		background: #F8F9FA;
+		display flex
+		padding 6px 10px
+		.carbon-tab-names
+			display flex
+			background: #ECF0F2
+			font-size 14px
+			border-radius 4px
+			.carbon-tab-name
+				padding 2px 10px
+				cursor pointer
+				background: #ECF0F2
+				line-height 20px
+				border-radius 4px
+				&[data-active=true]
+					background: #fff
+					box-shadow 0 0 0 1px #aaa
+					z-index 1
+
+	//background: #000;
+
+	.carbon-tab-content
+		min-height: 100px;

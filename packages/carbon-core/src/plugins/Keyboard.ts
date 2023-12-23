@@ -349,7 +349,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		const { blocks } = selection;
 		const firstNode = first(blocks) as Node;
-		const block = prevSelectableBlock(firstNode);
+		const block = prevSelectableBlock(firstNode, true);
 		// console.log(block?.id, firstNode.id, blocks.map(n => n.id.toString()));
 		if (!block) {
       console.log('--------------')
@@ -383,7 +383,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		const { blocks } = selection;
 		const lastNode = last(blocks) as Node;
-		const block = nextSelectableBlock(lastNode)
+		const block = nextSelectableBlock(lastNode, false)
 		if (!block) {
 			// ctx.event.preventDefault()
 			// ctx.stopPropagation()
@@ -398,7 +398,8 @@ export class KeyboardPlugin extends AfterPlugin {
     }
 
 		// ctx.event.preventDefault();
-		const after = PinnedSelection.fromNodes([...blocks, block]);
+    const nodes = blocks.filter(b => !b.parents.some(n => n.eq(block)))
+		const after = PinnedSelection.fromNodes([...nodes, block]);
 		cmd.Select(after).Dispatch();
 	}
 
@@ -529,7 +530,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			return
 		}
 
-		const block = prevSelectableBlock(node)
+		const block = prevSelectableBlock(node, true);
 		if (!block || block.isDocument) return
 
     const lastNode = last(blocks) as Node;
@@ -574,20 +575,14 @@ export class KeyboardPlugin extends AfterPlugin {
 }
 
 // find previous selectable block wrt the node
-const prevSelectableBlock = (node: Node, within = false) => {
+const prevSelectableBlock = (node: Node, within = true) => {
 	const block = node.chain.find(n => n.isContainerBlock) as Node;
-	// const { prevSibling } = block
-	// if (prevSibling?.isContainerBlock) {
-	// 	const childContainer = prevSibling.find(n => {
-	// 		return !n.eq(prevSibling) && !n.isCollapseHidden && n.isBlockSelectable
-	// 	}, { order: 'post', direction: 'backward' })
-  //
-	// 	return childContainer ?? prevSibling;
-	// }
-  //
-	// if (block.parent?.isBlockSelectable) {
-	// 	return node.parent
-	// }
+  if (!within) {
+    const { prevSibling } = block
+    if (prevSibling?.isContainerBlock) {
+      return prevSibling
+    }
+  }
 
   console.log('check prev sibling...', block.prevSibling?.id.toString())
   const prevIsolating = block?.prev(n => n.isIsolate, {order: 'pre'})
@@ -608,7 +603,7 @@ const prevSelectableBlock = (node: Node, within = false) => {
 }
 
 // find next selectable block wrt the node
-const nextSelectableBlock = (node: Node, within = false) => {
+const nextSelectableBlock = (node: Node, within = false, parent = false) => {
 	if (within) {
 		const block: Optional<Node> = node.chain.find(n => n.isBlockSelectable);
 		const found = block?.find(n => {
@@ -618,5 +613,5 @@ const nextSelectableBlock = (node: Node, within = false) => {
 		if (found) return found;
 	}
 
-	return node?.next(n => n.isBlockSelectable, { order: 'pre' });
+	return node?.next(n => n.isBlockSelectable, { order: 'pre', parent });
 }

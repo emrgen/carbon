@@ -129,7 +129,7 @@ export class PluginManager {
 
 		// console.log('onKeyDown', event);
 
-		console.group('onKeyDown', event)
+		console.groupCollapsed('onKeyDown', event)
 		each(this.before, (p: CarbonPlugin) => {
 			if (keyDownEvent.stopped) return
 			const handlers = p.keydown()

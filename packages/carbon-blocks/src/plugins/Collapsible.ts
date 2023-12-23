@@ -97,7 +97,7 @@ export class Collapsible extends NodePlugin {
 
   plugins(): CarbonPlugin[] {
     return [
-
+      new CollapsibleBeforePlugin(),
     ]
   }
 
@@ -248,33 +248,34 @@ class CollapsibleBeforePlugin extends BeforePlugin {
 
   keydown(): Partial<EventHandler> {
     return {
-      enter: (ctx: EventContext<KeyboardEvent>) => {
-        const { selection, node } = ctx;
-        const {start, end} = selection;
-        if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
-          preventAndStopCtx(ctx);
-          // app.cmd.collapsible.split(selection)?.Dispatch();
-        }
-      },
-      backspace: (ctx: EventContext<KeyboardEvent>) => {
-        const { selection, node } = ctx;
-        const { start, end } = selection;
-        console.log('[Backspace] collapsible', node.name);
-
-        if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
-          preventAndStopCtx(ctx);
-          console.log('[Backspace] collapsible');
-          // app.cmd.collapsible.split(selection)?.Dispatch();
-        }
-      },
-      delete: (ctx: EventContext<KeyboardEvent>) => {
-        const { selection, node } = ctx;
-        const { start, end } = selection;
-        if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
-          preventAndStopCtx(ctx);
-          // app.cmd.collapsible.split(selection)?.Dispatch();
-        }
-      }
+      // enter: (ctx: EventContext<KeyboardEvent>) => {
+      //   const { selection, node, cmd } = ctx;
+      //   const {start} = selection;
+      //   const collapsible = selection.start.node.closest(n => n.isCollapsible);
+      //   if (collapsible && selection.inSameNode && start.node.parent?.eq(collapsible) && !node.isEmpty) {
+      //     preventAndStopCtx(ctx);
+      //     cmd.collapsible.split(selection)?.Dispatch();
+      //   }
+      // },
+      // backspace: (ctx: EventContext<KeyboardEvent>) => {
+      //   const { selection, node } = ctx;
+      //   const { start, end } = selection;
+      //   console.log('[Backspace] collapsible', node.name);
+      //
+      //   if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
+      //     preventAndStopCtx(ctx);
+      //     console.log('[Backspace] collapsible');
+      //     // app.cmd.collapsible.split(selection)?.Dispatch();
+      //   }
+      // },
+      // delete: (ctx: EventContext<KeyboardEvent>) => {
+      //   const { selection, node } = ctx;
+      //   const { start, end } = selection;
+      //   if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
+      //     preventAndStopCtx(ctx);
+      //     // app.cmd.collapsible.split(selection)?.Dispatch();
+      //   }
+      // }
     }
   }
 }

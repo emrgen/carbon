@@ -1,16 +1,26 @@
+$lineHeight = 20px
 [data-name=code]
   user-select contain
-  font-size 14px
+  font-size 12px
   background: #F8F9FA;
   box-shadow 0 0 0 1px #E9EAED
-  padding: 16px 16px 16px 0;
+  padding: 10px 10px 10px 0px;
+  table
+    width 100%
+    td:nth-child(odd) {
+      //background-color: #eee;
+      width 30px
+      text-align: right
+      padding-right 10px
+    }
+
   [data-name=section]
-    line-height 22px
+    line-height $lineHeight
     font-family: "Source Code Pro", monospace
     display flex
     //background: #F8F9FA;
   [data-name=codeLine]
-    line-height 22px
+    line-height $lineHeight
     font-family: "Source Code Pro", monospace
     display flex
     gap 4px
@@ -29,8 +39,10 @@
     padding 0 10px
     font-size 10px
     line-height 10px
+    //display none
   [data-name=title]
     &:before
+      //display none
       position: absolute
       content: attr(data-id)
       line-height: inherit
@@ -40,13 +52,48 @@
       font-size 10px
       color: #aaa
       line-height 10px
+      //display none
 
 .carbon-code-line-number
   position: relative;
   pointer-events none
   user-select none
   padding-left: 10px;
-  //width: 20px;
+  width: 40px;
   .carbon-code-line-number-text
     padding-left: 6px;
-    //text-align right
+
+.code-table
+  display flex
+  flex-direction column
+  .code-table-header
+    display flex
+    flex-direction row
+    .code-header-line
+      font-weight bold
+      display flex
+      flex-direction row
+      > div:first-child
+        width 30px
+        text-align: right
+        padding-right 4px
+      div
+        flex 1
+        padding-left: 10px;
+  .code-table-body
+    display flex
+    flex-direction column
+  .carbon-code-line
+    display flex
+    position: relative;
+    width 100%;
+    .code-line-number
+      user-select none
+      //padding-right 10px
+      width 30px
+      padding-right: 4px;
+      text-align: right
+    [data-name=codeLine]
+      padding-left 10px
+      flex 1
+

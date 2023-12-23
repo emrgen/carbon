@@ -660,7 +660,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 	// check if next siblings' tree can fulfill predicate
 	// otherwise try parent next
 	next(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
-		const options = merge({ order: 'post', direction: 'forward', skip: noop }, opts) as TraverseOptions;
+		const options = merge({ order: 'post', direction: 'forward', skip: noop, parent: false }, opts) as TraverseOptions;
 		// if (options.skip(this)) return
 
 		const sibling = this.nextSibling;
@@ -670,12 +670,27 @@ export class Node extends EventEmitter implements IntoNodeId {
 			(options.order == 'pre' ? sibling?.preorder(collect, options) : sibling?.postorder(collect, options))
 		}
 
-		return (
-			found
-			|| sibling?.next(fn, options, false)
-			// || (lastChild && this.parent && fn(this.parent) ? this.parent : null)
-			|| (gotoParent ? this.parent?.next(fn, options, gotoParent) : null)
-		);
+    if (found) return found;
+
+    // pass the search role to next sibling
+    found = sibling?.next(fn, options, false);
+    if (found) return found;
+
+    // no siblings have the target, maybe we want to go above and beyond
+    if (!gotoParent || !this.parent) return null
+
+    // check if parent is the target
+    if (options.parent && fn(this.parent)) return this.parent;
+
+    // pass the search role to the parent
+    return this.parent.next(fn, options, gotoParent);
+
+		// return (
+		// 	found
+		// 	|| sibling?.next(fn, options, false)
+		// 	// || (lastChild && this.parent && fn(this.parent) ? this.parent : null)
+		// 	|| (gotoParent ? this.parent?.next(fn, options, gotoParent) : null)
+		// );
 	}
 
 	// walk preorder, traverse order: node -> children -> ...
@@ -884,7 +899,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 			return this;
 		}
 
-		console.log('clone', this.name, this.id.toString());
+		// console.log('clone', this.name, this.id.toString());
 
 		const clone = Node.create({
 			scope,

@@ -6,6 +6,7 @@ import { Slice } from "../core/Slice";
 import { preventAndStop } from "../utils/event";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { SelectedPath } from "../core/NodeProps";
+import {Optional} from "@emrgen/types";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
@@ -17,9 +18,9 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStop(event);
         const slice = this.slice(app);
         if (!slice.isEmpty) {
-          const serialized = app.serialize(slice.root)
-          console.log('Serialized =>', serialized);
-          event.clipboardData.setData('text/plain', serialized);
+          // const serialized = app.serialize(slice.root)
+          // console.log('Serialized =>', serialized);
+          // event.clipboardData.setData('text/plain', serialized);
 
           app.state.changes.clipboard = slice;
         }
@@ -34,9 +35,9 @@ export class ClipboardPlugin extends AfterPlugin {
         console.log('slice', slice);
 
         if (!slice.isEmpty) {
-          const serialized = app.serialize(slice.root)
-          console.log('Serialized =>', serialized);
-          event.clipboardData.setData('text/plain', serialized);
+          // const serialized = app.serialize(slice.root)
+          // console.log('Serialized =>', serialized);
+          // event.clipboardData.setData('text/plain', serialized);
           console.log(slice.root.children.map(n => n.textContent));
           app.runtime.clipboard = slice;
           return
@@ -80,7 +81,7 @@ export class ClipboardPlugin extends AfterPlugin {
     }
 
     const { start, end } = selection;
-    let [startNode, endNode] = blocksBelowCommonNode(start.node.parent!, end.node.parent!);
+    let [startNode, endNode] = blocksBelowCommonNode(start.node.parent!, end.node.parent!) as [Optional<Node>, Optional<Node>];
     if (!startNode || !endNode) {
       return Slice.empty;
     }
@@ -99,7 +100,7 @@ export class ClipboardPlugin extends AfterPlugin {
       (startNode?.parent?.children.slice(startNode.index, endNode.index + 1) ?? [])
 
     const cloned = nodes.map(n => n.clone());
-    console.log('cloned', cloned.map(n => n.name));
+    // console.log('cloned', cloned.map(n => n.name));
 
     const root = Node.create({
       id: NodeId.create(String(Math.random())),

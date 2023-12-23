@@ -18,6 +18,14 @@ export class Code extends CarbonPlugin {
       rectSelectable: true,
       draggable: true,
       dragHandle: true,
+      props:{
+        local:{
+          html:{
+            contentEditable: false,
+            suppressContentEditableWarning: true,
+          }
+        }
+      }
     }
   }
 

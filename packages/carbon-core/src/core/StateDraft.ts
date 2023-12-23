@@ -288,8 +288,6 @@ export class StateDraft {
       this.nodeMap.set(node.id, node);
     }
 
-
-
     switch (at.at) {
       case PointAt.After:
         return this.insertAfter(at.nodeId, node);
@@ -359,8 +357,9 @@ export class StateDraft {
     }
 
     this.mutable(parentId, parent => {
+      this.updateDependents(refNode, UpdateDependent.Next);
       parent.insertAfter(refNode, node);
-      this.updateDependents(node, UpdateDependent.Next);
+      this.updateDependents(refNode, UpdateDependent.Prev);
       this.contentChanges.add(parent.id);
     });
   }
@@ -386,6 +385,7 @@ export class StateDraft {
 
     this.mutable(parentId, parent => {
       this.updateDependents(node, UpdateDependent.Next);
+      this.updateDependents(node, UpdateDependent.Prev);
       parent.remove(node);
       this.contentChanges.add(parent.id);
 
@@ -449,7 +449,6 @@ export class StateDraft {
 
     // update selection nodes
     if (selection.isInline) {
-      console.log('-------------------')
       // const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
       // const after = selection.pin(this.nodeMap)!;
       // if (after) {
@@ -483,6 +482,7 @@ export class StateDraft {
     // update empty placeholder if needed
     if (this.state.selection.isInline && this.state.selection.isCollapsed) {
       if (!this.state.selection.isIdentity) {
+        const {head: headPin} = this.state.selection;
         const {head} = this.state.selection.unpin();
         const node = this.nodeMap.get(head.nodeId);
         if (!node) {
@@ -492,9 +492,10 @@ export class StateDraft {
         if (node.isEmpty) {
           this.mutable(head.nodeId, node => {
             const parent = this.nodeMap.parent(node);
+            const emptyPlaceholder = parent?.properties.get<string>(EmptyPlaceholderPath) ?? "";
             if (!parent) return;
             node.updateProps({
-              [PlaceholderPath]: parent.properties.get<string>(EmptyPlaceholderPath) ?? ""
+              [PlaceholderPath]: emptyPlaceholder,
             });
           });
         }
@@ -503,6 +504,7 @@ export class StateDraft {
 
     // update focus placeholder if needed
     if (selection.isCollapsed && selection.isInline && !selection.isIdentity) {
+      const {head: headPin} = this.state.selection;
       const { head } = selection;
       const node = this.nodeMap.get(head.nodeId);
       if (!node) {
@@ -512,9 +514,10 @@ export class StateDraft {
       if (node.isEmpty) {
         this.mutable(head.nodeId, node => {
           const parent = this.nodeMap.parent(node);
+          const focusedPlaceholder = parent?.properties.get<string>(FocusedPlaceholderPath) ?? "";
           if (!parent) return;
           node.updateProps({
-            [PlaceholderPath]: parent.properties.get<string>(FocusedPlaceholderPath) ?? ""
+            [PlaceholderPath]: focusedPlaceholder,
           });
         });
       }
@@ -523,19 +526,21 @@ export class StateDraft {
 
   // check and update render dependents
   private updateDependents(node: Node, flag: number) {
-    console.log('xxxxxxxxxxxxxxxxxxx', node.id.toString(), flag)
+    // console.log('xxxxxxxxxxxxxxxxxxx', node.id.toString(), flag)
     if (flag & UpdateDependent.Parent && node.parent?.type.spec.depends?.child) {
       this.mutable(node.parent.id, parent => {
         this.updateDependents(parent, UpdateDependent.Parent);
       })
     }
 
+    // console.log('update prev', flag, node.id.toString(), node.prevSibling?.type.spec.depends?.prev)
     if(flag & UpdateDependent.Prev && node.prevSibling?.type.spec.depends?.next) {
       this.mutable(node.prevSibling.id, prev => {
         this.updateDependents(prev, UpdateDependent.Prev);
       })
     }
 
+    // console.log('update next', flag, node.id.toString(), node.nextSibling?.type.spec.depends?.prev)
     if(flag & UpdateDependent.Next && node.nextSibling?.type.spec.depends?.prev) {
       this.mutable(node.nextSibling.id, next => {
         this.updateDependents(next, UpdateDependent.Next);
@@ -558,7 +563,7 @@ export class StateDraft {
     const mutable = this.nodeMap.has(id) ? node : node.clone();
     fn?.(mutable);
 
-    console.log('mutated', id.toString())
+    // console.log('mutated', id.toString())
     this.changes.add(id);
     this.nodeMap.set(id, mutable);
 

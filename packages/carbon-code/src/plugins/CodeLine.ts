@@ -16,10 +16,15 @@ export class CodeLine extends CarbonPlugin {
       content: 'title',
       splits: true,
       splitName: 'codeLine',
+      depends: {
+        // prev: true,
+        // next: true,
+      },
       props: {
         local: {
           html: {
-            // className: 'code-line',
+            contentEditable: true,
+            suppressContentEditableWarning: true,
           }
         }
       }

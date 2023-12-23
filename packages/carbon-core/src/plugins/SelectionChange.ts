@@ -44,18 +44,18 @@ export class SelectionChangePlugin extends AfterPlugin {
       },
 			selectionchange: (ctx: EventContext<Event>) => {
         // console.log('yyyyyyyyyyyyyyyy')
-        const mousedown = this.state.get('mousedown');
-        const mousedownselection = this.state.get('mousedownselection');
-        console.log('mousedown', mousedown, 'mousedownselection', mousedownselection)
-        if (mousedown) {
-          if (mousedownselection) {
-            console.log('selecting using mouse')
-            // return
-          }
-          console.log('first selection after mousedown')
-          this.state.set('mousedownselection', true);
-        }
-        console.log('selectionchange', ctx.event)
+        // const mousedown = this.state.get('mousedown');
+        // const mousedownselection = this.state.get('mousedownselection');
+        // console.log('mousedown', mousedown, 'mousedownselection', mousedownselection)
+        // if (mousedown) {
+        //   if (mousedownselection) {
+        //     console.log('selecting using mouse')
+        //     // return
+        //   }
+        //   console.log('first selection after mousedown')
+        //   this.state.set('mousedownselection', true);
+        // }
+        // console.log('selectionchange', ctx.event)
 
 				// console.log(p14('[event]'), 'selectionchange', ctx.event);
 				// helper code block to detect errant selectionchange effect

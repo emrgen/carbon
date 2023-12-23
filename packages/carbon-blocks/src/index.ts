@@ -44,8 +44,8 @@ import { CarbonComp } from "./renderers/Carbon";
 import { PageTree } from "./plugins/PageTree";
 import { PageTreeComp } from "./renderers/PageTree";
 import { PageTreeItemComp } from "./renderers/PageTreeItem";
-import { Tab } from "./plugins/Tab";
-import { TabComp, TabItemComp, TabTitlesComp, TextTitleComp } from "./renderers/TabComp";
+import {TabGroup} from "./plugins/Tab";
+import {TabComp, TabGroupComp} from "./renderers/TabComp";
 import { VideoComp } from "./renderers/Video";
 import { Video } from "./plugins/Video";
 import { HeaderComp } from "./renderers/Header";
@@ -78,7 +78,7 @@ export const blockPresets: Extension = {
 		new CarbonRoot(),
 		new PageTree(),
 		new BlockContent(),
-		new Tab(),
+		new TabGroup(),
 		new BlockContent(),
 		new Frame(),
 		new Insert(),
@@ -112,10 +112,8 @@ export const blockPresets: Extension = {
 		Renderer.create('carbon', CarbonComp),
 		Renderer.create('pageTree', PageTreeComp),
 		Renderer.create('pageTreeItem', PageTreeItemComp),
+		Renderer.create('tabGroup', TabGroupComp),
 		Renderer.create('tab', TabComp),
-		Renderer.create('tabContent', TabItemComp),
-		Renderer.create('tabTitles', TabTitlesComp),
-		Renderer.create('tabTitle', TextTitleComp),
 		Renderer.create('tagsAttr', () => 1),
 		Renderer.create('frame', FrameComp),
 		Renderer.create('blockContent', BlockContentComp),

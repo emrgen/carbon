@@ -248,7 +248,7 @@ export class Transaction {
 		}
 		this._dispatched = true;
 
-    console.group('dispatching transaction')
+    console.groupCollapsed('dispatching transaction')
     this.actions.forEach(ac => {
       console.log(ac.toString())
     })
@@ -270,9 +270,9 @@ export class Transaction {
 
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
-				console.group('Commit (runtime)');
+				console.groupCollapsed('Commit (runtime)');
 			} else {
-				console.group('Commit', this.id, this);
+				console.groupCollapsed  ('Commit', this.id, this);
 			}
 
 			for (const action of this.actions) {

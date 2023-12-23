@@ -1,5 +1,4 @@
 import { ActionOrigin, BeforePlugin, BlockContent, Carbon, CarbonPlugin, EventContext, EventHandler, EventHandlerMap, NodeSpec, Pin, PinnedSelection, SetContentAction, Slice, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
-import prism, { Token, TokenStream } from 'prismjs';
 import { flatten, flattenDeep } from 'lodash';
 
 export class Code extends CarbonPlugin {

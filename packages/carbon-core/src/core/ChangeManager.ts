@@ -248,5 +248,4 @@ export class ChangeManager extends NodeTopicEmitter {
     }
   }
 
-
 }

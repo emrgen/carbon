@@ -1,9 +1,9 @@
 import {
   CarbonBlock,
   CarbonChildren,
-  RendererProps,
+  RendererProps, useCarbon,
 } from "@emrgen/carbon-core";
-import {useMemo} from "react";
+import {useCallback, useMemo} from "react";
 import prism, { Token, TokenStream } from 'prismjs';
 
 declare module '@emrgen/carbon-core' {
@@ -15,14 +15,14 @@ declare module '@emrgen/carbon-core' {
 }
 
 export const CodeLineComp = (props: RendererProps) => {
-  const { node, custom } = props;
+  const { node } = props;
 
-  const parentSize = useMemo(() => {
-    if (node.parent) {
-      return String(node.parent.size).length * 10;
-    }
-    return 0;
-  },[node.parent])
+  // const parentSize = () => {
+  //   if (node.parent) {
+  //     return String(node.parent.size).length * 10;
+  //   }
+  //   return 0;
+  // }
 
   // const tokens = useMemo(() => {
   //   return prism.tokenize(node.textContent, prism.languages.javascript);
@@ -30,19 +30,11 @@ export const CodeLineComp = (props: RendererProps) => {
   //
   // console.log(tokens)
 
- const handleMouseOver = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
- }
-
+  const handleMouseOver = useCallback((e) => {
+  },[]);
 
   return (
-    <CarbonBlock node={node} custom={{onMouseOver: handleMouseOver}}>
-      <div className="carbon-code-line-number" style={{paddingRight: parentSize + 'px'}} contentEditable={"false"} suppressContentEditableWarning={true}>
-        {custom.lineNumber && (<span className="carbon-code-line-number-text">
-          {custom.lineNumber}
-        </span>
-        )}
-      </div>
-
+    <CarbonBlock {...props}>
       <CarbonChildren node={node} />
     </CarbonBlock>
   );

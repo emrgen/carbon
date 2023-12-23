@@ -121,4 +121,5 @@ export const NamePath = "plugin/name";
 export const CheckedPath = "remote/state/checked";
 export const EmojiPath = "remote/state/emoji";
 export const ListNumberPath = "remote/state/listNumber";
+export const TableNamePath = "remote/state/tabName";
 
