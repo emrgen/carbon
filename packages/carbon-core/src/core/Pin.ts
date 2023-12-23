@@ -326,7 +326,7 @@ export class Pin {
 			curr = curr.next(n => {
 				return n.isFocusable
 			}, {
-				skip: n => n.isIsolating
+				skip: n => n.isIsolate
 			});
 		}
 
@@ -366,7 +366,7 @@ export class Pin {
 			// console.log(curr.id.key, curr.focusSize);
 			prev = curr;
 			curr = curr.prev(n => n.isFocusable, {
-				skip: n => n.isIsolating,
+				skip: n => n.isIsolate,
 			});
 		}
 

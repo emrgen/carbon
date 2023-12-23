@@ -12,7 +12,7 @@ export class BoardView extends CarbonPlugin {
       droppable: true,
       insert: true,
       dragHandle: true,
-      isolating: true,
+      isolate: true,
       info: {
         title: 'Board',
         description: 'Create a board',

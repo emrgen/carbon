@@ -1,11 +1,11 @@
 import { Optional } from '@emrgen/types';
-import { each, isArray,  merge } from 'lodash';
+import {cloneDeep, each, isArray, merge} from 'lodash';
 import { ContentMatch } from './ContentMatch';
 import { Fragment } from './Fragment';
 import { MarkSet } from './Mark';
 import { Node } from './Node';
 import { NodeSpec, Schema } from './Schema';
-import { HTMLAttrs,  NodeName } from './types';
+import {HTMLAttrs, NodeJSON, NodeName} from './types';
 import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { NodeState, NodeStateJSON } from "./NodeState";
 import { InitNodeJSON } from "@emrgen/carbon-core";
@@ -53,6 +53,8 @@ export class NodeType {
 
 	contents: NodeName[];
 
+  _default: Optional<InitNodeJSON>;
+
 	static IDENTITY = new NodeType('identity', {} as Schema, IDENTITY_NODE_SPEC);
 	static NULL = new NodeType('null', {} as Schema, IDENTITY_NODE_SPEC);
 
@@ -76,6 +78,7 @@ export class NodeType {
 		this.isText = name == "text";
 		this.markSet = new MarkSet();
 		this.contents = [];
+    this._default = Object.freeze(spec.default);
 	}
 
 	computeContents() {
@@ -175,8 +178,8 @@ export class NodeType {
 		return !!this.spec.atom;
 	}
 
-	get isIsolating() {
-		return !!this.spec.isolating;
+	get isIsolate() {
+		return !!this.spec.isolate;
 	}
 
 	get isDraggable() {
@@ -210,37 +213,29 @@ export class NodeType {
 
 	// create a default node based on schema
 	default(): Optional<Node> {
-		if (this.isText) {
-			return this.schema.text('');
-		}
+    if (this._default) {
+      console.log('returning cached default', this._default)
+      return this.schema.nodeFromJSON(cloneDeep(this._default));
+    }
 
-		const blockJson: InitNodeJSON = {
-			name: this.name,
-			children: [],
-		}
-		let { contentMatch } = this
-		if (contentMatch.validEnd) {
-			return this.schema.nodeFromJSON(blockJson)
-		}
+    const node = this.createAndFill();
+    if (!node) {
+      return null
+    }
 
-		while (contentMatch) {
-			let { next: nextEdges, defaultType, validEnd } = contentMatch
-			if (validEnd || !nextEdges) {
-				break
-			}
-			if (defaultType && isArray(blockJson.children)) {
-				blockJson.children.push(defaultType.default()?.toJSON())
-			}
-			contentMatch = nextEdges[0].next
-		}
+    // save the default for future use
+    this._default = Object.freeze(this.removeNodeId(node.toJSON()))
 
-		const node = this.schema.nodeFromJSON(blockJson)
-		if (!node) {
-			throw new Error('node is null')
-		}
-
-		return node
+    return node
 	}
+
+  private removeNodeId(json: NodeJSON): InitNodeJSON {
+    const {id, ...rest} = json;
+    return {
+      ...rest,
+      children: json.children?.map(c => this.removeNodeId(c))
+    }
+  }
 
 	create(content: Node[] | string): Optional<Node> {
 		if (this.isText) {
@@ -253,8 +248,48 @@ export class NodeType {
 		return this.name === other.name;
 	}
 
+
+  defaultNodeCache: Optional<Node>
+
 	createAndFill(): Optional<Node> {
-		return null
+    if (this.defaultNodeCache) {
+      return this.schema.cloneWithId(this.defaultNodeCache);
+    }
+
+    if (this.isText) {
+      const node = this.schema.text('');
+      this.defaultNodeCache = node;
+      return node;
+    }
+
+    const blockJson: InitNodeJSON = {
+      name: this.name,
+      children: [],
+    }
+    let { contentMatch } = this
+    if (contentMatch.validEnd) {
+      return this.schema.nodeFromJSON(blockJson)
+    }
+
+    while (contentMatch) {
+      let { next: nextEdges, defaultType, validEnd } = contentMatch
+      if (validEnd || !nextEdges) {
+        break
+      }
+      if (defaultType && isArray(blockJson.children)) {
+        blockJson.children.push(defaultType.default()?.toJSON())
+      }
+      contentMatch = nextEdges[0].next
+    }
+
+    const node = this.schema.nodeFromJSON(blockJson)
+    if (!node) {
+      throw new Error('node is null')
+    }
+
+    this.defaultNodeCache = node;
+
+    return node
 	}
 }
 

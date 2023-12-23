@@ -184,7 +184,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
 	// nodes that are not allowed to merge with any other node
 	get canMerge() {
-		return !this.type.isIsolating && !this.isAtom;
+		return !this.type.isIsolate && !this.isAtom;
 	}
 
 	get name() {
@@ -450,8 +450,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 		return this.type.isBlock
 	}
 
-	get isIsolating() {
-		return this.type.isIsolating
+	get isIsolate() {
+		return this.type.isIsolate
 	}
 
 	get isCollapsible() {
@@ -835,6 +835,15 @@ export class Node extends EventEmitter implements IntoNodeId {
 	eq(node: Node): boolean {
 		return this.id.eq(node.id);
 	}
+
+  eqContent(node: Node): boolean {
+    // if (this.properties.eqContent(node.properties) === false) return false
+    if (this.children.length !== node.children.length) return false
+    if (this.children.length === 0) {
+      return this.textContent === node.textContent;
+    }
+    return this.children.every((n, i) => n.eqContent(node.children[i]));
+  }
 
 	toString(): string {
 		return classString(this)({

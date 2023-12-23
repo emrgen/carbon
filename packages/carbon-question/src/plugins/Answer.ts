@@ -11,7 +11,7 @@ export class QuestionAnswer extends CarbonPlugin {
       splits: true,
       splitName: "section",
       inlineSelectable: true,
-      isolating: true,
+      isolate: true,
       sandbox: true,
       collapsible: true,
       attrs: {

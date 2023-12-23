@@ -4,8 +4,9 @@ import { ContentMatch } from './ContentMatch';
 import { Node } from './Node';
 import { MarkType, NodeType } from "./NodeType";
 import { SchemaFactory } from './SchemaFactory';
-import { NodeIdFactory, NodeName } from "./types";
+import {NodeIdFactory, NodeJSON, NodeName} from "./types";
 import { Mark, MarkProps } from "./Mark";
+import {InitNodeJSON} from "@emrgen/carbon-core";
 
 interface SchemaSpec {
 	nodes: Record<NodeName, NodeSpec>;
@@ -194,12 +195,14 @@ export interface NodeSpec {
 	definingAsContext?: boolean;
 	definingForContent?: boolean;
 	defining?: boolean;
-	isolating?: boolean;
+	isolate?: boolean;
 	insertBefore?: boolean;
 	insertAfter?: boolean;
 	info?: NodeInfo;
 
 	props?: Record<string, any>;
+
+  default?: InitNodeJSON,
 
 	[key: string]: any;
 }

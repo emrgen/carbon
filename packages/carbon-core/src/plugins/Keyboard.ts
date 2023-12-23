@@ -18,7 +18,7 @@ import {
 	Point,
 	Transaction
 } from "../core";
-import { insertAfterAction, preventAndStopCtx } from "@emrgen/carbon-core";
+import {insertAfterAction, isIsolatedNodes, preventAndStopCtx} from "@emrgen/carbon-core";
 import { nodeLocation } from '../utils/location';
 import { Optional } from '@emrgen/types';
 import {NodeBTree} from "../core/BTree";
@@ -224,7 +224,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (head.isAtStartOfNode(head.node)) {
 			const { start } = selection;
 			const textBlock = start.node.chain.find(n => n.isTextBlock)
-			const prevTextBlock = textBlock?.prev(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
+			const prevTextBlock = textBlock?.prev(n => !n.isIsolate && n.isTextBlock, { skip: n => n.isIsolate });
 			if (!prevTextBlock || !textBlock) {
 				console.log('no prev text block found');
 				return
@@ -262,8 +262,13 @@ export class KeyboardPlugin extends AfterPlugin {
 				return
 			}
 
-			console.log('merge text block', prevTextBlock.name, textBlock.name);
+
+      if (isIsolatedNodes(prevTextBlock, textBlock)) {
+        return
+      }
+
 			// HOT
+      console.log('merge text block', prevTextBlock.name, textBlock.name);
 			tr.transform.merge(prevTextBlock, textBlock)?.Dispatch();
 			return
 		}
@@ -346,6 +351,11 @@ export class KeyboardPlugin extends AfterPlugin {
 			return
 		}
 
+    const lastNode = last(blocks) as Node;
+    if (block.isIsolate && lastNode.parents.some(n => n.eq(block))) {
+      return
+    }
+
 		// if parent node is selected remove descendant nodes
     const set = NodeBTree.from([block, ...blocks]);
     set.toArray().forEach(([id, node]) => {
@@ -372,6 +382,11 @@ export class KeyboardPlugin extends AfterPlugin {
 			// ctx.stopPropagation()
 			return
 		}
+
+    const firstNode = first(blocks) as Node;
+    if (isIsolatedNodes(block, firstNode)) {
+      return
+    }
 
 		// ctx.event.preventDefault();
 		const after = PinnedSelection.fromNodes([...blocks, block]);
@@ -478,7 +493,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (head.isAtEndOfNode(node)) {
 			const { start } = selection;
 			const textBlock = start.node.chain.find(n => n.isTextBlock)
-			const nextTextBlock = textBlock?.next(n => !n.isIsolating && n.isTextBlock, { skip: n => n.isIsolating });
+			const nextTextBlock = textBlock?.next(n => !n.isIsolate && n.isTextBlock, { skip: n => n.isIsolate });
 			if (!nextTextBlock || !textBlock) return
 
 			cmd.transform.merge(textBlock, nextTextBlock)?.Dispatch();
@@ -508,6 +523,11 @@ export class KeyboardPlugin extends AfterPlugin {
 		const block = prevSelectableBlock(node)
 		if (!block || block.isDocument) return
 
+    const lastNode = last(blocks) as Node;
+    if (block.isIsolate && lastNode.parents.some(n => n.eq(block))) {
+      return
+    }
+
 		const after = PinnedSelection.fromNodes(block);
 		cmd.Select(after).Dispatch()
 	}
@@ -518,8 +538,9 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (selection.isInline) return
 		preventAndStopCtx(ctx)
 
+    console.log('--------')
+
 		const {blocks, nodes } = selection;
-    console.log(nodes, blocks)
 		if (blocks.length > 1) {
 			const lastNode = last(blocks) as Node;
 			const after = PinnedSelection.fromNodes(lastNode);
@@ -530,6 +551,11 @@ export class KeyboardPlugin extends AfterPlugin {
 		const block = nextSelectableBlock(node, true)
 		// console.log('nextContainerBlock', block);
 		if (!block) return
+
+    const firstNode = first(blocks) as Node;
+    if (isIsolatedNodes(block, firstNode)) {
+      return
+    }
 
 		const after = PinnedSelection.fromNodes(block);
 		cmd.Select(after).Dispatch()
@@ -553,7 +579,21 @@ const prevSelectableBlock = (node: Node, within = false) => {
 	// }
 
   console.log('check prev sibling...', block.prevSibling?.id.toString())
-	return block?.prev(n => n.isBlockSelectable, {parent: true});
+  const prevIsolating = block?.prev(n => n.isIsolate, {order: 'pre'})
+	const blockSelectable = block?.prev(n => n.isBlockSelectable, {parent: true});
+
+  if (prevIsolating) {
+
+    if (node.parents.some(n => n.eq(prevIsolating))) {
+      return blockSelectable;
+    }
+
+    if (blockSelectable?.parents.some(n => n.eq(prevIsolating))) {
+      return prevIsolating;
+    }
+  }
+
+  return blockSelectable;
 }
 
 // find next selectable block wrt the node

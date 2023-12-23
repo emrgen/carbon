@@ -13,7 +13,7 @@ export class Code extends CarbonPlugin {
     return {
       group: 'content',
       content: 'codeLine+',
-      isolating: true,
+      isolate: true,
       blockSelectable: true,
     }
   }

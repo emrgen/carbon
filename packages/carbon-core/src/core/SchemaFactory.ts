@@ -34,7 +34,6 @@ export class SchemaFactory {
 			throw new Error(`Node Plugin is not registered ${name}`);
 		}
 
-
 		const properties = isEmpty(json.props) ? type.props : type.props.update(json.props);
 
 		if (name === 'text') {

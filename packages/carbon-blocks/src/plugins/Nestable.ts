@@ -90,7 +90,7 @@ export class NestablePlugin extends AfterPlugin {
 		return {
 			backspace: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, node, cmd } = ctx;
-				if (node.isIsolating) return;
+				if (node.isIsolate) return;
 
 				const { selection } = app;
 				if (!selection.isCollapsed || selection.isBlock) {
@@ -191,7 +191,7 @@ export class NestablePlugin extends AfterPlugin {
 				const nextSibling = listNode.nextSibling;
         const {parent} = listNode
 				// if parent is collapsible the listNode should be not unwrapped
-				if (!nextSibling && !parent?.isCollapsible && !parent?.isIsolating) {
+				if (!nextSibling && !parent?.isCollapsible && !parent?.isIsolate) {
 					preventAndStopCtx(ctx);
 					cmd.transform.unwrap(listNode)?.Dispatch();
 					return

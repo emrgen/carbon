@@ -40,6 +40,15 @@ export class NodeProps extends JsonStore {
     return result;
   }
 
+  eqContent(other: NodeProps): boolean {
+    if (this.store.size !== other.store.size) return false;
+    for (const [key, value] of this.store) {
+      if (other.store.get(key) !== value) return false;
+    }
+
+    return true;
+  }
+
   diff(other: NodeProps): NodeProps {
     const diff = new NodeProps();
     for (const [key, value] of this.store) {

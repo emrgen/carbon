@@ -166,6 +166,8 @@ export class PinnedSelection {
 		return this.tail.isIdentity && this.head.isIdentity;
 	}
 
+  // inline -> inlineBlock -> block
+
   // for selection spanning multiple blocks or a single block
 	get isBlock() {
 		return this.tail.isIdentity && this.head.isIdentity && this.nodes.length > 0;

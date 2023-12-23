@@ -103,3 +103,11 @@ export const sortNodesByPath = (nodes: Node[]): Node[] => {
 
   return paths.map(p => p.node);
 }
+
+
+export const isIsolatedNodes = (a: Node, b: Node): boolean => {
+  const aIsolate = a.closest(n => n.isIsolate)!
+  const bIsolate = b.closest(n => n.isIsolate)!
+
+  return !aIsolate.eq(bIsolate)
+}
