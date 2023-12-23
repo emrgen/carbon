@@ -7,7 +7,7 @@ import {
   BlockContent,
   Carbon,
   CarbonAction,
-  Format,
+  Format, Fragment,
   InlineContent,
   InsertPos, isIsolatedNodes,
   MoveNodeAction,
@@ -33,7 +33,7 @@ import { Transaction } from "../core/Transaction";
 import { ChangeNameAction } from "../core/actions/ChangeNameAction";
 import { InsertNodeAction } from "../core/actions/InsertNodeAction";
 import { NodeName } from "../core/types";
-import { takeBefore, takeUntil } from "../utils/array";
+import {takeAfter, takeBefore, takeUntil} from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { nodeLocation } from "../utils/location";
 import { splitTextBlock } from "../utils/split";
@@ -914,6 +914,16 @@ export class TransformCommands extends BeforePlugin {
     // check if after deleting the nodes we need to insert more node to maintain schema constraints
     // if next sibling is there after the delete nodes find fillbefore types
     // otherwise just find
+    const startNode = first(nodes)!;
+    const endNode = last(nodes)!;
+    const prevSiblings = takeBefore(parent.children, n => n.eq(startNode));
+    // const nextSiblings = takeAfter(parent.children, n => n.eq(endNode));
+    const match = parent.type.contentMatch.matchFragment(Fragment.from(prevSiblings));
+    // const {nodes: createNodes} = match?.fillBefore(Fragment.from(nextSiblings)) ?? Fragment.EMPTY;
+    // console.log('prevSiblings', prevSiblings.map(n => n.id.toString()))
+    // console.log('nextSiblings', nextSiblings.map(n => n.id.toString()))
+    // console.log('createNodes to be inserted', createNodes.map(n => n.name));
+
     // create the insert node and commands
     const { fall = 'after' } = opts;
     const deleteActions: CarbonAction[] = [];

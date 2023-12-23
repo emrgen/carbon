@@ -15,6 +15,8 @@ export class Code extends CarbonPlugin {
       content: 'codeLine+',
       isolate: true,
       blockSelectable: true,
+      draggable: true,
+      dragHandle: true,
     }
   }
 }

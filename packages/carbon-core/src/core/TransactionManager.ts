@@ -6,6 +6,7 @@ import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
 import { EventsOut } from './Event';
 import { State } from './State';
+import {StateDraft} from "./StateDraft";
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];
@@ -45,7 +46,7 @@ export class TransactionManager {
 			}
 
 			// produce a new state from the current state
-			const state = app.state.produce(app.runtime.origin, draft => {
+			const state = app.state.produce(app.runtime.origin, (draft) => {
 				tr.Commit(draft);
 			});
 

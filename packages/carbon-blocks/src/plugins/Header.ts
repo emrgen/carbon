@@ -46,6 +46,7 @@ export class Heading extends NodePlugin {
 			splits: true,
 			splitName: 'section',
 			inlineSelectable: true,
+      blockSelectable: true,
 			draggable: true,
 			dragHandle: true,
 			rectSelectable: true,
@@ -84,7 +85,7 @@ export class Heading extends NodePlugin {
 		return {}
 	}
 
-	serialize(app: Carbon, node: Node): SerializedNode {
-		return '#'.repeat(this.level) + ' ' + app.serialize(node.child(0)!) + app.commands.nestable.serializeChildren(node)
-	}
+	// serialize(app: Carbon, node: Node): SerializedNode {
+	// 	return '#'.repeat(this.level) + ' ' + app.serialize(node.child(0)!) + app.commands.nestable.serializeChildren(node)
+	// }
 }

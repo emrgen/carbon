@@ -69,3 +69,5 @@ export class Fragment {
 		}));
 	}
 }
+
+window.Fragment = Fragment;

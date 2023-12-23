@@ -78,8 +78,14 @@ export class KeyboardPlugin extends AfterPlugin {
 				const { app, cmd, node } = ctx;
 				const { selection } = app
 				if (selection.isBlock) {
-					// app.tr.selectNodes([]).Dispatch();
-					// app.blur()
+					const { blocks } = selection;
+          const lastNode = last(blocks) as Node;
+          const parentIsolate =  lastNode.parents.find(n => n.isBlockSelectable)
+          if (parentIsolate) {
+            if (parentIsolate.isDocument) return
+            const after = PinnedSelection.fromNodes(parentIsolate);
+            cmd.Select(after).Dispatch()
+          }
 					return
 				}
 
@@ -384,7 +390,9 @@ export class KeyboardPlugin extends AfterPlugin {
 		}
 
     const firstNode = first(blocks) as Node;
-    if (isIsolatedNodes(block, firstNode)) {
+    const selectedParentIsolate = firstNode.parents.find(n => n.isIsolate);
+    const blockParentIsolate = block.parents.find(n => n.isIsolate);
+    if (selectedParentIsolate && blockParentIsolate && !selectedParentIsolate.eq(blockParentIsolate)) {
       return
     }
 
@@ -548,12 +556,14 @@ export class KeyboardPlugin extends AfterPlugin {
 			return
 		}
 
-		const block = nextSelectableBlock(node, true)
-		// console.log('nextContainerBlock', block);
+    const lastNode = last(blocks) as Node;
+		const block = nextSelectableBlock(node, !lastNode.isIsolate)
+		console.log('nextContainerBlock', block);
 		if (!block) return
 
     const firstNode = first(blocks) as Node;
-    if (isIsolatedNodes(block, firstNode)) {
+    console.log(isIsolatedNodes(block, firstNode), !lastNode.isIsolate)
+    if (isIsolatedNodes(block, firstNode) && !lastNode.isIsolate) {
       return
     }
 

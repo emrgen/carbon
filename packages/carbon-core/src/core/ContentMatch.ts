@@ -104,31 +104,12 @@ export class ContentMatch {
   // successful, return a fragment of inserted nodes (which may be
   // empty if nothing had to be inserted).
   fillAfter(before: Fragment, startIndex = 0): Fragment | null {
-    const match = this.matchFragment(before, startIndex)
+    const match = this.matchFragment(before, startIndex);
     if (!match) {
-      return null
+      throw new Error("fillAfter: can't match fragment");
     }
 
-    let seen: ContentMatch[] = [this];
-    // dfs to find a match
-    function search(match: ContentMatch, types: readonly NodeType[]): Fragment | null {
-      if (match.validEnd) {
-        return Fragment.from(types.map(tp => tp.createAndFill()!))
-      }
-
-      for (let i = 0;i < match.next.length;i++) {
-        let { type, next } = match.next[i]
-        if (!(type.isText || type.hasRequiredAttrs()) && seen.indexOf(next) == -1) {
-          seen.push(next)
-          let found = search(next, types.concat(type))
-          if (found) return found
-        }
-      }
-
-      return null
-    }
-
-    return search(match, [])
+    return match.fillBefore(Fragment.EMPTY, true, startIndex);
   }
 
 	/// Find a set of wrapping node types that would allow a node of the
