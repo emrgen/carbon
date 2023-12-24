@@ -119,6 +119,7 @@ export const OpenedPath = "local/state/opened";
 export const CollapsedPath = "local/state/collapsed";
 export const HoveredPath = "local/state/hovered";
 export const SelectedPath = "local/state/selected";
+export const EditablePath = "local/state/editable";
 export const TagPath = "plugin/tag";
 export const NamePath = "plugin/name";
 export const CheckedPath = "remote/state/checked";

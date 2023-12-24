@@ -60,7 +60,8 @@ export function DraggableHandle(props: FastDragHandleProps) {
   useEffect(() => {
     const onChange = (state) => {
       if (state.isContentChanged) {
-        setShow(false);
+        console.log('changed........')
+        // setShow(false);
       }
     };
     app.on(EventsOut.changed, onChange);

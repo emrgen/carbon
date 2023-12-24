@@ -7,7 +7,7 @@ import { NodeId, NodeIdComparator } from "./NodeId";
 class NodeChainCache {
   private _map: Map<string, number> = new Map();
   private _parents: Map<string, Node[]> = new Map();
-  private _parent: Map<string, Optional<Node>> = new Map();
+  private _chain: Map<string, Node[]> = new Map();
 
   constructor() {
     // setTimeout(() => {
@@ -27,25 +27,27 @@ class NodeChainCache {
     }
   }
 
-  parent(nodeId: NodeId, root: Node, fn: (node: NodeId) => Optional<Node>) {
-    const key = nodeId.toString();
-    if (this._parent.has(key)) {
-      return this._parent.get(key);
-    } else {
-      const parent = fn(nodeId);
-      this._parent.set(key, parent);
-      return parent;
-    }
-  }
-
-  parents(nodeId: NodeId, root: Node, fn: (node: NodeId) => Node[]) {
-    const key = nodeId.toString();
+  parents(nodeId: NodeId, root: Node, fn: (node: NodeId) => Node[]): Node[] {
+    const key = `${root.scope.toString()}/${root.contentVersion}/${nodeId.toString()}`;
     if (this._parents.has(key)) {
-      return this._parents.get(key);
+      console.debug('parents cache hit', key);
+      return this._parents.get(key) ?? [];
     } else {
       const parents = fn(nodeId);
       this._parents.set(key, parents);
       return parents;
+    }
+  }
+
+  chain(nodeId: NodeId, root: Node, fn: (node: NodeId) => Node[]): Node[] {
+    const key = `${root.scope.toString()}/${root.contentVersion}/${nodeId.toString()}`;
+    if (this._chain.has(key)) {
+      // console.debug('chain cache hit', key);
+      return this._chain.get(key) ?? [];
+    } else {
+      const chain = fn(nodeId);
+      this._chain.set(key, chain);
+      return chain;
     }
   }
 }

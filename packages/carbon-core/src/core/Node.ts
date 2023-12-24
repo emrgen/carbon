@@ -15,7 +15,6 @@ import { StateScope } from "./StateScope";
 import { NodeLinks } from "./NodeLinks";
 import { NODE_CACHE_INDEX } from "./CarbonCache";
 import { ActivatedPath, CollapsedPath, NodeProps, NodePropsJson, OpenedPath, SelectedPath } from "./NodeProps";
-import {decl} from "postcss";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -134,6 +133,14 @@ export class Node extends EventEmitter implements IntoNodeId {
       this.renderVersion = renderVersion;
       this.contentVersion = contentVersion;
       this.deleted = deleted;
+    }
+
+    findParent(fn: Predicate<Node>): Optional<Node> {
+      let parent: Optional<Node> = this.parent;
+      while (parent) {
+        if (fn(parent)) return parent;
+        parent = parent.parent;
+      }
     }
 
     get parent(): Optional<Node> {
@@ -486,7 +493,11 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     closest(fn: Predicate<Node>): Optional<Node> {
-      return this.chain.find(fn);
+      let current: Optional<Node> = this;
+      while (current) {
+        if (fn(current)) return current;
+        current = current.parent;
+      }
     }
 
     // return true if `this` Node is after `other` Node
@@ -572,10 +583,15 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     each(fn: With<Node>, opts: Partial<TraverseOptions> = {}): void {
       const {direction = 'forward'} = opts
+      const { children } = this;
       if (direction === 'forward') {
-        this.children.forEach(c => fn(c));
+        for (let i = 0; i < children.length; i++) {
+          fn(children[i])
+        }
       } else {
-        this.children.slice().reverse().forEach(c => fn(c));
+        for (let i = children.length - 1; i >= 0; i--) {
+          fn(children[i])
+        }
       }
     }
 
@@ -616,12 +632,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 
       // pass the search role to the parent
       return this.parent.prev(fn, options, gotoParent);
-
-      // return (
-      // 	found
-      // 	|| sibling?.prev(fn, options, false)
-      // 	|| gotoParent ? this.parent?.prev(fn, options, gotoParent) : null
-      // );
     }
 
     // NOTE: the parent chain is not searched for the next node
@@ -652,13 +662,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 
       // pass the search role to the parent
       return this.parent.next(fn, options, gotoParent);
-
-      // return (
-      // 	found
-      // 	|| sibling?.next(fn, options, false)
-      // 	// || (lastChild && this.parent && fn(this.parent) ? this.parent : null)
-      // 	|| (gotoParent ? this.parent?.next(fn, options, gotoParent) : null)
-      // );
     }
 
     // walk preorder, traverse order: node -> children -> ...

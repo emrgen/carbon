@@ -30,6 +30,7 @@ import {
 } from "@emrgen/carbon-utils";
 import {BlockTree} from "@emrgen/carbon-blocktree";
 import SelectionTracker from "../../SelectionTracker";
+import {noop} from "lodash";
 
 const data = node("carbon", [
   node("document", [
@@ -173,6 +174,16 @@ const extensions = [
   }
   // extensions1,
 ];
+
+console.log = noop;
+console.info = noop;
+console.debug = noop;
+console.warn = noop;
+console.error = noop;
+console.group = noop;
+console.groupCollapsed = noop;
+console.groupEnd = noop;
+console.time = noop;
 
 export default function Dev() {
   const app = useCreateCarbon('dev', data, extensions);

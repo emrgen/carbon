@@ -138,7 +138,7 @@ export function DndController() {
   const onChange = useCallback(
     (state: State) => {
       if (state.isContentChanged) {
-        resetDragHandle();
+        // resetDragHandle();
       }
     },
     [resetDragHandle]

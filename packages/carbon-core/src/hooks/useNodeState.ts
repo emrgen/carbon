@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { RendererProps, useNodeActivated, useNodeOpened, useNodeSelected } from "@emrgen/carbon-core";
+import {useNodeEditable} from "./useNodeEditable";
 
 export const useNodeState = (props: RendererProps) => {
   const activated = useNodeActivated(props);
   const selected = useNodeSelected(props);
   const opened = useNodeOpened(props);
-
-  const { node } = props;
+  const editable = useNodeEditable(props);
 
   const attributes = useMemo(() => {
     const attrs: any = {};
@@ -23,6 +23,10 @@ export const useNodeState = (props: RendererProps) => {
       attrs['data-opened'] = 'true';
     }
 
+    if (editable.yes) {
+      attrs['data-editable'] = 'true';
+    }
+
     return attrs;
   },[activated, selected, opened]);
 
@@ -30,6 +34,7 @@ export const useNodeState = (props: RendererProps) => {
     isActive: activated.yes,
     isSelected: selected.yes,
     isOpened: opened.yes,
+    isEditable: editable.yes,
     attributes,
   };
 };
