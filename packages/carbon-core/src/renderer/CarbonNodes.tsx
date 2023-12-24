@@ -1,11 +1,4 @@
-import {
-  ForwardedRef,
-  forwardRef,
-  memo,
-  use,
-  useEffect,
-  useImperativeHandle, useMemo, useRef, useState
-} from "react";
+import {ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef} from "react";
 import {RendererProps} from "../core/Renderer";
 import {useCarbon} from '../hooks/useCarbon';
 import {useNodeChange} from "../hooks/useNodeChange";
@@ -233,11 +226,12 @@ export const CarbonNodeContent = (props: RendererProps) => {
 // render children except first node
 export const CarbonNodeChildren = (props: RendererProps) => {
   const {node} = props;
-  if (node.children.length < 2) return null;
-  const children = node.children
-    .slice(1)
-    .map((n) => <CarbonNode node={n} key={n.key}/>);
+  const children = useMemo(() => {
+    if (node.children.length < 2) return null;
+    return node.children
+      .slice(1)
+      .map((n) => <CarbonNode node={n} key={n.key}/>);
+  }, [node])
 
   return <div data-type="children">{children}</div>;
 };
-

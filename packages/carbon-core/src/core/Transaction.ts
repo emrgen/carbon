@@ -357,7 +357,7 @@ export class Transaction {
 
 				if (cmd) {
 					return (...args) => {
-						console.log(`2. calling ${propName}.${cmd.fn.name}`);
+						// console.log(`2. calling ${propName}.${cmd.fn.name}`);
 						cmd.fn(proxy, ...args)
 						return proxy;
 					}

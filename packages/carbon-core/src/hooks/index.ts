@@ -11,3 +11,4 @@ export * from './useNodeSelected';
 export * from './useNodeOpened';
 export * from './useNodeState';
 export * from './useCarbonMounted';
+export * from './useNodeWatcher';

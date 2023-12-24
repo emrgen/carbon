@@ -163,8 +163,7 @@ export class NodeMap {
     const parent = this.parent(node);
     const root = this.get(NodeId.ROOT);
     if (!root) {
-      throw new Error("Root node not found");
-      return -1;
+      throw new Error("carbon root node must always exists. root node not found");
     }
 
     if (!parent) return -1;

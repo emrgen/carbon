@@ -1,60 +1,67 @@
-import {createContext, useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
+import {createContext, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {
-  ActivatedPath,
   CarbonBlock,
   CarbonChildren,
-  CarbonNode,
-  CarbonNodeChildren,
-  CarbonNodeContent,
+  CarbonNode, CarbonPlaceholder,
   EventsOut,
   Node,
   NodeChangeType,
   NodeId,
-  prevent,
   preventAndStop,
   RendererProps,
-  RenderPath,
   stop,
   TitlePath,
   Transaction,
   useCarbon,
-  useCarbonChange,
-  useCarbonMounted,
-  useNodeChange,
+  useCarbonChange, useNodeContentWatcher, useNodePropertyWatcher, useNodeWatcher,
   useSelectionHalo,
   With,
-
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
-import { AiOutlinePlus } from "react-icons/ai";
+import {Optional} from "@emrgen/types";
 import {first} from "lodash";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon";
+
+const RenamingTabIdPath = 'local/state/rename/tabId';
 
 const TableContext = createContext<{
   onSelect: With<Node>;
   activeTabId: NodeId;
 }>({
-  onSelect: (id) => {},
+  onSelect: (id) => {
+  },
   activeTabId: NodeId.IDENTITY,
 });
-
 
 const getActiveTabId = (node: Node) => {
   return node.properties.get<string>('remote/state/activeTabId') ?? '';
 }
 
 const setActiveTabId = (cmd: Transaction, node: Node, tabId: string) => {
-  cmd.update(node,{
+  cmd.update(node, {
     ['remote/state/activeTabId']: tabId,
   })
-  .dispatch();
+  return cmd
 }
 
 const getTabTitle = (node: Node) => {
   return node.properties.get<string>(TitlePath) ?? '';
 }
 
-export const TabGroupComp = (props: RendererProps) => {
+
+const getRenamingTabId = (node: Node) => {
+  return node.properties.get<string>(RenamingTabIdPath) ?? '';
+}
+
+const setRenamingTabId = (cmd: Transaction, node: Node, tabId: string) => {
+  cmd.update(node, {
+    [RenamingTabIdPath]: tabId,
+  })
+
+  return cmd
+}
+
+
+export const TabsComp = (props: RendererProps) => {
   const {node} = props;
   const {children} = node;
   const [activeTabNode, setActiveTabNode] = useState(Node.IDENTITY);
@@ -67,19 +74,29 @@ export const TabGroupComp = (props: RendererProps) => {
     useCombineConnectors(dragDropRect, selection)
   );
 
-  console.log(node.key, activeTabNode.textContent);
+  const activeTabId = useMemo(() => getActiveTabId(node), [node]);
 
-  const activeTabId = useMemo(() => getActiveTabId(node),[node]);
+  useNodeContentWatcher((after, before) => {
+    if (after.size !== before.size) {
+      console.log('tab count changed', after.size, before.size)
+    }
+  }, node)
+
+  useNodePropertyWatcher((after, before) => {
+    console.log('tab property changed', after, before)
+  }, node)
 
   const handleActiveTabChange = useCallback((tab: Node) => {
     if (tab.id.toString() === activeTabId) {
       return;
     }
-    console.log('handleActiveTabChange', tab)
+    // console.log('handleActiveTabChange', tab)
     const {cmd} = app;
     setActiveTabId(cmd, node, tab.id.toString());
+    setRenamingTabId(cmd, node, '');
+    cmd.dispatch();
     setActiveTabNode(tab);
-  },[app, node, activeTabId])
+  }, [app, node, activeTabId])
 
   useEffect(() => {
     const onMounted = () => {
@@ -94,8 +111,8 @@ export const TabGroupComp = (props: RendererProps) => {
         }
 
         if (firstTab) {
-          setActiveTabId(app.cmd, node, firstTab.id.toString());
-          setActiveTabNode(firstTab);
+          setActiveTabId(app.cmd, node, firstTab.id.toString()).dispatch();
+          setActiveTabNode(firstTab)
         }
       }
     }
@@ -104,9 +121,7 @@ export const TabGroupComp = (props: RendererProps) => {
     return () => {
       app.off(EventsOut.mounted, onMounted)
     }
-  },[app, node])
-
-  console.log('activeTabId', getActiveTabId(node))
+  }, [app, node])
 
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
@@ -120,6 +135,16 @@ export const TabGroupComp = (props: RendererProps) => {
                 node={tab}
                 onTabChange={handleActiveTabChange}
                 activeTabId={getActiveTabId(node)}
+                isRenaming={getRenamingTabId(node) === tab.id.toString()}
+                onStartRenaming={(tab) => {
+                  const {cmd} = app;
+                  setRenamingTabId(cmd, node, tab.id.toString());
+                  cmd.dispatch();
+                }}
+                onDoneRenaming={(tab) => {
+                  const {cmd} = app;
+                  setRenamingTabId(cmd, node, '').dispatch();
+                }}
               />
             )
           })}
@@ -141,7 +166,7 @@ export const TabComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node} ref={ref}>
-      <CarbonChildren node={node} />
+      <CarbonChildren node={node}/>
       {selection.SelectionHalo}
     </CarbonBlock>
   )
@@ -150,121 +175,108 @@ export const TabComp = (props: RendererProps) => {
 interface TabTitleProps extends RendererProps {
   activeTabId: string;
   onTabChange: (tab: Node) => void;
-  editable?: boolean;
+  onStartRenaming?: (tab: Node) => void;
+  onDoneRenaming?: (tab: Node) => void;
+  isRenaming?: boolean;
 }
 
 const TabTitleComp = (props: TabTitleProps) => {
-  const {node: tab, onTabChange, activeTabId, editable} = props;
+  const {node: tab, onTabChange, activeTabId, isRenaming, onStartRenaming, onDoneRenaming} = props;
   const app = useCarbon();
   const change = useCarbonChange();
   const [tabTitle, setTabTitle] = useState(getTabTitle(tab));
+  const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const onChange = (value: Node, parent: Optional<Node>, counter: number) => {
-      // setNode(value);
-      // setCounter(counter);
-      // setParent(parent);
-      // console.log(value.version, node.version, value.id.toString(), value.textContent);
-      console.log("tab title changed", value.name, value.id.toString(), getTabTitle(value));
+      // console.log("tab title changed", value.name, value.id.toString(), getTabTitle(value));
       setTabTitle(getTabTitle(value));
     };
 
     change.on(tab.id, NodeChangeType.update, onChange);
     return () => {
-      // console.log('unmounting', node.id.toString());
       change.off(tab.id, NodeChangeType.update, onChange);
     };
   }, [change, tab]);
 
+  const handleTabNameChange = useCallback((e) => {
+    const {value} = e.target;
+    app.cmd.update(tab, {
+      [TitlePath]: value,
+    }).dispatch();
+  }, [app, tab]);
+
+  const isActive = useMemo(() => {
+    return tab.id.toString() === activeTabId;
+  }, [tab, activeTabId])
+
   const attributes = useMemo(() => {
-    const isActive = tab.id.toString() === activeTabId;
     if (isActive) {
       return {
         'data-active': true
       }
     }
     return {};
-  },[tab, activeTabId]);
+  }, [isActive]);
 
-  const handleChange = useCallback((e) => {
-    setTabTitle(e.target.value);
-    // console.log('value', e.target.value)
-    // app.cmd.update(tab, {
-    //   [TitlePath]: e.target.value,
-    // }).dispatch();
-  },[app])
-
-  const handleStartRenaming = useCallback((e) => {
-    if (isRenaming()) {
-      return;
+  useEffect(() => {
+    if (isRenaming && ref.current) {
+      console.log('focus')
+      setTimeout(() => {
+        ref.current?.focus();
+      }, 1000)
     }
-    app.cmd.update(tab.parent!, {
-      ['local/state/renaming/tabId']: tab.id.toString(),
-    }).dispatch();
-
-  },[app, tab.parent])
-
-  const isRenaming = useCallback(() => {
-    return (tab.parent!.properties.get<boolean>('local/state/renaming/tabId') ?? '') === tab.id.toString();
-  },[tab.parent])
-
-  const isActive = useMemo(() => {
-    return tab.id.toString() === activeTabId;
-  },[tab, activeTabId])
+  }, [isRenaming, tab.key, ref])
 
   return (
     <>
-      {!isActive && <div
+      {!isRenaming && <div
         className={'carbon-tab-name'}
-        onClick={(e) => {
+        onMouseDown={e => {
           stop(e);
-          onTabChange(tab)
+          if (isActive) {
+            app.disable()
+            onStartRenaming?.(tab)
+          } else if (activeTabId !== tab.id.toString()) {
+            app.enable();
+            onTabChange(tab)
+          }
         }}
-        onMouseDown={preventAndStop}
         key={tab.key}
         data-id={tab.key}
         {...attributes}
       >
         {tabTitle && tabTitle}
-        {!tabTitle && 'Click to edit'}
+        {!tabTitle && <span className={'carbon-tab-name-placeholder'}>Untitled</span>}
+
       </div>}
-      {isActive && <div
+      {isRenaming && <div
+        ref={ref}
         data-id={tab.key}
         className={'carbon-tab-name-edit'}
-        data-editable={isRenaming()}
-        onMouseOver={e => {
-          if (isRenaming()) {
-            return;
-          }
-
-          app.disable()
-        }}
-        onBlur={e => {
-          app.enable()
-        }}
-        onMouseOut={e => {
-          if (isRenaming()) {
-            return;
-          }
-          app.enable()
-        }}
-
-        onClick={(e) => {
-          console.log('focus', tab.id.toString())
-          handleStartRenaming(e);
-        }}
-        // onKeyDown={(e) => {
-        //   stop(e);
-        // }}
-        // onKeyUp={(e) => {
-        //   stop(e);
-        // }}
-        // onBeforeInput={(e) => {
-        //   stop(e);
-        // }}
+        data-editable={isRenaming}
         data-active={isActive}
+        onMouseDown={stop}
+        onKeyDown={stop}
+        onKeyUp={stop}
+        onBeforeInput={stop}
       >
-        <input value={tabTitle} onChange={handleChange} data-editable={isRenaming()}/>
+        <input
+          value={tabTitle}
+          onChange={handleTabNameChange}
+          data-editable={isRenaming}
+          onMouseUp={e => {
+           stop(e);
+           if (isRenaming) {
+             e.target.focus();
+             console.log('focus now')
+           }
+          }}
+          onBlur={e => {
+            onDoneRenaming?.(tab)
+            app.enable();
+          }}
+        />
       </div>}
     </>
   )

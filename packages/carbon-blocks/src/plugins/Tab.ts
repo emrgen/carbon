@@ -8,9 +8,12 @@ import {
 } from "@emrgen/carbon-core";
 import {IsolateChildren} from "./IsolateChildren";
 
+export const TabsName = 'tabs';
+export const TabName = 'tab';
+
 export class TabGroup extends CarbonPlugin {
 
-  name = 'tabGroup';
+  name = TabsName;
 
   spec(): NodeSpec {
     return {
@@ -41,7 +44,7 @@ export class TabGroup extends CarbonPlugin {
 
 export class Tab extends CarbonPlugin {
 
-  name = 'tab';
+  name = TabName
 
   spec(): NodeSpec {
     return {
@@ -54,7 +57,7 @@ export class Tab extends CarbonPlugin {
       props: {
         local:{
           html: {
-            contentEditable: false,
+            contentEditable: true,
             suppressContentEditableWarning: true,
           }
         }

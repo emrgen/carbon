@@ -35,7 +35,7 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
-    node("tabGroup", [
+    node("tabs", [
       node("tab", [
         // node("title", [text("tab 1")]),
         section([title([text("tab 1 content")])]),
