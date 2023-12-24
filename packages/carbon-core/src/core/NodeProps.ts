@@ -1,5 +1,6 @@
 import { JsonStore } from "./JsonStore";
 import { each, set } from "lodash";
+import {Node} from "@emrgen/carbon-core";
 
 export type NodePropsJson = Record<string, any>;
 
@@ -125,3 +126,6 @@ export const EmojiPath = "remote/state/emoji";
 export const ListNumberPath = "remote/state/listNumber";
 export const TitlePath = "remote/state/title";
 
+export const isPassiveHidden = (node: Node) => {
+  return node.chain.some(n => n.properties.get<boolean>(HiddenPath) ?? false);
+}

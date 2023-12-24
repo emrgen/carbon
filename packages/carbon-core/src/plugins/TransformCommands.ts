@@ -358,7 +358,7 @@ export class TransformCommands extends BeforePlugin {
 
   // TODO: use transaction to update attrs
   update(tr: Transaction, node: Node, attrs: Record<string, any>): Optional<Transaction> {
-    return tr.Update(node.id, attrs);
+    return tr.Update(node, attrs);
   }
 
   // wrap node within parent of type `name`

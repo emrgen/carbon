@@ -1,4 +1,11 @@
-import {ActionOrigin, FocusedPlaceholderPath, NodeIdSet, PinnedSelection, SelectedPath} from "@emrgen/carbon-core";
+import {
+  ActionOrigin,
+  FocusedPlaceholderPath,
+  isPassiveHidden,
+  NodeIdSet,
+  PinnedSelection,
+  SelectedPath
+} from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import FastPriorityQueue from "fastpriorityqueue";
 import { identity } from "lodash";
@@ -123,7 +130,6 @@ export class StateDraft {
       throw new Error("Cannot prepare a draft that is already committed");
     }
 
-
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
     this.changes.toArray().forEach(id => {
@@ -131,6 +137,15 @@ export class StateDraft {
       if (this.nodeMap.deleted(id)) {
         this.changes.remove(id);
       }
+      console.log('changed node id', id.toString())
+      // remove the hidden nodes
+      this.node(id, (node) => {
+        console.log('changed node id', id.toString(), isPassiveHidden(node))
+        if (isPassiveHidden(node) || node.isCollapseHidden) {
+          console.log('removing hidden node', node.id.toString());
+          this.changes.remove(id);
+        }
+      })
     });
 
     const changed: Node[] = this.changes.toArray().map(id => this.nodeMap.get(id)).map(identity) as unknown as Node[];
@@ -138,7 +153,7 @@ export class StateDraft {
     const updateOrder = NodeDepthPriorityQueue.from(changed, "desc");
 
 
-    // console.log('changed nodes',changed.map(n => `${n.node.name}: ${n.node.id.toString()}`));
+    console.log('changed nodes',changed.map(n => `${n.name}: ${n.id.toString()}`));
 
     // collect all mutable nodes tree created in this draft
     const updatedNodes = this.nodeMap.current.clone();
@@ -568,6 +583,15 @@ export class StateDraft {
     this.nodeMap.set(id, mutable);
 
     return mutable;
+  }
+
+  private node(id: NodeId, fn: (node: Node) => void) {
+    const node = this.nodeMap.get(id);
+    if (!node) {
+      throw new Error("Cannot mutate node that does not exist");
+    }
+
+    fn(node);
   }
 
   private delete(id: NodeId) {

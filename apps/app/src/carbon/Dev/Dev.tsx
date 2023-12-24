@@ -21,7 +21,7 @@ import {
   Renderer,
   RendererProps,
   extensionPresets,
-  useCreateCarbon, NodeId, ActivatedPath, TitlePath
+  useCreateCarbon, NodeId, ActivatedPath, TitlePath, CarbonModal
 } from "@emrgen/carbon-core";
 import {
   BlockMenu,

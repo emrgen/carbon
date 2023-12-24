@@ -4,7 +4,7 @@ import {
   EventHandler,
   EventHandlerMap, Node,
   NodeSpec, Point,
-  preventAndStopCtx, TitlePath, Transaction, Pin, PinnedSelection, ActivatedPath, ActionOrigin,
+  preventAndStopCtx, TitlePath, Transaction, Pin, PinnedSelection, ActivatedPath, ActionOrigin, HiddenPath,
 } from "@emrgen/carbon-core";
 import {IsolateChildren} from "./IsolateChildren";
 
@@ -105,12 +105,13 @@ export class TabGroup extends CarbonPlugin {
     // tr.Remove(tab)
   }
 
+  // select the tab and focus at the start of the tab content
   select(tr: Transaction, tabs: Node, tab: Node) {
-
     const activeTab = getActiveTab(tabs)
     if (activeTab) {
       tr.action.update(activeTab, {
         [ActivatedPath]: false,
+        [HiddenPath]: true,
       })
     }
 
@@ -121,6 +122,7 @@ export class TabGroup extends CarbonPlugin {
       })
       .action.update(tab, {
         [ActivatedPath]: true,
+        [HiddenPath]: false,
       })
 
     const after = PinnedSelection.fromPin(Pin.toStartOf(tab)!)

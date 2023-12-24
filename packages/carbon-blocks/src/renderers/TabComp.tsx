@@ -116,11 +116,12 @@ export const TabsComp = (props: RendererProps) => {
         <div className={'add-new-tab'} onClick={handleAddNewTab}>+</div>
       </div>
       <div className={'carbon-tab-content'}>
-        {tabs.children.map(tab => {
-          return (
-            <CarbonNode node={tab} key={tab.key}/>
-          )
-        })}
+        {!activeTabNode.id.eq(NodeId.IDENTITY) && <CarbonNode node={activeTabNode} key={activeTabNode.key}/>}
+        {/*{tabs.children.map(tab => {*/}
+        {/*  return (*/}
+        {/*    <CarbonNode node={tab} key={tab.key}/>*/}
+        {/*  )*/}
+        {/*})}*/}
       </div>
       {selection.SelectionHalo}
     </CarbonBlock>
@@ -189,15 +190,19 @@ const TabTitleComp = (props: TabTitleProps) => {
   return (
     <div className={'carbon-tab-name'} {...attributes} data-id={tab.key}>
       <div className={'carbon-tab-name-view'}
-        onMouseDown={e => {
-         stop(e);
-         if (isActive) {
-           app.disable()
-           onStartRenaming?.(tab)
-         } else if (activeTabId !== tab.id.toString()) {
+        onMouseUp={e => {
+         stop(e)
+         if (activeTabId !== tab.id.toString()) {
            app.enable();
            onTabChange(tab)
          }
+        }}
+        onMouseDown={e => {
+          stop(e);
+          if (isActive) {
+            app.disable()
+            onStartRenaming?.(tab)
+          }
         }}
       >
         {tabTitle && tabTitle}

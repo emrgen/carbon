@@ -16,10 +16,9 @@ export const CarbonModal = (props) => {
     };
   }, [overlay, isOpen]);
 
-  return isOpen && overlay.ref.current
-    ? PortalReactDOM.createPortal(
-        <div className="carbon-modal">{props.children}</div>,
-        overlay.ref.current!
-      )
-    : null;
+  if (isOpen && overlay.ref.current) {
+    return PortalReactDOM.createPortal(<div className="carbon-modal">{props.children}</div>, overlay.ref.current!);
+  }
+
+  return null;
 };
