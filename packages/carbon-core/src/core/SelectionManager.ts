@@ -7,7 +7,8 @@ import { SelectionEvent } from './SelectionEvent';
 import { EventsOut } from './Event';
 import { Optional } from '@emrgen/types';
 import { PinnedSelection } from './PinnedSelection';
-import { StateDraft } from './StateDraft';
+import { ImmutableDraft } from './ImmutableDraft';
+import {Draft} from "./Draft";
 
 export class SelectionManager {
 	focused = false;
@@ -39,7 +40,7 @@ export class SelectionManager {
 	// syncs selection with dom depending on `origin`
 	// used by commands to inform editor of a selection change
 	// the selection might be queued
-	onSelect(draft: StateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+	onSelect(draft: Draft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		// console.log('onSelect', before.toString(), after.toString(), origin, this.enabled);
 		// if (!this.enabled) {
 		// 	// console.log('skipped: app selection disabled');
@@ -59,7 +60,7 @@ export class SelectionManager {
 	}
 
 	// syncs selection with app dom state
-	private onSelectionChange(draft: StateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+	private onSelectionChange(draft: Draft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		const { state } = this;
 		if (before.eq(after) && origin !== ActionOrigin.UserInput && origin !== ActionOrigin.Normalizer && origin !== ActionOrigin.UserSelectionChange) {
 			console.info(p14('%c[info]'), 'color:pink', 'before and after selection same', before.toJSON(), after.toJSON());

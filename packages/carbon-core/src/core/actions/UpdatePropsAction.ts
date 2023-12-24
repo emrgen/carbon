@@ -3,7 +3,7 @@ import { IntoNodeId, NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { CarbonAction, ActionOrigin, ActionType } from "./types";
 import { Optional } from '@emrgen/types';
-import { StateDraft } from "../StateDraft";
+import { ImmutableDraft } from "../ImmutableDraft";
 import { NodePropsJson } from "../NodeProps";
 
 export class UpdatePropsAction implements CarbonAction {
@@ -15,7 +15,7 @@ export class UpdatePropsAction implements CarbonAction {
 
   constructor(readonly nodeId: NodeId, readonly props: Partial<NodePropsJson>, readonly origin: ActionOrigin) {}
 
-  execute(tr: Transaction, draft: StateDraft) {
+  execute(tr: Transaction, draft: ImmutableDraft) {
     const { nodeId } = this;
     const node = draft.get(nodeId)
     if (!node) {

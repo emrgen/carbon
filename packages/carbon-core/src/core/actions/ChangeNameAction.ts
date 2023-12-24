@@ -3,7 +3,7 @@ import { NodeId } from '../NodeId';
 import { Transaction } from '../Transaction';
 import { NodeName } from '../types';
 import { CarbonAction, ActionOrigin } from './types';
-import { StateDraft } from '../StateDraft';
+import { ImmutableDraft } from '../ImmutableDraft';
 
 export class ChangeNameAction implements CarbonAction{
 	from: string = '';
@@ -20,7 +20,7 @@ export class ChangeNameAction implements CarbonAction{
 		this.from = from;
 	}
 
-	execute(tr: Transaction, draft: StateDraft) {
+	execute(tr: Transaction, draft: ImmutableDraft) {
 		const { nodeId, to } = this;
 		const target = draft.get(nodeId);
 		if (!target) {

@@ -18,6 +18,8 @@ import { NodeType } from "./NodeType";
 import { Point, PointAt } from "./Point";
 import { PointedSelection } from "./PointedSelection";
 import { State } from "./State";
+import {Draft} from "./Draft";
+import {StateScope} from "./StateScope";
 
 enum UpdateDependent {
   None = 0,
@@ -62,7 +64,7 @@ class NodeDepthPriorityQueue {
 
 // NOTE: it is internal to the state and actions. it should not be used outside of it.
 //draft of a state is used to prepare a new state before commit
-export class StateDraft {
+export class ImmutableDraft implements Draft {
   origin: ActionOrigin;
   state: State;
   nodeMap: NodeMap;
@@ -89,8 +91,29 @@ export class StateDraft {
     return this.nodeMap.parent(from);
   }
 
+  produce(fn: (producer: Draft) => void): State {
+    // const draft = new ImmutableDraft(this, origin);
+    const {scope} = this.state;
+    try {
+      StateScope.set(scope, this.nodeMap)
+      fn(this);
+      const state = this.commit(3);
+      StateScope.set(scope, state.nodeMap)
+
+      this.dispose();
+      return state;
+    } catch (e) {
+      StateScope.set(scope, this.state.nodeMap);
+      console.error(e);
+      this.dispose();
+      return this.state;
+    }
+  }
+
   // turn the draft into a new state
   commit(depth: number): State {
+    this.prepare();
+
     const { state, changes, selection } = this;
 
     const nodeMap = this.nodeMap.current.size === 0 ? state.nodeMap : this.nodeMap;

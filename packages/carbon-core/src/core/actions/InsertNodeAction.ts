@@ -5,9 +5,10 @@ import { ActionOrigin } from './types';
 import { classString } from '../Logger';
 import { RemoveNodeAction } from './RemoveNodeAction';
 import { Node } from '../Node';
-import { StateDraft } from '../StateDraft';
+import { ImmutableDraft } from '../ImmutableDraft';
 import { deepCloneMap, NodeJSON } from "../types";
 import { NodeId } from "../NodeId";
+import {Draft} from "../Draft";
 
 export class InsertNodeAction implements CarbonAction {
 	static fromNode(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
@@ -17,7 +18,7 @@ export class InsertNodeAction implements CarbonAction {
 		return new InsertNodeAction(at, id, node, origin);
 	}
 	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {}
-	execute(tr: Transaction, draft: StateDraft) {
+	execute(tr: Transaction, draft: Draft) {
 		const { at, node: json } = this;
 		const {app}=tr;
 		const node = app.schema.nodeFromJSON(json)!;
@@ -32,7 +33,7 @@ export class InsertNodeAction implements CarbonAction {
 		}
 
 		const clone = node.clone(deepCloneMap);
-		draft.insert(at, clone, 'create');
+		draft.insert(at, clone);
 	}
 
 	inverse(): CarbonAction {

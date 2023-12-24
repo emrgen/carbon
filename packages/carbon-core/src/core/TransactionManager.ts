@@ -6,7 +6,7 @@ import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
 import { EventsOut } from './Event';
 import { State } from './State';
-import {StateDraft} from "./StateDraft";
+import {ImmutableDraft} from "./ImmutableDraft";
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];

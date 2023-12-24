@@ -7,8 +7,9 @@ import { Node } from "./Node";
 import { PinnedSelection } from "./PinnedSelection";
 import EventEmitter from "events";
 import { NodeMap } from "./NodeMap";
-import { StateDraft } from "./StateDraft";
+import { ImmutableDraft } from "./ImmutableDraft";
 import { StateScope } from "./StateScope";
+import {Draft} from "./Draft";
 
 interface StateProps {
 	scope: Symbol;
@@ -126,22 +127,9 @@ export class State extends EventEmitter {
 	}
 
 	// try to create a new state or fail and return the previous state
-	produce(origin: ActionOrigin, fn: (state: StateDraft) => void): State {
-		const draft = new StateDraft(this, origin);
-		try {
-			StateScope.set(this.scope, draft.nodeMap)
-			fn(draft);
-			const state = draft.prepare().commit(3);
-			StateScope.set(this.scope, this.nodeMap)
-
-			draft.dispose();
-			return state;
-		} catch (e) {
-			StateScope.set(this.scope, this.nodeMap);
-			console.error(e);
-			draft.dispose();
-			return this;
-		}
+	produce(origin: ActionOrigin, fn: (state: Draft) => void): State {
+		const draft = new ImmutableDraft(this, origin);
+    return draft.produce(fn);
 	}
 
 	revert(steps = 1) {

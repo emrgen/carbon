@@ -26,7 +26,7 @@ import { UpdatePropsAction } from './actions/UpdatePropsAction';
 import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
-import { StateDraft } from './StateDraft';
+import { ImmutableDraft } from './ImmutableDraft';
 import { ActivatedPath, OpenedPath, SelectedPath } from "./NodeProps";
 import { SetContentAction } from "./actions/SetContentAction";
 import { SelectAction } from "./actions/SelectAction";
@@ -34,6 +34,7 @@ import { RemoveNodeAction } from "./actions/RemoveNodeAction";
 import { MoveNodeAction } from "./actions/MoveNodeAction";
 import { isNestableNode } from "@emrgen/carbon-blocks";
 import { CarbonCommand, PluginCommand } from "./CarbonCommand";
+import {Draft} from "./Draft";
 
 let _id = 0
 const getId = () => String(_id++)
@@ -113,7 +114,7 @@ export class Transaction {
 		});
 	}
 
-	onSelect(draft:StateDraft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+	onSelect(draft:Draft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		this.sm.onSelect(draft, before, after, origin);
 	}
 
@@ -260,7 +261,7 @@ export class Transaction {
 		return this;
 	}
 
-	Commit(draft: StateDraft): Transaction {
+	Commit(draft: Draft): Transaction {
 		if (this.actions.length === 0) return this
 		if (this._committed) {
 			console.warn('skipped: transaction already committed')

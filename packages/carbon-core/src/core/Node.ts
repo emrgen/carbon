@@ -728,7 +728,7 @@ export class Node extends EventEmitter implements IntoNodeId {
         throw Error('cannot insert immutable node:' + node.id.toString())
       }
       node.parentId = this.id;
-      this.content = this.content.prepend([node]);
+      this.content.prepend([node]);
     }
 
     // @mutates
@@ -737,7 +737,7 @@ export class Node extends EventEmitter implements IntoNodeId {
         throw Error('cannot insert immutable node:' + node.id.toString())
       }
       node.parentId = this.id;
-      this.content = this.content.append([node]);
+      this.content.append([node]);
     }
 
     // @mutates
@@ -746,7 +746,7 @@ export class Node extends EventEmitter implements IntoNodeId {
         throw Error('cannot insert immutable node:' + node.id.toString())
       }
       node.parentId = this.id;
-      this.content = this.content.insertBefore(before, [node]);
+      this.content.insertBefore(before, [node]);
     }
 
     // @mutates
@@ -755,7 +755,7 @@ export class Node extends EventEmitter implements IntoNodeId {
         throw Error('cannot insert immutable node:' + node.id.toString())
       }
       node.parentId = this.id;
-      this.content = this.content.insertAfter(after, [node]);
+      this.content.insertAfter(after, [node]);
     }
 
     // @mutates

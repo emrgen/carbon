@@ -1,9 +1,10 @@
-import { StateDraft } from "../StateDraft";
+import { ImmutableDraft } from "../ImmutableDraft";
 import { Transaction } from "../Transaction"
+import {Draft} from "../Draft";
 
 export interface CarbonAction {
 	origin: ActionOrigin;
-	execute(tr: Transaction, draft: StateDraft);
+	execute(tr: Transaction, draft: Draft): void;
 	inverse(origin?: ActionOrigin): CarbonAction
 }
 
