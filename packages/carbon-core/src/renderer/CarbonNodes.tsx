@@ -43,7 +43,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   const {tag: Element = "div", node, children, custom} = props;
   const {key, name, renderVersion} = node;
   const editor = useCarbon();
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
 
   const attributes = useMemo(() => {
     return {
@@ -60,6 +60,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   useEffect(() => {
     if (ref.current) {
       editor.store.register(node, ref.current);
+      ref.current.dataset.nodeId = node.id.toString();
     } else {
       editor.store.delete(node);
     }
@@ -168,7 +169,7 @@ export const InnerCarbonNode = (props: RendererProps) => {
     console.warn('No component found for', node.name, 'fall back to CarbonDefaultNode')
 
     return <CarbonDefaultNode {...props} node={node}/>;
-  }, [app, node])
+  }, [app, node, props])
 
   if (!component) {
     return null;

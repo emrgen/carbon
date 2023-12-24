@@ -75,37 +75,37 @@ export const TableComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
-      <TableContext.Provider value={node}>
-        <table ref={tableRef}>
-          <tbody>
-            <CarbonChildren node={node} />
-          </tbody>
-        </table>
-        {selection.isSelected && (
-          <div
-            className="carbon-halo-container"
-            style={{ width: width + "px", height: height + "px" }}
-          >
-            {selection.SelectionHalo}
-          </div>
-        )}
-        {!!width && (
-          <div
-            className="add_table__row"
-            style={{ width: width + "px" }}
-            onClick={handleAddRow}
-            onMouseDown={preventAndStop}
-          />
-        )}
-        {!!height && (
-          <div
-            className="add_table__columns"
-            style={{ height: height + "px", left: width + "px" }}
-            onClick={handleAddColumns}
-            onMouseDown={preventAndStop}
-          />
-        )}
-      </TableContext.Provider>
+      {/*<TableContext.Provider value={node}>*/}
+      {/*  <table ref={tableRef}>*/}
+      {/*    <tbody>*/}
+      {/*      <CarbonChildren node={node} />*/}
+      {/*    </tbody>*/}
+      {/*  </table>*/}
+      {/*  {selection.isSelected && (*/}
+      {/*    <div*/}
+      {/*      className="carbon-halo-container"*/}
+      {/*      style={{ width: width + "px", height: height + "px" }}*/}
+      {/*    >*/}
+      {/*      {selection.SelectionHalo}*/}
+      {/*    </div>*/}
+      {/*  )}*/}
+      {/*  {!!width && (*/}
+      {/*    <div*/}
+      {/*      className="add_table__row"*/}
+      {/*      style={{ width: width + "px" }}*/}
+      {/*      onClick={handleAddRow}*/}
+      {/*      onMouseDown={preventAndStop}*/}
+      {/*    />*/}
+      {/*  )}*/}
+      {/*  {!!height && (*/}
+      {/*    <div*/}
+      {/*      className="add_table__columns"*/}
+      {/*      style={{ height: height + "px", left: width + "px" }}*/}
+      {/*      onClick={handleAddColumns}*/}
+      {/*      onMouseDown={preventAndStop}*/}
+      {/*    />*/}
+      {/*  )}*/}
+      {/*</TableContext.Provider>*/}
     </CarbonBlock>
   );
 };

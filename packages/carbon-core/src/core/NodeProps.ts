@@ -110,7 +110,9 @@ export const SuppressContenteditableWarningPath = "local/html/suppressContentEdi
 export const ContenteditablePath = "local/html/contentEditable";
 export const ActivatedPath = "local/state/activated";
 export const LocalContenteditablePath = "local/state/contentEditable";
-
+// hidden nodes are not rendered, draft change should emit changes only for visible nodes
+export const HiddenPath = 'remote/state/hidden';
+export const VisiblePath = 'remote/state/visible';
 export const RenderPath = "local/state/render";
 export const OpenedPath = "local/state/opened";
 export const CollapsedPath = "local/state/collapsed";

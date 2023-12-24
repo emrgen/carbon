@@ -40,14 +40,15 @@ const data = node("carbon", [
         // node("title", [text("tab 1")]),
         section([title([text("tab 1 content")])]),
       ], {
-        [TitlePath]: "tab 11"
+        [ActivatedPath]: true,
+        [TitlePath]: "tab 11 some big title"
       }),
       node("tab", [
         // node("title", [text("tab 2")]),
         section([title([text("tab 2 content")])]),
       ], {
-        [ActivatedPath]: true,
-        [TitlePath]: "tab 12"
+
+        [TitlePath]: "tab 12 medium"
       }),
       node("tab", [
         // node("title", [text("tab 3")]),

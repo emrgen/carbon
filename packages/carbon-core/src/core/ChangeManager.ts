@@ -154,7 +154,6 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   private onTransaction() {
-    // this.app.processTick();
     clearInterval(this.interval);
     const tr = this.transactions.shift();
     if (tr) {
@@ -163,6 +162,8 @@ export class ChangeManager extends NodeTopicEmitter {
       this.app.emit(EventsOut.changed, this.state);
     }
 
+    this.app.processTick();
+
     // this.promiseState.resolve?.();
   }
 
@@ -170,6 +171,15 @@ export class ChangeManager extends NodeTopicEmitter {
     console.groupCollapsed("syncing:  content");
     // console.group('syncing: content')
     const updatedNodeIds = this.changes;
+
+    // keep only the top level nodes that have been updated
+    // remove the update children
+    // this.changes.nodes(this.state.nodeMap).forEach(n => {
+    //   if (n.parents.some(p => updatedNodeIds.has(p.id))) {
+    //     this.changes.remove(n.id);
+    //   }
+    // })
+
     const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
 
     console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));

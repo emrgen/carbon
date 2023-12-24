@@ -108,7 +108,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       const hits = dnd.droppables.collides(bound);
       return hits[0];
     },
-    [dnd.droppables]
+    [app, dnd]
   );
 
   const findDropPosition = useCallback(

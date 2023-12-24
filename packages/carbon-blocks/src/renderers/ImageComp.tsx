@@ -32,7 +32,7 @@ export default function ImageComp(props: RendererProps) {
       ref.current?.getBoundingClientRect()
     );
 
-    app.tr.selectNodes([node.id]).Dispatch();
+    // app.tr.selectNodes([node.id]).Dispatch();
   };
 
   const alignImage = useCallback(
@@ -40,18 +40,18 @@ export default function ImageComp(props: RendererProps) {
       return (e) => {
         preventAndStop(e);
         const { tr } = app;
-        app.blockSelection.blocks
-          .filter((n) => n.name === "image")
-          .forEach(({id}) => {
-            tr.Update(id, {
-              html: {
-                style: {
-                  justifyContent: align,
-                },
-              },
-            });
-          });
-        tr.Dispatch();
+        // app.blockSelection.blocks
+        //   .filter((n) => n.name === "image")
+        //   .forEach(({id}) => {
+        //     tr.Update(id, {
+        //       html: {
+        //         style: {
+        //           justifyContent: align,
+        //         },
+        //       },
+        //     });
+        //   });
+        // tr.Dispatch();
       };
     },
     [app]
@@ -59,41 +59,41 @@ export default function ImageComp(props: RendererProps) {
 
   const onClick = useCallback((e) => {
     preventAndStop(e);
-    app.tr.selectNodes([]).Dispatch();
-  },[app.tr]);
+    // app.tr.selectNodes([]).Dispatch();
+  },[]);
 
   return (
     <CarbonBlock {...props} custom={{ ...connectors, onClick }} ref={ref}>
-      <div className="image-container" onClick={handleClick}>
-        {!node.properties.node.src && <div className="image-overlay">Image</div>}
-        <img src={node.properties.node.src} alt="" />
-        {selection.isSelected && (
-          <div className="image-align-controls">
-            <div
-              className="align-left"
-              onClick={alignImage("start")}
-              onMouseDown={preventAndStop}
-            >
-              <HiMiniBars3BottomLeft />
-            </div>
-            <div
-              className="align-center"
-              onClick={alignImage("center")}
-              onMouseDown={preventAndStop}
-            >
-              <LuAlignCenter />
-            </div>
-            <div
-              className="align-right"
-              onClick={alignImage("end")}
-              onMouseDown={preventAndStop}
-            >
-              <HiMiniBars3BottomRight />
-            </div>
-          </div>
-        )}
-        {selection.SelectionHalo}
-      </div>
+      {/*<div className="image-container" onClick={handleClick}>*/}
+      {/*  {!node.properties.node.src && <div className="image-overlay">Image</div>}*/}
+      {/*  <img src={node.properties.node.src} alt="" />*/}
+      {/*  {selection.isSelected && (*/}
+      {/*    <div className="image-align-controls">*/}
+      {/*      <div*/}
+      {/*        className="align-left"*/}
+      {/*        onClick={alignImage("start")}*/}
+      {/*        onMouseDown={preventAndStop}*/}
+      {/*      >*/}
+      {/*        <HiMiniBars3BottomLeft />*/}
+      {/*      </div>*/}
+      {/*      <div*/}
+      {/*        className="align-center"*/}
+      {/*        onClick={alignImage("center")}*/}
+      {/*        onMouseDown={preventAndStop}*/}
+      {/*      >*/}
+      {/*        <LuAlignCenter />*/}
+      {/*      </div>*/}
+      {/*      <div*/}
+      {/*        className="align-right"*/}
+      {/*        onClick={alignImage("end")}*/}
+      {/*        onMouseDown={preventAndStop}*/}
+      {/*      >*/}
+      {/*        <HiMiniBars3BottomRight />*/}
+      {/*      </div>*/}
+      {/*    </div>*/}
+      {/*  )}*/}
+      {/*  {selection.SelectionHalo}*/}
+      {/*</div>*/}
     </CarbonBlock>
   );
 }

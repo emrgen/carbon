@@ -5,7 +5,7 @@ import {
   PinnedSelection, Point,
   PointedSelection,
   Transaction,
-  Mark, MarkSet, Selection
+  Mark, MarkSet, Selection, ActionOrigin
 } from "@emrgen/carbon-core";
 
 declare module '@emrgen/carbon-core' {
@@ -20,14 +20,14 @@ declare module '@emrgen/carbon-core' {
     update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
     dispatch(): void;
     action: {
-      select(selection: PinnedSelection | PointedSelection): Transaction,
+      select(selection: PinnedSelection | PointedSelection, origin?: ActionOrigin): Transaction,
       setContent(ref: Node | NodeId, after: NodeContent): Transaction,
       insert(at: Point, nodes: Node | Node[]): Transaction,
       remove(at: Point, node: Node): Transaction,
       move(from: Point, to: Point, node: Node): Transaction,
       change(node: Node, to: NodeName): Transaction,
       format(tr: Transaction, selection: Selection, mark: Mark | MarkSet): Transaction,
-      Update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
+      update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
       dispatch(): void;
     }
   }
@@ -50,8 +50,8 @@ export class ActionPlugin extends CarbonPlugin {
     }
   }
 
-  select(tr: Transaction, selection: PinnedSelection | PointedSelection) {
-    tr.Select(selection)
+  select(tr: Transaction, selection: PinnedSelection | PointedSelection, origin?: ActionOrigin) {
+    tr.Select(selection, origin)
   }
 
   setContent(tr: Transaction, ref: Node | NodeId, after: NodeContent) {

@@ -1,4 +1,5 @@
 import { EventContext } from '../core';
+import {KeyboardEvent} from "react";
 
 // export const stop(fn: Function)
 
@@ -47,6 +48,12 @@ export const preventAndStopCtx = (ctx: EventContext<any>) => {
 	stop(ctx.event)
 	prevent(ctx.event)
 	ctx.stopPropagation()
+}
+
+export const onEnter = (fn: Function) => (e: KeyboardEvent) => {
+  if (e.key === "Enter") {
+    fn(e)
+  }
 }
 
 

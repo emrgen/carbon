@@ -45,7 +45,7 @@ export const EquationComp = (props: RendererProps) => {
     // app.tr
       // .setContent(node.id, BlockContent.create([title!]))
       // .forceRender([node.id]).Dispatch();
-    app.tr.activateNodes([node.id]).Dispatch();
+    // app.tr.activateNodes([node.id]).Dispatch();
   };
 
   return (
