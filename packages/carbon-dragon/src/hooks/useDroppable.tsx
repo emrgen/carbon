@@ -1,6 +1,7 @@
 import { MutableRefObject, useEffect } from "react";
 import { useDndContext } from "./useDndContext";
-import { Node, useNodeChange } from "@emrgen/carbon-core";
+import { Node } from "@emrgen/carbon-core";
+import {useNodeChange} from "@emrgen/carbon-react";
 
 export interface FastDroppableProps {
   node: Node;

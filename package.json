@@ -13,7 +13,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "cloc-src": "cloc --exclude-dir=node_modules,dist,mongo-data-4.4,yarn.lock,package.json,package-lock.json .",
     "cloc-dist": "cloc --match-d=/dist/ .",
-    "e2e": "playwright test --reporter=list"
+    "e2e": "playwright test --reporter=list",
+    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && find . -name \"pnpm-lock.yaml\" -type f -prune -exec rm -rf '{}' +"
   },
   "devDependencies": {
     "@playwright/test": "^1.39.0",

@@ -28,7 +28,7 @@ export class SelectionCommands extends BeforePlugin {
 	}
 
 	collapseToHead(tr, selection) {
-		// const dr = app.cmd.transform.delete()
+		// const dr = react.cmd.transform.delete()
 		const normalized = selection.normalize();
 		tr.select(normalized.collapseToHead()).Dispatch();
 	}

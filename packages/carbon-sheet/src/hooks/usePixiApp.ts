@@ -18,7 +18,7 @@ export const usePixiApp = (props: UseAppProps) => {
     });
   });
 
-  // TODO: this is a hack to get the app to render to the canvas
+  // TODO: this is a hack to get the react to render to the canvas
   useEffect(() => {
     if (ref.current) {
       const { offsetHeight: height, offsetWidth: width } = ref.current;

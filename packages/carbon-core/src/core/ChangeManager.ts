@@ -207,11 +207,11 @@ export class ChangeManager extends NodeTopicEmitter {
     const selection = this.state.selection;
     // console.debug("syncing: selection", this.state.selection.toJSON(), this.state.selection.isInline);
     if (!this.app.ready) {
-      // console.log('app not ready');
+      // console.log('react not ready');
       return;
     }
 
-    // this.app.enable();
+    // this.react.enable();
 
     if (selection.isInline) {
       this.syncSelection();

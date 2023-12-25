@@ -70,7 +70,7 @@ export class TransactionManager {
 	// 	}
 
 	// 	// update dom to reflect the state changes
-	// 	this.app.emit(EventsOut.change, this.state);
+	// 	this.react.emit(EventsOut.change, this.state);
 	// }
 
 	private updateDecorations() {

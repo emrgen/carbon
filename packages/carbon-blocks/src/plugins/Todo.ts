@@ -60,8 +60,8 @@ export class Todo extends Section {
     }
   }
 
-  // serialize(app: Carbon, node: Node): SerializedNode {
+  // serialize(react: Carbon, node: Node): SerializedNode {
   //   const prefix = node.properties.node?.isChecked ? ['x'] : '[]';
-  //   return `${prefix} ${app.serialize(node.child(0)!)}` + app.commands.nestable.serializeChildren(node);
+  //   return `${prefix} ${react.serialize(node.child(0)!)}` + react.commands.nestable.serializeChildren(node);
   // }
 }

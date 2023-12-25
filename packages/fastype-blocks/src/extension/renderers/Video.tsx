@@ -38,7 +38,7 @@
 //
 // export function VideoComp(props: RendererProps) {
 //   const { node } = props;
-//   const app = useCarbon();
+//   const react = useCarbon();
 //   const updater = useDisclosure();
 //   const { ref: overlayRef } = useFastypeOverlay({
 //     disclosure: updater,
@@ -70,9 +70,9 @@
 //   const onClick = useCallback(
 //     (e) => {
 //       // preventAndStop(e);
-//       app.tr.selectNodes([]).Dispatch();
+//       react.tr.selectNodes([]).Dispatch();
 //     },
-//     [app.tr]
+//     [react.tr]
 //   );
 //
 //   const updatePopover = useMemo(() => {
@@ -119,7 +119,7 @@
 //               setTimeout(() => {
 //                 updater.onClose();
 //                 actions.setSubmitting(false);
-//                 app.tr
+//                 react.tr
 //                   .Update(node.id, {
 //                     node: {
 //                       url: values.url,
@@ -161,7 +161,7 @@
 //       </Box>,
 //       overlayRef.current
 //     );
-//   }, [overlayRef, node.properties, node.id, updater, app.tr]);
+//   }, [overlayRef, node.properties, node.id, updater, react.tr]);
 //
 //   return (
 //     <CarbonBlock {...props} custom={{ ...connectors, onClick }} ref={ref}>

@@ -8,12 +8,12 @@ import {
   NodeId,
   Transaction,
   prevent,
-  useCarbon,
-  useCarbonOverlay, State
+  State
 } from "@emrgen/carbon-core";
 import { elementBound } from "../core/utils";
 import { DraggableHandle } from "./DraggableHandle";
 import { throttle } from "lodash";
+import {useCarbon, useCarbonOverlay} from "@emrgen/carbon-react";
 
 export function DndController() {
   const app = useCarbon();
@@ -165,8 +165,8 @@ export function DndController() {
     dnd.on("drag:end", onDragEnd);
     dnd.on("hide:drag:handle", resetDragHandle);
     return () => {
-      // app.off("mouseIn", onEditorMouseOver);
-      // app.off("mouseOut", onEditorMouseOut);
+      // react.off("mouseIn", onEditorMouseOver);
+      // react.off("mouseOut", onEditorMouseOut);
       app.off("changed", onChange);
       app.off("keyDown", onKeyDown);
       dnd.off("mouse:in", thMouseIn);

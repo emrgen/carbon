@@ -69,9 +69,9 @@ export function MediaView(props: MediaViewProps) {
   }, [updateDocumentWidth]);
 
   useEffect(() => {
-    app.on("app:mounted", updateDocumentWidth);
+    app.on("react:mounted", updateDocumentWidth);
     return () => {
-      app.off("app:mounted", updateDocumentWidth);
+      app.off("react:mounted", updateDocumentWidth);
     }
   },[app, updateDocumentWidth]);
 
@@ -80,7 +80,7 @@ export function MediaView(props: MediaViewProps) {
   //   return () => {
   //     window.removeEventListener("resize", updateDocumentWidth);
   //   };
-  // }, [app.store, node.parents, updateDocumentWidth]);
+  // }, [react.store, node.parents, updateDocumentWidth]);
 
   const onDragStart = useCallback(
     (e: DndEvent) => {

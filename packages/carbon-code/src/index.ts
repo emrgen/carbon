@@ -1,4 +1,4 @@
-import {Extension, Renderer} from "@emrgen/carbon-core";
+import {Extension, ReactRenderer} from "@emrgen/carbon-core";
 
 import "./code.styl";
 import {Code} from "./plugins/Code";
@@ -12,7 +12,7 @@ export const codeExtension: Extension = {
     new CodeLine()
   ],
   renderers: [
-    Renderer.create("code", CodeComp),
-    Renderer.create("codeLine", CodeLineComp)
+    ReactRenderer.create("code", CodeComp),
+    ReactRenderer.create("codeLine", CodeLineComp)
   ]
 }

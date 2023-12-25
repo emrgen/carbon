@@ -158,7 +158,7 @@ export const DocumentComp = (props: RendererProps) => {
             // onMouseUp: handleClick,
             onMouseDown: handleMouseDown,
             // onScroll: (e) => {
-            //   app.emit(EventsIn.scroll, e as any);
+            //   react.emit(EventsIn.scroll, e as any);
             // },
             onBlur: (e) => app.emit("document:blur", e as any),
             onFocus: (e) => app.emit("document:focus", e as any),

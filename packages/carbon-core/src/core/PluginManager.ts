@@ -190,13 +190,13 @@ export class PluginManager {
 	decoration(app: Carbon) {
 		const { decorations } = app.state;
 		// each(this.before, p => {
-		// 	p.decoration(app).forEach(d => decorations.set(d.span, d));
+		// 	p.decoration(react).forEach(d => decorations.set(d.span, d));
 		// });
 		// each(this.nodes, p => {
-		// 	p.decoration(app).forEach(d => decorations.set(d.span, d));
+		// 	p.decoration(react).forEach(d => decorations.set(d.span, d));
 		// })
 		// each(this.after, p => {
-		// 	p.decoration(app).forEach(d => decorations.set(d.span, d));
+		// 	p.decoration(react).forEach(d => decorations.set(d.span, d));
 		// });
 	}
 

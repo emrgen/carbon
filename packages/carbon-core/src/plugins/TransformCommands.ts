@@ -344,7 +344,7 @@ export class TransformCommands extends BeforePlugin {
     // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
     tr.transform.delete(selection)?.Then((carbon) => {
       // console.log('DELETED', carbon.selection.toString());
-      // return this.paste(carbon, after, BlockSelection.empty(app.store), slice);
+      // return this.paste(carbon, after, BlockSelection.empty(react.store), slice);
     })?.Dispatch();
   }
 
@@ -555,7 +555,7 @@ export class TransformCommands extends BeforePlugin {
   private splitByRangeAcrossBlocks(tr: Transaction, splitBlock: Node, start: Pin, end: Pin, startTopNode: Node, endTopNode: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const {app} = tr
     // console.log(deleteGroup.ids.toArray());
-    // console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
+    // console.log(deleteGroup.ids.toArray().map(id => react.store.get(id)));
 
     const { parent: commonNode } = startTopNode;
     if (!commonNode) {
@@ -1061,7 +1061,7 @@ export class TransformCommands extends BeforePlugin {
 
     // * startBlock === endBlock
     if (startBlock.eq(endBlock)) {
-      // return this.deleteWithinBlock(app, start, end, startBlock, endBlock, deleteGroup);
+      // return this.deleteWithinBlock(react, start, end, startBlock, endBlock, deleteGroup);
     }
 
     // * startBlock !== endBlock
@@ -1300,15 +1300,15 @@ export class TransformCommands extends BeforePlugin {
           actions.push(...this.removeNodeCommands(node.children))
           // const children = node.children;
           // if (children.length===0) {
-          //   // const textNode = app.schema.text("");
+          //   // const textNode = react.schema.text("");
           //   // actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
           // } if (children.length === 1) {
           //   if (!node.firstChild!.isEmpty) {
-          //     const textNode = app.schema.text("");
+          //     const textNode = react.schema.text("");
           //     actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
           //   }
           // } else {
-          //   const textNode = app.schema.text("");
+          //   const textNode = react.schema.text("");
           //   actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
           // }
           return;

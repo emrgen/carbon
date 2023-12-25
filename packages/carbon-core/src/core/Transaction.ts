@@ -298,7 +298,7 @@ export class Transaction {
 	// 	const {actions} = this;
 	// 	const {actions: otherActions} = other;
 	// 	if (this.textInsertOnly && other.textInsertOnly) {
-	// 		const { tr } = this.app
+	// 		const { tr } = this.react
 	// 		const thisSetContentAction = first(actions) as SetContentAction
 	// 		const otherSetContentAction = first(actions) as SetContentAction
 	//
@@ -411,7 +411,7 @@ export class TransactionCommit {
 	}
 
 	filter(fn: (action: CarbonAction) => boolean) {
-		// const {tr} = this.app;
+		// const {tr} = this.react;
 		// this.actions.filter(fn).forEach(action => {
 		// 	tr.Add(action);
 		// });

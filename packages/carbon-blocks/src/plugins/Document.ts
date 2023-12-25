@@ -66,7 +66,7 @@ export class DocPlugin extends CarbonPlugin {
 					preventAndStopCtx(ctx);
 					cmd.collapsible.split(selection).Dispatch();
 
-          // const section = app.schema.type(node.type.splitName).default();
+          // const section = react.schema.type(node.type.splitName).default();
           // if (!section) {
           //   throw Error("failed to create default node for type" + node.name)
           // }
@@ -97,8 +97,8 @@ export class DocPlugin extends CarbonPlugin {
 	// 	return undefined
 	// }
 
-	// serialize(app: Carbon, node: Node): SerializedNode {
-	// 	return node.children.map(n => app.serialize(n)).join('\n');
+	// serialize(react: Carbon, node: Node): SerializedNode {
+	// 	return node.children.map(n => react.serialize(n)).join('\n');
 	// }
 
 }

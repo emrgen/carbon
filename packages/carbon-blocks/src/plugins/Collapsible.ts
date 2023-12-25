@@ -235,8 +235,8 @@ export class Collapsible extends NodePlugin {
     return
   }
 
-  // serialize(app: Carbon, node: Node) {
-  //   return `- ${app.serialize(node.child(0)!)}` + app.cmd.nestable.serializeChildren(node);
+  // serialize(react: Carbon, node: Node) {
+  //   return `- ${react.serialize(node.child(0)!)}` + react.cmd.nestable.serializeChildren(node);
   // }
 
 }
@@ -264,7 +264,7 @@ class CollapsibleBeforePlugin extends BeforePlugin {
       //   if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
       //     preventAndStopCtx(ctx);
       //     console.log('[Backspace] collapsible');
-      //     // app.cmd.collapsible.split(selection)?.Dispatch();
+      //     // react.cmd.collapsible.split(selection)?.Dispatch();
       //   }
       // },
       // delete: (ctx: EventContext<KeyboardEvent>) => {
@@ -272,7 +272,7 @@ class CollapsibleBeforePlugin extends BeforePlugin {
       //   const { start, end } = selection;
       //   if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
       //     preventAndStopCtx(ctx);
-      //     // app.cmd.collapsible.split(selection)?.Dispatch();
+      //     // react.cmd.collapsible.split(selection)?.Dispatch();
       //   }
       // }
     }

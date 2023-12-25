@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-react": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
     "@react-icons/all-files": "^4.1.0",
     "@types/katex": "^0.16.0",

@@ -245,10 +245,10 @@ export class NestablePlugin extends AfterPlugin {
 		}
 	}
 
-	// serializeChildren(app: Carbon, node: Node): string {
+	// serializeChildren(react: Carbon, node: Node): string {
 	// 	const children = node.children.slice(1);
 	// 	const depth = takeBefore(node.parents, (n: Node) => !isNestableNode(n)).length + 1;
 	// 	if (!children.length) return ''
-	// 	return '\n' + children.map(n => app.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
+	// 	return '\n' + children.map(n => react.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
 	// }
 }

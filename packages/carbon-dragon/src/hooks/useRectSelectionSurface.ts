@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from "react";
 import { useDraggableHandle, UseDraggableHandleProps } from "./useDraggable";
 import { useRectSelector } from "./useRectSelector";
-import { useCarbon } from "@emrgen/carbon-core";
 import { RectSelectAreaId } from "../constants";
+import {useCarbon} from "@emrgen/carbon-react";
 
 export interface UseRectSelectionSurfaceProps extends UseDraggableHandleProps {}
 
@@ -29,13 +29,13 @@ export const useRectSelectionSurface = (props: UseRectSelectionSurfaceProps) => 
 		// e.preventDefault();
 		rectSelector.onMouseDown(e, node);
 		listeners.onMouseDown(e);
-		// app.disable();
+		// react.disable();
 	}, [node, listeners, rectSelector, ref]);
 
 	useEffect(() => {
 		const onMouseUp = (e: MouseEvent) => {
 			console.groupEnd()
-			// app.enable();
+			// react.enable();
 			rectSelector.onMouseUp(e, node)
 		}
 

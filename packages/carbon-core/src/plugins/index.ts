@@ -1,4 +1,4 @@
-import { Extension } from "../core";
+import {CarbonPlugin, Extension} from "../core";
 import { ClipboardPlugin } from "./Clipboard";
 import { KeyboardPlugin } from './Keyboard';
 import { SelectionChangePlugin } from './SelectionChange';
@@ -8,17 +8,15 @@ import { HistoryPlugin } from "./History";
 import { FormatterPlugin } from "./Formatter";
 import { ActionPlugin } from "./Action";
 
-export const extensionPresets: Extension = {
-	plugins: [
-		new SelectionChangePlugin(),
-		new TransformCommands(),
-		new KeyboardPlugin(),
-		new ClipboardPlugin(),
-		new SlicePlugin(),
-		new HistoryPlugin(),
-		new FormatterPlugin(),
-		new ActionPlugin(),
-	],
-}
+export const corePresetPlugins: CarbonPlugin[] = [
+  new SelectionChangePlugin(),
+  new TransformCommands(),
+  new KeyboardPlugin(),
+  new ClipboardPlugin(),
+  new SlicePlugin(),
+  new HistoryPlugin(),
+  new FormatterPlugin(),
+  new ActionPlugin(),
+];
 
 export * from './TransformCommands'

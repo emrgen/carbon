@@ -77,7 +77,7 @@ export class TitlePlugin extends NodePlugin {
 
 				if (selection.isCollapsed) {
 					preventAndStopCtx(ctx);
-					// app.commands.transform.insertText(selection, `\n`, false)?.Dispatch();
+					// react.commands.transform.insertText(selection, `\n`, false)?.Dispatch();
 				}
 			}
 		}
@@ -93,7 +93,7 @@ export class TitlePlugin extends NodePlugin {
 
 		cmd.transform.insertText(selection, data ?? key, false)?.Dispatch()
 
-		// app.commands.transform.insertText(selection, data ?? key, false)?.Dispatch();
+		// react.commands.transform.insertText(selection, data ?? key, false)?.Dispatch();
 	}
 
 	// decoration(state: CarbonState): Decoration[] {
@@ -151,7 +151,7 @@ export class TitlePlugin extends NodePlugin {
 	// 	return decorations;
 	// }
 
-	// serialize(app: Carbon, node: Node): SerializedNode {
-	// 	return node.children.map(n => app.serialize(n)).join('');
+	// serialize(react: Carbon, node: Node): SerializedNode {
+	// 	return node.children.map(n => react.serialize(n)).join('');
 	// }
 }

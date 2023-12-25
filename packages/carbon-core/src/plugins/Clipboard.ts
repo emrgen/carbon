@@ -18,11 +18,11 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStop(event);
         const slice = this.slice(app);
         if (!slice.isEmpty) {
-          // const serialized = app.serialize(slice.root)
+          // const serialized = react.serialize(slice.root)
           // console.log('Serialized =>', serialized);
           // event.clipboardData.setData('text/plain', serialized);
 
-          // app.state.changes.clipboard = slice;
+          // react.state.changes.clipboard = slice;
         }
         // delete the selection
         cmd.keyboard.backspace(ctx)?.Dispatch();
@@ -35,7 +35,7 @@ export class ClipboardPlugin extends AfterPlugin {
         console.log('slice', slice);
 
         if (!slice.isEmpty) {
-          // const serialized = app.serialize(slice.root)
+          // const serialized = react.serialize(slice.root)
           // console.log('Serialized =>', serialized);
           // event.clipboardData.setData('text/plain', serialized);
           console.log(slice.root.children.map(n => n.textContent));
@@ -48,9 +48,9 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStop(event);
         const { selection } = app
 
-        // if (!app.state.changes.clipboard.size === 0) {
-        //   const slice = app.state.changes.clipboard;
-        //   app.cmd.transform.paste(selection, slice)?.Dispatch()
+        // if (!react.state.changes.clipboard.size === 0) {
+        //   const slice = react.state.changes.clipboard;
+        //   react.cmd.transform.paste(selection, slice)?.Dispatch()
         // } else {
         //
         // }

@@ -1,4 +1,4 @@
-import { Extension, Renderer } from "@emrgen/carbon-core";
+import { Extension, ReactRenderer } from "@emrgen/carbon-core";
 import { TodoComp } from "./renderers/Todo";
 import { Callout } from "./renderers/Callout";
 import {SeparatorComp} from "./renderers/Separator";
@@ -13,14 +13,14 @@ export const fastypeBlocks: Extension = {
     new Separator()
   ],
   renderers: [
-    Renderer.create('todo', TodoComp),
-    Renderer.create('callout', Callout),
-    Renderer.create('separator', SeparatorComp),
+    ReactRenderer.create('todo', TodoComp),
+    ReactRenderer.create('callout', Callout),
+    ReactRenderer.create('separator', SeparatorComp),
     // Renderer.create('video', VideoComp),
-    Renderer.create('image', ImageComp),
-    Renderer.create('equation', EquationComp),
+    ReactRenderer.create('image', ImageComp),
+    ReactRenderer.create('equation', EquationComp),
     // Renderer.create('code', CodeComp),
-    Renderer.create('document', DocumentComp),
+    ReactRenderer.create('document', DocumentComp),
   ]
 }
 

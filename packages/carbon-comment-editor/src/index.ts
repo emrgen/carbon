@@ -1,4 +1,4 @@
-import {Extension, Renderer} from "@emrgen/carbon-core";
+import {Extension, ReactRenderer} from "@emrgen/carbon-core";
 
 import "./comment-editor.styl";
 import {CommentEditor} from "./plugins/CommentEditor";
@@ -10,6 +10,6 @@ export const commentEditorExtension: Extension = {
     new CommentEditor(),
   ],
   renderers: [
-    Renderer.create("commentEditor", CommentEditorComp),
+    ReactRenderer.create("commentEditor", CommentEditorComp),
   ]
 }

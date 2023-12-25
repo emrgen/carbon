@@ -26,8 +26,8 @@ export const BoardViewColumnComp = (props: RendererProps) => {
   // const handleAddItem = useCallback((e) => {
   //   preventAndStop(e);
   //   console.log('add column item')
-  //   // const column = app.schema.nodes.column.createAndFill();
-  // }, [app]);
+  //   // const column = react.schema.nodes.column.createAndFill();
+  // }, [react]);
 
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>

@@ -1,4 +1,4 @@
-import { State, EventsOut, Transaction, useCarbon } from "@emrgen/carbon-core";
+import { State, EventsOut, Transaction} from "@emrgen/carbon-core";
 import { throttle } from "lodash";
 import { useCallback, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
@@ -9,7 +9,7 @@ import { useRectSelector } from "../hooks/useRectSelector";
 import { DndEvent } from "../types";
 //
 // export const RectSelectController = () => {
-//   const app = useCarbon();
+//   const react = useCarbon();
 //   const rectSelector = useRectSelector();
 //   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
 //     overlay: true,
@@ -23,17 +23,17 @@ import { DndEvent } from "../types";
 //       }
 //     };
 //
-//     app.on(EventsOut.changed, onChanged);
+//     react.on(EventsOut.changed, onChanged);
 //     return () => {
-//       app.off(EventsOut.changed, onChanged);
+//       react.off(EventsOut.changed, onChanged);
 //     };
-//   }, [app, rectSelector]);
+//   }, [react, rectSelector]);
 //
 //   const onDragStart = useCallback(
 //     (e: DndEvent) => {
 //       if (e.id === RectSelectAreaId) {
 //         rectSelector.onDragStart(e);
-//         // app.disable();
+//         // react.disable();
 //       }
 //     },
 //     [rectSelector]
@@ -55,11 +55,11 @@ import { DndEvent } from "../types";
 //     (e: DndEvent) => {
 //       if (e.id === RectSelectAreaId) {
 //         rectSelector.onDragEnd(e);
-//         app.enable();
+//         react.enable();
 //         onDragRectStop(e);
 //       }
 //     },
-//     [app, onDragRectStop, rectSelector]
+//     [react, onDragRectStop, rectSelector]
 //   );
 //
 //   useDndMonitor({

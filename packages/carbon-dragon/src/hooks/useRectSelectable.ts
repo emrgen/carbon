@@ -1,6 +1,7 @@
 import { MutableRefObject, useEffect } from "react";
 import { useRectSelector } from "./useRectSelector";
-import { Node, useCarbon, useNodeChange } from "@emrgen/carbon-core";
+import { Node, } from "@emrgen/carbon-core";
+import {useCarbon} from "@emrgen/carbon-react";
 
 interface UseFastSelectableProps {
 	node: Node;

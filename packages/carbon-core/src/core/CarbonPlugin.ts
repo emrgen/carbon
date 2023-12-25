@@ -90,7 +90,7 @@ export abstract class CarbonPlugin {
 
 
 	// serialize the node into a copy string
-	// serialize<T>(app: Carbon, node: Node, encoder: NodeEncoder<T>) {
+	// serialize<T>(react: Carbon, node: Node, encoder: NodeEncoder<T>) {
 	// 	return {} as SerializedNode;
 	// }
 

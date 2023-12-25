@@ -26,7 +26,7 @@ export class NodeEncoderMarkdown implements NodeEncoder<MarkdownNode> {
   }
 
   decode(app: Carbon, node: string): Optional<Node> {
-    // return app.schema.nodeFromMarkdown(node);
+    // return react.schema.nodeFromMarkdown(node);
     return null;
   }
 }

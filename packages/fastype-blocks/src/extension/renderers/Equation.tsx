@@ -87,8 +87,8 @@ export const EquationComp = (props: RendererProps) => {
     (e) => {
       stop(e);
       // avoid selection if block is already selected
-      // if (app.blockSelection && app.blockSelection.has(node.id)) return;
-      // app.tr
+      // if (react.blockSelection && react.blockSelection.has(node.id)) return;
+      // react.tr
       //   .selectNodes([node.id])
       //   .Update(node.id, {
       //     node: {
@@ -114,7 +114,7 @@ export const EquationComp = (props: RendererProps) => {
     e.stopPropagation();
     e.preventDefault();
     // setPower(power + 1)
-    // const title = app.schema.nodeFromJSON({
+    // const title = react.schema.nodeFromJSON({
     //   name: 'title',
     //   content: [
     //     {
@@ -123,10 +123,10 @@ export const EquationComp = (props: RendererProps) => {
     //     }
     //   ]
     // })!
-    // app.tr
+    // react.tr
     // .setContent(node.id, BlockContent.create([title!]))
     // .forceRender([node.id]).Dispatch();
-    // app.tr.activateNodes([node.id]).Dispatch();
+    // react.tr.activateNodes([node.id]).Dispatch();
   };
 
   const updatePopover = useMemo(() => {

@@ -13,8 +13,6 @@ import {
   PinnedSelection,
   Point,
   preventAndStop,
-  useCarbon,
-  useNodeState
 } from "@emrgen/carbon-core";
 import { DndEvent } from "../types";
 import { HiOutlinePlus } from "react-icons/hi";
@@ -23,6 +21,7 @@ import { useDndContext } from "../hooks";
 import { elementBound } from "../core/utils";
 import { isNestableNode } from "@emrgen/carbon-blocks";
 import { CustomEvent } from "@emrgen/carbon-core/src/core/CustomEvent";
+import {useCarbon, useNodeState} from "@emrgen/carbon-react";
 
 export interface FastDragHandleProps {
   node: Node;
@@ -293,7 +292,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const onMouseUp = useCallback(
     (node: Node, e: DndEvent, isDragging: boolean) => {
       if (e.id !== CarbonDragHandleId) return;
-      // app.focus();
+      // react.focus();
       if (isDragging) {
         preventAndStop(e.event);
       } else {
@@ -347,16 +346,16 @@ export function DraggableHandle(props: FastDragHandleProps) {
     //   const title = node.find((n) => n.isTextBlock);
     //   if (node.isContainerBlock && title) {
     //     const after = PinnedSelection.fromPin(Pin.toStartOf(title)!);
-    //     if (app.selection.eq(after)) return;
-    //     app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
+    //     if (react.selection.eq(after)) return;
+    //     react.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
     //     return;
     //   }
     // }
     //
     // if (nextBlock && nextBlock?.isEmpty && !nextBlock?.isAtom) {
     //   const after = PinnedSelection.fromPin(Pin.toStartOf(nextBlock)!);
-    //   if (app.selection.eq(after)) return;
-    //   app.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
+    //   if (react.selection.eq(after)) return;
+    //   react.tr.Select(after, ActionOrigin.UserInput)?.Dispatch();
     //   return;
     // }
 

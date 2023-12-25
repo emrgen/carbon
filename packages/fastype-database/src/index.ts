@@ -1,4 +1,4 @@
-import { Extension, Renderer } from "@emrgen/carbon-core";
+import { Extension, ReactRenderer } from "@emrgen/carbon-core";
 import { BoardViewComp } from "./renderer/BoardView";
 import { BoardView } from "./plugins/BoardView";
 import './database.styl';
@@ -13,8 +13,8 @@ export const fastypeDatabase: Extension = {
     new BoardViewItem(),
   ],
   renderers: [
-    Renderer.create('board', BoardViewComp),
-    Renderer.create('boardColumn', BoardViewColumnComp),
+    ReactRenderer.create('board', BoardViewComp),
+    ReactRenderer.create('boardColumn', BoardViewColumnComp),
   ]
 }
 

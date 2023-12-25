@@ -20,7 +20,7 @@ export class CarbonRoot extends CarbonPlugin {
     }
   }
 
-  // serialize(app: Carbon, node: Node): SerializedNode {
-  //   return node.children.map(n => app.serialize(n)).join('\n');
+  // serialize(react: Carbon, node: Node): SerializedNode {
+  //   return node.children.map(n => react.serialize(n)).join('\n');
   // }
 }

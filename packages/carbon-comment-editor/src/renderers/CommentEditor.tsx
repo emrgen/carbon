@@ -1,11 +1,14 @@
-import {
-  CarbonBlock, CarbonEmpty,
-  CarbonNodeChildren,
-  CarbonNodeContent, CarbonPlaceholder,
-  RendererProps, useCarbon, useSelectionHalo
-} from "@emrgen/carbon-core";
+import {RendererProps} from "@emrgen/carbon-core";
 import {useCallback, useRef} from "react";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon";
+import {
+  CarbonBlock,
+  CarbonNodeChildren,
+  CarbonNodeContent,
+  CarbonPlaceholder,
+  useCarbon,
+  useSelectionHalo
+} from "@emrgen/carbon-react";
 
 export const CommentEditorComp = (props: RendererProps) => {
   const {node} = props;
@@ -20,7 +23,7 @@ export const CommentEditorComp = (props: RendererProps) => {
 
   const handleInsertNode = useCallback((e) => {
     app.cmd.inserter.append(node, 'section').dispatch();
-  }, [app])
+  }, [app, node])
 
 
   return (

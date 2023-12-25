@@ -194,7 +194,7 @@ export class ChangeName extends BeforePlugin {
       const content = BlockContent.empty()
 
       cmd.SetContent(block.firstChild!.id, content)
-        // .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
+        // .removeText(Pin.toStartOf(block)?.point!, react.schema.text(match[1].slice(0, -1))!)
         .Add(insertBeforeAction(block, divider))
         .Change(block.id, block.type.splitName)
         .Update(block.id, { node: { typeChanged: true } })

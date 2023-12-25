@@ -81,7 +81,7 @@ export class EventManager {
 				event.preventDefault();
 				console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'editor is disabled for events');
 			}
-			console.log('app: disabled', ' ignored event', type);
+			console.log('react: disabled', ' ignored event', type);
 			return
 		}
 
@@ -187,8 +187,8 @@ export class EventManager {
 
 	// clickTimer: any = null
 	// beforeEvent(type: EventsIn, event: Event): EventsIn {
-	// 	const { app } = this;
-	// 	const { selection } = app;
+	// 	const { react } = this;
+	// 	const { selection } = react;
 	// 	if (isKeyHotkey('shift+left')(event)) {
 	// 		if (selection.isCollapsed && selection.head.isAtDocStart) {
 	// 			event.preventDefault()
@@ -218,7 +218,7 @@ export class EventManager {
 	// 	}
 
 	// 	if (type === EventsIn.blur) {
-	// 		app.state.updateSelection(PinnedSelection.default(app.content), this.runtime.origin, true)
+	// 		react.state.updateSelection(PinnedSelection.default(react.content), this.runtime.origin, true)
 	// 		// this.focused = false
 	// 		return EventsIn.noop
 	// 	}

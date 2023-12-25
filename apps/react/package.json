@@ -1,0 +1,50 @@
+{
+  "name": "@emrgen/carbon-react-editor",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "license": "All rights reserved to the authors",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^2.8.0",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@emrgen/carbon-blocktree": "workspace:*",
+    "@emrgen/carbon-comment-editor": "workspace:*",
+    "@emrgen/carbon-code": "workspace:*",
+    "@emrgen/carbon-blocks": "workspace:*",
+    "@emrgen/carbon-react": "workspace:*",
+    "@emrgen/carbon-react-blocks": "workspace:*",
+    "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-dragon": "workspace:*",
+    "@emrgen/carbon-question": "workspace:*",
+    "@emrgen/carbon-sheet": "workspace:*",
+    "@emrgen/carbon-utils": "workspace:*",
+    "@emrgen/fastype-blocks": "workspace:*",
+    "@emrgen/fastype-core": "workspace:*",
+    "@emrgen/fastype-database": "workspace:*",
+    "@emrgen/types": "workspace:*",
+    "@monaco-editor/react": "^4.5.1",
+    "@types/lodash": "^4.14.191",
+    "@types/lodash-es": "^4.17.12",
+    "framer-motion": "^10.15.0",
+    "lodash": "^4.17.21",
+    "object-treeify": "^4.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.2",
+    "recoil": "^0.7.7",
+    "tailwindcss": "^3.1.8"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "@vitejs/plugin-react": "^3.1.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0"
+  }
+}

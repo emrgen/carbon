@@ -39,7 +39,7 @@ export class Video extends NodePlugin {
     }
   }
 
-  // serialize(app: Carbon, node: Node): SerializedNode {
+  // serialize(react: Carbon, node: Node): SerializedNode {
   //   return {
   //     name: node.name,
   //     title: `![](${node.attrs.node.src})`,

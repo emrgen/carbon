@@ -194,7 +194,7 @@ export interface NodeSpec {
 	dragHandle?: boolean;
 	insert?: boolean;
 	// node is a embedded element
-	// it can be a video, audio, external app
+	// it can be a video, audio, external react
 	embedded?: boolean;
 	// sandbox act as a divider of all interaction with other node
 	// sandbox also act as the edge of the interactions

@@ -9,7 +9,7 @@ import { EventManager } from "./EventManager";
 import { NodeStore } from "./NodeStore";
 import { PinnedSelection } from "./PinnedSelection";
 import { PluginManager } from "./PluginManager";
-import { RenderManager } from "./Renderer";
+import { RenderManager } from "../../../carbon-react/src/renderer/ReactRenderer";
 import { Schema } from "./Schema";
 import { SelectionManager } from "./SelectionManager";
 import { Transaction } from "./Transaction";
@@ -33,7 +33,6 @@ export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
 	private readonly em: EventManager;
 	private readonly sm: SelectionManager;
-	private readonly rm: RenderManager;
 	private readonly tm: TransactionManager;
 
 
@@ -63,13 +62,12 @@ export class Carbon extends EventEmitter {
 	committed: boolean;
 	private counter: number = 0;
 
-	constructor(state: State, schema: Schema, pm: PluginManager, renderer: RenderManager) {
+	constructor(state: State, schema: Schema, pm: PluginManager) {
 		super();
 
 		this.committed = true;
 
 		this.pm = pm;
-		this.rm = renderer;
 		this.schema = schema;
 
 		this.state = state;
@@ -123,7 +121,7 @@ export class Carbon extends EventEmitter {
 	}
 
 	get portal(): Optional<HTMLElement> {
-		this._portal = this._portal ?? querySelector('.carbon-app > .carbon-portal') as any ?? null;
+		this._portal = this._portal ?? querySelector('.carbon-react > .carbon-portal') as any ?? null;
 		return this._portal;
 	}
 
@@ -199,10 +197,6 @@ export class Carbon extends EventEmitter {
 		this.change.update(tr, state)
 
 		this.emit(EventsOut.transactionCommit, tr);
-	}
-
-	component(name: string) {
-		return this.rm.component(name)
 	}
 
 	// sanitize(node: Node): SerializedNode {

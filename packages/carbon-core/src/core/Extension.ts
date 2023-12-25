@@ -1,11 +1,11 @@
 import { CarbonPlugin } from "./CarbonPlugin";
-import { Renderer } from "./Renderer";
+import { ReactRenderer } from "../../../carbon-react/src/renderer/ReactRenderer";
 import { merge } from 'lodash';
 
 // Extension acts as group of plugins and renderers
 export interface Extension {
 	plugins?: CarbonPlugin[];
-	renderers?: Renderer[];
+	renderers?: ReactRenderer[];
 }
 
 export const mergeExtensions = (...extensions: Extension[]): Extension => {
