@@ -129,7 +129,8 @@ export class ImmutableDraft implements Draft {
     }
 
     changes.freeze();
-    nodeMap.freeze();
+    nodeMap.contracts(2)
+    // nodeMap.freeze();
     after.freeze();
 
     const newState = new State({

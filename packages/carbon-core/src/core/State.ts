@@ -149,7 +149,7 @@ export class State extends EventEmitter {
 	freeze() {
 		// remove all explicit parent links and freeze
 		this.changes.freeze();
-		this.nodeMap.freeze();
+		// this.nodeMap.freeze();
 		this.content.freeze();
 		this.selection.freeze();
 

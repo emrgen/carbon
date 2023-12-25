@@ -57,7 +57,7 @@ const NODE_CHAIN_CACHE = new NodeChainCache();
 export class NodeMap {
   private _map: NodeBTree = new NodeBTree();
   private _deleted: NodeBTree = new NodeBTree();
-  private readonly _parent: NodeMap | null = null;
+  private _parent: NodeMap | null = null;
   private _frozen = false;
 
   private _size = 0;
@@ -78,7 +78,7 @@ export class NodeMap {
 
   constructor(parent?: NodeMap) {
     if (parent && !parent._frozen) {
-      throw new Error("Parent map must be frozen");
+      // throw new Error("Parent map must be frozen");
     }
 
     this._parent = parent || null;
@@ -208,11 +208,24 @@ export class NodeMap {
     return ret;
   }
 
+  contracts(depth = 2) {
+    if (depth == 0) {
+      this._parent?.forEach((k, v) => {
+        if (!this._map.has(k)) {
+          this._map.set(k, v);
+        }
+      });
+      this._parent = null;
+    } else {
+      this._parent?.contracts(depth - 1);
+    }
+  }
+
   freeze() {
-    if (this._frozen) return;
-    this._frozen = true;
-    this._map.freeze();
-    this._size = this._map.size + (this._parent?.size || 0);
-    Object.freeze(this);
+    // if (this._frozen) return;
+    // this._frozen = true;
+    // this._map.freeze();
+    // this._size = this._map.size + (this._parent?.size || 0);
+    // Object.freeze(this);
   }
 }

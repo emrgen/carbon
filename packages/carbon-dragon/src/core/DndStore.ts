@@ -19,6 +19,8 @@ export class DndNodeStore {
 		return this.rtree.searchNodes(box);
 	}
 
+  //FIXME: this is a extremely expensive operation
+  // currently its happening on every render cycle
 	refresh(scrollTop: number, scrollLeft: number) {
 		this.rtree.clear();
 		this.entries().forEach(e => {
