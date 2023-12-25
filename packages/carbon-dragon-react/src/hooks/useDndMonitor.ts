@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 import { useDndContext } from './useDndContext';
-import { DndEvent } from '../types';
 import { Node } from "@emrgen/carbon-core";
 import { throttle } from 'lodash';
+import {DndEvent} from "@emrgen/carbon-dragon";
 
 interface FastDndMonitor {
-	onDragStart?(e: DndEvent);
-	onDragMove?(e: DndEvent);
-	onDragEnd?(e: DndEvent);
+	onDragStart?(e: DndEvent): void;
+	onDragMove?(e: DndEvent): void;
+	onDragEnd?(e: DndEvent): void;
 	onMouseDown?(node: Node, e: MouseEvent): void;
 	onMouseUp?(node: Node, e: DndEvent, isDragging: boolean): void;
 	options?: {

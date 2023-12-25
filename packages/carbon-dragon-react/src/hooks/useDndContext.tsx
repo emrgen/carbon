@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { Dnd } from '../core/Dnd';
+import {Dnd} from "@emrgen/carbon-dragon";
 
 const InternalDndContext = createContext<Dnd>(null!);
 

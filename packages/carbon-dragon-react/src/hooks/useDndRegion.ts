@@ -1,8 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useDndContext } from "./useDndContext";
-import { extend } from 'lodash';
 import { UseFastDraggableProps } from "./useDraggable";
-import { useNodeChange } from "@emrgen/carbon-core";
 
 interface UseFastDndRegionProps extends UseFastDraggableProps { }
 

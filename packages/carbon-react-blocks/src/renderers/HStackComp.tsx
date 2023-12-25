@@ -1,7 +1,7 @@
 import React from 'react'
 import { useRef } from 'react';
-import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from '@emrgen/carbon-dragon';
 import {CarbonBlock, CarbonChildren, RendererProps, useSelectionHalo} from "@emrgen/carbon-react";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 export function HStackComp(props: RendererProps) {
   const {node} = props;

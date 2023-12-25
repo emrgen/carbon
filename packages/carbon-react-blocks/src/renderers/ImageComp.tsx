@@ -1,19 +1,14 @@
 import React, { useCallback, useRef } from "react";
-import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon";
 import {RendererProps} from "@emrgen/carbon-core";
 import {CarbonBlock, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
 import {preventAndStop} from "@emrgen/carbon-core";
+import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
 
 export default function ImageComp(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
   const ref = useRef<HTMLDivElement>(null);
-
-  const selection = useSelectionHalo(props);
-  const dragDropRect = useDragDropRectSelect({ node, ref });
-  const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection)
-  );
+  const {connectors, SelectionHalo} = useDragDropRectSelectHalo({node, ref});
 
   const handleClick = (e) => {
     preventAndStop(e);

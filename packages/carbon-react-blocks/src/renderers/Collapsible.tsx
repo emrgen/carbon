@@ -7,23 +7,17 @@ import {
   useSelectionHalo
 } from "@emrgen/carbon-react";
 import {useCallback, useRef} from "react";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon";
 import {ActionOrigin, Carbon, CollapsedPath, Pin, PinnedSelection, Point,Node} from "@emrgen/carbon-core";
 import {MdOutlineKeyboardArrowDown, MdOutlineKeyboardArrowRight} from "react-icons/md";
+import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
 
 export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
-  const { SelectionHalo } = useSelectionHalo(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
 
   const ref = useRef(null);
-
-  const blockSelection = useSelectionHalo(props);
-  const dragDropRect = useDragDropRectSelect({ node, ref });
-  const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, blockSelection)
-  );
+  const {connectors, SelectionHalo} = useDragDropRectSelectHalo({node, ref})
 
   // insert a new section as child of this collapsible
   const handleInsert = useCallback((app: Carbon) => {

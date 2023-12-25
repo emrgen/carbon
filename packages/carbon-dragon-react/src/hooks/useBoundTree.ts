@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { NodeR3Tree } from "../core/NodeR3Tree";
-import { elementBound } from "../core/utils";
+import {elementBound, NodeR3Tree} from "@emrgen/carbon-dragon";
+
 
 const useBoundTree = () => {
 	const [boundTree] = useState(() => new NodeR3Tree());

@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RectSelect } from "../core/RectSelect";
 import { RectSelectorContext } from "../hooks/useRectSelector";
 import { Carbon, State, EventsOut, RendererProps, Transaction } from "@emrgen/carbon-core";
 import { createPortal } from "react-dom";
 import { useDndMonitor, useDragRect } from "../hooks";
-import { DndEvent } from "../types";
-import { RectSelectAreaId } from "../constants";
 import { throttle } from "lodash";
 import { CarbonDragHandleId } from "./DraggableHandle";
 import {useCarbon} from "@emrgen/carbon-react";
+import {DndEvent, RectSelect, RectSelectAreaId} from "@emrgen/carbon-dragon";
 
 export function RectSelectContext(props) {
   const app = useCarbon();

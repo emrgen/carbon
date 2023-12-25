@@ -3,7 +3,7 @@ import {ReactNode, useEffect, useRef} from "react";
 import { RecoilRoot } from "recoil";
 
 
-import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
+import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon-react";
 import {
   CarbonChangeContext,
   CarbonContent,
@@ -38,9 +38,9 @@ export function CarbonApp(props: CarbonAppProps) {
 
   return (
     <CarbonContext app={app}>
+      <CarbonOverlayContext>
       <DndContext>
       <RenderManagerContext manager={props.renderManager}>
-        <CarbonOverlayContext>
             <RecoilRoot>
               <CarbonEvents>
                 <div
@@ -59,9 +59,9 @@ export function CarbonApp(props: CarbonAppProps) {
                 </CarbonChangeContext>
               </CarbonEvents>
             </RecoilRoot>
-          </CarbonOverlayContext>
         </RenderManagerContext>
       </DndContext>
+      </CarbonOverlayContext>
     </CarbonContext>
   );
 }

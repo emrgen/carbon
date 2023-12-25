@@ -4,7 +4,7 @@ import {
   RendererProps, TitlePath
 } from "@emrgen/carbon-core";
 import {first} from "lodash";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock, CarbonChildren,
   CarbonNode,

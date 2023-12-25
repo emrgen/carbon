@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { RectSelect } from '../core/RectSelect';
+import {RectSelect} from "@emrgen/carbon-dragon";
 
 type RectSelectContextProps = RectSelect
 

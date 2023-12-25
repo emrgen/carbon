@@ -1,9 +1,9 @@
 import {title} from "@emrgen/carbon-blocks";
 import {CarbonBlock, CarbonNode, InitNodeJSON, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
 import {useCallback, useEffect, useRef, useState} from "react";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 import {Optional} from "@emrgen/types";
-import {EventsOut, State, Node} from "@emrgen/carbon-core";
+import {EventsOut, State,Node} from "@emrgen/carbon-core";
 
 const createBlockContentItem = (id: string, content?: string) => {
   return {

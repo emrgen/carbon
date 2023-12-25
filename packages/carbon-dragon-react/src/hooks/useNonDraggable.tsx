@@ -1,6 +1,6 @@
 import { MutableRefObject, useCallback, useEffect } from "react";
 import { useDndContext } from "./useDndContext";
-import { Node, useNodeChange } from "@emrgen/carbon-core";
+import { Node } from "@emrgen/carbon-core";
 
 export interface UseNonDraggableProps {
   node: Node;

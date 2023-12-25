@@ -1,7 +1,6 @@
 import { Optional, RawPoint } from "@emrgen/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDndContext } from "../hooks/useDndContext";
-import { DndEvent, RectStyle } from "../types";
 import {
   EventsIn,
   Node,
@@ -10,10 +9,10 @@ import {
   prevent,
   State
 } from "@emrgen/carbon-core";
-import { elementBound } from "../core/utils";
 import { DraggableHandle } from "./DraggableHandle";
 import { throttle } from "lodash";
 import {useCarbon, useCarbonOverlay} from "@emrgen/carbon-react";
+import {DndEvent, elementBound, RectStyle} from "@emrgen/carbon-dragon";
 
 export function DndController() {
   const app = useCarbon();

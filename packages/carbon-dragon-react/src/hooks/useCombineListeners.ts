@@ -1,7 +1,7 @@
 
-import { NodeEventListener } from '../types';
 import { each } from 'lodash';
 import { useMemo } from 'react';
+import {NodeEventListener} from "@emrgen/carbon-dragon";
 
 
 export const useCombineListeners = (...listeners: Record<string, NodeEventListener>[]): Record<string, NodeEventListener> => {

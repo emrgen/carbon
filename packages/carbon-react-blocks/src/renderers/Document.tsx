@@ -11,15 +11,15 @@ import {
   preventAndStop,
   RendererProps,
 } from "@emrgen/carbon-core";
+import { DocumentContext } from "../hooks";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useCarbon} from "@emrgen/carbon-react";
 import {
   useCombineConnectors,
   useConnectorsToProps,
   useDndRegion,
   useNonDraggable,
   useRectSelectionSurface
-} from "@emrgen/carbon-dragon";
-import { DocumentContext } from "../hooks";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useCarbon} from "@emrgen/carbon-react";
+} from "@emrgen/carbon-dragon-react";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;

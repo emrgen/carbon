@@ -3,23 +3,18 @@ import { useMemo, useRef } from "react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
-  CarbonNodeContent,
   Pin,
   PinnedSelection,
   RendererProps,
   preventAndStop,
-  useCarbon,
-  useSelectionHalo,
   EmojiPath,
 } from "@emrgen/carbon-core";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon";
+
 import { Emoji } from "emoji-picker-react";
 import { IconButton, useDisclosure } from "@chakra-ui/react";
 import { EmojiPicker } from "@emrgen/fastype-utils";
+import {CarbonNodeContent, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 export const Callout = (props: RendererProps) => {
   const { node } = props;

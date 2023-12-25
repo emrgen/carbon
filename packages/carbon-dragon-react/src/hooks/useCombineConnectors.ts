@@ -1,9 +1,9 @@
 
 import { isEmpty } from 'lodash';
 import { useMemo } from 'react';
-import { NodeConnector, NodeEventListener } from '../types';
 import { useCombineAttributes } from './useCombineAttributes';
 import { useCombineListeners } from './useCombineListeners';
+import {NodeConnector, NodeEventListener} from "@emrgen/carbon-dragon";
 
 // combine node connectors
 // the order of the connectors will be used to fire the events

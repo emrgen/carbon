@@ -1,13 +1,16 @@
+
+import { useCallback, useMemo, useRef } from "react";
+import { Button, HStack, Stack } from "@chakra-ui/react";
+import {useCombineConnectors, useConnectorsToProps, useDraggable} from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
-  CarbonNodeContent, Point, preventAndStop,
-  RendererProps, stop, useCarbon,
+  CarbonNodeContent,
+  RendererProps,
+  useCarbon,
   useSelectionHalo
-} from "@emrgen/carbon-core";
-import { useCallback, useMemo, useRef } from "react";
-import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect, useDraggable } from "@emrgen/carbon-dragon";
-import { Button, HStack, Stack } from "@chakra-ui/react";
+} from "@emrgen/carbon-react";
+import {Point, preventAndStop,Node} from "@emrgen/carbon-core";
 
 export const BoardViewComp = (props: RendererProps) => {
   const { node } = props;

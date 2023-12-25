@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { Dnd } from "../core/Dnd";
 import { DndContextProvider } from "../hooks/useDndContext";
 import {DndController} from "./DndController";
 import { State, EventsOut, Node, Transaction } from "@emrgen/carbon-core";
 import { sortBy } from "lodash";
 import {useCarbon} from "@emrgen/carbon-react";
+import {Dnd} from "@emrgen/carbon-dragon";
 
 // manages node drag drop context
 export const DndContext = (props) => {

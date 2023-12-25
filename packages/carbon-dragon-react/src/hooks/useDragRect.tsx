@@ -1,10 +1,7 @@
 import { Optional, RawPoint } from "@emrgen/types";
 import { useCallback, useState } from "react";
-import { boundFromPoints, pointsFromFastDndEvent } from "../core/utils";
-import { DndEvent } from "../types";
-import { prevent, preventAndStop } from "@emrgen/carbon-core";
+import {boundFromPoints, DndEvent, pointsFromFastDndEvent} from "@emrgen/carbon-dragon";
 
-const { min, max, abs } = Math;
 interface UseDragRectProps {
   offset?: number;
   overlay?: boolean;

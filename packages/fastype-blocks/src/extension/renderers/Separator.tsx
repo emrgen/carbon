@@ -1,17 +1,11 @@
 import {
-  CarbonBlock,
-  CarbonNodeContent,
   RendererProps,
   preventAndStop,
-  useCarbon,
-  useSelectionHalo,
 } from "@emrgen/carbon-core";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon";
+
 import { useCallback, useRef } from "react";
+import {CarbonBlock, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 export function SeparatorComp(props: RendererProps) {
   const app = useCarbon();

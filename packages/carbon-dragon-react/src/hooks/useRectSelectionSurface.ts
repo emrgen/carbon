@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from "react";
 import { useDraggableHandle, UseDraggableHandleProps } from "./useDraggable";
 import { useRectSelector } from "./useRectSelector";
-import { RectSelectAreaId } from "../constants";
 import {useCarbon} from "@emrgen/carbon-react";
+import {RectSelectAreaId} from "@emrgen/carbon-dragon";
 
 export interface UseRectSelectionSurfaceProps extends UseDraggableHandleProps {}
 

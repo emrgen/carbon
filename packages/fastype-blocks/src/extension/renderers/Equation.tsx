@@ -6,41 +6,28 @@ import React, {
   useState,
 } from "react";
 
-import {
-  CarbonBlock,
-  RendererProps,
-  useCarbon,
-  useSelectionHalo,
-  BlockContent,
-  preventAndStop,
-  stop,
-  Node, useNodeActivated
-} from "@emrgen/carbon-core";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import {
   Box,
   Center,
   HStack,
-  Input,
   Square,
   Stack,
   Text,
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
-import { RxImage } from "react-icons/rx";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon";
 import { useFastypeOverlay } from "../../hooks/useFastypeOverlay";
 import { createPortal } from "react-dom";
 import { Optional } from "@emrgen/types";
 import { TbMathXDivideY2 } from "react-icons/tb";
 import ResizeTextarea from "react-textarea-autosize";
-import { isHotkey, isKeyHotkey } from "is-hotkey";
+import { isKeyHotkey } from "is-hotkey";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
+import {CarbonBlock, RendererProps, useCarbon, useNodeActivated, useSelectionHalo} from "@emrgen/carbon-react";
+import {BlockContent, preventAndStop,Node} from "@emrgen/carbon-core";
+import {stop} from "@emrgen/carbon-core/src/utils/event";
 
 export const EquationComp = (props: RendererProps) => {
   const { node } = props;

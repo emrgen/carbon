@@ -1,8 +1,7 @@
 import { MutableRefObject, useCallback, useEffect, useState } from "react";
 import { useDndContext } from "./useDndContext";
-import { useNodeChange, Node, stop, preventAndStop } from "@emrgen/carbon-core";
-import { getEventPosition } from "../core/utils";
-import { DndEvent } from "../types";
+import {  Node, stop, preventAndStop } from "@emrgen/carbon-core";
+import {DndEvent, getEventPosition} from "@emrgen/carbon-dragon";
 
 export interface UseFastDraggableProps {
   node: Node;

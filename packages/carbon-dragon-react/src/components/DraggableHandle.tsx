@@ -14,14 +14,13 @@ import {
   Point,
   preventAndStop,
 } from "@emrgen/carbon-core";
-import { DndEvent } from "../types";
 import { HiOutlinePlus } from "react-icons/hi";
 import { PiDotsSixVerticalBold } from "react-icons/pi";
 import { useDndContext } from "../hooks";
-import { elementBound } from "../core/utils";
 import { isNestableNode } from "@emrgen/carbon-blocks";
 import { CustomEvent } from "@emrgen/carbon-core/src/core/CustomEvent";
 import {useCarbon, useNodeState} from "@emrgen/carbon-react";
+import {DndEvent, elementBound} from "@emrgen/carbon-dragon";
 
 export interface FastDragHandleProps {
   node: Node;

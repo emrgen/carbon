@@ -1,6 +1,5 @@
 import {RendererProps} from "@emrgen/carbon-core";
 import {useCallback, useRef} from "react";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -9,6 +8,7 @@ import {
   useCarbon,
   useSelectionHalo
 } from "@emrgen/carbon-react";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 export const CommentEditorComp = (props: RendererProps) => {
   const {node} = props;
