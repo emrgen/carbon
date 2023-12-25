@@ -98,7 +98,8 @@ export class Node extends EventEmitter implements IntoNodeId {
       return new Node(object)
     }
 
-    private constructor(object: NodeCreateProps) {
+    // don't use this constructor directly, use Node.create
+    constructor(object: NodeCreateProps) {
       super();
       const {
         scope = IDENTITY_SCOPE,

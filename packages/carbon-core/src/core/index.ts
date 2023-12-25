@@ -28,4 +28,5 @@ export * from './NodeMap'
 export * from './types'
 export * from './NodeFactory'
 export * from './NodeProps'
+export * from './Draft'
 

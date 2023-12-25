@@ -11,7 +11,7 @@ export type DraftFactory = (state: State) => Draft;
 export interface Draft {
   // once the producer is created it is bound to a state
   // the bounded state is passed to this method to produce a new state
-  produce(fn: (producer: Draft) => void): State;
+  produce(fn: (draft: Draft) => void): State;
 
   // private commit(): State;
   updateContent(nodeId: NodeId, content: NodeContent): void;
@@ -21,7 +21,8 @@ export interface Draft {
 
   change(nodeId: NodeId, type: NodeType): void;
 
-  updateProps(nodeId: NodeId, props: Partial<NodePropsJson>)
+  updateProps(nodeId: NodeId, props: Partial<NodePropsJson>): void
+
   updateSelection(selection: PointedSelection): void;
 
   get(id: NodeId): Optional<Node>;
