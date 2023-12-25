@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 let counter = 0;
 
-export class SchemaFactory {
+export class NodeFactory {
 	scope: Symbol;
 
 	static blockId() {
@@ -26,7 +26,7 @@ export class SchemaFactory {
 		this.scope = scope;
 	}
 
-	createNode(json: any, schema: Schema, nodeIdFactory: NodeIdFactory = SchemaFactory): Optional<Node> {
+	createNode(json: any, schema: Schema, nodeIdFactory: NodeIdFactory = NodeFactory): Optional<Node> {
 		const { scope } = this;
 		const { id, name, children = [], text } = json;
 		const type = schema.type(name);
@@ -53,9 +53,9 @@ export class SchemaFactory {
 		const clone = node.clone(deepCloneMap);
 		clone.forAll(n => {
 			if (n.name === 'text') {
-				n.id = NodeId.create(SchemaFactory.textId());
+				n.id = NodeId.create(NodeFactory.textId());
 			} else {
-				n.id = NodeId.create(SchemaFactory.blockId());
+				n.id = NodeId.create(NodeFactory.blockId());
 			}
 		});
 

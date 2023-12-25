@@ -53,7 +53,6 @@ export class IsolateChildren extends BeforePlugin {
   }
 
   preventAtContentStart(e) {
-    console.log('xxx', this.isAtStartOfChildren(e))
     if (this.isAtStartOfChildren(e)) {
       preventAndStopCtx(e)
     }
@@ -69,13 +68,10 @@ export class IsolateChildren extends BeforePlugin {
   isAtStartOfChildren(e) {
     const { app } = e;
     const isolating = this.isolatingNode(e);
-    console.log('isolating', isolating)
     if (!isolating) return false;
     const firstChild = isolating.child(1);
-    console.log('firstChild', firstChild)
     if (!firstChild) return false;
     const ret = app.selection.head.isAtStartOfNode(firstChild);
-    console.log('ret', ret)
     return ret;
   }
 

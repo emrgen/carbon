@@ -228,7 +228,7 @@ export class ChangeManager extends NodeTopicEmitter {
   // this must be called after the dom is updated
   private syncSelection() {
     try {
-      console.log('syncSelection', this.state.selectionOrigin, this.state.selection.toString()	);
+      // console.log('syncSelection', this.state.selectionOrigin, this.state.selection.toString()	);
       if (!this.app.enabled) {
         console.log("skipped: selection sync disabled");
         return;

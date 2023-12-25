@@ -4,7 +4,7 @@ import { Extension } from "../core/Extension";
 import { PluginManager } from '../core/PluginManager';
 import { RenderManager, Renderer } from "../core/Renderer";
 import { Schema } from '../core/Schema';
-import { SchemaFactory } from '../core/SchemaFactory';
+import { NodeFactory } from '../core/NodeFactory';
 import { NodeJSON } from "../core/types";
 import { CarbonDefaultNode } from "../renderer";
 import { Carbon } from '../core/Carbon';
@@ -25,7 +25,7 @@ export const createCarbon = (name: string, json: InitNodeJSON, extensions: Exten
 
 	const pm = new PluginManager(plugins);
 	const {specs} = pm;
-	const schema = new Schema(specs, new SchemaFactory(scope));
+	const schema = new Schema(specs, new NodeFactory(scope));
 	const content = schema.nodeFromJSON(json);
 
 
@@ -53,7 +53,7 @@ export const useCreateCarbonFromState = (state: State, extensions: Extension[] =
 
 	const pm = new PluginManager(plugins);
 	const {specs} = pm;
-	const schema = new Schema(specs, new SchemaFactory(state.scope));
+	const schema = new Schema(specs, new NodeFactory(state.scope));
 
 	return new Carbon(state.freeze(), schema, pm, renderer)
 }

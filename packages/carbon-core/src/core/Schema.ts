@@ -3,7 +3,7 @@ import { each } from 'lodash';
 import { ContentMatch } from './ContentMatch';
 import { Node } from './Node';
 import { MarkType, NodeType } from "./NodeType";
-import { SchemaFactory } from './SchemaFactory';
+import { NodeFactory } from './NodeFactory';
 import {NodeIdFactory, NodeJSON, NodeName} from "./types";
 import { Mark, MarkProps } from "./Mark";
 import {InitNodeJSON} from "@emrgen/carbon-core";
@@ -16,9 +16,9 @@ interface SchemaSpec {
 export class Schema {
 	nodes: Record<NodeName, NodeType>;
 	marks: Record<NodeName, MarkType>;
-	factory: SchemaFactory;
+	factory: NodeFactory;
 
-	constructor(spec: SchemaSpec, factory: SchemaFactory) {
+	constructor(spec: SchemaSpec, factory: NodeFactory) {
 		this.factory = factory;
 		this.nodes = NodeType.compile(spec.nodes, this);
 		this.marks = {}

@@ -140,7 +140,10 @@ export const CarbonChildren = (props: RendererProps) => {
     return <CarbonEmpty node={node}/>;
   }
 
-  const children = node.children.map((n) => <CarbonNode node={n} key={n.key}/>);
+  const children = node.children.map((n) => {
+    // console.log('CarbonChildren', n.name, n.id.toString());
+    return <CarbonNode node={n} key={n.key}/>
+  });
   return <>{children}</>;
 };
 
@@ -231,7 +234,10 @@ export const CarbonNodeChildren = (props: RendererProps) => {
     if (node.children.length < 2) return null;
     return node.children
       .slice(1)
-      .map((n) => <CarbonNode node={n} key={n.key}/>);
+      .map((n) => {
+        // console.log('CarbonChildren', n.name, n.id.toString());
+        return <CarbonNode node={n} key={n.key}/>
+      });
   }, [node])
 
   return <div data-type="children">{children}</div>;

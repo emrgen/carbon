@@ -325,10 +325,8 @@ export class IsolatingPlugin extends AfterPlugin {
   isAtStart(e) {
     const { app } = e;
     const isolating = this.isolatingNode(e);
-    console.log('isolating', isolating)
     if (!isolating) return false;
     const ret = app.selection.head.isAtStartOfNode(isolating);
-    console.log('isAtStart', ret)
     return ret;
   }
 

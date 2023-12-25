@@ -160,12 +160,12 @@ export class ImmutableDraft implements Draft {
       if (this.nodeMap.deleted(id)) {
         this.changes.remove(id);
       }
-      console.log('changed node id', id.toString())
+      // console.log('changed node id', id.toString())
       // remove the hidden nodes
       this.node(id, (node) => {
-        console.log('changed node id', id.toString(), isPassiveHidden(node))
+        // console.log('changed node id', id.toString(), isPassiveHidden(node))
         if (isPassiveHidden(node) || node.isCollapseHidden) {
-          console.log('removing hidden node', node.id.toString());
+          // console.log('removing hidden node', node.id.toString());
           this.changes.remove(id);
         }
       })
@@ -175,8 +175,7 @@ export class ImmutableDraft implements Draft {
     const queue = NodeDepthPriorityQueue.from(changed, "desc");
     const updateOrder = NodeDepthPriorityQueue.from(changed, "desc");
 
-
-    console.log('changed nodes',changed.map(n => `${n.name}: ${n.id.toString()}`));
+    // console.log('changed nodes',changed.map(n => `${n.name}: ${n.id.toString()}`));
 
     // collect all mutable nodes tree created in this draft
     const updatedNodes = this.nodeMap.current.clone();
@@ -306,14 +305,14 @@ export class ImmutableDraft implements Draft {
 
     if (type === "create") {
       node.forAll(n => {
-        console.log("inserting node", n.id.toString(), n.name);
+        // console.debug("inserting node", n.id.toString(), n.name);
         this.nodeMap.set(n.id, n);
       });
 
       // set empty placeholder of inserted node if needed
       if (node.isEmpty) {
         const placeholder = node.properties.get<string>(EmptyPlaceholderPath) ?? "";
-        console.log('empty placeholder', placeholder, node.id.toString())
+        // console.debug('empty placeholder', placeholder, node.id.toString())
         if (node.firstChild) {
           this.mutable(node.firstChild.id, child => {
             child.updateProps({
@@ -482,7 +481,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot update selection on a draft that is already committed");
     }
 
-    console.log("update selection", selection.isInline);
+    // console.log("update selection", selection.isInline);
     this.selection = selection;
 
     // update selection nodes
