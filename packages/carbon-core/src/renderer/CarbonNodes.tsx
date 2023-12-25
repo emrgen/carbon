@@ -4,8 +4,6 @@ import {useCarbon} from '../hooks/useCarbon';
 import {useNodeChange} from "../hooks/useNodeChange";
 import {LocalHtmlAttrPath, NamePath, TagPath} from "../core/NodeProps";
 import {Node} from "../core/Node";
-import {chunk} from "lodash";
-import hash from 'hash-it';
 
 export const JustEmpty = () => {
   return <span>&shy;</span>;

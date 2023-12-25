@@ -32,8 +32,9 @@ const listNumber = (node: Node, parent: Optional<Node>): number => {
   return -1;
 }
 
+
 export const NumberedListComp = (props: RendererProps) => {
-  const { node, parent } = props;
+  const { node, parent, custom } = props;
   const ref = useRef(null);
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
