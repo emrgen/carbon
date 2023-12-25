@@ -39,8 +39,8 @@ export class Image extends NodePlugin {
     }
   }
 
-  serialize(app: Carbon, node: Node): SerializedNode {
-    return `![](${node.properties.node.src})`;
-  }
+  // serialize(app: Carbon, node: Node): SerializedNode {
+  //   return `![](${node.properties.node.src})`;
+  // }
 
 }

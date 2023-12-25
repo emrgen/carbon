@@ -32,15 +32,15 @@ export class HistoryPlugin extends AfterPlugin {
   // }
 
   undo(transactions: Transaction[]): void {
-    const inverse = transactions.map(tr => tr.inverse());
-    this.redoStack.push(...inverse);
-    inverse.forEach(tr => tr.Dispatch());
+    // const inverse = transactions.map(tr => tr.inverse());
+    // this.redoStack.push(...inverse);
+    // inverse.forEach(tr => tr.Dispatch());
   }
 
   redo(transactions: Transaction[]): void {
-    const inverse = transactions.map(tr => tr.inverse());
-    this.undoStack.push(...inverse);
-    inverse.forEach(tr => tr.Dispatch());
+    // const inverse = transactions.map(tr => tr.inverse());
+    // this.undoStack.push(...inverse);
+    // inverse.forEach(tr => tr.Dispatch());
   }
 
   keydown(): Partial<EventHandler> {
@@ -54,11 +54,11 @@ export class HistoryPlugin extends AfterPlugin {
         // this.undo(undoTransactions);
 
         const tr = this.undoStack.pop()!
-        const inverse = tr.inverse()
-        console.log('tr', tr);
-        console.log('undo', inverse);
-        this.redoStack.push(inverse)
-        inverse.Dispatch();
+        // const inverse = tr.inverse()
+        // console.log('tr', tr);
+        // console.log('undo', inverse);
+        // this.redoStack.push(inverse)
+        // inverse.Dispatch();
 
         ctx.app.emit('history.undo', tr);
       },

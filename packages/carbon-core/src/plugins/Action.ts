@@ -26,7 +26,7 @@ declare module '@emrgen/carbon-core' {
       remove(at: Point, node: Node): Transaction,
       move(from: Point, to: Point, node: Node): Transaction,
       change(node: Node, to: NodeName): Transaction,
-      format(tr: Transaction, selection: Selection, mark: Mark | MarkSet): Transaction,
+      format(selection: Selection, mark: Mark | MarkSet): Transaction,
       update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
       dispatch(): void;
     }

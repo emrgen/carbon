@@ -23,7 +23,7 @@ export default function TimeTravel(props: TimeTravelProps) {
         }
       });
 
-      setCurrent(tree.current?.transaction.id ?? 0);
+      // setCurrent(tree.current?.transaction.id ?? 0);
       setTree(tree);
     }
 
@@ -46,9 +46,9 @@ export default function TimeTravel(props: TimeTravelProps) {
     });
 
     trs?.forEach(tr => {
-      const change = tr.filter(a => !(a instanceof SelectAction))
-      change.readOnly = true;
-      change.Dispatch();
+      // const change = tr.filter(a => !(a instanceof SelectAction))
+      // change.readOnly = true;
+      // change.Dispatch();
     });
 
     app.emit('timeTravel', tree);

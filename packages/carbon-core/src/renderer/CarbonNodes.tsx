@@ -1,8 +1,11 @@
-import {ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef} from "react";
+import {ForwardedRef, forwardRef, memo, ReactNode, useEffect, useImperativeHandle, useMemo, useRef} from "react";
 import {RendererProps} from "../core/Renderer";
 import {useCarbon} from '../hooks/useCarbon';
 import {useNodeChange} from "../hooks/useNodeChange";
 import {LocalHtmlAttrPath, NamePath, TagPath} from "../core/NodeProps";
+import {Node} from "../core/Node";
+import {chunk} from "lodash";
+import hash from 'hash-it';
 
 export const JustEmpty = () => {
   return <span>&shy;</span>;
@@ -60,7 +63,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   useEffect(() => {
     if (ref.current) {
       editor.store.register(node, ref.current);
-      ref.current.dataset.nodeId = node.id.toString();
+      // ref.current.dataset.nodeId = node.id.toString();
     } else {
       editor.store.delete(node);
     }
@@ -227,18 +230,28 @@ export const CarbonNodeContent = (props: RendererProps) => {
   );
 };
 
+interface ChildrenSegmentProps {
+  nodes: Node[];
+}
+
+
 // render children except first node
 export const CarbonNodeChildren = (props: RendererProps) => {
   const {node} = props;
   const children = useMemo(() => {
     if (node.children.length < 2) return null;
-    return node.children
+
+    return (
+      <div data-type="children">
+        {node.children
       .slice(1)
       .map((n) => {
-        // console.log('CarbonChildren', n.name, n.id.toString());
+        // console.debug('CarbonChildren', n.name, n.id.toString());
         return <CarbonNode node={n} key={n.key}/>
-      });
+      })}
+      </div>
+    )
   }, [node])
 
-  return <div data-type="children">{children}</div>;
+  return children
 };

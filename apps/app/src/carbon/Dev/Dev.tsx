@@ -35,51 +35,51 @@ import {noop} from "lodash";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
-
-    node("tabs", [
-      node("tab", [
-        // node("title", [text("tab 1")]),
-        section([title([text("tab 1 content")])]),
-      ], {
-        [ActivatedPath]: true,
-        [TitlePath]: "tab 11 some big title"
-      }),
-      node("tab", [
-        // node("title", [text("tab 2")]),
-        section([title([text("tab 2 content")])]),
-      ], {
-
-        [TitlePath]: "tab 12 medium"
-      }),
-      node("tab", [
-        // node("title", [text("tab 3")]),
-        section([title([text("tab 3 content")])]),
-      ], {
-        [TitlePath]: "tab 13"
-      }),
-    ]),
-
-    node("commentEditor", [
-      section([title([text('add a comment')])])
-    ]),
-
-    // node("blockContent"),
-
-    section([title([text("section 1")])]),
-
-    node("code", [
-      node("codeLine",[ title([text("function foo() {")])]),
-      node("codeLine", [title([text("  console.log('hello world')")])]),
-      node("codeLine",[ title([text("}")])])
-    ]),
-
-    section([title([text("section 1")])]),
-
-    node("code", [
-      node("codeLine",[ title([text("function foo() {")])]),
-      node("codeLine", [title([text("  console.log('hello world')")])]),
-      node("codeLine",[ title([text("}")])])
-    ]),
+    //
+    // node("tabs", [
+    //   node("tab", [
+    //     // node("title", [text("tab 1")]),
+    //     section([title([text("tab 1 content")])]),
+    //   ], {
+    //     [ActivatedPath]: true,
+    //     [TitlePath]: "tab 11 some big title"
+    //   }),
+    //   node("tab", [
+    //     // node("title", [text("tab 2")]),
+    //     section([title([text("tab 2 content")])]),
+    //   ], {
+    //
+    //     [TitlePath]: "tab 12 medium"
+    //   }),
+    //   node("tab", [
+    //     // node("title", [text("tab 3")]),
+    //     section([title([text("tab 3 content")])]),
+    //   ], {
+    //     [TitlePath]: "tab 13"
+    //   }),
+    // ]),
+    //
+    // node("commentEditor", [
+    //   section([title([text('add a comment')])])
+    // ]),
+    //
+    // // node("blockContent"),
+    //
+    // section([title([text("section 1")])]),
+    //
+    // node("code", [
+    //   node("codeLine",[ title([text("function foo() {")])]),
+    //   node("codeLine", [title([text("  console.log('hello world')")])]),
+    //   node("codeLine",[ title([text("}")])])
+    // ]),
+    //
+    // section([title([text("section 1")])]),
+    //
+    // node("code", [
+    //   node("codeLine",[ title([text("function foo() {")])]),
+    //   node("codeLine", [title([text("  console.log('hello world')")])]),
+    //   node("codeLine",[ title([text("}")])])
+    // ]),
 
 
 
@@ -175,14 +175,14 @@ const extensions = [
   // extensions1,
 ];
 
-// console.log = noop;
+console.log = noop;
 console.info = noop;
 console.debug = noop;
 console.warn = noop;
-// console.error = noop;
-// console.group = noop;
-// console.groupCollapsed = noop;
-// console.groupEnd = noop;
+console.error = noop;
+console.group = noop;
+console.groupCollapsed = noop;
+console.groupEnd = noop;
 console.time = noop;
 
 export default function Dev() {

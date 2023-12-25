@@ -65,7 +65,20 @@ export class DocPlugin extends CarbonPlugin {
 					console.log('[Enter] doc');
 					preventAndStopCtx(ctx);
 					cmd.collapsible.split(selection).Dispatch();
-					return
+
+          // const section = app.schema.type(node.type.splitName).default();
+          // if (!section) {
+          //   throw Error("failed to create default node for type" + node.name)
+          // }
+          //
+          // const focusPoint = Pin.toStartOf(node.firstChild!);
+          // const after = PinnedSelection.fromPin(focusPoint!);
+          // const at = Point.toAfter(node.firstChild!.id);
+          // ctx.cmd
+          //   .Insert(at, section!)
+          //   .Select(after)
+          //   .dispatch();
+					// return
 				}
 			}
 		}

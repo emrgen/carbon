@@ -88,14 +88,14 @@ export const EquationComp = (props: RendererProps) => {
       stop(e);
       // avoid selection if block is already selected
       // if (app.blockSelection && app.blockSelection.has(node.id)) return;
-      app.tr
-        .selectNodes([node.id])
-        .Update(node.id, {
-          node: {
-            isEditing: true,
-          },
-        })
-        .Dispatch();
+      // app.tr
+      //   .selectNodes([node.id])
+      //   .Update(node.id, {
+      //     node: {
+      //       isEditing: true,
+      //     },
+      //   })
+      //   .Dispatch();
     },
     [app.tr, node.id]
   );
@@ -126,7 +126,7 @@ export const EquationComp = (props: RendererProps) => {
     // app.tr
     // .setContent(node.id, BlockContent.create([title!]))
     // .forceRender([node.id]).Dispatch();
-    app.tr.activateNodes([node.id]).Dispatch();
+    // app.tr.activateNodes([node.id]).Dispatch();
   };
 
   const updatePopover = useMemo(() => {

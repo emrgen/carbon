@@ -9,8 +9,7 @@ import { RectSelectAreaId } from "../constants";
 import { throttle } from "lodash";
 import { CarbonDragHandleId } from "./DraggableHandle";
 
-export function RectSelectContext(props: RendererProps) {
-  const { node } = props;
+export function RectSelectContext(props) {
   const app = useCarbon();
   const [rectSelector] = useState(() => new RectSelect(app));
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({

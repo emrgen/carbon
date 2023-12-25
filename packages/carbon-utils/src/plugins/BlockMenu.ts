@@ -29,10 +29,10 @@ export class BlockMenuPlugin extends BeforePlugin {
   init(bus:PluginEmitter, state:PluginState): void {
     super.init(bus, state);
 
-    this.setState({
-      visible: false,
-      checked: new Map<string, boolean>(),
-    });
+    // this.setState({
+    //   visible: false,
+    //   checked: new Map<string, boolean>(),
+    // });
   }
 
   keydown(): Partial<EventHandler> {
@@ -108,7 +108,7 @@ export class BlockMenuPlugin extends BeforePlugin {
     }
 
     console.log('show menu');
-    this.bus.emit(BlockMenuCmd.show, node, el);
+    this.bus.emit(node, BlockMenuCmd.show, el);
   }
 
   onHide(app: Carbon, node: Node, isChecked = true) {

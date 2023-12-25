@@ -28,8 +28,8 @@ export function MediaView(props: MediaViewProps) {
   const app = useCarbon();
   const ref = useRef<HTMLDivElement>(null);
   const [initialSize, setInitialSize] = useState({ width: 0, height: 0 });
-  const [width, setWidth] = useState(node.properties.node.width ?? 0);
-  const [height, setHeight] = useState(node.properties.node.height ?? 0);
+  const [width, setWidth] = useState( 0);
+  const [height, setHeight] = useState( 0);
   const [documentWidth, setDocumentWidth] = useState(0);
 
   const [opacity, setOpacity] = React.useState(0);
@@ -151,9 +151,9 @@ export function MediaView(props: MediaViewProps) {
     <Flex
       // top={0}
       position={"relative"}
-      height={height ? height + "px" : node.properties.node.height ? node.properties.node.height + "px" : "60px"}
+      // height={height ? height + "px" : node.properties.node.height ? node.properties.node.height + "px" : "60px"}
       width={width ? width + "px" : "full"}
-      justifyContent={node.properties.node.justifyContent ?? "center"}
+      // justifyContent={node.properties.node.justifyContent ?? "center"}
       transition={"width 0.3s, height 0.3s"}
       // bg="red"
     >

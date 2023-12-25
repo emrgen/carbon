@@ -46,7 +46,7 @@ import { PageTreeComp } from "./renderers/PageTree";
 import { PageTreeItemComp } from "./renderers/PageTreeItem";
 import {TabGroup} from "./plugins/Tab";
 import {TabComp, TabsComp} from "./renderers/TabComp";
-import { VideoComp } from "./renderers/Video";
+// import { VideoComp } from "./renderers/Video";
 import { Video } from "./plugins/Video";
 import { HeaderComp } from "./renderers/Header";
 import FrameComp from "./renderers/Frame";
@@ -66,19 +66,19 @@ export const blockPresets: Extension = {
 		new NumberedList(),
 		new ChangeName(),
 		new Equation(),
-		new HStack(),
-		new Stack(),
-		new Image(),
-		new Video(),
+		// new HStack(),
+		// new Stack(),
+		// new Image(),
+		// new Video(),
 		new Todo(),
 		new Quote(),
 		new Callout(),
 		new DocLink(),
-		new Table(),
+		// new Table(),
 		new CarbonRoot(),
 		new PageTree(),
 		new BlockContent(),
-		new TabGroup(),
+		// new TabGroup(),
 		new BlockContent(),
 		new Frame(),
 		new Insert(),
@@ -100,7 +100,7 @@ export const blockPresets: Extension = {
 		Renderer.create('hstack', HStackComp),
 		Renderer.create('stack', HStackComp),
 		Renderer.create('image', ImageComp),
-		Renderer.create('video', VideoComp),
+		// Renderer.create('video', VideoComp),
 		Renderer.create('todo', TodoComp),
 		Renderer.create('quote', QuoteComp),
 		Renderer.create('callout', CalloutComp),

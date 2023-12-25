@@ -73,8 +73,8 @@ export class TransactionTree {
 
     // create the patch by reversing the backward path and appending the forward path
     const patch: TimeTravelPatch = [];
-    backward.forEach(tr => patch.push(tr.inverse()));
-    forward.reverse().forEach(tr => patch.push(tr));
+    // backward.forEach(tr => patch.push(tr.inverse()));
+    // forward.reverse().forEach(tr => patch.push(tr));
 
     if (to) {
       this.current = to;
@@ -86,13 +86,13 @@ export class TransactionTree {
   add(transaction: Transaction) {
     if (this.current) {
       const node = new TransactionNode(transaction, this.current.depth + 1, this.current);
-      this.trMap.set(transaction.id, node);
+      // this.trMap.set(transaction.id, node);
 
       this.current.children.push(node);
       this.current = node;
     } else {
       this.root = new TransactionNode(transaction, 0, null);
-      this.trMap.set(transaction.id, this.root);
+      // this.trMap.set(transaction.id, this.root);
 
       this.current = this.root;
     }
@@ -141,9 +141,9 @@ export class TransactionNode {
 
   toJSON(): any {
     return {
-      [this.transaction.id.toString()]: this.children.map(c => c.toJSON()).reduce((acc, val) => {
-        return { ...acc, ...val }
-      }, {})
+      // [this.transaction.id.toString()]: this.children.map(c => c.toJSON()).reduce((acc, val) => {
+      //   return { ...acc, ...val }
+      // }, {})
     }
   }
 }

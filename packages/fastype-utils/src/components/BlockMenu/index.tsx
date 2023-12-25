@@ -77,11 +77,11 @@ export function BlockMenu(props: BlockMenuProps) {
 
       setPosition({ left, top: top + height + 4 });
       setShow(true);
-      const { checked } = plugin?.state;
-      checked.set(node.id.toString(), false);
-      plugin.setState({ visible: true, checked });
-      setSearchText(node.textContent.slice(1));
-      setNode(node.parent);
+      // const { checked } = plugin?.state;
+      // checked.set(node.id.toString(), false);
+      // plugin.setState({ visible: true, checked });
+      // setSearchText(node.textContent.slice(1));
+      // setNode(node.parent);
     },
     [plugin]
   );
@@ -107,7 +107,7 @@ export function BlockMenu(props: BlockMenuProps) {
       });
       if (type.isAtom && type.isBlock) {
         app.parkCursor();
-        tr.selectNodes(node.id);
+        // tr.selectNodes(node.id);
       } else if (!type.isAtom && node.child(0)?.find((n) => n.hasFocusable)) {
         tr.Select(PinnedSelection.fromPin(Pin.future(node.child(0)!, 0)!)!);
       }

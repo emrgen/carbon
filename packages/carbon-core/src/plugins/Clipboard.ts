@@ -22,7 +22,7 @@ export class ClipboardPlugin extends AfterPlugin {
           // console.log('Serialized =>', serialized);
           // event.clipboardData.setData('text/plain', serialized);
 
-          app.state.changes.clipboard = slice;
+          // app.state.changes.clipboard = slice;
         }
         // delete the selection
         cmd.keyboard.backspace(ctx)?.Dispatch();
@@ -48,12 +48,12 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStop(event);
         const { selection } = app
 
-        if (!app.state.changes.clipboard.size === 0) {
-          const slice = app.state.changes.clipboard;
-          app.cmd.transform.paste(selection, slice)?.Dispatch()
-        } else {
-
-        }
+        // if (!app.state.changes.clipboard.size === 0) {
+        //   const slice = app.state.changes.clipboard;
+        //   app.cmd.transform.paste(selection, slice)?.Dispatch()
+        // } else {
+        //
+        // }
         console.log('paste', app.runtime.clipboard.root);
       }
     };

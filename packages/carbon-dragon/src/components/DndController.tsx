@@ -212,8 +212,8 @@ export function DndController() {
           }}
         />
       )}
-
     </div>
+
       {/* {isDragging && (
         <div
           className={"carbon-drag-overlay " + draggedNode?.name ?? ""}

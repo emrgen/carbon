@@ -500,6 +500,9 @@ importers:
       fastpriorityqueue:
         specifier: ^0.7.4
         version: 0.7.4
+      hash-it:
+        specifier: ^6.0.0
+        version: 6.0.0
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
@@ -5814,6 +5817,10 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       has-symbols: 1.0.3
+    dev: false
+
+  /hash-it@6.0.0:
+    resolution: {integrity: sha512-KHzmSFx1KwyMPw0kXeeUD752q/Kfbzhy6dAZrjXV9kAIXGqzGvv8vhkUqj+2MGZldTo0IBpw6v7iWE7uxsvH0w==}
     dev: false
 
   /hasown@2.0.0:

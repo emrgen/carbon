@@ -70,4 +70,4 @@ export class Fragment {
 	}
 }
 
-window.Fragment = Fragment;
+// window.Fragment = Fragment;

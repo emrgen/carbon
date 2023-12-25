@@ -21,9 +21,9 @@ export class SheetRenderer {
     this.rowHeaderGfx = new Graphics();
     this.gridGfx = new Graphics();
 
-    app.stage.addChild(this.gridGfx);
-    app.stage.addChild(this.columnHeaderGfx);
-    app.stage.addChild(this.rowHeaderGfx);
+    // app.stage.addChild(this.gridGfx);
+    // app.stage.addChild(this.columnHeaderGfx);
+    // app.stage.addChild(this.rowHeaderGfx);
   }
 
   render(data: SheetData, position: SheetPosition, size: SheetSize) {
@@ -129,7 +129,7 @@ export class SheetRenderer {
       const bound = text.getBounds()
       text.x = lineLeft + (cellWidth / 2) - (bound.width / 2)
       text.y = (cellHeight / 2) - (bound.height / 2)
-      this.columnHeaderGfx.addChild(text);
+      // this.columnHeaderGfx.addChild(text);
 
       lineLeft += cellWidth
     }
@@ -155,7 +155,7 @@ export class SheetRenderer {
       const bound = text.getBounds()
       text.x = (50 / 2) - (bound.width / 2)
       text.y = lineTop + (cellHeight / 2) - (bound.height / 2)
-      this.rowHeaderGfx.addChild(text);
+      // this.rowHeaderGfx.addChild(text);
 
       lineTop += cellHeight
     }
