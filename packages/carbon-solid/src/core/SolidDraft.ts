@@ -8,9 +8,6 @@ const draftFactory: Core.DraftFactory = (state: State) => {
 }
 
 export class SolidDraft implements Core.Draft {
-  static create<T extends SolidDraft>(this: new () => T): T {
-      return new this();
-  }
 
   constructor(private state: State) {
 

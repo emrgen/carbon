@@ -7,7 +7,7 @@ import {Optional} from "@emrgen/types";
 export type DraftFactory = (state: State) => Draft;
 
 // producer is a class that is responsible for producing a state after a transaction
-// it is inject into transaction/actions and is used to update the state
+// it is injected into transaction/actions and is used to update the state
 export interface Draft {
   // once the producer is created it is bound to a state
   // the bounded state is passed to this method to produce a new state
