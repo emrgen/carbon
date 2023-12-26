@@ -1,11 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import {
-  InlineContent,
-  RendererProps,
-  Node,
-  BlockContent,
-} from "@emrgen/carbon-core";
-import {CarbonBlock, CarbonChildren} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonChildren, RendererProps} from "@emrgen/carbon-react";
 
 export default function TitleComp(props: RendererProps) {
   const { node, custom } = props;

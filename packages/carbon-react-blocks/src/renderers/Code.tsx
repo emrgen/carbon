@@ -1,6 +1,5 @@
 import {useRef} from "react";
 import {CarbonBlock, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
-import {BlockContent,Node} from "@emrgen/carbon-core";
 import {stop} from "@emrgen/carbon-core/src/utils/event";
 
 export const CodeComp = (props: RendererProps) => {
@@ -28,7 +27,7 @@ export const CodeComp = (props: RendererProps) => {
     const text = app.schema.text(value)!;
     app.enable(() => {
       app.tr
-        .SetContent(node.child(0)?.id!, BlockContent.create([text]))
+        .SetContent(node.child(0)?.id!, [text])
         .Dispatch();
     });
   };

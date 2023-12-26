@@ -1,7 +1,5 @@
 import {
   BeforePlugin,
-  BlockContent,
-  Carbon,
   CarbonPlugin,
   EventContext,
   EventHandler,
@@ -168,7 +166,7 @@ export class Collapsible extends NodePlugin {
       const after = PinnedSelection.fromPin(focusPoint!);
 
       if (title.parent?.isDocument) {
-        const sectionTitle = app.schema.cloneWithId(title);
+        const sectionTitle = app.schema.clone(title);
 
         section.remove(section.child(0)!);
         section.insert(sectionTitle, 0)
@@ -177,7 +175,7 @@ export class Collapsible extends NodePlugin {
         const focusPoint = Pin.toStartOf(section!);
         const after = PinnedSelection.fromPin(focusPoint!);
         tr
-          .SetContent(title.id, BlockContent.create([]))
+          .SetContent(title.id, [])
           .Add(insertAfterAction(title, section!))
           .Select(after)
         return tr;
@@ -211,7 +209,7 @@ export class Collapsible extends NodePlugin {
       children: [
         {
           name: 'title',
-          children: rightContent.children.map(c => c.toJSON())
+          children: rightContent.map(c => c.toJSON())
         }
       ],
     }

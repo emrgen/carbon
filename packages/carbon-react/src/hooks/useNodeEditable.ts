@@ -5,7 +5,7 @@ export const useNodeEditable = (props: RendererProps) => {
   const { node } = props;
 
   const editable = useMemo(() => {
-    return node.properties.get(EditablePath);
+    return node.props.get(EditablePath);
   },[node])
 
   const attributes = useMemo(() => {

@@ -151,9 +151,9 @@ export function MediaView(props: MediaViewProps) {
     <Flex
       // top={0}
       position={"relative"}
-      // height={height ? height + "px" : node.properties.node.height ? node.properties.node.height + "px" : "60px"}
+      // height={height ? height + "px" : node.props.node.height ? node.props.node.height + "px" : "60px"}
       width={width ? width + "px" : "full"}
-      // justifyContent={node.properties.node.justifyContent ?? "center"}
+      // justifyContent={node.props.node.justifyContent ?? "center"}
       transition={"width 0.3s, height 0.3s"}
       // bg="red"
     >

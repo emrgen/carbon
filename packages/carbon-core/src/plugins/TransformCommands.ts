@@ -4,11 +4,9 @@ import { Optional } from "@emrgen/types";
 import {
   ActionOrigin,
   BeforePlugin,
-  BlockContent,
   Carbon,
   CarbonAction,
   Format, Fragment,
-  InlineContent,
   InsertPos, isIsolatedNodes,
   MoveNodeAction,
   NodeIdSet,
@@ -179,7 +177,7 @@ export class TransformCommands extends BeforePlugin {
         return tr
       }
 
-      tr.Add(SetContentAction.create(title.id, BlockContent.create([textNode])));
+      tr.Add(SetContentAction.create(title.id, [textNode]));
       tr.Select(after);
       return tr;
     }
@@ -292,7 +290,7 @@ export class TransformCommands extends BeforePlugin {
         const textNode = app.schema.text(textContent);
         const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
         tr
-          .SetContent(start.node.id, BlockContent.create([textNode!]))
+          .SetContent(start.node.id, [textNode!])
           .Select(after);
 
         return tr;
@@ -301,7 +299,7 @@ export class TransformCommands extends BeforePlugin {
         const startTitleTextNode = app.schema.text(startTitleText)!;
 
         tr
-          .SetContent(start.node.id, BlockContent.create([startTitleTextNode!]))
+          .SetContent(start.node.id, [startTitleTextNode!])
 
         let beforeNode: Optional<Node> = start.node;
         let afterNode: Optional<Node> = startTitle;
@@ -331,7 +329,7 @@ export class TransformCommands extends BeforePlugin {
         if (start.node.parent?.isCollapsed) {
           tr.Update(start.node.parent.id, { node: { collapsed: false } });
         }
-        tr.SetContent(endTitle.id, BlockContent.create([endTitleTextNode!]),)
+        tr.SetContent(endTitle.id, [endTitleTextNode!])
         const after = PinnedSelection.fromPin(Pin.future(endTitle, endTitle.textContent.length)!);
         tr.Select(after, ActionOrigin.UserInput);
         console.log(endTitleText, after.toString());
@@ -405,7 +403,7 @@ export class TransformCommands extends BeforePlugin {
     const after = PointedSelection.fromPoint(point);
 
     node?.nextSiblings.forEach(n => {
-      tr.Update(n.id, { [RenderPath]: 1 + (n.properties.get<number>(RenderPath) ?? 0) });
+      tr.Update(n.id, { [RenderPath]: 1 + (n.props.get<number>(RenderPath) ?? 0) });
     })
 
     tr
@@ -459,7 +457,7 @@ export class TransformCommands extends BeforePlugin {
           throw Error('failed to create block');
         }
 
-        tr.SetContent(textBlock.id, BlockContent.create([]));
+        tr.SetContent(textBlock.id, []);
         tr.Add(removeNodesActions(commonNode.children.slice(1)));
         tr.Insert(at, block);
         tr.Select(PinnedSelection.fromPin(Pin.toStartOf(block)!));
@@ -522,14 +520,14 @@ export class TransformCommands extends BeforePlugin {
 
   private splitByRangeWithinTextBlock(tr: Transaction, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const {app} = tr;
-    const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
+    const [leftNodes, _, rightNodes] = splitTextBlock(start, end, app);
 
     const json = {
       name: splitBlock.name,
       children: [
         {
           name: 'title',
-          children: rightContent.children.map(c => c.toJSON())
+          children: leftNodes.map(c => c.toJSON())
         }
       ]
     }
@@ -544,7 +542,7 @@ export class TransformCommands extends BeforePlugin {
     const after = PinnedSelection.fromPin(focusPoint!);
 
     app.tr
-      .SetContent(start.node.id, leftContent)
+      .SetContent(start.node.id, leftNodes)
       .Insert(at, section!)
       .Select(after)
       .Dispatch();
@@ -834,10 +832,10 @@ export class TransformCommands extends BeforePlugin {
         // leaf node is reached
         // console.log('last node', splittedNode.id.key);
         // console.log(pin.node.name, );
-        const [leftContent, _, rightContent] = splitTextBlock(pin, pin, app);
-        console.log(pin.node.name, leftContent, rightContent);
-        setContentCommands.push(SetContentAction.create(pin.node.id, leftContent));
-        setContentCommands.push(SetContentAction.create(parentBlock.id, rightContent));
+        const [leftNodes, _, rightNodes] = splitTextBlock(pin, pin, app);
+        console.log(pin.node.name, leftNodes, rightNodes);
+        setContentCommands.push(SetContentAction.create(pin.node.id, leftNodes));
+        setContentCommands.push(SetContentAction.create(parentBlock.id, rightNodes));
       }
 
       // parent must have at least one child
@@ -1038,7 +1036,7 @@ export class TransformCommands extends BeforePlugin {
           throw Error('failed to create block');
         }
 
-        tr.SetContent(textBlock.id, BlockContent.create([]));
+        tr.SetContent(textBlock.id, []);
         tr.Add(removeNodesActions(commonNode.children.slice(1)));
         tr.Select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
 
@@ -1147,7 +1145,7 @@ export class TransformCommands extends BeforePlugin {
         if (startContainer?.isTextContainer && endContainer?.isTextContainer) {
           const textContent = startTextBlock.textContent.slice(0, start.offset) + endTextBlock.textContent.slice(end.offset);
           const textNode = app.schema.text(textContent)!;
-          insertCommands.push(SetContentAction.withContent(startContainer.id, BlockContent.create([textNode]), startContainer.content));
+          insertCommands.push(SetContentAction.create(startContainer.id, [textNode]));
           contentUpdated.add(startContainer.id);
           console.log('merge start and end block');
         } else {
@@ -1319,7 +1317,7 @@ export class TransformCommands extends BeforePlugin {
         if (sdown?.node.eq(edown?.node)) {
           const { node } = sdown;
           const textContent = node.textContent.slice(0, start.offset) + node.textContent.slice(end.offset);
-          actions.push(SetContentAction.create(node.id, InlineContent.create(textContent)));
+          actions.push(SetContentAction.create(node.id,textContent));
           return
         }
 
@@ -1327,8 +1325,8 @@ export class TransformCommands extends BeforePlugin {
         // if (textContent === '') {
         //   actions.push(SetContentAction.create(node.id, BlockContent.empty()))
         // } else {
-        const textNode = app.schema.text(textContent);
-        actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)));
+        const textNode = app.schema.text(textContent)!;
+        actions.push(SetContentAction.create(node.id, [textNode]));
         // }
       }
     });
@@ -1592,7 +1590,7 @@ export class TransformCommands extends BeforePlugin {
           console.log('0000000000000000000000000000')
           const textContent = prev.textContent + next.textContent;
           const textNode = app.schema.text(textContent)!;
-          insertActions.push(SetContentAction.create(prev.id, BlockContent.create([textNode])));
+          insertActions.push(SetContentAction.create(prev.id, [textNode]));
         }
 
         if (prev.isEmpty && !next.isEmpty) {

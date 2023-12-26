@@ -47,8 +47,8 @@ export const Callout = (props: RendererProps) => {
   };
 
   const emoji = useMemo(() => {
-    return node.properties.get<string>(EmojiPath) ?? "26a0-fe0f";
-  },[node.properties])
+    return node.props.get<string>(EmojiPath) ?? "26a0-fe0f";
+  },[node.props])
 
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>

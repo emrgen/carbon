@@ -1,25 +1,28 @@
 import {
   ActionOrigin,
+  Draft as CoreDraft,
+  EmptyPlaceholderPath,
   FocusedPlaceholderPath,
   isPassiveHidden,
+  Node,
+  NodeId,
   NodeIdSet,
-  PinnedSelection,
-  SelectedPath
+  NodePropsJson,
+  NodeType,
+  PlaceholderPath,
+  Point,
+  PointAt,
+  PointedSelection,
+  State as CoreState,
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
+import {Optional} from "@emrgen/types";
+import {ImmutableState} from "./ImmutableState";
+import {identity, isArray} from "lodash";
 import FastPriorityQueue from "fastpriorityqueue";
-import { identity } from "lodash";
-import { Node } from "./Node";
-import { NodeContent } from "./NodeContent";
-import { NodeId } from "./NodeId";
-import { NodeMap } from "./NodeMap";
-import { EmptyPlaceholderPath, NodePropsJson, PlaceholderPath } from "./NodeProps";
-import { NodeType } from "./NodeType";
-import { Point, PointAt } from "./Point";
-import { PointedSelection } from "./PointedSelection";
-import { State } from "./State";
-import {Draft} from "./Draft";
-import {StateScope} from "./StateScope";
+import {ImmutableNodeMap} from "./ImmutableNodeMap";
+import {Scope} from "./Scope";
+import {ImmutableNodeContent} from "./ImmutableNodeContent";
+import {ImmutableNode} from "./ImmutableNode";
 
 enum UpdateDependent {
   None = 0,
@@ -64,10 +67,10 @@ class NodeDepthPriorityQueue {
 
 // NOTE: it is internal to the state and actions. it should not be used outside of it.
 //draft of a state is used to prepare a new state before commit
-export class ImmutableDraft implements Draft {
+export class ImmutableDraft implements CoreDraft {
   origin: ActionOrigin;
-  state: State;
-  nodeMap: NodeMap;
+  state: ImmutableState;
+  nodeMap: ImmutableNodeMap;
   selection: PointedSelection;
   changes: NodeIdSet; // tracks changed nodes
   contentChanges: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
@@ -75,10 +78,10 @@ export class ImmutableDraft implements Draft {
 
   private drafting = true;
 
-  constructor(state: State, origin: ActionOrigin) {
+  constructor(state: ImmutableState, origin: ActionOrigin) {
     this.origin = origin;
     this.state = state;
-    this.nodeMap = NodeMap.from(state.nodeMap);
+    this.nodeMap = ImmutableNodeMap.from(state.nodeMap);
     this.changes = new NodeIdSet();
     this.selection = state.selection.unpin(origin);
   }
@@ -91,19 +94,19 @@ export class ImmutableDraft implements Draft {
     return this.nodeMap.parent(from);
   }
 
-  produce(fn: (producer: Draft) => void): State {
+  produce(fn: (producer: ImmutableDraft) => void): CoreState {
     // const draft = new ImmutableDraft(this, origin);
     const {scope} = this.state;
     try {
-      StateScope.set(scope, this.nodeMap)
+      Scope.set(scope, this.nodeMap)
       fn(this);
       const state = this.commit(3);
-      StateScope.set(scope, state.nodeMap)
+      Scope.set(scope, state.nodeMap)
 
       this.dispose();
       return state;
     } catch (e) {
-      StateScope.set(scope, this.state.nodeMap);
+      Scope.set(scope, this.state.nodeMap);
       console.error(e);
       this.dispose();
       return this.state;
@@ -111,7 +114,7 @@ export class ImmutableDraft implements Draft {
   }
 
   // turn the draft into a new state
-  commit(depth: number): State {
+  commit(depth: number): ImmutableState {
     this.prepare();
 
     const { state, changes, selection } = this;
@@ -133,7 +136,7 @@ export class ImmutableDraft implements Draft {
     // nodeMap.freeze();
     after.freeze();
 
-    const newState = new State({
+    const newState = new ImmutableState({
       previous: state.clone(depth - 1),
       scope: state.scope,
       content,
@@ -152,6 +155,8 @@ export class ImmutableDraft implements Draft {
     if (!this.drafting) {
       throw new Error("Cannot prepare a draft that is already committed");
     }
+
+    const {scope} = this.state;
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
@@ -209,32 +214,40 @@ export class ImmutableDraft implements Draft {
         this.nodeMap.set(node.id, clone);
       } else {
         const mutable = this.nodeMap.get(node.id)!;
-        mutable.content = mutable.content.clone(n => {
+        const data = mutable.unwrap();
+        data.children = data.children.map(n => {
           if (this.nodeMap.deleted(n.id)) {
             return null;
           } else {
             return this.nodeMap.get(n.id);
           }
-        })
+        }).filter(identity) as Node[];
+
+        const content = new ImmutableNodeContent(scope, data);
+        const clone = ImmutableNode.create(scope, content);
+        clone.renderVersion = mutable.renderVersion;
+        clone.contentVersion = mutable.contentVersion;
+
+        this.nodeMap.set(node.id, clone);
       }
     }
 
     // in this scope all nodes are mutable
-    const dirtyContent = NodeMap.empty();
+    const dirtyContent = ImmutableNodeMap.empty();
     this.contentChanges.toArray().map(id => this.nodeMap.get(id)).map(n => n).forEach((node) => {
       node!.chain.forEach(n => {
         dirtyContent.set(n.id, n);
       });
     });
 
-    dirtyContent.forEach((id, node) => {
+    dirtyContent.forEach((node) => {
       node.contentVersion += 1;
     });
 
     return this;
   }
 
-  updateContent(nodeId: NodeId, content: NodeContent) {
+  updateContent(nodeId: NodeId, content: Node[] | string) {
     if (!this.drafting) {
       throw new Error("Cannot update content on a draft that is already committed");
     }
@@ -249,13 +262,14 @@ export class ImmutableDraft implements Draft {
         this.delete(child.id);
       })
 
-      if (node.isTextContainer) {
+      if (node.isTextContainer && isArray(content)) {
         node.updateProps({
-          [PlaceholderPath]: content.isEmpty ? this.nodeMap.parent(node)?.properties.get<string>(EmptyPlaceholderPath) ?? "" : ""
+          [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ?? "" : ""
         });
-      } else if (node.name === "text") {
+      } else if (node.isText) {
 
       }
+
       // console.log(content);
       node.updateContent(content);
       console.log("updated content", node.textContent);
@@ -272,7 +286,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot move node to a draft that is already committed");
     }
 
-    if (node.frozen) {
+    if (Object.isFrozen(node)) {
       throw Error("cannot insert immutable node, it must be at least mutable at top level");
     }
 
@@ -303,7 +317,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
 
-    if (node.frozen) {
+    if (Object.isFrozen(node)) {
       throw Error("cannot insert immutable node, it must be at least mutable at top level");
     }
 
@@ -315,7 +329,7 @@ export class ImmutableDraft implements Draft {
 
       // set empty placeholder of inserted node if needed
       if (node.isEmpty) {
-        const placeholder = node.properties.get<string>(EmptyPlaceholderPath) ?? "";
+        const placeholder = node.props.get<string>(EmptyPlaceholderPath) ?? "";
         // console.debug('empty placeholder', placeholder, node.id.toString())
         if (node.firstChild) {
           this.mutable(node.firstChild.id, child => {
@@ -410,7 +424,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot remove node from a draft that is already committed");
     }
 
-    if (node.frozen) {
+    if (Object.isFrozen(node)) {
       throw Error("cannot remove immutable node, it must be at least mutable at top level");
     }
 
@@ -432,7 +446,7 @@ export class ImmutableDraft implements Draft {
 
       // if parent title is empty, set placeholder from parent
       if (parent.isTextContainer && parent.isEmpty) {
-        const placeholder = this.nodeMap.parent(parent)?.properties.get<string>(EmptyPlaceholderPath) ?? "";
+        const placeholder = this.nodeMap.parent(parent)?.props.get<string>(EmptyPlaceholderPath) ?? "";
         parent.updateProps({
           [PlaceholderPath]: placeholder
         });
@@ -511,7 +525,7 @@ export class ImmutableDraft implements Draft {
       //   // find new block selection
       //   now.diff(old).forEach(id => {
       //     this.mutable(id, node => {
-      //       console.log('selected node', node.name, node.id.toString(), node.properties.toKV());
+      //       console.log('selected node', node.name, node.id.toString(), node.props.toKV());
       //       node.updateProps({
       //         [SelectedPath]: true
       //       });
@@ -533,7 +547,7 @@ export class ImmutableDraft implements Draft {
         if (node.isEmpty) {
           this.mutable(head.nodeId, node => {
             const parent = this.nodeMap.parent(node);
-            const emptyPlaceholder = parent?.properties.get<string>(EmptyPlaceholderPath) ?? "";
+            const emptyPlaceholder = parent?.props.get<string>(EmptyPlaceholderPath) ?? "";
             if (!parent) return;
             node.updateProps({
               [PlaceholderPath]: emptyPlaceholder,
@@ -555,7 +569,7 @@ export class ImmutableDraft implements Draft {
       if (node.isEmpty) {
         this.mutable(head.nodeId, node => {
           const parent = this.nodeMap.parent(node);
-          const focusedPlaceholder = parent?.properties.get<string>(FocusedPlaceholderPath) ?? "";
+          const focusedPlaceholder = parent?.props.get<string>(FocusedPlaceholderPath) ?? "";
           if (!parent) return;
           node.updateProps({
             [PlaceholderPath]: focusedPlaceholder,
@@ -632,6 +646,7 @@ export class ImmutableDraft implements Draft {
   dispose() {
     this.drafting = false;
   }
+
 }
 
 interface NodeDepthEntry {

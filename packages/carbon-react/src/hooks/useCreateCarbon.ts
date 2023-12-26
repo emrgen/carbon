@@ -1,19 +1,9 @@
-import { flatten } from 'lodash';
-import { useEffect, useState } from "react";
-import { CarbonDefaultNode } from "../renderer";
-import {
-  ReactRenderer,
-  Carbon,
-  Extension,
-  NodeJSON,
-  PinnedSelection,
-  PluginManager,
-  RenderManager,
-  Schema,
-  NodeFactory,
-  State,
-  CarbonPlugin
-} from "@emrgen/carbon-core";
+import {flatten} from 'lodash';
+import {useEffect, useState} from "react";
+import {CarbonDefaultNode, ReactRenderer, RenderManager} from "../renderer";
+import {Carbon, CarbonPlugin, Extension, NodeJSON, PinnedSelection, PluginManager, Schema} from "@emrgen/carbon-core";
+import {ImmutableState} from "../core";
+import {ImmutableNodeFactory} from "../core/ImmutableNodeFactory";
 
 
 export interface InitNodeJSON extends Omit<NodeJSON, 'id'> {
@@ -30,7 +20,7 @@ export const createCarbon = (name: string, json: InitNodeJSON, plugins: CarbonPl
 
 	const pm = new PluginManager(plugins);
 	const {specs} = pm;
-	const schema = new Schema(specs, new NodeFactory(scope));
+	const schema = new Schema(specs, new ImmutableNodeFactory(scope));
 	const content = schema.nodeFromJSON(json);
 
 
@@ -38,7 +28,7 @@ export const createCarbon = (name: string, json: InitNodeJSON, plugins: CarbonPl
 		throw new Error("Failed to parse react content");
 	}
 
-	const state = State.create(scope, content, PinnedSelection.IDENTITY);
+	const state = ImmutableState.create(scope, content, PinnedSelection.IDENTITY);
 	return new Carbon(state.freeze(), schema, pm)
 }
 
@@ -51,14 +41,14 @@ export const useCreateCarbon = (name: string, json: InitNodeJSON, plugins: Carbo
 	return app;
 }
 
-export const useCreateCarbonFromState = (state: State, extensions: Extension[] = []) => {
+export const useCreateCarbonFromState = (state: ImmutableState, extensions: Extension[] = []) => {
 	const plugins = flatten(extensions.map(e => e.plugins ?? []));
 	const renderers: ReactRenderer[] = flatten(extensions.map(e => e.renderers ?? []));
 	const renderer = RenderManager.create(renderers, CarbonDefaultNode)
 
 	const pm = new PluginManager(plugins);
 	const {specs} = pm;
-	const schema = new Schema(specs, new NodeFactory(state.scope));
+	const schema = new Schema(specs, new ImmutableNodeFactory(state.scope));
 
 	return new Carbon(state.freeze(), schema, pm)
 }
@@ -104,7 +94,7 @@ export const useCreateCachedCarbon = (name: string, json: InitNodeJSON, plugins:
 	// }, [react, extensions, isLoaded])
 
 	useEffect(() => {
-		const onChange = (state: State) => {
+		const onChange = (state: ImmutableState) => {
 			localStorage.setItem('carbon:content', JSON.stringify(state.content.toJSON()));
 			localStorage.setItem('carbon:selection', JSON.stringify(state.selection.toJSON()))
 			// saveDoc(state);

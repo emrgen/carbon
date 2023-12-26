@@ -5,7 +5,7 @@ export const useNodeSelected = (props: RendererProps) => {
   const { node } = props;
 
   const selected = useMemo(() => {
-    return node.properties.get(SelectedPath);
+    return node.props.get(SelectedPath);
   },[node])
 
   const attributes = useMemo(() => {

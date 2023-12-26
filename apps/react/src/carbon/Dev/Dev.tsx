@@ -1,36 +1,12 @@
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 
-import {RecoilRoot} from "recoil";
+import {blockPresetPlugins, node, section, text, title,} from "@emrgen/carbon-blocks";
 
-import {
-  blockPresetPlugins,
-  node,
-  section,
-  text,
-  title,
-} from "@emrgen/carbon-blocks";
-
-import {RenderManager, useCreateCarbon} from "@emrgen/carbon-react";
+import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon,} from "@emrgen/carbon-react";
 import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
 
-import {codeExtension} from "@emrgen/carbon-code";
-import {
-  commentEditorExtension,
-} from "@emrgen/carbon-comment-editor";
-
-import {
-  State,
-  Extension,
-  ReactRenderer,
-  RendererProps,
-  NodeId, ActivatedPath, TitlePath, corePresetPlugins,
-} from "@emrgen/carbon-core";
-import {
-  BlockMenu,
-  CarbonApp,
-  carbonUtilPlugins,
-} from "@emrgen/carbon-utils";
-import {BlockTree} from "@emrgen/carbon-blocktree";
+import {corePresetPlugins, Extension, NodeId, State,} from "@emrgen/carbon-core";
+import {CarbonApp,} from "@emrgen/carbon-utils";
 import SelectionTracker from "../../SelectionTracker";
 import {noop} from "lodash";
 
@@ -186,14 +162,14 @@ const renderManager = RenderManager.from(
 )
 
 // console.log = noop;
-console.info = noop;
-console.debug = noop;
-console.warn = noop;
-console.error = noop;
-console.group = noop;
-console.groupCollapsed = noop;
-console.groupEnd = noop;
-console.time = noop;
+// console.info = noop;
+// console.debug = noop;
+// console.warn = noop;
+// console.error = noop;
+// console.group = noop;
+// console.groupCollapsed = noop;
+// console.groupEnd = noop;
+// console.time = noop;
 
 export default function Dev() {
   const app = useCreateCarbon('dev', data, plugins);
@@ -201,7 +177,7 @@ export default function Dev() {
   useEffect(() => {
     const onChange = (state: State) => {
       state.content.all((node) => {
-        // console.log(node.id.toString(), node.name, node.properties.toKV());
+        // console.log(node.id.toString(), node.name, node.props.toKV());
       });
     }
 

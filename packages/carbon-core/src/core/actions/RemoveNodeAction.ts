@@ -6,7 +6,6 @@ import { classString } from "../Logger";
 import { Node } from "../Node";
 import { InsertNodeAction } from "./InsertNodeAction";
 import { NodeJSON } from "../types";
-import { ImmutableDraft } from "../ImmutableDraft";
 import { Optional } from "@emrgen/types";
 import {Draft} from "../Draft";
 

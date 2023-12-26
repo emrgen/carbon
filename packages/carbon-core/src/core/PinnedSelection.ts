@@ -7,7 +7,7 @@ import { NodeStore } from './NodeStore';
 import { DomSelection, Range } from './Range';
 import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
-import { NodeMap, sortNodes } from "@emrgen/carbon-core";
+import {NodeBTree, NodeMap, sortNodes} from "@emrgen/carbon-core";
 import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 import {blocksBelowCommonNode} from "../utils/findNodes";
 import {takeBefore} from "../utils/array";
@@ -125,9 +125,9 @@ export class PinnedSelection {
 	}
 
 	static fromNodes(nodes: Node | Node[], origin = ActionOrigin.Unknown): PinnedSelection {
-		const set = NodeMap.fromNodes(flatten([nodes]));
+		const set = NodeBTree.from(flatten([nodes]));
 
-		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, set.values(), origin);
+		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, set.nodes(), origin);
 	}
 
 	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
@@ -435,7 +435,7 @@ export class PinnedSelection {
 
 	eq(other: PinnedSelection) {
 		if (this.nodes.length !== other.nodes.length) return false;
-		const set = NodeMap.fromNodes(this.nodes);
+		const set = NodeBTree.from(this.nodes);
 		const nodesEq = other.nodes.every(n => set.has(n.id))
 
 		return nodesEq && this.tail.eq(other.tail) && this.head.eq(other.head)

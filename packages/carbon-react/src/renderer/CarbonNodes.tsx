@@ -47,7 +47,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   const attributes = useMemo(() => {
     return {
       ...custom,
-      ...node.properties.prefix(LocalHtmlAttrPath) ?? {}
+      ...node.props.prefix(LocalHtmlAttrPath) ?? {}
     }
   }, [custom, node])
 
@@ -117,8 +117,8 @@ const InnerCarbonBlock = (props: RendererProps, ref) => {
   const {node, children, custom} = props;
 
   const tag = useMemo(() => {
-    return props.tag ?? node.properties.get(TagPath) ?? 'div';
-  }, [props.tag, node.properties]);
+    return props.tag ?? node.props.get(TagPath) ?? 'div';
+  }, [props.tag, node.props]);
 
   return (
     <CarbonElement node={node} tag={tag} ref={ref} custom={custom}>
@@ -157,7 +157,7 @@ export const InnerCarbonNode = (props: RendererProps) => {
   // })
 
   const component = useMemo(() => {
-    const name = (node.properties.get(NamePath) ?? node.name) as string;
+    const name = (node.props.get(NamePath) ?? node.name) as string;
     const RegisteredComponent = rm.component(name);
 
     if (RegisteredComponent) {

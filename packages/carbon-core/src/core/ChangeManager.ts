@@ -79,10 +79,12 @@ export class ChangeManager extends NodeTopicEmitter {
     if (!isContentChanged && !isSelectionChanged) {
       return;
     }
-
+    console.log('-------------')
+    console.log('update', isContentChanged, isSelectionChanged);
     if (isContentChanged) {
       this.changes.clear();
       this.changes = state.changes.clone();
+      console.log("syncing: content", this.changes.toArray().map(n => n.toString()));
 
       this.interval = setTimeout(() => {
         console.error("syncing: content timeout", this.changes.toArray().map(n => n.toString()));

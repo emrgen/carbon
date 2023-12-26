@@ -1,26 +1,15 @@
-import { EventHandler, EventHandlerMap } from "../core/types";
-import { AfterPlugin, BeforePlugin, CarbonPlugin } from '../core/CarbonPlugin';
-import { EventContext } from "../core/EventContext";
-import { SelectionCommands } from "./SelectionCommands";
-import { IsolatingPlugin } from "./Isolating";
-import { TransformCommands } from "./TransformCommands";
-import { skipKeyEvent } from "../utils/key";
-import { first, last,  } from "lodash";
-import {
-	ActionOrigin,
-	BlockContent,
-	Carbon,
-	MoveNodeAction,
-	Node,
-	Pin,
-	PinnedSelection,
-	PlaceholderPath,
-	Point,
-	Transaction
-} from "../core";
+import {EventHandlerMap} from "../core/types";
+import {AfterPlugin, CarbonPlugin} from '../core/CarbonPlugin';
+import {EventContext} from "../core/EventContext";
+import {SelectionCommands} from "./SelectionCommands";
+import {IsolatingPlugin} from "./Isolating";
+import {TransformCommands} from "./TransformCommands";
+import {skipKeyEvent} from "../utils/key";
+import {first, last,} from "lodash";
+import {ActionOrigin, MoveNodeAction, Node, Pin, PinnedSelection, PlaceholderPath, Point, Transaction} from "../core";
 import {insertAfterAction, isIsolatedNodes, preventAndStopCtx} from "@emrgen/carbon-core";
-import { nodeLocation } from '../utils/location';
-import { Optional } from '@emrgen/types';
+import {nodeLocation} from '../utils/location';
+import {Optional} from '@emrgen/types';
 import {NodeBTree} from "../core/BTree";
 
 declare module '@emrgen/carbon-core' {
@@ -91,8 +80,6 @@ export class KeyboardPlugin extends AfterPlugin {
 
 				const block = node.chain.find(n => n.isBlockSelectable);
 				if (!block) return
-
-        console.log('xxxxxxxx', block)
 				cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
@@ -246,21 +233,20 @@ export class KeyboardPlugin extends AfterPlugin {
 				const after = PinnedSelection.fromPin(Pin.create(prevVisibleTextBlock, prevVisibleTextBlock.textContent.length));
 				const textContent = prevVisibleTextBlock.textContent + textBlock.textContent;
 				const textNode = app.schema.text(textContent)!;
-				const content = BlockContent.create([textNode]);
 
 				const at = Point.toAfter(prevVisibleBlock.id);
 				const moveActions = textBlock?.nextSiblings.slice().reverse().map(n => {
 					return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
 				});
 
-				if (prevVisibleTextBlock.isEmpty && !content.isEmpty) {
+				if (prevVisibleTextBlock.isEmpty && !textNode.isEmpty) {
 					tr.Update(prevVisibleTextBlock.id, {
 						[PlaceholderPath]: ''
 					})
 				}
 
 				tr
-					.SetContent(prevVisibleTextBlock.id, content)
+					.SetContent(prevVisibleTextBlock.id, [textNode])
 					.Add(moveActions)
 					.Remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
 					.Select(after)

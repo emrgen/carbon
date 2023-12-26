@@ -1,11 +1,12 @@
-import {OpenedPath, RendererProps} from "@emrgen/carbon-core";
-import { useMemo } from "react";
+import {useMemo} from "react";
+import {OpenedPath} from "@emrgen/carbon-core";
+import {RendererProps} from "@emrgen/carbon-react";
 
 export const useNodeOpened = (props: RendererProps) => {
   const { node } = props;
 
   const opened = useMemo(() => {
-    return node.properties.get(OpenedPath);
+    return node.props.get(OpenedPath);
   },[node])
 
   const attributes = useMemo(() => {

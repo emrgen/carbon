@@ -100,7 +100,7 @@ export class ChangeName extends BeforePlugin {
       // const after = titleContent.remove(0, match[1].length);
 
       if (match[1] === titleNode.textContent + ' ') {
-        const action = SetContentAction.create(titleNode.id,BlockContent.empty());
+        const action = SetContentAction.create(titleNode.id, []);
         cmd.Add(action);
         cmd.Update(titleNode.id, {
           [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
@@ -109,13 +109,11 @@ export class ChangeName extends BeforePlugin {
         const title = titleNode.textContent.slice(match[1].length - 1);
         // console.warn('title', title, match);
         if (title === '') {
-          const action = SetContentAction.create(titleNode.id,BlockContent.empty());
+          const action = SetContentAction.create(titleNode.id, []);
           cmd.Add(action);
         } else {
           const textNode = app.schema.text(title)!
-          const content = BlockContent.create(textNode);
-
-          const action = SetContentAction.withContent(titleNode.id, content, content);
+          const action = SetContentAction.create(titleNode.id, [textNode]);
           cmd.Add(action);
         }
       }
@@ -191,9 +189,7 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      const content = BlockContent.empty()
-
-      cmd.SetContent(block.firstChild!.id, content)
+      cmd.SetContent(block.firstChild!.id, [])
         // .removeText(Pin.toStartOf(block)?.point!, react.schema.text(match[1].slice(0, -1))!)
         .Add(insertBeforeAction(block, divider))
         .Change(block.id, block.type.splitName)

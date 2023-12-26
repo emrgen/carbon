@@ -22,8 +22,8 @@ export function TodoComp(props: RendererProps) {
   );
 
   const isChecked = useMemo(() => {
-    return !!node.properties.get(CheckedPath);
-  },[node.properties])
+    return !!node.props.get(CheckedPath);
+  },[node.props])
 
   const handleClick = useCallback(
     (e, app) => {
@@ -56,7 +56,7 @@ export function TodoComp(props: RendererProps) {
         />
       </div>
     );
-  }, [handleClick, node.properties]);
+  }, [handleClick, node.props]);
 
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>

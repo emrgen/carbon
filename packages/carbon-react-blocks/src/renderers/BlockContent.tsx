@@ -37,7 +37,7 @@ export function BlockContentComp(props: RendererProps) {
 
     // const getHeaderType = (node: Node): Optional<NodeType> => {
     //   const { type } = node;
-    //   const as = node.properties.html["data-as"] ?? "";
+    //   const as = node.props.html["data-as"] ?? "";
     //   const asType = type.schema.nodes[as];
     //   if (type.groups.includes("heading")) {
     //     return type

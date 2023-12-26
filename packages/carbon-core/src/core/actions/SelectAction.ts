@@ -2,7 +2,6 @@ import { Transaction } from "../Transaction";
 import { ActionOrigin, CarbonAction } from "./types";
 import { PointedSelection } from "../PointedSelection";
 import { classString } from "../Logger";
-import { ImmutableDraft } from "../ImmutableDraft";
 import {Draft} from "../Draft";
 
 export class SelectAction implements CarbonAction {

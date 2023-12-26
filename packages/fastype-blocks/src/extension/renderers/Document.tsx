@@ -28,7 +28,7 @@ import {DocumentContext} from "@emrgen/carbon-react-blocks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
-  // const { picture = {} } = node.properties.node;
+  // const { picture = {} } = node.props.node;
 
   const app = useCarbon();
 
@@ -129,7 +129,7 @@ export const DocumentComp = (props: RendererProps) => {
     };
   }, [app, ref]);
 
-  console.log(node.properties);
+  console.log(node.props);
 
   return (
     <DocumentContext document={node}>

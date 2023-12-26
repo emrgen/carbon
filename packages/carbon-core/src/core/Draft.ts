@@ -20,7 +20,7 @@ export interface Draft {
   remove(node: Node): void;
   change(nodeId: NodeId, type: NodeType): void;
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>): void
-  updateContent(nodeId: NodeId, content: NodeContent): void;
+  updateContent(nodeId: NodeId, content: Node[]|string): void;
   updateSelection(selection: PointedSelection): void;
 
   // used to verify and prepare the actions before apply

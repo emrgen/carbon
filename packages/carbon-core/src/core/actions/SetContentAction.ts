@@ -1,24 +1,19 @@
-import { classString } from "../Logger";
-import { InlineContent, NodeContent } from "../NodeContent";
 import { IntoNodeId, NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { ActionOrigin, CarbonAction } from "./types";
 import { Optional } from '@emrgen/types';
-import { ImmutableDraft } from '../ImmutableDraft';
-import {Draft} from "@emrgen/carbon-core";
+import {deepCloneMap, Draft, Node} from "@emrgen/carbon-core";
+
+type Content = string | Node[]
 
 export class SetContentAction implements CarbonAction {
-  before: Optional<NodeContent>;
+  before: Optional<Content>;
 
-  static create(nodeRef: IntoNodeId, after: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContentAction(nodeRef.nodeId(), after, null, origin)
+  static create(nodeRef: IntoNodeId, content: Content, origin: ActionOrigin = ActionOrigin.UserInput) {
+    return new SetContentAction(nodeRef.nodeId(), content, null, origin)
   }
 
-  static withContent(nodeId: NodeId, after: NodeContent, before: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContentAction(nodeId, after, before, origin)
-  }
-
-  constructor(readonly nodeId: NodeId, readonly after: NodeContent, before: Optional<NodeContent>, readonly origin: ActionOrigin) {}
+  constructor(readonly nodeId: NodeId, readonly after: Content, before: Optional<Content>, readonly origin: ActionOrigin) {}
 
   execute(tr: Transaction, draft: Draft) {
     const {app,} = tr
@@ -29,16 +24,18 @@ export class SetContentAction implements CarbonAction {
     }
 
     draft.updateContent(nodeId, after);
-
-    const a = (b) => b.clone(a)
-    this.before = node.content.clone(a);
+    if (node.isTextContainer) {
+      this.before = node.children.map(n => n.clone(deepCloneMap));
+    } else {
+      this.before = node.textContent
+    }
   }
 
-  merge(other: SetContentAction): SetContentAction {
-    console.log('####', this.before);
-
-    return SetContentAction.withContent(this.nodeId, other.after, this.before!, this.origin)
-  }
+  // merge(other: SetContentAction): SetContentAction {
+  //   console.log('####', this.before);
+  //
+  //   return SetContentAction.withContent(this.nodeId, other.after, this.origin)
+  // }
 
   inverse(): CarbonAction {
     if (!this.before) {
@@ -53,6 +50,7 @@ export class SetContentAction implements CarbonAction {
 
   toString() {
     const { nodeId, after } = this
-    return classString(this)([nodeId, after instanceof InlineContent ? after.textContent :after.children.map(n => n.textContent)]);
+    return this;
+    // return classString(this)([nodeId, after instanceof InlineContent ? after.textContent :after.children.map(n => n.textContent)]);
   }
 }

@@ -3,7 +3,6 @@ import { NodeId } from '../NodeId';
 import { Transaction } from '../Transaction';
 import { NodeName } from '../types';
 import { CarbonAction, ActionOrigin } from './types';
-import { ImmutableDraft } from '../ImmutableDraft';
 import {Draft} from "@emrgen/carbon-core";
 
 export class ChangeNameAction implements CarbonAction{

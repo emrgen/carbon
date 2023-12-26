@@ -1,10 +1,8 @@
 import { classString } from "./Logger";
 import { Mark, MarkSet } from "./Mark";
 import { Node } from "./Node";
-import { BlockContent, InlineContent, NodeContent } from "./NodeContent";
-import { node } from '@emrgen/carbon-blocks';
 import { Optional } from '@emrgen/types';
-import { flatten, identity, reduce } from "lodash";
+import { reduce } from "lodash";
 
 // utility class for text blocks
 // title is a text block
@@ -64,7 +62,7 @@ export class TextBlock {
 
     // split the content and insert the inline node in the relevant node
     const nodes = this.split(offset).reduce((acc, curr) => {
-      return curr.size === 0 ? acc : [...acc, ...curr.children];
+      return curr.length === 0 ? acc : [...acc, ...curr];
     }, [] as Node[]);
 
 
@@ -107,13 +105,14 @@ export class TextBlock {
       return [...acc.slice(0, -1)];
     }, [] as Node[]);
 
-    this.node.content = BlockContent.create(nodes);
+    // this.node.content = BlockContent.create(nodes);
 
     return this
   }
 
-  split(offset: number): [NodeContent, NodeContent] {
-    return this.node.content.split(offset);
+  split(offset: number): [Node[], Node[]] {
+    // return this.node.content.split(offset);
+    return [[],[]]
   }
 
   toJSON() {

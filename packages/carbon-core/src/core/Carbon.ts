@@ -70,8 +70,7 @@ export class Carbon extends EventEmitter {
 		this.pm = pm;
 		this.schema = schema;
 
-		this.state = state;
-		StateScope.set(this.state.scope, this.state.nodeMap);
+		this.state = state.activate()
 		this.runtime = new Runtime();
 
 		this.store = new NodeStore(this);
@@ -191,9 +190,10 @@ export class Carbon extends EventEmitter {
 			return
 		}
 
+
 		// keep three previous states
-		this.state = state;
-		StateScope.set(state.scope, state.nodeMap);
+		this.state = state.activate()
+    console.log('updateState', this.state.content.textContent);
 		this.change.update(tr, state)
 
 		this.emit(EventsOut.transactionCommit, tr);

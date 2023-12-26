@@ -52,8 +52,8 @@ export default function ImageComp(props: RendererProps) {
   return (
     <CarbonBlock {...props} custom={{ ...connectors, onClick }} ref={ref}>
       {/*<div className="image-container" onClick={handleClick}>*/}
-      {/*  {!node.properties.node.src && <div className="image-overlay">Image</div>}*/}
-      {/*  <img src={node.properties.node.src} alt="" />*/}
+      {/*  {!node.props.node.src && <div className="image-overlay">Image</div>}*/}
+      {/*  <img src={node.props.node.src} alt="" />*/}
       {/*  {selection.isSelected && (*/}
       {/*    <div className="image-align-controls">*/}
       {/*      <div*/}

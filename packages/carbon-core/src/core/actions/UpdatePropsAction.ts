@@ -3,7 +3,6 @@ import { IntoNodeId, NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { CarbonAction, ActionOrigin, ActionType } from "./types";
 import { Optional } from '@emrgen/types';
-import { ImmutableDraft } from "../ImmutableDraft";
 import { NodePropsJson } from "../NodeProps";
 import {Draft} from "@emrgen/carbon-core";
 
@@ -23,7 +22,7 @@ export class UpdatePropsAction implements CarbonAction {
       throw Error('update attrs: node not found')
     }
 
-    this.prevProps = node.properties.toJSON();
+    this.prevProps = node.props.toJSON();
     draft.updateProps(nodeId, this.props);
   }
 

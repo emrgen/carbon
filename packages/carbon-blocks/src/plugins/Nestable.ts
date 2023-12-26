@@ -164,7 +164,7 @@ export class NestablePlugin extends AfterPlugin {
 				const atStart = selection.head.isAtStartOfNode(listNode);
 				if (!atStart) return
 
-				const as = listNode.properties.get('html.data-as')
+				const as = listNode.props.get('html.data-as')
 				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
 					cmd

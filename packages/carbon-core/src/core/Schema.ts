@@ -1,12 +1,12 @@
 import { Optional } from '@emrgen/types';
-import {each, isArray} from 'lodash';
+import {each, identity, isArray} from 'lodash';
 import { ContentMatch } from './ContentMatch';
 import { Node } from './Node';
 import { MarkType, NodeType } from "./NodeType";
-import { NodeFactory } from './NodeFactory';
-import {NodeIdFactory, NodeJSON, NodeName} from "./types";
+import {Maps, NodeJSON, NodeName} from "./types";
 import { Mark, MarkProps } from "./Mark";
 import {InitNodeJSON} from "@emrgen/carbon-react";
+import {NodeData, NodeFactory} from "@emrgen/carbon-core";
 
 interface SchemaSpec {
 	nodes: Record<NodeName, NodeSpec>;
@@ -75,17 +75,17 @@ export class Schema {
 		return new Mark(name, props);
 	}
 
-	cloneWithId(node: Node): Node {
-		return this.factory.cloneWithId(node);
+	clone(node: Node, map: Maps<NodeData, NodeData> = identity): Node {
+		return this.factory.clone(node, map);
 	}
 
 	// create node from json
-	nodeFromJSON(json: any, nodeIdFactory?: NodeIdFactory): Optional<Node> {
+	nodeFromJSON(json: any): Optional<Node> {
 		if (json instanceof Node) {
 			return json;
 		}
 
-		return this.factory.createNode(json, this, nodeIdFactory);
+		return this.factory.create(json, this);
 
 		// const { name, id, text = '', content = [], attrs = {}, target = '' } = json ?? {};
 		// const type = this.type(name);

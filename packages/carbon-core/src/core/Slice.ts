@@ -35,7 +35,7 @@ export class Slice {
       }
     })
 
-    const cloned = root.type.schema.cloneWithId(root);
+    const cloned = root.type.schema.clone(root);
     const startNode = cloned.atPath(startPath)!;
     const endNode = cloned.atPath(endPath)!;
 

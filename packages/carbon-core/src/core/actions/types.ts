@@ -1,4 +1,3 @@
-import { ImmutableDraft } from "../ImmutableDraft";
 import { Transaction } from "../Transaction"
 import {Draft} from "../Draft";
 

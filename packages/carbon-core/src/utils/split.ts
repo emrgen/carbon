@@ -3,14 +3,12 @@ import { BlockContent, NodeContent } from "../core/NodeContent";
 import { takeAfter, takeBefore, takeUntil } from "./array";
 
 
-export function splitTextBlock(start: Pin, end: Pin, app: Carbon): NodeContent[] {
+export function splitTextBlock(start: Pin, end: Pin, app: Carbon): [Node[], Node[], Node[]] {
   const startPin = start.down()!;
   const endPin = end.down()!;
   const beforeNodes: Node[] = startPin.node.prevSiblings.map(n => n.clone());
   const middleNodes: Node[] = takeBefore(startPin.node.prevSiblings.map(n => n.clone()), n => n.eq(endPin.node))
   const afterNodes: Node[] = endPin.node.nextSiblings.map(n => n.clone());
-
-  const ret = () => [beforeNodes, middleNodes, afterNodes].map(nodes => BlockContent.create(nodes));
 
   if (startPin.eq(endPin)) {
     if (startPin.isWithin) {
@@ -33,8 +31,6 @@ export function splitTextBlock(start: Pin, end: Pin, app: Carbon): NodeContent[]
       const { node } = startPin;
       afterNodes.unshift(node.clone());
     }
-
-    return ret();
   } else {
     // console.log(beforeNodes, middleNodes, afterNodes);
     if (startPin.isWithin) {
@@ -78,7 +74,7 @@ export function splitTextBlock(start: Pin, end: Pin, app: Carbon): NodeContent[]
       const { node } = endPin;
       afterNodes.unshift(node.clone());
     }
-
-    return ret();
   }
+
+  return [beforeNodes, middleNodes, afterNodes];
 }

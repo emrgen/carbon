@@ -12,7 +12,7 @@ const RenamingTabIdPath = 'local/state/rename/tabId';
 const ActiveChildIdPath = 'remote/state/active/childId';
 
 export const getActiveTab = (node: Node) => {
-  return node.children.find(n => n.properties.get<boolean>(ActivatedPath) ?? false);
+  return node.children.find(n => n.props.get<boolean>(ActivatedPath) ?? false);
 }
 
 export const getActiveTabId = (node: Node) => {
@@ -27,11 +27,11 @@ export const setActiveTabId = (cmd: Transaction, node: Node, tabId: string) => {
 }
 
 export const getTabTitle = (node: Node) => {
-  return node.properties.get<string>(TitlePath) ?? '';
+  return node.props.get<string>(TitlePath) ?? '';
 }
 
 export const getRenamingTabId = (node: Node) => {
-  return node.properties.get<string>(RenamingTabIdPath) ?? '';
+  return node.props.get<string>(RenamingTabIdPath) ?? '';
 }
 
 export const setRenamingTabId = (cmd: Transaction, node: Node, tabId: string) => {

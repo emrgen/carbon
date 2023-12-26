@@ -47,7 +47,7 @@ export class JsonStore {
 
   frozen = false;
 
-  protected static PATCH_CACHE = new PathCache();
+  protected static PATH_CACHE = new PathCache();
 
   static keyValueToJson(kv: Record<string, any>) {
     const result = {};
@@ -107,7 +107,7 @@ export class JsonStore {
     if (typeof key === "string") {
       key = key.split("/");
     }
-    return this.store.has(JsonStore.PATCH_CACHE.get(key));
+    return this.store.has(JsonStore.PATH_CACHE.get(key));
   }
 
   prefix(prefix: string[] | string): Record<string, any> {
@@ -116,12 +116,12 @@ export class JsonStore {
       prefix = prefix.split("/")
     }
 
-    const path = JsonStore.PATCH_CACHE.key(prefix);
+    const path = JsonStore.PATH_CACHE.key(prefix);
     const pathLength = path.length + 1;
 
     for (const [key, value] of this.store) {
       if (key.startsWith(path)) {
-        result[JsonStore.PATCH_CACHE.path(key.slice(pathLength))] = value;
+        result[JsonStore.PATH_CACHE.path(key.slice(pathLength))] = value;
       }
     }
 
@@ -138,11 +138,11 @@ export class JsonStore {
     }
 
     if (value === undefined || value === null || value === "") {
-      this.store.delete(JsonStore.PATCH_CACHE.get(path));
+      this.store.delete(JsonStore.PATH_CACHE.get(path));
       return
     }
 
-    const key = JsonStore.PATCH_CACHE.get(path);
+    const key = JsonStore.PATH_CACHE.get(path);
     this.store.set(key, value);
   }
 
@@ -155,32 +155,32 @@ export class JsonStore {
       throw new Error("Path cannot be empty");
     }
 
-    return this.store.get(JsonStore.PATCH_CACHE.get(key)) as Optional<T>;
+    return this.store.get(JsonStore.PATH_CACHE.get(key)) as Optional<T>;
   }
 
-  merge(other: JsonStore) {
-    const result = new JsonStore();
-    for (const [key, value] of this.store) {
-      result.store.set(key, value);
-    }
+  // merge(other: JsonStore) {
+  //   const result = new JsonStore();
+  //   for (const [key, value] of this.store) {
+  //     result.store.set(key, value);
+  //   }
+  //
+  //   for (const [key, value] of other.store) {
+  //     result.store.set(key, value);
+  //   }
+  //
+  //   return result;
+  // }
 
-    for (const [key, value] of other.store) {
-      result.store.set(key, value);
-    }
-
-    return result;
-  }
-
-  diff(other: JsonStore) {
-    const diff = new JsonStore();
-    for (const [key, value] of this.store) {
-      if (!other.store.has(key)) {
-        diff.store.set(key, value);
-      }
-    }
-
-    return diff;
-  }
+  // diff(other: JsonStore) {
+  //   const diff = new JsonStore();
+  //   for (const [key, value] of this.store) {
+  //     if (!other.store.has(key)) {
+  //       diff.store.set(key, value);
+  //     }
+  //   }
+  //
+  //   return diff;
+  // }
 
   freeze() {
     if(this.frozen) return this
@@ -194,7 +194,7 @@ export class JsonStore {
   toJSON() {
    const result: Record<string, any> = {};
     for (const [key, value] of this.store) {
-      set(result, JsonStore.PATCH_CACHE.path(key), value);
+      set(result, JsonStore.PATH_CACHE.path(key), value);
     }
 
     return JsonStore.keyValueToJson(result);
@@ -203,7 +203,7 @@ export class JsonStore {
   toKV() {
     const result: Record<string, any> = {};
     for (const [key, value] of this.store) {
-      result[JsonStore.PATCH_CACHE.path(key)] = value;
+      result[JsonStore.PATH_CACHE.path(key)] = value;
     }
 
     return result;

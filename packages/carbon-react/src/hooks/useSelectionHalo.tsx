@@ -13,7 +13,7 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
 	const { isSelected, isActive, attributes } = useNodeState(props);
 
 	const SelectionHalo = useMemo(() => {
-    const parentSelected = node.parents.some((parent) => parent.properties.get(SelectedPath));
+    const parentSelected = node.parents.some((parent) => parent.props.get(SelectedPath));
 
     return (
       <>

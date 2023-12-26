@@ -18,8 +18,8 @@ export default function TodoComp(props: RendererProps) {
   );
 
   const isChecked = useMemo(() => {
-    return !!node.properties.get(CheckedPath);
-  },[node.properties])
+    return !!node.props.get(CheckedPath);
+  },[node.props])
 
 
   const handleClick = useCallback(

@@ -49,7 +49,7 @@
 //   const ref = useRef<any>(null);
 //   const containerRef = useRef<any>(null);
 //   const [height, setHeight] = useState(100);
-//   const { html, node: video } = node.properties;
+//   const { html, node: video } = node.props;
 //   const { provider, src } = video;
 //   const dimensions = useDimensions(containerRef, true);
 //   const [ready, setReady] = useState(false);
@@ -80,7 +80,7 @@
 //     if (!boundRef.current) return null;
 //     const { left, top, width, height } =
 //       boundRef.current?.getBoundingClientRect();
-//     const { node: video } = node.properties;
+//     const { node: video } = node.props;
 //     return createPortal(
 //       <Box pos={"absolute"} w={width} h={height} left={left} top={top}>
 //         <Box
@@ -161,7 +161,7 @@
 //       </Box>,
 //       overlayRef.current
 //     );
-//   }, [overlayRef, node.properties, node.id, updater, react.tr]);
+//   }, [overlayRef, node.props, node.id, updater, react.tr]);
 //
 //   return (
 //     <CarbonBlock {...props} custom={{ ...connectors, onClick }} ref={ref}>

@@ -1,11 +1,11 @@
-import { AfterPlugin, BlockContent, Carbon, EventContext, EventHandlerMap, Node, Pin } from "../core";
-import { SelectionPatch } from "../core/DeleteGroup";
-import { NodeId } from "../core/NodeId";
-import { Range } from "../core/Range";
-import { Slice } from "../core/Slice";
-import { preventAndStop } from "../utils/event";
-import { blocksBelowCommonNode } from "../utils/findNodes";
-import { SelectedPath } from "../core/NodeProps";
+import {AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Pin} from "../core";
+import {SelectionPatch} from "../core/DeleteGroup";
+import {NodeId} from "../core/NodeId";
+import {Range} from "../core/Range";
+import {Slice} from "../core/Slice";
+import {preventAndStop} from "../utils/event";
+import {blocksBelowCommonNode} from "../utils/findNodes";
+import {SelectedPath} from "../core/NodeProps";
 import {Optional} from "@emrgen/types";
 
 export class ClipboardPlugin extends AfterPlugin {
@@ -64,16 +64,12 @@ export class ClipboardPlugin extends AfterPlugin {
     if (selection.isBlock) {
       const { blocks } = selection;
       const cloned = blocks.map(n => {
-        const node = app.schema.cloneWithId(n)
+        const node = app.schema.clone(n)
         node.updateProps({ [SelectedPath]: false })
         return node
       })
 
-      const rootNode = Node.create({
-        type: app.schema.type('slice'),
-        content: BlockContent.create(cloned),
-        id: NodeId.create(String(Math.random())),
-      });
+      const rootNode = app.schema.type('slice').create(cloned)!;
 
       const first = rootNode.firstChild!;
       const last = rootNode.lastChild!;
@@ -102,12 +98,8 @@ export class ClipboardPlugin extends AfterPlugin {
     const cloned = nodes.map(n => n.clone());
     // console.log('cloned', cloned.map(n => n.name));
 
-    const root = Node.create({
-      id: NodeId.create(String(Math.random())),
-      type: app.schema.type('slice'),
-      content: BlockContent.create(cloned),
-    });
-    root.content.setParentId(root.id);
+    const root = app.schema.type('slice').create(cloned)!;
+
     console.log('rootNode', root);
 
     const deleteGroup = new SelectionPatch()
@@ -186,10 +178,10 @@ export class ClipboardPlugin extends AfterPlugin {
             // console.log(r, n.textContent, n.textContent.slice(0, r.start.offset));
             const textNode = app.schema.text(n.textContent.slice(0, r.start.offset));
             // console.log('XX',textNode);
-            n.updateContent(BlockContent.create([textNode!]))
+            n.updateContent(([textNode!]))
           } else if (r.start.offset === 0) {
             const textNode = app.schema.text(n.textContent.slice(r.end.offset));
-            n.updateContent(BlockContent.create([textNode!]))
+            n.updateContent(([textNode!]))
           }
 
           deleteGroup.removeRange(r);
@@ -221,8 +213,15 @@ export class ClipboardPlugin extends AfterPlugin {
       }
     })
 
-    const children = root.children.map(n => app.schema.cloneWithId(n));
-    root.updateContent(BlockContent.create(children));
+    const factory = app.schema.factory
+
+    const children = root.children.map(n => app.schema.clone(n, data => {
+      return {
+        ...data,
+        id: factory.blockId()
+      }
+    }));
+    root.updateContent(children);
 
     const startSliceNode = root.atPath(startPath);
     const endSliceNode = root.atPath(endPath);

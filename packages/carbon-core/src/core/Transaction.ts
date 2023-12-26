@@ -26,13 +26,11 @@ import { UpdatePropsAction } from './actions/UpdatePropsAction';
 import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
-import { ImmutableDraft } from './ImmutableDraft';
 import { ActivatedPath, OpenedPath, SelectedPath } from "./NodeProps";
 import { SetContentAction } from "./actions/SetContentAction";
 import { SelectAction } from "./actions/SelectAction";
 import { RemoveNodeAction } from "./actions/RemoveNodeAction";
 import { MoveNodeAction } from "./actions/MoveNodeAction";
-import { isNestableNode } from "@emrgen/carbon-blocks";
 import { CarbonCommand, PluginCommand } from "./CarbonCommand";
 import {Draft} from "./Draft";
 
@@ -148,7 +146,7 @@ export class Transaction {
 	}
 
   // can be called for textContainer only
-	SetContent(nodeRef: IntoNodeId, after: NodeContent, origin = this.origin): Transaction {
+	SetContent(nodeRef: IntoNodeId, after: Node[] | string, origin = this.origin): Transaction {
 		return this.Add(SetContentAction.create(nodeRef, after, origin));
 	}
 

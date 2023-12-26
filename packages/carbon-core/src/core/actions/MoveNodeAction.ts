@@ -3,7 +3,6 @@ import { Transaction } from "../Transaction";
 import { CarbonAction, ActionOrigin } from "./types";
 import { Point } from '../Point';
 import { classString } from "../Logger";
-import { ImmutableDraft } from "../ImmutableDraft";
 import {Draft} from "@emrgen/carbon-core";
 
 // a node can be moved to a new location, relative to another node

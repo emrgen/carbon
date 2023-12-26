@@ -1,10 +1,21 @@
-import { SolidNode } from './SolidNode';
-import {BlockContent, InlineContent, Node, NodeFactory, NodeId, NodeIdFactory, Schema} from "@emrgen/carbon-core";
+import {Node, NodeFactory, NodeId, NodeIdFactory, Schema} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {isEmpty} from "lodash";
+import { v4 as uuidv4 } from 'uuid';
+import {SolidNodeContent} from "./SolidNodeContent";
 
-export class SolidNodeFactory extends NodeFactory {
-  override	createNode(json: any, schema: Schema, nodeIdFactory: NodeIdFactory = NodeFactory): Optional<Node> {
+let counter = 0;
+
+export class SolidNodeFactory implements NodeFactory {
+  static blockId() {
+    return uuidv4().slice(-10) + '[' + ++counter + ']';
+  }
+
+  static textId() {
+    return uuidv4().slice(-10) + '(' + ++counter + ')';
+  }
+
+  create(json: any, schema: Schema, nodeIdFactory: NodeIdFactory = SolidNodeFactory): Optional<Node> {
     const { id, name, children = [], text } = json;
     const type = schema.type(name);
     if (!type) {
@@ -12,20 +23,23 @@ export class SolidNodeFactory extends NodeFactory {
     }
 
     const properties = isEmpty(json.props) ? type.props : type.props.update(json.props);
-
-    if (name === 'text') {
-      const content = InlineContent.create(text);
-      const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(nodeIdFactory.textId());
-      return SolidNode.create({ id: nodeId, type, content, properties });
-    } else {
-      const nodes = children.map(n => schema.nodeFromJSON(n));
-      const content = BlockContent.create(nodes);
-      const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(nodeIdFactory.blockId());
-      return SolidNode.create({ id: nodeId, type, content, properties });
-    }
+    const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(nodeIdFactory.textId());
+    const nodes = children.map(n => schema.nodeFromJSON(n));
+    const content = SolidNodeContent.create({
+      id: nodeId,
+      type,
+      children: nodes,
+      props: properties,
+      textContent: text,
+      parentId: null,
+      parent: null,
+      links: {},
+      linkName: ''
+    });
+    return new Node(content);
   }
 
-  override cloneWithId(node: SolidNode): SolidNode {
+  cloneWithId(node: Node): Node {
     return node.clone()
   }
 }

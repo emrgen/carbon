@@ -2,7 +2,7 @@ import { Carbon, CarbonPlugin, Node, SerializedNode } from "../core";
 
 export class SlicePlugin extends CarbonPlugin {
 
-  name = "slice";
+  name = 'slice';
 
   // serialize(react: Carbon, node: Node): SerializedNode {
   //   const contentNode = node.child(0);

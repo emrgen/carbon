@@ -76,7 +76,7 @@ export class Section extends NodePlugin {
 		let ret = contentNode?.textContent;
 
 		// TODO: This is a hack to get the correct heading level
-		switch (node.properties.get('html.data-as')) {
+		switch (node.props.get('html.data-as')) {
 			case 'h1':
 				ret = '# ' + ret;
 				break

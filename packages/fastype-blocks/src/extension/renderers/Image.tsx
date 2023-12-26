@@ -46,10 +46,10 @@ export const ImageComp = () => {
 //
 // export function ImageComp(props: RendererProps) {
 //   const { node } = props;
-//   const { node: image } = node.properties;
+//   const { node: image } = node.props;
 //   const react = useCarbon();
 //   const [ready, setReady] = useState(false);
-//   const [caption, setCaption] = useState(node.properties.node.caption ?? "");
+//   const [caption, setCaption] = useState(node.props.node.caption ?? "");
 //
 //   const ref = useRef<HTMLDivElement>(null);
 //   const boundRef = useRef<HTMLDivElement>(null);
@@ -225,7 +225,7 @@ export const ImageComp = () => {
 //     const { width, height } = imageRef.current;
 //     setAspectRatio(height / width);
 //
-//     if (!node.properties.node.height) {
+//     if (!node.props.node.height) {
 //       react.tr
 //         .Update(node.id, {
 //           node: {
@@ -234,7 +234,7 @@ export const ImageComp = () => {
 //         })
 //         .Dispatch();
 //     }
-//   }, [react.tr, imageRef, node.properties.node.height, node.id]);
+//   }, [react.tr, imageRef, node.props.node.height, node.id]);
 //
 //   return (
 //     <>
@@ -277,7 +277,7 @@ export const ImageComp = () => {
 //             pos={"relative"}
 //             onClick={handleClick}
 //             bg={ready ? "" : "#eee"}
-//             h={node.properties.node.src && !ready ? "100%" : "auto"}
+//             h={node.props.node.src && !ready ? "100%" : "auto"}
 //             // boxShadow={ready ? "0 0 0px 20px red" : ""}
 //           >
 //             <>
@@ -308,7 +308,7 @@ export const ImageComp = () => {
 //               {image.src && (
 //                 <>
 //                   <LazyLoadImage
-//                     src={node.properties.node.src}
+//                     src={node.props.node.src}
 //                     alt=""
 //                     onLoad={(e) => {
 //                       setReady(true);

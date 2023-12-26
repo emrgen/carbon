@@ -257,7 +257,7 @@ export class NodeType {
 
 	createAndFill(): Optional<Node> {
     if (this.defaultNodeCache) {
-      return this.schema.cloneWithId(this.defaultNodeCache);
+      return this.schema.clone(this.defaultNodeCache);
     }
 
     if (this.isText) {

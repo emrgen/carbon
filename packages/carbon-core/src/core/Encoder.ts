@@ -9,7 +9,7 @@ export class NodeEncoderJSON implements NodeEncoder<JSONNode> {
       id: node.id.toString(),
       name: node.name,
       content: node.children.map(n => this.encode(n)),
-      attrs: node.properties,
+      attrs: node.props,
       // data: node.data
     }
   }

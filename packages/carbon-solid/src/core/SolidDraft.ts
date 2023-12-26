@@ -1,48 +1,66 @@
 import * as Core from '@emrgen/carbon-core';
 import {Optional} from "@emrgen/types";
-import {Draft, NodeContent, NodeId, NodePropsJson, NodeType, Point, PointedSelection, State} from "@emrgen/carbon-core";
-import {SolidNode} from "./SolidNode";
+import {
+  Draft,
+  Node, NodeBTree,
+  NodeContent,
+  NodeId,
+  NodeMap,
+  NodePropsJson,
+  NodeType,
+  Point,
+  PointedSelection,
+  State
+} from "@emrgen/carbon-core";
+import {SolidNodeMap} from "./NodeMap";
 
-const draftFactory: Core.DraftFactory = (state: State) => {
-  return new SolidDraft(state);
-}
+export class SolidDraft implements Draft {
 
-export class SolidDraft implements Core.Draft {
+  changes: NodeMap = SolidNodeMap.empty();
 
-  constructor(private state: State) {
+  constructor(private state: State) {}
 
+  produce(fn: (draft: Draft) => void): State {
+    // start recording the changes
+    try {
+      fn(this);
+      this.commit();
+    } catch (e) {
+      this.rollback();
+    } finally {
+      return this.state;
+    }
+  }
+
+  commit() {
+
+  }
+
+  rollback(): void {
+
+  }
+
+  get(id: NodeId): Optional<Node> {
+    return undefined;
+  }
+
+  parent(from: NodeId | Node): Optional<Node> {
+    return undefined;
   }
 
   change(nodeId: NodeId, type: NodeType): void {
   }
 
-  get(id: NodeId): Optional<SolidNode> {
-    return undefined;
+  insert(at: Point, node: Node): void {
   }
 
-  insert(at: Point, node: SolidNode): void {
+  move(to: Point, node: Node): void {
   }
 
-  move(to: Point, node: SolidNode): void {
+  remove(node: Node): void {
   }
 
-  parent(from: NodeId | SolidNode): Optional<SolidNode> {
-    return undefined;
-  }
-
-  produce(fn: (draft: Draft) => void): State {
-    return this.commit();
-  }
-
-  commit(): State {
-    return null as unknown as State;
-  }
-
-  remove(node: SolidNode): void {
-  }
-
-  updateContent(nodeId: NodeId, content: NodeContent): void {
-  }
+  updateContent(nodeId: NodeId, content: Node[]|string): void {}
 
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
   }

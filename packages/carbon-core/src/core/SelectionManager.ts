@@ -1,13 +1,9 @@
-import { last } from 'lodash';
 import { p12, p14 } from "./Logger";
 import { Carbon } from './Carbon';
 import { ActionOrigin } from './actions/types';
 import { PointedSelection } from './PointedSelection';
 import { SelectionEvent } from './SelectionEvent';
-import { EventsOut } from './Event';
-import { Optional } from '@emrgen/types';
 import { PinnedSelection } from './PinnedSelection';
-import { ImmutableDraft } from './ImmutableDraft';
 import {Draft} from "./Draft";
 
 export class SelectionManager {

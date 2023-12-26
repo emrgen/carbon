@@ -21,11 +21,6 @@ export enum Format {
 
 export type InsertPos = "before" | "after" | "prepend" | "append";
 
-export interface NodeIdFactory {
-	blockId(): string;
-	textId(): string;
-}
-
 export type Selection = PinnedSelection | PointedSelection;
 export interface EventHandler {
 	click: EventHandlerFn;

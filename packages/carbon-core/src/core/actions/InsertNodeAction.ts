@@ -5,7 +5,6 @@ import { ActionOrigin } from './types';
 import { classString } from '../Logger';
 import { RemoveNodeAction } from './RemoveNodeAction';
 import { Node } from '../Node';
-import { ImmutableDraft } from '../ImmutableDraft';
 import { deepCloneMap, NodeJSON } from "../types";
 import { NodeId } from "../NodeId";
 import {Draft} from "../Draft";

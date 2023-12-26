@@ -5,7 +5,7 @@ export const useNodeActivated = (props: RendererProps) => {
   const { node } = props;
 
   const activated = useMemo(() => {
-    return node.properties.get(ActivatedPath);
+    return node.props.get(ActivatedPath);
   },[node])
 
   const attributes = useMemo(() => {
