@@ -79,7 +79,7 @@ export const DocumentComp = (props: RendererProps) => {
 
       if (e.clientY > bound.bottom) {
         if (lastChild.name === "section" && lastChild.isEmpty) {
-          const textBlock = lastChild.find((n) => n.isTextBlock);
+          const textBlock = lastChild.find((n) => n.isTextContainer);
           if (textBlock) {
             const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
             if (after.eq(app.selection)) return;

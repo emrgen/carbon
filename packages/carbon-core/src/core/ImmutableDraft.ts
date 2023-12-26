@@ -246,7 +246,7 @@ export class ImmutableDraft implements Draft {
         this.delete(child.id);
       })
 
-      if (node.isTextBlock) {
+      if (node.isTextContainer) {
         node.updateProps({
           [PlaceholderPath]: content.isEmpty ? this.nodeMap.parent(node)?.properties.get<string>(EmptyPlaceholderPath) ?? "" : ""
         });
@@ -305,7 +305,7 @@ export class ImmutableDraft implements Draft {
     }
 
     if (type === "create") {
-      node.forAll(n => {
+      node.all(n => {
         // console.debug("inserting node", n.id.toString(), n.name);
         this.nodeMap.set(n.id, n);
       });
@@ -343,14 +343,14 @@ export class ImmutableDraft implements Draft {
   private prepend(parentId: NodeId, node: Node) {
     this.mutable(parentId, parent => {
       parent.children.forEach(ch => this.mutable(ch.id));
-      parent.prepend(node);
+      parent.insert(node, 0);
       this.contentChanges.add(parent.id);
     });
   }
 
   private append(parentId: NodeId, node: Node) {
     this.mutable(parentId, parent => {
-      parent.append(node);
+      parent.insert(node, parent.size);
       this.contentChanges.add(parent.id);
     });
   }
@@ -372,7 +372,7 @@ export class ImmutableDraft implements Draft {
     }
 
     this.mutable(parentId, parent => {
-      parent.insertBefore(refNode, node);
+      parent.insert(node, refNode.index);
       this.updateDependents(node, UpdateDependent.Next);
       this.contentChanges.add(parent.id);
     });
@@ -396,7 +396,7 @@ export class ImmutableDraft implements Draft {
 
     this.mutable(parentId, parent => {
       this.updateDependents(refNode, UpdateDependent.Next);
-      parent.insertAfter(refNode, node);
+      parent.insert(node, refNode.index + 1);
       this.updateDependents(refNode, UpdateDependent.Prev);
       this.contentChanges.add(parent.id);
     });
@@ -428,7 +428,7 @@ export class ImmutableDraft implements Draft {
       this.contentChanges.add(parent.id);
 
       // if parent title is empty, set placeholder from parent
-      if (parent.isTextBlock && parent.isEmpty) {
+      if (parent.isTextContainer && parent.isEmpty) {
         const placeholder = this.nodeMap.parent(parent)?.properties.get<string>(EmptyPlaceholderPath) ?? "";
         parent.updateProps({
           [PlaceholderPath]: placeholder
@@ -438,7 +438,7 @@ export class ImmutableDraft implements Draft {
       }
     });
 
-    node.forAll(n => {
+    node.all(n => {
       this.delete(n.id);
     });
   }
@@ -451,7 +451,7 @@ export class ImmutableDraft implements Draft {
       node.changeType(type);
       // node.nextSiblings?.forEach(ch => this.mutable(ch.id));
       this.updateDependents(node, UpdateDependent.Next);
-      if (node.isContainerBlock && node.firstChild?.isEmpty) {
+      if (node.isContainer && node.firstChild?.isEmpty) {
         this.mutable(node.firstChild.id, child => {
           child.updateProps({
             [PlaceholderPath]: type.props.get<string>(EmptyPlaceholderPath) ?? ""

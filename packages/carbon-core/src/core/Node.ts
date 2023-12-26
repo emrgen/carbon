@@ -237,14 +237,14 @@ export class Node extends EventEmitter implements IntoNodeId {
       });
     }
 
-    get isTextBlock() {
+    get isTextContainer() {
       return this.type.isTextBlock;
     }
 
     // focus can be within the node(ex: text node), excluding any child node
     get isFocusable(): boolean {
       if (this.parents.some(n => n.isAtom)) return false;
-      return ((this.isTextBlock && this.isEmpty) || this.type.isFocusable) && !this.isCollapseHidden;
+      return ((this.isTextContainer && this.isEmpty) || this.type.isFocusable) && !this.isCollapseHidden;
     }
 
     // a node that does not avoid to have a focus moved in by arrow keys
@@ -419,7 +419,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       return this.children.length === 0;
     }
 
-    get isContainerBlock(): boolean {
+    get isContainer(): boolean {
       return this.type.isBlock && !this.type.isTextBlock
     }
 
@@ -456,7 +456,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       return this.parent?.type.contentMatch.matchFragment(fragment)
     }
 
-    intoNodeId(): NodeId {
+    nodeId(): NodeId {
       return this.id;
     }
 
@@ -563,7 +563,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       return false;
     }
 
-    forAll(fn: With<Node>): void {
+    all(fn: With<Node>): void {
       this.preorder(n => {
         fn(n)
         return false
@@ -665,6 +665,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       return this.parent.next(fn, options, gotoParent);
     }
 
+    // start walking from the node itself
     // walk preorder, traverse order: node -> children -> ...
     walk(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}): boolean {
       const {order = 'pre', direction = 'forward'} = opts;
@@ -704,7 +705,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    replace(node: Node, by: Node | Node[]) {
+    _replace(node: Node, by: Node | Node[]) {
       this.content = this.content.replace(node, flatten([by])).setParentId(this.id)
     }
 
@@ -724,7 +725,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    prepend(node: Node) {
+    _prepend(node: Node) {
       if (node.frozen) {
         throw Error('cannot insert immutable node:' + node.id.toString())
       }
@@ -733,7 +734,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    append(node: Node) {
+    _append(node: Node) {
       if (node.frozen) {
         throw Error('cannot insert immutable node:' + node.id.toString())
       }
@@ -741,8 +742,16 @@ export class Node extends EventEmitter implements IntoNodeId {
       this.content.append([node]);
     }
 
+    insert(node: Node, index: number) {
+      if (node.frozen) {
+        throw Error('cannot insert immutable node:' + node.id.toString())
+      }
+      node.parentId = this.id;
+      this.content.insert(node, index);
+    }
+
     // @mutates
-    insertBefore(before: Node, node: Node) {
+    _insertBefore(before: Node, node: Node) {
       if (node.frozen) {
         throw Error('cannot insert immutable node:' + node.id.toString())
       }
@@ -751,7 +760,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    insertAfter(after: Node, node: Node) {
+    _insertAfter(after: Node, node: Node) {
       if (node.frozen) {
         throw Error('cannot insert immutable node:' + node.id.toString())
       }

@@ -10,7 +10,7 @@ export class SetContentAction implements CarbonAction {
   before: Optional<NodeContent>;
 
   static create(nodeRef: IntoNodeId, after: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContentAction(nodeRef.intoNodeId(), after, null, origin)
+    return new SetContentAction(nodeRef.nodeId(), after, null, origin)
   }
 
   static withContent(nodeId: NodeId, after: NodeContent, before: NodeContent, origin: ActionOrigin = ActionOrigin.UserInput) {

@@ -10,7 +10,7 @@ export class UpdatePropsAction implements CarbonAction {
   private prevProps: Optional<NodePropsJson>;
 
   static create(nodeRef: IntoNodeId, props: Partial<NodePropsJson>, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new UpdatePropsAction(nodeRef.intoNodeId(), props, origin);
+    return new UpdatePropsAction(nodeRef.nodeId(), props, origin);
   }
 
   constructor(readonly nodeId: NodeId, readonly props: Partial<NodePropsJson>, readonly origin: ActionOrigin) {}

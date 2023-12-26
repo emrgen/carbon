@@ -4,7 +4,7 @@ import { NodeId } from './NodeId';
 import { Schema } from './Schema';
 import { BlockContent, InlineContent } from './NodeContent';
 
-import { deepCloneMap, NodeIdFactory } from "@emrgen/carbon-core";
+import {deepCloneMap, IDENTITY_SCOPE, NodeIdFactory} from "@emrgen/carbon-core";
 import { isEmpty } from "lodash";
 import { NodeProps } from "./NodeProps";
 import { v4 as uuidv4 } from 'uuid';
@@ -22,7 +22,7 @@ export class NodeFactory {
 		return uuidv4().slice(-10) + '(' + ++counter + ')';
 	}
 
-	constructor(scope: Symbol) {
+	constructor(scope: Symbol = IDENTITY_SCOPE) {
 		this.scope = scope;
 	}
 
@@ -51,7 +51,7 @@ export class NodeFactory {
 	// clone node with new id
 	cloneWithId(node: Node): Node {
 		const clone = node.clone(deepCloneMap);
-		clone.forAll(n => {
+		clone.all(n => {
 			if (n.name === 'text') {
 				n.id = NodeId.create(NodeFactory.textId());
 			} else {

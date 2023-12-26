@@ -71,7 +71,7 @@ export class Point {
 	}
 
 	constructor(nodeId: IntoNodeId, at: PointAt, offset: number = -1) {
-		this.nodeId = nodeId.intoNodeId();
+		this.nodeId = nodeId.nodeId();
 		this.at = at;
 		this.offset = offset;
 	}

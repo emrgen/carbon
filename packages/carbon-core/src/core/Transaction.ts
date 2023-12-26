@@ -157,15 +157,15 @@ export class Transaction {
 	}
 
 	Remove(at: Point, ref: IntoNodeId, origin = this.origin): Transaction {
-		return this.Add(RemoveNodeAction.fromNode(at, ref.intoNodeId(), origin));
+		return this.Add(RemoveNodeAction.fromNode(at, ref.nodeId(), origin));
 	}
 
 	Move(from: Point, to: Point, ref: IntoNodeId, origin = this.origin): Transaction {
-		return this.Add(MoveNodeAction.create(from, to, ref.intoNodeId(), origin));
+		return this.Add(MoveNodeAction.create(from, to, ref.nodeId(), origin));
 	}
 
 	Change(ref: NodeId | Node, to: NodeName, origin = this.origin): Transaction {
-		return this.Add(ChangeNameAction.create(ref.intoNodeId(), to, origin));
+		return this.Add(ChangeNameAction.create(ref.nodeId(), to, origin));
 	}
 
 	Format(selection: Selection, mark: Mark | MarkSet, origin = this.origin): Transaction {
@@ -184,7 +184,7 @@ export class Transaction {
 	// previously selected nodes will be deselected
 	// previously active nodes will be deactivated
 	private selectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
 		console.log('selectNodes', selectIds.map(id => id.toString()));
 		selectIds.forEach(id => {
 			this.Update(id, { [SelectedPath]: true }, origin)
@@ -194,7 +194,7 @@ export class Transaction {
 	}
 
 	private deselectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
 		selectIds.forEach(id => {
 			console.log('xxx deselecting', id.toString());
 			this.Update(id, { [SelectedPath]: false }, origin)
@@ -204,7 +204,7 @@ export class Transaction {
 	}
 
 	private activateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
 		activateIds.forEach(id => {
 			this.Update(id, { [ActivatedPath]: true }, origin)
 		})
@@ -213,7 +213,7 @@ export class Transaction {
 	}
 
 	private deactivateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
 		activateIds.forEach(id => {
 			this.Update(id, { [ActivatedPath]: false }, origin)
 		})

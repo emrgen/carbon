@@ -200,7 +200,7 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
-      state.content.forAll((node) => {
+      state.content.all((node) => {
         // console.log(node.id.toString(), node.name, node.properties.toKV());
       });
     }

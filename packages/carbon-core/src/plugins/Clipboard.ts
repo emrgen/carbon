@@ -88,7 +88,7 @@ export class ClipboardPlugin extends AfterPlugin {
     // console.log(startNode.id.toString(), endNode.id.toString());
     // console.log(startNode, endNode);
 
-    if (startNode.isTextBlock && startNode.eq(endNode)) {
+    if (startNode.isTextContainer && startNode.eq(endNode)) {
       startNode = endNode = startNode.parent;
     }
     if (!startNode || !endNode) {
@@ -124,9 +124,9 @@ export class ClipboardPlugin extends AfterPlugin {
       if (startPin.node.eq(n)) {
         return true;
       }
-      if (n.isContainerBlock) {
+      if (n.isContainer) {
         deleteGroup.addId(n.id);
-      } else if (n.isTextBlock) {
+      } else if (n.isTextContainer) {
         n.children.map(n => deleteGroup.addId(n.id));
       }
       return false;
@@ -139,9 +139,9 @@ export class ClipboardPlugin extends AfterPlugin {
       if (endPin.node.eq(n)) {
         return true;
       }
-      if (n.isContainerBlock) {
+      if (n.isContainer) {
         deleteGroup.addId(n.id);
-      } else if (n.isTextBlock) {
+      } else if (n.isTextContainer) {
         n.children.map(n => deleteGroup.addId(n.id));
       }
       return false;
@@ -177,7 +177,7 @@ export class ClipboardPlugin extends AfterPlugin {
     // remove the nodes outside the selection
     root.walk(n => {
       if (n === root) return false;
-      if (!n.isTextBlock) return false;
+      if (!n.isTextContainer) return false;
       deleteGroup.ranges.forEach(r => {
 
         console.log(n.textContent);
@@ -202,7 +202,7 @@ export class ClipboardPlugin extends AfterPlugin {
     // remove nodes outside the selection
     root.walk(n => {
       if (n === root) return false;
-      if (n.isTextBlock) return false;
+      if (n.isTextContainer) return false;
 
       if (deleteGroup.has(n.id)) {
         n.parent?.remove(n)
@@ -212,7 +212,7 @@ export class ClipboardPlugin extends AfterPlugin {
 
     let startPath: number[] = [];
     let endPath: number[] = [];
-    root.forAll(n => {
+    root.all(n => {
       if (n.eq(start.node)) {
         startPath = n.path
       }

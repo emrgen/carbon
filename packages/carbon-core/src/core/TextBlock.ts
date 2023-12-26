@@ -19,7 +19,7 @@ export class TextBlock {
   }
 
   constructor(node: Node) {
-    if (!node.isTextBlock) {
+    if (!node.isTextContainer) {
       throw new Error('can not create text block from non text block node');
     }
 
@@ -68,7 +68,10 @@ export class TextBlock {
     }, [] as Node[]);
 
 
-    this.node.replace(found, nodes);
+
+    // NOTE TO ME: this line is required to make the code work
+    // this.node.replace(found, nodes);
+
     // normalize the content
     this.normalize();
   }

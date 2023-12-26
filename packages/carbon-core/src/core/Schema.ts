@@ -1,12 +1,12 @@
 import { Optional } from '@emrgen/types';
-import { each } from 'lodash';
+import {each, isArray} from 'lodash';
 import { ContentMatch } from './ContentMatch';
 import { Node } from './Node';
 import { MarkType, NodeType } from "./NodeType";
 import { NodeFactory } from './NodeFactory';
 import {NodeIdFactory, NodeJSON, NodeName} from "./types";
 import { Mark, MarkProps } from "./Mark";
-import {InitNodeJSON} from "@emrgen/carbon-core";
+import {InitNodeJSON} from "@emrgen/carbon-react";
 
 interface SchemaSpec {
 	nodes: Record<NodeName, NodeSpec>;

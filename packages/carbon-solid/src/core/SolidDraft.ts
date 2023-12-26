@@ -1,7 +1,7 @@
 import * as Core from '@emrgen/carbon-core';
 import {Optional} from "@emrgen/types";
 import {Draft, NodeContent, NodeId, NodePropsJson, NodeType, Point, PointedSelection, State} from "@emrgen/carbon-core";
-import {Node} from "./Node";
+import {SolidNode} from "./SolidNode";
 
 const draftFactory: Core.DraftFactory = (state: State) => {
   return new SolidDraft(state);
@@ -16,17 +16,17 @@ export class SolidDraft implements Core.Draft {
   change(nodeId: NodeId, type: NodeType): void {
   }
 
-  get(id: NodeId): Optional<Node> {
+  get(id: NodeId): Optional<SolidNode> {
     return undefined;
   }
 
-  insert(at: Point, node: Node): void {
+  insert(at: Point, node: SolidNode): void {
   }
 
-  move(to: Point, node: Node): void {
+  move(to: Point, node: SolidNode): void {
   }
 
-  parent(from: NodeId | Node): Optional<Node> {
+  parent(from: NodeId | SolidNode): Optional<SolidNode> {
     return undefined;
   }
 
@@ -38,7 +38,7 @@ export class SolidDraft implements Core.Draft {
     return null as unknown as State;
   }
 
-  remove(node: Node): void {
+  remove(node: SolidNode): void {
   }
 
   updateContent(nodeId: NodeId, content: NodeContent): void {

@@ -4,7 +4,7 @@ const NullId = '0000000000';
 const IdentityId = '0000000001';
 
 export interface IntoNodeId {
-	intoNodeId(): NodeId;
+	nodeId(): NodeId;
 }
 
 export class NodeId implements IntoNodeId {
@@ -31,7 +31,7 @@ export class NodeId implements IntoNodeId {
 
 	private constructor(readonly id: string) {}
 
-	intoNodeId() {
+	nodeId() {
 		return this;
 	}
 

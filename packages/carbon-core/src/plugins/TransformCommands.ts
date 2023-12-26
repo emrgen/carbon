@@ -206,7 +206,7 @@ export class TransformCommands extends BeforePlugin {
     let focusNode: Optional<Node> = null;
     reverse(nodes.slice()).some(n => {
       return n.find(n => {
-        if (n.isTextBlock) {
+        if (n.isTextContainer) {
           focusNode = n;
           return true;
         }
@@ -468,7 +468,7 @@ export class TransformCommands extends BeforePlugin {
 
       const at = Point.toAfter(splitBlock!.id);
 
-      if (commonNode.isContainerBlock) {
+      if (commonNode.isContainer) {
         const block = splitBlock.type.default();
         if (!block) {
           throw Error('failed to create block');
@@ -819,7 +819,7 @@ export class TransformCommands extends BeforePlugin {
           console.warn("failed to create firstNode of type", splitNode.type?.name);
           return;
         }
-        parentBlock.append(firstNode);
+        parentBlock.insert(firstNode, parentBlock.size);
         // move the split node next siblings to root node
         // only if spit pos === 'out'
         if (opts?.pos === "out") {
@@ -1144,7 +1144,7 @@ export class TransformCommands extends BeforePlugin {
         // }
 
         // must be equal, otherwise the blocks can not be merged
-        if (startContainer?.isTextBlock && endContainer?.isTextBlock) {
+        if (startContainer?.isTextContainer && endContainer?.isTextContainer) {
           const textContent = startTextBlock.textContent.slice(0, start.offset) + endTextBlock.textContent.slice(end.offset);
           const textNode = app.schema.text(textContent)!;
           insertCommands.push(SetContentAction.withContent(startContainer.id, BlockContent.create([textNode]), startContainer.content));
@@ -1216,8 +1216,8 @@ export class TransformCommands extends BeforePlugin {
     if (startDepth < endDepth) {
       console.log('CASE: startBlock.depth < endBlock.depth');
       console.log('+==================+');
-      const lowestStartContainer = startTopBlock.chain.find(n => n.isContainerBlock);
-      const lowestEndContainer = endTopBlock.chain.find(n => n.isContainerBlock);
+      const lowestStartContainer = startTopBlock.chain.find(n => n.isContainer);
+      const lowestEndContainer = endTopBlock.chain.find(n => n.isContainer);
 
       const lastInsertedNodeId = handleUptoSameDepth();
 
@@ -1396,7 +1396,7 @@ export class TransformCommands extends BeforePlugin {
     };
 
     if (startBlock.eq(endBlock)) {
-      if (startBlock.isTextBlock) {
+      if (startBlock.isTextContainer) {
         selectedGroup.addRange(Range.create(start, end));
       } else if (startBlock.type.isAtom) {
         // is it required???
@@ -1406,7 +1406,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     // delete text range from startNode
-    if (startBlock.isTextBlock && !startInfo.isEmpty) {
+    if (startBlock.isTextContainer && !startInfo.isEmpty) {
       selectedGroup.addRange(Range.create(start.clone(), Pin.create(start.node, start.node.focusSize)));
     } else if (startBlock.type.isAtom) {
       collectId(startBlock.id);
@@ -1414,7 +1414,7 @@ export class TransformCommands extends BeforePlugin {
     startRemoveBlock = startBlock.next();
 
     // delete text range from endNode
-    if (endBlock.isTextBlock && !endInfo.isEmpty) {
+    if (endBlock.isTextContainer && !endInfo.isEmpty) {
       selectedGroup.addRange(Range.create(Pin.create(end.node, 0), end.clone()));
     } else if (endBlock.type.isAtom) {
       collectId(endBlock.id);
@@ -1436,8 +1436,8 @@ export class TransformCommands extends BeforePlugin {
     // console.log(startNode, endNode);
     // console.log(startNode.textContent, endNode.textContent);
 
-    const startContainer = startRemoveBlock.closest(n => n.isContainerBlock)
-    const endContainer = endRemoveBlock.closest(n => n.isContainerBlock)
+    const startContainer = startRemoveBlock.closest(n => n.isContainer)
+    const endContainer = endRemoveBlock.closest(n => n.isContainer)
 
     if (!startContainer || !endContainer) {
       console.log(p14("%c[failed]"), "color:red", "start/end node container not found");
@@ -1579,7 +1579,7 @@ export class TransformCommands extends BeforePlugin {
 
     // merge text blocks
     // TODO: need to test intensively for edge cases
-    if (prev.isTextBlock && next.isTextBlock) {
+    if (prev.isTextContainer && next.isTextContainer) {
       // NOTE: if next is empty, it will create a empty text node
       // empty text node will cause issue in `mergeTextNodes`
       // NOTE: empty text node are not valid in carbon

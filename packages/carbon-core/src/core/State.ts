@@ -38,7 +38,7 @@ export class State extends EventEmitter {
 	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: NodeMap = new NodeMap()) {
 		const state = new State({ content, selection, scope, nodeMap });
 		if (!nodeMap.size) {
-			content.forAll(n => {
+			content.all(n => {
 				nodeMap.set(n.id, n)
 				state.changes.add(n.id);
 			});

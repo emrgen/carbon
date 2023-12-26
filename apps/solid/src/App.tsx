@@ -1,66 +1,128 @@
 // import { createSignal } from 'solid-js'
 import './App.css'
 
-import {Node} from '@emrgen/carbon-solid';
+import {SolidNodeFactory} from '@emrgen/carbon-solid';
+import {blockPresetPlugins} from '@emrgen/carbon-blocks';
+import {Schema, PluginManager, Node, RendererProps, InlineContent, BlockContent, NodeMap} from '@emrgen/carbon-core';
+import {For} from "solid-js";
 
-import {createContext, createSignal, For} from "solid-js";
-import {createStore} from "solid-js/store";
+const plugins = [
+  ...blockPresetPlugins,
+]
+
+const pm = new PluginManager(plugins);
+const {specs} = pm;
+const schema = new Schema(specs, new SolidNodeFactory());
+// @ts-ignore
+window.schema = schema
+console.log(schema)
+
+const section = schema.type('section');
+
+const content = section.create([
+  schema.text('Hello')!,
+  section.create([
+    schema.text('World')!,
+  ])!,
+])!;
+
+// console.log(content?.textContent);
+// console.log(content);
+
+// @ts-ignore
+window.content = content;
+
+const map = NodeMap.empty();
+
+content.all(n => {
+  map.set(n.id, n);
+})
 
 function App() {
-  // const [count, setCount] = createSignal(0)
-
-  const [state, setState] = createStore({
-    key: 1,
-    isBlock: true,
-    children: [
-      {
-        key: 2,
-        isText: true,
-        textContent: "Hello"
-      },
-      {
-        key: 3,
-        isText: true,
-        textContent: "World"
-      }
-    ],
-  });
-
   const handleClick = () => {
-    setState("children", 0, "textContent", "Changed");
-  }
+    const newContent = section.create([
+      schema.text('New')!,
+    ])!
+    // content?.children.push(
+    //   section.create([
+    //     schema.text('New')!,
+    //   ])!
+    // );
+
+    content.updateContent(BlockContent.create(
+      [
+        ...content.children,
+        newContent,
+      ]
+    )!)
+  };
 
   return (
     <>
       <button onclick={handleClick}>Click</button>
       <div class={"bg-indigo-500 text-sky-400"}>
         123
-        {render(state as any)}
+        {render(content, map)}
       </div>
     </>
   )
 }
 
-
 // const RenderContext = createContext(null);
 
-const render = (node: Node) => {
-  console.log(node)
+const render = (node: Node, map: NodeMap) => {
+  // console.log(node)
   if (node.isBlock) {
-    return (
-      <div data-id={node.key}>
-        <For each={node.children}>
-          {(child) => render(child as any)}
-        </For>
-      </div>
-    );
+    return <BlockElement node={node} map={map}/>;
   }
 
   if (node.isText) {
-    return <span data-id={node.key}>{node.textContent + ' '}</span>;
+    return <TextElement node={node} map={map}/>;
   }
 
   return null;
 }
+
+const BlockElement = (props: RendererProps) => {
+  const {node, map} = props;
+  return (
+    <div data-name={node.name} data-id={node.key} >
+      <For each={node.children}>
+        {(child) => {
+          console.log('render child', child.key);
+
+          return render(child, map);
+        }}
+      </For>
+    </div>
+  );
+}
+
+const TextElement = (props: RendererProps) => {
+  const {node, map} = props;
+  const changeTextRandomly = () => {
+    const target = map.get(node.id);
+    console.log(target.key, target.textContent, target)
+    target.parent.updateContent(BlockContent.create([
+      section.create([
+        schema.text('Changed 1')!
+      ])!,
+      section.create([
+        schema.text('Changed 2')!
+      ])!
+    ]));
+    // target.parent.updateContent(InlineContent.create('Changed')!);
+  }
+
+  return (
+    <span data-name={node.name} data-id={node.key} onclick={changeTextRandomly}>
+      <span >
+        {node.textContent + ' '}
+      </span>
+      <span>{node.path.join(',')}</span>
+    </span>
+  );
+}
+
 
 export default App

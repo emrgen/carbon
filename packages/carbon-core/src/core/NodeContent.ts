@@ -32,7 +32,7 @@ export interface NodeContent {
 	toJSON(): any;
 }
 
-interface BlockContentProps {
+export interface BlockContentProps {
 	nodes: Node[]
 }
 
@@ -97,7 +97,7 @@ export class BlockContent implements NodeContent {
 
 	insert(node: Node, offset: number): NodeContent {
 		const { children } = this;
-		this.nodes = flatten([children.slice(0, offset), node, children.slice(offset)]);
+		this.nodes = [...children.slice(0, offset), node, ...children.slice(offset)];
 		return this;
 	}
 
@@ -186,7 +186,7 @@ export class BlockContent implements NodeContent {
 	}
 }
 
-interface TextContentProps {
+export interface TextContentProps {
 	text: string
 }
 

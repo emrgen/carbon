@@ -153,7 +153,7 @@ export class KeyboardPlugin extends AfterPlugin {
 						return
 					}
 
-					const block = node.find(n => !n.eq(node) && n.isContainerBlock)
+					const block = node.find(n => !n.eq(node) && n.isContainer)
 					if (!block) return
 					cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 					return
@@ -230,8 +230,8 @@ export class KeyboardPlugin extends AfterPlugin {
 		// console.log('1111111', head.isAtStartOfNode(node), head, node);
 		if (head.isAtStartOfNode(head.node)) {
 			const { start } = selection;
-			const textBlock = start.node.chain.find(n => n.isTextBlock)
-			const prevTextBlock = textBlock?.prev(n => !n.isIsolate && n.isTextBlock, { skip: n => n.isIsolate });
+			const textBlock = start.node.chain.find(n => n.isTextContainer)
+			const prevTextBlock = textBlock?.prev(n => !n.isIsolate && n.isTextContainer, { skip: n => n.isIsolate });
 			if (!prevTextBlock || !textBlock) {
 				console.log('no prev text block found');
 				return
@@ -456,7 +456,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		// const splitBlock = node.closest(n => n.canSplit);
 		// node.chain.forEach(n => console.log(n.name, n.groups));
 		const splitBlock = node.closest(n => n.type.splits);
-		const nonSplit = node.closest(n => n.isContainerBlock && !n.type.splits);
+		const nonSplit = node.closest(n => n.isContainer && !n.type.splits);
 
 		if (nonSplit && splitBlock && nonSplit.depth > splitBlock.depth) {
 			preventAndStopCtx(ctx);
@@ -502,8 +502,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		if (head.isAtEndOfNode(node)) {
 			const { start } = selection;
-			const textBlock = start.node.chain.find(n => n.isTextBlock)
-			const nextTextBlock = textBlock?.next(n => !n.isIsolate && n.isTextBlock, { skip: n => n.isIsolate });
+			const textBlock = start.node.chain.find(n => n.isTextContainer)
+			const nextTextBlock = textBlock?.next(n => !n.isIsolate && n.isTextContainer, { skip: n => n.isIsolate });
 			if (!nextTextBlock || !textBlock) return
 
 			cmd.transform.merge(textBlock, nextTextBlock)?.Dispatch();
@@ -576,10 +576,10 @@ export class KeyboardPlugin extends AfterPlugin {
 
 // find previous selectable block wrt the node
 const prevSelectableBlock = (node: Node, within = true) => {
-	const block = node.chain.find(n => n.isContainerBlock) as Node;
+	const block = node.chain.find(n => n.isContainer) as Node;
   if (!within) {
     const { prevSibling } = block
-    if (prevSibling?.isContainerBlock) {
+    if (prevSibling?.isContainer) {
       return prevSibling
     }
   }

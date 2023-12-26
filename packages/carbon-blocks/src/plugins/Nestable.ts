@@ -204,7 +204,7 @@ export class NestablePlugin extends AfterPlugin {
 				const { selection } = app;
 				console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
 
-				const container = node.closest(n => n.isContainerBlock);
+				const container = node.closest(n => n.isContainer);
 				console.log(container?.name, node.name, node.type.isBlock && !node.type.isTextBlock);
 				console.log(node.chain.map(n => n.name).join(' > '));
 

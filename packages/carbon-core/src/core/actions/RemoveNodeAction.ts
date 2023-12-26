@@ -15,7 +15,7 @@ export class RemoveNodeAction implements CarbonAction {
 	private node: Optional<NodeJSON>;
 
 	static fromNode(at: Point, ref: NodeId | Node, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new RemoveNodeAction(at, ref.intoNodeId(), null, origin);
+		return new RemoveNodeAction(at, ref.nodeId(), null, origin);
 	}
 
 	static create(at: Point, nodeId: NodeId, json: Optional<NodeJSON>,origin: ActionOrigin = ActionOrigin.UserInput) {

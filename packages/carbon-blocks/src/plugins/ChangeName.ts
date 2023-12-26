@@ -49,7 +49,7 @@ export class ChangeName extends BeforePlugin {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
         const { node } = ctx;
-        const block = node.closest(n => n.isContainerBlock)!;
+        const block = node.closest(n => n.isContainer)!;
 
         if (!isConvertible(block)) return
         if (this.inputRules.process(ctx, block)) {
@@ -63,7 +63,7 @@ export class ChangeName extends BeforePlugin {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app, cmd } = ctx;
       const { selection } = app;
-      const block = node.closest(n => n.isContainerBlock)!;
+      const block = node.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
 
       const type = app.schema.type(name);
@@ -135,7 +135,7 @@ export class ChangeName extends BeforePlugin {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app, cmd } = ctx;
       const {selection} = app;
-      const block = node.closest(n => n.isContainerBlock)!;
+      const block = node.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
       preventAndStopCtx(ctx)
 
@@ -164,7 +164,7 @@ export class ChangeName extends BeforePlugin {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app, cmd } = ctx;
       const { selection } = app;
-      const block = node.closest(n => n.isContainerBlock)!;
+      const block = node.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
 
       console.log('tryChangeType', ctx.node.textContent, name);
