@@ -5,6 +5,7 @@ import { Transaction } from "../Transaction";
 import { ActionOrigin, CarbonAction } from "./types";
 import { Optional } from '@emrgen/types';
 import { ImmutableDraft } from '../ImmutableDraft';
+import {Draft} from "@emrgen/carbon-core";
 
 export class SetContentAction implements CarbonAction {
   before: Optional<NodeContent>;
@@ -19,7 +20,7 @@ export class SetContentAction implements CarbonAction {
 
   constructor(readonly nodeId: NodeId, readonly after: NodeContent, before: Optional<NodeContent>, readonly origin: ActionOrigin) {}
 
-  execute(tr: Transaction, draft: ImmutableDraft) {
+  execute(tr: Transaction, draft: Draft) {
     const {app,} = tr
     const {nodeId, after} = this
     const node = draft.get(nodeId);

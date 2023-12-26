@@ -50,12 +50,12 @@ export class TextBlock {
     }
 
     if (offset <= 0) {
-      this.node.content.prepend([node]);
+      // this.node.content.prepend([node]);
       return;
     }
 
     if (offset >= this.node.focusSize) {
-      this.node.content.append([node]);
+      // this.node.content.append([node]);
       return;
     }
 
@@ -91,15 +91,6 @@ export class TextBlock {
     }
   }
 
-  tryMerge(other: TextBlock): Optional<TextBlock> {
-    const node = this.node.tryMerge(other.node);
-    if (!node) {
-      return null;
-    }
-
-    return new TextBlock(node);
-  }
-
   private normalize(): TextBlock {
     const nodes = reduce(this.node.children, (acc, curr) => {
       if (acc.length === 0) {
@@ -108,12 +99,12 @@ export class TextBlock {
 
       const prev = acc[acc.length - 1];
 
-      const newNode = prev.tryMerge(curr);
-      if (!newNode) {
-        return [...acc, curr]
-      }
+      // const newNode = prev.tryMerge(curr);
+      // if (!newNode) {
+      //   return [...acc, curr]
+      // }
 
-      return [...acc.slice(0, -1), newNode];
+      return [...acc.slice(0, -1)];
     }, [] as Node[]);
 
     this.node.content = BlockContent.create(nodes);

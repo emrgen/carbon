@@ -14,17 +14,12 @@ export interface NodeContent {
 
 	setParentId(parentId: NodeId): NodeContent;
 	setParent(parent: Node): NodeContent;
-	replace(node: Node, by: Node[]): NodeContent;
-	prepend(nodes: Node[]): NodeContent;
-	append(nodes: Node[]): NodeContent;
 	insert(node: Node, offset: number): NodeContent;
-	insertBefore(before: Node, node: Node[]): NodeContent;
-	insertAfter(after: Node, node: Node[]): NodeContent;
 	remove(node: Node): boolean;
-	tryMerge(other: NodeContent): Optional<NodeContent>;
 	split(offset: number): [NodeContent, NodeContent];
 
-	updateText(text: string): void;
+	insertText(text: string, offset: number): void;
+  removeText(offset: number, length: number): void;
 
 	view(container: Node[]): NodeContent;
 	clone(map: Maps<Node, Optional<Node>>): NodeContent;
@@ -37,7 +32,8 @@ export interface BlockContentProps {
 }
 
 export class BlockContent implements NodeContent {
-	nodes: Node[]
+	nodes: Node[];
+  text: string;
 	frozen: boolean = false
 
 	version: number = 0;
@@ -60,6 +56,7 @@ export class BlockContent implements NodeContent {
 
 	constructor(props: BlockContentProps) {
 		this.nodes = props.nodes
+    this.text = '';
 	}
 
 	get isEmpty() {
@@ -71,8 +68,22 @@ export class BlockContent implements NodeContent {
 	}
 
 	get textContent(): string {
+    if (this.text) {
+      return this.text
+    }
+
 		return this.children.reduce((text, node) => text + node.textContent, '');
 	}
+
+  insertText(text: string, offset: number): void {
+    this.text = this.text.slice(0, offset) + text + this.text.slice(offset);
+    this.version += 1;
+  }
+
+  removeText(offset: number, length: number): void {
+    this.text = this.text.slice(0, offset) + this.text.slice(offset + length);
+    this.version += 1;
+  }
 
 	setParentId(parentId: NodeId): NodeContent {
 		// if (this.frozen) return this
@@ -162,10 +173,6 @@ export class BlockContent implements NodeContent {
 
 	destroy() { }
 
-	updateText(text: string) {
-		throw new Error("Not implemented");
-	}
-
 	freeze() {
 		if (this.frozen) return this;
 		this.frozen = true;
@@ -227,14 +234,6 @@ export class InlineContent implements NodeContent {
 		this.text = props.text;
 	}
 
-	// setProps(props: TextContentProps): void {
-	// 	this.text = props.text;
-	// }
-
-	destroyShallow() {
-		throw new Error('Method not implemented for InlineContent');
-	}
-
 	setParentId(parentId: NodeId): NodeContent {
 		return this;
 	}
@@ -243,40 +242,12 @@ export class InlineContent implements NodeContent {
 		return this;
 	}
 
-	prepend(nodes: Node[]): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
-
-	append(nodes: Node[]): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
-
-	replace(node: Node, by: Node[]): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
-
 	insert(node: Node, offset: number): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
-
-	insertBefore(before: Node, nodes: Node[]): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
-
-	insertAfter(after: Node, nodes: Node[]): NodeContent {
 		throw new Error("Not implemented for InlineContent");
 	}
 
 	remove(node: Node): boolean {
 		return false
-	}
-
-	tryMerge(other: NodeContent): Optional<NodeContent> {
-		if (other instanceof InlineContent) {
-			return InlineContent.create(this.text + other.text);
-		}
-
-		return null;
 	}
 
 	split(offset: number): [NodeContent, NodeContent] {
@@ -286,10 +257,15 @@ export class InlineContent implements NodeContent {
 		return [left, right];
 	}
 
-	updateText(text: string) {
+	insertText(text: string) {
 		this.text = text;
 		this.version += 1;
 	}
+
+  removeText(offset: number, length: number) {
+    this.text = this.text.slice(0, offset) + this.text.slice(offset + length);
+    this.version += 1;
+  }
 
 	view(): NodeContent {
 		return this

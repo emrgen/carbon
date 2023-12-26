@@ -704,11 +704,6 @@ export class Node extends EventEmitter implements IntoNodeId {
       return nodes;
     }
 
-    // @mutates
-    _replace(node: Node, by: Node | Node[]) {
-      this.content = this.content.replace(node, flatten([by])).setParentId(this.id)
-    }
-
     link(name: string, node: Node) {
       if (this.frozen) {
         throw Error('cannot link immutable node:' + node.id.toString())
@@ -725,47 +720,12 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    _prepend(node: Node) {
-      if (node.frozen) {
-        throw Error('cannot insert immutable node:' + node.id.toString())
-      }
-      node.parentId = this.id;
-      this.content.prepend([node]);
-    }
-
-    // @mutates
-    _append(node: Node) {
-      if (node.frozen) {
-        throw Error('cannot insert immutable node:' + node.id.toString())
-      }
-      node.parentId = this.id;
-      this.content.append([node]);
-    }
-
     insert(node: Node, index: number) {
       if (node.frozen) {
         throw Error('cannot insert immutable node:' + node.id.toString())
       }
       node.parentId = this.id;
       this.content.insert(node, index);
-    }
-
-    // @mutates
-    _insertBefore(before: Node, node: Node) {
-      if (node.frozen) {
-        throw Error('cannot insert immutable node:' + node.id.toString())
-      }
-      node.parentId = this.id;
-      this.content.insertBefore(before, [node]);
-    }
-
-    // @mutates
-    _insertAfter(after: Node, node: Node) {
-      if (node.frozen) {
-        throw Error('cannot insert immutable node:' + node.id.toString())
-      }
-      node.parentId = this.id;
-      this.content.insertAfter(after, [node]);
     }
 
     // @mutates
@@ -806,17 +766,17 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    tryMerge(other: Node): Optional<Node> {
-      // TODO: use more general merge compatibility check
-      if (this.type !== other.type) return null;
-      if (!this.marks.eq(other.marks)) return null;
-
-      const merged = this.content.tryMerge(other.content);
-
-      if (!merged) return null;
-
-      this.updateContent(merged);
-    }
+    // tryMerge(other: Node): Optional<Node> {
+    //   // TODO: use more general merge compatibility check
+    //   if (this.type !== other.type) return null;
+    //   if (!this.marks.eq(other.marks)) return null;
+    //
+    //   const merged = this.content.tryMerge(other.content);
+    //
+    //   if (!merged) return null;
+    //
+    //   this.updateContent(merged);
+    // }
 
     compatible(other: Node) {
       throw new Error('not implemented')

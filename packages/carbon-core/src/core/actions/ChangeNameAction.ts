@@ -4,6 +4,7 @@ import { Transaction } from '../Transaction';
 import { NodeName } from '../types';
 import { CarbonAction, ActionOrigin } from './types';
 import { ImmutableDraft } from '../ImmutableDraft';
+import {Draft} from "@emrgen/carbon-core";
 
 export class ChangeNameAction implements CarbonAction{
 	from: string = '';
@@ -20,7 +21,7 @@ export class ChangeNameAction implements CarbonAction{
 		this.from = from;
 	}
 
-	execute(tr: Transaction, draft: ImmutableDraft) {
+	execute(tr: Transaction, draft: Draft) {
 		const { nodeId, to } = this;
 		const target = draft.get(nodeId);
 		if (!target) {

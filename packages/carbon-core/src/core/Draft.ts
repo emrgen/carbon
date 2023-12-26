@@ -11,22 +11,20 @@ export type DraftFactory = (state: State) => Draft;
 export interface Draft {
   // once the producer is created it is bound to a state
   // the bounded state is passed to this method to produce a new state
+  // rollback on error inside the fn
   produce(fn: (draft: Draft) => void): State;
 
   // private commit(): State;
-  updateContent(nodeId: NodeId, content: NodeContent): void;
   insert(at: Point, node: Node): void;
   move(to: Point, node: Node): void
   remove(node: Node): void;
-
   change(nodeId: NodeId, type: NodeType): void;
-
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>): void
-
+  updateContent(nodeId: NodeId, content: NodeContent): void;
   updateSelection(selection: PointedSelection): void;
 
+  // used to verify and prepare the actions before apply
   get(id: NodeId): Optional<Node>;
-
   parent(from: NodeId|Node): Optional<Node>;
 
 }

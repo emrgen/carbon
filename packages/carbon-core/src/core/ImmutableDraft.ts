@@ -241,6 +241,10 @@ export class ImmutableDraft implements Draft {
     }
 
     this.mutable(nodeId, node => {
+      if (!node.isTextContainer && !node.isText) {
+        throw new Error("Cannot update content on a node that is not a text container");
+      }
+
       node.descendants().forEach(child => {
         // console.log('removing content child', child.id.toString());
         this.delete(child.id);

@@ -17,8 +17,8 @@ export class NodeLinks {
       throw new Error("Cannot link frozen node");
     }
 
-    // node.link = name;
-    // this.nodes.set(node.link, node);
+    node.linkName = name;
+    this.nodes.set(node.linkName, node);
   }
 
   unlink(name: string): Optional<Node> {

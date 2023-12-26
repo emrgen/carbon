@@ -241,7 +241,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
       const { app } = this;
       const { selection } = this.state;
-      if (this.state.previous?.selection?.eq(selection) && selection.origin === ActionOrigin.DomSelectionChange) {
+      if (!this.state.isSelectionChanged && selection.origin === ActionOrigin.DomSelectionChange) {
         console.log("skipped: unchanged selection sync", selection.origin, selection.toString());
         return;
       }

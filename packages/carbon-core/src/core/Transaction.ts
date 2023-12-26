@@ -147,6 +147,7 @@ export class Transaction {
 		return this.Add(SelectAction.create(this.state.selection.unpin(), after, origin));
 	}
 
+  // can be called for textContainer only
 	SetContent(nodeRef: IntoNodeId, after: NodeContent, origin = this.origin): Transaction {
 		return this.Add(SetContentAction.create(nodeRef, after, origin));
 	}
@@ -261,7 +262,7 @@ export class Transaction {
 		return this;
 	}
 
-	Commit(draft: Draft): Transaction {
+	Commit(draft: Draft) {
 		if (this.actions.length === 0) return this
 		if (this._committed) {
 			console.warn('skipped: transaction already committed')
@@ -289,7 +290,6 @@ export class Transaction {
 		} finally {
 			console.groupEnd()
 			this._committed = true;
-			return this;
 		}
 	}
 

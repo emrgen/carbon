@@ -1,10 +1,9 @@
-// import { createSignal } from 'solid-js'
 import './App.css'
 
 import {SolidNodeFactory} from '@emrgen/carbon-solid';
 import {blockPresetPlugins} from '@emrgen/carbon-blocks';
-import {Schema, PluginManager, Node, RendererProps, InlineContent, BlockContent, NodeMap} from '@emrgen/carbon-core';
-import {For} from "solid-js";
+import {Schema, PluginManager, Node, RendererProps, BlockContent, NodeMap} from '@emrgen/carbon-core';
+import {createEffect, createSignal, For} from "solid-js";
 
 const plugins = [
   ...blockPresetPlugins,
@@ -43,19 +42,21 @@ function App() {
     const newContent = section.create([
       schema.text('New')!,
     ])!
-    // content?.children.push(
-    //   section.create([
-    //     schema.text('New')!,
-    //   ])!
-    // );
-
     content.updateContent(BlockContent.create(
       [
         ...content.children,
         newContent,
       ]
     )!)
+
+    newContent.all(n => {
+      map.set(n.id, n);
+    })
+
+    setCount(count() + 1)
   };
+
+  const [count, setCount] = createSignal(0)
 
   return (
     <>
@@ -89,8 +90,6 @@ const BlockElement = (props: RendererProps) => {
     <div data-name={node.name} data-id={node.key} >
       <For each={node.children}>
         {(child) => {
-          console.log('render child', child.key);
-
           return render(child, map);
         }}
       </For>
@@ -101,9 +100,14 @@ const BlockElement = (props: RendererProps) => {
 const TextElement = (props: RendererProps) => {
   const {node, map} = props;
   const changeTextRandomly = () => {
-    const target = map.get(node.id);
+
+    const target = map.get(node.id) as Node;
+    if (!target) {
+      console.log('target not found', node.id, node.textContent, node, map)
+      return;
+    }
     console.log(target.key, target.textContent, target)
-    target.parent.updateContent(BlockContent.create([
+    target.parent?.updateContent(BlockContent.create([
       section.create([
         schema.text('Changed 1')!
       ])!,
@@ -111,6 +115,9 @@ const TextElement = (props: RendererProps) => {
         schema.text('Changed 2')!
       ])!
     ]));
+    target.parent?.all(n => {
+      map.set(n.id, n);
+    })
     // target.parent.updateContent(InlineContent.create('Changed')!);
   }
 
