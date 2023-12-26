@@ -187,19 +187,6 @@ export class PluginManager {
 	// 	each(this.after, p => p.select(event));
 	// }
 
-	decoration(app: Carbon) {
-		const { decorations } = app.state;
-		// each(this.before, p => {
-		// 	p.decoration(react).forEach(d => decorations.set(d.span, d));
-		// });
-		// each(this.nodes, p => {
-		// 	p.decoration(react).forEach(d => decorations.set(d.span, d));
-		// })
-		// each(this.after, p => {
-		// 	p.decoration(react).forEach(d => decorations.set(d.span, d));
-		// });
-	}
-
 	onTransaction(tr: Transaction) {
 		each(this.before, p => p.transaction(tr));
 		each(this.after, p => p.transaction(tr));

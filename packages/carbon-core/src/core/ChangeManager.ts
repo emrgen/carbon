@@ -32,7 +32,6 @@ export class ChangeManager extends NodeTopicEmitter {
 
   promiseState: PromiseState;
 
-  counter: number = 0;
   private interval: any;
 
   constructor(
@@ -62,21 +61,14 @@ export class ChangeManager extends NodeTopicEmitter {
     return this.state.isSelectionChanged;
   }
 
-  get stateCounter() {
-    return this.app.state.counter;
-  }
-
   // 1. sync the doc
   // 2. sync the selection
   // 3. sync the node state
   update(tr: Transaction, state: State, timeout: number = 1000) {
-    this.counter = this.stateCounter;
-
     if (this.transactions.length) {
       // this.promiseState.reject?.();
       return;
     }
-
 
     this.transactions.push(tr);
     const { isContentChanged, isSelectionChanged } = this.state;
@@ -235,7 +227,7 @@ export class ChangeManager extends NodeTopicEmitter {
       }
 
       if (!this.state.isSelectionChanged) {
-        console.log("skipped: selection already synced", this.state.selectionOrigin, this.state.selection.toString());
+        console.log("skipped: selection already synced", this.state.selection.origin, this.state.selection.toString());
         return;
       }
 

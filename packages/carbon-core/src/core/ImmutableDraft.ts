@@ -140,7 +140,6 @@ export class ImmutableDraft implements Draft {
       selection: after,
       nodeMap,
       changes,
-      counter: state.counter + 1
     });
 
     return newState.freeze();

@@ -18,6 +18,7 @@ export default function SelectionTracker() {
       let depth = 0
       while (curr) {
         selections.push(curr.selection);
+        // @ts-ignore
         curr = curr.previous;
         depth += 1
       }

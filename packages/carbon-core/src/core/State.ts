@@ -11,6 +11,17 @@ import { ImmutableDraft } from "./ImmutableDraft";
 import { StateScope } from "./StateScope";
 import {Draft} from "./Draft";
 
+interface CoreState {
+  content: Node;
+  selection: PinnedSelection;
+  nodeMap: NodeMap;
+  changes?: NodeIdSet;
+
+  // app informs the state about the usage of the state
+  activate(): void;
+  deactivate(): void;
+}
+
 interface StateProps {
 	scope: Symbol;
 	previous?: State;
@@ -19,21 +30,16 @@ interface StateProps {
 	marks?: MarkSet;
 	nodeMap: NodeMap;
 	changes?: NodeIdSet;
-	decorations?: DecorationStore;
 	counter?: number;
 }
 
 export class State extends EventEmitter {
-	previous: Optional<State>;
+	private previous: Optional<State>;
 	scope: Symbol;
 	content: Node;
 	selection: PinnedSelection;
 	nodeMap: NodeMap;
-	decorations: DecorationStore;
 	changes: NodeIdSet;
-	selectionOrigin: ActionOrigin = ActionOrigin.Unknown;
-
-	counter: number = 0;
 
 	static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: NodeMap = new NodeMap()) {
 		const state = new State({ content, selection, scope, nodeMap });
@@ -56,7 +62,6 @@ export class State extends EventEmitter {
 			selection,
 			nodeMap,
 			changes = NodeIdSet.empty(),
-			decorations = new DecorationStore(),
 			counter = 0
 		} = props;
 
@@ -64,10 +69,8 @@ export class State extends EventEmitter {
 		this.scope = scope;
 		this.content = content;
 		this.selection = selection;
-		this.decorations = decorations;
 		this.nodeMap = nodeMap;
 		this.changes = changes;
-		this.counter = counter;
 	}
 
 	get isSelectionChanged() {
@@ -80,27 +83,27 @@ export class State extends EventEmitter {
 		return !this.previous?.content.eq(this.content) || this.previous?.content.renderVersion !== this.content.renderVersion;
 	}
 
-	get depth() {
-		let depth = 0;
-		let node: Optional<State> = this;
-		while (node.previous) {
-			depth++;
-			node = node.previous;
-		}
-		return depth;
-	}
-
-	init() {
-		// this.content.forAll(n => {
-		// 	this.store.put(n);
-		// 	this.runtime.updatedNodeIds.add(n.id);
-		// });
-	}
-
-	setContent(content: Node) {
-		this.content = content;
-		this.init();
-	}
+	// get depth() {
+	// 	let depth = 0;
+	// 	let node: Optional<State> = this;
+	// 	while (node.previous) {
+	// 		depth++;
+	// 		node = node.previous;
+	// 	}
+	// 	return depth;
+	// }
+  //
+	// init() {
+	// 	// this.content.forAll(n => {
+	// 	// 	this.store.put(n);
+	// 	// 	this.runtime.updatedNodeIds.add(n.id);
+	// 	// });
+	// }
+  //
+	// setContent(content: Node) {
+	// 	this.content = content;
+	// 	this.init();
+	// }
 
 	clone(depth: number = 2) {
 		if (depth === 0) return null
