@@ -14,23 +14,23 @@ export class SolidNodeContent implements NodeContent {
   store: Store<NodeData>;
 
   static create(data: NodeData): SolidNodeContent {
-    const {id, type, children = [], links = {}, linkName = '', props} = data;
+    const {id, type, children = [], textContent, parent, parentId, props, links = {}, linkName = '', } = data;
     const store = createMutable<NodeData>({
       id,
+      type,
+      parent,
+      parentId,
       children,
       linkName,
       links,
-      parent: null,
-      parentId: null,
-      props: props,
-      textContent: "",
-      type,
+      props,
+      textContent,
     });
 
     return new SolidNodeContent(id, store);
   }
 
-  constructor(id: NodeId, store: SolidNodeContent['store'] ) {
+  constructor(id: NodeId, store: SolidNodeContent['store']) {
     this.store = store;
   }
 
@@ -51,7 +51,12 @@ export class SolidNodeContent implements NodeContent {
   }
 
   get textContent(): string {
-    return this.store.textContent;
+    if (this.type.isText) {
+      return this.store.textContent;
+    }
+
+    // console.log("textContent is not available for non-text nodes")
+    return this.children.map(child => child.textContent).join("");
   }
 
   get children(): Node[] {
@@ -72,6 +77,10 @@ export class SolidNodeContent implements NodeContent {
 
   get size(): number {
     return this.children.length
+  }
+
+  child(index: number): Node {
+    return this.children[index];
   }
 
   unwrap(): NodeData {

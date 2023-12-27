@@ -1,9 +1,9 @@
 import {Carbon, preventAndStop, RenderManager} from "@emrgen/carbon-core";
 import {ReactNode, useEffect, useRef} from "react";
-import { RecoilRoot } from "recoil";
+import {RecoilRoot} from "recoil";
 
 
-import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon-react";
+import {DndContext, RectSelectContext} from "@emrgen/carbon-dragon-react";
 import {
   CarbonChangeContext,
   CarbonContent,
@@ -20,7 +20,7 @@ interface CarbonAppProps {
 }
 
 export function CarbonApp(props: CarbonAppProps) {
-  const { app, children } = props;
+  const {app, children} = props;
   // @ts-ignore
   window.app = app;
   // console.log(react.content)
@@ -39,8 +39,8 @@ export function CarbonApp(props: CarbonAppProps) {
   return (
     <CarbonContext app={app}>
       <CarbonOverlayContext>
-      <DndContext>
-      <RenderManagerContext manager={props.renderManager}>
+        <DndContext>
+          <RenderManagerContext manager={props.renderManager}>
             <RecoilRoot>
               <CarbonEvents>
                 <div
@@ -53,14 +53,14 @@ export function CarbonApp(props: CarbonAppProps) {
                 ></div>
                 <CarbonChangeContext>
                   <RectSelectContext>
-                    <CarbonContent />
+                    <CarbonContent/>
                     {children}
                   </RectSelectContext>
                 </CarbonChangeContext>
               </CarbonEvents>
             </RecoilRoot>
-        </RenderManagerContext>
-      </DndContext>
+          </RenderManagerContext>
+        </DndContext>
       </CarbonOverlayContext>
     </CarbonContext>
   );

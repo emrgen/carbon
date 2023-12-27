@@ -21,4 +21,6 @@ export interface State {
   // app informs the state about the usage of the state
   activate(): State;
   deactivate(): void;
+
+  eq(state: State): boolean;
 }

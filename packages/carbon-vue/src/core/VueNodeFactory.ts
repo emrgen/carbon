@@ -1,13 +1,13 @@
-import {Node, NodeFactory, NodeId, Schema} from "@emrgen/carbon-core";
+import {Maps, Node, NodeData, NodeFactory, NodeId, PlainNodeContent, Schema} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {isEmpty} from "lodash";
+import {VueNodeContent} from "./VueNodeContent";
+import {VueNode} from "./VueNode";
 import { v4 as uuidv4 } from 'uuid';
-import {SolidNodeContent} from "./SolidNodeContent";
-import {SolidNode} from "./SolidNode";
 
 let counter = 0;
 
-export class SolidNodeFactory implements NodeFactory {
+export class VueNodeFactory implements NodeFactory {
   blockId() {
     return NodeId.create(uuidv4().slice(-10) + '[' + ++counter + ']');
   }
@@ -24,9 +24,9 @@ export class SolidNodeFactory implements NodeFactory {
     }
 
     const properties = isEmpty(json.props) ? type.props : type.props.update(json.props);
-    const nodeId = id ? NodeId.deserialize(id)! : this.textId();
+    const nodeId = id ? NodeId.deserialize(id)! : type.isText ? this.textId() : this.blockId();
     const nodes = children.map(n => schema.nodeFromJSON(n));
-    const content = SolidNodeContent.create({
+    const content = PlainNodeContent.create({
       id: nodeId,
       type,
       children: nodes,
@@ -38,7 +38,7 @@ export class SolidNodeFactory implements NodeFactory {
       linkName: ''
     });
 
-    const node = new SolidNode(content);
+    const node = new Node(content);
     nodes.forEach(n => {
       n.setParent(node);
       n?.setParentId(node.id);
@@ -50,4 +50,5 @@ export class SolidNodeFactory implements NodeFactory {
   clone(node: Node): Node {
     return node.clone()
   }
+
 }

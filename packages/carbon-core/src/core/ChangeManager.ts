@@ -87,8 +87,8 @@ export class ChangeManager extends NodeTopicEmitter {
       console.log("syncing: content", this.changes.toArray().map(n => n.toString()));
 
       this.interval = setTimeout(() => {
-        console.error("syncing: content timeout", this.changes.toArray().map(n => n.toString()));
-        this.changes.clear();
+        // console.error("syncing: content timeout", this.changes.toArray().map(n => n.toString()));
+        // this.changes.clear();
       }, 2000)
     }
 
@@ -106,6 +106,8 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   mounted(node: Node, changeType: NodeChangeType) {
+    console.log('xxxxxxxxxxxxxxxxxxxx')
+    console.log('changes size', this.changes.size)
     // if (this.counter > this.stateCounter) {
     //   console.log('mounted: old transaction sync still in progress', this.counter, counter);
     //   return;

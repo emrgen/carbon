@@ -185,7 +185,7 @@ export class Carbon extends EventEmitter {
 			return
 		}
 
-		if (this.state === state) {
+		if (state.eq(this.state)) {
 			console.warn('new state is the same as current');
 			return
 		}

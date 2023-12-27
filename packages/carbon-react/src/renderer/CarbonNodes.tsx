@@ -1,7 +1,8 @@
 import {ForwardedRef, forwardRef, memo, ReactNode, useEffect, useImperativeHandle, useMemo, useRef} from "react";
 import {useCarbon} from '../hooks/useCarbon';
-import {LocalHtmlAttrPath, NamePath, RendererProps, TagPath} from "@emrgen/carbon-core";
+import {LocalHtmlAttrPath, NamePath, TagPath} from "@emrgen/carbon-core";
 import {useNodeChange, useRenderManager} from "../hooks";
+import {RendererProps} from "@emrgen/carbon-react";
 
 export const JustEmpty = () => {
   return <span>&shy;</span>;
@@ -174,10 +175,10 @@ export const InnerCarbonNode = (props: RendererProps) => {
   }, [rm, node, props])
 
   if (!component) {
-    return null;
+    return <></>
   }
 
-  return component;
+  return <>{component}</>;
 }
 
 export const CarbonNode = memo(InnerCarbonNode, (prev, next) => {

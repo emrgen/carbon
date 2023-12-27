@@ -1,11 +1,8 @@
 import {
   Carbon,
-  CarbonBlock,
-  CarbonNodeChildren,
-  CarbonNodeContent,
-  RendererProps,
 } from "@emrgen/carbon-core";
 import React from "react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps} from "@emrgen/carbon-react";
 
 export function QuestionAnswerComp(props: RendererProps) {
   const { node } = props;

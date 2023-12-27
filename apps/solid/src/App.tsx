@@ -1,9 +1,9 @@
 import './App.css'
 
-import {SolidNodeFactory} from '@emrgen/carbon-solid';
+import {SolidNodeFactory, RendererProps, SolidState} from '@emrgen/carbon-solid';
 import {blockPresetPlugins} from '@emrgen/carbon-blocks';
-import {Schema, PluginManager, Node, RendererProps, BlockContent, NodeMap} from '@emrgen/carbon-core';
-import {createEffect, createSignal, For} from "solid-js";
+import {Schema, PluginManager, Node, NodeMap, Carbon, PinnedSelection} from '@emrgen/carbon-core';
+import {createSignal, For} from "solid-js";
 
 const plugins = [
   ...blockPresetPlugins,
@@ -12,47 +12,31 @@ const plugins = [
 const pm = new PluginManager(plugins);
 const {specs} = pm;
 const schema = new Schema(specs, new SolidNodeFactory());
-// @ts-ignore
-window.schema = schema
-console.log(schema)
 
 const section = schema.type('section');
 
 const content = section.create([
-  schema.text('Hello')!,
+  schema.text('Hello World')!,
   section.create([
-    schema.text('World')!,
-  ])!,
+    schema.text('Hello World 2')!,
+    section.create([
+      schema.text('Hello World 3')!,
+    ])!
+  ])!
 ])!;
-
-// console.log(content?.textContent);
-// console.log(content);
 
 // @ts-ignore
 window.content = content;
 
-const map = NodeMap.empty();
+const state = new SolidState(content, PinnedSelection.NULL);
 
-content.all(n => {
-  map.set(n.id, n);
-})
+const app = new Carbon(state, schema, pm);
+
+// @ts-ignore
+window.app = app;
 
 function App() {
   const handleClick = () => {
-    const newContent = section.create([
-      schema.text('New')!,
-    ])!
-    content.updateContent(BlockContent.create(
-      [
-        ...content.children,
-        newContent,
-      ]
-    )!)
-
-    newContent.all(n => {
-      map.set(n.id, n);
-    })
-
     setCount(count() + 1)
   };
 
@@ -63,7 +47,7 @@ function App() {
       <button onclick={handleClick}>Click</button>
       <div class={"bg-indigo-500 text-sky-400"}>
         123
-        {render(content, map)}
+        {/*{render(content)}*/}
       </div>
     </>
   )
@@ -107,14 +91,15 @@ const TextElement = (props: RendererProps) => {
       return;
     }
     console.log(target.key, target.textContent, target)
-    target.parent?.updateContent(BlockContent.create([
+    target.parent?.updateContent([
       section.create([
         schema.text('Changed 1')!
       ])!,
       section.create([
         schema.text('Changed 2')!
       ])!
-    ]));
+    ]);
+
     target.parent?.all(n => {
       map.set(n.id, n);
     })

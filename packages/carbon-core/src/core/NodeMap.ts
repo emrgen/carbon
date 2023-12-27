@@ -62,4 +62,5 @@ export interface NodeMap {
   forEach(fn: (value: Node, key: NodeId) => void): void;
   nodes(): Node[];
   ids(): NodeId[];
+  size: number;
 }

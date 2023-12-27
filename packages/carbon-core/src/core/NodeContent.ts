@@ -24,6 +24,8 @@ export interface NodeContent extends NodeData, MutableNodeContent{
   size: number;
 
   unwrap(): NodeData;
+
+  child(index: number): Optional<Node>;
 }
 
 export interface MutableNodeContent {
@@ -42,43 +44,65 @@ export interface MutableNodeContent {
   freeze(): NodeContent;
 }
 
-export class EmptyNodeContent implements NodeContent{
-  children: Node[];
-  id: NodeId;
-  parent: Optional<Node>;
-  parentId: Optional<NodeId>;
-  textContent: string;
-  type: NodeType;
-  linkName: string;
-  links: Record<string, Node>;
-  props: NodeProps;
+export class PlainNodeContent implements NodeContent{
 
-  static create(id: NodeId, type: NodeType): NodeContent {
-    return new EmptyNodeContent(id, type);
+  static create(content: NodeData): NodeContent {
+    return new PlainNodeContent(content);
+  }
+
+  constructor(private content: NodeData) {}
+
+  get id(): NodeId {
+    return this.content.id;
+  }
+
+  get type(): NodeType {
+    return this.content.type;
+  }
+
+  get parentId(): Optional<NodeId> {
+    return this.content.parentId;
+  }
+
+  get parent(): Optional<Node> {
+    return this.content.parent;
+  }
+
+  get children(): Node[] {
+    return this.content.children;
+  }
+
+  get textContent(): string {
+    return this.type.isText ? this.content.textContent : this.children.map(n => n.textContent).join('');
+  }
+
+  get linkName(): string {
+    return this.content.linkName;
+  }
+
+  get links(): Record<string, Node> {
+    return this.content.links;
+  }
+
+  get props(): NodeProps {
+    return this.content.props;
   }
 
   get size(): number {
-    return this.children.length
-  }
-
-  constructor(id: NodeId, type: NodeType) {
-    this.id = id;
-    this.type = type;
-    this.textContent = '';
-    this.children = [];
-    this.parentId = null;
-    this.parent = null;
-    this.props = NodeProps.empty();
-    this.linkName = '';
-    this.links = {};
+    return (this.type.isText) ? this.textContent.length : this.children.length;
   }
 
   unwrap(): NodeData {
     return this;
   }
 
+  child(index: number): Optional<Node> {
+    return this.children[index];
+  }
+
   changeType(type: NodeType): void {
-    this.type = type;
+    this.content.type = type;
+    this.props.update(type.props);
   }
 
   clone(): NodeContent {
@@ -90,33 +114,48 @@ export class EmptyNodeContent implements NodeContent{
   }
 
   insert(node: Node, index: number): void {
-  }
-
-  insertText(text: string, offset: number): void {
+    this.children.splice(index, 0, node);
   }
 
   remove(node: Node): void {
+    this.content.children = this.children.filter(n => n.eq(node));
+  }
+
+  insertText(text: string, offset: number): void {
+    this.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
   }
 
   removeText(offset: number, length: number): void {
+    this.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
   }
 
   setParent(parent: Optional<Node>): void {
+    this.content.parent = parent;
   }
 
   setParentId(parentId: Optional<NodeId>): void {
+    this.content.parentId = parentId;
   }
 
   updateContent(content: Node[] | string): void {
+    if (typeof content === 'string') {
+      this.content.textContent = content;
+    } else {
+      this.content.children = content;
+    }
   }
 
   updateProps(props: NodePropsJson): void {
+    this.props.update(props);
   }
 
   addLink(name: string, node: Node): void {
+    this.links[name] = node;
   }
 
   removeLink(name: string): Optional<Node> {
-    return undefined;
+    const node = this.links[name];
+    delete this.links[name];
+    return node;
   }
 }

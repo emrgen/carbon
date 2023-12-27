@@ -11,7 +11,7 @@ import {
 declare module '@emrgen/carbon-core' {
   export interface Transaction {
     select(selection: PinnedSelection | PointedSelection): Transaction;
-    setContent(ref: Node | NodeId, after: NodeContent): Transaction;
+    setContent(ref: Node | NodeId, after: Node[]|string): Transaction;
     insert(at: Point, nodes: Node | Node[]): Transaction,
     remove(at: Point, node: Node): Transaction,
     move(from: Point, to: Point, node: Node): Transaction,
@@ -21,7 +21,7 @@ declare module '@emrgen/carbon-core' {
     dispatch(): void;
     action: {
       select(selection: PinnedSelection | PointedSelection, origin?: ActionOrigin): Transaction,
-      setContent(ref: Node | NodeId, after: NodeContent): Transaction,
+      setContent(ref: Node | NodeId, after: Node[]|string): Transaction,
       insert(at: Point, nodes: Node | Node[]): Transaction,
       remove(at: Point, node: Node): Transaction,
       move(from: Point, to: Point, node: Node): Transaction,
@@ -54,7 +54,7 @@ export class ActionPlugin extends CarbonPlugin {
     tr.Select(selection, origin)
   }
 
-  setContent(tr: Transaction, ref: Node | NodeId, after: NodeContent) {
+  setContent(tr: Transaction, ref: Node | NodeId, after: Node[]|string) {
     tr.SetContent(ref, after)
   }
 

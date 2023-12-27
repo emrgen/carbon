@@ -6,7 +6,7 @@ import { takeUpto } from "../utils/array";
 import { ContentMatch } from "./ContentMatch";
 import { classString } from "./Logger";
 import { Mark, MarkSet } from "./Mark";
-import {EmptyNodeContent, NodeContent} from "./NodeContent";
+import {PlainNodeContent, NodeContent} from "./NodeContent";
 import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeType } from "./NodeType";
 import { IDENTITY_SCOPE, no, NodeEncoder, NodeJSON, yes } from "./types";
@@ -28,11 +28,35 @@ const nextKey = () => key++
 
 export class Node extends EventEmitter implements IntoNodeId {
     protected content: NodeContent;
+
+    // useful for debugging
     contentVersion: number = 0;
+    // useful for debugging
     renderVersion: number = 0;
 
-    static IDENTITY = new Node(EmptyNodeContent.create(NodeId.IDENTITY, NodeType.IDENTITY),)
-    static NULL = new Node(EmptyNodeContent.create(NodeId.NULL, NodeType.NULL),)
+    static IDENTITY = new Node(PlainNodeContent.create({
+      id: NodeId.IDENTITY,
+      type: NodeType.IDENTITY,
+      parentId: null,
+      parent: null,
+      textContent: '',
+      children: [],
+      linkName: '',
+      links: {},
+      props: new NodeProps(),
+    }))
+
+    static NULL = new Node(PlainNodeContent.create({
+      id: NodeId.NULL,
+      type: NodeType.NULL,
+      parentId: null,
+      parent: null,
+      textContent: '',
+      children: [],
+      linkName: '',
+      links: {},
+      props: new NodeProps(),
+    }));
 
     // don't use this constructor directly, use NodeFactory
     constructor(content: NodeContent) {

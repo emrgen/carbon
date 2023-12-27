@@ -1,5 +1,6 @@
-import { RendererProps,ActivatedPath } from "@emrgen/carbon-core";
+import {ActivatedPath } from "@emrgen/carbon-core";
 import { useMemo } from "react";
+import {RendererProps} from "@emrgen/carbon-react";
 
 export const useNodeActivated = (props: RendererProps) => {
   const { node } = props;
