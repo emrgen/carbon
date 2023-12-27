@@ -4,11 +4,11 @@ import { Node } from './Node';
 import { Optional } from "@emrgen/types";
 import { NodeId } from './NodeId';
 import { Maps, With } from './types';
-import {NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-core";
+import {Mark, MarkSet, NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-core";
 
 export interface NodeData {
   id: NodeId;
-  type: NodeType;
+  name: string;
   parentId: Optional<NodeId>;
   textContent: string;
   children: NodeData[];
@@ -28,6 +28,7 @@ export interface NodeContentData {
   children: Node[];
   linkName: string;
   links: Record<string, Node>;
+  marks: MarkSet;
   props: NodeProps;
 }
 
@@ -52,11 +53,14 @@ export interface MutableNodeContent {
   removeLink(name: string): Optional<Node>;
   updateContent(content: Node[] | string): void;
   updateProps(props: NodePropsJson): void;
+  addMark(marks: Mark): void;
+  removeMark(marks: Mark): void;
+
   clone(): NodeContent;
   freeze(): void;
 }
 
-export class PlainNodeContent implements NodeContent{
+export class PlainNodeContent implements NodeContent {
 
   static create(content: NodeContentData): NodeContent {
     return new PlainNodeContent(content);
@@ -65,9 +69,10 @@ export class PlainNodeContent implements NodeContent{
   constructor(private content: NodeContentData) {}
 
   get data(): NodeData {
-    const {parent, children, ...rest} = this.content;
+    const {parent, type,children, ...rest} = this.content;
     return {
       ...rest,
+      name: type.name,
       children: this.children.map(c => c.data),
     }
   }
@@ -102,6 +107,10 @@ export class PlainNodeContent implements NodeContent{
 
   get links(): Record<string, Node> {
     return this.content.links;
+  }
+
+  get marks(): MarkSet {
+    return this.content.marks;
   }
 
   get props(): NodeProps {
@@ -180,5 +189,14 @@ export class PlainNodeContent implements NodeContent{
     const node = this.links[name];
     delete this.links[name];
     return node;
+  }
+
+
+  addMark(props: Mark): void {
+    // this.content.marks.update(props);
+  }
+
+  removeMark(props: Mark): void {
+    // this.content.marks.removeMarks();
   }
 }

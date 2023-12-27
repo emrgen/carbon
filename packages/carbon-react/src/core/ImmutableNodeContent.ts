@@ -6,7 +6,7 @@ import {
   NodeContentData,
   NodePropsJson,
   NodeType,
-  NodeProps, NodeData
+  NodeProps, NodeData, Mark, MarkSet
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {identity} from "lodash";
@@ -22,9 +22,10 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   get data(): NodeData {
-    const {parent, children, ...rest} = this.content;
+    const {parent, type, children, ...rest} = this.content;
     return {
       ...rest,
+      name: type.name,
       children: this.children.map(c => c.data),
     }
   }
@@ -66,6 +67,10 @@ export class ImmutableNodeContent implements NodeContent {
 
   get links(): Record<string, Node> {
     return this.content.links;
+  }
+
+  get marks(): MarkSet {
+    return this.content.marks;
   }
 
   get props(): NodeProps {
@@ -161,4 +166,12 @@ export class ImmutableNodeContent implements NodeContent {
       children,
     });
   }
+
+  addMark(marks: Mark): void {
+
+  }
+
+  removeMark(marks: Mark): void {
+  }
+
 }

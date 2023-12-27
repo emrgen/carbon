@@ -23,7 +23,16 @@ import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {Scope} from "./Scope";
 import {ImmutableNodeContent} from "./ImmutableNodeContent";
 import {ImmutableNode} from "./ImmutableNode";
-import {StateChanges} from "@emrgen/carbon-core/src/core/NodeChange";
+import {
+  InsertChange,
+  LinkChange,
+  NameChange,
+  RemoveChange,
+  SelectionChange,
+  SetContentChange,
+  StateChanges,
+  TextChange
+} from "@emrgen/carbon-core/src/core/NodeChange";
 import {p14} from "@emrgen/carbon-core/src/core/Logger";
 
 enum UpdateDependent {
@@ -116,6 +125,7 @@ export class ImmutableDraft implements CoreDraft {
       selection: after,
       nodeMap,
       updated: updated,
+      changes: this.changes,
     });
 
     return newState.freeze();
@@ -482,6 +492,7 @@ export class ImmutableDraft implements CoreDraft {
 
     // console.log("update selection", selection.isInline);
     this.selection = selection;
+    this.changes.add(SelectionChange.create(selection, this.state.selection.unpin()));
 
     // update selection nodes
     if (selection.isInline) {
@@ -562,7 +573,6 @@ export class ImmutableDraft implements CoreDraft {
 
   // check and update render dependents
   private updateDependents(node: Node, flag: number) {
-    // console.log('xxxxxxxxxxxxxxxxxxx', node.id.toString(), flag)
     if (flag & UpdateDependent.Parent && node.parent?.type.spec.depends?.child) {
       this.mutable(node.parent.id, parent => {
         this.updateDependents(parent, UpdateDependent.Parent);
@@ -598,7 +608,7 @@ export class ImmutableDraft implements CoreDraft {
 
     // console.log('before mutable', id.toString(), node.textContent, this.nodeMap.has(id), node.renderVersion, node)
     const clone = this.nodeMap.has(id) ? node : node.clone();
-    const mutable = MutableNode.from(this.changes, clone)
+    const mutable = DraftNode.from(this.changes, clone)
     // console.log('after mutable', id.toString(), mutable.textContent, this.nodeMap.has(id), mutable.renderVersion, mutable)
 
     fn?.(mutable);
@@ -663,19 +673,19 @@ const NodeDepthComparator = (a: NodeDepthEntry, b: NodeDepthEntry) => {
 };
 
 // traps the changes to the node and records them into the draft
-class MutableNode extends Node {
+class DraftNode extends Node {
   static from(changes: StateChanges, node: Node) {
 
     // return node;
-    if (node instanceof MutableNode) {
+    if (node instanceof DraftNode) {
       return node;
     }
 
-    return MutableNode.create(changes, node);
+    return DraftNode.create(changes, node);
   }
 
   static create(changes: StateChanges, node: Node) {
-    return new MutableNode(changes, node);
+    return new DraftNode(changes, node);
   }
 
   private constructor(private readonly changes: StateChanges, protected content: Node) {
@@ -697,32 +707,49 @@ class MutableNode extends Node {
 
   changeType(type: NodeType) {
     console.log(p14('%c[trap]'), "color:green", 'change type', this.id.toString(), this.textContent, this.renderVersion);
+    const oldType = this.type.name
     super.changeType(type);
+    this.changes.add(NameChange.create(this.id, oldType, type.name));
   }
 
   insert(node: Node, index: number) {
     console.log(p14('%c[trap]'), "color:green", 'insert', this.id.toString(), this.textContent, this.renderVersion);
     super.insert(node, index);
+
+    this.changes.add(InsertChange.create(this.id, node.id, index));
+    this.changes.dataMap.set(node.id, node.data);
   }
 
   remove(node: Node) {
     console.log(p14('%c[trap]'), "color:green", 'remove', this.id.toString(), this.textContent, this.renderVersion)
+    const index = node.index;
     super.remove(node);
+
+    this.changes.add(RemoveChange.create(this.id, node.id, node.index));
+    this.changes.dataMap.set(node.id, node.data);
   }
 
   insertText(text: string, offset: number) {
     console.log(p14('%c[trap]'), "color:green", 'add text', this.id.toString(), this.textContent, this.renderVersion)
     super.insertText(text, offset);
+    this.changes.add(TextChange.create(this.id, offset, text, 'insert'));
   }
 
   removeText(offset: number, length: number) {
     console.log(p14('%c[trap]'), "color:green", 'remove text', this.id.toString(), this.textContent, this.renderVersion)
     super.removeText(offset, length);
+
+   this.changes.add(TextChange.create(this.id, offset, this.textContent.slice(offset, offset + length), 'remove'));
   }
 
   addLink(name: string, node: Node) {
     console.log(p14('%c[trap]'), "color:green", 'link', this.id.toString(), this.textContent, this.renderVersion)
+    const oldLink = this.links[name]
     super.addLink(name, node);
+
+    if (oldLink !== node) {
+      this.changes.add(LinkChange.create(this.id, oldLink?.id, node.id));
+    }
   }
 
   removeLink(name: string): Optional<Node> {
@@ -730,9 +757,25 @@ class MutableNode extends Node {
     return super.removeLink(name);
   }
 
+  // update content is valid only for textContainer and text nodes
+  //
   updateContent(content: Node[] | string) {
     console.log(p14('%c[trap]'), "color:green", 'content', this.id.toString(), this.textContent, this.renderVersion);
+    const oldText = this.textContent;
+    const oldChildren = this.children;
     super.updateContent(content);
+    const newText = this.textContent;
+    const newChildren = this.children;
+
+    if (oldText !== newText) {
+      this.changes.add(SetContentChange.create(this.id, oldText, newText));
+    }
+
+    if (oldChildren !== newChildren) {
+      this.changes.add(SetContentChange.create(this.id, oldChildren.map(n => n.id), newChildren.map(n => n.id)))
+      oldChildren.forEach(n => this.changes.dataMap.set(n.id, n.data));
+      newChildren.forEach(n => this.changes.dataMap.set(n.id, n.data));
+    }
   }
 
   updateProps(props: NodePropsJson) {

@@ -1,4 +1,6 @@
 import {
+  Mark,
+  MarkSet,
   Node,
   NodeContent,
   NodeContentData, NodeData,
@@ -15,7 +17,7 @@ export class SolidNodeContent implements NodeContent {
   protected content: Store<NodeContentData>;
 
   static create(data: NodeContentData): SolidNodeContent {
-    const {id, type, children = [], textContent, parent, parentId, props, links = {}, linkName = '', } = data;
+    const {id, type, children = [], textContent, parent, parentId, props, links = {}, marks, linkName = '', } = data;
     const store = createMutable<NodeContentData>({
       id,
       type,
@@ -24,6 +26,7 @@ export class SolidNodeContent implements NodeContent {
       children,
       linkName,
       links,
+      marks,
       props,
       textContent,
     });
@@ -38,10 +41,11 @@ export class SolidNodeContent implements NodeContent {
 
   get data(): NodeData {
     const unwrap = this.unwrap();
-    const { parent, children, ...rest} = unwrap;
+    const { parent, type,children, ...rest} = unwrap;
 
     return {
       ...rest,
+      name: type.name,
       children: children.map(child => child.data)
     }
   }
@@ -85,6 +89,10 @@ export class SolidNodeContent implements NodeContent {
 
   get props(): NodeProps {
     return this.content.props
+  }
+
+  get marks(): MarkSet {
+    return this.content.marks;
   }
 
   get size(): number {
@@ -159,6 +167,13 @@ export class SolidNodeContent implements NodeContent {
 
   updateProps(props: NodePropsJson): void {
     this.content.props.update(props);
+  }
+
+  addMark(marks: Mark): void {
+
+  }
+
+  removeMark(marks: Mark): void {
   }
 
   clone(): NodeContent {

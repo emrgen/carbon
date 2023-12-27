@@ -13,6 +13,7 @@ interface StateProps {
   marks?: MarkSet;
   nodeMap: ImmutableNodeMap;
   updated?: NodeIdSet;
+  changes?: StateChanges;
   counter?: number;
 }
 
@@ -45,6 +46,7 @@ export class ImmutableState implements State {
       selection,
       nodeMap,
       updated = NodeIdSet.empty(),
+      changes = StateChanges.empty()
     } = props;
 
     this.previous = previous;
@@ -53,6 +55,7 @@ export class ImmutableState implements State {
     this.selection = selection;
     this.nodeMap = nodeMap;
     this.updated = updated;
+    this.changes = changes;
   }
 
   get isSelectionChanged() {
@@ -64,28 +67,6 @@ export class ImmutableState implements State {
   get isContentChanged() {
     return !this.previous?.content.eq(this.content) || this.previous?.content.renderVersion !== this.content.renderVersion;
   }
-
-  // get depth() {
-  // 	let depth = 0;
-  // 	let node: Optional<State> = this;
-  // 	while (node.previous) {
-  // 		depth++;
-  // 		node = node.previous;
-  // 	}
-  // 	return depth;
-  // }
-  //
-  // init() {
-  // 	// this.content.forAll(n => {
-  // 	// 	this.store.put(n);
-  // 	// 	this.runtime.updatedNodeIds.add(n.id);
-  // 	// });
-  // }
-  //
-  // setContent(content: Node) {
-  // 	this.content = content;
-  // 	this.init();
-  // }
 
   activate() {
     Scope.set(this.scope, this.nodeMap);

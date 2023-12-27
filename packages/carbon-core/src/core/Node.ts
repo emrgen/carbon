@@ -43,6 +43,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       children: [],
       linkName: '',
       links: {},
+      marks: MarkSet.empty(),
       props: new NodeProps(),
     }))
 
@@ -55,6 +56,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       children: [],
       linkName: '',
       links: {},
+      marks: MarkSet.empty(),
       props: new NodeProps(),
     }));
 
@@ -102,6 +104,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     get links(): Record<string, Node> {
       return this.content.links
+    }
+
+    get marks(): MarkSet {
+      return this.content.marks
     }
 
     get props(): NodeProps {
@@ -685,8 +691,8 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     updateContent(content: Node[]|string) {
-      this.content.updateContent(content);
       // console.log('updateContent', this.id.toString(), this.textContent, this.children.map(n => n.textContent));
+      this.content.updateContent(content);
       if (isArray(content)) {
         content.forEach(n => {
           n.setParent(this);
@@ -697,45 +703,30 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     // @mutates
     changeType(type: NodeType) {
-      this.content.props.merge(type.props);
       this.content.changeType(type);
     }
 
     // @mutates
     updateProps(props: NodePropsJson) {
-      // console.log('-- props', this.id.toString(), JSON.stringify(this.properties.toJSON()));
       this.content.updateProps(props);
-      // console.log('-> props', this.id.toString(), JSON.stringify(this.properties.toJSON()));
     }
 
     // @mutates
     addMark(mark: Mark) {
-      // this.marks.add(mark);
+      this.content.addMark(mark);
     }
 
     // @mutates
-    // tryMerge(other: Node): Optional<Node> {
-    //   // TODO: use more general merge compatibility check
-    //   if (this.type !== other.type) return null;
-    //   if (!this.marks.eq(other.marks)) return null;
-    //
-    //   const merged = this.content.tryMerge(other.content);
-    //
-    //   if (!merged) return null;
-    //
-    //   this.updateContent(merged);
-    // }
+    removeMark(mark: Mark) {
+      this.content.removeMark(mark);
+    }
 
     compatible(other: Node) {
       throw new Error('not implemented')
     }
 
-    // @mutates
-    removeMark(mark: Mark) {
-      // this.marks.remove(mark);
-    }
-
-
+    // only check by id
+    // not a deep check
     eq(node: Node): boolean {
       return this.id.eq(node.id);
     }
