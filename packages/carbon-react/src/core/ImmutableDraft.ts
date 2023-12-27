@@ -17,7 +17,7 @@ import {
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
-import {identity, isArray, map} from "lodash";
+import {identity, isArray} from "lodash";
 import FastPriorityQueue from "fastpriorityqueue";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {Scope} from "./Scope";
@@ -675,17 +675,14 @@ class MutableNode extends Node {
   }
 
   static create(changes: StateChanges, node: Node) {
-    const mutable = new MutableNode(changes, node);
-
-    // NOTE: without this the React render will fail to update the UI
-    mutable.renderVersion = node.renderVersion;
-    mutable.contentVersion = node.contentVersion;
-
-    return mutable;
+    return new MutableNode(changes, node);
   }
 
   private constructor(private readonly changes: StateChanges, protected content: Node) {
     super(content);
+    // NOTE: without this the React render will fail to update the UI
+    this.contentVersion = content.contentVersion;
+    this.renderVersion = content.renderVersion;
   }
 
   setParent(parent: Optional<Node>) {

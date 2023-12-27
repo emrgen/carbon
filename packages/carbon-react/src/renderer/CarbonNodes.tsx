@@ -1,4 +1,4 @@
-import {ForwardedRef, forwardRef, memo, ReactNode, useEffect, useImperativeHandle, useMemo, useRef} from "react";
+import {ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef} from "react";
 import {useCarbon} from '../hooks/useCarbon';
 import {LocalHtmlAttrPath, NamePath, TagPath} from "@emrgen/carbon-core";
 import {useNodeChange, useRenderManager} from "../hooks";
@@ -235,20 +235,23 @@ interface ChildrenSegmentProps {
 // render children except first node
 export const CarbonNodeChildren = (props: RendererProps) => {
   const {node} = props;
-  const children = useMemo(() => {
+  return useMemo(() => {
     if (node.children.length < 2) return null;
 
-    return (
-      <div data-type="children">
-        {node.children
+
+    const children =node.children
       .slice(1)
       .map((n) => {
         // console.debug('CarbonChildren', n.name, n.id.toString());
         return <CarbonNode node={n} key={n.key}/>
-      })}
+      })
+
+    // console.debug('CarbonNodeChildren', node.name, children.length);
+
+    return (
+      <div data-type="children">
+        {children}
       </div>
     )
   }, [node])
-
-  return children
 };

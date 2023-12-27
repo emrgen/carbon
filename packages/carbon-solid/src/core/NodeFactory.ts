@@ -39,9 +39,9 @@ export class SolidNodeFactory implements NodeFactory {
     });
 
     const node = new SolidNode(content);
-    nodes.forEach(n => {
+    node.children.forEach((n: Node) => {
       n.setParent(node);
-      n?.setParentId(node.id);
+      n.setParentId(node.id);
     });
 
     return node;

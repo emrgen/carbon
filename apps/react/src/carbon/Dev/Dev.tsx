@@ -161,15 +161,15 @@ const renderManager = RenderManager.from(
   renderers,
 )
 
-// console.log = noop;
-// console.info = noop;
+console.log = noop;
+console.info = noop;
 // console.debug = noop;
-// console.warn = noop;
-// console.error = noop;
+console.warn = noop;
+console.error = noop;
 console.group = noop;
 console.groupCollapsed = noop;
 console.groupEnd = noop;
-// console.time = noop;
+console.time = noop;
 
 export default function Dev() {
   const app = useCreateCarbon('dev', data, plugins);

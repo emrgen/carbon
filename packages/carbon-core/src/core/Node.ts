@@ -337,7 +337,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     get index(): number {
       const parent = this.parent;
       if (!parent) {
-        console.warn('node has no parent', this.id.toString());
+        // console.warn('node has no parent', this.id.toString());
         return -1
       }
 

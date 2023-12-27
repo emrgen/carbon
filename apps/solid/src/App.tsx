@@ -1,8 +1,8 @@
 import './App.css'
 
-import {SolidNodeFactory, RendererProps, SolidState} from '@emrgen/carbon-solid';
-import {blockPresetPlugins} from '@emrgen/carbon-blocks';
-import {Schema, PluginManager, Node, NodeMap, Carbon, PinnedSelection} from '@emrgen/carbon-core';
+import {SolidNodeFactory, RendererProps, SolidState, CarbonContext, useCarbon} from '@emrgen/carbon-solid';
+import {blockPresetPlugins,node, section, text, title} from '@emrgen/carbon-blocks';
+import {Schema, PluginManager, Node, Carbon, PinnedSelection} from '@emrgen/carbon-core';
 import {createSignal, For} from "solid-js";
 
 const plugins = [
@@ -13,17 +13,13 @@ const pm = new PluginManager(plugins);
 const {specs} = pm;
 const schema = new Schema(specs, new SolidNodeFactory());
 
-const section = schema.type('section');
+const data = node("carbon", [
+  section([title([text("section 1")])]),
+  section([title([text("section 2")])]),
+  section([title([text("section 3")])]),
+]);
 
-const content = section.create([
-  schema.text('Hello World')!,
-  section.create([
-    schema.text('Hello World 2')!,
-    section.create([
-      schema.text('Hello World 3')!,
-    ])!
-  ])!
-])!;
+const content = schema.nodeFromJSON(data)!
 
 // @ts-ignore
 window.content = content;
@@ -35,46 +31,67 @@ const app = new Carbon(state, schema, pm);
 // @ts-ignore
 window.app = app;
 
+
 function App() {
-  const handleClick = () => {
-    setCount(count() + 1)
+  const addNode = () => {
+    setCount(count() + 1);
+    const titleNode = schema.nodeFromJSON(title([text(`lorem ipsum ${count()}`)]))!;
+    const section = schema.nodeFromJSON(node('section', [titleNode]))!;
+    app.content.insert(section, 0);
+    setCount(count() + 1);
   };
 
   const [count, setCount] = createSignal(0)
 
+  let interval: any = null;
+
+  const keepAdding = () => {
+    clearInterval(interval)
+    interval = setInterval(() => {
+      addNode();
+    }, 10);
+  }
+
+  const stopAdding = () => {
+    clearInterval(interval);
+  }
+
+  const handleClick = () => {
+    clearInterval(interval);
+  }
+
   return (
-    <>
-      <button onclick={handleClick}>Click</button>
+    <CarbonContext value={app}>
+      <button onclick={handleClick} onmousedown={keepAdding} onmouseup={stopAdding}>Click</button>
       <div class={"bg-indigo-500 text-sky-400"}>
-        123
-        {/*{render(content)}*/}
+        {render(app.content)}
       </div>
-    </>
+    </CarbonContext>
   )
 }
 
 // const RenderContext = createContext(null);
 
-const render = (node: Node, map: NodeMap) => {
+const render = (node: Node) => {
   // console.log(node)
   if (node.isBlock) {
-    return <BlockElement node={node} map={map}/>;
+    return <BlockElement node={node}/>;
   }
 
   if (node.isText) {
-    return <TextElement node={node} map={map}/>;
+    return <TextElement node={node}/>;
   }
 
   return null;
 }
 
 const BlockElement = (props: RendererProps) => {
-  const {node, map} = props;
+  const {node} = props;
   return (
     <div data-name={node.name} data-id={node.key} >
       <For each={node.children}>
         {(child) => {
-          return render(child, map);
+          return render(child);
         }}
       </For>
     </div>
@@ -82,28 +99,10 @@ const BlockElement = (props: RendererProps) => {
 }
 
 const TextElement = (props: RendererProps) => {
-  const {node, map} = props;
+  const {node} = props;
+  // const app = useCarbon();
   const changeTextRandomly = () => {
-
-    const target = map.get(node.id) as Node;
-    if (!target) {
-      console.log('target not found', node.id, node.textContent, node, map)
-      return;
-    }
-    console.log(target.key, target.textContent, target)
-    target.parent?.updateContent([
-      section.create([
-        schema.text('Changed 1')!
-      ])!,
-      section.create([
-        schema.text('Changed 2')!
-      ])!
-    ]);
-
-    target.parent?.all(n => {
-      map.set(n.id, n);
-    })
-    // target.parent.updateContent(InlineContent.create('Changed')!);
+    node.updateContent(node.textContent + ' ' + Math.random().toString(36).substring(7));
   }
 
   return (
