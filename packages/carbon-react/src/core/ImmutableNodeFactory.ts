@@ -18,11 +18,11 @@ export class ImmutableNodeFactory implements NodeFactory {
   scope: Symbol;
 
   blockId() {
-    return uuidv4().slice(-10) + '[' + ++counter + ']';
+    return NodeId.create(uuidv4().slice(-10) + '[' + ++counter + ']');
   }
 
   textId() {
-    return uuidv4().slice(-10) + '(' + ++counter + ')';
+    return NodeId.create(uuidv4().slice(-10) + '(' + ++counter + ')');
   }
 
   constructor(scope: Symbol = IDENTITY_SCOPE) {
@@ -37,13 +37,13 @@ export class ImmutableNodeFactory implements NodeFactory {
       throw new Error(`Node Plugin is not registered ${name}`);
     }
 
-    const properties = isEmpty(json.props) ? type.props : type.props.update(json.props);
-    const nodeId = id ? NodeId.deserialize(id)! : NodeId.create(this.blockId());
+    const props = isEmpty(json.props) ? type.props : type.props.clone().update(json.props);
+    const nodeId = id ? NodeId.deserialize(id)! : this.blockId();
     const nodes = children.map(n => schema.nodeFromJSON(n));
     const content = ImmutableNodeContent.create(scope, {
       id: nodeId,
       type,
-      props: properties,
+      props,
       children: nodes,
       textContent: text,
       links: {},
@@ -52,7 +52,13 @@ export class ImmutableNodeFactory implements NodeFactory {
       parent: null
     });
 
-    return ImmutableNode.create(scope, content);
+    const node = ImmutableNode.create(scope, content);
+    node.children.forEach(n => {
+      n.setParentId(node.id)
+      n.setParent(node)
+    });
+
+    return node;
   }
 
   // clone node with new id
@@ -62,6 +68,12 @@ export class ImmutableNodeFactory implements NodeFactory {
       ...map(node.unwrap()),
       children: node.children.map(n => this.clone(n, map))
     }));
+
+    // update children parent
+    clone.children.forEach(n => {
+      n.setParentId(clone.id);
+      n.setParent(clone);
+    });
 
     clone.setParent(null);
     clone.setParentId(null);

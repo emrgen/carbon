@@ -38,10 +38,6 @@ export class Node extends EventEmitter implements IntoNodeId {
     constructor(content: NodeContent) {
       super();
       this.content = content;
-      content.children.forEach(n => {
-        n.setParent(this)
-        n.setParentId(this.id)
-      })
     }
 
     unwrap() {
@@ -634,7 +630,12 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     // @mutates
     insert(node: Node, index: number) {
+      if (node.id.eq(this.id)) {
+        throw new Error('cannot insert node to itself')
+      }
+
       node.setParent(this)
+      node.setParentId(this.id)
       this.content.insert(node, index);
     }
 
@@ -648,6 +649,9 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     // @mutates
     remove(node: Node) {
+      if (node.id.eq(this.id)) {
+        throw new Error('cannot remove node from itself')
+      }
       this.content.remove(node);
       node.setParent(null);
     }

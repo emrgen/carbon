@@ -75,7 +75,7 @@ export class Schema {
 		return new Mark(name, props);
 	}
 
-	clone(node: Node, map: Maps<NodeData, NodeData> = identity): Node {
+	clone(node: Node, map: Maps<Omit<NodeData,'children'>, Omit<NodeData,'children'>> = identity): Node {
 		return this.factory.clone(node, map);
 	}
 

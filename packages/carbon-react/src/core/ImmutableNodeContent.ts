@@ -137,12 +137,13 @@ export class ImmutableNodeContent implements CoreNodeContent {
 
     Object.freeze(this.data);
     Object.freeze(this);
+    this.children.forEach(n => n.freeze());
 
     return this;
   }
 
   clone(map: Maps<Node, Optional<Node>> = identity): CoreNodeContent {
-    const children = this.children.map(n => n.clone(map)).filter(identity) as Node[];
+    const children = this.children.map(n => map(n)).filter(identity) as Node[];
     return new ImmutableNodeContent(this.scope, {
       ...this.data,
       children,

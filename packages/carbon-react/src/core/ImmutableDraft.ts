@@ -120,7 +120,11 @@ export class ImmutableDraft implements CoreDraft {
     const { state, changes, selection } = this;
 
     const nodeMap = this.nodeMap.current.size === 0 ? state.nodeMap : this.nodeMap;
+    // as the root node is always same id, we can get the root node by id
     const content = this.nodeMap.get(this.state.content.id);
+
+    console.log('commit', content?.textContent)
+
     if (!content) {
       throw new Error("Cannot commit draft with invalid content");
     }
@@ -205,15 +209,19 @@ export class ImmutableDraft implements CoreDraft {
       const { node } = updateOrder.pop()!;
       if (!this.nodeMap.has(node.id)) {
         const clone = node.clone(n => {
+          // console.log('xxxxxxxxxxxx')
           if (this.nodeMap.deleted(n.id)) {
             return null;
           } else {
+            // console.log('node map', n.id.toString())
             return this.nodeMap.get(n.id);
           }
         });
         this.nodeMap.set(node.id, clone);
+        // console.log('updating node', node.name, node.id.toString(), node.textContent, clone.renderVersion);
       } else {
         const mutable = this.nodeMap.get(node.id)!;
+        console.log('mutable node', mutable.textContent)
         const data = mutable.unwrap();
         data.children = data.children.map(n => {
           if (this.nodeMap.deleted(n.id)) {
@@ -228,6 +236,9 @@ export class ImmutableDraft implements CoreDraft {
         clone.renderVersion = mutable.renderVersion;
         clone.contentVersion = mutable.contentVersion;
 
+        if (clone.name == 'text') {
+          console.log('mutable node', node.id.toString(), clone.textContent, clone.renderVersion, Object.isFrozen(mutable))
+        }
         this.nodeMap.set(node.id, clone);
       }
     }
@@ -270,9 +281,9 @@ export class ImmutableDraft implements CoreDraft {
 
       }
 
-      // console.log(content);
+      // console.log('updating content', node.textContent);
       node.updateContent(content);
-      console.log("updated content", node.textContent);
+      console.log("updated content", node.textContent, node.renderVersion);
 
       node.descendants().forEach(child => {
         console.log('inserted content child', child.id.toString());
@@ -615,7 +626,9 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot mutate node that does not exist");
     }
 
+    console.log('before mutable', id.toString(), node.textContent, this.nodeMap.has(id), node.renderVersion, Object.isFrozen(node))
     const mutable = this.nodeMap.has(id) ? node : node.clone();
+    console.log('mutable', id.toString(), mutable.textContent, this.nodeMap.has(id), mutable.renderVersion)
     fn?.(mutable);
 
     // console.log('mutated', id.toString())

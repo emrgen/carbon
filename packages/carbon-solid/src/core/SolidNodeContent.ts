@@ -1,28 +1,28 @@
 import {
   Node,
-  NodeContent as CoreNodeContent,
+  NodeContent,
   NodeData,
   NodeId,
   NodeProps,
   NodePropsJson,
   NodeType
 } from "@emrgen/carbon-core";
-import {createMutable, Store} from "solid-js/store";
+import {createMutable, Store, unwrap} from "solid-js/store";
 import {Optional} from "@emrgen/types";
 
-export class SolidNodeContent implements CoreNodeContent {
-  id: NodeId;
-  store: Store<Omit<NodeData,'id'>>;
+export class SolidNodeContent implements NodeContent {
+  store: Store<NodeData>;
 
   static create(data: NodeData): SolidNodeContent {
     const {id, type, children = [], links = {}, linkName = '', props} = data;
-    const store = createMutable<SolidNodeContent['store']>({
+    const store = createMutable<NodeData>({
+      id,
       children,
       linkName,
       links,
       parent: null,
       parentId: null,
-      props: properties,
+      props: props,
       textContent: "",
       type,
     });
@@ -31,8 +31,11 @@ export class SolidNodeContent implements CoreNodeContent {
   }
 
   constructor(id: NodeId, store: SolidNodeContent['store'] ) {
-    this.id = id;
     this.store = store;
+  }
+
+  get id(): NodeId {
+    return this.store.id;
   }
 
   get type(): NodeType {
@@ -63,12 +66,16 @@ export class SolidNodeContent implements CoreNodeContent {
     return this.store.links;
   }
 
-  get properties(): NodeProps {
+  get props(): NodeProps {
     return this.store.props
   }
 
   get size(): number {
     return this.children.length
+  }
+
+  unwrap(): NodeData {
+    return unwrap(this.store);
   }
 
   setParentId(parentId: Optional<NodeId>): void {
@@ -100,11 +107,11 @@ export class SolidNodeContent implements CoreNodeContent {
   changeType(type: NodeType): void {
   }
 
-  clone(): SolidNodeContent {
+  clone(): NodeContent {
     throw new Error("Method not implemented.");
   }
 
-  freeze(): SolidNodeContent {
+  freeze(): NodeContent {
     throw new Error("Method not implemented.");
   }
 

@@ -166,9 +166,9 @@ const renderManager = RenderManager.from(
 // console.debug = noop;
 // console.warn = noop;
 // console.error = noop;
-// console.group = noop;
-// console.groupCollapsed = noop;
-// console.groupEnd = noop;
+console.group = noop;
+console.groupCollapsed = noop;
+console.groupEnd = noop;
 // console.time = noop;
 
 export default function Dev() {
@@ -177,7 +177,7 @@ export default function Dev() {
   useEffect(() => {
     const onChange = (state: State) => {
       state.content.all((node) => {
-        // console.log(node.id.toString(), node.name, node.props.toKV());
+        // console.log(node.id.toString(), node.name, node.properties.toKV());
       });
     }
 

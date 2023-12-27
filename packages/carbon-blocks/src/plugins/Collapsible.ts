@@ -166,7 +166,12 @@ export class Collapsible extends NodePlugin {
       const after = PinnedSelection.fromPin(focusPoint!);
 
       if (title.parent?.isDocument) {
-        const sectionTitle = app.schema.clone(title);
+        const sectionTitle = app.schema.clone(title, n => {
+          return {
+            ...n,
+            id: app.schema.factory.blockId(),
+          }
+        });
 
         section.remove(section.child(0)!);
         section.insert(sectionTitle, 0)
