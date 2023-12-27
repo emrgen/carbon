@@ -3,6 +3,7 @@ import {Optional} from "@emrgen/types";
 import {Scope} from "./Scope";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {ImmutableDraft} from "./ImmutableDraft";
+import {StateChanges} from "@emrgen/carbon-core/src/core/NodeChange";
 
 interface StateProps {
   scope: Symbol;
@@ -22,7 +23,7 @@ export class ImmutableState implements State {
   selection: PinnedSelection;
   nodeMap: ImmutableNodeMap;
   updated: NodeIdSet;
-  changes: StateChanges
+  changes: StateChanges = new StateChanges();
 
   static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: ImmutableNodeMap = new ImmutableNodeMap()) {
     const state = new ImmutableState({ content, selection, scope, nodeMap });
@@ -126,7 +127,8 @@ export class ImmutableState implements State {
   }
 
   eq(other: State) {
-    return this.content.eq(other.content) && this.selection.eq(other.selection);
+    if (this.scope !== other.scope) return false;
+    return this.content.renderVersion === other.content.renderVersion && this.selection.eq(other.selection);
   }
 
   revert(steps = 1) {

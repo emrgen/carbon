@@ -1,4 +1,4 @@
-import {Schema, Node, Maps, NodeData, NodeId} from "@emrgen/carbon-core";
+import {Schema, Node, Maps, NodeContentData, NodeId} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 
 export class Factory {
@@ -12,5 +12,5 @@ export interface NodeFactory {
   textId(): NodeId;
   create(json: any, schema: Schema): Optional<Node>;
   // clone with new id for all nodes
-  clone(node: Node, map: Maps<Omit<NodeData, 'children'>, Omit<NodeData, 'children'>>): Node;
+  clone(node: Node, map: Maps<Omit<NodeContentData, 'children'>, Omit<NodeContentData, 'children'>>): Node;
 }

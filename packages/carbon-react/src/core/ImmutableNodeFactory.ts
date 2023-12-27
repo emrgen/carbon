@@ -5,7 +5,7 @@ import {
   Schema,
   Node,
   NodeId,
-  NodeFactory, Maps, NodeData,
+  NodeFactory, Maps, NodeContentData,
 } from "@emrgen/carbon-core";
 import {isEmpty} from "lodash";
 import {v4 as uuidv4} from 'uuid';
@@ -62,7 +62,7 @@ export class ImmutableNodeFactory implements NodeFactory {
   }
 
   // clone node with new id
-  clone(node: Node, map: Maps<Omit<NodeData, 'children'>, Omit<NodeData, 'children'>>): Node {
+  clone(node: Node, map: Maps<Omit<NodeContentData, 'children'>, Omit<NodeContentData, 'children'>>): Node {
     const {scope} = this;
     const clone = ImmutableNode.create(scope, ImmutableNodeContent.create(scope, {
       ...map(node.unwrap()),

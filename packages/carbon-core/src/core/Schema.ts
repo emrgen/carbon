@@ -6,7 +6,7 @@ import { MarkType, NodeType } from "./NodeType";
 import {Maps, NodeJSON, NodeName} from "./types";
 import { Mark, MarkProps } from "./Mark";
 import {InitNodeJSON} from "@emrgen/carbon-react";
-import {NodeData, NodeFactory} from "@emrgen/carbon-core";
+import {NodeContentData, NodeFactory} from "@emrgen/carbon-core";
 
 interface SchemaSpec {
 	nodes: Record<NodeName, NodeSpec>;
@@ -75,7 +75,7 @@ export class Schema {
 		return new Mark(name, props);
 	}
 
-	clone(node: Node, map: Maps<Omit<NodeData,'children'>, Omit<NodeData,'children'>> = identity): Node {
+	clone(node: Node, map: Maps<Omit<NodeContentData,'children'>, Omit<NodeContentData,'children'>> = identity): Node {
 		return this.factory.clone(node, map);
 	}
 

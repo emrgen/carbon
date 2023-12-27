@@ -186,7 +186,7 @@ export class Carbon extends EventEmitter {
 		}
 
 		if (state.eq(this.state)) {
-			console.warn('new state is the same as current');
+			console.warn('skipping ui sync: new state is the same as current', this.state.previous.content.renderVersion, this.state.content.renderVersion);
 			return
 		}
 

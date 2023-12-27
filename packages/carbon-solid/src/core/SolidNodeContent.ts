@@ -1,7 +1,7 @@
 import {
   Node,
   NodeContent,
-  NodeData,
+  NodeContentData,
   NodeId,
   NodeProps,
   NodePropsJson,
@@ -11,11 +11,11 @@ import {createMutable, Store, unwrap} from "solid-js/store";
 import {Optional} from "@emrgen/types";
 
 export class SolidNodeContent implements NodeContent {
-  store: Store<NodeData>;
+  store: Store<NodeContentData>;
 
-  static create(data: NodeData): SolidNodeContent {
+  static create(data: NodeContentData): SolidNodeContent {
     const {id, type, children = [], textContent, parent, parentId, props, links = {}, linkName = '', } = data;
-    const store = createMutable<NodeData>({
+    const store = createMutable<NodeContentData>({
       id,
       type,
       parent,
@@ -83,7 +83,7 @@ export class SolidNodeContent implements NodeContent {
     return this.children[index];
   }
 
-  unwrap(): NodeData {
+  unwrap(): NodeContentData {
     return unwrap(this.store);
   }
 

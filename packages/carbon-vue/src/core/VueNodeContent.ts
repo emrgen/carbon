@@ -1,4 +1,4 @@
-import {Node, NodeContent, NodeData, NodeId, NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-core";
+import {Node, NodeContent, NodeContentData, NodeId, NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-core";
 import {reactive, ref} from "vue";
 import {cloneDeep} from "lodash";
 import {Optional} from "@emrgen/types";
@@ -6,7 +6,7 @@ import {Optional} from "@emrgen/types";
 export class VueNodeContent implements NodeContent {
 
   // make the data reactive
-  static create(data: NodeData) {
+  static create(data: NodeContentData) {
     // const active = {
     //   id: data.id,
     //   type: data.type,
@@ -21,7 +21,7 @@ export class VueNodeContent implements NodeContent {
 
     return new VueNodeContent(data);
   }
-  constructor(private store: NodeData) {}
+  constructor(private store: NodeContentData) {}
 
   get id(): NodeId {
     return this.store.id;
@@ -71,7 +71,7 @@ export class VueNodeContent implements NodeContent {
     return this.children[index];
   }
 
-  unwrap(): NodeData {
+  unwrap(): NodeContentData {
     return cloneDeep(this.store)
   }
 

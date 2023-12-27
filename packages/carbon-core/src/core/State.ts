@@ -6,12 +6,15 @@ import { Node } from "./Node";
 import { PinnedSelection } from "./PinnedSelection";
 import { NodeMap } from "./NodeMap";
 import {Draft} from "./Draft";
+import {StateChanges} from "./NodeChange";
 
 export interface State {
+  scope: Symbol;
   content: Node;
   selection: PinnedSelection;
   nodeMap: NodeMap;
   updated: NodeIdSet;
+  changes: StateChanges;
 
   isContentChanged: boolean;
   isSelectionChanged: boolean;
@@ -21,6 +24,5 @@ export interface State {
   // app informs the state about the usage of the state
   activate(): State;
   deactivate(): void;
-
   eq(state: State): boolean;
 }

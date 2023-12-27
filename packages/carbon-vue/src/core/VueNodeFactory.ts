@@ -1,4 +1,4 @@
-import {Maps, Node, NodeData, NodeFactory, NodeId, PlainNodeContent, Schema} from "@emrgen/carbon-core";
+import {Maps, Node, NodeContentData, NodeFactory, NodeId, PlainNodeContent, Schema} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {isEmpty} from "lodash";
 import {VueNodeContent} from "./VueNodeContent";

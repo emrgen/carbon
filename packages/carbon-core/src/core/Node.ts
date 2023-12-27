@@ -6,7 +6,7 @@ import { takeUpto } from "../utils/array";
 import { ContentMatch } from "./ContentMatch";
 import { classString } from "./Logger";
 import { Mark, MarkSet } from "./Mark";
-import {PlainNodeContent, NodeContent} from "./NodeContent";
+import {PlainNodeContent, NodeContent, NodeData, NodeContentData} from "./NodeContent";
 import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeType } from "./NodeType";
 import { IDENTITY_SCOPE, no, NodeEncoder, NodeJSON, yes } from "./types";
@@ -64,7 +64,11 @@ export class Node extends EventEmitter implements IntoNodeId {
       this.content = content;
     }
 
-    unwrap() {
+    get data(): NodeData {
+      return this.content.data
+    }
+
+    unwrap(): NodeContentData {
       return this.content.unwrap()
     }
 

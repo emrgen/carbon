@@ -1,7 +1,7 @@
 import {
   Node as CoreNode,
   NodeContent,
-  NodeData,
+  NodeContentData,
   NodeId,
   NodePropsJson,
   NodeType
@@ -123,7 +123,7 @@ export class ImmutableNode extends CoreNode {
     console.log('x cloning', this.id.toString())
     const children = this.children.map(n => map(n)).filter(identity) as ImmutableNode[];
 
-    const data: NodeData = {
+    const data: NodeContentData = {
       parentId,
       parent: null,
       id,

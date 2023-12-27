@@ -7,11 +7,8 @@ import { SelectionManager } from "./SelectionManager";
 import { TransactionManager } from "./TransactionManager";
 import { EventsOut } from "./Event";
 import { Transaction } from "./Transaction";
-import { StateChanges } from "./NodeChange";
 import { PluginManager } from "./PluginManager";
-import { NodeId } from "./NodeId";
 import { ActionOrigin, State } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
 
 export enum NodeChangeType {
   update = "update",
@@ -79,7 +76,7 @@ export class ChangeManager extends NodeTopicEmitter {
     if (!isContentChanged && !isSelectionChanged) {
       return;
     }
-    console.log('-------------')
+
     console.log('update', isContentChanged, isSelectionChanged);
     if (isContentChanged) {
       this.updated.clear();
@@ -87,8 +84,8 @@ export class ChangeManager extends NodeTopicEmitter {
       console.log("syncing: content", this.updated.toArray().map(n => n.toString()));
 
       this.interval = setTimeout(() => {
-        // console.error("syncing: content timeout", this.changes.toArray().map(n => n.toString()));
-        // this.changes.clear();
+        console.error("syncing: content timeout", this.updated.toArray().map(n => n.toString()));
+        this.updated.clear();
       }, 2000)
     }
 
@@ -106,8 +103,7 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   mounted(node: Node, changeType: NodeChangeType) {
-    console.log('xxxxxxxxxxxxxxxxxxxx')
-    console.log('changes size', this.updated.size)
+    // console.log('changes size', this.updated.size)
     // if (this.counter > this.stateCounter) {
     //   console.log('mounted: old transaction sync still in progress', this.counter, counter);
     //   return;

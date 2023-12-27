@@ -6,9 +6,21 @@ import { NodeId } from './NodeId';
 import { Maps, With } from './types';
 import {NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-core";
 
+export interface NodeData {
+  id: NodeId;
+  type: NodeType;
+  parentId: Optional<NodeId>;
+  parent: Optional<NodeData>;
+  textContent: string;
+  children: NodeData[];
+  linkName: string;
+  links: Record<string, NodeData>;
+  props: NodeProps;
+}
+
 // all the data a node needs to be created
 // this is the core of the node
-export interface NodeData {
+export interface NodeContentData {
   id: NodeId;
   type: NodeType;
   parentId: Optional<NodeId>;
@@ -20,10 +32,11 @@ export interface NodeData {
   props: NodeProps;
 }
 
-export interface NodeContent extends NodeData, MutableNodeContent{
+export interface NodeContent extends NodeContentData, MutableNodeContent{
   size: number;
+  data: NodeData;
 
-  unwrap(): NodeData;
+  unwrap(): NodeContentData;
 
   child(index: number): Optional<Node>;
 }
@@ -46,11 +59,18 @@ export interface MutableNodeContent {
 
 export class PlainNodeContent implements NodeContent{
 
-  static create(content: NodeData): NodeContent {
+  static create(content: NodeContentData): NodeContent {
     return new PlainNodeContent(content);
   }
 
-  constructor(private content: NodeData) {}
+  constructor(private content: NodeContentData) {}
+
+  get data(): NodeData {
+    return {
+      ...this.content,
+      children: this.children.map(c => c.data),
+    }
+  }
 
   get id(): NodeId {
     return this.content.id;
@@ -92,8 +112,11 @@ export class PlainNodeContent implements NodeContent{
     return (this.type.isText) ? this.textContent.length : this.children.length;
   }
 
-  unwrap(): NodeData {
-    return this;
+
+  // return shallow clone of data
+  // the children are same references as the original
+  unwrap(): NodeContentData {
+    return { ...this.content };
   }
 
   child(index: number): Optional<Node> {

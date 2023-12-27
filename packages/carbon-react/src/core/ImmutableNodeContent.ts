@@ -3,7 +3,7 @@ import {
   Node,
   NodeId,
   NodeContent as CoreNodeContent,
-  NodeData,
+  NodeContentData,
   NodePropsJson,
   NodeType,
   NodeProps
@@ -14,11 +14,11 @@ import {Scope} from "./Scope";
 
 export class ImmutableNodeContent implements CoreNodeContent {
 
-  static create(scope: Symbol, data: NodeData) {
+  static create(scope: Symbol, data: NodeContentData) {
     return new ImmutableNodeContent(scope, data);
   }
 
-  constructor(private scope: Symbol, private data: NodeData) {
+  constructor(private scope: Symbol, private data: NodeContentData) {
   }
 
   get id(): NodeId {
@@ -128,7 +128,7 @@ export class ImmutableNodeContent implements CoreNodeContent {
     return node;
   }
 
-  unwrap(): NodeData {
+  unwrap(): NodeContentData {
     return this.data
   }
 

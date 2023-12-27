@@ -2,41 +2,77 @@ import { Optional } from "@emrgen/types";
 import { NodeIdSet } from "./BSet";
 import { PinnedSelection } from "./PinnedSelection";
 import { PointedSelection } from "./PointedSelection";
-import { Slice } from "@emrgen/carbon-core";
+import {BTreeNodeMap, Draft, NodeBTree, NodeId, NodeMap, NodePropsJson, Slice, State} from "@emrgen/carbon-core";
 
+enum ChangeType {
+  insert = 'insert',
+  remove = 'remove',
+  update = 'update',
+  setContent = 'setContent',
+  selection = 'selection',
+}
+
+export interface Change {
+  type: ChangeType;
+}
+
+class InsertChange implements Change {
+  type = ChangeType.insert;
+  constructor(readonly parentId: NodeId, readonly nodeId: NodeId, readonly offset: number) {}
+}
+
+class RemoveChange implements Change {
+  type = ChangeType.remove;
+  constructor(readonly parentId: NodeId, readonly nodeId: NodeId, readonly offset: number) {}
+}
+
+class UpdateChange implements Change {
+  type = ChangeType.update;
+  constructor(readonly nodeId: NodeId, readonly props: NodePropsJson) {}
+}
+
+class SetContentChange implements Change {
+  type = ChangeType.setContent;
+  constructor(readonly content: NodeId[] | string) {}
+}
+
+class SelectionChange implements Change {
+  type = ChangeType.selection;
+  constructor(readonly selection: PointedSelection) {}
+}
+
+// captures the changes in the state
+// this can be used to rollback or to update the UI
 export class StateChanges {
   // this nodes will be rendered
   // changed nodes will be rebuilt in the next render cycle
-  changed: NodeIdSet = new NodeIdSet();
+  changes: Change[] = [];
 
-  selection: Optional<PointedSelection> = null;
+  nodeMap: NodeMap = BTreeNodeMap.empty();
 
-  get isDirty() {
-    return this.isContentDirty || this.isSelectionDirty
+  apply(state: Draft) {
+
+  }
+
+  add(change: Change) {
+    this.changes.push(change);
   }
 
   get isContentDirty() {
-    return this.changed.size
+    return this.changes.some(c => c.type !== ChangeType.selection);
   }
 
   get isSelectionDirty() {
-    return !!this.selection?.isInline
+    return this.changes.some(c => c.type === ChangeType.selection);
   }
 
   freeze() {
-    this.changed.freeze();
-    this.selection?.freeze();
-
     Object.freeze(this);
-
     return this;
   }
 
   toJSON() {
-    return {
-      changed: this.changed.toJSON(),
-      selection: this.selection?.toJSON(),
-    }
+    return {}
   }
 
 }
