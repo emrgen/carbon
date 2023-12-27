@@ -28,7 +28,7 @@ interface PromiseState {
 export class ChangeManager extends NodeTopicEmitter {
 
   readonly transactions: Transaction[] = [];
-  changes: NodeIdSet = NodeIdSet.empty();
+  updated: NodeIdSet = NodeIdSet.empty();
 
   promiseState: PromiseState;
 
@@ -54,7 +54,7 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   private get isContentSynced() {
-    return !this.changes.size;
+    return !this.updated.size;
   }
 
   private get isSelectionDirty() {
@@ -82,9 +82,9 @@ export class ChangeManager extends NodeTopicEmitter {
     console.log('-------------')
     console.log('update', isContentChanged, isSelectionChanged);
     if (isContentChanged) {
-      this.changes.clear();
-      this.changes = state.changes.clone();
-      console.log("syncing: content", this.changes.toArray().map(n => n.toString()));
+      this.updated.clear();
+      this.updated = state.updated.clone();
+      console.log("syncing: content", this.updated.toArray().map(n => n.toString()));
 
       this.interval = setTimeout(() => {
         // console.error("syncing: content timeout", this.changes.toArray().map(n => n.toString()));
@@ -107,14 +107,14 @@ export class ChangeManager extends NodeTopicEmitter {
 
   mounted(node: Node, changeType: NodeChangeType) {
     console.log('xxxxxxxxxxxxxxxxxxxx')
-    console.log('changes size', this.changes.size)
+    console.log('changes size', this.updated.size)
     // if (this.counter > this.stateCounter) {
     //   console.log('mounted: old transaction sync still in progress', this.counter, counter);
     //   return;
     // }
 
     // force the promise to timeout
-    if (!this.changes.has(node.id)) {
+    if (!this.updated.has(node.id)) {
       // console.log('mounted node not dirty', node.id.toString(), changeType);
       return;
     }
@@ -124,7 +124,7 @@ export class ChangeManager extends NodeTopicEmitter {
     // keep track of the pending node updates
     if (changeType === NodeChangeType.update) {
       // console.log('mounted', node.id.toString(), changeType, this.changes.size, this.changes.toArray().map(n => n.toString()), node.textContent, node);
-      this.changes.remove(node.id);
+      this.updated.remove(node.id);
     }
 
     // console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
@@ -166,7 +166,7 @@ export class ChangeManager extends NodeTopicEmitter {
   private updateContent() {
     console.groupCollapsed("syncing:  content");
     // console.group('syncing: content')
-    const updatedNodeIds = this.changes;
+    const updatedNodeIds = this.updated;
 
     // keep only the top level nodes that have been updated
     // remove the update children

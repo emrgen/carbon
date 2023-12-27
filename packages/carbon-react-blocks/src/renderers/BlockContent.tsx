@@ -110,7 +110,7 @@ export function BlockContentComp(props: RendererProps) {
         const parent = state.nodeMap.get(parentId)
         let childrenUpdated = false
         parent?.preorder(n => {
-          if (state.changes.has(n.id)) {
+          if (state.updated.has(n.id)) {
             childrenUpdated = true
           }
           return childrenUpdated

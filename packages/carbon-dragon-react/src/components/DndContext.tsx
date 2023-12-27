@@ -18,7 +18,7 @@ export const DndContext = (props) => {
       if (state.isContentChanged) {
         dnd.isDirty = true;
         // console.log('update dnd context');
-        const nodes = app.state.changes.nodes(state.nodeMap);
+        const nodes = app.state.updated.nodes(state.nodeMap);
         const ancestor = sortBy(nodes, n => n.depth).pop();
         if (ancestor) {
           // console.log('refresh: refreshing dnd bounds');
@@ -26,7 +26,7 @@ export const DndContext = (props) => {
         }
       }
     },
-    [app.state.changes, dnd]
+    [app.state.updated, dnd]
   );
 
   useEffect(() => {

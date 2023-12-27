@@ -3,7 +3,7 @@ import {SolidNodeMap} from "./NodeMap";
 import {SolidDraft} from "./SolidDraft";
 
 export class SolidState implements State {
-  changes: NodeIdSet;
+  updated: NodeIdSet;
   content: Node;
   nodeMap: SolidNodeMap;
   selection: PinnedSelection;
@@ -14,7 +14,7 @@ export class SolidState implements State {
     this.content = content;
     this.selection = selection;
     this.nodeMap = new SolidNodeMap();
-    this.changes = new NodeIdSet();
+    this.updated = new NodeIdSet();
 
     this.isContentChanged = true;
     this.isSelectionChanged = true;

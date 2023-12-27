@@ -7,7 +7,7 @@ import {each} from "lodash";
 export class VueState implements State {
   content: Node;
   selection: PinnedSelection;
-  changes: NodeIdSet;
+  updated: NodeIdSet;
   isContentChanged: boolean;
   isSelectionChanged: boolean;
   nodeMap: NodeMap;
@@ -20,7 +20,7 @@ export class VueState implements State {
       // state.changes.add(n.id);
     });
 
-    console.log('VueState.create', state.nodeMap.size, state.changes.size);
+    console.log('VueState.create', state.nodeMap.size, state.updated.size);
 
     return state;
   }
@@ -29,7 +29,7 @@ export class VueState implements State {
     this.content = content;
     this.selection = selection;
     this.nodeMap = new VueNodeMap();
-    this.changes = new NodeIdSet();
+    this.updated = new NodeIdSet();
     this.isContentChanged = true;
     this.isSelectionChanged = true;
   }

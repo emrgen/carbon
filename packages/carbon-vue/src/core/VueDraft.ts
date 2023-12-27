@@ -40,9 +40,9 @@ export class VueDraft implements Draft {
     } catch (e) {
       this.rollback();
     } finally {
-      this.state.changes.clear();
-      this.changes.forEach(id => this.state.changes.add(id));
-      
+      this.state.updated.clear();
+      this.changes.forEach(id => this.state.updated.add(id));
+
       return this.state;
     }
   }

@@ -11,7 +11,7 @@ interface StateProps {
   selection: PinnedSelection;
   marks?: MarkSet;
   nodeMap: ImmutableNodeMap;
-  changes?: NodeIdSet;
+  updated?: NodeIdSet;
   counter?: number;
 }
 
@@ -21,14 +21,15 @@ export class ImmutableState implements State {
   content: Node;
   selection: PinnedSelection;
   nodeMap: ImmutableNodeMap;
-  changes: NodeIdSet;
+  updated: NodeIdSet;
+  changes: StateChanges
 
   static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: ImmutableNodeMap = new ImmutableNodeMap()) {
     const state = new ImmutableState({ content, selection, scope, nodeMap });
     if (!nodeMap.size) {
       content.all(n => {
         nodeMap.set(n.id, n)
-        state.changes.add(n.id);
+        state.updated.add(n.id);
       });
     }
 
@@ -42,7 +43,7 @@ export class ImmutableState implements State {
       content,
       selection,
       nodeMap,
-      changes = NodeIdSet.empty(),
+      updated = NodeIdSet.empty(),
     } = props;
 
     this.previous = previous;
@@ -50,7 +51,7 @@ export class ImmutableState implements State {
     this.content = content;
     this.selection = selection;
     this.nodeMap = nodeMap;
-    this.changes = changes;
+    this.updated = updated;
   }
 
   get isSelectionChanged() {
@@ -96,13 +97,13 @@ export class ImmutableState implements State {
 
   clone(depth: number = 2) {
     if (depth === 0) return null
-    const { scope, content, selection, changes, nodeMap } = this;
+    const { scope, content, selection, updated, nodeMap } = this;
     if (!this.previous) {
       return new ImmutableState({
         scope,
         content,
         selection,
-        changes,
+        updated,
         nodeMap,
       })
     }
@@ -112,7 +113,7 @@ export class ImmutableState implements State {
       scope,
       content,
       selection,
-      changes,
+      updated,
       nodeMap,
       previous,
     })
@@ -122,6 +123,10 @@ export class ImmutableState implements State {
   produce(origin: ActionOrigin, fn: (state: ImmutableDraft) => void): State {
     const draft = new ImmutableDraft(this, origin);
     return draft.produce(fn);
+  }
+
+  eq(other: State) {
+    return this.content.eq(other.content) && this.selection.eq(other.selection);
   }
 
   revert(steps = 1) {
@@ -140,7 +145,7 @@ export class ImmutableState implements State {
 
   freeze() {
     // remove all explicit parent links and freeze
-    this.changes.freeze();
+    this.updated.freeze();
     // this.nodeMap.freeze();
     this.content.freeze();
     this.selection.freeze();

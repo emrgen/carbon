@@ -11,7 +11,7 @@ export interface State {
   content: Node;
   selection: PinnedSelection;
   nodeMap: NodeMap;
-  changes: NodeIdSet;
+  updated: NodeIdSet;
 
   isContentChanged: boolean;
   isSelectionChanged: boolean;

@@ -146,7 +146,7 @@ export class ImmutableDraft implements CoreDraft {
       content,
       selection: after,
       nodeMap,
-      changes,
+      updated: changes,
     });
 
     return newState.freeze();
