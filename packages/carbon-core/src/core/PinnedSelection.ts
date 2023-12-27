@@ -4,7 +4,7 @@ import { Node } from './Node';
 import { Pin } from './Pin';
 import { PointedSelection } from './PointedSelection';
 import { NodeStore } from './NodeStore';
-import { DomSelection, Range } from './Range';
+import {DomSelection, Span} from './Span';
 import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
 import {NodeBTree, NodeMap, sortNodes} from "@emrgen/carbon-core";
@@ -182,10 +182,6 @@ export class PinnedSelection {
     return this.isInline && this.blocks.length > 0
   }
 
-	get range(): Range {
-		return Range.create(this.start, this.end);
-	}
-
 	get isInvalid() {
 		return this.tail.isNull || this.head.isNull;
 	}
@@ -280,12 +276,24 @@ export class PinnedSelection {
 			// Ref: https://stackoverflow.com/a/779785/4556425
 			// https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
 			var selection = window.getSelection();
-			selection?.setBaseAndExtent(
-				anchorNode,
-				anchorOffset,
-				focusNode,
-				focusOffset
-			);
+
+      // NOTE: this worked all the time
+			// selection?.setBaseAndExtent(
+			// 	anchorNode,
+			// 	anchorOffset,
+			// 	focusNode,
+			// 	focusOffset
+			// );
+
+      // NOTE: this didn't work before but now works
+      const range = new Range();
+      range.setStart(anchorNode, anchorOffset);
+      range.setEnd(focusNode, focusOffset);
+      selection?.removeAllRanges()
+      window.getSelection()?.addRange(range);
+
+      // NOTE: maybe not needed in production
+      // verify if the selection is successfully set
 			const pinnedSelection = PinnedSelection.fromDom(store);
 			const domSel = pinnedSelection?.intoDomSelection(store);
 			console.assert(domSel?.anchorNode === domSelection.anchorNode, 'failed to sync anchorNode')

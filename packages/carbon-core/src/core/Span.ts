@@ -8,12 +8,12 @@ interface RangeProps {
 
 // ready to be applied to dom
 // should be directly mappable to dom nodes
-export class Range {
+export class Span {
 	start: Pin;
 	end: Pin;
 
 	static create(start: Pin, end: Pin) {
-		return new Range({start,  end});
+		return new Span({start,  end});
 	}
 
 	get isCollapsed() {

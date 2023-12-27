@@ -1,7 +1,7 @@
 import {AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Pin} from "../core";
 import {SelectionPatch} from "../core/DeleteGroup";
 import {NodeId} from "../core/NodeId";
-import {Range} from "../core/Range";
+import {Span} from "../core/Span";
 import {Slice} from "../core/Slice";
 import {preventAndStop} from "../utils/event";
 import {blocksBelowCommonNode} from "../utils/findNodes";
@@ -158,8 +158,8 @@ export class ClipboardPlugin extends AfterPlugin {
     //   deleteGroup.addRange(Range.create(end, Pin.toEndOf(end.node)!,));
     // }
 
-    deleteGroup.addRange(Range.create(Pin.toStartOf(start.node)!, start));
-    deleteGroup.addRange(Range.create(end, Pin.toEndOf(end.node)!,));
+    deleteGroup.addRange(Span.create(Pin.toStartOf(start.node)!, start));
+    deleteGroup.addRange(Span.create(end, Pin.toEndOf(end.node)!,));
     // }
 
     // console.log(deleteGroup.ids.map(id => id.toString()));

@@ -25,7 +25,7 @@ import { NodeId } from "../core/NodeId";
 import { NodeType } from "../core/NodeType";
 import { Pin } from "../core/Pin";
 import { Point } from "../core/Point";
-import { Range } from "../core/Range";
+import { Span } from "../core/Span";
 import { Slice } from "../core/Slice";
 import { Transaction } from "../core/Transaction";
 import { ChangeNameAction } from "../core/actions/ChangeNameAction";
@@ -1395,7 +1395,7 @@ export class TransformCommands extends BeforePlugin {
 
     if (startBlock.eq(endBlock)) {
       if (startBlock.isTextContainer) {
-        selectedGroup.addRange(Range.create(start, end));
+        selectedGroup.addRange(Span.create(start, end));
       } else if (startBlock.type.isAtom) {
         // is it required???
         collectId(startBlock.id);
@@ -1405,7 +1405,7 @@ export class TransformCommands extends BeforePlugin {
 
     // delete text range from startNode
     if (startBlock.isTextContainer && !startInfo.isEmpty) {
-      selectedGroup.addRange(Range.create(start.clone(), Pin.create(start.node, start.node.focusSize)));
+      selectedGroup.addRange(Span.create(start.clone(), Pin.create(start.node, start.node.focusSize)));
     } else if (startBlock.type.isAtom) {
       collectId(startBlock.id);
     }
@@ -1413,7 +1413,7 @@ export class TransformCommands extends BeforePlugin {
 
     // delete text range from endNode
     if (endBlock.isTextContainer && !endInfo.isEmpty) {
-      selectedGroup.addRange(Range.create(Pin.create(end.node, 0), end.clone()));
+      selectedGroup.addRange(Span.create(Pin.create(end.node, 0), end.clone()));
     } else if (endBlock.type.isAtom) {
       collectId(endBlock.id);
     }
