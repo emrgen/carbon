@@ -115,12 +115,12 @@ export class ImmutableNode extends CoreNode {
   override clone(map: (node: CoreNode) => Optional<ImmutableNode> = identity): ImmutableNode {
     const {scope,parentId, id, type, links, linkName, props, renderVersion, contentVersion} = this;
 
-    console.log('cloning', this.id.toString(), this.isFrozen, map === identity)
+    // console.log('cloning', this.id.toString(), this.isFrozen, map === identity)
     if (!this.isFrozen && map === identity) {
       return this
     }
 
-    console.log('x cloning', this.id.toString())
+    // console.log('x cloning', this.id.toString())
     const children = this.children.map(n => map(n)).filter(identity) as ImmutableNode[];
 
     const data: NodeContentData = {

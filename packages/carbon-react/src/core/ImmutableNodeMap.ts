@@ -103,7 +103,7 @@ export class ImmutableNodeMap implements NodeMap {
   }
 
   delete(key: NodeId) {
-    console.log("deleting", key.toString(), this.get(key));
+    // console.log("deleting", key.toString(), this.get(key));
     this._deleted.set(key, this.get(key)!);
     this._map.delete(key);
   }

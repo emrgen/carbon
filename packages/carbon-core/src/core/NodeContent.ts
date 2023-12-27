@@ -10,7 +10,6 @@ export interface NodeData {
   id: NodeId;
   type: NodeType;
   parentId: Optional<NodeId>;
-  parent: Optional<NodeData>;
   textContent: string;
   children: NodeData[];
   linkName: string;
@@ -46,15 +45,15 @@ export interface MutableNodeContent {
   setParent(parent: Optional<Node>): void;
   changeType(type: NodeType): void;
   insert(node: Node, index: number): void;
+  remove(node: Node): void;
   insertText(text: string, offset: number): void;
   removeText(offset: number, length: number): void;
   addLink(name: string, node: Node): void;
   removeLink(name: string): Optional<Node>;
-  remove(node: Node): void;
   updateContent(content: Node[] | string): void;
   updateProps(props: NodePropsJson): void;
   clone(): NodeContent;
-  freeze(): NodeContent;
+  freeze(): void;
 }
 
 export class PlainNodeContent implements NodeContent{
@@ -66,8 +65,9 @@ export class PlainNodeContent implements NodeContent{
   constructor(private content: NodeContentData) {}
 
   get data(): NodeData {
+    const {parent, children, ...rest} = this.content;
     return {
-      ...this.content,
+      ...rest,
       children: this.children.map(c => c.data),
     }
   }

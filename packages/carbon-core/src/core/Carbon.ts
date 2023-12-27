@@ -186,14 +186,14 @@ export class Carbon extends EventEmitter {
 		}
 
 		if (state.eq(this.state)) {
-			console.warn('skipping ui sync: new state is the same as current', this.state.previous.content.renderVersion, this.state.content.renderVersion);
+			console.warn('skipping ui sync: new state is the same as current', state.content.renderVersion, this.state.content.contentVersion);
 			return
 		}
 
 
 		// keep three previous states
 		this.state = state.activate()
-    console.log('updateState', this.state.content.textContent);
+    // console.log('updateState', this.state.content.textContent);
 		this.change.update(tr, state)
 
 		this.emit(EventsOut.transactionCommit, tr);

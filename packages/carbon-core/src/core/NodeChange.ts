@@ -2,7 +2,19 @@ import { Optional } from "@emrgen/types";
 import { NodeIdSet } from "./BSet";
 import { PinnedSelection } from "./PinnedSelection";
 import { PointedSelection } from "./PointedSelection";
-import {BTreeNodeMap, Draft, NodeBTree, NodeId, NodeMap, NodePropsJson, Slice, State} from "@emrgen/carbon-core";
+import {
+  BTreeNodeMap,
+  Draft,
+  Node,
+  NodeBTree, NodeContentData,
+  NodeData,
+  NodeId, NodeIdComparator,
+  NodeMap,
+  NodePropsJson,
+  Slice,
+  State
+} from "@emrgen/carbon-core";
+import BTree from "sorted-btree";
 
 enum ChangeType {
   insert = 'insert',
@@ -16,27 +28,27 @@ export interface Change {
   type: ChangeType;
 }
 
-class InsertChange implements Change {
+export class InsertChange implements Change {
   type = ChangeType.insert;
   constructor(readonly parentId: NodeId, readonly nodeId: NodeId, readonly offset: number) {}
 }
 
-class RemoveChange implements Change {
+export class RemoveChange implements Change {
   type = ChangeType.remove;
   constructor(readonly parentId: NodeId, readonly nodeId: NodeId, readonly offset: number) {}
 }
 
-class UpdateChange implements Change {
+export class UpdateChange implements Change {
   type = ChangeType.update;
   constructor(readonly nodeId: NodeId, readonly props: NodePropsJson) {}
 }
 
-class SetContentChange implements Change {
+export class SetContentChange implements Change {
   type = ChangeType.setContent;
   constructor(readonly content: NodeId[] | string) {}
 }
 
-class SelectionChange implements Change {
+export class SelectionChange implements Change {
   type = ChangeType.selection;
   constructor(readonly selection: PointedSelection) {}
 }
@@ -48,13 +60,18 @@ export class StateChanges {
   // changed nodes will be rebuilt in the next render cycle
   changes: Change[] = [];
 
-  nodeMap: NodeMap = BTreeNodeMap.empty();
+  // stores the nodes that are changed
+  dataMap: NodeDataMap = NodeDataMap.empty()
+
+  static empty() {
+    return new StateChanges();
+  }
 
   apply(state: Draft) {
 
   }
 
-  add(change: Change) {
+  add(change: Change, data: NodeDataSelf) {
     this.changes.push(change);
   }
 
@@ -75,4 +92,12 @@ export class StateChanges {
     return {}
   }
 
+}
+
+type NodeDataSelf = Omit<NodeData, 'children'>;
+
+export class NodeDataMap extends BTree<NodeId, NodeDataSelf> {
+  static empty() {
+    return new NodeDataMap(undefined, NodeIdComparator);
+  }
 }

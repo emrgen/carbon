@@ -686,7 +686,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     updateContent(content: Node[]|string) {
       this.content.updateContent(content);
-      console.log('updateContent', this.id.toString(), this.textContent, this.children.map(n => n.textContent));
+      // console.log('updateContent', this.id.toString(), this.textContent, this.children.map(n => n.textContent));
       if (isArray(content)) {
         content.forEach(n => {
           n.setParent(this);
