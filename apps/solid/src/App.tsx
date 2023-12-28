@@ -46,10 +46,10 @@ const app = new Carbon(state, schema, pm);
 window.app = app;
 
 
-// console.log = noop;
+console.log = noop;
 // console.info = noop;
 // console.debug = noop;
-// console.warn = noop;
+console.warn = noop;
 // console.error = noop;
 console.group = noop;
 console.groupCollapsed = noop;
@@ -84,8 +84,10 @@ function App() {
     clearInterval(interval);
   }
 
-  const onChange = (state: State) => {
-    console.log('[changed state]', state)
+  const onChange = (_: State) => {
+    console.debug('[changed state]', count())
+
+    setCount(count() + 1)
   }
 
   app.on('changed', onChange)

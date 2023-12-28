@@ -7,9 +7,10 @@ import {
   NodeType
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
-import {identity} from "lodash";
+import {findIndex, identity} from "lodash";
 import {ImmutableNodeContent} from "./ImmutableNodeContent";
 import {IndexMap, IndexMapper} from "@emrgen/carbon-core/src/core/IndexMap";
+import {CarbonCache} from "@emrgen/carbon-core/src/core/CarbonCache";
 
 export class ImmutableNode extends Node {
   scope: Symbol;
@@ -31,7 +32,9 @@ export class ImmutableNode extends Node {
   }
 
   override get index(): number {
-    return super.index;
+    return this.getIndex();
+
+    // return super.index;
 
     console.debug('## called index', this.id.toString())
     const parent = this.parent as ImmutableNode;
@@ -42,6 +45,23 @@ export class ImmutableNode extends Node {
     const index = parent.indexMapper.map(this.indexMap, this.mappedIndex);
     console.debug('found index', this.id.toString(), index)
     return index;
+  }
+
+  private getIndex() {
+    const parent = this.parent;
+    if (!parent) {
+      // console.warn('node has no parent', this.id.toString());
+      return -1
+    }
+
+    // NOTE: this is a performance critical code
+    const key = `${parent.contentKey}/${this.id.toString()}`
+    return NODE_CACHE_INDEX.get(key, () => {
+      const {children = []} = parent;
+      return findIndex(children as Node[], n => {
+        return this.id.comp(n.id) === 0
+      });
+    })
   }
 
   override get key() {
@@ -200,3 +220,5 @@ export class ImmutableNode extends Node {
   }
 
 }
+
+export const NODE_CACHE_INDEX = new CarbonCache();

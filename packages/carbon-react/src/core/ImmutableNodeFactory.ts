@@ -38,7 +38,7 @@ export class ImmutableNodeFactory implements NodeFactory {
       throw new Error(`Node Plugin is not registered ${name}`);
     }
 
-    const props = isEmpty(json.props) ? type.props : type.props.clone().update(json.props);
+    const props = isEmpty(json.props) ? type.props.clone() : type.props.clone().update(json.props);
     const nodeId = id ? NodeId.deserialize(id)! : this.blockId();
     const nodes = children.map(n => schema.nodeFromJSON(n));
     const content = ImmutableNodeContent.create(scope, {

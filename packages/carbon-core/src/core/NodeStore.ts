@@ -133,7 +133,11 @@ export class NodeStore {
 			}
 		} while (el)
 
-		return node;
+    if (!node) {
+      return null
+    }
+
+		return this.nodeMap.get(node.id);
 	}
 
 }

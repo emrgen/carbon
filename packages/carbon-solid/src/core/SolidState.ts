@@ -14,19 +14,34 @@ export class SolidState implements State {
   isContentChanged: boolean;
   isSelectionChanged: boolean;
 
-  constructor(content: Node, selection: PinnedSelection) {
+  static create(content: Node, selection: PinnedSelection, nodeMap: SolidNodeMap = new SolidNodeMap()) {
+    const state = new SolidState(content, selection, nodeMap);
+    if (!nodeMap.size) {
+      content.all(n => {
+        nodeMap.set(n.id, n)
+        state.updated.add(n.id);
+      });
+    }
+
+    console.log('Nodemap', nodeMap.size)
+
+    return state;
+  }
+
+  constructor(content: Node, selection: PinnedSelection, nodeMap: SolidNodeMap) {
     this.scope = IDENTITY_SCOPE;
     this.content = content;
     this.selection = selection;
-    this.nodeMap = new SolidNodeMap();
+    this.nodeMap = nodeMap;
     this.updated = new NodeIdSet();
     this.changes = new StateChanges();
 
-    this.isContentChanged = true;
-    this.isSelectionChanged = true;
+    this.isContentChanged = false;
+    this.isSelectionChanged = false;
   }
 
   activate(): State {
+    console.log('[activate state]')
     return this
   }
 

@@ -63,17 +63,20 @@ export class ChangeManager extends NodeTopicEmitter {
   // 3. sync the node state
   update(tr: Transaction, state: State, timeout: number = 1000) {
     if (this.transactions.length) {
-      // this.promiseState.reject?.();
+      console.log('pending transaction', this.transactions.length, this.transactions.map(t => t.actions))
       return;
     }
 
     this.transactions.push(tr);
     const { isContentChanged, isSelectionChanged } = this.state;
 
+    console.log('isSelectionChanged', isSelectionChanged)
+
     // console.log('updating transaction effect', tr);
     // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
     // if nothing is dirty, then there is nothing to do
     if (!isContentChanged && !isSelectionChanged) {
+      console.log("skipped: nothing to sync");
       return;
     }
 
@@ -195,7 +198,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
   private updateSelection(cb: Function) {
     const selection = this.state.selection;
-    // console.debug("syncing: selection", this.state.selection.toJSON(), this.state.selection.isInline);
+    console.log("syncing: selection", this.state.selection.toJSON(), this.state.selection.isInline);
     if (!this.app.ready) {
       // console.log('react not ready');
       return;

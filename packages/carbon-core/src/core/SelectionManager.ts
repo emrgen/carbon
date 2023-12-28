@@ -71,7 +71,7 @@ export class SelectionManager {
 		}
 
 		draft.updateSelection(after);
-		console.log('synced selection from origin', origin)
+		console.log('synced selection from origin', origin, after.toString())
 		// this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange && origin !== ActionOrigin.NoSync);
 		// console.log('###', this.react.selection.toString(), selection.toString());
 		// this.updateFocusPlaceholder(this.state.prevSelection, selection);

@@ -49,4 +49,3 @@ export class CarbonCache {
 }
 
 export const NODE_CACHE = new CarbonCache();
-export const NODE_CACHE_INDEX = new CarbonCache();

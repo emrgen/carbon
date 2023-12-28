@@ -11,7 +11,6 @@ import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeType } from "./NodeType";
 import { IDENTITY_SCOPE, no, NodeEncoder, NodeJSON, yes } from "./types";
 import EventEmitter from "events";
-import { NODE_CACHE_INDEX } from "./CarbonCache";
 import {
   ActivatedPath,
   CollapsedPath,
@@ -363,14 +362,10 @@ export class Node extends EventEmitter implements IntoNodeId {
         return -1
       }
 
-      // NOTE: this is a performance critical code
-      const key = `${parent.contentKey}/${this.id.toString()}`
-      return NODE_CACHE_INDEX.get(key, () => {
-        const {children = []} = parent;
-        return findIndex(children as Node[], n => {
-          return this.id.comp(n.id) === 0
-        });
-      })
+      const {children = []} = parent;
+      return findIndex(children as Node[], n => {
+        return this.id.comp(n.id) === 0
+      });
     }
 
     get textContent(): string {

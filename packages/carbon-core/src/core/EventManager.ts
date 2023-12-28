@@ -1,15 +1,15 @@
-import { Carbon } from "./Carbon";
-import { EventContext, EventOrigin } from "./EventContext";
-import { PluginManager } from "./PluginManager";
-import { isKeyHotkey } from "is-hotkey";
-import { PinnedSelection } from "./PinnedSelection";
-import { Node } from "./Node";
-import { ActionOrigin } from "./actions/types";
-import { EventsIn } from "./Event";
-import { p12, p14, pad } from "./Logger";
-import { last } from "lodash";
-import { preventAndStop } from "../utils/event";
-import { CustomEvent } from "./CustomEvent";
+import {Carbon} from "./Carbon";
+import {EventContext, EventOrigin} from "./EventContext";
+import {PluginManager} from "./PluginManager";
+import {isKeyHotkey} from "is-hotkey";
+import {PinnedSelection} from "./PinnedSelection";
+import {Node} from "./Node";
+import {ActionOrigin} from "./actions/types";
+import {EventsIn} from "./Event";
+import {p12, p14, pad} from "./Logger";
+import {last} from "lodash";
+import {preventAndStop} from "../utils/event";
+import {CustomEvent} from "./CustomEvent";
 
 const selectionKeys: string[] = [
 	'left',
@@ -113,6 +113,9 @@ export class EventManager {
 		}
 
 		const selection = PinnedSelection.fromDom(app.store);
+    console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
+    console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
+    console.log(selection?.toString())
 		if (['selectionchange'].includes(type)) {
 			console.log(pad(`%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`, 100), 'background:#ffcc006e');
 		}
@@ -146,6 +149,8 @@ export class EventManager {
 			origin: EventOrigin.dom,
 			cmd: app.cmd,
 		});
+
+    console.log('node chain', node.chain.map(n => n.id.toString()).join(' > '))
 
 
 		let groupOpen = false;

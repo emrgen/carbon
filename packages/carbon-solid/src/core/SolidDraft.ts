@@ -20,8 +20,13 @@ export class SolidDraft implements Draft {
 
   constructor(private state: State) {}
 
+  get nodeMap(): NodeMap {
+    return this.state.nodeMap;
+  }
+
   produce(fn: (draft: Draft) => void): State {
     // start recording the changes
+    this.state.isSelectionChanged = false;
     try {
       fn(this);
       this.commit();
@@ -41,17 +46,54 @@ export class SolidDraft implements Draft {
   }
 
   get(id: NodeId): Optional<Node> {
-    return undefined;
+    const node = this.state.nodeMap.get(id);
+    if (!node) {
+      throw new Error(`Node ${id.toString()} not found`);
+    }
+
+    return node;
   }
 
   parent(from: NodeId | Node): Optional<Node> {
-    return undefined;
+    if (from instanceof Node) {
+      const {parentId} = from;
+      if (!parentId) {
+        return null;
+      }
+
+      return this.get(parentId);
+    }
+
+    const node = this.get(from);
+    if (!node) {
+      throw new Error(`Node ${from.toString()} not found`);
+    }
+
+    return this.parent(node);
   }
 
   change(nodeId: NodeId, type: NodeType): void {
   }
 
   insert(at: Point, node: Node): void {
+    console.log('[trap] insert', at.toString(), node.toString());
+
+    const refNode = this.get(at.nodeId);
+    if (!refNode) {
+      throw new Error(`Node ${at.nodeId.toString()} not found`);
+    }
+    const parent = this.parent(refNode);
+    if (!parent) {
+      throw new Error(`Parent of ${refNode.id.toString()} not found`);
+    }
+
+    node.all(n => {
+      this.nodeMap.set(n.id, n)
+    })
+
+    const index = refNode.index;
+    console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())
+    parent.insert(node, index + 1);
   }
 
   move(to: Point, node: Node): void {
@@ -60,11 +102,27 @@ export class SolidDraft implements Draft {
   remove(node: Node): void {
   }
 
-  updateContent(nodeId: NodeId, content: Node[]|string): void {}
+  updateContent(nodeId: NodeId, content: Node[]|string): void {
+    console.log('[trap] updateContent', nodeId.toString(), content);
+    const node = this.state.nodeMap.get(nodeId);
+    if (!node) {
+      throw new Error(`Node ${nodeId.toString()} not found`);
+    }
+
+    node.updateContent(content);
+  }
 
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
   }
 
   updateSelection(selection: PointedSelection): void {
+    console.log('updateSelection', selection.toString());
+    const pinned = selection.pin(this.state.nodeMap);
+    if (!pinned) {
+      throw new Error('Invalid selection');
+    }
+    this.state.selection = pinned;
+
+    this.state.isSelectionChanged = true;
   }
 }

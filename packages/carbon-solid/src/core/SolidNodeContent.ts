@@ -96,6 +96,9 @@ export class SolidNodeContent implements NodeContent {
   }
 
   get size(): number {
+    if (this.type.isText) {
+      return this.textContent.length
+    }
     return this.children.length
   }
 
@@ -104,7 +107,11 @@ export class SolidNodeContent implements NodeContent {
   }
 
   unwrap(): NodeContentData {
-    return unwrap(this.content);
+    // console.log('unwrap', this.id.toString())
+    const content =  unwrap(this.content);
+    return {
+      ...content,
+    }
   }
 
   setParentId(parentId: Optional<NodeId>): void {
@@ -112,6 +119,7 @@ export class SolidNodeContent implements NodeContent {
   }
 
   setParent(parent: Optional<Node>): void {
+    console.log('update parent', this.id.toString(), parent?.id.toString())
     this.content.parent = parent;
   }
 

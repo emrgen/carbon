@@ -36,8 +36,12 @@ export class PinnedSelection {
 		let { anchorNode: anchorEl, anchorOffset, focusNode: focusEl, focusOffset } = domSelection;
 		// console.log(p14('%c[info]'), 'color:pink', p30('Selection.fromDom'), anchorEl, focusEl, anchorOffset, focusOffset);
 
+    console.log(store.nodeMap.nodes().map(n => `${n.key}:${n.parent?.key}`).join(' > '))
 		let anchorNode = store.resolve(anchorEl);
+    console.log('anchorNode path', anchorNode?.chain.map(n => n.key).join(' > '), anchorEl)
+
 		let focusNode = store.resolve(focusEl);
+
 		// console.log(anchorEl, anchorNode, anchorOffset);
 		// console.log(anchorNode);
 		// console.log(focusNode);

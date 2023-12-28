@@ -190,10 +190,9 @@ export class Carbon extends EventEmitter {
 			return
 		}
 
-
 		// keep three previous states
 		this.state = state.activate()
-    // console.log('updateState', this.state.content.textContent);
+    console.log('updateState', this.state.content.textContent, this.state.isContentChanged, this.state.isSelectionChanged);
 		this.change.update(tr, state)
 
 		this.emit(EventsOut.transactionCommit, tr);
