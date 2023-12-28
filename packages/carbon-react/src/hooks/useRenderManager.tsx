@@ -1,5 +1,5 @@
-import { RenderManager } from '@emrgen/carbon-core';
 import {createContext, ReactNode, useContext} from 'react';
+import {RenderManager} from "@emrgen/carbon-react";
 export const InnerRenderManagerContext = createContext<RenderManager>(null!);
 
 export const useRenderManager = () => {

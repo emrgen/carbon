@@ -18,7 +18,7 @@ export class CarbonCache {
   get<T>(key: string, fn?: () => T, expire?: number): T {
     const value = this.cache.get(key);
     if (value !== undefined) {
-      // console.log('cache hit', key, value);
+      console.debug('cache hit', key, value);
       this.hitCount++;
       return value;
     }

@@ -788,6 +788,7 @@ class DraftNode extends Node {
   }
 }
 
+// NOTE: this is a priority queue that sorts nodes by depth
 class NodeDepthPriorityQueue {
   private queue: FastPriorityQueue<NodeDepthEntry>;
 
