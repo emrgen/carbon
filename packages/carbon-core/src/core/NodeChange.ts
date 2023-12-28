@@ -125,7 +125,7 @@ export class SelectionChange implements Change {
 export class StateChanges {
   // this nodes will be rendered
   // changed nodes will be rebuilt in the next render cycle
-  changes: Change[] = [];
+  patch: Change[] = [];
 
   // stores the nodes that are changed
   dataMap: NodeDataMap = NodeDataMap.empty()
@@ -142,11 +142,11 @@ export class StateChanges {
   }
 
   inverse(): StateChanges {
-    const {changes, dataMap} = this;
+    const {patch, dataMap} = this;
     const inverse = new StateChanges();
 
-    for (let i = changes.length - 1; i >= 0; i--) {
-      const change = changes[i];
+    for (let i = patch.length - 1; i >= 0; i--) {
+      const change = patch[i];
       this.match(change, {
         rename(change: NameChange) {
           inverse.add(NameChange.create(change.nodeId, change.after, change.before));
@@ -208,15 +208,15 @@ export class StateChanges {
   }
 
   add(change: Change) {
-    this.changes.push(change);
+    this.patch.push(change);
   }
 
   get isContentDirty() {
-    return this.changes.some(c => c.type !== ChangeType.selection);
+    return this.patch.some(c => c.type !== ChangeType.selection);
   }
 
   get isSelectionDirty() {
-    return this.changes.some(c => c.type === ChangeType.selection);
+    return this.patch.some(c => c.type === ChangeType.selection);
   }
 
   freeze() {

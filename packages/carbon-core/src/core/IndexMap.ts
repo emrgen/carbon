@@ -52,7 +52,6 @@ export class IndexMap {
 
 export class IndexMapper {
   mappers: IndexMap[] = [];
-  mapIndex: WeakMap<IndexMap, number> = new WeakMap();
 
   static empty() {
     return new IndexMapper([]);
@@ -66,7 +65,6 @@ export class IndexMapper {
     this.mappers = maps;
     for (let i = 0; i < maps.length; ++i) {
       const map = maps[i];
-      this.mapIndex.set(map, i);
       map.position = i;
     }
   }
@@ -74,13 +72,12 @@ export class IndexMapper {
   // remove index maps from the start of the list
   // this maps should be applied to the indexes before the current index map
   take(count: number) {
-    const {mappers, mapIndex} = this;
+    const {mappers} = this;
     const newMappers = mappers.slice(count);
     this.mappers = newMappers;
 
     for (let i = 0; i < newMappers.length; ++i) {
       const mapper = newMappers[i];
-      mapIndex.set(mapper, i);
       mapper.position = i;
     }
 
@@ -91,21 +88,20 @@ export class IndexMapper {
   }
 
   add(map: IndexMap) {
-    const {mappers, mapIndex} = this;
+    const {mappers} = this;
     mappers.push(map);
-    mapIndex.set(map, mappers.length - 1);
     map.position = mappers.length - 1;
   }
 
   map(ref: IndexMap, index: number): number {
-    const {mappers, mapIndex} = this;
-    let i = ref.isDefault ? 0 :mapIndex.get(ref);
+    const {mappers} = this;
+    let i = ref.isDefault ? 0 : ref.position
     if (i === undefined) {
       throw new Error("IndexMap not found");
     }
     for (++i; i < mappers.length; ++i) {
       const mapper = mappers[i];
-      // console.log('mapping', i, mapper, index, mapper.map(index))
+      console.debug('mapping', i, mapper, index, mapper.map(index))
       index = mapper.map(index);
     }
 
@@ -113,8 +109,8 @@ export class IndexMapper {
   }
 
   unmap(ref: IndexMap, index: number): number {
-    const {mappers, mapIndex} = this;
-    let i = mapIndex.get(ref);
+    const {mappers} = this;
+    let i = ref.isDefault ? 0 : ref.position
     if (i === undefined) {
       throw new Error("IndexMap not found");
     }

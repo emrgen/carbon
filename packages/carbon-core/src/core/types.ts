@@ -3,7 +3,7 @@ import { EventContext } from './EventContext';
 import { Node } from './Node';
 import { InputRule } from './Rules';
 import { Carbon } from './Carbon';
-import { CarbonPlugin, PinnedSelection, PointedSelection, Transaction } from "@emrgen/carbon-core";
+import {CarbonPlugin, NodeContentData, PinnedSelection, PointedSelection, Transaction} from "@emrgen/carbon-core";
 import { each, sortBy, values } from "lodash";
 
 export const IDENTITY_SCOPE = Symbol('identity');
@@ -80,7 +80,14 @@ export type SerializedNode = string;
 
 export type EncodedNode<T> = T;
 
-export const deepCloneMap = (node: Node) => node.clone(deepCloneMap);
+// export const deepCloneMap = (node: Node) => node.clone(deepCloneMap);
+
+export const deepCloneMap = (data: NodeContentData) =>  {
+  return {
+    ...data,
+    children: data.children.map(n => n.clone(deepCloneMap)),
+  }
+}
 
 export interface JSONNode {
 	id: string;

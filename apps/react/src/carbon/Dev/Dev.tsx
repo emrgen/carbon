@@ -161,11 +161,11 @@ const renderManager = RenderManager.from(
   renderers,
 )
 
-console.log = noop;
-console.info = noop;
+// console.log = noop;
+// console.info = noop;
 // console.debug = noop;
-console.warn = noop;
-console.error = noop;
+// console.warn = noop;
+// console.error = noop;
 console.group = noop;
 console.groupCollapsed = noop;
 console.groupEnd = noop;
@@ -176,6 +176,7 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
+      console.debug(state.changes.patch, Array.from(state.changes.dataMap.values()))
       state.content.all((node) => {
         // console.log(node.id.toString(), node.name, node.properties.toKV());
       });

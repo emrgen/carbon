@@ -133,7 +133,7 @@ export class ChangeManager extends NodeTopicEmitter {
     // sync the selection if the content is synced
     // console.log('mounted', this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
     if (this.isContentSynced) {
-      console.log("content synced, selection dirty:", this.isSelectionDirty, this.state.content.textContent, this.state.content);
+      console.log("content synced, selection dirty:", this.isSelectionDirty);
       // NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
       if (this.isSelectionDirty) {
         this.updateSelection(() => {
@@ -173,8 +173,7 @@ export class ChangeManager extends NodeTopicEmitter {
     // })
 
     const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
-
-    console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
+    // console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
 
     // updatedNodes.forEach(n => {
     //   updatedNodeIds.remove(n.id);
@@ -184,12 +183,11 @@ export class ChangeManager extends NodeTopicEmitter {
     //   updatedNodeIds.add(n.id);
     // });
 
-    console.log("publish", updatedNodes.map(n => n.key));
-
+    console.log("publish to ui", updatedNodes.map(n => n.key));
     updatedNodes
-      .filter(n => updatedNodeIds.has(n.id))
+      // .filter(n => updatedNodeIds.has(n.id))
       .forEach(n => {
-        console.log('publishing', n.id.toString());
+        // console.log('publishing', n.id.toString());
         this.emit(n, NodeChangeType.update)
       });
     console.groupEnd();

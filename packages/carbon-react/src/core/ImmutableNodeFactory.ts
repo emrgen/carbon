@@ -5,12 +5,13 @@ import {
   Schema,
   Node,
   NodeId,
-  NodeFactory, Maps, NodeContentData,
+  NodeFactory, Maps, NodeContentData, MarkSet,
 } from "@emrgen/carbon-core";
 import {isEmpty} from "lodash";
 import {v4 as uuidv4} from 'uuid';
 import {ImmutableNode} from "./ImmutableNode";
 import {ImmutableNodeContent} from "./ImmutableNodeContent";
+
 
 let counter = 0;
 
@@ -49,13 +50,16 @@ export class ImmutableNodeFactory implements NodeFactory {
       links: {},
       linkName: '',
       parentId: null,
-      parent: null
+      parent: null,
+      marks: MarkSet.empty(),
     });
 
     const node = ImmutableNode.create(scope, content);
-    node.children.forEach(n => {
+    node.children.forEach((n,i) => {
       n.setParentId(node.id)
       n.setParent(node)
+      const imn = n as ImmutableNode;
+      imn.mappedIndex = i;
     });
 
     return node;

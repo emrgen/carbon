@@ -783,7 +783,11 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // creates a mutable copy of the node
-    clone(map: (node: Node) => Optional<Node> = identity): Node {
+    clone(map: (node: NodeContentData) => NodeContentData = identity): Node {
+      throw new Error('not implemented')
+    }
+
+    map(mapper: (data: NodeContentData) => Optional<NodeContentData>): Node {
       throw new Error('not implemented')
     }
 

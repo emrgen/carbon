@@ -81,6 +81,10 @@ export class ImmutableNodeContent implements NodeContent {
     return this.type.isText ? this.textContent.length : this.children.length
   }
 
+  get isFrozen(): boolean {
+    return Object.isFrozen(this);
+  }
+
   child(index: number): Optional<Node> {
     return this.children[index];
   }
@@ -94,6 +98,10 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   insertText(text: string, offset: number): void {
+    if (this.isFrozen) {
+      throw Error('cannot insert text to immutable node:' + this.id.toString())
+    }
+
     this.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
   }
 
@@ -122,9 +130,14 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   updateContent(content: string | Node[]): void {
+    if (this.isFrozen) {
+      throw Error('cannot update content of immutable node:' + this.id.toString())
+    }
+
     if (typeof content === 'string') {
-      console.log('updateContent', content)
+      console.log('updateContent', content, Object.isFrozen(this.content))
       this.content.textContent = content;
+      console.log('after updateContent', this.textContent, Object.isFrozen(this.content))
       return;
     }
 
@@ -146,7 +159,10 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   unwrap(): NodeContentData {
-    return this.content
+    return {
+      ...this.content,
+      props: this.props.clone(),
+    }
   }
 
   freeze() {

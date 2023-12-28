@@ -1,5 +1,5 @@
 import {
-  Node as CoreNode,
+  Node,
   NodeContent,
   NodeContentData,
   NodeId,
@@ -11,7 +11,7 @@ import {identity} from "lodash";
 import {ImmutableNodeContent} from "./ImmutableNodeContent";
 import {IndexMap, IndexMapper} from "@emrgen/carbon-core/src/core/IndexMap";
 
-export class ImmutableNode extends CoreNode {
+export class ImmutableNode extends Node {
   scope: Symbol;
   indexMapper: IndexMapper = IndexMapper.empty();
   indexMap: IndexMap = IndexMap.DEFAULT;
@@ -31,9 +31,17 @@ export class ImmutableNode extends CoreNode {
   }
 
   override get index(): number {
+    return super.index;
+
+    console.debug('## called index', this.id.toString())
     const parent = this.parent as ImmutableNode;
+    if (!parent) {
+      return -1
+    }
     // console.log('getting index', this.id.toString(), this.isFrozen, parent.isFrozen)
-    return parent.indexMapper.map(this.indexMap, this.mappedIndex);
+    const index = parent.indexMapper.map(this.indexMap, this.mappedIndex);
+    console.debug('found index', this.id.toString(), index)
+    return index;
   }
 
   override get key() {
@@ -44,7 +52,7 @@ export class ImmutableNode extends CoreNode {
     return `${this.id.toString()}/${this.renderVersion}/${this.contentVersion}`;
   }
 
-  override setParent(parent: Optional<ImmutableNode>) {
+  override setParent(parent: Optional<Node>) {
     if (this.isFrozen) {
       throw Error('cannot set parent of immutable node:' + this.id.toString())
     }
@@ -71,7 +79,7 @@ export class ImmutableNode extends CoreNode {
     }
     super.insert(node, index);
 
-    const indexMap = new IndexMap(index, index, 1);
+    const indexMap = new IndexMap(index, 1);
     node.indexMap = indexMap;
     node.mappedIndex = index;
     this.indexMapper.add(indexMap);
@@ -81,9 +89,10 @@ export class ImmutableNode extends CoreNode {
     if (node.isFrozen) {
       throw Error('cannot remove immutable node:' + node.id.toString())
     }
+    const index = node.index;
     super.remove(node);
 
-    const indexMap = new IndexMap(node.index, node.index, -1);
+    const indexMap = new IndexMap(index, -1);
     this.indexMapper.add(indexMap);
   }
 
@@ -129,36 +138,52 @@ export class ImmutableNode extends CoreNode {
     return super.removeLink(name);
   }
 
-  override clone(map: (node: CoreNode) => Optional<ImmutableNode> = identity): ImmutableNode {
-    const {scope,parentId, id, type, links, linkName, props, marks, renderVersion, contentVersion} = this;
+  override clone(map: (node: NodeContentData) => NodeContentData = identity): Node {
+    const data = map(this.content.unwrap());
+    const content = new ImmutableNodeContent(this.scope, data);
+    const clone = ImmutableNode.create(this.scope, content);
 
-    // console.log('cloning', this.id.toString(), this.isFrozen, map === identity)
-    if (!this.isFrozen && map === identity) {
-      return this
-    }
-
-    // console.log('x cloning', this.id.toString())
-    const children = this.children.map(n => map(n)).filter(identity) as ImmutableNode[];
-
-    const data: NodeContentData = {
-      parentId,
-      parent: null,
-      id,
-      type,
-      children,
-      links,
-      linkName,
-      textContent: this.isText ? this.textContent : '',
-      props: props.clone(),
-      marks
-    };
-
-    const content = new ImmutableNodeContent(scope, data);
-    const clone = ImmutableNode.create(scope, content);
-    clone.renderVersion = renderVersion + 1;
-    clone.contentVersion = contentVersion;
+    clone.renderVersion = this.renderVersion;
+    clone.contentVersion = this.contentVersion;
+    clone.indexMapper = this.indexMapper;
+    clone.indexMap = this.indexMap;
+    clone.mappedIndex = this.mappedIndex;
 
     return clone;
+
+
+    // const {scope,parentId, id, type, links, linkName, props, marks, renderVersion, contentVersion} = this;
+    //
+    // // console.log('cloning', this.id.toString(), this.isFrozen, map === identity)
+    // if (!this.isFrozen && map === identity) {
+    //   return this
+    // }
+    //
+    // // console.log('x cloning', this.id.toString())
+    // const children = this.children.map(n => map(n)).filter(identity) as ImmutableNode[];
+    //
+    // const data: NodeContentData = {
+    //   parentId,
+    //   parent: null,
+    //   id,
+    //   type,
+    //   children,
+    //   links,
+    //   linkName,
+    //   textContent: this.isText ? this.textContent : '',
+    //   props: props.clone(),
+    //   marks
+    // };
+    //
+    // const content = new ImmutableNodeContent(scope, data);
+    // const clone = ImmutableNode.create(scope, content);
+    // clone.renderVersion = renderVersion + 1;
+    // clone.contentVersion = contentVersion;
+    // clone.indexMapper = this.indexMapper;
+    // clone.indexMap = this.indexMap;
+    // clone.mappedIndex = this.mappedIndex;
+    //
+    // return clone;
   }
 
   // @mutates
