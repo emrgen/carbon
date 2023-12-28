@@ -123,22 +123,28 @@ const render = (node: Node) => {
 const BlockElement = (props: RendererProps) => {
   const {node} = props;
 
-  let ref: Optional<HTMLElement> = null;
-  createEffect(() => {
-    app.store.register(node, ref)
-  })
+  // let ref: Optional<HTMLElement> = null;
+  // createEffect(() => {
+  //   console.log('registering', node.id.toString(), node.parent, ref)
+  //   app.store.register(node, ref)
+  // })
+
+  const register = (el: HTMLElement) => {
+    console.log('registering', node.id.toString(), node.parent, el)
+    app.store.register(node, el)
+  }
 
 
   if (node.isVoid) {
     return (
-      <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={ref}>
+      <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={register}>
         <span>&shy;</span>
       </div>
     );
   }
 
   return (
-    <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={ref}>
+    <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={register}>
       <For each={node.children}>
         {(child) => {
           return render(child);
@@ -156,13 +162,13 @@ const TextElement = (props: RendererProps) => {
   //   node.updateContent(node.textContent + ' ' + Math.random().toString(36).substring(7));
   // }
 
-  let ref: Optional<HTMLElement> = null;
-  createEffect(() => {
-    app.store.register(node, ref)
-  })
+  const register = (el: HTMLElement) => {
+    console.log('registering', node.id.toString(), node.parent, el)
+    app.store.register(node, el)
+  }
 
   return (
-    <span data-name={node.name} data-id={node.key} ref={ref}>
+    <span data-name={node.name} data-id={node.key} ref={register}>
       {node.textContent}
     </span>
   );
