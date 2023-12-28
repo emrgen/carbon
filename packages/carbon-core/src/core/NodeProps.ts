@@ -117,6 +117,7 @@ export const CheckedPath = "remote/state/checked";
 export const EmojiPath = "remote/state/emoji";
 export const ListNumberPath = "remote/state/listNumber";
 export const TitlePath = "remote/state/title";
+export const CollapseHidden = "local/state/collapseHidden";
 
 export const isPassiveHidden = (node: Node) => {
   return node.chain.some(n => n.props.get<boolean>(HiddenPath) ?? false);

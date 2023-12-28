@@ -8,47 +8,43 @@ type IndexMapOp = 1 | -1;
 export class IndexMap {
   position: number = 0;
 
-  start: number;
-
-  end: number;
+  offset: number;
 
   op: IndexMapOp = 1;
 
-  static DEFAULT = new IndexMap(-1, 1000000000, 1)
+  static DEFAULT = new IndexMap(1000000000, 1)
 
-  constructor(start: number, end: number, op: IndexMapOp) {
-    this.start = start;
-    this.end = end;
+  get isDefault() {
+    return this === IndexMap.DEFAULT;
+  }
+
+  constructor(offset: number, op: IndexMapOp) {
+    this.offset = offset;
     this.op = op;
   }
 
-  get length() {
-    return this.end - this.start + 1;
-  }
-
-
   map(index: number): number {
-    const {start, end, op, length} = this;
-    if (index < start) {
+    const {offset, op} = this;
+    if (index < offset) {
       // index is before this map
       return index;
     } else {
       // index is within this map
-      return index + op * length;
+      return index + op;
     }
   }
 
   unmap(index: number) {
-    const {start, end, op, length} = this;
-    if (index < start) {
+    const {offset, op} = this;
+    if (index < offset) {
       // index is before this map
       return index;
-    } else if (start <= index && index <= end) {
+    } else if (index < offset + op) {
       // index is within this map
-      return index;
+      return offset;
     } else {
       // index is after this map
-      return index - op * length;
+      return index - op;
     }
   }
 
@@ -57,6 +53,10 @@ export class IndexMap {
 export class IndexMapper {
   mappers: IndexMap[] = [];
   mapIndex: WeakMap<IndexMap, number> = new WeakMap();
+
+  static empty() {
+    return new IndexMapper([]);
+  }
 
   static from(maps: IndexMap[]) {
     return new IndexMapper(maps);
@@ -99,14 +99,13 @@ export class IndexMapper {
 
   map(ref: IndexMap, index: number): number {
     const {mappers, mapIndex} = this;
-    let i = mapIndex.get(ref);
+    let i = ref.isDefault ? 0 :mapIndex.get(ref);
     if (i === undefined) {
       throw new Error("IndexMap not found");
     }
-
-
     for (++i; i < mappers.length; ++i) {
       const mapper = mappers[i];
+      // console.log('mapping', i, mapper, index, mapper.map(index))
       index = mapper.map(index);
     }
 

@@ -811,7 +811,7 @@ export class TransformCommands extends BeforePlugin {
     // descend and clone nodes
     cloneBlocks.forEach((splitNode, index) => {
       if (index < maxDepth) {
-        // non leaf node
+        // non leaf node, a container node
         const firstNode = splitNode.type.default();
         if (!firstNode) {
           console.warn("failed to create firstNode of type", splitNode.type?.name);

@@ -342,7 +342,7 @@ export class Transaction {
 					} else {
 						const part = Reflect.get(target, prop);
 						if (isFunction(part)) {
-							return (...args) => {
+							return (...args: any) => {
 								part.bind(self)(...args);
 								return proxy;
 							}

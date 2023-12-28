@@ -30,6 +30,8 @@ export interface NodeContentData {
   links: Record<string, Node>;
   marks: MarkSet;
   props: NodeProps;
+  renderVersion?: number;
+  contentVersion?: number;
 }
 
 export interface NodeContent extends NodeContentData, MutableNodeContent{

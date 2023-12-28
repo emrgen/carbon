@@ -12,7 +12,15 @@ import { NodeType } from "./NodeType";
 import { IDENTITY_SCOPE, no, NodeEncoder, NodeJSON, yes } from "./types";
 import EventEmitter from "events";
 import { NODE_CACHE_INDEX } from "./CarbonCache";
-import { ActivatedPath, CollapsedPath, NodeProps, NodePropsJson, OpenedPath, SelectedPath } from "./NodeProps";
+import {
+  ActivatedPath,
+  CollapsedPath,
+  CollapseHidden,
+  NodeProps,
+  NodePropsJson,
+  OpenedPath,
+  SelectedPath
+} from "./NodeProps";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -71,7 +79,11 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     unwrap(): NodeContentData {
-      return this.content.unwrap()
+      const unwrapped = this.content.unwrap()
+      unwrapped.contentVersion = this.contentVersion
+      unwrapped.renderVersion = this.renderVersion
+
+      return unwrapped;
     }
 
     findParent(fn: Predicate<Node>): Optional<Node> {
@@ -220,10 +232,14 @@ export class Node extends EventEmitter implements IntoNodeId {
     // if content node i.e. first child is treated as content node
     // check if parent is collapse hidden
     get isCollapseHidden() {
+      return false;
+      if (this.props.get(CollapseHidden)) return true;
+
       // only collapsed parent can hide a child node
       // if the node is detached from the tree, it can't be collapse hidden
       if (!this.parentId) return false;
 
+      // for collapsed parent, only the first child is visible
       if (!this.isContentNode && this.parent?.isCollapsed) {
         return true
       }
@@ -273,20 +289,20 @@ export class Node extends EventEmitter implements IntoNodeId {
     get nextSibling(): Optional<Node> {
       const index = this.index;
       if (index === -1) return null;
-      return this.parent?.children[this.index + 1];
+      return this.parent?.children[index + 1];
     }
 
     get prevSiblings(): Node[] {
       const index = this.index;
       if (index === -1) return [];
-      return this.parent?.children.slice(0, this.index) ?? [];
+      return this.parent?.children.slice(0, index) ?? [];
     }
 
     get nextSiblings(): Node[] {
       const index = this.index;
       if (index === -1) return [];
 
-      return this.parent?.children.slice(this.index + 1) ?? [];
+      return this.parent?.children.slice(index + 1) ?? [];
     }
 
     get closestBlock(): Node {
@@ -362,7 +378,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     get isRoot(): boolean {
-      return !this.parent;
+      return this.id.eq(NodeId.ROOT);
     }
 
     get isDocument(): boolean {
@@ -403,15 +419,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     get isText(): boolean {
       return this.type.isText;
-    }
-
-    get offset(): number {
-      return this.prevSiblings.reduce((offset, s) => offset + s.size, 0)
-    }
-
-    get nextMatchType(): Optional<ContentMatch> {
-      const fragment = Fragment.from(takeUpto(this.parent?.children ?? [], n => n === this));
-      return this.parent?.type.contentMatch.matchFragment(fragment)
     }
 
     nodeId(): NodeId {
@@ -769,6 +776,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     encode<T>(encoder: NodeEncoder<T>) {
       return encoder.encode(this);
+    }
+
+    mutable() {
+      // return this.content.mutable();
     }
 
     // creates a mutable copy of the node

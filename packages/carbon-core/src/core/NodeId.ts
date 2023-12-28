@@ -8,7 +8,9 @@ export interface IntoNodeId {
 }
 
 export class NodeId implements IntoNodeId {
+  // root node id
 	static ROOT = new NodeId('1111111111');
+
 	static NULL = new NodeId(NullId);
 
 	static IDENTITY = new NodeId(IdentityId);

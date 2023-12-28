@@ -9,9 +9,13 @@ import {
 import {Optional} from "@emrgen/types";
 import {identity} from "lodash";
 import {ImmutableNodeContent} from "./ImmutableNodeContent";
+import {IndexMap, IndexMapper} from "@emrgen/carbon-core/src/core/IndexMap";
 
 export class ImmutableNode extends CoreNode {
-  scope: Symbol
+  scope: Symbol;
+  indexMapper: IndexMapper = IndexMapper.empty();
+  indexMap: IndexMap = IndexMap.DEFAULT;
+  mappedIndex: number = 0;
 
   static create(scope: Symbol, content: NodeContent) {
     return new ImmutableNode(scope, content);
@@ -26,6 +30,11 @@ export class ImmutableNode extends CoreNode {
     return Object.isFrozen(this);
   }
 
+  override get index(): number {
+    const parent = this.parent as ImmutableNode;
+    // console.log('getting index', this.id.toString(), this.isFrozen, parent.isFrozen)
+    return parent.indexMapper.map(this.indexMap, this.mappedIndex);
+  }
 
   override get key() {
     return `${this.id.toString()}/${this.renderVersion}/${this.contentVersion}`;
@@ -61,6 +70,11 @@ export class ImmutableNode extends CoreNode {
       throw Error('cannot insert immutable node:' + node.id.toString())
     }
     super.insert(node, index);
+
+    const indexMap = new IndexMap(index, index, 1);
+    node.indexMap = indexMap;
+    node.mappedIndex = index;
+    this.indexMapper.add(indexMap);
   }
 
   override remove(node: ImmutableNode) {
@@ -68,6 +82,9 @@ export class ImmutableNode extends CoreNode {
       throw Error('cannot remove immutable node:' + node.id.toString())
     }
     super.remove(node);
+
+    const indexMap = new IndexMap(node.index, node.index, -1);
+    this.indexMapper.add(indexMap);
   }
 
   override insertText(text: string, offset: number) {
@@ -113,7 +130,7 @@ export class ImmutableNode extends CoreNode {
   }
 
   override clone(map: (node: CoreNode) => Optional<ImmutableNode> = identity): ImmutableNode {
-    const {scope,parentId, id, type, links, linkName, props, renderVersion, contentVersion} = this;
+    const {scope,parentId, id, type, links, linkName, props, marks, renderVersion, contentVersion} = this;
 
     // console.log('cloning', this.id.toString(), this.isFrozen, map === identity)
     if (!this.isFrozen && map === identity) {
@@ -133,6 +150,7 @@ export class ImmutableNode extends CoreNode {
       linkName,
       textContent: this.isText ? this.textContent : '',
       props: props.clone(),
+      marks
     };
 
     const content = new ImmutableNodeContent(scope, data);
