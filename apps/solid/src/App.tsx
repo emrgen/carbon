@@ -1,11 +1,22 @@
 import './App.css'
+import {noop} from 'lodash';
 
 import {SolidNodeFactory, RendererProps, SolidState, CarbonContext, useCarbon} from '@emrgen/carbon-solid';
-import {blockPresetPlugins,node, section, text, title} from '@emrgen/carbon-blocks';
-import {Schema, PluginManager, Node, Carbon, PinnedSelection} from '@emrgen/carbon-core';
-import {createSignal, For} from "solid-js";
+import {blockPresetPlugins, node, section, text, title} from '@emrgen/carbon-blocks';
+import {
+  Schema,
+  PluginManager,
+  Node,
+  Carbon,
+  PinnedSelection,
+  LocalHtmlAttrPath,
+  corePresetPlugins, State
+} from '@emrgen/carbon-core';
+import {createEffect, createSignal, For, onCleanup} from "solid-js";
+import {Optional} from "@emrgen/types";
 
 const plugins = [
+  ...corePresetPlugins,
   ...blockPresetPlugins,
 ]
 
@@ -14,9 +25,12 @@ const {specs} = pm;
 const schema = new Schema(specs, new SolidNodeFactory());
 
 const data = node("carbon", [
-  section([title([text("section 1")])]),
-  section([title([text("section 2")])]),
-  section([title([text("section 3")])]),
+  node('document', [
+    title([]),
+    section([title([text("section 1")])]),
+    section([title([text("section 2")])]),
+    section([title([text("section 3")])]),
+  ])
 ]);
 
 const content = schema.nodeFromJSON(data)!
@@ -24,13 +38,23 @@ const content = schema.nodeFromJSON(data)!
 // @ts-ignore
 window.content = content;
 
-const state = new SolidState(content, PinnedSelection.NULL);
+const state = SolidState.create(content, PinnedSelection.NULL);
 
 const app = new Carbon(state, schema, pm);
 
 // @ts-ignore
 window.app = app;
 
+
+// console.log = noop;
+// console.info = noop;
+// console.debug = noop;
+// console.warn = noop;
+// console.error = noop;
+console.group = noop;
+console.groupCollapsed = noop;
+console.groupEnd = noop;
+console.time = noop;
 
 function App() {
   const addNode = () => {
@@ -60,8 +84,19 @@ function App() {
     clearInterval(interval);
   }
 
+  const onChange = (state: State) => {
+    console.log('[changed state]', state)
+  }
+
+  app.on('changed', onChange)
+
+  onCleanup(() => {
+    app.off('changed', onChange)
+  })
+
   return (
     <CarbonContext value={app}>
+      {/*listen and fire events into the app*/}
       <button onclick={handleClick} onmousedown={keepAdding} onmouseup={stopAdding}>Click</button>
       <div class={"bg-indigo-500 text-sky-400"}>
         {render(app.content)}
@@ -87,8 +122,23 @@ const render = (node: Node) => {
 
 const BlockElement = (props: RendererProps) => {
   const {node} = props;
+
+  let ref: Optional<HTMLElement> = null;
+  createEffect(() => {
+    app.store.register(node, ref)
+  })
+
+
+  if (node.isVoid) {
+    return (
+      <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={ref}>
+        <span>&shy;</span>
+      </div>
+    );
+  }
+
   return (
-    <div data-name={node.name} data-id={node.key} >
+    <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={ref}>
       <For each={node.children}>
         {(child) => {
           return render(child);
@@ -100,17 +150,20 @@ const BlockElement = (props: RendererProps) => {
 
 const TextElement = (props: RendererProps) => {
   const {node} = props;
-  // const app = useCarbon();
-  const changeTextRandomly = () => {
-    node.updateContent(node.textContent + ' ' + Math.random().toString(36).substring(7));
-  }
+  const app = useCarbon();
+
+  // const changeTextRandomly = () => {
+  //   node.updateContent(node.textContent + ' ' + Math.random().toString(36).substring(7));
+  // }
+
+  let ref: Optional<HTMLElement> = null;
+  createEffect(() => {
+    app.store.register(node, ref)
+  })
 
   return (
-    <span data-name={node.name} data-id={node.key} onclick={changeTextRandomly}>
-      <span >
-        {node.textContent + ' '}
-      </span>
-      <span>{node.path.join(',')}</span>
+    <span data-name={node.name} data-id={node.key} ref={ref}>
+      {node.textContent}
     </span>
   );
 }
