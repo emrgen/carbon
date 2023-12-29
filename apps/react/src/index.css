@@ -28,3 +28,13 @@ html, body, .root {
   top: 0;
   font-size: 12px;
 }
+
+#chain {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 12px;
+  overflow: auto;
+  height: 100%;
+  width: 100%;
+}

@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-chain",
+  "name": "@emrgen/carbon-element",
   "version": "0.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -8,14 +8,11 @@
     "lint": "eslint *.ts*"
   },
   "dependencies": {
-    "@emrgen/carbon-core": "workspace:*",
     "@types/lodash": "^4.14.191",
     "lodash": "^4.17.21",
-    "sorted-btree": "^1.8.0",
-    "uuid": "^9.0.0"
+    "@emrgen/types": "workspace:*"
   },
   "devDependencies": {
-    "@emrgen/types": "workspace:*",
     "eslint": "^7.32.0",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",

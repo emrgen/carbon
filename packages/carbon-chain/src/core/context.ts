@@ -1,12 +1,11 @@
-import {Optional} from "@emrgen/types";
-import {Node, NodeId} from "@emrgen/carbon-core";
+import {last} from "lodash";
+import {v4 as uuidv4} from 'uuid';
 
 export interface Context<T> {
   id: Symbol;
-  subscribe: (listener: (value: T) => void) => void;
-  unsubscribe: (listener: (value: T) => void) => void;
   update: (value: T) => void;
-  getValue: () => T;
+  value: () => T;
+  Provider: (props: { value: T, children?: any }) => any;
 }
 
 export const createContext = <T>(defaultValue: T): Context<T> => {
@@ -28,30 +27,33 @@ export const createContext = <T>(defaultValue: T): Context<T> => {
 
   const getValue = () => value;
 
+  const id = Symbol("context");
+
+  // console.log('createContext', id)
+
   const context = {
-    id: Symbol('context'),
-    subscribe,
-    unsubscribe,
+    id,
     update,
-    getValue,
-    Provider: (props: { value: T, children: any }) => {
+    value: getValue,
+    Provider: (props: { value: T, children?: any }) => {
+      CONTEXTS.set(id, [context]);
       update(props.value);
       return props.children;
     }
   }
-
-  CONTEXTS.set(context.id, context);
 
   return context;
 }
 
 const CONTEXTS = new Map<Symbol, any>();
 
-export const getContext = <T>(context: Context<T>): Context<T> => {
-  const instance = CONTEXTS.get(context.id)
+export const getContext = <T>(context: Context<T>): T => {
+  // console.log('getContext', context, Array.from(CONTEXTS.keys()).map(key => key === context.id));
+  const instance = last(CONTEXTS.get(context.id)) as Context<T>;
+
   if (!instance) {
     throw new Error('Context not found');
   }
 
-  return instance
+  return instance.value();
 }

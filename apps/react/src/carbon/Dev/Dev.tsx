@@ -1,15 +1,18 @@
 import {useEffect} from "react";
 
-import {blockPresetPlugins, node, section, text, title,} from "@emrgen/carbon-blocks";
-
-import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon,} from "@emrgen/carbon-react";
+import {blockPresetPlugins, node, text, title, section} from "@emrgen/carbon-blocks";
+import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon, ImmutableNodeFactory} from "@emrgen/carbon-react";
 import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
-
-import {corePresetPlugins, Extension, NodeId, State,} from "@emrgen/carbon-core";
-import {CarbonApp,} from "@emrgen/carbon-utils";
-import {h, createElement, onMount, onUnmount, onTransaction} from "@emrgen/carbon-chain";
-import SelectionTracker from "../../SelectionTracker";
-import {noop} from "lodash";
+import {corePresetPlugins, Extension, Node, NodeId, PluginManager, Schema, State, TagPath,} from "@emrgen/carbon-core";
+import {
+  h,
+  createElement,
+  ChainRenderContext,
+  createContext,
+  RenderContext,
+  NodeChangeContext, ChainNodeChangeManager, getContext
+} from "@emrgen/carbon-chain";
+import {noop, range} from "lodash";
 
 const data = node("carbon", [
   node("document", [
@@ -59,7 +62,6 @@ const data = node("carbon", [
     //   node("codeLine", [title([text("  console.log('hello world')")])]),
     //   node("codeLine",[ title([text("}")])])
     // ]),
-
 
 
     // node("pageTree", [
@@ -115,7 +117,6 @@ const data = node("carbon", [
       {}
     ),
 
-
     // node("hstack", [
     //   node("stack", [section([title([text("section 1")])])]),
     //   node("stack", [section([title([text("section 2")])])]),
@@ -141,8 +142,8 @@ const extensions1: Extension = {
 };
 
 const plugins = [
-    ...corePresetPlugins,
-    ...blockPresetPlugins,
+  ...corePresetPlugins,
+  ...blockPresetPlugins,
   // carbonUtilPlugins,
   // commentEditorExtension,
   // codeExtension,
@@ -178,10 +179,11 @@ window.h = h
 // @ts-ignore
 window.createElement = createElement
 
-
-
 export default function Dev() {
   const app = useCreateCarbon('dev', data, plugins);
+
+  // @ts-ignore
+  window.app = app;
 
   useEffect(() => {
     const onChange = (state: State) => {
@@ -198,12 +200,187 @@ export default function Dev() {
   }, [app]);
 
   return (
+    <></>
+  )
+
+  return (
     <div className={'carbon-app-container'}>
-      <CarbonApp app={app} renderManager={renderManager}>
-        <SelectionTracker/>
-      </CarbonApp>
+      {/*<CarbonApp app={app} renderManager={renderManager}>*/}
+      {/*  <SelectionTracker/>*/}
+      {/*</CarbonApp>*/}
     </div>
   );
 }
+
+
+// create a render context
+const ctx = new ChainRenderContext();
+
+const props = (node: Node) => {
+  return {
+    'data-id': node.key,
+    'data-name': node.name,
+    node
+  }
+}
+
+// create a renderer
+const textRenderer = (node: Node) => {
+  return h("span", props(node), [node.textContent]);
+}
+
+// this should be memoized to avoid creating a new function on every render
+// for the first render it's ok to create a new function
+// on dismount of the node we should remove the children cache from the context
+const renderChildren = (node: Node) => {
+  return node.children.map(n => {
+    const component = h(ctx.component(n.name), n);
+    if (!component) {
+      throw new Error(`no component for ${n.name}`);
+    }
+
+    console.log('xxxxxxxxxxxxxxxxxx', n.name, n.id.toString())
+
+    return component;
+  })
+
+}
+
+const titleRenderer = (node: Node) => {
+  return h("div", props(node), renderChildren(node));
+}
+
+const sectionRenderer = (node: Node) => {
+  const ctx = getContext(RenderContext);
+  const onClick = (e) => {
+    e.stopPropagation();
+    // change.notify(node.id, {
+    //   type: 'remove',
+    //   node: node,
+    //   // parent: node.parent as Node,
+    // })
+
+    change.notify(node.id, {
+      type: 'add:child',
+      node: para('xxx')!,
+      parent: node,
+      offset: 1
+    })
+  }
+
+  let interval = null;
+  let count = 0;
+
+  const onMouseOver = (e) => {
+    e.stopPropagation();
+    // console.log('over')
+    // interval = setInterval(() => {
+    //   change.notify(node.id, {
+    //     type: 'add:child',
+    //     node: para(count.toString())!,
+    //     parent: node,
+    //     offset: parent.size
+    //   })
+    //   count++;
+    // }, 16)
+  }
+
+  const onMouseOut = (e) => {
+    // e.stopPropagation();
+    // console.log('out')
+    // clearInterval(interval)
+  }
+
+  console.log('xxx')
+  // children updates will update the dom internally
+  // so we don't need to do anything here
+  // but we need to return a function that will be called
+  // when the node is updated, this way we can control the node template structure and attributes
+  return h("div", {
+    ...props(node),
+    onClick,
+    onMouseOver,
+    onMouseOut,
+  }, renderChildren(node));
+}
+
+// register the renderer
+ctx.component("section", sectionRenderer);
+ctx.component("title", titleRenderer);
+ctx.component("text", textRenderer);
+
+const change = new ChainNodeChangeManager()
+
+RenderContext.Provider({value: ctx});
+NodeChangeContext.Provider({value: change});
+
+//@ts-ignore
+window.ctx = ctx;
+
+//@ts-ignore
+window.change = change;
+
+
+const pm = new PluginManager(plugins);
+const schema = new Schema(pm.specs, new ImmutableNodeFactory());
+
+const para = (content: string = 'x') => {
+  return schema.nodeFromJSON(node("section", [title([text(content)])]));
+}
+
+//@ts-ignore
+window.section = section;
+
+//@ts-ignore
+window.insert = (parent: Node, node: Node) => {
+  change.notify(parent.id, {
+    type: 'add:child',
+    node: node,
+    parent,
+    offset: 1
+  })
+}
+
+
+const s = para('hello world')!;
+const root = document.querySelector('#chain')!;
+
+ctx.mount(root, s);
+
+
+let counter = 0;
+const addBunch = (count = 10) => {
+  range(count).forEach(i => {
+    const p = para('-' + counter)!;
+    ++counter
+    change.notify(s.id, {
+      type: 'add:child',
+      node: p,
+      parent: s,
+      offset: 1//counter
+    })
+  })
+}
+
+let interval = setInterval(() => {
+  addBunch(1)
+  // counter++;
+  if (counter > 5) {
+    clearInterval(interval)
+    return
+  }
+}, 30)
+
+
+
+
+
+
+
+
+
+
+
+
 
 

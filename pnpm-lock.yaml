@@ -440,6 +440,12 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      sorted-btree:
+        specifier: ^1.8.0
+        version: 1.8.1
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
     devDependencies:
       '@emrgen/types':
         specifier: workspace:*
@@ -840,6 +846,31 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
+  packages/carbon-element:
+    dependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.14.202
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+    devDependencies:
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -8391,7 +8422,6 @@ packages:
 
   /sorted-btree@1.8.1:
     resolution: {integrity: sha512-395+XIP+wqNn3USkFSrNz7G3Ss/MXlZEqesxvzCRFwL14h6e8LukDHdLBePn5pwbm5OQ9vGu8mDyz2lLDIqamQ==}
-    dev: true
 
   /source-map-js@1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}

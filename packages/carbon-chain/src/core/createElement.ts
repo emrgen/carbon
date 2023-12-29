@@ -19,14 +19,7 @@ export const createElement = (type: string, props: any, children: any[] = []) =>
 
   const element = document.createElement(type);
 
-  Object.keys(props).forEach(key => {
-    if (key.startsWith('on')) {
-      element.addEventListener(key.substring(2).toLowerCase(), props[key]);
-    } else {
-      console.log(key, props[key])
-      element.setAttribute(key, props[key]);
-    }
-  });
+  injectProps(element, props);
 
   childrenElements.forEach(child => {
     if (typeof child === 'string') {
@@ -37,4 +30,32 @@ export const createElement = (type: string, props: any, children: any[] = []) =>
   });
 
   return element;
+}
+
+export const injectProps = (element: HTMLElement, props: any) => {
+  Object.keys(props).forEach(key => {
+    if (key.startsWith('on')) {
+      registerListener(element, key.substring(2).toLowerCase(), props[key]);
+    } else {
+      element.setAttribute(key, props[key]);
+    }
+  });
+}
+
+export const ejectProps = (element: HTMLElement, props: any) => {
+  Object.keys(props).forEach(key => {
+    if (key.startsWith('on')) {
+      unregisterListener(element, key.substring(2).toLowerCase(), props[key]);
+    } else {
+      element.removeAttribute(key);
+    }
+  });
+}
+
+export const registerListener = (element: HTMLElement, event: string, listener: any) => {
+  element.addEventListener(event, listener);
+}
+
+export const unregisterListener = (element: HTMLElement, event: string, listener: any) => {
+  element.removeEventListener(event, listener);
 }

@@ -1,23 +1,34 @@
 import {createContext} from "./context";
 import {NodeId, Node} from "@emrgen/carbon-core";
-import {NodeStore} from "./store";
+import {RenderStore} from "./RenderContext";
 
 export interface NodeChange {
-  type: 'add:child' | 'remove' | 'update';
+  type: 'add:child' | 'remove' | 'update' | 'add:text' | 'remove:text';
   node: Node;
   // parent must exist if type is add or remove
-  parent: Node;
-  index: number;
+  parent?: Node;
+  text?: string;
+  offset?: number;
 }
 
 export interface NodeChangeManager {
-  subscribe(nodeId: NodeId, listener: (change: NodeChange, store: NodeStore) => void): void;
-  unsubscribe(nodeId: NodeId, listener: (change: NodeChange, store: NodeStore) => void): void;
-  notify(change: NodeChange): void;
+  once(nodeId: NodeId, listener: (change: NodeChange) => void): void;
+  subscribe(nodeId: NodeId, listener: (change: NodeChange) => void): void;
+  unsubscribe(nodeId: NodeId, listener: (change: NodeChange) => void): void;
+  notify(id: NodeId, change: NodeChange): void;
 }
 
 export const NodeChangeContext = createContext<NodeChangeManager>({
-  subscribe: () => undefined,
-  unsubscribe: () => undefined,
-  notify: () => undefined
+  once: () => {
+    throw new Error('not implemented');
+  },
+  subscribe: () => {
+    throw new Error('not implemented');
+  },
+  unsubscribe: () => {
+    throw new Error('not implemented');
+  },
+  notify: (id: NodeId, change: NodeChange) => {
+    throw new Error('not implemented');
+  }
 });
