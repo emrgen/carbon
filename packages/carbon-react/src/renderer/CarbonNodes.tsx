@@ -73,8 +73,8 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     <Element
       ref={ref}
       data-name={name}
-      data-version={renderVersion}
-      data-id={key}
+      // data-version={renderVersion}
+      // data-id={key}
       {...attributes}
     >
       {children}
@@ -216,15 +216,17 @@ export const CarbonNodeContent = (props: RendererProps) => {
   }
 
   return (
-    <div data-type="content" {...wrapper}>
+    // <div data-type="content" {...wrapper}>
+    <>
       {beforeContent}
       <CarbonNode
         node={content}
         custom={custom}
         key={content.key}
       />
-    </div>
+    </>
   );
+  // </div>
 };
 
 interface ChildrenSegmentProps {
@@ -249,9 +251,11 @@ export const CarbonNodeChildren = (props: RendererProps) => {
     // console.debug('CarbonNodeChildren', node.name, children.length);
 
     return (
-      <div data-type="children">
+      // <div data-type="children">
+      <>
         {children}
-      </div>
+      </>
+      // </div>
     )
   }, [node])
 };

@@ -1,11 +1,17 @@
 import {
   Point,
   preventAndStop,
-  RendererProps,
   Node,
 } from "@emrgen/carbon-core";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import {CarbonBlock, CarbonChildren, CarbonNodeContent, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
+import {
+  CarbonBlock,
+  CarbonChildren,
+  CarbonNodeContent,
+  RendererProps,
+  useCarbon,
+  useSelectionHalo
+} from "@emrgen/carbon-react";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 const TableContext = createContext<Node>(null!);

@@ -19,7 +19,7 @@ export class InsertNodeAction implements CarbonAction {
 	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {}
 	execute(tr: Transaction, draft: Draft) {
 		const { at, node: json } = this;
-		const {app}=tr;
+		const {app} = tr;
 
     // create a mutable node from json
 		const node = app.schema.nodeFromJSON(json)!;
@@ -33,6 +33,7 @@ export class InsertNodeAction implements CarbonAction {
 			throw new Error('failed to find parent node from: ' + at.toString())
 		}
 
+		// const clone = node.clone(deepCloneMap);
 		draft.insert(at, node);
 	}
 

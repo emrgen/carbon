@@ -1,3 +1,3 @@
 export  * from './SolidDraft';
-export * from './NodeFactory';
+export * from './SolidNodeFactory';
 export * from './SolidState';

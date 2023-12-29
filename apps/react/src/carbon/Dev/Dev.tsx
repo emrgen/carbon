@@ -7,6 +7,7 @@ import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
 
 import {corePresetPlugins, Extension, NodeId, State,} from "@emrgen/carbon-core";
 import {CarbonApp,} from "@emrgen/carbon-utils";
+import {h, createElement, onMount, onUnmount, onTransaction} from "@emrgen/carbon-chain";
 import SelectionTracker from "../../SelectionTracker";
 import {noop} from "lodash";
 
@@ -162,14 +163,22 @@ const renderManager = RenderManager.from(
 )
 
 // console.log = noop;
-// console.info = noop;
-// console.debug = noop;
-// console.warn = noop;
-// console.error = noop;
+console.info = noop;
+console.debug = noop;
+console.warn = noop;
+console.error = noop;
 console.group = noop;
 console.groupCollapsed = noop;
 console.groupEnd = noop;
 console.time = noop;
+
+
+// @ts-ignore
+window.h = h
+// @ts-ignore
+window.createElement = createElement
+
+
 
 export default function Dev() {
   const app = useCreateCarbon('dev', data, plugins);

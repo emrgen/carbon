@@ -85,6 +85,9 @@ importers:
       '@emrgen/carbon-blocktree':
         specifier: workspace:*
         version: link:../../packages/carbon-blocktree
+      '@emrgen/carbon-chain':
+        specifier: workspace:*
+        version: link:../../packages/carbon-chain
       '@emrgen/carbon-code':
         specifier: workspace:*
         version: link:../../packages/carbon-code
@@ -409,6 +412,34 @@ importers:
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
+    devDependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
+  packages/carbon-chain:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.14.202
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
     devDependencies:
       '@emrgen/types':
         specifier: workspace:*

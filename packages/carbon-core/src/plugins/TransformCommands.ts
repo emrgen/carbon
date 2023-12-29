@@ -6,7 +6,7 @@ import {
   BeforePlugin,
   Carbon,
   CarbonAction,
-  Format, Fragment,
+  Format, Fragment, insertAfterAction,
   InsertPos, isIsolatedNodes,
   MoveNodeAction,
   NodeIdSet,
@@ -751,6 +751,14 @@ export class TransformCommands extends BeforePlugin {
       if (!emptyBlock) {
         console.error("failed to create emptyBlock of type", opts.splitType?.name);
         return;
+      }
+
+      if (splitBlock.isEmpty) {
+        const after = PinnedSelection.fromPin(Pin.toStartOf(emptyBlock)!);
+        tr
+          .Add(insertAfterAction(splitBlock, emptyBlock))
+          .Select(after);
+        return
       }
 
       const after = selection.clone();
