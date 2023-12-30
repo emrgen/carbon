@@ -19,7 +19,6 @@ export class SelectionChangePlugin extends AfterPlugin {
         const {selection} = ctx.app;
         if (!selection.isCollapsed) return
 
-        // console.log('xxxxxxxxxxxxxxxxxxxxx')
         this.state.set('mousedown', true);
         this.state.set('mousedownselection', false);
         const before = PinnedSelection.fromDom(ctx.app.store);

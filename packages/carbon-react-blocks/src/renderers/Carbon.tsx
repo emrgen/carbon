@@ -1,7 +1,4 @@
-import {
-  RendererProps,
-} from "@emrgen/carbon-core";
-import {CarbonBlock, CarbonChildren} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonChildren, RendererProps} from "@emrgen/carbon-react";
 
 export const CarbonComp = (props: RendererProps) => {
   const { node } = props;

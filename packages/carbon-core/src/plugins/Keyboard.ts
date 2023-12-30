@@ -461,7 +461,6 @@ export class KeyboardPlugin extends AfterPlugin {
 			return
 		}
 
-    console.log('xxxxxxxxxxxxxxxxxxxxx')
 		cmd.transform
 			.split(splitBlock, selection, { splitType })?.Dispatch();
 	}

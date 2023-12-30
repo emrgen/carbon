@@ -7,7 +7,7 @@ import {getContext} from "./context";
 import {Optional} from "@emrgen/types";
 
 export interface ChainComponent {
-  (props: any): VNode;
+  (props: any): ChainVNode;
   id: string;
   // keep track of the nodes that are using this component
   nodes: NodeIdSet;
@@ -33,11 +33,11 @@ interface Props extends Record<string, any> {
   [key: string]: ((node: Node) => any) | any;
 }
 
-type Children = (VNode | string | (() => VNode))[];
+type Children = (ChainVNode | string | (() => ChainVNode))[];
 
-type Type = string | ((props: Props | Children, children?: Children) => VNode);
+type Type = string | ((props: Props | Children, children?: Children) => ChainVNode);
 
-export interface VNode {
+export interface ChainVNode {
   type: Type;
   // when id is same as node id, it means the vnode is linked to the node
   // when id is different from node id, it means its a child node
@@ -104,7 +104,7 @@ export const h = (type: Type, props: Props | Children, children: Children = []) 
   const attrs = computeProps(scope, rest)
 
   // create the vnode
-  const vnode: VNode = {
+  const vnode: ChainVNode = {
     type,
     el: createElement(type, attrs),
     props,
@@ -204,7 +204,7 @@ export const h = (type: Type, props: Props | Children, children: Children = []) 
   return vnode;
 }
 
-const createVNode = (type: string, props: Props, children?: Children): VNode => {
+const createVNode = (type: string, props: Props, children?: Children): ChainVNode => {
   const ctx = getContext(RenderContext);
   const scope = ctx.scope();
   const vnode = {
@@ -267,11 +267,11 @@ const computeProps = (node: Node, props: Props) => {
 }
 
 // handle initial render
-export const render = (vnode: VNode) => {
+export const render = (vnode: ChainVNode) => {
 
 }
 
-const refresh = (vnode: VNode) => {
+const refresh = (vnode: ChainVNode) => {
   const ctx = getContext(RenderContext);
   const node = ctx.node(vnode.scope.id);
   if (!node) {
@@ -290,11 +290,11 @@ const refresh = (vnode: VNode) => {
 }
 
 // handle node change events
-const changed = (vnode: VNode, change: NodeChange) => {
+const changed = (vnode: ChainVNode, change: NodeChange) => {
 
 }
 
-const update = (vnode: VNode) => {
+const update = (vnode: ChainVNode) => {
 
 }
 

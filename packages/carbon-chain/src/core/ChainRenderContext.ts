@@ -4,13 +4,13 @@ import {Optional} from "@emrgen/types";
 import {Node, NodeId, NodeIdComparator, NodeIdSet} from "@emrgen/carbon-core";
 import BTree from 'sorted-btree';
 import {v4 as uuidv4} from 'uuid';
-import {VNode} from './h';
+import {ChainVNode} from './h';
 
-export class ChainRenderContext extends BTree<NodeId, VNode> implements RenderStore {
+export class ChainRenderContext extends BTree<NodeId, ChainVNode> implements RenderStore {
   private components: Map<string, ChainComponent> = new Map<string, ChainComponent>();
   nodeScope: Node[] = [];
   scopeIds: BTree<NodeId, number> = new BTree<NodeId, number>(undefined, NodeIdComparator);
-  private links: BTree<NodeId, VNode[]> = new BTree<NodeId, VNode[]>(undefined, NodeIdComparator);
+  private links: BTree<NodeId, ChainVNode[]> = new BTree<NodeId, ChainVNode[]>(undefined, NodeIdComparator);
 
   scope(): Node {
     return this.nodeScope[this.nodeScope.length - 1];
@@ -29,7 +29,7 @@ export class ChainRenderContext extends BTree<NodeId, VNode> implements RenderSt
     return NodeId.create(`${scope.id}-${id}`);
   }
 
-  link(id: NodeId, vnode: VNode): void {
+  link(id: NodeId, vnode: ChainVNode): void {
     const links = this.links.get(id);
     if (links) {
       links.push(vnode);
@@ -38,11 +38,11 @@ export class ChainRenderContext extends BTree<NodeId, VNode> implements RenderSt
     }
   }
 
-  linked(id: NodeId): Optional<VNode[]> {
+  linked(id: NodeId): Optional<ChainVNode[]> {
     return this.links.get(id);
   }
 
-  unlink(id: NodeId, vnode: VNode): void {
+  unlink(id: NodeId, vnode: ChainVNode): void {
     const links = this.links.get(id);
     if (links) {
       const index = links.indexOf(vnode);
@@ -76,7 +76,7 @@ export class ChainRenderContext extends BTree<NodeId, VNode> implements RenderSt
     return this.vnode(id)?.scope
   }
 
-  render(content: Node): VNode {
+  render(content: Node): ChainVNode {
     const component = this.components.get(content.name);
     if (!component) {
       throw new Error(`component ${content.name} not found`);
@@ -99,7 +99,7 @@ export class ChainRenderContext extends BTree<NodeId, VNode> implements RenderSt
     this.delete(id);
   }
 
-  vnode(id: NodeId | HTMLElement): Optional<VNode> {
+  vnode(id: NodeId | HTMLElement): Optional<ChainVNode> {
     if (id instanceof NodeId) {
       return this.get(id);
     }
@@ -109,7 +109,7 @@ export class ChainRenderContext extends BTree<NodeId, VNode> implements RenderSt
     return this.vnode(id)?.el;
   }
 
-  register(id: NodeId, vnode: VNode): void {
+  register(id: NodeId, vnode: ChainVNode): void {
     // console.log(`registering node ${id.toString()} with vnode`, vnode);
     this.set(id, vnode);
   }

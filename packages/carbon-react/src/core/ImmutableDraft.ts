@@ -170,7 +170,7 @@ export class ImmutableDraft implements CoreDraft {
     const queue = NodeDepthPriorityQueue.from(updated, "desc");
     const updateOrder = NodeDepthPriorityQueue.from(updated, "desc");
 
-    console.log('updated nodes',updated.map(n => `${n.name}: ${n.id.toString()}`));
+    // console.log('updated nodes',updated.map(n => `${n.name}: ${n.id.toString()}`));
 
     const visited = NodeIdSet.fromIds(updated.map(n => n.id));
     // all nodes that are changed will be processed
@@ -197,7 +197,7 @@ export class ImmutableDraft implements CoreDraft {
           if (this.nodeMap.deleted(n.id)) {
             return null;
           } else {
-            console.log('node map', n.key)
+            // console.log('node map', n.key)
             return this.nodeMap.get(n.id);
           }
         }).filter(identity) as Node[],
@@ -227,12 +227,12 @@ export class ImmutableDraft implements CoreDraft {
         // the node is explicitly mutated, convert it to immutable node
         const mutable = this.nodeMap.get(node.id)!;
         updateStats.push(`[mutable] ${mutable.name} ${mutable.key}`)
-        console.debug('mutable node found', mutable.key, mutable.textContent, mutable.renderVersion, mutable.props.prefix(LocalHtmlAttrPath))
+        // console.debug('mutable node found', mutable.key, mutable.textContent, mutable.renderVersion, mutable.props.prefix(LocalHtmlAttrPath))
         const clone = mutable.clone(nodeCloner);
         clone.renderVersion += 1
 
         if (clone.name == 'text') {
-          console.log('mutable node', node.id.toString(), clone.textContent, clone.renderVersion, Object.isFrozen(mutable))
+          // console.log('mutable node', node.id.toString(), clone.textContent, clone.renderVersion, Object.isFrozen(mutable))
         }
 
         if (isContentChanged) {
@@ -243,7 +243,7 @@ export class ImmutableDraft implements CoreDraft {
       }
     }
 
-    console.log('[STATS]', updateStats.join(', '))
+    // console.log('[STATS]', updateStats.join(', '))
 
     return this;
   }

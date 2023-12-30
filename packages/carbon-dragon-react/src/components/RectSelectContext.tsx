@@ -109,11 +109,11 @@ export function RectSelectContext(props) {
   useEffect(() => {
     const onHideCursor = () => {
       setIsSelecting(true);
-      console.log('hide cursor');
+      // console.log('hide cursor');
 
     }
     const onShowCursor = () => {
-      console.log("show cursor");
+      // console.log("show cursor");
       setIsSelecting(false);
     }
 

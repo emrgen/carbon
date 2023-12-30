@@ -1,4 +1,4 @@
-import {ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef} from "react";
+import React, {ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef} from "react";
 import {useCarbon} from '../hooks/useCarbon';
 import {LocalHtmlAttrPath, NamePath, TagPath} from "@emrgen/carbon-core";
 import {useNodeChange, useRenderManager} from "../hooks";
@@ -40,7 +40,7 @@ const mapName = (name: string, parentName?: string) => {
 }
 
 const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => {
-  const {tag: Element = "div", node, children, custom} = props;
+  const {tag: Tag = "div", node, children, custom} = props;
   const {key, name, renderVersion} = node;
   const editor = useCarbon();
   const ref = useRef<HTMLElement>(null);
@@ -52,7 +52,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     }
   }, [custom, node])
 
-  console.log(node.key, attributes, node.props.prefix(LocalHtmlAttrPath))
+  // console.log(node.key, attributes, node.props.prefix(LocalHtmlAttrPath))
 
   // connect ref
   // https://t.ly/H4By
@@ -72,7 +72,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   }, [editor, node]);
 
   return (
-    <Element
+    <Tag
       ref={ref}
       data-name={name}
       data-version={renderVersion}
@@ -80,7 +80,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
       {...attributes}
     >
       {children}
-    </Element>
+    </Tag>
   );
 }
 

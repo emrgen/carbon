@@ -70,7 +70,7 @@ export class ChangeManager extends NodeTopicEmitter {
     this.transactions.push(tr);
     const { isContentChanged, isSelectionChanged } = this.state;
 
-    console.log('isSelectionChanged', isSelectionChanged)
+    // console.log('isSelectionChanged', isSelectionChanged)
 
     // console.log('updating transaction effect', tr);
     // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
@@ -203,7 +203,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
   private updateSelection(cb: Function) {
     const selection = this.state.selection;
-    console.log("syncing: selection", this.state.selection.toJSON(), this.state.selection.isInline);
+    // console.log("syncing: selection", this.state.selection.toJSON(), this.state.selection.isInline);
     if (!this.app.ready) {
       // console.log('react not ready');
       return;
