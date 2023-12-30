@@ -3,7 +3,17 @@ import {useEffect} from "react";
 import {blockPresetPlugins, node, text, title, section} from "@emrgen/carbon-blocks";
 import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon, ImmutableNodeFactory} from "@emrgen/carbon-react";
 import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
-import {corePresetPlugins, Extension, Node, NodeId, PluginManager, Schema, State, TagPath,} from "@emrgen/carbon-core";
+import {
+  CollapsedPath,
+  corePresetPlugins,
+  Extension,
+  Node,
+  NodeId,
+  PluginManager,
+  Schema,
+  State,
+  TagPath,
+} from "@emrgen/carbon-core";
 import {
   h,
   createElement,
@@ -239,8 +249,6 @@ const renderChildren = (node: Node) => {
       throw new Error(`no component for ${n.name}`);
     }
 
-    console.log('xxxxxxxxxxxxxxxxxx', n.name, n.id.toString())
-
     return component;
   })
 
@@ -265,6 +273,15 @@ const sectionRenderer = (node: Node) => {
       node: para('xxx')!,
       parent: node,
       offset: 1
+    })
+
+    node.updateProps({
+      [CollapsedPath]: !node.props.get<boolean>(CollapsedPath)
+    })
+
+    change.notify(node.id, {
+      type: 'update',
+      node: node,
     })
   }
 
@@ -296,12 +313,21 @@ const sectionRenderer = (node: Node) => {
   // so we don't need to do anything here
   // but we need to return a function that will be called
   // when the node is updated, this way we can control the node template structure and attributes
+  const checkbox = h('input', {
+    type:'checkbox',
+    kind: 'checkbox',
+    checked: (n: Node) => n.props.get<string>(CollapsedPath) ? 'checked' : ''
+  })
+
   return h("div", {
     ...props(node),
     onClick,
     onMouseOver,
     onMouseOut,
-  }, renderChildren(node));
+  }, [
+    checkbox,
+    ...renderChildren(node)
+  ]);
 }
 
 // register the renderer

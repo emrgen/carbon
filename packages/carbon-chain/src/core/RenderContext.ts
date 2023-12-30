@@ -1,21 +1,28 @@
 import {Node, NodeId} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {createContext, getContext} from "./context";
-import {VNode} from "@emrgen/carbon-react";
 import {ChainComponent} from "./h";
+import {VNode} from './h';
 
 export interface RenderStore {
-  vnode(id: NodeId | HTMLElement): Optional<VNode>;
+  vnode(id: NodeId | HTMLElement, kind?: string): Optional<VNode>;
   node(id: NodeId | HTMLElement): Optional<Node>;
   element(id: NodeId): Optional<HTMLElement>;
   register(id: NodeId, vnode: VNode): void;
   unregister(id: NodeId): void;
+  // all the components in the same scope are linked to the same node
+  // this is used to re-render the node components when the node changes
+  scope(): Node;
+  scopeId(): NodeId;
+  link(id: NodeId, vnode: VNode): void;
+  unlink(id: NodeId, vnode: VNode): void;
+  linked(id: NodeId): Optional<VNode[]>;
   // register and get the component
   component(name: string, component?: ChainComponent): Optional<ChainComponent>;
   // render the content to the root element
   render(content: Node): VNode;
   mount(root: Element, content: Node): HTMLElement;
-  has(id: NodeId): boolean;
+  has(id: NodeId, kind?: string): boolean;
 }
 
 export const RenderContext = createContext<RenderStore>({
@@ -32,6 +39,21 @@ export const RenderContext = createContext<RenderStore>({
     throw new Error('not implemented');
   },
   unregister: () => {
+    throw new Error('not implemented');
+  },
+  scope: (): Node => {
+    throw new Error('not implemented');
+  },
+  scopeId: (): NodeId => {
+    throw new Error('not implemented');
+  },
+  link: () => {
+    throw new Error('not implemented');
+  },
+  unlink: () => {
+    throw new Error('not implemented');
+  },
+  linked: () => {
     throw new Error('not implemented');
   },
   component: (name: string, component?: ChainComponent): Optional<ChainComponent> => {
