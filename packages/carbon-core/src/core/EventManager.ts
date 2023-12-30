@@ -113,8 +113,8 @@ export class EventManager {
 		}
 
 		const selection = PinnedSelection.fromDom(app.store);
-    console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
-    console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
+    // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
+    // console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
     console.log(selection?.toString())
 		if (['selectionchange'].includes(type)) {
 			console.log(pad(`%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`, 100), 'background:#ffcc006e');

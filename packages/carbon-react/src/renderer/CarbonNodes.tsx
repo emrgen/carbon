@@ -74,7 +74,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
       ref={ref}
       data-name={name}
       // data-version={renderVersion}
-      // data-id={key}
+      data-id={key}
       {...attributes}
     >
       {children}

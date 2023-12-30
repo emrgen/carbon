@@ -14,6 +14,7 @@ import {
   State,
   TagPath,
 } from "@emrgen/carbon-core";
+import {CarbonApp} from "@emrgen/carbon-utils";
 import {
   h,
   createElement,
@@ -23,6 +24,7 @@ import {
   NodeChangeContext, ChainNodeChangeManager, getContext
 } from "@emrgen/carbon-chain";
 import {noop, range} from "lodash";
+import SelectionTracker from "../../SelectionTracker";
 
 const data = node("carbon", [
   node("document", [
@@ -173,7 +175,7 @@ const renderManager = RenderManager.from(
   renderers,
 )
 
-// console.log = noop;
+console.log = noop;
 console.info = noop;
 console.debug = noop;
 console.warn = noop;
@@ -209,15 +211,15 @@ export default function Dev() {
     }
   }, [app]);
 
-  return (
-    <></>
-  )
+  // return (
+  //   <></>
+  // )
 
   return (
     <div className={'carbon-app-container'}>
-      {/*<CarbonApp app={app} renderManager={renderManager}>*/}
-      {/*  <SelectionTracker/>*/}
-      {/*</CarbonApp>*/}
+      <CarbonApp app={app} renderManager={renderManager}>
+        <SelectionTracker/>
+      </CarbonApp>
     </div>
   );
 }
@@ -308,20 +310,42 @@ const sectionRenderer = (node: Node) => {
     // clearInterval(interval)
   }
 
-  console.log('xxx')
   // children updates will update the dom internally
   // so we don't need to do anything here
   // but we need to return a function that will be called
   // when the node is updated, this way we can control the node template structure and attributes
   const checkbox = h('input', {
     type:'checkbox',
-    kind: 'checkbox',
-    checked: (n: Node) => n.props.get<string>(CollapsedPath) ? 'checked' : ''
+    // disabled: true,
+    onClick: (e, n: Node) => {
+      e.stopPropagation();
+      // e.preventDefault();
+      const isChecked = n.props.get<boolean>(CollapsedPath)
+      console.log('checked', n.props.get<boolean>(CollapsedPath), e.target.checked)
+      n.updateProps({
+        [CollapsedPath]: !isChecked,
+      })
+      change.notify(n.id, {
+        type: 'update',
+        node: n,
+      })
+    },
+    checked: (n: Node) => {
+      const isChecked = n.props.get(CollapsedPath) ? 'checked' : ''
+      return isChecked
+    },
+    class: (n: Node) => {
+      const attrs: string[] = []
+      if (n.props.get(CollapsedPath)) {
+        attrs.push('collapsed')
+      }
+      return attrs.join(' ')
+    }
   })
 
   return h("div", {
     ...props(node),
-    onClick,
+    // onClick,
     onMouseOver,
     onMouseOut,
   }, [
@@ -371,8 +395,7 @@ window.insert = (parent: Node, node: Node) => {
 const s = para('hello world')!;
 const root = document.querySelector('#chain')!;
 
-ctx.mount(root, s);
-
+// ctx.mount(root, s);
 
 let counter = 0;
 const addBunch = (count = 10) => {

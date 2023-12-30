@@ -6,17 +6,6 @@ import {createElement, ejectProps, injectProps} from "./createElement";
 import {getContext} from "./context";
 import {Optional} from "@emrgen/types";
 
-// interface ChainNode {
-//   type: string;
-//   // el: HTMLElement;
-//   props?: {
-//     node?: Node,
-//     [key: string]: any;
-//   },
-//   children: ChainNode[];
-//   update: (props: any) => void;
-// }
-
 export interface ChainComponent {
   (props: any): VNode;
   id: string;
@@ -87,8 +76,20 @@ export const h = (type: Type, props: Props | Children, children: Children = []) 
   const {node, kind, ref = identity, link, ...rest} = props || {};
   const scope = node || ctx.scope();
 
+  for (const key in rest) {
+    if (isFunction(props[key])) {
+      const fn = props[key];
+      if (key.startsWith('on')) {
+        rest[key] = props[key] = (e: Event) => {
+          const node = ctx.node(scope.id);
+          fn(e, node);
+        }
+      }
+    }
+  }
+
   if (isEmpty(props) && isEmpty(children)) {
-    return createVNode(type, {});
+    return createVNode(type, {}, []);
   }
 
   // if node was provided, check if it is already rendered
@@ -100,27 +101,7 @@ export const h = (type: Type, props: Props | Children, children: Children = []) 
     }
   }
 
-  const attrs = {};
-  const computed = {};
-  for (const key in props) {
-    if (isFunction(props[key])) {
-      const fn = props[key];
-      if (key.startsWith('on')) {
-        attrs[key] = fn
-        continue
-      }
-
-      attrs[kebabCase(key)] = fn(scope);
-
-      if (attrs[kebabCase(key)].length === 0) {
-        delete attrs[kebabCase(key)];
-      }
-
-      computed[kebabCase(key)] = props[key];
-    } else {
-      attrs[kebabCase(key)] = props[key];
-    }
-  }
+  const attrs = computeProps(scope, rest)
 
   // create the vnode
   const vnode: VNode = {
@@ -193,6 +174,7 @@ export const h = (type: Type, props: Props | Children, children: Children = []) 
         const vnodes = ctx.linked(change.node.id);
         // update the element in the dom
         vnodes?.forEach(vnode => {
+          console.log(vnode.el)
           refresh(vnode);
         });
         // NOTE: some vnodes may become visible or hidden
@@ -268,7 +250,7 @@ const computeProps = (node: Node, props: Props) => {
     if (isFunction(props[key])) {
       const fn = props[key];
       if (key.startsWith('on')) {
-        attrs[key] = fn
+        attrs[key] = fn;
         continue
       }
       attrs[kebabCase(key)] = fn(node);
@@ -298,29 +280,12 @@ const refresh = (vnode: VNode) => {
 
   // update the props
   const props = vnode.props;
-  const attrs = {};
-  for (const key in props) {
-    if (isFunction(props[key])) {
-      const fn = props[key];
-      if (key.startsWith('on')) {
-        attrs[key] = fn
-        continue
-      }
-
-      attrs[kebabCase(key)] = fn(node);
-
-      if (attrs[kebabCase(key)].length === 0) {
-        delete attrs[kebabCase(key)];
-      }
-
-    } else {
-      attrs[kebabCase(key)] = props[key];
-    }
-  }
+  const attrs = computeProps(node, props);
 
   // update the element props
   ejectProps(vnode.el, vnode.props);
   vnode.props = props;
+  console.log('refreshing vnode', vnode.el, attrs)
   injectProps(vnode.el, attrs);
 }
 

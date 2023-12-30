@@ -56,9 +56,11 @@ import { NodeId, NodeIdComparator } from "./NodeId";
 
 export interface NodeMap {
   get(key: NodeId): Optional<Node>;
+  parent(key: NodeId): Optional<Node>;
   set(key: NodeId, value: Node): void;
   has(key: NodeId): boolean;
   delete(key: NodeId): void;
+  deleted(id: NodeId): boolean;
   forEach(fn: (value: Node, key: NodeId) => void): void;
   nodes(): Node[];
   ids(): NodeId[];
@@ -72,6 +74,7 @@ export class BTreeNodeMap implements NodeMap {
   }
 
   map: NodeBTree = new NodeBTree();
+  _deleted: NodeBTree = new NodeBTree();
 
   constructor() {}
 
@@ -80,7 +83,15 @@ export class BTreeNodeMap implements NodeMap {
   }
 
   delete(key: NodeId): void {
+    const node = this.get(key);
     this.map.delete(key);
+    if (node) {
+      this._deleted.set(key, node);
+    }
+  }
+
+  deleted(id: NodeId): boolean {
+    return this._deleted.has(id)
   }
 
   forEach(fn: (value: Node, key: NodeId) => void): void {
@@ -89,6 +100,13 @@ export class BTreeNodeMap implements NodeMap {
 
   get(key: NodeId): Optional<Node> {
     return this.map.get(key);
+  }
+
+  parent(key: NodeId): Optional<Node> {
+    const node = this.get(key);
+    if (node?.parentId) {
+      return this.get(node.parentId);
+    }
   }
 
   set(key: NodeId, value: Node): void {
