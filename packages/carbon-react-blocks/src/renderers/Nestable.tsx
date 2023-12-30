@@ -1,10 +1,10 @@
 import { useRef } from "react";
 
 import {
-  RendererProps
-} from "@emrgen/carbon-core";
-
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useSelectionHalo} from "@emrgen/carbon-react";
+  CarbonBlock,
+  CarbonChildren, CarbonNodeChildren, CarbonNodeContent,
+  RendererProps,
+} from "@emrgen/carbon-react";
 import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
 
 export const NestableComp = (props: RendererProps) => {

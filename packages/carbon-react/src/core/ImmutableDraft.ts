@@ -3,7 +3,7 @@ import {
   Draft as CoreDraft,
   EmptyPlaceholderPath,
   FocusedPlaceholderPath,
-  isPassiveHidden,
+  isPassiveHidden, LocalHtmlAttrPath,
   Node, NodeContentData,
   NodeId,
   NodeIdSet,
@@ -170,7 +170,7 @@ export class ImmutableDraft implements CoreDraft {
     const queue = NodeDepthPriorityQueue.from(updated, "desc");
     const updateOrder = NodeDepthPriorityQueue.from(updated, "desc");
 
-    // console.log('updated nodes',updated.map(n => `${n.name}: ${n.id.toString()}`));
+    console.log('updated nodes',updated.map(n => `${n.name}: ${n.id.toString()}`));
 
     const visited = NodeIdSet.fromIds(updated.map(n => n.id));
     // all nodes that are changed will be processed
@@ -197,26 +197,25 @@ export class ImmutableDraft implements CoreDraft {
           if (this.nodeMap.deleted(n.id)) {
             return null;
           } else {
-            // console.log('node map', n.id.toString())
+            console.log('node map', n.key)
             return this.nodeMap.get(n.id);
           }
         }).filter(identity) as Node[],
       }
     }
-    const updateStats: string[] = [];
 
+    const updateStats: string[] = [];
     while (updateOrder.size) {
       const { node } = updateOrder.pop()!;
       const isContentChanged = this.contentChanges.has(node.id);
       // clone node children only if the node content is changed
-      const cloner = isContentChanged ? nodeCloner : identity;
 
       if (!this.nodeMap.has(node.id)) {
         // node is in update path but is mutated explicitly
         const immutable = this.nodeMap.get(node.id)!;
-        updateStats.push(`[immutable] ${immutable.name} ${immutable.id.toString()}`)
+        updateStats.push(`[immutable] ${immutable.name} ${immutable.key}`)
         // console.debug('immutable node found', node.id.toString(), node.renderVersion)
-        const mutable = node.clone(cloner) as ImmutableNode;
+        const mutable = node.clone(nodeCloner) as ImmutableNode;
         mutable.renderVersion += 1
         if (isContentChanged) {
           // console.log('content updated', node.id.toString())
@@ -227,9 +226,9 @@ export class ImmutableDraft implements CoreDraft {
       } else {
         // the node is explicitly mutated, convert it to immutable node
         const mutable = this.nodeMap.get(node.id)!;
-        updateStats.push(`[mutable] ${mutable.name} ${mutable.id.toString()}`)
-        // console.debug('mutable node found', mutable.id.toString(), mutable.textContent, mutable.renderVersion)
-        const clone = mutable.clone(cloner);
+        updateStats.push(`[mutable] ${mutable.name} ${mutable.key}`)
+        console.debug('mutable node found', mutable.key, mutable.textContent, mutable.renderVersion, mutable.props.prefix(LocalHtmlAttrPath))
+        const clone = mutable.clone(nodeCloner);
         clone.renderVersion += 1
 
         if (clone.name == 'text') {
@@ -244,7 +243,7 @@ export class ImmutableDraft implements CoreDraft {
       }
     }
 
-    // console.log('[STATS]', updateStats.join(', '))
+    console.log('[STATS]', updateStats.join(', '))
 
     return this;
   }
@@ -553,11 +552,12 @@ export class ImmutableDraft implements CoreDraft {
         if (node.isEmpty) {
           this.mutable(head.nodeId, node => {
             const parent = this.nodeMap.parent(node);
-            const emptyPlaceholder = parent?.props.get<string>(EmptyPlaceholderPath) ?? "";
+            const emptyPlaceholder = parent?.props.get<string>(EmptyPlaceholderPath) ?? " ";
             if (!parent) return;
             node.updateProps({
               [PlaceholderPath]: emptyPlaceholder,
             });
+            this.contentChanges.add(parent.id);
           });
         }
       }

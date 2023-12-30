@@ -84,10 +84,10 @@ export class ChangeManager extends NodeTopicEmitter {
     if (isContentChanged) {
       this.updated.clear();
       this.updated = state.updated.clone();
-      console.log("syncing: content", this.updated.toArray().map(n => n.toString()));
+      console.log("syncing: content", this.updated.nodes(this.state.nodeMap).map(n => n.key));
 
       this.interval = setTimeout(() => {
-        console.error("syncing: content timeout", this.updated.toArray().map(n => n.toString()));
+        console.error("syncing: content timeout", this.updated.nodes(this.state.nodeMap).map(n => n.key));
         this.updated.clear();
       }, 2000)
     }
@@ -177,6 +177,11 @@ export class ChangeManager extends NodeTopicEmitter {
 
     const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
     // console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
+
+    // sort the nodes by depth so that we can update the children first
+    updatedNodes.sort((a, b) => {
+      return b.depth - a.depth;
+    })
 
     // updatedNodes.forEach(n => {
     //   updatedNodeIds.remove(n.id);

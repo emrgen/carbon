@@ -52,6 +52,8 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     }
   }, [custom, node])
 
+  console.log(node.key, attributes, node.props.prefix(LocalHtmlAttrPath))
+
   // connect ref
   // https://t.ly/H4By
   useImperativeHandle(forwardedRef, () => ref.current);
@@ -73,7 +75,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     <Element
       ref={ref}
       data-name={name}
-      // data-version={renderVersion}
+      data-version={renderVersion}
       data-id={key}
       {...attributes}
     >
@@ -157,7 +159,7 @@ export const InnerCarbonNode = (props: RendererProps) => {
   //   console.log('CarbonNode', node.name, node.id.toString(), node.toJSON());
   // })
 
-  const component = useMemo(() => {
+  // const component = useMemo(() => {
     const name = (node.props.get(NamePath) ?? node.name) as string;
     const RegisteredComponent = rm.component(name);
 
@@ -172,13 +174,13 @@ export const InnerCarbonNode = (props: RendererProps) => {
     console.warn('No component found for', node.name, 'fall back to CarbonDefaultNode')
 
     return <CarbonDefaultNode {...props} node={node}/>;
-  }, [rm, node, props])
-
-  if (!component) {
-    return <></>
-  }
-
-  return <>{component}</>;
+  // }, [rm, node, props])
+  //
+  // if (!component) {
+  //   return <></>
+  // }
+  //
+  // return <>{component}</>;
 }
 
 export const CarbonNode = memo(InnerCarbonNode, (prev, next) => {
@@ -216,17 +218,15 @@ export const CarbonNodeContent = (props: RendererProps) => {
   }
 
   return (
-    // <div data-type="content" {...wrapper}>
-    <>
+    <div data-type="content" {...wrapper}>
       {beforeContent}
       <CarbonNode
         node={content}
         custom={custom}
         key={content.key}
       />
-    </>
+  </div>
   );
-  // </div>
 };
 
 interface ChildrenSegmentProps {
@@ -251,11 +251,9 @@ export const CarbonNodeChildren = (props: RendererProps) => {
     // console.debug('CarbonNodeChildren', node.name, children.length);
 
     return (
-      // <div data-type="children">
-      <>
+      <div data-type="children">
         {children}
-      </>
-      // </div>
+      </div>
     )
   }, [node])
 };

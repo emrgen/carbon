@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCarbonChange } from "./useCarbonChange";
 import { Optional } from "@emrgen/types";
-import {Node, NodeChangeType} from "@emrgen/carbon-core";
+import {Node, NodeChangeType, PlaceholderPath} from "@emrgen/carbon-core";
 
 interface UseTextChangeProps {
   node: Node,
@@ -19,7 +19,8 @@ export const useNodeChange = (props: UseNodeChangeProps) => {
   useEffect(() => {
     const onChange = (value: Node) => {
       setNode(value);
-      // console.log("node changed", value.name, value.id.toString(), value.textContent);
+      const placeholder = value.props.get(PlaceholderPath);
+      console.log("node changed", value.name, value.id.toString(), value.textContent, placeholder);
     };
 
     change.on(node.id, NodeChangeType.update, onChange);

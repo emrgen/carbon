@@ -132,7 +132,7 @@ export class PluginManager {
 
 		console.log('onKeyDown', event);
 
-		console.groupCollapsed('onKeyDown', event)
+		console.group('onKeyDown', event)
 
     const process = () => {
       each(this.before, (p: CarbonPlugin) => {
