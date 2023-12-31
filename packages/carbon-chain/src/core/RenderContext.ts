@@ -4,6 +4,21 @@ import {createContext, getContext} from "./context";
 import {ChainComponent} from "./h";
 import {ChainVNode} from './h';
 
+
+export class ScopeId {
+  nodeId: NodeId;
+  scope: string;
+
+  static from(nodeId: NodeId, scope: string = ''): ScopeId {
+    return new ScopeId(nodeId, scope);
+  }
+
+  constructor(nodeId: NodeId, scope: string) {
+    this.nodeId = nodeId;
+    this.scope = scope;
+  }
+}
+
 export interface RenderStore {
   vnode(id: NodeId | HTMLElement, kind?: string): Optional<ChainVNode>;
   node(id: NodeId | HTMLElement): Optional<Node>;
@@ -13,14 +28,14 @@ export interface RenderStore {
   // all the components in the same scope are linked to the same node
   // this is used to re-render the node components when the node changes
   scope(): Node;
-  scopeId(): NodeId;
-  link(id: NodeId, vnode: ChainVNode): void;
+  // scopeId(): ScopeId;
+  link(id: ScopeId, vnode: ChainVNode): void;
   unlink(id: NodeId, vnode: ChainVNode): void;
   linked(id: NodeId): Optional<ChainVNode[]>;
   // register and get the component
   component(name: string, component?: ChainComponent): Optional<ChainComponent>;
   // render the content to the root element
-  render(content: Node): ChainVNode;
+  render(content: Node): Optional<ChainVNode>;
   mount(root: Element, content: Node): HTMLElement;
   has(id: NodeId, kind?: string): boolean;
 }
@@ -44,9 +59,9 @@ export const RenderContext = createContext<RenderStore>({
   scope: (): Node => {
     throw new Error('not implemented');
   },
-  scopeId: (): NodeId => {
-    throw new Error('not implemented');
-  },
+  // scopeId: (): ScopeId => {
+  //   throw new Error('not implemented');
+  // },
   link: () => {
     throw new Error('not implemented');
   },

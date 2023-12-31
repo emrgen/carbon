@@ -7,6 +7,7 @@ import { FastEditor } from "./fastype/FastEditor";
 
 import './fastype/fastype.styl'
 import TestText from "./carbon/Test/Text";
+import {Chain} from "./carbon/Dev/Chain";
 
 function App() {
 
@@ -14,6 +15,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Dev />} />
+        <Route path="/chain" element={<Chain />} />
         <Route path="/text" element={<Text />} />
         <Route path="/test" element={<TestText />} />
         <Route path="/sheet" element={<Sheet />} />

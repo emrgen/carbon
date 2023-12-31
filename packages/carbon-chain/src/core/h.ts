@@ -1,18 +1,15 @@
 import {Node, NodeId, NodeIdSet} from "@emrgen/carbon-core";
 import {identity, isArray, isEmpty, isFunction, kebabCase, range, snakeCase} from "lodash";
-import {RenderContext} from "./RenderContext";
+import {RenderContext, RenderStore, ScopeId} from "./RenderContext";
 import {NodeChange, NodeChangeContext} from "./change";
 import {createElement, ejectProps, injectProps} from "./createElement";
 import {getContext} from "./context";
 import {Optional} from "@emrgen/types";
+import {NodeStore} from "@emrgen/carbon-core/src/core/NodeStore";
+import * as assert from "assert";
 
-export interface ChainComponent {
-  (node: Node): ChainVNode;
-  // id: string;
-  // // keep track of the nodes that are using this component
-  // nodes: NodeIdSet;
-  // component: string;
-}
+export type ChainComponent = (props: {node: Node}, children?: VNodeChildren) => Optional<ChainVNode>;
+
 
 // const components: ChainComponent = (props: any, children?: any) => {
 //   return h('div', props, children);
@@ -24,32 +21,34 @@ export interface ChainComponent {
 
 // type PropType = string | number | boolean | null | undefined | Node | Node[] | (() => VNode);
 
-interface Props extends Record<string, any> {
-  node?: Node,
-  ref?: (el: HTMLElement) => void;
-  link?: () => Optional<Node>;
-  kind?: string;
+type PropLiteral = string | number | boolean | null | undefined | Node | Node[] | (() => ChainVNode) | ((el: HTMLElement) => void) | ((e: any, node: Node) => void);
+type ComputedProp = (node: Node) => PropLiteral;
+export type Prop = PropLiteral | ComputedProp;
 
-  [key: string]: ((node: Node) => any) | any;
+
+export interface VNodeProps {
+  node?: Node | (() => Optional<Node>);
+  ref?: (el: HTMLElement) => void;
+  link?: string;
+  [key: string]: Prop;
 }
 
-type Children = (ChainVNode | string | (() => ChainVNode))[];
+export type VNodeChildren = (ChainVNode | string)[];
 
-type Type = string | ((props, children) => ChainVNode);
+type Type = string | ((props: VNodeProps, children: VNodeChildren) => Optional<ChainVNode>);
 
 export interface ChainVNode {
   type: Type;
+  parent?: ChainVNode;
+  prev?: ChainVNode;
   // when id is same as node id, it means the vnode is linked to the node
-  // when id is different from node id, it means its a child node
-  scopeId: NodeId;
-  scope: Node;
+  // when id is different from node id, it means it's a child node
+  scope?: Node; // this is a reference to the current node
+  scopeId?: ScopeId;
   el: HTMLElement;
-  props: {
-    node?: Node,
-    [key: string]: any;
-  },
+  props: VNodeProps,
   render(): void;
-  refresh(): void;
+  refresh(node: Node): void;
   changed(change: NodeChange): void;
   attach(parent: Element, after?: Element): void;
   detach(): void;
@@ -62,140 +61,40 @@ export interface ChainVNode {
 // more over, this will allow to call changed handler on the returned vnode within the node rendering context
 // assuming the returned vnode is the one responsible for rendering the node in the dom along with its children
 
-export const h = (type: Type, props: Props | Children, children: Children = []) => {
+export const h = (type: Type, props: VNodeProps | VNodeChildren, children: VNodeChildren = []) => {
+  // props can be children
   if (isArray(props)) {
-    children = props;
+    children = props as unknown as VNodeChildren;
     props = {};
   }
 
+  // type can be a component
   if (typeof type === 'function') {
     return type(props, children);
   }
 
-  const ctx = getContext(RenderContext);
-  const {node, kind, ref = identity, link, ...rest} = props || {};
-  const scope = node || ctx.scope();
-
-  for (const key in rest) {
-    if (isFunction(props[key])) {
-      const fn = props[key];
-      if (key.startsWith('on')) {
-        rest[key] = props[key] = (e: Event) => {
-          const node = ctx.node(scope.id);
-          fn(e, node);
-        }
-      }
-    }
-  }
-
+  // if props and children are empty, create an empty vnode
   if (isEmpty(props) && isEmpty(children)) {
     return createVNode(type, {}, []);
   }
 
-  // if node was provided, check if it is already rendered
-  if (node instanceof Node && ctx.has(node.id)) {
-    const vnode = ctx.vnode(node.id);
-    if (vnode && vnode.scope.renderVersion === node.renderVersion) {
-      console.log('[returning cached vnode]', vnode)
-      return vnode;
-    }
-  }
+  const ctx = getContext(RenderContext);
+  const {node, ref = identity, link, ...rest} = props || {};
 
-  const attrs = computeProps(scope, rest)
-
-  // create the vnode
-  const vnode: ChainVNode = {
-    type,
-    el: createElement(type, attrs),
-    props,
-    scope,
-    scopeId: ctx.scopeId(),
-    render() {
-      render(this);
-    },
-    refresh() {
-      refresh(this);
-    },
-    changed(change: NodeChange) {},
-    attach() {},
-    detach() {},
-  }
-
-  ctx.link(scope.id, vnode);
-
+  const scope = ctx.scope();
+  const preparedProps = prepareProps(ctx, scope, rest);
+  const vnode = createVNode(type, preparedProps, children);
   // add the ref to the element
   ref(vnode.el);
-
-  // add the node to the store
-  if (node instanceof Node) {
-    ctx.register(node.id, vnode);
-  }
-
-  // listen to node changes and update the dom
-  if (node instanceof Node) {
-    const cm = getContext(NodeChangeContext);
-    const update = (change: NodeChange) => {
-      // if node is removed, remove the element from the dom
-      if (change.type === 'remove') {
-        const vnode = ctx.vnode(change.node.id);
-        if (!vnode) {
-          throw new Error(`VNode for node ${change.node.id.toString()} not found`);
-        }
-
-        // remove the element from the dom
-        vnode.el.remove();
-        ejectProps(vnode.el, vnode.props);
-        // remove the node from the store
-        ctx.unregister(node.id);
-        cm.unsubscribe(node.id, update);
-
-        console.log('removing node', change.node.id.toString());
-        return
-      }
-
-      // if a child node is added, add the element to the dom
-      if (change.type === 'add:child') {
-        const component = ctx.component(change.node.name);
-        if (!component) {
-          throw new Error(`Component ${change.node.name} not found`);
-        }
-        // create a child vnode
-        const childVnode = component(change.node);
-        // insert the element to the parent at the index
-        const children = vnode.el.children || [];
-        vnode.el.insertBefore(childVnode.el, children[change.offset ?? change.parent?.size ?? 0]);
-        ctx.register(change.node.id, childVnode);
-        return
-      }
-
-      // if node is updated, update the element in the dom
-      if (change.type === 'update') {
-        // get linked vnodes
-        const vnodes = ctx.linked(change.node.id);
-        // update the element in the dom
-        vnodes?.forEach(vnode => {
-          console.log(vnode.el)
-          refresh(vnode);
-        });
-        // NOTE: some vnodes may become visible or hidden
-        // update the node in the store
-        return
-      }
-
-      console.log('unprocessed node change', change);
-    }
-
-    cm.subscribe(node.id, update);
+  if (link) {
+    const scopeId = ScopeId.from(scope.id, link);
+    ctx.link(scopeId, vnode);
   }
 
   // add the children to the element
   children.forEach(child => {
     if (typeof child === 'string') {
       vnode.el.appendChild(document.createTextNode(child));
-    } else if (typeof child === 'function') {
-      // avoid calling child() multiple times
-      const childVnode = child();
-      vnode.el.appendChild(childVnode.el);
     } else {
       vnode.el.appendChild(child.el);
     }
@@ -204,20 +103,18 @@ export const h = (type: Type, props: Props | Children, children: Children = []) 
   return vnode;
 }
 
-const createVNode = (type: string, props: Props, children?: Children): ChainVNode => {
+const createVNode = (type: string, props: VNodeProps, children?: VNodeChildren): ChainVNode => {
   const ctx = getContext(RenderContext);
   const scope = ctx.scope();
   const vnode = {
     type,
-    scope,
-    scopeId: ctx.scopeId(),
     el: createElement(type, computeProps(scope, props)),
     props,
     render() {
       render(vnode);
     },
-    refresh() {
-      refresh(vnode);
+    refresh(node: Node) {
+      refresh(node, vnode);
     },
     changed(change: NodeChange) {
       changed(vnode, change)
@@ -241,25 +138,53 @@ const createVNode = (type: string, props: Props, children?: Children): ChainVNod
     },
   }
 
+  watch(ctx, scope, vnode)
+
   return vnode;
 }
 
-const computeProps = (node: Node, props: Props) => {
+const watch = (ctx: RenderStore, node: Node, vnode: ChainVNode) => {
+
+}
+
+const unwatch = (ctx: RenderStore, node: Node, vnode: ChainVNode) => {
+
+}
+
+const prepareProps = (ctx: RenderStore, scope: Node, props: VNodeProps) => {
   const attrs = {};
   for (const key in props) {
     if (isFunction(props[key])) {
-      const fn = props[key];
+      const fn = props[key] as any
       if (key.startsWith('on')) {
-        attrs[key] = fn;
+        attrs[key] = (e: any) => {
+          const node = ctx.node(scope.id);
+          return fn(e, node);
+        };
         continue
       }
-      attrs[kebabCase(key)] = fn(node);
-      if (attrs[kebabCase(key)].length === 0) {
-        delete attrs[kebabCase(key)];
-      }
 
+      attrs[kebabCase(key)] = fn
     } else {
       attrs[kebabCase(key)] = props[key];
+    }
+  }
+
+  return attrs;
+}
+
+const computeProps = (scope: Node, props: VNodeProps) => {
+  const attrs = {};
+  for (const key in props) {
+    if (isFunction(props[key])) {
+      const fn = props[key] as any
+      if (key.startsWith('on')) {
+        attrs[key] = fn;
+      } else {
+        attrs[key] = fn(scope);
+      }
+    } else {
+      attrs[key] = props[key];
     }
   }
 
@@ -271,22 +196,22 @@ export const render = (vnode: ChainVNode) => {
 
 }
 
-const refresh = (vnode: ChainVNode) => {
-  const ctx = getContext(RenderContext);
-  const node = ctx.node(vnode.scope.id);
-  if (!node) {
-    throw new Error(`node ${vnode.scope.id.toString()} not found`);
-  }
-
-  // update the props
-  const props = vnode.props;
-  const attrs = computeProps(node, props);
-
-  // update the element props
-  ejectProps(vnode.el, vnode.props);
-  vnode.props = props;
-  console.log('refreshing vnode', vnode.el, attrs)
-  injectProps(vnode.el, attrs);
+const refresh = (node: Node, vnode: ChainVNode) => {
+  console.log('refreshing vnode', vnode.el, vnode.props)
+  // const ctx = getContext(RenderContext);
+  // if (!node) {
+  //   throw new Error(`node ${vnode.scope.id.toString()} not found`);
+  // }
+  //
+  // // update the props
+  // const props = vnode.props;
+  // const attrs = computeProps(node, props);
+  //
+  // // update the element props
+  // ejectProps(vnode.el, vnode.props);
+  // vnode.props = props;
+  // console.log('refreshing vnode', vnode.el, attrs)
+  // injectProps(vnode.el, attrs);
 }
 
 // handle node change events
