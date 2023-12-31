@@ -175,14 +175,14 @@ const renderManager = RenderManager.from(
   renderers,
 )
 
-// console.log = noop;
-// console.info = noop;
-// console.debug = noop;
+console.log = noop;
+console.info = noop;
+console.debug = noop;
 console.warn = noop;
 console.error = noop;
-// console.group = noop;
-// console.groupCollapsed = noop;
-// console.groupEnd = noop;
+console.group = noop;
+console.groupCollapsed = noop;
+console.groupEnd = noop;
 console.time = noop;
 
 
@@ -246,7 +246,7 @@ const textRenderer = (node: Node) => {
 // on dismount of the node we should remove the children cache from the context
 const renderChildren = (node: Node) => {
   return node.children.map(n => {
-    const component = h(ctx.component(n.name), n);
+    const component = h(ctx.component(n.name)!, n);
     if (!component) {
       throw new Error(`no component for ${n.name}`);
     }

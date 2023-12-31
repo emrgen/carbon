@@ -21,7 +21,7 @@ export function Fastype(props: FastypeProps) {
 
   return (
     <ChakraProvider>
-      <CarbonApp app={app} >
+      <CarbonApp app={app} renderManager={{} as any} >
         {children}
       </CarbonApp>
     </ChakraProvider>

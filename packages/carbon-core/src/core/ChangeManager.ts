@@ -63,7 +63,7 @@ export class ChangeManager extends NodeTopicEmitter {
   // 3. sync the node state
   update(tr: Transaction, state: State, timeout: number = 1000) {
     if (this.transactions.length) {
-      console.log('pending transaction', this.transactions.length, this.transactions.map(t => t.actions))
+      console.log('pending transaction', this.transactions.length);
       return;
     }
 

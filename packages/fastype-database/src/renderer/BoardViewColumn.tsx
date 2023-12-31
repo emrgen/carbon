@@ -31,7 +31,7 @@ export const BoardViewColumnComp = (props: RendererProps) => {
   // }, [react]);
 
   return (
-    <CarbonBlock node={node} ref={ref} custom={connectors}>
+    <CarbonBlock node={node} ref={ref as any} custom={connectors}>
       <Stack spacing={4}>
         <CarbonNodeContent node={node} custom={{contentEditable: true}}/>
         <Stack>

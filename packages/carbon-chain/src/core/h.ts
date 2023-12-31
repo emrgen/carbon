@@ -7,11 +7,11 @@ import {getContext} from "./context";
 import {Optional} from "@emrgen/types";
 
 export interface ChainComponent {
-  (props: any): ChainVNode;
-  id: string;
-  // keep track of the nodes that are using this component
-  nodes: NodeIdSet;
-  component: string;
+  (node: Node): ChainVNode;
+  // id: string;
+  // // keep track of the nodes that are using this component
+  // nodes: NodeIdSet;
+  // component: string;
 }
 
 // const components: ChainComponent = (props: any, children?: any) => {
@@ -35,7 +35,7 @@ interface Props extends Record<string, any> {
 
 type Children = (ChainVNode | string | (() => ChainVNode))[];
 
-type Type = string | ((props: Props | Children, children?: Children) => ChainVNode);
+type Type = string | ((props, children) => ChainVNode);
 
 export interface ChainVNode {
   type: Type;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { RectSelectorContext } from "../hooks/useRectSelector";
-import { Carbon, State, EventsOut, RendererProps, Transaction } from "@emrgen/carbon-core";
+import { Carbon, State, EventsOut, Transaction } from "@emrgen/carbon-core";
 import { createPortal } from "react-dom";
 import { useDndMonitor, useDragRect } from "../hooks";
 import { throttle } from "lodash";

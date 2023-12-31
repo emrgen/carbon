@@ -5,7 +5,6 @@ import { Node } from './Node';
 import { MarkType, NodeType } from "./NodeType";
 import {Maps, NodeJSON, NodeName} from "./types";
 import { Mark, MarkProps } from "./Mark";
-import {InitNodeJSON} from "@emrgen/carbon-react";
 import {NodeContentData, NodeFactory} from "@emrgen/carbon-core";
 
 interface SchemaSpec {
@@ -213,7 +212,7 @@ export interface NodeSpec {
 
 	props?: Record<string, any>;
 
-  default?: InitNodeJSON,
+  default?: any,//InitNodeJSON,
 
 	[key: string]: any;
 }

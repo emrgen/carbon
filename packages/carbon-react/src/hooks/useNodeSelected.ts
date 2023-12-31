@@ -1,4 +1,5 @@
-import {RendererProps, SelectedPath} from "@emrgen/carbon-core";
+import { SelectedPath } from "@emrgen/carbon-core";
+import {RendererProps} from "../renderer";
 import { useMemo } from "react";
 
 export const useNodeSelected = (props: RendererProps) => {

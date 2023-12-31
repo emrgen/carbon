@@ -1,6 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import {RendererProps} from "@emrgen/carbon-core";
-import {CarbonBlock, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
+import {CarbonBlock, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
 import {preventAndStop} from "@emrgen/carbon-core";
 import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
 

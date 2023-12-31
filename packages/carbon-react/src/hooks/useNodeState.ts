@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { RendererProps, } from "@emrgen/carbon-core";
 import {useNodeEditable} from "./useNodeEditable";
 import {useNodeActivated} from "./useNodeActivated";
 import {useNodeSelected} from "./useNodeSelected";
 import {useNodeOpened} from "./useNodeOpened";
+import { RendererProps } from "../renderer";
 
 export const useNodeState = (props: RendererProps) => {
   const activated = useNodeActivated(props);

@@ -1,7 +1,7 @@
 import { CarbonRoot } from "./plugins/CarbonRoot";
 
 export * from "./create"
-import {CarbonPlugin, Extension, ReactRenderer} from "@emrgen/carbon-core";
+import {CarbonPlugin, Extension} from "@emrgen/carbon-core";
 import {DocPlugin, NestablePlugin, Section} from "./plugins";
 import {Divider} from "./plugins/Divider";
 import {Header} from "./plugins/Header";
@@ -47,7 +47,6 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Frame(),
   new Insert(),
 ]
-
 
 export * from './events'
 export * from './plugins'

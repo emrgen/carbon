@@ -26,7 +26,7 @@ import ResizeTextarea from "react-textarea-autosize";
 import { isKeyHotkey } from "is-hotkey";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 import {CarbonBlock, RendererProps, useCarbon, useNodeActivated, useSelectionHalo} from "@emrgen/carbon-react";
-import {BlockContent, preventAndStop,Node} from "@emrgen/carbon-core";
+import { preventAndStop,Node} from "@emrgen/carbon-core";
 import {stop} from "@emrgen/carbon-core/src/utils/event";
 
 export const EquationComp = (props: RendererProps) => {
@@ -191,7 +191,7 @@ export const EquationComp = (props: RendererProps) => {
                 const text = app.schema.text(e.target.value)!;
                 app.enable(() => {
                   app.tr
-                    .SetContent(title.id, BlockContent.create(text))
+                    .SetContent(title.id, [text])
                     .Dispatch();
                 });
               }}
@@ -211,7 +211,7 @@ export const EquationComp = (props: RendererProps) => {
   return (
     <CarbonBlock
       node={node}
-      ref={ref}
+      ref={ref as any}
       custom={{
         onClick: handleClick,
         onMouseDown: handleMouseDown,
@@ -275,7 +275,7 @@ export const EquationContent = (props: EquationContentProps) => {
     <CarbonBlock node={node} custom={{ "data-name": "equation-wrapper" }}>
       <Box
         data-type="equation-content"
-        ref={eqRef}
+        ref={eqRef as any}
         p={2}
         opacity={error ? 0 : 1}
         minH={"50px"}

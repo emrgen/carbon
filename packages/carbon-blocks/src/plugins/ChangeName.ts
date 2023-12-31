@@ -13,7 +13,6 @@ import {
   moveNodesActions,
   insertBeforeAction,
   preventAndStopCtx,
-  BlockContent,
   SetContentAction,
   PlaceholderPath,
   EmptyPlaceholderPath,

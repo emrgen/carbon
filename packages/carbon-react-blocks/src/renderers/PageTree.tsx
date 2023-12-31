@@ -1,10 +1,10 @@
 import {
-  Carbon, preventAndStop, RendererProps,
+  Carbon, preventAndStop,
 
 } from "@emrgen/carbon-core";
 import { useCallback, useEffect, useMemo } from "react";
 import { usePrevious } from "@uidotdev/usehooks";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useCarbon} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon} from "@emrgen/carbon-react";
 
 export const PageTreeComp = (props: RendererProps) => {
   const { node } = props;

@@ -1,5 +1,5 @@
 import { RefObject, createContext, useContext, useRef, useState } from "react";
-import EventEmitter from "events";
+import {EventEmitter} from "events";
 import { Optional } from '@emrgen/types';
 import {Node, preventAndStop} from "@emrgen/carbon-core";
 

@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from "react";
 import {
-  Carbon, RendererProps,
+  Carbon, 
   Node, preventAndStop, OpenedPath, Point,
 } from "@emrgen/carbon-core";
 
 import { HiOutlinePlus } from "react-icons/hi";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useCarbon, useNodeOpened} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon, useNodeOpened} from "@emrgen/carbon-react";
 import {BlockEvent, PageTreeItemName, PageTreeName} from "@emrgen/carbon-blocks";
 
 const getPageTree = (n: Node) => n.closest(n => n.type.name === PageTreeName);

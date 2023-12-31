@@ -1,12 +1,7 @@
 
 import { useRef } from "react";
 
-import {
-  RendererProps
-
-} from "@emrgen/carbon-core";
-
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useSelectionHalo} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useSelectionHalo} from "@emrgen/carbon-react";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 export const QuoteComp = (props: RendererProps) => {

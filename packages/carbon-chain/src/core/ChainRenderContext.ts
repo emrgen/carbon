@@ -1,5 +1,5 @@
 import {RenderStore} from "./RenderContext";
-import {ChainComponent} from "@emrgen/carbon-chain";
+import {ChainComponent} from "./h";
 import {Optional} from "@emrgen/types";
 import {Node, NodeId, NodeIdComparator, NodeIdSet} from "@emrgen/carbon-core";
 import BTree from 'sorted-btree';

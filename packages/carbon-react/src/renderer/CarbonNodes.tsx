@@ -2,7 +2,7 @@ import React, {ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, u
 import {useCarbon} from '../hooks/useCarbon';
 import {LocalHtmlAttrPath, NamePath, TagPath} from "@emrgen/carbon-core";
 import {useNodeChange, useRenderManager} from "../hooks";
-import {RendererProps} from "@emrgen/carbon-react";
+import {RendererProps} from "../renderer/ReactRenderer";
 
 export const JustEmpty = () => {
   return <span>&shy;</span>;

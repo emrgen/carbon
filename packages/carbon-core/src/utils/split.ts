@@ -1,5 +1,5 @@
 import { Carbon, Node, Pin, PinnedSelection } from "../core";
-import { BlockContent, NodeContent } from "../core/NodeContent";
+import { NodeContent } from "../core/NodeContent";
 import { takeAfter, takeBefore, takeUntil } from "./array";
 
 

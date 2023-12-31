@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
-  ListNumberPath, RendererProps,Node,
+  ListNumberPath, Node,
 } from "@emrgen/carbon-core";
 import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon-react";
 import { Optional } from "@emrgen/types";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useSelectionHalo} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useSelectionHalo} from "@emrgen/carbon-react";
 
 // TODO: This is a hack to get the list number. May be should be stored in the node properties.
 const listNumber = (node: Node, parent: Optional<Node>): number => {

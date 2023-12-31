@@ -1,8 +1,5 @@
-import {
-  RendererProps
-} from "@emrgen/carbon-core";
 import { useRef } from "react";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useSelectionHalo} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useSelectionHalo} from "@emrgen/carbon-react";
 import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
 
 export default function FrameComp(props: RendererProps) {

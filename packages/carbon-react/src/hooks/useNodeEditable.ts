@@ -1,5 +1,6 @@
-import {EditablePath, RendererProps} from "@emrgen/carbon-core";
+import {EditablePath} from "@emrgen/carbon-core";
 import { useMemo } from "react";
+import { RendererProps } from "../renderer";
 
 export const useNodeEditable = (props: RendererProps) => {
   const { node } = props;

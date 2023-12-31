@@ -1,13 +1,14 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {
   EventsOut, Node, NodeId, onEnter,
-  RendererProps, TitlePath
+  TitlePath
 } from "@emrgen/carbon-core";
 import {first} from "lodash";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock, CarbonChildren,
   CarbonNode,
+  RendererProps,
   useCarbon,
   useNodePropertyWatcher,
   useNodeState,
@@ -21,7 +22,7 @@ export const TabsComp = (props: RendererProps) => {
   const {children} = tabs;
   const app = useCarbon();
 
-  const ref = useRef(null);
+  const ref = useRef<any>(null);
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({node: tabs, ref});
   const connectors = useConnectorsToProps(
@@ -120,7 +121,7 @@ export const TabsComp = (props: RendererProps) => {
 
 export const TabComp = (props: RendererProps) => {
   const {node} = props;
-  const ref = useRef(null);
+  const ref = useRef<any>(null);
 
   const selection = useSelectionHalo(props);
   const {attributes} = useNodeState({node})

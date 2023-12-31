@@ -2,20 +2,16 @@ import { useCallback, useEffect, useRef } from "react";
 
 import {
   ActionOrigin,
-  CarbonBlock,
-  CarbonNodeChildren,
-  CarbonNodeContent,
   EventsIn,
   EventsOut,
   Node,
   Pin,
   PinnedSelection,
   Point,
-  RendererProps,
   prevent,
   preventAndStop,
 } from "@emrgen/carbon-core";
-import {useCarbon} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon} from "@emrgen/carbon-react";
 import {
   useCombineConnectors,
   useConnectorsToProps,
@@ -152,7 +148,7 @@ export const DocumentComp = (props: RendererProps) => {
         )} */}
         <CarbonBlock
           node={node}
-          ref={ref}
+          ref={ref as any}
           custom={{
             ...connectors,
             // onMouseUp: handleClick,

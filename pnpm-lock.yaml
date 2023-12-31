@@ -1011,6 +1011,9 @@ importers:
       emoji-regex:
         specifier: ^10.2.1
         version: 10.3.0
+      events:
+        specifier: ^3.3.0
+        version: 3.3.0
       fastpriorityqueue:
         specifier: ^0.7.4
         version: 0.7.4
@@ -1788,6 +1791,15 @@ importers:
       '@emrgen/carbon-dragon':
         specifier: workspace:*
         version: link:../carbon-dragon
+      '@emrgen/carbon-dragon-react':
+        specifier: workspace:*
+        version: link:../carbon-dragon-react
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
+      '@emrgen/carbon-react-blocks':
+        specifier: workspace:*
+        version: link:../carbon-react-blocks
       '@emrgen/carbon-utils':
         specifier: workspace:*
         version: link:../carbon-utils
@@ -1985,6 +1997,12 @@ importers:
       '@emrgen/carbon-dragon':
         specifier: workspace:*
         version: link:../carbon-dragon
+      '@emrgen/carbon-dragon-react':
+        specifier: workspace:*
+        version: link:../carbon-dragon-react
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
       '@emrgen/carbon-utils':
         specifier: workspace:*
         version: link:../carbon-utils

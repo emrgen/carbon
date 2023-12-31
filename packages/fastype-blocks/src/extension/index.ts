@@ -1,4 +1,4 @@
-import { Extension, ReactRenderer } from "@emrgen/carbon-core";
+import { Extension } from "@emrgen/carbon-core";
 import { TodoComp } from "./renderers/Todo";
 import { Callout } from "./renderers/Callout";
 import {SeparatorComp} from "./renderers/Separator";
@@ -7,6 +7,7 @@ import { Separator } from "./plugins/Separator";
 import { ImageComp } from "./renderers/Image";
 import { EquationComp } from "./renderers/Equation";
 import { DocumentComp } from "./renderers/Document";
+import { ReactRenderer } from "@emrgen/carbon-react";
 
 export const fastypeBlocks: Extension = {
   plugins: [

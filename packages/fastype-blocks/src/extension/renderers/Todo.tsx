@@ -1,13 +1,12 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import {
-  RendererProps,
   preventAndStop,
 } from "@emrgen/carbon-core";
 
 
 import { Checkbox } from "@chakra-ui/react";
 import { CheckedPath } from "@emrgen/carbon-core/src/core/NodeProps";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 export function TodoComp(props: RendererProps) {
@@ -56,10 +55,10 @@ export function TodoComp(props: RendererProps) {
         />
       </div>
     );
-  }, [handleClick, node.props]);
+  }, [app, handleClick, isChecked]);
 
   return (
-    <CarbonBlock node={node} ref={ref} custom={connectors}>
+    <CarbonBlock node={node} ref={ref as any} custom={connectors}>
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}

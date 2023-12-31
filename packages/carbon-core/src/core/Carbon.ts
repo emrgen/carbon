@@ -23,12 +23,6 @@ import { PluginEmitter } from "./PluginEmitter";
 import { PluginStates } from "./PluginState";
 import { CarbonCommand } from "./CarbonCommand";
 
-declare module '@emrgen/carbon-core' {
-	export interface Carbon {
-		print(): void;
-	}
-}
-
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
 	private readonly em: EventManager;

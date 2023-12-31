@@ -2,10 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Carbon,
   Node,
-  useCarbon,
   NodeType,
   preventAndStop,
-  BlockContent,
   PinnedSelection,
   Pin,
   Point,
@@ -100,7 +98,7 @@ export function BlockMenu(props: BlockMenuProps) {
 
       const { tr } = app;
       tr.Change(node?.id, type.name)
-      tr.SetContent(node.child(0)!.id, BlockContent.create([]));
+      tr.SetContent(node.child(0)!.id, []);
       tr.Update(node.id, {
         node: { typeChanged: true },
         // html: { "data-as": type.name },

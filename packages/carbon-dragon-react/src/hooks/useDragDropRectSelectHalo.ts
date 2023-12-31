@@ -1,17 +1,10 @@
-import { Optional } from '@emrgen/types';
-import { MutableRefObject } from 'react';
 import { useDraggable } from './useDraggable';
 import { useDroppable } from './useDroppable';
 import { useRectSelectable } from './useRectSelectable';
-import { Node } from '@emrgen/carbon-core';
 import {useCombineConnectors} from "./useCombineConnectors";
 import {useSelectionHalo} from "@emrgen/carbon-react";
 import {useConnectorsToProps} from "./useConnectorsToProps";
-
-export interface UseDragDropProps {
-	ref: MutableRefObject<Optional<HTMLElement>>;
-	node: Node;
-}
+import { UseDragDropProps } from './useDragDrop';
 
 export const useDragDropRectSelectHalo = (props: UseDragDropProps) => {
 	const draggable = useDraggable(props)

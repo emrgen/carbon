@@ -1,12 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  RendererProps
-
-} from "@emrgen/carbon-core";
 import katex from "katex";
 import "katex/dist/katex.min.css";
-import {CarbonBlock, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
+import {CarbonBlock, useCarbon, useSelectionHalo, RendererProps} from "@emrgen/carbon-react";
 export const EquationComp = (props: RendererProps) => {
   const { node } = props;
   const { SelectionHalo } = useSelectionHalo(props);

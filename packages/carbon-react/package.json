@@ -14,6 +14,7 @@
     "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",
     "emoji-regex": "^10.2.1",
+    "events": "^3.3.0",
     "fastpriorityqueue": "^0.7.4",
     "lodash": "^4.17.21",
     "react-icons": "^4.10.1",

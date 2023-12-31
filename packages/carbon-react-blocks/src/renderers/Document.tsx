@@ -9,10 +9,9 @@ import {
   Point,
   prevent,
   preventAndStop,
-  RendererProps,
 } from "@emrgen/carbon-core";
 import { DocumentContext } from "../hooks";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useCarbon} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useCarbon, RendererProps} from "@emrgen/carbon-react";
 import {
   useCombineConnectors,
   useConnectorsToProps,
@@ -28,7 +27,7 @@ export const DocumentComp = (props: RendererProps) => {
   const app = useCarbon();
   const {store} = app;
 
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<Element>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dndRegion = useDndRegion({ node, ref });
   const nonDraggable = useNonDraggable({ node, ref });
@@ -145,7 +144,7 @@ export const DocumentComp = (props: RendererProps) => {
         )} */}
         <CarbonBlock
           node={node}
-          ref={ref}
+          ref={ref as any}
           custom={{
             ...connectors,
             onMouseUp: handleClick,
