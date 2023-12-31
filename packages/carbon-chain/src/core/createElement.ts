@@ -21,8 +21,6 @@ export const createElement = (type: string, props: any, children: any[] = []) =>
 
   injectProps(element, props);
 
-  console.log(props)
-
   childrenElements.forEach(child => {
     if (typeof child === 'string') {
       element.appendChild(document.createTextNode(child));

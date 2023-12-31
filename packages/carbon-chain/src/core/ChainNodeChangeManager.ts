@@ -36,4 +36,8 @@ export class ChainNodeChangeManager implements NodeChangeManager {
     this.listeners.get(nodeId)?.delete(listener);
   }
 
+  unsubscribeAll(nodeId: NodeId): void {
+    this.listeners.delete(nodeId);
+  }
+
 }

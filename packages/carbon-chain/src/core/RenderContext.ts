@@ -31,7 +31,7 @@ export interface RenderStore {
   // scopeId(): ScopeId;
   link(id: ScopeId, vnode: ChainVNode): void;
   unlink(id: NodeId, vnode: ChainVNode): void;
-  linked(id: NodeId): Optional<ChainVNode[]>;
+  linked(id: NodeId): ChainVNode[];
   // register and get the component
   component(name: string, component?: ChainComponent): Optional<ChainComponent>;
   // render the content to the root element

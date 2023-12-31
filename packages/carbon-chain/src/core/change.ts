@@ -15,6 +15,7 @@ export interface NodeChangeManager {
   once(nodeId: NodeId, listener: (change: NodeChange) => void): void;
   subscribe(nodeId: NodeId, listener: (change: NodeChange) => void): void;
   unsubscribe(nodeId: NodeId, listener: (change: NodeChange) => void): void;
+  unsubscribeAll(nodeId: NodeId): void;
   notify(id: NodeId, change: NodeChange): void;
 }
 
@@ -26,6 +27,9 @@ export const NodeChangeContext = createContext<NodeChangeManager>({
     throw new Error('not implemented');
   },
   unsubscribe: () => {
+    throw new Error('not implemented');
+  },
+  unsubscribeAll: () => {
     throw new Error('not implemented');
   },
   notify: (id: NodeId, change: NodeChange) => {
