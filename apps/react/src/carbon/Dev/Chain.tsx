@@ -24,6 +24,7 @@ import {
   RenderContext,
   NodeChangeContext, ChainNodeChangeManager, getContext
 } from "@emrgen/carbon-chain";
+import './chain.styl'
 
 const plugins = [
   ...corePresetPlugins,
@@ -156,24 +157,6 @@ const sectionRenderer = (props: RenderProps) => {
   // when the node is updated, this way we can control the node template structure and attributes
   const checkbox = h('input', {
     type:'checkbox',
-    // disabled: true,
-    // onClick: (e, n: Node) => {
-    //   e.stopPropagation();
-    //   // e.preventDefault();
-    //   const isChecked = n.props.get<boolean>(CollapsedPath)
-    //   console.log('checked', n.props.get<boolean>(CollapsedPath), e.target.checked)
-    //   n.updateProps({
-    //     [CollapsedPath]: !isChecked,
-    //   })
-    //   change.notify(n.id, {
-    //     type: 'update',
-    //     node: n,
-    //   })
-    // },
-    // checked: (n: Node) => {
-    //   const isChecked = n.props.get(CollapsedPath) ? 'checked' : ''
-    //   return isChecked
-    // },
     class: (n: Node) => {
       const attrs: string[] = []
       if (n.props.get(CollapsedPath)) {
@@ -181,7 +164,40 @@ const sectionRenderer = (props: RenderProps) => {
       }
       return attrs.join(' ')
     }
-  })
+  });
+
+  const add = h('button', {
+    onClick: (e, n: Node) => {
+      e.stopPropagation();
+      const node = para('xxx')!
+      const offset = node.size;
+
+      console.log('inserting at', n.size, n)
+
+      n.insert(node, offset);
+
+      change.notify(n.id, {
+        type: 'add:child',
+        node: node,
+        parent: n,
+        offset: offset,
+      })
+    }
+  }, ['Add']);
+
+  // const remove = h('button', {
+  //   onClick: (e, n: Node) => {
+  //     e.stopPropagation();
+  //
+  //     console.log('removing at', n.index)
+  //     n.parent?.remove(node);
+  //
+  //     change.notify(n.id, {
+  //       type: 'remove',
+  //       node: n,
+  //     })
+  //   }
+  // }, ['Remove'])
 
   return h("div", {
     ...computeProps(node),
@@ -189,8 +205,10 @@ const sectionRenderer = (props: RenderProps) => {
     onMouseOver,
     onMouseOut,
   }, [
-    checkbox!,
-    ...renderChildren(node)
+    // checkbox!,
+    ...renderChildren(node),
+    add!,
+    // remove!,
   ]);
 }
 

@@ -26,7 +26,7 @@ export type Prop = PropLiteral | ComputedProp;
 
 export interface VNodeProps {
   node?: Node | (() => Optional<Node>);
-  ref?: (el: HTMLElement) => void;
+  ref?: (el: any) => void;
   link?: string;
   [key: string]: Prop;
 }
@@ -39,12 +39,14 @@ export interface ChainVNode {
   type: Type;
   parent?: ChainVNode;
   prev?: ChainVNode;
+  next?: ChainVNode;
+  children?: ChainVNode[];
   // when id is same as node id, it means the vnode is linked to the node
   // when id is different from node id, it means it's a child node
-  oldScope?: Node; // this is a reference to the current node
-  getScope(): Optional<Node>;
+  scopeNode?: Node; // this is a reference to the current node
+  getScopeNode(): Optional<Node>;
   scopeId?: ScopeId;
-  el: HTMLElement;
+  el: Element;
   props: VNodeProps,
   render(): void;
   refresh(node: Node): void;
@@ -72,23 +74,11 @@ export const h = (type: Type, props: VNodeProps | VNodeChildren, children: VNode
     return type(props, children);
   }
 
-  // if props and children are empty, create an empty vnode
-  if (isEmpty(props) && isEmpty(children)) {
-    return createVNode(type, {}, []);
-  }
-
   const ctx = getContext(RenderContext);
   const {node, ref = identity, link, ...rest} = props || {};
-
   const scope = ctx.scope();
 
-  const preparedProps = prepareProps(ctx, scope, rest);
-  const vnode = createVNode(type, preparedProps, children);
-  // add the ref to the element
-  ref(vnode.el);
-
-  // console.log(type, scope)
-  vnode.getScope = () => {
+  const getScopeNode = () => {
     if (!node) {
       return ctx.node(scope.id);
     }
@@ -100,35 +90,86 @@ export const h = (type: Type, props: VNodeProps | VNodeChildren, children: VNode
     }
   };
 
+  // this is a virtual node that is not visible in the dom
+  // when the children are rendered, they will be added to the parent vnode
+  // when a child is added to a empty link fragment, the child will be added to the previous sibling
+  // if the previous sibling is not available, the child will be added to the parent vnode that has el(linkFragment does not have el)
+  if (type === 'link') {
+    const vnodeChildren = prepareChildren(children);
+    const linkFragment = {
+      type: 'link',
+      children: vnodeChildren,
+      getScopeNode: getScopeNode,
+      scopeNode: scope,
+      scopeId: ScopeId.from(scope.id, link),
+    } as ChainVNode;
+
+    vnodeChildren.forEach(child => {
+      child.parent = linkFragment;
+    });
+
+    return linkFragment;
+  }
+
+  // if props and children are empty, create an empty vnode
+  if (isEmpty(props) && isEmpty(children)) {
+    return createVNode(type, {}, []);
+  }
+
+  const preparedProps = prepareProps(ctx, scope, rest);
+  const vnodeChildren =prepareChildren(children);
+
+  const vnode = createVNode(type, preparedProps, vnodeChildren);
+  // add the ref to the element
+  ref(vnode.el);
+
+  // console.log(type, scope)
+  vnode.getScopeNode = getScopeNode;
+
   const scopeId = ScopeId.from(scope.id, link);
   ctx.link(scopeId, vnode);
   vnode.scopeId = scopeId;
-  vnode.oldScope = scope;
+  vnode.scopeNode = scope;
 
+  let prev: ChainVNode | undefined;
   // add the children to the element
-  children.forEach(child => {
-    if (typeof child === 'string') {
-      vnode.el.appendChild(document.createTextNode(child));
-    } else {
-      vnode.el.appendChild(child.el);
+  vnodeChildren.forEach(child => {
+    vnode.el.appendChild(child.el);
+    if (prev) {
+      prev.next = child;
     }
+    child.prev = prev;
+    prev = child;
   });
 
   return vnode;
 }
 
+const prepareChildren = (children: VNodeChildren) => {
+  return children.map(child => {
+    if (typeof child === 'string') {
+      return {
+        type: 'text',
+        el: createElement('text', child),
+      } as ChainVNode;
+    } else {
+      return child;
+    }
+  });
+}
 
-const createVNode = (type: string, props: VNodeProps, children?: VNodeChildren): ChainVNode => {
+
+const createVNode = (type: string, props: VNodeProps, children: ChainVNode[]): ChainVNode => {
   const ctx = getContext(RenderContext);
   const scope = ctx.scope();
-  const vnode = {
+  const vnode: ChainVNode = {
     type,
     el: createElement(type, computeProps(scope, props)),
     props,
     render() {
       render(vnode);
     },
-    getScope: identity,
+    getScopeNode: identity,
     refresh(node: Node) {
       refresh(node, vnode);
     },
@@ -148,76 +189,25 @@ const createVNode = (type: string, props: VNodeProps, children?: VNodeChildren):
     detach() {
       // remove the element from the dom
       vnode.el.remove();
-      ejectProps(vnode.el, vnode.props);
+      if (vnode.el instanceof HTMLElement) {
+        ejectProps(vnode.el, vnode.props);
+      }
       // remove the node from the store
       ctx.unregister(scope.id);
     },
   }
 
+
+  // add children to the parent vnode
+  children.forEach(child => {
+    child.parent = vnode;
+  });
+  vnode.children = children;
+
   watch(ctx, scope, vnode)
 
   return vnode;
 }
-
-
-// const xxx = () => {
-//   // listen to node changes and update the dom
-//   if (node instanceof Node) {
-//     const cm = getContext(NodeChangeContext);
-//     const update = (change: NodeChange) => {
-//       // if node is removed, remove the element from the dom
-//       if (change.type === 'remove') {
-//         const vnode = ctx.vnode(change.node.id);
-//         if (!vnode) {
-//           throw new Error(`VNode for node ${change.node.id.toString()} not found`);
-//         }
-//
-//         // remove the element from the dom
-//         vnode.el.remove();
-//         ejectProps(vnode.el, vnode.props);
-//         // remove the node from the store
-//         ctx.unregister(node.id);
-//         cm.unsubscribe(node.id, update);
-//
-//         console.log('removing node', change.node.id.toString());
-//         return
-//       }
-//
-//       // if a child node is added, add the element to the dom
-//       if (change.type === 'add:child') {
-//         const component = ctx.component(change.node.name);
-//         if (!component) {
-//           throw new Error(`Component ${change.node.name} not found`);
-//         }
-//         // create a child vnode
-//         const childVnode = component(change.node);
-//         // insert the element to the parent at the index
-//         const children = vnode.el.children || [];
-//         vnode.el.insertBefore(childVnode.el, children[change.offset ?? change.parent?.size ?? 0]);
-//         ctx.register(change.node.id, childVnode);
-//         return
-//       }
-//
-//       // if node is updated, update the element in the dom
-//       if (change.type === 'update') {
-//         // get linked vnodes
-//         const vnodes = ctx.linked(change.node.id);
-//         // update the element in the dom
-//         vnodes?.forEach(vnode => {
-//           console.log(vnode.el)
-//           refresh(vnode);
-//         });
-//         // NOTE: some vnodes may become visible or hidden
-//         // update the node in the store
-//         return
-//       }
-//
-//       console.log('unprocessed node change', change);
-//     }
-//
-//     cm.subscribe(node.id, update);
-//   }
-// }
 
 const watch = (ctx: RenderStore, node: Node, vnode: ChainVNode) => {
   const cm = getContext(NodeChangeContext);
@@ -247,11 +237,11 @@ const watch = (ctx: RenderStore, node: Node, vnode: ChainVNode) => {
         throw new Error(`Component ${change.node.name} not found`);
       }
       // create a child vnode
-      // const childVnode = component(change.node);
-      // // insert the element to the parent at the index
-      // const children = vnode.el.children || [];
-      // vnode.el.insertBefore(childVnode.el, children[change.offset ?? change.parent?.size ?? 0]);
-      // ctx.register(change.node.id, childVnode);
+      const childVnode = component({node: change.node})!;
+      // insert the element to the parent at the index
+      const children = vnode.el.children || [];
+      vnode.el.insertBefore(childVnode.el, children[change.offset ?? change.parent?.size ?? 0]);
+      ctx.register(change.node.id, childVnode);
       return
     }
 
@@ -327,7 +317,7 @@ export const render = (vnode: ChainVNode) => {
 }
 
 const refresh = (scope: Node, vnode: ChainVNode) => {
-  console.log('refreshing vnode', vnode.el, vnode.props)
+  // console.log('refreshing vnode', vnode.el, vnode.props)
 
   // update the props
   const props = vnode.props;

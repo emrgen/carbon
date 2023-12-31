@@ -84,7 +84,7 @@ export class ChainRenderContext extends BTree<NodeId, ChainVNode> implements Ren
           }
 
           this.register(scope.id, vnode);
-          vnode.oldScope = scope;
+          vnode.scopeNode = scope;
           vnode.scopeId = ScopeId.from(scope.id)
           entry.nodes.add(scope.id);
 
@@ -107,7 +107,7 @@ export class ChainRenderContext extends BTree<NodeId, ChainVNode> implements Ren
   }
 
   node(id: NodeId | HTMLElement): Optional<Node> {
-    return this.vnode(id)?.oldScope
+    return this.vnode(id)?.scopeNode
   }
 
   render(content: Node): Optional<ChainVNode> {

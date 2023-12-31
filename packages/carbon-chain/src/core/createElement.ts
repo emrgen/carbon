@@ -1,38 +1,38 @@
 
 // create html element
 import {isArray} from "lodash";
+import {Optional} from "@emrgen/types";
+import {ChainVNode} from "@emrgen/carbon-chain";
 
-export const createElement = (type: string, props: any, children: any[] = []) => {
+export const createElement = (type: string, props: any, children: any[] = []): Element => {
+  if (type =='text') {
+    return document.createTextNode(props) as unknown as Element;
+  }
+
   if (isArray(props)) {
     children = props as any[];
     console.log('setting props as empty object')
     props = {};
   }
 
-  const childrenElements = children.map(child => {
+  const element = document.createElement(type);
+
+  injectProps(element, props);
+
+  children.map(child => {
     if (typeof child === 'string') {
       return document.createTextNode(child);
     } else {
       return child;
     }
-  })
-
-  const element = document.createElement(type);
-
-  injectProps(element, props);
-
-  childrenElements.forEach(child => {
-    if (typeof child === 'string') {
-      element.appendChild(document.createTextNode(child));
-    } else {
-      element.appendChild(child);
-    }
+  }).forEach(child => {
+    element.appendChild(child);
   });
 
   return element;
 }
 
-export const injectProps = (element: HTMLElement, props: any) => {
+export const injectProps = (element: Element, props: any) => {
   Object.keys(props).forEach(key => {
     if (key.startsWith('on')) {
       registerListener(element, key.substring(2).toLowerCase(), props[key]);
@@ -42,7 +42,7 @@ export const injectProps = (element: HTMLElement, props: any) => {
   });
 }
 
-export const ejectProps = (element: HTMLElement, props: any) => {
+export const ejectProps = (element: Element, props: any) => {
   Object.keys(props).forEach(key => {
     if (key.startsWith('on')) {
       unregisterListener(element, key.substring(2).toLowerCase(), props[key]);
@@ -52,10 +52,10 @@ export const ejectProps = (element: HTMLElement, props: any) => {
   });
 }
 
-export const registerListener = (element: HTMLElement, event: string, listener: any) => {
+export const registerListener = (element: Element, event: string, listener: any) => {
   element.addEventListener(event, listener);
 }
 
-export const unregisterListener = (element: HTMLElement, event: string, listener: any) => {
+export const unregisterListener = (element: Element, event: string, listener: any) => {
   element.removeEventListener(event, listener);
 }
