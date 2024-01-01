@@ -1,8 +1,6 @@
 
 // create html element
 import {isArray} from "lodash";
-import {Optional} from "@emrgen/types";
-import {ChainVNode} from "@emrgen/carbon-chain";
 
 export const createElement = (type: string, props: any, children: any[] = []): Element => {
   if (type =='text') {

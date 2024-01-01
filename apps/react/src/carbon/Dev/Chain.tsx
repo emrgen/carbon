@@ -250,7 +250,7 @@ window.insert = (parent: Node, node: Node) => {
 const s = para('hello world')!;
 const root = document.querySelector('#chain')!;
 
-ctx.mount(root, s);
+// ctx.mount(root, s);
 
 let counter = 0;
 const addBunch = (count = 10) => {

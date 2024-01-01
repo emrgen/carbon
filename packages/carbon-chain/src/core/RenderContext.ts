@@ -22,7 +22,7 @@ export class ScopeId {
 export interface RenderStore {
   vnode(id: NodeId | HTMLElement, kind?: string): Optional<ChainVNode>;
   node(id: NodeId | HTMLElement): Optional<Node>;
-  element(id: NodeId): Optional<HTMLElement>;
+  element(id: NodeId): Optional<Element>;
   register(id: NodeId, vnode: ChainVNode): void;
   unregister(id: NodeId): void;
   // all the components in the same scope are linked to the same node
@@ -36,7 +36,7 @@ export interface RenderStore {
   component(name: string, component?: ChainComponent): Optional<ChainComponent>;
   // render the content to the root element
   render(content: Node): Optional<ChainVNode>;
-  mount(root: Element, content: Node): HTMLElement;
+  mount(root: Element, content: Node): Optional<Element>;
   has(id: NodeId, kind?: string): boolean;
 }
 

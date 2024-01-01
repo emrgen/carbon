@@ -46,8 +46,8 @@ export class ChainRenderContext extends BTree<NodeId, ChainVNode> implements Ren
     }
   }
 
-  linked(id: NodeId): Optional<ChainVNode[]> {
-    return this.links.get(id);
+  linked(id: NodeId): ChainVNode[] {
+    return this.links.get(id) ?? [];
   }
 
   unlink(id: NodeId, vnode: ChainVNode): void {
@@ -119,7 +119,7 @@ export class ChainRenderContext extends BTree<NodeId, ChainVNode> implements Ren
     return entry.component({node: content});
   }
 
-    mount(root: Element, content: Node): HTMLElement {
+    mount(root: Element, content: Node): Optional<Element> {
       console.log('xxxxxxxx')
     const vnode = this.render(content);
     if (!vnode) {
@@ -142,7 +142,7 @@ export class ChainRenderContext extends BTree<NodeId, ChainVNode> implements Ren
     }
   }
 
-  element(id: NodeId): Optional<HTMLElement> {
+  element(id: NodeId): Optional<Element> {
     return this.vnode(id)?.el;
   }
 
