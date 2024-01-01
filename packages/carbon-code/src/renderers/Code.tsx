@@ -1,6 +1,6 @@
-import {CarbonBlock, CarbonNode, RendererProps, useSelectionHalo} from "@emrgen/carbon-core";
 import {useRef} from "react";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
+import {CarbonBlock, CarbonNode, RendererProps, useSelectionHalo} from "@emrgen/carbon-react";
 
 export const CodeComp = (props: RendererProps) => {
   const {node} = props;

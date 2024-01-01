@@ -36,8 +36,8 @@ export class Equation extends CarbonPlugin {
       enter: (ctx: EventContext<KeyboardEvent>) => {
         const { app, node } = ctx;
         preventAndStopCtx(ctx);
-        // app.tr
-        //   .Update(node, { node: { isEditing: !node.properties.node.isEditing } })
+        // react.tr
+        //   .Update(node, { node: { isEditing: !node.props.node.isEditing } })
         //   .Dispatch();
       }
     }

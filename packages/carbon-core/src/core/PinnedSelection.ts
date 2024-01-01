@@ -4,10 +4,10 @@ import { Node } from './Node';
 import { Pin } from './Pin';
 import { PointedSelection } from './PointedSelection';
 import { NodeStore } from './NodeStore';
-import { DomSelection, Range } from './Range';
+import {DomSelection, Span} from './Span';
 import { SelectionBounds } from './types';
 import { ActionOrigin } from './actions';
-import { NodeMap, sortNodes } from "@emrgen/carbon-core";
+import {NodeBTree, NodeMap, sortNodes} from "@emrgen/carbon-core";
 import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 import {blocksBelowCommonNode} from "../utils/findNodes";
 import {takeBefore} from "../utils/array";
@@ -36,8 +36,12 @@ export class PinnedSelection {
 		let { anchorNode: anchorEl, anchorOffset, focusNode: focusEl, focusOffset } = domSelection;
 		// console.log(p14('%c[info]'), 'color:pink', p30('Selection.fromDom'), anchorEl, focusEl, anchorOffset, focusOffset);
 
+        // console.log(store.nodeMap.nodes().map(n => `${n.key}:${n.parent?.key}`).join(' > '))
 		let anchorNode = store.resolve(anchorEl);
+        // console.log('anchorNode path', anchorNode?.chain.map(n => n.key).join(' > '), anchorEl)
+
 		let focusNode = store.resolve(focusEl);
+
 		// console.log(anchorEl, anchorNode, anchorOffset);
 		// console.log(anchorNode);
 		// console.log(focusNode);
@@ -125,9 +129,9 @@ export class PinnedSelection {
 	}
 
 	static fromNodes(nodes: Node | Node[], origin = ActionOrigin.Unknown): PinnedSelection {
-		const set = NodeMap.fromNodes(flatten([nodes]));
+		const set = NodeBTree.from(flatten([nodes]));
 
-		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, set.values(), origin);
+		return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, set.nodes(), origin);
 	}
 
 	static create(tail: Pin, head: Pin, origin = ActionOrigin.Unknown): PinnedSelection {
@@ -181,10 +185,6 @@ export class PinnedSelection {
   get isInlineBlock() {
     return this.isInline && this.blocks.length > 0
   }
-
-	get range(): Range {
-		return Range.create(this.start, this.end);
-	}
 
 	get isInvalid() {
 		return this.tail.isNull || this.head.isNull;
@@ -275,24 +275,36 @@ export class PinnedSelection {
 			// 	console.log(node)
 			// }
 
-			console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
+			// console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
 
 			// Ref: https://stackoverflow.com/a/779785/4556425
 			// https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
 			var selection = window.getSelection();
+
+      // NOTE: this worked all the time
 			selection?.setBaseAndExtent(
 				anchorNode,
 				anchorOffset,
 				focusNode,
 				focusOffset
 			);
+
+      // NOTE: this works by fires two selectionchange event
+      // const range = new Range();
+      // range.setStart(anchorNode, anchorOffset);
+      // range.setEnd(focusNode, focusOffset);
+      // selection?.removeAllRanges()
+      // window.getSelection()?.addRange(range);
+
+      // NOTE: maybe not needed in production
+      // verify if the selection is successfully set
 			const pinnedSelection = PinnedSelection.fromDom(store);
 			const domSel = pinnedSelection?.intoDomSelection(store);
 			console.assert(domSel?.anchorNode === domSelection.anchorNode, 'failed to sync anchorNode')
 			console.assert(domSel?.focusNode === domSelection.focusNode, 'failed to sync focusNode')
 			console.assert(domSel?.anchorOffset === domSelection.anchorOffset, 'failed to sync anchor offset')
 			console.assert(domSel?.focusOffset === domSelection.focusOffset, 'failed to sync focus offset')
-			console.log('Selection.syncDom:', this.toString(), domSel)
+			// console.log('Selection.syncDom:', this.toString(), domSel)
 		} catch (err) {
 			console.error(err);
 		}
@@ -435,7 +447,7 @@ export class PinnedSelection {
 
 	eq(other: PinnedSelection) {
 		if (this.nodes.length !== other.nodes.length) return false;
-		const set = NodeMap.fromNodes(this.nodes);
+		const set = NodeBTree.from(this.nodes);
 		const nodesEq = other.nodes.every(n => set.has(n.id))
 
 		return nodesEq && this.tail.eq(other.tail) && this.head.eq(other.head)

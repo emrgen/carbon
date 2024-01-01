@@ -1,21 +1,13 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import {
-  CarbonBlock,
-  CarbonNodeChildren,
-  CarbonNodeContent,
-  RendererProps,
   preventAndStop,
-  useCarbon,
-  useSelectionHalo,
 } from "@emrgen/carbon-core";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon";
+
 
 import { Checkbox } from "@chakra-ui/react";
 import { CheckedPath } from "@emrgen/carbon-core/src/core/NodeProps";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 export function TodoComp(props: RendererProps) {
   const { node } = props;
@@ -29,8 +21,8 @@ export function TodoComp(props: RendererProps) {
   );
 
   const isChecked = useMemo(() => {
-    return !!node.properties.get(CheckedPath);
-  },[node.properties])
+    return !!node.props.get(CheckedPath);
+  },[node.props])
 
   const handleClick = useCallback(
     (e, app) => {
@@ -63,10 +55,10 @@ export function TodoComp(props: RendererProps) {
         />
       </div>
     );
-  }, [handleClick, node.properties]);
+  }, [app, handleClick, isChecked]);
 
   return (
-    <CarbonBlock node={node} ref={ref} custom={connectors}>
+    <CarbonBlock node={node} ref={ref as any} custom={connectors}>
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}

@@ -1,14 +1,15 @@
+
+import { useCallback, useMemo, useRef } from "react";
+import { Button, HStack, Stack } from "@chakra-ui/react";
+import {useCombineConnectors, useConnectorsToProps, useDraggable} from "@emrgen/carbon-dragon-react";
 import {
-  CarbonBlock, CarbonNodeChildren,
+  CarbonBlock,
+  CarbonNodeChildren,
   CarbonNodeContent,
-  preventAndStop,
-  RendererProps, stop,
+  RendererProps,
   useCarbon,
   useSelectionHalo
-} from "@emrgen/carbon-core";
-import { useCallback, useMemo, useRef } from "react";
-import { useCombineConnectors, useConnectorsToProps, useDraggable } from "@emrgen/carbon-dragon";
-import { Button, HStack, Stack } from "@chakra-ui/react";
+} from "@emrgen/carbon-react";
 
 export const BoardViewColumnComp = (props: RendererProps) => {
   const { node } = props;
@@ -26,11 +27,11 @@ export const BoardViewColumnComp = (props: RendererProps) => {
   // const handleAddItem = useCallback((e) => {
   //   preventAndStop(e);
   //   console.log('add column item')
-  //   // const column = app.schema.nodes.column.createAndFill();
-  // }, [app]);
+  //   // const column = react.schema.nodes.column.createAndFill();
+  // }, [react]);
 
   return (
-    <CarbonBlock node={node} ref={ref} custom={connectors}>
+    <CarbonBlock node={node} ref={ref as any} custom={connectors}>
       <Stack spacing={4}>
         <CarbonNodeContent node={node} custom={{contentEditable: true}}/>
         <Stack>

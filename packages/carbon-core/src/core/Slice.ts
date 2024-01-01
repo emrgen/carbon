@@ -7,7 +7,7 @@ export class Slice {
   static empty = new Slice(null!, null!, null!);
 
   get isBlockSelection () {
-    return this.start?.isContainerBlock && this.end?.isContainerBlock
+    return this.start?.isContainer && this.end?.isContainer
   }
 
   get isEmpty() {
@@ -26,7 +26,7 @@ export class Slice {
     let startPath: number[] = [];
     let endPath: number[] = [];
     const {root, start, end} = this
-    root.forAll(n => {
+    root.all(n => {
       if (n.eq(start)) {
         startPath = n.path
       }
@@ -35,16 +35,16 @@ export class Slice {
       }
     })
 
-    const cloned = root.type.schema.cloneWithId(root);
+    const cloned = root.type.schema.clone(root);
     const startNode = cloned.atPath(startPath)!;
     const endNode = cloned.atPath(endPath)!;
-    
+
     return new Slice(cloned, startNode, endNode);
   }
 
   static from(node: Node) {
-    const start = node.find(n => n.isTextBlock, { direction: 'forward', order: 'post' });
-    const end = node.find(n => n.isTextBlock, { direction: 'backward', order: 'post' });
+    const start = node.find(n => n.isTextContainer, { direction: 'forward', order: 'post' });
+    const end = node.find(n => n.isTextContainer, { direction: 'backward', order: 'post' });
     return new Slice(node, start!, end!)
   }
 

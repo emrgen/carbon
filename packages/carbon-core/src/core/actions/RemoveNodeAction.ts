@@ -6,7 +6,6 @@ import { classString } from "../Logger";
 import { Node } from "../Node";
 import { InsertNodeAction } from "./InsertNodeAction";
 import { NodeJSON } from "../types";
-import { ImmutableDraft } from "../ImmutableDraft";
 import { Optional } from "@emrgen/types";
 import {Draft} from "../Draft";
 
@@ -15,7 +14,7 @@ export class RemoveNodeAction implements CarbonAction {
 	private node: Optional<NodeJSON>;
 
 	static fromNode(at: Point, ref: NodeId | Node, origin: ActionOrigin = ActionOrigin.UserInput) {
-		return new RemoveNodeAction(at, ref.intoNodeId(), null, origin);
+		return new RemoveNodeAction(at, ref.nodeId(), null, origin);
 	}
 
 	static create(at: Point, nodeId: NodeId, json: Optional<NodeJSON>,origin: ActionOrigin = ActionOrigin.UserInput) {

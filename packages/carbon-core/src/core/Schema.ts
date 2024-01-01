@@ -1,12 +1,11 @@
 import { Optional } from '@emrgen/types';
-import { each } from 'lodash';
+import {each, identity, isArray} from 'lodash';
 import { ContentMatch } from './ContentMatch';
 import { Node } from './Node';
 import { MarkType, NodeType } from "./NodeType";
-import { NodeFactory } from './NodeFactory';
-import {NodeIdFactory, NodeJSON, NodeName} from "./types";
+import {Maps, NodeJSON, NodeName} from "./types";
 import { Mark, MarkProps } from "./Mark";
-import {InitNodeJSON} from "@emrgen/carbon-core";
+import {NodeContentData, NodeFactory} from "@emrgen/carbon-core";
 
 interface SchemaSpec {
 	nodes: Record<NodeName, NodeSpec>;
@@ -75,17 +74,17 @@ export class Schema {
 		return new Mark(name, props);
 	}
 
-	cloneWithId(node: Node): Node {
-		return this.factory.cloneWithId(node);
+	clone(node: Node, map: Maps<Omit<NodeContentData,'children'>, Omit<NodeContentData,'children'>> = identity): Node {
+		return this.factory.clone(node, map);
 	}
 
 	// create node from json
-	nodeFromJSON(json: any, nodeIdFactory?: NodeIdFactory): Optional<Node> {
+	nodeFromJSON(json: any): Optional<Node> {
 		if (json instanceof Node) {
 			return json;
 		}
 
-		return this.factory.createNode(json, this, nodeIdFactory);
+		return this.factory.create(json, this);
 
 		// const { name, id, text = '', content = [], attrs = {}, target = '' } = json ?? {};
 		// const type = this.type(name);
@@ -194,7 +193,7 @@ export interface NodeSpec {
 	dragHandle?: boolean;
 	insert?: boolean;
 	// node is a embedded element
-	// it can be a video, audio, external app
+	// it can be a video, audio, external react
 	embedded?: boolean;
 	// sandbox act as a divider of all interaction with other node
 	// sandbox also act as the edge of the interactions
@@ -213,7 +212,7 @@ export interface NodeSpec {
 
 	props?: Record<string, any>;
 
-  default?: InitNodeJSON,
+  default?: any,//InitNodeJSON,
 
 	[key: string]: any;
 }

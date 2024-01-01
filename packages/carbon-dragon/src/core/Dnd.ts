@@ -112,6 +112,7 @@ export class Dnd extends EventEmitter {
 	}
 
 	refresh(node: Node) {
+    return
 		// console.log('show drag handle', node.id.toString());
 		const { app, draggables, draggedNodeId } = this
 		const document = node.chain.find(n => n.isDocument);

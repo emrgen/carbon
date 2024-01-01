@@ -7,7 +7,7 @@ import {
   Transaction,
   addClass,
   removeClass,
-  useCarbon, State
+  State
 } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { BlockMenu, PorterOverlay } from "@emrgen/fastype-utils";

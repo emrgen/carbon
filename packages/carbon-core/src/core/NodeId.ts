@@ -4,11 +4,13 @@ const NullId = '0000000000';
 const IdentityId = '0000000001';
 
 export interface IntoNodeId {
-	intoNodeId(): NodeId;
+	nodeId(): NodeId;
 }
 
 export class NodeId implements IntoNodeId {
+  // root node id
 	static ROOT = new NodeId('1111111111');
+
 	static NULL = new NodeId(NullId);
 
 	static IDENTITY = new NodeId(IdentityId);
@@ -31,7 +33,7 @@ export class NodeId implements IntoNodeId {
 
 	private constructor(readonly id: string) {}
 
-	intoNodeId() {
+	nodeId() {
 		return this;
 	}
 

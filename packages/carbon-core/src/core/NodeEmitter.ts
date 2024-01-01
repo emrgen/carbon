@@ -45,10 +45,17 @@ export class NodeTopicEmitter {
 		this.listeners.get(event)?.get(id)?.delete(cb);
 	}
 
+  // unsubscribe from all events
+  offAll(id: NodeId) {
+    this.listeners.forEach((events, event) => {
+      events.get(id)?.clear();
+    });
+  }
+
 	emit (node: Node, event: string | symbol, ...args: any[]) {
 		const listeners = this.listeners.get(event)?.get(node.id);
 		listeners?.forEach(cb => {
-			console.log('emitting', event, node.id, cb);
+			// console.log('emitting', event, node.id, cb);
 			cb(node, ...args)
 		});
 

@@ -1,11 +1,11 @@
-import { AfterPlugin, BlockContent, Carbon, EventContext, EventHandlerMap, Node, Pin } from "../core";
-import { SelectionPatch } from "../core/DeleteGroup";
-import { NodeId } from "../core/NodeId";
-import { Range } from "../core/Range";
-import { Slice } from "../core/Slice";
-import { preventAndStop } from "../utils/event";
-import { blocksBelowCommonNode } from "../utils/findNodes";
-import { SelectedPath } from "../core/NodeProps";
+import {AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Pin} from "../core";
+import {SelectionPatch} from "../core/DeleteGroup";
+import {NodeId} from "../core/NodeId";
+import {Span} from "../core/Span";
+import {Slice} from "../core/Slice";
+import {preventAndStop} from "../utils/event";
+import {blocksBelowCommonNode} from "../utils/findNodes";
+import {SelectedPath} from "../core/NodeProps";
 import {Optional} from "@emrgen/types";
 
 export class ClipboardPlugin extends AfterPlugin {
@@ -18,11 +18,11 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStop(event);
         const slice = this.slice(app);
         if (!slice.isEmpty) {
-          // const serialized = app.serialize(slice.root)
+          // const serialized = react.serialize(slice.root)
           // console.log('Serialized =>', serialized);
           // event.clipboardData.setData('text/plain', serialized);
 
-          // app.state.changes.clipboard = slice;
+          // react.state.changes.clipboard = slice;
         }
         // delete the selection
         cmd.keyboard.backspace(ctx)?.Dispatch();
@@ -35,7 +35,7 @@ export class ClipboardPlugin extends AfterPlugin {
         console.log('slice', slice);
 
         if (!slice.isEmpty) {
-          // const serialized = app.serialize(slice.root)
+          // const serialized = react.serialize(slice.root)
           // console.log('Serialized =>', serialized);
           // event.clipboardData.setData('text/plain', serialized);
           console.log(slice.root.children.map(n => n.textContent));
@@ -48,9 +48,9 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStop(event);
         const { selection } = app
 
-        // if (!app.state.changes.clipboard.size === 0) {
-        //   const slice = app.state.changes.clipboard;
-        //   app.cmd.transform.paste(selection, slice)?.Dispatch()
+        // if (!react.state.changes.clipboard.size === 0) {
+        //   const slice = react.state.changes.clipboard;
+        //   react.cmd.transform.paste(selection, slice)?.Dispatch()
         // } else {
         //
         // }
@@ -64,16 +64,12 @@ export class ClipboardPlugin extends AfterPlugin {
     if (selection.isBlock) {
       const { blocks } = selection;
       const cloned = blocks.map(n => {
-        const node = app.schema.cloneWithId(n)
+        const node = app.schema.clone(n)
         node.updateProps({ [SelectedPath]: false })
         return node
       })
 
-      const rootNode = Node.create({
-        type: app.schema.type('slice'),
-        content: BlockContent.create(cloned),
-        id: NodeId.create(String(Math.random())),
-      });
+      const rootNode = app.schema.type('slice').create(cloned)!;
 
       const first = rootNode.firstChild!;
       const last = rootNode.lastChild!;
@@ -88,7 +84,7 @@ export class ClipboardPlugin extends AfterPlugin {
     // console.log(startNode.id.toString(), endNode.id.toString());
     // console.log(startNode, endNode);
 
-    if (startNode.isTextBlock && startNode.eq(endNode)) {
+    if (startNode.isTextContainer && startNode.eq(endNode)) {
       startNode = endNode = startNode.parent;
     }
     if (!startNode || !endNode) {
@@ -102,12 +98,8 @@ export class ClipboardPlugin extends AfterPlugin {
     const cloned = nodes.map(n => n.clone());
     // console.log('cloned', cloned.map(n => n.name));
 
-    const root = Node.create({
-      id: NodeId.create(String(Math.random())),
-      type: app.schema.type('slice'),
-      content: BlockContent.create(cloned),
-    });
-    root.content.setParentId(root.id);
+    const root = app.schema.type('slice').create(cloned)!;
+
     console.log('rootNode', root);
 
     const deleteGroup = new SelectionPatch()
@@ -124,9 +116,9 @@ export class ClipboardPlugin extends AfterPlugin {
       if (startPin.node.eq(n)) {
         return true;
       }
-      if (n.isContainerBlock) {
+      if (n.isContainer) {
         deleteGroup.addId(n.id);
-      } else if (n.isTextBlock) {
+      } else if (n.isTextContainer) {
         n.children.map(n => deleteGroup.addId(n.id));
       }
       return false;
@@ -139,9 +131,9 @@ export class ClipboardPlugin extends AfterPlugin {
       if (endPin.node.eq(n)) {
         return true;
       }
-      if (n.isContainerBlock) {
+      if (n.isContainer) {
         deleteGroup.addId(n.id);
-      } else if (n.isTextBlock) {
+      } else if (n.isTextContainer) {
         n.children.map(n => deleteGroup.addId(n.id));
       }
       return false;
@@ -166,8 +158,8 @@ export class ClipboardPlugin extends AfterPlugin {
     //   deleteGroup.addRange(Range.create(end, Pin.toEndOf(end.node)!,));
     // }
 
-    deleteGroup.addRange(Range.create(Pin.toStartOf(start.node)!, start));
-    deleteGroup.addRange(Range.create(end, Pin.toEndOf(end.node)!,));
+    deleteGroup.addRange(Span.create(Pin.toStartOf(start.node)!, start));
+    deleteGroup.addRange(Span.create(end, Pin.toEndOf(end.node)!,));
     // }
 
     // console.log(deleteGroup.ids.map(id => id.toString()));
@@ -177,7 +169,7 @@ export class ClipboardPlugin extends AfterPlugin {
     // remove the nodes outside the selection
     root.walk(n => {
       if (n === root) return false;
-      if (!n.isTextBlock) return false;
+      if (!n.isTextContainer) return false;
       deleteGroup.ranges.forEach(r => {
 
         console.log(n.textContent);
@@ -186,10 +178,10 @@ export class ClipboardPlugin extends AfterPlugin {
             // console.log(r, n.textContent, n.textContent.slice(0, r.start.offset));
             const textNode = app.schema.text(n.textContent.slice(0, r.start.offset));
             // console.log('XX',textNode);
-            n.updateContent(BlockContent.create([textNode!]))
+            n.updateContent(([textNode!]))
           } else if (r.start.offset === 0) {
             const textNode = app.schema.text(n.textContent.slice(r.end.offset));
-            n.updateContent(BlockContent.create([textNode!]))
+            n.updateContent(([textNode!]))
           }
 
           deleteGroup.removeRange(r);
@@ -202,7 +194,7 @@ export class ClipboardPlugin extends AfterPlugin {
     // remove nodes outside the selection
     root.walk(n => {
       if (n === root) return false;
-      if (n.isTextBlock) return false;
+      if (n.isTextContainer) return false;
 
       if (deleteGroup.has(n.id)) {
         n.parent?.remove(n)
@@ -212,7 +204,7 @@ export class ClipboardPlugin extends AfterPlugin {
 
     let startPath: number[] = [];
     let endPath: number[] = [];
-    root.forAll(n => {
+    root.all(n => {
       if (n.eq(start.node)) {
         startPath = n.path
       }
@@ -221,8 +213,15 @@ export class ClipboardPlugin extends AfterPlugin {
       }
     })
 
-    const children = root.children.map(n => app.schema.cloneWithId(n));
-    root.updateContent(BlockContent.create(children));
+    const factory = app.schema.factory
+
+    const children = root.children.map(n => app.schema.clone(n, data => {
+      return {
+        ...data,
+        id: factory.blockId()
+      }
+    }));
+    root.updateContent(children);
 
     const startSliceNode = root.atPath(startPath);
     const endSliceNode = root.atPath(endPath);

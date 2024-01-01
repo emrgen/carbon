@@ -119,7 +119,10 @@ export class PluginManager {
 		}
 
 		event.changeNode(node);
-		some(this.after, p => event.stopped || p.handlers()[event.type]?.(event))
+		some(this.after, p => {
+      // console.log('after', p.name, event.type, event.stopped)
+      return event.stopped || p.handlers()[event.type]?.(event)
+    })
 	}
 
 	// methods returned from Plugin.keydown() are executed
@@ -127,16 +130,16 @@ export class PluginManager {
 		const keyDownEvent = <EventContext<any>>EventContext.fromContext(event)
 		const { node } = keyDownEvent
 
-		// console.log('onKeyDown', event);
+		console.log('onKeyDown', event);
 
-		console.groupCollapsed('onKeyDown', event)
+		console.group('onKeyDown', event)
 
     const process = () => {
       each(this.before, (p: CarbonPlugin) => {
         if (keyDownEvent.stopped) return
         const handlers = p.keydown()
         const handler = entries(handlers).find(([key]) => {
-          return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event);
+          return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event.nativeEvent);
         })
         if (handler) {
           console.log('before', p.name, handler[0], handler[1]);
@@ -150,7 +153,7 @@ export class PluginManager {
           this.nodePlugin(n.name)?.keydown()[keyDownEvent.type]?.(keyDownEvent);
           const handlers = (this.nodePlugin(n.type.name)?.keydown() ?? {}) as EventHandlerMap;
           const handler = entries(handlers).find(([key]) => {
-            return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
+            return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event.nativeEvent)
           });
           if (handler) {
             console.log('node', n.name, handler[0], handler[1]);
@@ -165,7 +168,7 @@ export class PluginManager {
       some(this.after, (p: CarbonPlugin) => {
         const handlers = p.keydown()
         const handler = entries(handlers).find(([key]) => {
-          return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event)
+          return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event.nativeEvent)
         });
 
         if (handler) {
@@ -186,19 +189,6 @@ export class PluginManager {
 	// 	each(this.before, p => p.select(event));
 	// 	each(this.after, p => p.select(event));
 	// }
-
-	decoration(app: Carbon) {
-		const { decorations } = app.state;
-		// each(this.before, p => {
-		// 	p.decoration(app).forEach(d => decorations.set(d.span, d));
-		// });
-		// each(this.nodes, p => {
-		// 	p.decoration(app).forEach(d => decorations.set(d.span, d));
-		// })
-		// each(this.after, p => {
-		// 	p.decoration(app).forEach(d => decorations.set(d.span, d));
-		// });
-	}
 
 	onTransaction(tr: Transaction) {
 		each(this.before, p => p.transaction(tr));

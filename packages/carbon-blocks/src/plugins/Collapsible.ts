@@ -1,7 +1,5 @@
 import {
   BeforePlugin,
-  BlockContent,
-  Carbon,
   CarbonPlugin,
   EventContext,
   EventHandler,
@@ -168,13 +166,21 @@ export class Collapsible extends NodePlugin {
       const after = PinnedSelection.fromPin(focusPoint!);
 
       if (title.parent?.isDocument) {
-        const sectionTitle = app.schema.cloneWithId(title);
-        section.replace(section.child(0)!, sectionTitle);
+        const sectionTitle = app.schema.clone(title, n => {
+          return {
+            ...n,
+            id: app.schema.factory.blockId(),
+          }
+        });
+
+        section.remove(section.child(0)!);
+        section.insert(sectionTitle, 0)
+        // section.replace(section.child(0)!, sectionTitle);
 
         const focusPoint = Pin.toStartOf(section!);
         const after = PinnedSelection.fromPin(focusPoint!);
         tr
-          .SetContent(title.id, BlockContent.create([]))
+          .SetContent(title.id, [])
           .Add(insertAfterAction(title, section!))
           .Select(after)
         return tr;
@@ -208,7 +214,7 @@ export class Collapsible extends NodePlugin {
       children: [
         {
           name: 'title',
-          children: rightContent.children.map(c => c.toJSON())
+          children: rightContent.map(c => c.toJSON())
         }
       ],
     }
@@ -235,8 +241,8 @@ export class Collapsible extends NodePlugin {
     return
   }
 
-  // serialize(app: Carbon, node: Node) {
-  //   return `- ${app.serialize(node.child(0)!)}` + app.cmd.nestable.serializeChildren(node);
+  // serialize(react: Carbon, node: Node) {
+  //   return `- ${react.serialize(node.child(0)!)}` + react.cmd.nestable.serializeChildren(node);
   // }
 
 }
@@ -264,7 +270,7 @@ class CollapsibleBeforePlugin extends BeforePlugin {
       //   if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
       //     preventAndStopCtx(ctx);
       //     console.log('[Backspace] collapsible');
-      //     // app.cmd.collapsible.split(selection)?.Dispatch();
+      //     // react.cmd.collapsible.split(selection)?.Dispatch();
       //   }
       // },
       // delete: (ctx: EventContext<KeyboardEvent>) => {
@@ -272,7 +278,7 @@ class CollapsibleBeforePlugin extends BeforePlugin {
       //   const { start, end } = selection;
       //   if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node)) {
       //     preventAndStopCtx(ctx);
-      //     // app.cmd.collapsible.split(selection)?.Dispatch();
+      //     // react.cmd.collapsible.split(selection)?.Dispatch();
       //   }
       // }
     }

@@ -1,12 +1,8 @@
-import { identity, last } from 'lodash';
-import { p12 } from "./Logger";
 import { PluginManager } from './PluginManager';
 import { Transaction } from "./Transaction";
 import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
-import { EventsOut } from './Event';
 import { State } from './State';
-import {ImmutableDraft} from "./ImmutableDraft";
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];
@@ -70,7 +66,7 @@ export class TransactionManager {
 	// 	}
 
 	// 	// update dom to reflect the state changes
-	// 	this.app.emit(EventsOut.change, this.state);
+	// 	this.react.emit(EventsOut.change, this.state);
 	// }
 
 	private updateDecorations() {

@@ -49,13 +49,16 @@ export class Section extends NodePlugin {
 					placeholder: {
 						// TODO: This is a hack to get the correct placeholder for empty section
 						// not empty placeholder is not removed from node props.
-						empty: ' ',
+						empty: '',
 						focused: 'Press / for commands'
 					},
 				},
 				html: {
 					suppressContentEditableWarning: true,
-				}
+				},
+        // plugin: {
+        //   'tag': 'p'
+        // }
 			}
 		}
 	}
@@ -76,7 +79,7 @@ export class Section extends NodePlugin {
 		let ret = contentNode?.textContent;
 
 		// TODO: This is a hack to get the correct heading level
-		switch (node.properties.get('html.data-as')) {
+		switch (node.props.get('html.data-as')) {
 			case 'h1':
 				ret = '# ' + ret;
 				break

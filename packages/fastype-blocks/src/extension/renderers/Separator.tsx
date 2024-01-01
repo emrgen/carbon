@@ -1,17 +1,10 @@
 import {
-  CarbonBlock,
-  CarbonNodeContent,
-  RendererProps,
   preventAndStop,
-  useCarbon,
-  useSelectionHalo,
 } from "@emrgen/carbon-core";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon";
+
 import { useCallback, useRef } from "react";
+import {CarbonBlock, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 export function SeparatorComp(props: RendererProps) {
   const app = useCarbon();
@@ -29,7 +22,7 @@ export function SeparatorComp(props: RendererProps) {
       preventAndStop(e);
       // avoid selection if block is already selected
       if (app.selection.blocks.some(n => n.id.eq(node.id))) return;
-      // app.tr.selectNodes([node.id]).Dispatch();
+      // react.tr.selectNodes([node.id]).Dispatch();
     },
     [app.selection.blocks, app.tr, node.id]
   );

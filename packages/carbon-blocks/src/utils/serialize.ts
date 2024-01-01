@@ -1,14 +1,14 @@
 import { Carbon,  Node, SerializedNode } from "@emrgen/carbon-core";
 import { isString } from 'lodash';
 
-// export const serializeNestableNode = (app: Carbon, node: Node, prefix = '', suffix = ''): SerializedNode => {
+// export const serializeNestableNode = (react: Carbon, node: Node, prefix = '', suffix = ''): SerializedNode => {
 //   if (node.isVoid) {
 //     throw Error('section is missing title child');
 //   }
 //   const { children } = node;
 //   const contentNode = children[0] as Node;
 //   const nodes = children.slice(1);
-//   const serializeChildren = nodes.map(n => app.serialize(n));
+//   const serializeChildren = nodes.map(n => react.serialize(n));
 
 //   if (contentNode.isEmpty) {
 //     return serializeChildren;

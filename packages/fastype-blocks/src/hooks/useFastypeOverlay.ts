@@ -1,4 +1,4 @@
-import { Node, useCarbon, useCarbonOverlay } from "@emrgen/carbon-core"
+import { Node } from "@emrgen/carbon-core"
 import { useCallback, useEffect } from 'react';
 import { keys } from 'lodash';
 import {
@@ -6,6 +6,7 @@ import {
   UseDisclosureReturn,
   usePrevious
 } from "@chakra-ui/react";
+import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 
 interface UseFastypeOverlayProps {
   disclosure: UseDisclosureReturn;

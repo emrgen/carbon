@@ -51,7 +51,7 @@ export class Todo extends Section {
           app.tr
             .Update(node.id, {
               node: {
-                checked: !node.properties.get('node.checked'),
+                checked: !node.props.get('node.checked'),
               },
             })
             .Dispatch();
@@ -60,8 +60,8 @@ export class Todo extends Section {
     }
   }
 
-  // serialize(app: Carbon, node: Node): SerializedNode {
-  //   const prefix = node.properties.node?.isChecked ? ['x'] : '[]';
-  //   return `${prefix} ${app.serialize(node.child(0)!)}` + app.commands.nestable.serializeChildren(node);
+  // serialize(react: Carbon, node: Node): SerializedNode {
+  //   const prefix = node.props.node?.isChecked ? ['x'] : '[]';
+  //   return `${prefix} ${react.serialize(node.child(0)!)}` + react.commands.nestable.serializeChildren(node);
   // }
 }

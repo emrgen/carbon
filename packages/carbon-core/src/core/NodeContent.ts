@@ -4,314 +4,201 @@ import { Node } from './Node';
 import { Optional } from "@emrgen/types";
 import { NodeId } from './NodeId';
 import { Maps, With } from './types';
+import {Mark, MarkSet, NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-core";
 
-export interface NodeContent {
-	size: number;
-	children: Node[];
-	textContent: string;
-	isEmpty: boolean;
-	version: number;
-
-	setParentId(parentId: NodeId): NodeContent;
-	setParent(parent: Node): NodeContent;
-	replace(node: Node, by: Node[]): NodeContent;
-	prepend(nodes: Node[]): NodeContent;
-	append(nodes: Node[]): NodeContent;
-	insert(node: Node, offset: number): NodeContent;
-	insertBefore(before: Node, node: Node[]): NodeContent;
-	insertAfter(after: Node, node: Node[]): NodeContent;
-	remove(node: Node): boolean;
-	tryMerge(other: NodeContent): Optional<NodeContent>;
-	split(offset: number): [NodeContent, NodeContent];
-
-	updateText(text: string): void;
-
-	view(container: Node[]): NodeContent;
-	clone(map: Maps<Node, Optional<Node>>): NodeContent;
-	freeze(): NodeContent;
-	toJSON(): any;
+export interface NodeData {
+  id: NodeId;
+  name: string;
+  parentId: Optional<NodeId>;
+  textContent: string;
+  children: NodeData[];
+  linkName: string;
+  links: Record<string, NodeData>;
+  props: NodeProps;
 }
 
-interface BlockContentProps {
-	nodes: Node[]
+// all the data a node needs to be created
+// this is the core of the node
+export interface NodeContentData {
+  id: NodeId;
+  type: NodeType;
+  parentId: Optional<NodeId>;
+  parent: Optional<Node>;
+  textContent: string;
+  children: Node[];
+  linkName: string;
+  links: Record<string, Node>;
+  marks: MarkSet;
+  props: NodeProps;
+  renderVersion?: number;
+  contentVersion?: number;
 }
 
-export class BlockContent implements NodeContent {
-	nodes: Node[]
-	frozen: boolean = false
+export interface NodeContent extends NodeContentData, MutableNodeContent{
+  size: number;
+  data: NodeData;
 
-	version: number = 0;
+  unwrap(): NodeContentData;
 
-	get children(): Node[] {
-		return this.nodes;
-	}
-
-	static empty(): BlockContent {
-		return BlockContent.create([])
-	}
-
-	static create(nodes: Node | Node[]) {
-		if (!Array.isArray(nodes)) {
-			return new BlockContent({ nodes: [nodes] });
-		} else {
-			return new BlockContent({ nodes: nodes });
-		}
-	}
-
-	constructor(props: BlockContentProps) {
-		this.nodes = props.nodes
-	}
-
-	get isEmpty() {
-		return this.size == 0 || this.children.every(n => n.isEmpty)
-	}
-
-	get size(): number {
-		return this.children.length;
-	}
-
-	get textContent(): string {
-		return this.children.reduce((text, node) => text + node.textContent, '');
-	}
-
-	setParentId(parentId: NodeId): NodeContent {
-		// if (this.frozen) return this
-		this.nodes.forEach(n => n.setParentId(parentId));
-		return this;
-	}
-
-	setParent(parent: Node): NodeContent {
-		if (this.frozen) return this
-		this.nodes.forEach(n => {
-			n.setParent(parent);
-			n.setParentId(parent.id);
-		});
-		return this;
-	}
-
-	indexOf(node: Node) {
-		return findIndex(this.nodes, n => {
-			return node.id.comp(n.id) === 0
-		});
-	}
-
-	insert(node: Node, offset: number): NodeContent {
-		const { children } = this;
-		this.nodes = flatten([children.slice(0, offset), node, children.slice(offset)]);
-		return this;
-	}
-
-	prepend(nodes: Node[]): NodeContent {
-		this.nodes = [...nodes, ...this.nodes];
-		return this
-	}
-
-	append(nodes: Node[]): NodeContent {
-		this.nodes = [...this.nodes, ...nodes];
-		return this
-	}
-
-	replace(node: Node, by: Node[]): NodeContent {
-		this.nodes = flatten(this.nodes.map(n => {
-			return n.eq(node) ? by : n;
-		}));
-
-		return this
-	}
-
-	insertBefore(before: Node, nodes: Node[]): NodeContent {
-		const { children } = this
-		const index = this.indexOf(before);
-		this.nodes = flatten([children.slice(0, index), nodes, children.slice(index)]);
-		return this
-	}
-
-	insertAfter(after: Node, nodes: Node[]): NodeContent {
-		const { children } = this;
-		const index = this.indexOf(after);
-		this.nodes = flatten([children.slice(0, index + 1), nodes, children.slice(index + 1)]);
-		return this;
-	}
-
-	remove(node: Node): boolean {
-		const { nodes } = this;
-		const found = nodes.find(n => n.eq(node));
-		this.nodes = nodes.filter(n => !n.eq(node));
-		return !!found;
-	}
-
-	tryMerge(other: NodeContent): Optional<NodeContent> {
-		if (other instanceof BlockContent) {
-			return BlockContent.create([...this.nodes, ...other.nodes]);
-		}
-
-		return null;
-	}
-
-	split(offset: number): [NodeContent, NodeContent] {
-		const { nodes } = this;
-		const left = nodes.slice(0, offset);
-		const right = nodes.slice(offset);
-
-		return [BlockContent.create(left), BlockContent.create(right)];
-	}
-
-	view(container: Node[]): NodeContent {
-		return BlockContent.create(this.nodes);
-	}
-
-	destroy() { }
-
-	updateText(text: string) {
-		throw new Error("Not implemented");
-	}
-
-	freeze() {
-		if (this.frozen) return this;
-		this.frozen = true;
-		this.nodes.forEach(n => n.freeze());
-		Object.freeze(this)
-		return this;
-	}
-
-	clone(map: Maps<Node, Optional<Node>> = identity): BlockContent {
-		const children = this.nodes.map(n => map(n)).filter(identity) as Node[];
-		return BlockContent.create(children);
-	}
-
-	toJSON() {
-		return {
-			children: this.nodes.map(n => n.toJSON())
-		}
-	}
+  child(index: number): Optional<Node>;
 }
 
-interface TextContentProps {
-	text: string
+export interface MutableNodeContent {
+  setParentId(parentId: Optional<NodeId>): void;
+  setParent(parent: Optional<Node>): void;
+  changeType(type: NodeType): void;
+  insert(node: Node, index: number): void;
+  remove(node: Node): void;
+  insertText(text: string, offset: number): void;
+  removeText(offset: number, length: number): void;
+  addLink(name: string, node: Node): void;
+  removeLink(name: string): Optional<Node>;
+  updateContent(content: Node[] | string): void;
+  updateProps(props: NodePropsJson): void;
+  addMark(marks: Mark): void;
+  removeMark(marks: Mark): void;
+
+  clone(): NodeContent;
+  freeze(): void;
 }
 
-export class InlineContent implements NodeContent {
-	text: string;
-	frozen: boolean = false;
-	version: number = 0;
+export class PlainNodeContent implements NodeContent {
 
-	get isEmpty() {
-		return !this.text
-	}
+  static create(content: NodeContentData): NodeContent {
+    return new PlainNodeContent(content);
+  }
 
-	get children(): Node[] {
-		return []
-	}
+  constructor(private content: NodeContentData) {}
 
-	get nodes(): Node[] {
-		return []
-	}
+  get data(): NodeData {
+    const {parent, type,children, ...rest} = this.content;
+    return {
+      ...rest,
+      name: type.name,
+      children: this.children.map(c => c.data),
+    }
+  }
 
-	get size(): number {
-		return this.text.length
-	}
+  get id(): NodeId {
+    return this.content.id;
+  }
 
-	get textContent(): string {
-		return this.text;
-	}
+  get type(): NodeType {
+    return this.content.type;
+  }
 
-	static create(text: string) {
-		return InlineContent.fromProps({ text })
-	}
+  get parentId(): Optional<NodeId> {
+    return this.content.parentId;
+  }
 
-	static fromProps(props: TextContentProps) {
-		return new InlineContent(props);
-	}
+  get parent(): Optional<Node> {
+    return this.content.parent;
+  }
 
-	constructor(props: TextContentProps) {
-		this.text = props.text;
-	}
+  get children(): Node[] {
+    return this.content.children;
+  }
 
-	// setProps(props: TextContentProps): void {
-	// 	this.text = props.text;
-	// }
+  get textContent(): string {
+    return this.type.isText ? this.content.textContent : this.children.map(n => n.textContent).join('');
+  }
 
-	destroyShallow() {
-		throw new Error('Method not implemented for InlineContent');
-	}
+  get linkName(): string {
+    return this.content.linkName;
+  }
 
-	setParentId(parentId: NodeId): NodeContent {
-		return this;
-	}
+  get links(): Record<string, Node> {
+    return this.content.links;
+  }
 
-	setParent(parent: Node): NodeContent {
-		return this;
-	}
+  get marks(): MarkSet {
+    return this.content.marks;
+  }
 
-	prepend(nodes: Node[]): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
+  get props(): NodeProps {
+    return this.content.props;
+  }
 
-	append(nodes: Node[]): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
+  get size(): number {
+    return (this.type.isText) ? this.textContent.length : this.children.length;
+  }
 
-	replace(node: Node, by: Node[]): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
 
-	insert(node: Node, offset: number): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
+  // return shallow clone of data
+  // the children are same references as the original
+  unwrap(): NodeContentData {
+    return { ...this.content };
+  }
 
-	insertBefore(before: Node, nodes: Node[]): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
+  child(index: number): Optional<Node> {
+    return this.children[index];
+  }
 
-	insertAfter(after: Node, nodes: Node[]): NodeContent {
-		throw new Error("Not implemented for InlineContent");
-	}
+  changeType(type: NodeType): void {
+    this.content.type = type;
+    this.props.update(type.props);
+  }
 
-	remove(node: Node): boolean {
-		return false
-	}
+  clone(): NodeContent {
+    throw new Error("Method not implemented.");
+  }
 
-	tryMerge(other: NodeContent): Optional<NodeContent> {
-		if (other instanceof InlineContent) {
-			return InlineContent.create(this.text + other.text);
-		}
+  freeze(): NodeContent {
+    throw new Error("Method not implemented.");
+  }
 
-		return null;
-	}
+  insert(node: Node, index: number): void {
+    this.children.splice(index, 0, node);
+  }
 
-	split(offset: number): [NodeContent, NodeContent] {
-		const left = InlineContent.create(this.text.slice(0, offset));
-		const right = InlineContent.create(this.text.slice(offset));
+  remove(node: Node): void {
+    this.content.children = this.children.filter(n => n.eq(node));
+  }
 
-		return [left, right];
-	}
+  insertText(text: string, offset: number): void {
+    this.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
+  }
 
-	updateText(text: string) {
-		this.text = text;
-		this.version += 1;
-	}
+  removeText(offset: number, length: number): void {
+    this.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
+  }
 
-	view(): NodeContent {
-		return this
-	}
+  setParent(parent: Optional<Node>): void {
+    this.content.parent = parent;
+  }
 
-	freeze() {
-		if (this.frozen) return this;
-		this.frozen = true;
-		Object.freeze(this)
-		return this;
-	}
+  setParentId(parentId: Optional<NodeId>): void {
+    this.content.parentId = parentId;
+  }
 
-	clone(): InlineContent {
-		return InlineContent.create(this.text);
-	}
+  updateContent(content: Node[] | string): void {
+    if (typeof content === 'string') {
+      this.content.textContent = content;
+    } else {
+      this.content.children = content;
+    }
+  }
 
-	destroy() { }
+  updateProps(props: NodePropsJson): void {
+    this.props.update(props);
+  }
 
-	toJSON() {
-		return {
-			text: this.textContent
-		}
-	}
+  addLink(name: string, node: Node): void {
+    this.links[name] = node;
+  }
+
+  removeLink(name: string): Optional<Node> {
+    const node = this.links[name];
+    delete this.links[name];
+    return node;
+  }
+
+
+  addMark(props: Mark): void {
+    // this.content.marks.update(props);
+  }
+
+  removeMark(props: Mark): void {
+    // this.content.marks.removeMarks();
+  }
 }
-

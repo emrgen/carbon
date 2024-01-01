@@ -27,7 +27,7 @@
 //
 // export const CodeComp = (props: RendererProps) => {
 //   const { node } = props;
-//   const app = useCarbon();
+//   const react = useCarbon();
 //   const ref = useRef(null);
 //
 //   const selection = useSelectionHalo(props);
@@ -49,7 +49,7 @@
 //
 // // const CodeContentMirror = (props: RendererProps) => {
 // //   const { node, version } = useNodeChange(props);
-// //   const app = useCarbon();
+// //   const react = useCarbon();
 // //
 // //   console.log(node.textContent);
 // //
@@ -62,14 +62,14 @@
 // //       language: 'go',
 // //     }}
 // //     onFocus={() => {
-// //       app.tr.selectNodes([]).Dispatch();
-// //       app.disable();
+// //       react.tr.selectNodes([]).Dispatch();
+// //       react.disable();
 // //     }}
-// //     onBlur={() => app.enable()}
+// //     onBlur={() => react.enable()}
 // //     onChange={(value) => {
-// //       app.enable(() => {
-// //         const text = app.schema.text(value)!;
-// //         app.tr.setContent(node.id, BlockContent.create([text])).Dispatch();
+// //       react.enable(() => {
+// //         const text = react.schema.text(value)!;
+// //         react.tr.setContent(node.id, BlockContent.create([text])).Dispatch();
 // //       });
 // //     }}
 // //   />
@@ -78,19 +78,19 @@
 //
 // const CodeContent = (props: RendererProps) => {
 //   const { node } = props;
-//   const app = useCarbon();
+//   const react = useCarbon();
 //   const refText = useRef<HTMLTextAreaElement>(null);
 //
 //   useEffect(() => {
 //     if (!node.parent) return;
 //     if (node.parent.properties.node.typeChanged) {
 //       console.log("focus");
-//       app.tr
+//       react.tr
 //         .Update(node.parent.id, { node: { typeChanged: false } })
 //         .Dispatch();
 //       refText.current?.focus();
 //     }
-//   }, [app, node]);
+//   }, [react, node]);
 //
 //   useEffect(() => {
 //     const onFocus = () => {
@@ -114,15 +114,15 @@
 //     }
 //
 //     if (e.key == "Enter") {
-//       if (app.selection.isBlock) {
+//       if (react.selection.isBlock) {
 //         e.preventDefault();
 //       }
 //     }
 //
 //     if (e.key == "Escape") {
 //       stop(e);
-//       app.parkCursor();
-//       // app.tr.selectNodes([node.parent!.id]).Dispatch();
+//       react.parkCursor();
+//       // react.tr.selectNodes([node.parent!.id]).Dispatch();
 //     }
 //
 //     // if back spaced at the beginning of the line
@@ -136,9 +136,9 @@
 //         preventAndStop(e);
 //         // NOTE: when the text area is removed in section the onBlur is not called.
 //         // so we need to enable the editor here.
-//         app.enable();
+//         react.enable();
 //
-//         const { tr } = app;
+//         const { tr } = react;
 //         tr.Change(parent.id, parent.name, "section");
 //         tr.Update(parent.id, { node: { typeChanged: true } });
 //         tr.Select(
@@ -157,9 +157,9 @@
 //   const handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 //     stop(e);
 //     const { value } = e.target;
-//     const text = app.schema.text(value)!;
-//     app.enable(() => {
-//       app.tr.SetContent(node.id, BlockContent.create([text])).Dispatch();
+//     const text = react.schema.text(value)!;
+//     react.enable(() => {
+//       react.tr.SetContent(node.id, BlockContent.create([text])).Dispatch();
 //     });
 //   };
 //
@@ -204,10 +204,10 @@
 //           onKeyUp={handleKeyUp}
 //           onChange={handleOnChange}
 //           onFocus={() => {
-//             app.tr.selectNodes([]).Dispatch();
-//             app.disable();
+//             react.tr.selectNodes([]).Dispatch();
+//             react.disable();
 //           }}
-//           onBlur={() => app.enable()}
+//           onBlur={() => react.enable()}
 //         />
 //       </Box>
 //     </CarbonBlock>

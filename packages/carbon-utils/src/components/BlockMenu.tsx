@@ -1,8 +1,9 @@
-import { Node, useCarbon } from "@emrgen/carbon-core";
+import { Node } from "@emrgen/carbon-core";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BlockMenuCmd } from "../types";
 import { activeBlockMenuTarget, activeBlockMenuTargetText } from "../atoms";
 import { useRecoilState } from "recoil";
+import {useCarbon} from "@emrgen/carbon-react";
 
 const BlockNameRegex = /^\/(.*)$/;
 

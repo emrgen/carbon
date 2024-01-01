@@ -1,10 +1,8 @@
 import { classString } from "./Logger";
 import { Mark, MarkSet } from "./Mark";
 import { Node } from "./Node";
-import { BlockContent, InlineContent, NodeContent } from "./NodeContent";
-import { node } from '@emrgen/carbon-blocks';
 import { Optional } from '@emrgen/types';
-import { flatten, identity, reduce } from "lodash";
+import { reduce } from "lodash";
 
 // utility class for text blocks
 // title is a text block
@@ -19,7 +17,7 @@ export class TextBlock {
   }
 
   constructor(node: Node) {
-    if (!node.isTextBlock) {
+    if (!node.isTextContainer) {
       throw new Error('can not create text block from non text block node');
     }
 
@@ -50,12 +48,12 @@ export class TextBlock {
     }
 
     if (offset <= 0) {
-      this.node.content.prepend([node]);
+      // this.node.content.prepend([node]);
       return;
     }
 
     if (offset >= this.node.focusSize) {
-      this.node.content.append([node]);
+      // this.node.content.append([node]);
       return;
     }
 
@@ -64,11 +62,14 @@ export class TextBlock {
 
     // split the content and insert the inline node in the relevant node
     const nodes = this.split(offset).reduce((acc, curr) => {
-      return curr.size === 0 ? acc : [...acc, ...curr.children];
+      return curr.length === 0 ? acc : [...acc, ...curr];
     }, [] as Node[]);
 
 
-    this.node.replace(found, nodes);
+
+    // NOTE TO ME: this line is required to make the code work
+    // this.node.replace(found, nodes);
+
     // normalize the content
     this.normalize();
   }
@@ -88,15 +89,6 @@ export class TextBlock {
     }
   }
 
-  tryMerge(other: TextBlock): Optional<TextBlock> {
-    const node = this.node.tryMerge(other.node);
-    if (!node) {
-      return null;
-    }
-
-    return new TextBlock(node);
-  }
-
   private normalize(): TextBlock {
     const nodes = reduce(this.node.children, (acc, curr) => {
       if (acc.length === 0) {
@@ -105,21 +97,22 @@ export class TextBlock {
 
       const prev = acc[acc.length - 1];
 
-      const newNode = prev.tryMerge(curr);
-      if (!newNode) {
-        return [...acc, curr]
-      }
+      // const newNode = prev.tryMerge(curr);
+      // if (!newNode) {
+      //   return [...acc, curr]
+      // }
 
-      return [...acc.slice(0, -1), newNode];
+      return [...acc.slice(0, -1)];
     }, [] as Node[]);
 
-    this.node.content = BlockContent.create(nodes);
+    // this.node.content = BlockContent.create(nodes);
 
     return this
   }
 
-  split(offset: number): [NodeContent, NodeContent] {
-    return this.node.content.split(offset);
+  split(offset: number): [Node[], Node[]] {
+    // return this.node.content.split(offset);
+    return [[],[]]
   }
 
   toJSON() {

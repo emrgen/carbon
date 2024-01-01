@@ -46,10 +46,10 @@ export const ImageComp = () => {
 //
 // export function ImageComp(props: RendererProps) {
 //   const { node } = props;
-//   const { node: image } = node.properties;
-//   const app = useCarbon();
+//   const { node: image } = node.props;
+//   const react = useCarbon();
 //   const [ready, setReady] = useState(false);
-//   const [caption, setCaption] = useState(node.properties.node.caption ?? "");
+//   const [caption, setCaption] = useState(node.props.node.caption ?? "");
 //
 //   const ref = useRef<HTMLDivElement>(null);
 //   const boundRef = useRef<HTMLDivElement>(null);
@@ -71,21 +71,21 @@ export const ImageComp = () => {
 //   const handleClick = (e) => {
 //     preventAndStop(e);
 //
-//     app.emit(
+//     react.emit(
 //       "show:options:menu",
 //       node.id,
 //       ref.current?.getBoundingClientRect()
 //     );
 //
-//     app.tr.selectNodes([node.id]).Dispatch();
+//     react.tr.selectNodes([node.id]).Dispatch();
 //   };
 //
 //   const alignImage = useCallback(
 //     (align) => {
 //       return (e) => {
 //         preventAndStop(e);
-//         const { tr } = app;
-//         app.selection.blocks
+//         const { tr } = react;
+//         react.selection.blocks
 //           .filter((n) => n.name === "image")
 //           .forEach(({ id }) => {
 //             tr.Update(id, {
@@ -99,15 +99,15 @@ export const ImageComp = () => {
 //         tr.Dispatch();
 //       };
 //     },
-//     [app]
+//     [react]
 //   );
 //
 //   const onClick = useCallback(
 //     (e) => {
 //       // preventAndStop(e);
-//       app.tr.selectNodes([]).Dispatch();
+//       react.tr.selectNodes([]).Dispatch();
 //     },
-//     [app.tr]
+//     [react.tr]
 //   );
 //
 //   const updatePopover = useMemo(() => {
@@ -166,7 +166,7 @@ export const ImageComp = () => {
 //               setTimeout(() => {
 //                 updater.onClose();
 //                 actions.setSubmitting(false);
-//                 app.tr
+//                 react.tr
 //                   .Update(node.id, {
 //                     node: {
 //                       src: values.src,
@@ -218,15 +218,15 @@ export const ImageComp = () => {
 //       </Box>,
 //       overlayRef.current!
 //     );
-//   }, [app.tr, node.id, boundRef, overlayRef, updater]);
+//   }, [react.tr, node.id, boundRef, overlayRef, updater]);
 //
 //   useEffect(() => {
 //     if (!imageRef.current) return;
 //     const { width, height } = imageRef.current;
 //     setAspectRatio(height / width);
 //
-//     if (!node.properties.node.height) {
-//       app.tr
+//     if (!node.props.node.height) {
+//       react.tr
 //         .Update(node.id, {
 //           node: {
 //             height: height,
@@ -234,7 +234,7 @@ export const ImageComp = () => {
 //         })
 //         .Dispatch();
 //     }
-//   }, [app.tr, imageRef, node.properties.node.height, node.id]);
+//   }, [react.tr, imageRef, node.props.node.height, node.id]);
 //
 //   return (
 //     <>
@@ -277,7 +277,7 @@ export const ImageComp = () => {
 //             pos={"relative"}
 //             onClick={handleClick}
 //             bg={ready ? "" : "#eee"}
-//             h={node.properties.node.src && !ready ? "100%" : "auto"}
+//             h={node.props.node.src && !ready ? "100%" : "auto"}
 //             // boxShadow={ready ? "0 0 0px 20px red" : ""}
 //           >
 //             <>
@@ -287,7 +287,7 @@ export const ImageComp = () => {
 //                   className="image-overlay"
 //                   onClick={(e) => {
 //                     stop(e);
-//                     app.tr.selectNodes([node.id]).Dispatch();
+//                     react.tr.selectNodes([node.id]).Dispatch();
 //                     updater.onOpen();
 //                   }}
 //                 >
@@ -308,7 +308,7 @@ export const ImageComp = () => {
 //               {image.src && (
 //                 <>
 //                   <LazyLoadImage
-//                     src={node.properties.node.src}
+//                     src={node.props.node.src}
 //                     alt=""
 //                     onLoad={(e) => {
 //                       setReady(true);
@@ -351,10 +351,10 @@ export const ImageComp = () => {
 //               stop(e);
 //               if (e.key === "Enter") {
 //                 e.preventDefault();
-//                 app.enable()
-//                 const section = app.schema.nodes.section.default();
+//                 react.enable()
+//                 const section = react.schema.nodes.section.default();
 //                 if (!section) return;
-//                 app.tr
+//                 react.tr
 //                   .insert(Point.toAfter(node.id), section)
 //                   .select(
 //                     PinnedSelection.fromPin(Pin.toStartOf(section)!),
@@ -364,9 +364,9 @@ export const ImageComp = () => {
 //               }
 //             }}
 //             onKeyUp={stop}
-//             onFocus={() => app.disable()}
+//             onFocus={() => react.disable()}
 //             onBlur={(e) => {
-//               app.enable()
+//               react.enable()
 //               setCaption(!!e.target.value)
 //             }}
 //             outline={"none"}
@@ -383,7 +383,7 @@ export const ImageComp = () => {
 //               boxShadow: "none",
 //             }}
 //             onChange={(e) => {
-//               app.tr
+//               react.tr
 //                 .updateAttrs(node.id, {
 //                   node: {
 //                     caption: e.target.value,

@@ -96,7 +96,7 @@ export class BlockMenuPlugin extends BeforePlugin {
       return;
     }
 
-    if (!selection.isCollapsed || !node.isTextBlock || !selection.start.isAtEndOfNode(node) || !BlockMenuRegex.test(node.textContent)) {
+    if (!selection.isCollapsed || !node.isTextContainer || !selection.start.isAtEndOfNode(node) || !BlockMenuRegex.test(node.textContent)) {
       this.onHide(app, node, this.visible);
       return
     }

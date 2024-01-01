@@ -21,9 +21,9 @@ export class SheetRenderer {
     this.rowHeaderGfx = new Graphics();
     this.gridGfx = new Graphics();
 
-    // app.stage.addChild(this.gridGfx);
-    // app.stage.addChild(this.columnHeaderGfx);
-    // app.stage.addChild(this.rowHeaderGfx);
+    // react.stage.addChild(this.gridGfx);
+    // react.stage.addChild(this.columnHeaderGfx);
+    // react.stage.addChild(this.rowHeaderGfx);
   }
 
   render(data: SheetData, position: SheetPosition, size: SheetSize) {
@@ -71,7 +71,7 @@ export class SheetRenderer {
     // gfx.transform.position.x = left;
     // gfx.transform.position.y = top;
 
-    // console.log('rerender the app', left, top);
+    // console.log('rerender the react', left, top);
 
 
   }

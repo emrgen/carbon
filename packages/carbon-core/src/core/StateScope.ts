@@ -3,7 +3,7 @@ import { NodeMap } from "./NodeMap";
 
 const STATE_SCOPE: Map<Symbol, NodeMap> = new Map();
 
-// this is a global state scope, used for storing global state of the app
+// this is a global state scope, used for storing global state of the react
 export class StateScope {
   static get(scope: Symbol): NodeMap {
     let map = STATE_SCOPE.get(scope);

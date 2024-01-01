@@ -33,8 +33,8 @@ export class Quote extends CarbonPlugin {
     }
   }
 
-  // serialize(app: Carbon, node: Node): SerializedNode {
+  // serialize(react: Carbon, node: Node): SerializedNode {
   //   const content = node.child(0)!
-  //   return `> ${app.serialize(content)}${app.commands.nestable.serializeChildren(node)}`;
+  //   return `> ${react.serialize(content)}${react.commands.nestable.serializeChildren(node)}`;
   // }
 }

@@ -9,7 +9,7 @@ import { EventManager } from "./EventManager";
 import { NodeStore } from "./NodeStore";
 import { PinnedSelection } from "./PinnedSelection";
 import { PluginManager } from "./PluginManager";
-import { RenderManager } from "./Renderer";
+import { RenderManager } from "../../../carbon-react/src/renderer/ReactRenderer";
 import { Schema } from "./Schema";
 import { SelectionManager } from "./SelectionManager";
 import { Transaction } from "./Transaction";
@@ -23,17 +23,10 @@ import { PluginEmitter } from "./PluginEmitter";
 import { PluginStates } from "./PluginState";
 import { CarbonCommand } from "./CarbonCommand";
 
-declare module '@emrgen/carbon-core' {
-	export interface Carbon {
-		print(): void;
-	}
-}
-
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
 	private readonly em: EventManager;
 	private readonly sm: SelectionManager;
-	private readonly rm: RenderManager;
 	private readonly tm: TransactionManager;
 
 
@@ -63,17 +56,15 @@ export class Carbon extends EventEmitter {
 	committed: boolean;
 	private counter: number = 0;
 
-	constructor(state: State, schema: Schema, pm: PluginManager, renderer: RenderManager) {
+	constructor(state: State, schema: Schema, pm: PluginManager) {
 		super();
 
 		this.committed = true;
 
 		this.pm = pm;
-		this.rm = renderer;
 		this.schema = schema;
 
-		this.state = state;
-		StateScope.set(this.state.scope, this.state.nodeMap);
+		this.state = state.activate()
 		this.runtime = new Runtime();
 
 		this.store = new NodeStore(this);
@@ -123,7 +114,7 @@ export class Carbon extends EventEmitter {
 	}
 
 	get portal(): Optional<HTMLElement> {
-		this._portal = this._portal ?? querySelector('.carbon-app > .carbon-portal') as any ?? null;
+		this._portal = this._portal ?? querySelector('.carbon-react > .carbon-portal') as any ?? null;
 		return this._portal;
 	}
 
@@ -188,21 +179,17 @@ export class Carbon extends EventEmitter {
 			return
 		}
 
-		if (this.state === state) {
-			console.warn('new state is the same as current');
+		if (state.eq(this.state)) {
+			console.warn('skipping ui sync: new state is the same as current', state.content.renderVersion, this.state.content.contentVersion);
 			return
 		}
 
 		// keep three previous states
-		this.state = state;
-		StateScope.set(state.scope, state.nodeMap);
+		this.state = state.activate()
+        // console.log('updateState', this.state.content.textContent, this.state.isContentChanged, this.state.isSelectionChanged);
 		this.change.update(tr, state)
 
 		this.emit(EventsOut.transactionCommit, tr);
-	}
-
-	component(name: string) {
-		return this.rm.component(name)
 	}
 
 	// sanitize(node: Node): SerializedNode {

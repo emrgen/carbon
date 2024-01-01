@@ -28,17 +28,13 @@ export class NodeProps extends JsonStore {
     return store;
   }
 
-  merge(other: NodeProps): NodeProps {
-    const result = new NodeProps();
-    for (const [key, value] of this.store) {
-      result.store.set(key, value);
-    }
-
+  // @mutates
+  merge(other: NodeProps) {
     for (const [key, value] of other.store) {
-      result.store.set(key, value);
+      this.store.set(key, value);
     }
 
-    return result;
+    return this;
   }
 
   eqContent(other: NodeProps): boolean {
@@ -62,22 +58,17 @@ export class NodeProps extends JsonStore {
   }
 
   update(attrs: NodePropsJson) {
-    const result = new NodeProps();
-    for (const [key, value] of this.store) {
-      result.store.set(key, value);
-    }
-
     each(JsonStore.jsonToKeyValue(attrs), (value, key) => {
-      result.set(key, value);
+      this.set(key, value);
     });
 
-    return result;
+    return this;
   }
 
   toJSON(): {} {
     const result: Record<string, any> = {};
     for (const [key, value] of this.store) {
-      set(result, JsonStore.PATCH_CACHE.path(key), value);
+      set(result, JsonStore.PATH_CACHE.path(key), value);
     }
 
     return JsonStore.keyValueToJson(result);
@@ -126,7 +117,8 @@ export const CheckedPath = "remote/state/checked";
 export const EmojiPath = "remote/state/emoji";
 export const ListNumberPath = "remote/state/listNumber";
 export const TitlePath = "remote/state/title";
+export const CollapseHidden = "local/state/collapseHidden";
 
 export const isPassiveHidden = (node: Node) => {
-  return node.chain.some(n => n.properties.get<boolean>(HiddenPath) ?? false);
+  return node.chain.some(n => n.props.get<boolean>(HiddenPath) ?? false);
 }

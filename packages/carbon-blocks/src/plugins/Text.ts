@@ -1,7 +1,7 @@
 import {
 	Carbon,
 	EventContext,
-	EventHandlerMap, InlineContent,
+	EventHandlerMap,
 	Node,
 	NodePlugin,
 	NodeSpec, PinnedSelection,
@@ -71,9 +71,8 @@ export class TextPlugin extends NodePlugin {
 		const textContent = node.textContent.slice(0, offset) + (text) + node.textContent.slice(offset);
 		const after = PinnedSelection.fromPin(Pin.future(start.node, start.offset + text.length));
 		console.log('onTextInsert', textContent, after, node.id.toString());
-		tr.SetContent(node, InlineContent.create(textContent)).Select(after).Dispatch();
+		tr.SetContent(node, textContent).Select(after).Dispatch();
 	}
-
 
 
 	serialize(app: Carbon, node: Node): SerializedNode {

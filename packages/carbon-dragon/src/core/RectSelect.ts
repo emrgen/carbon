@@ -81,7 +81,7 @@ export class RectSelect extends EventEmitter {
 		this.emit(RectSelectorEvent.DragStart, e);
 		this.isSelecting = true;
 
-		// this.app.blur();
+		// this.react.blur();
 		if (this.isDirty) {
 			const document = node.chain.find(n => n.isDocument);
 			if (!document) {
@@ -110,7 +110,7 @@ export class RectSelect extends EventEmitter {
 
 		const { node } = e;
 		const { app, selectables } = this;
-		// const {selection} = app.state;
+		// const {selection} = react.state;
 		// // can not move block while inline selection is active
 		// console.log(selection.isInline);
 		// if (selection.isInline) return;

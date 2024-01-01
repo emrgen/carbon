@@ -1,4 +1,4 @@
-import { Carbon, Node, useCarbon } from "@emrgen/carbon-core";
+import { Carbon, Node } from "@emrgen/carbon-core";
 import { useRecoilState } from 'recoil';
 import { activeBlockMenuTarget, activeBlockMenuTargetText } from "../atoms";
 import { useEffect } from 'react';

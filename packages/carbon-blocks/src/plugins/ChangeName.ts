@@ -13,7 +13,6 @@ import {
   moveNodesActions,
   insertBeforeAction,
   preventAndStopCtx,
-  BlockContent,
   SetContentAction,
   PlaceholderPath,
   EmptyPlaceholderPath,
@@ -49,7 +48,7 @@ export class ChangeName extends BeforePlugin {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
         const { node } = ctx;
-        const block = node.closest(n => n.isContainerBlock)!;
+        const block = node.closest(n => n.isContainer)!;
 
         if (!isConvertible(block)) return
         if (this.inputRules.process(ctx, block)) {
@@ -63,7 +62,7 @@ export class ChangeName extends BeforePlugin {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app, cmd } = ctx;
       const { selection } = app;
-      const block = node.closest(n => n.isContainerBlock)!;
+      const block = node.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
 
       const type = app.schema.type(name);
@@ -100,7 +99,7 @@ export class ChangeName extends BeforePlugin {
       // const after = titleContent.remove(0, match[1].length);
 
       if (match[1] === titleNode.textContent + ' ') {
-        const action = SetContentAction.create(titleNode.id,BlockContent.empty());
+        const action = SetContentAction.create(titleNode.id, []);
         cmd.Add(action);
         cmd.Update(titleNode.id, {
           [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
@@ -109,13 +108,11 @@ export class ChangeName extends BeforePlugin {
         const title = titleNode.textContent.slice(match[1].length - 1);
         // console.warn('title', title, match);
         if (title === '') {
-          const action = SetContentAction.create(titleNode.id,BlockContent.empty());
+          const action = SetContentAction.create(titleNode.id, []);
           cmd.Add(action);
         } else {
           const textNode = app.schema.text(title)!
-          const content = BlockContent.create(textNode);
-
-          const action = SetContentAction.withContent(titleNode.id, content, content);
+          const action = SetContentAction.create(titleNode.id, [textNode]);
           cmd.Add(action);
         }
       }
@@ -135,7 +132,7 @@ export class ChangeName extends BeforePlugin {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app, cmd } = ctx;
       const {selection} = app;
-      const block = node.closest(n => n.isContainerBlock)!;
+      const block = node.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
       preventAndStopCtx(ctx)
 
@@ -164,7 +161,7 @@ export class ChangeName extends BeforePlugin {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { node, app, cmd } = ctx;
       const { selection } = app;
-      const block = node.closest(n => n.isContainerBlock)!;
+      const block = node.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
 
       console.log('tryChangeType', ctx.node.textContent, name);
@@ -191,10 +188,8 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      const content = BlockContent.empty()
-
-      cmd.SetContent(block.firstChild!.id, content)
-        // .removeText(Pin.toStartOf(block)?.point!, app.schema.text(match[1].slice(0, -1))!)
+      cmd.SetContent(block.firstChild!.id, [])
+        // .removeText(Pin.toStartOf(block)?.point!, react.schema.text(match[1].slice(0, -1))!)
         .Add(insertBeforeAction(block, divider))
         .Change(block.id, block.type.splitName)
         .Update(block.id, { node: { typeChanged: true } })

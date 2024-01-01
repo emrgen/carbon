@@ -164,7 +164,7 @@ export class NestablePlugin extends AfterPlugin {
 				const atStart = selection.head.isAtStartOfNode(listNode);
 				if (!atStart) return
 
-				const as = listNode.properties.get('html.data-as')
+				const as = listNode.props.get('html.data-as')
 				if (as && as !== listNode.name) {
 					preventAndStopCtx(ctx);
 					cmd
@@ -204,7 +204,7 @@ export class NestablePlugin extends AfterPlugin {
 				const { selection } = app;
 				console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
 
-				const container = node.closest(n => n.isContainerBlock);
+				const container = node.closest(n => n.isContainer);
 				console.log(container?.name, node.name, node.type.isBlock && !node.type.isTextBlock);
 				console.log(node.chain.map(n => n.name).join(' > '));
 
@@ -245,10 +245,10 @@ export class NestablePlugin extends AfterPlugin {
 		}
 	}
 
-	// serializeChildren(app: Carbon, node: Node): string {
+	// serializeChildren(react: Carbon, node: Node): string {
 	// 	const children = node.children.slice(1);
 	// 	const depth = takeBefore(node.parents, (n: Node) => !isNestableNode(n)).length + 1;
 	// 	if (!children.length) return ''
-	// 	return '\n' + children.map(n => app.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
+	// 	return '\n' + children.map(n => react.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
 	// }
 }

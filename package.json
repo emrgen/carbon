@@ -7,13 +7,17 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "react": "cd apps/react && pnpm dev --port 5550",
+    "vue": "cd apps/vue && pnpm dev --port 5552",
+    "solid": "cd apps/solid && pnpm dev --port 5553",
+    "preact": "cd apps/preact && pnpm dev --port 5554",
+    "lit": "cd apps/lit && pnpm dev --port 5555",
+    "qwik": "cd apps/qwik && pnpm dev --port 5556",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "cloc-src": "cloc --exclude-dir=node_modules,dist,mongo-data-4.4,yarn.lock,package.json,package-lock.json .",
     "cloc-dist": "cloc --match-d=/dist/ .",
-    "e2e": "playwright test --reporter=list"
+    "e2e": "playwright test --reporter=list",
+    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && find . -name \"pnpm-lock.yaml\" -type f -prune -exec rm -rf '{}' +"
   },
   "devDependencies": {
     "@playwright/test": "^1.39.0",

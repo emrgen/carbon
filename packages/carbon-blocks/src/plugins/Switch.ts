@@ -40,7 +40,7 @@ export class Switch extends CarbonPlugin {
   }
 
   isChecked(node: Node) {
-    return node.properties.get<boolean>(CheckedPath)
+    return node.props.get<boolean>(CheckedPath)
   }
 
 

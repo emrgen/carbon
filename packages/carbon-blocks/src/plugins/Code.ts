@@ -50,12 +50,12 @@ export class Code extends CarbonPlugin {
         ctx.stopPropagation();
         const { selection } = app
 
-        // if (!app.state.runtime.clipboard.isEmpty) {
-        //   const { slice } = app.state.runtime.clipboard;
+        // if (!react.state.runtime.clipboard.isEmpty) {
+        //   const { slice } = react.state.runtime.clipboard;
         //   const textContent = slice.root.textContent;
         //   console.log('textContent', textContent);
         //   // Slice.create(slice.root, slice.start, slice.end);
-        //   app.cmd.transform.paste(selection, blockSelection, slice)?.Dispatch()
+        //   react.cmd.transform.paste(selection, blockSelection, slice)?.Dispatch()
         // } else {
         //
         // }
@@ -70,10 +70,10 @@ export class Code extends CarbonPlugin {
         const { app, node } = ctx;
         const { selection } = app;
         // if (selection.isBlock === 1) {
-        //   console.log('blockSelection', app.blockSelection);
+        //   console.log('blockSelection', react.blockSelection);
         //
         //   preventAndStopCtx(ctx);
-        //   app.tr.selectNodes([]).Dispatch();
+        //   react.tr.selectNodes([]).Dispatch();
         //   node.child(0)?.emit('focus', node.child(0)!)
         // }
       },
@@ -88,14 +88,14 @@ export class Code extends CarbonPlugin {
       },
 
       // backspace: (ctx: EventContext<KeyboardEvent>) => {
-      //   const { app, event, node } = ctx;
-      //   const { selection, cmd } = app;
+      //   const { react, event, node } = ctx;
+      //   const { selection, cmd } = react;
       //   const { start } = selection;
 
       //   if (selection.isCollapsed && start.isAtStart) {
       //     ctx.event.preventDefault();
       //     ctx.stopPropagation();
-      //     app.tr
+      //     react.tr
       //       .change(node.id, 'code', 'section')
       //       .select(selection)
       //       .Dispatch();
@@ -114,7 +114,7 @@ export class BeforeCodePlugin extends BeforePlugin {
   //   return {
   //     // insert text node at
   //     beforeInput: (ctx: EventContext<any>) => {
-  //       const { app, event, node } = ctx;
+  //       const { react, event, node } = ctx;
   //       const withinCode = node.parents.find(n => n.name === 'code');
   //
   //       if (!withinCode) return
@@ -129,8 +129,8 @@ export class BeforeCodePlugin extends BeforePlugin {
   // keydown(): Partial<EventHandler> {
   //   return {
   //     enter: (ctx: EventContext<KeyboardEvent>) => {
-  //       const { app, event, node } = ctx;
-  //       if (app.selection.isBlock) {
+  //       const { react, event, node } = ctx;
+  //       if (react.selection.isBlock) {
   //         return
   //       }
   //
@@ -144,14 +144,14 @@ export class BeforeCodePlugin extends BeforePlugin {
   // }
   //
   // insertText(ctx: EventContext<any>, text: string) {
-  //   const { app, event, node } = ctx;
+  //   const { react, event, node } = ctx;
   //   const { firstChild: textBlock } = node;
   //   if (!textBlock) {
   //     console.error(`textBlock not found for block ${node.id.toString()}`);
   //     return;
   //   }
   //
-  //   const { selection, commands } = app;
+  //   const { selection, commands } = react;
   //   // console.log('textBlock', textBlock);
   //
   //   const updateTitleText = (carbon: Carbon) => {
@@ -217,7 +217,7 @@ export class BeforeCodePlugin extends BeforePlugin {
   //   }
   //
   //   if (selection.isCollapsed) {
-  //     updateTitleText(app).Dispatch()
+  //     updateTitleText(react).Dispatch()
   //     return
   //   }
   // }

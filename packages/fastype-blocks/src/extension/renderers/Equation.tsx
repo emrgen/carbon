@@ -6,41 +6,28 @@ import React, {
   useState,
 } from "react";
 
-import {
-  CarbonBlock,
-  RendererProps,
-  useCarbon,
-  useSelectionHalo,
-  BlockContent,
-  preventAndStop,
-  stop,
-  Node, useNodeActivated
-} from "@emrgen/carbon-core";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import {
   Box,
   Center,
   HStack,
-  Input,
   Square,
   Stack,
   Text,
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
-import { RxImage } from "react-icons/rx";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon";
 import { useFastypeOverlay } from "../../hooks/useFastypeOverlay";
 import { createPortal } from "react-dom";
 import { Optional } from "@emrgen/types";
 import { TbMathXDivideY2 } from "react-icons/tb";
 import ResizeTextarea from "react-textarea-autosize";
-import { isHotkey, isKeyHotkey } from "is-hotkey";
+import { isKeyHotkey } from "is-hotkey";
+import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
+import {CarbonBlock, RendererProps, useCarbon, useNodeActivated, useSelectionHalo} from "@emrgen/carbon-react";
+import { preventAndStop,Node} from "@emrgen/carbon-core";
+import {stop} from "@emrgen/carbon-core/src/utils/event";
 
 export const EquationComp = (props: RendererProps) => {
   const { node } = props;
@@ -87,8 +74,8 @@ export const EquationComp = (props: RendererProps) => {
     (e) => {
       stop(e);
       // avoid selection if block is already selected
-      // if (app.blockSelection && app.blockSelection.has(node.id)) return;
-      // app.tr
+      // if (react.blockSelection && react.blockSelection.has(node.id)) return;
+      // react.tr
       //   .selectNodes([node.id])
       //   .Update(node.id, {
       //     node: {
@@ -114,7 +101,7 @@ export const EquationComp = (props: RendererProps) => {
     e.stopPropagation();
     e.preventDefault();
     // setPower(power + 1)
-    // const title = app.schema.nodeFromJSON({
+    // const title = react.schema.nodeFromJSON({
     //   name: 'title',
     //   content: [
     //     {
@@ -123,10 +110,10 @@ export const EquationComp = (props: RendererProps) => {
     //     }
     //   ]
     // })!
-    // app.tr
+    // react.tr
     // .setContent(node.id, BlockContent.create([title!]))
     // .forceRender([node.id]).Dispatch();
-    // app.tr.activateNodes([node.id]).Dispatch();
+    // react.tr.activateNodes([node.id]).Dispatch();
   };
 
   const updatePopover = useMemo(() => {
@@ -204,7 +191,7 @@ export const EquationComp = (props: RendererProps) => {
                 const text = app.schema.text(e.target.value)!;
                 app.enable(() => {
                   app.tr
-                    .SetContent(title.id, BlockContent.create(text))
+                    .SetContent(title.id, [text])
                     .Dispatch();
                 });
               }}
@@ -224,7 +211,7 @@ export const EquationComp = (props: RendererProps) => {
   return (
     <CarbonBlock
       node={node}
-      ref={ref}
+      ref={ref as any}
       custom={{
         onClick: handleClick,
         onMouseDown: handleMouseDown,
@@ -288,7 +275,7 @@ export const EquationContent = (props: EquationContentProps) => {
     <CarbonBlock node={node} custom={{ "data-name": "equation-wrapper" }}>
       <Box
         data-type="equation-content"
-        ref={eqRef}
+        ref={eqRef as any}
         p={2}
         opacity={error ? 0 : 1}
         minH={"50px"}

@@ -1,13 +1,9 @@
-import { last } from 'lodash';
 import { p12, p14 } from "./Logger";
 import { Carbon } from './Carbon';
 import { ActionOrigin } from './actions/types';
 import { PointedSelection } from './PointedSelection';
 import { SelectionEvent } from './SelectionEvent';
-import { EventsOut } from './Event';
-import { Optional } from '@emrgen/types';
 import { PinnedSelection } from './PinnedSelection';
-import { ImmutableDraft } from './ImmutableDraft';
 import {Draft} from "./Draft";
 
 export class SelectionManager {
@@ -43,7 +39,7 @@ export class SelectionManager {
 	onSelect(draft: Draft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		// console.log('onSelect', before.toString(), after.toString(), origin, this.enabled);
 		// if (!this.enabled) {
-		// 	// console.log('skipped: app selection disabled');
+		// 	// console.log('skipped: react selection disabled');
 		// 	return
 		// }
 
@@ -59,7 +55,7 @@ export class SelectionManager {
 		}
 	}
 
-	// syncs selection with app dom state
+	// syncs selection with react dom state
 	private onSelectionChange(draft: Draft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		const { state } = this;
 		if (before.eq(after) && origin !== ActionOrigin.UserInput && origin !== ActionOrigin.Normalizer && origin !== ActionOrigin.UserSelectionChange) {
@@ -75,12 +71,12 @@ export class SelectionManager {
 		}
 
 		draft.updateSelection(after);
-		console.log('synced selection from origin', origin)
+		console.log('synced selection from origin', origin, after.toString())
 		// this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange && origin !== ActionOrigin.NoSync);
-		// console.log('###', this.app.selection.toString(), selection.toString());
+		// console.log('###', this.react.selection.toString(), selection.toString());
 		// this.updateFocusPlaceholder(this.state.prevSelection, selection);
-		// this.app.change.update();
-		// this.app.emit(EventsOut.selectionUpdated, this.state);
+		// this.react.change.update();
+		// this.react.emit(EventsOut.selectionUpdated, this.state);
 	}
 
 	// update placeholder visibility for the focus node

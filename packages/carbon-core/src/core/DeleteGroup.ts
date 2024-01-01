@@ -1,12 +1,12 @@
 import { NodeIdSet } from "./BSet";
-import { Range } from './Range';
+import { Span } from './Span';
 import { NodeId } from './NodeId';
 import { State } from "./State";
 import { sortBy } from 'lodash';
 
 export class SelectionPatch {
 	ids: NodeIdSet = new NodeIdSet();
-	ranges: Range[] = [];
+	ranges: Span[] = [];
 
 	static fromState(state: State) {
 		let patch = new SelectionPatch();
@@ -18,13 +18,13 @@ export class SelectionPatch {
 		return new SelectionPatch();
 	}
 
-	addRange(range: Range) {
+	addRange(range: Span) {
 		if (!range.isCollapsed) {
 			this.ranges.push(range)
 		}
 	}
 
-	removeRange(range: Range) {
+	removeRange(range: Span) {
 		this.ranges = this.ranges.filter(r => r !== range);
 	}
 

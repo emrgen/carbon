@@ -12,6 +12,10 @@ export class NodeBTree extends BTree<NodeId, Node> {
     return tree;
   }
 
+  nodes(): Node[] {
+    return Array.from(this.values());
+  }
+
   static create() {
     return new NodeBTree();
   }

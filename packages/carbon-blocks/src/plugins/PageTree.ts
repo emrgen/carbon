@@ -55,7 +55,7 @@ export class PageTree extends CarbonPlugin {
   }
 
   closeAll(tr: Transaction, node: Node) {
-    node.forAll(n => {
+    node.all(n => {
       if (n.name === PageTreeItemName && n.isOpen) {
         tr.pageTreeItem.close(n)
       }

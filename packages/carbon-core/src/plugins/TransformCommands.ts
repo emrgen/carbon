@@ -4,11 +4,9 @@ import { Optional } from "@emrgen/types";
 import {
   ActionOrigin,
   BeforePlugin,
-  BlockContent,
   Carbon,
   CarbonAction,
-  Format, Fragment,
-  InlineContent,
+  Format, Fragment, insertAfterAction,
   InsertPos, isIsolatedNodes,
   MoveNodeAction,
   NodeIdSet,
@@ -27,7 +25,7 @@ import { NodeId } from "../core/NodeId";
 import { NodeType } from "../core/NodeType";
 import { Pin } from "../core/Pin";
 import { Point } from "../core/Point";
-import { Range } from "../core/Range";
+import { Span } from "../core/Span";
 import { Slice } from "../core/Slice";
 import { Transaction } from "../core/Transaction";
 import { ChangeNameAction } from "../core/actions/ChangeNameAction";
@@ -179,7 +177,7 @@ export class TransformCommands extends BeforePlugin {
         return tr
       }
 
-      tr.Add(SetContentAction.create(title.id, BlockContent.create([textNode])));
+      tr.Add(SetContentAction.create(title.id, [textNode]));
       tr.Select(after);
       return tr;
     }
@@ -206,7 +204,7 @@ export class TransformCommands extends BeforePlugin {
     let focusNode: Optional<Node> = null;
     reverse(nodes.slice()).some(n => {
       return n.find(n => {
-        if (n.isTextBlock) {
+        if (n.isTextContainer) {
           focusNode = n;
           return true;
         }
@@ -292,7 +290,7 @@ export class TransformCommands extends BeforePlugin {
         const textNode = app.schema.text(textContent);
         const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
         tr
-          .SetContent(start.node.id, BlockContent.create([textNode!]))
+          .SetContent(start.node.id, [textNode!])
           .Select(after);
 
         return tr;
@@ -301,7 +299,7 @@ export class TransformCommands extends BeforePlugin {
         const startTitleTextNode = app.schema.text(startTitleText)!;
 
         tr
-          .SetContent(start.node.id, BlockContent.create([startTitleTextNode!]))
+          .SetContent(start.node.id, [startTitleTextNode!])
 
         let beforeNode: Optional<Node> = start.node;
         let afterNode: Optional<Node> = startTitle;
@@ -331,7 +329,7 @@ export class TransformCommands extends BeforePlugin {
         if (start.node.parent?.isCollapsed) {
           tr.Update(start.node.parent.id, { node: { collapsed: false } });
         }
-        tr.SetContent(endTitle.id, BlockContent.create([endTitleTextNode!]),)
+        tr.SetContent(endTitle.id, [endTitleTextNode!])
         const after = PinnedSelection.fromPin(Pin.future(endTitle, endTitle.textContent.length)!);
         tr.Select(after, ActionOrigin.UserInput);
         console.log(endTitleText, after.toString());
@@ -344,7 +342,7 @@ export class TransformCommands extends BeforePlugin {
     // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
     tr.transform.delete(selection)?.Then((carbon) => {
       // console.log('DELETED', carbon.selection.toString());
-      // return this.paste(carbon, after, BlockSelection.empty(app.store), slice);
+      // return this.paste(carbon, after, BlockSelection.empty(react.store), slice);
     })?.Dispatch();
   }
 
@@ -405,7 +403,7 @@ export class TransformCommands extends BeforePlugin {
     const after = PointedSelection.fromPoint(point);
 
     node?.nextSiblings.forEach(n => {
-      tr.Update(n.id, { [RenderPath]: 1 + (n.properties.get<number>(RenderPath) ?? 0) });
+      tr.Update(n.id, { [RenderPath]: 1 + (n.props.get<number>(RenderPath) ?? 0) });
     })
 
     tr
@@ -459,7 +457,7 @@ export class TransformCommands extends BeforePlugin {
           throw Error('failed to create block');
         }
 
-        tr.SetContent(textBlock.id, BlockContent.create([]));
+        tr.SetContent(textBlock.id, []);
         tr.Add(removeNodesActions(commonNode.children.slice(1)));
         tr.Insert(at, block);
         tr.Select(PinnedSelection.fromPin(Pin.toStartOf(block)!));
@@ -468,7 +466,7 @@ export class TransformCommands extends BeforePlugin {
 
       const at = Point.toAfter(splitBlock!.id);
 
-      if (commonNode.isContainerBlock) {
+      if (commonNode.isContainer) {
         const block = splitBlock.type.default();
         if (!block) {
           throw Error('failed to create block');
@@ -522,14 +520,14 @@ export class TransformCommands extends BeforePlugin {
 
   private splitByRangeWithinTextBlock(tr: Transaction, splitBlock: Node, start: Pin, end: Pin, startBlock: Node, endBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const {app} = tr;
-    const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
+    const [leftNodes, _, rightNodes] = splitTextBlock(start, end, app);
 
     const json = {
       name: splitBlock.name,
       children: [
         {
           name: 'title',
-          children: rightContent.children.map(c => c.toJSON())
+          children: leftNodes.map(c => c.toJSON())
         }
       ]
     }
@@ -544,7 +542,7 @@ export class TransformCommands extends BeforePlugin {
     const after = PinnedSelection.fromPin(focusPoint!);
 
     app.tr
-      .SetContent(start.node.id, leftContent)
+      .SetContent(start.node.id, leftNodes)
       .Insert(at, section!)
       .Select(after)
       .Dispatch();
@@ -555,7 +553,7 @@ export class TransformCommands extends BeforePlugin {
   private splitByRangeAcrossBlocks(tr: Transaction, splitBlock: Node, start: Pin, end: Pin, startTopNode: Node, endTopNode: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const {app} = tr
     // console.log(deleteGroup.ids.toArray());
-    // console.log(deleteGroup.ids.toArray().map(id => app.store.get(id)));
+    // console.log(deleteGroup.ids.toArray().map(id => react.store.get(id)));
 
     const { parent: commonNode } = startTopNode;
     if (!commonNode) {
@@ -755,6 +753,14 @@ export class TransformCommands extends BeforePlugin {
         return;
       }
 
+      if (splitBlock.isEmpty) {
+        const after = PinnedSelection.fromPin(Pin.toStartOf(emptyBlock)!);
+        tr
+          .Add(insertAfterAction(splitBlock, emptyBlock))
+          .Select(after);
+        return
+      }
+
       const after = selection.clone();
       tr
         .Add(insertBeforeAction(splitBlock, emptyBlock))
@@ -813,13 +819,13 @@ export class TransformCommands extends BeforePlugin {
     // descend and clone nodes
     cloneBlocks.forEach((splitNode, index) => {
       if (index < maxDepth) {
-        // non leaf node
+        // non leaf node, a container node
         const firstNode = splitNode.type.default();
         if (!firstNode) {
           console.warn("failed to create firstNode of type", splitNode.type?.name);
           return;
         }
-        parentBlock.append(firstNode);
+        parentBlock.insert(firstNode, parentBlock.size);
         // move the split node next siblings to root node
         // only if spit pos === 'out'
         if (opts?.pos === "out") {
@@ -834,10 +840,10 @@ export class TransformCommands extends BeforePlugin {
         // leaf node is reached
         // console.log('last node', splittedNode.id.key);
         // console.log(pin.node.name, );
-        const [leftContent, _, rightContent] = splitTextBlock(pin, pin, app);
-        console.log(pin.node.name, leftContent, rightContent);
-        setContentCommands.push(SetContentAction.create(pin.node.id, leftContent));
-        setContentCommands.push(SetContentAction.create(parentBlock.id, rightContent));
+        const [leftNodes, _, rightNodes] = splitTextBlock(pin, pin, app);
+        console.log(pin.node.name, leftNodes, rightNodes);
+        setContentCommands.push(SetContentAction.create(pin.node.id, leftNodes));
+        setContentCommands.push(SetContentAction.create(parentBlock.id, rightNodes));
       }
 
       // parent must have at least one child
@@ -1038,7 +1044,7 @@ export class TransformCommands extends BeforePlugin {
           throw Error('failed to create block');
         }
 
-        tr.SetContent(textBlock.id, BlockContent.create([]));
+        tr.SetContent(textBlock.id, []);
         tr.Add(removeNodesActions(commonNode.children.slice(1)));
         tr.Select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
 
@@ -1061,7 +1067,7 @@ export class TransformCommands extends BeforePlugin {
 
     // * startBlock === endBlock
     if (startBlock.eq(endBlock)) {
-      // return this.deleteWithinBlock(app, start, end, startBlock, endBlock, deleteGroup);
+      // return this.deleteWithinBlock(react, start, end, startBlock, endBlock, deleteGroup);
     }
 
     // * startBlock !== endBlock
@@ -1144,10 +1150,10 @@ export class TransformCommands extends BeforePlugin {
         // }
 
         // must be equal, otherwise the blocks can not be merged
-        if (startContainer?.isTextBlock && endContainer?.isTextBlock) {
+        if (startContainer?.isTextContainer && endContainer?.isTextContainer) {
           const textContent = startTextBlock.textContent.slice(0, start.offset) + endTextBlock.textContent.slice(end.offset);
           const textNode = app.schema.text(textContent)!;
-          insertCommands.push(SetContentAction.withContent(startContainer.id, BlockContent.create([textNode]), startContainer.content));
+          insertCommands.push(SetContentAction.create(startContainer.id, [textNode]));
           contentUpdated.add(startContainer.id);
           console.log('merge start and end block');
         } else {
@@ -1216,8 +1222,8 @@ export class TransformCommands extends BeforePlugin {
     if (startDepth < endDepth) {
       console.log('CASE: startBlock.depth < endBlock.depth');
       console.log('+==================+');
-      const lowestStartContainer = startTopBlock.chain.find(n => n.isContainerBlock);
-      const lowestEndContainer = endTopBlock.chain.find(n => n.isContainerBlock);
+      const lowestStartContainer = startTopBlock.chain.find(n => n.isContainer);
+      const lowestEndContainer = endTopBlock.chain.find(n => n.isContainer);
 
       const lastInsertedNodeId = handleUptoSameDepth();
 
@@ -1300,15 +1306,15 @@ export class TransformCommands extends BeforePlugin {
           actions.push(...this.removeNodeCommands(node.children))
           // const children = node.children;
           // if (children.length===0) {
-          //   // const textNode = app.schema.text("");
+          //   // const textNode = react.schema.text("");
           //   // actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
           // } if (children.length === 1) {
           //   if (!node.firstChild!.isEmpty) {
-          //     const textNode = app.schema.text("");
+          //     const textNode = react.schema.text("");
           //     actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
           //   }
           // } else {
-          //   const textNode = app.schema.text("");
+          //   const textNode = react.schema.text("");
           //   actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
           // }
           return;
@@ -1319,7 +1325,7 @@ export class TransformCommands extends BeforePlugin {
         if (sdown?.node.eq(edown?.node)) {
           const { node } = sdown;
           const textContent = node.textContent.slice(0, start.offset) + node.textContent.slice(end.offset);
-          actions.push(SetContentAction.create(node.id, InlineContent.create(textContent)));
+          actions.push(SetContentAction.create(node.id,textContent));
           return
         }
 
@@ -1327,8 +1333,8 @@ export class TransformCommands extends BeforePlugin {
         // if (textContent === '') {
         //   actions.push(SetContentAction.create(node.id, BlockContent.empty()))
         // } else {
-        const textNode = app.schema.text(textContent);
-        actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)));
+        const textNode = app.schema.text(textContent)!;
+        actions.push(SetContentAction.create(node.id, [textNode]));
         // }
       }
     });
@@ -1396,8 +1402,8 @@ export class TransformCommands extends BeforePlugin {
     };
 
     if (startBlock.eq(endBlock)) {
-      if (startBlock.isTextBlock) {
-        selectedGroup.addRange(Range.create(start, end));
+      if (startBlock.isTextContainer) {
+        selectedGroup.addRange(Span.create(start, end));
       } else if (startBlock.type.isAtom) {
         // is it required???
         collectId(startBlock.id);
@@ -1406,16 +1412,16 @@ export class TransformCommands extends BeforePlugin {
     }
 
     // delete text range from startNode
-    if (startBlock.isTextBlock && !startInfo.isEmpty) {
-      selectedGroup.addRange(Range.create(start.clone(), Pin.create(start.node, start.node.focusSize)));
+    if (startBlock.isTextContainer && !startInfo.isEmpty) {
+      selectedGroup.addRange(Span.create(start.clone(), Pin.create(start.node, start.node.focusSize)));
     } else if (startBlock.type.isAtom) {
       collectId(startBlock.id);
     }
     startRemoveBlock = startBlock.next();
 
     // delete text range from endNode
-    if (endBlock.isTextBlock && !endInfo.isEmpty) {
-      selectedGroup.addRange(Range.create(Pin.create(end.node, 0), end.clone()));
+    if (endBlock.isTextContainer && !endInfo.isEmpty) {
+      selectedGroup.addRange(Span.create(Pin.create(end.node, 0), end.clone()));
     } else if (endBlock.type.isAtom) {
       collectId(endBlock.id);
     }
@@ -1436,8 +1442,8 @@ export class TransformCommands extends BeforePlugin {
     // console.log(startNode, endNode);
     // console.log(startNode.textContent, endNode.textContent);
 
-    const startContainer = startRemoveBlock.closest(n => n.isContainerBlock)
-    const endContainer = endRemoveBlock.closest(n => n.isContainerBlock)
+    const startContainer = startRemoveBlock.closest(n => n.isContainer)
+    const endContainer = endRemoveBlock.closest(n => n.isContainer)
 
     if (!startContainer || !endContainer) {
       console.log(p14("%c[failed]"), "color:red", "start/end node container not found");
@@ -1579,7 +1585,7 @@ export class TransformCommands extends BeforePlugin {
 
     // merge text blocks
     // TODO: need to test intensively for edge cases
-    if (prev.isTextBlock && next.isTextBlock) {
+    if (prev.isTextContainer && next.isTextContainer) {
       // NOTE: if next is empty, it will create a empty text node
       // empty text node will cause issue in `mergeTextNodes`
       // NOTE: empty text node are not valid in carbon
@@ -1592,7 +1598,7 @@ export class TransformCommands extends BeforePlugin {
           console.log('0000000000000000000000000000')
           const textContent = prev.textContent + next.textContent;
           const textNode = app.schema.text(textContent)!;
-          insertActions.push(SetContentAction.create(prev.id, BlockContent.create([textNode])));
+          insertActions.push(SetContentAction.create(prev.id, [textNode]));
         }
 
         if (prev.isEmpty && !next.isEmpty) {

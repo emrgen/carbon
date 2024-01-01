@@ -75,8 +75,6 @@ export class Mark {
 export class MarkSet {
 	marks: Record<string, Mark> = {};
 
-
-
 	get size() {
 		return keys(this.marks).length;
 	}

@@ -26,13 +26,11 @@ import { UpdatePropsAction } from './actions/UpdatePropsAction';
 import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
-import { ImmutableDraft } from './ImmutableDraft';
 import { ActivatedPath, OpenedPath, SelectedPath } from "./NodeProps";
 import { SetContentAction } from "./actions/SetContentAction";
 import { SelectAction } from "./actions/SelectAction";
 import { RemoveNodeAction } from "./actions/RemoveNodeAction";
 import { MoveNodeAction } from "./actions/MoveNodeAction";
-import { isNestableNode } from "@emrgen/carbon-blocks";
 import { CarbonCommand, PluginCommand } from "./CarbonCommand";
 import {Draft} from "./Draft";
 
@@ -147,7 +145,8 @@ export class Transaction {
 		return this.Add(SelectAction.create(this.state.selection.unpin(), after, origin));
 	}
 
-	SetContent(nodeRef: IntoNodeId, after: NodeContent, origin = this.origin): Transaction {
+  // can be called for textContainer only
+	SetContent(nodeRef: IntoNodeId, after: Node[] | string, origin = this.origin): Transaction {
 		return this.Add(SetContentAction.create(nodeRef, after, origin));
 	}
 
@@ -157,15 +156,15 @@ export class Transaction {
 	}
 
 	Remove(at: Point, ref: IntoNodeId, origin = this.origin): Transaction {
-		return this.Add(RemoveNodeAction.fromNode(at, ref.intoNodeId(), origin));
+		return this.Add(RemoveNodeAction.fromNode(at, ref.nodeId(), origin));
 	}
 
 	Move(from: Point, to: Point, ref: IntoNodeId, origin = this.origin): Transaction {
-		return this.Add(MoveNodeAction.create(from, to, ref.intoNodeId(), origin));
+		return this.Add(MoveNodeAction.create(from, to, ref.nodeId(), origin));
 	}
 
 	Change(ref: NodeId | Node, to: NodeName, origin = this.origin): Transaction {
-		return this.Add(ChangeNameAction.create(ref.intoNodeId(), to, origin));
+		return this.Add(ChangeNameAction.create(ref.nodeId(), to, origin));
 	}
 
 	Format(selection: Selection, mark: Mark | MarkSet, origin = this.origin): Transaction {
@@ -184,7 +183,7 @@ export class Transaction {
 	// previously selected nodes will be deselected
 	// previously active nodes will be deactivated
 	private selectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
 		console.log('selectNodes', selectIds.map(id => id.toString()));
 		selectIds.forEach(id => {
 			this.Update(id, { [SelectedPath]: true }, origin)
@@ -194,7 +193,7 @@ export class Transaction {
 	}
 
 	private deselectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
 		selectIds.forEach(id => {
 			console.log('xxx deselecting', id.toString());
 			this.Update(id, { [SelectedPath]: false }, origin)
@@ -204,7 +203,7 @@ export class Transaction {
 	}
 
 	private activateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
 		activateIds.forEach(id => {
 			this.Update(id, { [ActivatedPath]: true }, origin)
 		})
@@ -213,7 +212,7 @@ export class Transaction {
 	}
 
 	private deactivateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.intoNodeId());
+		const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
 		activateIds.forEach(id => {
 			this.Update(id, { [ActivatedPath]: false }, origin)
 		})
@@ -249,11 +248,11 @@ export class Transaction {
 		}
 		this._dispatched = true;
 
-    console.groupCollapsed('dispatching transaction')
-    this.actions.forEach(ac => {
-      console.log(ac.toString())
-    })
-    console.groupEnd();
+    // console.groupCollapsed('dispatching transaction')
+    // this.actions.forEach(ac => {
+    //   console.log(ac.toString())
+    // })
+    // console.groupEnd();
 
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema
@@ -261,7 +260,7 @@ export class Transaction {
 		return this;
 	}
 
-	Commit(draft: Draft): Transaction {
+	Commit(draft: Draft) {
 		if (this.actions.length === 0) return this
 		if (this._committed) {
 			console.warn('skipped: transaction already committed')
@@ -271,9 +270,9 @@ export class Transaction {
 
 		try {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
-				console.groupCollapsed('Commit (runtime)');
+				console.group('Commit (runtime)');
 			} else {
-				console.groupCollapsed  ('Commit', this.id, this);
+				console.group('Commit', this.id, this);
 			}
 
 			for (const action of this.actions) {
@@ -289,7 +288,6 @@ export class Transaction {
 		} finally {
 			console.groupEnd()
 			this._committed = true;
-			return this;
 		}
 	}
 
@@ -298,7 +296,7 @@ export class Transaction {
 	// 	const {actions} = this;
 	// 	const {actions: otherActions} = other;
 	// 	if (this.textInsertOnly && other.textInsertOnly) {
-	// 		const { tr } = this.app
+	// 		const { tr } = this.react
 	// 		const thisSetContentAction = first(actions) as SetContentAction
 	// 		const otherSetContentAction = first(actions) as SetContentAction
 	//
@@ -344,7 +342,7 @@ export class Transaction {
 					} else {
 						const part = Reflect.get(target, prop);
 						if (isFunction(part)) {
-							return (...args) => {
+							return (...args: any) => {
 								part.bind(self)(...args);
 								return proxy;
 							}
@@ -411,7 +409,7 @@ export class TransactionCommit {
 	}
 
 	filter(fn: (action: CarbonAction) => boolean) {
-		// const {tr} = this.app;
+		// const {tr} = this.react;
 		// this.actions.filter(fn).forEach(action => {
 		// 	tr.Add(action);
 		// });

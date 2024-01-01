@@ -5,7 +5,6 @@ import { ActionOrigin } from './types';
 import { classString } from '../Logger';
 import { RemoveNodeAction } from './RemoveNodeAction';
 import { Node } from '../Node';
-import { ImmutableDraft } from '../ImmutableDraft';
 import { deepCloneMap, NodeJSON } from "../types";
 import { NodeId } from "../NodeId";
 import {Draft} from "../Draft";
@@ -20,7 +19,9 @@ export class InsertNodeAction implements CarbonAction {
 	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {}
 	execute(tr: Transaction, draft: Draft) {
 		const { at, node: json } = this;
-		const {app}=tr;
+		const {app} = tr;
+
+    // create a mutable node from json
 		const node = app.schema.nodeFromJSON(json)!;
 
 		const refNode = draft.get(at.nodeId);
@@ -32,8 +33,8 @@ export class InsertNodeAction implements CarbonAction {
 			throw new Error('failed to find parent node from: ' + at.toString())
 		}
 
-		const clone = node.clone(deepCloneMap);
-		draft.insert(at, clone);
+		// const clone = node.clone(deepCloneMap);
+		draft.insert(at, node);
 	}
 
 	inverse(): CarbonAction {

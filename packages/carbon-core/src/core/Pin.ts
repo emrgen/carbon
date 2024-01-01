@@ -199,10 +199,7 @@ export class Pin {
 
 		const { parent } = node;
 		if (!parent) {
-			const map = StateScope.get(node.scope)
-			console.log(map);
 			throw Error('Pin.up: node does not have a parent' + node.id.toString());
-			return
 		}
 
 		let distance = 0

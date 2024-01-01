@@ -1,25 +1,28 @@
-import { Carbon, CarbonOverlayContext, preventAndStop } from "@emrgen/carbon-core";
-import { useEffect, useRef } from "react";
-import { RecoilRoot } from "recoil";
-
+import {Carbon} from "@emrgen/carbon-core";
+import {ReactNode, useEffect, useRef} from "react";
+import {RecoilRoot} from "recoil";
+import {DndContext, RectSelectContext} from "@emrgen/carbon-dragon-react";
 import {
   CarbonChangeContext,
   CarbonContent,
   CarbonContext,
   CarbonEvents,
-} from "@emrgen/carbon-core";
-import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon";
+  CarbonOverlayContext,
+  RenderManager,
+  RenderManagerContext
+} from "@emrgen/carbon-react";
 
 interface CarbonAppProps {
   app: Carbon;
-  children?: React.ReactNode;
+  renderManager: RenderManager;
+  children?: ReactNode;
 }
 
 export function CarbonApp(props: CarbonAppProps) {
-  const { app, children } = props;
+  const {app, children} = props;
   // @ts-ignore
   window.app = app;
-  // console.log(app.content)
+  // console.log(react.content)
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     app.focus();
@@ -36,24 +39,26 @@ export function CarbonApp(props: CarbonAppProps) {
     <CarbonContext app={app}>
       <CarbonOverlayContext>
         <DndContext>
-          <RecoilRoot>
-            <CarbonEvents>
-              <div
-                ref={ref}
-                className="carbon-app-cursor-rest"
-                contentEditable={true}
-                suppressContentEditableWarning
-                // onKeyDown={preventAndStop}
-                // onKeyUp={preventAndStop}
-              ></div>
-              <CarbonChangeContext>
-                <RectSelectContext>
-                  <CarbonContent />
-                  {children}
-                </RectSelectContext>
-              </CarbonChangeContext>
-            </CarbonEvents>
-          </RecoilRoot>
+          <RenderManagerContext manager={props.renderManager}>
+            <RecoilRoot>
+              <CarbonEvents>
+                <div
+                  ref={ref}
+                  className="carbon-app-cursor-rest"
+                  contentEditable={true}
+                  suppressContentEditableWarning
+                  // onKeyDown={preventAndStop}
+                  // onKeyUp={preventAndStop}
+                ></div>
+                <CarbonChangeContext>
+                  <RectSelectContext>
+                    <CarbonContent/>
+                    {children}
+                  </RectSelectContext>
+                </CarbonChangeContext>
+              </CarbonEvents>
+            </RecoilRoot>
+          </RenderManagerContext>
         </DndContext>
       </CarbonOverlayContext>
     </CarbonContext>

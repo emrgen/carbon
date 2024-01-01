@@ -9,7 +9,7 @@ export class NodeEncoderJSON implements NodeEncoder<JSONNode> {
       id: node.id.toString(),
       name: node.name,
       content: node.children.map(n => this.encode(n)),
-      attrs: node.properties,
+      attrs: node.props,
       // data: node.data
     }
   }
@@ -26,7 +26,7 @@ export class NodeEncoderMarkdown implements NodeEncoder<MarkdownNode> {
   }
 
   decode(app: Carbon, node: string): Optional<Node> {
-    // return app.schema.nodeFromMarkdown(node);
+    // return react.schema.nodeFromMarkdown(node);
     return null;
   }
 }

@@ -6,7 +6,7 @@ import { Decoration } from '../core/Decoration';
 
 let count = 0
 
-// handles selection change events and dispatches a transaction to update the app state
+// handles selection change events and dispatches a transaction to update the react state
 export class SelectionChangePlugin extends AfterPlugin {
 
 	name = 'selectionChange'
@@ -19,7 +19,6 @@ export class SelectionChangePlugin extends AfterPlugin {
         const {selection} = ctx.app;
         if (!selection.isCollapsed) return
 
-        // console.log('xxxxxxxxxxxxxxxxxxxxx')
         this.state.set('mousedown', true);
         this.state.set('mousedownselection', false);
         const before = PinnedSelection.fromDom(ctx.app.store);
@@ -34,7 +33,7 @@ export class SelectionChangePlugin extends AfterPlugin {
           window.removeEventListener('mouseup', onMouseUp);
 
           if (before && after && !before.eq(after)) {
-            // ctx.app.cmd.Select(after).Dispatch();
+            // ctx.react.cmd.Select(after).Dispatch();
             console.log('selecting using mouse')
             return
           }
@@ -96,7 +95,7 @@ export class SelectionChangePlugin extends AfterPlugin {
 				const {app} = ctx;
 				const {selection} = app;
 				if (selection.isBlock) {
-					// app.tr.se
+					// react.tr.se
 				}
 			},
 		}

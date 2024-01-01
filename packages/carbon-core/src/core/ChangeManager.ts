@@ -7,11 +7,8 @@ import { SelectionManager } from "./SelectionManager";
 import { TransactionManager } from "./TransactionManager";
 import { EventsOut } from "./Event";
 import { Transaction } from "./Transaction";
-import { StateChanges } from "./NodeChange";
 import { PluginManager } from "./PluginManager";
-import { NodeId } from "./NodeId";
 import { ActionOrigin, State } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
 
 export enum NodeChangeType {
   update = "update",
@@ -28,11 +25,10 @@ interface PromiseState {
 export class ChangeManager extends NodeTopicEmitter {
 
   readonly transactions: Transaction[] = [];
-  changes: NodeIdSet = NodeIdSet.empty();
+  updated: NodeIdSet = NodeIdSet.empty();
 
   promiseState: PromiseState;
 
-  counter: number = 0;
   private interval: any;
 
   constructor(
@@ -55,46 +51,44 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   private get isContentSynced() {
-    return !this.changes.size;
+    return !this.updated.size;
   }
 
   private get isSelectionDirty() {
     return this.state.isSelectionChanged;
   }
 
-  get stateCounter() {
-    return this.app.state.counter;
-  }
-
   // 1. sync the doc
   // 2. sync the selection
   // 3. sync the node state
   update(tr: Transaction, state: State, timeout: number = 1000) {
-    this.counter = this.stateCounter;
-
     if (this.transactions.length) {
-      // this.promiseState.reject?.();
+      console.log('pending transaction', this.transactions.length);
       return;
     }
 
-
     this.transactions.push(tr);
     const { isContentChanged, isSelectionChanged } = this.state;
+
+    // console.log('isSelectionChanged', isSelectionChanged)
 
     // console.log('updating transaction effect', tr);
     // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
     // if nothing is dirty, then there is nothing to do
     if (!isContentChanged && !isSelectionChanged) {
+      console.log("skipped: nothing to sync");
       return;
     }
 
+    // console.log('update', isContentChanged, isSelectionChanged);
     if (isContentChanged) {
-      this.changes.clear();
-      this.changes = state.changes.clone();
+      this.updated.clear();
+      this.updated = state.updated.clone();
+      console.log("syncing: content", this.updated.nodes(this.state.nodeMap).map(n => n.key));
 
       this.interval = setTimeout(() => {
-        console.error("syncing: content timeout", this.changes.toArray().map(n => n.toString()));
-        this.changes.clear();
+        console.error("syncing: content timeout", this.updated.nodes(this.state.nodeMap).map(n => n.key));
+        this.updated.clear();
       }, 2000)
     }
 
@@ -112,13 +106,14 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   mounted(node: Node, changeType: NodeChangeType) {
+    // console.log('changes size', this.updated.size)
     // if (this.counter > this.stateCounter) {
     //   console.log('mounted: old transaction sync still in progress', this.counter, counter);
     //   return;
     // }
 
     // force the promise to timeout
-    if (!this.changes.has(node.id)) {
+    if (!this.updated.has(node.id)) {
       // console.log('mounted node not dirty', node.id.toString(), changeType);
       return;
     }
@@ -128,7 +123,7 @@ export class ChangeManager extends NodeTopicEmitter {
     // keep track of the pending node updates
     if (changeType === NodeChangeType.update) {
       // console.log('mounted', node.id.toString(), changeType, this.changes.size, this.changes.toArray().map(n => n.toString()), node.textContent, node);
-      this.changes.remove(node.id);
+      this.updated.remove(node.id);
     }
 
     // console.log('mounted', this.isContentSynced, this.state.isSelectionDirty);
@@ -170,7 +165,7 @@ export class ChangeManager extends NodeTopicEmitter {
   private updateContent() {
     console.groupCollapsed("syncing:  content");
     // console.group('syncing: content')
-    const updatedNodeIds = this.changes;
+    const updatedNodeIds = this.updated;
 
     // keep only the top level nodes that have been updated
     // remove the update children
@@ -181,8 +176,12 @@ export class ChangeManager extends NodeTopicEmitter {
     // })
 
     const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
+    // console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
 
-    console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
+    // sort the nodes by depth so that we can update the children first
+    updatedNodes.sort((a, b) => {
+      return b.depth - a.depth;
+    })
 
     // updatedNodes.forEach(n => {
     //   updatedNodeIds.remove(n.id);
@@ -192,12 +191,11 @@ export class ChangeManager extends NodeTopicEmitter {
     //   updatedNodeIds.add(n.id);
     // });
 
-    console.log("publish", updatedNodes.map(n => n.key));
-
+    console.log("publish to ui", updatedNodes.map(n => n.key));
     updatedNodes
-      .filter(n => updatedNodeIds.has(n.id))
+      // .filter(n => updatedNodeIds.has(n.id))
       .forEach(n => {
-        console.log('publishing', n.id.toString());
+        // console.log('publishing', n.id.toString());
         this.emit(n, NodeChangeType.update)
       });
     console.groupEnd();
@@ -205,13 +203,13 @@ export class ChangeManager extends NodeTopicEmitter {
 
   private updateSelection(cb: Function) {
     const selection = this.state.selection;
-    // console.debug("syncing: selection", this.state.selection.toJSON(), this.state.selection.isInline);
+    // console.log("syncing: selection", this.state.selection.toJSON(), this.state.selection.isInline);
     if (!this.app.ready) {
-      // console.log('app not ready');
+      // console.log('react not ready');
       return;
     }
 
-    // this.app.enable();
+    // this.react.enable();
 
     if (selection.isInline) {
       this.syncSelection();
@@ -235,13 +233,13 @@ export class ChangeManager extends NodeTopicEmitter {
       }
 
       if (!this.state.isSelectionChanged) {
-        console.log("skipped: selection already synced", this.state.selectionOrigin, this.state.selection.toString());
+        console.log("skipped: selection already synced", this.state.selection.origin, this.state.selection.toString());
         return;
       }
 
       const { app } = this;
       const { selection } = this.state;
-      if (this.state.previous?.selection?.eq(selection) && selection.origin === ActionOrigin.DomSelectionChange) {
+      if (!this.state.isSelectionChanged && selection.origin === ActionOrigin.DomSelectionChange) {
         console.log("skipped: unchanged selection sync", selection.origin, selection.toString());
         return;
       }

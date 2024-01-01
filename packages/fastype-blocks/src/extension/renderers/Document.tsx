@@ -2,33 +2,29 @@ import { useCallback, useEffect, useRef } from "react";
 
 import {
   ActionOrigin,
-  CarbonBlock,
-  CarbonNodeChildren,
-  CarbonNodeContent,
   EventsIn,
   EventsOut,
   Node,
   Pin,
   PinnedSelection,
   Point,
-  RendererProps,
   prevent,
   preventAndStop,
-  useCarbon,
 } from "@emrgen/carbon-core";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon} from "@emrgen/carbon-react";
 import {
   useCombineConnectors,
   useConnectorsToProps,
   useDndRegion,
   useDroppable,
   useNonDraggable,
-  useRectSelectionSurface,
-} from "@emrgen/carbon-dragon";
-import { DocumentContext } from "@emrgen/carbon-blocks";
+  useRectSelectionSurface
+} from "@emrgen/carbon-dragon-react";
+import {DocumentContext} from "@emrgen/carbon-react-blocks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
-  // const { picture = {} } = node.properties.node;
+  // const { picture = {} } = node.props.node;
 
   const app = useCarbon();
 
@@ -79,7 +75,7 @@ export const DocumentComp = (props: RendererProps) => {
 
       if (e.clientY > bound.bottom) {
         if (lastChild.name === "section" && lastChild.isEmpty) {
-          const textBlock = lastChild.find((n) => n.isTextBlock);
+          const textBlock = lastChild.find((n) => n.isTextContainer);
           if (textBlock) {
             const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
             if (after.eq(app.selection)) return;
@@ -129,7 +125,7 @@ export const DocumentComp = (props: RendererProps) => {
     };
   }, [app, ref]);
 
-  console.log(node.properties);
+  console.log(node.props);
 
   return (
     <DocumentContext document={node}>
@@ -152,13 +148,13 @@ export const DocumentComp = (props: RendererProps) => {
         )} */}
         <CarbonBlock
           node={node}
-          ref={ref}
+          ref={ref as any}
           custom={{
             ...connectors,
             // onMouseUp: handleClick,
             onMouseDown: handleMouseDown,
             // onScroll: (e) => {
-            //   app.emit(EventsIn.scroll, e as any);
+            //   react.emit(EventsIn.scroll, e as any);
             // },
             onBlur: (e) => app.emit("document:blur", e as any),
             onFocus: (e) => app.emit("document:focus", e as any),

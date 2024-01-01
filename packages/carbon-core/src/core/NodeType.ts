@@ -8,8 +8,11 @@ import { NodeSpec, Schema } from './Schema';
 import {HTMLAttrs, NodeJSON, NodeName} from './types';
 import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { NodeState, NodeStateJSON } from "./NodeState";
-import { InitNodeJSON } from "@emrgen/carbon-core";
 import { NodeProps, NodePropsJson } from "./NodeProps";
+
+interface InitNodeJSON extends Omit<NodeJSON, 'id'> {
+  id?: string;
+}
 
 const specGroups = (name: string, spec: NodeSpec) => {
 	const groups = new Set(spec.group ? spec.group.split(" ") : []);
@@ -241,7 +244,8 @@ export class NodeType {
 		if (this.isText) {
 			return this.schema.text(content as string);
 		}
-		return this.schema.node(this.name, { content: content as Node[] });
+
+		return this.schema.node(this.name, { children: content as Node[] });
 	}
 
 	eq(other: NodeType) {
@@ -253,7 +257,7 @@ export class NodeType {
 
 	createAndFill(): Optional<Node> {
     if (this.defaultNodeCache) {
-      return this.schema.cloneWithId(this.defaultNodeCache);
+      return this.schema.clone(this.defaultNodeCache);
     }
 
     if (this.isText) {
