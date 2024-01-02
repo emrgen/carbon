@@ -288,8 +288,9 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot move node to a draft that is already committed");
     }
 
+    // moving node should be mutable wo that it can be updated
     if (Object.isFrozen(node)) {
-      throw Error("cannot insert immutable node, it must be at least mutable at top level");
+      node = node.clone();
     }
 
     if (!this.get(node.id)) {

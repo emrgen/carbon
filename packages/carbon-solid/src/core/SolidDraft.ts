@@ -1,19 +1,18 @@
-import * as Core from '@emrgen/carbon-core';
 import {Optional} from "@emrgen/types";
 import {
   Draft,
-  Node, NodeBTree,
-  NodeContent,
+  Node,
   NodeId,
   NodeMap,
   NodePropsJson,
   NodeType,
-  Point,
+  Point, PointAt,
   PointedSelection,
   State
 } from "@emrgen/carbon-core";
 import {SolidNodeMap} from "./NodeMap";
 import {isArray} from "lodash";
+import {p14} from "@emrgen/carbon-core/src/core/Logger";
 
 export class SolidDraft implements Draft {
 
@@ -76,7 +75,25 @@ export class SolidDraft implements Draft {
   change(nodeId: NodeId, type: NodeType): void {
   }
 
-  insert(at: Point, node: Node): void {
+  move(to: Point, node: Node): void {
+    console.log(p14('%c[trap]'), "color:green", 'move', to.toString(), node.toString());
+
+    const refNode = this.get(to.nodeId);
+    if (!refNode) {
+      throw new Error(`Node ${to.nodeId.toString()} not found`);
+    }
+
+
+    const { parent } = node;
+    if (!parent) {
+      throw new Error(`Parent of ${node.id.toString()} not found`);
+    }
+
+    parent.remove(node);
+    this.insert(to, node, "move");
+  }
+
+  insert(at: Point, node: Node, type: "create" | "move" = "create") {
     console.log('[trap] insert', at.toString(), node.toString());
 
     const refNode = this.get(at.nodeId);
@@ -90,17 +107,55 @@ export class SolidDraft implements Draft {
 
     node.all(n => {
       this.nodeMap.set(n.id, n)
-    })
+    });
+
+    // const index = refNode.index;
+    // console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())
+    // parent.insert(node, index + 1);
+
+    switch (at.at) {
+      case PointAt.After:
+        return this.insertAfter(node, refNode);
+      case PointAt.Before:
+        return this.insertBefore(node, refNode);
+      case PointAt.Start:
+        return this.prepend(node, refNode);
+      case PointAt.End:
+        return this.append(node, refNode);
+    }
+
+    throw new Error("Invalid insertion point");
+  }
+
+  private insertBefore(node: Node, refNode: Node) {}
+
+  private insertAfter(node: Node, refNode: Node) {
+    console.log(p14('%c[trap]'), "color:green", 'insertAfter', node.toString(), refNode.toString());
+    const parent = this.parent(refNode);
+    if (!parent) {
+      throw new Error(`Parent of ${refNode.id.toString()} not found`);
+    }
+
+    node.all(n => {
+      this.nodeMap.set(n.id, n)
+    });
 
     const index = refNode.index;
     console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())
     parent.insert(node, index + 1);
   }
 
-  move(to: Point, node: Node): void {
-  }
+  private prepend(node: Node, refNode: Node) {}
+
+  private append(node: Node, refNode: Node) {}
 
   remove(node: Node): void {
+    console.log(p14('%c[trap]'), "color:green", 'remove', node.toString());
+    const parent = this.parent(node);
+    parent?.remove(node);
+    node.all(n => {
+      this.nodeMap.delete(n.id);
+    })
   }
 
   updateContent(nodeId: NodeId, content: Node[]|string): void {

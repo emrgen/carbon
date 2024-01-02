@@ -10,10 +10,10 @@ import {
   Carbon,
   PinnedSelection,
   LocalHtmlAttrPath,
-  corePresetPlugins, State, EditablePath
+  corePresetPlugins,
+  State,
 } from '@emrgen/carbon-core';
-import {createEffect, createSignal, For, onCleanup, onMount, Show} from "solid-js";
-import {Optional} from "@emrgen/types";
+import {createSignal, For, onCleanup, onMount, Show} from "solid-js";
 
 const plugins = [
   ...corePresetPlugins,
