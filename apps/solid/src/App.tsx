@@ -11,9 +11,9 @@ import {
   PinnedSelection,
   LocalHtmlAttrPath,
   corePresetPlugins,
-  State, preventAndStop, stop, CheckedPath,
+  State, CheckedPath,
 } from '@emrgen/carbon-core';
-import {createSignal, For, onCleanup, onMount, Show} from "solid-js";
+import {createSignal, For, onCleanup, onMount} from "solid-js";
 
 const plugins = [
   ...corePresetPlugins,
@@ -46,7 +46,7 @@ const app = new Carbon(state, schema, pm);
 window.app = app;
 
 
-// console.log = noop;
+console.log = noop;
 console.info = noop;
 // console.debug = noop;
 // console.warn = noop;

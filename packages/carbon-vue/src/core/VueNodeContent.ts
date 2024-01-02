@@ -16,20 +16,7 @@ export class VueNodeContent implements NodeContent {
 
   // make the data reactive
   static create(data: NodeContentData) {
-    const content = reactive(data);
-    // const active = reactive({
-    //   id: data.id,
-    //   type: data.type,
-    //   parentId: data.parentId,
-    //   parent: data.parent,
-    //   textContent: data.textContent,
-    //   children: data.children,
-    //   linkName: data.linkName,
-    //   links: data.links,
-    //   props: data.props,
-    //   marks: data.marks,
-    // } as NodeContentData);
-
+    const content = reactive(data) as NodeContentData;
     return new VueNodeContent(content);
   }
 

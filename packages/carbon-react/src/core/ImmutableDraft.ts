@@ -20,7 +20,7 @@ import {ImmutableState} from "./ImmutableState";
 import {identity, isArray} from "lodash";
 import FastPriorityQueue from "fastpriorityqueue";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
-import {Scope} from "./Scope";
+import {StateScope} from "./StateScope";
 import {ImmutableNodeContent} from "./ImmutableNodeContent";
 import {ImmutableNode} from "./ImmutableNode";
 import {
@@ -77,15 +77,15 @@ export class ImmutableDraft implements CoreDraft {
     // const draft = new ImmutableDraft(this, origin);
     const {scope} = this.state;
     try {
-      Scope.set(scope, this.nodeMap)
+      StateScope.set(scope, this.nodeMap)
       fn(this);
       const state = this.commit(3);
-      Scope.set(scope, state.nodeMap)
+      StateScope.set(scope, state.nodeMap)
 
       this.dispose();
       return state;
     } catch (e) {
-      Scope.set(scope, this.state.nodeMap);
+      StateScope.set(scope, this.state.nodeMap);
       console.error(e);
       this.dispose();
       return this.state;

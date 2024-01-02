@@ -1,6 +1,6 @@
 import {ActionOrigin, MarkSet, Node, NodeIdSet, PinnedSelection, State} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
-import {Scope} from "./Scope";
+import {StateScope} from "./StateScope";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {ImmutableDraft} from "./ImmutableDraft";
 import {StateChanges} from "@emrgen/carbon-core/src/core/NodeChange";
@@ -69,12 +69,12 @@ export class ImmutableState implements State {
   }
 
   activate() {
-    Scope.set(this.scope, this.nodeMap);
+    StateScope.set(this.scope, this.nodeMap);
     return this;
   }
 
   deactivate() {
-    Scope.delete(this.scope);
+    StateScope.delete(this.scope);
   }
 
   clone(depth: number = 2) {

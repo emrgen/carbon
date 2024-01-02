@@ -9,11 +9,11 @@ import {Mark, MarkSet, NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-
 export interface NodeData {
   id: string;
   name: string;
-  parentId: Optional<string>;
-  textContent: string;
-  children: NodeData[];
-  linkName: string;
-  links: Record<string, NodeData>;
+  parentId?: string;
+  textContent?: string;
+  children?: NodeData[];
+  linkName?: string;
+  links?: Record<string, NodeData>;
   props?: NodePropsJson;
   marks?: string[]
 }

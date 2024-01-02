@@ -54,7 +54,6 @@ export default {
 
   mounted() {
     this.app.change.on(this.node.id, NodeChangeType.update, this.onChange.bind(this));
-    console.log(this.dataNode)
   },
   beforeUnmount() {
     // const app = inject('app') as Carbon;

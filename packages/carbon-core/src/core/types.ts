@@ -3,7 +3,14 @@ import { EventContext } from './EventContext';
 import { Node } from './Node';
 import { InputRule } from './Rules';
 import { Carbon } from './Carbon';
-import {CarbonPlugin, NodeContentData, PinnedSelection, PointedSelection, Transaction} from "@emrgen/carbon-core";
+import {
+  CarbonPlugin,
+  NodeContentData,
+  NodeData,
+  PinnedSelection,
+  PointedSelection,
+  Transaction
+} from "@emrgen/carbon-core";
 import { each, sortBy, values } from "lodash";
 
 export const IDENTITY_SCOPE = Symbol('identity');
@@ -79,6 +86,7 @@ export interface SelectionBounds {
 export type SerializedNode = string;
 
 export type EncodedNode<T> = T;
+export type EncodedNodeData<T> = T;
 
 // export const deepCloneMap = (node: Node) => node.clone(deepCloneMap);
 
@@ -103,5 +111,10 @@ export type MarkdownNode = string;
 // encode/decode node to/from JSON
 export interface NodeEncoder<T> {
 	encode(node: Node): EncodedNode<T>;
-	decode(app: Carbon, node: EncodedNode<T>): Optional<Node>;
+	decode(node: EncodedNode<T>): Optional<Node>;
+}
+
+export interface NodeDataEncoder<T> {
+  encode(data: NodeData): EncodedNodeData<T>;
+  decode(node: EncodedNodeData<T>): Optional<NodeData>;
 }

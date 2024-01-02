@@ -14,8 +14,8 @@ export class NodeEncoderJSON implements NodeEncoder<JSONNode> {
     }
   }
 
-  decode(app: Carbon, node: JSONNode): Optional<Node> {
-    return app.schema.nodeFromJSON(node);
+  decode(node: JSONNode): Optional<Node> {
+    return null;
   }
 }
 
@@ -25,7 +25,7 @@ export class NodeEncoderMarkdown implements NodeEncoder<MarkdownNode> {
     return node.name;
   }
 
-  decode(app: Carbon, node: string): Optional<Node> {
+  decode(node: string): Optional<Node> {
     // return react.schema.nodeFromMarkdown(node);
     return null;
   }

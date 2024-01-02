@@ -10,7 +10,7 @@ import {
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {identity} from "lodash";
-import {Scope} from "./Scope";
+import {StateScope} from "./StateScope";
 
 export class ImmutableNodeContent implements NodeContent {
 
@@ -50,7 +50,7 @@ export class ImmutableNodeContent implements NodeContent {
   get parent(): Optional<Node> {
     const {parent} = this.content;
     if (parent) return parent;
-    const map = Scope.get(this.scope);
+    const map = StateScope.get(this.scope);
     if (!this.parentId) return null;
     return map.get(this.parentId);
   }

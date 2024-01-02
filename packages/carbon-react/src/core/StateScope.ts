@@ -4,7 +4,7 @@ import {NodeMap} from "@emrgen/carbon-core";
 const STATE_SCOPE: Map<Symbol, NodeMap> = new Map();
 
 // this is a global state scope, used for storing global state of the react
-export class Scope {
+export class StateScope {
   static get(scope: Symbol): NodeMap {
     let map = STATE_SCOPE.get(scope);
     if (!map) {
