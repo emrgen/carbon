@@ -37,6 +37,15 @@ export class NodeProps extends JsonStore {
     return this;
   }
 
+  // @mutates
+  update(attrs: NodePropsJson) {
+    each(JsonStore.jsonToKeyValue(attrs), (value, key) => {
+      this.set(key, value);
+    });
+
+    return this;
+  }
+
   eqContent(other: NodeProps): boolean {
     if (this.store.size !== other.store.size) return false;
     for (const [key, value] of this.store) {
@@ -55,14 +64,6 @@ export class NodeProps extends JsonStore {
     }
 
     return diff;
-  }
-
-  update(attrs: NodePropsJson) {
-    each(JsonStore.jsonToKeyValue(attrs), (value, key) => {
-      this.set(key, value);
-    });
-
-    return this;
   }
 
   toJSON(): {} {

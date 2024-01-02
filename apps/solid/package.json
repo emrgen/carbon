@@ -13,6 +13,7 @@
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-solid": "workspace:*",
     "@emrgen/carbon-solid-blocks": "workspace:*",
+    "@solid-primitives/autofocus": "^0.0.108",
     "@types/lodash": "^4.14.191",
     "lodash": "^4.17.21",
     "solid-js": "^1.8.7"

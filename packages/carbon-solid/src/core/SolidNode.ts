@@ -10,7 +10,7 @@ export class SolidNode extends Node {
   constructor(content: SolidNodeContent) {
     super(content);
     this.counter = ++nodeCounter;
-    console.log('CREATING NODE', this.id.toString(), this.counter)
+    // console.log('CREATING NODE', this.id.toString(), this.counter)
   }
 
   override get key(): string {
@@ -19,7 +19,7 @@ export class SolidNode extends Node {
 
   override get index(): number {
     const index = super.index;
-    if (index === -1) {
+    if (index === -1 && !this.isRoot) {
       throw new Error('node has no parent');
     }
     console.log('got index', this.id.toString(), index, this.parent)

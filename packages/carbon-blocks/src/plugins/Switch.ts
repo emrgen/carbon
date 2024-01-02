@@ -1,6 +1,8 @@
 import { CarbonPlugin, CheckedPath, Node, Transaction } from "@emrgen/carbon-core";
 
 declare module '@emrgen/carbon-core' {
+  export interface Node {}
+
   export interface Transaction {
     switch: {
       toggle(node: Node): Transaction;

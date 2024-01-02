@@ -41,6 +41,5 @@ test('update node content', () => {
 
   Content.insertText(data, [0, 0, 2], "human");
   const node4 = Content.atPath(data, [0]);
-  console.log(Content.textContent(node4!))
   expect(Content.textContent(node4!)).toBe("hehumanlloworld");
 });

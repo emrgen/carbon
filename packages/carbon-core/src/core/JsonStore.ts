@@ -9,14 +9,12 @@ class PathCache {
 
   constructor() {}
 
-  key(path: string[]): string {
-    return path.map((token) => this.getTokenNumber(token)).join("/");
-  }
-
+  // return string path for given number encoded path
   path(key: string): string {
     return key.split("/").map((token) => this.decodes.get(token) ?? '').join("/");
   }
 
+  // return number for given string token
   getTokenNumber(token: string): number {
     if (!this.encodes.has(token)) {
       this.encodes.set(token, this.counter);
@@ -27,12 +25,18 @@ class PathCache {
     return this.encodes.get(token)!;
   }
 
+  // return number encoded path for given string path
   get(path: string[]): string {
     if (path.length === 0) {
       throw new Error("Path cannot be empty");
     }
 
     return this.key(path);
+  }
+
+  // return number encoded path for given string path
+  key(path: string[]): string {
+    return path.map((token) => this.getTokenNumber(token)).join("/");
   }
 }
 
@@ -157,30 +161,6 @@ export class JsonStore {
 
     return this.store.get(JsonStore.PATH_CACHE.get(key)) as Optional<T>;
   }
-
-  // merge(other: JsonStore) {
-  //   const result = new JsonStore();
-  //   for (const [key, value] of this.store) {
-  //     result.store.set(key, value);
-  //   }
-  //
-  //   for (const [key, value] of other.store) {
-  //     result.store.set(key, value);
-  //   }
-  //
-  //   return result;
-  // }
-
-  // diff(other: JsonStore) {
-  //   const diff = new JsonStore();
-  //   for (const [key, value] of this.store) {
-  //     if (!other.store.has(key)) {
-  //       diff.store.set(key, value);
-  //     }
-  //   }
-  //
-  //   return diff;
-  // }
 
   freeze() {
     if(this.frozen) return this

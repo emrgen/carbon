@@ -44,9 +44,8 @@ export class SolidDraft implements Draft {
     })
   }
 
-  rollback(): void {
-
-  }
+  // use the changes to revert the state
+  rollback(): void {}
 
   get(id: NodeId): Optional<Node> {
     const node = this.state.nodeMap.get(id);

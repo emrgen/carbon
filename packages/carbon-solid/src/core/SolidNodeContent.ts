@@ -11,6 +11,7 @@ import {
 } from "@emrgen/carbon-core";
 import {createMutable, Store, unwrap} from "solid-js/store";
 import {Optional} from "@emrgen/types";
+import {each, reduce} from "lodash";
 
 
 export class SolidNodeContent implements NodeContent {
@@ -41,12 +42,16 @@ export class SolidNodeContent implements NodeContent {
 
   get data(): NodeData {
     const unwrap = this.unwrap();
-    const { parent, type,children, ...rest} = unwrap;
+    const { parent,id, parentId, type,children, ...rest} = unwrap;
 
     return {
       ...rest,
+      id: id.toString(),
+      parentId: parentId?.toString(),
       name: type.name,
-      children: children.map(child => child.data)
+      children: children.map(child => child.data),
+      links: {},
+      marks: [],
     }
   }
 
@@ -119,7 +124,6 @@ export class SolidNodeContent implements NodeContent {
   }
 
   setParent(parent: Optional<Node>): void {
-    console.log('update parent', this.id.toString(), parent?.id.toString())
     this.content.parent = parent;
   }
 
@@ -174,7 +178,9 @@ export class SolidNodeContent implements NodeContent {
   }
 
   updateProps(props: NodePropsJson): void {
-    this.content.props.update(props);
+    each(props, (value, key) => {
+      // this.content.props.set(key, createMutable(value));
+    });
   }
 
   addMark(marks: Mark): void {

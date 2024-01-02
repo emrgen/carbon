@@ -2,10 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-
+.carbon-app {
+    button {
+        margin: 10px 0;
+    }
+}
 [data-name=document] {
     outline: none;
-    box-shadow: 0 0 0 1px #eee;
-    padding: 10px;
+    box-shadow: 0 0 0 1px #ddd;
+    padding: 10px 20px;
+    border-radius: 4px;
 }
 

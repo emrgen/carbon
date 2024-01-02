@@ -6,9 +6,21 @@
   width 100%
   flex: 1
 
+[data-name=title]
+  line-height 28px
+
+[data-name=document]
+  > [data-name=title]
+    font-size: 2em
+    font-weight: bold
+    margin: 0.67em 0
+    padding: 0
+    line-height 36px
+
 [data-name=section]
 [data-name=bulletedList]
 [data-name=numberedList]
+  margin-top: 1px;
   > [data-name=section],
   > [data-name=bulletedList]
   > [data-name=numberedList]
@@ -79,3 +91,18 @@
   ////text-align right
   //////display inline-block
 }
+
+[data-name=todo]
+  > *
+    margin-left: 32px
+  > input
+    position: absolute;
+    margin-left: 0.8em
+    height: 24px
+
+
+[data-name=quote]
+    box-shadow 4px 0 0 0 #ccc inset
+    padding: 3px 0
+    padding-left: 20px;
+    margin: 2px 0;

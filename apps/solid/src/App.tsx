@@ -2,7 +2,7 @@ import './App.css'
 import {noop} from 'lodash';
 
 import {SolidNodeFactory, RendererProps, SolidState, CarbonContext, useCarbon} from '@emrgen/carbon-solid';
-import {blockPresetPlugins, node, section, text, title} from '@emrgen/carbon-blocks';
+import {blockPresetPlugins, carbon, node, section, text, title} from '@emrgen/carbon-blocks';
 import {
   Schema,
   PluginManager,
@@ -11,9 +11,9 @@ import {
   PinnedSelection,
   LocalHtmlAttrPath,
   corePresetPlugins,
-  State, CheckedPath,
+  State, CheckedPath, preventAndStop,
 } from '@emrgen/carbon-core';
-import {createSignal, For, onCleanup, onMount} from "solid-js";
+import {createEffect, createSignal, For, onCleanup, onMount} from "solid-js";
 
 const plugins = [
   ...corePresetPlugins,
@@ -24,7 +24,7 @@ const pm = new PluginManager(plugins);
 const {specs} = pm;
 const schema = new Schema(specs, new SolidNodeFactory());
 
-const data = node("carbon", [
+const data = carbon( [
   node('document', [
     title([]),
     section([title([text("section 1")])]),
@@ -46,7 +46,7 @@ const app = new Carbon(state, schema, pm);
 window.app = app;
 
 
-console.log = noop;
+// console.log = noop;
 console.info = noop;
 // console.debug = noop;
 // console.warn = noop;
@@ -86,7 +86,6 @@ function App() {
 
   const onChange = (_: State) => {
     console.debug('[changed state]', count())
-
     setCount(count() + 1)
   }
 
@@ -106,6 +105,7 @@ function App() {
   return (
     <CarbonContext value={app}>
       <button onclick={handleClick} onmousedown={keepAdding} onmouseup={stopAdding}>Click</button>
+
       <div class={"bg-indigo-500 text-sky-400"}>
         {RenderElement(app.content)}
       </div>
@@ -115,14 +115,19 @@ function App() {
 
 // const RenderContext = createContext(null);
 
+const useRegister = (node: Node) => {
+  const app = useCarbon();
+
+  const register = (el: HTMLElement) => {
+    app.store.register(node, el)
+  }
+
+  return register;
+}
 
 const BlockElement = (props: RendererProps) => {
   const {node} = props;
-
-  const register = (el: HTMLElement) => {
-    console.log('registering', node.id.toString(), node.parent, el)
-    app.store.register(node, el)
-  }
+  const register = useRegister(node);
 
   return (
     <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={register}>
@@ -139,16 +144,7 @@ const BlockElement = (props: RendererProps) => {
 
 const TextElement = (props: RendererProps) => {
   const {node} = props;
-  const app = useCarbon();
-
-  // const changeTextRandomly = () => {
-  //   node.updateContent(node.textContent + ' ' + Math.random().toString(36).substring(7));
-  // }
-
-  const register = (el: HTMLElement) => {
-    console.log('registering', node.id.toString(), node.parent, el)
-    app.store.register(node, el)
-  }
+  const register = useRegister(node);
 
   return (
     <span data-name={node.name} data-id={node.key} ref={register}>
@@ -160,19 +156,26 @@ const TextElement = (props: RendererProps) => {
 const TodoElement = (props: RendererProps) => {
   const {node} = props;
   const app = useCarbon();
+  const register = useRegister(node);
 
-  const toggle = (e) => {
+  const toggle = (e: MouseEvent) => {
     e.stopPropagation();
     app.cmd.switch.toggle(node);
   }
 
-  const register = (el: HTMLElement) => {
-    app.store.register(node, el)
+  const isChecked = () => {
+    return !!node.props.get(CheckedPath)
   }
+
+  createEffect(() => {
+    console.log('todo changed', isChecked())
+  })
+
+  console.log('xxx',isChecked(), node.props)
 
   return (
     <div data-name={node.name} data-id={node.key} ref={register}>
-      <input type="checkbox" checked={node.props.get(CheckedPath)} onclick={toggle} />
+      <input type="checkbox" checked={!!node.props.get(CheckedPath)} onclick={toggle} onmousedown={preventAndStop}/>
       <For each={node.children}>
         {(child) => {
           return RenderElement(child);

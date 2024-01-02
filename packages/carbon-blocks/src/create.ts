@@ -1,8 +1,17 @@
+import {NodeId} from "@emrgen/carbon-core";
+
 export const text = (text: string = '', props = {}) => ({
 	name: 'text',
 	text,
 	props,
 });
+
+export const carbon = (children: any[] = [], props = {}) => ({
+  id: NodeId.ROOT.toString(),
+  name: 'carbon',
+  children,
+  props,
+})
 
 export const node = (name: string, children: any[] = [], props = {}) => ({
 	name,

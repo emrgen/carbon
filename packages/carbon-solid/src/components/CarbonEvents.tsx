@@ -82,7 +82,6 @@ export const CarbonEvents = (props) => {
   const app = useCarbon();
 
   const onSelectionChange = (event: Event) => {
-    console.log('selection change', event);
     app.onEvent(EventsIn.selectionchange, event);
   }
 
