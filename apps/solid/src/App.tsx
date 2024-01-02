@@ -10,7 +10,7 @@ import {
   Carbon,
   PinnedSelection,
   LocalHtmlAttrPath,
-  corePresetPlugins, State
+  corePresetPlugins, State, EditablePath
 } from '@emrgen/carbon-core';
 import {createEffect, createSignal, For, onCleanup, onMount, Show} from "solid-js";
 import {Optional} from "@emrgen/types";
@@ -96,17 +96,18 @@ function App() {
     app.off('changed', onChange)
   })
 
-  let ref: Optional<HTMLElement> = null;
-
   onMount(() => {
-    ref?.focus()
+    const node = app.content.find(n => !!n.props.get('local/html/contentEditable'));
+    if (!node) return;
+    const el = app.store.element(node.id)
+    el?.focus();
   })
 
   return (
     <CarbonContext value={app}>
       {/*listen and fire events into the app*/}
       <button onclick={handleClick} onmousedown={keepAdding} onmouseup={stopAdding}>Click</button>
-      <div class={"bg-indigo-500 text-sky-400"} ref={e => ref = e}>
+      <div class={"bg-indigo-500 text-sky-400"}>
         {render(app.content)}
       </div>
     </CarbonContext>
