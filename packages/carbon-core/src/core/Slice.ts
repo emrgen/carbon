@@ -1,5 +1,5 @@
 import { Carbon } from "./Carbon";
-import { Node } from "./Node";
+import {Node, Path} from "./Node";
 import { first, last } from 'lodash';
 
 export class Slice {
@@ -23,8 +23,8 @@ export class Slice {
       return Slice.empty;
     }
 
-    let startPath: number[] = [];
-    let endPath: number[] = [];
+    let startPath: Path = [];
+    let endPath: Path = [];
     const {root, start, end} = this
     root.all(n => {
       if (n.eq(start)) {

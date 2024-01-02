@@ -9,6 +9,10 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-blocks": "workspace:*",
+    "@emrgen/carbon-qwik": "workspace:*",
+    "@emrgen/carbon-react": "workspace:*",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
   },

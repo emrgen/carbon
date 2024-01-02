@@ -7,14 +7,15 @@ import { Maps, With } from './types';
 import {Mark, MarkSet, NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-core";
 
 export interface NodeData {
-  id: NodeId;
+  id: string;
   name: string;
-  parentId: Optional<NodeId>;
+  parentId: Optional<string>;
   textContent: string;
   children: NodeData[];
   linkName: string;
   links: Record<string, NodeData>;
-  props: NodeProps;
+  props?: NodePropsJson;
+  marks?: string[]
 }
 
 // all the data a node needs to be created
@@ -71,11 +72,15 @@ export class PlainNodeContent implements NodeContent {
   constructor(private content: NodeContentData) {}
 
   get data(): NodeData {
-    const {parent, type,children, ...rest} = this.content;
+    const {parent, type, id, parentId,children, ...rest} = this.content;
     return {
       ...rest,
+      id: id.toString(),
+      parentId: parentId?.toString(),
       name: type.name,
       children: this.children.map(c => c.data),
+      links: {},
+      marks: [],
     }
   }
 

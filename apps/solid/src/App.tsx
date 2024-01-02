@@ -116,18 +116,6 @@ function App() {
 
 // const RenderContext = createContext(null);
 
-const render = (node: Node) => {
-  // console.log(node)
-  if (node.isBlock) {
-    return <BlockElement node={node}/>;
-  }
-
-  if (node.isText) {
-    return <TextElement node={node}/>;
-  }
-
-  return null;
-}
 
 const BlockElement = (props: RendererProps) => {
   const {node} = props;
@@ -186,6 +174,33 @@ const TextElement = (props: RendererProps) => {
       {node.textContent}
     </span>
   );
+}
+
+const components: Record<string, any> = {
+  'carbon': BlockElement,
+  'document': BlockElement,
+  'section': BlockElement,
+  'title': BlockElement,
+  'text': TextElement,
+}
+
+const render = (node: Node) => {
+  const element = components[node.name]?.({node});
+
+  if (!element) {
+    console.warn('no element for', node.name, node, 'using default block')
+  } else {
+    return element
+  }
+
+  // console.log(node)
+  if (node.isBlock) {
+    return <BlockElement node={node}/>;
+  }
+  //
+  // if (node.isText) {
+  //   return <TextElement node={node}/>;
+  // }
 }
 
 

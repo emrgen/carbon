@@ -16,6 +16,11 @@ export default {
       required: true,
     }
   },
+  mounted() {
+  },
+  updated() {
+    console.log(this.node.id.toString(), this.node.textContent)
+  }
 }
 </script>
 

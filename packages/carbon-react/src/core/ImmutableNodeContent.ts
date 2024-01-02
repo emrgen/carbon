@@ -22,11 +22,16 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   get data(): NodeData {
-    const {parent, type, children, ...rest} = this.content;
+    const {parent,id, parentId, type, children, ...rest} = this.content;
     return {
       ...rest,
+      id: id.toString(),
+      parentId: parentId?.toString(),
       name: type.name,
       children: this.children.map(c => c.data),
+      links: {},
+      props: {},
+      marks: [],
     }
   }
 

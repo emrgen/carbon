@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import {blockPresetPlugins} from '@emrgen/carbon-blocks';
-import {Carbon, PinnedSelection, PluginManager, Schema} from '@emrgen/carbon-core';
+import {Carbon, Node, PinnedSelection, PluginManager, Schema} from '@emrgen/carbon-core';
 import {VueNodeFactory, VueState} from '@emrgen/carbon-vue';
-import CarbonNode from "./CarbonNode.vue";
-import {provide, reactive, ref} from 'vue'
+import {provide, reactive, ref} from 'vue';
 import Person from "./Person.vue";
 
 const node = reactive({
   name: 'Person',
   text: "Hello, World!",
-})
-
+});
 
 const rm = {
   'Person': Person
@@ -26,7 +24,7 @@ const plugins = [
 const pm = new PluginManager(plugins)
 const schema = new Schema(pm.specs, new VueNodeFactory())
 
-const content = schema.type('section').create([
+const content: Node = schema.type('section').create([
   schema.type('title').create([
     schema.text('Hello, World! 1')!,
   ])!,
@@ -38,9 +36,9 @@ const content = schema.type('section').create([
   ])!,
 ])!;
 
-const state = VueState.create(content, PinnedSelection.NULL)
+const state = VueState.create(content, PinnedSelection.NULL);
 
-const app = new Carbon(state, schema, pm)
+const app = new Carbon(state, schema, pm);
 
 provide('app', app);
 
@@ -63,22 +61,21 @@ const data = reactive({
 })
 
 const update = () => {
-  data.counter++
-  data.children.push(data.children.length + 1)
+  // data.counter++
+  // data.children.push(data.children.length + 1)
   // counter.value = counter.value + 1
+  // content.find(n => n.isText)?.updateContent('Hello, World! ' + counter.value++);
+  app.cmd.SetContent(content.find(n => n.isText)!, 'Hello, World! ' + counter.value).Dispatch();
+  counter.value++
 }
-
 
 </script>
 
 <template>
   <div id="app">
     <button @click="update">Update</button>
-    {{data.counter}}
-    <div v-for="child in data.children" :key="child">
-      {{child}}
-    </div>
-<!--    <CarbonNode :node="app.content"/>-->
+<!--    {{content.textContent}}-->
+    <CarbonNode :node="app.content"/>
   </div>
 </template>
 

@@ -65,7 +65,7 @@ export class ImmutableNodeFactory implements NodeFactory {
     return node;
   }
 
-  // clone node with new id
+  // clone node with new mapped content
   clone(node: Node, map: Maps<Omit<NodeContentData, 'children'>, Omit<NodeContentData, 'children'>>): Node {
     const {scope} = this;
     const clone = ImmutableNode.create(scope, ImmutableNodeContent.create(scope, {

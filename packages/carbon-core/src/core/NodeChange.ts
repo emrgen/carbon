@@ -9,7 +9,7 @@ import {
   NodeBTree, NodeContentData,
   NodeData,
   NodeId, NodeIdComparator,
-  NodeMap,
+  NodeMap, Path,
   NodePropsJson,
   Slice,
   State
@@ -45,11 +45,11 @@ export class NameChange implements Change {
 export class InsertChange implements Change {
   type = ChangeType.insert;
 
-  constructor(readonly parentId: NodeId, readonly nodeId: NodeId, readonly offset: number) {
+  constructor(readonly parentId: NodeId, readonly nodeId: NodeId, readonly path: Path) {
   }
 
-  static create(parentId: NodeId, nodeId: NodeId, offset: number) {
-    return new InsertChange(parentId, nodeId, offset);
+  static create(parentId: NodeId, nodeId: NodeId, path: Path) {
+    return new InsertChange(parentId, nodeId, path);
   }
 }
 
@@ -67,11 +67,11 @@ export class TextChange implements Change {
 export class RemoveChange implements Change {
   type = ChangeType.remove;
 
-  constructor(readonly parentId: NodeId, readonly nodeId: NodeId, readonly offset: number) {
+  constructor(readonly parentId: NodeId, readonly nodeId: NodeId, readonly path: Path) {
   }
 
-  static create(parentId: NodeId, nodeId: NodeId, offset: number) {
-    return new RemoveChange(parentId, nodeId, offset);
+  static create(parentId: NodeId, nodeId: NodeId, path: Path) {
+    return new RemoveChange(parentId, nodeId, path);
   }
 }
 
@@ -90,11 +90,11 @@ export class UpdateChange implements Change {
 export class SetContentChange implements Change {
   type = ChangeType.content;
 
-  constructor(readonly nodeId: NodeId, readonly before: NodeId[] | string, readonly after: NodeId[] | string) {
+  constructor(readonly nodeId: NodeId, readonly path: Path, readonly before: NodeId[] | string, readonly after: NodeId[] | string) {
   }
 
-  static create(nodeId: NodeId, before: NodeId[] | string, after: NodeId[] | string) {
-    return new SetContentChange(nodeId, before, after);
+  static create(nodeId: NodeId, path: Path, before: NodeId[] | string, after: NodeId[] | string) {
+    return new SetContentChange(nodeId, path, before, after);
   }
 }
 
@@ -152,7 +152,7 @@ export class StateChanges {
           inverse.add(NameChange.create(change.nodeId, change.after, change.before));
         },
         insert(change: InsertChange) {
-          inverse.add(RemoveChange.create(change.parentId, change.nodeId, change.offset));
+          inverse.add(RemoveChange.create(change.parentId, change.nodeId, change.path));
         },
         text(change: TextChange) {
           if (change.action === 'insert') {
@@ -162,7 +162,7 @@ export class StateChanges {
           }
         },
         remove(change: RemoveChange) {
-          inverse.add(InsertChange.create(change.parentId, change.nodeId, change.offset));
+          inverse.add(InsertChange.create(change.parentId, change.nodeId, change.path));
         },
         update(change: UpdateChange) {
           inverse.add(UpdateChange.create(change.nodeId, change.after, change.before));
@@ -171,7 +171,7 @@ export class StateChanges {
           inverse.add(LinkChange.create(change.nodeId, change.after, change.before));
         },
         content(change: SetContentChange) {
-          inverse.add(SetContentChange.create(change.nodeId, change.after, change.before));
+          inverse.add(SetContentChange.create(change.nodeId, change.path, change.after, change.before));
         },
         selection(change: SelectionChange) {
           inverse.add(SelectionChange.create(change.after, change.before));

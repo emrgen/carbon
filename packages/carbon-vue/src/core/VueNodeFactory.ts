@@ -1,4 +1,4 @@
-import {Maps, Node, NodeContentData, NodeFactory, NodeId, PlainNodeContent, Schema} from "@emrgen/carbon-core";
+import {Maps, MarkSet, Node, NodeContentData, NodeFactory, NodeId, PlainNodeContent, Schema} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {isEmpty} from "lodash";
 import {VueNodeContent} from "./VueNodeContent";
@@ -26,7 +26,7 @@ export class VueNodeFactory implements NodeFactory {
     const properties = isEmpty(json.props) ? type.props : type.props.update(json.props);
     const nodeId = id ? NodeId.deserialize(id)! : type.isText ? this.textId() : this.blockId();
     const nodes = children.map(n => schema.nodeFromJSON(n));
-    const content = PlainNodeContent.create({
+    const content = VueNodeContent.create({
       id: nodeId,
       type,
       children: nodes,
@@ -35,7 +35,10 @@ export class VueNodeFactory implements NodeFactory {
       parentId: null,
       parent: null,
       links: {},
-      linkName: ''
+      linkName: '',
+      contentVersion: 0,
+      renderVersion: 0,
+      marks: MarkSet.empty(),
     });
 
     const node = new Node(content);

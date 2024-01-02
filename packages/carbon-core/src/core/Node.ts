@@ -33,6 +33,8 @@ export type TraverseOptions = {
 let key = 0
 const nextKey = () => key++
 
+export type Path = (number | string)[];
+
 export class Node extends EventEmitter implements IntoNodeId {
     protected content: NodeContent;
 
@@ -277,8 +279,8 @@ export class Node extends EventEmitter implements IntoNodeId {
       return last(this.parents);
     }
 
-    get path(): number[] {
-      return reverse(this.chain.map(n => n.index).slice(0, -1));
+    get path(): Path {
+      return reverse(this.chain.map(n => n.linkName || n.index).slice(0, -1));
     }
 
     get prevSibling(): Optional<Node> {
@@ -421,7 +423,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // return a child node at given path
-    atPath(path: number[]): Optional<Node> {
+    atPath(path: Path): Optional<Node> {
       let node: Optional<Node> = this;
       for (let i = 0, len = path.length; i < len && node; i++) {
         node = node.child(path[i])
@@ -486,7 +488,10 @@ export class Node extends EventEmitter implements IntoNodeId {
       return !this.after(node);
     }
 
-    child(index: number): Optional<Node> {
+    child(index: number|string): Optional<Node> {
+      if (typeof index === 'string') {
+        return this.links[index];
+      }
       return this.children[index];
     }
 

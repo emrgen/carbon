@@ -17,6 +17,7 @@ import {p14} from "@emrgen/carbon-core/src/core/Logger";
 export class SolidDraft implements Draft {
 
   changes: NodeMap = SolidNodeMap.empty();
+  deleted: NodeMap = SolidNodeMap.empty();
 
   constructor(private state: State) {}
 
@@ -38,7 +39,9 @@ export class SolidDraft implements Draft {
   }
 
   commit() {
-
+    this.deleted.forEach(node => {
+      this.nodeMap.delete(node.id);
+    })
   }
 
   rollback(): void {
@@ -117,7 +120,8 @@ export class SolidDraft implements Draft {
     }
 
     node.all(n => {
-      this.nodeMap.set(n.id, n)
+      this.nodeMap.set(n.id, n);
+      this.deleted.deleted(n.id);
     });
 
     // const index = refNode.index;
@@ -187,10 +191,11 @@ export class SolidDraft implements Draft {
   remove(node: Node): void {
     console.log(p14('%c[trap]'), "color:green", 'remove', node.toString());
     const parent = this.parent(node);
-    node.all(n => {
-      this.nodeMap.delete(n.id);
-    })
     parent?.remove(node);
+    node.all(n => {
+      // this.nodeMap.delete(n.id);
+      this.deleted.set(n.id, n);
+    })
   }
 
   updateContent(nodeId: NodeId, content: Node[]|string): void {
@@ -213,6 +218,10 @@ export class SolidDraft implements Draft {
 
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
     console.log('[trap] updateProps', nodeId.toString(), props);
+    if (this.deleted.has(nodeId)) {
+      return;
+    }
+
     const node = this.state.nodeMap.get(nodeId);
     if (!node) {
       throw new Error(`Node ${nodeId.toString()} not found`);

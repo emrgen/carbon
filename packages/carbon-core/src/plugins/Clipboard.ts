@@ -1,4 +1,4 @@
-import {AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Pin} from "../core";
+import {AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Path, Pin} from "../core";
 import {SelectionPatch} from "../core/DeleteGroup";
 import {NodeId} from "../core/NodeId";
 import {Span} from "../core/Span";
@@ -202,8 +202,8 @@ export class ClipboardPlugin extends AfterPlugin {
       return false;
     })
 
-    let startPath: number[] = [];
-    let endPath: number[] = [];
+    let startPath: Path = [];
+    let endPath: Path = [];
     root.all(n => {
       if (n.eq(start.node)) {
         startPath = n.path

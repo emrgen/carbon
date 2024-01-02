@@ -30,8 +30,8 @@ export class VueState implements State {
     this.selection = selection;
     this.nodeMap = new VueNodeMap();
     this.updated = new NodeIdSet();
-    this.isContentChanged = true;
-    this.isSelectionChanged = true;
+    this.isContentChanged = false;
+    this.isSelectionChanged = false;
   }
 
   activate(): State {

@@ -57,7 +57,7 @@ export class VueDraft implements Draft {
   updateContent(nodeId: NodeId, content: Node[] | string): void {
     this.node(nodeId, node => {
       node.updateContent(content);
-      this.changes.add(nodeId);
+      // this.changes.add(nodeId);
     })
   }
 

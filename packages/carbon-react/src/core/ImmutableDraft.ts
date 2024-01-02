@@ -734,16 +734,18 @@ class DraftNode extends ImmutableNode {
     console.log(p14('%c[trap]'), "color:green", 'insert', this.id.toString(), this.textContent, this.renderVersion);
     super.insert(node, index);
 
-    this.changes.add(InsertChange.create(this.id, node.id, index));
+    const {path} = node;
+
+    this.changes.add(InsertChange.create(this.id, node.id, path));
     this.changes.dataMap.set(node.id, node.data);
   }
 
   remove(node: ImmutableNode) {
     console.log(p14('%c[trap]'), "color:green", 'remove', this.id.toString(), this.textContent, this.renderVersion)
-    const index = node.index;
+    const {path} = node;
     super.remove(node);
 
-    this.changes.add(RemoveChange.create(this.id, node.id, node.index));
+    this.changes.add(RemoveChange.create(this.id, node.id, path));
     this.changes.dataMap.set(node.id, node.data);
   }
 
@@ -791,12 +793,14 @@ class DraftNode extends ImmutableNode {
       console.warn("unnecessary content update detected. possibly the node is immutable")
     }
 
+    const path = this.path;
+    console.log(path)
     if (oldText !== newText) {
-      this.changes.add(SetContentChange.create(this.id, oldText, newText));
+      this.changes.add(SetContentChange.create(this.id, path, oldText, newText));
     }
 
     if (oldChildren !== newChildren) {
-      this.changes.add(SetContentChange.create(this.id, oldChildren.map(n => n.id), newChildren.map(n => n.id)))
+      this.changes.add(SetContentChange.create(this.id, path, oldChildren.map(n => n.id), newChildren.map(n => n.id)))
       oldChildren.forEach(n => this.changes.dataMap.set(n.id, n.data));
       newChildren.forEach(n => this.changes.dataMap.set(n.id, n.data));
     }
