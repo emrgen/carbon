@@ -12,7 +12,7 @@ import {
   LocalHtmlAttrPath,
   corePresetPlugins, State
 } from '@emrgen/carbon-core';
-import {createEffect, createSignal, For, onCleanup} from "solid-js";
+import {createEffect, createSignal, For, onCleanup, onMount, Show} from "solid-js";
 import {Optional} from "@emrgen/types";
 
 const plugins = [
@@ -46,7 +46,7 @@ const app = new Carbon(state, schema, pm);
 window.app = app;
 
 
-console.log = noop;
+// console.log = noop;
 console.info = noop;
 // console.debug = noop;
 console.warn = noop;
@@ -96,11 +96,17 @@ function App() {
     app.off('changed', onChange)
   })
 
+  let ref: Optional<HTMLElement> = null;
+
+  onMount(() => {
+    ref?.focus()
+  })
+
   return (
     <CarbonContext value={app}>
       {/*listen and fire events into the app*/}
       <button onclick={handleClick} onmousedown={keepAdding} onmouseup={stopAdding}>Click</button>
-      <div class={"bg-indigo-500 text-sky-400"}>
+      <div class={"bg-indigo-500 text-sky-400"} ref={e => ref = e}>
         {render(app.content)}
       </div>
     </CarbonContext>
@@ -137,21 +143,26 @@ const BlockElement = (props: RendererProps) => {
   }
 
 
-  if (node.isVoid) {
-    return (
-      <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={register}>
-        <span>&shy;</span>
-      </div>
-    );
-  }
+  // if (node.isVoid) {
+  //   return (
+  //     <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={register}>
+  //       <span>&shy;</span>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={register}>
-      <For each={node.children}>
-        {(child) => {
-          return render(child);
-        }}
-      </For>
+      <Show
+        when={!node.isVoid}
+        fallback={<span>&shy;</span>}
+      >
+        <For each={node.children}>
+          {(child) => {
+            return render(child);
+          }}
+        </For>
+      </Show>
     </div>
   );
 }

@@ -9,14 +9,14 @@ import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
 
 export const NestableComp = (props: RendererProps) => {
   const { node } = props;
-  // const ref = useRef(null);
-  // const {connectors, SelectionHalo} = useDragDropRectSelectHalo({node, ref});
+  const ref = useRef(null);
+  const {connectors, SelectionHalo} = useDragDropRectSelectHalo({node, ref});
 
   return (
     <CarbonBlock node={node}>
       <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
-      {/*{SelectionHalo}*/}
+      {SelectionHalo}
     </CarbonBlock>
   );
 };

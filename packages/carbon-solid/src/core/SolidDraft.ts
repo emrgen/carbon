@@ -13,6 +13,7 @@ import {
   State
 } from "@emrgen/carbon-core";
 import {SolidNodeMap} from "./NodeMap";
+import {isArray} from "lodash";
 
 export class SolidDraft implements Draft {
 
@@ -107,6 +108,14 @@ export class SolidDraft implements Draft {
     const node = this.state.nodeMap.get(nodeId);
     if (!node) {
       throw new Error(`Node ${nodeId.toString()} not found`);
+    }
+
+    if (isArray(content)) {
+      content.forEach(n => {
+        n.all(child => {
+          this.nodeMap.set(child.id, child);
+        })
+      })
     }
 
     node.updateContent(content);
