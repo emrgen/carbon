@@ -49,6 +49,7 @@ const preventDefaultEvents = {
 
 const eventWrapper = (event) => {
   return {
+    ...event,
     nativeEvent: event,
     stopPropagation: () => {
       event.stopPropagation();

@@ -73,6 +73,13 @@ export class SolidDraft implements Draft {
   }
 
   change(nodeId: NodeId, type: NodeType): void {
+    console.log(p14('%c[trap]'), "color:green", 'change', nodeId.toString(), type.name);
+    const node = this.get(nodeId);
+    if (!node) {
+      throw new Error(`Node ${nodeId.toString()} not found`);
+    }
+
+    node.changeType(type);
   }
 
   move(to: Point, node: Node): void {
@@ -88,6 +95,10 @@ export class SolidDraft implements Draft {
     if (!parent) {
       throw new Error(`Parent of ${node.id.toString()} not found`);
     }
+
+    node.all(n => {
+      this.nodeMap.delete(n.id);
+    })
 
     parent.remove(node);
     this.insert(to, node, "move");
@@ -127,7 +138,17 @@ export class SolidDraft implements Draft {
     throw new Error("Invalid insertion point");
   }
 
-  private insertBefore(node: Node, refNode: Node) {}
+  private insertBefore(node: Node, refNode: Node) {
+    console.log(p14('%c[trap]'), "color:green", 'insertBefore', node.toString(), refNode.toString());
+    const parent = this.parent(refNode);
+    if (!parent) {
+      throw new Error(`Parent of ${refNode.id.toString()} not found`);
+    }
+
+    const index = refNode.index;
+    console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())
+    parent.insert(node, index);
+  }
 
   private insertAfter(node: Node, refNode: Node) {
     console.log(p14('%c[trap]'), "color:green", 'insertAfter', node.toString(), refNode.toString());
@@ -136,26 +157,40 @@ export class SolidDraft implements Draft {
       throw new Error(`Parent of ${refNode.id.toString()} not found`);
     }
 
-    node.all(n => {
-      this.nodeMap.set(n.id, n)
-    });
-
     const index = refNode.index;
     console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())
     parent.insert(node, index + 1);
   }
 
-  private prepend(node: Node, refNode: Node) {}
+  private prepend(node: Node, refNode: Node) {
+    console.log(p14('%c[trap]'), "color:green", 'prepend', node.toString(), refNode.toString());
+    const parent = this.parent(refNode);
+    if (!parent) {
+      throw new Error(`Parent of ${refNode.id.toString()} not found`);
+    }
 
-  private append(node: Node, refNode: Node) {}
+    console.log('# adding new child node', 'parent', parent.id.toString(), 'index', 0, 'node', node.id.toString())
+    parent.insert(node, 0);
+  }
+
+  private append(node: Node, refNode: Node) {
+    console.log(p14('%c[trap]'), "color:green", 'append', node.toString(), refNode.toString());
+    const parent = this.parent(refNode);
+    if (!parent) {
+      throw new Error(`Parent of ${refNode.id.toString()} not found`);
+    }
+
+    console.log('# adding new child node', 'parent', parent.id.toString(), 'index', parent.children.length, 'node', node.id.toString())
+    parent.insert(node, parent.children.length);
+  }
 
   remove(node: Node): void {
     console.log(p14('%c[trap]'), "color:green", 'remove', node.toString());
     const parent = this.parent(node);
-    parent?.remove(node);
     node.all(n => {
       this.nodeMap.delete(n.id);
     })
+    parent?.remove(node);
   }
 
   updateContent(nodeId: NodeId, content: Node[]|string): void {
@@ -177,6 +212,13 @@ export class SolidDraft implements Draft {
   }
 
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
+    console.log('[trap] updateProps', nodeId.toString(), props);
+    const node = this.state.nodeMap.get(nodeId);
+    if (!node) {
+      throw new Error(`Node ${nodeId.toString()} not found`);
+    }
+
+    node.updateProps(props);
   }
 
   updateSelection(selection: PointedSelection): void {

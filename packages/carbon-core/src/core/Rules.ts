@@ -54,20 +54,25 @@ export class BeforeInputRuleHandler {
   // process the event based on modified node.textContent
   process(ctx: EventContext<KeyboardEvent>, node: Node): boolean {
     const {event, app} = ctx;
+    // @ts-ignore
+    const { data, key } = event.nativeEvent;
+    const insertText =(event as any).data ?? data;
+
     const { selection } = app;
     if (!selection.isCollapsed) return false;
     const { head } = selection;
     // console.log('before input', node.id.toString(), node.textContent);
-    
+
     let text = '';
     if (node.isEmpty) {
-      text = (event as any).data;
+      text = insertText
     } else {
       const { textContent } = node;
-      text = textContent.slice(0, head.offset) + (event as any).data + textContent.slice(head.offset);
+      text = textContent.slice(0, head.offset) + insertText + textContent.slice(head.offset);
     }
 
-    // console.log(`"${text}"`, node.id.toString(), node.textContent);
+    console.log(event)
+    console.log(`"${text}"`, node.id.toString(), node.textContent);
     const done = this.rules.some(rule => rule.execute(ctx, text))
     return done;
   }
