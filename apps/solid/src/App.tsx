@@ -11,7 +11,7 @@ import {
   PinnedSelection,
   LocalHtmlAttrPath,
   corePresetPlugins,
-  State,
+  State, preventAndStop, stop, CheckedPath,
 } from '@emrgen/carbon-core';
 import {createSignal, For, onCleanup, onMount, Show} from "solid-js";
 
@@ -49,7 +49,7 @@ window.app = app;
 // console.log = noop;
 console.info = noop;
 // console.debug = noop;
-console.warn = noop;
+// console.warn = noop;
 // console.error = noop;
 console.group = noop;
 console.groupCollapsed = noop;
@@ -105,10 +105,9 @@ function App() {
 
   return (
     <CarbonContext value={app}>
-      {/*listen and fire events into the app*/}
       <button onclick={handleClick} onmousedown={keepAdding} onmouseup={stopAdding}>Click</button>
       <div class={"bg-indigo-500 text-sky-400"}>
-        {render(app.content)}
+        {RenderElement(app.content)}
       </div>
     </CarbonContext>
   )
@@ -120,38 +119,20 @@ function App() {
 const BlockElement = (props: RendererProps) => {
   const {node} = props;
 
-  // let ref: Optional<HTMLElement> = null;
-  // createEffect(() => {
-  //   console.log('registering', node.id.toString(), node.parent, ref)
-  //   app.store.register(node, ref)
-  // })
-
   const register = (el: HTMLElement) => {
     console.log('registering', node.id.toString(), node.parent, el)
     app.store.register(node, el)
   }
 
-
-  // if (node.isVoid) {
-  //   return (
-  //     <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={register}>
-  //       <span>&shy;</span>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={register}>
-      <Show
-        when={!node.isVoid}
-        fallback={<span>&shy;</span>}
-      >
-        <For each={node.children}>
+      {node.isVoid && <span>&shy;</span>}
+      {!node.isVoid && <For each={node.children}>
           {(child) => {
-            return render(child);
+            return RenderElement(child)
           }}
         </For>
-      </Show>
+      }
     </div>
   );
 }
@@ -176,32 +157,48 @@ const TextElement = (props: RendererProps) => {
   );
 }
 
+const TodoElement = (props: RendererProps) => {
+  const {node} = props;
+  const app = useCarbon();
+
+  const toggle = (e) => {
+    e.stopPropagation();
+    app.cmd.switch.toggle(node);
+  }
+
+  const register = (el: HTMLElement) => {
+    app.store.register(node, el)
+  }
+
+  return (
+    <div data-name={node.name} data-id={node.key} ref={register}>
+      <input type="checkbox" checked={node.props.get(CheckedPath)} onclick={toggle} />
+      <For each={node.children}>
+        {(child) => {
+          return RenderElement(child);
+        }}
+      </For>
+    </div>
+  );
+}
+
 const components: Record<string, any> = {
   'carbon': BlockElement,
   'document': BlockElement,
+  'todo': TodoElement,
   'section': BlockElement,
   'title': BlockElement,
   'text': TextElement,
 }
 
-const render = (node: Node) => {
-  const element = components[node.name]?.({node});
-
-  if (!element) {
-    console.warn('no element for', node.name, node, 'using default block')
-  } else {
-    return element
+//
+const RenderElement = (node: Node) => {
+  const name = () => node.name;
+  const Component = () => {
+    return components[name()] ?? BlockElement
   }
 
-  // console.log(node)
-  if (node.isBlock) {
-    return <BlockElement node={node}/>;
-  }
-  //
-  // if (node.isText) {
-  //   return <TextElement node={node}/>;
-  // }
+  return (<>{Component()({node})}</>)
 }
-
 
 export default App
