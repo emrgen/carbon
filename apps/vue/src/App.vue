@@ -56,8 +56,16 @@ setTimeout(() => {
   console.log('content', content.textContent)
 }, 1000)
 
+
+const data = reactive({
+  counter,
+  children: [1,2,3,4,5]
+})
+
 const update = () => {
-  counter.value = counter.value + 1
+  data.counter++
+  data.children.push(data.children.length + 1)
+  // counter.value = counter.value + 1
 }
 
 
@@ -65,7 +73,12 @@ const update = () => {
 
 <template>
   <div id="app">
-    <CarbonNode :node="app.content"/>
+    <button @click="update">Update</button>
+    {{data.counter}}
+    <div v-for="child in data.children" :key="child">
+      {{child}}
+    </div>
+<!--    <CarbonNode :node="app.content"/>-->
   </div>
 </template>
 

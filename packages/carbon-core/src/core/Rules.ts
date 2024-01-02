@@ -71,8 +71,7 @@ export class BeforeInputRuleHandler {
       text = textContent.slice(0, head.offset) + insertText + textContent.slice(head.offset);
     }
 
-    console.log(event)
-    console.log(`"${text}"`, node.id.toString(), node.textContent);
+    // console.log(`"${text}"`, node.id.toString(), node.textContent);
     const done = this.rules.some(rule => rule.execute(ctx, text))
     return done;
   }

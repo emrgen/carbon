@@ -1,5 +1,14 @@
-import {Node, NodeContent, NodeContentData, NodeId, NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-core";
-import {reactive, ref} from "vue";
+import {Mark, MarkSet,
+  Node,
+  NodeContent,
+  NodeContentData,
+  NodeData,
+  NodeId,
+  NodeProps,
+  NodePropsJson,
+  NodeType
+} from "@emrgen/carbon-core";
+import {reactive, ref, UnwrapNestedRefs} from "vue";
 import {cloneDeep} from "lodash";
 import {Optional} from "@emrgen/types";
 
@@ -7,7 +16,8 @@ export class VueNodeContent implements NodeContent {
 
   // make the data reactive
   static create(data: NodeContentData) {
-    // const active = {
+    const content = reactive(data);
+    // const active = reactive({
     //   id: data.id,
     //   type: data.type,
     //   parentId: data.parentId,
@@ -17,54 +27,74 @@ export class VueNodeContent implements NodeContent {
     //   linkName: data.linkName,
     //   links: data.links,
     //   props: data.props,
-    // }
+    //   marks: data.marks,
+    // } as NodeContentData);
 
-    return new VueNodeContent(data);
+    return new VueNodeContent(content);
   }
-  constructor(private store: NodeContentData) {}
+
+  constructor(private content: NodeContentData) {
+  }
+
+  get data(): NodeData {
+    return {} as any
+  }
+
+  get marks(): MarkSet {
+    return this.content.marks;
+  }
+
+  renderVersion?: number | undefined;
+  contentVersion?: number | undefined;
+  addMark(marks: Mark): void {
+      throw new Error("Method not implemented.");
+  }
+  removeMark(marks: Mark): void {
+      throw new Error("Method not implemented.");
+  }
 
   get id(): NodeId {
-    return this.store.id;
+    return this.content.id;
   }
 
   get type(): NodeType {
-    return this.store.type;
+    return this.content.type;
   }
 
   get parentId(): Optional<NodeId> {
-    return this.store.parentId;
+    return this.content.parentId;
   }
 
   get parent(): Optional<Node> {
-    return this.store.parent;
+    return this.content.parent;
   }
 
   get textContent(): string {
     if (this.type.isText) {
-      return this.store.textContent;
+      return this.content.textContent;
     } else {
-      return this.store.children.map(c => c.textContent).join('');
+      return this.content.children.map(c => c.textContent).join('');
     }
   }
 
   get children(): Node[] {
-    return this.store.children;
+    return this.content.children;
   }
 
   get linkName(): string {
-    return this.store.linkName;
+    return this.content.linkName;
   }
 
   get links(): Record<string, Node> {
-    return this.store.links;
+    return this.content.links;
   }
 
   get props(): NodeProps {
-    return this.store.props;
+    return this.content.props;
   }
 
   get size(): number {
-    return (this.type.isText) ? this.store.textContent.length : this.store.children.length;
+    return (this.type.isText) ? this.content.textContent.length : this.content.children.length;
   }
 
   child(index: number): Optional<Node> {
@@ -72,19 +102,19 @@ export class VueNodeContent implements NodeContent {
   }
 
   unwrap(): NodeContentData {
-    return cloneDeep(this.store)
+    return cloneDeep(this.content)
   }
 
   setParent(parent: Optional<Node>): void {
-    this.store.parent = parent;
+    this.content.parent = parent;
   }
 
   setParentId(parentId: Optional<NodeId>): void {
-    this.store.parentId = parentId;
+    this.content.parentId = parentId;
   }
 
   changeType(type: NodeType): void {
-    this.store.type = type;
+    this.content.type = type;
   }
 
   insert(node: Node, index: number): void {
@@ -92,7 +122,7 @@ export class VueNodeContent implements NodeContent {
   }
 
   insertText(text: string, offset: number): void {
-    this.store.textContent = this.store.textContent.slice(0, offset) + text + this.store.textContent.slice(offset);
+    this.content.textContent = this.content.textContent.slice(0, offset) + text + this.content.textContent.slice(offset);
   }
 
   remove(node: Node): void {
@@ -114,14 +144,14 @@ export class VueNodeContent implements NodeContent {
 
   updateContent(content: Node[] | string): void {
     if (typeof content === "string") {
-      this.store.textContent = content;
+      this.content.textContent = content;
     } else {
-      this.store.children = content;
+      this.content.children = content;
     }
   }
 
   updateProps(props: NodePropsJson): void {
-    this.store.props.update(props);
+    this.content.props.update(props);
   }
 
   clone(): NodeContent {
