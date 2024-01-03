@@ -49,12 +49,12 @@ export class Section extends NodePlugin {
 					placeholder: {
 						// TODO: This is a hack to get the correct placeholder for empty section
 						// not empty placeholder is not removed from node props.
-						empty: '',
+						empty: ' ',
 						focused: 'Press / for commands'
 					},
-				},
-				html: {
-					suppressContentEditableWarning: true,
+          html: {
+            suppressContentEditableWarning: true,
+          },
 				},
         // plugin: {
         //   'tag': 'p'

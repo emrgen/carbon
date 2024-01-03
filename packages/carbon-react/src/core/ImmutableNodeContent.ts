@@ -150,6 +150,7 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   updateProps(props: NodePropsJson): void {
+    console.debug('updateProps', props)
     this.content.props.update(props);
   }
 

@@ -82,6 +82,7 @@ export class SolidDraft implements Draft {
     }
 
     node.changeType(type);
+
   }
 
   move(to: Point, node: Node): void {

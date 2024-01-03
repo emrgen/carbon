@@ -118,6 +118,11 @@ export class NestablePlugin extends AfterPlugin {
 					cmd
 						.Change(listNode.id, 'section')
 						.Select(PinnedSelection.fromPin(selection.head))
+          // if (listNode.firstChild?.isEmpty) {
+          //   cmd.Update(listNode.firstChild.id, {
+          //     [PlaceholderPath]: listNode.props.get(Em) ?? '',
+          //   })
+          // }
 					cmd.Dispatch();
 					return
 				}

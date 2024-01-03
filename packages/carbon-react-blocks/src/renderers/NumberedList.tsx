@@ -57,12 +57,11 @@ export const NumberedListComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock {...props} custom={connectors} ref={ref}>
-      {/*<CarbonNodeContent*/}
-      {/*  node={node}*/}
-      {/*  beforeContent={beforeContent}*/}
-      {/*/>*/}
-      {/*<CarbonNodeChildren node={node}/>*/}
-      <CarbonChildren node={node} />
+      <CarbonNodeContent
+        node={node}
+        beforeContent={beforeContent}
+      />
+      <CarbonNodeChildren node={node}/>
       {SelectionHalo}
     </CarbonBlock>
   );

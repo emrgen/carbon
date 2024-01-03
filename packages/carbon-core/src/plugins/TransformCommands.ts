@@ -1104,7 +1104,6 @@ export class TransformCommands extends BeforePlugin {
     const { app } = tr;
     const startTextBlock = start.node;
     const endTextBlock = end.node;
-    // console.log('xxxxxxxxxxx', startTopBlock.name);
 
     const { parent: commonNode } = startTopBlock;
     if (!commonNode) {

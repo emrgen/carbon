@@ -378,7 +378,6 @@ export class Pin {
 		}
 
 		distance = constrain(curr.focusSize - distance, 0, curr.focusSize)
-    console.log('xxxxxxxxx', curr.id.toString(), distance, curr.focusSize - distance, 0, curr.focusSize)
 		return Pin.create(curr, distance);
 	}
 

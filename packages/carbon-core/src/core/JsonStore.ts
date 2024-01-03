@@ -47,6 +47,7 @@ class PathCache {
 //
 export class JsonStore {
 
+  // store save path encoded field, value pairs
   protected store: Map<string, any>;
 
   frozen = false;
