@@ -18,7 +18,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const isCollapsed = node.isCollapsed;
 
   const handleToggle = useCallback((app: Carbon) => {
-    app.cmd.toggle(node).Dispatch();
+    app.cmd.collapsible.toggle(node).Dispatch();
   }, [node]);
 
   // insert a new section as child of this collapsible
@@ -94,7 +94,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
         </div>
       </>
     );
-  }, [handleInsert, handleToggle, isCollapsed]);
+  }, [app, handleInsert, handleToggle, isCollapsed]);
 
   return (
     <CarbonBlock

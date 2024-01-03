@@ -23,6 +23,10 @@ export class NodeId implements IntoNodeId {
 		return this.eq(NodeId.NULL);
 	}
 
+  get key() {
+    return this.id;
+  }
+
 	static deserialize(id: string): Optional<NodeId> {
 		return new NodeId(id);
 	}

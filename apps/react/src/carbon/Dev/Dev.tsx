@@ -68,26 +68,26 @@ const data = node("carbon", [
     // ]),
 
 
-    // node("pageTree", [
-    //   title([text("Favorites")]),
-    //   node(
-    //     "pageTreeItem",
-    //     [
-    //       title([text("Computer Science")]),
-    //       node("pageTreeItem", [title([text("Algorithms")])]),
-    //       node("pageTreeItem", [title([text("Data Structures")])]),
-    //       node("pageTreeItem", [title([text("Operating Systems")])]),
-    //     ],
-    //     {[CollapsedPath]: true}
-    //   ),
-    //   node("pageTreeItem",
-    //     [
-    //       title([text("Electrical Engineering")]),
-    //       node("pageTreeItem", [title([text("Circuits")])]),
-    //       node("pageTreeItem", [title([text("Digital Logic")])]),
-    //       node("pageTreeItem", [title([text("Microprocessors")])]),
-    //     ]),
-    // ]),
+    node("pageTree", [
+      title([text("Favorites")]),
+      node(
+        "pageTreeItem",
+        [
+          title([text("Computer Science")]),
+          node("pageTreeItem", [title([text("Algorithms")])]),
+          node("pageTreeItem", [title([text("Data Structures")])]),
+          node("pageTreeItem", [title([text("Operating Systems")])]),
+        ],
+        {[CollapsedPath]: true}
+      ),
+      node("pageTreeItem",
+        [
+          title([text("Electrical Engineering")]),
+          node("pageTreeItem", [title([text("Circuits")])]),
+          node("pageTreeItem", [title([text("Digital Logic")])]),
+          node("pageTreeItem", [title([text("Microprocessors")])]),
+        ]),
+    ]),
 
     // node("pageTree", [
     //   title([text("Private")]),
