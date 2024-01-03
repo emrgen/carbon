@@ -1153,7 +1153,13 @@ export class TransformCommands extends BeforePlugin {
         if (startContainer?.isTextContainer && endContainer?.isTextContainer) {
           const textContent = startTextBlock.textContent.slice(0, start.offset) + endTextBlock.textContent.slice(end.offset);
           const textNode = app.schema.text(textContent)!;
-          insertCommands.push(SetContentAction.create(startContainer.id, [textNode]));
+          // when the text node is empty, we need to set content to empty array
+          if (textNode.isEmpty) {
+            insertCommands.push(SetContentAction.create(startContainer.id, []));
+          } else {
+            insertCommands.push(SetContentAction.create(startContainer.id, [textNode]));
+          }
+
           contentUpdated.add(startContainer.id);
           console.log('merge start and end block');
         } else {
