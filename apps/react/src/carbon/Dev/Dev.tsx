@@ -15,14 +15,6 @@ import {
   TagPath,
 } from "@emrgen/carbon-core";
 import {CarbonApp} from "@emrgen/carbon-utils";
-import {
-  h,
-  createElement,
-  ChainRenderContext,
-  createContext,
-  RenderContext,
-  NodeChangeContext, ChainNodeChangeManager, getContext
-} from "@emrgen/carbon-chain";
 import {noop, range} from "lodash";
 import SelectionTracker from "../../SelectionTracker";
 
@@ -175,21 +167,16 @@ const renderManager = RenderManager.from(
   renderers,
 )
 
-console.log = noop;
+// console.log = noop;
 console.info = noop;
-console.debug = noop;
-console.warn = noop;
+// console.debug = noop;
+// console.warn = noop;
 // console.error = noop;
-console.group = noop;
-console.groupCollapsed = noop;
-console.groupEnd = noop;
+// console.group = noop;
+// console.groupCollapsed = noop;
+// console.groupEnd = noop;
 console.time = noop;
 
-
-// @ts-ignore
-window.h = h
-// @ts-ignore
-window.createElement = createElement
 
 export default function Dev() {
   const app = useCreateCarbon('dev', data, plugins);

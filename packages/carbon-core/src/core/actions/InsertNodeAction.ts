@@ -22,6 +22,7 @@ export class InsertNodeAction implements CarbonAction {
 		const {app} = tr;
 
     // create a mutable node from json
+    console.log('inserting node', json)
 		const node = app.schema.nodeFromJSON(json)!;
 
 		const refNode = draft.get(at.nodeId);

@@ -15,7 +15,6 @@
     "@emotion/styled": "^11.11.0",
     "@emrgen/carbon-blocktree": "workspace:*",
     "@emrgen/carbon-comment-editor": "workspace:*",
-    "@emrgen/carbon-chain": "workspace:*",
     "@emrgen/carbon-code": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-blocks": "workspace:*",

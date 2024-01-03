@@ -211,7 +211,7 @@ export class ImmutableNode extends Node {
     if (this.isFrozen) return this
 
     // unlink from parent when freezing
-    this.setParent(null)
+    // this.setParent(null)
     this.content.freeze();
     this.props.freeze();
 

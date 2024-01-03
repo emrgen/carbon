@@ -13,7 +13,7 @@ import {
   corePresetPlugins,
   State, CheckedPath, preventAndStop,
 } from '@emrgen/carbon-core';
-import {createEffect, createSignal, For, onCleanup, onMount} from "solid-js";
+import {createContext, createEffect, createSignal, For, onCleanup, onMount, useContext} from "solid-js";
 
 const plugins = [
   ...corePresetPlugins,
@@ -56,6 +56,8 @@ console.groupCollapsed = noop;
 console.groupEnd = noop;
 console.time = noop;
 
+const DndContext = createContext<any>(null);
+
 function App() {
   const addNode = () => {
     setCount(count() + 1);
@@ -65,7 +67,17 @@ function App() {
     setCount(count() + 1);
   };
 
-  const [count, setCount] = createSignal(0)
+  const [count, setCount] = createSignal(0);
+  const dnd = {
+    dragging: false,
+    dragNode: null,
+    dragIndex: 0,
+    dropIndex: 0,
+    listeners: [],
+    viewport: document.querySelector('body')!,
+    options: null as any,
+    observer: null as any,
+  }
 
   let interval: any = null;
 
@@ -100,9 +112,24 @@ function App() {
     if (!node) return;
     const el = app.store.element(node.id)
     el?.focus();
+
+    // dnd.viewport = document.querySelector('body')!;
+    // dnd.options = {
+    //   root: dnd.viewport!,
+    //   threshold: 0,
+    //   rootMargin: '0px',
+    // }
+    // dnd.observer = new IntersectionObserver((entries) => {
+    //   entries.forEach(entry => {
+    //     if (entry.isIntersecting) {
+    //       console.log('intersecting', entry.target)
+    //     }
+    //   })
+    // }, dnd.options);
   })
 
   return (
+    <DndContext.Provider value={dnd}>
     <CarbonContext value={app}>
       <button onclick={handleClick} onmousedown={keepAdding} onmouseup={stopAdding}>Click</button>
 
@@ -110,16 +137,22 @@ function App() {
         {RenderElement(app.content)}
       </div>
     </CarbonContext>
+    </DndContext.Provider>
   )
 }
 
 // const RenderContext = createContext(null);
 
+
 const useRegister = (node: Node) => {
   const app = useCarbon();
+  const dnd =  useContext(DndContext);
 
   const register = (el: HTMLElement) => {
-    app.store.register(node, el)
+    app.store.register(node, el);
+    if (dnd.observer) {
+      dnd.observer.observe(el);
+    }
   }
 
   return register;
@@ -185,10 +218,33 @@ const TodoElement = (props: RendererProps) => {
   );
 }
 
+const NumberedElement = (props: RendererProps) => {
+  const {node} = props;
+  const register = useRegister(node);
+  const listNumber = () => {
+    const parent = node.parent;
+    if (!parent) return 0;
+    const index = parent.children.indexOf(node);
+    return index + 1;
+  }
+
+  return (
+    <div data-name={node.name} data-id={node.key} ref={register}>
+      {listNumber()}.&nbsp;
+      <For each={node.children}>
+        {(child) => {
+          return RenderElement(child);
+        }}
+      </For>
+    </div>
+  );
+}
+
 const components: Record<string, any> = {
   'carbon': BlockElement,
   'document': BlockElement,
   'todo': TodoElement,
+  'numberedList': NumberedElement,
   'section': BlockElement,
   'title': BlockElement,
   'text': TextElement,

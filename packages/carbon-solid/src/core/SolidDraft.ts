@@ -167,24 +167,12 @@ export class SolidDraft implements Draft {
 
   private prepend(node: Node, refNode: Node) {
     console.log(p14('%c[trap]'), "color:green", 'prepend', node.toString(), refNode.toString());
-    const parent = this.parent(refNode);
-    if (!parent) {
-      throw new Error(`Parent of ${refNode.id.toString()} not found`);
-    }
-
-    console.log('# adding new child node', 'parent', parent.id.toString(), 'index', 0, 'node', node.id.toString())
-    parent.insert(node, 0);
+    refNode.insert(node, 0);
   }
 
   private append(node: Node, refNode: Node) {
     console.log(p14('%c[trap]'), "color:green", 'append', node.toString(), refNode.toString());
-    const parent = this.parent(refNode);
-    if (!parent) {
-      throw new Error(`Parent of ${refNode.id.toString()} not found`);
-    }
-
-    console.log('# adding new child node', 'parent', parent.id.toString(), 'index', parent.children.length, 'node', node.id.toString())
-    parent.insert(node, parent.children.length);
+    refNode.insert(node, refNode.children.length);
   }
 
   remove(node: Node): void {

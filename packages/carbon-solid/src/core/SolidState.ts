@@ -23,8 +23,6 @@ export class SolidState implements State {
       });
     }
 
-    console.log('Nodemap', nodeMap.size)
-
     return state;
   }
 

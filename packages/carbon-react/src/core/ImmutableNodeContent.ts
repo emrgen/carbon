@@ -171,11 +171,13 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   freeze() {
+    if (this.isFrozen) return this;
     this.content.parent = null;
 
+    // first freeze the children
+    this.children.forEach(n => n.freeze());
     Object.freeze(this.content);
     Object.freeze(this);
-    this.children.forEach(n => n.freeze());
 
     return this;
   }

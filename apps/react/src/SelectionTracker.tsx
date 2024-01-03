@@ -34,13 +34,13 @@ export default function SelectionTracker() {
 
   return (
     <div className="carbon-selection-tracker">
-      {selections.map((s, i) => {
-        return (
-          <div className="carbon-selection-tracker__item" key={i}>
-            {`${i}: tail: ${s.tail.node.id.toString()}/${s.tail.offset} => head: ${s.head.node.id.toString()}/${s.head.offset}`}
-          </div>
-        );
-      })}
+      {/*{selections.map((s, i) => {*/}
+      {/*  return (*/}
+      {/*    <div className="carbon-selection-tracker__item" key={i}>*/}
+      {/*      {`${i}: tail: ${s.tail.node.id.toString()}/${s.tail.offset} => head: ${s.head.node.id.toString()}/${s.head.offset}`}*/}
+      {/*    </div>*/}
+      {/*  );*/}
+      {/*})}*/}
     </div>
   );
 }
