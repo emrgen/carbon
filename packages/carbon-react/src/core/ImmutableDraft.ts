@@ -348,6 +348,7 @@ export class ImmutableDraft implements CoreDraft {
       this.nodeMap.set(node.id, node);
     }
 
+    console.debug('inserting new item')
     switch (at.at) {
       case PointAt.After:
         return this.insertAfter(at.nodeId, node);
@@ -416,6 +417,7 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot insert node before a node that does not have a parent");
     }
 
+    console.debug('insert after', refNode.id.toString(), refNode.name, refNode.index, parent.children.length, Object.isFrozen(node.content))
     this.mutable(parentId, parent => {
       this.updateDependents(refNode, UpdateDependent.Next);
       parent.insert(node, refNode.index + 1);

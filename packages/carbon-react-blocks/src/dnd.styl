@@ -46,17 +46,17 @@
 [data-name=title]
 	position relative
 
-//[data-name=h1]
-//[data-name=h2]
-//[data-name=h3]
-//[data-name=h4]
+[data-name=h1]
+[data-name=h2]
+[data-name=h3]
+[data-name=h4]
 [data-name=document]
-//[data-name=section]
-//[data-name=bulletedList]
-//[data-name=numberedList]
-//[data-name=todo]
-//[data-name=pageTree]
-//[data-name=pageTreeItem]
+[data-name=section]
+[data-name=bulletedList]
+[data-name=numberedList]
+[data-name=todo]
+[data-name=pageTree]
+[data-name=pageTreeItem]
 	position: relative;
 	&:after
 		position: absolute
@@ -67,17 +67,17 @@
 		padding 0 10px
 		font-size 10px
 		line-height 10px
-	//[data-name=title]
-	//	&:before
-	//		position: absolute
-	//		content: attr(data-id)
-	//		line-height: inherit
-	//		top 12px
-	//		right 0
-	//		padding 0 10px
-	//		font-size 10px
-	//		color: #aaa
-	//		line-height 10px
+	[data-name=title]
+		&:before
+			position: absolute
+			content: attr(data-id)
+			line-height: inherit
+			top 12px
+			right 0
+			padding 0 10px
+			font-size 10px
+			color: #aaa
+			line-height 10px
 
 &[data-name=doc]:after
 &[data-name=paragraph]:after
