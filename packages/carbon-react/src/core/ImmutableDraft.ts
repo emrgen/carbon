@@ -149,12 +149,12 @@ export class ImmutableDraft implements CoreDraft {
       if (this.nodeMap.deleted(id)) {
         this.updated.remove(id);
       }
-      // console.log('changed node id', id.toString())
+      console.log('check if node is hidden', id.toString())
       // remove the hidden nodes
       this.node(id, (node) => {
         // console.log('changed node id', id.toString(), isPassiveHidden(node))
         if (isPassiveHidden(node) || node.isCollapseHidden) {
-          // console.log('removing hidden node', node.id.toString());
+          console.debug('removing hidden node', node.name, node.id.toString());
           this.updated.remove(id);
         }
       })

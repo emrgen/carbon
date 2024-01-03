@@ -19,7 +19,6 @@ import {
 
 declare module '@emrgen/carbon-core' {
   interface Transaction {
-    toggle(node: Node): Transaction;
     collapsible: {
       split(selection: PinnedSelection): Transaction;
       enter(selection: PinnedSelection): Transaction;

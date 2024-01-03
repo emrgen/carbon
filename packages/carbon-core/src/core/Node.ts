@@ -233,7 +233,6 @@ export class Node extends EventEmitter implements IntoNodeId {
     // if content node i.e. first child is treated as content node
     // check if parent is collapse hidden
     get isCollapseHidden() {
-      return false;
       if (this.props.get(CollapseHidden)) return true;
 
       // only collapsed parent can hide a child node
