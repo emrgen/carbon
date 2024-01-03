@@ -2,7 +2,7 @@ import {
   ActionOrigin,
   Draft as CoreDraft,
   EmptyPlaceholderPath,
-  FocusedPlaceholderPath,
+  FocusedPlaceholderPath, HasFocusPath,
   isPassiveHidden, LocalHtmlAttrPath,
   Node, NodeContentData,
   NodeId,
@@ -417,7 +417,7 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot insert node before a node that does not have a parent");
     }
 
-    console.debug('insert after', refNode.id.toString(), refNode.name, refNode.index, parent.children.length, Object.isFrozen(node.content))
+    // console.debug('insert after', refNode.id.toString(), refNode.name, refNode.index, parent.children.length)
     this.mutable(parentId, parent => {
       this.updateDependents(refNode, UpdateDependent.Next);
       parent.insert(node, refNode.index + 1);
@@ -585,6 +585,22 @@ export class ImmutableDraft implements CoreDraft {
           });
         });
       }
+    }
+
+    if (this.state.selection.isInline) {
+      this.mutable(this.state.selection.tail.node.id, node => {
+        node.updateProps({
+          [HasFocusPath]: '',
+        })
+      })
+    }
+
+    if (this.selection.isInline) {
+      this.mutable(this.selection.tail.nodeId, node => {
+        node.updateProps({
+          [HasFocusPath]: true,
+        })
+      })
     }
   }
 

@@ -2,9 +2,21 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   ListNumberPath, Node,
 } from "@emrgen/carbon-core";
-import { useCombineConnectors, useConnectorsToProps, useDragDropRectSelect } from "@emrgen/carbon-dragon-react";
+import {
+  useCombineConnectors,
+  useConnectorsToProps,
+  useDragDropRectSelect,
+  useDragDropRectSelectHalo
+} from "@emrgen/carbon-dragon-react";
 import { Optional } from "@emrgen/types";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useSelectionHalo} from "@emrgen/carbon-react";
+import {
+  CarbonBlock,
+  CarbonChildren,
+  CarbonNodeChildren,
+  CarbonNodeContent,
+  RendererProps,
+  useSelectionHalo
+} from "@emrgen/carbon-react";
 
 // TODO: This is a hack to get the list number. May be should be stored in the node properties.
 const listNumber = (node: Node, parent: Optional<Node>): number => {
@@ -31,11 +43,7 @@ const listNumber = (node: Node, parent: Optional<Node>): number => {
 export const NumberedListComp = (props: RendererProps) => {
   const { node, parent, custom } = props;
   const ref = useRef(null);
-  const selection = useSelectionHalo(props);
-  const dragDropRect = useDragDropRectSelect({ node, ref });
-  const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection),
-  );
+ const {connectors, SelectionHalo} = useDragDropRectSelectHalo({ref, node})
 
   const beforeContent = useMemo(() => {
     return (<label
@@ -49,13 +57,13 @@ export const NumberedListComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock {...props} custom={connectors} ref={ref}>
-      <CarbonNodeContent
-        node={node}
-        // parent={parent}
-        beforeContent={beforeContent}
-      />
-      <CarbonNodeChildren node={node}/>
-      {selection.SelectionHalo}
+      {/*<CarbonNodeContent*/}
+      {/*  node={node}*/}
+      {/*  beforeContent={beforeContent}*/}
+      {/*/>*/}
+      {/*<CarbonNodeChildren node={node}/>*/}
+      <CarbonChildren node={node} />
+      {SelectionHalo}
     </CarbonBlock>
   );
 };
