@@ -144,7 +144,7 @@ export class ImmutableNode extends Node {
     super.updateProps(props);
   }
 
-  override addLink(name: string, node: ImmutableNode) {
+  override addLink(name: string, node: Node) {
     if (this.isFrozen) {
       throw Error('cannot add link to immutable node:' + this.id.toString())
     }

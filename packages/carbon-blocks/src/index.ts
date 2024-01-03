@@ -18,6 +18,8 @@ import {PageTree} from "./plugins/PageTree";
 import {BlockContent} from "./plugins/BlockContent";
 import {Frame} from "./plugins/Frame";
 import {Insert} from "./plugins/Inserter";
+import {Modal} from "./plugins/Modal";
+import {TabGroup} from "./plugins/Tab";
 
 export const blockPresetPlugins: CarbonPlugin[] = [
   new Section(),
@@ -42,10 +44,11 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new CarbonRoot(),
   new PageTree(),
   new BlockContent(),
-  // new TabGroup(),
+  new TabGroup(),
   new BlockContent(),
   new Frame(),
   new Insert(),
+  new Modal(),
 ]
 
 export * from './events'

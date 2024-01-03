@@ -1,15 +1,23 @@
 import {
+  ActionOrigin,
+  ActivatedPath,
   CarbonPlugin,
   EventContext,
-  EventHandler,
-  EventHandlerMap, Node,
-  NodeSpec, Point,
-  preventAndStopCtx, TitlePath, Transaction, Pin, PinnedSelection, ActivatedPath, ActionOrigin, HiddenPath,
+  EventHandlerMap,
+  HiddenPath,
+  Node,
+  NodeSpec,
+  Pin,
+  PinnedSelection,
+  Point,
+  preventAndStopCtx,
+  TitlePath,
+  Transaction,
 } from "@emrgen/carbon-core";
 import {IsolateChildren} from "./IsolateChildren";
 
 const RenamingTabIdPath = 'local/state/rename/tabId';
-const ActiveChildIdPath = 'remote/state/active/childId';
+const ActiveTabIdPath = 'remote/state/active/tabId';
 
 export const getActiveTab = (node: Node) => {
   return node.children.find(n => n.props.get<boolean>(ActivatedPath) ?? false);
@@ -21,7 +29,7 @@ export const getActiveTabId = (node: Node) => {
 
 export const setActiveTabId = (cmd: Transaction, node: Node, tabId: string) => {
   cmd.update(node, {
-    [ActiveChildIdPath]: tabId,
+    [ActiveTabIdPath]: tabId,
   })
   return cmd
 }
@@ -47,10 +55,12 @@ export const TabName = 'tab';
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
+    select(tabs: Node, tab: Node): Transaction;
+
     tabs: {
       create(tabs: Node): Transaction;
       remove(tabs: Node, tab: Node): Transaction;
-      select(tabs: Node, tab: Node): Transaction;
+      open(tabs: Node, tab: Node): Transaction;
       startRenaming(tabs: Node, tab: Node): Transaction;
       stopRenaming(tabs: Node): Transaction;
     }
@@ -85,7 +95,7 @@ export class TabGroup extends CarbonPlugin {
     return {
       create: this.create,
       remove: this.remove,
-      select: this.select,
+      open: this.select,
       startRenaming: this.startRenaming,
       stopRenaming: this.stopRenaming,
     }
@@ -98,7 +108,7 @@ export class TabGroup extends CarbonPlugin {
     console.log('created tab', block.id.toString());
 
     const to = tabs.isVoid ? Point.toStart(tabs.id) : Point.toAfter(tabs.lastChild!.id);
-    tr.action.insert(to, block).tabs.select(tabs, block);
+    tr.action.insert(to, block).tabs.open(tabs, block);
   }
 
   remove(tr: Transaction, tabs: Node, tab: Node) {
@@ -117,13 +127,13 @@ export class TabGroup extends CarbonPlugin {
 
     tr
       .action.update(tabs, {
-        [ActiveChildIdPath]: tab.id.toString(),
-        [RenamingTabIdPath]: '',
-      })
+      [ActiveTabIdPath]: tab.id.toString(),
+      [RenamingTabIdPath]: '',
+    })
       .action.update(tab, {
-        [ActivatedPath]: true,
-        [HiddenPath]: false,
-      })
+      [ActivatedPath]: true,
+      [HiddenPath]: false,
+    })
 
     const after = PinnedSelection.fromPin(Pin.toStartOf(tab)!)
     tr.action.select(after, ActionOrigin.UserInput)
@@ -140,7 +150,6 @@ export class TabGroup extends CarbonPlugin {
       [RenamingTabIdPath]: ''
     })
   }
-
 
   plugins(): CarbonPlugin[] {
     return [

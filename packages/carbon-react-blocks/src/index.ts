@@ -24,6 +24,7 @@ import {BlockContentComp} from "./renderers/BlockContent";
 
 import './dnd.styl';
 import './style.styl';
+import {Modal} from "./renderers/Modal";
 
 export const blockPresetRenderers = [
   ReactRenderer.create('document', DocumentComp),
@@ -59,6 +60,7 @@ export const blockPresetRenderers = [
   ReactRenderer.create('tagsAttr', () => 1),
   ReactRenderer.create('frame', FrameComp),
   ReactRenderer.create('blockContent', BlockContentComp),
+  ReactRenderer.create('modal', Modal),
 ];
 
 

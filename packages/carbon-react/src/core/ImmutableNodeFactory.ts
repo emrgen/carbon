@@ -32,7 +32,7 @@ export class ImmutableNodeFactory implements NodeFactory {
 
   create(json: any, schema: Schema): Optional<Node> {
     const {scope} = this;
-    const {id, name, children = [], text} = json;
+    const {id, name, children = [], links = {}, text} = json;
     const type = schema.type(name);
     if (!type) {
       throw new Error(`Node Plugin is not registered ${name}`);
@@ -41,6 +41,7 @@ export class ImmutableNodeFactory implements NodeFactory {
     const props = isEmpty(json.props) ? type.props.clone() : type.props.clone().update(json.props);
     const nodeId = id ? NodeId.deserialize(id)! : this.blockId();
     const nodes = children.map(n => schema.nodeFromJSON(n));
+
     const content = ImmutableNodeContent.create(scope, {
       id: nodeId,
       type,
@@ -60,6 +61,15 @@ export class ImmutableNodeFactory implements NodeFactory {
       n.setParent(node)
       const imn = n as ImmutableNode;
       imn.mappedIndex = i;
+    });
+
+    Object.entries(links).forEach(([name, json]) => {
+      const child = schema.nodeFromJSON(json);
+      if (!child) {
+        throw new Error(`Node Plugin is not registered ${name}`);
+      }
+
+      node.addLink(name, child);
     });
 
     return node;

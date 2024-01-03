@@ -44,7 +44,7 @@ export const TabsComp = (props: RendererProps) => {
     }
     // console.log('handleActiveTabChange', tab)
     const {cmd} = app;
-    cmd.tabs.select(tabs, tab).dispatch()
+    cmd.tabs.open(tabs, tab).dispatch()
   }, [app, tabs, activeTabId])
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export const TabsComp = (props: RendererProps) => {
         }
 
         if (firstTab) {
-          app.cmd.tabs.select(tabs, firstTab).dispatch();
+          app.cmd.tabs.open(tabs, firstTab).dispatch();
         }
       }
     }

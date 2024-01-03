@@ -13,6 +13,13 @@ export const carbon = (children: any[] = [], props = {}) => ({
   props,
 })
 
+export const block = ({name, children = [], links = {}, props = {}}: {name: string, children?: any[], links?: Record<string, any>, props?: any}) => ({
+  name,
+  children,
+  links,
+  props,
+})
+
 export const node = (name: string, children: any[] = [], props = {}) => ({
 	name,
 	children,

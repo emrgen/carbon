@@ -181,7 +181,7 @@ export class ChangeManager extends NodeTopicEmitter {
     // sort the nodes by depth so that we can update the children first
     updatedNodes.sort((a, b) => {
       return b.depth - a.depth;
-    })
+    });
 
     // updatedNodes.forEach(n => {
     //   updatedNodeIds.remove(n.id);

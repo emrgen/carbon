@@ -1,9 +1,10 @@
 import {useEffect} from "react";
 
-import {blockPresetPlugins, node, text, title, section} from "@emrgen/carbon-blocks";
+import {blockPresetPlugins, node, text, title, section, block} from "@emrgen/carbon-blocks";
 import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon, ImmutableNodeFactory} from "@emrgen/carbon-react";
 import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
 import {
+  ActivatedPath,
   CollapsedPath,
   corePresetPlugins,
   Extension,
@@ -12,7 +13,7 @@ import {
   PluginManager,
   Schema,
   State,
-  TagPath,
+  TagPath, TitlePath,
 } from "@emrgen/carbon-core";
 import {CarbonApp} from "@emrgen/carbon-utils";
 import {noop, range} from "lodash";
@@ -21,29 +22,41 @@ import SelectionTracker from "../../SelectionTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
-    //
-    // node("tabs", [
-    //   node("tab", [
-    //     // node("title", [text("tab 1")]),
-    //     section([title([text("tab 1 content")])]),
-    //   ], {
-    //     [ActivatedPath]: true,
-    //     [TitlePath]: "tab 11 some big title"
-    //   }),
-    //   node("tab", [
-    //     // node("title", [text("tab 2")]),
-    //     section([title([text("tab 2 content")])]),
-    //   ], {
-    //
-    //     [TitlePath]: "tab 12 medium"
-    //   }),
-    //   node("tab", [
-    //     // node("title", [text("tab 3")]),
-    //     section([title([text("tab 3 content")])]),
-    //   ], {
-    //     [TitlePath]: "tab 13"
-    //   }),
-    // ]),
+    block({
+      name: 'modal', children: [
+        title([text('modal title')]),
+        section([title([text('modal content')])]),
+        section([title([text('modal content')])]),
+        section([title([text('modal content')])]),
+      ],
+      links: {
+        'header': node('title', [text('modal header')]),
+        'footer': node('title', [text('modal footer')]),
+      }
+    }),
+
+    node("tabs", [
+      node("tab", [
+        // node("title", [text("tab 1")]),
+        section([title([text("tab 1 content")])]),
+      ], {
+        [ActivatedPath]: true,
+        [TitlePath]: "tab 11 some big title"
+      }),
+      node("tab", [
+        // node("title", [text("tab 2")]),
+        section([title([text("tab 2 content")])]),
+      ], {
+
+        [TitlePath]: "tab 12 medium"
+      }),
+      node("tab", [
+        // node("title", [text("tab 3")]),
+        section([title([text("tab 3 content")])]),
+      ], {
+        [TitlePath]: "tab 13"
+      }),
+    ]),
     //
     // node("commentEditor", [
     //   section([title([text('add a comment')])])
