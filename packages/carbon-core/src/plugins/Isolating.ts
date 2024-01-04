@@ -22,9 +22,9 @@ export class IsolatingPlugin extends AfterPlugin {
   priority = 10 ** 4 + 600;
 
   handlers(): EventHandlerMap {
-    return {}
+
     return {
-      mouseDown: (ctx: EventContext<Event>) => {
+      _mouseDown: (ctx: EventContext<Event>) => {
         const {cmd, app, event} = ctx;
         if (!app.selection.isCollapsed) return
         const store = app.store;
@@ -107,10 +107,11 @@ export class IsolatingPlugin extends AfterPlugin {
 
       // TODO: may be mark all the isolating nodes as non-focusable
       // selecting within a isolating node
-      _selectionchange: (ctx: EventContext<Event>) => {
+      selectionchange: (ctx: EventContext<Event>) => {
         const {selection, cmd} = ctx;
         const {start, end, head, tail} = selection;
         if (selection.isCollapsed) return;
+        if (this.state.plugin('runtime')?.get('mousedown')) return;
 
         const headIsolating = head.node.closest((n) => n.isIsolate);
         const tailIsolating = tail.node.closest((n) => n.isIsolate);
@@ -118,6 +119,7 @@ export class IsolatingPlugin extends AfterPlugin {
         if (!headIsolating && !tailIsolating) return;
 
         if (headIsolating && tailIsolating && !headIsolating.eq(tailIsolating)) {
+          preventAndStopCtx(ctx);
           // keep the selection outside the child isolating node
           if (headIsolating.parents.some((n) => n.eq(tailIsolating))) {
             if (selection.isForward) {
@@ -181,7 +183,7 @@ export class IsolatingPlugin extends AfterPlugin {
     return {
       shiftUp: (e: EventContext<KeyboardEvent>) => {
         if (e.app.selection.isBlock) return;
-        const { selection, node } = e;
+        const { selection, currentNode } = e;
         const { head } = selection;
 
         // cursor can move to the previous focusable node
@@ -197,7 +199,7 @@ export class IsolatingPlugin extends AfterPlugin {
 
         // or only if the current node is inside the previous isolating node
         const prevIsolating = prevFocusable.closest((n) => n.isIsolate);
-        if (prevIsolating && !node.parents.some((n) => n.eq(prevIsolating))) {
+        if (prevIsolating && !currentNode.parents.some((n) => n.eq(prevIsolating))) {
           this.prevent(e);
           return;
         }

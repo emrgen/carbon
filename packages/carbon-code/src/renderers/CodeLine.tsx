@@ -1,10 +1,6 @@
-import {
-  CarbonBlock,
-  CarbonChildren,
-  RendererProps, useCarbon,
-} from "@emrgen/carbon-core";
 import {useCallback, useMemo} from "react";
 import prism, { Token, TokenStream } from 'prismjs';
+import {CarbonBlock, CarbonChildren, RendererProps} from "@emrgen/carbon-react";
 
 declare module '@emrgen/carbon-core' {
   interface Transaction {

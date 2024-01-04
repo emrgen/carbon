@@ -59,9 +59,9 @@ export class PointedSelection {
 		return !this.isBlock;
 	}
 
-  // get isInlineBlock() {
-  //   return this.isBlock &&
-  // }
+  get isInlineBlock() {
+    return this.isInline && this.nodeIds.length > 0
+  }
 
 	get isCollapsed() {
 		return this.tail.eq(this.head);

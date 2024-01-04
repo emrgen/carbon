@@ -34,9 +34,9 @@ export class CommentEditor extends CarbonPlugin {
     return {
       cmd_a: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
-        const {node, cmd} = ctx;
-        const start = Pin.toStartOf(node)!
-        const end = Pin.toEndOf(node)!
+        const {currentNode, cmd} = ctx;
+        const start = Pin.toStartOf(currentNode)!
+        const end = Pin.toEndOf(currentNode)!
         const selection = PinnedSelection.create(start, end);
         cmd.action.select(selection).dispatch();
       }

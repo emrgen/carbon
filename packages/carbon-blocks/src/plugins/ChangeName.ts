@@ -47,8 +47,8 @@ export class ChangeName extends BeforePlugin {
   handlers(): Partial<EventHandler> {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-        const { node } = ctx;
-        const block = node.closest(n => n.isContainer)!;
+        const { currentNode } = ctx;
+        const block = currentNode.closest(n => n.isContainer)!;
 
         if (!isConvertible(block)) return
         if (this.inputRules.process(ctx, block)) {
@@ -60,9 +60,9 @@ export class ChangeName extends BeforePlugin {
 
   tryChangeName(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
-      const { node, app, cmd } = ctx;
+      const { currentNode, app, cmd } = ctx;
       const { selection } = app;
-      const block = node.closest(n => n.isContainer)!;
+      const block = currentNode.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
 
       const type = app.schema.type(name);
@@ -70,7 +70,7 @@ export class ChangeName extends BeforePlugin {
         throw Error('change name does not exists: ' + name)
       }
 
-      console.log('tryChangeType', ctx.node.textContent, name);
+      console.log('tryChangeType', ctx.currentNode.textContent, name);
 
       preventAndStopCtx(ctx);
 
@@ -130,13 +130,13 @@ export class ChangeName extends BeforePlugin {
 
   tryChangeIntoCode(type: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
-      const { node, app, cmd } = ctx;
+      const { currentNode, app, cmd } = ctx;
       const {selection} = app;
-      const block = node.closest(n => n.isContainer)!;
+      const block = currentNode.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
       preventAndStopCtx(ctx)
 
-      console.log('tryChangeIntoCode', ctx.node.textContent, type);
+      console.log('tryChangeIntoCode', ctx.currentNode.textContent, type);
 
       // const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
       // const match = text.match(regex);
@@ -159,12 +159,12 @@ export class ChangeName extends BeforePlugin {
 
   tryChangeIntoDivider(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
-      const { node, app, cmd } = ctx;
+      const { currentNode, app, cmd } = ctx;
       const { selection } = app;
-      const block = node.closest(n => n.isContainer)!;
+      const block = currentNode.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
 
-      console.log('tryChangeType', ctx.node.textContent, name);
+      console.log('tryChangeType', ctx.currentNode.textContent, name);
 
       ctx.event.preventDefault();
       ctx.stopPropagation();

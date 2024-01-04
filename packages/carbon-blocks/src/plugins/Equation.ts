@@ -34,7 +34,7 @@ export class Equation extends CarbonPlugin {
   keydown(): Partial<EventHandler> {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
-        const { app, node } = ctx;
+        const { app, currentNode } = ctx;
         preventAndStopCtx(ctx);
         // react.tr
         //   .Update(node, { node: { isEditing: !node.props.node.isEditing } })

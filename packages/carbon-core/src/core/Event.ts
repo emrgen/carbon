@@ -52,3 +52,14 @@ export enum EventsOut {
 	mounted = 'mounted',
 	nodeInserted = 'nodeInserted',
 }
+
+
+export class CarbonMouseEvent extends Event {
+  constructor(readonly nativeEvent: MouseEvent) {
+    super(nativeEvent.type)
+  }
+}
+
+export class CarbonKeyboardEvent {
+  constructor(readonly nativeEvent: KeyboardEvent) {}
+}

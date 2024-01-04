@@ -85,6 +85,9 @@ export class TabGroup extends CarbonPlugin {
           html: {
             contentEditable: false,
             suppressContentEditableWarning: true,
+          },
+          style: {
+            userSelect: 'none'
           }
         }
       }
@@ -95,7 +98,7 @@ export class TabGroup extends CarbonPlugin {
     return {
       create: this.create,
       remove: this.remove,
-      open: this.select,
+      open: this.open,
       startRenaming: this.startRenaming,
       stopRenaming: this.stopRenaming,
     }
@@ -115,8 +118,8 @@ export class TabGroup extends CarbonPlugin {
     // tr.Remove(tab)
   }
 
-  // select the tab and focus at the start of the tab content
-  select(tr: Transaction, tabs: Node, tab: Node) {
+  // open the tab and focus at the start of the tab content
+  open(tr: Transaction, tabs: Node, tab: Node) {
     const activeTab = getActiveTab(tabs)
     if (activeTab) {
       tr.action.update(activeTab, {
@@ -161,7 +164,7 @@ export class TabGroup extends CarbonPlugin {
     return {
       left: (ctx: EventContext<KeyboardEvent>) => {
         // focus at the start of the active tab content
-        const {app, node: tabs, cmd} = ctx;
+        const {app, currentNode: tabs, cmd} = ctx;
         const {selection} = app;
         if (selection.isBlock) {
           preventAndStopCtx(ctx);
@@ -177,7 +180,7 @@ export class TabGroup extends CarbonPlugin {
       },
       right: (ctx: EventContext<KeyboardEvent>) => {
         // focus at the end of the active tab content
-        const {app, node: tabs, cmd} = ctx;
+        const {app, currentNode: tabs, cmd} = ctx;
         const {selection} = app;
         if (selection.isBlock) {
           preventAndStopCtx(ctx);
@@ -220,7 +223,7 @@ export class Tab extends CarbonPlugin {
       props: {
         local: {
           html: {
-            contentEditable: true,
+            contentEditable: false,
             suppressContentEditableWarning: true,
           }
         }
@@ -237,10 +240,10 @@ export class Tab extends CarbonPlugin {
   keydown(): EventHandlerMap {
     return {
       enter(ctx: EventContext<KeyboardEvent>) {
-        const {app, selection, node} = ctx;
+        const {app, selection, currentNode} = ctx;
         console.log('[Enter] tab');
         // if selection is within the collapsible node title split the collapsible node
-        if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
+        if (selection.inSameNode && selection.start.node.parent?.eq(currentNode) && !currentNode.isEmpty) {
           preventAndStopCtx(ctx);
           app.cmd.collapsible.split(selection)?.Dispatch();
         }

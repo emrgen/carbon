@@ -89,15 +89,15 @@ export class NestablePlugin extends AfterPlugin {
 	keydown(): EventHandlerMap {
 		return {
 			backspace: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, node, cmd } = ctx;
-				if (node.isIsolate) return;
+				const { app, currentNode, cmd } = ctx;
+				if (currentNode.isIsolate) return;
 
 				const { selection } = app;
 				if (!selection.isCollapsed || selection.isBlock) {
 					return
 				}
 
-				const listNode = node.closest(isNestableNode);
+				const listNode = currentNode.closest(isNestableNode);
 				if (!listNode) return
 				const head = selection.head.node.isEmpty ? selection.head.down() : selection.head;
 				if (!head) return
@@ -140,9 +140,9 @@ export class NestablePlugin extends AfterPlugin {
 				console.log('should pull the last node');
 			},
 			shiftBackspace: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, node } = ctx;
+				const { app, currentNode } = ctx;
 				const { selection} = app;
-				const listNode = node.closest(isNestableNode);
+				const listNode = currentNode.closest(isNestableNode);
 				// console.log(rootListNode, listNode);
 				if (!listNode) return
 				const atStart = selection.head.isAtStartOfNode(listNode);
@@ -156,14 +156,14 @@ export class NestablePlugin extends AfterPlugin {
 				}
 			},
 			enter: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, node, cmd } = ctx;
+				const { app, currentNode, cmd } = ctx;
 				const { selection } = app;
 				if (!selection.isCollapsed) {
 					return
 				}
 
 				// when the cursor is at start of the empty node
-				const listNode = node.closest(isNestableNode);
+				const listNode = currentNode.closest(isNestableNode);
 				if (!listNode) return
 				if (!listNode.isEmpty) return
 				const atStart = selection.head.isAtStartOfNode(listNode);
@@ -205,13 +205,13 @@ export class NestablePlugin extends AfterPlugin {
 			// push the
 			tab: (ctx: EventContext<KeyboardEvent>) => {
 				preventAndStopCtx(ctx);
-				const { app, node, cmd } = ctx;
+				const { app, currentNode, cmd } = ctx;
 				const { selection } = app;
-				console.log(`tabbed on node: ${node.name} => ${node.id.toString()}`);
+				console.log(`tabbed on node: ${currentNode.name} => ${currentNode.id.toString()}`);
 
-				const container = node.closest(n => n.isContainer);
-				console.log(container?.name, node.name, node.type.isBlock && !node.type.isTextBlock);
-				console.log(node.chain.map(n => n.name).join(' > '));
+				const container = currentNode.closest(n => n.isContainer);
+				console.log(container?.name, currentNode.name, currentNode.type.isBlock && !currentNode.type.isTextBlock);
+				console.log(currentNode.chain.map(n => n.name).join(' > '));
 
 				const listNode = isNestableNode(container!) ? container : undefined;
 				if (!listNode) return
@@ -226,9 +226,9 @@ export class NestablePlugin extends AfterPlugin {
 			},
 			shiftTab: (ctx: EventContext<KeyboardEvent>) => {
 				preventAndStopCtx(ctx);
-				const { app, node, cmd } = ctx;
+				const { app, currentNode, cmd } = ctx;
 				const { selection } = app;
-				const listNode = node.closest(isNestableNode);
+				const listNode = currentNode.closest(isNestableNode);
 				if (!listNode) return
 				const {parent} = listNode;
 				if (!parent || !isNestableNode(parent)) return

@@ -22,18 +22,26 @@ import SelectionTracker from "../../SelectionTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
-    block({
-      name: 'modal', children: [
-        title([text('modal title')]),
-        section([title([text('modal content')])]),
-        section([title([text('modal content')])]),
-        section([title([text('modal content')])]),
-      ],
-      links: {
-        'header': node('title', [text('modal header')]),
-        'footer': node('title', [text('modal footer')]),
-      }
-    }),
+    section([title([text("section 1")])]),
+    section([title([])]),
+    section([title([text("section 3")])]),
+    node('frame', [
+      title([text('frame title')]),
+      section([title([text('frame section')])]),
+    ]),
+
+    // block({
+    //   name: 'modal', children: [
+    //     title([text('modal title')]),
+    //     section([title([text('modal content')])]),
+    //     section([title([text('modal content')])]),
+    //     section([title([text('modal content')])]),
+    //   ],
+    //   links: {
+    //     'header': node('title', [text('modal header')]),
+    //     'footer': node('title', [text('modal footer')]),
+    //   }
+    // }),
 
     node("tabs", [
       node("tab", [
@@ -57,11 +65,11 @@ const data = node("carbon", [
         [TitlePath]: "tab 13"
       }),
     ]),
-    //
+
     // node("commentEditor", [
     //   section([title([text('add a comment')])])
     // ]),
-    //
+
     // // node("blockContent"),
     //
     // section([title([text("section 1")])]),
@@ -119,7 +127,7 @@ const data = node("carbon", [
     //   node("pageTreeItem", [title([text("Economics")])]),
     // ]),
     //
-    node("section", [title([text("Phycology")])]),
+    node("section", [title([text("Psychology")])]),
 
     node(
       "section",

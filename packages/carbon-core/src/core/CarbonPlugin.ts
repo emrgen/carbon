@@ -34,10 +34,8 @@ export abstract class CarbonPlugin {
 
 	name: PluginName = '';
 
-	// @ts-ignore
-	protected bus: PluginEmitter;
-	// @ts-ignore
-	protected state: PluginState;
+	protected bus!: PluginEmitter;
+	protected state!: PluginState;
 
 	init(bus: PluginEmitter, state: PluginState) {
 		this.bus = bus;

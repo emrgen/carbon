@@ -178,7 +178,7 @@ export class PinnedSelection {
 	}
 
 	get isInline() {
-		return !this.tail.eq(Pin.IDENTITY);
+		return !this.tail.eq(Pin.IDENTITY) && !this.nodes.length;
 	}
 
   // block selection that spans multiple blocks with range selection at ends

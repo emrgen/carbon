@@ -51,7 +51,7 @@ export class BlockMenuPlugin extends BeforePlugin {
       },
       'enter': (ctx: EventContext<KeyboardEvent>) => {
         if (this.visible) {
-          console.log('enter', ctx.node.id.toString(), this.visible);
+          console.log('enter', ctx.currentNode.id.toString(), this.visible);
           preventAndStopCtx(ctx);
           ctx.app.emit(BlockMenuCmd.select);
         }
@@ -59,8 +59,8 @@ export class BlockMenuPlugin extends BeforePlugin {
       'esc': (ctx: EventContext<KeyboardEvent>) => {
         if (this.visible) {
           preventAndStopCtx(ctx);
-          const { node, app } = ctx;
-          this.onHide(app, node, true);
+          const { currentNode, app } = ctx;
+          this.onHide(app, currentNode, true);
         }
       }
     }
@@ -71,44 +71,44 @@ export class BlockMenuPlugin extends BeforePlugin {
       keyUp: this.onKeyUp.bind(this),
       // hide block menu on mouse down outside the menu
       mouseDown: (ctx: EventContext<MouseEvent>) => {
-        const {node, app} = ctx;
+        const {currentNode, app} = ctx;
         if (this.visible) {
-          this.onHide(app, node, true);
+          this.onHide(app, currentNode, true);
         }
       },
     }
   }
 
   onKeyUp(ctx: EventContext<KeyboardEvent>) {
-    const { app, node } = ctx;
+    const { app, currentNode } = ctx;
     const { selection } = app;
     const {checked} = this;
 
     // console.log('onKeyUp', node.textContent, ctx.node.id.toString(), checked.get(ctx.node.id.toString()), node.isEmpty);
 
-    if (node.isEmpty) {
-      this.onHide(app, node, false);
+    if (currentNode.isEmpty) {
+      this.onHide(app, currentNode, false);
       return;
     }
 
-    if (checked.get(node.id.toString())) {
-      console.log('node is checked', checked.get(ctx.node.id.toString()));
+    if (checked.get(currentNode.id.toString())) {
+      console.log('node is checked', checked.get(ctx.currentNode.id.toString()));
       return;
     }
 
-    if (!selection.isCollapsed || !node.isTextContainer || !selection.start.isAtEndOfNode(node) || !BlockMenuRegex.test(node.textContent)) {
-      this.onHide(app, node, this.visible);
+    if (!selection.isCollapsed || !currentNode.isTextContainer || !selection.start.isAtEndOfNode(currentNode) || !BlockMenuRegex.test(currentNode.textContent)) {
+      this.onHide(app, currentNode, this.visible);
       return
     }
-    const el = app.store.element(node.id);
+    const el = app.store.element(currentNode.id);
 
     if (!el) {
-      console.error("no element found for node", node);
+      console.error("no element found for node", currentNode);
       return;
     }
 
     console.log('show menu');
-    this.bus.emit(node, BlockMenuCmd.show, el);
+    this.bus.emit(currentNode, BlockMenuCmd.show, el);
   }
 
   onHide(app: Carbon, node: Node, isChecked = true) {

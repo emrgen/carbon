@@ -7,6 +7,7 @@ import { TransformCommands } from './TransformCommands';
 import { HistoryPlugin } from "./History";
 import { FormatterPlugin } from "./Formatter";
 import { ActionPlugin } from "./Action";
+import {Runtime} from "./Runtime";
 
 export const corePresetPlugins: CarbonPlugin[] = [
   new SelectionChangePlugin(),
@@ -17,6 +18,7 @@ export const corePresetPlugins: CarbonPlugin[] = [
   new HistoryPlugin(),
   new FormatterPlugin(),
   new ActionPlugin(),
+  new Runtime(),
 ];
 
 export * from './TransformCommands'

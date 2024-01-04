@@ -90,31 +90,31 @@ export class Column extends CarbonPlugin {
         preventAndStopCtx(ctx);
       },
       shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
-        const { node, app } = ctx;
+        const { currentNode, app } = ctx;
         const { selection } = app;
-        if (!selection.isCollapsed && selection.start.isAtStartOfNode(node)) {
+        if (!selection.isCollapsed && selection.start.isAtStartOfNode(currentNode)) {
           preventAndStopCtx(ctx);
 
         }
       },
       shiftRight: (ctx: EventContext<KeyboardEvent>) => {
-        const { node, app } = ctx;
+        const { currentNode, app } = ctx;
         const { selection } = app;
-        if (!selection.isCollapsed && selection.end.isAtEndOfNode(node)) {
+        if (!selection.isCollapsed && selection.end.isAtEndOfNode(currentNode)) {
           preventAndStopCtx(ctx);
         }
       },
       backspace: (ctx: EventContext<KeyboardEvent>) => {
-        const { node, app } = ctx;
+        const { currentNode, app } = ctx;
         const { selection } = app;
-        if (selection.isCollapsed && selection.start.isAtStartOfNode(node)) {
+        if (selection.isCollapsed && selection.start.isAtStartOfNode(currentNode)) {
           preventAndStopCtx(ctx);
         }
       },
       delete: (ctx: EventContext<KeyboardEvent>) => {
-        const { node, app } = ctx;
+        const { currentNode, app } = ctx;
         const { selection } = app;
-        if (selection.isCollapsed && selection.end.isAtEndOfNode(node)) {
+        if (selection.isCollapsed && selection.end.isAtEndOfNode(currentNode)) {
           preventAndStopCtx(ctx);
         }
       }

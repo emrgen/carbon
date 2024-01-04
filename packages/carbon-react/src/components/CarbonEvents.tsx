@@ -12,6 +12,7 @@ const events: EventsIn[] = [
   EventsIn.mouseDown,
   EventsIn.mouseDown,
   EventsIn.mouseOver,
+  // EventsIn.mouseMove,
   EventsIn.mouseOut,
   EventsIn.mouseUp,
   EventsIn.dragStart,

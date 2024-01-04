@@ -51,7 +51,7 @@ export class TextPlugin extends NodePlugin {
 	handlers(): EventHandlerMap {
 		return {
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, node, cmd } = ctx;
+				const { app, currentNode, cmd } = ctx;
 				const { selection } = app;
 				const { start, end } = selection;
 				if (!selection.isCollapsed) {

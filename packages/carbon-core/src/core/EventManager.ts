@@ -47,7 +47,7 @@ export class EventManager {
 			node: event.node,
 			selection: app.selection,
 			origin: EventOrigin.custom,
-			cmd: app.cmd,
+			// cmd: app.cmd,
 		})
 
 		this.pm.onEvent(ctx);
@@ -103,7 +103,6 @@ export class EventManager {
 				node: lastNode,
 				selection: PinnedSelection.IDENTITY,
 				origin: EventOrigin.dom,
-				cmd: app.cmd,
 			});
 
 			this.pm.onEvent(editorEvent);
@@ -147,7 +146,7 @@ export class EventManager {
 			node,
 			selection: selection,
 			origin: EventOrigin.dom,
-			cmd: app.cmd,
+			// cmd: app.cmd,
 		});
 
     // console.log('node chain', node.chain.map(n => n.id.toString()).join(' > '))
@@ -180,7 +179,7 @@ export class EventManager {
 		}
 
 		// if the transaction is not committed, discard it
-		if (!editorEvent.cmd.committed) {
+		if (editorEvent.transaction && !editorEvent.transaction.committed) {
 			this.app.committed = true;
 			console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'Discarded transaction', type);
 			return

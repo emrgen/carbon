@@ -40,8 +40,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
 			},
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				const { node, event } = ctx;
-				if (node.isAtom) {
+				const { currentNode, event } = ctx;
+				if (currentNode.isAtom) {
 					// event.preventDefault()
 					return
 				}
@@ -64,7 +64,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			cmd_i: preventAndStopCtx,
 			cmd_u: preventAndStopCtx,
 			esc: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, cmd, node } = ctx;
+				const { app, cmd, currentNode } = ctx;
 				const { selection } = app
 				if (selection.isBlock) {
 					const { blocks } = selection;
@@ -78,7 +78,7 @@ export class KeyboardPlugin extends AfterPlugin {
 					return
 				}
 
-				const block = node.chain.find(n => n.isBlockSelectable);
+				const block = currentNode.chain.find(n => n.isBlockSelectable);
 				if (!block) return
 				cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 			},
@@ -130,7 +130,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			},
 
 			shiftRight: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event, node } = ctx;
+				const { app, event, currentNode } = ctx;
 				const {cmd} = app;
 				event.preventDefault();
 				const { selection } = app;
@@ -140,7 +140,7 @@ export class KeyboardPlugin extends AfterPlugin {
 						return
 					}
 
-					const block = node.find(n => !n.eq(node) && n.isContainer)
+					const block = currentNode.find(n => !n.eq(currentNode) && n.isContainer)
 					if (!block) return
 					cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
 					return
@@ -151,7 +151,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			},
 
 			shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, event, node, cmd } = ctx;
+				const { app, event, currentNode, cmd } = ctx;
 
 				event.preventDefault();
 				const { selection } = app;
@@ -161,7 +161,7 @@ export class KeyboardPlugin extends AfterPlugin {
 						return
 					}
 
-					const { parent } = node;
+					const { parent } = currentNode;
 					if (parent?.isSandbox) return
 					cmd.Select(PinnedSelection.fromNodes(parent!)).Dispatch();
 					return
@@ -471,7 +471,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		ctx.event.stopPropagation();
 
 		const { event, cmd } = ctx;
-		const { app, node } = ctx;
+		const { app, currentNode } = ctx;
 		const { selection } = app;
 
 		// delete node selection if any
@@ -486,7 +486,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			return
 		}
 
-		if (head.isAtEndOfNode(node)) {
+		if (head.isAtEndOfNode(currentNode)) {
 			const { start } = selection;
 			const textBlock = start.node.chain.find(n => n.isTextContainer)
 			const nextTextBlock = textBlock?.next(n => !n.isIsolate && n.isTextContainer, { skip: n => n.isIsolate });
@@ -503,7 +503,7 @@ export class KeyboardPlugin extends AfterPlugin {
 	}
 
 	up(ctx: EventContext<KeyboardEvent>) {
-		const { app, node, cmd } = ctx;
+		const { app, currentNode, cmd } = ctx;
 		const { selection } = app;
 		if (selection.isInline) return
 		preventAndStopCtx(ctx);
@@ -516,7 +516,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			return
 		}
 
-		const block = prevSelectableBlock(node, true);
+		const block = prevSelectableBlock(currentNode, true);
 		if (!block || block.isDocument) return
 
     const lastNode = last(blocks) as Node;
@@ -529,7 +529,7 @@ export class KeyboardPlugin extends AfterPlugin {
 	}
 
 	down(ctx: EventContext<KeyboardEvent>) {
-		const { app, node, cmd } = ctx;
+		const { app, currentNode, cmd } = ctx;
 		const { selection } = app;
 		if (selection.isInline) return
 		preventAndStopCtx(ctx)
@@ -545,7 +545,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		}
 
     const lastNode = last(blocks) as Node;
-		const block = nextSelectableBlock(node, !lastNode.isIsolate)
+		const block = nextSelectableBlock(currentNode, !lastNode.isIsolate)
 		console.log('nextContainerBlock', block);
 		if (!block) return
 

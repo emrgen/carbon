@@ -132,11 +132,11 @@ export class PageTreeItem extends CarbonPlugin {
     return {
       blur: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
-        const {target, node} = ctx;
-        const {parent} = target;
+        const {targetNode, currentNode} = ctx;
+        const {parent} = targetNode;
         // if this node is the closest pageTreeItem node to the target, then mark it closed
-        if (parent?.name === this.name && target.closest(n => n.name === this.name)?.eq(node)) {
-          ctx.cmd.Update(node.id, {
+        if (parent?.name === this.name && targetNode.closest(n => n.name === this.name)?.eq(currentNode)) {
+          ctx.cmd.Update(currentNode.id, {
             [OpenedPath]: false
           });
         }

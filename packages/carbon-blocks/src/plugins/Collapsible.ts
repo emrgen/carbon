@@ -38,7 +38,7 @@ export class Collapsible extends NodePlugin {
       group: 'content nestable',
       content: 'title content*',
       splits: true,
-      splitName: 'section',
+      splitName: 'bulletedList',
       insert: true,
       collapsible: true,
       inlineSelectable: true,
@@ -100,47 +100,47 @@ export class Collapsible extends NodePlugin {
   keydown(): Partial<EventHandler> {
     return {
       'ctrl_shift_e': (ctx: EventContext<KeyboardEvent>) => {
-        const { node } = ctx;
-        if (node.name === 'document') {
+        const { currentNode } = ctx;
+        if (currentNode.name === 'document') {
           return;
         }
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        ctx.cmd.Update(node.id, {
-          [CollapsedPath]: !node.isCollapsed,
+        ctx.cmd.Update(currentNode.id, {
+          [CollapsedPath]: !currentNode.isCollapsed,
         }).Dispatch();
       },
 
       'ctrl_shift_c': (ctx: EventContext<KeyboardEvent>) => {
-        const { node } = ctx;
-        if (node.name === 'document') {
+        const { currentNode } = ctx;
+        if (currentNode.name === 'document') {
           return;
         }
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        ctx.cmd.Update(node.id, { node: { collapsed: true } }).Dispatch();
+        ctx.cmd.Update(currentNode.id, { node: { collapsed: true } }).Dispatch();
       },
       // tab: skipKeyEvent
       enter(ctx: EventContext<KeyboardEvent>) {
-        const { app, selection, node } = ctx;
+        const { app, selection, currentNode } = ctx;
         console.log('[Enter] collapsible');
         // if selection is within the collapsible node title split the collapsible node
-        if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
+        if (selection.inSameNode && selection.start.node.parent?.eq(currentNode) && !currentNode.isEmpty) {
           preventAndStopCtx(ctx);
           app.cmd.collapsible.split(selection)?.Dispatch();
         }
       },
       backspace: (ctx: EventContext<KeyboardEvent>) => {
-        const { selection, node, cmd } = ctx;
-        if (selection.isCollapsed && selection.head.isAtStartOfNode(node)) {
-          if (node.child(0)?.isEmpty) {
+        const { selection, currentNode, cmd } = ctx;
+        if (selection.isCollapsed && selection.head.isAtStartOfNode(currentNode)) {
+          if (currentNode.child(0)?.isEmpty) {
             preventAndStopCtx(ctx);
 
-            cmd.transform.change(node, 'section');
-            if (node.firstChild?.isEmpty) {
-              cmd.update(node.firstChild.id, { [PlaceholderPath]: '' })
+            cmd.transform.change(currentNode, 'section');
+            if (currentNode.firstChild?.isEmpty) {
+              cmd.update(currentNode.firstChild.id, { [PlaceholderPath]: '' })
             }
             cmd.Dispatch();
           }

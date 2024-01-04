@@ -8,12 +8,18 @@ export class Frame extends Collapsible  {
   spec(): NodeSpec {
     return {
       ...super.spec(),
-      attrs: {
-        ...super.spec().attrs,
-        node: {
-          ...super.spec().attrs?.node,
-          focusPlaceholder: 'Frame',
-          emptyPlaceholder: 'Frame',
+      isolate: true,
+      draggable: true,
+      dragHandle: true,
+      props: {
+        local: {
+          html: {
+            // contentEditable: false,
+            suppressContentEditableWarning: true,
+          },
+          style: {
+            // userSelect: 'none'
+          }
         }
       },
       info: {

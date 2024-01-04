@@ -45,13 +45,13 @@ export class Todo extends Section {
     return {
       // toggle checkbox
       'ctrl_shift_t': (ctx: EventContext<KeyboardEvent>) => {
-        const { node, app } = ctx;
+        const { currentNode, app } = ctx;
         const { selection } = app;
-        if (selection.head.node.parent?.eq(node)) {
+        if (selection.head.node.parent?.eq(currentNode)) {
           app.tr
-            .Update(node.id, {
+            .Update(currentNode.id, {
               node: {
-                checked: !node.props.get('node.checked'),
+                checked: !currentNode.props.get('node.checked'),
               },
             })
             .Dispatch();

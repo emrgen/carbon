@@ -68,6 +68,7 @@ export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 		);
 	}, [app, events]);
 
+
 	useEffect(() => {
 		const onWindowResize = () => {
 			app.emit('document:resize');
@@ -78,7 +79,10 @@ export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 		return () => {
 			window.removeEventListener('resize', onWindowResize);
 		}
+
 	},[app])
+
+  console.log(handlers)
 
 	return handlers;
 }

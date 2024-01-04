@@ -33,9 +33,9 @@ export class Code extends CarbonPlugin {
     return {
       backspace: (ctx: EventContext<KeyboardEvent>) => {
         console.log('backspace', ctx.type, ctx.event.key, ctx);
-        const {selection, node, cmd} = ctx;
+        const {selection, currentNode, cmd} = ctx;
         const {start} = selection;
-        if (selection.isCollapsed && selection.head.isAtStartOfNode(node)) {
+        if (selection.isCollapsed && selection.head.isAtStartOfNode(currentNode)) {
           console.log('TODO: unwraps children of code node');
           // cmd.transform.joinBackward(selection).Dispatch();
           // cmd.transform.unwrap(node).Dispatch();

@@ -67,7 +67,7 @@ export class Code extends CarbonPlugin {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
-        const { app, node } = ctx;
+        const { app, currentNode } = ctx;
         const { selection } = app;
         // if (selection.isBlock === 1) {
         //   console.log('blockSelection', react.blockSelection);

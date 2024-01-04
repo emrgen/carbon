@@ -28,9 +28,9 @@ export class QuestionAnswer extends CarbonPlugin {
   keydown(): Partial<EventHandler> {
     return {
       enter(ctx: EventContext<KeyboardEvent>) {
-        const { app, selection, node, cmd } = ctx;
+        const { app, selection, currentNode, cmd } = ctx;
         console.log('[Enter] collapsible');
-        if (selection.inSameNode && selection.start.node.parent?.eq(node) && !node.isEmpty) {
+        if (selection.inSameNode && selection.start.node.parent?.eq(currentNode) && !currentNode.isEmpty) {
           preventAndStopCtx(ctx)
           cmd.collapsible.split(selection)?.Dispatch();
         }

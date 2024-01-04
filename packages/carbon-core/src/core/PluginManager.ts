@@ -106,11 +106,11 @@ export class PluginManager {
 	private handleEvent(event: EventContext<Event>) {
 		if (event.stopped) return
 
-		const { node } = event
+		const { currentNode } = event
 		some(this.before, p => event.stopped || p.handlers()[event.type]?.(event))
 
 		if (!event.stopped) {
-			node?.chain.some(n => {
+			currentNode?.chain.some(n => {
 				// console.log(n.name, event.type, node?.chain.length);
 				event.changeNode(n);
 				this.nodePlugin(n.name)?.handlers()[camelCase(event.type)]?.(event);
@@ -118,7 +118,7 @@ export class PluginManager {
 			});
 		}
 
-		event.changeNode(node);
+		event.changeNode(currentNode);
 		some(this.after, p => {
       // console.log('after', p.name, event.type, event.stopped)
       return event.stopped || p.handlers()[event.type]?.(event)
@@ -128,7 +128,7 @@ export class PluginManager {
 	// methods returned from Plugin.keydown() are executed
 	private onKeyDown(event: EventContext<KeyboardEvent>) {
 		const keyDownEvent = <EventContext<any>>EventContext.fromContext(event)
-		const { node } = keyDownEvent
+		const { currentNode } = keyDownEvent
 
 		console.log('onKeyDown', event);
 
@@ -148,7 +148,7 @@ export class PluginManager {
       })
 
       if (!keyDownEvent.stopped) {
-        node?.chain.some(n => {
+        currentNode?.chain.some(n => {
           keyDownEvent.changeNode(n);
           this.nodePlugin(n.name)?.keydown()[keyDownEvent.type]?.(keyDownEvent);
           const handlers = (this.nodePlugin(n.type.name)?.keydown() ?? {}) as EventHandlerMap;
@@ -164,7 +164,7 @@ export class PluginManager {
       }
 
       if (keyDownEvent.stopped) return
-      keyDownEvent.changeNode(node);
+      keyDownEvent.changeNode(currentNode);
       some(this.after, (p: CarbonPlugin) => {
         const handlers = p.keydown()
         const handler = entries(handlers).find(([key]) => {
