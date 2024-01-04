@@ -120,26 +120,26 @@ export class Transaction {
 		const after = selection.unpin();
 		after.origin = origin;
 
-		// if (this.state.selection.isBlock && after.isBlock) {
-		// 	const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
-		// 	const now = NodeIdSet.fromIds(after.nodeIds);
-		// 	// find removed block selection
-		// 	old.diff(now).forEach(id => {
-		// 		this.deselectNodes(id, origin);
-		// 	})
-    //
-		// 	// find new block selection
-		// 	now.diff(old).forEach(id => {
-		// 		this.selectNodes(id, origin);
-		// 	})
-		// } else {
-		// 	// if selection is block selection, deselect previous block selection and select new block selection
-    //   this.deselectNodes(this.state.selection.blocks, origin);
-    //   // console.log('00000000000000', after.nodeIds)
-		// 	if (selection.isBlock) {
-		// 		this.selectNodes(after.nodeIds, origin);
-		// 	}
-		// }
+		if (this.state.selection.isBlock && after.isBlock) {
+			const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+			const now = NodeIdSet.fromIds(after.nodeIds);
+			// find removed block selection
+			old.diff(now).forEach(id => {
+				this.deselectNodes(id, origin);
+			})
+
+			// find new block selection
+			now.diff(old).forEach(id => {
+				this.selectNodes(id, origin);
+			})
+		} else {
+			// if selection is block selection, deselect previous block selection and select new block selection
+      this.deselectNodes(this.state.selection.blocks, origin);
+      // console.log('00000000000000', after.nodeIds)
+			if (selection.isBlock) {
+				this.selectNodes(after.nodeIds, origin);
+			}
+		}
 
 		return this.Add(SelectAction.create(this.state.selection.unpin(), after, origin));
 	}

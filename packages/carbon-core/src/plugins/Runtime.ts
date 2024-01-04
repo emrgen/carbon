@@ -1,4 +1,12 @@
-import {BeforePlugin, Carbon, CarbonMouseEvent, EventContext, EventHandlerMap, Node} from "@emrgen/carbon-core";
+import {
+  BeforePlugin,
+  Carbon,
+  CarbonMouseEvent,
+  EventContext,
+  EventHandlerMap,
+  Node, prevent,
+  preventAndStopCtx
+} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 
 export class Runtime extends BeforePlugin {
@@ -12,6 +20,7 @@ export class Runtime extends BeforePlugin {
     this.onSelectionChange = this.onSelectionChange.bind(this);
     this.onMouseOver = this.onMouseOver.bind(this);
     this.onMouseOut = this.onMouseOut.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
   }
 
   handlers(): EventHandlerMap {
@@ -20,7 +29,7 @@ export class Runtime extends BeforePlugin {
       mouseDown: this.onMouseDown,
       mouseOver: this.onMouseOver,
       mouseOut: this.onMouseOut,
-      mouseIn: this.onMouseIn,
+      mouseMove: this.onMouseMove,
       selectionchange: this.onSelectionChange,
     }
   }
@@ -37,38 +46,50 @@ export class Runtime extends BeforePlugin {
     return this.state.get("mouseOverNode");
   }
 
+  get isSelecting(): boolean {
+    return this.state.get("isSelecting");
+  }
+
   onWindowMouseUp() {
     // window.removeEventListener("mouseup", this.onMouseUp);
   }
 
   onSelectionChange(ctx: EventContext<MouseEvent>) {
-    // console.log("[before]: onSelectionChange", this.mouseOverNode);
+    if (this.isMouseDown) {
+      this.state.set("isSelecting", true);
+    }
   }
 
-  onMouseMove() {
-    // console.log("onMouseMove");
+  onMouseMove(ctx: EventContext<CarbonMouseEvent>) {
+    if (this.isSelecting && this.targetNode(ctx)?.isIsolate) {
+      // preventAndStopCtx(ctx)
+    }
   }
 
   onMouseUp() {
     this.setNode("mouseDownNode",  null);
     this.state.set("mousedown", false);
+    this.state.set("isSelecting", false);
   }
 
   onMouseDown(ctx: EventContext<CarbonMouseEvent>) {
     this.state.set("mousedown", true)
-    const targetNode = this.resolveNode(ctx);
+    const targetNode = this.targetNode(ctx);
     // console.debug('[mouse down]', targetNode?.chain.map(n => n.name).join(' > '));
     this.setNode("mouseDownNode",  targetNode);
+
+    window.addEventListener("mouseup", this.onMouseUp);
   }
 
   onMouseOver(ctx: EventContext<CarbonMouseEvent>) {
-    const targetNode = this.resolveNode(ctx);
+    const targetNode = this.targetNode(ctx);
     console.debug('[mouse over]', targetNode?.chain.map(n => n.name).join(' > '));
+    preventAndStopCtx(ctx);
     this.setNode("mouseOverNode", targetNode);
   }
 
   onMouseOut(ctx: EventContext<MouseEvent>) {
-    if (this.mouseOverNode?.eq(ctx.targetNode)) {
+    if (this.mouseOverNode?.eq(ctx.startNode)) {
       this.setNode("mouseOverNode", null);
     }
   }
@@ -81,13 +102,17 @@ export class Runtime extends BeforePlugin {
     this.state.set(key, node);
   }
 
-  resolveNode(ctx: EventContext<CarbonMouseEvent>): Optional<Node> {
+
+  targetNode(ctx: EventContext<CarbonMouseEvent>): Optional<Node> {
     const {event, app} = ctx;
     const {nativeEvent} = event;
     const {target} = nativeEvent;
-    // console.log(nativeEvent)
-    const node = app.store.resolve(target as HTMLElement);
+    return this.resolveNode(app, target as HTMLElement);
+  }
+
+  resolveNode(app: Carbon, target: HTMLElement): Optional<Node> {
     return app.store.resolve(target as HTMLElement);
   }
+
 
 }

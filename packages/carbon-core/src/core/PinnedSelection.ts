@@ -51,6 +51,11 @@ export class PinnedSelection {
 			return
 		}
 
+    if (!anchorNode.isTextContainer && !anchorNode.isText || !focusNode.isTextContainer && !focusNode.isText) {
+      console.warn(p14('%c[error]'), 'color:red', 'anchorNode or focusNode is not text container', anchorNode.name, focusNode.name);
+      return
+    }
+
 		// NOTE: anchorNode is always valid and pointed to a focusable node
 		if (!anchorNode.hasFocusable && !anchorNode.isFocusable) {
 			console.warn(p14('%c[info]'), 'color:pink', 'anchorNode skips focus', anchorNode.name, focusNode.name);
@@ -154,7 +159,7 @@ export class PinnedSelection {
 
     const { start, end } = this;
     const [firstNode, lastNode] = blocksBelowCommonNode(start.node, end.node);
-		// console.log('blocksBelowCommonNode', firstNode.id.toString(), lastNode.id.toString())
+		console.log('[[blocksBelowCommonNode]]', firstNode.id.toString(), lastNode.id.toString())
 
     if (firstNode.eq(lastNode)) return [];
 
@@ -178,16 +183,16 @@ export class PinnedSelection {
 	}
 
 	get isInline() {
-		return !this.tail.eq(Pin.IDENTITY) && !this.nodes.length;
+		return !this.tail.eq(Pin.IDENTITY) && !this.head.eq(Pin.IDENTITY) && !this.nodes.length;
 	}
 
   // block selection that spans multiple blocks with range selection at ends
   get isInlineBlock() {
-    return this.isInline && this.blocks.length > 0
+    return (!this.head.eq(Pin.IDENTITY) || !this.tail.eq(Pin.IDENTITY)) && this.nodes.length > 0
   }
 
 	get isInvalid() {
-		return this.tail.isNull || this.head.isNull;
+		return this.tail.isNull || this.head.isNull || !this.isBlock && !this.isInline && !this.isInlineBlock;
 	}
 
 	// for block selection the
@@ -250,6 +255,10 @@ export class PinnedSelection {
 
 
 	syncDom(store: NodeStore) {
+    if (this.isBlock) {
+      console.warn('skipped block selection sync');
+      return;
+    }
 		// if (this.isInvalid) {
 		// 	console.warn('skipped invalid selection sync');
 		// 	return

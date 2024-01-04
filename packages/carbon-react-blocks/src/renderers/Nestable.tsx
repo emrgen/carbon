@@ -13,7 +13,7 @@ export const NestableComp = (props: RendererProps) => {
   const {connectors, SelectionHalo} = useDragDropRectSelectHalo({node, ref});
 
   return (
-    <CarbonBlock node={node}>
+    <CarbonBlock node={node} custom={connectors}>
       <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
       {SelectionHalo}

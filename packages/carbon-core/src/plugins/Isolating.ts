@@ -11,107 +11,38 @@ import {preventAndStopCtx} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 
 export const createIsolatingPlugin = () => {
-  new IsolatingPlugin();
+  new IsolateSelectionPlugin();
 };
 
 // handle caret movement around isolating nodes
-export class IsolatingPlugin extends AfterPlugin {
+export class IsolateSelectionPlugin extends AfterPlugin {
   name = "isolating";
 
   // needs to be more than KeyboardPrevent.priority
-  priority = 10 ** 4 + 600;
+  priority = 10 ** 4 + 800;
+
+  isMouseDown = false;
+  isSelecting = false;
 
   handlers(): EventHandlerMap {
-
     return {
-      _mouseDown: (ctx: EventContext<Event>) => {
-        const {cmd, app, event} = ctx;
-        if (!app.selection.isCollapsed) return
-        const store = app.store;
-        let el = event.target as Optional<HTMLElement>;
-        let node = store.get(el!);
-
-        while (el && !node && el != app.contentElement) {
-          node = store.get(el);
-          el = el.parentElement;
+      selectionchange: (ctx: EventContext<Event>) => {
+        const targetNode = ctx.targetNode;
+        if (targetNode?.isIsolate) {
+          preventAndStopCtx(ctx);
         }
-
-        if (!node) return;
-
-        console.log('selectstart', ctx.type, ctx);
-        const isolating = node.closest((n) => n.isIsolate);
-        if (!isolating) return;
-
-        // make the isolating node selectable for the duration of the mouse down
-
-        // isolating node should become selectable
-        // all other isolating nodes should become non-selectable
-        // these include all child isolating nodes and all parent isolating nodes
-        // this is needed to prevent selection of nodes inside other isolating nodes
-
-        // make all ge level isolating nodes non selectable
-        app.content.preorder(n => {
-          if (n.isIsolate) {
-            cmd.Update(n, {
-              // [UserSelectPath]: 'none', // making parent user-select=none will make the target node non selectable
-              [ContenteditablePath]: 'false',
-              [SuppressContenteditableWarningPath]: 'true',
-            })
-          }
-
-          return false
-        }, {
-          skip: n => n.eq(isolating)
-        })
-
-        // make all child isolating nodes non selectable
-        isolating.descendants(n => n.isIsolate).forEach((n) => {
-          cmd.Update(n, {
-            [UserSelectPath]: 'none',
-            [ContenteditablePath]: 'false',
-            [SuppressContenteditableWarningPath]: 'true',
-          })
-        })
-
-        cmd.Dispatch();
-
-        const onMouseUp = (e) => {
-          e.preventDefault();
-          const {cmd} = app;
-            // make all ge level isolating nodes non selectable
-            app.content.preorder(n => {
-              if (n.isIsolate) {
-                cmd.Update(n, {
-                  [ContenteditablePath]: 'true',
-                })
-              }
-
-              return false
-            }, {
-              skip: n => n.eq(isolating)
-            })
-
-            // make all child isolating nodes non selectable
-            isolating.descendants(n => n.isIsolate).forEach((n) => {
-              cmd.Update(n, {
-                [UserSelectPath]: '',
-                [ContenteditablePath]: 'true',
-              })
-            })
-
-          cmd.Dispatch();
-          window.removeEventListener('mouseup', onMouseUp);
-        }
-        window.addEventListener('mouseup', onMouseUp);
       },
-
       // TODO: may be mark all the isolating nodes as non-focusable
       // selecting within a isolating node
-      selectionchange: (ctx: EventContext<Event>) => {
+      _selectionchange: (ctx: EventContext<Event>) => {
         const {selection, cmd} = ctx;
         const {start, end, head, tail} = selection;
         if (selection.isCollapsed) return;
-        if (this.state.plugin('runtime')?.get('mousedown')) return;
+
+        if (this.isMouseDown) {
+          this.isSelecting = true;
+          return;
+        }
 
         const headIsolating = head.node.closest((n) => n.isIsolate);
         const tailIsolating = tail.node.closest((n) => n.isIsolate);
@@ -175,16 +106,136 @@ export class IsolatingPlugin extends AfterPlugin {
         }
 
         // NOTE: because document is isolating, this code block is not needed
+      },
+      _mouseMove: (ctx: EventContext<Event>) => {
+        const headIsolating = ctx.targetNode?.closest((n) => n.isIsolate);
+        const tailIsolating = this.tailIsolate(ctx);
+        console.log(headIsolating?.name, tailIsolating?.name)
+        if (headIsolating && tailIsolating && !headIsolating.eq(tailIsolating) && this.state.plugin('runtime')?.get('isSelecting')) {
+          // preventAndStopCtx(ctx);
+
+          const {selection, cmd} = ctx;
+          const {start, end, head, tail} = selection;
+
+          if (headIsolating.parents.some((n) => n.eq(tailIsolating))) {
+            // if (selection.isForward) {
+            //   const prevFocusable = headIsolating.prev((n) => n.isFocusable, {
+            //     skip: n => n.isIsolate
+            //   });
+            //   if (prevFocusable) {
+            //     const headPin = Pin.toEndOf(prevFocusable)!;
+            //     const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            //     cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            //   }
+            // } else {
+            //   const nextFocusable = headIsolating.next((n) => n.isFocusable, {
+            //     skip: n => n.isIsolate
+            //   });
+            //   if (nextFocusable) {
+            //     const headPin = Pin.toStartOf(nextFocusable)!;
+            //     const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            //     cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            //   }
+            // }
+            return;
+          }
+        }
+      },
+      mouseDown: (ctx) => {
+        this.isMouseDown = true;
+        const onMouseUp = () => {
+          this.isMouseDown = false;
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        document.addEventListener('mouseup', onMouseUp);
+      },
+      mouseMove: (ctx) => {
+        if (this.isMouseDown) {
+          this.isSelecting = true;
+        } else {
+          return;
+        }
+
+        const {targetNode} = ctx;
+        const {selection} = ctx;
+        const {tail, head} = selection;
+
+        const tailIsolating = this.tailIsolate(ctx);
+        const headIsolating = targetNode?.closest((n) => n.isIsolate);
+        if (!headIsolating) return;
+
+        return;
+
+        console.log(headIsolating.name, tailIsolating.name)
+
+         if (targetNode && headIsolating?.eq(targetNode) ||
+           (tailIsolating && !headIsolating.eq(tailIsolating))) {
+          preventAndStopCtx(ctx)
+          if (selection.isForward || (selection.isCollapsed && headIsolating.after(tail.node))) {
+            const prevFocusable = headIsolating.prev((n) => {
+              return n.isFocusable && !!n.closest((n) => n.isIsolate)?.eq(tailIsolating);
+            });
+
+            const topHeadIsolate = headIsolating.chain.find(n => {
+              return n.isIsolate && n.parents.some(p => p.eq(tailIsolating))
+            })
+
+            if (topHeadIsolate) {
+              // return;
+            }
+
+            if (prevFocusable) {
+              const headPin = Pin.toEndOf(prevFocusable)!;
+              const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+              if (selection.eq(newSelection)) return;
+              ctx.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+              return
+            }
+          }
+
+          if (selection.isBackward || (selection.isCollapsed && headIsolating.before(tail.node))) {
+            const nextFocusable = headIsolating.next((n) => {
+              return n.isFocusable && !!n.closest((n) => n.isIsolate)?.eq(tailIsolating);
+            });
+
+            if (nextFocusable) {
+              const headPin = Pin.toStartOf(nextFocusable)!;
+              const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+              if (selection.eq(newSelection)) return;
+              ctx.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+              return
+            }
+          }
+
+          // TODO: select within the isolating node when the mouse goes outside
+           console.log('SELECT WITHIN ISOLATE')
+
+          return;
+        }
+      },
+      mouseUp: (ctx) => {
+        if (this.isSelecting) {
+          console.log('selected')
+        }
+        this.isMouseDown = false;
+        this.isSelecting = false;
       }
     };
   }
 
   keydown(): EventHandlerMap {
     return {
+      down: (e: EventContext<KeyboardEvent>) => {
+        console.log('down isolating')
+      },
+      up: (e: EventContext<KeyboardEvent>) => {
+
+      },
       shiftUp: (e: EventContext<KeyboardEvent>) => {
         if (e.app.selection.isBlock) return;
         const { selection, currentNode } = e;
-        const { head } = selection;
+        const { head, tail } = selection;
 
         // cursor can move to the previous focusable node
         const prevFocusable = head.node.prev((n) => n.isFocusable);
@@ -194,6 +245,12 @@ export class IsolatingPlugin extends AfterPlugin {
         const isolating = head.node.closest((n) => n.isIsolate);
         if (isolating && !prevFocusable.parents.some((n) => n.eq(isolating))) {
           this.prevent(e);
+          const firstFocusable = currentNode.find((n) => n.isFocusable);
+          if (firstFocusable) {
+            const headPin = Pin.toStartOf(firstFocusable)!;
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            e.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+          }
           return;
         }
 
@@ -207,7 +264,7 @@ export class IsolatingPlugin extends AfterPlugin {
       shiftDown: (e: EventContext<KeyboardEvent>) => {
         if (e.app.selection.isBlock) return;
         const { selection } = e;
-        const { head } = selection;
+        const { head, tail } = selection;
 
         // cursor can move to the next focusable node
         const nextFocusable = head.node.next((n) => n.isFocusable);
@@ -217,6 +274,14 @@ export class IsolatingPlugin extends AfterPlugin {
         const isolating = head.node.closest((n) => n.isIsolate);
         if (isolating && !nextFocusable.parents.some((n) => n.eq(isolating))) {
           this.prevent(e);
+          const lastFocusable = isolating.find((n) => n.isFocusable, { direction: 'backward' });
+          if (!lastFocusable?.eq(head.node)) return;
+
+          const headPin = Pin.toEndOf(isolating)!;
+          if (headPin) {
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            e.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+          }
           return;
         }
 
@@ -326,7 +391,7 @@ export class IsolatingPlugin extends AfterPlugin {
 
   isAtStart(e) {
     const { app } = e;
-    const isolating = this.isolatingNode(e);
+    const isolating = this.headIsolate(e);
     if (!isolating) return false;
     const ret = app.selection.head.isAtStartOfNode(isolating);
     return ret;
@@ -334,16 +399,23 @@ export class IsolatingPlugin extends AfterPlugin {
 
   isAtEnd(e) {
     const { app } = e;
-    const isolating = this.isolatingNode(e);
+    const isolating = this.headIsolate(e);
     if (!isolating) return false;
     const ret = app.selection.head.isAtEndOfNode(isolating);
     return ret;
   }
 
-  isolatingNode(e) {
+  headIsolate(e) {
     const { app } = e;
     const { selection } = app;
     const { head } = selection;
     return head.node.closest((n) => n.isIsolate);
+  }
+
+  tailIsolate(e) {
+    const { app } = e;
+    const { selection } = app;
+    const { tail } = selection;
+    return tail.node.closest((n) => n.isIsolate);
   }
 }

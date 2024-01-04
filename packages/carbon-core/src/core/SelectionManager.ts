@@ -29,6 +29,7 @@ export class SelectionManager {
 	}
 
 	blur() {
+    console.log(this.app.element)
 		this.app.element?.blur()
 		this.focused = false;
 	}

@@ -7,7 +7,7 @@ import {
   Carbon,
   CarbonAction,
   Format, Fragment, insertAfterAction,
-  InsertPos, isIsolatedNodes,
+  InsertPos, hasSameIsolate,
   MoveNodeAction,
   NodeIdSet,
   NodePropsJson,
@@ -942,38 +942,40 @@ export class TransformCommands extends BeforePlugin {
 
     if (fall === 'after') {
       const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
-      if (focusNode) {
-        after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+      if (focusNode && hasSameIsolate(focusNode, lastNode)) {
+        console.log(hasSameIsolate(focusNode, lastNode), focusNode.name, lastNode.name, focusNode.id.toString(), lastNode.id.toString())
+        // after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
       }
 
-      if (!after) {
-        const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
-        if (focusNode) {
-          after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
-        }
-      }
+      // if (!after) {
+      //   const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
+      //   if (focusNode && hasSameIsolate(focusNode, firstNode)) {
+      //     after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+      //   }
+      // }
     } else {
-      const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
-      if (focusNode) {
-        after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
-      }
-
-      if (!after) {
-        const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
-        if (focusNode) {
-          after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
-        }
-      }
+      // const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
+      // if (focusNode && hasSameIsolate(focusNode, firstNode)) {
+      //   after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+      // }
+      //
+      // if (!after) {
+      //   const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
+      //   if (focusNode && hasSameIsolate(lastNode, focusNode)) {
+      //     after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+      //   }
+      // }
     }
 
-    // console.log('XXX', selection, blocks.map(n => n.id.toString()));
+    console.log('XXX', nodes.map(n => n.id.toString()));
     // console.log('XXX', after?.toString());
 
     tr
-      .Select(PinnedSelection.fromNodes([]))
       .Add(deleteActions)
     if (after) {
       tr.Select(after, ActionOrigin.UserInput);
+    } else {
+      tr.Select(PinnedSelection.fromNodes([]))
     }
     return tr;
   }
@@ -991,6 +993,7 @@ export class TransformCommands extends BeforePlugin {
     if (selection.isBlock) {
       const { blocks } = selection;
       const { parent } = blocks[0];
+      console.log('xxxxxxxxxxxx')
       return this.deleteNodes(tr, parent!, blocks, opts);
     }
 
@@ -1572,7 +1575,7 @@ export class TransformCommands extends BeforePlugin {
 
   // merge two nodes
   merge(tr: Transaction, prev: Node, next: Node) {
-    if (isIsolatedNodes(prev, next)) {
+    if (hasSameIsolate(prev, next)) {
       throw new Error("can't merge isolated nodes");
     }
 

@@ -42,7 +42,7 @@ const data = node("carbon", [
     //     'footer': node('title', [text('modal footer')]),
     //   }
     // }),
-
+    // section([title([text("section 3")])]),
     node("tabs", [
       node("tab", [
         // node("title", [text("tab 1")]),

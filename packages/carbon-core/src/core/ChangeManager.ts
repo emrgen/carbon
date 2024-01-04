@@ -211,9 +211,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
     // this.react.enable();
 
-    if (selection.isInline) {
-      this.syncSelection();
-    }
+    this.syncSelection();
     this.app.emit(EventsOut.selectionUpdated, this.state.selection);
     cb();
 
@@ -226,7 +224,7 @@ export class ChangeManager extends NodeTopicEmitter {
   // this must be called after the dom is updated
   private syncSelection() {
     try {
-      // console.log('syncSelection', this.state.selectionOrigin, this.state.selection.toString()	);
+      console.log('syncSelection', this.state.selection.toString()	);
       if (!this.app.enabled) {
         console.log("skipped: selection sync disabled");
         return;
@@ -246,7 +244,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
       if (selection.isInvalid) {
         console.warn("skipped invalid selection sync");
-        app.element?.blur();
+        app.blur();
         return;
       }
 

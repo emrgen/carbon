@@ -2,12 +2,12 @@ import {EventHandlerMap} from "../core/types";
 import {AfterPlugin, CarbonPlugin} from '../core/CarbonPlugin';
 import {EventContext} from "../core/EventContext";
 import {SelectionCommands} from "./SelectionCommands";
-import {IsolatingPlugin} from "./Isolating";
+import {IsolateSelectionPlugin} from "./Isolating";
 import {TransformCommands} from "./TransformCommands";
 import {skipKeyEvent} from "../utils/key";
 import {first, last,} from "lodash";
 import {ActionOrigin, MoveNodeAction, Node, Pin, PinnedSelection, PlaceholderPath, Point, Transaction} from "../core";
-import {insertAfterAction, isIsolatedNodes, preventAndStopCtx} from "@emrgen/carbon-core";
+import {insertAfterAction, hasSameIsolate, preventAndStopCtx} from "@emrgen/carbon-core";
 import {nodeLocation} from '../utils/location';
 import {Optional} from '@emrgen/types';
 import {NodeBTree} from "../core/BTree";
@@ -53,7 +53,7 @@ export class KeyboardPlugin extends AfterPlugin {
 	plugins(): CarbonPlugin[] {
 		return [
 			new SelectionCommands(),
-			new IsolatingPlugin(),
+			new IsolateSelectionPlugin(),
 			new TransformCommands(),
 		]
 	}
@@ -256,7 +256,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			}
 
 
-      if (isIsolatedNodes(prevTextBlock, textBlock)) {
+      if (hasSameIsolate(prevTextBlock, textBlock)) {
         return
       }
 
@@ -338,7 +338,6 @@ export class KeyboardPlugin extends AfterPlugin {
 		const block = prevSelectableBlock(firstNode, true);
 		// console.log(block?.id, firstNode.id, blocks.map(n => n.id.toString()));
 		if (!block) {
-      console.log('--------------')
 			// ctx.event.preventDefault()
 			// ctx.stopPropagation()
 			return
@@ -466,10 +465,7 @@ export class KeyboardPlugin extends AfterPlugin {
 	}
 
 	delete(ctx: EventContext<KeyboardEvent>) {
-		ctx.preventDefault();
-		ctx.event.preventDefault();
-		ctx.event.stopPropagation();
-
+		preventAndStopCtx(ctx);
 		const { event, cmd } = ctx;
 		const { app, currentNode } = ctx;
 		const { selection } = app;
@@ -550,8 +546,8 @@ export class KeyboardPlugin extends AfterPlugin {
 		if (!block) return
 
     const firstNode = first(blocks) as Node;
-    console.log(isIsolatedNodes(block, firstNode), !lastNode.isIsolate)
-    if (isIsolatedNodes(block, firstNode) && !lastNode.isIsolate) {
+    console.log(hasSameIsolate(block, firstNode), !lastNode.isIsolate)
+    if (hasSameIsolate(block, firstNode) && !lastNode.isIsolate) {
       return
     }
 

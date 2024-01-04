@@ -5,7 +5,7 @@ import {
   EventContext,
   EventHandlerMap,
   HiddenPath,
-  Node,
+  Node, nodeLocation,
   NodeSpec,
   Pin,
   PinnedSelection,
@@ -115,7 +115,18 @@ export class TabGroup extends CarbonPlugin {
   }
 
   remove(tr: Transaction, tabs: Node, tab: Node) {
-    // tr.Remove(tab)
+    console.log('remove tab', tab.id.toString());
+    const nextSibling = tab.nextSibling;
+    const prevSibling = tab.prevSibling;
+    const nextActiveTab = nextSibling ?? prevSibling;
+
+    if (nextActiveTab) {
+      console.log(tab.parents[0].id.toString(), nextActiveTab.id.toString());
+     tr.action.remove(nodeLocation(tab)!, tab);
+     this.open(tr, tabs, nextActiveTab);
+    } else {
+      // TODO: insert a default tab and delete the current tab
+    }
   }
 
   // open the tab and focus at the start of the tab content
@@ -248,6 +259,20 @@ export class Tab extends CarbonPlugin {
           app.cmd.collapsible.split(selection)?.Dispatch();
         }
       },
+      delete(ctx: EventContext<KeyboardEvent>) {
+        if (ctx.selection.isBlock) {
+          const {blocks} = ctx.selection;
+          if (blocks.length === 1 && blocks[0].eq(ctx.currentNode)) {
+            preventAndStopCtx(ctx);
+            ctx.cmd.tabs.remove(ctx.currentNode.parent!, ctx.currentNode).dispatch();
+          }
+        }
+      },
+      escape(ctx: EventContext<KeyboardEvent>) {
+        if (ctx.currentNode.name === TabName) {
+          // preventAndStopCtx(ctx);
+        }
+      }
     }
   }
 }

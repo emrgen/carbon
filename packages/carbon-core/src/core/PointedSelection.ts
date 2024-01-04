@@ -56,7 +56,7 @@ export class PointedSelection {
 	}
 
 	get isInline() {
-		return !this.isBlock;
+		return !this.head.isIdentity && !this.tail.isIdentity && this.nodeIds.length === 0;
 	}
 
   get isInlineBlock() {

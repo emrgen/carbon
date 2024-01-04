@@ -27,7 +27,7 @@ export class EventContext<T extends Event> {
 	readonly selection: PinnedSelection;
 	// targetNode is the node that the event was dispatched to
 	// its always text block node or a node that contains text blocks but currently empty
-	readonly targetNode: Node
+	readonly startNode: Node
 	// origin is the source of the event, e.g. dom or custom
 	readonly origin: EventOrigin;
 	// type is the event type
@@ -52,6 +52,12 @@ export class EventContext<T extends Event> {
     return this.transaction = this.app.cmd;
   }
 
+  get targetNode(): Optional<Node> {
+    const { nativeEvent } = this.event as any;
+    const target = nativeEvent?.target;
+    return this.app.store.resolve(target);
+  }
+
 	static create<T extends Event>(props: EventContextProps<T>) {
 		return new EventContext({
 			...props,
@@ -60,8 +66,8 @@ export class EventContext<T extends Event> {
 
 	// create a new event context from an existing one
 	static fromContext<T extends Event>(event: EventContext<T>, opts: Partial<EventContextProps<T>> = {}) {
-    const { currentNode, targetNode, ...rest } = event;
-		return EventContext.create({...rest, node: targetNode, ...opts})
+    const { currentNode, startNode, ...rest } = event;
+		return EventContext.create({...rest, node: startNode, ...opts})
 	}
 
 	private constructor(props: EventContextProps<T>) {
@@ -70,7 +76,7 @@ export class EventContext<T extends Event> {
 		this.type = type;
 		this.app = app;
 		this.currentNode = node;
-		this.targetNode = node
+		this.startNode = node
 		this.event = event;
 		this.selection = selection;
 		// this.cmd = cmd;

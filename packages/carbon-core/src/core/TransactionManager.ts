@@ -3,6 +3,7 @@ import { Transaction } from "./Transaction";
 import { SelectionManager } from './SelectionManager';
 import { Carbon } from './Carbon';
 import { State } from './State';
+import {SelectAction} from "@emrgen/carbon-core";
 
 export class TransactionManager {
 	private transactions: Transaction[] = [];

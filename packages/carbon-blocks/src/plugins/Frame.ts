@@ -14,11 +14,11 @@ export class Frame extends Collapsible  {
       props: {
         local: {
           html: {
-            // contentEditable: false,
+            contentEditable: false,
             suppressContentEditableWarning: true,
           },
           style: {
-            // userSelect: 'none'
+            userSelect: 'none'
           }
         }
       },

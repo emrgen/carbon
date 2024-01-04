@@ -105,7 +105,7 @@ export const sortNodesByPath = (nodes: Node[]): Node[] => {
 }
 
 
-export const isIsolatedNodes = (a: Node, b: Node): boolean => {
+export const hasSameIsolate = (a: Node, b: Node): boolean => {
   const aIsolate = a.parent?.closest(n => n.isIsolate)!
   const bIsolate = b.parent?.closest(n => n.isIsolate)!
 

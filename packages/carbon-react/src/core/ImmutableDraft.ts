@@ -14,6 +14,7 @@ import {
   PointAt,
   PointedSelection, SelectedPath,
   State as CoreState,
+  Pin,
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
@@ -263,17 +264,25 @@ export class ImmutableDraft implements CoreDraft {
         this.delete(child.id);
       })
 
+      node.updateContent(content);
+      this.contentChanges.add(node.id);
+
       if (node.isTextContainer && isArray(content)) {
         node.updateProps({
           [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ?? "" : ""
         });
       } else if (node.isText) {
-
+        // NOTE(fix): when the text is updated, the parent should be updated as well
+        // otherwise the pin on parent cant find the updated child text
+        this.mutable(node.parentId!, parent => {
+          const index = node.index;
+          parent.remove(node);
+          parent.insert(node, index);
+        }, false)
       }
 
       // console.log('updating content', node.textContent);
-      node.updateContent(content);
-      this.contentChanges.add(node.id);
+
       // console.log("updated draft content", node.textContent, node.renderVersion);
 
       node.descendants().forEach(child => {
@@ -510,37 +519,37 @@ export class ImmutableDraft implements CoreDraft {
     this.selection = selection;
     this.changes.add(SelectionChange.create(selection, this.state.selection.unpin()));
 
-    // // update selection nodes
-    // if (selection.isInline) {
-    //   const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
-    //   const after = selection.pin(this.nodeMap)!;
-    //   if (after) {
-    //     const nids = after.blocks.map(n => n.id);
-    //     const now = NodeIdSet.fromIds(nids);
-    //     console.log(nids, after.nodes, after.head.node, after.tail.node)
-    //
-    //     this.selection = PointedSelection.create(selection.tail, selection.head, nids, selection.origin);
-    //
-    //     // find removed block selection
-    //     old.diff(now).forEach(id => {
-    //       this.mutable(id, node => {
-    //         node.updateProps({
-    //           [SelectedPath]: false
-    //         });
-    //       });
-    //     })
-    //
-    //     // find new block selection
-    //     now.diff(old).forEach(id => {
-    //       this.mutable(id, node => {
-    //         console.log('selected node', node.name, node.id.toString(), node.props.toKV());
-    //         node.updateProps({
-    //           [SelectedPath]: true
-    //         });
-    //       });
-    //     })
-    //   }
-    // }
+    // update selection nodes
+    if (selection.isInline) {
+      const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+      const after = selection.pin(this.nodeMap)!;
+      if (after) {
+        const nids = after.blocks.map(n => n.id);
+        const now = NodeIdSet.fromIds(nids);
+        console.log(nids, after.nodes, after.head.node, after.tail.node)
+
+        this.selection = PointedSelection.create(selection.tail, selection.head, nids, selection.origin);
+
+        // find removed block selection
+        old.diff(now).forEach(id => {
+          this.mutable(id, node => {
+            node.updateProps({
+              [SelectedPath]: false
+            });
+          });
+        })
+
+        // find new block selection
+        now.diff(old).forEach(id => {
+          this.mutable(id, node => {
+            console.log('selected node', node.name, node.id.toString(), node.props.toKV());
+            node.updateProps({
+              [SelectedPath]: true
+            });
+          });
+        })
+      }
+    }
 
     // update empty placeholder if needed
     if (this.state.selection.isInline && this.state.selection.isCollapsed) {
@@ -587,6 +596,13 @@ export class ImmutableDraft implements CoreDraft {
       }
     }
 
+    // update focus marker if needed
+    if (this.state.selection.isInline && this.selection.isInline) {
+      if (this.state.selection.tail.node.id.eq(this.selection.tail.nodeId)) {
+        return
+      }
+    }
+
     if (this.state.selection.isInline) {
       this.mutable(this.state.selection.tail.node.id, node => {
         node.updateProps({
@@ -596,6 +612,7 @@ export class ImmutableDraft implements CoreDraft {
     }
 
     if (this.selection.isInline) {
+      console.log('Selection', this.selection.isInline, this.selection.head.eq(Point.IDENTITY))
       this.mutable(this.selection.tail.nodeId, node => {
         node.updateProps({
           [HasFocusPath]: true,
@@ -628,7 +645,7 @@ export class ImmutableDraft implements CoreDraft {
   }
 
   // creates a mutable copy of a node and adds it to the draft changes
-  private mutable(id: NodeId, fn?: (node: Node) => void) {
+  private mutable(id: NodeId, fn?: (node: Node) => void, changed = true) {
     // can not update a deleted node
     if (this.nodeMap.deleted(id)) {
       return
@@ -651,7 +668,9 @@ export class ImmutableDraft implements CoreDraft {
     // newly inserted nodes are not marked updated for render
     // their parent will be marked updated
     if (!this.inserted.has(id)) {
-      this.updated.add(id);
+      if (changed) {
+        this.updated.add(id);
+      }
     } else {
       console.debug('node is not marked updated, already marked inserted', id.toString())
     }

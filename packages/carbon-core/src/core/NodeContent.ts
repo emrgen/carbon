@@ -50,6 +50,7 @@ export interface MutableNodeContent {
   changeType(type: NodeType): void;
   insert(node: Node, index: number): void;
   remove(node: Node): void;
+  // replace(node: Node): void;
   insertText(text: string, offset: number): void;
   removeText(offset: number, length: number): void;
   addLink(name: string, node: Node): void;
@@ -70,6 +71,12 @@ export class PlainNodeContent implements NodeContent {
   }
 
   constructor(private content: NodeContentData) {}
+
+  renderVersion?: number | undefined;
+    contentVersion?: number | undefined;
+    replace(node: Node): void {
+        throw new Error('Method not implemented.');
+    }
 
   get data(): NodeData {
     const {parent, type, id, parentId,children, ...rest} = this.content;

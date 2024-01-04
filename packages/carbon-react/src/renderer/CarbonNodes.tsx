@@ -5,7 +5,8 @@ import {useNodeChange, useRenderManager} from "../hooks";
 import {RendererProps} from "../renderer/ReactRenderer";
 
 export const JustEmpty = () => {
-  return <span>&shy;</span>;
+  // return <span>&shy;</span>;
+  return <span><br/></span>;
 }
 
 interface CarbonPlaceholder extends RendererProps {

@@ -97,23 +97,23 @@ $lineHeight = 22px
   font-size 15px
   position relative
   outline none
-  padding: 0px 50px
+  //padding: 0px 50px
   padding-bottom 200px
   overflow: inherit
 
   .document-content
     max-width: 700px
     margin: 0 auto;
+  ::selection
+    background: $selectionHaloColor
 
-@container (min-width: 800px)
-{
-[data-name=document],
-[data-as=document] {
-  padding-left: 100px
-  padding-right: 100px
-  min-height: 100%
-}
-
+@container (min-width: 800px) {
+  [data-name=document],
+  [data-as=document] {
+    padding-left: 100px
+    padding-right: 100px
+    min-height: 100%
+  }
 }
 
 @container (min-width: 1000px)
@@ -270,6 +270,20 @@ span[data-name=text] {
 
 [data-selected=true]
   caret-color: transparent;
+  ::selection
+    background: transparent
+
+
+
+[data-name=tabs] .carbon-tab-content
+[data-name=frame]
+  ::selection
+    background transparent
+
+[data-name=tabs]:has([data-focused=true])
+[data-name=frame]:has([data-focused=true])
+  ::selection
+    background: $selectionHaloColor
 
 .carbon-collapsible__control
   user-select: none
