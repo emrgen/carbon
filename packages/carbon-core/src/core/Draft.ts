@@ -15,6 +15,7 @@ export interface Draft {
   produce(fn: (draft: Draft) => void): State;
 
   insert(at: Point, node: Node): void;
+  insertText(at: Point, text: string): void;
   move(to: Point, node: Node): void
   remove(node: Node): void;
   change(nodeId: NodeId, type: NodeType): void;

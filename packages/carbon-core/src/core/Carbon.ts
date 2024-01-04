@@ -13,7 +13,7 @@ import { Schema } from "./Schema";
 import { SelectionManager } from "./SelectionManager";
 import { Transaction } from "./Transaction";
 import { TransactionManager } from "./TransactionManager";
-import {  Maps } from "./types";
+import {Maps, With} from "./types";
 import { first, isFunction } from "lodash";
 import { CarbonPlugin } from "./CarbonPlugin";
 import { Runtime } from "./Runtime";
@@ -49,7 +49,7 @@ export class Carbon extends EventEmitter {
 	_portal: Optional<HTMLElement>;
 	_contentElement: Optional<HTMLElement>;
 	private cursorParkingElement: Optional<HTMLDivElement>;
-	ticks: Maps<Carbon, Optional<Transaction>>[];
+	ticks: With<Transaction>[];
 
 	committed: boolean;
 	private counter: number = 0;
@@ -68,13 +68,14 @@ export class Carbon extends EventEmitter {
 		this.store = new NodeStore(this);
 
 		this.sm = new SelectionManager(this);
-		this.em = new EventManager(this, pm);
+
 
 		this.tm = new TransactionManager(this, pm, this.sm, (state, tr) => {
 			this.updateState(state, tr);
 		});
 
 		this.change = new ChangeManager(this, this.sm, this.tm, pm);
+    this.em = new EventManager(this, pm, this.change);
 
 		this.commands = pm.commands();
 		// this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
@@ -237,15 +238,17 @@ export class Carbon extends EventEmitter {
 		if (this.ticks.length) {
 			const tick = first(this.ticks);
 			this.ticks = this.ticks.slice(1);
-			const tr = tick?.(this);
-			if (!tr) return
-			if (tr instanceof Transaction) {
-				// tr.onTick = true;
-				tr.Dispatch();
-			} else if (isFunction(tr)) {
-				(tr as Function)(this);
-				return true;
-			}
+      const cmd = this.cmd;
+			tick?.(cmd);
+      cmd.Dispatch();
+			// if (!tr) return
+			// if (tr instanceof Transaction) {
+			// 	// tr.onTick = true;
+			// 	tr.Dispatch();
+			// } else if (isFunction(tr)) {
+			// 	(tr as Function)(this);
+			// 	return true;
+			// }
 			return true;
 		}
 		return false;

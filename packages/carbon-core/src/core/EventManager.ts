@@ -10,6 +10,7 @@ import {p12, p14, pad} from "./Logger";
 import {last} from "lodash";
 import {preventAndStop} from "../utils/event";
 import {CustomEvent} from "./CustomEvent";
+import {ChangeManager} from "@emrgen/carbon-core";
 
 const selectionKeys: string[] = [
 	'left',
@@ -36,7 +37,7 @@ export class EventManager {
 		return this.app.runtime;
 	}
 
-	constructor(readonly app: Carbon, readonly pm: PluginManager) { }
+	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly cm: ChangeManager) { }
 
 	onCustomEvent(type: EventsIn, event: CustomEvent): boolean {
 		const {app, } = this
@@ -63,6 +64,11 @@ export class EventManager {
 		// if (type === EventsIn.noop) {
 		// 	return
 		// }
+
+    if (this.cm.transactions.length) {
+      console.log('pending transaction', this.cm.transactions.length);
+      return
+    }
 
 		if (event instanceof CustomEvent) {
 			this.onCustomEvent(type, event);

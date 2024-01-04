@@ -1,42 +1,46 @@
-import { each, first, flatten, last, merge, reverse, sortBy } from "lodash";
+import {each, first, flatten, last, merge, reverse, sortBy} from "lodash";
 
-import { Optional } from "@emrgen/types";
+import {Optional} from "@emrgen/types";
 import {
   ActionOrigin,
   BeforePlugin,
   Carbon,
   CarbonAction,
-  Format, Fragment, insertAfterAction,
-  InsertPos, hasSameIsolate,
+  Format,
+  Fragment,
+  hasSameIsolate,
+  insertAfterAction,
+  InsertPos,
   MoveNodeAction,
   NodeIdSet,
   NodePropsJson,
   PinnedSelection,
   PlaceholderPath,
   PointedSelection,
-  RenderPath,
+  RenderPath, SelectAction,
   SetContentAction,
   UpdatePropsAction
 } from "@emrgen/carbon-core";
-import { SelectionPatch } from "../core/DeleteGroup";
-import { p14 } from "../core/Logger";
-import { Node } from "../core/Node";
-import { NodeId } from "../core/NodeId";
-import { NodeType } from "../core/NodeType";
-import { Pin } from "../core/Pin";
-import { Point } from "../core/Point";
-import { Span } from "../core/Span";
-import { Slice } from "../core/Slice";
-import { Transaction } from "../core/Transaction";
-import { ChangeNameAction } from "../core/actions/ChangeNameAction";
-import { InsertNodeAction } from "../core/actions/InsertNodeAction";
-import { NodeName } from "../core/types";
-import {takeAfter, takeBefore, takeUntil} from "../utils/array";
-import { blocksBelowCommonNode } from "../utils/findNodes";
-import { nodeLocation } from "../utils/location";
-import { splitTextBlock } from "../utils/split";
-import { insertBeforeAction, moveNodesActions, removeNodesActions } from "../utils/action";
-import { RemoveNodeAction } from "../core/actions/RemoveNodeAction";
+import {SelectionPatch} from "../core/DeleteGroup";
+import {p14} from "../core/Logger";
+import {Node} from "../core/Node";
+import {NodeId} from "../core/NodeId";
+import {NodeType} from "../core/NodeType";
+import {Pin} from "../core/Pin";
+import {Point} from "../core/Point";
+import {Span} from "../core/Span";
+import {Slice} from "../core/Slice";
+import {Transaction} from "../core/Transaction";
+import {ChangeNameAction} from "../core/actions/ChangeNameAction";
+import {InsertNodeAction} from "../core/actions/InsertNodeAction";
+import {NodeName} from "../core/types";
+import {takeBefore, takeUntil} from "../utils/array";
+import {blocksBelowCommonNode} from "../utils/findNodes";
+import {nodeLocation} from "../utils/location";
+import {splitTextBlock} from "../utils/split";
+import {insertBeforeAction, moveNodesActions, removeNodesActions} from "../utils/action";
+import {RemoveNodeAction} from "../core/actions/RemoveNodeAction";
+import {InsertTextAction} from "../core/actions/InsertTextAction";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -157,35 +161,35 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  private insertText(tr: Transaction, selection: PinnedSelection, text: string, native = false): Transaction {
+  private insertText(tr: Transaction, selection: PinnedSelection, text: string, native = false) {
     const { app } = tr;
-
     if (selection.isBlock) {
-      return tr
+      return
     }
-    const updateTitleText = (app: Carbon) => {
-      // console.log('insertText', text);
-      const { schema, selection } = app;
-      const { head, start } = selection;
-      const title = head.node;
-      const pin = Pin.future(start.node, start.offset + text.length);
-      const after = PinnedSelection.fromPin(pin);
-      const textContent = title.textContent.slice(0, start.offset) + text + title.textContent.slice(start.offset);
-      const textNode = schema.text(textContent)!;
-      if (!textNode) {
-        console.error('failed to create text node');
-        return tr
-      }
 
-      tr.Add(SetContentAction.create(title.id, [textNode]));
-      tr.Select(after);
-      return tr;
+    const updateTitleText = (cmd: Transaction, selection: PointedSelection) => {
+      const {  app } = cmd;
+      const { head } = selection;
+      const { offset } = head;
+      const after = PointedSelection.fromPoint(Point.toStart(head.nodeId, offset + text.length));
+
+      cmd.Add(InsertTextAction.create(head, text));
+      cmd.Select(after, ActionOrigin.UserInput);
+    }
+
+    const updateContentText = (cmd: Transaction, selection: PointedSelection) => {
+
     }
 
     if (!selection.isCollapsed) {
-      return tr.transform.delete(selection)?.Then(carbon => {
-        return updateTitleText(carbon);
-      })
+      tr.transform.delete(selection)
+      const { lastSelection } = tr;
+      const action = tr.Pop();
+      console.log(action)
+      if (action instanceof SelectAction) {
+        const { after } = action;
+        updateTitleText(tr, after);
+      }
     }
 
     if (selection.isCollapsed) {
@@ -194,7 +198,11 @@ export class TransformCommands extends BeforePlugin {
       // if (!native) {
       // 	ctx.event.preventDefault();
       // }
-      return updateTitleText(app);
+      if (selection.head.node.isEmpty) {
+
+      } else {
+        updateTitleText(tr, tr.app.selection.unpin());
+      }
     }
 
     return tr;
@@ -993,7 +1001,6 @@ export class TransformCommands extends BeforePlugin {
     if (selection.isBlock) {
       const { blocks } = selection;
       const { parent } = blocks[0];
-      console.log('xxxxxxxxxxxx')
       return this.deleteNodes(tr, parent!, blocks, opts);
     }
 

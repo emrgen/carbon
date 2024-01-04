@@ -83,7 +83,7 @@ export class TabGroup extends CarbonPlugin {
       props: {
         local: {
           html: {
-            contentEditable: false,
+            contentEditable: true,
             suppressContentEditableWarning: true,
           },
           style: {
@@ -234,7 +234,7 @@ export class Tab extends CarbonPlugin {
       props: {
         local: {
           html: {
-            contentEditable: false,
+            contentEditable: true,
             suppressContentEditableWarning: true,
           }
         }

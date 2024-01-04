@@ -6,6 +6,7 @@ import {deepCloneMap, Draft, Node} from "@emrgen/carbon-core";
 
 type Content = string | Node[]
 
+// NOTE: it can be transformed into combination of InsertNode/RemoveNode/InsertText/RemoveText action
 export class SetContentAction implements CarbonAction {
   before: Optional<Content>;
 

@@ -324,6 +324,30 @@ export class ImmutableDraft implements CoreDraft {
     this.insert(to, node, "move");
   }
 
+  insertText(at: Point, text: string) {
+    const {nodeId, offset} = at;
+    const node = this.nodeMap.get(nodeId);
+    if (!node) {
+      throw new Error("Cannot insert text to a node that does not exist");
+    }
+
+    if (node.isTextContainer) {
+      if (node.isEmpty) {
+        // insert a empty text node with the text
+        const textNode = node.type.schema.text(text)!;
+        this.updateContent(node.id, [textNode]);
+      } else {
+        const {textContent} = node;
+        // FIXME: find the correct child with offset
+        const newText = textContent.slice(0, offset) + text + textContent.slice(offset);
+        const textNode = node.firstChild!;
+        this.updateContent(textNode.id, newText);
+      }
+    }
+
+
+  }
+
   insert(at: Point, node: Node, type: "create" | "move" = "create") {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");

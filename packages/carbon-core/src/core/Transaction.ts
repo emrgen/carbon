@@ -57,6 +57,7 @@ export class Transaction {
 	private actions: CarbonAction[] = [];
 	private _committed: boolean = false;
 	private _dispatched: boolean = false;
+  lastSelection: PointedSelection;
 
 	private readOnly = false;
 
@@ -102,6 +103,7 @@ export class Transaction {
 		protected readonly sm: SelectionManager
 	) {
 		this.id = getId();
+    this.lastSelection = this.app.selection.unpin();
 	}
 
 	get isEmpty() {
@@ -118,6 +120,7 @@ export class Transaction {
 
 	Select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
 		const after = selection.unpin();
+    this.lastSelection = after;
 		after.origin = origin;
 
 		if (this.state.selection.isBlock && after.isBlock) {
@@ -325,10 +328,14 @@ export class Transaction {
 	// 	return this;
 	// }
 
-	Then(cb: With<Carbon>): Transaction {
+	Then(cb: With<Transaction>): Transaction {
 		this.app.nextTick(cb);
 		return this;
 	}
+
+  Pop() {
+    return this.actions.pop();
+  }
 
 	Proxy(): Transaction {
 		const self = this;
@@ -336,7 +343,7 @@ export class Transaction {
 			get: (target, prop) => {
 				const propName = prop.toString();
 				if (Reflect.has(target, prop)) {
-					if (['x'].includes(propName)) {
+					if (['Pop'].includes(propName)) {
 						return Reflect.get(target, prop);
 					} else {
 						const part = Reflect.get(target, prop);
