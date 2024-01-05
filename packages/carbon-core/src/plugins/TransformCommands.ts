@@ -198,14 +198,15 @@ export class TransformCommands extends BeforePlugin {
       // if (!native) {
       // 	ctx.event.preventDefault();
       // }
+      const {head} = selection;
       if (selection.head.node.isEmpty) {
-
+        const textNode = tr.app.schema.text(text)!;
+        tr.SetContent(head.node.id, [textNode]);
+        tr.Select(PinnedSelection.fromPin(Pin.future(head.node, text.length)));
       } else {
         updateTitleText(tr, tr.app.selection.unpin());
       }
     }
-
-    return tr;
   }
 
   private findFocusNode(nodes: Node[]): Optional<Node> {
