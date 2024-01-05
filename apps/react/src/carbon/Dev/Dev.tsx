@@ -25,11 +25,23 @@ const data = node("carbon", [
     section([title([text("section 1")])]),
     section([title([])]),
     section([title([text("section 3")])]),
+
+    // title([]),
     node('frame', [
       title([text('frame title')]),
       section([title([text('frame section')])]),
     ]),
-
+    section([title([text("section 1")])]),
+    node('frame', [
+      title([text('frame title')]),
+      section([title([text('frame section')])]),
+    ]),
+    section([title([text("section 2")])]),
+    section([title([text("section 3")])]),
+    node('frame', [
+      title([text('frame title')]),
+      section([title([text('frame section')])]),
+    ]),
     // block({
     //   name: 'modal', children: [
     //     title([text('modal title')]),

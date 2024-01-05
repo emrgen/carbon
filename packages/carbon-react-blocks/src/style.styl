@@ -101,11 +101,11 @@ $lineHeight = 22px
   padding-bottom 200px
   overflow: inherit
 
-  .document-content
-    max-width: 700px
-    margin: 0 auto;
-  ::selection
-    background: $selectionHaloColor
+  //.document-content
+  //  max-width: 700px
+  //  margin: 0 auto;
+  //::selection
+  //  background: $selectionHaloColor
 
 @container (min-width: 800px) {
   [data-name=document],
@@ -156,11 +156,15 @@ $lineHeight = 22px
   [data-type="content"]
     // padding-left: 2px
     // padding: 2px 0px
-    display: flex
+    //display: flex
     align-content: flex-start
 
     [data-name=title]
       flex 1
+
+//[data-name=collapsible]
+//    [data-type=content]
+//        display flex
 
 [data-name=numberedList][data-as=h1]
   [data-type=content]
@@ -272,8 +276,6 @@ span[data-name=text] {
   caret-color: transparent;
   ::selection
     background: transparent
-
-
 
 //[data-name=tabs] .carbon-tab-content
 //[data-name=frame]
@@ -432,6 +434,7 @@ span[data-name=text] {
     left 0
     top 0
     pointer-events: none
+    user-select none
     opacity: 0.4
 
 // [data-name=section] > [data-type=content] > [data-name=title]
@@ -937,7 +940,7 @@ span[data-name=text] {
 [data-name=frame]
   position relative
   background #eee
-  padding: 10px
+  //padding: 10px
   margin: 10px 0
   border-radius: 4px
 
@@ -1097,3 +1100,32 @@ span[data-name=text] {
 [data-name=empty-text]
   user-select none
 
+
+.frame-bound
+    position absolute
+    top 0
+    left 0
+    width 100%
+    height 100%
+    background rgba(159,243,159, 0.3)
+
+.frame-wrapper
+    position relative
+    &[contenteditable=false]
+        user-select none
+        .frame-bound
+            display block
+    &[contenteditable=true]
+        user-select text
+        .frame-bound
+            display none
+            z-index -1
+
+.frame-wrapper
+    position relative
+    top 0
+    left 0
+    width 100%
+    height 100%
+    padding 10px
+    //background: red;

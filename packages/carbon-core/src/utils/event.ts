@@ -5,6 +5,9 @@ import {KeyboardEvent} from "react";
 
 interface EventPreventable {
 	preventDefault(): void
+  nativeEvent?: {
+    preventDefault(): void
+  }
 }
 
 interface EventStoppable {
@@ -32,6 +35,9 @@ export function prevent<T extends EventPreventable>(eventOrFn: T | Function): ((
 	if (typeof eventOrFn === "function") {
 		return (e) => {
 			e.preventDefault()
+      if (e.nativeEvent) {
+        e.nativeEvent.preventDefault()
+      }
 			eventOrFn()
 		}
 	} else {

@@ -7,7 +7,7 @@ import {
   PinnedSelection, SuppressContenteditableWarningPath,
   UserSelectPath
 } from "../core";
-import {preventAndStopCtx} from "@emrgen/carbon-core";
+import {preventAndStopCtx, Node} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 
 export const createIsolatingPlugin = () => {
@@ -24,12 +24,15 @@ export class IsolateSelectionPlugin extends AfterPlugin {
   isMouseDown = false;
   isSelecting = false;
 
+  startIsolate: Optional<Node>;
+  selection: Optional<PinnedSelection>;
+
   handlers(): EventHandlerMap {
     return {
       selectionchange: (ctx: EventContext<Event>) => {
         const targetNode = ctx.targetNode;
         if (targetNode?.isIsolate) {
-          preventAndStopCtx(ctx);
+          // preventAndStopCtx(ctx);
         }
       },
       // TODO: may be mark all the isolating nodes as non-focusable
@@ -107,40 +110,6 @@ export class IsolateSelectionPlugin extends AfterPlugin {
 
         // NOTE: because document is isolating, this code block is not needed
       },
-      _mouseMove: (ctx: EventContext<Event>) => {
-        const headIsolating = ctx.targetNode?.closest((n) => n.isIsolate);
-        const tailIsolating = this.tailIsolate(ctx);
-        console.log(headIsolating?.name, tailIsolating?.name)
-        if (headIsolating && tailIsolating && !headIsolating.eq(tailIsolating) && this.state.plugin('runtime')?.get('isSelecting')) {
-          // preventAndStopCtx(ctx);
-
-          const {selection, cmd} = ctx;
-          const {start, end, head, tail} = selection;
-
-          if (headIsolating.parents.some((n) => n.eq(tailIsolating))) {
-            // if (selection.isForward) {
-            //   const prevFocusable = headIsolating.prev((n) => n.isFocusable, {
-            //     skip: n => n.isIsolate
-            //   });
-            //   if (prevFocusable) {
-            //     const headPin = Pin.toEndOf(prevFocusable)!;
-            //     const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
-            //     cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
-            //   }
-            // } else {
-            //   const nextFocusable = headIsolating.next((n) => n.isFocusable, {
-            //     skip: n => n.isIsolate
-            //   });
-            //   if (nextFocusable) {
-            //     const headPin = Pin.toStartOf(nextFocusable)!;
-            //     const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
-            //     cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
-            //   }
-            // }
-            return;
-          }
-        }
-      },
       mouseDown: (ctx) => {
         this.isMouseDown = true;
         const onMouseUp = () => {
@@ -149,29 +118,45 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         }
 
         document.addEventListener('mouseup', onMouseUp);
+
+        this.startIsolate = ctx.targetNode?.closest((n) => n.isIsolate);
+        this.selection = ctx.app.selection.clone();
+        ctx.app.runtime.selectionchange = false;
       },
-      mouseMove: (ctx) => {
-        if (this.isMouseDown) {
-          this.isSelecting = true;
-        } else {
+      _mouseMove: (ctx) => {
+        return
+        console.log('-------------------------------------', this.isMouseDown)
+        // console.log(ctx.event.nativeEvent)
+        // if (this.isMouseDown && !this.isSelecting) {
+        //   this.isSelecting = true
+        //   return;
+        // }
+
+        if (!this.isMouseDown) {
           return;
         }
+
 
         const {targetNode} = ctx;
         const {selection} = ctx;
         const {tail, head} = selection;
 
-        const tailIsolating = this.tailIsolate(ctx);
+        // const tailIsolating = this.tailIsolate(ctx);
+        const {startIsolate: tailIsolating} = this
         const headIsolating = targetNode?.closest((n) => n.isIsolate);
         if (!headIsolating) return;
+        if (!tailIsolating) return;
 
-        return;
+        // return;
 
         console.log(headIsolating.name, tailIsolating.name)
 
-         if (targetNode && headIsolating?.eq(targetNode) ||
-           (tailIsolating && !headIsolating.eq(tailIsolating))) {
+         // if (targetNode && headIsolating?.eq(targetNode) ||
+        if (!headIsolating.eq(tailIsolating)) {
+          ctx.app.runtime.skipSelectionSync = true;
+          console.log('================================', ctx.event)
           preventAndStopCtx(ctx)
+
           if (selection.isForward || (selection.isCollapsed && headIsolating.after(tail.node))) {
             const prevFocusable = headIsolating.prev((n) => {
               return n.isFocusable && !!n.closest((n) => n.isIsolate)?.eq(tailIsolating);
@@ -215,11 +200,36 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         }
       },
       mouseUp: (ctx) => {
-        if (this.isSelecting) {
-          console.log('selected')
+        if (!ctx.app.runtime.selectionchange) {
+          return;
         }
-        this.isMouseDown = false;
-        this.isSelecting = false;
+        console.log('mouse up ----------------------', PinnedSelection.fromDom(ctx.app.store)?.toString())
+        const selection = PinnedSelection.fromDom(ctx.app.store);
+        if (!selection) return;
+
+        const {head, tail} = selection;
+        const headIsolating = head.node.closest((n) => n.isIsolate);
+        const tailIsolating = tail.node.closest((n) => n.isIsolate);
+        if (!headIsolating || !tailIsolating) return;
+
+        if (headIsolating.eq(tailIsolating)) {
+          ctx.cmd.Select(selection, ActionOrigin.UserInput).Dispatch();
+          return;
+        }
+
+
+        if (selection.isForward) {
+          const prevFocusable = headIsolating.prev((n) => {
+            return n.isFocusable && !!n.closest((n) => n.isIsolate)?.eq(tailIsolating);
+          });
+
+          if (prevFocusable) {
+            const headPin = Pin.toEndOf(prevFocusable)!;
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            ctx.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            return;
+          }
+        }
       }
     };
   }

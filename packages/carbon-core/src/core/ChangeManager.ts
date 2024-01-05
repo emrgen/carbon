@@ -249,7 +249,6 @@ export class ChangeManager extends NodeTopicEmitter {
         app.blur();
         return;
       }
-
       selection.syncDom(app.store);
     } catch (error) {
       this.promiseState.reject?.(error);

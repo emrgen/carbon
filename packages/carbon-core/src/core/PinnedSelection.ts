@@ -291,19 +291,19 @@ export class PinnedSelection {
 			var selection = window.getSelection();
 
       // NOTE: this worked all the time
-			selection?.setBaseAndExtent(
-				anchorNode,
-				anchorOffset,
-				focusNode,
-				focusOffset
-			);
+			// selection?.setBaseAndExtent(
+			// 	anchorNode,
+			// 	anchorOffset,
+			// 	focusNode,
+			// 	focusOffset
+			// );
 
       // NOTE: this works by fires two selectionchange event
-      // const range = new Range();
-      // range.setStart(anchorNode, anchorOffset);
-      // range.setEnd(focusNode, focusOffset);
-      // selection?.removeAllRanges()
-      // window.getSelection()?.addRange(range);
+      const range = new Range();
+      range.setStart(anchorNode, anchorOffset);
+      range.setEnd(focusNode, focusOffset);
+      selection?.removeAllRanges()
+      window.getSelection()?.addRange(range);
 
       // NOTE: maybe not needed in production
       // verify if the selection is successfully set

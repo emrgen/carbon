@@ -47,6 +47,10 @@ export class TransactionManager {
 				tr.Commit(draft);
 			});
 
+      // if the state is updated by the transaction
+      // then update the state and emit the change event
+      // associate the state with the transaction so that it can be used by plugins
+
 			app.committed = true;
 
 			this.updateState(state, tr);

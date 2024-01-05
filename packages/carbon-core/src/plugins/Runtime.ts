@@ -27,9 +27,9 @@ export class Runtime extends BeforePlugin {
     return {
       mouseUp: this.onMouseUp,
       mouseDown: this.onMouseDown,
-      mouseOver: this.onMouseOver,
-      mouseOut: this.onMouseOut,
-      mouseMove: this.onMouseMove,
+      // mouseOver: this.onMouseOver,
+      // mouseOut: this.onMouseOut,
+      // mouseMove: this.onMouseMove,
       selectionchange: this.onSelectionChange,
     }
   }
@@ -55,8 +55,9 @@ export class Runtime extends BeforePlugin {
   }
 
   onSelectionChange(ctx: EventContext<MouseEvent>) {
-    if (this.isMouseDown) {
-      this.state.set("isSelecting", true);
+    if (ctx.app.runtime.mousedown) {
+      ctx.app.runtime.selecting = true;
+      // this.state.set("isSelecting", true);
     }
   }
 
@@ -66,24 +67,27 @@ export class Runtime extends BeforePlugin {
     }
   }
 
-  onMouseUp() {
-    this.setNode("mouseDownNode",  null);
-    this.state.set("mousedown", false);
-    this.state.set("isSelecting", false);
+  onMouseUp(ctx: EventContext<CarbonMouseEvent>) {
+    ctx.app.runtime.mousedown = false;
+    ctx.app.runtime.selecting = false;
+    // this.setNode("mouseDownNode",  null);
+    // this.state.set("mousedown", false);
+    // this.state.set("isSelecting", false);
   }
 
   onMouseDown(ctx: EventContext<CarbonMouseEvent>) {
-    this.state.set("mousedown", true)
-    const targetNode = this.targetNode(ctx);
-    // console.debug('[mouse down]', targetNode?.chain.map(n => n.name).join(' > '));
-    this.setNode("mouseDownNode",  targetNode);
+    ctx.app.runtime.mousedown = true;
+    // this.state.set("mousedown", true)
+    // const targetNode = this.targetNode(ctx);
+    // // console.debug('[mouse down]', targetNode?.chain.map(n => n.name).join(' > '));
+    // this.setNode("mouseDownNode",  targetNode);
 
-    window.addEventListener("mouseup", this.onMouseUp);
+    // window.addEventListener("mouseup", this.onMouseUp);
   }
 
   onMouseOver(ctx: EventContext<CarbonMouseEvent>) {
     const targetNode = this.targetNode(ctx);
-    console.debug('[mouse over]', targetNode?.chain.map(n => n.name).join(' > '));
+    // console.debug('[mouse over]', targetNode?.chain.map(n => n.name).join(' > '));
     preventAndStopCtx(ctx);
     this.setNode("mouseOverNode", targetNode);
   }

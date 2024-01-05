@@ -14,12 +14,12 @@ import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
 import {
-	ListNumberPath,
-	NodeIdSet,
-	NodePropsJson,
-	RenderPath,
-	Selection,
-	TransactionManager
+  ListNumberPath, NodeBTree,
+  NodeIdSet,
+  NodePropsJson,
+  RenderPath,
+  Selection,
+  TransactionManager
 } from "@emrgen/carbon-core";
 import { ChangeNameAction } from './actions/ChangeNameAction';
 import { UpdatePropsAction } from './actions/UpdatePropsAction';
@@ -123,11 +123,16 @@ export class Transaction {
     this.lastSelection = after;
 		after.origin = origin;
 
+    // FIXME: this is a hack to fix selection bug
+    // current issue is that same node marked deselected and selected again
 		if (this.state.selection.isBlock && after.isBlock) {
-			const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+      const { nodes } = this.state.selection;
+      const nodeSet = NodeBTree.from(nodes)
+			const old = NodeIdSet.fromIds(nodes.map(n => n.id));
 			const now = NodeIdSet.fromIds(after.nodeIds);
 			// find removed block selection
 			old.diff(now).forEach(id => {
+        // if (!nodeSet.has(id))
 				this.deselectNodes(id, origin);
 			})
 

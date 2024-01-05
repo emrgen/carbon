@@ -14,7 +14,7 @@ import {
   PointAt,
   PointedSelection, SelectedPath,
   State as CoreState,
-  Pin,
+  Pin, browser,
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
@@ -544,36 +544,7 @@ export class ImmutableDraft implements CoreDraft {
     this.changes.add(SelectionChange.create(selection, this.state.selection.unpin()));
 
     // update selection nodes
-    if (selection.isInline) {
-      const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
-      const after = selection.pin(this.nodeMap)!;
-      if (after) {
-        const nids = after.blocks.map(n => n.id);
-        const now = NodeIdSet.fromIds(nids);
-        console.log(nids, after.nodes, after.head.node, after.tail.node)
-
-        this.selection = PointedSelection.create(selection.tail, selection.head, nids, selection.origin);
-
-        // find removed block selection
-        old.diff(now).forEach(id => {
-          this.mutable(id, node => {
-            node.updateProps({
-              [SelectedPath]: false
-            });
-          });
-        })
-
-        // find new block selection
-        now.diff(old).forEach(id => {
-          this.mutable(id, node => {
-            console.log('selected node', node.name, node.id.toString(), node.props.toKV());
-            node.updateProps({
-              [SelectedPath]: true
-            });
-          });
-        })
-      }
-    }
+    this.updateBlockSelection(selection)
 
     // update empty placeholder if needed
     if (this.state.selection.isInline && this.state.selection.isCollapsed) {
@@ -642,6 +613,41 @@ export class ImmutableDraft implements CoreDraft {
           [HasFocusPath]: true,
         })
       })
+    }
+  }
+
+  private updateBlockSelection(selection: PointedSelection) {
+    // if (browser)
+    return
+    if (selection.isInline) {
+      const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+      const after = selection.pin(this.nodeMap)!;
+      if (after) {
+        const nids = after.blocks.map(n => n.id);
+        const now = NodeIdSet.fromIds(nids);
+        console.log(nids, after.nodes, after.head.node, after.tail.node)
+
+        this.selection = PointedSelection.create(selection.tail, selection.head, nids, selection.origin);
+
+        // find removed block selection
+        old.diff(now).forEach(id => {
+          this.mutable(id, node => {
+            node.updateProps({
+              [SelectedPath]: false
+            });
+          });
+        })
+
+        // find new block selection
+        now.diff(old).forEach(id => {
+          this.mutable(id, node => {
+            console.log('selected node', node.name, node.id.toString(), node.props.toKV());
+            node.updateProps({
+              [SelectedPath]: true
+            });
+          });
+        })
+      }
     }
   }
 

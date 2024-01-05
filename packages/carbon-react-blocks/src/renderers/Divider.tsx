@@ -15,7 +15,7 @@ export default function DividerComp(props: RendererProps) {
       preventAndStop(e);
       // avoid selection if block is already selected
       if (app.selection.nodes.some((n) => n.id.eq(node.id))) return;
-      app.cmd.select(PointedSelection.fromNodes([node.id]))
+      app.cmd.select(PointedSelection.fromNodes([node.id])).dispatch();
     },
     [node.id]
   );
