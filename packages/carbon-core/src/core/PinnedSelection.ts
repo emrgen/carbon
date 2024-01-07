@@ -150,6 +150,10 @@ export class PinnedSelection {
 	}
 
 	get blocks(): Node[] {
+    if (this.isCollapsed) {
+      return []
+    }
+
     if (this.isBlock) {
       if (this.nodes.length=== 1) return this.nodes;
       return sortNodes(this.nodes, 'index')
@@ -442,8 +446,8 @@ export class PinnedSelection {
 	}
 
 	unpin(origin?: ActionOrigin): PointedSelection {
-		const { tail, head, nodes } = this;
-    const ids = nodes.map(n => n.id);
+		const { tail, head, nodes, blocks } = this;
+    const ids = blocks.map(n => n.id);
 		if (this.isBlock) {
 			return PointedSelection.fromNodes(ids, origin ?? this.origin)
 		}

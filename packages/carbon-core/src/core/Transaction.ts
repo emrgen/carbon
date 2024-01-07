@@ -131,10 +131,8 @@ export class Transaction {
 			const old = NodeIdSet.fromIds(nodes.map(n => n.id));
 			const now = NodeIdSet.fromIds(after.nodeIds);
 			// find removed block selection
-			old.diff(now).forEach(id => {
-        // if (!nodeSet.has(id))
-				this.deselectNodes(id, origin);
-			})
+			const removed = old.diff(now).map(id => nodeSet.get(id)).map(v => v).filter(identity) as Node[];
+      this.deselectNodes(removed)
 
 			// find new block selection
 			now.diff(old).forEach(id => {
@@ -199,11 +197,12 @@ export class Transaction {
 		return this
 	}
 
-	private deselectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
-		selectIds.forEach(id => {
-			console.log('xxx deselecting', id.toString());
-			this.Update(id, { [SelectedPath]: false }, origin)
+	private deselectNodes(nodes: Node[], origin = this.origin): Transaction {
+    nodes.forEach(node => {
+			console.log('xxx deselecting', node.id.toString());
+      if (node.props.get(SelectedPath)) {
+        this.Update(node.id, {[SelectedPath]: false}, origin)
+      }
 		})
 
 		return this;
