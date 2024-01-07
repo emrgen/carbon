@@ -1,25 +1,26 @@
-import { Optional } from "@emrgen/types";
-import { Node } from "./Node";
-import { EventEmitter } from "events";
-import { querySelector } from "../utils/domElement";
-import { State } from "./State";
-import { ChangeManager } from "./ChangeManager";
-import { EventsIn, EventsOut } from "./Event";
-import { EventManager } from "./EventManager";
-import { NodeStore } from "./NodeStore";
-import { PinnedSelection } from "./PinnedSelection";
-import { PluginManager } from "./PluginManager";
-import { Schema } from "./Schema";
-import { SelectionManager } from "./SelectionManager";
-import { Transaction } from "./Transaction";
-import { TransactionManager } from "./TransactionManager";
-import {Maps, With} from "./types";
-import { first, isFunction } from "lodash";
-import { CarbonPlugin } from "./CarbonPlugin";
-import { Runtime } from "./Runtime";
-import { PluginEmitter } from "./PluginEmitter";
-import { PluginStates } from "./PluginState";
-import { CarbonCommand } from "./CarbonCommand";
+import {Optional} from "@emrgen/types";
+import {Node} from "./Node";
+import {EventEmitter} from "events";
+import {querySelector} from "../utils/domElement";
+import {State} from "./State";
+import {ChangeManager} from "./ChangeManager";
+import {EventsIn, EventsOut} from "./Event";
+import {EventManager} from "./EventManager";
+import {NodeStore} from "./NodeStore";
+import {PinnedSelection} from "./PinnedSelection";
+import {PluginManager} from "./PluginManager";
+import {Schema} from "./Schema";
+import {SelectionManager} from "./SelectionManager";
+import {Transaction} from "./Transaction";
+import {TransactionManager} from "./TransactionManager";
+import {With} from "./types";
+import {first} from "lodash";
+import {CarbonPlugin} from "./CarbonPlugin";
+import {Runtime} from "./Runtime";
+import {PluginEmitter} from "./PluginEmitter";
+import {PluginStates} from "./PluginState";
+import {CarbonCommand} from "./CarbonCommand";
+import {ActionOrigin} from "@emrgen/carbon-core";
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -178,7 +179,7 @@ export class Carbon extends EventEmitter {
 			return
 		}
 
-		if (state.eq(this.state)) {
+		if (state.eq(this.state) && state.selection.origin !== ActionOrigin.UserInput) {
 			console.warn('skipping ui sync: new state is the same as current', state.content.renderVersion, this.state.content.contentVersion);
 			return
 		}
