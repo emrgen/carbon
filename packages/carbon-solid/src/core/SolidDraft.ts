@@ -21,6 +21,10 @@ export class SolidDraft implements Draft {
 
   constructor(private state: State) {}
 
+  insertText(at: Point, text: string): void {
+      throw new Error("Method not implemented.");
+  }
+
   get nodeMap(): NodeMap {
     return this.state.nodeMap;
   }

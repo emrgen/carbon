@@ -11,7 +11,7 @@ import {
   PinnedSelection,
   LocalHtmlAttrPath,
   corePresetPlugins,
-  State, CheckedPath, preventAndStop,
+  State, CheckedPath, preventAndStop, BlockSelection,
 } from '@emrgen/carbon-core';
 import {createContext, createEffect, createSignal, For, onCleanup, onMount, useContext} from "solid-js";
 
@@ -33,12 +33,12 @@ const data = carbon( [
   ])
 ]);
 
-const content = schema.nodeFromJSON(data)!
+const content = schema.nodeFromJSON(data)!;
 
 // @ts-ignore
 window.content = content;
 
-const state = SolidState.create(content, PinnedSelection.NULL);
+const state = SolidState.create(content, PinnedSelection.NULL, BlockSelection.empty());
 
 const app = new Carbon(state, schema, pm);
 

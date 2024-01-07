@@ -130,7 +130,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         if (!headIsolating || !tailIsolating) return;
 
         if (headIsolating.eq(tailIsolating)) {
-          ctx.cmd.Select(selection, ActionOrigin.UserInput).Dispatch();
+          ctx.cmd.SelectBlocks([]).Select(selection, ActionOrigin.UserInput).Dispatch();
           return;
         }
 
@@ -143,7 +143,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           if (prevFocusable) {
             const headPin = Pin.toEndOf(prevFocusable)!;
             const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
-            ctx.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            ctx.cmd.SelectBlocks([]).Select(newSelection, ActionOrigin.UserInput).Dispatch();
             return;
           }
         }
@@ -156,7 +156,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           if (nextFocusable) {
             const headPin = Pin.toStartOf(nextFocusable)!;
             const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
-            ctx.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            ctx.cmd.SelectBlocks([]).Select(newSelection, ActionOrigin.UserInput).Dispatch();
             return;
           }
         }
