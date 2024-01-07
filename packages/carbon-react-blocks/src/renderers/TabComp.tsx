@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {
-  EventsOut, Node, NodeId, onEnter,
+  ContenteditablePath,
+  EventsOut, Node, NodeId, onEnter, State,
   TitlePath
 } from "@emrgen/carbon-core";
 import {first} from "lodash";
@@ -122,12 +123,70 @@ export const TabsComp = (props: RendererProps) => {
 export const TabComp = (props: RendererProps) => {
   const {node} = props;
   const ref = useRef<any>(null);
+  const app = useCarbon();
 
   const selection = useSelectionHalo(props);
-  const {attributes} = useNodeState({node})
+  const {attributes} = useNodeState({node});
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [isMouseDown, setIsMouseDown] = useState(false);
+
+  useEffect(() => {
+    // const onMouseDown = (e) => {
+    //   console.log('tab mouse down', e)
+    //   setIsMouseDown(true)
+    // }
+    // const onMouseUp = (e) => {
+    //   console.log('tab mouse up', e)
+    //   setIsMouseDown(false)
+    //   setIsSelecting(false)
+    // }
+    // window.addEventListener('mousedown', onMouseDown)
+    // window.addEventListener('mouseup', onMouseUp)
+    // return () => {
+    //   window.removeEventListener('mousedown', onMouseDown)
+    //   window.removeEventListener('mouseup', onMouseUp)
+    // }
+  }, []);
+
+  useEffect(() => {
+    // const onChange = (state: State) => {
+    //   const {isSelectionChanged} = state;
+    //   if (isSelectionChanged && isMouseDown) {
+    //     setIsSelecting(true);
+    //   }
+    //   const {selection} = state;
+    //   if (selection.isInline && !selection.tail.node.chain.some(n => n.id.eq(node.id))) {
+    //     onMouseOut(null)
+    //   }
+    // }
+    //
+    // app.on(EventsOut.changed, onChange)
+    // return () => {
+    //   app.off(EventsOut.changed, onChange)
+    // }
+  }, [app, isMouseDown, node]);
+
+  const onMouseOver = useCallback((e) => {
+    // console.log('tab mouse over', e , isSelecting)
+    // if (isSelecting) return
+    // if (node.props.get(ContenteditablePath)) return
+    // console.log('-------------', node.props.get(ContenteditablePath))
+    // app.cmd.Update(node.id, {
+    //   [ContenteditablePath]: true,
+    // }).Dispatch();
+    // console.log('tab mouse over', e)
+  },[app, isSelecting, node])
+
+  const onMouseOut = useCallback((e) => {
+    // if (!node.props.get(ContenteditablePath)) return
+    // app.cmd.Update(node.id, {
+    //   [ContenteditablePath]: false,
+    // }).Dispatch();
+    // console.log('tab mouse out', e)
+  },[app, node])
 
   return (
-    <CarbonBlock {...props} ref={ref} custom={attributes}>
+    <CarbonBlock {...props} ref={ref} custom={{...attributes, onMouseOver}}>
       <CarbonChildren node={node}/>
       {selection.SelectionHalo}
     </CarbonBlock>

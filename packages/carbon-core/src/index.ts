@@ -14,5 +14,6 @@ export * from './utils/event';
 export * from './utils/action';
 export * from './utils/constrain';
 export * from './utils/htmlAttrs';
+export * from './utils/browser';
 
 export * from './core/BSet';

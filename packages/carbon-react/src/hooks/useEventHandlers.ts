@@ -82,7 +82,5 @@ export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 
 	},[app])
 
-  console.log(handlers)
-
 	return handlers;
 }

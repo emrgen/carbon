@@ -23,6 +23,12 @@ export class SelectionChangePlugin extends AfterPlugin {
 	handlers(): EventHandlerMap {
 		return {
 			selectionchange: (ctx: EventContext<Event>) => {
+        if (ctx.app.runtime.mousedown) {
+          ctx.app.runtime.selectionchange = true;
+          ctx.app.runtime.selection = ctx.selection;
+          console.log('selectionchange while selecting, ignore')
+          return;
+        }
         // console.debug('mouseover node', this.state.plugin('runtime')?.get('mouseOverNode')?.chain.map(n => n.name).join(' > '))
 				console.log(p14('[event]'), 'selectionchange', ctx.event);
 				// helper code block to detect errant selectionchange effect
@@ -54,15 +60,25 @@ export class SelectionChangePlugin extends AfterPlugin {
 
 				// console.log('SelectionPlugin.selectionchanged',before.toJSON(),after.toJSON());
 				console.debug(p14('%c[create]'), 'color:green', 'select transaction');
+        // this.selected.clear();
+        // after.blocks.forEach(block => {
+        //   this.selected.add(block.id)
+        // });
 
 				cmd
 					.Select(after)
 					.Dispatch()
 			},
 			selectstart: (ctx: EventContext<Event>) => {
-				const {app} = ctx;
+				const {app, cmd} = ctx;
 				const {selection} = app;
-				if (selection.isBlock) {}
+				if (selection.blocks.length > 0) {
+          selection.blocks.forEach(block => {
+            cmd.Update(block.id, { [SelectedPath]: false })
+          });
+          cmd.Dispatch();
+          console.log('selectstart', selection.toString());
+        }
 			},
 		}
 	}

@@ -7,11 +7,13 @@ import { PinnedSelection } from "./PinnedSelection";
 import { NodeMap } from "./NodeMap";
 import {Draft} from "./Draft";
 import {StateChanges} from "./NodeChange";
+import {BlockSelection} from "./BlockSelection";
 
 export interface State {
   scope: Symbol;
   content: Node;
   selection: PinnedSelection;
+  blockSelection: BlockSelection;
   nodeMap: NodeMap;
   updated: NodeIdSet;
   changes: StateChanges;

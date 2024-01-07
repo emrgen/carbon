@@ -49,9 +49,9 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   const attributes = useMemo(() => {
     const style = node.props.prefix('local/style') ?? {};
     return {
-      ...custom,
       ...node.props.prefix(LocalHtmlAttrPath) ?? {},
       ...(Object.keys(style).length ? {style} : {}),
+      ...custom,
     }
   }, [custom, node])
 
@@ -109,6 +109,7 @@ const InnerCarbonText = (props: RendererProps) => {
         ) : (
           node.textContent
         )}
+
       </>
     </CarbonElement>
   );

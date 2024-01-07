@@ -49,7 +49,11 @@ export class EventContext<T extends Event> {
 
 	// create a new event context
 	get cmd(): Transaction {
-    return this.transaction = this.app.cmd;
+    if (!this.transaction) {
+      this.transaction = this.app.cmd;
+    }
+
+    return this.transaction;
   }
 
   get targetNode(): Optional<Node> {

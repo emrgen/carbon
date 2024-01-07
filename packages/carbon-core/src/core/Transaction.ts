@@ -14,12 +14,12 @@ import { Point } from './Point';
 import { PointedSelection } from './PointedSelection';
 import { SelectionManager } from './SelectionManager';
 import {
-	ListNumberPath,
-	NodeIdSet,
-	NodePropsJson,
-	RenderPath,
-	Selection,
-	TransactionManager
+  ListNumberPath, NodeBTree,
+  NodeIdSet,
+  NodePropsJson,
+  RenderPath,
+  Selection,
+  TransactionManager
 } from "@emrgen/carbon-core";
 import { ChangeNameAction } from './actions/ChangeNameAction';
 import { UpdatePropsAction } from './actions/UpdatePropsAction';
@@ -123,13 +123,16 @@ export class Transaction {
     this.lastSelection = after;
 		after.origin = origin;
 
+    // FIXME: this is a hack to fix selection bug
+    // current issue is that same node marked deselected and selected again
 		if (this.state.selection.isBlock && after.isBlock) {
-			const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+      const { nodes } = this.state.selection;
+      const nodeSet = NodeBTree.from(nodes)
+			const old = NodeIdSet.fromIds(nodes.map(n => n.id));
 			const now = NodeIdSet.fromIds(after.nodeIds);
 			// find removed block selection
-			old.diff(now).forEach(id => {
-				this.deselectNodes(id, origin);
-			})
+			const removed = old.diff(now).map(id => nodeSet.get(id)).map(v => v).filter(identity) as Node[];
+      this.deselectNodes(removed)
 
 			// find new block selection
 			now.diff(old).forEach(id => {
@@ -194,11 +197,12 @@ export class Transaction {
 		return this
 	}
 
-	private deselectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
-		const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(n => n.nodeId());
-		selectIds.forEach(id => {
-			console.log('xxx deselecting', id.toString());
-			this.Update(id, { [SelectedPath]: false }, origin)
+	private deselectNodes(nodes: Node[], origin = this.origin): Transaction {
+    nodes.forEach(node => {
+			console.log('xxx deselecting', node.id.toString());
+      if (node.props.get(SelectedPath)) {
+        this.Update(node.id, {[SelectedPath]: false}, origin)
+      }
 		})
 
 		return this;

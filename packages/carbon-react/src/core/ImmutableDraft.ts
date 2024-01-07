@@ -14,7 +14,7 @@ import {
   PointAt,
   PointedSelection, SelectedPath,
   State as CoreState,
-  Pin,
+  Pin, browser,
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
@@ -617,36 +617,38 @@ export class ImmutableDraft implements CoreDraft {
   }
 
   private updateBlockSelection(selection: PointedSelection) {
-    // if (selection.isInline) {
-    //   const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
-    //   const after = selection.pin(this.nodeMap)!;
-    //   if (after) {
-    //     const nids = after.blocks.map(n => n.id);
-    //     const now = NodeIdSet.fromIds(nids);
-    //     console.log(nids, after.nodes, after.head.node, after.tail.node)
-    //
-    //     this.selection = PointedSelection.create(selection.tail, selection.head, nids, selection.origin);
-    //
-    //     // find removed block selection
-    //     old.diff(now).forEach(id => {
-    //       this.mutable(id, node => {
-    //         node.updateProps({
-    //           [SelectedPath]: false
-    //         });
-    //       });
-    //     })
-    //
-    //     // find new block selection
-    //     now.diff(old).forEach(id => {
-    //       this.mutable(id, node => {
-    //         console.log('selected node', node.name, node.id.toString(), node.props.toKV());
-    //         node.updateProps({
-    //           [SelectedPath]: true
-    //         });
-    //       });
-    //     })
-    //   }
-    // }
+    // if (browser)
+    return
+    if (selection.isInline) {
+      const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+      const after = selection.pin(this.nodeMap)!;
+      if (after) {
+        const nids = after.blocks.map(n => n.id);
+        const now = NodeIdSet.fromIds(nids);
+        console.log(nids, after.nodes, after.head.node, after.tail.node)
+
+        this.selection = PointedSelection.create(selection.tail, selection.head, nids, selection.origin);
+
+        // find removed block selection
+        old.diff(now).forEach(id => {
+          this.mutable(id, node => {
+            node.updateProps({
+              [SelectedPath]: false
+            });
+          });
+        })
+
+        // find new block selection
+        now.diff(old).forEach(id => {
+          this.mutable(id, node => {
+            console.log('selected node', node.name, node.id.toString(), node.props.toKV());
+            node.updateProps({
+              [SelectedPath]: true
+            });
+          });
+        })
+      }
+    }
   }
 
   // check and update render dependents

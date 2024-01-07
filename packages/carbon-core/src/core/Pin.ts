@@ -137,7 +137,6 @@ export class Pin {
 		this.ref = ref;
 	}
 
-
 	get isInvalid() {
 		return this.eq(Pin.IDENTITY)
 	}

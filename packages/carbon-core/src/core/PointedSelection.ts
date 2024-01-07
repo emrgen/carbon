@@ -33,7 +33,7 @@ export class PointedSelection {
 	}
 
 	static create(tail: Point, head: Point, nodeIds: NodeId[] = [], origin = ActionOrigin.Unknown): PointedSelection {
-		return new PointedSelection(tail, head, [], origin);
+		return new PointedSelection(tail, head, nodeIds, origin);
 	}
 
 	constructor(readonly tail: Point, readonly head: Point, readonly nodeIds: NodeId[], public origin: ActionOrigin = ActionOrigin.Unknown) {
