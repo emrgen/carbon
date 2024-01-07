@@ -140,7 +140,7 @@ export function DndController() {
         // resetDragHandle();
       }
     },
-    [resetDragHandle]
+    []
   );
 
 

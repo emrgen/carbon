@@ -67,7 +67,7 @@ export class KeyboardPlugin extends AfterPlugin {
 				const { app, cmd, currentNode } = ctx;
 				const { selection, blockSelection } = app.state;
 				if (blockSelection.isActive) {
-					const { blocks } = selection;
+					const { blocks } = blockSelection;
           const lastNode = last(blocks) as Node;
           const parentIsolate =  lastNode.parents.find(n => n.isBlockSelectable)
           if (parentIsolate) {
@@ -397,7 +397,7 @@ export class KeyboardPlugin extends AfterPlugin {
 		// put the cursor at the end of the first text block
 		if (!blockSelection.isEmpty) {
 			console.log('node selection...');
-			const { blocks } = selection;
+			const { blocks } = blockSelection;
 			console.log(blocks.map(n => n.id.toString()));
 			const lastNode = last(blocks) as Node;
 			if (lastNode.hasFocusable) {

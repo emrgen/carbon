@@ -561,73 +561,71 @@ export class ImmutableDraft implements CoreDraft {
     this.changes.add(SelectionChange.create(selection, this.state.selection.unpin()));
 
     // update empty placeholder if needed
-    // if (this.state.selection.isInline && this.state.selection.isCollapsed) {
-    //   if (!this.state.selection.isIdentity) {
-    //     const {head: headPin} = this.state.selection;
-    //     const {head} = this.state.selection.unpin();
-    //     const node = this.nodeMap.get(head.nodeId);
-    //     if (!node) {
-    //       throw new Error("Cannot update selection on a draft that is already committed");
-    //     }
-    //
-    //     if (node.isEmpty) {
-    //       this.mutable(head.nodeId, node => {
-    //         const parent = this.nodeMap.parent(node);
-    //         const emptyPlaceholder = parent?.props.get<string>(EmptyPlaceholderPath) ?? " ";
-    //         if (!parent) return;
-    //         node.updateProps({
-    //           [PlaceholderPath]: emptyPlaceholder,
-    //         });
-    //         this.contentChanges.add(parent.id);
-    //       });
-    //     }
-    //   }
-    // }
-    //
-    // // update focus placeholder if needed
-    // if (selection.isCollapsed && selection.isInline && !selection.isIdentity) {
-    //   const {head: headPin} = this.state.selection;
-    //   const { head } = selection;
-    //   const node = this.nodeMap.get(head.nodeId);
-    //   if (!node) {
-    //     throw new Error("Cannot update selection on a draft that is already committed");
-    //   }
-    //
-    //   if (node.isEmpty) {
-    //     this.mutable(head.nodeId, node => {
-    //       const parent = this.nodeMap.parent(node);
-    //       const focusedPlaceholder = parent?.props.get<string>(FocusedPlaceholderPath) ?? "";
-    //       if (!parent) return;
-    //       node.updateProps({
-    //         [PlaceholderPath]: focusedPlaceholder,
-    //       });
-    //     });
-    //   }
-    // }
-    //
-    // // update focus marker if needed
-    // if (this.state.selection.isInline && this.selection.isInline) {
-    //   if (this.state.selection.tail.node.id.eq(this.selection.tail.nodeId)) {
-    //     return
-    //   }
-    // }
-    //
-    // if (this.state.selection.isInline) {
-    //   this.mutable(this.state.selection.tail.node.id, node => {
-    //     node.updateProps({
-    //       [HasFocusPath]: '',
-    //     })
-    //   })
-    // }
-    //
-    // if (this.selection.isInline) {
-    //   console.log('Selection', this.selection.isInline, this.selection.head.eq(Point.IDENTITY))
-    //   this.mutable(this.selection.tail.nodeId, node => {
-    //     node.updateProps({
-    //       [HasFocusPath]: true,
-    //     })
-    //   })
-    // }
+    if (this.state.selection.isCollapsed) {
+      if (!this.state.selection.isIdentity) {
+        const {head: headPin} = this.state.selection;
+        const {head} = this.state.selection.unpin();
+        const node = this.nodeMap.get(head.nodeId);
+        if (!node) {
+          throw new Error("Cannot update selection on a draft that is already committed");
+        }
+
+        if (node.isEmpty) {
+          this.mutable(head.nodeId, node => {
+            const parent = this.nodeMap.parent(node);
+            const emptyPlaceholder = parent?.props.get<string>(EmptyPlaceholderPath) ?? " ";
+            if (!parent) return;
+            node.updateProps({
+              [PlaceholderPath]: emptyPlaceholder,
+            });
+            this.contentChanges.add(parent.id);
+          });
+        }
+      }
+    }
+
+    // update focus placeholder if needed
+    if (selection.isCollapsed && !selection.isIdentity) {
+      const {head: headPin} = this.state.selection;
+      const { head } = selection;
+      const node = this.nodeMap.get(head.nodeId);
+      if (!node) {
+        throw new Error("Cannot update selection on a draft that is already committed");
+      }
+
+      if (node.isEmpty) {
+        this.mutable(head.nodeId, node => {
+          const parent = this.nodeMap.parent(node);
+          const focusedPlaceholder = parent?.props.get<string>(FocusedPlaceholderPath) ?? "";
+          if (!parent) return;
+          node.updateProps({
+            [PlaceholderPath]: focusedPlaceholder,
+          });
+        });
+      }
+    }
+
+    // update focus marker if needed
+    if (this.state.selection.tail.node.id.eq(this.selection.tail.nodeId)) {
+      return
+    }
+
+    if (!this.state.selection.isInvalid) {
+      this.mutable(this.state.selection.tail.node.id, node => {
+        node.updateProps({
+          [HasFocusPath]: '',
+        })
+      })
+    }
+
+    console.log('Selection', this.selection.head.eq(Point.IDENTITY))
+    if (!this.selection.isInvalid) {
+      this.mutable(this.selection.tail.nodeId, node => {
+        node.updateProps({
+          [HasFocusPath]: true,
+        })
+      })
+    }
   }
 
   private updateBlockSelection(selection: PointedSelection) {

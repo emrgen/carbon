@@ -128,7 +128,7 @@ export class Transaction {
 
     // find removed block selection
     const removed = old.diff(now).map(id => blocks.get(id)).map(v => v).filter(identity) as Node[];
-    this.deselectNodes(removed)
+    this.deselectNodes(removed);
 
     // find new block selection
     now.diff(old).forEach(id => {

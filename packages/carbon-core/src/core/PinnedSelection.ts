@@ -196,7 +196,7 @@ export class PinnedSelection {
   }
 
 	get isInvalid() {
-		return this.tail.isNull || this.head.isNull;
+		return this.tail.isNull || this.head.isNull || this.tail.isIdentity || this.head.isIdentity;
 	}
 
 	// for block selection the

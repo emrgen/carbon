@@ -983,11 +983,14 @@ export class TransformCommands extends BeforePlugin {
 
     tr
       .Add(deleteActions)
+      .SelectBlocks([])
+
     if (after) {
       tr.Select(after, ActionOrigin.UserInput);
     } else {
-      tr.Select(PinnedSelection.fromNodes([]))
+      tr.Select(PinnedSelection.fromPin(Pin.toStartOf(parent)!), ActionOrigin.UserInput);
     }
+
     return tr;
   }
 
@@ -1003,7 +1006,7 @@ export class TransformCommands extends BeforePlugin {
     const { app } = tr;
     const {blockSelection} = app.state;
     if (blockSelection.isActive) {
-      const { blocks } = selection;
+      const { blocks } = blockSelection;
       const { parent } = blocks[0];
       return this.deleteNodes(tr, parent!, blocks, opts);
     }

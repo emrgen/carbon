@@ -16,7 +16,7 @@ export class PointedSelection {
 	static IDENTITY = new PointedSelection(Point.IDENTITY, Point.IDENTITY);
 
 	get isInvalid() {
-		return this.head.isNull || this.tail.isNull;
+		return this.isNull || this.isIdentity;
 	}
 
 	static fromPoint(point: Point): PointedSelection {
