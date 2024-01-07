@@ -22,12 +22,19 @@ export function RectSelectContext(props) {
   // mark the rect-selector dirty when the content changes
   useEffect(() => {
     const onChanged = (state: State) => {
+      console.log('####################1')
       setIsBlockSelection(state.selection.isBlock)
     };
+    const onSelectStart = (e) => {
+      console.log('####################2')
+      setIsBlockSelection(false)
+    }
 
     app.on(EventsOut.changed, onChanged);
+    app.on('selectstart', onSelectStart)
     return () => {
       app.off(EventsOut.changed, onChanged);
+      app.off('selectstart', onSelectStart)
     };
   }, [app, rectSelector]);
 
