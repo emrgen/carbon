@@ -61,8 +61,8 @@ export class RectSelect extends EventEmitter {
 		// console.log(this.region === e.target, editor.state.selectedNodeIds.size)
 		this.downEvent = e;
 		if (this.region === e.target) {
-			const {selection} = app.state;
-			if (selection.isBlock) {
+			const {selection, blockSelection} = app.state;
+			if (blockSelection.isActive) {
 				this.selectNodes([]);
 			}
 		}
@@ -197,7 +197,8 @@ export class RectSelect extends EventEmitter {
 		const { app } = this;
 		const idList = set.toArray();
 		if (this.noSelectionChange(idList)) return
-		app.cmd.Select(PointedSelection.fromNodes(idList)).Dispatch();
+    app.cmd.SelectBlocks(idList).Dispatch();
+		// app.cmd.Select(PointedSelection.fromNodes(idList)).Dispatch();
 	}
 
 	private noSelectionChange(ids: NodeId[]) {

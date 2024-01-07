@@ -20,10 +20,10 @@ interface EventContextProps<T> {
 	// cmd: Transaction;
 }
 
-// EventContext is the context of an event that is being handled by the react and its plugins
+// EventContext is the context of an event that is being handled by the application and its plugins
 export class EventContext<T extends Event> {
 	readonly app: Carbon;
-	// selection is the selection at the time of the event not the current react state selection
+	// selection is the selection at the time of the event not the current application state selection
 	readonly selection: PinnedSelection;
 	// targetNode is the node that the event was dispatched to
 	// its always text block node or a node that contains text blocks but currently empty

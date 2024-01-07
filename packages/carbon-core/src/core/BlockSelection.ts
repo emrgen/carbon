@@ -1,4 +1,4 @@
-import {Node} from "@emrgen/carbon-core";
+import {Node, sortNodes} from "@emrgen/carbon-core";
 
 // separated block selection from pinned/pointed selection
 // because its a different concept and it's not clear how to combine them
@@ -10,8 +10,24 @@ import {Node} from "@emrgen/carbon-core";
 export class BlockSelection {
   readonly blocks: Node[];
 
+  static empty() {
+    return new BlockSelection([]);
+  }
+
+  static create(nodes: Node[]) {
+    return new BlockSelection(nodes);
+  }
+
+  get isEmpty() {
+    return this.blocks.length === 0;
+  }
+
+  get isActive() {
+    return this.blocks.length > 0;
+  }
+
   constructor(nodes: Node[]) {
-    this.blocks = nodes;
+    this.blocks = sortNodes(nodes, 'index')
   }
 
   sorted() {

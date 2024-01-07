@@ -186,7 +186,7 @@ export class PinnedSelection {
 		return this.tail.isIdentity && this.head.isIdentity && this.nodes.length > 0;
 	}
 
-	get isInline() {
+	get _isInline() {
 		return !this.tail.eq(Pin.IDENTITY) && !this.head.eq(Pin.IDENTITY) && !this.nodes.length;
 	}
 
@@ -196,13 +196,17 @@ export class PinnedSelection {
   }
 
 	get isInvalid() {
-		return this.tail.isNull || this.head.isNull || !this.isBlock && !this.isInline && !this.isInlineBlock;
+		return this.tail.isNull || this.head.isNull;
 	}
 
 	// for block selection the
 	get isCollapsed() {
-		return this.tail.eq(this.head) && !this.isBlock;
+		return this.tail.eq(this.head);
 	}
+
+  get isExpanded() {
+    return !this.isCollapsed;
+  }
 
 	get inSameNode() {
 		return this.tail.node.eq(this.head.node);
@@ -259,14 +263,10 @@ export class PinnedSelection {
 
 
 	syncDom(store: NodeStore) {
-    if (this.isBlock) {
-      console.warn('skipped block selection sync');
-      return;
-    }
-		// if (this.isInvalid) {
-		// 	console.warn('skipped invalid selection sync');
-		// 	return
-		// }
+		if (this.isInvalid) {
+			console.warn('skipped invalid selection sync');
+			return
+		}
 
 		try {
 			const domSelection = this.intoDomSelection(store);
@@ -447,11 +447,7 @@ export class PinnedSelection {
 
 	unpin(origin?: ActionOrigin): PointedSelection {
 		const { tail, head, nodes, blocks } = this;
-    const ids = blocks.map(n => n.id);
-		if (this.isBlock) {
-			return PointedSelection.fromNodes(ids, origin ?? this.origin)
-		}
-		return PointedSelection.create(tail.point, head.point, ids, origin ?? this.origin);
+		return PointedSelection.create(tail.point, head.point, origin ?? this.origin);
 	}
 
 	pin(map: NodeMap): Optional<PinnedSelection> {
@@ -471,12 +467,6 @@ export class PinnedSelection {
 	}
 
 	toJSON() {
-		if (this.isBlock) {
-			return {
-				nodes: this.nodes.map(n => n.id.toString()),
-			}
-		}
-
 		return {
 			tail: this.tail.toJSON(),
 			head: this.head.toJSON(),

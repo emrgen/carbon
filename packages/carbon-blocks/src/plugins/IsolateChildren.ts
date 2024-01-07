@@ -16,7 +16,7 @@ export class IsolateChildren extends BeforePlugin {
   }
 
   backspace = (ctx: EventContext<KeyboardEvent>) => {
-    if (ctx.app.selection.isBlock) return;
+    if (!ctx.app.state.blockSelection.isEmpty) return;
 
     if (!ctx.selection.isCollapsed) {
       return;
@@ -25,7 +25,7 @@ export class IsolateChildren extends BeforePlugin {
   }
 
   left = (ctx: EventContext<KeyboardEvent>) => {
-    if (ctx.app.selection.isBlock) return;
+    if (!ctx.app.state.blockSelection.isEmpty) return;
 
     if (!ctx.selection.isCollapsed) {
       return;
@@ -34,7 +34,7 @@ export class IsolateChildren extends BeforePlugin {
   }
 
   right = (ctx: EventContext<KeyboardEvent>) => {
-    if (ctx.app.selection.isBlock) return;
+    if (!ctx.app.state.blockSelection.isEmpty) return;
 
     if (!ctx.selection.isCollapsed) {
       return;
@@ -43,12 +43,12 @@ export class IsolateChildren extends BeforePlugin {
   }
 
   shiftLeft = (ctx: EventContext<KeyboardEvent>) => {
-    if (ctx.app.selection.isBlock) return;
+    if (!ctx.app.state.blockSelection.isEmpty) return;
     this.preventAtContentStart(ctx);
   }
 
   shiftRight = (ctx: EventContext<KeyboardEvent>) => {
-    if (ctx.app.selection.isBlock) return;
+    if (!ctx.app.state.blockSelection.isEmpty) return;
     this.preventAtTitleEnd(ctx);
   }
 

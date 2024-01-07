@@ -56,7 +56,7 @@ export class DocPlugin extends CarbonPlugin {
 			// on enter split without merge
 			enter: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, currentNode, cmd } = ctx;
-				if (app.selection.isBlock) {
+				if (!app.state.blockSelection.isEmpty) {
 					return
 				}
 

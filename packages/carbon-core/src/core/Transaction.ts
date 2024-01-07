@@ -108,46 +108,42 @@ export class Transaction {
 
 	get isEmpty() {
 		return this.actions.length === 0;
-		return this.actions.length === 0 || this.actions.filter(a => a instanceof SelectAction).every(a => {
-			const select = a as SelectAction;
-			return select.before.eq(select.after) && select.before.isBlock && select.after.isBlock;
-		});
+		// return this.actions.length === 0 || this.actions.filter(a => a instanceof SelectAction).every(a => {
+		// 	const select = a as SelectAction;
+		// 	return select.before.eq(select.after) && select.before.isBlock && select.after.isBlock;
+		// });
 	}
 
 	onSelect(draft:Draft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
 		this.sm.onSelect(draft, before, after, origin);
 	}
 
+  // removes old selection if any and selects new selection
+  // internally it creates update props action for new selection and old deselection
+  SelectBlocks(nodeIds: NodeId[], origin = this.origin): Transaction {
+    const {blockSelection} = this.state;
+    const blocks = NodeBTree.from(blockSelection.blocks);
+    const old = NodeIdSet.fromIds(blockSelection.blocks.map(n => n.id));
+    const now = NodeIdSet.fromIds(nodeIds);
+
+    // find removed block selection
+    const removed = old.diff(now).map(id => blocks.get(id)).map(v => v).filter(identity) as Node[];
+    this.deselectNodes(removed)
+
+    // find new block selection
+    now.diff(old).forEach(id => {
+      this.selectNodes(id, origin);
+    })
+
+    return this;
+  }
+
 	Select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
 		const after = selection.unpin();
     this.lastSelection = after;
 		after.origin = origin;
 
-    // FIXME: this is a hack to fix selection bug
-    // current issue is that same node marked deselected and selected again
-		if (this.state.selection.isBlock && after.isBlock) {
-      const { nodes } = this.state.selection;
-      const nodeSet = NodeBTree.from(nodes)
-			const old = NodeIdSet.fromIds(nodes.map(n => n.id));
-			const now = NodeIdSet.fromIds(after.nodeIds);
-			// find removed block selection
-			const removed = old.diff(now).map(id => nodeSet.get(id)).map(v => v).filter(identity) as Node[];
-      this.deselectNodes(removed)
-
-			// find new block selection
-			now.diff(old).forEach(id => {
-				this.selectNodes(id, origin);
-			})
-		} else {
-			// if selection is block selection, deselect previous block selection and select new block selection
-      this.deselectNodes(this.state.selection.blocks, origin);
-      // console.log('00000000000000', after.nodeIds)
-			if (selection.isBlock) {
-				this.selectNodes(after.nodeIds, origin);
-			}
-		}
-
-		return this.Add(SelectAction.create(this.state.selection.unpin(), after, origin));
+    return this.Add(SelectAction.create(this.state.selection.unpin(), after, origin));
 	}
 
   // can be called for textContainer only

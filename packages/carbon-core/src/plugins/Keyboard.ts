@@ -65,36 +65,37 @@ export class KeyboardPlugin extends AfterPlugin {
 			cmd_u: preventAndStopCtx,
 			esc: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, cmd, currentNode } = ctx;
-				const { selection } = app
-				if (selection.isBlock) {
+				const { selection, blockSelection } = app.state;
+				if (blockSelection.isActive) {
 					const { blocks } = selection;
           const lastNode = last(blocks) as Node;
           const parentIsolate =  lastNode.parents.find(n => n.isBlockSelectable)
           if (parentIsolate) {
             if (parentIsolate.isDocument) return
-            const after = PinnedSelection.fromNodes(parentIsolate);
-            cmd.Select(after).Dispatch()
+            cmd.SelectBlocks([parentIsolate.id]).Dispatch();
           }
 					return
 				}
 
 				const block = currentNode.chain.find(n => n.isBlockSelectable);
 				if (!block) return
-				cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
+        cmd.SelectBlocks([block.id]).Dispatch();
 			},
 			left: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, cmd } = ctx;
-				const { selection } = app;
+				const { selection, blockSelection } = app.state
+
+        console.log(blockSelection.blocks)
 
 				// nodes selection is visible using halo
-				if (selection.isBlock) {
+				if (blockSelection.isActive) {
 					preventAndStopCtx(ctx)
 					console.log('block selection...');
-					this.collapseSelectionBefore(cmd, selection.blocks);
+					this.collapseSelectionBefore(cmd, blockSelection.blocks);
 					return
 				}
 
-				if (!selection.isCollapsed) {
+				if (selection.isExpanded) {
 					preventAndStopCtx(ctx)
 					cmd.selection.collapseToTail(app.selection)
 					return
@@ -108,10 +109,10 @@ export class KeyboardPlugin extends AfterPlugin {
 			right: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, event, cmd } = ctx;
 				event.preventDefault();
-				const { selection } = app;
+				const { selection, blockSelection } = app.state;
 
 				// nodes selection is visible using halo
-				if (selection.isBlock) {
+				if (blockSelection.isActive) {
 					preventAndStopCtx(ctx)
 					this.collapseSelectionAfter(cmd, selection.blocks);
 					return
@@ -133,8 +134,8 @@ export class KeyboardPlugin extends AfterPlugin {
 				const { app, event, currentNode } = ctx;
 				const {cmd} = app;
 				event.preventDefault();
-				const { selection } = app;
-				if (selection.isBlock) {
+				const { selection, blockSelection } = app.state;
+				if (blockSelection.isActive) {
 					if (selection.blocks.length > 1) {
 						console.log("TODO: select first top level node");
 						return
@@ -154,8 +155,8 @@ export class KeyboardPlugin extends AfterPlugin {
 				const { app, event, currentNode, cmd } = ctx;
 
 				event.preventDefault();
-				const { selection } = app;
-				if (selection.isBlock) {
+				const { selection, blockSelection } = app.state;
+				if (blockSelection.isActive) {
 					if (selection.blocks.length) {
 						console.log("TODO: select first top level node");
 						return
@@ -294,6 +295,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			const pin = Pin.toStartOf(focusNode!)
 			console.log('pin', pin?.toString());
 			tr
+        .SelectBlocks([])
 				.Select(PinnedSelection.fromPin(pin!))
 				.Dispatch();
 			return
@@ -325,12 +327,11 @@ export class KeyboardPlugin extends AfterPlugin {
 			.Dispatch();
 	}
 
-
 	shiftUp(ctx: EventContext<KeyboardEvent>) {
 		const { app, cmd } = ctx;
-		const { selection } = app;
+		const { selection, blockSelection } = app;
 
-		if (selection.isInline) return
+		if (blockSelection.isEmpty) return
 		preventAndStopCtx(ctx);
 
 		const { blocks } = selection;
@@ -362,8 +363,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
 	shiftDown(ctx: EventContext<KeyboardEvent>) {
 		const { app, cmd } = ctx;
-		const { selection } = app;
-		if (selection.isInline) return
+		const { selection, blockSelection } = app;
+		if (blockSelection.isEmpty) return
 		preventAndStopCtx(ctx);
 
 		const { blocks } = selection;
@@ -393,12 +394,12 @@ export class KeyboardPlugin extends AfterPlugin {
 		console.log('Enter event...');
 		preventAndStopCtx(ctx);
 		const { app, cmd } = ctx;
-		const { selection } = app;
+		const { selection, blockSelection } = app.state;
 		const { start, end } = selection
 		const { node } = start;
 
 		// put the cursor at the end of the first text block
-		if (selection.isBlock) {
+		if (!blockSelection.isEmpty) {
 			console.log('node selection...');
 			const { blocks } = selection;
 			console.log(blocks.map(n => n.id.toString()));
@@ -468,10 +469,10 @@ export class KeyboardPlugin extends AfterPlugin {
 		preventAndStopCtx(ctx);
 		const { event, cmd } = ctx;
 		const { app, currentNode } = ctx;
-		const { selection } = app;
+		const { selection, blockSelection } = app.state;
 
 		// delete node selection if any
-		if (selection.isBlock) {
+		if (!blockSelection.isEmpty) {
 			cmd.transform.delete(selection, { fall: 'after' })?.Dispatch();
 			return
 		}
@@ -500,8 +501,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
 	up(ctx: EventContext<KeyboardEvent>) {
 		const { app, currentNode, cmd } = ctx;
-		const { selection } = app;
-		if (selection.isInline) return
+		const { selection, blockSelection } = app;
+		if (blockSelection.isEmpty) return
 		preventAndStopCtx(ctx);
 
 		const {blocks} = selection;
@@ -526,8 +527,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
 	down(ctx: EventContext<KeyboardEvent>) {
 		const { app, currentNode, cmd } = ctx;
-		const { selection } = app;
-		if (selection.isInline) return
+		const { selection, blockSelection } = app;
+		if (blockSelection.isEmpty) return
 		preventAndStopCtx(ctx)
 
     console.log('--------')

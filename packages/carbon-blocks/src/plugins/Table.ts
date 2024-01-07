@@ -91,7 +91,7 @@ export class Column extends CarbonPlugin {
       },
       shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
         const { currentNode, app } = ctx;
-        const { selection } = app;
+        const { selection } = app.state;
         if (!selection.isCollapsed && selection.start.isAtStartOfNode(currentNode)) {
           preventAndStopCtx(ctx);
 
