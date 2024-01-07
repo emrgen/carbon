@@ -65,8 +65,9 @@ export class TitlePlugin extends NodePlugin {
 	keydown(): Partial<EventHandler> {
 		return {
 			shiftEnter: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, selection } = ctx;
-				if (selection.isBlock) return
+				const { app } = ctx;
+                const { selection, blockSelection} = app.state
+				if (blockSelection.isActive) return
 
 				if (selection.isCollapsed) {
 					preventAndStopCtx(ctx);

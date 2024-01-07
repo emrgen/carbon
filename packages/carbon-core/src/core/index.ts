@@ -30,4 +30,6 @@ export * from './Draft'
 export * from './BSet'
 export * from './BTree'
 export * from './Factory'
+export * from './NodeChange'
+export * from './BlockSelection'
 

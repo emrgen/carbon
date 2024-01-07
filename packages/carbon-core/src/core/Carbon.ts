@@ -21,6 +21,7 @@ import {PluginEmitter} from "./PluginEmitter";
 import {PluginStates} from "./PluginState";
 import {CarbonCommand} from "./CarbonCommand";
 import {ActionOrigin} from "@emrgen/carbon-core";
+import {BlockSelection} from "./BlockSelection";
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -103,6 +104,10 @@ export class Carbon extends EventEmitter {
 	get selection(): PinnedSelection {
 		return this.state.selection;
 	}
+
+  get blockSelection(): BlockSelection {
+    return this.state.blockSelection;
+  }
 
 	get focused() {
 		return this.sm.focused;

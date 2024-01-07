@@ -163,7 +163,8 @@ export class TransformCommands extends BeforePlugin {
 
   private insertText(tr: Transaction, selection: PinnedSelection, text: string, native = false) {
     const { app } = tr;
-    if (selection.isBlock) {
+    const {blockSelection} = app.state;
+    if (blockSelection.isActive) {
       return
     }
 
@@ -235,9 +236,10 @@ export class TransformCommands extends BeforePlugin {
     // console.log('xxx', nodes.map(n => n.id.toString()), root.id.toString());
 
     // if the selection is not empty, we need to paste the nodes after the last node
-    if (selection.isBlock) {
-      const {blocks} = selection
-      const lastNode = last(selection.blocks) as Node
+    const {blockSelection} = app.state;
+    if (blockSelection.isActive) {
+      const {blocks} = blockSelection
+      const lastNode = last(blocks) as Node
       const focusNode = this.findFocusNode(blocks);
 
       tr.Insert(Point.toAfter(lastNode.id), blocks)
@@ -981,11 +983,14 @@ export class TransformCommands extends BeforePlugin {
 
     tr
       .Add(deleteActions)
+      .SelectBlocks([])
+
     if (after) {
       tr.Select(after, ActionOrigin.UserInput);
     } else {
-      tr.Select(PinnedSelection.fromNodes([]))
+      tr.Select(PinnedSelection.fromPin(Pin.toStartOf(parent)!), ActionOrigin.UserInput);
     }
+
     return tr;
   }
 
@@ -999,8 +1004,9 @@ export class TransformCommands extends BeforePlugin {
   // delete nodes within selection
   delete(tr: Transaction, selection: PinnedSelection = tr.app.selection, opts?: DeleteOpts): Optional<Transaction> {
     const { app } = tr;
-    if (selection.isBlock) {
-      const { blocks } = selection;
+    const {blockSelection} = app.state;
+    if (blockSelection.isActive) {
+      const { blocks } = blockSelection;
       const { parent } = blocks[0];
       return this.deleteNodes(tr, parent!, blocks, opts);
     }

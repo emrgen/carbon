@@ -14,7 +14,7 @@ import {
   PointAt,
   PointedSelection, SelectedPath,
   State as CoreState,
-  Pin, browser,
+  Pin, browser, BlockSelection,
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
@@ -55,6 +55,7 @@ export class ImmutableDraft implements CoreDraft {
   removed: NodeIdSet = NodeIdSet.empty(); // tracks removed nodes
   changes: StateChanges = StateChanges.empty();
   inserted: NodeIdSet = NodeIdSet.empty();
+  selected: NodeIdSet = NodeIdSet.empty();
 
   private drafting = true;
 
@@ -64,6 +65,7 @@ export class ImmutableDraft implements CoreDraft {
     this.nodeMap = ImmutableNodeMap.from(state.nodeMap);
     this.updated = new NodeIdSet();
     this.selection = state.selection.unpin(origin);
+    state.blockSelection.blocks.forEach(n => this.selected.add(n.id));
   }
 
   get(id: NodeId): Optional<Node> {
@@ -120,11 +122,15 @@ export class ImmutableDraft implements CoreDraft {
     // nodeMap.freeze();
     after.freeze();
 
+    const selected = this.selected.nodes(this.nodeMap)
+    const blockSelection = BlockSelection.create(selected);
+
     const newState = new ImmutableState({
       previous: state.clone(depth - 1),
       scope: state.scope,
       content,
       selection: after,
+      blockSelection,
       nodeMap,
       updated: updated,
       changes: this.changes,
@@ -523,6 +529,9 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
     if (this.nodeMap.deleted(nodeId)) {
+      if (props[SelectedPath] === false) {
+        this.selected.remove(nodeId);
+      }
       return;
     }
     // console.log('before update props', this.nodeMap.get(nodeId)?.properties.toKV());
@@ -530,6 +539,14 @@ export class ImmutableDraft implements CoreDraft {
     this.mutable(nodeId, node => {
       node.updateProps(props);
     });
+
+    if (props[SelectedPath] === true) {
+      this.selected.add(nodeId);
+    }
+
+    if (props[SelectedPath] === false) {
+      this.selected.remove(nodeId);
+    }
 
     // console.log('after update props', this.nodeMap.get(nodeId)?.properties.toKV());
   }
@@ -543,11 +560,8 @@ export class ImmutableDraft implements CoreDraft {
     this.selection = selection;
     this.changes.add(SelectionChange.create(selection, this.state.selection.unpin()));
 
-    // update selection nodes
-    this.updateBlockSelection(selection)
-
     // update empty placeholder if needed
-    if (this.state.selection.isInline && this.state.selection.isCollapsed) {
+    if (this.state.selection.isCollapsed) {
       if (!this.state.selection.isIdentity) {
         const {head: headPin} = this.state.selection;
         const {head} = this.state.selection.unpin();
@@ -571,7 +585,7 @@ export class ImmutableDraft implements CoreDraft {
     }
 
     // update focus placeholder if needed
-    if (selection.isCollapsed && selection.isInline && !selection.isIdentity) {
+    if (selection.isCollapsed && !selection.isIdentity) {
       const {head: headPin} = this.state.selection;
       const { head } = selection;
       const node = this.nodeMap.get(head.nodeId);
@@ -592,13 +606,11 @@ export class ImmutableDraft implements CoreDraft {
     }
 
     // update focus marker if needed
-    if (this.state.selection.isInline && this.selection.isInline) {
-      if (this.state.selection.tail.node.id.eq(this.selection.tail.nodeId)) {
-        return
-      }
+    if (this.state.selection.tail.node.id.eq(this.selection.tail.nodeId)) {
+      return
     }
 
-    if (this.state.selection.isInline) {
+    if (!this.state.selection.isInvalid) {
       this.mutable(this.state.selection.tail.node.id, node => {
         node.updateProps({
           [HasFocusPath]: '',
@@ -606,8 +618,8 @@ export class ImmutableDraft implements CoreDraft {
       })
     }
 
-    if (this.selection.isInline) {
-      console.log('Selection', this.selection.isInline, this.selection.head.eq(Point.IDENTITY))
+    console.log('Selection', this.selection.head.eq(Point.IDENTITY))
+    if (!this.selection.isInvalid) {
       this.mutable(this.selection.tail.nodeId, node => {
         node.updateProps({
           [HasFocusPath]: true,
@@ -618,36 +630,33 @@ export class ImmutableDraft implements CoreDraft {
 
   private updateBlockSelection(selection: PointedSelection) {
     // if (browser)
-    return
-    if (selection.isInline) {
-      const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
-      const after = selection.pin(this.nodeMap)!;
-      if (after) {
-        const nids = after.blocks.map(n => n.id);
-        const now = NodeIdSet.fromIds(nids);
-        console.log(nids, after.nodes, after.head.node, after.tail.node)
+    const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+    const after = selection.pin(this.nodeMap)!;
+    if (after) {
+      const nids = after.blocks.map(n => n.id);
+      const now = NodeIdSet.fromIds(nids);
+      console.log(nids, after.nodes, after.head.node, after.tail.node)
 
-        this.selection = PointedSelection.create(selection.tail, selection.head, nids, selection.origin);
+      this.selection = PointedSelection.create(selection.tail, selection.head, selection.origin);
 
-        // find removed block selection
-        old.diff(now).forEach(id => {
-          this.mutable(id, node => {
-            node.updateProps({
-              [SelectedPath]: false
-            });
+      // find removed block selection
+      old.diff(now).forEach(id => {
+        this.mutable(id, node => {
+          node.updateProps({
+            [SelectedPath]: false
           });
-        })
+        });
+      })
 
-        // find new block selection
-        now.diff(old).forEach(id => {
-          this.mutable(id, node => {
-            console.log('selected node', node.name, node.id.toString(), node.props.toKV());
-            node.updateProps({
-              [SelectedPath]: true
-            });
+      // find new block selection
+      now.diff(old).forEach(id => {
+        this.mutable(id, node => {
+          console.log('selected node', node.name, node.id.toString(), node.props.toKV());
+          node.updateProps({
+            [SelectedPath]: true
           });
-        })
-      }
+        });
+      })
     }
   }
 

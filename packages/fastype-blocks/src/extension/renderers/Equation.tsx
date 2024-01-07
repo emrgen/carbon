@@ -84,13 +84,13 @@ export const EquationComp = (props: RendererProps) => {
       //   })
       //   .Dispatch();
     },
-    [app.tr, node.id]
+    []
   );
 
   const handleMouseDown = useCallback(
     (e) => {
-      const { selection } = app;
-      if (selection.isBlock && selection.blocks.some(n => n.id.eq(node.id))) {
+      const { selection, blockSelection } = app.state;
+      if (blockSelection.isActive && blockSelection.blocks.some(n => n.id.eq(node.id))) {
         stop(e);
       }
     },

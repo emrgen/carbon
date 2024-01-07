@@ -23,18 +23,19 @@ export function RectSelectContext(props) {
   useEffect(() => {
     const onChanged = (state: State) => {
       console.log('####################1')
-      setIsBlockSelection(state.selection.isBlock)
+      setIsBlockSelection(state.blockSelection.isActive)
     };
+
     const onSelectStart = (e) => {
-      console.log('####################2')
-      setIsBlockSelection(false)
+      // console.log('####################2')
+      // setIsBlockSelection(false)
     }
 
     app.on(EventsOut.changed, onChanged);
-    app.on('selectstart', onSelectStart)
+    // app.on('selectstart', onSelectStart)
     return () => {
       app.off(EventsOut.changed, onChanged);
-      app.off('selectstart', onSelectStart)
+      // app.off('selectstart', onSelectStart)
     };
   }, [app, rectSelector]);
 
@@ -99,7 +100,7 @@ export function RectSelectContext(props) {
 
     const onMouseUp = (e) => {
       // if there is a block selection, keep the rect-select active
-      if (app.selection.isBlock) return;
+      if (app.state.blockSelection.isActive) return;
       // setIsSelecting(false);
     };
 
@@ -110,7 +111,7 @@ export function RectSelectContext(props) {
       rectSelector.off("mouse:down", onMouseDown);
       rectSelector.off("mouse:up", onMouseUp);
     };
-  }, [app.selection, rectSelector]);
+  }, [app, rectSelector]);
 
 
   useEffect(() => {

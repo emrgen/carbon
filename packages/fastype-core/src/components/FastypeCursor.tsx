@@ -49,7 +49,7 @@ export const FastypeCursor = (props: CustomCursorProps) => {
     const onChange = (state: State) => {
       if (!ref.current) return;
       const cursor = ref.current;
-      if (state.selection.isBlock) {
+      if (state.blockSelection.isActive) {
         addClass(cursor, `hidden`);
         return
       } else {

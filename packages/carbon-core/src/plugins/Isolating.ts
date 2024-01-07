@@ -236,7 +236,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         }
       },
       left: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.state.blockSelection.isActive) return;
 
         if (!e.selection.isCollapsed) {
           e.cmd.Select(e.selection.collapseToStart());
@@ -245,7 +245,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         this.preventAtStart(e);
       },
       right: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.state.blockSelection.isActive) return;
 
         if (!e.selection.isCollapsed) {
           e.cmd.Select(e.selection.collapseToEnd());
@@ -254,27 +254,27 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         this.preventAtEnd(e);
       },
       shiftLeft: (e) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.state.blockSelection.isActive) return;
         this.preventAtStart(e);
       },
       shiftRight: (e) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.state.blockSelection.isActive) return;
         this.preventAtEnd(e);
       },
       backspace: (e) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.state.blockSelection.isActive) return;
         this.preventAtStartCollapsed(e);
       },
       delete: (e) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.state.blockSelection.isActive) return;
         this.preventAtEndCollapsed(e);
       },
       shiftBackspace: (e) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.state.blockSelection.isActive) return;
         this.preventAtStart(e);
       },
       shiftDelete: (e) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.state.blockSelection.isActive) return;
         this.preventAtEnd(e);
       },
     };

@@ -71,14 +71,11 @@ export class SelectionChangePlugin extends AfterPlugin {
 			},
 			selectstart: (ctx: EventContext<Event>) => {
 				const {app, cmd} = ctx;
-				const {selection} = app;
-				if (selection.blocks.length > 0) {
-          selection.blocks.forEach(block => {
-            cmd.Update(block.id, { [SelectedPath]: false })
-          });
-          cmd.Dispatch();
-          console.log('selectstart', selection.toString());
-        }
+				const {blockSelection} = app.state;
+        blockSelection.blocks.forEach(block => {
+          cmd.Update(block.id, { [SelectedPath]: false })
+        });
+        cmd.Dispatch();
 			},
 		}
 	}

@@ -1,15 +1,15 @@
-import {ActionOrigin, MarkSet, Node, NodeIdSet, PinnedSelection, State} from "@emrgen/carbon-core";
+import {ActionOrigin, MarkSet, Node, NodeIdSet, PinnedSelection, State, BlockSelection, StateChanges} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {StateScope} from "./StateScope";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {ImmutableDraft} from "./ImmutableDraft";
-import {StateChanges} from "@emrgen/carbon-core/src/core/NodeChange";
 
 interface StateProps {
   scope: Symbol;
   previous?: ImmutableState;
   content: Node;
   selection: PinnedSelection;
+  blockSelection?: BlockSelection;
   marks?: MarkSet;
   nodeMap: ImmutableNodeMap;
   updated?: NodeIdSet;
@@ -22,6 +22,7 @@ export class ImmutableState implements State {
   scope: Symbol;
   content: Node;
   selection: PinnedSelection;
+  blockSelection: BlockSelection;
   nodeMap: ImmutableNodeMap;
   updated: NodeIdSet;
   changes: StateChanges = new StateChanges();
@@ -46,13 +47,15 @@ export class ImmutableState implements State {
       selection,
       nodeMap,
       updated = NodeIdSet.empty(),
-      changes = StateChanges.empty()
+      changes = StateChanges.empty(),
+      blockSelection = BlockSelection.empty(),
     } = props;
 
     this.previous = previous;
     this.scope = scope;
     this.content = content;
     this.selection = selection;
+    this.blockSelection = blockSelection;
     this.nodeMap = nodeMap;
     this.updated = updated;
     this.changes = changes;

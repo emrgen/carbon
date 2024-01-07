@@ -176,8 +176,8 @@ export class TabGroup extends CarbonPlugin {
       left: (ctx: EventContext<KeyboardEvent>) => {
         // focus at the start of the active tab content
         const {app, currentNode: tabs, cmd} = ctx;
-        const {selection} = app;
-        if (selection.isBlock) {
+        const {selection, blockSelection} = app.state;
+        if (blockSelection.isActive) {
           preventAndStopCtx(ctx);
           const activeTabId = getActiveTabId(tabs);
           const activeTab = tabs.children.find(n => n.id.toString() === activeTabId);
@@ -192,8 +192,8 @@ export class TabGroup extends CarbonPlugin {
       right: (ctx: EventContext<KeyboardEvent>) => {
         // focus at the end of the active tab content
         const {app, currentNode: tabs, cmd} = ctx;
-        const {selection} = app;
-        if (selection.isBlock) {
+        const {selection, blockSelection} = app.state;
+        if (blockSelection.isActive) {
           preventAndStopCtx(ctx);
           const activeTabId = getActiveTabId(tabs);
           const activeTab = tabs.children.find(n => n.id.toString() === activeTabId);
@@ -210,7 +210,7 @@ export class TabGroup extends CarbonPlugin {
       // shiftLeft: preventAndStopCtx,
       // shiftRight: preventAndStopCtx,
       enter: (ctx: EventContext<KeyboardEvent>) => {
-        if (ctx.selection.isBlock) {
+        if (ctx.app.state.blockSelection.isActive) {
           preventAndStopCtx(ctx);
         }
       },
@@ -260,7 +260,7 @@ export class Tab extends CarbonPlugin {
         }
       },
       delete(ctx: EventContext<KeyboardEvent>) {
-        if (ctx.selection.isBlock) {
+        if (ctx.app.state.blockSelection.isActive) {
           const {blocks} = ctx.selection;
           if (blocks.length === 1 && blocks[0].eq(ctx.currentNode)) {
             preventAndStopCtx(ctx);

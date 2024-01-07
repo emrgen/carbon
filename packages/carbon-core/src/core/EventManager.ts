@@ -97,8 +97,8 @@ export class EventManager {
 			return
 		}
 
-		if (type !== EventsIn.selectionchange && app.state.selection.isBlock && app.selection.blocks.length) {
-			const lastNode = last(app.selection.blocks) as Node;
+		if (type !== EventsIn.selectionchange && app.state.blockSelection.isActive) {
+			const lastNode = last(app.blockSelection.blocks) as Node;
 			this.updateCommandOrigin(type, event);
 
 			// TODO: check if this can be optimized

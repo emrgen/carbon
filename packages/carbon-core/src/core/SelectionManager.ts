@@ -47,7 +47,7 @@ export class SelectionManager {
 		const { app } = this;
 
 		// console.log('Editor.onSelect', after.toString(), 'pendingSelection', origin);
-		if (after.isInline && [ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
+		if ([ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
 			this.onSelectionChange(draft, before, after, origin)
 		} else {
 			const event = SelectionEvent.create(before, after, origin);
