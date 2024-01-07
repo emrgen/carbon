@@ -295,19 +295,19 @@ export class PinnedSelection {
 			var selection = window.getSelection();
 
       // NOTE: this worked all the time
-			// selection?.setBaseAndExtent(
-			// 	anchorNode,
-			// 	anchorOffset,
-			// 	focusNode,
-			// 	focusOffset
-			// );
+			selection?.setBaseAndExtent(
+				anchorNode,
+				anchorOffset,
+				focusNode,
+				focusOffset
+			);
 
       // NOTE: this works by fires two selectionchange event
-      const range = new Range();
-      range.setStart(anchorNode, anchorOffset);
-      range.setEnd(focusNode, focusOffset);
-      selection?.removeAllRanges()
-      window.getSelection()?.addRange(range);
+      // const range = new Range();
+      // range.setStart(anchorNode, anchorOffset);
+      // range.setEnd(focusNode, focusOffset);
+      // selection?.removeAllRanges()
+      // window.getSelection()?.addRange(range);
 
       // NOTE: maybe not needed in production
       // verify if the selection is successfully set
@@ -317,7 +317,7 @@ export class PinnedSelection {
 			console.assert(domSel?.focusNode === domSelection.focusNode, 'failed to sync focusNode')
 			console.assert(domSel?.anchorOffset === domSelection.anchorOffset, 'failed to sync anchor offset')
 			console.assert(domSel?.focusOffset === domSelection.focusOffset, 'failed to sync focus offset')
-			// console.log('Selection.syncDom:', this.toString(), domSel)
+			console.log('Selection.syncDom:', this.toString(), domSel)
 		} catch (err) {
 			console.error(err);
 		}

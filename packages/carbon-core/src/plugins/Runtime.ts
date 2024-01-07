@@ -68,7 +68,7 @@ export class Runtime extends BeforePlugin {
   }
 
   onMouseUp(ctx: EventContext<CarbonMouseEvent>) {
-    ctx.app.runtime.mousedown = false;
+    // ctx.app.runtime.mousedown = false;
     ctx.app.runtime.selecting = false;
     // this.setNode("mouseDownNode",  null);
     // this.state.set("mousedown", false);

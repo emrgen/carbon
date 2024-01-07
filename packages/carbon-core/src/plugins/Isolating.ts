@@ -213,7 +213,9 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         if (!headIsolating || !tailIsolating) return;
 
         if (headIsolating.eq(tailIsolating)) {
+          console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
           ctx.cmd.Select(selection, ActionOrigin.UserInput).Dispatch();
+          // ctx.app.runtime.mousedown = false;
           return;
         }
 
@@ -225,6 +227,19 @@ export class IsolateSelectionPlugin extends AfterPlugin {
 
           if (prevFocusable) {
             const headPin = Pin.toEndOf(prevFocusable)!;
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            ctx.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            return;
+          }
+        }
+
+        if (selection.isBackward) {
+          const nextFocusable = headIsolating.next((n) => {
+            return n.isFocusable && !!n.closest((n) => n.isIsolate)?.eq(tailIsolating);
+          });
+
+          if (nextFocusable) {
+            const headPin = Pin.toStartOf(nextFocusable)!;
             const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
             ctx.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
             return;
