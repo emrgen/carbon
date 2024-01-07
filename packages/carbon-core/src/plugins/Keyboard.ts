@@ -114,7 +114,7 @@ export class KeyboardPlugin extends AfterPlugin {
 				// nodes selection is visible using halo
 				if (blockSelection.isActive) {
 					preventAndStopCtx(ctx)
-					this.collapseSelectionAfter(cmd, selection.blocks);
+					this.collapseSelectionAfter(cmd, blockSelection.blocks);
 					return
 				}
 
@@ -143,7 +143,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 					const block = currentNode.find(n => !n.eq(currentNode) && n.isContainer)
 					if (!block) return
-					cmd.Select(PinnedSelection.fromNodes(block)).Dispatch();
+					cmd.SelectBlocks([block.id]).Dispatch();
 					return
 				}
 
@@ -164,7 +164,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 					const { parent } = currentNode;
 					if (parent?.isSandbox) return
-					cmd.Select(PinnedSelection.fromNodes(parent!)).Dispatch();
+          cmd.SelectBlocks([parent!.id]).Dispatch();
 					return
 				}
 
@@ -315,6 +315,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			const focusNode = lastNode.find(n => n.isFocusable, { direction: 'backward' })
 			const pin = Pin.toEndOf(focusNode!)
 			tr
+        .SelectBlocks([])
 				.Select(PinnedSelection.fromPin(pin!))
 				.Dispatch();
 			return
@@ -329,18 +330,15 @@ export class KeyboardPlugin extends AfterPlugin {
 
 	shiftUp(ctx: EventContext<KeyboardEvent>) {
 		const { app, cmd } = ctx;
-		const { selection, blockSelection } = app;
+		const {  blockSelection } = app;
 
 		if (blockSelection.isEmpty) return
 		preventAndStopCtx(ctx);
 
-		const { blocks } = selection;
+		const { blocks } = blockSelection;
 		const firstNode = first(blocks) as Node;
 		const block = prevSelectableBlock(firstNode, true);
-		// console.log(block?.id, firstNode.id, blocks.map(n => n.id.toString()));
 		if (!block) {
-			// ctx.event.preventDefault()
-			// ctx.stopPropagation()
 			return
 		}
 
@@ -357,22 +355,20 @@ export class KeyboardPlugin extends AfterPlugin {
     const nodes = set.toArray().map(([id, node]) => node);
 		const after = PinnedSelection.fromNodes(nodes);
 		cmd
-			.Select(after)
+			.SelectBlocks(nodes.map(n => n.id))
 			.Dispatch();
 	}
 
 	shiftDown(ctx: EventContext<KeyboardEvent>) {
 		const { app, cmd } = ctx;
-		const { selection, blockSelection } = app;
+		const {  blockSelection } = app;
 		if (blockSelection.isEmpty) return
 		preventAndStopCtx(ctx);
 
-		const { blocks } = selection;
+		const { blocks } = blockSelection;
 		const lastNode = last(blocks) as Node;
 		const block = nextSelectableBlock(lastNode, false)
 		if (!block) {
-			// ctx.event.preventDefault()
-			// ctx.stopPropagation()
 			return
 		}
 
@@ -385,8 +381,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		// ctx.event.preventDefault();
     const nodes = blocks.filter(b => !b.parents.some(n => n.eq(block)))
-		const after = PinnedSelection.fromNodes([...nodes, block]);
-		cmd.Select(after).Dispatch();
+    const selected = [block, ...nodes]
+    cmd.SelectBlocks(selected.map(n => n.id)).Dispatch();
 	}
 
 	// handles enter event
@@ -501,15 +497,14 @@ export class KeyboardPlugin extends AfterPlugin {
 
 	up(ctx: EventContext<KeyboardEvent>) {
 		const { app, currentNode, cmd } = ctx;
-		const { selection, blockSelection } = app;
+		const { blockSelection } = app;
 		if (blockSelection.isEmpty) return
 		preventAndStopCtx(ctx);
 
-		const {blocks} = selection;
+		const {blocks} = blockSelection;
 		if (blocks.length > 1) {
 			const lastNode = first(blocks) as Node;
-			const after = PinnedSelection.fromNodes(lastNode);
-			cmd.Select(after).Dispatch()
+			cmd.SelectBlocks([lastNode.id]).Dispatch()
 			return
 		}
 
@@ -521,27 +516,26 @@ export class KeyboardPlugin extends AfterPlugin {
       return
     }
 
-		const after = PinnedSelection.fromNodes(block);
-		cmd.Select(after).Dispatch()
+		cmd.SelectBlocks([block.id]).Dispatch()
 	}
 
 	down(ctx: EventContext<KeyboardEvent>) {
 		const { app, currentNode, cmd } = ctx;
-		const { selection, blockSelection } = app;
+		const {blockSelection } = app;
+    console.log('down', blockSelection.blocks)
 		if (blockSelection.isEmpty) return
+
 		preventAndStopCtx(ctx)
 
-    console.log('--------')
-
-		const {blocks, nodes } = selection;
+		const {blocks } = blockSelection;
 		if (blocks.length > 1) {
 			const lastNode = last(blocks) as Node;
-			const after = PinnedSelection.fromNodes(lastNode);
-			cmd.Select(after).Dispatch()
+			cmd.SelectBlocks([lastNode.id]).Dispatch()
 			return
 		}
 
     const lastNode = last(blocks) as Node;
+    console.log(blocks)
 		const block = nextSelectableBlock(currentNode, !lastNode.isIsolate)
 		console.log('nextContainerBlock', block);
 		if (!block) return
@@ -552,8 +546,7 @@ export class KeyboardPlugin extends AfterPlugin {
       return
     }
 
-		const after = PinnedSelection.fromNodes(block);
-		cmd.Select(after).Dispatch()
+		cmd.SelectBlocks([block.id]).Dispatch()
 	}
 }
 
