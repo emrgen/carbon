@@ -1,3 +1,7 @@
+export const Dummy = () => {
+  return null
+}
+
 // import {range} from "lodash";
 // import {useEffect} from "react";
 //
