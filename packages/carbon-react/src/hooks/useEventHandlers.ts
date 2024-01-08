@@ -1,7 +1,7 @@
 import { camelCase } from "lodash";
 import { useEffect, useMemo } from "react";
 import { useCarbon } from './useCarbon';
-import {EventsIn} from "@emrgen/carbon-core";
+import {EventsIn, StateScope} from "@emrgen/carbon-core";
 
 // listen for dom event
 const defaultEvents: EventsIn[] = [
@@ -50,6 +50,7 @@ const preventDefaultEvents = {
 
 export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 	const app = useCarbon();
+  const {scope} = app.state;
 
 	const handlers = useMemo(() => {
 		return events.reduce(
@@ -57,6 +58,7 @@ export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 				...o,
 				[camelCase(`on-${eventType}`)]: (event: Event) => {
 					// console.log('xxx', eventType, event);
+          StateScope.set(scope)
 					if (preventDefaultEvents[eventType]?.(event)) {
 						event.preventDefault();
 					}
@@ -66,7 +68,7 @@ export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 			}),
 			{}
 		);
-	}, [app, events]);
+	}, [app, events, scope]);
 
 
 	useEffect(() => {

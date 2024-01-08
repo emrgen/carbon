@@ -130,7 +130,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         if (!headIsolating || !tailIsolating) return;
 
         if (headIsolating.eq(tailIsolating)) {
-          ctx.cmd.Select(selection, ActionOrigin.UserInput).Dispatch();
+          ctx.cmd.SelectBlocks([]).Select(selection, ActionOrigin.UserInput).Dispatch();
           return;
         }
 
@@ -143,7 +143,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           if (prevFocusable) {
             const headPin = Pin.toEndOf(prevFocusable)!;
             const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
-            ctx.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            ctx.cmd.SelectBlocks([]).Select(newSelection, ActionOrigin.UserInput).Dispatch();
             return;
           }
         }
@@ -156,7 +156,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           if (nextFocusable) {
             const headPin = Pin.toStartOf(nextFocusable)!;
             const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
-            ctx.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            ctx.cmd.SelectBlocks([]).Select(newSelection, ActionOrigin.UserInput).Dispatch();
             return;
           }
         }
@@ -236,45 +236,45 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         }
       },
       left: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
 
         if (!e.selection.isCollapsed) {
-          e.cmd.Select(e.selection.collapseToStart());
+          e.cmd.Select(e.selection.collapseToStart()).Dispatch();
           return;
         }
         this.preventAtStart(e);
       },
       right: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
 
         if (!e.selection.isCollapsed) {
-          e.cmd.Select(e.selection.collapseToEnd());
+          e.cmd.Select(e.selection.collapseToEnd()).Dispatch();
           return;
         }
         this.preventAtEnd(e);
       },
       shiftLeft: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtStart(e);
       },
       shiftRight: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtEnd(e);
       },
       backspace: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtStartCollapsed(e);
       },
       delete: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtEndCollapsed(e);
       },
       shiftBackspace: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtStart(e);
       },
       shiftDelete: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtEnd(e);
       },
     };

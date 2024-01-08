@@ -2,13 +2,12 @@ import { Optional } from '@emrgen/types';
 import {cloneDeep, each, isArray, merge} from 'lodash';
 import { ContentMatch } from './ContentMatch';
 import { Fragment } from './Fragment';
-import { MarkSet } from './Mark';
 import { Node } from './Node';
 import { NodeSpec, Schema } from './Schema';
 import {HTMLAttrs, NodeJSON, NodeName} from './types';
 import { NodeAttrs, NodeAttrsJSON } from "./NodeAttrs";
 import { NodeState, NodeStateJSON } from "./NodeState";
-import { NodeProps, NodePropsJson } from "./NodeProps";
+import {NodeProps, NodePropsJson, PlainNodeProps} from "./NodeProps";
 
 interface InitNodeJSON extends Omit<NodeJSON, 'id'> {
   id?: string;
@@ -52,8 +51,6 @@ export class NodeType {
 
 	contentMatch!: ContentMatch;
 
-	markSet: MarkSet;
-
 	contents: NodeName[];
 
   _default: Optional<InitNodeJSON>;
@@ -75,11 +72,10 @@ export class NodeType {
 	// spec: spec of the NodeType
 	constructor(readonly name: NodeName, readonly schema: Schema, readonly spec: NodeSpec) {
 		this.groupsNames = specGroups(name, spec);
-		this.props = NodeProps.fromJSON(spec.props ?? {});
+		this.props = PlainNodeProps.create(spec.props ?? {});
 
 		this.isBlock = !(spec.inline || name == "text")
 		this.isText = name == "text";
-		this.markSet = new MarkSet();
 		this.contents = [];
     this._default = Object.freeze(spec.default);
 	}

@@ -1,18 +1,11 @@
 import {Optional} from "@emrgen/types";
-import {NodeIdSet} from "./BSet";
-import {PinnedSelection} from "./PinnedSelection";
 import {PointedSelection} from "./PointedSelection";
 import {
-  BTreeNodeMap,
-  Draft, Maps,
-  Node,
-  NodeBTree, NodeContentData,
+  Draft,
   NodeData,
   NodeId, NodeIdComparator,
-  NodeMap, Path,
+  Path,
   NodePropsJson,
-  Slice,
-  State
 } from "@emrgen/carbon-core";
 import BTree from "sorted-btree";
 

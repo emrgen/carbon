@@ -22,12 +22,21 @@ import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
 import { NumberedList } from "./NumberedList";
 
+declare module "@emrgen/carbon-core" {
+  export interface Transaction {
+    // change
+  }
+}
+
+// Things needed to change a node type (e.g. from paragraph to heading):
 export class ChangeName extends BeforePlugin {
-  name = 'changeName';
+  name = 'change';
+
+  rules: BeforeInputRuleHandler[] = [];
 
   inputRules = new BeforeInputRuleHandler([
     //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberedList')),
-    new InputRule(/^(\[\]\s)(.)*/, this.tryChangeName('todo', ['nestable'])),
+    new InputRule(/^(\[]\s)(.)*/, this.tryChangeName('todo', ['nestable'])),
     new InputRule(/^(#\s)(.)*/, this.tryChangeName('h1', ['nestable'])),
     new InputRule(/^(##\s)(.)*/, this.tryChangeName('h2', ['nestable'])),
     new InputRule(/^(###\s)(.)*/, this.tryChangeName('h3', ['nestable'])),
@@ -61,9 +70,11 @@ export class ChangeName extends BeforePlugin {
   tryChangeName(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { currentNode, app, cmd } = ctx;
+
       const { selection } = app;
-      const block = currentNode.closest(n => n.isContainer)!;
-      if (!isConvertible(block)) return
+      const changeNode = currentNode.closest(n => n.isContainer)!;
+      if (!isConvertible(changeNode)) return
+      if (changeNode.name === name) return;
 
       const type = app.schema.type(name);
       if (!type) {
@@ -83,7 +94,7 @@ export class ChangeName extends BeforePlugin {
       }
 
       if (name === 'numberedList') {
-        const listNumber = NumberedList.listNumber(block)
+        const listNumber = NumberedList.listNumber(changeNode)
         const inputNumber = parseInt(match[1].slice(0, -2));
         if (listNumber != inputNumber) {
           console.warn('TODO: listNumber', listNumber, inputNumber);
@@ -93,7 +104,7 @@ export class ChangeName extends BeforePlugin {
         }
       }
 
-      const titleNode = block.child(0)!;
+      const titleNode = changeNode.child(0)!;
       // const titleContent = TitleContent.from(titleNode);
       // const before = titleContent.insert(match[1].length,);
       // const after = titleContent.remove(0, match[1].length);
@@ -117,11 +128,11 @@ export class ChangeName extends BeforePlugin {
         }
       }
 
-      cmd.Change(block.id, name)
-      cmd.Update(block.id, { node: { typeChanged: true },});
+      cmd.Change(changeNode.id, name)
+      cmd.Update(changeNode.id, { node: { typeChanged: true },});
       // expand collapsed block
-      if (block.isCollapsed) {
-        cmd.Update(block.id, { node: { collapsed: false } });
+      if (changeNode.isCollapsed) {
+        cmd.Update(changeNode.id, { node: { collapsed: false } });
       }
       cmd.Select(after)
         .Dispatch()

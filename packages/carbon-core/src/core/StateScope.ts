@@ -3,9 +3,26 @@ import { NodeMap } from "./NodeMap";
 
 const STATE_SCOPE: Map<Symbol, NodeMap> = new Map();
 
-// this is a global state scope, used for storing global state of the react
+const GLOBAL_SCOPE = Symbol("GLOBAL");
+
+const SCOPES: Symbol[] = [GLOBAL_SCOPE];
+
+// this is a global state scope, used for storing global state of the application
 export class StateScope {
-  static get(scope: Symbol): NodeMap {
+  // global scope acts as a default scope and bridge between all other scopes
+  static GLOBAL = GLOBAL_SCOPE;
+
+  static scope: Symbol = GLOBAL_SCOPE;
+
+  get current() {
+    return SCOPES[SCOPES.length - 1];
+  }
+
+  static set(scope: Symbol) {
+    this.scope = scope;
+  }
+
+  static get(scope: Symbol = StateScope.scope): NodeMap {
     let map = STATE_SCOPE.get(scope);
     if (!map) {
      throw new Error(`StateScope ${scope.toString()} not found`);
@@ -24,7 +41,7 @@ export class StateScope {
     }
   }
 
-  static set(scope: Symbol, map: NodeMap) {
+  static put(scope: Symbol, map: NodeMap) {
     STATE_SCOPE.set(scope, map);
   }
 

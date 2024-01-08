@@ -1,4 +1,11 @@
-import {ActionOrigin, Draft, IDENTITY_SCOPE, Node, NodeIdSet, PinnedSelection, State} from "@emrgen/carbon-core";
+import {ActionOrigin, BlockSelection,
+  Draft,
+  IDENTITY_SCOPE,
+  Node,
+  NodeIdSet,
+  PinnedSelection,
+  State
+} from "@emrgen/carbon-core";
 import {SolidNodeMap} from "./NodeMap";
 import {SolidDraft} from "./SolidDraft";
 import {StateChanges} from "@emrgen/carbon-core/src/core/NodeChange";
@@ -9,16 +16,17 @@ export class SolidState implements State {
   content: Node;
   nodeMap: SolidNodeMap;
   selection: PinnedSelection;
+  blockSelection: BlockSelection;
   changes: StateChanges;
 
   isContentChanged: boolean;
   isSelectionChanged: boolean;
 
-  static create(content: Node, selection: PinnedSelection, nodeMap: SolidNodeMap = new SolidNodeMap()) {
-    const state = new SolidState(content, selection, nodeMap);
+  static create(content: Node, selection: PinnedSelection, blockSelection: BlockSelection, nodeMap: SolidNodeMap = new SolidNodeMap()) {
+    const state = new SolidState(content, selection, blockSelection, nodeMap);
     if (!nodeMap.size) {
       content.all(n => {
-        nodeMap.set(n.id, n)
+        nodeMap.set(n.id, n);
         state.updated.add(n.id);
       });
     }
@@ -26,10 +34,11 @@ export class SolidState implements State {
     return state;
   }
 
-  constructor(content: Node, selection: PinnedSelection, nodeMap: SolidNodeMap) {
+  constructor(content: Node, selection: PinnedSelection, blockSelection: BlockSelection, nodeMap: SolidNodeMap) {
     this.scope = IDENTITY_SCOPE;
     this.content = content;
     this.selection = selection;
+    this.blockSelection = blockSelection;
     this.nodeMap = nodeMap;
     this.updated = new NodeIdSet();
     this.changes = new StateChanges();

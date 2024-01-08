@@ -1,4 +1,4 @@
-import {Mark, MarkSet,
+import {Mark,
   Node,
   NodeContent,
   NodeContentData,
@@ -27,12 +27,6 @@ export class VueNodeContent implements NodeContent {
     return {} as any
   }
 
-  get marks(): MarkSet {
-    return this.content.marks;
-  }
-
-  renderVersion?: number | undefined;
-  contentVersion?: number | undefined;
   addMark(marks: Mark): void {
       throw new Error("Method not implemented.");
   }
@@ -138,7 +132,7 @@ export class VueNodeContent implements NodeContent {
   }
 
   updateProps(props: NodePropsJson): void {
-    this.content.props.update(props);
+    this.content.props.merge(props);
   }
 
   clone(): NodeContent {

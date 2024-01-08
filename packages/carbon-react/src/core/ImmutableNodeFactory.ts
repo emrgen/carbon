@@ -5,7 +5,7 @@ import {
   Schema,
   Node,
   NodeId,
-  NodeFactory, Maps, NodeContentData, MarkSet,
+  NodeFactory, Maps, NodeContentData
 } from "@emrgen/carbon-core";
 import {isEmpty} from "lodash";
 import {v4 as uuidv4} from 'uuid';
@@ -38,7 +38,7 @@ export class ImmutableNodeFactory implements NodeFactory {
       throw new Error(`Node Plugin is not registered ${name}`);
     }
 
-    const props = isEmpty(json.props) ? type.props.clone() : type.props.clone().update(json.props);
+    const props = isEmpty(json.props) ? type.props.clone() : type.props.clone().merge(json.props);
     const nodeId = id ? NodeId.deserialize(id)! : this.blockId();
     const nodes = children.map(n => schema.nodeFromJSON(n));
 
@@ -52,7 +52,6 @@ export class ImmutableNodeFactory implements NodeFactory {
       linkName: '',
       parentId: null,
       parent: null,
-      marks: MarkSet.empty(),
     });
 
     const node = ImmutableNode.create(scope, content);

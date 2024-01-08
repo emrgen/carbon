@@ -35,6 +35,7 @@ export const setActiveTabId = (cmd: Transaction, node: Node, tabId: string) => {
 }
 
 export const getTabTitle = (node: Node) => {
+  console.log(node.props)
   return node.props.get<string>(TitlePath) ?? '';
 }
 
@@ -56,11 +57,10 @@ export const TabName = 'tab';
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
     select(tabs: Node, tab: Node): Transaction;
-
     tabs: {
       create(tabs: Node): Transaction;
       remove(tabs: Node, tab: Node): Transaction;
-      open(tabs: Node, tab: Node): Transaction;
+      openTab(tabs: Node, tab: Node): Transaction;
       startRenaming(tabs: Node, tab: Node): Transaction;
       stopRenaming(tabs: Node): Transaction;
     }
@@ -98,7 +98,7 @@ export class TabGroup extends CarbonPlugin {
     return {
       create: this.create,
       remove: this.remove,
-      open: this.open,
+      openTab: this.openTab,
       startRenaming: this.startRenaming,
       stopRenaming: this.stopRenaming,
     }
@@ -111,7 +111,7 @@ export class TabGroup extends CarbonPlugin {
     console.log('created tab', block.id.toString());
 
     const to = tabs.isVoid ? Point.toStart(tabs.id) : Point.toAfter(tabs.lastChild!.id);
-    tr.action.insert(to, block).tabs.open(tabs, block);
+    tr.action.insert(to, block).tabs.openTab(tabs, block);
   }
 
   remove(tr: Transaction, tabs: Node, tab: Node) {
@@ -123,14 +123,14 @@ export class TabGroup extends CarbonPlugin {
     if (nextActiveTab) {
       console.log(tab.parents[0].id.toString(), nextActiveTab.id.toString());
      tr.action.remove(nodeLocation(tab)!, tab);
-     this.open(tr, tabs, nextActiveTab);
+     this.openTab(tr, tabs, nextActiveTab);
     } else {
       // TODO: insert a default tab and delete the current tab
     }
   }
 
   // open the tab and focus at the start of the tab content
-  open(tr: Transaction, tabs: Node, tab: Node) {
+  openTab(tr: Transaction, tabs: Node, tab: Node) {
     const activeTab = getActiveTab(tabs)
     if (activeTab) {
       tr.action.update(activeTab, {

@@ -29,7 +29,6 @@ export class Carbon extends EventEmitter {
 	private readonly sm: SelectionManager;
 	private readonly tm: TransactionManager;
 
-
 	// for external application use
 	private readonly pluginBus: PluginEmitter;
 	private readonly pluginStates: PluginStates;

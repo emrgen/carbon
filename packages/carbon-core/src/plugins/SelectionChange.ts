@@ -22,6 +22,10 @@ export class SelectionChangePlugin extends AfterPlugin {
 
 	handlers(): EventHandlerMap {
 		return {
+      dragStart: (ctx: EventContext<Event>) => {
+        // ctx.event.preventDefault();
+        console.log(p14('[event]'), 'dragStart', ctx.event);
+      },
 			selectionchange: (ctx: EventContext<Event>) => {
         if (ctx.app.runtime.mousedown) {
           ctx.app.runtime.selectionchange = true;
@@ -67,18 +71,26 @@ export class SelectionChangePlugin extends AfterPlugin {
 
 				cmd
 					.Select(after)
-					.Dispatch()
+        // if (ctx.app.state.blockSelection.isActive) {
+        //   this.removeBlockSelection(ctx);
+        // }
+
+					cmd.Dispatch()
 			},
 			selectstart: (ctx: EventContext<Event>) => {
-				const {app, cmd} = ctx;
-				const {blockSelection} = app.state;
-        blockSelection.blocks.forEach(block => {
-          cmd.Update(block.id, { [SelectedPath]: false })
-        });
-        cmd.Dispatch();
+				this.removeBlockSelection(ctx)
+        ctx.cmd.Dispatch();
 			},
 		}
 	}
+
+  removeBlockSelection(ctx: EventContext<Event>) {
+    const {app, cmd} = ctx;
+    const {blockSelection} = app.state;
+    blockSelection.blocks.forEach(block => {
+      cmd.Update(block.id, { [SelectedPath]: false })
+    });
+  }
 
 	// TODO: decorate selected nodes with halo
 	decoration(state: State): Decoration[] {

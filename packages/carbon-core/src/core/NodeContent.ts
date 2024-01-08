@@ -1,10 +1,9 @@
-import { findIndex, flatten, identity } from 'lodash';
+import {findIndex, flatten, identity} from 'lodash';
 
-import { Node } from './Node';
-import { Optional } from "@emrgen/types";
-import { NodeId } from './NodeId';
-import { Maps, With } from './types';
-import {Mark, MarkSet, NodeProps, NodePropsJson, NodeType} from "@emrgen/carbon-core";
+import {Node} from './Node';
+import {Optional} from "@emrgen/types";
+import {NodeId} from './NodeId';
+import {Mark, NodePropsJson, NodeType, NodeProps} from "@emrgen/carbon-core";
 
 export interface NodeData {
   id: string;
@@ -15,7 +14,6 @@ export interface NodeData {
   linkName?: string;
   links?: Record<string, NodeData>;
   props?: NodePropsJson;
-  marks?: string[]
 }
 
 // all the data a node needs to be created
@@ -29,13 +27,12 @@ export interface NodeContentData {
   children: Node[];
   linkName: string;
   links: Record<string, Node>;
-  marks: MarkSet;
   props: NodeProps;
   renderVersion?: number;
   contentVersion?: number;
 }
 
-export interface NodeContent extends NodeContentData, MutableNodeContent{
+export interface NodeContent extends NodeContentData, MutableNodeContent {
   size: number;
   data: NodeData;
 
@@ -46,21 +43,30 @@ export interface NodeContent extends NodeContentData, MutableNodeContent{
 
 export interface MutableNodeContent {
   setParentId(parentId: Optional<NodeId>): void;
+
   setParent(parent: Optional<Node>): void;
+
   changeType(type: NodeType): void;
+
   insert(node: Node, index: number): void;
+
   remove(node: Node): void;
+
   // replace(node: Node): void;
   insertText(text: string, offset: number): void;
+
   removeText(offset: number, length: number): void;
+
   addLink(name: string, node: Node): void;
+
   removeLink(name: string): Optional<Node>;
+
   updateContent(content: Node[] | string): void;
+
   updateProps(props: NodePropsJson): void;
-  addMark(marks: Mark): void;
-  removeMark(marks: Mark): void;
 
   clone(): NodeContent;
+
   freeze(): void;
 }
 
@@ -70,16 +76,18 @@ export class PlainNodeContent implements NodeContent {
     return new PlainNodeContent(content);
   }
 
-  constructor(private content: NodeContentData) {}
+  renderVersion = 0;
+  contentVersion = 0;
 
-  renderVersion?: number | undefined;
-    contentVersion?: number | undefined;
-    replace(node: Node): void {
-        throw new Error('Method not implemented.');
-    }
+  constructor(private content: NodeContentData) {
+  }
+
+  replace(node: Node): void {
+    throw new Error('Method not implemented.');
+  }
 
   get data(): NodeData {
-    const {parent, type, id, parentId,children, ...rest} = this.content;
+    const {parent, type, id, parentId, children, ...rest} = this.content;
     return {
       ...rest,
       id: id.toString(),
@@ -87,7 +95,6 @@ export class PlainNodeContent implements NodeContent {
       name: type.name,
       children: this.children.map(c => c.data),
       links: {},
-      marks: [],
     }
   }
 
@@ -123,10 +130,6 @@ export class PlainNodeContent implements NodeContent {
     return this.content.links;
   }
 
-  get marks(): MarkSet {
-    return this.content.marks;
-  }
-
   get props(): NodeProps {
     return this.content.props;
   }
@@ -135,11 +138,10 @@ export class PlainNodeContent implements NodeContent {
     return (this.type.isText) ? this.textContent.length : this.children.length;
   }
 
-
   // return shallow clone of data
   // the children are same references as the original
   unwrap(): NodeContentData {
-    return { ...this.content };
+    return {...this.content};
   }
 
   child(index: number): Optional<Node> {
@@ -148,7 +150,7 @@ export class PlainNodeContent implements NodeContent {
 
   changeType(type: NodeType): void {
     this.content.type = type;
-    this.props.update(type.props);
+    this.props.merge(type.props);
   }
 
   clone(): NodeContent {
@@ -192,7 +194,7 @@ export class PlainNodeContent implements NodeContent {
   }
 
   updateProps(props: NodePropsJson): void {
-    this.props.update(props);
+    this.props.merge(props);
   }
 
   addLink(name: string, node: Node): void {
@@ -203,14 +205,5 @@ export class PlainNodeContent implements NodeContent {
     const node = this.links[name];
     delete this.links[name];
     return node;
-  }
-
-
-  addMark(props: Mark): void {
-    // this.content.marks.update(props);
-  }
-
-  removeMark(props: Mark): void {
-    // this.content.marks.removeMarks();
   }
 }
