@@ -61,7 +61,7 @@ export class PlainNodeProps implements NodeProps {
   }
 
   set(path: string, value: any): void {
-    throw new Error("Method not implemented.");
+    set(this.props, this.dotPath(path), value);
   }
 
   merge(other: NodeProps | NodePropsJson): NodeProps {

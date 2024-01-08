@@ -26,6 +26,8 @@ export class SolidNodeFactory implements NodeFactory {
 
     const properties = isEmpty(json.props) ? type.props : type.props.merge(json.props);
     const props = PlainNodeProps.create(properties.toJSON());
+    props.set('local/html/suppressContentEditableWarning', false)
+
     const nodeId = id ? NodeId.deserialize(id)! : this.textId();
     const nodes = children.map((n: any) => schema.nodeFromJSON(n));
     const content = SolidNodeContent.create({

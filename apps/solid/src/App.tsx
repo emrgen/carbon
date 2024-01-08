@@ -193,11 +193,6 @@ const BlockElement = (props: RendererProps) => {
   const {node} = props;
   const register = useRegister(node);
 
-  createEffect(() => {
-    // console.log(attrs())
-    console.debug('block c/hanged', node.name, node.id.toString(), node.props.get(LocalHtmlAttrPath), node.props.toJSON())
-  })
-
   const selectedAttr = () => {
     if (node.props.get(SelectedPath)) {
       return {
@@ -209,7 +204,7 @@ const BlockElement = (props: RendererProps) => {
   }
 
   return (
-    <div data-name={node.name} data-id={node.key} {...node.props.get(LocalHtmlAttrPath)} ref={register} {...selectedAttr}>
+    <div data-name={node.name} data-id={node.key} {...nodeAttrs(node)} ref={register} {...selectedAttr}>
       {node.isVoid && <span>&shy;</span>}
       {!node.isVoid && <For each={node.children}>
           {(child) => {
@@ -233,10 +228,11 @@ const TextElement = (props: RendererProps) => {
 }
 
 const nodeAttrs = (node: Node) => {
-  const attrs = node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
-  for (const [k, v] of Object.entries(attrs)) {
-    if (v === null || v === undefined || v == '') {
-      delete attrs[k];
+  const props = node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
+  const attrs: any = {}
+  for (const [k, v] of Object.entries(props)) {
+    if (!(v === null || v === undefined || v == '' || v == "false" || v == false)) {
+      attrs[k] = v;
     }
   }
 
