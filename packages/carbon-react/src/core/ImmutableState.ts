@@ -1,4 +1,4 @@
-import {ActionOrigin, MarkSet, Node, NodeIdSet, PinnedSelection, State, BlockSelection, StateChanges, StateScope} from "@emrgen/carbon-core";
+import {ActionOrigin, Node, NodeIdSet, PinnedSelection, State, BlockSelection, StateChanges, StateScope} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {ImmutableDraft} from "./ImmutableDraft";
@@ -9,7 +9,6 @@ interface StateProps {
   content: Node;
   selection: PinnedSelection;
   blockSelection?: BlockSelection;
-  marks?: MarkSet;
   nodeMap: ImmutableNodeMap;
   updated?: NodeIdSet;
   changes?: StateChanges;

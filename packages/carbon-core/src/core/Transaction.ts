@@ -3,7 +3,7 @@ import { first, flatten, identity, isArray, last, sortBy, merge, isEmpty, isFunc
 import {  With } from '@emrgen/types';
 import { Carbon } from './Carbon';
 import { p14 } from './Logger';
-import { Mark, MarkSet } from "./Mark";
+import { Mark } from "./Mark";
 import { Node } from './Node';
 import { NodeAttrsJSON } from "./NodeAttrs";
 import { NodeContent } from './NodeContent';
@@ -166,8 +166,7 @@ export class Transaction {
 		return this.Add(ChangeNameAction.create(ref.nodeId(), to, origin));
 	}
 
-	Format(selection: Selection, mark: Mark | MarkSet, origin = this.origin): Transaction {
-		const marks = MarkSet.from(mark);
+	Format(selection: Selection, mark: Mark, origin = this.origin): Transaction {
 		// const after = selection.unpin();
 		// const marks = isArray(mark) ? mark : [mark];
 		// this.Add(MarkCommand.create(start, end, mark, origin))

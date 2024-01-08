@@ -3,6 +3,7 @@ import {useCarbon} from '../hooks/useCarbon';
 import {LocalHtmlAttrPath, NamePath, TagPath} from "@emrgen/carbon-core";
 import {useNodeChange, useRenderManager} from "../hooks";
 import {RendererProps} from "../renderer/ReactRenderer";
+import {isEmpty} from "lodash";
 
 export const JustEmpty = () => {
   // return <span>&shy;</span>;
@@ -47,9 +48,16 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
   const ref = useRef<HTMLElement>(null);
 
   const attributes = useMemo(() => {
-    const style = node.props.prefix('local/style') ?? {};
+    const style = node.props.get('local/style') ?? {};
+    const attrs = node.props.get(LocalHtmlAttrPath) ?? {};
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === null || v === undefined || v == '') {
+        delete attrs[k];
+      }
+    }
+
     return {
-      ...node.props.prefix(LocalHtmlAttrPath) ?? {},
+      ...attrs,
       ...(Object.keys(style).length ? {style} : {}),
       ...custom,
     }

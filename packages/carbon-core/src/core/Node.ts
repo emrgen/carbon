@@ -1,23 +1,20 @@
 import {findIndex, first, flatten, identity, isArray, isEmpty, last, merge, noop, reverse} from "lodash";
-import { Fragment } from "./Fragment";
 
 import { Optional, Predicate, With } from "@emrgen/types";
-import { takeUpto } from "../utils/array";
-import { ContentMatch } from "./ContentMatch";
 import { classString } from "./Logger";
-import { Mark, MarkSet } from "./Mark";
+import { Mark } from "./Mark";
 import {PlainNodeContent, NodeContent, NodeData, NodeContentData} from "./NodeContent";
 import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeType } from "./NodeType";
-import { IDENTITY_SCOPE, no, NodeEncoder, NodeJSON, yes } from "./types";
+import { NodeProps } from "./NodeProps";
+import { no, NodeEncoder, yes } from "./types";
 import EventEmitter from "events";
 import {
   ActivatedPath,
   CollapsedPath,
   CollapseHidden,
-  NodeProps,
   NodePropsJson,
-  OpenedPath,
+  OpenedPath, PlainNodeProps,
   SelectedPath
 } from "./NodeProps";
 
@@ -68,8 +65,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       children: [],
       linkName: '',
       links: {},
-      marks: MarkSet.empty(),
-      props: new NodeProps(),
+      props: PlainNodeProps.empty(),
     }))
 
     static NULL = new Node(PlainNodeContent.create({
@@ -81,8 +77,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       children: [],
       linkName: '',
       links: {},
-      marks: MarkSet.empty(),
-      props: new NodeProps(),
+      props: PlainNodeProps.empty(),
     }));
 
     // don't use this constructor directly, use NodeFactory
@@ -133,10 +128,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     get links(): Record<string, Node> {
       return this.content.links
-    }
-
-    get marks(): MarkSet {
-      return this.content.marks
     }
 
     get props(): NodeProps {
@@ -731,16 +722,6 @@ export class Node extends EventEmitter implements IntoNodeId {
     // @mutates
     updateProps(props: NodePropsJson) {
       this.content.updateProps(props);
-    }
-
-    // @mutates
-    addMark(mark: Mark) {
-      this.content.addMark(mark);
-    }
-
-    // @mutates
-    removeMark(mark: Mark) {
-      this.content.removeMark(mark);
     }
 
     compatible(other: Node) {

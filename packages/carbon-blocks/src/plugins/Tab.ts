@@ -35,6 +35,7 @@ export const setActiveTabId = (cmd: Transaction, node: Node, tabId: string) => {
 }
 
 export const getTabTitle = (node: Node) => {
+  console.log(node.props)
   return node.props.get<string>(TitlePath) ?? '';
 }
 

@@ -1,13 +1,17 @@
 import {Optional} from "@emrgen/types";
 import {
+  BlockSelection,
   Draft,
   Node,
-  NodeId, NodeIdSet,
+  NodeId,
+  NodeIdSet,
   NodeMap,
   NodePropsJson,
   NodeType,
-  Point, PointAt,
+  Point,
+  PointAt,
   PointedSelection,
+  SelectedPath,
   State
 } from "@emrgen/carbon-core";
 import {SolidNodeMap} from "./NodeMap";
@@ -19,8 +23,13 @@ export class SolidDraft implements Draft {
   changes: NodeMap = SolidNodeMap.empty();
   deleted: NodeMap = SolidNodeMap.empty();
   contentChanged: NodeIdSet = NodeIdSet.empty();
+  selected: NodeIdSet = NodeIdSet.empty();
 
-  constructor(private state: State) {}
+  constructor(private state: State) {
+    state.blockSelection.blocks.forEach(node => {
+      this.selected.add(node.id);
+    });
+  }
 
   insertText(at: Point, text: string): void {
       throw new Error("Method not implemented.");
@@ -38,9 +47,9 @@ export class SolidDraft implements Draft {
       this.commit();
     } catch (e) {
       this.rollback();
-    } finally {
-      return this.state;
     }
+
+    return this.state;
   }
 
   commit() {
@@ -55,6 +64,9 @@ export class SolidDraft implements Draft {
       console.log('[updated content]', node.key, node)
       node.contentVersion = node.contentVersion + 1
     });
+
+    const selected = this.selected.nodes(this.nodeMap)
+    this.state.blockSelection = BlockSelection.create(selected);
   }
 
   // use the changes to revert the state
@@ -221,6 +233,13 @@ export class SolidDraft implements Draft {
     }
 
     node.updateProps(props);
+    if (props[SelectedPath] === false) {
+      this.selected.remove(nodeId);
+    }
+
+    if (props[SelectedPath] === true) {
+      this.selected.add(nodeId);
+    }
   }
 
   updateSelection(selection: PointedSelection): void {

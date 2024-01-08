@@ -1,16 +1,15 @@
 import {
   Maps,
   Mark,
-  MarkSet,
   Node,
   NodeContent,
   NodeContentData,
   NodeData,
   NodeId,
-  NodeProps,
   NodePropsJson,
   NodeType,
-  StateScope
+  StateScope,
+  NodeProps, MarksPath
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {identity} from "lodash";
@@ -34,7 +33,6 @@ export class ImmutableNodeContent implements NodeContent {
       children: this.children.map(c => c.data),
       links: {},
       props: {},
-      marks: [],
     }
   }
 
@@ -77,8 +75,8 @@ export class ImmutableNodeContent implements NodeContent {
     return this.content.links;
   }
 
-  get marks(): MarkSet {
-    return this.content.marks;
+  get marks(): Record<string, Mark> {
+    return this.props.get(MarksPath) ?? {}
   }
 
   get props(): NodeProps {
@@ -153,8 +151,8 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   updateProps(props: NodePropsJson): void {
-    console.debug('updateProps', props)
-    this.content.props.update(props);
+    console.debug('updateProps', props);
+    this.content.props = this.content.props.merge(props);
   }
 
   addLink(name: string, node: Node) {

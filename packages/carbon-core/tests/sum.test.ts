@@ -1,7 +1,7 @@
 // sum.test.js
 import { expect, test } from 'vitest'
 import { JsonStore } from "../src/core/JsonStore";
-import { NodeProps } from "../src/core/NodeProps";
+import { NodeProps_old } from "../src/core/NodeProps";
 
 test('set and get from json store', () => {
   const store = new JsonStore();
@@ -100,7 +100,7 @@ test("nested json to kv", () => {
     }
   };
 
-  const props = NodeProps.fromKeyValue(JsonStore.jsonToKeyValue(json));
+  const props = NodeProps_old.fromKeyValue(JsonStore.jsonToKeyValue(json));
   expect(props.get("a/b/c")).toBe(1);
   expect(props.get("a/d/e")).toBe(2);
   expect(props.get("b/c")).toBe(3);
@@ -120,7 +120,7 @@ test("nested json to kv", () => {
     }
   });
 
-  const props2 = NodeProps.fromJSON(propsJson);
+  const props2 = NodeProps_old.fromJSON(propsJson);
 
   expect(props2.get("a/b/c")).toBe(1);
   expect(props2.get("a/d/e")).toBe(2);
@@ -128,13 +128,13 @@ test("nested json to kv", () => {
 });
 
 test("merge props", () => {
-  const props1 = NodeProps.fromKeyValue({
+  const props1 = NodeProps_old.fromKeyValue({
     "a/b/c": 1,
     "a/d/e": 2,
     "b/c": 3,
   });
 
-  const props2 = NodeProps.fromKeyValue({
+  const props2 = NodeProps_old.fromKeyValue({
     "a/b/c": 4,
     "a/d/e": 5,
     "b/c": 6,
@@ -150,7 +150,7 @@ test("merge props", () => {
 });
 
 test("update props", () => {
-  const props1 = NodeProps.fromKeyValue({
+  const props1 = NodeProps_old.fromKeyValue({
     "a/b/c": 1,
     "a/d/e": 2,
     "b/c": 3,

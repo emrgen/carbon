@@ -1,5 +1,5 @@
 import { classString } from "./Logger";
-import { Mark, MarkSet } from "./Mark";
+import { Mark } from "./Mark";
 import { Node } from "./Node";
 import { Optional } from '@emrgen/types';
 import { reduce } from "lodash";
@@ -29,7 +29,7 @@ export class TextBlock {
   }
 
   intoContent() {
-    return this.node.content;
+    return this.node.unwrap();
   }
 
   // @mutation
@@ -76,7 +76,7 @@ export class TextBlock {
 
   //
   private find(offset: number): Optional<Node> {
-     for (const node of this.node.content.children) {
+     for (const node of this.node.children) {
       if (node.isInline) {
         if (offset === node.focusSize) return node;
 

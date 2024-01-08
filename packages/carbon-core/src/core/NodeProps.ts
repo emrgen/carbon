@@ -1,17 +1,103 @@
-import { JsonStore } from "./JsonStore";
-import { each, set } from "lodash";
+import {JsonStore} from "./JsonStore";
+import {each, set, get, cloneDeep, merge, isEmpty, remove} from "lodash";
 import {Node} from "@emrgen/carbon-core";
 
 export type NodePropsJson = Record<string, any>;
 
-export class NodeProps extends JsonStore {
+// different states should implement this interface
+export interface NodeProps {
+  isNodeProps: boolean;
+  get<T>(path: string): T;
+  set(path: string, value: any): void;
+  merge(other: NodeProps | NodePropsJson): NodeProps;
+  toJSON(): NodePropsJson;
+  clone(): NodeProps;
+  freeze(): NodeProps;
+}
+
+export class PlainNodeProps implements NodeProps {
+  static empty() {
+    return new PlainNodeProps();
+  }
+
+  static create(json: NodePropsJson) {
+    return new PlainNodeProps(json);
+  }
+
+  get isNodeProps() {
+    return true;
+  }
+
+  private props: NodePropsJson;
+
+  constructor(props: Record<string, any> = {}) {
+    this.props = {};
+    this.traverse(props, this.props);
+  }
+
+   protected traverse(json: any, props: any) {
+    if (!json) return;
+    for (const [key, value] of Object.entries(json)) {
+      if (key.split("/").length > 1) {
+        console.log("key contains /", key)
+        set(props, this.dotPath(key), json[key])
+        continue;
+      }
+      if (typeof value === "object") {
+        props[key] = {};
+        this.traverse(value, props[key]);
+      } else {
+        props[key] = value;
+      }
+    }
+  }
+
+  protected dotPath(path: string) {
+    return path.split("/").join(".");
+  }
+
+  get<T>(path: string): T {
+    return get(this.props, this.dotPath(path));
+  }
+
+  set(path: string, value: any): void {
+    throw new Error("Method not implemented.");
+  }
+
+  merge(other: NodeProps | NodePropsJson): NodeProps {
+    const props = this.toJSON();
+    if (other.isNodeProps) {
+      this.traverse(other.toJSON(), props);
+    } else {
+      this.traverse(other, props)
+    }
+
+    return PlainNodeProps.create(props);
+  }
+
+  toJSON(): NodePropsJson {
+    return this.props;
+  }
+
+  clone(): NodeProps {
+    return PlainNodeProps.create(cloneDeep(this.props));
+  }
+
+  freeze(): NodeProps {
+    Object.freeze(this.props);
+    Object.freeze(this);
+    return this;
+  }
+}
+
+export class NodeProps_old extends JsonStore {
 
   static empty () {
-    return new NodeProps();
+    return new NodeProps_old();
   }
 
   static fromJSON(json: any) {
-    const props = new NodeProps();
+    const props = new NodeProps_old();
     each(JsonStore.jsonToKeyValue(json), (value, key) => {
       props.set(key, value);
     })
@@ -20,7 +106,7 @@ export class NodeProps extends JsonStore {
   }
 
   static fromKeyValue(kv: Record<string, any>) {
-    const store = new NodeProps();
+    const store = new NodeProps_old();
     for (const [key, value] of Object.entries(kv)) {
       store.set(key, value);
     }
@@ -29,7 +115,7 @@ export class NodeProps extends JsonStore {
   }
 
   // @mutates
-  merge(other: NodeProps) {
+  merge(other: NodeProps_old) {
     for (const [key, value] of other.store) {
       this.store.set(key, value);
     }
@@ -46,26 +132,6 @@ export class NodeProps extends JsonStore {
     return this;
   }
 
-  eqContent(other: NodeProps): boolean {
-    if (this.store.size !== other.store.size) return false;
-    for (const [key, value] of this.store) {
-      if (other.store.get(key) !== value) return false;
-    }
-
-    return true;
-  }
-
-  diff(other: NodeProps): NodeProps {
-    const diff = new NodeProps();
-    for (const [key, value] of this.store) {
-      if (other.store.get(key) !== value) {
-        diff.store.set(key, value);
-      }
-    }
-
-    return diff;
-  }
-
   toJSON(): {} {
     const result: Record<string, any> = {};
     for (const [key, value] of this.store) {
@@ -76,7 +142,7 @@ export class NodeProps extends JsonStore {
   }
 
   clone() {
-    const result = new NodeProps();
+    const result = new NodeProps_old();
     for (const [key, value] of this.store) {
       result.store.set(key, value);
     }
@@ -120,6 +186,7 @@ export const EmojiPath = "remote/state/emoji";
 export const ListNumberPath = "remote/state/listNumber";
 export const TitlePath = "remote/state/title";
 export const CollapseHidden = "local/state/collapseHidden";
+export const MarksPath = "remote/state/marks";
 
 export const isPassiveHidden = (node: Node) => {
   return node.chain.some(n => n.props.get<boolean>(HiddenPath) ?? false);

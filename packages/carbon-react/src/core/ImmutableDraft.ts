@@ -653,7 +653,7 @@ export class ImmutableDraft implements CoreDraft {
       // find new block selection
       now.diff(old).forEach(id => {
         this.mutable(id, node => {
-          console.log('selected node', node.name, node.id.toString(), node.props.toKV());
+          console.log('selected node', node.name, node.id.toString());
           node.updateProps({
             [SelectedPath]: true
           });

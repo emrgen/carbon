@@ -1,11 +1,11 @@
 import {
   CarbonPlugin,
-  IntoNodeId, Node,
-  NodeContent, NodeId, NodeName, NodePropsJson,
+  Node,
+  NodeId, NodeName, NodePropsJson,
   PinnedSelection, Point,
   PointedSelection,
   Transaction,
-  Mark, MarkSet, Selection, ActionOrigin
+  Mark,  Selection, ActionOrigin
 } from "@emrgen/carbon-core";
 
 declare module '@emrgen/carbon-core' {
@@ -16,7 +16,7 @@ declare module '@emrgen/carbon-core' {
     remove(at: Point, node: Node): Transaction,
     move(from: Point, to: Point, node: Node): Transaction,
     change(ref: Node | NodeId, to: NodeName): Transaction,
-    format(tr: Transaction, selection: Selection, mark: Mark | MarkSet): Transaction,
+    format(tr: Transaction, selection: Selection, mark: Mark): Transaction,
     update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
     dispatch(): void;
     action: {
@@ -26,7 +26,7 @@ declare module '@emrgen/carbon-core' {
       remove(at: Point, node: Node): Transaction,
       move(from: Point, to: Point, node: Node): Transaction,
       change(node: Node, to: NodeName): Transaction,
-      format(selection: Selection, mark: Mark | MarkSet): Transaction,
+      format(selection: Selection, mark: Mark): Transaction,
       update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
       dispatch(): void;
     }
@@ -104,7 +104,7 @@ export class ActionPlugin extends CarbonPlugin {
     tr.Update(ref, props);
   }
 
-  format(tr: Transaction, selection: Selection = tr.state.selection, mark: Mark | MarkSet) {
+  format(tr: Transaction, selection: Selection = tr.state.selection, mark: Mark) {
     tr.Format(selection, mark);
   }
 

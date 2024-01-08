@@ -1,5 +1,3 @@
-import { MarkSet } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
 import { NodeIdSet } from "./BSet";
 import { ActionOrigin } from "./actions/types";
 import { Node } from "./Node";

@@ -1,10 +1,10 @@
-import {Maps, MarkSet, Node, NodeContentData, NodeFactory, NodeId, Schema} from "@emrgen/carbon-core";
+import {Maps, Node, NodeContentData, NodeFactory, NodeId, PlainNodeProps, Schema} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {isEmpty} from "lodash";
 import { v4 as uuidv4 } from 'uuid';
 import {SolidNodeContent} from "./SolidNodeContent";
 import {SolidNode} from "./SolidNode";
-import {SolidNodeMap} from "./NodeMap";
+import {SolidNodeProps} from "./SolidProps";
 
 let counter = 0;
 
@@ -24,20 +24,20 @@ export class SolidNodeFactory implements NodeFactory {
       throw new Error(`Node Plugin is not registered ${name}`);
     }
 
-    const properties = isEmpty(json.props) ? type.props : type.props.update(json.props);
+    const properties = isEmpty(json.props) ? type.props : type.props.merge(json.props);
+    const props = PlainNodeProps.create(properties.toJSON());
     const nodeId = id ? NodeId.deserialize(id)! : this.textId();
-    const nodes = children.map(n => schema.nodeFromJSON(n));
+    const nodes = children.map((n: any) => schema.nodeFromJSON(n));
     const content = SolidNodeContent.create({
       id: nodeId,
       type,
       children: nodes,
-      props: properties,
+      props,
       textContent: text,
       parentId: null,
       parent: null,
       links: {},
       linkName: '',
-      marks: MarkSet.empty(),
     });
 
     const node = new SolidNode(content);

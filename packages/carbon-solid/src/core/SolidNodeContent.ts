@@ -1,13 +1,12 @@
 import {
   Mark,
-  MarkSet,
   Node,
   NodeContent,
   NodeContentData, NodeData,
   NodeId,
-  NodeProps,
   NodePropsJson,
-  NodeType
+  NodeType,
+  NodeProps,
 } from "@emrgen/carbon-core";
 import {createMutable, Store, unwrap} from "solid-js/store";
 import {Optional} from "@emrgen/types";
@@ -18,7 +17,7 @@ export class SolidNodeContent implements NodeContent {
   protected content: Store<NodeContentData>;
 
   static create(data: NodeContentData): SolidNodeContent {
-    const {id, type, children = [], textContent, parent, parentId, props, links = {}, marks, linkName = '', renderVersion = 0, contentVersion= 0 } = data;
+    const {id, type, children = [], textContent, parent, parentId, props, links = {}, linkName = '', renderVersion = 0, contentVersion= 0 } = data;
     const store = createMutable<NodeContentData>({
       id,
       type,
@@ -27,7 +26,6 @@ export class SolidNodeContent implements NodeContent {
       children,
       linkName,
       links,
-      marks,
       props,
       textContent,
       renderVersion,
@@ -68,7 +66,6 @@ export class SolidNodeContent implements NodeContent {
       name: type.name,
       children: children.map(child => child.data),
       links: {},
-      marks: [],
     }
   }
 
@@ -113,10 +110,6 @@ export class SolidNodeContent implements NodeContent {
     return this.content.props
   }
 
-  get marks(): MarkSet {
-    return this.content.marks;
-  }
-
   get size(): number {
     if (this.type.isText) {
       return this.textContent.length
@@ -146,7 +139,7 @@ export class SolidNodeContent implements NodeContent {
 
   changeType(type: NodeType): void {
     this.content.type = type;
-    this.props.update(type.props)
+    this.content.props = this.props.merge(type.props);
   }
 
   insert(node: Node, index: number): void {
@@ -195,16 +188,7 @@ export class SolidNodeContent implements NodeContent {
   }
 
   updateProps(props: NodePropsJson): void {
-    each(props, (value, key) => {
-      // this.content.props.set(key, createMutable(value));
-    });
-  }
-
-  addMark(marks: Mark): void {
-
-  }
-
-  removeMark(marks: Mark): void {
+    this.content.props = this.content.props.merge(props);
   }
 
   clone(): NodeContent {

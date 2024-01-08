@@ -2,14 +2,9 @@ import {
   Carbon,
   CarbonPlugin,
   Mark,
-  PinnedSelection,
-  PointedSelection,
   Selection,
   Transaction
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
-import { MarkSet } from "../core/Mark";
-
 
 // add formatter commands to the CarbonCommands interface
 declare module '@emrgen/carbon-core' {

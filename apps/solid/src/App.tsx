@@ -1,19 +1,23 @@
 import './App.css'
 import {noop} from 'lodash';
 
-import {SolidNodeFactory, RendererProps, SolidState, CarbonContext, useCarbon} from '@emrgen/carbon-solid';
+import {CarbonContext, RendererProps, SolidNodeFactory, SolidState, useCarbon} from '@emrgen/carbon-solid';
 import {blockPresetPlugins, carbon, node, section, text, title} from '@emrgen/carbon-blocks';
 import {
-  Schema,
-  PluginManager,
-  Node,
+  BlockSelection,
   Carbon,
-  PinnedSelection,
-  LocalHtmlAttrPath,
+  CheckedPath,
   corePresetPlugins,
-  State, CheckedPath, preventAndStop, BlockSelection,
+  LocalHtmlAttrPath,
+  Node,
+  PinnedSelection,
+  PluginManager,
+  preventAndStop,
+  Schema, SelectedPath,
+  State,
 } from '@emrgen/carbon-core';
 import {createContext, createEffect, createSignal, For, onCleanup, onMount, useContext} from "solid-js";
+import {createMutable} from "solid-js/store";
 
 const plugins = [
   ...corePresetPlugins,
@@ -46,9 +50,9 @@ const app = new Carbon(state, schema, pm);
 window.app = app;
 
 
-console.log = noop;
+// console.log = noop;
 console.info = noop;
-console.debug = noop;
+// console.debug = noop;
 console.warn = noop;
 // console.error = noop;
 console.group = noop;
@@ -128,11 +132,40 @@ function App() {
     // }, dnd.options);
   })
 
+  const object = createMutable({
+    name: 'subhasis',
+    age: 30,
+    phone: '1234567890',
+  })
+
+  const person = {
+    props: object,
+    name(prop: string) {
+      switch (prop) {
+        case 'name':
+          return this.props.name
+        case 'x':
+          return this.props.age
+        case 'y':
+          return this.props.phone
+        default:
+          return 'unknown'
+      }
+    }
+  }
+
+  // const [propCounter, setPropCounter] = createSignal(1);
+
+  // const name = () => object.name;
+
   return (
     <DndContext.Provider value={dnd}>
     <CarbonContext value={app}>
       <button onclick={handleClick} onmousedown={keepAdding} onmouseup={stopAdding}>Click</button>
-
+      <button onclick={() => {
+        object.name = 'subhasis' + Math.random();
+      }}>Click</button>
+      {person.name('name')}
       <div class={"bg-indigo-500 text-sky-400"}>
         {RenderElement(app.content)}
       </div>
@@ -148,22 +181,35 @@ const useRegister = (node: Node) => {
   const app = useCarbon();
   const dnd =  useContext(DndContext);
 
-  const register = (el: HTMLElement) => {
+  return (el: HTMLElement) => {
     app.store.register(node, el);
     if (dnd.observer) {
       dnd.observer.observe(el);
     }
-  }
-
-  return register;
+  };
 }
 
 const BlockElement = (props: RendererProps) => {
   const {node} = props;
   const register = useRegister(node);
 
+  createEffect(() => {
+    // console.log(attrs())
+    console.debug('block c/hanged', node.name, node.id.toString(), node.props.get(LocalHtmlAttrPath), node.props.toJSON())
+  })
+
+  const selectedAttr = () => {
+    if (node.props.get(SelectedPath)) {
+      return {
+        'data-selected': true,
+      }
+    } else {
+      return {}
+    }
+  }
+
   return (
-    <div data-name={node.name} data-id={node.key} {...node.props.prefix(LocalHtmlAttrPath)} ref={register}>
+    <div data-name={node.name} data-id={node.key} {...node.props.get(LocalHtmlAttrPath)} ref={register} {...selectedAttr}>
       {node.isVoid && <span>&shy;</span>}
       {!node.isVoid && <For each={node.children}>
           {(child) => {
@@ -184,6 +230,17 @@ const TextElement = (props: RendererProps) => {
       {node.textContent}
     </span>
   );
+}
+
+const nodeAttrs = (node: Node) => {
+  const attrs = node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v == '') {
+      delete attrs[k];
+    }
+  }
+
+  return attrs;
 }
 
 const TodoElement = (props: RendererProps) => {
@@ -207,7 +264,7 @@ const TodoElement = (props: RendererProps) => {
   console.log('xxx',isChecked(), node.props)
 
   return (
-    <div data-name={node.name} data-id={node.key} ref={register}>
+    <div data-name={node.name} data-id={node.key} ref={register} {...nodeAttrs(node)}>
       <input type="checkbox" checked={!!node.props.get(CheckedPath)} onclick={toggle} onmousedown={preventAndStop}/>
       <For each={node.children}>
         {(child) => {
