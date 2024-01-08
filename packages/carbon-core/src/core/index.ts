@@ -32,4 +32,6 @@ export * from './BTree'
 export * from './Factory'
 export * from './NodeChange'
 export * from './BlockSelection'
+export * from './StateScope'
+export * from './Block'
 

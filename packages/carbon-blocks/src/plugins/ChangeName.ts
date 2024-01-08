@@ -22,8 +22,17 @@ import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
 import { NumberedList } from "./NumberedList";
 
+declare module "@emrgen/carbon-core" {
+  export interface Transaction {
+    // change
+  }
+}
+
+// Things needed to change a node type (e.g. from paragraph to heading):
 export class ChangeName extends BeforePlugin {
-  name = 'changeName';
+  name = 'change';
+
+  rules: BeforeInputRuleHandler[] = [];
 
   inputRules = new BeforeInputRuleHandler([
     //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberedList')),

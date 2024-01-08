@@ -1,16 +1,19 @@
 import {
   Maps,
+  Mark,
+  MarkSet,
   Node,
-  NodeId,
   NodeContent,
   NodeContentData,
+  NodeData,
+  NodeId,
+  NodeProps,
   NodePropsJson,
   NodeType,
-  NodeProps, NodeData, Mark, MarkSet
+  StateScope
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {identity} from "lodash";
-import {StateScope} from "./StateScope";
 
 export class ImmutableNodeContent implements NodeContent {
 

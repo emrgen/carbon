@@ -1,10 +1,13 @@
 import {
   ActionOrigin,
+  BlockSelection,
   Draft as CoreDraft,
   EmptyPlaceholderPath,
-  FocusedPlaceholderPath, HasFocusPath,
-  isPassiveHidden, LocalHtmlAttrPath,
-  Node, NodeContentData,
+  FocusedPlaceholderPath,
+  HasFocusPath,
+  isPassiveHidden,
+  Node,
+  NodeContentData,
   NodeId,
   NodeIdSet,
   NodePropsJson,
@@ -12,17 +15,16 @@ import {
   PlaceholderPath,
   Point,
   PointAt,
-  PointedSelection, SelectedPath,
+  PointedSelection,
+  SelectedPath,
   State as CoreState,
-  Pin, browser, BlockSelection,
+  StateScope,
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
 import {identity, isArray} from "lodash";
 import FastPriorityQueue from "fastpriorityqueue";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
-import {StateScope} from "./StateScope";
-import {ImmutableNodeContent} from "./ImmutableNodeContent";
 import {ImmutableNode} from "./ImmutableNode";
 import {
   InsertChange,
@@ -80,15 +82,15 @@ export class ImmutableDraft implements CoreDraft {
     // const draft = new ImmutableDraft(this, origin);
     const {scope} = this.state;
     try {
-      StateScope.set(scope, this.nodeMap)
+      StateScope.put(scope, this.nodeMap)
       fn(this);
       const state = this.commit(3);
-      StateScope.set(scope, state.nodeMap)
+      StateScope.put(scope, state.nodeMap)
 
       this.dispose();
       return state;
     } catch (e) {
-      StateScope.set(scope, this.state.nodeMap);
+      StateScope.put(scope, this.state.nodeMap);
       console.error(e);
       this.dispose();
       return this.state;

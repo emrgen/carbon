@@ -14,7 +14,7 @@ export class SolidNode extends Node {
   }
 
   override get key(): string {
-    return `${this.id.toString()}-${this.counter}`;
+    return `${this.id.toString()}-${this.counter}/${this.contentVersion}`;
   }
 
   override get index(): number {
@@ -22,11 +22,26 @@ export class SolidNode extends Node {
     if (index === -1 && !this.isRoot) {
       throw new Error('node has no parent');
     }
-    console.log('got index', this.id.toString(), index, this.parent)
+    // console.log('got index', this.id.toString(), index, this.parent)
 
     return index;
   }
 
+  get renderVersion(): number {
+    return this.content.renderVersion!;
+  }
+
+  set renderVersion(version: number) {
+    this.content.renderVersion = version;
+  }
+
+  get contentVersion(): number {
+    return this.content.contentVersion!;
+  }
+
+  set contentVersion(version: number) {
+    this.content.contentVersion = version;
+  }
 
   override clone(map: (node: NodeContentData) => NodeContentData = identity): Node {
     console.log('clone', this.id.toString())

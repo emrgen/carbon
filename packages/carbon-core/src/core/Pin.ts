@@ -1,13 +1,10 @@
-import { Optional, Predicate, With } from '@emrgen/types';
+import { Optional, Predicate } from '@emrgen/types';
 import { classString } from './Logger';
 import { Node } from './Node';
-import { NodeStore } from './NodeStore';
 import { Point } from './Point';
 import { constrain } from '../utils/constrain';
 import { Maps } from './types';
-import { NodeContent } from './NodeContent';
 import { NodeMap } from './NodeMap';
-import { StateScope } from "./StateScope";
 
 enum PinReference {
 	front = 'front',

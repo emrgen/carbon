@@ -1,6 +1,5 @@
-import {ActionOrigin, MarkSet, Node, NodeIdSet, PinnedSelection, State, BlockSelection, StateChanges} from "@emrgen/carbon-core";
+import {ActionOrigin, MarkSet, Node, NodeIdSet, PinnedSelection, State, BlockSelection, StateChanges, StateScope} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
-import {StateScope} from "./StateScope";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {ImmutableDraft} from "./ImmutableDraft";
 
@@ -72,7 +71,7 @@ export class ImmutableState implements State {
   }
 
   activate() {
-    StateScope.set(this.scope, this.nodeMap);
+    StateScope.put(this.scope, this.nodeMap);
     return this;
   }
 

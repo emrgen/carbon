@@ -39,9 +39,25 @@ export class Node extends EventEmitter implements IntoNodeId {
     protected content: NodeContent;
 
     // useful for debugging
-    contentVersion: number = 0;
+    _contentVersion: number = 0;
     // useful for debugging
-    renderVersion: number = 0;
+    _renderVersion: number = 0;
+
+    get contentVersion() {
+      return this._contentVersion
+    }
+
+    get renderVersion() {
+      return this._renderVersion
+    }
+
+    set contentVersion(version: number) {
+      this._contentVersion = version
+    }
+
+    set renderVersion(version: number) {
+      this._renderVersion = version
+    }
 
     static IDENTITY = new Node(PlainNodeContent.create({
       id: NodeId.IDENTITY,
@@ -76,7 +92,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     get data(): NodeData {
-      return this.content.data
+      return this.content.data;
     }
 
     unwrap(): NodeContentData {

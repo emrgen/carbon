@@ -47,8 +47,6 @@ declare module '@emrgen/carbon-core' {
 	}
 }
 
-
-
 export class Transaction {
 	private id: string;
 	private type: TransactionType = TransactionType.TwoWay;
@@ -243,6 +241,12 @@ export class Transaction {
 			console.warn('skipped: empty transaction')
 			return this;
 		}
+
+    // check one transaction can have only one select action
+    const selectActions = this.actions.filter(a => a instanceof SelectAction);
+    if (selectActions.length > 1) {
+      throw new Error('transaction can have only one select action');
+    }
 
 		if (this._dispatched) {
 			console.warn('skipped: transaction already dispatched')

@@ -120,7 +120,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 				if (!selection.isCollapsed) {
 					preventAndStopCtx(ctx)
-					cmd.selection.collapseToHead(app.selection)
+					cmd.selection.collapseToHead(app.selection).Dispatch();
 					return
 				}
 

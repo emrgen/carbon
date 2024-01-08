@@ -1,23 +1,21 @@
 import {Node, NodeId, Path, StateScope} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
-import {Location} from "./Location";
+import {Block} from "./Block";
 import {isArray} from "lodash";
 
-export class Block {
-  static isText(node: Node) {
-    return node.type.isText;
-  }
+export class Location {
+  constructor(readonly scope: Symbol, readonly location: Path | NodeId) {}
 
-  // static get(locator: Location | Path | NodeId): Optional<Node> {
-  //
-  //   const {scope, location} = pos;
+  // use global scope to get the node
+  // get node(): Optional<Node> {
+  //   const {scope, location} = this;
   //   const map = StateScope.get(scope);
   //   if (!map) {
   //     return null;
   //   }
   //
   //   if (location instanceof NodeId) {
-  //     return map.get(location);
+  //     return Block.get(this);
   //   }
   //
   //   if (isArray(location)) {
@@ -44,6 +42,3 @@ export class Block {
   //   return node
   // }
 }
-
-// @ts-ignore
-window.Block = Block;

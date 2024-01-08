@@ -2,7 +2,7 @@ import {Optional} from "@emrgen/types";
 import {
   Draft,
   Node,
-  NodeId,
+  NodeId, NodeIdSet,
   NodeMap,
   NodePropsJson,
   NodeType,
@@ -18,6 +18,7 @@ export class SolidDraft implements Draft {
 
   changes: NodeMap = SolidNodeMap.empty();
   deleted: NodeMap = SolidNodeMap.empty();
+  contentChanged: NodeIdSet = NodeIdSet.empty();
 
   constructor(private state: State) {}
 
@@ -46,6 +47,14 @@ export class SolidDraft implements Draft {
     this.deleted.forEach(node => {
       this.nodeMap.delete(node.id);
     })
+    this.contentChanged.forEach(id => {
+      const node = this.nodeMap.get(id);
+      if (!node) {
+        throw new Error(`Node ${id.toString()} not found`);
+      }
+      console.log('[updated content]', node.key, node)
+      node.contentVersion = node.contentVersion + 1
+    });
   }
 
   // use the changes to revert the state
@@ -91,23 +100,7 @@ export class SolidDraft implements Draft {
 
   move(to: Point, node: Node): void {
     console.log(p14('%c[trap]'), "color:green", 'move', to.toString(), node.toString());
-
-    const refNode = this.get(to.nodeId);
-    if (!refNode) {
-      throw new Error(`Node ${to.nodeId.toString()} not found`);
-    }
-
-
-    const { parent } = node;
-    if (!parent) {
-      throw new Error(`Parent of ${node.id.toString()} not found`);
-    }
-
-    node.all(n => {
-      this.nodeMap.delete(n.id);
-    })
-
-    parent.remove(node);
+    this.remove(node)
     this.insert(to, node, "move");
   }
 
@@ -156,6 +149,7 @@ export class SolidDraft implements Draft {
     const index = refNode.index;
     console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())
     parent.insert(node, index);
+    this.contentChanged.add(parent.id);
   }
 
   private insertAfter(node: Node, refNode: Node) {
@@ -168,24 +162,31 @@ export class SolidDraft implements Draft {
     const index = refNode.index;
     console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())
     parent.insert(node, index + 1);
+    this.contentChanged.add(parent.id);
   }
 
-  private prepend(node: Node, refNode: Node) {
-    console.log(p14('%c[trap]'), "color:green", 'prepend', node.toString(), refNode.toString());
-    refNode.insert(node, 0);
+  private prepend(node: Node, parent: Node) {
+    console.log(p14('%c[trap]'), "color:green", 'prepend', node.toString(), parent.toString());
+    parent.insert(node, 0);
+    this.contentChanged.add(parent.id);
   }
 
-  private append(node: Node, refNode: Node) {
-    console.log(p14('%c[trap]'), "color:green", 'append', node.toString(), refNode.toString());
-    refNode.insert(node, refNode.children.length);
+  private append(node: Node, parent: Node) {
+    console.log(p14('%c[trap]'), "color:green", 'append', node.toString(), parent.toString());
+    parent.insert(node, parent.children.length);
+    this.contentChanged.add(parent.id);
   }
 
   remove(node: Node): void {
     console.log(p14('%c[trap]'), "color:green", 'remove', node.toString());
     const parent = this.parent(node);
-    parent?.remove(node);
+    if (!parent) {
+      throw new Error(`Parent of ${node.id.toString()} not found`);
+    }
+
+    parent.remove(node);
+    this.contentChanged.add(parent.id);
     node.all(n => {
-      // this.nodeMap.delete(n.id);
       this.deleted.set(n.id, n);
     })
   }

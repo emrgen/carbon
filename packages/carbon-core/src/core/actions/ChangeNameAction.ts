@@ -5,7 +5,7 @@ import { NodeName } from '../types';
 import { CarbonAction, ActionOrigin } from './types';
 import {Draft} from "@emrgen/carbon-core";
 
-export class ChangeNameAction implements CarbonAction{
+export class ChangeNameAction implements CarbonAction {
 	from: string = '';
 
 	static create(nodeId: NodeId, to: NodeName, origin: ActionOrigin = ActionOrigin.UserInput) {

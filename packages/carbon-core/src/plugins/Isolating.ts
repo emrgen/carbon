@@ -236,45 +236,45 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         }
       },
       left: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
 
         if (!e.selection.isCollapsed) {
-          e.cmd.Select(e.selection.collapseToStart());
+          e.cmd.Select(e.selection.collapseToStart()).Dispatch();
           return;
         }
         this.preventAtStart(e);
       },
       right: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
 
         if (!e.selection.isCollapsed) {
-          e.cmd.Select(e.selection.collapseToEnd());
+          e.cmd.Select(e.selection.collapseToEnd()).Dispatch();
           return;
         }
         this.preventAtEnd(e);
       },
       shiftLeft: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtStart(e);
       },
       shiftRight: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtEnd(e);
       },
       backspace: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtStartCollapsed(e);
       },
       delete: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtEndCollapsed(e);
       },
       shiftBackspace: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtStart(e);
       },
       shiftDelete: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (e.app.state.blockSelection.isEmpty) return;
         this.preventAtEnd(e);
       },
     };

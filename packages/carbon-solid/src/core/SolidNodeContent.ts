@@ -18,7 +18,7 @@ export class SolidNodeContent implements NodeContent {
   protected content: Store<NodeContentData>;
 
   static create(data: NodeContentData): SolidNodeContent {
-    const {id, type, children = [], textContent, parent, parentId, props, links = {}, marks, linkName = '', } = data;
+    const {id, type, children = [], textContent, parent, parentId, props, links = {}, marks, linkName = '', renderVersion = 0, contentVersion= 0 } = data;
     const store = createMutable<NodeContentData>({
       id,
       type,
@@ -30,6 +30,8 @@ export class SolidNodeContent implements NodeContent {
       marks,
       props,
       textContent,
+      renderVersion,
+      contentVersion,
     });
 
     return new SolidNodeContent(id, store);
@@ -39,6 +41,21 @@ export class SolidNodeContent implements NodeContent {
     this.content = store;
   }
 
+  get renderVersion(): number {
+    return this.content.renderVersion!;
+  }
+
+  set renderVersion(version: number) {
+    this.content.renderVersion = version;
+  }
+
+  get contentVersion(): number {
+    return this.content.contentVersion!;
+  }
+
+  set contentVersion(version: number) {
+    this.content.contentVersion = version;
+  }
 
   get data(): NodeData {
     const unwrap = this.unwrap();

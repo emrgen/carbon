@@ -27,8 +27,8 @@ export class Runtime extends BeforePlugin {
     return {
       mouseUp: this.onMouseUp,
       mouseDown: this.onMouseDown,
-      // mouseOver: this.onMouseOver,
-      // mouseOut: this.onMouseOut,
+      mouseOver: this.onMouseOver,
+      mouseOut: this.onMouseOut,
       // mouseMove: this.onMouseMove,
       selectionchange: this.onSelectionChange,
     }
@@ -86,16 +86,15 @@ export class Runtime extends BeforePlugin {
   }
 
   onMouseOver(ctx: EventContext<CarbonMouseEvent>) {
-    const targetNode = this.targetNode(ctx);
+    // const targetNode = this.targetNode(ctx);
     // console.debug('[mouse over]', targetNode?.chain.map(n => n.name).join(' > '));
-    preventAndStopCtx(ctx);
-    this.setNode("mouseOverNode", targetNode);
+    // preventAndStopCtx(ctx);
+    // this.setNode("mouseOverNode", targetNode);
   }
 
-  onMouseOut(ctx: EventContext<MouseEvent>) {
-    if (this.mouseOverNode?.eq(ctx.startNode)) {
-      this.setNode("mouseOverNode", null);
-    }
+  onMouseOut(ctx: EventContext<CarbonMouseEvent>) {
+    // const targetNode = this.targetNode(ctx);
+    // console.debug('[mouse out]', targetNode?.chain.map(n => n.name).join(' > '));
   }
 
   onMouseIn() {
