@@ -129,10 +129,16 @@ export class NestablePlugin extends AfterPlugin {
 
 				if (!parentList || parentList.depth > listNode.depth - 1) return
 
-				// pull up
 				const nextSibling = listNode.nextSibling;
+        const prevSibling = listNode.prevSibling;
 				if (!nextSibling) {
+          // when prevSibling is empty avoid unwrapping because this leads to repeated unwrapping and move actions
+          if (prevSibling && prevSibling.isEmpty) {
+            return
+          }
+
 					preventAndStopCtx(ctx);
+          // pull up the last node
 					cmd.nestable.unwrap(listNode)?.Dispatch();
 					return
 				}
