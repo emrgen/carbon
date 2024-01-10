@@ -3,7 +3,7 @@ import { NodeId } from '../NodeId';
 import { Transaction } from '../Transaction';
 import { NodeName } from '../types';
 import { CarbonAction, ActionOrigin } from './types';
-import {Draft} from "@emrgen/carbon-core";
+import {Draft, Schema} from "@emrgen/carbon-core";
 
 export class ChangeNameAction implements CarbonAction {
 	from: string = '';
@@ -20,15 +20,16 @@ export class ChangeNameAction implements CarbonAction {
 		this.from = from;
 	}
 
-	execute(tr: Transaction, draft: Draft) {
+  execute(draft: Draft) {
 		const { nodeId, to } = this;
+    const {schema} = draft;
 		const target = draft.get(nodeId);
 		if (!target) {
 			throw new Error('failed to find node for: ' + nodeId)
 		}
 		this.from = target.name;
 
-		const type = tr.app.schema.type(to);
+		const type = schema.type(to);
 		if (!type) {
 			throw new Error('failed to find type for: ' + to)
 		}

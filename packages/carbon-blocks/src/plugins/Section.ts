@@ -1,17 +1,17 @@
 import {
-	Carbon, CarbonAction,
-	CarbonPlugin,
-	State,
-	Node,
-	NodePlugin,
-	NodeSpec,
-	SerializedNode,
-	Transaction
+  Carbon, CarbonAction,
+  CarbonPlugin,
+  State,
+  Node,
+  NodePlugin,
+  NodeSpec,
+  SerializedNode,
+  Transaction, SetContentAction, RemoveNodeAction, nodeLocation
 } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 import { TitlePlugin } from './Title';
-import { node } from "@emrgen/carbon-blocks";
+import {node, text, title} from "@emrgen/carbon-blocks";
 
 declare module '@emrgen/carbon-core' {
 	export interface Transaction {
@@ -97,11 +97,19 @@ export class Section extends NodePlugin {
 		return ret + app.cmd.nestable.serializeChildren(node)
 	}
 
-	// normalize(node: Node, state: CarbonState): CarbonAction[] {
-	// 	console.log('normalize section', node.children.length);
-	// 	console.warn('normalize section', node.children.length);
-	// 	return []
-	// }
+	normalize(node: Node): CarbonAction[] {
+		console.log('normalize section', node.children.length);
+		console.warn('normalize section', node.children.length);
+    if (node.isEmpty) {
+      // const actions = SetContentAction.create(node.firstChild!, [
+      //   this.app.schema.nodeFromJSON(text('hello world')!)!
+      // ]);
+
+      // return [RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON())];
+    }
+
+		return [];
+	}
 }
 
 

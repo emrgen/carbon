@@ -1,8 +1,10 @@
 import { Transaction } from "../Transaction";
 import { ActionOrigin, CarbonAction } from "./types";
 import { PointedSelection } from "../PointedSelection";
-import { classString } from "../Logger";
+import {classString, p12, p14} from "../Logger";
 import {Draft} from "../Draft";
+import {SelectionEvent} from "../SelectionEvent";
+import {Schema} from "@emrgen/carbon-core";
 
 export class SelectAction implements CarbonAction {
 	static create(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
@@ -12,11 +14,43 @@ export class SelectAction implements CarbonAction {
 	constructor(readonly before: PointedSelection, readonly after: PointedSelection, readonly origin: ActionOrigin) {}
 
 	// this will update the carbon selection state or schedule a selection change after the ui update
-	execute(tr: Transaction, draft: Draft) {
+  execute(draft: Draft) {
 		const { before, after, origin } = this;
 		// draft.updateSelection(after);
-		tr.onSelect(draft, before, after, origin);
+    // syncs selection with dom depending on `origin`
+    // used by commands to inform editor of a selection change
+    // the selection might be queued for later update if the editor is not ready
+    if ([ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
+      this.onSelectionChange(draft, before, after, origin)
+    } else {
+      const event = SelectionEvent.create(before, after, origin);
+      // console.log('pushing selection event to draft for next state', event);
+      draft.updateSelection(after);
+    }
 	}
+
+  // syncs selection with react dom state
+  private onSelectionChange(draft: Draft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+    if (before.eq(after) && origin !== ActionOrigin.UserInput && origin !== ActionOrigin.Normalizer && origin !== ActionOrigin.UserSelectionChange) {
+      console.info(p14('%c[info]'), 'color:pink', 'before and after selection same', before.toJSON(), after.toJSON());
+      return
+    }
+
+    // this is just a sanity check
+    const selection = after.pin();
+    if (!selection) {
+      console.error(p12('%c[error]'), 'color:red', 'updateSelection', 'failed to get next selection');
+      return
+    }
+
+    draft.updateSelection(after);
+    console.log('synced selection from origin', origin, after.toString())
+    // this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange && origin !== ActionOrigin.NoSync);
+    // console.log('###', this.react.selection.toString(), selection.toString());
+    // this.updateFocusPlaceholder(this.state.prevSelection, selection);
+    // this.react.change.update();
+    // this.react.emit(EventsOut.selectionUpdated, this.state);
+  }
 
 	// FIXME: this is a hack to make undo/redo work with selection
 	// commented out some code for future reference. may need to uncomment it for some reason

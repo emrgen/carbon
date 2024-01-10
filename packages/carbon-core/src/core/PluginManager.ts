@@ -35,6 +35,7 @@ export class PluginManager {
 		};
 	}
 
+
 	constructor(plugins: CarbonPlugin[]) {
 		const flattened = this.flatten(plugins);
 		// console.log(flattened)
@@ -61,17 +62,6 @@ export class PluginManager {
 	// collect plugin commands
 	commands(): CarbonCommand {
 		return CarbonCommand.from(this.plugins);
-	}
-
-	mounted(app: Carbon, node: Node) {
-		each(this.before, p => p.mounted(app, node));
-		each(this.after, p => p.mounted(app, node));
-	}
-
-	updated(app: Carbon, node: Node) {
-		each(this.before, p => p.updated(app, node));
-		this.nodes[node.name]?.updated(app, node);
-		each(this.after, p => p.updated(app, node));
 	}
 
 	destroyed(app: Carbon) { }

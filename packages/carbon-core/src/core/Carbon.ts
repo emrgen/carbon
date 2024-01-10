@@ -92,7 +92,7 @@ export class Carbon extends EventEmitter {
 		this.pm.plugins.forEach(p => {
 			this.pluginBus.register(p);
 			const state = this.pluginStates.register(p);
-			p.init(this.pluginBus, state);
+			p.init(this, this.pluginBus, state);
 		})
 	}
 

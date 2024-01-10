@@ -49,6 +49,7 @@ export const sortNodesByIndex = (nodes: Node[]): Node[] => {
 
 }
 
+// sort nodes by depth in the tree, less deep nodes will be first
 export const sortNodesByDepth = (nodes: Node[]): Node[] => {
   const paths = nodes.map(n => ({
     node: n,

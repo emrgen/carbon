@@ -6,7 +6,7 @@ import { Pin } from "./Pin";
 import { classString } from "./Logger";
 import { ActionOrigin } from "./actions";
 import { NodeMap } from "./NodeMap";
-import { Node, NodeIdSet } from "@emrgen/carbon-core";
+import {Node, NodeIdSet, StateScope} from "@emrgen/carbon-core";
 import { flatten } from "lodash";
 
 export class PointedSelection {
@@ -45,10 +45,12 @@ export class PointedSelection {
 		return this.tail.eq(this.head);
 	}
 
-	pin(store: NodeMap): Optional<PinnedSelection> {
+	pin(): Optional<PinnedSelection> {
 		if (this.isNull) {
 			return PinnedSelection.NULL;
 		}
+
+    const store = StateScope.get();
 
 		const { tail, head, origin } = this;
 		// console.log('Selection.pin', head.toString());

@@ -43,9 +43,13 @@ export class TransactionManager {
 			}
 
 			// produce a new state from the current state
-			const state = app.state.produce(app.runtime.origin, (draft) => {
+			const state = app.state.produce((draft) => {
 				tr.Commit(draft);
-			});
+			}, {
+        origin: app.runtime.origin,
+        pm: this.pm,
+        schema: app.schema,
+      });
 
       // if the state is updated by the transaction
       // then update the state and emit the change event

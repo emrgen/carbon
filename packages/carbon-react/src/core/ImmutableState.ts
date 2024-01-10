@@ -1,4 +1,14 @@
-import {ActionOrigin, Node, NodeIdSet, PinnedSelection, State, BlockSelection, StateChanges, StateScope} from "@emrgen/carbon-core";
+import {
+  ActionOrigin,
+  Node,
+  NodeIdSet,
+  PinnedSelection,
+  State,
+  BlockSelection,
+  StateChanges,
+  StateScope,
+  ProduceOpts
+} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {ImmutableDraft} from "./ImmutableDraft";
@@ -103,8 +113,9 @@ export class ImmutableState implements State {
   }
 
   // try to create a new state or fail and return the previous state
-  produce(origin: ActionOrigin, fn: (state: ImmutableDraft) => void): State {
-    const draft = new ImmutableDraft(this, origin);
+  produce(fn: (state: ImmutableDraft) => void, opts: ProduceOpts): State {
+    const { origin, pm, schema } = opts;
+    const draft = new ImmutableDraft(this, origin, pm, schema);
     return draft.produce(fn);
   }
 

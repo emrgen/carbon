@@ -1,4 +1,4 @@
-import {ActionOrigin, CarbonAction, Draft, Point, Transaction} from "@emrgen/carbon-core";
+import {ActionOrigin, CarbonAction, Draft, Point, Schema, Transaction} from "@emrgen/carbon-core";
 
 // NOTE: it can be transformed into SetContent action
 export class InsertTextAction implements CarbonAction {
@@ -8,7 +8,7 @@ export class InsertTextAction implements CarbonAction {
 
   constructor(readonly point: Point, readonly text: string, readonly origin: ActionOrigin = ActionOrigin.UserInput) {}
 
-  execute(tr: Transaction, draft: Draft): void {
+  execute(draft: Draft, schema: Schema) {
     const { point, text, origin } = this;
     draft.insertText(point, text);
   }

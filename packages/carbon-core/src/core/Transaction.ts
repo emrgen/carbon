@@ -112,10 +112,6 @@ export class Transaction {
 		// });
 	}
 
-	onSelect(draft:Draft, before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
-		this.sm.onSelect(draft, before, after, origin);
-	}
-
   // removes old selection if any and selects new selection
   // internally it creates update props action for new selection and old deselection
   SelectBlocks(nodeIds: NodeId[], origin = this.origin): Transaction {
@@ -282,7 +278,7 @@ export class Transaction {
 
 			for (const action of this.actions) {
 				console.log(p14('%c[command]'), "color:white", action.toString());
-				action.execute(this, draft);
+				action.execute(draft);
 			}
 			// normalize after transaction command
 			// this way the merge will happen before the final selection
@@ -340,6 +336,8 @@ export class Transaction {
     return this.actions.pop();
   }
 
+  // TODO: generate a chain transaction object with all the actions precomputed
+  // this way we can check for method conflicts and raise error before the application starts
 	Proxy(): Transaction {
 		const self = this;
 		const proxy = new Proxy(self, {

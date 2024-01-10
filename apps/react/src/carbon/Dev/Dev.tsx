@@ -206,7 +206,7 @@ const renderManager = RenderManager.from(
 )
 
 // console.log = noop;
-console.info = noop;
+// console.info = noop;
 // console.debug = noop;
 // console.warn = noop;
 // console.error = noop;

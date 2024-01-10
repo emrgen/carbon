@@ -8,6 +8,7 @@ import { Node } from '../Node';
 import { deepCloneMap, NodeJSON } from "../types";
 import { NodeId } from "../NodeId";
 import {Draft} from "../Draft";
+import {Schema} from "@emrgen/carbon-core";
 
 export class InsertNodeAction implements CarbonAction {
 	static fromNode(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
@@ -17,13 +18,12 @@ export class InsertNodeAction implements CarbonAction {
 		return new InsertNodeAction(at, id, node, origin);
 	}
 	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {}
-	execute(tr: Transaction, draft: Draft) {
+	execute(draft: Draft) {
 		const { at, node: json } = this;
-		const {app} = tr;
-
     // create a mutable node from json
     console.log('inserting node', json)
-		const node = app.schema.nodeFromJSON(json)!;
+    const { schema } = draft;
+		const node = schema.nodeFromJSON(json)!;
 
 		const refNode = draft.get(at.nodeId);
 		if (!refNode) {

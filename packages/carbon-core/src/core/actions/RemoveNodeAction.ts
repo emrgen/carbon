@@ -8,6 +8,7 @@ import { InsertNodeAction } from "./InsertNodeAction";
 import { NodeJSON } from "../types";
 import { Optional } from "@emrgen/types";
 import {Draft} from "../Draft";
+import {Schema} from "@emrgen/carbon-core";
 
 // action to remove a node by id
 export class RemoveNodeAction implements CarbonAction {
@@ -25,7 +26,7 @@ export class RemoveNodeAction implements CarbonAction {
 		this.node = json;
 	}
 
-	execute(tr: Transaction, draft: Draft) {
+  execute(draft: Draft) {
 		const { nodeId } = this;
 		const node = draft.get(nodeId);
 		if (!node) {

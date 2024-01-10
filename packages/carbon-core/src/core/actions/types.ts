@@ -1,9 +1,10 @@
 import { Transaction } from "../Transaction"
 import {Draft} from "../Draft";
+import {Schema} from "@emrgen/carbon-core";
 
 export interface CarbonAction {
 	origin: ActionOrigin;
-	execute(tr: Transaction, draft: Draft): void;
+	execute(draft: Draft): void;
 	inverse(origin?: ActionOrigin): CarbonAction
 }
 

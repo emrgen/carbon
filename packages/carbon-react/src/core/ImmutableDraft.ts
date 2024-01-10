@@ -1,6 +1,6 @@
 import {
   ActionOrigin,
-  BlockSelection,
+  BlockSelection, Draft,
   Draft as CoreDraft,
   EmptyPlaceholderPath,
   FocusedPlaceholderPath,
@@ -12,11 +12,11 @@ import {
   NodeIdSet,
   NodePropsJson,
   NodeType,
-  PlaceholderPath,
+  PlaceholderPath, PluginManager,
   Point,
   PointAt,
-  PointedSelection,
-  SelectedPath,
+  PointedSelection, Schema,
+  SelectedPath, sortNodes, sortNodesByDepth,
   State as CoreState,
   StateScope,
 } from "@emrgen/carbon-core";
@@ -36,7 +36,8 @@ import {
   StateChanges,
   TextChange
 } from "@emrgen/carbon-core/src/core/NodeChange";
-import {p14} from "@emrgen/carbon-core/src/core/Logger";
+import {p12, p14} from "@emrgen/carbon-core/src/core/Logger";
+import {SelectionEvent} from "@emrgen/carbon-core/src/core/SelectionEvent";
 
 enum UpdateDependent {
   None = 0,
@@ -49,6 +50,9 @@ enum UpdateDependent {
 //draft of a state is used to prepare a new state before commit
 export class ImmutableDraft implements CoreDraft {
   origin: ActionOrigin;
+  pm: PluginManager;
+  schema: Schema;
+
   state: ImmutableState;
   nodeMap: ImmutableNodeMap;
   selection: PointedSelection;
@@ -61,9 +65,11 @@ export class ImmutableDraft implements CoreDraft {
 
   private drafting = true;
 
-  constructor(state: ImmutableState, origin: ActionOrigin) {
+  constructor(state: ImmutableState, origin: ActionOrigin, pm: PluginManager, schema: Schema) {
     this.origin = origin;
     this.state = state;
+    this.pm = pm;
+    this.schema = schema;
     this.nodeMap = ImmutableNodeMap.from(state.nodeMap);
     this.updated = new NodeIdSet();
     this.selection = state.selection.unpin(origin);
@@ -84,6 +90,7 @@ export class ImmutableDraft implements CoreDraft {
     try {
       StateScope.put(scope, this.nodeMap)
       fn(this);
+      this.normalize();
       const state = this.commit(3);
       StateScope.put(scope, state.nodeMap)
 
@@ -114,7 +121,7 @@ export class ImmutableDraft implements CoreDraft {
     }
 
     // create a new selection based on the new node map using the draft selection
-    const after = selection.pin(nodeMap);
+    const after = selection.pin();
     if (!after) {
       throw new Error("Cannot commit draft with invalid pinned selection");
     }
@@ -255,6 +262,20 @@ export class ImmutableDraft implements CoreDraft {
     // console.log('[STATS]', updateStats.join(', '))
 
     return this;
+  }
+
+  normalize() {
+    const changedNodes = this.updated.union(this.inserted);
+    const nodes = sortNodesByDepth(changedNodes.nodes(this.nodeMap)).reverse();
+    const actions = nodes.map(node => {
+      return this.pm.normalize(node);
+    });
+
+    const changes = actions.flat().filter(identity);
+    changes.forEach(change => {
+      change.execute(this)
+    })
+    console.log('normalizing', changes)
   }
 
   updateContent(nodeId: NodeId, content: Node[] | string) {
@@ -630,10 +651,11 @@ export class ImmutableDraft implements CoreDraft {
     }
   }
 
+
   private updateBlockSelection(selection: PointedSelection) {
     // if (browser)
     const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
-    const after = selection.pin(this.nodeMap)!;
+    const after = selection.pin()!;
     if (after) {
       const nids = after.blocks.map(n => n.id);
       const now = NodeIdSet.fromIds(nids);

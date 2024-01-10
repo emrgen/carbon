@@ -6,6 +6,13 @@ import { NodeMap } from "./NodeMap";
 import {Draft} from "./Draft";
 import {StateChanges} from "./NodeChange";
 import {BlockSelection} from "./BlockSelection";
+import {PluginManager, Schema} from "@emrgen/carbon-core";
+
+export interface ProduceOpts {
+  origin: ActionOrigin,
+  pm: PluginManager,
+  schema: Schema,
+}
 
 export interface State {
   scope: Symbol;
@@ -20,7 +27,7 @@ export interface State {
   isSelectionChanged: boolean;
 
   // try to create a new state or fail and return the previous state
-  produce(origin: ActionOrigin, fn: (state: Draft) => void): State;
+  produce(fn: (state: Draft) => void, opts: ProduceOpts): State;
   // app informs the state about the usage of the state
   activate(): State;
   deactivate(): void;

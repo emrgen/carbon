@@ -15,7 +15,7 @@ export class UpdatePropsAction implements CarbonAction {
 
   constructor(readonly nodeId: NodeId, readonly props: Partial<NodePropsJson>, readonly origin: ActionOrigin) {}
 
-  execute(tr: Transaction, draft: Draft) {
+  execute( draft: Draft) {
     const { nodeId } = this;
     const node = draft.get(nodeId)
     if (!node) {

@@ -16,8 +16,7 @@ export class SetContentAction implements CarbonAction {
 
   constructor(readonly nodeId: NodeId, readonly after: Content, before: Optional<Content>, readonly origin: ActionOrigin) {}
 
-  execute(tr: Transaction, draft: Draft) {
-    const {app,} = tr
+  execute(draft: Draft) {
     const {nodeId, after} = this
     const node = draft.get(nodeId);
     if (!node) {

@@ -1,5 +1,15 @@
 // producer
-import {Node, NodeContent, NodeId, NodePropsJson, NodeType, Point, PointedSelection, State} from "@emrgen/carbon-core";
+import {
+  Node,
+  NodeContent,
+  NodeId,
+  NodePropsJson,
+  NodeType,
+  Point,
+  PointedSelection,
+  Schema,
+  State
+} from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 
 // producer factory is a function that creates a producer
@@ -12,6 +22,7 @@ export interface Draft {
   // once the producer is created it is bound to a state
   // the bounded state is passed to this method to produce a new state.
   // rollback on error is handled by the draft
+  schema: Schema;
   produce(fn: (draft: Draft) => void): State;
 
   insert(at: Point, node: Node): void;

@@ -36,8 +36,10 @@ export abstract class CarbonPlugin {
 
 	protected bus!: PluginEmitter;
 	protected state!: PluginState;
+  protected app!: Carbon;
 
-	init(bus: PluginEmitter, state: PluginState) {
+	init(app: Carbon, bus: PluginEmitter, state: PluginState) {
+    this.app = app;
 		this.bus = bus;
 		this.state = state;
 	}
@@ -82,10 +84,6 @@ export abstract class CarbonPlugin {
 	normalize(node: Node): CarbonAction[] { return [] }
 
 	// node lifecycle hooks
-	mounted(editor: Carbon, node: Node) { }
-	updated(editor: Carbon, node: Node) { }
-	unmounted(editor: Carbon, node: Node) { }
-
 
 	// serialize the node into a copy string
 	// serialize<T>(react: Carbon, node: Node, encoder: NodeEncoder<T>) {
