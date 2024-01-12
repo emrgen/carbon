@@ -14,10 +14,16 @@ export class InsertNodeAction implements CarbonAction {
 	static fromNode(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new InsertNodeAction(at, node.id, node.toJSON(), origin);
 	}
-	static create(at: Point, id: NodeId, node: NodeJSON, origin: ActionOrigin = ActionOrigin.UserInput) {
+
+	static create(at: Point, id: NodeId, node: Node | NodeJSON, origin: ActionOrigin = ActionOrigin.UserInput) {
+    if (node instanceof Node) {
+      return InsertNodeAction.fromNode(at, node, origin);
+    }
 		return new InsertNodeAction(at, id, node, origin);
 	}
+
 	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {}
+
 	execute(draft: Draft) {
 		const { at, node: json } = this;
     // create a mutable node from json

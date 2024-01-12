@@ -5,19 +5,29 @@ import {Optional} from "@emrgen/types";
 import {NodeId} from './NodeId';
 import {Mark, NodePropsJson, NodeType, NodeProps, With} from "@emrgen/carbon-core";
 
+// this is the data that is used to create a node
 export interface NodeData {
+  // id is used to identify the node
   id: string;
+  // name is used to identify the node type
   name: string;
+  // parentId is used to identify the link in the parent node
   parentId?: string;
+  // textContent is used to identify the link in the parent node
   textContent?: string;
+  // children are used to identify the link in the parent node
   children?: NodeData[];
+  // link name is used to identify the link in the parent node
   linkName?: string;
+  // links are used to identify the link in the child node
   links?: Record<string, NodeData>;
+  // props are used to identify the link in the child node
   props?: NodePropsJson;
 }
 
-// all the data a node needs to be created
+// all the data a node needs to function
 // this is the core of the node
+// for functional style programming this is the data that is passed around and manipulated
 export interface NodeContentData {
   id: NodeId;
   type: NodeType;
@@ -28,7 +38,9 @@ export interface NodeContentData {
   linkName: string;
   links: Record<string, Node>;
   props: NodeProps;
+  // track the version of the content that requires a re-render
   renderVersion?: number;
+  // track the version of the content, this is used to structural changes(useful for various caching and optimizations)
   contentVersion?: number;
 }
 
