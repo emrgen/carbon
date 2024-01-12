@@ -81,11 +81,13 @@ export class ImmutableState implements State {
 
   activate() {
     StateScope.put(this.scope, this.nodeMap);
+    StateScope.set(this.scope);
     return this;
   }
 
   deactivate() {
     StateScope.delete(this.scope);
+    StateScope.remove(this.scope);
   }
 
   clone(depth: number = 2) {

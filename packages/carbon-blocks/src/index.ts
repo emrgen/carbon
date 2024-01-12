@@ -20,6 +20,7 @@ import {Frame} from "./plugins/Frame";
 import {Insert} from "./plugins/Inserter";
 import {Modal} from "./plugins/Modal";
 import {TabGroup} from "./plugins/Tab";
+import {HStack} from "./plugins/HStack";
 
 export const blockPresetPlugins: CarbonPlugin[] = [
   new Section(),
@@ -32,8 +33,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new NumberedList(),
   new ChangeName(),
   new Equation(),
-  // new HStack(),
-  // new Stack(),
+  new HStack(),
   // new Image(),
   // new Video(),
   new Todo(),

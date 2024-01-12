@@ -1,12 +1,15 @@
 import { Transaction } from "../Transaction"
 import {Draft} from "../Draft";
-import {Schema} from "@emrgen/carbon-core";
+import {InsertNodeAction, MoveNodeAction, RemoveNodeAction, Schema} from "@emrgen/carbon-core";
 
 export interface CarbonAction {
 	origin: ActionOrigin;
 	execute(draft: Draft): void;
 	inverse(origin?: ActionOrigin): CarbonAction
 }
+
+// restrict the normalizer to only these actions so that we can easily reason about the normalizer
+export type NormalizeAction = InsertNodeAction | RemoveNodeAction | MoveNodeAction;
 
 export enum TransactionType {
 	OneWay = 'OneWay',

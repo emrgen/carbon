@@ -14,15 +14,22 @@ export class StateScope {
 
   static scope: Symbol = GLOBAL_SCOPE;
 
-  get current() {
+  static current() {
     return SCOPES[SCOPES.length - 1];
   }
 
   static set(scope: Symbol) {
-    this.scope = scope;
+    SCOPES.push(scope);
   }
 
-  static get(scope: Symbol = StateScope.scope): NodeMap {
+  static remove(scope: Symbol) {
+    const index = SCOPES.indexOf(scope);
+    if (index >= 0) {
+      SCOPES.splice(index, 1);
+    }
+  }
+
+  static get(scope: Symbol = StateScope.current()): NodeMap {
     let map = STATE_SCOPE.get(scope);
     if (!map) {
      throw new Error(`StateScope ${scope.toString()} not found`);

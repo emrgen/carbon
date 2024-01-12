@@ -1,6 +1,5 @@
 import { Carbon } from "./Carbon";
 import {Node, Path} from "./Node";
-import { first, last } from 'lodash';
 
 export class Slice {
 

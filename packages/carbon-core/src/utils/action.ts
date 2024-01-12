@@ -1,6 +1,7 @@
 import { ActionOrigin, CarbonAction, MoveNodeAction, Node, NodeId, Point, RemoveNodeAction } from "../core";
 import { InsertNodeAction } from "../core/actions/InsertNodeAction";
 import { nodeLocation } from "./location";
+import {flatten} from "lodash";
 
 export const moveNodesActions = (to: Point, nodes: Node[], origin: ActionOrigin = ActionOrigin.UserInput) => {
   const actions: CarbonAction[] = [];
@@ -25,9 +26,9 @@ export const insertNodesActions = (at: Point, nodes: Node[], origin: ActionOrigi
   return actions;
 }
 
-export const removeNodesActions = (nodes: Node[], origin: ActionOrigin = ActionOrigin.UserInput) => {
+export const removeNodesActions = (nodes: Node[] | Node, origin: ActionOrigin = ActionOrigin.UserInput) => {
   const actions: CarbonAction[] = [];
-  nodes.slice().reverse().forEach(n => {
+  flatten([nodes]).slice().reverse().forEach(n => {
     actions.push(RemoveNodeAction.fromNode(nodeLocation(n)!, n, origin));
   });
 

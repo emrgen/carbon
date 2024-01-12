@@ -6,7 +6,7 @@ import { Pin } from "./Pin";
 import { classString } from "./Logger";
 import { ActionOrigin } from "./actions";
 import { NodeMap } from "./NodeMap";
-import {Node, NodeIdSet, StateScope} from "@emrgen/carbon-core";
+import {StateScope} from "@emrgen/carbon-core";
 import { flatten } from "lodash";
 
 export class PointedSelection {

@@ -26,6 +26,11 @@ const data = node("carbon", [
     section([title([])]),
     section([title([text("section 3")])]),
 
+    node("hstack", [
+      node("stack", [section([title([text("section 1")])])]),
+      node("stack", [section([title([text("section 2")])])]),
+    ]),
+
     // title([]),
     node('frame', [
       title([text('frame title')]),

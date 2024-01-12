@@ -12,8 +12,15 @@ export class HStack extends CarbonPlugin {
     }
   }
 
+
+  plugins(): CarbonPlugin[] {
+    return [
+      new Stack(),
+    ]
+  }
+
   normalize(node: Node): CarbonAction[] {
-    console.log('Normalize ', node.name,);
+    console.log('Normalize ', node.name, node.key);
     // TODO: check if stack schema is correct
     if (node.isVoid) {
       return [RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON())];
@@ -22,10 +29,12 @@ export class HStack extends CarbonPlugin {
     if (node.size == 1) {
       console.log('Unpack all children');
       const children = node.child(0)?.children;
-      const at = Point.toAfter(node.prevSibling!.id)
+      const at = Point.toAfter(node.id)
+      console.log('Move children to ', at.toString(), children)
+
       return [
         ...moveNodesActions(at, children!),
-        RemoveNodeAction.fromNode(nodeLocation(node)!, node)
+        RemoveNodeAction.fromNode(nodeLocation(node)!, node),
       ]
     }
 
@@ -43,8 +52,9 @@ export class Stack extends CarbonPlugin {
     }
   }
 
+
   normalize(node: Node): CarbonAction[] {
-    console.log('Normalize ', node.name, );
+    console.log('Normalize ', node.name, node.key);
     // check if stack schema is correct
     if (node.isVoid) {
       return [RemoveNodeAction.fromNode(nodeLocation(node)!, node)];
