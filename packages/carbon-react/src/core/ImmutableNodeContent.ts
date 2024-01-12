@@ -9,7 +9,7 @@ import {
   NodePropsJson,
   NodeType,
   StateScope,
-  NodeProps, MarksPath
+  NodeProps, MarksPath, With
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {identity} from "lodash";
@@ -91,54 +91,64 @@ export class ImmutableNodeContent implements NodeContent {
     return Object.isFrozen(this);
   }
 
+  // do a shallow clone
+  private get mutable() {
+    return this.isFrozen ? this.clone() : this;
+  }
+
   child(index: number): Optional<Node> {
     return this.children[index];
   }
 
   setParentId(parentId: NodeId) {
-    this.content.parentId = parentId;
+    const {mutable} = this
+    mutable.content.parentId = parentId;
+
+    return mutable;
   }
 
   setParent(parent: Node) {
-    this.content.parent = parent;
+    const {mutable} = this
+    mutable.content.parent = parent;
+
+    return mutable;
   }
 
-  insertText(text: string, offset: number): void {
-    if (this.isFrozen) {
-      throw Error('cannot insert text to immutable node:' + this.id.toString())
-    }
-
-    this.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
+  insertText(text: string, offset: number) {
+    const {mutable} = this
+    mutable.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
+    return mutable
   }
 
-  removeText(offset: number, length: number): void {
-    this.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
+  removeText(offset: number, length: number) {
+    const {mutable} = this
+    mutable.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
+    return mutable;
   }
 
   insert(node: Node, offset: number) {
-    const {children} = this;
-    this.content.children = [...children.slice(0, offset), node, ...children.slice(offset)];
+    const {children, mutable} = this;
+    mutable.content.children = [...children.slice(0, offset), node, ...children.slice(offset)];
+    return mutable
   }
 
-  remove(node: Node): boolean {
-    const {content} = this;
+  remove(node: Node) {
+    const {content, mutable} = this;
     const {children} = content;
-    const found = children.find(n => n.eq(node));
-    if (!found) return false;
-
-    content.children = children.filter(n => !n.eq(node));
-    return !!found;
+    mutable.content.children = children.filter(n => !n.eq(node));
+    return mutable
   }
 
   changeType(type: NodeType) {
-    this.content.type = type;
-    this.props.merge(type.props)
+    const { mutable} = this;
+    mutable.content.type = type;
+    mutable.props.merge(type.props)
+
+    return mutable;
   }
 
-  updateContent(content: string | Node[]): void {
-    if (this.isFrozen) {
-      throw Error('cannot update content of immutable node:' + this.id.toString())
-    }
+  updateContent(content: string | Node[]) {
+    const { mutable} = this;
 
     if (typeof content === 'string') {
       console.log('updateContent', content, Object.isFrozen(this.content))
@@ -147,22 +157,31 @@ export class ImmutableNodeContent implements NodeContent {
       return;
     }
 
-    this.content.children = content as Node[];
+    mutable.content.children = content as Node[];
+
+    return mutable;
   }
 
-  updateProps(props: NodePropsJson): void {
+  updateProps(props: NodePropsJson) {
+    const { mutable} = this;
     console.debug('updateProps', props);
-    this.content.props = this.content.props.merge(props);
+    mutable.content.props = this.content.props.merge(props);
+
+    return mutable;
   }
 
   addLink(name: string, node: Node) {
-    this.content.links[name] = node;
+    const { mutable} = this;
+    mutable.content.links[name] = node;
+
+    return mutable;
   }
 
   removeLink(name: string) {
-    const node = this.content.links[name];
-    delete this.content.links[name];
-    return node;
+    const { mutable} = this;
+    delete mutable.content.links[name];
+
+    return mutable;
   }
 
   unwrap(): NodeContentData {
@@ -172,12 +191,12 @@ export class ImmutableNodeContent implements NodeContent {
     }
   }
 
-  freeze() {
+  freeze(fn: With<Node>): NodeContent {
     if (this.isFrozen) return this;
     this.content.parent = null;
 
     // first freeze the children
-    this.children.forEach(n => n.freeze());
+    this.children.forEach(n => n.freeze(fn));
     Object.freeze(this.content);
     Object.freeze(this);
 

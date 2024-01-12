@@ -854,97 +854,81 @@ const NodeDepthComparator = (a: NodeDepthEntry, b: NodeDepthEntry) => {
 };
 
 // traps the changes to the node and records them into the draft
-class DraftNode extends ImmutableNode {
-  static from(scope: Symbol, node: Node, changes: StateChanges, ) {
+class Transformer {
+  private constructor(scope: Symbol, private readonly changes: StateChanges) {}
 
-    // return node;
-    if (node instanceof DraftNode) {
-      return node;
-    }
-
-    return new DraftNode(scope, node, changes);
+  setParent(node: Node, parent: Node): Node {
+    console.log(p14('%c[trap]'), "color:green", 'set parent', node.key);
+    return node.setParent(parent)
   }
 
-  private constructor(scope: Symbol,protected content: Node, private readonly changes: StateChanges) {
-    super(scope, content);
-    // NOTE: without this the React render will fail to update the UI
-    this.contentVersion = content.contentVersion;
-    this.renderVersion = content.renderVersion;
+  setParentId(node: Node, parentId: Optional<NodeId>): Node {
+    console.log(p14('%c[trap]'), "color:green", 'set parent id', node.key);
+    return node.setParentId(parentId)
   }
 
-  setParent(parent: Optional<Node>) {
-    console.log(p14('%c[trap]'), "color:green", 'set parent', this.id.toString(), this.textContent, this.renderVersion);
-    super.setParent(parent);
+  changeType(node: Node, type: NodeType): Node {
+    console.log(p14('%c[trap]'), "color:green", 'change type', node.id.toString(), node.renderVersion);
+    this.changes.add(NameChange.create(node.id, node.type.name, type.name));
+
+    return node.changeType(type);
   }
 
-  setParentId(parentId: Optional<NodeId>) {
-    console.log(p14('%c[trap]'), "color:green", 'set parent id', this.id.toString(), this.textContent, this.renderVersion);
-    super.setParentId(parentId);
-  }
-
-  changeType(type: NodeType) {
-    console.log(p14('%c[trap]'), "color:green", 'change type', this.id.toString(), this.textContent, this.renderVersion);
-    const oldType = this.type.name
-    super.changeType(type);
-    this.changes.add(NameChange.create(this.id, oldType, type.name));
-  }
-
-  insert(node: ImmutableNode, index: number) {
-    console.log(p14('%c[trap]'), "color:green", 'insert', this.id.toString(), this.textContent, this.renderVersion);
-    super.insert(node, index);
+  insert(parent: Node, node: Node,  index: number): Node {
+    console.log(p14('%c[trap]'), "color:green", 'insert', node.key);
+    const updated = parent.insert(node, index);
 
     const {path} = node;
-
-    this.changes.add(InsertChange.create(this.id, node.id, path));
+    this.changes.add(InsertChange.create(node.id, node.id, path));
     this.changes.dataMap.set(node.id, node.data);
+
+    return updated;
   }
 
-  remove(node: ImmutableNode) {
-    console.log(p14('%c[trap]'), "color:green", 'remove from parent', this.id.toString(), node.key, this.textContent, this.renderVersion)
+  remove(node: Node, parent: Node): Node {
     const {path} = node;
-    super.remove(node);
-
-    this.changes.add(RemoveChange.create(this.id, node.id, path));
+    this.changes.add(RemoveChange.create(parent.id, node.id, path));
     this.changes.dataMap.set(node.id, node.data);
+
+    return parent.remove(node);
   }
 
-  insertText(text: string, offset: number) {
-    console.log(p14('%c[trap]'), "color:green", 'add text', this.id.toString(), this.textContent, this.renderVersion)
-    super.insertText(text, offset);
-    this.changes.add(TextChange.create(this.id, offset, text, 'insert'));
+  insertText(node: Node, text: string, offset: number): Node {
+    console.log(p14('%c[trap]'), "color:green", 'add text', node.key)
+    this.changes.add(TextChange.create(node.id, offset, text, 'insert'));
+
+    return node.insertText(text, offset)
   }
 
-  removeText(offset: number, length: number) {
-    console.log(p14('%c[trap]'), "color:green", 'remove text', this.id.toString(), this.textContent, this.renderVersion)
-    super.removeText(offset, length);
+  removeText(node: Node, text: string, offset: number): Node {
+    console.log(p14('%c[trap]'), "color:green", 'add text', node.key);
+    this.changes.add(TextChange.create(node.id, offset, node.textContent.slice(offset, offset + length), 'remove'));
 
-   this.changes.add(TextChange.create(this.id, offset, this.textContent.slice(offset, offset + length), 'remove'));
+    return node.removeText(offset, text.length);
   }
 
-  addLink(name: string, node: ImmutableNode) {
-    console.log(p14('%c[trap]'), "color:green", 'link', this.id.toString(), this.textContent, this.renderVersion)
-    const oldLink = this.links[name]
-    super.addLink(name, node);
-
-    if (oldLink !== node) {
-      this.changes.add(LinkChange.create(this.id, oldLink?.id, node.id));
+  addLink(node: Node, link: Node): Node {
+    console.log(p14('%c[trap]'), "color:green", 'link', node.key)
+    const oldLink = node.links[link.linkName]
+    if (!oldLink.eq(node)) {
+      this.changes.add(LinkChange.create(node.id, oldLink?.id, node.id));
     }
+
+    return node.addLink(link.linkName, link);
   }
 
-  removeLink(name: string): Optional<Node> {
-    console.log(p14('%c[trap]'), "color:green", 'unlink', this.id.toString(), this.textContent, this.renderVersion)
-    return super.removeLink(name);
+  removeLink(node: Node, linkName: string): Node {
+    return node.removeLink(linkName);
   }
 
   // update content is valid only for textContainer and text nodes
-  //
-  updateContent(content: ImmutableNode[] | string) {
-    console.log(p14('%c[trap]'), "color:green", 'content', this.id.toString(), this.textContent, this.renderVersion);
-    const oldText = this.textContent;
-    const oldChildren = this.children;
-    super.updateContent(content);
-    const newText = this.textContent;
-    const newChildren = this.children;
+  updateContent(node: Node, content: Node[]|string): Node {
+    console.log(p14('%c[trap]'), "color:green", 'content', node.key, node.textContent);
+    const oldText = node.textContent;
+    const oldChildren = node.children;
+    const updated = node.updateContent(content)
+    const newText = node.textContent;
+    const newChildren = node.children;
     // console.log('update content', oldText, newText, oldChildren, newChildren)
 
     const isUpdated = oldText !== newText || oldChildren !== newChildren;
@@ -952,26 +936,23 @@ class DraftNode extends ImmutableNode {
       console.warn("unnecessary content update detected. possibly the node is immutable")
     }
 
-    const path = this.path;
+    const path = node.path;
     if (oldText !== newText) {
-      this.changes.add(SetContentChange.create(this.id, path, oldText, newText));
+      this.changes.add(SetContentChange.create(node.id, path, oldText, newText));
     }
 
     if (oldChildren !== newChildren) {
-      this.changes.add(SetContentChange.create(this.id, path, oldChildren.map(n => n.id), newChildren.map(n => n.id)))
+      this.changes.add(SetContentChange.create(node.id, path, oldChildren.map(n => n.id), newChildren.map(n => n.id)))
       oldChildren.forEach(n => this.changes.dataMap.set(n.id, n.data));
       newChildren.forEach(n => this.changes.dataMap.set(n.id, n.data));
     }
+
+    return updated;
   }
 
-  updateProps(props: NodePropsJson) {
-    console.log(p14('%c[trap]'), "color:green", 'update', this.id.toString(), this.textContent, props);
-    super.updateProps(props);
-  }
-
-  clone(map: (node: NodeContentData) => NodeContentData = identity): Node {
-    // console.log(p14('%c[trap]'), "color:green", 'clone', this.id.toString(), this.textContent, this.renderVersion);
-    return super.clone(map);
+  updateProps(node: Node, props: NodePropsJson): Node {
+    console.log(p14('%c[trap]'), "color:green", 'update', node.key)
+    return node.updateProps(props);
   }
 }
 

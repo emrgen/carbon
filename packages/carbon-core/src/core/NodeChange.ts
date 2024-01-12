@@ -5,7 +5,7 @@ import {
   NodeData,
   NodeId, NodeIdComparator,
   Path,
-  NodePropsJson,
+  NodePropsJson, Point,
 } from "@emrgen/carbon-core";
 import BTree from "sorted-btree";
 
@@ -20,6 +20,11 @@ enum ChangeType {
   selection = 'selection',
 }
 
+// path based actions are called changes
+// they are used to update the state
+// they can also be used to update the UI
+// once applied to the state they can be used to rollback
+// they will be used to implement realtime collaboration
 export interface Change {
   type: ChangeType;
 }

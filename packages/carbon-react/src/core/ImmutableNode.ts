@@ -4,7 +4,7 @@ import {
   NodeContentData,
   NodeId,
   NodePropsJson,
-  NodeType
+  NodeType, With
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {findIndex, identity} from "lodash";
@@ -36,15 +36,15 @@ export class ImmutableNode extends Node {
 
     // return super.index;
 
-    console.debug('## called index', this.id.toString())
-    const parent = this.parent as ImmutableNode;
-    if (!parent) {
-      return -1
-    }
-    // console.log('getting index', this.id.toString(), this.isFrozen, parent.isFrozen)
-    const index = parent.indexMapper.map(this.indexMap, this.mappedIndex);
-    console.debug('found index', this.id.toString(), index)
-    return index;
+    // console.debug('## called index', this.id.toString())
+    // const parent = this.parent as ImmutableNode;
+    // if (!parent) {
+    //   return -1
+    // }
+    // // console.log('getting index', this.id.toString(), this.isFrozen, parent.isFrozen)
+    // const index = parent.indexMapper.map(this.indexMap, this.mappedIndex);
+    // console.debug('found index', this.id.toString(), index)
+    // return index;
   }
 
   private getIndex() {
@@ -73,89 +73,103 @@ export class ImmutableNode extends Node {
   }
 
   override setParent(parent: Optional<Node>) {
-    if (this.isFrozen) {
-      throw Error('cannot set parent of immutable node:' + this.id.toString())
+    if (!this.isFrozen) {
+      return super.setParent(parent);
     }
-    super.setParent(parent);
+
+    return this.mutable.setParent(parent);
   }
 
   override setParentId(parentId: Optional<NodeId>) {
-    if (this.isFrozen) {
-      throw Error('cannot set parent of immutable node:' + this.id.toString())
+    if (!this.isFrozen) {
+      return super.setParentId(parentId);
     }
-    super.setParentId(parentId);
+
+    return this.mutable.setParentId(parentId)
   }
 
   override changeType(type: NodeType) {
-    if (this.isFrozen) {
-      throw Error('cannot change type of immutable node:' + this.id.toString())
-    }
-    super.changeType(type);
+    if (!this.isFrozen) return super.changeType(type);
+
+    return this.mutable.changeType(type);
   }
 
-  override insert(node: ImmutableNode, index: number) {
-    if (node.isFrozen) {
-      throw Error('cannot insert immutable node:' + node.id.toString())
-    }
-    super.insert(node, index);
+  override insert(node: Node, index: number) {
+    if (!this.isFrozen) {
+      super.insert(node, index);
 
-    const indexMap = new IndexMap(index, 1);
-    node.indexMap = indexMap;
-    node.mappedIndex = index;
-    this.indexMapper.add(indexMap);
+      // const indexMap = new IndexMap(index, 1);
+      // node.indexMap = indexMap;
+      // node.mappedIndex = index;
+      // this.indexMapper.add(indexMap);
+
+      return this;
+    }
+
+    return this.mutable.insert(node, index)
   }
 
-  override remove(node: ImmutableNode) {
-    if (node.isFrozen) {
-      throw Error('cannot remove immutable node:' + node.id.toString())
+  override remove(node: Node) {
+    if (!this.isFrozen) {
+      const index = node.index;
+      return super.remove(node);
+      // const indexMap = new IndexMap(index, -1);
+      // this.indexMapper.add(indexMap);
     }
-    const index = node.index;
-    super.remove(node);
 
-    const indexMap = new IndexMap(index, -1);
-    this.indexMapper.add(indexMap);
+    return this.mutable.remove(node);
   }
 
   override insertText(text: string, offset: number) {
-    if (this.isFrozen) {
-      throw Error('cannot insert text to immutable node:' + this.id.toString())
+    if (!this.isFrozen) {
+      return  super.insertText(text, offset);
     }
-    super.insertText(text, offset);
+
+    return this.mutable.insertText(text, offset);
   }
 
   override removeText(offset: number, length: number) {
-    if (this.isFrozen) {
-      throw Error('cannot remove text from immutable node:' + this.id.toString())
+    if (!this.isFrozen) {
+      return super.removeText(offset, length);
     }
-    super.removeText(offset, length);
+
+    return this.mutable.removeText(offset, length)
   }
 
   override updateContent(content: ImmutableNode[] | string) {
-    if (this.isFrozen) {
-      throw Error('cannot update content of immutable node:' + this.id.toString())
+    if (!this.isFrozen) {
+      return super.updateContent(content);
     }
-    super.updateContent(content);
+
+    return this.mutable.updateContent(content)
   }
 
   override updateProps(props: NodePropsJson) {
-    if (this.isFrozen) {
-      throw Error('cannot update props of immutable node:' + this.id.toString())
+    if (!this.isFrozen) {
+      return super.updateProps(props);
     }
-    super.updateProps(props);
+
+    return this.mutable.updateProps(props)
   }
 
   override addLink(name: string, node: Node) {
-    if (this.isFrozen) {
-      throw Error('cannot add link to immutable node:' + this.id.toString())
+    if (!this.isFrozen) {
+      return super.addLink(name, node);
     }
-    super.addLink(name, node);
+
+    return this.mutable.addLink(name, node);
   }
 
   override removeLink(name: string) {
-    if (this.isFrozen) {
-      throw Error('cannot remove link from immutable node:' + this.id.toString())
+    if (!this.isFrozen) {
+      return super.removeLink(name)
     }
-    return super.removeLink(name);
+
+    return this.mutable.removeLink(name);
+  }
+
+  get mutable(): Node {
+    return this.isFrozen ? this.clone() : this;
   }
 
   override clone(map: (node: NodeContentData) => NodeContentData = identity): Node {
@@ -207,15 +221,17 @@ export class ImmutableNode extends Node {
   }
 
   // @mutates
-  freeze() {
+  freeze(fn: With<Node>): Node {
     if (this.isFrozen) return this
 
     // unlink from parent when freezing
     // this.setParent(null)
-    this.content.freeze();
+    this.content.freeze(fn);
     this.props.freeze();
 
     Object.freeze(this)
+    fn(this);
+
     return this;
   }
 

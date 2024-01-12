@@ -3,7 +3,7 @@ import {findIndex, flatten, identity} from 'lodash';
 import {Node} from './Node';
 import {Optional} from "@emrgen/types";
 import {NodeId} from './NodeId';
-import {Mark, NodePropsJson, NodeType, NodeProps} from "@emrgen/carbon-core";
+import {Mark, NodePropsJson, NodeType, NodeProps, With} from "@emrgen/carbon-core";
 
 export interface NodeData {
   id: string;
@@ -42,32 +42,32 @@ export interface NodeContent extends NodeContentData, MutableNodeContent {
 }
 
 export interface MutableNodeContent {
-  setParentId(parentId: Optional<NodeId>): void;
+  setParentId(parentId: Optional<NodeId>): NodeContent;
 
-  setParent(parent: Optional<Node>): void;
+  setParent(parent: Optional<Node>): NodeContent;
 
-  changeType(type: NodeType): void;
+  changeType(type: NodeType): NodeContent;
 
-  insert(node: Node, index: number): void;
+  insert(node: Node, index: number): NodeContent;
 
-  remove(node: Node): void;
+  remove(node: Node): NodeContent;
 
   // replace(node: Node): void;
-  insertText(text: string, offset: number): void;
+  insertText(text: string, offset: number): NodeContent;
 
-  removeText(offset: number, length: number): void;
+  removeText(offset: number, length: number): NodeContent;
 
-  addLink(name: string, node: Node): void;
+  addLink(name: string, node: Node): NodeContent;
 
-  removeLink(name: string): Optional<Node>;
+  removeLink(name: string): NodeContent;
 
-  updateContent(content: Node[] | string): void;
+  updateContent(content: Node[] | string): NodeContent;
 
-  updateProps(props: NodePropsJson): void;
+  updateProps(props: NodePropsJson): NodeContent;
 
   clone(): NodeContent;
 
-  freeze(): void;
+  freeze(fn: With<Node>): NodeContent;
 }
 
 export class PlainNodeContent implements NodeContent {
@@ -148,9 +148,11 @@ export class PlainNodeContent implements NodeContent {
     return this.children[index];
   }
 
-  changeType(type: NodeType): void {
+  changeType(type: NodeType) {
     this.content.type = type;
     this.props.merge(type.props);
+
+    return this;
   }
 
   clone(): NodeContent {
@@ -161,49 +163,66 @@ export class PlainNodeContent implements NodeContent {
     throw new Error("Method not implemented.");
   }
 
-  insert(node: Node, index: number): void {
+  insert(node: Node, index: number) {
     this.children.splice(index, 0, node);
+
+    return this;
   }
 
-  remove(node: Node): void {
+  remove(node: Node) {
     this.content.children = this.children.filter(n => n.eq(node));
+
+    return this;
   }
 
-  insertText(text: string, offset: number): void {
+  insertText(text: string, offset: number) {
     this.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
+
+    return this;
   }
 
-  removeText(offset: number, length: number): void {
+  removeText(offset: number, length: number) {
     this.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
+
+    return this;
   }
 
-  setParent(parent: Optional<Node>): void {
+  setParent(parent: Optional<Node>) {
     this.content.parent = parent;
+
+    return this;
   }
 
-  setParentId(parentId: Optional<NodeId>): void {
+  setParentId(parentId: Optional<NodeId>) {
     this.content.parentId = parentId;
+
+    return this;
   }
 
-  updateContent(content: Node[] | string): void {
+  updateContent(content: Node[] | string) {
     if (typeof content === 'string') {
       this.content.textContent = content;
     } else {
       this.content.children = content;
     }
+
+    return this;
   }
 
-  updateProps(props: NodePropsJson): void {
+  updateProps(props: NodePropsJson) {
     this.props.merge(props);
+
+    return this;
   }
 
-  addLink(name: string, node: Node): void {
+  addLink(name: string, node: Node) {
     this.links[name] = node;
+
+    return this;
   }
 
-  removeLink(name: string): Optional<Node> {
-    const node = this.links[name];
+  removeLink(name: string) {
     delete this.links[name];
-    return node;
+    return this
   }
 }

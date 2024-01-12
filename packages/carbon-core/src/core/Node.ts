@@ -443,12 +443,16 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    setParentId(parentId: Optional<NodeId>) {
+    setParentId(parentId: Optional<NodeId>): Node {
       this.content.setParentId(parentId);
+
+      return this;
     }
 
-    setParent(parent: Optional<Node>) {
+    setParent(parent: Optional<Node>): Node {
       this.content.setParent(parent)
+
+      return this;
     }
 
     closest(fn: Predicate<Node>): Optional<Node> {
@@ -666,62 +670,79 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    addLink(name: string, node: Node) {
+    addLink(name: string, node: Node): Node {
       this.content.addLink(name, node)
+
+      return this
     }
 
   // @mutates
-    removeLink(name: string): Optional<Node> {
-      return this.content.removeLink(name)
+    removeLink(name: string): Node  {
+      this.content.removeLink(name)
+
+      return this
     }
 
     // @mutates
-    insert(node: Node, index: number) {
+    insert(node: Node, index: number): Node {
       if (node.id.eq(this.id)) {
         throw new Error('cannot insert node to itself')
       }
 
-      node.setParent(this)
+      const child = node.setParent(this).setParentId(this.id)
       node.setParentId(this.id)
-      this.content.insert(node, index);
+      this.content = this.content.insert(child, index);
+
+      return this
     }
 
-    insertText(text: string, offset: number) {
-      this.content.insertText(text, offset);
+    insertText(text: string, offset: number): Node {
+      this.content = this.content.insertText(text, offset);
+
+      return this
     }
 
-    removeText(offset: number, length: number) {
-      this.content.removeText(offset, length);
+    removeText(offset: number, length: number): Node {
+      this.content = this.content.removeText(offset, length);
+
+      return this
     }
 
     // @mutates
-    remove(node: Node) {
+    remove(node: Node): Node {
       if (node.id.eq(this.id)) {
         throw new Error('cannot remove node from itself')
       }
-      this.content.remove(node);
+      this.content = this.content.remove(node);
       node.setParent(null);
+
+      return this
     }
 
-    updateContent(content: Node[]|string) {
+    updateContent(content: Node[]|string): Node {
       // console.log('updateContent', this.id.toString(), this.textContent, this.children.map(n => n.textContent));
-      this.content.updateContent(content);
       if (isArray(content)) {
-        content.forEach(n => {
-          n.setParent(this);
-          n.setParentId(this.id);
-        })
+        const nodes = content.map(n =>  n.setParent(this).setParentId(this.id));
+        this.content = this.content.updateContent(nodes);
+      } else {
+        this.content = this.content.updateContent(content);
       }
+
+      return this
     }
 
     // @mutates
-    changeType(type: NodeType) {
-      this.content.changeType(type);
+    changeType(type: NodeType): Node {
+      this.content = this.content.changeType(type);
+
+      return this
     }
 
     // @mutates
-    updateProps(props: NodePropsJson) {
+  updateProps(props: NodePropsJson): Node {
       this.content.updateProps(props);
+
+      return this
     }
 
     compatible(other: Node) {
@@ -774,10 +795,6 @@ export class Node extends EventEmitter implements IntoNodeId {
       return encoder.encode(this);
     }
 
-    mutable() {
-      // return this.content.mutable();
-    }
-
     // creates a mutable copy of the node
     clone(map: (node: NodeContentData) => NodeContentData = identity): Node {
       throw new Error('not implemented')
@@ -788,7 +805,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    freeze() {
+    freeze(fn: With<Node>): Node {
       throw new Error('not implemented')
     }
   }
