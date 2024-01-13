@@ -57,6 +57,7 @@ import { NodeId, NodeIdComparator } from "./NodeId";
 export interface NodeMap {
   get(key: NodeId): Optional<Node>;
   parent(key: NodeId): Optional<Node>;
+  put(node: Node): void;
   set(key: NodeId, value: Node): void;
   has(key: NodeId): boolean;
   delete(key: NodeId): void;
@@ -111,6 +112,10 @@ export class BTreeNodeMap implements NodeMap {
 
   set(key: NodeId, value: Node): void {
     this.map.set(key, value);
+  }
+
+  put(node: Node): void {
+    this.map.set(node.id, node);
   }
 
   has(key: NodeId): boolean {

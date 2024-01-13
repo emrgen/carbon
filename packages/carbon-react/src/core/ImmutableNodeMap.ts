@@ -90,6 +90,11 @@ export class ImmutableNodeMap implements NodeMap {
     this._map.set(key, value);
   }
 
+  put(node: Node) {
+    this._deleted.delete(node.id);
+    this._map.set(node.id, node);
+  }
+
   has(key: NodeId) {
     return this._map.has(key);
   }

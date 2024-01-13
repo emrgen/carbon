@@ -9,10 +9,10 @@ import {
   NodePropsJson,
   NodeType,
   StateScope,
-  NodeProps, MarksPath, With
+  NodeProps, MarksPath, With, Path, NodeMap
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
-import {identity} from "lodash";
+import {identity, isString} from "lodash";
 
 export class ImmutableNodeContent implements NodeContent {
 
@@ -91,65 +91,49 @@ export class ImmutableNodeContent implements NodeContent {
     return Object.isFrozen(this);
   }
 
-  // do a shallow clone
-  private get mutable() {
-    return this.isFrozen ? this.clone() : this;
-  }
-
   child(index: number): Optional<Node> {
     return this.children[index];
   }
 
   setParentId(parentId: NodeId) {
-    const {mutable} = this
-    mutable.content.parentId = parentId;
-
-    return mutable;
+    this.content.parentId = parentId;
+    return this
   }
 
   setParent(parent: Node) {
-    const {mutable} = this
-    mutable.content.parent = parent;
-
-    return mutable;
+    this.content.parent = parent;
+    return this
   }
 
   insertText(text: string, offset: number) {
-    const {mutable} = this
-    mutable.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
-    return mutable
+    this.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
   }
 
   removeText(offset: number, length: number) {
-    const {mutable} = this
-    mutable.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
-    return mutable;
+    this.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
   }
 
   insert(node: Node, offset: number) {
-    const {children, mutable} = this;
-    mutable.content.children = [...children.slice(0, offset), node, ...children.slice(offset)];
-    return mutable
+    const {children} = this;
+    this.content.children = [...children.slice(0, offset), node, ...children.slice(offset)];
   }
 
   remove(node: Node) {
-    const {content, mutable} = this;
+    const {content} = this;
     const {children} = content;
-    mutable.content.children = children.filter(n => !n.eq(node));
-    return mutable
+    this.content.children = children.filter(n => !n.eq(node));
+  }
+
+  replace(index: number, node: Node) {
+    this.content.children[index] = node;
   }
 
   changeType(type: NodeType) {
-    const { mutable} = this;
-    mutable.content.type = type;
-    mutable.props.merge(type.props)
-
-    return mutable;
+    this.content.type = type;
+    this.props.merge(type.props)
   }
 
   updateContent(content: string | Node[]) {
-    const { mutable} = this;
-
     if (typeof content === 'string') {
       console.log('updateContent', content, Object.isFrozen(this.content))
       this.content.textContent = content;
@@ -157,31 +141,20 @@ export class ImmutableNodeContent implements NodeContent {
       return;
     }
 
-    mutable.content.children = content as Node[];
-
-    return mutable;
+    this.content.children = content as Node[];
   }
 
   updateProps(props: NodePropsJson) {
-    const { mutable} = this;
     console.debug('updateProps', props);
-    mutable.content.props = this.content.props.merge(props);
-
-    return mutable;
+    this.content.props = this.content.props.merge(props);
   }
 
   addLink(name: string, node: Node) {
-    const { mutable} = this;
-    mutable.content.links[name] = node;
-
-    return mutable;
+    this.content.links[name] = node;
   }
 
   removeLink(name: string) {
-    const { mutable} = this;
-    delete mutable.content.links[name];
-
-    return mutable;
+    delete this.content.links[name];
   }
 
   unwrap(): NodeContentData {
@@ -201,6 +174,39 @@ export class ImmutableNodeContent implements NodeContent {
     Object.freeze(this);
 
     return this;
+  }
+
+
+  // do a shallow clone
+  unfreeze(path: Path, map: NodeMap): NodeContent {
+    const mutable = this.isFrozen ? this.clone() : this;
+    if (path.length === 0) {
+      return mutable;
+    }
+
+    const [index, ...rest] = path;
+
+    if (isString(index)) {
+      const child = mutable.links[index];
+      if (!child) {
+        throw new Error(`child not found at ${index}`)
+      }
+
+      const mutableChild = child.unfreeze(rest, map);
+      mutable.addLink(index, mutableChild);
+
+      return mutable;
+    } else {
+      const child = mutable.children[index];
+      if (!child) {
+        throw new Error(`child not found at ${index}`)
+      }
+
+      const mutableChild = child.unfreeze(rest, map);
+      mutable.replace(index, mutableChild);
+
+      return mutable;
+    }
   }
 
   clone(map: Maps<Node, Optional<Node>> = identity): NodeContent {

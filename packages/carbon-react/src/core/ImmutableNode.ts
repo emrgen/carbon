@@ -1,13 +1,14 @@
 import {
+  MutableNode,
   Node,
   NodeContent,
   NodeContentData,
-  NodeId,
+  NodeId, NodeMap,
   NodePropsJson,
-  NodeType, With
+  NodeType, Path, StateScope, With
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
-import {findIndex, identity} from "lodash";
+import {findIndex, identity, isString} from "lodash";
 import {ImmutableNodeContent} from "./ImmutableNodeContent";
 import {IndexMap, IndexMapper} from "@emrgen/carbon-core/src/core/IndexMap";
 import {CarbonCache} from "@emrgen/carbon-core/src/core/CarbonCache";
@@ -73,103 +74,134 @@ export class ImmutableNode extends Node {
   }
 
   override setParent(parent: Optional<Node>) {
-    if (!this.isFrozen) {
-      return super.setParent(parent);
+    if (this.isFrozen) {
+      throw new Error(`cannot set parent on frozen node: ${this.id.toString()}`)
     }
 
-    return this.mutable.setParent(parent);
+    super.setParent(parent);
+
+    return this;
   }
 
   override setParentId(parentId: Optional<NodeId>) {
-    if (!this.isFrozen) {
-      return super.setParentId(parentId);
+    if (this.isFrozen) {
+      throw new Error(`cannot set parent id on frozen node: ${this.id.toString()}`)
     }
 
-    return this.mutable.setParentId(parentId)
+    return super.setParentId(parentId)
   }
 
   override changeType(type: NodeType) {
-    if (!this.isFrozen) return super.changeType(type);
+    if (this.isFrozen) {
+      throw new Error(`cannot change type on frozen node: ${this.id.toString()}`)
+    }
 
-    return this.mutable.changeType(type);
+    super.changeType(type);
   }
 
   override insert(node: Node, index: number) {
-    if (!this.isFrozen) {
-      super.insert(node, index);
-
+    if (this.isFrozen) {
+      throw new Error(`cannot insert node on frozen node: ${this.id.toString()}`)
       // const indexMap = new IndexMap(index, 1);
       // node.indexMap = indexMap;
       // node.mappedIndex = index;
       // this.indexMapper.add(indexMap);
-
-      return this;
     }
 
-    return this.mutable.insert(node, index)
+    return super.insert(node, index)
   }
 
   override remove(node: Node) {
-    if (!this.isFrozen) {
-      const index = node.index;
-      return super.remove(node);
+    if (this.isFrozen) {
+      throw new Error(`cannot remove node on frozen node: ${this.id.toString()}`)
       // const indexMap = new IndexMap(index, -1);
       // this.indexMapper.add(indexMap);
     }
 
-    return this.mutable.remove(node);
+    return super.remove(node);
   }
 
   override insertText(text: string, offset: number) {
-    if (!this.isFrozen) {
-      return  super.insertText(text, offset);
+    if (this.isFrozen) {
+      throw new Error(`cannot insert text on frozen node: ${this.id.toString()}`)
     }
 
-    return this.mutable.insertText(text, offset);
+    return super.insertText(text, offset);
   }
 
   override removeText(offset: number, length: number) {
-    if (!this.isFrozen) {
-      return super.removeText(offset, length);
+    if (this.isFrozen) {
+      throw new Error(`cannot remove text on frozen node: ${this.id.toString()}`)
     }
 
-    return this.mutable.removeText(offset, length)
+    return super.removeText(offset, length)
   }
 
   override updateContent(content: ImmutableNode[] | string) {
-    if (!this.isFrozen) {
-      return super.updateContent(content);
+    if (this.isFrozen) {
+      throw new Error(`cannot update content on frozen node: ${this.id.toString()}`)
     }
 
-    return this.mutable.updateContent(content)
+    return super.updateContent(content)
   }
 
   override updateProps(props: NodePropsJson) {
-    if (!this.isFrozen) {
-      return super.updateProps(props);
+    if (this.isFrozen) {
+      throw new Error(`cannot update props on frozen node: ${this.id.toString()}`)
     }
 
-    return this.mutable.updateProps(props)
+    return super.updateProps(props)
   }
 
   override addLink(name: string, node: Node) {
-    if (!this.isFrozen) {
-      return super.addLink(name, node);
+    if (this.isFrozen) {
+      throw new Error(`cannot add link on frozen node: ${this.id.toString()}`)
     }
 
-    return this.mutable.addLink(name, node);
+    return super.addLink(name, node);
   }
 
   override removeLink(name: string) {
-    if (!this.isFrozen) {
-      return super.removeLink(name)
+    if (this.isFrozen) {
+      throw new Error(`cannot remove link from frozen node: ${this.id.toString()}`)
     }
 
-    return this.mutable.removeLink(name);
+    return super.removeLink(name)
   }
 
-  get mutable(): Node {
-    return this.isFrozen ? this.clone() : this;
+  unfreeze(path: Path, map: NodeMap): MutableNode {
+    const mutable = this.isFrozen ? this.clone() : this;
+    if (this.isFrozen) {
+      map.put(mutable)
+    }
+
+    if (path.length === 0) {
+      return mutable;
+    }
+
+    const [index, ...rest] = path;
+
+    if (isString(index)) {
+      const child = mutable.links[index];
+      if (!child) {
+        throw new Error(`child not found at ${index}`)
+      }
+
+      const mutableChild = child.unfreeze(rest, map);
+      mutable.addLink(index, mutableChild);
+
+      return mutable;
+    } else {
+      const child = mutable.children[index];
+      if (!child) {
+        throw new Error(`child not found at ${index}`)
+      }
+
+      const mutableChild = child.unfreeze(rest, map);
+      mutable.replace(index, mutableChild);
+
+      return mutable;
+    }
   }
 
   override clone(map: (node: NodeContentData) => NodeContentData = identity): Node {

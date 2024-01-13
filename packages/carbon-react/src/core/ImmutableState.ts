@@ -84,6 +84,8 @@ export class ImmutableState implements State {
   activate() {
     StateScope.put(this.scope, this.nodeMap);
     StateScope.set(this.scope);
+    console.log('activate', this.scope, this.updated.map(n => n.toString()));
+
     return this;
   }
 

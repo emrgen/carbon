@@ -20,6 +20,7 @@ export interface State {
   selection: PinnedSelection;
   blockSelection: BlockSelection;
   nodeMap: NodeMap;
+  // these are the nodes that need to be updated in the UI
   updated: NodeIdSet;
   changes: StateChanges;
   actions: StateActions;
