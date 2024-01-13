@@ -7,16 +7,20 @@ import { NodePropsJson } from "../NodeProps";
 import {Draft} from "@emrgen/carbon-core";
 
 export class UpdatePropsAction implements CarbonAction {
+  before: Partial<NodePropsJson>;
+
 
   static create(nodeRef: IntoNodeId, props: Partial<NodePropsJson>, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new UpdatePropsAction(nodeRef.nodeId(), props, {}, origin);
+    return new UpdatePropsAction(nodeRef.nodeId(), {}, props, origin);
   }
 
   static withBefore(nodeRef: IntoNodeId, props: Partial<NodePropsJson>, before: Partial<NodePropsJson>, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new UpdatePropsAction(nodeRef.nodeId(), props, before, origin);
+    return new UpdatePropsAction(nodeRef.nodeId(), before, props, origin);
   }
 
-  constructor(readonly nodeId: NodeId, readonly after: Partial<NodePropsJson>, private before: Partial<NodePropsJson>, readonly origin: ActionOrigin) {}
+  constructor(readonly nodeId: NodeId, before: Partial<NodePropsJson>, readonly after: Partial<NodePropsJson>, readonly origin: ActionOrigin) {
+    this.before = before;
+  }
 
   execute( draft: Draft) {
     const { nodeId } = this;
@@ -39,7 +43,13 @@ export class UpdatePropsAction implements CarbonAction {
   }
 
   toJSON() {
-    throw new Error("Method not implemented.");
+    return {
+      type: ActionType.props,
+      nodeId: this.nodeId,
+      before: this.before,
+      after: this.after,
+      origin: this.origin,
+    }
   }
 
 }

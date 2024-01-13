@@ -59,4 +59,14 @@ export class InsertNodeAction implements CarbonAction {
 			nodes: nodeId.toString(),
 		})
 	}
+
+  toJSON() {
+    return {
+      type: 'insert',
+      nodeId: this.nodeId.toString(),
+      node: this.node,
+      at: this.at.toJSON(),
+      origin: this.origin,
+    }
+  }
 }

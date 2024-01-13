@@ -772,7 +772,6 @@ export class Node extends EventEmitter implements IntoNodeId {
           id: id.toString(),
           name: type.name,
           text: textContent,
-          marks: []
         }
       }
 
@@ -780,7 +779,6 @@ export class Node extends EventEmitter implements IntoNodeId {
         id: id.toString(),
         name: type.name,
         children: children.map(n => n.toJSON()),
-        marks: [],
         props: props.toJSON(),
       }
     }

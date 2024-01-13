@@ -2,7 +2,7 @@ import { classString } from '../Logger';
 import { NodeId } from '../NodeId';
 import { Transaction } from '../Transaction';
 import { NodeName } from '../types';
-import { CarbonAction, ActionOrigin } from './types';
+import {CarbonAction, ActionOrigin, ActionType} from './types';
 import {Draft, Schema} from "@emrgen/carbon-core";
 
 export class ChangeNameAction implements CarbonAction {
@@ -53,4 +53,14 @@ export class ChangeNameAction implements CarbonAction {
 			to,
 		})
 	}
+
+  toJSON() {
+    return {
+      type: ActionType.rename,
+      nodeId: this.nodeId,
+      from: this.from,
+      to: this.to,
+      origin: this.origin,
+    }
+  }
 }

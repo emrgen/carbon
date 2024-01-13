@@ -1,132 +1,26 @@
 import {Optional} from "@emrgen/types";
 import {PointedSelection} from "./PointedSelection";
 import {
+  CarbonAction,
   Draft,
   NodeData,
   NodeId,
-  NodeIdComparator,
-  Path,
+  NodeIdComparator, NodeIdSet,
   NodePropsJson,
-  Point,
-  CarbonAction,
-  ChangeNameAction,
-  InsertNodeAction,
-  StateScope,
-  nodeLocation,
-  NodeMap,
-  RemoveNodeAction, UpdatePropsAction, SelectAction, ActionOrigin, SetContentAction,
-  Content
+  Path, SelectAction, SetContentAction,
+  UpdatePropsAction,
 } from "@emrgen/carbon-core";
 import BTree from "sorted-btree";
 
 export class StateActions {
-  actions: CarbonAction[] = [];
+  actions: CarbonAction[];
+
+  constructor(actions: CarbonAction[] = []) {
+    this.actions = actions;
+  }
 
   static empty() {
     return new StateActions();
-  }
-
-  static from(changes: StateChanges, scope: Symbol, origin: ActionOrigin): StateActions {
-    const map = StateScope.get(scope);
-    if (!map) {
-      throw new Error('failed to find scope: ' + scope.toString());
-    }
-
-    const actions = new StateActions();
-    changes.patch.forEach(change => {
-      changes.match(change, {
-        rename: (change: NameChange) => {
-          actions.add(ChangeNameAction.withBefore(change.nodeId, change.before, change.after, origin));
-        },
-        insert(change: InsertChange) {
-          const node = map.get(change.nodeId);
-          if (!node) {
-            throw new Error('failed to find node: ' + change.nodeId);
-          }
-
-          const at = nodeLocation(node);
-          if (!at) {
-            throw new Error('failed to find node location for: ' + change.nodeId);
-          }
-
-          actions.add(InsertNodeAction.create(at, change.nodeId, node.toJSON(), origin));
-        },
-        text(change: TextChange) {
-          if (change.action === 'insert') {
-            // actions.add(CarbonAction.insertText(change.nodeId, change.offset, change.text));
-          } else {
-            // actions.add(CarbonAction.removeText(change.nodeId, change.offset, change.text));
-          }
-        },
-        remove(change: RemoveChange) {
-          const from = StateActions.point(change.path, map);
-          if (!from) {
-            throw new Error('failed to find node location for: ' + change.nodeId);
-          }
-
-          const node = map.get(change.nodeId);
-
-          if (!node) {
-            throw new Error('failed to find node: ' + change.nodeId);
-          }
-
-          actions.add(RemoveNodeAction.create(from, change.nodeId, node.toJSON(), origin));
-        },
-        update(change: UpdateChange) {
-          const node = map.get(change.nodeId);
-          if (!node) {
-            throw new Error('failed to find node: ' + change.nodeId);
-          }
-
-          actions.add(UpdatePropsAction.withBefore(change.nodeId, change.before, change.after, origin));
-        },
-        link(change: LinkChange) {
-          // actions.add(CarbonAction.link(change.nodeId, change.after));
-        },
-        content(change: SetContentChange) {
-          const {nodeId, path, before, after} = change;
-          let beforeContent: Optional<Content>;
-          let afterContent: Optional<Content>;
-
-          if (before instanceof Array) {
-            beforeContent = before.map(id => changes.dataMap.get(id)) as Content;
-          } else {
-            beforeContent = before
-          }
-          if (after instanceof Array) {
-            afterContent = after.map(id => changes.dataMap.get(id)) as Content;
-          } else {
-            afterContent = after;
-          }
-
-          actions.add(SetContentAction.withBefore(nodeId, beforeContent, afterContent, origin));
-        },
-        selection(change: SelectionChange) {
-
-          actions.add(SelectAction.create(change.before, change.after, origin));
-        }
-      })
-    })
-
-    console.log(actions)
-    return actions;
-  }
-
-  static point(path: Path, map: NodeMap) {
-    let node = map.get(NodeId.ROOT);
-    if (!node) {
-      throw new Error('failed to find root node');
-    }
-
-    for (let i = 0; i < path.length; i++) {
-      const index = path[i];
-      node = node.child(index);
-      if (!node) {
-        throw new Error('failed to find node at: ' + path.toString());
-      }
-    }
-
-    return nodeLocation(node);
   }
 
   add(action: CarbonAction) {
@@ -136,6 +30,57 @@ export class StateActions {
   rollback(state: Draft) {}
 
   apply(state: Draft) {}
+
+  optimize(): StateActions {
+    // reduce prop updates
+    const propActions: BTree<NodeId, UpdatePropsAction[]> = new BTree(undefined, NodeIdComparator);
+    const removedNodes: NodeIdSet = NodeIdSet.empty();
+
+    this.actions.forEach(action => {
+      if (action instanceof UpdatePropsAction) {
+        const nodeId = action.nodeId;
+        let actions = propActions.get(nodeId);
+        if (!actions) {
+          actions = [];
+          propActions.set(nodeId, actions);
+        }
+        actions.push(action);
+      }
+
+      if (action instanceof RemoveChange) {
+        removedNodes.add(action.nodeId);
+      }
+    });
+
+    const actions = this.actions.filter(action => {
+      if (action instanceof UpdatePropsAction) {
+        return false;
+      }
+
+      return true;
+    });
+
+    removedNodes.forEach(nodeId => {
+      propActions.delete(nodeId);
+    })
+
+    // optimize prop updates
+    propActions.forEach((propAction, nodeId) => {
+      const optimized = propAction.reduce((prev, curr) => {
+        return {
+          before: {...prev.before, ...curr.before},
+          after: {...prev.after, ...curr.after}
+        }
+      }, {
+        before: {},
+        after: {},
+      });
+
+      actions.push(UpdatePropsAction.withBefore(nodeId, optimized.before, optimized.after));
+    });
+
+    return new StateActions(actions);
+  }
 }
 
 enum ChangeType {
@@ -206,11 +151,11 @@ export class RemoveChange implements Change {
 export class UpdateChange implements Change {
   type = ChangeType.update;
 
-  constructor(readonly nodeId: NodeId, readonly before: NodePropsJson, readonly after: NodePropsJson) {
+  constructor(readonly nodeId: NodeId, readonly path: Path, readonly before: NodePropsJson, readonly after: NodePropsJson) {
   }
 
-  static create(nodeId: NodeId, before: NodePropsJson, after: NodePropsJson) {
-    return new UpdateChange(nodeId, before, after);
+  static create(nodeId: NodeId, path: Path, before: NodePropsJson, after: NodePropsJson) {
+    return new UpdateChange(nodeId, path, before, after);
   }
 }
 
@@ -261,6 +206,14 @@ export class StateChanges {
     return new StateChanges();
   }
 
+  last() {
+    return this.patch[this.patch.length - 1];
+  }
+
+  pop() {
+    return this.patch.pop();
+  }
+
   apply(state: Draft) {
   }
 
@@ -292,7 +245,7 @@ export class StateChanges {
           inverse.add(InsertChange.create(change.parentId, change.nodeId, change.path));
         },
         update(change: UpdateChange) {
-          inverse.add(UpdateChange.create(change.nodeId, change.after, change.before));
+          inverse.add(UpdateChange.create(change.nodeId, change.path, change.after, change.before));
         },
         link(change: LinkChange) {
           inverse.add(LinkChange.create(change.nodeId, change.after, change.before));
@@ -336,6 +289,10 @@ export class StateChanges {
 
   add(change: Change) {
     this.patch.push(change);
+  }
+
+  optimize(): StateChanges {
+    return this;
   }
 
   get isContentDirty() {

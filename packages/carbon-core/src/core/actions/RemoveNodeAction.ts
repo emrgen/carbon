@@ -56,4 +56,13 @@ export class RemoveNodeAction implements CarbonAction {
 		return classString(this)({from: from, nodeId});
 	}
 
+  toJSON() {
+    return {
+      type: ActionType.remove,
+      nodeId: this.nodeId.toString(),
+      from: this.from.toJSON(),
+      origin: this.origin,
+    }
+  }
+
 }

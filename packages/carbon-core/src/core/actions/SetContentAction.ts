@@ -2,7 +2,7 @@ import { IntoNodeId, NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { ActionOrigin, CarbonAction } from "./types";
 import { Optional } from '@emrgen/types';
-import {deepCloneMap, Draft, Node, NodeContent, NodeData} from "@emrgen/carbon-core";
+import {classString, deepCloneMap, Draft, Node, NodeContent, NodeData} from "@emrgen/carbon-core";
 import {isArray} from "lodash";
 
 export type Content = string | NodeData[] | Node[]
@@ -61,7 +61,16 @@ export class SetContentAction implements CarbonAction {
 
   toString() {
     const { nodeId, after } = this
-    return this;
-    // return classString(this)([nodeId, after instanceof InlineContent ? after.textContent :after.children.map(n => n.textContent)]);
+    return classString(this)([nodeId, after]);
+  }
+
+  toJSON() {
+    return {
+      type: 'content',
+      nodeId: this.nodeId,
+      before: this.before,
+      after: this.after,
+      origin: this.origin,
+    }
   }
 }

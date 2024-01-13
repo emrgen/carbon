@@ -5,7 +5,8 @@ import {InsertNodeAction, MoveNodeAction, RemoveNodeAction, Schema} from "@emrge
 export interface CarbonAction {
 	origin: ActionOrigin;
 	execute(draft: Draft): void;
-	inverse(origin?: ActionOrigin): CarbonAction
+	inverse(origin?: ActionOrigin): CarbonAction;
+  toJSON(): any;
 }
 
 // restrict the normalizer to only these actions so that we can easily reason about the normalizer
@@ -32,7 +33,7 @@ export enum ActionType {
 	select = 'select',
 	insert = 'insert',
 	remove = 'remove',
-	mark = 'mark',
 	props = 'props',
 	content = 'content',
+  rename = 'rename',
 }

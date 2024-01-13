@@ -92,4 +92,16 @@ export class Point {
 		const {nodeId, at, offset} = this;
 		return classString(this)(`${nodeId.toString()}/${at}/${offset}`)
 	}
+
+  toJSON() {
+    return {
+      id: this.nodeId.toString(),
+      at: this.at,
+      offset: this.offset,
+    }
+  }
+
+  static fromJSON(json: any) {
+    return Point.create(NodeId.create(json.id), json.at, json.offset)
+  }
 }

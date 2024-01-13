@@ -17,3 +17,4 @@ export * from './utils/htmlAttrs';
 export * from './utils/browser';
 
 export * from './core/BSet';
+export * from './core/Logger';

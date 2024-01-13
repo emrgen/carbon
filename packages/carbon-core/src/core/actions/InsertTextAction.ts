@@ -17,4 +17,18 @@ export class InsertTextAction implements CarbonAction {
     throw new Error("Method not implemented.");
   }
 
+  toString() {
+    const { point, text } = this;
+    return `InsertTextAction(${point}, ${text})`;
+  }
+
+  toJSON() {
+    return {
+      type: 'insertText',
+      point: this.point.toJSON(),
+      text: this.text,
+      origin: this.origin,
+    }
+  }
+
 }

@@ -7,7 +7,7 @@ import {SelectionEvent} from "../SelectionEvent";
 import {Schema} from "@emrgen/carbon-core";
 
 export class SelectAction implements CarbonAction {
-	static create(before: PointedSelection, after: PointedSelection, origin: ActionOrigin) {
+	static create(before: PointedSelection, after: PointedSelection, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new SelectAction(before, after, origin)
 	}
 
@@ -48,7 +48,6 @@ export class SelectAction implements CarbonAction {
 	// commented out some code for future reference. may need to uncomment it for some reason
 	collapseToHead(): CarbonAction {
 		const {after} = this;
-		// after.tail = after.head;
 		return SelectAction.create(this.before, after, this.origin);
 	}
 
@@ -66,4 +65,13 @@ export class SelectAction implements CarbonAction {
 		const {after, before} = this
 		return classString(this)([before, after]);
 	}
+
+  toJSON() {
+    return {
+      type: 'select',
+      before: this.before,
+      after: this.after,
+      origin: this.origin,
+    }
+  }
 }
