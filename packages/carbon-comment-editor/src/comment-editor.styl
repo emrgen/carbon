@@ -1,19 +1,32 @@
 [data-name="commentEditor"]
-  position: relative;
-  user-select contain
-  box-shadow 0 0 0 1px #eee
-  border-radius 4px
-  padding 10px 10px
-  margin 10px 0
-  min-height 100px
+    position: relative;
+    box-shadow 0 0 0 1px #eee
+    border-radius 4px
+    padding 10px 10px
+    margin 10px 0
+    min-height 100px
+    display flex
+    flex-direction column
 
-  &:focus-within
-    box-shadow 0 0 0 1px #acbfff
-    outline none
+    &:focus-within
+        box-shadow 0 0 0 1px #acbfff
+        outline none
 
-  [data-type="content"]
-    [data-name]
-      margin-top: 0;
-      > [data-type=content]
-        margin-top: 0;
+    [data-type="content"]
+        [data-name]
+            margin-top: 0;
 
+            > [data-type=content]
+                margin-top: 0;
+
+    .comment-editor-content
+        position: relative;
+        display flex
+        flex-direction column
+        width 100%
+        min-height inherit
+
+    .comment-editor-bottom-filler
+        flex 1
+        min-height 30px
+        cursor text

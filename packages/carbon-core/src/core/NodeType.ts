@@ -253,12 +253,18 @@ export class NodeType {
 
 	createAndFill(): Optional<Node> {
     if (this.defaultNodeCache) {
-      return this.schema.clone(this.defaultNodeCache);
+      console.log('returning cached default node', this.defaultNodeCache)
+      return this.schema.clone(this.defaultNodeCache, n => {
+        return {
+          ...n,
+          id: this.schema.factory.blockId(),
+        }
+      });
     }
 
     if (this.isText) {
       const node = this.schema.text('');
-      this.defaultNodeCache = node;
+      this.defaultNodeCache = node?.toJSON();
       return node;
     }
 

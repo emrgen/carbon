@@ -117,8 +117,6 @@ export class ImmutableDraft implements Draft {
 
   private addRemoved(id: NodeId) {
     this.nodeMap.delete(id);
-    // this.removed.add(id);
-    // this.inserted.remove(id);
   }
 
   get(id: NodeId): Optional<Node> {
@@ -477,6 +475,7 @@ export class ImmutableDraft implements Draft {
 
     this.tm.remove(node, parent);
 
+    this.addRemoved(node.id);
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
     node.all(n => this.addRemoved(n.id));
@@ -747,6 +746,8 @@ class Transformer {
   }
 
   remove(node: Node, parent: Node) {
+    console.log(p14('%c[trap]'), "color:green", 'remove', node.key)
+
     const {path} = node;
     this.changes.add(RemoveChange.create(parent.id, node.id, path));
     this.changes.dataMap.set(node.id, node.data);

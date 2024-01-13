@@ -945,11 +945,10 @@ export class TransformCommands extends BeforePlugin {
     const prevSiblings = takeBefore(parent.children, n => n.eq(startNode));
     const nextSiblings = takeAfter(parent.children, n => n.eq(endNode));
     const match = parent.type.contentMatch.matchFragment(Fragment.from(prevSiblings));
-    console.log(match, parent.name, match?.defaultType)
     const {nodes: createNodes} = match?.fillBefore(Fragment.from(nextSiblings), true) ?? Fragment.EMPTY;
     console.log('prevSiblings', prevSiblings.map(n => n.id.toString()))
     console.log('nextSiblings', nextSiblings.map(n => n.id.toString()))
-    console.log('createNodes to be inserted', createNodes.map(n => n.name));
+    console.log('createNodes to be inserted', createNodes.map(n => [n.name, n.key, n]));
 
     const at = nodeLocation(startNode)!;
     const insertActions = this.insertNodeCommands(at, createNodes)
@@ -1000,8 +999,6 @@ export class TransformCommands extends BeforePlugin {
     //     }
     //   }
     // }
-
-    console.log('XXX', nodes.map(n => n.id.toString()));
 
     tr
       .Add(deleteActions)

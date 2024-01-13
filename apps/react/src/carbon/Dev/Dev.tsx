@@ -3,6 +3,7 @@ import {useEffect} from "react";
 import {blockPresetPlugins, node, text, title, section, block} from "@emrgen/carbon-blocks";
 import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon, ImmutableNodeFactory} from "@emrgen/carbon-react";
 import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
+import {commentEditorPlugin, commentEditorComp} from "@emrgen/carbon-comment-editor";
 import {
   ActivatedPath,
   CollapsedPath,
@@ -26,6 +27,11 @@ const data = node("carbon", [
     section([title([])]),
     section([title([text("section 3")])]),
 
+    node("commentEditor", [
+      section([title([text('add a comment')])])
+    ]),
+
+    section([title([text("section 3")])]),
     node("hstack", [
       node("stack", [section([title([text("section 1")])])]),
       node("stack", [section([title([text("section 2")])])]),
@@ -88,9 +94,7 @@ const data = node("carbon", [
       }),
     ]),
 
-    // node("commentEditor", [
-    //   section([title([text('add a comment')])])
-    // ]),
+
 
     // // node("blockContent"),
     //
@@ -192,7 +196,7 @@ const plugins = [
   ...corePresetPlugins,
   ...blockPresetPlugins,
   // carbonUtilPlugins,
-  // commentEditorExtension,
+  commentEditorPlugin,
   // codeExtension,
   // {
   //   plugins: [
@@ -204,6 +208,7 @@ const plugins = [
 
 const renderers = [
   ...blockPresetRenderers,
+  commentEditorComp,
 ];
 
 const renderManager = RenderManager.from(

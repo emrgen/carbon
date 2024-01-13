@@ -1,14 +1,15 @@
-import {RendererProps} from "@emrgen/carbon-core";
 import {useCallback, useRef} from "react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent,
   CarbonPlaceholder,
+  RendererProps,
   useCarbon,
   useSelectionHalo
 } from "@emrgen/carbon-react";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
+import {prevent, preventAndStop} from "@emrgen/carbon-core";
 
 export const CommentEditorComp = (props: RendererProps) => {
   const {node} = props;
@@ -22,20 +23,18 @@ export const CommentEditorComp = (props: RendererProps) => {
   );
 
   const handleInsertNode = useCallback((e) => {
+    prevent(e);
+    const {lastChild} = node;
+    if (lastChild && lastChild.name === 'section' && lastChild.isEmpty) {
+      app.cmd.selection.collapseAtStartOf(lastChild).dispatch();
+      return
+    }
+
     app.cmd.inserter.append(node, 'section').dispatch();
   }, [app, node])
 
-
   return (
-    <CarbonBlock
-      {...props} ref={ref}
-      custom={{
-        ...connectors,
-        contentEditable: !node.isVoid,
-        suppressContentEditableWarning: true
-      }}
-    >
-      <CarbonPlaceholder node={node} onClick={handleInsertNode}/>
+    <CarbonBlock {...props} ref={ref} custom={{...connectors}}>
       <CarbonNodeContent node={node}/>
       <CarbonNodeChildren node={node}/>
       {selection.SelectionHalo}
