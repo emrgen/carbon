@@ -42,6 +42,10 @@ export class ContentMatch {
 	/// successful.
 	matchFragment(frag: Fragment, start = 0, end = frag.childCount): ContentMatch | null {
 		let cur: ContentMatch | null = this
+    if (frag.isEmpty) {
+      return cur
+    }
+
 		for (let i = start;cur && i < end;i++)
 			cur = cur.matchType(frag.child(i).type)
 		return cur

@@ -7,6 +7,7 @@ declare module '@emrgen/carbon-core' {
 		selection: {
 			collapseToTail(selection: PinnedSelection): Transaction;
 			collapseToHead(selection: PinnedSelection): Transaction;
+      collapseToStart(selection: PinnedSelection): Transaction;
 		}
 	}
 }
@@ -23,6 +24,7 @@ export class SelectionCommands extends BeforePlugin {
 		return {
 			collapseToTail: this.collapseToTail,
 			collapseToHead: this.collapseToHead,
+      collapseToStart: this.collapseToStart,
 		}
 	}
 
@@ -31,10 +33,15 @@ export class SelectionCommands extends BeforePlugin {
 		tr.select(normalized.collapseToTail())
 	}
 
-	collapseToHead(tr, selection) {
+	collapseToHead(tr: Transaction, selection: PinnedSelection) {
 		// const dr = react.cmd.transform.delete()
 		const normalized = selection.normalize();
 		tr.select(normalized.collapseToHead());
 	}
+
+  collapseToStart(tr: Transaction, selection: PinnedSelection) {
+    const normalized = selection.normalize();
+    tr.select(normalized.collapseToStart());
+  }
 
 }

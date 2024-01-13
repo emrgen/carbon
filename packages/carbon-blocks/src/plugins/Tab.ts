@@ -1,10 +1,10 @@
 import {
   ActionOrigin,
-  ActivatedPath,
+  ActivatedPath, CarbonAction,
   CarbonPlugin,
   EventContext,
   EventHandlerMap,
-  HiddenPath,
+  HiddenPath, InsertNodeAction,
   Node, nodeLocation,
   NodeSpec,
   Pin,
@@ -15,6 +15,7 @@ import {
   Transaction,
 } from "@emrgen/carbon-core";
 import {IsolateChildren} from "./IsolateChildren";
+import {node} from "@emrgen/carbon-blocks";
 
 const RenamingTabIdPath = 'local/state/rename/tabId';
 const ActiveTabIdPath = 'remote/state/active/tabId';
@@ -224,7 +225,7 @@ export class Tab extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: '',
-      content: 'title content*',
+      content: 'section content*',
       isolate: true,
       collapsible: true,
       // isolateContent: true,
@@ -274,4 +275,3 @@ export class Tab extends CarbonPlugin {
     }
   }
 }
-

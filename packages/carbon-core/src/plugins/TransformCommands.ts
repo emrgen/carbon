@@ -34,7 +34,7 @@ import {Transaction} from "../core/Transaction";
 import {ChangeNameAction} from "../core/actions/ChangeNameAction";
 import {InsertNodeAction} from "../core/actions/InsertNodeAction";
 import {NodeName} from "../core/types";
-import {takeBefore, takeUntil} from "../utils/array";
+import {takeAfter, takeBefore, takeUntil} from "../utils/array";
 import {blocksBelowCommonNode} from "../utils/findNodes";
 import {nodeLocation} from "../utils/location";
 import {splitTextBlock} from "../utils/split";
@@ -923,6 +923,15 @@ export class TransformCommands extends BeforePlugin {
     const defaultParent = parent.type.default();
     console.log('isDefault', parent.toJSON(), defaultParent?.toJSON(), parent.id.toString(), defaultParent?.id.toString());
     if (defaultParent && parent.eqContent(defaultParent)) {
+      nodes.slice().reverse().some(n => {
+        const focusNode = n.find(n => n.isFocusable, { order: 'post' });
+        if (focusNode) {
+          tr.Select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!));
+          tr.SelectBlocks([])
+          return true;
+        }
+      });
+
       return tr
     }
 
@@ -934,12 +943,16 @@ export class TransformCommands extends BeforePlugin {
     const startNode = first(nodes)!;
     const endNode = last(nodes)!;
     const prevSiblings = takeBefore(parent.children, n => n.eq(startNode));
-    // const nextSiblings = takeAfter(parent.children, n => n.eq(endNode));
+    const nextSiblings = takeAfter(parent.children, n => n.eq(endNode));
     const match = parent.type.contentMatch.matchFragment(Fragment.from(prevSiblings));
-    // const {nodes: createNodes} = match?.fillBefore(Fragment.from(nextSiblings)) ?? Fragment.EMPTY;
-    // console.log('prevSiblings', prevSiblings.map(n => n.id.toString()))
-    // console.log('nextSiblings', nextSiblings.map(n => n.id.toString()))
-    // console.log('createNodes to be inserted', createNodes.map(n => n.name));
+    console.log(match, parent.name, match?.defaultType)
+    const {nodes: createNodes} = match?.fillBefore(Fragment.from(nextSiblings), true) ?? Fragment.EMPTY;
+    console.log('prevSiblings', prevSiblings.map(n => n.id.toString()))
+    console.log('nextSiblings', nextSiblings.map(n => n.id.toString()))
+    console.log('createNodes to be inserted', createNodes.map(n => n.name));
+
+    const at = nodeLocation(startNode)!;
+    const insertActions = this.insertNodeCommands(at, createNodes)
 
     // create the insert node and commands
     const { fall = 'after' } = opts;
@@ -951,50 +964,58 @@ export class TransformCommands extends BeforePlugin {
     const lastNode = last(nodes)!;
     let after: Optional<PinnedSelection> = undefined;
 
-    if (fall === 'after') {
-      const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
-      if (focusNode && hasSameIsolate(focusNode, lastNode)) {
-        console.log(hasSameIsolate(focusNode, lastNode), focusNode.name, lastNode.name, focusNode.id.toString(), lastNode.id.toString())
-        // after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
-      }
-
-      // if (!after) {
-      //   const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
-      //   if (focusNode && hasSameIsolate(focusNode, firstNode)) {
-      //     after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
-      //   }
-      // }
-    } else {
-      // const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
-      // if (focusNode && hasSameIsolate(focusNode, firstNode)) {
-      //   after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
-      // }
-      //
-      // if (!after) {
-      //   const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
-      //   if (focusNode && hasSameIsolate(lastNode, focusNode)) {
-      //     after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
-      //   }
-      // }
+    if (createNodes.length) {
+      createNodes.slice().reverse().some(n => {
+        const focusNode = n.find(n => n.isFocusable, { order: 'post' });
+        if (focusNode) {
+          after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+          return true;
+        }
+      })
     }
 
+    // if (!after && fall === 'after') {
+    //   const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
+    //   if (focusNode && hasSameIsolate(focusNode, lastNode)) {
+    //     console.log(hasSameIsolate(focusNode, lastNode), focusNode.name, lastNode.name, focusNode.id.toString(), lastNode.id.toString())
+    //     after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+    //   }
+    //
+    //   if (!after) {
+    //     const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
+    //     if (focusNode && hasSameIsolate(focusNode, firstNode)) {
+    //       after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+    //     }
+    //   }
+    // } else if (!after) {
+    //   const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
+    //   if (focusNode && hasSameIsolate(focusNode, firstNode)) {
+    //     after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+    //   }
+    //
+    //   if (!after) {
+    //     const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
+    //     if (focusNode && hasSameIsolate(lastNode, focusNode)) {
+    //       after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+    //     }
+    //   }
+    // }
+
     console.log('XXX', nodes.map(n => n.id.toString()));
-    // console.log('XXX', after?.toString());
 
     tr
       .Add(deleteActions)
+      .Add(insertActions)
       .SelectBlocks([])
 
     if (after) {
       tr.Select(after, ActionOrigin.UserInput);
     } else {
-      tr.Select(PinnedSelection.fromPin(Pin.toStartOf(parent)!), ActionOrigin.UserInput);
+      tr.Select(PinnedSelection.fromPin(Pin.toStartOf(tr.app.store.get(NodeId.ROOT)!)!), ActionOrigin.UserInput);
     }
 
     return tr;
   }
-
-  private
 
   // ref: https://www.notion.so/fastype-6858ec35e5e04e919b9dc5b3a37f6c85
   // the delete logic works based on the following entities
@@ -1589,7 +1610,7 @@ export class TransformCommands extends BeforePlugin {
 
   // merge two nodes
   merge(tr: Transaction, prev: Node, next: Node) {
-    if (hasSameIsolate(prev, next)) {
+    if (!hasSameIsolate(prev, next)) {
       throw new Error("can't merge isolated nodes");
     }
 

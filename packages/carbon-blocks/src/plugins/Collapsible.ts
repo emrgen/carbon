@@ -38,7 +38,7 @@ export class Collapsible extends NodePlugin {
       group: 'content nestable',
       content: 'title content*',
       splits: true,
-      splitName: 'bulletedList',
+      splitName: 'section',
       insert: true,
       collapsible: true,
       inlineSelectable: true,

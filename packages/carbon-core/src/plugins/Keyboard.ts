@@ -96,8 +96,8 @@ export class KeyboardPlugin extends AfterPlugin {
 				}
 
 				if (selection.isExpanded) {
-					preventAndStopCtx(ctx)
-					cmd.selection.collapseToTail(app.selection)
+					preventAndStopCtx(ctx);
+					cmd.selection.collapseToStart(app.selection).Dispatch();
 					return
 				}
 
@@ -205,12 +205,12 @@ export class KeyboardPlugin extends AfterPlugin {
 	backspace(tr: Transaction, ctx: EventContext<KeyboardEvent>) {
 		preventAndStopCtx(ctx);
 		const {  app } = ctx;
-		const { selection } = app;
+		const { selection, blockSelection } = app.state;
 
 		const { head } = selection;
 
 		// delete node selection if any
-		if (!selection.isCollapsed || selection.isBlock) {
+		if (!selection.isCollapsed || blockSelection.isActive) {
 			tr.transform.delete(selection, { fall: 'before' })?.Dispatch();
 			return
 		}
@@ -257,7 +257,7 @@ export class KeyboardPlugin extends AfterPlugin {
 			}
 
 
-      if (hasSameIsolate(prevTextBlock, textBlock)) {
+      if (!hasSameIsolate(prevTextBlock, textBlock)) {
         return
       }
 
@@ -542,7 +542,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
     const firstNode = first(blocks) as Node;
     console.log(hasSameIsolate(block, firstNode), !lastNode.isIsolate)
-    if (hasSameIsolate(block, firstNode) && !lastNode.isIsolate) {
+    if (!hasSameIsolate(block, firstNode) && !lastNode.isIsolate) {
       return
     }
 

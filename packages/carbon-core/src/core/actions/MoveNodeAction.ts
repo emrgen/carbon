@@ -46,4 +46,14 @@ export class MoveNodeAction implements CarbonAction {
 			nodeId: nodeId.toString()
 		})
 	}
+
+  toJSON(): any {
+    return {
+      type: 'move',
+      from: this.from.toJSON(),
+      to: this.to.toJSON(),
+      nodeId: this.nodeId.toJSON(),
+      origin: this.origin,
+    }
+  }
 }

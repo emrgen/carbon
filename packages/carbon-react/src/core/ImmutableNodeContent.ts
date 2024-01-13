@@ -55,7 +55,7 @@ export class ImmutableNodeContent implements NodeContent {
   get parent(): Optional<Node> {
     const {parent} = this.content;
     if (parent) return parent;
-    const map = StateScope.get(this.scope);
+    const map = StateScope.get();
     if (!this.parentId) return null;
     return map.get(this.parentId);
   }

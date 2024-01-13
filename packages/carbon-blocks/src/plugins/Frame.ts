@@ -8,6 +8,7 @@ export class Frame extends Collapsible  {
   spec(): NodeSpec {
     return {
       ...super.spec(),
+      splits: false,
       isolate: true,
       draggable: true,
       dragHandle: true,

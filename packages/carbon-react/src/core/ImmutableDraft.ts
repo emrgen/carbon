@@ -91,7 +91,7 @@ export class ImmutableDraft implements Draft {
     state.blockSelection.blocks.forEach(n => this.selected.add(n.id));
   }
 
-  addContentChanged(id: NodeId) {
+  private addContentChanged(id: NodeId) {
     this.contentChanged.add(id);
     // if the node is not deleted, add it to the unstable list
     // there is no need to stabilize deleted nodes
@@ -100,22 +100,22 @@ export class ImmutableDraft implements Draft {
     }
   }
 
-  addUpdated(id: NodeId) {
+  private addUpdated(id: NodeId) {
     this.updated.add(id);
   }
 
-  removeUpdated(id: NodeId) {
+  private removeUpdated(id: NodeId) {
     this.updated.remove(id);
   }
 
-  addInserted(node: Node) {
+  private addInserted(node: Node) {
     const {id} = node;
     this.nodeMap.set(node.id, node);
     // this.inserted.add(id);
     // this.removed.remove(id);
   }
 
-  addRemoved(id: NodeId) {
+  private addRemoved(id: NodeId) {
     this.nodeMap.delete(id);
     // this.removed.add(id);
     // this.inserted.remove(id);
@@ -285,7 +285,10 @@ export class ImmutableDraft implements Draft {
 
   // normalize unstable nodes by inserting missing nodes as per the schema
   private normalizeSchema() {
-    console.debug('normalizing schema')
+    console.debug('normalizing schema');
+    const nodes = this.unstable.nodes(this.nodeMap).forEach(node => {
+
+    })
   }
 
   updateContent(nodeId: NodeId, content: Node[] | string) {
@@ -512,9 +515,8 @@ export class ImmutableDraft implements Draft {
     }
 
     if (this.nodeMap.deleted(nodeId)) {
-      if (props[SelectedPath] === false) {
-        this.selected.remove(nodeId);
-      }
+      this.selected.remove(nodeId);
+      return;
     }
 
     const node = this.unfreeze(nodeId);
@@ -569,6 +571,8 @@ export class ImmutableDraft implements Draft {
     if (selection.isCollapsed && !selection.isInvalid) {
       const {head: headPin} = this.state.selection;
       const {head} = selection;
+      if (this.nodeMap.deleted(head.nodeId)) return;
+
       const node = this.unfreeze(head.nodeId);
       if (!node) {
         throw new Error("Cannot update selection on a draft that is already committed");
