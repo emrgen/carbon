@@ -62,6 +62,7 @@ export class ChangeManager extends NodeTopicEmitter {
   // 2. sync the selection
   // 3. sync the node state
   update(tr: Transaction, state: State, timeout: number = 1000) {
+    console.log('------------------------')
     if (this.transactions.length) {
       console.log('pending transaction', this.transactions.length);
       return;
@@ -70,7 +71,8 @@ export class ChangeManager extends NodeTopicEmitter {
     this.transactions.push(tr);
     const { isContentChanged, isSelectionChanged } = this.state;
 
-    // console.log('isSelectionChanged', isSelectionChanged)
+    console.log('isSelectionChanged', isSelectionChanged)
+    console.log('isContentChanged', isContentChanged)
 
     // console.log('updating transaction effect', tr);
     // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);

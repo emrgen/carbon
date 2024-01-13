@@ -4,7 +4,7 @@ import { Node } from "./Node";
 import { PinnedSelection } from "./PinnedSelection";
 import { NodeMap } from "./NodeMap";
 import {Draft} from "./Draft";
-import {StateChanges} from "./NodeChange";
+import {StateActions, StateChanges} from "./NodeChange";
 import {BlockSelection} from "./BlockSelection";
 import {PluginManager, Schema} from "@emrgen/carbon-core";
 
@@ -20,8 +20,10 @@ export interface State {
   selection: PinnedSelection;
   blockSelection: BlockSelection;
   nodeMap: NodeMap;
+  // these are the nodes that need to be updated in the UI
   updated: NodeIdSet;
   changes: StateChanges;
+  actions: StateActions;
 
   isContentChanged: boolean;
   isSelectionChanged: boolean;

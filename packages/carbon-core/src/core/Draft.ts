@@ -2,7 +2,7 @@
 import {
   Node,
   NodeContent,
-  NodeId,
+  NodeId, NodeJSON,
   NodePropsJson,
   NodeType,
   Point,
@@ -27,8 +27,8 @@ export interface Draft {
 
   insert(at: Point, node: Node): void;
   insertText(at: Point, text: string): void;
-  move(to: Point, node: Node): void
-  remove(node: Node): void;
+  move(to: Point, nodeId: NodeId): void
+  remove(nodeId: NodeId): void;
   change(nodeId: NodeId, type: NodeType): void;
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>): void
   updateContent(nodeId: NodeId, content: Node[]|string): void;

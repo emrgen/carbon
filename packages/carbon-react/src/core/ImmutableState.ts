@@ -7,11 +7,12 @@ import {
   BlockSelection,
   StateChanges,
   StateScope,
-  ProduceOpts
+  ProduceOpts, StateActions
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {ImmutableDraft} from "./ImmutableDraft";
+import {identity} from "lodash";
 
 interface StateProps {
   scope: Symbol;
@@ -34,6 +35,7 @@ export class ImmutableState implements State {
   nodeMap: ImmutableNodeMap;
   updated: NodeIdSet;
   changes: StateChanges = new StateChanges();
+  actions: StateActions = new StateActions();
 
   static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: ImmutableNodeMap = new ImmutableNodeMap()) {
     const state = new ImmutableState({ content, selection, scope, nodeMap });
@@ -87,7 +89,6 @@ export class ImmutableState implements State {
 
   deactivate() {
     StateScope.delete(this.scope);
-    StateScope.remove(this.scope);
   }
 
   clone(depth: number = 2) {
@@ -144,7 +145,7 @@ export class ImmutableState implements State {
     // remove all explicit parent links and freeze
     this.updated.freeze();
     // this.nodeMap.freeze();
-    this.content.freeze();
+    this.content.freeze(identity);
     this.selection.freeze();
 
     Object.freeze(this);

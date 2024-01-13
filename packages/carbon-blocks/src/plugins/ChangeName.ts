@@ -49,8 +49,8 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(>>\s)(.)*/, this.tryChangeName('callout', ['nestable'])),
     new InputRule(/^(>\s)(.)*/, this.tryChangeName('collapsible', ['nestable'])),
     new InputRule(/^(```)(.)*/, this.tryChangeIntoCode('code', ['nestable'])),
-    new InputRule(/^(---)(.)*/, this.tryChangeIntoDivider('divider', ['nestable'])),
-    new InputRule(/^(\*\*\*\s)(.)*/, this.tryChangeIntoDivider('separator', ['nestable'])),
+    new InputRule(/^(---)(.)*/, this.insertDividerBefore('divider', ['nestable'])),
+    new InputRule(/^(\*\*\*\s)(.)*/, this.insertDividerBefore('separator', ['nestable'])),
   ])
 
   handlers(): Partial<EventHandler> {
@@ -105,27 +105,17 @@ export class ChangeName extends BeforePlugin {
       }
 
       const titleNode = changeNode.child(0)!;
-      // const titleContent = TitleContent.from(titleNode);
-      // const before = titleContent.insert(match[1].length,);
-      // const after = titleContent.remove(0, match[1].length);
-
-      if (match[1] === titleNode.textContent + ' ') {
+      const title = titleNode.textContent.slice(match[1].length - 1)
+      if (match[1] === titleNode.textContent + ' ' || title === '') {
         const action = SetContentAction.create(titleNode.id, []);
         cmd.Add(action);
-        cmd.Update(titleNode.id, {
-          [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
-        })
+        // cmd.Update(titleNode.id, {
+        //   [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
+        // })
       } else {
-        const title = titleNode.textContent.slice(match[1].length - 1);
-        // console.warn('title', title, match);
-        if (title === '') {
-          const action = SetContentAction.create(titleNode.id, []);
-          cmd.Add(action);
-        } else {
-          const textNode = app.schema.text(title)!
-          const action = SetContentAction.create(titleNode.id, [textNode]);
-          cmd.Add(action);
-        }
+        const textNode = app.schema.text(title)!
+        const action = SetContentAction.create(titleNode.id, [textNode]);
+        cmd.Add(action);
       }
 
       cmd.Change(changeNode.id, name)
@@ -168,10 +158,10 @@ export class ChangeName extends BeforePlugin {
     }
   }
 
-  tryChangeIntoDivider(name: string, groups: string[]) {
+  insertDividerBefore(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { currentNode, app, cmd } = ctx;
-      const { selection } = app;
+      const { selection, schema } = app;
       const block = currentNode.closest(n => n.isContainer)!;
       if (!isConvertible(block)) return
 
@@ -187,24 +177,25 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      const at = Point.toAfter(block.id);
-      const moveActions: CarbonAction[] = []
-      reverse(block.children.slice(1)).forEach(n => {
-        moveActions.push(MoveNodeAction.create(nodeLocation(n)!, at, n.id));
-      });
-
       const match = text.match(regex);
       if (match === null) {
         console.error('failed to match regex', regex, text);
         return
       }
 
-      cmd.SetContent(block.firstChild!.id, [])
-        // .removeText(Pin.toStartOf(block)?.point!, react.schema.text(match[1].slice(0, -1))!)
+      const titleNode = block.child(0)!;
+      const title = titleNode.textContent.slice(match[1].length - 1)
+      if (match[1] === titleNode.textContent + ' ' || title === '') {
+        const action = SetContentAction.create(titleNode.id, []);
+        cmd.Add(action);
+      } else {
+        const textNode = app.schema.text(title)!
+        const action = SetContentAction.create(titleNode.id, [textNode]);
+        cmd.Add(action);
+      }
+
+      cmd
         .Add(insertBeforeAction(block, divider))
-        .Change(block.id, block.type.splitName)
-        .Update(block.id, { node: { typeChanged: true } })
-        .Add(moveActions)
         .Select(after)
         .Dispatch()
     }

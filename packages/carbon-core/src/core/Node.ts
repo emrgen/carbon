@@ -1,22 +1,23 @@
-import {findIndex, first, flatten, identity, isArray, isEmpty, last, merge, noop, reverse} from "lodash";
+import {findIndex, first, identity, isArray, last, merge, noop, reverse} from "lodash";
 
-import { Optional, Predicate, With } from "@emrgen/types";
-import { classString } from "./Logger";
-import { Mark } from "./Mark";
-import {PlainNodeContent, NodeContent, NodeData, NodeContentData} from "./NodeContent";
-import { IntoNodeId, NodeId } from "./NodeId";
-import { NodeType } from "./NodeType";
-import { NodeProps } from "./NodeProps";
-import { no, NodeEncoder, yes } from "./types";
-import EventEmitter from "events";
+import {Optional, Predicate, With} from "@emrgen/types";
+import {classString} from "./Logger";
+import {NodeContent, NodeContentData, NodeData, PlainNodeContent} from "./NodeContent";
+import {IntoNodeId, NodeId} from "./NodeId";
+import {NodeType} from "./NodeType";
 import {
   ActivatedPath,
   CollapsedPath,
   CollapseHidden,
+  NodeProps,
   NodePropsJson,
-  OpenedPath, PlainNodeProps,
+  OpenedPath,
+  PlainNodeProps,
   SelectedPath
 } from "./NodeProps";
+import {no, NodeEncoder, yes} from "./types";
+import EventEmitter from "events";
+import {NodeMap} from "@emrgen/carbon-core";
 
 export type TraverseOptions = {
 	order: 'pre' | 'post';
@@ -31,6 +32,7 @@ let key = 0
 const nextKey = () => key++
 
 export type Path = (number | string)[];
+export type MutableNode = Node;
 
 export class Node extends EventEmitter implements IntoNodeId {
     protected content: NodeContent;
@@ -670,79 +672,71 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // @mutates
-    addLink(name: string, node: Node): Node {
+    addLink(name: string, node: Node) {
       this.content.addLink(name, node)
-
-      return this
     }
 
   // @mutates
-    removeLink(name: string): Node  {
+    removeLink(name: string) {
       this.content.removeLink(name)
-
-      return this
     }
 
     // @mutates
-    insert(node: Node, index: number): Node {
+    insert(node: Node, index: number) {
       if (node.id.eq(this.id)) {
         throw new Error('cannot insert node to itself')
       }
 
       const child = node.setParent(this).setParentId(this.id)
-      node.setParentId(this.id)
-      this.content = this.content.insert(child, index);
-
-      return this
+      this.content.insert(child, index);
     }
 
-    insertText(text: string, offset: number): Node {
-      this.content = this.content.insertText(text, offset);
-
-      return this
+    insertText(text: string, offset: number) {
+      this.content.insertText(text, offset);
     }
 
-    removeText(offset: number, length: number): Node {
-      this.content = this.content.removeText(offset, length);
-
-      return this
+    removeText(offset: number, length: number) {
+      this.content.removeText(offset, length);
     }
 
     // @mutates
-    remove(node: Node): Node {
+    remove(node: Node) {
       if (node.id.eq(this.id)) {
         throw new Error('cannot remove node from itself')
       }
-      this.content = this.content.remove(node);
-      node.setParent(null);
-
-      return this
+      this.content.remove(node);
     }
 
-    updateContent(content: Node[]|string): Node {
+    replace(index: number, replacement: Node) {
+      this.content.replace(index, replacement);
+    }
+
+    updateContent(content: Node[]|string) {
       // console.log('updateContent', this.id.toString(), this.textContent, this.children.map(n => n.textContent));
       if (isArray(content)) {
         const nodes = content.map(n =>  n.setParent(this).setParentId(this.id));
-        this.content = this.content.updateContent(nodes);
+        this.content.updateContent(nodes);
       } else {
-        this.content = this.content.updateContent(content);
+        this.content.updateContent(content);
       }
-
-      return this
     }
 
     // @mutates
-    changeType(type: NodeType): Node {
-      this.content = this.content.changeType(type);
-
-      return this
+    changeType(type: NodeType) {
+      this.content.changeType(type);
     }
 
     // @mutates
-  updateProps(props: NodePropsJson): Node {
+    updateProps(props: NodePropsJson) {
+      console.debug('updateProps', this.key, props);
       this.content.updateProps(props);
+    }
 
-      return this
+    // unfreeze unfreezes the node and all its descendants along the path
+    // this is useful when we want to mutate the node and its descendants multiple times without creating new nodes
+    // one way to think about this is that we are unfreezing the node and its descendants to a temporary state using a path laser
+    unfreeze(path: Path, map: NodeMap): MutableNode {
+      return this;
     }
 
     compatible(other: Node) {

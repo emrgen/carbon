@@ -6,17 +6,16 @@ import { CarbonAction, ActionOrigin } from './types';
 import {Draft, Schema} from "@emrgen/carbon-core";
 
 export class ChangeNameAction implements CarbonAction {
-	from: string = '';
 
 	static create(nodeId: NodeId, to: NodeName, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new ChangeNameAction(nodeId, '', to, origin);
 	}
 
-	private static fromName(nodeId: NodeId, from: NodeName, to: NodeName, origin: ActionOrigin = ActionOrigin.UserInput) {
+	static withBefore(nodeId: NodeId, from: NodeName, to: NodeName, origin: ActionOrigin = ActionOrigin.UserInput) {
 		return new ChangeNameAction(nodeId, from, to, origin);
 	}
 
-	constructor(readonly nodeId: NodeId, from: string, readonly to: string, readonly origin: ActionOrigin) {
+	constructor(readonly nodeId: NodeId, private from: string, readonly to: string, readonly origin: ActionOrigin) {
 		this.from = from;
 	}
 
@@ -43,7 +42,7 @@ export class ChangeNameAction implements CarbonAction {
 			throw new Error('cant inverse, action is not executed:' + this.toString())
 		}
 
-		return ChangeNameAction.fromName(nodeId, to, from, ActionOrigin.UserInput);
+		return ChangeNameAction.withBefore(nodeId, to, from, ActionOrigin.UserInput);
 	}
 
 	toString() {

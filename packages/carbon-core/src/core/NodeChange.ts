@@ -3,11 +3,120 @@ import {PointedSelection} from "./PointedSelection";
 import {
   Draft,
   NodeData,
-  NodeId, NodeIdComparator,
+  NodeId,
+  NodeIdComparator,
   Path,
-  NodePropsJson, Point,
+  NodePropsJson,
+  Point,
+  CarbonAction,
+  ChangeNameAction,
+  InsertNodeAction,
+  StateScope,
+  nodeLocation,
+  NodeMap,
+  RemoveNodeAction, UpdatePropsAction, SelectAction, ActionOrigin, SetContentAction,
 } from "@emrgen/carbon-core";
 import BTree from "sorted-btree";
+
+export class StateActions {
+  actions: CarbonAction[] = [];
+
+  static from(changes: StateChanges, scope: Symbol, origin: ActionOrigin): StateActions {
+    const map = StateScope.get(scope);
+    if (!map) {
+      throw new Error('failed to find scope: ' + scope.toString());
+    }
+
+    const actions = new StateActions();
+    changes.patch.forEach(change => {
+      changes.match(change, {
+        rename: (change: NameChange) => {
+          actions.add(ChangeNameAction.withBefore(change.nodeId, change.before, change.after, origin));
+        },
+        insert(change: InsertChange) {
+          const node = map.get(change.nodeId);
+          if (!node) {
+            throw new Error('failed to find node: ' + change.nodeId);
+          }
+
+          const at = nodeLocation(node);
+          if (!at) {
+            throw new Error('failed to find node location for: ' + change.nodeId);
+          }
+
+          actions.add(InsertNodeAction.create(at, change.nodeId, node.toJSON(), origin));
+        },
+        text(change: TextChange) {
+          if (change.action === 'insert') {
+            // actions.add(CarbonAction.insertText(change.nodeId, change.offset, change.text));
+          } else {
+            // actions.add(CarbonAction.removeText(change.nodeId, change.offset, change.text));
+          }
+        },
+        remove(change: RemoveChange) {
+          const from = StateActions.point(change.path, map);
+          if (!from) {
+            throw new Error('failed to find node location for: ' + change.nodeId);
+          }
+
+          const node = map.get(change.nodeId);
+
+          if (!node) {
+            throw new Error('failed to find node: ' + change.nodeId);
+          }
+
+          actions.add(RemoveNodeAction.create(from, change.nodeId, node.toJSON(), origin));
+        },
+        update(change: UpdateChange) {
+          const node = map.get(change.nodeId);
+          if (!node) {
+            throw new Error('failed to find node: ' + change.nodeId);
+          }
+
+          actions.add(UpdatePropsAction.withBefore(change.nodeId, change.before, change.after, origin));
+        },
+        link(change: LinkChange) {
+          // actions.add(CarbonAction.link(change.nodeId, change.after));
+        },
+        content(change: SetContentChange) {
+          const {nodeId, path, before, after} = change;
+          // const nodes = after instanceof Array ? after.map(id => change) : after;
+          // actions.add(SetContentAction.withBefore(nodeId, before, after, origin));
+        },
+        selection(change: SelectionChange) {
+          actions.add(SelectAction.create(change.before, change.after, origin));
+        }
+      })
+    })
+
+    return actions;
+  }
+
+  static point(path: Path, map: NodeMap) {
+    let node = map.get(NodeId.ROOT);
+    if (!node) {
+      throw new Error('failed to find root node');
+    }
+
+    for (let i = 0; i < path.length; i++) {
+      const index = path[i];
+      node = node.child(index);
+      if (!node) {
+        throw new Error('failed to find node at: ' + path.toString());
+      }
+    }
+
+    return nodeLocation(node);
+  }
+
+  add(action: CarbonAction) {
+    this.actions.push(action);
+  }
+
+  rollback(state: Draft) {}
+
+  apply(state: Draft) {}
+}
 
 enum ChangeType {
   rename = 'rename',
@@ -126,7 +235,7 @@ export class StateChanges {
   patch: Change[] = [];
 
   // stores the nodes that are changed
-  dataMap: NodeDataMap = NodeDataMap.empty()
+  dataMap: NodeDataMap = NodeDataMap.empty();
 
   static empty() {
     return new StateChanges();
@@ -246,9 +355,8 @@ interface ChangeMatcher {
   selection(change: SelectionChange): void;
 }
 
-type NodeDataSelf = Omit<NodeData, 'children'>;
 
-export class NodeDataMap extends BTree<NodeId, NodeDataSelf> {
+export class NodeDataMap extends BTree<NodeId, NodeData> {
   static empty() {
     return new NodeDataMap(undefined, NodeIdComparator);
   }
