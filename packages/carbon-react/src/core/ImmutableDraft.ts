@@ -17,7 +17,7 @@ import {
   PointAt,
   PointedSelection, Schema,
   SelectedPath, sortNodes, sortNodesByDepth,
-  State as CoreState,
+  State as CoreState, StateActions,
   StateScope,
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
@@ -56,11 +56,12 @@ export class ImmutableDraft implements CoreDraft {
   state: ImmutableState;
   nodeMap: ImmutableNodeMap;
   selection: PointedSelection;
-  updated: NodeIdSet; // tracks changed nodes
-  contentChanged: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
-  removed: NodeIdSet = NodeIdSet.empty(); // tracks removed nodes
-  inserted: NodeIdSet = NodeIdSet.empty();
+
   selected: NodeIdSet = NodeIdSet.empty();
+
+  viewChanged: NodeIdSet; // tracks changed nodes
+  contentChanged: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
+
   unstable: NodeIdSet = NodeIdSet.empty();
 
   changes: StateChanges = StateChanges.empty();
@@ -75,22 +76,26 @@ export class ImmutableDraft implements CoreDraft {
     this.tm = new Transformer(this.changes);
     this.schema = schema;
     this.nodeMap = ImmutableNodeMap.from(state.nodeMap);
-    this.updated = new NodeIdSet();
+    this.viewChanged = new NodeIdSet();
     this.selection = state.selection.unpin(origin);
     state.blockSelection.blocks.forEach(n => this.selected.add(n.id));
   }
 
   addContentChanged(id: NodeId) {
     this.contentChanged.add(id);
-    this.unstable.add(id);
+    // if the node is not deleted, add it to the unstable list
+    // there is no need to stabilize deleted nodes
+    if (!this.nodeMap.deleted(id)) {
+      this.unstable.add(id);
+    }
   }
 
   addUpdated(id: NodeId) {
-    this.updated.add(id);
+    this.viewChanged.add(id);
   }
 
   removeUpdated(id: NodeId) {
-    this.updated.remove(id);
+    this.viewChanged.remove(id);
   }
 
   addInserted(node: Node) {
@@ -140,7 +145,7 @@ export class ImmutableDraft implements CoreDraft {
   commit(depth: number): ImmutableState {
     this.prepare();
 
-    const { state, updated, selection } = this;
+    const { state, viewChanged, selection } = this;
 
     const nodeMap = this.nodeMap.current.size === 0 ? state.nodeMap : this.nodeMap;
     // as the root node is always same id, we can get the root node by id
@@ -158,7 +163,7 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot commit draft with invalid pinned selection");
     }
 
-    updated.freeze();
+    viewChanged.freeze();
     nodeMap.contracts(2)
     // nodeMap.freeze();
     after.freeze();
@@ -173,8 +178,9 @@ export class ImmutableDraft implements CoreDraft {
       selection: after,
       blockSelection,
       nodeMap,
-      updated: updated,
+      updated: viewChanged,
       changes: this.changes,
+      actions: StateActions.from(this.changes, this.state.scope, this.origin),
     });
 
     return newState.freeze();
@@ -199,7 +205,7 @@ export class ImmutableDraft implements CoreDraft {
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
-    this.updated.toArray().forEach(id => {
+    this.viewChanged.toArray().forEach(id => {
       // console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
       if (this.nodeMap.deleted(id)) {
         this.removeUpdated(id);
@@ -215,8 +221,8 @@ export class ImmutableDraft implements CoreDraft {
       })
     });
 
-    const dirty = this.updated.clone();
-    this.updated.nodes(this.nodeMap).forEach(node => {
+    const dirty = this.viewChanged.clone();
+    this.viewChanged.nodes(this.nodeMap).forEach(node => {
       node.parents.forEach(parent => {
         dirty.add(parent.id);
       })

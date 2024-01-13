@@ -15,11 +15,16 @@ import {
   nodeLocation,
   NodeMap,
   RemoveNodeAction, UpdatePropsAction, SelectAction, ActionOrigin, SetContentAction,
+  Content
 } from "@emrgen/carbon-core";
 import BTree from "sorted-btree";
 
 export class StateActions {
   actions: CarbonAction[] = [];
+
+  static empty() {
+    return new StateActions();
+  }
 
   static from(changes: StateChanges, scope: Symbol, origin: ActionOrigin): StateActions {
     const map = StateScope.get(scope);
@@ -80,15 +85,30 @@ export class StateActions {
         },
         content(change: SetContentChange) {
           const {nodeId, path, before, after} = change;
-          // const nodes = after instanceof Array ? after.map(id => change) : after;
-          // actions.add(SetContentAction.withBefore(nodeId, before, after, origin));
+          let beforeContent: Optional<Content>;
+          let afterContent: Optional<Content>;
+
+          if (before instanceof Array) {
+            beforeContent = before.map(id => changes.dataMap.get(id)) as Content;
+          } else {
+            beforeContent = before
+          }
+          if (after instanceof Array) {
+            afterContent = after.map(id => changes.dataMap.get(id)) as Content;
+          } else {
+            afterContent = after;
+          }
+
+          actions.add(SetContentAction.withBefore(nodeId, beforeContent, afterContent, origin));
         },
         selection(change: SelectionChange) {
+
           actions.add(SelectAction.create(change.before, change.after, origin));
         }
       })
     })
 
+    console.log(actions)
     return actions;
   }
 

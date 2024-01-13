@@ -23,6 +23,7 @@ interface StateProps {
   nodeMap: ImmutableNodeMap;
   updated?: NodeIdSet;
   changes?: StateChanges;
+  actions?: StateActions;
   counter?: number;
 }
 
@@ -34,8 +35,8 @@ export class ImmutableState implements State {
   blockSelection: BlockSelection;
   nodeMap: ImmutableNodeMap;
   updated: NodeIdSet;
-  changes: StateChanges = new StateChanges();
-  actions: StateActions = new StateActions();
+  changes: StateChanges;
+  actions: StateActions;
 
   static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: ImmutableNodeMap = new ImmutableNodeMap()) {
     const state = new ImmutableState({ content, selection, scope, nodeMap });
@@ -58,6 +59,7 @@ export class ImmutableState implements State {
       nodeMap,
       updated = NodeIdSet.empty(),
       changes = StateChanges.empty(),
+      actions = StateActions.empty(),
       blockSelection = BlockSelection.empty(),
     } = props;
 
@@ -69,6 +71,7 @@ export class ImmutableState implements State {
     this.nodeMap = nodeMap;
     this.updated = updated;
     this.changes = changes;
+    this.actions = actions;
   }
 
   get isSelectionChanged() {

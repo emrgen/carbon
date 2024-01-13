@@ -2,23 +2,26 @@ import { IntoNodeId, NodeId } from "../NodeId";
 import { Transaction } from "../Transaction";
 import { ActionOrigin, CarbonAction } from "./types";
 import { Optional } from '@emrgen/types';
-import {deepCloneMap, Draft, Node} from "@emrgen/carbon-core";
+import {deepCloneMap, Draft, Node, NodeContent, NodeData} from "@emrgen/carbon-core";
+import {isArray} from "lodash";
 
-type Content = string | Node[]
+export type Content = string | NodeData[] | Node[]
 
 // NOTE: it can be transformed into combination of InsertNode/RemoveNode/InsertText/RemoveText action
 export class SetContentAction implements CarbonAction {
   before: Optional<Content>;
 
   static create(nodeRef: IntoNodeId, content: Content, origin: ActionOrigin = ActionOrigin.UserInput) {
-    return new SetContentAction(nodeRef.nodeId(), content, null, origin)
+    return new SetContentAction(nodeRef.nodeId(),null, content, origin)
   }
 
   static withBefore(nodeRef: IntoNodeId, before: Content, after: Content, origin: ActionOrigin = ActionOrigin.UserInput) {
     return new SetContentAction(nodeRef.nodeId(), before, after, origin)
   }
 
-  constructor(readonly nodeId: NodeId, readonly after: Content, before: Optional<Content>, readonly origin: ActionOrigin) {}
+  constructor(readonly nodeId: NodeId, before: Optional<Content>, readonly after: Content,  readonly origin: ActionOrigin) {
+    this.before = before
+  }
 
   execute(draft: Draft) {
     const {nodeId, after} = this
@@ -27,19 +30,23 @@ export class SetContentAction implements CarbonAction {
       throw new Error('failed to find target node from: ' + nodeId.toString())
     }
 
-    draft.updateContent(nodeId, after);
+    if (isArray(after)) {
+      const nodes = after.map(n => draft.schema.nodeFromJSON(n)).filter(n => !!n) as Node[];
+      if (nodes.length !== after.length) {
+        throw new Error('failed to create nodes from: ' + after.toString())
+      }
+
+      draft.updateContent(nodeId, nodes);
+    } else {
+      draft.updateContent(nodeId, after);
+    }
+
     if (node.isTextContainer) {
       this.before = node.children.map(n => n.clone(deepCloneMap));
     } else {
       this.before = node.textContent
     }
   }
-
-  // merge(other: SetContentAction): SetContentAction {
-  //   console.log('####', this.before);
-  //
-  //   return SetContentAction.withContent(this.nodeId, other.after, this.origin)
-  // }
 
   inverse(): CarbonAction {
     if (!this.before) {
