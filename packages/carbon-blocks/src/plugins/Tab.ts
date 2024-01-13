@@ -86,9 +86,7 @@ export class TabGroup extends CarbonPlugin {
             contentEditable: false,
             suppressContentEditableWarning: true,
           },
-          style: {
-            userSelect: 'none'
-          }
+          style: {}
         }
       }
     }

@@ -30,7 +30,7 @@ export class MoveNodeAction implements CarbonAction {
 
     // do not clone the node here.
     // if cloning is required, it should be done in the draft implementation
-		draft.move(to, node)
+		draft.move(to, nodeId);
 	}
 
 	inverse(): CarbonAction {

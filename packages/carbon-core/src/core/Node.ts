@@ -1,22 +1,22 @@
-import {findIndex, first, flatten, identity, isArray, isEmpty, last, merge, noop, reverse} from "lodash";
+import {findIndex, first, identity, isArray, last, merge, noop, reverse} from "lodash";
 
-import { Optional, Predicate, With } from "@emrgen/types";
-import { classString } from "./Logger";
-import { Mark } from "./Mark";
-import {PlainNodeContent, NodeContent, NodeData, NodeContentData} from "./NodeContent";
-import { IntoNodeId, NodeId } from "./NodeId";
-import { NodeType } from "./NodeType";
-import { NodeProps } from "./NodeProps";
-import { no, NodeEncoder, yes } from "./types";
-import EventEmitter from "events";
+import {Optional, Predicate, With} from "@emrgen/types";
+import {classString} from "./Logger";
+import {NodeContent, NodeContentData, NodeData, PlainNodeContent} from "./NodeContent";
+import {IntoNodeId, NodeId} from "./NodeId";
+import {NodeType} from "./NodeType";
 import {
   ActivatedPath,
   CollapsedPath,
   CollapseHidden,
+  NodeProps,
   NodePropsJson,
-  OpenedPath, PlainNodeProps,
+  OpenedPath,
+  PlainNodeProps,
   SelectedPath
 } from "./NodeProps";
+import {no, NodeEncoder, yes} from "./types";
+import EventEmitter from "events";
 import {NodeMap} from "@emrgen/carbon-core";
 
 export type TraverseOptions = {
@@ -705,7 +705,6 @@ export class Node extends EventEmitter implements IntoNodeId {
         throw new Error('cannot remove node from itself')
       }
       this.content.remove(node);
-      node.setParent(null);
     }
 
     replace(index: number, replacement: Node) {
@@ -729,6 +728,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     // @mutates
     updateProps(props: NodePropsJson) {
+      console.debug('updateProps', this.key, props);
       this.content.updateProps(props);
     }
 

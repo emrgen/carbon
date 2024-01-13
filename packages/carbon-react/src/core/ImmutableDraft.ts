@@ -22,7 +22,7 @@ import {
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
-import {first, identity, isArray, isEmpty} from "lodash";
+import {first, identity, isArray, isEmpty, isString, zip} from "lodash";
 import FastPriorityQueue from "fastpriorityqueue";
 import {ImmutableNodeMap} from "./ImmutableNodeMap";
 import {ImmutableNode} from "./ImmutableNode";
@@ -57,7 +57,7 @@ export class ImmutableDraft implements CoreDraft {
   nodeMap: ImmutableNodeMap;
   selection: PointedSelection;
   updated: NodeIdSet; // tracks changed nodes
-  contentChanges: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
+  contentChanged: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
   removed: NodeIdSet = NodeIdSet.empty(); // tracks removed nodes
   inserted: NodeIdSet = NodeIdSet.empty();
   selected: NodeIdSet = NodeIdSet.empty();
@@ -80,6 +80,11 @@ export class ImmutableDraft implements CoreDraft {
     state.blockSelection.blocks.forEach(n => this.selected.add(n.id));
   }
 
+  addContentChanged(id: NodeId) {
+    this.contentChanged.add(id);
+    this.unstable.add(id);
+  }
+
   addUpdated(id: NodeId) {
     this.updated.add(id);
   }
@@ -88,16 +93,17 @@ export class ImmutableDraft implements CoreDraft {
     this.updated.remove(id);
   }
 
-  addInserted(id: NodeId) {
-    this.nodeMap.set(id, this.nodeMap.get(id)!);
-    this.inserted.add(id);
-    this.removed.remove(id);
+  addInserted(node: Node) {
+    const {id} = node;
+    this.nodeMap.set(node.id, node);
+    // this.inserted.add(id);
+    // this.removed.remove(id);
   }
 
   addRemoved(id: NodeId) {
     this.nodeMap.delete(id);
-    this.removed.add(id);
-    this.inserted.remove(id);
+    // this.removed.add(id);
+    // this.inserted.remove(id);
   }
 
   get(id: NodeId): Optional<Node> {
@@ -117,9 +123,6 @@ export class ImmutableDraft implements CoreDraft {
       StateScope.set(scope);
 
       fn(this);
-      // normalize the changes before commit
-      this.normalize();
-
       const state = this.commit(3);
       StateScope.put(scope, state.nodeMap)
 
@@ -185,8 +188,14 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot prepare a draft that is already committed");
     }
 
-    const {scope} = this.state;
-    console.log('####', this.updated.toArray().map(n => n.toString()).join(', '))
+    // remove deleted nodes from unstable node before normalization
+    this.unstable.toArray().forEach(id => {
+      if (this.nodeMap.deleted(id)) {
+        this.unstable.remove(id)
+      }
+    })
+
+    this.normalize();
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
@@ -206,111 +215,32 @@ export class ImmutableDraft implements CoreDraft {
       })
     });
 
-    this.contentChanges.nodes(this.nodeMap).forEach(node => {
-      node.parents.forEach(parent => {
-        this.contentChanges.add(parent.id);
-      })
-    });
-
-    console.log('@@@@', this.updated.toArray().map(n => n.toString()).join(', '))
+    const dirty = this.updated.clone();
     this.updated.nodes(this.nodeMap).forEach(node => {
+      node.parents.forEach(parent => {
+        dirty.add(parent.id);
+      })
+    })
+
+    dirty.nodes(this.nodeMap).forEach(node => {
       node.renderVersion += 1;
       console.log('updated node', node.name, node.id.toString(), node.renderVersion, node.contentVersion)
     });
 
-    this.contentChanges.nodes(this.nodeMap).forEach(node => {
-      node.contentVersion += 1;
-      if (!this.updated.has(node.id)) {
-        node.renderVersion += 1;
-      }
+    //
+    this.contentChanged.nodes(this.nodeMap).forEach(node => {
+      node.parents.forEach(parent => {
+        this.contentChanged.add(parent.id);
+      })
+    });
 
+    this.contentChanged.nodes(this.nodeMap).forEach(node => {
+      node.contentVersion += 1;
       console.log('updated content', node.name, node.id.toString(), node.renderVersion, node.contentVersion)
     });
 
-    return
-
-    const updated: Node[] = this.updated.toArray().map(id => this.nodeMap.get(id)).map(identity) as unknown as Node[];
-    const queue = NodeDepthPriorityQueue.from(updated, "desc");
-    const updateOrder = NodeDepthPriorityQueue.from(updated, "desc");
-
-    // console.log('updated nodes',updated.map(n => `${n.name}: ${n.id.toString()}`));
-
-    const visited = NodeIdSet.fromIds(updated.map(n => n.id));
-    // all nodes that are changed will be processed
-    while (queue.size) {
-      const { node, depth } = queue.pop()!;
-      // console.log('processing node', node.name, node.id.toString(), depth);
-      const parent = this.nodeMap.parent(node);
-      // console.log('found parent', node.id.toString(), parent?.id.toString())
-      if (parent) {
-        queue.add(parent, depth - 1);
-        if (visited.has(parent.id)) {
-          continue;
-        }
-        visited.add(parent.id);
-        updateOrder.add(parent, depth - 1);
-      }
-    }
-
-    // console.debug('content changes', this.contentChanges.size, this.contentChanges.map(n => n.toString()).join(', '))
-    const nodeCloner = (data: NodeContentData) => {
-      return {
-        ...data,
-        children: data.children.map(n => {
-          if (this.nodeMap.deleted(n.id)) {
-            return null;
-          } else {
-            // console.log('node map', n.key)
-            return this.nodeMap.get(n.id);
-          }
-        }).filter(identity) as Node[],
-      }
-    }
-
-    const updateStats: string[] = [];
-    while (updateOrder.size) {
-      const { node } = updateOrder.pop()!;
-      const isContentChanged = this.contentChanges.has(node.id);
-      // clone node children only if the node content is changed
-
-      if (!this.nodeMap.has(node.id)) {
-        // node is in update path but is mutated explicitly
-        const immutable = this.nodeMap.get(node.id)!;
-        updateStats.push(`[immutable] ${immutable.name} ${immutable.key}`)
-        // console.debug('immutable node found', node.id.toString(), node.renderVersion)
-        const mutable = node.clone(nodeCloner) as ImmutableNode;
-        mutable.renderVersion += 1
-        if (isContentChanged) {
-          // console.log('content updated', node.id.toString())
-          mutable.contentVersion += 1
-        }
-        this.nodeMap.set(node.id, mutable);
-        // console.debug('updating node', node.name, node.id.toString(), node.textContent, mutable.renderVersion);
-      } else {
-        // the node is explicitly mutated, convert it to immutable node
-        const mutable = this.nodeMap.get(node.id)!;
-        updateStats.push(`[mutable] ${mutable.name} ${mutable.key}`)
-        // console.debug('mutable node found', mutable.key, mutable.textContent, mutable.renderVersion, mutable.props.prefix(LocalHtmlAttrPath))
-        const clone = mutable.clone(nodeCloner);
-        clone.renderVersion += 1
-
-        if (clone.name == 'text') {
-          // console.log('mutable node', node.id.toString(), clone.textContent, clone.renderVersion, Object.isFrozen(mutable))
-        }
-
-        if (isContentChanged) {
-          // console.log('content updated', node.id.toString())
-          clone.contentVersion += 1
-        }
-        this.nodeMap.set(node.id, clone);
-      }
-    }
-
-    // console.log('[STATS]', updateStats.join(', '))
-
     return this;
   }
-
 
   // WARNING: inefficient implementation for validation of ideas only
   private normalize() {
@@ -319,21 +249,25 @@ export class ImmutableDraft implements CoreDraft {
     const nodes = sortNodesByDepth(unstable).reverse();
     const node = first(nodes);
     if (!node) {
+      console.warn('no unstable node not found')
       return
     }
 
     const actions = this.pm.normalize(node);
+    console.debug(actions, node.name, node.key)
     if (!isEmpty(actions)) {
-      console.log('normalizing')
+      console.debug('normalizing', node.name, node.id.toString(), actions)
       actions.forEach(action => {
         action.execute(this)
       })
 
-      this.unstable.remove(node.id);
-
       console.log(actions, actions.map(a => a.toString()), 'actions normalized')
+    }
+
+    this.unstable.remove(node.id);
+    if (this.unstable.size > 0) {
       this.normalize();
-      return
+      return;
     }
 
     this.normalizeSchema()
@@ -355,8 +289,14 @@ export class ImmutableDraft implements CoreDraft {
     // update state
     this.tm.updateContent(node, content);
 
+    if (isArray(content)) {
+      node.descendants().forEach(n => this.addInserted(n));
+    }
+
+    console.log(content, node.textContent, node.renderVersion)
+
     this.addUpdated(nodeId);
-    this.contentChanges.add(nodeId);
+    this.addContentChanged(nodeId);
 
     if (node.isTextContainer && isArray(content)) {
       node.updateProps({
@@ -364,75 +304,66 @@ export class ImmutableDraft implements CoreDraft {
       });
     }
 
-    return
-
-    this.mutable(nodeId, node => {
-      if (!node.isTextContainer && !node.isText) {
-        throw new Error("Cannot update content on a node that is not a text container");
-      }
-
-      this.all(node, n => {
-        if (n.eq(node)) return
-        this.addRemoved(n.id);
-      })
-
-      node.updateContent(content);
-      this.contentChanges.add(node.id);
-
-      if (node.isTextContainer && isArray(content)) {
-        node.updateProps({
-          [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ?? "" : ""
-        });
-      } else if (node.isText) {
-        // NOTE(fix): when the text is updated, the parent should be updated as well
-        // otherwise the pin on parent cant find the updated child text
-        this.mutable(node.parentId!, parent => {
-          const index = node.index;
-          parent.remove(node);
-          parent.insert(node, index);
-        }, false)
-      }
-
-      // console.log('updating content', node.textContent);
-
-      // console.log("updated draft content", node.textContent, node.renderVersion);
-
-      node.descendants().forEach(child => {
-        console.log('inserted content child', child.id.toString());
-        this.nodeMap.set(child.id, child);
-        this.removed.remove(child.id);
-      })
-    });
+    // this.mutable(nodeId, node => {
+    //   if (!node.isTextContainer && !node.isText) {
+    //     throw new Error("Cannot update content on a node that is not a text container");
+    //   }
+    //
+    //   // this.all(node, n => {
+    //   //   if (n.eq(node)) return
+    //   //   this.addRemoved(n.id);
+    //   // })
+    //
+    //   node.updateContent(content);
+    //   this.contentChanged.add(node.id);
+    //
+    //   if (node.isTextContainer && isArray(content)) {
+    //     node.updateProps({
+    //       [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ?? "" : ""
+    //     });
+    //   } else if (node.isText) {
+    //     // NOTE(fix): when the text is updated, the parent should be updated as well
+    //     // otherwise the pin on parent cant find the updated child text
+    //     this.mutable(node.parentId!, parent => {
+    //       const index = node.index;
+    //       parent.remove(node);
+    //       parent.insert(node, index);
+    //     }, false)
+    //   }
+    //
+    //   // console.log('updating content', node.textContent);
+    //
+    //   // console.log("updated draft content", node.textContent, node.renderVersion);
+    //
+    //   node.descendants().forEach(child => {
+    //     console.log('inserted content child', child.id.toString());
+    //     this.nodeMap.set(child.id, child);
+    //     this.removed.remove(child.id);
+    //   })
+    // });
   }
 
-  move(to: Point, node: Node) {
+  move(to: Point, nodeId: NodeId) {
     if (!this.drafting) {
       throw new Error("Cannot move node to a draft that is already committed");
     }
 
-    // moving node should be mutable wo that it can be updated
-    if (Object.isFrozen(node)) {
-      node = node.clone();
+    const node = this.unfreeze(nodeId);
+    const {parent} = node;
+    if (!parent) {
+      throw new Error("Cannot move node that does not have a parent");
     }
 
-    if (!this.get(node.id)) {
-      throw Error("move node not found in state map");
-    }
+    this.tm.remove(node, parent);
+    node.setParentId(null);
 
-    const { parentId } = node;
-    if (!parentId) {
-      throw Error("move node does not have parent id");
-    }
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
 
-    const oldParent = this.get(parentId);
-    if (!oldParent) {
-      throw Error("move node does not have old parent");
-    }
-
-    this.mutable(parentId, parent => {
-      this.updateDependents(node, UpdateDependent.Next);
-      parent.remove(node);
-    });
+    // this.mutable(parentId, parent => {
+    //   this.updateDependents(node, UpdateDependent.Next);
+    //   parent.remove(node);
+    // });
 
     this.insert(to, node, "move");
   }
@@ -466,13 +397,9 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
 
-    if (Object.isFrozen(node)) {
-      throw Error("cannot insert immutable node, it must be at least mutable at top level");
-    }
-
     // mark moved/inserted nodes as inserted ones
     // these will not be rendered explicitly
-    node.all(n => this.addInserted(n.id));
+    node.all(n => this.addInserted(n));
 
     if (type === "create") {
       // set empty placeholder of inserted node if needed
@@ -483,12 +410,9 @@ export class ImmutableDraft implements CoreDraft {
           [PlaceholderPath]: placeholder
         });
       }
-    } else {
-      this.nodeMap.set(node.id, node);
     }
 
     console.debug('inserting new item')
-    return
     switch (at.at) {
       case PointAt.After:
         return this.insertAfter(at.nodeId, node);
@@ -504,20 +428,29 @@ export class ImmutableDraft implements CoreDraft {
   }
 
   private prepend(parentId: NodeId, node: Node) {
-    this.mutable(parentId, parent => {
-      parent.children.forEach(ch => this.mutable(ch.id));
-      parent.insert(node, 0);
-      this.contentChanges.add(parent.id);
-      this.unstable.add(parent.id);
-    });
+    const parent = this.unfreeze(parentId);
+    this.tm.insert(node, parent, 0);
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
+
+    // this.mutable(parentId, parent => {
+    //   parent.children.forEach(ch => this.mutable(ch.id));
+    //   parent.insert(node, 0);
+    //   this.contentChanged.add(parent.id);
+    //   this.unstable.add(parent.id);
+    // });
   }
 
   private append(parentId: NodeId, node: Node) {
-    this.mutable(parentId, parent => {
-      parent.insert(node, parent.size);
-      this.contentChanges.add(parent.id);
-      this.unstable.add(parent.id);
-    });
+    const parent = this.unfreeze(parentId);
+    this.tm.insert(node, parent, parent.size);
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
+    // this.mutable(parentId, parent => {
+    //   parent.insert(node, parent.size);
+    //   this.contentChanged.add(parent.id);
+    //   this.unstable.add(parent.id);
+    // });
   }
 
   private insertBefore(refId: NodeId, node: Node) {
@@ -531,17 +464,10 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot insert node before a node that does not have a parent");
     }
 
-    const parent = this.nodeMap.get(parentId);
-    if (!parent) {
-      throw new Error("Cannot insert node before a node that does not have a parent");
-    }
-
-    this.mutable(parentId, parent => {
-      parent.insert(node, refNode.index);
-      this.updateDependents(node, UpdateDependent.Next);
-      this.contentChanges.add(parent.id);
-      this.unstable.add(parent.id);
-    });
+    const parent = this.unfreeze(parentId);
+    this.tm.insert(node, parent, refNode.index);
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
   }
 
   private insertAfter(refId: NodeId, node: Node) {
@@ -555,25 +481,18 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot insert node before a node that does not have a parent");
     }
 
-    const parent = this.nodeMap.get(parentId);
-    if (!parent) {
-      throw new Error("Cannot insert node before a node that does not have a parent");
-    }
-
-    // console.debug('insert after', refNode.id.toString(), refNode.name, refNode.index, parent.children.length)
-    this.mutable(parentId, parent => {
-      this.updateDependents(refNode, UpdateDependent.Next);
-      parent.insert(node, refNode.index + 1);
-      this.updateDependents(refNode, UpdateDependent.Prev);
-      this.contentChanges.add(parent.id);
-      this.unstable.add(parent.id);
-    });
+    const parent = this.unfreeze(parentId);
+    this.tm.insert(node, parent, refNode.index + 1);
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
   }
 
-  remove(node: Node) {
+  remove(nodeId: NodeId) {
     if (!this.drafting) {
       throw new Error("Cannot remove node from a draft that is already committed");
     }
+
+    const node = this.unfreeze(nodeId);
 
     const parentId = node.parentId;
     if (!parentId) {
@@ -581,7 +500,11 @@ export class ImmutableDraft implements CoreDraft {
     }
 
     const parent = this.unfreeze(parentId);
-    parent.remove(node);
+    this.tm.remove(node, parent);
+
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
+    node.all(n => this.addRemoved(n.id));
 
     // if parent title is empty, set placeholder from parent
     // if (parent.isTextContainer && parent.isEmpty) {
@@ -590,24 +513,6 @@ export class ImmutableDraft implements CoreDraft {
     //     [PlaceholderPath]: placeholder
     //   });
     // }
-
-    // bookkeeping
-    this.addUpdated(parent.id);
-    this.contentChanges.add(parent.id);
-    node.all(n => this.addRemoved(n.id));
-  }
-
-  all(node: Node, fn: (node: Node) => void) {
-    // callback at the beginning of the recursion to process the node
-    fn(node);
-
-    node.children.map(ch => {
-      this.node(ch.id, n => {
-        if (ch.parentId?.eq(node.id)) {
-          this.all(n, fn);
-        }
-      });
-    })
   }
 
   change(nodeId: NodeId, type: NodeType) {
@@ -615,36 +520,53 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
-    this.unstable.add(nodeId);
-    this.mutable(nodeId, node => {
-      node.changeType(type);
-      // node.nextSiblings?.forEach(ch => this.mutable(ch.id));
-      this.updateDependents(node, UpdateDependent.Next);
-      if (node.isContainer && node.firstChild?.isEmpty) {
-        this.mutable(node.firstChild.id, child => {
-          child.updateProps({
-            [PlaceholderPath]: type.props.get<string>(EmptyPlaceholderPath) ?? ""
-          });
-        });
-      }
-    });
+    const node = this.unfreeze(nodeId);
+    this.tm.changeType(node, type);
+
+    if (node.isContainer && node.firstChild?.isEmpty) {
+      const firstChild = this.unfreeze(node.firstChild.id);
+      firstChild.updateProps({
+        [PlaceholderPath]: type.props.get<string>(EmptyPlaceholderPath) ?? ""
+      });
+    }
+
+    this.addUpdated(node.id);
+
+    // this.unstable.add(nodeId);
+    // this.mutable(nodeId, node => {
+    //   node.changeType(type);
+    //   // node.nextSiblings?.forEach(ch => this.mutable(ch.id));
+    //   this.updateDependents(node, UpdateDependent.Next);
+    //   if (node.isContainer && node.firstChild?.isEmpty) {
+    //     this.mutable(node.firstChild.id, child => {
+    //       child.updateProps({
+    //         [PlaceholderPath]: type.props.get<string>(EmptyPlaceholderPath) ?? ""
+    //       });
+    //     });
+    //   }
+    // });
   }
 
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");
     }
+
     if (this.nodeMap.deleted(nodeId)) {
       if (props[SelectedPath] === false) {
         this.selected.remove(nodeId);
       }
-      return;
     }
+
+    const node = this.unfreeze(nodeId);
+    this.tm.updateProps(node, props);
+    this.addUpdated(node.id);
+
     // console.log('before update props', this.nodeMap.get(nodeId)?.properties.toKV());
 
-    this.mutable(nodeId, node => {
-      node.updateProps(props);
-    });
+    // this.mutable(nodeId, node => {
+    //   node.updateProps(props);
+    // });
 
     if (props[SelectedPath] === true) {
       this.selected.add(nodeId);
@@ -665,28 +587,27 @@ export class ImmutableDraft implements CoreDraft {
     // console.log("update selection", selection.isInline);
     this.selection = selection;
     this.changes.add(SelectionChange.create(selection, this.state.selection.unpin()));
-    return;
+
+    return
 
     // update empty placeholder if needed
     if (this.state.selection.isCollapsed) {
       if (!this.state.selection.isIdentity) {
         const {head: headPin} = this.state.selection;
         const {head} = this.state.selection.unpin();
-        const node = this.nodeMap.get(head.nodeId);
+        const node = this.unfreeze(head.nodeId);
         if (!node) {
           throw new Error("Cannot update selection on a draft that is already committed");
         }
 
         if (node.isEmpty) {
-          this.mutable(head.nodeId, node => {
-            const parent = this.nodeMap.parent(node);
-            const emptyPlaceholder = parent?.props.get<string>(EmptyPlaceholderPath) ?? " ";
-            if (!parent) return;
-            node.updateProps({
-              [PlaceholderPath]: emptyPlaceholder,
-            });
-            this.contentChanges.add(parent.id);
+          const {parent} = node;
+          if (!parent) return
+          this.tm.updateProps(node, {
+            [PlaceholderPath]: parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
           });
+          console.log('updated empty placeholder', node.key, parent.props.get<string>(EmptyPlaceholderPath), parent.name)
+          this.addUpdated(node.id);
         }
       }
     }
@@ -695,20 +616,18 @@ export class ImmutableDraft implements CoreDraft {
     if (selection.isCollapsed && !selection.isIdentity) {
       const {head: headPin} = this.state.selection;
       const { head } = selection;
-      const node = this.nodeMap.get(head.nodeId);
+      const node = this.unfreeze(head.nodeId);
       if (!node) {
         throw new Error("Cannot update selection on a draft that is already committed");
       }
 
       if (node.isEmpty) {
-        this.mutable(head.nodeId, node => {
-          const parent = this.nodeMap.parent(node);
-          const focusedPlaceholder = parent?.props.get<string>(FocusedPlaceholderPath) ?? "";
-          if (!parent) return;
-          node.updateProps({
-            [PlaceholderPath]: focusedPlaceholder,
-          });
-        });
+        const {parent} = node;
+        if (!parent) return;
+        this.tm.updateProps(node, {
+          [PlaceholderPath]: parent.props.get<string>(FocusedPlaceholderPath) ?? "",
+        })
+        this.addUpdated(node.id);
       }
     }
 
@@ -718,117 +637,84 @@ export class ImmutableDraft implements CoreDraft {
     }
 
     if (!this.state.selection.isInvalid) {
-      this.mutable(this.state.selection.tail.node.id, node => {
-        node.updateProps({
-          [HasFocusPath]: '',
-        })
-      })
+      // const node = this.unfreeze(this.state.selection.tail.node.id);
+      // if (this.nodeMap.deleted(node.id)) return;
+      // this.tm.updateProps(node, {
+      //   [HasFocusPath]: '',
+      // });
     }
 
     console.log('Selection', this.selection.head.eq(Point.IDENTITY))
     if (!this.selection.isInvalid) {
-      this.mutable(this.selection.tail.nodeId, node => {
-        node.updateProps({
-          [HasFocusPath]: true,
-        })
+      const node = this.unfreeze(this.selection.tail.nodeId);
+      this.tm.updateProps(node, {
+        [HasFocusPath]: true,
       })
     }
   }
 
   private updateBlockSelection(selection: PointedSelection) {
     // if (browser)
-    const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
-    const after = selection.pin()!;
-    if (after) {
-      const nids = after.blocks.map(n => n.id);
-      const now = NodeIdSet.fromIds(nids);
-      console.log(nids, after.nodes, after.head.node, after.tail.node)
-
-      this.selection = PointedSelection.create(selection.tail, selection.head, selection.origin);
-
-      // find removed block selection
-      old.diff(now).forEach(id => {
-        this.mutable(id, node => {
-          node.updateProps({
-            [SelectedPath]: false
-          });
-        });
-      })
-
-      // find new block selection
-      now.diff(old).forEach(id => {
-        this.mutable(id, node => {
-          console.log('selected node', node.name, node.id.toString());
-          node.updateProps({
-            [SelectedPath]: true
-          });
-        });
-      })
-    }
+    // const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
+    // const after = selection.pin()!;
+    // if (after) {
+    //   const nids = after.blocks.map(n => n.id);
+    //   const now = NodeIdSet.fromIds(nids);
+    //   console.log(nids, after.nodes, after.head.node, after.tail.node)
+    //
+    //   this.selection = PointedSelection.create(selection.tail, selection.head, selection.origin);
+    //
+    //   // find removed block selection
+    //   old.diff(now).forEach(id => {
+    //     this.mutable(id, node => {
+    //       node.updateProps({
+    //         [SelectedPath]: false
+    //       });
+    //     });
+    //   })
+    //
+    //   // find new block selection
+    //   now.diff(old).forEach(id => {
+    //     this.mutable(id, node => {
+    //       console.log('selected node', node.name, node.id.toString());
+    //       node.updateProps({
+    //         [SelectedPath]: true
+    //       });
+    //     });
+    //   })
+    // }
   }
 
   // check and update render dependents
   private updateDependents(node: Node, flag: number) {
-    if (flag & UpdateDependent.Parent && node.parent?.type.spec.depends?.child) {
-      this.mutable(node.parent.id, parent => {
-        this.updateDependents(parent, UpdateDependent.Parent);
-      })
-    }
-
-    // console.log('update prev', flag, node.id.toString(), node.prevSibling?.type.spec.depends?.prev)
-    if(flag & UpdateDependent.Prev && node.prevSibling?.type.spec.depends?.next) {
-      this.mutable(node.prevSibling.id, prev => {
-        this.updateDependents(prev, UpdateDependent.Prev);
-      })
-    }
-
-    // console.log('update next', flag, node.id.toString(), node.nextSibling?.type.spec.depends?.prev)
-    if(flag & UpdateDependent.Next && node.nextSibling?.type.spec.depends?.prev) {
-      this.mutable(node.nextSibling.id, next => {
-        this.updateDependents(next, UpdateDependent.Next);
-      })
-    }
-  }
-
-  // creates a mutable copy of a node and adds it to the draft changes
-  private mutable(id: NodeId, fn?: (node: Node) => void, changed = true) {
-    // can not update a deleted node
-    if (this.nodeMap.deleted(id)) {
-      return
-    }
-
-    const node = this.nodeMap.get(id);
-    if (!node) {
-      throw new Error("Cannot mutate node that does not exist");
-    }
-
-    // console.log('before mutable', id.toString(), node.textContent, this.nodeMap.has(id), node.renderVersion, node)
-    const clone = this.nodeMap.has(id) ? node : node.clone();
-    const mutable = DraftNode.from(this.state.scope, clone, this.changes)
-    // console.log('after mutable', id.toString(), mutable.textContent, this.nodeMap.has(id), mutable.renderVersion, mutable)
-
-    fn?.(mutable);
-
-    // console.log('', mutable.name, id.toString(), this.inserted.has(id), this.contentChanges.has(id))
-
-    // newly inserted nodes are not marked updated for render
-    // their parent will be marked updated
-    if (!this.inserted.has(id)) {
-      if (changed) {
-        this.addUpdated(id);
-      }
-    } else {
-      console.debug('node is not marked updated, already marked inserted', id.toString())
-    }
-    // put the mutable node into the draft map
-    this.nodeMap.set(id, mutable);
-
-    return mutable;
+    // if (flag & UpdateDependent.Parent && node.parent?.type.spec.depends?.child) {
+    //   this.mutable(node.parent.id, parent => {
+    //     this.updateDependents(parent, UpdateDependent.Parent);
+    //   })
+    // }
+    //
+    // // console.log('update prev', flag, node.id.toString(), node.prevSibling?.type.spec.depends?.prev)
+    // if(flag & UpdateDependent.Prev && node.prevSibling?.type.spec.depends?.next) {
+    //   this.mutable(node.prevSibling.id, prev => {
+    //     this.updateDependents(prev, UpdateDependent.Prev);
+    //   })
+    // }
+    //
+    // // console.log('update next', flag, node.id.toString(), node.nextSibling?.type.spec.depends?.prev)
+    // if(flag & UpdateDependent.Next && node.nextSibling?.type.spec.depends?.prev) {
+    //   this.mutable(node.nextSibling.id, next => {
+    //     this.updateDependents(next, UpdateDependent.Next);
+    //   })
+    // }
   }
 
   private unfreeze(id: NodeId): MutableNode {
     const node = this.node(id);
-    const root = this.root();
+    const root = this.nodeMap.get(NodeId.ROOT);
+    if (!root) {
+      throw new Error("Cannot mutate node that does not exist");
+    }
+
     const {path} = node;
     root.unfreeze(path, this.nodeMap);
 
@@ -845,15 +731,6 @@ export class ImmutableDraft implements CoreDraft {
     fn?.(node);
 
     return node;
-  }
-
-  private root() {
-    const root = this.nodeMap.get(NodeId.ROOT);
-    if (!root) {
-      throw new Error("Cannot mutate node that does not exist");
-    }
-
-    return root;
   }
 
   private delete(id: NodeId) {
@@ -874,44 +751,10 @@ interface NodeDepthEntry {
   depth: number;
 }
 
-const NodeDepthComparator = (a: NodeDepthEntry, b: NodeDepthEntry) => {
-  if (!a.node.parentId) {
-    return true;
-  }
-
-  if (!b.node.parentId) {
-    return false;
-  }
-
-  if (a.depth === b.depth) {
-    if (a.node.parentId === b.node.parentId) {
-      return a.node.id.comp(b.node.id) < 0;
-    } else if (a.node.parentId && b.node.parentId) {
-      return a.node.parentId.comp(b.node.parentId) < 0;
-    } else {
-      return false;
-    }
-  }
-
-  return a.depth < b.depth;
-};
-
-
-
 
 // traps the changes to the node and records them into the draft
 class Transformer {
   constructor(private readonly changes: StateChanges) {}
-
-  setParent(node: Node, parent: Node) {
-    console.log(p14('%c[trap]'), "color:green", 'set parent', node.key);
-    node.setParent(parent)
-  }
-
-  setParentId(node: Node, parentId: Optional<NodeId>) {
-    console.log(p14('%c[trap]'), "color:green", 'set parent id', node.key);
-    node.setParentId(parentId)
-  }
 
   changeType(node: Node, type: NodeType) {
     console.log(p14('%c[trap]'), "color:green", 'change type', node.id.toString(), node.renderVersion);
@@ -920,7 +763,7 @@ class Transformer {
     node.changeType(type);
   }
 
-  insert(parent: Node, node: Node,  index: number) {
+  insert(node: Node, parent: Node, index: number) {
     console.log(p14('%c[trap]'), "color:green", 'insert', node.key);
     const updated = parent.insert(node, index);
 
@@ -979,11 +822,13 @@ class Transformer {
     }
 
     const path = node.path;
-    if (oldText !== newText) {
+
+    if (isString(content) && oldText !== newText) {
       this.changes.add(SetContentChange.create(node.id, path, oldText, newText));
+      return
     }
 
-    if (oldChildren !== newChildren) {
+    if (isArray(content) && oldChildren.length !== newChildren.length || oldChildren.some((n, i) => n.id !== newChildren[i].id)) {
       this.changes.add(SetContentChange.create(node.id, path, oldChildren.map(n => n.id), newChildren.map(n => n.id)))
       oldChildren.forEach(n => this.changes.dataMap.set(n.id, n.data));
       newChildren.forEach(n => this.changes.dataMap.set(n.id, n.data));
@@ -991,7 +836,7 @@ class Transformer {
   }
 
   updateProps(node: Node, props: NodePropsJson) {
-    console.log(p14('%c[trap]'), "color:green", 'update', node.key)
+    console.log(p14('%c[trap]'), "color:green", 'update', node.key);
     node.updateProps(props);
   }
 }
@@ -1030,3 +875,25 @@ class NodeDepthPriorityQueue {
     return this.queue.size;
   }
 }
+
+const NodeDepthComparator = (a: NodeDepthEntry, b: NodeDepthEntry) => {
+  if (!a.node.parentId) {
+    return true;
+  }
+
+  if (!b.node.parentId) {
+    return false;
+  }
+
+  if (a.depth === b.depth) {
+    if (a.node.parentId === b.node.parentId) {
+      return a.node.id.comp(b.node.id) < 0;
+    } else if (a.node.parentId && b.node.parentId) {
+      return a.node.parentId.comp(b.node.parentId) < 0;
+    } else {
+      return false;
+    }
+  }
+
+  return a.depth < b.depth;
+};

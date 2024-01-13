@@ -16,15 +16,12 @@ export class SelectAction implements CarbonAction {
 	// this will update the carbon selection state or schedule a selection change after the ui update
   execute(draft: Draft) {
 		const { before, after, origin } = this;
-		// draft.updateSelection(after);
     // syncs selection with dom depending on `origin`
     // used by commands to inform editor of a selection change
     // the selection might be queued for later update if the editor is not ready
     if ([ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
       this.onSelectionChange(draft, before, after, origin)
     } else {
-      const event = SelectionEvent.create(before, after, origin);
-      // console.log('pushing selection event to draft for next state', event);
       draft.updateSelection(after);
     }
 	}
@@ -45,11 +42,6 @@ export class SelectAction implements CarbonAction {
 
     draft.updateSelection(after);
     console.log('synced selection from origin', origin, after.toString())
-    // this.state.updateSelection(selection, origin, origin !== ActionOrigin.DomSelectionChange && origin !== ActionOrigin.NoSync);
-    // console.log('###', this.react.selection.toString(), selection.toString());
-    // this.updateFocusPlaceholder(this.state.prevSelection, selection);
-    // this.react.change.update();
-    // this.react.emit(EventsOut.selectionUpdated, this.state);
   }
 
 	// FIXME: this is a hack to make undo/redo work with selection
@@ -60,9 +52,9 @@ export class SelectAction implements CarbonAction {
 		return SelectAction.create(this.before, after, this.origin);
 	}
 
-	merge(other: SelectAction) {
-		return SelectAction.create(this.before, other.after, this.origin);
-	}
+	// merge(other: SelectAction) {
+	// 	return SelectAction.create(this.before, other.after, this.origin);
+	// }
 
 	inverse(): CarbonAction {
 		this.after.origin = ActionOrigin.System

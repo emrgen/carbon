@@ -51,7 +51,7 @@ const InnerElement = (props: RendererProps, forwardedRef: ForwardedRef<any>) => 
     const style = node.props.get('local/style') ?? {};
     const attrs = node.props.get(LocalHtmlAttrPath) ?? {};
     for (const [k, v] of Object.entries(attrs)) {
-      if (v === null || v === undefined || v == '') {
+      if (v === null || v === undefined || v === '') {
         delete attrs[k];
       }
     }
