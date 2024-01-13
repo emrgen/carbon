@@ -58,6 +58,7 @@ export class StateScope {
 
   static delete(scope: Symbol) {
     STATE_SCOPE.delete(scope);
+    StateScope.remove(scope);
   }
 }
 

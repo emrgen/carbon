@@ -354,16 +354,13 @@ export class ImmutableDraft implements CoreDraft {
       throw new Error("Cannot move node that does not have a parent");
     }
 
+    this.updateDependents(node, UpdateDependent.Next);
+
     this.tm.remove(node, parent);
     node.setParentId(null);
 
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
-
-    // this.mutable(parentId, parent => {
-    //   this.updateDependents(node, UpdateDependent.Next);
-    //   parent.remove(node);
-    // });
 
     this.insert(to, node, "move");
   }
@@ -521,6 +518,7 @@ export class ImmutableDraft implements CoreDraft {
     }
 
     const node = this.unfreeze(nodeId);
+    this.updateDependents(node, UpdateDependent.Next);
     this.tm.changeType(node, type);
 
     if (node.isContainer && node.firstChild?.isEmpty) {
@@ -531,20 +529,6 @@ export class ImmutableDraft implements CoreDraft {
     }
 
     this.addUpdated(node.id);
-
-    // this.unstable.add(nodeId);
-    // this.mutable(nodeId, node => {
-    //   node.changeType(type);
-    //   // node.nextSiblings?.forEach(ch => this.mutable(ch.id));
-    //   this.updateDependents(node, UpdateDependent.Next);
-    //   if (node.isContainer && node.firstChild?.isEmpty) {
-    //     this.mutable(node.firstChild.id, child => {
-    //       child.updateProps({
-    //         [PlaceholderPath]: type.props.get<string>(EmptyPlaceholderPath) ?? ""
-    //       });
-    //     });
-    //   }
-    // });
   }
 
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
@@ -588,32 +572,31 @@ export class ImmutableDraft implements CoreDraft {
     this.selection = selection;
     this.changes.add(SelectionChange.create(selection, this.state.selection.unpin()));
 
-    return
-
-    // update empty placeholder if needed
+    // update empty placeholder of the previous head node
     if (this.state.selection.isCollapsed) {
       if (!this.state.selection.isIdentity) {
-        const {head: headPin} = this.state.selection;
         const {head} = this.state.selection.unpin();
-        const node = this.unfreeze(head.nodeId);
-        if (!node) {
-          throw new Error("Cannot update selection on a draft that is already committed");
-        }
+        if (!this.nodeMap.deleted(head.nodeId)) {
+          const node = this.unfreeze(head.nodeId);
+          if (!node) {
+            throw new Error("Cannot update selection on a draft that is already committed");
+          }
 
-        if (node.isEmpty) {
-          const {parent} = node;
-          if (!parent) return
-          this.tm.updateProps(node, {
-            [PlaceholderPath]: parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
-          });
-          console.log('updated empty placeholder', node.key, parent.props.get<string>(EmptyPlaceholderPath), parent.name)
-          this.addUpdated(node.id);
+          if (node.isEmpty) {
+            const {parent} = node;
+            if (!parent) return
+            this.tm.updateProps(node, {
+              [PlaceholderPath]: parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
+            });
+            console.log('updated empty placeholder', node.key, parent.props.get<string>(EmptyPlaceholderPath), parent.name)
+            this.addUpdated(node.id);
+          }
         }
       }
     }
 
-    // update focus placeholder if needed
-    if (selection.isCollapsed && !selection.isIdentity) {
+    // update focus placeholder of the current head node
+    if (selection.isCollapsed && !selection.isInvalid) {
       const {head: headPin} = this.state.selection;
       const { head } = selection;
       const node = this.unfreeze(head.nodeId);
@@ -637,14 +620,17 @@ export class ImmutableDraft implements CoreDraft {
     }
 
     if (!this.state.selection.isInvalid) {
-      // const node = this.unfreeze(this.state.selection.tail.node.id);
-      // if (this.nodeMap.deleted(node.id)) return;
-      // this.tm.updateProps(node, {
-      //   [HasFocusPath]: '',
-      // });
+      const {tail} = this.state.selection.unpin();
+      if (!this.nodeMap.deleted(tail.nodeId)) {
+        const node = this.unfreeze(tail.nodeId);
+        if (this.nodeMap.deleted(node.id)) return;
+        this.tm.updateProps(node, {
+          [HasFocusPath]: '',
+        });
+      }
     }
 
-    console.log('Selection', this.selection.head.eq(Point.IDENTITY))
+    // console.log('Selection', this.selection.head.eq(Point.IDENTITY))
     if (!this.selection.isInvalid) {
       const node = this.unfreeze(this.selection.tail.nodeId);
       this.tm.updateProps(node, {
@@ -687,25 +673,32 @@ export class ImmutableDraft implements CoreDraft {
 
   // check and update render dependents
   private updateDependents(node: Node, flag: number) {
-    // if (flag & UpdateDependent.Parent && node.parent?.type.spec.depends?.child) {
-    //   this.mutable(node.parent.id, parent => {
-    //     this.updateDependents(parent, UpdateDependent.Parent);
-    //   })
-    // }
-    //
-    // // console.log('update prev', flag, node.id.toString(), node.prevSibling?.type.spec.depends?.prev)
-    // if(flag & UpdateDependent.Prev && node.prevSibling?.type.spec.depends?.next) {
-    //   this.mutable(node.prevSibling.id, prev => {
-    //     this.updateDependents(prev, UpdateDependent.Prev);
-    //   })
-    // }
-    //
-    // // console.log('update next', flag, node.id.toString(), node.nextSibling?.type.spec.depends?.prev)
-    // if(flag & UpdateDependent.Next && node.nextSibling?.type.spec.depends?.prev) {
-    //   this.mutable(node.nextSibling.id, next => {
-    //     this.updateDependents(next, UpdateDependent.Next);
-    //   })
-    // }
+    if (flag & UpdateDependent.Parent && node.parent?.type.spec.depends?.child) {
+      const parentId = node.parent?.id;
+      if (!parentId) return
+      const parent = this.unfreeze(parentId);
+      this.addUpdated(parent.id);
+      this.updateDependents(parent, UpdateDependent.Parent);
+    }
+
+    // console.log('update prev', flag, node.id.toString(), node.prevSibling?.type.spec.depends?.prev)
+    if(flag & UpdateDependent.Prev && node.prevSibling?.type.spec.depends?.next) {
+      const prevId = node.prevSibling?.id;
+      if (!prevId) return
+      const prev = this.unfreeze(prevId);
+      this.addUpdated(prev.id);
+      this.updateDependents(prev, UpdateDependent.Prev);
+    }
+
+
+    // console.log('update next', flag, node.id.toString(), node.nextSibling?.type.spec.depends?.prev)
+    if(flag & UpdateDependent.Next && node.nextSibling?.type.spec.depends?.prev) {
+      const nextId = node.nextSibling?.id;
+      if (!nextId) return
+      const next = this.unfreeze(nextId);
+      this.addUpdated(next.id);
+      this.updateDependents(next, UpdateDependent.Next);
+    }
   }
 
   private unfreeze(id: NodeId): MutableNode {

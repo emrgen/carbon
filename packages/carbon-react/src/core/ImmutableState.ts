@@ -89,7 +89,6 @@ export class ImmutableState implements State {
 
   deactivate() {
     StateScope.delete(this.scope);
-    StateScope.remove(this.scope);
   }
 
   clone(depth: number = 2) {
