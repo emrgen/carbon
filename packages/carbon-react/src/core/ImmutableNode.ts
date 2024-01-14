@@ -49,7 +49,7 @@ export class ImmutableNode extends Node {
   }
 
   private getIndex() {
-    const parent = this.parent;
+    const parent = this.parent as ImmutableNode;
     if (!parent) {
       // console.warn('node has no parent', this.id.toString());
       return -1
@@ -62,7 +62,7 @@ export class ImmutableNode extends Node {
       return findIndex(children, n => {
         return this.id.eq(n.id);
       });
-    }, this.isFrozen)
+    }, parent.isFrozen)
   }
 
   override get key() {

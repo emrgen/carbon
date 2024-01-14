@@ -453,6 +453,7 @@ export class ImmutableDraft implements Draft {
 
     const parent = this.unfreeze(parentId);
     this.tm.insert(node, parent, refNode.index + 1);
+    this.updateDependents(node, UpdateDependent.Next)
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
   }
