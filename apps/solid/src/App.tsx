@@ -297,7 +297,7 @@ const components: Record<string, any> = {
   'carbon': BlockElement,
   'document': BlockElement,
   'todo': TodoElement,
-  'numberedList': NumberedElement,
+  'numberList': NumberedElement,
   'section': BlockElement,
   'title': BlockElement,
   'text': TextElement,

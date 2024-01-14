@@ -131,10 +131,9 @@ $lineHeight = 22px
 
 [data-name=section]
 [data-name=collapsible]
-[data-name=bulletedList]
-[data-name=numberedList]
+[data-name=bulletList]
+[data-name=numberList]
 [data-name=todo]
-[data-name=collapsibleList]
 [data-name=h1]
 [data-as=h1]
 [data-name=h2]
@@ -165,11 +164,11 @@ $lineHeight = 22px
 //    [data-type=content]
 //        display flex
 
-[data-name=numberedList][data-as=h1]
+[data-name=numberList][data-as=h1]
     [data-type=content]
         padding-left: 20px
 
-[data-name=numberedList][data-as=h2]
+[data-name=numberList][data-as=h2]
     [data-type=content]
         padding-left: 12px
 
@@ -326,12 +325,12 @@ span[data-name=text] {
 
 // background: #eee
 
-[data-name=bulletedList]
+[data-name=bulletList]
     > [data-type=children]
         padding-left 0px
     padding-left: 30px
 
-    .carbon-bulletedList__label
+    .carbon-bulletList__label
         padding 0 10px
         user-select: none
         position absolute
@@ -363,12 +362,12 @@ span[data-name=text] {
 
 // vertical-align: middle
 
-[data-name=numberedList]
+[data-name=numberList]
     > [data-type=children]
         padding-left 0px
     padding-left: 30px
 
-    .carbon-numberedList__label
+    .carbon-numberList__label
         padding 0 10px
         user-select: none
         position absolute

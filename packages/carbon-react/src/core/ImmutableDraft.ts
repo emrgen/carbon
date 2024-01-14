@@ -79,14 +79,11 @@ export class ImmutableDraft implements Draft {
   tm: Transformer;
 
   private drafting = true;
-  private type: TransactionType;
 
   constructor(state: ImmutableState, origin: ActionOrigin, type: TransactionType, pm: PluginManager, schema: Schema) {
     this.origin = origin;
-    this.type = type;
     this.state = state;
     this.pm = pm;
-    console.log('[ORIGIN]', origin, type)
     this.actions = new StateActions([], type);
     this.tm = new Transformer(this.changes, this.actions);
     this.schema = schema;
@@ -215,7 +212,7 @@ export class ImmutableDraft implements Draft {
       }
     })
 
-    // this.normalize();
+    this.normalize();
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes

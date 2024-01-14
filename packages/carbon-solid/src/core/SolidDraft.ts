@@ -1,5 +1,6 @@
 import {Optional} from "@emrgen/types";
 import {
+  ActionOrigin,
   BlockSelection,
   Draft,
   Node,
@@ -10,9 +11,9 @@ import {
   NodeType,
   Point,
   PointAt,
-  PointedSelection,
+  PointedSelection, Schema,
   SelectedPath,
-  State
+  State, TransactionType
 } from "@emrgen/carbon-core";
 import {SolidNodeMap} from "./NodeMap";
 import {isArray} from "lodash";
@@ -25,7 +26,8 @@ export class SolidDraft implements Draft {
   contentChanged: NodeIdSet = NodeIdSet.empty();
   selected: NodeIdSet = NodeIdSet.empty();
 
-  constructor(private state: State) {
+  constructor(private state: State, readonly origin: ActionOrigin, readonly type: TransactionType, readonly schema: Schema) {
+    this.schema = schema;
     state.blockSelection.blocks.forEach(node => {
       this.selected.add(node.id);
     });
@@ -110,9 +112,19 @@ export class SolidDraft implements Draft {
 
   }
 
-  move(to: Point, node: Node): void {
-    console.log(p14('%c[trap]'), "color:green", 'move', to.toString(), node.toString());
-    this.remove(node)
+  move(to: Point, nodeId: NodeId): void {
+    console.log(p14('%c[trap]'), "color:green", 'move', to.toString(), nodeId.toString());
+    const node = this.get(nodeId);
+    if (!node) {
+      throw new Error(`Node ${nodeId.toString()} not found`);
+    }
+
+    const {parent} = node;
+    if (!parent) {
+      throw new Error(`Parent of ${node.id.toString()} not found`);
+    }
+
+    parent.remove(node);
     this.insert(to, node, "move");
   }
 
@@ -189,7 +201,12 @@ export class SolidDraft implements Draft {
     this.contentChanged.add(parent.id);
   }
 
-  remove(node: Node): void {
+  remove(nodeId: NodeId): void {
+    console.log(p14('%c[trap]'), "color:green", 'remove', nodeId.toString());
+    const node = this.get(nodeId);
+    if (!node) {
+      throw new Error(`Node ${nodeId.toString()} not found`);
+    }
     console.log(p14('%c[trap]'), "color:green", 'remove', node.toString());
     const parent = this.parent(node);
     if (!parent) {
@@ -244,7 +261,7 @@ export class SolidDraft implements Draft {
 
   updateSelection(selection: PointedSelection): void {
     console.log('updateSelection', selection.toString());
-    const pinned = selection.pin(this.state.nodeMap);
+    const pinned = selection.pin();
     if (!pinned) {
       throw new Error('Invalid selection');
     }

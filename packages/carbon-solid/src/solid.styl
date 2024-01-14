@@ -20,12 +20,12 @@ $selectionHaloColor = #accef78d
     line-height 36px
 
 [data-name=section]
-[data-name=bulletedList]
-[data-name=numberedList]
+[data-name=bulletList]
+[data-name=numberList]
   margin-top: 1px;
   > [data-name=section],
-  > [data-name=bulletedList]
-  > [data-name=numberedList]
+  > [data-name=bulletList]
+  > [data-name=numberList]
     margin-left: 30px;
 
 [data-name=h1] > [data-name=title]
@@ -64,7 +64,7 @@ $selectionHaloColor = #accef78d
     height: 1px
     background: #ccc
 
-[data-name=bulletedList]
+[data-name=bulletList]
   > [data-name=title]
     :before
       content: '• '
@@ -75,12 +75,12 @@ $selectionHaloColor = #accef78d
       vertical-align: middle
 
 // number list counter styles
-//[data-name=bulletedList],
+//[data-name=bulletList],
 //[data-name=section],
 //[data-name=divider]
 //  counter-reset: number;
 
-//[data-name=numberedList] > [data-name=title]::before {
+//[data-name=numberList] > [data-name=title]::before {
 //  content: counter(number) ". ";
 //  //counter-increment: number;
 //  margin-right: 1em;
@@ -105,8 +105,8 @@ $selectionHaloColor = #accef78d
 
 [data-name=document]
 [data-name=section]
-[data-name=bulletedList]
-[data-name=numberedList]
+[data-name=bulletList]
+[data-name=numberList]
   position: relative;
   &:after
     content: attr(data-id)

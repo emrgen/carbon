@@ -21,7 +21,7 @@ export const BulletedListComp = (props: RendererProps) => {
       <div
         contentEditable="false"
         suppressContentEditableWarning
-        className="carbon-bulletedList__label"
+        className="carbon-bulletList__label"
       >
         ●
       </div>

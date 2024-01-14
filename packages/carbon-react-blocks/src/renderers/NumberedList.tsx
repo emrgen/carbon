@@ -26,7 +26,7 @@ const listNumber = (node: Node, parent: Optional<Node>): number => {
 
   let result = 0;
   for (const child of parent?.children) {
-    if (child.name === "numberedList") {
+    if (child.name === "numberList") {
       result += 1;
       if (child.eq(node)) {
         return result;
@@ -49,7 +49,7 @@ export const NumberedListComp = (props: RendererProps) => {
     return (<label
       contentEditable="false"
       suppressContentEditableWarning
-      className="carbon-numberedList__label"
+      className="carbon-numberList__label"
     >
       {listNumber(node, node.parent) + "."}
     </label>)

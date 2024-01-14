@@ -35,16 +35,16 @@ export class ChangeName extends BeforePlugin {
   rules: BeforeInputRuleHandler[] = [];
 
   inputRules = new BeforeInputRuleHandler([
-    //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberedList')),
+    //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberList')),
     new InputRule(/^(\[]\s)(.)*/, this.tryChangeName('todo', ['nestable'])),
     new InputRule(/^(#\s)(.)*/, this.tryChangeName('h1', ['nestable'])),
     new InputRule(/^(##\s)(.)*/, this.tryChangeName('h2', ['nestable'])),
     new InputRule(/^(###\s)(.)*/, this.tryChangeName('h3', ['nestable'])),
     new InputRule(/^(####\s)(.)*/, this.tryChangeName('h4', ['nestable'])),
 
-    new InputRule(/^(-\s)(.)*/, this.tryChangeName('bulletedList', ['nestable'])),
-    new InputRule(/^(\*\s)(.)*/, this.tryChangeName('bulletedList', ['nestable'])),
-    new InputRule(/^([0-9]+\.\s)(.)*/, this.tryChangeName('numberedList', ['nestable'])),
+    new InputRule(/^(-\s)(.)*/, this.tryChangeName('bulletList', ['nestable'])),
+    new InputRule(/^(\*\s)(.)*/, this.tryChangeName('bulletList', ['nestable'])),
+    new InputRule(/^([0-9]+\.\s)(.)*/, this.tryChangeName('numberList', ['nestable'])),
     new InputRule(/^(\|\s)(.)*/, this.tryChangeName('quote', ['nestable'])),
     new InputRule(/^(>>\s)(.)*/, this.tryChangeName('callout', ['nestable'])),
     new InputRule(/^(>\s)(.)*/, this.tryChangeName('collapsible', ['nestable'])),
@@ -93,7 +93,7 @@ export class ChangeName extends BeforePlugin {
         return
       }
 
-      if (name === 'numberedList') {
+      if (name === 'numberList') {
         const listNumber = NumberedList.listNumber(changeNode)
         const inputNumber = parseInt(match[1].slice(0, -2));
         if (listNumber != inputNumber) {

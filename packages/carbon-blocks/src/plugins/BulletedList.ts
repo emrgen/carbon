@@ -2,16 +2,16 @@ import { Carbon, CarbonPlugin, Node, NodeSpec, SerializedNode } from "@emrgen/ca
 import { Section } from "./Section";
 
 export class BulletedList extends Section {
-  name = 'bulletedList'
+  name = 'bulletList'
 
   spec(): NodeSpec {
     return {
       ...super.spec(),
-      splitName: 'bulletedList',
+      splitName: 'bulletList',
       info: {
         title: 'Bulleted List',
         description: 'Create a bulleted list',
-        icon: 'bulletedList',
+        icon: 'bulletList',
         tags: ['bulleted list', 'unordered list', 'list', 'ul', 'unordered'],
         order: 3,
       },

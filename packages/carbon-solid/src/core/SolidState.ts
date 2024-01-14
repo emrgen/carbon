@@ -1,10 +1,11 @@
-import {ActionOrigin, BlockSelection,
+import {
+  ActionOrigin, BlockSelection,
   Draft,
   IDENTITY_SCOPE,
   Node,
   NodeIdSet,
-  PinnedSelection,
-  State
+  PinnedSelection, ProduceOpts,
+  State, StateActions
 } from "@emrgen/carbon-core";
 import {SolidNodeMap} from "./NodeMap";
 import {SolidDraft} from "./SolidDraft";
@@ -18,6 +19,7 @@ export class SolidState implements State {
   selection: PinnedSelection;
   blockSelection: BlockSelection;
   changes: StateChanges;
+  actions: StateActions;
 
   isContentChanged: boolean;
   isSelectionChanged: boolean;
@@ -42,6 +44,7 @@ export class SolidState implements State {
     this.nodeMap = nodeMap;
     this.updated = new NodeIdSet();
     this.changes = new StateChanges();
+    this.actions = new StateActions();
 
     this.isContentChanged = false;
     this.isSelectionChanged = false;
@@ -54,8 +57,9 @@ export class SolidState implements State {
 
   deactivate(): void {}
 
-  produce(origin: ActionOrigin, fn: (state: Draft) => void): State {
-    const draft = new SolidDraft(this);
+  produce(fn: (state: Draft) => void, opts: ProduceOpts): State {
+    const {origin, type,schema} = opts;
+    const draft = new SolidDraft(this, origin, type, schema);
     return draft.produce(fn);
   }
 

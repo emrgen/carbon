@@ -13,8 +13,8 @@ import { VscListSelection } from "react-icons/vsc"
 export const blockIcons = {
   section: <PiTextAaBold />,
   collapsible: <IoToggleOutline />,
-  numberedList: <TbListNumbers />,
-  bulletedList: <PiListBulletsBold />,
+  numberList: <TbListNumbers />,
+  bulletList: <PiListBulletsBold />,
   todo: <FcTodoList />,
   h1: <PiTextHOneBold />,
   h2: <PiTextHTwoBold />,

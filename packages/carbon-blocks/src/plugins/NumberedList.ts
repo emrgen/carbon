@@ -9,19 +9,19 @@ declare module '@emrgen/carbon-core' {
 }
 
 export class NumberedList extends Section {
-  name = 'numberedList'
+  name = 'numberList'
 
   spec(): NodeSpec {
     return {
       ...super.spec(),
-      splitName: 'numberedList',
+      splitName: 'numberList',
       depends:{
         prev: true,
       },
       info: {
         title: 'Numbered List',
         description: 'Create a numbered list',
-        icon: 'numberedList',
+        icon: 'numberList',
         tags: ['numbered list', 'ordered list', 'ol', 'ordered', 'list', 'numbered'],
         order: 4,
       },
