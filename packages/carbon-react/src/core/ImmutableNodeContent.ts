@@ -24,8 +24,7 @@ export class ImmutableNodeContent implements NodeContent {
     return new ImmutableNodeContent(scope, data);
   }
 
-  constructor(private scope: Symbol, private content: NodeContentData) {
-  }
+  constructor(private scope: Symbol, private content: NodeContentData) {}
 
   get data(): NodeData {
     const {parent,id, parentId, type, children, ...rest} = this.content;

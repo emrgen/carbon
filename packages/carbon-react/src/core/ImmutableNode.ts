@@ -59,10 +59,10 @@ export class ImmutableNode extends Node {
     const key = `${parent.contentKey}/${this.id.toString()}`
     return NODE_CACHE_INDEX.get(key, () => {
       const {children = []} = parent;
-      return findIndex(children as Node[], n => {
-        return this.id.comp(n.id) === 0
+      return findIndex(children, n => {
+        return this.id.eq(n.id);
       });
-    })
+    }, this.isFrozen)
   }
 
   override get key() {
@@ -216,40 +216,6 @@ export class ImmutableNode extends Node {
     clone.mappedIndex = this.mappedIndex;
 
     return clone;
-
-
-    // const {scope,parentId, id, type, links, linkName, props, marks, renderVersion, contentVersion} = this;
-    //
-    // // console.log('cloning', this.id.toString(), this.isFrozen, map === identity)
-    // if (!this.isFrozen && map === identity) {
-    //   return this
-    // }
-    //
-    // // console.log('x cloning', this.id.toString())
-    // const children = this.children.map(n => map(n)).filter(identity) as ImmutableNode[];
-    //
-    // const data: NodeContentData = {
-    //   parentId,
-    //   parent: null,
-    //   id,
-    //   type,
-    //   children,
-    //   links,
-    //   linkName,
-    //   textContent: this.isText ? this.textContent : '',
-    //   props: props.clone(),
-    //   marks
-    // };
-    //
-    // const content = new ImmutableNodeContent(scope, data);
-    // const clone = ImmutableNode.create(scope, content);
-    // clone.renderVersion = renderVersion + 1;
-    // clone.contentVersion = contentVersion;
-    // clone.indexMapper = this.indexMapper;
-    // clone.indexMap = this.indexMap;
-    // clone.mappedIndex = this.mappedIndex;
-    //
-    // return clone;
   }
 
   // @mutates

@@ -15,7 +15,12 @@ export class CarbonCache {
     }, 1000 * 0.4);
   }
 
-  get<T>(key: string, fn?: () => T, expire?: number): T {
+  get<T>(key: string, fn: () => T, cache = true): T {
+    if (!cache) {
+      this.cache.delete(key);
+      return fn?.() as T;
+    }
+
     const value = this.cache.get(key);
     if (value !== undefined) {
       // console.debug('cache hit', key, value);

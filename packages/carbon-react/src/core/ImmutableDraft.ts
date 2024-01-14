@@ -514,6 +514,7 @@ export class ImmutableDraft implements Draft {
     }
 
     if (this.nodeMap.deleted(nodeId)) {
+      console.debug('node is deleted', nodeId.toString())
       this.selected.remove(nodeId);
       return;
     }
