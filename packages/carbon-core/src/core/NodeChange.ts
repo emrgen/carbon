@@ -5,33 +5,60 @@ import {
   Draft,
   NodeData,
   NodeId,
-  NodeIdComparator, NodeIdSet,
+  NodeIdComparator,
+  NodeIdSet,
   NodePropsJson,
-  Path, SelectAction, SetContentAction,
+  Path,
+  SelectAction,
+  TransactionType,
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
 import BTree from "sorted-btree";
+import {last} from "lodash";
 
 export class StateActions {
   actions: CarbonAction[];
+  type: TransactionType;
 
-  constructor(actions: CarbonAction[] = []) {
+  constructor(actions: CarbonAction[] = [], type: TransactionType = TransactionType.TwoWay) {
     this.actions = actions;
+    this.type = type;
   }
 
   static empty() {
     return new StateActions();
   }
 
+  get selectionOnly() {
+    return this.actions.every(a => a instanceof SelectAction);
+  }
+
   add(action: CarbonAction) {
     this.actions.push(action);
   }
 
-  rollback(state: Draft) {}
+  inverse(): StateActions {
+    const actions = this.actions.slice();
+    if (last(this.actions) instanceof SelectAction) {
+      const select = actions.pop() as SelectAction;
+      const inverseActions = new StateActions(actions.reverse().map(a => a.inverse(), this.type));
+      const inverse = select.inverse();
+      inverseActions.add(inverse);
 
-  apply(state: Draft) {}
+      return inverseActions;
+    } else {
+      return new StateActions( actions.reverse().map(a => a.inverse()), this.type);
+    }
+  }
+
+  oneWay() {
+    this.type = TransactionType.OneWay;
+    return this;
+  }
 
   optimize(): StateActions {
+    return this;
+
     // reduce prop updates
     const propActions: BTree<NodeId, UpdatePropsAction[]> = new BTree(undefined, NodeIdComparator);
     const removedNodes: NodeIdSet = NodeIdSet.empty();
@@ -79,7 +106,7 @@ export class StateActions {
       actions.push(UpdatePropsAction.withBefore(nodeId, optimized.before, optimized.after));
     });
 
-    return new StateActions(actions);
+    return new StateActions(actions, this.type);
   }
 }
 
@@ -197,13 +224,18 @@ export class SelectionChange implements Change {
 export class StateChanges {
   // this nodes will be rendered
   // changed nodes will be rebuilt in the next render cycle
-  patch: Change[] = [];
+  patch: Change[];
 
   // stores the nodes that are changed
-  dataMap: NodeDataMap = NodeDataMap.empty();
+  dataMap: NodeDataMap;
 
   static empty() {
     return new StateChanges();
+  }
+
+  constructor(patch: Change[] = [], dataMap: NodeDataMap = NodeDataMap.empty()) {
+    this.patch = patch;
+    this.dataMap = dataMap;
   }
 
   last() {

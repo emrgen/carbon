@@ -33,7 +33,7 @@ export const TabsComp = (props: RendererProps) => {
   const activeTabNode = getActiveTab(tabs) ?? Node.IDENTITY;
   const activeTabId = activeTabNode.id.toString();
 
-  console.log('activeTabId', activeTabId)
+  // console.log('activeTabId', activeTabId)
 
   useNodePropertyWatcher((after, before) => {
     console.log('tab property changed', after, before)

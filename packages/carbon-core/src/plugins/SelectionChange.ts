@@ -34,7 +34,7 @@ export class SelectionChangePlugin extends AfterPlugin {
           return;
         }
         // console.debug('mouseover node', this.state.plugin('runtime')?.get('mouseOverNode')?.chain.map(n => n.name).join(' > '))
-				console.log(p14('[event]'), 'selectionchange', ctx.event);
+				// console.log(p14('[event]'), 'selectionchange', ctx.event);
 				// helper code block to detect errant selectionchange effect
 				count++;
 				setTimeout(() => {

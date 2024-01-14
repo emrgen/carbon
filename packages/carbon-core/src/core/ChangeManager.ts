@@ -8,7 +8,7 @@ import { TransactionManager } from "./TransactionManager";
 import { EventsOut } from "./Event";
 import { Transaction } from "./Transaction";
 import { PluginManager } from "./PluginManager";
-import { ActionOrigin, State } from "@emrgen/carbon-core";
+import {ActionOrigin, State, StateActions} from "@emrgen/carbon-core";
 
 export enum NodeChangeType {
   update = "update",
@@ -24,7 +24,7 @@ interface PromiseState {
  */
 export class ChangeManager extends NodeTopicEmitter {
 
-  readonly transactions: Transaction[] = [];
+  readonly actions: StateActions[] = [];
   updated: NodeIdSet = NodeIdSet.empty();
 
   promiseState: PromiseState;
@@ -62,17 +62,16 @@ export class ChangeManager extends NodeTopicEmitter {
   // 2. sync the selection
   // 3. sync the node state
   update(tr: Transaction, state: State, timeout: number = 1000) {
-    console.log('------------------------')
-    if (this.transactions.length) {
-      console.log('pending transaction', this.transactions.length);
+    if (this.actions.length) {
+      console.log('pending transaction', this.actions.length);
       return;
     }
 
-    this.transactions.push(tr);
+    this.actions.push(state.actions);
     const { isContentChanged, isSelectionChanged } = this.state;
 
-    console.log('isSelectionChanged', isSelectionChanged)
-    console.log('isContentChanged', isContentChanged)
+    // console.log('isSelectionChanged', isSelectionChanged)
+    // console.log('isContentChanged', isContentChanged)
 
     // console.log('updating transaction effect', tr);
     // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
@@ -152,8 +151,9 @@ export class ChangeManager extends NodeTopicEmitter {
 
   private onTransaction() {
     clearInterval(this.interval);
-    const tr = this.transactions.shift();
+    const tr = this.actions.shift();
     if (tr) {
+      console.log('processing transaction', tr.type);
       this.pm.onTransaction(tr);
       this.app.emit(EventsOut.transaction, tr);
       this.app.emit(EventsOut.changed, this.state);

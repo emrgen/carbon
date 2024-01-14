@@ -1,12 +1,20 @@
-import { ActionOrigin, EventContext, EventHandler, Transaction, TransactionType } from "../core";
+import {
+  ActionOrigin,
+  EventContext,
+  EventHandler,
+  SelectAction,
+  StateActions,
+  Transaction,
+  TransactionType
+} from "../core";
 import { AfterPlugin } from "../core/CarbonPlugin";
 import { last } from "lodash";
 
 export class HistoryPlugin extends AfterPlugin {
   name = 'history';
 
-  undoStack: Transaction[] = [];
-  redoStack: Transaction[] = [];
+  undoStack: StateActions[] = [];
+  redoStack: StateActions[] = [];
 
   // takeTransactions(stack: Transaction[], timeSpan = 3000): Transaction[] {
   //   const lastTransaction = last(stack)!;
@@ -54,11 +62,15 @@ export class HistoryPlugin extends AfterPlugin {
         // this.undo(undoTransactions);
 
         const tr = this.undoStack.pop()!
-        // const inverse = tr.inverse()
-        // console.log('tr', tr);
-        // console.log('undo', inverse);
-        // this.redoStack.push(inverse)
-        // inverse.Dispatch();
+        const inverse = tr.inverse()
+        console.log('undo', inverse);
+        this.redoStack.push(inverse)
+        const {cmd} = ctx;
+        inverse.actions.forEach(action => {
+          cmd.Add(action);
+        })
+        cmd.OneWay()
+        cmd.Dispatch();
 
         ctx.app.emit('history.undo', tr);
       },
@@ -67,21 +79,24 @@ export class HistoryPlugin extends AfterPlugin {
         if (this.redoStack.length === 0) return
 
         const tr = this.redoStack.pop()!
-        // const inverse = tr.inverse()
-        console.log('tr', tr);
-        // console.log('redo', inverse);
-        // this.undoStack.push(inverse);
-        // inverse.Dispatch();
+        const inverse = tr.inverse()
+        console.log('redo', inverse);
+        this.undoStack.push(inverse)
+        const {cmd} = ctx;
+        inverse.actions.forEach(action => {
+          cmd.Add(action);
+        })
+        cmd.OneWay()
+        cmd.Dispatch();
 
         ctx.app.emit('history.redo', tr);
       },
     };
   }
 
-  transaction(tr: Transaction): void {
-    const tx = tr.Into();
+  transaction(tr: StateActions): void {
     // window.tr = tr;
-    if (tx.type === TransactionType.TwoWay && !tr.selectionOnly) {
+    if (tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
       this.undoStack.push(tr);
       this.redoStack = [];
     } else {

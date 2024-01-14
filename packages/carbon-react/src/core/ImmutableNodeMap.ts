@@ -80,7 +80,7 @@ export class ImmutableNodeMap implements NodeMap {
 
   // tries to find the node in the map or in the parent map
   get(key: NodeId): Optional<Node> {
-    return this._map.get(key) || this._deleted.get(key) || this._parent?.get(key);
+    return this._map.get(key) || this._parent?.get(key);
   }
 
   set(key: NodeId, value: Node) {
@@ -104,7 +104,7 @@ export class ImmutableNodeMap implements NodeMap {
   }
 
   deleted(id: NodeId) {
-    return this._deleted.has(id) || this._parent?.deleted(id);
+    return this._deleted.has(id);
   }
 
   delete(key: NodeId) {

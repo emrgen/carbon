@@ -12,6 +12,7 @@ import { EventHandlerMap, NodeName } from './types';
 import { CarbonAction } from './actions/types';
 import { EventsIn } from './Event';
 import { CarbonCommand } from "./CarbonCommand";
+import {StateActions} from "@emrgen/carbon-core";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -180,7 +181,7 @@ export class PluginManager {
 	// 	each(this.after, p => p.select(event));
 	// }
 
-	onTransaction(tr: Transaction) {
+	onTransaction(tr: StateActions) {
 		each(this.before, p => p.transaction(tr));
 		each(this.after, p => p.transaction(tr));
 	}

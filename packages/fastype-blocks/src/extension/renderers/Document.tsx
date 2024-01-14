@@ -125,8 +125,6 @@ export const DocumentComp = (props: RendererProps) => {
     };
   }, [app, ref]);
 
-  console.log(node.props);
-
   return (
     <DocumentContext document={node}>
       <div

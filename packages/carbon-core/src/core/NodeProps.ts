@@ -40,7 +40,7 @@ export class PlainNodeProps implements NodeProps {
     if (!json) return;
     for (const [key, value] of Object.entries(json)) {
       if (key.split("/").length > 1) {
-        console.log("key contains /", key)
+        // console.log("key contains /", key)
         set(props, this.dotPath(key), json[key])
         continue;
       }

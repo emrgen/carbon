@@ -32,7 +32,8 @@ export class CommentEditor extends CarbonPlugin {
           html: {
             contentEditable: true,
             suppressContentEditableWarning: true,
-          }
+            placeholder: 'Add a comment...',
+          },
         }
       }
     }

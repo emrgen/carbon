@@ -20,10 +20,23 @@
     padding 10px
     border-bottom-right-radius 4px
     border-bottom-left-radius 4px
-
+    &[data-empty=true]:after
+        position: absolute;
+        content: "hello"
+        position: absolute
+        bottom: 0
+        left: 0
+        right: 0
+        top 0
+        margin: 10px
+        color #aaa
+        user-select none
     &:focus-within
         box-shadow inset 0 0 0 1px rgba(25,76,209,0.6)
         outline none
+        &:after
+            display none
+
 
     [data-type="content"]
         [data-name]

@@ -66,8 +66,8 @@ export class EventManager {
 		// 	return
 		// }
 
-    if (this.cm.transactions.length) {
-      console.log('pending transaction', this.cm.transactions.length);
+    if (this.cm.actions.length) {
+      console.log('pending transaction', this.cm.actions.length);
       return
     }
 

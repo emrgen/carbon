@@ -30,7 +30,7 @@ import {
   SetContentAction,
   ChangeNameAction,
   UpdatePropsAction,
-  UpdateChange, SelectAction, MoveNodeAction,
+  UpdateChange, SelectAction, MoveNodeAction, TransactionType,
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
@@ -74,15 +74,20 @@ export class ImmutableDraft implements Draft {
   unstable: NodeIdSet = NodeIdSet.empty();
 
   changes: StateChanges = StateChanges.empty();
-  actions: StateActions = StateActions.empty();
+  actions: StateActions;
+
   tm: Transformer;
 
   private drafting = true;
+  private type: TransactionType;
 
-  constructor(state: ImmutableState, origin: ActionOrigin, pm: PluginManager, schema: Schema) {
+  constructor(state: ImmutableState, origin: ActionOrigin, type: TransactionType, pm: PluginManager, schema: Schema) {
     this.origin = origin;
+    this.type = type;
     this.state = state;
     this.pm = pm;
+    console.log('[ORIGIN]', origin, type)
+    this.actions = new StateActions([], type);
     this.tm = new Transformer(this.changes, this.actions);
     this.schema = schema;
     this.nodeMap = ImmutableNodeMap.from(state.nodeMap);
@@ -92,12 +97,13 @@ export class ImmutableDraft implements Draft {
   }
 
   private addContentChanged(id: NodeId) {
+    if (this.nodeMap.deleted(id)) {
+      return
+    }
     this.contentChanged.add(id);
     // if the node is not deleted, add it to the unstable list
     // there is no need to stabilize deleted nodes
-    if (!this.nodeMap.deleted(id)) {
-      this.unstable.add(id);
-    }
+    this.unstable.add(id);
   }
 
   private addUpdated(id: NodeId) {
@@ -116,6 +122,7 @@ export class ImmutableDraft implements Draft {
   }
 
   private addRemoved(id: NodeId) {
+    console.log('Removing node', id.toString())
     this.nodeMap.delete(id);
   }
 
@@ -169,6 +176,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot commit draft with invalid pinned selection");
     }
 
+    console.log('updated state', updated.toArray().map(n => n.toString()).join(', '))
     updated.freeze();
     nodeMap.contracts(2)
     nodeMap.freeze();
@@ -207,7 +215,7 @@ export class ImmutableDraft implements Draft {
       }
     })
 
-    this.normalize();
+    // this.normalize();
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
@@ -215,7 +223,6 @@ export class ImmutableDraft implements Draft {
       // console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
       if (this.nodeMap.deleted(id)) {
         this.removeUpdated(id);
-        return
       }
 
       // remove the hidden nodes
@@ -226,6 +233,8 @@ export class ImmutableDraft implements Draft {
         }
       })
     });
+
+    console.log('updated', this.updated.toArray().map(n => n.toString()).join(', '))
 
     const dirty = this.updated.clone();
     this.updated.nodes(this.nodeMap).forEach(node => {
@@ -239,7 +248,13 @@ export class ImmutableDraft implements Draft {
     });
 
     this.contentChanged.nodes(this.nodeMap).forEach(node => {
-      node.parents.forEach(parent => {
+      const {chain} = node;
+      if (chain.some(n => this.nodeMap.deleted(n.id))) {
+        this.contentChanged.remove(node.id);
+        return;
+      }
+
+      chain.forEach(parent => {
         this.contentChanged.add(parent.id);
       })
     });
@@ -284,6 +299,7 @@ export class ImmutableDraft implements Draft {
   // normalize unstable nodes by inserting missing nodes as per the schema
   private normalizeSchema() {
     console.debug('normalizing schema');
+    console.log('normalized',this.updated.toArray().map(n => n.toString()).join(', '))
     const nodes = this.unstable.nodes(this.nodeMap).forEach(node => {
 
     })
@@ -315,7 +331,7 @@ export class ImmutableDraft implements Draft {
     this.addContentChanged(nodeId);
 
     if (node.isTextContainer && isArray(content)) {
-      node.updateProps({
+      this.tm.updateProps(node, {
         [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ?? "" : ""
       });
     }
@@ -386,10 +402,12 @@ export class ImmutableDraft implements Draft {
       // set empty placeholder of inserted node if needed
       if (node.isEmpty) {
         const placeholder = node.props.get<string>(EmptyPlaceholderPath) ?? "";
-        // console.debug('empty placeholder', placeholder, node.id.toString())
-        node.firstChild?.updateProps({
-          [PlaceholderPath]: placeholder
-        });
+        // console.debug('empty placeholder', placeholder, node.id.toString())a
+        if (node.firstChild) {
+          this.tm.updateProps(node.firstChild!, {
+            [PlaceholderPath]: placeholder
+          });
+        }
       }
 
       this.actions.add(InsertNodeAction.create(at, node.id, node.toJSON()));
@@ -443,7 +461,6 @@ export class ImmutableDraft implements Draft {
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
   }
-
   private insertAfter(refId: NodeId, node: Node) {
     const refNode = this.nodeMap.get(refId);
     if (!refNode) {
@@ -468,6 +485,7 @@ export class ImmutableDraft implements Draft {
     }
 
     if (this.nodeMap.deleted(nodeId)) {
+      console.log('node is already deleted', nodeId.toString())
       return;
     }
 
@@ -486,7 +504,6 @@ export class ImmutableDraft implements Draft {
 
     this.tm.remove(node, parent);
 
-    this.addRemoved(node.id);
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
     node.all(n => this.addRemoved(n.id));
@@ -518,7 +535,7 @@ export class ImmutableDraft implements Draft {
 
     if (node.isContainer && node.firstChild?.isEmpty) {
       const firstChild = this.unfreeze(node.firstChild.id);
-      firstChild.updateProps({
+      this.tm.updateProps(firstChild, {
         [PlaceholderPath]: type.props.get<string>(EmptyPlaceholderPath) ?? ""
       });
     }
@@ -538,7 +555,6 @@ export class ImmutableDraft implements Draft {
     }
 
     const node = this.unfreeze(nodeId);
-    this.actions.add(UpdatePropsAction.withBefore(nodeId, node.props.toJSON(), props));
 
     this.tm.updateProps(node, props);
     this.addUpdated(node.id);
@@ -856,7 +872,7 @@ class Transformer {
       return
     }
 
-    // this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
+    this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
     this.changes.add(UpdateChange.create(node.id, node.path, before, props));
 
     node.updateProps(props);

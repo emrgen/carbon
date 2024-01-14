@@ -11,6 +11,7 @@ import EventEmitter from 'events';
 import { CarbonMessageBus, CarbonMessageFormat } from './MessageBus';
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginState } from "./PluginState";
+import {StateActions} from "@emrgen/carbon-core";
 
 export enum PluginType {
 	Node,
@@ -73,7 +74,7 @@ export abstract class CarbonPlugin {
 		return {}
 	}
 
-	transaction(tr: Transaction) { }
+	transaction(tr: StateActions) { }
 
 	// return decorations that will be applied on the view
 	decoration(state: State): Decoration[] {

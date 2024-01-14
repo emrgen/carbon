@@ -39,18 +39,16 @@ export const CommentEditorComp = (props: RendererProps) => {
     // if its a nestable toggle it
     // else insert a new item with that name
     app.cmd.nestable.toggle(name).dispatch();
-  }, []);
+  }, [app]);
 
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const onChange = (state: State) => {
-      console.log('changed')
       if (state.blockSelection.isActive) {
         setIsFocused(false);
       } else {
         const {head, tail} = state.selection;
-        console.log(head.node.parents.some(p => p.eq(node)), tail.node.parents.some(p => p.eq(node)))
         if (head.node.parents.some(p => p.eq(node)) && tail.node.parents.some(p => p.eq(node))) {
           setIsFocused(true);
         } else {
@@ -66,8 +64,8 @@ export const CommentEditorComp = (props: RendererProps) => {
   }, [node]);
 
   useEffect(() => {
-    console.log('isFocused', isFocused)
-  }, [isFocused]);
+    console.log(node.isEmpty)
+  }, [node]);
 
   const toolbar = useMemo(() => (
     <div className={'carbon-comment-editor-toolbar'} data-focused={isFocused}>
@@ -90,8 +88,8 @@ export const CommentEditorComp = (props: RendererProps) => {
       <CarbonBlock {...props} ref={ref} custom={{...connectors}}>
         <CarbonNodeContent node={node}/>
         <CarbonNodeChildren node={node}/>
-        {selection.SelectionHalo}
       </CarbonBlock>
+      {selection.SelectionHalo}
     </div>
   )
 }

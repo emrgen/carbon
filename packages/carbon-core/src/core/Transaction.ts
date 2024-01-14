@@ -49,9 +49,7 @@ declare module '@emrgen/carbon-core' {
 
 export class Transaction {
 	private id: string;
-	private type: TransactionType = TransactionType.TwoWay;
-	private timestamp: number = Date.now();
-	private onTick: boolean = false;
+	type: TransactionType = TransactionType.TwoWay;
 	private actions: CarbonAction[] = [];
 	private _committed: boolean = false;
 	private _dispatched: boolean = false;
@@ -257,6 +255,7 @@ export class Transaction {
 
 		// IMPORTANT
 		// TODO: check if transaction changes violates the schema
+    console.log('before dispatch', this.type)
 		this.tm.dispatch(this);
 		return this;
 	}

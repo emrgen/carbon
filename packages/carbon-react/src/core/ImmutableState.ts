@@ -120,8 +120,8 @@ export class ImmutableState implements State {
 
   // try to create a new state or fail and return the previous state
   produce(fn: (state: ImmutableDraft) => void, opts: ProduceOpts): State {
-    const { origin, pm, schema } = opts;
-    const draft = new ImmutableDraft(this, origin, pm, schema);
+    const { origin, pm, schema, type } = opts;
+    const draft = new ImmutableDraft(this, origin, type, pm, schema);
     return draft.produce(fn);
   }
 
