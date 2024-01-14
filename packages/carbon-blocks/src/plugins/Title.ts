@@ -44,6 +44,13 @@ export class TitlePlugin extends NodePlugin {
 		return {
 			// insert text node at
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
+        preventAndStopCtx(ctx);
+        const { app, cmd } = ctx;
+        const { blockSelection } = app.state;
+        if (blockSelection.isActive) {
+          return;
+        }
+
 				this.onTextInsert(ctx);
 			},
 			input: (ctx: EventContext<KeyboardEvent>) => {

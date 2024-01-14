@@ -935,44 +935,50 @@ export class TransformCommands extends BeforePlugin {
       return tr
     }
 
+    const deleteActions: CarbonAction[] = [];
+    const insertActions: CarbonAction[] = [];
+    reverse(nodes.slice()).forEach(node => {
+      deleteActions.push(RemoveNodeAction.fromNode(nodeLocation(node)!, node));
+    });
+
     // delete children while maintaining parent schema constraints
     // find the content match for fragment before the delete nodes
     // check if after deleting the nodes we need to insert more node to maintain schema constraints
     // if next sibling is there after the delete nodes find fillbefore types
     // otherwise just find
-    const startNode = first(nodes)!;
-    const endNode = last(nodes)!;
-    const prevSiblings = takeBefore(parent.children, n => n.eq(startNode));
-    const nextSiblings = takeAfter(parent.children, n => n.eq(endNode));
-    const match = parent.type.contentMatch.matchFragment(Fragment.from(prevSiblings));
-    const {nodes: createNodes} = match?.fillBefore(Fragment.from(nextSiblings), true) ?? Fragment.EMPTY;
-    console.log('prevSiblings', prevSiblings.map(n => n.id.toString()))
-    console.log('nextSiblings', nextSiblings.map(n => n.id.toString()))
-    console.log('createNodes to be inserted', createNodes.map(n => [n.name, n.key, n]));
 
-    const at = nodeLocation(startNode)!;
-    const insertActions = this.insertNodeCommands(at, createNodes)
+    // if all nodes are deleted, we need dont fix the schema constraints here.
+    // instead we will fix it in the normalization step
+    if (nodes.length !== parent.children.length) {
+      const startNode = first(nodes)!;
+      const endNode = last(nodes)!;
+      const prevSiblings = takeBefore(parent.children, n => n.eq(startNode));
+      const nextSiblings = takeAfter(parent.children, n => n.eq(endNode));
+      const match = parent.type.contentMatch.matchFragment(Fragment.from(prevSiblings));
+      const {nodes: createNodes} = match?.fillBefore(Fragment.from(nextSiblings), true) ?? Fragment.EMPTY;
+      console.log('prevSiblings', prevSiblings.map(n => n.id.toString()))
+      console.log('nextSiblings', nextSiblings.map(n => n.id.toString()))
+      console.log('createNodes to be inserted', createNodes.map(n => [n.name, n.key, n]));
+
+      const at = nodeLocation(startNode)!;
+      this.insertNodeCommands(at, createNodes).forEach(action => insertActions.push(action));
+
+      if (createNodes.length) {
+        createNodes.slice().reverse().some(n => {
+          const focusNode = n.find(n => n.isFocusable, {order: 'post'});
+          if (focusNode) {
+            after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+            return true;
+          }
+        })
+      }
+    }
 
     // create the insert node and commands
-    const { fall = 'after' } = opts;
-    const deleteActions: CarbonAction[] = [];
-    reverse(nodes.slice()).forEach(node => {
-      deleteActions.push(RemoveNodeAction.fromNode(nodeLocation(node)!, node));
-    });
+    const {fall = 'after'} = opts;
     const firstNode = first(nodes)!;
     const lastNode = last(nodes)!;
     let after: Optional<PinnedSelection> = undefined;
-
-    if (createNodes.length) {
-      createNodes.slice().reverse().some(n => {
-        const focusNode = n.find(n => n.isFocusable, { order: 'post' });
-        if (focusNode) {
-          after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
-          return true;
-        }
-      })
-    }
-
     // if (!after && fall === 'after') {
     //   const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
     //   if (focusNode && hasSameIsolate(focusNode, lastNode)) {

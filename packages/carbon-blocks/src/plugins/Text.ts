@@ -51,13 +51,18 @@ export class TextPlugin extends NodePlugin {
 	handlers(): EventHandlerMap {
 		return {
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
+        preventAndStopCtx(ctx);
 				const { app, currentNode, cmd } = ctx;
-				const { selection } = app;
+				const { selection, blockSelection } = app.state;
+        if (blockSelection.isActive)  {
+          return;
+        }
+
 				const { start, end } = selection;
 				if (!selection.isCollapsed) {
 					return
 				}
-				preventAndStopCtx(ctx);
+
 
 				// @ts-ignore
 				const { data, key } = ctx.event.nativeEvent;

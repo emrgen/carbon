@@ -107,13 +107,13 @@ export class ContentMatch {
   // be made to match by inserting nodes in end of it. When
   // successful, return a fragment of inserted nodes (which may be
   // empty if nothing had to be inserted).
-  fillAfter(before: Fragment, startIndex = 0): Fragment | null {
+  fillAfter(before: Fragment, startIndex = 0): Fragment {
     const match = this.matchFragment(before, startIndex);
     if (!match) {
       throw new Error("fillAfter: can't match fragment");
     }
 
-    return match.fillBefore(Fragment.EMPTY, true, startIndex);
+    return match.fillBefore(Fragment.EMPTY, true, startIndex) ?? Fragment.EMPTY;
   }
 
 	/// Find a set of wrapping node types that would allow a node of the

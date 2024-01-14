@@ -5,8 +5,17 @@ import {
   NodeSpec,
   preventAndStopCtx,
   Pin,
-  PinnedSelection
+  PinnedSelection,
+  CarbonAction,
+  Node,
+  InsertNodeAction,
+  Point,
+  SelectAction,
+  PointedSelection,
+  Fragment,
+  insertNodesActions
 } from "@emrgen/carbon-core";
+import {node} from "@emrgen/carbon-blocks";
 
 declare module '@emrgen/carbon-core' {
   interface Transaction {
@@ -51,6 +60,31 @@ export class CommentEditor extends CarbonPlugin {
       }
     }
   }
+
+
+  normalize(node: Node): CarbonAction[] {
+    if (node.isVoid) {
+      return fillAndFocus(node);
+    }
+
+    return [];
+  }
+}
+
+const fillAndFocus = (node: Node) => {
+  const fragment = node.type.contentMatch.fillAfter(Fragment.default(), 0);
+  const actions: CarbonAction[] = [];
+  const {nodes = []} = fragment;
+  actions.push(...insertNodesActions(Point.toStart(node)!, nodes));
+  nodes.some(n => {
+    const focusable = n.find(n => n.isFocusable);
+    if (focusable) {
+      actions.push(SelectAction.create(PointedSelection.IDENTITY, PinnedSelection.fromPin(Pin.toStartOf(focusable)!).unpin()))
+      return true;
+    }
+  })
+
+  return actions;
 }
 
 

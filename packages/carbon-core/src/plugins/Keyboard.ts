@@ -40,12 +40,17 @@ export class KeyboardPlugin extends AfterPlugin {
 
 			},
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-				const { currentNode, event } = ctx;
+				const { currentNode, app, event } = ctx;
+        const { selection, blockSelection } = app.state;
+        if (blockSelection.isActive) {
+          preventAndStopCtx(ctx);
+          return;
+        }
+
 				if (currentNode.isAtom) {
 					// event.preventDefault()
 					return
 				}
-				// console.log(p14('%c[insert]'), 'color:green', 'text node by keypress');
 			}
 		}
 	}
@@ -400,6 +405,9 @@ export class KeyboardPlugin extends AfterPlugin {
 			const { blocks } = blockSelection;
 			console.log(blocks.map(n => n.id.toString()));
 			const lastNode = last(blocks) as Node;
+
+      cmd.SelectBlocks([]);
+
 			if (lastNode.hasFocusable) {
 				const textBlock = lastNode.find(n => n.isFocusable);
 				// if there is a text block, put the cursor at the end of the text block
