@@ -23,7 +23,7 @@ export class CarbonCache {
 
     const value = this.cache.get(key);
     if (value !== undefined) {
-      // console.debug('cache hit', key, value);
+      // console.debug('cache hit', key, value, this.hitCount);
       this.hitCount++;
       return value;
     }

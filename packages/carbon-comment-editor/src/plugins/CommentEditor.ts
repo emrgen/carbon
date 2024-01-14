@@ -21,12 +21,20 @@ export class CommentEditor extends CarbonPlugin {
     return {
       group: 'content',
       content: 'content+',
-      inlineSelectable: true,
       isolate: true,
       draggable: true,
       dragHandle: true,
+      inlineSelectable: true,
       rectSelectable: true,
       blockSelectable: true,
+      props: {
+        local: {
+          html: {
+            contentEditable: true,
+            suppressContentEditableWarning: true,
+          }
+        }
+      }
     }
   }
 

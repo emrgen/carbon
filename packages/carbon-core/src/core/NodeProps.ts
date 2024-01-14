@@ -1,10 +1,10 @@
 import {JsonStore} from "./JsonStore";
-import {each, set, get, cloneDeep, merge, isEmpty, remove} from "lodash";
+import {each, set, get, cloneDeep, merge, isEmpty, remove, isEqual} from "lodash";
 import {Node} from "@emrgen/carbon-core";
 
 export type NodePropsJson = Record<string, any>;
 
-// different states should implement this interface
+// different states should have different implementation this interface
 export interface NodeProps {
   isNodeProps: boolean;
   get<T>(path: string): T;
@@ -13,6 +13,7 @@ export interface NodeProps {
   toJSON(): NodePropsJson;
   clone(): NodeProps;
   freeze(): NodeProps;
+  eq(other: NodeProps): boolean;
 }
 
 export class PlainNodeProps implements NodeProps {
@@ -87,6 +88,10 @@ export class PlainNodeProps implements NodeProps {
     Object.freeze(this.props);
     Object.freeze(this);
     return this;
+  }
+
+  eq(other: NodeProps): boolean {
+    return isEqual(JSON.stringify(this.props), JSON.stringify(other.toJSON()));
   }
 }
 

@@ -1,19 +1,20 @@
 import {
+  ActionOrigin,
   AfterPlugin,
-  Carbon,
+  CollapsedPath,
   EventContext,
   EventHandlerMap,
+  moveNodesActions,
   Node,
+  nodeLocation,
   Pin,
   PinnedSelection,
   Point,
-  Transaction,
-  nodeLocation,
-  preventAndStopCtx, moveNodesActions, PlaceholderPath, EmptyPlaceholderPath, RenderPath, CollapsedPath
+  preventAndStopCtx,
+  Transaction
 } from "@emrgen/carbon-core";
-import { isNestableNode } from '../utils';
-import { Optional } from '@emrgen/types';
-import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
+import {isNestableNode} from '../utils';
+import {Optional} from '@emrgen/types';
 
 declare module '@emrgen/carbon-core' {
 	interface Transaction {
@@ -22,6 +23,7 @@ declare module '@emrgen/carbon-core' {
 			unwrap(node: Node): Transaction;
 			serializeChildren(node: Node): string;
 			inject(encoder: () => string): void;
+      toggle(name: string): Transaction;
 		}
 	}
 }
@@ -30,7 +32,7 @@ export class NestablePlugin extends AfterPlugin {
 
 	name = 'nestable'
 
-	priority = 10 ** 4 + 700;
+	priority = 10 ** 4 + 900;
 
 	commands(): Record<string, Function> {
 		return {
@@ -38,8 +40,24 @@ export class NestablePlugin extends AfterPlugin {
 			unwrap: this.unwrap,
 			// serializeChildren: this.serializeChildren,
 			inject: this.inject,
+      toggle: this.toggle,
 		}
 	}
+
+  toggle(tr: Transaction, name: string) {
+    const {selection, blockSelection} = tr.app.state;
+    if (blockSelection.isActive) return
+    const {head, tail} = selection;
+    if (head.node.parent?.eq(tail.node.parent!)) {
+      const {parent} = head.node;
+      if (head.node.parent?.name === name) {
+        tr.Change(parent.id, 'section')
+      } else {
+        tr.Change(parent.id, name)
+      }
+      tr.Select(selection, ActionOrigin.UserInput);
+    }
+  }
 
 	inject(tr: Transaction, encoder: () => string) {
 		console.log('injecting', encoder());
@@ -90,6 +108,7 @@ export class NestablePlugin extends AfterPlugin {
 		return {
 			backspace: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, currentNode, cmd } = ctx;
+        console.log('xxxxxxxxxxxxxxx')
 				if (currentNode.isIsolate) return;
 
 				const { selection, blockSelection } = app.state;
