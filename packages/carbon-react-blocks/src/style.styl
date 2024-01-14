@@ -5,127 +5,129 @@ $quoteColor = #555
 $lineHeight = 22px
 
 #root
-  position absolute
-  width 100%
-  height: 100%
+    position absolute
+    width 100%
+    height: 100%
 
 // background #eee
 
 .carbon-app
-  font-family: Arial, Helvetica, sans-serif
-  margin: 0 auto
-  // position absolute
-  // position relative
-  // width: 100%
-  // padding: 0
-  outline none
-  // overflow: auto;
-  white-space: pre-wrap;
-  //height: 400px
-  width 100%
-  flex: 1
+    font-family: Arial, Helvetica, sans-serif
+    margin: 0 auto
+    // position absolute
+    // position relative
+    // width: 100%
+    // padding: 0
+    outline none
+    // overflow: auto;
+    white-space: pre-wrap;
+    //height: 400px
+    width 100%
+    flex: 1
 
 // padding: 50px 0px
 // overflow: hidden
 
 .carbon-app-content
-  position relative
-  height: 100%
-  width 100%
-  overflow: hidden
-  margin: 0 auto
+    position relative
+    height: 100%
+    width 100%
+    overflow: hidden
+    margin: 0 auto
 
 .carbon-header
-  position: sticky
-  top 10px
-  padding: 0px 100px
-  height: 30px
-  background #fafafa
-  display: flex
-  align-items: center
-  gap 4px
-  z-index: 1
-  margin-bottom: 12px
-  // outline: 2px dashed blue;
-
-  .carbon-control
-    // background #000
-    padding 4px
-    cursor: pointer
-    user-select: none
-
-    &:hover
-      background #eee
-
-.carbon-park-cursor
-  position absolute
-  left: 50%
-  transform: translateX(-50%)
-  z-index: 100
-
-.document-wrapper
-  position absolute
-  top: 0
-  left: 0
-  width 100%
-  height: 100%
-  overflow: auto
-  display: flex
-  flex-direction: column
-  container-type: inline-size
-
-.carbon-document-picture
-  padding-top 300px
-  background #000
-
-  .carbon-document-picture-overlay
-    position absolute
-    width 100%
-    left: 0
-    top: 0
-    height: 300px
-    overflow: hidden
+    position: sticky
+    top 10px
+    padding: 0px 100px
+    height: 30px
+    background #fafafa
     display: flex
     align-items: center
-    justify-content: center
+    gap 4px
+    z-index: 1
+    margin-bottom: 12px
+    // outline: 2px dashed blue;
 
-    img
-      width: 100%
+    .carbon-control
+        // background #000
+        padding 4px
+        cursor: pointer
+        user-select: none
+
+        &:hover
+            background #eee
+
+.carbon-park-cursor
+    position absolute
+    left: 50%
+    transform: translateX(-50%)
+    z-index: 100
+
+.document-wrapper
+    position absolute
+    top: 0
+    left: 0
+    width 100%
+    height: 100%
+    overflow: auto
+    display: flex
+    flex-direction: column
+    container-type: inline-size
+
+.carbon-document-picture
+    padding-top 300px
+    background #000
+
+    .carbon-document-picture-overlay
+        position absolute
+        width 100%
+        left: 0
+        top: 0
+        height: 300px
+        overflow: hidden
+        display: flex
+        align-items: center
+        justify-content: center
+
+        img
+            width: 100%
 
 [data-name=document],
 [data-as=document]
-  font-size 15px
-  position relative
-  outline none
-  //padding: 0px 50px
-  padding-bottom 200px
-  overflow: inherit
+    font-size 15px
+    position relative
+    outline none
+    //padding: 0px 50px
+    padding-bottom 200px
+    overflow: inherit
 
-  ::selection
-    background: $selectionHaloColor
+    ::selection
+        background: $selectionHaloColor
 
-@container (min-width: 800px) {
-  [data-name=document],
-  [data-as=document] {
+@container (min-width: 800px)
+{
+[data-name=document],
+[data-as=document] {
     padding-left: 100px
     padding-right: 100px
     min-height: 100%
-  }
+}
+
 }
 
 @container (min-width: 1000px)
 {
 [data-name=document],
 [data-as=document] {
-  padding-left: calc(50% - 360px)
-  padding-right: calc(50% - 360px)
-  min-height: 100%
+    padding-left: calc(50% - 360px)
+    padding-right: calc(50% - 360px)
+    min-height: 100%
 }
 
 }
 
 [data-name=divider]
-  margin-top: 3px;
+    margin-top: 3px;
 
 [data-name=section]
 [data-name=collapsible]
@@ -140,50 +142,50 @@ $lineHeight = 22px
 [data-name=h3]
 [data-as=h3]
 [data-name=h4]
-  // padding-left: 10px
-  // padding: 1px 0
-  margin-top 2px
-  // background rgba(168, 225, 255, 0.316)
+    // padding-left: 10px
+    // padding: 1px 0
+    margin-top 2px
+    // background rgba(168, 225, 255, 0.316)
 
-  > [data-type=children]
-    padding-left 30px
-  position relative
-  line-height: $lineHeight
+    > [data-type=children]
+        padding-left 30px
+    position relative
+    line-height: $lineHeight
 
-  [data-type="content"]
-    // padding-left: 2px
-    // padding: 2px 0px
-    //display: flex
-    align-content: flex-start
+    [data-type="content"]
+        // padding-left: 2px
+        // padding: 2px 0px
+        //display: flex
+        align-content: flex-start
 
-    [data-name=title]
-      flex 1
+        [data-name=title]
+            flex 1
 
 //[data-name=collapsible]
 //    [data-type=content]
 //        display flex
 
 [data-name=numberedList][data-as=h1]
-  [data-type=content]
-    padding-left: 20px
+    [data-type=content]
+        padding-left: 20px
 
 [data-name=numberedList][data-as=h2]
-  [data-type=content]
-    padding-left: 12px
+    [data-type=content]
+        padding-left: 12px
 
 --webkit::spelling-error {
-  color: teal !important;
+    color: teal !important;
 }
 
 [data-name=document] > [data-type="content"],
 [data-as=document] > [data-type="content"]
-  padding: 40px 0 10px 0
+    padding: 40px 0 10px 0
 
 [data-name=document] > [data-type="content"] > [data-name="title"],
 [data-as=document] > [data-type="content"] > [data-name="title"]
-  font-size: 30px
-  font-weight: bold
-  line-height: 30px
+    font-size: 30px
+    font-weight: bold
+    line-height: 30px
 
 [data-as=h1],
 [data-as=h2],
@@ -193,86 +195,87 @@ $lineHeight = 22px
 [data-name=h2],
 [data-name=h3],
 [data-name=h4]
-  margin: 0
+    margin: 0
 
-  & > [data-type="content"] > [data-name="title"]
-    font-weight: bold
+    & > [data-type="content"] > [data-name="title"]
+        font-weight: bold
 
 [data-name=h1] > [data-type="content"],
 [data-as=h1] > [data-type="content"]
-  font-size: 32px
-  margin-top: 30px
-  margin-bottom: 10px
-  line-height: 40px
+    font-size: 32px
+    margin-top: 30px
+    margin-bottom: 10px
+    line-height: 40px
 
 [data-name=h2] > [data-type="content"],
 [data-as=h2] > [data-type="content"]
-  font-size: 26px
-  margin-top: 24px
-  margin-bottom: 10px
-  line-height: 30px
+    font-size: 26px
+    margin-top: 24px
+    margin-bottom: 10px
+    line-height: 30px
 
 [data-name=h3] > [data-type="content"],
 [data-as=h3] > [data-type="content"]
-  font-size: 22px
-  margin-top: 20px
-  margin-bottom: 2px
-  line-height: 30px
+    font-size: 22px
+    margin-top: 20px
+    margin-bottom: 2px
+    line-height: 30px
 
 [data-name=h4] > [data-type="content"],
 [data-as=h4] > [data-type="content"]
-  font-size: 18px
-  margin-top: 16px
-  margin-bottom: 10px
-  line-height: 30px
+    font-size: 18px
+    margin-top: 16px
+    margin-bottom: 10px
+    line-height: 30px
 
 span[data-name=text] {
-  white-space: pre-wrap;
-  word-break: break-word;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 [data-name="divider"]
-  outline: none
-  position relative
-  cursor default
-  height: 15px
-  margin-bottom: 1px
-  caret-color: transparent;
-
-  .divider
+    outline: none
     position relative
-    top: 7px
-    height: 2px
-    width: 100%
-    background: #eee
+    cursor default
+    height: 15px
+    margin-bottom: 1px
+    caret-color: transparent;
+
+    .divider
+        position relative
+        top: 7px
+        height: 2px
+        width: 100%
+        background: #eee
 
 // border-bottom: 1px solid rgba(55, 53, 47, 0.184)
 
 .carbon-selection-halo
-  position absolute
-  width 100%
-  height 100%
-  top 0
-  left 0
-  background: $selectionHaloColor
-  border-radius: 2px
-  pointer-events: none
+    position absolute
+    width 100%
+    height 100%
+    top 0
+    left 0
+    background: $selectionHaloColor
+    border-radius: 2px
+    pointer-events: none
 
 //animation halo-animation 0.1s ease-in forwards
 
 @keyframes halo-animation {
-  0% {
-    opacity: 0
-  }
-  100% {
-    opacity: 1
-  }
+    0% {
+        opacity: 0
+    }
+    100% {
+        opacity: 1
+    }
 }
 
 [data-selected=true]
-  //caret-color: transparent;
-  ::selection
-    background: transparent
+    //caret-color: transparent;
+
+    ::selection
+        background: transparent
 
 //[data-name=tabs] .carbon-tab-content
 //[data-name=frame]
@@ -285,154 +288,154 @@ span[data-name=text] {
 //    background: $selectionHaloColor
 
 .carbon-collapsible__control
-  user-select: none
-  left 0
-  top 1px
-  margin-left: 4px;
-  padding-left 0px
-  padding 0
-  cursor: pointer
-  font-size: 18px
-  line-height: $lineHeight
-  display flex
-  justify-content center
-  align-items center
-  border-radius 4px
-  transform scaleX(0.85)
+    user-select: none
+    left 0
+    top 1px
+    margin-left: 4px;
+    padding-left 0px
+    padding 0
+    cursor: pointer
+    font-size: 18px
+    line-height: $lineHeight
+    display flex
+    justify-content center
+    align-items center
+    border-radius 4px
+    transform scaleX(0.85)
 
-  &:hover
-    background: #eee;
-  transition background 0.3s
+    &:hover
+        background: #eee;
+    transition background 0.3s
 
 
 [data-name=collapsible]
-  > [data-type=content] > [data-name=title]
-    margin-left 4px
+    > [data-type=content] > [data-name=title]
+        margin-left 4px
 
-  > [data-type=children]
-    padding-left 30px
-  padding-left: 0px
+    > [data-type=children]
+        padding-left 30px
+    padding-left: 0px
 
-  .carbon-collapsible__control
-    left 4px
-    width 22px
-    height $lineHeight
-    display: flex
-    line-height: $lineHeight
-    align-items: center
+    .carbon-collapsible__control
+        left 4px
+        width 22px
+        height $lineHeight
+        display: flex
+        line-height: $lineHeight
+        align-items: center
 
 // background: #eee
 
 [data-name=bulletedList]
-  > [data-type=children]
-    padding-left 0px
-  padding-left: 30px
+    > [data-type=children]
+        padding-left 0px
+    padding-left: 30px
 
-  .carbon-bulletedList__label
-    padding 0 10px
-    user-select: none
-    position absolute
-    left 0
+    .carbon-bulletedList__label
+        padding 0 10px
+        user-select: none
+        position absolute
+        left 0
 
 [data-name=todo]
-  position relative
+    position relative
 
-  > [data-type=children]
-    padding-left 0px
-  padding-left: 30px
+    > [data-type=children]
+        padding-left 0px
+    padding-left: 30px
 
-  .carbon-todo__control
-    display: flex
-    position absolute
-    left 0
-    align-items: center
-    height $lineHeight
-    user-select: none
-    padding-left 7px
+    .carbon-todo__control
+        display: flex
+        position absolute
+        left 0
+        align-items: center
+        height $lineHeight
+        user-select: none
+        padding-left 7px
 
-    input
-      height: 14px
-      width: 18px
-      // margin-top 6px
+        input
+            height: 14px
+            width: 18px
+            // margin-top 6px
 
-      &:hover
-        cursor: pointer
+            &:hover
+                cursor: pointer
 
 // vertical-align: middle
 
 [data-name=numberedList]
-  > [data-type=children]
-    padding-left 0px
-  padding-left: 30px
+    > [data-type=children]
+        padding-left 0px
+    padding-left: 30px
 
-  .carbon-numberedList__label
-    padding 0 10px
-    user-select: none
-    position absolute
-    left 0
+    .carbon-numberedList__label
+        padding 0 10px
+        user-select: none
+        position absolute
+        left 0
 
 [data-name=equation]
-  position relative
-  margin-top 2px
-  display: flex
-  justify-content: center
-  outline: none
-  cursor pointer
-  min-height: 54px
-
-  > [data-name=equation-wrapper]
+    position relative
+    margin-top 2px
     display: flex
-    // min-height: inherit
-    align-items: center
-    overflow: hidden
+    justify-content: center
+    outline: none
+    cursor pointer
+    min-height: 54px
 
-    > [data-type=equation-content]
-      align-items: center
-      justify-content: center
-      display: block
-      user-select: none
-      // text-align: center
-      min-height: inherit
-      width: 100%
+    > [data-name=equation-wrapper]
+        display: flex
+        // min-height: inherit
+        align-items: center
+        overflow: hidden
 
-      > *
-        user-select: none
+        > [data-type=equation-content]
+            align-items: center
+            justify-content: center
+            display: block
+            user-select: none
+            // text-align: center
+            min-height: inherit
+            width: 100%
 
-    > [data-type=content]
-      position absolute
-      width: 260px
-      min-height: 100px
-      top calc(100% + 6px)
-      // left 50%
-      padding: 16px
-      background #fff
-      z-index: 1
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)
-      border-radius: 4px
+            > *
+                user-select: none
+
+        > [data-type=content]
+            position absolute
+            width: 260px
+            min-height: 100px
+            top calc(100% + 6px)
+            // left 50%
+            padding: 16px
+            background #fff
+            z-index: 1
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)
+            border-radius: 4px
 
 .katex
-  display: block
-  text-align: center
-  white-space: nowrap
-
-  .katex-html
     display: block
-    position relative
+    text-align: center
+    white-space: nowrap
+
+    .katex-html
+        display: block
+        position relative
 
 // [data-content-editable="false"]
 // 	-webkit-user-modify: read-only;
 
 [data-name="title"]
-  position relative
+    position relative
 
-  &:after
-    position absolute
-    content attr(placeholder)
-    left 0
-    top 0
-    pointer-events: none
-    user-select none
-    opacity: 0.4
+    &:after
+        position absolute
+        content attr(placeholder)
+        left 0
+        top 0
+        pointer-events: none
+        user-select none
+        opacity: 0.4
 
 // [data-name=section] > [data-type=content] > [data-name=title]
 // 	&:after
@@ -443,438 +446,438 @@ span[data-name=text] {
 // 		display: normal !important
 
 [data-name="hstack"]
-  display: flex
-  padding: 10px 0
-  gap 50px
-  // position relative
+    display: flex
+    padding: 10px 0
+    gap 50px
+    // position relative
 
-  > div
-    flex 1
+    > div
+        flex 1
 
 [data-name="stack"]
-  padding-left 10px
+    padding-left 10px
 
-  &:first-child
-    padding-left 0px
+    &:first-child
+        padding-left 0px
 
 // display: flex
 // flex-direction: column
 // gap 2px
 
 [data-name="title"] a
-  cursor pointer
+    cursor pointer
 
 [data-name="image"],
 [data-name="video"]
-  width 100%
-  display: flex
-  position relative
-  margin-top: 8px
-  margin-bottom 4px
-  // background: #eee
-  min-height: 60px
-  justify-content: center
-  transition: width 0.3s, height 0.3s
+    width 100%
+    display: flex
+    position relative
+    margin-top: 8px
+    margin-bottom 4px
+    // background: #eee
+    min-height: 60px
+    justify-content: center
+    transition: width 0.3s, height 0.3s
 
 // background #000
 
 [data-name="image"]
-  .image-container
-    position relative
-    cursor: pointer
+    .image-container
+        position relative
+        cursor: pointer
 
-  img
-    width 100%
-    user-select: none
+    img
+        width 100%
+        user-select: none
 
 .carbon-portal
-  position absolute
-  top: 0
-  left: 0
-  width: 100%
-  height 100%
+    position absolute
+    top: 0
+    left: 0
+    width: 100%
+    height 100%
 
 // background #000
 
 .collapsible-empty-content
-  user-select: none
-  color #aaa
-  // background: #eee
-  cursor: pointer
-  line-height: 26px
-  margin-left: 30px;
-  padding 0 6px
-  border-radius: 4px
+    user-select: none
+    color #aaa
+    // background: #eee
+    cursor: pointer
+    line-height: 26px
+    margin-left: 30px;
+    padding 0 6px
+    border-radius: 4px
 
-  &:hover
-    background: #eee
+    &:hover
+        background: #eee
 
 [data-name="collapsible"][data-collapsed="true"]
-  .collapsible-empty-content,
-  [data-type="children"]
-    display: none
+    .collapsible-empty-content,
+    [data-type="children"]
+        display: none
 
 [data-name=quote]
-  position relative
-  padding: 4px 10px
-  margin: 4px 0
-  border-left: 3px solid $quoteColor
-  // [data-type="content"]
-  // 	line-height: $lineHeight
+    position relative
+    padding: 4px 10px
+    margin: 4px 0
+    border-left: 3px solid $quoteColor
+    // [data-type="content"]
+    // 	line-height: $lineHeight
 
-  &[data-as] > [data-type=content]
-    padding-top 0
-    padding-bottom: 0
+    &[data-as] > [data-type=content]
+        padding-top 0
+        padding-bottom: 0
 
-  &[data-as] > [data-type=children]
-    padding-left 0
+    &[data-as] > [data-type=children]
+        padding-left 0
 
 [data-name=callout]
-  position relative
-  padding: 10px 10px
-  margin: 10px 0
-  background: #FBF3DB
-  border: 2px solid #f4d999
-  border-radius: 4px
-  line-height: $lineHeight
+    position relative
+    padding: 10px 10px
+    margin: 10px 0
+    background: #FBF3DB
+    border: 2px solid #f4d999
+    border-radius: 4px
+    line-height: $lineHeight
 
-  &[data-as] > [data-type=content]
-    padding-top 0
-    padding-bottom: 0
+    &[data-as] > [data-type=content]
+        padding-top 0
+        padding-bottom: 0
 
-  &[data-as] > [data-type=children]
-    padding-left 0
+    &[data-as] > [data-type=children]
+        padding-left 0
 
 [data-name=code]
-  display: block
-  position relative
-  // padding: 16px
-  margin: 10px 0
-  // background: #eee
-  border-radius: 4px
-  overflow: hidden
+    display: block
+    position relative
+    // padding: 16px
+    margin: 10px 0
+    // background: #eee
+    border-radius: 4px
+    overflow: hidden
 
-  [data-name=code-content]
-    // background #eee
+    [data-name=code-content]
+        // background #eee
 
-    > [data-name=text]
-      white-space: pre-wrap
-      word-break: break-all
+        > [data-name=text]
+            white-space: pre-wrap
+            word-break: break-all
 
 [data-name=docLink]
-  position relative
-  cursor pointer
-  padding: 0 2px
-  margin-top 2px
+    position relative
+    cursor pointer
+    padding: 0 2px
+    margin-top 2px
 
-  &:hover
-    background: #eee
-    border-radius: 4px
+    &:hover
+        background: #eee
+        border-radius: 4px
 
-  [data-type="content"]
-    padding: 2px 4px
-    line-height: $lineHeight
-    display: flex
-    gap 6px
+    [data-type="content"]
+        padding: 2px 4px
+        line-height: $lineHeight
+        display: flex
+        gap 6px
 
-    [data-name=title]
-      font-weight: 500
-      padding 0 2px
+        [data-name=title]
+            font-weight: 500
+            padding 0 2px
 
-      span
-        border-bottom: 2px solid #ddd
+            span
+                border-bottom: 2px solid #ddd
 
 [data-name=table]
-  position relative
-  margin-top 14px
-  margin-bottom: 36px
+    position relative
+    margin-top 14px
+    margin-bottom: 36px
 
-  .add_table__row
-    position absolute
-    background: #eee
-    height: 20px
-    border-radius: 4px
-    margin-top 4px
-    cursor: pointer
+    .add_table__row
+        position absolute
+        background: #eee
+        height: 20px
+        border-radius: 4px
+        margin-top 4px
+        cursor: pointer
 
-  .add_table__columns
-    top: 0
-    position absolute
-    background: #eee
-    width: 20px
-    border-radius: 4px
-    margin-left 4px
-    cursor: pointer
+    .add_table__columns
+        top: 0
+        position absolute
+        background: #eee
+        width: 20px
+        border-radius: 4px
+        margin-left 4px
+        cursor: pointer
 
-  .add_table__row, .add_table__columns
-    // opacity 0
-    transition: opacity 0.2s
+    .add_table__row, .add_table__columns
+        // opacity 0
+        transition: opacity 0.2s
 
-    &:after
-      content: "+"
-      position: absolute
-      top: 50%
-      left: 50%
-      transform: translate(-50%, -50%)
-      font-size: 16px
-      color: #555
-      transition: opacity 0.2s
+        &:after
+            content: "+"
+            position: absolute
+            top: 50%
+            left: 50%
+            transform: translate(-50%, -50%)
+            font-size: 16px
+            color: #555
+            transition: opacity 0.2s
 
-  // &:hover
-  // 	.add_table__row, .add_table__columns
-  // 		background: #ddd
-  // 		opacity: 0.8
+    // &:hover
+    // 	.add_table__row, .add_table__columns
+    // 		background: #ddd
+    // 		opacity: 0.8
 
-  .update_table__row
-    position absolute
-    background: #eee
-    height: 20px
-    width: 16px
-    left: 0
-    top: 50%
-    transform: translate(-50%, -50%)
-    cursor: pointer
-    border-radius: 4px
+    .update_table__row
+        position absolute
+        background: #eee
+        height: 20px
+        width: 16px
+        left: 0
+        top: 50%
+        transform: translate(-50%, -50%)
+        cursor: pointer
+        border-radius: 4px
 
-  table
-    border-collapse: collapse;
-    border-spacing 0;
+    table
+        border-collapse: collapse;
+        border-spacing 0;
 
-    [data-name=row]
-      position relative
-      outline: none
-      border-top: 1px solid #ddd;
-      vertical-align top
+        [data-name=row]
+            position relative
+            outline: none
+            border-top: 1px solid #ddd;
+            vertical-align top
 
-      &:last-child
-        border-bottom: 1px solid #ddd
+            &:last-child
+                border-bottom: 1px solid #ddd
 
-      [data-name=column]
-        text-align: left;
-        outline: none
-        padding: 7px 9px
-        line-height: 22px
-        border-left: 1px solid #ddd
+            [data-name=column]
+                text-align: left;
+                outline: none
+                padding: 7px 9px
+                line-height: 22px
+                border-left: 1px solid #ddd
 
-        &:last-child
-          border-right: 1px solid #ddd
+                &:last-child
+                    border-right: 1px solid #ddd
 
 // [data-hide-cursor=true],
 .carbon-selection,
 .carbon-app-events
-  width 100%
-  height 100%
-  overflow: hidden
+    width 100%
+    height 100%
+    overflow: hidden
 
 .carbon-selection.carbon-selecting,
 .carbon-selection.block-selection
-  caret-color: transparent
-  user-select: none
+    caret-color: transparent
+    user-select: none
 
-  ::selection
-    background: transparent
+    ::selection
+        background: transparent
 
-  .carbon-selection-halo[data-selected=true]
-    background: transparent !important
+    .carbon-selection-halo[data-selected=true]
+        background: transparent !important
 
 .carbon-halo-container
-  position absolute
-  top: 0
+    position absolute
+    top: 0
 
 [data-name=carbon]
-  display: flex
-  padding: 10px
-  gap 10px
+    display: flex
+    padding: 10px
+    gap 10px
 
-  [data-name=document],
-  [data-as=document]
-    flex 1
-    padding 0 100px
-    padding-top: 40px;
+    [data-name=document],
+    [data-as=document]
+        flex 1
+        padding 0 100px
+        padding-top: 40px;
 
 
 [data-name=pageTree]
-  margin 10px 0
-  font-size 15px
-  padding 10px 0
-  background #fafafa
-  border: 2px dashed blue
+    margin 10px 0
+    font-size 15px
+    padding 10px 0
+    background #fafafa
+    border: 2px dashed blue
 
-  [data-name=title]:before
-    display none
+    [data-name=title]:before
+        display none
 
-  [data-type=children]
-    padding-top 4px
+    [data-type=children]
+        padding-top 4px
 
 [data-name=pageTree] > [data-type=content]
-  font-size 13px
-  margin 0 10px
-  display flex
+    font-size 13px
+    margin 0 10px
+    display flex
 
-  [data-name=title]
-    line-height 14px
-    padding: 2px 4px
-    font-weight bold
-    color #aaa
-    cursor pointer
+    [data-name=title]
+        line-height 14px
+        padding: 2px 4px
+        font-weight bold
+        color #aaa
+        cursor pointer
 
-    &:hover
-      background: #eee;
-      color #555
-      border-radius 4px
+        &:hover
+            background: #eee;
+            color #555
+            border-radius 4px
 
 
 [data-name=pageTreeItem]
-  border-radius: 4px
-  padding: 0 4px
+    border-radius: 4px
+    padding: 0 4px
 
-  & > [data-type=children]
-    padding-left: 20px
+    & > [data-type=children]
+        padding-left: 20px
 
-  & > [data-type=content]
-    position relative
-    line-height: $lineHeight
-    display: flex
-    align-items: center
-    padding-left: 4px;
-    gap 4px
+    & > [data-type=content]
+        position relative
+        line-height: $lineHeight
+        display: flex
+        align-items: center
+        padding-left: 4px;
+        gap 4px
 
-    &:hover
-      background: #eee
+        &:hover
+            background: #eee
 
-    [data-name=title]
-      flex 1
-      display: flex
-      color: #666
-      cursor pointer
-      user-select: none
-      overflow: hidden
-      justify-content: flex-start
-      align-items: flex-start
-      line-height 28px
+        [data-name=title]
+            flex 1
+            display: flex
+            color: #666
+            cursor pointer
+            user-select: none
+            overflow: hidden
+            justify-content: flex-start
+            align-items: flex-start
+            line-height 28px
 
-      span
-        display: inline-block
-        left: 0
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
+            span
+                display: inline-block
+                left: 0
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
 
-    .carbon-collapsible__control
-      color: #aaa
-      background: transparent;
-      width 20px
-      height: 20px
-      display: flex
-      align-items: center
-      justify-content: center
-      padding 0px
-      border-radius: 4px
+        .carbon-collapsible__control
+            color: #aaa
+            background: transparent;
+            width 20px
+            height: 20px
+            display: flex
+            align-items: center
+            justify-content: center
+            padding 0px
+            border-radius: 4px
 
-      .page-tree-open-close-icon
-        transition transform 0.2s
+            .page-tree-open-close-icon
+                transition transform 0.2s
 
-      &.collapsed > .page-tree-open-close-icon
-        transform: rotate(0deg)
+            &.collapsed > .page-tree-open-close-icon
+                transform: rotate(0deg)
 
-      &.expanded > .page-tree-open-close-icon
-        transform: rotate(90deg)
+            &.expanded > .page-tree-open-close-icon
+                transform: rotate(90deg)
 
-      &:hover
-        background: #ddd
-        color #666
+            &:hover
+                background: #ddd
+                color #666
 
-    .add-child-file
-      position absolute
-      z-index: 1
-      top: 50%
-      right: 4px
-      width: 20px
-      height: 20px
-      transform: translate(0%, -50%)
-      display: flex
-      align-items: center
-      justify-content: center
-      cursor: pointer
-      user-select: none
-      border-radius: 4px
-      color: #aaa
-      opacity 0
-      font-size: 14px
+        .add-child-file
+            position absolute
+            z-index: 1
+            top: 50%
+            right: 4px
+            width: 20px
+            height: 20px
+            transform: translate(0%, -50%)
+            display: flex
+            align-items: center
+            justify-content: center
+            cursor: pointer
+            user-select: none
+            border-radius: 4px
+            color: #aaa
+            opacity 0
+            font-size: 14px
 
-      &:hover
-        background: #ddd
-        color #666
+            &:hover
+                background: #ddd
+                color #666
 
-  & > [data-type=content]:hover
-    .add-child-file
-      opacity 1
+    & > [data-type=content]:hover
+        .add-child-file
+            opacity 1
 
-  .carbon-collapsible__empty
-    padding-left 24px
-    color: #ccc
-    font-size: 14px
-    line-height: $lineHeight
-    user-select: none
+    .carbon-collapsible__empty
+        padding-left 24px
+        color: #ccc
+        font-size: 14px
+        line-height: $lineHeight
+        user-select: none
 
-  &[data-opened=true] > [data-type=content] > [data-name=title]
-    color: #000 !important
+    &[data-opened=true] > [data-type=content] > [data-name=title]
+        color: #000 !important
 
 .carbon-overlay
-  position absolute
-  height: 100%
-  width 100%
-  top 0
-  left: 0
+    position absolute
+    height: 100%
+    width 100%
+    top 0
+    left: 0
 
 
 [contenteditable]
-  outline: none
+    outline: none
 
 .carbon-block-menu
-  position absolute
-  z-index inherit
+    position absolute
+    z-index inherit
 
 .carbon-ai-suggested
-  position absolute
-  width: 100%
-  height: 100%
-  top: 0
-  left: 0
-  color: #aaa
-  z-index: -1
+    position absolute
+    width: 100%
+    height: 100%
+    top: 0
+    left: 0
+    color: #aaa
+    z-index: -1
 
 .carbon-ai-suggested
-  user-select: none
-  pointer-events: none
-
-  span
     user-select: none
+    pointer-events: none
+
+    span
+        user-select: none
 
 .image-align-controls
-  position absolute
-  bottom: 10px
-  left 50%
-  transform: translate(-50%, 0)
-  display: flex
-  align-items: center
-  gap: 10px
-  z-index: 100
-
-  > div
-    width: 24px
-    height: 24px
-    cursor: pointer
+    position absolute
+    bottom: 10px
+    left 50%
+    transform: translate(-50%, 0)
     display: flex
     align-items: center
-    justify-content: center
-    border-radius: 4px
-    cursor: pointer
-    background: #eee
+    gap: 10px
+    z-index: 100
 
-    &:hover
-    &[data-active=true]
-      background: #ddd
+    > div
+        width: 24px
+        height: 24px
+        cursor: pointer
+        display: flex
+        align-items: center
+        justify-content: center
+        border-radius: 4px
+        cursor: pointer
+        background: #eee
+
+        &:hover
+        &[data-active=true]
+            background: #ddd
 
 [data-name="callout"][data-as=h1]
 [data-name="callout"][data-as=h2],
@@ -884,62 +887,62 @@ span[data-name=text] {
 [data-name="quote"][data-as=h2],
 [data-name="quote"][data-as=h3]
 [data-name="quote"][data-as=h4]
-  > [data-type=content]
-    margin-top 0
+    > [data-type=content]
+        margin-top 0
 
 
 .image-container,
 .video-container
-  position: relative
-  width: 100%
+    position: relative
+    width: 100%
 
 .video-overlay,
 .image-overlay
-  display: flex
-  align-items: center
-  justify-content: center
-  min-height: 54px
-  width 100%
-  user-select: none
-  color: #aaa
-  border-radius: 4px
+    display: flex
+    align-items: center
+    justify-content: center
+    min-height: 54px
+    width 100%
+    user-select: none
+    color: #aaa
+    border-radius: 4px
 
 .carbon-document-empty-picture
-  height 80px
+    height 80px
 
 [data-name=content]
-  position relative
-  padding: 10px 0
-  user-select: none
+    position relative
+    padding: 10px 0
+    user-select: none
 
 .empty-content-text
-  color: #aaa
+    color: #aaa
 
 .carbon-code-textarea
-  // position absolute
-  top: 0
-  left: 0
-  width: 100%
-  min-height: 150px
-  outline: none
+    // position absolute
+    top: 0
+    left: 0
+    width: 100%
+    min-height: 150px
+    outline: none
 
 // height: 100%
 
 .carbon-app-cursor-rest
-  height: 20px
-  width: 20px
-  position: absolute
-  top: 0
-  left: 0
-  background: #eee
-  margin: 4px
+    height: 20px
+    width: 20px
+    position: absolute
+    top: 0
+    left: 0
+    background: #eee
+    margin: 4px
 
 [data-name=frame]
-  position relative
-  background #eee
-  //padding: 10px
-  margin: 10px 0
-  border-radius: 4px
+    position relative
+    background #eee
+    //padding: 10px
+    margin: 10px 0
+    border-radius: 4px
 
 // font-size: 13px
 // line-height: 26px
@@ -953,149 +956,165 @@ span[data-name=text] {
 // right 0
 
 [data-user-select="none"]
-  user-select: none
+    user-select: none
 
 [data-user-select="normal"]
-  user-select: text
+    user-select: text
 
 [data-pointer-events="none"]
-  pointer-events: none
+    pointer-events: none
 
 [data-name=tabs]
-  position: relative;
-  border-radius 4px
-  box-shadow 0 0 0 1px #eee
-  overflow: hidden
-  margin 16px 0
-  [data-name=tab]
     position: relative;
-    padding 10px
-    min-height 100px
+    border-radius 4px
+    box-shadow 0 0 0 1px #eee
+    overflow: hidden
+    margin 16px 0
 
-  .carbon-tab-header
-    //user-select none
-    background: #F8F9FA;
-    display flex
-    padding 6px 10px
+    [data-name=tab]
+        position: relative;
+        padding 10px
+        min-height 100px
 
-    .carbon-tab-names
-      display flex
-      background: #ECF0F2
-      font-size 14px
-      border-radius 4px
-      gap 4px
-      box-shadow 0 0 0 1px #ECF0F2
-      margin-right: 6px;
+    .carbon-tab-header
+        //user-select none
+        background: #F8F9FA;
+        display flex
+        padding 6px 10px
 
-      .carbon-tab-name
-        line-height 20px
-        position relative
-        min-width 10px
-        //overflow hidden
-        //white-space nowrap
-        // just the tab name text
-        .carbon-tab-name-view
-          padding 2px 10px
-          cursor pointer
-          background: #ECF0F2
-          line-height 20px
-          border-radius 4px
-          //text-overflow ellipsis
-
-        // editable tab name
-        .carbon-tab-name-edit
-          position: absolute;
-          top 0
-          width 100%
-          height 100%
-          &.data-editable
-            z-index 100
-          input
-            width: 100%;
-            height 100%
-            padding 2px 10px
-            display inline-block
-            //box-shadow 0 0 0 1px #ddd
+        .carbon-tab-names
+            display flex
+            background: #ECF0F2
+            font-size 14px
             border-radius 4px
-            outline none
-            z-index 0
+            gap 4px
+            box-shadow 0 0 0 1px #ECF0F2
+            margin-right: 6px;
 
-        // tab is active
-        &[data-active=true]
-          .carbon-tab-name-view
-            background: #fff
-            box-shadow 0 0 0 1px #ddd
-            z-index 1
-        // tab name is being edited
-        &[data-editable=true]
-          .carbon-tab-name-edit
-            background: #000;
-            z-index 100
-            input
-              z-index 100
-              background: #fff;
-              box-shadow 0 0 0 2px rgba(25, 76, 209, 0.6)
+            .carbon-tab-name
+                line-height 20px
+                position relative
+                min-width 10px
+                //overflow hidden
+                //white-space nowrap
+                // just the tab name text
+
+                .carbon-tab-name-view
+                    padding 2px 10px
+                    cursor pointer
+                    background: #ECF0F2
+                    line-height 20px
+                    border-radius 4px
+
+                //text-overflow ellipsis
+
+                // editable tab name
+
+                .carbon-tab-name-edit
+                    position: absolute;
+                    top 0
+                    width 100%
+                    height 100%
+
+                    &.data-editable
+                        z-index 100
+
+                    input
+                        width: 100%;
+                        height 100%
+                        padding 2px 10px
+                        display inline-block
+                        //box-shadow 0 0 0 1px #ddd
+                        border-radius 4px
+                        outline none
+                        z-index 0
+
+                // tab is active
+
+                &[data-active=true]
+                    .carbon-tab-name-view
+                        background: #fff
+                        box-shadow 0 0 0 1px #ddd
+                        z-index 1
+
+                // tab name is being edited
+
+                &[data-editable=true]
+                    .carbon-tab-name-edit
+                        background: #000;
+                        z-index 100
+
+                        input
+                            z-index 100
+                            background: #fff;
+                            box-shadow 0 0 0 2px rgba(25, 76, 209, 0.6)
 
 .carbon-tab-content
-  position relative
-  display flex
-  flex-direction column
-  gap 10px
-  [data-name=tab]
-    //background: red;
-    box-shadow 0 0 0 1px #eee
-    width: 100%;
-    top 0
-    border-bottom-left-radius 4px
-    border-bottom-right-radius 4px
-    &:focus
-      z-index 10
-      //box-shadow inset 0 0 0 1px
+    position relative
+    display flex
+    flex-direction column
+    gap 10px
+
+    [data-name=tab]
+        //background: red;
+        box-shadow 0 0 0 1px #eee
+        width: 100%;
+        top 0
+        border-bottom-left-radius 4px
+        border-bottom-right-radius 4px
+
+        &:focus
+            z-index 10
+
+//box-shadow inset 0 0 0 1px
 
 .carbon-tab-content
     min-height: 100px;
+
 .add-new-tab
-  height 100%
-  padding 1px 8px
-  border-radius 4px;
-  background #eee
-  display: flex
-  align-items center
-  justify-content center
-  cursor: pointer;
-  user-select none
-  box-shadow 0 0 0 1px #eee
+    height 100%
+    padding 1px 8px
+    border-radius 4px;
+    background #eee
+    display: flex
+    align-items center
+    justify-content center
+    cursor: pointer;
+    user-select none
+    box-shadow 0 0 0 1px #eee
 
 [data-name=section]
-  > [data-name=section]
-    margin-left 20px
+    > [data-name=section]
+        margin-left 20px
 
 [data-name=modal]
-  .modal__title
-    font-size: 24px
-    font-weight: bold
-    margin-bottom: 4px
-    margin-top: 4px
-    padding 6px 16px
-    background: #eee;
-  .modal__content
-    margin-top: 4px
-    margin-bottom: 4px
-    padding 10px 16px
-  .modal__footer
-    margin-top: 4px
-    margin-bottom: 4px
-    padding 10px 16px
-    background: #eee
-    font-size 12px
+    .modal__title
+        font-size: 24px
+        font-weight: bold
+        margin-bottom: 4px
+        margin-top: 4px
+        padding 6px 16px
+        background: #eee;
 
-    border-radius 4px
-    box-shadow 0 0 0 1px #eee
-    margin 10px 0 20px 0
-    border-radius 4px
+    .modal__content
+        margin-top: 4px
+        margin-bottom: 4px
+        padding 10px 16px
+
+    .modal__footer
+        margin-top: 4px
+        margin-bottom: 4px
+        padding 10px 16px
+        background: #eee
+        font-size 12px
+
+        border-radius 4px
+        box-shadow 0 0 0 1px #eee
+        margin 10px 0 20px 0
+        border-radius 4px
 
 [data-name=empty-text]
-  user-select none
+    user-select none
 
 
 .frame-bound
@@ -1104,16 +1123,20 @@ span[data-name=text] {
     left 0
     width 100%
     height 100%
-    background rgba(159,243,159, 0.3)
+    background rgba(159, 243, 159, 0.3)
 
 .frame-wrapper
     position relative
+
     &[contenteditable=false]
         user-select none
+
         .frame-bound
             display block
+
     &[contenteditable=true]
         user-select text
+
         .frame-bound
             display none
             z-index -1
@@ -1125,7 +1148,8 @@ span[data-name=text] {
     width 100%
     height 100%
     padding 10px
-    //background: red;
+
+//background: red;
 
 [data-name=tab]:has([data-focused])
 [data-name=frame]:has([data-focused])

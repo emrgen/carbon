@@ -751,7 +751,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     eqContent(node: Node): boolean {
       if (this.name !== node.name) return false
-      if (this.props.eq(node.props) === false) return false
       if (this.children.length !== node.children.length) return false
       if (this.children.length === 0) {
         return this.textContent === node.textContent;

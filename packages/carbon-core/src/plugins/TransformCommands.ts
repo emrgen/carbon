@@ -921,7 +921,7 @@ export class TransformCommands extends BeforePlugin {
   private deleteNodes(tr: Transaction, parent: Node, nodes: Node[], opts: DeleteOpts = {}): Optional<Transaction> {
     // if parents current content is structurally same as default content, dont do anything
     const defaultParent = parent.type.default();
-    console.log('isDefault', parent.toJSON(), defaultParent?.toJSON(), parent.id.toString(), defaultParent?.id.toString());
+    // console.log('isDefault', parent.toJSON(), defaultParent?.toJSON(), parent.id.toString(), defaultParent?.id.toString());
     if (defaultParent && parent.eqContent(defaultParent)) {
       nodes.slice().reverse().some(n => {
         const focusNode = n.find(n => n.isFocusable, { order: 'post' });

@@ -31,8 +31,8 @@ export enum EventsIn {
 	selectstart = 'selectstart',
 
 	click = 'click',
-	doubleclick = 'doubleClick',
-	tripleclick = 'tripleClick',
+	doubleClick = 'doubleClick',
+	tripleClick = 'tripleClick',
 
 	custom = 'custom',
 	noop = 'noop',

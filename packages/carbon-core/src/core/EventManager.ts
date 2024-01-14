@@ -39,6 +39,7 @@ export class EventManager {
 
 	constructor(readonly app: Carbon, readonly pm: PluginManager, readonly cm: ChangeManager) { }
 
+  // bypass the event manager and directly dispatch an event to plugins
 	onCustomEvent(type: EventsIn, event: CustomEvent): boolean {
 		const {app, } = this
 		const ctx = EventContext.create({
@@ -48,9 +49,9 @@ export class EventManager {
 			node: event.node,
 			selection: app.selection,
 			origin: EventOrigin.custom,
-			// cmd: app.cmd,
 		})
 
+    // dispatch custom event to plugins
 		this.pm.onEvent(ctx);
 
 		return false

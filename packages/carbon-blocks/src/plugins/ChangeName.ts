@@ -30,7 +30,7 @@ declare module "@emrgen/carbon-core" {
 
 // Things needed to change a node type (e.g. from paragraph to heading):
 export class ChangeName extends BeforePlugin {
-  name = 'change';
+  name = 'changeName';
 
   rules: BeforeInputRuleHandler[] = [];
 

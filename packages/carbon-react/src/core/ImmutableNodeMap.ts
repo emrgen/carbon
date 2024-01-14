@@ -104,7 +104,7 @@ export class ImmutableNodeMap implements NodeMap {
   }
 
   deleted(id: NodeId) {
-    return this._deleted.has(id);
+    return this._deleted.has(id) || this._parent?.deleted(id);
   }
 
   delete(key: NodeId) {

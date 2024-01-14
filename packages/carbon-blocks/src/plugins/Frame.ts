@@ -8,6 +8,7 @@ export class Frame extends Collapsible  {
   spec(): NodeSpec {
     return {
       ...super.spec(),
+      group: 'content',
       splits: false,
       isolate: true,
       draggable: true,
@@ -18,9 +19,6 @@ export class Frame extends Collapsible  {
             contentEditable: true,
             suppressContentEditableWarning: true,
           },
-          style: {
-            // userSelect: 'none'
-          }
         }
       },
       info: {

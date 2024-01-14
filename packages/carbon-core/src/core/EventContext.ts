@@ -17,7 +17,6 @@ interface EventContextProps<T> {
 	app: Carbon,
 	node: Node,
 	selection: PinnedSelection;
-	// cmd: Transaction;
 }
 
 // EventContext is the context of an event that is being handled by the application and its plugins

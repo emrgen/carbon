@@ -30,7 +30,7 @@ import {
   SetContentAction,
   ChangeNameAction,
   UpdatePropsAction,
-  UpdateChange, SelectAction,
+  UpdateChange, SelectAction, MoveNodeAction,
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
@@ -295,6 +295,11 @@ export class ImmutableDraft implements Draft {
     }
 
     const node = this.unfreeze(nodeId);
+    // if the node is already deleted, skip the update
+    if (this.nodeMap.deleted(nodeId)) {
+      return;
+    }
+
     node.descendants().forEach(n => this.addRemoved(n.id));
 
     // update state
@@ -322,10 +327,17 @@ export class ImmutableDraft implements Draft {
     }
 
     const node = this.unfreeze(nodeId);
+    // if the node is already deleted, skip the move
+    if (this.nodeMap.deleted(nodeId)) {
+      return;
+    }
+
     const {parent} = node;
     if (!parent) {
       throw new Error("Cannot move node that does not have a parent");
     }
+
+    this.actions.add(MoveNodeAction.create(nodeLocation(node)!, to, nodeId));
 
     this.updateDependents(node, UpdateDependent.Next);
 
@@ -358,18 +370,17 @@ export class ImmutableDraft implements Draft {
         this.updateContent(textNode.id, newText);
       }
     }
-
-
   }
 
   insert(at: Point, node: Node, type: "create" | "move" = "create") {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
-
-    // mark moved/inserted nodes as inserted ones
-    // these will not be rendered explicitly
-    node.all(n => this.addInserted(n));
+    // NOTE: this will skip insertion w.r.t. the deleted nodes
+    if (this.nodeMap.deleted(at.nodeId)) {
+      node.all(n => this.addRemoved(n.id));
+      return
+    }
 
     if (type === "create") {
       // set empty placeholder of inserted node if needed
@@ -380,7 +391,13 @@ export class ImmutableDraft implements Draft {
           [PlaceholderPath]: placeholder
         });
       }
+
+      this.actions.add(InsertNodeAction.create(at, node.id, node.toJSON()));
     }
+
+    // mark moved/inserted nodes as inserted ones
+    // these will not be rendered explicitly
+    node.all(n => this.addInserted(n));
 
     console.debug('inserting new item')
     switch (at.at) {
@@ -402,13 +419,6 @@ export class ImmutableDraft implements Draft {
     this.tm.insert(node, parent, 0);
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
-
-    // this.mutable(parentId, parent => {
-    //   parent.children.forEach(ch => this.mutable(ch.id));
-    //   parent.insert(node, 0);
-    //   this.contentChanged.add(parent.id);
-    //   this.unstable.add(parent.id);
-    // });
   }
 
   private append(parentId: NodeId, node: Node) {
@@ -416,11 +426,6 @@ export class ImmutableDraft implements Draft {
     this.tm.insert(node, parent, parent.size);
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
-    // this.mutable(parentId, parent => {
-    //   parent.insert(node, parent.size);
-    //   this.contentChanged.add(parent.id);
-    //   this.unstable.add(parent.id);
-    // });
   }
 
   private insertBefore(refId: NodeId, node: Node) {
@@ -433,7 +438,6 @@ export class ImmutableDraft implements Draft {
     if (!parentId) {
       throw new Error("Cannot insert node before a node that does not have a parent");
     }
-
     const parent = this.unfreeze(parentId);
     this.tm.insert(node, parent, refNode.index);
     this.addUpdated(parent.id);
@@ -463,11 +467,17 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot remove node from a draft that is already committed");
     }
 
+    if (this.nodeMap.deleted(nodeId)) {
+      return;
+    }
+
     const node = this.unfreeze(nodeId);
     const parentId = node.parentId;
     if (!parentId) {
       throw new Error("Cannot remove node that does not have a parent");
     }
+
+    this.actions.add(RemoveNodeAction.create(nodeLocation(node)!, nodeId, node.toJSON()));
 
     const {parent} = node;
     if (!parent) {
@@ -496,6 +506,13 @@ export class ImmutableDraft implements Draft {
     }
 
     const node = this.unfreeze(nodeId);
+    // if the node is already deleted, skip the change
+    if (this.nodeMap.deleted(nodeId)) {
+      return;
+    }
+
+    this.actions.add(ChangeNameAction.withBefore(nodeId, node.type.name, type.name));
+
     this.updateDependents(node, UpdateDependent.Next);
     this.tm.changeType(node, type);
 
@@ -521,6 +538,8 @@ export class ImmutableDraft implements Draft {
     }
 
     const node = this.unfreeze(nodeId);
+    this.actions.add(UpdatePropsAction.withBefore(nodeId, node.props.toJSON(), props));
+
     this.tm.updateProps(node, props);
     this.addUpdated(node.id);
 
@@ -727,7 +746,7 @@ class Transformer {
   changeType(node: Node, type: NodeType) {
     console.log(p14('%c[trap]'), "color:green", 'change type', node.id.toString(), node.renderVersion);
     this.changes.add(NameChange.create(node.id, node.type.name, type.name));
-    this.actions.add(ChangeNameAction.withBefore(node.id, node.type.name, type.name));
+    // this.actions.add(ChangeNameAction.withBefore(node.id, node.type.name, type.name));
 
     node.changeType(type);
   }
@@ -738,11 +757,11 @@ class Transformer {
 
     const {path} = node;
     this.changes.add(InsertChange.create(node.id, node.id, path));
-    if (index === 0) {
-      this.actions.add(InsertNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()));
-    } else {
-      this.actions.add(InsertNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()));
-    }
+    // if (index === 0) {
+    //   this.actions.add(InsertNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()));
+    // } else {
+    //   this.actions.add(InsertNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()));
+    // }
 
     this.changes.dataMap.set(node.id, node.data);
   }
@@ -753,7 +772,7 @@ class Transformer {
     const {path} = node;
     this.changes.add(RemoveChange.create(parent.id, node.id, path));
     this.changes.dataMap.set(node.id, node.data);
-    this.actions.add(RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()));
+    // this.actions.add(RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()));
 
     parent.remove(node);
   }
@@ -766,7 +785,7 @@ class Transformer {
     node.insertText(text, offset)
 
     const after = node.textContent
-    this.actions.add(SetContentAction.withBefore(node.id, before, after));
+    // this.actions.add(SetContentAction.withBefore(node.id, before, after));
   }
 
   removeText(node: Node, text: string, offset: number) {
@@ -837,7 +856,7 @@ class Transformer {
       return
     }
 
-    this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
+    // this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
     this.changes.add(UpdateChange.create(node.id, node.path, before, props));
 
     node.updateProps(props);

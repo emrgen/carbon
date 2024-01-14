@@ -75,6 +75,7 @@ export const CommentEditorComp = (props: RendererProps) => {
       <button onMouseDown={toggleName('h2')} disabled={!isFocused}>H2</button>
       <button onMouseDown={toggleName('h3')} disabled={!isFocused}>H3</button>
       <button onMouseDown={toggleName('bulletedList')} disabled={!isFocused}>-</button>
+      <button onMouseDown={toggleName('numberedList')} disabled={!isFocused}>1.</button>
       <button onMouseDown={toggleName('todo')} disabled={!isFocused}>[]</button>
       &nbsp; · &nbsp;
       <button disabled={!isFocused}>B</button>
