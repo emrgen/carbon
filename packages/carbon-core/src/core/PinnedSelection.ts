@@ -12,6 +12,8 @@ import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 import {blocksBelowCommonNode} from "../utils/findNodes";
 import {takeBefore} from "../utils/array";
 
+const GNode = window.Node
+
 // PinnedSelection is a selection that is pinned to start and end nodes
 // It serves three purpose
 // 1. Materialized range selection
@@ -375,12 +377,25 @@ export class PinnedSelection {
 			// NOTE: need to find focusable node. all HTML elements are not focusable
 			// anchorNode: anchorNode.firstChild?.firstChild ?? anchorNode.firstChild ?? anchorNode,
 			// focusNode: focusNode.firstChild?.firstChild ?? focusNode.firstChild ?? focusNode,
-			anchorNode: anchorNode,
-			focusNode: focusNode,
+			anchorNode: this.findTextNode(anchorNode),
+			focusNode: this.findTextNode(focusNode),
 			anchorOffset: tailOffset,
 			focusOffset: headOffset,
 		}
 	}
+
+  private findTextNode(node: HTMLElement) {
+    if (node.nodeType === GNode.TEXT_NODE) {
+      return node
+    }
+
+    for (let i = 0; i < node.childNodes.length; i++) {
+      const found = this.findTextNode(node.childNodes[i] as HTMLElement)
+      if (found) return found
+    }
+
+    return node
+  }
 
 	collapseToHead(): PinnedSelection {
 		const { head, } = this

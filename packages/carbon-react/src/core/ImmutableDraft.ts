@@ -297,7 +297,6 @@ export class ImmutableDraft implements Draft {
   // normalize unstable nodes by inserting missing nodes as per the schema
   private normalizeSchema() {
     console.debug('normalizing schema');
-    console.log('normalized',this.updated.toArray().map(n => n.toString()).join(', '))
     this.contentChanged.nodes(this.nodeMap).forEach(node => {
       const nodes: Node[] = []
       node.all(n => {

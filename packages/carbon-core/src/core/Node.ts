@@ -19,6 +19,8 @@ import {no, NodeEncoder, yes} from "./types";
 import EventEmitter from "events";
 import {NodeMap} from "@emrgen/carbon-core";
 
+
+
 export type TraverseOptions = {
 	order: 'pre' | 'post';
 	direction: 'forward' | 'backward';

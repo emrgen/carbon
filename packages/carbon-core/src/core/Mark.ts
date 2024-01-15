@@ -16,25 +16,43 @@ export class Mark {
 	type: string;
 	props?: MarkProps;
 
-	static BOLD =  new Mark('bold')
+	static BOLD =  {
+    type: 'bold',
+  }
 
-	static ITALIC = new Mark('italic')
+	static ITALIC = {
+    type: 'italic',
+  }
 
-	static UNDERLINE = new Mark('underline')
+	static UNDERLINE = {
+    type: 'underline',
+  }
 
-	static CODE = new Mark('code')
 
-	static SUBSCRIPT = new Mark('subscript')
+  static STRIKE = {
+    type: 'strike',
+  }
 
-	static SUPERSCRIPT = new Mark('superscript')
+	static CODE = {
+    type: 'code',
+  }
 
-	static HASHTAG = new Mark('hashtag')
+	static SUBSCRIPT = {
+    type: 'subscript',
+  }
+
+	static SUPERSCRIPT = {
+    type: 'superscript',
+  }
+
+	static HASHTAG = {
+    type: 'hashtag',
+  }
 
 	static mention(): Mark {
 		return new Mark('mention');
 	}
 
-	static STRIKE = new Mark('strike')
 
 	static link(url: string): Mark {
 		return new Mark('link', { url });

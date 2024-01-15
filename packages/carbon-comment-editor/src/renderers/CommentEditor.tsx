@@ -29,7 +29,7 @@ export const CommentEditorComp = (props: RendererProps) => {
       return
     }
 
-    app.cmd.inserter.append(node, 'section').dispatch();
+    app.cmd.inserter.appendDefault(node, 'section').dispatch();
   }, [app, node])
 
   const toggleName = useCallback((name: string) => (e) => {
@@ -61,11 +61,7 @@ export const CommentEditorComp = (props: RendererProps) => {
     return () => {
       app.off('changed', onChange);
     }
-  }, [node]);
-
-  useEffect(() => {
-    console.log(node.isEmpty)
-  }, [node]);
+  }, [app, node]);
 
   const toolbar = useMemo(() => (
     <div className={'carbon-comment-editor-toolbar'} data-focused={isFocused}>

@@ -1,6 +1,6 @@
-import React, {ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef} from "react";
+import React, {ForwardedRef, forwardRef, memo, ReactNode, useEffect, useImperativeHandle, useMemo, useRef} from "react";
 import {useCarbon} from '../hooks/useCarbon';
-import {LocalHtmlAttrPath, NamePath, TagPath} from "@emrgen/carbon-core";
+import {LocalHtmlAttrPath, Mark, MarksPath, NamePath, TagPath} from "@emrgen/carbon-core";
 import {useNodeChange, useRenderManager} from "../hooks";
 import {RendererProps} from "../renderer/ReactRenderer";
 import {isEmpty} from "lodash";
@@ -109,9 +109,60 @@ export const RawText = memo(function RT(props: RendererProps) {
   return <>{ref.current}</>
 });
 
+interface RenderMark {
+  mark: Mark
+  children?: React.ReactNode;
+}
+
+const CarbonMark = (props: RenderMark) => {
+  const {mark, children} = props;
+  const view = useMemo(() => {
+    switch (mark.type) {
+      case 'bold':
+        return <strong>{children}</strong>
+      case 'italic':
+        return <em>{children}</em>
+      case 'underline':
+        return <u>{children}</u>
+      case 'color':
+        return <span style={{color: mark.props?.color ?? 'default'}}>{children}</span>
+      default:
+        return children
+    }
+  },[children, mark]);
+
+  return <>{view}</>
+}
+
+interface RenderMarks {
+  marks: Mark[];
+  children?: React.ReactNode;
+}
+
+const CarbonMarks = (props: RenderMarks) => {
+  const {marks} = props;
+
+  if (isEmpty(marks)) {
+    return <>{props.children}</>
+  }
+
+  return (
+    <>
+      {marks.reduce((acc, mark) => {
+        return <CarbonMark mark={mark}>{acc}</CarbonMark>
+      }, props.children)}
+    </>
+  )
+}
+
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
   const {node, parent} = props;
+  const marks: Mark[] = Object.values(node.props.get(MarksPath) ?? {});
+
+  if (!isEmpty(marks)) {
+    console.log('InnerCarbonText', node.name, node.id.toString(), marks);
+  }
 
   return (
     <CarbonElement node={node} tag="span">
@@ -119,7 +170,7 @@ const InnerCarbonText = (props: RendererProps) => {
         {node.isEmpty ? (
           <CarbonEmpty node={node} parent={parent}/>
         ) : (
-          node.textContent
+          <CarbonMarks marks={marks}>{node.textContent}</CarbonMarks>
         )}
 
       </>

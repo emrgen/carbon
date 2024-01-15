@@ -8,7 +8,7 @@ import {
   ActivatedPath,
   CollapsedPath,
   corePresetPlugins,
-  Extension,
+  Extension, Mark,
   Node,
   NodeId,
   PluginManager,
@@ -24,7 +24,31 @@ import {PathTracker} from "../../PathTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
-    section([title([text("section 1")])]),
+
+
+    section([title([
+      text("section 1"),
+      text(" bold", {
+        'remote/state/marks/bold:': Mark.BOLD,
+      }),
+      text(" italic", {
+        'remote/state/marks/italic:': Mark.ITALIC,
+      }),
+      text(" underline", {
+        'remote/state/marks/underline:': Mark.UNDERLINE,
+      }),
+      text(" bold italic", {
+        'remote/state/marks/bold:': Mark.BOLD,
+        'remote/state/marks/italic:': Mark.ITALIC,
+      }),
+      text(" color", {
+        'remote/state/marks/bold:': Mark.BOLD,
+        'remote/state/marks/color:': Mark.color('teal'),
+      }),
+      text("", {}),
+    ])]),
+
+
     section([title([])]),
     section([title([text("section 3")])]),
 

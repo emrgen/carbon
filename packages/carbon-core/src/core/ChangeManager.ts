@@ -153,7 +153,6 @@ export class ChangeManager extends NodeTopicEmitter {
     clearInterval(this.interval);
     const tr = this.actions.shift();
     if (tr) {
-      console.log('processing transaction', tr.type);
       this.pm.onTransaction(tr);
       this.app.emit(EventsOut.transaction, tr);
       this.app.emit(EventsOut.changed, this.state);

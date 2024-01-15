@@ -42,7 +42,6 @@ export class TransactionManager {
 				continue;
 			}
 
-      console.log('processing transaction', tr.type);
 			// produce a new state from the current state
 			const state = app.state.produce((draft) => {
 				tr.Commit(draft);
