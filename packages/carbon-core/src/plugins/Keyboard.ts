@@ -289,6 +289,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
 		// console.log('Keyboard.backspace',deleteSel.toString());
 		const deleteSel = selection.moveStart(-1)
+    console.log('deleteSel', deleteSel?.toString())
 		if (!deleteSel) return
 		tr.transform.delete(deleteSel)?.Dispatch()
 	}

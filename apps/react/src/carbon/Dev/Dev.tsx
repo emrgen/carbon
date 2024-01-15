@@ -45,7 +45,12 @@ const data = node("carbon", [
         'remote/state/marks/bold:': Mark.BOLD,
         'remote/state/marks/color:': Mark.color('teal'),
       }),
-      text("", {}),
+      text("code", {
+        'remote/state/marks/code:': Mark.CODE,
+      }),
+      // text("", {
+      //   'local/html/data-empty': true,
+      // }),
     ])]),
 
 

@@ -234,7 +234,7 @@ export class Pin {
 			return false
 		})
 
-		return pin;
+    return pin;
 	}
 
 	// check if pin is before the provided pin

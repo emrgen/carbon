@@ -1311,7 +1311,7 @@ export class TransformCommands extends BeforePlugin {
     const actions: CarbonAction[] = [];
 
     // if a node is a child of another node in the deleteGroup, it will be implicitly removed
-    // remove it from the deleteGroup to avoid duplicate remove action
+    // it from the deleteGroup to avoid duplicate remove action
     sortBy(deleteGroup.ids.toArray().map(id => app.store.get(id)), n => -(n?.depth ?? 0)).forEach(n => {
       if (n?.parents.some(p => deleteGroup.has(p.id))) {
         deleteGroup.removeId(n.id);
@@ -1372,11 +1372,12 @@ export class TransformCommands extends BeforePlugin {
         const edown = end.down();
         if (sdown?.node.eq(edown?.node)) {
           const { node } = sdown;
-          const textContent = node.textContent.slice(0, start.offset) + node.textContent.slice(end.offset);
+          const textContent = node.textContent.slice(0, sdown.offset) + node.textContent.slice(edown.offset);
           actions.push(SetContentAction.create(node.id,textContent));
           return
         }
 
+        // TODO: delete using TextContent methods
         const textContent = node.textContent.slice(0, start.offset) + node.textContent.slice(end.offset);
         // if (textContent === '') {
         //   actions.push(SetContentAction.create(node.id, BlockContent.empty()))
