@@ -83,8 +83,9 @@ export class Pin {
 
 	static toStartOf(node: Node): Optional<Pin> {
 		if (node.isEmpty || node.isAtom) {
-			return Pin.create(node.find(n => n.isLeaf)!, 0);
+			return Pin.create(node.find(n => n.isTextContainer || n.isLeaf)!, 0);
 		}
+
 		const target = node.find(n => n.isFocusable, { order: 'post' });
 		if (!target) return null;
 
@@ -95,6 +96,10 @@ export class Pin {
 		if (node.isEmpty) {
 			const target = node.find(n => n.isFocusable, { order: 'post', direction: 'backward' })!
 			if (!target) return null
+      if (target.isText) {
+        return Pin.create(target, target.size).up();
+      }
+
 			return Pin.create(target, 0);
 		}
 

@@ -1,7 +1,10 @@
 import {ActionOrigin, CarbonAction, Draft, Point} from "@emrgen/carbon-core";
+import dayjs from "dayjs";
 
 // NOTE: it can be transformed into SetContent action
 export class InsertTextAction implements CarbonAction {
+  time: number = dayjs().unix();
+
   static create(point: Point, text: string, origin: ActionOrigin = ActionOrigin.UserInput) {
     return new InsertTextAction(point, text, origin);
   }

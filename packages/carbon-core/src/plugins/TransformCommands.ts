@@ -1350,6 +1350,8 @@ export class TransformCommands extends BeforePlugin {
         // NOTE: if the textBlock becomes empty after delete all text nodes
         if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node) && !node.isVoid) {
           actions.push(...this.removeNodeCommands(node.children))
+          // MAYBE: may be insert a default empty node to keep the text node filled all the time.
+
           // const children = node.children;
           // if (children.length===0) {
           //   // const textNode = react.schema.text("");

@@ -1,14 +1,28 @@
-import { ActionOrigin, BeforePlugin, Carbon, Node, Pin, PinnedSelection, Point, Transaction } from "@emrgen/carbon-core";
+import {
+  ActionOrigin,
+  BeforePlugin,
+  Carbon,
+  insertNodesActions,
+  Node,
+  Pin,
+  PinnedSelection,
+  Point,
+  Transaction
+} from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 declare module '@emrgen/carbon-core' {
   interface Transaction {
+    insertAfterDefault(node: Node, name: string): Transaction;
+    insertBeforeDefault(node: Node, name: string): Transaction;
     inserter: {
-      node(name: string): Transaction;
-      before(node: Node, name: string): Transaction;
-      after(node: Node, name: string): Transaction;
-      append(node: Node, name: string): Transaction;
-      prepend(node: Node, name: string): Transaction;
+      insertBeforeDefault(node: Node, name: string): Transaction;
+      insertAfterDefault(node: Node, name: string): Transaction;
+      appendDefault(node: Node, name: string): Transaction;
+      prependDefault(node: Node, name: string): Transaction;
+      insertBefore(ref: Node, node: Node): Transaction;
+      insertAfter(ref: Node, node: Node): Transaction;
+      insertNodes(at: Point, nodes: Node[]): Transaction;
     }
   }
 }
@@ -19,12 +33,31 @@ export class Insert extends BeforePlugin {
 
   commands(): Record<string, Function> {
     return {
-      node: this.node,
-      before: this.before,
-      after: this.after,
-      append: this.append,
-      prepend: this.prepend,
+      // node: this.node,
+      insertBeforeDefault: this.before,
+      insertAfterDefault: this.after,
+      appendDefault: this.append,
+      prependDefault: this.prepend,
+      insertBefore: this.insertBefore,
+      insertAfter: this.insertAfter,
+      insertNodes: this.insertNodes,
     };
+  }
+
+  insertNodes(tr: Transaction, at: Point, nodes: Node[]) {
+    insertNodesActions(at, nodes).forEach(action => {
+      tr.Add(action);
+    });
+  }
+
+  insertBefore(tr: Transaction, ref: Node, node: Node) {
+    const at = Point.toBefore(ref.id);
+    this.insert(tr, at, node);
+  }
+
+  insertAfter(tr: Transaction, ref: Node, node: Node) {
+    const at = Point.toAfter(ref.id);
+    this.insert(tr, at, node);
   }
 
   // TODO: check if the node is allowed in the current context

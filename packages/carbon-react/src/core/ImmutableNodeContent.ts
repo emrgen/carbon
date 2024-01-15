@@ -125,6 +125,8 @@ export class ImmutableNodeContent implements NodeContent {
     const {content} = this;
     const {children} = content;
     this.content.children = children.filter(n => !n.eq(node));
+    node.setParent(null);
+    node.setParentId(null);
   }
 
   replace(index: number, node: Node) {

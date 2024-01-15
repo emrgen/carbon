@@ -8,7 +8,6 @@ import { Node } from '../Node';
 import { deepCloneMap, NodeJSON } from "../types";
 import { NodeId } from "../NodeId";
 import {Draft} from "../Draft";
-import {Schema} from "@emrgen/carbon-core";
 
 export class InsertNodeAction implements CarbonAction {
 	static fromNode(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
@@ -22,7 +21,8 @@ export class InsertNodeAction implements CarbonAction {
 		return new InsertNodeAction(at, id, node, origin);
 	}
 
-	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {}
+	constructor(readonly at: Point, readonly nodeId: NodeId, readonly node: NodeJSON, readonly origin: ActionOrigin) {
+  }
 
 	execute(draft: Draft) {
 		const { at, node: json } = this;

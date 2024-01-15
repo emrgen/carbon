@@ -13,7 +13,7 @@ import {
   PointAt,
   PointedSelection, Schema,
   SelectedPath,
-  State, TransactionType
+  State, TxType
 } from "@emrgen/carbon-core";
 import {SolidNodeMap} from "./NodeMap";
 import {isArray} from "lodash";
@@ -26,7 +26,7 @@ export class SolidDraft implements Draft {
   contentChanged: NodeIdSet = NodeIdSet.empty();
   selected: NodeIdSet = NodeIdSet.empty();
 
-  constructor(private state: State, readonly origin: ActionOrigin, readonly type: TransactionType, readonly schema: Schema) {
+  constructor(private state: State, readonly origin: ActionOrigin, readonly type: TxType, readonly schema: Schema) {
     this.schema = schema;
     state.blockSelection.blocks.forEach(node => {
       this.selected.add(node.id);

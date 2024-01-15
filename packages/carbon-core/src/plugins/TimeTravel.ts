@@ -1,4 +1,4 @@
-import { AfterPlugin, Carbon, EventContext, EventHandler, SelectAction, Transaction, TransactionType } from "../core";
+import { AfterPlugin, Carbon, EventContext, EventHandler, SelectAction, Transaction, TxType } from "../core";
 import { TransactionTree } from "../core/TransactionTree";
 
 // time travel to any point in the past or even the future

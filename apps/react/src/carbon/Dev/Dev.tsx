@@ -19,6 +19,7 @@ import {
 import {CarbonApp} from "@emrgen/carbon-utils";
 import {noop, range} from "lodash";
 import SelectionTracker from "../../SelectionTracker";
+import {PathTracker} from "../../PathTracker";
 
 const data = node("carbon", [
   node("document", [
@@ -255,6 +256,7 @@ export default function Dev() {
     <div className={'carbon-app-container'}>
       <CarbonApp app={app} renderManager={renderManager}>
         <SelectionTracker/>
+        <PathTracker/>
       </CarbonApp>
     </div>
   );

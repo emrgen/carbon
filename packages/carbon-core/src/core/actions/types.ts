@@ -12,9 +12,11 @@ export interface CarbonAction {
 // restrict the normalizer to only these actions so that we can easily reason about the normalizer
 export type NormalizeAction = InsertNodeAction | RemoveNodeAction | MoveNodeAction;
 
-export enum TransactionType {
+export enum TxType {
 	OneWay = 'OneWay',
 	TwoWay = 'TwoWay',
+  Undo = 'Undo',
+  Redo = 'Redo',
 }
 
 export enum ActionOrigin {

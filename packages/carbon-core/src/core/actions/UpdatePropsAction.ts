@@ -1,8 +1,6 @@
 import { classString } from "../Logger";
 import { IntoNodeId, NodeId } from "../NodeId";
-import { Transaction } from "../Transaction";
 import { CarbonAction, ActionOrigin, ActionType } from "./types";
-import { Optional } from '@emrgen/types';
 import { NodePropsJson } from "../NodeProps";
 import {Draft} from "@emrgen/carbon-core";
 

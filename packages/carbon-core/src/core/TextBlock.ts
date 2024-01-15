@@ -3,6 +3,7 @@ import { Mark } from "./Mark";
 import { Node } from "./Node";
 import { Optional } from '@emrgen/types';
 import { reduce } from "lodash";
+import {deepCloneMap} from "@emrgen/carbon-core";
 
 // utility class for text blocks
 // title is a text block
@@ -13,7 +14,7 @@ export class TextBlock {
   private node: Node;
 
   static from(node: Node) {
-    return new TextBlock(node.clone());
+    return new TextBlock(node.clone(deepCloneMap));
   }
 
   constructor(node: Node) {

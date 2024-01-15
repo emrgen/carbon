@@ -4,6 +4,7 @@ import { ActionOrigin, CarbonAction } from "./types";
 import { Optional } from '@emrgen/types';
 import {classString, deepCloneMap, Draft, Node, NodeContent, NodeData} from "@emrgen/carbon-core";
 import {isArray} from "lodash";
+import dayjs from "dayjs";
 
 export type Content = string | NodeData[] | Node[]
 
@@ -41,22 +42,21 @@ export class SetContentAction implements CarbonAction {
       draft.updateContent(nodeId, after);
     }
 
-    if (node.isTextContainer) {
-      this.before = node.children.map(n => n.clone(deepCloneMap));
-    } else {
-      this.before = node.textContent
+    if (!this.before) {
+      if (node.isTextContainer) {
+        this.before = node.children.map(n => n.clone(deepCloneMap));
+      } else {
+        this.before = node.textContent
+      }
     }
   }
 
   inverse(): CarbonAction {
-    if (!this.before) {
+    if (this.before == null) {
       throw new Error("Cannot invert action without before state");
     }
 
-    const action = SetContentAction.create(this.nodeId, this.before, this.origin)
-    action.before = this.after
-
-    return action
+    return SetContentAction.withBefore(this.nodeId, this.after, this.before, this.origin)
   }
 
   toString() {

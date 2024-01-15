@@ -2,9 +2,11 @@ import {
   Carbon,
   CarbonPlugin,
   Mark,
-  Selection,
+  Selection, State,
   Transaction
 } from "@emrgen/carbon-core";
+import {PluginEmitter} from "../core/PluginEmitter";
+import {PluginState} from "../core/PluginState";
 
 // add formatter commands to the CarbonCommands interface
 declare module '@emrgen/carbon-core' {
@@ -51,6 +53,30 @@ export class FormatterPlugin extends CarbonPlugin {
       superscript: this.superscript,
       color: this.color,
       background: this.background,
+    }
+  }
+
+  constructor() {
+    super();
+
+    this.onChanged = this.onChanged.bind(this);
+  }
+
+  init(app:Carbon, bus:PluginEmitter, state: PluginState) {
+    super.init(app, bus, state);
+    app.on('changed', this.onChanged);
+  }
+
+  destroy(app: Carbon) {
+    super.destroy(app);
+    app.off('changed', this.onChanged);
+  }
+
+  onChanged(state: State) {
+    const {selection} = state
+    if (selection.isCollapsed && !selection.isInvalid) {
+      const {head} = selection;
+      console.log('Save marks from node', head.node)
     }
   }
 

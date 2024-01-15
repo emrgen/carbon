@@ -23,7 +23,7 @@ import {
 } from "@emrgen/carbon-core";
 import { ChangeNameAction } from './actions/ChangeNameAction';
 import { UpdatePropsAction } from './actions/UpdatePropsAction';
-import { ActionOrigin, CarbonAction, TransactionType } from "./actions/types";
+import { ActionOrigin, CarbonAction, TxType } from "./actions/types";
 import { NodeName } from './types';
 import { insertNodesActions } from '../utils/action';
 import { ActivatedPath, OpenedPath, SelectedPath } from "./NodeProps";
@@ -33,6 +33,7 @@ import { RemoveNodeAction } from "./actions/RemoveNodeAction";
 import { MoveNodeAction } from "./actions/MoveNodeAction";
 import { CarbonCommand, PluginCommand } from "./CarbonCommand";
 import {Draft} from "./Draft";
+import dayjs from "dayjs";
 
 let _id = 0
 const getId = () => String(_id++)
@@ -48,8 +49,9 @@ declare module '@emrgen/carbon-core' {
 }
 
 export class Transaction {
-	private id: string;
-	type: TransactionType = TransactionType.TwoWay;
+  private readonly id: string;
+  time = dayjs().unix();
+	type: TxType = TxType.TwoWay;
 	private actions: CarbonAction[] = [];
 	private _committed: boolean = false;
 	private _dispatched: boolean = false;
@@ -213,8 +215,8 @@ export class Transaction {
 		return this
 	}
 
-	OneWay(): Transaction {
-		this.type = TransactionType.OneWay;
+	WithType(type: TxType): Transaction {
+		this.type = type;
 		return this;
 	}
 
@@ -236,10 +238,10 @@ export class Transaction {
 		}
 
     // check one transaction can have only one select action
-    const selectActions = this.actions.filter(a => a instanceof SelectAction);
-    if (selectActions.length > 1) {
-      throw new Error('transaction can have only one select action');
-    }
+    // const selectActions = this.actions.filter(a => a instanceof SelectAction);
+    // if (selectActions.length > 1) {
+    //   throw new Error('transaction can have only one select action');
+    // }
 
 		if (this._dispatched) {
 			console.warn('skipped: transaction already dispatched')
@@ -400,7 +402,7 @@ export class Transaction {
 }
 
 export class TransactionCommit {
-	constructor(readonly type: TransactionType, readonly id: string, readonly actions: CarbonAction[], origin: ActionOrigin) {}
+	constructor(readonly type: TxType, readonly id: string, readonly actions: CarbonAction[], origin: ActionOrigin) {}
 
 	// create an inverse transaction
 	inverse(app: Carbon, origin?: ActionOrigin) {

@@ -2,25 +2,54 @@ import {Optional} from "@emrgen/types";
 import {PointedSelection} from "./PointedSelection";
 import {
   CarbonAction,
-  Draft,
+  Draft, InsertNodeAction,
   NodeData,
   NodeId,
   NodeIdComparator,
   NodeIdSet,
   NodePropsJson,
-  Path,
-  SelectAction,
-  TransactionType,
+  Path, RemoveNodeAction,
+  SelectAction, SetContentAction,
+  TxType,
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
 import BTree from "sorted-btree";
-import {last} from "lodash";
+import {last, uniqBy} from "lodash";
+import dayjs from "dayjs";
+
+const CONTENT_ACTIONS = [SetContentAction, InsertNodeAction, RemoveNodeAction];
 
 export class StateActions {
+  time: number = dayjs().unix();
   actions: CarbonAction[];
-  type: TransactionType;
+  type: TxType;
 
-  constructor(actions: CarbonAction[] = [], type: TransactionType = TransactionType.TwoWay) {
+  static compress(actions: StateActions[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    let stateAction = actions.pop()!;
+    while (true) {
+      const next = actions.pop();
+      if (!next) {
+        break;
+      }
+
+      const merged = stateAction.merge(next);
+
+      if (merged) {
+        stateAction = merged;
+      } else {
+        actions.push(next);
+        break;
+      }
+    }
+
+    actions.push(stateAction!);
+  }
+
+  constructor(actions: CarbonAction[] = [], type: TxType = TxType.TwoWay) {
     this.actions = actions;
     this.type = type;
   }
@@ -38,6 +67,50 @@ export class StateActions {
   }
 
   inverse(): StateActions {
+    // split the actions into parts ending with a select action
+    // reverse each part
+    // reverse the parts
+    // reverse the select action
+    // reverse the whole thing
+
+    // const actions = this.actions.slice();
+    // console.log('actions', actions);
+    //
+    // const parts: CarbonAction[][] = [];
+    // let part: CarbonAction[] = [];
+    // for (let i = 0; i < actions.length; i++) {
+    //   const action = actions[i];
+    //   part.push(action);
+    //   if (action instanceof SelectAction) {
+    //     parts.push(part);
+    //     part = [];
+    //   }
+    // }
+    //
+    // if (part.length > 0) {
+    //   parts.push(part);
+    // }
+    //
+    // const inverseActions = new StateActions([], this.type);
+    // parts.reverse().forEach(part => {
+    //   if (last(part) instanceof SelectAction) {
+    //     const select = part.pop() as SelectAction;
+    //     part.reverse().forEach(action => {
+    //       inverseActions.add(action.inverse());
+    //     })
+    //     const inverse = select.inverse();
+    //     inverseActions.add(inverse);
+    //   } else {
+    //     part.reverse().forEach(action => {
+    //       inverseActions.add(action.inverse());
+    //     })
+    //   }
+    // })
+    //
+    // console.log('inverseActions', inverseActions.actions)
+    //
+    // return inverseActions;
+
     const actions = this.actions.slice();
     if (last(this.actions) instanceof SelectAction) {
       const select = actions.pop() as SelectAction;
@@ -51,8 +124,32 @@ export class StateActions {
     }
   }
 
+  merge(other: StateActions, order: 'prev' | 'next' = 'prev'): Optional<StateActions> {
+    if (this.type !== other.type) return null;
+
+    // if both update content part is only set content and both have the same node id
+    const selfActions = this.actions.filter(a => CONTENT_ACTIONS.includes(a.constructor as any));
+    const otherActions = other.actions.filter(a => CONTENT_ACTIONS.includes(a.constructor as any));
+    const selfSetContent = selfActions.every(a => a instanceof SetContentAction);
+    const otherSetContent = otherActions.every(a => a instanceof SetContentAction);
+    if (selfSetContent && otherSetContent) {
+      const selfTarget = uniqBy(selfActions.map(a => (a as SetContentAction).nodeId), id => id.toString());
+      const otherTarget = uniqBy(otherActions.map(a => (a as SetContentAction).nodeId), id => id.toString());
+      if (selfTarget.length === 1 && otherTarget.length === 1 && selfTarget[0].eq(otherTarget[0])) {
+        console.log('merge content', selfTarget[0].toString());
+        if (order === 'prev') {
+          // return new StateActions([...this.actions, ...other.actions], this.type);
+        } else {
+          // return new StateActions([...other.actions, ...this.actions], this.type);
+        }
+      }
+    }
+
+    return null;
+  }
+
   oneWay() {
-    this.type = TransactionType.OneWay;
+    this.type = TxType.OneWay;
     return this;
   }
 
@@ -222,6 +319,7 @@ export class SelectionChange implements Change {
 // captures the changes in the state
 // this can be used to rollback or to update the UI
 export class StateChanges {
+  time: number = dayjs().unix();
   // this nodes will be rendered
   // changed nodes will be rebuilt in the next render cycle
   patch: Change[];

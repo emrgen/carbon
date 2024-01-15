@@ -5,7 +5,11 @@ import {useNodeChange, useRenderManager} from "../hooks";
 import {RendererProps} from "../renderer/ReactRenderer";
 import {isEmpty} from "lodash";
 
-export const JustEmpty = () => {
+export const JustEmpty = (props: RendererProps) => {
+  if (props.node.isText) {
+    return <br/>;
+  }
+
   // return <span>&shy;</span>;
   return <span><br/></span>;
 }
@@ -27,7 +31,7 @@ export const CarbonPlaceholder = (props: CarbonPlaceholder) => {
 //
 export const CarbonEmpty = (props: RendererProps) => {
   const {node} = props;
-  return <JustEmpty key={node.key + "empty"}/>;
+  return <JustEmpty key={node.key + "empty"} node={node}/>;
 };
 
 const mapName = (name: string, parentName?: string) => {

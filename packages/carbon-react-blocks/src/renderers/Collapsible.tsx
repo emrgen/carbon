@@ -1,13 +1,6 @@
-import {
-  CarbonBlock,
-  CarbonNodeChildren,
-  CarbonNodeContent,
-  RendererProps,
-  useCarbon,
-  useSelectionHalo
-} from "@emrgen/carbon-react";
+import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon} from "@emrgen/carbon-react";
 import {useCallback, useRef} from "react";
-import {ActionOrigin, Carbon, CollapsedPath, Pin, PinnedSelection, Point,Node} from "@emrgen/carbon-core";
+import {ActionOrigin, Carbon, CollapsedPath, Pin, PinnedSelection, Point, TxType} from "@emrgen/carbon-core";
 import {MdOutlineKeyboardArrowDown, MdOutlineKeyboardArrowRight} from "react-icons/md";
 import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
 
@@ -47,7 +40,7 @@ export default function CollapsibleListComp(props: RendererProps) {
       cmd.Select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
     }
 
-    cmd.OneWay()
+    cmd.WithType(TxType.OneWay)
     cmd.Dispatch();
   }, [node, isCollapsed]);
 

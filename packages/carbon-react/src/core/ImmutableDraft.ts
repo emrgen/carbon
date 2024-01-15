@@ -30,7 +30,7 @@ import {
   SetContentAction,
   ChangeNameAction,
   UpdatePropsAction,
-  UpdateChange, SelectAction, MoveNodeAction, TransactionType,
+  UpdateChange, SelectAction, MoveNodeAction, TxType,
 } from "@emrgen/carbon-core";
 import {Optional} from "@emrgen/types";
 import {ImmutableState} from "./ImmutableState";
@@ -80,7 +80,7 @@ export class ImmutableDraft implements Draft {
 
   private drafting = true;
 
-  constructor(state: ImmutableState, origin: ActionOrigin, type: TransactionType, pm: PluginManager, schema: Schema) {
+  constructor(state: ImmutableState, origin: ActionOrigin, type: TxType, pm: PluginManager, schema: Schema) {
     this.origin = origin;
     this.state = state;
     this.pm = pm;
@@ -106,7 +106,6 @@ export class ImmutableDraft implements Draft {
   private addUpdated(id: NodeId) {
     this.updated.add(id);
   }
-
   private removeUpdated(id: NodeId) {
     this.updated.remove(id);
   }
@@ -170,6 +169,7 @@ export class ImmutableDraft implements Draft {
     // create a new selection based on the new node map using the draft selection
     const after = selection.pin();
     if (!after) {
+      console.error(selection.toString(), this.nodeMap.get(selection.head.nodeId)?.textContent)
       throw new Error("Cannot commit draft with invalid pinned selection");
     }
 
@@ -213,6 +213,7 @@ export class ImmutableDraft implements Draft {
     })
 
     this.normalize();
+    this.updateSelectionProps();
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
@@ -297,8 +298,22 @@ export class ImmutableDraft implements Draft {
   private normalizeSchema() {
     console.debug('normalizing schema');
     console.log('normalized',this.updated.toArray().map(n => n.toString()).join(', '))
-    const nodes = this.unstable.nodes(this.nodeMap).forEach(node => {
+    this.contentChanged.nodes(this.nodeMap).forEach(node => {
+      const nodes: Node[] = []
+      node.all(n => {
+        if (n.isTextContainer) {
+          nodes.push(n)
+        }
+      })
 
+      nodes.forEach(n => {
+        if (n.isVoid) {
+          const textNode = this.schema.text('')!;
+          const action = SetContentAction.create(n.id, [textNode]);
+          action.execute(this);
+          console.log('normalizing void node', n.name, n.id.toString())
+        }
+      })
     })
   }
 
@@ -327,10 +342,21 @@ export class ImmutableDraft implements Draft {
     this.addUpdated(nodeId);
     this.addContentChanged(nodeId);
 
+    // for text container update empty placeholder
     if (node.isTextContainer && isArray(content)) {
       this.tm.updateProps(node, {
-        [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ?? "" : ""
+        [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ?? "" : " "
       });
+    }
+
+    // for text node update empty placeholder of parent title
+    if (node.isText && isString(content)) {
+      const {parent} = node;
+      if (!parent) return;
+      this.tm.updateProps(parent, {
+        [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(parent)?.props.get<string>(EmptyPlaceholderPath) ?? "" : " "
+      });
+      this.addUpdated(parent.id);
     }
   }
 
@@ -399,7 +425,7 @@ export class ImmutableDraft implements Draft {
       // set empty placeholder of inserted node if needed
       if (node.isEmpty) {
         const placeholder = node.props.get<string>(EmptyPlaceholderPath) ?? "";
-        // console.debug('empty placeholder', placeholder, node.id.toString())a
+        console.debug('empty placeholder', placeholder, node.id.toString())
         if (node.firstChild) {
           this.tm.updateProps(node.firstChild!, {
             [PlaceholderPath]: placeholder
@@ -507,7 +533,7 @@ export class ImmutableDraft implements Draft {
 
     // if parent title is empty, set placeholder from parent
     if (parent.isTextContainer && parent.isEmpty) {
-      const placeholder = parent.parent?.props.get<string>(EmptyPlaceholderPath) ?? "";
+      const placeholder = parent.parent?.props.get<string>(EmptyPlaceholderPath) ?? " ";
       this.tm.updateProps(parent, {
         [PlaceholderPath]: placeholder
       });
@@ -572,11 +598,13 @@ export class ImmutableDraft implements Draft {
 
     // console.log("update selection", selection.isInline);
     this.selection = selection;
-
     const before = this.state.selection.unpin()
     this.changes.add(SelectionChange.create(before, selection));
     this.actions.add(SelectAction.create(before, selection));
+  }
 
+  private updateSelectionProps() {
+    const selection = this.selection;
     // update empty placeholder of the previous head node
     if (this.state.selection.isCollapsed) {
       if (!this.state.selection.isInvalid) {
@@ -590,9 +618,12 @@ export class ImmutableDraft implements Draft {
           if (node.isEmpty) {
             const {parent} = node;
             if (!parent) return
-            this.tm.updateProps(node, {
+            node.updateProps({
               [PlaceholderPath]: parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
-            });
+            })
+            // this.tm.updateProps(node, {
+            //   [PlaceholderPath]: parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
+            // });
             console.log('updated empty placeholder', node.key, parent.props.get<string>(EmptyPlaceholderPath), parent.name)
             this.addUpdated(node.id);
           }
@@ -614,9 +645,12 @@ export class ImmutableDraft implements Draft {
       if (node.isEmpty) {
         const {parent} = node;
         if (!parent) return;
-        this.tm.updateProps(node, {
-          [PlaceholderPath]: parent.props.get<string>(FocusedPlaceholderPath) ?? "",
+        node.updateProps({
+          [PlaceholderPath]: parent.props.get<string>(FocusedPlaceholderPath) ?? " ",
         })
+        // this.tm.updateProps(node, {
+        //   [PlaceholderPath]: parent.props.get<string>(FocusedPlaceholderPath) ?? " ",
+        // })
         this.addUpdated(node.id);
       }
     }
@@ -631,9 +665,12 @@ export class ImmutableDraft implements Draft {
       if (!this.nodeMap.deleted(tail.nodeId)) {
         const node = this.unfreeze(tail.nodeId);
         if (this.nodeMap.deleted(node.id)) return;
-        this.tm.updateProps(node, {
+        node.updateProps({
           [HasFocusPath]: '',
-        });
+        })
+        // this.tm.updateProps(node, {
+        //   [HasFocusPath]: '',
+        // });
         this.addUpdated(node.id)
       }
     }
@@ -641,9 +678,12 @@ export class ImmutableDraft implements Draft {
     // console.log('Selection', this.selection.head.eq(Point.IDENTITY))
     if (!this.selection.isInvalid) {
       const node = this.unfreeze(this.selection.tail.nodeId);
-      this.tm.updateProps(node, {
+      node.updateProps({
         [HasFocusPath]: true,
       })
+      // this.tm.updateProps(node, {
+      //   [HasFocusPath]: true,
+      // })
       this.addUpdated(node.id);
     }
   }
@@ -785,7 +825,6 @@ class Transformer {
     const {path} = node;
     this.changes.add(RemoveChange.create(parent.id, node.id, path));
     this.changes.dataMap.set(node.id, node.data);
-    // this.actions.add(RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()));
 
     parent.remove(node);
   }
@@ -854,6 +893,7 @@ class Transformer {
   }
 
   updateProps(node: Node, props: NodePropsJson) {
+    // return
     console.log(p14('%c[trap]'), "color:green", 'update', node.key);
     const before = reduce(props, (acc, _, k) => {
       const v = node.props.get(k);
@@ -865,12 +905,15 @@ class Transformer {
     },{});
 
     if (isEqual(before, props)) {
+      console.log('same props', before, props)
       console.warn("unnecessary props update detected. possibly the node is immutable")
       return
     }
 
     this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
     this.changes.add(UpdateChange.create(node.id, node.path, before, props));
+
+    console.log('UPDATING props', props)
 
     node.updateProps(props);
   }

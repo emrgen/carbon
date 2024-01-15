@@ -78,10 +78,10 @@ export abstract class CarbonPlugin {
 
 	// return decorations that will be applied on the view
 	decoration(state: State): Decoration[] {
-		return []
-	}
+    return []
+  }
 
-	// normalize the node based on schema
+  // normalize the node based on schema
 	normalize(node: Node): CarbonAction[] { return [] }
 
 	// node lifecycle hooks

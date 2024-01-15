@@ -1,5 +1,5 @@
 import { NodeIdSet } from "./BSet";
-import {ActionOrigin, TransactionType} from "./actions/types";
+import {ActionOrigin, TxType} from "./actions/types";
 import { Node } from "./Node";
 import { PinnedSelection } from "./PinnedSelection";
 import { NodeMap } from "./NodeMap";
@@ -10,7 +10,7 @@ import {PluginManager, Schema} from "@emrgen/carbon-core";
 
 export interface ProduceOpts {
   origin: ActionOrigin,
-  type: TransactionType,
+  type: TxType,
   pm: PluginManager,
   schema: Schema,
 }
