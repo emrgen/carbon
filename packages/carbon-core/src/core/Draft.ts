@@ -2,7 +2,7 @@
 import {
   Node,
   NodeContent,
-  NodeId, NodeJSON,
+  NodeId, NodeJSON, NodeMap,
   NodePropsJson,
   NodeType,
   Point,
@@ -23,6 +23,7 @@ export interface Draft {
   // the bounded state is passed to this method to produce a new state.
   // rollback on error is handled by the draft
   schema: Schema;
+  nodeMap: NodeMap;
   produce(fn: (draft: Draft) => void): State;
 
   insert(at: Point, node: Node): void;

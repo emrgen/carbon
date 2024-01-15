@@ -167,7 +167,7 @@ export class ImmutableDraft implements Draft {
     }
 
     // create a new selection based on the new node map using the draft selection
-    const after = selection.pin();
+    const after = selection.pin(this.nodeMap);
     if (!after) {
       console.error(selection.toString(), this.nodeMap.get(selection.head.nodeId)?.textContent)
       throw new Error("Cannot commit draft with invalid pinned selection");

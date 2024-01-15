@@ -261,7 +261,7 @@ export class SolidDraft implements Draft {
 
   updateSelection(selection: PointedSelection): void {
     console.log('updateSelection', selection.toString());
-    const pinned = selection.pin();
+    const pinned = selection.pin(this.nodeMap);
     if (!pinned) {
       throw new Error('Invalid selection');
     }

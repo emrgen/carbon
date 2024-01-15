@@ -45,20 +45,19 @@ export class PointedSelection {
 		return this.tail.eq(this.head);
 	}
 
-	pin(): Optional<PinnedSelection> {
+	pin(nodeMap: NodeMap): Optional<PinnedSelection> {
 		if (this.isNull) {
 			return PinnedSelection.NULL;
 		}
 
-    const store = StateScope.get();
 
 		const { tail, head, origin } = this;
 		// console.log('Selection.pin', head.toString());
 
-		const focus = Pin.fromPoint(head, store);
-		const anchor = Pin.fromPoint(tail, store);
+		const focus = Pin.fromPoint(head, nodeMap);
+		const anchor = Pin.fromPoint(tail, nodeMap);
 		if (!focus || !anchor) {
-			console.warn('Selection.pin: invalid selection', this.toString(), head.toString(), store.get(head.nodeId)	);
+			console.warn('Selection.pin: invalid selection', this.toString(), head.toString(), nodeMap.get(head.nodeId)	);
 			return
 		}
 		return PinnedSelection.create(anchor, focus, origin);
