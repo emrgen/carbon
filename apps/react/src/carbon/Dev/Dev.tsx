@@ -29,25 +29,26 @@ const data = node("carbon", [
     section([title([
       text("section 1"),
       text(" bold", {
-        'remote/state/marks/bold:': Mark.BOLD,
+        'remote/state/marks/bold': Mark.BOLD,
       }),
       text(" italic", {
-        'remote/state/marks/italic:': Mark.ITALIC,
+        'remote/state/marks/italic': Mark.ITALIC,
       }),
       text(" underline", {
-        'remote/state/marks/underline:': Mark.UNDERLINE,
+        'remote/state/marks/underline': Mark.UNDERLINE,
       }),
       text(" bold italic", {
-        'remote/state/marks/bold:': Mark.BOLD,
-        'remote/state/marks/italic:': Mark.ITALIC,
+        'remote/state/marks/bold': Mark.BOLD,
+        'remote/state/marks/italic': Mark.ITALIC,
       }),
       text(" color", {
-        'remote/state/marks/bold:': Mark.BOLD,
-        'remote/state/marks/color:': Mark.color('teal'),
+        'remote/state/marks/bold': Mark.BOLD,
+        'remote/state/marks/color': Mark.color('teal'),
       }),
       text("code", {
-        'remote/state/marks/code:': Mark.CODE,
+        'remote/state/marks/code': Mark.CODE,
       }),
+      // text("plain"),
       // text("", {
       //   'local/html/data-empty': true,
       // }),

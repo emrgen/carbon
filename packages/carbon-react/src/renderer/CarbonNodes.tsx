@@ -194,7 +194,7 @@ const InnerCarbonText = (props: RendererProps) => {
       className: classNames.join(' '),
     }
   },[marks])
-
+  console.log('rerendering', node.key, node.textContent)
   return (
     <CarbonElement node={node} tag="span" custom={attrs}>
       <>
