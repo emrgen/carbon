@@ -108,7 +108,7 @@ export class TabGroup extends CarbonPlugin {
     if (!block) return;
     console.log('created tab', block.id.toString());
 
-    const to = tabs.isVoid ? Point.toStart(tabs.id) : Point.toAfter(tabs.lastChild!.id);
+    const to = tabs.isVoid ? Point.atOffset(tabs.id) : Point.toAfter(tabs.lastChild!.id);
     tr.action.insert(to, block).tabs.openTab(tabs, block);
   }
 

@@ -48,7 +48,7 @@ export class Point {
 	}
 
 	// point to before start of the node children
-	static toStart(nodeId: IntoNodeId, offset: number = 0) {
+	static atOffset(nodeId: IntoNodeId, offset: number = 0) {
 		return new Point(nodeId, PointAt.Start, offset);
 	}
 

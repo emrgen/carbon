@@ -9,7 +9,7 @@ import {
   NodePlugin,
   NodeSpec,
   Pin,
-  PinnedSelection,
+  PinnedSelection, Point, PointedSelection,
   preventAndStopCtx,
 } from "@emrgen/carbon-core";
 
@@ -63,12 +63,6 @@ export class TitlePlugin extends NodePlugin {
         console.log('input', ctx.event);
         preventAndStopCtx(ctx);
       },
-      // keyDown: (ctx) => {
-      //  ctx.event.preventDefault()
-      // },
-      // keyUp: (ctx) => {
-      // 	ctx.event.preventDefault()
-      // },
       dragStart(ctx: EventContext<DragEvent>) {
         ctx.event.preventDefault()
       },
@@ -93,7 +87,7 @@ export class TitlePlugin extends NodePlugin {
           const content = flatten([down.node.prevSiblings, down.node, textNode, down.node.nextSiblings]).filter(identity) as Node[]
           console.log(down.node.textContent, content);
           app.cmd.SetContent(currentNode, content.map(n => n.clone(deepCloneMap)))
-            .Select(PinnedSelection.fromPin(Pin.future(head.node, head.offset + 1)))
+            .Select(PointedSelection.fromPoint(Point.atOffset(head.node.id, head.offset + 1)))
             .Dispatch()
         }
       },
@@ -104,7 +98,6 @@ export class TitlePlugin extends NodePlugin {
 
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
-          // react.commands.transform.insertText(selection, `\n`, false)?.Dispatch();
         }
       }
     }
@@ -122,61 +115,6 @@ export class TitlePlugin extends NodePlugin {
 
     // react.commands.transform.insertText(selection, data ?? key, false)?.Dispatch();
   }
-
-  // decoration(state: CarbonState): Decoration[] {
-  // 	const { selection } = state;
-  // 	const decorations: Decoration[] = [];
-  // 	if (selection.isCollapsed) {
-  // 		return decorations;
-  // 	}
-
-  // 	const { end, start } = selection;
-  // 	const { node: startNode } = start;
-  // 	const { node: endNode } = end;
-  // 	// console.log(selection.isForward, selection.isCollapsed);
-  // 	const [prev, next] = blocksBelowCommonNode(startNode, endNode)
-  // 	if (!prev || !next) {
-  // 		return decorations
-  // 	}
-  // 	// const headOrTail = n => n.eq(endNode) || n.eq(startNode);
-  // 	let selected: Node[] = [];
-
-  // 	if (!prev.eq(next)) {
-  // 		selected = takeUntil(prev?.nextSiblings ?? [], n => n.eq(next))
-  // 	}
-
-  // 	const addNode = n => {
-  // 		if (!n.isBlock) return
-  // 		decorations.push(Decoration.around(n).addClass('node-selected'))
-  // 	}
-
-  // 	selected.forEach(addNode);
-
-  // 	prev.find(n => {
-  // 		if (n.eq(startNode)) return true;
-  // 		addNode(n);
-  // 		return false
-  // 	}, { direction: 'backward', order: 'post' });
-
-
-  // 	next.find(n => {
-  // 		if (n.eq(endNode)) return true;
-  // 		addNode(n);
-  // 		return false
-  // 	}, { direction: 'forward', order: 'post' });
-
-  // 	// if (selection.isExpanded && !headNode.eq(tailNode)){
-  // 	// 	if (selection.isForward && tailNode.isEmpty || Pin.toEndOf(tailNode)?.eq(tail)) {
-  // 	// 		decorations.push(Decoration.around(tailNode).addClass(tailNode.isAtom ? 'node-selected':'empty-selection-end'))
-  // 	// 	}
-
-  // 	// 	if (selection.isBackward && headNode.isEmpty) {
-  // 	// 		decorations.push(Decoration.around(headNode).addClass(headNode.isAtom ? 'node-selected' : 'empty-selection-end'))
-  // 	// 	}
-  // 	// }
-
-  // 	return decorations;
-  // }
 
   // serialize(react: Carbon, node: Node): SerializedNode {
   // 	return node.children.map(n => react.serialize(n)).join('');

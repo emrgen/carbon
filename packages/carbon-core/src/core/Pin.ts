@@ -147,7 +147,7 @@ export class Pin {
     if (this.eq(Pin.IDENTITY)) {
       return Point.IDENTITY
     }
-		return Point.toStart(this.node.id, this.offset);
+		return Point.atOffset(this.node.id, this.offset);
 	}
 
 	get isAtStart(): boolean {

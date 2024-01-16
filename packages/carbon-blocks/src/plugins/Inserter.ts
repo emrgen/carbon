@@ -85,7 +85,7 @@ export class Insert extends BeforePlugin {
   }
 
   append(tr: Transaction, node: Node, name: string) {
-    const at = node.isVoid ? Point.toStart(node.id) : Point.toAfter(node.lastChild!.id);
+    const at = node.isVoid ? Point.atOffset(node.id) : Point.toAfter(node.lastChild!.id);
     const block = tr.app.schema.type(name)?.default();
     if (!block) return;
 
@@ -93,7 +93,7 @@ export class Insert extends BeforePlugin {
   }
 
   prepend(tr: Transaction, node: Node, name: string) {
-    const at = node.isVoid ? Point.toStart(node.id) : Point.toBefore(node.firstChild!.id);
+    const at = node.isVoid ? Point.atOffset(node.id) : Point.toBefore(node.firstChild!.id);
     const block = tr.app.schema.type(name)?.default();
     if (!block) return;
 

@@ -17,7 +17,7 @@ export const nodeLocation = (node: Node, associate: 'before' | 'after' | 'parent
 	}
 
   if (parent.size == 1 || parent.firstChild?.eq(node)) {
-    return Point.toStart(parent.id);
+    return Point.atOffset(parent.id);
   }
 
 	throw new Error('nodeLocation: node is not associated with a location' + node.id.toString())

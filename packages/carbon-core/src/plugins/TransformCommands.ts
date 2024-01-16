@@ -156,7 +156,7 @@ export class TransformCommands extends BeforePlugin {
 
   private append(tr: Transaction, node: Node, parent: Node): Transaction {
     const { lastChild } = parent;
-    const at = lastChild ? Point.toAfter(lastChild?.id) : Point.toStart(parent?.id!, 0);
+    const at = lastChild ? Point.toAfter(lastChild?.id) : Point.atOffset(parent?.id!, 0);
     tr.Insert(at, node);
     return tr;
   }
@@ -172,7 +172,7 @@ export class TransformCommands extends BeforePlugin {
       const {  app } = cmd;
       const { head } = selection;
       const { offset } = head;
-      const after = PointedSelection.fromPoint(Point.toStart(head.nodeId, offset + text.length));
+      const after = PointedSelection.fromPoint(Point.atOffset(head.nodeId, offset + text.length));
 
       cmd.Add(InsertTextAction.create(head, text));
       cmd.Select(after, ActionOrigin.UserInput);
@@ -1124,7 +1124,7 @@ export class TransformCommands extends BeforePlugin {
     let point: Optional<Point>;
     // TODO: we are free to decide how we want to put the final cursor position
     if (start.isAtStartOfNode(startTopBlock)) {
-      point = Point.toStart(startTopBlock.id);
+      point = Point.atOffset(startTopBlock.id);
     } else {
       point = start.leftAlign.point;
     }
@@ -1642,7 +1642,7 @@ export class TransformCommands extends BeforePlugin {
         if (prev.isVoid) {
           console.log('111111111111111111111111111')
           const textNode = app.schema.text(next.textContent)!;
-          insertActions.push(InsertNodeAction.fromNode(Point.toStart(prev.id), textNode));
+          insertActions.push(InsertNodeAction.fromNode(Point.atOffset(prev.id), textNode));
         } else {
           console.log('0000000000000000000000000000')
           const textContent = prev.textContent + next.textContent;

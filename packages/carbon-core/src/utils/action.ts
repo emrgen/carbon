@@ -36,7 +36,7 @@ export const removeNodesActions = (nodes: Node[] | Node, origin: ActionOrigin = 
 }
 
 export const insertBeforeAction = (before: Node, node: Node,  origin: ActionOrigin = ActionOrigin.UserInput) => {
-  const at = before.prevSibling ? Point.toAfter(before.prevSibling!.id) : Point.toStart(before.parent!.id);
+  const at = before.prevSibling ? Point.toAfter(before.prevSibling!.id) : Point.atOffset(before.parent!.id);
   return InsertNodeAction.fromNode(at, node, origin);
 }
 

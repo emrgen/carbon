@@ -75,7 +75,7 @@ const fillAndFocus = (node: Node) => {
   const fragment = node.type.contentMatch.fillAfter(Fragment.default(), 0);
   const actions: CarbonAction[] = [];
   const {nodes = []} = fragment;
-  actions.push(...insertNodesActions(Point.toStart(node)!, nodes));
+  actions.push(...insertNodesActions(Point.atOffset(node)!, nodes));
   nodes.some(n => {
     const focusable = n.find(n => n.isFocusable);
     if (focusable) {
