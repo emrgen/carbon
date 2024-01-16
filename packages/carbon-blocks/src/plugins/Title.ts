@@ -82,7 +82,8 @@ export class TitlePlugin extends NodePlugin {
         const {head} = selection;
         const down = head.down();
         const marks = down.node.props.get<Record<string, Mark>>(MarksPath);
-        if (down.isAtEnd && marks['code']) {
+        console.log(down.isAtEnd, down.node.textContent, marks)
+        if (down.isAtEnd) {
           const textNode = app.schema.text(' ')!;
           const content = flatten([down.node.prevSiblings, down.node, textNode, down.node.nextSiblings]).filter(identity) as Node[]
           console.log(down.node.textContent, content);
