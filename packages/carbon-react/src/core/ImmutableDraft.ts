@@ -297,23 +297,23 @@ export class ImmutableDraft implements Draft {
   // normalize unstable nodes by inserting missing nodes as per the schema
   private normalizeSchema() {
     console.debug('normalizing schema');
-    this.contentChanged.nodes(this.nodeMap).forEach(node => {
-      const nodes: Node[] = []
-      node.all(n => {
-        if (n.isTextContainer) {
-          nodes.push(n)
-        }
-      })
-
-      nodes.forEach(n => {
-        if (n.isVoid) {
-          const textNode = this.schema.text('')!;
-          const action = SetContentAction.create(n.id, [textNode]);
-          action.execute(this);
-          console.log('normalizing void node', n.name, n.id.toString())
-        }
-      })
-    })
+    // this.contentChanged.nodes(this.nodeMap).forEach(node => {
+    //   const nodes: Node[] = []
+    //   node.all(n => {
+    //     if (n.isTextContainer) {
+    //       nodes.push(n)
+    //     }
+    //   })
+    //
+    //   nodes.forEach(n => {
+    //     if (n.isVoid) {
+    //       const textNode = this.schema.text('')!;
+    //       const action = SetContentAction.create(n.id, [textNode]);
+    //       action.execute(this);
+    //       console.log('normalizing void node', n.name, n.id.toString())
+    //     }
+    //   })
+    // })
   }
 
   updateContent(nodeId: NodeId, content: Node[] | string) {

@@ -109,9 +109,6 @@ export class ChangeName extends BeforePlugin {
       if (match[1] === titleNode.textContent + ' ' || title === '') {
         const action = SetContentAction.create(titleNode.id, []);
         cmd.Add(action);
-        // cmd.Update(titleNode.id, {
-        //   [PlaceholderPath]: type.props.get(EmptyPlaceholderPath) ?? '',
-        // })
       } else {
         const textNode = app.schema.text(title)!
         const action = SetContentAction.create(titleNode.id, [textNode]);

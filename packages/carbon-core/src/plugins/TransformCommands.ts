@@ -1,4 +1,4 @@
-import {each, first, flatten, last, merge, reverse, sortBy} from "lodash";
+import {each, first, flatten, identity, last, merge, reverse, sortBy} from "lodash";
 
 import {Optional} from "@emrgen/types";
 import {
@@ -1373,18 +1373,22 @@ export class TransformCommands extends BeforePlugin {
         if (sdown?.node.eq(edown?.node)) {
           const { node } = sdown;
           const textContent = node.textContent.slice(0, sdown.offset) + node.textContent.slice(edown.offset);
-          actions.push(SetContentAction.create(node.id,textContent));
+          if (textContent === '') {
+            actions.push(SetContentAction.create(node.parentId!, flatten([node.prevSiblings, node.nextSiblings]).filter(identity)))
+          } else {
+            actions.push(SetContentAction.create(node.id, textContent));
+          }
           return
         }
 
         // TODO: delete using TextContent methods
         const textContent = node.textContent.slice(0, start.offset) + node.textContent.slice(end.offset);
-        // if (textContent === '') {
-        //   actions.push(SetContentAction.create(node.id, BlockContent.empty()))
-        // } else {
-        const textNode = app.schema.text(textContent)!;
-        actions.push(SetContentAction.create(node.id, [textNode]));
-        // }
+        if (textContent === '') {
+          actions.push(SetContentAction.create(node.id, []))
+        } else {
+          const textNode = app.schema.text(textContent)!;
+          actions.push(SetContentAction.create(node.id, [textNode]));
+        }
       }
     });
 

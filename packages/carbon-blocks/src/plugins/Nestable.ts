@@ -108,7 +108,7 @@ export class NestablePlugin extends AfterPlugin {
 		return {
 			backspace: (ctx: EventContext<KeyboardEvent>) => {
 				const { app, currentNode, cmd } = ctx;
-				if (currentNode.isIsolate) return;
+				// if (currentNode.isIsolate) return;
 
 				const { selection, blockSelection } = app.state;
 				if (selection.isExpanded || blockSelection.isActive) {
