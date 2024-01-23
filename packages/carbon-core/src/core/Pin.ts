@@ -217,6 +217,7 @@ export class Pin {
 	}
 
 	// push pin down to the proper child
+  // down pin may not be inline node. when the pin node is void it will be a block node (mostly text container node)
 	down() {
 		const { node, offset } = this;
 		if (offset === 0 && node.isVoid || node.isInline) {
