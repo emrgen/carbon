@@ -41,6 +41,7 @@ import {splitTextBlock} from "../utils/split";
 import {insertBeforeAction, moveNodesActions, removeNodesActions} from "../utils/action";
 import {RemoveNodeAction} from "../core/actions/RemoveNodeAction";
 import {InsertTextAction} from "../core/actions/InsertTextAction";
+import {ContentMatch} from "../core/ContentMatch";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -604,8 +605,11 @@ export class TransformCommands extends BeforePlugin {
       // console.log('splitUptoSameDepth', mergeDepth);
 
       let to: Optional<Point> = Point.toAfter(startBlock!.id);
+      let toContentMatch = startBlock.parent?.type.contentMatch.matchFragment(Fragment.from([...startBlock.prevSiblings, startBlock]));
+      // if cursor start is in the title of a collapsible node
       if (startBlock!.isCollapsible && !startBlock.isCollapsed) {
         to = Point.toAfter(startBlock?.firstChild?.id!);
+        toContentMatch = startBlock.type.contentMatch.matchFragment(Fragment.from([startBlock.firstChild!]))
       }
 
       if (startBlock!.type.splitName !== endBlock!.name) {
@@ -613,25 +617,29 @@ export class TransformCommands extends BeforePlugin {
       }
 
       // * move nodes from endContainer to startContainer
+      // do schema validation while moving
+      // implemented correctly, this will reduce a lot of headache
       while (startContainer && endContainer && mergeDepth) {
-        // move endBlock to after startBlock
         if (endContainer.eq(endBlock)) {
-          console.log('merging lowest levels', endBlock.id.toString());
+          // move endBlock to after startBlock
+          console.log('merging highest levels', endBlock.id.toString());
           moveActions.push(...this.moveNodeCommands(to, endContainer));
 
           to = Point.toAfter(endContainer.id);
           if (startBlock.isCollapsible && !startBlock.isCollapsed) {
-            const moveNodes = endContainer.children.slice(1)
+            const moveNodes = endContainer.children.slice(1);
+            // check if schema is violated by move
             moveActions.push(...this.moveNodeCommands(to, moveNodes));
             moveNodeIds.add(moveNodes.map(n => n.id));
           }
 
-          lastInsertedNodeId = endContainer.lastChild!.id
+          lastInsertedNodeId = endContainer.lastChild!.id;
           ignoreMove.add(endContainer.id);
         } else {
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
           if (moveNodes.length) {
             // console.log('moving nodes...', moveNodes.length, to.toString());
+            // check if schema is violated by move
             moveActions.push(...this.moveNodeCommands(to, moveNodes));
             lastInsertedNodeId = last(moveNodes)!.id;
             moveNodeIds.add(moveNodes.map(n => n.id));
@@ -696,6 +704,7 @@ export class TransformCommands extends BeforePlugin {
       // console.log(endContainer, startTopNode, lastInsertedNodeId.toString());
 
       if (endBlock.ancestor(startBlock)) {
+        // startBlock is an ancestor of endBlock
         while (endContainer && startTopNode!.depth <= endContainer.depth) {
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
           console.log('moveNodes', endContainer.id.toString(), moveNodes.length, moveNodes.map(n => n.id.toString()));
@@ -717,6 +726,7 @@ export class TransformCommands extends BeforePlugin {
           }
         }
       } else {
+        // endBlock and startBlock
         while (endContainer && startTopNode!.depth <= endContainer.depth) {
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
           if (moveNodes.length) {
@@ -1172,6 +1182,7 @@ export class TransformCommands extends BeforePlugin {
 
     const handleUptoSameDepth = () => {
       let lastInsertedNodeId: Optional<NodeId>;
+      let contentMatch: Optional<ContentMatch>;
       let mergeDepth = commonDepth;
       console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
 
@@ -1180,8 +1191,8 @@ export class TransformCommands extends BeforePlugin {
         tr.Update(startBlock.id, { node: { collapsed: false } });
       }
 
-
       // move endParent children to startParent
+      // start from bottom and move up along parent chain
       while (startContainer && endContainer && mergeDepth) {
         console.log('mergeDepth', mergeDepth);
 
@@ -1204,9 +1215,15 @@ export class TransformCommands extends BeforePlugin {
           console.log('merge start and end block');
         } else {
           // move endContainer children to the end of startContainer
-          let to = Point.toAfter(startContainer?.lastChild?.id!)
+          let to = Point.toAfter(startContainer?.lastChild?.id!);
+          contentMatch = startContainer.type.contentMatch.matchFragment(Fragment.from(startContainer.children));
+
           // move undeleted children
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id)) ?? [];
+          // check if the moveNodes generates a new valid end
+          // if not try to reach valid end by unwrapping or wrapping
+          const currMatch = contentMatch?.matchFragment(Fragment.from(moveNodes));
+          contentMatch = currMatch!;
           if (moveNodes.length) {
             console.log('moving nodes...', moveNodes.length, to.toString());
             moveCommands.push(...this.moveNodeCommands(to, moveNodes));
@@ -1222,7 +1239,10 @@ export class TransformCommands extends BeforePlugin {
         mergeDepth -= 1;
       }
 
-      return lastInsertedNodeId
+      return {
+        lastInsertedNodeId,
+        contentMatch,
+      }
     } // handleUptoSameDepth
 
     const after = PinnedSelection.fromPin(start)
@@ -1271,23 +1291,44 @@ export class TransformCommands extends BeforePlugin {
       const lowestStartContainer = startTopBlock.chain.find(n => n.isContainer);
       const lowestEndContainer = endTopBlock.chain.find(n => n.isContainer);
 
-      const lastInsertedNodeId = handleUptoSameDepth();
+      let {lastInsertedNodeId, contentMatch } = handleUptoSameDepth();
+      if (lastInsertedNodeId && !contentMatch) {
+        throw Error('invalid state, contentMatch is empty while lastInsertedNodeId is present')
+      }
 
       // move endNodes remaining children after startParent
-      // NOTE: this create the effect of moving endParents non content children
+      // NOTE: this create the effect of moving endParents non-content children
       let at = Point.toAfter(lastInsertedNodeId ?? startContainer.id);
-      // NOTE: this is a special case where endContainer is child of startContainer and we need to move endContainer children after startContainer
+      // NOTE: this is a special case where endContainer is child of startContainer, and we need to move endContainer children after startContainer
       if (lowestStartContainer?.isCollapsible && lowestEndContainer?.parents.some(p => p.id === lowestStartContainer?.id)) {
         console.log('endContainer is child of startContainer');
         at = Point.toAfter(startContainer.child(0)!.id);
+        contentMatch = startContainer.type.contentMatch.matchFragment(Fragment.from([startContainer.firstChild!]));
       }
 
       // unwrap
       while (endContainer && startTopBlock.depth <= endContainer?.depth) {
         const moveNodes = endContainer.children.filter(n => !deleteGroup.has(n.id))
+
+        const currMatch = contentMatch?.matchFragment(Fragment.from(moveNodes));
+        console.log('CONTENT MATCH', currMatch, contentMatch, moveNodes.map(n => n.name))
         if (moveNodes.length) {
-          moveCommands.push(...this.moveNodeCommands(at, moveNodes));
-          at = Point.toAfter(last(moveNodes)!.id);
+          if (!currMatch?.validEnd) {
+            // How to resolve the content match
+            // 1. try unwrapping
+            // 2. try wrapping
+            // 3. can't move throw error
+            const actions = this.matchActions(contentMatch!, at, moveNodes)
+            if (!actions.length) {
+              throw Error('failed to find valid content match')
+            }
+            tr.Add(actions);
+            console.error('Invalid content match found')
+          } else {
+            contentMatch = currMatch;
+            moveCommands.push(...this.moveNodeCommands(at, moveNodes));
+            at = Point.toAfter(last(moveNodes)!.id);
+          }
         }
 
         deleteGroup.addId(endContainer.id);
@@ -1305,6 +1346,47 @@ export class TransformCommands extends BeforePlugin {
 
       return
     }
+  }
+
+  private matchActions(contentMatch: ContentMatch, at: Point, nodes: Node[]): CarbonAction[] {
+    const actions: CarbonAction[] = [];
+    this.findMatchingMoves(actions, contentMatch, at, nodes);
+    return actions;
+  }
+
+  private findMatchingMoves(actions: CarbonAction[], contentMatch: ContentMatch, at: Point, nodes: Node[]): boolean {
+    if (nodes.length === 0) return contentMatch.validEnd;
+    const node = first(nodes) as Node;
+
+    // check as is match
+    let currMatch = contentMatch.matchFragment(Fragment.from([node]))
+    if (currMatch) {
+      actions.push(...moveNodesActions(at, [node]));
+      if (this.findMatchingMoves(actions, currMatch, Point.toAfter(node), nodes.slice(1))) {
+        return true;
+      } else {
+        actions.pop();
+      }
+    }
+
+    // check after unwrapping
+    currMatch = contentMatch.matchFragment(Fragment.from(node.children))
+    if (currMatch) {
+      const {size, children} = node;
+      if (children.length) {
+        actions.push(...moveNodesActions(at, children))
+        actions.push(RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()))
+        if (this.findMatchingMoves(actions, currMatch, Point.toAfter(last(children)!), nodes.slice(1))) {
+          return true;
+        } else {
+          actions.splice(actions.length - size + 1, size + 1)
+        }
+      }
+    }
+
+    // try wrapping the node
+
+    return false
   }
 
   private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch, moveNodeIds = NodeIdSet.EMPTY, contentUpdated = NodeIdSet.EMPTY): CarbonAction[] {
