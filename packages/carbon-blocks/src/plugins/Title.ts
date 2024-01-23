@@ -78,12 +78,12 @@ export class TitlePlugin extends NodePlugin {
         if (!selection.isCollapsed) {
           return
         }
-        preventAndStopCtx(ctx);
         const {head} = selection;
         const down = head.down();
         const marks = down.node.props.get<Record<string, Mark>>(MarksPath);
         console.log(down.isAtEnd, down.node.textContent, marks)
-        if (down.isAtEnd) {
+        if (down.isAtEnd && down.node.isInline) {
+          preventAndStopCtx(ctx);
           const textNode = app.schema.text(' ')!;
           const content = flatten([down.node.prevSiblings, down.node, textNode, down.node.nextSiblings]).filter(identity) as Node[]
           console.log(down.node.textContent, content);
@@ -110,8 +110,8 @@ export class TitlePlugin extends NodePlugin {
     const {selection} = app;
     // @ts-ignore
     const {data, key} = event.nativeEvent;
-    console.log('########');
 
+    preventAndStopCtx(ctx);
     cmd.transform.insertText(selection, data ?? key, false)?.Dispatch()
 
     // react.commands.transform.insertText(selection, data ?? key, false)?.Dispatch();

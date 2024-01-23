@@ -56,7 +56,9 @@ export class BeforeInputRuleHandler {
     const {event, app} = ctx;
     // @ts-ignore
     const { data, key } = event.nativeEvent;
-    const insertText =(event as any).data ?? data;
+    const insertText =(event as any).data ?? data ?? key;
+
+    console.log('insertText', insertText, key)
 
     const { selection } = app;
     if (!selection.isCollapsed) return false;

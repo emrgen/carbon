@@ -16,7 +16,7 @@ import {
   SetContentAction,
   PlaceholderPath,
   EmptyPlaceholderPath,
-  ListNumberPath
+  ListNumberPath, EventHandlerMap
 } from "@emrgen/carbon-core";
 import { reverse } from 'lodash';
 import { isConvertible } from "../utils";
@@ -56,15 +56,26 @@ export class ChangeName extends BeforePlugin {
   handlers(): Partial<EventHandler> {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-        const { currentNode } = ctx;
-        const block = currentNode.closest(n => n.isContainer)!;
-
-        if (!isConvertible(block)) return
-        if (this.inputRules.process(ctx, block)) {
-          console.log('done...');
-        }
+        this.checkInputRules(ctx)
       },
     };
+  }
+
+  keydown(): EventHandlerMap {
+    return {
+      shiftSpace: (ctx: EventContext<KeyboardEvent>) => {
+        this.checkInputRules(ctx)
+      }
+    }
+  }
+
+  checkInputRules(ctx: EventContext<KeyboardEvent>) {
+    const { currentNode } = ctx;
+    const block = currentNode.closest(n => n.isContainer)!;
+    if (!isConvertible(block)) return
+    if (this.inputRules.process(ctx, block)) {
+      console.log('done...');
+    }
   }
 
   tryChangeName(name: string, groups: string[]) {
