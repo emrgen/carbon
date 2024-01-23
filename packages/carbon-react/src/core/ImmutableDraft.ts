@@ -364,6 +364,15 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot move node to a draft that is already committed");
     }
 
+    // allow no op move without altering index.
+    const inode = this.node(nodeId);
+    const at = nodeLocation(inode)
+    if (at?.eq(to)) {
+      console.warn('no op move detected, check origin')
+      return;
+    }
+
+
     const node = this.unfreeze(nodeId);
     // if the node is already deleted, skip the move
     if (this.nodeMap.deleted(nodeId)) {
