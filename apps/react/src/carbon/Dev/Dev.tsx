@@ -67,7 +67,6 @@ const data = node("carbon", [
       node("stack", [section([title([text("section 1")])])]),
       node("stack", [section([title([text("section 2")])])]),
       node("stack", [section([title([text("section 3")])])]),
-      node("stack", [section([title([text("section 4")])])]),
     ]),
 
     // title([]),

@@ -213,7 +213,6 @@ export class ImmutableDraft implements Draft {
       }
     })
 
-    console.log('----------------------------')
     this.normalize();
     this.updateSelectionProps();
 
@@ -234,8 +233,7 @@ export class ImmutableDraft implements Draft {
       })
     });
 
-    console.log('updated', this.updated.toArray().map(n => n.toString()).join(', '))
-
+    // console.log('updated', this.updated.toArray().map(n => n.toString()).join(', '))
     const dirty = this.updated.clone();
     this.updated.nodes(this.nodeMap).forEach(node => {
       node.parents.forEach(parent => {
@@ -485,6 +483,7 @@ export class ImmutableDraft implements Draft {
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
   }
+
   private insertAfter(refId: NodeId, node: Node) {
     const refNode = this.nodeMap.get(refId);
     if (!refNode) {
@@ -669,9 +668,6 @@ export class ImmutableDraft implements Draft {
         node.updateProps({
           [HasFocusPath]: '',
         })
-        // this.tm.updateProps(node, {
-        //   [HasFocusPath]: '',
-        // });
         this.addUpdated(node.id)
       }
     }
@@ -682,9 +678,6 @@ export class ImmutableDraft implements Draft {
       node.updateProps({
         [HasFocusPath]: true,
       })
-      // this.tm.updateProps(node, {
-      //   [HasFocusPath]: true,
-      // })
       this.addUpdated(node.id);
     }
   }
@@ -740,7 +733,6 @@ export class ImmutableDraft implements Draft {
       this.updateDependents(prev, UpdateDependent.Prev);
     }
 
-
     // console.log('update next', flag, node.id.toString(), node.nextSibling?.type.spec.depends?.prev)
     if (flag & UpdateDependent.Next && node.nextSibling?.type.spec.depends?.prev) {
       const nextId = node.nextSibling?.id;
@@ -753,6 +745,10 @@ export class ImmutableDraft implements Draft {
 
   private unfreeze(id: NodeId): MutableNode {
     const node = this.node(id);
+    if (!Object.isFrozen(node)) {
+      return node as MutableNode;
+    }
+
     const root = this.nodeMap.get(NodeId.ROOT);
     if (!root) {
       throw new Error("Cannot mutate node that does not exist");

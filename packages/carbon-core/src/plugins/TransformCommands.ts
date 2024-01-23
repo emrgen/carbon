@@ -539,7 +539,7 @@ export class TransformCommands extends BeforePlugin {
       children: [
         {
           name: 'title',
-          children: leftNodes.map(c => c.toJSON())
+          children: rightNodes.map(c => c.toJSON())
         }
       ]
     }
@@ -553,7 +553,7 @@ export class TransformCommands extends BeforePlugin {
     const focusPoint = Pin.toStartOf(section!);
     const after = PinnedSelection.fromPin(focusPoint!);
 
-    app.tr
+    tr
       .SetContent(start.node.id, leftNodes)
       .Insert(at, section!)
       .Select(after)
