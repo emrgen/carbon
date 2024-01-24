@@ -63,7 +63,7 @@ test('index-map', t => {
 });
 
 test('find previous index map', () => {
-  const mapper = new IndexMapper();
+  const mapper = IndexMapper.empty();
   const m1 = IndexMap.DEFAULT;
   mapper.add(m1);
 
@@ -76,3 +76,15 @@ test('find previous index map', () => {
   // find current index of a node (index 11) with current mapper identity
   expect(mapper.map(m1, 11)).toBe(14);
 });
+
+
+test('insert at the end', () => {
+  const mapper = IndexMapper.empty();
+  const m0 = IndexMap.DEFAULT;
+  mapper.add(m0);
+  const m1 = new IndexMap(10, 1);
+  mapper.add(m1);
+
+  expect(mapper.map(m0, 9)).toBe(9);
+  expect(mapper.map(m0, 10)).toBe(11);
+})

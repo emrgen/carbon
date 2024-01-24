@@ -62,9 +62,13 @@ export class Point {
 	}
 
 	// point to after end of the node children
-	static toInside(nodeId: IntoNodeId) {
-		return new Point(nodeId, PointAt.Inside);
+	static toEnd(nodeId: IntoNodeId) {
+		return new Point(nodeId, PointAt.End);
 	}
+
+  static toStart(nodeId: IntoNodeId) {
+    return new Point(nodeId, PointAt.Start);
+  }
 
 	static create(nodeId: IntoNodeId, at: PointAt, offset: number = 0) {
 		return new Point(nodeId, at, offset);

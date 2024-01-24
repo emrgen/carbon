@@ -61,7 +61,7 @@ export class IndexMapper {
     return new IndexMapper(maps);
   }
 
-  constructor(maps: IndexMap[] = []) {
+  constructor(maps: IndexMap[] = [IndexMap.DEFAULT]) {
     this.mappers = maps;
     for (let i = 0; i < maps.length; ++i) {
       const map = maps[i];
@@ -89,8 +89,8 @@ export class IndexMapper {
 
   add(map: IndexMap) {
     const {mappers} = this;
+    map.position = mappers.length;
     mappers.push(map);
-    map.position = mappers.length - 1;
   }
 
   map(ref: IndexMap, index: number): number {
@@ -99,9 +99,10 @@ export class IndexMapper {
     if (i === undefined) {
       throw new Error("IndexMap not found");
     }
+    // console.log(this.mappers, this.mappers.length, i)
     for (++i; i < mappers.length; ++i) {
       const mapper = mappers[i];
-      console.debug('mapping', i, mapper, index, mapper.map(index))
+      // console.debug('mapping', i, mapper, index, mapper.map(index))
       index = mapper.map(index);
     }
 
@@ -121,6 +122,10 @@ export class IndexMapper {
     }
 
     return index;
+  }
+
+  pop() {
+    return this.mappers.pop();
   }
 }
 
