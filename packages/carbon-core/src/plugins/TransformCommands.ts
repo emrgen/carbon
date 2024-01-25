@@ -1252,6 +1252,16 @@ export class TransformCommands extends BeforePlugin {
     // content of endBlock goes into startBlock.
     if (startDepth === endDepth) {
       console.log('CASE: merge same depth blocks');
+      // if (startBlock.isEmpty) {
+      //   // startBlock is empty, just replace it with endBlock
+      //   const deleteGroupActions = this.deleteGroupCommands(app, deleteGroup, NodeIdSet.EMPTY, contentUpdated);
+      //   deleteGroupActions.push(RemoveNodeAction.create(nodeLocation(startBlock)!, startBlock.id, startBlock.toJSON()));
+      //   tr
+      //     .Add(deleteGroupActions)
+      //     .Select(after)
+      //   return
+      // }
+
       handleUptoSameDepth();
 
       const deleteGroupActions = this.deleteGroupCommands(app, deleteGroup, NodeIdSet.EMPTY, contentUpdated);
@@ -1717,6 +1727,13 @@ export class TransformCommands extends BeforePlugin {
     const removeActions: CarbonAction[] = [];
     const insertActions: CarbonAction[] = [];
     const updateActions: CarbonAction[] = [];
+
+    if (prev.isEmpty) {
+      removeActions.push(RemoveNodeAction.fromNode(nodeLocation(prev)!, prev));
+      const after = PinnedSelection.fromPin(Pin.toStartOf(next)!);
+      tr.Add(removeActions).Select(after);
+      return
+    }
 
     // merge text blocks
     // TODO: need to test intensively for edge cases
