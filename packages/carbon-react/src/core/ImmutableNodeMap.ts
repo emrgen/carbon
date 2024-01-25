@@ -1,7 +1,9 @@
-import {Node, NodeId, NodeMap as NodeMap, NodeBTree} from "@emrgen/carbon-core";
+import {Node, NodeId, NodeMap as NodeMap, NodeBTree, Point, NodeIdComparator} from "@emrgen/carbon-core";
 import {Optional, Predicate} from "@emrgen/types";
 
 export class ImmutableNodeMap implements NodeMap {
+  private _children: Map<NodeId, NodeId[]> = new Map();
+  private _parents: Map<NodeId, NodeId> = new Map();
   private _map: NodeBTree = new NodeBTree();
   private _deleted: NodeBTree = new NodeBTree();
   private _parent: ImmutableNodeMap | null = null;
@@ -103,7 +105,7 @@ export class ImmutableNodeMap implements NodeMap {
     return this._map.has(key) || this._parent?.hasDeep(key);
   }
 
-  deleted(id: NodeId) {
+  isDeleted(id: NodeId) {
     if (this._map.has(id)) {
       return false;
     }
@@ -111,7 +113,7 @@ export class ImmutableNodeMap implements NodeMap {
       return true;
     }
 
-    return this._parent?.deleted(id) ?? false;
+    return this._parent?.isDeleted(id) ?? false;
   }
 
   delete(key: NodeId) {
@@ -186,5 +188,83 @@ export class ImmutableNodeMap implements NodeMap {
     // this._map.freeze();
     // this._size = this._map.size + (this._parent?.size || 0);
     // Object.freeze(this);
+  }
+
+  children(key: NodeId): NodeId[] {
+    const children = this._children.get(key);
+    if (!children) {
+      const node = this.get(key);
+      if (node) {
+        return node.children.map(c => c.id);
+      }
+    }
+
+    return children?.filter(id => !this.isDeleted(id)) || [];
+  }
+
+  insert(at: Point, childId: NodeId): void {
+    switch (at.at) {
+      case "start":
+        this.insertAtStart(at.nodeId, childId);
+        break;
+      case "end":
+        this.insertAtEnd(at.nodeId, childId);
+        break;
+      case "before":
+        this.insertBefore(at.nodeId, childId);
+        break;
+      case "after":
+        this.insertAfter(at.nodeId, childId);
+        break;
+    }
+  }
+
+  private insertAtStart(parentId: NodeId, childId: NodeId) {
+    const children = this._children.get(parentId) ?? [];
+    children.unshift(childId);
+    this._children.set(parentId, children);
+    this._parents.set(childId, parentId);
+  }
+
+  private insertAtEnd(parentId: NodeId, childId: NodeId) {
+    const children = this._children.get(parentId) ?? [];
+    children.push(childId);
+    this._children.set(parentId, children);
+    this._parents.set(childId, parentId);
+  }
+
+  private insertAfter(prevId: NodeId, childId: NodeId) {
+    const parentId = this._parents.get(prevId)!;
+    const children = this._children.get(parentId) ?? [];
+    const index = children.findIndex(id => NodeIdComparator(id, prevId) === 0);
+    if (index >= 0) {
+      children.splice(index + 1, 0, childId);
+    }
+    this._children.set(parentId, children);
+    this._parents.set(childId, parentId);
+  }
+
+  private insertBefore(nextId: NodeId, childId: NodeId) {
+    const parentId = this._parents.get(nextId)!;
+    const children = this._children.get(parentId) ?? [];
+    const index = children.findIndex(id => NodeIdComparator(id, nextId) === 0);
+    if (index >= 0) {
+      children.splice(index, 0, childId);
+    }
+    this._children.set(parentId, children);
+    this._parents.set(childId, parentId);
+  }
+
+  remove(childId: NodeId): void {
+    const parentId = this._parents.get(childId);
+    if (parentId) {
+      const children = this._children.get(parentId);
+      if (children) {
+        const index = children.findIndex(id => NodeIdComparator(id, childId) === 0);
+        if (index >= 0) {
+          children.splice(index, 1);
+        }
+      }
+    }
   }
 }

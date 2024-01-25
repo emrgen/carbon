@@ -94,7 +94,7 @@ export class ImmutableDraft implements Draft {
   }
 
   private addContentChanged(id: NodeId) {
-    if (this.nodeMap.deleted(id)) {
+    if (this.nodeMap.isDeleted(id)) {
       return
     }
     this.contentChanged.add(id);
@@ -208,7 +208,7 @@ export class ImmutableDraft implements Draft {
 
     // remove deleted nodes from unstable node before normalization
     this.unstable.toArray().forEach(id => {
-      if (this.nodeMap.deleted(id)) {
+      if (this.nodeMap.isDeleted(id)) {
         this.unstable.remove(id)
       }
     })
@@ -220,7 +220,7 @@ export class ImmutableDraft implements Draft {
     // this will prevent from trying to render deleted nodes
     this.updated.toArray().forEach(id => {
       // console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
-      if (this.nodeMap.deleted(id)) {
+      if (this.nodeMap.isDeleted(id)) {
         this.removeUpdated(id);
       }
 
@@ -247,7 +247,7 @@ export class ImmutableDraft implements Draft {
 
     this.contentChanged.nodes(this.nodeMap).forEach(node => {
       const {chain} = node;
-      if (chain.some(n => this.nodeMap.deleted(n.id))) {
+      if (chain.some(n => this.nodeMap.isDeleted(n.id))) {
         this.contentChanged.remove(node.id);
         return;
       }
@@ -323,7 +323,7 @@ export class ImmutableDraft implements Draft {
 
     const node = this.unfreeze(nodeId);
     // if the node is already deleted, skip the update
-    if (this.nodeMap.deleted(nodeId)) {
+    if (this.nodeMap.isDeleted(nodeId)) {
       return;
     }
 
@@ -375,7 +375,7 @@ export class ImmutableDraft implements Draft {
 
     const node = this.unfreeze(nodeId);
     // if the node is already deleted, skip the move
-    if (this.nodeMap.deleted(nodeId)) {
+    if (this.nodeMap.isDeleted(nodeId)) {
       return;
     }
 
@@ -424,7 +424,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
     // NOTE: this will skip insertion w.r.t. the deleted nodes
-    if (this.nodeMap.deleted(at.nodeId)) {
+    if (this.nodeMap.isDeleted(at.nodeId)) {
       node.all(n => this.addRemoved(n.id));
       return
     }
@@ -516,7 +516,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot remove node from a draft that is already committed");
     }
 
-    if (this.nodeMap.deleted(nodeId)) {
+    if (this.nodeMap.isDeleted(nodeId)) {
       console.log('node is already deleted', nodeId.toString())
       return;
     }
@@ -556,7 +556,7 @@ export class ImmutableDraft implements Draft {
 
     const node = this.unfreeze(nodeId);
     // if the node is already deleted, skip the change
-    if (this.nodeMap.deleted(nodeId)) {
+    if (this.nodeMap.isDeleted(nodeId)) {
       return;
     }
 
@@ -580,7 +580,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot change name on a draft that is already committed");
     }
 
-    if (this.nodeMap.deleted(nodeId)) {
+    if (this.nodeMap.isDeleted(nodeId)) {
       console.debug('node is deleted', nodeId.toString())
       this.selected.remove(nodeId);
       return;
@@ -618,7 +618,7 @@ export class ImmutableDraft implements Draft {
     if (this.state.selection.isCollapsed) {
       if (!this.state.selection.isInvalid) {
         const {head} = this.state.selection.unpin();
-        if (!this.nodeMap.deleted(head.nodeId)) {
+        if (!this.nodeMap.isDeleted(head.nodeId)) {
           const node = this.unfreeze(head.nodeId);
           if (!node) {
             throw new Error("Cannot update selection on a draft that is already committed");
@@ -630,9 +630,6 @@ export class ImmutableDraft implements Draft {
             node.updateProps({
               [PlaceholderPath]: parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
             })
-            // this.tm.updateProps(node, {
-            //   [PlaceholderPath]: parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
-            // });
             console.log('updated empty placeholder', node.key, parent.props.get<string>(EmptyPlaceholderPath), parent.name)
             this.addUpdated(node.id);
           }
@@ -644,7 +641,7 @@ export class ImmutableDraft implements Draft {
     if (selection.isCollapsed && !selection.isInvalid) {
       const {head: headPin} = this.state.selection;
       const {head} = selection;
-      if (this.nodeMap.deleted(head.nodeId)) return;
+      if (this.nodeMap.isDeleted(head.nodeId)) return;
 
       const node = this.unfreeze(head.nodeId);
       if (!node) {
@@ -657,9 +654,6 @@ export class ImmutableDraft implements Draft {
         node.updateProps({
           [PlaceholderPath]: parent.props.get<string>(FocusedPlaceholderPath) ?? " ",
         })
-        // this.tm.updateProps(node, {
-        //   [PlaceholderPath]: parent.props.get<string>(FocusedPlaceholderPath) ?? " ",
-        // })
         this.addUpdated(node.id);
       }
     }
@@ -671,9 +665,9 @@ export class ImmutableDraft implements Draft {
 
     if (!this.state.selection.isInvalid) {
       const {tail} = this.state.selection.unpin();
-      if (!this.nodeMap.deleted(tail.nodeId)) {
+      if (!this.nodeMap.isDeleted(tail.nodeId)) {
         const node = this.unfreeze(tail.nodeId);
-        if (this.nodeMap.deleted(node.id)) return;
+        if (this.nodeMap.isDeleted(node.id)) return;
         node.updateProps({
           [HasFocusPath]: '',
         })
@@ -689,38 +683,6 @@ export class ImmutableDraft implements Draft {
       })
       this.addUpdated(node.id);
     }
-  }
-
-  private updateBlockSelection(selection: PointedSelection) {
-    // if (browser)
-    // const old = NodeIdSet.fromIds(this.state.selection.nodes.map(n => n.id));
-    // const after = selection.pin()!;
-    // if (after) {
-    //   const nids = after.blocks.map(n => n.id);
-    //   const now = NodeIdSet.fromIds(nids);
-    //   console.log(nids, after.nodes, after.head.node, after.tail.node)
-    //
-    //   this.selection = PointedSelection.create(selection.tail, selection.head, selection.origin);
-    //
-    //   // find removed block selection
-    //   old.diff(now).forEach(id => {
-    //     this.mutable(id, node => {
-    //       node.updateProps({
-    //         [SelectedPath]: false
-    //       });
-    //     });
-    //   })
-    //
-    //   // find new block selection
-    //   now.diff(old).forEach(id => {
-    //     this.mutable(id, node => {
-    //       console.log('selected node', node.name, node.id.toString());
-    //       node.updateProps({
-    //         [SelectedPath]: true
-    //       });
-    //     });
-    //   })
-    // }
   }
 
   // check and update render dependents
@@ -779,10 +741,6 @@ export class ImmutableDraft implements Draft {
     fn?.(node);
 
     return node;
-  }
-
-  private put(id: NodeId, node: Node) {
-    this.nodeMap.set(id, node);
   }
 
   dispose() {

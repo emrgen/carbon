@@ -142,7 +142,7 @@ export class SolidDraft implements Draft {
 
     node.all(n => {
       this.nodeMap.set(n.id, n);
-      this.deleted.deleted(n.id);
+      this.deleted.isDeleted(n.id);
     });
 
     // const index = refNode.index;

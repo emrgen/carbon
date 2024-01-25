@@ -1,2 +1,2 @@
 
-export * from './plugins/BlockTree';
+export * from './BlockTree';
