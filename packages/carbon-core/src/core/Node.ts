@@ -15,9 +15,10 @@ import {
   PlainNodeProps,
   SelectedPath
 } from "./NodeProps";
-import {no, NodeEncoder, yes} from "./types";
+import {no, yes} from "./types";
 import EventEmitter from "events";
 import {NodeMap} from "@emrgen/carbon-core";
+import {Encoder, Writer} from "./Encoder";
 
 
 
@@ -783,10 +784,6 @@ export class Node extends EventEmitter implements IntoNodeId {
         children: children.map(n => n.toJSON()),
         props: props.toJSON(),
       }
-    }
-
-    encode<T>(encoder: NodeEncoder<T>) {
-      return encoder.encode(this);
     }
 
     // creates a mutable copy of the node

@@ -5,13 +5,14 @@ import { Decoration } from './Decoration';
 import { Node } from './Node';
 import { NodeSpec } from './Schema';
 import { Transaction } from './Transaction';
-import { EventHandlerMap, InputRules, NodeEncoder, PluginName, SerializedNode } from "./types";
+import { EventHandlerMap, InputRules, PluginName, SerializedNode } from "./types";
 import { CarbonAction } from "./actions/types";
 import EventEmitter from 'events';
 import { CarbonMessageBus, CarbonMessageFormat } from './MessageBus';
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginState } from "./PluginState";
 import {StateActions} from "@emrgen/carbon-core";
+import {Encoder, Writer} from "./Encoder";
 
 export enum PluginType {
 	Node,
@@ -76,30 +77,14 @@ export abstract class CarbonPlugin {
 
 	transaction(tr: StateActions) { }
 
-	// return decorations that will be applied on the view
-	decoration(state: State): Decoration[] {
-    return []
-  }
-
   // normalize the node based on schema
 	normalize(node: Node): CarbonAction[] { return [] }
 
-	// node lifecycle hooks
-
-	// serialize the node into a copy string
-	// serialize<T>(react: Carbon, node: Node, encoder: NodeEncoder<T>) {
-	// 	return {} as SerializedNode;
-	// }
-
-	// deserialize the copy string into a Node
-	deserialize(data: string): Optional<Node> {
-		return null;
-	}
-
-	// sanitize the node before putting into clipboard
-	sanitize(node: Node): Optional<Node> {
-		return null;
-	}
+	// encode the node into a copy string
+  encode(writer: Writer, encoder: Encoder<string>, node: Node) {
+    // encoder.encode(this, writer)
+    throw new Error('not implemented');
+  }
 
 	onReceive(app: Carbon, msg: CarbonMessageFormat) {
 		const { source, dest } = msg;

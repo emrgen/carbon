@@ -12,6 +12,7 @@ import { Optional } from '@emrgen/types';
 
 import { TitlePlugin } from './Title';
 import {node, text, title} from "@emrgen/carbon-blocks";
+import {Encoder, Writer} from "@emrgen/carbon-core/src/core/Encoder";
 
 declare module '@emrgen/carbon-core' {
 	export interface Transaction {
@@ -110,6 +111,10 @@ export class Section extends NodePlugin {
 
 		return [];
 	}
+
+  encode(writer: Writer, encoder: Encoder<string>, node: Node) {
+    writer.write(node.firstChild?.textContent ?? '')
+  }
 }
 
 
