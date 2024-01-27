@@ -2,7 +2,7 @@ import { CarbonRoot } from "./plugins/CarbonRoot";
 
 export * from "./create"
 import {CarbonPlugin, Extension} from "@emrgen/carbon-core";
-import {DocPlugin, NestablePlugin, Section} from "./plugins";
+import {PagePlugin, NestablePlugin, Section} from "./plugins";
 import {Divider} from "./plugins/Divider";
 import {Header} from "./plugins/Header";
 import {Collapsible} from "./plugins/Collapsible";
@@ -26,7 +26,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Section(),
   new Divider(),
   new Header(),
-  new DocPlugin(),
+  new PagePlugin(),
   new NestablePlugin(),
   new Collapsible(),
   new BulletedList(),

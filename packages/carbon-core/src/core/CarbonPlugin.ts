@@ -12,7 +12,7 @@ import { CarbonMessageBus, CarbonMessageFormat } from './MessageBus';
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginState } from "./PluginState";
 import {StateActions} from "@emrgen/carbon-core";
-import {Encoder, Writer} from "./Encoder";
+import {Encoder, NodeEncoder, Writer} from "./Encoder";
 
 export enum PluginType {
 	Node,
@@ -81,7 +81,7 @@ export abstract class CarbonPlugin {
 	normalize(node: Node): CarbonAction[] { return [] }
 
 	// encode the node into a copy string
-  encode(writer: Writer, encoder: Encoder<string>, node: Node) {
+  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
     // encoder.encode(this, writer)
     throw new Error('not implemented');
   }

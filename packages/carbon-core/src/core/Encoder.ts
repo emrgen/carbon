@@ -28,28 +28,20 @@ export interface Encoder<B> {
   encode(writer: Writer, encoder: Encoder<B>, node: Node): void;
 }
 
-export class NodeEncoder<T> {
-  encoder: Encoder<T>;
-
-  constructor(encoder: Encoder<T>) {
-   this.encoder = encoder;
-  }
-
-  encode(writer: Writer, node: Node) {
-   this.encoder.encode(writer, this.encoder, node)
-  }
+export interface NodeEncoder<T> {
+  encode(writer: Writer, node: Node): void;
 }
 
 export class TreeEncoder<B> implements Encoder<B> {
   name: string = '';
 
-  private encoders: Map<string, Encoder<B>> = new Map();
+  private encoders: Map<string, NodeEncoder<B>> = new Map();
 
-  addEncoder(name: string, encoder: Encoder<B>) {
+  addEncoder(name: string, encoder: NodeEncoder<B>) {
     this.encoders.set(name, encoder);
   }
 
-  static from<B>(encoders: [string, Encoder<B>][] = []): TreeEncoder<B> {
+  static from<B>(encoders: [string, NodeEncoder<B>][] = []): TreeEncoder<B> {
     const encoder = new TreeEncoder<B>();
     encoders.forEach(([name, e]) => encoder.addEncoder(name, e));
     return encoder;
@@ -63,6 +55,6 @@ export class TreeEncoder<B> implements Encoder<B> {
       throw new Error('No encoder found for node: ' + name);
     }
 
-    return nodeEncoder.encode(writer, this, node);
+    return nodeEncoder.encode(writer, node);
   }
 }

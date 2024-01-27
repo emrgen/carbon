@@ -1,7 +1,7 @@
-import { DocPlugin } from "@emrgen/carbon-blocks";
+import { PagePlugin } from "@emrgen/carbon-blocks";
 import { NodeSpec } from "@emrgen/carbon-core";
 
-export class Question extends DocPlugin {
+export class Question extends PagePlugin {
   name = "question";
 
   spec(): NodeSpec {

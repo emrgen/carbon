@@ -10,6 +10,7 @@ import {
 	Pin, Transaction, Point, NodeName, Slice, InsertPos, DeleteOpts, SplitOpts
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import {NodeEncoder, Writer} from "@emrgen/carbon-core/src/core/Encoder";
 
 declare module '@emrgen/carbon-core' {
 	export interface Transaction {
@@ -80,7 +81,7 @@ export class TextPlugin extends NodePlugin {
 	}
 
 
-	serialize(app: Carbon, node: Node): SerializedNode {
-		return node.textContent ?? ''
-	}
+	encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    w.write(node.textContent);
+  }
 }
