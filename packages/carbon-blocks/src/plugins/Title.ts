@@ -118,11 +118,7 @@ export class TitlePlugin extends NodePlugin {
     // react.commands.transform.insertText(selection, data ?? key, false)?.Dispatch();
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
-  // 	return node.children.map(n => react.serialize(n)).join('');
-  // }
-
   encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
-    w.write(node.children.map(n => ne.encode(w, n)).join(''));
+    node.children.map(n => ne.encode(w, n));
   }
 }

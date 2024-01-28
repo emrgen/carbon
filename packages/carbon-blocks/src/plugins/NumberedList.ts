@@ -1,6 +1,7 @@
-import { Carbon, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
+import {Carbon, CheckedPath, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
 import { Section } from "./Section";
 import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
+import {encodeNestableChildren, node} from "@emrgen/carbon-blocks";
 
 
 declare module '@emrgen/carbon-core' {
@@ -54,11 +55,14 @@ export class NumberedList extends Section {
     return prevSiblings.length + 1;
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
-  //   const contentNode = node.child(0);
-  //
-  //   let ret = `${NumberedList.listNumber(node)}. ${contentNode ? react.serialize(contentNode) : ''}`;
-  //   // ret += react.cmd.nestable.serializeChildren(node);
-  //   return ret
-  // }
+  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+    writer.write('\n');
+    if (node.firstChild) {
+      writer.write(writer.meta.get('indent') ?? '');
+      writer.write('1. ');
+      encoder.encode(writer, node.firstChild);
+    }
+
+    encodeNestableChildren(writer, encoder, node);
+  }
 }

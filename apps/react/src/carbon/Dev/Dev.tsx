@@ -57,9 +57,9 @@ const data = node("carbon", [
     section([title([])]),
     section([title([text("section 3")])]),
 
-    node("commentEditor", [
-      section([title([text('add a comment')])])
-    ]),
+    // node("commentEditor", [
+    //   section([title([text('add a comment')])])
+    // ]),
 
     section([title([text("section 3")])]),
     node("hstack", [
@@ -69,26 +69,26 @@ const data = node("carbon", [
     ]),
     section([title([text("section 4")])]),
     // title([]),
-    node('frame', [
-      title([text('frame title')]),
-      section([title([text('frame section')])]),
-    ]),
-    section([title([text("section 1")])]),
-    node('frame', [
-      title([text('frame title')]),
-      section([title([text('frame section')])]),
-    ]),
-    section([title([text("section 2")])]),
-    section([title([text("section 3")])]),
-    node('frame', [
-      title([text('frame title 1')]),
-      section([title([text('frame section')])]),
-      node('frame', [
-        title([text('frame title 2')]),
-        section([title([text('frame section')])]),
-      ]),
-    ]),
-    section([title([text("section 4")])]),
+    // node('frame', [
+    //   title([text('frame title')]),
+    //   section([title([text('frame section')])]),
+    // ]),
+    // section([title([text("section 1")])]),
+    // node('frame', [
+    //   title([text('frame title')]),
+    //   section([title([text('frame section')])]),
+    // ]),
+    // section([title([text("section 2")])]),
+    // section([title([text("section 3")])]),
+    // node('frame', [
+    //   title([text('frame title 1')]),
+    //   section([title([text('frame section')])]),
+    //   node('frame', [
+    //     title([text('frame title 2')]),
+    //     section([title([text('frame section')])]),
+    //   ]),
+    // ]),
+    // section([title([text("section 4")])]),
     // block({
     //   name: 'modal', children: [
     //     title([text('modal title')]),
@@ -102,28 +102,28 @@ const data = node("carbon", [
     //   }
     // }),
     // section([title([text("section 3")])]),
-    node("tabs", [
-      node("tab", [
-        // node("title", [text("tab 1")]),
-        section([title([text("tab 1 content")])]),
-      ], {
-        [ActivatedPath]: true,
-        [TitlePath]: "tab 11 some big title"
-      }),
-      node("tab", [
-        // node("title", [text("tab 2")]),
-        section([title([text("tab 2 content")])]),
-      ], {
-
-        [TitlePath]: "tab 12 medium"
-      }),
-      node("tab", [
-        // node("title", [text("tab 3")]),
-        section([title([text("tab 3 content")])]),
-      ], {
-        [TitlePath]: "tab 13"
-      }),
-    ]),
+    // node("tabs", [
+    //   node("tab", [
+    //     // node("title", [text("tab 1")]),
+    //     section([title([text("tab 1 content")])]),
+    //   ], {
+    //     [ActivatedPath]: true,
+    //     [TitlePath]: "tab 11 some big title"
+    //   }),
+    //   node("tab", [
+    //     // node("title", [text("tab 2")]),
+    //     section([title([text("tab 2 content")])]),
+    //   ], {
+    //
+    //     [TitlePath]: "tab 12 medium"
+    //   }),
+    //   node("tab", [
+    //     // node("title", [text("tab 3")]),
+    //     section([title([text("tab 3 content")])]),
+    //   ], {
+    //     [TitlePath]: "tab 13"
+    //   }),
+    // ]),
 
 
 
@@ -195,6 +195,12 @@ const data = node("carbon", [
           [title([text("section 1")]), section([title([text("section")])])],
           {}
         ),
+        node('numberList', [
+          title([text("section 1")]),
+        ]),
+        node('bulletList', [
+          title([text("section 1")]),
+        ]),
       ],
       {}
     ),

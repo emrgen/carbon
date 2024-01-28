@@ -17,6 +17,20 @@ export class Slice {
     return this.root?.children ?? [];
   }
 
+  clonedWIthIds() {
+    const {schema} = this.root.type;
+    const {factory} = schema;
+    // we need to clone the nodes to generate new ids, otherwise the editor will think the copied nodes are the same
+    const children = this.root.children.map(n => schema.clone(n, data => {
+      return {
+        ...data,
+        id: factory.blockId()
+      }
+    }));
+
+    this.root.updateContent(children);
+  }
+
   clone() {
     if (this.isEmpty) {
       return Slice.empty;
@@ -34,7 +48,16 @@ export class Slice {
       }
     })
 
-    const cloned = root.type.schema.clone(root);
+    // we need to clone the nodes to generate new ids, otherwise the editor will think the copied nodes are the same
+    const {schema} = this.root.type;
+    const {factory} = schema;
+    const cloned = root.type.schema.clone(root, data => {
+      return {
+        ...data,
+        id: factory.blockId()
+      }
+    });
+
     const startNode = cloned.atPath(startPath)!;
     const endNode = cloned.atPath(endPath)!;
 

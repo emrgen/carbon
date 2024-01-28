@@ -82,8 +82,7 @@ export abstract class CarbonPlugin {
 
 	// encode the node into a copy string
   encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
-    // encoder.encode(this, writer)
-    throw new Error('not implemented');
+    throw new Error('encode not implemented for ' + this.name)
   }
 
 	onReceive(app: Carbon, msg: CarbonMessageFormat) {

@@ -1,6 +1,16 @@
-import { CarbonPlugin, EventContext, EventHandler, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
+import {
+  CarbonPlugin, CheckedPath,
+  EventContext,
+  EventHandler,
+  Node,
+  NodeEncoder,
+  NodeSpec,
+  SerializedNode,
+  Writer
+} from "@emrgen/carbon-core";
 import { Section } from "./Section";
 import { Switch } from "./Switch";
+import {encodeNestableChildren} from "@emrgen/carbon-blocks";
 
 export class Todo extends Section {
   name = 'todo'
@@ -60,8 +70,21 @@ export class Todo extends Section {
     }
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
-  //   const prefix = node.props.node?.isChecked ? ['x'] : '[]';
-  //   return `${prefix} ${react.serialize(node.child(0)!)}` + react.commands.nestable.serializeChildren(node);
-  // }
+  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+    const checked = node.props.get(CheckedPath);
+    const {prevSibling} = node;
+    if (prevSibling?.name === node.name) {
+      writer.write('\n');
+    } else {
+      writer.write('\n\n');
+    }
+
+    if (node.firstChild) {
+      writer.write(writer.meta.get('indent') ?? '');
+      writer.write(checked ? '- [x] ' : '- [ ] ');
+      encoder.encode(writer, node.firstChild);
+    }
+
+    encodeNestableChildren(writer, encoder, node)
+  }
 }

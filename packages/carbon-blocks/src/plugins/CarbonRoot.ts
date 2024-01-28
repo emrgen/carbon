@@ -1,4 +1,4 @@
-import { Carbon, CarbonPlugin, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
+import {Carbon, CarbonPlugin, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
 import { identity } from "lodash";
 
 export class CarbonRoot extends CarbonPlugin {
@@ -20,7 +20,10 @@ export class CarbonRoot extends CarbonPlugin {
     }
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
-  //   return node.children.map(n => react.serialize(n)).join('\n');
-  // }
+  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    node.children.forEach(child => {
+      ne.encode(w, child);
+    });
+  }
+
 }

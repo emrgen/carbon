@@ -51,7 +51,6 @@ export class PagePlugin extends CarbonPlugin {
 		]
 	}
 
-
 	keydown(): EventHandlerMap {
 		return {
 			// on enter split without merge
@@ -98,12 +97,16 @@ export class PagePlugin extends CarbonPlugin {
 	// 	return undefined
 	// }
 
-	// serialize(react: Carbon, node: Node): SerializedNode {
-	// 	return node.children.map(n => react.serialize(n)).join('\n');
-	// }
-
   encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
-    w.write(node.children.map(n => ne.encode(w, n)).join('\n'));
+    const {children, firstChild} = node;
+    if (firstChild) {
+      w.write('# ');
+      ne.encode(w, firstChild);
+    }
+
+    children.slice(1).forEach(n => {
+      ne.encode(w, n);
+    })
   }
 
 }

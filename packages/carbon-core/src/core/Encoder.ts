@@ -1,11 +1,13 @@
 import { Node } from "./Node";
 
 export interface Writer {
+  meta: Map<string, any>;
   write(content: string): Writer;
 }
 
 class TextWriter implements Writer {
   private content: string = '';
+  meta: Map<string, any> = new Map();
 
   write(content: string) {
     this.content += content;

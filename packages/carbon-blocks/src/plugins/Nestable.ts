@@ -5,13 +5,13 @@ import {
   EventContext,
   EventHandlerMap,
   moveNodesActions,
-  Node,
+  Node, NodeEncoder,
   nodeLocation,
   Pin,
   PinnedSelection,
   Point,
   preventAndStopCtx,
-  Transaction
+  Transaction, Writer
 } from "@emrgen/carbon-core";
 import {isNestableNode} from '../utils';
 import {Optional} from '@emrgen/types';
@@ -280,4 +280,13 @@ export class NestablePlugin extends AfterPlugin {
 	// 	if (!children.length) return ''
 	// 	return '\n' + children.map(n => react.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
 	// }
+}
+
+
+export const encodeNestableChildren = (writer: Writer, encoder: NodeEncoder<string>, node: Node, indent = '  ') => {
+  writer.meta.set('indent', (writer.meta.get('indent') ?? '') + indent);
+  node.children.slice(1).forEach(child => {
+    encoder.encode(writer, child);
+  })
+  writer.meta.set('indent', (writer.meta.get('indent') ?? '').slice(0, -indent.length));
 }

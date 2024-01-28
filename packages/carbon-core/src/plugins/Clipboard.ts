@@ -201,16 +201,6 @@ export class ClipboardPlugin extends AfterPlugin {
       }
     })
 
-    const {factory} = app.schema;
-    // we need to clone the nodes to generate new ids, otherwise the editor will think the copied nodes are the same
-    const children = root.children.map(n => app.schema.clone(n, data => {
-      return {
-        ...data,
-        id: factory.blockId()
-      }
-    }));
-    root.updateContent(children);
-
     const startSliceNode = root.atPath(startPath);
     const endSliceNode = root.atPath(endPath);
 

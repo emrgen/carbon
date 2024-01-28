@@ -1,15 +1,15 @@
 
 import {
-	AfterPlugin,
-	CarbonPlugin,
-	NodePlugin,
-	Node,
-	NodeSpec,
-	EventHandlerMap,
-	EventContext,
-	Carbon, SerializedNode
+  AfterPlugin,
+  CarbonPlugin,
+  NodePlugin,
+  Node,
+  NodeSpec,
+  EventHandlerMap,
+  EventContext,
+  Carbon, SerializedNode, Writer, NodeEncoder
 } from "@emrgen/carbon-core";
-import { node } from "@emrgen/carbon-blocks";
+import {encodeNestableChildren, node} from "@emrgen/carbon-blocks";
 
 export class Header extends AfterPlugin {
 	name = 'header';
@@ -85,7 +85,15 @@ export class Heading extends NodePlugin {
 		return {}
 	}
 
-	// serialize(react: Carbon, node: Node): SerializedNode {
-	// 	return '#'.repeat(this.level) + ' ' + react.serialize(node.child(0)!) + react.commands.nestable.serializeChildren(node)
-	// }
+	encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    const { level } = this;
+    w.write('\n\n');
+    w.write('#'.repeat(level) + ' ');
+    const {firstChild} = node;
+    if (firstChild) {
+      ne.encode(w, firstChild);
+    }
+
+    encodeNestableChildren(w, ne, node, '');
+  }
 }
