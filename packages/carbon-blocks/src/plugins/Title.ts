@@ -15,6 +15,7 @@ import {
 
 import {TextPlugin} from "./Text";
 import {flatten, identity} from "lodash";
+import {NodeEncoder, Writer} from "@emrgen/carbon-core/src/core/Encoder";
 
 // title is a block content that can be used as a title for a block
 export class TitlePlugin extends NodePlugin {
@@ -117,7 +118,7 @@ export class TitlePlugin extends NodePlugin {
     // react.commands.transform.insertText(selection, data ?? key, false)?.Dispatch();
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
-  // 	return node.children.map(n => react.serialize(n)).join('');
-  // }
+  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    node.children.map(n => ne.encode(w, n));
+  }
 }

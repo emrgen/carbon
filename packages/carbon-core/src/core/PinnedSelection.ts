@@ -231,6 +231,7 @@ export class PinnedSelection {
 		return head.isAfterOf(tail);
 	}
 
+  // bounds return coordinate bound of the selection in the dom
 	bounds(store: NodeStore): SelectionBounds {
 		const { head } = this;
 		const selection = window.getSelection();

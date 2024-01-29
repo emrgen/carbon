@@ -1,5 +1,6 @@
-import { Carbon, CarbonPlugin, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
+import {Carbon, CarbonPlugin, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
 import { Section } from "./Section";
+import {encodeNestableChildren} from "@emrgen/carbon-blocks";
 
 export class BulletedList extends Section {
   name = 'bulletList'
@@ -29,11 +30,14 @@ export class BulletedList extends Section {
     }
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
-  //   const contentNode = node.child(0);
-  //   let ret = `- ${contentNode ? react.serialize(contentNode) : ''}`;
-  //   ret += react.commands.nestable.serializeChildren(node);
-  //
-  //   return ret
-  // }
+  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+    writer.write('\n');
+    if (node.firstChild) {
+      writer.write(writer.meta.get('indent') ?? '');
+      writer.write('- ');
+      encoder.encode(writer, node.firstChild);
+    }
+
+    encodeNestableChildren(writer, encoder, node);
+  }
 }

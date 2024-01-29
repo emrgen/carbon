@@ -15,13 +15,14 @@ import {Transaction} from "./Transaction";
 import {TransactionManager} from "./TransactionManager";
 import {With} from "./types";
 import {first} from "lodash";
-import {CarbonPlugin} from "./CarbonPlugin";
-import {Runtime} from "./Runtime";
+import {CarbonPlugin, PluginType} from "./CarbonPlugin";
+import {RuntimeState} from "./RuntimeState";
 import {PluginEmitter} from "./PluginEmitter";
 import {PluginStates} from "./PluginState";
 import {CarbonCommand} from "./CarbonCommand";
 import {ActionOrigin} from "@emrgen/carbon-core";
 import {BlockSelection} from "./BlockSelection";
+import {Encoder, NodeEncoder, TreeEncoder, Writer} from "./Encoder";
 
 export class Carbon extends EventEmitter {
 	private readonly pm: PluginManager;
@@ -34,9 +35,13 @@ export class Carbon extends EventEmitter {
 	private readonly pluginStates: PluginStates;
 	private readonly commands: CarbonCommand;
 
+  // TODO: move to external package if possible
+  // string encoder is required clipboard
+  private encoder: NodeEncoder<string>;
+
 	schema: Schema;
 	state: State; // immutable state
-	runtime: Runtime;
+	runtime: RuntimeState;
 	store: NodeStore;
 
 	// chain: CarbonCommandChain;
@@ -64,12 +69,11 @@ export class Carbon extends EventEmitter {
 		this.schema = schema;
 
 		this.state = state.activate()
-		this.runtime = new Runtime();
+		this.runtime = new RuntimeState();
 
 		this.store = new NodeStore(this);
 
 		this.sm = new SelectionManager(this);
-
 
 		this.tm = new TransactionManager(this, pm, this.sm, (state, tr) => {
 			this.updateState(state, tr);
@@ -94,7 +98,29 @@ export class Carbon extends EventEmitter {
 			const state = this.pluginStates.register(p);
 			p.init(this, this.pluginBus, state);
 		})
+
+    // create a string encoder
+    const plugins = this.pm.plugins.filter(p => p.type ===  PluginType.Node);
+    const encoder = TreeEncoder.from<string>();
+    this.encoder = {
+      encode(writer: Writer, node: Node) {
+        return encoder.encode(writer, encoder, node);
+      }
+    }
+
+    plugins.forEach(p => {
+      encoder.addEncoder(p.name, {
+        encode: (writer: Writer, node: Node) => {
+          return p.encode(writer, this.encoder, node);
+        }
+      })
+    });
 	}
+
+  encode(writer: Writer, node: Node) {
+    const {encoder} = this;
+    encoder.encode(writer, node);
+  }
 
 	get content(): Node {
 		return this.state.content;

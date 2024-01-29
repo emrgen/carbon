@@ -34,4 +34,5 @@ export * from './NodeChange'
 export * from './BlockSelection'
 export * from './StateScope'
 export * from './Block'
+export * from './Encoder'
 

@@ -1,4 +1,4 @@
-import { CarbonPlugin, EventHandler, NodeSpec } from "@emrgen/carbon-core";
+import {CarbonPlugin, EventHandler, Node, NodeEncoder, NodeSpec, Writer} from "@emrgen/carbon-core";
 import { Collapsible } from "./Collapsible";
 
 export class Frame extends Collapsible  {
@@ -30,4 +30,9 @@ export class Frame extends Collapsible  {
     }
   }
 
+  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    node.children.forEach(child => {
+      ne.encode(w, child);
+    })
+  }
 }

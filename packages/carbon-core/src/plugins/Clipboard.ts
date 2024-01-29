@@ -1,4 +1,4 @@
-import {AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Path, Pin} from "../core";
+import {AfterPlugin, Carbon, deepCloneMap, EventContext, EventHandlerMap, Node, Path, Pin} from "../core";
 import {SelectionPatch} from "../core/DeleteGroup";
 import {NodeId} from "../core/NodeId";
 import {Span} from "../core/Span";
@@ -7,6 +7,7 @@ import {preventAndStop} from "../utils/event";
 import {blocksBelowCommonNode} from "../utils/findNodes";
 import {SelectedPath} from "../core/NodeProps";
 import {Optional} from "@emrgen/types";
+import {identity} from "lodash";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
@@ -17,28 +18,32 @@ export class ClipboardPlugin extends AfterPlugin {
         const { event, app, cmd } = ctx
         preventAndStop(event);
         const slice = this.slice(app);
+        slice.normalize();
+
         if (!slice.isEmpty) {
           // const serialized = react.serialize(slice.root)
           // console.log('Serialized =>', serialized);
           // event.clipboardData.setData('text/plain', serialized);
-
-          // react.state.changes.clipboard = slice;
+          app.runtime.clipboard = slice;
         }
+
         // delete the selection
         cmd.keyboard.backspace(ctx)?.Dispatch();
       },
       copy: (ctx: EventContext<any>) => {
         const { event, app, cmd } = ctx
         preventAndStop(event);
-        console.log('copy', event);
         const slice = this.slice(app);
         console.log('slice', slice);
+        console.log('slice content =>', slice.root.textContent);
+
+        slice.normalize();
 
         if (!slice.isEmpty) {
           // const serialized = react.serialize(slice.root)
           // console.log('Serialized =>', serialized);
           // event.clipboardData.setData('text/plain', serialized);
-          console.log(slice.root.children.map(n => n.textContent));
+          // console.log(slice.root.children.map(n => n.textContent));
           app.runtime.clipboard = slice;
           return
         }
@@ -48,17 +53,18 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStop(event);
         const { selection } = app
 
-        // if (!react.state.changes.clipboard.size === 0) {
-        //   const slice = react.state.changes.clipboard;
-        //   react.cmd.transform.paste(selection, slice)?.Dispatch()
-        // } else {
-        //
-        // }
+        if (!app.runtime.clipboard.isEmpty) {
+          const slice = app.runtime.clipboard;
+          app.cmd.transform.paste(selection, slice)?.Dispatch()
+        } else {
+
+        }
         console.log('paste', app.runtime.clipboard.root);
       }
     };
   }
 
+  // slice the selected nodes and remove the nodes outside the selection
   slice(app: Carbon): Slice {
     const { selection, blockSelection,  } = app.state;
     if (blockSelection.isActive) {
@@ -81,8 +87,6 @@ export class ClipboardPlugin extends AfterPlugin {
     if (!startNode || !endNode) {
       return Slice.empty;
     }
-    // console.log(startNode.id.toString(), endNode.id.toString());
-    // console.log(startNode, endNode);
 
     if (startNode.isTextContainer && startNode.eq(endNode)) {
       startNode = endNode = startNode.parent;
@@ -95,8 +99,10 @@ export class ClipboardPlugin extends AfterPlugin {
       ? [startNode] :
       (startNode?.parent?.children.slice(startNode.index, endNode.index + 1) ?? [])
 
-    const cloned = nodes.map(n => n.clone());
-    // console.log('cloned', cloned.map(n => n.name));
+    // create clone of selected nodes
+    // the ids are cloned as well, so that we can remove the nodes outside the selection
+    const cloned: Node[] = nodes.map(n => app.schema.clone(n, identity));
+    console.log('cloned', cloned.map(n => n.name));
 
     const root = app.schema.type('slice').create(cloned)!;
 
@@ -110,9 +116,9 @@ export class ClipboardPlugin extends AfterPlugin {
       return Slice.empty;
     }
 
+    // delete nodes is before start pin
     root.find(n => {
-      console.log(n.name, n.textContent);
-
+      // console.log(n.name, n.textContent);
       if (startPin.node.eq(n)) {
         return true;
       }
@@ -127,6 +133,7 @@ export class ClipboardPlugin extends AfterPlugin {
       direction: 'forward',
     });
 
+    // delete nodes is after end pin
     root.find(n => {
       if (endPin.node.eq(n)) {
         return true;
@@ -142,31 +149,14 @@ export class ClipboardPlugin extends AfterPlugin {
       direction: 'backward',
     });
 
-    // if the start and end cursor covers a node title entirely, we need to keep the title
-    // if (!(start.isAtStart && end.isAtEnd)) {
-    // delete range is before start pin
-    // if (start.isAtEndOfNode(start.node)) {
-    //   start.node.children.forEach(n => deleteGroup.addId(n.id));
-    // } else {
-    //   deleteGroup.addRange(Range.create(Pin.toStartOf(start.node)!, start));
-    // }
-
-    // delete range is after end pin
-    // if (end.isAtStartOfNode(end.node)) {
-    //   start.node.children.forEach(n => deleteGroup.addId(n.id));
-    // } else {
-    //   deleteGroup.addRange(Range.create(end, Pin.toEndOf(end.node)!,));
-    // }
-
     deleteGroup.addRange(Span.create(Pin.toStartOf(start.node)!, start));
     deleteGroup.addRange(Span.create(end, Pin.toEndOf(end.node)!,));
-    // }
 
     // console.log(deleteGroup.ids.map(id => id.toString()));
-    console.log(deleteGroup.ranges);
+    // console.log(deleteGroup.ranges);
     deleteGroup.ranges.reverse()
 
-    // remove the nodes outside the selection
+    // remove the ranges outside the selection
     root.walk(n => {
       if (n === root) return false;
       if (!n.isTextContainer) return false;
@@ -213,16 +203,6 @@ export class ClipboardPlugin extends AfterPlugin {
       }
     })
 
-    const factory = app.schema.factory
-
-    const children = root.children.map(n => app.schema.clone(n, data => {
-      return {
-        ...data,
-        id: factory.blockId()
-      }
-    }));
-    root.updateContent(children);
-
     const startSliceNode = root.atPath(startPath);
     const endSliceNode = root.atPath(endPath);
 
@@ -230,9 +210,9 @@ export class ClipboardPlugin extends AfterPlugin {
       throw Error('failed to get start and end slice node')
     }
 
-    console.log(startSliceNode.chain.map(n => n.type.name).join(' > '));
-    console.log('rootNode.children', root.children);
-    console.log(startSliceNode.textContent, endSliceNode.textContent);
+    // console.log(startSliceNode.chain.map(n => n.type.name).join(' > '));
+    // console.log('rootNode.children', root.children);
+    // console.log(startSliceNode.textContent, endSliceNode.textContent);
 
     // remove nodes and content outside the selection
     return Slice.create(root, startSliceNode, endSliceNode);

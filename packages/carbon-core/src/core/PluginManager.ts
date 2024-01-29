@@ -13,6 +13,7 @@ import { CarbonAction } from './actions/types';
 import { EventsIn } from './Event';
 import { CarbonCommand } from "./CarbonCommand";
 import {StateActions} from "@emrgen/carbon-core";
+import {Encoder, TreeEncoder, Writer} from "./Encoder";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -36,6 +37,12 @@ export class PluginManager {
 		};
 	}
 
+  // encode(writer: Writer, encoder: Encoder<string>, node: Node) {
+  //   // const plugin = this.plugin(node.name);
+  //   // if (!plugin) throw new Error(`No plugin found for node ${node.name}`);
+  //   //
+  //   // return plugin?.encode(writer, node);
+  // }
 
 	constructor(plugins: CarbonPlugin[]) {
 		const flattened = this.flatten(plugins);

@@ -9,7 +9,7 @@ import {
   Format,
   Fragment,
   hasSameIsolate,
-  insertAfterAction,
+  insertAfterAction, insertNodesActions,
   InsertPos,
   MoveNodeAction,
   NodeIdSet,
@@ -231,6 +231,8 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
+    // clone will create nodes with new ids
+    // this will allow multiple paste from same copy without id conflict
     const sliceClone = slice.clone();
     const { root, nodes } = sliceClone;
 
@@ -294,9 +296,11 @@ export class TransformCommands extends BeforePlugin {
     }
 
     console.log(startTitle.chain.map(n => n.type.name));
-    // if selection is within same title
+
     if (selection.isCollapsed) {
+      // if selection is within same title
       if (startTitle.eq(endTitle)) {
+        // if slice is within same title
         const textBeforeCursor = startNode.textContent.slice(0, start.offset) + startTitle.textContent
         const textContent = textBeforeCursor + startNode.textContent.slice(end.offset);
         const textNode = app.schema.text(textContent);
@@ -307,32 +311,65 @@ export class TransformCommands extends BeforePlugin {
 
         return tr;
       } else {
+        // if slice is across blocks
         const startTitleText = startNode.textContent.slice(0, start.offset) + startTitle.textContent;
         const startTitleTextNode = app.schema.text(startTitleText)!;
 
         tr
-          .SetContent(start.node.id, [startTitleTextNode!])
+          .SetContent(start.node.id, [startTitleTextNode!]);
 
         let beforeNode: Optional<Node> = start.node;
         let afterNode: Optional<Node> = startTitle;
 
         // move upwards until we find a collapsible node
         while (beforeNode && afterNode && !beforeNode.parent?.isCollapsible) {
+          const contentMatch = getContentMatch(beforeNode);
+          const {nextSiblings} = afterNode;
           // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
-          if (afterNode.nextSiblings.length) {
-            tr.Insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings);
+          if (nextSiblings.length) {
+            const at = Point.toAfter(beforeNode.id);
+            // const actions = this.matchActions(contentMatch!, at, nextSiblings, 'insert')
+            const matches: MatchAction[] = [];
+            const matchActions = findMatchingActions(matches, contentMatch!, at, nextSiblings, beforeNode.nextSiblings);
+            if (!matchActions.validEnd) {
+              throw Error('failed to find valid content match')
+            }
+            const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
+            if (!actions.length) {
+              throw Error('failed to find valid content match')
+            }
+            tr.Add(actions);
+
+            // tr.Insert(at, nextSiblings)
           }
+
           beforeNode = beforeNode.parent
           afterNode = afterNode.parent
         }
 
+        let contentMatch: Optional<ContentMatch> = null;
         // NOTE: slice.nodes has parent node with name 'document'
+        // insert the nodes after the collapsible node (document is a collapsible node)
         while (beforeNode && afterNode && afterNode.name !== 'slice') {
+          contentMatch = getContentMatch(beforeNode);
+          const {nextSiblings} = afterNode;
+          // find nodes from within next siblings that satisfy the content match
+          // console.log('beforeNode', beforeNode.name, beforeNode.id.toString());
           // console.log('afterNode', afterNode);
-          if (afterNode.nextSiblings.length) {
-            tr.Insert(Point.toAfter(beforeNode.id), afterNode.nextSiblings)
-            beforeNode = last(afterNode.nextSiblings)
+          if (nextSiblings.length) {
+            // console.log('------------------', nextSiblings.map(n => n.name), beforeNode.nextSiblings.map(n => n.name));
+            // console.log(nextSiblings.map(n => n.textContent))
+            const matches: MatchAction[] = [];
+            const matchActions = findMatchingActions(matches, contentMatch!, Point.toAfter(beforeNode.id), nextSiblings, beforeNode.nextSiblings);
+            if (!matchActions.validEnd) {
+              throw Error('failed to find valid content match')
+            }
+            const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
+            tr.Add(actions);
+
+            beforeNode = last(matches)!.node;
           }
+
           afterNode = afterNode.parent
         }
 
@@ -341,7 +378,8 @@ export class TransformCommands extends BeforePlugin {
         if (start.node.parent?.isCollapsed) {
           tr.Update(start.node.parent.id, { node: { collapsed: false } });
         }
-        tr.SetContent(endTitle.id, [endTitleTextNode!])
+        tr.SetContent(endTitle.id, [endTitleTextNode!]);
+
         const after = PinnedSelection.fromPin(Pin.future(endTitle, endTitle.textContent.length)!);
         tr.Select(after, ActionOrigin.UserInput);
         console.log(endTitleText, after.toString());
@@ -350,6 +388,7 @@ export class TransformCommands extends BeforePlugin {
       }
     }
 
+    // selection is not collapsed
     const after = selection.collapseToStart();
     // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
     tr.transform.delete(selection)?.Then((carbon) => {
@@ -1185,6 +1224,7 @@ export class TransformCommands extends BeforePlugin {
       let contentMatch: Optional<ContentMatch>;
       let mergeDepth = commonDepth;
       console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
+      let afterNodes: Node[] = [];
 
       // open
       if (startBlock?.isCollapsed) {
@@ -1212,6 +1252,8 @@ export class TransformCommands extends BeforePlugin {
           }
 
           contentUpdated.add(startContainer.id);
+          contentMatch = startContainer.parent!.type.contentMatch.matchFragment(Fragment.from([startContainer]))!;
+          afterNodes = startContainer.nextSiblings.filter(n => !deleteGroup.has(n.id)) ?? [];
           console.log('merge start and end block');
         } else {
           // move endContainer children to the end of startContainer
@@ -1223,6 +1265,7 @@ export class TransformCommands extends BeforePlugin {
           // check if the moveNodes generates a new valid end
           // if not try to reach valid end by unwrapping or wrapping
           const currMatch = contentMatch?.matchFragment(Fragment.from(moveNodes));
+          afterNodes = [];
           contentMatch = currMatch!;
           if (moveNodes.length) {
             console.log('moving nodes...', moveNodes.length, to.toString());
@@ -1242,6 +1285,7 @@ export class TransformCommands extends BeforePlugin {
       return {
         lastInsertedNodeId,
         contentMatch,
+        afterNodes
       }
     } // handleUptoSameDepth
 
@@ -1301,20 +1345,25 @@ export class TransformCommands extends BeforePlugin {
       const lowestStartContainer = startTopBlock.chain.find(n => n.isContainer);
       const lowestEndContainer = endTopBlock.chain.find(n => n.isContainer);
 
-      let {lastInsertedNodeId, contentMatch } = handleUptoSameDepth();
+      let {lastInsertedNodeId, contentMatch, afterNodes } = handleUptoSameDepth();
       if (lastInsertedNodeId && !contentMatch) {
         throw Error('invalid state, contentMatch is empty while lastInsertedNodeId is present')
       }
 
+      console.debug('lastInsertedId', lastInsertedNodeId?.toString())
+
       // move endNodes remaining children after startParent
       // NOTE: this create the effect of moving endParents non-content children
-      let at = Point.toAfter(lastInsertedNodeId ?? startContainer.id);
+      let at: Optional<Point> = Point.toAfter(lastInsertedNodeId ?? startContainer.id);
       // NOTE: this is a special case where endContainer is child of startContainer, and we need to move endContainer children after startContainer
       if (lowestStartContainer?.isCollapsible && lowestEndContainer?.parents.some(p => p.id === lowestStartContainer?.id)) {
         console.log('endContainer is child of startContainer');
         at = Point.toAfter(startContainer.child(0)!.id);
         contentMatch = startContainer.type.contentMatch.matchFragment(Fragment.from([startContainer.firstChild!]));
       }
+
+      console.log('--------------------------')
+      console.log('inserting after', at?.toString(), lastInsertedNodeId?.toString(), startContainer.id.toString());
 
       // unwrap
       while (endContainer && startTopBlock.depth <= endContainer?.depth) {
@@ -1326,12 +1375,21 @@ export class TransformCommands extends BeforePlugin {
           if (!currMatch?.validEnd) {
             // How to resolve the content match
             // 1. try unwrapping
-            // 2. try wrapping
-            // 3. can't move throw error
-            const actions = this.matchActions(contentMatch!, at, moveNodes)
-            if (!actions.length) {
-              throw Error('failed to find valid content match')
+            // 2. can't move throw error
+            const matches: MatchAction[] = []
+            console.log('content match', contentMatch?.validEnd, contentMatch);
+            const matchActions = findMatchingActions(matches, contentMatch!, at, moveNodes, afterNodes);
+            if (!matchActions.validEnd) {
+              throw Error('failed to find valid end for content match')
             }
+            matches.forEach(m => {
+              console.log('move modes', m.node.id.toString());
+            })
+            const actions = matches.map(m => MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id));
+            if (!actions.length) {
+              throw Error('failed to find valid move actions')
+            }
+
             tr.Add(actions);
             console.error('Invalid content match found')
           } else {
@@ -1358,9 +1416,14 @@ export class TransformCommands extends BeforePlugin {
     }
   }
 
-  private matchActions(contentMatch: ContentMatch, at: Point, nodes: Node[]): CarbonAction[] {
+  private matchActions(contentMatch: ContentMatch, at: Point, nodes: Node[], action: 'move'|'insert'): CarbonAction[] {
     const actions: CarbonAction[] = [];
-    this.findMatchingMoves(actions, contentMatch, at, nodes);
+    if (action === 'move') {
+      this.findMatchingMoves(actions, contentMatch, at, nodes);
+    } else {
+      this.findMatchingInserts(actions, contentMatch, at, nodes);
+    }
+
     return actions;
   }
 
@@ -1387,6 +1450,40 @@ export class TransformCommands extends BeforePlugin {
         actions.push(...moveNodesActions(at, children))
         actions.push(RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()))
         if (this.findMatchingMoves(actions, currMatch, Point.toAfter(last(children)!), nodes.slice(1))) {
+          return true;
+        } else {
+          actions.splice(actions.length - size + 1, size + 1)
+        }
+      }
+    }
+
+    // try wrapping the node
+
+    return false
+  }
+
+  private findMatchingInserts(actions: CarbonAction[], contentMatch: ContentMatch, at: Point, nodes: Node[]): boolean {
+    if (nodes.length === 0) return contentMatch.validEnd;
+    const node = first(nodes) as Node;
+
+    // check as is match
+    let currMatch = contentMatch.matchFragment(Fragment.from([node]))
+    if (currMatch) {
+      actions.push(...insertNodesActions(at, [node]));
+      if (this.findMatchingInserts(actions, currMatch, Point.toAfter(node), nodes.slice(1))) {
+        return true;
+      } else {
+        actions.pop();
+      }
+    }
+
+    // check after unwrapping
+    currMatch = contentMatch.matchFragment(Fragment.from(node.children))
+    if (currMatch) {
+      const {size, children} = node;
+      if (children.length) {
+        actions.push(...insertNodesActions(at, children))
+        if (this.findMatchingInserts(actions, currMatch, Point.toAfter(last(children)!), nodes.slice(1))) {
           return true;
         } else {
           actions.splice(actions.length - size + 1, size + 1)
@@ -1790,3 +1887,63 @@ export class TransformCommands extends BeforePlugin {
   }
 
 }
+
+const getContentMatch = (node: Node) => {
+  const parent = node.parent!;
+  const matchNodes = parent.children.slice(0, node.index+1) ?? []
+  return parent.type.contentMatch.matchFragment(Fragment.from(matchNodes))!;
+}
+
+// each node make progress towards valid content match
+// if the node cant make progress or the node progress does not lead to valid content match end,
+// try to unwrap and check if the children can make progress
+
+interface MatchResult {
+  match: ContentMatch|null;
+  validEnd: boolean;
+}
+
+interface MatchAction {
+  at: Point;
+  node: Node;
+}
+
+const findMatchingActions = (actions: MatchAction[], contentMatch: ContentMatch, at: Point, nodes: Node[], after: Node[]): MatchResult => {
+  // debugger
+  if (nodes.length === 0) {
+    const nextMatch = contentMatch.matchFragment(Fragment.from(after));
+    return {
+      match: nextMatch,
+      validEnd: !!nextMatch?.validEnd
+    }
+  }
+
+  const node = first(nodes) as Node;
+  if (node.isTextContainer) {
+    return {
+      match: null,
+      validEnd: false
+    }
+  }
+
+  // if the node can add to contentMatch without unwrapping
+  let currMatch = contentMatch.matchFragment(Fragment.from([node]));
+  if (currMatch) {
+    console.log('match', node.name, node.id.toString(), currMatch);
+    actions.push({ at, node});
+    const result = findMatchingActions(actions, currMatch, Point.toAfter(node), nodes.slice(1), after);
+    if (result.validEnd) {
+      console.log('valid end', node.name, node.id.toString())
+      return result;
+    } else {
+      actions.pop();
+    }
+  } else {
+    console.log('no match', node.name, node.id.toString());
+  }
+
+  // try with unwrapping the node
+  return findMatchingActions(actions, contentMatch, at, node.children.concat(nodes.slice(1)), after);
+}
+
+

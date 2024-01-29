@@ -12,8 +12,9 @@ import {
 	preventAndStopCtx,
 	splitTextBlock
 } from '@emrgen/carbon-core';
+import {Encoder, NodeEncoder, Writer} from "@emrgen/carbon-core/src/core/Encoder";
 
-export class DocPlugin extends CarbonPlugin {
+export class PagePlugin extends CarbonPlugin {
 
 	name = 'document';
 
@@ -49,7 +50,6 @@ export class DocPlugin extends CarbonPlugin {
 			// new IsolatingPlugin()
 		]
 	}
-
 
 	keydown(): EventHandlerMap {
 		return {
@@ -97,8 +97,16 @@ export class DocPlugin extends CarbonPlugin {
 	// 	return undefined
 	// }
 
-	// serialize(react: Carbon, node: Node): SerializedNode {
-	// 	return node.children.map(n => react.serialize(n)).join('\n');
-	// }
+  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    const {children, firstChild} = node;
+    if (firstChild) {
+      w.write('# ');
+      ne.encode(w, firstChild);
+    }
+
+    children.slice(1).forEach(n => {
+      ne.encode(w, n);
+    })
+  }
 
 }

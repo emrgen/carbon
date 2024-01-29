@@ -6,12 +6,13 @@ import {
   NodePlugin,
   NodeSpec,
   SerializedNode,
-  Transaction, SetContentAction, RemoveNodeAction, nodeLocation
+  Transaction, SetContentAction, RemoveNodeAction, nodeLocation, NodeEncoder
 } from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 import { TitlePlugin } from './Title';
-import {node, text, title} from "@emrgen/carbon-blocks";
+import {encodeNestableChildren, node, text, title} from "@emrgen/carbon-blocks";
+import {Encoder, Writer} from "@emrgen/carbon-core/src/core/Encoder";
 
 declare module '@emrgen/carbon-core' {
 	export interface Transaction {
@@ -110,6 +111,20 @@ export class Section extends NodePlugin {
 
 		return [];
 	}
+
+  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+    if (node.isEmpty) {
+      return
+    }
+
+    writer.write('\n\n');
+    if (node.firstChild) {
+      writer.write(writer.meta.get('indent') ?? '');
+      encoder.encode(writer, node.firstChild);
+    }
+
+    encodeNestableChildren(writer, encoder, node, '')
+  }
 }
 
 

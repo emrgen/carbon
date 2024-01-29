@@ -107,14 +107,3 @@ export interface JSONNode {
 }
 
 export type MarkdownNode = string;
-
-// encode/decode node to/from JSON
-export interface NodeEncoder<T> {
-	encode(node: Node): EncodedNode<T>;
-	decode(node: EncodedNode<T>): Optional<Node>;
-}
-
-export interface NodeDataEncoder<T> {
-  encode(data: NodeData): EncodedNodeData<T>;
-  decode(node: EncodedNodeData<T>): Optional<NodeData>;
-}

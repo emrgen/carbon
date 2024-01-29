@@ -1,4 +1,16 @@
-import { CarbonAction, CarbonPlugin, NodeSpec, State, Node, RemoveNodeAction, nodeLocation, Point, moveNodesActions, SelectAction } from "@emrgen/carbon-core";
+import {
+  CarbonAction,
+  CarbonPlugin,
+  NodeSpec,
+  State,
+  Node,
+  RemoveNodeAction,
+  nodeLocation,
+  Point,
+  moveNodesActions,
+  SelectAction,
+  Writer, NodeEncoder
+} from "@emrgen/carbon-core";
 import { Optional } from '@emrgen/types';
 
 export class HStack extends CarbonPlugin {
@@ -6,6 +18,7 @@ export class HStack extends CarbonPlugin {
 
   spec(): NodeSpec {
     return {
+      group: "content",
       content: "stack stack+",
       replaceName: 'section',
       rectSelectable: true,
@@ -41,6 +54,12 @@ export class HStack extends CarbonPlugin {
 
     return [];
   }
+
+  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    node.children.forEach(child => {
+      ne.encode(w, child);
+    })
+  }
 }
 
 export class Stack extends CarbonPlugin {
@@ -53,7 +72,6 @@ export class Stack extends CarbonPlugin {
     }
   }
 
-
   normalize(node: Node): CarbonAction[] {
     console.log('Normalize ', node.name, node.key);
     // check if stack schema is correct
@@ -62,6 +80,15 @@ export class Stack extends CarbonPlugin {
     }
 
     return [];
+  }
+
+  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    if (node.isEmpty) {
+      return;
+    }
+    node.children.forEach(child => {
+      ne.encode(w, child);
+    })
   }
 }
 
