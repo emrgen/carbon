@@ -1208,6 +1208,7 @@ export class TransformCommands extends BeforePlugin {
       let contentMatch: Optional<ContentMatch>;
       let mergeDepth = commonDepth;
       console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
+      let afterNodes: Node[] = [];
 
       // open
       if (startBlock?.isCollapsed) {
@@ -1235,6 +1236,8 @@ export class TransformCommands extends BeforePlugin {
           }
 
           contentUpdated.add(startContainer.id);
+          contentMatch = startContainer.parent!.type.contentMatch.matchFragment(Fragment.from([startContainer]))!;
+          afterNodes = startContainer.nextSiblings.filter(n => !deleteGroup.has(n.id)) ?? [];
           console.log('merge start and end block');
         } else {
           // move endContainer children to the end of startContainer
@@ -1246,6 +1249,7 @@ export class TransformCommands extends BeforePlugin {
           // check if the moveNodes generates a new valid end
           // if not try to reach valid end by unwrapping or wrapping
           const currMatch = contentMatch?.matchFragment(Fragment.from(moveNodes));
+          afterNodes = [];
           contentMatch = currMatch!;
           if (moveNodes.length) {
             console.log('moving nodes...', moveNodes.length, to.toString());
@@ -1265,6 +1269,7 @@ export class TransformCommands extends BeforePlugin {
       return {
         lastInsertedNodeId,
         contentMatch,
+        afterNodes
       }
     } // handleUptoSameDepth
 
@@ -1324,20 +1329,25 @@ export class TransformCommands extends BeforePlugin {
       const lowestStartContainer = startTopBlock.chain.find(n => n.isContainer);
       const lowestEndContainer = endTopBlock.chain.find(n => n.isContainer);
 
-      let {lastInsertedNodeId, contentMatch } = handleUptoSameDepth();
+      let {lastInsertedNodeId, contentMatch, afterNodes } = handleUptoSameDepth();
       if (lastInsertedNodeId && !contentMatch) {
         throw Error('invalid state, contentMatch is empty while lastInsertedNodeId is present')
       }
 
+      console.debug('lastInsertedId', lastInsertedNodeId?.toString())
+
       // move endNodes remaining children after startParent
       // NOTE: this create the effect of moving endParents non-content children
-      let at = Point.toAfter(lastInsertedNodeId ?? startContainer.id);
+      let at: Optional<Point> = Point.toAfter(lastInsertedNodeId ?? startContainer.id);
       // NOTE: this is a special case where endContainer is child of startContainer, and we need to move endContainer children after startContainer
       if (lowestStartContainer?.isCollapsible && lowestEndContainer?.parents.some(p => p.id === lowestStartContainer?.id)) {
         console.log('endContainer is child of startContainer');
         at = Point.toAfter(startContainer.child(0)!.id);
         contentMatch = startContainer.type.contentMatch.matchFragment(Fragment.from([startContainer.firstChild!]));
       }
+
+      console.log('--------------------------')
+      console.log('inserting after', at?.toString(), lastInsertedNodeId?.toString(), startContainer.id.toString());
 
       // unwrap
       while (endContainer && startTopBlock.depth <= endContainer?.depth) {
@@ -1351,9 +1361,15 @@ export class TransformCommands extends BeforePlugin {
             // 1. try unwrapping
             // 2. try wrapping
             // 3. can't move throw error
-            const actions = this.matchActions(contentMatch!, at, moveNodes, 'move')
+            const matches = []
+            const matchActions = findMatchingActions(matches, contentMatch!, at, moveNodes, afterNodes);
+            if (!matchActions.validEnd) {
+              throw Error('failed to find valid end for content match')
+            }
+
+            const actions = []//this.matchActions(contentMatch!, at, moveNodes, 'move')
             if (!actions.length) {
-              throw Error('failed to find valid content match')
+              throw Error('failed to find valid move actions')
             }
             tr.Add(actions);
             console.error('Invalid content match found')
@@ -1388,6 +1404,7 @@ export class TransformCommands extends BeforePlugin {
     } else {
       this.findMatchingInserts(actions, contentMatch, at, nodes);
     }
+
     return actions;
   }
 
@@ -1857,3 +1874,48 @@ const getContentMatch = (node: Node) => {
   const matchNodes = parent.children.slice(0, node.index+1) ?? []
   return parent.type.contentMatch.matchFragment(Fragment.from(matchNodes))!;
 }
+
+// each node make progress towards valid content match
+// if the node cant make progress or the node progress does not lead to valid content match end,
+// try to unwrap and check if the children can make progress
+
+interface MatchResult {
+  match: ContentMatch|null;
+  validEnd: boolean;
+}
+
+const findMatchingActions = (actions: [Point, Node][], contentMatch: ContentMatch, at: Point, nodes: Node[], after: Node[]): MatchResult => {
+  debugger
+  if (nodes.length === 0) {
+    const nextMatch = contentMatch.matchFragment(Fragment.from(after));
+    return {
+      match: nextMatch,
+      validEnd: !!nextMatch?.validEnd
+    }
+  }
+
+  const node = first(nodes) as Node;
+  if (node.isTextContainer) {
+    return {
+      match: null,
+      validEnd: false
+    }
+  }
+
+  // if the node can add to contentMatch without unwrapping
+  let currMatch = contentMatch.matchFragment(Fragment.from([node]));
+  if (currMatch) {
+    actions.push([at, node]);
+    const result = findMatchingActions(actions, currMatch, Point.toAfter(node), nodes.slice(1), after);
+    if (result.validEnd) {
+      return result;
+    } else {
+      actions.pop();
+    }
+  }
+
+  // try with unwrapping the node
+  return findMatchingActions(actions, contentMatch, at, node.children.concat(nodes.slice(1)), after);
+}
+
+
