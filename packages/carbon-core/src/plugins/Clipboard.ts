@@ -18,6 +18,8 @@ export class ClipboardPlugin extends AfterPlugin {
         const { event, app, cmd } = ctx
         preventAndStop(event);
         const slice = this.slice(app);
+        slice.normalize();
+
         if (!slice.isEmpty) {
           // const serialized = react.serialize(slice.root)
           // console.log('Serialized =>', serialized);
@@ -34,6 +36,8 @@ export class ClipboardPlugin extends AfterPlugin {
         const slice = this.slice(app);
         console.log('slice', slice);
         console.log('slice content =>', slice.root.textContent);
+
+        slice.normalize();
 
         if (!slice.isEmpty) {
           // const serialized = react.serialize(slice.root)
@@ -83,8 +87,6 @@ export class ClipboardPlugin extends AfterPlugin {
     if (!startNode || !endNode) {
       return Slice.empty;
     }
-    // console.log(startNode.id.toString(), endNode.id.toString());
-    // console.log(startNode, endNode);
 
     if (startNode.isTextContainer && startNode.eq(endNode)) {
       startNode = endNode = startNode.parent;

@@ -328,7 +328,13 @@ export class TransformCommands extends BeforePlugin {
           // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
           if (nextSiblings.length) {
             const at = Point.toAfter(beforeNode.id);
-            const actions = this.matchActions(contentMatch!, at, nextSiblings, 'insert')
+            // const actions = this.matchActions(contentMatch!, at, nextSiblings, 'insert')
+            const matches: MatchAction[] = [];
+            const matchActions = findMatchingActions(matches, contentMatch!, at, nextSiblings, beforeNode.nextSiblings);
+            if (!matchActions.validEnd) {
+              throw Error('failed to find valid content match')
+            }
+            const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
             if (!actions.length) {
               throw Error('failed to find valid content match')
             }
@@ -348,10 +354,20 @@ export class TransformCommands extends BeforePlugin {
           contentMatch = getContentMatch(beforeNode);
           const {nextSiblings} = afterNode;
           // find nodes from within next siblings that satisfy the content match
+          // console.log('beforeNode', beforeNode.name, beforeNode.id.toString());
           // console.log('afterNode', afterNode);
           if (nextSiblings.length) {
-            tr.Insert(Point.toAfter(beforeNode.id), nextSiblings)
-            beforeNode = last(afterNode.nextSiblings)
+            // console.log('------------------', nextSiblings.map(n => n.name), beforeNode.nextSiblings.map(n => n.name));
+            // console.log(nextSiblings.map(n => n.textContent))
+            const matches: MatchAction[] = [];
+            const matchActions = findMatchingActions(matches, contentMatch!, Point.toAfter(beforeNode.id), nextSiblings, beforeNode.nextSiblings);
+            if (!matchActions.validEnd) {
+              throw Error('failed to find valid content match')
+            }
+            const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
+            tr.Add(actions);
+
+            beforeNode = last(matches)!.node;
           }
 
           afterNode = afterNode.parent
@@ -1359,18 +1375,21 @@ export class TransformCommands extends BeforePlugin {
           if (!currMatch?.validEnd) {
             // How to resolve the content match
             // 1. try unwrapping
-            // 2. try wrapping
-            // 3. can't move throw error
-            const matches = []
+            // 2. can't move throw error
+            const matches: MatchAction[] = []
+            console.log('content match', contentMatch?.validEnd, contentMatch);
             const matchActions = findMatchingActions(matches, contentMatch!, at, moveNodes, afterNodes);
             if (!matchActions.validEnd) {
               throw Error('failed to find valid end for content match')
             }
-
-            const actions = []//this.matchActions(contentMatch!, at, moveNodes, 'move')
+            matches.forEach(m => {
+              console.log('move modes', m.node.id.toString());
+            })
+            const actions = matches.map(m => MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id));
             if (!actions.length) {
               throw Error('failed to find valid move actions')
             }
+
             tr.Add(actions);
             console.error('Invalid content match found')
           } else {
@@ -1884,8 +1903,13 @@ interface MatchResult {
   validEnd: boolean;
 }
 
-const findMatchingActions = (actions: [Point, Node][], contentMatch: ContentMatch, at: Point, nodes: Node[], after: Node[]): MatchResult => {
-  debugger
+interface MatchAction {
+  at: Point;
+  node: Node;
+}
+
+const findMatchingActions = (actions: MatchAction[], contentMatch: ContentMatch, at: Point, nodes: Node[], after: Node[]): MatchResult => {
+  // debugger
   if (nodes.length === 0) {
     const nextMatch = contentMatch.matchFragment(Fragment.from(after));
     return {
@@ -1905,13 +1929,17 @@ const findMatchingActions = (actions: [Point, Node][], contentMatch: ContentMatc
   // if the node can add to contentMatch without unwrapping
   let currMatch = contentMatch.matchFragment(Fragment.from([node]));
   if (currMatch) {
-    actions.push([at, node]);
+    console.log('match', node.name, node.id.toString(), currMatch);
+    actions.push({ at, node});
     const result = findMatchingActions(actions, currMatch, Point.toAfter(node), nodes.slice(1), after);
     if (result.validEnd) {
+      console.log('valid end', node.name, node.id.toString())
       return result;
     } else {
       actions.pop();
     }
+  } else {
+    console.log('no match', node.name, node.id.toString());
   }
 
   // try with unwrapping the node
