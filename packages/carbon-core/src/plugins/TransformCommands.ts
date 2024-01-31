@@ -290,7 +290,7 @@ export class TransformCommands extends BeforePlugin {
     const { node: startNode } = start;
     const { start: startTitle, end: endTitle } = sliceClone;
     if (!startTitle || !endTitle) {
-      console.error('no title found');
+      console.error('no title node found');
       return;
     }
 
@@ -298,20 +298,20 @@ export class TransformCommands extends BeforePlugin {
 
     if (selection.isCollapsed) {
       // if selection is within same title
-      if (startTitle.eq(endTitle)) {
-        // if slice is within same title
-        const textBeforeCursor = startNode.textContent.slice(0, start.offset) + startTitle.textContent
-        const textContent = textBeforeCursor + startNode.textContent.slice(end.offset);
-        const textNode = app.schema.text(textContent);
-        const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
-        tr
-          .SetContent(start.node.id, [textNode!])
-          .Select(after);
-
-        return tr;
-      } else {
+      // if (startTitle.eq(endTitle)) {
+      //   // if slice is within same title
+      //   const textBeforeCursor = startNode.textContent.slice(0, start.offset) + startTitle.textContent
+      //   const textContent = textBeforeCursor + startNode.textContent.slice(end.offset);
+      //   const textNode = app.schema.text(textContent);
+      //   const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
+      //   tr
+      //     .SetContent(start.node.id, [textNode!])
+      //     .Select(after);
+      //
+      //   return tr;
+      // } else {
         // if slice is across blocks
-        const startTitleText = startNode.textContent.slice(0, start.offset) + startTitle.textContent;
+        const startTitleText = startNode.textContent.slice(0, start.offset) + startTitle.textContent + startNode.textContent.slice(end.offset)
         const startTitleTextNode = app.schema.text(startTitleText)!;
 
         tr
@@ -321,7 +321,7 @@ export class TransformCommands extends BeforePlugin {
         let afterNode: Optional<Node> = startTitle;
 
         // move upwards until we find a collapsible node
-        while (beforeNode && afterNode && !beforeNode.parent?.isCollapsible) {
+        while (beforeNode && afterNode && !beforeNode.parent?.isCollapsible && !beforeNode.parent?.isIsolate) {
           const contentMatch = getContentMatch(beforeNode);
           const {nextSiblings} = afterNode;
           // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
@@ -384,16 +384,120 @@ export class TransformCommands extends BeforePlugin {
         console.log(endTitleText, after.toString());
 
         return tr;
-      }
+      // }
     } else {
-      this.deleteAndInsert(tr, selection, sliceClone);
+      this.deleteAndPaste(tr, selection, sliceClone);
     }
 
   }
 
   // delete the selection and insert the slice
   // similar to split+paste
-  private deleteAndInsert(tr: Transaction, selection: PinnedSelection, slice: Slice) {
+
+  /**
+   * case 1: slice contains one text block without any children
+   *     delete the selection and insert the slice, merge text before and after selection around slice text
+   * case 2: slice contains one text block with children
+   *     delete the selection and insert the slice, merge text before with first child of slice and merge last child(first from preorder, backward) of slice with text after selection
+   * case 3: slice contains multiple blocks
+   *
+   */
+  private deleteAndPaste(tr: Transaction, selection: PinnedSelection, slice: Slice) {
+    const {app} = tr;
+    if (app.state.blockSelection.isActive) {
+      throw Error('block selection is not supported');
+    }
+
+    const docSelection = PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!;
+
+    // delete like split and insert like paste
+    const selectionInfo = this.selectionInfo(app, selection);
+
+    // delete the selection
+    const {actions: deleteGroupActions} = this.deleteGroupCommands(app, selectionInfo);
+
+    const {start, end} = selection;
+
+    const {node: startTitle} = start;
+    const {node: endTitle} = end;
+
+    if (!startTitle || !endTitle) {
+      console.error('no title node found');
+      return;
+    }
+
+    const {start: sliceStartTitle, end: sliceEndTitle} = slice;
+
+    console.log(sliceStartTitle.name, sliceStartTitle.textContent, sliceEndTitle.name, sliceEndTitle.textContent);
+
+    // first: insert the slice
+    // second: move, merge nodes after selection end
+
+    let beforeNode: Optional<Node> = start.node;
+    let afterNode: Optional<Node> = sliceStartTitle;
+    let contentMatch = getContentMatch(beforeNode);
+
+    // once the isolated or collapsible node stop the loop
+    while (beforeNode && afterNode && !beforeNode.parent?.isCollapsible && !beforeNode.parent?.isIsolate) {
+      const {nextSiblings} = afterNode;
+      // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
+      const afterNodes = beforeNode.nextSiblings.filter(n => !selectionInfo.has(n.id));
+
+      console.log('nextSiblings', nextSiblings, sliceStartTitle)
+      if (nextSiblings.length) {
+        const matches: MatchAction[] = [];
+        const matchActions = findMatchingActions(matches, contentMatch!, Point.toAfter(beforeNode.id), nextSiblings, afterNodes);
+        if (!matchActions.validEnd) {
+          throw Error('failed to find valid content match')
+        }
+        const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
+        tr.Add(actions);
+      }
+
+      beforeNode = beforeNode.parent
+      afterNode = afterNode.parent
+    }
+
+    // keep unwrapping until
+    while (beforeNode && afterNode && afterNode.name !== 'slice') {
+      // contentMatch = getContentMatch(beforeNode);
+      const {nextSiblings} = afterNode;
+      // find nodes from within next siblings that satisfy the content match
+      // console.log('beforeNode', beforeNode.name, beforeNode.id.toString());
+      // console.log('afterNode', afterNode);
+      if (nextSiblings.length) {
+        const matches: MatchAction[] = [];
+        const matchActions = findMatchingActions(matches, contentMatch!, Point.toAfter(beforeNode.id), nextSiblings, beforeNode.nextSiblings);
+        if (!matchActions.validEnd) {
+          throw Error('failed to find valid content match')
+        }
+        const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
+        tr.Add(actions);
+
+        beforeNode = last(matches)!.node;
+      }
+
+      afterNode = afterNode.parent
+    }
+
+    // adjust the nodes after selection end
+    if (startTitle.eq(endTitle) && sliceStartTitle.eq(sliceEndTitle)) {
+      const textContent = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent + endTitle.textContent.slice(end.offset);
+      const textNode = app.schema.text(textContent);
+      tr.Add(SetContentAction.create(startTitle.id, [textNode!]));
+    } else {
+      const startTextContent = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
+      const startTextNode = app.schema.text(startTextContent);
+      tr.Add(SetContentAction.create(startTitle.id, [startTextNode!]));
+
+        const endTextContent = sliceEndTitle.textContent + endTitle.textContent.slice(end.offset);
+        const endTextNode = app.schema.text(endTextContent);
+        tr.Add(SetContentAction.create(sliceEndTitle.id, [endTextNode!]));
+    }
+
+    const after = PinnedSelection.fromPin(Pin.toStartOf(startTitle)!);
+    tr.Select(after)
+
 
   }
 
