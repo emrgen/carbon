@@ -667,36 +667,45 @@ export class TransformCommands extends BeforePlugin {
           }
 
           // move endBlock to after startBlock
-          console.log('merging highest levels', endBlock.id.toString());
-          moveActions.push(...this.moveNodeCommands(to, endContainer));
+          console.log('merging lowest levels', endBlock.id.toString());
+          moveActions.push(...this.moveNodeCommands(to, endBlock));
 
-          to = Point.toAfter(endContainer.id);
-          afterNodes = endContainer.nextSiblings;
-          if (startBlock.isCollapsible && !startBlock.isCollapsed) {
-            const moveNodes = endContainer.children.slice(1);
-            contentMatch = contentMatch.matchFragment(Fragment.from(moveNodes));
-            if (!contentMatch) {
-              throw Error('failed to progressive match content')
-            }
+          to = Point.toAfter(endBlock.id);
+          // afterNodes = endBlock.nextSiblings;
+          // if (startBlock.isCollapsible && !startBlock.isCollapsed) {
+          //   const moveNodes = endBlock.children.slice(1);
+          //   contentMatch = contentMatch.matchFragment(Fragment.from(moveNodes));
+          //   if (!contentMatch) {
+          //     throw Error('failed to progressive match content')
+          //   }
+          //
+          //   contentMatch = contentMatch.matchFragment(Fragment.from(afterNodes));
+          //   if (!contentMatch?.validEnd) {
+          //     throw Error('failed to find valid content match')
+          //   }
+          //
+          //   // check if schema is violated by move
+          //   moveActions.push(...this.moveNodeCommands(to, moveNodes));
+          //   moveNodeIds.add(moveNodes.map(n => n.id));
+          // }
+          // lastInsertedNodeId = endBlock.lastChild!.id;
 
-            contentMatch = contentMatch.matchFragment(Fragment.from(afterNodes));
-            if (!contentMatch?.validEnd) {
-              throw Error('failed to find valid content match')
-            }
-
-            // check if schema is violated by move
-            moveActions.push(...this.moveNodeCommands(to, moveNodes));
-            moveNodeIds.add(moveNodes.map(n => n.id));
-          }
-
-          lastInsertedNodeId = endContainer.lastChild!.id;
-          ignoreMove.add(endContainer.id);
+          lastInsertedNodeId = endBlock.id;
+          ignoreMove.add(endBlock.id);
         } else {
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
-          if (moveNodes.length) {
+          const matches: MatchAction[] = [];
+          const matchResult = findMatchingActions(matches, contentMatch!, to, moveNodes, afterNodes);
+          if (!matchResult.validEnd) {
+            throw Error('failed to find valid content match')
+          }
+
+          if (matches.length) {
             // console.log('moving nodes...', moveNodes.length, to.toString());
             // check if schema is violated by move
-            moveActions.push(...this.moveNodeCommands(to, moveNodes));
+            const matchingMoves = matches.map(m => MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id));
+            moveActions.push(...matchingMoves);
+            moveNodes.forEach(n => ignoreMove.add(n.id));
             lastInsertedNodeId = last(moveNodes)!.id;
             moveNodeIds.add(moveNodes.map(n => n.id));
           }
@@ -724,13 +733,13 @@ export class TransformCommands extends BeforePlugin {
     if (startDepth === endDepth) {
       console.log('CASE: startDepth === endDepth');
       handleSplitUptoSameDepth();
-      const deleteActions = this.deleteGroupCommands(app, deleteGroup);
+      const {actions: deleteGroupActions} = this.deleteGroupCommands(app, deleteGroup);
       const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
 
       tr
         .Add(changeActions)
         .Add(moveActions)
-        .Add(deleteActions)
+        .Add(deleteGroupActions)
         .Select(after)
       return tr;
     }
@@ -738,13 +747,13 @@ export class TransformCommands extends BeforePlugin {
     if (startDepth > endDepth) {
       console.log('CASE: startDepth > endDepth');
       handleSplitUptoSameDepth();
-      const deleteActions = this.deleteGroupCommands(app, deleteGroup);
+      const {actions: deleteGroupActions} = this.deleteGroupCommands(app, deleteGroup);
       const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
 
       tr
         .Add(changeActions)
         .Add(moveActions)
-        .Add(deleteActions)
+        .Add(deleteGroupActions)
         .Select(after)
 
       return tr;
@@ -789,8 +798,14 @@ export class TransformCommands extends BeforePlugin {
         // endBlock and startBlock
         while (endContainer && startTopNode!.depth <= endContainer.depth) {
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id) && !ignoreMove.has(ch.id)) ?? [];
-          if (moveNodes.length) {
-            moveActions.push(...this.moveNodeCommands(at, moveNodes));
+          const matches: MatchAction[] = [];
+          const match = findMatchingActions(matches, contentMatch!, at, moveNodes, []);
+          if (!match.validEnd) {
+            throw Error('failed to find valid content match')
+          }
+          if (matches.length) {
+            const matchingMoves = matches.map(m => MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id));
+            moveActions.push(...matchingMoves);
             at = Point.toAfter(last(moveNodes)!.id);
           }
 
@@ -800,14 +815,16 @@ export class TransformCommands extends BeforePlugin {
       }
 
       console.log('start block', startTopNode.depth, endContainer?.depth, startTopNode);
-      const deleteActions = this.deleteGroupCommands(app, deleteGroup, moveNodeIds);
+      const {rangeAction, nodeActions, actions} = this.deleteGroupCommands(app, deleteGroup, moveNodeIds);
 
-      console.log('deleteActions', deleteActions);
+      console.log('rangeAction', rangeAction);
+      console.log('nodeActions', nodeActions);
+      console.log('ranges', deleteGroup.ranges)
 
       tr
         .Add(changeActions)
         .Add(moveActions)
-        .Add(deleteActions)
+        .Add(actions)
         .Select(after)
 
       return tr;
@@ -1123,7 +1140,7 @@ export class TransformCommands extends BeforePlugin {
     // selection is within same text container block
     if (endTextBlock.eq(startTextBlock)) {
       const after = selection.collapseToStart();
-      tr.Add(this.deleteGroupCommands(app, deleteGroup));
+      tr.Add(this.deleteGroupCommands(app, deleteGroup).actions);
       tr.Select(after);
       return tr
     }
@@ -1203,7 +1220,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     const after = PointedSelection.fromPoint(point);
-    tr.Add(this.deleteGroupCommands(app, deleteGroup));
+    tr.Add(this.deleteGroupCommands(app, deleteGroup).actions);
     tr.Select(after);
 
     return tr;
@@ -1319,7 +1336,7 @@ export class TransformCommands extends BeforePlugin {
     if (startDepth === endDepth) {
       console.log('CASE: merge same depth blocks');
       handleMergeUptoSameDepth();
-      const deleteGroupActions = this.deleteGroupCommands(app, deleteGroup, NodeIdSet.EMPTY, contentUpdated);
+      const {actions: deleteGroupActions} = this.deleteGroupCommands(app, deleteGroup, NodeIdSet.EMPTY, contentUpdated);
 
       console.log('deleteActions', deleteGroupActions);
       console.log('insertCommands', insertCommands);
@@ -1338,11 +1355,11 @@ export class TransformCommands extends BeforePlugin {
     if (startDepth > endDepth) {
       console.log('CASE: startBlock.depth > endBlock.depth');
       handleMergeUptoSameDepth();
-      const deleteActions = this.deleteGroupCommands(app, deleteGroup);
+      const {actions: deleteGroupActions} = this.deleteGroupCommands(app, deleteGroup);
 
       tr
         .Add(moveCommands)
-        .Add(deleteActions)
+        .Add(deleteGroupActions)
         .Add(insertCommands)
         .Select(after)
       return
@@ -1415,11 +1432,11 @@ export class TransformCommands extends BeforePlugin {
       }
       console.log(deleteGroup.ids.toArray().map(id => id.toString()));
 
-      const deleteActions = this.deleteGroupCommands(app, deleteGroup);
+    const {actions: groupDeleteActions} = this.deleteGroupCommands(app, deleteGroup);
 
       tr
         .Add(moveCommands)
-        .Add(deleteActions)
+        .Add(groupDeleteActions)
         .Add(insertCommands)
         .Select(after)
 
@@ -1428,8 +1445,13 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // delete nodes within selection patch
-  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch, moveNodeIds = NodeIdSet.EMPTY, contentUpdated = NodeIdSet.EMPTY): CarbonAction[] {
-    const actions: CarbonAction[] = [];
+  private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch, moveNodeIds = NodeIdSet.EMPTY, contentUpdated = NodeIdSet.EMPTY): {
+    rangeAction: CarbonAction[],
+    nodeActions: CarbonAction[],
+    actions: CarbonAction[]
+  } {
+    const rangeAction: CarbonAction[] = [];
+    const nodeActions: CarbonAction[] = [];
 
     // if a node is a child of another node in the deleteGroup, it will be implicitly removed
     // it from the deleteGroup to avoid duplicate remove action
@@ -1444,7 +1466,7 @@ export class TransformCommands extends BeforePlugin {
       if (!n) {
         throw new Error("Failed to get node for id");
       }
-      actions.push(RemoveNodeAction.fromNode(nodeLocation(n)!, n))
+      nodeActions.push(RemoveNodeAction.fromNode(nodeLocation(n)!, n))
     })
 
     each(deleteGroup.ranges, range => {
@@ -1456,23 +1478,14 @@ export class TransformCommands extends BeforePlugin {
         return
       }
 
-      // if node is a child of another node in the deleteGroup, it will be implicitly removed
-      // no need to update the content
-      if (node.chain.some(p => deleteGroup.has(p.id))) {
-        return
-      }
+      // NOTE: if node is a child of another node in the deleteGroup, it will be implicitly removed
+      // we still need to update the node content as the node is not explicitly removed it might get moved to another location
 
       if (start.node.eq(end.node)) {
-        // TODO: maybe we don't need this check
-        if (node.chain.some(n => deleteGroup.has(n.id)) && !node.chain.every(n => !moveNodeIds.has(n.id))) {
-          return
-        }
-
         // NOTE: if the textBlock becomes empty after delete all text nodes
         if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node) && !node.isVoid) {
-          actions.push(...this.removeNodeCommands(node.children))
+          rangeAction.push(...this.removeNodeCommands(node.children))
           // MAYBE: may be insert a default empty node to keep the text node filled all the time.
-
           // const children = node.children;
           // if (children.length===0) {
           //   // const textNode = react.schema.text("");
@@ -1495,9 +1508,9 @@ export class TransformCommands extends BeforePlugin {
           const { node } = sdown;
           const textContent = node.textContent.slice(0, sdown.offset) + node.textContent.slice(edown.offset);
           if (textContent === '') {
-            actions.push(SetContentAction.create(node.parentId!, flatten([node.prevSiblings, node.nextSiblings]).filter(identity)))
+            rangeAction.push(SetContentAction.create(node.parentId!, flatten([node.prevSiblings, node.nextSiblings]).filter(identity)))
           } else {
-            actions.push(SetContentAction.create(node.id, textContent));
+            rangeAction.push(SetContentAction.create(node.id, textContent));
           }
           return
         }
@@ -1505,15 +1518,19 @@ export class TransformCommands extends BeforePlugin {
         // TODO: delete using TextContent methods
         const textContent = node.textContent.slice(0, start.offset) + node.textContent.slice(end.offset);
         if (textContent === '') {
-          actions.push(SetContentAction.create(node.id, []))
+          rangeAction.push(SetContentAction.create(node.id, []))
         } else {
           const textNode = app.schema.text(textContent)!;
-          actions.push(SetContentAction.create(node.id, [textNode]));
+          rangeAction.push(SetContentAction.create(node.id, [textNode]));
         }
       }
     });
 
-    return actions;
+    return {
+      rangeAction,
+      nodeActions,
+      actions: [...rangeAction, ...nodeActions]
+    };
   }
 
   private deleteText(app: Carbon, pin: Pin, text: string): Optional<Transaction> {

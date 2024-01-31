@@ -431,16 +431,16 @@ export class ImmutableDraft implements Draft {
 
     if (type === "create") {
       // set empty placeholder of inserted node if needed
-      if (node.isEmpty) {
-        this.updatePlaceholder(node, node.firstChild, EmptyPlaceholderPath);
-        // const placeholder = node.props.get<string>(EmptyPlaceholderPath) ?? "";
-        // console.debug('empty placeholder', placeholder, node.id.toString())
-        // if (node.firstChild) {
-        //   this.tm.updateProps(node.firstChild!, {
-        //     [PlaceholderPath]: placeholder
-        //   });
-        // }
-      }
+      // if (node.isEmpty) {
+      //   this.updatePlaceholder(node, node.firstChild, EmptyPlaceholderPath);
+      //   const placeholder = node.props.get<string>(EmptyPlaceholderPath) ?? "";
+      //   // console.debug('empty placeholder', placeholder, node.id.toString())
+      //   if (node.firstChild) {
+      //     this.tm.updateProps(node.firstChild!, {
+      //       [PlaceholderPath]: placeholder
+      //     });
+      //   }
+      // }
 
       this.actions.add(InsertNodeAction.create(at, node.id, node.toJSON()));
     }
@@ -469,9 +469,15 @@ export class ImmutableDraft implements Draft {
   private updatePlaceholder(source: Node, target: Optional<Node>, path: string = EmptyPlaceholderPath) {
     const placeholder = source.props.get<string>(path) ?? " ";
     if (target) {
-      this.tm.updateProps(target, {
-        [PlaceholderPath]: placeholder
-      });
+      if (path === EmptyPlaceholderPath) {
+        this.tm.updateProps(target, {
+          [PlaceholderPath]: source.firstChild?.isEmpty ? placeholder : " "
+        });
+      } else {
+        this.tm.updateProps(target, {
+          [PlaceholderPath]: placeholder
+        });
+      }
     }
   }
 
@@ -480,7 +486,6 @@ export class ImmutableDraft implements Draft {
     this.tm.insert(node, parent, 0);
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
-
     // if parent title is empty, set placeholder from parent
     const block = parent.closestBlock;
     this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath)
@@ -511,6 +516,8 @@ export class ImmutableDraft implements Draft {
     this.tm.insert(node, parent, refNode.index);
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
+    const block = node.closestBlock;
+    this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath);
   }
 
   private insertAfter(refId: NodeId, node: Node) {
@@ -529,6 +536,8 @@ export class ImmutableDraft implements Draft {
     this.updateDependents(node, UpdateDependent.Next)
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
+    const block = node.closestBlock;
+    this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath)
   }
 
   remove(nodeId: NodeId) {
