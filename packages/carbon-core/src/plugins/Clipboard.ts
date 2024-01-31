@@ -1,4 +1,4 @@
-import {AfterPlugin, Carbon, deepCloneMap, EventContext, EventHandlerMap, Node, Path, Pin} from "../core";
+import {AfterPlugin, Carbon, deepCloneMap, EventContext, EventHandlerMap, Node, Path, Pin, TextWriter} from "../core";
 import {SelectionPatch} from "../core/DeleteGroup";
 import {NodeId} from "../core/NodeId";
 import {Span} from "../core/Span";
@@ -21,9 +21,9 @@ export class ClipboardPlugin extends AfterPlugin {
         slice.normalize();
 
         if (!slice.isEmpty) {
-          // const serialized = react.serialize(slice.root)
-          // console.log('Serialized =>', serialized);
-          // event.clipboardData.setData('text/plain', serialized);
+          const writer = new TextWriter();
+          app.encode(writer, slice.root);
+          event.clipboardData.setData('text/plain', writer.toString());
           app.runtime.clipboard = slice;
         }
 
@@ -34,16 +34,15 @@ export class ClipboardPlugin extends AfterPlugin {
         const { event, app, cmd } = ctx
         preventAndStop(event);
         const slice = this.slice(app);
-        console.log('slice', slice);
+        console.log('slice', slice, slice.isBlockSelection);
         console.log('slice content =>', slice.root.textContent);
 
         slice.normalize();
 
         if (!slice.isEmpty) {
-          // const serialized = react.serialize(slice.root)
-          // console.log('Serialized =>', serialized);
-          // event.clipboardData.setData('text/plain', serialized);
-          // console.log(slice.root.children.map(n => n.textContent));
+          const writer = new TextWriter();
+          app.encode(writer, slice.root);
+          event.clipboardData.setData('text/plain', writer.toString());
           app.runtime.clipboard = slice;
           return
         }

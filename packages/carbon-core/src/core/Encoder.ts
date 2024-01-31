@@ -5,7 +5,7 @@ export interface Writer {
   write(content: string): Writer;
 }
 
-class TextWriter implements Writer {
+export class TextWriter implements Writer {
   private content: string = '';
   meta: Map<string, any> = new Map();
 

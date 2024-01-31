@@ -1,5 +1,12 @@
-import { ActionOrigin, BeforePlugin, BlockContent, Carbon, CarbonPlugin, EventContext, EventHandler, EventHandlerMap, NodeSpec, Pin, PinnedSelection, SetContentAction, Slice, preventAndStop, preventAndStopCtx } from "@emrgen/carbon-core";
-import { flatten, flattenDeep } from 'lodash';
+import {
+  BeforePlugin,
+  CarbonPlugin,
+  EventContext,
+  EventHandler,
+  NodeSpec,
+  preventAndStop,
+  preventAndStopCtx
+} from "@emrgen/carbon-core";
 
 export class Code extends CarbonPlugin {
   name = 'code';

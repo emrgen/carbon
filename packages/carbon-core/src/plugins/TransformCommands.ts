@@ -5,7 +5,7 @@ import {
   ActionOrigin,
   BeforePlugin,
   Carbon,
-  CarbonAction,
+  CarbonAction, CollapsedPath,
   Format,
   Fragment,
   hasSameIsolate,
@@ -232,18 +232,25 @@ export class TransformCommands extends BeforePlugin {
     const sliceClone = slice.clone();
     const { root, nodes } = sliceClone;
 
-    // console.log('xxx', nodes.map(n => n.id.toString()), root.id.toString());
 
     // if the selection is not empty, we need to paste the nodes after the last node
     const {blockSelection} = app.state;
+    console.log('xxx',blockSelection.isActive);
+
     if (blockSelection.isActive) {
       const {blocks} = blockSelection
       const lastNode = last(blocks) as Node
-      const focusNode = this.findFocusNode(blocks);
+      const focusNode = this.findFocusNode(sliceClone.nodes);
+      console.log(lastNode.renderVersion, lastNode.parent)
+      tr.Insert(Point.toAfter(lastNode.id), sliceClone.nodes)
 
-      tr.Insert(Point.toAfter(lastNode.id), blocks)
-      if (focusNode) {
-        tr.Select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
+      if (sliceClone.isBlockSelection) {
+        console.log('XXXXXXXXXXXXXXXXXXXXX')
+        tr.SelectBlocks(sliceClone.nodes.map(n => n.id))
+      } else if (focusNode) {
+        tr
+          .SelectBlocks([])
+          .Select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
       }
       return
     }
@@ -251,32 +258,28 @@ export class TransformCommands extends BeforePlugin {
     // we need to paste the nodes after the selection
     // TODO: make the selection a block selection and hide cursor
     if (sliceClone.isBlockSelection) {
-      const { head, tail } = selection;
-      const { parent } = tail.node;
-      if (!parent) {
-        console.error('no parent found');
+      const { start, end } = selection;
+      const container = end.node.closest(n => n.isContainer)!;
+      if (!container) {
+        console.error('no container block found');
         return;
       }
 
-      if (parent.isEmpty) {
-        const prevNode = parent?.prevSibling!
+      if (container.isEmpty) {
+        const prevNode = container?.prevSibling!
         const at = Point.toAfter(prevNode.id);
         const focusNode = this.findFocusNode(nodes);
         tr
           .Insert(at, sliceClone.nodes)
-          .Remove(nodeLocation(parent)!, parent)
-        // .select(PinnedSelection.fromPin(Pin.toEndOf(prevNode)!));
-        // .selectNodes(sliceClone.nodes.map(n => n.id))
-        if (focusNode) {
-          tr.Select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!))
-        }
+          .Remove(nodeLocation(container)!, container)
+          .SelectBlocks(sliceClone.nodes.map(n => n.id))
       } else {
-        if (head.eq(tail) && head.isAtStartOfNode(parent)) {
-          const at = Point.toAfter(parent?.prevSibling!.id);
-          tr.Insert(at, sliceClone.nodes);
+        if (start.eq(end) && start.isAtStartOfNode(container)) {
+          const at = Point.toAfter(container?.prevSibling!.id);
+          tr.Insert(at, sliceClone.nodes).SelectBlocks(sliceClone.nodes.map(n => n.id));
         } else {
-          const at = Point.toAfter(parent.id);
-          tr.Insert(at, sliceClone.nodes);
+          const at = Point.toAfter(container.id);
+          tr.Insert(at, sliceClone.nodes).SelectBlocks(sliceClone.nodes.map(n => n.id));
         }
       }
 
@@ -382,15 +385,16 @@ export class TransformCommands extends BeforePlugin {
 
         return tr;
       }
+    } else {
+      this.deleteAndInsert(tr, selection, sliceClone);
     }
 
-    // selection is not collapsed
-    const after = selection.collapseToStart();
-    // FIXME: this can cause bug as the first transaction failing might cause the second transaction to fail
-    tr.transform.delete(selection)?.Then((carbon) => {
-      // console.log('DELETED', carbon.selection.toString());
-      // return this.paste(carbon, after, BlockSelection.empty(react.store), slice);
-    })?.Dispatch();
+  }
+
+  // delete the selection and insert the slice
+  // similar to split+paste
+  private deleteAndInsert(tr: Transaction, selection: PinnedSelection, slice: Slice) {
+
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {
@@ -1228,8 +1232,8 @@ export class TransformCommands extends BeforePlugin {
 
   private deleteAcrossBlock(tr: Transaction, start: Pin, end: Pin, startTopBlock: Node, endTopBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const { app } = tr;
-    const startTextBlock = start.node;
-    const endTextBlock = end.node;
+    const startTitleBlock = start.node;
+    const endTitleBlock = end.node;
 
     const { parent: commonNode } = startTopBlock;
     if (!commonNode) {
@@ -1237,20 +1241,20 @@ export class TransformCommands extends BeforePlugin {
       return
     }
 
-    if (!startTextBlock || !endTextBlock) {
+    if (!startTitleBlock || !endTitleBlock) {
       console.error('start/end parent not found for merging node');
       return
     }
 
-    let startDepth = startTextBlock.depth - commonNode.depth;
-    let endDepth = endTextBlock.depth - commonNode.depth;
+    let startDepth = startTitleBlock.depth - commonNode.depth;
+    let endDepth = endTitleBlock.depth - commonNode.depth;
     const commonDepth = Math.min(startDepth, endDepth);
 
     // the core of the delete logic
     // merge node as if startNode and endNode are at same depth
-    let startContainer: Optional<Node> = startTextBlock;
-    let endContainer: Optional<Node> = endTextBlock;
-    const startBlock = startTextBlock.parent!;
+    let startContainer: Optional<Node> = startTitleBlock;
+    let endContainer: Optional<Node> = endTitleBlock;
+    const startBlock = startTitleBlock.parent!;
     const insertCommands: CarbonAction[] = [];
     const moveCommands: CarbonAction[] = [];
     const contentUpdated = NodeIdSet.empty()
@@ -1262,9 +1266,9 @@ export class TransformCommands extends BeforePlugin {
       console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
       let afterNodes: Node[] = [];
 
-      // open
+      // open startBlock if it is collapsed before
       if (startBlock?.isCollapsed) {
-        tr.Update(startBlock.id, { node: { collapsed: false } });
+        tr.Update(startBlock.id, { [CollapsedPath]: false });
       }
 
       // move endParent children to startParent
@@ -1278,7 +1282,7 @@ export class TransformCommands extends BeforePlugin {
 
         // must be equal, otherwise the blocks can not be merged
         if (startContainer?.isTextContainer && endContainer?.isTextContainer) {
-          const textContent = startTextBlock.textContent.slice(0, start.offset) + endTextBlock.textContent.slice(end.offset);
+          const textContent = startTitleBlock.textContent.slice(0, start.offset) + endTitleBlock.textContent.slice(end.offset);
           const textNode = app.schema.text(textContent)!;
           // when the text node is empty, we need to set content to empty array
           if (textNode.isEmpty) {
@@ -1294,7 +1298,8 @@ export class TransformCommands extends BeforePlugin {
         } else {
           // move endContainer children to the end of startContainer
           let to = Point.toAfter(startContainer?.lastChild?.id!);
-          contentMatch = startContainer.type.contentMatch.matchFragment(Fragment.from(startContainer.children));
+          const children = afterNodes = startContainer.children.filter(n => !deleteGroup.has(n.id)) ?? [];
+          contentMatch = startContainer.type.contentMatch.matchFragment(Fragment.from(children));
 
           // move undeleted matching nodes from endContainer to startContainer
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id)) ?? [];

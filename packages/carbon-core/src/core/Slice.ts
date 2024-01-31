@@ -46,6 +46,10 @@ export class Slice {
       }
     });
 
+    if (this.isBlockSelection) {
+      return new Slice(cloned, cloned.firstChild!, cloned.lastChild!)
+    }
+
     const startNode = cloned.atPath(startPath)!;
     const endNode = cloned.atPath(endPath)!;
 

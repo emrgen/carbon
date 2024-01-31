@@ -78,7 +78,10 @@ export const DocumentComp = (props: RendererProps) => {
             const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
             if (after.eq(app.selection)) return;
             prevent(e);
-            app.tr.Select(after, ActionOrigin.UserInput).Dispatch();
+            app.tr
+              .SelectBlocks([])
+              .Select(after, ActionOrigin.UserInput)
+              .Dispatch();
           }
           return;
         }
@@ -88,6 +91,7 @@ export const DocumentComp = (props: RendererProps) => {
         if (!section) return;
         const after = PinnedSelection.fromPin(Pin.toStartOf(section)!);
         app.tr
+          .SelectBlocks([])
           .Insert(at, section)
           .Select(after, ActionOrigin.UserInput)
           .Dispatch();

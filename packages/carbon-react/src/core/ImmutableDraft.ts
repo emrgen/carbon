@@ -521,10 +521,11 @@ export class ImmutableDraft implements Draft {
   }
 
   private insertAfter(refId: NodeId, node: Node) {
-    const refNode = this.nodeMap.get(refId);
+    const refNode = this.node(refId);
     if (!refNode) {
       throw new Error("Cannot insert node before a node that does not exist");
     }
+    console.log('[render version]', refNode.id.toString(), refNode.renderVersion)
 
     const parentId = refNode.parentId;
     if (!parentId) {
@@ -616,8 +617,10 @@ export class ImmutableDraft implements Draft {
     }
 
     const node = this.unfreeze(nodeId);
+    console.log('parent', node.parentId?.toString(), node.parent?.name, node.parent?.id.toString())
 
     this.tm.updateProps(node, props);
+    console.log('[render version]', node.id.toString(), node.renderVersion)
     this.addUpdated(node.id);
 
     if (props[SelectedPath] === true) {
