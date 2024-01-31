@@ -59,14 +59,18 @@ export class TextPlugin extends NodePlugin {
           return;
         }
 
+        // @ts-ignore
+        const { data, key } = ctx.event.nativeEvent;
+
 				const { start, end } = selection;
 				if (!selection.isCollapsed) {
+          const {cmd} = ctx;
+          cmd.transform.insertText(selection, data ?? key).Dispatch();
 					return
 				}
 
 
-				// @ts-ignore
-				const { data, key } = ctx.event.nativeEvent;
+
 				this.onTextInsert(cmd, start, data ?? key);
 			},
 		}

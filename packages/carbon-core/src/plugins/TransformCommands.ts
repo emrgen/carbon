@@ -640,19 +640,18 @@ export class TransformCommands extends BeforePlugin {
 
     const splitUptoSameDepth = () => {
       let lastInsertedNodeId = endBlock.id;
+
       let mergeDepth = commonDepth;
       // console.log('splitUptoSameDepth', mergeDepth);
 
       let to: Optional<Point> = Point.toAfter(startBlock!.id);
-      let toContentMatch = startBlock.parent?.type.contentMatch.matchFragment(Fragment.from([...startBlock.prevSiblings, startBlock]));
+      let contentMatch: Optional<ContentMatch> = getContentMatch(startBlock!);
+      let afterNodes: Node[] = startBlock.nextSiblings
       // if cursor start is in the title of a collapsible node
       if (startBlock!.isCollapsible && !startBlock.isCollapsed) {
         to = Point.toAfter(startBlock?.firstChild?.id!);
-        toContentMatch = startBlock.type.contentMatch.matchFragment(Fragment.from([startBlock.firstChild!]))
-      }
-
-      if (startBlock!.type.splitName !== endBlock!.name) {
-        changeActions.push(ChangeNameAction.create(endBlock!.id, startBlock!.type.splitName));
+        contentMatch = getContentMatch(startBlock?.firstChild!);
+        afterNodes = startBlock.children.slice(1);
       }
 
       // * move nodes from endContainer to startContainer
@@ -660,13 +659,35 @@ export class TransformCommands extends BeforePlugin {
       // implemented correctly, this will reduce a lot of headache
       while (startContainer && endContainer && mergeDepth) {
         if (endContainer.eq(endBlock)) {
+          let type = startBlock!.type.splitName !== endBlock!.name ? endBlock!.type : endBlock!.type
+          if (startBlock!.type.splitName !== endBlock!.name) {
+            changeActions.push(ChangeNameAction.create(endBlock!.id, startBlock!.type.splitName));
+          }
+
+          contentMatch = contentMatch!.matchFragment(Fragment.from([startBlock]))
+
+          if (!contentMatch) {
+            throw Error('failed to progressive match content')
+          }
+
           // move endBlock to after startBlock
           console.log('merging highest levels', endBlock.id.toString());
           moveActions.push(...this.moveNodeCommands(to, endContainer));
 
           to = Point.toAfter(endContainer.id);
+          afterNodes = endContainer.nextSiblings;
           if (startBlock.isCollapsible && !startBlock.isCollapsed) {
             const moveNodes = endContainer.children.slice(1);
+            contentMatch = contentMatch.matchFragment(Fragment.from(moveNodes));
+            if (!contentMatch) {
+              throw Error('failed to progressive match content')
+            }
+
+            contentMatch = contentMatch.matchFragment(Fragment.from(afterNodes));
+            if (!contentMatch?.validEnd) {
+              throw Error('failed to find valid content match')
+            }
+
             // check if schema is violated by move
             moveActions.push(...this.moveNodeCommands(to, moveNodes));
             moveNodeIds.add(moveNodes.map(n => n.id));
@@ -697,7 +718,11 @@ export class TransformCommands extends BeforePlugin {
         mergeDepth -= 1
       }
 
-      return lastInsertedNodeId;
+      return {
+        lastInsertedNodeId,
+        contentMatch,
+        afterNodes
+      };
     }
 
     if (startDepth === endDepth) {
@@ -731,7 +756,7 @@ export class TransformCommands extends BeforePlugin {
 
     if (startDepth < endDepth) {
       console.log('CASE: startDepth < endDepth');
-      const lastInsertedNodeId = splitUptoSameDepth();
+      const {lastInsertedNodeId} = splitUptoSameDepth();
       const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
 
       let at = Point.toAfter(lastInsertedNodeId ?? startContainer!.id);
@@ -1101,9 +1126,6 @@ export class TransformCommands extends BeforePlugin {
 
     // selection is within same text block
     if (endTextBlock.eq(startTextBlock)) {
-      if (import.meta.env.VITE_MODE == "dev") {
-        console.log(p14("%c[failed]"), "color:red", "selection within same text block");
-      }
       tr.Add(this.deleteGroupCommands(app, deleteGroup));
       const after = selection.collapseToStart();
       tr.Select(after);
@@ -1222,9 +1244,10 @@ export class TransformCommands extends BeforePlugin {
     const handleUptoSameDepth = () => {
       let lastInsertedNodeId: Optional<NodeId>;
       let contentMatch: Optional<ContentMatch>;
+      let afterNodes: Node[] = [];
       let mergeDepth = commonDepth;
       console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
-      let afterNodes: Node[] = [];
+
 
       // open
       if (startBlock?.isCollapsed) {
@@ -1816,21 +1839,12 @@ export class TransformCommands extends BeforePlugin {
     const { app } = tr;
     const actions: CarbonAction[] = [];
     // check if prev and next can be merged
-    // console.log('xxxxxx',prev, next, prev.isEmpty);
-
     const after = PinnedSelection.fromPin(Pin.toEndOf(prev)!);
 
     const moveActions: CarbonAction[] = [];
     const removeActions: CarbonAction[] = [];
     const insertActions: CarbonAction[] = [];
     const updateActions: CarbonAction[] = [];
-
-    if (prev.isEmpty) {
-      removeActions.push(RemoveNodeAction.fromNode(nodeLocation(prev)!, prev));
-      const after = PinnedSelection.fromPin(Pin.toStartOf(next)!);
-      tr.Add(removeActions).Select(after);
-      return
-    }
 
     // merge text blocks
     // TODO: need to test intensively for edge cases
@@ -1840,11 +1854,9 @@ export class TransformCommands extends BeforePlugin {
       // NOTE: empty text node are not valid in carbon
       if (next.textContent) {
         if (prev.isVoid) {
-          console.log('111111111111111111111111111')
           const textNode = app.schema.text(next.textContent)!;
           insertActions.push(InsertNodeAction.fromNode(Point.atOffset(prev.id), textNode));
         } else {
-          console.log('0000000000000000000000000000')
           const textContent = prev.textContent + next.textContent;
           const textNode = app.schema.text(textContent)!;
           insertActions.push(SetContentAction.create(prev.id, [textNode]));
@@ -1855,10 +1867,6 @@ export class TransformCommands extends BeforePlugin {
             [PlaceholderPath]: ''
           }));
         }
-
-        // const at = prev.isVoid ? Point.toStart(prev.id) : Point.toAfter(prev.lastChild?.id!);
-        // console.log(at.toString(), prev.toJSON());
-        // insertActions.push(...this.insertNodeCommands(at!, [textNode]))
       } else {
         // next node is empty
       }
@@ -1894,10 +1902,6 @@ const getContentMatch = (node: Node) => {
   return parent.type.contentMatch.matchFragment(Fragment.from(matchNodes))!;
 }
 
-// each node make progress towards valid content match
-// if the node cant make progress or the node progress does not lead to valid content match end,
-// try to unwrap and check if the children can make progress
-
 interface MatchResult {
   match: ContentMatch|null;
   validEnd: boolean;
@@ -1908,6 +1912,9 @@ interface MatchAction {
   node: Node;
 }
 
+// TODO: optimize this function
+// find a valid end for content match with the given nodes and after nodes
+// if the nodes can not make progress, try to unwrap the nodes and check if the children can make progress
 const findMatchingActions = (actions: MatchAction[], contentMatch: ContentMatch, at: Point, nodes: Node[], after: Node[]): MatchResult => {
   // debugger
   if (nodes.length === 0) {
@@ -1933,17 +1940,12 @@ const findMatchingActions = (actions: MatchAction[], contentMatch: ContentMatch,
     actions.push({ at, node});
     const result = findMatchingActions(actions, currMatch, Point.toAfter(node), nodes.slice(1), after);
     if (result.validEnd) {
-      console.log('valid end', node.name, node.id.toString())
       return result;
     } else {
       actions.pop();
     }
-  } else {
-    console.log('no match', node.name, node.id.toString());
   }
 
   // try with unwrapping the node
   return findMatchingActions(actions, contentMatch, at, node.children.concat(nodes.slice(1)), after);
 }
-
-

@@ -432,13 +432,14 @@ export class ImmutableDraft implements Draft {
     if (type === "create") {
       // set empty placeholder of inserted node if needed
       if (node.isEmpty) {
-        const placeholder = node.props.get<string>(EmptyPlaceholderPath) ?? "";
-        console.debug('empty placeholder', placeholder, node.id.toString())
-        if (node.firstChild) {
-          this.tm.updateProps(node.firstChild!, {
-            [PlaceholderPath]: placeholder
-          });
-        }
+        this.updatePlaceholder(node, node.firstChild, EmptyPlaceholderPath);
+        // const placeholder = node.props.get<string>(EmptyPlaceholderPath) ?? "";
+        // console.debug('empty placeholder', placeholder, node.id.toString())
+        // if (node.firstChild) {
+        //   this.tm.updateProps(node.firstChild!, {
+        //     [PlaceholderPath]: placeholder
+        //   });
+        // }
       }
 
       this.actions.add(InsertNodeAction.create(at, node.id, node.toJSON()));
@@ -451,16 +452,27 @@ export class ImmutableDraft implements Draft {
     console.debug('inserting new item')
     switch (at.at) {
       case PointAt.After:
-        return this.insertAfter(at.nodeId, node);
+        this.insertAfter(at.nodeId, node);
+        break
       case PointAt.Before:
-        return this.insertBefore(at.nodeId, node);
+        this.insertBefore(at.nodeId, node);
+        break
       case PointAt.Start:
-        return this.prepend(at.nodeId, node);
+        this.prepend(at.nodeId, node);
+        break
       case PointAt.End:
-        return this.append(at.nodeId, node);
+        this.append(at.nodeId, node);
+        break
     }
+  }
 
-    throw new Error("Invalid insertion point");
+  private updatePlaceholder(source: Node, target: Optional<Node>, path: string = EmptyPlaceholderPath) {
+    const placeholder = source.props.get<string>(path) ?? " ";
+    if (target) {
+      this.tm.updateProps(target, {
+        [PlaceholderPath]: placeholder
+      });
+    }
   }
 
   private prepend(parentId: NodeId, node: Node) {
@@ -468,6 +480,10 @@ export class ImmutableDraft implements Draft {
     this.tm.insert(node, parent, 0);
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
+
+    // if parent title is empty, set placeholder from parent
+    const block = parent.closestBlock;
+    this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath)
   }
 
   private append(parentId: NodeId, node: Node) {
@@ -475,6 +491,10 @@ export class ImmutableDraft implements Draft {
     this.tm.insert(node, parent, parent.size);
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
+
+    // if parent title is empty, set placeholder from parent
+    const block = parent.closestBlock;
+    this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath)
   }
 
   private insertBefore(refId: NodeId, node: Node) {
