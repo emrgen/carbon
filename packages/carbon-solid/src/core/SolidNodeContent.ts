@@ -6,7 +6,7 @@ import {
   NodeId,
   NodePropsJson,
   NodeType,
-  NodeProps,
+  NodeProps, NodeMap, Path,
 } from "@emrgen/carbon-core";
 import {createMutable, Store, unwrap} from "solid-js/store";
 import {Optional} from "@emrgen/types";
@@ -129,12 +129,14 @@ export class SolidNodeContent implements NodeContent {
     }
   }
 
-  setParentId(parentId: Optional<NodeId>): void {
+  setParentId(parentId: Optional<NodeId>): NodeContent {
     this.content.parentId = parentId;
+    return this;
   }
 
-  setParent(parent: Optional<Node>): void {
+  setParent(parent: Optional<Node>): NodeContent {
     this.content.parent = parent;
+    return this;
   }
 
   changeType(type: NodeType): void {
@@ -152,6 +154,10 @@ export class SolidNodeContent implements NodeContent {
       throw new Error("Node is not found");
     }
     this.content.children.splice(index, 1);
+  }
+
+  replace(index: number, node: Node) {
+    this.content.children.splice(index, 1, node);
   }
 
   insertText(text: string, index: number): void {
@@ -196,6 +202,10 @@ export class SolidNodeContent implements NodeContent {
   }
 
   freeze(): NodeContent {
+    throw new Error("Method not implemented.");
+  }
+
+  unfreeze(path: Path, map: NodeMap): NodeContent {
     throw new Error("Method not implemented.");
   }
 

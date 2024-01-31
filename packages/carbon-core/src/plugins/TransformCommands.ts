@@ -179,10 +179,6 @@ export class TransformCommands extends BeforePlugin {
       cmd.Select(after, ActionOrigin.UserInput);
     }
 
-    const updateContentText = (cmd: Transaction, selection: PointedSelection) => {
-
-    }
-
     if (!selection.isCollapsed) {
       tr.transform.delete(selection)
       const { lastSelection } = tr;
@@ -466,7 +462,6 @@ export class TransformCommands extends BeforePlugin {
   // TODO: check if schema is violated by the split
   split(tr: Transaction, splitBlock: Node, selection: PinnedSelection = tr.app.selection, opts?: SplitOpts) {
     opts = merge({ side: "bottom", pos: "out", rootType: splitBlock.type }, opts);
-
     if (selection.isCollapsed) {
       return this.splitAtPin(tr, splitBlock, selection.start, opts);
     } else {
@@ -474,6 +469,7 @@ export class TransformCommands extends BeforePlugin {
     }
   }
 
+  // the logic is very similar to delete command
   private splitByRange(tr: Transaction, splitBlock: Node, selection: PinnedSelection, opts: SplitOpts): Optional<Transaction> {
     const { app } = tr;
     const { start, end } = selection;
@@ -638,7 +634,7 @@ export class TransformCommands extends BeforePlugin {
     let endContainer: Optional<Node> = endBlock;
     let ignoreMove = new NodeIdSet()
 
-    const splitUptoSameDepth = () => {
+    const handleSplitUptoSameDepth = () => {
       let lastInsertedNodeId = endBlock.id;
 
       let mergeDepth = commonDepth;
@@ -727,7 +723,7 @@ export class TransformCommands extends BeforePlugin {
 
     if (startDepth === endDepth) {
       console.log('CASE: startDepth === endDepth');
-      splitUptoSameDepth();
+      handleSplitUptoSameDepth();
       const deleteActions = this.deleteGroupCommands(app, deleteGroup);
       const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
 
@@ -741,7 +737,7 @@ export class TransformCommands extends BeforePlugin {
 
     if (startDepth > endDepth) {
       console.log('CASE: startDepth > endDepth');
-      splitUptoSameDepth();
+      handleSplitUptoSameDepth();
       const deleteActions = this.deleteGroupCommands(app, deleteGroup);
       const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
 
@@ -756,7 +752,7 @@ export class TransformCommands extends BeforePlugin {
 
     if (startDepth < endDepth) {
       console.log('CASE: startDepth < endDepth');
-      const {lastInsertedNodeId} = splitUptoSameDepth();
+      const {lastInsertedNodeId, contentMatch, afterNodes }= handleSplitUptoSameDepth();
       const after = PinnedSelection.fromPin(Pin.toStartOf(endBlock)!);
 
       let at = Point.toAfter(lastInsertedNodeId ?? startContainer!.id);
@@ -1124,10 +1120,10 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    // selection is within same text block
+    // selection is within same text container block
     if (endTextBlock.eq(startTextBlock)) {
-      tr.Add(this.deleteGroupCommands(app, deleteGroup));
       const after = selection.collapseToStart();
+      tr.Add(this.deleteGroupCommands(app, deleteGroup));
       tr.Select(after);
       return tr
     }
@@ -1148,7 +1144,8 @@ export class TransformCommands extends BeforePlugin {
     // commonNode is selected
     // replace commonNode with default block
     if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-      // ASK: is it needed to check if commonNode is collapsible?
+      // when a collapsible node is selected entirely and delete
+      // for example: when a page is selected and deleted
       if (commonNode.isCollapsible) {
         const textBlock = commonNode.child(0)!
         const at = Point.toAfter(textBlock.id);
@@ -1160,7 +1157,6 @@ export class TransformCommands extends BeforePlugin {
         tr.SetContent(textBlock.id, []);
         tr.Add(removeNodesActions(commonNode.children.slice(1)));
         tr.Select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
-
         return
       }
 
@@ -1242,12 +1238,12 @@ export class TransformCommands extends BeforePlugin {
     const moveCommands: CarbonAction[] = [];
     const contentUpdated = NodeIdSet.empty()
 
-    const handleUptoSameDepth = () => {
+    const handleMergeUptoSameDepth = () => {
       let lastInsertedNodeId: Optional<NodeId>;
       let contentMatch: Optional<ContentMatch>;
-      let afterNodes: Node[] = [];
       let mergeDepth = commonDepth;
       console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
+      let afterNodes: Node[] = [];
 
       // open
       if (startBlock?.isCollapsed) {
@@ -1288,6 +1284,9 @@ export class TransformCommands extends BeforePlugin {
           // check if the moveNodes generates a new valid end
           // if not try to reach valid end by unwrapping or wrapping
           const currMatch = contentMatch?.matchFragment(Fragment.from(moveNodes));
+          if (!currMatch?.validEnd) {
+            throw Error('invalid content match found')
+          }
           afterNodes = [];
           contentMatch = currMatch!;
           if (moveNodes.length) {
@@ -1319,18 +1318,7 @@ export class TransformCommands extends BeforePlugin {
     // content of endBlock goes into startBlock.
     if (startDepth === endDepth) {
       console.log('CASE: merge same depth blocks');
-      // if (startBlock.isEmpty) {
-      //   // startBlock is empty, just replace it with endBlock
-      //   const deleteGroupActions = this.deleteGroupCommands(app, deleteGroup, NodeIdSet.EMPTY, contentUpdated);
-      //   deleteGroupActions.push(RemoveNodeAction.create(nodeLocation(startBlock)!, startBlock.id, startBlock.toJSON()));
-      //   tr
-      //     .Add(deleteGroupActions)
-      //     .Select(after)
-      //   return
-      // }
-
-      handleUptoSameDepth();
-
+      handleMergeUptoSameDepth();
       const deleteGroupActions = this.deleteGroupCommands(app, deleteGroup, NodeIdSet.EMPTY, contentUpdated);
 
       console.log('deleteActions', deleteGroupActions);
@@ -1349,7 +1337,7 @@ export class TransformCommands extends BeforePlugin {
     // partial match where startBlock has more depth than endBlock.
     if (startDepth > endDepth) {
       console.log('CASE: startBlock.depth > endBlock.depth');
-      handleUptoSameDepth();
+      handleMergeUptoSameDepth();
       const deleteActions = this.deleteGroupCommands(app, deleteGroup);
 
       tr
@@ -1368,7 +1356,7 @@ export class TransformCommands extends BeforePlugin {
       const lowestStartContainer = startTopBlock.chain.find(n => n.isContainer);
       const lowestEndContainer = endTopBlock.chain.find(n => n.isContainer);
 
-      let {lastInsertedNodeId, contentMatch, afterNodes } = handleUptoSameDepth();
+      let {lastInsertedNodeId, contentMatch, afterNodes } = handleMergeUptoSameDepth();
       if (lastInsertedNodeId && !contentMatch) {
         throw Error('invalid state, contentMatch is empty while lastInsertedNodeId is present')
       }
@@ -1439,86 +1427,7 @@ export class TransformCommands extends BeforePlugin {
     }
   }
 
-  private matchActions(contentMatch: ContentMatch, at: Point, nodes: Node[], action: 'move'|'insert'): CarbonAction[] {
-    const actions: CarbonAction[] = [];
-    if (action === 'move') {
-      this.findMatchingMoves(actions, contentMatch, at, nodes);
-    } else {
-      this.findMatchingInserts(actions, contentMatch, at, nodes);
-    }
-
-    return actions;
-  }
-
-  private findMatchingMoves(actions: CarbonAction[], contentMatch: ContentMatch, at: Point, nodes: Node[]): boolean {
-    if (nodes.length === 0) return contentMatch.validEnd;
-    const node = first(nodes) as Node;
-
-    // check as is match
-    let currMatch = contentMatch.matchFragment(Fragment.from([node]))
-    if (currMatch) {
-      actions.push(...moveNodesActions(at, [node]));
-      if (this.findMatchingMoves(actions, currMatch, Point.toAfter(node), nodes.slice(1))) {
-        return true;
-      } else {
-        actions.pop();
-      }
-    }
-
-    // check after unwrapping
-    currMatch = contentMatch.matchFragment(Fragment.from(node.children))
-    if (currMatch) {
-      const {size, children} = node;
-      if (children.length) {
-        actions.push(...moveNodesActions(at, children))
-        actions.push(RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()))
-        if (this.findMatchingMoves(actions, currMatch, Point.toAfter(last(children)!), nodes.slice(1))) {
-          return true;
-        } else {
-          actions.splice(actions.length - size + 1, size + 1)
-        }
-      }
-    }
-
-    // try wrapping the node
-
-    return false
-  }
-
-  private findMatchingInserts(actions: CarbonAction[], contentMatch: ContentMatch, at: Point, nodes: Node[]): boolean {
-    if (nodes.length === 0) return contentMatch.validEnd;
-    const node = first(nodes) as Node;
-
-    // check as is match
-    let currMatch = contentMatch.matchFragment(Fragment.from([node]))
-    if (currMatch) {
-      actions.push(...insertNodesActions(at, [node]));
-      if (this.findMatchingInserts(actions, currMatch, Point.toAfter(node), nodes.slice(1))) {
-        return true;
-      } else {
-        actions.pop();
-      }
-    }
-
-    // check after unwrapping
-    currMatch = contentMatch.matchFragment(Fragment.from(node.children))
-    if (currMatch) {
-      const {size, children} = node;
-      if (children.length) {
-        actions.push(...insertNodesActions(at, children))
-        if (this.findMatchingInserts(actions, currMatch, Point.toAfter(last(children)!), nodes.slice(1))) {
-          return true;
-        } else {
-          actions.splice(actions.length - size + 1, size + 1)
-        }
-      }
-    }
-
-    // try wrapping the node
-
-    return false
-  }
-
+  // delete nodes within selection patch
   private deleteGroupCommands(app: Carbon, deleteGroup: SelectionPatch, moveNodeIds = NodeIdSet.EMPTY, contentUpdated = NodeIdSet.EMPTY): CarbonAction[] {
     const actions: CarbonAction[] = [];
 
@@ -1949,3 +1858,5 @@ const findMatchingActions = (actions: MatchAction[], contentMatch: ContentMatch,
   // try with unwrapping the node
   return findMatchingActions(actions, contentMatch, at, node.children.concat(nodes.slice(1)), after);
 }
+
+
