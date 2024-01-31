@@ -1148,6 +1148,7 @@ export class TransformCommands extends BeforePlugin {
     // commonNode is selected
     // replace commonNode with default block
     if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+      // ASK: is it needed to check if commonNode is collapsible?
       if (commonNode.isCollapsible) {
         const textBlock = commonNode.child(0)!
         const at = Point.toAfter(textBlock.id);
@@ -1248,7 +1249,6 @@ export class TransformCommands extends BeforePlugin {
       let mergeDepth = commonDepth;
       console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
 
-
       // open
       if (startBlock?.isCollapsed) {
         tr.Update(startBlock.id, { node: { collapsed: false } });
@@ -1283,7 +1283,7 @@ export class TransformCommands extends BeforePlugin {
           let to = Point.toAfter(startContainer?.lastChild?.id!);
           contentMatch = startContainer.type.contentMatch.matchFragment(Fragment.from(startContainer.children));
 
-          // move undeleted children
+          // move undeleted matching nodes from endContainer to startContainer
           const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id)) ?? [];
           // check if the moveNodes generates a new valid end
           // if not try to reach valid end by unwrapping or wrapping
@@ -1296,7 +1296,7 @@ export class TransformCommands extends BeforePlugin {
           }
         }
 
-        // endParent children will be moved to startParent
+        // endContainer children will be moved to startContainer
         deleteGroup.addId(endContainer?.id!);
 
         lastInsertedNodeId = startContainer.id
