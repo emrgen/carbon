@@ -416,7 +416,7 @@ export class TransformCommands extends BeforePlugin {
     const selectionInfo = this.selectionInfo(app, selection);
 
     // delete the selection
-    const {actions: deleteGroupActions} = this.deleteGroupCommands(app, selectionInfo);
+    const {actions: deleteGroupActions, rangeAction, nodeActions} = this.deleteGroupCommands(app, selectionInfo);
 
     const {start, end} = selection;
 
@@ -482,6 +482,8 @@ export class TransformCommands extends BeforePlugin {
       afterNode = afterNode.parent
     }
 
+    tr.Add(rangeAction)
+
     // adjust the nodes after selection end
     if (sliceStartTitle.eq(sliceEndTitle)) {
       const textContent = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent + endTitle.textContent.slice(end.offset);
@@ -489,6 +491,7 @@ export class TransformCommands extends BeforePlugin {
       tr.Add(SetContentAction.create(startTitle.id, [textNode!]));
 
       const after = PinnedSelection.fromPin(Pin.future(startTitle, start.offset + sliceStartTitle.textContent.length)!);
+
       tr.Select(after);
     } else {
       const startTextContent = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
@@ -498,8 +501,31 @@ export class TransformCommands extends BeforePlugin {
       const endTextNode = app.schema.text(endTextContent);
       tr.Add(SetContentAction.create(sliceEndTitle.id, [endTextNode!]));
       const after = PinnedSelection.fromPin(Pin.future(sliceEndTitle, sliceEndTitle.textContent.length)!);
+
       tr.Select(after);
     }
+    const removeActions = removeNodesActions(endTitle)
+
+    // move nodes after selection end after the slice until the common node with the start selection is reached
+    let to = Point.toAfter(sliceEndTitle.id);
+    {
+      const {nextSiblings} = endTitle;
+      const moveActions = moveNodesActions(to, nextSiblings)
+      tr.Add(moveActions);
+      const lastNode = last(nextSiblings);
+      if (lastNode) {
+        to = Point.toAfter(lastNode.id)
+      }
+    }
+
+    {
+      const moveNodes = startTitle.parent?.nextSiblings.filter(n => !selectionInfo.has(n.id)) ?? [];
+      const moveActions = moveNodesActions(to, moveNodes);
+      tr.Add(moveActions);
+    }
+
+    tr.Add(removeActions);
+    tr.Add(nodeActions);
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {
