@@ -6,7 +6,7 @@ import {
   BeforePlugin,
   Carbon,
   CarbonAction,
-  CollapsedPath,
+  CollapsedPath, deepCloneMap,
   Format,
   Fragment,
   hasSameIsolate,
@@ -44,6 +44,7 @@ import {insertBeforeAction, moveNodesActions, removeNodesActions} from "../utils
 import {RemoveNodeAction} from "../core/actions/RemoveNodeAction";
 import {InsertTextAction} from "../core/actions/InsertTextAction";
 import {ContentMatch} from "../core/ContentMatch";
+import {NodeColumn} from "../core/NodeColumn";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -1361,7 +1362,7 @@ export class TransformCommands extends BeforePlugin {
     return tr;
   }
 
-  private deleteAcrossBlock(tr: Transaction, start: Pin, end: Pin, startTopBlock: Node, endTopBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+  private deleteAcrossBlock_(tr: Transaction, start: Pin, end: Pin, startTopBlock: Node, endTopBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
     const {app} = tr;
     const startTitleBlock = start.node;
     const endTitleBlock = end.node;
@@ -1381,203 +1382,97 @@ export class TransformCommands extends BeforePlugin {
     let endDepth = endTitleBlock.depth - commonNode.depth;
     const commonDepth = Math.min(startDepth, endDepth);
 
-    // the core of the delete logic
-    // merge node as if startNode and endNode are at same depth
-    let startContainer: Optional<Node> = startTitleBlock;
-    let endContainer: Optional<Node> = endTitleBlock;
-    const startBlock = startTitleBlock.parent!;
+  }
+
+  private deleteAcrossBlock(tr: Transaction, start: Pin, end: Pin, startTopBlock: Node, endTopBlock: Node, deleteGroup: SelectionPatch): Optional<Transaction> {
+    const {app} = tr;
+    const startTitleBlock = start.node;
+    const endTitleBlock = end.node;
+
+
+    const {parent: commonNode} = startTopBlock;
+    if (!commonNode) {
+      console.error('cant merge without commonNode');
+      return
+    }
+
+    if (!startTitleBlock || !endTitleBlock) {
+      console.error('start/end parent not found for merging node');
+      return
+    }
+
+    let startBlock: Optional<Node> = startTitleBlock.parent!;
+    let endBlock: Optional<Node> = endTitleBlock.parent!;
+
+    let commonNodeDepth = commonNode.depth;
+    let startBlockDepth = startBlock.depth;
+    let endBlockDepth = endBlock.depth;
+
     const insertCommands: CarbonAction[] = [];
     const moveCommands: CarbonAction[] = [];
-    const contentUpdated = NodeIdSet.empty()
+    const contentUpdated = NodeIdSet.empty();
 
-    const handleMergeUptoSameDepth = () => {
-      let lastInsertedNodeId: Optional<NodeId>;
-      let contentMatch: Optional<ContentMatch>;
-      let mergeDepth = commonDepth;
-      console.log('>>> MERGE SAME DEPTH NODES', mergeDepth);
-      let afterNodes: Node[] = [];
+    const leftColumn = NodeColumn.create();
+    const rightColumn = NodeColumn.create();
 
-      // open startBlock if it is collapsed before
-      if (startBlock?.isCollapsed) {
-        tr.Update(startBlock.id, {[CollapsedPath]: false});
-      }
-
-      // move endParent children to startParent
-      // start from bottom and move up along parent chain
-      while (startContainer && endContainer && mergeDepth) {
-        console.log('mergeDepth', mergeDepth);
-
-        // let to: Optional<Point> = Point.toAfter(startContainer.id);
-        // if (startContainer.isCollapsible) {
-        // }
-
-        // must be equal, otherwise the blocks can not be merged
-        if (startContainer?.isTextContainer && endContainer?.isTextContainer) {
-          const textContent = startTitleBlock.textContent.slice(0, start.offset) + endTitleBlock.textContent.slice(end.offset);
+    // collect nodes to be deleted and moved
+    while (endBlock && commonNodeDepth < endBlockDepth) {
+      const children = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
+      const nodes = children.map(ch => {
+        if (ch.isTextContainer) {
+          const title = ch.clone(deepCloneMap)
+          const textContent = title.textContent.slice(end.offset)
           const textNode = app.schema.text(textContent)!;
-          // when the text node is empty, we need to set content to empty array
-          if (textNode.isEmpty) {
-            insertCommands.push(SetContentAction.create(startContainer.id, []));
-          } else {
-            insertCommands.push(SetContentAction.create(startContainer.id, [textNode]));
-          }
-
-          contentUpdated.add(startContainer.id);
-          contentMatch = startContainer.parent!.type.contentMatch.matchFragment(Fragment.from([startContainer]))!;
-          afterNodes = startContainer.nextSiblings.filter(n => !deleteGroup.has(n.id)) ?? [];
-          console.log('merge start and end block');
-        } else {
-          // move endContainer children to the end of startContainer
-          let to = Point.toAfter(startContainer?.lastChild?.id!);
-          const children = afterNodes = startContainer.children.filter(n => !deleteGroup.has(n.id)) ?? [];
-          contentMatch = startContainer.type.contentMatch.matchFragment(Fragment.from(children));
-
-          // move undeleted matching nodes from endContainer to startContainer
-          const moveNodes = endContainer?.children.filter(ch => !deleteGroup.has(ch.id)) ?? [];
-          // check if the moveNodes generates a new valid end
-          // if not try to reach valid end by unwrapping or wrapping
-          const currMatch = contentMatch?.matchFragment(Fragment.from(moveNodes));
-          if (!currMatch?.validEnd) {
-            throw Error('invalid content match found')
-          }
-          afterNodes = [];
-          contentMatch = currMatch!;
-          if (moveNodes.length) {
-            console.log('moving nodes...', moveNodes.length, to.toString());
-            moveCommands.push(...this.moveNodeCommands(to, moveNodes));
-          }
+          title.updateContent([textNode]);
+          return title;
         }
 
-        // endContainer children will be moved to startContainer
-        deleteGroup.addId(endContainer?.id!);
+        return ch;
+      })
 
-        lastInsertedNodeId = startContainer.id
-        startContainer = startContainer?.parent;
-        endContainer = endContainer?.parent;
-        mergeDepth -= 1;
-      }
+      // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
+      rightColumn.add(endBlockDepth + 1, nodes);
+      deleteGroup.addId(endBlock.id);
 
-      return {
-        lastInsertedNodeId,
-        contentMatch,
-        afterNodes
-      }
-    } // handleUptoSameDepth
+      endBlock = endBlock.parent;
+      endBlockDepth -= 1
+    }
 
+    if (endTitleBlock?.parents.some(n => n.eq(startBlock!))) {
+      commonNodeDepth -= 1
+    }
+
+    while (commonNodeDepth < startBlockDepth) {
+      const children = startBlock!.children.filter(n => !deleteGroup.has(n.id)) ?? [];
+      const nodes = children.map(ch => {
+        if (ch.isTextContainer) {
+          const title = ch.clone(deepCloneMap)
+          const textContent = title.textContent.slice(0, start.offset)
+          const textNode = app.schema.text(textContent)!;
+          title.updateContent([textNode]);
+          return title;
+        }
+
+        return ch;
+      })
+      leftColumn.add(startBlockDepth + 1, nodes)
+
+      startBlock = startBlock!.parent;
+      startBlockDepth -= 1
+    }
+
+    // merge the columns
+    console.log('leftColumn', leftColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+    console.log('rightColumn', rightColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+
+    const mergeActions = NodeColumn.mergeByMove(leftColumn, rightColumn);
+
+    const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+
+    tr.Add(mergeActions);
+    tr.Add(nodeActions);
     const after = PinnedSelection.fromPin(start)
-
-    // CASE 1
-    // prev & next have same merge depth and are in perfect match for merge.
-    // content of endBlock goes into startBlock.
-    if (startDepth === endDepth) {
-      console.log('CASE: merge same depth blocks');
-      handleMergeUptoSameDepth();
-      const {actions: deleteGroupActions} = this.deleteGroupCommands(app, deleteGroup, NodeIdSet.EMPTY, contentUpdated);
-
-      console.log('deleteActions', deleteGroupActions);
-      console.log('insertCommands', insertCommands);
-      console.log('moveCommands', moveCommands);
-
-      tr
-        .Add(moveCommands)
-        .Add(deleteGroupActions)
-        .Add(insertCommands)
-        .Select(after)
-      return
-    }
-
-    // CASE 2
-    // partial match where startBlock has more depth than endBlock.
-    if (startDepth > endDepth) {
-      console.log('CASE: startBlock.depth > endBlock.depth');
-      handleMergeUptoSameDepth();
-      const {actions: deleteGroupActions} = this.deleteGroupCommands(app, deleteGroup);
-
-      tr
-        .Add(moveCommands)
-        .Add(deleteGroupActions)
-        .Add(insertCommands)
-        .Select(after)
-      return
-    }
-
-    // CASE 3
-    // partial match where startBlock has less depth than endBlock.
-    if (startDepth < endDepth) {
-      console.log('CASE: startBlock.depth < endBlock.depth');
-      console.log('+==================+');
-      const lowestStartContainer = startTopBlock.chain.find(n => n.isContainer);
-      const lowestEndContainer = endTopBlock.chain.find(n => n.isContainer);
-
-      let {lastInsertedNodeId, contentMatch, afterNodes} = handleMergeUptoSameDepth();
-      if (lastInsertedNodeId && !contentMatch) {
-        throw Error('invalid state, contentMatch is empty while lastInsertedNodeId is present')
-      }
-
-      console.debug('lastInsertedId', lastInsertedNodeId?.toString())
-
-      // move endNodes remaining children after startParent
-      // NOTE: this create the effect of moving endParents non-content children
-      let at: Optional<Point> = Point.toAfter(lastInsertedNodeId ?? startContainer.id);
-      // NOTE: this is a special case where endContainer is child of startContainer, and we need to move endContainer children after startContainer
-      if (lowestStartContainer?.isCollapsible && lowestEndContainer?.parents.some(p => p.id === lowestStartContainer?.id)) {
-        console.log('endContainer is child of startContainer');
-        at = Point.toAfter(startContainer.child(0)!.id);
-        contentMatch = startContainer.type.contentMatch.matchFragment(Fragment.from([startContainer.firstChild!]));
-      }
-
-      console.log('--------------------------')
-      console.log('inserting after', at?.toString(), lastInsertedNodeId?.toString(), startContainer.id.toString());
-
-      // unwrap
-      while (endContainer && startTopBlock.depth <= endContainer?.depth) {
-        const moveNodes = endContainer.children.filter(n => !deleteGroup.has(n.id))
-
-        const currMatch = contentMatch?.matchFragment(Fragment.from(moveNodes));
-        console.log('CONTENT MATCH', currMatch, contentMatch, moveNodes.map(n => n.name))
-        if (moveNodes.length) {
-          if (!currMatch?.validEnd) {
-            // How to resolve the content match
-            // 1. try unwrapping
-            // 2. can't move throw error
-            const matches: MatchAction[] = []
-            console.log('content match', contentMatch?.validEnd, contentMatch);
-            const matchActions = findMatchingActions(matches, contentMatch!, at, moveNodes, afterNodes);
-            if (!matchActions.validEnd) {
-              throw Error('failed to find valid end for content match')
-            }
-            matches.forEach(m => {
-              console.log('move modes', m.node.id.toString());
-            })
-            const actions = matches.map(m => MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id));
-            if (!actions.length) {
-              throw Error('failed to find valid move actions')
-            }
-
-            tr.Add(actions);
-            console.error('Invalid content match found')
-          } else {
-            contentMatch = currMatch;
-            moveCommands.push(...this.moveNodeCommands(at, moveNodes));
-            at = Point.toAfter(last(moveNodes)!.id);
-          }
-        }
-
-        deleteGroup.addId(endContainer.id);
-        endContainer = endContainer.parent;
-      }
-      console.log(deleteGroup.ids.toArray().map(id => id.toString()));
-
-      const {actions: groupDeleteActions} = this.deleteGroupCommands(app, deleteGroup);
-
-      tr
-        .Add(moveCommands)
-        .Add(groupDeleteActions)
-        .Add(insertCommands)
-        .Select(after)
-
-      return
-    }
+    tr.Select(after);
   }
 
   // delete nodes within selection patch

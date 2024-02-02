@@ -213,16 +213,16 @@ const data = node("carbon", [
     section([
       title([text("123")]),
       section([
-        title([text("123")]),
+        title([text("1239")]),
         section([
-          title([text("123")]),
-          section([title([text("123")])]),
+          title([text("1238")]),
+          section([title([text("1237")])]),
         ]),
-        section([title([text("123")])]),
+        section([title([text("1236")])]),
       ]),
-      section([title([text("123")])]),
+      section([title([text("1235")])]),
     ]),
-    section([title([text("123")])]),
+    section([title([text("1234")])]),
     node(
       "section",
       [
