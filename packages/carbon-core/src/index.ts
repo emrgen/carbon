@@ -15,6 +15,7 @@ export * from './utils/action';
 export * from './utils/constrain';
 export * from './utils/htmlAttrs';
 export * from './utils/browser';
+export * from './utils/content_match';
 
 export * from './core/BSet';
 export * from './core/Logger';

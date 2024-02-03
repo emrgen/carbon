@@ -6,12 +6,12 @@ import {
   BeforePlugin,
   Carbon,
   CarbonAction,
-  CollapsedPath, deepCloneMap,
+  CollapsedPath, deepCloneMap, findMatchingActions,
   Format,
-  Fragment,
+  Fragment, getContentMatch,
   hasSameIsolate,
   insertAfterAction,
-  InsertPos,
+  InsertPos, MatchAction,
   MoveNodeAction,
   NodeIdSet,
   NodePropsJson,
@@ -771,16 +771,20 @@ export class TransformCommands extends BeforePlugin {
     tr.Add(MoveNodeAction.create(nodeLocation(endBlock)!, Point.toAfter(startBlock), endBlock.id));
     moveNodeIds.add(endBlock.id);
 
-    // leftColumn.append(startBlockDepth, [endBlock]);
-    const lastChild = endBlock.lastChild!
-
     // this entry is done so that the next siblings of endBlock can move within endBlock
+    const lastChild = endBlock.lastChild!
     leftColumn.append(startBlockDepth, [lastChild]);
 
     // collect nodes to be from left of selection
     while (commonNodeDepth < currEndBlockDepth) {
       const children = endBlock.nextSiblings.filter(n => !deleteGroup.has(n.id) && !moveNodeIds.has(n.id)) ?? [];
       rightColumn.append(currEndBlockDepth, children);
+
+      // nodes between startBlock and endBlock are to be removed
+      if (!moveNodeIds.has(endBlock.id)) {
+        deleteGroup.addId(endBlock.id);
+      }
+
       endBlock = endBlock!.parent!;
       currEndBlockDepth -= 1
     }
@@ -1719,59 +1723,4 @@ export class TransformCommands extends BeforePlugin {
   }
 
 }
-
-const getContentMatch = (node: Node) => {
-  const parent = node.parent!;
-  const matchNodes = parent.children.slice(0, node.index + 1) ?? []
-  return parent.type.contentMatch.matchFragment(Fragment.from(matchNodes))!;
-}
-
-interface MatchResult {
-  match: ContentMatch | null;
-  validEnd: boolean;
-}
-
-interface MatchAction {
-  at: Point;
-  node: Node;
-}
-
-// TODO: optimize this function
-// find a valid end for content match with the given nodes and after nodes
-// if the nodes can not make progress, try to unwrap the nodes and check if the children can make progress
-const findMatchingActions = (actions: MatchAction[], contentMatch: ContentMatch, at: Point, nodes: Node[], after: Node[]): MatchResult => {
-  // debugger
-  if (nodes.length === 0) {
-    const nextMatch = contentMatch.matchFragment(Fragment.from(after));
-    return {
-      match: nextMatch,
-      validEnd: !!nextMatch?.validEnd
-    }
-  }
-
-  const node = first(nodes) as Node;
-  if (node.isTextContainer) {
-    return {
-      match: null,
-      validEnd: false
-    }
-  }
-
-  // if the node can add to contentMatch without unwrapping
-  let currMatch = contentMatch.matchFragment(Fragment.from([node]));
-  if (currMatch) {
-    console.log('match', node.name, node.id.toString(), currMatch);
-    actions.push({at, node});
-    const result = findMatchingActions(actions, currMatch, Point.toAfter(node), nodes.slice(1), after);
-    if (result.validEnd) {
-      return result;
-    } else {
-      actions.pop();
-    }
-  }
-
-  // try with unwrapping the node
-  return findMatchingActions(actions, contentMatch, at, node.children.concat(nodes.slice(1)), after);
-}
-
 
