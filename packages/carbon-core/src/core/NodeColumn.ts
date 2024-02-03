@@ -1,16 +1,19 @@
 import {CarbonAction, moveNodesActions, Node, Point, SetContentAction} from "@emrgen/carbon-core";
-import {flatten, identity} from "lodash";
+import {flatten, identity, isEmpty} from "lodash";
 
 export class NodeColumn {
   nodes: Node[][] = [];
 
   static moveNodes(before: Node[], after: Node[]) {
+    if (isEmpty(after)) {
+      return []
+    }
     const lastNode = before[before.length-1];
     const at = Point.toAfter(lastNode);
     return moveNodesActions(at, after)
   }
 
-  static mergeByMove(left: NodeColumn, right: NodeColumn): CarbonAction[] {
+  static deleteMergeByMove(left: NodeColumn, right: NodeColumn): CarbonAction[] {
     const actions: CarbonAction[] = [];
 
     let rightLength = right.nodes.length-1;
@@ -22,6 +25,12 @@ export class NodeColumn {
 
       if (!leftNodes || !rightNodes) {
         break;
+      }
+
+      if (isEmpty(leftNodes) || isEmpty(rightNodes)) {
+        leftLength--;
+        rightLength--;
+        continue
       }
 
       const leftFirst = leftNodes[0];
@@ -38,18 +47,21 @@ export class NodeColumn {
           actions.push(...NodeColumn.moveNodes([leftFirst], [
             ...rightNodes.slice(1),
             ...flatten(nodes),
-            ...leftNodes.slice(1)
           ]));
         } else {
-          actions.push(...NodeColumn.moveNodes([leftFirst], [...rightNodes.slice(1), ...leftNodes.slice(1)]))
+          actions.push(...NodeColumn.moveNodes([leftFirst], [
+            ...rightNodes.slice(1),
+          ]))
         }
       }
       else if (!left.nodes[leftLength-1]) {
         const nodes = right.nodes.splice(0, rightLength+1).filter(identity).reverse();
-        actions.push(...NodeColumn.moveNodes(leftNodes, flatten(nodes)));
+        const leftFirst = leftNodes[0]
+        actions.push(...NodeColumn.moveNodes([leftFirst], flatten(nodes)));
       }
       else {
-        actions.push(...NodeColumn.moveNodes(leftNodes, rightNodes));
+        const leftFirst = leftNodes[0]
+        actions.push(...NodeColumn.moveNodes([leftFirst], rightNodes));
       }
 
       leftLength--;
@@ -59,12 +71,41 @@ export class NodeColumn {
     return actions;
   }
 
+  static splitMergeByMove(left: NodeColumn, right: NodeColumn): CarbonAction[] {
+    const actions: CarbonAction[] = [];
+
+    let rightLength = right.nodes.length-1;
+    let leftLength = left.nodes.length-1;
+
+    while (true) {
+      const leftNodes = left.nodes[leftLength]
+      const rightNodes = right.nodes[rightLength]
+
+      if (!leftNodes || !rightNodes) {
+        break;
+      }
+
+      const leftFirst = leftNodes[0];
+      const rightFirst = rightNodes[0];
+    }
+
+    return actions;
+  }
+
+  static collect() {}
+
   static create() {
     return new NodeColumn();
   }
 
-  add(depth: number, nodes: Node[]) {
-    this.nodes[depth] = nodes
+  append(depth: number, nodes: Node[]) {
+    this.nodes[depth] = this.nodes[depth] ?? []
+    this.nodes[depth].push(...nodes)
+  }
+
+  prepend(depth: number, nodes: Node[]) {
+    this.nodes[depth] = this.nodes[depth] ?? []
+    this.nodes[depth].unshift(...nodes)
   }
 
   isEmpty() {

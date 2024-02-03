@@ -461,7 +461,9 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     closest(fn: Predicate<Node>): Optional<Node> {
-      let current: Optional<Node> = this;
+      if (fn(this)) return this;
+
+      let current: Optional<Node> = this.parent;
       while (current) {
         if (fn(current)) return current;
         current = current.parent;
