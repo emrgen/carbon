@@ -87,7 +87,9 @@ export class NestablePlugin extends AfterPlugin {
 	// TODO: add support for unwrapping multiple nodes
 	unwrap(tr: Transaction, node: Node): Optional<Transaction> {
 		const { parent } = node;
-		if (!parent || !isNestableNode(parent)) return
+		if (!parent || !isNestableNode(parent)) {
+      return
+    }
 
 		// move node after the parent
 		const to = Point.toAfter(parent!.id)
@@ -136,11 +138,7 @@ export class NestablePlugin extends AfterPlugin {
 					cmd
 						.Change(listNode.id, 'section')
 						.Select(PinnedSelection.fromPin(selection.head))
-          // if (listNode.firstChild?.isEmpty) {
-          //   cmd.Update(listNode.firstChild.id, {
-          //     [PlaceholderPath]: listNode.props.get(Em) ?? '',
-          //   })
-          // }
+
 					cmd.Dispatch();
 					return
 				}
@@ -149,7 +147,7 @@ export class NestablePlugin extends AfterPlugin {
 
 				const nextSibling = listNode.nextSibling;
         const prevSibling = listNode.prevSibling;
-				if (!nextSibling) {
+				if (!nextSibling && isNestableNode(listNode.parent!)) {
           // when prevSibling is empty avoid unwrapping because this leads to repeated unwrapping and move actions
           if (prevSibling && prevSibling.isEmpty) {
             return

@@ -192,10 +192,16 @@ const data = node("carbon", [
     node("section", [title([text("12345678")])]),
     section([
       title([text("abc")]),
+      node("hstack", [
+        node("stack", [section([title([text("section 1")])])]),
+        node("stack", [section([title([text("section 2")])])]),
+        node("stack", [section([title([text("section 3")])])]),
+      ]),
       section([
         title([text("def")]),
         section([
           title([text("ghi")]),
+
           section([
             title([text("abc")]),
             section([
@@ -205,7 +211,13 @@ const data = node("carbon", [
               title([text("mno")]),
             ]),
           ]),
+          node("hstack", [
+            node("stack", [section([title([text("section 1")])])]),
+            node("stack", [section([title([text("section 2")])])]),
+            node("stack", [section([title([text("section 3")])])]),
+          ]),
           section([title([text("uvw")])]),
+
         ]),
         section([title([text("stu")])]),
       ]),

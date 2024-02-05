@@ -105,6 +105,7 @@ export class NodeColumn {
         }
         matches[leftLength] = moves;
         actions.push(...moves.actions);
+        break;
       }
       else {
         const leftFirst = leftNodes[0]
@@ -116,6 +117,7 @@ export class NodeColumn {
         }
         matches[leftLength] = moves;
         actions.push(...moves.actions);
+        console.log('xxxxx', leftFirst.name, leftFirst.id.toString(), rightNodes.map(n => n.name))
       }
 
       leftLength--;

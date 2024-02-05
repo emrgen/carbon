@@ -6,12 +6,15 @@ import {
   BeforePlugin,
   Carbon,
   CarbonAction,
-  CollapsedPath, deepCloneMap, findMatchingActions,
+  deepCloneMap,
+  findMatchingActions,
   Format,
-  Fragment, getContentMatch,
+  Fragment,
+  getContentMatch,
   hasSameIsolate,
   insertAfterAction,
-  InsertPos, MatchAction,
+  InsertPos,
+  MatchAction,
   MoveNodeAction,
   NodeIdSet,
   NodePropsJson,
@@ -734,8 +737,8 @@ export class TransformCommands extends BeforePlugin {
   }
 
   private splitByRangeAcrossBlocks(tr: Transaction, splitBlock: Node, start: Pin, end: Pin, startTopNode: Node, endTopNode: Node, deleteGroup: SelectionPatch) {
-    const startTopContainer = startTopNode.closest(n =>n.isContainer)!;
-    const endTopContainer = endTopNode.closest(n =>n.isContainer)!;
+    const startTopContainer = startTopNode.closest(n => n.isContainer)!;
+    const endTopContainer = endTopNode.closest(n => n.isContainer)!;
     if (endTopContainer.parents.some(n => n.eq(startTopContainer))) {
       this.splitByRangeWithSameTopBlock(tr, splitBlock, start, end, startTopNode, endTopNode, deleteGroup);
     } else {
@@ -753,7 +756,7 @@ export class TransformCommands extends BeforePlugin {
 
     const startTitleBlock = start.node;
     const endTitleBlock = end.node;
-    let startBlock : Node = startTitleBlock.parent!;
+    let startBlock: Node = startTitleBlock.parent!;
     let endBlock: Node = endTitleBlock.parent!;
 
     let commonNodeDepth = commonNode.depth;
@@ -810,7 +813,7 @@ export class TransformCommands extends BeforePlugin {
 
     const startTitleBlock = start.node;
     const endTitleBlock = end.node;
-    let startBlock : Node = startTitleBlock.parent!;
+    let startBlock: Node = startTitleBlock.parent!;
     let endBlock: Node = endTitleBlock.parent!;
 
     let commonNodeDepth = commonNode.depth;
@@ -836,6 +839,7 @@ export class TransformCommands extends BeforePlugin {
         // because the startBlock start as parent of the startTitleBlock we need move the children 1 level deeper
         rightColumn.append(currEndBlockDepth + 1, children);
         deleteGroup.addId(endBlock.id);
+        moveNodeIds.add(children.map(n => n.id));
       }
 
       endBlock = endBlock.parent!;
@@ -1263,7 +1267,6 @@ export class TransformCommands extends BeforePlugin {
     const {app} = tr;
     const startTitleBlock = start.node;
     const endTitleBlock = end.node;
-
 
     const {parent: commonNode} = startTopBlock;
     if (!commonNode) {
