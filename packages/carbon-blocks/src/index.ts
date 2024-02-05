@@ -21,6 +21,7 @@ import {Insert} from "./plugins/Inserter";
 import {Modal} from "./plugins/Modal";
 import {TabGroup} from "./plugins/Tab";
 import {HStack} from "./plugins/HStack";
+import {Hint} from "./plugins/Hint";
 
 export const blockPresetPlugins: CarbonPlugin[] = [
   new Section(),
@@ -49,6 +50,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Frame(),
   new Insert(),
   new Modal(),
+  new Hint(),
 ]
 
 export * from './events'

@@ -38,7 +38,7 @@ export class Collapsible extends NodePlugin {
       group: 'content nestable',
       content: 'title content*',
       splits: true,
-      splitName: 'section',
+      splitName: 'collapsible',
       insert: true,
       collapsible: true,
       inlineSelectable: true,
@@ -200,15 +200,14 @@ export class Collapsible extends NodePlugin {
       const at = Point.toAfter(title.id);
       const after = PinnedSelection.fromPin(Pin.toStartOf(section)!);
       tr
-        .Add(insertAfterAction(title, section!))
+        .Add(insertAfterAction(title.parent!, section!))
         .Select(after);
       return
     }
 
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
-    console.log(leftContent, 'xx',rightContent)
     const json = {
-      name: splitBlock.isCollapsed ? splitBlock.name : splitBlock.type.splitName,
+      name: splitBlock.isCollapsed ? splitBlock.type.splitName : 'section',
       props: { 'remote/': { collapsed: splitBlock.isCollapsed } },
       children: [
         {
