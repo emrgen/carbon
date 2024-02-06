@@ -28,7 +28,7 @@ const data = node("carbon", [
     node('scale', []),
 
     node('button', [
-      title([text('button title')])
+      title([text('submit')]),
     ]),
 
     node('question', [
