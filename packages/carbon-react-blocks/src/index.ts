@@ -28,6 +28,7 @@ import {Modal} from "./renderers/Modal";
 import HintComp from "./renderers/Hint";
 import MCQComp from "./renderers/MCQ";
 import {QuestionComp} from "./renderers/Question";
+import ScaleComp from "./renderers/Scale";
 
 export const blockPresetRenderers = [
   ReactRenderer.create('document', DocumentComp),
@@ -67,6 +68,7 @@ export const blockPresetRenderers = [
   ReactRenderer.create('hint', HintComp),
   ReactRenderer.create('mcq', MCQComp),
   ReactRenderer.create('question', QuestionComp),
+  ReactRenderer.create('scale', ScaleComp),
 ];
 
 

@@ -169,8 +169,8 @@ export class Transaction {
 		return this;
 	}
 
-	Update(nodeRef: IntoNodeId, attrs: Partial<NodePropsJson>, origin = this.origin): Transaction {
-		this.Add(UpdatePropsAction.create(nodeRef, attrs, origin))
+	Update(nodeRef: IntoNodeId, props: Partial<NodePropsJson>, origin = this.origin): Transaction {
+		this.Add(UpdatePropsAction.create(nodeRef, props, origin))
 		return this;
 	}
 

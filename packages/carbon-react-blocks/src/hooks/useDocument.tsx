@@ -1,11 +1,11 @@
-import { createContext, useContext } from "react";
+import {createContext, ReactNode, useContext} from "react";
 import { Node } from "@emrgen/carbon-core";
 
-const InnerDocumentContext = createContext<Node | null>(null);
+const InnerDocumentContext = createContext<Node>(Node.IDENTITY);
 
 interface DocumentContextProps {
   document: Node;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const DocumentContext = (props: DocumentContextProps) => {

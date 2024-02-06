@@ -25,6 +25,8 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
+    node('scale', []),
+
     node('question', [
       title([text('question title')]),
     ]),
@@ -49,10 +51,6 @@ const data = node("carbon", [
     ]),
     node('hint', [
       title([text('hint 3')]),
-      section([title([text('hint content')])]),
-    ]),
-    node('hint', [
-      title([text('hint 4')]),
       section([title([text('hint content')])]),
     ]),
 

@@ -24,6 +24,7 @@ import {HStack} from "./plugins/HStack";
 import {Hint} from "./plugins/Hint";
 import {MCQ} from "./plugins/MCQ";
 import {Question} from "./plugins/Question";
+import {Scale} from "./plugins/Scale";
 
 export const blockPresetPlugins: CarbonPlugin[] = [
   new Section(),
@@ -55,6 +56,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Hint(),
   new MCQ(),
   new Question(),
+  new Scale(),
 ]
 
 export * from './events'
@@ -62,3 +64,12 @@ export * from './plugins'
 export * from './utils'
 export * from './plugins/PageTree';
 export * from './plugins/Tab';
+
+import {StartPath, EndPath, StepPath, ValuePath} from "./plugins/Scale";
+
+export {
+  StartPath,
+  EndPath,
+  StepPath,
+  ValuePath
+}

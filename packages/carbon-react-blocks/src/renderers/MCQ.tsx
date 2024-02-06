@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import {
-  CheckedPath, stop, preventAndStop
+  CheckedPath, stop, preventAndStop, isContentEditable
 } from "@emrgen/carbon-core";
 import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
+import {useDocument} from "../hooks";
 
 export default function MCQComp(props: RendererProps) {
   const { node } = props;
@@ -27,7 +28,6 @@ export default function MCQComp(props: RendererProps) {
     },
     [app, node]
   );
-
 
   const beforeContent = useMemo(() => {
     return (

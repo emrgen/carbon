@@ -1253,7 +1253,6 @@ span[data-name=text] {
             margin-right: 8px;
             display flex
             cursor pointer
-            //background: #000;
             align-items center
             > .mcq-control-wrapper
                 position: relative;
@@ -1273,9 +1272,10 @@ span[data-name=text] {
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    background: #555;
+                    background: #ccc
                     border-radius 50%;
                     display none
+                    box-shadow inset 0 0 0 1px #aaa;
                 &[data-checked=true]
                     font-size: 18px;
                     font-weight: bold;
@@ -1298,7 +1298,7 @@ span[data-name=text] {
     > [data-type=content]
         display inline-flex
         font-weight bold
-        font-size 20px
+        font-size 22px
         [data-name=title]
             position inherit
             //flex 1
@@ -1312,3 +1312,24 @@ span[data-name=text] {
                 margin-left 4px
     > [data-type=children]
         padding-left 24px
+
+[data-name=scale]
+    display flex
+    gap 10px
+    margin-top 10px
+    margin-bottom: 10px
+    .carbon-scale-option
+        padding 0 6px
+        min-width 36px
+        height 36px
+        box-shadow inset 0 0 0 2px #aaa
+        justify-content center
+        align-items center
+        text-align center
+        line-height 36px
+        border-radius 4px
+        font-size 18px
+        user-select none
+        cursor: pointer;
+        &[data-selected=true]
+            box-shadow inset 0 0 0 2px #555
