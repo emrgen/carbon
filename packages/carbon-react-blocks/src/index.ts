@@ -26,6 +26,8 @@ import './dnd.styl';
 import './style.styl';
 import {Modal} from "./renderers/Modal";
 import HintComp from "./renderers/Hint";
+import MCQComp from "./renderers/MCQ";
+import {QuestionComp} from "./renderers/Question";
 
 export const blockPresetRenderers = [
   ReactRenderer.create('document', DocumentComp),
@@ -63,6 +65,8 @@ export const blockPresetRenderers = [
   ReactRenderer.create('blockContent', BlockContentComp),
   ReactRenderer.create('modal', Modal),
   ReactRenderer.create('hint', HintComp),
+  ReactRenderer.create('mcq', MCQComp),
+  ReactRenderer.create('question', QuestionComp),
 ];
 
 

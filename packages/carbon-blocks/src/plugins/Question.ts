@@ -1,8 +1,13 @@
 import {Collapsible} from "./Collapsible";
 import {NodeSpec} from "@emrgen/carbon-core";
+import {Header, Heading} from "./Header";
 
-export class Hint extends Collapsible {
-    name = 'hint';
+export class Question extends Heading {
+    name = 'question';
+
+    constructor() {
+      super(3);
+    }
 
     spec(): NodeSpec {
       return {

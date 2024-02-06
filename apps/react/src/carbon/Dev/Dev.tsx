@@ -25,6 +25,20 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
+    node('question', [
+      title([text('question title')]),
+    ]),
+
+    node('mcq', [
+      title([text('mcq title')]),
+    ]),
+    node('mcq', [
+      title([text('mcq title')]),
+    ]),
+    node('mcq', [
+      title([text('mcq title')]),
+    ]),
+
     node('hint', [
       title([text('hint 1')]),
       section([title([text('hint content')])]),

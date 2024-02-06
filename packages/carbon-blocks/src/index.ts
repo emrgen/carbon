@@ -22,6 +22,8 @@ import {Modal} from "./plugins/Modal";
 import {TabGroup} from "./plugins/Tab";
 import {HStack} from "./plugins/HStack";
 import {Hint} from "./plugins/Hint";
+import {MCQ} from "./plugins/MCQ";
+import {Question} from "./plugins/Question";
 
 export const blockPresetPlugins: CarbonPlugin[] = [
   new Section(),
@@ -51,6 +53,8 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Insert(),
   new Modal(),
   new Hint(),
+  new MCQ(),
+  new Question(),
 ]
 
 export * from './events'

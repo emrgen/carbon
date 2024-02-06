@@ -38,7 +38,7 @@ export class Collapsible extends NodePlugin {
       group: 'content nestable',
       content: 'title content*',
       splits: true,
-      splitName: 'collapsible',
+      splitName: 'section',
       insert: true,
       collapsible: true,
       inlineSelectable: true,
@@ -154,6 +154,7 @@ export class Collapsible extends NodePlugin {
     const { start, end } = selection;
     const title = start.node;
     const splitBlock = title.parent!;
+    const isCollapsed = splitBlock.isCollapsed;
 
     if (selection.isCollapsed && start.isAtStartOfNode(title)) {
       const section = app.schema.type(splitBlock.type.splitName).default();
@@ -192,7 +193,7 @@ export class Collapsible extends NodePlugin {
     }
 
     if (selection.isCollapsed && start.isAtEndOfNode(title)) {
-      const section =  app.schema.type(splitBlock.type.splitName).default();
+      const section =  app.schema.type(isCollapsed ? splitBlock.type.splitName:'section').default();
       if (!section) {
         throw Error("failed to create default node for type" + splitBlock.name)
       }
@@ -200,14 +201,15 @@ export class Collapsible extends NodePlugin {
       const at = Point.toAfter(title.id);
       const after = PinnedSelection.fromPin(Pin.toStartOf(section)!);
       tr
-        .Add(insertAfterAction(title.parent!, section!))
+        .Add(insertAfterAction(isCollapsed ? splitBlock : title, section!))
         .Select(after);
       return
     }
 
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
+    console.log(leftContent, 'xx',rightContent)
     const json = {
-      name: splitBlock.isCollapsed ? splitBlock.type.splitName : 'section',
+      name: splitBlock.isCollapsed ? splitBlock.name : splitBlock.type.splitName,
       props: { 'remote/': { collapsed: splitBlock.isCollapsed } },
       children: [
         {
