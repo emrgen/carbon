@@ -66,10 +66,12 @@ export * from './plugins/PageTree';
 export * from './plugins/Tab';
 
 import {StartPath, EndPath, StepPath, ValuePath} from "./plugins/Scale";
+import {ViewedPath} from "./plugins/Hint";
 
 export {
   StartPath,
   EndPath,
   StepPath,
-  ValuePath
+  ValuePath,
+  ViewedPath,
 }

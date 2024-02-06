@@ -53,16 +53,6 @@ export class Collapsible extends NodePlugin {
         tags: ['toggle list', 'toggle', 'collapsible', 'list'],
         order: 6,
       },
-      // attrs: {
-      //   node: {
-      //     placeholder: 'Toggle',
-      //     collapsed: false,
-      //   },
-      //   html: {
-      //     // contentEditable: false,
-      //     suppressContentEditableWarning: true,
-      //   }
-      // },
     }
   }
 

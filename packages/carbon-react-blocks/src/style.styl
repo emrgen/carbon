@@ -1193,6 +1193,14 @@ span[data-name=text] {
         > [data-name=title]
             posrtion: relative
             flex 1
+        > .carbon-hint__viewe
+            background: #aaa
+            color: #fff
+            padding: 0 4px
+            border-radius: 4px
+            margin-right: 4px
+
+        > .carbon-hint__viewed,
         > .carbon-hint__control
             padding-right 6px
             cursor: pointer
@@ -1256,7 +1264,7 @@ span[data-name=text] {
             align-items center
             > .mcq-control-wrapper
                 position: relative;
-                border-radius 50%
+                border-radius 4px
                 width: 16px;
                 height: 16px;
                 display flex
@@ -1267,13 +1275,13 @@ span[data-name=text] {
                     opacity: 0;
                 .mcq-selected-hint
                     position: absolute;
-                    width: 8px;
-                    height: 8px;
+                    width: 10px;
+                    height: 10px;
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    background: #ccc
-                    border-radius 50%;
+                    background: #aaa
+                    border-radius 3px
                     display none
                     box-shadow inset 0 0 0 1px #aaa;
                 &[data-checked=true]
@@ -1322,7 +1330,7 @@ span[data-name=text] {
         padding 0 6px
         min-width 36px
         height 36px
-        box-shadow inset 0 0 0 2px #aaa
+        box-shadow inset 0 0 0 2px #eee
         justify-content center
         align-items center
         text-align center
@@ -1331,5 +1339,13 @@ span[data-name=text] {
         font-size 18px
         user-select none
         cursor: pointer;
+        &:hover
+            box-shadow inset 0 0 0 2px #555
+            transition box-shadow 0.3s
         &[data-selected=true]
             box-shadow inset 0 0 0 2px #555
+
+[data-name=document][contenteditable=false]
+    [data-name=mcq] > [data-type=content],
+    [data-name=hint] > [data-type=content]
+        cursor pointer

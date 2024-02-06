@@ -23,7 +23,6 @@ export class Scale extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: "content",
-      content: "",
       draggable: true,
       props: {
         remote: {
