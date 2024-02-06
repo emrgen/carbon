@@ -1,4 +1,4 @@
-import { Carbon, CarbonPlugin, Node, SerializedNode } from "../core";
+import {Carbon, CarbonPlugin, Node, NodeEncoder, SerializedNode, Writer} from "../core";
 
 export class SlicePlugin extends CarbonPlugin {
 
@@ -11,4 +11,10 @@ export class SlicePlugin extends CarbonPlugin {
   //     content: node.children.map(n => react.serialize(n)) as SerializedNode[]
   //   }
   // }
+
+  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    node.children.forEach(n => {
+      ne.encode(w, n);
+    });
+  }
 }

@@ -52,13 +52,11 @@ export class TitlePlugin extends NodePlugin {
       // insert text node at
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
-        const {app, cmd} = ctx;
-        const {blockSelection} = app.state;
-        if (blockSelection.isActive) {
-          return;
-        }
-
-        this.onTextInsert(ctx);
+        const {app, cmd, event} = ctx;
+        const { selection} = app.state;
+        // @ts-ignore
+        const {data, key} = event.nativeEvent;
+        cmd.transform.insertText(selection, data ?? key, false)?.Dispatch()
       },
       input: (ctx: EventContext<KeyboardEvent>) => {
         console.log('input', ctx.event);
@@ -114,8 +112,6 @@ export class TitlePlugin extends NodePlugin {
 
     preventAndStopCtx(ctx);
     cmd.transform.insertText(selection, data ?? key, false)?.Dispatch()
-
-    // react.commands.transform.insertText(selection, data ?? key, false)?.Dispatch();
   }
 
   encode(w: Writer, ne: NodeEncoder<string>, node: Node) {

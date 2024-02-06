@@ -10,7 +10,6 @@ export class SolidNode extends Node {
   constructor(content: SolidNodeContent) {
     super(content);
     this.counter = ++nodeCounter;
-    // console.log('CREATING NODE', this.id.toString(), this.counter)
   }
 
   override get key(): string {

@@ -25,6 +25,34 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
+    node('scale', []),
+
+    node('question', [
+      title([text('question title')]),
+    ]),
+
+    node('mcq', [
+      title([text('mcq title')]),
+    ]),
+    node('mcq', [
+      title([text('mcq title')]),
+    ]),
+    node('mcq', [
+      title([text('mcq title')]),
+    ]),
+
+    node('hint', [
+      title([text('hint 1')]),
+      section([title([text('hint content')])]),
+    ]),
+    node('hint', [
+      title([text('hint 2')]),
+      section([title([text('hint content')])]),
+    ]),
+    node('hint', [
+      title([text('hint 3')]),
+      section([title([text('hint content')])]),
+    ]),
 
     section([title([
       text("section 1"),
@@ -62,6 +90,12 @@ const data = node("carbon", [
     ]),
 
     section([title([text("section 3")])]),
+    node("hstack", [
+      node("stack", [section([title([text("section 1")])])]),
+      node("stack", [section([title([text("section 2")])])]),
+      node("stack", [section([title([text("section 3")])])]),
+    ]),
+    section([title([text("section 543")])]),
     node("hstack", [
       node("stack", [section([title([text("section 1")])])]),
       node("stack", [section([title([text("section 2")])])]),
@@ -126,7 +160,6 @@ const data = node("carbon", [
     // ]),
 
 
-
     // // node("blockContent"),
     //
     // section([title([text("section 1")])]),
@@ -184,15 +217,62 @@ const data = node("carbon", [
     //   node("pageTreeItem", [title([text("Economics")])]),
     // ]),
     //
-    node("section", [title([text("Psychology")])]),
+    node("section", [title([text("12345678")])]),
+    section([
+      title([text("abc")]),
+      node("hstack", [
+        node("stack", [section([title([text("section 1")])])]),
+        node("stack", [section([title([text("section 2")])])]),
+        node("stack", [section([title([text("section 3")])])]),
+      ]),
+      section([
+        title([text("def")]),
+        section([
+          title([text("ghi")]),
 
+          section([
+            title([text("abc")]),
+            section([
+              title([text("pqr")]),
+            ]),
+            section([
+              title([text("mno")]),
+            ]),
+          ]),
+          node("hstack", [
+            node("stack", [section([title([text("section 1")])])]),
+            node("stack", [section([title([text("section 2")])])]),
+            node("stack", [section([title([text("section 3")])])]),
+          ]),
+          section([title([text("uvw")])]),
+
+        ]),
+        section([title([text("stu")])]),
+      ]),
+      section([title([text("def")])]),
+    ]),
+    section([title([text("ghi")])]),
+
+    section([
+      title([text("123")]),
+      section([
+        title([text("1239")]),
+        section([
+          title([text("1238")]),
+          section([title([text("1237")])]),
+        ]),
+        section([title([text("1236")])]),
+      ]),
+      section([title([text("1235")])]),
+    ]),
+    section([title([text("1234")])]),
     node(
       "section",
       [
-        title([text("section 1")]),
+        title([text("abcdef")]),
         node(
           "todo",
-          [title([text("section 1")]), section([title([text("section")])])],
+          [title([text("pqrst")]), section([title([text("section")])])],
           {}
         ),
         node('numberList', [

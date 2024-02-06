@@ -1172,3 +1172,164 @@ span[data-name=text] {
     font-style: italic
 .carbon-underline
     text-decoration: underline
+
+[data-name=hint]
+    position: relative;
+    border-radius 4px
+    overflow hidden
+    box-shadow inset 0 0 0 2px #eee
+    &[contenteditable=false]
+        user-select none
+        > [data-type=content]
+            cursor pointer
+    > [data-type=content]
+        position: relative;
+        padding 10px
+        line-height: $lineHeight
+        display flex
+        background: #eee;
+        font-weight bold
+        color #555
+        > [data-name=title]
+            posrtion: relative
+            flex 1
+        > .carbon-hint__control
+            padding-right 6px
+            cursor: pointer
+            user-select: none
+            display flex
+            align-items: center
+            justify-content: center
+            border-radius 4px
+            transform scale(1.1)
+            &:hover
+                background: #eee;
+                transition background 0.3s
+    > [data-type=children]
+        padding 10px
+    &[data-collapsed=true]
+        > [data-type=children]
+            display: none
+
+    .hint-insert-section
+        padding 10px
+        color #aaa
+        cursor pointer
+        user-select none
+        &:hover
+            color #555
+
+
+
+[data-name=hint]
+    margin-bottom 14px
+    margin-top: 10px;
+
+[data-name=hint] + [data-name=hint]
+        margin-top 4px
+[data-name=hint]:has(+ [data-name=hint])
+        margin-bottom 4px
+
+[data-name=mcq]
+    position: relative;
+    margin-bottom: 14px;
+    margin-top: 10px;
+    background: #eee;
+    padding 10px
+    border-radius 4px
+
+    > [data-type=content]
+        line-height: $lineHeight
+        display flex
+        font-weight bold
+        color #555
+
+        > [data-name=title]
+            posrtion: relative
+            flex 1
+            gap 4px
+        > .carbon-mcq__control
+            margin-left: 2px;
+            margin-right: 8px;
+            display flex
+            cursor pointer
+            align-items center
+            > .mcq-control-wrapper
+                position: relative;
+                border-radius 50%
+                width: 16px;
+                height: 16px;
+                display flex
+                justify-content center
+                box-shadow 0 0 0 1px #aaa;
+                background: #fff;
+                input
+                    opacity: 0;
+                .mcq-selected-hint
+                    position: absolute;
+                    width: 8px;
+                    height: 8px;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #ccc
+                    border-radius 50%;
+                    display none
+                    box-shadow inset 0 0 0 1px #aaa;
+                &[data-checked=true]
+                    font-size: 18px;
+                    font-weight: bold;
+                    //background: #666;
+                    .mcq-selected-hint
+                        display flex
+
+    > [data-type=children]
+        padding-left 24px
+
+// add margin to mcq with previous mcq
+[data-name=mcq] + [data-name=mcq]
+    margin-top 4px
+
+[data-name=mcq]:has(+ [data-name=mcq])
+    margin-bottom 4px
+
+[data-name=question]
+    position: relative;
+    > [data-type=content]
+        display inline-flex
+        font-weight bold
+        font-size 22px
+        [data-name=title]
+            position inherit
+            //flex 1
+            gap 4px
+        [data-required=true]
+            //user-select none
+            color red
+            &:after
+                content "*"
+                color red
+                margin-left 4px
+    > [data-type=children]
+        padding-left 24px
+
+[data-name=scale]
+    display flex
+    gap 10px
+    margin-top 10px
+    margin-bottom: 10px
+    .carbon-scale-option
+        padding 0 6px
+        min-width 36px
+        height 36px
+        box-shadow inset 0 0 0 2px #aaa
+        justify-content center
+        align-items center
+        text-align center
+        line-height 36px
+        border-radius 4px
+        font-size 18px
+        user-select none
+        cursor: pointer;
+        &[data-selected=true]
+            box-shadow inset 0 0 0 2px #555

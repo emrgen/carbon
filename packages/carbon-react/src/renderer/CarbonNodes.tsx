@@ -298,7 +298,7 @@ export const CarbonDefaultNode = (props: RendererProps) => {
 
 // render first node a content
 export const CarbonNodeContent = (props: RendererProps) => {
-  const {node, beforeContent, custom, wrapper} = props;
+  const {node, beforeContent, afterContent, custom, wrapper} = props;
 
   const content = useMemo(() => {
     const {children = []} = node;
@@ -322,6 +322,7 @@ export const CarbonNodeContent = (props: RendererProps) => {
         custom={custom}
         key={content.key}
       />
+      {afterContent}
   </div>
   );
 };

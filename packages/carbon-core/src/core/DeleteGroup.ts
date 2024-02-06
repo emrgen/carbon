@@ -1,18 +1,10 @@
-import { NodeIdSet } from "./BSet";
-import { Span } from './Span';
-import { NodeId } from './NodeId';
-import { State } from "./State";
-import { sortBy } from 'lodash';
+import {NodeIdSet} from "./BSet";
+import {Span} from './Span';
+import {NodeId} from './NodeId';
 
 export class SelectionPatch {
 	ids: NodeIdSet = new NodeIdSet();
 	ranges: Span[] = [];
-
-	static fromState(state: State) {
-		let patch = new SelectionPatch();
-
-		return patch;
-	}
 
 	static default() {
 		return new SelectionPatch();

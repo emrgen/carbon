@@ -21,6 +21,10 @@ import {Insert} from "./plugins/Inserter";
 import {Modal} from "./plugins/Modal";
 import {TabGroup} from "./plugins/Tab";
 import {HStack} from "./plugins/HStack";
+import {Hint} from "./plugins/Hint";
+import {MCQ} from "./plugins/MCQ";
+import {Question} from "./plugins/Question";
+import {Scale} from "./plugins/Scale";
 
 export const blockPresetPlugins: CarbonPlugin[] = [
   new Section(),
@@ -49,6 +53,10 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Frame(),
   new Insert(),
   new Modal(),
+  new Hint(),
+  new MCQ(),
+  new Question(),
+  new Scale(),
 ]
 
 export * from './events'
@@ -56,3 +64,12 @@ export * from './plugins'
 export * from './utils'
 export * from './plugins/PageTree';
 export * from './plugins/Tab';
+
+import {StartPath, EndPath, StepPath, ValuePath} from "./plugins/Scale";
+
+export {
+  StartPath,
+  EndPath,
+  StepPath,
+  ValuePath
+}

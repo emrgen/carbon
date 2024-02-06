@@ -1,5 +1,5 @@
 import {JsonStore} from "./JsonStore";
-import {each, set, get, cloneDeep, merge, isEmpty, remove, isEqual} from "lodash";
+import {each, set, get, cloneDeep, merge, isEmpty, remove, isEqual, isArray} from "lodash";
 import {Node} from "@emrgen/carbon-core";
 
 export type NodePropsJson = Record<string, any>;
@@ -7,7 +7,7 @@ export type NodePropsJson = Record<string, any>;
 // different states should have different implementation this interface
 export interface NodeProps {
   isNodeProps: boolean;
-  get<T>(path: string): T;
+  get<T>(path: string, defaultValue?: T): T;
   set(path: string, value: any): void;
   merge(other: NodeProps | NodePropsJson): NodeProps;
   toJSON(): NodePropsJson;
@@ -44,7 +44,9 @@ export class PlainNodeProps implements NodeProps {
         set(props, this.dotPath(key), json[key])
         continue;
       }
-      if (typeof value === "object") {
+      if (isArray(value)) {
+        props[key] = value
+      } else if (typeof value === "object") {
         props[key] = {};
         this.traverse(value, props[key]);
       } else {
@@ -57,8 +59,8 @@ export class PlainNodeProps implements NodeProps {
     return path.split("/").join(".");
   }
 
-  get<T>(path: string): T {
-    return get(this.props, this.dotPath(path));
+  get<T>(path: string, defaultValue?: T): T {
+    return get(this.props, this.dotPath(path)) ?? defaultValue;
   }
 
   set(path: string, value: any): void {
@@ -192,6 +194,8 @@ export const ListNumberPath = "remote/state/listNumber";
 export const TitlePath = "remote/state/title";
 export const CollapseHidden = "local/state/collapseHidden";
 export const MarksPath = "remote/state/marks";
+export const MultiPath = "remote/state/multi";
+export const ValuePath = "remote/state/value";
 
 export const isPassiveHidden = (node: Node) => {
   return node.chain.some(n => n.props.get<boolean>(HiddenPath) ?? false);

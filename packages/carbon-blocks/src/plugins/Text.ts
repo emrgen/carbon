@@ -54,20 +54,10 @@ export class TextPlugin extends NodePlugin {
 			beforeInput: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
 				const { app, currentNode, cmd } = ctx;
-				const { selection, blockSelection } = app.state;
-        if (blockSelection.isActive)  {
-          return;
-        }
-
-				const { start, end } = selection;
-				if (!selection.isCollapsed) {
-					return
-				}
-
-
-				// @ts-ignore
-				const { data, key } = ctx.event.nativeEvent;
-				this.onTextInsert(cmd, start, data ?? key);
+				const { selection} = app.state;
+        // @ts-ignore
+        const { data, key } = ctx.event.nativeEvent;
+        cmd.transform.insertText(selection, data ?? key).Dispatch();
 			},
 		}
 	}
