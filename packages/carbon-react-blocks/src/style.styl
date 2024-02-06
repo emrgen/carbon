@@ -1336,7 +1336,7 @@ span[data-name=text] {
         text-align center
         line-height 36px
         border-radius 4px
-        font-size 18px
+        font-size 14px
         user-select none
         cursor: pointer;
         &:hover
@@ -1349,3 +1349,24 @@ span[data-name=text] {
     [data-name=mcq] > [data-type=content],
     [data-name=hint] > [data-type=content]
         cursor pointer
+    [data-name=button]
+        cursor pointer
+
+[data-name=button]
+    postion: relative
+    display: flex
+    justify-content start
+.carbon-button
+    padding 6px 10px
+    background #fff
+    border-radius 4px
+    font-weight bold
+    margin 10px 0
+    min-width 80px
+    justify-content center
+    box-shadow inset 0 0 0 2px #aaa
+    [data-name=title]
+        text-align center
+        &:after
+            width: 100%;
+            text-align center

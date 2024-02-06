@@ -57,6 +57,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new MCQ(),
   new Question(),
   new Scale(),
+  new Button(),
 ]
 
 export * from './events'
@@ -67,6 +68,7 @@ export * from './plugins/Tab';
 
 import {StartPath, EndPath, StepPath, ValuePath} from "./plugins/Scale";
 import {ViewedPath} from "./plugins/Hint";
+import {Button} from "./plugins/Button";
 
 export {
   StartPath,
