@@ -69,6 +69,7 @@ export * from './plugins/Tab';
 import {StartPath, EndPath, StepPath, ValuePath} from "./plugins/Scale";
 import {ViewedPath} from "./plugins/Hint";
 import {Button} from "./plugins/Button";
+import {Timeline} from "./plugins/Timeline";
 
 export {
   StartPath,

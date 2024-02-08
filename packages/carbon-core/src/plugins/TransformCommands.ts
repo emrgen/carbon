@@ -1197,36 +1197,36 @@ export class TransformCommands extends BeforePlugin {
 
     // commonNode is selected
     // replace commonNode with default block
-    if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-      // when a collapsible node is selected entirely and delete
-      // for example: when a page is selected and deleted
-      if (commonNode.isCollapsible) {
-        const textBlock = commonNode.child(0)!
-        const at = Point.toAfter(textBlock.id);
-        const block = app.schema.type(textBlock.type.splitName)?.default()
-        if (!block) {
-          throw Error('failed to create block');
-        }
-
-        tr.SetContent(textBlock.id, []);
-        tr.Add(removeNodesActions(commonNode.children.slice(1)));
-        tr.Select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
-        return
-      }
-
-      const block = app.schema.type(commonNode.type.replaceName)?.default();
-      if (!block) {
-        console.log(p14("%c[failed]"), "color:red", "block not found");
-        return;
-      }
-
-      const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
-      tr
-        .Insert(Point.toAfter(commonNode.id), block)
-        .Remove(nodeLocation(commonNode)!, commonNode)
-        .Select(after);
-      return tr;
-    }
+    // if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+    //   // when a collapsible node is selected entirely and delete
+    //   // for example: when a page is selected and deleted
+    //   if (commonNode.isCollapsible) {
+    //     const textBlock = commonNode.child(0)!
+    //     const at = Point.toAfter(textBlock.id);
+    //     const block = app.schema.type(textBlock.type.splitName)?.default()
+    //     if (!block) {
+    //       throw Error('failed to create block');
+    //     }
+    //
+    //     tr.SetContent(textBlock.id, []);
+    //     tr.Add(removeNodesActions(commonNode.children.slice(1)));
+    //     tr.Select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
+    //     return
+    //   }
+    //
+    //   const block = app.schema.type(commonNode.type.replaceName)?.default();
+    //   if (!block) {
+    //     console.log(p14("%c[failed]"), "color:red", "block not found");
+    //     return;
+    //   }
+    //
+    //   const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
+    //   tr
+    //     .Insert(Point.toAfter(commonNode.id), block)
+    //     .Remove(nodeLocation(commonNode)!, commonNode)
+    //     .Select(after);
+    //   return tr;
+    // }
 
     // * startBlock === endBlock
     if (startBlock.eq(endBlock)) {

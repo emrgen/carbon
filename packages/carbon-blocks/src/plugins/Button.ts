@@ -3,8 +3,6 @@ import {CarbonPlugin, EventHandlerMap, NodeSpec, preventAndStopCtx} from "@emrge
 export class Button extends CarbonPlugin {
   name = "button";
 
-  description = "A button";
-
   spec(): NodeSpec {
     return {
       group: "content",
@@ -15,7 +13,10 @@ export class Button extends CarbonPlugin {
           placeholder: {
             empty: 'Untitled',
           },
-        }
+          html: {
+            contentEditable: false,
+          }
+        },
       }
     }
   }

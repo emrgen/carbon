@@ -1,9 +1,5 @@
-import React, { useCallback, useMemo, useRef } from "react";
-import {
-  CheckedPath, stop, preventAndStop, isContentEditable
-} from "@emrgen/carbon-core";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
+import React, {useRef} from "react";
+import {CarbonBlock, CarbonNodeContent, RendererProps, useCarbon} from "@emrgen/carbon-react";
 import {useDocument} from "../hooks";
 
 export function ButtonComp(props: RendererProps) {
@@ -14,7 +10,7 @@ export function ButtonComp(props: RendererProps) {
 
   return (
     <CarbonBlock {...props} ref={ref}>
-      <div className={'carbon-button'}>
+      <div className={'carbon-button'} contentEditable={true} suppressContentEditableWarning={true}>
         <CarbonNodeContent node={node} />
       </div>
     </CarbonBlock>
