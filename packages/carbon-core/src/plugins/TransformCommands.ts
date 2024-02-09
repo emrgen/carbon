@@ -417,10 +417,7 @@ export class TransformCommands extends BeforePlugin {
     const docSelection = PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!;
 
     // delete like split and insert like paste
-    const selectionInfo = this.selectionInfo(app, selection);
-
-    // delete the selection
-    const {actions: deleteGroupActions, rangeAction, nodeActions} = this.deleteGroupCommands(app, selectionInfo);
+    const deleteGroup = this.selectionInfo(app, selection);
 
     const {start, end} = selection;
 
@@ -435,101 +432,83 @@ export class TransformCommands extends BeforePlugin {
     const {start: sliceStartTitle, end: sliceEndTitle} = slice;
 
     console.log(sliceStartTitle.name, sliceStartTitle.textContent, sliceEndTitle.name, sliceEndTitle.textContent);
+    const leftNodes = NodeColumn.create();
+    const rightNodes = NodeColumn.create();
 
-    // first: insert the slice
-    // second: move, merge nodes after selection end
+    const commonNode = startTitle.commonNode(endTitle);
+    const commonDepth = commonNode?.depth ?? 0;
+    let startBlockDepth = startTitle.depth;
+    let endBlockDepth = endTitle.depth;
+    let startBlock = startTitle.parent!;
+    let endBlock = endTitle.parent!;
 
-    let beforeNode: Optional<Node> = start.node;
-    let afterNode: Optional<Node> = sliceStartTitle;
-    let contentMatch = getContentMatch(beforeNode);
-
-    // once the isolated or collapsible node stop the loop
-    while (beforeNode && afterNode && !beforeNode.parent?.isCollapsible && !beforeNode.parent?.isIsolate) {
-      const {nextSiblings} = afterNode;
-      // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
-      const afterNodes = beforeNode.nextSiblings.filter(n => !selectionInfo.has(n.id));
-
-      console.log('nextSiblings', nextSiblings, sliceStartTitle)
-      if (nextSiblings.length) {
-        const matches: MatchAction[] = [];
-        const matchActions = findMatchingActions(matches, contentMatch!, Point.toAfter(beforeNode.id), nextSiblings, afterNodes);
-        if (!matchActions.validEnd) {
-          throw Error('failed to find valid content match')
+    while (commonDepth < endBlockDepth) {
+      const children = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
+      const nodes = children.map(ch => {
+        if (ch.isTextContainer) {
+          const title = ch.clone(deepCloneMap)
+          const textContent = title.textContent.slice(end.offset)
+          const textNode = app.schema.text(textContent)!;
+          title.updateContent([textNode]);
+          return title;
         }
-        const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
-        tr.Add(actions);
-      }
 
-      beforeNode = beforeNode.parent
-      afterNode = afterNode.parent
+        return ch;
+      })
+
+      // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
+      rightNodes.append(endBlockDepth + 1, nodes);
+      deleteGroup.addId(endBlock.id);
+
+      endBlock = endBlock.parent!;
+      endBlockDepth -= 1
     }
 
-    // keep unwrapping until
-    while (beforeNode && afterNode && afterNode.name !== 'slice') {
-      // contentMatch = getContentMatch(beforeNode);
-      const {nextSiblings} = afterNode;
-      // find nodes from within next siblings that satisfy the content match
-      // console.log('beforeNode', beforeNode.name, beforeNode.id.toString());
-      // console.log('afterNode', afterNode);
-      if (nextSiblings.length) {
-        const matches: MatchAction[] = [];
-        const matchActions = findMatchingActions(matches, contentMatch!, Point.toAfter(beforeNode.id), nextSiblings, beforeNode.nextSiblings);
-        if (!matchActions.validEnd) {
-          throw Error('failed to find valid content match')
+    while (commonDepth < startBlockDepth) {
+      const children = startBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
+      const nodes = children.map(ch => {
+        if (ch.isTextContainer) {
+          const title = ch.clone(deepCloneMap)
+          const textContent = title.textContent.slice(0, start.offset)
+          const textNode = app.schema.text(textContent)!;
+          title.updateContent([textNode]);
+          return title;
         }
-        const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
-        tr.Add(actions);
 
-        beforeNode = last(matches)!.node;
-      }
+        return ch;
+      })
 
-      afterNode = afterNode.parent
+      leftNodes.append(startBlockDepth + 1, nodes);
+      startBlock = startBlock.parent!;
+      startBlockDepth -= 1
     }
 
-    tr.Add(rangeAction)
-
-    // adjust the nodes after selection end
-    if (sliceStartTitle.eq(sliceEndTitle)) {
-      const textContent = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent + endTitle.textContent.slice(end.offset);
-      const textNode = app.schema.text(textContent);
-      tr.Add(SetContentAction.create(startTitle.id, [textNode!]));
-
-      const after = PinnedSelection.fromPin(Pin.future(startTitle, start.offset + sliceStartTitle.textContent.length)!);
-
-      tr.Select(after);
-    } else {
-      const startTextContent = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
-      const startTextNode = app.schema.text(startTextContent);
-      tr.Add(SetContentAction.create(startTitle.id, [startTextNode!]));
-      const endTextContent = sliceEndTitle.textContent + endTitle.textContent.slice(end.offset);
-      const endTextNode = app.schema.text(endTextContent);
-      tr.Add(SetContentAction.create(sliceEndTitle.id, [endTextNode!]));
-      const after = PinnedSelection.fromPin(Pin.future(sliceEndTitle, sliceEndTitle.textContent.length)!);
-
-      tr.Select(after);
-    }
-    const removeActions = removeNodesActions(endTitle)
-
-    // move nodes after selection end after the slice until the common node with the start selection is reached
-    let to = Point.toAfter(sliceEndTitle.id);
-    {
-      const {nextSiblings} = endTitle;
-      const moveActions = moveNodesActions(to, nextSiblings)
-      tr.Add(moveActions);
-      const lastNode = last(nextSiblings);
-      if (lastNode) {
-        to = Point.toAfter(lastNode.id)
-      }
+    const sliceLeftNodes = NodeColumn.create();
+    let sliceStart = sliceStartTitle.parent!
+    const taken = new NodeIdSet();
+    while (!sliceStart.eq(slice.root)) {
+      const children = sliceStart.children.filter(n => !taken.has(n.id)) ?? [];
+      sliceLeftNodes.append(sliceStart.depth, children);
+      taken.add(sliceStart.id);
+      sliceStart = sliceStart.parent!
     }
 
-    {
-      const moveNodes = startTitle.parent?.nextSiblings.filter(n => !selectionInfo.has(n.id)) ?? [];
-      const moveActions = moveNodesActions(to, moveNodes);
-      tr.Add(moveActions);
+
+    const sliceRightNodes = NodeColumn.create();
+    let sliceEnd = sliceEndTitle.parent!
+    while (!sliceEnd.eq(slice.root)) {
+      const children = sliceEnd.lastChild!;
+      sliceRightNodes.append(sliceEnd.depth, [children]);
+      sliceEnd = sliceEnd.parent!
     }
 
-    tr.Add(removeActions);
-    tr.Add(nodeActions);
+    // merge selection left and slice left nodes (merge via insert)
+    // merge slice right and selection right nodes (merge via move)
+
+
+    // delete the selection
+    // const {actions: deleteGroupActions, rangeAction, nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {
