@@ -423,13 +423,18 @@ export class TransformCommands extends BeforePlugin {
 
     const {node: startTitle} = start;
     const {node: endTitle} = end;
-
-    if (!startTitle || !endTitle) {
-      console.error('no title node found');
-      return;
-    }
-
     const {start: sliceStartTitle, end: sliceEndTitle} = slice;
+
+    if (startTitle.eq(endTitle) && sliceStartTitle.eq(sliceEndTitle)) {
+      const textBeforeCursor = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
+      const textContent = textBeforeCursor + startTitle.textContent.slice(end.offset);
+      const textNode = app.schema.text(textContent);
+      const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
+      tr
+        .SetContent(start.node.id, [textNode!])
+        .Select(after);
+      return tr;
+    }
 
     console.log(sliceStartTitle.name, sliceStartTitle.textContent, sliceEndTitle.name, sliceEndTitle.textContent);
     const leftNodes = NodeColumn.create();
@@ -493,7 +498,6 @@ export class TransformCommands extends BeforePlugin {
       sliceStart = sliceStart.parent!
     }
 
-
     const sliceRightNodes = NodeColumn.create();
     let sliceEnd = sliceEndTitle.parent!
     while (!sliceEnd.eq(slice.root)) {
@@ -505,10 +509,8 @@ export class TransformCommands extends BeforePlugin {
     // merge selection left and slice left nodes (merge via insert)
     // merge slice right and selection right nodes (merge via move)
 
-
     // delete the selection
     // const {actions: deleteGroupActions, rangeAction, nodeActions} = this.deleteGroupCommands(app, deleteGroup);
-
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {
