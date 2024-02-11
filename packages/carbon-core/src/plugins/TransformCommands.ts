@@ -439,6 +439,7 @@ export class TransformCommands extends BeforePlugin {
     console.log(sliceStartTitle.name, sliceStartTitle.textContent, sliceEndTitle.name, sliceEndTitle.textContent);
     const leftNodes = NodeColumn.create();
     const rightNodes = NodeColumn.create();
+    const movedNodes = new NodeIdSet();
 
     const commonNode = start.node.commonNode(end.node);
     let startBlock: Optional<Node> = startTitleBlock.parent!;
@@ -448,9 +449,6 @@ export class TransformCommands extends BeforePlugin {
     let commonNodeDepth = commonNode.depth;
     let startBlockDepth = startBlock.depth;
     let endBlockDepth = endBlock.depth;
-
-    const leftColumn = NodeColumn.create();
-    const rightColumn = NodeColumn.create();
 
     // collect nodes to be from right of selection
     while (endBlock && commonNodeDepth < endBlockDepth) {
@@ -468,11 +466,16 @@ export class TransformCommands extends BeforePlugin {
       })
 
       // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
-      rightColumn.append(endBlockDepth + 1, nodes);
+      rightNodes.append(endBlockDepth + 1, nodes);
       deleteGroup.addId(endBlock.id);
+      movedNodes.add(nodes.map(n => n.id));
 
       endBlock = endBlock.parent;
       endBlockDepth -= 1
+
+      if (startTitleBlock.eq(endTitleBlock)) {
+        break
+      }
     }
 
     // collect nodes to be from left of selection
@@ -490,43 +493,41 @@ export class TransformCommands extends BeforePlugin {
 
         return ch;
       })
-      leftColumn.append(startBlockDepth + 1, nodes)
 
-      startBlockChild = startBlock!
-      startBlock = startBlock!.parent;
+      leftNodes.append(startBlockDepth + 1, nodes);
+      startBlock = startBlock.parent!;
       startBlockDepth -= 1
     }
 
-    // const sliceLeftNodes = NodeColumn.create();
-    // let sliceStart = sliceStartTitle.parent!
-    // const taken = new NodeIdSet();
-    // while (!sliceStart.eq(slice.root)) {
-    //   const children = sliceStart.children.filter(n => !taken.has(n.id)) ?? [];
-    //   sliceLeftNodes.append(sliceStart.depth, children);
-    //   taken.add(sliceStart.id);
-    //   sliceStart = sliceStart.parent!
-    // }
-    //
-    // const sliceRightNodes = NodeColumn.create();
-    // let sliceEnd = sliceEndTitle.parent!
-    // while (!sliceEnd.eq(slice.root)) {
-    //   const children = sliceEnd.lastChild!;
-    //   sliceRightNodes.append(sliceEnd.depth, [children]);
-    //   sliceEnd = sliceEnd.parent!
-    // }
+    console.log(leftNodes.nodes)
 
-    // merge selection left and slice left nodes (merge via insert)
-    // merge slice right and selection right nodes (merge via move)
+    console.log('LEFT', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+    console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
-    // delete the selection
-    // const {actions: deleteGroupActions, rangeAction, nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+    const rightMoveNodes = NodeColumn.preparePlacement(leftNodes, rightNodes);
+    const entries = rightMoveNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name]));
+    console.log('ENTRIES', entries)
 
-    // const mergeActions = NodeColumn.prepareDeleteMergeByMove(leftNodes, rightNodes);
+    const sliceRightNodes = NodeColumn.create();
+    let sliceBlock = sliceStartTitle.parent!;
+    let sliceBlockDepth = sliceBlock.depth;
+    const taken = new NodeIdSet();
+    while (!sliceBlock.eq(slice.root)) {
+      const children = sliceBlock.children.filter(n => !taken.has(n.id)) ?? [];
+      sliceRightNodes.append(sliceBlockDepth, children);
+
+      taken.add(sliceBlock.id);
+      sliceBlock = sliceBlock.parent!;
+      sliceBlockDepth -= 1
+    }
+
+    const rightInsertNodes = NodeColumn.preparePlacement(leftNodes, sliceRightNodes);
+    console.log('INSERT', rightInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
     const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
 
     // tr.Add(mergeActions);
-    tr.Add(nodeActions);
+    // tr.Add(nodeActions);
     const after = PinnedSelection.fromPin(start)
     tr.Select(after);
   }
