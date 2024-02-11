@@ -421,13 +421,13 @@ export class TransformCommands extends BeforePlugin {
 
     const {start, end} = selection;
 
-    const {node: startTitle} = start;
-    const {node: endTitle} = end;
+    const {node: startTitleBlock} = start;
+    const {node: endTitleBlock} = end;
     const {start: sliceStartTitle, end: sliceEndTitle} = slice;
 
-    if (startTitle.eq(endTitle) && sliceStartTitle.eq(sliceEndTitle)) {
-      const textBeforeCursor = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
-      const textContent = textBeforeCursor + startTitle.textContent.slice(end.offset);
+    if (startTitleBlock.eq(endTitleBlock) && sliceStartTitle.eq(sliceEndTitle)) {
+      const textBeforeCursor = endTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
+      const textContent = textBeforeCursor + startTitleBlock.textContent.slice(end.offset);
       const textNode = app.schema.text(textContent);
       const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
       tr
@@ -440,14 +440,20 @@ export class TransformCommands extends BeforePlugin {
     const leftNodes = NodeColumn.create();
     const rightNodes = NodeColumn.create();
 
-    const commonNode = startTitle.commonNode(endTitle);
-    const commonDepth = commonNode?.depth ?? 0;
-    let startBlockDepth = startTitle.depth;
-    let endBlockDepth = endTitle.depth;
-    let startBlock = startTitle.parent!;
-    let endBlock = endTitle.parent!;
+    const commonNode = start.node.commonNode(end.node);
+    let startBlock: Optional<Node> = startTitleBlock.parent!;
+    let startBlockChild: Node = startTitleBlock;
+    let endBlock: Optional<Node> = endTitleBlock.parent!;
 
-    while (commonDepth < endBlockDepth) {
+    let commonNodeDepth = commonNode.depth;
+    let startBlockDepth = startBlock.depth;
+    let endBlockDepth = endBlock.depth;
+
+    const leftColumn = NodeColumn.create();
+    const rightColumn = NodeColumn.create();
+
+    // collect nodes to be from right of selection
+    while (endBlock && commonNodeDepth < endBlockDepth) {
       const children = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
       const nodes = children.map(ch => {
         if (ch.isTextContainer) {
@@ -462,15 +468,17 @@ export class TransformCommands extends BeforePlugin {
       })
 
       // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
-      rightNodes.append(endBlockDepth + 1, nodes);
+      rightColumn.append(endBlockDepth + 1, nodes);
       deleteGroup.addId(endBlock.id);
 
-      endBlock = endBlock.parent!;
+      endBlock = endBlock.parent;
       endBlockDepth -= 1
     }
 
-    while (commonDepth < startBlockDepth) {
-      const children = startBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
+    // collect nodes to be from left of selection
+    while (commonNodeDepth <= startBlockDepth) {
+      // NOTE: next siblings of startBlockChild is collected for contentMatch check during merge
+      const children = startBlock!.children.slice(startBlockChild.index).filter(n => !deleteGroup.has(n.id)) ?? [];
       const nodes = children.map(ch => {
         if (ch.isTextContainer) {
           const title = ch.clone(deepCloneMap)
@@ -482,35 +490,45 @@ export class TransformCommands extends BeforePlugin {
 
         return ch;
       })
+      leftColumn.append(startBlockDepth + 1, nodes)
 
-      leftNodes.append(startBlockDepth + 1, nodes);
-      startBlock = startBlock.parent!;
+      startBlockChild = startBlock!
+      startBlock = startBlock!.parent;
       startBlockDepth -= 1
     }
 
-    const sliceLeftNodes = NodeColumn.create();
-    let sliceStart = sliceStartTitle.parent!
-    const taken = new NodeIdSet();
-    while (!sliceStart.eq(slice.root)) {
-      const children = sliceStart.children.filter(n => !taken.has(n.id)) ?? [];
-      sliceLeftNodes.append(sliceStart.depth, children);
-      taken.add(sliceStart.id);
-      sliceStart = sliceStart.parent!
-    }
-
-    const sliceRightNodes = NodeColumn.create();
-    let sliceEnd = sliceEndTitle.parent!
-    while (!sliceEnd.eq(slice.root)) {
-      const children = sliceEnd.lastChild!;
-      sliceRightNodes.append(sliceEnd.depth, [children]);
-      sliceEnd = sliceEnd.parent!
-    }
+    // const sliceLeftNodes = NodeColumn.create();
+    // let sliceStart = sliceStartTitle.parent!
+    // const taken = new NodeIdSet();
+    // while (!sliceStart.eq(slice.root)) {
+    //   const children = sliceStart.children.filter(n => !taken.has(n.id)) ?? [];
+    //   sliceLeftNodes.append(sliceStart.depth, children);
+    //   taken.add(sliceStart.id);
+    //   sliceStart = sliceStart.parent!
+    // }
+    //
+    // const sliceRightNodes = NodeColumn.create();
+    // let sliceEnd = sliceEndTitle.parent!
+    // while (!sliceEnd.eq(slice.root)) {
+    //   const children = sliceEnd.lastChild!;
+    //   sliceRightNodes.append(sliceEnd.depth, [children]);
+    //   sliceEnd = sliceEnd.parent!
+    // }
 
     // merge selection left and slice left nodes (merge via insert)
     // merge slice right and selection right nodes (merge via move)
 
     // delete the selection
     // const {actions: deleteGroupActions, rangeAction, nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+
+    // const mergeActions = NodeColumn.prepareDeleteMergeByMove(leftNodes, rightNodes);
+
+    const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+
+    // tr.Add(mergeActions);
+    tr.Add(nodeActions);
+    const after = PinnedSelection.fromPin(start)
+    tr.Select(after);
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {

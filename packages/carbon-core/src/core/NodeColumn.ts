@@ -37,6 +37,10 @@ export class NodeColumn {
     }
   }
 
+  static prepareMoves(before: Node[], after: Node[]) {
+
+  }
+
   static deleteMergeByMove(left: NodeColumn, right: NodeColumn): CarbonAction[] {
     const actions: CarbonAction[] = [];
 
@@ -131,10 +135,35 @@ export class NodeColumn {
       return !!match.contentMatch?.validEnd;
     });
 
-
     console.log(yes)
 
     return actions;
+  }
+
+  static prepareDeleteMergeByMove(left: NodeColumn, right: NodeColumn): NodeColumn {
+    const column = NodeColumn.create();
+    let rightLength = right.nodes.length-1;
+    let leftLength = left.nodes.length-1;
+
+    while (true) {
+      const leftNodes = left.nodes[leftLength]
+      const rightNodes = right.nodes[rightLength]
+
+      if (!leftNodes || !rightNodes) {
+        if (leftNodes) {
+          const leftFirst = left.nodes.find(n => !isEmpty(n))?.[0]!;
+          const nodes = right.nodes.splice(0, rightLength+1).filter(identity).reverse();
+          const moves = NodeColumn.moveNodes([leftFirst], flatten(nodes));
+          column.append(leftLength, moves.actions.map(a => a.node));
+        }
+        break;
+      }
+
+
+      leftLength--;
+      rightLength--;
+    }
+    return column;
   }
 
   static splitMergeByMove(left: NodeColumn, right: NodeColumn): CarbonAction[] {
