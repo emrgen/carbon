@@ -417,119 +417,157 @@ export class TransformCommands extends BeforePlugin {
     const docSelection = PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!;
 
     // delete like split and insert like paste
-    const selectionInfo = this.selectionInfo(app, selection);
-
-    // delete the selection
-    const {actions: deleteGroupActions, rangeAction, nodeActions} = this.deleteGroupCommands(app, selectionInfo);
+    const deleteGroup = this.selectionInfo(app, selection);
 
     const {start, end} = selection;
 
-    const {node: startTitle} = start;
-    const {node: endTitle} = end;
-
-    if (!startTitle || !endTitle) {
-      console.error('no title node found');
-      return;
-    }
-
+    const {node: startTitleBlock} = start;
+    const {node: endTitleBlock} = end;
     const {start: sliceStartTitle, end: sliceEndTitle} = slice;
 
-    console.log(sliceStartTitle.name, sliceStartTitle.textContent, sliceEndTitle.name, sliceEndTitle.textContent);
-
-    // first: insert the slice
-    // second: move, merge nodes after selection end
-
-    let beforeNode: Optional<Node> = start.node;
-    let afterNode: Optional<Node> = sliceStartTitle;
-    let contentMatch = getContentMatch(beforeNode);
-
-    // once the isolated or collapsible node stop the loop
-    while (beforeNode && afterNode && !beforeNode.parent?.isCollapsible && !beforeNode.parent?.isIsolate) {
-      const {nextSiblings} = afterNode;
-      // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
-      const afterNodes = beforeNode.nextSiblings.filter(n => !selectionInfo.has(n.id));
-
-      console.log('nextSiblings', nextSiblings, sliceStartTitle)
-      if (nextSiblings.length) {
-        const matches: MatchAction[] = [];
-        const matchActions = findMatchingActions(matches, contentMatch!, Point.toAfter(beforeNode.id), nextSiblings, afterNodes);
-        if (!matchActions.validEnd) {
-          throw Error('failed to find valid content match')
-        }
-        const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
-        tr.Add(actions);
-      }
-
-      beforeNode = beforeNode.parent
-      afterNode = afterNode.parent
-    }
-
-    // keep unwrapping until
-    while (beforeNode && afterNode && afterNode.name !== 'slice') {
-      // contentMatch = getContentMatch(beforeNode);
-      const {nextSiblings} = afterNode;
-      // find nodes from within next siblings that satisfy the content match
-      // console.log('beforeNode', beforeNode.name, beforeNode.id.toString());
-      // console.log('afterNode', afterNode);
-      if (nextSiblings.length) {
-        const matches: MatchAction[] = [];
-        const matchActions = findMatchingActions(matches, contentMatch!, Point.toAfter(beforeNode.id), nextSiblings, beforeNode.nextSiblings);
-        if (!matchActions.validEnd) {
-          throw Error('failed to find valid content match')
-        }
-        const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
-        tr.Add(actions);
-
-        beforeNode = last(matches)!.node;
-      }
-
-      afterNode = afterNode.parent
-    }
-
-    tr.Add(rangeAction)
-
-    // adjust the nodes after selection end
-    if (sliceStartTitle.eq(sliceEndTitle)) {
-      const textContent = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent + endTitle.textContent.slice(end.offset);
+    if (startTitleBlock.eq(endTitleBlock) && sliceStartTitle.eq(sliceEndTitle)) {
+      const textBeforeCursor = endTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
+      const textContent = textBeforeCursor + startTitleBlock.textContent.slice(end.offset);
       const textNode = app.schema.text(textContent);
-      tr.Add(SetContentAction.create(startTitle.id, [textNode!]));
-
-      const after = PinnedSelection.fromPin(Pin.future(startTitle, start.offset + sliceStartTitle.textContent.length)!);
-
-      tr.Select(after);
-    } else {
-      const startTextContent = startTitle.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
-      const startTextNode = app.schema.text(startTextContent);
-      tr.Add(SetContentAction.create(startTitle.id, [startTextNode!]));
-      const endTextContent = sliceEndTitle.textContent + endTitle.textContent.slice(end.offset);
-      const endTextNode = app.schema.text(endTextContent);
-      tr.Add(SetContentAction.create(sliceEndTitle.id, [endTextNode!]));
-      const after = PinnedSelection.fromPin(Pin.future(sliceEndTitle, sliceEndTitle.textContent.length)!);
-
-      tr.Select(after);
+      const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
+      tr
+        .SetContent(start.node.id, [textNode!])
+        .Select(after);
+      return tr;
     }
-    const removeActions = removeNodesActions(endTitle)
 
-    // move nodes after selection end after the slice until the common node with the start selection is reached
-    let to = Point.toAfter(sliceEndTitle.id);
-    {
-      const {nextSiblings} = endTitle;
-      const moveActions = moveNodesActions(to, nextSiblings)
-      tr.Add(moveActions);
-      const lastNode = last(nextSiblings);
-      if (lastNode) {
-        to = Point.toAfter(lastNode.id)
+    console.log(sliceStartTitle.name, sliceStartTitle.textContent, sliceEndTitle.name, sliceEndTitle.textContent);
+    const leftNodes = NodeColumn.create();
+    const rightNodes = NodeColumn.create();
+    const movedNodes = new NodeIdSet();
+
+    const commonNode = start.node.commonNode(end.node);
+    let startBlock: Optional<Node> = startTitleBlock.parent!;
+    let startBlockChild: Node = startTitleBlock;
+    let endBlock: Optional<Node> = endTitleBlock.parent!;
+
+    let commonNodeDepth = commonNode.depth;
+    let startBlockDepth = startBlock.depth;
+    let endBlockDepth = endBlock.depth;
+
+    // collect nodes to be from right of selection
+    while (commonNodeDepth < endBlockDepth) {
+      const children = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
+      const nodes = children.map(ch => {
+        if (ch.isTextContainer) {
+          const title = ch.clone(deepCloneMap)
+          const textContent = title.textContent.slice(end.offset)
+          const textNode = app.schema.text(textContent)!;
+          title.updateContent([textNode]);
+          return title;
+        }
+
+        return ch;
+      })
+
+      // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
+      rightNodes.append(endBlockDepth + 1, nodes);
+      deleteGroup.addId(endBlock.id);
+      movedNodes.add(nodes.map(n => n.id));
+
+      endBlock = endBlock.parent!;
+      endBlockDepth -= 1
+
+      if (startTitleBlock.eq(endTitleBlock)) {
+        break
       }
     }
 
-    {
-      const moveNodes = startTitle.parent?.nextSiblings.filter(n => !selectionInfo.has(n.id)) ?? [];
-      const moveActions = moveNodesActions(to, moveNodes);
-      tr.Add(moveActions);
+    // collect nodes to be from left of selection
+    while (commonNodeDepth <= startBlockDepth) {
+      // NOTE: next siblings of startBlockChild is collected for contentMatch check during merge
+      const children = startBlock!.children.slice(startBlockChild.index).filter(n => !deleteGroup.has(n.id)) ?? [];
+      const nodes = children.map(ch => {
+        if (ch.isTextContainer) {
+          const title = ch.clone(deepCloneMap)
+          const textContent = title.textContent.slice(0, start.offset)
+          const textNode = app.schema.text(textContent)!;
+          title.updateContent([textNode]);
+          return title;
+        }
+
+        return ch;
+      })
+
+      leftNodes.append(startBlockDepth + 1, nodes);
+      startBlock = startBlock.parent!;
+      startBlockDepth -= 1
     }
 
-    tr.Add(removeActions);
-    tr.Add(nodeActions);
+    if (sliceStartTitle.eq(sliceEndTitle)) {
+      const textBeforeCursor = startTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
+      const textContent = textBeforeCursor + endTitleBlock.textContent.slice(end.offset);
+      const textNode = app.schema.text(textContent);
+      const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
+
+      const startTitle = first(last(leftNodes.nodes))
+      if (!startTitle) {
+        throw Error('failed to find startTitle')
+      }
+      if (!startTitle.isTextContainer) {
+        throw Error('startTitle is not text container')
+      }
+
+      const lastEntry= last(rightNodes.nodes)
+      if (!lastEntry) {
+        throw Error('failed to find lastEntry')
+      }
+      const endTitle = first(lastEntry);
+      if (!endTitle) {
+        throw Error('failed to find endTitle')
+      }
+      if (!endTitle.isTextContainer) {
+        throw Error('endTitle is not text container')
+      }
+
+      lastEntry.shift();
+
+      const actions = NodeColumn.deleteMergeByMove(leftNodes, rightNodes);
+      const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+
+      tr
+        .SetContent(startTitle, [textNode!])
+        .Add(actions)
+        .Add(nodeActions)
+        .Select(after);
+      return tr;
+    }
+
+    console.log(leftNodes.nodes)
+    console.log('LEFT', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+    console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+
+    const rightMoveNodes = NodeColumn.preparePlacement(leftNodes, rightNodes);
+    const entries = rightMoveNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name]));
+    console.log('ENTRIES', entries)
+
+    const sliceRightNodes = NodeColumn.create();
+    let sliceBlock = sliceStartTitle.parent!;
+    let sliceBlockDepth = sliceBlock.depth;
+    const taken = new NodeIdSet();
+    while (!sliceBlock.eq(slice.root)) {
+      const children = sliceBlock.children.filter(n => !taken.has(n.id)) ?? [];
+      sliceRightNodes.append(sliceBlockDepth, children);
+
+      taken.add(sliceBlock.id);
+      sliceBlock = sliceBlock.parent!;
+      sliceBlockDepth -= 1;
+    }
+
+    const rightInsertNodes = NodeColumn.preparePlacement(leftNodes, sliceRightNodes);
+    console.log('INSERT', rightInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
+
+    const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+
+    // tr.Add(mergeActions);
+    // tr.Add(nodeActions);
+    const after = PinnedSelection.fromPin(start)
+    tr.Select(after);
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {
@@ -1197,36 +1235,36 @@ export class TransformCommands extends BeforePlugin {
 
     // commonNode is selected
     // replace commonNode with default block
-    if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-      // when a collapsible node is selected entirely and delete
-      // for example: when a page is selected and deleted
-      if (commonNode.isCollapsible) {
-        const textBlock = commonNode.child(0)!
-        const at = Point.toAfter(textBlock.id);
-        const block = app.schema.type(textBlock.type.splitName)?.default()
-        if (!block) {
-          throw Error('failed to create block');
-        }
-
-        tr.SetContent(textBlock.id, []);
-        tr.Add(removeNodesActions(commonNode.children.slice(1)));
-        tr.Select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
-        return
-      }
-
-      const block = app.schema.type(commonNode.type.replaceName)?.default();
-      if (!block) {
-        console.log(p14("%c[failed]"), "color:red", "block not found");
-        return;
-      }
-
-      const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
-      tr
-        .Insert(Point.toAfter(commonNode.id), block)
-        .Remove(nodeLocation(commonNode)!, commonNode)
-        .Select(after);
-      return tr;
-    }
+    // if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
+    //   // when a collapsible node is selected entirely and delete
+    //   // for example: when a page is selected and deleted
+    //   if (commonNode.isCollapsible) {
+    //     const textBlock = commonNode.child(0)!
+    //     const at = Point.toAfter(textBlock.id);
+    //     const block = app.schema.type(textBlock.type.splitName)?.default()
+    //     if (!block) {
+    //       throw Error('failed to create block');
+    //     }
+    //
+    //     tr.SetContent(textBlock.id, []);
+    //     tr.Add(removeNodesActions(commonNode.children.slice(1)));
+    //     tr.Select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
+    //     return
+    //   }
+    //
+    //   const block = app.schema.type(commonNode.type.replaceName)?.default();
+    //   if (!block) {
+    //     console.log(p14("%c[failed]"), "color:red", "block not found");
+    //     return;
+    //   }
+    //
+    //   const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
+    //   tr
+    //     .Insert(Point.toAfter(commonNode.id), block)
+    //     .Remove(nodeLocation(commonNode)!, commonNode)
+    //     .Select(after);
+    //   return tr;
+    // }
 
     // * startBlock === endBlock
     if (startBlock.eq(endBlock)) {

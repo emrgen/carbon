@@ -10,6 +10,7 @@ export default function MCQComp(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
   const ref = useRef(null);
+  const document = useDocument();
 
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
@@ -22,11 +23,22 @@ export default function MCQComp(props: RendererProps) {
   },[node.props])
 
 
+  // toggle the checked state of mcq option
   const handleClick = useCallback(
     () => {
       app.cmd.switch.toggle(node);
     },
     [app, node]
+  );
+
+  // prevent click if content is editable
+  const handleContentClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isContentEditable(document)) {
+        handleClick();
+      }
+    },
+    [document, handleClick]
   );
 
   const beforeContent = useMemo(() => {
@@ -51,6 +63,7 @@ export default function MCQComp(props: RendererProps) {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
+        wrapper={{onClick: handleContentClick}}
       />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}

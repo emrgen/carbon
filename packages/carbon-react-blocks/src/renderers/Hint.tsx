@@ -1,10 +1,10 @@
 import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon} from "@emrgen/carbon-react";
-import {useCallback, useRef} from "react";
+import React, {useCallback, useRef} from "react";
 import {
   ActionOrigin,
   Carbon,
-  CollapsedPath,
-  ContenteditablePath,
+  CollapsedPath, CollapsedPathLocal,
+  ContenteditablePath, isContentEditable,
   Node,
   Pin,
   PinnedSelection,
@@ -14,6 +14,10 @@ import {
 import {MdOutlineKeyboardArrowDown, MdOutlineKeyboardArrowRight} from "react-icons/md";
 import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
 import {Optional} from "@emrgen/types";
+import {useDocument} from "../hooks";
+import {BiBulb} from "react-icons/bi";
+import {FaLightbulb, FaRegCheckCircle, FaRegCircle, FaRegLightbulb} from "react-icons/fa";
+import {ViewedPath} from "@emrgen/carbon-blocks";
 
 const isParentContentEditable = (el: HTMLElement) => {
   let node: Optional<HTMLElement> = el;
@@ -26,18 +30,16 @@ const isParentContentEditable = (el: HTMLElement) => {
   return false;
 }
 
-const isContentEditable = (node: Node, el: HTMLElement) => {
-  const editable = node.props.get<boolean>(ContenteditablePath);
-  return editable || editable === undefined && isParentContentEditable(el);
-}
-
 export default function HintComp(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
-  const isCollapsed = node.isCollapsed;
+
+  const document = useDocument();
 
   const ref = useRef(null);
   const {connectors, SelectionHalo} = useDragDropRectSelectHalo({node, ref})
+
+  const isCollapsed = node.props.get<boolean>(CollapsedPathLocal, false);
 
   // insert a new section as child of this collapsible
   const handleInsert = useCallback((app: Carbon) => {
@@ -54,30 +56,37 @@ export default function HintComp(props: RendererProps) {
   }, [node]);
 
   // toggle collapsed state
-  const handleToggle = useCallback((app: Carbon) => {
+  const handleToggle = useCallback(() => {
     const {cmd, selection} = app;
     cmd
       .Update(node.id, {
-        [CollapsedPath]: !isCollapsed,
+        [CollapsedPathLocal]: !isCollapsed,
+        [ViewedPath]: true,
       })
+
+    // if currently not collapsed, next state will be collapsed
+    // so select the first child otherwise the current selection may not be valid
     if (!isCollapsed) {
-      // const {start, end} = selection;
-      // const startInTitle = start.node.closest(n => !!node.firstChild?.eq(n));
-      // const endInTitle = end.node.closest(n => !!node.firstChild?.eq(n));
       cmd.Select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
+    } else {
+      cmd.Select(selection);
     }
 
     cmd.WithType(TxType.OneWay)
     cmd.Dispatch();
-  }, [node, isCollapsed]);
+  }, [app, node, isCollapsed]);
 
-  const handleToggleInViewerMove = useCallback((e) => {
-    // if (!isContentEditable(node, e.target)) {
-    //   e.stopPropagation();
-    //   e.preventDefault();
-    //   handleToggle(app);
-    // }
-  },[handleToggle, app]);
+  // prevent click if content is editable
+  const handleContentClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isContentEditable(document)) {
+        handleToggle();
+      }
+    },
+    [document, handleToggle]
+  );
+
+
 
   const beforeContent = (
     <div
@@ -88,13 +97,26 @@ export default function HintComp(props: RendererProps) {
         e.preventDefault();
         e.stopPropagation();
       }}
-      onClick={() => handleToggle(app)}
+      onClick={() => handleToggle()}
     >
       {isCollapsed ? (
-        <MdOutlineKeyboardArrowRight />
+        <FaRegLightbulb />
       ) : (
-        <MdOutlineKeyboardArrowDown />
+        <FaLightbulb />
       )}
+    </div>
+  );
+
+  const isViewed = node.props.get<boolean>(ViewedPath, false)
+
+  const afterContent = (
+    <div
+      className="carbon-hint__viewed"
+      contentEditable="false"
+      suppressContentEditableWarning
+      data-viewed={isViewed}
+    >
+      {isViewed && <FaRegCheckCircle /> }
     </div>
   );
 
@@ -107,8 +129,9 @@ export default function HintComp(props: RendererProps) {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
+        afterContent={afterContent}
         key={node.renderVersion}
-        wrapper={{ onMouseDown: handleToggleInViewerMove }}
+        wrapper={{ onMouseDown: handleContentClick }}
       />
 
       {node.size > 1 ? (

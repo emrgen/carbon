@@ -183,6 +183,7 @@ export const VisiblePath = 'remote/state/visible';
 export const RenderPath = "local/state/render";
 export const OpenedPath = "local/state/opened";
 export const CollapsedPath = "local/state/collapsed";
+export const CollapsedPathLocal = "local/state/collapsed";
 export const HoveredPath = "local/state/hovered";
 export const SelectedPath = "local/state/selected";
 export const EditablePath = "local/state/editable";

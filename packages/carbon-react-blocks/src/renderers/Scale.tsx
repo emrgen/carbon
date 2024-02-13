@@ -21,19 +21,29 @@ export default function ScaleComp(props: RendererProps) {
 
   const handleToggle = useCallback((value: number) => {
     app.cmd.scale.toggleValue(node, value).Dispatch();
-  },[app, node]);
+  }, [app, node]);
 
   return (
     <CarbonBlock ref={ref} {...props}>
-      {range(start, end+1, step).map((i) => {
+      {range(start, end + 1, step).map((i) => {
         if (value.includes(i)) {
           return (
-            <div key={i} data-selected={true} className={'carbon-scale-option'}
-                 onClick={() => handleToggle(i)}>{i}</div>
+            <div
+              key={i}
+              data-selected={true}
+              className={'carbon-scale-option'}
+              onClick={() => handleToggle(i)}>
+              {i}
+            </div>
           )
         } else {
           return (
-            <div key={i} className={'carbon-scale-option'} onClick={() => handleToggle(i)}>{i}</div>
+            <div
+              key={i}
+              className={'carbon-scale-option'}
+              onClick={() => handleToggle(i)}>
+              {i}
+            </div>
           )
         }
       })}
