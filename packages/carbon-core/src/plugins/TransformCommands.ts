@@ -302,99 +302,7 @@ export class TransformCommands extends BeforePlugin {
 
     console.log(startTitle.chain.map(n => n.type.name));
 
-    if (selection.isCollapsed) {
-      // if selection is within same title
-      // if (startTitle.eq(endTitle)) {
-      //   // if slice is within same title
-      //   const textBeforeCursor = startNode.textContent.slice(0, start.offset) + startTitle.textContent
-      //   const textContent = textBeforeCursor + startNode.textContent.slice(end.offset);
-      //   const textNode = app.schema.text(textContent);
-      //   const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
-      //   tr
-      //     .SetContent(start.node.id, [textNode!])
-      //     .Select(after);
-      //
-      //   return tr;
-      // } else {
-      // if slice is across blocks
-      const startTitleText = startNode.textContent.slice(0, start.offset) + startTitle.textContent + startNode.textContent.slice(end.offset)
-      const startTitleTextNode = app.schema.text(startTitleText)!;
-
-      tr
-        .SetContent(start.node.id, [startTitleTextNode!]);
-
-      let beforeNode: Optional<Node> = start.node;
-      let afterNode: Optional<Node> = startTitle;
-
-      // move upwards until we find a collapsible node
-      while (beforeNode && afterNode && !beforeNode.parent?.isCollapsible && !beforeNode.parent?.isIsolate) {
-        const contentMatch = getContentMatch(beforeNode);
-        const {nextSiblings} = afterNode;
-        // console.log('beforeNode', beforeNode, afterNode, afterNode.children);
-        if (nextSiblings.length) {
-          const at = Point.toAfter(beforeNode.id);
-          // const actions = this.matchActions(contentMatch!, at, nextSiblings, 'insert')
-          const matches: MatchAction[] = [];
-          const matchActions = findMatchingActions(matches, contentMatch!, at, nextSiblings, beforeNode.nextSiblings);
-          if (!matchActions.validEnd) {
-            throw Error('failed to find valid content match')
-          }
-          const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
-          if (!actions.length) {
-            throw Error('failed to find valid content match')
-          }
-          tr.Add(actions);
-
-          // tr.Insert(at, nextSiblings)
-        }
-
-        beforeNode = beforeNode.parent
-        afterNode = afterNode.parent
-      }
-
-      let contentMatch: Optional<ContentMatch> = null;
-      // NOTE: slice.nodes has parent node with name 'document'
-      // insert the nodes after the collapsible node (document is a collapsible node)
-      while (beforeNode && afterNode && afterNode.name !== 'slice') {
-        contentMatch = getContentMatch(beforeNode);
-        const {nextSiblings} = afterNode;
-        // find nodes from within next siblings that satisfy the content match
-        // console.log('beforeNode', beforeNode.name, beforeNode.id.toString());
-        // console.log('afterNode', afterNode);
-        if (nextSiblings.length) {
-          // console.log('------------------', nextSiblings.map(n => n.name), beforeNode.nextSiblings.map(n => n.name));
-          // console.log(nextSiblings.map(n => n.textContent))
-          const matches: MatchAction[] = [];
-          const matchActions = findMatchingActions(matches, contentMatch!, Point.toAfter(beforeNode.id), nextSiblings, beforeNode.nextSiblings);
-          if (!matchActions.validEnd) {
-            throw Error('failed to find valid content match')
-          }
-          const actions = matches.map(m => InsertNodeAction.create(m.at, m.node.id, m.node.toJSON()));
-          tr.Add(actions);
-
-          beforeNode = last(matches)!.node;
-        }
-
-        afterNode = afterNode.parent
-      }
-
-      const endTitleText = endTitle.textContent + startNode.textContent.slice(end.offset);
-      const endTitleTextNode = app.schema.text(endTitleText)!;
-      if (start.node.parent?.isCollapsed) {
-        tr.Update(start.node.parent.id, {node: {collapsed: false}});
-      }
-      tr.SetContent(endTitle.id, [endTitleTextNode!]);
-
-      const after = PinnedSelection.fromPin(Pin.future(endTitle, endTitle.textContent.length)!);
-      tr.Select(after, ActionOrigin.UserInput);
-      console.log(endTitleText, after.toString());
-
-      return tr;
-      // }
-    } else {
-      this.deleteAndPaste(tr, selection, sliceClone);
-    }
-
+    this.deleteAndPaste(tr, selection, sliceClone);
   }
 
   // delete the selection and insert the slice
@@ -484,8 +392,13 @@ export class TransformCommands extends BeforePlugin {
       const children = startBlock!.children.slice(startBlockChild.index).filter(n => !deleteGroup.has(n.id)) ?? [];
       const nodes = children.map(ch => {
         if (ch.isTextContainer) {
-          const title = ch.clone(deepCloneMap)
-          const textContent = title.textContent.slice(0, start.offset)
+          const title = ch.clone(deepCloneMap);
+          let textContent = title.textContent.slice(0, start.offset)
+          // if slice is within same title block
+          if (sliceStartTitle.eq(sliceEndTitle)) {
+            textContent += sliceStartTitle.textContent;
+          }
+
           const textNode = app.schema.text(textContent)!;
           title.updateContent([textNode]);
           return title;
@@ -495,50 +408,26 @@ export class TransformCommands extends BeforePlugin {
       })
 
       leftNodes.append(startBlockDepth + 1, nodes);
+
+      startBlockChild = startBlock!
       startBlock = startBlock.parent!;
       startBlockDepth -= 1
     }
 
     if (sliceStartTitle.eq(sliceEndTitle)) {
       const textBeforeCursor = startTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
-      const textContent = textBeforeCursor + endTitleBlock.textContent.slice(end.offset);
-      const textNode = app.schema.text(textContent);
       const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
-
-      const startTitle = first(last(leftNodes.nodes))
-      if (!startTitle) {
-        throw Error('failed to find startTitle')
-      }
-      if (!startTitle.isTextContainer) {
-        throw Error('startTitle is not text container')
-      }
-
-      const lastEntry= last(rightNodes.nodes)
-      if (!lastEntry) {
-        throw Error('failed to find lastEntry')
-      }
-      const endTitle = first(lastEntry);
-      if (!endTitle) {
-        throw Error('failed to find endTitle')
-      }
-      if (!endTitle.isTextContainer) {
-        throw Error('endTitle is not text container')
-      }
-
-      lastEntry.shift();
 
       const actions = NodeColumn.deleteMergeByMove(leftNodes, rightNodes);
       const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
 
       tr
-        .SetContent(startTitle, [textNode!])
         .Add(actions)
         .Add(nodeActions)
         .Select(after);
       return tr;
     }
 
-    console.log(leftNodes.nodes)
     console.log('LEFT', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
     console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
