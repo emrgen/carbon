@@ -451,7 +451,7 @@ export class TransformCommands extends BeforePlugin {
     let endBlockDepth = endBlock.depth;
 
     // collect nodes to be from right of selection
-    while (endBlock && commonNodeDepth < endBlockDepth) {
+    while (commonNodeDepth < endBlockDepth) {
       const children = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
       const nodes = children.map(ch => {
         if (ch.isTextContainer) {
@@ -470,7 +470,7 @@ export class TransformCommands extends BeforePlugin {
       deleteGroup.addId(endBlock.id);
       movedNodes.add(nodes.map(n => n.id));
 
-      endBlock = endBlock.parent;
+      endBlock = endBlock.parent!;
       endBlockDepth -= 1
 
       if (startTitleBlock.eq(endTitleBlock)) {
@@ -499,8 +499,46 @@ export class TransformCommands extends BeforePlugin {
       startBlockDepth -= 1
     }
 
-    console.log(leftNodes.nodes)
+    if (sliceStartTitle.eq(sliceEndTitle)) {
+      const textBeforeCursor = startTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
+      const textContent = textBeforeCursor + endTitleBlock.textContent.slice(end.offset);
+      const textNode = app.schema.text(textContent);
+      const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
 
+      const startTitle = first(last(leftNodes.nodes))
+      if (!startTitle) {
+        throw Error('failed to find startTitle')
+      }
+      if (!startTitle.isTextContainer) {
+        throw Error('startTitle is not text container')
+      }
+
+      const lastEntry= last(rightNodes.nodes)
+      if (!lastEntry) {
+        throw Error('failed to find lastEntry')
+      }
+      const endTitle = first(lastEntry);
+      if (!endTitle) {
+        throw Error('failed to find endTitle')
+      }
+      if (!endTitle.isTextContainer) {
+        throw Error('endTitle is not text container')
+      }
+
+      lastEntry.shift();
+
+      const actions = NodeColumn.deleteMergeByMove(leftNodes, rightNodes);
+      const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+
+      tr
+        .SetContent(startTitle, [textNode!])
+        .Add(actions)
+        .Add(nodeActions)
+        .Select(after);
+      return tr;
+    }
+
+    console.log(leftNodes.nodes)
     console.log('LEFT', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
     console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
@@ -518,11 +556,11 @@ export class TransformCommands extends BeforePlugin {
 
       taken.add(sliceBlock.id);
       sliceBlock = sliceBlock.parent!;
-      sliceBlockDepth -= 1
+      sliceBlockDepth -= 1;
     }
 
     const rightInsertNodes = NodeColumn.preparePlacement(leftNodes, sliceRightNodes);
-    console.log('INSERT', rightInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+    console.log('INSERT', rightInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
 
     const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
 
