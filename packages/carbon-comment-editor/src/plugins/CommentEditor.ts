@@ -50,10 +50,7 @@ export class CommentEditor extends CarbonPlugin {
 
   keydown(): EventHandlerMap {
     return {
-      cmd_k: (ctx: EventContext<KeyboardEvent>) => {
-      },
-      cmd_a: (ctx: EventContext<KeyboardEvent>) => {
-        console.log('xxxxxxxxxxxxxxxxxxxxxx')
+      ctrl_a: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
         const {currentNode, cmd} = ctx;
         const isolated = currentNode.closest(n => n.isIsolate);
@@ -61,12 +58,11 @@ export class CommentEditor extends CarbonPlugin {
           const start = Pin.toStartOf(isolated)!
           const end = Pin.toEndOf(isolated)!
           const selection = PinnedSelection.create(start, end);
-          // cmd.action.select(selection).dispatch();
+          cmd.action.select(selection).dispatch();
         }
       }
     }
   }
-
 
   normalize(node: Node): CarbonAction[] {
     if (node.isVoid) {

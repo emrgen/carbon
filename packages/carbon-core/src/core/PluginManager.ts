@@ -13,7 +13,6 @@ import { CarbonAction } from './actions/types';
 import { EventsIn } from './Event';
 import { CarbonCommand } from "./CarbonCommand";
 import {StateActions} from "@emrgen/carbon-core";
-import {Encoder, TreeEncoder, Writer} from "./Encoder";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -82,7 +81,7 @@ export class PluginManager {
 
 	// handle incoming events from ui
 	onEvent(event: EventContext<Event>) {
-		// console.log(event.type, event, event.node?.name);
+		// console.log(event.type, event)
 
 		// keyDown is handled explicitly using Plugin.keydown()
 		if (event.type === 'keyDown') {
@@ -128,9 +127,9 @@ export class PluginManager {
 		const keyDownEvent = <EventContext<any>>EventContext.fromContext(event)
 		const { currentNode } = keyDownEvent
 
-		console.log('onKeyDown', event);
+		// console.log('onKeyDown', event);
 
-		console.group('onKeyDown', event)
+		console.group('onKeyDown xxx', event)
 
     const process = () => {
       each(this.before, (p: CarbonPlugin) => {
@@ -151,10 +150,13 @@ export class PluginManager {
           this.nodePlugin(n.name)?.keydown()[keyDownEvent.type]?.(keyDownEvent);
           const handlers = (this.nodePlugin(n.type.name)?.keydown() ?? {}) as EventHandlerMap;
           const handler = entries(handlers).find(([key]) => {
+            console.log(isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event.nativeEvent), keyDownEvent.event.nativeEvent)
             return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event.nativeEvent)
           });
           if (handler) {
             console.log('node', n.name, handler[0], handler[1]);
+          } else {
+            console.log('node', n.name, 'no handler', handlers)
           }
           handler?.[1]?.(keyDownEvent)
           return keyDownEvent.stopped
