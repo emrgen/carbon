@@ -31,19 +31,22 @@ const data = node("carbon", [
     //   title([text('submit')]),
     // ]),
     //
-    // node('question', [
-    //   title([text('question title')]),
-    // ]),
-    //
-    // node('mcq', [
-    //   title([text('mcq title')]),
-    // ]),
-    // node('mcq', [
-    //   title([text('mcq title')]),
-    // ]),
-    // node('mcq', [
-    //   title([text('mcq title')]),
-    // ]),
+    node('question', [
+      title([text('question title')]),
+    ]),
+
+    node('mcq', [
+      title([text('mcq title 1')]),
+    ]),
+    node('mcq', [
+      title([text('mcq title 2')]),
+    ]),
+    node('mcq', [
+      title([text('mcq title 3')]),
+    ]),
+    node('explain', [
+      title([text('question title')]),
+    ]),
     //
     // node('hint', [
     //   title([text('hint 1')]),

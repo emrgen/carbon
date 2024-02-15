@@ -30,6 +30,7 @@ import MCQComp from "./renderers/MCQ";
 import {QuestionComp} from "./renderers/Question";
 import ScaleComp from "./renderers/Scale";
 import {ButtonComp} from "./renderers/Button";
+import {ExplainComp} from "./renderers/Explain";
 
 export const blockPresetRenderers = [
   ReactRenderer.create('document', DocumentComp),
@@ -71,6 +72,7 @@ export const blockPresetRenderers = [
   ReactRenderer.create('question', QuestionComp),
   ReactRenderer.create('scale', ScaleComp),
   ReactRenderer.create('button', ButtonComp),
+  ReactRenderer.create('explain', ExplainComp),
 ];
 
 

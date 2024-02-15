@@ -1,6 +1,7 @@
 import {Collapsible} from "./Collapsible";
-import {NodeSpec} from "@emrgen/carbon-core";
+import {CarbonPlugin, NodeSpec} from "@emrgen/carbon-core";
 import {Header, Heading} from "./Header";
+import {Explain} from "./Explain";
 
 export class Question extends Heading {
     name = 'question';
@@ -21,5 +22,11 @@ export class Question extends Heading {
           }
         }
       }
+    }
+
+    plugins(): CarbonPlugin[] {
+      return [
+        new Explain(),
+      ]
     }
 }
