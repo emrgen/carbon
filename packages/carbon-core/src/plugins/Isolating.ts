@@ -236,38 +236,42 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         }
       },
       left: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (this.isExpanded(e)) return;
         this.preventAtStart(e);
       },
       right: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (this.isExpanded(e)) return;
         this.preventAtEnd(e);
       },
       shiftLeft: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (this.isExpanded(e)) return;
         this.preventAtStart(e);
       },
       shiftRight: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (this.isExpanded(e)) return;
         this.preventAtEnd(e);
       },
       backspace: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (this.isExpanded(e)) return;
         this.preventAtStartCollapsed(e);
       },
       delete: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (this.isExpanded(e)) return;
         this.preventAtEndCollapsed(e);
       },
       shiftBackspace: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (this.isExpanded(e)) return;
         this.preventAtStart(e);
       },
       shiftDelete: (e) => {
-        if (e.app.state.blockSelection.isActive) return;
+        if (this.isExpanded(e)) return;
         this.preventAtEnd(e);
       },
     };
+  }
+
+  isExpanded(e: EventContext<KeyboardEvent>) {
+    return !e.app.selection.isCollapsed && !e.app.state.blockSelection.isActive;
   }
 
   collapseToHead(e) {}

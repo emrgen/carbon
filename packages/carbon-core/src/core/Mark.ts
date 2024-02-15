@@ -16,43 +16,24 @@ export class Mark {
 	type: string;
 	props?: MarkProps;
 
-	static BOLD =  {
-    type: 'bold',
-  }
+	static BOLD =  Mark.create('bold');
 
-	static ITALIC = {
-    type: 'italic',
-  }
+	static ITALIC = Mark.create('italic');
 
-	static UNDERLINE = {
-    type: 'underline',
-  }
+	static UNDERLINE = Mark.create('underline');
 
+  static STRIKE = Mark.create('strike');
+  static CODE = Mark.create('code');
 
-  static STRIKE = {
-    type: 'strike',
-  }
+	static SUBSCRIPT = Mark.create('subscript');
 
-	static CODE = {
-    type: 'code',
-  }
+	static SUPERSCRIPT = Mark.create('superscript');
 
-	static SUBSCRIPT = {
-    type: 'subscript',
-  }
-
-	static SUPERSCRIPT = {
-    type: 'superscript',
-  }
-
-	static HASHTAG = {
-    type: 'hashtag',
-  }
+	static HASHTAG = Mark.create('hashtag');
 
 	static mention(): Mark {
 		return new Mark('mention');
 	}
-
 
 	static link(url: string): Mark {
 		return new Mark('link', { url });
@@ -65,6 +46,10 @@ export class Mark {
 	static background(color: string): Mark {
 		return new Mark('background', { color });
 	}
+
+  static create(type: string, props: MarkProps = {}) {
+    return new Mark(type, props);
+  }
 
 	constructor(type: string, props: MarkProps = {}) {
 		this.type = type;

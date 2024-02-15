@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import {
   preventAndStop,
+  CheckedPath,
 } from "@emrgen/carbon-core";
 
 
 import { Checkbox } from "@chakra-ui/react";
-import { CheckedPath } from "packages/carbon-core/src/core/NodeProps";
 import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
 import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 

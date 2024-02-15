@@ -6,7 +6,7 @@ export function ExplainComp(props: RendererProps) {
 
   return (
     <CarbonBlock {...props}>
-      <div className={'carbon-block-explain'}>explanation</div>
+      <div className={'carbon-block-explain'} contentEditable={false}>explanation</div>
       <CarbonNodeContent node={node}/>
       <CarbonNodeChildren node={node}/>
     </CarbonBlock>

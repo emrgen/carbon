@@ -26,13 +26,8 @@ export class BlockMenuPlugin extends BeforePlugin {
     this.state.set('checked', value);
   }
 
-  init(bus:PluginEmitter, state:PluginState): void {
-    super.init(bus, state);
-
-    // this.setState({
-    //   visible: false,
-    //   checked: new Map<string, boolean>(),
-    // });
+  init(app: Carbon, bus:PluginEmitter, state:PluginState): void {
+    super.init(app, bus, state);
   }
 
   keydown(): Partial<EventHandler> {
