@@ -344,12 +344,20 @@ export class TransformCommands extends BeforePlugin {
       return tr;
     }
 
+
+
     console.log(sliceStartTitle.name, sliceStartTitle.textContent, sliceEndTitle.name, sliceEndTitle.textContent);
     const leftNodes = NodeColumn.create();
     const rightNodes = NodeColumn.create();
     const movedNodes = new NodeIdSet();
 
-    const commonNode = start.node.commonNode(end.node);
+    // if (startTitleBlock.eq(endTitleBlock)) {
+    //   console.log('LEFT', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+    //   console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+    //   return tr;
+    // }
+
+    const commonNode = start.node.commonNode(end.node).closest(n => n.isIsolate)!;
     let startBlock: Optional<Node> = startTitleBlock.parent!;
     let startBlockChild: Node = startTitleBlock;
     let endBlock: Optional<Node> = endTitleBlock.parent!;
@@ -375,20 +383,21 @@ export class TransformCommands extends BeforePlugin {
 
       // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
       rightNodes.append(endBlockDepth + 1, nodes);
-      deleteGroup.addId(endBlock.id);
       movedNodes.add(nodes.map(n => n.id));
-
-      endBlock = endBlock.parent!;
-      endBlockDepth -= 1
 
       if (startTitleBlock.eq(endTitleBlock)) {
         break
       }
+
+      deleteGroup.addId(endBlock.id);
+      endBlock = endBlock.parent!;
+      endBlockDepth -= 1
     }
 
     // collect nodes to be from left of selection
     while (commonNodeDepth <= startBlockDepth) {
       // NOTE: next siblings of startBlockChild is collected for contentMatch check during merge
+      console.log(startBlockChild.id.toString(), startBlockChild.index ,startBlock!.children.map(n => n.id.toString()))
       const children = startBlock!.children.slice(startBlockChild.index).filter(n => !deleteGroup.has(n.id)) ?? [];
       const nodes = children.map(ch => {
         if (ch.isTextContainer) {
@@ -439,7 +448,7 @@ export class TransformCommands extends BeforePlugin {
     let sliceBlock = sliceStartTitle.parent!;
     let sliceBlockDepth = sliceBlock.depth;
     const taken = new NodeIdSet();
-    while (!sliceBlock.eq(slice.root)) {
+    while (sliceBlock) {
       const children = sliceBlock.children.filter(n => !taken.has(n.id)) ?? [];
       sliceRightNodes.append(sliceBlockDepth, children);
 
@@ -450,11 +459,15 @@ export class TransformCommands extends BeforePlugin {
 
     const rightInsertNodes = NodeColumn.preparePlacement(leftNodes, sliceRightNodes);
     console.log('INSERT', rightInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
+    const actions = NodeColumn.insertActions(leftNodes, rightInsertNodes);
 
     const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
 
+    console.log(actions)
+
     // tr.Add(mergeActions);
     // tr.Add(nodeActions);
+    tr.Add(actions);
     const after = PinnedSelection.fromPin(start)
     tr.Select(after);
   }

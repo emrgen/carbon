@@ -1,7 +1,7 @@
 import {
   CarbonAction, findMatchingActions,
   Fragment,
-  getContentMatch, InsertNodeAction, MatchAction, MoveNodeAction,
+  getContentMatch, InsertNodeAction, insertNodesActions, MatchAction, MoveNodeAction,
   moveNodesActions,
   Node, nodeLocation,
   Point,
@@ -37,23 +37,73 @@ export class NodeColumn {
     }
   }
 
-  private static prepareMoves(before: Node[], nodes: Node[], after: Node[]) {
-    if (isEmpty(nodes)) {
+  private static prepareMoves(before: Node, nodes: Node[], after: Node[]) {
+    if (isEmpty(nodes) && isEmpty(after)) {
       return {
         nodes: [],
         contentMatch: null,
       }
     }
 
-    const lastNode = before[before.length-1];
-    const at = Point.toAfter(lastNode);
-    const contentMatch = getContentMatch(lastNode);
+    const at = Point.toAfter(before);
+    const contentMatch = getContentMatch(before);
     const matchActions: MatchAction[] = [];
     const matches = findMatchingActions(matchActions, contentMatch, at, nodes, after);
     return {
       nodes: matchActions.map(m => m.node),
       contentMatch: matches.match,
     }
+  }
+
+  static insertActions(leftNodes: NodeColumn, rightNodes: NodeColumn) {
+    if (isEmpty(rightNodes.nodes)) {
+      return [];
+    }
+
+    if (leftNodes.nodes.length !== rightNodes.nodes.length) {
+      return []
+    }
+
+    let rightLength = rightNodes.nodes.length-1;
+    let leftLength = leftNodes.nodes.length-1;
+    const actions: CarbonAction[] = [];
+
+    while (true) {
+      const left = leftNodes.nodes[leftLength];
+      const right = rightNodes.nodes[rightLength];
+
+      if (!left || !right) {
+        break;
+      }
+
+      const leftFirst = left[0];
+      const rightFirst = right[0];
+
+      if (leftFirst.isTextContainer && rightFirst.isTextContainer) {
+        // const moves = NodeColumn.moveNodes(left, right);
+        // actions.push(...moves.actions);
+      }
+      else if (!isEmpty(right) && !isEmpty(left)) {
+        const firstNode = left[0];
+        const at = Point.toAfter(firstNode);
+        actions.push(...insertNodesActions(at, right));
+      }
+
+      leftLength--;
+      rightLength--;
+    }
+
+    return actions;
+  }
+
+  static moveActions(after: Node, nodes: Node[]) {
+    // const at = Point.toAfter(after);
+    // const contentMatch = getContentMatch(after);
+    // const matchActions: MatchAction[] = [];
+    // const matches = findMatchingActions(matchActions, contentMatch, at, nodes, []);
+    // return matchActions.map(m => InsertNodeAction.create(m.at, m.node));
+
+    return [];
   }
 
   static deleteMergeByMove(left: NodeColumn, right: NodeColumn): CarbonAction[] {
@@ -172,7 +222,7 @@ export class NodeColumn {
           const leftFirst = leftNodes[0];
           const after = (column.nodes[nonEmptyIndex] ?? []).concat(leftNodes.slice(1));
           const nodes = right.nodes.splice(0, rightIndex+1).filter(identity).reverse();
-          const moves = NodeColumn.prepareMoves([leftFirst], flatten(nodes), after);
+          const moves = NodeColumn.prepareMoves(leftFirst, flatten(nodes), after);
           column.append(leftIndex, moves.nodes);
         }
         break;
@@ -188,8 +238,8 @@ export class NodeColumn {
       const rightFirst = rightNodes[0];
 
       if (leftFirst.isTextContainer && rightFirst.isTextContainer) {
-        const moves = NodeColumn.prepareMoves([leftFirst], rightNodes.slice(1), leftNodes.slice(1));
-        if (!moves.contentMatch?.validEnd) {
+        const moves = NodeColumn.prepareMoves(leftFirst, rightNodes.slice(1), leftNodes.slice(1));
+        if (moves.nodes.length && !moves.contentMatch?.validEnd) {
           throw new Error('failed to find a valid end');
         }
 
@@ -199,7 +249,7 @@ export class NodeColumn {
       else if (!left.nodes[leftIndex-1]) {
         const nodes = right.nodes.splice(0, rightIndex+1).filter(identity).reverse();
         const leftFirst = leftNodes[0]
-        const moves = NodeColumn.prepareMoves([leftFirst], flatten(nodes), leftNodes.splice(1));
+        const moves = NodeColumn.prepareMoves(leftFirst, flatten(nodes), leftNodes.splice(1));
         // failed to find a valid end
         // try with higher left node
         if (!moves.contentMatch?.validEnd) {
@@ -212,7 +262,7 @@ export class NodeColumn {
       //
       else {
         const leftFirst = leftNodes[0]
-        const moves = NodeColumn.prepareMoves([leftFirst], rightNodes, leftNodes.slice(1));
+        const moves = NodeColumn.prepareMoves(leftFirst, rightNodes, leftNodes.slice(1));
         // failed to find a valid end
         // try with higher left node
         if (!moves.contentMatch?.validEnd) {
