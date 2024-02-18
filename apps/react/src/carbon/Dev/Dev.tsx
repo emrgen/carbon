@@ -25,41 +25,41 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
-    // node('scale', []),
-    //
-    // node('button', [
-    //   title([text('submit')]),
-    // ]),
-    //
-    // node('question', [
-    //   title([text('question title')]),
-    // ]),
-    //
-    // node('mcq', [
-    //   title([text('mcq title 1')]),
-    // ]),
-    // node('mcq', [
-    //   title([text('mcq title 2')]),
-    // ]),
-    // node('mcq', [
-    //   title([text('mcq title 3')]),
-    // ]),
-    // node('explain', [
-    //   title([text('question title')]),
-    // ]),
-    //
-    // node('hint', [
-    //   title([text('hint 1')]),
-    //   section([title([text('hint content')])]),
-    // ]),
-    // node('hint', [
-    //   title([text('hint 2')]),
-    //   section([title([text('hint content')])]),
-    // ]),
-    // node('hint', [
-    //   title([text('hint 3')]),
-    //   section([title([text('hint content')])]),
-    // ]),
+    node('scale', []),
+
+    node('button', [
+      title([text('submit')]),
+    ]),
+
+    node('question', [
+      title([text('question title')]),
+    ]),
+
+    node('mcq', [
+      title([text('mcq title 1')]),
+    ]),
+    node('mcq', [
+      title([text('mcq title 2')]),
+    ]),
+    node('mcq', [
+      title([text('mcq title 3')]),
+    ]),
+    node('explain', [
+      title([text('question title')]),
+    ]),
+
+    node('hint', [
+      title([text('hint 1')]),
+      section([title([text('hint content')])]),
+    ]),
+    node('hint', [
+      title([text('hint 2')]),
+      section([title([text('hint content')])]),
+    ]),
+    node('hint', [
+      title([text('hint 3')]),
+      section([title([text('hint content')])]),
+    ]),
 
     section([title([
       text("section 1"),

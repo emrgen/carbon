@@ -150,7 +150,6 @@ export class PluginManager {
           this.nodePlugin(n.name)?.keydown()[keyDownEvent.type]?.(keyDownEvent);
           const handlers = (this.nodePlugin(n.type.name)?.keydown() ?? {}) as EventHandlerMap;
           const handler = entries(handlers).find(([key]) => {
-            console.log(isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event.nativeEvent), keyDownEvent.event.nativeEvent)
             return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event.nativeEvent)
           });
           if (handler) {
