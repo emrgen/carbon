@@ -453,7 +453,13 @@ export class TransformCommands extends BeforePlugin {
     let sliceBlockDepth = sliceBlock.depth;
     const taken = new NodeIdSet();
     while (sliceBlock) {
-      const children = sliceBlock.children.filter(n => !taken.has(n.id)) ?? [];
+      const children = sliceBlock.children.filter(n => {
+        if (n.isTextContainer && !n.eq(sliceStartTitle)) {
+          return false;
+        }
+
+        return !taken.has(n.id)
+      }) ?? [];
       sliceRightNodes.append(sliceBlockDepth, children);
 
       taken.add(sliceBlock.id);
@@ -471,10 +477,11 @@ export class TransformCommands extends BeforePlugin {
 
     console.log(actions)
 
-    // tr.Add(mergeActions);
-    // tr.Add(nodeActions);
     tr.Add(actions);
-    const after = PinnedSelection.fromPin(start)
+    tr.Add(nodeActions);
+
+    const pin = Pin.toEndOf(sliceEndTitle)!;
+    const after = PinnedSelection.fromPin(pin)
     tr.Select(after);
   }
 

@@ -25,76 +25,76 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
-    node('scale', []),
+    // node('scale', []),
+    //
+    // node('button', [
+    //   title([text('submit')]),
+    // ]),
+    //
+    // node('question', [
+    //   title([text('question title')]),
+    // ]),
+    //
+    // node('mcq', [
+    //   title([text('mcq title 1')]),
+    // ]),
+    // node('mcq', [
+    //   title([text('mcq title 2')]),
+    // ]),
+    // node('mcq', [
+    //   title([text('mcq title 3')]),
+    // ]),
+    // node('explain', [
+    //   title([text('question title')]),
+    // ]),
+    //
+    // node('hint', [
+    //   title([text('hint 1')]),
+    //   section([title([text('hint content')])]),
+    // ]),
+    // node('hint', [
+    //   title([text('hint 2')]),
+    //   section([title([text('hint content')])]),
+    // ]),
+    // node('hint', [
+    //   title([text('hint 3')]),
+    //   section([title([text('hint content')])]),
+    // ]),
 
-    node('button', [
-      title([text('submit')]),
-    ]),
-
-    node('question', [
-      title([text('question title')]),
-    ]),
-
-    node('mcq', [
-      title([text('mcq title 1')]),
-    ]),
-    node('mcq', [
-      title([text('mcq title 2')]),
-    ]),
-    node('mcq', [
-      title([text('mcq title 3')]),
-    ]),
-    node('explain', [
-      title([text('question title')]),
-    ]),
-
-    node('hint', [
-      title([text('hint 1')]),
-      section([title([text('hint content')])]),
-    ]),
-    node('hint', [
-      title([text('hint 2')]),
-      section([title([text('hint content')])]),
-    ]),
-    node('hint', [
-      title([text('hint 3')]),
-      section([title([text('hint content')])]),
-    ]),
-
-    section([title([
-      text("section 1"),
-      text(" bold", {
-        'remote/state/marks/bold': Mark.BOLD,
-      }),
-      text(" italic", {
-        'remote/state/marks/italic': Mark.ITALIC,
-      }),
-      text(" underline", {
-        'remote/state/marks/underline': Mark.UNDERLINE,
-      }),
-      text(" bold italic", {
-        'remote/state/marks/bold': Mark.BOLD,
-        'remote/state/marks/italic': Mark.ITALIC,
-      }),
-      text(" color", {
-        'remote/state/marks/bold': Mark.BOLD,
-        'remote/state/marks/color': Mark.color('teal'),
-      }),
-      text("code", {
-        'remote/state/marks/code': Mark.CODE,
-      }),
-      // text("plain"),
-      // text("", {
-      //   'local/html/data-empty': true,
-      // }),
-    ])]),
+    // section([title([
+    //   text("section 1"),
+    //   text(" bold", {
+    //     'remote/state/marks/bold': Mark.BOLD,
+    //   }),
+    //   text(" italic", {
+    //     'remote/state/marks/italic': Mark.ITALIC,
+    //   }),
+    //   text(" underline", {
+    //     'remote/state/marks/underline': Mark.UNDERLINE,
+    //   }),
+    //   text(" bold italic", {
+    //     'remote/state/marks/bold': Mark.BOLD,
+    //     'remote/state/marks/italic': Mark.ITALIC,
+    //   }),
+    //   text(" color", {
+    //     'remote/state/marks/bold': Mark.BOLD,
+    //     'remote/state/marks/color': Mark.color('teal'),
+    //   }),
+    //   text("code", {
+    //     'remote/state/marks/code': Mark.CODE,
+    //   }),
+    //   // text("plain"),
+    //   // text("", {
+    //   //   'local/html/data-empty': true,
+    //   // }),
+    // ])]),
 
     section([title([])]),
     section([title([text("section 3")])]),
 
-    node("commentEditor", [
-      section([title([text('add a comment')])])
-    ]),
+    // node("commentEditor", [
+    //   section([title([text('add a comment')])])
+    // ]),
 
     section([title([text("section 3")])]),
     node("hstack", [
