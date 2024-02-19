@@ -440,13 +440,7 @@ export class TransformCommands extends BeforePlugin {
     let sliceBlockDepth = sliceBlock.depth;
     const taken = new NodeIdSet();
     while (sliceBlock) {
-      const children = sliceBlock.children.filter(n => {
-        if (n.isTextContainer && !n.eq(sliceStartTitle)) {
-          return false;
-        }
-
-        return !taken.has(n.id)
-      }) ?? [];
+      const children = sliceBlock.children.filter(n => !taken.has(n.id) && !n.isTextContainer) ?? [];
       sliceRightNodes.append(sliceBlockDepth, children);
 
       taken.add(sliceBlock.id);
@@ -458,11 +452,23 @@ export class TransformCommands extends BeforePlugin {
 
     // const sliceInsertNodes = NodeColumn.preparePlacement(leftNodes, sliceRightNodes);
     // console.log('INSERT', sliceInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
-    if (sliceStartTitle.depth < sliceEndTitle.depth) {
+    if (sliceStartTitle.depth <= sliceEndTitle.depth) {
       const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
+      const siblings = end.node.nextSiblings;
+      const to = Point.toAfter(sliceEndTitle.id);
+      const moveActions = moveNodesActions(to, siblings);
+      console.log('ACTIONS')
       tr.Add(actions);
+      tr.Add(moveActions);
     } else {
-      return
+      console.log('------------------------------------<ooooooooooooooo>------------------------------------')
+      const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
+      const siblings = end.node.nextSiblings;
+      const to = Point.toAfter(sliceEndTitle.id);
+      const moveActions = moveNodesActions(to, siblings);
+      console.log('ACTIONS')
+      tr.Add(actions);
+      tr.Add(moveActions);
     }
 
     const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
@@ -1243,7 +1249,7 @@ export class TransformCommands extends BeforePlugin {
 
     // collect nodes to be from right of selection
     while (endBlock && commonNodeDepth < endBlockDepth) {
-      const nodes = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
+      const nodes = endBlock.children.filter(n => !deleteGroup.has(n.id) && !n.isTextContainer) ?? [];
       // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
       rightColumn.append(endBlockDepth + 1, nodes);
       deleteGroup.addId(endBlock.id);
