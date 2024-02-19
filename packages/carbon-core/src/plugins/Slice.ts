@@ -1,8 +1,14 @@
-import {Carbon, CarbonPlugin, Node, NodeEncoder, SerializedNode, Writer} from "../core";
+import {Carbon, CarbonPlugin, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "../core";
 
 export class SlicePlugin extends CarbonPlugin {
 
   name = 'slice';
+
+  spec(): NodeSpec {
+    return {
+      content: 'content+'
+    }
+  }
 
   // serialize(react: Carbon, node: Node): SerializedNode {
   //   const contentNode = node.child(0);

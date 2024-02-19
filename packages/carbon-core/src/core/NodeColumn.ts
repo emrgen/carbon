@@ -1,13 +1,13 @@
 import {
-  CarbonAction, findMatchingActions,
+  CarbonAction, findMatchingActions, findMatchingNodes,
   Fragment,
-  getContentMatch, InsertNodeAction, insertNodesActions, MatchAction, MoveNodeAction,
+  getContentMatch, InsertNodeAction, insertNodesActions, MatchAction, MatchResult, MoveNodeAction,
   moveNodesActions,
   Node, nodeLocation,
   Point, RemoveNodeAction, removeNodesActions,
   SetContentAction
 } from "@emrgen/carbon-core";
-import {flatten, identity, isEmpty, last} from "lodash";
+import {flatten, get, identity, isEmpty, last} from "lodash";
 import {ContentMatch} from "./ContentMatch";
 import {Optional} from "@emrgen/types";
 import {takeBefore} from "../utils/array";
@@ -20,7 +20,7 @@ interface MoveNodesResult {
 interface TargetEntry {
   before: Node[];
   after: Node[];
-  contentMatch: Optional<ContentMatch>;
+  contentMatch: MatchResult;
 }
 
 class TargetColumn {
@@ -66,36 +66,29 @@ export class NodeColumn {
     }
   }
 
-  // ALGORITHM
-  // 1. insert the slice nodes
-  //   - if the left node is a text node and the right node is a text node
-  //     - merge the text nodes
-  // 2. move the right nodes wrt slice end node
-  //
-  static pasteActions(left: NodeColumn, middle: NodeColumn, right: NodeColumn) {
+  // insert the slice nodes
+  // NOTE: only works for case 1 and 2
+  // https://www.notion.so/paste-so-many-damn-cases-f7ef4f8160034836b6eafdcd92589486
+  static pasteActionsEasy(left: NodeColumn, right: NodeColumn) {
     const actions: CarbonAction[] = [];
 
     let leftLength = left.nodes.length-1;
     let rightLength = right.nodes.length-1;
-    let middleLength = middle.nodes.length-1;
-    const matches = new TargetColumn();
-
 
     while (true) {
       const leftNodes = left.nodes[leftLength];
-      const middleNodes = middle.nodes[middleLength];
+      const middleNodes = right.nodes[rightLength];
 
       if (!leftNodes || !middleNodes) {
-        console.log('EMPTY LEFT', 0, middleLength+1, leftNodes)
+        console.log('EMPTY LEFT', 0, rightLength+1, leftNodes)
         if (!leftNodes) {
           const leftIndex = left.nodes.findIndex(n => !isEmpty(n));
           const leftFirst = left.nodes[leftIndex]?.[0]!;
-          const nodes = middle.nodes.slice(0, middleLength+1).filter(identity).reverse();
+          const nodes = right.nodes.slice(0, rightLength+1).filter(identity).reverse();
           const flatNodes = flatten(nodes);
           if (!isEmpty(flatNodes)) {
             const result = NodeColumn.insertActions(leftFirst, flatNodes);
             console.log('bulk insert', leftIndex, result.before, nodes.map(ns => ns.map(n => [n.name, n.id.toString()])))
-            matches.nodes[leftIndex] = result;
             actions.push(...result.actions);
           }
         }
@@ -104,7 +97,7 @@ export class NodeColumn {
 
       if (isEmpty(leftNodes) || isEmpty(middleNodes)) {
         leftLength--;
-        middleLength--;
+        rightLength--;
         continue
       }
 
@@ -114,155 +107,40 @@ export class NodeColumn {
       if (leftFirst.isTextContainer && middleFirst.isTextContainer) {
         const nodes = middleNodes.slice(1);
         const textContent = leftFirst.textContent + middleFirst.textContent;
-        const textNode = leftFirst.type.schema.text(textContent)!;
-        actions.push(SetContentAction.create(leftFirst, [textNode]));
 
         if (!isEmpty(nodes)) {
           const matched = NodeColumn.insertActions(leftFirst, flatten(nodes), leftNodes.slice(1));
-          matches.nodes[leftLength] = matched;
           actions.push(...matched.actions);
-        } else {
-          matches.nodes[leftLength] = {
-            contentMatch: getContentMatch(leftFirst),
-            before: [leftFirst],
-            after: leftNodes.slice(1),
-          }
         }
       }
       else if (!left.nodes[leftLength-1]) {
-        // console.log('', 0, middleLength + 1)
-        const nodes = middle.nodes.slice(0, middleLength + 1).filter(identity).reverse();
+        const nodes = right.nodes.slice(0, rightLength + 1).filter(identity).reverse();
         const leftFirst = leftNodes[0];
-        // console.log('nodes', nodes.map(ns => ns.map(n => [n.name, n.id.toString()])))
-        const result = NodeColumn.insertActions(leftFirst, flatten(nodes), leftNodes.slice(1));
-        matches.nodes[leftLength] = result;
+        const flatNodes = flatten(nodes);
+        const result = NodeColumn.insertActions(leftFirst,flatNodes, leftNodes.slice(1));
         actions.push(...result.actions);
       }
       else {
         const firstNode = leftNodes[0];
         const at = Point.toAfter(firstNode);
         actions.push(...insertNodesActions(at, middleNodes));
-        matches.nodes[leftLength] = {
-          contentMatch: getContentMatch(firstNode),
-          before: [firstNode, ...middleNodes],
-          after: leftNodes.slice(1),
-        }
       }
 
       leftLength--;
-      middleLength--;
+      rightLength--;
     }
 
-    // const lastLevel = matches.nodes.findIndex(n => n && !isEmpty(n.before));
-    // console.log('lastLevel', lastLevel, matches.nodes.map(n => n?.before.map(n => [n.name, n.textContent])))
-    // const sliceEndParent = last(matches.nodes[lastLevel]?.before);
-    // if (!sliceEndParent) {
-    //   throw new Error('failed to find slice end parent');
-    // }
-    //
-    // const sliceEndTitle = sliceEndParent?.find(n => n.isTextContainer, {
-    //   order: 'post',
-    //   direction: 'backward'
-    // });
-    //
-    // const chain = takeBefore(sliceEndTitle?.chain ?? [], n => n.eq(sliceEndParent));
-    // console.log('chain', chain.map(n => [n.name, n.id.toString()]))
-    //
-    // chain.reverse().forEach((node, i) => {
-    //   matches.nodes[lastLevel + i + 1] = {
-    //     contentMatch: getContentMatch(node),
-    //     before: [node],
-    //     after: []
-    //   }
-    // })
-
-    // console.log('last level', lastLevel, matches.nodes, sliceEndTitle?.name, sliceEndTitle?.textContent)
-
-    // const matches: MoveNodesResult[] = [];
-
-    // move the nodes after selection end to the end of the inserted nodes
-    // {
-    //   let leftIndex = lastLevel + chain.length;
-    //   let rightIndex = right.nodes.length-1;
-    //
-    //   while (true) {
-    //     const leftEntry = matches.nodes[leftIndex];
-    //     const leftNodes = leftEntry?.before;
-    //     const rightNodes = right.nodes[rightIndex];
-    //
-    //
-    //     // when one of the columns is empty
-    //     if (!leftNodes || !rightNodes) {
-    //       // if left nodes are empty, move remaining right nodes to left
-    //       if (!leftNodes) {
-    //         // const leftFirst = matches.nodes.find(e => !isEmpty(e.before));
-    //         // const nodes = right.nodes.slice(0, rightLength+1).filter(identity).reverse();
-    //         // const moves = NodeColumn.moveNodes([leftFirst], flatten(nodes));
-    //         // matches[leftLength] = moves;
-    //         // actions.push(...moves.actions);
-    //       }
-    //
-    //       break;
-    //     }
-    //
-    //     //
-    //     if (isEmpty(leftNodes) || isEmpty(rightNodes)) {
-    //       leftLength--;
-    //       rightLength--;
-    //       continue
-    //     }
-    //
-    //     // all the moves are done after the leftLast node
-    //     const leftLast = last(leftEntry?.before)!;
-    //     const rightFirst = rightNodes[0];
-    //
-    //     if (leftLast.isTextContainer && rightFirst.isTextContainer) {
-    //       const leftText = leftLast.textContent;
-    //       const rightText = rightFirst.textContent;
-    //       const textContent = leftText + rightText;
-    //       const textNode = leftLast.type.schema.text(textContent)!;
-    //       actions.push(SetContentAction.create(leftLast, [textNode]));
-    //
-    //       if (rightNodes.length > 1) {
-    //         const nodes = rightNodes.slice(1);
-    //         const matched = NodeColumn.moveActions(leftEntry.contentMatch!, leftLast, nodes, leftEntry.after);
-    //         actions.push(...matched);
-    //       }
-    //
-    //       console.log('remaining nodes', rightNodes.slice(1).map(n => [n.name, n.id.toString()]))
-    //     }
-    //     else if (!matches.nodes[leftLength-1]) {
-    //       console.log('DISASTER', 0, rightLength+1, rightNodes.map(n => [n.name, n.id.toString()]))
-    //       // const nodes = right.nodes.slice(0, rightLength+1).filter(identity).reverse();
-    //       // const leftFirst = left.nodes.find(n => !isEmpty(n))?.[0]!;
-    //       // const moves = NodeColumn.moveNodes([leftFirst], flatten(nodes));
-    //       // matches[leftLength] = moves;
-    //       // actions.push(...moves.actions);
-    //     }
-    //     else {
-    //       // const matched = NodeColumn.moveActions(leftLast, rightNodes);
-    //       // actions.push(...matched);
-    //     }
-    //
-    //     leftIndex--;
-    //     rightIndex--;
-    //
-    //     break;
-    //   }
-    // }
-
     return actions;
-
-    // return []
   }
 
   // insert nodes after the before node
-  static insertActions(before: Node, nodes: Node[], after: Node[] = []) {
+  static insertActions(before: Node, nodes: Node[], after: Node[] = []): TargetEntry & {actions: CarbonAction[]}{
     const at = Point.toAfter(before);
     const contentMatch = getContentMatch(before);
-    const match = contentMatch.matchFragment(Fragment.from(nodes));
+    const matches: Node[] = [];
+    const match = findMatchingNodes(matches, contentMatch, nodes, after);
 
-    const actions = insertNodesActions(at, nodes)
+    const actions = insertNodesActions(at, matches)
 
     return {
       actions,
@@ -329,7 +207,7 @@ export class NodeColumn {
         const rightText = rightFirst.textContent
         const {type} = leftFirst;
         const textNode = type.schema.text(leftText + rightText)!;
-        actions.push(SetContentAction.create(leftFirst, [textNode]));
+        // actions.push(SetContentAction.create(leftFirst, [textNode]));
 
         if (!left.nodes[leftLength-1]) {
           const nodes = right.nodes.slice(0, rightLength).filter(n => !isEmpty(n)).reverse();
@@ -345,11 +223,11 @@ export class NodeColumn {
             ...rightNodes.slice(1),
           ], leftNodes.slice(1));
 
-          targets.nodes[leftLength] = {
-            before: [leftFirst, ...rightNodes],
-            after: leftNodes.slice(1),
-            contentMatch: moves.contentMatch,
-          }
+          // targets.nodes[leftLength] = {
+          //   before: [leftFirst, ...rightNodes],
+          //   after: leftNodes.slice(1),
+          //   contentMatch: moves.contentMatch,
+          // }
 
           matches[leftLength] = moves;
           actions.push(...moves.actions);
@@ -379,11 +257,11 @@ export class NodeColumn {
         }
         matches[leftLength] = moves;
         actions.push(...moves.actions);
-        targets.nodes[leftLength] = {
-          before: [leftFirst, ...rightNodes],
-          after: leftNodes.slice(1),
-          contentMatch: moves.contentMatch,
-        }
+        // targets.nodes[leftLength] = {
+        //   before: [leftFirst, ...rightNodes],
+        //   after: leftNodes.slice(1),
+        //   contentMatch: moves.contentMatch,
+        // }
         console.log('xxxxx', leftFirst.name, leftFirst.id.toString(), rightNodes.map(n => n.name))
       }
 

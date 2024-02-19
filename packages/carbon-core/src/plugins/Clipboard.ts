@@ -8,6 +8,7 @@ import {blocksBelowCommonNode} from "../utils/findNodes";
 import {SelectedPath} from "../core/NodeProps";
 import {Optional} from "@emrgen/types";
 import {identity} from "lodash";
+import {findMatchingActions, findMatchingNodes} from "@emrgen/carbon-core";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
@@ -98,12 +99,22 @@ export class ClipboardPlugin extends AfterPlugin {
       ? [startNode] :
       (startNode?.parent?.children.slice(startNode.index, endNode.index + 1) ?? [])
 
+    const type = app.schema.type('slice');
+    const matches: Node[] = []
+    const match = findMatchingNodes(matches, type.contentMatch, nodes, []);
+
+    if (!match.validEnd) {
+      return Slice.empty;
+    }
+
+    console.log('match', match.validEnd, matches.map(n => n.name), type.contentMatch, nodes.map(n => n.name));
+
     // create clone of selected nodes
     // the ids are cloned as well, so that we can remove the nodes outside the selection
-    const cloned: Node[] = nodes.map(n => app.schema.clone(n, identity));
+    const cloned: Node[] = matches.map(n => app.schema.clone(n, identity));
     console.log('cloned', cloned.map(n => n.name));
 
-    const root = app.schema.type('slice').create(cloned)!;
+    const root = type.create(cloned)!;
 
     console.log('rootNode', root);
 

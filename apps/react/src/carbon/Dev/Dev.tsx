@@ -89,26 +89,26 @@ const data = node("carbon", [
     //   // }),
     // ])]),
 
-    section([title([])]),
-    section([title([text("section 3")])]),
+    // section([title([])]),
+    // section([title([text("section 3")])]),
 
     // node("commentEditor", [
     //   section([title([text('add a comment')])])
     // ]),
 
-    section([title([text("section 3")])]),
-    node("hstack", [
-      node("stack", [section([title([text("section 1")])])]),
-      node("stack", [section([title([text("section 2")])])]),
-      node("stack", [section([title([text("section 3")])])]),
-    ]),
-    section([title([text("section 543")])]),
-    node("hstack", [
-      node("stack", [section([title([text("section 1")])])]),
-      node("stack", [section([title([text("section 2")])])]),
-      node("stack", [section([title([text("section 3")])])]),
-    ]),
-    section([title([text("section 4")])]),
+    // section([title([text("section 3")])]),
+    // node("hstack", [
+    //   node("stack", [section([title([text("section 1")])])]),
+    //   node("stack", [section([title([text("section 2")])])]),
+    //   node("stack", [section([title([text("section 3")])])]),
+    // ]),
+    // section([title([text("section 543")])]),
+    // node("hstack", [
+    //   node("stack", [section([title([text("section 1")])])]),
+    //   node("stack", [section([title([text("section 2")])])]),
+    //   node("stack", [section([title([text("section 3")])])]),
+    // ]),
+    // section([title([text("section 4")])]),
     // title([]),
     // node('frame', [
     //   title([text('frame title')]),
@@ -273,6 +273,21 @@ const data = node("carbon", [
       section([title([text("1235")])]),
     ]),
     section([title([text("1234")])]),
+
+    section([
+      title([text("abc")]),
+      section([
+        title([text("def")]),
+        section([
+          title([text("ghi")]),
+          section([title([text("jkl")])]),
+        ]),
+        section([title([text("mno")])]),
+      ]),
+      section([title([text("pqr")])]),
+    ]),
+    section([title([text("stu")])]),
+
     node(
       "section",
       [
