@@ -147,7 +147,8 @@ export class NodeColumn {
     return matchActions.map(m => MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id));
   }
 
-  static deleteMergeByMove(left: NodeColumn, right: NodeColumn): CarbonAction[] {
+  // merge left and right column by moving nodes from right to left
+  static mergeByMove(left: NodeColumn, right: NodeColumn): CarbonAction[] {
     const actions: CarbonAction[] = [];
 
     let rightLength = right.nodes.length-1;
@@ -158,8 +159,16 @@ export class NodeColumn {
       const leftNodes = left.nodes[leftLength]
       const rightNodes = right.nodes[rightLength]
 
-      // when right column is is consumed
-      if (!rightNodes) {
+      if (!rightNodes || !leftNodes) {
+        // when left column is consumed fully but there are still nodes in right column
+        if (!leftNodes) {
+          const leftFirst = left.nodes.find(n => !isEmpty(n))?.[0]!;
+          const nodes = right.nodes.slice(0, rightLength+1).filter(e => !isEmpty(e)).reverse();
+          if (!isEmpty(nodes)) {
+            const moves = NodeColumn.moveNodes([leftFirst], flatten(nodes));
+            actions.push(...moves.actions);
+          }
+        }
         break;
       }
 

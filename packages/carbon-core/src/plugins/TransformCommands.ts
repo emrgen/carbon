@@ -405,7 +405,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     if (sliceStartTitle.eq(sliceEndTitle)) {
-      const actions = NodeColumn.deleteMergeByMove(leftNodes, rightNodes);
+      const actions = NodeColumn.mergeByMove(leftNodes, rightNodes);
       const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
 
       const textBeforeCursor = startTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
@@ -709,7 +709,7 @@ export class TransformCommands extends BeforePlugin {
       console.error('cant merge without commonNode');
       return
     }
-
+    console.log('----------------------')
     const startTitleBlock = start.node;
     const endTitleBlock = end.node;
     let startBlock: Node = startTitleBlock.parent!;
@@ -752,7 +752,7 @@ export class TransformCommands extends BeforePlugin {
     console.log('leftColumn', leftColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
     console.log('rightColumn', rightColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
-    const mergeAction = NodeColumn.deleteMergeByMove(leftColumn, rightColumn);
+    const mergeAction = NodeColumn.mergeByMove(leftColumn, rightColumn);
     const {actions} = this.deleteGroupCommands(app, deleteGroup)
 
     tr.Add(mergeAction)
@@ -780,6 +780,7 @@ export class TransformCommands extends BeforePlugin {
     const leftColumn = NodeColumn.create();
     const rightColumn = NodeColumn.create();
     const moveNodeIds = new NodeIdSet();
+    console.log('==============================================')
 
     // collect nodes to be from right of selection
     while (commonNodeDepth < endBlockDepth) {
@@ -799,6 +800,7 @@ export class TransformCommands extends BeforePlugin {
         moveNodeIds.add(children.map(n => n.id));
       }
 
+      console.log('=> End block name', endBlock.name)
       endBlock = endBlock.parent!;
       endBlockDepth -= 1
     }
@@ -820,7 +822,7 @@ export class TransformCommands extends BeforePlugin {
     console.log('rightColumn', rightColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
     const {actions} = this.deleteGroupCommands(app, deleteGroup)
-    const mergeAction = NodeColumn.deleteMergeByMove(leftColumn, rightColumn);
+    const mergeAction = NodeColumn.mergeByMove(leftColumn, rightColumn);
 
     tr.Add(mergeAction)
     tr.Add(actions)
@@ -1246,15 +1248,19 @@ export class TransformCommands extends BeforePlugin {
 
     const leftColumn = NodeColumn.create();
     const rightColumn = NodeColumn.create();
+    const moveNodeIds = new NodeIdSet();
 
     // collect nodes to be from right of selection
-    while (endBlock && commonNodeDepth < endBlockDepth) {
-      const nodes = endBlock.children.filter(n => !deleteGroup.has(n.id) && !n.isTextContainer) ?? [];
+    while (commonNodeDepth < endBlockDepth) {
+      const nodes = endBlock.children.filter(n => !moveNodeIds.has(n.id) && !deleteGroup.has(n.id) && !n.isTextContainer) ?? [];
       // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
+
       rightColumn.append(endBlockDepth + 1, nodes);
+      moveNodeIds.add(nodes.map(n => n.id));
       deleteGroup.addId(endBlock.id);
 
-      endBlock = endBlock.parent;
+      console.log('=> End block name', endBlock.name)
+      endBlock = endBlock.parent!;
       endBlockDepth -= 1
     }
 
@@ -1277,7 +1283,7 @@ export class TransformCommands extends BeforePlugin {
     const textNode = app.schema.text(textContent)!;
     tr.Add(SetContentAction.create(start.node.id, [textNode]));
 
-    const mergeActions = NodeColumn.deleteMergeByMove(leftColumn, rightColumn);
+    const mergeActions = NodeColumn.mergeByMove(leftColumn, rightColumn);
 
     const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
 
