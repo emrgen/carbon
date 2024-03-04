@@ -413,6 +413,8 @@ export class Node extends EventEmitter implements IntoNodeId {
       return this.type.isIsolate
     }
 
+
+
     get isCollapsible() {
       return this.type.isCollapsible
     }
@@ -737,7 +739,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       this.content.updateProps(props);
     }
 
-    // unfreeze unfreezes the node and all its descendants along the path
+    // unfreeze unfreezes the nodes in the path
     // this is useful when we want to mutate the node and its descendants multiple times without creating new nodes
     // one way to think about this is that we are unfreezing the node and its descendants to a temporary state using a path laser
     unfreeze(path: Path, map: NodeMap): MutableNode {

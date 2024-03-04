@@ -333,6 +333,7 @@ export class TransformCommands extends BeforePlugin {
     const {node: endTitleBlock} = end;
     const {start: sliceStartTitle, end: sliceEndTitle} = slice;
 
+    // early exit for simple case
     if (startTitleBlock.eq(endTitleBlock) && sliceStartTitle.eq(sliceEndTitle)) {
       const textBeforeCursor = endTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
       const textContent = textBeforeCursor + startTitleBlock.textContent.slice(end.offset);
@@ -349,140 +350,207 @@ export class TransformCommands extends BeforePlugin {
     const rightNodes = NodeColumn.create();
     const movedNodes = new NodeIdSet();
 
-    // if (startTitleBlock.eq(endTitleBlock)) {
-    //   console.log('LEFT', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
-    //   console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
-    //   return tr;
-    // }
-
-    const commonNode = start.node.commonNode(end.node)
-    const closestIsolate = commonNode.closest(n => n.isIsolate)!;
+    const commonNode = start.node.commonNode(end.node).closest(n => n.isContainer)!;
     let startBlock: Optional<Node> = startTitleBlock.parent!;
     let startBlockChild: Node = startTitleBlock;
     let endBlock: Optional<Node> = endTitleBlock.parent!;
 
-    const isolateDepth = closestIsolate.depth;
+    const pasteBoundary = startTitleBlock.closest(n => n.type.isPasteBoundary)!;
+    const pasteBoundaryDepth = pasteBoundary.depth;
     let commonNodeDepth = commonNode.depth;
     let startBlockDepth = startBlock.depth;
-    let endBlockDepth = endBlock.depth;
+    let startBlockLimit = pasteBoundaryDepth
 
-    // collect nodes to be from right of selection
-    while (isolateDepth < endBlockDepth) {
-      const children = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
-      const nodes = children.map(ch => {
-        if (ch.isTextContainer) {
-          const title = ch.clone(deepCloneMap)
-          const textContent = title.textContent.slice(end.offset)
-          const textNode = app.schema.text(textContent)!;
-          title.updateContent([textNode]);
-          return title;
-        }
 
-        return ch;
-      })
-
-      // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
-      rightNodes.append(endBlockDepth + 1, nodes);
-      movedNodes.add(nodes.map(n => n.id));
-
-      if (startTitleBlock.eq(endTitleBlock)) {
-        break
-      }
-
-      if (commonNodeDepth < endBlockDepth) {
-        deleteGroup.addId(endBlock.id);
-      }
-
-      endBlock = endBlock.parent!;
-      endBlockDepth -= 1
+    // when start and end slice block are same
+    // the nodes to be moved are always below the common node
+    if (sliceStartTitle.eq(sliceEndTitle)) {
+      startBlockLimit = commonNodeDepth;
     }
 
     // collect nodes to be from left of selection
-    while (isolateDepth <= startBlockDepth) {
+    // the target nodes for moves can be above or below the common node
+    while (startBlockLimit <= startBlockDepth) {
       // NOTE: next siblings of startBlockChild is collected for contentMatch check during merge
       // console.log(startBlockChild.id.toString(), startBlockChild.index ,startBlock!.children.map(n => n.id.toString()))
-      const children = startBlock!.children.slice(startBlockChild.index).filter(n => !deleteGroup.has(n.id)) ?? [];
-      const nodes = children.map(ch => {
-        if (ch.isTextContainer) {
-          const title = ch.clone(deepCloneMap);
-          let textContent = title.textContent.slice(0, start.offset)
-          // if slice is within same title block
-          if (sliceStartTitle.eq(sliceEndTitle)) {
-            textContent += sliceStartTitle.textContent;
-          }
-
-          const textNode = app.schema.text(textContent)!;
-          title.updateContent([textNode]);
-          return title;
-        }
-
-        return ch;
-      })
+      const nodes = startBlock!.children.slice(startBlockChild.index).filter(n => !deleteGroup.has(n.id)) ?? [];
 
       leftNodes.append(startBlockDepth + 1, nodes);
-
       startBlockChild = startBlock!
       startBlock = startBlock.parent!;
       startBlockDepth -= 1
     }
 
     if (sliceStartTitle.eq(sliceEndTitle)) {
+      const actions = NodeColumn.mergeByMove(leftNodes, rightNodes);
+      const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+
       const textBeforeCursor = startTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
       const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
+      const textContent = textBeforeCursor + endTitleBlock.textContent.slice(end.offset);
+      const textNode = app.schema.text(textContent);
 
-      const actions = NodeColumn.deleteMergeByMove(leftNodes, rightNodes);
-      const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+      console.log('leftNodes', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
+      console.log('rightNodes', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
+      console.log("DELETE NODES", deleteGroup.ids.map(id => id.toString()));
 
       tr
         .Add(actions)
         .Add(nodeActions)
+      tr
+        .Add(SetContentAction.create(start.node, [textNode!]));
+      tr
         .Select(after);
 
       return tr;
     }
 
     console.log('LEFT', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
-    console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+    // console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
-    const rightMoveNodes = NodeColumn.preparePlacement(leftNodes, rightNodes);
-    const entries = rightMoveNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name]));
-    console.log('ENTRIES', entries)
+    // const rightMoveNodes = NodeColumn.preparePlacement(leftNodes, rightNodes);
+    // const entries = rightMoveNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name]));
+    // console.log('ENTRIES', entries)
 
-    const sliceRightNodes = NodeColumn.create();
+    const sliceNodes = NodeColumn.create();
     let sliceBlock = sliceStartTitle.parent!;
     let sliceBlockDepth = sliceBlock.depth;
     const taken = new NodeIdSet();
     while (sliceBlock) {
-      const children = sliceBlock.children.filter(n => {
-        if (n.isTextContainer && !n.eq(sliceStartTitle)) {
-          return false;
-        }
-
-        return !taken.has(n.id)
-      }) ?? [];
-      sliceRightNodes.append(sliceBlockDepth, children);
+      const children = sliceBlock.children.filter(n => !taken.has(n.id) && !n.isTextContainer) ?? [];
+      sliceNodes.append(sliceBlockDepth, children);
 
       taken.add(sliceBlock.id);
       sliceBlock = sliceBlock.parent!;
       sliceBlockDepth -= 1;
     }
 
-    console.log('SLICE', sliceRightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name, n.textContent])))
+    console.log('SLICE', sliceNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name, n.textContent])));
+    const {actions, targets } = NodeColumn.pasteInsertActions(leftNodes, sliceNodes);
+    tr.Add(actions);
+    const firstUsedDepth = targets.nodes.findIndex(n => n && n.used);
+    const topSliceDepth = Math.min(firstUsedDepth, startTitleBlock.parent!.depth);
+    const entry = targets.nodes[firstUsedDepth];
+    const endParent = last(entry.before)!;
+    const parents = takeBefore(slice.end.chain, p => p.eq(endParent));
+    console.log(parents.map(p => [p.id.toString(), p.name, p.textContent]));
+    parents.reverse().forEach((p, index) => {
+      targets.nodes[firstUsedDepth + index + 1] = {
+        before: [p],
+        after: [],
+        contentMatch: getContentMatch(p),
+        used: false,
+      }
+    });
 
-    const sliceInsertNodes = NodeColumn.preparePlacement(leftNodes, sliceRightNodes);
-    console.log('INSERT', sliceInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
-    const actions = NodeColumn.pasteActions(leftNodes, sliceInsertNodes, rightMoveNodes);
+    const maxMergeDepth = firstUsedDepth + parents.length;
+
+    // collect nodes after selection end that should be moved and merged below inserted(pasted) nodes
+    let mergeBlockLimit = Math.min(Math.max(commonNodeDepth, pasteBoundaryDepth), topSliceDepth-1);
+
+    targets.nodes.forEach((nodes, index) => {
+      if (index < mergeBlockLimit || index > maxMergeDepth) {
+        targets.nodes[index] = {
+          before: [],
+          after: [],
+          contentMatch: ContentMatch.empty,
+          used: false,
+        }
+      }
+    })
+
+    let endBlockDepth = endBlock.depth;
+    // collect nodes to be from right of selection upto min(endBlockLimit, sliceRootDepth)
+    let endBlockLimit = Math.min(commonNodeDepth, topSliceDepth-1);
+
+    const [startNode, endNode] = blocksBelowCommonNode(startTitleBlock!, endTitleBlock!);
+    const startTopContainer = startNode.closest(n => n.isContainer)!;
+    const endTopContainer = endNode.closest(n => n.isContainer)!;
+    if (endTopContainer.parents.some(n => n.eq(startTopContainer))) {
+      endBlockLimit = mergeBlockLimit;
+    }
+
+    // collect nodes to be from right of selection upto min(endBlockLimit, sliceRootDepth)
+    // add deleted nodes from rightNodes that should be deleted
+    let endBlockChild = endTitleBlock;
+    // Note: is some situations endBlock can be document node and the children will be document content slice
+    while (endBlockLimit <= endBlockDepth) {
+      // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
+      const nodes = endBlock.children.slice(endBlockChild.index).filter(n => !deleteGroup.has(n.id) && !n.isTextContainer) ?? [];
+
+      // movedNodes.add(nodes.map(n => n.id));
+      // deleteGroup.addIds(nodes.map(n => n.id));
+      if (commonNodeDepth <= endBlockDepth) {
+        rightNodes.append(endBlockDepth + 1, nodes);
+      } else {
+        console.log('out of common depth', nodes.slice(1))
+        rightNodes.append(endBlockDepth + 1, nodes.slice(1));
+      }
+
+      if (commonNodeDepth < endBlockDepth) {
+        deleteGroup.addId(endBlock.id);
+      }
+
+      endBlockChild = endBlock;
+      endBlock = endBlock.parent!;
+      endBlockDepth -= 1
+    }
+
+    console.log('endBlockLimit', endBlockLimit)
+    console.log('topSliceDepth', topSliceDepth)
+    console.log('commonNodeDepth', commonNodeDepth)
+    console.log('pasteBoundaryDepth', pasteBoundaryDepth)
+    console.log('mergeBlockLimit', pasteBoundaryDepth)
+    console.log('targets', targets)
+
+    console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
+
+    // merge target with rightNodes
+    const moveActions = NodeColumn.pasteMoveActions(targets, rightNodes);
+    console.log('moveActions', moveActions)
+    tr.Add(moveActions);
+
+    // rightNodes.nodes.forEach((nodes, index) => {
+    //   tr.Add(removeNodesActions(nodes));
+    // });
+
+    // const sliceInsertNodes = NodeColumn.preparePlacement(leftNodes, sliceRightNodes);
+    // console.log('INSERT', sliceInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
+    // if (sliceStartTitle.depth <= sliceEndTitle.depth) {
+    //   const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
+    //   const siblings = end.node.nextSiblings;
+    //   const to = Point.toAfter(sliceEndTitle.id);
+    //   const moveActions = moveNodesActions(to, siblings);
+    //   console.log('ACTIONS')
+    //   tr.Add(actions);
+    //   tr.Add(moveActions);
+    // } else {
+    //   console.log('------------------------------------<ooooooooooooooo>------------------------------------')
+    //   const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
+    //   const siblings = end.node.nextSiblings;
+    //   const to = Point.toAfter(sliceEndTitle.id);
+    //   const moveActions = moveNodesActions(to, siblings);
+    //   console.log('ACTIONS')
+    //   tr.Add(actions);
+    //   tr.Add(moveActions);
+    // }
+
+    const startTextContent = startTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
+    const startTextNode = app.schema.text(startTextContent);
+    tr.Add(SetContentAction.create(start.node, [startTextNode!]));
+
+    const endTextContent = sliceEndTitle.textContent + endTitleBlock.textContent.slice(end.offset);
+    const endTextNode = app.schema.text(endTextContent);
+    tr.Add(SetContentAction.create(sliceEndTitle, [endTextNode!]));
 
     const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
-
-    console.log(actions)
-
-    tr.Add(actions);
     tr.Add(nodeActions);
 
     const pin = Pin.toEndOf(sliceEndTitle)!;
-    const after = PinnedSelection.fromPin(pin)
+    const after = PinnedSelection.fromPin(pin);
     tr.Select(after);
+
+    // tr.Select(PinnedSelection.fromPin(Pin.future(start.node, startTextContent.length)!));
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {
@@ -706,7 +774,7 @@ export class TransformCommands extends BeforePlugin {
       console.error('cant merge without commonNode');
       return
     }
-
+    console.log('----------------------')
     const startTitleBlock = start.node;
     const endTitleBlock = end.node;
     let startBlock: Node = startTitleBlock.parent!;
@@ -714,7 +782,7 @@ export class TransformCommands extends BeforePlugin {
 
     let commonNodeDepth = commonNode.depth;
     const startBlockDepth = startBlock.depth;
-    let currEndBlockDepth = endBlock.depth;
+    let endBlockDepth = endBlock.depth;
 
     const leftColumn = NodeColumn.create();
     const rightColumn = NodeColumn.create();
@@ -724,6 +792,7 @@ export class TransformCommands extends BeforePlugin {
       tr.Add(ChangeNameAction.create(endBlock.id, splitBlock.type.splitName));
     }
 
+    // 1. move the endBlock to after startBlock
     tr.Add(MoveNodeAction.create(nodeLocation(endBlock)!, Point.toAfter(startBlock), endBlock.id));
     moveNodeIds.add(endBlock.id);
 
@@ -731,10 +800,10 @@ export class TransformCommands extends BeforePlugin {
     const lastChild = endBlock.lastChild!
     leftColumn.append(startBlockDepth, [lastChild]);
 
-    // collect nodes to be from left of selection
-    while (commonNodeDepth < currEndBlockDepth) {
+    // collect nodes to be moved from after end of selection
+    while (commonNodeDepth < endBlockDepth) {
       const children = endBlock.nextSiblings.filter(n => !deleteGroup.has(n.id) && !moveNodeIds.has(n.id)) ?? [];
-      rightColumn.append(currEndBlockDepth, children);
+      rightColumn.append(endBlockDepth, children);
 
       // nodes between startBlock and endBlock are to be removed
       if (!moveNodeIds.has(endBlock.id)) {
@@ -742,13 +811,13 @@ export class TransformCommands extends BeforePlugin {
       }
 
       endBlock = endBlock!.parent!;
-      currEndBlockDepth -= 1
+      endBlockDepth -= 1
     }
 
     console.log('leftColumn', leftColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
     console.log('rightColumn', rightColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
-    const mergeAction = NodeColumn.deleteMergeByMove(leftColumn, rightColumn);
+    const mergeAction = NodeColumn.mergeByMove(leftColumn, rightColumn);
     const {actions} = this.deleteGroupCommands(app, deleteGroup)
 
     tr.Add(mergeAction)
@@ -770,45 +839,47 @@ export class TransformCommands extends BeforePlugin {
     let endBlock: Node = endTitleBlock.parent!;
 
     let commonNodeDepth = commonNode.depth;
-    let currStartBlockDepth = startBlock.depth;
-    let currEndBlockDepth = endBlock.depth;
+    let startBlockDepth = startBlock.depth;
+    let endBlockDepth = endBlock.depth;
 
     const leftColumn = NodeColumn.create();
     const rightColumn = NodeColumn.create();
     const moveNodeIds = new NodeIdSet();
+    console.log('==============================================')
 
     // collect nodes to be from right of selection
-    while (commonNodeDepth < currEndBlockDepth) {
+    while (commonNodeDepth < endBlockDepth) {
       if (endTitleBlock.parent?.eq(endBlock)) {
         // change the name of the endBlock before moving
         if (!endBlock.type.eq(splitBlock.type)) {
           tr.Add(ChangeNameAction.create(endBlock.id, splitBlock.type.splitName));
         }
 
-        rightColumn.append(currEndBlockDepth, [endBlock]);
+        rightColumn.append(endBlockDepth, [endBlock]);
         moveNodeIds.add(endBlock.id);
       } else {
         const children = endBlock.children.filter(n => !deleteGroup.has(n.id) && !moveNodeIds.has(n.id)) ?? [];
-        // because the startBlock start as parent of the startTitleBlock we need move the children 1 level deeper
-        rightColumn.append(currEndBlockDepth + 1, children);
+        // NOTE: because the startBlock start as parent of the startTitleBlock we need move the children 1 level deeper
+        rightColumn.append(endBlockDepth + 1, children);
         deleteGroup.addId(endBlock.id);
         moveNodeIds.add(children.map(n => n.id));
       }
 
+      console.log('=> End block name', endBlock.name)
       endBlock = endBlock.parent!;
-      currEndBlockDepth -= 1
+      endBlockDepth -= 1
     }
 
     // collect nodes to be from left of selection
-    while (commonNodeDepth < currStartBlockDepth) {
+    while (commonNodeDepth < startBlockDepth) {
       if (startTitleBlock.parent?.eq(startBlock)) {
-        leftColumn.append(currStartBlockDepth, [startBlock]);
+        leftColumn.append(startBlockDepth, [startBlock]);
       } else {
         const children = [startBlock, ...startBlock.nextSiblings].filter(n => !deleteGroup.has(n.id) && !moveNodeIds.has(n.id)) ?? [];
-        leftColumn.append(currStartBlockDepth, children)
+        leftColumn.append(startBlockDepth, children)
       }
       startBlock = startBlock!.parent!;
-      currStartBlockDepth -= 1
+      startBlockDepth -= 1
     }
 
     // merge the columns
@@ -816,7 +887,7 @@ export class TransformCommands extends BeforePlugin {
     console.log('rightColumn', rightColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
     const {actions} = this.deleteGroupCommands(app, deleteGroup)
-    const mergeAction = NodeColumn.deleteMergeByMove(leftColumn, rightColumn);
+    const mergeAction = NodeColumn.mergeByMove(leftColumn, rightColumn);
 
     tr.Add(mergeAction)
     tr.Add(actions)
@@ -1242,45 +1313,26 @@ export class TransformCommands extends BeforePlugin {
 
     const leftColumn = NodeColumn.create();
     const rightColumn = NodeColumn.create();
+    const moveNodeIds = new NodeIdSet();
 
     // collect nodes to be from right of selection
-    while (endBlock && commonNodeDepth < endBlockDepth) {
-      const children = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
-      const nodes = children.map(ch => {
-        if (ch.isTextContainer) {
-          const title = ch.clone(deepCloneMap)
-          const textContent = title.textContent.slice(end.offset)
-          const textNode = app.schema.text(textContent)!;
-          title.updateContent([textNode]);
-          return title;
-        }
-
-        return ch;
-      })
-
+    while (commonNodeDepth < endBlockDepth) {
+      const nodes = endBlock.children.filter(n => !moveNodeIds.has(n.id) && !deleteGroup.has(n.id) && !n.isTextContainer) ?? [];
       // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
+
       rightColumn.append(endBlockDepth + 1, nodes);
+      moveNodeIds.add(nodes.map(n => n.id));
       deleteGroup.addId(endBlock.id);
 
-      endBlock = endBlock.parent;
+      console.log('=> End block name', endBlock.name)
+      endBlock = endBlock.parent!;
       endBlockDepth -= 1
     }
 
     // collect nodes to be from left of selection
     while (commonNodeDepth <= startBlockDepth) {
       // NOTE: next siblings of startBlockChild is collected for contentMatch check during merge
-      const children = startBlock!.children.slice(startBlockChild.index).filter(n => !deleteGroup.has(n.id)) ?? [];
-      const nodes = children.map(ch => {
-        if (ch.isTextContainer) {
-          const title = ch.clone(deepCloneMap)
-          const textContent = title.textContent.slice(0, start.offset)
-          const textNode = app.schema.text(textContent)!;
-          title.updateContent([textNode]);
-          return title;
-        }
-
-        return ch;
-      })
+      const nodes = startBlock!.children.slice(startBlockChild.index).filter(n => !deleteGroup.has(n.id)) ?? [];
       leftColumn.append(startBlockDepth + 1, nodes)
 
       startBlockChild = startBlock!
@@ -1292,7 +1344,11 @@ export class TransformCommands extends BeforePlugin {
     console.log('leftColumn', leftColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
     console.log('rightColumn', rightColumn.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
-    const mergeActions = NodeColumn.deleteMergeByMove(leftColumn, rightColumn);
+    const textContent = start.node.textContent.slice(0, start.offset) + end.node.textContent.slice(end.offset);
+    const textNode = app.schema.text(textContent)!;
+    tr.Add(SetContentAction.create(start.node.id, [textNode]));
+
+    const mergeActions = NodeColumn.mergeByMove(leftColumn, rightColumn);
 
     const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
 

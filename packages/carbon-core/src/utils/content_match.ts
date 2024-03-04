@@ -26,7 +26,7 @@ export const findMatchingActions = (actions: MatchAction[], contentMatch: Conten
   if (nodes.length === 0) {
     const nextMatch = contentMatch.matchFragment(Fragment.from(after));
     return {
-      match: nextMatch,
+      match: contentMatch,
       validEnd: !!nextMatch?.validEnd
     }
   }
@@ -54,6 +54,37 @@ export const findMatchingActions = (actions: MatchAction[], contentMatch: Conten
 
   // try with unwrapping the node
   return findMatchingActions(actions, contentMatch, at, node.children.concat(nodes.slice(1)), after);
+}
+
+export const findMatchingNodes = (before: Node[], contentMatch: ContentMatch, nodes: Node[], after: Node[]): MatchResult => {
+  if (nodes.length === 0) {
+    const nextMatch = contentMatch.matchFragment(Fragment.from(after));
+    return {
+      match: contentMatch,
+      validEnd: !!nextMatch?.validEnd
+    }
+  }
+
+const node = first(nodes) as Node;
+  if (node.isTextContainer) {
+    return {
+      match: null,
+      validEnd: false
+    }
+  }
+
+  const currMatch = contentMatch.matchFragment(Fragment.from([node]));
+  if (currMatch) {
+    before.push(node);
+    const result = findMatchingNodes(before, currMatch, nodes.slice(1), after);
+    if (result.validEnd) {
+      return result;
+    } else {
+      before.pop();
+    }
+  }
+
+  return findMatchingNodes(before, contentMatch, node.children.concat(nodes.slice(1)), after);
 }
 
 

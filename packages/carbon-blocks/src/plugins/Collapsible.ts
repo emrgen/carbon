@@ -46,6 +46,7 @@ export class Collapsible extends NodePlugin {
       dragHandle: true,
       rectSelectable: true,
       blockSelectable: true,
+      pasteBoundary: true,
       info: {
         title: 'Toggle List',
         description: 'Create a toggle list',

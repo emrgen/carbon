@@ -69,6 +69,7 @@ export class Stack extends CarbonPlugin {
     return {
       content: "content+",
       collapsible: true,
+      pasteBoundary: true,
     }
   }
 
