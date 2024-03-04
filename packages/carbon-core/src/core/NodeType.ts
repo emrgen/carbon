@@ -1,3 +1,4 @@
+
 import { Optional } from '@emrgen/types';
 import {cloneDeep, each, isArray, merge} from 'lodash';
 import { ContentMatch } from './ContentMatch';
@@ -176,6 +177,10 @@ export class NodeType {
 	get isAtom() {
 		return !!this.spec.atom;
 	}
+
+  get isPasteBoundary() {
+    return !!this.spec.pasteBoundary
+  }
 
 	get isIsolate() {
 		return !!this.spec.isolate;

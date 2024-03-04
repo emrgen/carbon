@@ -352,43 +352,22 @@ export class TransformCommands extends BeforePlugin {
     const movedNodes = new NodeIdSet();
 
     const commonNode = start.node.commonNode(end.node)
-    const closestIsolate = commonNode.closest(n => n.isIsolate)!;
     let startBlock: Optional<Node> = startTitleBlock.parent!;
     let startBlockChild: Node = startTitleBlock;
     let endBlock: Optional<Node> = endTitleBlock.parent!;
 
-    const isolateDepth = closestIsolate.depth;
+    const pasteBoundary = startTitleBlock.closest(n => n.type.isPasteBoundary)!;
+    const pasteBoundaryDepth = pasteBoundary.depth;
     let commonNodeDepth = commonNode.depth;
     let startBlockDepth = startBlock.depth;
-    let startBlockLimit = isolateDepth;
+    let startBlockLimit = pasteBoundaryDepth
     let endBlockDepth = endBlock.depth;
+    let endBlockLimit = Math.max(pasteBoundaryDepth, commonNodeDepth);
 
     // when start and end slice block are same
     // the nodes to be moved are always below the common node
     if (sliceStartTitle.eq(sliceEndTitle)) {
       startBlockLimit = commonNodeDepth;
-    }
-
-    // collect nodes to be from right of selection
-    // the nodes to be moved are always below the common node
-    while (commonNodeDepth < endBlockDepth) {
-      // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
-      const nodes = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
-
-      rightNodes.append(endBlockDepth + 1, nodes);
-      movedNodes.add(nodes.map(n => n.id));
-      // deleteGroup.addIds(nodes.map(n => n.id));
-
-      // if (startTitleBlock.eq(endTitleBlock)) {
-      //   break
-      // }
-
-      if (commonNodeDepth < endBlockDepth) {
-        deleteGroup.addId(endBlock.id);
-      }
-
-      endBlock = endBlock.parent!;
-      endBlockDepth -= 1
     }
 
     // collect nodes to be from left of selection
@@ -429,63 +408,89 @@ export class TransformCommands extends BeforePlugin {
     }
 
     console.log('LEFT', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
-    console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
+    // console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
 
     // const rightMoveNodes = NodeColumn.preparePlacement(leftNodes, rightNodes);
     // const entries = rightMoveNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name]));
     // console.log('ENTRIES', entries)
 
-    const sliceRightNodes = NodeColumn.create();
+    const sliceNodes = NodeColumn.create();
     let sliceBlock = sliceStartTitle.parent!;
     let sliceBlockDepth = sliceBlock.depth;
     const taken = new NodeIdSet();
     while (sliceBlock) {
       const children = sliceBlock.children.filter(n => !taken.has(n.id) && !n.isTextContainer) ?? [];
-      sliceRightNodes.append(sliceBlockDepth, children);
+      sliceNodes.append(sliceBlockDepth, children);
 
       taken.add(sliceBlock.id);
       sliceBlock = sliceBlock.parent!;
       sliceBlockDepth -= 1;
     }
 
-    console.log('SLICE', sliceRightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name, n.textContent])))
+    console.log('SLICE', sliceNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name, n.textContent])))
+    const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceNodes);
+    tr.Add(actions);
+
+    // collect nodes to be from right of selection upto min(endBlockLimit, sliceRootDepth)
+    // while (commonNodeDepth < endBlockDepth) {
+    //   // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
+    //   const nodes = endBlock.children.filter(n => !deleteGroup.has(n.id)) ?? [];
+    //
+    //   rightNodes.append(endBlockDepth + 1, nodes);
+    //   movedNodes.add(nodes.map(n => n.id));
+    //   // deleteGroup.addIds(nodes.map(n => n.id));
+    //
+    //   // if (startTitleBlock.eq(endTitleBlock)) {
+    //   //   break
+    //   // }
+    //
+    //   if (commonNodeDepth < endBlockDepth) {
+    //     deleteGroup.addId(endBlock.id);
+    //   }
+    //
+    //   endBlock = endBlock.parent!;
+    //   endBlockDepth -= 1
+    // }
+
 
     // const sliceInsertNodes = NodeColumn.preparePlacement(leftNodes, sliceRightNodes);
     // console.log('INSERT', sliceInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
-    if (sliceStartTitle.depth <= sliceEndTitle.depth) {
-      const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
-      const siblings = end.node.nextSiblings;
-      const to = Point.toAfter(sliceEndTitle.id);
-      const moveActions = moveNodesActions(to, siblings);
-      console.log('ACTIONS')
-      tr.Add(actions);
-      tr.Add(moveActions);
-    } else {
-      console.log('------------------------------------<ooooooooooooooo>------------------------------------')
-      const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
-      const siblings = end.node.nextSiblings;
-      const to = Point.toAfter(sliceEndTitle.id);
-      const moveActions = moveNodesActions(to, siblings);
-      console.log('ACTIONS')
-      tr.Add(actions);
-      tr.Add(moveActions);
-    }
+    // if (sliceStartTitle.depth <= sliceEndTitle.depth) {
+    //   const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
+    //   const siblings = end.node.nextSiblings;
+    //   const to = Point.toAfter(sliceEndTitle.id);
+    //   const moveActions = moveNodesActions(to, siblings);
+    //   console.log('ACTIONS')
+    //   tr.Add(actions);
+    //   tr.Add(moveActions);
+    // } else {
+    //   console.log('------------------------------------<ooooooooooooooo>------------------------------------')
+    //   const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
+    //   const siblings = end.node.nextSiblings;
+    //   const to = Point.toAfter(sliceEndTitle.id);
+    //   const moveActions = moveNodesActions(to, siblings);
+    //   console.log('ACTIONS')
+    //   tr.Add(actions);
+    //   tr.Add(moveActions);
+    // }
 
-    const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
+    // const {nodeActions} = this.deleteGroupCommands(app, deleteGroup);
 
-    tr.Add(nodeActions);
+    // tr.Add(nodeActions);
 
     const startTextContent = startTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
     const startTextNode = app.schema.text(startTextContent);
     tr.Add(SetContentAction.create(start.node, [startTextNode!]));
 
-    const endTextContent = sliceEndTitle.textContent + endTitleBlock.textContent.slice(end.offset);
-    const endTextNode = app.schema.text(endTextContent);
-    tr.Add(SetContentAction.create(sliceEndTitle, [endTextNode!]));
+    // const endTextContent = sliceEndTitle.textContent + endTitleBlock.textContent.slice(end.offset);
+    // const endTextNode = app.schema.text(endTextContent);
+    // tr.Add(SetContentAction.create(sliceEndTitle, [endTextNode!]));
+    //
+    // const pin = Pin.toEndOf(sliceEndTitle)!;
+    // const after = PinnedSelection.fromPin(pin);
+    // tr.Select(after);
 
-    const pin = Pin.toEndOf(sliceEndTitle)!;
-    const after = PinnedSelection.fromPin(pin);
-    tr.Select(after);
+    tr.Select(PinnedSelection.fromPin(Pin.future(start.node, startTextContent.length)!));
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {

@@ -644,6 +644,7 @@ export class ImmutableDraft implements Draft {
     this.actions.add(SelectAction.create(before, selection));
   }
 
+  // update selected node props
   private updateSelectionProps() {
     const selection = this.selection;
     // update empty placeholder of the previous head node

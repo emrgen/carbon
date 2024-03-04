@@ -37,7 +37,7 @@ export class NodeColumn {
         contentMatch: null,
       }
     }
-    const lastNode = before[before.length-1];
+    const lastNode = before[before.length - 1];
     const at = Point.toAfter(lastNode);
     const contentMatch = getContentMatch(lastNode);
     const matchActions: MatchAction[] = [];
@@ -73,12 +73,24 @@ export class NodeColumn {
     const actions: CarbonAction[] = [];
     const nodes: Node[][] = [];
 
-    let leftLength = left.nodes.length-1;
-    let rightLength = right.nodes.length-1;
+    let leftLength = left.nodes.length - 1;
+    let rightLength = right.nodes.length - 1;
 
     while (true) {
       const leftNodes = left.nodes[leftLength];
       const rightNodes = right.nodes[rightLength];
+      console.log('leftNodes', leftLength, !left.nodes[leftLength - 1], leftNodes);
+
+      if (!leftNodes) {
+        // when left column is consumed fully but there are still nodes in right column
+        const leftFirst = left.nodes.find(n => !isEmpty(n))?.[0]!; // FIXME: this is not correct, it should be the first non-empty node (previous or inserted)
+        const nodes = right.nodes.slice(0, rightLength + 1).filter(e => !isEmpty(e)).reverse();
+        if (!isEmpty(nodes)) {
+          const at = Point.toAfter(leftFirst);
+          actions.push(...insertNodesActions(at, flatten(nodes)));
+        }
+        break;
+      }
 
       if (!rightNodes) {
         break;
@@ -93,17 +105,18 @@ export class NodeColumn {
       const leftFirst = leftNodes[0];
       const rightFirst = rightNodes[0];
 
-       if (!left.nodes[leftLength-1]) {
+      if (!left.nodes[leftLength - 1]) {
         const nodes = right.nodes.slice(0, rightLength + 1).filter(identity).reverse();
         const flatNodes = flatten(nodes);
+        const leftFirst = leftNodes[0]; // FIXME: this is not correct, it should be the first non-empty node (previous or inserted)
         const result = NodeColumn.insertActions(leftFirst, flatNodes, leftNodes.slice(1));
         actions.push(...result.actions);
         nodes[leftLength] = flatNodes;
-      }
-      else {
+        break
+      } else {
         const at = Point.toAfter(leftFirst);
         actions.push(...insertNodesActions(at, rightNodes));
-         nodes[leftLength] = rightNodes;
+        nodes[leftLength] = rightNodes;
       }
 
       leftLength--;
@@ -116,7 +129,7 @@ export class NodeColumn {
   }
 
   // insert nodes after the before node with valid content matching
-  static insertActions(before: Node, nodes: Node[], after: Node[] = []): TargetEntry & {actions: CarbonAction[]}{
+  static insertActions(before: Node, nodes: Node[], after: Node[] = []): TargetEntry & { actions: CarbonAction[] } {
     const at = Point.toAfter(before);
     const contentMatch = getContentMatch(before);
     const matches: Node[] = [];
@@ -151,24 +164,26 @@ export class NodeColumn {
   static mergeByMove(left: NodeColumn, right: NodeColumn): CarbonAction[] {
     const actions: CarbonAction[] = [];
 
-    let rightLength = right.nodes.length-1;
-    let leftLength = left.nodes.length-1;
+    let rightLength = right.nodes.length - 1;
+    let leftLength = left.nodes.length - 1;
     const matches: MoveNodesResult[] = [];
 
     while (true) {
       const leftNodes = left.nodes[leftLength]
       const rightNodes = right.nodes[rightLength]
 
-      if (!rightNodes || !leftNodes) {
+      if (!leftNodes) {
         // when left column is consumed fully but there are still nodes in right column
-        if (!leftNodes) {
-          const leftFirst = left.nodes.find(n => !isEmpty(n))?.[0]!;
-          const nodes = right.nodes.slice(0, rightLength+1).filter(e => !isEmpty(e)).reverse();
-          if (!isEmpty(nodes)) {
-            const moves = NodeColumn.moveNodes([leftFirst], flatten(nodes));
-            actions.push(...moves.actions);
-          }
+        const leftFirst = left.nodes.find(n => !isEmpty(n))?.[0]!;
+        const nodes = right.nodes.slice(0, rightLength + 1).filter(e => !isEmpty(e)).reverse();
+        if (!isEmpty(nodes)) {
+          const moves = NodeColumn.moveNodes([leftFirst], flatten(nodes));
+          actions.push(...moves.actions);
         }
+        break;
+      }
+
+      if (!rightNodes) {
         break;
       }
 
@@ -181,8 +196,8 @@ export class NodeColumn {
 
       const leftFirst = leftNodes[0];
       // current level is the top most left level
-      if (!left.nodes[leftLength-1]) {
-        const nodes = right.nodes.slice(0, rightLength+1).filter(identity).reverse();
+      if (!left.nodes[leftLength - 1]) {
+        const nodes = right.nodes.slice(0, rightLength + 1).filter(identity).reverse();
         const moves = NodeColumn.moveNodes([leftFirst], flatten(nodes), leftNodes.slice(1));
         // failed to find a valid end try with higher left node
         if (!moves.contentMatch?.validEnd) {

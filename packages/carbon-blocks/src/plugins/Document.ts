@@ -29,6 +29,7 @@ export class PagePlugin extends CarbonPlugin {
 			isolate: true,
 			sandbox: true,
 			document: true,
+      pasteBoundary: true,
 			props: {
 				local: {
 					placeholder: {
