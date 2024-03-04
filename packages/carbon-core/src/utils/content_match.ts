@@ -56,7 +56,7 @@ export const findMatchingActions = (actions: MatchAction[], contentMatch: Conten
   return findMatchingActions(actions, contentMatch, at, node.children.concat(nodes.slice(1)), after);
 }
 
-export const findMatchingNodes = (placement: Node[], contentMatch: ContentMatch, nodes: Node[], after: Node[]): MatchResult => {
+export const findMatchingNodes = (before: Node[], contentMatch: ContentMatch, nodes: Node[], after: Node[]): MatchResult => {
   if (nodes.length === 0) {
     const nextMatch = contentMatch.matchFragment(Fragment.from(after));
     return {
@@ -75,16 +75,16 @@ const node = first(nodes) as Node;
 
   const currMatch = contentMatch.matchFragment(Fragment.from([node]));
   if (currMatch) {
-    placement.push(node);
-    const result = findMatchingNodes(placement, currMatch, nodes.slice(1), after);
+    before.push(node);
+    const result = findMatchingNodes(before, currMatch, nodes.slice(1), after);
     if (result.validEnd) {
       return result;
     } else {
-      placement.pop();
+      before.pop();
     }
   }
 
-  return findMatchingNodes(placement, contentMatch, node.children.concat(nodes.slice(1)), after);
+  return findMatchingNodes(before, contentMatch, node.children.concat(nodes.slice(1)), after);
 }
 
 
