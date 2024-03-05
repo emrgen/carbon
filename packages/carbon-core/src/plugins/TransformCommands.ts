@@ -322,8 +322,6 @@ export class TransformCommands extends BeforePlugin {
       throw Error('block selection is not supported');
     }
 
-    const docSelection = PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!;
-
     // delete like split and insert like paste
     const deleteGroup = this.selectionInfo(app, selection);
 
@@ -428,12 +426,14 @@ export class TransformCommands extends BeforePlugin {
     console.log('SLICE', sliceNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name, n.textContent])));
     const {actions, targets } = NodeColumn.pasteInsertActions(leftNodes, sliceNodes);
     tr.Add(actions);
+
     const firstUsedDepth = targets.nodes.findIndex(n => n && n.used);
     const topSliceDepth = Math.min(firstUsedDepth, startTitleBlock.parent!.depth);
     const entry = targets.nodes[firstUsedDepth];
+    // console.log("FIRST USED DEPTH", firstUsedDepth, entry.before.map(n => n.id.toString()));
     const endParent = last(entry.before)!;
     const parents = takeBefore(slice.end.chain, p => p.eq(endParent));
-    console.log(parents.map(p => [p.id.toString(), p.name, p.textContent]));
+    // console.log(parents.map(p => [p.id.toString(), p.name, p.textContent]));
     parents.reverse().forEach((p, index) => {
       targets.nodes[firstUsedDepth + index + 1] = {
         before: [p],
@@ -449,7 +449,8 @@ export class TransformCommands extends BeforePlugin {
     let mergeBlockLimit = Math.min(Math.max(commonNodeDepth, pasteBoundaryDepth), topSliceDepth-1);
 
     targets.nodes.forEach((nodes, index) => {
-      if (index < mergeBlockLimit || index > maxMergeDepth) {
+      // console.log('INDEX', index, index <= mergeBlockLimit, maxMergeDepth < index)
+      if (index <= mergeBlockLimit || maxMergeDepth < index) {
         targets.nodes[index] = {
           before: [],
           after: [],
@@ -467,23 +468,21 @@ export class TransformCommands extends BeforePlugin {
     const startTopContainer = startNode.closest(n => n.isContainer)!;
     const endTopContainer = endNode.closest(n => n.isContainer)!;
     if (endTopContainer.parents.some(n => n.eq(startTopContainer))) {
-      endBlockLimit = mergeBlockLimit;
+      endBlockLimit = mergeBlockLimit - 1;
     }
 
     // collect nodes to be from right of selection upto min(endBlockLimit, sliceRootDepth)
     // add deleted nodes from rightNodes that should be deleted
     let endBlockChild = endTitleBlock;
     // Note: is some situations endBlock can be document node and the children will be document content slice
-    while (endBlockLimit <= endBlockDepth) {
-      // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
+    while (endBlockLimit < endBlockDepth) {
       const nodes = endBlock.children.slice(endBlockChild.index).filter(n => !deleteGroup.has(n.id) && !n.isTextContainer) ?? [];
+      // console.log('endBlock',endBlockDepth, endBlock.firstChild?.textContent, endBlock.children.map(n => n.firstChild?.textContent), nodes.map(n => n.id.toString()));
 
-      // movedNodes.add(nodes.map(n => n.id));
-      // deleteGroup.addIds(nodes.map(n => n.id));
       if (commonNodeDepth <= endBlockDepth) {
         rightNodes.append(endBlockDepth + 1, nodes);
       } else {
-        console.log('out of common depth', nodes.slice(1))
+        // console.log('out of common depth', nodes.slice(1))
         rightNodes.append(endBlockDepth + 1, nodes.slice(1));
       }
 
@@ -507,33 +506,12 @@ export class TransformCommands extends BeforePlugin {
 
     // merge target with rightNodes
     const moveActions = NodeColumn.pasteMoveActions(targets, rightNodes);
-    console.log('moveActions', moveActions)
+    // console.log('move actions', moveActions)
     tr.Add(moveActions);
 
     // rightNodes.nodes.forEach((nodes, index) => {
     //   tr.Add(removeNodesActions(nodes));
     // });
-
-    // const sliceInsertNodes = NodeColumn.preparePlacement(leftNodes, sliceRightNodes);
-    // console.log('INSERT', sliceInsertNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])));
-    // if (sliceStartTitle.depth <= sliceEndTitle.depth) {
-    //   const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
-    //   const siblings = end.node.nextSiblings;
-    //   const to = Point.toAfter(sliceEndTitle.id);
-    //   const moveActions = moveNodesActions(to, siblings);
-    //   console.log('ACTIONS')
-    //   tr.Add(actions);
-    //   tr.Add(moveActions);
-    // } else {
-    //   console.log('------------------------------------<ooooooooooooooo>------------------------------------')
-    //   const actions = NodeColumn.pasteActionsEasy(leftNodes, sliceRightNodes);
-    //   const siblings = end.node.nextSiblings;
-    //   const to = Point.toAfter(sliceEndTitle.id);
-    //   const moveActions = moveNodesActions(to, siblings);
-    //   console.log('ACTIONS')
-    //   tr.Add(actions);
-    //   tr.Add(moveActions);
-    // }
 
     const startTextContent = startTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
     const startTextNode = app.schema.text(startTextContent);
@@ -550,7 +528,8 @@ export class TransformCommands extends BeforePlugin {
     const after = PinnedSelection.fromPin(pin);
     tr.Select(after);
 
-    // tr.Select(PinnedSelection.fromPin(Pin.future(start.node, startTextContent.length)!));
+    // const docSelection = PinnedSelection.fromPin(Pin.toStartOf(app.content)!)!;
+    // tr.Select(docSelection);
   }
 
   private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {

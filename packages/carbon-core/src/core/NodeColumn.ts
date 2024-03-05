@@ -311,7 +311,7 @@ export class NodeColumn {
       actions,
       validEnd: match.validEnd,
       contentMatch: match.match,
-      before: before,
+      before: matches,
       after: after,
     }
   }
