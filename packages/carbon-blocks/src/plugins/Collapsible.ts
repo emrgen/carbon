@@ -14,8 +14,9 @@ import {
   insertBeforeAction,
   preventAndStopCtx,
   splitTextBlock,
-  PlaceholderPath, CollapsedPath
+  PlaceholderPath, CollapsedPath, Writer, NodeEncoder
 } from "@emrgen/carbon-core";
+import {encodeNestableChildren} from "@emrgen/carbon-blocks";
 
 declare module '@emrgen/carbon-core' {
   interface Transaction {
@@ -232,10 +233,19 @@ export class Collapsible extends NodePlugin {
     return
   }
 
-  // serialize(react: Carbon, node: Node) {
-  //   return `- ${react.serialize(node.child(0)!)}` + react.cmd.nestable.serializeChildren(node);
-  // }
+  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+    if (node.isEmpty) {
+      return
+    }
 
+    writer.write('\n\n');
+    if (node.firstChild) {
+      writer.write(writer.meta.get('indent') ?? '');
+      encoder.encode(writer, node.firstChild);
+    }
+
+    encodeNestableChildren(writer, encoder, node, '');
+  }
 }
 
 class CollapsibleBeforePlugin extends BeforePlugin {

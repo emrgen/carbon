@@ -1,4 +1,5 @@
-import { Carbon, CarbonPlugin, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
+import {Carbon, CarbonPlugin, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
+import {encodeNestableChildren} from "@emrgen/carbon-blocks";
 
 export class Callout extends CarbonPlugin {
   name = 'callout';
@@ -35,12 +36,18 @@ export class Callout extends CarbonPlugin {
     }
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
-  //   const contentNode = node.child(0);
-  //
-  //   let ret = `${contentNode ? react.serialize(contentNode) : ''}`;
-  //   ret += react.commands.nestable.serializeChildren(node);
-  //   return ret
-  // }
+  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+    if (node.isEmpty) {
+      return
+    }
+
+    writer.write('\n\n');
+    if (node.firstChild) {
+      writer.write(writer.meta.get('indent') ?? '');
+      encoder.encode(writer, node.firstChild);
+    }
+
+    encodeNestableChildren(writer, encoder, node, '')
+  }
 
 }

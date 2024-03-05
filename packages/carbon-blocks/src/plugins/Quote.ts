@@ -1,4 +1,5 @@
-import { Carbon, CarbonPlugin, Node, NodeSpec, SerializedNode } from "@emrgen/carbon-core";
+import {Carbon, CarbonPlugin, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
+import {encodeNestableChildren} from "@emrgen/carbon-blocks";
 
 export class Quote extends CarbonPlugin {
   name = 'quote';
@@ -33,8 +34,18 @@ export class Quote extends CarbonPlugin {
     }
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
-  //   const content = node.child(0)!
-  //   return `> ${react.serialize(content)}${react.commands.nestable.serializeChildren(node)}`;
-  // }
+  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+    if (node.isEmpty) {
+      return
+    }
+
+    writer.write('\n\n');
+    if (node.firstChild) {
+      writer.write(writer.meta.get('indent') ?? '');
+      writer.write('> ');
+      encoder.encode(writer, node.firstChild);
+    }
+
+    encodeNestableChildren(writer, encoder, node, '');
+  }
 }

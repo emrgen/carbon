@@ -404,11 +404,6 @@ export class TransformCommands extends BeforePlugin {
     }
 
     console.log('LEFT', leftNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
-    // console.log('RIGHT', rightNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name])))
-
-    // const rightMoveNodes = NodeColumn.preparePlacement(leftNodes, rightNodes);
-    // const entries = rightMoveNodes.nodes.map(n => n.map(n => [n.id.toString(), n.name]));
-    // console.log('ENTRIES', entries)
 
     const sliceNodes = NodeColumn.create();
     let sliceBlock = sliceStartTitle.parent!;
@@ -434,6 +429,8 @@ export class TransformCommands extends BeforePlugin {
     const endParent = last(entry.before)!;
     const parents = takeBefore(slice.end.chain, p => p.eq(endParent));
     // console.log(parents.map(p => [p.id.toString(), p.name, p.textContent]));
+
+    // overwrite the move targets with the slice nodes
     parents.reverse().forEach((p, index) => {
       targets.nodes[firstUsedDepth + index + 1] = {
         before: [p],
@@ -448,6 +445,7 @@ export class TransformCommands extends BeforePlugin {
     // collect nodes after selection end that should be moved and merged below inserted(pasted) nodes
     let mergeBlockLimit = Math.min(Math.max(commonNodeDepth, pasteBoundaryDepth), topSliceDepth-1);
 
+    // limit the move targets span
     targets.nodes.forEach((nodes, index) => {
       // console.log('INDEX', index, index <= mergeBlockLimit, maxMergeDepth < index)
       if (index <= mergeBlockLimit || maxMergeDepth < index) {
@@ -468,7 +466,7 @@ export class TransformCommands extends BeforePlugin {
     const startTopContainer = startNode.closest(n => n.isContainer)!;
     const endTopContainer = endNode.closest(n => n.isContainer)!;
     if (endTopContainer.parents.some(n => n.eq(startTopContainer))) {
-      endBlockLimit = mergeBlockLimit - 1;
+      endBlockLimit = mergeBlockLimit;
     }
 
     // collect nodes to be from right of selection upto min(endBlockLimit, sliceRootDepth)
