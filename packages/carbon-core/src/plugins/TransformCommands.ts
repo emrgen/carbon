@@ -350,6 +350,7 @@ export class TransformCommands extends BeforePlugin {
 
     const commonNode = start.node.commonNode(end.node).closest(n => n.isContainer)!;
     let startBlock: Optional<Node> = startTitleBlock.parent!;
+    const startTitleParent = startBlock;
     let startBlockChild: Node = startTitleBlock;
     let endBlock: Optional<Node> = endTitleBlock.parent!;
 
@@ -357,8 +358,7 @@ export class TransformCommands extends BeforePlugin {
     const pasteBoundaryDepth = pasteBoundary.depth;
     let commonNodeDepth = commonNode.depth;
     let startBlockDepth = startBlock.depth;
-    let startBlockLimit = pasteBoundaryDepth
-
+    let startBlockLimit = pasteBoundaryDepth;
 
     // when start and end slice block are same
     // the nodes to be moved are always below the common node
@@ -423,11 +423,18 @@ export class TransformCommands extends BeforePlugin {
     tr.Add(actions);
 
     const firstUsedDepth = targets.nodes.findIndex(n => n && n.used);
-    const topSliceDepth = Math.min(firstUsedDepth, startTitleBlock.parent!.depth);
+    // for collapsible startTitleParent, the top slice depth is the depth of the parent
+    const topSliceDepth = Math.min(
+      firstUsedDepth,
+      startTitleParent.isCollapsible
+        ? startTitleParent!.depth + 1
+        : startTitleParent!.depth
+    );
     const entry = targets.nodes[firstUsedDepth];
     // console.log("FIRST USED DEPTH", firstUsedDepth, entry.before.map(n => n.id.toString()));
     const endParent = last(entry.before)!;
-    const parents = takeBefore(slice.end.chain, p => p.eq(endParent));
+    // nodes after the selection end will be moved below the inserted nodes starting from sliceStartTitle.parent
+    const parents = takeBefore(sliceEndTitle.chain, p => p.eq(endParent));
     // console.log(parents.map(p => [p.id.toString(), p.name, p.textContent]));
 
     // overwrite the move targets with the slice nodes
@@ -465,13 +472,20 @@ export class TransformCommands extends BeforePlugin {
     const [startNode, endNode] = blocksBelowCommonNode(startTitleBlock!, endTitleBlock!);
     const startTopContainer = startNode.closest(n => n.isContainer)!;
     const endTopContainer = endNode.closest(n => n.isContainer)!;
-    if (endTopContainer.parents.some(n => n.eq(startTopContainer))) {
+    const isSameParent = endTopContainer.parents.some(n => n.eq(startTopContainer));
+    if (isSameParent) {
       endBlockLimit = mergeBlockLimit;
     }
 
     // collect nodes to be from right of selection upto min(endBlockLimit, sliceRootDepth)
     // add deleted nodes from rightNodes that should be deleted
     let endBlockChild = endTitleBlock;
+    // if ((isSameParent || startTitleBlock.eq(endTitleBlock)) && startTitleParent!.isCollapsible) {
+    //   endBlockChild = endBlock;
+    //   endBlock = endBlock.parent!;
+    //   endBlockDepth -= 1;
+    // }
+
     // Note: is some situations endBlock can be document node and the children will be document content slice
     while (endBlockLimit < endBlockDepth) {
       const nodes = endBlock.children.slice(endBlockChild.index).filter(n => !deleteGroup.has(n.id) && !n.isTextContainer) ?? [];
