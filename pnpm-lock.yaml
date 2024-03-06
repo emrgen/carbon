@@ -507,6 +507,40 @@ importers:
         specifier: ^4.9.5
         version: 4.9.5
 
+  packages/carbon-clipboard:
+    dependencies:
+      '@emrgen/carbon-attributes':
+        specifier: workspace:*
+        version: link:../carbon-attributes
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      marked:
+        specifier: ^12.0.0
+        version: 12.0.0
+    devDependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.14.202
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+
   packages/carbon-code:
     dependencies:
       '@emrgen/carbon-attributes':
@@ -662,6 +696,9 @@ importers:
         specifier: ^4.2.2
         version: 4.2.3(typescript@4.9.5)(vite@4.5.1)
     devDependencies:
+      '@emrgen/carbon-clipboard':
+        specifier: workspace:*
+        version: link:../carbon-clipboard
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
@@ -7865,6 +7902,12 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       '@jridgewell/sourcemap-codec': 1.4.15
+
+  /marked@12.0.0:
+    resolution: {integrity: sha512-Vkwtq9rLqXryZnWaQc86+FHLC6tr/fycMfYAhiOIXkrNmeGAyhSxjqu0Rs1i0bBqw5u0S7+lV9fdH2ZSVaoa0w==}
+    engines: {node: '>= 18'}
+    hasBin: true
+    dev: false
 
   /mdn-data@2.0.30:
     resolution: {integrity: sha512-GaqWWShW4kv/G9IEucWScBx9G1/vsFZZJUO+tD26M8J8z3Kw5RDQjaoZe03YAClgeS/SWPOcb4nkFBTEi5DUEA==}

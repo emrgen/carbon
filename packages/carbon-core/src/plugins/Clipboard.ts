@@ -1,6 +1,5 @@
-import {AfterPlugin, Carbon, deepCloneMap, EventContext, EventHandlerMap, Node, Path, Pin, TextWriter} from "../core";
+import {AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Path, Pin, TextWriter} from "../core";
 import {SelectionPatch} from "../core/DeleteGroup";
-import {NodeId} from "../core/NodeId";
 import {Span} from "../core/Span";
 import {Slice} from "../core/Slice";
 import {preventAndStop} from "../utils/event";
@@ -8,7 +7,8 @@ import {blocksBelowCommonNode} from "../utils/findNodes";
 import {SelectedPath} from "../core/NodeProps";
 import {Optional} from "@emrgen/types";
 import {identity} from "lodash";
-import {findMatchingActions, findMatchingNodes} from "@emrgen/carbon-core";
+import {findMatchingNodes} from "@emrgen/carbon-core";
+import clipboard from "@emrgen/carbon-clipboard";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
@@ -57,7 +57,8 @@ export class ClipboardPlugin extends AfterPlugin {
           const slice = app.runtime.clipboard;
           app.cmd.transform.paste(selection, slice)?.Dispatch()
         } else {
-
+          const nodes = clipboard.parse();
+          console.log('clipboard nodes', nodes);
         }
         console.log('paste', app.runtime.clipboard.root);
       }
