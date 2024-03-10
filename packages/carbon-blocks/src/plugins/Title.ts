@@ -117,4 +117,8 @@ export class TitlePlugin extends NodePlugin {
   encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
     node.children.map(n => ne.encode(w, n));
   }
+
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    node.children.map(n => ne.encodeHtml(w, n));
+  }
 }

@@ -44,6 +44,7 @@ export class ClipboardPlugin extends AfterPlugin {
           const writer = new TextWriter();
           app.encode(writer, slice.root);
           event.clipboardData.setData('text/plain', writer.toString());
+          clipboard.setClipboard(JSON.stringify(slice.toJSON()), 'web application/carbon');
           app.runtime.clipboard = slice;
           return
         }
@@ -52,7 +53,7 @@ export class ClipboardPlugin extends AfterPlugin {
         const {event, app} = ctx
         preventAndStop(event);
         const {selection} = app
-
+        const nodes = clipboard.parse();
         if (!app.runtime.clipboard.isEmpty) {
           const slice = app.runtime.clipboard;
           app.cmd.transform.paste(selection, slice)?.Dispatch()

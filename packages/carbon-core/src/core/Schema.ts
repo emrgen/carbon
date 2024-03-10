@@ -150,6 +150,10 @@ export interface NodeSpec {
 	atom?: boolean;
 	tag?: string;
 	options?: boolean;
+  
+  // toDOM?: (node: Node) => [string, any];
+  // fromDOM?: (dom: Node) => NodeJSON;
+
 	// the node can be treated as a standalone document
 	document?: boolean;
   inlineSelectable?: boolean

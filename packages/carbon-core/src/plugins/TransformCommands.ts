@@ -337,9 +337,13 @@ export class TransformCommands extends BeforePlugin {
       const textContent = textBeforeCursor + startTitleBlock.textContent.slice(end.offset);
       const textNode = app.schema.text(textContent);
       const after = PinnedSelection.fromPin(Pin.future(start.node!, textBeforeCursor.length)!);
-      tr
-        .SetContent(start.node.id, [textNode!])
-        .Select(after);
+
+      tr.SetContent(start.node.id, [textNode!])
+      if (startTitleBlock.isEmpty || start.offset === 0) {
+        tr.Add(ChangeNameAction.create(start.node.parent!.id, sliceStartTitle.parent!.type.splitName));
+      }
+      tr.Select(after);
+
       return tr;
     }
 
@@ -528,6 +532,13 @@ export class TransformCommands extends BeforePlugin {
     const startTextContent = startTitleBlock.textContent.slice(0, start.offset) + sliceStartTitle.textContent;
     const startTextNode = app.schema.text(startTextContent);
     tr.Add(SetContentAction.create(start.node, [startTextNode!]));
+
+    // NOTE: change the startTitleBlock parent to sliceStartTitle parent
+    if (startTitleBlock.isEmpty || start.offset === 0) {
+      tr.Add(ChangeNameAction.create(start.node.parent!.id, sliceStartTitle.parent!.type.splitName));
+    }
+
+    console.log('XXX', sliceStartTitle.parent!.name)
 
     const endTextContent = sliceEndTitle.textContent + endTitleBlock.textContent.slice(end.offset);
     const endTextNode = app.schema.text(endTextContent);

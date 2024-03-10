@@ -1,60 +1,90 @@
 import {Optional} from "@emrgen/types";
-import {Node} from "@emrgen/carbon-core";
 import {marked} from "marked";
 
 async function parse(): Promise<Optional<any[]>> {
-  navigator.clipboard.readText().then(text => {
-    navigator.clipboard.read().then(data => {
-      try {
-        for (const item of data) {
-          for (const type of item.types) {
-            console.log(type)
-            if (type === 'text/html') {
-              item.getType(type).then(blob => {
-                blob.text().then(text => {
-                  console.log('blob text', text);
-                })
-              });
-              break
-            }
+  const nodes: any[] = [];
+  console.log('xxxxxxxxxxxxxxxxx')
+  navigator.clipboard.read().then(data => {
+    try {
+      for (const item of data) {
+        console.log('XXXX')
+        let consumed = false;
+        for (const type of item.types) {
+          console.log(type)
+          if (!consumed && type === 'text/plain') {
+            const p1 = item.getType(type).then(blob => {
+              const p2 = blob.text().then(text => {
+                nodes.push({
+                  name: 'section',
+                  children: [{
+                    name: 'title',
+                    children: [{
+                      type: 'text',
+                      text: text,
+                    }],
+                  }],
+                });
+                console.log('blob text', text);
+              })
+            });
+            consumed = true;
+          }
 
-            if (type === 'text/plain') {
-              item.getType(type).then(blob => {
-                blob.text().then(text => {
-                  console.log('blob text', text);
-                })
-              });
-              break
-            }
+          if (!consumed && type === 'text/html') {
+            item.getType(type).then(blob => {
+              blob.text().then(text => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const body = doc.querySelector('body');
+                console.log('doc', body);
+                console.log('doc string', body?.innerHTML);
+                // console.log('blob text', text);
+              })
+            });
+            consumed = true;
+          }
 
-            if (type === 'image/png') {
-              item.getType(type).then(blob => {
-                console.log('blob', blob);
-              });
-              break
-            }
+          if (!consumed && type === 'web application/carbon') {
+            item.getType(type).then(blob => {
+              blob.text().then(text => {
+                const slice = JSON.parse(text);
+                console.log('slice', slice);
+              })
+            });
+            consumed = true;
           }
         }
-      } catch (e) {
-        console.error('clipboard paste error', e);
       }
-    })
+    } catch (e) {
+      console.error('clipboard paste error', e);
+    }
 
-    marked.parse(text, {
-      walkTokens(token) {
-        console.log('token', token);
-      },
-    });
+    return nodes;
+  })
 
-    console.log('clipboard paste');
-    console.log(text)
-  });
+  // navigator.clipboard.readText().then(text => {
+  //   marked.parse(text, {
+  //     walkTokens(token) {
+  //       console.log('token', token);
+  //     },
+  //   });
+  //
+  //   console.log('clipboard paste');
+  //   console.log(text)
+  // });
 
   return [];
 }
 
+const setClipboard = async function (text, type = 'text/plain') {
+  const blob = new Blob([text], { type });
+  const data = [new ClipboardItem({ [type]: blob })];
+  return await navigator.clipboard.write(data);
+}
+
 const clipboard = {
-  parse
+  parse,
+  setClipboard
 }
 
 export default clipboard;

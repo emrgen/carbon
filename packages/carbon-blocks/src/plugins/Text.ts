@@ -70,8 +70,15 @@ export class TextPlugin extends NodePlugin {
 		tr.SetContent(node, textContent).Select(after).Dispatch();
 	}
 
-
+  // encode the node as markdown
 	encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
     w.write(node.textContent);
+  }
+
+  // encode the node as html
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    w.write('<span>')
+    w.write(node.textContent);
+    w.write('</span>')
   }
 }
