@@ -85,49 +85,6 @@ export class Schema {
 		}
 
 		return this.factory.create(json, this);
-
-		// const { name, id, text = '', content = [], attrs = {}, target = '' } = json ?? {};
-		// const type = this.type(name);
-		// if (!type) {
-		// 	// console.log(...lp('error'), 'type not found for node:', name, json);
-		// 	throw new Error("node type is not found" + name);
-		// }
-
-		// const nodes = content.map(c => this.nodeFromJSON(c, store, false)).filter(identity);
-		// const nodeContent: NodeContent = type.isText ? InlineContent.create(text) : BlockContent.create(nodes);
-
-		// const nodeId = generateID(id, type.isText ? text.length : 1);
-		// console.log(nodeId.toJSON());
-
-		// if (attrs.node?.proxy) {
-		// 	const node = NodeProxy.createShadow(id, type, attrs);
-		// 	store.put(node)
-		// 	return node;
-		// }
-
-		// console.log('NEW NODE ID', nodeId.toString());
-		// const node = Node.create({ id: nodeId, type, content: nodeContent, attrs });
-		// store.put(node)
-		// console.log/(name, node)
-
-		// replace shadow nodes with proxy nodes
-		// if (start) {
-		// 	const done = {}
-		// 	store.proxy.forEach(pn => {
-		// 		const targetId = parseID(pn.attrs.node?.proxy);
-		// 		if (!targetId) {
-		// 			throw new Error("Failed to parse proxy target Id");
-		// 		}
-
-		// 		const target = store.nodes.get(targetId);
-		// 		if (!target) {
-		// 			throw new Error("Failed to get proxy target Node");
-		// 		}
-		// 		node.parent?.replace(pn, NodeProxy.createProxy(target))
-		// 	});
-		// }
-
-		// return node;
 	}
 
 }

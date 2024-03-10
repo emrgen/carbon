@@ -352,10 +352,12 @@ export class ImmutableDraft implements Draft {
     if (node.isText && isString(content)) {
       const {parent} = node;
       if (!parent) return;
-      this.tm.updateProps(parent, {
+      const updated = this.tm.updateProps(parent, {
         [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(parent)?.props.get<string>(EmptyPlaceholderPath) ?? "" : " "
       });
-      this.addUpdated(parent.id);
+      // if (updated) {
+        this.addUpdated(parent.id);
+      // }
     }
   }
 
@@ -893,7 +895,7 @@ class Transformer {
     if (isEqual(before, props)) {
       console.log('same props', before, props)
       console.warn("unnecessary props update detected. possibly the node is immutable")
-      return
+      return false;
     }
 
     this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
@@ -902,6 +904,8 @@ class Transformer {
     console.log('UPDATING props', props)
 
     node.updateProps(props);
+
+    return true;
   }
 }
 

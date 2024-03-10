@@ -1,16 +1,17 @@
 import {
-	Carbon,
-	EventContext,
-	EventHandlerMap,
-	Node,
-	NodePlugin,
-	NodeSpec, PinnedSelection,
-	preventAndStopCtx,
-	SerializedNode,
-	Pin, Transaction, Point, NodeName, Slice, InsertPos, DeleteOpts, SplitOpts
+  Carbon,
+  EventContext,
+  EventHandlerMap,
+  Node,
+  NodePlugin,
+  NodeSpec, PinnedSelection,
+  preventAndStopCtx,
+  SerializedNode,
+  Pin, Transaction, Point, NodeName, Slice, InsertPos, DeleteOpts, SplitOpts, MarksPath
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import {NodeEncoder, Writer} from "@emrgen/carbon-core/src/core/Encoder";
+import {isEmpty} from "lodash";
 
 declare module '@emrgen/carbon-core' {
 	export interface Transaction {
@@ -71,14 +72,18 @@ export class TextPlugin extends NodePlugin {
 	}
 
   // encode the node as markdown
-	encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+	encode(w: Writer, ne: NodeEncoder, node: Node) {
     w.write(node.textContent);
   }
 
   // encode the node as html
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
-    w.write('<span>')
-    w.write(node.textContent);
-    w.write('</span>')
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
+    if (isEmpty(node.props.get(MarksPath))) {
+      w.write(node.textContent);
+    } else {
+      w.write('<span>')
+      w.write(node.textContent);
+      w.write('</span>')
+    }
   }
 }

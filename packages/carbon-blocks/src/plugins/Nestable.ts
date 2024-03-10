@@ -273,7 +273,7 @@ export class NestablePlugin extends AfterPlugin {
 	}
 }
 
-export const encodeNestableChildren = (writer: Writer, encoder: NodeEncoder<string>, node: Node, indent = '  ') => {
+export const encodeNestableChildren = (writer: Writer, encoder: NodeEncoder, node: Node, indent = '  ') => {
   writer.meta.set('indent', (writer.meta.get('indent') ?? '') + indent);
   node.children.slice(1).forEach(child => {
     encoder.encode(writer, child);
@@ -281,8 +281,10 @@ export const encodeNestableChildren = (writer: Writer, encoder: NodeEncoder<stri
   writer.meta.set('indent', (writer.meta.get('indent') ?? '').slice(0, -indent.length));
 }
 
-export const encodeHtmlNestableChildren = (writer: Writer, encoder: NodeEncoder<string>, node: Node) => {
+export const encodeHtmlNestableChildren = (writer: Writer, encoder: NodeEncoder, node: Node, indent = '  ') => {
+  // writer.meta.set('indent', (writer.meta.get('indent') ?? '') + indent);
   node.children.slice(1).forEach(child => {
     encoder.encodeHtml(writer, child);
   })
+  // writer.meta.set('indent', (writer.meta.get('indent') ?? '').slice(0, -indent.length));
 }
