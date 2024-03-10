@@ -9,7 +9,7 @@ import {
   EventContext,
   Carbon, SerializedNode, Writer, NodeEncoder
 } from "@emrgen/carbon-core";
-import {encodeNestableChildren, node} from "@emrgen/carbon-blocks";
+import {encodeHtmlNestableChildren, encodeNestableChildren, node} from "@emrgen/carbon-blocks";
 
 export class Header extends AfterPlugin {
 	name = 'header';
@@ -95,5 +95,17 @@ export class Heading extends NodePlugin {
     }
 
     encodeNestableChildren(w, ne, node, '');
+  }
+
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    const { level } = this;
+    w.write('<h' + level + '>');
+    const {firstChild} = node;
+    if (firstChild) {
+      ne.encodeHtml(w, firstChild);
+    }
+    w.write('</h' + level + '>');
+
+    encodeHtmlNestableChildren(w, ne, node);
   }
 }

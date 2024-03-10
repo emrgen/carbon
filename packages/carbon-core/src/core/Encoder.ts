@@ -8,10 +8,59 @@ export interface Writer {
 export class TextWriter implements Writer {
   private content: string = '';
   meta: Map<string, any> = new Map();
+  parser: DOMParser;
+
+  constructor() {
+    this.parser = new DOMParser();
+  }
 
   write(content: string) {
     this.content += content;
     return this;
+  }
+
+  buildHtml() {
+    const dom = this.parser.parseFromString(this.content, 'text/html');
+    // merge adjacent unordered list items
+
+    this.mergeAdjacentListItemsRecursive(dom.body);
+
+    return dom.body.innerHTML;
+  }
+
+  private mergeAdjacentListItemsRecursive(parent: HTMLElement) {
+    parent.childNodes.forEach((child, i) => {
+      if (child instanceof HTMLElement) {
+        this.mergeAdjacentListItemsRecursive(child);
+      }
+    });
+
+    this.mergeAdjacentListItems(parent);
+  }
+
+  private mergeAdjacentListItems(parent: HTMLElement) {
+    const children = Array.from(parent.children);
+    let i = children.length - 1;
+    while (i > 0) {
+      const child = children[i];
+      const prev = children[i - 1];
+
+      // if the current child is a UL and the previous child is a UL
+      // then merge the current child's children into the previous child's children
+      if (child.tagName === 'UL' && prev.tagName === 'UL') {
+        const children = Array.from(child.children);
+        children.forEach(c => prev.appendChild(c));
+        child.remove();
+      }
+
+      if (child.tagName === 'OL' && prev.tagName === 'OL') {
+        const children = Array.from(child.children);
+        children.forEach(c => prev.appendChild(c));
+        child.remove();
+      }
+
+      i--;
+    }
   }
 
   toString() {

@@ -1,6 +1,6 @@
 import {Carbon, CarbonPlugin, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
 import { Section } from "./Section";
-import {encodeNestableChildren} from "@emrgen/carbon-blocks";
+import {encodeHtmlNestableChildren, encodeNestableChildren} from "@emrgen/carbon-blocks";
 
 export class BulletedList extends Section {
   name = 'bulletList'
@@ -40,4 +40,16 @@ export class BulletedList extends Section {
 
     encodeNestableChildren(writer, encoder, node);
   }
+
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    w.write('<ul>');
+    w.write('<li>');
+
+    ne.encode(w, node.firstChild!);
+    encodeHtmlNestableChildren(w, ne, node);
+
+    w.write('</li>');
+    w.write('</ul>');
+  }
+
 }

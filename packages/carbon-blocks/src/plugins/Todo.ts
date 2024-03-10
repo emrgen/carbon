@@ -10,7 +10,7 @@ import {
 } from "@emrgen/carbon-core";
 import { Section } from "./Section";
 import { Switch } from "./Switch";
-import {encodeNestableChildren} from "@emrgen/carbon-blocks";
+import {encodeHtmlNestableChildren, encodeNestableChildren} from "@emrgen/carbon-blocks";
 
 export class Todo extends Section {
   name = 'todo'
@@ -86,5 +86,17 @@ export class Todo extends Section {
     }
 
     encodeNestableChildren(writer, encoder, node)
+  }
+
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    w.write('<ul>');
+    w.write('<li>');
+
+    w.write(`[${node.props.get(CheckedPath) ? 'x' : ' '}] `);
+    ne.encode(w, node.firstChild!);
+    encodeHtmlNestableChildren(w, ne, node);
+
+    w.write('</li>');
+    w.write('</ul>');
   }
 }

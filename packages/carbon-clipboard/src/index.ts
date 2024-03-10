@@ -1,5 +1,6 @@
 import {Optional} from "@emrgen/types";
 import {marked} from "marked";
+import {values} from "lodash";
 
 async function parse(): Promise<Optional<any[]>> {
   const nodes: any[] = [];
@@ -7,7 +8,7 @@ async function parse(): Promise<Optional<any[]>> {
   navigator.clipboard.read().then(data => {
     try {
       for (const item of data) {
-        console.log('XXXX')
+        console.log('types', item.types);
         let consumed = false;
         for (const type of item.types) {
           console.log(type)
@@ -27,7 +28,7 @@ async function parse(): Promise<Optional<any[]>> {
                 console.log('blob text', text);
               })
             });
-            consumed = true;
+            // consumed = true;
           }
 
           if (!consumed && type === 'text/html') {
@@ -41,7 +42,7 @@ async function parse(): Promise<Optional<any[]>> {
                 // console.log('blob text', text);
               })
             });
-            consumed = true;
+            // consumed = true;
           }
 
           if (!consumed && type === 'web application/carbon') {
@@ -51,7 +52,7 @@ async function parse(): Promise<Optional<any[]>> {
                 console.log('slice', slice);
               })
             });
-            consumed = true;
+            // consumed = true;
           }
         }
       }
@@ -76,10 +77,21 @@ async function parse(): Promise<Optional<any[]>> {
   return [];
 }
 
-const setClipboard = async function (text, type = 'text/plain') {
-  const blob = new Blob([text], { type });
-  const data = [new ClipboardItem({ [type]: blob })];
-  return await navigator.clipboard.write(data);
+interface ClipboardItemType {
+  type: string
+  data: string
+}
+
+const setClipboard = async function (dateItems: ClipboardItemType[]) {
+  const data = dateItems.map(({type, data}) => {
+    const blob = new Blob([data], {type});
+    return {[type]: blob};
+  }).reduce((acc, item) => {
+    return {...acc, ...item};
+  }, {});
+
+  const item = [new ClipboardItem(data)];
+  return await navigator.clipboard.write(item);
 }
 
 const clipboard = {

@@ -46,6 +46,17 @@ export class Quote extends CarbonPlugin {
       encoder.encode(writer, node.firstChild);
     }
 
-    encodeNestableChildren(writer, encoder, node, '');
+    encodeNestableChildren(writer, encoder, node, '> ');
+  }
+
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    w.write('<blockquote>');
+    w.write('<p>');
+
+    ne.encode(w, node.firstChild!);
+    encodeNestableChildren(w, ne, node);
+
+    w.write('</p>');
+    w.write('</blockquote>');
   }
 }

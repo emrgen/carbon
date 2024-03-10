@@ -130,6 +130,11 @@ export class Carbon extends EventEmitter {
     encoder.encode(writer, node);
   }
 
+  encodeHtml(writer: Writer, node: Node) {
+    const {encoder} = this;
+    encoder.encodeHtml(writer, node);
+  }
+
 	get content(): Node {
 		return this.state.content;
 	}
