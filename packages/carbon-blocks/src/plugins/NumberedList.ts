@@ -1,7 +1,7 @@
 import {Carbon, CheckedPath, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
 import { Section } from "./Section";
 import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
-import {encodeNestableChildren, node} from "@emrgen/carbon-blocks";
+import {encodeHtmlNestableChildren, encodeNestableChildren, node} from "@emrgen/carbon-blocks";
 
 
 declare module '@emrgen/carbon-core' {
@@ -57,12 +57,24 @@ export class NumberedList extends Section {
 
   encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
     writer.write('\n');
+    const listNumber = NumberedList.listNumber(node);
     if (node.firstChild) {
       writer.write(writer.meta.get('indent') ?? '');
-      writer.write('1. ');
+      writer.write(`${listNumber}. `);
       encoder.encode(writer, node.firstChild);
     }
 
     encodeNestableChildren(writer, encoder, node);
+  }
+
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    w.write('<ol>');
+    w.write('<li>');
+
+    ne.encode(w, node.firstChild!);
+    encodeHtmlNestableChildren(w, ne, node);
+
+    w.write('</li>');
+    w.write('</ol>');
   }
 }

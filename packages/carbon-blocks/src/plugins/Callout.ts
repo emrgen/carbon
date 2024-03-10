@@ -50,4 +50,17 @@ export class Callout extends CarbonPlugin {
     encodeNestableChildren(writer, encoder, node, '')
   }
 
+
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    w.write('<aside>');
+
+    w.write('<p>');
+    ne.encode(w, node.firstChild!);
+    w.write('</p>');
+
+    encodeNestableChildren(w, ne, node);
+
+    w.write('</aside>');
+  }
+
 }

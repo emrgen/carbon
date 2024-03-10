@@ -12,6 +12,13 @@ import clipboard from "@emrgen/carbon-clipboard";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
+  private clipboard: any;
+  
+  constructor(clipboard: any) {
+    super();
+    
+    this.clipboard = clipboard;
+  }
 
   handlers(): EventHandlerMap {
     return {
@@ -24,7 +31,27 @@ export class ClipboardPlugin extends AfterPlugin {
         if (!slice.isEmpty) {
           const writer = new TextWriter();
           app.encode(writer, slice.root);
-          event.clipboardData.setData('text/plain', writer.toString());
+
+          const html = new TextWriter();
+          app.encodeHtml(html, slice.root);
+
+          clipboard.setClipboard([
+            {
+              type: 'text/plain',
+              data: writer.toString(),
+            },
+            {
+              type: 'text/html',
+              data: html.buildHtml(),
+            },
+            {
+              type: 'web application/carbon',
+              data: JSON.stringify(slice.toJSON()),
+            }
+          ]).catch(e => {
+            console.error('clipboard cut error', e);
+          });
+
           app.runtime.clipboard = slice;
         }
 
@@ -43,8 +70,28 @@ export class ClipboardPlugin extends AfterPlugin {
         if (!slice.isEmpty) {
           const writer = new TextWriter();
           app.encode(writer, slice.root);
-          event.clipboardData.setData('text/plain', writer.toString());
-          clipboard.setClipboard(JSON.stringify(slice.toJSON()), 'web application/carbon');
+
+          const html = new TextWriter();
+          app.encodeHtml(html, slice.root);
+          console.log('html', html.toString());
+
+          clipboard.setClipboard([
+            {
+              type: 'text/plain',
+              data: writer.toString(),
+            },
+            {
+              type: 'text/html',
+              data: html.buildHtml(),
+            },
+            {
+              type: 'web application/carbon',
+              data: JSON.stringify(slice.toJSON()),
+            }
+          ]).catch(e => {
+            console.error('clipboard copy error', e);
+          });
+
           app.runtime.clipboard = slice;
           return
         }

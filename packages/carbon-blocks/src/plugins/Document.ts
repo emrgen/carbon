@@ -13,6 +13,7 @@ import {
 	splitTextBlock
 } from '@emrgen/carbon-core';
 import {Encoder, NodeEncoder, Writer} from "@emrgen/carbon-core/src/core/Encoder";
+import {encodeHtmlNestableChildren, encodeNestableChildren} from "@emrgen/carbon-blocks";
 
 export class PagePlugin extends CarbonPlugin {
 
@@ -105,9 +106,18 @@ export class PagePlugin extends CarbonPlugin {
       ne.encode(w, firstChild);
     }
 
-    children.slice(1).forEach(n => {
-      ne.encode(w, n);
-    })
+    encodeNestableChildren(w, ne, node)
+  }
+
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    const {children, firstChild} = node;
+    if (firstChild) {
+      w.write('<h1>');
+      ne.encodeHtml(w, firstChild);
+      w.write('</h1>');
+    }
+
+    encodeHtmlNestableChildren(w, ne, node)
   }
 
 }
