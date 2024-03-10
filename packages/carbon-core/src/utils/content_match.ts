@@ -65,7 +65,7 @@ export const findMatchingNodes = (before: Node[], contentMatch: ContentMatch, no
     }
   }
 
-const node = first(nodes) as Node;
+  const node = first(nodes) as Node;
   if (node.isTextContainer) {
     return {
       match: null,

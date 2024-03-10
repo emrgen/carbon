@@ -1,8 +1,10 @@
-import { Carbon } from "./Carbon";
 import {Node, Path} from "./Node";
 import {Fragment} from "@emrgen/carbon-core";
 import {flatten, zip} from "lodash";
 
+// Slice represents a selection of nodes in the editor
+// it is used to store the current selection and to copy and paste nodes
+// when the start and end nodes both are containers, it represents a block selection
 export class Slice {
 
   static empty = new Slice(null!, null!, null!);

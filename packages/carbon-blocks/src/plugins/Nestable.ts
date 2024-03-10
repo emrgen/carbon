@@ -271,15 +271,7 @@ export class NestablePlugin extends AfterPlugin {
 			}
 		}
 	}
-
-	// serializeChildren(react: Carbon, node: Node): string {
-	// 	const children = node.children.slice(1);
-	// 	const depth = takeBefore(node.parents, (n: Node) => !isNestableNode(n)).length + 1;
-	// 	if (!children.length) return ''
-	// 	return '\n' + children.map(n => react.serialize(n)).map(a => ` `.repeat(depth) + a).join('\n')
-	// }
 }
-
 
 export const encodeNestableChildren = (writer: Writer, encoder: NodeEncoder<string>, node: Node, indent = '  ') => {
   writer.meta.set('indent', (writer.meta.get('indent') ?? '') + indent);
@@ -287,4 +279,10 @@ export const encodeNestableChildren = (writer: Writer, encoder: NodeEncoder<stri
     encoder.encode(writer, child);
   })
   writer.meta.set('indent', (writer.meta.get('indent') ?? '').slice(0, -indent.length));
+}
+
+export const encodeHtmlNestableChildren = (writer: Writer, encoder: NodeEncoder<string>, node: Node) => {
+  node.children.slice(1).forEach(child => {
+    encoder.encodeHtml(writer, child);
+  })
 }

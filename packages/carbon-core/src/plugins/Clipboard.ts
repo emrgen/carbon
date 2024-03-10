@@ -1,6 +1,5 @@
-import {AfterPlugin, Carbon, deepCloneMap, EventContext, EventHandlerMap, Node, Path, Pin, TextWriter} from "../core";
+import {AfterPlugin, Carbon, EventContext, EventHandlerMap, Node, Path, Pin, TextWriter} from "../core";
 import {SelectionPatch} from "../core/DeleteGroup";
-import {NodeId} from "../core/NodeId";
 import {Span} from "../core/Span";
 import {Slice} from "../core/Slice";
 import {preventAndStop} from "../utils/event";
@@ -8,7 +7,8 @@ import {blocksBelowCommonNode} from "../utils/findNodes";
 import {SelectedPath} from "../core/NodeProps";
 import {Optional} from "@emrgen/types";
 import {identity} from "lodash";
-import {findMatchingActions, findMatchingNodes} from "@emrgen/carbon-core";
+import {findMatchingNodes} from "@emrgen/carbon-core";
+import clipboard from "@emrgen/carbon-clipboard";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
@@ -16,7 +16,7 @@ export class ClipboardPlugin extends AfterPlugin {
   handlers(): EventHandlerMap {
     return {
       cut: (ctx: EventContext<any>) => {
-        const { event, app, cmd } = ctx
+        const {event, app, cmd} = ctx
         preventAndStop(event);
         const slice = this.slice(app);
         slice.normalize();
@@ -32,7 +32,7 @@ export class ClipboardPlugin extends AfterPlugin {
         cmd.keyboard.backspace(ctx)?.Dispatch();
       },
       copy: (ctx: EventContext<any>) => {
-        const { event, app, cmd } = ctx
+        const {event, app, cmd} = ctx
         preventAndStop(event);
         const slice = this.slice(app);
         console.log('slice', slice, slice.isBlockSelection);
@@ -44,20 +44,22 @@ export class ClipboardPlugin extends AfterPlugin {
           const writer = new TextWriter();
           app.encode(writer, slice.root);
           event.clipboardData.setData('text/plain', writer.toString());
+          clipboard.setClipboard(JSON.stringify(slice.toJSON()), 'web application/carbon');
           app.runtime.clipboard = slice;
           return
         }
       },
       paste: (ctx: EventContext<any>) => {
-        const { event, app } = ctx
+        const {event, app} = ctx
         preventAndStop(event);
-        const { selection } = app
-
+        const {selection} = app
+        const nodes = clipboard.parse();
         if (!app.runtime.clipboard.isEmpty) {
           const slice = app.runtime.clipboard;
           app.cmd.transform.paste(selection, slice)?.Dispatch()
         } else {
-
+          const nodes = clipboard.parse();
+          console.log('clipboard nodes', nodes);
         }
         console.log('paste', app.runtime.clipboard.root);
       }
@@ -66,12 +68,12 @@ export class ClipboardPlugin extends AfterPlugin {
 
   // slice the selected nodes and remove the nodes outside the selection
   slice(app: Carbon): Slice {
-    const { selection, blockSelection,  } = app.state;
+    const {selection, blockSelection,} = app.state;
     if (blockSelection.isActive) {
-      const { blocks } = blockSelection;
+      const {blocks} = blockSelection;
       const cloned = blocks.map(n => {
         const node = app.schema.clone(n)
-        node.updateProps({ [SelectedPath]: false })
+        node.updateProps({[SelectedPath]: false})
         return node
       })
 
@@ -82,11 +84,13 @@ export class ClipboardPlugin extends AfterPlugin {
       return Slice.create(rootNode, first, last);
     }
 
-    const { start, end } = selection;
+    const {start, end} = selection;
     let [startNode, endNode] = blocksBelowCommonNode(start.node.parent!, end.node.parent!) as [Optional<Node>, Optional<Node>];
     if (!startNode || !endNode) {
       return Slice.empty;
     }
+
+    let matches: Node[] = [];
 
     if (startNode.isTextContainer && startNode.eq(endNode)) {
       startNode = endNode = startNode.parent;
@@ -100,19 +104,23 @@ export class ClipboardPlugin extends AfterPlugin {
       (startNode?.parent?.children.slice(startNode.index, endNode.index + 1) ?? [])
 
     const type = app.schema.type('slice');
-    const matches: Node[] = []
-    const match = findMatchingNodes(matches, type.contentMatch, nodes, []);
+    // extract document content matching nodes
+    if (!startNode.isDocument) {
+      const match = findMatchingNodes(matches, type.contentMatch, nodes, []);
 
-    if (!match.validEnd) {
-      return Slice.empty;
+      if (!match.validEnd) {
+        return Slice.empty;
+      }
+
+      console.log('match', match.validEnd, matches.map(n => n.name), type.contentMatch, nodes.map(n => n.name));
+    } else {
+      matches = nodes;
     }
-
-    console.log('match', match.validEnd, matches.map(n => n.name), type.contentMatch, nodes.map(n => n.name));
 
     // create clone of selected nodes
     // the ids are cloned as well, so that we can remove the nodes outside the selection
     const cloned: Node[] = matches.map(n => app.schema.clone(n, identity));
-    console.log('cloned', cloned.map(n => n.name));
+    // console.log('cloned', cloned.map(n => n.name));
 
     const root = type.create(cloned)!;
 
@@ -177,7 +185,6 @@ export class ClipboardPlugin extends AfterPlugin {
           if (r.end.offset === n.focusSize) {
             // console.log(r, n.textContent, n.textContent.slice(0, r.start.offset));
             const textNode = app.schema.text(n.textContent.slice(0, r.start.offset));
-            // console.log('XX',textNode);
             n.updateContent(([textNode!]))
           } else if (r.start.offset === 0) {
             const textNode = app.schema.text(n.textContent.slice(r.end.offset));
@@ -219,10 +226,6 @@ export class ClipboardPlugin extends AfterPlugin {
     if (!startSliceNode || !endSliceNode) {
       throw Error('failed to get start and end slice node')
     }
-
-    // console.log(startSliceNode.chain.map(n => n.type.name).join(' > '));
-    // console.log('rootNode.children', root.children);
-    // console.log(startSliceNode.textContent, endSliceNode.textContent);
 
     // remove nodes and content outside the selection
     return Slice.create(root, startSliceNode, endSliceNode);

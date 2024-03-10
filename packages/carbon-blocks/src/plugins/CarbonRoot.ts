@@ -26,4 +26,10 @@ export class CarbonRoot extends CarbonPlugin {
     });
   }
 
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    node.children.forEach(child => {
+      ne.encodeHtml(w, child);
+    });
+  }
+
 }

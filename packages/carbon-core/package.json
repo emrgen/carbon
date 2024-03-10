@@ -12,6 +12,7 @@
     "directory": "packages/carbon-core"
   },
   "devDependencies": {
+    "@emrgen/carbon-clipboard": "workspace:*",
     "@emrgen/types": "workspace:*",
     "@types/events": "^3.0.0",
     "@types/lodash": "^4.14.191",

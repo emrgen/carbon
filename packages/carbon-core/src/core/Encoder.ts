@@ -28,10 +28,12 @@ window.tw = new TextWriter();
 
 export interface Encoder<B> {
   encode(writer: Writer, encoder: Encoder<B>, node: Node): void;
+  encodeHtml(writer: Writer, encoder: Encoder<B>, node: Node): void;
 }
 
 export interface NodeEncoder<T> {
   encode(writer: Writer, node: Node): void;
+  encodeHtml(writer: Writer, node: Node): void;
 }
 
 export class TreeEncoder<B> implements Encoder<B> {
@@ -58,5 +60,16 @@ export class TreeEncoder<B> implements Encoder<B> {
     }
 
     return nodeEncoder.encode(writer, node);
+  }
+
+  encodeHtml(writer: Writer, encoder: Encoder<B>, node: Node) {
+    const {name} = node;
+    const nodeEncoder = this.encoders.get(name);
+
+    if (!nodeEncoder) {
+      throw new Error('No encoder found for node: ' + name);
+    }
+
+    return nodeEncoder.encodeHtml(writer, node);
   }
 }

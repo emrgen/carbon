@@ -430,18 +430,6 @@ export class ImmutableDraft implements Draft {
     }
 
     if (type === "create") {
-      // set empty placeholder of inserted node if needed
-      // if (node.isEmpty) {
-      //   this.updatePlaceholder(node, node.firstChild, EmptyPlaceholderPath);
-      //   const placeholder = node.props.get<string>(EmptyPlaceholderPath) ?? "";
-      //   // console.debug('empty placeholder', placeholder, node.id.toString())
-      //   if (node.firstChild) {
-      //     this.tm.updateProps(node.firstChild!, {
-      //       [PlaceholderPath]: placeholder
-      //     });
-      //   }
-      // }
-
       this.actions.add(InsertNodeAction.create(at, node.id, node.toJSON()));
     }
 
@@ -449,7 +437,7 @@ export class ImmutableDraft implements Draft {
     // these will not be rendered explicitly
     node.all(n => this.addInserted(n));
 
-    console.debug('inserting new item')
+    // console.debug('inserting new item')
     switch (at.at) {
       case PointAt.After:
         this.insertAfter(at.nodeId, node);
@@ -466,6 +454,7 @@ export class ImmutableDraft implements Draft {
     }
   }
 
+  // update the placeholder of the target node based on the source node placeholder
   private updatePlaceholder(source: Node, target: Optional<Node>, path: string = EmptyPlaceholderPath) {
     const placeholder = source.props.get<string>(path) ?? " ";
     if (target) {

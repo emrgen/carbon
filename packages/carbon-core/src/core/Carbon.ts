@@ -100,18 +100,26 @@ export class Carbon extends EventEmitter {
 		})
 
     // create a string encoder
-    const plugins = this.pm.plugins.filter(p => p.type ===  PluginType.Node);
+    const plugins: CarbonPlugin[] = this.pm.plugins.filter(p => p.type ===  PluginType.Node);
     const encoder = TreeEncoder.from<string>();
     this.encoder = {
       encode(writer: Writer, node: Node) {
         return encoder.encode(writer, encoder, node);
+      },
+
+      encodeHtml(writer: Writer,node: Node) {
+        return encoder.encodeHtml(writer, encoder, node);
       }
-    }
+    };
 
     plugins.forEach(p => {
       encoder.addEncoder(p.name, {
         encode: (writer: Writer, node: Node) => {
           return p.encode(writer, this.encoder, node);
+        },
+
+        encodeHtml: (writer: Writer, node: Node) => {
+          return p.encodeHtml(writer, this.encoder, node);
         }
       })
     });

@@ -85,6 +85,11 @@ export abstract class CarbonPlugin {
     throw new Error('encode not implemented for ' + this.name)
   }
 
+  // encode the node into a html string
+  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+    throw new Error('encodeHtml not implemented for ' + this.name)
+  }
+
 	onReceive(app: Carbon, msg: CarbonMessageFormat) {
 		const { source, dest } = msg;
 		if (source.eq(dest)) return true;
