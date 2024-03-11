@@ -3,6 +3,7 @@ import {useEffect} from "react";
 import {blockPresetPlugins, node, text, title, section, block} from "@emrgen/carbon-blocks";
 import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon, ImmutableNodeFactory} from "@emrgen/carbon-react";
 import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
+import {flashComp, flashPlugin} from "@emrgen/carbon-flash";
 import {commentEditorPlugin, commentEditorComp} from "@emrgen/carbon-comment-editor";
 import {
   ActivatedPath,
@@ -24,6 +25,10 @@ import {PathTracker} from "../../PathTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
+
+    node('flashCard', [
+      title([text('flash card title')]),
+    ]),
 
     // node('scale', []),
     //
@@ -336,6 +341,7 @@ const plugins = [
   ...blockPresetPlugins,
   // carbonUtilPlugins,
   commentEditorPlugin,
+  flashPlugin,
   // codeExtension,
   // {
   //   plugins: [
@@ -348,6 +354,7 @@ const plugins = [
 const renderers = [
   ...blockPresetRenderers,
   commentEditorComp,
+  flashComp,
 ];
 
 const renderManager = RenderManager.from(

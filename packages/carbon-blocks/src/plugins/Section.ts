@@ -112,7 +112,7 @@ export class Section extends NodePlugin {
 	}
 
   // encode into markdown
-  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+  encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     if (node.isEmpty) {
       return
     }
@@ -127,7 +127,7 @@ export class Section extends NodePlugin {
   }
 
   // encode into html
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     if (node.isEmpty) {
       return
     }

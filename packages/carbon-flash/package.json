@@ -9,16 +9,12 @@
   },
   "dependencies": {
     "@emrgen/carbon-core": "workspace:*",
-    "@emrgen/carbon-dragon": "workspace:*",
+    "@emrgen/carbon-react": "workspace:*",
     "@react-icons/all-files": "^4.1.0",
-    "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",
     "emoji-regex": "^10.2.1",
-    "katex": "^0.16.7",
     "lodash": "^4.17.21",
-    "prismjs": "^1.29.0",
     "react-icons": "^4.10.1",
-    "recoil": "^0.7.7",
     "@emrgen/types": "workspace:*"
   },
   "devDependencies": {

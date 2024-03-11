@@ -151,6 +151,9 @@ importers:
       '@emrgen/carbon-dragon':
         specifier: workspace:*
         version: link:../../packages/carbon-dragon
+      '@emrgen/carbon-flash':
+        specifier: workspace:*
+        version: link:../../packages/carbon-flash
       '@emrgen/carbon-question':
         specifier: workspace:*
         version: link:../../packages/carbon-question
@@ -961,39 +964,27 @@ importers:
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
-      '@emrgen/carbon-dragon':
+      '@emrgen/carbon-react':
         specifier: workspace:*
-        version: link:../carbon-dragon
+        version: link:../carbon-react
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
       '@react-icons/all-files':
         specifier: ^4.1.0
         version: 4.1.0(react@18.2.0)
-      '@types/katex':
-        specifier: ^0.16.0
-        version: 0.16.7
       '@types/lodash':
         specifier: ^4.14.191
         version: 4.14.202
       emoji-regex:
         specifier: ^10.2.1
         version: 10.3.0
-      katex:
-        specifier: ^0.16.7
-        version: 0.16.9
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
-      prismjs:
-        specifier: ^1.29.0
-        version: 1.29.0
       react-icons:
         specifier: ^4.10.1
         version: 4.12.0(react@18.2.0)
-      recoil:
-        specifier: ^0.7.7
-        version: 0.7.7(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.0.27
