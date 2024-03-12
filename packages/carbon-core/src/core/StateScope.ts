@@ -14,14 +14,17 @@ export class StateScope {
 
   static scope: Symbol = GLOBAL_SCOPE;
 
+  // get the current scope
   static current() {
     return SCOPES[SCOPES.length - 1];
   }
 
+  // set the current scope
   static set(scope: Symbol) {
     SCOPES.push(scope);
   }
 
+  // remove the scope from the stack
   static remove(scope: Symbol) {
     const index = SCOPES.indexOf(scope);
     if (index >= 0) {
@@ -29,6 +32,7 @@ export class StateScope {
     }
   }
 
+  // get the state map for the given scope
   static get(scope: Symbol = StateScope.current()): NodeMap {
     let map = STATE_SCOPE.get(scope);
     if (!map) {
@@ -48,14 +52,17 @@ export class StateScope {
     }
   }
 
+  // put the state map for the given scope
   static put(scope: Symbol, map: NodeMap) {
     STATE_SCOPE.set(scope, map);
   }
 
+  // check if the state map for the given scope exists
   static has(scope: Symbol) {
     return STATE_SCOPE.has(scope);
   }
 
+  // delete the state map for the given scope
   static delete(scope: Symbol) {
     STATE_SCOPE.delete(scope);
     StateScope.remove(scope);

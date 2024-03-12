@@ -261,6 +261,7 @@ export class Transaction {
 		return this;
 	}
 
+  // Commit applies changes to the draft
 	Commit(draft: Draft) {
 		if (this.actions.length === 0) return this
 		if (this._committed) {

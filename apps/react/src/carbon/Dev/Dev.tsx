@@ -26,9 +26,9 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
-    node('flashCard', [
-      title([text('flash card title')]),
-    ]),
+    // node('flashCard', [
+    //   title([text('flash card title')]),
+    // ]),
 
     // node('scale', []),
     //
@@ -201,7 +201,7 @@ const data = node("carbon", [
     //       node("pageTreeItem", [title([text("Data Structures")])]),
     //       node("pageTreeItem", [title([text("Operating Systems")])]),
     //     ],
-    //     {[CollapsedPath]: true}
+    //     {[CollapsedPath]: false}
     //   ),
     //   node("pageTreeItem",
     //     [
@@ -228,7 +228,7 @@ const data = node("carbon", [
     //   node("pageTreeItem", [title([text("Chemistry")])]),
     //   node("pageTreeItem", [title([text("Economics")])]),
     // ]),
-    //
+
     node("section", [title([text("12345678")])]),
     // section([
     //   title([text("abc")]),

@@ -131,15 +131,18 @@ export class ImmutableDraft implements Draft {
     return this.nodeMap.parent(from);
   }
 
+  // produce a new state from the draft
   produce(fn: (producer: ImmutableDraft) => void): CoreState {
-    // const draft = new ImmutableDraft(this, origin);
     const {scope} = this.state;
     try {
-      console.log('[SCOPE]', scope.toString())
+      // console.log('[SCOPE]', scope.toString())
       StateScope.put(scope, this.nodeMap);
       StateScope.set(scope);
 
+      // update the draft
       fn(this);
+
+      // commit the draft with the updated node map
       const state = this.commit(3);
       StateScope.put(scope, state.nodeMap)
 
@@ -154,7 +157,7 @@ export class ImmutableDraft implements Draft {
   }
 
   // turn the draft into a new state
-  commit(depth: number): ImmutableState {
+  private commit(depth: number): ImmutableState {
     this.prepare();
 
     const {state, updated, selection} = this;

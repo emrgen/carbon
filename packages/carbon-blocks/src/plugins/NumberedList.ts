@@ -55,7 +55,7 @@ export class NumberedList extends Section {
     return prevSiblings.length + 1;
   }
 
-  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+  encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     writer.write('\n');
     const listNumber = NumberedList.listNumber(node);
     if (node.firstChild) {
@@ -67,7 +67,7 @@ export class NumberedList extends Section {
     encodeNestableChildren(writer, encoder, node);
   }
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     w.write('<ol>');
     w.write('<li>');
 

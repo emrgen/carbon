@@ -61,7 +61,7 @@ export class ChangeManager extends NodeTopicEmitter {
   // 1. sync the doc
   // 2. sync the selection
   // 3. sync the node state
-  update(tr: Transaction, state: State, timeout: number = 1000) {
+  update(state: State, tr: Transaction, timeout: number = 1000) {
     if (this.actions.length) {
       console.log('pending transaction', this.actions.length);
       return;

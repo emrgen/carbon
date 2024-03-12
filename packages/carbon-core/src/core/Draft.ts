@@ -24,6 +24,10 @@ export interface Draft {
   // rollback on error is handled by the draft
   schema: Schema;
   nodeMap: NodeMap;
+
+  // produce creates a new draft and pass to the fn to update the draft
+  // if the fn fails then the draft is rolled back to the previous state
+  // if the fn succeeds then the draft is committed and the new state is returned
   produce(fn: (draft: Draft) => void): State;
 
   insert(at: Point, node: Node): void;

@@ -295,15 +295,18 @@ export class PinnedSelection {
 
 			// Ref: https://stackoverflow.com/a/779785/4556425
 			// https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
-			var selection = window.getSelection();
+			const selection = window.getSelection();
 
-      // NOTE: this worked all the time
-			selection?.setBaseAndExtent(
-				anchorNode,
-				anchorOffset,
-				focusNode,
-				focusOffset
-			);
+      const inSync = selection?.anchorNode === anchorNode && selection?.focusNode === focusNode && selection?.anchorOffset === anchorOffset && selection?.focusOffset === focusOffset
+      if (!inSync) {
+        console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
+        selection?.setBaseAndExtent(
+        	anchorNode,
+        	anchorOffset,
+        	focusNode,
+        	focusOffset
+        );
+      }
 
       // NOTE: this works by fires two selectionchange event
       // const range = new Range();

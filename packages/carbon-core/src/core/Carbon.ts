@@ -37,7 +37,7 @@ export class Carbon extends EventEmitter {
 
   // TODO: move to external package if possible
   // string encoder is required clipboard
-  private encoder: NodeEncoder<string>;
+  private encoder: NodeEncoder;
 
 	schema: Schema;
 	state: State; // immutable state
@@ -229,15 +229,11 @@ export class Carbon extends EventEmitter {
 
 		// keep three previous states
 		this.state = state.activate()
-        // console.log('updateState', this.state.content.textContent, this.state.isContentChanged, this.state.isSelectionChanged);
-		this.change.update(tr, state)
+    // console.log('updateState', this.state.content.textContent, this.state.isContentChanged, this.state.isSelectionChanged);
+		this.change.update(state, tr)
 
 		this.emit(EventsOut.transactionCommit, tr);
 	}
-
-	// sanitize(node: Node): SerializedNode {
-	// 	return this.pm.serialize(this, node);
-	// }
 
 	blur() {
 		// this.sm.blur();
