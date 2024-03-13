@@ -1,6 +1,6 @@
 import {Carbon, CheckedPath, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
 import { Section } from "./Section";
-import { takeBefore } from "@emrgen/carbon-core/src/utils/array";
+import {takeBefore, takeUpto} from "@emrgen/carbon-core/src/utils/array";
 import {encodeHtmlNestableChildren, encodeNestableChildren, node} from "@emrgen/carbon-blocks";
 
 
@@ -51,12 +51,17 @@ export class NumberedList extends Section {
   }
 
   static listNumber(node: Node): number {
-    const prevSiblings = takeBefore(node.prevSiblings.slice().reverse(), (n: Node) => n.name !== this.name);
-    return prevSiblings.length + 1;
+    // const prevSiblings = takeUpto(node.prevSiblings.slice().reverse(), (n: Node) => n.name !== this.name);
+    // console.log(prevSiblings, node.prevSiblings, node.name, node.prevSiblings.map(n => n.name));
+    return 1//prevSiblings.length;
   }
 
   encode(writer: Writer, encoder: NodeEncoder, node: Node) {
-    writer.write('\n');
+    const prevSibling = node.prevSibling;
+    if (prevSibling) {
+      writer.write('\n');
+    }
+
     const listNumber = NumberedList.listNumber(node);
     if (node.firstChild) {
       writer.write(writer.meta.get('indent') ?? '');

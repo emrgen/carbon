@@ -31,7 +31,10 @@ export class BulletedList extends Section {
   }
 
   encode(writer: Writer, encoder: NodeEncoder, node: Node) {
-    writer.write('\n');
+    const prevSibling = node.prevSibling;
+    if (prevSibling) {
+      writer.write('\n');
+    }
     if (node.firstChild) {
       writer.write(writer.meta.get('indent') ?? '');
       writer.write('- ');

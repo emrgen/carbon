@@ -30,8 +30,9 @@ export class TextWriter implements Writer {
 
   private mergeAdjacentListItemsRecursive(parent: HTMLElement) {
     parent.childNodes.forEach((child, i) => {
-      if (child instanceof HTMLElement) {
-        this.mergeAdjacentListItemsRecursive(child);
+      // child id not text element
+      if (child.nodeType !== 1) {
+        this.mergeAdjacentListItemsRecursive(child as any);
       }
     });
 
@@ -52,6 +53,8 @@ export class TextWriter implements Writer {
         children.forEach(c => prev.appendChild(c));
         child.remove();
       }
+
+      console.log(child.tagName)
 
       if (child.tagName === 'OL' && prev.tagName === 'OL') {
         const children = Array.from(child.children);

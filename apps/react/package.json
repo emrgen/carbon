@@ -18,6 +18,7 @@
     "@emrgen/carbon-flash": "workspace:*",
     "@emrgen/carbon-code": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-cell": "workspace:*",
     "@emrgen/carbon-blocks": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
     "@emrgen/carbon-react-blocks": "workspace:*",

@@ -117,7 +117,16 @@ export class Section extends NodePlugin {
       return
     }
 
-    writer.write('\n\n');
+
+    const prevSibling = node.prevSibling;
+    if (prevSibling) {
+      if (prevSibling?.name === 'section') {
+        writer.write('\n\n');
+      } else {
+        writer.write('\n');
+      }
+    }
+    
     if (node.firstChild) {
       writer.write(writer.meta.get('indent') ?? '');
       encoder.encode(writer, node.firstChild);

@@ -22,10 +22,10 @@ export const CodeMirrorComp = (props: RendererProps) => {
       extensions: [
         basicSetup,
         lineNumbers({}),
-        javascript({
-          jsx: true,
-          typescript: true,
-        })
+        // javascript({
+        //   jsx: true,
+        //   typescript: true,
+        // })
       ],
       doc: code!,
     })
