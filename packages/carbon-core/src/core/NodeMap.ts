@@ -12,6 +12,7 @@ export interface NodeMap {
   children(key: NodeId): NodeId[];
 
   insert(at: Point, childId: NodeId): void;
+
   // remove child id from parent
   remove(childId: NodeId): void;
 

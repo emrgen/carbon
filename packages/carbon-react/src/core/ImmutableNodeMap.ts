@@ -2,13 +2,18 @@ import {Node, NodeId, NodeMap as NodeMap, NodeBTree, Point, NodeIdComparator} fr
 import {Optional, Predicate} from "@emrgen/types";
 
 export class ImmutableNodeMap implements NodeMap {
-  private _children: Map<NodeId, NodeId[]> = new Map();
-  private _parents: Map<NodeId, NodeId> = new Map();
+  // recent insertions
   private _map: NodeBTree = new NodeBTree();
+  // node parents
+  private _parents: Map<NodeId, NodeId> = new Map();
+  // node children
+  private _children: Map<NodeId, NodeId[]> = new Map();
+  // recently deleted nodes
   private _deleted: NodeBTree = new NodeBTree();
-  private _parent: ImmutableNodeMap | null = null;
-  private _frozen = false;
 
+  private _parent: ImmutableNodeMap | null = null;
+
+  private _frozen = false;
   private _size = 0;
 
   static empty() {
@@ -101,10 +106,12 @@ export class ImmutableNodeMap implements NodeMap {
     return this._map.has(key);
   }
 
+  // tries to find the node in the map or in the parent
   hasDeep(key: NodeId) {
     return this._map.has(key) || this._parent?.hasDeep(key);
   }
 
+  // check if the node is deleted in the map or in the parent
   isDeleted(id: NodeId) {
     if (this._map.has(id)) {
       return false;
@@ -116,12 +123,15 @@ export class ImmutableNodeMap implements NodeMap {
     return this._parent?.isDeleted(id) ?? false;
   }
 
+  // delete the node from the map
   delete(key: NodeId) {
     // console.log("deleting", key.toString(), this.get(key));
     this._deleted.set(key, this.get(key)!);
     this._map.delete(key);
+    console.log('delete', key.toString(), this.get(key));
   }
 
+  // find the index of the given node
   indexOf(node: Node) {
     const parent = this.parent(node);
     const root = this.get(NodeId.ROOT);
@@ -133,11 +143,13 @@ export class ImmutableNodeMap implements NodeMap {
     return parent.children.indexOf(node);
   }
 
+  // find the parent of the given node
   parent(from: Node|NodeId): Optional<Node> {
     let node = from instanceof Node ? from : this.get(from);
     return node && node.parentId && this.get(node.parentId);
   }
 
+  // find the first node that matches the given predicate
   closest(from: NodeId, fn: Predicate<Node>): Optional<Node> {
     let node = this.get(from);
     while (node) {
@@ -146,6 +158,7 @@ export class ImmutableNodeMap implements NodeMap {
     }
   }
 
+  // find the chain of nodes starting at the given node
   chain(from: NodeId | Node): Node[] {
     let node = from instanceof Node ? from : this.get(from);
     const nodes: Node[] = [];
@@ -157,6 +170,7 @@ export class ImmutableNodeMap implements NodeMap {
     return nodes;
   }
 
+  // find the chain of nodes starting at the parent of the given node
   parents(from: NodeId | Node): Node[] {
     let node = from instanceof Node ? from : this.get(from);
     let ret: Node[] = [];

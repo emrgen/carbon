@@ -18,6 +18,7 @@ import {
   TagPath, TitlePath,
 } from "@emrgen/carbon-core";
 import {CarbonApp} from "@emrgen/carbon-utils";
+import {codeExtension} from "@emrgen/carbon-code";
 import {noop, range} from "lodash";
 import SelectionTracker from "../../SelectionTracker";
 import {PathTracker} from "../../PathTracker";
@@ -181,7 +182,11 @@ const data = node("carbon", [
     //   node("codeLine", [title([text("  console.log('hello world')")])]),
     //   node("codeLine",[ title([text("}")])])
     // ]),
-    //
+
+    node("codeMirror", [], {
+      ['remote/state/codemirror']: `function foo() {\n  console.log('hello world')\n}`,
+    }),
+
     // section([title([text("section 1")])]),
     //
     // node("code", [
@@ -342,7 +347,7 @@ const plugins = [
   // carbonUtilPlugins,
   commentEditorPlugin,
   flashPlugin,
-  // codeExtension,
+  ...codeExtension.plugins!
   // {
   //   plugins: [
   //     new BlockTree(),
@@ -355,6 +360,7 @@ const renderers = [
   ...blockPresetRenderers,
   commentEditorComp,
   flashComp,
+  ...codeExtension.renderers!,
 ];
 
 const renderManager = RenderManager.from(

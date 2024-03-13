@@ -165,7 +165,7 @@ export class PinnedSelection {
 
     const { start, end } = this;
     const [firstNode, lastNode] = blocksBelowCommonNode(start.node, end.node);
-		console.log('[[blocksBelowCommonNode]]', firstNode.id.toString(), lastNode.id.toString())
+		// console.log('[[blocksBelowCommonNode]]', firstNode.id.toString(), lastNode.id.toString())
 
     if (firstNode.eq(lastNode)) return [];
 
