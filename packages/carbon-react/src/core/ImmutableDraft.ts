@@ -177,7 +177,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot commit draft with invalid pinned selection");
     }
 
-    console.log('updated state', updated.toArray().map(n => n.toString()).join(', '))
+    // console.log('updated state', updated.toArray().map(n => n.toString()).join(', '))
     updated.freeze();
     nodeMap.contracts(2)
     nodeMap.freeze();

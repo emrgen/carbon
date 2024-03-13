@@ -127,9 +127,8 @@ export class PluginManager {
 		const keyDownEvent = <EventContext<any>>EventContext.fromContext(event)
 		const { currentNode } = keyDownEvent
 
-		// console.log('onKeyDown', event);
 
-		console.group('onKeyDown xxx', event)
+		console.groupCollapsed('onKeyDown', event)
 
     const process = () => {
       each(this.before, (p: CarbonPlugin) => {
@@ -152,11 +151,11 @@ export class PluginManager {
           const handler = entries(handlers).find(([key]) => {
             return isKeyHotkey(snakeCase(key).replaceAll('_', '+'))(keyDownEvent.event.nativeEvent)
           });
-          if (handler) {
-            console.log('node', n.name, handler[0], handler[1]);
-          } else {
-            console.log('node', n.name, 'no handler', handlers)
-          }
+          // if (handler) {
+          //   console.log('node', n.name, handler[0], handler[1]);
+          // } else {
+          //   console.log('node', n.name, 'no handler', handlers)
+          // }
           handler?.[1]?.(keyDownEvent)
           return keyDownEvent.stopped
         });
@@ -179,7 +178,7 @@ export class PluginManager {
       })
     };
 
-    process();
+    process()
 
 		console.groupEnd()
 	}

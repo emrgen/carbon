@@ -1,8 +1,8 @@
-import React, {ForwardedRef, forwardRef, memo, ReactNode, useEffect, useImperativeHandle, useMemo, useRef} from "react";
+import React, {ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef} from "react";
 import {useCarbon} from '../hooks/useCarbon';
 import {LocalHtmlAttrPath, Mark, MarksPath, NamePath, TagPath} from "@emrgen/carbon-core";
 import {useNodeChange, useRenderManager} from "../hooks";
-import {RendererProps} from "../renderer/ReactRenderer";
+import {RendererProps} from "@emrgen/carbon-react";
 import {isEmpty} from "lodash";
 
 export const JustEmpty = (props: RendererProps) => {
@@ -131,7 +131,7 @@ const CarbonMark = (props: RenderMark) => {
       default:
         return children
     }
-  },[children, mark]);
+  }, [children, mark]);
 
   return <>{view}</>
 }
@@ -169,7 +169,7 @@ const InnerCarbonText = (props: RendererProps) => {
   const attrs = useMemo(() => {
     const style = {}
     const classNames: string[] = []
-    marks.forEach(( mark) => {
+    marks.forEach((mark) => {
       switch (mark.type) {
         case 'bold':
           classNames.push('carbon-bold')
@@ -193,7 +193,7 @@ const InnerCarbonText = (props: RendererProps) => {
       style,
       className: classNames.join(' '),
     }
-  },[marks])
+  }, [marks])
   return (
     <CarbonElement node={node} tag="span" custom={attrs}>
       <>
@@ -257,20 +257,20 @@ export const InnerCarbonNode = (props: RendererProps) => {
   // })
 
   // const component = useMemo(() => {
-    const name = (node.props.get(NamePath) ?? node.name) as string;
-    const RegisteredComponent = rm.component(name);
+  const name = (node.props.get(NamePath) ?? node.name) as string;
+  const RegisteredComponent = rm.component(name);
 
-    if (RegisteredComponent) {
-      if (RegisteredComponent === CarbonNode) {
-        console.warn(`${node.name} is registered as CarbonNode, this will fall back to CarbonDefaultNode`)
-      } else {
-        return <RegisteredComponent {...props} node={node}/>;
-      }
+  if (RegisteredComponent) {
+    if (RegisteredComponent === CarbonNode) {
+      console.warn(`${node.name} is registered as CarbonNode, this will fall back to CarbonDefaultNode`)
+    } else {
+      return <RegisteredComponent {...props} node={node}/>;
     }
+  }
 
-    console.warn('No component found for', node.name, 'fall back to CarbonDefaultNode')
+  console.warn('No component found for', node.name, 'fall back to CarbonDefaultNode')
 
-    return <CarbonDefaultNode {...props} node={node}/>;
+  return <CarbonDefaultNode {...props} node={node}/>;
   // }, [rm, node, props])
   //
   // if (!component) {
@@ -323,7 +323,7 @@ export const CarbonNodeContent = (props: RendererProps) => {
         key={content.key}
       />
       {afterContent}
-  </div>
+    </div>
   );
 };
 
@@ -339,7 +339,7 @@ export const CarbonNodeChildren = (props: RendererProps) => {
     if (node.children.length < 2) return null;
 
 
-    const children =node.children
+    const children = node.children
       .slice(1)
       .map((n) => {
         // console.debug('CarbonChildren', n.name, n.id.toString());
