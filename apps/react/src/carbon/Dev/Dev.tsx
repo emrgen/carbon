@@ -191,9 +191,22 @@ const data = node("carbon", [
     node("cell", [
       node('cellView'),
       node("codeMirror", [], {
-        ['remote/state/codemirror']: `function foo() {\n  console.log('hello world')\n}`,
       }),
     ]),
+
+    node("cell", [
+      node('cellView'),
+      node("codeMirror", [], {
+      }),
+    ]),
+
+    node("cell", [
+      node('cellView'),
+      node("codeMirror", [], {
+      }),
+    ]),
+
+
 
     // section([title([text("section 1")])]),
     //
