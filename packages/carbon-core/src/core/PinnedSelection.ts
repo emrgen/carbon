@@ -165,7 +165,7 @@ export class PinnedSelection {
 
     const { start, end } = this;
     const [firstNode, lastNode] = blocksBelowCommonNode(start.node, end.node);
-		console.log('[[blocksBelowCommonNode]]', firstNode.id.toString(), lastNode.id.toString())
+		// console.log('[[blocksBelowCommonNode]]', firstNode.id.toString(), lastNode.id.toString())
 
     if (firstNode.eq(lastNode)) return [];
 
@@ -295,15 +295,18 @@ export class PinnedSelection {
 
 			// Ref: https://stackoverflow.com/a/779785/4556425
 			// https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
-			var selection = window.getSelection();
+			const selection = window.getSelection();
 
-      // NOTE: this worked all the time
-			selection?.setBaseAndExtent(
-				anchorNode,
-				anchorOffset,
-				focusNode,
-				focusOffset
-			);
+      const inSync = selection?.anchorNode === anchorNode && selection?.focusNode === focusNode && selection?.anchorOffset === anchorOffset && selection?.focusOffset === focusOffset
+      if (!inSync) {
+        // console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
+        selection?.setBaseAndExtent(
+        	anchorNode,
+        	anchorOffset,
+        	focusNode,
+        	focusOffset
+        );
+      }
 
       // NOTE: this works by fires two selectionchange event
       // const range = new Range();
@@ -320,7 +323,7 @@ export class PinnedSelection {
 			console.assert(domSel?.focusNode === domSelection.focusNode, 'failed to sync focusNode')
 			console.assert(domSel?.anchorOffset === domSelection.anchorOffset, 'failed to sync anchor offset')
 			console.assert(domSel?.focusOffset === domSelection.focusOffset, 'failed to sync focus offset')
-			console.log('Selection.syncDom:', this.toString(), domSel)
+			// console.log('Selection.syncDom:', this.toString(), domSel)
 		} catch (err) {
 			console.error(err);
 		}

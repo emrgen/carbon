@@ -27,10 +27,14 @@ export const PageTreeComp = (props: RendererProps) => {
         <CarbonNodeChildren node={node}/>
       )
     }
-  },[handleToggleCollapse, node]);
+  },[app, handleToggleCollapse, node]);
+
+  const onMouseDown = useCallback((e) => {
+    // preventAndStop(e);
+  },[]);
 
   return (
-    <CarbonBlock node={node} custom={{onMouseDown: preventAndStop}}>
+    <CarbonBlock node={node} custom={{onMouseDown}}>
       {content}
     </CarbonBlock>
   );

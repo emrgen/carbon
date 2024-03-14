@@ -30,8 +30,11 @@ export class BulletedList extends Section {
     }
   }
 
-  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
-    writer.write('\n');
+  encode(writer: Writer, encoder: NodeEncoder, node: Node) {
+    const prevSibling = node.prevSibling;
+    if (prevSibling) {
+      writer.write('\n');
+    }
     if (node.firstChild) {
       writer.write(writer.meta.get('indent') ?? '');
       writer.write('- ');
@@ -41,15 +44,15 @@ export class BulletedList extends Section {
     encodeNestableChildren(writer, encoder, node);
   }
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
-    w.write('<ul>');
-    w.write('<li>');
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write('<ul>\n');
+    w.write('<li>\n');
 
     ne.encode(w, node.firstChild!);
-    encodeHtmlNestableChildren(w, ne, node);
+    encodeHtmlNestableChildren(w, ne, node, '');
 
-    w.write('</li>');
-    w.write('</ul>');
+    w.write('\n</li>');
+    w.write('\n</ul>');
   }
 
 }

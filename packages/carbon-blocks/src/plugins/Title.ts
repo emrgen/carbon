@@ -114,11 +114,11 @@ export class TitlePlugin extends NodePlugin {
     cmd.transform.insertText(selection, data ?? key, false)?.Dispatch()
   }
 
-  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
     node.children.map(n => ne.encode(w, n));
   }
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     node.children.map(n => ne.encodeHtml(w, n));
   }
 }

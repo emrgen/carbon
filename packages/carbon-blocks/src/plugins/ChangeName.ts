@@ -24,7 +24,7 @@ import { NumberedList } from "./NumberedList";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
-    // change
+
   }
 }
 
@@ -50,7 +50,9 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(>\s)(.)*/, this.tryChangeName('collapsible', ['nestable'])),
     new InputRule(/^(```)(.)*/, this.tryChangeIntoCode('code', ['nestable'])),
     new InputRule(/^(---)(.)*/, this.insertDividerBefore('divider', ['nestable'])),
-    new InputRule(/^(\*\*\*\s)(.)*/, this.insertDividerBefore('separator', ['nestable'])),
+    new InputRule(/^(===)(.)*/, this.insertDividerBefore('divider', ['nestable'])),
+    new InputRule(/^(\\cell\s)(.)*/, this.insertDividerBefore('cell', [])),
+    // new InputRule(/^(\*\*\*\s)(.)*/, this.insertDividerBefore('separator', ['nestable'])),
   ])
 
   handlers(): Partial<EventHandler> {
@@ -116,6 +118,7 @@ export class ChangeName extends BeforePlugin {
       }
 
       const titleNode = changeNode.child(0)!;
+      console.log(match)
       const title = titleNode.textContent.slice(match[1].length - 1)
       if (match[1] === titleNode.textContent + ' ' || title === '') {
         const action = SetContentAction.create(titleNode.id, []);
@@ -207,6 +210,10 @@ export class ChangeName extends BeforePlugin {
         .Select(after)
         .Dispatch()
     }
+  }
+
+  insertBefore(name: string, groups: string[]) {
+
   }
 
 }

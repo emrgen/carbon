@@ -112,12 +112,21 @@ export class Section extends NodePlugin {
 	}
 
   // encode into markdown
-  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+  encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     if (node.isEmpty) {
       return
     }
 
-    writer.write('\n\n');
+
+    const prevSibling = node.prevSibling;
+    if (prevSibling) {
+      if (prevSibling?.name === 'section') {
+        writer.write('\n\n');
+      } else {
+        writer.write('\n');
+      }
+    }
+    
     if (node.firstChild) {
       writer.write(writer.meta.get('indent') ?? '');
       encoder.encode(writer, node.firstChild);
@@ -127,7 +136,7 @@ export class Section extends NodePlugin {
   }
 
   // encode into html
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     if (node.isEmpty) {
       return
     }

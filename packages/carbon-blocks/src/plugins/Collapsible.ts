@@ -16,7 +16,7 @@ import {
   splitTextBlock,
   PlaceholderPath, CollapsedPath, Writer, NodeEncoder
 } from "@emrgen/carbon-core";
-import {encodeNestableChildren} from "@emrgen/carbon-blocks";
+import {encodeHtmlNestableChildren, encodeNestableChildren} from "@emrgen/carbon-blocks";
 
 declare module '@emrgen/carbon-core' {
   interface Transaction {
@@ -233,7 +233,7 @@ export class Collapsible extends NodePlugin {
     return
   }
 
-  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+  encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     if (node.isEmpty) {
       return
     }
@@ -245,6 +245,24 @@ export class Collapsible extends NodePlugin {
     }
 
     encodeNestableChildren(writer, encoder, node, '');
+  }
+
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
+    if (node.isEmpty) {
+      return;
+    }
+
+    w.write('<ul>');
+    w.write('<li>');
+    w.write('<p>');
+    if (node.firstChild) {
+      ne.encodeHtml(w, node.firstChild);
+    }
+    w.write('</p>');
+    encodeHtmlNestableChildren(w, ne, node)
+    w.write('</li>');
+    w.write('</ul>');
+
   }
 }
 

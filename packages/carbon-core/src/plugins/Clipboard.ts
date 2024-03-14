@@ -14,10 +14,10 @@ export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
   private clipboard: any;
   
-  constructor(clipboard: any) {
+  constructor() {
     super();
     
-    this.clipboard = clipboard;
+    // this.clipboard = clipboard;
   }
 
   handlers(): EventHandlerMap {

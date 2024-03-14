@@ -78,11 +78,15 @@ export class PageTreeItem extends CarbonPlugin {
       group: '',
       content: 'title pageTreeItem*',
       focusable: true,
+      isolate: true,
+      inlineSelectable: true,
+      draggable: true,
+      dragHandle: true,
       props: {
         local: {
           html: {
             suppressContentEditableWarning: true,
-            contentEditable: false,
+            contentEditable: true,
           },
           state: {
             opened: false,

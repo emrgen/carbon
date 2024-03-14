@@ -1,8 +1,16 @@
 import {useEffect} from "react";
 
 import {blockPresetPlugins, node, text, title, section, block} from "@emrgen/carbon-blocks";
-import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon, ImmutableNodeFactory} from "@emrgen/carbon-react";
+import {
+  ReactRenderer,
+  RendererProps,
+  RenderManager,
+  useCreateCarbon,
+  ImmutableNodeFactory,
+  useCreateCachedCarbon
+} from "@emrgen/carbon-react";
 import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
+import {flashComp, flashPlugin} from "@emrgen/carbon-flash";
 import {commentEditorPlugin, commentEditorComp} from "@emrgen/carbon-comment-editor";
 import {
   ActivatedPath,
@@ -17,6 +25,8 @@ import {
   TagPath, TitlePath,
 } from "@emrgen/carbon-core";
 import {CarbonApp} from "@emrgen/carbon-utils";
+import {codeExtension} from "@emrgen/carbon-code";
+import {cellPlugin, cellRenderer} from "@emrgen/carbon-cell";
 import {noop, range} from "lodash";
 import SelectionTracker from "../../SelectionTracker";
 import {PathTracker} from "../../PathTracker";
@@ -24,6 +34,10 @@ import {PathTracker} from "../../PathTracker";
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
+
+    // node('flashCard', [
+    //   title([text('flash card title')]),
+    // ]),
 
     // node('scale', []),
     //
@@ -176,7 +190,31 @@ const data = node("carbon", [
     //   node("codeLine", [title([text("  console.log('hello world')")])]),
     //   node("codeLine",[ title([text("}")])])
     // ]),
-    //
+
+    node("codeMirror", [], {
+      ['remote/state/codemirror']: `function foo() {\n  console.log('hello world')\n}`,
+    }),
+
+    node("cell", [
+      node('cellView'),
+      node("codeMirror", [], {
+      }),
+    ]),
+
+    node("cell", [
+      node('cellView'),
+      node("codeMirror", [], {
+      }),
+    ]),
+
+    node("cell", [
+      node('cellView'),
+      node("codeMirror", [], {
+      }),
+    ]),
+
+
+
     // section([title([text("section 1")])]),
     //
     // node("code", [
@@ -196,7 +234,7 @@ const data = node("carbon", [
     //       node("pageTreeItem", [title([text("Data Structures")])]),
     //       node("pageTreeItem", [title([text("Operating Systems")])]),
     //     ],
-    //     {[CollapsedPath]: true}
+    //     {[CollapsedPath]: false}
     //   ),
     //   node("pageTreeItem",
     //     [
@@ -223,7 +261,7 @@ const data = node("carbon", [
     //   node("pageTreeItem", [title([text("Chemistry")])]),
     //   node("pageTreeItem", [title([text("Economics")])]),
     // ]),
-    //
+
     node("section", [title([text("12345678")])]),
     // section([
     //   title([text("abc")]),
@@ -336,7 +374,9 @@ const plugins = [
   ...blockPresetPlugins,
   // carbonUtilPlugins,
   commentEditorPlugin,
-  // codeExtension,
+  flashPlugin,
+  ...codeExtension.plugins!,
+  cellPlugin,
   // {
   //   plugins: [
   //     new BlockTree(),
@@ -348,6 +388,9 @@ const plugins = [
 const renderers = [
   ...blockPresetRenderers,
   commentEditorComp,
+  flashComp,
+  ...codeExtension.renderers!,
+  ...cellRenderer,
 ];
 
 const renderManager = RenderManager.from(
@@ -364,9 +407,10 @@ const renderManager = RenderManager.from(
 // console.groupEnd = noop;
 console.time = noop;
 
+// localStorage.setItem('carbon:content', JSON.stringify(data));
 
 export default function Dev() {
-  const app = useCreateCarbon('dev', data, plugins);
+  const app = useCreateCachedCarbon('dev', data, plugins);
 
   // @ts-ignore
   window.app = app;

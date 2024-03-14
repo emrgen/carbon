@@ -76,7 +76,7 @@ export class FormatterPlugin extends CarbonPlugin {
     const {selection} = state
     if (selection.isCollapsed && !selection.isInvalid) {
       const {head} = selection;
-      console.log('Save marks from node', head.node)
+      // console.log('Save marks from node', head.node)
     }
   }
 

@@ -27,12 +27,13 @@ export class SelectionChangePlugin extends AfterPlugin {
         console.log(p14('[event]'), 'dragStart', ctx.event);
       },
 			selectionchange: (ctx: EventContext<Event>) => {
-        if (ctx.app.runtime.mousedown) {
-          ctx.app.runtime.selectionchange = true;
-          ctx.app.runtime.selection = ctx.selection;
-          console.log('selectionchange while selecting, ignore')
-          return;
-        }
+        // if (ctx.app.runtime.mousedown) {
+        //   ctx.app.runtime.selectionchange = true;
+        //   ctx.app.runtime.selection = ctx.selection;
+        //   console.log('selectionchange while selecting, ignore')
+        //   return;
+        // }
+
         // console.debug('mouseover node', this.state.plugin('runtime')?.get('mouseOverNode')?.chain.map(n => n.name).join(' > '))
 				// console.log(p14('[event]'), 'selectionchange', ctx.event);
 				// helper code block to detect errant selectionchange effect

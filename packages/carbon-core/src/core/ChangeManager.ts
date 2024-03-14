@@ -61,7 +61,7 @@ export class ChangeManager extends NodeTopicEmitter {
   // 1. sync the doc
   // 2. sync the selection
   // 3. sync the node state
-  update(tr: Transaction, state: State, timeout: number = 1000) {
+  update(state: State, tr: Transaction, timeout: number = 1000) {
     if (this.actions.length) {
       console.log('pending transaction', this.actions.length);
       return;
@@ -85,7 +85,7 @@ export class ChangeManager extends NodeTopicEmitter {
     if (isContentChanged) {
       this.updated.clear();
       this.updated = state.updated.clone();
-      console.log("syncing: content", this.updated.nodes(this.state.nodeMap).map(n => n.key));
+      // console.log("syncing: content", this.updated.nodes(this.state.nodeMap).map(n => n.key));
 
       this.interval = setTimeout(() => {
         console.error("syncing: content timeout", this.updated.nodes(this.state.nodeMap).map(n => n.key));
@@ -137,7 +137,7 @@ export class ChangeManager extends NodeTopicEmitter {
     // sync the selection if the content is synced
     // console.log('mounted', this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
     if (this.isContentSynced) {
-      console.log("content synced, selection dirty:", this.isSelectionDirty);
+      // console.log("content synced, selection dirty:", this.isSelectionDirty);
       // NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
       if (this.isSelectionDirty) {
         this.updateSelection(() => {
@@ -159,7 +159,7 @@ export class ChangeManager extends NodeTopicEmitter {
     }
 
 
-    console.log('PROCESSING NEXT TICK')
+    // console.log('PROCESSING NEXT TICK')
     this.app.processTick();
 
     // this.promiseState.resolve?.();
@@ -227,7 +227,7 @@ export class ChangeManager extends NodeTopicEmitter {
   // this must be called after the dom is updated
   private syncSelection() {
     try {
-      console.log('syncSelection', this.state.selection.toString()	);
+      // console.log('syncSelection', this.state.selection.toString()	);
       if (!this.app.enabled) {
         console.log("skipped: selection sync disabled");
         return;

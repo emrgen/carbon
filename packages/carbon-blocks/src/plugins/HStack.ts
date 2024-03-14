@@ -55,7 +55,7 @@ export class HStack extends CarbonPlugin {
     return [];
   }
 
-  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
     node.children.forEach(child => {
       ne.encode(w, child);
     })
@@ -83,7 +83,7 @@ export class Stack extends CarbonPlugin {
     return [];
   }
 
-  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
     if (node.isEmpty) {
       return;
     }

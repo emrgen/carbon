@@ -34,7 +34,7 @@ export class Quote extends CarbonPlugin {
     }
   }
 
-  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+  encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     if (node.isEmpty) {
       return
     }

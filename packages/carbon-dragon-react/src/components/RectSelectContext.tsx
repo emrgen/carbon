@@ -22,7 +22,7 @@ export function RectSelectContext(props) {
   // mark the rect-selector dirty when the content changes
   useEffect(() => {
     const onChanged = (state: State) => {
-      console.log('####################1')
+      // console.log('####################1')
       setIsBlockSelection(state.blockSelection.isActive)
     };
 

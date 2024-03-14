@@ -61,6 +61,7 @@ export const DocumentComp = (props: RendererProps) => {
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
+      console.log('xxxxxxxxxxxxxxxxxxxxxxx')
       app.emit("document:cursor:show");
       const lastChildId = node.lastChild?.id;
       if (!lastChildId) return;
@@ -82,6 +83,7 @@ export const DocumentComp = (props: RendererProps) => {
               .SelectBlocks([])
               .Select(after, ActionOrigin.UserInput)
               .Dispatch();
+            console.log('######################')
           }
           return;
         }
@@ -157,8 +159,8 @@ export const DocumentComp = (props: RendererProps) => {
               // console.log(e.target.scrollTop);
               app.emit(EventsIn.scroll, e as any)
             },
-            onBlur: (e) => app.emit('document:blur', e as any),
-            onFocus: (e) => app.emit('document:focus', e as any),
+            // onBlur: (e) => app.emit('document:blur', e as any),
+            // onFocus: (e) => app.emit('document:focus', e as any),
             className: 'carbon-document',
           }}
         >

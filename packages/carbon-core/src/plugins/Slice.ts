@@ -10,13 +10,13 @@ export class SlicePlugin extends CarbonPlugin {
     }
   }
 
-  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
     node.children.forEach(n => {
       ne.encode(w, n);
     });
   }
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     node.children.forEach(n => {
       ne.encodeHtml(w, n);
     });

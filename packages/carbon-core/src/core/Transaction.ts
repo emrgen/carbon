@@ -261,6 +261,7 @@ export class Transaction {
 		return this;
 	}
 
+  // Commit applies changes to the draft
 	Commit(draft: Draft) {
 		if (this.actions.length === 0) return this
 		if (this._committed) {
@@ -273,7 +274,7 @@ export class Transaction {
 			if (this.actions.every(c => c.origin === ActionOrigin.Runtime)) {
 				console.group('Commit (runtime)');
 			} else {
-				console.group('Commit', this.id, this);
+				console.groupCollapsed('Commit', this.id, this);
 			}
 
 			for (const action of this.actions) {

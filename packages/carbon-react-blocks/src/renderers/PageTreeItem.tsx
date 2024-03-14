@@ -21,7 +21,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
     app.cmd.collapsible.toggle(node).Dispatch();
   }, [node]);
 
-  // insert a new section as child of this collapsible
+  // insert a new section as child of this collapsible and open it
   const handleInsert = useCallback(
     (e) => {
       preventAndStop(e);
@@ -107,7 +107,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
         <CarbonNodeContent
           node={node}
           beforeContent={beforeContent}
-          custom={{ onClick: handleOpenDocument }}
+          // custom={{ onClick: handleOpenDocument }}
         />
       )}
       {node.isEmpty && (

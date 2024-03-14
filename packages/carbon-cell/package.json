@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-code",
+  "name": "@emrgen/carbon-cell",
   "version": "0.0.0",
   "type": "module",
   "main": "src/index.ts",
@@ -27,11 +27,8 @@
     "@uiw/react-codemirror": "^4.21.20",
     "codemirror": "^6.0.1",
     "emoji-regex": "^10.2.1",
-    "katex": "^0.16.7",
     "lodash": "^4.17.21",
-    "prismjs": "^1.29.0",
-    "react-icons": "^4.10.1",
-    "recoil": "^0.7.7"
+    "react-icons": "^4.10.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",

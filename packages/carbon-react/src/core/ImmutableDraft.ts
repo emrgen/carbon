@@ -131,15 +131,18 @@ export class ImmutableDraft implements Draft {
     return this.nodeMap.parent(from);
   }
 
+  // produce a new state from the draft
   produce(fn: (producer: ImmutableDraft) => void): CoreState {
-    // const draft = new ImmutableDraft(this, origin);
     const {scope} = this.state;
     try {
-      console.log('[SCOPE]', scope.toString())
+      // console.log('[SCOPE]', scope.toString())
       StateScope.put(scope, this.nodeMap);
       StateScope.set(scope);
 
+      // update the draft
       fn(this);
+
+      // commit the draft with the updated node map
       const state = this.commit(3);
       StateScope.put(scope, state.nodeMap)
 
@@ -154,7 +157,7 @@ export class ImmutableDraft implements Draft {
   }
 
   // turn the draft into a new state
-  commit(depth: number): ImmutableState {
+  private commit(depth: number): ImmutableState {
     this.prepare();
 
     const {state, updated, selection} = this;
@@ -174,7 +177,7 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot commit draft with invalid pinned selection");
     }
 
-    console.log('updated state', updated.toArray().map(n => n.toString()).join(', '))
+    // console.log('updated state', updated.toArray().map(n => n.toString()).join(', '))
     updated.freeze();
     nodeMap.contracts(2)
     nodeMap.freeze();
@@ -352,10 +355,12 @@ export class ImmutableDraft implements Draft {
     if (node.isText && isString(content)) {
       const {parent} = node;
       if (!parent) return;
-      this.tm.updateProps(parent, {
+      const updated = this.tm.updateProps(parent, {
         [PlaceholderPath]: content.length === 0 ? this.nodeMap.parent(parent)?.props.get<string>(EmptyPlaceholderPath) ?? "" : " "
       });
-      this.addUpdated(parent.id);
+      // if (updated) {
+        this.addUpdated(parent.id);
+      // }
     }
   }
 
@@ -893,7 +898,7 @@ class Transformer {
     if (isEqual(before, props)) {
       console.log('same props', before, props)
       console.warn("unnecessary props update detected. possibly the node is immutable")
-      return
+      return false;
     }
 
     this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
@@ -902,6 +907,8 @@ class Transformer {
     console.log('UPDATING props', props)
 
     node.updateProps(props);
+
+    return true;
   }
 }
 
