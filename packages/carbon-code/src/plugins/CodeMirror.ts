@@ -1,4 +1,4 @@
-import {CarbonPlugin, NodeSpec} from "@emrgen/carbon-core";
+import {CarbonPlugin, EventContext, EventHandlerMap, NodeSpec} from "@emrgen/carbon-core";
 
 export class CodeMirror extends CarbonPlugin {
 
@@ -20,6 +20,15 @@ export class CodeMirror extends CarbonPlugin {
             suppressContentEditableWarning: true,
           }
         }
+      }
+    }
+  }
+
+  keydown(): EventHandlerMap {
+    return {
+      shiftTab: (ctx: EventContext<KeyboardEvent>) => {
+        console.log('xxxxxxxx')
+        ctx.stopPropagation();
       }
     }
   }

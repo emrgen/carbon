@@ -1,7 +1,14 @@
 import {useEffect} from "react";
 
 import {blockPresetPlugins, node, text, title, section, block} from "@emrgen/carbon-blocks";
-import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon, ImmutableNodeFactory} from "@emrgen/carbon-react";
+import {
+  ReactRenderer,
+  RendererProps,
+  RenderManager,
+  useCreateCarbon,
+  ImmutableNodeFactory,
+  useCreateCachedCarbon
+} from "@emrgen/carbon-react";
 import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
 import {flashComp, flashPlugin} from "@emrgen/carbon-flash";
 import {commentEditorPlugin, commentEditorComp} from "@emrgen/carbon-comment-editor";
@@ -400,9 +407,10 @@ const renderManager = RenderManager.from(
 // console.groupEnd = noop;
 console.time = noop;
 
+// localStorage.setItem('carbon:content', JSON.stringify(data));
 
 export default function Dev() {
-  const app = useCreateCarbon('dev', data, plugins);
+  const app = useCreateCachedCarbon('dev', data, plugins);
 
   // @ts-ignore
   window.app = app;
