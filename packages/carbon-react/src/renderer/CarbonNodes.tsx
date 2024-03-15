@@ -2,7 +2,7 @@ import React, {ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, u
 import {useCarbon} from '../hooks/useCarbon';
 import {LocalHtmlAttrPath, Mark, MarksPath, NamePath, TagPath} from "@emrgen/carbon-core";
 import {useNodeChange, useRenderManager} from "../hooks";
-import {RendererProps} from "@emrgen/carbon-react";
+import {RendererProps} from "./ReactRenderer";
 import {isEmpty} from "lodash";
 
 export const JustEmpty = (props: RendererProps) => {

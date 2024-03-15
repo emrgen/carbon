@@ -51,7 +51,7 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(```)(.)*/, this.tryChangeIntoCode('code', ['nestable'])),
     new InputRule(/^(---)(.)*/, this.insertDividerBefore('divider', ['nestable'])),
     new InputRule(/^(===)(.)*/, this.insertDividerBefore('divider', ['nestable'])),
-    new InputRule(/^(\\cell\s)(.)*/, this.insertDividerBefore('cell', [])),
+    new InputRule(/^(\/cell\s)(.)*/, this.insertDividerBefore('cell', [])),
     // new InputRule(/^(\*\*\*\s)(.)*/, this.insertDividerBefore('separator', ['nestable'])),
   ])
 

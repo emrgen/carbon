@@ -70,7 +70,7 @@ export class Todo extends Section {
     }
   }
 
-  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+  encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     const checked = node.props.get(CheckedPath);
     const {prevSibling} = node;
     if (prevSibling?.name === node.name) {
@@ -88,7 +88,7 @@ export class Todo extends Section {
     encodeNestableChildren(writer, encoder, node)
   }
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     w.write('<ul>');
     w.write('<li>');
 

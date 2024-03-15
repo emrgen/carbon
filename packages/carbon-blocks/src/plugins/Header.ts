@@ -85,7 +85,7 @@ export class Heading extends NodePlugin {
 		return {}
 	}
 
-	encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+	encode(w: Writer, ne: NodeEncoder, node: Node) {
     const { level } = this;
     w.write('\n\n');
     w.write('#'.repeat(level) + ' ');
@@ -97,7 +97,7 @@ export class Heading extends NodePlugin {
     encodeNestableChildren(w, ne, node, '');
   }
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     const { level } = this;
     w.write('<h' + level + '>');
     const {firstChild} = node;

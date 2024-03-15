@@ -49,7 +49,7 @@ export class Quote extends CarbonPlugin {
     encodeNestableChildren(writer, encoder, node, '> ');
   }
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     w.write('<blockquote>');
     w.write('<p>');
 

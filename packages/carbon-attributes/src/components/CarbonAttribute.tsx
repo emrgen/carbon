@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { RendererProps } from '@emrgen/carbon-core'
+import { RendererProps } from '@emrgen/carbon-react'
 import { Tags } from './Tags';
 
 export default function CarbonProp(props: RendererProps) {
