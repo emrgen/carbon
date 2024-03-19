@@ -81,12 +81,12 @@ export abstract class CarbonPlugin {
 	normalize(node: Node): CarbonAction[] { return [] }
 
 	// encode the node into a copy string
-  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
     throw new Error('encode not implemented for ' + this.name)
   }
 
   // encode the node into a html string
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     throw new Error('encodeHtml not implemented for ' + this.name)
   }
 

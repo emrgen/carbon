@@ -20,13 +20,13 @@ export class CarbonRoot extends CarbonPlugin {
     }
   }
 
-  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
     node.children.forEach(child => {
       ne.encode(w, child);
     });
   }
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     node.children.forEach(child => {
       ne.encodeHtml(w, child);
     });

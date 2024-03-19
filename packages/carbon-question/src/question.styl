@@ -2,11 +2,83 @@ $selectionHaloColor = #accef78d
 $quoteColor = #555
 $lineHeight = 26px
 
-[data-name=questionAnswer]
-  margin-top 20px
-  line-height: $lineHeight
-  > [data-type=content]
-    font-size 20px
+[data-name=question]
+    margin-top 20px
+    margin-bottom: 20px;
+    line-height: $lineHeight
+
+    > [data-type=content]
+        padding 10px 0
+        
     padding 10px 0
-  > [data-type=children]
-    padding-left 32px
+    //background: #eee;
+    border-radius 4px
+    .question__footer
+        display flex
+        justify-content center
+        opacity 0
+        transition opacity 0.2s
+
+        .question__footer-add-hint,
+        .question__footer-add-explanation
+            margin 0 10px
+            padding 0 6px
+            border-radius 4px
+            background: #eee
+            cursor pointer
+            font-size 12px
+            font-weight bold
+            transition background-color 0.2s
+            user-select none
+            &:hover
+                background: #ddd
+    &:hover .question__footer
+        opacity 1
+[data-name=questionTitle]
+    font-size 18px
+    font-weight 600
+
+    .title-wrapper
+        padding-bottom 10px
+    [data-name=title]
+        &:after
+            display none
+
+[data-name=questionDescription]
+    .description-wrapper
+        padding-bottom 10px
+
+    [data-name=description]
+        &:after
+            display none
+
+[data-name=multipleChoice]
+    margin: 10px 0;
+
+    [data-name=multipleChoiceOption]
+        padding 5px
+        margin 6px 0
+        border 1px solid #ddd
+        border-radius 3px
+        background: #eee;
+        .multiple-choice-option
+            display flex
+            gap 10px
+            .multiple-choice-option__input
+                font-weight bold
+                margin 0
+                padding 0
+                width 24px
+                height 24px
+                border 2px solid #8c95a1
+                border-radius 3px
+                background: #fff
+                cursor pointer
+                display flex
+                justify-content center
+                align-items center
+                user-select none
+                
+        [data-name=title]
+            flex 1
+

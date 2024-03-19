@@ -99,7 +99,7 @@ export class PagePlugin extends CarbonPlugin {
 	// 	return undefined
 	// }
 
-  encode(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
     const {children, firstChild} = node;
     if (firstChild) {
       w.write('# ');
@@ -109,7 +109,7 @@ export class PagePlugin extends CarbonPlugin {
     encodeNestableChildren(w, ne, node)
   }
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     const {children, firstChild} = node;
     if (firstChild) {
       w.write('<h1>');

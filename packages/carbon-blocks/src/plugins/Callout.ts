@@ -25,8 +25,8 @@ export class Callout extends CarbonPlugin {
       props: {
         local: {
           placeholder: {
-            empty: 'Callout',
-            focus: 'Callout'
+            empty: '',
+            focused: 'Press / for commands'
           },
           html: {
             suppressContentEditableWarning: true,
@@ -36,7 +36,7 @@ export class Callout extends CarbonPlugin {
     }
   }
 
-  encode(writer: Writer, encoder: NodeEncoder<string>, node: Node) {
+  encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     if (node.isEmpty) {
       return
     }
@@ -51,7 +51,7 @@ export class Callout extends CarbonPlugin {
   }
 
 
-  encodeHtml(w: Writer, ne: NodeEncoder<string>, node: Node) {
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     w.write('<aside>');
 
     w.write('<p>');

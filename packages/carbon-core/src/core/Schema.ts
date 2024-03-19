@@ -107,6 +107,9 @@ export interface NodeSpec {
 	atom?: boolean;
 	tag?: string;
 	options?: boolean;
+  // when the node content match is not valid
+  // the new node will be inserted or the current node will be unwrapped based on the consistency
+  consistency?: 'insert' | 'remove',
   
   // toDOM?: (node: Node) => [string, any];
   // fromDOM?: (dom: Node) => NodeJSON;
@@ -138,7 +141,7 @@ export interface NodeSpec {
 		layout?: DndLayout;
 	},
 
-  // if the depends node content is updated, the node will be updated as well
+  // if the depends on node content is updated, the node will be updated as well
   depends?:{
     prev?: boolean,
     next?: boolean,
