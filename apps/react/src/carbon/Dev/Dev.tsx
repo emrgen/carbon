@@ -27,13 +27,36 @@ import {
 import {CarbonApp} from "@emrgen/carbon-utils";
 import {codeExtension} from "@emrgen/carbon-code";
 import {cellPlugin, cellRenderer} from "@emrgen/carbon-cell";
-import {noop, range} from "lodash";
+import {questionExtension} from "@emrgen/carbon-question";
+import {noop, flattenDeep} from "lodash";
 import SelectionTracker from "../../SelectionTracker";
 import {PathTracker} from "../../PathTracker";
 
 const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
+
+    node('question', [
+      node('questionTitle', [
+        section([title([text('question title')])]),
+      ]),
+      node('questionDescription', [
+        section([title([text('question description')])]),
+      ]),
+      node('questionType', [
+        node('multipleChoice', [
+          node('multipleChoiceOption', [
+            title([text('option 1')]),
+          ]),
+          node('multipleChoiceOption', [
+            title([text('option 2')]),
+          ]),
+          node('multipleChoiceOption', [
+            title([text('option 3')]),
+          ]),
+        ])
+      ])
+    ]),
 
     // node('flashCard', [
     //   title([text('flash card title')]),
@@ -62,18 +85,18 @@ const data = node("carbon", [
     //   title([text('question title')]),
     // ]),
     //
-    // node('hint', [
-    //   title([text('hint 1')]),
-    //   section([title([text('hint content')])]),
-    // ]),
-    // node('hint', [
-    //   title([text('hint 2')]),
-    //   section([title([text('hint content')])]),
-    // ]),
-    // node('hint', [
-    //   title([text('hint 3')]),
-    //   section([title([text('hint content')])]),
-    // ]),
+    node('hint', [
+      title([text('hint 1')]),
+      section([title([text('hint content')])]),
+    ]),
+    node('hint', [
+      title([text('hint 2')]),
+      section([title([text('hint content')])]),
+    ]),
+    node('hint', [
+      title([text('hint 3')]),
+      section([title([text('hint content')])]),
+    ]),
 
     // section([title([
     //   text("section 1"),
@@ -106,9 +129,9 @@ const data = node("carbon", [
     // section([title([])]),
     // section([title([text("section 3")])]),
 
-    // node("commentEditor", [
-    //   section([title([text('add a comment')])])
-    // ]),
+    node("commentEditor", [
+      section([title([text('add a comment')])])
+    ]),
 
     // section([title([text("section 3")])]),
     // node("hstack", [
@@ -191,28 +214,28 @@ const data = node("carbon", [
     //   node("codeLine",[ title([text("}")])])
     // ]),
 
-    node("codeMirror", [], {
-      ['remote/state/codemirror']: `function foo() {\n  console.log('hello world')\n}`,
-    }),
+    // node("codeMirror", [], {
+    //   ['remote/state/codemirror']: `function foo() {\n  console.log('hello world')\n}`,
+    // }),
 
-    node("cell", [
-      node('cellView'),
-      node("codeMirror", [], {
-      }),
-    ]),
-
-    node("cell", [
-      node('cellView'),
-      node("codeMirror", [], {
-      }),
-    ]),
-
-    node("cell", [
-      node('cellView'),
-      node("codeMirror", [], {
-      }),
-    ]),
-
+    // node("cell", [
+    //   node('cellView'),
+    //   node("codeMirror", [], {
+    //   }),
+    // ]),
+    //
+    // node("cell", [
+    //   node('cellView'),
+    //   node("codeMirror", [], {
+    //   }),
+    // ]),
+    //
+    // node("cell", [
+    //   node('cellView'),
+    //   node("codeMirror", [], {
+    //   }),
+    // ]),
+    //
 
 
     // section([title([text("section 1")])]),
@@ -377,6 +400,7 @@ const plugins = [
   flashPlugin,
   ...codeExtension.plugins!,
   cellPlugin,
+    ...questionExtension.plugins!,
   // {
   //   plugins: [
   //     new BlockTree(),
@@ -391,6 +415,7 @@ const renderers = [
   flashComp,
   ...codeExtension.renderers!,
   ...cellRenderer,
+  ...questionExtension.renderers!,
 ];
 
 const renderManager = RenderManager.from(
@@ -410,7 +435,7 @@ console.time = noop;
 // localStorage.setItem('carbon:content', JSON.stringify(data));
 
 export default function Dev() {
-  const app = useCreateCachedCarbon('dev', data, plugins);
+  const app = useCreateCarbon('dev', data, flattenDeep(plugins));
 
   // @ts-ignore
   window.app = app;

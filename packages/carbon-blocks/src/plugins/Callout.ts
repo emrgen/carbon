@@ -25,8 +25,8 @@ export class Callout extends CarbonPlugin {
       props: {
         local: {
           placeholder: {
-            empty: 'Callout',
-            focus: 'Callout'
+            empty: '',
+            focused: 'Press / for commands'
           },
           html: {
             suppressContentEditableWarning: true,

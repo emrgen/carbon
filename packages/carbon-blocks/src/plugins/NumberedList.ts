@@ -3,7 +3,6 @@ import { Section } from "./Section";
 import {takeBefore, takeUpto} from "@emrgen/carbon-core/src/utils/array";
 import {encodeHtmlNestableChildren, encodeNestableChildren, node} from "@emrgen/carbon-blocks";
 
-
 declare module '@emrgen/carbon-core' {
   export interface Transaction {
   }
@@ -16,7 +15,7 @@ export class NumberedList extends Section {
     return {
       ...super.spec(),
       splitName: 'numberList',
-      depends:{
+      depends: {
         prev: true,
       },
       info: {
@@ -42,11 +41,6 @@ export class NumberedList extends Section {
           }
         }
       }
-    }
-  }
-
-  commands(): Record<string, Function> {
-    return {
     }
   }
 

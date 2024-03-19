@@ -1128,6 +1128,9 @@ importers:
       '@emrgen/carbon-dragon':
         specifier: workspace:*
         version: link:../carbon-dragon
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
       '@react-icons/all-files':
         specifier: ^4.1.0
         version: 4.1.0(react@18.2.0)
