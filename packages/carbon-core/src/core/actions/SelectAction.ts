@@ -36,7 +36,7 @@ export class SelectAction implements CarbonAction {
     }
 
     // this is just a sanity check
-    const selection = after.pin(draft.nodeMap);
+    const selection = after.pin(draft);
     if (!selection) {
       console.error(p12('%c[error]'), 'color:red', 'updateSelection', 'failed to get next selection');
       return

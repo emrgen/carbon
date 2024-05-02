@@ -100,15 +100,17 @@ export class ClipboardPlugin extends AfterPlugin {
         const {event, app} = ctx
         preventAndStop(event);
         const {selection} = app
-        const nodes = clipboard.parse();
         if (!app.runtime.clipboard.isEmpty) {
+          console.log('runtime.clipboard.root', app.runtime.clipboard.root);
           const slice = app.runtime.clipboard;
           app.cmd.transform.paste(selection, slice)?.Dispatch()
         } else {
-          const nodes = clipboard.parse();
-          console.log('clipboard nodes', nodes);
+          clipboard.parse().then(nodes => {
+            // const slice = app.schema.type('slice').create(nodes)!;
+            // app.cmd.transform.paste(selection, slice)?.Dispatch()
+            console.log('parsed clipboard nodes', nodes);
+          })
         }
-        console.log('paste', app.runtime.clipboard.root);
       }
     };
   }

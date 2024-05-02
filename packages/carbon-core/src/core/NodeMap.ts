@@ -4,10 +4,12 @@ import {Node} from "./Node";
 import {NodeId, NodeIdComparator} from "./NodeId";
 import {Point} from "@emrgen/carbon-core";
 
-export interface NodeMap {
+export interface NodeMapGet {
   get(key: NodeId): Optional<Node>;
-
   parent(key: NodeId): Optional<Node>;
+}
+
+export interface NodeMap extends NodeMapGet{
 
   children(key: NodeId): NodeId[];
 

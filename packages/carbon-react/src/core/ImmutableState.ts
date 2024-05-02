@@ -28,7 +28,7 @@ interface StateProps {
 }
 
 export class ImmutableState implements State {
-  private previous: Optional<ImmutableState>;
+  previous: Optional<ImmutableState>;
   scope: Symbol;
   content: Node;
   selection: PinnedSelection;

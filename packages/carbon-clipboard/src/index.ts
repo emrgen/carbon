@@ -1,80 +1,71 @@
 import {Optional} from "@emrgen/types";
-import {marked} from "marked";
-import {values} from "lodash";
+import {parseText} from "./parser/text";
 
 async function parse(): Promise<Optional<any[]>> {
   const nodes: any[] = [];
-  console.log('xxxxxxxxxxxxxxxxx')
-  navigator.clipboard.read().then(data => {
-    try {
-      for (const item of data) {
-        console.log('types', item.types);
-        let consumed = false;
-        for (const type of item.types) {
-          console.log(type)
-          if (!consumed && type === 'text/plain') {
-            const p1 = item.getType(type).then(blob => {
-              const p2 = blob.text().then(text => {
-                nodes.push({
-                  name: 'section',
-                  children: [{
-                    name: 'title',
-                    children: [{
-                      type: 'text',
-                      text: text,
-                    }],
-                  }],
-                });
-                console.log('blob text', text);
-              })
-            });
-            // consumed = true;
-          }
+  return new Promise((resolve, reject) => {
+    navigator.clipboard.read().then(data => {
+      try {
+        for (const item of data) {
+          console.log('types', item.types);
 
-          if (!consumed && type === 'text/html') {
-            item.getType(type).then(blob => {
-              blob.text().then(text => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'text/html');
-                const body = doc.querySelector('body');
-                console.log('doc', body);
-                console.log('doc string', body?.innerHTML);
-                // console.log('blob text', text);
-              })
-            });
-            // consumed = true;
-          }
+          let consumed = false;
+          for (const type of item.types) {
+            // parse text content to carbon slice
+            if (!consumed && type === 'text/plain') {
+              item.getType(type).then(blob => {
+               blob.text().then(text => {
+                  const slice = parseText(text);
+                  resolve(nodes);
+                })
+              });
+              break
+            }
 
-          if (!consumed && type === 'web application/carbon') {
-            item.getType(type).then(blob => {
-              blob.text().then(text => {
-                const slice = JSON.parse(text);
-                console.log('slice', slice);
-              })
-            });
-            // consumed = true;
+            // TODO: parse html content to carbon slice
+            if (!consumed && type === 'text/html') {
+              item.getType(type).then(blob => {
+                blob.text().then(text => {
+                  const parser = new DOMParser();
+                  const doc = parser.parseFromString(text, 'text/html');
+                  const body = doc.querySelector('body');
+                  console.log('doc', body);
+                  console.log('doc string', body?.innerHTML);
+                  // console.log('blob text', text);
+                })
+              });
+              // break
+            }
+
+            // parse web application/carbon content to carbon slice
+            if (!consumed && type === 'web application/carbon') {
+              item.getType(type).then(blob => {
+                blob.text().then(text => {
+                  const slice = JSON.parse(text);
+                  console.log('slice', slice);
+                })
+              });
+              break
+            }
           }
         }
+      } catch (e) {
+        console.error('clipboard paste error', e);
+        reject(e);
       }
-    } catch (e) {
-      console.error('clipboard paste error', e);
-    }
+    })
 
-    return nodes;
+    // navigator.clipboard.readText().then(text => {
+    //   marked.parse(text, {
+    //     walkTokens(token) {
+    //       console.log('token', token);
+    //     },
+    //   });
+    //
+    //   console.log('clipboard paste');
+    //   console.log(text)
+    // });
   })
-
-  // navigator.clipboard.readText().then(text => {
-  //   marked.parse(text, {
-  //     walkTokens(token) {
-  //       console.log('token', token);
-  //     },
-  //   });
-  //
-  //   console.log('clipboard paste');
-  //   console.log(text)
-  // });
-
-  return [];
 }
 
 interface ClipboardItemType {

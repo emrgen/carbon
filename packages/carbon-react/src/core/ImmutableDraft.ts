@@ -58,25 +58,24 @@ enum UpdateDependent {
 // NOTE: it is internal to the state and actions. it should not be used outside of it.
 //draft of a state is used to prepare a new state before commit
 export class ImmutableDraft implements Draft {
-  origin: ActionOrigin;
-  pm: PluginManager;
+  private readonly state: ImmutableState;
+
   schema: Schema;
+  private readonly nodeMap: ImmutableNodeMap;
 
-  state: ImmutableState;
-  nodeMap: ImmutableNodeMap;
-  selection: PointedSelection;
+  private origin: ActionOrigin;
+  private pm: PluginManager;
+  private selection: PointedSelection;
 
-  selected: NodeIdSet = NodeIdSet.empty();
+  private selected: NodeIdSet = NodeIdSet.empty();
+  private updated: NodeIdSet; // tracks changed nodes
+  private contentChanged: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
+  private unstable: NodeIdSet = NodeIdSet.empty();
 
-  updated: NodeIdSet; // tracks changed nodes
-  contentChanged: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
+  private readonly changes: StateChanges;
+  private readonly actions: StateActions;
 
-  unstable: NodeIdSet = NodeIdSet.empty();
-
-  changes: StateChanges = StateChanges.empty();
-  actions: StateActions;
-
-  tm: Transformer;
+  private tm: Transformer;
 
   private drafting = true;
 
@@ -84,6 +83,7 @@ export class ImmutableDraft implements Draft {
     this.origin = origin;
     this.state = state;
     this.pm = pm;
+    this.changes = new StateChanges();
     this.actions = new StateActions([], type);
     this.tm = new Transformer(this.changes, this.actions);
     this.schema = schema;
@@ -364,44 +364,6 @@ export class ImmutableDraft implements Draft {
     }
   }
 
-  move(to: Point, nodeId: NodeId) {
-    if (!this.drafting) {
-      throw new Error("Cannot move node to a draft that is already committed");
-    }
-
-    // allow no op move without altering index.
-    const inode = this.node(nodeId);
-    const at = nodeLocation(inode)
-    if (at?.eq(to)) {
-      console.warn('no op move detected, check origin')
-      return;
-    }
-
-
-    const node = this.unfreeze(nodeId);
-    // if the node is already deleted, skip the move
-    if (this.nodeMap.isDeleted(nodeId)) {
-      return;
-    }
-
-    const {parent} = node;
-    if (!parent) {
-      throw new Error("Cannot move node that does not have a parent");
-    }
-
-    this.actions.add(MoveNodeAction.create(nodeLocation(node)!, to, nodeId));
-
-    this.updateDependents(node, UpdateDependent.Next);
-
-    this.tm.remove(node, parent);
-    node.setParentId(null);
-
-    this.addUpdated(parent.id);
-    this.addContentChanged(parent.id);
-
-    this.insert(to, node, "move");
-  }
-
   insertText(at: Point, text: string) {
     const {nodeId, offset} = at;
     const node = this.nodeMap.get(nodeId);
@@ -424,7 +386,48 @@ export class ImmutableDraft implements Draft {
     }
   }
 
-  insert(at: Point, node: Node, type: "create" | "move" = "create") {
+  insert(at: Point, node: Node) {
+    this.insertBy(at, node, 'create')
+  }
+
+  move(to: Point, nodeId: NodeId) {
+    if (!this.drafting) {
+      throw new Error("Cannot move node to a draft that is already committed");
+    }
+
+    // allow no op move without altering index.
+    const inode = this.node(nodeId);
+    const at = nodeLocation(inode)
+    if (at?.eq(to)) {
+      console.warn('no op move detected, check origin')
+      return;
+    }
+
+    // if the node is already deleted, skip the move
+    if (this.nodeMap.isDeleted(nodeId)) {
+      return;
+    }
+
+    const node = this.unfreeze(nodeId);
+    const {parent} = node;
+    if (!parent) {
+      throw new Error("Cannot move node that does not have a parent");
+    }
+
+    this.actions.add(MoveNodeAction.create(nodeLocation(node)!, to, nodeId));
+
+    this.updateDependents(node, UpdateDependent.Next);
+
+    this.tm.remove(node, parent);
+    node.setParentId(null);
+
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
+
+    this.insertBy(to, node, "move");
+  }
+
+  private insertBy(at: Point, node: Node, type: "create" | "move" = "create") {
     if (!this.drafting) {
       throw new Error("Cannot insert node to a draft that is already committed");
     }
@@ -434,6 +437,7 @@ export class ImmutableDraft implements Draft {
       return
     }
 
+    //
     if (type === "create") {
       this.actions.add(InsertNodeAction.create(at, node.id, node.toJSON()));
     }
@@ -444,11 +448,11 @@ export class ImmutableDraft implements Draft {
 
     // console.debug('inserting new item')
     switch (at.at) {
-      case PointAt.After:
-        this.insertAfter(at.nodeId, node);
-        break
       case PointAt.Before:
         this.insertBefore(at.nodeId, node);
+        break
+      case PointAt.After:
+        this.insertAfter(at.nodeId, node);
         break
       case PointAt.Start:
         this.prepend(at.nodeId, node);
@@ -457,43 +461,6 @@ export class ImmutableDraft implements Draft {
         this.append(at.nodeId, node);
         break
     }
-  }
-
-  // update the placeholder of the target node based on the source node placeholder
-  private updatePlaceholder(source: Node, target: Optional<Node>, path: string = EmptyPlaceholderPath) {
-    const placeholder = source.props.get<string>(path) ?? " ";
-    if (target) {
-      if (path === EmptyPlaceholderPath) {
-        this.tm.updateProps(target, {
-          [PlaceholderPath]: source.firstChild?.isEmpty ? placeholder : " "
-        });
-      } else {
-        this.tm.updateProps(target, {
-          [PlaceholderPath]: placeholder
-        });
-      }
-    }
-  }
-
-  private prepend(parentId: NodeId, node: Node) {
-    const parent = this.unfreeze(parentId);
-    this.tm.insert(node, parent, 0);
-    this.addUpdated(parent.id);
-    this.addContentChanged(parent.id);
-    // if parent title is empty, set placeholder from parent
-    const block = parent.closestBlock;
-    this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath)
-  }
-
-  private append(parentId: NodeId, node: Node) {
-    const parent = this.unfreeze(parentId);
-    this.tm.insert(node, parent, parent.size);
-    this.addUpdated(parent.id);
-    this.addContentChanged(parent.id);
-
-    // if parent title is empty, set placeholder from parent
-    const block = parent.closestBlock;
-    this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath)
   }
 
   private insertBefore(refId: NodeId, node: Node) {
@@ -533,6 +500,43 @@ export class ImmutableDraft implements Draft {
     this.addContentChanged(parent.id);
     const block = node.closestBlock;
     this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath)
+  }
+
+  private prepend(parentId: NodeId, node: Node) {
+    const parent = this.unfreeze(parentId);
+    this.tm.insert(node, parent, 0);
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
+    // if parent title is empty, set placeholder from parent
+    const block = parent.closestBlock;
+    this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath)
+  }
+
+  private append(parentId: NodeId, node: Node) {
+    const parent = this.unfreeze(parentId);
+    this.tm.insert(node, parent, parent.size);
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
+
+    // if parent title is empty, set placeholder from parent
+    const block = parent.closestBlock;
+    this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath)
+  }
+
+  // update the placeholder of the target node based on the source node placeholder
+  private updatePlaceholder(source: Node, target: Optional<Node>, path: string = EmptyPlaceholderPath) {
+    const placeholder = source.props.get<string>(path) ?? " ";
+    if (target) {
+      if (path === EmptyPlaceholderPath) {
+        this.tm.updateProps(target, {
+          [PlaceholderPath]: source.firstChild?.isEmpty ? placeholder : " "
+        });
+      } else {
+        this.tm.updateProps(target, {
+          [PlaceholderPath]: placeholder
+        });
+      }
+    }
   }
 
   remove(nodeId: NodeId) {
@@ -782,7 +786,7 @@ interface NodeDepthEntry {
 }
 
 
-// traps the changes to the node and records them into the draft
+// traps the changes to the node and records them
 class Transformer {
   constructor(private readonly changes: StateChanges, private readonly actions: StateActions) {
   }

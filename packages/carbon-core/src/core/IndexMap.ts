@@ -4,7 +4,7 @@ import {Optional} from "@emrgen/types";
 // -1 = node removed from index map
 type IndexMapOp = 1 | -1;
 
-//
+// IndexMap maps indexes to new indexes
 export class IndexMap {
   position: number = 0;
 
@@ -19,6 +19,10 @@ export class IndexMap {
   }
 
   constructor(offset: number, op: IndexMapOp) {
+    if (offset < 0) {
+      throw Error('IndexMap ref offset must be positive')
+    }
+
     this.offset = offset;
     this.op = op;
   }
@@ -50,6 +54,7 @@ export class IndexMap {
 
 }
 
+// IndexMapper maps indexes through a list of IndexMap
 export class IndexMapper {
   mappers: IndexMap[] = [];
 
@@ -93,6 +98,7 @@ export class IndexMapper {
     map.position = mappers.length - 1;
   }
 
+  // map the index through all the index maps
   map(ref: IndexMap, index: number): number {
     const {mappers} = this;
     let i = ref.isDefault ? 0 : ref.position

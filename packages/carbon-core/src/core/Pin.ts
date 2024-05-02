@@ -4,7 +4,7 @@ import { Node } from './Node';
 import { Point } from './Point';
 import { constrain } from '../utils/constrain';
 import { Maps } from './types';
-import { NodeMap } from './NodeMap';
+import {NodeMap, NodeMapGet} from './NodeMap';
 
 enum PinReference {
 	front = 'front',
@@ -36,7 +36,7 @@ export class Pin {
 		return this.eq(Pin.NULL);
 	}
 
-	static fromPoint(point: Point, store: NodeMap): Optional<Pin> {
+	static fromPoint(point: Point, store: NodeMapGet): Optional<Pin> {
     if (point.eq(Point.IDENTITY)) {
       return Pin.IDENTITY
     }
