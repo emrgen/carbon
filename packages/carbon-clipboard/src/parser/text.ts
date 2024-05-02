@@ -4,8 +4,7 @@ import {isArray} from "lodash";
 export const parseText = (text: string) => {
   const tree: TokensList = lexer(text);
   console.log('blob text', `"${text}"`);
-  // console.log('syntax tree', tree);
-
+  // console.log('syntax tree', JSON.stringify(tree, null, 2));
 
   return transformer.transform(tree);
 }
@@ -31,6 +30,11 @@ const transformer = {
     const texts = [];
     return section([title(children)]);
   },
+  code(root: any) {
+    return node('code', [title([text(root.text)])], {
+      'remote/state/code/lang': root.lang ?? '',
+    });
+  },
 
   codespan: (root: any) => {
     return text(root.text);
@@ -44,22 +48,23 @@ const transformer = {
 }
 
 
-const node = (name: string, children: any[]) => {
+export const node = (name: string, children: any[], props = {}) => {
   return {
     name,
-    children
+    children,
+    props
   }
 }
 
-const section = (children: any[]) => {
+export const section = (children: any[]) => {
   return node('section', children);
 }
 
-const title = (children: any[] = []) => {
+export const title = (children: any[] = []) => {
   return node('title', children);
 }
 
-const text = (content: string) => {
+export const text = (content: string) => {
   return {
     name: 'text',
     text: content
