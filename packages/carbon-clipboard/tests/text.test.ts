@@ -1,7 +1,25 @@
 import {expect, test} from 'vitest'
 import {parseText, section, title, text, node} from "../src/parser/text";
 
-test('parse plain text', () => {
+test('parse plain space', () => {
+  const content = 'a \n\n b ';
+  const res = parseText(content);
+  expect(res).toMatchObject([
+    section([title([text('a ')])]),
+    section([title([])]),
+    section([title([text(' b ')])])
+  ])
+})
+
+test('parse plain header', () => {
+  const content = '# hello';
+  const res = parseText(content);
+  expect(res).toMatchObject([
+    node('h1',[title([text('hello')])])
+  ])
+})
+
+test('parse plain paragraph', () => {
   const content = 'hello';
   const res = parseText(content);
   expect(res).toMatchObject([

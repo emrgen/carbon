@@ -3,7 +3,7 @@ import {isArray} from "lodash";
 
 export const parseText = (text: string) => {
   const tree: TokensList = lexer(text);
-  console.log('blob text', `"${text}"`);
+  // console.log('blob text', `"${text}"`);
   // console.log('syntax tree', JSON.stringify(tree, null, 2));
 
   return transformer.transform(tree);
@@ -24,6 +24,11 @@ const transformer = {
     });
   },
   space(root: any) {return section([title()]) },
+  heading(root: any) {
+    const {tokens = [], depth} = root;
+    const children = tokens.map(t => this[t.type](t));
+    return node(`h${depth}`,[title(children)]);
+  },
   paragraph(root: any) {
     const {tokens = []} = root;
     const children = tokens.map(t => this[t.type](t));
