@@ -13,21 +13,15 @@ import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
 import {flashComp, flashPlugin} from "@emrgen/carbon-flash";
 import {commentEditorPlugin, commentEditorComp} from "@emrgen/carbon-comment-editor";
 import {
-  ActivatedPath,
-  CollapsedPath,
   corePresetPlugins,
-  Extension, Mark,
-  Node,
+  Extension,
   NodeId,
-  PluginManager,
-  Schema,
   State,
-  TagPath, TitlePath,
 } from "@emrgen/carbon-core";
 import {CarbonApp} from "@emrgen/carbon-utils";
 import {codeExtension} from "@emrgen/carbon-code";
 import {cellPlugin, cellRenderer} from "@emrgen/carbon-cell";
-import {questionExtension} from "@emrgen/carbon-question";
+import {questionExtension } from "@emrgen/carbon-question";
 import {noop, flattenDeep} from "lodash";
 import SelectionTracker from "../../SelectionTracker";
 import {PathTracker} from "../../PathTracker";
@@ -36,27 +30,27 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
-    node('question', [
-      node('questionTitle', [
-        section([title([text('question title')])]),
-      ]),
-      node('questionDescription', [
-        section([title([text('question description')])]),
-      ]),
-      node('questionType', [
-        node('multipleChoice', [
-          node('multipleChoiceOption', [
-            title([text('option 1')]),
-          ]),
-          node('multipleChoiceOption', [
-            title([text('option 2')]),
-          ]),
-          node('multipleChoiceOption', [
-            title([text('option 3')]),
-          ]),
-        ])
-      ])
-    ]),
+    // node('question', [
+    //   node('questionTitle', [
+    //     section([title([text('question title')])]),
+    //   ]),
+    //   node('questionDescription', [
+    //     section([title([text('question description')])]),
+    //   ]),
+    //   node('questionType', [
+    //     node('multipleChoice', [
+    //       node('multipleChoiceOption', [
+    //         title([text('option 1')]),
+    //       ]),
+    //       node('multipleChoiceOption', [
+    //         title([text('option 2')]),
+    //       ]),
+    //       node('multipleChoiceOption', [
+    //         title([text('option 3')]),
+    //       ]),
+    //     ])
+    //   ])
+    // ]),
 
     // node('flashCard', [
     //   title([text('flash card title')]),
@@ -85,18 +79,18 @@ const data = node("carbon", [
     //   title([text('question title')]),
     // ]),
     //
-    node('hint', [
-      title([text('hint 1')]),
-      section([title([text('hint content')])]),
-    ]),
-    node('hint', [
-      title([text('hint 2')]),
-      section([title([text('hint content')])]),
-    ]),
-    node('hint', [
-      title([text('hint 3')]),
-      section([title([text('hint content')])]),
-    ]),
+    // node('hint', [
+    //   title([text('hint 1')]),
+    //   section([title([text('hint content')])]),
+    // ]),
+    // node('hint', [
+    //   title([text('hint 2')]),
+    //   section([title([text('hint content')])]),
+    // ]),
+    // node('hint', [
+    //   title([text('hint 3')]),
+    //   section([title([text('hint content')])]),
+    // ]),
 
     // section([title([
     //   text("section 1"),

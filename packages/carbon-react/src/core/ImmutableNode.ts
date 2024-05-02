@@ -15,8 +15,8 @@ import {CarbonCache} from "@emrgen/carbon-core/src/core/CarbonCache";
 
 export class ImmutableNode extends Node {
   scope: Symbol;
-  indexMapper: IndexMapper = IndexMapper.empty();
   indexMap: IndexMap = IndexMap.DEFAULT;
+  indexMapper: IndexMapper = IndexMapper.empty();
   mappedIndex: number = 0;
 
   static create(scope: Symbol, content: NodeContent) {
@@ -169,6 +169,7 @@ export class ImmutableNode extends Node {
     return super.removeLink(name)
   }
 
+  // @mutates
   unfreeze(path: Path, map: NodeMap): MutableNode {
     const mutable = this.isFrozen ? this.clone() : this;
     if (this.isFrozen) {
@@ -204,6 +205,7 @@ export class ImmutableNode extends Node {
     }
   }
 
+  // clone the content by providing a map function (default is identity)
   override clone(map: (node: NodeContentData) => NodeContentData = identity): Node {
     const data = map(this.content.unwrap());
     const content = new ImmutableNodeContent(this.scope, data);

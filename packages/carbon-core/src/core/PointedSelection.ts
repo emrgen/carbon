@@ -5,7 +5,7 @@ import { PinnedSelection } from "./PinnedSelection";
 import { Pin } from "./Pin";
 import { classString } from "./Logger";
 import { ActionOrigin } from "./actions";
-import { NodeMap } from "./NodeMap";
+import {NodeMap, NodeMapGet} from "./NodeMap";
 import {StateScope} from "@emrgen/carbon-core";
 import { flatten } from "lodash";
 
@@ -45,7 +45,7 @@ export class PointedSelection {
 		return this.tail.eq(this.head);
 	}
 
-	pin(nodeMap: NodeMap): Optional<PinnedSelection> {
+	pin(nodeMap: NodeMapGet): Optional<PinnedSelection> {
 		if (this.isNull) {
 			return PinnedSelection.NULL;
 		}
