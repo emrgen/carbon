@@ -4,7 +4,7 @@ import {flatten, flattenDeep, isArray, takeWhile} from "lodash";
 export const parseText = (text: string) => {
   const tree: TokensList = lexer(text);
   // console.log('blob text', `"${text}"`);
-  // console.log('syntax tree', JSON.stringify(tree, null, 2));
+  console.log('syntax tree', JSON.stringify(tree, null, 2));
 
   return flatten(transformer.transform(tree));
 }
@@ -34,13 +34,19 @@ const transformer = {
   },
   list_item(root: any) {
     const {tokens = [], raw} = root;
-    let listStart = raw.trim()[0];
+    const listText = raw.trim()
+    // console.log('listStart', `"${listStart}"`);
 
-    if (listStart === '-') {
-      node('bulletList', this.parseNestableChildren(tokens));
+    if (listText.startsWith('- [ ]') || listText.startsWith('- [x]')) {
+      return node('checkList', this.parseNestableChildren(tokens));
     }
 
-    if (listStart.match(/[0-9a-z]+/)) {
+    if (listText.startsWith('-')) {
+      return node('bulletList', this.parseNestableChildren(tokens));
+    }
+
+    const listStart = listText.match(/^[0-9a-z]+/)?.[0];
+    if (listStart) {
       return node('numberedList', this.parseNestableChildren(tokens));
     }
 

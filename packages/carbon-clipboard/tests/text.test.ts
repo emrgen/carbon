@@ -75,8 +75,8 @@ test("parse ordered list", () => {
   const content =
 `1. a
  2. b
-     1. c
-     2. d   
+     3. c
+     4. d   
 `;
   const res = parseText(content);
   expect(res).toMatchObject([
@@ -88,4 +88,41 @@ test("parse ordered list", () => {
     ]),
     section([title([])]),
   ]);
+});
+
+test('parse mixed list', () => {
+  const content =
+`- a
+ 1. b
+     - c
+ 2. d
+`;
+  const res = parseText(content);
+  expect(res).toMatchObject([
+    node('bulletList',[title([text('a')])]),
+    node('numberedList',[
+      title([text('b')]),
+      node('bulletList',[title([text('c')])]),
+    ]),
+    node('numberedList',[title([text('d')])]),
+    // section([title([])]),
+  ]);
+});
+
+test('parse checkbox', () => {
+  const content =
+`- [ ] a
+- [x] b
+    - [x] c 
+`;
+    const res = parseText(content);
+    expect(res).toMatchObject([
+      node('checkList',[title([text('a')])]),
+      node('checkList',[
+        title([text('b')]),
+        node('checkList',[title([text('c')])]),
+      ]),
+      section([title([])]),
+    ]);
+
 });
