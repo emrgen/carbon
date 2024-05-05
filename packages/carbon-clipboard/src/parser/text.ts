@@ -73,6 +73,10 @@ const transformer = {
     return flattenDeep(children);
   },
 
+  parseTitleChildren(tokens: any[]) {
+    return flattenDeep(tokens.map(t => this[t.type](t)));
+  },
+
 
   space(root: any) {return section([title()]) },
   heading(root: any) {
@@ -83,12 +87,17 @@ const transformer = {
   paragraph(root: any) {
     const {tokens = []} = root;
     const children = tokens.map(t => this[t.type](t));
-    const texts = [];
     return section([title(children)]);
   },
   code(root: any) {
     return node('code', [title([text(root.text)])], {
       'remote/state/code/lang': root.lang ?? '',
+    });
+  },
+  link(root: any) {
+    const {text, href, tokens} = root;
+    return node('link', this.parseTitleChildren(tokens), {
+      'remote/state/link/href': href,
     });
   },
 
@@ -104,9 +113,12 @@ const transformer = {
     return text(root.raw);
     // return text(root.raw);
   },
-  em: (root: any) => {
-    return text(root.text);
-  }
+  em(root: any) {
+    return node('italic', this.parseTitleChildren(root.tokens));
+  },
+  strong(root: any) {
+    return node('bold', this.parseTitleChildren(root.tokens));
+  },
 }
 
 export const node = (name: string, children: any[], props = {}) => {

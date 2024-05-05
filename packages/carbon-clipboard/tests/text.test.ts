@@ -1,5 +1,6 @@
 import {expect, test} from 'vitest'
 import {parseText, section, title, text, node} from "../src/parser/text";
+import {no} from "@emrgen/carbon-core";
 
 test('parse plain space', () => {
   const content = 'a \n\n b ';
@@ -125,4 +126,35 @@ test('parse checkbox', () => {
       section([title([])]),
     ]);
 
+});
+
+test('parse link', () => {
+  const content = '[he**llo**](https://google.com)';
+  const res = parseText(content);
+  expect(res).toMatchObject([
+    section([
+      title([
+        node('link', [
+          text('he'),
+          node('bold', [text('llo')]),
+        ], {'remote/state/link/href': 'https://google.com'})
+      ])
+    ])
+  ])
+});
+
+test('parse italic', () => {
+  const content = 'he*llo* w**or**ld';
+  const res = parseText(content);
+  expect(res).toMatchObject([
+    section([
+      title([
+        text('he'),
+        node('italic', [text('llo')]),
+        text(' w'),
+        node('bold', [text('or')]),
+        text('ld')
+      ])
+    ])
+  ])
 });
