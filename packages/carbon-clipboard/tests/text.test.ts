@@ -51,3 +51,41 @@ test('parse paragraph', () => {
     section([title([text('const'), text(' fn = () => '), text('hi')])])
   ])
 });
+
+test("parse bullet list", () => {
+  const content =
+`- a
+ - b
+     - c
+     - d   
+`;
+  const res = parseText(content);
+  expect(res).toMatchObject([
+    node('bulletList',[title([text('a')])]),
+    node('bulletList',[
+      title([text('b')]),
+      node('bulletList',[title([text('c')])]),
+      node('bulletList',[title([text('d')])])
+    ]),
+    section([title([])]),
+  ]);
+});
+
+test("parse ordered list", () => {
+  const content =
+`1. a
+ 2. b
+     1. c
+     2. d   
+`;
+  const res = parseText(content);
+  expect(res).toMatchObject([
+    node('numberedList',[title([text('a')])]),
+    node('numberedList',[
+      title([text('b')]),
+      node('numberedList',[title([text('c')])]),
+      node('numberedList',[title([text('d')])])
+    ]),
+    section([title([])]),
+  ]);
+});
