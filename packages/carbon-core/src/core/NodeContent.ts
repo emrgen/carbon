@@ -1,9 +1,13 @@
-import {findIndex, flatten, identity, isString} from 'lodash';
-
-import {Node, Path} from './Node';
-import {Optional} from "@emrgen/types";
-import {NodeId} from './NodeId';
-import {Mark, NodePropsJson, NodeType, NodeProps, With, NodeMap} from "@emrgen/carbon-core";
+import { Node, Path } from "./Node";
+import { Optional } from "@emrgen/types";
+import { NodeId } from "./NodeId";
+import {
+  NodeMap,
+  NodeProps,
+  NodePropsJson,
+  NodeType,
+  With,
+} from "@emrgen/carbon-core";
 
 // this is the data that is used to create a node
 export interface NodeData {
@@ -86,7 +90,6 @@ export interface MutableNodeContent {
 }
 
 export class PlainNodeContent implements NodeContent {
-
   static create(content: NodeContentData): NodeContent {
     return new PlainNodeContent(content);
   }
@@ -94,19 +97,18 @@ export class PlainNodeContent implements NodeContent {
   renderVersion = 0;
   contentVersion = 0;
 
-  constructor(private content: NodeContentData) {
-  }
+  constructor(private content: NodeContentData) {}
 
   get data(): NodeData {
-    const {parent, type, id, parentId, children, ...rest} = this.content;
+    const { parent, type, id, parentId, children, ...rest } = this.content;
     return {
       ...rest,
       id: id.toString(),
       parentId: parentId?.toString(),
       name: type.name,
-      children: this.children.map(c => c.data),
+      children: this.children.map((c) => c.data),
       links: {},
-    }
+    };
   }
 
   get id(): NodeId {
@@ -130,7 +132,9 @@ export class PlainNodeContent implements NodeContent {
   }
 
   get textContent(): string {
-    return this.type.isText ? this.content.textContent : this.children.map(n => n.textContent).join('');
+    return this.type.isText
+      ? this.content.textContent
+      : this.children.map((n) => n.textContent).join("");
   }
 
   get linkName(): string {
@@ -146,13 +150,13 @@ export class PlainNodeContent implements NodeContent {
   }
 
   get size(): number {
-    return (this.type.isText) ? this.textContent.length : this.children.length;
+    return this.type.isText ? this.textContent.length : this.children.length;
   }
 
   // return shallow clone of data
   // the children are same references as the original
   unwrap(): NodeContentData {
-    return {...this.content};
+    return { ...this.content };
   }
 
   child(index: number): Optional<Node> {
@@ -183,7 +187,7 @@ export class PlainNodeContent implements NodeContent {
   }
 
   remove(node: Node) {
-    this.content.children = this.children.filter(n => n.eq(node));
+    this.content.children = this.children.filter((n) => n.eq(node));
   }
 
   replace(index: number, node: Node) {
@@ -191,11 +195,14 @@ export class PlainNodeContent implements NodeContent {
   }
 
   insertText(text: string, offset: number) {
-    this.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
+    this.content.textContent =
+      this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
   }
 
   removeText(offset: number, length: number) {
-    this.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
+    this.content.textContent =
+      this.textContent.slice(0, offset) +
+      this.textContent.slice(offset + length);
   }
 
   setParent(parent: Optional<Node>) {
@@ -211,7 +218,7 @@ export class PlainNodeContent implements NodeContent {
   }
 
   updateContent(content: Node[] | string) {
-    if (typeof content === 'string') {
+    if (typeof content === "string") {
       this.content.textContent = content;
     } else {
       this.content.children = content;
@@ -229,5 +236,4 @@ export class PlainNodeContent implements NodeContent {
   removeLink(name: string) {
     delete this.links[name];
   }
-
 }

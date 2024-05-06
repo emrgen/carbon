@@ -1,12 +1,18 @@
 import {
-  CarbonAction, findMatchingActions, findMatchingNodes,
-  getContentMatch, insertNodesActions, MatchAction, MoveNodeAction,
-  Node, nodeLocation,
+  CarbonAction,
+  findMatchingActions,
+  findMatchingNodes,
+  getContentMatch,
+  insertNodesActions,
+  MatchAction,
+  MoveNodeAction,
+  Node,
+  nodeLocation,
   Point,
 } from "@emrgen/carbon-core";
-import {flatten, get, identity, isEmpty, last} from "lodash";
-import {ContentMatch} from "./ContentMatch";
-import {Optional} from "@emrgen/types";
+import { flatten, identity, isEmpty, last } from "lodash";
+import { ContentMatch } from "./ContentMatch";
+import { Optional } from "@emrgen/types";
 
 interface MoveNodesResult {
   actions: CarbonAction[];
@@ -24,7 +30,6 @@ class TargetColumn {
   nodes: TargetEntry[] = [];
 }
 
-
 export class NodeColumn {
   nodes: Node[][] = [];
 
@@ -33,17 +38,25 @@ export class NodeColumn {
       return {
         actions: [],
         contentMatch: null,
-      }
+      };
     }
     const lastNode = before[before.length - 1];
     const at = Point.toAfter(lastNode);
     const contentMatch = getContentMatch(lastNode);
     const matchActions: MatchAction[] = [];
-    const matches = findMatchingActions(matchActions, contentMatch, at, nodes, []);
+    const matches = findMatchingActions(
+      matchActions,
+      contentMatch,
+      at,
+      nodes,
+      [],
+    );
     return {
-      actions: matchActions.map(m => MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id)),
+      actions: matchActions.map((m) =>
+        MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id),
+      ),
       contentMatch: matches.match,
-    }
+    };
   }
 
   private static prepareMoves(before: Node, nodes: Node[], after: Node[]) {
@@ -51,25 +64,34 @@ export class NodeColumn {
       return {
         nodes: [],
         contentMatch: null,
-      }
+      };
     }
 
     const at = Point.toAfter(before);
     const contentMatch = getContentMatch(before);
     const matchActions: MatchAction[] = [];
-    const matches = findMatchingActions(matchActions, contentMatch, at, nodes, after);
+    const matches = findMatchingActions(
+      matchActions,
+      contentMatch,
+      at,
+      nodes,
+      after,
+    );
     return {
-      nodes: matchActions.map(m => m.node),
+      nodes: matchActions.map((m) => m.node),
       contentMatch: matches.match,
-    }
+    };
   }
 
   // insert the slice nodes
   // NOTE: only works for case 1 and 2
   // https://www.notion.so/paste-so-many-damn-cases-f7ef4f8160034836b6eafdcd92589486
-  static pasteInsertActions(left: NodeColumn, right: NodeColumn): {
-    actions: CarbonAction[],
-    targets: TargetColumn,
+  static pasteInsertActions(
+    left: NodeColumn,
+    right: NodeColumn,
+  ): {
+    actions: CarbonAction[];
+    targets: TargetColumn;
   } {
     const insertActions: CarbonAction[] = [];
     const nodes: Node[][] = [];
@@ -83,33 +105,48 @@ export class NodeColumn {
         after: leftNodes.slice(1),
         contentMatch: getContentMatch(leftNodes[0]),
         used: false,
-      }
+      };
     });
 
-    console.log('targets', targets)
+    console.log("targets", targets);
 
     while (true) {
       const leftNodes = left.nodes[leftLength];
       const rightNodes = right.nodes[rightLength];
-      console.log('leftNodes', leftLength, !left.nodes[leftLength - 1], leftNodes);
+      console.log(
+        "leftNodes",
+        leftLength,
+        !left.nodes[leftLength - 1],
+        leftNodes,
+      );
 
       if (!leftNodes) {
-        const nodes = right.nodes.slice(0, rightLength + 1).filter(e => !isEmpty(e)).reverse();
+        const nodes = right.nodes
+          .slice(0, rightLength + 1)
+          .filter((e) => !isEmpty(e))
+          .reverse();
         if (isEmpty(nodes)) {
           break;
         }
 
         // when left column is consumed fully but there are still nodes in right column
-        const siblingIndex = targets.nodes.findIndex(n => n && !isEmpty(n.before));
+        const siblingIndex = targets.nodes.findIndex(
+          (n) => n && !isEmpty(n.before),
+        );
         const siblings = targets.nodes[siblingIndex];
         if (!siblings) {
-          throw new Error('failed to find siblings');
+          throw new Error("failed to find siblings");
         }
 
-        const {before, after, contentMatch } = siblings;
-        const match = NodeColumn.insertActionWithMatch(before, contentMatch, flatten(nodes), after);
+        const { before, after, contentMatch } = siblings;
+        const match = NodeColumn.insertActionWithMatch(
+          before,
+          contentMatch,
+          flatten(nodes),
+          after,
+        );
         if (!match.validEnd) {
-          throw new Error('failed to find a valid end');
+          throw new Error("failed to find a valid end");
         }
 
         insertActions.push(...match.actions);
@@ -118,7 +155,7 @@ export class NodeColumn {
           contentMatch: match.contentMatch!,
           after: match.after,
           used: true,
-        }
+        };
         break;
       }
 
@@ -129,18 +166,22 @@ export class NodeColumn {
       if (isEmpty(leftNodes) || isEmpty(rightNodes)) {
         leftLength--;
         rightLength--;
-        continue
+        continue;
       }
 
       const leftFirst = leftNodes[0];
 
       // current level is the top most left level
       if (!left.nodes[leftLength - 1]) {
-        const nodes = right.nodes.slice(0, rightLength + 1).filter(identity).reverse();
+        const nodes = right.nodes
+          .slice(0, rightLength + 1)
+          .filter(identity)
+          .reverse();
         const flatNodes = flatten(nodes);
-        const {actions, before, after, contentMatch, validEnd} = NodeColumn.insertActions(leftFirst, flatNodes, leftNodes.slice(1));
+        const { actions, before, after, contentMatch, validEnd } =
+          NodeColumn.insertActions(leftFirst, flatNodes, leftNodes.slice(1));
         if (!validEnd) {
-          throw new Error('failed to find a valid end');
+          throw new Error("failed to find a valid end");
         }
         insertActions.push(...actions);
         targets.nodes[leftLength] = {
@@ -148,14 +189,15 @@ export class NodeColumn {
           after: after,
           contentMatch: contentMatch!,
           used: true,
-        }
-        break
+        };
+        break;
       } else {
         const at = Point.toAfter(leftFirst);
-        const {actions, before, after, contentMatch, validEnd} = NodeColumn.insertActions(leftFirst, rightNodes, leftNodes.slice(1));
+        const { actions, before, after, contentMatch, validEnd } =
+          NodeColumn.insertActions(leftFirst, rightNodes, leftNodes.slice(1));
         if (!validEnd) {
           leftLength--;
-          continue
+          continue;
         }
 
         insertActions.push(...actions);
@@ -164,26 +206,29 @@ export class NodeColumn {
           after: after,
           contentMatch: contentMatch!,
           used: true,
-        }
+        };
       }
 
       leftLength--;
       rightLength--;
     }
 
-    console.log('nodes', nodes);
+    console.log("nodes", nodes);
 
     return {
       actions: insertActions,
       targets,
-    }
+    };
   }
 
-  static pasteMoveActions(targets: TargetColumn, right: NodeColumn): CarbonAction[] {
+  static pasteMoveActions(
+    targets: TargetColumn,
+    right: NodeColumn,
+  ): CarbonAction[] {
     const moveActions: CarbonAction[] = [];
 
     let leftLength = targets.nodes.length - 1;
-    while(isEmpty(targets.nodes[leftLength]?.before)) {
+    while (isEmpty(targets.nodes[leftLength]?.before)) {
       leftLength--;
     }
 
@@ -197,35 +242,46 @@ export class NodeColumn {
         after: target.after,
         contentMatch: target.contentMatch,
         used: false,
-      }
+      };
     });
 
-    while(true) {
-      const {before, after, contentMatch, used} = targets.nodes[leftLength] ?? {};
+    while (true) {
+      const { before, after, contentMatch, used } =
+        targets.nodes[leftLength] ?? {};
       const rightNodes = right.nodes[rightLength];
 
       if (isEmpty(before)) {
         console.log("COLLAPSE RIGHT", rightLength);
-        const nodes = right.nodes.slice(0, rightLength + 1).filter(e => !isEmpty(e)).reverse();
+        const nodes = right.nodes
+          .slice(0, rightLength + 1)
+          .filter((e) => !isEmpty(e))
+          .reverse();
         if (isEmpty(nodes)) {
           break;
         }
 
         // when left column is consumed fully but there are still nodes in right column
-        const siblingIndex = moveTargets.nodes.findIndex(n => n && !isEmpty(n.before));
+        const siblingIndex = moveTargets.nodes.findIndex(
+          (n) => n && !isEmpty(n.before),
+        );
         const siblings = targets.nodes[siblingIndex];
         if (!siblings) {
-          throw new Error('failed to find siblings');
+          throw new Error("failed to find siblings");
         }
 
-        const {before, after, contentMatch } = siblings;
-        const match = NodeColumn.moveActions(contentMatch, last(before)!, flatten(nodes), after);
+        const { before, after, contentMatch } = siblings;
+        const match = NodeColumn.moveActions(
+          contentMatch,
+          last(before)!,
+          flatten(nodes),
+          after,
+        );
         if (!match.validEnd) {
-          throw new Error('failed to find a valid end');
+          throw new Error("failed to find a valid end");
         }
 
         moveActions.push(...match.actions);
-        break
+        break;
       }
 
       if (!rightNodes) {
@@ -235,17 +291,25 @@ export class NodeColumn {
       if (isEmpty(before) || isEmpty(rightNodes)) {
         leftLength--;
         rightLength--;
-        continue
+        continue;
       }
 
       const leftFirst = last(before)!;
       if (isEmpty(targets.nodes[leftLength - 1]?.before)) {
-        const nodes = right.nodes.slice(0, rightLength + 1).filter(e => !isEmpty(e)).reverse();
+        const nodes = right.nodes
+          .slice(0, rightLength + 1)
+          .filter((e) => !isEmpty(e))
+          .reverse();
         const flatNodes = flatten(nodes);
-        const matches = NodeColumn.moveActions(contentMatch, leftFirst, flatNodes, after);
+        const matches = NodeColumn.moveActions(
+          contentMatch,
+          leftFirst,
+          flatNodes,
+          after,
+        );
         if (!matches.validEnd) {
           leftLength--;
-          continue
+          continue;
         }
 
         moveActions.push(...matches.actions);
@@ -254,13 +318,18 @@ export class NodeColumn {
           after: after,
           contentMatch: contentMatch!,
           used: true,
-        }
-        break
+        };
+        break;
       } else {
-        const matches = NodeColumn.moveActions(contentMatch, leftFirst, rightNodes, after);
+        const matches = NodeColumn.moveActions(
+          contentMatch,
+          leftFirst,
+          rightNodes,
+          after,
+        );
         if (!matches?.validEnd) {
           leftLength--;
-          continue
+          continue;
         }
         moveActions.push(...matches.actions);
         moveTargets.nodes[leftLength] = {
@@ -268,7 +337,7 @@ export class NodeColumn {
           after: after,
           contentMatch: contentMatch!,
           used: true,
-        }
+        };
       }
 
       leftLength--;
@@ -279,18 +348,22 @@ export class NodeColumn {
   }
 
   // insert nodes after the before node with valid content matching
-  static insertActions(before: Node, nodes: Node[], after: Node[] = []): {
-    actions: CarbonAction[],
-    validEnd: boolean,
-    contentMatch: Optional<ContentMatch>,
-    before: Node[],
-    after: Node[],
+  static insertActions(
+    before: Node,
+    nodes: Node[],
+    after: Node[] = [],
+  ): {
+    actions: CarbonAction[];
+    validEnd: boolean;
+    contentMatch: Optional<ContentMatch>;
+    before: Node[];
+    after: Node[];
   } {
     const at = Point.toAfter(before);
     const contentMatch = getContentMatch(before);
     const matches: Node[] = [];
     const match = findMatchingNodes(matches, contentMatch, nodes, after);
-    const actions = insertNodesActions(at, matches)
+    const actions = insertNodesActions(at, matches);
 
     return {
       actions,
@@ -298,14 +371,19 @@ export class NodeColumn {
       contentMatch: match.match,
       before: [before, ...nodes],
       after: after,
-    }
+    };
   }
 
-  static insertActionWithMatch(before: Node[], contentMatch: ContentMatch, nodes: Node[], after: Node[] = []) {
+  static insertActionWithMatch(
+    before: Node[],
+    contentMatch: ContentMatch,
+    nodes: Node[],
+    after: Node[] = [],
+  ) {
     const at = Point.toAfter(last(before)!);
     const matches: Node[] = [];
     const match = findMatchingNodes(matches, contentMatch, nodes, after);
-    const actions = insertNodesActions(at, matches)
+    const actions = insertNodesActions(at, matches);
 
     return {
       actions,
@@ -313,26 +391,39 @@ export class NodeColumn {
       contentMatch: match.match,
       before: matches,
       after: after,
-    }
+    };
   }
 
-  static moveActions(contentMatch: ContentMatch, before: Node, nodes: Node[], after: Node[] = []) {
+  static moveActions(
+    contentMatch: ContentMatch,
+    before: Node,
+    nodes: Node[],
+    after: Node[] = [],
+  ) {
     const matchActions: MatchAction[] = [];
 
     const at = Point.toAfter(before);
-    const matches = findMatchingActions(matchActions, contentMatch, at, nodes, []);
+    const matches = findMatchingActions(
+      matchActions,
+      contentMatch,
+      at,
+      nodes,
+      [],
+    );
     if (!matches.match) {
-      throw new Error('failed to find a valid end');
+      throw new Error("failed to find a valid end");
     }
 
     if (!matches.match.validEnd) {
-      throw new Error('failed to find a valid end');
+      throw new Error("failed to find a valid end");
     }
 
     return {
       contentMatch: matches.match,
       validEnd: matches.match.validEnd,
-      actions: matchActions.map(m => MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id))
+      actions: matchActions.map((m) =>
+        MoveNodeAction.create(nodeLocation(m.node)!, m.at, m.node.id),
+      ),
     };
   }
 
@@ -345,13 +436,16 @@ export class NodeColumn {
     const matches: MoveNodesResult[] = [];
 
     while (true) {
-      const leftNodes = left.nodes[leftLength]
-      const rightNodes = right.nodes[rightLength]
+      const leftNodes = left.nodes[leftLength];
+      const rightNodes = right.nodes[rightLength];
 
       if (!leftNodes) {
         // when left column is consumed fully but there are still nodes in right column
-        const leftFirst = left.nodes.find(n => !isEmpty(n))?.[0]!;
-        const nodes = right.nodes.slice(0, rightLength + 1).filter(e => !isEmpty(e)).reverse();
+        const leftFirst = left.nodes.find((n) => !isEmpty(n))?.[0]!;
+        const nodes = right.nodes
+          .slice(0, rightLength + 1)
+          .filter((e) => !isEmpty(e))
+          .reverse();
         if (!isEmpty(nodes)) {
           const moves = NodeColumn.moveNodes([leftFirst], flatten(nodes));
           actions.push(...moves.actions);
@@ -367,18 +461,25 @@ export class NodeColumn {
       if (isEmpty(leftNodes) || isEmpty(rightNodes)) {
         leftLength--;
         rightLength--;
-        continue
+        continue;
       }
 
       const leftFirst = leftNodes[0];
       // current level is the top most left level
       if (!left.nodes[leftLength - 1]) {
-        const nodes = right.nodes.slice(0, rightLength + 1).filter(identity).reverse();
-        const moves = NodeColumn.moveNodes([leftFirst], flatten(nodes), leftNodes.slice(1));
+        const nodes = right.nodes
+          .slice(0, rightLength + 1)
+          .filter(identity)
+          .reverse();
+        const moves = NodeColumn.moveNodes(
+          [leftFirst],
+          flatten(nodes),
+          leftNodes.slice(1),
+        );
         // failed to find a valid end try with higher left node
         if (!moves.contentMatch?.validEnd) {
           leftLength--;
-          continue
+          continue;
         }
         matches[leftLength] = moves;
         actions.push(...moves.actions);
@@ -386,11 +487,15 @@ export class NodeColumn {
       }
       // current level is not the top most left level
       else {
-        const moves = NodeColumn.moveNodes([leftFirst], rightNodes, leftNodes.slice(1));
+        const moves = NodeColumn.moveNodes(
+          [leftFirst],
+          rightNodes,
+          leftNodes.slice(1),
+        );
         // failed to find a valid end try with higher left node
         if (!moves.contentMatch?.validEnd) {
           leftLength--;
-          continue
+          continue;
         }
         matches[leftLength] = moves;
         actions.push(...moves.actions);
@@ -408,7 +513,7 @@ export class NodeColumn {
     });
 
     if (!yes) {
-      throw new Error('failed to find a valid end for all moves');
+      throw new Error("failed to find a valid end for all moves");
     }
 
     return actions;
@@ -419,20 +524,20 @@ export class NodeColumn {
   }
 
   append(depth: number, nodes: Node[]) {
-    this.nodes[depth] = this.nodes[depth] ?? []
-    this.nodes[depth].push(...nodes)
+    this.nodes[depth] = this.nodes[depth] ?? [];
+    this.nodes[depth].push(...nodes);
   }
 
   prepend(depth: number, nodes: Node[]) {
-    this.nodes[depth] = this.nodes[depth] ?? []
-    this.nodes[depth].unshift(...nodes)
+    this.nodes[depth] = this.nodes[depth] ?? [];
+    this.nodes[depth].unshift(...nodes);
   }
 
   isEmpty() {
     return !this.nodes.length;
   }
 
-  merge(column: NodeColumn, action: 'insert' | 'move') {
+  merge(column: NodeColumn, action: "insert" | "move") {
     // this.nodes.push(...column.nodes);
   }
 }

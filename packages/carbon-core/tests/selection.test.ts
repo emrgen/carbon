@@ -1,7 +1,5 @@
-import {assert, test} from "vitest";
-import {PinnedSelection} from "../src/core/PinnedSelection";
-import {Pin} from "../src/core/Pin";
-import {PointedSelection} from "../src/core/PointedSelection";
+import { assert, test } from "vitest";
+import { Pin, PinnedSelection, PointedSelection } from "@emrgen/carbon-core";
 
 test("create identity selection", () => {
   const sel = PinnedSelection.IDENTITY;
@@ -9,7 +7,6 @@ test("create identity selection", () => {
 
   const point = Pin.IDENTITY;
   assert(point.isIdentity);
-
 
   assert(sel.head.eq(point));
   assert(sel.tail.eq(point));

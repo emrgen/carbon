@@ -7,4 +7,5 @@ module.exports = {
       rootDir: ["apps/*/"],
     },
   },
+  // ignorePatterns: "test-results/*",
 };
