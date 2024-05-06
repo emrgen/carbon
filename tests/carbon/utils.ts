@@ -1,6 +1,6 @@
 import { Page } from "@playwright/test";
 
-import { Carbon } from "@emrgen/carbon-core";
+import {Carbon, TextWriter} from "@emrgen/carbon-core";
 import * as timers from "timers";
 declare global {
   interface Window {
@@ -14,7 +14,8 @@ export const getDocContent =  async (page: Page) => {
     const app = window.app;
     const doc = app.content.find((n) => n.isDocument);
 
-    return app.serialize(doc!);
+    const writer = new TextWriter();
+    return app.encode(writer, doc!).toString();
   });
 }
 
@@ -49,7 +50,8 @@ export class CarbonPage {
       const app = window.app;
       const doc = app.content.find((n) => n.isDocument);
 
-      return app.serialize(doc!);
+      const writer = new TextWriter();
+      return app.encode(writer, doc!).toString();
     });
   }
 

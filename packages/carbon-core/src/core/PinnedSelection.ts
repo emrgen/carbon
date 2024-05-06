@@ -12,10 +12,14 @@ import { flatten, isEmpty, isEqual, isEqualWith } from "lodash";
 import {blocksBelowCommonNode} from "../utils/findNodes";
 import {takeBefore} from "../utils/array";
 
-const GNode = window.Node
+
+enum HTMLNodeType {
+  TEXT = 3,
+  ELEMENT = 1,
+}
 
 // PinnedSelection is a selection that is pinned to start and end nodes
-// It serves three purpose
+// It serves two purpose
 // 1. Materialized range selection
 // 2. Materialized block selection
 
@@ -389,7 +393,7 @@ export class PinnedSelection {
 	}
 
   private findTextNode(node: HTMLElement) {
-    if (node.nodeType === GNode.TEXT_NODE) {
+    if (node.nodeType === HTMLNodeType.TEXT) {
       return node
     }
 

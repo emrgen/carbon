@@ -13,7 +13,7 @@ import {RenderManager, useCreateCarbon} from "@emrgen/carbon-react";
 import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
 
 import {
-  CarbonPlugin, corePresetPlugins
+  CarbonPlugin, corePresetPlugins, NodeId
 
 } from "@emrgen/carbon-core";
 import {
@@ -22,6 +22,7 @@ import {
   carbonUtilPlugins,
 } from "@emrgen/carbon-utils";
 import SelectionTracker from "../../SelectionTracker";
+import {flattenDeep} from "lodash";
 
 
 const data = node("carbon", [
@@ -29,6 +30,9 @@ const data = node("carbon", [
     title(),
   ]),
 ]);
+
+// @ts-ignore
+data.id = NodeId.ROOT.toString();
 
 const extensions: CarbonPlugin[] = [
   ...corePresetPlugins,
@@ -41,7 +45,7 @@ const renderManager = RenderManager.from([
 ])
 
 export default function TestText() {
-  const app = useCreateCarbon('test/text', data, extensions);
+  const app = useCreateCarbon('test/text', data, flattenDeep(extensions));
 
   return (
     <div className={'carbon-app-container'}>

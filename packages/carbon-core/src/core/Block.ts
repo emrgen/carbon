@@ -46,4 +46,4 @@ export class Block {
 }
 
 // @ts-ignore
-window.Block = Block;
+// window.Block = Block;

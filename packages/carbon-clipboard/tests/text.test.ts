@@ -15,9 +15,9 @@ test('parse plain space', () => {
 test('parse plain header', () => {
   const content = '# hello';
   const res = parseText(content);
-  expect(res).toMatchObject([
-    node('h1',[title([text('hello')])])
-  ])
+  const expected = node('h1',[title([text('hello')])]);
+  console.log(JSON.stringify(res, null, 2));
+  expect(res).toMatchObject([expected])
 })
 
 test('parse plain paragraph', () => {
@@ -45,12 +45,16 @@ test('parse code block', () => {
 // parse br
 test('parse paragraph', () => {
   const content = '`const` fn = () => *hi*';
-  const res = parseText(content);
-  // console.log(JSON.stringify(tree, null, 2));
-  // console.log('transformed tree', JSON.stringify(parseText(text), null, 2));
-  expect(res).toMatchObject([
-    section([title([text('const'), text(' fn = () => '), text('hi')])])
-  ])
+  const actual = parseText(content);
+  expect(actual).toMatchObject([
+    section([
+      title([
+        text('const'),
+        text(' fn = () => '),
+        node('italic', [text('hi')])
+      ]),
+    ]),
+  ]);
 });
 
 test("parse bullet list", () => {

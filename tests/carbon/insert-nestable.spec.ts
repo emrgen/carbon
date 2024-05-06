@@ -1,5 +1,5 @@
 import { expect, Page, test } from "@playwright/test";
-import { Carbon } from "@emrgen/carbon-core";
+import {Carbon, TextWriter} from "@emrgen/carbon-core";
 import { CarbonPage, focusDocTitle, getDocContent } from "./utils";
 
 test.beforeEach(async ({ page }, testInfo) => {
@@ -39,7 +39,8 @@ test("add number list to the document", async ({ page }) => {
     const app = window.app;
     const doc = app.content.find((n) => n.isDocument);
 
-    return app.serialize(doc!);
+    const writer = new TextWriter();
+    return app.encode(writer, doc!).toString();
   });
 
   expect(docContent).toBe("Doc title\ndocument content\n1. first item\n2. second item\n3. third item\n");
@@ -63,7 +64,8 @@ test("add bullet list to the document", async ({ page }) => {
     const app = window.app;
     const doc = app.content.find((n) => n.isDocument);
 
-    return app.serialize(doc!);
+    const writer = new TextWriter();
+    return app.encode(writer, doc!).toString();
   });
 
   expect(docContent).toBe("Doc title\ndocument content\n- first item\n- second item\n- third item\n");
@@ -82,7 +84,8 @@ test("add nested number list to the document", async ({ page }) => {
     const app = window.app;
     const doc = app.content.find((n) => n.isDocument);
 
-    return app.serialize(doc!);
+    const writer = new TextWriter();
+    return app.encode(writer, doc!).toString();
   });
 
   expect(docContent).toBe("Doc title\n1. first item\n 1. first item child 1\n 2. first item child 2");

@@ -76,7 +76,7 @@ export class TextWriter implements Writer {
 }
 
 // @ts-ignore
-window.tw = new TextWriter();
+// window.tw = new TextWriter();
 
 export interface Encoder {
   encode(writer: Writer, encoder: Encoder, node: Node): void;

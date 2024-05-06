@@ -15,17 +15,19 @@ async function parse(): Promise<Optional<any[]>> {
             if (!consumed && type === 'text/plain') {
               item.getType(type).then(blob => {
                blob.text().then(text => {
+                 console.log(text)
                   const slice = parseText(text);
                   resolve(nodes);
                 })
               });
-              break
+              // break
             }
 
             // TODO: parse html content to carbon slice
             if (!consumed && type === 'text/html') {
               item.getType(type).then(blob => {
                 blob.text().then(text => {
+                  console.log(text)
                   const parser = new DOMParser();
                   const doc = parser.parseFromString(text, 'text/html');
                   const body = doc.querySelector('body');
