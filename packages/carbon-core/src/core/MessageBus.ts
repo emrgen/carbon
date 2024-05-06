@@ -1,5 +1,4 @@
 import EventEmitter from "events";
-import { Node } from "./Node";
 import { NodeId } from "./NodeId";
 
 export interface CarbonMessageFormat {
@@ -17,7 +16,11 @@ export class CarbonMessageBus extends EventEmitter {
     this.addressListeners = new EventEmitter();
   }
 
-  send(from: NodeId, to: NodeId, msg: Omit<CarbonMessageFormat, "source" | "dest">) {
+  send(
+    from: NodeId,
+    to: NodeId,
+    msg: Omit<CarbonMessageFormat, "source" | "dest">,
+  ) {
     // prevent sending messages to self
     if (from.eq(to)) return;
 
@@ -37,5 +40,4 @@ export class CarbonMessageBus extends EventEmitter {
   unsubscribe(nodeId: NodeId, callback: (msg: CarbonMessageFormat) => void) {
     this.addressListeners.off(nodeId.toString(), callback);
   }
-
 }

@@ -2,11 +2,12 @@ import { Node } from "./Node";
 
 export interface Writer {
   meta: Map<string, any>;
+
   write(content: string): Writer;
 }
 
 export class TextWriter implements Writer {
-  private content: string = '';
+  private content: string = "";
   meta: Map<string, any> = new Map();
   parser: DOMParser;
 
@@ -20,7 +21,7 @@ export class TextWriter implements Writer {
   }
 
   buildHtml() {
-    const dom = this.parser.parseFromString(this.content, 'text/html');
+    const dom = this.parser.parseFromString(this.content, "text/html");
     // merge adjacent unordered list items
 
     this.mergeAdjacentListItemsRecursive(dom.body);
@@ -48,17 +49,17 @@ export class TextWriter implements Writer {
 
       // if the current child is a UL and the previous child is a UL
       // then merge the current child's children into the previous child's children
-      if (child.tagName === 'UL' && prev.tagName === 'UL') {
+      if (child.tagName === "UL" && prev.tagName === "UL") {
         const children = Array.from(child.children);
-        children.forEach(c => prev.appendChild(c));
+        children.forEach((c) => prev.appendChild(c));
         child.remove();
       }
 
-      console.log(child.tagName)
+      console.log(child.tagName);
 
-      if (child.tagName === 'OL' && prev.tagName === 'OL') {
+      if (child.tagName === "OL" && prev.tagName === "OL") {
         const children = Array.from(child.children);
-        children.forEach(c => prev.appendChild(c));
+        children.forEach((c) => prev.appendChild(c));
         child.remove();
       }
 
@@ -71,7 +72,7 @@ export class TextWriter implements Writer {
   }
 
   clear() {
-    this.content = '';
+    this.content = "";
   }
 }
 
@@ -80,16 +81,18 @@ export class TextWriter implements Writer {
 
 export interface Encoder {
   encode(writer: Writer, encoder: Encoder, node: Node): void;
+
   encodeHtml(writer: Writer, encoder: Encoder, node: Node): void;
 }
 
 export interface NodeEncoder {
   encode(writer: Writer, node: Node): void;
+
   encodeHtml(writer: Writer, node: Node): void;
 }
 
 export class TreeEncoder implements Encoder {
-  name: string = '';
+  name: string = "";
 
   private encoders: Map<string, NodeEncoder> = new Map();
 
@@ -104,22 +107,22 @@ export class TreeEncoder implements Encoder {
   }
 
   encode(writer: Writer, encoder: Encoder, node: Node) {
-    const {name} = node;
+    const { name } = node;
     const nodeEncoder = this.encoders.get(name);
 
     if (!nodeEncoder) {
-      throw new Error('No encoder found for node: ' + name);
+      throw new Error("No encoder found for node: " + name);
     }
 
     return nodeEncoder.encode(writer, node);
   }
 
   encodeHtml(writer: Writer, encoder: Encoder, node: Node) {
-    const {name} = node;
+    const { name } = node;
     const nodeEncoder = this.encoders.get(name);
 
     if (!nodeEncoder) {
-      throw new Error('No encoder found for node: ' + name);
+      throw new Error("No encoder found for node: " + name);
     }
 
     return nodeEncoder.encodeHtml(writer, node);

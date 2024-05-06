@@ -1,33 +1,36 @@
-import {CarbonBlock, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
-import {useCallback, useRef} from "react";
-import {PointedSelection, preventAndStop} from "@emrgen/carbon-core";
-import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
+import { CarbonBlock, RendererProps, useCarbon } from "@emrgen/carbon-react";
+import { useCallback, useRef } from "react";
+import { preventAndStop } from "@emrgen/carbon-core";
+import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
 
 export default function DividerComp(props: RendererProps) {
   const app = useCarbon();
   const { node } = props;
 
   const ref = useRef(null);
-  const {connectors, SelectionHalo} = useDragDropRectSelectHalo({node, ref})
+  const { connectors, SelectionHalo } = useDragDropRectSelectHalo({
+    node,
+    ref,
+  });
 
   const handleClick = useCallback(
     (e, app) => {
       preventAndStop(e);
       // avoid selection if block is already selected
       if (app.selection.nodes.some((n) => n.id.eq(node.id))) return;
-      app.cmd.BlockSelect([node.id]).Dispatch();
+      app.cmd.SelectBlocks([node.id]).Dispatch();
       // app.cmd.select(PointedSelection.fromNodes([node.id])).dispatch();
     },
-    [node.id]
+    [node.id],
   );
 
   const handleMouseDown = useCallback(
     (e) => {
       if (app.selection.blocks.some((n) => n.id.eq(node.id))) {
-        preventAndStop(e)
+        preventAndStop(e);
       }
     },
-    [app.selection, node.id]
+    [app.selection, node.id],
   );
 
   return (

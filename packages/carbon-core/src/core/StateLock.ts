@@ -1,4 +1,4 @@
-import { Returns, With } from "./types";
+import { Returns } from "./types";
 
 export class CarbonStateLock {
   _locked: boolean;
@@ -19,6 +19,7 @@ export class CarbonStateLock {
     this._locked = true;
     this._lockers.push(new Error().stack);
   }
+
   unlock() {
     this._locked = false;
     this._lockers.pop();
@@ -45,5 +46,3 @@ export class CarbonStateLock {
     return this._lockers[this._lockers.length - 1];
   }
 }
-
-export const CARBON_STATE_LOCK = CarbonStateLock.locked();

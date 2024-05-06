@@ -1,16 +1,15 @@
-import {Node, Path} from "./Node";
-import {Fragment} from "@emrgen/carbon-core";
-import {flatten, zip} from "lodash";
+import { Node, Path } from "./Node";
+import { Fragment } from "@emrgen/carbon-core";
+import { flatten, zip } from "lodash";
 
 // Slice represents a selection of nodes in the editor
 // it is used to store the current selection and to copy and paste nodes
 // when the start and end nodes both are containers, it represents a block selection
 export class Slice {
-
   static empty = new Slice(null!, null!, null!);
 
-  get isBlockSelection () {
-    return this.start?.isContainer && this.end?.isContainer
+  get isBlockSelection() {
+    return this.start?.isContainer && this.end?.isContainer;
   }
 
   get isEmpty() {
@@ -28,28 +27,28 @@ export class Slice {
 
     let startPath: Path = [];
     let endPath: Path = [];
-    const {root, start, end} = this
-    root.all(n => {
+    const { root, start, end } = this;
+    root.all((n) => {
       if (n.eq(start)) {
-        startPath = n.path
+        startPath = n.path;
       }
       if (n.eq(end)) {
-        endPath = n.path
-      }
-    })
-
-    // we need to clone the nodes to generate new ids, otherwise the editor will think the copied nodes are the same
-    const {schema} = this.root.type;
-    const {factory} = schema;
-    const cloned = root.type.schema.clone(root, data => {
-      return {
-        ...data,
-        id: factory.blockId()
+        endPath = n.path;
       }
     });
 
+    // we need to clone the nodes to generate new ids, otherwise the editor will think the copied nodes are the same
+    const { schema } = this.root.type;
+    const { factory } = schema;
+    const cloned = root.type.schema.clone(root, (data) => {
+      return {
+        ...data,
+        id: factory.blockId(),
+      };
+    });
+
     if (this.isBlockSelection) {
-      return new Slice(cloned, cloned.firstChild!, cloned.lastChild!)
+      return new Slice(cloned, cloned.firstChild!, cloned.lastChild!);
     }
 
     const startNode = cloned.atPath(startPath)!;
@@ -64,25 +63,34 @@ export class Slice {
     }
 
     const normalized = this.normalizeChildren(this.nodes);
-    this.root.updateContent(normalized)
+    this.root.updateContent(normalized);
   }
 
   // TODO: this is a hack to fix the issue with invalid end nodes
   // we need to find a better way to fix this
   // the problem is that the schema is not strict enough
   normalizeChildren(nodes: Node[]) {
-    const normalized = flatten(nodes.map(n => {
-      const contentMatch = n.type.contentMatch;
-      const match = contentMatch.matchFragment(Fragment.from(n.children));
-      if (match?.validEnd) {
-        return [n];
-      } else {
-        console.log('invalid end', n.type.name, n.children.map(n => n.type.name).join(' > '));
-        return n.children;
-      }
-    }));
+    const normalized = flatten(
+      nodes.map((n) => {
+        const contentMatch = n.type.contentMatch;
+        const match = contentMatch.matchFragment(Fragment.from(n.children));
+        if (match?.validEnd) {
+          return [n];
+        } else {
+          console.log(
+            "invalid end",
+            n.type.name,
+            n.children.map((n) => n.type.name).join(" > "),
+          );
+          return n.children;
+        }
+      }),
+    );
 
-    if (nodes.length === normalized.length && zip(nodes, normalized).every(([a, b]) => a!.eq(b!))) {
+    if (
+      nodes.length === normalized.length &&
+      zip(nodes, normalized).every(([a, b]) => a!.eq(b!))
+    ) {
       return normalized;
     }
 
@@ -90,16 +98,26 @@ export class Slice {
   }
 
   static from(node: Node) {
-    const start = node.find(n => n.isTextContainer, { direction: 'forward', order: 'post' });
-    const end = node.find(n => n.isTextContainer, { direction: 'backward', order: 'post' });
-    return new Slice(node, start!, end!)
+    const start = node.find((n) => n.isTextContainer, {
+      direction: "forward",
+      order: "post",
+    });
+    const end = node.find((n) => n.isTextContainer, {
+      direction: "backward",
+      order: "post",
+    });
+    return new Slice(node, start!, end!);
   }
 
   static create(node: Node, start: Node, end: Node) {
     return new Slice(node, start, end);
   }
 
-  constructor(readonly root: Node, readonly start: Node, readonly end: Node) {}
+  constructor(
+    readonly root: Node,
+    readonly start: Node,
+    readonly end: Node,
+  ) {}
 
   freeze() {
     Object.freeze(this);

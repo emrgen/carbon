@@ -1,5 +1,4 @@
 export class CarbonCache {
-
   private cache: Map<string, any>;
   private hitCount: number = 0;
 
@@ -28,14 +27,15 @@ export class CarbonCache {
       return value;
     }
 
-    const newValue = fn?.()
+    const newValue = fn?.();
 
     if (newValue !== undefined) {
       this.cache.set(key, newValue);
     }
 
-    return newValue as T
+    return newValue as T;
   }
+
   set(key: string, value: any, expire?: number) {
     this.cache.set(key, value);
   }

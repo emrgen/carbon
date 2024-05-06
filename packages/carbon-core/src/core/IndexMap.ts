@@ -1,5 +1,3 @@
-import {Optional} from "@emrgen/types";
-
 // +1 = node added within index map
 // -1 = node removed from index map
 type IndexMapOp = 1 | -1;
@@ -12,7 +10,7 @@ export class IndexMap {
 
   op: IndexMapOp = 1;
 
-  static DEFAULT = new IndexMap(1000000000, 1)
+  static DEFAULT = new IndexMap(1000000000, 1);
 
   get isDefault() {
     return this === IndexMap.DEFAULT;
@@ -20,7 +18,7 @@ export class IndexMap {
 
   constructor(offset: number, op: IndexMapOp) {
     if (offset < 0) {
-      throw Error('IndexMap ref offset must be positive')
+      throw Error("IndexMap ref offset must be positive");
     }
 
     this.offset = offset;
@@ -28,7 +26,7 @@ export class IndexMap {
   }
 
   map(index: number): number {
-    const {offset, op} = this;
+    const { offset, op } = this;
     if (index < offset) {
       // index is before this map
       return index;
@@ -39,7 +37,7 @@ export class IndexMap {
   }
 
   unmap(index: number) {
-    const {offset, op} = this;
+    const { offset, op } = this;
     if (index < offset) {
       // index is before this map
       return index;
@@ -51,7 +49,6 @@ export class IndexMap {
       return index - op;
     }
   }
-
 }
 
 // IndexMapper maps indexes through a list of IndexMap
@@ -77,7 +74,7 @@ export class IndexMapper {
   // remove index maps from the start of the list
   // this maps should be applied to the indexes before the current index map
   take(count: number) {
-    const {mappers} = this;
+    const { mappers } = this;
     const newMappers = mappers.slice(count);
     this.mappers = newMappers;
 
@@ -88,26 +85,26 @@ export class IndexMapper {
 
     return {
       maps: IndexMapper.from(mappers.slice(0, count)),
-      current: newMappers[0]
+      current: newMappers[0],
     };
   }
 
   add(map: IndexMap) {
-    const {mappers} = this;
+    const { mappers } = this;
     mappers.push(map);
     map.position = mappers.length - 1;
   }
 
   // map the index through all the index maps
   map(ref: IndexMap, index: number): number {
-    const {mappers} = this;
-    let i = ref.isDefault ? 0 : ref.position
+    const { mappers } = this;
+    let i = ref.isDefault ? 0 : ref.position;
     if (i === undefined) {
       throw new Error("IndexMap not found");
     }
     for (++i; i < mappers.length; ++i) {
       const mapper = mappers[i];
-      console.debug('mapping', i, mapper, index, mapper.map(index))
+      console.debug("mapping", i, mapper, index, mapper.map(index));
       index = mapper.map(index);
     }
 
@@ -115,8 +112,8 @@ export class IndexMapper {
   }
 
   unmap(ref: IndexMap, index: number): number {
-    const {mappers} = this;
-    let i = ref.isDefault ? 0 : ref.position
+    const { mappers } = this;
+    let i = ref.isDefault ? 0 : ref.position;
     if (i === undefined) {
       throw new Error("IndexMap not found");
     }

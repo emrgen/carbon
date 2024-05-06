@@ -1,9 +1,9 @@
 import { classString } from "./Logger";
 import { Mark } from "./Mark";
 import { Node } from "./Node";
-import { Optional } from '@emrgen/types';
+import { Optional } from "@emrgen/types";
 import { reduce } from "lodash";
-import {deepCloneMap} from "@emrgen/carbon-core";
+import { deepCloneMap } from "@emrgen/carbon-core";
 
 // utility class for text blocks
 // title is a text block
@@ -19,7 +19,7 @@ export class TextBlock {
 
   constructor(node: Node) {
     if (!node.isTextContainer) {
-      throw new Error('can not create text block from non text block node');
+      throw new Error("can not create text block from non text block node");
     }
 
     this.node = node;
@@ -39,13 +39,12 @@ export class TextBlock {
   }
 
   // @mutation
-  removeMark(mark: Mark, start: number, end: number) {
-  }
+  removeMark(mark: Mark, start: number, end: number) {}
 
   // @mutation
   insert(node: Node, offset: number) {
     if (!node.isInline) {
-      throw new Error('node is not inline');
+      throw new Error("node is not inline");
     }
 
     if (offset <= 0) {
@@ -66,8 +65,6 @@ export class TextBlock {
       return curr.length === 0 ? acc : [...acc, ...curr];
     }, [] as Node[]);
 
-
-
     // NOTE TO ME: this line is required to make the code work
     // this.node.replace(found, nodes);
 
@@ -77,7 +74,7 @@ export class TextBlock {
 
   //
   private find(offset: number): Optional<Node> {
-     for (const node of this.node.children) {
+    for (const node of this.node.children) {
       if (node.isInline) {
         if (offset === node.focusSize) return node;
 
@@ -91,29 +88,33 @@ export class TextBlock {
   }
 
   private normalize(): TextBlock {
-    const nodes = reduce(this.node.children, (acc, curr) => {
-      if (acc.length === 0) {
-        return [curr]
-      }
+    const nodes = reduce(
+      this.node.children,
+      (acc, curr) => {
+        if (acc.length === 0) {
+          return [curr];
+        }
 
-      const prev = acc[acc.length - 1];
+        const prev = acc[acc.length - 1];
 
-      // const newNode = prev.tryMerge(curr);
-      // if (!newNode) {
-      //   return [...acc, curr]
-      // }
+        // const newNode = prev.tryMerge(curr);
+        // if (!newNode) {
+        //   return [...acc, curr]
+        // }
 
-      return [...acc.slice(0, -1)];
-    }, [] as Node[]);
+        return [...acc.slice(0, -1)];
+      },
+      [] as Node[],
+    );
 
     // this.node.content = BlockContent.create(nodes);
 
-    return this
+    return this;
   }
 
   split(offset: number): [Node[], Node[]] {
     // return this.node.content.split(offset);
-    return [[],[]]
+    return [[], []];
   }
 
   toJSON() {
@@ -121,6 +122,6 @@ export class TextBlock {
   }
 
   toString(): string {
-    return classString(this)(this.node.toJSON())
+    return classString(this)(this.node.toJSON());
   }
 }

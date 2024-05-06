@@ -1,4 +1,3 @@
-import { NodeBTree } from "./BTree";
 import { NodeMap } from "./NodeMap";
 
 const STATE_SCOPE: Map<Symbol, NodeMap> = new Map();
@@ -36,7 +35,7 @@ export class StateScope {
   static get(scope: Symbol = StateScope.current()): NodeMap {
     let map = STATE_SCOPE.get(scope);
     if (!map) {
-     throw new Error(`StateScope ${scope.toString()} not found`);
+      throw new Error(`StateScope ${scope.toString()} not found`);
     }
 
     return map;
@@ -68,4 +67,3 @@ export class StateScope {
     StateScope.remove(scope);
   }
 }
-

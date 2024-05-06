@@ -1,5 +1,5 @@
 import { Optional } from "@emrgen/types";
-import { isArray, isObject, set } from "lodash";
+import { isObject, set } from "lodash";
 
 class PathCache {
   private encodes = new Map<string, number>();
@@ -11,7 +11,10 @@ class PathCache {
 
   // return string path for given number encoded path
   path(key: string): string {
-    return key.split("/").map((token) => this.decodes.get(token) ?? '').join("/");
+    return key
+      .split("/")
+      .map((token) => this.decodes.get(token) ?? "")
+      .join("/");
   }
 
   // return number for given string token
@@ -46,7 +49,6 @@ class PathCache {
 
 //
 export class JsonStore {
-
   // store save path encoded field, value pairs
   protected store: Map<string, any>;
 
@@ -59,14 +61,14 @@ export class JsonStore {
 
     Object.entries(kv).map(([key, value]) => {
       setValue(result, key.split("/"), value);
-    })
+    });
 
     return result;
   }
 
   static jsonToKeyValue(json: any): Record<string, any> {
     if (!isObject(json)) {
-      throw Error('params in not an object')
+      throw Error("params in not an object");
     }
     const result: Record<string, any> = {};
 
@@ -79,11 +81,11 @@ export class JsonStore {
           }
 
           traverse(value, [...path, key]);
-        })
+        });
       } else {
         result[path.join("/")] = obj;
       }
-    }
+    };
 
     traverse(json);
 
@@ -107,7 +109,7 @@ export class JsonStore {
     return this.store.size;
   }
 
-  has(path: string[]|string): boolean {
+  has(path: string[] | string): boolean {
     let key = path;
     if (typeof key === "string") {
       key = key.split("/");
@@ -118,7 +120,7 @@ export class JsonStore {
   prefix(prefix: string[] | string): Record<string, any> {
     const result: Record<string, any> = {};
     if (typeof prefix === "string") {
-      prefix = prefix.split("/")
+      prefix = prefix.split("/");
     }
 
     const path = JsonStore.PATH_CACHE.key(prefix);
@@ -144,7 +146,7 @@ export class JsonStore {
 
     if (value === undefined || value === null || value === "") {
       this.store.delete(JsonStore.PATH_CACHE.get(path));
-      return
+      return;
     }
 
     const key = JsonStore.PATH_CACHE.get(path);
@@ -164,7 +166,7 @@ export class JsonStore {
   }
 
   freeze() {
-    if(this.frozen) return this
+    if (this.frozen) return this;
     this.frozen = true;
 
     Object.freeze(this);
@@ -173,7 +175,7 @@ export class JsonStore {
   }
 
   toJSON() {
-   const result: Record<string, any> = {};
+    const result: Record<string, any> = {};
     for (const [key, value] of this.store) {
       set(result, JsonStore.PATH_CACHE.path(key), value);
     }
@@ -191,7 +193,6 @@ export class JsonStore {
   }
 }
 
-
 const setValue = (obj: any, path: string[], value: any) => {
   if (path.length === 0) {
     return;
@@ -202,7 +203,7 @@ const setValue = (obj: any, path: string[], value: any) => {
     obj[key] = {
       ...obj[key],
       value,
-    }
+    };
     return;
   }
 
@@ -211,4 +212,4 @@ const setValue = (obj: any, path: string[], value: any) => {
   }
 
   setValue(obj[key], path, value);
-}
+};

@@ -1,6 +1,11 @@
 import { Optional } from "@emrgen/types";
-import { CarbonPlugin, PluginName, PluginType, Transaction } from "@emrgen/carbon-core";
-import { each, sortBy, values } from "lodash";
+import {
+  CarbonPlugin,
+  PluginName,
+  PluginType,
+  Transaction,
+} from "@emrgen/carbon-core";
+import { each, values } from "lodash";
 
 interface CommandHandler {
   type: PluginType;
@@ -21,11 +26,11 @@ export class CarbonCommand {
   static tr: Optional<Transaction>;
 
   static from(plugins: CarbonPlugin[]): CarbonCommand {
-    const commands: Record<PluginCommandName, CommandHandler[]> = {}
+    const commands: Record<PluginCommandName, CommandHandler[]> = {};
     const carbonCommands: CommandMap = {};
     const pluginCommands: PluginCommandMap = {};
 
-    plugins.forEach(p => {
+    plugins.forEach((p) => {
       each(p.commands(), (fn, name) => {
         fn = fn.bind(p);
         // if (p.type !== PluginType.Node) {
@@ -35,39 +40,38 @@ export class CarbonCommand {
           name: p.name,
           priority: p.priority,
           fn,
-        }
+        };
         commands[name].push(handler);
 
         pluginCommands[p.name] = pluginCommands[p.name] ?? {};
         pluginCommands[p.name][name] = handler;
-      })
-
-    })
+      });
+    });
 
     const typeOrder = {
       [PluginType.Before]: 0,
       [PluginType.Node]: 1,
       [PluginType.After]: 2,
-    }
+    };
 
     const comparePluginType = (a: PluginType, b: PluginType) => {
       return typeOrder[a] - typeOrder[b];
-    }
+    };
 
     // sort commands by priority
-    values(commands).forEach(commands => {
+    values(commands).forEach((commands) => {
       commands.sort((a, b) => {
         const type = comparePluginType(a.type, b.type);
         if (type !== 0) {
           return type;
         }
-        return b.priority - a.priority
+        return b.priority - a.priority;
       });
-    })
+    });
 
     each(commands, (commands, name) => {
       const fn = (tr: Transaction, ...args: any) => {
-        commands.some(c => {
+        commands.some((c) => {
           return c.fn(tr, ...args);
         });
 
@@ -78,11 +82,11 @@ export class CarbonCommand {
         type: PluginType.Node,
         name,
         priority: 0,
-        fn
-      }
-    })
+        fn,
+      };
+    });
 
-    return new CarbonCommand(carbonCommands, pluginCommands)
+    return new CarbonCommand(carbonCommands, pluginCommands);
   }
 
   constructor(carbonCommands: CommandMap, pluginCommands: PluginCommandMap) {
@@ -105,7 +109,11 @@ export class PluginCommand {
   private tr: Transaction;
   private commands: CommandMap;
 
-  static from(tr: Transaction, plugin: PluginName, commands: CommandMap): PluginCommand {
+  static from(
+    tr: Transaction,
+    plugin: PluginName,
+    commands: CommandMap,
+  ): PluginCommand {
     return new PluginCommand(tr, plugin, commands);
   }
 
@@ -130,10 +138,10 @@ export class PluginCommand {
             return target.tr;
           }
           // console.log(`1. calling ${prop.toString()}.${command.fn.name}`);
-          command.fn(target.tr, ...args)
+          command.fn(target.tr, ...args);
           return target.tr;
-        }
-      }
-    })
+        };
+      },
+    });
   }
 }

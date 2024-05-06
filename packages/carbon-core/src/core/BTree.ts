@@ -1,9 +1,8 @@
-import BTree from 'sorted-btree';
-import { NodeId, NodeIdComparator } from './NodeId';
-import { Node } from './Node';
+import BTree from "sorted-btree";
+import { NodeId, NodeIdComparator } from "./NodeId";
+import { Node } from "./Node";
 
 export class NodeBTree extends BTree<NodeId, Node> {
-
   static from(nodes: Node[]) {
     let tree = new NodeBTree();
     for (let node of nodes) {
@@ -20,8 +19,7 @@ export class NodeBTree extends BTree<NodeId, Node> {
     return new NodeBTree();
   }
 
-	constructor() {
-		super(undefined, NodeIdComparator)
-	}
+  constructor() {
+    super(undefined, NodeIdComparator);
+  }
 }
-

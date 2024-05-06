@@ -1,16 +1,16 @@
-import {Optional} from "@emrgen/types";
-import {NodeBTree} from "./BTree";
-import {Node} from "./Node";
-import {NodeId, NodeIdComparator} from "./NodeId";
-import {Point} from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
+import { NodeBTree } from "./BTree";
+import { Node } from "./Node";
+import { NodeId, NodeIdComparator } from "./NodeId";
+import { Point } from "@emrgen/carbon-core";
 
 export interface NodeMapGet {
   get(key: NodeId): Optional<Node>;
+
   parent(key: NodeId): Optional<Node>;
 }
 
-export interface NodeMap extends NodeMapGet{
-
+export interface NodeMap extends NodeMapGet {
   children(key: NodeId): NodeId[];
 
   insert(at: Point, childId: NodeId): void;
@@ -38,7 +38,6 @@ export interface NodeMap extends NodeMapGet{
 }
 
 export class BTreeNodeMap implements NodeMap {
-
   static empty() {
     return new BTreeNodeMap();
   }
@@ -51,26 +50,26 @@ export class BTreeNodeMap implements NodeMap {
   constructor() {}
 
   get size() {
-    return this._map.size
+    return this._map.size;
   }
 
   children(key: NodeId): NodeId[] {
     const children = this._children.get(key);
-    return children?.filter(id => !this.isDeleted(id)) ?? [];
+    return children?.filter((id) => !this.isDeleted(id)) ?? [];
   }
 
   insert(at: Point, childId: NodeId): void {
     switch (at.at) {
-      case 'start':
+      case "start":
         this.insertAtStart(at.nodeId, childId);
         break;
-      case 'end':
+      case "end":
         this.insertAtEnd(at.nodeId, childId);
         break;
-      case 'before':
+      case "before":
         this.insertBefore(at.nodeId, childId);
         break;
-      case 'after':
+      case "after":
         this.insertAfter(at.nodeId, childId);
         break;
     }
@@ -81,7 +80,9 @@ export class BTreeNodeMap implements NodeMap {
     if (parentId) {
       const children = this._children.get(parentId);
       if (children) {
-        const index = children.findIndex(id => NodeIdComparator(id, childId) === 0);
+        const index = children.findIndex(
+          (id) => NodeIdComparator(id, childId) === 0,
+        );
         if (index >= 0) {
           children.splice(index, 1);
         }
@@ -92,7 +93,9 @@ export class BTreeNodeMap implements NodeMap {
   private insertAfter(prevId: NodeId, childId: NodeId) {
     const parentId = this._parents.get(prevId)!;
     const children = this._children.get(parentId) ?? [];
-    const index = children.findIndex(id => NodeIdComparator(id, prevId) === 0);
+    const index = children.findIndex(
+      (id) => NodeIdComparator(id, prevId) === 0,
+    );
     if (index >= 0) {
       children.splice(index + 1, 0, childId);
     }
@@ -103,7 +106,9 @@ export class BTreeNodeMap implements NodeMap {
   private insertBefore(nextId: NodeId, childId: NodeId) {
     const parentId = this._parents.get(nextId)!;
     const children = this._children.get(parentId) ?? [];
-    const index = children.findIndex(id => NodeIdComparator(id, nextId) === 0);
+    const index = children.findIndex(
+      (id) => NodeIdComparator(id, nextId) === 0,
+    );
     if (index >= 0) {
       children.splice(index, 0, childId);
     }
@@ -134,11 +139,11 @@ export class BTreeNodeMap implements NodeMap {
   }
 
   isDeleted(id: NodeId): boolean {
-    return this._deleted.has(id)
+    return this._deleted.has(id);
   }
 
   forEach(fn: (value: Node, key: NodeId) => void): void {
-    this._map.forEach(fn)
+    this._map.forEach(fn);
   }
 
   get(key: NodeId): Optional<Node> {

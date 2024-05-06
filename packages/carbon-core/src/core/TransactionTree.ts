@@ -1,6 +1,6 @@
-import { Transaction } from '@emrgen/carbon-core';
-import { Optional } from '@emrgen/types';
-import { last } from 'lodash';
+import { Transaction } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
+import { last } from "lodash";
 
 // a transaction tree is a tree of transactions that can be rolled back and committed
 // it can be used to create time travel functionality
@@ -22,7 +22,7 @@ export class TransactionTree {
       parent: null,
       transaction: null as any,
       children: [],
-      depth: 0
+      depth: 0,
     } as unknown as TransactionNode;
 
     this.current = null;
@@ -85,7 +85,11 @@ export class TransactionTree {
 
   add(transaction: Transaction) {
     if (this.current) {
-      const node = new TransactionNode(transaction, this.current.depth + 1, this.current);
+      const node = new TransactionNode(
+        transaction,
+        this.current.depth + 1,
+        this.current,
+      );
       // this.trMap.set(transaction.id, node);
 
       this.current.children.push(node);
@@ -96,13 +100,12 @@ export class TransactionTree {
 
       this.current = this.root;
     }
-
   }
 
   prev(): Optional<Transaction> {
     // if we are at the root, we can't go back any further
     if (this.current == this.root) {
-      console.warn('Already at root');
+      console.warn("Already at root");
       return;
     }
 
@@ -132,7 +135,11 @@ export class TransactionNode {
   children: TransactionNode[];
   depth: number;
 
-  constructor(transaction: Transaction, depth: number, parent: Optional<TransactionNode>) {
+  constructor(
+    transaction: Transaction,
+    depth: number,
+    parent: Optional<TransactionNode>,
+  ) {
     this.transaction = transaction;
     this.parent = parent;
     this.depth = depth;
@@ -144,6 +151,6 @@ export class TransactionNode {
       // [this.transaction.id.toString()]: this.children.map(c => c.toJSON()).reduce((acc, val) => {
       //   return { ...acc, ...val }
       // }, {})
-    }
+    };
   }
 }

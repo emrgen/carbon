@@ -1,10 +1,10 @@
-import {Node, NodeId, Path, StateScope} from "@emrgen/carbon-core";
-import {Optional} from "@emrgen/types";
-import {Block} from "./Block";
-import {isArray} from "lodash";
+import { NodeId, Path } from "@emrgen/carbon-core";
 
 export class Location {
-  constructor(readonly scope: Symbol, readonly location: Path | NodeId) {}
+  constructor(
+    readonly scope: Symbol,
+    readonly location: Path | NodeId,
+  ) {}
 
   // use global scope to get the node
   // get node(): Optional<Node> {

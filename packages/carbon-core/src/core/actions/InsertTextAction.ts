@@ -1,15 +1,23 @@
-import {ActionOrigin, CarbonAction, Draft, Point} from "@emrgen/carbon-core";
+import { ActionOrigin, CarbonAction, Draft, Point } from "@emrgen/carbon-core";
 import dayjs from "dayjs";
 
 // NOTE: it can be transformed into SetContent action
 export class InsertTextAction implements CarbonAction {
   time: number = dayjs().unix();
 
-  static create(point: Point, text: string, origin: ActionOrigin = ActionOrigin.UserInput) {
+  static create(
+    point: Point,
+    text: string,
+    origin: ActionOrigin = ActionOrigin.UserInput,
+  ) {
     return new InsertTextAction(point, text, origin);
   }
 
-  constructor(readonly point: Point, readonly text: string, readonly origin: ActionOrigin = ActionOrigin.UserInput) {}
+  constructor(
+    readonly point: Point,
+    readonly text: string,
+    readonly origin: ActionOrigin = ActionOrigin.UserInput,
+  ) {}
 
   execute(draft: Draft) {
     const { point, text, origin } = this;
@@ -27,11 +35,10 @@ export class InsertTextAction implements CarbonAction {
 
   toJSON() {
     return {
-      type: 'insertText',
+      type: "insertText",
       point: this.point.toJSON(),
       text: this.text,
       origin: this.origin,
-    }
+    };
   }
-
 }

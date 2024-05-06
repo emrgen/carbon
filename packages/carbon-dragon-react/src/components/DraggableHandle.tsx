@@ -6,10 +6,10 @@ import { useDraggableHandle } from "../hooks/useDraggable";
 import { useDragRect } from "../hooks/useDragRect";
 import {
   ActionOrigin,
-  EventsIn, EventsOut,
+  EventsIn,
+  EventsOut,
   Node,
   nodeLocation,
-  Pin,
   PinnedSelection,
   Point,
   preventAndStop,
@@ -19,8 +19,8 @@ import { PiDotsSixVerticalBold } from "react-icons/pi";
 import { useDndContext } from "../hooks";
 import { isNestableNode } from "@emrgen/carbon-blocks";
 import { CustomEvent } from "@emrgen/carbon-core/src/core/CustomEvent";
-import {useCarbon, useNodeState} from "@emrgen/carbon-react";
-import {DndEvent, elementBound} from "@emrgen/carbon-dragon";
+import { useCarbon, useNodeState } from "@emrgen/carbon-react";
+import { DndEvent, elementBound } from "@emrgen/carbon-dragon";
 
 export interface FastDragHandleProps {
   node: Node;
@@ -34,7 +34,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const [show, setShow] = useState(false);
   const [showDropHint, setShowDropHint] = useState(false);
   const [dropHintStyle, setDropHintStyle] = useState({} as any);
-  const {attributes} = useNodeState({node});
+  const { attributes } = useNodeState({ node });
   const dnd = useDndContext();
 
   const app = useCarbon();
@@ -47,12 +47,12 @@ export function DraggableHandle(props: FastDragHandleProps) {
     disabled: !node,
     ref: handleRef,
     activationConstraint: {
-      distance: 2
-    }
+      distance: 2,
+    },
   });
 
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
-    overlay: false
+    overlay: false,
   });
 
   useEffect(() => {
@@ -81,21 +81,29 @@ export function DraggableHandle(props: FastDragHandleProps) {
     };
   }, []);
 
-  const onDragStart = useCallback((e: DndEvent) => {
-    if (e.id === CarbonDragHandleId) {
-      app.onEvent(EventsIn.dragStart, CustomEvent.create(EventsIn.dragStart, e.node, e.event));
-      app.enable(() => {
-        app.cmd.Select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput).Dispatch();
-      });
-    }
-  }, [app]);
+  const onDragStart = useCallback(
+    (e: DndEvent) => {
+      if (e.id === CarbonDragHandleId) {
+        app.onEvent(
+          EventsIn.dragStart,
+          CustomEvent.create(EventsIn.dragStart, e.node, e.event),
+        );
+        app.enable(() => {
+          app.cmd
+            .Select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput)
+            .Dispatch();
+        });
+      }
+    },
+    [app],
+  );
 
   const findHitNode = useCallback(
     (e: DndEvent) => {
-      const {node} = e;
+      const { node } = e;
       const { clientX: x, clientY: y } = e.event;
-      const el = app.store.element(node.id)
-      const belBound = elementBound(el!)
+      const el = app.store.element(node.id);
+      const belBound = elementBound(el!);
 
       const bound = {
         minX: x - 10,
@@ -107,7 +115,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       const hits = dnd.droppables.collides(bound);
       return hits[0];
     },
-    [app, dnd]
+    [app, dnd],
   );
 
   const findDropPosition = useCallback(
@@ -117,7 +125,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       const hitElement = app.store.element(hitNode!.id!);
       const { top, bottom } = elementBound(hitTitleElement!);
       const elBound = elementBound(hitElement!);
-      const {clientX, clientY} = e.event;
+      const { clientX, clientY } = e.event;
       const x = clientX;
       const y = clientY;
 
@@ -129,12 +137,8 @@ export function DraggableHandle(props: FastDragHandleProps) {
           //   return to;
           // }
         } else {
-          const hasChildren = true//hitNode.size > 1;
-          if (
-            hasChildren && x > elBound.left + 30 &&
-            isNestableNode(hitNode)
-          ) {
-
+          const hasChildren = true; //hitNode.size > 1;
+          if (hasChildren && x > elBound.left + 30 && isNestableNode(hitNode)) {
             to = Point.toAfter(firstChild?.id!);
           } else {
             to = Point.toAfter(hitNode);
@@ -146,7 +150,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
       return to;
     },
-    [app.store]
+    [app.store],
   );
 
   const onDragOverNode = useCallback(
@@ -173,7 +177,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       // console.log("hits", hitNode?.id.toString());
       const to = findDropPosition(e, hitNode);
       const from = nodeLocation(node)!;
-      if (!to) return
+      if (!to) return;
       // if (!to || from.eq(to) || to.isBefore && hitNode.prevSibling?.id.eq(node.id)) {
       //   return;
       // }
@@ -183,7 +187,8 @@ export function DraggableHandle(props: FastDragHandleProps) {
       let { top, bottom, left, right, x, y } = elementBound(hitElement!);
       const width = right - left;
       const height = bottom - top;
-      const offset = !to.nodeId.eq(hitNode.id) && hitNode.name == 'section' ? 30 : 0;
+      const offset =
+        !to.nodeId.eq(hitNode.id) && hitNode.name == "section" ? 30 : 0;
       if (to.isBefore) {
         // drop before the hit node
         console.log(x, y);
@@ -192,7 +197,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         if (beforeNode) {
           const beforeElement = app.store.element(beforeNode?.id!);
           const { bottom: beforeBottom = top } = elementBound(beforeElement!);
-          top = top - (top - beforeBottom) / 2
+          top = top - (top - beforeBottom) / 2;
         } else {
           top = top - 1;
         }
@@ -206,7 +211,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         const afterElement = hitElement?.nextSibling as Optional<HTMLElement>;
         if (afterElement) {
           const { top: afterTop = bottom } = elementBound(afterElement);
-          bottom = bottom + (afterTop - bottom) / 2
+          bottom = bottom + (afterTop - bottom) / 2;
         }
 
         if (!to.nodeId.eq(hitNode.id)) {
@@ -222,7 +227,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
       setShowDropHint(true);
     },
-    [app.store, findDropPosition, findHitNode]
+    [app.store, findDropPosition, findHitNode],
   );
 
   const onDropNode = useCallback(
@@ -250,22 +255,29 @@ export function DraggableHandle(props: FastDragHandleProps) {
       // setShowDropHint(false);
       const from = nodeLocation(node)!;
       const to = findDropPosition(e, hitNode);
-      if (!to || from.eq(to) || to.isBefore && hitNode.prevSibling?.id.eq(node.id)) {
+      if (
+        !to ||
+        from.eq(to) ||
+        (to.isBefore && hitNode.prevSibling?.id.eq(node.id))
+      ) {
         return;
       }
 
       app.enable(() => {
         app.parkCursor();
 
-        const {tr} = app;
-        const after = PinnedSelection.fromNodes(node)
+        const { tr } = app;
+        const after = PinnedSelection.fromNodes(node);
 
-        tr.Move(from, to, node.id).Select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput);
+        tr.Move(from, to, node.id).Select(
+          PinnedSelection.fromNodes(node),
+          ActionOrigin.UserInput,
+        );
         tr.Select(after, ActionOrigin.NoSync);
         tr.Dispatch();
       });
     },
-    [app, findDropPosition, findHitNode]
+    [app, findDropPosition, findHitNode],
   );
 
   const onDragMove = useCallback(
@@ -275,7 +287,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         onDragOverNode(e);
       }
     },
-    [onDragOverNode, onDragRectProgress]
+    [onDragOverNode, onDragRectProgress],
   );
 
   const onDragEnd = useCallback(
@@ -285,7 +297,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         onDropNode(e);
       }
     },
-    [onDragRectStop, onDropNode]
+    [onDragRectStop, onDropNode],
   );
 
   const onMouseUp = useCallback(
@@ -303,18 +315,21 @@ export function DraggableHandle(props: FastDragHandleProps) {
         }
       }
 
-      app.onEvent(EventsIn.dragUp, CustomEvent.create(EventsIn.dragDown, node, e.event));
+      app.onEvent(
+        EventsIn.dragUp,
+        CustomEvent.create(EventsIn.dragDown, node, e.event),
+      );
     },
-    [app]
+    [app],
   );
 
-  const onMouseDown = useCallback(
-    (node: Node, e) => {
-      if (e.id !== CarbonDragHandleId) return;
-      app.onEvent(EventsIn.dragDown, CustomEvent.create(EventsIn.dragDown, node, e.event));
-    },
-    []
-  );
+  const onMouseDown = useCallback((node: Node, e) => {
+    if (e.id !== CarbonDragHandleId) return;
+    app.onEvent(
+      EventsIn.dragDown,
+      CustomEvent.create(EventsIn.dragDown, node, e.event),
+    );
+  }, []);
 
   useDndMonitor({
     onDragStart,
@@ -324,7 +339,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     onMouseDown,
     options: {
       throttle: 100,
-    }
+    },
   });
 
   const handleInsertNode = (e) => {
@@ -335,7 +350,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     app.enable();
     app.focus();
     if (e.shiftKey) {
-      const after = PinnedSelection.fromNodes([])
+      const after = PinnedSelection.fromNodes([]);
       app.cmd.inserter.insertBeforeDefault(node, "section")?.Dispatch();
       return;
     }
@@ -358,7 +373,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     //   return;
     // }
 
-    app.cmd.insertAfterDefault(node, "section").Dispatch();
+    app.cmd.inserter.insertAfterDefault(node, "section").Dispatch();
   };
 
   return (
@@ -369,30 +384,45 @@ export function DraggableHandle(props: FastDragHandleProps) {
       {...attributes}
       style={{ ...style, display: show ? "flex" : "none" }}
     >
-      {!node?.type.dragHandle && <div className="carbon-drag-handle-cover"  ref={handleRef} {...listeners} />}
-      {node?.type.dragHandle && <>
-      <div
-        className="carbon-add-handle"
-        onClick={handleInsertNode}
-        onMouseDown={preventAndStop}
-      >
-        <HiOutlinePlus />
-      </div>
-      <div
-        className="carbon-drag-handle"
-        onKeyDown={(e) => console.log(e)}
-        ref={handleRef}
-        {...listeners}
-      >
-        <PiDotsSixVerticalBold />
-      </div></>}
+      {!node?.type.dragHandle && (
+        <div
+          className="carbon-drag-handle-cover"
+          ref={handleRef}
+          {...listeners}
+        />
+      )}
+      {node?.type.dragHandle && (
+        <>
+          <div
+            className="carbon-add-handle"
+            onClick={handleInsertNode}
+            onMouseDown={preventAndStop}
+          >
+            <HiOutlinePlus />
+          </div>
+          <div
+            className="carbon-drag-handle"
+            onKeyDown={(e) => console.log(e)}
+            ref={handleRef}
+            {...listeners}
+          >
+            <PiDotsSixVerticalBold />
+          </div>
+        </>
+      )}
       {createPortal(<>{DragRectComp}</>, document.body)}
       {createPortal(
         <>
-          <div className="carbon-drop-hint"
-               style={{ display: showDropHint ? "flex" : "none", ...dropHintStyle, position: "absolute" }} />
+          <div
+            className="carbon-drop-hint"
+            style={{
+              display: showDropHint ? "flex" : "none",
+              ...dropHintStyle,
+              position: "absolute",
+            }}
+          />
         </>,
-        document.body
+        document.body,
       )}
     </div>
   );

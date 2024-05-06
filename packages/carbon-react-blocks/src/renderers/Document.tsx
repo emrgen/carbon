@@ -11,13 +11,19 @@ import {
   preventAndStop,
 } from "@emrgen/carbon-core";
 import { DocumentContext } from "../hooks";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, useCarbon, RendererProps} from "@emrgen/carbon-react";
+import {
+  CarbonBlock,
+  CarbonNodeChildren,
+  CarbonNodeContent,
+  RendererProps,
+  useCarbon,
+} from "@emrgen/carbon-react";
 import {
   useCombineConnectors,
   useConnectorsToProps,
   useDndRegion,
   useNonDraggable,
-  useRectSelectionSurface
+  useRectSelectionSurface,
 } from "@emrgen/carbon-dragon-react";
 
 export const DocumentComp = (props: RendererProps) => {
@@ -25,7 +31,7 @@ export const DocumentComp = (props: RendererProps) => {
   // const  = node.props.get("document");
 
   const app = useCarbon();
-  const {store} = app;
+  const { store } = app;
 
   const ref = useRef<Element>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -33,35 +39,41 @@ export const DocumentComp = (props: RendererProps) => {
   const nonDraggable = useNonDraggable({ node, ref });
   const selectionSurface = useRectSelectionSurface({ node, ref });
 
-
   useEffect(() => {
     app.emit("document:mounted", node);
   }, [app, node]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    const lastChild = node.lastChild as Node;
-    const lastElement = app.store.element(lastChild?.id!);
-    if (!lastChild) return;
-    const bound = lastElement?.getBoundingClientRect();
-    if (!bound) return;
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      const lastChild = node.lastChild as Node;
+      const lastElement = app.store.element(lastChild?.id!);
+      if (!lastChild) return;
+      const bound = lastElement?.getBoundingClientRect();
+      if (!bound) return;
 
-    if (e.clientY > bound.bottom) {
-      app.emit("document:cursor:hide");
-      preventAndStop(e);
-    }
-  }, [node.lastChild, app]);
+      if (e.clientY > bound.bottom) {
+        app.emit("document:cursor:hide");
+        preventAndStop(e);
+      }
+    },
+    [node.lastChild, app],
+  );
 
   const connectors = useConnectorsToProps(
-    useCombineConnectors({
-      listeners: {
-        onMouseDown: handleMouseDown
-      }
-    }, selectionSurface, dndRegion, nonDraggable)
+    useCombineConnectors(
+      {
+        listeners: {
+          onMouseDown: handleMouseDown,
+        },
+      },
+      selectionSurface,
+      dndRegion,
+      nonDraggable,
+    ),
   );
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      console.log('xxxxxxxxxxxxxxxxxxxxxxx')
       app.emit("document:cursor:show");
       const lastChildId = node.lastChild?.id;
       if (!lastChildId) return;
@@ -83,7 +95,7 @@ export const DocumentComp = (props: RendererProps) => {
               .SelectBlocks([])
               .Select(after, ActionOrigin.UserInput)
               .Dispatch();
-            console.log('######################')
+            console.log("######################");
           }
           return;
         }
@@ -99,7 +111,7 @@ export const DocumentComp = (props: RendererProps) => {
           .Dispatch();
       }
     },
-    [app, node]
+    [app, node],
   );
 
   // scroll to bottom on transaction if cursor is below the screen
@@ -135,7 +147,7 @@ export const DocumentComp = (props: RendererProps) => {
         className="document-wrapper"
         ref={wrapperRef}
         onScroll={(e) => {
-          app.onEvent(EventsIn.scroll, e as any)
+          app.onEvent(EventsIn.scroll, e as any);
         }}
       >
         {/* {picture.src && (
@@ -157,11 +169,11 @@ export const DocumentComp = (props: RendererProps) => {
             // onMouseDown: handleMouseDown,
             onScroll: (e) => {
               // console.log(e.target.scrollTop);
-              app.emit(EventsIn.scroll, e as any)
+              app.emit(EventsIn.scroll, e as any);
             },
             // onBlur: (e) => app.emit('document:blur', e as any),
             // onFocus: (e) => app.emit('document:focus', e as any),
-            className: 'carbon-document',
+            className: "carbon-document",
           }}
         >
           <CarbonNodeContent node={node} />

@@ -1,4 +1,4 @@
-import {Node, sortNodes} from "@emrgen/carbon-core";
+import { Node, sortNodes } from "@emrgen/carbon-core";
 
 // separated block selection from pinned/pointed selection
 // because its a different concept and it's not clear how to combine them
@@ -27,10 +27,8 @@ export class BlockSelection {
   }
 
   constructor(nodes: Node[]) {
-    this.blocks = sortNodes(nodes, 'index')
+    this.blocks = sortNodes(nodes, "index");
   }
 
-  sorted() {
-
-  }
+  sorted() {}
 }

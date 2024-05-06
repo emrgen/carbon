@@ -1,139 +1,139 @@
 import { each, isArray, isEmpty, isEqual, keys, values } from "lodash";
 
 export interface User {
-	id: string;
-	name: string;
+  id: string;
+  name: string;
 }
 
 export interface MarkProps {
-	color?: string;
-	url?: string;
-	user?: User;
+  color?: string;
+  url?: string;
+  user?: User;
 }
 
 export class Mark {
-	// type is the name of the mark
-	type: string;
-	props?: MarkProps;
+  // type is the name of the mark
+  type: string;
+  props?: MarkProps;
 
-	static BOLD =  Mark.create('bold');
+  static BOLD = Mark.create("bold");
 
-	static ITALIC = Mark.create('italic');
+  static ITALIC = Mark.create("italic");
 
-	static UNDERLINE = Mark.create('underline');
+  static UNDERLINE = Mark.create("underline");
 
-  static STRIKE = Mark.create('strike');
-  static CODE = Mark.create('code');
+  static STRIKE = Mark.create("strike");
+  static CODE = Mark.create("code");
 
-	static SUBSCRIPT = Mark.create('subscript');
+  static SUBSCRIPT = Mark.create("subscript");
 
-	static SUPERSCRIPT = Mark.create('superscript');
+  static SUPERSCRIPT = Mark.create("superscript");
 
-	static HASHTAG = Mark.create('hashtag');
+  static HASHTAG = Mark.create("hashtag");
 
-	static mention(): Mark {
-		return new Mark('mention');
-	}
+  static mention(): Mark {
+    return new Mark("mention");
+  }
 
-	static link(url: string): Mark {
-		return new Mark('link', { url });
-	}
+  static link(url: string): Mark {
+    return new Mark("link", { url });
+  }
 
-	static color(color: string): Mark {
-		return new Mark('color', { color });
-	}
+  static color(color: string): Mark {
+    return new Mark("color", { color });
+  }
 
-	static background(color: string): Mark {
-		return new Mark('background', { color });
-	}
+  static background(color: string): Mark {
+    return new Mark("background", { color });
+  }
 
   static create(type: string, props: MarkProps = {}) {
     return new Mark(type, props);
   }
 
-	constructor(type: string, props: MarkProps = {}) {
-		this.type = type;
-		this.props = props;
-	}
+  constructor(type: string, props: MarkProps = {}) {
+    this.type = type;
+    this.props = props;
+  }
 
-	eq(other: Mark) {
-		return this.type === other.type && isEqual(this.props, other.props)
-	}
+  eq(other: Mark) {
+    return this.type === other.type && isEqual(this.props, other.props);
+  }
 
-	toString() {
-		return JSON.stringify(this.toJSON());
-	}
+  toString() {
+    return JSON.stringify(this.toJSON());
+  }
 
-	toJSON() {
-		const { type, props } = this;
-		const ret: any = { type };
-		if (!isEmpty(props)) {
-			ret.props = props;
-		}
+  toJSON() {
+    const { type, props } = this;
+    const ret: any = { type };
+    if (!isEmpty(props)) {
+      ret.props = props;
+    }
 
-		return ret;
-	}
+    return ret;
+  }
 }
 
 export class MarkSet {
-	marks: Record<string, Mark> = {};
+  marks: Record<string, Mark> = {};
 
-	get size() {
-		return keys(this.marks).length;
-	}
+  get size() {
+    return keys(this.marks).length;
+  }
 
-	static empty() {
-		return new MarkSet([]);
-	}
+  static empty() {
+    return new MarkSet([]);
+  }
 
-	static from(marks: Mark | Mark[] | MarkSet){
-		if (marks instanceof MarkSet) {
-			return marks;
-		}
+  static from(marks: Mark | Mark[] | MarkSet) {
+    if (marks instanceof MarkSet) {
+      return marks;
+    }
 
-		if (isArray(marks)) {
-			return new MarkSet(marks);
-		}
+    if (isArray(marks)) {
+      return new MarkSet(marks);
+    }
 
-		return new MarkSet([marks]);
-	}
+    return new MarkSet([marks]);
+  }
 
-	constructor(marks: Mark[] = []) {
-		each(marks, m => this.add(m));
-	}
+  constructor(marks: Mark[] = []) {
+    each(marks, (m) => this.add(m));
+  }
 
-	add(mark: Mark | Mark[]) {
-		if (isArray(mark)) {
-			each(mark, m => this.add(m));
-		} else {
-			this.marks[mark.type] = mark
-		}
-	}
+  add(mark: Mark | Mark[]) {
+    if (isArray(mark)) {
+      each(mark, (m) => this.add(m));
+    } else {
+      this.marks[mark.type] = mark;
+    }
+  }
 
-	remove(mark: Mark) {
-		delete this.marks[mark.type]
-	}
+  remove(mark: Mark) {
+    delete this.marks[mark.type];
+  }
 
-	map(fn: (value: Mark, index: number, array: Mark[]) => unknown) {
-		return values(this.marks).map(fn)
-	}
+  map(fn: (value: Mark, index: number, array: Mark[]) => unknown) {
+    return values(this.marks).map(fn);
+  }
 
-	forEach(fn: (value: Mark, index: number, array: Mark[]) => void) {
-		values(this.marks).forEach(fn)
-	}
+  forEach(fn: (value: Mark, index: number, array: Mark[]) => void) {
+    values(this.marks).forEach(fn);
+  }
 
-	eq(other: MarkSet) {
-		if (this.size !== other.size) return false;
-		const types = keys(this.marks);
+  eq(other: MarkSet) {
+    if (this.size !== other.size) return false;
+    const types = keys(this.marks);
 
-		return types.every(k => {
-			const otherMark = other.marks[k];
-			const thisMark = this.marks[k];
-			return otherMark && thisMark && thisMark.eq(otherMark);
-		})
-	}
+    return types.every((k) => {
+      const otherMark = other.marks[k];
+      const thisMark = this.marks[k];
+      return otherMark && thisMark && thisMark.eq(otherMark);
+    });
+  }
 
-	toJSON() {
-		return keys(this.marks)
-	}
+  toJSON() {
+    return keys(this.marks);
+  }
 }

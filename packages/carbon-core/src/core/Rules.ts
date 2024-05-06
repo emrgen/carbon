@@ -1,22 +1,27 @@
-import { EventContext } from "./EventContext"
-import { Node } from "./Node"
+import { EventContext } from "./EventContext";
+import { Node } from "./Node";
 
-export type InputHandler = (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => void;
+export type InputHandler = (
+  ctx: EventContext<KeyboardEvent>,
+  regex: RegExp,
+  text: string,
+) => void;
 
 export interface ChangeRule {
-  execute(ctx: EventContext<KeyboardEvent>, text: string,): boolean
-  merge(rule: ChangeRule): ChangeRule
+  execute(ctx: EventContext<KeyboardEvent>, text: string): boolean;
+
+  merge(rule: ChangeRule): ChangeRule;
 }
 
 export class ChangeRules implements ChangeRule {
-  rules: ChangeRule[]
+  rules: ChangeRule[];
 
   constructor(...rules: ChangeRule[]) {
-    this.rules = rules
+    this.rules = rules;
   }
 
-  execute(ctx: EventContext<KeyboardEvent>, text: string,): boolean {
-    return this.rules.some(r => r.execute(ctx, text))
+  execute(ctx: EventContext<KeyboardEvent>, text: string): boolean {
+    return this.rules.some((r) => r.execute(ctx, text));
   }
 
   merge(...rules: ChangeRule[]): ChangeRule {
@@ -34,14 +39,14 @@ export class InputRule implements ChangeRule {
     this.handler = handler;
   }
 
-  execute(ctx: EventContext<KeyboardEvent>, text: string,): boolean {
+  execute(ctx: EventContext<KeyboardEvent>, text: string): boolean {
     // console.info('[matching]', text, this.regex, this.regex.test(text));
 
     if (this.regex.test(text)) {
       this.handler(ctx, this.regex, text);
-      return true
+      return true;
     }
-    return false
+    return false;
   }
 
   merge(...rules: ChangeRule[]): ChangeRule {
@@ -50,13 +55,14 @@ export class InputRule implements ChangeRule {
 }
 
 export class BeforeInputRuleHandler {
-  constructor(readonly rules: InputRule[]) { }
+  constructor(readonly rules: InputRule[]) {}
+
   // process the event based on modified node.textContent
   process(ctx: EventContext<KeyboardEvent>, node: Node): boolean {
-    const {event, app} = ctx;
+    const { event, app } = ctx;
     // @ts-ignore
     const { data, key } = event.nativeEvent;
-    const insertText =(event as any).data ?? data ?? key;
+    const insertText = (event as any).data ?? data ?? key;
 
     // console.log('insertText', insertText, key)
 
@@ -65,27 +71,30 @@ export class BeforeInputRuleHandler {
     const { head } = selection;
     // console.log('before input', node.id.toString(), node.textContent);
 
-    let text = '';
+    let text = "";
     if (node.isEmpty) {
-      text = insertText
+      text = insertText;
     } else {
       const { textContent } = node;
-      text = textContent.slice(0, head.offset) + insertText + textContent.slice(head.offset);
+      text =
+        textContent.slice(0, head.offset) +
+        insertText +
+        textContent.slice(head.offset);
     }
 
     // console.log(`"${text}"`, node.id.toString(), node.textContent);
-    const done = this.rules.some(rule => rule.execute(ctx, text))
+    const done = this.rules.some((rule) => rule.execute(ctx, text));
     return done;
   }
 }
 
 export class AfterInputRuleHandler {
-  constructor(readonly rules: InputRule[]) { }
+  constructor(readonly rules: InputRule[]) {}
 
   // process the event based on existing node.textContent
   process(ctx: EventContext<KeyboardEvent>, node: Node): boolean {
     const text = node.textContent;
-    return this.rules.some(rule => rule.execute(ctx,  text))
+    return this.rules.some((rule) => rule.execute(ctx, text));
   }
 }
 
@@ -99,20 +108,23 @@ export class PasteRule implements ChangeRule {
 
   handler: (event: EventContext<KeyboardEvent>) => void;
 
-  constructor(regex: RegExp, handler: (event: EventContext<KeyboardEvent>) => void) {
+  constructor(
+    regex: RegExp,
+    handler: (event: EventContext<KeyboardEvent>) => void,
+  ) {
     this.regex = regex;
     this.handler = handler;
   }
 
-  execute(ctx: EventContext<KeyboardEvent>, text: string,): boolean {
+  execute(ctx: EventContext<KeyboardEvent>, text: string): boolean {
     if (this.regex.test(text)) {
       this.handler(ctx);
-      return true
+      return true;
     }
-    return false
+    return false;
   }
 
   merge(rule: ChangeRule): ChangeRule {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 }

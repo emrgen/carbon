@@ -1,7 +1,7 @@
 export class DecorationStore {
-	get size() {
-		return 0
-	}
-	
-	set() {}
+  get size() {
+    return 0;
+  }
+
+  set() {}
 }

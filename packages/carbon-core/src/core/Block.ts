@@ -1,7 +1,4 @@
-import {Node, NodeId, Path, StateScope} from "@emrgen/carbon-core";
-import {Optional} from "@emrgen/types";
-import {Location} from "./Location";
-import {isArray} from "lodash";
+import { Node } from "@emrgen/carbon-core";
 
 export class Block {
   static isText(node: Node) {

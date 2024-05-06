@@ -1,4 +1,4 @@
-import { each, identity } from "lodash";
+import { identity } from "lodash";
 import { NodeIdSet } from "./BSet";
 import { Carbon } from "./Carbon";
 import { Node } from "./Node";
@@ -8,7 +8,7 @@ import { TransactionManager } from "./TransactionManager";
 import { EventsOut } from "./Event";
 import { Transaction } from "./Transaction";
 import { PluginManager } from "./PluginManager";
-import {ActionOrigin, State, StateActions} from "@emrgen/carbon-core";
+import { ActionOrigin, State, StateActions } from "@emrgen/carbon-core";
 
 export enum NodeChangeType {
   update = "update",
@@ -23,7 +23,6 @@ interface PromiseState {
  * Syncs the editor state with the UI
  */
 export class ChangeManager extends NodeTopicEmitter {
-
   readonly actions: StateActions[] = [];
   updated: NodeIdSet = NodeIdSet.empty();
 
@@ -35,11 +34,11 @@ export class ChangeManager extends NodeTopicEmitter {
     private readonly app: Carbon,
     private readonly sm: SelectionManager,
     private readonly tm: TransactionManager,
-    private readonly pm: PluginManager
+    private readonly pm: PluginManager,
   ) {
     super();
 
-    this.promiseState = {}
+    this.promiseState = {};
   }
 
   private get state() {
@@ -63,7 +62,7 @@ export class ChangeManager extends NodeTopicEmitter {
   // 3. sync the node state
   update(state: State, tr: Transaction, timeout: number = 1000) {
     if (this.actions.length) {
-      console.log('pending transaction', this.actions.length);
+      console.log("pending transaction", this.actions.length);
       return;
     }
 
@@ -88,9 +87,12 @@ export class ChangeManager extends NodeTopicEmitter {
       // console.log("syncing: content", this.updated.nodes(this.state.nodeMap).map(n => n.key));
 
       this.interval = setTimeout(() => {
-        console.error("syncing: content timeout", this.updated.nodes(this.state.nodeMap).map(n => n.key));
+        console.error(
+          "syncing: content timeout",
+          this.updated.nodes(this.state.nodeMap).map((n) => n.key),
+        );
         this.updated.clear();
-      }, 2000)
+      }, 2000);
     }
 
     if (isContentChanged) {
@@ -158,7 +160,6 @@ export class ChangeManager extends NodeTopicEmitter {
       this.app.emit(EventsOut.changed, this.state);
     }
 
-
     // console.log('PROCESSING NEXT TICK')
     this.app.processTick();
 
@@ -178,7 +179,9 @@ export class ChangeManager extends NodeTopicEmitter {
     //   }
     // })
 
-    const updatedNodes = updatedNodeIds.map(n => this.store.get(n)).filter(identity) as Node[];
+    const updatedNodes = updatedNodeIds
+      .map((n) => this.store.get(n))
+      .filter(identity) as Node[];
     // console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
 
     // sort the nodes by depth so that we can update the children first
@@ -194,12 +197,15 @@ export class ChangeManager extends NodeTopicEmitter {
     //   updatedNodeIds.add(n.id);
     // });
 
-    console.log("publish to ui", updatedNodes.map(n => n.key));
+    console.log(
+      "publish to ui",
+      updatedNodes.map((n) => n.key),
+    );
     updatedNodes
       // .filter(n => updatedNodeIds.has(n.id))
-      .forEach(n => {
+      .forEach((n) => {
         // console.log('publishing', n.id.toString());
-        this.emit(n, NodeChangeType.update)
+        this.emit(n, NodeChangeType.update);
       });
     console.groupEnd();
   }
@@ -234,14 +240,25 @@ export class ChangeManager extends NodeTopicEmitter {
       }
 
       if (!this.state.isSelectionChanged) {
-        console.log("skipped: selection already synced", this.state.selection.origin, this.state.selection.toString());
+        console.log(
+          "skipped: selection already synced",
+          this.state.selection.origin,
+          this.state.selection.toString(),
+        );
         return;
       }
 
       const { app } = this;
       const { selection } = this.state;
-      if (!this.state.isSelectionChanged && selection.origin === ActionOrigin.DomSelectionChange) {
-        console.log("skipped: unchanged selection sync", selection.origin, selection.toString());
+      if (
+        !this.state.isSelectionChanged &&
+        selection.origin === ActionOrigin.DomSelectionChange
+      ) {
+        console.log(
+          "skipped: unchanged selection sync",
+          selection.origin,
+          selection.toString(),
+        );
         return;
       }
 
@@ -255,5 +272,4 @@ export class ChangeManager extends NodeTopicEmitter {
       this.promiseState.reject?.(error);
     }
   }
-
 }
