@@ -1,9 +1,9 @@
 // sum.test.js
-import { expect, test } from 'vitest'
+import { expect, test } from "vitest";
 import { JsonStore } from "../src/core/JsonStore";
-import { NodeProps_old } from "../src/core/NodeProps";
+import { PlainNodeProps } from "../src/core/NodeProps";
 
-test('set and get from json store', () => {
+test("set and get from json store", () => {
   const store = new JsonStore();
   store.set(["a", "b"], 1);
   store.set(["a", "c"], 2);
@@ -14,10 +14,9 @@ test('set and get from json store', () => {
   store.set(["a", "b"], undefined);
   expect(store.get(["a", "b"])).toBe(undefined);
   expect(store.size).toBe(1);
-})
+});
 
-
-test('set and get from json store using string path', () => {
+test("set and get from json store using string path", () => {
   const store = new JsonStore();
   store.set("a/b", 1);
   store.set("a/c", 2);
@@ -39,7 +38,7 @@ test("get values by prefix", () => {
 
   console.log(store.prefix("a"));
 
-  expect(store.prefix("a")).toEqual({ "b": 1, "c": 2 });
+  expect(store.prefix("a")).toEqual({ b: 1, c: 2 });
 });
 
 test("kv to nested json", () => {
@@ -50,16 +49,16 @@ test("kv to nested json", () => {
     "a/d/e": 4,
   };
   expect(JsonStore.keyValueToJson(kv)).toEqual({
-    "a": {
-      "b": {value: 1},
-      "c": {value: 2},
-      "d": {
-        "e": {value: 4}
+    a: {
+      b: { value: 1 },
+      c: { value: 2 },
+      d: {
+        e: { value: 4 },
       },
     },
-    "b": {
-      "c": {value: 3}
-    }
+    b: {
+      c: { value: 3 },
+    },
   });
 });
 
@@ -67,15 +66,15 @@ test("nested json to kv", () => {
   const json = {
     a: {
       b: {
-        c: 1
+        c: 1,
       },
       d: {
-        e: 2
-      }
+        e: 2,
+      },
     },
     b: {
-      c: {value: 3}
-    }
+      c: { value: 3 },
+    },
   };
 
   expect(JsonStore.jsonToKeyValue(json)).toStrictEqual({
@@ -89,18 +88,18 @@ test("nested json to kv", () => {
   const json = {
     a: {
       b: {
-        c: 1
+        c: 1,
       },
       d: {
-        e: 2
-      }
+        e: 2,
+      },
     },
     b: {
-      c: 3
-    }
+      c: 3,
+    },
   };
 
-  const props = NodeProps_old.fromKeyValue(JsonStore.jsonToKeyValue(json));
+  const props = PlainNodeProps.create(JsonStore.jsonToKeyValue(json));
   expect(props.get("a/b/c")).toBe(1);
   expect(props.get("a/d/e")).toBe(2);
   expect(props.get("b/c")).toBe(3);
@@ -109,18 +108,18 @@ test("nested json to kv", () => {
   expect(propsJson).toStrictEqual({
     a: {
       b: {
-        c: {value: 1}
+        c: 1,
       },
       d: {
-        e: {value: 2}
-      }
+        e: 2,
+      },
     },
     b: {
-      c: {value: 3}
-    }
+      c: 3,
+    },
   });
 
-  const props2 = NodeProps_old.fromJSON(propsJson);
+  const props2 = PlainNodeProps.create(propsJson);
 
   expect(props2.get("a/b/c")).toBe(1);
   expect(props2.get("a/d/e")).toBe(2);
@@ -128,35 +127,32 @@ test("nested json to kv", () => {
 });
 
 test("merge props", () => {
-  const props1 = NodeProps_old.fromKeyValue({
+  const props1 = PlainNodeProps.create({
     "a/b/c": 1,
     "a/d/e": 2,
     "b/c": 3,
   });
 
-  const props2 = NodeProps_old.fromKeyValue({
+  const props2 = PlainNodeProps.create({
     "a/b/c": 4,
     "a/d/e": 5,
     "b/c": 6,
   });
 
-  console.log(props1.toJSON());
-  console.log(props2.toJSON());
   const props3 = props1.merge(props2);
-  console.log(props3.toJSON());
   expect(props3.get("a/b/c")).toBe(4);
   expect(props3.get("a/d/e")).toBe(5);
   expect(props3.get("b/c")).toBe(6);
 });
 
 test("update props", () => {
-  const props1 = NodeProps_old.fromKeyValue({
+  const props1 = PlainNodeProps.create({
     "a/b/c": 1,
     "a/d/e": 2,
     "b/c": 3,
   });
 
-  const props2 = props1.update({
+  const props2 = props1.merge({
     "a/b/c": 4,
     "a/d/e": 5,
     "b/c": 6,

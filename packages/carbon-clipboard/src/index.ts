@@ -92,4 +92,9 @@ const clipboard = {
   setClipboard
 }
 
+export interface Clipboard {
+  parse(): Promise<Optional<any[]>>
+  setClipboard(dataItems: ClipboardItemType[]): Promise<void>
+}
+
 export default clipboard;

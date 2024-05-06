@@ -13,8 +13,6 @@ import { Optional } from '@emrgen/types';
 
 declare module '@emrgen/carbon-core' {
   interface Transaction {
-    insertAfterDefault(node: Node, name: string): Transaction;
-    insertBeforeDefault(node: Node, name: string): Transaction;
     inserter: {
       insertBeforeDefault(node: Node, name: string): Transaction;
       insertAfterDefault(node: Node, name: string): Transaction;
@@ -62,7 +60,7 @@ export class Insert extends BeforePlugin {
 
   // TODO: check if the node is allowed in the current context
   node(app: Carbon, name: string) {
-    const { selection, tr } = app;
+    const { selection, cmd} = app;
     if (selection.isInvalid || !selection.isCollapsed) return;
 
     const { start } = selection;
@@ -75,13 +73,13 @@ export class Insert extends BeforePlugin {
       at = Point.toAfter(parent.id);
     }
 
-    tr.Insert(at, node)
+    cmd.Insert(at, node)
     if (node.hasFocusable) {
       const after = PinnedSelection.fromPin(Pin.toStartOf(node)!)
-      tr.Select(after, ActionOrigin.UserInput)
+      cmd.Select(after, ActionOrigin.UserInput)
     }
 
-    return tr;
+    return cmd;
   }
 
   append(tr: Transaction, node: Node, name: string) {

@@ -27,6 +27,37 @@ const transformer = {
 
   // block level nodes
 
+  hr(root: any) {
+    return node('divider');
+  },
+
+  space(root: any) {return section([title()]) },
+  heading(root: any) {
+    const {tokens = [], depth} = root;
+    const children = this.parseNestableChildren(tokens);
+    return node(`h${depth}`,children);
+  },
+  paragraph(root: any) {
+    const {tokens = []} = root;
+    const children = tokens.map(t => this[t.type](t));
+    return section([title(children)]);
+  },
+  code(root: any) {
+    return node('code', [title([text(root.text)])], {
+      'remote/state/code/lang': root.lang ?? '',
+    });
+  },
+  link(root: any) {
+    const {text, href, tokens} = root;
+    return node('link', this.parseTitleChildren(tokens), {
+      'remote/state/link/href': href,
+    });
+  },
+  blockquote(root: any) {
+    const {tokens = []} = root;
+    return node('quote', this.parseNestableChildren(tokens[0].tokens))
+  },
+
   list(root: any) {
     const {items = []} = root;
     // console.log('root', JSON.stringify(root, null, 2));
@@ -53,6 +84,9 @@ const transformer = {
     throw new Error(`Unknown list type: ${listStart}`);
   },
 
+
+
+
   // parse children of a node
   parseNestableChildren(tokens: any[]) {
     const children: any[] = [];
@@ -77,30 +111,6 @@ const transformer = {
     return flattenDeep(tokens.map(t => this[t.type](t)));
   },
 
-
-  space(root: any) {return section([title()]) },
-  heading(root: any) {
-    const {tokens = [], depth} = root;
-    const children = this.parseNestableChildren(tokens);
-    return node(`h${depth}`,children);
-  },
-  paragraph(root: any) {
-    const {tokens = []} = root;
-    const children = tokens.map(t => this[t.type](t));
-    return section([title(children)]);
-  },
-  code(root: any) {
-    return node('code', [title([text(root.text)])], {
-      'remote/state/code/lang': root.lang ?? '',
-    });
-  },
-  link(root: any) {
-    const {text, href, tokens} = root;
-    return node('link', this.parseTitleChildren(tokens), {
-      'remote/state/link/href': href,
-    });
-  },
-
   // inline nodes
   codespan: (root: any) => {
     return text(root.text);
@@ -121,7 +131,7 @@ const transformer = {
   },
 }
 
-export const node = (name: string, children: any[], props = {}) => {
+export const node = (name: string, children: any[] = [], props = {}) => {
   return {
     name,
     children,

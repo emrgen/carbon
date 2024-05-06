@@ -162,3 +162,22 @@ test('parse italic', () => {
     ])
   ])
 });
+
+test("parse blockquote", () => {
+  const content = `> hello world`;
+  const actual = parseText(content);
+  expect(actual).toMatchObject(([
+    node('quote', [
+      title([text('hello world')])
+    ])
+  ]))
+});
+
+
+test("parse image", () => {
+  const content = `![title](https://local.image) ![title](https://local.image)`
+  const actual = parseText(content);
+  expect(actual).toMatchObject(([
+    node('divider', )
+  ]))
+});

@@ -1,30 +1,37 @@
-import {useEffect} from "react";
+import { useEffect } from "react";
 
-import {blockPresetPlugins, node, text, title, section, block} from "@emrgen/carbon-blocks";
+import {
+  blockPresetPlugins,
+  node,
+  section,
+  text,
+  title,
+} from "@emrgen/carbon-blocks";
 import {
   ReactRenderer,
   RendererProps,
   RenderManager,
   useCreateCarbon,
-  ImmutableNodeFactory,
-  useCreateCachedCarbon
 } from "@emrgen/carbon-react";
-import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
-import {flashComp, flashPlugin} from "@emrgen/carbon-flash";
-import {commentEditorPlugin, commentEditorComp} from "@emrgen/carbon-comment-editor";
+import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
+import { flashComp, flashPlugin } from "@emrgen/carbon-flash";
+import {
+  commentEditorComp,
+  commentEditorPlugin,
+} from "@emrgen/carbon-comment-editor";
 import {
   corePresetPlugins,
   Extension,
   NodeId,
   State,
 } from "@emrgen/carbon-core";
-import {CarbonApp} from "@emrgen/carbon-utils";
-import {codeExtension} from "@emrgen/carbon-code";
-import {cellPlugin, cellRenderer} from "@emrgen/carbon-cell";
-import {questionExtension } from "@emrgen/carbon-question";
-import {noop, flattenDeep} from "lodash";
+import { CarbonApp } from "@emrgen/carbon-utils";
+import { codeExtension } from "@emrgen/carbon-code";
+import { cellPlugin, cellRenderer } from "@emrgen/carbon-cell";
+import { questionExtension } from "@emrgen/carbon-question";
+import { flattenDeep, noop } from "lodash";
 import SelectionTracker from "../../SelectionTracker";
-import {PathTracker} from "../../PathTracker";
+import { PathTracker } from "../../PathTracker";
 
 const data = node("carbon", [
   node("document", [
@@ -123,9 +130,9 @@ const data = node("carbon", [
     // section([title([])]),
     // section([title([text("section 3")])]),
 
-    node("commentEditor", [
-      section([title([text('add a comment')])])
-    ]),
+    // node("commentEditor", [
+    //   section([title([text('add a comment')])])
+    // ]),
 
     // section([title([text("section 3")])]),
     // node("hstack", [
@@ -197,7 +204,6 @@ const data = node("carbon", [
     //   }),
     // ]),
 
-
     // // node("blockContent"),
     //
     // section([title([text("section 1")])]),
@@ -231,7 +237,6 @@ const data = node("carbon", [
     // ]),
     //
 
-
     // section([title([text("section 1")])]),
     //
     // node("code", [
@@ -239,7 +244,6 @@ const data = node("carbon", [
     //   node("codeLine", [title([text("  console.log('hello world')")])]),
     //   node("codeLine",[ title([text("}")])])
     // ]),
-
 
     // node("pageTree", [
     //   title([text("Favorites")]),
@@ -367,7 +371,6 @@ const data = node("carbon", [
     //   node("stack", [section([title([text("section 2")])])]),
     //   node("stack", [section([title([text("section 3")])])]),
     // ]),
-
   ]),
 ]);
 
@@ -394,7 +397,7 @@ const plugins = [
   flashPlugin,
   ...codeExtension.plugins!,
   cellPlugin,
-    ...questionExtension.plugins!,
+  ...questionExtension.plugins!,
   // {
   //   plugins: [
   //     new BlockTree(),
@@ -412,9 +415,7 @@ const renderers = [
   ...questionExtension.renderers!,
 ];
 
-const renderManager = RenderManager.from(
-  renderers,
-)
+const renderManager = RenderManager.from(renderers);
 
 // console.log = noop;
 // console.info = noop;
@@ -429,24 +430,28 @@ console.time = noop;
 // localStorage.setItem('carbon:content', JSON.stringify(data));
 
 export default function Dev() {
-  const app = useCreateCarbon('dev', data, flattenDeep(plugins));
+  const app = useCreateCarbon("dev", data, flattenDeep(plugins));
 
   // @ts-ignore
   window.app = app;
 
   useEffect(() => {
     const onChange = (state: State) => {
-      console.debug('changes', state.changes.patch, Array.from(state.changes.dataMap.values()))
-      console.debug('actions', state.actions.actions)//.map(a => a.toJSON()));
+      console.debug(
+        "changes",
+        state.changes.patch,
+        Array.from(state.changes.dataMap.values()),
+      );
+      console.debug("actions", state.actions.actions); //.map(a => a.toJSON()));
       state.content.all((node) => {
         // console.log(node.id.toString(), node.name, node.properties.toKV());
       });
-    }
+    };
 
     app.on("changed", onChange);
     return () => {
       app.off("changed", onChange);
-    }
+    };
   }, [app]);
 
   // return (
@@ -454,12 +459,11 @@ export default function Dev() {
   // )
 
   return (
-    <div className={'carbon-app-container'}>
+    <div className={"carbon-app-container"}>
       <CarbonApp app={app} renderManager={renderManager}>
-        <SelectionTracker/>
-        <PathTracker/>
+        <SelectionTracker />
+        <PathTracker />
       </CarbonApp>
     </div>
   );
 }
-
