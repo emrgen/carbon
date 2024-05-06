@@ -17,7 +17,8 @@
     "cloc-src": "cloc --exclude-dir=node_modules,dist,mongo-data-4.4,yarn.lock,package.json,package-lock.json .",
     "cloc-dist": "cloc --match-d=/dist/ .",
     "e2e": "playwright test --reporter=list",
-    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && find . -name \"pnpm-lock.yaml\" -type f -prune -exec rm -rf '{}' +"
+    "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && find . -name \"pnpm-lock.yaml\" -type f -prune -exec rm -rf '{}' +",
+    "release": "pnpm publish --recursive --registry https://npm.pkg.github.com"
   },
   "devDependencies": {
     "@playwright/test": "^1.42.1",
