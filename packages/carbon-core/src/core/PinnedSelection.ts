@@ -168,7 +168,6 @@ export class PinnedSelection {
     origin = ActionOrigin.Unknown,
   ): PinnedSelection {
     const set = NodeBTree.from(flatten([nodes]));
-
     return new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, set.nodes(), origin);
   }
 
@@ -229,14 +228,6 @@ export class PinnedSelection {
   get isBlock() {
     return (
       this.tail.isIdentity && this.head.isIdentity && this.nodes.length > 0
-    );
-  }
-
-  get _isInline() {
-    return (
-      !this.tail.eq(Pin.IDENTITY) &&
-      !this.head.eq(Pin.IDENTITY) &&
-      !this.nodes.length
     );
   }
 
@@ -566,10 +557,6 @@ export class PinnedSelection {
   }
 
   toString() {
-    // if (this.isBlock) {
-    // 	return classString(this)(this.nodes.map(n => n.id.toString()));
-    // }
-
     return classString(this)({
       tail: this.tail.toString(),
       head: this.head.toString(),

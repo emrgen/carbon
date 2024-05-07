@@ -3,6 +3,7 @@ import { IntoNodeId, NodeId } from "../NodeId";
 import { ActionOrigin, ActionType, CarbonAction } from "./types";
 import { NodePropsJson } from "../NodeProps";
 import { Draft } from "@emrgen/carbon-core";
+import { keys } from "lodash";
 
 export class UpdatePropsAction implements CarbonAction {
   before: Partial<NodePropsJson>;
@@ -17,11 +18,11 @@ export class UpdatePropsAction implements CarbonAction {
 
   static withBefore(
     nodeRef: IntoNodeId,
-    props: Partial<NodePropsJson>,
     before: Partial<NodePropsJson>,
+    after: Partial<NodePropsJson>,
     origin: ActionOrigin = ActionOrigin.UserInput,
   ) {
-    return new UpdatePropsAction(nodeRef.nodeId(), before, props, origin);
+    return new UpdatePropsAction(nodeRef.nodeId(), before, after, origin);
   }
 
   constructor(
@@ -40,16 +41,24 @@ export class UpdatePropsAction implements CarbonAction {
       throw Error("update attrs: node not found");
     }
 
-    this.before = node.props.toJSON();
+    const before = {};
+    keys(this.after).forEach((key) => {
+      before[key] = node.props.get(key);
+    });
+
+    console.log("update props", before, this.after);
+
+    this.before = before;
     draft.updateProps(nodeId, this.after);
   }
 
   inverse(): CarbonAction {
     const { nodeId, after, before } = this;
+    console.log("inverse", nodeId, after, before);
     return UpdatePropsAction.withBefore(
       nodeId,
-      before,
-      after!,
+      after,
+      before!,
       ActionOrigin.UserInput,
     );
   }

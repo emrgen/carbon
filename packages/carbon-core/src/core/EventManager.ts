@@ -65,7 +65,7 @@ export class EventManager {
     // }
 
     if (this.cm.actions.length) {
-      console.log("pending transaction", this.cm.actions.length);
+      console.log("skip event", type, "pending transaction");
       return;
     }
 
@@ -94,12 +94,14 @@ export class EventManager {
       return;
     }
 
+    // when dragging, prevent selection
     if (type == EventsIn.selectstart && app.dragging) {
       console.log("select start", app.dragging);
       preventAndStop(event);
       return;
     }
 
+    // when block selection is active
     if (
       type !== EventsIn.selectionchange &&
       app.state.blockSelection.isActive
@@ -123,10 +125,13 @@ export class EventManager {
       return;
     }
 
+    // create a pinned selection from dom selection
     const selection = PinnedSelection.fromDom(app.store);
+    // console.log(selection?.toString())
+
     // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
     // console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
-    // console.log(selection?.toString())
+
     if (["selectionchange"].includes(type)) {
       console.log(
         pad(
@@ -137,7 +142,7 @@ export class EventManager {
       );
     }
 
-    // editor cannot process event without active selection
+    // NOTE: editor cannot process event without active selection
     if (!selection) {
       console.error(
         p12("%c[invalid]"),
@@ -148,7 +153,7 @@ export class EventManager {
       return;
     }
 
-    // new dom selection is same as exiting editor.selection
+    // new dom selection is same as exiting editor.selection then skip
     if (type === EventsIn.selectionchange && app.selection.eq(selection)) {
       // console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
       console.log(p14("%c●"), "color:#ffcc006e");
@@ -297,6 +302,7 @@ export class EventManager {
 
   // }
 
+  // set the origin of the command based on the event type
   private updateCommandOrigin(type: EventsIn, event: Event) {
     if (selectionChangedUsingKeys(event)) {
       this.runtime.origin = ActionOrigin.UserSelectionChange;

@@ -15,7 +15,6 @@ import {
 } from "lodash";
 import { EventContext } from "./EventContext";
 import { CarbonPlugin, PluginType } from "./CarbonPlugin";
-import { Carbon } from "./Carbon";
 import { Node } from "./Node";
 import { CarbonAction } from "./actions/types";
 import { EventsIn } from "./Event";
@@ -88,8 +87,7 @@ export class PluginManager {
     return CarbonCommand.from(this.plugins);
   }
 
-  destroyed(app: Carbon) {}
-
+  // get a plugin by name
   plugin(name: string): Optional<CarbonPlugin> {
     return (
       this.nodes[name] ??
@@ -211,17 +209,12 @@ export class PluginManager {
     console.groupEnd();
   }
 
-  // onSelect(event: SelectionEvent) {
-  // 	each(this.before, p => p.select(event));
-  // 	each(this.after, p => p.select(event));
-  // }
-
   onTransaction(tr: StateActions) {
     each(this.before, (p) => p.transaction(tr));
     each(this.after, (p) => p.transaction(tr));
   }
 
-  // normalize node as per the schema
+  // normalize node as per the schema defined by plugins
   normalize(node: Node): CarbonAction[] {
     for (const p of this.before) {
       const actions = p.normalize(node);
@@ -238,10 +231,12 @@ export class PluginManager {
     return [];
   }
 
+  // get a plugin by name
   private nodePlugin(name: NodeName): Optional<CarbonPlugin> {
     return this.nodes[name];
   }
 
+  // filter plugins by type
   private filter(plugins: CarbonPlugin[], type: PluginType) {
     return plugins.filter((p) => p.type === type);
   }

@@ -138,6 +138,13 @@ export class Transaction {
       this.selectNodes(id, origin);
     });
 
+    console.log(
+      "SelectBlocks",
+      nodeIds.map((id) => id.toString()),
+    );
+    console.log("old", old.toString());
+    console.log("now", now.toString());
+
     return this;
   }
 
@@ -197,6 +204,7 @@ export class Transaction {
     props: Partial<NodePropsJson>,
     origin = this.origin,
   ): Transaction {
+    console.log("Update", nodeRef, props, origin);
     this.Add(UpdatePropsAction.create(nodeRef, props, origin));
     return this;
   }

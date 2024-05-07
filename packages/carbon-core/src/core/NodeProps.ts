@@ -1,18 +1,27 @@
-import {JsonStore} from "./JsonStore";
-import {each, set, get, cloneDeep, merge, isEmpty, remove, isEqual, isArray} from "lodash";
-import {Node} from "@emrgen/carbon-core";
+import { JsonStore } from "./JsonStore";
+import { cloneDeep, each, get, isArray, isEqual, set } from "lodash";
+import { Node } from "@emrgen/carbon-core";
 
 export type NodePropsJson = Record<string, any>;
 
 // different states should have different implementation this interface
 export interface NodeProps {
+  empty(): NodeProps;
+
   isNodeProps: boolean;
+
   get<T>(path: string, defaultValue?: T): T;
+
   set(path: string, value: any): void;
+
   merge(other: NodeProps | NodePropsJson): NodeProps;
+
   toJSON(): NodePropsJson;
+
   clone(): NodeProps;
+
   freeze(): NodeProps;
+
   eq(other: NodeProps): boolean;
 }
 
@@ -36,16 +45,16 @@ export class PlainNodeProps implements NodeProps {
     this.traverse(props, this.props);
   }
 
-   protected traverse(json: any, props: any) {
+  protected traverse(json: any, props: any) {
     if (!json) return;
     for (const [key, value] of Object.entries(json)) {
       if (key.split("/").length > 1) {
         // console.log("key contains /", key)
-        set(props, this.dotPath(key), json[key])
+        set(props, this.dotPath(key), json[key]);
         continue;
       }
       if (isArray(value)) {
-        props[key] = value
+        props[key] = value;
       } else if (typeof value === "object") {
         props[key] = {};
         this.traverse(value, props[key]);
@@ -53,6 +62,10 @@ export class PlainNodeProps implements NodeProps {
         props[key] = value;
       }
     }
+  }
+
+  empty(): NodeProps {
+    return new PlainNodeProps();
   }
 
   protected dotPath(path: string) {
@@ -72,7 +85,7 @@ export class PlainNodeProps implements NodeProps {
     if (other.isNodeProps) {
       this.traverse(other.toJSON(), props);
     } else {
-      this.traverse(other, props)
+      this.traverse(other, props);
     }
 
     return PlainNodeProps.create(props);
@@ -98,8 +111,7 @@ export class PlainNodeProps implements NodeProps {
 }
 
 export class NodeProps_old extends JsonStore {
-
-  static empty () {
+  static empty() {
     return new NodeProps_old();
   }
 
@@ -107,7 +119,7 @@ export class NodeProps_old extends JsonStore {
     const props = new NodeProps_old();
     each(JsonStore.jsonToKeyValue(json), (value, key) => {
       props.set(key, value);
-    })
+    });
 
     return props;
   }
@@ -158,7 +170,7 @@ export class NodeProps_old extends JsonStore {
   }
 
   freeze() {
-    if(this.frozen) return this
+    if (this.frozen) return this;
     this.frozen = true;
 
     super.freeze();
@@ -173,13 +185,14 @@ export const LocalHtmlAttrPath = "local/html";
 export const PlaceholderPath = "local/html/placeholder";
 export const HasFocusPath = "local/html/data-focused";
 export const UserSelectPath = "local/html/data-user-select";
-export const SuppressContenteditableWarningPath = "local/html/suppressContentEditableWarning";
+export const SuppressContenteditableWarningPath =
+  "local/html/suppressContentEditableWarning";
 export const ContenteditablePath = "local/html/contentEditable";
 export const ActivatedPath = "local/state/activated";
 export const LocalContenteditablePath = "local/state/contentEditable";
 // hidden nodes are not rendered, draft change should emit changes only for visible nodes
-export const HiddenPath = 'remote/state/hidden';
-export const VisiblePath = 'remote/state/visible';
+export const HiddenPath = "remote/state/hidden";
+export const VisiblePath = "remote/state/visible";
 export const RenderPath = "local/state/render";
 export const OpenedPath = "local/state/opened";
 export const CollapsedPath = "local/state/collapsed";
@@ -199,5 +212,5 @@ export const MultiPath = "remote/state/multi";
 export const ValuePath = "remote/state/value";
 
 export const isPassiveHidden = (node: Node) => {
-  return node.chain.some(n => n.props.get<boolean>(HiddenPath) ?? false);
-}
+  return node.chain.some((n) => n.props.get<boolean>(HiddenPath) ?? false);
+};
