@@ -1,6 +1,6 @@
 import React from "react";
-
-import { RendererProps, preventAndStop, useCarbon } from "@emrgen/carbon-core";
+import { RendererProps, useCarbon } from "@emrgen/carbon-react";
+import { preventAndStop } from "@emrgen/carbon-core";
 
 export function CarbonProps(props: RendererProps) {
   const { node } = props;

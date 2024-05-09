@@ -1,15 +1,14 @@
 import { Page } from "@playwright/test";
 
-import {Carbon, TextWriter} from "@emrgen/carbon-core";
-import * as timers from "timers";
+import { Carbon, TextWriter } from "@emrgen/carbon-core";
+
 declare global {
   interface Window {
     app: Carbon;
   }
 }
 
-
-export const getDocContent =  async (page: Page) => {
+export const getDocContent = async (page: Page) => {
   return await page.evaluate(() => {
     const app = window.app;
     const doc = app.content.find((n) => n.isDocument);
@@ -17,11 +16,11 @@ export const getDocContent =  async (page: Page) => {
     const writer = new TextWriter();
     return app.encode(writer, doc!).toString();
   });
-}
+};
 
 export const focusDocTitle = async (page: Page) => {
-  await page.click('.carbon-document > [data-type=content]');
-}
+  await page.click(".carbon-document > [data-type=content]");
+};
 
 export class CarbonPage {
   constructor(public page: Page) {}
@@ -42,7 +41,7 @@ export class CarbonPage {
   }
 
   async focusDocTitle() {
-    await this.page.click('.carbon-document > [data-type=content]');
+    await this.page.click(".carbon-document > [data-type=content]");
   }
 
   async getDocContent() {
@@ -72,7 +71,7 @@ export class CarbonPage {
   }
 
   async repeat(key: string, times = 1, press = false) {
-    for (let i = 0; i< times; i++) {
+    for (let i = 0; i < times; i++) {
       if (press) {
         await this.page.keyboard.press(key);
       } else {
@@ -81,7 +80,7 @@ export class CarbonPage {
     }
   }
 
-  async  arrowRight(count = 1) {
+  async arrowRight(count = 1) {
     for (let i = 0; i < count; i++) {
       await this.page.keyboard.press("ArrowRight");
     }
@@ -101,8 +100,7 @@ export class CarbonPage {
     await this.page.keyboard.type(`1. ${text}`);
   }
 
-  async insertTodo (text: string) {
+  async insertTodo(text: string) {
     await this.page.keyboard.type(`[] ${text}`);
   }
 }
-

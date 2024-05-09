@@ -1,6 +1,6 @@
-import { expect, Page, test } from "@playwright/test";
-import {Carbon, TextWriter} from "@emrgen/carbon-core";
-import { CarbonPage, focusDocTitle, getDocContent } from "./utils";
+import { expect, test } from "@playwright/test";
+import { TextWriter } from "@emrgen/carbon-core";
+import { CarbonPage, getDocContent } from "./utils";
 
 test.beforeEach(async ({ page }, testInfo) => {
   console.log(`Running ${testInfo.title}`);
@@ -43,7 +43,9 @@ test("add number list to the document", async ({ page }) => {
     return app.encode(writer, doc!).toString();
   });
 
-  expect(docContent).toBe("Doc title\ndocument content\n1. first item\n2. second item\n3. third item\n");
+  expect(docContent).toBe(
+    "Doc title\ndocument content\n1. first item\n2. second item\n3. third item\n",
+  );
 });
 
 test("add bullet list to the document", async ({ page }) => {
@@ -68,7 +70,9 @@ test("add bullet list to the document", async ({ page }) => {
     return app.encode(writer, doc!).toString();
   });
 
-  expect(docContent).toBe("Doc title\ndocument content\n- first item\n- second item\n- third item\n");
+  expect(docContent).toBe(
+    "Doc title\ndocument content\n- first item\n- second item\n- third item\n",
+  );
 });
 
 test("add nested number list to the document", async ({ page }) => {
@@ -88,7 +92,9 @@ test("add nested number list to the document", async ({ page }) => {
     return app.encode(writer, doc!).toString();
   });
 
-  expect(docContent).toBe("Doc title\n1. first item\n 1. first item child 1\n 2. first item child 2");
+  expect(docContent).toBe(
+    "Doc title\n1. first item\n 1. first item child 1\n 2. first item child 2",
+  );
 });
 
 test("add nested bullet list to the document", async ({ page }) => {
@@ -102,22 +108,26 @@ test("add nested bullet list to the document", async ({ page }) => {
 
   const docContent = await getDocContent(page);
 
-  expect(docContent).toBe("Doc title\n- first item\n - first item child 1\n - first item child 2");
+  expect(docContent).toBe(
+    "Doc title\n- first item\n - first item child 1\n - first item child 2",
+  );
 });
 
-test('add todo in document', async ({ page }) => {
+test("add todo in document", async ({ page }) => {
   const carbonPage = new CarbonPage(page);
-  await carbonPage.insertTodo('this is a todo');
+  await carbonPage.insertTodo("this is a todo");
   await carbonPage.enter();
-  await carbonPage.type('another todo');
+  await carbonPage.type("another todo");
   await carbonPage.enter();
-  await carbonPage.type('yet another todo');
+  await carbonPage.type("yet another todo");
 
   const docContent = await getDocContent(page);
-  expect(docContent).toBe("Doc title\n[] this is a todo\n[] another todo\n[] yet another todo");
-})
+  expect(docContent).toBe(
+    "Doc title\n[] this is a todo\n[] another todo\n[] yet another todo",
+  );
+});
 
-test('add callout into document', async ({ page }) => {
+test("add callout into document", async ({ page }) => {
   await page.keyboard.type(">> this is a callout");
   const docContent = await getDocContent(page);
 
@@ -132,7 +142,7 @@ test('add callout into document', async ({ page }) => {
   expect(docContent2).toBe("Doc title\nthis is a callout\n callout content");
 });
 
-test('add toggle list in document', async ({ page }) => {
+test("add toggle list in document", async ({ page }) => {
   await page.keyboard.type("> this is a toggle list");
   await page.keyboard.press("Enter");
   await page.keyboard.type("toggle content");
@@ -143,13 +153,15 @@ test('add toggle list in document', async ({ page }) => {
   await page.keyboard.type("after toggle content");
 
   const docContent = await getDocContent(page);
-  await page.click('.carbon-collapsible__control');
+  await page.click(".carbon-collapsible__control");
 
-  expect(docContent).toBe("Doc title\n- this is a toggle list\n toggle content\n more toggle content\nafter toggle content");
+  expect(docContent).toBe(
+    "Doc title\n- this is a toggle list\n toggle content\n more toggle content\nafter toggle content",
+  );
   // expect(await page.isVisible('.carbon-collapsible__content')).toBe(false);
-})
+});
 
-test('add header in document', async ({ page }) => {
+test("add header in document", async ({ page }) => {
   await page.keyboard.type("# this is a header");
   await page.keyboard.press("Enter");
   await page.keyboard.type("header content");
@@ -157,9 +169,9 @@ test('add header in document', async ({ page }) => {
 
   const docContent = await getDocContent(page);
   expect(docContent).toBe("Doc title\n# this is a header\n header content");
-})
+});
 
-test('add quote in document', async ({ page }) => {
+test("add quote in document", async ({ page }) => {
   const carbonPage = new CarbonPage(page);
   await page.keyboard.type("| this is a quote");
   await page.keyboard.press("Enter");
@@ -171,8 +183,10 @@ test('add quote in document', async ({ page }) => {
 
   await carbonPage.enter();
   await carbonPage.enter();
-  await carbonPage.type('after the quote');
+  await carbonPage.type("after the quote");
 
   const docContent2 = await getDocContent(page);
-  expect(docContent2).toBe("Doc title\n> this is a quote\n quote content\nafter the quote");
+  expect(docContent2).toBe(
+    "Doc title\n> this is a quote\n quote content\nafter the quote",
+  );
 });

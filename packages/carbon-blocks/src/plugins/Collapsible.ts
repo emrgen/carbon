@@ -1,24 +1,30 @@
 import {
   BeforePlugin,
   CarbonPlugin,
+  CollapsedPath,
   EventContext,
   EventHandler,
+  insertAfterAction,
+  insertBeforeAction,
   Node,
+  NodeEncoder,
   NodePlugin,
   NodeSpec,
   Pin,
   PinnedSelection,
+  PlaceholderPath,
   Point,
-  Transaction,
-  insertAfterAction,
-  insertBeforeAction,
   preventAndStopCtx,
   splitTextBlock,
-  PlaceholderPath, CollapsedPath, Writer, NodeEncoder
+  Transaction,
+  Writer,
 } from "@emrgen/carbon-core";
-import {encodeHtmlNestableChildren, encodeNestableChildren} from "@emrgen/carbon-blocks";
+import {
+  encodeHtmlNestableChildren,
+  encodeNestableChildren,
+} from "@emrgen/carbon-blocks";
 
-declare module '@emrgen/carbon-core' {
+declare module "@emrgen/carbon-core" {
   interface Transaction {
     collapsible: {
       split(selection: PinnedSelection): Transaction;
@@ -26,20 +32,19 @@ declare module '@emrgen/carbon-core' {
       expand(node: Node): Transaction;
       collapse(node: Node): Transaction;
       toggle(node: Node): Transaction;
-    }
+    };
   }
 }
 
 export class Collapsible extends NodePlugin {
-
-  name = 'collapsible';
+  name = "collapsible";
 
   spec(): NodeSpec {
     return {
-      group: 'content nestable',
-      content: 'title content*',
+      group: "content nestable",
+      content: "title content*",
       splits: true,
-      splitName: 'section',
+      splitName: "section",
       insert: true,
       collapsible: true,
       inlineSelectable: true,
@@ -49,13 +54,13 @@ export class Collapsible extends NodePlugin {
       blockSelectable: true,
       pasteBoundary: true,
       info: {
-        title: 'Toggle List',
-        description: 'Create a toggle list',
-        icon: 'toggleList',
-        tags: ['toggle list', 'toggle', 'collapsible', 'list'],
+        title: "Toggle List",
+        description: "Create a toggle list",
+        icon: "toggleList",
+        tags: ["toggle list", "toggle", "collapsible", "list"],
         order: 6,
       },
-    }
+    };
   }
 
   commands(): Record<string, Function> {
@@ -65,7 +70,7 @@ export class Collapsible extends NodePlugin {
       expand: this.expand,
       collapse: this.collapse,
       toggle: this.toggle,
-    }
+    };
   }
 
   toggle(tr: Transaction, node: Node) {
@@ -85,64 +90,74 @@ export class Collapsible extends NodePlugin {
   }
 
   plugins(): CarbonPlugin[] {
-    return [
-    ]
+    return [];
   }
 
   keydown(): Partial<EventHandler> {
     return {
-      'ctrl_shift_e': (ctx: EventContext<KeyboardEvent>) => {
+      ctrl_shift_e: (ctx: EventContext<KeyboardEvent>) => {
         const { currentNode } = ctx;
-        if (currentNode.name === 'document') {
+        if (currentNode.name === "document") {
           return;
         }
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        ctx.cmd.Update(currentNode.id, {
-          [CollapsedPath]: !currentNode.isCollapsed,
-        }).Dispatch();
+        ctx.cmd
+          .Update(currentNode.id, {
+            [CollapsedPath]: !currentNode.isCollapsed,
+          })
+          .Dispatch();
       },
 
-      'ctrl_shift_c': (ctx: EventContext<KeyboardEvent>) => {
+      ctrl_shift_c: (ctx: EventContext<KeyboardEvent>) => {
         const { currentNode } = ctx;
-        if (currentNode.name === 'document') {
+        if (currentNode.name === "document") {
           return;
         }
         ctx.event.preventDefault();
         ctx.stopPropagation();
 
-        ctx.cmd.Update(currentNode.id, { node: { collapsed: true } }).Dispatch();
+        ctx.cmd
+          .Update(currentNode.id, { node: { collapsed: true } })
+          .Dispatch();
       },
       // tab: skipKeyEvent
       enter(ctx: EventContext<KeyboardEvent>) {
         const { app, selection, currentNode } = ctx;
-        console.log('[Enter] collapsible');
+        console.log("[Enter] collapsible");
         // if selection is within the collapsible node title split the collapsible node
-        if (selection.inSameNode && selection.start.node.parent?.eq(currentNode) && !currentNode.isEmpty) {
+        if (
+          selection.inSameNode &&
+          selection.start.node.parent?.eq(currentNode) &&
+          !currentNode.isEmpty
+        ) {
           preventAndStopCtx(ctx);
           app.cmd.collapsible.split(selection)?.Dispatch();
         }
       },
       backspace: (ctx: EventContext<KeyboardEvent>) => {
         const { selection, currentNode, cmd } = ctx;
-        if (selection.isCollapsed && selection.head.isAtStartOfNode(currentNode)) {
+        if (
+          selection.isCollapsed &&
+          selection.head.isAtStartOfNode(currentNode)
+        ) {
           if (currentNode.child(0)?.isEmpty) {
             preventAndStopCtx(ctx);
 
-            cmd.transform.change(currentNode, 'section');
+            cmd.transform.change(currentNode, "section");
             if (currentNode.firstChild?.isEmpty) {
-              cmd.update(currentNode.firstChild.id, { [PlaceholderPath]: '' })
+              cmd.update(currentNode.firstChild.id, { [PlaceholderPath]: "" });
             }
             cmd.Dispatch();
           }
         }
-      }
-    }
+      },
+    };
   }
 
   split(tr: Transaction, selection: PinnedSelection) {
-    const {app} = tr;
+    const { app } = tr;
     const { start, end } = selection;
     const title = start.node;
     const splitBlock = title.parent!;
@@ -151,69 +166,70 @@ export class Collapsible extends NodePlugin {
     if (selection.isCollapsed && start.isAtStartOfNode(title)) {
       const section = app.schema.type(splitBlock.type.splitName).default();
       if (!section) {
-        throw Error("failed to create default node for type" + splitBlock.name)
+        throw Error("failed to create default node for type" + splitBlock.name);
       }
 
       const focusPoint = Pin.toStartOf(title!);
       const after = PinnedSelection.fromPin(focusPoint!);
 
       if (title.parent?.isDocument) {
-        const sectionTitle = app.schema.clone(title, n => {
+        const sectionTitle = app.schema.clone(title, (n) => {
           return {
             ...n,
             id: app.schema.factory.blockId(),
-          }
+          };
         });
 
         section.remove(section.child(0)!);
-        section.insert(sectionTitle, 0)
+        section.insert(sectionTitle, 0);
         // section.replace(section.child(0)!, sectionTitle);
 
         const focusPoint = Pin.toStartOf(section!);
         const after = PinnedSelection.fromPin(focusPoint!);
-        tr
-          .SetContent(title.id, [])
+        tr.SetContent(title.id, [])
           .Add(insertAfterAction(title, section!))
-          .Select(after)
+          .Select(after);
         return tr;
       }
 
-      tr
-        .Add(insertBeforeAction(title.parent!, section!))
-        .Select(after)
-      return
+      tr.Add(insertBeforeAction(title.parent!, section!)).Select(after);
+      return;
     }
 
     if (selection.isCollapsed && start.isAtEndOfNode(title)) {
-      const section =  app.schema.type(isCollapsed ? splitBlock.type.splitName:'section').default();
+      const section = app.schema
+        .type(isCollapsed ? splitBlock.type.splitName : "section")
+        .default();
       if (!section) {
-        throw Error("failed to create default node for type" + splitBlock.name)
+        throw Error("failed to create default node for type" + splitBlock.name);
       }
 
       const at = Point.toAfter(title.id);
       const after = PinnedSelection.fromPin(Pin.toStartOf(section)!);
-      tr
-        .Add(insertAfterAction(isCollapsed ? splitBlock : title, section!))
-        .Select(after);
-      return
+      tr.Add(
+        insertAfterAction(isCollapsed ? splitBlock : title, section!),
+      ).Select(after);
+      return;
     }
 
     const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
-    console.log(leftContent, 'xx',rightContent)
+    console.log(leftContent, "xx", rightContent);
     const json = {
-      name: splitBlock.isCollapsed ? splitBlock.name : splitBlock.type.splitName,
-      props: { 'remote/': { collapsed: splitBlock.isCollapsed } },
+      name: splitBlock.isCollapsed
+        ? splitBlock.name
+        : splitBlock.type.splitName,
+      props: { "remote/": { collapsed: splitBlock.isCollapsed } },
       children: [
         {
-          name: 'title',
-          children: rightContent.map(c => c.toJSON())
-        }
+          name: "title",
+          children: rightContent.map((c) => c.toJSON()),
+        },
       ],
-    }
+    };
 
     const section = app.schema.nodeFromJSON(json);
     if (!section) {
-      throw Error('failed to create section');
+      throw Error("failed to create section");
     }
 
     const at = splitBlock.isCollapsed
@@ -222,29 +238,26 @@ export class Collapsible extends NodePlugin {
     const focusPoint = Pin.toStartOf(section!);
     const after = PinnedSelection.fromPin(focusPoint!);
 
-    tr
-      .SetContent(title.id, leftContent)
-      .Insert(at, section!)
-      .Select(after)
+    tr.SetContent(title.id, leftContent).Insert(at, section!).Select(after);
   }
 
   enter(tr: Transaction, selection: PinnedSelection) {
-    console.log('[Enter] collapsible');
-    return
+    console.log("[Enter] collapsible");
+    return;
   }
 
   encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     if (node.isEmpty) {
-      return
+      return;
     }
 
-    writer.write('\n\n');
+    writer.write("\n\n");
     if (node.firstChild) {
-      writer.write(writer.meta.get('indent') ?? '');
+      writer.write(writer.meta.get("indent") ?? "");
       encoder.encode(writer, node.firstChild);
     }
 
-    encodeNestableChildren(writer, encoder, node, '');
+    encodeNestableChildren(writer, encoder, node, "");
   }
 
   encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
@@ -252,23 +265,21 @@ export class Collapsible extends NodePlugin {
       return;
     }
 
-    w.write('<ul>');
-    w.write('<li>');
-    w.write('<p>');
+    w.write("<ul>");
+    w.write("<li>");
+    w.write("<p>");
     if (node.firstChild) {
       ne.encodeHtml(w, node.firstChild);
     }
-    w.write('</p>');
-    encodeHtmlNestableChildren(w, ne, node)
-    w.write('</li>');
-    w.write('</ul>');
-
+    w.write("</p>");
+    encodeHtmlNestableChildren(w, ne, node);
+    w.write("</li>");
+    w.write("</ul>");
   }
 }
 
 class CollapsibleBeforePlugin extends BeforePlugin {
-
-  name = 'collapsibleBefore';
+  name = "collapsibleBefore";
 
   keydown(): Partial<EventHandler> {
     return {
@@ -300,6 +311,6 @@ class CollapsibleBeforePlugin extends BeforePlugin {
       //     // react.cmd.collapsible.split(selection)?.Dispatch();
       //   }
       // }
-    }
+    };
   }
 }
