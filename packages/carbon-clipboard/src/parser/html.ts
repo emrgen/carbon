@@ -1,13 +1,15 @@
-import {parseDom} from "./dom";
-import {map} from "lodash";
+import { NodeHtmlMarkdown } from "node-html-markdown";
+import { lexer } from "marked";
 
-export const parseHtml = async (item: ClipboardItem) => {
-  const type = 'text/html';
-  const blob = await item.getType(type);
-  const text = await blob.text();
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(text, type);
-  const body = doc.querySelector('body');
-  const nodes = map(body?.children, (el) => el) ?? [] as Element[];
-  return parseDom(nodes);
-}
+// parse html(text) -> markdown(text) -> carbon content json
+export const parseHtml = (html: string) => {
+  const markdown = NodeHtmlMarkdown.translate(html);
+  console.log(markdown);
+  return lexer(`**# RIENCE**
+
+**## Company, Location — Job Title**
+
+**### MONTH 20XX -** `);
+  // return markdown;
+  // return parseText(markdown);
+};

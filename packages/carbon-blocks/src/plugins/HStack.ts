@@ -1,17 +1,15 @@
 import {
   CarbonAction,
   CarbonPlugin,
-  NodeSpec,
-  State,
-  Node,
-  RemoveNodeAction,
-  nodeLocation,
-  Point,
   moveNodesActions,
-  SelectAction,
-  Writer, NodeEncoder
+  Node,
+  NodeEncoder,
+  nodeLocation,
+  NodeSpec,
+  Point,
+  RemoveNodeAction,
+  Writer,
 } from "@emrgen/carbon-core";
-import { Optional } from '@emrgen/types';
 
 export class HStack extends CarbonPlugin {
   name = "hstack";
@@ -20,45 +18,44 @@ export class HStack extends CarbonPlugin {
     return {
       group: "content",
       content: "stack stack+",
-      replaceName: 'section',
+      replaceName: "section",
       rectSelectable: true,
       blockSelectable: true,
-    }
+    };
   }
 
-
   plugins(): CarbonPlugin[] {
-    return [
-      new Stack(),
-    ]
+    return [new Stack()];
   }
 
   normalize(node: Node): CarbonAction[] {
-    console.log('Normalize ', node.name, node.key);
+    console.log("Normalize ", node.name, node.key);
     // TODO: check if stack schema is correct
     if (node.isVoid) {
-      return [RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON())];
+      return [
+        RemoveNodeAction.create(nodeLocation(node)!, node.id, node.toJSON()),
+      ];
     }
 
     if (node.size == 1) {
-      console.log('Unpack all children');
+      console.log("Unpack all children");
       const children = node.child(0)?.children;
-      const at = Point.toAfter(node.id)
-      console.log('Move children to ', at.toString(), children)
+      const at = Point.toAfter(node.id);
+      console.log("Move children to ", at.toString(), children);
 
       return [
         ...moveNodesActions(at, children!),
         RemoveNodeAction.fromNode(nodeLocation(node)!, node),
-      ]
+      ];
     }
 
     return [];
   }
 
   encode(w: Writer, ne: NodeEncoder, node: Node) {
-    node.children.forEach(child => {
+    node.children.forEach((child) => {
       ne.encode(w, child);
-    })
+    });
   }
 }
 
@@ -67,14 +64,15 @@ export class Stack extends CarbonPlugin {
 
   spec(): NodeSpec {
     return {
+      group: "nestable",
       content: "content+",
       collapsible: true,
       pasteBoundary: true,
-    }
+    };
   }
 
   normalize(node: Node): CarbonAction[] {
-    console.log('Normalize ', node.name, node.key);
+    console.log("Normalize ", node.name, node.key);
     // check if stack schema is correct
     if (node.isVoid) {
       return [RemoveNodeAction.fromNode(nodeLocation(node)!, node)];
@@ -87,9 +85,8 @@ export class Stack extends CarbonPlugin {
     if (node.isEmpty) {
       return;
     }
-    node.children.forEach(child => {
+    node.children.forEach((child) => {
       ne.encode(w, child);
-    })
+    });
   }
 }
-

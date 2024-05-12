@@ -20,7 +20,7 @@ import { RuntimeState } from "./RuntimeState";
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginStates } from "./PluginState";
 import { CarbonCommand } from "./CarbonCommand";
-import { ActionOrigin } from "@emrgen/carbon-core";
+import { ActionOrigin, TextWriter } from "@emrgen/carbon-core";
 import { BlockSelection } from "./BlockSelection";
 import { NodeEncoder, TreeEncoder, Writer } from "./Encoder";
 
@@ -191,6 +191,14 @@ export class Carbon extends EventEmitter {
     }
     this.committed = false;
     return Transaction.create(this, this.commands, this.tm, this.pm, this.sm);
+  }
+
+  // return markdown
+  markdown(node: Node = this.state.content) {
+    const writer = new TextWriter();
+    this.encode(writer, node);
+
+    return writer.toString();
   }
 
   // encode a node to string

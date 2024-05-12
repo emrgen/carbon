@@ -1,123 +1,108 @@
 import {
-	Carbon,
-	CarbonPlugin,
-	EventContext,
-	EventHandlerMap,
-	Node,
-	NodeSpec,
-	Pin,
-	PinnedSelection,
-	Point,
-	SerializedNode,
-	preventAndStopCtx,
-	splitTextBlock
-} from '@emrgen/carbon-core';
-import {Encoder, NodeEncoder, Writer} from "@emrgen/carbon-core/src/core/Encoder";
-import {encodeHtmlNestableChildren, encodeNestableChildren} from "@emrgen/carbon-blocks";
+  CarbonPlugin,
+  EventContext,
+  EventHandlerMap,
+  Node,
+  NodeSpec,
+  preventAndStopCtx,
+} from "@emrgen/carbon-core";
+import { NodeEncoder, Writer } from "@emrgen/carbon-core/src/core/Encoder";
+import {
+  encodeHtmlNestableChildren,
+  encodeNestableChildren,
+} from "@emrgen/carbon-blocks";
 
 export class PagePlugin extends CarbonPlugin {
+  name = "document";
 
-	name = 'document';
-
-	spec(): NodeSpec {
-		return {
-			group: '',
-			content: 'title content*',
-			splits: true,
-			splitName: 'section',
-			inlineSelectable: true,
-			collapsible: true,
-			isolate: true,
-			sandbox: true,
-			document: true,
+  spec(): NodeSpec {
+    return {
+      group: "",
+      content: "title content*",
+      splits: true,
+      splitName: "section",
+      inlineSelectable: true,
+      collapsible: true,
+      isolate: true,
+      sandbox: true,
+      document: true,
       pasteBoundary: true,
-			props: {
-				local: {
-					placeholder: {
-						empty: 'Untitled',
-						focused: 'Untitled',
-					},
-					html: {
-						spellCheck: false,
-						contentEditable: true,
-						suppressContentEditableWarning: true,
-					},
-				},
-			},
-		}
-	}
+      props: {
+        local: {
+          placeholder: {
+            empty: "Untitled",
+            focused: "Untitled",
+          },
+          html: {
+            spellCheck: false,
+            contentEditable: true,
+            suppressContentEditableWarning: true,
+          },
+        },
+      },
+    };
+  }
 
-	plugins(): CarbonPlugin[] {
-		return [
-			// new IsolatingPlugin()
-		]
-	}
+  plugins(): CarbonPlugin[] {
+    return [
+      // new IsolatingPlugin()
+    ];
+  }
 
-	keydown(): EventHandlerMap {
-		return {
-			// on enter split without merge
-			enter: (ctx: EventContext<KeyboardEvent>) => {
-				const { app, currentNode, cmd } = ctx;
-				if (!app.state.blockSelection.isEmpty) {
-					return
-				}
+  keydown(): EventHandlerMap {
+    return {
+      // on enter split without merge
+      enter: (ctx: EventContext<KeyboardEvent>) => {
+        const { app, currentNode, cmd } = ctx;
+        if (!app.state.blockSelection.isEmpty) {
+          return;
+        }
 
-        const {selection} = ctx;
-				if (selection.inSameNode && selection.start.node.parent?.eq(currentNode)) {
-					console.log('[Enter] doc');
-					preventAndStopCtx(ctx);
-					cmd.collapsible.split(selection).Dispatch();
+        const { selection } = ctx;
+        if (
+          selection.inSameNode &&
+          selection.start.node.parent?.eq(currentNode)
+        ) {
+          console.log("[Enter] doc");
+          preventAndStopCtx(ctx);
+          cmd.collapsible.split(selection).Dispatch();
+        }
+      },
+    };
+  }
 
-          // const section = react.schema.type(node.type.splitName).default();
-          // if (!section) {
-          //   throw Error("failed to create default node for type" + node.name)
-          // }
-          //
-          // const focusPoint = Pin.toStartOf(node.firstChild!);
-          // const after = PinnedSelection.fromPin(focusPoint!);
-          // const at = Point.toAfter(node.firstChild!.id);
-          // ctx.cmd
-          //   .Insert(at, section!)
-          //   .Select(after)
-          //   .dispatch();
-					// return
-				}
-			}
-		}
-	}
+  // normalize(node: Node, editor: Car): Optional<Command> {
+  // 	if (node.isVoid) {
+  // 		console.log('fill doc with default children');
+  // 		const {schema} = editor;
+  // 		const at = Point.toWithin(node);
+  // 		const para = schema.node('paragraph');
+  // 		const child = schema.node('section', { content: [para]});
+  // 		return InsertCommand.create(at, Fragment.fromNode(child!))//.dispatch(true)
+  // 	}
 
-	// normalize(node: Node, editor: Car): Optional<Command> {
-	// 	if (node.isVoid) {
-	// 		console.log('fill doc with default children');
-	// 		const {schema} = editor;
-	// 		const at = Point.toWithin(node);
-	// 		const para = schema.node('paragraph');
-	// 		const child = schema.node('section', { content: [para]});
-	// 		return InsertCommand.create(at, Fragment.fromNode(child!))//.dispatch(true)
-	// 	}
-
-	// 	return undefined
-	// }
+  // 	return undefined
+  // }
 
   encode(w: Writer, ne: NodeEncoder, node: Node) {
-    const {children, firstChild} = node;
+    const { children, firstChild } = node;
     if (firstChild) {
-      w.write('# ');
+      w.write("# ");
       ne.encode(w, firstChild);
     }
+    w.write("\n");
 
-    encodeNestableChildren(w, ne, node)
+    encodeNestableChildren(w, ne, node, "");
   }
 
   encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
-    const {children, firstChild} = node;
+    const { children, firstChild } = node;
     if (firstChild) {
-      w.write('<h1>');
+      w.write("<h1>");
       ne.encodeHtml(w, firstChild);
-      w.write('</h1>');
+      w.write("</h1>");
     }
 
-    encodeHtmlNestableChildren(w, ne, node)
+    encodeHtmlNestableChildren(w, ne, node);
   }
-
 }

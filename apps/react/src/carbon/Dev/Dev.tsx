@@ -37,6 +37,13 @@ const data = node("carbon", [
   node("document", [
     title([text("I am a frame title")]),
 
+    section([title([text("question title")])]),
+
+    node("stack", [
+      section([title([text("question title 1")])]),
+      section([title([text("question title 2")])]),
+    ]),
+
     // node('question', [
     //   node('questionTitle', [
     //     section([title([text('question title')])]),
@@ -215,7 +222,7 @@ const data = node("carbon", [
     // ]),
 
     // node("codeMirror", [], {
-    //   ['remote/state/codemirror']: `function foo() {\n  console.log('hello world')\n}`,
+    //   ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
     // }),
 
     // node("cell", [
@@ -238,11 +245,11 @@ const data = node("carbon", [
     //
 
     // section([title([text("section 1")])]),
-    //
+
     // node("code", [
-    //   node("codeLine",[ title([text("function foo() {")])]),
+    //   node("codeLine", [title([text("function foo() {")])]),
     //   node("codeLine", [title([text("  console.log('hello world')")])]),
-    //   node("codeLine",[ title([text("}")])])
+    //   node("codeLine", [title([text("}")])]),
     // ]),
 
     // node("pageTree", [

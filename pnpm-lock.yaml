@@ -284,7 +284,7 @@ importers:
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^3.0.1
-        version: 3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0))
+        version: 3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45))
       '@tsconfig/svelte':
         specifier: ^5.0.2
         version: 5.0.2
@@ -293,7 +293,7 @@ importers:
         version: 4.2.8
       svelte-check:
         specifier: ^3.6.2
-        version: 3.6.2(@babel/core@7.24.0)(postcss-load-config@4.0.2(postcss@8.4.32))(postcss@8.4.32)(stylus@0.59.0)(svelte@4.2.8)
+        version: 3.6.2(@babel/core@7.24.0)(postcss-load-config@4.0.2(postcss@8.4.32))(postcss@8.4.32)(svelte@4.2.8)
       tslib:
         specifier: ^2.6.2
         version: 2.6.2
@@ -615,6 +615,9 @@ importers:
       marked:
         specifier: ^12.0.0
         version: 12.0.0
+      node-html-markdown:
+        specifier: ^1.3.0
+        version: 1.3.0
       vitest:
         specifier: ^0.34.6
         version: 0.34.6(playwright@1.42.1)(stylus@0.59.0)
@@ -5728,6 +5731,10 @@ packages:
       sass:
         optional: true
 
+  node-html-markdown@1.3.0:
+    resolution: {integrity: sha512-OeFi3QwC/cPjvVKZ114tzzu+YoR+v9UXW5RwSXGUqGb0qCl0DvP406tzdL7SFn8pZrMyzXoisfG2zcuF9+zw4g==}
+    engines: {node: '>=10.0.0'}
+
   node-html-parser@6.1.12:
     resolution: {integrity: sha512-/bT/Ncmv+fbMGX96XG9g05vFt43m/+SYKIs9oAemQVYyVcZmDAI2Xq/SbNcpOA35eF0Zk2av3Ksf+Xk8Vt8abA==}
 
@@ -8590,18 +8597,18 @@ snapshots:
     dependencies:
       solid-js: 1.8.7
 
-  '@sveltejs/vite-plugin-svelte-inspector@2.0.0(@sveltejs/vite-plugin-svelte@3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0)))(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0))':
+  '@sveltejs/vite-plugin-svelte-inspector@2.0.0(@sveltejs/vite-plugin-svelte@3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45)))(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0))
+      '@sveltejs/vite-plugin-svelte': 3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45))
       debug: 4.3.4
       svelte: 4.2.8
       vite: 5.0.10(@types/node@17.0.45)(stylus@0.59.0)
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte@3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0))':
+  '@sveltejs/vite-plugin-svelte@3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 2.0.0(@sveltejs/vite-plugin-svelte@3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0)))(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0))
+      '@sveltejs/vite-plugin-svelte-inspector': 2.0.0(@sveltejs/vite-plugin-svelte@3.0.1(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45)))(svelte@4.2.8)(vite@5.0.10(@types/node@17.0.45))
       debug: 4.3.4
       deepmerge: 4.3.1
       kleur: 4.1.5
@@ -8609,7 +8616,7 @@ snapshots:
       svelte: 4.2.8
       svelte-hmr: 0.15.3(svelte@4.2.8)
       vite: 5.0.10(@types/node@17.0.45)(stylus@0.59.0)
-      vitefu: 0.2.5(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0))
+      vitefu: 0.2.5(vite@5.0.10(@types/node@17.0.45))
     transitivePeerDependencies:
       - supports-color
 
@@ -10309,6 +10316,10 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
+  node-html-markdown@1.3.0:
+    dependencies:
+      node-html-parser: 6.1.12
+
   node-html-parser@6.1.12:
     dependencies:
       css-select: 5.1.0
@@ -10998,7 +11009,7 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  svelte-check@3.6.2(@babel/core@7.24.0)(postcss-load-config@4.0.2(postcss@8.4.32))(postcss@8.4.32)(stylus@0.59.0)(svelte@4.2.8):
+  svelte-check@3.6.2(@babel/core@7.24.0)(postcss-load-config@4.0.2(postcss@8.4.32))(postcss@8.4.32)(svelte@4.2.8):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.20
       chokidar: 3.5.3
@@ -11007,7 +11018,7 @@ snapshots:
       picocolors: 1.0.0
       sade: 1.8.1
       svelte: 4.2.8
-      svelte-preprocess: 5.1.3(@babel/core@7.24.0)(postcss-load-config@4.0.2(postcss@8.4.32))(postcss@8.4.32)(stylus@0.59.0)(svelte@4.2.8)(typescript@5.3.3)
+      svelte-preprocess: 5.1.3(@babel/core@7.24.0)(postcss-load-config@4.0.2(postcss@8.4.32))(postcss@8.4.32)(svelte@4.2.8)(typescript@5.3.3)
       typescript: 5.3.3
     transitivePeerDependencies:
       - '@babel/core'
@@ -11024,7 +11035,7 @@ snapshots:
     dependencies:
       svelte: 4.2.8
 
-  svelte-preprocess@5.1.3(@babel/core@7.24.0)(postcss-load-config@4.0.2(postcss@8.4.32))(postcss@8.4.32)(stylus@0.59.0)(svelte@4.2.8)(typescript@5.3.3):
+  svelte-preprocess@5.1.3(@babel/core@7.24.0)(postcss-load-config@4.0.2(postcss@8.4.32))(postcss@8.4.32)(svelte@4.2.8)(typescript@5.3.3):
     dependencies:
       '@types/pug': 2.0.10
       detect-indent: 6.1.0
@@ -11036,7 +11047,6 @@ snapshots:
       '@babel/core': 7.24.0
       postcss: 8.4.32
       postcss-load-config: 4.0.2(postcss@8.4.32)
-      stylus: 0.59.0
       typescript: 5.3.3
 
   svelte@4.2.8:
@@ -11277,7 +11287,7 @@ snapshots:
       solid-js: 1.8.7
       solid-refresh: 0.5.3(solid-js@1.8.7)
       vite: 5.0.10(@types/node@17.0.45)(stylus@0.59.0)
-      vitefu: 0.2.5(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0))
+      vitefu: 0.2.5(vite@5.0.10(@types/node@17.0.45))
     transitivePeerDependencies:
       - supports-color
 
@@ -11312,7 +11322,7 @@ snapshots:
       fsevents: 2.3.3
       stylus: 0.59.0
 
-  vitefu@0.2.5(vite@5.0.10(@types/node@17.0.45)(stylus@0.59.0)):
+  vitefu@0.2.5(vite@5.0.10(@types/node@17.0.45)):
     optionalDependencies:
       vite: 5.0.10(@types/node@17.0.45)(stylus@0.59.0)
 

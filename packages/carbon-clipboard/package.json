@@ -14,13 +14,14 @@
     "@emrgen/carbon-core": "workspace:*",
     "lodash": "^4.17.21",
     "marked": "^12.0.0",
+    "node-html-markdown": "^1.3.0",
     "vitest": "^0.34.6"
   },
   "devDependencies": {
+    "@emrgen/eslint-config-custom": "workspace:*",
     "@emrgen/types": "workspace:*",
     "@types/lodash": "^4.14.191",
     "eslint": "^7.32.0",
-    "@emrgen/eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
     "typescript": "^4.9.5"
   }
