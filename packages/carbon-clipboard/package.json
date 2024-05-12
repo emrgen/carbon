@@ -12,6 +12,7 @@
   "dependencies": {
     "@emrgen/carbon-attributes": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-react": "workspace:*",
     "lodash": "^4.17.21",
     "marked": "^12.0.0",
     "node-html-markdown": "^1.3.0",

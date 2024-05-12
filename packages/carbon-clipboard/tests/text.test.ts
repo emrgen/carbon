@@ -11,21 +11,21 @@ test("parse plain space", () => {
   ]);
 });
 
-test("parse plain header", () => {
+test("parse header", () => {
   const content = "# hello";
   const res = parseText(content);
   const expected = node("h1", [title([text("hello")])]);
-  console.log(JSON.stringify(res, null, 2));
+
   expect(res).toMatchObject([expected]);
 });
 
-test("parse plain paragraph", () => {
+test("parse paragraph", () => {
   const content = "hello";
   const res = parseText(content);
   expect(res).toMatchObject([section([title([text("hello")])])]);
 });
 
-test("parse code block", () => {
+test("parse code  ", () => {
   const content = "```js\nconst fn = () => hi\n```";
   const res = parseText(content);
   expect(res).toStrictEqual([
@@ -43,7 +43,7 @@ test("parse paragraph", () => {
   expect(actual).toMatchObject([
     section([
       title([
-        text("const"),
+        node("codespan", [text("const")]),
         text(" fn = () => "),
         node("italic", [text("hi")]),
       ]),
@@ -79,11 +79,11 @@ test("parse ordered list", () => {
   const res = parseText(content);
 
   expect(res).toMatchObject([
-    node("numberedList", [title([text("a")])]),
-    node("numberedList", [
+    node("numberList", [title([text("a")])]),
+    node("numberList", [
       title([text("b")]),
-      node("numberedList", [title([text("c")])]),
-      node("numberedList", [title([text("d")])]),
+      node("numberList", [title([text("c")])]),
+      node("numberList", [title([text("d")])]),
     ]),
     section([title([])]),
   ]);
@@ -98,11 +98,11 @@ test("parse mixed list", () => {
   const res = parseText(content);
   expect(res).toMatchObject([
     node("bulletList", [title([text("a")])]),
-    node("numberedList", [
+    node("numberList", [
       title([text("b")]),
       node("bulletList", [title([text("c")])]),
     ]),
-    node("numberedList", [title([text("d")])]),
+    node("numberList", [title([text("d")])]),
     // section([title([])]),
   ]);
 });

@@ -609,6 +609,9 @@ importers:
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
       lodash:
         specifier: ^4.17.21
         version: 4.17.21

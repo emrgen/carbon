@@ -1,17 +1,28 @@
 import { lexer, Token, TokensList } from "marked";
-import { flatten, isArray, isEmpty, last, takeWhile } from "lodash";
+import {
+  first,
+  flatten,
+  identity,
+  isArray,
+  isEmpty,
+  isFunction,
+  last,
+  takeWhile,
+} from "lodash";
+import { Fragment, MatchResult, Node, Schema } from "@emrgen/carbon-core";
+import { ContentMatch } from "@emrgen/carbon-core/src/core/ContentMatch";
 
 export const parseText = (text: string) => {
   const tree: TokensList = lexer(text);
   // console.log('blob text', `"${text}"`);
-  console.log("syntax tree", JSON.stringify(tree, null, 2));
+  // console.log("syntax tree", JSON.stringify(tree, null, 2));
 
   const nodes = flatten(transformer.transform(tree));
   const withTitleNodes = wrapInlineWithTitle(nodes);
 
   const validSiblings = removeInlinesWithBlockSibling(withTitleNodes);
 
-  console.log(JSON.stringify(validSiblings, null, 2));
+  // console.log(JSON.stringify(validSiblings, null, 2));
 
   return validSiblings;
 };
@@ -67,9 +78,50 @@ const removeInlinesWithBlockSibling = (nodes) => {
   });
 };
 
+// push marks to inline nodes
 const processMarks = () => {};
 
-const findContentMatch = () => {};
+export const fixContentMatch = (schema: Schema, node: Node) => {
+  if (node.isText) return node;
+  const { children, type } = node;
+
+  const fixedChildren = children.map((child) => {
+    const node = fixContentMatch(schema, child);
+
+    return fixNodeContentMatch(schema, node);
+  });
+
+  return schema.nodeFromJSON({
+    name: node.name,
+    children: fixedChildren,
+  });
+};
+
+const fixNodeContentMatch = (schema: Schema, node: Node) => {
+  if (node.isText) return node;
+
+  const { children, type } = node;
+
+  const matched: Node[] = [];
+
+  const match = findMatchingNodes(matched, type.contentMatch, children, []);
+
+  if (!match.validEnd) {
+    console.log(children.map((ch) => ch.name));
+    throw Error("failed to find valid content match for node: " + node.name);
+  }
+
+  const fixedNode = schema.nodeFromJSON({
+    name: node.name,
+    children: matched,
+  });
+
+  if (!fixedNode) {
+    throw Error("failed to create a node form json");
+  }
+
+  return fixedNode;
+};
 
 const transformer = {
   // transform the marked syntax tree into a carbon syntax tree
@@ -78,13 +130,22 @@ const transformer = {
       return this.transform([nodes]);
     }
 
-    const result = nodes.map((n) => {
-      if (!this[n.type]) {
-        throw new Error(`Unknown node type: ${n.type}`);
-      }
+    const result = nodes
+      .map((n) => {
+        const processor = this[n.type];
+        if (!processor) {
+          console.error(`Unknown node type: ${n.type}`);
+          return null;
+        }
 
-      return this[n.type](n);
-    });
+        if (!isFunction(processor)) {
+          console.error(`${n.type}: is not a function`);
+          return null;
+        }
+
+        return processor.bind(this)(n);
+      })
+      .filter(identity);
 
     return flatten(result);
   },
@@ -147,7 +208,7 @@ const transformer = {
 
     const listStart = listText.match(/^[0-9a-z]+/)?.[0];
     if (listStart) {
-      return node("numberedList", this.transform(tokens));
+      return node("numberList", this.transform(tokens));
     }
 
     throw new Error(`Unknown list type: ${listStart}`);
@@ -210,4 +271,40 @@ export const text = (content: string) => {
     name: "text",
     text: content,
   };
+};
+
+export const findMatchingNodes = (
+  before: Node[],
+  contentMatch: ContentMatch,
+  nodes: Node[],
+  after: Node[],
+): MatchResult => {
+  if (nodes.length === 0) {
+    const nextMatch = contentMatch.matchFragment(Fragment.from(after));
+    return {
+      match: contentMatch,
+      validEnd: !!nextMatch?.validEnd,
+    };
+  }
+
+  const node = first(nodes) as Node;
+
+  const currMatch = contentMatch.matchFragment(Fragment.from([node]));
+  if (currMatch) {
+    // console.log("matched", node.name);
+    before.push(node);
+    const result = findMatchingNodes(before, currMatch, nodes.slice(1), after);
+    if (result.validEnd) {
+      return result;
+    } else {
+      before.pop();
+    }
+  }
+
+  return findMatchingNodes(
+    before,
+    contentMatch,
+    node.children.concat(nodes.slice(1)),
+    after,
+  );
 };
