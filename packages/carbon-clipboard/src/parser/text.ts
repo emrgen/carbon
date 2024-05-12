@@ -82,45 +82,33 @@ const removeInlinesWithBlockSibling = (nodes) => {
 const processMarks = () => {};
 
 export const fixContentMatch = (schema: Schema, node: Node) => {
-  if (node.isText) return node;
+  if (node.isText) return [node];
   const { children, type } = node;
 
-  const fixedChildren = children.map((child) => {
-    const node = fixContentMatch(schema, child);
-
-    return fixNodeContentMatch(schema, node);
-  });
-
-  return schema.nodeFromJSON({
-    name: node.name,
-    children: fixedChildren,
-  });
-};
-
-const fixNodeContentMatch = (schema: Schema, node: Node) => {
-  if (node.isText) return node;
-
-  const { children, type } = node;
+  const fixedChildren = flatten(
+    children.map((child) => {
+      return fixContentMatch(schema, child);
+    }),
+  ).filter(identity) as Node[];
 
   const matched: Node[] = [];
-
-  const match = findMatchingNodes(matched, type.contentMatch, children, []);
+  const match = findMatchingNodes(
+    matched,
+    type.contentMatch,
+    fixedChildren,
+    [],
+  );
 
   if (!match.validEnd) {
-    console.log(children.map((ch) => ch.name));
-    throw Error("failed to find valid content match for node: " + node.name);
+    return node.children;
   }
 
-  const fixedNode = schema.nodeFromJSON({
-    name: node.name,
-    children: matched,
-  });
-
-  if (!fixedNode) {
-    throw Error("failed to create a node form json");
-  }
-
-  return fixedNode;
+  return [
+    schema.nodeFromJSON({
+      name: node.name,
+      children: matched,
+    })!,
+  ];
 };
 
 const transformer = {

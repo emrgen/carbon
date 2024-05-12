@@ -3,7 +3,9 @@ import { entries } from "lodash";
 
 export const printNode = (node: JSON | Node) => {
   if (node instanceof Node) {
-    return printNode(node.toJSON());
+    return printNode({
+      ...node.toJSON(),
+    });
   }
 
   const nodes: Record<
@@ -27,6 +29,9 @@ export const printNode = (node: JSON | Node) => {
   entries(nodes).forEach(([key, node]) => {
     const ids = key.split(",");
     let line = "  ".repeat(ids.length - 1);
+
+    const props = {};
+    // console.log(node.props);
 
     if (node.name === "text") {
       line += "| " + `'${node.text}'`;
