@@ -27,6 +27,7 @@ import {
 } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
+import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { cellPlugin, cellRenderer } from "@emrgen/carbon-cell";
 import { questionExtension } from "@emrgen/carbon-question";
 import { flattenDeep, noop } from "lodash";
@@ -39,10 +40,8 @@ const data = node("carbon", [
 
     section([title([text("question title")])]),
 
-    node("stack", [
-      section([title([text("question title 1")])]),
-      section([title([text("question title 2")])]),
-    ]),
+    section([title([text("question title 1")])]),
+    section([title([text("question title 2")])]),
 
     node("collapsible", [title([text("question title")])]),
 
@@ -407,6 +406,7 @@ const plugins = [
   ...codeExtension.plugins!,
   cellPlugin,
   ...questionExtension.plugins!,
+  new ClipboardPlugin(),
   // {
   //   plugins: [
   //     new BlockTree(),

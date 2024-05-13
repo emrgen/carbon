@@ -36,8 +36,11 @@ export class ContentMatch {
   /// Match a node type, returning a match after that node if
   /// successful.
   matchType(type: NodeType): ContentMatch | null {
-    for (let i = 0; i < this.next.length; i++)
+    for (let i = 0; i < this.next.length; i++) {
       if (this.next[i].type == type) return this.next[i].next;
+    }
+
+    debugger;
     return null;
   }
 
@@ -53,8 +56,9 @@ export class ContentMatch {
       return cur;
     }
 
-    for (let i = start; cur && i < end; i++)
+    for (let i = start; cur && i < end; i++) {
       cur = cur.matchType(frag.child(i).type);
+    }
     return cur;
   }
 

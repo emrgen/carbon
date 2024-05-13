@@ -1,32 +1,32 @@
 import {
   AfterPlugin,
+  blocksBelowCommonNode,
   Carbon,
   EventContext,
   EventHandlerMap,
+  findMatchingNodes,
   Node,
   Path,
   Pin,
+  preventAndStop,
+  printNode,
+  SelectedPath,
+  SelectionPatch,
+  Slice,
+  Span,
   TextWriter,
-} from "../core";
-import { SelectionPatch } from "../core/DeleteGroup";
-import { Span } from "../core/Span";
-import { Slice } from "../core/Slice";
-import { preventAndStop } from "../utils/event";
-import { blocksBelowCommonNode } from "../utils/findNodes";
-import { SelectedPath } from "../core/NodeProps";
+} from "@emrgen/carbon-core";
+
 import { Optional } from "@emrgen/types";
-import { identity } from "lodash";
-import { findMatchingNodes } from "@emrgen/carbon-core";
-import clipboard from "@emrgen/carbon-clipboard";
+import { identity, isEmpty } from "lodash";
+import { setClipboard } from "../clipboard";
+import { parseClipboard } from "../parser/parse";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
-  private clipboard: any;
 
   constructor() {
     super();
-
-    // this.clipboard = clipboard;
   }
 
   handlers(): EventHandlerMap {
@@ -44,24 +44,22 @@ export class ClipboardPlugin extends AfterPlugin {
           const html = new TextWriter();
           app.encodeHtml(html, slice.root);
 
-          clipboard
-            .setClipboard([
-              {
-                type: "text/plain",
-                data: writer.toString(),
-              },
-              {
-                type: "text/html",
-                data: html.buildHtml(),
-              },
-              {
-                type: "web application/carbon",
-                data: JSON.stringify(slice.toJSON()),
-              },
-            ])
-            .catch((e) => {
-              console.error("clipboard cut error", e);
-            });
+          setClipboard([
+            {
+              type: "text/plain",
+              data: writer.toString(),
+            },
+            {
+              type: "text/html",
+              data: html.buildHtml(),
+            },
+            {
+              type: "web application/carbon",
+              data: JSON.stringify(slice.toJSON()),
+            },
+          ]).catch((e) => {
+            console.error("clipboard cut error", e);
+          });
 
           app.runtime.clipboard = slice;
         }
@@ -86,24 +84,22 @@ export class ClipboardPlugin extends AfterPlugin {
           app.encodeHtml(html, slice.root);
           console.log("html", html.toString());
 
-          clipboard
-            .setClipboard([
-              {
-                type: "text/plain",
-                data: writer.toString(),
-              },
-              {
-                type: "text/html",
-                data: html.buildHtml(),
-              },
-              {
-                type: "web application/carbon",
-                data: JSON.stringify(slice.toJSON()),
-              },
-            ])
-            .catch((e) => {
-              console.error("clipboard copy error", e);
-            });
+          setClipboard([
+            {
+              type: "text/plain",
+              data: writer.toString(),
+            },
+            {
+              type: "text/html",
+              data: html.buildHtml(),
+            },
+            {
+              type: "web application/carbon",
+              data: JSON.stringify(slice.toJSON()),
+            },
+          ]).catch((e) => {
+            console.error("clipboard copy error", e);
+          });
 
           app.runtime.clipboard = slice;
           return;
@@ -113,17 +109,24 @@ export class ClipboardPlugin extends AfterPlugin {
         const { event, app } = ctx;
         preventAndStop(event);
         const { selection } = app;
-        if (!app.runtime.clipboard.isEmpty) {
-          console.log("runtime.clipboard.root", app.runtime.clipboard.root);
-          const slice = app.runtime.clipboard;
+        // if (!app.runtime.clipboard.isEmpty) {
+        //   console.log("runtime.clipboard.root", app.runtime.clipboard.root);
+        //   const slice = app.runtime.clipboard;
+        //   printNode(slice.root);
+        //
+        //   app.cmd.transform.paste(selection, slice)?.Dispatch();
+        // } else {
+        parseClipboard(ctx.app.schema).then((slice) => {
+          if (isEmpty(slice)) {
+            console.log("failed to parse clipboard data");
+            return;
+          }
+
+          printNode(slice.root);
+
           app.cmd.transform.paste(selection, slice)?.Dispatch();
-        } else {
-          clipboard.parse().then((nodes) => {
-            // const slice = app.schema.type('slice').create(nodes)!;
-            // app.cmd.transform.paste(selection, slice)?.Dispatch()
-            console.log("parsed clipboard nodes", nodes);
-          });
-        }
+        });
+        // }
       },
     };
   }

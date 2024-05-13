@@ -339,8 +339,6 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    console.log(startTitle.chain.map((n) => n.type.name));
-
     this.deleteAndPaste(tr, selection, sliceClone);
   }
 
