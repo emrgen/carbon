@@ -5,7 +5,15 @@ import { first } from "lodash";
 export const getContentMatch = (node: Node) => {
   const parent = node.parent!;
   const matchNodes = parent.children.slice(0, node.index + 1) ?? [];
-  return parent.type.contentMatch.matchFragment(Fragment.from(matchNodes))!;
+  console.log(matchNodes.map((n) => n.name));
+  const match = parent.type.contentMatch.matchFragment(
+    Fragment.from(matchNodes),
+  )!;
+  if (!match) {
+    debugger;
+    throw Error("failed to find content match for children");
+  }
+  return match;
 };
 
 export interface MatchResult {

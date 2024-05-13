@@ -12,6 +12,7 @@ import {
 import { Fragment, MatchResult, Node, Schema } from "@emrgen/carbon-core";
 import { ContentMatch } from "@emrgen/carbon-core/src/core/ContentMatch";
 
+// parse: markdown(text) -> carbon content json
 export const parseText = (text: string) => {
   const tree: TokensList = lexer(text);
   // console.log('blob text', `"${text}"`);
@@ -27,7 +28,7 @@ export const parseText = (text: string) => {
   return validSiblings;
 };
 
-const wrapInlineWithTitle = (nodes) => {
+const wrapInlineWithTitle = (nodes: any[]) => {
   // take text nodes and wrap them in title node
   const inlineNodes = takeWhile(nodes, isInlineNode);
 
@@ -192,6 +193,10 @@ const transformer = {
 
     if (listText.startsWith("-")) {
       return node("bulletList", this.transform(tokens));
+    }
+
+    if (listText.startsWith("*")) {
+      return node("todo", this.transform(tokens));
     }
 
     const listStart = listText.match(/^[0-9a-z]+/)?.[0];

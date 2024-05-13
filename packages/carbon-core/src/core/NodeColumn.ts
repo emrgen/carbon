@@ -361,6 +361,9 @@ export class NodeColumn {
   } {
     const at = Point.toAfter(before);
     const contentMatch = getContentMatch(before);
+    if (!contentMatch) {
+      debugger;
+    }
     const matches: Node[] = [];
     const match = findMatchingNodes(matches, contentMatch, nodes, after);
     const actions = insertNodesActions(at, matches);

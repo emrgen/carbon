@@ -17,6 +17,7 @@ export * from "./utils/browser";
 export * from "./utils/content_match";
 export * from "./utils/props";
 export * from "./utils/print";
+export * from "./utils/findNodes";
 
 export * from "./core/BSet";
 export * from "./core/Logger";

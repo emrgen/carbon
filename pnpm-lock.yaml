@@ -142,6 +142,9 @@ importers:
       '@emrgen/carbon-cell':
         specifier: workspace:*
         version: link:../../packages/carbon-cell
+      '@emrgen/carbon-clipboard':
+        specifier: workspace:*
+        version: link:../../packages/carbon-clipboard
       '@emrgen/carbon-code':
         specifier: workspace:*
         version: link:../../packages/carbon-code

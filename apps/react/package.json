@@ -21,6 +21,7 @@
     "@emrgen/carbon-cell": "workspace:*",
     "@emrgen/carbon-blocks": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
+    "@emrgen/carbon-clipboard": "workspace:*",
     "@emrgen/carbon-react-blocks": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/carbon-question": "workspace:*",
