@@ -14,9 +14,9 @@ import { ContentMatch } from "@emrgen/carbon-core/src/core/ContentMatch";
 
 // parse: markdown(text) -> carbon content json
 export const parseText = (text: string) => {
-  const tree: TokensList = lexer(text);
+  const tree: TokensList = lexer(text, {});
   // console.log('blob text', `"${text}"`);
-  // console.log("syntax tree", JSON.stringify(tree, null, 2));
+  // console.log("syntax tree\n", JSON.stringify(tree, null, 2));
 
   const nodes = flatten(transformer.transform(tree));
   const withTitleNodes = wrapInlineWithTitle(nodes);
@@ -143,7 +143,7 @@ const transformer = {
     return section([title()]);
   },
   code(root: any) {
-    return node("code", [text(root.text)], {
+    return node("code", [node("codeLine", [text(root.text)])], {
       "remote/state/code/lang": root.lang ?? "",
     });
   },
@@ -183,8 +183,9 @@ const transformer = {
     return flatten(items.map((i) => this[i.type](i)));
   },
   list_item(root: any) {
-    const { tokens = [], raw } = root;
+    const { raw } = root;
     const listText = raw.trim();
+    const tokens = root.tokens?.filter((n) => n.type !== "space") ?? [];
     // console.log('listStart', `"${listStart}"`);
 
     if (listText.startsWith("- [ ]") || listText.startsWith("- [x]")) {
@@ -195,8 +196,12 @@ const transformer = {
       return node("bulletList", this.transform(tokens));
     }
 
-    if (listText.startsWith("*")) {
+    if (listText.startsWith("* [")) {
       return node("todo", this.transform(tokens));
+    }
+
+    if (listText.startsWith("*")) {
+      return node("bulletList", this.transform(tokens));
     }
 
     const listStart = listText.match(/^[0-9a-z]+/)?.[0];

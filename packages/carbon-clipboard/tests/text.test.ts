@@ -89,6 +89,23 @@ test("parse ordered list", () => {
   ]);
 });
 
+test("parse nested bullet list", () => {
+  const content = `* a
+   * b
+   * c  
+   1. d`;
+  const res = parseText(content);
+
+  expect(res).toMatchObject([
+    node("bulletList", [
+      title([text("a")]),
+      node("bulletList", [title([text("b")])]),
+      node("bulletList", [title([text("c")])]),
+      node("numberList", [title([text("d")])]),
+    ]),
+  ]);
+});
+
 test("parse mixed list", () => {
   const content = `- a
  1. b

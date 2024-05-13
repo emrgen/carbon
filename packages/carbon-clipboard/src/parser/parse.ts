@@ -1,7 +1,7 @@
 import { Node, Schema, Slice } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { fixContentMatch, parseText } from "./text";
-import { isEmpty } from "lodash";
+import { isEmpty, sortBy } from "lodash";
 import { parseHtml } from "./html";
 
 export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
@@ -12,7 +12,11 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
           console.log("types", item.types);
 
           let consumed = false;
-          for (const type of item.types) {
+          const types = sortBy(item.types, (type) =>
+            ["web application/carbon", "text/html", "text/plain"].indexOf(type),
+          );
+
+          for (const type of types) {
             // parse web application/carbon content to carbon slice
             if (!consumed && type === "web application/carbon") {
               item.getType(type).then((blob) => {
@@ -22,7 +26,7 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                   const startNode = schema.nodeFromJSON(start)!;
                   const endNode = schema.nodeFromJSON(end)!;
                   const slice = Slice.create(rootNode, startNode, endNode);
-                  console.log("slice", slice);
+                  // console.log("slice", slice);
                   resolve(slice);
                 });
               });
@@ -32,7 +36,8 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
             if (!consumed && type === "text/html") {
               item.getType(type).then((blob) => {
                 blob.text().then((text) => {
-                  console.log(text);
+                  console.log("test/html", text);
+
                   const nodes = parseHtml(text);
                   const root = createCarbonSlice(nodes, schema);
                   if (!root) {
@@ -49,13 +54,17 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
             if (!consumed && type === "text/plain") {
               item.getType(type).then((blob) => {
                 blob.text().then((text) => {
-                  console.log(text);
+                  console.log("test/plain", text);
+
                   const nodes = parseText(text);
                   const root = createCarbonSlice(nodes, schema);
                   if (!root) {
                     resolve(null);
                     return;
                   }
+
+                  console.log("slice", root.toJSON());
+
                   const slice = Slice.from(root);
                   resolve(slice);
                 });
@@ -89,6 +98,8 @@ export const createCarbonSlice = (clipNodes: any[], schema: Schema) => {
     return null;
   }
   const slice = schema.type("slice").create(nodes as Node[])!;
+
+  console.log("slice", slice);
 
   const cleaned = fixContentMatch(schema, slice);
   if (isEmpty(cleaned)) {

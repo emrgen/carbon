@@ -10,7 +10,6 @@ export const getContentMatch = (node: Node) => {
     Fragment.from(matchNodes),
   )!;
   if (!match) {
-    debugger;
     throw Error("failed to find content match for children");
   }
   return match;

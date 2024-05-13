@@ -123,6 +123,7 @@ export class ClipboardPlugin extends AfterPlugin {
           }
 
           printNode(slice.root);
+          console.log(slice.root.toJSON());
 
           app.cmd.transform.paste(selection, slice)?.Dispatch();
         });

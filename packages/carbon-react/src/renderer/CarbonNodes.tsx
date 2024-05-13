@@ -204,36 +204,37 @@ const InnerCarbonText = (props: RendererProps) => {
     console.log("InnerCarbonText", node.name, node.id.toString(), marks);
   }
 
-  const attrs = useMemo(() => {
-    const style = {};
-    const classNames: string[] = [];
-    marks.forEach((mark) => {
-      switch (mark.type) {
-        case "bold":
-          classNames.push("carbon-bold");
-          break;
-        case "italic":
-          classNames.push("carbon-italic");
-          break;
-        case "underline":
-          classNames.push("carbon-underline");
-          break;
-        case "color":
-          style["color"] = mark.props?.color ?? "default";
-          break;
-        case "code":
-          classNames.push("carbon-code");
-          break;
-      }
-    }, {});
+  // const attrs = useMemo(() => {
+  //   const style = {};
+  //   const classNames: string[] = [];
+  //   marks.forEach((mark) => {
+  //     switch (mark.type) {
+  //       case "bold":
+  //         classNames.push("carbon-bold");
+  //         break;
+  //       case "italic":
+  //         classNames.push("carbon-italic");
+  //         break;
+  //       case "underline":
+  //         classNames.push("carbon-underline");
+  //         break;
+  //       case "color":
+  //         style["color"] = mark.props?.color ?? "default";
+  //         break;
+  //       case "code":
+  //         classNames.push("carbon-code");
+  //         break;
+  //     }
+  //   }, {});
+  //
+  //   return {
+  //     style,
+  //     className: classNames.join(" "),
+  //   };
+  // }, [marks]);
 
-    return {
-      style,
-      className: classNames.join(" "),
-    };
-  }, [marks]);
   return (
-    <CarbonElement node={node} tag="span" custom={attrs}>
+    <CarbonElement node={node} tag="span">
       <>
         {node.isEmpty ? (
           <CarbonEmpty node={node} parent={parent} />

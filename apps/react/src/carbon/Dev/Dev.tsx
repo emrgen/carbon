@@ -446,12 +446,13 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
-      console.debug(
-        "changes",
-        state.changes.patch,
-        Array.from(state.changes.dataMap.values()),
-      );
-      console.debug("actions", state.actions.actions); //.map(a => a.toJSON()));
+      // console.debug(
+      //   "changes",
+      //   state.changes.patch,
+      //   Array.from(state.changes.dataMap.values()),
+      // );
+      // console.debug("actions", state.actions.actions); //.map(a => a.toJSON()));
+      // printNode(state.content);
       state.content.all((node) => {
         // console.log(node.id.toString(), node.name, node.properties.toKV());
       });

@@ -652,9 +652,12 @@ export class TransformCommands extends BeforePlugin {
       const parent = sliceStartTitle.parent!;
       const name = parent.isDocument ? parent.type.splitName : parent.name;
       const target = start.node.parent!;
-      if (target.name === parent.type.splitName) {
-        tr.Add(ChangeNameAction.create(target!.id, name));
-      }
+
+      // TODO: check if parent and name has same content match
+      // if yes change the name of the target node
+      // if (target.name === parent.type.splitName) {
+      tr.Add(ChangeNameAction.create(target!.id, name));
+      // }
     }
 
     // * update endTitle text content

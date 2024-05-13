@@ -40,7 +40,6 @@ export class ContentMatch {
       if (this.next[i].type == type) return this.next[i].next;
     }
 
-    debugger;
     return null;
   }
 
