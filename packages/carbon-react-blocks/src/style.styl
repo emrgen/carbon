@@ -152,6 +152,7 @@ $lineHeight = 22px
     line-height: $lineHeight
 
     [data-type="content"]
+        line-height 28px
         // padding-left: 2px
         // padding: 2px 0px
         display: flex
@@ -289,11 +290,12 @@ span[data-name=text] {
 //    background: $selectionHaloColor
 
 .carbon-collapsible__control
+    position: relative;
     user-select: none
     left 0
-    top 1px
-    margin-left: 4px;
-    padding-left 0px
+    top 3px
+    margin-left: 0;
+    margin-right 2px
     padding 0
     cursor: pointer
     font-size: 18px
@@ -309,13 +311,29 @@ span[data-name=text] {
     transition background 0.3s
 
 
+[data-as=h1]
+    > [data-type=content] > .carbon-collapsible__control
+        position: relative;
+        top 12px
+
+[data-as=h2]
+    > [data-type=content] > .carbon-collapsible__control
+        position: relative;
+        top 6px
+
+
+[data-as=h2]
+    > [data-type=content] > .carbon-collapsible__control
+        position: relative;
+        top 6px
+
 [data-name=collapsible]
     > [data-type=content] > [data-name=title]
         margin-left 4px
 
     > [data-type=children]
         padding-left 30px
-    padding-left: 0px
+    padding-left: 0
 
     .carbon-collapsible__control
         left 4px

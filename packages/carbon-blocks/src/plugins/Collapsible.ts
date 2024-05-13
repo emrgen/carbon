@@ -15,6 +15,7 @@ import {
   PlaceholderPath,
   Point,
   preventAndStopCtx,
+  RemoteDataAsPath,
   splitTextBlock,
   Transaction,
   Writer,
@@ -59,6 +60,12 @@ export class Collapsible extends NodePlugin {
         icon: "toggleList",
         tags: ["toggle list", "toggle", "collapsible", "list"],
         order: 6,
+      },
+      props: {
+        remote: {
+          // html: { "data-as": "h3" },
+          state: {},
+        },
       },
     };
   }
@@ -138,6 +145,23 @@ export class Collapsible extends NodePlugin {
       },
       backspace: (ctx: EventContext<KeyboardEvent>) => {
         const { selection, currentNode, cmd } = ctx;
+
+        // change collapsible props data-as
+        if (
+          selection.head.isAtStartOfNode(currentNode) &&
+          currentNode.name === this.name &&
+          currentNode.props.get(RemoteDataAsPath, "").match(/h[1-9]/)
+        ) {
+          ctx.stopPropagation();
+          ctx.cmd
+            .Update(currentNode, {
+              [RemoteDataAsPath]: "",
+            })
+            .Dispatch();
+
+          return;
+        }
+
         if (
           selection.isCollapsed &&
           selection.head.isAtStartOfNode(currentNode)

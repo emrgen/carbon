@@ -44,6 +44,8 @@ const data = node("carbon", [
       section([title([text("question title 2")])]),
     ]),
 
+    node("collapsible", [title([text("question title")])]),
+
     // node('question', [
     //   node('questionTitle', [
     //     section([title([text('question title')])]),

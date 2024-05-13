@@ -182,6 +182,8 @@ export class NodeProps_old extends JsonStore {
 export const EmptyPlaceholderPath = "local/placeholder/empty";
 export const FocusedPlaceholderPath = "local/placeholder/focused";
 export const LocalHtmlAttrPath = "local/html";
+export const RemoteHtmlAttrPath = "remote/html";
+export const RemoteDataAsPath = "remote/html/data-as";
 export const PlaceholderPath = "local/html/placeholder";
 export const HasFocusPath = "local/html/data-focused";
 export const UserSelectPath = "local/html/data-user-select";

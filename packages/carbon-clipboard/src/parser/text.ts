@@ -194,6 +194,10 @@ const transformer = {
       return node("bulletList", this.transform(tokens));
     }
 
+    if (listText.startsWith("*")) {
+      return node("todo", this.transform(tokens));
+    }
+
     const listStart = listText.match(/^[0-9a-z]+/)?.[0];
     if (listStart) {
       return node("numberList", this.transform(tokens));
