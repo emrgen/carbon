@@ -36,7 +36,7 @@ class InlinePlugin extends NodePlugin {
       content: "inline+",
       inline: true,
       inlineSelectable: true,
-      focusable: true,
+      focusable: false,
       props: {
         plugin: {
           tag: this.tag,
