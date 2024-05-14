@@ -28,6 +28,7 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                   const slice = Slice.create(rootNode, startNode, endNode);
                   // console.log("slice", slice);
                   resolve(slice);
+                  consumed = true;
                 });
               });
             }
@@ -45,9 +46,9 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                   }
                   const slice = Slice.from(root);
                   resolve(slice);
+                  consumed = true;
                 });
               });
-              // break;
             }
 
             // parse text content to carbon slice
@@ -67,9 +68,9 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
 
                   const slice = Slice.from(root);
                   resolve(slice);
+                  consumed = true;
                 });
               });
-              // break;
             }
           }
         }

@@ -20,6 +20,8 @@ import {
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
 import {
+  BackgroundPath,
+  ColorPath,
   corePresetPlugins,
   Extension,
   NodeId,
@@ -41,9 +43,27 @@ const data = node("carbon", [
     section([title([text("question title")])]),
 
     section([title([text("question title 1")])]),
-    section([title([text("question title 2")])]),
+    section([
+      title([
+        text("question "),
+        node("bold", [text("number ")]),
+        node("italic", [text("number ")]),
+        node("italic", [node("strike", [text("number ")])]),
+        node("superscript", [text("number ")]),
+        node("codespan", [text("number")]),
+        node("subscript", [text("number ")]),
+        node("underline", [text("number ")]),
+        node("strike", [text("number ")]),
+        node("color", [text("color ")], {
+          [ColorPath]: "red",
+        }),
+        node("background", [text("background ")], {
+          [BackgroundPath]: "red",
+        }),
+      ]),
+    ]),
 
-    node("collapsible", [title([text("question title")])]),
+    // node("collapsible", [title([text("question title")])]),
 
     // node('question', [
     //   node('questionTitle', [
