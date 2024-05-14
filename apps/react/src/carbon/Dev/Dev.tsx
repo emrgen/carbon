@@ -52,7 +52,7 @@ const data = node("carbon", [
         node("italic", [text("number ")]),
         node("italic", [node("strike", [text("number ")])]),
         node("superscript", [text("number ")]),
-        node("codespan", [text("number")]),
+        node("codespan", [text("number ")]),
         node("subscript", [text("number ")]),
         node("underline", [text("number ")]),
         node("strike", [text("number ")]),
