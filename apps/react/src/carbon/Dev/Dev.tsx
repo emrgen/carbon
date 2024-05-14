@@ -42,7 +42,9 @@ const data = node("carbon", [
 
     section([title([text("question title")])]),
 
-    section([title([text("question title 1")])]),
+    section([title([text("question title 1")])], {
+      [BackgroundPath]: "red",
+    }),
     section([
       title([
         text("question "),
@@ -62,6 +64,8 @@ const data = node("carbon", [
         }),
       ]),
     ]),
+
+    section([title([text("X"), node("superscript", [text("2")])])]),
 
     // node("collapsible", [title([text("question title")])]),
 
