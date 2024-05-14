@@ -1,12 +1,39 @@
 import { expect, test } from "vitest";
-import { Pin, printNode } from "@emrgen/carbon-core";
-import { node, section, text, title } from "@emrgen/carbon-blocks";
-import { createCarbon } from "./utils";
+import {
+  Carbon,
+  corePresetPlugins,
+  Pin,
+  PinnedSelection,
+  PluginManager,
+  printNode,
+  Schema,
+} from "@emrgen/carbon-core";
+import {
+  blockPresetPlugins,
+  node,
+  section,
+  text,
+  title,
+} from "@emrgen/carbon-blocks";
+import { ImmutableNodeFactory, ImmutableState } from "@emrgen/carbon-react";
+
+const createCarbon = (json: any) => {
+  const plugins = [...corePresetPlugins, ...blockPresetPlugins];
+
+  const pm = new PluginManager(plugins);
+  const scope = Symbol("test");
+
+  const specs = pm.specs;
+  const schema = new Schema(specs, new ImmutableNodeFactory(scope, () => ""));
+
+  const root = schema.nodeFromJSON(json)!;
+  const state = ImmutableState.create(scope, root, PinnedSelection.IDENTITY);
+
+  return new Carbon(state, schema, pm);
+};
 
 test("put the pin at the start of inline", () => {
-  const json = section([
-    title([node("bold", [node("italic", [text("01234")])]), text("5678")]),
-  ]);
+  const json = section([title([node("bold", [text("01234")]), text("5678")])]);
   const app = createCarbon(json);
 
   printNode(app.content);
