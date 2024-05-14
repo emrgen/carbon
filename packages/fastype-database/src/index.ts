@@ -1,4 +1,4 @@
-import { Extension } from "@emrgen/carbon-core";
+import { Extension } from "@emrgen/carbon-react";
 import { BoardViewComp } from "./renderer/BoardView";
 import { BoardView } from "./plugins/BoardView";
 import './database.styl';

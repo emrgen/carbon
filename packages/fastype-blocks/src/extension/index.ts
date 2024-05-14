@@ -1,4 +1,4 @@
-import { Extension } from "@emrgen/carbon-core";
+import { Extension } from "@emrgen/carbon-react";
 import { TodoComp } from "./renderers/Todo";
 import { Callout } from "./renderers/Callout";
 import {SeparatorComp} from "./renderers/Separator";

@@ -8,6 +8,7 @@ import {
   title,
 } from "@emrgen/carbon-blocks";
 import {
+  Extension,
   ReactRenderer,
   RendererProps,
   RenderManager,
@@ -23,7 +24,6 @@ import {
   BackgroundPath,
   ColorPath,
   corePresetPlugins,
-  Extension,
   NodeId,
   State,
 } from "@emrgen/carbon-core";
@@ -43,11 +43,12 @@ const data = node("carbon", [
     section([title([text("question title")])]),
 
     section([title([text("question title 1")])], {
-      [BackgroundPath]: "red",
+      // [BackgroundPath]: "#fb8500",
     }),
     section([
       title([
         text("question "),
+        text(" "),
         node("bold", [text("number ")]),
         node("italic", [text("number ")]),
         node("italic", [node("strike", [text("number ")])]),
@@ -60,7 +61,7 @@ const data = node("carbon", [
           [ColorPath]: "red",
         }),
         node("background", [text("background ")], {
-          [BackgroundPath]: "red",
+          [BackgroundPath]: "#fb8500",
         }),
       ]),
     ]),

@@ -10,7 +10,6 @@ export * from "./Point";
 export * from "./Mark";
 export * from "./PinnedSelection";
 export * from "./PointedSelection";
-export * from "./Extension";
 export * from "./EventContext";
 export * from "./Event";
 export * from "./Schema";
