@@ -1332,6 +1332,9 @@ importers:
       react-icons:
         specifier: ^4.10.1
         version: 4.12.0(react@18.2.0)
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(playwright@1.42.1)(stylus@0.59.0)
     devDependencies:
       '@emrgen/eslint-config-custom':
         specifier: workspace:*

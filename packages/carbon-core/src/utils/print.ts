@@ -13,6 +13,7 @@ export const printNode = (node: JSON | Node) => {
     {
       name: string;
       text?: string;
+      id?: string;
     }
   > = {};
 
@@ -34,11 +35,14 @@ export const printNode = (node: JSON | Node) => {
     // console.log(node.props);
 
     if (node.name === "text") {
-      line += "| " + `'${node.text}'`;
+      line += `\`${node.text}\``;
     } else {
       line += node.name;
     }
 
+    if (node.id) {
+      line += `(id=${node.id})`;
+    }
     console.log(line);
   });
 };
