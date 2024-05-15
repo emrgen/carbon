@@ -130,6 +130,9 @@ export class Pin {
 
   static create(node: Node, offset: number) {
     if (!node.isFocusable && !node.hasFocusable) {
+      debugger;
+    }
+    if (!node.isFocusable && !node.hasFocusable) {
       console.log("create pin", node.name, offset, node);
       throw new Error(`node is not focusable: ${node.name}`);
     }
@@ -227,14 +230,15 @@ export class Pin {
     const { node, offset } = this;
     if (node.isBlock) return this;
 
-    const { parent } = node;
-    if (!parent) {
+    const textBlock = node.parents.find((n) => n.isTextContainer);
+    if (!textBlock) {
       throw Error("Pin.up: node does not have a parent" + node.id.toString());
     }
 
     let distance = 0;
-    parent?.children.some((n) => {
-      if (n.eq(node)) {
+    textBlock?.children.some((n) => {
+      //
+      if (n.find((ch) => ch.eq(node))) {
         distance += offset;
         return true;
       }
@@ -242,7 +246,7 @@ export class Pin {
       return false;
     });
 
-    return Pin.create(parent, distance);
+    return Pin.create(textBlock, distance);
   }
 
   // push pin down to the proper child
@@ -381,7 +385,7 @@ export class Pin {
     }
 
     let { node, offset } = this;
-    distance = node.size - offset + distance;
+    distance = node.focusSize - offset + distance;
     let prev: Node = node;
     let curr: Optional<Node> = node;
     let currSize: number = 0;

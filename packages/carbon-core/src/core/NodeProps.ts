@@ -208,6 +208,7 @@ export const CheckedPath = "remote/state/checked";
 export const EmojiPath = "remote/state/emoji";
 export const ListNumberPath = "remote/state/listNumber";
 export const TitlePath = "remote/state/title";
+export const LinkPath = "remote/state/link/href";
 export const CollapseHidden = "local/state/collapseHidden";
 export const MarksPath = "remote/state/marks";
 export const MultiPath = "remote/state/multi";

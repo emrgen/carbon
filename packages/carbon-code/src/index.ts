@@ -1,4 +1,4 @@
-import {Extension} from "@emrgen/carbon-core";
+import {Extension} from "@emrgen/carbon-react";
 import {ReactRenderer} from "@emrgen/carbon-react";
 
 import "./code.styl";

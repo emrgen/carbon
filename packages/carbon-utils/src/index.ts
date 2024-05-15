@@ -1,4 +1,4 @@
-import { Extension } from '@emrgen/carbon-core'
+import { Extension } from '@emrgen/carbon-react'
 import { BlockMenuPlugin } from './plugins'
 
 export * from './components'

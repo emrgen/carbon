@@ -66,6 +66,7 @@ export class Carbon extends EventEmitter {
     this.pm = pm;
     this.schema = schema;
 
+    // NOTE: without the state activation the node map is not updated with state nodes
     this.state = state.activate();
     this.runtime = new RuntimeState();
 

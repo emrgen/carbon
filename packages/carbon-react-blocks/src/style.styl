@@ -2,7 +2,7 @@
 
 $selectionHaloColor = #accef78d
 $quoteColor = #555
-$lineHeight = 22px
+$lineHeight = 28px
 
 #root
     position absolute
@@ -152,7 +152,7 @@ $lineHeight = 22px
     line-height: $lineHeight
 
     [data-type="content"]
-        line-height 28px
+        line-height $lineHeight
         // padding-left: 2px
         // padding: 2px 0px
         display: flex
@@ -772,7 +772,7 @@ span[data-name=text] {
             overflow: hidden
             justify-content: flex-start
             align-items: flex-start
-            line-height 28px
+            line-height $lineHeight
 
             span
                 display: inline-block
@@ -1417,8 +1417,11 @@ span[data-name=text] {
 
 [data-name="codespan"]
     font-style italic
-    background: #ddd
+    background: #eaeaea
+    color #c7254e
     margin 0 4px
     border-radius 4px
     padding 2px 4px
     font-size 13px
+[data-name="background"]
+    padding 2px 0

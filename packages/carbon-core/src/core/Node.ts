@@ -226,7 +226,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   // focus can be within the node, including any descendants node
   get hasFocusable() {
-    if (!this.isBlock) return false;
+    // if (!this.isBlock) return false;
     if (this.isAtom) return false;
     if (this.isBlock && this.isFocusable && this.isEmpty) return true;
     return this.find((n) => {

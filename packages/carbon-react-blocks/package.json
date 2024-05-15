@@ -6,26 +6,28 @@
   "types": "src/index.ts",
   "license": "All rights reserved to the authors",
   "scripts": {
-    "lint": "eslint *.ts*"
+    "lint": "eslint *.ts*",
+    "test": "vitest"
   },
   "dependencies": {
-    "@emrgen/carbon-react": "workspace:*",
     "@emrgen/carbon-attributes": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/carbon-dragon-react": "workspace:*",
+    "@emrgen/carbon-react": "workspace:*",
     "@uidotdev/usehooks": "^2.4.1",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
-    "react-icons": "^4.10.1"
+    "react-icons": "^4.10.1",
+    "vitest": "^0.34.6"
   },
   "devDependencies": {
+    "@emrgen/eslint-config-custom": "workspace:*",
     "@emrgen/types": "workspace:*",
     "@types/lodash": "^4.14.191",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",
-    "@emrgen/eslint-config-custom": "workspace:*",
     "react": "^18.2.0",
     "tsconfig": "workspace:*",
     "typescript": "^4.9.5"

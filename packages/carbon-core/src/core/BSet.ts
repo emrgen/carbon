@@ -5,6 +5,7 @@ import { Carbon } from "./Carbon";
 import { Maps } from "./types";
 import { NodeMap } from "./NodeMap";
 import { Node } from "./Node";
+import {classString} from "@emrgen/carbon-core";
 
 // A Btree based set
 export class BSet<K> {
@@ -191,5 +192,9 @@ export class NodeIdSet extends BSet<NodeId> {
 
   toJSON() {
     return this.toArray().map((id) => id.toString());
+  }
+
+  toString() {
+    return classString(this)(this.toArray().map(id => id.toString()))
   }
 }

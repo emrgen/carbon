@@ -1,5 +1,5 @@
-import { CarbonPlugin } from "./CarbonPlugin";
-import { ReactRenderer } from "@emrgen/carbon-react";
+import { CarbonPlugin } from "@emrgen/carbon-core"
+import {ReactRenderer} from "../renderer/ReactRenderer"
 
 // Extension acts as group of plugins and renderers
 export interface Extension {

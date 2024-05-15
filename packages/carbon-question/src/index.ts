@@ -2,7 +2,7 @@
 import './question.styl'
 import { Question } from "./plugins/Question";
 import {QuestionTitleComp} from "./renderers/QuestionTitle";
-import {Extension} from "@emrgen/carbon-core";
+import {Extension} from "@emrgen/carbon-react";
 import {ReactRenderer} from "@emrgen/carbon-react";
 import {QuestionComp} from "./renderers/Question";
 import {QuestionTitle} from "./plugins/QuestionTitle";
