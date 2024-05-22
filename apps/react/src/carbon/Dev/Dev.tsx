@@ -24,6 +24,8 @@ import {
   BackgroundPath,
   ColorPath,
   corePresetPlugins,
+  Mark,
+  MarksPath,
   NodeId,
   State,
 } from "@emrgen/carbon-core";
@@ -45,6 +47,27 @@ const data = node("carbon", [
     section([title([text("question title 1")])], {
       // [BackgroundPath]: "#fb8500",
     }),
+    section([
+      title([
+        text("question"),
+        text(" "),
+        text("italic bold", {
+          [MarksPath]: [Mark.BOLD, Mark.ITALIC],
+        }),
+        text(" "),
+        text("colored", {
+          [MarksPath]: [Mark.color("red")],
+        }),
+        text(" "),
+        text("background", {
+          [MarksPath]: [Mark.background("#fb8500")],
+        }),
+        text(" "),
+        text("code", {
+          [MarksPath]: [Mark.CODE],
+        }),
+      ]),
+    ]),
     section([
       title([
         text("question "),

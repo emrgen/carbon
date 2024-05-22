@@ -18,7 +18,7 @@ import {
 } from "@emrgen/carbon-core";
 import { useNodeChange, useRenderManager } from "../hooks";
 import { RendererProps } from "./ReactRenderer";
-import { isEmpty } from "lodash";
+import { isEmpty, merge, sortBy } from "lodash";
 
 export const JustEmpty = (props: RendererProps) => {
   if (props.node.isText) {
@@ -93,10 +93,12 @@ const InnerElement = (
       }
     }
 
+    const styles = merge({}, style, props.style ?? {});
+
     return {
       ...localAttrs,
       ...remoteAttrs,
-      ...(Object.keys(style).length ? { style } : {}),
+      ...(Object.keys(styles).length ? { styles } : {}),
       ...custom,
     };
   }, [custom, node]);
@@ -198,43 +200,59 @@ const CarbonMarks = (props: RenderMarks) => {
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
   const { node, parent } = props;
-  const marks: Mark[] = Object.values(node.props.get(MarksPath) ?? {});
+  const marks: Mark[] = sortBy(
+    Object.values(node.props.get(MarksPath) ?? {}),
+    "type",
+  );
 
   if (!isEmpty(marks)) {
     console.log("InnerCarbonText", node.name, node.id.toString(), marks);
   }
 
-  // const attrs = useMemo(() => {
-  //   const style = {};
-  //   const classNames: string[] = [];
-  //   marks.forEach((mark) => {
-  //     switch (mark.type) {
-  //       case "bold":
-  //         classNames.push("carbon-bold");
-  //         break;
-  //       case "italic":
-  //         classNames.push("carbon-italic");
-  //         break;
-  //       case "underline":
-  //         classNames.push("carbon-underline");
-  //         break;
-  //       case "color":
-  //         style["color"] = mark.props?.color ?? "default";
-  //         break;
-  //       case "code":
-  //         classNames.push("carbon-code");
-  //         break;
-  //     }
-  //   }, {});
-  //
-  //   return {
-  //     style,
-  //     className: classNames.join(" "),
-  //   };
-  // }, [marks]);
+  const style = useMemo(() => {
+    const style = {};
+    marks.forEach((mark) => {
+      switch (mark.type) {
+        case "bold":
+          style["font-weight"] = "bold";
+          break;
+        case "italic":
+          style["font-style"] = "italic";
+          break;
+        case "underline":
+          style["text-decoration"] = "underline";
+          break;
+        case "color":
+          style["color"] = mark.props?.color ?? "default";
+          break;
+        case "background":
+          style["background"] = mark.props?.color ?? "default";
+          break;
+        case "code":
+          style["font-family"] = "monospace";
+          style["background"] = "#f4f4f4";
+          break;
+      }
+    }, {});
+
+    return style;
+  }, [marks]);
+
+  const className = useMemo(() => {
+    const classes: string[] = [];
+    marks.forEach((mark) => {
+      switch (mark.type) {
+        case "code":
+          classes.push("codespan");
+          break;
+      }
+    }, {});
+
+    return classes.join(" ");
+  }, []);
 
   return (
-    <CarbonElement node={node} tag="span">
+    <CarbonElement node={node} tag="span" custom={{ style, className }}>
       <>
         {node.isEmpty ? (
           <CarbonEmpty node={node} parent={parent} />
