@@ -98,7 +98,7 @@ export class PluginManager {
 
   // handle incoming events from ui
   onEvent(event: EventContext<Event>) {
-    // console.log(event.type, event)
+    // console.log(event.type, event);
 
     // keyDown is handled explicitly using Plugin.keydown()
     if (event.type === "keyDown") {

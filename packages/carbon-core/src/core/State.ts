@@ -6,7 +6,7 @@ import { NodeMap } from "./NodeMap";
 import { Draft } from "./Draft";
 import { StateActions, StateChanges } from "./NodeChange";
 import { BlockSelection } from "./BlockSelection";
-import { PluginManager, Schema } from "@emrgen/carbon-core";
+import { MarkSet, PluginManager, Schema } from "@emrgen/carbon-core";
 
 export interface ProduceOpts {
   origin: ActionOrigin;
@@ -18,6 +18,7 @@ export interface ProduceOpts {
 export interface State {
   scope: Symbol;
   content: Node;
+  marks: MarkSet;
   selection: PinnedSelection;
   blockSelection: BlockSelection;
   nodeMap: NodeMap;

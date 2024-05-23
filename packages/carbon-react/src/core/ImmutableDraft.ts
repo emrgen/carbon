@@ -6,10 +6,17 @@ import {
   EmptyPlaceholderPath,
   FocusedPlaceholderPath,
   HasFocusPath,
+  InsertChange,
   InsertNodeAction,
   isPassiveHidden,
+  LinkChange,
+  Mark,
+  MarkAction,
+  MarkSet,
+  MarksPath,
   MoveNodeAction,
   MutableNode,
+  NameChange,
   Node,
   NodeId,
   NodeIdSet,
@@ -17,20 +24,26 @@ import {
   NodePropsJson,
   NodeType,
   p14,
+  Pin,
   PlaceholderPath,
   PluginManager,
   Point,
   PointAt,
   PointedSelection,
+  RemoveChange,
   RemoveNodeAction,
   Schema,
   SelectAction,
   SelectedPath,
+  SelectionChange,
   SetContentAction,
+  SetContentChange,
   sortNodesByDepth,
   State as CoreState,
   StateActions,
+  StateChanges,
   StateScope,
+  TextChange,
   TxType,
   UpdateChange,
   UpdatePropsAction,
@@ -40,16 +53,6 @@ import { ImmutableState } from "./ImmutableState";
 import { first, isArray, isEmpty, isEqual, isString, reduce } from "lodash";
 import FastPriorityQueue from "fastpriorityqueue";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
-import {
-  InsertChange,
-  LinkChange,
-  NameChange,
-  RemoveChange,
-  SelectionChange,
-  SetContentChange,
-  StateChanges,
-  TextChange,
-} from "@emrgen/carbon-core/src/core/NodeChange";
 
 enum UpdateDependent {
   None = 0,
@@ -64,6 +67,8 @@ export class ImmutableDraft implements Draft {
   private readonly state: ImmutableState;
 
   schema: Schema;
+  marks: MarkSet;
+
   private readonly nodeMap: ImmutableNodeMap;
 
   private origin: ActionOrigin;
@@ -88,6 +93,7 @@ export class ImmutableDraft implements Draft {
     type: TxType,
     pm: PluginManager,
     schema: Schema,
+    marks: MarkSet,
   ) {
     this.origin = origin;
     this.state = state;
@@ -96,6 +102,7 @@ export class ImmutableDraft implements Draft {
     this.actions = new StateActions([], type);
     this.tm = new Transformer(this.changes, this.actions);
     this.schema = schema;
+    this.marks = marks.clone();
     this.nodeMap = ImmutableNodeMap.from(state.nodeMap);
     this.updated = new NodeIdSet();
     this.selection = state.selection.unpin(origin);
@@ -170,7 +177,7 @@ export class ImmutableDraft implements Draft {
   private commit(depth: number): ImmutableState {
     this.prepare();
 
-    const { state, updated, selection } = this;
+    const { state, updated, selection, marks } = this;
 
     const nodeMap =
       this.nodeMap.current.size === 0 ? state.nodeMap : this.nodeMap;
@@ -196,6 +203,7 @@ export class ImmutableDraft implements Draft {
     nodeMap.contracts(2);
     nodeMap.freeze();
     after.freeze();
+    marks.freeze();
 
     const selected = this.selected.nodes(this.nodeMap);
     const blockSelection = BlockSelection.create(selected);
@@ -210,6 +218,7 @@ export class ImmutableDraft implements Draft {
       updated: updated,
       changes: this.changes.optimize(),
       actions: this.actions.optimize(),
+      marks,
     });
 
     return newState.freeze();
@@ -232,6 +241,10 @@ export class ImmutableDraft implements Draft {
 
     this.normalize();
     this.updateSelectionProps();
+
+    if (!this.state.selection.unpin().eq(this.selection)) {
+      this.collectMarks();
+    }
 
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
@@ -401,6 +414,7 @@ export class ImmutableDraft implements Draft {
   }
 
   insertText(at: Point, text: string) {
+    const { marks } = this;
     const { nodeId, offset } = at;
     const node = this.nodeMap.get(nodeId);
     if (!node) {
@@ -413,11 +427,39 @@ export class ImmutableDraft implements Draft {
         const textNode = node.type.schema.text(text)!;
         this.updateContent(node.id, [textNode]);
       } else {
+        console.log(
+          "INSERTING TEXT",
+          text,
+          offset,
+          node.textContent,
+          marks.toString(),
+        );
+
+        // find text node and insert text at the offset
+        // if the marks match with the text node, insert the text only
+        // otherwise split the text node and insert the text with the marks
+
+        const pin = Pin.fromPoint(at, this.nodeMap);
+        const down = pin?.down();
+        if (!down) {
+          throw new Error("Cannot insert text to a node that does not exist");
+        }
+
+        console.log(
+          "CURRENT NODE",
+          down.node.name,
+          down.node.textContent,
+          down.node.props.get(MarksPath, []),
+        );
+        console.log("CURRENT MARKS", marks.toString());
+
         const { textContent } = node;
         // FIXME: find the correct child with offset
         const newText =
           textContent.slice(0, offset) + text + textContent.slice(offset);
         const textNode = node.firstChild!;
+        debugger;
+
         this.updateContent(textNode.id, newText);
       }
     }
@@ -697,6 +739,26 @@ export class ImmutableDraft implements Draft {
     }
   }
 
+  updateMark(action: MarkAction, mark: Mark): void {
+    if (!this.drafting) {
+      throw new Error(
+        "Cannot update mark on a draft that is already committed",
+      );
+    }
+
+    const { marks } = this;
+    switch (action) {
+      case "add":
+        marks.add(mark);
+        break;
+      case "remove":
+        marks.remove(mark);
+        break;
+      default:
+        throw new Error("Invalid mark action");
+    }
+  }
+
   updateSelection(selection: PointedSelection) {
     if (!this.drafting) {
       throw new Error(
@@ -794,6 +856,23 @@ export class ImmutableDraft implements Draft {
       });
       this.addUpdated(node.id);
     }
+  }
+
+  private collectMarks() {
+    const { selection } = this;
+    const pinnedSelection = selection.pin(this.nodeMap);
+    if (!pinnedSelection) {
+      console.error("pinned selection is invalid", selection.toString());
+      return;
+    }
+
+    // collect marks from the selection
+    const { start } = pinnedSelection;
+    const downPin = start.down();
+    console.info("down pin", downPin.toString());
+    console.info(downPin.node.props.get(MarksPath, []));
+    const marks = downPin.node.props.get(MarksPath, []);
+    this.marks = MarkSet.from(marks);
   }
 
   // check and update render dependents

@@ -18,7 +18,7 @@ import {
 } from "@emrgen/carbon-core";
 import { useNodeChange, useRenderManager } from "../hooks";
 import { RendererProps } from "./ReactRenderer";
-import { isEmpty } from "lodash";
+import { merge } from "lodash";
 
 export const JustEmpty = (props: RendererProps) => {
   if (props.node.isText) {
@@ -93,10 +93,12 @@ const InnerElement = (
       }
     }
 
+    const styles = merge({}, style, props.style ?? {});
+
     return {
       ...localAttrs,
       ...remoteAttrs,
-      ...(Object.keys(style).length ? { style } : {}),
+      ...(Object.keys(styles).length ? { styles } : {}),
       ...custom,
     };
   }, [custom, node]);
@@ -143,98 +145,80 @@ export const RawText = memo(function RT(props: RendererProps) {
   return <>{ref.current}</>;
 });
 
-interface RenderMark {
-  mark: Mark;
-  children?: React.ReactNode;
-}
+// hook to apply marks to text node
+const useMarks = (marks: Mark[]) => {
+  return useMemo(() => {
+    const style = {};
+    marks.forEach((mark) => {
+      switch (mark.type) {
+        case "bold":
+          merge(style, {
+            fontWeight: "bold",
+          });
+          break;
+        case "strike":
+          merge(style, {
+            textDecoration: "line-through",
+          });
+          break;
+        case "superscript":
+          merge(style, {
+            verticalAlign: "super",
+            fontSize: "smaller",
+          });
+          break;
+        case "subscript":
+          merge(style, {
+            verticalAlign: "sub",
+            fontSize: "smaller",
+          });
+          break;
+        case "italic":
+          merge(style, {
+            fontStyle: "italic",
+          });
+          break;
+        case "underline":
+          merge(style, {
+            textDecoration: "underline",
+          });
+          break;
+        case "color":
+          merge(style, {
+            color: mark.props?.color ?? "default",
+          });
+          break;
+        case "background":
+          merge(style, {
+            background: mark.props?.color ?? "default",
+            padding: "0.1em 0.1em",
+          });
+          break;
+        case "code":
+          merge(style, {
+            background: "#f4f4f4",
+            padding: "0.1em 0.4em",
+            borderRadius: "3px",
+            fontFamily:
+              "Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
+            color: "#c7254e",
+          });
+          break;
+      }
+    }, {});
 
-const CarbonMark = (props: RenderMark) => {
-  const { mark, children } = props;
-  const view = useMemo(() => {
-    switch (mark.type) {
-      case "bold":
-        return <strong>{children}</strong>;
-      case "italic":
-        return <em>{children}</em>;
-      case "underline":
-        return <u>{children}</u>;
-      case "color":
-        return (
-          <span style={{ color: mark.props?.color ?? "default" }}>
-            {children}
-          </span>
-        );
-      case "code":
-        return <>{children}</>;
-      default:
-        return children;
-    }
-  }, [children, mark]);
-
-  return <>{view}</>;
-};
-
-interface RenderMarks {
-  marks: Mark[];
-  children?: React.ReactNode;
-}
-
-const CarbonMarks = (props: RenderMarks) => {
-  const { marks } = props;
-
-  if (isEmpty(marks)) {
-    return <>{props.children}</>;
-  }
-
-  return (
-    <>
-      {marks.reduce((acc, mark) => {
-        return <CarbonMark mark={mark}>{acc}</CarbonMark>;
-      }, props.children)}
-    </>
-  );
+    return style;
+  }, [marks]);
 };
 
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
   const { node, parent } = props;
-  const marks: Mark[] = Object.values(node.props.get(MarksPath) ?? {});
-
-  if (!isEmpty(marks)) {
-    console.log("InnerCarbonText", node.name, node.id.toString(), marks);
-  }
-
-  // const attrs = useMemo(() => {
-  //   const style = {};
-  //   const classNames: string[] = [];
-  //   marks.forEach((mark) => {
-  //     switch (mark.type) {
-  //       case "bold":
-  //         classNames.push("carbon-bold");
-  //         break;
-  //       case "italic":
-  //         classNames.push("carbon-italic");
-  //         break;
-  //       case "underline":
-  //         classNames.push("carbon-underline");
-  //         break;
-  //       case "color":
-  //         style["color"] = mark.props?.color ?? "default";
-  //         break;
-  //       case "code":
-  //         classNames.push("carbon-code");
-  //         break;
-  //     }
-  //   }, {});
-  //
-  //   return {
-  //     style,
-  //     className: classNames.join(" "),
-  //   };
-  // }, [marks]);
+  const marks: Mark[] = node.props.get(MarksPath, [] as Mark[]);
+  const style = useMarks(marks);
 
   return (
-    <CarbonElement node={node} tag="span">
+    <CarbonElement node={node} tag="span" custom={{ style }}>
       <>
         {node.isEmpty ? (
           <CarbonEmpty node={node} parent={parent} />

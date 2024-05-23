@@ -21,9 +21,9 @@ import {
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
 import {
-  BackgroundPath,
-  ColorPath,
   corePresetPlugins,
+  Mark,
+  MarksPath,
   NodeId,
   State,
 } from "@emrgen/carbon-core";
@@ -47,26 +47,39 @@ const data = node("carbon", [
     }),
     section([
       title([
-        text("question "),
+        text("question"),
         text(" "),
-        node("bold", [text("number ")]),
-        node("italic", [text("number ")]),
-        node("italic", [node("strike", [text("number ")])]),
-        node("superscript", [text("number ")]),
-        node("codespan", [text("number ")]),
-        node("subscript", [text("number ")]),
-        node("underline", [text("number ")]),
-        node("strike", [text("number ")]),
-        node("color", [text("color ")], {
-          [ColorPath]: "red",
+        text("italic bold", {
+          [MarksPath]: [Mark.BOLD, Mark.ITALIC],
         }),
-        node("background", [text("background ")], {
-          [BackgroundPath]: "#fb8500",
+        text(" "),
+        text("colored", {
+          [MarksPath]: [Mark.color("red")],
+        }),
+        text(" "),
+        text("background", {
+          [MarksPath]: [Mark.background("#fb8500")],
+        }),
+        text(" "),
+        text("code", {
+          [MarksPath]: [Mark.CODE],
+        }),
+        text(" "),
+        text("sub", {
+          [MarksPath]: [Mark.SUBSCRIPT],
+        }),
+        text("strike", {
+          [MarksPath]: [Mark.STRIKE],
+        }),
+        text("super", {
+          [MarksPath]: [Mark.SUPERSCRIPT],
+        }),
+        text(" "),
+        text("underline", {
+          [MarksPath]: [Mark.UNDERLINE],
         }),
       ]),
     ]),
-
-    section([title([text("X"), node("superscript", [text("2")])])]),
 
     // node("collapsible", [title([text("question title")])]),
 
@@ -471,6 +484,7 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
+      console.log(state.marks.toString());
       // console.debug(
       //   "changes",
       //   state.changes.patch,

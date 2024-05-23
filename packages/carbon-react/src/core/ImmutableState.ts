@@ -1,18 +1,20 @@
 import {
   ActionOrigin,
+  BlockSelection,
+  MarkSet,
   Node,
   NodeIdSet,
   PinnedSelection,
+  ProduceOpts,
   State,
-  BlockSelection,
+  StateActions,
   StateChanges,
   StateScope,
-  ProduceOpts, StateActions
 } from "@emrgen/carbon-core";
-import {Optional} from "@emrgen/types";
-import {ImmutableNodeMap} from "./ImmutableNodeMap";
-import {ImmutableDraft} from "./ImmutableDraft";
-import {identity} from "lodash";
+import { Optional } from "@emrgen/types";
+import { ImmutableNodeMap } from "./ImmutableNodeMap";
+import { ImmutableDraft } from "./ImmutableDraft";
+import { identity } from "lodash";
 
 interface StateProps {
   scope: Symbol;
@@ -25,6 +27,7 @@ interface StateProps {
   changes?: StateChanges;
   actions?: StateActions;
   counter?: number;
+  marks?: MarkSet;
 }
 
 export class ImmutableState implements State {
@@ -32,17 +35,23 @@ export class ImmutableState implements State {
   scope: Symbol;
   content: Node;
   selection: PinnedSelection;
+  marks: MarkSet;
   blockSelection: BlockSelection;
   nodeMap: ImmutableNodeMap;
   updated: NodeIdSet;
   changes: StateChanges;
   actions: StateActions;
 
-  static create(scope: Symbol, content: Node, selection: PinnedSelection, nodeMap: ImmutableNodeMap = new ImmutableNodeMap()) {
+  static create(
+    scope: Symbol,
+    content: Node,
+    selection: PinnedSelection,
+    nodeMap: ImmutableNodeMap = new ImmutableNodeMap(),
+  ) {
     const state = new ImmutableState({ content, selection, scope, nodeMap });
     if (!nodeMap.size) {
-      content.all(n => {
-        nodeMap.set(n.id, n)
+      content.all((n) => {
+        nodeMap.set(n.id, n);
         state.updated.add(n.id);
       });
     }
@@ -61,6 +70,7 @@ export class ImmutableState implements State {
       changes = StateChanges.empty(),
       actions = StateActions.empty(),
       blockSelection = BlockSelection.empty(),
+      marks = MarkSet.empty(),
     } = props;
 
     this.previous = previous;
@@ -72,6 +82,7 @@ export class ImmutableState implements State {
     this.updated = updated;
     this.changes = changes;
     this.actions = actions;
+    this.marks = marks;
   }
 
   get isSelectionChanged() {
@@ -81,7 +92,10 @@ export class ImmutableState implements State {
   }
 
   get isContentChanged() {
-    return !this.previous?.content.eq(this.content) || this.previous?.content.renderVersion !== this.content.renderVersion;
+    return (
+      !this.previous?.content.eq(this.content) ||
+      this.previous?.content.renderVersion !== this.content.renderVersion
+    );
   }
 
   activate() {
@@ -95,8 +109,8 @@ export class ImmutableState implements State {
   }
 
   clone(depth: number = 2) {
-    if (depth === 0) return null
-    const { scope, content, selection, updated, nodeMap } = this;
+    if (depth === 0) return null;
+    const { scope, content, selection, updated, nodeMap, marks } = this;
     if (!this.previous) {
       return new ImmutableState({
         scope,
@@ -104,7 +118,8 @@ export class ImmutableState implements State {
         selection,
         updated,
         nodeMap,
-      })
+        marks,
+      });
     }
 
     const previous = this.previous.clone(depth - 1);
@@ -115,19 +130,24 @@ export class ImmutableState implements State {
       updated,
       nodeMap,
       previous,
-    })
+      marks,
+    });
   }
 
   // try to create a new state or fail and return the previous state
   produce(fn: (state: ImmutableDraft) => void, opts: ProduceOpts): State {
     const { origin, pm, schema, type } = opts;
-    const draft = new ImmutableDraft(this, origin, type, pm, schema);
+    const { marks } = this;
+    const draft = new ImmutableDraft(this, origin, type, pm, schema, marks);
     return draft.produce(fn);
   }
 
   eq(other: State) {
     if (this.scope !== other.scope) return false;
-    return this.content.renderVersion === other.content.renderVersion && this.selection.eq(other.selection);
+    return (
+      this.content.renderVersion === other.content.renderVersion &&
+      this.selection.eq(other.selection)
+    );
   }
 
   revert(steps = 1) {
@@ -138,7 +158,11 @@ export class ImmutableState implements State {
     }
 
     // create a new state with the same scope and content as the old state but with the old state as previous
-    const state = ImmutableState.create(oldState.scope, oldState.content, oldState.selection);
+    const state = ImmutableState.create(
+      oldState.scope,
+      oldState.content,
+      oldState.selection,
+    );
     state.previous = oldState.previous;
 
     return state.freeze();

@@ -23,6 +23,7 @@ import {
   ActivatedPath,
   CollapsedPath,
   CollapseHidden,
+  MarksPath,
   NodeProps,
   NodePropsJson,
   OpenedPath,
@@ -31,7 +32,7 @@ import {
 } from "./NodeProps";
 import { no, yes } from "./types";
 import EventEmitter from "events";
-import { NodeMap } from "@emrgen/carbon-core";
+import { Mark, NodeMap } from "@emrgen/carbon-core";
 
 export type TraverseOptions = {
   order: "pre" | "post";
@@ -152,6 +153,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   get props(): NodeProps {
     return this.content.props;
+  }
+
+  get marks() {
+    return this.props.get(MarksPath, [] as Mark[]);
   }
 
   get key() {

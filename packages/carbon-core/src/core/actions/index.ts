@@ -5,4 +5,5 @@ export * from "./SelectAction";
 export * from "./UpdatePropsAction";
 export * from "./ChangeNameAction";
 export * from "./SetContentAction";
+export * from "./UpdateMarkAction";
 export * from "./types";
