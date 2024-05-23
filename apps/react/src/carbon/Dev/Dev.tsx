@@ -21,8 +21,6 @@ import {
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
 import {
-  BackgroundPath,
-  ColorPath,
   corePresetPlugins,
   Mark,
   MarksPath,
@@ -66,30 +64,22 @@ const data = node("carbon", [
         text("code", {
           [MarksPath]: [Mark.CODE],
         }),
-      ]),
-    ]),
-    section([
-      title([
-        text("question "),
         text(" "),
-        node("bold", [text("number ")]),
-        node("italic", [text("number ")]),
-        node("italic", [node("strike", [text("number ")])]),
-        node("superscript", [text("number ")]),
-        node("codespan", [text("number ")]),
-        node("subscript", [text("number ")]),
-        node("underline", [text("number ")]),
-        node("strike", [text("number ")]),
-        node("color", [text("color ")], {
-          [ColorPath]: "red",
+        text("sub", {
+          [MarksPath]: [Mark.SUBSCRIPT],
         }),
-        node("background", [text("background ")], {
-          [BackgroundPath]: "#fb8500",
+        text("strike", {
+          [MarksPath]: [Mark.STRIKE],
+        }),
+        text("super", {
+          [MarksPath]: [Mark.SUPERSCRIPT],
+        }),
+        text(" "),
+        text("underline", {
+          [MarksPath]: [Mark.UNDERLINE],
         }),
       ]),
     ]),
-
-    section([title([text("X"), node("superscript", [text("2")])])]),
 
     // node("collapsible", [title([text("question title")])]),
 

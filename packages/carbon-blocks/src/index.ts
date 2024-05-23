@@ -30,7 +30,6 @@ import {
   ValuePath,
 } from "./plugins/Scale";
 import { Button } from "./plugins/Button";
-import { InlineStylePlugin } from "./plugins/InlineStyle";
 import { ImagePlugin } from "./plugins/ImagePlugin";
 
 export * from "./create";
@@ -67,8 +66,6 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Question(),
   new Scale(),
   new Button(),
-
-  new InlineStylePlugin(),
 ];
 
 export * from "./events";
