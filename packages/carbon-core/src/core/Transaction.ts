@@ -15,8 +15,8 @@ import {
   NodeBTree,
   NodeIdSet,
   NodePropsJson,
-  Selection,
   TransactionManager,
+  UpdateMarkAction,
 } from "@emrgen/carbon-core";
 import { ChangeNameAction } from "./actions/ChangeNameAction";
 import { UpdatePropsAction } from "./actions/UpdatePropsAction";
@@ -192,11 +192,12 @@ export class Transaction {
     return this.Add(ChangeNameAction.create(ref.nodeId(), to, origin));
   }
 
-  Format(selection: Selection, mark: Mark, origin = this.origin): Transaction {
-    // const after = selection.unpin();
-    // const marks = isArray(mark) ? mark : [mark];
-    // this.Add(MarkCommand.create(start, end, mark, origin))
-    return this;
+  Mark(
+    action: "add" | "remove",
+    mark: Mark,
+    origin = this.origin,
+  ): Transaction {
+    return this.Add(UpdateMarkAction.create(action, mark, origin));
   }
 
   Update(

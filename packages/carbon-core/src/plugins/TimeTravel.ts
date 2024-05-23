@@ -1,16 +1,15 @@
-import { AfterPlugin, Carbon, EventContext, EventHandler, SelectAction, Transaction, TxType } from "../core";
+import { AfterPlugin, EventContext, EventHandler, StateActions } from "../core";
 import { TransactionTree } from "../core/TransactionTree";
 
 // time travel to any point in the past or even the future
 export class TimeTravelPlugin extends AfterPlugin {
-
-  name = 'timeTravel';
+  name = "timeTravel";
 
   transactionTree = new TransactionTree();
 
   keydown(): Partial<EventHandler> {
     return {
-      'cmd_z': (ctx: EventContext<Event>) => {
+      cmd_z: (ctx: EventContext<Event>) => {
         // ctx.event.preventDefault();
         // const tr = this.transactionTree.prev();
         // if (!tr) return;
@@ -28,10 +27,9 @@ export class TimeTravelPlugin extends AfterPlugin {
         //
         // backwardTr.readOnly = true;
         // backwardTr.Dispatch();
-
         // this.bus.emit('timeTravel', this.transactionTree);
       },
-      'cmd_shift_z': (ctx: EventContext<Event>) => {
+      cmd_shift_z: (ctx: EventContext<Event>) => {
         // ctx.event.preventDefault();
         // const tr = this.transactionTree.next();
         // if (!tr) return;
@@ -51,15 +49,14 @@ export class TimeTravelPlugin extends AfterPlugin {
         // forwardTr.Dispatch();
         //
         // // this.bus.emit('timeTravel', this.transactionTree);
-      }
-    }
+      },
+    };
   }
 
-  transaction(tr: Transaction): void {
+  transaction(sa: StateActions): void {
     // if (!tr.readOnly && tr.type === TransactionType.TwoWay && !tr.selectionOnly) {
     //   this.transactionTree.add(tr)
     //   this.bus.emit('timeTravel', this.transactionTree);
     // }
   }
 }
-

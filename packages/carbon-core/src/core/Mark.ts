@@ -1,4 +1,4 @@
-import { each, isArray, isEmpty, isEqual, keys, values } from "lodash";
+import { each, isArray, isEmpty, isEqual, keys, sortBy, values } from "lodash";
 
 export interface User {
   id: string;
@@ -47,6 +47,20 @@ export class Mark {
     return new Mark("background", { color });
   }
 
+  static eqList(a: Mark[], b: Mark[]) {
+    if (a.length !== b.length) return false;
+    const as = sortBy(a, "type");
+    const bs = sortBy(b, "type");
+    return as.every((mark, i) => mark.eq(bs[i]));
+  }
+
+  static fromJSON(json: any) {
+    const { type, props } = json;
+    if (!type) throw new Error("Mark.fromJSON: missing type");
+
+    return new Mark(type, props);
+  }
+
   static create(type: string, props: MarkProps = {}) {
     return new Mark(type, props);
   }
@@ -72,6 +86,10 @@ export class Mark {
     }
 
     return ret;
+  }
+
+  clone() {
+    return new Mark(this.type, { ...this.props });
   }
 }
 
@@ -114,7 +132,11 @@ export class MarkSet {
     delete this.marks[mark.type];
   }
 
-  map(fn: (value: Mark, index: number, array: Mark[]) => unknown) {
+  has(mark: Mark): boolean {
+    return !!this.marks[mark.type];
+  }
+
+  map<A>(fn: (value: Mark, index: number, array: Mark[]) => A) {
     return values(this.marks).map(fn);
   }
 
@@ -133,7 +155,20 @@ export class MarkSet {
     });
   }
 
+  freeze() {
+    values(this.marks).forEach((m) => Object.freeze(m));
+    return Object.freeze(this);
+  }
+
+  clone() {
+    return MarkSet.from(this.map((m) => m.clone()));
+  }
+
   toJSON() {
     return keys(this.marks);
+  }
+
+  toString() {
+    return JSON.stringify(this.map((m) => m.toJSON()));
   }
 }

@@ -1,4 +1,7 @@
 import {
+  Mark,
+  MarkAction,
+  MarkSet,
   Node,
   NodeId,
   NodePropsJson,
@@ -14,6 +17,7 @@ import { Optional } from "@emrgen/types";
 // Actions delegate the state update to the draft
 export interface Draft {
   schema: Schema;
+  marks: MarkSet;
   // nodeMap: NodeMap;
 
   // produce creates a new draft and pass to the fn to update the draft
@@ -33,6 +37,8 @@ export interface Draft {
   change(nodeId: NodeId, type: NodeType): void;
 
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>): void;
+
+  updateMark(action: MarkAction, mark: Mark): void;
 
   updateContent(nodeId: NodeId, content: Node[] | string): void;
 

@@ -484,6 +484,7 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
+      console.log(state.marks.toString());
       // console.debug(
       //   "changes",
       //   state.changes.patch,

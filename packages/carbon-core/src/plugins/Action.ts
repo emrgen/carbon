@@ -1,40 +1,62 @@
 import {
+  ActionOrigin,
+  BlockSelection,
   CarbonPlugin,
+  Mark,
   Node,
-  NodeId, NodeName, NodePropsJson,
-  PinnedSelection, Point,
+  NodeId,
+  NodeName,
+  NodePropsJson,
+  PinnedSelection,
+  Point,
   PointedSelection,
+  Selection,
   Transaction,
-  Mark,  Selection, ActionOrigin
 } from "@emrgen/carbon-core";
 
-declare module '@emrgen/carbon-core' {
+declare module "@emrgen/carbon-core" {
   export interface Transaction {
     select(selection: PinnedSelection | PointedSelection): Transaction;
-    setContent(ref: Node | NodeId, after: Node[]|string): Transaction;
-    insert(at: Point, nodes: Node | Node[]): Transaction,
-    remove(at: Point, node: Node): Transaction,
-    move(from: Point, to: Point, node: Node): Transaction,
-    change(ref: Node | NodeId, to: NodeName): Transaction,
-    format(tr: Transaction, selection: Selection, mark: Mark): Transaction,
-    update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
+
+    setContent(ref: Node | NodeId, after: Node[] | string): Transaction;
+
+    insert(at: Point, nodes: Node | Node[]): Transaction;
+
+    remove(at: Point, node: Node): Transaction;
+
+    move(from: Point, to: Point, node: Node): Transaction;
+
+    change(ref: Node | NodeId, to: NodeName): Transaction;
+
+    format(
+      tr: Transaction,
+      selection: Selection | BlockSelection,
+      mark: Mark,
+    ): Transaction;
+
+    update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction;
+
     dispatch(): void;
+
     action: {
-      select(selection: PinnedSelection | PointedSelection, origin?: ActionOrigin): Transaction,
-      setContent(ref: Node | NodeId, after: Node[]|string): Transaction,
-      insert(at: Point, nodes: Node | Node[]): Transaction,
-      remove(at: Point, node: Node): Transaction,
-      move(from: Point, to: Point, node: Node): Transaction,
-      change(node: Node, to: NodeName): Transaction,
-      format(selection: Selection, mark: Mark): Transaction,
-      update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction,
+      select(
+        selection: PinnedSelection | PointedSelection,
+        origin?: ActionOrigin,
+      ): Transaction;
+      setContent(ref: Node | NodeId, after: Node[] | string): Transaction;
+      insert(at: Point, nodes: Node | Node[]): Transaction;
+      remove(at: Point, node: Node): Transaction;
+      move(from: Point, to: Point, node: Node): Transaction;
+      change(node: Node, to: NodeName): Transaction;
+      format(selection: Selection | BlockSelection, mark: Mark): Transaction;
+      update(ref: Node | NodeId, attrs: Partial<NodePropsJson>): Transaction;
       dispatch(): void;
-    }
+    };
   }
 }
 
 export class ActionPlugin extends CarbonPlugin {
-  name = 'action';
+  name = "action";
 
   commands(): Record<string, Function> {
     return {
@@ -47,15 +69,19 @@ export class ActionPlugin extends CarbonPlugin {
       update: this.update,
       format: this.format,
       dispatch: this.dispatch,
-    }
+    };
   }
 
-  select(tr: Transaction, selection: PinnedSelection | PointedSelection, origin?: ActionOrigin) {
-    tr.Select(selection, origin)
+  select(
+    tr: Transaction,
+    selection: PinnedSelection | PointedSelection,
+    origin?: ActionOrigin,
+  ) {
+    tr.Select(selection, origin);
   }
 
-  setContent(tr: Transaction, ref: Node | NodeId, after: Node[]|string) {
-    tr.SetContent(ref, after)
+  setContent(tr: Transaction, ref: Node | NodeId, after: Node[] | string) {
+    tr.SetContent(ref, after);
   }
 
   insert(tr: Transaction, at: Point, nodes: Node | Node[]) {
@@ -104,8 +130,14 @@ export class ActionPlugin extends CarbonPlugin {
     tr.Update(ref, props);
   }
 
-  format(tr: Transaction, selection: Selection = tr.state.selection, mark: Mark) {
-    tr.Format(selection, mark);
+  format(
+    tr: Transaction,
+    selection: Selection | BlockSelection = tr.state.blockSelection.isEmpty
+      ? tr.state.selection
+      : tr.state.blockSelection,
+    mark: Mark,
+  ) {
+    // tr.Format(selection, mark);
   }
 
   dispatch(tr: Transaction) {
