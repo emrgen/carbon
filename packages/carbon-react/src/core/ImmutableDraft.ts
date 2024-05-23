@@ -867,8 +867,8 @@ export class ImmutableDraft implements Draft {
     }
 
     // collect marks from the selection
-    const { end } = pinnedSelection;
-    const downPin = end.down();
+    const { start } = pinnedSelection;
+    const downPin = start.down();
     console.info("down pin", downPin.toString());
     console.info(downPin.node.props.get(MarksPath, []));
     const marks = downPin.node.props.get(MarksPath, []);

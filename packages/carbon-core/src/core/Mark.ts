@@ -120,12 +120,28 @@ export class MarkSet {
     each(marks, (m) => this.add(m));
   }
 
+  toArray() {
+    return values(this.marks);
+  }
+
+  toggle(mark: Mark) {
+    if (this.has(mark)) {
+      this.remove(mark);
+    } else {
+      this.add(mark);
+    }
+
+    return this;
+  }
+
   add(mark: Mark | Mark[]) {
     if (isArray(mark)) {
       each(mark, (m) => this.add(m));
     } else {
       this.marks[mark.type] = mark;
     }
+
+    return this;
   }
 
   remove(mark: Mark) {
