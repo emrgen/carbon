@@ -1,45 +1,63 @@
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent,
-  CarbonPlaceholder,
   RendererProps,
   useCarbon,
-  useSelectionHalo
+  useSelectionHalo,
 } from "@emrgen/carbon-react";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
+import {
+  useCombineConnectors,
+  useConnectorsToProps,
+  useDragDropRectSelect,
+} from "@emrgen/carbon-dragon-react";
+import { Mark, prevent, preventAndStop, State } from "@emrgen/carbon-core";
 
 export const CommentEditorComp = (props: RendererProps) => {
-  const {node} = props;
+  const { node } = props;
   const ref = useRef(null);
   const app = useCarbon();
 
   const selection = useSelectionHalo(props);
-  const dragDropRect = useDragDropRectSelect({node, ref});
+  const dragDropRect = useDragDropRectSelect({ node, ref });
   const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection)
+    useCombineConnectors(dragDropRect, selection),
   );
 
-  const handleInsertNode = useCallback((e) => {
-    prevent(e);
-    const {lastChild} = node;
-    if (lastChild && lastChild.name === 'section' && lastChild.isEmpty) {
-      app.cmd.selection.collapseAtStartOf(lastChild).dispatch();
-      return
-    }
+  const handleInsertNode = useCallback(
+    (e) => {
+      prevent(e);
+      const { lastChild } = node;
+      if (lastChild && lastChild.name === "section" && lastChild.isEmpty) {
+        app.cmd.selection.collapseAtStartOf(lastChild).dispatch();
+        return;
+      }
 
-    app.cmd.inserter.appendDefault(node, 'section').dispatch();
-  }, [app, node])
+      app.cmd.inserter.appendDefault(node, "section").dispatch();
+    },
+    [app, node],
+  );
 
-  const toggleName = useCallback((name: string) => (e) => {
-    preventAndStop(e);
-    // TODO
-    // find the last child
-    // if its a nestable toggle it
-    // else insert a new item with that name
-    app.cmd.nestable.toggle(name).dispatch();
-  }, [app]);
+  const toggleName = useCallback(
+    (name: string) => (e) => {
+      preventAndStop(e);
+      // TODO
+      // find the last child
+      // if its a nestable toggle it
+      // else insert a new item with that name
+      app.cmd.nestable.toggle(name).dispatch();
+    },
+    [app],
+  );
+
+  const toggleMark = useCallback(
+    (mark: Mark) => (e) => {
+      preventAndStop(e);
+      app.cmd.formatter.toggle(mark)?.dispatch();
+    },
+    [app],
+  );
 
   const [isFocused, setIsFocused] = useState(false);
 
@@ -48,46 +66,99 @@ export const CommentEditorComp = (props: RendererProps) => {
       if (state.blockSelection.isActive) {
         setIsFocused(false);
       } else {
-        const {head, tail} = state.selection;
-        if (head.node.parents.some(p => p.eq(node)) && tail.node.parents.some(p => p.eq(node))) {
+        const { head, tail } = state.selection;
+        if (
+          head.node.parents.some((p) => p.eq(node)) &&
+          tail.node.parents.some((p) => p.eq(node))
+        ) {
           setIsFocused(true);
         } else {
           setIsFocused(false);
         }
       }
-    }
+    };
 
-    app.on('changed', onChange);
+    app.on("changed", onChange);
     return () => {
-      app.off('changed', onChange);
-    }
+      app.off("changed", onChange);
+    };
   }, [app, node]);
 
-  const toolbar = useMemo(() => (
-    <div className={'carbon-comment-editor-toolbar'} data-focused={isFocused}>
-      <button onMouseDown={toggleName('h1')} disabled={!isFocused}>H1</button>
-      <button onMouseDown={toggleName('h2')} disabled={!isFocused}>H2</button>
-      <button onMouseDown={toggleName('h3')} disabled={!isFocused}>H3</button>
-      <button onMouseDown={toggleName('bulletList')} disabled={!isFocused}>-</button>
-      <button onMouseDown={toggleName('numberList')} disabled={!isFocused}>1.</button>
-      <button onMouseDown={toggleName('todo')} disabled={!isFocused}>[]</button>
-      &nbsp; · &nbsp;
-      <button disabled={!isFocused}>B</button>
-      <button disabled={!isFocused}>I</button>
-      <button disabled={!isFocused}>U</button>
-    </div>
-  ), [isFocused]);
+  const toolbar = useMemo(
+    () => (
+      <div className={"carbon-comment-editor-toolbar"} data-focused={isFocused}>
+        <button onMouseDown={toggleName("h1")} disabled={!isFocused}>
+          H1
+        </button>
+        <button onMouseDown={toggleName("h2")} disabled={!isFocused}>
+          H2
+        </button>
+        <button onMouseDown={toggleName("h3")} disabled={!isFocused}>
+          H3
+        </button>
+        <button onMouseDown={toggleName("bulletList")} disabled={!isFocused}>
+          -
+        </button>
+        <button onMouseDown={toggleName("numberList")} disabled={!isFocused}>
+          1.
+        </button>
+        <button onMouseDown={toggleName("todo")} disabled={!isFocused}>
+          []
+        </button>
+        &nbsp; · &nbsp;
+        <button
+          disabled={!isFocused}
+          onMouseDown={toggleMark(Mark.BOLD)}
+          className={"inline-style-bold"}
+        >
+          B
+        </button>
+        <button
+          disabled={!isFocused}
+          onMouseDown={toggleMark(Mark.ITALIC)}
+          className={"inline-style-italic"}
+        >
+          I
+        </button>
+        <button
+          disabled={!isFocused}
+          onMouseDown={toggleMark(Mark.UNDERLINE)}
+          className={"inline-style-underline"}
+        >
+          U
+        </button>
+        <button
+          disabled={!isFocused}
+          onMouseDown={toggleMark(Mark.STRIKE)}
+          className={"inline-style-strike"}
+        >
+          S
+        </button>
+        <button
+          disabled={!isFocused}
+          onMouseDown={toggleMark(Mark.CODE)}
+          className={"inline-style-code"}
+        >
+          {"</>"}
+        </button>
+      </div>
+    ),
+    [isFocused],
+  );
 
   return (
-    <div className="carbon-comment-editor" contentEditable={false} suppressContentEditableWarning={true} key={node.key}>
+    <div
+      className="carbon-comment-editor"
+      contentEditable={false}
+      suppressContentEditableWarning={true}
+      key={node.key}
+    >
       {toolbar}
-      <CarbonBlock {...props} ref={ref} custom={{...connectors}}>
-        <CarbonNodeContent node={node}/>
-        <CarbonNodeChildren node={node}/>
+      <CarbonBlock {...props} ref={ref} custom={{ ...connectors }}>
+        <CarbonNodeContent node={node} />
+        <CarbonNodeChildren node={node} />
       </CarbonBlock>
       {selection.SelectionHalo}
     </div>
-  )
-}
-
-import {prevent, preventAndStop, State} from "@emrgen/carbon-core";
+  );
+};

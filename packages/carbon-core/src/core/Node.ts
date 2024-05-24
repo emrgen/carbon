@@ -193,6 +193,10 @@ export class Node extends EventEmitter implements IntoNodeId {
     return this.content.size;
   }
 
+  get isFrozen() {
+    return false;
+  }
+
   // starting from left of <a> to before of </a>
   // if total focus size is needed for a block, need to add 1
   // used in Position
@@ -838,6 +842,7 @@ export class Node extends EventEmitter implements IntoNodeId {
         id: id.toString(),
         name: type.name,
         text: textContent,
+        props: props.toJSON(),
       };
     }
 

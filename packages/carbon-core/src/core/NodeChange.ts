@@ -69,6 +69,14 @@ export class StateActions {
     this.actions.push(action);
   }
 
+  pop() {
+    return this.actions.pop();
+  }
+
+  last() {
+    return this.actions[this.actions.length - 1];
+  }
+
   inverse(): StateActions {
     // split the actions into parts ending with a select action
     // reverse each part

@@ -3,15 +3,18 @@ import {
   Node,
   NodeContent,
   NodeContentData,
-  NodeId, NodeMap,
+  NodeId,
+  NodeMap,
   NodePropsJson,
-  NodeType, Path, StateScope, With
+  NodeType,
+  Path,
+  With,
 } from "@emrgen/carbon-core";
-import {Optional} from "@emrgen/types";
-import {findIndex, identity, isString} from "lodash";
-import {ImmutableNodeContent} from "./ImmutableNodeContent";
-import {IndexMap, IndexMapper} from "@emrgen/carbon-core/src/core/IndexMap";
-import {CarbonCache} from "@emrgen/carbon-core/src/core/CarbonCache";
+import { Optional } from "@emrgen/types";
+import { findIndex, identity, isString } from "lodash";
+import { ImmutableNodeContent } from "./ImmutableNodeContent";
+import { IndexMap, IndexMapper } from "@emrgen/carbon-core/src/core/IndexMap";
+import { CarbonCache } from "@emrgen/carbon-core/src/core/CarbonCache";
 
 export class ImmutableNode extends Node {
   scope: Symbol;
@@ -28,7 +31,7 @@ export class ImmutableNode extends Node {
     this.scope = scope;
   }
 
-  private get isFrozen() {
+  get isFrozen() {
     return Object.isFrozen(this);
   }
 
@@ -52,17 +55,21 @@ export class ImmutableNode extends Node {
     const parent = this.parent as ImmutableNode;
     if (!parent) {
       // console.warn('node has no parent', this.id.toString());
-      return -1
+      return -1;
     }
 
     // NOTE: this is a performance critical code
-    const key = `${parent.contentKey}/${this.id.toString()}`
-    return NODE_CACHE_INDEX.get(key, () => {
-      const {children = []} = parent;
-      return findIndex(children, n => {
-        return this.id.eq(n.id);
-      });
-    }, parent.isFrozen)
+    const key = `${parent.contentKey}/${this.id.toString()}`;
+    return NODE_CACHE_INDEX.get(
+      key,
+      () => {
+        const { children = [] } = parent;
+        return findIndex(children, (n) => {
+          return this.id.eq(n.id);
+        });
+      },
+      parent.isFrozen,
+    );
   }
 
   override get key() {
@@ -75,7 +82,9 @@ export class ImmutableNode extends Node {
 
   override setParent(parent: Optional<Node>) {
     if (this.isFrozen) {
-      throw new Error(`cannot set parent on frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot set parent on frozen node: ${this.id.toString()}`,
+      );
     }
 
     super.setParent(parent);
@@ -85,15 +94,19 @@ export class ImmutableNode extends Node {
 
   override setParentId(parentId: Optional<NodeId>) {
     if (this.isFrozen) {
-      throw new Error(`cannot set parent id on frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot set parent id on frozen node: ${this.id.toString()}`,
+      );
     }
 
-    return super.setParentId(parentId)
+    return super.setParentId(parentId);
   }
 
   override changeType(type: NodeType) {
     if (this.isFrozen) {
-      throw new Error(`cannot change type on frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot change type on frozen node: ${this.id.toString()}`,
+      );
     }
 
     super.changeType(type);
@@ -101,19 +114,23 @@ export class ImmutableNode extends Node {
 
   override insert(node: Node, index: number) {
     if (this.isFrozen) {
-      throw new Error(`cannot insert node on frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot insert node on frozen node: ${this.id.toString()}`,
+      );
       // const indexMap = new IndexMap(index, 1);
       // node.indexMap = indexMap;
       // node.mappedIndex = index;
       // this.indexMapper.add(indexMap);
     }
 
-    return super.insert(node, index)
+    return super.insert(node, index);
   }
 
   override remove(node: Node) {
     if (this.isFrozen) {
-      throw new Error(`cannot remove node on frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot remove node on frozen node: ${this.id.toString()}`,
+      );
       // const indexMap = new IndexMap(index, -1);
       // this.indexMapper.add(indexMap);
     }
@@ -123,7 +140,9 @@ export class ImmutableNode extends Node {
 
   override insertText(text: string, offset: number) {
     if (this.isFrozen) {
-      throw new Error(`cannot insert text on frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot insert text on frozen node: ${this.id.toString()}`,
+      );
     }
 
     return super.insertText(text, offset);
@@ -131,31 +150,37 @@ export class ImmutableNode extends Node {
 
   override removeText(offset: number, length: number) {
     if (this.isFrozen) {
-      throw new Error(`cannot remove text on frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot remove text on frozen node: ${this.id.toString()}`,
+      );
     }
 
-    return super.removeText(offset, length)
+    return super.removeText(offset, length);
   }
 
   override updateContent(content: ImmutableNode[] | string) {
     if (this.isFrozen) {
-      throw new Error(`cannot update content on frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot update content on frozen node: ${this.id.toString()}`,
+      );
     }
 
-    return super.updateContent(content)
+    return super.updateContent(content);
   }
 
   override updateProps(props: NodePropsJson) {
     if (this.isFrozen) {
-      throw new Error(`cannot update props on frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot update props on frozen node: ${this.id.toString()}`,
+      );
     }
 
-    return super.updateProps(props)
+    return super.updateProps(props);
   }
 
   override addLink(name: string, node: Node) {
     if (this.isFrozen) {
-      throw new Error(`cannot add link on frozen node: ${this.id.toString()}`)
+      throw new Error(`cannot add link on frozen node: ${this.id.toString()}`);
     }
 
     return super.addLink(name, node);
@@ -163,17 +188,19 @@ export class ImmutableNode extends Node {
 
   override removeLink(name: string) {
     if (this.isFrozen) {
-      throw new Error(`cannot remove link from frozen node: ${this.id.toString()}`)
+      throw new Error(
+        `cannot remove link from frozen node: ${this.id.toString()}`,
+      );
     }
 
-    return super.removeLink(name)
+    return super.removeLink(name);
   }
 
   // @mutates
   unfreeze(path: Path, map: NodeMap): MutableNode {
     const mutable = this.isFrozen ? this.clone() : this;
     if (this.isFrozen) {
-      map.put(mutable)
+      map.put(mutable);
     }
 
     if (path.length === 0) {
@@ -185,7 +212,7 @@ export class ImmutableNode extends Node {
     if (isString(index)) {
       const child = mutable.links[index];
       if (!child) {
-        throw new Error(`child not found at ${index}`)
+        throw new Error(`child not found at ${index}`);
       }
 
       const mutableChild = child.unfreeze(rest, map);
@@ -195,7 +222,7 @@ export class ImmutableNode extends Node {
     } else {
       const child = mutable.children[index];
       if (!child) {
-        throw new Error(`child not found at ${index}`)
+        throw new Error(`child not found at ${index}`);
       }
 
       const mutableChild = child.unfreeze(rest, map);
@@ -206,7 +233,9 @@ export class ImmutableNode extends Node {
   }
 
   // clone the content by providing a map function (default is identity)
-  override clone(map: (node: NodeContentData) => NodeContentData = identity): Node {
+  override clone(
+    map: (node: NodeContentData) => NodeContentData = identity,
+  ): Node {
     const data = map(this.content.unwrap());
     const content = new ImmutableNodeContent(this.scope, data);
     const clone = ImmutableNode.create(this.scope, content);
@@ -222,19 +251,18 @@ export class ImmutableNode extends Node {
 
   // @mutates
   freeze(fn: With<Node>): Node {
-    if (this.isFrozen) return this
+    if (this.isFrozen) return this;
 
     // unlink from parent when freezing
     // this.setParent(null)
     this.content.freeze(fn);
     this.props.freeze();
 
-    Object.freeze(this)
+    Object.freeze(this);
     fn(this);
 
     return this;
   }
-
 }
 
 export const NODE_CACHE_INDEX = new CarbonCache();

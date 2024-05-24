@@ -1,16 +1,19 @@
 import {
+  ActionOrigin,
   BeforePlugin,
   BlockSelection,
   Carbon,
+  EventContext,
   EventHandlerMap,
   Mark,
+  preventAndStopCtx,
   Selection,
   State,
   Transaction,
 } from "@emrgen/carbon-core";
 import { PluginEmitter } from "../core/PluginEmitter";
 import { PluginState } from "../core/PluginState";
-import { Optional } from "@emrgen/types";
+import { Optional, With } from "@emrgen/types";
 
 // add formatter commands to the CarbonCommands interface
 declare module "@emrgen/carbon-core" {
@@ -18,17 +21,27 @@ declare module "@emrgen/carbon-core" {
     formatter: {
       bold: (selection?: Selection | BlockSelection) => Optional<Transaction>;
       italic: (selection?: Selection | BlockSelection) => Optional<Transaction>;
-      underline: (selection?: Selection) => Optional<Transaction>;
-      strike: (selection?: Selection) => Optional<Transaction>;
-      code: (selection?: Selection) => Optional<Transaction>;
+      underline: (
+        selection?: Selection | BlockSelection,
+      ) => Optional<Transaction>;
+      strike: (selection?: Selection | BlockSelection) => Optional<Transaction>;
+      code: (selection?: Selection | BlockSelection) => Optional<Transaction>;
       link: (link: string, selection?: Selection) => Optional<Transaction>;
-      subscript: (selection?: Selection) => Optional<Transaction>;
-      superscript: (selection?: Selection) => Optional<Transaction>;
-      color: (color: string, selection?: Selection) => Optional<Transaction>;
+      subscript: (
+        selection?: Selection | BlockSelection,
+      ) => Optional<Transaction>;
+      superscript: (
+        selection?: Selection | BlockSelection,
+      ) => Optional<Transaction>;
+      color: (
+        color: string,
+        selection?: Selection | BlockSelection,
+      ) => Optional<Transaction>;
       background: (
         color: string,
-        selection: Selection,
+        selection: Selection | BlockSelection,
       ) => Optional<Transaction>;
+      toggle(mark: Mark): Optional<Transaction>;
     };
   }
 }
@@ -48,6 +61,7 @@ export class FormatterPlugin extends BeforePlugin {
       superscript: this.superscript,
       color: this.color,
       background: this.background,
+      toggle: this.toggle,
     };
   }
 
@@ -78,25 +92,42 @@ export class FormatterPlugin extends BeforePlugin {
   keydown(): EventHandlerMap {
     return {
       "ctrl+b": (e) => {
-        const { app } = e;
-        const { selection, blockSelection } = app.state;
-        if (!blockSelection.isEmpty) {
-          throw new Error("Not implemented");
-        } else if (selection.isExpanded) {
-          e.event.preventDefault();
-          e.stopPropagation();
-
-          e.cmd.formatter.bold(selection)?.dispatch();
-        }
+        this.toggleMark(e, (cmd, selection) => cmd.formatter.bold(selection));
+      },
+      "ctrl+i": (e) => {
+        this.toggleMark(e, (cmd, selection) => cmd.formatter.italic(selection));
+      },
+      "ctrl+u": (e) => {
+        this.toggleMark(e, (cmd, selection) =>
+          cmd.formatter.underline(selection),
+        );
+      },
+      "ctrl+shift+s": (e) => {
+        this.toggleMark(e, (cmd, selection) => cmd.formatter.strike(selection));
+      },
+      "ctrl+e": (e) => {
+        this.toggleMark(e, (cmd, selection) => cmd.formatter.code(selection));
       },
     };
+  }
+
+  toggleMark(
+    ctx: EventContext<any>,
+    fn: With<Transaction, Selection | BlockSelection>,
+  ) {
+    const { app, cmd } = ctx;
+    preventAndStopCtx(ctx);
+    const { selection, blockSelection } = app.state;
+
+    fn(cmd, blockSelection.isEmpty ? selection : blockSelection);
+    cmd?.select(selection)?.dispatch();
   }
 
   bold(tr: Transaction, selection: Selection | BlockSelection) {
     tr.action.format(selection, Mark.BOLD);
   }
 
-  italic(tr: Transaction, selection: Selection = tr.app.selection) {
+  italic(tr: Transaction, selection: Selection | BlockSelection) {
     tr.action.format(selection, Mark.ITALIC);
   }
 
@@ -104,7 +135,7 @@ export class FormatterPlugin extends BeforePlugin {
     tr.action.format(selection, Mark.UNDERLINE);
   }
 
-  strike(app: Carbon, tr: Transaction, selection: Selection) {
+  strike(tr: Transaction, selection: Selection) {
     tr.action.format(selection, Mark.STRIKE);
   }
 
@@ -130,5 +161,16 @@ export class FormatterPlugin extends BeforePlugin {
 
   background(tr: Transaction, selection: Selection, color = "#eee") {
     tr.action.format(selection, Mark.background(color));
+  }
+
+  toggle(tr: Transaction, mark: Mark) {
+    const { selection, blockSelection } = tr.state;
+    if (blockSelection.isEmpty) {
+      return tr.action
+        .format(selection, mark)
+        .select(selection, ActionOrigin.UserInput);
+    } else {
+      return tr.action.format(blockSelection, mark);
+    }
   }
 }

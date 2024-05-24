@@ -89,6 +89,14 @@ export const deepCloneMap = (data: NodeContentData) => {
   };
 };
 
+export const cloneFrozenNode = (node: Node) => {
+  if (node.isFrozen) {
+    return node.clone();
+  } else {
+    return node;
+  }
+};
+
 export interface JSONNode {
   id: string;
   name: string;

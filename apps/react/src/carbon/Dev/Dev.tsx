@@ -176,9 +176,7 @@ const data = node("carbon", [
     // section([title([])]),
     // section([title([text("section 3")])]),
 
-    // node("commentEditor", [
-    //   section([title([text('add a comment')])])
-    // ]),
+    node("commentEditor", [section([title([text("add a comment")])])]),
 
     // section([title([text("section 3")])]),
     // node("hstack", [
@@ -490,7 +488,10 @@ export default function Dev() {
       //   state.changes.patch,
       //   Array.from(state.changes.dataMap.values()),
       // );
-      // console.debug("actions", state.actions.actions); //.map(a => a.toJSON()));
+      console.debug(
+        "actions",
+        state.actions.actions.map((a) => a.toJSON()),
+      );
       // printNode(state.content);
       state.content.all((node) => {
         // console.log(node.id.toString(), node.name, node.properties.toKV());

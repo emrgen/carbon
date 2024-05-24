@@ -1,4 +1,5 @@
 import {
+  CarbonAction,
   CarbonPlugin,
   deepCloneMap,
   EventContext,
@@ -11,11 +12,14 @@ import {
   Point,
   PointedSelection,
   preventAndStopCtx,
+  SetContentAction,
 } from "@emrgen/carbon-core";
 
 import { TextPlugin } from "./Text";
 import { flatten, identity } from "lodash";
 import { NodeEncoder, Writer } from "@emrgen/carbon-core/src/core/Encoder";
+import { TextBlock } from "@emrgen/carbon-core/src/core/TextBlock";
+import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
 
 // title is a block content that can be used as a title for a block
 export class TitlePlugin extends NodePlugin {
@@ -23,7 +27,7 @@ export class TitlePlugin extends NodePlugin {
 
   priority: number = -1;
 
-  spec(): NodeSpec {
+  override spec(): NodeSpec {
     return {
       group: "",
       content: "inline*",
@@ -36,15 +40,15 @@ export class TitlePlugin extends NodePlugin {
     };
   }
 
-  plugins(): CarbonPlugin[] {
+  override plugins(): CarbonPlugin[] {
     return [new TextPlugin()];
   }
 
-  commands(): Record<string, Function> {
+  override commands(): Record<string, Function> {
     return {};
   }
 
-  handlers(): EventHandlerMap {
+  override handlers(): EventHandlerMap {
     return {
       // insert text node at
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
@@ -65,7 +69,7 @@ export class TitlePlugin extends NodePlugin {
     };
   }
 
-  keydown(): Partial<EventHandler> {
+  override keydown(): Partial<EventHandler> {
     return {
       // if the selection is collapsed the cursor is at the end of the line and inline code
       shiftSpace: (ctx: EventContext<KeyboardEvent>) => {
@@ -122,6 +126,19 @@ export class TitlePlugin extends NodePlugin {
 
     preventAndStopCtx(ctx);
     cmd.transform.insertText(selection, data ?? key, false)?.Dispatch();
+  }
+
+  override normalize(node: Node): CarbonAction[] {
+    const content = TextBlock.from(node).normalizeContent();
+    const { children } = node;
+    if (
+      content.length === children.length &&
+      content.every((n, i) => InlineNode.isSimilar(n, children[i]))
+    ) {
+      return [];
+    }
+
+    return [SetContentAction.withBefore(node, children, content)];
   }
 
   encode(w: Writer, ne: NodeEncoder, node: Node) {

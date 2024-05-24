@@ -1,4 +1,4 @@
-import { Node } from "@emrgen/carbon-core";
+import { MarkSet, Node } from "@emrgen/carbon-core";
 
 export class InlineNode {
   private readonly node: Node;
@@ -14,6 +14,14 @@ export class InlineNode {
 
     this.node = node;
   }
+
+  static isSimilar = (a: Node, b: Node) => {
+    return (
+      a.textContent === b.textContent &&
+      MarkSet.from(a.marks).eq(MarkSet.from(b.marks)) &&
+      a.type.eq(b.type)
+    );
+  };
 
   split(offset: number): Node[] {
     const { node } = this;
@@ -37,5 +45,20 @@ export class InlineNode {
     console.log("XXX", prev.props.toJSON(), node.props.toJSON());
 
     return [prev, next];
+  }
+
+  merge(other: Node): Node {
+    const { node } = this;
+    const { type, textContent } = node;
+    const { textContent: otherText } = other;
+    const merged = textContent + otherText;
+
+    const mergedNode = type.create(merged, node.props.toJSON());
+    if (!mergedNode) {
+      console.warn("Merge failed", mergedNode);
+      return node;
+    }
+
+    return mergedNode;
   }
 }

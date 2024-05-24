@@ -52,6 +52,7 @@ import { Optional } from "@emrgen/types";
 import { ImmutableState } from "./ImmutableState";
 import { first, isArray, isEmpty, isEqual, isString, reduce } from "lodash";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
+import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
 
 enum UpdateDependent {
   None = 0,
@@ -128,11 +129,12 @@ export class ImmutableDraft implements Draft {
   }
 
   private addInserted(node: Node) {
+    // console.log("ADD INSERTED", node.id.toString());
     this.nodeMap.set(node.id, node);
   }
 
   private addRemoved(id: NodeId) {
-    console.log("Removing node", id.toString());
+    // console.log("ADD REMOVED", id.toString());
     this.nodeMap.delete(id);
   }
 
@@ -235,7 +237,15 @@ export class ImmutableDraft implements Draft {
       }
     });
 
-    this.normalize();
+    // move the select action to the end of the actions
+    // this will ensure that the selection is updated after all the changes
+    if (this.actions.last() instanceof SelectAction) {
+      const selectAction = this.actions.pop() as SelectAction;
+      this.normalize();
+      this.actions.add(selectAction);
+    } else {
+      this.normalize();
+    }
     this.updateSelectionProps();
 
     if (!this.state.selection.unpin().eq(this.selection)) {
@@ -247,7 +257,9 @@ export class ImmutableDraft implements Draft {
     this.updated.toArray().forEach((id) => {
       // console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
       if (this.nodeMap.isDeleted(id)) {
+        console.log("REMOVED", id.toString());
         this.removeUpdated(id);
+        // return;
       }
 
       // remove the hidden nodes
@@ -374,7 +386,7 @@ export class ImmutableDraft implements Draft {
       node.descendants().forEach((n) => this.addInserted(n));
     }
 
-    console.log(content, node.textContent, node.renderVersion);
+    // console.log(content, node.textContent, node.renderVersion);
 
     this.addUpdated(nodeId);
     this.addContentChanged(nodeId);
@@ -421,7 +433,7 @@ export class ImmutableDraft implements Draft {
       });
       newChildren.forEach((n) => {
         this.addInserted(n);
-        console.log("INSERTED", n.id.toString());
+        // console.log("INSERTED", n.id.toString());
       });
       this.addUpdated(nodeId);
     }
@@ -743,6 +755,10 @@ export class ImmutableDraft implements Draft {
     this.tm.updateProps(node, props);
     console.log("[render version]", node.id.toString(), node.renderVersion);
     this.addUpdated(node.id);
+
+    if (props[MarksPath] && node.isInline) {
+      this.addContentChanged(node.parentId!);
+    }
 
     if (props[SelectedPath] === true) {
       this.selected.add(nodeId);
@@ -1075,15 +1091,16 @@ class Transformer {
 
     if (
       (isArray(content) && oldChildren.length !== newChildren.length) ||
-      oldChildren.some((n, i) => n.id !== newChildren[i].id)
+      oldChildren.some((n, i) => InlineNode.isSimilar(n, newChildren[i]))
     ) {
+      // collect set content action
+      const oldContent = oldChildren.map((n) => n.toJSON());
+      const newContent = newChildren.map((n) => n.toJSON());
       this.actions.add(
-        SetContentAction.withBefore(
-          node.id,
-          oldChildren.map((n) => n.toJSON()),
-          newChildren.map((n) => n.toJSON()),
-        ),
+        SetContentAction.withBefore(node.id, oldContent, newContent),
       );
+
+      // collect set content change
       this.changes.add(
         SetContentChange.create(
           node.id,
@@ -1092,6 +1109,7 @@ class Transformer {
           newChildren.map((n) => n.id),
         ),
       );
+      this.changes.dataMap.set(node.id, node.data);
     }
   }
 
@@ -1120,7 +1138,7 @@ class Transformer {
     this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
     this.changes.add(UpdateChange.create(node.id, node.path, before, props));
 
-    console.log("UPDATING props", props);
+    // console.log("UPDATING props", props, before);
 
     node.updateProps(props);
 

@@ -3,8 +3,6 @@ import {
   BlockSelection,
   CarbonPlugin,
   Mark,
-  MarkSet,
-  MarksPath,
   Node,
   NodeId,
   NodeName,
@@ -15,12 +13,13 @@ import {
   Selection,
   Transaction,
 } from "@emrgen/carbon-core";
-import { InlineNode } from "../core/InlineNode";
-import { flatten } from "lodash";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
-    select(selection: PinnedSelection | PointedSelection): Transaction;
+    select(
+      selection: PinnedSelection | PointedSelection,
+      origin?: ActionOrigin,
+    ): Transaction;
 
     setContent(ref: Node | NodeId, after: Node[] | string): Transaction;
 
@@ -75,7 +74,7 @@ export class ActionPlugin extends CarbonPlugin {
   select(
     tr: Transaction,
     selection: PinnedSelection | PointedSelection,
-    origin?: ActionOrigin,
+    origin: ActionOrigin = tr.origin,
   ) {
     tr.Select(selection, origin);
   }
@@ -130,166 +129,12 @@ export class ActionPlugin extends CarbonPlugin {
     tr.Update(ref, props);
   }
 
-  format(tr: Transaction, selection: Selection | BlockSelection, mark: Mark) {
-    if (selection instanceof BlockSelection) {
-      throw new Error("Not implemented");
-    } else {
-      console.log("Format selection", selection, mark);
-      const { start, end } = selection.pin(tr.state.nodeMap)!;
-      const startDownPin = start.down().rightAlign;
-      const endDownPin = end.down().leftAlign;
-      const { node: startNode } = startDownPin;
-      const { node: endNode } = endDownPin;
-
-      console.log(startDownPin.node.textContent, endDownPin.node.textContent);
-
-      console.log(startNode.id.toString(), endNode.id.toString());
-
-      // if start and end pin are within the same title node
-      if (startNode.eq(endNode)) {
-        throw new Error("Not implemented");
-      } else {
-        // update start node marks after splitting
-        const startNodes = InlineNode.from(startDownPin.node).split(
-          startDownPin.offset,
-        );
-
-        // update end node marks after splitting
-        const endNodes = InlineNode.from(endDownPin.node).split(
-          endDownPin.offset,
-        );
-
-        if (start.node.eq(end.node)) {
-          const { children } = start.node;
-          let nodes = children;
-          let updated = false;
-
-          if (endNodes.length === 2) {
-            nodes = flatten(
-              nodes.map((child) => {
-                if (child.eq(endNode)) {
-                  console.log(
-                    "XX",
-                    endNodes.map((n) => n.id.toString()),
-                  );
-                  return endNodes;
-                }
-                return child.clone();
-              }),
-            );
-
-            updated = true;
-          }
-
-          if (startNodes.length === 2) {
-            nodes = flatten(
-              nodes.map((child) => {
-                if (child.eq(startNode)) {
-                  console.log(
-                    "XX",
-                    startNodes.map((n) => n.id.toString()),
-                  );
-                  return startNodes;
-                }
-                return child.clone();
-              }),
-            );
-
-            updated = true;
-          }
-
-          if (updated) {
-            tr.SetContent(start.node, nodes);
-          }
-        } else {
-          // if start and end pin are in different title nodes
-          if (startNodes.length === 2) {
-            const { children } = start.node;
-            const nodes = flatten(
-              children.map((child) => {
-                if (child.eq(start.node)) {
-                  return startNodes;
-                }
-                return child;
-              }),
-            );
-
-            tr.SetContent(start.node, nodes);
-          }
-
-          if (endNodes.length === 2) {
-            const { children } = endNode;
-            const nodes = flatten(
-              children.map((child) => {
-                if (child.eq(endNode)) {
-                  return endNodes;
-                }
-                return child;
-              }),
-            );
-
-            tr.SetContent(endNode, nodes);
-          }
-        }
-
-        // update marks between start and end nodes
-        const toggleMarkNodes: Node[] = [];
-
-        if (!startNode.eq(endNode)) {
-          startNode.next((next) => {
-            if (next.eq(endNode)) {
-              return true;
-            }
-
-            toggleMarkNodes.push(next);
-
-            return false;
-          });
-        }
-
-        if (startNodes.length === 2) {
-          const [_, tailNode] = startNodes;
-          toggleMarkNodes.push(tailNode);
-        } else if (startNodes.length === 1) {
-          this.toggleMark(tr, startNode, mark);
-        }
-
-        if (endNodes.length === 2) {
-          const [headNode, _] = endNodes;
-          toggleMarkNodes.push(headNode);
-        } else if (endNodes.length === 1) {
-          this.toggleMark(tr, endNode, mark);
-        }
-
-        const hasMark = toggleMarkNodes.every((node) => {
-          return MarkSet.from(node.marks).has(mark);
-        });
-
-        // if all toggle node has the mark, remove the mark
-        // if all toggle node does not have the mark, add the mark to nodes with the mark
-        if (hasMark) {
-          toggleMarkNodes.forEach((node) => {
-            this.toggleMark(tr, node, mark);
-          });
-        } else {
-          // if some nodes have the mark, remove the mark from nodes with the mark
-          toggleMarkNodes
-            .filter((node) => {
-              return !MarkSet.from(node.marks).has(mark);
-            })
-            .forEach((node) => {
-              this.toggleMark(tr, node, mark);
-            });
-        }
-      }
-    }
-  }
-
-  private toggleMark(tr: Transaction, node: Node, mark: Mark) {
-    const marks = MarkSet.from(node.marks).toggle(mark).toArray();
-    tr.Update(node, {
-      [MarksPath]: marks,
-    });
+  format(
+    tr: Transaction,
+    selection: PinnedSelection | BlockSelection,
+    mark: Mark,
+  ) {
+    tr.transform.mark(selection, mark);
   }
 
   dispatch(tr: Transaction) {

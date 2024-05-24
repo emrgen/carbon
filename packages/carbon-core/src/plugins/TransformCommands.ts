@@ -13,17 +13,19 @@ import { Optional } from "@emrgen/types";
 import {
   ActionOrigin,
   BeforePlugin,
+  BlockSelection,
   Carbon,
   CarbonAction,
-  Format,
   Fragment,
   getContentMatch,
   hasSameIsolate,
   insertAfterAction,
   InsertPos,
+  Mark,
+  MarkSet,
+  MarksPath,
   MoveNodeAction,
   NodeIdSet,
-  NodePropsJson,
   PinnedSelection,
   PlaceholderPath,
   PointedSelection,
@@ -58,6 +60,7 @@ import { RemoveNodeAction } from "../core/actions/RemoveNodeAction";
 import { InsertTextAction } from "../core/actions/InsertTextAction";
 import { ContentMatch } from "../core/ContentMatch";
 import { NodeColumn } from "../core/NodeColumn";
+import { InlineNode } from "../core/InlineNode";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -73,10 +76,9 @@ export interface DeleteOpts {
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
     transform: {
-      format: (
-        type: Format,
-        selection?: PinnedSelection,
-        props?: NodePropsJson,
+      mark: (
+        selection: PinnedSelection | BlockSelection,
+        mark: Mark,
       ) => Transaction;
       insert(node: Node, ref: Node, opts?: InsertPos): Transaction;
       insertText(
@@ -125,22 +127,263 @@ export class TransformCommands extends BeforePlugin {
       unwrap: this.unwrap,
       change: this.change,
       update: this.update,
-      format: this.format,
+      mark: this.mark,
     };
   }
 
   // these are the default formats that can be applied to a node
-  format(
+  mark(
     tr: Transaction,
-    type: Format,
-    selection: PinnedSelection = tr.app.selection,
-    props?: NodePropsJson,
+    selection: PinnedSelection | BlockSelection,
+    mark: Mark,
   ) {
-    if (selection.isCollapsed) {
-      return;
+    if (selection instanceof BlockSelection) {
+      throw new Error("Not implemented");
+    } else {
+      if (selection.isCollapsed) {
+        return;
+      }
+
+      console.log("Format selection", selection, mark);
+      const { start, end } = selection.pin(tr.state.nodeMap)!;
+      const startDownPin = start.down().rightAlign;
+      const endDownPin = end.down().leftAlign;
+      const { node: startNode } = startDownPin;
+      const { node: endNode } = endDownPin;
+
+      const inlineNodes: Node[] = [startNode, endNode];
+      startNode.next((next) => {
+        if (next.eq(endNode)) {
+          return true;
+        }
+
+        inlineNodes.push(next);
+
+        return false;
+      });
+
+      const hasMark = inlineNodes.every((node) => {
+        return MarkSet.from(node.marks).has(mark);
+      });
+
+      const updateStartNode =
+        hasMark || (!hasMark && !MarkSet.from(startNode.marks).has(mark));
+      const updateEndNode =
+        hasMark || (!hasMark && !MarkSet.from(endNode.marks).has(mark));
+
+      console.log(startDownPin.node.textContent, endDownPin.node.textContent);
+
+      console.log(startNode.id.toString(), endNode.id.toString());
+
+      // if start and end pin are within the same title node
+      if (startNode.eq(endNode)) {
+        // if start and end pin are at the same offset, return
+        if (startDownPin.offset === endDownPin.offset) {
+          return;
+        }
+
+        // if start and end pin are at the start and end of the node toggle the mark
+        if (
+          startDownPin.offset === 0 &&
+          endDownPin.offset === endNode.focusSize
+        ) {
+          this.toggleMark(tr, startNode, mark);
+          return;
+        }
+
+        // if start pin is at the start of the node split the node into two parts at the end pin
+        if (startDownPin.offset === 0) {
+          const [headNode, tailNode] = InlineNode.from(startNode).split(
+            endDownPin.offset,
+          );
+          tr.SetContent(start.node, [
+            ...startNode.prevSiblings,
+            headNode,
+            tailNode,
+            ...startNode.nextSiblings,
+          ]);
+          this.toggleMark(tr, headNode, mark);
+          return;
+        }
+
+        // if end pin is at the end of the node split the node into two parts at the start pin
+        if (endDownPin.offset === endNode.focusSize) {
+          const [headNode, tailNode] = InlineNode.from(startNode).split(
+            startDownPin.offset,
+          );
+          tr.SetContent(start.node, [
+            ...startNode.prevSiblings,
+            headNode,
+            tailNode,
+            ...startNode.nextSiblings,
+          ]);
+          this.toggleMark(tr, tailNode, mark);
+          return;
+        }
+
+        // split the node into three parts
+        const [tempNode, tailNode] = InlineNode.from(startNode).split(
+          endDownPin.offset,
+        );
+        const [headNode, middleNode] = InlineNode.from(tempNode).split(
+          startDownPin.offset,
+        );
+
+        tr.SetContent(start.node, [
+          ...startNode.prevSiblings,
+          headNode,
+          middleNode,
+          tailNode,
+          ...startNode.nextSiblings,
+        ]);
+        this.toggleMark(tr, middleNode, mark);
+      } else {
+        // update start node marks after splitting
+        const startNodes = InlineNode.from(startDownPin.node).split(
+          startDownPin.offset,
+        );
+
+        // update end node marks after splitting
+        const endNodes = InlineNode.from(endDownPin.node).split(
+          endDownPin.offset,
+        );
+
+        if (start.node.eq(end.node)) {
+          const { children } = start.node;
+          let nodes = children;
+          let updated = false;
+
+          if (endNodes.length === 2 && updateEndNode) {
+            nodes = flatten(
+              nodes.map((child) => {
+                if (child.eq(endNode)) {
+                  console.log(
+                    "XX",
+                    endNodes.map((n) => n.id.toString()),
+                  );
+                  return endNodes;
+                }
+                return child.clone();
+              }),
+            );
+
+            updated = true;
+          }
+
+          if (startNodes.length === 2 && updateStartNode) {
+            nodes = flatten(
+              nodes.map((child) => {
+                if (child.eq(startNode)) {
+                  console.log(
+                    "XX",
+                    startNodes.map((n) => n.id.toString()),
+                  );
+                  return startNodes;
+                }
+                return child.clone();
+              }),
+            );
+
+            updated = true;
+          }
+
+          if (updated) {
+            tr.SetContent(start.node, nodes);
+          }
+        } else {
+          // if start and end pin are in different title nodes
+          if (startNodes.length === 2 && updateStartNode) {
+            const { children } = start.node;
+            const nodes = flatten(
+              children.map((child) => {
+                if (child.eq(startNode)) {
+                  return startNodes;
+                }
+                return child;
+              }),
+            );
+
+            tr.SetContent(start.node, nodes);
+          }
+
+          if (endNodes.length === 2 && updateEndNode) {
+            const { children } = end.node;
+            const nodes = flatten(
+              children.map((child) => {
+                if (child.eq(endNode)) {
+                  return endNodes;
+                }
+                return child;
+              }),
+            );
+
+            tr.SetContent(end.node, nodes);
+          }
+        }
+
+        // update marks between start and end nodes
+        const toggleMarkNodes: Node[] = [];
+
+        //
+        if (!startNode.eq(endNode)) {
+          startNode.next((next) => {
+            if (next.eq(endNode)) {
+              return true;
+            }
+
+            toggleMarkNodes.push(next);
+
+            return false;
+          });
+        }
+
+        if (updateStartNode) {
+          if (startNodes.length === 2) {
+            const [_, tailNode] = startNodes;
+            toggleMarkNodes.push(tailNode);
+          } else if (startNodes.length === 1) {
+            toggleMarkNodes.push(startNode);
+          }
+        }
+
+        if (updateEndNode) {
+          if (endNodes.length === 2) {
+            const [headNode, _] = endNodes;
+            toggleMarkNodes.push(headNode);
+          } else if (endNodes.length === 1) {
+            toggleMarkNodes.push(endNode);
+          }
+        }
+
+        // if all toggle node has the mark, remove the mark
+        // if all toggle node does not have the mark, add the mark to nodes with the mark
+        if (hasMark) {
+          toggleMarkNodes.forEach((node) => {
+            console.log("toggle mark", node.id.toString(), node.textContent);
+            this.toggleMark(tr, node, mark);
+          });
+        } else {
+          // if some nodes have the mark, remove the mark from nodes with the mark
+          toggleMarkNodes
+            .filter((node) => {
+              return !MarkSet.from(node.marks).has(mark);
+            })
+            .forEach((node) => {
+              console.log("toggle mark", node.id.toString(), node.textContent);
+              this.toggleMark(tr, node, mark);
+            });
+        }
+      }
     }
 
     return tr;
+  }
+
+  private toggleMark(tr: Transaction, node: Node, mark: Mark) {
+    const marks = MarkSet.from(node.marks).toggle(mark).toArray();
+    tr.Update(node, {
+      [MarksPath]: marks,
+    });
   }
 
   // insert node wrt ref node

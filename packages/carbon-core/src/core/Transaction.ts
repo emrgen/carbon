@@ -12,6 +12,7 @@ import { Point } from "./Point";
 import { PointedSelection } from "./PointedSelection";
 import { SelectionManager } from "./SelectionManager";
 import {
+  cloneFrozenNode,
   NodeBTree,
   NodeIdSet,
   NodePropsJson,
@@ -167,6 +168,10 @@ export class Transaction {
     after: Node[] | string,
     origin = this.origin,
   ): Transaction {
+    if (isArray(after)) {
+      after = after.map(cloneFrozenNode);
+    }
+
     return this.Add(SetContentAction.create(nodeRef, after, origin));
   }
 

@@ -1,9 +1,10 @@
 import { classString } from "./Logger";
-import { Mark } from "./Mark";
+import { Mark, MarkSet } from "./Mark";
 import { Node } from "./Node";
 import { Optional } from "@emrgen/types";
 import { reduce } from "lodash";
 import { deepCloneMap } from "@emrgen/carbon-core";
+import { InlineNode } from "./InlineNode";
 
 // utility class for text blocks
 // title is a text block
@@ -33,16 +34,43 @@ export class TextBlock {
     return this.node.unwrap();
   }
 
+  normalizeContent() {
+    const { children } = this.node;
+    // merge adjacent text nodes with the same marks
+    return (
+      children.reduce((acc, curr, index) => {
+        if (index === 0) {
+          return [curr];
+        }
+
+        const prev = acc[acc.length - 1];
+        const prevMarks = MarkSet.from(prev.marks);
+        const currMarks = MarkSet.from(curr.marks);
+        if (prevMarks.eq(currMarks)) {
+          const prevClone = prev.clone();
+          acc.pop();
+
+          const newNode = InlineNode.from(prev).merge(curr);
+
+          acc.push(newNode);
+          return acc;
+        }
+
+        return [...acc, curr];
+      }, [] as Node[]) ?? []
+    );
+  }
+
   // @mutation
-  addMark(mark: Mark, start: number, end: number) {
+  #addMark(mark: Mark, start: number, end: number) {
     // split the content and add the mark in the relevant node
   }
 
   // @mutation
-  removeMark(mark: Mark, start: number, end: number) {}
+  #removeMark(mark: Mark, start: number, end: number) {}
 
   // @mutation
-  insert(node: Node, offset: number) {
+  #insert(node: Node, offset: number) {
     if (!node.isInline) {
       throw new Error("node is not inline");
     }
@@ -112,7 +140,7 @@ export class TextBlock {
     return this;
   }
 
-  split(offset: number): [Node[], Node[]] {
+  private split(offset: number): [Node[], Node[]] {
     // return this.node.content.split(offset);
     return [[], []];
   }

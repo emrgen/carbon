@@ -1,5 +1,12 @@
-import {Node, NodeId, NodeMap as NodeMap, NodeBTree, Point, NodeIdComparator} from "@emrgen/carbon-core";
-import {Optional, Predicate} from "@emrgen/types";
+import {
+  Node,
+  NodeBTree,
+  NodeId,
+  NodeIdComparator,
+  NodeMap as NodeMap,
+  Point,
+} from "@emrgen/carbon-core";
+import { Optional, Predicate } from "@emrgen/types";
 
 export class ImmutableNodeMap implements NodeMap {
   // recent insertions
@@ -26,7 +33,7 @@ export class ImmutableNodeMap implements NodeMap {
 
   static fromNodes(nodes: Node[]) {
     const map = new ImmutableNodeMap();
-    nodes.forEach(n => map.set(n.id, n));
+    nodes.forEach((n) => map.set(n.id, n));
     return map;
   }
 
@@ -55,7 +62,7 @@ export class ImmutableNodeMap implements NodeMap {
     });
   }
 
-  forEach(fn: (node: Node, id: NodeId, ) => void, deep = false) {
+  forEach(fn: (node: Node, id: NodeId) => void, deep = false) {
     const map = ImmutableNodeMap.empty();
     this.collect(this, map);
     map._map.forEach((v, k) => {
@@ -128,7 +135,7 @@ export class ImmutableNodeMap implements NodeMap {
     // console.log("deleting", key.toString(), this.get(key));
     this._deleted.set(key, this.get(key)!);
     this._map.delete(key);
-    console.log('delete', key.toString(), this.get(key));
+    // console.log('delete', key.toString(), this.get(key));
   }
 
   // find the index of the given node
@@ -136,7 +143,9 @@ export class ImmutableNodeMap implements NodeMap {
     const parent = this.parent(node);
     const root = this.get(NodeId.ROOT);
     if (!root) {
-      throw new Error("carbon root node must always exists. root node not found");
+      throw new Error(
+        "carbon root node must always exists. root node not found",
+      );
     }
 
     if (!parent) return -1;
@@ -144,7 +153,7 @@ export class ImmutableNodeMap implements NodeMap {
   }
 
   // find the parent of the given node
-  parent(from: Node|NodeId): Optional<Node> {
+  parent(from: Node | NodeId): Optional<Node> {
     let node = from instanceof Node ? from : this.get(from);
     return node && node.parentId && this.get(node.parentId);
   }
@@ -154,7 +163,7 @@ export class ImmutableNodeMap implements NodeMap {
     let node = this.get(from);
     while (node) {
       if (fn(node)) return node;
-      node = this.parent(node)
+      node = this.parent(node);
     }
   }
 
@@ -163,7 +172,7 @@ export class ImmutableNodeMap implements NodeMap {
     let node = from instanceof Node ? from : this.get(from);
     const nodes: Node[] = [];
     while (node) {
-      nodes.push(node)
+      nodes.push(node);
       node = this.parent(node.id);
     }
 
@@ -209,11 +218,11 @@ export class ImmutableNodeMap implements NodeMap {
     if (!children) {
       const node = this.get(key);
       if (node) {
-        return node.children.map(c => c.id);
+        return node.children.map((c) => c.id);
       }
     }
 
-    return children?.filter(id => !this.isDeleted(id)) || [];
+    return children?.filter((id) => !this.isDeleted(id)) || [];
   }
 
   insert(at: Point, childId: NodeId): void {
@@ -250,7 +259,9 @@ export class ImmutableNodeMap implements NodeMap {
   private insertAfter(prevId: NodeId, childId: NodeId) {
     const parentId = this._parents.get(prevId)!;
     const children = this._children.get(parentId) ?? [];
-    const index = children.findIndex(id => NodeIdComparator(id, prevId) === 0);
+    const index = children.findIndex(
+      (id) => NodeIdComparator(id, prevId) === 0,
+    );
     if (index >= 0) {
       children.splice(index + 1, 0, childId);
     }
@@ -261,7 +272,9 @@ export class ImmutableNodeMap implements NodeMap {
   private insertBefore(nextId: NodeId, childId: NodeId) {
     const parentId = this._parents.get(nextId)!;
     const children = this._children.get(parentId) ?? [];
-    const index = children.findIndex(id => NodeIdComparator(id, nextId) === 0);
+    const index = children.findIndex(
+      (id) => NodeIdComparator(id, nextId) === 0,
+    );
     if (index >= 0) {
       children.splice(index, 0, childId);
     }
@@ -274,7 +287,9 @@ export class ImmutableNodeMap implements NodeMap {
     if (parentId) {
       const children = this._children.get(parentId);
       if (children) {
-        const index = children.findIndex(id => NodeIdComparator(id, childId) === 0);
+        const index = children.findIndex(
+          (id) => NodeIdComparator(id, childId) === 0,
+        );
         if (index >= 0) {
           children.splice(index, 1);
         }
