@@ -88,8 +88,10 @@ export class TextBlock {
             return textNode;
           }
           return child;
-        }) ?? ([] as Node[]).map(cloneFrozenNode)
-      );
+        }) ?? ([] as Node[])
+      )
+        .map(cloneFrozenNode)
+        .filter((n) => n.focusSize);
     }
 
     const startNodes = InlineNode.from(startNode).split(startDown.offset);
@@ -104,9 +106,9 @@ export class TextBlock {
       endNodes.shift();
     }
 
-    return [...prevNodes, ...startNodes, ...endNodes, ...nextNodes].map(
-      cloneFrozenNode,
-    );
+    return [...prevNodes, ...startNodes, ...endNodes, ...nextNodes]
+      .map(cloneFrozenNode)
+      .filter((n) => n.focusSize);
   }
 
   // check if a and b have the same content and marks in the same order

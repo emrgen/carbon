@@ -7,6 +7,7 @@ import {
   BlockSelection,
   Carbon,
   CarbonAction,
+  cloneFrozenNode,
   Fragment,
   getContentMatch,
   hasSameIsolate,
@@ -2011,36 +2012,10 @@ export class TransformCommands extends BeforePlugin {
           return;
         }
 
-        // const sdown = start.down();
-        // const edown = end.down();
-        // if (sdown?.node.eq(edown?.node)) {
-        //   if (sdown.offset === edown.offset) {
-        //     return;
-        //   }
-        //   const { node } = sdown;
-        //   const textContent =
-        //     node.textContent.slice(0, sdown.offset) +
-        //     node.textContent.slice(edown.offset);
-        //   if (textContent === "") {
-        //     rangeAction.push(
-        //       SetContentAction.create(
-        //         node.parentId!,
-        //         flatten([node.prevSiblings, node.nextSiblings]).filter(
-        //           identity,
-        //         ),
-        //       ),
-        //     );
-        //   } else {
-        //     rangeAction.push(SetContentAction.create(node.id, textContent));
-        //   }
-        //   return;
-        // }
-
         if (start.offset === end.offset) {
           return;
         }
 
-        // TODO: delete using TextContent methods
         const content = TextBlock.from(node).removeContent(
           start.offset,
           end.offset,
@@ -2092,7 +2067,6 @@ export class TransformCommands extends BeforePlugin {
     // console.log('###', normalSelection.toJSON());
 
     // TODO: check if this is unnecessary
-
     const startPoint = start.point;
     const endPoint = end.point;
 
@@ -2357,14 +2331,17 @@ export class TransformCommands extends BeforePlugin {
       // NOTE: empty text node are not valid in carbon
       if (next.textContent) {
         if (prev.isVoid) {
-          const textNode = app.schema.text(next.textContent)!;
+          const { children } = next;
           insertActions.push(
-            InsertNodeAction.fromNode(Point.atOffset(prev.id), textNode),
+            SetContentAction.create(prev.id, children.map(cloneFrozenNode)),
           );
         } else {
-          const textContent = prev.textContent + next.textContent;
-          const textNode = app.schema.text(textContent)!;
-          insertActions.push(SetContentAction.create(prev.id, [textNode]));
+          insertActions.push(
+            SetContentAction.create(
+              prev.id,
+              [...prev.children, ...next.children].map(cloneFrozenNode),
+            ),
+          );
         }
 
         if (prev.isEmpty && !next.isEmpty) {
