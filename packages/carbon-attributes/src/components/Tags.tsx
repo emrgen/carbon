@@ -1,4 +1,4 @@
-import { RendererProps } from "@emrgen/carbon-core";
+import { RendererProps } from "@emrgen/carbon-react";
 import React from "react";
 
 export function Tags(props: RendererProps) {
@@ -6,7 +6,7 @@ export function Tags(props: RendererProps) {
   return (
     <div className="carbon-attrs">
       <div className="carbon-attrs-name">
-        <span className="carbon-attrs-name-label">  &nbsp;#&nbsp; Tags</span>
+        <span className="carbon-attrs-name-label"> &nbsp;#&nbsp; Tags</span>
       </div>
       <div className="carbon-attrs-values">
         {value.map((tag) => (

@@ -1,17 +1,16 @@
-import React, { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { Box, Flex, useDimensions } from "@chakra-ui/react";
-import {
-  RendererProps,
-  constrain,
-  stop,
-  useCarbon,
-} from "@emrgen/carbon-core";
-import {
-  DndEvent,
-  useDndMonitor,
-  useDraggable,
-  useDraggableHandle,
-} from "@emrgen/carbon-dragon";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { Flex } from "@chakra-ui/react";
+
+import { DndEvent } from "@emrgen/carbon-dragon";
+import { RendererProps, useCarbon } from "@emrgen/carbon-react";
+import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
+import { constrain } from "@emrgen/carbon-core";
 
 interface MediaViewProps extends RendererProps {
   aspectRatio?: number;
@@ -28,8 +27,8 @@ export function MediaView(props: MediaViewProps) {
   const app = useCarbon();
   const ref = useRef<HTMLDivElement>(null);
   const [initialSize, setInitialSize] = useState({ width: 0, height: 0 });
-  const [width, setWidth] = useState( 0);
-  const [height, setHeight] = useState( 0);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
   const [documentWidth, setDocumentWidth] = useState(0);
 
   const [opacity, setOpacity] = React.useState(0);
@@ -62,7 +61,7 @@ export function MediaView(props: MediaViewProps) {
     const parentWidth = docEl.offsetWidth ?? 0;
 
     setDocumentWidth(parentWidth);
-  },[app.store, node.parents])
+  }, [app.store, node.parents]);
 
   useEffect(() => {
     updateDocumentWidth();
@@ -72,8 +71,8 @@ export function MediaView(props: MediaViewProps) {
     app.on("react:mounted", updateDocumentWidth);
     return () => {
       app.off("react:mounted", updateDocumentWidth);
-    }
-  },[app, updateDocumentWidth]);
+    };
+  }, [app, updateDocumentWidth]);
 
   // useEffect(() => {
   //   window.addEventListener("resize", updateDocumentWidth);
@@ -90,7 +89,7 @@ export function MediaView(props: MediaViewProps) {
         height: ref.current?.offsetHeight ?? 0,
       });
     },
-    [ref]
+    [ref],
   );
 
   const onDragMove = useCallback(
@@ -119,14 +118,14 @@ export function MediaView(props: MediaViewProps) {
         const nh = constrain(
           roundInOffset(height + dy, 50),
           100,
-          aspectRatio * width
+          aspectRatio * width,
         );
         if (nh / width < aspectRatio) {
           setHeight(nh);
         }
       }
     },
-    [aspectRatio, documentWidth, initialSize, node.id]
+    [aspectRatio, documentWidth, initialSize, node.id],
   );
 
   const onDragEnd = useCallback(
@@ -138,7 +137,7 @@ export function MediaView(props: MediaViewProps) {
         })
         .Dispatch();
     },
-    [app.tr, height, node.id, width]
+    [app.tr, height, node.id, width],
   );
 
   useDndMonitor({
