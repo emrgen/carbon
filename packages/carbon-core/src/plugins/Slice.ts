@@ -1,23 +1,29 @@
-import {Carbon, CarbonPlugin, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "../core";
+import {CarbonPlugin, Node, NodeEncoder, NodeSpec, Writer} from "../core";
 
-export class SlicePlugin extends CarbonPlugin {
+/**
+ * Slice is a special node that represents a selection of nodes in the document.
+ * It is used to represent the selection in the editor and to copy and paste content.
+ * The content of a slice is a list of nodes that are selected in the document.
+ **/
+export class SliceNode extends CarbonPlugin {
+  static kind = "slice";
 
-  name = 'slice';
+  name = "slice";
 
   spec(): NodeSpec {
     return {
-      content: 'content+'
-    }
+      content: "content+",
+    };
   }
 
   encode(w: Writer, ne: NodeEncoder, node: Node) {
-    node.children.forEach(n => {
+    node.children.forEach((n) => {
       ne.encode(w, n);
     });
   }
 
   encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
-    node.children.forEach(n => {
+    node.children.forEach((n) => {
       ne.encodeHtml(w, n);
     });
   }

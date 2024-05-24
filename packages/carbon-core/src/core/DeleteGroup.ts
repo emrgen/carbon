@@ -1,5 +1,5 @@
 import { NodeIdSet } from "./BSet";
-import { Span } from "./Span";
+import { NodeSpan, Span } from "./Span";
 import { NodeId } from "./NodeId";
 
 export class SelectionPatch {
@@ -38,5 +38,23 @@ export class SelectionPatch {
 
   has(id: NodeId) {
     return this.ids.has(id);
+  }
+}
+
+export class DeletePatch extends SelectionPatch {
+  ranges: NodeSpan[] = [];
+
+  static default() {
+    return new DeletePatch();
+  }
+
+  override addRange(range: NodeSpan) {
+    NodeSpan.assert(range);
+    super.addRange(range);
+  }
+
+  override removeRange(range: Span) {
+    NodeSpan.assert(range);
+    super.removeRange(range);
   }
 }

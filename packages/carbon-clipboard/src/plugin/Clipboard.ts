@@ -2,18 +2,20 @@ import {
   AfterPlugin,
   blocksBelowCommonNode,
   Carbon,
+  DeletePatch,
   EventContext,
   EventHandlerMap,
   findMatchingNodes,
   Node,
+  NodeIdComparator,
+  NodeSpan,
   Path,
   Pin,
   preventAndStop,
   printNode,
   SelectedPath,
-  SelectionPatch,
   Slice,
-  Span,
+  SliceNode,
   TextWriter,
 } from "@emrgen/carbon-core";
 
@@ -21,6 +23,8 @@ import { Optional } from "@emrgen/types";
 import { identity, isEmpty } from "lodash";
 import { setClipboard } from "../clipboard";
 import { parseClipboard } from "../parser/parse";
+import { TextBlock } from "@emrgen/carbon-core/src/core/TextBlock";
+import BTree from "sorted-btree";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
@@ -175,7 +179,7 @@ export class ClipboardPlugin extends AfterPlugin {
             endNode.index + 1,
           ) ?? [];
 
-    const type = app.schema.type("slice");
+    const type = app.schema.type(SliceNode.kind);
     // extract document content matching nodes
     if (!startNode.isDocument) {
       const match = findMatchingNodes(matches, type.contentMatch, nodes, []);
@@ -204,7 +208,7 @@ export class ClipboardPlugin extends AfterPlugin {
 
     console.log("rootNode", root);
 
-    const deleteGroup = new SelectionPatch();
+    const deleteGroup = DeletePatch.default();
     const startPin = start.down();
     const endPin = end.down();
 
@@ -251,34 +255,35 @@ export class ClipboardPlugin extends AfterPlugin {
       },
     );
 
-    deleteGroup.addRange(Span.create(Pin.toStartOf(start.node)!, start));
-    deleteGroup.addRange(Span.create(end, Pin.toEndOf(end.node)!));
+    // collect spans that falls outside the selection, so that we can remove them later
+    deleteGroup.addRange(NodeSpan.create(Pin.toStartOf(start.node)!, start));
+    deleteGroup.addRange(NodeSpan.create(end, Pin.toEndOf(end.node)!));
 
     // console.log(deleteGroup.ids.map(id => id.toString()));
     // console.log(deleteGroup.ranges);
+
+    // TODO: check if we really need to reverse the ranges
     deleteGroup.ranges.reverse();
 
-    // remove the ranges outside the selection
+    // create a map of spans to remove the content within the span
+    const spanMap = new BTree(undefined, NodeIdComparator);
+    deleteGroup.ranges.forEach((r) => {
+      spanMap.set(r.start.node.id, r);
+    });
+
+    // remove the content within the span for text containers
     root.walk((n) => {
       if (n === root) return false;
       if (!n.isTextContainer) return false;
-      deleteGroup.ranges.forEach((r) => {
-        console.log(n.textContent);
-        if (r.start.node.eq(n)) {
-          if (r.end.offset === n.focusSize) {
-            // console.log(r, n.textContent, n.textContent.slice(0, r.start.offset));
-            const textNode = app.schema.text(
-              n.textContent.slice(0, r.start.offset),
-            );
-            n.updateContent([textNode!]);
-          } else if (r.start.offset === 0) {
-            const textNode = app.schema.text(n.textContent.slice(r.end.offset));
-            n.updateContent([textNode!]);
-          }
 
-          deleteGroup.removeRange(r);
-        }
-      });
+      const span = spanMap.get(n.id);
+      if (span) {
+        const content = TextBlock.from(span.start.node).removeContent(
+          span.start.offset,
+          span.end.offset,
+        );
+        n.updateContent(content);
+      }
 
       return false;
     });

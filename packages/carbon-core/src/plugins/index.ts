@@ -1,7 +1,7 @@
 import { CarbonPlugin } from "../core";
 import { KeyboardPlugin } from "./Keyboard";
 import { SelectionChangePlugin } from "./SelectionChange";
-import { SlicePlugin } from "./Slice";
+import { SliceNode } from "./Slice";
 import { TransformCommands } from "./TransformCommands";
 import { HistoryPlugin } from "./History";
 import { FormatterPlugin } from "./Formatter";
@@ -13,7 +13,7 @@ export const corePresetPlugins: CarbonPlugin[] = [
   new SelectionChangePlugin(),
   new TransformCommands(),
   new KeyboardPlugin(),
-  new SlicePlugin(),
+  new SliceNode(),
   new HistoryPlugin(),
   new FormatterPlugin(),
   new ActionPlugin(),
@@ -22,3 +22,5 @@ export const corePresetPlugins: CarbonPlugin[] = [
 ];
 
 export * from "./TransformCommands";
+
+export * from "./Slice";
