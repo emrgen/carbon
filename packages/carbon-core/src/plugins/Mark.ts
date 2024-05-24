@@ -9,14 +9,14 @@ import { Optional } from "@emrgen/types";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
-    mark: {
+    marks: {
       toggle(mark: Mark): Optional<Transaction>;
     };
   }
 }
 
 export class MarkPlugin extends BeforePlugin {
-  name = "mark";
+  name = "marks";
 
   override commands(): Record<string, Function> {
     return {
@@ -43,6 +43,6 @@ export class MarkPlugin extends BeforePlugin {
   }
 
   toggleMark(e: EventContext<any>) {
-    return (mark: Mark) => e.cmd.mark.toggle(mark)?.Dispatch();
+    return (mark: Mark) => e.cmd.marks.toggle(mark)?.Dispatch();
   }
 }

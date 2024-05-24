@@ -1,9 +1,8 @@
 import { classString } from "./Logger";
-import { Mark, MarkSet } from "./Mark";
+import { MarkSet } from "./Mark";
 import { Node } from "./Node";
-import { Optional } from "@emrgen/types";
 import { reduce } from "lodash";
-import { deepCloneMap } from "@emrgen/carbon-core";
+import { cloneFrozenNode, deepCloneMap, Pin } from "@emrgen/carbon-core";
 import { InlineNode } from "./InlineNode";
 
 // utility class for text blocks
@@ -61,58 +60,60 @@ export class TextBlock {
     );
   }
 
-  // @mutation
-  #addMark(mark: Mark, start: number, end: number) {
-    // split the content and add the mark in the relevant node
+  removeContent(from: number, to: number): Node[] {
+    if (from === to) {
+      return this.node.children;
+    }
+
+    const start = Pin.create(this.node, from);
+    const end = Pin.create(this.node, to);
+    const startDown = start.down().rightAlign;
+    const endDown = end.down().leftAlign;
+    const { node: startNode } = startDown;
+    const { node: endNode } = endDown;
+
+    if (startNode.eq(endNode)) {
+      const textContent =
+        startNode.textContent.slice(0, startDown.offset) +
+        endNode.textContent.slice(endDown.offset);
+      const textNode = startNode.type.create(
+        textContent,
+        startNode.props.toJSON(),
+      )!;
+
+      console.log(
+        "UPDATED NODE",
+        textNode.textContent,
+        textNode.marks,
+        startNode.marks,
+      );
+
+      return (
+        this.node.children.map((child) => {
+          if (child.eq(startNode)) {
+            return textNode;
+          }
+          return child;
+        }) ?? ([] as Node[]).map(cloneFrozenNode)
+      );
+    }
+
+    return [];
   }
 
-  // @mutation
-  #removeMark(mark: Mark, start: number, end: number) {}
-
-  // @mutation
-  #insert(node: Node, offset: number) {
-    if (!node.isInline) {
-      throw new Error("node is not inline");
+  // check if a and b have the same content and marks in the same order
+  static isSimilarContent(a: Node[], b: Node[]) {
+    if (a.length !== b.length) {
+      return false;
     }
 
-    if (offset <= 0) {
-      // this.node.content.prepend([node]);
-      return;
-    }
-
-    if (offset >= this.node.focusSize) {
-      // this.node.content.append([node]);
-      return;
-    }
-
-    const found = this.find(offset);
-    if (!found) return;
-
-    // split the content and insert the inline node in the relevant node
-    const nodes = this.split(offset).reduce((acc, curr) => {
-      return curr.length === 0 ? acc : [...acc, ...curr];
-    }, [] as Node[]);
-
-    // NOTE TO ME: this line is required to make the code work
-    // this.node.replace(found, nodes);
-
-    // normalize the content
-    this.normalize();
-  }
-
-  //
-  private find(offset: number): Optional<Node> {
-    for (const node of this.node.children) {
-      if (node.isInline) {
-        if (offset === node.focusSize) return node;
-
-        if (offset > node.focusSize) {
-          offset -= node.focusSize;
-        } else {
-          return node;
-        }
+    for (let i = 0; i < a.length; i++) {
+      if (!InlineNode.isSimilar(a[i], b[i])) {
+        return false;
       }
     }
+
+    return true;
   }
 
   private normalize(): TextBlock {
@@ -138,11 +139,6 @@ export class TextBlock {
     // this.node.content = BlockContent.create(nodes);
 
     return this;
-  }
-
-  private split(offset: number): [Node[], Node[]] {
-    // return this.node.content.split(offset);
-    return [[], []];
   }
 
   toJSON() {

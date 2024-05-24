@@ -2,6 +2,7 @@ import {
   ActionOrigin,
   BlockSelection,
   ChangeNameAction,
+  cloneFrozenNode,
   Draft,
   EmptyPlaceholderPath,
   FocusedPlaceholderPath,
@@ -50,7 +51,16 @@ import {
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { ImmutableState } from "./ImmutableState";
-import { first, isArray, isEmpty, isEqual, isString, reduce } from "lodash";
+import {
+  first,
+  flatten,
+  identity,
+  isArray,
+  isEmpty,
+  isEqual,
+  isString,
+  reduce,
+} from "lodash";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
 import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
 
@@ -466,10 +476,15 @@ export class ImmutableDraft implements Draft {
         // otherwise split the text node and insert the text with the marks
 
         const pin = Pin.fromPoint(at, this.nodeMap);
+        if (!pin) {
+          throw new Error("Cannot insert text to a node that does not exist");
+        }
         const down = pin?.down();
         if (!down) {
           throw new Error("Cannot insert text to a node that does not exist");
         }
+
+        const { node: downNode } = down;
 
         console.log(
           "CURRENT NODE",
@@ -478,15 +493,46 @@ export class ImmutableDraft implements Draft {
           down.node.props.get(MarksPath, []),
         );
         console.log("CURRENT MARKS", marks.toString());
+        const insertTextNode = node.type.schema.text(text, {
+          props: {
+            [MarksPath]: marks.toArray(),
+          },
+        })!;
 
-        const { textContent } = node;
-        // FIXME: find the correct child with offset
-        const newText =
-          textContent.slice(0, offset) + text + textContent.slice(offset);
-        const textNode = node.firstChild!;
-        debugger;
+        if (offset === 0) {
+          this.updateContent(
+            pin?.node.id!,
+            [
+              ...downNode.prevSiblings,
+              insertTextNode,
+              downNode,
+              ...downNode.nextSiblings,
+            ].map(cloneFrozenNode),
+          );
+        } else if (offset === downNode.focusSize) {
+          this.updateContent(
+            pin?.node.id!,
+            [
+              ...downNode.prevSiblings,
+              downNode,
+              insertTextNode,
+              ...downNode.nextSiblings,
+            ].map(cloneFrozenNode),
+          );
+        } else {
+          const [left, right] = InlineNode.from(downNode).split(down.offset);
+          const nodes = flatten(
+            pin?.node.children.map((n) => {
+              if (n.id.eq(downNode.id)) {
+                return [left, insertTextNode, right].filter(identity);
+              }
 
-        this.updateContent(textNode.id, newText);
+              return n;
+            }),
+          ).map(cloneFrozenNode);
+
+          this.updateContent(pin?.node.id!, nodes);
+        }
       }
     }
   }

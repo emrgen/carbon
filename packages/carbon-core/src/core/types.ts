@@ -90,6 +90,9 @@ export const deepCloneMap = (data: NodeContentData) => {
 };
 
 export const cloneFrozenNode = (node: Node) => {
+  if (!node) {
+    throw Error("node is undefined");
+  }
   if (node.isFrozen) {
     return node.clone();
   } else {

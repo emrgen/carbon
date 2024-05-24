@@ -116,9 +116,13 @@ export class FormatterPlugin extends BeforePlugin {
     fn: With<Transaction, Selection | BlockSelection>,
   ) {
     const { app, cmd } = ctx;
-    preventAndStopCtx(ctx);
     const { selection, blockSelection } = app.state;
 
+    if (selection.isCollapsed && blockSelection.isEmpty) {
+      return;
+    }
+
+    preventAndStopCtx(ctx);
     fn(cmd, blockSelection.isEmpty ? selection : blockSelection);
     cmd?.select(selection)?.dispatch();
   }

@@ -1,13 +1,4 @@
-import {
-  each,
-  first,
-  flatten,
-  identity,
-  last,
-  merge,
-  reverse,
-  sortBy,
-} from "lodash";
+import { each, first, flatten, last, merge, reverse, sortBy } from "lodash";
 
 import { Optional } from "@emrgen/types";
 import {
@@ -61,6 +52,7 @@ import { InsertTextAction } from "../core/actions/InsertTextAction";
 import { ContentMatch } from "../core/ContentMatch";
 import { NodeColumn } from "../core/NodeColumn";
 import { InlineNode } from "../core/InlineNode";
+import { TextBlock } from "../core/TextBlock";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -2019,38 +2011,46 @@ export class TransformCommands extends BeforePlugin {
           return;
         }
 
-        const sdown = start.down();
-        const edown = end.down();
-        if (sdown?.node.eq(edown?.node)) {
-          const { node } = sdown;
-          const textContent =
-            node.textContent.slice(0, sdown.offset) +
-            node.textContent.slice(edown.offset);
-          if (textContent === "") {
-            rangeAction.push(
-              SetContentAction.create(
-                node.parentId!,
-                flatten([node.prevSiblings, node.nextSiblings]).filter(
-                  identity,
-                ),
-              ),
-            );
-          } else {
-            rangeAction.push(SetContentAction.create(node.id, textContent));
-          }
+        // const sdown = start.down();
+        // const edown = end.down();
+        // if (sdown?.node.eq(edown?.node)) {
+        //   if (sdown.offset === edown.offset) {
+        //     return;
+        //   }
+        //   const { node } = sdown;
+        //   const textContent =
+        //     node.textContent.slice(0, sdown.offset) +
+        //     node.textContent.slice(edown.offset);
+        //   if (textContent === "") {
+        //     rangeAction.push(
+        //       SetContentAction.create(
+        //         node.parentId!,
+        //         flatten([node.prevSiblings, node.nextSiblings]).filter(
+        //           identity,
+        //         ),
+        //       ),
+        //     );
+        //   } else {
+        //     rangeAction.push(SetContentAction.create(node.id, textContent));
+        //   }
+        //   return;
+        // }
+
+        if (start.offset === end.offset) {
           return;
         }
 
         // TODO: delete using TextContent methods
-        const textContent =
-          node.textContent.slice(0, start.offset) +
-          node.textContent.slice(end.offset);
-        if (textContent === "") {
-          rangeAction.push(SetContentAction.create(node.id, []));
-        } else {
-          const textNode = app.schema.text(textContent)!;
-          rangeAction.push(SetContentAction.create(node.id, [textNode]));
+        const content = TextBlock.from(node).removeContent(
+          start.offset,
+          end.offset,
+        );
+
+        if (TextBlock.isSimilarContent(node.children, content)) {
+          return;
         }
+
+        rangeAction.push(SetContentAction.create(node.id, content));
       }
     });
 
