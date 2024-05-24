@@ -1,4 +1,14 @@
-import { each, first, flatten, last, merge, reverse, sortBy } from "lodash";
+import {
+  each,
+  first,
+  flatten,
+  identity,
+  last,
+  merge,
+  reduce,
+  reverse,
+  sortBy,
+} from "lodash";
 
 import { Optional } from "@emrgen/types";
 import {
@@ -613,17 +623,20 @@ export class TransformCommands extends BeforePlugin {
       startTitleBlock.eq(endTitleBlock) &&
       sliceStartTitle.eq(sliceEndTitle)
     ) {
-      const textBeforeCursor =
-        endTitleBlock.textContent.slice(0, start.offset) +
-        sliceStartTitle.textContent;
-      const textContent =
-        textBeforeCursor + startTitleBlock.textContent.slice(end.offset);
-      const textNode = app.schema.text(textContent);
+      const beforeCursorTextContent = [
+        ...TextBlock.from(startTitleBlock).removeContent(0, start.offset),
+        ...sliceStartTitle.children,
+      ];
+      const pinOffset = reduce(
+        beforeCursorTextContent,
+        (acc, n) => acc + n.focusSize,
+        0,
+      );
       const after = PinnedSelection.fromPin(
-        Pin.future(start.node!, textBeforeCursor.length)!,
+        Pin.future(start.node!, pinOffset)!,
       );
 
-      tr.SetContent(start.node.id, [textNode!]);
+      tr.SetContent(start.node.id, beforeCursorTextContent);
 
       // destination title block is empty, change the parent name
       if (startTitleBlock.isEmpty) {
@@ -692,15 +705,18 @@ export class TransformCommands extends BeforePlugin {
       const actions = NodeColumn.mergeByMove(leftNodes, rightNodes);
       const { nodeActions } = this.deleteGroupCommands(app, deleteGroup);
 
-      const textBeforeCursor =
-        startTitleBlock.textContent.slice(0, start.offset) +
-        sliceStartTitle.textContent;
-      const after = PinnedSelection.fromPin(
-        Pin.future(start.node!, textBeforeCursor.length)!,
+      const beforeCursorTextContent = [
+        ...TextBlock.from(startTitleBlock).removeContent(0, start.offset),
+        ...sliceStartTitle.children,
+      ];
+      const pinOffset = reduce(
+        beforeCursorTextContent,
+        (acc, n) => acc + n.focusSize,
+        0,
       );
-      const textContent =
-        textBeforeCursor + endTitleBlock.textContent.slice(end.offset);
-      const textNode = app.schema.text(textContent);
+      const after = PinnedSelection.fromPin(
+        Pin.future(start.node!, pinOffset)!,
+      );
 
       console.log(
         "leftNodes",
@@ -716,7 +732,7 @@ export class TransformCommands extends BeforePlugin {
       );
 
       tr.Add(actions).Add(nodeActions);
-      tr.Add(SetContentAction.create(start.node, [textNode!]));
+      tr.Add(SetContentAction.create(start.node, beforeCursorTextContent));
       tr.Select(after);
 
       return tr;
@@ -877,11 +893,11 @@ export class TransformCommands extends BeforePlugin {
     // });
 
     // * update startTitle text content
-    const startTextContent =
-      startTitleBlock.textContent.slice(0, start.offset) +
-      sliceStartTitle.textContent;
-    const startTextNode = app.schema.text(startTextContent);
-    tr.Add(SetContentAction.create(start.node, [startTextNode!]));
+    const startTextContent = [
+      ...TextBlock.from(startTitleBlock).removeContent(0, start.offset),
+      ...sliceStartTitle.children,
+    ];
+    tr.Add(SetContentAction.create(start.node, startTextContent));
 
     // NOTE: change the startTitleBlock parent to sliceStartTitle parent
     if (startTitleBlock.isEmpty) {
@@ -897,10 +913,14 @@ export class TransformCommands extends BeforePlugin {
     }
 
     // * update endTitle text content
-    const endTextContent =
-      sliceEndTitle.textContent + endTitleBlock.textContent.slice(end.offset);
-    const endTextNode = app.schema.text(endTextContent);
-    tr.Add(SetContentAction.create(sliceEndTitle, [endTextNode!]));
+    const endTextContent = [
+      ...sliceEndTitle.children,
+      ...TextBlock.from(endTitleBlock).removeContent(
+        end.offset,
+        endTitleBlock.focusSize,
+      ),
+    ];
+    tr.Add(SetContentAction.create(sliceEndTitle, endTextContent));
 
     const { nodeActions } = this.deleteGroupCommands(app, deleteGroup);
     tr.Add(nodeActions);
@@ -1923,11 +1943,18 @@ export class TransformCommands extends BeforePlugin {
       rightColumn.nodes.map((n) => n.map((n) => [n.id.toString(), n.name])),
     );
 
-    const textContent =
-      start.node.textContent.slice(0, start.offset) +
-      end.node.textContent.slice(end.offset);
-    const textNode = app.schema.text(textContent)!;
-    tr.Add(SetContentAction.create(start.node.id, [textNode]));
+    const prevContent = TextBlock.from(start.node).removeContent(
+      start.offset,
+      start.node.focusSize,
+    );
+    const nextContent = TextBlock.from(end.node).removeContent(0, end.offset);
+    tr.Add(
+      SetContentAction.withBefore(
+        start.node.id,
+        start.node.children,
+        [...prevContent, ...nextContent].map(cloneFrozenNode).filter(identity),
+      ),
+    );
 
     const mergeActions = NodeColumn.mergeByMove(leftColumn, rightColumn);
 

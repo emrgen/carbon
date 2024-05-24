@@ -102,7 +102,7 @@ export class TextBlock {
       startNodes.pop();
     }
 
-    if (endDown.offset !== endNode.focusSize) {
+    if (endDown.offset !== 0) {
       endNodes.shift();
     }
 

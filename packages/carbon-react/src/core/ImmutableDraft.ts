@@ -1140,8 +1140,9 @@ class Transformer {
     }
 
     if (
-      (isArray(content) && oldChildren.length !== newChildren.length) ||
-      oldChildren.some((n, i) => InlineNode.isSimilar(n, newChildren[i]))
+      isArray(content) &&
+      (oldChildren.length !== newChildren.length ||
+        oldChildren.some((n, i) => !InlineNode.isSimilar(n, newChildren[i])))
     ) {
       // collect set content action
       const oldContent = oldChildren.map((n) => n.toJSON());

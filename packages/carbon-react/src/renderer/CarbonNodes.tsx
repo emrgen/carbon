@@ -197,11 +197,12 @@ const useMarks = (marks: Mark[]) => {
         case "code":
           merge(style, {
             background: "#f4f4f4",
-            padding: "0.1em 0.4em",
+            padding: "0.2em 0.4em",
             borderRadius: "3px",
             fontFamily:
               "Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
             color: "#c7254e",
+            fontSize: "14px",
           });
           break;
       }

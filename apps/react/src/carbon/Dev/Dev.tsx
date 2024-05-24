@@ -327,7 +327,22 @@ const data = node("carbon", [
     //   node("pageTreeItem", [title([text("Economics")])]),
     // ]),
 
-    node("section", [title([text("12345678")])]),
+    node("section", [
+      title([
+        text("123456", {
+          [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
+        }),
+        text("78"),
+      ]),
+    ]),
+    node("section", [
+      title([
+        text("ab", {}),
+        text("cdefgh", {
+          [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
+        }),
+      ]),
+    ]),
     // section([
     //   title([text("abc")]),
     //   node("hstack", [

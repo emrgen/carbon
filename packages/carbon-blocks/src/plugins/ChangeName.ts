@@ -14,6 +14,7 @@ import {
 } from "@emrgen/carbon-core";
 import { isConvertible } from "../utils";
 import { NumberedList } from "./NumberedList";
+import { TextBlock } from "@emrgen/carbon-core/src/core/TextBlock";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {}
@@ -130,8 +131,11 @@ export class ChangeName extends BeforePlugin {
         const action = SetContentAction.create(titleNode.id, []);
         cmd.Add(action);
       } else {
-        const textNode = app.schema.text(title)!;
-        const action = SetContentAction.create(titleNode.id, [textNode]);
+        const content = TextBlock.from(titleNode).removeContent(
+          0,
+          match[1].length - 1,
+        );
+        const action = SetContentAction.create(titleNode.id, content);
         cmd.Add(action);
       }
 
@@ -217,6 +221,7 @@ export class ChangeName extends BeforePlugin {
         const action = SetContentAction.create(titleNode.id, []);
         cmd.Add(action);
       } else {
+        debugger;
         const textNode = app.schema.text(title)!;
         const action = SetContentAction.create(titleNode.id, [textNode]);
         cmd.Add(action);
