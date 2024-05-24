@@ -1763,7 +1763,7 @@ importers:
   packages/fastform-blocks:
     dependencies:
       '@chakra-ui/react':
-        specifier: ^2.8.0
+        specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(framer-motion@11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emoji-mart/data':
         specifier: ^1.1.2
@@ -1866,7 +1866,7 @@ importers:
   packages/fastform-core:
     dependencies:
       '@chakra-ui/react':
-        specifier: ^2.8.0
+        specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(framer-motion@11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emoji-mart/data':
         specifier: ^1.1.2
@@ -1963,7 +1963,7 @@ importers:
   packages/fastform-utils:
     dependencies:
       '@chakra-ui/react':
-        specifier: ^2.8.0
+        specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(framer-motion@11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emoji-mart/data':
         specifier: ^1.1.2
@@ -2060,7 +2060,7 @@ importers:
   packages/fastype-blocks:
     dependencies:
       '@chakra-ui/react':
-        specifier: ^2.8.0
+        specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(framer-motion@11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emotion/react':
         specifier: ^11.11.1
@@ -2181,7 +2181,7 @@ importers:
   packages/fastype-core:
     dependencies:
       '@chakra-ui/react':
-        specifier: ^2.8.0
+        specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(framer-motion@11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emotion/react':
         specifier: ^11.11.1
@@ -2266,7 +2266,7 @@ importers:
   packages/fastype-database:
     dependencies:
       '@chakra-ui/react':
-        specifier: ^2.8.0
+        specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(framer-motion@11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emotion/react':
         specifier: ^11.11.1
@@ -2336,7 +2336,7 @@ importers:
   packages/fastype-interact:
     dependencies:
       '@chakra-ui/react':
-        specifier: ^2.8.0
+        specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(framer-motion@11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emoji-mart/data':
         specifier: ^1.1.2
@@ -2436,7 +2436,7 @@ importers:
   packages/fastype-props:
     dependencies:
       '@chakra-ui/react':
-        specifier: ^2.8.0
+        specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(framer-motion@11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emoji-mart/data':
         specifier: ^1.1.2
@@ -2524,7 +2524,7 @@ importers:
   packages/fastype-utils:
     dependencies:
       '@chakra-ui/react':
-        specifier: ^2.8.0
+        specifier: ^2.8.2
         version: 2.8.2(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@emotion/styled@11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(framer-motion@11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@emoji-mart/data':
         specifier: ^1.1.2
@@ -2663,7 +2663,11 @@ importers:
 
   packages/tsconfig: {}
 
-  packages/types: {}
+  packages/types:
+    dependencies:
+      vite:
+        specifier: ^5.2.11
+        version: 5.2.11(@types/node@20.12.12)(stylus@0.59.0)
 
 packages:
 
