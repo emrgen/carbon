@@ -243,12 +243,12 @@ export class NodeType {
     };
   }
 
-  create(content: Node[] | string): Optional<Node> {
+  create(content: Node[] | string, props = {}): Optional<Node> {
     if (this.isText) {
-      return this.schema.text(content as string);
+      return this.schema.text(content as string, { props });
     }
 
-    return this.schema.node(this.name, { children: content as Node[] });
+    return this.schema.node(this.name, { children: content as Node[], props });
   }
 
   eq(other: NodeType) {

@@ -156,7 +156,7 @@ export class Node extends EventEmitter implements IntoNodeId {
   }
 
   get marks() {
-    return this.props.get(MarksPath, [] as Mark[]);
+    return this.props.get(MarksPath, []).map((m) => Mark.fromJSON(m));
   }
 
   get key() {

@@ -51,7 +51,6 @@ import {
 import { Optional } from "@emrgen/types";
 import { ImmutableState } from "./ImmutableState";
 import { first, isArray, isEmpty, isEqual, isString, reduce } from "lodash";
-import FastPriorityQueue from "fastpriorityqueue";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
 
 enum UpdateDependent {
@@ -129,10 +128,7 @@ export class ImmutableDraft implements Draft {
   }
 
   private addInserted(node: Node) {
-    const { id } = node;
     this.nodeMap.set(node.id, node);
-    // this.inserted.add(id);
-    // this.removed.remove(id);
   }
 
   private addRemoved(id: NodeId) {
@@ -410,6 +406,24 @@ export class ImmutableDraft implements Draft {
       // if (updated) {
       this.addUpdated(parent.id);
       // }
+    } else if (node.isTextContainer && isArray(content)) {
+      const oldChildren = node.children;
+      const newChildren = content;
+      oldChildren.forEach((n) => this.changes.dataMap.set(n.id, n.data));
+      newChildren.forEach((n) => this.changes.dataMap.set(n.id, n.data));
+      const nodeIdSet = new NodeIdSet();
+      newChildren.forEach((n) => nodeIdSet.add(n.id));
+      oldChildren.forEach((n) => {
+        if (!nodeIdSet.has(n.id)) {
+          console.log("REMOVING", n.id.toString());
+          this.addRemoved(n.id);
+        }
+      });
+      newChildren.forEach((n) => {
+        this.addInserted(n);
+        console.log("INSERTED", n.id.toString());
+      });
+      this.addUpdated(nodeId);
     }
   }
 
@@ -423,7 +437,7 @@ export class ImmutableDraft implements Draft {
 
     if (node.isTextContainer) {
       if (node.isEmpty) {
-        // insert a empty text node with the text
+        // insert an empty text node with the text
         const textNode = node.type.schema.text(text)!;
         this.updateContent(node.id, [textNode]);
       } else {
@@ -809,7 +823,6 @@ export class ImmutableDraft implements Draft {
 
     // update focus placeholder of the current head node
     if (selection.isCollapsed && !selection.isInvalid) {
-      const { head: headPin } = this.state.selection;
       const { head } = selection;
       if (this.nodeMap.isDeleted(head.nodeId)) return;
 
@@ -871,7 +884,7 @@ export class ImmutableDraft implements Draft {
     const downPin = start.down();
     console.info("down pin", downPin.toString());
     console.info(downPin.node.props.get(MarksPath, []));
-    const marks = downPin.node.props.get(MarksPath, []);
+    const marks = downPin.node.marks;
     this.marks = MarkSet.from(marks);
   }
 
@@ -947,11 +960,6 @@ export class ImmutableDraft implements Draft {
   }
 }
 
-interface NodeDepthEntry {
-  node: Node;
-  depth: number;
-}
-
 // traps the changes to the node and records them
 class Transformer {
   constructor(
@@ -1001,12 +1009,7 @@ class Transformer {
   insertText(node: Node, text: string, offset: number) {
     console.log(p14("%c[trap]"), "color:green", "add text", node.key);
     this.changes.add(TextChange.create(node.id, offset, text, "insert"));
-    const before = node.textContent;
-
     node.insertText(text, offset);
-
-    const after = node.textContent;
-    // this.actions.add(SetContentAction.withBefore(node.id, before, after));
   }
 
   removeText(node: Node, text: string, offset: number) {
@@ -1089,8 +1092,6 @@ class Transformer {
           newChildren.map((n) => n.id),
         ),
       );
-      oldChildren.forEach((n) => this.changes.dataMap.set(n.id, n.data));
-      newChildren.forEach((n) => this.changes.dataMap.set(n.id, n.data));
     }
   }
 
@@ -1126,63 +1127,3 @@ class Transformer {
     return true;
   }
 }
-
-// NOTE: this is a priority queue that sorts nodes by depth
-class NodeDepthPriorityQueue {
-  private queue: FastPriorityQueue<NodeDepthEntry>;
-
-  static from(nodes: Node[], order: "asc" | "desc" = "desc") {
-    const comparator =
-      order === "asc"
-        ? NodeDepthComparator
-        : (a: NodeDepthEntry, b: NodeDepthEntry) => NodeDepthComparator(b, a);
-    const queue = new NodeDepthPriorityQueue(comparator);
-    nodes.forEach((n) => {
-      const depth = n.parents.length;
-      queue.add(n, depth);
-    });
-    return queue;
-  }
-
-  constructor(comparator: (a: NodeDepthEntry, b: NodeDepthEntry) => boolean) {
-    this.queue = new FastPriorityQueue(comparator);
-  }
-
-  add(node: Node, depth: number) {
-    this.queue.add({ node, depth });
-  }
-
-  pop() {
-    return this.queue.poll();
-  }
-
-  isEmpty() {
-    return this.queue.isEmpty();
-  }
-
-  get size() {
-    return this.queue.size;
-  }
-}
-
-const NodeDepthComparator = (a: NodeDepthEntry, b: NodeDepthEntry) => {
-  if (!a.node.parentId) {
-    return true;
-  }
-
-  if (!b.node.parentId) {
-    return false;
-  }
-
-  if (a.depth === b.depth) {
-    if (a.node.parentId === b.node.parentId) {
-      return a.node.id.comp(b.node.id) < 0;
-    } else if (a.node.parentId && b.node.parentId) {
-      return a.node.parentId.comp(b.node.parentId) < 0;
-    } else {
-      return false;
-    }
-  }
-
-  return a.depth < b.depth;
-};

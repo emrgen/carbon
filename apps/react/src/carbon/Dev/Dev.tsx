@@ -50,33 +50,33 @@ const data = node("carbon", [
         text("question"),
         text(" "),
         text("italic bold", {
-          [MarksPath]: [Mark.BOLD, Mark.ITALIC],
+          [MarksPath]: [Mark.BOLD, Mark.ITALIC].map((m) => m.toJSON()),
         }),
         text(" "),
         text("colored", {
-          [MarksPath]: [Mark.color("red")],
+          [MarksPath]: [Mark.color("red")].map((m) => m.toJSON()),
         }),
         text(" "),
         text("background", {
-          [MarksPath]: [Mark.background("#fb8500")],
+          [MarksPath]: [Mark.background("#fb8500")].map((m) => m.toJSON()),
         }),
         text(" "),
         text("code", {
-          [MarksPath]: [Mark.CODE],
+          [MarksPath]: [Mark.CODE].map((m) => m.toJSON()),
         }),
         text(" "),
         text("sub", {
-          [MarksPath]: [Mark.SUBSCRIPT],
+          [MarksPath]: [Mark.SUBSCRIPT].map((m) => m.toJSON()),
         }),
         text("strike", {
-          [MarksPath]: [Mark.STRIKE],
+          [MarksPath]: [Mark.STRIKE].map((m) => m.toJSON()),
         }),
         text("super", {
-          [MarksPath]: [Mark.SUPERSCRIPT],
+          [MarksPath]: [Mark.SUPERSCRIPT].map((m) => m.toJSON()),
         }),
         text(" "),
         text("underline", {
-          [MarksPath]: [Mark.UNDERLINE],
+          [MarksPath]: [Mark.UNDERLINE].map((m) => m.toJSON()),
         }),
       ]),
     ]),
