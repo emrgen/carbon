@@ -850,9 +850,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.0.6
         version: 18.3.0
-      eslint:
-        specifier: ^7.32.0
-        version: 7.32.0
       events:
         specifier: ^3.3.0
         version: 3.3.0
