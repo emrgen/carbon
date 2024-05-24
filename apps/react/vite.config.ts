@@ -7,11 +7,11 @@ export default defineConfig(({ mode }) => {
 
   return {
     define: {
-      process: {
-        env: {
-          ...process.env,
-        },
-      },
+      // process: {
+      //   env: {
+      //     ...process.env,
+      //   },
+      // },
     },
     plugins: [react()],
   };

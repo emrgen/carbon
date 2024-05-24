@@ -133,36 +133,12 @@ importers:
       '@emotion/styled':
         specifier: ^11.11.5
         version: 11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1)
-      '@emrgen/carbon-blocks':
-        specifier: workspace:*
-        version: link:../../packages/carbon-blocks
-      '@emrgen/carbon-blocktree':
-        specifier: workspace:*
-        version: link:../../packages/carbon-blocktree
-      '@emrgen/carbon-cell':
-        specifier: workspace:*
-        version: link:../../packages/carbon-cell
       '@emrgen/carbon-clipboard':
         specifier: workspace:*
         version: link:../../packages/carbon-clipboard
-      '@emrgen/carbon-code':
-        specifier: workspace:*
-        version: link:../../packages/carbon-code
-      '@emrgen/carbon-comment-editor':
-        specifier: workspace:*
-        version: link:../../packages/carbon-comment-editor
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../../packages/carbon-core
-      '@emrgen/carbon-dragon':
-        specifier: workspace:*
-        version: link:../../packages/carbon-dragon
-      '@emrgen/carbon-flash':
-        specifier: workspace:*
-        version: link:../../packages/carbon-flash
-      '@emrgen/carbon-question':
-        specifier: workspace:*
-        version: link:../../packages/carbon-question
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../../packages/carbon-react
@@ -175,15 +151,9 @@ importers:
       '@emrgen/carbon-utils':
         specifier: workspace:*
         version: link:../../packages/carbon-utils
-      '@emrgen/fastype-blocks':
-        specifier: workspace:*
-        version: link:../../packages/fastype-blocks
       '@emrgen/fastype-core':
         specifier: workspace:*
         version: link:../../packages/fastype-core
-      '@emrgen/fastype-database':
-        specifier: workspace:*
-        version: link:../../packages/fastype-database
       '@emrgen/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -196,6 +166,9 @@ importers:
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
+      framer-motion:
+        specifier: 11.2.6
+        version: 11.2.6(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21

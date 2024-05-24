@@ -58,7 +58,7 @@ export class BeforeInputRuleHandler {
   constructor(readonly rules: InputRule[]) {}
 
   // process the event based on modified node.textContent
-  process(ctx: EventContext<KeyboardEvent>, node: Node): boolean {
+  execute(ctx: EventContext<KeyboardEvent>, node: Node): boolean {
     const { event, app } = ctx;
     // @ts-ignore
     const { data, key } = event.nativeEvent;
@@ -92,7 +92,7 @@ export class AfterInputRuleHandler {
   constructor(readonly rules: InputRule[]) {}
 
   // process the event based on existing node.textContent
-  process(ctx: EventContext<KeyboardEvent>, node: Node): boolean {
+  execute(ctx: EventContext<KeyboardEvent>, node: Node): boolean {
     const text = node.textContent;
     return this.rules.some((rule) => rule.execute(ctx, text));
   }

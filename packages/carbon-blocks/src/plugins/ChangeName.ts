@@ -82,7 +82,7 @@ export class ChangeName extends BeforePlugin {
     const { currentNode } = ctx;
     const block = currentNode.closest((n) => n.isContainer)!;
     if (!isConvertible(block)) return;
-    if (this.inputRules.process(ctx, block)) {
+    if (this.inputRules.execute(ctx, block)) {
       console.log("done...");
     }
   }

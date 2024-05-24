@@ -149,7 +149,7 @@ export class PluginManager {
 
     console.group("onKeyDown", event);
 
-    const process = () => {
+    const processKeyDown = () => {
       each(this.before, (p: CarbonPlugin) => {
         if (keyDownEvent.stopped) return;
         const handlers = p.keydown();
@@ -204,7 +204,7 @@ export class PluginManager {
       });
     };
 
-    process();
+    processKeyDown();
 
     console.groupEnd();
   }

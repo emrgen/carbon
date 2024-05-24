@@ -15,11 +15,6 @@ import {
   useCreateCarbon,
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
-import { flashComp, flashPlugin } from "@emrgen/carbon-flash";
-import {
-  commentEditorComp,
-  commentEditorPlugin,
-} from "@emrgen/carbon-comment-editor";
 import {
   corePresetPlugins,
   Mark,
@@ -28,10 +23,7 @@ import {
   State,
 } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
-import { codeExtension } from "@emrgen/carbon-code";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { cellPlugin, cellRenderer } from "@emrgen/carbon-cell";
-import { questionExtension } from "@emrgen/carbon-question";
 import { flattenDeep, noop } from "lodash";
 import SelectionTracker from "../../SelectionTracker";
 import { PathTracker } from "../../PathTracker";
@@ -452,11 +444,11 @@ const plugins = [
   ...corePresetPlugins,
   ...blockPresetPlugins,
   // carbonUtilPlugins,
-  commentEditorPlugin,
-  flashPlugin,
-  ...codeExtension.plugins!,
-  cellPlugin,
-  ...questionExtension.plugins!,
+  // commentEditorPlugin,
+  // flashPlugin,
+  // ...codeExtension.plugins!,
+  // cellPlugin,
+  // ...questionExtension.plugins!,
   new ClipboardPlugin(),
   // {
   //   plugins: [
@@ -468,11 +460,11 @@ const plugins = [
 
 const renderers = [
   ...blockPresetRenderers,
-  commentEditorComp,
-  flashComp,
-  ...codeExtension.renderers!,
-  ...cellRenderer,
-  ...questionExtension.renderers!,
+  // commentEditorComp,
+  // flashComp,
+  // ...codeExtension.renderers!,
+  // ...cellRenderer,
+  // ...questionExtension.renderers!,
 ];
 
 const renderManager = RenderManager.from(renderers);
