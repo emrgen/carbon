@@ -61,6 +61,7 @@
     border-top-right-radius 4px
     background-color #f5f5f5
     color #aaa
+    gap 1px
     //justify-content end
 
     &[data-focused=true]
@@ -96,6 +97,14 @@
 .inline-style-code
     font-family monospace
     background-color #f5f5f5
+
+.inline-style-bold,
+.inline-style-italic,
+.inline-style-underline,
+.inline-style-strike,
+.inline-style-code
+    &[data-active=true]
+        background #aaa
 
 //border 1px solid #eee
 

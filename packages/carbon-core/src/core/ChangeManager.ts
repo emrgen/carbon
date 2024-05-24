@@ -75,7 +75,7 @@ export class ChangeManager extends NodeTopicEmitter {
     // console.log('updating transaction effect', tr);
     // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
     // if nothing is dirty, then there is nothing to do
-    if (!isContentChanged && !isSelectionChanged) {
+    if (!isContentChanged && !isSelectionChanged && !state.isMarksChanged) {
       console.log("skipped: nothing to sync");
       return;
     }
@@ -104,6 +104,10 @@ export class ChangeManager extends NodeTopicEmitter {
       this.updateSelection(() => {
         this.onTransaction();
       });
+    }
+
+    if (state.isMarksChanged) {
+      this.onTransaction();
     }
     // });
   }

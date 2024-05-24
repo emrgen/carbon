@@ -98,6 +98,10 @@ export class ImmutableState implements State {
     );
   }
 
+  get isMarksChanged() {
+    return !this.previous?.marks.eq(this.marks);
+  }
+
   activate() {
     StateScope.put(this.scope, this.nodeMap);
     StateScope.set(this.scope);
@@ -146,7 +150,8 @@ export class ImmutableState implements State {
     if (this.scope !== other.scope) return false;
     return (
       this.content.renderVersion === other.content.renderVersion &&
-      this.selection.eq(other.selection)
+      this.selection.eq(other.selection) &&
+      this.marks.eq(other.marks)
     );
   }
 

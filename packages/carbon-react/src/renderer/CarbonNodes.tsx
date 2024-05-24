@@ -150,7 +150,7 @@ const useMarks = (marks: Mark[]) => {
   return useMemo(() => {
     const style = {};
     marks.forEach((mark) => {
-      switch (mark.type) {
+      switch (mark.name) {
         case "bold":
           merge(style, {
             fontWeight: "bold",

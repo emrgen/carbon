@@ -18,6 +18,7 @@ export const CommentEditorComp = (props: RendererProps) => {
   const { node } = props;
   const ref = useRef(null);
   const app = useCarbon();
+  const [marks, setMarks] = useState<string[]>([]);
 
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
@@ -54,7 +55,12 @@ export const CommentEditorComp = (props: RendererProps) => {
   const toggleMark = useCallback(
     (mark: Mark) => (e) => {
       preventAndStop(e);
-      app.cmd.formatter.toggle(mark)?.dispatch();
+      const { blockSelection, selection } = app.state;
+      if (blockSelection.isEmpty && selection.isCollapsed) {
+        app.cmd.marks.toggle(mark)?.dispatch();
+      } else {
+        app.cmd.formatter.toggle(mark)?.dispatch();
+      }
     },
     [app],
   );
@@ -76,6 +82,8 @@ export const CommentEditorComp = (props: RendererProps) => {
           setIsFocused(false);
         }
       }
+
+      setMarks(() => state.marks.toArray().map((mark) => mark.name));
     };
 
     app.on("changed", onChange);
@@ -103,13 +111,14 @@ export const CommentEditorComp = (props: RendererProps) => {
           1.
         </button>
         <button onMouseDown={toggleName("todo")} disabled={!isFocused}>
-          []
+          [ ]
         </button>
         &nbsp; · &nbsp;
         <button
           disabled={!isFocused}
           onMouseDown={toggleMark(Mark.BOLD)}
           className={"inline-style-bold"}
+          data-active={marks.includes(Mark.BOLD.name)}
         >
           B
         </button>
@@ -117,6 +126,7 @@ export const CommentEditorComp = (props: RendererProps) => {
           disabled={!isFocused}
           onMouseDown={toggleMark(Mark.ITALIC)}
           className={"inline-style-italic"}
+          data-active={marks.includes(Mark.ITALIC.name)}
         >
           I
         </button>
@@ -124,6 +134,7 @@ export const CommentEditorComp = (props: RendererProps) => {
           disabled={!isFocused}
           onMouseDown={toggleMark(Mark.UNDERLINE)}
           className={"inline-style-underline"}
+          data-active={marks.includes(Mark.UNDERLINE.name)}
         >
           U
         </button>
@@ -131,6 +142,7 @@ export const CommentEditorComp = (props: RendererProps) => {
           disabled={!isFocused}
           onMouseDown={toggleMark(Mark.STRIKE)}
           className={"inline-style-strike"}
+          data-active={marks.includes(Mark.STRIKE.name)}
         >
           S
         </button>
@@ -138,12 +150,13 @@ export const CommentEditorComp = (props: RendererProps) => {
           disabled={!isFocused}
           onMouseDown={toggleMark(Mark.CODE)}
           className={"inline-style-code"}
+          data-active={marks.includes(Mark.CODE.name)}
         >
-          {"</>"}
+          {"{}"}
         </button>
       </div>
     ),
-    [isFocused],
+    [isFocused, marks, toggleMark, toggleName],
   );
 
   return (

@@ -946,12 +946,34 @@ export class ImmutableDraft implements Draft {
     }
 
     // collect marks from the selection
-    const { start } = pinnedSelection;
-    const downPin = start.down();
-    console.info("down pin", downPin.toString());
-    console.info(downPin.node.props.get(MarksPath, []));
-    const marks = downPin.node.marks;
-    this.marks = MarkSet.from(marks);
+    const { start, end } = pinnedSelection;
+    if (selection.isCollapsed) {
+      const downPin = start.down().rightAlign;
+      console.info("down pin", downPin.toString());
+      console.info(downPin.node.props.get(MarksPath, []));
+      const marks = downPin.node.marks;
+      this.marks = MarkSet.from(marks);
+    } else {
+      const startDown = start.down().rightAlign;
+      const endDown = end.down().leftAlign;
+      const nodes: Node[] = [startDown.node, endDown.node];
+      startDown.node.next((n) => {
+        if (!n.isInline) {
+          return false;
+        }
+        if (n.id.eq(endDown.node.id)) return true;
+        nodes.push(n);
+        return false;
+      });
+
+      const marks: Record<string, number> = {};
+      nodes.forEach((n) => {
+        n.marks.forEach((m) => {
+          marks[m.name] = (marks[m.name] ?? 0) + 1;
+        });
+      });
+      // TODO: collect marks that exists in all nodes
+    }
   }
 
   // check and update render dependents

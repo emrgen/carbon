@@ -13,7 +13,7 @@ export interface MarkProps {
 
 export class Mark {
   // type is the name of the mark
-  type: string;
+  name: string;
   props?: MarkProps;
 
   static BOLD = Mark.create("bold");
@@ -55,23 +55,23 @@ export class Mark {
   }
 
   static fromJSON(json: any) {
-    const { type, props } = json;
-    if (!type) throw new Error("Mark.fromJSON: missing type");
+    const { name, props } = json;
+    if (!name) throw new Error("Mark.fromJSON: missing name field in mark");
 
-    return new Mark(type, props);
+    return new Mark(name, props);
   }
 
-  static create(type: string, props: MarkProps = {}) {
-    return new Mark(type, props);
+  static create(name: string, props: MarkProps = {}) {
+    return new Mark(name, props);
   }
 
-  constructor(type: string, props: MarkProps = {}) {
-    this.type = type;
+  constructor(name: string, props: MarkProps = {}) {
+    this.name = name;
     this.props = props;
   }
 
   eq(other: Mark) {
-    return this.type === other.type && isEqual(this.props, other.props);
+    return this.name === other.name && isEqual(this.props, other.props);
   }
 
   toString() {
@@ -79,8 +79,8 @@ export class Mark {
   }
 
   toJSON() {
-    const { type, props } = this;
-    const ret: any = { type };
+    const { name, props } = this;
+    const ret: any = { name: name };
     if (!isEmpty(props)) {
       ret.props = props;
     }
@@ -89,7 +89,7 @@ export class Mark {
   }
 
   clone() {
-    return new Mark(this.type, { ...this.props });
+    return new Mark(this.name, { ...this.props });
   }
 }
 
@@ -138,18 +138,18 @@ export class MarkSet {
     if (isArray(mark)) {
       each(mark, (m) => this.add(m));
     } else {
-      this.marks[mark.type] = mark;
+      this.marks[mark.name] = mark;
     }
 
     return this;
   }
 
   remove(mark: Mark) {
-    delete this.marks[mark.type];
+    delete this.marks[mark.name];
   }
 
   has(mark: Mark): boolean {
-    return !!this.marks[mark.type];
+    return !!this.marks[mark.name];
   }
 
   map<A>(fn: (value: Mark, index: number, array: Mark[]) => A) {

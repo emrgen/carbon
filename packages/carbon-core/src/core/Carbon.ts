@@ -256,7 +256,11 @@ export class Carbon extends EventEmitter {
   }
 
   private updateState(state: State, tr: Transaction) {
-    if (!state.isContentChanged && !state.isSelectionChanged) {
+    if (
+      !state.isContentChanged &&
+      !state.isSelectionChanged &&
+      !state.isMarksChanged
+    ) {
       console.warn("new state is not dirty");
       return;
     }
@@ -275,9 +279,19 @@ export class Carbon extends EventEmitter {
 
     // keep three previous states
     this.state = state.activate();
-    // console.log('updateState', this.state.content.textContent, this.state.isContentChanged, this.state.isSelectionChanged);
+    console.log(
+      "updateState",
+      this.state.content.textContent,
+      this.state.isContentChanged,
+      this.state.isSelectionChanged,
+    );
+    debugger;
     this.change.update(state, tr);
 
+    console.log(
+      "MARKS",
+      this.state.marks.toArray().map((m) => m.toJSON()),
+    );
     this.emit(EventsOut.transactionCommit, tr);
   }
 
