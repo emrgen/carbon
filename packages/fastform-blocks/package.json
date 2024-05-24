@@ -24,7 +24,7 @@
     "emoji-mart": "^5.5.2",
     "emoji-picker-react": "^4.4.10",
     "emoji-regex": "^10.2.1",
-    "framer-motion": "^10.15.0",
+    "framer-motion": "11.2.6",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
     "prismjs": "^1.29.0",
@@ -40,8 +40,8 @@
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",
     "@emrgen/eslint-config-custom": "workspace:*",
-    "react": "^18.2.0",
+    "react": "^18.3.1",
     "tsconfig": "workspace:*",
-    "typescript": "^4.9.5"
+    "typescript": "^5.4.5"
   }
 }

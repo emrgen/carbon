@@ -19,7 +19,7 @@
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
     "react-icons": "^4.10.1",
-    "vitest": "^0.34.6"
+    "react": "^18.3.1"
   },
   "devDependencies": {
     "@emrgen/eslint-config-custom": "workspace:*",
@@ -28,8 +28,8 @@
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",
-    "react": "^18.2.0",
     "tsconfig": "workspace:*",
-    "typescript": "^4.9.5"
+    "typescript": "^5.4.5",
+    "vitest": "^0.34.6"
   }
 }

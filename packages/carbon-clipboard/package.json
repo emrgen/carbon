@@ -26,6 +26,6 @@
     "@types/lodash": "^4.14.191",
     "eslint": "^7.32.0",
     "tsconfig": "workspace:*",
-    "typescript": "^4.9.5"
+    "typescript": "^5.4.5"
   }
 }
