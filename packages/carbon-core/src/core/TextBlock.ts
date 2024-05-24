@@ -1,7 +1,6 @@
 import { classString } from "./Logger";
 import { MarkSet } from "./Mark";
 import { Node } from "./Node";
-import { reduce } from "lodash";
 import { cloneFrozenNode, deepCloneMap, Pin } from "@emrgen/carbon-core";
 import { InlineNode } from "./InlineNode";
 
@@ -11,7 +10,7 @@ import { InlineNode } from "./InlineNode";
 // when you type in a text block, you are typing in the inline content
 // when merging text blocks, you are merging the inline content along with the content marks
 export class TextBlock {
-  private node: Node;
+  private readonly node: Node;
 
   static from(node: Node) {
     return new TextBlock(node.clone(deepCloneMap));
@@ -33,6 +32,7 @@ export class TextBlock {
     return this.node.unwrap();
   }
 
+  // merge adjacent text nodes with the same marks
   normalizeContent() {
     const { children } = this.node;
     // merge adjacent text nodes with the same marks
@@ -60,6 +60,7 @@ export class TextBlock {
     );
   }
 
+  // remove content from a text block from a given range
   removeContent(from: number, to: number): Node[] {
     if (from === to) {
       return this.node.children;
@@ -81,13 +82,6 @@ export class TextBlock {
         startNode.props.toJSON(),
       )!;
 
-      console.log(
-        "UPDATED NODE",
-        textNode.textContent,
-        textNode.marks,
-        startNode.marks,
-      );
-
       return (
         this.node.children.map((child) => {
           if (child.eq(startNode)) {
@@ -98,7 +92,21 @@ export class TextBlock {
       );
     }
 
-    return [];
+    const startNodes = InlineNode.from(startNode).split(startDown.offset);
+    const endNodes = InlineNode.from(endNode).split(endDown.offset);
+    const prevNodes = startNode.prevSiblings;
+    const nextNodes = endNode.nextSiblings;
+    if (startDown.offset !== startNode.focusSize) {
+      startNodes.pop();
+    }
+
+    if (endDown.offset !== endNode.focusSize) {
+      endNodes.shift();
+    }
+
+    return [...prevNodes, ...startNodes, ...endNodes, ...nextNodes].map(
+      cloneFrozenNode,
+    );
   }
 
   // check if a and b have the same content and marks in the same order
@@ -114,31 +122,6 @@ export class TextBlock {
     }
 
     return true;
-  }
-
-  private normalize(): TextBlock {
-    const nodes = reduce(
-      this.node.children,
-      (acc, curr) => {
-        if (acc.length === 0) {
-          return [curr];
-        }
-
-        const prev = acc[acc.length - 1];
-
-        // const newNode = prev.tryMerge(curr);
-        // if (!newNode) {
-        //   return [...acc, curr]
-        // }
-
-        return [...acc.slice(0, -1)];
-      },
-      [] as Node[],
-    );
-
-    // this.node.content = BlockContent.create(nodes);
-
-    return this;
   }
 
   toJSON() {

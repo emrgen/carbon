@@ -507,7 +507,9 @@ export class ImmutableDraft implements Draft {
               insertTextNode,
               downNode,
               ...downNode.nextSiblings,
-            ].map(cloneFrozenNode),
+            ]
+              .filter(identity)
+              .map(cloneFrozenNode),
           );
         } else if (offset === downNode.focusSize) {
           this.updateContent(
@@ -517,7 +519,9 @@ export class ImmutableDraft implements Draft {
               downNode,
               insertTextNode,
               ...downNode.nextSiblings,
-            ].map(cloneFrozenNode),
+            ]
+              .filter(identity)
+              .map(cloneFrozenNode),
           );
         } else {
           const [left, right] = InlineNode.from(downNode).split(down.offset);
