@@ -82,8 +82,6 @@ export const CommentEditorComp = (props: RendererProps) => {
           setIsFocused(false);
         }
       }
-
-      setMarks(() => state.marks.toArray().map((mark) => mark.name));
     };
 
     app.on("changed", onChange);
@@ -91,6 +89,17 @@ export const CommentEditorComp = (props: RendererProps) => {
       app.off("changed", onChange);
     };
   }, [app, node]);
+
+  useEffect(() => {
+    const onChange = (state: State) => {
+      setMarks(() => state.marks.toArray().map((mark) => mark.name));
+    };
+
+    app.on("changed", onChange);
+    return () => {
+      app.off("changed", onChange);
+    };
+  }, [app]);
 
   const toolbar = useMemo(
     () => (

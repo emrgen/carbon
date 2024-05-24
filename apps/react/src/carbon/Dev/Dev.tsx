@@ -176,7 +176,7 @@ const data = node("carbon", [
     // section([title([])]),
     // section([title([text("section 3")])]),
 
-    node("commentEditor", [section([title([text("add a comment")])])]),
+    // node("commentEditor", [section([title([text("add a comment")])])]),
 
     // section([title([text("section 3")])]),
     // node("hstack", [
