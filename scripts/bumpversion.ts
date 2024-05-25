@@ -8,19 +8,18 @@ const packageVersionHashFilePath = path.resolve(
   "../package-version-hash.json",
 );
 
-const oldVersions = require(packageVersionHashFilePath);
-
-const oldVersionMap = oldVersions
-  .filter((a) => !!a)
-  .reduce((acc, cur) => {
-    acc[cur.name] = cur;
-    return acc;
-  });
-
+// get the md5 hash of all files in the src directory of each package and the current version
 const getPackageVersionHash = () => {
   return fs
     .readdirSync(path.resolve(__dirname, "../packages"))
     .map((dir) => {
+      // check if git repo
+      const gitPath = path.resolve(__dirname, `../packages/${dir}/.git`);
+      if (fs.existsSync(gitPath)) {
+        console.warn(`WARN: ${dir} is a git repository`);
+        return;
+      }
+
       const packageJsonPath = path.resolve(
         __dirname,
         `../packages/${dir}/package.json`,
@@ -66,6 +65,12 @@ const getPackageVersionHash = () => {
 
 const updatePackagesVersionHashFile = () => {
   const packages = getPackageVersionHash();
+  const oldPackages = require(packageVersionHashFilePath);
+  if (JSON.stringify(packages) === JSON.stringify(oldPackages)) {
+    console.log("No packages changed, skipping version bump");
+    return;
+  }
+
   fs.writeFileSync(
     packageVersionHashFilePath,
     JSON.stringify(packages, null, 2),
@@ -74,62 +79,94 @@ const updatePackagesVersionHashFile = () => {
 
 const packages = getPackageVersionHash();
 
-const newVersions = packages.reduce((acc, cur) => {
-  acc[cur.name] = cur;
-  return acc;
-});
+const bumpPackageVersions = () => {
+  const oldVersions = require(packageVersionHashFilePath);
 
-const changedPackages = Object.keys(newVersions).filter((name) => {
-  return oldVersionMap[name]
-    ? oldVersionMap[name].hash !== newVersions[name].hash
-    : true;
-});
+  const oldVersionMap = oldVersions
+    .filter((a) => !!a)
+    .reduce((acc, cur) => {
+      acc[cur.name] = cur;
+      return acc;
+    }, {});
 
-console.log("--------------------");
-console.log("Changed packages:");
-console.log("--------------------");
+  const newVersions = packages.reduce((acc, cur) => {
+    acc[cur.name] = cur;
+    return acc;
+  }, {});
 
-if (changedPackages.length === -1) {
-  console.log("No packages changed, skipping version bump");
-} else {
-  // write new bumped versions to package.json for each package
-  const updatedPackages = packages.map((pkg) => {
-    const packageJsonPath = path.resolve(
-      __dirname,
-      `../packages/${pkg.name.replace("@emrgen/", "")}/package.json`,
+  const changedPackages = packages
+    .map((p) => p.name)
+    .filter((name) => {
+      if (!oldVersionMap[name]) {
+        return true;
+      }
+      return oldVersionMap[name].hash != newVersions[name].hash;
+    });
+
+  console.log("--------------------");
+  console.log("Changed packages:");
+  console.log("--------------------");
+
+  if (changedPackages.length === -1) {
+    console.log("No packages changed, skipping version bump");
+  } else {
+    // write new bumped versions to package.json for each package
+    const updatedPackages = changedPackages
+      .map((name) => {
+        const pkg = newVersions[name];
+        if (!pkg) {
+          return {
+            name,
+            current: "UNKNOWN",
+            next: "UNKNOWN",
+          };
+        }
+
+        console.log(
+          `Bumping ${name} from ${pkg.version} to ${semver.inc(pkg.version, "patch")}`,
+        );
+
+        const packageJsonPath = path.resolve(
+          __dirname,
+          `../packages/${pkg.name.replace("@emrgen/", "")}/package.json`,
+        );
+        const packageJson = require(packageJsonPath);
+        packageJson.version = semver.inc(packageJson.version, "patch");
+
+        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+        return {
+          name: pkg.name,
+          current: pkg.version,
+          next: packageJson.version,
+        };
+      })
+      .filter((a) => !!a);
+
+    const columnWidths = updatedPackages.reduce(
+      (acc, cur) => {
+        return {
+          name: Math.max(acc.name, cur.name.length),
+          current: Math.max(acc.current, cur.current.length),
+          next: Math.max(acc.next, cur.next.length),
+        };
+      },
+      { name: 0, current: 0, next: 0 },
     );
-    const packageJson = require(packageJsonPath);
-    packageJson.version = semver.inc(packageJson.version, "patch");
 
-    // fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-
-    return {
-      name: pkg.name,
-      current: pkg.version,
-      next: packageJson.version,
-    };
-  });
-
-  const columnWidths = updatedPackages.reduce(
-    (acc, cur) => {
+    const formattedTableData = updatedPackages.map((pkg) => {
       return {
-        name: Math.max(acc.name, cur.name.length),
-        current: Math.max(acc.current, cur.current.length),
-        next: Math.max(acc.next, cur.next.length),
+        name: pkg.name + " ".repeat(columnWidths.name - pkg.name.length),
+        current: pkg.current.padEnd(columnWidths.current),
+        next: pkg.next.padEnd(columnWidths.next),
       };
-    },
-    { name: 0, current: 0, next: 0 },
-  );
+    });
 
-  const formattedTableData = updatedPackages.map((pkg) => {
-    return {
-      name: pkg.name + " ".repeat(columnWidths.name - pkg.name.length),
-      current: pkg.current.padEnd(columnWidths.current),
-      next: pkg.next.padEnd(columnWidths.next),
-    };
-  });
+    console.table(formattedTableData);
 
-  console.table(formattedTableData);
+    updatePackagesVersionHashFile();
+  }
+};
 
-  // updatePackagesVersionHashFile()
-}
+bumpPackageVersions();
+// updatePackagesVersionHashFile();

@@ -1,6 +1,6 @@
 {
   "name": "@emrgen/carbon-clipboard",
-  "version": "0.0.1-alpha",
+  "version": "0.0.3",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
