@@ -1,3 +1,4 @@
+const { zip, isEqual } = require("lodash");
 const fs = require("fs");
 const path = require("path");
 const { createHash } = require("crypto");
@@ -18,9 +19,6 @@ const getPackageVersionHash = () => {
         `../packages/${dir}/package.json`,
       );
       const packageJson = require(packageJsonPath);
-      const version = packageJson.version.split(".");
-      version[2] = parseInt(version[2]) + 1;
-      packageJson.version = version.join(".");
 
       // check if git repo
       const gitPath = path.resolve(__dirname, `../packages/${dir}/.git`);
@@ -65,12 +63,18 @@ const getPackageVersionHash = () => {
 
 const updatePackagesVersionHashFile = () => {
   const packages = getPackageVersionHash();
+
   const oldPackages = require(packageVersionHashFilePath);
   if (JSON.stringify(packages) === JSON.stringify(oldPackages)) {
     console.log("No packages changed, skipping version bump");
     return;
   }
 
+  // const version = zip(oldPackages, packages)
+  //   .filter(([a, b]) => !isEqual(a, b))
+  //   .map(([oldPkg, newPkg]) => [newPkg.name, oldPkg.version, newPkg.version]);
+
+  console.log("Writing new package version hash file");
   fs.writeFileSync(
     packageVersionHashFilePath,
     JSON.stringify(packages, null, 2),
@@ -107,7 +111,7 @@ const bumpPackageVersions = () => {
   console.log("Changed packages:");
   console.log("--------------------");
 
-  if (changedPackages.length === -1) {
+  if (changedPackages.length === 0) {
     console.log("No packages changed, skipping version bump");
   } else {
     // write new bumped versions to package.json for each package
@@ -121,10 +125,6 @@ const bumpPackageVersions = () => {
             next: "UNKNOWN",
           };
         }
-
-        console.log(
-          `Bumping ${name} from ${pkg.version} to ${semver.inc(pkg.version, "patch")}`,
-        );
 
         const packageJsonPath = path.resolve(
           __dirname,
@@ -168,5 +168,5 @@ const bumpPackageVersions = () => {
   }
 };
 
-bumpPackageVersions();
-// updatePackagesVersionHashFile();
+// bumpPackageVersions();
+updatePackagesVersionHashFile();

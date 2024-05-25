@@ -34,7 +34,8 @@
   "dependencies": {
     "@emrgen/carbon-blocks": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
-    "@emrgen/types": "workspace:*"
+    "@emrgen/types": "workspace:*",
+    "lodash": "^4.17.21"
   },
   "packageManager": "pnpm@9.1.0+sha256.22e36fba7f4880ecf749a5ca128b8435da085ecd49575e7fb9e64d6bf4fad394"
 }
