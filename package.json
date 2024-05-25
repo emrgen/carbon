@@ -25,7 +25,8 @@
     "@emrgen/eslint-config-custom": "workspace:*",
     "@playwright/test": "^1.44.1",
     "@types/node": "^20.12.12",
-    "prettier": "latest"
+    "prettier": "latest",
+    "semver": "^7.6.2"
   },
   "engines": {
     "node": ">=20.0.0"
