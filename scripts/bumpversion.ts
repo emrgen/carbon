@@ -25,7 +25,7 @@ const getPackageVersionHash = () => {
       // check if git repo
       const gitPath = path.resolve(__dirname, `../packages/${dir}/.git`);
       if (fs.existsSync(gitPath)) {
-        console.warn(`WARN: ${packageJson.name} is in a git repository`);
+        // console.warn(`SKIPPING: ${packageJson.name} is in a git repository`);
         return;
       }
 
@@ -33,7 +33,7 @@ const getPackageVersionHash = () => {
       const srcPath = path.resolve(__dirname, `../packages/${dir}/src`);
       // stat the srcPath
       if (!fs.existsSync(srcPath)) {
-        console.warn(`WARN: ${srcPath} is not a directory`);
+        // console.warn(`SKIPPING: ${srcPath} is not a directory`);
         return;
       }
 
