@@ -1,4 +1,4 @@
-import { Node, Schema, Slice } from "@emrgen/carbon-core";
+import { Node, printNode, Schema, Slice } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { fixContentMatch, parseText } from "./text";
 import { isEmpty, sortBy } from "lodash";
@@ -7,6 +7,7 @@ import { parseHtml } from "./html";
 export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
   return new Promise((resolve, reject) => {
     navigator.clipboard.read().then((data) => {
+      const processClipboard: (() => Promise<boolean>)[] = [];
       try {
         for (const item of data) {
           console.log("types", item.types);
@@ -18,78 +19,122 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
 
           for (const type of types) {
             // parse web application/carbon content to carbon slice
-            if (!consumed && type === "web application/carbon") {
-              item.getType(type).then((blob) => {
-                blob.text().then((text) => {
-                  const { root, start, end } = JSON.parse(text);
-                  const rootNode = schema.nodeFromJSON(root)!;
-                  const startNode = schema.nodeFromJSON(start)!;
-                  const endNode = schema.nodeFromJSON(end)!;
-                  const slice = Slice.create(rootNode, startNode, endNode);
-                  // console.log("slice", slice);
-                  resolve(slice);
-                  consumed = true;
+            if (type === "web application/carbon") {
+              processClipboard.push(() => {
+                return new Promise((done, failed) => {
+                  item
+                    .getType(type)
+                    .then((blob) => {
+                      console.log("web application/carbon", blob);
+                      blob
+                        .text()
+                        .then((text) => {
+                          console.log("web application/carbon", text);
+                          const { root, start, end } = JSON.parse(text);
+                          const rootNode = schema.nodeFromJSON(root)!;
+                          const startNode = schema.nodeFromJSON(start)!;
+                          const endNode = schema.nodeFromJSON(end)!;
+                          const slice = Slice.create(
+                            rootNode,
+                            startNode,
+                            endNode,
+                          );
+                          printNode(slice.root);
+                          resolve(slice);
+                          done(true);
+                        })
+                        .catch(failed);
+                    })
+                    .catch(failed);
                 });
               });
             }
 
             // TODO: parse html content to carbon slice
-            if (!consumed && type === "text/html") {
-              item.getType(type).then((blob) => {
-                blob.text().then((text) => {
-                  console.log("test/html", text);
+            if (type === "text/html") {
+              processClipboard.push(() => {
+                return new Promise((done, failed) => {
+                  item
+                    .getType(type)
+                    .then((blob) => {
+                      blob
+                        .text()
+                        .then((text) => {
+                          console.log("text/html", text);
 
-                  const nodes = parseHtml(text);
-                  const root = createCarbonSlice(nodes, schema);
-                  if (!root) {
-                    return;
-                  }
-                  const slice = Slice.from(root);
-                  resolve(slice);
-                  consumed = true;
+                          const nodes = parseHtml(text);
+                          const root = createCarbonSlice(nodes, schema);
+                          if (!root) {
+                            failed("failed to parse html");
+                            return;
+                          }
+                          const slice = Slice.from(root);
+                          resolve(slice);
+                        })
+                        .catch(failed);
+                    })
+                    .catch(failed);
                 });
               });
             }
 
             // parse text content to carbon slice
-            if (!consumed && type === "text/plain") {
-              item.getType(type).then((blob) => {
-                blob.text().then((text) => {
-                  console.log("test/plain", text);
+            if (type === "text/plain") {
+              processClipboard.push(() => {
+                return new Promise((done, failed) => {
+                  item
+                    .getType(type)
+                    .then((blob) => {
+                      blob
+                        .text()
+                        .then((text) => {
+                          console.log("test/plain", text);
 
-                  const nodes = parseText(text);
-                  const root = createCarbonSlice(nodes, schema);
-                  if (!root) {
-                    resolve(null);
-                    return;
-                  }
+                          const nodes = parseText(text);
+                          const root = createCarbonSlice(nodes, schema);
+                          if (!root) {
+                            failed("failed to parse text");
+                            return;
+                          }
 
-                  console.log("slice", root.toJSON());
+                          console.log("slice", root.toJSON());
 
-                  const slice = Slice.from(root);
-                  resolve(slice);
-                  consumed = true;
+                          const slice = Slice.from(root);
+                          resolve(slice);
+                        })
+                        .catch(failed);
+                    })
+                    .catch(failed);
                 });
               });
             }
           }
         }
+
+        if (isEmpty(processClipboard)) {
+          resolve(null);
+          return;
+        }
+
+        // process clipboard data in sequence order
+        // if one of the process failed, the next process will be triggered
+        // once one of the process success, the rest of the process will be ignored
+        const head = processClipboard.reduce(
+          (prev, next) => {
+            return () => prev().catch(next);
+          },
+          () => Promise.reject("initial promise") as Promise<boolean>,
+        );
+
+        head().catch((e) => {
+          console.error("clipboard paste error", e);
+          reject(e);
+        });
       } catch (e) {
         console.error("clipboard paste error", e);
         reject(e);
       }
     });
-
-    // navigator.clipboard.readText().then(text => {
-    //   marked.parse(text, {
-    //     walkTokens(token) {
-    //       console.log('token', token);
-    //     },
-    //   });
-    //
-    //   console.log('clipboard paste');
-    //   console.log(text)
-    // });
   });
 }
 

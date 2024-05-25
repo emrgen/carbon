@@ -13,6 +13,7 @@ import {
   Path,
   Pin,
   preventAndStop,
+  preventAndStopCtx,
   printNode,
   SelectedPath,
   Slice,
@@ -58,15 +59,15 @@ export class ClipboardPlugin extends AfterPlugin {
               type: "text/html",
               data: html.buildHtml(),
             },
-            {
-              type: "web application/carbon",
-              data: JSON.stringify(slice.toJSON()),
-            },
+            // {
+            //   type: "web application/carbon",
+            //   data: JSON.stringify(slice.toJSON()),
+            // },
           ]).catch((e) => {
             console.error("clipboard cut error", e);
           });
 
-          app.runtime.clipboard = slice;
+          // app.runtime.clipboard = slice;
         }
 
         // delete the selection
@@ -106,21 +107,14 @@ export class ClipboardPlugin extends AfterPlugin {
             console.error("clipboard copy error", e);
           });
 
-          app.runtime.clipboard = slice;
+          // app.runtime.clipboard = slice;
           return;
         }
       },
       paste: (ctx: EventContext<any>) => {
-        const { event, app } = ctx;
-        preventAndStop(event);
+        const { app } = ctx;
+        preventAndStopCtx(ctx);
         const { selection } = app;
-        // if (!app.runtime.clipboard.isEmpty) {
-        //   console.log("runtime.clipboard.root", app.runtime.clipboard.root);
-        //   const slice = app.runtime.clipboard;
-        //   printNode(slice.root);
-        //
-        //   app.cmd.transform.paste(selection, slice)?.Dispatch();
-        // } else {
         parseClipboard(ctx.app.schema).then((slice) => {
           if (isEmpty(slice)) {
             console.log("failed to parse clipboard data");
@@ -131,7 +125,6 @@ export class ClipboardPlugin extends AfterPlugin {
 
           app.cmd.transform.paste(selection, slice)?.Dispatch();
         });
-        // }
       },
     };
   }
