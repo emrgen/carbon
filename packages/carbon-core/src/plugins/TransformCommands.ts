@@ -624,7 +624,10 @@ export class TransformCommands extends BeforePlugin {
       sliceStartTitle.eq(sliceEndTitle)
     ) {
       const beforeCursorTextContent = [
-        ...TextBlock.from(startTitleBlock).removeContent(0, start.offset),
+        ...TextBlock.from(startTitleBlock).removeContent(
+          start.offset,
+          startTitleBlock.focusSize,
+        ),
         ...sliceStartTitle.children,
       ];
       const pinOffset = reduce(
@@ -636,7 +639,14 @@ export class TransformCommands extends BeforePlugin {
         Pin.future(start.node!, pinOffset)!,
       );
 
-      tr.SetContent(start.node.id, beforeCursorTextContent);
+      const afterCursorTextContent = TextBlock.from(
+        startTitleBlock,
+      ).removeContent(0, end.offset);
+
+      tr.SetContent(start.node.id, [
+        ...beforeCursorTextContent,
+        ...afterCursorTextContent,
+      ]);
 
       // destination title block is empty, change the parent name
       if (startTitleBlock.isEmpty) {

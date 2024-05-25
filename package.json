@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "lint:all": "eslint --ext .ts,.tsx .",
     "react": "cd apps/react && pnpm dev --port 5550",
     "vue": "cd apps/vue && pnpm dev --port 5552",
     "solid": "cd apps/solid && pnpm dev --port 5553",

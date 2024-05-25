@@ -7,6 +7,7 @@ import {
   EventHandlerMap,
   findMatchingNodes,
   Node,
+  NodeId,
   NodeIdComparator,
   NodeSpan,
   Path,
@@ -265,10 +266,21 @@ export class ClipboardPlugin extends AfterPlugin {
     // TODO: check if we really need to reverse the ranges
     deleteGroup.ranges.reverse();
 
+    console.log(
+      "deleteGroup",
+      deleteGroup.ranges.map((r) => r.start.node.textContent),
+    );
+    console.log(
+      "deleteGroup",
+      deleteGroup.ranges.map((r) => [r.start.offset, r.end.offset]),
+    );
+
     // create a map of spans to remove the content within the span
-    const spanMap = new BTree(undefined, NodeIdComparator);
+    const spanMap = new BTree<NodeId, NodeSpan[]>(undefined, NodeIdComparator);
     deleteGroup.ranges.forEach((r) => {
-      spanMap.set(r.start.node.id, r);
+      const spans = spanMap.get(r.start.node.id) ?? [];
+      spans.push(r);
+      spanMap.set(r.start.node.id, spans);
     });
 
     // remove the content within the span for text containers
@@ -276,14 +288,21 @@ export class ClipboardPlugin extends AfterPlugin {
       if (n === root) return false;
       if (!n.isTextContainer) return false;
 
-      const span = spanMap.get(n.id);
-      if (span) {
-        const content = TextBlock.from(span.start.node).removeContent(
+      const spans = spanMap.get(n.id);
+      spans?.forEach((span) => {
+        const content = TextBlock.from(n).removeContent(
           span.start.offset,
           span.end.offset,
         );
+        console.log(
+          "remove content",
+          start.node.textContent,
+          start.offset,
+          end.offset,
+        );
+
         n.updateContent(content);
-      }
+      });
 
       return false;
     });

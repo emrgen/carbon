@@ -8,6 +8,7 @@ export interface User {
 export interface MarkProps {
   color?: string;
   url?: string;
+  href?: string;
   user?: User;
 }
 
@@ -23,6 +24,7 @@ export class Mark {
   static UNDERLINE = Mark.create("underline");
 
   static STRIKE = Mark.create("strike");
+
   static CODE = Mark.create("code");
 
   static SUBSCRIPT = Mark.create("subscript");
