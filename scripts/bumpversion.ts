@@ -13,13 +13,6 @@ const getPackageVersionHash = () => {
   return fs
     .readdirSync(path.resolve(__dirname, "../packages"))
     .map((dir) => {
-      // check if git repo
-      const gitPath = path.resolve(__dirname, `../packages/${dir}/.git`);
-      if (fs.existsSync(gitPath)) {
-        console.warn(`WARN: ${dir} is a git repository`);
-        return;
-      }
-
       const packageJsonPath = path.resolve(
         __dirname,
         `../packages/${dir}/package.json`,
@@ -28,6 +21,13 @@ const getPackageVersionHash = () => {
       const version = packageJson.version.split(".");
       version[2] = parseInt(version[2]) + 1;
       packageJson.version = version.join(".");
+
+      // check if git repo
+      const gitPath = path.resolve(__dirname, `../packages/${dir}/.git`);
+      if (fs.existsSync(gitPath)) {
+        console.warn(`WARN: ${packageJson.name} is in a git repository`);
+        return;
+      }
 
       // generate md5 hash of src files
       const srcPath = path.resolve(__dirname, `../packages/${dir}/src`);
