@@ -36,8 +36,8 @@
   },
   {
     "name": "@emrgen/carbon-core",
-    "version": "0.0.2",
-    "hash": "660785761b5acd580881420b14ff2064"
+    "version": "0.0.3",
+    "hash": "1faca1e8796ac265c0a9c9aa9b614642"
   },
   {
     "name": "@emrgen/carbon-diamond",

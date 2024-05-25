@@ -168,5 +168,5 @@ const bumpPackageVersions = () => {
   }
 };
 
-// bumpPackageVersions();
-updatePackagesVersionHashFile();
+bumpPackageVersions();
+// updatePackagesVersionHashFile();
