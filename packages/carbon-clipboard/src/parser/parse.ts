@@ -121,7 +121,15 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
         // once one of the process success, the rest of the process will be ignored
         const head = processClipboard.reduce(
           (prev, next) => {
-            return () => prev().catch(next);
+            return () =>
+              prev().catch((err) => {
+                if (err === "initial promise") {
+                  return next();
+                }
+
+                console.error("clipboard paste error", err);
+                return next();
+              });
           },
           () => Promise.reject("initial promise") as Promise<boolean>,
         );
