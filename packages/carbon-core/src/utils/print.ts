@@ -1,7 +1,10 @@
 import { Node } from "@emrgen/carbon-core";
 import { entries } from "lodash";
 
-export const printNode = (node: JSON | Node) => {
+export const printNode = (
+  node: JSON | Node,
+  logger = console.log.bind(console),
+) => {
   if (node instanceof Node) {
     return printNode({
       ...node.toJSON(),
@@ -27,6 +30,8 @@ export const printNode = (node: JSON | Node) => {
 
   collect([], 0, node);
 
+  let printLine = "";
+
   entries(nodes).forEach(([key, node]) => {
     const ids = key.split(",");
     let line = "  ".repeat(ids.length - 1);
@@ -43,6 +48,9 @@ export const printNode = (node: JSON | Node) => {
     if (node.id) {
       line += `(id=${node.id})`;
     }
-    console.log(line);
+
+    printLine += line + "\n";
   });
+
+  logger(printLine);
 };

@@ -147,18 +147,24 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
 }
 
 export const createCarbonSlice = (clipNodes: any[], schema: Schema) => {
-  const nodes = clipNodes.map((n) => schema.nodeFromJSON(n));
-  if (isEmpty(nodes)) {
+  try {
+    const nodes = clipNodes.map((n) => schema.nodeFromJSON(n));
+    if (isEmpty(nodes)) {
+      return null;
+    }
+    const slice = schema.type("slice").create(nodes as Node[])!;
+
+    console.log("slice", slice);
+
+    const cleaned = fixContentMatch(schema, slice);
+    if (isEmpty(cleaned)) {
+      return null;
+    }
+
+    return cleaned[0];
+  } catch (e) {
+    clipNodes.forEach((n) => printNode(n, console.error.bind(console)));
+    console.error("failed to create carbon slice", e);
     return null;
   }
-  const slice = schema.type("slice").create(nodes as Node[])!;
-
-  console.log("slice", slice);
-
-  const cleaned = fixContentMatch(schema, slice);
-  if (isEmpty(cleaned)) {
-    return null;
-  }
-
-  return cleaned[0];
 };
