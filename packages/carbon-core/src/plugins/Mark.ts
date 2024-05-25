@@ -3,6 +3,7 @@ import {
   EventContext,
   EventHandlerMap,
   Mark,
+  preventAndStopCtx,
   Transaction,
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
@@ -43,6 +44,9 @@ export class MarkPlugin extends BeforePlugin {
   }
 
   toggleMark(e: EventContext<any>) {
-    return (mark: Mark) => e.cmd.marks.toggle(mark)?.Dispatch();
+    return (mark: Mark) => {
+      preventAndStopCtx(e);
+      e.cmd.marks.toggle(mark)?.Dispatch();
+    };
   }
 }
