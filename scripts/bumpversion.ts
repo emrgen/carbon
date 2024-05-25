@@ -7,8 +7,6 @@ const commandLineArgs = require("command-line-args");
 const optionDefinitions = [{ name: "write", alias: "w", type: Boolean }];
 const options = commandLineArgs(optionDefinitions);
 
-console.log(options);
-
 const packageVersionHashFilePath = path.resolve(
   __dirname,
   "../package-version-hash.json",
@@ -122,6 +120,7 @@ const bumpPackageVersions = (writeFile = false) => {
     // write new bumped versions to package.json for each package
     const updatedPackages = changedPackages
       .map((name) => {
+        const oldPkg = oldVersionMap[name];
         const pkg = newVersions[name];
         if (!pkg) {
           return {
@@ -136,7 +135,14 @@ const bumpPackageVersions = (writeFile = false) => {
           `../packages/${pkg.name.replace("@emrgen/", "")}/package.json`,
         );
         const packageJson = require(packageJsonPath);
-        packageJson.version = semver.inc(packageJson.version, "patch");
+        // increment patch version if the current package version is the same as the old version
+        let autoBump = false;
+        if (packageJson.version === oldPkg.version) {
+          packageJson.version = semver.inc(packageJson.version, "patch");
+          autoBump = true;
+        } else {
+          autoBump = false;
+        }
 
         if (writeFile) {
           fs.writeFileSync(
@@ -147,8 +153,9 @@ const bumpPackageVersions = (writeFile = false) => {
 
         return {
           name: pkg.name,
-          current: pkg.version,
+          current: oldPkg.version,
           next: packageJson.version,
+          bump: autoBump ? "AUTO" : "MANUAL",
         };
       })
       .filter((a) => !!a);
@@ -159,9 +166,10 @@ const bumpPackageVersions = (writeFile = false) => {
           name: Math.max(acc.name, cur.name.length),
           current: Math.max(acc.current, cur.current.length),
           next: Math.max(acc.next, cur.next.length),
+          bump: Math.max(acc.bump, cur.bump.length),
         };
       },
-      { name: 0, current: 0, next: 0 },
+      { name: 0, current: 0, next: 0, bump: 0 },
     );
 
     const formattedTableData = updatedPackages.map((pkg) => {
@@ -169,6 +177,7 @@ const bumpPackageVersions = (writeFile = false) => {
         name: pkg.name + " ".repeat(columnWidths.name - pkg.name.length),
         current: pkg.current.padEnd(columnWidths.current),
         next: pkg.next.padEnd(columnWidths.next),
+        bump: pkg.bump.padEnd(columnWidths.bump),
       };
     });
 
