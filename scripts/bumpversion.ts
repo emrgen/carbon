@@ -3,6 +3,11 @@ const fs = require("fs");
 const path = require("path");
 const { createHash } = require("crypto");
 const semver = require("semver");
+const commandLineArgs = require("command-line-args");
+const optionDefinitions = [{ name: "write", alias: "w", type: Boolean }];
+const options = commandLineArgs(optionDefinitions);
+
+console.log(options);
 
 const packageVersionHashFilePath = path.resolve(
   __dirname,
@@ -83,7 +88,7 @@ const updatePackagesVersionHashFile = () => {
 
 const packages = getPackageVersionHash();
 
-const bumpPackageVersions = () => {
+const bumpPackageVersions = (writeFile = false) => {
   const oldVersions = require(packageVersionHashFilePath);
 
   const oldVersionMap = oldVersions
@@ -133,7 +138,12 @@ const bumpPackageVersions = () => {
         const packageJson = require(packageJsonPath);
         packageJson.version = semver.inc(packageJson.version, "patch");
 
-        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+        if (writeFile) {
+          fs.writeFileSync(
+            packageJsonPath,
+            JSON.stringify(packageJson, null, 2),
+          );
+        }
 
         return {
           name: pkg.name,
@@ -164,9 +174,11 @@ const bumpPackageVersions = () => {
 
     console.table(formattedTableData);
 
-    updatePackagesVersionHashFile();
+    if (writeFile) {
+      updatePackagesVersionHashFile();
+    }
   }
 };
 
-bumpPackageVersions();
+bumpPackageVersions(options.write);
 // updatePackagesVersionHashFile();
