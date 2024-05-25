@@ -948,11 +948,16 @@ export class ImmutableDraft implements Draft {
     // collect marks from the selection
     const { start, end } = pinnedSelection;
     if (selection.isCollapsed) {
-      const downPin = start.down().rightAlign;
-      // console.info("down pin", downPin.toString());
-      // console.info(downPin.node.props.get(MarksPath, []));
-      const marks = downPin.node.marks;
-      this.marks = MarkSet.from(marks);
+      let downPin = start.down();
+      if (downPin.offset === 0 && downPin.node.prevSiblings.length === 0) {
+        this.marks = MarkSet.empty();
+      } else {
+        downPin = downPin.leftAlign;
+        // console.info("down pin", downPin.toString());
+        // console.info(downPin.node.props.get(MarksPath, []));
+        const marks = downPin.node.marks;
+        this.marks = MarkSet.from(marks);
+      }
     } else {
       const startDown = start.down().rightAlign;
       const endDown = end.down().leftAlign;

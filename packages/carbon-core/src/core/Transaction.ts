@@ -199,9 +199,14 @@ export class Transaction {
 
   Mark(
     action: "add" | "remove",
-    mark: Mark,
+    mark: Mark | Mark[],
     origin = this.origin,
   ): Transaction {
+    if (isArray(mark)) {
+      mark.forEach((m) => this.Add(UpdateMarkAction.create(action, m, origin)));
+      return this;
+    }
+
     return this.Add(UpdateMarkAction.create(action, mark, origin));
   }
 

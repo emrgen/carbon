@@ -1,5 +1,6 @@
 import { EventContext } from "./EventContext";
 import { Node } from "./Node";
+import { Pin } from "@emrgen/carbon-core";
 
 export type InputHandler = (
   ctx: EventContext<KeyboardEvent>,
@@ -69,22 +70,41 @@ export class BeforeInputRuleHandler {
     const { selection } = app;
     if (!selection.isCollapsed) return false;
     const { head } = selection;
+    const text = this.getText(head, node, insertText);
     // console.log('before input', node.id.toString(), node.textContent);
-
-    let text = "";
-    if (node.isEmpty) {
-      text = insertText;
-    } else {
-      const { textContent } = node;
-      text =
-        textContent.slice(0, head.offset) +
-        insertText +
-        textContent.slice(head.offset);
-    }
 
     // console.log(`"${text}"`, node.id.toString(), node.textContent);
     const done = this.rules.some((rule) => rule.execute(ctx, text));
     return done;
+  }
+
+  protected getText(head: Pin, node: Node, insertText: string) {
+    if (node.isEmpty) {
+      return insertText;
+    } else {
+      const { textContent } = node;
+      return (
+        textContent.slice(0, head.offset) +
+        insertText +
+        textContent.slice(head.offset)
+      );
+    }
+  }
+}
+
+export class BeforeInputRuleInlineHandler extends BeforeInputRuleHandler {
+  override getText(head: Pin, _node: Node, insertText: string) {
+    const down = head.down();
+    const { node } = down;
+    if (node.isText) {
+      return (
+        node.textContent.slice(0, head.offset) +
+        insertText +
+        node.textContent.slice(head.offset)
+      );
+    } else {
+      return insertText;
+    }
   }
 }
 

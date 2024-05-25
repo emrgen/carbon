@@ -1,13 +1,19 @@
 import {
   BeforeInputRuleHandler,
+  BeforeInputRuleInlineHandler,
   BeforePlugin,
   EventContext,
   EventHandler,
   EventHandlerMap,
   InputRule,
   insertBeforeAction,
+  Mark,
+  MarkSet,
+  MarksPath,
   Pin,
   PinnedSelection,
+  Point,
+  PointedSelection,
   preventAndStopCtx,
   RemoteDataAsPath,
   SetContentAction,
@@ -26,7 +32,7 @@ export class ChangeName extends BeforePlugin {
 
   rules: BeforeInputRuleHandler[] = [];
 
-  inputRules = new BeforeInputRuleHandler([
+  titleInputRules = new BeforeInputRuleHandler([
     //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberList')),
     new InputRule(/^(\[]\s)(.)*/, this.tryChangeName("todo", ["nestable"])),
     new InputRule(/^(#\s)(.)*/, this.tryChangeName("h1", ["nestable"])),
@@ -62,6 +68,10 @@ export class ChangeName extends BeforePlugin {
     // new InputRule(/^(\*\*\*\s)(.)*/, this.insertDividerBefore('separator', ['nestable'])),
   ]);
 
+  inlineInputRules = new BeforeInputRuleInlineHandler([
+    new InputRule(/`(.)+`/, this.changeIntoCodeSpan(["inline"])),
+  ]);
+
   handlers(): Partial<EventHandler> {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
@@ -82,8 +92,14 @@ export class ChangeName extends BeforePlugin {
     const { currentNode } = ctx;
     const block = currentNode.closest((n) => n.isContainer)!;
     if (!isConvertible(block)) return;
-    if (this.inputRules.execute(ctx, block)) {
+    if (this.titleInputRules.execute(ctx, block)) {
       console.log("done...");
+      return;
+    }
+
+    if (this.inlineInputRules.execute(ctx, block)) {
+      console.log("done...");
+      return;
     }
   }
 
@@ -221,13 +237,91 @@ export class ChangeName extends BeforePlugin {
         const action = SetContentAction.create(titleNode.id, []);
         cmd.Add(action);
       } else {
-        debugger;
         const textNode = app.schema.text(title)!;
         const action = SetContentAction.create(titleNode.id, [textNode]);
         cmd.Add(action);
       }
 
       cmd.Add(insertBeforeAction(block, divider)).Select(after).Dispatch();
+    };
+  }
+
+  changeIntoCodeSpan(groups: string[]) {
+    return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
+      const { currentNode, app, cmd } = ctx;
+      if (!currentNode.isInline) return;
+      if (MarkSet.from(currentNode.marks).has(Mark.CODE)) return;
+
+      const { textContent } = currentNode;
+
+      const { selection } = app.state;
+      const { start } = selection;
+      const { offset: endOffset } = start;
+      // if the current node has two ` marks, then it is a code span
+      let startOffset = endOffset - 1;
+      while (startOffset >= 0) {
+        if (textContent[startOffset] === "`") {
+          break;
+        }
+        startOffset--;
+      }
+
+      if (startOffset === -1 || startOffset === endOffset - 1) {
+        // if there is no ` mark before the current offset, then it is not a code span
+        return;
+      }
+
+      if (textContent[startOffset] === "`") {
+        const cmd = ctx.cmd;
+
+        // if the current offset is a ` mark, then it is a code span
+        const prefixContent = textContent.slice(0, startOffset);
+        const suffixContent = textContent.slice(endOffset);
+        const codeContent = textContent.slice(startOffset + 1, endOffset);
+        const { prevSiblings, nextSiblings } = currentNode;
+        const prefixNode = app.schema.text(
+          prefixContent + (prevSiblings.length ? " " : ""),
+          {
+            props: currentNode.props.toJSON(),
+          },
+        )!;
+        const codeSpan = app.schema.text(codeContent, {
+          props: currentNode.props.toJSON(),
+        })!;
+        const suffixNode = app.schema.text(
+          (nextSiblings.length ? " " : " ") + suffixContent,
+          {
+            props: currentNode.props.toJSON(),
+          },
+        )!;
+
+        const nodes = [prefixNode, codeSpan, suffixNode].filter(
+          (n) => n?.textContent.length,
+        );
+
+        cmd.SetContent(start.node, [
+          ...prevSiblings,
+          ...nodes,
+          ...nextSiblings,
+        ]);
+
+        const marks = MarkSet.from(currentNode.marks).add(Mark.CODE).toArray();
+
+        cmd.Update(codeSpan, {
+          [MarksPath]: marks,
+        });
+        cmd.Mark("add", marks);
+
+        const after = PointedSelection.fromPoint(
+          Point.atOffset(
+            start.node,
+            start.offset + (prevSiblings.length ? 0 : -1),
+          ),
+        );
+        cmd.Select(after).Dispatch();
+      }
+
+      console.log("changeIntoCodeSpan");
     };
   }
 

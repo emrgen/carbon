@@ -107,13 +107,13 @@ const bumpPackageVersions = () => {
       return oldVersionMap[name].hash != newVersions[name].hash;
     });
 
-  console.log("--------------------");
-  console.log("Changed packages:");
-  console.log("--------------------");
-
   if (changedPackages.length === 0) {
     console.log("No packages changed, skipping version bump");
   } else {
+    console.log("--------------------");
+    console.log("Changed packages:");
+    console.log("--------------------");
+
     // write new bumped versions to package.json for each package
     const updatedPackages = changedPackages
       .map((name) => {
