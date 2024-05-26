@@ -1,5 +1,15 @@
 # @emrgen/fastform-core
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @emrgen/carbon-core@0.0.5
+  - @emrgen/carbon-blocks@0.0.7
+  - @emrgen/carbon-dragon@0.0.3
+  - @emrgen/carbon-utils@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes

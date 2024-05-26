@@ -1,5 +1,17 @@
 # @emrgen/carbon-react-editor
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @emrgen/carbon-core@0.0.5
+  - @emrgen/carbon-clipboard@0.0.5
+  - @emrgen/carbon-react@0.0.4
+  - @emrgen/carbon-react-blocks@0.0.4
+  - @emrgen/carbon-utils@0.0.4
+  - @emrgen/fastype-core@0.0.4
+
 ## 0.0.1
 
 ### Patch Changes

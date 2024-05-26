@@ -1,5 +1,15 @@
 # vue
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @emrgen/carbon-core@0.0.5
+  - vue@0.0.2
+  - @emrgen/carbon-blocks@0.0.7
+  - @emrgen/carbon-vue@0.0.4
+
 ## 0.0.1
 
 ### Patch Changes

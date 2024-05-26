@@ -1,5 +1,11 @@
 # @emrgen/carbon-solid-blocks
 
+## 0.0.4
+
+### Patch Changes
+
+- @emrgen/carbon-solid@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes
