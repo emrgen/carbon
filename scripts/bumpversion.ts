@@ -1,4 +1,4 @@
-const { zip, isEqual } = require("lodash");
+const { zip, isEqual, sortBy } = require("lodash");
 const fs = require("fs");
 const path = require("path");
 const { createHash } = require("crypto");
@@ -65,13 +65,13 @@ const getPackageVersionHash = () => {
 };
 
 const updatePackagesVersionHashFile = () => {
-  const packages = getPackageVersionHash();
+  const packages = sortBy(getPackageVersionHash(), "name");
 
-  const oldPackages = require(packageVersionHashFilePath);
-  if (JSON.stringify(packages) === JSON.stringify(oldPackages)) {
-    console.log("No packages changed, skipping version bump");
-    return;
-  }
+  // const oldPackages = require(packageVersionHashFilePath);
+  // if (JSON.stringify(packages) === JSON.stringify(oldPackages)) {
+  //   console.log("No packages changed, skipping version bump");
+  //   return;
+  // }
 
   // const version = zip(oldPackages, packages)
   //   .filter(([a, b]) => !isEqual(a, b))
@@ -189,5 +189,5 @@ const bumpPackageVersions = (writeFile = false) => {
   }
 };
 
-bumpPackageVersions(options.write);
-// updatePackagesVersionHashFile();
+// bumpPackageVersions(options.write);
+updatePackagesVersionHashFile();

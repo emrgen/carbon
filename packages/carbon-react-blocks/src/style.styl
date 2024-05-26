@@ -1425,3 +1425,19 @@ span[data-name=text] {
     font-size 13px
 [data-name="background"]
     padding 2px 0
+
+
+[data-name=section],
+[data-name=collapsible],
+[data-name=bulletList],
+[data-name=numberList],
+[data-name=todo]
+    & > [data-type=content] .code
+        font-size 14px
+
+[data-name=h1],
+[data-name=h2],
+[data-name=h3],
+[data-name=h4]
+    & > [data-type=content] .code
+        font-size 90%

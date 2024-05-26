@@ -904,7 +904,10 @@ export class TransformCommands extends BeforePlugin {
 
     // * update startTitle text content
     const startTextContent = [
-      ...TextBlock.from(startTitleBlock).removeContent(0, start.offset),
+      ...TextBlock.from(startTitleBlock).removeContent(
+        start.offset,
+        start.node.focusSize,
+      ),
       ...sliceStartTitle.children,
     ];
     tr.Add(SetContentAction.create(start.node, startTextContent));
@@ -925,10 +928,7 @@ export class TransformCommands extends BeforePlugin {
     // * update endTitle text content
     const endTextContent = [
       ...sliceEndTitle.children,
-      ...TextBlock.from(endTitleBlock).removeContent(
-        end.offset,
-        endTitleBlock.focusSize,
-      ),
+      ...TextBlock.from(endTitleBlock).removeContent(0, end.offset),
     ];
     tr.Add(SetContentAction.create(sliceEndTitle, endTextContent));
 

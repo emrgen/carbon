@@ -202,7 +202,6 @@ const useMarks = (marks: Mark[]) => {
             fontFamily:
               "Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
             color: "#c7254e",
-            fontSize: "14px",
           });
           break;
       }
@@ -212,14 +211,30 @@ const useMarks = (marks: Mark[]) => {
   }, [marks]);
 };
 
+const useClassName = (marks: Mark[]) => {
+  return useMemo(() => {
+    const classes: string[] = [];
+    marks.forEach((mark) => {
+      switch (mark.name) {
+        case "code":
+          classes.push("code");
+          break;
+      }
+    }, {});
+
+    return classes.join(" ");
+  }, [marks]);
+};
+
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
   const { node, parent } = props;
   const marks: Mark[] = node.props.get(MarksPath, [] as Mark[]);
   const style = useMarks(marks);
+  const className = useClassName(marks);
 
   return (
-    <CarbonElement node={node} tag="span" custom={{ style }}>
+    <CarbonElement node={node} tag="span" custom={{ style, className }}>
       <>
         {node.isEmpty ? (
           <CarbonEmpty node={node} parent={parent} />
