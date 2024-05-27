@@ -1,123 +1,142 @@
 $lineHeight = 20px
 [data-name=code]
-  user-select contain
-  font-size 12px
-  background: #F8F9FA;
-  box-shadow 0 0 0 1px #E9EAED
-  padding: 10px 10px 10px 0px;
-  table
-    width 100%
-    td:nth-child(odd) {
-      //background-color: #eee;
-      width 30px
-      text-align: right
-      padding-right 10px
-    }
+    user-select contain
+    font-size 12px
+    background: #F8F9FA;
+    box-shadow 0 0 0 1px #E9EAED
+    padding: 10px 10px 10px 0px;
 
-  [data-name=section]
-    line-height $lineHeight
-    font-family: "Source Code Pro", monospace
-    display flex
+    table
+        width 100%
+
+        td:nth-child(odd) {
+            //background-color: #eee;
+            width 30px
+            text-align: right
+            padding-right 10px
+        }
+
+    [data-name=section]
+        line-height $lineHeight
+        font-family: "Source Code Pro", monospace
+        display flex
+
     //background: #F8F9FA;
-  [data-name=codeLine]
-    line-height $lineHeight
-    font-family: "Source Code Pro", monospace
-    display flex
-    gap 4px
-    [data-name=title]
-      flex 1
+
+    [data-name=codeLine]
+        line-height $lineHeight
+        font-family: "Source Code Pro", monospace
+        display flex
+        gap 4px
+
+        [data-name=title]
+            flex 1
 
 [data-name=code]
 [data-name=codeLine]
-  position: relative;
-  &:after
-    position: absolute
-    content: attr(data-id)
-    line-height: inherit
-    top 1px
-    right 0
-    padding 0 10px
-    font-size 10px
-    line-height 10px
+    position: relative;
+
+    &:after
+        position: absolute
+        content: attr(data-id)
+        line-height: inherit
+        top 1px
+        right 0
+        padding 0 10px
+        font-size 10px
+        line-height 10px
+
     //display none
-  [data-name=title]
-    &:before
-      //display none
-      position: absolute
-      content: attr(data-id)
-      line-height: inherit
-      top 12px
-      right 0
-      padding 0 10px
-      font-size 10px
-      color: #aaa
-      line-height 10px
-      //display none
+
+    [data-name=title]
+        &:before
+            //display none
+            position: absolute
+            content: attr(data-id)
+            top 12px
+            right 0
+            padding 0 10px
+            font-size 10px
+            color: #aaa
+            line-height 10px
+
+//display none
 
 .carbon-code-line-number
-  position: relative;
-  pointer-events none
-  user-select none
-  padding-left: 10px;
-  width: 40px;
-  .carbon-code-line-number-text
-    padding-left: 6px;
+    position: relative;
+    pointer-events none
+    user-select none
+    padding-left: 10px;
+    width: 40px;
+
+    .carbon-code-line-number-text
+        padding-left: 6px;
 
 .code-table
-  display flex
-  flex-direction column
-  .code-table-header
-    display flex
-    flex-direction row
-    .code-header-line
-      font-weight bold
-      display flex
-      flex-direction row
-      > div:first-child
-        width 30px
-        text-align: right
-        padding-right 4px
-      div
-        flex 1
-        padding-left: 10px;
-  .code-table-body
     display flex
     flex-direction column
-  .carbon-code-line
-    display flex
-    position: relative;
-    width 100%;
-    .code-line-number
-      user-select none
-      //padding-right 10px
-      width 30px
-      padding-right: 4px;
-      text-align: right
-    [data-name=codeLine]
-      padding-left 10px
-      flex 1
+
+    .code-table-header
+        display flex
+        flex-direction row
+
+        .code-header-line
+            font-weight bold
+            display flex
+            flex-direction row
+
+            > div:first-child
+                width 30px
+                text-align: right
+                padding-right 4px
+
+            div
+                flex 1
+                padding-left: 10px;
+
+    .code-table-body
+        display flex
+        flex-direction column
+
+    .carbon-code-line
+        display flex
+        position: relative;
+        width 100%;
+
+        .code-line-number
+            user-select none
+            //padding-right 10px
+            width 30px
+            padding-right: 4px;
+            text-align: right
+
+        [data-name=codeLine]
+            padding-left 10px
+            flex 1
 
 
 [data-name=codeMirror]
     //height 200px
     border 1px solid #eee
     margin 10px 0
-    border-radius 4px!important
+    border-radius 4px !important
     background: rgba(153, 153, 153, 0.12);
 
 .cm-gutters
-    display none!important
+    display none !important
 
 .cm-editor.cm-focused
     border none
-    outline none!important
+    outline none !important
     background: rgba(172, 191, 255, 0.14);
     transition background ease 0.1s
+
 .cm-editor
     font-size 13px
-    padding 2px 0!important
+    padding 2px 0 !important
+
 .cm-line
-    padding 0 12px!important
+    padding 0 12px !important
 
 .cm-activeLine.cm-line
-    background transparent!important
+    background transparent !important

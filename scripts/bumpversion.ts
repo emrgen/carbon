@@ -189,5 +189,5 @@ const bumpPackageVersions = (writeFile = false) => {
   }
 };
 
-// bumpPackageVersions(options.write);
-updatePackagesVersionHashFile();
+bumpPackageVersions(options.write);
+// updatePackagesVersionHashFile();

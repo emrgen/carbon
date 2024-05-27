@@ -20,6 +20,7 @@ import {
 import { useNodeChange, useRenderManager } from "../hooks";
 import { RendererProps } from "./ReactRenderer";
 import { merge } from "lodash";
+import { is_env_development } from "../env";
 
 export const JustEmpty = (props: RendererProps) => {
   if (props.node.isText) {
@@ -123,14 +124,19 @@ const InnerElement = (
     };
   }, [editor, node]);
 
+  const customProps = useMemo(() => {
+    if (is_env_development()) {
+      return {
+        "data-version": renderVersion,
+        "data-id": key,
+      };
+    }
+
+    return {};
+  }, [renderVersion, key]);
+
   return (
-    <Tag
-      ref={ref}
-      data-name={name}
-      data-version={renderVersion}
-      data-id={key}
-      {...attributes}
-    >
+    <Tag ref={ref} data-name={name} {...customProps} {...attributes}>
       {children}
     </Tag>
   );

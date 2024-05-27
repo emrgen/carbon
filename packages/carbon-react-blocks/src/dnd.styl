@@ -1,50 +1,50 @@
 
 .drag-cursor-overlay
-	position absolute
-	width 100%
-	height: 100%
-	background: rgba(255, 0, 0, 0.01)
-	// cursor: none
-	// cursor grabbing
-	user-select: none
-	z-index: 999999999
+    position absolute
+    width 100%
+    height: 100%
+    background: rgba(255, 0, 0, 0.01)
+    // cursor: none
+    // cursor grabbing
+    user-select: none
+    z-index: 999999999
 
 .carbon-selector
-	position absolute
-	box-shadow: 0 0 0 1px #555
-	background: rgba(51, 51, 51, 0.1)
-	user-select: none
-	pointer-events: none
-	z-index: 9999
-	overflow: hidden
+    position absolute
+    box-shadow: 0 0 0 1px #555
+    background: rgba(51, 51, 51, 0.1)
+    user-select: none
+    pointer-events: none
+    z-index: 9999
+    overflow: hidden
 
 .carbon-drag-overlay
-	position absolute
-	width 100%
-	height: 100%
-	background: rgba(245, 118, 118, 0.8)
+    position absolute
+    width 100%
+    height: 100%
+    background: rgba(245, 118, 118, 0.8)
 
 .drag-handle-hint
-	position absolute
-	background: rgba(245, 118, 118, 0.8)
-	width 10px
-	height 10px
-	transform: translate(-50%, -50%)
+    position absolute
+    background: rgba(245, 118, 118, 0.8)
+    width 10px
+    height 10px
+    transform: translate(-50%, -50%)
 
 .droppable-rect
-	position absolute
-	box-shadow: inset 0 0 0 3px rgb(42, 51, 171)
-	pointer-events: none
-	background: transparent
+    position absolute
+    box-shadow: inset 0 0 0 3px rgb(42, 51, 171)
+    pointer-events: none
+    background: transparent
 
 .draggable-rect
-	position absolute
-	box-shadow: inset 0px 0px 0 2px rgb(211, 46, 128)
-	pointer-events: none
-	background: transparent
+    position absolute
+    box-shadow: inset 0 0 0 2px rgb(211, 46, 128)
+    pointer-events: none
+    background: transparent
 
 [data-name=title]
-	position relative
+    position relative
 
 [data-name=h1]
 [data-name=h2]
@@ -57,145 +57,155 @@
 [data-name=todo]
 [data-name=pageTree]
 [data-name=pageTreeItem]
-	position: relative;
-	&:after
-		position: absolute
-		content: attr(data-id)
-		top 1px
-		right 0
-		padding 0 10px
-		font-size 10px
-		line-height 10px
+    position: relative;
 
-	//[data-name=title]
-	//	&:before
-	//		position: absolute
-	//		content: attr(data-id)
-	//		line-height: inherit
-	//		top 12px
-	//		right 0
-	//		padding 0 10px
-	//		font-size 10px
-	//		color: #aaa
-	//		line-height 10px
+    &:after
+        position: absolute
+        content: attr(data-id)
+        top 1px
+        right 0
+        padding 0 10px
+        font-size 10px
+        line-height 10px
+
+//[data-name=title]
+//	&:before
+//		position: absolute
+//		content: attr(data-id)
+//		line-height: inherit
+//		top 12px
+//		right 0
+//		padding 0 10px
+//		font-size 10px
+//		color: #aaa
+//		line-height 10px
 
 &[data-name=doc]:after
 &[data-name=paragraph]:after
-	position: absolute
-	content: attr(data-id)
-	top 1px
-	right 100px
-	padding 0 10px
-	font-size 13px
+    position: absolute
+    content: attr(data-id)
+    top 1px
+    right 100px
+    padding 0 10px
+    font-size 13px
 
 
 [data-name=doc]
-	caret-color teal
+    caret-color teal
 
 .carbon-rect-select-area
-	// position absolute
-	padding: 0 20px
-	height: 100%
-	width: 100%
-	top: 0
-	left: 0
-	// background rgb(0, 128, 128)
-	z-index -1
+    // position absolute
+    padding: 0 20px
+    height: 100%
+    width: 100%
+    top: 0
+    left: 0
+    // background rgb(0, 128, 128)
+    z-index -1
 
 .carbon-dnd-portal
-	position absolute
-	left: 0
-	top: 0
-	// width 100%
-	// height: 100%
-	// background: rgba(30, 112, 255, 0.161)
+    position absolute
+    left: 0
+    top: 0
+
+// width 100%
+// height: 100%
+// background: rgba(30, 112, 255, 0.161)
 
 .carbon-node-handle
-	position absolute
-	user-select: none
-	display: flex
-	gap: 4px
-	//background #eee
-	// flex-direction: row-reverse
-	.carbon-add-handle
-		cursor: pointer
-		width 24px
-		height: 24px
-		border-radius: 4px
-		display: flex
-		align-items: center
-		justify-content: center
-		color #aaa
-		padding: 0 1px
-		&:hover
-			background: #ddd
-			color #555
-		&:active
-			background: #ccc
-			color #444
-		svg
-			pointer-events: none
+    position absolute
+    user-select: none
+    display: flex
+    gap: 4px
+    //background #eee
+    // flex-direction: row-reverse
 
-	.carbon-drag-handle
-		cursor: grab
-		width 20px
-		height: 24px
-		transition: opacity 0.3s
-		border-radius: 4px
-		display: flex
-		align-items: center
-		justify-content: center
-		color #aaa
-		font-size: 20px
-		&:hover
-			background: #ddd
-			color #555
-		&:active
-			background: #ccc
-			color #444
-		svg
-			pointer-events: none
+    .carbon-add-handle
+        cursor: pointer
+        width 24px
+        height: 24px
+        border-radius: 4px
+        display: flex
+        align-items: center
+        justify-content: center
+        color #aaa
+        padding: 0 1px
+
+        &:hover
+            background: #ddd
+            color #555
+
+        &:active
+            background: #ccc
+            color #444
+
+        svg
+            pointer-events: none
+
+    .carbon-drag-handle
+        cursor: grab
+        width 20px
+        height: 24px
+        transition: opacity 0.3s
+        border-radius: 4px
+        display: flex
+        align-items: center
+        justify-content: center
+        color #aaa
+        font-size: 20px
+
+        &:hover
+            background: #ddd
+            color #555
+
+        &:active
+            background: #ccc
+            color #444
+
+        svg
+            pointer-events: none
+
 .carbon-drag-overlay
-	position absolute
-	width 100%
-	height: 100%
-	cursor grabbing
-	user-select: none
-	background: rgba(255, 0, 0, 0.094)
-	z-index 999999999
+    position absolute
+    width 100%
+    height: 100%
+    cursor grabbing
+    user-select: none
+    background: rgba(255, 0, 0, 0.094)
+    z-index 999999999
 
 .carbon-drag-handle-cover
-	position absolute
-	width 100%
-	height: 100%
-	//cursor grabbing
-	background: rgba(100, 0, 0, 0.094)
-	user-select: none
-	z-index 999999999
+    position absolute
+    width 100%
+    height: 100%
+    //cursor grabbing
+    background: rgba(100, 0, 0, 0.094)
+    user-select: none
+    z-index 999999999
 
 .carbon-node-handle[data-target-name=section]
-	//> *
-	//	display none
-	transform: translate(-4px, -1px)
+    //> *
+    //	display none
+    transform: translate(-4px, -1px)
 
 .carbon-node-handle[data-target-name=h1],
 .carbon-node-handle[data-target-as=h1]
-	transform: translate(-4px, 6px)
+    transform: translate(-4px, 6px)
 
 .carbon-node-handle[data-target-name=h2],
 .carbon-node-handle[data-target-as=h2]
-	transform: translate(-4px, -1px)
+    transform: translate(-4px, -1px)
 
 .carbon-node-handle[data-target-name=h3],
 .carbon-node-handle[data-target-as=h3]
-	transform: translate(-4px, 2px)
+    transform: translate(-4px, 2px)
 
 .carbon-node-handle[data-target-name=h4],
 .carbon-node-handle[data-target-as=h4]
-	transform: translate(-4px, 0px)
+    transform: translate(-4px, 0px)
 
 .carbon-node-handle[data-target-name=divider]
-	transform: translate(-4px, -8px)
+    transform: translate(-4px, -8px)
 
 $selection-color = hsla(213, 82%, 82%, 0.5)
 // [data-selected=true]
@@ -206,32 +216,35 @@ $selection-color = hsla(213, 82%, 82%, 0.5)
 // 		background-color: transparent;
 
 [data-name=text]
-	white-space: pre-wrap;
-	word-break: break-word;
+    white-space: pre-wrap;
+    word-break: break-word;
 
 .fast-selection-halo
-	position absolute
-	top: 0
-	left 0
-	width: 100%
-	height: 100%
-	background: $selection-color
-	opacity: 0.6
-	border-radius: 4px
-	pointer-events: none
+    position absolute
+    top: 0
+    left 0
+    width: 100%
+    height: 100%
+    background: $selection-color
+    opacity: 0.6
+    border-radius: 4px
+    pointer-events: none
 
 [data-name=h1] > [data-type="content"]
-	font-size: 26px
+    font-size: 26px
+
 [data-name=h2] > [data-type="content"]
-	font-size: 24px
+    font-size: 24px
+
 [data-name=h3] > [data-type="content"]
-	font-size: 18px
+    font-size: 18px
+
 [data-name=h4] > [data-type="content"]
-	font-size: 16px
+    font-size: 16px
 
 .carbon-drop-hint
-	background $selection-color
-	width 100%
-	height: 5px
-	z-index 100
-	transform: translate(0, -2px)
+    background $selection-color
+    width 100%
+    height: 5px
+    z-index 100
+    transform: translate(0, -2px)

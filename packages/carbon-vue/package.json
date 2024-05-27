@@ -10,11 +10,11 @@
   "dependencies": {
     "@emrgen/carbon-core": "workspace:*",
     "@types/lodash": "^4.14.191",
+    "@emrgen/types": "workspace:*",
     "uuid": "^9.0.0",
     "vue": "^0.0.2"
   },
   "devDependencies": {
-    "@emrgen/types": "workspace:*",
     "eslint": "^7.32.0",
     "@emrgen/eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
