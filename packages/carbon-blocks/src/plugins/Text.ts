@@ -14,6 +14,7 @@ import {
 } from "@emrgen/carbon-core";
 import { NodeEncoder, Writer } from "@emrgen/carbon-core/src/core/Encoder";
 import { isEmpty } from "lodash";
+import compareUrls from "compare-urls";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
@@ -65,6 +66,10 @@ export class TextPlugin extends NodePlugin {
         const { selection } = app.state;
         const mark = MarkSet.from(currentNode.marks).get("link");
         if (mark) {
+          if (compareUrls(mark.props?.href ?? "", window.location.href)) {
+            return;
+          }
+
           const { start, end } = selection;
           const down = start.down();
           if (!down.node.eq(currentNode)) {

@@ -227,6 +227,15 @@ const useClassName = (marks: Mark[]) => {
   }, [marks]);
 };
 
+const useTag = (marks: Mark[]) => {
+  return useMemo(() => {
+    if (MarkSet.from(marks).has(Mark.link(""))) {
+      return "a";
+    }
+    return "span";
+  }, [marks]);
+};
+
 // render text node with span
 const InnerCarbonText = (props: RendererProps) => {
   const { node, parent } = props;
@@ -234,12 +243,7 @@ const InnerCarbonText = (props: RendererProps) => {
   const style = useMarks(marks);
   const className = useClassName(marks);
 
-  const tag = useMemo(() => {
-    if (MarkSet.from(marks).has(Mark.link(""))) {
-      return "a";
-    }
-    return "span";
-  }, [marks]);
+  const tag = useTag(marks);
 
   const nodeProps = useMemo(() => {
     const props = {};

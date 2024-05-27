@@ -444,6 +444,9 @@ importers:
       '@uidotdev/usehooks':
         specifier: ^2.4.1
         version: 2.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      compare-urls:
+        specifier: ^4.1.0
+        version: 4.1.0
       katex:
         specifier: ^0.16.7
         version: 0.16.10
@@ -4757,6 +4760,10 @@ packages:
     resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
     engines: {node: '>= 12'}
 
+  compare-urls@4.1.0:
+    resolution: {integrity: sha512-uFKDbZjEu8rs8f7PvRBAQjDFqq0ySaUwg0x0NENrqDyTRD+nCvuHkgZsYjmakr60RDB+MSRczejwlxVCTU+F4A==}
+    engines: {node: '>=18'}
+
   compute-scroll-into-view@3.0.3:
     resolution: {integrity: sha512-nadqwNxghAGTamwIqQSG433W6OADZx2vCo3UXHNrzTRHK/htu+7+L0zhjEoaeaQVNAi3YgqWDv8+tzf0hRfR+A==}
 
@@ -5931,6 +5938,10 @@ packages:
   normalize-range@0.1.2:
     resolution: {integrity: sha512-bdok/XvKII3nUpklnV6P2hxtMNrCboOjAcyBuQnWEhO665FwrSNRxU+AqpsyvO6LgGYPspN+lu5CLtw4jPRKNA==}
     engines: {node: '>=0.10.0'}
+
+  normalize-url@8.0.1:
+    resolution: {integrity: sha512-IO9QvjUMWxPQQhs60oOu10CRkWCiZzSUkzbXGGV9pviYl1fXYcvkzQ5jV9z8Y6un8ARoVRl4EtC6v6jNqbaJ/w==}
+    engines: {node: '>=14.16'}
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
@@ -9673,6 +9684,10 @@ snapshots:
 
   commander@8.3.0: {}
 
+  compare-urls@4.1.0:
+    dependencies:
+      normalize-url: 8.0.1
+
   compute-scroll-into-view@3.0.3: {}
 
   computeds@0.0.1: {}
@@ -10975,6 +10990,8 @@ snapshots:
   normalize-path@3.0.0: {}
 
   normalize-range@0.1.2: {}
+
+  normalize-url@8.0.1: {}
 
   nth-check@2.1.1:
     dependencies:
