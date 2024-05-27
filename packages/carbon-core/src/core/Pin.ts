@@ -2,7 +2,7 @@ import { Optional, Predicate } from "@emrgen/types";
 import { classString } from "./Logger";
 import { Node } from "./Node";
 import { Point } from "./Point";
-import { constrain } from "../utils/constrain";
+import { clamp } from "../utils/clamp";
 import { Maps } from "./types";
 import { NodeMapGet } from "./NodeMap";
 
@@ -374,7 +374,7 @@ export class Pin {
       return Pin.create(prev, prev.size);
     }
 
-    distance = constrain(distance, 0, curr.focusSize);
+    distance = clamp(distance, 0, curr.focusSize);
     return Pin.create(curr, distance);
   }
 
@@ -420,7 +420,7 @@ export class Pin {
       return Pin.create(prev, 0);
     }
 
-    distance = constrain(curr.focusSize - distance, 0, curr.focusSize);
+    distance = clamp(curr.focusSize - distance, 0, curr.focusSize);
     return Pin.create(curr, distance);
   }
 

@@ -10,7 +10,7 @@ import { Flex } from "@chakra-ui/react";
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { RendererProps, useCarbon } from "@emrgen/carbon-react";
 import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
-import { constrain } from "@emrgen/carbon-core";
+import { clamp } from "@emrgen/carbon-core";
 
 interface MediaViewProps extends RendererProps {
   aspectRatio?: number;
@@ -103,19 +103,19 @@ export function MediaView(props: MediaViewProps) {
       // console.log("dx", dx, "dy", dy, documentWidth);
 
       if (e.id === "media-left-resizer") {
-        const nw = constrain(roundInOffset(width - dx, 50), 100, documentWidth);
+        const nw = clamp(roundInOffset(width - dx, 50), 100, documentWidth);
         setWidth(nw);
         if (height / nw > aspectRatio) {
           setHeight(nw * aspectRatio);
         }
       } else if (e.id === "media-right-resizer") {
-        const nw = constrain(roundInOffset(width + dx, 50), 100, documentWidth);
+        const nw = clamp(roundInOffset(width + dx, 50), 100, documentWidth);
         setWidth(nw);
         if (height / nw > aspectRatio) {
           setHeight(nw * aspectRatio);
         }
       } else if (e.id === "media-bottom-resizer") {
-        const nh = constrain(
+        const nh = clamp(
           roundInOffset(height + dy, 50),
           100,
           aspectRatio * width,
