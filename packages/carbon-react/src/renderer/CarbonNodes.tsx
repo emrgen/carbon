@@ -11,6 +11,7 @@ import { useCarbon } from "../hooks/useCarbon";
 import {
   LocalHtmlAttrPath,
   Mark,
+  MarkSet,
   MarksPath,
   NamePath,
   RemoteHtmlAttrPath,
@@ -101,7 +102,7 @@ const InnerElement = (
       ...(Object.keys(styles).length ? { styles } : {}),
       ...custom,
     };
-  }, [custom, node]);
+  }, [custom, node, props.style]);
 
   // console.log(node.key, attributes, node.props.prefix(LocalHtmlAttrPath))
 
@@ -233,8 +234,32 @@ const InnerCarbonText = (props: RendererProps) => {
   const style = useMarks(marks);
   const className = useClassName(marks);
 
+  const tag = useMemo(() => {
+    if (MarkSet.from(marks).has(Mark.link(""))) {
+      return "a";
+    }
+    return "span";
+  }, [marks]);
+
+  const nodeProps = useMemo(() => {
+    const props = {};
+    if (tag === "a") {
+      const link = MarkSet.from(marks).get(Mark.link("").name);
+      if (link) {
+        props["href"] = link.props?.href ?? "#";
+        props["target"] = "_blank";
+      }
+    }
+
+    return props;
+  }, [marks, tag]);
+
   return (
-    <CarbonElement node={node} tag="span" custom={{ style, className }}>
+    <CarbonElement
+      node={node}
+      tag={tag}
+      custom={{ style, className, ...nodeProps }}
+    >
       <>
         {node.isEmpty ? (
           <CarbonEmpty node={node} parent={parent} />

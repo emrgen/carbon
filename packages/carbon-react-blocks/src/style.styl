@@ -1441,3 +1441,20 @@ span[data-name=text] {
 [data-name=h4]
     & > [data-type=content] .code
         font-size 90%
+
+[data-name=title]
+    a
+        color: #555
+        text-decoration: none
+        position: relative;
+
+        &:after {
+            content: '';
+            width: 100%;
+            position: absolute;
+            left: 0;
+            bottom: -1px
+
+            border-width: 0 0 2px;
+            border-style: solid;
+        }

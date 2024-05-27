@@ -7,7 +7,6 @@ export interface User {
 
 export interface MarkProps {
   color?: string;
-  url?: string;
   href?: string;
   user?: User;
 }
@@ -37,8 +36,8 @@ export class Mark {
     return new Mark("mention");
   }
 
-  static link(url: string): Mark {
-    return new Mark("link", { url });
+  static link(href: string = "#"): Mark {
+    return new Mark("link", { href });
   }
 
   static color(color: string): Mark {
@@ -116,6 +115,10 @@ export class MarkSet {
     }
 
     return new MarkSet([marks]);
+  }
+
+  get(name: string) {
+    return this.marks[name];
   }
 
   constructor(marks: Mark[] = []) {

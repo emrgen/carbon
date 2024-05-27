@@ -2,6 +2,7 @@ import {
   EventContext,
   EventHandlerMap,
   Mark,
+  MarkSet,
   MarksPath,
   Node,
   NodePlugin,
@@ -58,6 +59,25 @@ export class TextPlugin extends NodePlugin {
         // @ts-ignore
         const { data, key } = ctx.event.nativeEvent;
         cmd.transform.insertText(selection, data ?? key).Dispatch();
+      },
+      mouseUp: (ctx: EventContext<MouseEvent>) => {
+        const { app, cmd, currentNode } = ctx;
+        const { selection } = app.state;
+        const mark = MarkSet.from(currentNode.marks).get("link");
+        if (mark) {
+          const { start, end } = selection;
+          const down = start.down();
+          if (!down.node.eq(currentNode)) {
+            return;
+          }
+
+          if (down.offset == 0 || down.offset == currentNode.focusSize) {
+            return;
+          }
+
+          preventAndStopCtx(ctx);
+          window.open(mark.props?.href ?? "", "_blank");
+        }
       },
     };
   }
@@ -132,7 +152,7 @@ const encodeMarkText = (w: Writer, ne: NodeEncoder, node: Node) => {
         break;
     }
   });
-  
+
   opens.forEach((tag) => w.write(tag));
   w.write(node.textContent);
   closes.forEach((tag) => w.write(tag));

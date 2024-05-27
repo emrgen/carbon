@@ -27,6 +27,10 @@ import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { flattenDeep, noop } from "lodash";
 import SelectionTracker from "../../SelectionTracker";
 import { PathTracker } from "../../PathTracker";
+import {
+  commentEditorComp,
+  commentEditorPlugin,
+} from "@emrgen/carbon-comment-editor";
 
 const data = node("carbon", [
   node("document", [
@@ -34,9 +38,22 @@ const data = node("carbon", [
 
     section([title([text("question title")])]),
 
-    section([title([text("question title 1")])], {
-      // [BackgroundPath]: "#fb8500",
-    }),
+    section(
+      [
+        title([
+          text("question"),
+          text(" "),
+          text("title", {
+            [MarksPath]: [Mark.link("http://localhost:3000")].map((m) =>
+              m.toJSON(),
+            ),
+          }),
+        ]),
+      ],
+      {
+        // [BackgroundPath]: "#fb8500",
+      },
+    ),
     section([
       title([
         text("question"),
@@ -444,7 +461,7 @@ const plugins = [
   ...corePresetPlugins,
   ...blockPresetPlugins,
   // carbonUtilPlugins,
-  // commentEditorPlugin,
+  commentEditorPlugin,
   // flashPlugin,
   // ...codeExtension.plugins!,
   // cellPlugin,
@@ -460,7 +477,7 @@ const plugins = [
 
 const renderers = [
   ...blockPresetRenderers,
-  // commentEditorComp,
+  commentEditorComp,
   // flashComp,
   // ...codeExtension.renderers!,
   // ...cellRenderer,
