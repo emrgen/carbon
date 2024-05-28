@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import {
   ActionOrigin,
   EventsIn,
+  ModePath,
   Node,
   Pin,
   PinnedSelection,
@@ -143,6 +144,8 @@ export const DocumentComp = (props: RendererProps) => {
 
   const image = useNodeImage(node);
 
+  const isEditable = node.props.get<string>(ModePath, "view") === "edit";
+
   return (
     <DocumentContext document={node}>
       <div
@@ -176,6 +179,8 @@ export const DocumentComp = (props: RendererProps) => {
             // onBlur: (e) => app.emit('document:blur', e as any),
             // onFocus: (e) => app.emit('document:focus', e as any),
             className: "carbon-document",
+            contentEditable: isEditable,
+            suppressContentEditableWarning: true,
           }}
         >
           <CarbonNodeContent node={node} />

@@ -472,7 +472,7 @@ const data = node("carbon", [
       // ]),
     ],
     {
-      [ModePath]: "view",
+      [ModePath]: "edit",
       // [ImagePath]:
       //   "https://momentum.photos/img/605ec0cd-c21b-420d-9ec7-f1a63d69cafd.jpg?momo_cache_bg_uuid=a63a8845-920b-4562-ba44-d3d5228261c9",
     },

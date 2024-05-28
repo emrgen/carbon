@@ -37,7 +37,6 @@ export const PartialComp = (props: RendererProps) => {
         ...(!isEditing
           ? {
               "data-collapsed": isCollapsed,
-              contentEditable: !isCollapsed,
               suppressContentEditableWarning: true,
             }
           : { "data-mode": "edit" }),
