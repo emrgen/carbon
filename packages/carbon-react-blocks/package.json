@@ -20,8 +20,9 @@
     "@uidotdev/usehooks": "^2.4.1",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
-    "react-icons": "^4.10.1",
-    "react": "^18.3.1"
+    "react": "^18.3.1",
+    "react-detectable-overflow": "^0.7.1",
+    "react-icons": "^4.10.1"
   },
   "devDependencies": {
     "@emrgen/eslint-config-custom": "workspace:*",

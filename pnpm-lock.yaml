@@ -1320,6 +1320,9 @@ importers:
       react:
         specifier: ^18.3.1
         version: 18.3.1
+      react-detectable-overflow:
+        specifier: ^0.7.1
+        version: 0.7.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-icons:
         specifier: ^4.10.1
         version: 4.12.0(react@18.3.1)
@@ -1715,9 +1718,6 @@ importers:
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
-      vue:
-        specifier: ^0.0.2
-        version: link:../../apps/vue
     devDependencies:
       '@emrgen/eslint-config-custom':
         specifier: workspace:*

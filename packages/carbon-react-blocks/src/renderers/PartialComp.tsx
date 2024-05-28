@@ -5,36 +5,42 @@ import {
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
-import { CollapsedPath, Pin, PinnedSelection } from "@emrgen/carbon-core";
+import {
+  CollapsedPathLocal,
+  ModePath,
+  Pin,
+  PinnedSelection,
+} from "@emrgen/carbon-core";
+import { useDocument } from "../hooks/useDocument";
+import { useCallback } from "react";
 
 export const PartialComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
+  const doc = useDocument();
 
-  const isCollapsed = node.props.get(CollapsedPath, true);
+  const isEditing = doc.props.get<string>(ModePath, "view") === "edit";
+  const isCollapsed = node.props.get(CollapsedPathLocal, true);
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     const { cmd } = app;
-    cmd.collapsible.toggle(node);
-    if (isCollapsed) {
-      const after = PinnedSelection.fromPin(Pin.toEndOf(node.firstChild!)!);
-      cmd.select(after);
-    } else {
-      const after = PinnedSelection.fromPin(
-        Pin.toEndOf(node.prev((n) => n.isTextContainer)!)!,
-      );
-      cmd.select(after);
-    }
-    cmd.dispatch();
-  };
+    const after = PinnedSelection.fromPin(Pin.toEndOf(node.firstChild!)!);
+
+    cmd.Update(node.id, { [CollapsedPathLocal]: !isCollapsed });
+    cmd.select(after).dispatch();
+  }, [app, node, isCollapsed]);
 
   return (
     <CarbonBlock
       node={node}
       custom={{
-        "data-collapsed": isCollapsed,
-        contentEditable: !isCollapsed,
-        suppressContentEditableWarning: true,
+        ...(!isEditing
+          ? {
+              "data-collapsed": isCollapsed,
+              contentEditable: !isCollapsed,
+              suppressContentEditableWarning: true,
+            }
+          : { "data-mode": "edit" }),
       }}
     >
       <div className={"carbon-partial-body"}>
@@ -42,13 +48,16 @@ export const PartialComp = (props: RendererProps) => {
         <CarbonNodeChildren node={node} />
       </div>
 
-      <div
-        className={"carbon-partial-footer"}
-        contentEditable={false}
-        onClick={handleToggle}
-      >
-        {isCollapsed ? "Expand" : "Collapse"}
-      </div>
+      {/*TOOD: only show the collaps/expand button if the content is overflowing*/}
+      {!isEditing && (
+        <div
+          className={"carbon-partial-footer"}
+          contentEditable={false}
+          onClick={handleToggle}
+        >
+          {isCollapsed ? "Expand" : "Collapse"}
+        </div>
+      )}
     </CarbonBlock>
   );
 };

@@ -197,7 +197,7 @@ export const HiddenPath = "remote/state/hidden";
 export const VisiblePath = "remote/state/visible";
 export const RenderPath = "local/state/render";
 export const OpenedPath = "local/state/opened";
-export const CollapsedPath = "local/state/collapsed";
+export const CollapsedPath = "remote/state/collapsed";
 export const CollapsedPathLocal = "local/state/collapsed";
 export const HoveredPath = "local/state/hovered";
 export const SelectedPath = "local/state/selected";
@@ -217,6 +217,7 @@ export const ColorPath = "remote/html/style/color";
 export const BackgroundPath = "remote/html/style/background";
 export const ImagePath = "remote/state/image/src";
 export const ImagePropsPath = "remote/state/image/props";
+export const ModePath = "local/state/mode";
 
 export const isPassiveHidden = (node: Node) => {
   return node.chain.some((n) => n.props.get<boolean>(HiddenPath) ?? false);

@@ -11,8 +11,7 @@
     "@emrgen/carbon-core": "workspace:*",
     "@types/lodash": "^4.14.191",
     "@emrgen/types": "workspace:*",
-    "uuid": "^9.0.0",
-    "vue": "^0.0.3"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "^7.32.0",

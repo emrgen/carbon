@@ -1,7 +1,7 @@
 import { NodeSpec } from "@emrgen/carbon-core";
-import { Section } from "@emrgen/carbon-blocks";
+import { Collapsible } from "./Collapsible";
 
-export class Partial extends Section {
+export class Partial extends Collapsible {
   name = "partial";
 
   override spec(): NodeSpec {

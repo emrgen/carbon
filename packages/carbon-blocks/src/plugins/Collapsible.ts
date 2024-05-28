@@ -32,7 +32,7 @@ declare module "@emrgen/carbon-core" {
       enter(selection: PinnedSelection): Transaction;
       expand(node: Node): Transaction;
       collapse(node: Node): Transaction;
-      toggle(node: Node): Transaction;
+      toggle(node: Node, path?: string): Transaction;
     };
   }
 }
@@ -80,20 +80,21 @@ export class Collapsible extends NodePlugin {
     };
   }
 
-  toggle(tr: Transaction, node: Node) {
-    if (node.isCollapsed) {
-      this.expand(tr, node);
+  toggle(tr: Transaction, node: Node, path: string = CollapsedPath) {
+    const isCollapsed = node.props.get(path, false);
+    if (isCollapsed) {
+      this.expand(tr, node, path);
     } else {
-      this.collapse(tr, node);
+      this.collapse(tr, node, path);
     }
   }
 
-  expand(tr: Transaction, node: Node) {
-    tr.Update(node.id, { [CollapsedPath]: false });
+  expand(tr: Transaction, node: Node, path = CollapsedPath) {
+    tr.Update(node.id, { [path]: false });
   }
 
-  collapse(tr: Transaction, node: Node) {
-    tr.Update(node.id, { [CollapsedPath]: true });
+  collapse(tr: Transaction, node: Node, path = CollapsedPath) {
+    tr.Update(node.id, { [path]: true });
   }
 
   plugins(): CarbonPlugin[] {
