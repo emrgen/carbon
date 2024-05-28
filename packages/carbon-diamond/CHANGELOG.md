@@ -1,5 +1,12 @@
 # @emrgen/carbon-diamond
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @emrgen/carbon-core@0.0.7
+
 ## 0.0.4
 
 ### Patch Changes

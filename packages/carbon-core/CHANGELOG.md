@@ -1,5 +1,11 @@
 # @emrgen/carbon-core
 
+## 0.0.7
+
+### Patch Changes
+
+- added code block
+
 ## 0.0.6
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @emrgen/fastype-utils
 
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies
+  - @emrgen/carbon-blocks@0.0.9
+  - @emrgen/carbon-core@0.0.7
+  - @emrgen/carbon-dragon@0.0.5
+  - @emrgen/carbon-utils@0.0.6
+
 ## 0.0.5
 
 ### Patch Changes

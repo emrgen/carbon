@@ -1,5 +1,17 @@
 # @emrgen/carbon-react-blocks
 
+## 0.0.6
+
+### Patch Changes
+
+- added code block
+- Updated dependencies
+  - @emrgen/carbon-core@0.0.7
+  - @emrgen/carbon-react@0.0.6
+  - @emrgen/carbon-attributes@0.0.5
+  - @emrgen/carbon-dragon@0.0.5
+  - @emrgen/carbon-dragon-react@0.0.5
+
 ## 0.0.5
 
 ### Patch Changes
