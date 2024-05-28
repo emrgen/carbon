@@ -31,6 +31,7 @@ import {
 } from "./plugins/Scale";
 import { Button } from "./plugins/Button";
 import { ImagePlugin } from "./plugins/ImagePlugin";
+import { Partial } from "./plugins/Partial";
 
 export * from "./create";
 
@@ -66,6 +67,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Question(),
   new Scale(),
   new Button(),
+  new Partial(),
 ];
 
 export * from "./events";

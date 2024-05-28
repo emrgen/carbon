@@ -10,7 +10,7 @@ import {
   prevent,
   preventAndStop,
 } from "@emrgen/carbon-core";
-import { DocumentContext } from "../hooks";
+import { DocumentContext, useNodeImage } from "../hooks";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -141,6 +141,8 @@ export const DocumentComp = (props: RendererProps) => {
   //   };
   // }, [react, ref]);
 
+  const image = useNodeImage(node);
+
   return (
     <DocumentContext document={node}>
       <div
@@ -150,16 +152,16 @@ export const DocumentComp = (props: RendererProps) => {
           app.onEvent(EventsIn.scroll, e as any);
         }}
       >
-        {/* {picture.src && (
-        <div className="carbon-document-picture">
-          <div className="carbon-document-picture-overlay">
-            <img src={picture.src} alt="document picture" />
-          </div>
-        </div>
-      )}
-      {!picture.src && (
-          <div className="carbon-document-empty-picture"/>
-        )} */}
+        {/*{image.src && (*/}
+        {/*  <div className="carbon-page-picture">*/}
+        {/*    <div className="carbon-page-picture-overlay">*/}
+        {/*      <img src={image.src} alt="page picture" />*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*)}*/}
+
+        {/*{!image.src && <div className="carbon-document-empty-picture" />}*/}
+
         <CarbonBlock
           node={node}
           ref={ref as any}

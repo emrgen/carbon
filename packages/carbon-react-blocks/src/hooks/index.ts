@@ -1,1 +1,2 @@
-export * from './useDocument'
+export * from "./useDocument";
+export * from "./useNodeImage";

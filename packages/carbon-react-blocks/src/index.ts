@@ -31,6 +31,7 @@ import { QuestionComp } from "./renderers/Question";
 import ScaleComp from "./renderers/Scale";
 import { ButtonComp } from "./renderers/Button";
 import { ExplainComp } from "./renderers/Explain";
+import { PartialComp } from "./renderers/PartialComp";
 
 export const blockPresetRenderers = [
   ReactRenderer.create("document", DocumentComp),
@@ -74,7 +75,10 @@ export const blockPresetRenderers = [
   ReactRenderer.create("button", ButtonComp),
   ReactRenderer.create("button", ButtonComp),
   ReactRenderer.create("explain", ExplainComp),
+  ReactRenderer.create("partial", PartialComp),
 ];
+
+export * from "./renderers/Document";
 
 export * from "./hooks";
 export * from "./components/renderAttrs";

@@ -212,8 +212,11 @@ export const LinkPath = "remote/state/link/href";
 export const CollapseHidden = "local/state/collapseHidden";
 export const MarksPath = "remote/state/marks";
 export const MultiPath = "remote/state/multi";
+export const StylePath = "remote/html/style";
 export const ColorPath = "remote/html/style/color";
 export const BackgroundPath = "remote/html/style/background";
+export const ImagePath = "remote/state/image/src";
+export const ImagePropsPath = "remote/state/image/props";
 
 export const isPassiveHidden = (node: Node) => {
   return node.chain.some((n) => n.props.get<boolean>(HiddenPath) ?? false);
