@@ -25,6 +25,7 @@ import {
   StylePath,
 } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
+import { codeExtension } from "@emrgen/carbon-code";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { flattenDeep, noop } from "lodash";
 import SelectionTracker from "../../SelectionTracker";
@@ -291,16 +292,22 @@ const data = node("carbon", [
       // // node("blockContent"),
       //
       // section([title([text("section 1")])]),
-      //
-      // node("code", [
-      //   node("codeLine",[ title([text("function foo() {")])]),
-      //   node("codeLine", [title([text("  console.log('hello world')")])]),
-      //   node("codeLine",[ title([text("}")])])
-      // ]),
 
-      // node("codeMirror", [], {
-      //   ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
-      // }),
+      node(
+        "code",
+        [title([text(`function name() { console.log("hello there"); }`)])],
+        {},
+      ),
+
+      node("codeBox", [
+        node("codeLine", [title([text("function foo() {")])]),
+        node("codeLine", [title([text("  console.log('hello world')")])]),
+        node("codeLine", [title([text("}")])]),
+      ]),
+
+      node("codeMirror", [], {
+        ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
+      }),
 
       // node("cell", [
       //   node('cellView'),
@@ -500,7 +507,7 @@ const plugins = [
   // carbonUtilPlugins,
   commentEditorPlugin,
   // flashPlugin,
-  // ...codeExtension.plugins!,
+  ...codeExtension.plugins!,
   // cellPlugin,
   // ...questionExtension.plugins!,
   new ClipboardPlugin(),
@@ -516,7 +523,7 @@ const renderers = [
   ...blockPresetRenderers,
   commentEditorComp,
   // flashComp,
-  // ...codeExtension.renderers!,
+  ...codeExtension.renderers!,
   // ...cellRenderer,
   // ...questionExtension.renderers!,
 ];

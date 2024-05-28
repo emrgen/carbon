@@ -148,6 +148,9 @@ importers:
       '@emrgen/carbon-clipboard':
         specifier: workspace:*
         version: link:../../packages/carbon-clipboard
+      '@emrgen/carbon-code':
+        specifier: workspace:*
+        version: link:../../packages/carbon-code
       '@emrgen/carbon-comment-editor':
         specifier: workspace:*
         version: link:../../packages/carbon-comment-editor

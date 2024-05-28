@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
 import {
   ActionOrigin,
@@ -73,9 +73,15 @@ export const DocumentComp = (props: RendererProps) => {
     ),
   );
 
+  const isEditable = useMemo(
+    () => node.props.get<string>(ModePath, "view") === "edit",
+    [node],
+  );
+
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       app.emit("document:cursor:show");
+      if (!isEditable) return;
       const lastChildId = node.lastChild?.id;
       if (!lastChildId) return;
       const lastElement = app.store.element(lastChildId);
@@ -112,7 +118,7 @@ export const DocumentComp = (props: RendererProps) => {
           .Dispatch();
       }
     },
-    [app, node],
+    [app, isEditable, node.lastChild?.id],
   );
 
   // scroll to bottom on transaction if cursor is below the screen
@@ -144,8 +150,6 @@ export const DocumentComp = (props: RendererProps) => {
 
   const image = useNodeImage(node);
 
-  const isEditable = node.props.get<string>(ModePath, "view") === "edit";
-
   return (
     <DocumentContext document={node}>
       <div
@@ -155,15 +159,15 @@ export const DocumentComp = (props: RendererProps) => {
           app.onEvent(EventsIn.scroll, e as any);
         }}
       >
-        {/*{image.src && (*/}
-        {/*  <div className="carbon-page-picture">*/}
-        {/*    <div className="carbon-page-picture-overlay">*/}
-        {/*      <img src={image.src} alt="page picture" />*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*)}*/}
+        {image.src && (
+          <div className="carbon-page-picture">
+            <div className="carbon-page-picture-overlay">
+              <img src={image.src} alt="page picture" />
+            </div>
+          </div>
+        )}
 
-        {/*{!image.src && <div className="carbon-document-empty-picture" />}*/}
+        {!image.src && <div className="carbon-document-empty-picture" />}
 
         <CarbonBlock
           node={node}

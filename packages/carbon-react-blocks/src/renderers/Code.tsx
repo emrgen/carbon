@@ -1,6 +1,12 @@
-import {useRef} from "react";
-import {CarbonBlock, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
-import {stop} from "@emrgen/carbon-core/src/utils/event";
+import React, { useEffect, useRef } from "react";
+import {
+  CarbonBlock,
+  CarbonNode,
+  RendererProps,
+  useCarbon,
+  useSelectionHalo,
+} from "@emrgen/carbon-react";
+import { stop } from "@emrgen/carbon-core/src/utils/event";
 
 export const CodeComp = (props: RendererProps) => {
   const { node } = props;
@@ -11,7 +17,6 @@ export const CodeComp = (props: RendererProps) => {
   // const { listeners } = useDragDropRectSelect({ node, ref });
   // console.log(attributes);
   // console.log(node.attrs.node.emptyPlaceholder, node.name);
-  console.log(node.child(0));
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     stop(e);
@@ -26,28 +31,17 @@ export const CodeComp = (props: RendererProps) => {
     const { value } = e.target;
     const text = app.schema.text(value)!;
     app.enable(() => {
-      app.tr
-        .SetContent(node.child(0)?.id!, [text])
-        .Dispatch();
+      app.tr.SetContent(node.child(0)?.id!, [text]).Dispatch();
     });
   };
 
+  useEffect(() => {
+    console.log(node.textContent);
+  }, [node]);
+
   return (
     <CarbonBlock node={node} ref={ref} custom={{ ...attributes }}>
-      {/* <div className="carbon-code-content">
-        <pre>
-          <code></code>
-        </pre>
-      </div> */}
-      <textarea
-        className="carbon-code-textarea"
-        onKeyDown={handleKeyDown}
-        onKeyUp={handleKeyUp}
-        defaultValue={node.textContent}
-        onChange={handleOnChange}
-        onFocus={() => app.disable()}
-        onBlur={() => app.enable()}
-      />
+      <CarbonNode node={node.firstChild!} tag={"code"} />
       {SelectionHalo}
     </CarbonBlock>
   );

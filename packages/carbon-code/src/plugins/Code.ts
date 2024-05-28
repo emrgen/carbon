@@ -1,48 +1,63 @@
-import {CarbonPlugin, EventContext, EventHandlerMap, NodeSpec, TagPath} from "@emrgen/carbon-core";
+import {
+  CarbonPlugin,
+  EventContext,
+  EventHandlerMap,
+  NodeSpec,
+  preventAndStopCtx,
+} from "@emrgen/carbon-core";
 
-declare module '@emrgen/carbon-core' {
-  interface Transaction {
-  }
+declare module "@emrgen/carbon-core" {
+  interface Transaction {}
 }
 
 export class Code extends CarbonPlugin {
-
-  name = 'code';
+  name = "code";
 
   spec(): NodeSpec {
     return {
-      group: 'content',
-      content: 'codeLine+',
-      isolate: true,
+      group: "content",
+      content: "title",
       blockSelectable: true,
       rectSelectable: true,
       draggable: true,
       dragHandle: true,
-      props:{
-        local:{
-          html:{
-            contentEditable: false,
+      tag: "pre",
+      props: {
+        local: {
+          placeholder: {
+            empty: "Code",
+            focused: "Write some code",
+          },
+          html: {
             suppressContentEditableWarning: true,
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    };
   }
 
   keydown(): EventHandlerMap {
     return {
-      backspace: (ctx: EventContext<KeyboardEvent>) => {
-        console.log('backspace', ctx.type, ctx.event.key, ctx);
-        const {selection, currentNode, cmd} = ctx;
-        const {start} = selection;
-        if (selection.isCollapsed && selection.head.isAtStartOfNode(currentNode)) {
-          console.log('TODO: unwraps children of code node');
-          // cmd.transform.joinBackward(selection).Dispatch();
-          // cmd.transform.unwrap(node).Dispatch();
+      enter: (ctx: EventContext<any>) => {
+        const { app } = ctx;
+        const { selection } = ctx.app.state;
+        // insert a new line into the title
+        if (selection.isCollapsed) {
+          preventAndStopCtx(ctx);
+          app.cmd.transform.insertText(selection, "\n").Dispatch();
         }
-      }
-    }
+      },
+      backspace: (ctx: EventContext<any>) => {
+        const { app, currentNode } = ctx;
+        const { selection } = app.state;
+        if (selection.isCollapsed) {
+          const { head } = selection;
+          if (head.isAtStartOfNode(currentNode)) {
+            preventAndStopCtx(ctx);
+            app.cmd.Change(currentNode, "section").Select(selection).Dispatch();
+          }
+        }
+      },
+    };
   }
 }
-
-

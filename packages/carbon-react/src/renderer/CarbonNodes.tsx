@@ -290,8 +290,14 @@ const InnerCarbonBlock = (props: RendererProps, ref) => {
   const { node, children, custom } = props;
 
   const tag = useMemo(() => {
-    return props.tag ?? node.props.get(TagPath) ?? "div";
-  }, [props.tag, node.props]);
+    return (
+      props.tag ??
+      custom?.tag ??
+      node.type.spec.tag ??
+      node.props.get(TagPath) ??
+      "div"
+    );
+  }, [custom?.tag, props.tag, node]);
 
   return (
     <CarbonElement node={node} tag={tag} ref={ref} custom={custom}>

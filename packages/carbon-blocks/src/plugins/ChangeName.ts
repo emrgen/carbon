@@ -10,6 +10,7 @@ import {
   Mark,
   MarkSet,
   MarksPath,
+  moveNodesActions,
   Pin,
   PinnedSelection,
   Point,
@@ -181,28 +182,36 @@ export class ChangeName extends BeforePlugin {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { currentNode, app, cmd } = ctx;
       const { selection } = app;
+      const { start } = selection;
       const block = currentNode.closest((n) => n.isContainer)!;
       if (!isConvertible(block)) return;
       preventAndStopCtx(ctx);
 
       console.log("tryChangeIntoCode", ctx.currentNode.textContent, type);
 
-      // const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
-      // const match = text.match(regex);
-      // if (match === null) {
-      //   console.error('failed to match regex', regex, text);
-      //   return
-      // }
-      //
-      // const to = Point.toAfter(block.id);
-      // const moveNodes = block.children.slice(1);
-      // if (moveNodes.length) {
-      //   cmd.Add(moveNodesActions(to, moveNodes));
-      // }
-      // cmd.Change(block.id, type)
-      // cmd.Update(block.id, { node: { typeChanged: true },  });
-      // cmd.Select(after)
-      // cmd.Dispatch()
+      const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
+      const match = text.match(regex);
+      if (match === null) {
+        console.error("failed to match regex", regex, text);
+        return;
+      }
+
+      const content = TextBlock.from(start.node).removeContent(
+        0,
+        match[1].length - 1,
+      );
+
+      const to = Point.toAfter(block.id);
+      const moveNodes = block.children.slice(1);
+      if (moveNodes.length) {
+        cmd.Add(moveNodesActions(to, moveNodes));
+      }
+
+      cmd.SetContent(start.node, content);
+      cmd.Change(block.id, type);
+      cmd.Update(block.id, { node: { typeChanged: true } });
+      cmd.Select(after);
+      cmd.Dispatch();
     };
   }
 

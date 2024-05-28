@@ -856,39 +856,39 @@ export class ImmutableDraft implements Draft {
   // update selected node props
   private updateSelectionProps() {
     const selection = this.selection;
-    // update empty placeholder of the previous head node
-    if (this.state.selection.isCollapsed) {
-      if (!this.state.selection.isInvalid) {
-        const { head } = this.state.selection.unpin();
-        if (!this.nodeMap.isDeleted(head.nodeId)) {
-          const node = this.unfreeze(head.nodeId);
-          if (!node) {
-            throw new Error(
-              "Cannot update selection on a draft that is already committed",
-            );
-          }
+    const prevSelection = this.state.selection;
 
-          if (node.isEmpty) {
-            const { parent } = node;
-            if (!parent) return;
-            node.updateProps({
-              [PlaceholderPath]:
-                parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
-            });
-            console.log(
-              "updated empty placeholder",
-              node.key,
-              parent.props.get<string>(EmptyPlaceholderPath),
-              parent.name,
-            );
-            this.addUpdated(node.id);
-          }
+    // update empty placeholder of the previous head node
+    if (!prevSelection.isInvalid && prevSelection.isCollapsed) {
+      const { head } = this.state.selection.unpin();
+      if (!this.nodeMap.isDeleted(head.nodeId)) {
+        const node = this.unfreeze(head.nodeId);
+        if (!node) {
+          throw new Error(
+            "Cannot update selection on a draft that is already committed",
+          );
+        }
+
+        if (node.isEmpty) {
+          const { parent } = node;
+          if (!parent) return;
+          node.updateProps({
+            [PlaceholderPath]:
+              parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
+          });
+          console.log(
+            "updated empty placeholder",
+            node.key,
+            parent.props.get<string>(EmptyPlaceholderPath),
+            parent.name,
+          );
+          this.addUpdated(node.id);
         }
       }
     }
 
     // update focus placeholder of the current head node
-    if (selection.isCollapsed && !selection.isInvalid) {
+    if (!selection.isInvalid && selection.isCollapsed) {
       const { head } = selection;
       if (this.nodeMap.isDeleted(head.nodeId)) return;
 
@@ -915,8 +915,8 @@ export class ImmutableDraft implements Draft {
       return;
     }
 
-    if (!this.state.selection.isInvalid) {
-      const { tail } = this.state.selection.unpin();
+    if (!prevSelection.isInvalid) {
+      const { tail } = prevSelection.unpin();
       if (!this.nodeMap.isDeleted(tail.nodeId)) {
         const node = this.unfreeze(tail.nodeId);
         if (this.nodeMap.isDeleted(node.id)) return;
