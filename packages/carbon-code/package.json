@@ -29,17 +29,19 @@
     "@uiw/react-codemirror": "^4.21.20",
     "codemirror": "^6.0.1",
     "emoji-regex": "^10.2.1",
+    "highlight.js": "^11.9.0",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
     "prismjs": "^1.29.0",
     "react-icons": "^4.10.1",
-    "recoil": "^0.7.7"
+    "recoil": "^0.7.7",
+    "vitest": "^0.34.6"
   },
   "devDependencies": {
+    "@emrgen/eslint-config-custom": "workspace:*",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",
-    "@emrgen/eslint-config-custom": "workspace:*",
     "react": "^18.3.1",
     "tsconfig": "workspace:*",
     "typescript": "^5.4.5"

@@ -7,8 +7,9 @@ import { CarbonAction } from "./actions/types";
 import { CarbonMessageFormat } from "./MessageBus";
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginState } from "./PluginState";
-import { StateActions } from "@emrgen/carbon-core";
+import { PluginManager, StateActions } from "@emrgen/carbon-core";
 import { NodeEncoder, Writer } from "./Encoder";
+import { identity } from "lodash";
 
 export enum PluginType {
   Node,
@@ -45,6 +46,16 @@ export abstract class CarbonPlugin {
 
   spec(): NodeSpec {
     return {};
+  }
+
+  // initialize the node with default styles and attributes
+  sanitize(node: Node, pm: PluginManager): Optional<Node> {
+    return node.clone((data) => ({
+      ...data,
+      children: node.children
+        .map((child) => pm.sanitize(child)?.setParentId(node.id))
+        .filter(identity) as Node[],
+    }));
   }
 
   default(app: Carbon): Optional<Node> {

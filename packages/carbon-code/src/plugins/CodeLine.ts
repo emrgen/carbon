@@ -4,18 +4,20 @@ import {
   EventContext,
   EventHandlerMap,
   NodeSpec,
-  preventAndStopCtx
+  preventAndStopCtx,
 } from "@emrgen/carbon-core";
 
-export class CodeLine extends CarbonPlugin {
+// import prism css
+import "prismjs/themes/prism.css";
 
-  name = 'codeLine';
+export class CodeLine extends CarbonPlugin {
+  name = "codeLine";
 
   spec(): NodeSpec {
     return {
-      content: 'title',
+      content: "title",
       splits: true,
-      splitName: 'codeLine',
+      splitName: "codeLine",
       depends: {
         // prev: true,
         // next: true,
@@ -25,24 +27,22 @@ export class CodeLine extends CarbonPlugin {
           html: {
             contentEditable: true,
             suppressContentEditableWarning: true,
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    };
   }
 
   plugins(): CarbonPlugin[] {
-    return [
-      new BeforeInputHandler(),
-    ]
+    return [new BeforeInputHandler()];
   }
 
   handlers(): EventHandlerMap {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-        console.log('beforeInput', ctx.type, ctx.event.key, ctx);
+        console.log("beforeInput", ctx.type, ctx.event.key, ctx);
       },
-    }
+    };
   }
 
   keydown(): EventHandlerMap {
@@ -51,29 +51,27 @@ export class CodeLine extends CarbonPlugin {
       tab: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
 
-        const {selection, cmd} = ctx;
-        const {start} = selection;
-        console.log('tab', ctx.type, ctx.event.key, ctx);
+        const { selection, cmd } = ctx;
+        const { start } = selection;
+        console.log("tab", ctx.type, ctx.event.key, ctx);
         if (selection.isCollapsed) {
           cmd.transform.insertText(selection, "  ").Dispatch();
         }
-      }
-    }
+      },
+    };
   }
-
 }
 
 class BeforeInputHandler extends BeforePlugin {
-  name = 'beforeCodeInput';
+  name = "beforeCodeInput";
 
   handlers(): EventHandlerMap {
     return {
-      beforeInput: this.beforeInput
-    }
+      beforeInput: this.beforeInput,
+    };
   }
 
   beforeInput(ctx: EventContext<KeyboardEvent>) {
-    console.log('beforeInput', ctx.type, ctx.event.key, ctx);
+    console.log("beforeInput", ctx.type, ctx.event.key, ctx);
   }
-
 }

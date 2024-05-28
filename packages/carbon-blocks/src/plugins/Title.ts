@@ -129,7 +129,7 @@ export class TitlePlugin extends NodePlugin {
   }
 
   override normalize(node: Node): CarbonAction[] {
-    const content = TextBlock.from(node).normalizeContent();
+    const content = TextBlock.from(node).normalizeContent(node);
     const { children } = node;
     if (
       content.length === children.length &&

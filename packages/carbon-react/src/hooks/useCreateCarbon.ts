@@ -42,7 +42,16 @@ export const createCarbon = (
     throw new Error("Failed to parse react content");
   }
 
-  const state = ImmutableState.create(scope, content, PinnedSelection.IDENTITY);
+  const sanitized = pm.sanitize(content);
+  if (!sanitized) {
+    throw new Error("Failed to sanitize react content");
+  }
+
+  const state = ImmutableState.create(
+    scope,
+    sanitized,
+    PinnedSelection.IDENTITY,
+  );
   return new Carbon(state.freeze(), schema, pm);
 };
 

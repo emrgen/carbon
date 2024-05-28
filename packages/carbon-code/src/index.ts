@@ -8,10 +8,19 @@ import { CodeMirrorComp } from "./renderers/codeMirror";
 import { CodeMirror } from "./plugins/CodeMirror";
 import { CodeBoxComp } from "./renderers/CodeBox";
 import { Code } from "./plugins/Code";
+import { CodeTitle } from "./plugins/CodeTitle";
+import { CodeTitleComp } from "./renderers/CodeTitleComp";
 
 export const codeExtension: Extension = {
-  plugins: [new Code(), new CodeBox(), new CodeLine(), new CodeMirror()],
+  plugins: [
+    new Code(),
+    new CodeTitle(),
+    new CodeBox(),
+    new CodeLine(),
+    new CodeMirror(),
+  ],
   renderers: [
+    ReactRenderer.create("codeTitle", CodeTitleComp),
     ReactRenderer.create("codeBox", CodeBoxComp),
     ReactRenderer.create("codeLine", CodeLineComp),
     ReactRenderer.create("codeMirror", CodeMirrorComp),

@@ -19,6 +19,7 @@ export class InlineNode {
     return (
       a.textContent === b.textContent &&
       MarkSet.from(a.marks).eq(MarkSet.from(b.marks)) &&
+      a.props.eq(b.props) &&
       a.type.eq(b.type)
     );
   };

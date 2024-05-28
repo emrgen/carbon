@@ -800,6 +800,8 @@ export class Node extends EventEmitter implements IntoNodeId {
   updateProps(props: NodePropsJson) {
     console.debug("updateProps", this.key, props);
     this.content.updateProps(props);
+
+    return this;
   }
 
   // unfreeze unfreezes the nodes in the path

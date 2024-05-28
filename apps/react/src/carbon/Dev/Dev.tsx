@@ -295,19 +295,27 @@ const data = node("carbon", [
 
       node(
         "code",
-        [title([text(`function name() { console.log("hello there"); }`)])],
+        [
+          node("codeTitle", [
+            text(`func main() {
+  fmt.Println("Hello, Go!")
+}`),
+          ]),
+        ],
         {},
       ),
 
-      node("codeBox", [
-        node("codeLine", [title([text("function foo() {")])]),
-        node("codeLine", [title([text("  console.log('hello world')")])]),
-        node("codeLine", [title([text("}")])]),
-      ]),
+      section([title([text("section 1")])]),
 
-      node("codeMirror", [], {
-        ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
-      }),
+      // node("codeBox", [
+      //   node("codeLine", [title([text("function foo() {")])]),
+      //   node("codeLine", [title([text("  console.log('hello world')")])]),
+      //   node("codeLine", [title([text("}")])]),
+      // ]),
+      //
+      // node("codeMirror", [], {
+      //   ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
+      // }),
 
       // node("cell", [
       //   node('cellView'),

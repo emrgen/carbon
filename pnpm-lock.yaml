@@ -706,6 +706,9 @@ importers:
       emoji-regex:
         specifier: ^10.2.1
         version: 10.3.0
+      highlight.js:
+        specifier: ^11.9.0
+        version: 11.9.0
       katex:
         specifier: ^0.16.7
         version: 0.16.10
@@ -721,6 +724,9 @@ importers:
       recoil:
         specifier: ^0.7.7
         version: 0.7.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(playwright@1.44.1)(stylus@0.59.0)
     devDependencies:
       '@emrgen/eslint-config-custom':
         specifier: workspace:*
@@ -5442,6 +5448,10 @@ packages:
   he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
+
+  highlight.js@11.9.0:
+    resolution: {integrity: sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==}
+    engines: {node: '>=12.0.0'}
 
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
@@ -10525,6 +10535,8 @@ snapshots:
       function-bind: 1.1.2
 
   he@1.2.0: {}
+
+  highlight.js@11.9.0: {}
 
   hoist-non-react-statics@3.3.2:
     dependencies:

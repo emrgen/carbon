@@ -217,6 +217,9 @@ export const ColorPath = "remote/html/style/color";
 export const BackgroundPath = "remote/html/style/background";
 export const ImagePath = "remote/state/image/src";
 export const ImagePropsPath = "remote/state/image/props";
+export const ClassPathLocal = "local/html/className";
+export const CodeTokenClassPath = "local/html/className";
+export const UnstablePath = "local/state/unstable";
 
 export const ModePath = "local/state/mode";
 

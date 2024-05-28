@@ -127,13 +127,13 @@ const InnerElement = (
   const customProps = useMemo(() => {
     if (is_env_development()) {
       return {
-        "data-version": renderVersion,
+        // "data-version": renderVersion,
         "data-id": key,
       };
     }
 
     return {};
-  }, [renderVersion, key]);
+  }, [key]);
 
   return (
     <Tag ref={ref} data-name={name} {...customProps} {...attributes}>
@@ -264,11 +264,21 @@ const InnerCarbonText = (props: RendererProps) => {
     return props;
   }, [marks, tag]);
 
+  const attrs = useMemo(() => {
+    const localAttrs = node.props.get(LocalHtmlAttrPath) ?? {};
+    const remoteAttrs = node.props.get(RemoteHtmlAttrPath) ?? {};
+
+    return {
+      ...localAttrs,
+      ...remoteAttrs,
+    };
+  }, [node]);
+
   return (
     <CarbonElement
       node={node}
       tag={tag}
-      custom={{ style, className, ...nodeProps }}
+      custom={{ style, className, ...nodeProps, ...attrs }}
     >
       <>
         {node.isEmpty ? (

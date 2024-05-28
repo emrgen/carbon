@@ -1,9 +1,16 @@
 import {
   CarbonPlugin,
+  ClassPathLocal,
+  cloneFrozenNode,
   EventContext,
   EventHandlerMap,
+  Node,
+  NodeEncoder,
   NodeSpec,
+  Pin,
+  PinnedSelection,
   preventAndStopCtx,
+  Writer,
 } from "@emrgen/carbon-core";
 
 declare module "@emrgen/carbon-core" {
@@ -38,15 +45,15 @@ export class Code extends CarbonPlugin {
 
   keydown(): EventHandlerMap {
     return {
-      enter: (ctx: EventContext<any>) => {
-        const { app } = ctx;
-        const { selection } = ctx.app.state;
-        // insert a new line into the title
-        if (selection.isCollapsed) {
-          preventAndStopCtx(ctx);
-          app.cmd.transform.insertText(selection, "\n").Dispatch();
-        }
-      },
+      // enter: (ctx: EventContext<any>) => {
+      //   const { app } = ctx;
+      //   const { selection } = ctx.app.state;
+      //   // insert a new line into the title
+      //   if (selection.isCollapsed) {
+      //     preventAndStopCtx(ctx);
+      //     app.cmd.transform.insertText(selection, "\n").Dispatch();
+      //   }
+      // },
       backspace: (ctx: EventContext<any>) => {
         const { app, currentNode } = ctx;
         const { selection } = app.state;
@@ -54,10 +61,41 @@ export class Code extends CarbonPlugin {
           const { head } = selection;
           if (head.isAtStartOfNode(currentNode)) {
             preventAndStopCtx(ctx);
-            app.cmd.Change(currentNode, "section").Select(selection).Dispatch();
+
+            // TODO: remove code highlight before deleting the code block
+
+            const content = currentNode
+              .firstChild!.children.map(cloneFrozenNode)
+              .map((n) =>
+                n.updateProps({
+                  [ClassPathLocal]: "",
+                }),
+              );
+
+            const after = PinnedSelection.fromPin(
+              Pin.future(currentNode.firstChild!, 0),
+            )!;
+            app.cmd
+              .Change(currentNode, "section")
+              .Change(currentNode.firstChild!, "title")
+              .SetContent(currentNode.firstChild!, content)
+              .Select(after)
+              .Dispatch();
           }
         }
       },
     };
+  }
+
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write("```\n");
+    node.children.map((n) => ne.encode(w, n));
+    w.write("\n```");
+  }
+
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write("<pre>");
+    node.children.map((n) => ne.encodeHtml(w, n));
+    w.write("</pre>");
   }
 }

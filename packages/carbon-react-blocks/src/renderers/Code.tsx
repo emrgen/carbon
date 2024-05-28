@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import {
   CarbonBlock,
-  CarbonNode,
+  CarbonChildren,
   RendererProps,
   useCarbon,
   useSelectionHalo,
@@ -13,10 +13,6 @@ export const CodeComp = (props: RendererProps) => {
   const ref = useRef(null);
   const { attributes, SelectionHalo } = useSelectionHalo(props);
   const app = useCarbon();
-
-  // const { listeners } = useDragDropRectSelect({ node, ref });
-  // console.log(attributes);
-  // console.log(node.attrs.node.emptyPlaceholder, node.name);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     stop(e);
@@ -35,13 +31,9 @@ export const CodeComp = (props: RendererProps) => {
     });
   };
 
-  useEffect(() => {
-    console.log(node.textContent);
-  }, [node]);
-
   return (
     <CarbonBlock node={node} ref={ref} custom={{ ...attributes }}>
-      <CarbonNode node={node.firstChild!} tag={"code"} />
+      <CarbonChildren node={node} />
       {SelectionHalo}
     </CarbonBlock>
   );

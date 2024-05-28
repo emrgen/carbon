@@ -18,6 +18,7 @@ import {
   preventAndStopCtx,
   RemoteDataAsPath,
   SetContentAction,
+  UnstablePath,
 } from "@emrgen/carbon-core";
 import { isConvertible } from "../utils";
 import { NumberedList } from "./NumberedList";
@@ -209,7 +210,11 @@ export class ChangeName extends BeforePlugin {
 
       cmd.SetContent(start.node, content);
       cmd.Change(block.id, type);
+      cmd.Change(block.firstChild!, "codeTitle");
       cmd.Update(block.id, { node: { typeChanged: true } });
+      cmd.Update(block.firstChild!, {
+        [UnstablePath]: Math.random().toString(36).slice(2, 12),
+      });
       cmd.Select(after);
       cmd.Dispatch();
     };

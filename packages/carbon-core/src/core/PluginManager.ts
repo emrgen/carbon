@@ -87,6 +87,12 @@ export class PluginManager {
     return CarbonCommand.from(this.plugins);
   }
 
+  sanitize(node: Node): Optional<Node> {
+    const plugin = this.nodes[node.name];
+    if (!plugin) throw new Error(`No plugin found for node ${node.name}`);
+    return plugin?.sanitize(node, this);
+  }
+
   // get a plugin by name
   plugin(name: string): Optional<CarbonPlugin> {
     return (

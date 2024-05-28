@@ -1,7 +1,12 @@
 import { classString } from "./Logger";
 import { MarkSet } from "./Mark";
 import { Node } from "./Node";
-import { cloneFrozenNode, deepCloneMap, Pin } from "@emrgen/carbon-core";
+import {
+  cloneFrozenNode,
+  CodeTokenClassPath,
+  deepCloneMap,
+  Pin,
+} from "@emrgen/carbon-core";
 import { InlineNode } from "./InlineNode";
 
 // utility class for text blocks
@@ -33,11 +38,16 @@ export class TextBlock {
   }
 
   // merge adjacent text nodes with the same marks
-  normalizeContent() {
+  normalizeContent(parent: Node) {
     const { children } = this.node;
     // merge adjacent text nodes with the same marks
     return (
       children.reduce((acc, curr, index) => {
+        // FIXME: this is a hack to remove the class from the title node
+        // as
+        if (parent.name === "title") {
+          curr.updateProps({ [CodeTokenClassPath]: "" });
+        }
         if (index === 0) {
           return [curr];
         }

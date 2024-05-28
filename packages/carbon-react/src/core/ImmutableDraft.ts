@@ -46,6 +46,7 @@ import {
   StateScope,
   TextChange,
   TxType,
+  UnstablePath,
   UpdateChange,
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
@@ -269,7 +270,7 @@ export class ImmutableDraft implements Draft {
       if (this.nodeMap.isDeleted(id)) {
         console.log("REMOVED", id.toString());
         this.removeUpdated(id);
-        // return;
+        return;
       }
 
       // remove the hidden nodes
@@ -391,7 +392,6 @@ export class ImmutableDraft implements Draft {
 
     // update state
     this.tm.updateContent(node, content);
-
     if (isArray(content)) {
       node.descendants().forEach((n) => this.addInserted(n));
     }
@@ -816,6 +816,10 @@ export class ImmutableDraft implements Draft {
 
     if (props[SelectedPath] !== true) {
       this.selected.remove(nodeId);
+    }
+
+    if (props[UnstablePath]) {
+      this.unstable.add(nodeId);
     }
   }
 

@@ -141,3 +141,29 @@ $lineHeight = 20px
 
 .cm-activeLine.cm-line
     background transparent !important
+
+[data-name=code]
+    flex-grow 1
+    flex-shrink 1
+    text-align left
+    tab-size 2
+
+[data-name=code],
+[data-name=codeTitle]
+    white-space pre !important
+    font-family: "Source Code Pro", monospace
+
+[data-name=codeTitle]
+    span:last-child
+        user-select none
+        height 0
+        pointer-events none
+
+
+//-webkit-user-modify: read-write;
+//overflow-wrap: break-word;
+//-webkit-line-break: after-white-space;
+//text-align: left;
+
+.token.newline
+    white-space pre !important
