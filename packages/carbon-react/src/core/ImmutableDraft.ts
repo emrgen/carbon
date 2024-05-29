@@ -493,7 +493,6 @@ export class ImmutableDraft implements Draft {
           down.node.textContent,
           down.node.props.get(MarksPath, []),
         );
-        console.log("CURRENT MARKS", marks.toString());
         const insertTextNode = node.type.schema.text(text, {
           props: {
             [MarksPath]: marks.toArray(),

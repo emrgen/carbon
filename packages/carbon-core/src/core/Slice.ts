@@ -1,5 +1,5 @@
 import { Node, Path } from "./Node";
-import { Fragment } from "@emrgen/carbon-core";
+import { CodeTokenClassPath, Fragment } from "@emrgen/carbon-core";
 import { flatten, zip } from "lodash";
 
 // Slice represents a selection of nodes in the editor
@@ -63,7 +63,39 @@ export class Slice {
     }
 
     const normalized = this.normalizeChildren(this.nodes);
-    this.root.updateContent(normalized);
+    const removeCodeNodes = this.transformCodeNodes(normalized);
+    this.root.updateContent(removeCodeNodes);
+  }
+
+  // FIXME: replace code>codeTitle with section>title otherwise the paste is creating a code block
+  // also remove all CodeTClassPathLocal from the children
+  transformCodeNodes(nodes: Node[]) {
+    return nodes.map((n) => {
+      n.updateProps({
+        [CodeTokenClassPath]: "",
+      });
+
+      if (n.type.name === "codeTitle") {
+        return n.type.schema.nodeFromJSON({
+          id: n.id.toString(),
+          name: "title",
+          children: this.transformCodeNodes(n.children),
+        });
+      }
+
+      if (n.type.name === "code") {
+        return n.type.schema.nodeFromJSON({
+          id: n.id.toString(),
+          name: "section",
+          children: this.transformCodeNodes(n.children),
+        });
+      }
+
+      return n.clone((data) => ({
+        ...data,
+        children: this.transformCodeNodes(data.children),
+      }));
+    });
   }
 
   // TODO: this is a hack to fix the issue with invalid end nodes

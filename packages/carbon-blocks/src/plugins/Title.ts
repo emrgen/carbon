@@ -138,11 +138,11 @@ export class TitlePlugin extends NodePlugin {
       return [];
     }
 
-    console.log(
-      "NORMALIZE",
-      content.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
-      children.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
-    );
+    // console.log(
+    //   "NORMALIZE",
+    //   content.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
+    //   children.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
+    // );
 
     return [SetContentAction.withBefore(node, children, content)];
   }

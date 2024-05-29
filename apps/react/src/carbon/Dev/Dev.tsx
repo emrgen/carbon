@@ -299,7 +299,7 @@ const data = node("carbon", [
           node("codeTitle", [
             text(`func main() {
   fmt.Println("Hello, Go!")
-}\n`),
+}`),
           ]),
         ],
         {},

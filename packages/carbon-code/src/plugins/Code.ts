@@ -25,7 +25,7 @@ export class Code extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: "content",
-      content: "title",
+      content: "codeTitle",
       blockSelectable: true,
       rectSelectable: true,
       draggable: true,
