@@ -399,7 +399,6 @@ export class ImmutableDraft implements Draft {
     // console.log(content, node.textContent, node.renderVersion);
 
     this.addUpdated(nodeId);
-    this.addContentChanged(nodeId);
 
     // for text container update empty placeholder
     if (node.isTextContainer && isArray(content)) {
@@ -427,6 +426,7 @@ export class ImmutableDraft implements Draft {
       });
       // if (updated) {
       this.addUpdated(parent.id);
+      this.addContentChanged(parent.id);
       // }
     } else if (node.isTextContainer && isArray(content)) {
       const oldChildren = node.children;
@@ -446,6 +446,7 @@ export class ImmutableDraft implements Draft {
         // console.log("INSERTED", n.id.toString());
       });
       this.addUpdated(nodeId);
+      this.addContentChanged(nodeId);
     }
   }
 

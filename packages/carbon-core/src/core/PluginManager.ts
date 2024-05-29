@@ -43,13 +43,6 @@ export class PluginManager {
     };
   }
 
-  // encode(writer: Writer, encoder: Encoder<string>, node: Node) {
-  //   // const plugin = this.plugin(node.name);
-  //   // if (!plugin) throw new Error(`No plugin found for node ${node.name}`);
-  //   //
-  //   // return plugin?.encode(writer, node);
-  // }
-
   constructor(plugins: CarbonPlugin[]) {
     const flattened = this.flatten(plugins);
     // console.log(flattened)

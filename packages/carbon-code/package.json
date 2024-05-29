@@ -28,8 +28,10 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@uiw/react-codemirror": "^4.21.20",
     "codemirror": "^6.0.1",
+    "diff": "^5.2.0",
     "emoji-regex": "^10.2.1",
     "highlight.js": "^11.9.0",
+    "is-hotkey": "^0.2.0",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",
     "prismjs": "^1.29.0",
@@ -39,6 +41,7 @@
   },
   "devDependencies": {
     "@emrgen/eslint-config-custom": "workspace:*",
+    "@types/diff": "^5.2.1",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",

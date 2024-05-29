@@ -30,7 +30,10 @@ export class PinnedSelection {
   // map dom selection to editor selection
   static fromDom(store: NodeStore): Optional<PinnedSelection> {
     const domSelection = window.getSelection();
-    // console.log(domSelection);
+    // console.log("ANCHOR TEXT", `"${domSelection?.anchorNode?.textContent}"`);
+    // if (domSelection?.anchorNode?.textContent === "\n") {
+    //   debugger;
+    // }
 
     if (!domSelection) {
       console.warn(p14("%c[error]"), "color:red", "window selection is EMPTY");
@@ -46,10 +49,14 @@ export class PinnedSelection {
     // console.log(p14('%c[info]'), 'color:pink', p30('Selection.fromDom'), anchorEl, focusEl, anchorOffset, focusOffset);
 
     // console.log(store.nodeMap.nodes().map(n => `${n.key}:${n.parent?.key}`).join(' > '))
-    let anchorNode = store.resolve(anchorEl);
+    let resolvedAnchorNode = store.resolve(anchorEl, anchorOffset);
+    let anchorNode = resolvedAnchorNode.node;
+    anchorOffset = resolvedAnchorNode.offset;
     // console.log('anchorNode path', anchorNode?.chain.map(n => n.key).join(' > '), anchorEl)
 
-    let focusNode = store.resolve(focusEl);
+    let resolvedFocusNode = store.resolve(focusEl, focusOffset);
+    let focusNode = resolvedFocusNode.node;
+    focusOffset = resolvedFocusNode.offset;
 
     // console.log(anchorEl, anchorNode, anchorOffset);
     // console.log(anchorNode);

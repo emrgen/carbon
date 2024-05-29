@@ -5,6 +5,7 @@ import {
   EventContext,
   EventHandler,
   EventHandlerMap,
+  InlineNode,
   Mark,
   MarksPath,
   Node,
@@ -18,7 +19,7 @@ import {
 import prism from "prismjs";
 import { Optional } from "@emrgen/types";
 import { cloneDeep, identity, uniq } from "lodash";
-
+import { diffArrays } from "diff";
 import "prismjs/components/prism-go";
 
 export class CodeTitle extends TitlePlugin {
@@ -39,6 +40,7 @@ export class CodeTitle extends TitlePlugin {
         const { selection } = app.state;
         // @ts-ignore
         const { data, key } = event.nativeEvent;
+        const { start } = selection;
         cmd.transform.insertText(selection, data ?? key, false)?.Dispatch();
       },
     };
@@ -52,7 +54,8 @@ export class CodeTitle extends TitlePlugin {
         // insert a new line into the title
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
-          app.cmd.transform.insertText(selection, "\n").Dispatch();
+          const { start } = selection;
+          app.cmd.transform.insertText(selection, "\n")?.Dispatch();
         }
       },
       tab: (ctx: EventContext<any>) => {
@@ -61,7 +64,8 @@ export class CodeTitle extends TitlePlugin {
         // insert a tab into the title
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
-          app.cmd.transform.insertText(selection, `  `).Dispatch();
+          const { start } = selection;
+          app.cmd.transform.insertText(selection, `  `)?.Dispatch();
         }
       },
     };
@@ -77,12 +81,15 @@ export class CodeTitle extends TitlePlugin {
     w.write("</code>");
   }
 
+  // add token class to the text nodes for syntax highlighting
+  // merge adjacent text nodes with the same marks and token class
   override sanitize(node: Node, pm: PluginManager): Optional<Node> {
+    const content = CodeTitle.highlightContent(node).map((child) =>
+      child.clone().setParentId(node.id),
+    );
     const sanitized = node.clone((data) => ({
       ...data,
-      children: CodeTitle.highlightContent(node).map((child) =>
-        child.setParentId(node.id),
-      ),
+      children: content,
     }));
 
     if (TextBlock.isSimilarContent(node.children, sanitized.children)) {
@@ -98,6 +105,7 @@ export class CodeTitle extends TitlePlugin {
     if (TextBlock.isSimilarContent(node.children, content)) {
       return [];
     }
+
     return [SetContentAction.withBefore(node, node.children, content)];
   }
 
@@ -113,25 +121,40 @@ export class CodeTitle extends TitlePlugin {
     // console.log(markLightTokens);
     // console.log(marks, textContent);
 
-    const { schema } = node.type;
+    // NOTE:
+    // get a diff if old and new tokens, if same return the old node content
+    // if some text node is changed, return old node content nodes with the new text nodes
+    const changes = diffArrays(
+      node.children as NodeToken[],
+      markLightTokens as NodeToken[],
+      {
+        comparator: compareTextContentNode,
+      },
+    );
+    // console.log("CHANGES", changes);
 
-    const nodes = markLightTokens
-      .map((t) => {
-        const { start, end, marks } = t;
-        const text = textContent.slice(start, end);
-        const textNode = schema.text(text, {
+    const merged = mergeDiff(
+      changes,
+      node.children as NodeToken[],
+      markLightTokens,
+    );
+    // console.log("MERGED", merged);
+
+    const { schema } = node.type;
+    return merged
+      .map((n) => {
+        if (n instanceof Node) {
+          return n;
+        }
+
+        return schema.text(n.content, {
           props: {
-            [MarksPath]: marks.map((m) => m.toJSON()),
-            [CodeTokenClassPath]: "token " + t.token,
+            [MarksPath]: n.marks.map((m) => m.toJSON()),
+            [CodeTokenClassPath]: `token ${n.token}`,
           },
         });
-
-        // console.log(textNode);
-        return textNode;
       })
       .filter(identity) as Node[];
-
-    return nodes;
   }
 
   static applyTokenMarks(
@@ -388,3 +411,78 @@ interface MarkToken {
 
 // alpha-numeric characters with 10 digits
 const generateShortId = () => Math.random().toString(36).slice(2, 12);
+
+type NodeToken = Node | MarkLightToken;
+
+const compareNodeToken = (a: Node, b: MarkLightToken) => {
+  if (a.textContent !== b.content) {
+    return false;
+  }
+
+  if (a.marks.length !== b.marks.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.marks.length; i++) {
+    if (a.marks[i].name !== b.marks[i].name) {
+      return false;
+    }
+  }
+
+  return a.props.get(CodeTokenClassPath) === `token ${b.token}`;
+};
+
+const compareMarkLightToken = (a: MarkLightToken, b: MarkLightToken) => {
+  return a.content === b.content && a.token === b.token;
+};
+
+const compareTextContentNode = (a, b) => {
+  if (a instanceof Node && b instanceof Node) {
+    return InlineNode.isSimilar(a, b);
+  }
+
+  if (a instanceof Node) {
+    return compareNodeToken(a, b as MarkLightToken);
+  }
+
+  if (b instanceof Node) {
+    return compareNodeToken(b, a as MarkLightToken);
+  }
+
+  return compareMarkLightToken(a, b);
+};
+
+export const mergeDiff = (diff: any[], prev: any[], next: any[]) => {
+  let prevIndex = 0;
+  let nextIndex = 0;
+  const result: any[] = [];
+  for (const part of diff) {
+    if (part.added) {
+      for (const value of part.value) {
+        result.push(value);
+      }
+      nextIndex += part.value.length;
+      continue;
+    }
+
+    if (part.removed) {
+      prevIndex += part.value.length;
+      continue;
+    }
+
+    for (const value of part.value) {
+      const prevValue = prev[prevIndex];
+      // const nextValue = next[nextIndex];
+      if (prevValue) {
+        result.push(prevValue);
+      } else {
+        result.push(value);
+      }
+
+      prevIndex++;
+      nextIndex++;
+    }
+  }
+
+  return result;
+};

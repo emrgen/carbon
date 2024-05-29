@@ -869,6 +869,10 @@ export class Node extends EventEmitter implements IntoNodeId {
   freeze(fn: With<Node>): Node {
     throw new Error("not implemented");
   }
+
+  isNode(): this is Node {
+    return true;
+  }
 }
 
 export function NodeComparator(a: Node, b: Node): number {

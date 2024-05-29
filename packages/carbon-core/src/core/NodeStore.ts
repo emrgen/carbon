@@ -77,12 +77,43 @@ export class NodeStore {
   }
 
   // resolve the node from the HTML element
-  resolve(el: any): Optional<Node> {
-    if (!el) return;
+  resolve(el: any, offset: number): { node: Optional<Node>; offset: number } {
+    if (!el) return { node: null, offset };
     let node: Optional<Node>;
+
+    // if el is a text node
+    if (el.nodeType === document.TEXT_NODE) {
+    }
 
     do {
       node = this.elementToNodeMap.get(el);
+      // if el is a text node and no carbon node is found
+      // then check if prev or next node is a carbon node
+      if (
+        !node &&
+        el.nodeType === 1 &&
+        el.tagName === "SPAN" &&
+        el.textContent == "\n"
+      ) {
+        const prev = el.previousSibling;
+        if (prev) {
+          node = this.elementToNodeMap.get(prev);
+          if (node) {
+            offset = node.textContent.length;
+            break;
+          }
+        }
+
+        const next = el.nextSibling;
+        if (next) {
+          node = this.elementToNodeMap.get(next);
+          if (node) {
+            offset = 0;
+            break;
+          }
+        }
+      }
+
       if (node) {
         break;
       } else {
@@ -91,10 +122,13 @@ export class NodeStore {
     } while (el);
 
     if (!node) {
-      return null;
+      return { node: null, offset };
     }
 
-    return this.nodeMap.get(node.id);
+    return {
+      node: this.nodeMap.get(node.id),
+      offset,
+    };
   }
 
   clear() {

@@ -37,7 +37,7 @@ import {
 
 function is_env_development() {
   // @ts-ignore
-  return import.meta.env.VITE_MOVE === "dev";
+  return import.meta.env.VITE_MODE === "dev";
 }
 
 const data = node("carbon", [
@@ -299,7 +299,7 @@ const data = node("carbon", [
           node("codeTitle", [
             text(`func main() {
   fmt.Println("Hello, Go!")
-}`),
+}\n`),
           ]),
         ],
         {},

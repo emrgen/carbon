@@ -58,7 +58,7 @@ export class EventContext<T extends Event> {
   get targetNode(): Optional<Node> {
     const { nativeEvent } = this.event as any;
     const target = nativeEvent?.target;
-    return this.app.store.resolve(target);
+    return this.app.store.resolve(target, 0).node;
   }
 
   static create<T extends Event>(props: EventContextProps<T>) {

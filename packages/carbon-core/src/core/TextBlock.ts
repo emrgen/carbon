@@ -38,14 +38,19 @@ export class TextBlock {
   }
 
   // merge adjacent text nodes with the same marks
-  normalizeContent(parent: Node) {
+  normalizeContent() {
     const { children } = this.node;
+
+    return TextBlock.normalizeNodeContent(children, this.node);
+  }
+
+  static normalizeNodeContent(content: Node[], prent?: Node) {
     // merge adjacent text nodes with the same marks
     return (
-      children.reduce((acc, curr, index) => {
+      content.reduce((acc, curr, index) => {
         // FIXME: this is a hack to remove the class from the title node
         // as
-        if (parent.name === "title") {
+        if (parent?.name === "title") {
           curr.updateProps({ [CodeTokenClassPath]: "" });
         }
         if (index === 0) {
@@ -55,7 +60,9 @@ export class TextBlock {
         const prev = acc[acc.length - 1];
         const prevMarks = MarkSet.from(prev.marks);
         const currMarks = MarkSet.from(curr.marks);
-        if (prevMarks.eq(currMarks)) {
+        const prevClass = prev.props.get(CodeTokenClassPath);
+        const currClass = curr.props.get(CodeTokenClassPath);
+        if (prevMarks.eq(currMarks) && prevClass === currClass) {
           const prevClone = prev.clone();
           acc.pop();
 

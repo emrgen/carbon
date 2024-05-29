@@ -5,6 +5,7 @@ import { querySelector } from "../utils/domElement";
 import { State } from "./State";
 import { ChangeManager } from "./ChangeManager";
 import { EventsIn, EventsOut } from "./Event";
+import { CustomEvent } from "./CustomEvent";
 import { EventManager } from "./EventManager";
 import { NodeStore } from "./NodeStore";
 import { PinnedSelection } from "./PinnedSelection";
@@ -41,6 +42,7 @@ export class Carbon extends EventEmitter {
 
   schema: Schema;
   state: State;
+  previous?: State;
   runtime: RuntimeState;
   store: NodeStore;
 
@@ -125,6 +127,10 @@ export class Carbon extends EventEmitter {
         },
       });
     });
+  }
+
+  get prevEvents() {
+    return this.em.prevEvents;
   }
 
   get content(): Node {
@@ -285,6 +291,13 @@ export class Carbon extends EventEmitter {
     //   this.state.isContentChanged,
     //   this.state.isSelectionChanged,
     // );
+
+    this.em.onEventOut(
+      EventsOut.updateView,
+      CustomEvent.create("updateView", this.state.content, {
+        state,
+      }),
+    );
     this.change.update(state, tr);
     this.emit(EventsOut.transactionCommit, tr);
   }

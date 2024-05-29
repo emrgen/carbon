@@ -12,6 +12,8 @@ import {
   preventAndStopCtx,
   Writer,
 } from "@emrgen/carbon-core";
+import { isEqual } from "lodash";
+import { isKeyHotkey } from "is-hotkey";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {}
@@ -81,6 +83,38 @@ export class Code extends CarbonPlugin {
               .SetContent(currentNode.firstChild!, content)
               .Select(after)
               .Dispatch();
+          }
+        }
+      },
+    };
+  }
+
+  override handlers(): EventHandlerMap {
+    return {
+      selectionchange: (ctx: EventContext<any>) => {
+        const { prevEvents } = ctx.app;
+        const originKeydown = ["keyDown", "selectionchange"];
+        if (
+          isEqual(
+            prevEvents.map((e) => e.type as string).slice(-2),
+            originKeydown,
+          )
+        ) {
+          if (isKeyHotkey("up")(prevEvents[prevEvents.length - 2].event)) {
+            // if previous selection was out of the code block
+            const { selection: prevSelection } = ctx.app.state;
+            if (
+              prevSelection.isCollapsed &&
+              !prevSelection.head.node.parents.some((n) =>
+                n.eq(ctx.currentNode),
+              )
+            ) {
+              preventAndStopCtx(ctx);
+              // TODO: select the last character of the code block
+              const pin = Pin.toEndOf(ctx.currentNode.firstChild!)!;
+              ctx.app.cmd.Select(PinnedSelection.fromPin(pin)!).Dispatch();
+              // console.log("up.....");
+            }
           }
         }
       },

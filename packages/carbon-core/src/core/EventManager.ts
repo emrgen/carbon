@@ -5,7 +5,7 @@ import { isKeyHotkey } from "is-hotkey";
 import { PinnedSelection } from "./PinnedSelection";
 import { Node } from "./Node";
 import { ActionOrigin } from "./actions/types";
-import { EventsIn } from "./Event";
+import { EventsIn, EventsOut } from "./Event";
 import { p12, p14, pad } from "./Logger";
 import { last } from "lodash";
 import { preventAndStop } from "../utils/event";
@@ -22,6 +22,10 @@ const selectionChangedUsingKeys = (event) => {
 export class EventManager {
   event?: EventContext<Event>;
   clicks = 0;
+  prevEvents: {
+    type: EventsIn | EventsOut;
+    event: Event | CustomEvent;
+  }[] = [];
 
   get state() {
     return this.app.state;
@@ -37,9 +41,15 @@ export class EventManager {
     readonly cm: ChangeManager,
   ) {}
 
+  onEventOut(type: EventsOut, event: Event | CustomEvent) {
+    this.beforeEvent(type, event);
+  }
+
   // bypass the event manager and directly dispatch an event to plugins
   onCustomEvent(type: EventsIn, event: CustomEvent): boolean {
     const { app } = this;
+    this.beforeEvent(type, event);
+
     const ctx = EventContext.create({
       app,
       type,
@@ -55,11 +65,25 @@ export class EventManager {
     return false;
   }
 
+  // keep track of last 4 events for debugging and double/tripple click detection
+  beforeEvent(type: EventsIn | EventsOut, event: Event | CustomEvent) {
+    setTimeout(() => {
+      if (this.prevEvents.length > 6) {
+        this.prevEvents.shift();
+      }
+    }, 200);
+
+    this.prevEvents.push({ type, event });
+    if (this.prevEvents.length > 6) {
+      this.prevEvents.splice(0, this.prevEvents.length - 6);
+    }
+  }
+
   onEvent(type: EventsIn, event: Event | CustomEvent) {
+    this.beforeEvent(type, event);
     const { app } = this;
     // console.log(type, event);
 
-    // type = this.beforeEvent(type, event);
     // if (type === EventsIn.noop) {
     // 	return
     // }
@@ -72,6 +96,13 @@ export class EventManager {
     if (event instanceof CustomEvent) {
       this.onCustomEvent(type, event);
       return;
+    }
+
+    if (type == EventsIn.selectionchange) {
+      console.log(
+        this.prevEvents.map((e) => e.type),
+        event,
+      );
     }
 
     // check if editor handles the event
@@ -127,7 +158,7 @@ export class EventManager {
 
     // create a pinned selection from dom selection
     const selection = PinnedSelection.fromDom(app.store);
-    // console.log(selection?.toString())
+    // console.log(selection?.toString());
 
     // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
     // console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))

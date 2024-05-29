@@ -212,6 +212,9 @@ importers:
         specifier: ^3.4.3
         version: 3.4.3
     devDependencies:
+      '@types/diff':
+        specifier: ^5.2.1
+        version: 5.2.1
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -221,6 +224,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^3.1.0
         version: 3.1.0(vite@4.5.3(@types/node@20.12.12)(stylus@0.59.0))
+      diff:
+        specifier: ^5.2.0
+        version: 5.2.0
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -703,12 +709,18 @@ importers:
       codemirror:
         specifier: ^6.0.1
         version: 6.0.1(@lezer/common@1.2.1)
+      diff:
+        specifier: ^5.2.0
+        version: 5.2.0
       emoji-regex:
         specifier: ^10.2.1
         version: 10.3.0
       highlight.js:
         specifier: ^11.9.0
         version: 11.9.0
+      is-hotkey:
+        specifier: ^0.2.0
+        version: 0.2.0
       katex:
         specifier: ^0.16.7
         version: 0.16.10
@@ -731,6 +743,9 @@ importers:
       '@emrgen/eslint-config-custom':
         specifier: workspace:*
         version: link:../eslint-config-custom
+      '@types/diff':
+        specifier: ^5.2.1
+        version: 5.2.1
       '@types/react':
         specifier: ^18.0.27
         version: 18.3.3
@@ -4255,6 +4270,9 @@ packages:
   '@types/css-font-loading-module@0.0.12':
     resolution: {integrity: sha512-x2tZZYkSxXqWvTDgveSynfjq/T2HyiZHXb00j/+gy19yp70PHCizM48XFdjBCWH7eHBD0R5i/pw9yMBP/BH5uA==}
 
+  '@types/diff@5.2.1':
+    resolution: {integrity: sha512-uxpcuwWJGhe2AR1g8hD9F5OYGCqjqWnBUQFD8gMZsDbv8oPHzxJF6iMO6n8Tk0AdzlxoaaoQhOYlIg/PukVU8g==}
+
   '@types/earcut@2.1.4':
     resolution: {integrity: sha512-qp3m9PPz4gULB9MhjGID7wpo3gJ4bTGXm7ltNDsmOvsPduTeHp8wSW9YckBj3mljeOh4F0m2z/0JKAALRKbmLQ==}
 
@@ -4937,6 +4955,10 @@ packages:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
+  diff@5.2.0:
+    resolution: {integrity: sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==}
+    engines: {node: '>=0.3.1'}
+
   dir-glob@3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
@@ -5376,6 +5398,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   globals@11.12.0:
     resolution: {integrity: sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==}
@@ -6463,6 +6486,7 @@ packages:
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rollup@3.29.4:
@@ -9114,6 +9138,8 @@ snapshots:
 
   '@types/css-font-loading-module@0.0.12': {}
 
+  '@types/diff@5.2.1': {}
+
   '@types/earcut@2.1.4': {}
 
   '@types/eslint@8.56.10':
@@ -9851,6 +9877,8 @@ snapshots:
   didyoumean@1.2.2: {}
 
   diff-sequences@29.6.3: {}
+
+  diff@5.2.0: {}
 
   dir-glob@3.0.1:
     dependencies:

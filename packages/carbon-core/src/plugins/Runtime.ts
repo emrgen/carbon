@@ -4,10 +4,9 @@ import {
   CarbonMouseEvent,
   EventContext,
   EventHandlerMap,
-  Node, prevent,
-  preventAndStopCtx
+  Node,
 } from "@emrgen/carbon-core";
-import {Optional} from "@emrgen/types";
+import { Optional } from "@emrgen/types";
 
 export class Runtime extends BeforePlugin {
   name = "runtime";
@@ -31,7 +30,7 @@ export class Runtime extends BeforePlugin {
       mouseOut: this.onMouseOut,
       // mouseMove: this.onMouseMove,
       selectionchange: this.onSelectionChange,
-    }
+    };
   }
 
   get isMouseDown(): boolean {
@@ -105,17 +104,14 @@ export class Runtime extends BeforePlugin {
     this.state.set(key, node);
   }
 
-
   targetNode(ctx: EventContext<CarbonMouseEvent>): Optional<Node> {
-    const {event, app} = ctx;
-    const {nativeEvent} = event;
-    const {target} = nativeEvent;
+    const { event, app } = ctx;
+    const { nativeEvent } = event;
+    const { target } = nativeEvent;
     return this.resolveNode(app, target as HTMLElement);
   }
 
   resolveNode(app: Carbon, target: HTMLElement): Optional<Node> {
-    return app.store.resolve(target as HTMLElement);
+    return app.store.resolve(target as HTMLElement, 0).node;
   }
-
-
 }
