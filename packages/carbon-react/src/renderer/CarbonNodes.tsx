@@ -27,12 +27,12 @@ export const JustEmpty = (props: RendererProps) => {
     return <br />;
   }
 
-  // return <span>&shy;</span>;
-  return (
-    <span>
-      <br />
-    </span>
-  );
+  return <span>&shy;</span>;
+  // return (
+  //   <span>
+  //     <br />
+  //   </span>
+  // );
 };
 
 interface CarbonPlaceholder extends RendererProps {
@@ -153,7 +153,7 @@ export const RawText = memo(function RT(props: RendererProps) {
 });
 
 // hook to apply marks to text node
-const useMarks = (marks: Mark[]) => {
+export const useMarks = (marks: Mark[]) => {
   return useMemo(() => {
     const style = {};
     marks.forEach((mark) => {
@@ -187,7 +187,7 @@ const useMarks = (marks: Mark[]) => {
           break;
         case "underline":
           merge(style, {
-            textDecoration: "underline",
+            borderBottom: `0.05em solid`,
           });
           break;
         case "color":
@@ -218,7 +218,7 @@ const useMarks = (marks: Mark[]) => {
   }, [marks]);
 };
 
-const useClassName = (marks: Mark[]) => {
+export const useClassName = (marks: Mark[]) => {
   return useMemo(() => {
     const classes: string[] = [];
     marks.forEach((mark) => {
@@ -233,7 +233,7 @@ const useClassName = (marks: Mark[]) => {
   }, [marks]);
 };
 
-const useTag = (marks: Mark[]) => {
+export const useTag = (marks: Mark[]) => {
   return useMemo(() => {
     if (MarkSet.from(marks).has(Mark.link(""))) {
       return "a";

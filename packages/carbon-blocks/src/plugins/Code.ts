@@ -1,231 +1,140 @@
 import {
-  BeforePlugin,
   CarbonPlugin,
+  ClassPathLocal,
+  cloneFrozenNode,
   EventContext,
-  EventHandler,
+  EventHandlerMap,
+  Node,
+  NodeEncoder,
   NodeSpec,
-  preventAndStop,
-  preventAndStopCtx
+  Pin,
+  PinnedSelection,
+  preventAndStopCtx,
+  Writer,
 } from "@emrgen/carbon-core";
+import { isEqual } from "lodash";
+import { isKeyHotkey } from "is-hotkey";
+import { CodeTitle } from "./CodeTitle";
+
+declare module "@emrgen/carbon-core" {
+  interface Transaction {}
+}
 
 export class Code extends CarbonPlugin {
-  name = 'code';
+  name = "code";
 
   spec(): NodeSpec {
     return {
-      group: 'content',
-      content: 'title',
-      splitName: 'section',
-      inlineSelectable: true,
-      isolate: true,
+      group: "content",
+      content: "codeTitle",
+      blockSelectable: true,
+      rectSelectable: true,
       draggable: true,
       dragHandle: true,
-      rectSelectable: true,
-      blockSelectable: true,
-      insert: true,
-      info: {
-        title: 'Code',
-        description: 'Insert a code block',
-        icon: 'code',
-        tags: ['code', 'codeblock', 'pre', 'source'],
-      },
+      tag: "pre",
       props: {
         local: {
           placeholder: {
-            empty: '',
-            focused: ''
+            empty: "Code",
+            focused: "Write some code",
+          },
+          html: {
+            suppressContentEditableWarning: true,
           },
         },
-        html: {
-          suppressContentEditableWarning: true,
-        }
-      }
-    }
+      },
+    };
   }
 
   plugins(): CarbonPlugin[] {
-    return [
-      new BeforeCodePlugin(),
-    ]
+    return [new CodeTitle()];
   }
 
-  handlers(): Partial<EventHandler> {
+  keydown(): EventHandlerMap {
     return {
-      paste: (ctx: EventContext<ClipboardEvent>) => {
-        const { event, app } = ctx
-        preventAndStop(event);
-        ctx.stopPropagation();
-        const { selection } = app
-
-        // if (!react.state.runtime.clipboard.isEmpty) {
-        //   const { slice } = react.state.runtime.clipboard;
-        //   const textContent = slice.root.textContent;
-        //   console.log('textContent', textContent);
-        //   // Slice.create(slice.root, slice.start, slice.end);
-        //   react.cmd.transform.paste(selection, blockSelection, slice)?.Dispatch()
-        // } else {
-        //
-        // }
-      }
-    }
-  }
-
-  keydown(): Partial<EventHandler> {
-    return {
-      enter: (ctx: EventContext<KeyboardEvent>) => {
-        preventAndStopCtx(ctx);
-        const { app, currentNode } = ctx;
-        const { selection } = app;
-        // if (selection.isBlock === 1) {
-        //   console.log('blockSelection', react.blockSelection);
-        //
-        //   preventAndStopCtx(ctx);
-        //   react.tr.selectNodes([]).Dispatch();
-        //   node.child(0)?.emit('focus', node.child(0)!)
-        // }
-      },
-
-      tab: (ctx: EventContext<KeyboardEvent>) => {
-        ctx.event.preventDefault();
-        ctx.stopPropagation();
-        const { app, cmd } = ctx;
-        const { selection } = app;
-
-        cmd.transform.insertText(selection, '  ')?.Dispatch();
-      },
-
-      // backspace: (ctx: EventContext<KeyboardEvent>) => {
-      //   const { react, event, node } = ctx;
-      //   const { selection, cmd } = react;
-      //   const { start } = selection;
-
-      //   if (selection.isCollapsed && start.isAtStart) {
-      //     ctx.event.preventDefault();
-      //     ctx.stopPropagation();
-      //     react.tr
-      //       .change(node.id, 'code', 'section')
-      //       .select(selection)
-      //       .Dispatch();
+      // enter: (ctx: EventContext<any>) => {
+      //   const { app } = ctx;
+      //   const { selection } = ctx.app.state;
+      //   // insert a new line into the title
+      //   if (selection.isCollapsed) {
+      //     preventAndStopCtx(ctx);
+      //     app.cmd.transform.insertText(selection, "\n").Dispatch();
       //   }
-      // }
-    }
+      // },
+      backspace: (ctx: EventContext<any>) => {
+        const { app, currentNode } = ctx;
+        const { selection } = app.state;
+        if (selection.isCollapsed) {
+          const { head } = selection;
+          if (head.isAtStartOfNode(currentNode)) {
+            preventAndStopCtx(ctx);
+
+            // TODO: remove code highlight before deleting the code block
+
+            const content = currentNode
+              .firstChild!.children.map(cloneFrozenNode)
+              .map((n) =>
+                n.updateProps({
+                  [ClassPathLocal]: "",
+                }),
+              );
+
+            const after = PinnedSelection.fromPin(
+              Pin.future(currentNode.firstChild!, 0),
+            )!;
+            app.cmd
+              .Change(currentNode, "section")
+              .Change(currentNode.firstChild!, "title")
+              .SetContent(currentNode.firstChild!, content)
+              .Select(after)
+              .Dispatch();
+          }
+        }
+      },
+    };
   }
-}
 
-export class BeforeCodePlugin extends BeforePlugin {
-  name = 'beforeCode';
+  override handlers(): EventHandlerMap {
+    return {
+      selectionchange: (ctx: EventContext<any>) => {
+        const { prevEvents } = ctx.app;
+        const originKeydown = ["keyDown", "selectionchange"];
+        if (
+          isEqual(
+            prevEvents.map((e) => e.type as string).slice(-2),
+            originKeydown,
+          )
+        ) {
+          if (isKeyHotkey("up")(prevEvents[prevEvents.length - 2].event)) {
+            // if previous selection was out of the code block
+            const { selection: prevSelection } = ctx.app.state;
+            if (
+              prevSelection.isCollapsed &&
+              !prevSelection.head.node.parents.some((n) =>
+                n.eq(ctx.currentNode),
+              )
+            ) {
+              preventAndStopCtx(ctx);
+              // TODO: select the last character of the code block
+              const pin = Pin.toEndOf(ctx.currentNode.firstChild!)!;
+              ctx.app.cmd.Select(PinnedSelection.fromPin(pin)!).Dispatch();
+              // console.log("up.....");
+            }
+          }
+        }
+      },
+    };
+  }
 
-  // priority = 10002;
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write("```\n");
+    node.children.map((n) => ne.encode(w, n));
+    w.write("\n```");
+  }
 
-  // handlers(): EventHandlerMap {
-  //   return {
-  //     // insert text node at
-  //     beforeInput: (ctx: EventContext<any>) => {
-  //       const { react, event, node } = ctx;
-  //       const withinCode = node.parents.find(n => n.name === 'code');
-  //
-  //       if (!withinCode) return
-  //       preventAndStopCtx(ctx);
-  //       const { data, key } = event.nativeEvent;
-  //       const text = data ?? key;
-  //       this.insertText(ctx, text);
-  //     },
-  //   }
-  // }
-  //
-  // keydown(): Partial<EventHandler> {
-  //   return {
-  //     enter: (ctx: EventContext<KeyboardEvent>) => {
-  //       const { react, event, node } = ctx;
-  //       if (react.selection.isBlock) {
-  //         return
-  //       }
-  //
-  //       const withinCode = node.parents.find(n => n.name === 'code');
-  //       if (!withinCode) return
-  //
-  //       preventAndStopCtx(ctx);
-  //       this.insertText(ctx, '\n');
-  //     }
-  //   }
-  // }
-  //
-  // insertText(ctx: EventContext<any>, text: string) {
-  //   const { react, event, node } = ctx;
-  //   const { firstChild: textBlock } = node;
-  //   if (!textBlock) {
-  //     console.error(`textBlock not found for block ${node.id.toString()}`);
-  //     return;
-  //   }
-  //
-  //   const { selection, commands } = react;
-  //   // console.log('textBlock', textBlock);
-  //
-  //   const updateTitleText = (carbon: Carbon) => {
-  //     console.log('insertText', prism);
-  //
-  //     const { tr } = carbon;
-  //     const { schema, selection } = carbon;
-  //     const { head, start } = selection;
-  //     const title = head.node;
-  //     const pin = Pin.future(start.node, start.offset + text.length);
-  //     const after = PinnedSelection.fromPin(pin);
-  //     const textContent = title.textContent.slice(0, start.offset) + String.raw`${text}` + title.textContent.slice(start.offset);
-  //     const textNode = schema.text(String.raw`${textContent}`)!;
-  //     if (!textNode) {
-  //       console.error('failed to create text node');
-  //       return tr
-  //     }
-  //
-  //     const tokens = prism.tokenize(textContent, prism.languages.javascript);
-  //     console.log('tokens', tokens);
-  //     const intoTextNode = (token: TokenStream) => {
-  //       if (token instanceof Token) {
-  //         const { type, content } = token;
-  //         if (Array.isArray(content)) {
-  //           return flatten(content).map(intoTextNode);
-  //         } else if (content instanceof Token) {
-  //           return intoTextNode(content);
-  //         } else if (typeof content === 'string') {
-  //           // return schema.text(content, {
-  //           //   attrs: {
-  //           //     html: {
-  //           //       [`className`]: `token ${type}`,
-  //           //     }
-  //           //   }
-  //           // });
-  //         }
-  //       } else if (Array.isArray(token)) {
-  //         return flatten(token).map(intoTextNode);
-  //       } else {
-  //         // return schema.text(token, {
-  //         //   attrs: {
-  //         //     html: {
-  //         //       [`className`]: `token`,
-  //         //     }
-  //         //   }
-  //         // });
-  //       }
-  //     };
-  //
-  //     const textNodes = flattenDeep(flattenDeep(tokens).map(intoTextNode));
-  //
-  //     tr.Add(SetContentAction.create(title.id, BlockContent.create(textNodes)));
-  //     tr.Select(after);
-  //     return tr;
-  //
-  //   }
-  //
-  //   if (!selection.isCollapsed) {
-  //     commands.transform.delete(selection)?.then(carbon => {
-  //       return updateTitleText(carbon);
-  //     }).Dispatch();
-  //     return
-  //   }
-  //
-  //   if (selection.isCollapsed) {
-  //     updateTitleText(react).Dispatch()
-  //     return
-  //   }
-  // }
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write("<pre>");
+    node.children.map((n) => ne.encodeHtml(w, n));
+    w.write("</pre>");
+  }
 }

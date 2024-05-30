@@ -103,6 +103,10 @@ export class EventManager {
         this.prevEvents.map((e) => e.type),
         event,
       );
+      // console.log(
+      //   "DOM SELECTION",
+      //   PinnedSelection.fromDom(app.store)?.toString(),
+      // );
     }
 
     // check if editor handles the event
@@ -157,7 +161,16 @@ export class EventManager {
     }
 
     // create a pinned selection from dom selection
-    const selection = PinnedSelection.fromDom(app.store);
+    // NOTE: this is a normalized and valid selection for the editor
+    let selection = PinnedSelection.fromDom(app.store);
+    if (
+      this.prevEvents
+        .map((a) => a.type as string)
+        .some((a) => ["mouseDown"].includes(a))
+    ) {
+      selection = PinnedSelection.fromDom(app.store, true);
+    }
+
     // console.log(selection?.toString());
 
     // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
@@ -184,11 +197,25 @@ export class EventManager {
       return;
     }
 
+    const isSelectionUnchanged = app.selection.eq(selection);
+    let isDomSelectionChanged = false;
+    if (type === EventsIn.selectionchange) {
+      // isDomSelectionChanged = !selection.isDomInSync(app.store);
+    }
+
     // new dom selection is same as exiting editor.selection then skip
-    if (type === EventsIn.selectionchange && app.selection.eq(selection)) {
+    if (type === EventsIn.selectionchange && isSelectionUnchanged) {
+      console.log(
+        p14("%c[sync-check]"),
+        "color:#ffcc006e",
+        selection.isDomInSync(app.store),
+      );
+
       // console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
       console.log(p14("%c●"), "color:#ffcc006e");
-      return;
+      if (!isDomSelectionChanged) {
+        return;
+      }
     }
 
     // start node corresponds to focus point in DOM
@@ -204,7 +231,7 @@ export class EventManager {
       return;
     }
 
-    this.updateCommandOrigin(type, event);
+    this.updateCommandOrigin(type, event, isDomSelectionChanged);
     const editorEvent = EventContext.create({
       type,
       event,
@@ -330,11 +357,15 @@ export class EventManager {
   // 	if (type === EventsIn.mouseUp) {
   // 		// this.normalize();
   // 	}
-
   // }
 
   // set the origin of the command based on the event type
-  private updateCommandOrigin(type: EventsIn, event: Event) {
+  private updateCommandOrigin(type: EventsIn, event: Event, force = false) {
+    if (force) {
+      this.runtime.origin = ActionOrigin.UserInput;
+      return;
+    }
+
     if (selectionChangedUsingKeys(event)) {
       this.runtime.origin = ActionOrigin.UserSelectionChange;
       return;

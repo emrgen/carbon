@@ -2,6 +2,7 @@ import { Optional } from "@emrgen/types";
 import { NodeId } from "./NodeId";
 import { Node } from "./Node";
 import { Carbon, NodeMap } from "@emrgen/carbon-core";
+import { clamp } from "lodash";
 
 // NodeStore is a store for the nodes and their rendered HTML elements
 export class NodeStore {
@@ -82,9 +83,10 @@ export class NodeStore {
     let node: Optional<Node>;
 
     // if el is a text node
-    if (el.nodeType === document.TEXT_NODE) {
-    }
-
+    // if (el.nodeType === document.TEXT_NODE) {
+    //   console.log("text node", el);
+    // }
+    //
     do {
       node = this.elementToNodeMap.get(el);
       // if el is a text node and no carbon node is found
@@ -115,8 +117,10 @@ export class NodeStore {
       }
 
       if (node) {
+        // debugger;
         break;
       } else {
+        // debugger;
         el = el.parentNode;
       }
     } while (el);
@@ -125,8 +129,18 @@ export class NodeStore {
       return { node: null, offset };
     }
 
+    const cnode = this.nodeMap.get(node.id);
+    // console.log(el, cnode);
+    // if (cnode?.isInlineAtom) {
+    //   debugger;
+    // }
+
+    if (el.nodeType === 3) {
+      offset = clamp(offset, 0, el.textContent.length);
+    }
+
     return {
-      node: this.nodeMap.get(node.id),
+      node: cnode,
       offset,
     };
   }

@@ -319,23 +319,7 @@ export class CodeTitle extends TitlePlugin {
       (acc, tok) => {
         const { tokens, offset } = acc;
         if (typeof tok === "string") {
-          if (tok === "\n") {
-            console.log("newline", `"${tok.trim()}"`);
-            return {
-              tokens: [
-                ...tokens,
-                {
-                  content: tok,
-                  type: "newline",
-                  start: offset,
-                  end: offset + tok.length,
-                },
-              ],
-              offset: offset + tok.length,
-            };
-          }
-
-          if (tok.replace(/^\s+|\s+$/g, "") === "") {
+          if (tok.trim() === "") {
             console.log("whitespace", `"${tok}"`);
             return {
               tokens: [

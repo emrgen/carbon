@@ -222,6 +222,8 @@ export const CodeTokenClassPath = "local/html/className";
 export const UnstablePath = "local/state/unstable";
 
 export const ModePath = "local/state/mode";
+export const AtomSizePath = "remote/state/atom/size";
+export const AtomContentPath = "remote/state/atom/content";
 
 export enum DocModes {
   View = "view",

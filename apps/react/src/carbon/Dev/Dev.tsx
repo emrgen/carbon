@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import {
   blockPresetPlugins,
+  emoji,
   node,
   section,
   text,
@@ -58,7 +59,7 @@ const data = node("carbon", [
           section([
             title([
               text(
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard m is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's m is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's m is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's m is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's m is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's m is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's m is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's ",
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard m is simply dummy text of the printing and typesetting industry.",
               ),
             ]),
           ]),
@@ -485,6 +486,11 @@ const data = node("carbon", [
       //   node("stack", [section([title([text("section 2")])])]),
       //   node("stack", [section([title([text("section 3")])])]),
       // ]),
+
+      section([title([emoji("🖐️")])]),
+      // section([
+      //   title([mention("subhasis"), mention("subhasis"), mention("subhasis")]),
+      // ]),
     ],
     {
       [ModePath]: "edit",
@@ -579,6 +585,12 @@ export default function Dev() {
       app.off("changed", onChange);
     };
   }, [app]);
+
+  // useEffect(() => {
+  //   debugger;
+  //   const pin = Pin.toEndOf(app.state.content)!;
+  //   // const after = PinnedSelection.fromPin(pin)!;
+  // }, [app]);
 
   // return (
   //   <></>

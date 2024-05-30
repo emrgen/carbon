@@ -180,6 +180,10 @@ export class NodeType {
     return !!this.spec.atom;
   }
 
+  get isZero() {
+    return !!this.spec.zero;
+  }
+
   get isPasteBoundary() {
     return !!this.spec.pasteBoundary;
   }

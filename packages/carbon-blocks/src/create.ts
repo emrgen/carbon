@@ -1,4 +1,9 @@
-import { NodeId } from "@emrgen/carbon-core";
+import {
+  AtomContentPath,
+  AtomSizePath,
+  EmojiPath,
+  NodeId,
+} from "@emrgen/carbon-core";
 
 export const text = (text: string = "", props = {}) => ({
   name: "text",
@@ -46,6 +51,25 @@ export const section = (children: any[] = [], props = {}) => ({
   children,
   props,
 });
+
+export const mention = (name: string) => {
+  return node("mention", [
+    node("empty"),
+    node("mentionAtom", [], {
+      [AtomContentPath]: `@${name}`,
+      [AtomSizePath]: name.length + 1,
+    }),
+    node("empty"),
+  ]);
+};
+
+export const emoji = (emoji: string) => {
+  return node("emoji", [], {
+    [EmojiPath]: emoji,
+    [AtomContentPath]: emoji,
+    [AtomSizePath]: `${emoji}`.length,
+  });
+};
 
 export const para = (children: any[] = [], attrs = {}, state = {}) => ({
   name: "paragraph",

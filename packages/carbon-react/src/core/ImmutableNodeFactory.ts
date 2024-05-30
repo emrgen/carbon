@@ -9,7 +9,7 @@ import {
   NodeId,
   Schema,
 } from "@emrgen/carbon-core";
-import { isEmpty } from "lodash";
+import { identity, isArray, isEmpty } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 import { ImmutableNode } from "./ImmutableNode";
 import { ImmutableNodeContent } from "./ImmutableNodeContent";
@@ -44,11 +44,21 @@ export class ImmutableNodeFactory implements NodeFactory {
       throw new Error(`Node Plugin is not registered ${name}`);
     }
 
+    if (!isArray(children)) {
+      throw new Error(`Children must be an array`);
+    }
+
     const props = isEmpty(json.props)
       ? type.props.clone()
       : type.props.clone().merge(json.props);
     const nodeId = id ? NodeId.deserialize(id)! : this.blockId();
-    const nodes = children.map((n) => schema.nodeFromJSON(n));
+    const nodes = children.map((n) => schema.nodeFromJSON(n)) as Node[];
+
+    if (nodes.filter(identity).length !== children.length) {
+      throw new Error(
+        `Failed to create children. Check if all expected node Plugins are registered.`,
+      );
+    }
 
     const content = ImmutableNodeContent.create(scope, {
       id: nodeId,

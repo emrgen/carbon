@@ -21,6 +21,8 @@ import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeType } from "./NodeType";
 import {
   ActivatedPath,
+  AtomContentPath,
+  AtomSizePath,
   CollapsedPath,
   CollapseHidden,
   MarksPath,
@@ -179,6 +181,10 @@ export class Node extends EventEmitter implements IntoNodeId {
     return this.props.get(ActivatedPath);
   }
 
+  get isZero() {
+    return this.type.isZero;
+  }
+
   get isSelected() {
     return this.props.get(SelectedPath);
   }
@@ -221,11 +227,14 @@ export class Node extends EventEmitter implements IntoNodeId {
   // focus steps count within the node
   // start and end locations are within the node
   get focusSize(): number {
-    if (this.isInlineAtom) return this.props.get("size") ?? 1;
+    if (this.isInlineAtom) {
+      return this.props.get(AtomSizePath) ?? this.textContent.length;
+    }
     // if (this.isEmpty && this.isInline) return 1
     // if (this.isEmpty || this.isInlineAtom) return 1;
     // if (this.isBlockAtom) return 0;
     if (this.isText) return this.textContent.length;
+    if (this.isInline) return this.textContent.length;
 
     // focus size is the sum of focus size of all children
     return this.children.reduce((fs, n) => {
@@ -250,7 +259,9 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   // focus can be within the node(ex: text node), excluding any child node
   get isFocusable(): boolean {
-    if (this.parents.some((n) => n.isAtom)) return false;
+    if (this.isInlineAtom && !this.isIsolate) return true;
+    // if (this.isText) return true;
+    if (this.parents.some((n) => n.isAtom && n.isBlock)) return false;
     return (
       ((this.isTextContainer && this.isEmpty) || this.type.isFocusable) &&
       !this.isCollapseHidden
@@ -411,6 +422,10 @@ export class Node extends EventEmitter implements IntoNodeId {
   }
 
   get textContent(): string {
+    if (this.isInlineAtom) {
+      return this.props.get(AtomContentPath) ?? "";
+    }
+
     return this.content.textContent;
   }
 
@@ -735,7 +750,13 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   descendants(fn: Predicate<Node> = yes, opts?: TraverseOptions): Node[] {
     const nodes: Node[] = [];
-    const collect: Predicate<Node> = (node) => !!(fn(node) && nodes.push(node));
+    const collect: Predicate<Node> = (node) => {
+      if (fn(node)) {
+        nodes.push(node);
+      }
+
+      return false;
+    };
 
     this.each((child) => child.preorder((node) => collect(node), opts));
     return nodes;

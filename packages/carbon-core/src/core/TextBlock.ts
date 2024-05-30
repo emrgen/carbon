@@ -66,9 +66,9 @@ export class TextBlock {
           const prevClone = prev.clone();
           acc.pop();
 
-          const newNode = InlineNode.from(prev).merge(curr);
+          const newNodes = InlineNode.from(prev).merge(curr);
 
-          acc.push(newNode);
+          acc.push(...newNodes);
           return acc;
         }
 
@@ -91,6 +91,10 @@ export class TextBlock {
     const { node: endNode } = endDown;
 
     if (startNode.eq(endNode)) {
+      if (startNode.isInlineAtom) {
+        return this.node.children.filter((n) => !n.eq(startNode));
+      }
+
       const textContent =
         startNode.textContent.slice(0, startDown.offset) +
         endNode.textContent.slice(endDown.offset);

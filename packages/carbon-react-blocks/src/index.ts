@@ -76,6 +76,10 @@ export const blockPresetRenderers = [
   ReactRenderer.create("button", ButtonComp),
   ReactRenderer.create("explain", ExplainComp),
   ReactRenderer.create("partial", PartialComp),
+  ReactRenderer.create("emoji", CarbonText),
+  ReactRenderer.create("empty", CarbonText),
+  // ReactRenderer.create("mention", Car),
+  ReactRenderer.create("mentionAtom", CarbonText),
 ];
 
 export * from "./renderers/Document";

@@ -76,7 +76,6 @@ export class ChangeManager extends NodeTopicEmitter {
     // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
     // if nothing is dirty, then there is nothing to do
     if (!isContentChanged && !isSelectionChanged && !state.isMarksChanged) {
-      debugger;
       console.log("skipped: nothing to sync");
       return;
     }

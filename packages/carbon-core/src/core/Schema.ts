@@ -118,6 +118,7 @@ export interface NodeSpec {
   inline?: boolean;
   atom?: boolean;
   tag?: string;
+  zero?: boolean;
   options?: boolean;
   // when the node content match is not valid
   // the new node will be inserted or the current node will be unwrapped based on the consistency

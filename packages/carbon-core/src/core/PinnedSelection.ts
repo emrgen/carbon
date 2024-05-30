@@ -28,10 +28,14 @@ export class PinnedSelection {
   static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
 
   // map dom selection to editor selection
-  static fromDom(store: NodeStore): Optional<PinnedSelection> {
+  static fromDom(store: NodeStore, align = false): Optional<PinnedSelection> {
     const domSelection = window.getSelection();
-    // console.log("ANCHOR TEXT", `"${domSelection?.anchorNode?.textContent}"`);
-    // if (domSelection?.anchorNode?.textContent === "\n") {
+    // console.log(
+    //   "ANCHOR TEXT",
+    //   `"${domSelection?.anchorNode?.textContent}"`,
+    //   domSelection?.anchorOffset,
+    // );
+    // if (domSelection?.anchorOffset === 1) {
     //   debugger;
     // }
 
@@ -68,8 +72,8 @@ export class PinnedSelection {
     }
 
     if (
-      (!anchorNode.isTextContainer && !anchorNode.isText) ||
-      (!focusNode.isTextContainer && !focusNode.isText)
+      (!anchorNode.isTextContainer && !anchorNode.isInline) ||
+      (!focusNode.isTextContainer && !focusNode.isInline)
     ) {
       console.warn(
         p14("%c[error]"),
@@ -148,9 +152,27 @@ export class PinnedSelection {
     // if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
     // if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
 
+    if (anchorNode.isZero) {
+      const { nextSibling, prevSibling } = anchorNode;
+      if (nextSibling?.isInlineAtom && nextSibling.isIsolate) {
+        anchorOffset = 0;
+      } else if (prevSibling?.isInlineAtom && prevSibling.isIsolate) {
+        anchorOffset = 1;
+      }
+    }
+
+    if (focusNode.isZero) {
+      const { nextSibling, prevSibling } = focusNode;
+      if (nextSibling?.isInlineAtom && nextSibling.isIsolate) {
+        focusOffset = 0;
+      } else if (prevSibling?.isInlineAtom && prevSibling.isIsolate) {
+        focusOffset = 1;
+      }
+    }
+
     // console.log(anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
-    const tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
-    const head = Pin.fromDom(focusNode, focusOffset)?.up();
+    const tail = Pin.fromDom(anchorNode, anchorOffset, align)?.up();
+    const head = Pin.fromDom(focusNode, focusOffset, align)?.up();
     // console.log(tail?.toString(), head?.toString());
 
     if (!tail || !head) {
@@ -328,6 +350,15 @@ export class PinnedSelection {
       return;
     }
 
+    // if (this.isDomInSync(store)) {
+    //   console.warn("skipped selection sync, already in sync");
+    //   return;
+    // } else {
+    //   console.log("selection not in sync");
+    //   console.log("selection", this.toString());
+    //   console.log("dom selection", window.getSelection());
+    // }
+
     try {
       const domSelection = this.intoDomSelection(store);
       // console.log('Selection.syncDom:', domSelection);
@@ -399,6 +430,27 @@ export class PinnedSelection {
     } catch (err) {
       console.error(err);
     }
+  }
+
+  isDomInSync(store: NodeStore) {
+    const domSelection = this.intoDomSelection(store);
+    if (!domSelection) {
+      console.error(
+        p14("%c[error]"),
+        "color:red",
+        "failed to map selection to dom",
+      );
+      return false;
+    }
+
+    const { anchorNode, anchorOffset, focusNode, focusOffset } = domSelection;
+    const selection = window.getSelection();
+    return (
+      selection?.anchorNode === anchorNode &&
+      selection?.focusNode === focusNode &&
+      selection?.anchorOffset === anchorOffset &&
+      selection?.focusOffset === focusOffset
+    );
   }
 
   intoDomSelection(store: NodeStore): Optional<DomSelection> {

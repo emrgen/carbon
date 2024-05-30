@@ -48,18 +48,24 @@ export class InlineNode {
     return [prev, next];
   }
 
-  merge(other: Node): Node {
+  merge(other: Node): Node[] {
     const { node } = this;
     const { type, textContent } = node;
+
+    // inline atoms can not be merged
+    if (node.isAtom || other.isAtom) {
+      return [node, other];
+    }
+
     const { textContent: otherText } = other;
     const merged = textContent + otherText;
 
     const mergedNode = type.create(merged, node.props.toJSON());
     if (!mergedNode) {
       console.warn("Merge failed", mergedNode);
-      return node;
+      return [node];
     }
 
-    return mergedNode;
+    return [mergedNode];
   }
 }
