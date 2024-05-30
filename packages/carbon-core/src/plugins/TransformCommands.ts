@@ -154,13 +154,17 @@ export class TransformCommands extends BeforePlugin {
       const { node: startNode } = startDownPin;
       const { node: endNode } = endDownPin;
 
-      const inlineNodes: Node[] = [startNode, endNode];
+      const inlineNodes: Node[] = [startNode, endNode].filter(
+        (n) => n.isInline && n.isLeaf,
+      );
       startNode.next((next) => {
         if (next.eq(endNode)) {
           return true;
         }
 
-        inlineNodes.push(next);
+        if (next.isInline && next.isLeaf) {
+          inlineNodes.push(next);
+        }
 
         return false;
       });
@@ -242,14 +246,14 @@ export class TransformCommands extends BeforePlugin {
         this.toggleMark(tr, middleNode, mark);
       } else {
         // update start node marks after splitting
-        const startNodes = InlineNode.from(startDownPin.node).split(
-          startDownPin.offset,
-        );
+        const startNodes = startDownPin.node.isTextContainer
+          ? []
+          : InlineNode.from(startDownPin.node).split(startDownPin.offset);
 
         // update end node marks after splitting
-        const endNodes = InlineNode.from(endDownPin.node).split(
-          endDownPin.offset,
-        );
+        const endNodes = endDownPin.node.isTextContainer
+          ? []
+          : InlineNode.from(endDownPin.node).split(endDownPin.offset);
 
         if (start.node.eq(end.node)) {
           const { children } = start.node;
@@ -335,7 +339,6 @@ export class TransformCommands extends BeforePlugin {
             }
 
             toggleMarkNodes.push(next);
-
             return false;
           });
         }
