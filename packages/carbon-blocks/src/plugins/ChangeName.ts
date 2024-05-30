@@ -72,6 +72,7 @@ export class ChangeName extends BeforePlugin {
 
   inlineInputRules = new BeforeInputRuleInlineHandler([
     new InputRule(/`(.)+`/, this.changeIntoCodeSpan(["inline"])),
+    new InputRule(/:(.)+:/, this.changeIntoEmoji(["inline"])),
   ]);
 
   handlers(): Partial<EventHandler> {
@@ -257,6 +258,13 @@ export class ChangeName extends BeforePlugin {
       }
 
       cmd.Add(insertBeforeAction(block, divider)).Select(after).Dispatch();
+    };
+  }
+
+  changeIntoEmoji(groups: string[]) {
+    return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
+      // alert("not implemented");
+      console.error("not implemented");
     };
   }
 

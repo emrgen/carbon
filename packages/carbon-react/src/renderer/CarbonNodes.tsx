@@ -27,12 +27,12 @@ export const JustEmpty = (props: RendererProps) => {
     return <br />;
   }
 
-  return <span>&shy;</span>;
-  // return (
-  //   <span>
-  //     <br />
-  //   </span>
-  // );
+  // return <span>&shy;</span>;
+  return (
+    <span>
+      <br />
+    </span>
+  );
 };
 
 interface CarbonPlaceholder extends RendererProps {
