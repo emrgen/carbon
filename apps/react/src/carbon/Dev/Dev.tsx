@@ -45,6 +45,7 @@ import {
   AttrEmailPath,
   AttrMultiSelectedPath,
   AttrNamePath,
+  AttrNumberPath,
   attrRenderers,
   AttrSelectedPath,
   AttrSelectOptionsPath,
@@ -572,7 +573,7 @@ const data = node("carbon", [
           attribute({
             [AttrNamePath]: "Number",
             [AttrTypePath]: "number",
-            [AttrTextPath]: 123,
+            [AttrNumberPath]: 123,
           }),
         ],
         {},
