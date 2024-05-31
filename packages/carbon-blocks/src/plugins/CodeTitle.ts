@@ -49,13 +49,20 @@ export class CodeTitle extends TitlePlugin {
   override keydown(): Partial<EventHandler> {
     return {
       enter: (ctx: EventContext<any>) => {
-        const { app } = ctx;
+        const { app, currentNode } = ctx;
         const { selection } = ctx.app.state;
         // insert a new line into the title
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
           const { start } = selection;
-          app.cmd.transform.insertText(selection, "\n")?.Dispatch();
+          // to keep the tabbing consistent, check if last line prefix space count
+          const { textContent } = currentNode;
+          const beforeCursor = textContent.slice(0, start.offset);
+          const lastLine = beforeCursor.split("\n").pop();
+          const prefixSpace = lastLine?.match(/^\s*/)?.[0]?.length || 0;
+          app.cmd.transform
+            .insertText(selection, "\n" + " ".repeat(prefixSpace))
+            ?.Dispatch();
         }
       },
       tab: (ctx: EventContext<any>) => {
@@ -65,6 +72,7 @@ export class CodeTitle extends TitlePlugin {
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
           const { start } = selection;
+          // use 2 spaces for tabbing
           app.cmd.transform.insertText(selection, `  `)?.Dispatch();
         }
       },

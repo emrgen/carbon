@@ -52,15 +52,6 @@ export class Code extends CarbonPlugin {
 
   keydown(): EventHandlerMap {
     return {
-      // enter: (ctx: EventContext<any>) => {
-      //   const { app } = ctx;
-      //   const { selection } = ctx.app.state;
-      //   // insert a new line into the title
-      //   if (selection.isCollapsed) {
-      //     preventAndStopCtx(ctx);
-      //     app.cmd.transform.insertText(selection, "\n").Dispatch();
-      //   }
-      // },
       backspace: (ctx: EventContext<any>) => {
         const { app, currentNode } = ctx;
         const { selection } = app.state;
@@ -105,7 +96,11 @@ export class Code extends CarbonPlugin {
             originKeydown,
           )
         ) {
-          if (isKeyHotkey("up")(prevEvents[prevEvents.length - 2].event)) {
+          if (
+            isKeyHotkey("up")(
+              prevEvents[prevEvents.length - 2].event as KeyboardEvent,
+            )
+          ) {
             // if previous selection was out of the code block
             const { selection: prevSelection } = ctx.app.state;
             if (

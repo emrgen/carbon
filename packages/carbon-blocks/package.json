@@ -14,6 +14,7 @@
     "@emrgen/carbon-attributes": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
+    "@types/is-hotkey": "^0.1.10",
     "@uidotdev/usehooks": "^2.4.1",
     "compare-urls": "^4.1.0",
     "diff": "^5.2.0",
