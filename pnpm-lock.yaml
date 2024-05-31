@@ -145,6 +145,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.11.5
         version: 11.11.5(@emotion/react@11.11.4(@types/react@18.3.3)(react@18.3.1))(@types/react@18.3.3)(react@18.3.1)
+      '@emrgen/carbon-attributes':
+        specifier: workspace:*
+        version: link:../../packages/carbon-attributes
       '@emrgen/carbon-clipboard':
         specifier: workspace:*
         version: link:../../packages/carbon-clipboard
@@ -386,6 +389,9 @@ importers:
       '@emrgen/carbon-dragon':
         specifier: workspace:*
         version: link:../carbon-dragon
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
       '@react-icons/all-files':
         specifier: ^4.1.0
         version: 4.1.0(react@18.3.1)

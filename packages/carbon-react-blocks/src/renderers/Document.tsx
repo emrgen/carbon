@@ -10,10 +10,12 @@ import {
   Point,
   prevent,
   preventAndStop,
+  PropLink,
 } from "@emrgen/carbon-core";
 import { DocumentContext, useNodeImage } from "../hooks";
 import {
   CarbonBlock,
+  CarbonNode,
   CarbonNodeChildren,
   CarbonNodeContent,
   RendererProps,
@@ -158,6 +160,10 @@ export const DocumentComp = (props: RendererProps) => {
       .Dispatch();
   }, [app, isEditable, node]);
 
+  const pageProps = useMemo(() => {
+    return node.links[PropLink] ?? Node.NULL;
+  }, [node]);
+
   return (
     <DocumentContext document={node}>
       <div
@@ -199,6 +205,7 @@ export const DocumentComp = (props: RendererProps) => {
           }}
         >
           <CarbonNodeContent node={node} />
+          {!pageProps.eq(Node.NULL) && <CarbonNode node={pageProps} />}
           {/*<CarbonProps node={node} />*/}
           <CarbonNodeChildren node={node} />
         </CarbonBlock>

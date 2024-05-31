@@ -35,9 +35,20 @@ export const block = ({
   props,
 });
 
-export const node = (name: string, children: any[] = [], props = {}) => ({
+export const attribute = (props = {}) => ({
+  name: "attribute",
+  props,
+});
+
+export const node = (
+  name: string,
+  children: any[] = [],
+  props = {},
+  links = {},
+) => ({
   name,
   children,
+  links,
   props,
 });
 

@@ -1,26 +1,18 @@
 import React from "react";
-import { RendererProps, useCarbon } from "@emrgen/carbon-react";
-import { preventAndStop } from "@emrgen/carbon-core";
+import {
+  CarbonBlock,
+  CarbonChildren,
+  RendererProps,
+  useCarbon,
+} from "@emrgen/carbon-react";
 
-export function CarbonProps(props: RendererProps) {
+export function CarbonAttrs(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
 
   return (
-    <div
-      className="carbon-document-attrs"
-      contentEditable={false}
-      suppressContentEditableWarning
-      onMouseDown={(e) => {
-        preventAndStop(e);
-        // react.blur();
-      }}
-      onMouseUp={preventAndStop}
-    >
-      {/*{nodeProps(node).map((prop) => {*/}
-      {/*  return <CarbonProp node={node} prop={prop} key={prop.name} />;*/}
-      {/*})}*/}
-      {/*<div className="carbon-add-prop"> &nbsp;+&nbsp; Add Property</div>*/}
-    </div>
+    <CarbonBlock node={node} className="carbon-attrs">
+      <CarbonChildren node={node} />
+    </CarbonBlock>
   );
 }

@@ -13,30 +13,32 @@ import {
   NodeType,
   Path,
   StateScope,
-  With
+  With,
 } from "@emrgen/carbon-core";
-import {Optional} from "@emrgen/types";
-import {identity, isString} from "lodash";
+import { Optional } from "@emrgen/types";
+import { identity, isString } from "lodash";
 
 export class ImmutableNodeContent implements NodeContent {
-
   static create(scope: Symbol, data: NodeContentData) {
     return new ImmutableNodeContent(scope, data);
   }
 
-  constructor(private scope: Symbol, private content: NodeContentData) {}
+  constructor(
+    private scope: Symbol,
+    private content: NodeContentData,
+  ) {}
 
   get data(): NodeData {
-    const {parent,id, parentId, type, children, ...rest} = this.content;
+    const { parent, id, parentId, type, children, ...rest } = this.content;
     return {
       ...rest,
       id: id.toString(),
       parentId: parentId?.toString(),
       name: type.name,
-      children: this.children.map(c => c.data),
+      children: this.children.map((c) => c.data),
       links: {},
       props: {},
-    }
+    };
   }
 
   get id(): NodeId {
@@ -52,7 +54,7 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   get parent(): Optional<Node> {
-    const {parent} = this.content;
+    const { parent } = this.content;
     if (parent) return parent;
     const map = StateScope.get();
     if (!this.parentId) return null;
@@ -67,7 +69,7 @@ export class ImmutableNodeContent implements NodeContent {
     if (this.content.type.isText) {
       return this.content.textContent;
     }
-    return this.children.reduce((text, node) => text + node.textContent, '');
+    return this.children.reduce((text, node) => text + node.textContent, "");
   }
 
   get linkName(): string {
@@ -79,7 +81,7 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   get marks(): Record<string, Mark> {
-    return this.props.get(MarksPath) ?? {}
+    return this.props.get(MarksPath) ?? {};
   }
 
   get props(): NodeProps {
@@ -87,7 +89,7 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   get size(): number {
-    return this.type.isText ? this.textContent.length : this.children.length
+    return this.type.isText ? this.textContent.length : this.children.length;
   }
 
   get isFrozen(): boolean {
@@ -100,31 +102,38 @@ export class ImmutableNodeContent implements NodeContent {
 
   setParentId(parentId: NodeId) {
     this.content.parentId = parentId;
-    return this
+    return this;
   }
 
   setParent(parent: Node) {
     this.content.parent = parent;
-    return this
+    return this;
   }
 
   insertText(text: string, offset: number) {
-    this.content.textContent = this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
+    this.content.textContent =
+      this.textContent.slice(0, offset) + text + this.textContent.slice(offset);
   }
 
   removeText(offset: number, length: number) {
-    this.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
+    this.content.textContent =
+      this.textContent.slice(0, offset) +
+      this.textContent.slice(offset + length);
   }
 
   insert(node: Node, offset: number) {
-    const {children} = this;
-    this.content.children = [...children.slice(0, offset), node, ...children.slice(offset)];
+    const { children } = this;
+    this.content.children = [
+      ...children.slice(0, offset),
+      node,
+      ...children.slice(offset),
+    ];
   }
 
   remove(node: Node) {
-    const {content} = this;
-    const {children} = content;
-    this.content.children = children.filter(n => !n.eq(node));
+    const { content } = this;
+    const { children } = content;
+    this.content.children = children.filter((n) => !n.eq(node));
     node.setParent(null);
     node.setParentId(null);
   }
@@ -135,14 +144,18 @@ export class ImmutableNodeContent implements NodeContent {
 
   changeType(type: NodeType) {
     this.content.type = type;
-    this.props.merge(type.props)
+    this.props.merge(type.props);
   }
 
   updateContent(content: string | Node[]) {
-    if (typeof content === 'string') {
-      console.log('updateContent', content, Object.isFrozen(this.content))
+    if (typeof content === "string") {
+      console.log("updateContent", content, Object.isFrozen(this.content));
       this.content.textContent = content;
-      console.log('after updateContent', this.textContent, Object.isFrozen(this.content))
+      console.log(
+        "after updateContent",
+        this.textContent,
+        Object.isFrozen(this.content),
+      );
       return;
     }
 
@@ -154,6 +167,7 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   addLink(name: string, node: Node) {
+    console.log("xxxxxxxxxxx", node, node.name);
     this.content.links[name] = node;
   }
 
@@ -165,7 +179,7 @@ export class ImmutableNodeContent implements NodeContent {
     return {
       ...this.content,
       props: this.props.clone(),
-    }
+    };
   }
 
   freeze(fn: With<Node>): NodeContent {
@@ -173,13 +187,12 @@ export class ImmutableNodeContent implements NodeContent {
     this.content.parent = null;
 
     // first freeze the children
-    this.children.forEach(n => n.freeze(fn));
+    this.children.forEach((n) => n.freeze(fn));
     Object.freeze(this.content);
     Object.freeze(this);
 
     return this;
   }
-
 
   // do a shallow clone
   unfreeze(path: Path, map: NodeMap): NodeContent {
@@ -193,7 +206,7 @@ export class ImmutableNodeContent implements NodeContent {
     if (isString(index)) {
       const child = mutable.links[index];
       if (!child) {
-        throw new Error(`child not found at ${index}`)
+        throw new Error(`child not found at ${index}`);
       }
 
       const mutableChild = child.unfreeze(rest, map);
@@ -203,7 +216,7 @@ export class ImmutableNodeContent implements NodeContent {
     } else {
       const child = mutable.children[index];
       if (!child) {
-        throw new Error(`child not found at ${index}`)
+        throw new Error(`child not found at ${index}`);
       }
 
       const mutableChild = child.unfreeze(rest, map);
@@ -214,11 +227,12 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   clone(map: Maps<Node, Optional<Node>> = identity): NodeContent {
-    const children = this.children.map(n => map(n)).filter(identity) as Node[];
+    const children = this.children
+      .map((n) => map(n))
+      .filter(identity) as Node[];
     return new ImmutableNodeContent(this.scope, {
       ...this.content,
       children,
     });
   }
-
 }

@@ -15,6 +15,7 @@
     "@emotion/styled": "^11.11.5",
     "@emrgen/carbon-clipboard": "workspace:*",
     "@emrgen/carbon-code": "workspace:*",
+    "@emrgen/carbon-attributes": "workspace:*",
     "@emrgen/carbon-comment-editor": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",

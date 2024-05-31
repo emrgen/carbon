@@ -18,7 +18,6 @@ export const BookmarkComp = (props: RendererProps) => {
     const info = node.props.get(BookmarkInfoPath, {} as BookmarkInfo);
 
     if (info.link === src) {
-      console.error("Already fetched", node.id.toString());
       setLoading(false);
       return;
     }
@@ -59,7 +58,12 @@ export const BookmarkComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node}>
-      <a href={bookmark.link} className={"bookmark-wrapper"} target={"_blank"} rel="noreferrer">
+      <a
+        href={bookmark.link}
+        className={"bookmark-wrapper"}
+        target={"_blank"}
+        rel="noreferrer"
+      >
         <div className={"bookmark-content"}>
           <div className={"bookmark-title"}>
             {bookmark.title ?? "Loading..."}

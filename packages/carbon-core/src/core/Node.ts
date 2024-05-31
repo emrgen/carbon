@@ -860,11 +860,20 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   toJSON() {
     const { id, type, children, textContent, props } = this;
+    const links = Object.entries(this.links).reduce(
+      (acc, [k, v]) => {
+        acc[k] = v.toJSON();
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+
     if (this.isText) {
       return {
         id: id.toString(),
         name: type.name,
         text: textContent,
+        links,
         props: props.toJSON(),
       };
     }
@@ -873,6 +882,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       id: id.toString(),
       name: type.name,
       children: children.map((n) => n.toJSON()),
+      links,
       props: props.toJSON(),
     };
   }

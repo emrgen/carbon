@@ -1,67 +1,35 @@
+[data-name=attributes]
+    display flex
+    flex-direction column
+    //background: #f4f4f4
+    padding: 16px 0
+    margin 26px 16px 26px
+    gap 4px
 
-.carbon-document-attrs
-	// background: #f4f4f4
-	padding: 16px 0px
-	user-select: none
+[data-name=attributes] [data-name=attribute]
+    display: flex
+    padding: 0 4px
 
-.carbon-attrs
-	display flex
-	gap: 10px
+    .carbon-attribute-label
+        display flex
+        cursor: pointer
+        //background red
+        align-items center
+        padding: 0 4px
+        border-radius: 4px
 
-.carbon-attrs-name
-	width 180px
-	display flex
-	align-items: center
-	justify-content: start
-	padding: 6px 4px
-	border-radius: 4px
-	cursor pointer
-	color: #999
-	&:hover
-		background: #eee
+        :hover
+            background: #f4f4f4
 
-	&>span
-		display: inline-block
-		white-space: nowrap;
-		text-overflow: ellipsis;
-		overflow: hidden;
+        .carbon-attribute-type
+            font-weight: bold
+            margin-right: 4px
+            width 20px
+            height 20px
+            background: #000;
 
-.carbon-attrs-values
-	display flex
-	gap 6px
-	font-size: 14px
-	align-items: center
-
-	.carbon-tag-attr
-		display: flex
-		align-items: center
-		justify-content: center
-		padding: 2px 4px
-		border-radius: 4px
-		background: rgba(0, 128, 128, 0.178)
-		height: 18px
-		cursor pointer
-		&:hover
-			background: #ccc
-		&>span
-			display: inline-block
-			white-space: nowrap;
-			text-overflow: ellipsis;
-			overflow: hidden;
-		&>input
-			width 100%
-			border: none
-			outline: none
-			background: transparent
-			&:focus
-				background: #ddd
-
-.carbon-add-prop
-	padding: 6px 4px
-	margin: 4px 0
-	cursor: pointer
-	user-select: none
-	width 180px
-	color: #999
-	&:hover
-		background: #eee
+        .carbon-attribute-name
+            padding 4px 0
+            font-weight: bold
+            margin-right: 4px
+            width 160px
