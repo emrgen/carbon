@@ -1,7 +1,7 @@
 import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
 
 export class PageLink extends CarbonPlugin {
-  name = "docLink";
+  name = "pageLink";
 
   spec(): NodeSpec {
     return {
@@ -16,15 +16,17 @@ export class PageLink extends CarbonPlugin {
       info: {
         title: "Code",
       },
-      attrs: {
+      props: {
         node: {
-          focusPlaceholder: "Code",
+          focusPlaceholder: "Type '/' for commands",
           emptyPlaceholder: "",
           // tag: 'code',
         },
-        html: {
-          contentEditable: false,
-          suppressContentEditableWarning: true,
+        local: {
+          html: {
+            contentEditable: false,
+            suppressContentEditableWarning: true,
+          },
         },
       },
     };

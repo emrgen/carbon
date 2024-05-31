@@ -59,27 +59,34 @@ export const BookmarkComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node}>
-      <div className={"bookmark-content"}>
-        <div className={"bookmark-title"}>{bookmark.title ?? "Loading..."}</div>
-        <div className={"bookmark-description"}>
-          {bookmark.description ?? "\u200B"}
+      <a href={bookmark.link} className={"bookmark-wrapper"} target={"_blank"} rel="noreferrer">
+        <div className={"bookmark-content"}>
+          <div className={"bookmark-title"}>
+            {bookmark.title ?? "Loading..."}
+          </div>
+          <div className={"bookmark-description"}>
+            {bookmark.description ?? "\u200B"}
+          </div>
+          <div className={"bookmark-source"}>
+            <div className={"bookmark-fabicon"}>
+              {bookmark.logo?.url && (
+                <img
+                  src={bookmark.logo?.url}
+                  alt={bookmark.title ?? "\u200B"}
+                />
+              )}
+            </div>
+            <div className={"bookmark-src"}>{bookmark.link ?? "\u200B"}</div>
+          </div>
         </div>
-        <div className={"bookmark-source"}>
-          <div className={"bookmark-fabicon"}>
-            {bookmark.logo?.url && (
-              <img src={bookmark.logo?.url} alt={bookmark.title ?? "\u200B"} />
+        <div className={"bookmark-image"}>
+          <div className={"bookmark-image-wrapper"}>
+            {bookmark.image?.url && (
+              <img src={bookmark.image?.url} alt={bookmark.title} />
             )}
           </div>
-          <div className={"bookmark-src"}>{bookmark.link ?? "\u200B"}</div>
         </div>
-      </div>
-      <div className={"bookmark-image"}>
-        <div className={"bookmark-image-wrapper"}>
-          {bookmark.image?.url && (
-            <img src={bookmark.image?.url} alt={bookmark.title} />
-          )}
-        </div>
-      </div>
+      </a>
     </CarbonBlock>
   );
 };

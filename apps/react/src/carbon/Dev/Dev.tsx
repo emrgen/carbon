@@ -20,6 +20,7 @@ import {
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
   corePresetPlugins,
+  LinkPath,
   Mark,
   MarksPath,
   ModePath,
@@ -494,6 +495,9 @@ const data = node("carbon", [
         title([mention("subhasis"), mention("subhasis"), mention("subhasis")]),
       ]),
       section([title([text("section 1")])]),
+      node("pageLink", [], {
+        [LinkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdMsdf",
+      }),
       node("bookmark", [], {
         [BookmarkPath]: "https://blog.medium.com/bnp-editors-9c0a6f5a133a",
       }),

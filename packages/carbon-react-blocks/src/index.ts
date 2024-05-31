@@ -33,6 +33,7 @@ import { ButtonComp } from "./renderers/Button";
 import { ExplainComp } from "./renderers/Explain";
 import { PartialComp } from "./renderers/PartialComp";
 import { BookmarkComp } from "./renderers/Bookmark";
+import { PageLinkComp } from "./renderers/PageLink";
 
 export const blockPresetRenderers = [
   ReactRenderer.create("document", DocumentComp),
@@ -82,6 +83,7 @@ export const blockPresetRenderers = [
   // ReactRenderer.create("mention", Car),
   ReactRenderer.create("mentionAtom", CarbonText),
   ReactRenderer.create("bookmark", BookmarkComp),
+  ReactRenderer.create("pageLink", PageLinkComp),
 ];
 
 export * from "./renderers/Document";
