@@ -1,22 +1,10 @@
 import { CarbonBlock, RendererProps, useCarbon } from "@emrgen/carbon-react";
+import {
+  BookmarkInfo,
+  BookmarkInfoPath,
+  BookmarkPath,
+} from "@emrgen/carbon-blocks";
 import { useEffect, useState } from "react";
-import { BookmarkPath } from "@emrgen/carbon-core";
-
-const BookmarkInfoPath = "local/state/bookmark/info";
-
-interface BookmarkInfo {
-  title?: string;
-  description?: string;
-  link?: string;
-  image?: {
-    url: string;
-    type: string;
-  };
-  logo?: {
-    url: string;
-    type: string;
-  };
-}
 
 export const BookmarkComp = (props: RendererProps) => {
   const { node } = props;

@@ -298,7 +298,6 @@ export class Transaction {
 
   // TODO: transaction should be immutable before dispatch
   Dispatch(): Transaction {
-    debugger;
     if (this.actions.length === 0) {
       console.warn("skipped: empty transaction");
       return this;

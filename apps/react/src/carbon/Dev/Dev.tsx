@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import {
   blockPresetPlugins,
+  BookmarkPath,
   emoji,
   mention,
   node,
@@ -18,7 +19,6 @@ import {
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
-  BookmarkPath,
   corePresetPlugins,
   Mark,
   MarksPath,
@@ -493,6 +493,7 @@ const data = node("carbon", [
       section([
         title([mention("subhasis"), mention("subhasis"), mention("subhasis")]),
       ]),
+      section([title([text("section 1")])]),
       node("bookmark", [], {
         [BookmarkPath]: "https://blog.medium.com/bnp-editors-9c0a6f5a133a",
       }),
