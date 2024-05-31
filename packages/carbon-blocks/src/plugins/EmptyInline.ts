@@ -3,11 +3,16 @@ import {
   AtomContentPath,
   AtomSizePath,
   EventHandlerMap,
+  Node,
   NodeSpec,
   Pin,
   PinnedSelection,
   preventAndStopCtx,
 } from "@emrgen/carbon-core";
+
+// <EmptyInline><IsolateInlineAtom><EmptyInline>
+
+//
 
 export class EmptyInline extends InlineAtom {
   name = "empty";
@@ -87,5 +92,23 @@ export class EmptyInline extends InlineAtom {
         }
       },
     };
+  }
+
+  static isPrefix(node: Node): boolean {
+    const { nextSibling } = node;
+    return <boolean>(
+      (node.name === "empty" &&
+        nextSibling?.isIsolate &&
+        nextSibling?.isInlineAtom)
+    );
+  }
+
+  static isSuffix(node: Node): boolean {
+    const { prevSibling } = node;
+    return <boolean>(
+      (node.name === "empty" &&
+        prevSibling?.isIsolate &&
+        prevSibling?.isInlineAtom)
+    );
   }
 }

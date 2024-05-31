@@ -19,8 +19,6 @@ export const PartialComp = (props: RendererProps) => {
   const app = useCarbon();
   const doc = useDocument();
 
-  console.log("doc", doc);
-
   const isEditing = doc.props.get<string>(ModePath, "view") === "edit";
   const isCollapsed = node.props.get(CollapsedPathLocal, true);
 

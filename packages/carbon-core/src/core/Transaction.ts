@@ -45,7 +45,7 @@ declare module "@emrgen/carbon-core" {
 }
 
 export class Transaction {
-  private readonly id: string;
+  readonly id: string;
   time = dayjs().unix();
   type: TxType = TxType.TwoWay;
   private actions: CarbonAction[] = [];
@@ -215,7 +215,7 @@ export class Transaction {
     props: Partial<NodePropsJson>,
     origin = this.origin,
   ): Transaction {
-    console.log("Update", nodeRef, props, origin);
+    // console.log("Update", nodeRef, props, origin);
     this.Add(UpdatePropsAction.create(nodeRef, props, origin));
     return this;
   }
@@ -298,6 +298,7 @@ export class Transaction {
 
   // TODO: transaction should be immutable before dispatch
   Dispatch(): Transaction {
+    debugger;
     if (this.actions.length === 0) {
       console.warn("skipped: empty transaction");
       return this;
@@ -338,7 +339,7 @@ export class Transaction {
       if (this.actions.every((c) => c.origin === ActionOrigin.Runtime)) {
         console.group("Commit (runtime)");
       } else {
-        console.group("Commit", this.id, this);
+        console.groupCollapsed("Commit", this.id, this);
       }
 
       for (const action of this.actions) {

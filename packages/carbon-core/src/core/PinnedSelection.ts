@@ -152,24 +152,6 @@ export class PinnedSelection {
     // if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
     // if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
 
-    if (anchorNode.isZero) {
-      const { nextSibling, prevSibling } = anchorNode;
-      if (nextSibling?.isInlineAtom && nextSibling.isIsolate) {
-        anchorOffset = 0;
-      } else if (prevSibling?.isInlineAtom && prevSibling.isIsolate) {
-        anchorOffset = 1;
-      }
-    }
-
-    if (focusNode.isZero) {
-      const { nextSibling, prevSibling } = focusNode;
-      if (nextSibling?.isInlineAtom && nextSibling.isIsolate) {
-        focusOffset = 0;
-      } else if (prevSibling?.isInlineAtom && prevSibling.isIsolate) {
-        focusOffset = 1;
-      }
-    }
-
     // console.log(anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
     const tail = Pin.fromDom(anchorNode, anchorOffset, align)?.up();
     const head = Pin.fromDom(focusNode, focusOffset, align)?.up();

@@ -179,12 +179,11 @@ $lineHeight = 28px
     color: teal !important;
 }
 
-[data-name=document] > [data-type="content"],
-[data-as=document] > [data-type="content"]
-    padding: 40px 0 10px 0
+[data-name=document] > [data-type="content"]
+[data-name=document] > [data-type="children"]
+    padding: 40px 16px 10px 16px
 
-[data-name=document] > [data-type="content"] > [data-name="title"],
-[data-as=document] > [data-type="content"] > [data-name="title"]
+[data-name=document] > [data-type="content"] > [data-name="title"]
     font-size: 42px
     font-weight: bold
     line-height: 30px
@@ -717,7 +716,7 @@ span[data-name=text] {
     [data-name=document],
     [data-as=document]
         flex 1
-        padding 0 100px
+        padding 0 80px
         padding-top: 40px;
 
 
@@ -1535,14 +1534,7 @@ a[data-name="text"]
     border-radius: 4px;
     font-size: 14px;
     color: #999;
-    //cursor: pointer;
-    //user-select: none;
-    //pointer-events none
-    //&:hover
-    //    background: #ddd
 [data-name=mentionAtom]
-    //user-select none
-    //pointer-events none
     -webkit-user-modify: read-only
 
 [data-name=title]
@@ -1551,3 +1543,67 @@ a[data-name="text"]
     span:first-child
         margin-left: 0
 
+[data-name=bookmark]
+    margin 10px 0
+    display flex
+    border 1px solid #eee
+    border-radius 4px
+    overflow hidden
+    .bookmark-content
+        padding 12px
+        flex 1
+        width calc(100% - 250px)
+        .bookmark-title
+            font-size 14px
+            margin-bottom 4px
+            white-space: nowrap
+            text-overflow: ellipsis
+            overflow: hidden
+
+        .bookmark-description
+            font-size 12px
+            color #999
+            margin-bottom 4px
+            line-height 20px
+            height 40px
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+        .bookmark-source
+            font-size 12px
+            color #555
+            display flex
+            gap 6px
+            .bookmark-fabicon
+                width 16px
+                height 16px
+                overflow hidden
+                img
+                    width 100%
+                    height 100%
+            .bookmark-src
+                white-space: nowrap
+                text-overflow: ellipsis
+                overflow: hidden
+                flex 1
+                line-height 16px
+
+    .bookmark-image
+        position: relative;
+        width 250px
+        height inherit
+        background: #eee;
+        overflow hidden
+        .bookmark-image-wrapper
+            position: absolute;
+            overflow hidden
+            height 100%
+            width 100%
+            display flex
+            justify-content center
+            align-items center
+        img
+            width 100%

@@ -341,7 +341,7 @@ export class Carbon extends EventEmitter {
     this.ticks.push(cb);
   }
 
-  processTick() {
+  processTick(tr: Transaction) {
     if (this.ticks.length) {
       const tick = first(this.ticks);
       this.ticks = this.ticks.slice(1);
@@ -357,6 +357,8 @@ export class Carbon extends EventEmitter {
       // 	return true;
       // }
       return true;
+    } else {
+      this.tm.unlock(tr);
     }
     return false;
   }

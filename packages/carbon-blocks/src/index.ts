@@ -37,6 +37,7 @@ import { InlineAtom } from "./plugins/InlineAtom";
 import { Emoji } from "./plugins/Emoji";
 import { Mention } from "./plugins/Mention";
 import { EmptyInline } from "./plugins/EmptyInline";
+import { Bookmark } from "./plugins/Bookmark";
 
 export * from "./create";
 
@@ -78,6 +79,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Emoji(),
   new Mention(),
   new EmptyInline(),
+  new Bookmark(),
 ];
 
 export * from "./events";

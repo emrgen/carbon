@@ -99,13 +99,9 @@ export class EventManager {
     }
 
     if (type == EventsIn.selectionchange) {
-      console.log(
-        this.prevEvents.map((e) => e.type),
-        event,
-      );
       // console.log(
-      //   "DOM SELECTION",
-      //   PinnedSelection.fromDom(app.store)?.toString(),
+      //   this.prevEvents.map((e) => e.type),
+      //   event,
       // );
     }
 

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import {
   blockPresetPlugins,
   emoji,
+  mention,
   node,
   section,
   text,
@@ -17,6 +18,7 @@ import {
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
+  BookmarkPath,
   corePresetPlugins,
   Mark,
   MarksPath,
@@ -488,9 +490,22 @@ const data = node("carbon", [
       // ]),
 
       section([title([emoji("🖐️")])]),
-      // section([
-      //   title([mention("subhasis"), mention("subhasis"), mention("subhasis")]),
-      // ]),
+      section([
+        title([mention("subhasis"), mention("subhasis"), mention("subhasis")]),
+      ]),
+      node("bookmark", [], {
+        [BookmarkPath]: "https://blog.medium.com/bnp-editors-9c0a6f5a133a",
+      }),
+      node("bookmark", [], {
+        [BookmarkPath]:
+          "https://www.w3schools.com/cssref/css3_pr_text-overflow.php",
+      }),
+      node("bookmark", [], {
+        [BookmarkPath]: "https://www.npmjs.com/package/image-thumbnail",
+      }),
+      node("bookmark", [], {
+        [BookmarkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdM",
+      }),
     ],
     {
       [ModePath]: "edit",
@@ -564,7 +579,6 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
-      console.log(state.marks.toString());
       // console.debug(
       //   "changes",
       //   state.changes.patch,

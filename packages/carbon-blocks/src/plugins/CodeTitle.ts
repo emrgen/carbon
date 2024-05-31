@@ -320,7 +320,6 @@ export class CodeTitle extends TitlePlugin {
         const { tokens, offset } = acc;
         if (typeof tok === "string") {
           if (tok.trim() === "") {
-            console.log("whitespace", `"${tok}"`);
             return {
               tokens: [
                 ...tokens,

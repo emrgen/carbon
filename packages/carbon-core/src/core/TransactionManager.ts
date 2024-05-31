@@ -3,8 +3,10 @@ import { Transaction } from "./Transaction";
 import { SelectionManager } from "./SelectionManager";
 import { Carbon } from "./Carbon";
 import { State } from "./State";
+import { Optional } from "@emrgen/types";
 
 export class TransactionManager {
+  private currentTr: Optional<Transaction>;
   private transactions: Transaction[] = [];
 
   constructor(
@@ -26,6 +28,18 @@ export class TransactionManager {
     return this.app.runtime;
   }
 
+  lock(tr: Transaction) {
+    // console.group("lock", tr.id, tr);
+    this.currentTr = tr;
+  }
+
+  unlock(tr: Transaction) {
+    // console.groupEnd();
+    // console.log("unlocking...", this._locked?.id, tr.id);
+    this.currentTr = null;
+    this.processTransactions();
+  }
+
   // empty dispatch tries to process pending transactions
   dispatch(tr?: Transaction) {
     if (tr) {
@@ -40,6 +54,10 @@ export class TransactionManager {
     // allow transactions to run only when there is no pending selection events
     // normalizer transactions are allowed to commit even with pending selection events
     while (this.transactions.length) {
+      if (this.currentTr) {
+        return;
+      }
+
       const tr = this.transactions.shift();
       if (!tr || tr.isEmpty) {
         app.committed = true;
@@ -65,6 +83,7 @@ export class TransactionManager {
       app.committed = true;
 
       if (app.state !== state) {
+        this.lock(tr);
         this.updateState(state, tr);
       }
     }

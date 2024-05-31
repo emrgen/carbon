@@ -9,6 +9,7 @@ import { EventsOut } from "./Event";
 import { Transaction } from "./Transaction";
 import { PluginManager } from "./PluginManager";
 import { ActionOrigin, State, StateActions } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
 
 export enum NodeChangeType {
   update = "update",
@@ -27,6 +28,7 @@ export class ChangeManager extends NodeTopicEmitter {
   updated: NodeIdSet = NodeIdSet.empty();
 
   promiseState: PromiseState;
+  tr: Optional<Transaction>;
 
   private interval: any;
 
@@ -62,7 +64,8 @@ export class ChangeManager extends NodeTopicEmitter {
   // 3. sync the node state
   update(state: State, tr: Transaction, timeout: number = 1000) {
     if (this.actions.length) {
-      console.log("pending transaction", this.actions.length);
+      this.actions.push(state.actions);
+      console.log("pending transaction change update", this.actions.length);
       return;
     }
 
@@ -79,6 +82,8 @@ export class ChangeManager extends NodeTopicEmitter {
       console.log("skipped: nothing to sync");
       return;
     }
+
+    this.tr = tr;
 
     // console.log('update', isContentChanged, isSelectionChanged);
     if (isContentChanged) {
@@ -165,7 +170,7 @@ export class ChangeManager extends NodeTopicEmitter {
     }
 
     // console.log('PROCESSING NEXT TICK')
-    this.app.processTick();
+    this.app.processTick(this.tr!);
 
     // this.promiseState.resolve?.();
   }
