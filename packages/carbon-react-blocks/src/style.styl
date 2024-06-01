@@ -1550,6 +1550,7 @@ a[data-name="text"]
     border 1px solid #eee
     border-radius 4px
     overflow hidden
+    user-select none
     :hover
         background #eee
     .bookmark-wrapper
@@ -1652,3 +1653,34 @@ a[data-name="text"]
         background #eee
         border-radius 4px
         cursor: pointer;
+
+.multi-value-remove
+    height 24px
+    width 18px
+    justify-content center
+    align-items center
+    padding-right: 5px;
+    display none
+
+    div
+        //background: #000;
+        height 16px
+        width 16px
+        border-radius 50%
+        position: relative;
+        svg
+            transform scale(1.8)
+.multi-value-label
+    padding-right: 2px;
+    font-size 17px!important
+.select-focused
+    .multi-value-label
+        padding-right: -2px;
+    .multi-value-remove
+        display flex
+
+//.attribute-type-multi-select,
+//.attribute-type-select,
+//.attribute-type-status
+//    font-size 13px
+

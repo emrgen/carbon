@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import Select from "react-select";
+import { Select } from "./Select";
 
 import { CarbonBlock, RendererProps } from "@emrgen/carbon-react";
 import { stop } from "@emrgen/carbon-core";
@@ -12,13 +12,12 @@ import {
   AttrPersonPath,
   AttrSelectedPath,
   AttrSelectOptionsPath,
-  AttrStatusOptionsPath,
-  AttrStatusPath,
   AttrTextPath,
   AttrTypePath,
 } from "../constants";
 import { debounce } from "lodash";
 import dayjs from "dayjs";
+import { StatusAttrValue } from "./StatusAttributeValue";
 
 export default function CarbonAttribute(props: RendererProps) {
   const { node } = props;
@@ -37,7 +36,9 @@ export default function CarbonAttribute(props: RendererProps) {
         <CarbonAttrTypeIcon type={attr.type} />
         <div className="carbon-attribute-name">{attr.name}</div>
       </div>
-      <div className="carbon-attribute-value-wrapper">
+      <div
+        className={`carbon-attribute-value-wrapper attribute-type-${attr.type}`}
+      >
         <CarbonAttrValue node={node} />
       </div>
     </CarbonBlock>
@@ -175,60 +176,6 @@ const PersonAttrValue = (props: RendererProps) => {
         e.stopPropagation();
         setValue(e.target.value);
         handleChange(e.target.value);
-      }}
-    />
-  );
-};
-
-const StatusAttrValue = (props: RendererProps) => {
-  const { node } = props;
-  const [value, setValue] = useState<string | undefined>(undefined);
-  const text = node.props.get(AttrStatusPath, "");
-  const options = node.props.get(AttrStatusOptionsPath, [] as string[]);
-
-  const handleChange = useCallback(
-    debounce((value: string) => {
-      console.log("change", value);
-    }, 2000),
-    [node],
-  );
-
-  return (
-    <Select
-      isMulti
-      value={
-        text
-          ? {
-              label: text,
-              value: text,
-            }
-          : (undefined as any)
-      }
-      options={options.map((option) => ({
-        label: option,
-        value: option,
-      }))}
-      onChange={(selected) => {
-        // handleChange(selected.map((option) => option.value));
-      }}
-      styles={{
-        control: (styles) => ({
-          ...styles,
-          border: "none",
-          boxShadow: "none",
-        }),
-        multiValue: (base) => ({
-          ...base,
-          borderRadius: "14px",
-          fontSize: "18px",
-          padding: "0 2px",
-          overflow: "hidden",
-        }),
-      }}
-      components={{
-        DropdownIndicator: () => null,
-        IndicatorSeparator: () => null,
-        ClearIndicator: () => null,
       }}
     />
   );
