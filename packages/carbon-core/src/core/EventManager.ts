@@ -215,7 +215,7 @@ export class EventManager {
     }
 
     // start node corresponds to focus point in DOM
-    const node = selection.start.down().node;
+    const node = selection.head.down().node;
     if (!node) {
       console.error(
         p12("%c[invalid]"),

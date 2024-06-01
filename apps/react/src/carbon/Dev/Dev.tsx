@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 
 import {
-  attribute,
   blockPresetPlugins,
   BookmarkPath,
   emoji,
@@ -26,7 +25,6 @@ import {
   MarksPath,
   ModePath,
   NodeId,
-  PropLink,
   State,
   StylePath,
 } from "@emrgen/carbon-core";
@@ -40,20 +38,7 @@ import {
   commentEditorComp,
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
-import {
-  AttrCreatedAtPath,
-  AttrEmailPath,
-  AttrMultiSelectedPath,
-  AttrNamePath,
-  AttrNumberPath,
-  attrRenderers,
-  AttrSelectedPath,
-  AttrSelectOptionsPath,
-  AttrStatusOptionsPath,
-  AttrStatusPath,
-  AttrTextPath,
-  AttrTypePath,
-} from "@emrgen/carbon-attributes";
+import { attrRenderers } from "@emrgen/carbon-attributes";
 
 function is_env_development() {
   // @ts-ignore
@@ -508,7 +493,7 @@ const data = node("carbon", [
 
       section([title([emoji("🖐️")])]),
       section([
-        title([mention("subhasis"), mention("subhasis"), mention("subhasis")]),
+        title([mention("subhasis"), mention("bubun"), mention("bappa")]),
       ]),
       section([title([text("section 1")])]),
       node("pageLink", [], {
@@ -533,52 +518,52 @@ const data = node("carbon", [
       // [ImagePath]:
       //   "https://momentum.photos/img/605ec0cd-c21b-420d-9ec7-f1a63d69cafd.jpg?momo_cache_bg_uuid=a63a8845-920b-4562-ba44-d3d5228261c9",
     },
-    {
-      [PropLink]: node(
-        "attributes",
-        [
-          attribute({
-            [AttrNamePath]: "Email",
-            [AttrTypePath]: "email",
-            [AttrEmailPath]: "subhasis@mail.com",
-          }),
-          attribute({
-            [AttrNamePath]: "Created At",
-            [AttrTypePath]: "created-at",
-            [AttrCreatedAtPath]: new Date().toISOString(),
-          }),
-          attribute({
-            [AttrNamePath]: "Multi Select",
-            [AttrTypePath]: "multi-select",
-            [AttrMultiSelectedPath]: ["option 1", "option 2"],
-            [AttrSelectOptionsPath]: ["option 1", "option 2", "option 3"],
-          }),
-          attribute({
-            [AttrNamePath]: "Status",
-            [AttrTypePath]: "status",
-            [AttrStatusPath]: "done",
-            [AttrStatusOptionsPath]: ["todo", "done", "in progress", "triage"],
-          }),
-          attribute({
-            [AttrNamePath]: "Select",
-            [AttrTypePath]: "select",
-            [AttrSelectedPath]: "option 1",
-            [AttrSelectOptionsPath]: ["option 1", "option 2", "option 3"],
-          }),
-          attribute({
-            [AttrNamePath]: "Text",
-            [AttrTypePath]: "text",
-            [AttrTextPath]: "text value",
-          }),
-          attribute({
-            [AttrNamePath]: "Number",
-            [AttrTypePath]: "number",
-            [AttrNumberPath]: 123,
-          }),
-        ],
-        {},
-      ),
-    },
+    // {
+    //   [PropLink]: node(
+    //     "attributes",
+    //     [
+    //       attribute({
+    //         [AttrNamePath]: "Email",
+    //         [AttrTypePath]: "email",
+    //         [AttrEmailPath]: "subhasis@mail.com",
+    //       }),
+    //       attribute({
+    //         [AttrNamePath]: "Created At",
+    //         [AttrTypePath]: "created-at",
+    //         [AttrCreatedAtPath]: new Date().toISOString(),
+    //       }),
+    //       attribute({
+    //         [AttrNamePath]: "Multi Select",
+    //         [AttrTypePath]: "multi-select",
+    //         [AttrMultiSelectedPath]: ["option 1", "option 2"],
+    //         [AttrSelectOptionsPath]: ["option 1", "option 2", "option 3"],
+    //       }),
+    //       attribute({
+    //         [AttrNamePath]: "Status",
+    //         [AttrTypePath]: "status",
+    //         [AttrStatusPath]: "done",
+    //         [AttrStatusOptionsPath]: ["todo", "done", "in progress", "triage"],
+    //       }),
+    //       attribute({
+    //         [AttrNamePath]: "Select",
+    //         [AttrTypePath]: "select",
+    //         [AttrSelectedPath]: "option 1",
+    //         [AttrSelectOptionsPath]: ["option 1", "option 2", "option 3"],
+    //       }),
+    //       attribute({
+    //         [AttrNamePath]: "Text",
+    //         [AttrTypePath]: "text",
+    //         [AttrTextPath]: "text value",
+    //       }),
+    //       attribute({
+    //         [AttrNamePath]: "Number",
+    //         [AttrTypePath]: "number",
+    //         [AttrNumberPath]: 123,
+    //       }),
+    //     ],
+    //     {},
+    //   ),
+    // },
   ),
 ]);
 

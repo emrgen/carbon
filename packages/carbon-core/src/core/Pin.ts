@@ -202,25 +202,37 @@ export class Pin {
     return this.offset === this.node.focusSize;
   }
 
-  // align pin to the left when it is in the middle of the two text blocks
+  // NOTE: cursor move between two inline nodes within the same text container block
+  // has no visual difference and the offset w.r.t the text container block is the same
+  // aligns pin to the left when it is in the middle of the two text blocks
+  // Validity: valid for down pin only
   get leftAlign(): Pin {
     const { prevSibling } = this.node;
-    if (!this.node.isEmpty && this.offset === 0 && prevSibling?.isFocusable) {
-      return Pin.create(prevSibling, prevSibling.focusSize);
+    // if previous node is a inline node within the same text container block
+    const prevFocusable = this.node.prev((n) => n.isFocusable);
+    if (
+      !this.node.isEmpty &&
+      this.offset === 0 &&
+      prevFocusable?.commonNode(this.node).isTextContainer
+    ) {
+      return Pin.create(prevFocusable, prevFocusable.focusSize);
     } else {
       return this;
     }
   }
 
-  // align pin to the right when it is in the middle of the two text blocks
+  // aligns pin to the right when it is in the middle of the two text blocks
+  // Validity: valid for down pin only
   get rightAlign(): Pin {
     const { nextSibling } = this.node;
+    // if previous node is a inline node within the same text container block
+    const nextFocusable = this.node.next((n) => n.isFocusable);
     if (
       !this.node.isEmpty &&
       this.offset === this.node.focusSize &&
-      nextSibling?.isFocusable
+      nextFocusable?.commonNode(this.node).isTextContainer
     ) {
-      return Pin.create(nextSibling, 0);
+      return Pin.create(nextFocusable, 0);
     } else {
       return this;
     }
