@@ -13,8 +13,8 @@ export class Mention extends CarbonPlugin {
     return {
       group: "inline",
       content: "empty mentionAtom empty",
-      inlineAtomParent: true,
       inline: true,
+      mergeable: false,
       // inlineSelectable: true,
       // focusable: true,
       tag: "span",

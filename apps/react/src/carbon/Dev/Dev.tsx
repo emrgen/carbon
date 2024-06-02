@@ -2,7 +2,6 @@ import { useEffect } from "react";
 
 import {
   blockPresetPlugins,
-  BookmarkPath,
   emoji,
   mention,
   node,
@@ -19,14 +18,15 @@ import {
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
+  ActivatedPath,
   corePresetPlugins,
-  LinkPath,
   Mark,
   MarksPath,
   ModePath,
   NodeId,
   State,
   StylePath,
+  TitlePath,
 } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
@@ -39,6 +39,7 @@ import {
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
 import { attrRenderers } from "@emrgen/carbon-attributes";
+import { databasePlugins } from "@emrgen/carbon-database";
 
 function is_env_development() {
   // @ts-ignore
@@ -74,6 +75,8 @@ const data = node("carbon", [
       ),
 
       section([title([text("question title")])]),
+
+      node("tableView", []),
 
       section(
         [
@@ -271,28 +274,39 @@ const data = node("carbon", [
       //   }
       // }),
       // section([title([text("section 3")])]),
-      // node("tabs", [
-      //   node("tab", [
-      //     // node("title", [text("tab 1")]),
-      //     section([title([text("tab 1 content")])]),
-      //   ], {
-      //     [ActivatedPath]: true,
-      //     [TitlePath]: "tab 11 some big title"
-      //   }),
-      //   node("tab", [
-      //     // node("title", [text("tab 2")]),
-      //     section([title([text("tab 2 content")])]),
-      //   ], {
-      //
-      //     [TitlePath]: "tab 12 medium"
-      //   }),
-      //   node("tab", [
-      //     // node("title", [text("tab 3")]),
-      //     section([title([text("tab 3 content")])]),
-      //   ], {
-      //     [TitlePath]: "tab 13"
-      //   }),
-      // ]),
+      node("tabs", [
+        node(
+          "tab",
+          [
+            // node("title", [text("tab 1")]),
+            section([title([text("tab 1 content")])]),
+          ],
+          {
+            [ActivatedPath]: true,
+            [TitlePath]: "tab 11 some big title",
+          },
+        ),
+        node(
+          "tab",
+          [
+            // node("title", [text("tab 2")]),
+            section([title([text("tab 2 content")])]),
+          ],
+          {
+            [TitlePath]: "tab 12 medium",
+          },
+        ),
+        node(
+          "tab",
+          [
+            // node("title", [text("tab 3")]),
+            section([title([text("tab 3 content")])]),
+          ],
+          {
+            [TitlePath]: "tab 13",
+          },
+        ),
+      ]),
 
       // // node("blockContent"),
       //
@@ -496,22 +510,22 @@ const data = node("carbon", [
         title([mention("subhasis"), mention("bubun"), mention("bappa")]),
       ]),
       section([title([text("section 1")])]),
-      node("pageLink", [], {
-        [LinkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdMsdf",
-      }),
-      node("bookmark", [], {
-        [BookmarkPath]: "https://blog.medium.com/bnp-editors-9c0a6f5a133a",
-      }),
-      node("bookmark", [], {
-        [BookmarkPath]:
-          "https://www.w3schools.com/cssref/css3_pr_text-overflow.php",
-      }),
-      node("bookmark", [], {
-        [BookmarkPath]: "https://www.npmjs.com/package/image-thumbnail",
-      }),
-      node("bookmark", [], {
-        [BookmarkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdM",
-      }),
+      // node("pageLink", [], {
+      //   [LinkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdMsdf",
+      // }),
+      // node("bookmark", [], {
+      //   [BookmarkPath]: "https://blog.medium.com/bnp-editors-9c0a6f5a133a",
+      // }),
+      // node("bookmark", [], {
+      //   [BookmarkPath]:
+      //     "https://www.w3schools.com/cssref/css3_pr_text-overflow.php",
+      // }),
+      // node("bookmark", [], {
+      //   [BookmarkPath]: "https://www.npmjs.com/package/image-thumbnail",
+      // }),
+      // node("bookmark", [], {
+      //   [BookmarkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdM",
+      // }),
     ],
     {
       [ModePath]: "edit",
@@ -592,6 +606,7 @@ const plugins = [
   // cellPlugin,
   // ...questionExtension.plugins!,
   new ClipboardPlugin(),
+  ...databasePlugins,
   // {
   //   plugins: [
   //     new BlockTree(),

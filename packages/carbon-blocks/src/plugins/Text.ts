@@ -32,6 +32,7 @@ export class TextPlugin extends NodePlugin {
       inline: true,
       inlineSelectable: true,
       focusable: true,
+      mergeable: true,
       tag: "span",
       attrs: {
         html: {

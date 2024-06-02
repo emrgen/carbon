@@ -12,8 +12,6 @@ import {
 
 // <EmptyInline><IsolateInlineAtom><EmptyInline>
 
-//
-
 export class EmptyInline extends InlineAtom {
   name = "empty";
 

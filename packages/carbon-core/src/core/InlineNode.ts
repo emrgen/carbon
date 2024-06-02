@@ -53,7 +53,12 @@ export class InlineNode {
     const { type, textContent } = node;
 
     // inline atoms can not be merged
-    if (node.isAtom || other.isAtom) {
+    if (
+      node.isAtom ||
+      other.isAtom ||
+      !node.type.spec.mergeable ||
+      !other.type.spec.mergeable
+    ) {
       return [node, other];
     }
 

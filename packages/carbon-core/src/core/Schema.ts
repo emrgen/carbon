@@ -1,11 +1,11 @@
-import { Optional } from "@emrgen/types";
-import { each, identity, keys } from "lodash";
-import { ContentMatch } from "./ContentMatch";
-import { Node } from "./Node";
-import { MarkType, NodeType } from "./NodeType";
-import { Maps, NodeName } from "./types";
-import { Mark, MarkProps } from "./Mark";
-import { NodeContentData, NodeFactory } from "@emrgen/carbon-core";
+import {Optional} from "@emrgen/types";
+import {each, identity, keys} from "lodash";
+import {ContentMatch} from "./ContentMatch";
+import {Node} from "./Node";
+import {MarkType, NodeType} from "./NodeType";
+import {Maps, NodeName} from "./types";
+import {Mark, MarkProps} from "./Mark";
+import {NodeContentData, NodeFactory} from "@emrgen/carbon-core";
 
 interface SchemaSpec {
   nodes: Record<NodeName, NodeSpec>;
@@ -70,11 +70,11 @@ export class Schema {
   }
 
   text(text: string, json = {}): Optional<Node> {
-    return this.node("text", { text, ...json });
+    return this.node("text", {text, ...json});
   }
 
   node(name: string, json = {}): Optional<Node> {
-    return this.nodeFromJSON({ name, ...json });
+    return this.nodeFromJSON({name, ...json});
   }
 
   mark(name: string, props?: MarkProps): Mark {
@@ -120,6 +120,7 @@ export interface NodeSpec {
   tag?: string;
   zero?: boolean;
   options?: boolean;
+  mergeable?: boolean;
   // when the node content match is not valid
   // the new node will be inserted or the current node will be unwrapped based on the consistency
   consistency?: "insert" | "remove";

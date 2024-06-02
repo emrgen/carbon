@@ -209,15 +209,12 @@ export class KeyboardPlugin extends AfterPlugin {
       up: (e) => this.up(e),
       down: (e) => this.down(e),
 
-      // 'cmd+a': (event: EditorEvent<KeyboardEvent>) => {
-      // 	event.preventDomDefault();
-      // 	const { editor } = event;
-      // 	const {content: doc, tr} = editor;
-      // 	if (!doc) return
-      // 	const after = Selection.aroundNode(doc);
-      // 	if (!after) return
-      // 	tr.select(after).Dispatch();
-      // }
+      // cmd+a
+      "ctrl+a": (ctx: EventContext<KeyboardEvent>) => {
+        preventAndStopCtx(ctx);
+        const { cmd, selection } = ctx;
+        cmd.selection.selectAll(selection).Dispatch();
+      },
     };
   }
 

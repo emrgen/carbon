@@ -14,6 +14,7 @@ declare module "@emrgen/carbon-core" {
       collapseToHead(selection: PinnedSelection): Transaction;
       collapseToStart(selection: PinnedSelection): Transaction;
       collapseAtStartOf(node: Node): Transaction;
+      selectAll(selection: PinnedSelection): Transaction;
     };
   }
 }
@@ -31,6 +32,7 @@ export class SelectionCommands extends BeforePlugin {
       collapseToHead: this.collapseToHead,
       collapseToStart: this.collapseToStart,
       collapseAtStartOf: this.collapseAtStartOf,
+      selectAll: this.selectAll,
     };
   }
 
@@ -53,5 +55,17 @@ export class SelectionCommands extends BeforePlugin {
   collapseAtStartOf(tr: Transaction, node: Node) {
     const after = PinnedSelection.fromPin(Pin.toStartOf(node)!);
     tr.Select(after, ActionOrigin.UserInput);
+  }
+
+  selectAll(tr: Transaction, selection: PinnedSelection) {
+    const { tail, head } = selection;
+    const commonNode = tail.node.commonNode(head.node);
+    const isolate = commonNode?.closest((n) => n.isIsolate);
+    if (!isolate) return;
+
+    const from = Pin.toStartOf(isolate);
+    const to = Pin.toEndOf(isolate);
+    if (!from || !to) return;
+    tr.Select(PinnedSelection.create(from, to));
   }
 }
