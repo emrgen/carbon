@@ -95,6 +95,9 @@ $selection-color = hsla(213, 82%, 82%, 0.5)
     min-width: 300px
     width 300px
 
+    &[contenteditable=false]
+        user-select none
+
     &[data-collapsed=true]
         .sq-column-content
             display none
@@ -120,6 +123,7 @@ $selection-color = hsla(213, 82%, 82%, 0.5)
         min-width calc(300px - 24px)
         width 100%
         margin 0 !important
+        box-shadow 0 0 0 1px #eee
 
     &:hover
         box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1)
@@ -136,7 +140,10 @@ $selection-color = hsla(213, 82%, 82%, 0.5)
         font-size 13px
         text-align center
 
-    .sq-column-content[data-content-empty]
+    .sq-column-content[data-content-empty=false]
+        margin-top 10px
+
+    .sq-column-content[data-content-empty=true]
         margin-top: 10px;
         height 60px
         background: #eee;

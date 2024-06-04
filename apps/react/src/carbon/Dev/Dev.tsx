@@ -109,12 +109,12 @@ const data = node("carbon", [
             "sqColumn",
             [
               node("sqTitle", [text("column 1")]),
-              // node("sqNote", [section([title([text("add a note 1")])])], {
-              //   [ContenteditablePath]: false,
-              // }),
-              // node("sqNote", [section([title([text("add a note 2")])])], {
-              //   [ContenteditablePath]: false,
-              // }),
+              node("sqNote", [section([title([text("add a note 1")])])], {
+                [ContenteditablePath]: false,
+              }),
+              node("sqNote", [section([title([text("add a note 2")])])], {
+                [ContenteditablePath]: false,
+              }),
             ],
             {
               [StylePath]: {
