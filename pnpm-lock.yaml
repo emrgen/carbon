@@ -603,6 +603,9 @@ importers:
 
   packages/carbon-board-react:
     dependencies:
+      '@emrgen/carbon-board':
+        specifier: workspace:*
+        version: link:../carbon-board
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core

@@ -74,13 +74,15 @@ const InnerElement = (
   props: RendererProps,
   forwardedRef: ForwardedRef<any>,
 ) => {
-  const { tag: Tag = "div", node, children, custom } = props;
+  const { tag: Tag = "div", node, children, custom = {} } = props;
   const { key, name, renderVersion } = node;
   const editor = useCarbon();
   const ref = useRef<HTMLElement>(null);
 
   const attributes = useMemo(() => {
-    const style = node.props.get("local/style") ?? {};
+    const { style = {}, ...rest } = custom;
+    const remoteStyle = node.props.get("remote/html/style") ?? {};
+    const localStyle = node.props.get("local/html/style") ?? {};
     const localAttrs = node.props.get(LocalHtmlAttrPath) ?? {};
     const remoteAttrs = node.props.get(RemoteHtmlAttrPath) ?? {};
     for (const [k, v] of Object.entries(localAttrs)) {
@@ -95,15 +97,15 @@ const InnerElement = (
       }
     }
 
-    const styles = merge({}, style, props.style ?? {});
+    const styles = merge({}, remoteStyle, localStyle, style ?? {});
 
     return {
       ...localAttrs,
       ...remoteAttrs,
-      ...(Object.keys(styles).length ? { styles } : {}),
-      ...custom,
+      ...(Object.keys(style).length ? { style: styles } : {}),
+      ...rest,
     };
-  }, [custom, node, props.style]);
+  }, [custom, node]);
 
   // console.log(node.key, attributes, node.props.prefix(LocalHtmlAttrPath))
 

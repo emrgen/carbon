@@ -1,11 +1,11 @@
 import {
   CarbonPlugin,
-  ClassPathLocal,
   IntoNodeId,
   NodeSpec,
   SelectedPath,
   Transaction,
 } from "@emrgen/carbon-core";
+import { TitlePlugin } from "@emrgen/carbon-blocks";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {
@@ -15,8 +15,8 @@ declare module "@emrgen/carbon-core" {
   }
 }
 
-export class Board extends CarbonPlugin {
-  name = "sqBoard";
+export class Canvas extends CarbonPlugin {
+  name = "sqCanvas";
 
   spec(): NodeSpec {
     return {
@@ -27,7 +27,7 @@ export class Board extends CarbonPlugin {
   }
 
   plugins(): CarbonPlugin[] {
-    return [new Column(), new Note()];
+    return [new Column(), new Note(), new Board(), new Title()];
   }
 
   commands(): Record<string, Function> {
@@ -68,10 +68,37 @@ export class Column extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: "sqItem",
-      content: "sqColumnItem+",
+      content: "sqTitle sqColumnItem+",
       isolate: true,
       props: {
-        [ClassPathLocal]: "sqItem",
+        local: {
+          html: {
+            suppressContentEditableWarning: true,
+            contentEditable: false,
+            className: "sqItem",
+          },
+        },
+      },
+    };
+  }
+}
+
+export class Board extends CarbonPlugin {
+  name = "sqBoard";
+
+  spec(): NodeSpec {
+    return {
+      group: "sqItem sqColumnItem",
+      content: "sqTitle",
+      isolate: true,
+      props: {
+        local: {
+          html: {
+            suppressContentEditableWarning: true,
+            contentEditable: false,
+            className: "sqItem",
+          },
+        },
       },
     };
   }
@@ -82,7 +109,7 @@ export class Note extends CarbonPlugin {
 
   spec(): NodeSpec {
     return {
-      group: "sqItem sqColumnItem",
+      group: "sqItem sqColumnItem sqCard",
       content: "(section | todo | bulletList)+",
       isolate: true,
       props: {
@@ -90,6 +117,26 @@ export class Note extends CarbonPlugin {
           html: {
             suppressContentEditableWarning: true,
             className: "sqItem",
+            contentEditable: false,
+          },
+        },
+      },
+    };
+  }
+}
+
+export class Title extends TitlePlugin {
+  name = "sqTitle";
+
+  spec(): NodeSpec {
+    return {
+      ...super.spec(),
+      group: "",
+      isolate: true,
+      props: {
+        local: {
+          html: {
+            suppressContentEditableWarning: true,
           },
         },
       },

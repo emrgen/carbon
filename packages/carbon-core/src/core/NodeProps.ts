@@ -225,6 +225,7 @@ export const ModePath = "local/state/mode";
 export const AtomSizePath = "remote/state/atom/size";
 export const AtomContentPath = "remote/state/atom/content";
 export const PropLink = "link/props";
+export const BackgroundImagePath = "remote/state/backgroundImage";
 
 export enum DocModes {
   View = "view",

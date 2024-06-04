@@ -1,4 +1,5 @@
 import {
+  ActionOrigin,
   ActivatedPath,
   Carbon,
   ContenteditablePath,
@@ -11,6 +12,7 @@ import {
   Transaction,
 } from "@emrgen/carbon-core";
 import { NodeTopicEmitter } from "@emrgen/carbon-core/src/core/NodeEmitter";
+import { KeyboardEvent } from "react";
 
 export class SquareBoardState extends NodeTopicEmitter {
   app: Carbon;
@@ -30,9 +32,24 @@ export class SquareBoardState extends NodeTopicEmitter {
 
   activateItem(cmd: Transaction, node: Node) {
     cmd.Update(node.id, { [ActivatedPath]: true, [ContenteditablePath]: true });
-    const pin = Pin.toEndOf(node)!;
-    const after = PinnedSelection.fromPin(pin);
-    cmd.Select(after);
+
+    const hasTitle = node.type.contentMatch.next.some(
+      (t) => t.type.name === "sqTitle",
+    );
+
+    if (hasTitle) {
+      const { firstChild } = node;
+      const tail = Pin.toEndOf(firstChild!)!;
+      const head = Pin.toStartOf(firstChild!)!;
+      const after = PinnedSelection.create(head, tail);
+      cmd.Select(after, ActionOrigin.UserInput);
+    } else {
+      // select the title node fully for certain types of nodes
+      const pin = Pin.toEndOf(node)!;
+      const tail = pin.moveBy(0)!;
+      const after = PinnedSelection.create(tail, pin);
+      cmd.Select(after, ActionOrigin.UserInput);
+    }
   }
 
   deactivateItem(cmd: Transaction, node: Node) {
@@ -43,7 +60,7 @@ export class SquareBoardState extends NodeTopicEmitter {
     cmd.Select(PinnedSelection.IDENTITY);
   }
 
-  onBoardClick(e, node: Node) {
+  onBoardClick(e: KeyboardEvent, node: Node) {
     const { selectedItems, app, activeItem } = this;
     const { cmd } = app;
     const events: { node: Node; event: string }[] = [];
@@ -66,7 +83,7 @@ export class SquareBoardState extends NodeTopicEmitter {
     console.log(events);
   }
 
-  onClick(e, node: Node) {
+  onClick(e: KeyboardEvent, node: Node) {
     const { selectedItems, app, activeItem } = this;
     const { cmd } = app;
     const events: { node: Node; event: string }[] = [];
@@ -75,6 +92,7 @@ export class SquareBoardState extends NodeTopicEmitter {
       if (activeItem.eq(node)) {
         return;
       }
+
       cmd.Update(activeItem.id, {
         [ActivatedPath]: false,
         [ContenteditablePath]: false,
@@ -105,15 +123,15 @@ export class SquareBoardState extends NodeTopicEmitter {
     events.forEach(({ node, event }) => this.emit(node, event));
   }
 
-  onDoubleClick(e, item: NodeId) {}
+  onDoubleClick(e: KeyboardEvent, item: NodeId) {}
 
-  onMouseDown(e, item: NodeId) {}
+  onMouseDown(e: KeyboardEvent, item: NodeId) {}
 
-  onMouseUp(e, item: NodeId) {}
+  onMouseUp(e: KeyboardEvent, item: NodeId) {}
 
-  onMouseMove(e, item: NodeId) {}
+  onMouseMove(e: KeyboardEvent, item: NodeId) {}
 
-  onMouseEnter(e, item: NodeId) {}
+  onMouseEnter(e: KeyboardEvent, item: NodeId) {}
 
-  onMouseLeave(e, item: NodeId) {}
+  onMouseLeave(e: KeyboardEvent, item: NodeId) {}
 }

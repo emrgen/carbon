@@ -19,6 +19,7 @@ import {
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
   ActivatedPath,
+  BackgroundImagePath,
   ColorPath,
   ContenteditablePath,
   corePresetPlugins,
@@ -43,7 +44,7 @@ import {
 import { attrRenderers } from "@emrgen/carbon-attributes";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
-import { boardPlugins } from "@emrgen/carbon-board";
+import { boardPlugins, CardsCountPath } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
 
 function is_env_development() {
@@ -80,13 +81,12 @@ const data = node("carbon", [
       ),
 
       node(
-        "sqBoard",
+        "sqCanvas",
         [
           node("sqNote", [section([title([text("add a note")])])], {
             [StylePath]: {
               left: 100,
               top: 100,
-              userSelect: "none",
             },
             [ContenteditablePath]: false,
           }),
@@ -94,17 +94,44 @@ const data = node("carbon", [
             [StylePath]: {
               left: 120,
               top: 200,
-              userSelect: "none",
             },
-            [ContenteditablePath]: false,
+            // [ContenteditablePath]: false,
           }),
           node("sqNote", [section([title([text("add a note")])])], {
             [StylePath]: {
               left: 460,
               top: 50,
-              userSelect: "none",
             },
-            [ContenteditablePath]: false,
+            // [ContenteditablePath]: false,
+          }),
+
+          node(
+            "sqColumn",
+            [
+              node("sqTitle", [text("column 1")]),
+              // node("sqNote", [section([title([text("add a note 1")])])], {
+              //   [ContenteditablePath]: false,
+              // }),
+              // node("sqNote", [section([title([text("add a note 2")])])], {
+              //   [ContenteditablePath]: false,
+              // }),
+            ],
+            {
+              [StylePath]: {
+                left: 50,
+                top: 300,
+              },
+              [TitlePath]: "column 1",
+              [CardsCountPath]: 3,
+            },
+          ),
+
+          node("sqBoard", [node("sqTitle", [text("board 1")])], {
+            [StylePath]: {
+              left: 50,
+              top: 20,
+            },
+            [BackgroundImagePath]: `https://png.pngtree.com/element_our/20190530/ourmid/pngtree-correct-icon-image_1267804.jpg`,
           }),
         ],
         {},

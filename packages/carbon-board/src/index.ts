@@ -1,3 +1,5 @@
-import { Board } from "./plugins/Board";
+import { Canvas } from "./plugins/Canvas";
 
-export const boardPlugins = [new Board()];
+export const boardPlugins = [new Canvas()];
+
+export * from "./constants";

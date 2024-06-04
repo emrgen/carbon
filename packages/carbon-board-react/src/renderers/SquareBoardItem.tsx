@@ -6,11 +6,11 @@ import {
   useNodeActivated,
   useNodeSelected,
 } from "@emrgen/carbon-react";
-import { stop } from "@emrgen/carbon-core";
 import { useSquareBoard } from "../context";
 import { useRef, useState } from "react";
+import { stop } from "@emrgen/carbon-core";
 
-export const Note = (props: RendererProps) => {
+export const SquareBoardItem = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
   const board = useSquareBoard();
@@ -23,32 +23,26 @@ export const Note = (props: RendererProps) => {
     node,
   });
 
-  // focus the node when editable
-  // useEffect(() => {
-  //   const editable = node.props.get(ContenteditablePath, false);
-  //   if (isEditable !== editable) {
-  //     if (editable) {
-  //       // console.log("focus", ref.current);
-  //       const pin = Pin.toEndOf(node)!;
-  //       const after = PinnedSelection.fromPin(pin);
-  //       app.cmd.Select(after).Dispatch();
-  //     }
-  //     setIsEditable(editable);
-  //   }
-  // }, [app, isEditable, node]);
+  const isCanvasChild = node.parent?.name === "sqCanvas";
 
   return (
     <CarbonBlock
       node={node}
       ref={ref}
       custom={{
-        onClick: (e) => board.onClick(e, node),
+        onClick: (e) => {
+          stop(e);
+          board.onClick(e, node);
+        },
         onMouseDown: (e) => {
           stop(e);
           board.onMouseDown(e, node.id);
         },
         ...selectedAttributes,
         ...activeAttributes,
+        style: {
+          position: isCanvasChild ? "absolute" : "relative",
+        },
       }}
     >
       <CarbonChildren node={node} />
