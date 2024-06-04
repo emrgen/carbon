@@ -23,6 +23,7 @@ import {
   ColorPath,
   ContenteditablePath,
   corePresetPlugins,
+  ImagePath,
   Mark,
   MarksPath,
   ModePath,
@@ -132,6 +133,13 @@ const data = node("carbon", [
               top: 20,
             },
             [BackgroundImagePath]: `https://png.pngtree.com/element_our/20190530/ourmid/pngtree-correct-icon-image_1267804.jpg`,
+          }),
+          node("sqImage", [node("sqTitle", [text("image 1")])], {
+            [StylePath]: {
+              left: 800,
+              top: 100,
+            },
+            [ImagePath]: `https://png.pngtree.com/element_our/20190530/ourmid/pngtree-correct-icon-image_1267804.jpg`,
           }),
         ],
         {},

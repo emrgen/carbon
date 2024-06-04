@@ -27,7 +27,7 @@ export class Canvas extends CarbonPlugin {
   }
 
   plugins(): CarbonPlugin[] {
-    return [new Column(), new Note(), new Board(), new Title()];
+    return [new Column(), new Note(), new Board(), new Title(), new Image()];
   }
 
   commands(): Record<string, Function> {
@@ -114,6 +114,31 @@ export class Note extends CarbonPlugin {
       isolate: true,
       props: {
         local: {
+          html: {
+            suppressContentEditableWarning: true,
+            className: "sqItem",
+            contentEditable: false,
+          },
+        },
+      },
+    };
+  }
+}
+
+export class Image extends CarbonPlugin {
+  name = "sqImage";
+
+  spec(): NodeSpec {
+    return {
+      group: "sqItem sqColumnItem sqCard",
+      content: "sqTitle",
+      isolate: true,
+      props: {
+        local: {
+          placeholder: {
+            empty: "Add a caption",
+            focused: "",
+          },
           html: {
             suppressContentEditableWarning: true,
             className: "sqItem",
