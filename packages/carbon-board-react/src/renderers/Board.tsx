@@ -7,7 +7,7 @@ import {
 } from "@emrgen/carbon-react";
 import { BackgroundImagePath, stop } from "@emrgen/carbon-core";
 import { useSquareBoard } from "../context";
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { CardsCountPath } from "@emrgen/carbon-board";
 
 export const Board = (props: RendererProps) => {
@@ -24,6 +24,15 @@ export const Board = (props: RendererProps) => {
   const image = node.props.get(BackgroundImagePath, "");
   // const title = node.props.get(TitlePath, "");
   const cardsCount = node.props.get(CardsCountPath, 0);
+
+  const handleIconClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (isSelected) {
+        stop(e);
+      }
+    },
+    [isSelected],
+  );
 
   return (
     <CarbonBlock
@@ -42,6 +51,7 @@ export const Board = (props: RendererProps) => {
       <div
         style={{ backgroundImage: `url(${image})` }}
         className={"sq-board-icon"}
+        onClick={handleIconClick}
       />
       <div className={"sq-board-header"}>
         <div

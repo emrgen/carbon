@@ -13,6 +13,7 @@ import {
 } from "@emrgen/carbon-core";
 import { NodeTopicEmitter } from "@emrgen/carbon-core/src/core/NodeEmitter";
 import { KeyboardEvent } from "react";
+import { Optional } from "@emrgen/types";
 
 export class SquareBoardState extends NodeTopicEmitter {
   app: Carbon;
@@ -30,25 +31,35 @@ export class SquareBoardState extends NodeTopicEmitter {
     return new SquareBoardState(app);
   }
 
-  activateItem(cmd: Transaction, node: Node) {
+  activateItem(cmd: Transaction, node: Node, currentNode: Optional<Node>) {
     cmd.Update(node.id, { [ActivatedPath]: true, [ContenteditablePath]: true });
+
+    const closestNode = currentNode?.chain.find(
+      (n) => n.type.name === "sqTitle" || n.type.name === "sqDescription",
+    );
+    console.log("currentNode", currentNode?.name);
 
     const hasTitle = node.type.contentMatch.next.some(
       (t) => t.type.name === "sqTitle",
     );
 
-    if (hasTitle) {
+    if (closestNode?.name === "sqTitle") {
       const { firstChild } = node;
       const tail = Pin.toEndOf(firstChild!)!;
       const head = Pin.toStartOf(firstChild!)!;
       const after = PinnedSelection.create(head, tail);
       cmd.Select(after, ActionOrigin.UserInput);
+    } else if (closestNode?.name === "sqDescription") {
+      const pin = Pin.toEndOf(closestNode)!;
+      const after = PinnedSelection.fromPin(pin);
+      cmd.Select(after, ActionOrigin.UserInput);
     } else {
       // select the title node fully for certain types of nodes
       const pin = Pin.toEndOf(node)!;
-      const tail = pin.moveBy(0)!;
-      const after = PinnedSelection.create(tail, pin);
-      cmd.Select(after, ActionOrigin.UserInput);
+      if (pin.node.name !== "sqTitle") {
+        const after = PinnedSelection.fromPin(pin);
+        cmd.Select(after, ActionOrigin.UserInput);
+      }
     }
   }
 
@@ -88,6 +99,17 @@ export class SquareBoardState extends NodeTopicEmitter {
     const { cmd } = app;
     const events: { node: Node; event: string }[] = [];
 
+    console.log(e.target);
+    let currentNode: Optional<Node>;
+    let el: Optional<Element> = e.target as Element;
+    while (el) {
+      currentNode = app.store.get(el);
+      if (currentNode) {
+        break;
+      }
+      el = el.parentElement;
+    }
+
     if (activeItem) {
       if (activeItem.eq(node)) {
         return;
@@ -102,7 +124,7 @@ export class SquareBoardState extends NodeTopicEmitter {
     }
 
     if (selectedItems.has(node.id) && selectedItems.size === 1) {
-      this.activateItem(cmd, node);
+      this.activateItem(cmd, node, currentNode);
       cmd.Dispatch();
 
       events.push({ node: node, event: "activate" });
