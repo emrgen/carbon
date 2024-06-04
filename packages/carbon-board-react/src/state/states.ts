@@ -5,6 +5,8 @@ import {
   Node,
   NodeBTree,
   NodeId,
+  Pin,
+  PinnedSelection,
   SelectedPath,
   Transaction,
 } from "@emrgen/carbon-core";
@@ -28,6 +30,9 @@ export class SquareBoardState extends NodeTopicEmitter {
 
   activateItem(cmd: Transaction, node: Node) {
     cmd.Update(node.id, { [ActivatedPath]: true, [ContenteditablePath]: true });
+    const pin = Pin.toEndOf(node)!;
+    const after = PinnedSelection.fromPin(pin);
+    cmd.Select(after);
   }
 
   deactivateItem(cmd: Transaction, node: Node) {
@@ -35,6 +40,7 @@ export class SquareBoardState extends NodeTopicEmitter {
       [ActivatedPath]: false,
       [ContenteditablePath]: false,
     });
+    cmd.Select(PinnedSelection.IDENTITY);
   }
 
   onBoardClick(e, node: Node) {
@@ -43,8 +49,9 @@ export class SquareBoardState extends NodeTopicEmitter {
     const events: { node: Node; event: string }[] = [];
 
     if (activeItem) {
-      this.deactivateItem(cmd, node);
+      this.deactivateItem(cmd, activeItem);
       events.push({ node: activeItem, event: "deactivate" });
+      this.activeItem = null;
     }
 
     selectedItems.forEach((n) => {
@@ -73,12 +80,13 @@ export class SquareBoardState extends NodeTopicEmitter {
         [ContenteditablePath]: false,
       });
       events.push({ node: activeItem, event: "deactivate" });
+      this.activeItem = null;
     }
 
     if (selectedItems.has(node.id) && selectedItems.size === 1) {
-      cmd
-        .Update(node.id, { [ActivatedPath]: true, [ContenteditablePath]: true })
-        .Dispatch();
+      this.activateItem(cmd, node);
+      cmd.Dispatch();
+
       events.push({ node: node, event: "activate" });
       this.activeItem = node;
       return;

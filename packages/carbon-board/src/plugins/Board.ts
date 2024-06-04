@@ -86,7 +86,12 @@ export class Note extends CarbonPlugin {
       content: "(section | todo | bulletList)+",
       isolate: true,
       props: {
-        [ClassPathLocal]: "sqItem",
+        local: {
+          html: {
+            suppressContentEditableWarning: true,
+            className: "sqItem",
+          },
+        },
       },
     };
   }

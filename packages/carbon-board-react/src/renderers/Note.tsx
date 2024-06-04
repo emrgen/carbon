@@ -6,14 +6,9 @@ import {
   useNodeActivated,
   useNodeSelected,
 } from "@emrgen/carbon-react";
-import {
-  ContenteditablePath,
-  Pin,
-  PinnedSelection,
-  stop,
-} from "@emrgen/carbon-core";
+import { stop } from "@emrgen/carbon-core";
 import { useSquareBoard } from "../context";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 export const Note = (props: RendererProps) => {
   const { node } = props;
@@ -29,18 +24,18 @@ export const Note = (props: RendererProps) => {
   });
 
   // focus the node when editable
-  useEffect(() => {
-    const editable = node.props.get(ContenteditablePath, false);
-    if (isEditable !== editable) {
-      if (editable) {
-        // console.log("focus", ref.current);
-        const pin = Pin.toEndOf(node)!;
-        const after = PinnedSelection.fromPin(pin);
-        app.cmd.Select(after).Dispatch();
-      }
-      setIsEditable(editable);
-    }
-  }, [app, isEditable, node]);
+  // useEffect(() => {
+  //   const editable = node.props.get(ContenteditablePath, false);
+  //   if (isEditable !== editable) {
+  //     if (editable) {
+  //       // console.log("focus", ref.current);
+  //       const pin = Pin.toEndOf(node)!;
+  //       const after = PinnedSelection.fromPin(pin);
+  //       app.cmd.Select(after).Dispatch();
+  //     }
+  //     setIsEditable(editable);
+  //   }
+  // }, [app, isEditable, node]);
 
   return (
     <CarbonBlock
