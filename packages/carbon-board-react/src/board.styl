@@ -1,11 +1,21 @@
 $selection-color = hsla(213, 82%, 82%, 0.5)
 
+
+$dot-size = 1px;
+$gap-size = 10px;
+$dot-color = rgba(0, 0, 0, 0.1);
+
 [data-name=sqCanvas]
     min-height 600px
     background: #f8f8f8
     position: relative;
     cursor: default;
     overflow hidden
+    // dotted gradient background
+    background-image: radial-gradient($dot-color $dot-size, transparent $dot-size),
+        radial-gradient($dot-color $dot-size, transparent $dot-size)
+    background-position: 0 0, $gap-size $gap-size
+    background-size: $gap-size $gap-size
 
     [data-selected=true]
         ::selection

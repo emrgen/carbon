@@ -35,6 +35,15 @@ export const Column = (props: RendererProps) => {
     [app, node],
   );
 
+  const handleSelect = useCallback(
+    (e: React.MouseEvent) => {
+      if (isSelected) {
+        stop(e);
+      }
+    },
+    [isSelected],
+  );
+
   return (
     <CarbonBlock
       node={node}
@@ -68,8 +77,12 @@ export const Column = (props: RendererProps) => {
             -
           </div>
         </div>
-        <div className={"sq-column-info"}>
-          {cardsCount} Card {cardsCount > 1 ? "s" : ""}
+        <div
+          className={"sq-column-info"}
+          contentEditable={false}
+          onClick={handleSelect}
+        >
+          {cardsCount} Card{cardsCount > 1 ? "s" : ""}
         </div>
       </div>
       <div className={"sq-column-content"} data-content-empty={node.size <= 1}>
