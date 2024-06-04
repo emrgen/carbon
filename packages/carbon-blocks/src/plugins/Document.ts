@@ -49,6 +49,21 @@ export class PagePlugin extends CarbonPlugin {
     ];
   }
 
+  handlers(): EventHandlerMap {
+    return {
+      // mouseMove: throttle((ctx) => {
+      //   const { event, app } = ctx;
+      //   const el = document.elementFromPoint(event.clientX, event.clientY);
+      //   if (el) {
+      //     const node = app.store.get(el);
+      //     if (node) {
+      //       console.log(node.name, node.id.toString());
+      //     }
+      //   }
+      // }, 10000),
+    };
+  }
+
   keydown(): EventHandlerMap {
     return {
       // on enter split without merge

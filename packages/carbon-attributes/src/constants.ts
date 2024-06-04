@@ -10,6 +10,7 @@ export const AttrTimeFormatPath = "remote/state/attr/timeFormat";
 // data
 export const AttrDataPath = "remote/state/attr/tags";
 export const AttrDatePath = "remote/state/attr/date";
+
 export const AttrNumberPath = "remote/state/attr/number";
 export const AttrTextPath = "remote/state/attr/text";
 export const AttrTimePath = "remote/state/attr/time";
@@ -35,3 +36,6 @@ export const AttrMultiSelectedPath =
 // status is a single select
 export const AttrStatusOptionsPath = "remote/state/attr/status/options";
 export const AttrStatusPath = "remote/state/attr/status/selected";
+
+// this id is used to link the attribute to the column of a table
+export const AttrsIDPath = "remote/state/attrs/id";

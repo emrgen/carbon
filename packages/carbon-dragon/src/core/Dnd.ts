@@ -93,13 +93,11 @@ export class Dnd extends EventEmitter {
   }
 
   onMouseOver(node: Node, e: MouseEvent) {
-    // console.log('XXX');
     this.showDragHandle(node, e);
   }
 
   // start showing drag handles on hover on draggable
   onMouseMove(node: Node, e: MouseEvent) {
-    // console.log('XXX');
     this.showDragHandle(node, e);
   }
 

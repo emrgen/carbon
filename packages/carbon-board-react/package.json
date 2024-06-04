@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-flash",
+  "name": "@emrgen/carbon-board-react",
   "version": "0.0.5",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -9,15 +9,21 @@
   },
   "dependencies": {
     "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-react": "workspace:*",
+    "@emrgen/types": "workspace:*",
+    "@react-icons/all-files": "^4.1.0",
     "@types/lodash": "^4.14.191",
+    "emoji-regex": "^10.2.1",
     "lodash": "^4.17.21",
-    "@emrgen/types": "workspace:*"
+    "react-icons": "^4.10.1",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@emrgen/eslint-config-custom": "workspace:*",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",
-    "@emrgen/eslint-config-custom": "workspace:*",
+    "react": "^18.3.1",
     "tsconfig": "workspace:*",
     "typescript": "^5.4.5"
   }

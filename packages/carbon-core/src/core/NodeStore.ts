@@ -19,7 +19,7 @@ export class NodeStore {
     return Array.from(this.elementMap.values());
   }
 
-  get(entry: NodeId | HTMLElement): Optional<Node> {
+  get(entry: NodeId | HTMLElement | Element): Optional<Node> {
     const nodeId = entry;
     if (nodeId instanceof NodeId) {
       return this.nodeMap.get(nodeId);

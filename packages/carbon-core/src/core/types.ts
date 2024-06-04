@@ -42,6 +42,7 @@ export interface EventHandler {
   keyDown: EventHandlerFn;
   keyUp: EventHandlerFn;
   paste: EventHandlerFn;
+  mouseMove: EventHandlerFn;
 
   [key: string]: EventHandlerFn;
 }

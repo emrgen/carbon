@@ -19,6 +19,8 @@ import {
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
   ActivatedPath,
+  ColorPath,
+  ContenteditablePath,
   corePresetPlugins,
   Mark,
   MarksPath,
@@ -40,6 +42,9 @@ import {
 } from "@emrgen/carbon-comment-editor";
 import { attrRenderers } from "@emrgen/carbon-attributes";
 import { databasePlugins } from "@emrgen/carbon-database";
+import { databaseRenderers } from "@emrgen/carbon-database-react";
+import { boardPlugins } from "@emrgen/carbon-board";
+import { boardRenderers } from "@emrgen/carbon-board-react";
 
 function is_env_development() {
   // @ts-ignore
@@ -74,9 +79,68 @@ const data = node("carbon", [
         },
       ),
 
+      node(
+        "sqBoard",
+        [
+          node("sqNote", [section([title([text("add a note")])])], {
+            [StylePath]: {
+              left: 100,
+              top: 100,
+              userSelect: "none",
+            },
+            [ContenteditablePath]: false,
+          }),
+          node("sqNote", [section([title([text("add a note")])])], {
+            [StylePath]: {
+              left: 120,
+              top: 200,
+              userSelect: "none",
+            },
+            [ContenteditablePath]: false,
+          }),
+          node("sqNote", [section([title([text("add a note")])])], {
+            [StylePath]: {
+              left: 460,
+              top: 50,
+              userSelect: "none",
+            },
+            [ContenteditablePath]: false,
+          }),
+        ],
+        {},
+      ),
+
       section([title([text("question title")])]),
 
-      node("tableView", []),
+      // node(
+      //   "table",
+      //   [],
+      //   {},
+      //   {
+      //     columns: node(
+      //       "tableHeader",
+      //       [
+      //         node("tableColumn", [], {
+      //           [TableColumnNamePath]: "Name",
+      //           [TableColumnTypePath]: "text",
+      //         }),
+      //         node("tableColumn", [], {
+      //           [TableColumnNamePath]: "Age",
+      //           [TableColumnTypePath]: "number",
+      //         }),
+      //         node("tableColumn", [], {
+      //           [TableColumnNamePath]: "Email",
+      //           [TableColumnTypePath]: "email",
+      //         }),
+      //         node("tableColumn", [], {
+      //           [TableColumnNamePath]: "Status",
+      //           [TableColumnTypePath]: "status",
+      //         }),
+      //       ],
+      //       {},
+      //     ),
+      //   },
+      // ),
 
       section(
         [
@@ -92,6 +156,7 @@ const data = node("carbon", [
         ],
         {
           // [BackgroundPath]: "#fb8500",
+          [ColorPath]: "red",
         },
       ),
       section([
@@ -607,6 +672,7 @@ const plugins = [
   // ...questionExtension.plugins!,
   new ClipboardPlugin(),
   ...databasePlugins,
+  ...boardPlugins,
   // {
   //   plugins: [
   //     new BlockTree(),
@@ -621,6 +687,8 @@ const renderers = [
   // flashComp,
   ...codeExtension.renderers!,
   ...attrRenderers,
+  ...databaseRenderers,
+  ...boardRenderers,
   // ...cellRenderer,
   // ...questionExtension.renderers!,
 ];
