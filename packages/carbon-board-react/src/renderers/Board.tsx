@@ -60,7 +60,13 @@ export const Board = (props: RendererProps) => {
         >
           <CarbonNodeContent node={node} />
         </div>
-        <div className={"sq-board-info"}>
+        <div
+          className={"sq-board-info"}
+          contentEditable={false}
+          onClick={(e) => {
+            if (isSelected) stop(e);
+          }}
+        >
           {cardsCount} Card {cardsCount > 1 ? "s" : ""}
         </div>
       </div>
