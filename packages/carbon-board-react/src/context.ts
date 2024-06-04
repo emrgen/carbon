@@ -1,27 +1,10 @@
 import { createContext, useContext } from "react";
-import { NodeId } from "@emrgen/carbon-core";
+import { SquareBoardState } from "./state/states";
 
-export interface SquareBoardState {
-  activeItem: NodeId | null;
-  selectedItems: NodeId[];
-}
+export interface SquareBoardActions {}
 
-export interface SquareBoardActions {
-  selectItems: (items: NodeId[]) => void;
-  deSelectItems: (items: NodeId[]) => void;
-  activateItem: (item: NodeId) => void;
-}
-
-export interface SquareBoardContextValue
-  extends SquareBoardState,
-    SquareBoardActions {}
-
-export const SquareBoardContext = createContext<SquareBoardContextValue>({
-  activeItem: null,
-  selectedItems: [],
-  selectItems: () => {},
-  deSelectItems: () => {},
-  activateItem: () => {},
-});
+export const SquareBoardContext = createContext<SquareBoardState>(
+  SquareBoardState.default(null as any),
+);
 
 export const useSquareBoard = () => useContext(SquareBoardContext);

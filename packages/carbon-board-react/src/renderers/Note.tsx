@@ -7,18 +7,20 @@ import {
   useNodeSelected,
 } from "@emrgen/carbon-react";
 import {
-  ActivatedPath,
-  NodeIdSet,
-  SelectedPath,
+  ContenteditablePath,
+  Pin,
+  PinnedSelection,
   stop,
 } from "@emrgen/carbon-core";
-import { useCallback, useEffect } from "react";
 import { useSquareBoard } from "../context";
+import { useEffect, useRef, useState } from "react";
 
 export const Note = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
-  const { selectedItems, activateItem, selectItems } = useSquareBoard();
+  const board = useSquareBoard();
+  const ref = useRef<any>();
+  const [isEditable, setIsEditable] = useState(false);
   const { attributes: selectedAttributes, yes: isSelected } = useNodeSelected({
     node,
   });
@@ -26,55 +28,30 @@ export const Note = (props: RendererProps) => {
     node,
   });
 
+  // focus the node when editable
   useEffect(() => {
-    const set = NodeIdSet.fromIds(selectedItems);
-    const inStore = set.has(node.id);
-
-    if (isSelected && !inStore) {
-      console.log("select", node.id);
-      set.add(node.id);
-      selectItems(set.toArray());
-    } else if (!isSelected && inStore) {
-      set.remove(node.id);
-      selectItems(set.toArray());
-    }
-  }, [selectItems, node, selectedItems, isSelected]);
-
-  useEffect(() => {
-    if (isActive) {
-      activateItem(node.id);
-    }
-  }, [activateItem, node.id, isActive]);
-
-  const handleClick = useCallback(() => {
-    const selected = NodeIdSet.fromIds(selectedItems);
-    console.log("selected", selected.toArray());
-    if (selected.has(node.id)) {
-      if (selected.size === 1) {
-        app.cmd.Update(node.id, { [ActivatedPath]: true }).Dispatch();
-      } else {
-        const { cmd } = app;
-        selected.forEach((id) => {
-          cmd.Update(id, { [SelectedPath]: false });
-        });
-        app.cmd.Update(node.id, { [SelectedPath]: false }).Dispatch();
+    const editable = node.props.get(ContenteditablePath, false);
+    if (isEditable !== editable) {
+      if (editable) {
+        // console.log("focus", ref.current);
+        const pin = Pin.toEndOf(node)!;
+        const after = PinnedSelection.fromPin(pin);
+        app.cmd.Select(after).Dispatch();
       }
-    } else {
-      const { cmd } = app;
-      selected.forEach((id) => {
-        cmd.Update(id, { [SelectedPath]: false });
-      });
-      cmd.Update(node.id, { [SelectedPath]: true }).Dispatch();
+      setIsEditable(editable);
     }
-    selectItems([node.id]);
-  }, [selectedItems, node.id, selectItems, app]);
+  }, [app, isEditable, node]);
 
   return (
     <CarbonBlock
       node={node}
+      ref={ref}
       custom={{
-        onClick: handleClick,
-        onMouseDown: stop,
+        onClick: (e) => board.onClick(e, node),
+        onMouseDown: (e) => {
+          stop(e);
+          board.onMouseDown(e, node.id);
+        },
         ...selectedAttributes,
         ...activeAttributes,
       }}

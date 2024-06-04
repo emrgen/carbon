@@ -4,33 +4,26 @@ import {
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
+import { preventAndStop } from "@emrgen/carbon-core";
+import { useCallback, useState } from "react";
+import { SquareBoardState } from "../state/states";
 import { SquareBoardContext } from "../context";
-import { useSquareBoardStore } from "../state/states";
-import { preventAndStop, SelectedPath } from "@emrgen/carbon-core";
-import { useCallback } from "react";
 
 export const Board = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
-
-  const store = useSquareBoardStore();
+  const [board] = useState(() => SquareBoardState.default(app));
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       preventAndStop(e);
-      console.log("handleMouseDown", store.selectedItems);
-
-      const { cmd } = app;
-      store.selectedItems.forEach((id) => {
-        cmd.Update(id, { [SelectedPath]: false });
-      });
-      cmd.Dispatch();
+      board.onBoardClick(e, node);
     },
-    [app, store.selectedItems],
+    [board, node],
   );
 
   return (
-    <SquareBoardContext.Provider value={store}>
+    <SquareBoardContext.Provider value={board}>
       <CarbonBlock node={node} custom={{ onMouseDown: handleMouseDown }}>
         <CarbonChildren node={node} />
       </CarbonBlock>

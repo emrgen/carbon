@@ -1,5 +1,6 @@
 import {
   CarbonPlugin,
+  ClassPathLocal,
   IntoNodeId,
   NodeSpec,
   SelectedPath,
@@ -69,6 +70,9 @@ export class Column extends CarbonPlugin {
       group: "sqItem",
       content: "sqColumnItem+",
       isolate: true,
+      props: {
+        [ClassPathLocal]: "sqItem",
+      },
     };
   }
 }
@@ -81,6 +85,9 @@ export class Note extends CarbonPlugin {
       group: "sqItem sqColumnItem",
       content: "(section | todo | bulletList)+",
       isolate: true,
+      props: {
+        [ClassPathLocal]: "sqItem",
+      },
     };
   }
 }

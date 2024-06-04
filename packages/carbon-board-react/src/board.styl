@@ -4,11 +4,15 @@
     position: relative;
     cursor: default;
 
+.sqItem
+    border 2px solid transparent
+
+.sqItem[data-selected=true]
+    border 2px solid #555
+
 [data-name=sqNote]
     position: absolute;
     background: #fff
-    border: 1px solid #ddd
-    border-radius: 3px
     padding: 10px
     margin: 10px
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1)
