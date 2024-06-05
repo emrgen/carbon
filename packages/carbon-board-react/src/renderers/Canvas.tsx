@@ -4,12 +4,12 @@ import {
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
-import { preventAndStop } from "@emrgen/carbon-core";
+import { preventAndStop, stop } from "@emrgen/carbon-core";
 import { useCallback, useState } from "react";
-import { SquareBoardState } from "../state/states";
+import { SquareBoardState } from "../state/BoardState";
 import { SquareBoardContext } from "../context";
 
-export const SquareCanvas = (props: RendererProps) => {
+export const Canvas = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
   const [board] = useState(() => SquareBoardState.default(app));
@@ -24,7 +24,17 @@ export const SquareCanvas = (props: RendererProps) => {
 
   return (
     <SquareBoardContext.Provider value={board}>
-      <CarbonBlock node={node} custom={{ onMouseDown: handleMouseDown }}>
+      <CarbonBlock
+        node={node}
+        custom={{
+          onMouseDown: handleMouseDown,
+          onMouseMove: stop,
+          onMouseOver: stop,
+          onMouseOut: stop,
+          onMouseUp: stop,
+          onClick: stop,
+        }}
+      >
         <CarbonChildren node={node} />
       </CarbonBlock>
     </SquareBoardContext.Provider>

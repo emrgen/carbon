@@ -46,7 +46,11 @@ import {
 import { attrRenderers } from "@emrgen/carbon-attributes";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
-import { boardPlugins, CardsCountPath } from "@emrgen/carbon-board";
+import {
+  boardPlugins,
+  CardsCountPath,
+  CommentedByPath,
+} from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
 
 function is_env_development() {
@@ -162,6 +166,26 @@ const data = node("carbon", [
             },
             [VideoPath]: `https://youtu.be/srNoYnGhXAg`,
           }),
+          node(
+            "sqComment",
+            [
+              node("sqCommentLine", [node("sqTitle", [text("comment 1")])], {
+                [CommentedByPath]: "subhasis",
+              }),
+              node("sqCommentLine", [node("sqTitle", [text("comment 2")])], {
+                [CommentedByPath]: "subhasis",
+              }),
+              node("sqCommentLine", [node("sqTitle", [text("comment 3")])], {
+                [CommentedByPath]: "subhasis",
+              }),
+            ],
+            {
+              [StylePath]: {
+                left: 1400,
+                top: 250,
+              },
+            },
+          ),
         ],
         {},
       ),

@@ -9,6 +9,7 @@ import {
   Pin,
   PinnedSelection,
   SelectedPath,
+  stop,
   Transaction,
 } from "@emrgen/carbon-core";
 import { NodeTopicEmitter } from "@emrgen/carbon-core/src/core/NodeEmitter";
@@ -18,12 +19,14 @@ import { Optional } from "@emrgen/types";
 export class SquareBoardState extends NodeTopicEmitter {
   app: Carbon;
   activeItem: Node | null;
+  activeComment: Node | null;
   selectedItems: NodeBTree;
 
   constructor(app: Carbon) {
     super();
     this.app = app;
     this.activeItem = null;
+    this.activeComment = null;
     this.selectedItems = new NodeBTree();
   }
 
@@ -31,13 +34,20 @@ export class SquareBoardState extends NodeTopicEmitter {
     return new SquareBoardState(app);
   }
 
-  activateItem(cmd: Transaction, node: Node, currentNode: Optional<Node>) {
-    cmd.Update(node.id, { [ActivatedPath]: true, [ContenteditablePath]: true });
+  activateItem(
+    cmd: Transaction,
+    node: Node,
+    currentNode: Optional<Node>,
+    editable = true,
+  ) {
+    cmd.Update(node.id, {
+      [ActivatedPath]: true,
+      [ContenteditablePath]: editable,
+    });
 
     const closestNode = currentNode?.chain.find(
       (n) => n.type.name === "sqTitle" || n.type.name === "sqDescription",
     );
-    console.log("currentNode", currentNode?.name);
 
     const hasTitle = node.type.contentMatch.next.some(
       (t) => t.type.name === "sqTitle",
@@ -63,7 +73,10 @@ export class SquareBoardState extends NodeTopicEmitter {
     }
   }
 
-  deactivateItem(cmd: Transaction, node: Node) {
+  deactivateItem(cmd: Transaction, node: Optional<Node>) {
+    if (!node) {
+      return;
+    }
     cmd.Update(node.id, {
       [ActivatedPath]: false,
       [ContenteditablePath]: false,
@@ -76,17 +89,24 @@ export class SquareBoardState extends NodeTopicEmitter {
     const { cmd } = app;
     const events: { node: Node; event: string }[] = [];
 
+    selectedItems.forEach((n) => {
+      cmd.Update(n, { [SelectedPath]: false });
+      events.push({ node: n, event: "deselect" });
+    });
+    selectedItems.clear();
+
     if (activeItem) {
       this.deactivateItem(cmd, activeItem);
       events.push({ node: activeItem, event: "deactivate" });
       this.activeItem = null;
     }
 
-    selectedItems.forEach((n) => {
-      cmd.Update(n, { [SelectedPath]: false });
-      events.push({ node: n, event: "deselect" });
-    });
-    selectedItems.clear();
+    if (this.activeComment) {
+      cmd.Update(this.activeComment.firstChild!, {
+        [ContenteditablePath]: false,
+      });
+      this.activeComment = null;
+    }
 
     cmd.Dispatch();
     events.forEach(({ node, event }) => this.emit(node, event));
@@ -99,7 +119,6 @@ export class SquareBoardState extends NodeTopicEmitter {
     const { cmd } = app;
     const events: { node: Node; event: string }[] = [];
 
-    console.log(e.target);
     let currentNode: Optional<Node>;
     let el: Optional<Element> = e.target as Element;
     while (el) {
@@ -113,6 +132,13 @@ export class SquareBoardState extends NodeTopicEmitter {
     if (activeItem) {
       if (activeItem.eq(node)) {
         return;
+      }
+
+      if (this.activeComment) {
+        cmd.Update(this.activeComment.firstChild!, {
+          [ContenteditablePath]: false,
+        });
+        this.activeComment = null;
       }
 
       cmd.Update(activeItem.id, {
@@ -132,6 +158,13 @@ export class SquareBoardState extends NodeTopicEmitter {
       return;
     }
 
+    if (this.activeComment) {
+      cmd.Update(this.activeComment.firstChild!, {
+        [ContenteditablePath]: false,
+      });
+      this.activeComment = null;
+    }
+
     // mark the clicked node as selected
     selectedItems.forEach((n) => {
       cmd.Update(n, { [SelectedPath]: false });
@@ -143,6 +176,73 @@ export class SquareBoardState extends NodeTopicEmitter {
     this.selectedItems.clear();
     this.selectedItems.set(node.id, node);
     events.forEach(({ node, event }) => this.emit(node, event));
+  }
+
+  onEditComment(e, commentLine: Node) {
+    const { selectedItems, app, activeItem } = this;
+    const { parent } = commentLine;
+    if (!parent) {
+      throw new Error("Comment line must have a parent");
+    }
+
+    // let the event pass to parent event handlers
+    if (
+      selectedItems.length > 1 ||
+      selectedItems.length === 0 ||
+      !selectedItems.has(parent.id)
+    ) {
+      return;
+    }
+
+    stop(e);
+    const { cmd } = app;
+    if (!this.activeItem?.eq(parent)) {
+      if (this.activeItem) {
+        this.deactivateItem(cmd, this.activeItem);
+      }
+      this.activateItem(cmd, parent, null, false);
+
+      if (this.activeComment) {
+        cmd.Update(this.activeComment.firstChild!, {
+          [ContenteditablePath]: false,
+        });
+        this.activeComment = null;
+      }
+
+      cmd.Update(commentLine.firstChild!, {
+        [ContenteditablePath]: true,
+      });
+      this.activeComment = commentLine;
+      const pin = Pin.toEndOf(commentLine)!;
+      const after = PinnedSelection.fromPin(pin);
+      cmd.Select(after, ActionOrigin.UserInput);
+      cmd.Dispatch();
+    } else {
+      if (this.activeComment) {
+        cmd.Update(this.activeComment.firstChild!, {
+          [ContenteditablePath]: false,
+        });
+      }
+      cmd.Update(commentLine.firstChild!, {
+        [ContenteditablePath]: true,
+      });
+      this.activeComment = commentLine;
+      const pin = Pin.toEndOf(commentLine)!;
+      const after = PinnedSelection.fromPin(pin);
+      cmd.Select(after, ActionOrigin.UserInput);
+      cmd.Dispatch();
+    }
+  }
+
+  onSendComment(e, commentLine: Node) {
+    const { selectedItems, app, activeItem } = this;
+    const { parent } = commentLine;
+    app.cmd
+      .Update(commentLine.firstChild!, {
+        [ContenteditablePath]: false,
+      })
+      .Select(PinnedSelection.IDENTITY)
+      .Dispatch();
   }
 
   onDoubleClick(e: KeyboardEvent, item: NodeId) {}

@@ -79,6 +79,7 @@ $dot-color = rgba(100, 100, 100, 0.05);
 
 .sqItem[data-active=true]
     border -2px solid #555
+    z-index 1000
 
 [data-name=sqNote]
     @extend .sq-card
@@ -280,3 +281,59 @@ $dot-color = rgba(100, 100, 100, 0.05);
         align-items center
         cursor pointer
         transition all 0.3s ease
+
+[data-name=sqComment]
+    @extend .sq-card
+    background #f2f5fa
+    padding 10px 0
+
+    .sq-comment-reply
+        margin-top 10px
+        padding-left 50px
+        font-size 12px
+        color teal
+        cursor pointer
+
+[data-name=sqCommentLine]
+    padding 4px 10px
+    display flex
+
+    .sq-comment-author-logo
+        width 30px
+        height 30px
+        border-radius 50%
+        background-size 100% 100% !important
+        background #bbb
+
+    .sq-comment-content
+        flex 1
+        border-radius 10px
+
+    .sq-comment-author
+        display flex
+        justify-content space-between
+        width 100%
+        padding 0 10px
+
+    .sq-comment-edit
+        font-size 12px
+        line-height 30px
+        color teal
+        cursor: pointer;
+
+    .sq-comment-author-name
+        font-weight bold
+        margin-right 10px
+        font-size 12px
+        line-height 30px
+
+    [data-name=sqTitle]
+        font-size 12px
+        margin 0 2px
+        padding: 2px 8px;
+        border-radius: 4px;
+
+        &[contenteditable=true][data-focused=true]
+            background: #fff
+
+

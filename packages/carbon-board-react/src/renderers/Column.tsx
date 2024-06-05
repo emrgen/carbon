@@ -4,61 +4,28 @@ import {
   CarbonNodeContent,
   RendererProps,
   useCarbon,
-  useNodeActivated,
-  useNodeSelected,
 } from "@emrgen/carbon-react";
 import { useSquareBoard } from "../context";
-import { useCallback, useRef } from "react";
-import { stop } from "@emrgen/carbon-core";
+import { useRef } from "react";
 import { CardsCountPath } from "@emrgen/carbon-board";
+import { useBoardElement } from "../hooks/useBoardElement";
 
 export const Column = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
   const board = useSquareBoard();
   const ref = useRef<any>();
-  const { attributes: selectedAttributes, yes: isSelected } = useNodeSelected({
-    node,
-  });
-  const { attributes: activeAttributes, yes: isActive } = useNodeActivated({
-    node,
-  });
-
-  const isCanvasChild = node.parent?.name === "sqCanvas";
+  const { attributes, listeners, skipSecondClick, toggleCollapse, isSelected } =
+    useBoardElement({ node });
   const cardsCount = node.props.get(CardsCountPath, 0);
-
-  const handleToggleCollapse = useCallback(
-    (e: React.MouseEvent) => {
-      stop(e);
-      app.cmd.collapsible.toggle(node).Dispatch();
-    },
-    [app, node],
-  );
-
-  const handleSelect = useCallback(
-    (e: React.MouseEvent) => {
-      if (isSelected) {
-        stop(e);
-      }
-    },
-    [isSelected],
-  );
 
   return (
     <CarbonBlock
       node={node}
       ref={ref}
       custom={{
-        onClick: (e) => {
-          stop(e);
-          board.onClick(e, node);
-        },
-        onMouseDown: (e) => {
-          stop(e);
-          board.onMouseDown(e, node.id);
-        },
-        ...selectedAttributes,
-        ...activeAttributes,
+        ...attributes,
+        ...listeners,
         "data-collapsed": node.isCollapsed,
       }}
     >
@@ -72,7 +39,7 @@ export const Column = (props: RendererProps) => {
             className={"sq-column-collapse-button"}
             contentEditable={false}
             suppressContentEditableWarning={true}
-            onClick={handleToggleCollapse}
+            onClick={toggleCollapse}
           >
             -
           </div>
@@ -80,7 +47,7 @@ export const Column = (props: RendererProps) => {
         <div
           className={"sq-column-info"}
           contentEditable={false}
-          onClick={handleSelect}
+          onClick={skipSecondClick}
         >
           {cardsCount} Card{cardsCount > 1 ? "s" : ""}
         </div>

@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { SquareBoardState } from "./state/states";
+import { SquareBoardState } from "./state/BoardState";
 
 export interface SquareBoardActions {}
 
