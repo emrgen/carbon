@@ -1,60 +1,15 @@
 import { CarbonBlock, RendererProps, useCarbon } from "@emrgen/carbon-react";
-import {
-  BookmarkInfo,
-  BookmarkInfoPath,
-  BookmarkPath,
-} from "@emrgen/carbon-blocks";
-import { useEffect, useState } from "react";
+import { useLinkInfo } from "../hooks/useLinkInfo";
+import { BookmarkInfoPath, BookmarkPath } from "@emrgen/carbon-blocks";
 
 export const BookmarkComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
-  const bookmark = node.props.get(BookmarkInfoPath, {} as BookmarkInfo);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    const src = node.props.get(BookmarkPath, "");
-    const info = node.props.get(BookmarkInfoPath, {} as BookmarkInfo);
-
-    if (info.link === src) {
-      setLoading(false);
-      return;
-    }
-
-    if (src === "") {
-      console.error("No src", node.id.toString());
-      app.cmd.Update(node, {
-        [BookmarkInfoPath]: {},
-      });
-      setLoading(false);
-      return;
-    }
-
-    fetch(`https://api.microlink.io?url=${src}`)
-      .then((res) => {
-        res.json().then((r) => {
-          const { data } = r;
-          const { title, description, url, image, logo } = data;
-          app.cmd
-            .Update(node, {
-              [BookmarkInfoPath]: {
-                title,
-                description,
-                link: url,
-                image,
-                logo,
-              },
-            })
-            .Dispatch();
-          setLoading(false);
-        });
-      })
-      .catch((e) => {
-        console.error(e);
-        setLoading(false);
-      });
-  }, [app, node]);
+  const { loading, bookmark } = useLinkInfo(
+    node,
+    BookmarkPath,
+    BookmarkInfoPath,
+  );
 
   return (
     <CarbonBlock node={node}>

@@ -157,8 +157,8 @@ const data = node("carbon", [
           ),
           node("sqVideo", [node("sqTitle", [text("video title")])], {
             [StylePath]: {
-              left: 200,
-              top: 200,
+              left: 2000,
+              top: 20,
             },
             [VideoPath]: `https://youtu.be/srNoYnGhXAg`,
           }),

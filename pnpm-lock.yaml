@@ -612,6 +612,9 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../carbon-react
+      '@emrgen/carbon-react-blocks':
+        specifier: workspace:*
+        version: link:../carbon-react-blocks
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types

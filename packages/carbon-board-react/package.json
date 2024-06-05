@@ -11,6 +11,7 @@
     "@emrgen/carbon-board": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
+    "@emrgen/carbon-react-blocks": "workspace:*",
     "@emrgen/types": "workspace:*",
     "@react-icons/all-files": "^4.1.0",
     "@types/lodash": "^4.14.191",

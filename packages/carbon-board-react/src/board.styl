@@ -243,6 +243,15 @@ $dot-color = rgba(100, 100, 100, 0.05);
 
 [data-name=sqVideo]
     @extend .sq-card
+    .sq-video-media-container
+        min-height 150px
+        position: relative;
+
+        &[data-loading=true]
+            background red
+            display flex
+            justify-content center
+            align-items center
 
     &:hover
         box-shadow 0 2px 2px rgba(0, 0, 0, 0.1)
@@ -255,3 +264,19 @@ $dot-color = rgba(100, 100, 100, 0.05);
     .sq-video-caption
         padding 10px
         font-size 15px
+
+    .sq-video-overlay-icon
+        position absolute
+        top 50%
+        left 50%
+        transform translate(-50%, -50%)
+        width 50px
+        height 50px
+        background-size 100% 100% !important
+        background-color rgba(200, 200, 200, 0.5)
+        border-radius 50%
+        display flex
+        justify-content center
+        align-items center
+        cursor pointer
+        transition all 0.3s ease
