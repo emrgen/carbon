@@ -141,6 +141,19 @@ const data = node("carbon", [
             },
             [ImagePath]: `https://png.pngtree.com/element_our/20190530/ourmid/pngtree-correct-icon-image_1267804.jpg`,
           }),
+          node(
+            "sqHeading",
+            [
+              node("h3", [title([text("heading 1")])]),
+              section([title([text("section 1")])]),
+            ],
+            {
+              [StylePath]: {
+                left: 1200,
+                top: 100,
+              },
+            },
+          ),
         ],
         {},
       ),

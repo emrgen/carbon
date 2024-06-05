@@ -3,7 +3,14 @@ $selection-color = hsla(213, 82%, 82%, 0.5)
 
 $dot-size = 1px;
 $gap-size = 10px;
-$dot-color = rgba(0, 0, 0, 0.1);
+$dot-color = rgba(100, 100, 100, 0.05);
+
+.sqItem
+    border 2px solid transparent
+    transition: all 0.3s ease
+
+    &[data-selected=true]
+        border 2px solid #555
 
 [data-name=sqCanvas]
     min-height 600px
@@ -21,22 +28,8 @@ $dot-color = rgba(0, 0, 0, 0.1);
         ::selection
             background: $selection-color
 
-[data-name=sqNote]
-    &[contentEditable=false]
-        user-select none
 
-.sqItem
-    border 2px solid transparent
-
-
-.sqItem[data-selected=true]
-    border 2px solid #555
-
-
-.sqItem[data-active=true]
-    border -2px solid #555
-
-[data-name=sqNote]
+.sq-card
     background: #fff
     padding: 10px
     margin: 10px
@@ -48,6 +41,47 @@ $dot-color = rgba(0, 0, 0, 0.1);
 
     &:hover
         box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1)
+
+    &[contentEditable=false]
+        user-select none
+
+//.sq-card-header
+//    position: absolute;
+//    min-width: 150px;
+//    //max-width 200px
+//    transform: translateX(-50%);
+//    left: 50%;
+//
+//.sq-card-title
+//    margin-top: 10px;
+//    font-weight: bold;
+//    font-size: 16px;
+//
+//.sq-card-title,
+//.sq-card-info
+//    text-align: center;
+//
+//.sq-card-info
+//    color: #999;
+//    font-size: 13px;
+//
+//.sq-card-content[data-content-empty=true]
+//    margin-top: 10px;
+//    height: 60px;
+//    background: #eee;
+//
+//.sq-card-content
+//    [data-type=children]
+//        display: flex;
+//        flex-direction: column;
+//        gap: 10px;
+
+
+.sqItem[data-active=true]
+    border -2px solid #555
+
+[data-name=sqNote]
+    @extend .sq-card
 
 
 [data-name=sqBoard]
@@ -96,14 +130,7 @@ $dot-color = rgba(0, 0, 0, 0.1);
 
 [data-name=sqColumn]
     position: absolute;
-    background: #fff
-    padding: 10px
-    margin: 10px
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1)
-    cursor: default
-    transition: all 0.3s ease
-    min-width: 300px
-    width 300px
+    @extend .sq-card
 
     &[contenteditable=false]
         user-select none
@@ -165,14 +192,7 @@ $dot-color = rgba(0, 0, 0, 0.1);
             gap 10px
 
 [data-name=sqImage]
-    background: #fff
-    padding: 10px
-    margin: 10px
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1)
-    cursor: default
-    transition: all 0.3s ease
-    min-width: 300px
-    width 300px
+    @extend .sq-card
 
     &:hover
         box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1)
@@ -195,3 +215,25 @@ $dot-color = rgba(0, 0, 0, 0.1);
         user-select none
         opacity: 0.4
         padding-left: 1px;
+
+[data-name=sqHeading]
+    @extend .sq-card
+    background transparent
+    box-shadow none
+
+    &:hover
+        box-shadow 0 0 0 1px #ddd
+
+    > div:nth-child(1)
+        font-size 24px
+        font-weight 600
+        font-family: "Times New Roman", Times, serif
+        text-align center
+
+        &:after
+            width 100%
+            text-align center
+
+        &[data-name=h3] > [data-type=content]
+            padding-top: 0;
+            margin-top: 0;

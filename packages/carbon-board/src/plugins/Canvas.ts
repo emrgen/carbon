@@ -7,6 +7,7 @@ import {
 } from "@emrgen/carbon-core";
 import { TitlePlugin } from "@emrgen/carbon-blocks";
 import { Link } from "./Link";
+import { Heading } from "./Heading";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {
@@ -35,6 +36,7 @@ export class Canvas extends CarbonPlugin {
       new Title(),
       new Image(),
       new Link(),
+      new Heading(),
     ];
   }
 

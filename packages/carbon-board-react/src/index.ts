@@ -10,6 +10,7 @@ import { Image } from "./renderers/Image";
 export const boardRenderers = [
   ReactRenderer.create("sqCanvas", SquareCanvas),
   ReactRenderer.create("sqNote", SquareBoardItem),
+  ReactRenderer.create("sqHeading", SquareBoardItem),
   ReactRenderer.create("sqBoard", Board),
   ReactRenderer.create("sqColumn", Column),
   ReactRenderer.create("sqImage", Image),
