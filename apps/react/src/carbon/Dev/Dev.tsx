@@ -31,6 +31,7 @@ import {
   State,
   StylePath,
   TitlePath,
+  VideoPath,
 } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
@@ -154,6 +155,13 @@ const data = node("carbon", [
               },
             },
           ),
+          node("sqVideo", [node("sqTitle", [text("video title")])], {
+            [StylePath]: {
+              left: 200,
+              top: 200,
+            },
+            [VideoPath]: `https://youtu.be/srNoYnGhXAg`,
+          }),
         ],
         {},
       ),

@@ -6,6 +6,7 @@ import "./board.styl";
 import { Board } from "./renderers/Board";
 import { Column } from "./renderers/Column";
 import { Image } from "./renderers/Image";
+import { Video } from "./renderers/Video";
 
 export const boardRenderers = [
   ReactRenderer.create("sqCanvas", SquareCanvas),
@@ -14,4 +15,5 @@ export const boardRenderers = [
   ReactRenderer.create("sqBoard", Board),
   ReactRenderer.create("sqColumn", Column),
   ReactRenderer.create("sqImage", Image),
+  ReactRenderer.create("sqVideo", Video),
 ];

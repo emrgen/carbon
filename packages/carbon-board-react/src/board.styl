@@ -31,7 +31,7 @@ $dot-color = rgba(100, 100, 100, 0.05);
 
 .sq-card
     background: #fff
-    padding: 10px
+    //padding: 10px
     margin: 10px
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1)
     cursor: default
@@ -82,6 +82,7 @@ $dot-color = rgba(100, 100, 100, 0.05);
 
 [data-name=sqNote]
     @extend .sq-card
+    padding 10px
 
 
 [data-name=sqBoard]
@@ -131,6 +132,7 @@ $dot-color = rgba(100, 100, 100, 0.05);
 [data-name=sqColumn]
     position: absolute;
     @extend .sq-card
+    padding 10px
 
     &[contenteditable=false]
         user-select none
@@ -198,7 +200,7 @@ $dot-color = rgba(100, 100, 100, 0.05);
         box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1)
 
     .sq-image-caption
-        padding 20px 4px 10px
+        padding 16px
         font-size 13px
         color #999
 
@@ -218,6 +220,7 @@ $dot-color = rgba(100, 100, 100, 0.05);
 
 [data-name=sqHeading]
     @extend .sq-card
+    padding 10px
     background transparent
     box-shadow none
 
@@ -237,3 +240,18 @@ $dot-color = rgba(100, 100, 100, 0.05);
         &[data-name=h3] > [data-type=content]
             padding-top: 0;
             margin-top: 0;
+
+[data-name=sqVideo]
+    @extend .sq-card
+
+    &:hover
+        box-shadow 0 2px 2px rgba(0, 0, 0, 0.1)
+
+    .sq-video-link
+        padding 10px 10px 0
+        font-size 13px
+        color #999
+
+    .sq-video-caption
+        padding 10px
+        font-size 15px

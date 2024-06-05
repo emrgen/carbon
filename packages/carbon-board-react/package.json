@@ -8,8 +8,8 @@
     "lint": "eslint *.ts*"
   },
   "dependencies": {
-    "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-board": "workspace:*",
+    "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
     "@emrgen/types": "workspace:*",
     "@react-icons/all-files": "^4.1.0",
@@ -17,6 +17,7 @@
     "emoji-regex": "^10.2.1",
     "lodash": "^4.17.21",
     "react-icons": "^4.10.1",
+    "react-player": "^2.12.0",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
