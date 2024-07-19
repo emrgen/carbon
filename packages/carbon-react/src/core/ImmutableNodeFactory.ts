@@ -30,7 +30,7 @@ export class ImmutableNodeFactory implements NodeFactory {
 
   constructor(
     scope: Symbol = IDENTITY_SCOPE,
-    createId = () => uuidv4().slice(-10),
+    createId = () => uuidv4().slice(-2),
   ) {
     this.scope = scope;
     this.createId = createId;

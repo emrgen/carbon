@@ -65,28 +65,6 @@ const data = node("carbon", [
       title([text("I am a frame title")]),
 
       node(
-        "partial",
-        [
-          title([
-            text("Summary", {
-              [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
-            }),
-          ]),
-          //  long lorem text
-          section([
-            title([
-              text(
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard m is simply dummy text of the printing and typesetting industry.",
-              ),
-            ]),
-          ]),
-        ],
-        {
-          [StylePath]: {},
-        },
-      ),
-
-      node(
         "sqCanvas",
         [
           node("sqNote", [section([title([text("add a note")])])], {
@@ -188,6 +166,28 @@ const data = node("carbon", [
           ),
         ],
         {},
+      ),
+
+      node(
+        "partial",
+        [
+          title([
+            text("Summary", {
+              [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
+            }),
+          ]),
+          //  long lorem text
+          section([
+            title([
+              text(
+                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard m is simply dummy text of the printing and typesetting industry.",
+              ),
+            ]),
+          ]),
+        ],
+        {
+          [StylePath]: {},
+        },
       ),
 
       section([title([text("question title")])]),
