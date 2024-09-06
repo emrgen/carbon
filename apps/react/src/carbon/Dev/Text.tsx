@@ -1,12 +1,22 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useContext } from "react";
 import "./test.styl";
-import { createPortal } from "react-dom";
+import { CarbonApp } from "@emrgen/carbon-utils";
+import SelectionTracker from "../../SelectionTracker";
+import { PathTracker } from "../../PathTracker";
+import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
+import { flattenDeep } from "lodash";
+import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
+import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
+import {
+  commentEditorComp,
+  commentEditorPlugin,
+} from "@emrgen/carbon-comment-editor";
+import { codeExtension } from "@emrgen/carbon-code";
+import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
+import { databasePlugins } from "@emrgen/carbon-database";
+import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
+import { attrRenderers } from "@emrgen/carbon-attributes";
+import { databaseRenderers } from "@emrgen/carbon-database-react";
 
 const Person = ({ name }) => {
   const context = useContext(TestContext);
@@ -17,46 +27,50 @@ const Person = ({ name }) => {
 
 const TestContext = createContext<any>(null);
 
-export default function Text() {
-  const [text, setText] = useState("skajgn");
-  const ref = useRef<any>();
-  const [portal, setPortal] = useState<any>(null);
-  const onBeforeInput = (e) => {
-    e.preventDefault();
-    const { data } = e;
-    console.log(data);
-    // setText(text + data)
-    e.target.innerHTML = e.target.textContent + data;
-  };
+export const data = node("carbon", [
+  node(
+    "document",
+    [
+      title([text("I am a frame title")]),
+      node("section", [title([text("I am a section title")])]),
+    ],
+    {
+      [ModePath]: "edit",
+    },
+  ),
+]);
 
-  useEffect(() => {
-    if (!ref.current) return;
-    setPortal(ref.current);
-  }, []);
+// @ts-ignore
+data.id = NodeId.ROOT.toString();
+
+const plugins = [
+  ...corePresetPlugins,
+  ...blockPresetPlugins,
+  ...codeExtension.plugins!,
+  ...databasePlugins,
+  commentEditorPlugin,
+  new ClipboardPlugin(),
+];
+
+const renderers = [
+  ...blockPresetRenderers,
+  ...codeExtension.renderers!,
+  ...attrRenderers,
+  ...databaseRenderers,
+  commentEditorComp,
+];
+
+const renderManager = RenderManager.from(renderers);
+
+export default function Text() {
+  const app = useCreateCarbon("dev", data, flattenDeep(plugins));
 
   return (
-    <TestContext.Provider value={ref}>
-      <div
-        className="text-insert-spellcheck-poc"
-        contentEditable
-        suppressContentEditableWarning
-        onBeforeInput={onBeforeInput}
-      >
-        <div>{text}</div>
-
-        <div ref={ref}></div>
-        {portal && (
-          <Portal contentElement={portal}>
-            <Person name={"subhasis"} />
-          </Portal>
-        )}
-      </div>
-    </TestContext.Provider>
+    <div className={"carbon-app-container"}>
+      <CarbonApp app={app} renderManager={renderManager}>
+        <SelectionTracker />
+        <PathTracker />
+      </CarbonApp>
+    </div>
   );
 }
-
-const Portal = ({ children, contentElement }) => {
-  console.log(contentElement);
-  if (!contentElement) return null;
-  return createPortal(children, contentElement);
-};
