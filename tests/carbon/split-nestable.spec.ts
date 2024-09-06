@@ -1,4 +1,4 @@
-import { expect, Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { CarbonPage } from "./utils";
 
 test.beforeEach(async ({ page }, testInfo) => {
@@ -9,40 +9,45 @@ test.beforeEach(async ({ page }, testInfo) => {
 
 test("add multilevel bullet list to the document", async ({ page }) => {
   const carbonPage = new CarbonPage(page);
-  await carbonPage.insertBulletList('First item');
+  await carbonPage.insertBulletList("First item");
   await carbonPage.enter();
-  await carbonPage.type('Second item');
+  await carbonPage.type("Second item");
   await carbonPage.tab();
   await carbonPage.enter();
-  await carbonPage.type('Third item');
+  await carbonPage.type("Third item");
   await carbonPage.tab();
   await carbonPage.enter();
   await carbonPage.enter();
   await carbonPage.enter();
   await carbonPage.enter();
-  await carbonPage.insertBulletList('Fourth item');
+  await carbonPage.insertBulletList("Fourth item");
   await carbonPage.enter();
-  await carbonPage.type('Fifth item');
+  await carbonPage.type("Fifth item");
   await carbonPage.tab();
   await carbonPage.enter();
-  await carbonPage.type('Sixth item');
+  await carbonPage.type("Sixth item");
   await carbonPage.tab();
   await carbonPage.enter();
-  await carbonPage.type('Seventh item');
+  await carbonPage.type("Seventh item");
 
   await carbonPage.arrowLeft(7);
   for (let i = 0; i < 13; i++) {
-    await page.keyboard.press('Shift+ArrowLeft');
+    await page.keyboard.press("Shift+ArrowLeft");
   }
-  await carbonPage.press('Backspace');
+  await carbonPage.press("Backspace");
 
-  await carbonPage.arrowRight(2)
+  await carbonPage.arrowRight(2);
   for (let i = 0; i < 34; i++) {
-    await page.keyboard.press('Shift+ArrowLeft');
+    await page.keyboard.press("Shift+ArrowLeft");
   }
-  await carbonPage.press('Backspace');
+  await carbonPage.press("Backspace");
 
   const docContent = await carbonPage.getDocContent();
+  console.log(docContent);
 
-  expect(docContent).toBe('Doc title\n- First item\n - Second item\n  - Third item')
+  expect(docContent).toBe(`# Doc title
+
+- First item
+  - Second item
+    - Third item`);
 });

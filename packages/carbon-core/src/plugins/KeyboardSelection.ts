@@ -1,13 +1,11 @@
-import {BeforePlugin, EventHandlerMap} from "@emrgen/carbon-core";
+import { BeforePlugin, EventHandlerMap } from "@emrgen/carbon-core";
 
 export class KeyboardSelection extends BeforePlugin {
-  name = 'keyboardSelection'
+  name = "keyboardSelection";
 
   keydown(): EventHandlerMap {
     return {
-      up: (ctx) => {
-        console.log('upped')
-      },
-    }
+      up: (ctx) => {},
+    };
   }
 }

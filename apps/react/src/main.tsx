@@ -6,7 +6,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 
 import App from "./App";
 
-createRoot(document.getElementById("root")).render(
+createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
     <ChakraProvider>
       <App />
