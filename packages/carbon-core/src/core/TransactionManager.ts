@@ -24,10 +24,6 @@ export class TransactionManager {
     return this.app.store;
   }
 
-  private get runtime() {
-    return this.app.runtime;
-  }
-
   lock(tr: Transaction) {
     // console.group("lock", tr.id, tr);
     this.currentTr = tr;

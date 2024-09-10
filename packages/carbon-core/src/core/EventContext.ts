@@ -4,6 +4,7 @@ import { Node } from "./Node";
 import { PinnedSelection } from "./PinnedSelection";
 import { Transaction } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { Service } from "./Service";
 
 export enum EventOrigin {
   dom,
@@ -53,6 +54,10 @@ export class EventContext<T extends Event> {
     }
 
     return this.transaction;
+  }
+
+  get service(): Service {
+    return this.app.service;
   }
 
   get targetNode(): Optional<Node> {

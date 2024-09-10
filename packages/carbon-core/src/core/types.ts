@@ -8,6 +8,12 @@ import {
   PointedSelection,
 } from "@emrgen/carbon-core";
 
+declare module "@emrgen/carbon-core" {
+  export interface Transaction {}
+
+  export interface Service {}
+}
+
 export const IDENTITY_SCOPE = Symbol("identity");
 
 export enum Format {

@@ -25,6 +25,8 @@ export default function SelectionTracker() {
       const { state } = app;
       if (!app.committed) return;
 
+      app.service.codec.encodeMarkdown(state.content);
+
       if (state.blockSelection.isActive) {
         setShowContextMenu(false);
         console.warn("block selection is active");

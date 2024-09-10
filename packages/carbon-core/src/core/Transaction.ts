@@ -36,14 +36,6 @@ import dayjs from "dayjs";
 let _id = 0;
 const getId = () => String(_id++);
 
-declare module "@emrgen/carbon-core" {
-  export interface Transaction {}
-}
-
-declare module "@emrgen/carbon-core" {
-  export interface Transaction {}
-}
-
 export class Transaction {
   readonly id: string;
   time = dayjs().unix();
@@ -427,7 +419,7 @@ export class Transaction {
         const cmd = target.cmd.command(propName);
 
         if (cmd) {
-          return (...args) => {
+          return (...args: any) => {
             // console.log(`2. calling ${propName}.${cmd.fn.name}`);
             cmd.fn(proxy, ...args);
             return proxy;

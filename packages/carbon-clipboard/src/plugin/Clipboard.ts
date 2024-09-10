@@ -2,6 +2,7 @@ import {
   AfterPlugin,
   blocksBelowCommonNode,
   Carbon,
+  CarbonPlugin,
   DeletePatch,
   EventContext,
   EventHandlerMap,
@@ -27,12 +28,17 @@ import { setClipboard } from "../clipboard";
 import { parseClipboard } from "../parser/parse";
 import { TextBlock } from "@emrgen/carbon-core/src/core/TextBlock";
 import BTree from "sorted-btree";
+import { CarbonCodec } from "@emrgen/carbon-codec";
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
 
   constructor() {
     super();
+  }
+
+  plugins(): CarbonPlugin[] {
+    return [new CarbonCodec()];
   }
 
   handlers(): EventHandlerMap {
@@ -168,10 +174,10 @@ export class ClipboardPlugin extends AfterPlugin {
     const nodes =
       startNode === endNode
         ? [startNode]
-        : startNode?.parent?.children.slice(
+        : (startNode?.parent?.children.slice(
             startNode.index,
             endNode.index + 1,
-          ) ?? [];
+          ) ?? []);
 
     const type = app.schema.type(SliceNode.kind);
     // extract document content matching nodes

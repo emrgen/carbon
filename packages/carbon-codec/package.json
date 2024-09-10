@@ -1,6 +1,6 @@
 {
-  "name": "@emrgen/carbon-clipboard",
-  "version": "0.0.7",
+  "name": "@emrgen/carbon-codec",
+  "version": "0.0.5",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
@@ -8,26 +8,24 @@
   "scripts": {
     "lint": "eslint *.ts*",
     "tscwatch": "tsc -w --noEmit",
-    "test": "vitest"
+    "build": "tsc && vite build"
   },
   "dependencies": {
     "@emrgen/carbon-attributes": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
-    "@emrgen/carbon-codec": "workspace:*",
+    "@emrgen/carbon-dragon": "workspace:*",
+    "@emrgen/carbon-dragon-react": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
-    "device-detector-js": "^3.0.3",
-    "lodash": "^4.17.21",
-    "marked": "^12.0.0",
-    "node-html-markdown": "^1.3.0",
-    "sorted-btree": "^1.8.0",
-    "turndown": "^7.1.3",
+    "@emrgen/types": "workspace:*",
     "vitest": "^0.34.6"
   },
   "devDependencies": {
     "@emrgen/eslint-config-custom": "workspace:*",
-    "@emrgen/types": "workspace:*",
-    "@types/lodash": "^4.14.191",
+    "@types/diff": "^5.2.1",
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",
+    "react": "^18.3.1",
     "tsconfig": "workspace:*",
     "typescript": "^5.4.5"
   }

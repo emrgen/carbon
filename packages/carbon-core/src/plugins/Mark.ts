@@ -3,6 +3,8 @@ import {
   EventContext,
   EventHandlerMap,
   Mark,
+  Node,
+  PinnedSelection,
   preventAndStopCtx,
   Transaction,
 } from "@emrgen/carbon-core";
@@ -12,6 +14,24 @@ declare module "@emrgen/carbon-core" {
   export interface Transaction {
     marks: {
       toggle(mark: Mark): Optional<Transaction>;
+    };
+  }
+
+  export interface Service {
+    marks: {
+      get(node: Node, offset: number): Mark[];
+    };
+  }
+}
+
+declare module "@emrgen/carbon-core" {
+  interface Transaction {
+    collapsible: {
+      split(selection: PinnedSelection): Transaction;
+      enter(selection: PinnedSelection): Transaction;
+      expand(node: Node): Transaction;
+      collapse(node: Node): Transaction;
+      toggle(node: Node, path?: string): Transaction;
     };
   }
 }
@@ -46,6 +66,8 @@ export class MarkPlugin extends BeforePlugin {
   toggleMark(e: EventContext<any>) {
     return (mark: Mark) => {
       preventAndStopCtx(e);
+      e.service.all();
+
       e.cmd.marks.toggle(mark)?.Dispatch();
     };
   }

@@ -67,6 +67,10 @@ export abstract class CarbonPlugin {
     return {};
   }
 
+  services(): Record<string, Function> {
+    return {};
+  }
+
   // return dependency plugins
   plugins(): CarbonPlugin[] {
     return [] as CarbonPlugin[];

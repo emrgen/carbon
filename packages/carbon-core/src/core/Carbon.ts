@@ -24,6 +24,7 @@ import { CarbonCommand } from "./CarbonCommand";
 import { ActionOrigin, TextWriter } from "@emrgen/carbon-core";
 import { BlockSelection } from "./BlockSelection";
 import { NodeEncoder, TreeEncoder, Writer } from "./Encoder";
+import { Service } from "./Service";
 
 export class Carbon extends EventEmitter {
   private readonly pm: PluginManager;
@@ -35,6 +36,7 @@ export class Carbon extends EventEmitter {
   private readonly pluginBus: PluginEmitter;
   private readonly pluginStates: PluginStates;
   private readonly commands: CarbonCommand;
+  readonly service: Service;
 
   // TODO: move to external package if possible
   // string encoder is required clipboard
@@ -42,9 +44,8 @@ export class Carbon extends EventEmitter {
 
   schema: Schema;
   state: State;
-  previous?: State;
-  runtime: RuntimeState;
   store: NodeStore;
+  runtime: RuntimeState;
 
   change: ChangeManager;
 
@@ -84,6 +85,7 @@ export class Carbon extends EventEmitter {
     this.em = new EventManager(this, pm, this.change);
 
     this.commands = pm.commands();
+    this.service = pm.services();
     // this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
 
     this.enabled = true;

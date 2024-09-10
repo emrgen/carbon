@@ -1,6 +1,7 @@
 export * from "./Carbon";
 export * from "./CarbonPlugin";
 export * from "./Transaction";
+export * from "./Service";
 export * from "./ChangeManager";
 export * from "./PluginManager";
 export * from "./TransactionManager";

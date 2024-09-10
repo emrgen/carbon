@@ -755,6 +755,9 @@ importers:
       '@emrgen/carbon-attributes':
         specifier: workspace:*
         version: link:../carbon-attributes
+      '@emrgen/carbon-codec':
+        specifier: workspace:*
+        version: link:../carbon-codec
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
@@ -882,6 +885,55 @@ importers:
       recoil:
         specifier: ^0.7.7
         version: 0.7.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(playwright@1.47.0)(stylus@0.59.0)
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@types/diff':
+        specifier: ^5.2.1
+        version: 5.2.2
+      '@types/react':
+        specifier: ^18.0.27
+        version: 18.3.5
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.3.0
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.5.4
+
+  packages/carbon-codec:
+    dependencies:
+      '@emrgen/carbon-attributes':
+        specifier: workspace:*
+        version: link:../carbon-attributes
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/carbon-dragon':
+        specifier: workspace:*
+        version: link:../carbon-dragon
+      '@emrgen/carbon-dragon-react':
+        specifier: workspace:*
+        version: link:../carbon-dragon-react
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
       vitest:
         specifier: ^0.34.6
         version: 0.34.6(playwright@1.47.0)(stylus@0.59.0)

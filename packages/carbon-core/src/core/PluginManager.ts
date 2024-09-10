@@ -20,11 +20,13 @@ import { CarbonAction } from "./actions/types";
 import { EventsIn } from "./Event";
 import { CarbonCommand } from "./CarbonCommand";
 import { StateActions } from "@emrgen/carbon-core";
+import { Service } from "./Service";
 
 // handles events by executing proper plugin
 export class PluginManager {
   private readonly after: CarbonPlugin[];
   private readonly before: CarbonPlugin[];
+  private readonly commandPlugins: CarbonPlugin[];
   private readonly nodes: Record<string, CarbonPlugin>;
 
   readonly plugins: CarbonPlugin[];
@@ -48,6 +50,7 @@ export class PluginManager {
     // console.log(flattened)
     this.after = this.filter(flattened, PluginType.After);
     this.before = this.filter(flattened, PluginType.Before);
+    this.commandPlugins = this.filter(flattened, PluginType.Command);
     this.nodes = this.filter(flattened, PluginType.Node).reduce(
       (o, p) => ({ ...o, [p.name]: p }),
       {},
@@ -61,7 +64,12 @@ export class PluginManager {
     );
     this.events = new Set(events.concat([EventsIn.keyDown]));
 
-    this.plugins = [...this.after, ...values(this.nodes), ...this.before];
+    this.plugins = [
+      ...this.after,
+      ...values(this.nodes),
+      ...this.before,
+      ...this.commandPlugins,
+    ];
   }
 
   private flatten(plugins: CarbonPlugin[]): CarbonPlugin[] {
@@ -78,6 +86,10 @@ export class PluginManager {
   // collect plugin commands
   commands(): CarbonCommand {
     return CarbonCommand.from(this.plugins);
+  }
+
+  services() {
+    return Service.from(this.plugins);
   }
 
   sanitize(node: Node): Optional<Node> {
