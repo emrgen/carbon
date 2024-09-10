@@ -37,6 +37,12 @@ export default function SelectionTracker() {
         return;
       }
 
+      // dont show context menu if the selection is in the document title
+      if (head.node.parent?.isDocument || tail.node.parent?.isDocument) {
+        setShowContextMenu(false);
+        return;
+      }
+
       const selection = window.getSelection();
       if (selection && !state.selection.isCollapsed) {
         const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
