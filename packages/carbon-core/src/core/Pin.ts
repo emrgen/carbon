@@ -5,6 +5,7 @@ import { Point } from "./Point";
 import { clamp } from "../utils/clamp";
 import { Maps } from "./types";
 import { NodeMapGet } from "./NodeMap";
+import { EmptyInline } from "@emrgen/carbon-core";
 
 enum PinReference {
   front = "front",
@@ -207,13 +208,21 @@ export class Pin {
   // aligns pin to the left when it is in the middle of the two text blocks
   // Validity: valid for down pin only
   get leftAlign(): Pin {
-    const { prevSibling } = this.node;
+    // has focusable node is the closest text container block child
+    const hasFocusable = this.node.closest((n) => !!n.parent?.isTextContainer)!;
     // if previous node is a inline node within the same text container block
     const prevFocusable = this.node.prev((n) => n.isFocusable);
+    console.log(
+      this.toString(),
+      EmptyInline.is(this.node),
+      !this.node.isEmpty,
+      this.offset,
+      prevFocusable?.commonNode(hasFocusable)?.isTextContainer,
+    );
     if (
       !this.node.isEmpty &&
-      this.offset === 0 &&
-      prevFocusable?.commonNode(this.node).isTextContainer
+      (this.offset === 0 || EmptyInline.is(this.node)) &&
+      prevFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
       return Pin.create(prevFocusable, prevFocusable.focusSize);
     } else {
@@ -221,16 +230,17 @@ export class Pin {
     }
   }
 
-  // aligns pin to the right when it is in the middle of the two text blocks
+  // aligns pin to the right when it is in the middle of the two inline nodes, can be text, atomWrapper etc.
   // Validity: valid for down pin only
   get rightAlign(): Pin {
-    const { nextSibling } = this.node;
-    // if previous node is a inline node within the same text container block
+    // has focusable node is the closest text container block child
+    const hasFocusable = this.node.closest((n) => !!n.parent?.isTextContainer)!;
+    // if previous node is an inline node within the same text container block
     const nextFocusable = this.node.next((n) => n.isFocusable);
     if (
       !this.node.isEmpty &&
-      this.offset === this.node.focusSize &&
-      nextFocusable?.commonNode(this.node).isTextContainer
+      (this.offset === this.node.focusSize || EmptyInline.is(this.node)) &&
+      nextFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
       return Pin.create(nextFocusable, 0);
     } else {
@@ -330,7 +340,9 @@ export class Pin {
 
   // check if pin is at the start of the provided node
   isAtStartOfNode(node: Node): boolean {
-    const first = node.find((n) => n.hasFocusable, { order: "post" });
+    const first = node.find((n) => n.hasFocusable && n.isTextContainer, {
+      order: "post",
+    });
     if (!first) return false;
     // console.log(first.toString(), this.toString());
     return Pin.create(first, 0).eq(this);

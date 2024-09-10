@@ -1,14 +1,51 @@
-import { Carbon, Node, Pin, PinnedSelection } from "../core";
-import { NodeContent } from "../core/NodeContent";
-import { takeAfter, takeBefore, takeUntil } from "./array";
+import { Carbon, Node, Pin } from "../core";
+import { takeBefore } from "./array";
+import { EmptyInline } from "@emrgen/carbon-core";
 
-
-export function splitTextBlock(start: Pin, end: Pin, app: Carbon): [Node[], Node[], Node[]] {
+export function splitTextBlock(
+  start: Pin,
+  end: Pin,
+  app: Carbon,
+): [Node[], Node[], Node[]] {
   const startPin = start.down()!;
   const endPin = end.down()!;
-  const beforeNodes: Node[] = startPin.node.prevSiblings.map(n => n.clone());
-  const middleNodes: Node[] = takeBefore(startPin.node.prevSiblings.map(n => n.clone()), n => n.eq(endPin.node))
-  const afterNodes: Node[] = endPin.node.nextSiblings.map(n => n.clone());
+
+  if (EmptyInline.is(startPin.node) && EmptyInline.is(endPin.node)) {
+    if (startPin.eq(endPin)) {
+      console.log("xxxxxxxxxxx");
+      const node = startPin.node.parent!;
+      if (EmptyInline.isPrefix(startPin.node)) {
+        console.log("prefix", node.name);
+        return [
+          node.prevSiblings.map((n) => n.clone()),
+          [],
+          [node.clone(), ...node.nextSiblings.map((n) => n.clone())],
+        ];
+      }
+      if (EmptyInline.isSuffix(startPin.node)) {
+        console.log("suffix");
+        return [
+          [...node.prevSiblings.map((n) => n.clone()), node.clone()],
+          [],
+          node.nextSiblings.map((n) => n.clone()),
+        ];
+      }
+    }
+  }
+
+  if (EmptyInline.is(startPin.node)) {
+  }
+  if (EmptyInline.is(endPin.node)) {
+  }
+
+  // both startPin and endPin are associated with the simple inline node
+
+  const beforeNodes: Node[] = startPin.node.prevSiblings.map((n) => n.clone());
+  const middleNodes: Node[] = takeBefore(
+    startPin.node.prevSiblings.map((n) => n.clone()),
+    (n) => n.eq(endPin.node),
+  );
+  const afterNodes: Node[] = endPin.node.nextSiblings.map((n) => n.clone());
 
   if (startPin.eq(endPin)) {
     if (startPin.isWithin) {

@@ -19,11 +19,8 @@ import {
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
   ActivatedPath,
-  BackgroundImagePath,
   ColorPath,
-  ContenteditablePath,
   corePresetPlugins,
-  ImagePath,
   Mark,
   MarksPath,
   ModePath,
@@ -31,7 +28,6 @@ import {
   State,
   StylePath,
   TitlePath,
-  VideoPath,
 } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
@@ -46,11 +42,7 @@ import {
 import { attrRenderers } from "@emrgen/carbon-attributes";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
-import {
-  boardPlugins,
-  CardsCountPath,
-  CommentedByPath,
-} from "@emrgen/carbon-board";
+import { boardPlugins } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
 
 function is_env_development() {
@@ -64,109 +56,109 @@ const data = node("carbon", [
     [
       title([text("I am a frame title")]),
 
-      node(
-        "sqCanvas",
-        [
-          node("sqNote", [section([title([text("add a note")])])], {
-            [StylePath]: {
-              left: 100,
-              top: 100,
-            },
-            [ContenteditablePath]: false,
-          }),
-          node("sqNote", [section([title([text("add a note")])])], {
-            [StylePath]: {
-              left: 120,
-              top: 200,
-            },
-            // [ContenteditablePath]: false,
-          }),
-          node("sqNote", [section([title([text("add a note")])])], {
-            [StylePath]: {
-              left: 460,
-              top: 50,
-            },
-            // [ContenteditablePath]: false,
-          }),
-
-          node(
-            "sqColumn",
-            [
-              node("sqTitle", [text("column 1")]),
-              node("sqNote", [section([title([text("add a note 1")])])], {
-                [ContenteditablePath]: false,
-              }),
-              node("sqNote", [section([title([text("add a note 2")])])], {
-                [ContenteditablePath]: false,
-              }),
-            ],
-            {
-              [StylePath]: {
-                left: 50,
-                top: 300,
-              },
-              [TitlePath]: "column 1",
-              [CardsCountPath]: 3,
-            },
-          ),
-
-          node("sqBoard", [node("sqTitle", [text("board 1")])], {
-            [StylePath]: {
-              left: 50,
-              top: 20,
-            },
-            [BackgroundImagePath]: `https://png.pngtree.com/element_our/20190530/ourmid/pngtree-correct-icon-image_1267804.jpg`,
-          }),
-          node("sqImage", [node("sqTitle", [text("image 1")])], {
-            [StylePath]: {
-              left: 800,
-              top: 100,
-            },
-            [ImagePath]: `https://png.pngtree.com/element_our/20190530/ourmid/pngtree-correct-icon-image_1267804.jpg`,
-          }),
-          node(
-            "sqHeading",
-            [
-              node("h3", [title([text("heading 1")])]),
-              section([title([text("section 1")])]),
-            ],
-            {
-              [StylePath]: {
-                left: 1200,
-                top: 100,
-              },
-            },
-          ),
-          node("sqVideo", [node("sqTitle", [text("video title")])], {
-            [StylePath]: {
-              left: 2000,
-              top: 20,
-            },
-            [VideoPath]: `https://youtu.be/srNoYnGhXAg`,
-          }),
-          node(
-            "sqComment",
-            [
-              node("sqCommentLine", [node("sqTitle", [text("comment 1")])], {
-                [CommentedByPath]: "subhasis",
-              }),
-              node("sqCommentLine", [node("sqTitle", [text("comment 2")])], {
-                [CommentedByPath]: "subhasis",
-              }),
-              node("sqCommentLine", [node("sqTitle", [text("comment 3")])], {
-                [CommentedByPath]: "subhasis",
-              }),
-            ],
-            {
-              [StylePath]: {
-                left: 1400,
-                top: 250,
-              },
-            },
-          ),
-        ],
-        {},
-      ),
+      // node(
+      //   "sqCanvas",
+      //   [
+      //     node("sqNote", [section([title([text("add a note")])])], {
+      //       [StylePath]: {
+      //         left: 100,
+      //         top: 100,
+      //       },
+      //       [ContenteditablePath]: false,
+      //     }),
+      //     node("sqNote", [section([title([text("add a note")])])], {
+      //       [StylePath]: {
+      //         left: 120,
+      //         top: 200,
+      //       },
+      //       // [ContenteditablePath]: false,
+      //     }),
+      //     node("sqNote", [section([title([text("add a note")])])], {
+      //       [StylePath]: {
+      //         left: 460,
+      //         top: 50,
+      //       },
+      //       // [ContenteditablePath]: false,
+      //     }),
+      //
+      //     node(
+      //       "sqColumn",
+      //       [
+      //         node("sqTitle", [text("column 1")]),
+      //         node("sqNote", [section([title([text("add a note 1")])])], {
+      //           [ContenteditablePath]: false,
+      //         }),
+      //         node("sqNote", [section([title([text("add a note 2")])])], {
+      //           [ContenteditablePath]: false,
+      //         }),
+      //       ],
+      //       {
+      //         [StylePath]: {
+      //           left: 50,
+      //           top: 300,
+      //         },
+      //         [TitlePath]: "column 1",
+      //         [CardsCountPath]: 3,
+      //       },
+      //     ),
+      //
+      //     node("sqBoard", [node("sqTitle", [text("board 1")])], {
+      //       [StylePath]: {
+      //         left: 50,
+      //         top: 20,
+      //       },
+      //       [BackgroundImagePath]: `https://png.pngtree.com/element_our/20190530/ourmid/pngtree-correct-icon-image_1267804.jpg`,
+      //     }),
+      //     node("sqImage", [node("sqTitle", [text("image 1")])], {
+      //       [StylePath]: {
+      //         left: 800,
+      //         top: 100,
+      //       },
+      //       [ImagePath]: `https://png.pngtree.com/element_our/20190530/ourmid/pngtree-correct-icon-image_1267804.jpg`,
+      //     }),
+      //     node(
+      //       "sqHeading",
+      //       [
+      //         node("h3", [title([text("heading 1")])]),
+      //         section([title([text("section 1")])]),
+      //       ],
+      //       {
+      //         [StylePath]: {
+      //           left: 1200,
+      //           top: 100,
+      //         },
+      //       },
+      //     ),
+      //     node("sqVideo", [node("sqTitle", [text("video title")])], {
+      //       [StylePath]: {
+      //         left: 2000,
+      //         top: 20,
+      //       },
+      //       [VideoPath]: `https://youtu.be/srNoYnGhXAg`,
+      //     }),
+      //     node(
+      //       "sqComment",
+      //       [
+      //         node("sqCommentLine", [node("sqTitle", [text("comment 1")])], {
+      //           [CommentedByPath]: "subhasis",
+      //         }),
+      //         node("sqCommentLine", [node("sqTitle", [text("comment 2")])], {
+      //           [CommentedByPath]: "subhasis",
+      //         }),
+      //         node("sqCommentLine", [node("sqTitle", [text("comment 3")])], {
+      //           [CommentedByPath]: "subhasis",
+      //         }),
+      //       ],
+      //       {
+      //         [StylePath]: {
+      //           left: 1400,
+      //           top: 250,
+      //         },
+      //       },
+      //     ),
+      //   ],
+      //   {},
+      // ),
 
       node(
         "partial",

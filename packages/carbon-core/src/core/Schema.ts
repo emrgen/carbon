@@ -1,11 +1,11 @@
-import {Optional} from "@emrgen/types";
-import {each, identity, keys} from "lodash";
-import {ContentMatch} from "./ContentMatch";
-import {Node} from "./Node";
-import {MarkType, NodeType} from "./NodeType";
-import {Maps, NodeName} from "./types";
-import {Mark, MarkProps} from "./Mark";
-import {NodeContentData, NodeFactory} from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
+import { each, identity, keys } from "lodash";
+import { ContentMatch } from "./ContentMatch";
+import { Node } from "./Node";
+import { MarkType, NodeType } from "./NodeType";
+import { Maps, NodeName } from "./types";
+import { Mark, MarkProps } from "./Mark";
+import { NodeContentData, NodeFactory } from "@emrgen/carbon-core";
 
 interface SchemaSpec {
   nodes: Record<NodeName, NodeSpec>;
@@ -70,11 +70,11 @@ export class Schema {
   }
 
   text(text: string, json = {}): Optional<Node> {
-    return this.node("text", {text, ...json});
+    return this.node("text", { text, ...json });
   }
 
   node(name: string, json = {}): Optional<Node> {
-    return this.nodeFromJSON({name, ...json});
+    return this.nodeFromJSON({ name, ...json });
   }
 
   mark(name: string, props?: MarkProps): Mark {
@@ -130,15 +130,20 @@ export interface NodeSpec {
 
   // the node can be treated as a standalone document
   document?: boolean;
+  // inline atom wrapper wraps the inline atom with two empty text nodes
+  inlineAtomWrapper?: boolean;
+
   inlineSelectable?: boolean;
   blockSelectable?: boolean;
   rectSelectable?: boolean;
+
   // last empty children stays within on enter
   // only backspace can unwrap the last child
   collapsible?: boolean;
   selection?: {
     inline?: boolean;
     block?: boolean;
+    rect?: boolean;
   };
   dnd?: {
     // same as drag handle

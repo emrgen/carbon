@@ -31,6 +31,7 @@ import {
   PinnedSelection,
   PlaceholderPath,
   PointedSelection,
+  printNode,
   RenderPath,
   SelectAction,
   SetContentAction,
@@ -64,6 +65,7 @@ import { ContentMatch } from "../core/ContentMatch";
 import { NodeColumn } from "../core/NodeColumn";
 import { InlineNode } from "../core/InlineNode";
 import { TextBlock } from "../core/TextBlock";
+import { EmptyInline } from "./EmptyInline";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -1490,7 +1492,7 @@ export class TransformCommands extends BeforePlugin {
     // need more involved splitting
     // clone all nodes after the cursor up to the splitBlock
     const { node } = pin.down()!;
-    const cloneBlocks = takeUntil(node.chain, (n) =>
+    const cloneBlocks = takeUntil(node.closest((n) => !n.isZero)?.chain!, (n) =>
       n.eq(splitBlock),
     ).reverse();
 
@@ -1550,7 +1552,12 @@ export class TransformCommands extends BeforePlugin {
         // console.log('last node', splittedNode.id.key);
         // console.log(pin.node.name, );
         const [leftNodes, _, rightNodes] = splitTextBlock(pin, pin, app);
-        console.log(pin.node.name, leftNodes, rightNodes);
+        console.log(
+          pin.node.id.toString(),
+          pin.node.name,
+          leftNodes,
+          rightNodes,
+        );
         setContentCommands.push(
           SetContentAction.create(pin.node.id, leftNodes),
         );
@@ -1572,7 +1579,9 @@ export class TransformCommands extends BeforePlugin {
     // console.log("move command count", moveCommands.length);
     // console.log("remove command count", removeCommands.length);
 
-    // console.log(focusPoint?.toString(), rootNode.textContent);
+    console.log(focusPoint?.toString(), rootNode);
+
+    printNode(rootNode);
 
     // console.log("insert point", rootNode?.name, rootNode);
     tr.Insert(rootInsertPoint, rootNode!)
@@ -1778,6 +1787,12 @@ export class TransformCommands extends BeforePlugin {
     const endTextBlock = end.node;
     const startTextBlock = start.node;
 
+    console.log(
+      "deleteGroup",
+      deleteGroup.ids.map((id) => id.toString()),
+      deleteGroup.ranges,
+    );
+
     if (!endTextBlock || !startTextBlock) {
       console.log(p14("%c[failed]"), "color:red", "head/tail node not found");
       return;
@@ -1785,9 +1800,31 @@ export class TransformCommands extends BeforePlugin {
 
     // selection is within same text container block
     if (endTextBlock.eq(startTextBlock)) {
-      const after = selection.collapseToStart();
+      const down = start.down();
+      let after: Optional<PinnedSelection> = null;
+      if (down.node.isZero) {
+        const leftAligned = down.leftAlign;
+        // if after left aligning the pin is at start of a inlineAtomWrapper node
+        if (EmptyInline.isPrefix(leftAligned.node)) {
+          after = PinnedSelection.fromPin(
+            Pin.create(start.node, Math.max(start.offset - 1, 0)),
+          );
+        } else {
+          after = selection.collapseToStart();
+        }
+      } else {
+        after = selection.collapseToStart();
+      }
+      console.log(
+        deleteGroup.ids.map((id) => id.toString()),
+        deleteGroup.ranges,
+      );
+      console.log("xxxxx", after?.toString());
       tr.Add(this.deleteGroupCommands(app, deleteGroup).actions);
-      tr.Select(after);
+      tr.Select(after!, ActionOrigin.UserInput);
+      // after = PinnedSelection.fromPin(Pin.toStartOf(app.state.content)!)!;
+      // tr.Select(after!, ActionOrigin.UserInput);
+
       return tr;
     }
 
@@ -1810,39 +1847,6 @@ export class TransformCommands extends BeforePlugin {
       );
       return;
     }
-
-    // commonNode is selected
-    // replace commonNode with default block
-    // if (start.isAtStartOfNode(commonNode) && end.isAtEndOfNode(commonNode)) {
-    //   // when a collapsible node is selected entirely and delete
-    //   // for example: when a page is selected and deleted
-    //   if (commonNode.isCollapsible) {
-    //     const textBlock = commonNode.child(0)!
-    //     const at = Point.toAfter(textBlock.id);
-    //     const block = app.schema.type(textBlock.type.splitName)?.default()
-    //     if (!block) {
-    //       throw Error('failed to create block');
-    //     }
-    //
-    //     tr.SetContent(textBlock.id, []);
-    //     tr.Add(removeNodesActions(commonNode.children.slice(1)));
-    //     tr.Select(PinnedSelection.fromPin(Pin.toStartOf(textBlock)!));
-    //     return
-    //   }
-    //
-    //   const block = app.schema.type(commonNode.type.replaceName)?.default();
-    //   if (!block) {
-    //     console.log(p14("%c[failed]"), "color:red", "block not found");
-    //     return;
-    //   }
-    //
-    //   const after = PinnedSelection.fromPin(Pin.toStartOf(block)!);
-    //   tr
-    //     .Insert(Point.toAfter(commonNode.id), block)
-    //     .Remove(nodeLocation(commonNode)!, commonNode)
-    //     .Select(after);
-    //   return tr;
-    // }
 
     // * startBlock === endBlock
     if (startBlock.eq(endBlock)) {
@@ -2075,6 +2079,40 @@ export class TransformCommands extends BeforePlugin {
         if (start.offset === end.offset) {
           return;
         }
+
+        // const startDown = start.down().rightAlign;
+        // const endDown = end.down().leftAlign;
+        // console.log("startDown", startDown.toString());
+        // console.log("endDown", endDown.toString());
+        // console.log(
+        //   EmptyInline.isPrefix(startDown.node),
+        //   EmptyInline.isSuffix(endDown.node),
+        // );
+        //
+        // if (
+        //   EmptyInline.isPrefix(startDown.node) &&
+        //   EmptyInline.isSuffix(endDown.node)
+        // ) {
+        //   const startNode = startDown.node.parent!;
+        //   const endNode = endDown.node.parent!;
+        //   console.log(startNode.id.toString(), endNode.id.toString());
+        //   let nodes: Node[] = [];
+        //   if (startNode.eq(endNode)) {
+        //     nodes = [startNode];
+        //   } else {
+        //     nodes = takeUpto(startNode.nextSiblings, (n) =>
+        //       n.eq(endNode),
+        //     ).concat([endNode]);
+        //   }
+        //
+        //   console.log(
+        //     "nodes",
+        //     nodes.map((n) => n.id.toString()),
+        //   );
+        //
+        //   rangeAction.push(...this.removeNodeCommands([startNode, ...nodes]));
+        //   return;
+        // }
 
         const content = TextBlock.from(node).removeContent(
           start.offset,

@@ -56,25 +56,26 @@ export class NodeStore {
       console.error(`Registering empty dom node for ${node.id.toString()}`);
       return;
     }
+    // console.log("registering", node.id.toString(), el);
     const { id: nodeId } = node;
     const { id } = nodeId;
     // remove old reference first
     // other part of the id will eventually be added while rendering
     this.delete(node);
 
-    this.elementMap.set(id, el);
+    this.elementMap.set(id.toString(), el);
     this.elementToNodeMap.set(el, node);
   }
 
   // remove the node from the store
   delete(from: Node | NodeId) {
     const id = (from instanceof Node ? from.id : from).toString();
-    const el = this.elementMap.get(id);
+    const el = this.elementMap.get(id.toString());
     if (el) {
       this.elementToNodeMap.delete(el);
     }
 
-    this.elementMap.delete(id);
+    this.elementMap.delete(id.toString());
   }
 
   // resolve the node from the HTML element

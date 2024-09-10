@@ -56,7 +56,11 @@ export class PinnedSelection {
     let resolvedAnchorNode = store.resolve(anchorEl, anchorOffset);
     let anchorNode = resolvedAnchorNode.node;
     anchorOffset = resolvedAnchorNode.offset;
-    // console.log('anchorNode path', anchorNode?.chain.map(n => n.key).join(' > '), anchorEl)
+    // console.log(
+    //   "anchorNode path",
+    //   anchorNode?.chain.map((n) => n.key).join(" > "),
+    //   anchorEl,
+    // );
 
     let resolvedFocusNode = store.resolve(focusEl, focusOffset);
     let focusNode = resolvedFocusNode.node;
@@ -201,6 +205,10 @@ export class PinnedSelection {
         "PinnedSelection: invalid selection, one pin is identity and another is not",
       );
     }
+
+    // ensure that the selection is valid
+    console.assert(tail.node.isTextContainer);
+    console.assert(head.node.isTextContainer);
   }
 
   get blocks(): Node[] {

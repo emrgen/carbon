@@ -1,8 +1,8 @@
-import { InlineAtom } from "./InlineAtom";
 import {
   CarbonPlugin,
   EventContext,
   EventHandlerMap,
+  InlineAtom,
   NodeSpec,
 } from "@emrgen/carbon-core";
 
@@ -15,8 +15,9 @@ export class Mention extends CarbonPlugin {
       content: "empty mentionAtom empty",
       inline: true,
       mergeable: false,
+      inlineAtomWrapper: true,
       // inlineSelectable: true,
-      // focusable: true,
+      focusable: false,
       tag: "span",
     };
   }
@@ -51,6 +52,7 @@ export class MentionAtom extends InlineAtom {
       ...super.spec(),
       focusable: false,
       isolate: true,
+      atom: true,
       props: {
         local: {
           html: {

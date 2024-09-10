@@ -43,7 +43,7 @@ export class InlineNode {
       return [node];
     }
 
-    console.log("XXX", prev.props.toJSON(), node.props.toJSON());
+    // console.log("XXX", prev.props.toJSON(), node.props.toJSON());
 
     return [prev, next];
   }

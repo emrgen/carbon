@@ -1,5 +1,10 @@
-import { InlineAtom } from "./InlineAtom";
-import { EmojiPath, Node, NodeEncoder, Writer } from "@emrgen/carbon-core";
+import {
+  EmojiPath,
+  InlineAtom,
+  Node,
+  NodeEncoder,
+  Writer,
+} from "@emrgen/carbon-core";
 
 export class Emoji extends InlineAtom {
   name = "emoji";

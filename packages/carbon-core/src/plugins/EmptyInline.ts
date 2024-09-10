@@ -53,9 +53,13 @@ export class EmptyInline extends InlineAtom {
         const selection = EmptyInline.normalizeSelection(ctx.selection);
         const { start } = selection;
         const down = start.down().leftAlign;
+
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
-          const prevFocusable = down.node.prev((n) => n.isFocusable);
+          const prevFocusable = down.node.prev((n) => {
+            console.log("prev", n.name, n);
+            return n.isFocusable;
+          });
           if (!prevFocusable) {
             console.log("no focusable found");
             return;
@@ -68,8 +72,9 @@ export class EmptyInline extends InlineAtom {
       },
 
       shiftRight: (ctx) => {
-        const { selection } = ctx;
         preventAndStopCtx(ctx);
+
+        const { selection } = ctx;
         const head = EmptyInline.normalizePin(selection.head).down().rightAlign;
         const nextFocusable = head.node.next((n) => n.isFocusable);
         if (!nextFocusable) {
@@ -83,8 +88,9 @@ export class EmptyInline extends InlineAtom {
       },
 
       shiftLeft: (ctx) => {
-        const { selection } = ctx;
+        preventAndStopCtx(ctx);
 
+        const { selection } = ctx;
         const head = EmptyInline.normalizePin(selection.head).down().leftAlign;
         const prevFocusable = head.node.prev((n) => n.isFocusable);
         if (!prevFocusable) {
@@ -121,12 +127,17 @@ export class EmptyInline extends InlineAtom {
     return pin;
   }
 
+  static is(node: Node): boolean {
+    return node.name === "empty";
+  }
+
   static isPrefix(node: Node): boolean {
     const { nextSibling } = node;
     return <boolean>(
       (node.name === "empty" &&
         nextSibling?.isIsolate &&
-        nextSibling?.isInlineAtom)
+        nextSibling?.isInlineAtom &&
+        node.parent?.type.isInlineAtomWrapper)
     );
   }
 
@@ -135,7 +146,8 @@ export class EmptyInline extends InlineAtom {
     return <boolean>(
       (node.name === "empty" &&
         prevSibling?.isIsolate &&
-        prevSibling?.isInlineAtom)
+        prevSibling?.isInlineAtom &&
+        node.parent?.type.isInlineAtomWrapper)
     );
   }
 }

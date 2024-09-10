@@ -231,7 +231,7 @@ export class KeyboardPlugin extends AfterPlugin {
       return;
     }
 
-    // console.log('1111111', head.isAtStartOfNode(node), head, node);
+    // console.log("1111111", head.isAtStartOfNode(head.node), head, head.node);
     if (head.isAtStartOfNode(head.node)) {
       const { start } = selection;
       const textBlock = start.node.chain.find((n) => n.isTextContainer);
@@ -258,6 +258,7 @@ export class KeyboardPlugin extends AfterPlugin {
             prevVisibleTextBlock.textContent.length,
           ),
         );
+        console.log("------------");
         const textContent =
           prevVisibleTextBlock.textContent + textBlock.textContent;
         const textNode = app.schema.text(textContent)!;

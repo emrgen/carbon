@@ -54,7 +54,7 @@ export class ImmutableNode extends Node {
   private getIndex() {
     const parent = this.parent as ImmutableNode;
     if (!parent) {
-      // console.warn('node has no parent', this.id.toString());
+      console.warn("node has no parent", this.id.toString());
       return -1;
     }
 
@@ -224,7 +224,7 @@ export class ImmutableNode extends Node {
       if (!child) {
         throw new Error(`child not found at ${index}`);
       }
-
+      // console.log("unfreezing child", index, child.id.toString());
       const mutableChild = child.unfreeze(rest, map);
       mutable.replace(index, mutableChild);
 

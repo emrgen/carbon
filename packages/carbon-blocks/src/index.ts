@@ -33,10 +33,8 @@ import { Button } from "./plugins/Button";
 import { ImagePlugin } from "./plugins/ImagePlugin";
 import { Partial } from "./plugins/Partial";
 import { Code } from "./plugins/Code";
-import { InlineAtom } from "./plugins/InlineAtom";
 import { Emoji } from "./plugins/Emoji";
 import { Mention } from "./plugins/Mention";
-import { EmptyInline } from "./plugins/EmptyInline";
 import { Bookmark } from "./plugins/Bookmark";
 import { Attributes } from "./plugins/Attributes";
 
@@ -76,10 +74,8 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Button(),
   new Partial(),
   new Code(),
-  new InlineAtom(),
   new Emoji(),
   new Mention(),
-  new EmptyInline(),
   new Bookmark(),
   new Attributes(),
 ];

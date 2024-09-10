@@ -648,6 +648,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     if (found) return found;
 
     // pass the search role to prev sibling
+    console.log("check in prev sigbling", sibling?.name);
     found = sibling?.prev(fn, options, false);
     if (found) return found;
 

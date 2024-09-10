@@ -5,6 +5,7 @@ import {
   cloneFrozenNode,
   CodeTokenClassPath,
   deepCloneMap,
+  EmptyInline,
   Pin,
 } from "@emrgen/carbon-core";
 import { InlineNode } from "./InlineNode";
@@ -82,16 +83,21 @@ export class TextBlock {
     if (from === to) {
       return this.node.children;
     }
+    console.log("x");
 
     const start = Pin.create(this.node, from);
     const end = Pin.create(this.node, to);
     const startDown = start.down().rightAlign;
     const endDown = end.down().leftAlign;
-    const { node: startNode } = startDown;
-    const { node: endNode } = endDown;
+    const startNode = startDown.node.closest(
+      (n) => n.parent?.isTextContainer!,
+    )!;
+    const endNode = endDown.node.closest((n) => n.parent?.isTextContainer!)!;
 
+    console.log(startDown.node.id.toString(), endDown.node.id.toString());
+    console.log(startNode.id.toString(), endNode.id.toString());
     if (startNode.eq(endNode)) {
-      if (startNode.isInlineAtom) {
+      if (startNode.isInlineAtom || startNode.type.isInlineAtomWrapper) {
         return this.node.children.filter((n) => !n.eq(startNode));
       }
 
@@ -115,16 +121,31 @@ export class TextBlock {
         .filter((n) => n.focusSize);
     }
 
-    const startNodes = InlineNode.from(startNode).split(startDown.offset);
-    const endNodes = InlineNode.from(endNode).split(endDown.offset);
     const prevNodes = startNode.prevSiblings;
     const nextNodes = endNode.nextSiblings;
-    if (startDown.offset !== startNode.focusSize) {
-      startNodes.pop();
+    let startNodes: Node[] = [];
+    let endNodes: Node[] = [];
+
+    if (EmptyInline.is(startDown.node)) {
+      if (EmptyInline.isSuffix(startDown.node)) {
+        startNodes = [startDown.node];
+      }
+    } else {
+      startNodes = InlineNode.from(startDown.node).split(startDown.offset);
+      if (startDown.offset !== startNode.focusSize) {
+        startNodes.pop();
+      }
     }
 
-    if (endDown.offset !== 0) {
-      endNodes.shift();
+    if (EmptyInline.is(endDown.node)) {
+      if (EmptyInline.isPrefix(endDown.node)) {
+        endNodes = [endDown.node];
+      }
+    } else {
+      endNodes = InlineNode.from(endDown.node).split(endDown.offset);
+      if (endDown.offset !== 0) {
+        endNodes.shift();
+      }
     }
 
     return [...prevNodes, ...startNodes, ...endNodes, ...nextNodes]

@@ -8,6 +8,7 @@ import { FormatterPlugin } from "./Formatter";
 import { ActionPlugin } from "./Action";
 import { Runtime } from "./Runtime";
 import { MarkPlugin } from "./Mark";
+import { EmptyInline } from "./EmptyInline";
 
 export const corePresetPlugins: CarbonPlugin[] = [
   new SelectionChangePlugin(),
@@ -19,8 +20,11 @@ export const corePresetPlugins: CarbonPlugin[] = [
   new ActionPlugin(),
   new Runtime(),
   new MarkPlugin(),
+  new EmptyInline(),
 ];
 
 export * from "./TransformCommands";
 
 export * from "./Slice";
+export * from "./InlineAtom";
+export * from "./EmptyInline";
