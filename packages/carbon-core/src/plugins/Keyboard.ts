@@ -465,9 +465,12 @@ export class KeyboardPlugin extends AfterPlugin {
 
     // const splitBlock = node.closest(n => n.canSplit);
     // node.chain.forEach(n => console.log(n.name, n.groups));
+
+    // find the split block in the chain
     const splitBlock = node.closest((n) => n.type.splits);
     const nonSplit = node.closest((n) => n.isContainer && !n.type.splits);
 
+    // if there is a non-split block below the split block, prevent the event
     if (nonSplit && splitBlock && nonSplit.depth > splitBlock.depth) {
       preventAndStopCtx(ctx);
       return;

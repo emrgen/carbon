@@ -100,7 +100,7 @@ export const DocumentComp = (props: RendererProps) => {
             const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
             if (after.eq(app.selection)) return;
             prevent(e);
-            app.tr
+            app.cmd
               .SelectBlocks([])
               .Select(after, ActionOrigin.UserInput)
               .Dispatch();
@@ -113,7 +113,7 @@ export const DocumentComp = (props: RendererProps) => {
         const section = app.schema.type("section").default();
         if (!section) return;
         const after = PinnedSelection.fromPin(Pin.toStartOf(section)!);
-        app.tr
+        app.cmd
           .SelectBlocks([])
           .Insert(at, section)
           .Select(after, ActionOrigin.UserInput)

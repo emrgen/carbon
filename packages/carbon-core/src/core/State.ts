@@ -7,6 +7,7 @@ import { Draft } from "./Draft";
 import { StateActions, StateChanges } from "./NodeChange";
 import { BlockSelection } from "./BlockSelection";
 import { MarkSet, PluginManager, Schema } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
 
 export interface ProduceOpts {
   origin: ActionOrigin;
@@ -16,6 +17,7 @@ export interface ProduceOpts {
 }
 
 export interface State {
+  previous: Optional<State>;
   scope: Symbol;
   content: Node;
   marks: MarkSet;

@@ -176,10 +176,12 @@ export class Carbon extends EventEmitter {
 
   // return a proxy transaction
   get cmd(): Transaction {
-    // if (!this.committed) {
-    // 	throw new Error('cannot create a new command while there is a pending transaction')
-    // }
-    this.committed = false;
+    if (!this.committed) {
+      throw new Error(
+        "cannot create a new command while there is a pending transaction",
+      );
+    }
+    // this.committed = false;
     return Transaction.create(
       this,
       this.commands,

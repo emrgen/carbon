@@ -2,8 +2,7 @@ import { Node } from "./Node";
 import { NodeId } from "./NodeId";
 import { With } from "@emrgen/types";
 
-// a slice of adjacent nodes
-
+// Fragment is a slice of adjacent nodes
 export class Fragment {
   static fromNode(node: Node): Fragment {
     return Fragment.from([node]);
@@ -18,8 +17,6 @@ export class Fragment {
   static from(nodes: Node[], nodeSelection = false): Fragment {
     return new Fragment(nodes, nodeSelection);
   }
-
-  static empty = new Fragment([]);
 
   get isEmpty() {
     return this.content.length === 0;
@@ -57,12 +54,12 @@ export class Fragment {
   destroy(): void {}
 
   // process each node inside the fragment
-  forEach(fn: With<Node>) {
+  each(fn: With<Node>) {
     this.nodes.forEach(fn);
   }
 
   // traverse all nodes inside the fragment
-  forAll(fn: With<Node>) {
+  all(fn: With<Node>) {
     this.nodes.forEach((n) =>
       n.preorder((ch) => {
         fn(ch);

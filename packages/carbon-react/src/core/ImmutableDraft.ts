@@ -121,13 +121,13 @@ export class ImmutableDraft implements Draft {
   }
 
   private addContentChanged(id: NodeId) {
+    // if the node is not deleted, we need to update the view and stabilize the node
+    // there is no need to update or stabilize deleted nodes
     if (this.nodeMap.isDeleted(id)) {
       return;
     }
+    // console.log("UNSTABLE", id.toString());
     this.contentChanged.add(id);
-    // if the node is not deleted, add it to the unstable list
-    // there is no need to stabilize deleted nodes
-    console.log("UNSTABLE", id.toString());
     this.unstable.add(id);
   }
 
@@ -405,9 +405,9 @@ export class ImmutableDraft implements Draft {
       this.tm.updateProps(node, {
         [PlaceholderPath]:
           content.length === 0
-            ? this.nodeMap
+            ? (this.nodeMap
                 .parent(node)
-                ?.props.get<string>(EmptyPlaceholderPath) ?? ""
+                ?.props.get<string>(EmptyPlaceholderPath) ?? "")
             : " ",
       });
     }
@@ -419,9 +419,9 @@ export class ImmutableDraft implements Draft {
       const updated = this.tm.updateProps(parent, {
         [PlaceholderPath]:
           content.length === 0
-            ? this.nodeMap
+            ? (this.nodeMap
                 .parent(parent)
-                ?.props.get<string>(EmptyPlaceholderPath) ?? ""
+                ?.props.get<string>(EmptyPlaceholderPath) ?? "")
             : " ",
       });
       // if (updated) {
@@ -1057,7 +1057,7 @@ export class ImmutableDraft implements Draft {
   }
 }
 
-// traps the changes to the node and records them
+// traps the changes to the node and records them for the commit
 class Transformer {
   constructor(
     private readonly changes: StateChanges,
@@ -1074,7 +1074,6 @@ class Transformer {
     );
     this.changes.add(NameChange.create(node.id, node.type.name, type.name));
     // this.actions.add(ChangeNameAction.withBefore(node.id, node.type.name, type.name));
-
     node.changeType(type);
   }
 
@@ -1196,7 +1195,6 @@ class Transformer {
   }
 
   updateProps(node: Node, props: NodePropsJson) {
-    // return
     console.log(p14("%c[trap]"), "color:green", "update", node.key);
     const before = reduce(
       props,

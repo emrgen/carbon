@@ -24,10 +24,20 @@ import { Optional } from "@emrgen/types";
 import { TbMathXDivideY2 } from "react-icons/tb";
 import ResizeTextarea from "react-textarea-autosize";
 import { isKeyHotkey } from "is-hotkey";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
-import {CarbonBlock, RendererProps, useCarbon, useNodeActivated, useSelectionHalo} from "@emrgen/carbon-react";
-import { preventAndStop,Node} from "@emrgen/carbon-core";
-import {stop} from "@emrgen/carbon-core/src/utils/event";
+import {
+  useCombineConnectors,
+  useConnectorsToProps,
+  useDragDropRectSelect,
+} from "@emrgen/carbon-dragon-react";
+import {
+  CarbonBlock,
+  RendererProps,
+  useCarbon,
+  useNodeActivated,
+  useSelectionHalo,
+} from "@emrgen/carbon-react";
+import { Node, preventAndStop } from "@emrgen/carbon-core";
+import { stop } from "@emrgen/carbon-core/src/utils/event";
 
 export const EquationComp = (props: RendererProps) => {
   const { node } = props;
@@ -58,7 +68,7 @@ export const EquationComp = (props: RendererProps) => {
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
   const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection)
+    useCombineConnectors(dragDropRect, selection),
   );
   const activated = useNodeActivated(props);
 
@@ -68,33 +78,33 @@ export const EquationComp = (props: RendererProps) => {
     } else {
       updater.onClose();
     }
-  }, [activated.yes]);
+  }, [activated.yes, updater]);
 
-  const handleClick = useCallback(
-    (e) => {
-      stop(e);
-      // avoid selection if block is already selected
-      // if (react.blockSelection && react.blockSelection.has(node.id)) return;
-      // react.tr
-      //   .selectNodes([node.id])
-      //   .Update(node.id, {
-      //     node: {
-      //       isEditing: true,
-      //     },
-      //   })
-      //   .Dispatch();
-    },
-    []
-  );
+  const handleClick = useCallback((e) => {
+    stop(e);
+    // avoid selection if block is already selected
+    // if (react.blockSelection && react.blockSelection.has(node.id)) return;
+    // react.tr
+    //   .selectNodes([node.id])
+    //   .Update(node.id, {
+    //     node: {
+    //       isEditing: true,
+    //     },
+    //   })
+    //   .Dispatch();
+  }, []);
 
   const handleMouseDown = useCallback(
     (e) => {
       const { selection, blockSelection } = app.state;
-      if (blockSelection.isActive && blockSelection.blocks.some(n => n.id.eq(node.id))) {
+      if (
+        blockSelection.isActive &&
+        blockSelection.blocks.some((n) => n.id.eq(node.id))
+      ) {
         stop(e);
       }
     },
-    [app, node.id]
+    [app, node.id],
   );
 
   const handleOnClick = (e: React.MouseEvent) => {
@@ -190,9 +200,7 @@ export const EquationComp = (props: RendererProps) => {
                 const title = node.child(0) as Node;
                 const text = app.schema.text(e.target.value)!;
                 app.enable(() => {
-                  app.tr
-                    .SetContent(title.id, [text])
-                    .Dispatch();
+                  app.tr.SetContent(title.id, [text]).Dispatch();
                 });
               }}
             />
@@ -204,7 +212,7 @@ export const EquationComp = (props: RendererProps) => {
           </Stack>
         ) : null}
       </>,
-      overlayRef.current
+      overlayRef.current,
     );
   }, [app, node, overlayRef, updater, error]);
 
@@ -245,6 +253,7 @@ export const EquationComp = (props: RendererProps) => {
 
 interface EquationContentProps extends RendererProps {
   onError(msg: string): void;
+
   error: string;
 }
 
