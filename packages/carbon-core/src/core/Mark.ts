@@ -163,8 +163,18 @@ export class MarkSet {
     return !!this.marks[mark.name];
   }
 
-  has(mark: Mark): boolean {
-    return values(this.marks).some((m) => m.eq(mark));
+  has(mark: Mark | Object): boolean {
+    // FIXME: This is hack, we should not be comparing objects like this
+    return values(this.marks)
+      .map((m) => new Mark(m.name, m.props))
+      .some((m) => {
+        if (mark instanceof Mark) {
+          return m.eq(mark);
+        }
+
+        const { name, props } = mark as any;
+        return m.eq(new Mark(name, props));
+      });
   }
 
   map<A>(fn: (value: Mark, index: number, array: Mark[]) => A) {
