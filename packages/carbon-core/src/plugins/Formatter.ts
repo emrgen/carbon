@@ -42,6 +42,7 @@ declare module "@emrgen/carbon-core" {
         selection: Selection | BlockSelection,
       ) => Optional<Transaction>;
       toggle(mark: Mark): Optional<Transaction>;
+      remove(mark: Mark, exact?: boolean): Optional<Transaction>;
     };
   }
 }
@@ -62,6 +63,7 @@ export class FormatterPlugin extends BeforePlugin {
       color: this.color,
       background: this.background,
       toggle: this.toggle,
+      remove: this.remove,
     };
   }
 
@@ -175,6 +177,17 @@ export class FormatterPlugin extends BeforePlugin {
         .select(selection, ActionOrigin.UserInput);
     } else {
       return tr.action.format(blockSelection, mark);
+    }
+  }
+
+  remove(tr: Transaction, mark: Mark, exact = false) {
+    const { selection, blockSelection } = tr.state;
+    if (blockSelection.isEmpty) {
+      return tr.transform
+        ?.removeMark(selection, mark)
+        ?.select(selection, ActionOrigin.UserInput);
+    } else {
+      return tr.transform.removeMark(blockSelection, mark);
     }
   }
 }

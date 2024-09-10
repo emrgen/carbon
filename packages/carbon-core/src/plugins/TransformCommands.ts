@@ -83,6 +83,10 @@ declare module "@emrgen/carbon-core" {
         selection: PinnedSelection | BlockSelection,
         mark: Mark,
       ) => Transaction;
+      removeMark: (
+        selection: PinnedSelection | BlockSelection,
+        mark: Mark,
+      ) => Transaction;
       insert(node: Node, ref: Node, opts?: InsertPos): Transaction;
       insertText(
         selection: PinnedSelection,
@@ -131,7 +135,24 @@ export class TransformCommands extends BeforePlugin {
       change: this.change,
       update: this.update,
       mark: this.mark,
+      removeMark: this.removeMark,
     };
+  }
+
+  removeMark(
+    tr: Transaction,
+    selection: PinnedSelection | BlockSelection,
+    mark: Mark,
+  ) {
+    if (selection instanceof BlockSelection) {
+      throw new Error("Not implemented");
+    } else {
+      if (selection.isCollapsed) {
+        return;
+      }
+
+      throw new Error("Not implemented");
+    }
   }
 
   // these are the default formats that can be applied to a node
@@ -178,9 +199,8 @@ export class TransformCommands extends BeforePlugin {
       const updateEndNode =
         hasMark || (!hasMark && !MarkSet.from(endNode.marks).has(mark));
 
-      console.log(startDownPin.node.textContent, endDownPin.node.textContent);
-
-      console.log(startNode.id.toString(), endNode.id.toString());
+      // console.log(startDownPin.node.textContent, endDownPin.node.textContent);
+      // console.log(startNode.id.toString(), endNode.id.toString());
 
       // if start and end pin are within the same title node
       if (startNode.eq(endNode)) {

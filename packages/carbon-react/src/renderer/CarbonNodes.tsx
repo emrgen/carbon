@@ -1,6 +1,6 @@
 import React, {
-  ForwardedRef,
   forwardRef,
+  ForwardRefRenderFunction,
   memo,
   useEffect,
   useImperativeHandle,
@@ -70,10 +70,10 @@ const mapName = (name: string, parentName?: string) => {
   return name;
 };
 
-const InnerElement = (
-  props: RendererProps,
-  forwardedRef: ForwardedRef<any>,
-) => {
+const InnerElement: ForwardRefRenderFunction<
+  any,
+  Omit<RendererProps, "ref">
+> = (props, forwardedRef) => {
   const { tag: Tag = "div", node, children, custom = {} } = props;
   const { key, name, renderVersion } = node;
   const editor = useCarbon();
@@ -200,7 +200,7 @@ export const useMarks = (marks: Mark[]) => {
         case "background":
           merge(style, {
             background: mark.props?.color ?? "default",
-            padding: "0.1em 0.1em",
+            // padding: "0.1em 0.1em",
           });
           break;
         case "code":
@@ -298,7 +298,10 @@ export const CarbonText = memo(InnerCarbonText, (prev, next) => {
 });
 
 // render block node with div
-const InnerCarbonBlock = (props: RendererProps, ref) => {
+const InnerCarbonBlock: ForwardRefRenderFunction<
+  any,
+  Omit<RendererProps, "ref">
+> = (props, ref) => {
   const { node, children, custom } = props;
 
   const tag = useMemo(() => {

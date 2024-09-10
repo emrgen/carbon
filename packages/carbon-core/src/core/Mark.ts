@@ -131,7 +131,13 @@ export class MarkSet {
 
   toggle(mark: Mark) {
     if (this.has(mark)) {
-      this.remove(mark);
+      const similar = this.marks[mark.name];
+      if (similar && !similar.eq(mark)) {
+        this.remove(similar);
+        this.add(mark);
+      } else {
+        this.remove(mark);
+      }
     } else {
       this.add(mark);
     }
@@ -153,8 +159,12 @@ export class MarkSet {
     delete this.marks[mark.name];
   }
 
-  has(mark: Mark): boolean {
+  hasSimilar(mark: Mark) {
     return !!this.marks[mark.name];
+  }
+
+  has(mark: Mark): boolean {
+    return values(this.marks).some((m) => m.eq(mark));
   }
 
   map<A>(fn: (value: Mark, index: number, array: Mark[]) => A) {

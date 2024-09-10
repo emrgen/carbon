@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 import {
   Box,
+  Circle,
   HStack,
   IconButton,
   IconButtonProps,
@@ -10,7 +11,8 @@ import {
 } from "@chakra-ui/react";
 import { BiBold, BiStrikethrough, BiUnderline } from "react-icons/bi";
 import { debounce } from "lodash";
-import { GoItalic } from "react-icons/go";
+import { TbItalic } from "react-icons/tb";
+import { RxCross2 } from "react-icons/rx";
 
 export default function SelectionTracker() {
   const app = useCarbon();
@@ -91,8 +93,10 @@ export default function SelectionTracker() {
             p={1}
             bg={"white"}
             borderRadius={"md"}
-            boxShadow={"md"}
-            w={"130px"}
+            boxShadow={"0 3px 10px rgba(0,0,0,0.2)"}
+            justify={"space-between"}
+            w={"190px"}
+            spacing={0}
           >
             <ContextButton
               aria-label={"bold"}
@@ -103,7 +107,7 @@ export default function SelectionTracker() {
             />
             <ContextButton
               aria-label={"italic"}
-              icon={<GoItalic />}
+              icon={<TbItalic />}
               onClick={() => {
                 app.cmd.formatter.toggle(Mark.ITALIC)?.dispatch();
               }}
@@ -120,6 +124,31 @@ export default function SelectionTracker() {
               icon={<BiStrikethrough />}
               onClick={() => {
                 app.cmd.formatter.toggle(Mark.STRIKE)?.dispatch();
+              }}
+            />
+            <ContextButton
+              aria-label={"strike"}
+              icon={<Circle size={4} bg={"#ffce26"} />}
+              onClick={() => {
+                app.cmd.formatter
+                  .toggle(Mark.background("#ffce26"))
+                  ?.dispatch();
+              }}
+            />
+            <ContextButton
+              aria-label={"strike"}
+              icon={<Circle size={4} bg={"#8ae0ff"} />}
+              onClick={() => {
+                app.cmd.formatter
+                  .toggle(Mark.background("#8ae0ff"))
+                  ?.dispatch();
+              }}
+            />
+            <ContextButton
+              aria-label={"strike"}
+              icon={<RxCross2 />}
+              onClick={() => {
+                app.cmd.formatter.remove(Mark.background("x"))?.dispatch();
               }}
             />
           </HStack>
