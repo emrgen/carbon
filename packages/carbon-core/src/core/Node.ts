@@ -206,10 +206,15 @@ export class Node extends EventEmitter implements IntoNodeId {
   // starting from left of <a> to before of </a>
   // if total focus size is needed for a block, need to add 1
   // used in Position
-  // get stepSize() {
-  // 	if (this.stepSizeCache) {
-  // 		return this.stepSizeCache
-  // 	}
+  get stepSize() {
+    if (this.isText) return this.textContent.length;
+    if (this.isInlineAtom) {
+      return this.isIsolate ? 1 : (this.props.get(AtomSizePath) ?? 1);
+    }
+
+    const { children } = this;
+    return children.reduce((s, n) => s + n.stepSize, children.length + 1);
+  }
 
   // 	if (this.isText) {
   // 		this.stepSizeCache = this.size

@@ -8,8 +8,10 @@ import { TransactionManager } from "./TransactionManager";
 import { EventsOut } from "./Event";
 import { Transaction } from "./Transaction";
 import { PluginManager } from "./PluginManager";
-import { ActionOrigin, State, StateActions } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { StateActions } from "./NodeChange";
+import { State } from "./State";
+import { ActionOrigin } from "./actions/types";
 
 export enum NodeChangeType {
   update = "update",

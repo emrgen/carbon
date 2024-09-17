@@ -22,12 +22,13 @@ export class Pin {
   node: Node;
   // focus offset
   offset: number;
-  //
-  ref: PinReference;
 
-  static NULL = new Pin(Node.NULL, 0);
+  // number of steps to reach the location
+  steps: number = 0;
 
-  static IDENTITY = new Pin(Node.IDENTITY, IDENTITY_OFFSET);
+  static NULL = new Pin(Node.NULL, 0, 0);
+
+  static IDENTITY = new Pin(Node.IDENTITY, IDENTITY_OFFSET, 0);
 
   get isIdentity() {
     return this.eq(Pin.IDENTITY);
@@ -66,7 +67,7 @@ export class Pin {
     return Pin.create(node, offset);
   }
 
-  static fromDom(node: Node, offset: number, align = false): Optional<Pin> {
+  static fromDom(node: Node, offset: number): Optional<Pin> {
     if (!node.isFocusable) {
       if (offset === 0) {
         node = node.find((n) => n.isFocusable) as Node;
@@ -80,7 +81,7 @@ export class Pin {
       return pin;
     }
 
-    return pin?.moveBy(offset, align);
+    return pin?.moveBy(offset);
   }
 
   static toBefore(node: Node): Pin {
@@ -133,7 +134,7 @@ export class Pin {
     return Pin.create(child, child.focusSize).up();
   }
 
-  static create(node: Node, offset: number) {
+  static create(node: Node, offset: number, steps: number = 0) {
     if (!node.isFocusable && !node.hasFocusable) {
       console.log("create pin", node.name, offset, node);
       throw new Error(`node is not focusable: ${node.name}`);
@@ -145,28 +146,20 @@ export class Pin {
       );
     }
 
-    return new Pin(node, offset);
+    return new Pin(node, offset, steps);
   }
 
   // NOTE: use it very cautiously and sparingly
   // use it when you want to create a pin that is points to a location which is will exist in the future
   // for example when you want to create a pin to the end of the node that is not created yet
-  static future(
-    node: Node,
-    offset: number,
-    ref: PinReference = PinReference.front,
-  ): Pin {
-    return new Pin(node, offset, ref);
+  static future(node: Node, offset: number, steps: number): Pin {
+    return new Pin(node, offset, steps);
   }
 
-  private constructor(
-    node: Node,
-    offset: number,
-    ref: PinReference = PinReference.front,
-  ) {
+  private constructor(node: Node, offset: number, steps: number) {
     this.node = node;
     this.offset = offset;
-    this.ref = ref;
+    this.steps = steps;
   }
 
   get isInvalid() {
@@ -373,16 +366,16 @@ export class Pin {
   }
 
   // move the pin by distance through focusable nodes
-  moveBy(distance: number, align = false): Optional<Pin> {
+  moveBy(distance: number): Optional<Pin> {
     const down = this.down();
     return distance >= 0
-      ? down?.moveForwardBy(distance, align)?.up()
-      : down?.moveBackwardBy(-distance, align)?.up();
+      ? down?.moveForwardBy(distance)?.up()
+      : down?.moveBackwardBy(-distance)?.up();
   }
 
   // each step can be considered as one right key press
   // tries to move as much as possible
-  private moveForwardBy(distance: number, align = false): Optional<Pin> {
+  private moveForwardBy(distance: number): Optional<Pin> {
     // console.log('Pin.moveForwardBy', this.toString(),distance);
     if (distance === 0) {
       return this.clone();
@@ -436,7 +429,7 @@ export class Pin {
   }
 
   // each step can be considered as one left key press
-  private moveBackwardBy(distance: number, align = false): Optional<Pin> {
+  private moveBackwardBy(distance: number): Optional<Pin> {
     if (distance === 0) {
       return this.clone();
     }
@@ -500,7 +493,7 @@ export class Pin {
   }
 
   clone() {
-    return new Pin(this.node, this.offset);
+    return new Pin(this.node, this.offset, this.steps);
   }
 
   toJSON() {
