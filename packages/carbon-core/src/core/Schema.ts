@@ -130,8 +130,6 @@ export interface NodeSpec {
 
   // the node can be treated as a standalone document
   document?: boolean;
-  // inline atom wrapper wraps the inline atom with two empty text nodes
-  inlineAtomWrapper?: boolean;
 
   inlineSelectable?: boolean;
   blockSelectable?: boolean;

@@ -1492,7 +1492,7 @@ export class TransformCommands extends BeforePlugin {
     // need more involved splitting
     // clone all nodes after the cursor up to the splitBlock
     const { node } = pin.down()!;
-    const cloneBlocks = takeUntil(node.closest((n) => !n.isZero)?.chain!, (n) =>
+    const cloneBlocks = takeUntil(node.chain!, (n) =>
       n.eq(splitBlock),
     ).reverse();
 
@@ -1548,7 +1548,7 @@ export class TransformCommands extends BeforePlugin {
           }
         }
       } else {
-        // leaf node is reached
+        // NOTE: leaf node is reached
         // console.log('last node', splittedNode.id.key);
         // console.log(pin.node.name, );
         const [leftNodes, _, rightNodes] = splitTextBlock(pin, pin, app);
@@ -1559,7 +1559,10 @@ export class TransformCommands extends BeforePlugin {
           rightNodes,
         );
         setContentCommands.push(
-          SetContentAction.create(pin.node.id, leftNodes),
+          SetContentAction.create(
+            pin.node.id,
+            TextBlock.normalizeNodeContent(leftNodes),
+          ),
         );
         setContentCommands.push(
           SetContentAction.create(parentBlock.id, rightNodes),
@@ -1574,14 +1577,14 @@ export class TransformCommands extends BeforePlugin {
     // console.log(rootNode?.descendants().map(n => n.id.key));
     // console.log('XXXXX', rootNode, rootInsertPoint.toString());
 
+    console.log(rootNode?.name, rootNode?.id.toString());
+    printNode(rootNode);
     focusPoint = Pin.toStartOf(rootNode)?.point;
     // console.log("insert node", rootNode?.name, rootNode);
     // console.log("move command count", moveCommands.length);
     // console.log("remove command count", removeCommands.length);
 
     console.log(focusPoint?.toString(), rootNode);
-
-    printNode(rootNode);
 
     // console.log("insert point", rootNode?.name, rootNode);
     tr.Insert(rootInsertPoint, rootNode!)

@@ -1,4 +1,4 @@
-import { Mark } from "@emrgen/carbon-core";
+import { EmptyInline, Mark } from "@emrgen/carbon-core";
 import React, { useEffect, useMemo, useState } from "react";
 import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 import {
@@ -34,12 +34,17 @@ export default function SelectionTracker() {
       }
 
       const { head, tail } = state.selection;
-      if (head.eq(tail)) {
+      const headDown = head.down();
+      const tailDown = tail.down();
+      if (
+        head.eq(tail) ||
+        (headDown.node.eq(tailDown.node) && EmptyInline.is(headDown.node))
+      ) {
         setShowContextMenu(false);
         return;
       }
 
-      // dont show context menu if the selection is in the document title
+      // don't show context menu if the selection is in the document title
       if (head.node.parent?.isDocument || tail.node.parent?.isDocument) {
         setShowContextMenu(false);
         return;

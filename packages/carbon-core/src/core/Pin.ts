@@ -133,7 +133,11 @@ export class Pin {
     return Pin.create(child, child.focusSize).up();
   }
 
-  static create(node: Node, offset: number) {
+  static create(
+    node: Node,
+    offset: number,
+    ref: PinReference = PinReference.front,
+  ): Pin {
     if (!node.isFocusable && !node.hasFocusable) {
       console.log("create pin", node.name, offset, node);
       throw new Error(`node is not focusable: ${node.name}`);
@@ -145,7 +149,7 @@ export class Pin {
       );
     }
 
-    return new Pin(node, offset);
+    return new Pin(node, offset, ref);
   }
 
   // NOTE: use it very cautiously and sparingly
@@ -157,6 +161,14 @@ export class Pin {
     ref: PinReference = PinReference.front,
   ): Pin {
     return new Pin(node, offset, ref);
+  }
+
+  get isLeftAligned(): boolean {
+    return this.ref === PinReference.front;
+  }
+
+  get isRightAligned(): boolean {
+    return this.ref === PinReference.back;
   }
 
   private constructor(
@@ -217,8 +229,10 @@ export class Pin {
     }
 
     // has focusable node is the closest text container block child
-    const hasFocusable = this.node.closest((n) => !!n.parent?.isTextContainer)!;
-    // if previous node is a inline node within the same text container block
+    const hasFocusable = this.node.closest(
+      (n) => n.isTextContainer || !!n.parent?.isTextContainer,
+    )!;
+    // if previous node is an inline node within the same text container block
     const prevFocusable = this.node.prev((n) => n.isFocusable);
     console.log(
       this.toString(),
@@ -232,9 +246,13 @@ export class Pin {
       this.offset === 0 &&
       prevFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
-      return Pin.create(prevFocusable, prevFocusable.focusSize);
+      return Pin.create(
+        prevFocusable,
+        prevFocusable.focusSize,
+        PinReference.back,
+      );
     } else {
-      return this;
+      return Pin.create(this.node, this.offset, PinReference.front);
     }
   }
 
@@ -250,7 +268,9 @@ export class Pin {
     }
 
     // has focusable node is the closest text container block child
-    const hasFocusable = this.node.closest((n) => !!n.parent?.isTextContainer)!;
+    const hasFocusable = this.node.closest(
+      (n) => n.isTextContainer || !!n.parent?.isTextContainer,
+    )!;
     // if previous node is an inline node within the same text container block
     const nextFocusable = this.node.next((n) => n.isFocusable);
     if (
@@ -258,9 +278,9 @@ export class Pin {
       this.offset === this.node.focusSize &&
       nextFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
-      return Pin.create(nextFocusable, 0);
+      return Pin.create(nextFocusable, 0, PinReference.front);
     } else {
-      return this;
+      return Pin.create(this.node, this.offset, PinReference.back);
     }
   }
 

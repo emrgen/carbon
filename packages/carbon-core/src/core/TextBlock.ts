@@ -9,6 +9,7 @@ import {
   Pin,
 } from "@emrgen/carbon-core";
 import { InlineNode } from "./InlineNode";
+import { last } from "lodash";
 
 // utility class for text blocks
 // title is a text block
@@ -47,7 +48,7 @@ export class TextBlock {
 
   static normalizeNodeContent(content: Node[], prent?: Node) {
     // merge adjacent text nodes with the same marks
-    return (
+    const nodes =
       content.reduce((acc, curr, index) => {
         // FIXME: this is a hack to remove the class from the title node
         // as
@@ -63,7 +64,12 @@ export class TextBlock {
         const currMarks = MarkSet.from(curr.marks);
         const prevClass = prev.props.get(CodeTokenClassPath);
         const currClass = curr.props.get(CodeTokenClassPath);
-        if (prevMarks.eq(currMarks) && prevClass === currClass) {
+        if (
+          prevMarks.eq(currMarks) &&
+          prevClass === currClass &&
+          !prev.isIsolate &&
+          !curr.isIsolate
+        ) {
           const prevClone = prev.clone();
           acc.pop();
 
@@ -74,8 +80,53 @@ export class TextBlock {
         }
 
         return [...acc, curr];
-      }, [] as Node[]) ?? []
-    );
+      }, [] as Node[]) ?? [];
+
+    const result = nodes.reduce((acc, curr, index) => {
+      if (index === 0) {
+        // if the first node is an inline atom wrapper, add an empty node before it
+        if (this.isInlineAtomIsolate(curr)) {
+          const empty = curr.type.schema.type("empty")?.default();
+          if (!empty) {
+            throw new Error("empty node not found");
+          }
+          return [empty, curr];
+        }
+
+        return [curr];
+      }
+
+      const prev = acc[acc.length - 1] as Node;
+
+      if (EmptyInline.is(prev) && EmptyInline.is(curr)) {
+        return acc;
+      }
+
+      // if both are not inline atom wrappers, add an empty node between them
+      if (!this.isInlineAtomIsolate(prev) && !this.isInlineAtomIsolate(curr)) {
+        const empty = curr.type.schema.type("empty")?.default();
+        if (!empty) {
+          throw new Error("empty node not found");
+        }
+        return [...acc, empty, curr];
+      }
+
+      return [...acc, curr];
+    }, [] as Node[]);
+
+    if (result.length && this.isInlineAtomIsolate(last(result)!)) {
+      const empty = last(result)?.type.schema.type("empty")?.default();
+      if (!empty) {
+        throw new Error("empty node not found");
+      }
+      return [...result, empty];
+    }
+
+    return result;
+  }
+
+  static isInlineAtomIsolate(node: Node) {
+    return node.isIsolate && node.type.isInline && node.type.isAtom;
   }
 
   // remove content from a text block from a given range
@@ -97,7 +148,7 @@ export class TextBlock {
     console.log(startDown.node.id.toString(), endDown.node.id.toString());
     console.log(startNode.id.toString(), endNode.id.toString());
     if (startNode.eq(endNode)) {
-      if (startNode.isInlineAtom || startNode.type.isInlineAtomWrapper) {
+      if (startNode.isInlineAtom) {
         return this.node.children.filter((n) => !n.eq(startNode));
       }
 

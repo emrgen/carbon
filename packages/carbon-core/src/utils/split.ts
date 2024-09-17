@@ -7,29 +7,35 @@ export function splitTextBlock(
   end: Pin,
   app: Carbon,
 ): [Node[], Node[], Node[]] {
-  const startPin = start.down()!;
-  const endPin = end.down()!;
+  const startPin = start.down()!.leftAlign;
+  const endPin = end.down()!.leftAlign;
 
   if (EmptyInline.is(startPin.node) && EmptyInline.is(endPin.node)) {
+    const startNode = startPin.node!;
+    const endNode = endPin.node!;
     if (startPin.eq(endPin)) {
-      console.log("xxxxxxxxxxx");
-      const node = startPin.node.parent!;
-      if (EmptyInline.isPrefix(startPin.node)) {
-        console.log("prefix", node.name);
+      if (startPin.isLeftAligned) {
+        console.log("prefix", startNode.name);
         return [
-          node.prevSiblings.map((n) => n.clone()),
+          [
+            ...startNode.prevSiblings.map((n) => n.clone()),
+            startNode.type.default()!,
+          ],
           [],
-          [node.clone(), ...node.nextSiblings.map((n) => n.clone())],
+          [startNode.clone(), ...startNode.nextSiblings.map((n) => n.clone())],
+        ];
+      } else {
+        console.log("suffix", startNode.name);
+        return [
+          [...startNode.prevSiblings.map((n) => n.clone()), startNode.clone()],
+          [],
+          [
+            startNode.type.default()!,
+            ...startNode.nextSiblings.map((n) => n.clone()),
+          ],
         ];
       }
-      if (EmptyInline.isSuffix(startPin.node)) {
-        console.log("suffix");
-        return [
-          [...node.prevSiblings.map((n) => n.clone()), node.clone()],
-          [],
-          node.nextSiblings.map((n) => n.clone()),
-        ];
-      }
+    } else {
     }
   }
 
