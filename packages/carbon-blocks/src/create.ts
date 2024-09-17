@@ -64,14 +64,10 @@ export const section = (children: any[] = [], props = {}) => ({
 });
 
 export const mention = (name: string) => {
-  return node("mention", [
-    node("empty"),
-    node("mentionAtom", [], {
-      [AtomContentPath]: `@${name}`,
-      [AtomSizePath]: name.length + 1,
-    }),
-    node("empty"),
-  ]);
+  return node("mention", [], {
+    [AtomContentPath]: `@${name}`,
+    [AtomSizePath]: name.length + 1,
+  });
 };
 
 export const emoji = (emoji: string) => {

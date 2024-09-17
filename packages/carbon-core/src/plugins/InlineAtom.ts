@@ -8,6 +8,7 @@ export class InlineAtom extends CarbonPlugin {
       group: "inline",
       inline: true,
       inlineSelectable: true,
+      // hint that the node is focusable (cursor can be placed wrt this node)
       focusable: true,
       atom: true,
       tag: "span",

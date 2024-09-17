@@ -644,7 +644,15 @@ const data = node("carbon", [
 
       section([title([emoji("🖐️")])]),
       section([
-        title([mention("subhasis"), mention("bubun"), mention("bappa")]),
+        title([
+          node("empty"),
+          mention("subhasis"),
+          node("empty"),
+          mention("bubun"),
+          node("empty"),
+          mention("bappa"),
+          node("empty"),
+        ]),
       ]),
       section([title([text("section 1")])]),
       // node("pageLink", [], {

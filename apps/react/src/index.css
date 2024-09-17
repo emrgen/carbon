@@ -38,3 +38,10 @@ html, body, .root {
   height: 100%;
   width: 100%;
 }
+
+span[data-name=text] {
+  /*font-family: 'SF Pro Text', Arial, Helvetica, sans-serif;*/
+  /*font-size: 16px;*/
+  /*color: #000;*/
+  /*letter-spacing: 0.04em;*/
+}

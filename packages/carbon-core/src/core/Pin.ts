@@ -208,6 +208,14 @@ export class Pin {
   // aligns pin to the left when it is in the middle of the two text blocks
   // Validity: valid for down pin only
   get leftAlign(): Pin {
+    if (EmptyInline.is(this.node)) {
+      if (this.offset === 1) {
+        return Pin.create(this.node, 0);
+      } else {
+        return this;
+      }
+    }
+
     // has focusable node is the closest text container block child
     const hasFocusable = this.node.closest((n) => !!n.parent?.isTextContainer)!;
     // if previous node is a inline node within the same text container block
@@ -221,7 +229,7 @@ export class Pin {
     );
     if (
       !this.node.isEmpty &&
-      (this.offset === 0 || EmptyInline.is(this.node)) &&
+      this.offset === 0 &&
       prevFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
       return Pin.create(prevFocusable, prevFocusable.focusSize);
@@ -233,13 +241,21 @@ export class Pin {
   // aligns pin to the right when it is in the middle of the two inline nodes, can be text, atomWrapper etc.
   // Validity: valid for down pin only
   get rightAlign(): Pin {
+    if (EmptyInline.is(this.node)) {
+      if (this.offset === 0) {
+        return Pin.create(this.node, 1);
+      } else {
+        return this;
+      }
+    }
+
     // has focusable node is the closest text container block child
     const hasFocusable = this.node.closest((n) => !!n.parent?.isTextContainer)!;
     // if previous node is an inline node within the same text container block
     const nextFocusable = this.node.next((n) => n.isFocusable);
     if (
       !this.node.isEmpty &&
-      (this.offset === this.node.focusSize || EmptyInline.is(this.node)) &&
+      this.offset === this.node.focusSize &&
       nextFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
       return Pin.create(nextFocusable, 0);

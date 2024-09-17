@@ -6,24 +6,24 @@ import {
   NodeSpec,
 } from "@emrgen/carbon-core";
 
-export class Mention extends CarbonPlugin {
+export class Mention extends InlineAtom {
   name = "mention";
 
   override spec(): NodeSpec {
     return {
       group: "inline",
-      content: "empty mentionAtom empty",
       inline: true,
+      atom: true,
+      isolate: true,
       mergeable: false,
-      inlineAtomWrapper: true,
-      // inlineSelectable: true,
+      // hint that the node is not focusable (cursor can't be placed wrt this node)
       focusable: false,
       tag: "span",
     };
   }
 
   plugins(): CarbonPlugin[] {
-    return [new MentionAtom()];
+    return [];
   }
 
   override handlers(): EventHandlerMap {

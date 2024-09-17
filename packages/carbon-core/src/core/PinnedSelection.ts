@@ -207,8 +207,10 @@ export class PinnedSelection {
     }
 
     // ensure that the selection is valid
-    console.assert(tail.node.isTextContainer);
-    console.assert(head.node.isTextContainer);
+    if (!tail.eq(Pin.NULL) && !tail.eq(head)) {
+      // console.assert(tail.node.isTextContainer);
+      // console.assert(head.node.isTextContainer);
+    }
   }
 
   get blocks(): Node[] {
@@ -334,10 +336,10 @@ export class PinnedSelection {
     return { head: null, tail: null };
   }
 
-  syncDom(store: NodeStore) {
+  syncDom(store: NodeStore): boolean {
     if (this.isInvalid) {
       console.warn("skipped invalid selection sync");
-      return;
+      return false;
     }
 
     // if (this.isDomInSync(store)) {
@@ -358,7 +360,7 @@ export class PinnedSelection {
           "color:red",
           "failed to map selection to dom",
         );
-        return;
+        return false;
       }
 
       const { anchorNode, anchorOffset, focusNode, focusOffset } = domSelection;
@@ -379,6 +381,7 @@ export class PinnedSelection {
         selection?.focusNode === focusNode &&
         selection?.anchorOffset === anchorOffset &&
         selection?.focusOffset === focusOffset;
+
       if (!inSync) {
         // console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
         selection?.setBaseAndExtent(
@@ -417,9 +420,13 @@ export class PinnedSelection {
         "failed to sync focus offset",
       );
       // console.log('Selection.syncDom:', this.toString(), domSel)
+
+      return inSync;
     } catch (err) {
       console.error(err);
     }
+
+    return false;
   }
 
   isDomInSync(store: NodeStore) {

@@ -34,6 +34,7 @@ import { ExplainComp } from "./renderers/Explain";
 import { PartialComp } from "./renderers/PartialComp";
 import { BookmarkComp } from "./renderers/Bookmark";
 import { PageLinkComp } from "./renderers/PageLink";
+import { MentionComp } from "./renderers/Mention";
 
 export const blockPresetRenderers = [
   ReactRenderer.create("document", DocumentComp),
@@ -80,8 +81,8 @@ export const blockPresetRenderers = [
   ReactRenderer.create("partial", PartialComp),
   ReactRenderer.create("emoji", CarbonText),
   ReactRenderer.create("empty", CarbonText),
-  // ReactRenderer.create("mention", Car),
-  ReactRenderer.create("mentionAtom", CarbonText),
+  ReactRenderer.create("mention", MentionComp),
+  // ReactRenderer.create("mentionAtom", CarbonText),
   ReactRenderer.create("bookmark", BookmarkComp),
   ReactRenderer.create("pageLink", PageLinkComp),
 ];

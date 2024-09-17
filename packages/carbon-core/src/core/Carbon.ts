@@ -81,7 +81,7 @@ export class Carbon extends EventEmitter {
       this.updateState(state, tr);
     });
 
-    this.change = new ChangeManager(this, this.sm, this.tm, pm);
+    this.change = new ChangeManager(this, pm);
     this.em = new EventManager(this, pm, this.change);
 
     this.commands = pm.commands();

@@ -29,11 +29,36 @@ export class EmptyInline extends InlineAtom {
 
   keydown(): EventHandlerMap {
     return {
+      left: (ctx) => {
+        const { currentNode, selection } = ctx;
+        console.log(
+          "before left",
+          selection.head.down().node.id.toString(),
+          selection.head.down().offset,
+        );
+        const down = selection.head.down().leftAlign;
+
+        if (selection.isCollapsed) {
+          preventAndStopCtx(ctx);
+          console.log(down.node.name, down.node.id.toString());
+          const prevFocusable = down.node.prev((n) => {
+            console.log("prev", n.name, n.toString());
+            return n.isFocusable;
+          });
+          if (!prevFocusable) {
+            console.log("no focusable found");
+            return;
+          }
+
+          const pin = Pin.toEndOf(prevFocusable)!;
+          const after = PinnedSelection.fromPin(pin)!;
+          console.log("after", after.toString());
+          ctx.cmd.Select(after).Dispatch();
+        }
+      },
       right: (ctx) => {
-        const { currentNode } = ctx;
-        const selection = EmptyInline.normalizeSelection(ctx.selection);
-        const { start } = selection;
-        const down = start.down().rightAlign;
+        const { currentNode, selection } = ctx;
+        const down = selection.start.down().rightAlign;
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
 
@@ -48,34 +73,11 @@ export class EmptyInline extends InlineAtom {
           ctx.cmd.Select(after).Dispatch();
         }
       },
-      left: (ctx) => {
-        const { currentNode } = ctx;
-        const selection = EmptyInline.normalizeSelection(ctx.selection);
-        const { start } = selection;
-        const down = start.down().leftAlign;
-
-        if (selection.isCollapsed) {
-          preventAndStopCtx(ctx);
-          const prevFocusable = down.node.prev((n) => {
-            console.log("prev", n.name, n);
-            return n.isFocusable;
-          });
-          if (!prevFocusable) {
-            console.log("no focusable found");
-            return;
-          }
-
-          const pin = Pin.toStartOf(prevFocusable)!;
-          const after = PinnedSelection.fromPin(pin)!;
-          ctx.cmd.Select(after).Dispatch();
-        }
-      },
-
       shiftRight: (ctx) => {
         preventAndStopCtx(ctx);
 
         const { selection } = ctx;
-        const head = EmptyInline.normalizePin(selection.head).down().rightAlign;
+        const head = selection.head.down().rightAlign;
         const nextFocusable = head.node.next((n) => n.isFocusable);
         if (!nextFocusable) {
           console.log("no focusable found");
@@ -91,7 +93,7 @@ export class EmptyInline extends InlineAtom {
         preventAndStopCtx(ctx);
 
         const { selection } = ctx;
-        const head = EmptyInline.normalizePin(selection.head).down().leftAlign;
+        const head = selection.head.down().leftAlign;
         const prevFocusable = head.node.prev((n) => n.isFocusable);
         if (!prevFocusable) {
           console.log("no focusable found");
@@ -105,49 +107,42 @@ export class EmptyInline extends InlineAtom {
     };
   }
 
-  static normalizeSelection(selection: PinnedSelection): PinnedSelection {
-    const { tail, head } = selection;
-    const t = EmptyInline.normalizePin(tail);
-    const h = EmptyInline.normalizePin(head);
-    return PinnedSelection.create(t, h);
-  }
-
-  // normalize pin to the nearest focusable node away from the inlineAtomIsolate
-  static normalizePin(pin: Pin): Pin {
-    const down = pin.down();
-    if (EmptyInline.isPrefix(down.node)) {
-      return Pin.toStartOf(down.node)!.up()!;
-    }
-
-    if (EmptyInline.isSuffix(down.node)) {
-      // debugger;
-      return Pin.toEndOf(down.node)!.up()!;
-    }
-
-    return pin;
-  }
-
   static is(node: Node): boolean {
     return node.name === "empty";
   }
 
   static isPrefix(node: Node): boolean {
-    const { nextSibling } = node;
+    const { prevSibling, nextSibling } = node;
     return <boolean>(
       (node.name === "empty" &&
+        !prevSibling &&
         nextSibling?.isIsolate &&
         nextSibling?.isInlineAtom &&
-        node.parent?.type.isInlineAtomWrapper)
+        !nextSibling?.isFocusable)
     );
   }
 
   static isSuffix(node: Node): boolean {
-    const { prevSibling } = node;
+    const { prevSibling, nextSibling } = node;
+    return <boolean>(
+      (node.name === "empty" &&
+        !node.nextSibling &&
+        prevSibling?.isIsolate &&
+        prevSibling?.isInlineAtom &&
+        !prevSibling?.isFocusable)
+    );
+  }
+
+  static isBetween(node: Node): boolean {
+    const { prevSibling, nextSibling } = node;
     return <boolean>(
       (node.name === "empty" &&
         prevSibling?.isIsolate &&
         prevSibling?.isInlineAtom &&
-        node.parent?.type.isInlineAtomWrapper)
+        !prevSibling?.isFocusable &&
+        nextSibling?.isIsolate &&
+        nextSibling?.isInlineAtom &&
+        !nextSibling?.isFocusable)
     );
   }
 }

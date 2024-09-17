@@ -3,8 +3,6 @@ import { NodeIdSet } from "./BSet";
 import { Carbon } from "./Carbon";
 import { Node } from "./Node";
 import { NodeTopicEmitter } from "./NodeEmitter";
-import { SelectionManager } from "./SelectionManager";
-import { TransactionManager } from "./TransactionManager";
 import { EventsOut } from "./Event";
 import { Transaction } from "./Transaction";
 import { PluginManager } from "./PluginManager";
@@ -34,8 +32,6 @@ export class ChangeManager extends NodeTopicEmitter {
 
   constructor(
     private readonly app: Carbon,
-    private readonly sm: SelectionManager,
-    private readonly tm: TransactionManager,
     private readonly pm: PluginManager,
   ) {
     super();
