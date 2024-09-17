@@ -1,11 +1,11 @@
 import { TitlePlugin } from "@emrgen/carbon-blocks";
 import {
   CarbonAction,
-  CodeTokenClassPath,
   EventContext,
   EventHandler,
   EventHandlerMap,
   InlineNode,
+  LocalClassPath,
   Mark,
   MarksPath,
   Node,
@@ -158,7 +158,7 @@ export class CodeTitle extends TitlePlugin {
         return schema.text(n.content, {
           props: {
             [MarksPath]: n.marks.map((m) => m.toJSON()),
-            [CodeTokenClassPath]: `token ${n.token}`,
+            [LocalClassPath]: `token ${n.token}`,
           },
         });
       })
@@ -420,7 +420,7 @@ const compareNodeToken = (a: Node, b: MarkLightToken) => {
     }
   }
 
-  return a.props.get(CodeTokenClassPath) === `token ${b.token}`;
+  return a.props.get(LocalClassPath) === `token ${b.token}`;
 };
 
 const compareMarkLightToken = (a: MarkLightToken, b: MarkLightToken) => {

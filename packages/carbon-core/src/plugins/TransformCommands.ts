@@ -18,6 +18,7 @@ import {
   Carbon,
   CarbonAction,
   cloneFrozenNode,
+  EmptyInline,
   Fragment,
   getContentMatch,
   hasSameIsolate,
@@ -65,7 +66,6 @@ import { ContentMatch } from "../core/ContentMatch";
 import { NodeColumn } from "../core/NodeColumn";
 import { InlineNode } from "../core/InlineNode";
 import { TextBlock } from "../core/TextBlock";
-import { EmptyInline } from "./EmptyInline";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -1549,7 +1549,7 @@ export class TransformCommands extends BeforePlugin {
         }
       } else {
         // NOTE: leaf node is reached
-        // console.log('last node', splittedNode.id.key);
+        // console.log('last node', splitNode.id.key);
         // console.log(pin.node.name, );
         const [leftNodes, _, rightNodes] = splitTextBlock(pin, pin, app);
         console.log(
@@ -1565,7 +1565,10 @@ export class TransformCommands extends BeforePlugin {
           ),
         );
         setContentCommands.push(
-          SetContentAction.create(parentBlock.id, rightNodes),
+          SetContentAction.create(
+            parentBlock.id,
+            TextBlock.normalizeNodeContent(rightNodes),
+          ),
         );
       }
 
@@ -2117,16 +2120,21 @@ export class TransformCommands extends BeforePlugin {
         //   return;
         // }
 
+        console.log("start/end", start.toString(), end.toString());
         const content = TextBlock.from(node).removeContent(
           start.offset,
           end.offset,
         );
-
-        if (TextBlock.isSimilarContent(node.children, content)) {
+        const nodes = TextBlock.normalizeNodeContent(content);
+        if (TextBlock.isSimilarContent(node.children, nodes)) {
           return;
         }
 
-        rangeAction.push(SetContentAction.create(node.id, content));
+        console.log(
+          "xxxx",
+          nodes.map((n) => n.name),
+        );
+        rangeAction.push(SetContentAction.create(node.id, nodes));
       }
     });
 

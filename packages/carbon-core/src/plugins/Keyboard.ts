@@ -17,9 +17,11 @@ import {
   Transaction,
 } from "../core";
 import {
+  EmptyInline,
   hasSameIsolate,
   insertAfterAction,
   preventAndStopCtx,
+  TextBlock,
 } from "@emrgen/carbon-core";
 import { nodeLocation } from "../utils/location";
 import { Optional } from "@emrgen/types";
@@ -232,7 +234,12 @@ export class KeyboardPlugin extends AfterPlugin {
     }
 
     // console.log("1111111", head.isAtStartOfNode(head.node), head, head.node);
-    if (head.isAtStartOfNode(head.node)) {
+    // if cursor is at the start of the text block merge with the previous text block
+    const downNode = head.down().node;
+    const isFirstNode =
+      head.isAtStartOfNode(head.node) ||
+      (EmptyInline.is(downNode) && downNode.prevSiblings.length === 0);
+    if (isFirstNode) {
       const { start } = selection;
       const textBlock = start.node.chain.find((n) => n.isTextContainer);
       const prevTextBlock = textBlock?.prev(
@@ -258,10 +265,12 @@ export class KeyboardPlugin extends AfterPlugin {
             prevVisibleTextBlock.textContent.length,
           ),
         );
-        console.log("------------");
-        const textContent =
-          prevVisibleTextBlock.textContent + textBlock.textContent;
-        const textNode = app.schema.text(textContent)!;
+
+        // merge the text content of the previous text block and the current text block
+        const content = TextBlock.normalizeNodeContent([
+          ...prevVisibleTextBlock.children.map((n) => n.clone()),
+          ...textBlock.children.map((n) => n.clone()),
+        ]);
 
         const at = Point.toAfter(prevVisibleBlock.id);
         const moveActions = textBlock?.nextSiblings
@@ -271,13 +280,14 @@ export class KeyboardPlugin extends AfterPlugin {
             return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
           });
 
-        if (prevVisibleTextBlock.isEmpty && !textNode.isEmpty) {
+        // remove the placeholder if the previous text block is empty
+        if (prevVisibleTextBlock.isEmpty && !content.length) {
           tr.Update(prevVisibleTextBlock.id, {
             [PlaceholderPath]: "",
           });
         }
 
-        tr.SetContent(prevVisibleTextBlock.id, [textNode])
+        tr.SetContent(prevVisibleTextBlock.id, content)
           .Add(moveActions)
           .Remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
           .Select(after)
@@ -295,21 +305,6 @@ export class KeyboardPlugin extends AfterPlugin {
       tr.transform.merge(prevTextBlock, textBlock)?.Dispatch();
       return;
     }
-
-    // 	event.stopPropagation()
-    // 	if (node.isBlockAtom) {
-    // 		const found = node.chain.reverse().find(n => n.isBlockAtom)
-    // 		if (!found) return
-    // 		// final caret position can be above or below
-    // 		const beforeSel = selection.moveStart(-1);
-    // 		if (beforeSel) {
-    // 			editor.tr
-    // 				.add(DeleteCommand.create([node.id]))
-    // 				.select(beforeSel.collapseToHead())
-    // 				.Dispatch()
-    // 		}
-    // 		return
-    // 	}
 
     // console.log('Keyboard.backspace',deleteSel.toString());
     const deleteSel = selection.moveStart(-1);

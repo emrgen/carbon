@@ -3,9 +3,8 @@ import { MarkSet } from "./Mark";
 import { Node } from "./Node";
 import {
   cloneFrozenNode,
-  CodeTokenClassPath,
   deepCloneMap,
-  EmptyInline,
+  LocalClassPath,
   Pin,
 } from "@emrgen/carbon-core";
 import { InlineNode } from "./InlineNode";
@@ -46,14 +45,14 @@ export class TextBlock {
     return TextBlock.normalizeNodeContent(children, this.node);
   }
 
-  static normalizeNodeContent(content: Node[], prent?: Node) {
+  static normalizeNodeContent(content: Node[], parent?: Node) {
     // merge adjacent text nodes with the same marks
     const nodes =
       content.reduce((acc, curr, index) => {
         // FIXME: this is a hack to remove the class from the title node
         // as
         if (parent?.name === "title") {
-          curr.updateProps({ [CodeTokenClassPath]: "" });
+          curr.updateProps({ [LocalClassPath]: "" });
         }
         if (index === 0) {
           return [curr];
@@ -62,8 +61,8 @@ export class TextBlock {
         const prev = acc[acc.length - 1];
         const prevMarks = MarkSet.from(prev.marks);
         const currMarks = MarkSet.from(curr.marks);
-        const prevClass = prev.props.get(CodeTokenClassPath);
-        const currClass = curr.props.get(CodeTokenClassPath);
+        const prevClass = prev.props.get(LocalClassPath);
+        const currClass = curr.props.get(LocalClassPath);
         if (
           prevMarks.eq(currMarks) &&
           prevClass === currClass &&
@@ -98,12 +97,16 @@ export class TextBlock {
 
       const prev = acc[acc.length - 1] as Node;
 
-      if (EmptyInline.is(prev) && EmptyInline.is(curr)) {
+      // if both are empty nodes, skip the current node
+      if (prev.isZero && curr.isZero) {
         return acc;
       }
 
       // if both are not inline atom wrappers, add an empty node between them
-      if (!this.isInlineAtomIsolate(prev) && !this.isInlineAtomIsolate(curr)) {
+      if (
+        (this.isInlineAtomIsolate(prev) && !curr.isZero) ||
+        (!prev.isZero && this.isInlineAtomIsolate(curr))
+      ) {
         const empty = curr.type.schema.type("empty")?.default();
         if (!empty) {
           throw new Error("empty node not found");
@@ -177,10 +180,8 @@ export class TextBlock {
     let startNodes: Node[] = [];
     let endNodes: Node[] = [];
 
-    if (EmptyInline.is(startDown.node)) {
-      if (EmptyInline.isSuffix(startDown.node)) {
-        startNodes = [startDown.node];
-      }
+    if (startDown.node.isZero) {
+      startNodes = [startDown.node];
     } else {
       startNodes = InlineNode.from(startDown.node).split(startDown.offset);
       if (startDown.offset !== startNode.focusSize) {
@@ -188,10 +189,8 @@ export class TextBlock {
       }
     }
 
-    if (EmptyInline.is(endDown.node)) {
-      if (EmptyInline.isPrefix(endDown.node)) {
-        endNodes = [endDown.node];
-      }
+    if (endDown.node.isZero) {
+      endNodes = [endDown.node];
     } else {
       endNodes = InlineNode.from(endDown.node).split(endDown.offset);
       if (endDown.offset !== 0) {

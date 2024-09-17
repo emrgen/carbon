@@ -1,5 +1,5 @@
 import { Node, Path } from "./Node";
-import { CodeTokenClassPath, Fragment } from "@emrgen/carbon-core";
+import { Fragment, LocalClassPath } from "@emrgen/carbon-core";
 import { flatten, zip } from "lodash";
 
 // Slice represents a selection of nodes in the editor
@@ -72,7 +72,7 @@ export class Slice {
   transformCodeNodes(nodes: Node[]) {
     return nodes.map((n) => {
       n.updateProps({
-        [CodeTokenClassPath]: "",
+        [LocalClassPath]: "",
       });
 
       if (n.type.name === "codeTitle") {
