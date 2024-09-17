@@ -144,7 +144,7 @@ export class KeyboardPlugin extends AfterPlugin {
         }
 
         preventAndStopCtx(ctx);
-        const after = selection.moveBy(1);
+        const after = selection.rightAlign.moveBy(1);
         console.log("#>", after?.toString());
         cmd.Select(after!).Dispatch();
       },
@@ -307,7 +307,7 @@ export class KeyboardPlugin extends AfterPlugin {
     }
 
     // console.log('Keyboard.backspace',deleteSel.toString());
-    const deleteSel = selection.moveStart(-1);
+    const deleteSel = selection.leftAlign.moveStart(-1);
     console.log("deleteSel", deleteSel?.toString());
     if (!deleteSel) return;
     tr.transform.delete(deleteSel)?.Dispatch();

@@ -285,7 +285,7 @@ export class Pin {
   }
 
   // lift pin to the parent (possibly to the text block)
-  up(): Optional<Pin> {
+  up(): Pin {
     const { node, offset } = this;
     if (node.isBlock) return this;
 
@@ -410,7 +410,12 @@ export class Pin {
 
   // move the pin by distance through focusable nodes
   moveBy(distance: number, align = false): Optional<Pin> {
+    if (distance === 0) {
+      return this;
+    }
+
     const down = this.down();
+    const aligned = distance >= 0 ? down.rightAlign : down.leftAlign;
     return distance >= 0
       ? down?.moveForwardBy(distance, align)?.up()
       : down?.moveBackwardBy(-distance, align)?.up();

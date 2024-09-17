@@ -515,7 +515,14 @@ export class TransformCommands extends BeforePlugin {
         tr.SetContent(head.node.id, [textNode]);
         tr.Select(PinnedSelection.fromPin(Pin.future(head.node, text.length)));
       } else {
-        updateTitleText(tr, tr.app.selection.unpin());
+        const downPin = head.down();
+        if (downPin.node.isZero) {
+          tr.Add(removeNodesActions([downPin.node]));
+          console.log("xxxxxxxxxxxxxxx");
+          updateTitleText(tr, selection.unpin());
+        } else {
+          updateTitleText(tr, selection.unpin());
+        }
       }
     }
   }

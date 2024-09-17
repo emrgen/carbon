@@ -206,9 +206,9 @@ export class PluginManager {
           );
         });
 
-        // if (handler) {
-        //   console.log("after", p.name, handler[0], handler[1]);
-        // }
+        if (handler) {
+          console.log("after", p.name, handler[0], handler[1]);
+        }
 
         handler?.[1]?.(keyDownEvent);
         return keyDownEvent.stopped;

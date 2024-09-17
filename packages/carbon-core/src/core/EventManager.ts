@@ -271,7 +271,7 @@ export class EventManager {
     // if the transaction is not committed, discard it
     if (editorEvent.transaction && !editorEvent.transaction.committed) {
       this.app.committed = true;
-      console.log(
+      console.warn(
         p14("%c[skipped]"),
         "color:#ffcc006e",
         "Discarded transaction",

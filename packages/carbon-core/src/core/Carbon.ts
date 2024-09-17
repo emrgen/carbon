@@ -78,7 +78,7 @@ export class Carbon extends EventEmitter {
     this.sm = new SelectionManager(this);
 
     this.tm = new TransactionManager(this, pm, this.sm, (state, tr) => {
-      this.updateState(state, tr);
+      return this.updateState(state, tr);
     });
 
     this.change = new ChangeManager(this, pm);
@@ -265,14 +265,14 @@ export class Carbon extends EventEmitter {
     }
   }
 
-  private updateState(state: State, tr: Transaction) {
+  private updateState(state: State, tr: Transaction): boolean {
     if (
       !state.isContentChanged &&
       !state.isSelectionChanged &&
       !state.isMarksChanged
     ) {
       console.warn("new state is not dirty");
-      return;
+      return false;
     }
 
     if (
@@ -284,7 +284,8 @@ export class Carbon extends EventEmitter {
         state.content.renderVersion,
         this.state.content.contentVersion,
       );
-      return;
+
+      return false;
     }
 
     // keep three previous states
@@ -296,6 +297,7 @@ export class Carbon extends EventEmitter {
     //   this.state.isSelectionChanged,
     // );
 
+    console.log("updateState", state.content.textContent);
     this.em.onEventOut(
       EventsOut.updateView,
       CustomEvent.create("updateView", this.state.content, {
@@ -304,6 +306,7 @@ export class Carbon extends EventEmitter {
     );
     this.change.update(state, tr);
     this.emit(EventsOut.transactionCommit, tr);
+    return true;
   }
 
   blur() {
@@ -352,6 +355,7 @@ export class Carbon extends EventEmitter {
       const cmd = this.cmd;
       tick?.(cmd);
       cmd.Dispatch();
+      console.log("xxxxxxxxxx");
       // if (!tr) return
       // if (tr instanceof Transaction) {
       // 	// tr.onTick = true;

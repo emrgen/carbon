@@ -13,7 +13,7 @@ export class TransactionManager {
     readonly app: Carbon,
     readonly pm: PluginManager,
     readonly sm: SelectionManager,
-    readonly updateState: (state: State, tr: Transaction) => void,
+    readonly updateState: (state: State, tr: Transaction) => boolean,
   ) {}
 
   private get state() {
@@ -31,7 +31,7 @@ export class TransactionManager {
 
   unlock(tr: Transaction) {
     // console.groupEnd();
-    // console.log("unlocking...", this._locked?.id, tr.id);
+    console.log("unlocking...", tr.id);
     this.currentTr = null;
     this.processTransactions();
   }
@@ -51,6 +51,10 @@ export class TransactionManager {
     // normalizer transactions are allowed to commit even with pending selection events
     while (this.transactions.length) {
       if (this.currentTr) {
+        console.log(
+          "waiting for current transaction to finish",
+          this.currentTr.id,
+        );
         return;
       }
 
@@ -79,8 +83,12 @@ export class TransactionManager {
       app.committed = true;
 
       if (app.state !== state) {
+        console.log("committing transaction", tr.id);
         this.lock(tr);
-        this.updateState(state, tr);
+        // if failed to update the state, then unlock the transaction
+        if (!this.updateState(state, tr)) {
+          this.unlock(tr);
+        }
       }
     }
   }

@@ -299,6 +299,26 @@ export class PinnedSelection {
     return head.isAfterOf(tail);
   }
 
+  get leftAlign(): PinnedSelection {
+    const { tail, head } = this;
+    const downTail = tail.down();
+    const downHead = head.down();
+    return PinnedSelection.create(
+      downTail.leftAlign.up(),
+      downHead.leftAlign.up(),
+    );
+  }
+
+  get rightAlign(): PinnedSelection {
+    const { tail, head } = this;
+    const downTail = tail.down();
+    const downHead = head.down();
+    return PinnedSelection.create(
+      downTail.rightAlign.up(),
+      downHead.rightAlign.up(),
+    );
+  }
+
   // bounds return coordinate bound of the selection in the dom
   bounds(store: NodeStore): SelectionBounds {
     const { head } = this;
@@ -493,6 +513,24 @@ export class PinnedSelection {
     }
     if (!head.node.isBlock || !head.node.isAtom) {
       focusNode = focusNode.firstChild ?? focusNode;
+    }
+
+    if (!anchor.node?.isFocusable) {
+      console.warn(
+        p14("%c[error]"),
+        "color:red",
+        "tailNode is not focusable",
+        anchorNode,
+      );
+    }
+
+    if (!focus.node?.isFocusable) {
+      console.warn(
+        p14("%c[error]"),
+        "color:red",
+        "headNode is not focusable",
+        focusNode,
+      );
     }
 
     // find focusable dom nodes

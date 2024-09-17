@@ -103,10 +103,7 @@ export class TextBlock {
       }
 
       // if both are not inline atom wrappers, add an empty node between them
-      if (
-        (this.isInlineAtomIsolate(prev) && !curr.isZero) ||
-        (!prev.isZero && this.isInlineAtomIsolate(curr))
-      ) {
+      if (this.isInlineAtomIsolate(prev) && this.isInlineAtomIsolate(curr)) {
         const empty = curr.type.schema.type("empty")?.default();
         if (!empty) {
           throw new Error("empty node not found");
