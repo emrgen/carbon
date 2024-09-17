@@ -102,6 +102,12 @@ export class TextBlock {
         return acc;
       }
 
+      // if the previous node is an empty node and the current node is focusable,
+      // replace the empty node with the current node
+      if (prev.isZero && curr.isFocusable) {
+        return [...acc.slice(0, -1), curr];
+      }
+
       // if both are not inline atom wrappers, add an empty node between them
       if (this.isInlineAtomIsolate(prev) && this.isInlineAtomIsolate(curr)) {
         const empty = curr.type.schema.type("empty")?.default();

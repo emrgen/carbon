@@ -1,5 +1,10 @@
-import {ActionOrigin, PinnedSelection, Slice} from "@emrgen/carbon-core";
-import {Optional} from "@emrgen/types";
+import {
+  ActionOrigin,
+  MarkSet,
+  PinnedSelection,
+  Slice,
+} from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
 
 export class RuntimeState {
   origin: ActionOrigin = ActionOrigin.Unknown;
@@ -9,4 +14,5 @@ export class RuntimeState {
   skipSelectionSync: boolean = false;
   selectionchange: boolean = false;
   selection: Optional<PinnedSelection>;
+  marks: MarkSet = new MarkSet();
 }

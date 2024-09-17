@@ -157,8 +157,8 @@ export class PinnedSelection {
     // if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
 
     // console.log(anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
-    const tail = Pin.fromDom(anchorNode, anchorOffset, align)?.up();
-    const head = Pin.fromDom(focusNode, focusOffset, align)?.up();
+    const tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
+    const head = Pin.fromDom(focusNode, focusOffset)?.up();
     // console.log(tail?.toString(), head?.toString());
 
     if (!tail || !head) {

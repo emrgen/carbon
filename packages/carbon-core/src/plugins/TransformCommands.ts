@@ -481,7 +481,6 @@ export class TransformCommands extends BeforePlugin {
     }
 
     const updateTitleText = (cmd: Transaction, selection: PointedSelection) => {
-      const { app } = cmd;
       const { head } = selection;
       const { offset } = head;
       const after = PointedSelection.fromPoint(
@@ -493,13 +492,28 @@ export class TransformCommands extends BeforePlugin {
     };
 
     if (!selection.isCollapsed) {
-      tr.transform.delete(selection);
+      const aligned = selection.rightAlign;
+      tr.transform.delete(aligned);
       const { lastSelection } = tr;
       const action = tr.Pop();
       console.log(action);
       if (action instanceof SelectAction) {
-        const { after } = action;
-        updateTitleText(tr, after);
+        const downPin = selection.start.down().rightAlign;
+        if (downPin.node.isZero) {
+          const { start } = selection.leftAlign;
+          const { offset } = start;
+          const after = PinnedSelection.fromPin(
+            Pin.future(start.node, offset + text.length),
+          );
+
+          tr.Add(InsertTextAction.create(start.point, text));
+          tr.Add(removeNodesActions([downPin.node]));
+          tr.Select(after, ActionOrigin.UserInput);
+        } else {
+          const { after } = action;
+          console.log("after", after.toString());
+          updateTitleText(tr, after);
+        }
       }
     }
 
@@ -515,11 +529,17 @@ export class TransformCommands extends BeforePlugin {
         tr.SetContent(head.node.id, [textNode]);
         tr.Select(PinnedSelection.fromPin(Pin.future(head.node, text.length)));
       } else {
-        const downPin = head.down();
+        const downPin = head.down().rightAlign;
         if (downPin.node.isZero) {
+          const { start } = selection.leftAlign;
+          const { offset } = start;
+          const after = PinnedSelection.fromPin(
+            Pin.future(start.node, offset + text.length),
+          );
+
+          tr.Add(InsertTextAction.create(start.point, text));
           tr.Add(removeNodesActions([downPin.node]));
-          console.log("xxxxxxxxxxxxxxx");
-          updateTitleText(tr, selection.unpin());
+          tr.Select(after, ActionOrigin.UserInput);
         } else {
           updateTitleText(tr, selection.unpin());
         }
@@ -1832,11 +1852,8 @@ export class TransformCommands extends BeforePlugin {
         deleteGroup.ids.map((id) => id.toString()),
         deleteGroup.ranges,
       );
-      console.log("xxxxx", after?.toString());
       tr.Add(this.deleteGroupCommands(app, deleteGroup).actions);
       tr.Select(after!, ActionOrigin.UserInput);
-      // after = PinnedSelection.fromPin(Pin.toStartOf(app.state.content)!)!;
-      // tr.Select(after!, ActionOrigin.UserInput);
 
       return tr;
     }

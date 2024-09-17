@@ -22,12 +22,13 @@ export class Pin {
   node: Node;
   // focus offset
   offset: number;
-  //
-  ref: PinReference;
 
-  static NULL = new Pin(Node.NULL, 0);
+  // number of steps to reach the location
+  steps: number = 0;
 
-  static IDENTITY = new Pin(Node.IDENTITY, IDENTITY_OFFSET);
+  static NULL = new Pin(Node.NULL, 0, 0);
+
+  static IDENTITY = new Pin(Node.IDENTITY, IDENTITY_OFFSET, 0);
 
   get isIdentity() {
     return this.eq(Pin.IDENTITY);
@@ -66,7 +67,7 @@ export class Pin {
     return Pin.create(node, offset);
   }
 
-  static fromDom(node: Node, offset: number, align = false): Optional<Pin> {
+  static fromDom(node: Node, offset: number): Optional<Pin> {
     if (!node.isFocusable) {
       if (offset === 0) {
         node = node.find((n) => n.isFocusable) as Node;
@@ -80,7 +81,7 @@ export class Pin {
       return pin;
     }
 
-    return pin?.moveBy(offset, align);
+    return pin?.moveBy(offset);
   }
 
   static toBefore(node: Node): Pin {
@@ -133,11 +134,7 @@ export class Pin {
     return Pin.create(child, child.focusSize).up();
   }
 
-  static create(
-    node: Node,
-    offset: number,
-    ref: PinReference = PinReference.front,
-  ): Pin {
+  static create(node: Node, offset: number, steps: number = 0) {
     if (!node.isFocusable && !node.hasFocusable) {
       console.log("create pin", node.name, offset, node);
       throw new Error(`node is not focusable: ${node.name}`);
@@ -149,36 +146,20 @@ export class Pin {
       );
     }
 
-    return new Pin(node, offset, ref);
+    return new Pin(node, offset, steps);
   }
 
   // NOTE: use it very cautiously and sparingly
   // use it when you want to create a pin that is points to a location which is will exist in the future
   // for example when you want to create a pin to the end of the node that is not created yet
-  static future(
-    node: Node,
-    offset: number,
-    ref: PinReference = PinReference.front,
-  ): Pin {
-    return new Pin(node, offset, ref);
+  static future(node: Node, offset: number, steps: number = 0): Pin {
+    return new Pin(node, offset, steps);
   }
 
-  get isLeftAligned(): boolean {
-    return this.ref === PinReference.front;
-  }
-
-  get isRightAligned(): boolean {
-    return this.ref === PinReference.back;
-  }
-
-  private constructor(
-    node: Node,
-    offset: number,
-    ref: PinReference = PinReference.front,
-  ) {
+  private constructor(node: Node, offset: number, steps: number) {
     this.node = node;
     this.offset = offset;
-    this.ref = ref;
+    this.steps = steps;
   }
 
   get isInvalid() {
@@ -220,8 +201,8 @@ export class Pin {
   // aligns pin to the left when it is in the middle of the two text blocks
   // Validity: valid for down pin only
   get leftAlign(): Pin {
-    if (EmptyInline.is(this.node)) {
-      if (this.offset === 1) {
+    if (this.node.isZero) {
+      if (this.offset !== 0) {
         return Pin.create(this.node, 0);
       } else {
         return this;
@@ -232,8 +213,14 @@ export class Pin {
     const hasFocusable = this.node.closest(
       (n) => n.isTextContainer || !!n.parent?.isTextContainer,
     )!;
+    let atom = false;
     // if previous node is an inline node within the same text container block
-    const prevFocusable = this.node.prev((n) => n.isFocusable);
+    const prevFocusable = this.node.prev((n) => {
+      if (n.isInlineAtom) {
+        atom = true;
+      }
+      return n.isFocusable;
+    });
     console.log(
       this.toString(),
       EmptyInline.is(this.node),
@@ -242,45 +229,49 @@ export class Pin {
       prevFocusable?.commonNode(hasFocusable)?.isTextContainer,
     );
     if (
+      !atom &&
       !this.node.isEmpty &&
       this.offset === 0 &&
       prevFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
-      return Pin.create(
-        prevFocusable,
-        prevFocusable.focusSize,
-        PinReference.back,
-      );
+      return Pin.create(prevFocusable, prevFocusable.focusSize);
     } else {
-      return Pin.create(this.node, this.offset, PinReference.front);
+      return this;
     }
   }
 
   // aligns pin to the right when it is in the middle of the two inline nodes, can be text, atomWrapper etc.
   // Validity: valid for down pin only
   get rightAlign(): Pin {
-    if (EmptyInline.is(this.node)) {
+    if (this.node.isZero) {
       if (this.offset === 0) {
         return Pin.create(this.node, 1);
       } else {
         return this;
       }
     }
-
     // has focusable node is the closest text container block child
     const hasFocusable = this.node.closest(
       (n) => n.isTextContainer || !!n.parent?.isTextContainer,
     )!;
+    let atom = false;
     // if previous node is an inline node within the same text container block
-    const nextFocusable = this.node.next((n) => n.isFocusable);
+    const nextFocusable = this.node.next((n) => {
+      if (n.isInlineAtom) {
+        atom = true;
+      }
+      return n.isFocusable;
+    });
+
     if (
+      !atom &&
       !this.node.isEmpty &&
       this.offset === this.node.focusSize &&
       nextFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
-      return Pin.create(nextFocusable, 0, PinReference.front);
+      return Pin.create(nextFocusable, 0);
     } else {
-      return Pin.create(this.node, this.offset, PinReference.back);
+      return this;
     }
   }
 
@@ -409,21 +400,19 @@ export class Pin {
   }
 
   // move the pin by distance through focusable nodes
-  moveBy(distance: number, align = false): Optional<Pin> {
-    if (distance === 0) {
-      return this;
-    }
-
+  moveBy(distance: number): Optional<Pin> {
     const down = this.down();
-    const aligned = distance >= 0 ? down.rightAlign : down.leftAlign;
-    return distance >= 0
-      ? down?.moveForwardBy(distance, align)?.up()
-      : down?.moveBackwardBy(-distance, align)?.up();
+    const pin =
+      distance >= 0
+        ? down?.moveForwardBy(distance)
+        : down?.moveBackwardBy(-distance);
+
+    return pin?.up();
   }
 
   // each step can be considered as one right key press
   // tries to move as much as possible
-  private moveForwardBy(distance: number, align = false): Optional<Pin> {
+  private moveForwardBy(distance: number): Optional<Pin> {
     // console.log('Pin.moveForwardBy', this.toString(),distance);
     if (distance === 0) {
       return this.clone();
@@ -477,7 +466,7 @@ export class Pin {
   }
 
   // each step can be considered as one left key press
-  private moveBackwardBy(distance: number, align = false): Optional<Pin> {
+  private moveBackwardBy(distance: number): Optional<Pin> {
     if (distance === 0) {
       return this.clone();
     }
@@ -541,7 +530,7 @@ export class Pin {
   }
 
   clone() {
-    return new Pin(this.node, this.offset);
+    return new Pin(this.node, this.offset, this.steps);
   }
 
   toJSON() {
