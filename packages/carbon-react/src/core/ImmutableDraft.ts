@@ -401,7 +401,7 @@ export class ImmutableDraft implements Draft {
     }
 
     console.log("@@@", this.getNode()?.parent?.id.toString());
-    // node.descendants().forEach((n) => this.addRemoved(n));
+    node.descendants().forEach((n) => this.addRemoved(n));
     // update state
     this.tm.updateContent(node, content);
     if (isArray(content)) {
