@@ -43,6 +43,7 @@ export class TransactionManager {
     this.processTransactions();
   }
 
+  // process transactions in the queue and update the state
   private processTransactions() {
     const { app, state } = this;
 

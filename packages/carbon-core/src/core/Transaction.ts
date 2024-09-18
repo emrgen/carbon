@@ -1,6 +1,6 @@
 import { flatten, identity, isArray, isFunction } from "lodash";
 
-import { With } from "@emrgen/types";
+import { Optional, With } from "@emrgen/types";
 import { Carbon } from "./Carbon";
 import { p14 } from "./Logger";
 import { Mark } from "./Mark";
@@ -37,13 +37,19 @@ let _id = 0;
 const getId = () => String(_id++);
 
 export class Transaction {
-  readonly id: string;
   time = dayjs().unix();
   type: TxType = TxType.TwoWay;
+  readonly id: string;
   private actions: CarbonAction[] = [];
+  lastSelection: PointedSelection;
+
+  // track the end and start block of the transaction
+  // this is useful for combining multiple actions like delete -> insert, delete -> paste
+  startBlock: Optional<Node>;
+  endBlock: Optional<Node>;
+
   private _committed: boolean = false;
   private _dispatched: boolean = false;
-  lastSelection: PointedSelection;
 
   private readOnly = false;
 

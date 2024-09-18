@@ -49,6 +49,9 @@ export class ImmutableState implements State {
     nodeMap: ImmutableNodeMap = new ImmutableNodeMap(),
   ) {
     const state = new ImmutableState({ content, selection, scope, nodeMap });
+    // NOTE: if the nodeMap is empty, fill it with the content nodes and mark them as updated
+    // this is necessary to ensure to force a re-render of the content nodes
+    // when the state is activated for the first time
     if (!nodeMap.size) {
       content.all((n) => {
         nodeMap.set(n.id, n);
@@ -73,13 +76,20 @@ export class ImmutableState implements State {
       marks = MarkSet.empty(),
     } = props;
 
-    this.previous = previous;
+    // scope and previous state
     this.scope = scope;
+    this.previous = previous;
+
+    // content and selection
     this.content = content;
     this.selection = selection;
     this.blockSelection = blockSelection;
+
+    // keep track of which nodes have been updated
     this.nodeMap = nodeMap;
     this.updated = updated;
+
+    // keep track of changes and actions that have been applied to the state
     this.changes = changes;
     this.actions = actions;
     this.marks = marks;
