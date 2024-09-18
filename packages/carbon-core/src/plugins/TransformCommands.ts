@@ -18,7 +18,6 @@ import {
   Carbon,
   CarbonAction,
   cloneFrozenNode,
-  EmptyInline,
   Fragment,
   getContentMatch,
   hasSameIsolate,
@@ -1838,13 +1837,9 @@ export class TransformCommands extends BeforePlugin {
       if (down.node.isZero) {
         const leftAligned = down.leftAlign;
         // if after left aligning the pin is at start of a inlineAtomWrapper node
-        if (EmptyInline.isPrefix(leftAligned.node)) {
-          after = PinnedSelection.fromPin(
-            Pin.create(start.node, Math.max(start.offset - 1, 0)),
-          );
-        } else {
-          after = selection.collapseToStart();
-        }
+        after = PinnedSelection.fromPin(
+          Pin.create(start.node, Math.max(start.offset - 1, 0)),
+        );
       } else {
         after = selection.collapseToStart();
       }
@@ -2015,12 +2010,11 @@ export class TransformCommands extends BeforePlugin {
       start.node.focusSize,
     );
     const nextContent = TextBlock.from(end.node).removeContent(0, end.offset);
+    const content = TextBlock.normalizeNodeContent(
+      [...prevContent, ...nextContent].map(cloneFrozenNode).filter(identity),
+    );
     tr.Add(
-      SetContentAction.withBefore(
-        start.node.id,
-        start.node.children,
-        [...prevContent, ...nextContent].map(cloneFrozenNode).filter(identity),
-      ),
+      SetContentAction.withBefore(start.node.id, start.node.children, content),
     );
 
     const mergeActions = NodeColumn.mergeByMove(leftColumn, rightColumn);
@@ -2029,7 +2023,8 @@ export class TransformCommands extends BeforePlugin {
 
     tr.Add(mergeActions);
     tr.Add(nodeActions);
-    const after = PinnedSelection.fromPin(start);
+    const down = start.down().leftAlign.up();
+    const after = PinnedSelection.fromPin(down);
     tr.Select(after);
   }
 
@@ -2154,10 +2149,6 @@ export class TransformCommands extends BeforePlugin {
           return;
         }
 
-        console.log(
-          "xxxx",
-          nodes.map((n) => n.name),
-        );
         rangeAction.push(SetContentAction.create(node.id, nodes));
       }
     });

@@ -3,6 +3,7 @@ import {
   BlockSelection,
   ChangeNameAction,
   cloneFrozenNode,
+  deepCloneMap,
   Draft,
   EmptyPlaceholderPath,
   FocusedPlaceholderPath,
@@ -144,8 +145,10 @@ export class ImmutableDraft implements Draft {
     this.nodeMap.set(node.id, node);
   }
 
-  private addRemoved(id: NodeId) {
-    // console.log("ADD REMOVED", id.toString());
+  private addRemoved(node: Node) {
+    // console.log("ADD REMOVED", node.id.toString());
+    const { parentId, id } = node;
+    // remove the node from the map if the parent of the node matches with the parent id in the map node
     this.nodeMap.delete(id);
   }
 
@@ -233,6 +236,11 @@ export class ImmutableDraft implements Draft {
     return newState.freeze();
   }
 
+  getNode() {
+    const id = this.nodeMap.ids().find((n) => n.toString().includes("187"));
+    return this.nodeMap.get(id!);
+  }
+
   // prepare the draft for commit
   // transaction updates the node map to reflect the changes
   // prepare will create a new node map and tree with all the changes applied
@@ -244,6 +252,7 @@ export class ImmutableDraft implements Draft {
     // remove deleted nodes from unstable node before normalization
     this.unstable.toArray().forEach((id) => {
       if (this.nodeMap.isDeleted(id)) {
+        console.log("REMOVING DELETED NODE", id.toString());
         this.unstable.remove(id);
       }
     });
@@ -268,7 +277,7 @@ export class ImmutableDraft implements Draft {
     this.updated.toArray().forEach((id) => {
       // console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
       if (this.nodeMap.isDeleted(id)) {
-        console.log("REMOVED", id.toString());
+        // console.log("REMOVED", id.toString());
         this.removeUpdated(id);
         return;
       }
@@ -310,6 +319,13 @@ export class ImmutableDraft implements Draft {
       node.contentVersion += 1;
     });
 
+    console.log(
+      this.updated
+        .toArray()
+        .map((n) => n.toString())
+        .join(", "),
+    );
+
     return this;
   }
 
@@ -330,18 +346,12 @@ export class ImmutableDraft implements Draft {
       return;
     }
 
-    const actions = this.pm.normalize(node);
+    const actions = this.pm.normalize(node.clone(deepCloneMap));
     if (!isEmpty(actions)) {
-      console.debug("normalizing", node.name, node.id.toString(), actions);
+      console.log("normalizing", node.name, node.id.toString(), actions);
       actions.forEach((action) => {
         action.execute(this);
       });
-
-      console.log(
-        actions,
-        actions.map((a) => a.toString()),
-        "actions normalized",
-      );
     }
 
     this.unstable.remove(node.id);
@@ -353,7 +363,8 @@ export class ImmutableDraft implements Draft {
     this.normalizeSchema();
   }
 
-  // normalize unstable nodes by inserting missing nodes as per the schema
+  // TODO: normalize unstable nodes by inserting missing nodes as per the schema
+  // we keep the schema consistent by inserting missing nodes
   private normalizeSchema() {
     console.debug("normalizing schema");
     // this.contentChanged.nodes(this.nodeMap).forEach(node => {
@@ -376,6 +387,7 @@ export class ImmutableDraft implements Draft {
   }
 
   updateContent(nodeId: NodeId, content: Node[] | string) {
+    console.debug("update content", nodeId.toString(), content);
     if (!this.drafting) {
       throw new Error(
         "Cannot update content on a draft that is already committed",
@@ -388,8 +400,8 @@ export class ImmutableDraft implements Draft {
       return;
     }
 
-    node.descendants().forEach((n) => this.addRemoved(n.id));
-
+    console.log("@@@", this.getNode()?.parent?.id.toString());
+    // node.descendants().forEach((n) => this.addRemoved(n));
     // update state
     this.tm.updateContent(node, content);
     if (isArray(content)) {
@@ -437,13 +449,11 @@ export class ImmutableDraft implements Draft {
       newChildren.forEach((n) => nodeIdSet.add(n.id));
       oldChildren.forEach((n) => {
         if (!nodeIdSet.has(n.id)) {
-          console.log("REMOVING", n.id.toString());
-          this.addRemoved(n.id);
+          this.addRemoved(n);
         }
       });
       newChildren.forEach((n) => {
         this.addInserted(n);
-        // console.log("INSERTED", n.id.toString());
       });
       this.addUpdated(nodeId);
       this.addContentChanged(nodeId);
@@ -590,7 +600,7 @@ export class ImmutableDraft implements Draft {
     }
     // NOTE: this will skip insertion w.r.t. the deleted nodes
     if (this.nodeMap.isDeleted(at.nodeId)) {
-      node.all((n) => this.addRemoved(n.id));
+      node.all((n) => this.addRemoved(n));
       return;
     }
 
@@ -598,10 +608,6 @@ export class ImmutableDraft implements Draft {
     if (type === "create") {
       this.actions.add(InsertNodeAction.create(at, node.id, node.toJSON()));
     }
-
-    // mark moved/inserted nodes as inserted ones
-    // these will not be rendered explicitly
-    node.all((n) => this.addInserted(n));
 
     // console.debug('inserting new item')
     switch (at.at) {
@@ -618,6 +624,13 @@ export class ImmutableDraft implements Draft {
         this.append(at.nodeId, node);
         break;
     }
+
+    // mark moved/inserted nodes as inserted ones
+    // these will not be rendered explicitly
+    node.all((n) => {
+      console.log("INSERTED", n.id.toString(), n.parentId?.toString());
+      this.addInserted(n);
+    });
   }
 
   private insertBefore(refId: NodeId, node: Node) {
@@ -739,7 +752,7 @@ export class ImmutableDraft implements Draft {
 
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
-    node.all((n) => this.addRemoved(n.id));
+    node.all((n) => this.addRemoved(n));
 
     // if parent title is empty, set placeholder from parent
     if (parent.isTextContainer && parent.isEmpty) {

@@ -58,7 +58,7 @@ export class IsolateChildren extends BeforePlugin {
 
   preventAtContentStart(e) {
     if (this.isAtStartOfChildren(e)) {
-      console.log("xxxxxxxxxxxxxxxxx");
+      // console.log("xxxxxxxxxxxxxxxxx");
       preventAndStopCtx(e);
     }
   }

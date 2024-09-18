@@ -131,11 +131,12 @@ const InnerElement: ForwardRefRenderFunction<
       return {
         // "data-version": renderVersion,
         "data-id": key,
+        "data-parent": node.parent?.key,
       };
     }
 
     return {};
-  }, [key]);
+  }, [node, key]);
 
   return (
     <Tag ref={ref} data-name={name} {...customProps} {...attributes}>

@@ -129,9 +129,9 @@ export class TitlePlugin extends NodePlugin {
   }
 
   override normalize(node: Node): CarbonAction[] {
-    console.log(
-      node.children.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
-    );
+    // console.log(
+    //   node.children.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
+    // );
     const content = TextBlock.from(node).normalizeContent();
     const { children } = node;
     if (

@@ -192,7 +192,6 @@ export class StateActions {
 
   optimize(): StateActions {
     return this;
-
     // reduce prop updates
     const propActions: BTree<NodeId, UpdatePropsAction[]> = new BTree(
       undefined,

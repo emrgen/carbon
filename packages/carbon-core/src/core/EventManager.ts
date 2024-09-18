@@ -167,8 +167,6 @@ export class EventManager {
       selection = PinnedSelection.fromDom(app.store, true);
     }
 
-    // console.log(selection?.toString());
-
     // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
     // console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
 

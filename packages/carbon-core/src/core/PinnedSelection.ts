@@ -28,7 +28,7 @@ export class PinnedSelection {
   static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
 
   // map dom selection to editor selection
-  static fromDom(store: NodeStore, align = false): Optional<PinnedSelection> {
+  static fromDom(store: NodeStore): Optional<PinnedSelection> {
     const domSelection = window.getSelection();
     // console.log(
     //   "ANCHOR TEXT",
@@ -156,10 +156,16 @@ export class PinnedSelection {
     // if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
     // if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
 
-    // console.log(anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
-    const tail = Pin.fromDom(anchorNode, anchorOffset)?.up();
-    const head = Pin.fromDom(focusNode, focusOffset)?.up();
-    // console.log(tail?.toString(), head?.toString());
+    // console.log(
+    //   anchorNode.id.toString(),
+    //   focusNode.id.toString(),
+    //   anchorOffset,
+    //   focusOffset,
+    // );
+    const downTail = Pin.fromDom(anchorNode, anchorOffset);
+    const downHead = Pin.fromDom(focusNode, focusOffset);
+    const tail = downTail?.up();
+    const head = downHead?.up();
 
     if (!tail || !head) {
       console.warn(p14("%c[error]"), "color:red", "Pin.fromDom failed");
@@ -208,8 +214,8 @@ export class PinnedSelection {
 
     // ensure that the selection is valid
     if (!tail.eq(Pin.NULL) && !tail.eq(head)) {
-      // console.assert(tail.node.isTextContainer);
-      // console.assert(head.node.isTextContainer);
+      console.assert(tail.node.isTextContainer);
+      console.assert(head.node.isTextContainer);
     }
   }
 

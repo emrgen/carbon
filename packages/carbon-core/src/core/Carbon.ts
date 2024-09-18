@@ -290,6 +290,7 @@ export class Carbon extends EventEmitter {
 
     // keep three previous states
     this.state = state.activate();
+
     // console.log(
     //   "updateState",
     //   this.state.content.textContent,
@@ -297,7 +298,7 @@ export class Carbon extends EventEmitter {
     //   this.state.isSelectionChanged,
     // );
 
-    console.log("updateState", state.content.textContent);
+    // console.log("updateState", state.content.textContent);
     this.em.onEventOut(
       EventsOut.updateView,
       CustomEvent.create("updateView", this.state.content, {

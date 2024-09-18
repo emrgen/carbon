@@ -31,7 +31,6 @@ export class TransactionManager {
 
   unlock(tr: Transaction) {
     // console.groupEnd();
-    console.log("unlocking...", tr.id);
     this.currentTr = null;
     this.processTransactions();
   }

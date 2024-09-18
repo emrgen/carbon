@@ -810,7 +810,12 @@ export class Node extends EventEmitter implements IntoNodeId {
   updateContent(content: Node[] | string) {
     // console.log('updateContent', this.id.toString(), this.textContent, this.children.map(n => n.textContent));
     if (isArray(content)) {
-      const nodes = content.map((n) => n.setParent(this).setParentId(this.id));
+      const nodes = content.map((n) => {
+        if (n.isFrozen) {
+          throw new Error("cannot update frozen node");
+        }
+        return n.setParent(this).setParentId(this.id);
+      });
       this.content.updateContent(nodes);
     } else {
       this.content.updateContent(content);

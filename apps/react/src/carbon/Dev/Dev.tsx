@@ -813,7 +813,7 @@ export default function Dev() {
       // );
       console.debug(
         "actions",
-        state.actions.actions.map((a) => a.toJSON()),
+        state.actions.optimize().actions.map((a) => a.toJSON()),
       );
       // printNode(state.content);
       state.content.all((node) => {
