@@ -19,10 +19,10 @@ import {
 import {
   hasSameIsolate,
   insertAfterAction,
+  nodeLocation,
   preventAndStopCtx,
   TextBlock,
 } from "@emrgen/carbon-core";
-import { nodeLocation } from "../utils/location";
 import { Optional } from "@emrgen/types";
 import { NodeBTree } from "../core/BTree";
 
@@ -239,75 +239,78 @@ export class KeyboardPlugin extends AfterPlugin {
       head.isAtStartOfNode(head.node) ||
       (downNode.isZero && downNode.prevSiblings.length === 0);
     console.log("isFirstNode", isFirstNode);
-    // if (isFirstNode) {
-    //   const { start } = selection;
-    //   const textBlock = start.node.chain.find((n) => n.isTextContainer);
-    //   const prevTextBlock = textBlock?.prev(
-    //     (n) => !n.isIsolate && n.isTextContainer,
-    //     { skip: (n) => n.isIsolate },
-    //   );
-    //   if (!prevTextBlock || !textBlock) {
-    //     console.log("no prev text block found");
-    //     return;
-    //   }
-    //
-    //   if (prevTextBlock.isCollapseHidden) {
-    //     const prevVisibleBlock = prevTextBlock.closest(
-    //       (n) => !n.isCollapseHidden,
-    //     )!;
-    //     const prevVisibleTextBlock = prevVisibleBlock?.child(0)!;
-    //     console.log(prevTextBlock, prevVisibleTextBlock);
-    //
-    //     if (!prevVisibleTextBlock) return;
-    //     const after = PinnedSelection.fromPin(
-    //       Pin.create(
-    //         prevVisibleTextBlock,
-    //         prevVisibleTextBlock.textContent.length,
-    //       ),
-    //     );
-    //
-    //     // merge the text content of the previous text block and the current text block
-    //     const content = TextBlock.normalizeNodeContent([
-    //       ...prevVisibleTextBlock.children.map((n) => n.clone()),
-    //       ...textBlock.children.map((n) => n.clone()),
-    //     ]);
-    //
-    //     const at = Point.toAfter(prevVisibleBlock.id);
-    //     const moveActions = textBlock?.nextSiblings
-    //       .slice()
-    //       .reverse()
-    //       .map((n) => {
-    //         return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
-    //       });
-    //
-    //     // remove the placeholder if the previous text block is empty
-    //     if (prevVisibleTextBlock.isEmpty && !content.length) {
-    //       tr.Update(prevVisibleTextBlock.id, {
-    //         [PlaceholderPath]: "",
-    //       });
-    //     }
-    //
-    //     tr.SetContent(prevVisibleTextBlock.id, content)
-    //       .Add(moveActions)
-    //       .Remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
-    //       .Select(after)
-    //       .Dispatch();
-    //
-    //     return;
-    //   }
-    //
-    //   if (!hasSameIsolate(prevTextBlock, textBlock)) {
-    //     return;
-    //   }
-    //
-    //   // HOT
-    //   console.log("merge text block", prevTextBlock.name, textBlock.name);
-    //   tr.transform.merge(prevTextBlock, textBlock)?.Dispatch();
-    //   return;
-    // }
+    if (isFirstNode) {
+      const { start } = selection;
+      const textBlock = start.node.chain.find((n) => n.isTextContainer);
+      const prevTextBlock = textBlock?.prev(
+        (n) => !n.isIsolate && n.isTextContainer,
+        { skip: (n) => n.isIsolate },
+      );
+      if (!prevTextBlock || !textBlock) {
+        console.log("no prev text block found");
+        return;
+      }
+
+      if (prevTextBlock.isCollapseHidden) {
+        const prevVisibleBlock = prevTextBlock.closest(
+          (n) => !n.isCollapseHidden,
+        )!;
+        const prevVisibleTextBlock = prevVisibleBlock?.child(0)!;
+        console.log(prevTextBlock, prevVisibleTextBlock);
+
+        if (!prevVisibleTextBlock) return;
+        const pin = Pin.create(
+          prevVisibleTextBlock,
+          prevVisibleTextBlock.textContent.length,
+        )
+          .down()
+          .leftAlign.up();
+        const after = PinnedSelection.fromPin(pin);
+
+        // merge the text content of the previous text block and the current text block
+        const content = TextBlock.normalizeNodeContent([
+          ...prevVisibleTextBlock.children.map((n) => n.clone()),
+          ...textBlock.children.map((n) => n.clone()),
+        ]);
+
+        const at = Point.toAfter(prevVisibleBlock.id);
+        const moveActions = textBlock?.nextSiblings
+          .slice()
+          .reverse()
+          .map((n) => {
+            return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
+          });
+
+        // remove the placeholder if the previous text block is empty
+        if (prevVisibleTextBlock.isEmpty && !content.length) {
+          tr.Update(prevVisibleTextBlock.id, {
+            [PlaceholderPath]: "",
+          });
+        }
+
+        tr.SetContent(prevVisibleTextBlock.id, content)
+          .Add(moveActions)
+          .Remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
+          .Select(after)
+          .Dispatch();
+
+        return;
+      }
+
+      if (!hasSameIsolate(prevTextBlock, textBlock)) {
+        return;
+      }
+
+      // HOT
+      console.log("merge text block", prevTextBlock.name, textBlock.name);
+      tr.transform.merge(prevTextBlock, textBlock)?.Dispatch();
+      return;
+    }
 
     // console.log('Keyboard.backspace',deleteSel.toString());
     const deleteSel = selection.leftAlign.moveStart(-1);
+    if (!deleteSel) return;
+
     console.log("deleteSel", deleteSel?.toString());
     if (!deleteSel) return;
     tr.transform.delete(deleteSel)?.Dispatch();

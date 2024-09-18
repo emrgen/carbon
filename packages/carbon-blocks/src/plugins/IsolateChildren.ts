@@ -43,7 +43,7 @@ export class IsolateChildren extends BeforePlugin {
     if (!ctx.selection.isCollapsed) {
       return;
     }
-    // this.preventAtTitleEnd(ctx);
+    this.preventAtTitleEnd(ctx);
   };
 
   shiftLeft = (ctx: EventContext<KeyboardEvent>) => {
@@ -58,14 +58,13 @@ export class IsolateChildren extends BeforePlugin {
 
   preventAtContentStart(e) {
     if (this.isAtStartOfChildren(e)) {
-      // console.log("xxxxxxxxxxxxxxxxx");
       preventAndStopCtx(e);
     }
   }
 
   preventAtTitleEnd(e) {
     if (this.isAtEndOfTitle(e)) {
-      // preventAndStopCtx(e)
+      preventAndStopCtx(e);
     }
   }
 
