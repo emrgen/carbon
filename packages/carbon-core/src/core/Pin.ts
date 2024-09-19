@@ -391,12 +391,20 @@ export class Pin {
 
   // check if pin is at the start of the provided node
   isAtStartOfNode(node: Node): boolean {
-    const first = node.find((n) => n.hasFocusable && n.isTextContainer, {
-      order: "post",
-    });
-    if (!first) return false;
+    const firstTextBlock = node.find(
+      (n) => n.hasFocusable && n.isTextContainer,
+      {
+        order: "post",
+      },
+    );
+
+    if (!firstTextBlock) return false;
+
+    const firstInline = firstTextBlock.firstChild;
+    if (firstInline?.isZero) return true;
+
     // console.log(first.toString(), this.toString());
-    return Pin.create(first, 0).eq(this);
+    return Pin.create(firstTextBlock, 0).eq(this);
   }
 
   // check if pin is at the end of the provide node
@@ -432,7 +440,6 @@ export class Pin {
         ? down?.moveForwardBy(distance)
         : down?.moveBackwardBy(-distance);
 
-    // console.log(down.toString(), pin?.toString());
     return pin?.up();
   }
 
@@ -474,7 +481,12 @@ export class Pin {
           return n.isFocusable;
         },
         {
-          skip: (n) => n.isIsolate,
+          skip: (n) => {
+            if (n.isIsolate && n.isAtom) {
+              distance -= 1;
+            }
+            return n.isIsolate;
+          },
         },
       );
     }
@@ -524,7 +536,12 @@ export class Pin {
       // console.log(curr.id.key, curr.focusSize);
       prev = curr;
       let nextCurr = curr.prev((n) => n.isFocusable, {
-        skip: (n) => n.isIsolate,
+        skip: (n) => {
+          if (n.isIsolate && n.isAtom) {
+            distance -= 1;
+          }
+          return n.isIsolate;
+        },
       });
 
       console.log("change curr", curr?.id.toString(), nextCurr?.id.toString());

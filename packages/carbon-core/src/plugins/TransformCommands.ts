@@ -18,6 +18,7 @@ import {
   Carbon,
   CarbonAction,
   cloneFrozenNode,
+  deepCloneWithNewId,
   Fragment,
   getContentMatch,
   hasSameIsolate,
@@ -2009,7 +2010,11 @@ export class TransformCommands extends BeforePlugin {
       start.offset,
       start.node.focusSize,
     );
-    const nextContent = TextBlock.from(end.node).removeContent(0, end.offset);
+
+    // NOTE: clone the nodes to avoid mutation
+    const nextContent = TextBlock.from(end.node)
+      .removeContent(0, end.offset)
+      .map((n) => n.clone(deepCloneWithNewId));
     const content = TextBlock.normalizeNodeContent(
       [...prevContent, ...nextContent].map(cloneFrozenNode).filter(identity),
     );

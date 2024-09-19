@@ -234,12 +234,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
     // console.log("1111111", head.isAtStartOfNode(head.node), head, head.node);
     // if cursor is at the start of the text block merge with the previous text block
-    const downNode = head.down().node;
-    const isFirstNode =
-      head.isAtStartOfNode(head.node) ||
-      (downNode.isZero && downNode.prevSiblings.length === 0);
-    console.log("isFirstNode", isFirstNode);
-    if (isFirstNode) {
+
+    if (head.isAtStartOfNode(head.node)) {
       const { start } = selection;
       const textBlock = start.node.chain.find((n) => n.isTextContainer);
       const prevTextBlock = textBlock?.prev(

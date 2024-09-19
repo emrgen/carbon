@@ -96,6 +96,16 @@ export const deepCloneMap = (data: NodeContentData) => {
   };
 };
 
+export const deepCloneWithNewId = (data: NodeContentData) => {
+  const factory = data.type.schema.factory;
+  const id = data.type.isBlock ? factory.blockId() : factory.textId();
+  return {
+    ...data,
+    id,
+    children: data.children.map((n) => n.clone(deepCloneWithNewId)),
+  };
+};
+
 export const cloneFrozenNode = (node: Node) => {
   if (!node) {
     throw Error("node is undefined");
