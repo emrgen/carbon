@@ -129,7 +129,7 @@ export class ClipboardPlugin extends AfterPlugin {
 
           printNode(slice.root);
 
-          app.cmd.transform.paste(selection, slice)?.Dispatch();
+          app.cmd.transform.paste(selection, slice.clone())?.Dispatch();
         });
       },
     };

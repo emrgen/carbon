@@ -399,9 +399,8 @@ export class Pin {
     );
 
     if (!firstTextBlock) return false;
-
     const firstInline = firstTextBlock.firstChild;
-    if (firstInline?.isZero) return true;
+    if (firstInline?.isZero && this.offset <= 1) return true;
 
     // console.log(first.toString(), this.toString());
     return Pin.create(firstTextBlock, 0).eq(this);

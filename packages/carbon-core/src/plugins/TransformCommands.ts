@@ -682,23 +682,34 @@ export class TransformCommands extends BeforePlugin {
         ),
         ...sliceStartTitle.children,
       ];
+
       const pinOffset = reduce(
         beforeCursorTextContent,
-        (acc, n) => acc + n.focusSize,
+        (acc, n) => {
+          if (n.isZero && n.prevSibling) {
+            return acc;
+          }
+          return acc + n.focusSize;
+        },
         0,
       );
       const after = PinnedSelection.fromPin(
         Pin.future(start.node!, pinOffset)!,
       );
 
-      const afterCursorTextContent = TextBlock.from(
-        startTitleBlock,
-      ).removeContent(0, end.offset);
+      const afterCursorTextContent = TextBlock.from(startTitleBlock)
+        .removeContent(0, end.offset)
+        .map((n) => n.clone(deepCloneWithNewId));
 
-      tr.SetContent(start.node.id, [
-        ...beforeCursorTextContent,
-        ...afterCursorTextContent,
-      ]);
+      console.log(beforeCursorTextContent, afterCursorTextContent);
+
+      tr.SetContent(
+        start.node.id,
+        TextBlock.normalizeNodeContent([
+          ...beforeCursorTextContent,
+          ...afterCursorTextContent,
+        ]),
+      );
 
       // destination title block is empty, change the parent name
       if (startTitleBlock.isEmpty) {

@@ -4,10 +4,12 @@ import {
   AtomSizePath,
   EventHandlerMap,
   Node,
+  NodeEncoder,
   NodeSpec,
   Pin,
   PinnedSelection,
   preventAndStopCtx,
+  Writer,
 } from "@emrgen/carbon-core";
 
 // <EmptyInline><IsolateInlineAtom><EmptyInline>
@@ -105,6 +107,14 @@ export class EmptyInline extends InlineAtom {
         ctx.cmd.Select(after).Dispatch();
       },
     };
+  }
+
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write("");
+  }
+
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write("");
   }
 
   static is(node: Node): boolean {

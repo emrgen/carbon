@@ -164,7 +164,7 @@ export class EventManager {
         .map((a) => a.type as string)
         .some((a) => ["mouseDown"].includes(a))
     ) {
-      selection = PinnedSelection.fromDom(app.store, true);
+      selection = PinnedSelection.fromDom(app.store);
     }
 
     // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
