@@ -143,7 +143,7 @@ export class KeyboardPlugin extends AfterPlugin {
         }
 
         preventAndStopCtx(ctx);
-        const after = selection.rightAlign.moveBy(1);
+        const after = selection.moveBy(1);
         console.log("#>", after?.toString());
         cmd.Select(after!).Dispatch();
       },

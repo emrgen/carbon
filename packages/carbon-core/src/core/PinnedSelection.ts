@@ -108,7 +108,7 @@ export class PinnedSelection {
       } else {
         anchorNode = anchorNode.next((n) => n.isFocusable);
         if (focusNode) {
-          anchorOffset = anchorNode?.focusSize ?? 0;
+          anchorOffset = anchorNode?.focusSize() ?? 0;
         } else {
           console.error("should not reach here");
         }

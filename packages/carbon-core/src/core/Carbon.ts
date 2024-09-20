@@ -238,6 +238,11 @@ export class Carbon extends EventEmitter {
     this.emit(EventsOut.mounted);
   }
 
+  unmounted() {
+    this.ready = false;
+    this.emit(EventsOut.unmounted);
+  }
+
   // all events are emitted through this method
   onEvent(type: EventsIn, event: any) {
     // emit event to external application

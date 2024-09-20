@@ -1532,14 +1532,6 @@ a[data-name="text"]
     &:hover
         background: #ddd
 
-//[data-name=emoji]
-[data-name=mention]
-    border-radius: 4px;
-    font-size: 14px;
-    color: #999;
-[data-name=mention]
-    -webkit-user-modify: read-only
-
 [data-name=title]
     span:last-child
         margin-right: 0
@@ -1686,3 +1678,23 @@ a[data-name="text"]
 //.attribute-type-status
 //    font-size 13px
 
+.empty-zero-width-space::after
+    content ''
+
+//[data-name=mention]
+//    background red;
+
+//[data-focused=true]
+//    background teal
+
+//[data-name=emoji]
+[data-name=mention]
+    border-radius: 10px;
+    font-size: 14px;
+    color: #888;
+    background #eee
+    padding 1px 4px
+    cursor pointer;
+
+//[data-name=mention]
+//    -webkit-user-modify: read-only

@@ -521,7 +521,7 @@ export class ImmutableDraft implements Draft {
               .filter(identity)
               .map(cloneFrozenNode),
           );
-        } else if (offset === downNode.focusSize) {
+        } else if (offset === downNode.focusSize()) {
           this.updateContent(
             pin?.node.id!,
             [
@@ -1078,13 +1078,13 @@ class Transformer {
   ) {}
 
   changeType(node: Node, type: NodeType) {
-    console.log(
-      p14("%c[trap]"),
-      "color:green",
-      "change type",
-      node.id.toString(),
-      node.renderVersion,
-    );
+    // console.log(
+    //   p14("%c[trap]"),
+    //   "color:green",
+    //   "change type",
+    //   node.id.toString(),
+    //   node.renderVersion,
+    // );
     this.changes.add(NameChange.create(node.id, node.type.name, type.name));
     // this.actions.add(ChangeNameAction.withBefore(node.id, node.type.name, type.name));
     node.changeType(type);

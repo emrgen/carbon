@@ -5,6 +5,7 @@ import {
   EventHandlerMap,
   InlineAtom,
   LocalClassPath,
+  LocalContenteditablePath,
   Node,
   NodeEncoder,
   NodeSpec,
@@ -17,15 +18,17 @@ export class Mention extends InlineAtom {
   override spec(): NodeSpec {
     return {
       group: "inline",
+      content: "empty",
       inline: true,
       atom: true,
-      isolate: true,
+      // isolate: true,
       mergeable: false,
       // hint that the node is not focusable (cursor can't be placed wrt this node)
-      focusable: false,
+      // focusable: true,
       tag: "span",
       props: {
         [LocalClassPath]: "mention",
+        [LocalContenteditablePath]: false,
       },
     };
   }

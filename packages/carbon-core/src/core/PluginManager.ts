@@ -169,9 +169,9 @@ export class PluginManager {
             keyDownEvent.event.nativeEvent,
           );
         });
-        if (handler) {
-          console.log("before", p.name, handler[0], handler[1]);
-        }
+        // if (handler) {
+        //   console.log("before", p.name, handler[0], handler[1]);
+        // }
         handler?.[1]?.(keyDownEvent);
       });
 

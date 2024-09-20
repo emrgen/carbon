@@ -203,17 +203,26 @@ export class Node extends EventEmitter implements IntoNodeId {
     return false;
   }
 
-  // starting from left of <a> to before of </a>
-  // if total focus size is needed for a block, need to add 1
-  // used in Position
-  get stepSize() {
-    if (this.isText) return this.textContent.length;
-    if (this.isInlineAtom) {
-      return this.isIsolate ? 1 : (this.props.get(AtomSizePath) ?? 1);
+  // starting from left of <a> to end of </a>
+  // if total focus size is needed for a block is
+  // (the sum of focus size of all children - (size - 1)) + 2
+  stepSize(self = true) {
+    if (this.isText) return this.textContent.length + 3;
+
+    if (this.isIsolate && !self) {
+      return 2;
     }
 
-    const { children } = this;
-    return children.reduce((s, n) => s + n.stepSize, children.length + 1);
+    if (this.isAtom) {
+    }
+
+    if (this.isBlock && this.isEmpty) {
+      return 3;
+    }
+
+    return this.children
+      .map((n) => n.stepSize(false))
+      .reduce((s, n) => s + n, -(this.size - 1) + 2);
   }
 
   // 	if (this.isText) {
@@ -231,7 +240,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   // focus steps count within the node
   // start and end locations are within the node
-  get focusSize(): number {
+  focusSize(): number {
     if (this.isInlineAtom) {
       return this.props.get(AtomSizePath) ?? this.textContent.length;
     }
@@ -243,7 +252,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     // focus size is the sum of focus size of all children
     return this.children.reduce((fs, n) => {
-      return fs + n.focusSize;
+      return fs + n.focusSize();
     }, 0);
   }
 

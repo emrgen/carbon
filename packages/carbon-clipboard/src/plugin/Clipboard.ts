@@ -30,6 +30,9 @@ import { TextBlock } from "@emrgen/carbon-core/src/core/TextBlock";
 import BTree from "sorted-btree";
 import { CarbonCodec } from "@emrgen/carbon-codec";
 
+let cache: any = null;
+let clipboard: any = null;
+
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
 
@@ -121,11 +124,18 @@ export class ClipboardPlugin extends AfterPlugin {
         const { app } = ctx;
         preventAndStopCtx(ctx);
         const { selection } = app;
+        // if (cache) {
+        //   app.cmd.transform.paste(selection, cache.clone())?.Dispatch();
+        //   return;
+        // }
+
         parseClipboard(ctx.app.schema).then((slice) => {
           if (isEmpty(slice)) {
+            cache = null;
             console.log("failed to parse clipboard data");
             return;
           }
+          cache = slice;
 
           printNode(slice.root);
 

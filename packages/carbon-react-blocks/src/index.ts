@@ -85,6 +85,7 @@ export const blockPresetRenderers = [
   // ReactRenderer.create("mentionAtom", CarbonText),
   ReactRenderer.create("bookmark", BookmarkComp),
   ReactRenderer.create("pageLink", PageLinkComp),
+  // ReactRenderer.create("empty", EmptyInline),
 ];
 
 export * from "./renderers/Document";

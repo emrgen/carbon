@@ -1,13 +1,15 @@
-import { CarbonText, RendererProps } from "@emrgen/carbon-react";
+import {
+  CarbonBlock,
+  CarbonChildren,
+  RendererProps,
+} from "@emrgen/carbon-react";
 
 export const MentionComp = (props: RendererProps) => {
-  const { node, children } = props;
+  const { node } = props;
 
   return (
-    <>
-      {/*<span>&shy;</span>*/}
-      <CarbonText node={node} />
-      {/*<span>&shy;</span>*/}
-    </>
+    <CarbonBlock node={node}>
+      <CarbonChildren node={node} />
+    </CarbonBlock>
   );
 };

@@ -3,6 +3,7 @@ import {
   AtomContentPath,
   AtomSizePath,
   EventHandlerMap,
+  LocalClassPath,
   Node,
   NodeEncoder,
   NodeSpec,
@@ -25,6 +26,7 @@ export class EmptyInline extends InlineAtom {
       props: {
         [AtomSizePath]: 1,
         [AtomContentPath]: "\u200B",
+        [LocalClassPath]: "empty-zero-width-space",
       },
     };
   }
@@ -60,7 +62,7 @@ export class EmptyInline extends InlineAtom {
       },
       right: (ctx) => {
         const { currentNode, selection } = ctx;
-        const down = selection.start.down().rightAlign;
+        const down = selection.head.down().rightAlign;
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
 
@@ -70,7 +72,14 @@ export class EmptyInline extends InlineAtom {
             return;
           }
 
+          console.log(
+            "next focusable",
+            nextFocusable.toString(),
+            down.node.toString(),
+          );
+
           const pin = Pin.toStartOf(nextFocusable)!;
+          console.log("pin", pin.toString());
           const after = PinnedSelection.fromPin(pin)!;
           ctx.cmd.Select(after).Dispatch();
         }

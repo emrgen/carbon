@@ -37,3 +37,5 @@ export * from "./Block";
 export * from "./Encoder";
 export * from "./Span";
 export * from "./DeleteGroup";
+export * from "./PluginEmitter";
+export * from "./PluginState";

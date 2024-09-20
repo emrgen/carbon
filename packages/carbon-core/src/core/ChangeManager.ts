@@ -174,7 +174,7 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   private updateContent() {
-    console.group("syncing:  content");
+    console.groupCollapsed("syncing:  content");
     // console.group('syncing: content')
     const updatedNodeIds = this.updated;
 

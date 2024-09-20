@@ -214,7 +214,7 @@ export class TransformCommands extends BeforePlugin {
         // if start and end pin are at the start and end of the node toggle the mark
         if (
           startDownPin.offset === 0 &&
-          endDownPin.offset === endNode.focusSize
+          endDownPin.offset === endNode.focusSize()
         ) {
           this.toggleMark(tr, startNode, mark);
           return;
@@ -236,7 +236,7 @@ export class TransformCommands extends BeforePlugin {
         }
 
         // if end pin is at the end of the node split the node into two parts at the start pin
-        if (endDownPin.offset === endNode.focusSize) {
+        if (endDownPin.offset === endNode.focusSize()) {
           const [headNode, tailNode] = InlineNode.from(startNode).split(
             startDownPin.offset,
           );
@@ -629,8 +629,6 @@ export class TransformCommands extends BeforePlugin {
       return tr;
     }
 
-    const { start, end } = selection;
-    const { node: startNode } = start;
     const { start: startTitle, end: endTitle } = sliceClone;
     if (!startTitle || !endTitle) {
       console.error("no title node found");
@@ -678,7 +676,7 @@ export class TransformCommands extends BeforePlugin {
       const beforeCursorTextContent = [
         ...TextBlock.from(startTitleBlock).removeContent(
           start.offset,
-          startTitleBlock.focusSize,
+          startTitleBlock.focusSize(),
         ),
         ...sliceStartTitle.children,
       ];
@@ -689,7 +687,7 @@ export class TransformCommands extends BeforePlugin {
           if (n.isZero && n.prevSibling) {
             return acc;
           }
-          return acc + n.focusSize;
+          return acc + n.focusSize();
         },
         0,
       );
@@ -784,7 +782,7 @@ export class TransformCommands extends BeforePlugin {
       ];
       const pinOffset = reduce(
         beforeCursorTextContent,
-        (acc, n) => acc + n.focusSize,
+        (acc, n) => acc + n.focusSize(),
         0,
       );
       const after = PinnedSelection.fromPin(
@@ -969,7 +967,7 @@ export class TransformCommands extends BeforePlugin {
     const startTextContent = [
       ...TextBlock.from(startTitleBlock).removeContent(
         start.offset,
-        start.node.focusSize,
+        start.node.focusSize(),
       ),
       ...sliceStartTitle.children,
     ];
@@ -2019,7 +2017,7 @@ export class TransformCommands extends BeforePlugin {
 
     const prevContent = TextBlock.from(start.node).removeContent(
       start.offset,
-      start.node.focusSize,
+      start.node.focusSize(),
     );
 
     // NOTE: clone the nodes to avoid mutation
@@ -2261,7 +2259,7 @@ export class TransformCommands extends BeforePlugin {
       selectedGroup.addRange(
         Span.create(
           start.clone(),
-          Pin.create(start.node, start.node.focusSize),
+          Pin.create(start.node, start.node.focusSize()),
         ),
       );
     } else if (startBlock.type.isAtom) {

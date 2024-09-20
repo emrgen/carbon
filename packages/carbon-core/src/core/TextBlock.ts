@@ -140,7 +140,10 @@ export class TextBlock {
     if (from === to) {
       return this.node.children;
     }
-    console.log("x");
+
+    if (from === 0 && to === this.node.focusSize()) {
+      return [];
+    }
 
     const start = Pin.create(this.node, from);
     const end = Pin.create(this.node, to);
@@ -175,7 +178,7 @@ export class TextBlock {
         }) ?? ([] as Node[])
       )
         .map(cloneFrozenNode)
-        .filter((n) => n.focusSize);
+        .filter((n) => n.focusSize());
     }
 
     const prevNodes = startNode.prevSiblings;
@@ -187,7 +190,7 @@ export class TextBlock {
       startNodes = [startDown.node];
     } else {
       startNodes = InlineNode.from(startDown.node).split(startDown.offset);
-      if (startDown.offset !== startNode.focusSize) {
+      if (startDown.offset !== startNode.focusSize()) {
         startNodes.pop();
       }
     }
@@ -203,7 +206,7 @@ export class TextBlock {
 
     return [...prevNodes, ...startNodes, ...endNodes, ...nextNodes]
       .map(cloneFrozenNode)
-      .filter((n) => n.focusSize);
+      .filter((n) => n.focusSize());
   }
 
   // check if a and b have the same content and marks in the same order

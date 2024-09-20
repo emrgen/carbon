@@ -49,7 +49,7 @@ export class Pin {
       return;
     }
     const { offset } = point;
-    if (node.focusSize < offset) {
+    if (node.focusSize() < offset) {
       console.warn(
         "Pin.fromPoint: invalid offset",
         node.toString(),
@@ -129,7 +129,7 @@ export class Pin {
       return Pin.create(child, 0);
     }
 
-    return Pin.create(child, child.focusSize).up();
+    return Pin.create(child, child.focusSize()).up();
   }
 
   static create(node: Node, offset: number, steps: number = 0) {
@@ -137,7 +137,7 @@ export class Pin {
       throw new Error(`node is not focusable: ${node.name}`);
     }
 
-    if (node.focusSize < offset) {
+    if (node.focusSize() < offset) {
       throw new Error(
         `node: ${node.name} does not have the provided offset: ${offset}`,
       );
@@ -183,7 +183,7 @@ export class Pin {
   }
 
   get isAtEnd(): boolean {
-    return this.offset === this.node.focusSize;
+    return this.offset === this.node.focusSize();
   }
 
   get isBefore() {
@@ -193,12 +193,12 @@ export class Pin {
 
   get isWithin() {
     if (this.node.isEmpty) return true;
-    return 0 < this.offset && this.offset < this.node.focusSize;
+    return 0 < this.offset && this.offset < this.node.focusSize();
   }
 
   get isAfter() {
     if (this.node.isEmpty) return false;
-    return this.offset === this.node.focusSize;
+    return this.offset === this.node.focusSize();
   }
 
   get isDown() {
@@ -253,7 +253,7 @@ export class Pin {
       this.offset === 0 &&
       prevFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
-      return Pin.create(prevFocusable, prevFocusable.focusSize);
+      return Pin.create(prevFocusable, prevFocusable.focusSize());
     } else {
       return this;
     }
@@ -285,7 +285,7 @@ export class Pin {
     if (
       !atom &&
       !this.node.isEmpty &&
-      this.offset === this.node.focusSize &&
+      this.offset === this.node.focusSize() &&
       nextFocusable?.commonNode(hasFocusable)?.isTextContainer
     ) {
       return Pin.create(nextFocusable, 0);
@@ -315,7 +315,7 @@ export class Pin {
         distance += offset;
         return true;
       }
-      distance += n.focusSize;
+      distance += n.focusSize();
       return false;
     });
 
@@ -347,13 +347,13 @@ export class Pin {
     node
       ?.descendants((n) => n.isLeaf)
       .some((n) => {
-        if (distance <= n.focusSize) {
+        if (distance <= n.focusSize()) {
           if (n.isInlineAtom && n.isIsolate) {
             if (distance === 0) {
               if (!n.prevSibling) {
                 throw new Error("Pin.down: no prevSibling");
               }
-              pin = Pin.create(n.prevSibling!, n.prevSibling!.focusSize);
+              pin = Pin.create(n.prevSibling!, n.prevSibling!.focusSize());
             } else {
               if (!n.nextSibling) {
                 throw new Error("Pin.down: no nextSibling");
@@ -366,7 +366,7 @@ export class Pin {
 
           return true;
         }
-        distance -= n.focusSize;
+        distance -= n.focusSize();
         return false;
       });
 
@@ -413,7 +413,7 @@ export class Pin {
       order: "post",
     });
     if (!last) return false;
-    return Pin.create(last, last.focusSize).eq(this);
+    return Pin.create(last, last.focusSize()).eq(this);
   }
 
   // move the pin to the start of next matching node
@@ -427,7 +427,7 @@ export class Pin {
   moveToEndOfPrev(fn: Predicate<Node>): Optional<Pin> {
     const prev = this.node.prev(fn);
     if (!prev || !prev.isSelectable) return null;
-    return Pin.create(prev, prev.focusSize);
+    return Pin.create(prev, prev.focusSize());
   }
 
   // move the pin by distance through focusable nodes
@@ -464,15 +464,15 @@ export class Pin {
       }
       // console.log('=>',curr.id.toString(), curr.size, distance);
 
-      currSize = curr.focusSize;
+      currSize = curr.focusSize();
       // console.log(focusSize, curr.id, curr.name);
       if (distance <= currSize) {
-        // console.log(curr.id, curr.focusSize, offset);
+        // console.log(curr.id, curr.focusSize(), offset);
         break;
       }
       // if curr is Empty it will have -
       distance -= currSize;
-      // console.log(curr.id.key, curr.focusSize);
+      // console.log(curr.id.key, curr.focusSize());
       prev = curr;
 
       curr = curr.next(
@@ -494,9 +494,11 @@ export class Pin {
       return Pin.create(prev, prev.size);
     }
 
-    distance = clamp(distance, 0, curr.focusSize);
+    distance = clamp(distance, 0, curr.focusSize());
+
+    // if the current node is inline atom and the distance is within the atom
     if (curr.isInlineAtom && distance) {
-      return Pin.create(curr, curr.focusSize);
+      return Pin.create(curr, curr.focusSize());
     }
 
     return Pin.create(curr, distance);
@@ -509,7 +511,7 @@ export class Pin {
     }
 
     let { node, offset } = this;
-    distance = node.focusSize - offset + distance;
+    distance = node.focusSize() - offset + distance;
 
     let prev: Node = node;
     let curr: Optional<Node> = node;
@@ -524,15 +526,15 @@ export class Pin {
       }
       // console.log('=>', curr.id.toString(), curr.size, distance);
 
-      currSize = curr.focusSize;
+      currSize = curr.focusSize();
       // console.log(focusSize, curr.id, curr.name);
       if (distance <= currSize) {
-        // console.log(curr.id, curr.focusSize, offset);
+        // console.log(curr.id, curr.focusSize(), offset);
         break;
       }
       // if curr is Empty it will have -
       distance -= currSize;
-      // console.log(curr.id.key, curr.focusSize);
+      // console.log(curr.id.key, curr.focusSize());
       prev = curr;
       let nextCurr = curr.prev((n) => n.isFocusable, {
         skip: (n) => {
@@ -554,12 +556,13 @@ export class Pin {
       return Pin.create(prev, 0);
     }
 
-    distance = clamp(distance, 0, curr.focusSize);
+    distance = clamp(distance, 0, curr.focusSize());
+    // if the current node is inline atom and the distance is within the atom
     if (curr.isInlineAtom && distance) {
       return Pin.create(curr, 0);
     }
 
-    return Pin.create(curr, curr.focusSize - distance);
+    return Pin.create(curr, curr.focusSize() - distance);
   }
 
   map<B>(fn: Maps<Pin, B>) {
