@@ -81,9 +81,9 @@ export class ImmutableNode extends Node {
     return `${this.id.toString()}/${this.renderVersion}/${this.contentVersion}`;
   }
 
-  override stepSize(self: boolean = true): number {
+  override get stepCount(): number {
     return StepCache.get(this.contentKey, () => {
-      return super.stepSize();
+      return super.stepCount;
     });
   }
 

@@ -515,7 +515,7 @@ export class ImmutableDraft implements Draft {
               .filter(identity)
               .map(cloneFrozenNode),
           );
-        } else if (offset === downNode.focusSize()) {
+        } else if (offset === downNode.focusSize) {
           this.updateContent(
             pin?.node.id!,
             [

@@ -1,5 +1,6 @@
 import { Node } from "./Node";
 import { Optional } from "@emrgen/types";
+import { Predicate } from "@emrgen/types";
 import { classString } from "./Logger";
 
 export enum WrtHint {
@@ -15,12 +16,16 @@ export class Position {
     readonly offset: number,
   ) {}
 
+  static create(node: Node, offset: number) {
+    return new Position(node, offset);
+  }
+
   static toStartOf(node: Node) {
     return new Position(node, 1);
   }
 
   static toEndOf(node: Node) {
-    return new Position(node, node.stepSize() - 1);
+    return new Position(node, node.stepCount - 1);
   }
 
   static toBefore(node: Node) {
@@ -28,7 +33,7 @@ export class Position {
   }
 
   static toAfter(node: Node) {
-    return new Position(node, node.stepSize());
+    return new Position(node, node.stepCount);
   }
 
   get isBefore() {
@@ -36,14 +41,16 @@ export class Position {
   }
 
   get isAfter() {
-    return this.offset === this.node.stepSize();
+    return this.offset === this.node.stepCount;
   }
 
   get leftAlign() {
     if (this.isBefore) {
       const prevSibling = this.node.prevSibling;
       if (prevSibling) {
-        return new Position(prevSibling, prevSibling.stepSize());
+        return new Position(prevSibling, prevSibling.stepCount);
+      } else {
+        return Position.toStartOf(this.node.parent!);
       }
     }
 
@@ -55,6 +62,8 @@ export class Position {
       const nextSibling = this.node.nextSibling;
       if (nextSibling) {
         return new Position(nextSibling, 0);
+      } else {
+        return Position.toEndOf(this.node.parent!);
       }
     }
 
@@ -68,31 +77,47 @@ export class Position {
   }
 
   // moveBy the position down to target node
-  down() {
+  down(): Position {
     if (this.node.isText) {
       return this;
     }
 
-    const stepSize = this.node.stepSize();
-    if (this.offset === stepSize || this.offset === 0) {
-      return Position.toAfter(this.node);
+    const stepCount = this.node.stepCount;
+    if (this.offset === stepCount || this.offset === 0) {
+      return this;
     }
 
     let steps = this.offset - 1;
     for (let i = 0; i < this.node.size; i++) {
       const child = this.node.child(i);
       if (child) {
-        if (child.stepSize() >= steps) {
+        if (child.stepCount >= steps) {
           return new Position(child, steps).down();
         }
-        steps -= child.stepSize();
+        steps -= child.stepCount;
       }
     }
+
+    throw new Error("Failed to move down");
   }
 
   // moveBy the position up to the text block of the target node
-  up() {
-    return new Position(this.node, this.offset - 1);
+  up(fn: Predicate<Node> = (n) => n.isTextContainer): Position {
+    if (fn(this.node)) {
+      return this;
+    }
+
+    const steps = this.node.prevSiblings.reduce(
+      (sc, n) => sc + n.stepCount,
+      this.offset,
+    );
+
+    const { parent } = this.node;
+    if (!parent) {
+      throw new Error("Node has no parent");
+    }
+
+    return Position.create(parent, steps + 1).up(fn);
   }
 
   toString() {
@@ -103,28 +128,27 @@ export class Position {
   }
 
   moveBy(steps: number): Position {
+    if (steps === 0) {
+      return this;
+    }
     return steps > 0 ? this.moveForwardBy(steps) : this.moveBackwardBy(-steps);
   }
 
   private moveForwardBy(steps: number): Position {
-    const stepSize = this.node.stepSize();
-    if (this.offset + steps === stepSize) {
+    const stepCount = this.node.stepCount;
+    if (this.offset + steps === stepCount) {
       return Position.toAfter(this.node);
     }
 
     // If the number of steps to move forward is less than the remaining steps in the current node
-    if (stepSize > this.offset + steps) {
-      for (let i = 0; i < this.node.size; i++) {
-        const child = this.node.child(i);
-        if (child) {
-          if (child.stepSize() >= steps) {
-            return new Position(child, steps);
-          }
-          steps -= child.stepSize() - 1;
-        }
+    if (stepCount >= this.offset + steps) {
+      if (this.node.isVoid) {
+        return new Position(this.node, this.offset + steps);
       }
+      // go to at step wrt the current node
+      steps += this.offset;
 
-      throw new Error("Failed to move forward");
+      return new Position(this.node, steps);
     }
 
     // check if the offset falls in some next siblings
@@ -133,10 +157,10 @@ export class Position {
     for (let i = index + 1; i < size; i++) {
       const child = this.node.child(i);
       if (child) {
-        if (child.stepSize() >= steps) {
+        if (child.stepCount >= steps) {
           return new Position(child, steps);
         }
-        steps -= child.stepSize() - 1;
+        steps -= child.stepCount;
       }
     }
 
@@ -146,33 +170,31 @@ export class Position {
     }
     const pPos = Position.toBefore(parent);
     const childDistance = pPos.childDistance(this.node);
-    const newOffset = childDistance + this.offset + steps - parent.stepSize();
+    const newOffset = childDistance + this.offset + steps - parent.stepCount;
 
     return Position.toAfter(parent).moveBy(newOffset);
   }
 
   private moveBackwardBy(steps: number): Position {
-    const stepSize = this.node.stepSize();
-    if (this.offset - steps === 0) {
+    if (this.offset === steps) {
       return Position.toBefore(this.node);
     }
 
-    // console.log("moveBackwardBy", this.node.stepSize(), this.offset - number);
+    if (this.offset - steps === 1) {
+      return Position.toStartOf(this.node);
+    }
 
-    // If the number of steps to move forward is less than the remaining steps in the current node
-    if (stepSize > this.offset - steps) {
-      for (let i = this.node.size - 1; i >= 0; i--) {
-        const child = this.node.child(i);
-        if (child) {
-          const stepSize = child.stepSize();
-          if (stepSize >= steps) {
-            return new Position(child, stepSize - steps);
-          }
-          steps -= child.stepSize() - 1;
-        }
+    // If the number of steps to move backward is less than the offset
+    if (this.offset - steps > 0) {
+      if (this.node.isVoid) {
+        return new Position(this.node, steps);
       }
 
-      throw new Error("Failed to move forward");
+      return Position.toBefore(this.node).moveBy(this.offset - steps);
+    }
+
+    if (steps === 0) {
+      return Position.toBefore(this.node);
     }
 
     // check if the offset falls in some next siblings
@@ -181,10 +203,10 @@ export class Position {
     for (let i = index + 1; i < size; i++) {
       const child = this.node.child(i);
       if (child) {
-        if (child.stepSize() >= steps) {
+        if (child.stepCount >= steps) {
           return new Position(child, steps);
         }
-        steps -= child.stepSize() - 1;
+        steps -= child.stepCount;
       }
     }
 
@@ -194,7 +216,7 @@ export class Position {
     }
     const pPos = Position.toBefore(parent);
     const childDistance = pPos.childDistance(this.node);
-    const newOffset = childDistance + this.offset + steps - parent.stepSize();
+    const newOffset = childDistance + this.offset + steps - parent.stepCount;
 
     return Position.toAfter(parent).moveBy(newOffset);
   }
@@ -207,7 +229,7 @@ export class Position {
     let steps = 1;
     const found = this.node.children.find((child, index) => {
       if (child.eq(node)) return true;
-      steps += child.stepSize() - 1;
+      steps += child.stepCount - 1;
     });
 
     if (!found) {
@@ -215,5 +237,13 @@ export class Position {
     }
 
     return steps;
+  }
+
+  toJSON() {
+    return {
+      id: this.node.id.toString(),
+      name: this.node.name,
+      offset: this.offset,
+    };
   }
 }

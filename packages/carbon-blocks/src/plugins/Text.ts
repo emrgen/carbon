@@ -78,7 +78,7 @@ export class TextPlugin extends NodePlugin {
             return;
           }
 
-          if (down.offset == 0 || down.offset == currentNode.focusSize()) {
+          if (down.offset == 0 || down.offset == currentNode.focusSize) {
             return;
           }
 

@@ -139,7 +139,7 @@ export class TextBlock {
       return this.node.children;
     }
 
-    if (from === 0 && to === this.node.focusSize()) {
+    if (from === 0 && to === this.node.focusSize) {
       return [];
     }
 
@@ -176,7 +176,7 @@ export class TextBlock {
         }) ?? ([] as Node[])
       )
         .map(cloneFrozenNode)
-        .filter((n) => n.focusSize());
+        .filter((n) => n.focusSize);
     }
 
     const prevNodes = startNode.prevSiblings;
@@ -188,7 +188,7 @@ export class TextBlock {
       startNodes = [startDown.node];
     } else {
       startNodes = InlineNode.from(startDown.node).split(startDown.offset);
-      if (startDown.offset !== startNode.focusSize()) {
+      if (startDown.offset !== startNode.focusSize) {
         startNodes.pop();
       }
     }
@@ -204,7 +204,7 @@ export class TextBlock {
 
     return [...prevNodes, ...startNodes, ...endNodes, ...nextNodes]
       .map(cloneFrozenNode)
-      .filter((n) => n.focusSize());
+      .filter((n) => n.focusSize);
   }
 
   // check if a and b have the same content and marks in the same order
