@@ -9,6 +9,7 @@ import {
   NodeId,
   Schema,
 } from "@emrgen/carbon-core";
+import { Fragment } from "@emrgen/carbon-core";
 import { identity, isArray, isEmpty } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 import { ImmutableNode } from "./ImmutableNode";
@@ -58,6 +59,14 @@ export class ImmutableNodeFactory implements NodeFactory {
       throw new Error(
         `Failed to create children. Check if all expected node Plugins are registered.`,
       );
+    }
+
+    const match = type.contentMatch.matchFragment(Fragment.from(nodes));
+    if (!match) {
+      throw new Error(`Failed to match content for ${name}`);
+    }
+    if (!match.validEnd) {
+      throw new Error(`Invalid content match for ${name}`);
     }
 
     const content = ImmutableNodeContent.create(scope, {

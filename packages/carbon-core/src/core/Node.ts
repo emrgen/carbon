@@ -217,13 +217,13 @@ export class Node extends EventEmitter implements IntoNodeId {
     if (this.isAtom) {
     }
 
-    if (this.isBlock && this.isEmpty) {
+    if (this.isBlock && this.isVoid) {
       return 3;
     }
 
     return this.children
-      .map((n) => n.stepSize(false))
-      .reduce((s, n) => s + n, -(this.size - 1) + 2);
+      .map((n) => n.stepSize())
+      .reduce((s, n) => s + n, 2 - (this.size - 1));
   }
 
   // 	if (this.isText) {

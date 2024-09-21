@@ -20,6 +20,8 @@ export class Point {
   // valid when point is within a node
   offset: number;
 
+  steps: number = 0;
+
   static IDENTITY = new Point(NodeId.IDENTITY, PointAt.Inside, 0);
   static NULL = new Point(NodeId.NULL, PointAt.Inside, 0);
 

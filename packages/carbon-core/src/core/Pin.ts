@@ -583,7 +583,7 @@ export class Pin {
   }
 
   toString() {
-    const { node, offset } = this;
-    return classString(this)(`${node.id.toString()}/${offset}`);
+    const { node, offset, steps } = this;
+    return classString(this)(`${node.id.toString()}/${offset}/${steps}`);
   }
 }

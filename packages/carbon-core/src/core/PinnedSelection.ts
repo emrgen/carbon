@@ -409,7 +409,15 @@ export class PinnedSelection {
         selection?.focusOffset === focusOffset;
 
       if (!inSync) {
-        // console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
+        // console.log(
+        //   p14("%c[info]"),
+        //   "color:pink",
+        //   p30("selection.setBaseAndExtent"),
+        //   anchorNode,
+        //   anchorOffset,
+        //   focusNode,
+        //   focusOffset,
+        // );
         selection?.setBaseAndExtent(
           anchorNode,
           anchorOffset,
