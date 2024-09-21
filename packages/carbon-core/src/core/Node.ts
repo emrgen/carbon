@@ -34,7 +34,8 @@ import {
 } from "./NodeProps";
 import { no, yes } from "./types";
 import EventEmitter from "events";
-import { Mark, NodeMap } from "@emrgen/carbon-core";
+import { Mark } from "./Mark";
+import { NodeMap } from "./NodeMap";
 
 export type TraverseOptions = {
   order: "pre" | "post";

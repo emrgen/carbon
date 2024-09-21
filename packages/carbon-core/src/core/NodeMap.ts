@@ -2,7 +2,7 @@ import { Optional } from "@emrgen/types";
 import { NodeBTree } from "./BTree";
 import { Node } from "./Node";
 import { NodeId, NodeIdComparator } from "./NodeId";
-import { Point } from "@emrgen/carbon-core";
+import { Point } from "./Point";
 
 export interface NodeMapGet {
   get(key: NodeId): Optional<Node>;

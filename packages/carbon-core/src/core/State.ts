@@ -6,8 +6,10 @@ import { NodeMap } from "./NodeMap";
 import { Draft } from "./Draft";
 import { StateActions, StateChanges } from "./NodeChange";
 import { BlockSelection } from "./BlockSelection";
-import { MarkSet, PluginManager, Schema } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { PluginManager } from "./PluginManager";
+import { Schema } from "./Schema";
+import { MarkSet } from "./Mark";
 
 export interface ProduceOpts {
   origin: ActionOrigin;

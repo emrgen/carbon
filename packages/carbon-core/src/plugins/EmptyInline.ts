@@ -13,7 +13,7 @@ import {
   Writer,
 } from "@emrgen/carbon-core";
 
-// <EmptyInline><IsolateInlineAtom><EmptyInline>
+// <Text/><EmptyInline/><Text/><Mention><EmptyInline/></Mention/>
 
 export class EmptyInline extends InlineAtom {
   name = "empty";

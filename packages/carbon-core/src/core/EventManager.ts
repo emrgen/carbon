@@ -10,7 +10,7 @@ import { p12, p14, pad } from "./Logger";
 import { last } from "lodash";
 import { preventAndStop } from "../utils/event";
 import { CustomEvent } from "./CustomEvent";
-import { ChangeManager } from "@emrgen/carbon-core";
+import { ChangeManager } from "./ChangeManager";
 
 const selectionKeys: string[] = ["left", "right", "shift+left", "shift+right"];
 

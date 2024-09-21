@@ -1,6 +1,6 @@
 import { JsonStore } from "./JsonStore";
 import { cloneDeep, each, get, isArray, isEqual, set } from "lodash";
-import { Node } from "@emrgen/carbon-core";
+import { Node } from "./Node";
 
 export type NodePropsJson = Record<string, any>;
 

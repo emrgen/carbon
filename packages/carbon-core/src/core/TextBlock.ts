@@ -1,14 +1,12 @@
 import { classString } from "./Logger";
 import { MarkSet } from "./Mark";
 import { Node } from "./Node";
-import {
-  cloneFrozenNode,
-  deepCloneMap,
-  LocalClassPath,
-  Pin,
-} from "@emrgen/carbon-core";
 import { InlineNode } from "./InlineNode";
 import { last } from "lodash";
+import { deepCloneMap } from "./types";
+import { cloneFrozenNode } from "./types";
+import { Pin } from "./Pin";
+import { LocalClassPath } from "./NodeProps";
 
 // utility class for text blocks
 // title is a text block

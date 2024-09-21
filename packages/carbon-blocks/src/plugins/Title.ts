@@ -5,21 +5,22 @@ import {
   EventContext,
   EventHandler,
   EventHandlerMap,
+  InlineNode,
   MarksPath,
   Node,
+  NodeEncoder,
   NodePlugin,
   NodeSpec,
   Point,
   PointedSelection,
   preventAndStopCtx,
   SetContentAction,
+  TextBlock,
+  Writer,
 } from "@emrgen/carbon-core";
 
 import { TextPlugin } from "./Text";
 import { flatten, identity } from "lodash";
-import { NodeEncoder, Writer } from "@emrgen/carbon-core/src/core/Encoder";
-import { TextBlock } from "@emrgen/carbon-core/src/core/TextBlock";
-import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
 
 // title is a block content that can be used as a title for a block
 export class TitlePlugin extends NodePlugin {

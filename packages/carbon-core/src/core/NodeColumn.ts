@@ -1,18 +1,16 @@
-import {
-  CarbonAction,
-  findMatchingActions,
-  findMatchingNodes,
-  getContentMatch,
-  insertNodesActions,
-  MatchAction,
-  MoveNodeAction,
-  Node,
-  nodeLocation,
-  Point,
-} from "@emrgen/carbon-core";
 import { flatten, identity, isEmpty, last } from "lodash";
 import { ContentMatch } from "./ContentMatch";
 import { Optional } from "@emrgen/types";
+import { CarbonAction } from "./actions/index";
+import { MoveNodeAction } from "./actions/index";
+import { Point } from "./Point";
+import { getContentMatch } from "../utils/content_match";
+import { MatchAction } from "../utils/content_match";
+import { findMatchingActions } from "../utils/content_match";
+import { findMatchingNodes } from "../utils/content_match";
+import { nodeLocation } from "../utils/location";
+import { insertNodesActions } from "../utils/action";
+import { Node } from "./Node";
 
 interface MoveNodesResult {
   actions: CarbonAction[];

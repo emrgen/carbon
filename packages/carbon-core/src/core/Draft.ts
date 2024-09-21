@@ -1,17 +1,15 @@
-import {
-  Mark,
-  MarkAction,
-  MarkSet,
-  Node,
-  NodeId,
-  NodePropsJson,
-  NodeType,
-  Point,
-  PointedSelection,
-  Schema,
-  State,
-} from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { Schema } from "./Schema";
+import { MarkSet } from "./Mark";
+import { Mark } from "./Mark";
+import { State } from "./State";
+import { Point } from "./Point";
+import { NodeId } from "./NodeId";
+import { NodeType } from "./NodeType";
+import { NodePropsJson } from "./NodeProps";
+import { MarkAction } from "./actions/index";
+import { PointedSelection } from "./PointedSelection";
+import { Node } from "./Node";
 
 // Draft is responsible for producing a state after a Transaction
 // Actions delegate the state update to the draft

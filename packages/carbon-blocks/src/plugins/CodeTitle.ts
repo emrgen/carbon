@@ -1,4 +1,3 @@
-import { TitlePlugin } from "@emrgen/carbon-blocks";
 import {
   CarbonAction,
   EventContext,
@@ -21,6 +20,7 @@ import { Optional } from "@emrgen/types";
 import { cloneDeep, identity, uniq } from "lodash";
 import { diffArrays } from "diff";
 import "prismjs/components/prism-go";
+import { TitlePlugin } from "./Title";
 
 export class CodeTitle extends TitlePlugin {
   name = "codeTitle";

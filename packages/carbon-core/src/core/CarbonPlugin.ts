@@ -7,8 +7,9 @@ import { CarbonAction } from "./actions/types";
 import { CarbonMessageFormat } from "./MessageBus";
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginState } from "./PluginState";
-import { PluginManager, StateActions } from "@emrgen/carbon-core";
+import { PluginManager } from "./PluginManager";
 import { NodeEncoder, Writer } from "./Encoder";
+import { StateActions } from "./NodeChange";
 import { identity } from "lodash";
 
 export enum PluginType {

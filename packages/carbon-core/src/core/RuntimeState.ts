@@ -1,10 +1,8 @@
-import {
-  ActionOrigin,
-  MarkSet,
-  PinnedSelection,
-  Slice,
-} from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { ActionOrigin } from "./actions/index";
+import { Slice } from "./Slice";
+import { PinnedSelection } from "./PinnedSelection";
+import { MarkSet } from "./Mark";
 
 export class RuntimeState {
   origin: ActionOrigin = ActionOrigin.Unknown;

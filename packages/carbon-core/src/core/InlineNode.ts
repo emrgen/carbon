@@ -1,4 +1,5 @@
-import { MarkSet, Node } from "@emrgen/carbon-core";
+import { Node } from "./Node";
+import { MarkSet } from "./Mark";
 
 export class InlineNode {
   private readonly node: Node;

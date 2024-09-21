@@ -5,7 +5,8 @@ import { Node } from "./Node";
 import { MarkType, NodeType } from "./NodeType";
 import { Maps, NodeName } from "./types";
 import { Mark, MarkProps } from "./Mark";
-import { NodeContentData, NodeFactory } from "@emrgen/carbon-core";
+import { NodeFactory } from "./Factory";
+import { NodeContentData } from "./NodeContent";
 
 interface SchemaSpec {
   nodes: Record<NodeName, NodeSpec>;

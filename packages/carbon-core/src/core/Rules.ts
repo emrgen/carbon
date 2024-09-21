@@ -1,6 +1,6 @@
 import { EventContext } from "./EventContext";
 import { Node } from "./Node";
-import { Pin } from "@emrgen/carbon-core";
+import { Pin } from "./Pin";
 
 export type InputHandler = (
   ctx: EventContext<KeyboardEvent>,

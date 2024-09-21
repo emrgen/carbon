@@ -2,9 +2,9 @@ import { Carbon } from "./Carbon";
 import { EventsIn } from "./Event";
 import { Node } from "./Node";
 import { PinnedSelection } from "./PinnedSelection";
-import { Transaction } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { Service } from "./Service";
+import { Transaction } from "./Transaction";
 
 export enum EventOrigin {
   dom,

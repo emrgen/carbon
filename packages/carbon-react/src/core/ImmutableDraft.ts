@@ -236,11 +236,6 @@ export class ImmutableDraft implements Draft {
     return newState.freeze();
   }
 
-  getNode() {
-    const id = this.nodeMap.ids().find((n) => n.toString().includes("187"));
-    return this.nodeMap.get(id!);
-  }
-
   // prepare the draft for commit
   // transaction updates the node map to reflect the changes
   // prepare will create a new node map and tree with all the changes applied
@@ -400,7 +395,6 @@ export class ImmutableDraft implements Draft {
       return;
     }
 
-    console.log("@@@", this.getNode()?.parent?.id.toString());
     node.descendants().forEach((n) => this.addRemoved(n));
     // update state
     this.tm.updateContent(node, content);

@@ -1,15 +1,21 @@
-import {Carbon, CarbonPlugin, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
-import {encodeNestableChildren} from "@emrgen/carbon-blocks";
+import {
+  CarbonPlugin,
+  Node,
+  NodeEncoder,
+  NodeSpec,
+  Writer,
+} from "@emrgen/carbon-core";
+import { encodeNestableChildren } from "./Nestable";
 
 export class Callout extends CarbonPlugin {
-  name = 'callout';
+  name = "callout";
 
   spec(): NodeSpec {
     return {
-      group: 'content nestable',
-      content: 'title content*',
+      group: "content nestable",
+      content: "title content*",
       splits: true,
-      splitName: 'section',
+      splitName: "section",
       insert: true,
       inlineSelectable: true,
       draggable: true,
@@ -17,50 +23,48 @@ export class Callout extends CarbonPlugin {
       rectSelectable: true,
       blockSelectable: true,
       info: {
-        title: 'Callout',
-        description: 'Write a callout',
-        icon: 'callout',
-        tags: ['callout', "side note", ]
+        title: "Callout",
+        description: "Write a callout",
+        icon: "callout",
+        tags: ["callout", "side note"],
       },
       props: {
         local: {
           placeholder: {
-            empty: '',
-            focused: 'Press / for commands'
+            empty: "",
+            focused: "Press / for commands",
           },
           html: {
             suppressContentEditableWarning: true,
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    };
   }
 
   encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     if (node.isEmpty) {
-      return
+      return;
     }
 
-    writer.write('\n\n');
+    writer.write("\n\n");
     if (node.firstChild) {
-      writer.write(writer.meta.get('indent') ?? '');
+      writer.write(writer.meta.get("indent") ?? "");
       encoder.encode(writer, node.firstChild);
     }
 
-    encodeNestableChildren(writer, encoder, node, '')
+    encodeNestableChildren(writer, encoder, node, "");
   }
 
-
   encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
-    w.write('<aside>');
+    w.write("<aside>");
 
-    w.write('<p>');
+    w.write("<p>");
     ne.encode(w, node.firstChild!);
-    w.write('</p>');
+    w.write("</p>");
 
     encodeNestableChildren(w, ne, node);
 
-    w.write('</aside>');
+    w.write("</aside>");
   }
-
 }

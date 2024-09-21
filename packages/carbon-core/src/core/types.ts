@@ -2,11 +2,9 @@ import { Bound, Optional } from "@emrgen/types";
 import { EventContext } from "./EventContext";
 import { Node } from "./Node";
 import { InputRule } from "./Rules";
-import {
-  NodeContentData,
-  PinnedSelection,
-  PointedSelection,
-} from "@emrgen/carbon-core";
+import { PinnedSelection } from "./PinnedSelection";
+import { PointedSelection } from "./PointedSelection";
+import { NodeContentData } from "./NodeContent";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {}

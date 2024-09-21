@@ -1,5 +1,6 @@
-import { NodeData, Path } from "@emrgen/carbon-core";
 import { each, isEmpty } from "lodash";
+import { Path } from "./Node";
+import { NodeData } from "./NodeContent";
 
 export class Content {
   static atPath(root: NodeData, path: Path): NodeData | undefined {

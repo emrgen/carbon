@@ -1,6 +1,7 @@
 import { Node, Path } from "./Node";
-import { Fragment, LocalClassPath } from "@emrgen/carbon-core";
 import { flatten, zip } from "lodash";
+import { Fragment } from "./Fragment";
+import { LocalClassPath } from "./NodeProps";
 
 // Slice represents a selection of nodes in the editor
 // it is used to store the current selection and to copy and paste nodes

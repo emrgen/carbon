@@ -19,8 +19,8 @@ import { Node } from "./Node";
 import { CarbonAction } from "./actions/types";
 import { EventsIn } from "./Event";
 import { CarbonCommand } from "./CarbonCommand";
-import { StateActions } from "@emrgen/carbon-core";
 import { Service } from "./Service";
+import { StateActions } from "./NodeChange";
 
 // handles events by executing proper plugin
 export class PluginManager {

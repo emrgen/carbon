@@ -11,27 +11,26 @@ import { PluginManager } from "./PluginManager";
 import { Point } from "./Point";
 import { PointedSelection } from "./PointedSelection";
 import { SelectionManager } from "./SelectionManager";
-import {
-  cloneFrozenNode,
-  NodeBTree,
-  NodeIdSet,
-  NodePropsJson,
-  TransactionManager,
-  UpdateMarkAction,
-} from "@emrgen/carbon-core";
-import { ChangeNameAction } from "./actions/ChangeNameAction";
-import { UpdatePropsAction } from "./actions/UpdatePropsAction";
+
 import { ActionOrigin, CarbonAction, TxType } from "./actions/types";
 import { NodeName } from "./types";
+import { cloneFrozenNode } from "./types";
 import { insertNodesActions } from "../utils/action";
 import { ActivatedPath, SelectedPath } from "./NodeProps";
-import { SetContentAction } from "./actions/SetContentAction";
-import { SelectAction } from "./actions/SelectAction";
-import { RemoveNodeAction } from "./actions/RemoveNodeAction";
-import { MoveNodeAction } from "./actions/MoveNodeAction";
+import { NodePropsJson } from "./NodeProps";
 import { CarbonCommand, PluginCommand } from "./CarbonCommand";
 import { Draft } from "./Draft";
 import dayjs from "dayjs";
+import { TransactionManager } from "./TransactionManager";
+import { SelectAction } from "./actions/index";
+import { SetContentAction } from "./actions/index";
+import { RemoveNodeAction } from "./actions/index";
+import { MoveNodeAction } from "./actions/index";
+import { ChangeNameAction } from "./actions/index";
+import { UpdateMarkAction } from "./actions/index";
+import { UpdatePropsAction } from "./actions/index";
+import { NodeBTree } from "./BTree";
+import { NodeIdSet } from "./BSet";
 
 let _id = 0;
 const getId = () => String(_id++);
@@ -341,12 +340,16 @@ export class Transaction {
       if (this.actions.every((c) => c.origin === ActionOrigin.Runtime)) {
         console.group("Commit (runtime)");
       } else {
-        console.groupCollapsed("Commit", this.id, this);
+        console.group("Commit", this.id, this);
       }
 
       for (const action of this.actions) {
         console.log(p14("%c[command]"), "color:white", action.toString());
-        action.execute(draft);
+        try {
+          action.execute(draft);
+        } catch (e) {
+          console.log(e);
+        }
       }
       // normalize after transaction command
       // this way the merge will happen before the final selection

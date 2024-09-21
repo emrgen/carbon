@@ -79,6 +79,30 @@ export class KeyboardPlugin extends AfterPlugin {
       cmd_b: preventAndStopCtx,
       cmd_i: preventAndStopCtx,
       cmd_u: preventAndStopCtx,
+      // FIXME: this is not triggering on linux
+      // not tested on windows, max
+      "cmd+left": (ctx: EventContext<KeyboardEvent>) => {
+        debugger;
+        const { app, cmd } = ctx;
+        const { selection, blockSelection } = app.state;
+
+        if (blockSelection.isActive) {
+          return;
+        }
+
+        // move the head to the start of the current node
+        const { head } = selection;
+        const pinAtStart = Pin.toStartOf(head.node)!;
+        const after = PinnedSelection.fromPin(pinAtStart);
+        if (!after) {
+          return;
+        }
+        if (pinAtStart.eq(head)) {
+          return;
+        }
+
+        cmd.Select(after).Dispatch();
+      },
       esc: (ctx: EventContext<KeyboardEvent>) => {
         const { app, cmd, currentNode } = ctx;
         const { selection, blockSelection } = app.state;

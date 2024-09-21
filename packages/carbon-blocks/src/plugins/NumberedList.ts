@@ -1,9 +1,7 @@
 import { Node, NodeEncoder, NodeSpec, Writer } from "@emrgen/carbon-core";
 import { Section } from "./Section";
-import {
-  encodeHtmlNestableChildren,
-  encodeNestableChildren,
-} from "@emrgen/carbon-blocks";
+import { encodeNestableChildren } from "./Nestable";
+import { encodeHtmlNestableChildren } from "./Nestable";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {}

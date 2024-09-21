@@ -1,8 +1,9 @@
 import { Optional } from "@emrgen/types";
 import { NodeId } from "./NodeId";
 import { Node } from "./Node";
-import { Carbon, NodeMap } from "@emrgen/carbon-core";
 import { clamp } from "lodash";
+import { Carbon } from "./Carbon";
+import { NodeMap } from "./NodeMap";
 
 // NodeStore is a store for the nodes and their rendered HTML elements
 export class NodeStore {
