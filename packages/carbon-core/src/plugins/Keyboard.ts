@@ -1,6 +1,6 @@
 import { EventHandlerMap } from "../core/types";
-import { AfterPlugin, CarbonPlugin } from "../core/CarbonPlugin";
-import { EventContext } from "../core/EventContext";
+import { AfterPlugin, CarbonPlugin } from "../core/index";
+import { EventContext } from "../core/index";
 import { SelectionCommands } from "./SelectionCommands";
 import { IsolateSelectionPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";

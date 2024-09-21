@@ -15,6 +15,7 @@ import { findIndex, identity, isString } from "lodash";
 import { ImmutableNodeContent } from "./ImmutableNodeContent";
 import { IndexMap, IndexMapper } from "@emrgen/carbon-core/src/core/IndexMap";
 import { CarbonCache } from "@emrgen/carbon-core/src/core/CarbonCache";
+import { StepCache } from "./Cache";
 
 export class ImmutableNode extends Node {
   scope: Symbol;
@@ -78,6 +79,12 @@ export class ImmutableNode extends Node {
 
   override get contentKey(): string {
     return `${this.id.toString()}/${this.renderVersion}/${this.contentVersion}`;
+  }
+
+  override stepSize(self: boolean = true): number {
+    return StepCache.get(this.contentKey, () => {
+      return super.stepSize();
+    });
   }
 
   override setParent(parent: Optional<Node>) {

@@ -18,16 +18,17 @@
     "events": "^3.3.0",
     "fastpriorityqueue": "^0.7.4",
     "lodash": "^4.17.21",
+    "lru-cache": "^10.0.0",
     "react-dom": "^18.3.1",
     "react-icons": "^4.10.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@emrgen/eslint-config-custom": "workspace:*",
     "@emrgen/types": "workspace:*",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",
-    "@emrgen/eslint-config-custom": "workspace:*",
     "react": "^18.3.1",
     "tsconfig": "workspace:*",
     "typescript": "^5.4.5",
