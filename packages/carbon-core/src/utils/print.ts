@@ -67,7 +67,7 @@ export const printSteps = (node: Node, steps = 0, tokens: string[] = []) => {
       node.children.forEach((child, i) => {
         tokens.push((i === 0 ? `[${steps}]` : "") + `<${child.name}>`);
         printSteps(child, steps, tokens);
-        steps += child.stepSize() - 1;
+        steps += child.stepCount;
         tokens.push(`</${child.name}>[${steps}]`);
       });
     } else if (node.isText) {
@@ -76,14 +76,14 @@ export const printSteps = (node: Node, steps = 0, tokens: string[] = []) => {
         tokens.push(char);
         tokens.push(`[${steps + i + 1}]`);
       });
-      steps += node.stepSize() - 1;
+      steps += node.stepCount;
     }
   } else {
     tokens.push(`[${steps + 1}]`);
   }
 
   if (isRoot) {
-    tokens.push(`</${node.name}>[${node.stepSize() - 1}]`);
+    tokens.push(`</${node.name}>[${node.stepCount}]`);
   }
 
   if (isRoot) {

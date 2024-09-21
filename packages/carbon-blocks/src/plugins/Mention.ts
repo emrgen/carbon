@@ -20,7 +20,6 @@ export class Mention extends InlineAtom {
       group: "inline",
       content: "empty",
       inline: true,
-      atom: true,
       // isolate: true,
       mergeable: false,
       // hint that the node is not focusable (cursor can't be placed wrt this node)
