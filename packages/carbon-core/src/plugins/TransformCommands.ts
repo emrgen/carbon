@@ -1845,11 +1845,7 @@ export class TransformCommands extends BeforePlugin {
       const down = start.down();
       let after: Optional<PinnedSelection> = null;
       if (down.node.isZero) {
-        const leftAligned = down.leftAlign;
         // if after left aligning the pin is at start of a inlineAtomWrapper node
-        after = PinnedSelection.fromPin(
-          Pin.create(start.node, Math.max(start.offset - 1, 0)),
-        );
       } else {
         after = selection.collapseToStart();
       }

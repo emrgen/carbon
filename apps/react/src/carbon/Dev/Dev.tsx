@@ -8,6 +8,7 @@ import {
   text,
   title,
 } from "@emrgen/carbon-blocks";
+import { mention } from "@emrgen/carbon-blocks";
 import {
   Extension,
   ReactRenderer,
@@ -656,15 +657,17 @@ const data = node("carbon", [
       section([
         title([
           node("empty"),
+          mention("123"),
           node("empty"),
+          mention("bubun"),
           node("empty"),
-          // mention("123"),
+          mention("bappa"),
           node("empty"),
-          // mention("bubun"),
-          // node("empty"),
-          // mention("bappa"),
-          // node("empty"),
         ]),
+      ]),
+      section([title([text("section 1")])]),
+      section([
+        title([node("empty"), node("empty"), node("empty"), node("empty")]),
       ]),
       section([title([text("section 1")])]),
       // node("pageLink", [], {

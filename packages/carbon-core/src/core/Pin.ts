@@ -5,6 +5,7 @@ import { Point } from "./Point";
 import { clamp } from "../utils/clamp";
 import { Maps } from "./types";
 import { NodeMapGet } from "./NodeMap";
+import { Step } from "./Step";
 
 export const IDENTITY_OFFSET = -1;
 
@@ -16,22 +17,15 @@ export class Pin {
   node: Node;
   // focus offset
   // it allows to point to a location within the node
-  offset: number;
+  offset: Optional<number>;
 
   // number of steps to reach the location
+  // when steps is null use offset to calculate the location
   steps: Optional<number>;
 
-  static NULL = new Pin(Node.NULL, 0, 0);
+  static NULL = new Pin(Node.NULL);
 
-  static IDENTITY = new Pin(Node.IDENTITY, IDENTITY_OFFSET, 0);
-
-  get isIdentity() {
-    return this.eq(Pin.IDENTITY);
-  }
-
-  get isNull() {
-    return this.eq(Pin.NULL);
-  }
+  static IDENTITY = new Pin(Node.IDENTITY);
 
   static fromPoint(point: Point, store: NodeMapGet): Optional<Pin> {
     if (point.eq(Point.IDENTITY)) {
@@ -48,7 +42,7 @@ export class Pin {
       );
       return;
     }
-    const { offset } = point;
+    const { offset, steps } = point;
     if (node.focusSize < offset) {
       console.warn(
         "Pin.fromPoint: invalid offset",
@@ -59,10 +53,11 @@ export class Pin {
       return;
     }
 
-    return Pin.create(node, offset);
+    return Pin.create(node, offset, steps);
   }
 
   static fromDom(node: Node, offset: number): Optional<Pin> {
+    // console.log("fromDom", node.name);
     if (!node.isFocusable) {
       if (offset === 0) {
         node = node.find((n) => n.isFocusable) as Node;
@@ -72,8 +67,15 @@ export class Pin {
       }
     }
 
+    Step.create(node, offset + 1).pin();
+
     const pin = Pin.toStartOf(node);
-    // console.log("creating pin", node.id.toString(), pin?.toString());
+    // console.log(
+    //   "creating pin",
+    //   node.id.toString(),
+    //   pin?.toString(),
+    //   pin?.steps,
+    // );
     if (node.isEmpty) {
       return pin;
     }
@@ -82,27 +84,27 @@ export class Pin {
   }
 
   static toBefore(node: Node): Pin {
-    return Pin.create(node, -1);
+    return Pin.create(node, -1, 0);
   }
 
   static toAfter(node: Node): Pin {
-    return Pin.create(node, node.size + 1);
+    return Pin.create(node, node.size + 1, node.stepCount);
   }
 
   static toStartOf(node: Node): Optional<Pin> {
     if (node.isEmpty || node.isBlockAtom) {
-      return Pin.create(node.find((n) => n.isTextContainer || n.isLeaf)!, 0);
+      const target = node.find((n) => n.isTextContainer || n.isLeaf);
+      return Pin.create(target!, 0, 1).up();
     }
 
     if ((node.isInlineAtom && !node.isIsolate) || node.isZero) {
-      return Pin.create(node, 0).up();
+      return Pin.create(node, 0, 1).up();
     }
 
     const target = node.find((n) => n.isFocusable, { order: "post" });
     if (!target) return null;
 
-    // console.log("target", target.id.toString());
-    return Pin.create(target, 0).up();
+    return Pin.create(target, 0, 1).up();
   }
 
   static toEndOf(node: Node): Optional<Pin> {
@@ -113,10 +115,10 @@ export class Pin {
       })!;
       if (!target) return null;
       if (target.isText) {
-        return Pin.create(target, target.size).up();
+        return Pin.create(target, target.size, target.stepCount - 1).up();
       }
 
-      return Pin.create(target, 0);
+      return Pin.create(target, 0, 1).up();
     }
 
     const child = node.find((n) => n.isFocusable || n.hasFocusable, {
@@ -126,13 +128,13 @@ export class Pin {
     if (!child) return null;
 
     if (child.isEmpty) {
-      return Pin.create(child, 0);
+      return Pin.create(child, 0, 1).up();
     }
 
     return Pin.create(child, child.focusSize).up();
   }
 
-  static create(node: Node, offset: number, steps: number = 0) {
+  static create(node: Node, offset: number, steps: Optional<number> = null) {
     if (!node.isFocusable && !node.hasFocusable) {
       throw new Error(`node is not focusable: ${node.name}`);
     }
@@ -140,6 +142,12 @@ export class Pin {
     if (node.focusSize < offset) {
       throw new Error(
         `node: ${node.name} does not have the provided offset: ${offset}`,
+      );
+    }
+
+    if (steps && node.stepCount < steps) {
+      throw new Error(
+        `node: ${node.name} does not have the provided steps: ${steps}`,
       );
     }
 
@@ -155,27 +163,40 @@ export class Pin {
 
   private constructor(
     node: Node,
-    offset: number,
+    offset: Optional<number> = null,
     steps: Optional<number> = null,
   ) {
     this.node = node;
     this.offset = offset;
     this.steps = steps;
+
+    console.assert(
+      !this.offset && !this.steps,
+      "Pin: offset and steps both are null",
+    );
   }
 
-  get hasSteps() {
-    return this.steps === null;
-  }
-
-  get isInvalid() {
+  get isIdentity() {
     return this.eq(Pin.IDENTITY);
+  }
+
+  get isNull() {
+    return this.eq(Pin.NULL);
+  }
+
+  get isStepped() {
+    return this.steps !== null;
+  }
+
+  get isFocused() {
+    return this.offset !== null;
   }
 
   get point(): Point {
     if (this.eq(Pin.IDENTITY)) {
       return Point.IDENTITY;
     }
-    return Point.atOffset(this.node.id, this.offset);
+    return Point.atOffset(this.node.id, this.offset, this.steps);
   }
 
   get isAtStart(): boolean {
@@ -203,12 +224,11 @@ export class Pin {
 
   get isDown() {
     const { node, offset } = this;
-    if ((offset === 0 && node.isVoid) || (node.isInline && node.isLeaf)) {
-      // debugger;
-      return this.clone();
-    }
-
-    return false;
+    return (
+      (offset === 0 && node.isVoid) ||
+      (node.isInline && node.isLeaf) ||
+      node.isInlineAtom
+    );
   }
 
   // NOTE: cursor move between two inline nodes within the same text container block
@@ -295,9 +315,12 @@ export class Pin {
   }
 
   // lift pin to the parent (possibly to the text block)
+  // NOTE: up looses the precise location information when the pin is between two inline nodes
+  // by default it will be aligned to the left node when the pin is in the middle of the two inline nodes
+  // this causes some selection to be unreachable
   up(): Pin {
-    const { node, offset } = this;
-    if (node.isBlock) return this;
+    if (this.node.isBlock) return this;
+    const { node, offset, steps } = this;
 
     // console.log(node.parents.map((n) => n.id.toString()));
     const textBlock = node.chain.find((n) => n.isTextContainer);
@@ -319,6 +342,13 @@ export class Pin {
       return false;
     });
 
+    if (steps) {
+      const pos = Step.create(this.node, steps).up((n) => n.eq(textBlock));
+      // console.log("before:", this.node.id.toString(), steps);
+      // console.log("after:", pos.node.id.toString(), pos.offset);
+      return Pin.create(textBlock, distance, pos.offset);
+    }
+
     // console.log(
     //   "up",
     //   this.toString(),
@@ -327,6 +357,8 @@ export class Pin {
     //   distance,
     //   node.chain.map((n) => n.id.toString()),
     // );
+
+    // TODO: always create pin with steps
     return Pin.create(textBlock, distance);
   }
 
@@ -339,6 +371,23 @@ export class Pin {
   down() {
     if (this.isDown) {
       return this;
+    }
+
+    if (this.steps) {
+      // console.log(
+      //   "Pin.down: steps is not null",
+      //   this.toString(),
+      //   this.steps,
+      //   this.steps,
+      //   Step.create(this.node, this.steps).down().toString(),
+      // );
+      console.log(
+        this.node.id.toString(),
+        this.offset,
+        this.steps,
+        Step.create(this.node, this.steps).toString(),
+      );
+      return Step.create(this.node, this.steps).down().pin()!;
     }
 
     const { node, offset } = this;
@@ -445,33 +494,40 @@ export class Pin {
   // each step can be considered as one right key press
   // tries to move as much as possible
   private moveForwardBy(distance: number): Optional<Pin> {
-    // console.log('Pin.moveForwardBy', this.toString(),distance);
     if (distance === 0) {
       return this.clone();
     }
 
     let { node, offset } = this;
     distance = offset + distance; //+ (node.isEmpty ? 1 : 0);
+
     let prev: Node = node;
     let curr: Optional<Node> = node;
-    let currSize: number = 0;
-    // console.log(node.id);
+    let focusSize: number = 0;
     // console.log('start pos', curr.id.toString(), offset, distance);
 
     while (prev && curr) {
+      const isSameBlock =
+        !prev.eq(curr) && prev.closestBlock.eq(curr.closestBlock);
       if (!prev.closestBlock.eq(curr.closestBlock)) {
         distance -= 1;
+      } else if (
+        !prev.eq(curr) &&
+        (prev.isZero || curr.isZero) &&
+        isSameBlock
+      ) {
+        // distance -= 1;
       }
       // console.log('=>',curr.id.toString(), curr.size, distance);
 
-      currSize = curr.focusSize;
-      // console.log(focusSize, curr.id, curr.name);
-      if (distance <= currSize) {
+      focusSize = curr.isZero ? (isSameBlock ? 0 : 1) : curr.focusSize;
+      console.log(focusSize, curr.id, curr.name);
+      if (distance <= focusSize) {
         // console.log(curr.id, curr.focusSize, offset);
         break;
       }
       // if curr is Empty it will have -
-      distance -= currSize;
+      distance -= focusSize;
       // console.log(curr.id.key, curr.focusSize);
       prev = curr;
 
@@ -481,27 +537,27 @@ export class Pin {
         },
         {
           skip: (n) => {
-            if (n.isIsolate && n.isAtom) {
-              distance -= 1;
-            }
             return n.isIsolate;
           },
         },
       );
     }
 
+    // console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);
+
     if (!curr) {
-      return Pin.create(prev, prev.size);
+      return Pin.create(prev, prev.focusSize, prev.stepCount);
     }
 
     distance = clamp(distance, 0, curr.focusSize);
 
     // if the current node is inline atom and the distance is within the atom
     if (curr.isInlineAtom && distance) {
-      return Pin.create(curr, curr.focusSize);
+      return Pin.create(curr, curr.focusSize, curr.stepCount);
     }
 
-    return Pin.create(curr, distance);
+    console.log("x");
+    return Pin.create(curr, distance, distance + 1);
   }
 
   // each step can be considered as one left key press
@@ -511,36 +567,44 @@ export class Pin {
     }
 
     let { node, offset } = this;
+    // if (node.isZero && offset === 1) {
+    //   distance += 1;
+    // }
+
     distance = node.focusSize - offset + distance;
 
     let prev: Node = node;
     let curr: Optional<Node> = node;
-    let currSize: number = 0;
-    let blockChanged = false;
+    let focusSize: number = 0;
+    // let blockChanged = false;
     while (prev && curr) {
+      const isSameBlock =
+        !prev.eq(curr) && prev.closestBlock.eq(curr.closestBlock);
       if (!prev.closestBlock.eq(curr.closestBlock)) {
         distance -= 1;
-        blockChanged = true;
-      } else {
-        blockChanged = false;
+        // blockChanged = true;
+      } else if (
+        !prev.eq(curr) &&
+        (prev.isZero || curr.isZero) &&
+        prev.closestBlock?.eq(curr.closestBlock)
+      ) {
+        distance -= 1;
+        // blockChanged = false;
       }
       // console.log('=>', curr.id.toString(), curr.size, distance);
 
-      currSize = curr.focusSize;
+      focusSize = curr.isZero ? 0 : curr.focusSize;
       // console.log(focusSize, curr.id, curr.name);
-      if (distance <= currSize) {
+      if (distance <= focusSize) {
         // console.log(curr.id, curr.focusSize, offset);
         break;
       }
       // if curr is Empty it will have -
-      distance -= currSize;
+      distance -= focusSize;
       // console.log(curr.id.key, curr.focusSize);
       prev = curr;
       let nextCurr = curr.prev((n) => n.isFocusable, {
         skip: (n) => {
-          if (n.isIsolate && n.isAtom) {
-            distance -= 1;
-          }
           return n.isIsolate;
         },
       });
@@ -553,16 +617,20 @@ export class Pin {
     // console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);
 
     if (!curr) {
-      return Pin.create(prev, 0);
+      return Pin.create(prev, 0, 1);
     }
 
     distance = clamp(distance, 0, curr.focusSize);
     // if the current node is inline atom and the distance is within the atom
     if (curr.isInlineAtom && distance) {
-      return Pin.create(curr, 0);
+      return Pin.create(curr, 0, 1);
     }
 
-    return Pin.create(curr, curr.focusSize - distance);
+    return Pin.create(
+      curr,
+      curr.focusSize - distance,
+      // curr.stepCount - distance - 1,
+    );
   }
 
   map<B>(fn: Maps<Pin, B>) {

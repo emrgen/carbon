@@ -50,7 +50,15 @@ export class PinnedSelection {
       focusNode: focusEl,
       focusOffset,
     } = domSelection;
-    // console.log(p14('%c[info]'), 'color:pink', p30('Selection.fromDom'), anchorEl, focusEl, anchorOffset, focusOffset);
+    // console.log(
+    //   p14("%c[info]"),
+    //   "color:pink",
+    //   p30("Selection.fromDom"),
+    //   anchorEl,
+    //   focusEl,
+    //   anchorOffset,
+    //   focusOffset,
+    // );
 
     // console.log(store.nodeMap.nodes().map(n => `${n.key}:${n.parent?.key}`).join(' > '))
     let resolvedAnchorNode = store.resolve(anchorEl, anchorOffset);
@@ -101,7 +109,7 @@ export class PinnedSelection {
       if (anchorNode.after(focusNode)) {
         anchorNode = anchorNode.prev((n) => n.isFocusable);
         if (anchorNode) {
-          anchorOffset = anchorNode.size;
+          anchorOffset = anchorNode.focusSize;
         } else {
           console.error("should not reach here");
         }
@@ -162,8 +170,14 @@ export class PinnedSelection {
     //   anchorOffset,
     //   focusOffset,
     // );
-    const downTail = Pin.fromDom(anchorNode, anchorOffset);
-    const downHead = Pin.fromDom(focusNode, focusOffset);
+    const downTail = Pin.fromDom(
+      anchorNode,
+      anchorNode.isZero ? 1 : anchorOffset,
+    );
+    const downHead = Pin.fromDom(
+      focusNode,
+      anchorNode.isZero ? 1 : focusOffset,
+    );
     const tail = downTail?.up();
     const head = downHead?.up();
 
@@ -396,7 +410,15 @@ export class PinnedSelection {
       // 	console.log(node)
       // }
 
-      // console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
+      // console.log(
+      //   p14("%c[info]"),
+      //   "color:pink",
+      //   p30("selection.setBaseAndExtent"),
+      //   anchorNode,
+      //   anchorOffset,
+      //   focusNode,
+      //   focusOffset,
+      // );
 
       // Ref: https://stackoverflow.com/a/779785/4556425
       // https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
@@ -494,6 +516,7 @@ export class PinnedSelection {
 
     if (!focus || !anchor) return;
 
+    // console.log(anchor.node.id.toString(), anchor.offset);
     let anchorNode: any = store.element(anchor.node.id);
     let focusNode: any = store.element(focus.node.id);
 
@@ -518,7 +541,7 @@ export class PinnedSelection {
     // 	headOffset = 11
     // }
 
-    // console.log('nativeSelection', anchorNode.id.toString(), anchorNode);
+    // console.log("nativeSelection", anchorNode.id.toString(), anchorNode);
     // console.log(focusNode.firstChild?.firstChild ?? focusNode.firstChild ?? focusNode, headOffset);
     // console.log(anchorNode.firstChild?.firstChild ?? anchorNode.firstChild ?? anchorNode, tailOffset);
 

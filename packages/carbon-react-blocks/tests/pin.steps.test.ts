@@ -3,12 +3,8 @@ import { section, title } from "@emrgen/carbon-blocks";
 import { text } from "@emrgen/carbon-blocks";
 import { node } from "@emrgen/carbon-blocks";
 import { createCarbon } from "./utils";
-import { Position } from "@emrgen/carbon-core";
-import { printSteps } from "@emrgen/carbon-core";
-
-const nameOffset = (pos: Position) => {
-  return `${pos.node.name}:${pos.offset}`;
-};
+import { nameOffset } from "./utils";
+import { Step } from "@emrgen/carbon-core";
 
 const json = node("callout", [
   title([text("abc")]),
@@ -16,10 +12,10 @@ const json = node("callout", [
 ]);
 const app = createCarbon(json);
 
-printSteps(app.content);
+// printSteps(app.content);
 
 test("pin step forwards ", () => {
-  const pos = Position.toStartOf(app.content);
+  const pos = Step.toStartOf(app.content);
 
   expect(nameOffset(pos)).toBe("callout:1");
   expect(nameOffset(pos.moveBy(0))).toBe("callout:1");
@@ -32,7 +28,7 @@ test("pin step forwards ", () => {
 });
 
 test("pin step forwards down", () => {
-  const pos = Position.toStartOf(app.content);
+  const pos = Step.toStartOf(app.content);
 
   expect(nameOffset(pos)).toBe("callout:1");
   expect(nameOffset(pos.moveBy(0).down())).toBe("title:0");
@@ -54,7 +50,7 @@ test("pin step forwards down", () => {
 });
 
 test("pin step backwards", () => {
-  const pos = Position.toEndOf(app.content);
+  const pos = Step.toEndOf(app.content);
   expect(nameOffset(pos)).toBe("callout:17");
   expect(nameOffset(pos.moveBy(0))).toBe("callout:17");
   expect(nameOffset(pos.moveBy(-1))).toBe("callout:16");
@@ -65,7 +61,7 @@ test("pin step backwards", () => {
 });
 
 test("pin step backwards down", () => {
-  const pos = Position.toEndOf(app.content);
+  const pos = Step.toEndOf(app.content);
   expect(nameOffset(pos)).toBe("callout:17");
   expect(nameOffset(pos.moveBy(0).down())).toBe("section:9");
   expect(nameOffset(pos.moveBy(-1).down())).toBe("title:7");
@@ -87,7 +83,7 @@ test("pin step backwards down", () => {
 });
 
 test("pin step up", () => {
-  const pos = Position.toEndOf(app.content);
+  const pos = Step.toEndOf(app.content);
   expect(nameOffset(pos)).toBe("callout:17");
   expect(nameOffset(pos.moveBy(0).up(isCallout))).toBe("callout:17");
   expect(nameOffset(pos.moveBy(-1).down().up(isCallout))).toBe("callout:16");

@@ -1,6 +1,7 @@
 import { IntoNodeId, NodeId } from "./NodeId";
 import { classString } from "./Logger";
 import { Maps } from "./types";
+import { Optional } from "@emrgen/types";
 
 export enum PointAt {
   Start = "start",
@@ -20,7 +21,8 @@ export class Point {
   // valid when point is within a node
   offset: number;
 
-  steps: number = 0;
+  // carrying precise location information
+  steps: Optional<number>;
 
   static IDENTITY = new Point(NodeId.IDENTITY, PointAt.Inside, 0);
   static NULL = new Point(NodeId.NULL, PointAt.Inside, 0);
@@ -50,12 +52,16 @@ export class Point {
   }
 
   // point to before start of the node children
-  static atOffset(nodeId: IntoNodeId, offset: number = 0) {
-    return new Point(nodeId, PointAt.Start, offset);
+  static atOffset(
+    nodeId: IntoNodeId,
+    offset: number = 0,
+    steps: Optional<number> = null,
+  ) {
+    return new Point(nodeId, PointAt.Start, offset, steps);
   }
 
   static toBefore(nodeId: IntoNodeId) {
-    return new Point(nodeId, PointAt.Before);
+    return new Point(nodeId, PointAt.Before, 0, 0);
   }
 
   // point to after the id
@@ -72,10 +78,16 @@ export class Point {
     return new Point(nodeId, at, offset);
   }
 
-  constructor(nodeId: IntoNodeId, at: PointAt, offset: number = -1) {
+  constructor(
+    nodeId: IntoNodeId,
+    at: PointAt,
+    offset: number = 0,
+    steps: Optional<number> = null,
+  ) {
     this.nodeId = nodeId.nodeId();
     this.at = at;
     this.offset = offset;
+    this.steps = steps;
   }
 
   map<B>(fn: Maps<Point, B>) {
@@ -95,8 +107,8 @@ export class Point {
   }
 
   toString() {
-    const { nodeId, at, offset } = this;
-    return classString(this)(`${nodeId.toString()}/${at}/${offset}`);
+    const { nodeId, at, offset, steps } = this;
+    return classString(this)(`${nodeId.toString()}/${at}/${offset}/${steps}`);
   }
 
   toJSON() {

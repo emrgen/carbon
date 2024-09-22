@@ -15,7 +15,6 @@ import { findIndex, identity, isString } from "lodash";
 import { ImmutableNodeContent } from "./ImmutableNodeContent";
 import { IndexMap, IndexMapper } from "@emrgen/carbon-core/src/core/IndexMap";
 import { CarbonCache } from "@emrgen/carbon-core/src/core/CarbonCache";
-import { StepCache } from "./Cache";
 
 export class ImmutableNode extends Node {
   scope: Symbol;
@@ -81,11 +80,12 @@ export class ImmutableNode extends Node {
     return `${this.id.toString()}/${this.renderVersion}/${this.contentVersion}`;
   }
 
-  override get stepCount(): number {
-    return StepCache.get(this.contentKey, () => {
-      return super.stepCount;
-    });
-  }
+  // FIXME: cache is causing issues with the undo/redo of emoji. Need to investigate.
+  // override get stepCount(): number {
+  //   return StepCache.get(this.contentKey, () => {
+  //     return super.stepCount;
+  //   });
+  // }
 
   override setParent(parent: Optional<Node>) {
     if (this.isFrozen) {

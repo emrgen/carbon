@@ -35,6 +35,12 @@ export default function SelectionTracker() {
 
       const { head, tail } = state.selection;
       const headDown = head.down();
+      // console.log(
+      //   "xx",
+      //   head.toString(),
+      //   headDown.leftAlign.up().toString(),
+      //   headDown.rightAlign.up().toString(),
+      // );
       const tailDown = tail.down();
       if (
         head.eq(tail) ||

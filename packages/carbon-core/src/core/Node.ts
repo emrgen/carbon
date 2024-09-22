@@ -211,6 +211,14 @@ export class Node extends EventEmitter implements IntoNodeId {
     // two steps to enter and exit the text node
     if (this.isText) return this.textContent.length + 2;
 
+    if ((this.isBlock && this.isVoid) || this.isZero) {
+      return 2;
+    }
+
+    if (this.isInlineAtom) {
+      return this.focusSize + 1;
+    }
+
     // once step to cross the block
     if (this.isIsolate) {
       return 1;
@@ -220,34 +228,18 @@ export class Node extends EventEmitter implements IntoNodeId {
       throw new Error("not implemented");
     }
 
-    if (this.isBlock && this.isVoid) {
-      return 2;
-    }
-
     // two steps to enter and exit the block
     return this.children.map((n) => n.stepCount).reduce((s, n) => s + n, 2);
   }
 
-  // 	if (this.isText) {
-  // 		this.stepSizeCache = this.size
-  // 	} else if (this.isVoid) {
-  // 		this.stepSizeCache = 2
-  // 	} else if (this.isAtom) {
-  // 		this.stepSizeCache = 1
-  // 	} else {
-  // 		this.stepSizeCache = 2 + this.children.reduce((s, ch) => s + ch.stepCount, 0);
-  // 	}
-
-  // 	return this.stepSizeCache;
-  // }
-
   // focus steps count within the node
   // start and end locations are within the node
   get focusSize(): number {
+    if (this.isZero) return 1;
+
     if (this.isInlineAtom) {
       return this.props.get(AtomSizePath) ?? this.textContent.length;
     }
-    // if (this.isEmpty && this.isInline) return 1
     // if (this.isEmpty || this.isInlineAtom) return 1;
     // if (this.isBlockAtom) return 0;
     if (this.isText) return this.textContent.length;
@@ -276,11 +268,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   // focus can be within the node(ex: text node), excluding any child node
   get isFocusable(): boolean {
-    if (this.isInlineAtom && !this.isIsolate) return true;
-    // if (this.isText) return true;
+    if (this.type.isFocusable) return true;
     if (this.parents.some((n) => n.isAtom && n.isBlock)) return false;
     return (
-      ((this.isTextContainer && this.isEmpty) || this.type.isFocusable) &&
+      ((this.isTextContainer && this.isVoid) || this.type.isFocusable) &&
       !this.isCollapseHidden
     );
   }

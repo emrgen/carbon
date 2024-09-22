@@ -1678,9 +1678,6 @@ a[data-name="text"]
 //.attribute-type-status
 //    font-size 13px
 
-.empty-zero-width-space::after
-    content ''
-
 //[data-name=mention]
 //    background red;
 
@@ -1692,9 +1689,14 @@ a[data-name="text"]
     border-radius: 10px;
     font-size: 14px;
     color: #888;
-    background #eee
-    padding 1px 4px
+    //background #eee
+    //padding 1px 4px
     cursor pointer;
+
+[data-name=empty]
+    background red
+    padding 0 2px
+    margin 0 2px
 
 //[data-name=mention]
 //    -webkit-user-modify: read-only

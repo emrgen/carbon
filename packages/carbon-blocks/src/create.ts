@@ -67,12 +67,7 @@ export const mention = (name: string) => {
   return node(
     "mention",
     [
-      text("@" + name, {
-        // [AtomSizePath]: name.length,
-        // [ContenteditablePath]: false,
-        // [SuppressContenteditableWarningPath]: true,
-      }),
-      node("empty"),
+      // node("empty")
     ],
     {
       [AtomContentPath]: `@${name}`,

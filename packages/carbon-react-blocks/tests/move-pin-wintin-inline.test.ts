@@ -1,10 +1,9 @@
 import { test } from "vitest";
-import { node, section, text, title } from "@emrgen/carbon-blocks";
 
 test("put the pin at the start of inline", () => {
-  const json = section([
-    title([node("bold", [node("italic", [text("01234")])]), text("5678")]),
-  ]);
+  // const json = section([
+  //   title([node("bold", [node("italic", [text("01234")])]), text("5678")]),
+  // ]);
   // const app = createCarbon(json);
   //
   // printNode(app.content);

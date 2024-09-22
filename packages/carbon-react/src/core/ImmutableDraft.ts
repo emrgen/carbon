@@ -314,13 +314,6 @@ export class ImmutableDraft implements Draft {
       node.contentVersion += 1;
     });
 
-    console.log(
-      this.updated
-        .toArray()
-        .map((n) => n.toString())
-        .join(", "),
-    );
-
     return this;
   }
 
@@ -468,13 +461,13 @@ export class ImmutableDraft implements Draft {
         const textNode = node.type.schema.text(text)!;
         this.updateContent(node.id, [textNode]);
       } else {
-        console.log(
-          "INSERTING TEXT",
-          text,
-          offset,
-          node.textContent,
-          marks.toString(),
-        );
+        // console.log(
+        //   "INSERTING TEXT",
+        //   text,
+        //   offset,
+        //   node.textContent,
+        //   marks.toString(),
+        // );
 
         // find text node and insert text at the offset
         // if the marks match with the text node, insert the text only

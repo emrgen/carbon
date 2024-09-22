@@ -88,7 +88,7 @@ export class NodeStore {
     // if (el.nodeType === document.TEXT_NODE) {
     //   console.log("text node", el);
     // }
-    //
+
     do {
       node = this.elementToNodeMap.get(el);
       // if el is a text node and no carbon node is found

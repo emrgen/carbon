@@ -15,7 +15,7 @@ export class PagePlugin extends CarbonPlugin {
 
   spec(): NodeSpec {
     return {
-      group: "",
+      group: "block",
       content: "title content*",
       splits: true,
       splitName: "section",

@@ -9,6 +9,10 @@ export class Factory {
   constructor(readonly nodeFactory: NodeFactory) {}
 }
 
+export interface NodeFactoryOptions {
+  strict?: boolean;
+}
+
 export interface NodeFactory {
   blockId(): NodeId;
 

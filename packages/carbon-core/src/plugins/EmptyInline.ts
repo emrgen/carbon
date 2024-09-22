@@ -33,57 +33,57 @@ export class EmptyInline extends InlineAtom {
 
   keydown(): EventHandlerMap {
     return {
-      left: (ctx) => {
-        const { currentNode, selection } = ctx;
-        console.log(
-          "before left",
-          selection.head.down().node.id.toString(),
-          selection.head.down().offset,
-        );
-        const down = selection.head.down().leftAlign;
-
-        if (selection.isCollapsed) {
-          preventAndStopCtx(ctx);
-          console.log(down.node.name, down.node.id.toString());
-          const prevFocusable = down.node.prev((n) => {
-            console.log("prev", n.name, n.toString());
-            return n.isFocusable;
-          });
-          if (!prevFocusable) {
-            console.log("no focusable found");
-            return;
-          }
-
-          const pin = Pin.toEndOf(prevFocusable)!;
-          const after = PinnedSelection.fromPin(pin)!;
-          console.log("after", after.toString());
-          ctx.cmd.Select(after).Dispatch();
-        }
-      },
-      right: (ctx) => {
-        const { currentNode, selection } = ctx;
-        const down = selection.head.down().rightAlign;
-        if (selection.isCollapsed) {
-          preventAndStopCtx(ctx);
-
-          const nextFocusable = down.node.next((n) => n.isFocusable);
-          if (!nextFocusable) {
-            console.log("no focusable found");
-            return;
-          }
-
-          console.log(
-            "next focusable",
-            nextFocusable.toString(),
-            down.node.toString(),
-          );
-
-          const pin = Pin.toStartOf(nextFocusable)!;
-          console.log("pin", pin.toString());
-          const after = PinnedSelection.fromPin(pin)!;
-          ctx.cmd.Select(after).Dispatch();
-        }
-      },
+      // left: (ctx) => {
+      //   const { currentNode, selection } = ctx;
+      //   console.log(
+      //     "before left",
+      //     selection.head.down().node.id.toString(),
+      //     selection.head.down().offset,
+      //   );
+      //   const down = selection.head.down().leftAlign;
+      //
+      //   if (selection.isCollapsed) {
+      //     preventAndStopCtx(ctx);
+      //     console.log(down.node.name, down.node.id.toString());
+      //     const prevFocusable = down.node.prev((n) => {
+      //       console.log("prev", n.name, n.toString());
+      //       return n.isFocusable;
+      //     });
+      //     if (!prevFocusable) {
+      //       console.log("no focusable found");
+      //       return;
+      //     }
+      //
+      //     const pin = Pin.toEndOf(prevFocusable)!;
+      //     const after = PinnedSelection.fromPin(pin)!;
+      //     console.log("after", after.toString());
+      //     ctx.cmd.Select(after).Dispatch();
+      //   }
+      // },
+      // right: (ctx) => {
+      //   const { currentNode, selection } = ctx;
+      //   const down = selection.head.down().rightAlign;
+      //   if (selection.isCollapsed) {
+      //     preventAndStopCtx(ctx);
+      //
+      //     const nextFocusable = down.node.next((n) => n.isFocusable);
+      //     if (!nextFocusable) {
+      //       console.log("no focusable found");
+      //       return;
+      //     }
+      //
+      //     console.log(
+      //       "next focusable",
+      //       nextFocusable.toString(),
+      //       down.node.toString(),
+      //     );
+      //
+      //     const pin = Pin.toStartOf(nextFocusable)!;
+      //     console.log("pin", pin.toString());
+      //     const after = PinnedSelection.fromPin(pin)!;
+      //     ctx.cmd.Select(after).Dispatch();
+      //   }
+      // },
       shiftRight: (ctx) => {
         preventAndStopCtx(ctx);
 

@@ -82,7 +82,7 @@ export class TextBlock {
     const result = nodes.reduce((acc, curr, index) => {
       if (index === 0) {
         // if the first node is an inline atom wrapper, add an empty node before it
-        if (this.isInlineAtomIsolate(curr)) {
+        if (this.isNonFocusableInlineAtom(curr)) {
           const empty = curr.type.schema.type("empty")?.default();
           if (!empty) {
             throw new Error("empty node not found");
@@ -107,7 +107,10 @@ export class TextBlock {
       }
 
       // if both are not inline atom wrappers, add an empty node between them
-      if (this.isInlineAtomIsolate(prev) && this.isInlineAtomIsolate(curr)) {
+      if (
+        this.isNonFocusableInlineAtom(prev) &&
+        this.isNonFocusableInlineAtom(curr)
+      ) {
         const empty = curr.type.schema.type("empty")?.default();
         if (!empty) {
           throw new Error("empty node not found");
@@ -118,19 +121,35 @@ export class TextBlock {
       return [...acc, curr];
     }, [] as Node[]);
 
-    if (result.length && this.isInlineAtomIsolate(last(result)!)) {
-      const empty = last(result)?.type.schema.type("empty")?.default();
-      if (!empty) {
-        throw new Error("empty node not found");
+    if (result.length) {
+      const lastNode = last(result)!;
+      const secondLastNode = result[result.length - 2];
+      if (
+        secondLastNode &&
+        !this.isNonFocusableInlineAtom(secondLastNode) &&
+        lastNode.isZero
+      ) {
+        return result.slice(0, -1);
       }
-      return [...result, empty];
+
+      if (result.length === 1 && lastNode.isZero) {
+        return [];
+      }
+
+      if (this.isNonFocusableInlineAtom(lastNode)) {
+        const empty = last(result)?.type.schema.type("empty")?.default();
+        if (!empty) {
+          throw new Error("empty node not found");
+        }
+        return [...result, empty];
+      }
     }
 
     return result;
   }
 
-  static isInlineAtomIsolate(node: Node) {
-    return node.isIsolate && node.type.isInline && node.type.isAtom;
+  static isNonFocusableInlineAtom(node: Node) {
+    return node.type.isInline && node.type.isAtom && !node.isFocusable;
   }
 
   // remove content from a text block from a given range

@@ -46,7 +46,9 @@ export abstract class CarbonPlugin {
   destroy(app: Carbon) {}
 
   spec(): NodeSpec {
-    return {};
+    return {
+      content: "block*",
+    };
   }
 
   // initialize the node with default styles and attributes

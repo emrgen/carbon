@@ -39,4 +39,5 @@ export * from "./Span";
 export * from "./DeleteGroup";
 export * from "./PluginEmitter";
 export * from "./PluginState";
-export * from "./Position";
+export * from "./Step";
+export * from "./Focus";
