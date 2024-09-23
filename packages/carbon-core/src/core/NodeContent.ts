@@ -223,6 +223,7 @@ export class PlainNodeContent implements NodeContent {
   }
 
   updateProps(props: NodePropsJson) {
+    const newProps = this.props.fromJSON(props);
     this.props.merge(props);
   }
 

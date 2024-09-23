@@ -1848,7 +1848,7 @@ export class TransformCommands extends BeforePlugin {
     if (endTextBlock.eq(startTextBlock)) {
       const down = start.down();
       let after: Optional<PinnedSelection> = null;
-      if (down.node.isZero) {
+      if (down?.node.isZero) {
         // if after left aligning the pin is at start of a inlineAtomWrapper node
       } else {
         after = selection.collapseToStart();
@@ -2037,7 +2037,7 @@ export class TransformCommands extends BeforePlugin {
 
     tr.Add(mergeActions);
     tr.Add(nodeActions);
-    const down = start.down().leftAlign.up();
+    const down = start.down()?.leftAlign.up();
     const after = PinnedSelection.fromPin(down);
     tr.Select(after);
   }
@@ -2454,7 +2454,6 @@ export class TransformCommands extends BeforePlugin {
     const { app } = tr;
     const actions: CarbonAction[] = [];
     // check if prev and next can be merged
-    console.log(Pin.toEndOf(prev)!.down().toString());
     const pin = Pin.toEndOf(prev)!.down().leftAlign.up();
     const after = PinnedSelection.fromPin(pin);
 

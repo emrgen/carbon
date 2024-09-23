@@ -164,14 +164,14 @@ export class TextBlock {
 
     const start = Pin.create(this.node, from);
     const end = Pin.create(this.node, to);
-    const startDown = start.down().rightAlign;
-    const endDown = end.down().leftAlign;
-    const startNode = startDown.node.closest(
+    const startDown = start.down()?.rightAlign;
+    const endDown = end.down()?.leftAlign;
+    const startNode = startDown?.node.closest(
       (n) => n.parent?.isTextContainer!,
     )!;
-    const endNode = endDown.node.closest((n) => n.parent?.isTextContainer!)!;
+    const endNode = endDown?.node.closest((n) => n.parent?.isTextContainer!)!;
 
-    console.log(startDown.node.id.toString(), endDown.node.id.toString());
+    console.log(startDown?.node.id.toString(), endDown?.node.id.toString());
     console.log(startNode.id.toString(), endNode.id.toString());
     if (startNode.eq(endNode)) {
       if (startNode.isInlineAtom) {
@@ -179,8 +179,8 @@ export class TextBlock {
       }
 
       const textContent =
-        startNode.textContent.slice(0, startDown.offset) +
-        endNode.textContent.slice(endDown.offset);
+        startNode.textContent.slice(0, startDown?.offset) +
+        endNode.textContent.slice(endDown?.offset);
       const textNode = startNode.type.create(
         textContent,
         startNode.props.toJSON(),
@@ -195,7 +195,9 @@ export class TextBlock {
         }) ?? ([] as Node[])
       )
         .map(cloneFrozenNode)
-        .filter((n) => n.focusSize);
+        .filter((n) => {
+          return !(n.isText && n.size === 0);
+        });
     }
 
     const prevNodes = startNode.prevSiblings;
@@ -203,23 +205,24 @@ export class TextBlock {
     let startNodes: Node[] = [];
     let endNodes: Node[] = [];
 
-    if (startDown.node.isZero) {
+    if (startDown?.node.isZero) {
       startNodes = [startDown.node];
     } else {
-      startNodes = InlineNode.from(startDown.node).split(startDown.offset);
+      startNodes = InlineNode.from(startDown?.node).split(startDown?.offset);
       if (startDown.offset !== startNode.focusSize) {
         startNodes.pop();
       }
     }
 
-    if (endDown.node.isZero) {
+    if (endDown?.node.isZero) {
       endNodes = [endDown.node];
     } else {
-      endNodes = InlineNode.from(endDown.node).split(endDown.offset);
+      endNodes = InlineNode.from(endDown?.node).split(endDown.offset);
       if (endDown.offset !== 0) {
         endNodes.shift();
       }
     }
+    console.log([...prevNodes, ...startNodes, ...endNodes, ...nextNodes]);
 
     return [...prevNodes, ...startNodes, ...endNodes, ...nextNodes]
       .map(cloneFrozenNode)

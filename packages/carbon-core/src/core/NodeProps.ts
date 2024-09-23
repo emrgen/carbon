@@ -1,5 +1,9 @@
-import { JsonStore } from "./JsonStore";
-import { cloneDeep, each, get, isArray, isEqual, set } from "lodash";
+import { isArray } from "lodash";
+import { get } from "lodash";
+import { set } from "lodash";
+import { cloneDeep } from "lodash";
+import { isEqual } from "lodash";
+import { entries } from "lodash";
 import { Node } from "./Node";
 
 export type NodePropsJson = Record<string, any>;
@@ -23,6 +27,10 @@ export interface NodeProps {
   freeze(): NodeProps;
 
   eq(other: NodeProps): boolean;
+
+  diff(other: NodeProps): NodeProps;
+
+  map(): Record<string, any>;
 }
 
 export class PlainNodeProps implements NodeProps {
@@ -72,6 +80,25 @@ export class PlainNodeProps implements NodeProps {
     return path.split("/").join(".");
   }
 
+  map() {
+    const entries: any = {};
+    this.collectEntries(this.props, "", entries);
+    return entries;
+  }
+
+  private collectEntries(json: any, path: string, entries: any) {
+    for (const [key, value] of Object.entries(json)) {
+      if (isArray(value)) {
+        entries[path + "/" + key] = value;
+        this.collectEntries(value, path + "/" + key, entries);
+      } else if (typeof value === "object") {
+        this.collectEntries(value, path + "/" + key, entries);
+      } else {
+        entries[path + "/" + key] = value;
+      }
+    }
+  }
+
   get<T>(path: string, defaultValue?: T): T {
     return get(this.props, this.dotPath(path)) ?? defaultValue;
   }
@@ -108,73 +135,17 @@ export class PlainNodeProps implements NodeProps {
   eq(other: NodeProps): boolean {
     return isEqual(JSON.stringify(this.props), JSON.stringify(other.toJSON()));
   }
-}
 
-export class NodeProps_old extends JsonStore {
-  static empty() {
-    return new NodeProps_old();
-  }
-
-  static fromJSON(json: any) {
-    const props = new NodeProps_old();
-    each(JsonStore.jsonToKeyValue(json), (value, key) => {
-      props.set(key, value);
-    });
-
-    return props;
-  }
-
-  static fromKeyValue(kv: Record<string, any>) {
-    const store = new NodeProps_old();
-    for (const [key, value] of Object.entries(kv)) {
-      store.set(key, value);
+  diff(other: NodeProps): NodeProps {
+    const diff: any = {};
+    for (const [key, value] of entries(other.map())) {
+      const selfValue = this.get<typeof value>(key);
+      if (!isEqual(value, selfValue)) {
+        diff[key] = value;
+      }
     }
 
-    return store;
-  }
-
-  // @mutates
-  merge(other: NodeProps_old) {
-    for (const [key, value] of other.store) {
-      this.store.set(key, value);
-    }
-
-    return this;
-  }
-
-  // @mutates
-  update(attrs: NodePropsJson) {
-    each(JsonStore.jsonToKeyValue(attrs), (value, key) => {
-      this.set(key, value);
-    });
-
-    return this;
-  }
-
-  toJSON(): {} {
-    const result: Record<string, any> = {};
-    for (const [key, value] of this.store) {
-      set(result, JsonStore.PATH_CACHE.path(key), value);
-    }
-
-    return JsonStore.keyValueToJson(result);
-  }
-
-  clone() {
-    const result = new NodeProps_old();
-    for (const [key, value] of this.store) {
-      result.store.set(key, value);
-    }
-
-    return result;
-  }
-
-  freeze() {
-    if (this.frozen) return this;
-    this.frozen = true;
-
-    super.freeze();
-    return this;
+    return PlainNodeProps.create(diff);
   }
 }
 

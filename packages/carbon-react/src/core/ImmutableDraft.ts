@@ -354,7 +354,7 @@ export class ImmutableDraft implements Draft {
     const nodes = sortNodesByDepth(unstable).reverse();
     const node = first(nodes);
     if (!node) {
-      console.warn("no unstable node not found");
+      // console.warn("no unstable node not found");
       return;
     }
 
@@ -947,16 +947,16 @@ export class ImmutableDraft implements Draft {
     if (!prevSelection.isInvalid) {
       const head = prevSelection.head.down();
       if (head) {
-        // const headId = head.node.id;
-        // if (!this.nodeMap.isDeleted(headId)) {
-        //   const node = this.unfreeze(headId);
-        //   if (this.nodeMap.isDeleted(node.id)) return;
-        //   node.updateProps({
-        //     [HasFocusPath]: "",
-        //   });
-        //
-        //   this.addUpdated(node.id);
-        // }
+        const headId = head.node.id;
+        if (!this.nodeMap.isDeleted(headId)) {
+          const node = this.unfreeze(headId);
+          if (this.nodeMap.isDeleted(node.id)) return;
+          node.updateProps({
+            [HasFocusPath]: "",
+          });
+
+          this.addUpdated(node.id);
+        }
       }
     }
 

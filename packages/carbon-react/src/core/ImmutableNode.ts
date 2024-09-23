@@ -54,7 +54,7 @@ export class ImmutableNode extends Node {
   private getIndex() {
     const parent = this.parent as ImmutableNode;
     if (!parent) {
-      console.warn("node has no parent", this.id.toString());
+      // console.warn("node has no parent", this.id.toString());
       return -1;
     }
 

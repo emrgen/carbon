@@ -50,13 +50,20 @@ export class Focus {
     if (this.node.isZero) return Focus.create(this.node, 0);
 
     if (this.offset === 0) {
+      const textBlock = this.node.closest((n) => n.isTextContainer);
       let blocker = false;
       const prevFocusable = this.node.prev((n) => {
-        blocker = n.isAtom || n.isIsolate || n.isBlock;
+        blocker = n.isAtom || n.isIsolate;
         return n.isFocusable;
       });
+      const prevTextBlock = prevFocusable?.closest((n) => n.isTextContainer);
 
-      if (!blocker && prevFocusable) {
+      if (
+        !blocker &&
+        prevFocusable &&
+        textBlock &&
+        prevTextBlock?.eq(textBlock)
+      ) {
         return Focus.create(prevFocusable, prevFocusable.focusSize);
       }
     }

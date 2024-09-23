@@ -51,7 +51,6 @@ export class Pin {
         offset,
         point.toString(),
       );
-      return;
     }
 
     return Pin.create(node, offset, steps);
@@ -130,7 +129,7 @@ export class Pin {
     }
 
     if (node.focusSize < offset) {
-      throw new Error(
+      console.error(
         `node: ${node.name} does not have the provided offset: ${offset}`,
       );
     }
@@ -281,7 +280,11 @@ export class Pin {
     // return PIN_DOWN_CACHE.get(this.node.id.toString() + this.offset, () => {
     if (this.steps !== -1) {
       const step = Step.create(this.node, this.steps).down();
-      return step.pin();
+      // NOTE: as the pin was valid before it should be valid after down
+      const down = step.pin()!;
+      console.assert(down, "Pin.down: down pin is null");
+
+      return down;
     }
 
     const focus = Focus.create(this.node, this.offset).down();

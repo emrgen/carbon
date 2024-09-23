@@ -245,7 +245,7 @@ export class Carbon extends EventEmitter {
 
   // all events are emitted through this method
   onEvent(type: EventsIn, event: any) {
-    // emit event to external application
+    // emit event to external listeners
     this.emit(type, event);
 
     // if cursor is parked, ignore selection change
