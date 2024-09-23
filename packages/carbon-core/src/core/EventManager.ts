@@ -264,7 +264,7 @@ export class EventManager {
       // console.log('onEvent:', event);
     }
 
-    console.log(type, editorEvent.selection.toString());
+    // console.log(type, editorEvent.selection.toString(), node.name);
     this.pm.onEvent(editorEvent);
     if (groupOpen) {
       // console.groupEnd();

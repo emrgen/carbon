@@ -645,16 +645,16 @@ const data = node("carbon", [
       //   node("stack", [section([title([text("section 3")])])]),
       // ]),
 
-      // section([title([text("time"), mention("today"), node("empty")])]),
-      // section([
-      //   title([
-      //     text("123"),
-      //     mention("ankita"),
-      //     node("empty"),
-      //     mention("avira"),
-      //     node("empty"),
-      //   ]),
-      // ]),
+      section([title([text("time"), mention("today"), node("empty")])]),
+      section([
+        title([
+          text("123"),
+          mention("ankita"),
+          node("empty"),
+          mention("avira"),
+          node("empty"),
+        ]),
+      ]),
       section([title([text("123456789")])]),
       section([title([emoji("🖐️")])]),
       section([
@@ -671,16 +671,7 @@ const data = node("carbon", [
           }),
 
           mention("bubun"),
-          // empty({
-          //   [ContenteditablePath]: true,
-          //   [SuppressContenteditableWarningPath]: true,
-          // }),
-
           text("abc"),
-          // empty({
-          //   [ContenteditablePath]: true,
-          //   [SuppressContenteditableWarningPath]: true,
-          // }),
           mention("bappa"),
           empty({
             [ContenteditablePath]: true,
@@ -689,18 +680,6 @@ const data = node("carbon", [
         ]),
       ]),
       section([title([text("section 1")])]),
-      section([
-        title([
-          node("empty"),
-          node("empty"),
-          node("empty"),
-          node("empty"),
-          node("empty"),
-          node("empty"),
-          node("empty"),
-          node("empty"),
-        ]),
-      ]),
       section([title([text("section 1")])]),
       // node("pageLink", [], {
       //   [LinkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdMsdf",

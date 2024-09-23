@@ -37,6 +37,8 @@ export class Step {
       // console.log("pin", down.node.id.toString(), down.offset);
       return Pin.create(down.node, down.offset - 1, down.offset);
     }
+
+    return null;
   }
 
   get isBefore() {
@@ -75,9 +77,7 @@ export class Step {
 
   // moveBy the position down to target node
   down(): Step {
-    const { node } = this;
-    if (node.isText || node.isZero || node.isVoid || node.isAtom) {
-      // console.log("down", this.toString());
+    if (this.node.isFocusable) {
       return this;
     }
 

@@ -186,7 +186,7 @@ export class ImmutableState implements State {
   freeze() {
     // remove all explicit parent links and freeze
     this.updated.freeze();
-    // this.nodeMap.freeze();
+    this.nodeMap.freeze();
     this.content.freeze(identity);
     this.selection.freeze();
 

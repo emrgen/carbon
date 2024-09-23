@@ -198,7 +198,7 @@ export class KeyboardPlugin extends AfterPlugin {
       shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
         const { app, event, currentNode, cmd } = ctx;
 
-        event.preventDefault();
+        preventAndStopCtx(ctx);
         const { selection, blockSelection } = app.state;
         if (blockSelection.isActive) {
           if (selection.blocks.length) {
@@ -283,8 +283,10 @@ export class KeyboardPlugin extends AfterPlugin {
           prevVisibleTextBlock,
           prevVisibleTextBlock.textContent.length,
         )
-          .down()
-          .leftAlign.up();
+          ?.down()
+          ?.leftAlign.up();
+        if (!pin) return; // should not happen
+
         const after = PinnedSelection.fromPin(pin);
 
         // merge the text content of the previous text block and the current text block

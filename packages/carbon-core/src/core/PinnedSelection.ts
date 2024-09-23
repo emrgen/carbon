@@ -1,6 +1,5 @@
 import { Optional } from "@emrgen/types";
 import { classString, p14 } from "./Logger";
-import { p30 } from "./Logger";
 import { Node } from "./Node";
 import { Pin } from "./Pin";
 import { PointedSelection } from "./PointedSelection";
@@ -394,7 +393,7 @@ export class PinnedSelection {
 
     try {
       const domSelection = this.intoDomSelection(store);
-      console.log("Selection.syncDom:", domSelection);
+      // console.log("Selection.syncDom:", domSelection);
       if (!domSelection) {
         console.log(
           p14("%c[error]"),
@@ -411,15 +410,15 @@ export class PinnedSelection {
       // 	console.log(node)
       // }
 
-      console.log(
-        p14("%c[info]"),
-        "color:pink",
-        p30("selection.setBaseAndExtent"),
-        anchorNode,
-        anchorOffset,
-        focusNode,
-        focusOffset,
-      );
+      // console.log(
+      //   p14("%c[info]"),
+      //   "color:pink",
+      //   p30("selection.setBaseAndExtent"),
+      //   anchorNode,
+      //   anchorOffset,
+      //   focusNode,
+      //   focusOffset,
+      // );
 
       // Ref: https://stackoverflow.com/a/779785/4556425
       // https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
@@ -476,7 +475,7 @@ export class PinnedSelection {
         domSel?.focusOffset === domSelection.focusOffset,
         "failed to sync focus offset",
       );
-      console.log("Selection.syncDom:", this.toString(), domSel);
+      // console.log("Selection.syncDom:", this.toString(), domSel);
 
       return inSync;
     } catch (err) {
@@ -571,7 +570,7 @@ export class PinnedSelection {
       );
     }
 
-    console.log("anchorNode", anchorNode);
+    // console.log("anchorNode", anchorNode);
 
     // find focusable dom nodes
     return {

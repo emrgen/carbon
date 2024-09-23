@@ -202,6 +202,9 @@ export class Focus {
 
       curr = curr.next((n) => n.isFocusable, {
         skip: (n) => {
+          if (n.isInlineAtom && !n.hasFocusable) {
+            distance -= 1;
+          }
           return n.isIsolate;
         },
       });
@@ -242,6 +245,9 @@ export class Focus {
 
       curr = curr.prev((n) => n.isFocusable, {
         skip: (n) => {
+          if (n.isInlineAtom && !n.hasFocusable) {
+            distance -= 1;
+          }
           return n.isIsolate;
         },
       });

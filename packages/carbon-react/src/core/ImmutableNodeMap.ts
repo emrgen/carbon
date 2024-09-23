@@ -206,11 +206,11 @@ export class ImmutableNodeMap implements NodeMap {
   }
 
   freeze() {
-    // if (this._frozen) return;
-    // this._frozen = true;
-    // this._map.freeze();
-    // this._size = this._map.size + (this._parent?.size || 0);
-    // Object.freeze(this);
+    if (this._frozen) return;
+    this._frozen = true;
+    this._map.freeze();
+    this._size = this._map.size + (this._parent?.size || 0);
+    Object.freeze(this);
   }
 
   children(key: NodeId): NodeId[] {

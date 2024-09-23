@@ -61,6 +61,7 @@ export class TextPlugin extends NodePlugin {
         const { selection } = app.state;
         // @ts-ignore
         const { data, key } = ctx.event.nativeEvent;
+
         cmd.transform.insertText(selection, data ?? key).Dispatch();
       },
       mouseUp: (ctx: EventContext<MouseEvent>) => {

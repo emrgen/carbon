@@ -71,28 +71,22 @@ export const section = (children: any[] = [], props = {}) => ({
 });
 
 export const mention = (name: string) => {
-  return node(
-    "mention",
-    [
-      // node("empty", [], {
-      //   [ContenteditablePath]: false,
-      //   [SuppressContenteditableWarningPath]: false,
-      // }),
-      node(`mentionAtom`, [], {
-        [ContenteditablePath]: false,
-        [SuppressContenteditableWarningPath]: true,
-        [AtomContentPath]: `@${name}`,
-      }),
-      empty({
-        [ContenteditablePath]: true,
-        [SuppressContenteditableWarningPath]: true,
-      }),
-    ],
-    {
+  return node("mention", [
+    // node("empty", [], {
+    //   [ContenteditablePath]: false,
+    //   [SuppressContenteditableWarningPath]: false,
+    // }),
+    node(`atomicText`, [], {
+      [ContenteditablePath]: false,
+      [SuppressContenteditableWarningPath]: true,
       [AtomContentPath]: `@${name}`,
-      // [AtomSizePath]: name.length + 1,
-    },
-  );
+      [AtomSizePath]: name.length + 1,
+    }),
+    // empty({
+    //   [ContenteditablePath]: false,
+    //   [SuppressContenteditableWarningPath]: true,
+    // }),
+  ]);
 };
 
 export const emoji = (emoji: string) => {

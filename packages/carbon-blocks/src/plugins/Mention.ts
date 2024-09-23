@@ -11,6 +11,7 @@ import {
   Writer,
 } from "@emrgen/carbon-core";
 import { ContenteditablePath } from "@emrgen/carbon-core";
+import { AtomicText } from "../AtomicText";
 
 export class Mention extends InlineAtom {
   name = "mention";
@@ -18,7 +19,7 @@ export class Mention extends InlineAtom {
   override spec(): NodeSpec {
     return {
       group: "inline",
-      content: "empty",
+      content: "atomicText",
       inline: true,
       atom: true,
       // isolate: true,
@@ -34,7 +35,7 @@ export class Mention extends InlineAtom {
   }
 
   plugins(): CarbonPlugin[] {
-    return [new MentionAtom()];
+    return [new AtomicText()];
   }
 
   override handlers(): EventHandlerMap {
@@ -69,25 +70,5 @@ export class Mention extends InlineAtom {
 
   encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
     w.write(`<span class="mention">${node.props.get(AtomContentPath)}</span>`);
-  }
-}
-
-export class MentionAtom extends InlineAtom {
-  name = "mentionAtom";
-
-  override spec(): NodeSpec {
-    return {
-      ...super.spec(),
-      focusable: false,
-      // isolate: true,
-      atom: true,
-      props: {
-        local: {
-          html: {
-            contentEditable: false,
-          },
-        },
-      },
-    };
   }
 }

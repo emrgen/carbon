@@ -266,8 +266,10 @@ export class ClipboardPlugin extends AfterPlugin {
     );
 
     // collect spans that falls outside the selection, so that we can remove them later
-    deleteGroup.addRange(NodeSpan.create(Pin.toStartOf(start.node)!, start));
-    deleteGroup.addRange(NodeSpan.create(end, Pin.toEndOf(end.node)!));
+    deleteGroup.addRange(
+      NodeSpan.create(Pin.toStartOf(start.node)?.up()!, start),
+    );
+    deleteGroup.addRange(NodeSpan.create(end, Pin.toEndOf(end.node)?.up()!));
 
     // console.log(deleteGroup.ids.map(id => id.toString()));
     // console.log(deleteGroup.ranges);

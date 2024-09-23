@@ -165,6 +165,7 @@ export class ImmutableDraft implements Draft {
   // produce a new state from the draft
   produce(fn: (producer: ImmutableDraft) => void): CoreState {
     const { scope } = this.state;
+    const oldScope = StateScope.current();
     try {
       // console.log('[SCOPE]', scope.toString())
       StateScope.put(scope, this.nodeMap);
@@ -183,7 +184,10 @@ export class ImmutableDraft implements Draft {
       StateScope.put(scope, this.state.nodeMap);
       console.error(e);
       this.dispose();
+      console.log("rejected commit");
       return this.state;
+    } finally {
+      StateScope.set(oldScope);
     }
   }
 
@@ -214,8 +218,8 @@ export class ImmutableDraft implements Draft {
 
     // console.log('updated state', updated.toArray().map(n => n.toString()).join(', '))
     updated.freeze();
-    nodeMap.contracts(2);
-    nodeMap.freeze();
+    // nodeMap.contracts(2);
+    // nodeMap.freeze();
     after.freeze();
     marks.freeze();
 
@@ -284,7 +288,7 @@ export class ImmutableDraft implements Draft {
     this.updateSelectionProps();
 
     if (!this.state.selection.unpin().eq(this.selection)) {
-      this.collectMarks();
+      // this.collectMarks();
     }
 
     // remove deleted nodes from changed list
@@ -935,59 +939,42 @@ export class ImmutableDraft implements Draft {
 
     const selection = this.selection.pin(this.nodeMap);
     // update focus marker if needed
-    if (selection?.tail.node.eq(this.state.selection.tail.down().node)) {
+    const downHead = this.state.selection.tail.down()?.node;
+    if (downHead && selection?.head.node.eq(downHead)) {
       return;
     }
 
-    let prevZeroHead: Optional<Node> = null;
-    let nextZeroHead: Optional<Node> = null;
     if (!prevSelection.isInvalid) {
       const head = prevSelection.head.down();
-      const headId = head.node.id;
-      if (!this.nodeMap.isDeleted(headId)) {
-        const node = this.unfreeze(headId);
-        if (this.nodeMap.isDeleted(node.id)) return;
-        node.updateProps({
-          [HasFocusPath]: "",
-        });
-
-        if (node.isZero) {
-          prevZeroHead = node;
-        }
-
-        this.addUpdated(node.id);
+      if (head) {
+        // const headId = head.node.id;
+        // if (!this.nodeMap.isDeleted(headId)) {
+        //   const node = this.unfreeze(headId);
+        //   if (this.nodeMap.isDeleted(node.id)) return;
+        //   node.updateProps({
+        //     [HasFocusPath]: "",
+        //   });
+        //
+        //   this.addUpdated(node.id);
+        // }
       }
     }
 
     // console.log('Selection', this.selection.head.eq(Point.IDENTITY))
     if (!this.selection.isInvalid) {
       if (selection) {
-        // const head = selection.head.down();
-        // const headId = head.node.id;
-        // const node = this.unfreeze(headId);
-        // node.updateProps({
-        //   [HasFocusPath]: true,
-        // });
-        //
-        // if (node.isZero) {
-        //   nextZeroHead = node;
-        // }
-        //
-        // this.addUpdated(node.id);
+        const head = selection.head.down();
+        if (head) {
+          const headId = head.node.id;
+          const node = this.unfreeze(headId);
+          node.updateProps({
+            [HasFocusPath]: true,
+          });
+
+          this.addUpdated(node.id);
+        }
       }
     }
-
-    // if (prevZeroHead) {
-    //   prevZeroHead.updateProps({
-    //     [ContenteditablePath]: false,
-    //   });
-    // }
-    //
-    // if (nextZeroHead) {
-    //   nextZeroHead.updateProps({
-    //     [ContenteditablePath]: true,
-    //   });
-    // }
   }
 
   private updateFocusMarker() {}
@@ -1004,7 +991,7 @@ export class ImmutableDraft implements Draft {
     const { start, end } = pinnedSelection;
     if (selection.isCollapsed) {
       let downPin = start.down();
-      if (downPin.offset === 0 && downPin.node.prevSiblings.length === 0) {
+      if (downPin?.offset === 0 && downPin?.node.prevSiblings.length === 0) {
         this.marks = MarkSet.empty();
       } else {
         downPin = downPin.leftAlign;

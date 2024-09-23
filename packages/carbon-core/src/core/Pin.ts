@@ -135,7 +135,7 @@ export class Pin {
       );
     }
 
-    if (steps && node.stepCount < steps) {
+    if (steps != -1 && node.stepCount - 1 < steps) {
       throw new Error(
         `node: ${node.name} does not have the provided steps: ${steps}`,
       );
@@ -147,7 +147,7 @@ export class Pin {
   // NOTE: use it very cautiously and sparingly
   // use it when you want to create a pin that is points to a location which is will exist in the future
   // for example when you want to create a pin to the end of the node that is not created yet
-  static future(node: Node, offset: number, steps: number = 0): Pin {
+  static future(node: Node, offset: number, steps: number = -1): Pin {
     return new Pin(node, offset, steps);
   }
 
@@ -280,8 +280,8 @@ export class Pin {
 
     // return PIN_DOWN_CACHE.get(this.node.id.toString() + this.offset, () => {
     if (this.steps !== -1) {
-      console.log(Step.create(this.node, this.steps).toString());
-      return Step.create(this.node, this.steps).down().pin()!;
+      const step = Step.create(this.node, this.steps).down();
+      return step.pin();
     }
 
     const focus = Focus.create(this.node, this.offset).down();

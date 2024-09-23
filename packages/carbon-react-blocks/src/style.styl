@@ -1686,31 +1686,33 @@ a[data-name="text"]
 
 //[data-name=emoji]
 [data-name=mention]
-    border-radius: 10px;
-    font-size: 14px;
+    border-radius: 8px;
+    //font-size: 14px;
     color: #888;
-    //background #eee
-    //padding 1px 4px
-    margin-right 2px
+    background #eee
+    padding 1px 3px
+    margin 0 1px
     cursor pointer;
-    //position relative;
-    //[data-name=text]
-    //   -webkit-user-modify: read-only
+    position relative;
+
     [data-name=empty]
-        //position absolute;
-        //left 50%
+        position absolute;
+        left 50%
         //margin 0
         //padding 0
         caret-color transparent
 
+    [data-name=atomicText]::first-letter
+        color red
+        font-size 20px
 
 [data-name=mention]:has([data-focused=true])
-    background: red
+    box-shadow inset 0 0 0 1px #aaa
 
 [data-name=empty]
-    background red
-    padding 0 2px
-    margin 0 10px
+    //background red
+    padding-left 1px
+    //margin 0 1px
 
 //[data-name=mention]
 //    -webkit-user-modify: read-only

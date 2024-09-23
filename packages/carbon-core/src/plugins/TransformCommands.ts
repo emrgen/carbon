@@ -498,8 +498,8 @@ export class TransformCommands extends BeforePlugin {
       const action = tr.Pop();
       console.log(action);
       if (action instanceof SelectAction) {
-        const downPin = selection.start.down().rightAlign;
-        if (downPin.node.isZero) {
+        const downPin = selection.start.down()?.rightAlign;
+        if (downPin?.node.isZero) {
           const { start } = selection.leftAlign;
           const { offset } = start;
           const after = PinnedSelection.fromPin(
@@ -527,7 +527,11 @@ export class TransformCommands extends BeforePlugin {
       if (selection.head.node.isEmpty) {
         const textNode = tr.app.schema.text(text)!;
         tr.SetContent(head.node.id, [textNode]);
-        tr.Select(PinnedSelection.fromPin(Pin.future(head.node, text.length)));
+        tr.Select(
+          PinnedSelection.fromPin(
+            Pin.future(head.node, text.length, text.length + 2),
+          ),
+        );
       } else {
         const downPin = head.down().rightAlign;
         if (downPin.node.isZero) {
