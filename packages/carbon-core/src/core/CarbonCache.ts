@@ -4,14 +4,6 @@ export class CarbonCache {
 
   constructor() {
     this.cache = new Map();
-    setInterval(() => {
-      // console.log('cache hit count', this.hitCount);
-      this.hitCount = 0;
-    }, 1000 * 5);
-
-    setInterval(() => {
-      this.cache.clear();
-    }, 1000 * 0.4);
   }
 
   get<T>(key: string, fn: () => T, cache = true): T {
@@ -54,3 +46,4 @@ export class CarbonCache {
 }
 
 export const NODE_CACHE = new CarbonCache();
+export const PIN_DOWN_CACHE = new CarbonCache();

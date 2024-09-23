@@ -82,6 +82,7 @@ export const blockPresetRenderers = [
   ReactRenderer.create("emoji", CarbonText),
   ReactRenderer.create("empty", CarbonText),
   ReactRenderer.create("mention", MentionComp),
+  ReactRenderer.create("mentionAtom", CarbonText),
   ReactRenderer.create("bookmark", BookmarkComp),
   ReactRenderer.create("pageLink", PageLinkComp),
   // ReactRenderer.create("empty", EmptyInline),

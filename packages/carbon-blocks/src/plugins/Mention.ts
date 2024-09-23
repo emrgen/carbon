@@ -21,7 +21,7 @@ export class Mention extends InlineAtom {
       content: "empty",
       inline: true,
       atom: true,
-      isolate: true,
+      // isolate: true,
       mergeable: false,
       // hint that the node is not focusable (cursor can't be placed wrt this node)
       // focusable: true,
@@ -34,7 +34,7 @@ export class Mention extends InlineAtom {
   }
 
   plugins(): CarbonPlugin[] {
-    return [];
+    return [new MentionAtom()];
   }
 
   override handlers(): EventHandlerMap {
@@ -47,7 +47,7 @@ export class Mention extends InlineAtom {
 
   onMouseDown(ctx: EventContext<MouseEvent>) {
     // move the cursor to the end of the mention
-    // console.log("mention mousedown");
+    console.log("mention mousedown");
     // ctx.app.parkCursor();
   }
 
@@ -79,7 +79,7 @@ export class MentionAtom extends InlineAtom {
     return {
       ...super.spec(),
       focusable: false,
-      isolate: true,
+      // isolate: true,
       atom: true,
       props: {
         local: {

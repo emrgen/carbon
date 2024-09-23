@@ -124,7 +124,7 @@ export class NestablePlugin extends AfterPlugin {
         if (!head) return;
 
         // console.log(listNode?.id.toString(), listNode?.name, head.toString(), Pin.toStartOf(listNode)?.toJSON());
-        const atStart = Pin.toStartOf(listNode)?.eq(head);
+        const atStart = Pin.toStartOf(listNode)?.eq(head.down());
         // console.log(atStart, Pin.toStartOf(listNode)?.node.name, head.node.name);
 
         if (!atStart) return;

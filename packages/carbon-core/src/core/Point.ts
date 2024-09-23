@@ -1,7 +1,6 @@
 import { IntoNodeId, NodeId } from "./NodeId";
 import { classString } from "./Logger";
 import { Maps } from "./types";
-import { Optional } from "@emrgen/types";
 
 export enum PointAt {
   Start = "start",
@@ -22,7 +21,7 @@ export class Point {
   offset: number;
 
   // carrying precise location information
-  steps: Optional<number>;
+  steps: number;
 
   static IDENTITY = new Point(NodeId.IDENTITY, PointAt.Inside, 0);
   static NULL = new Point(NodeId.NULL, PointAt.Inside, 0);
@@ -52,11 +51,7 @@ export class Point {
   }
 
   // point to before start of the node children
-  static atOffset(
-    nodeId: IntoNodeId,
-    offset: number = 0,
-    steps: Optional<number> = null,
-  ) {
+  static atOffset(nodeId: IntoNodeId, offset: number = 0, steps: number = -1) {
     return new Point(nodeId, PointAt.Start, offset, steps);
   }
 
@@ -82,7 +77,7 @@ export class Point {
     nodeId: IntoNodeId,
     at: PointAt,
     offset: number = 0,
-    steps: Optional<number> = null,
+    steps: number = -1,
   ) {
     this.nodeId = nodeId.nodeId();
     this.at = at;

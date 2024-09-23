@@ -158,17 +158,19 @@ export class EventManager {
 
     // create a pinned selection from dom selection
     // NOTE: this is a normalized and valid selection for the editor
-    let selection = PinnedSelection.fromDom(app.store);
+    let domSelection = PinnedSelection.fromDom(app.store);
     if (
       this.prevEvents
         .map((a) => a.type as string)
         .some((a) => ["mouseDown"].includes(a))
     ) {
-      selection = PinnedSelection.fromDom(app.store);
+      domSelection = PinnedSelection.fromDom(app.store);
     }
 
     // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
     // console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
+
+    const { selection, head } = domSelection ?? {};
 
     if (["selectionchange"].includes(type)) {
       console.log(
@@ -213,7 +215,8 @@ export class EventManager {
     }
 
     // start node corresponds to focus point in DOM
-    const node = selection.head.down().node;
+    const node = head!.node;
+
     if (!node) {
       console.error(
         p12("%c[invalid]"),
@@ -261,6 +264,7 @@ export class EventManager {
       // console.log('onEvent:', event);
     }
 
+    console.log(type, editorEvent.selection.toString());
     this.pm.onEvent(editorEvent);
     if (groupOpen) {
       // console.groupEnd();

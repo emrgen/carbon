@@ -23,3 +23,21 @@ export class NodeBTree extends BTree<NodeId, Node> {
     super(undefined, NodeIdComparator);
   }
 }
+
+export class NodeIdMap<T> extends BTree<NodeId, T> {
+  static from<T>(map: Map<NodeId, T>) {
+    let tree = new NodeIdMap<T>();
+    for (let [key, value] of map) {
+      tree.set(key, value);
+    }
+    return tree;
+  }
+
+  static create<T>() {
+    return new NodeIdMap<T>();
+  }
+
+  constructor() {
+    super(undefined, NodeIdComparator);
+  }
+}

@@ -322,7 +322,12 @@ export class KeyboardPlugin extends AfterPlugin {
       }
 
       // HOT
-      console.log("merge text block", prevTextBlock.name, textBlock.name);
+      console.log(
+        "merge text block",
+        prevTextBlock.name,
+        textBlock.name,
+        prevTextBlock.id.toString(),
+      );
       tr.transform.merge(prevTextBlock, textBlock)?.Dispatch();
       return;
     }

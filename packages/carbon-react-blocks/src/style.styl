@@ -1691,12 +1691,26 @@ a[data-name="text"]
     color: #888;
     //background #eee
     //padding 1px 4px
+    margin-right 2px
     cursor pointer;
+    //position relative;
+    //[data-name=text]
+    //   -webkit-user-modify: read-only
+    [data-name=empty]
+        //position absolute;
+        //left 50%
+        //margin 0
+        //padding 0
+        caret-color transparent
+
+
+[data-name=mention]:has([data-focused=true])
+    background: red
 
 [data-name=empty]
     background red
     padding 0 2px
-    margin 0 2px
+    margin 0 10px
 
 //[data-name=mention]
 //    -webkit-user-modify: read-only

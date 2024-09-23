@@ -9,6 +9,7 @@ import {
   title,
 } from "@emrgen/carbon-blocks";
 import { mention } from "@emrgen/carbon-blocks";
+import { empty } from "@emrgen/carbon-blocks";
 import {
   Extension,
   ReactRenderer,
@@ -29,6 +30,8 @@ import {
   StylePath,
   TitlePath,
 } from "@emrgen/carbon-core";
+import { ContenteditablePath } from "@emrgen/carbon-core";
+import { SuppressContenteditableWarningPath } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
@@ -656,18 +659,47 @@ const data = node("carbon", [
       section([title([emoji("🖐️")])]),
       section([
         title([
-          node("empty"),
+          empty({
+            [ContenteditablePath]: true,
+            [SuppressContenteditableWarningPath]: true,
+          }),
+
           mention("123"),
-          node("empty"),
+          empty({
+            [ContenteditablePath]: true,
+            [SuppressContenteditableWarningPath]: true,
+          }),
+
           mention("bubun"),
-          node("empty"),
+          // empty({
+          //   [ContenteditablePath]: true,
+          //   [SuppressContenteditableWarningPath]: true,
+          // }),
+
+          text("abc"),
+          // empty({
+          //   [ContenteditablePath]: true,
+          //   [SuppressContenteditableWarningPath]: true,
+          // }),
           mention("bappa"),
-          node("empty"),
+          empty({
+            [ContenteditablePath]: true,
+            [SuppressContenteditableWarningPath]: true,
+          }),
         ]),
       ]),
       section([title([text("section 1")])]),
       section([
-        title([node("empty"), node("empty"), node("empty"), node("empty")]),
+        title([
+          node("empty"),
+          node("empty"),
+          node("empty"),
+          node("empty"),
+          node("empty"),
+          node("empty"),
+          node("empty"),
+          node("empty"),
+        ]),
       ]),
       section([title([text("section 1")])]),
       // node("pageLink", [], {

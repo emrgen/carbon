@@ -21,6 +21,7 @@ import { EventsIn } from "./Event";
 import { CarbonCommand } from "./CarbonCommand";
 import { Service } from "./Service";
 import { StateActions } from "./NodeChange";
+import { PlainNodeProps } from "./NodeProps";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -250,5 +251,13 @@ export class PluginManager {
   // filter plugins by type
   private filter(plugins: CarbonPlugin[], type: PluginType) {
     return plugins.filter((p) => p.type === type);
+  }
+
+  decoration(node: Node): PlainNodeProps {
+    const props = PlainNodeProps.empty();
+    for (const p of this.plugins) {
+      p.decorate(node, props);
+    }
+    return props;
   }
 }

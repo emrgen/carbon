@@ -2450,6 +2450,7 @@ export class TransformCommands extends BeforePlugin {
     const { app } = tr;
     const actions: CarbonAction[] = [];
     // check if prev and next can be merged
+    console.log(Pin.toEndOf(prev)!.down().toString());
     const pin = Pin.toEndOf(prev)!.down().leftAlign.up();
     const after = PinnedSelection.fromPin(pin);
 

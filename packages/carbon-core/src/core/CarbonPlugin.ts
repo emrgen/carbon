@@ -11,6 +11,7 @@ import { PluginManager } from "./PluginManager";
 import { NodeEncoder, Writer } from "./Encoder";
 import { StateActions } from "./NodeChange";
 import { identity } from "lodash";
+import { PlainNodeProps } from "./NodeProps";
 
 export enum PluginType {
   Node,
@@ -114,6 +115,8 @@ export abstract class CarbonPlugin {
   // subscribe(editor:Editor) { }
   // unsubscribe(editor:Editor) { }
   // publish(editor:Editor) { }
+
+  decorate(node: Node, props: PlainNodeProps) {}
 }
 
 export class NodePlugin extends CarbonPlugin {

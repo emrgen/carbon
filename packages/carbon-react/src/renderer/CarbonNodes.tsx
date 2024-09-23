@@ -107,8 +107,6 @@ const InnerElement: ForwardRefRenderFunction<
     };
   }, [custom, node]);
 
-  // console.log(node.key, attributes, node.props.prefix(LocalHtmlAttrPath))
-
   // connect ref
   // https://t.ly/H4By
   useImperativeHandle(forwardedRef, () => ref.current);
@@ -131,12 +129,12 @@ const InnerElement: ForwardRefRenderFunction<
       return {
         // "data-version": renderVersion,
         "data-id": key,
-        "data-parent": node.parent?.key,
+        // "data-parent": node.parent?.key,
       };
     }
 
     return {};
-  }, [node, key]);
+  }, [key]);
 
   return (
     <Tag ref={ref} data-name={name} {...customProps} {...attributes}>

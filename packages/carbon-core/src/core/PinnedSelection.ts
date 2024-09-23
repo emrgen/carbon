@@ -1,5 +1,6 @@
 import { Optional } from "@emrgen/types";
 import { classString, p14 } from "./Logger";
+import { p30 } from "./Logger";
 import { Node } from "./Node";
 import { Pin } from "./Pin";
 import { PointedSelection } from "./PointedSelection";
@@ -28,7 +29,11 @@ export class PinnedSelection {
   static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
 
   // map dom selection to editor selection
-  static fromDom(store: NodeStore): Optional<PinnedSelection> {
+  static fromDom(store: NodeStore): Optional<{
+    head: Pin;
+    tail: Pin;
+    selection: PinnedSelection;
+  }> {
     const domSelection = window.getSelection();
     // console.log(
     //   "ANCHOR TEXT",
@@ -170,28 +175,24 @@ export class PinnedSelection {
     //   anchorOffset,
     //   focusOffset,
     // );
-    const downTail = Pin.fromDom(
-      anchorNode,
-      anchorNode.isZero ? 1 : anchorOffset,
-    );
-    const downHead = Pin.fromDom(
-      focusNode,
-      anchorNode.isZero ? 1 : focusOffset,
-    );
-    const tail = downTail?.up();
-    const head = downHead?.up();
+    const tail = Pin.fromDom(anchorNode, anchorOffset);
+    const head = Pin.fromDom(focusNode, focusOffset);
 
     if (!tail || !head) {
       console.warn(p14("%c[error]"), "color:red", "Pin.fromDom failed");
       // throw new Error('Pin.fromDom failed');
-      return;
+      return null;
     }
 
     // console.info(p14('%c[info]'), 'color:pink', p30('fromDom:afterOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
     const selection = PinnedSelection.create(tail, head);
     // console.log(p14('%c[info]'), 'color:pink', p30('fromDom:Selection'), selection.toString());
 
-    return selection;
+    return {
+      head,
+      tail,
+      selection,
+    };
   }
 
   static fromPin(pin: Pin): PinnedSelection {
@@ -211,7 +212,7 @@ export class PinnedSelection {
     head: Pin,
     origin = ActionOrigin.Unknown,
   ): PinnedSelection {
-    return new PinnedSelection(tail, head, [], origin);
+    return new PinnedSelection(tail.up(), head.up(), [], origin);
   }
 
   private constructor(
@@ -393,7 +394,7 @@ export class PinnedSelection {
 
     try {
       const domSelection = this.intoDomSelection(store);
-      // console.log('Selection.syncDom:', domSelection);
+      console.log("Selection.syncDom:", domSelection);
       if (!domSelection) {
         console.log(
           p14("%c[error]"),
@@ -410,15 +411,15 @@ export class PinnedSelection {
       // 	console.log(node)
       // }
 
-      // console.log(
-      //   p14("%c[info]"),
-      //   "color:pink",
-      //   p30("selection.setBaseAndExtent"),
-      //   anchorNode,
-      //   anchorOffset,
-      //   focusNode,
-      //   focusOffset,
-      // );
+      console.log(
+        p14("%c[info]"),
+        "color:pink",
+        p30("selection.setBaseAndExtent"),
+        anchorNode,
+        anchorOffset,
+        focusNode,
+        focusOffset,
+      );
 
       // Ref: https://stackoverflow.com/a/779785/4556425
       // https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
@@ -458,7 +459,7 @@ export class PinnedSelection {
       // NOTE: maybe not needed in production
       // verify if the selection is successfully set
       const pinnedSelection = PinnedSelection.fromDom(store);
-      const domSel = pinnedSelection?.intoDomSelection(store);
+      const domSel = pinnedSelection?.selection.intoDomSelection(store);
       console.assert(
         domSel?.anchorNode === domSelection.anchorNode,
         "failed to sync anchorNode",
@@ -475,7 +476,7 @@ export class PinnedSelection {
         domSel?.focusOffset === domSelection.focusOffset,
         "failed to sync focus offset",
       );
-      // console.log('Selection.syncDom:', this.toString(), domSel)
+      console.log("Selection.syncDom:", this.toString(), domSel);
 
       return inSync;
     } catch (err) {
@@ -569,6 +570,8 @@ export class PinnedSelection {
         focusNode,
       );
     }
+
+    console.log("anchorNode", anchorNode);
 
     // find focusable dom nodes
     return {

@@ -7,7 +7,6 @@ import {
   Draft,
   EmptyPlaceholderPath,
   FocusedPlaceholderPath,
-  HasFocusPath,
   InsertChange,
   InsertNodeAction,
   isPassiveHidden,
@@ -51,6 +50,7 @@ import {
   UpdateChange,
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
+import { HasFocusPath } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { ImmutableState } from "./ImmutableState";
 import {
@@ -86,6 +86,8 @@ export class ImmutableDraft implements Draft {
   private origin: ActionOrigin;
   private pm: PluginManager;
   private selection: PointedSelection;
+
+  // private decorations: NodeIdMap = new NodeIdMap();
 
   private selected: NodeIdSet = NodeIdSet.empty();
   private updated: NodeIdSet; // tracks changed nodes
@@ -232,6 +234,24 @@ export class ImmutableDraft implements Draft {
       actions: this.actions.optimize(),
       marks,
     });
+
+    // traverse all nodes within the selection and collect decorations
+    const { start, end } = after;
+    const startDown = start.down();
+    const endDown = end.down();
+    const nodes: Node[] = [startDown.node, endDown.node];
+    startDown.node.next((n) => {
+      if (n.id.eq(endDown.node.id)) return true;
+      nodes.push(n);
+      return false;
+    });
+
+    // collect decorations from the selected nodes
+    // const decorations: NodeIdMap<PlainNodeProps> = new NodeIdMap();
+    // nodes.forEach((n) => {
+    //   const props = this.pm.decoration(n);
+    //   decorations.set(n.id, props);
+    // });
 
     return newState.freeze();
   }
@@ -859,7 +879,6 @@ export class ImmutableDraft implements Draft {
 
   // update selected node props
   private updateSelectionProps() {
-    const selection = this.selection;
     const prevSelection = this.state.selection;
 
     // update empty placeholder of the previous head node
@@ -892,8 +911,8 @@ export class ImmutableDraft implements Draft {
     }
 
     // update focus placeholder of the current head node
-    if (!selection.isInvalid && selection.isCollapsed) {
-      const { head } = selection;
+    if (!this.selection.isInvalid && this.selection.isCollapsed) {
+      const { head } = this.selection;
       if (this.nodeMap.isDeleted(head.nodeId)) return;
 
       const node = this.unfreeze(head.nodeId);
@@ -914,32 +933,64 @@ export class ImmutableDraft implements Draft {
       }
     }
 
+    const selection = this.selection.pin(this.nodeMap);
     // update focus marker if needed
-    if (this.state.selection.tail.node.id.eq(this.selection.tail.nodeId)) {
+    if (selection?.tail.node.eq(this.state.selection.tail.down().node)) {
       return;
     }
 
+    let prevZeroHead: Optional<Node> = null;
+    let nextZeroHead: Optional<Node> = null;
     if (!prevSelection.isInvalid) {
-      const { tail } = prevSelection.unpin();
-      if (!this.nodeMap.isDeleted(tail.nodeId)) {
-        const node = this.unfreeze(tail.nodeId);
+      const head = prevSelection.head.down();
+      const headId = head.node.id;
+      if (!this.nodeMap.isDeleted(headId)) {
+        const node = this.unfreeze(headId);
         if (this.nodeMap.isDeleted(node.id)) return;
         node.updateProps({
           [HasFocusPath]: "",
         });
+
+        if (node.isZero) {
+          prevZeroHead = node;
+        }
+
         this.addUpdated(node.id);
       }
     }
 
     // console.log('Selection', this.selection.head.eq(Point.IDENTITY))
     if (!this.selection.isInvalid) {
-      const node = this.unfreeze(this.selection.tail.nodeId);
-      node.updateProps({
-        [HasFocusPath]: true,
-      });
-      this.addUpdated(node.id);
+      if (selection) {
+        // const head = selection.head.down();
+        // const headId = head.node.id;
+        // const node = this.unfreeze(headId);
+        // node.updateProps({
+        //   [HasFocusPath]: true,
+        // });
+        //
+        // if (node.isZero) {
+        //   nextZeroHead = node;
+        // }
+        //
+        // this.addUpdated(node.id);
+      }
     }
+
+    // if (prevZeroHead) {
+    //   prevZeroHead.updateProps({
+    //     [ContenteditablePath]: false,
+    //   });
+    // }
+    //
+    // if (nextZeroHead) {
+    //   nextZeroHead.updateProps({
+    //     [ContenteditablePath]: true,
+    //   });
+    // }
   }
+
+  private updateFocusMarker() {}
 
   private collectMarks() {
     const { selection } = this;

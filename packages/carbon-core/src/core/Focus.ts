@@ -5,6 +5,7 @@ import { classString } from "./Logger";
 import { clamp } from "lodash";
 import { last } from "lodash";
 import { takeBefore } from "../utils/array";
+import { Pin } from "./Pin";
 
 // by default everything happens at down level
 export class Focus {
@@ -44,14 +45,31 @@ export class Focus {
     readonly offset: number,
   ) {}
 
-  get step() {
-    const down = this.down();
-    return Step.create(this.node, this.offset);
+  get leftAlign(): Focus {
+    if (this.node.isTextContainer && this.node.isVoid) return this;
+    if (this.node.isZero) return Focus.create(this.node, 0);
+
+    if (this.offset === 0) {
+      let blocker = false;
+      const prevFocusable = this.node.prev((n) => {
+        blocker = n.isAtom || n.isIsolate || n.isBlock;
+        return n.isFocusable;
+      });
+
+      if (!blocker && prevFocusable) {
+        return Focus.create(prevFocusable, prevFocusable.focusSize);
+      }
+    }
+
+    console.log("leftAlign", this.toString());
+
+    return this;
   }
 
-  // get leftAlign(): Focus {}
-
   get rightAlign() {
+    if (this.node.isTextContainer && this.node.isVoid) return this;
+    if (this.node.isZero) return Focus.create(this.node, 1);
+
     if (this.offset === this.node.focusSize) {
       let blocker = false;
       const nextFocusable = this.node.next((n) => {
@@ -68,13 +86,23 @@ export class Focus {
   }
 
   get isAtStart() {
-    if (this.node.isEmpty) return false;
+    if (this.node.isVoid) return true;
     return !this.node.isEmpty && this.offset === 0;
   }
 
   get isAtEnd() {
-    if (this.node.isEmpty) return false;
+    if (this.node.isVoid) return true;
     return this.offset === this.node.focusSize;
+  }
+
+  pin() {
+    const down = this.down();
+    return Pin.create(down.node, down.offset, down.offset + 1);
+  }
+
+  step() {
+    const down = this.down();
+    return Step.create(down.node, down.offset + 1);
   }
 
   up(): Focus {
@@ -104,9 +132,7 @@ export class Focus {
     }
 
     let offset = this.offset;
-
     const leaves = this.node.descendants((n) => n.isFocusable);
-    console.log(leaves.map((n) => n.name));
     for (const leaf of leaves) {
       if (offset <= leaf.focusSize) {
         return new Focus(leaf, offset);
@@ -133,19 +159,29 @@ export class Focus {
   // moveBy returns a down focus at the new position
   moveBy(distance: number) {
     if (distance === 0) return this;
-    const down = this.down();
-    return distance > 0
-      ? down.moveForwardBy(distance)
-      : down.moveBackwardBy(-distance);
+    let down = this.down();
+
+    // down = distance > 0 ? down.rightAlign : down.leftAlign;
+
+    const pin =
+      distance > 0
+        ? down.moveForwardBy(distance)
+        : down.moveBackwardBy(-distance);
+
+    // if (distance > 0 && pin.rightAlign.node.isZero) {
+    //   return Focus.create(pin.rightAlign.node, 1);
+    // }
+
+    return pin;
   }
 
   private moveForwardBy(distance: number) {
     let { node, offset } = this;
 
     distance = offset + distance;
-    if (node.isZero && offset === 0) {
-      distance += 1;
-    }
+    // if (node.isZero && offset === 0) {
+    //   distance += 1;
+    // }
 
     let prev: Node = node;
     let curr: Optional<Node> = node;
@@ -165,7 +201,9 @@ export class Focus {
       prev = curr;
 
       curr = curr.next((n) => n.isFocusable, {
-        skip: (n) => n.isIsolate,
+        skip: (n) => {
+          return n.isIsolate;
+        },
       });
     }
 
@@ -184,9 +222,6 @@ export class Focus {
     let { node, offset } = this;
 
     distance = node.focusSize - offset + distance;
-    if (node.isZero && offset === 1) {
-      distance += 1;
-    }
 
     let next: Node = node;
     let curr: Optional<Node> = node;
@@ -206,7 +241,9 @@ export class Focus {
       next = curr;
 
       curr = curr.prev((n) => n.isFocusable, {
-        skip: (n) => n.isIsolate,
+        skip: (n) => {
+          return n.isIsolate;
+        },
       });
     }
 
@@ -238,7 +275,7 @@ export class Focus {
 
   toString() {
     return classString(this)({
-      node: this.node.name,
+      id: this.node.id.toString(),
       offset: this.offset,
     });
   }

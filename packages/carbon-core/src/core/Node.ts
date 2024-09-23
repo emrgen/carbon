@@ -212,7 +212,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     if (this.isText) return this.textContent.length + 2;
 
     if ((this.isBlock && this.isVoid) || this.isZero) {
-      return 2;
+      return 3;
     }
 
     if (this.isInlineAtom) {

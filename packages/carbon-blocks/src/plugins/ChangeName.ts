@@ -124,7 +124,9 @@ export class ChangeName extends BeforePlugin {
 
       preventAndStopCtx(ctx);
 
-      const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
+      const after = PinnedSelection.fromPin(
+        Pin.future(selection.end.node, 0, 2),
+      );
 
       const match = text.match(regex);
       if (match === null) {
