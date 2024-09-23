@@ -51,6 +51,7 @@ import {
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
 import { HasFocusPath } from "@emrgen/carbon-core";
+import { PlainNodeProps } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { ImmutableState } from "./ImmutableState";
 import {
@@ -59,10 +60,10 @@ import {
   identity,
   isArray,
   isEmpty,
-  isEqual,
   isString,
   reduce,
 } from "lodash";
+import { before } from "lodash";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
 import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
 
@@ -1234,22 +1235,23 @@ class Transformer {
 
   updateProps(node: Node, props: NodePropsJson) {
     console.log(p14("%c[trap]"), "color:green", "update", node.key);
-    const before = reduce(
-      props,
-      (acc, _, k) => {
-        // NOTE: we are only interested in the props that are changed
-        // even if it was undefined before, we need to track it as before value
-        acc[k] = node.props.get(k);
-        return acc;
-      },
-      {},
-    );
+    const diff = node.props.diff(PlainNodeProps.create(props));
 
-    if (isEqual(before, props)) {
-      console.log("same props", before, props);
-      console.warn(
-        "unnecessary props update detected. possibly the node is immutable",
+    if (diff.isEmpty()) {
+      const before = reduce(
+        props,
+        (acc, _, k) => {
+          // NOTE: we are only interested in the props that are changed
+          // even if it was undefined before, we need to track it as before value
+          acc[k] = node.props.get(k);
+          return acc;
+        },
+        {},
       );
+      // console.log("same props", before, props);
+      // console.warn(
+      //   "unnecessary props update detected. possibly the node is immutable",
+      // );
       return false;
     }
 

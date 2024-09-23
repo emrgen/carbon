@@ -185,7 +185,7 @@ export class TransformCommands extends BeforePlugin {
           return true;
         }
 
-        if (next.isInline && next.isLeaf) {
+        if (next.isInline && next.isLeaf && !(next.isAtom && next.isIsolate)) {
           inlineNodes.push(next);
         }
 
@@ -360,7 +360,9 @@ export class TransformCommands extends BeforePlugin {
               return true;
             }
 
-            toggleMarkNodes.push(next);
+            if (!next.isIsolate) {
+              toggleMarkNodes.push(next);
+            }
             return false;
           });
         }

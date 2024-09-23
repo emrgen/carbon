@@ -8,7 +8,7 @@ export class AtomicText extends InlineAtom {
     return {
       ...super.spec(),
       focusable: false,
-      // isolate: true,
+      isolate: true,
       atom: true,
       props: {
         local: {

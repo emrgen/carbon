@@ -1,6 +1,7 @@
 import { Node } from "./Node";
 import { Step } from "./Step";
 import { Optional } from "@emrgen/types";
+import { Predicate } from "@emrgen/types";
 import { classString } from "./Logger";
 import { clamp } from "lodash";
 import { last } from "lodash";
@@ -164,7 +165,7 @@ export class Focus {
   }
 
   // moveBy returns a down focus at the new position
-  moveBy(distance: number) {
+  moveBy(distance: number, skip: Predicate<Node> = (n) => n.isIsolate): Focus {
     if (distance === 0) return this;
     let down = this.down();
 
@@ -172,8 +173,8 @@ export class Focus {
 
     const pin =
       distance > 0
-        ? down.moveForwardBy(distance)
-        : down.moveBackwardBy(-distance);
+        ? down.moveForwardBy(distance, skip)
+        : down.moveBackwardBy(-distance, skip);
 
     // if (distance > 0 && pin.rightAlign.node.isZero) {
     //   return Focus.create(pin.rightAlign.node, 1);
@@ -182,7 +183,7 @@ export class Focus {
     return pin;
   }
 
-  private moveForwardBy(distance: number) {
+  private moveForwardBy(distance: number, skip: Predicate<Node>) {
     let { node, offset } = this;
 
     distance = offset + distance;
@@ -212,7 +213,7 @@ export class Focus {
           if (n.isInlineAtom && !n.hasFocusable) {
             distance -= 1;
           }
-          return n.isIsolate;
+          return skip(n);
         },
       });
     }
@@ -228,7 +229,7 @@ export class Focus {
     return Focus.create(curr, distance);
   }
 
-  private moveBackwardBy(distance: number) {
+  private moveBackwardBy(distance: number, skip: Predicate<Node>) {
     let { node, offset } = this;
 
     distance = node.focusSize - offset + distance;
@@ -255,7 +256,7 @@ export class Focus {
           if (n.isInlineAtom && !n.hasFocusable) {
             distance -= 1;
           }
-          return n.isIsolate;
+          return skip(n);
         },
       });
     }

@@ -2,8 +2,9 @@ import { isArray } from "lodash";
 import { get } from "lodash";
 import { set } from "lodash";
 import { cloneDeep } from "lodash";
-import { isEqual } from "lodash";
 import { entries } from "lodash";
+import { isEqual } from "lodash";
+import { keys } from "lodash";
 import { Node } from "./Node";
 
 export type NodePropsJson = Record<string, any>;
@@ -31,6 +32,8 @@ export interface NodeProps {
   diff(other: NodeProps): NodeProps;
 
   map(): Record<string, any>;
+
+  isEmpty(): boolean;
 }
 
 export class PlainNodeProps implements NodeProps {
@@ -146,6 +149,10 @@ export class PlainNodeProps implements NodeProps {
     }
 
     return PlainNodeProps.create(diff);
+  }
+
+  isEmpty(): boolean {
+    return keys(this.props).length === 0;
   }
 }
 

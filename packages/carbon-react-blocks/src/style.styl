@@ -1690,7 +1690,7 @@ a[data-name="text"]
     //font-size: 14px;
     color: #888;
     background #eee
-    padding 1px 3px
+    padding 1px 0px
     margin 0 1px
     cursor pointer;
     position relative;
@@ -1699,8 +1699,11 @@ a[data-name="text"]
         position absolute;
         left 50%
         //margin 0
-        //padding 0
+        //padding 0 2px
+        //background red
         caret-color transparent
+        &::selection
+            background: transparent
 
     [data-name=atomicText]::first-letter
         color red
