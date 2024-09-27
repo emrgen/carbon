@@ -1,4 +1,5 @@
 import { EmptyInline, Mark } from "@emrgen/carbon-core";
+import { EventsOut } from "@emrgen/carbon-core";
 import React, { useEffect, useMemo, useState } from "react";
 import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 import {
@@ -80,9 +81,22 @@ export default function SelectionTracker() {
       }
     }, 100);
 
+    const onSelectionUpdate = (e: MouseEvent) => {
+      const { state } = app;
+      if (!app.committed) return;
+      const { selection } = state;
+      if (selection.isCollapsed) {
+        setShowContextMenu(false);
+        return;
+      }
+    };
+
+    app.on(EventsOut.selectionUpdated, onSelectionUpdate);
     app.contentElement?.addEventListener("mouseup", onChange);
     app.contentElement?.addEventListener("keyup", onChange);
+
     return () => {
+      app.off(EventsOut.selectionUpdated, onSelectionUpdate);
       app.contentElement?.removeEventListener("mouseup", onChange);
       app.contentElement?.removeEventListener("keyup", onChange);
     };

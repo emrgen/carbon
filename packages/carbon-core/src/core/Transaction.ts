@@ -318,11 +318,11 @@ export class Transaction {
     // })
     // console.groupEnd();
 
-    console.log(
-      "dispatching transaction",
-      this.id,
-      this.actions.map((a) => a.toString()),
-    );
+    // console.log(
+    //   "dispatching transaction",
+    //   this.id,
+    //   this.actions.map((a) => a.toString()),
+    // );
     this.tm.dispatch(this);
     return this;
   }
