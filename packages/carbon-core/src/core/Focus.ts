@@ -210,7 +210,10 @@ export class Focus {
 
       curr = curr.next((n) => n.isFocusable, {
         skip: (n) => {
-          if (n.isInlineAtom && !n.hasFocusable) {
+          // NOTE: to cross once inline atom without focusable inside it takes 1 step
+          // if the inline atom has focusable or is focusable,
+          // then the steps will be counted as part of the next found focusable
+          if (n.isInlineAtom && !n.isFocusable && !n.hasFocusable) {
             distance -= 1;
           }
           return skip(n);
@@ -253,7 +256,7 @@ export class Focus {
 
       curr = curr.prev((n) => n.isFocusable, {
         skip: (n) => {
-          if (n.isInlineAtom && !n.hasFocusable) {
+          if (n.isInlineAtom && !n.isFocusable && !n.hasFocusable) {
             distance -= 1;
           }
           return skip(n);

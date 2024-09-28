@@ -21,6 +21,8 @@ export interface NodeProps {
 
   merge(other: NodeProps | NodePropsJson): NodeProps;
 
+  fromJSON(json: NodePropsJson): NodeProps;
+
   toJSON(): NodePropsJson;
 
   clone(): NodeProps;
@@ -73,6 +75,10 @@ export class PlainNodeProps implements NodeProps {
         props[key] = value;
       }
     }
+  }
+
+  fromJSON(json: NodePropsJson): NodeProps {
+    return new PlainNodeProps(json);
   }
 
   empty(): NodeProps {
@@ -157,6 +163,7 @@ export class PlainNodeProps implements NodeProps {
 }
 
 // common paths for node props
+export const FamilyLinkPath = "local/state/familyLink";
 export const EmptyPlaceholderPath = "local/placeholder/empty";
 export const FocusedPlaceholderPath = "local/placeholder/focused";
 export const LocalHtmlAttrPath = "local/html";

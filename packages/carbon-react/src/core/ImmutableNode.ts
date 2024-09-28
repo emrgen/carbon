@@ -10,6 +10,7 @@ import {
   Path,
   With,
 } from "@emrgen/carbon-core";
+import { shallowCloneMap } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { findIndex, identity, isString } from "lodash";
 import { ImmutableNodeContent } from "./ImmutableNodeContent";
@@ -205,10 +206,8 @@ export class ImmutableNode extends Node {
 
   // @mutates
   unfreeze(path: Path, map: NodeMap): MutableNode {
-    const mutable = this.isFrozen ? this.clone() : this;
-    if (this.isFrozen) {
-      map.put(mutable);
-    }
+    const mutable = this.isFrozen ? this.clone(shallowCloneMap) : this;
+    map.put(mutable);
 
     if (path.length === 0) {
       return mutable;
@@ -231,12 +230,26 @@ export class ImmutableNode extends Node {
       if (!child) {
         throw new Error(`child not found at ${index}`);
       }
-      // console.log("unfreezing child", index, child.id.toString());
       const mutableChild = child.unfreeze(rest, map);
       mutable.replace(index, mutableChild);
 
       return mutable;
     }
+  }
+
+  // @mutates
+  freeze(fn: With<Node>): Node {
+    if (this.isFrozen) return this;
+
+    // unlink from parent when freezing
+    this.setParent(null);
+    this.content.freeze(fn);
+    this.props.freeze();
+
+    Object.freeze(this);
+    fn(this);
+
+    return this;
   }
 
   // clone the content by providing a map function (default is identity)
@@ -249,26 +262,12 @@ export class ImmutableNode extends Node {
 
     clone.renderVersion = this.renderVersion;
     clone.contentVersion = this.contentVersion;
+
     clone.indexMapper = this.indexMapper;
     clone.indexMap = this.indexMap;
     clone.mappedIndex = this.mappedIndex;
 
     return clone;
-  }
-
-  // @mutates
-  freeze(fn: With<Node>): Node {
-    if (this.isFrozen) return this;
-
-    // unlink from parent when freezing
-    // this.setParent(null)
-    this.content.freeze(fn);
-    this.props.freeze();
-
-    Object.freeze(this);
-    fn(this);
-
-    return this;
   }
 }
 

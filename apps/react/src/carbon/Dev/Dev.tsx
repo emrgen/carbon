@@ -821,11 +821,11 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
-      // console.debug(
-      //   "changes",
-      //   state.changes.patch,
-      //   Array.from(state.changes.dataMap.values()),
-      // );
+      console.debug(
+        "changes",
+        state.changes.patch,
+        Array.from(state.changes.dataMap.values()),
+      );
       console.debug(
         "actions",
         state.actions.optimize().actions.map((a) => a.toJSON()),

@@ -14,7 +14,6 @@ import {
 import { Optional } from "@emrgen/types";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
 import { ImmutableDraft } from "./ImmutableDraft";
-import { identity } from "lodash";
 
 interface StateProps {
   scope: Symbol;
@@ -152,6 +151,7 @@ export class ImmutableState implements State {
   produce(fn: (state: ImmutableDraft) => void, opts: ProduceOpts): State {
     const { origin, pm, schema, type } = opts;
     const { marks } = this;
+    console.log("creating new draft", this.nodeMap.isFrozen);
     const draft = new ImmutableDraft(this, origin, type, pm, schema, marks);
     return draft.produce(fn);
   }
@@ -187,7 +187,7 @@ export class ImmutableState implements State {
     // remove all explicit parent links and freeze
     this.updated.freeze();
     this.nodeMap.freeze();
-    this.content.freeze(identity);
+    // this.content.freeze(identity);
     this.selection.freeze();
 
     Object.freeze(this);

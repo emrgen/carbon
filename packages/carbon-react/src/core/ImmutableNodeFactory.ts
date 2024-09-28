@@ -12,7 +12,6 @@ import {
 import { NodeFactoryOptions } from "@emrgen/carbon-core";
 import { Fragment } from "@emrgen/carbon-core";
 import { identity, isArray, isEmpty } from "lodash";
-import { v4 as uuidv4 } from "uuid";
 import { ImmutableNode } from "./ImmutableNode";
 import { ImmutableNodeContent } from "./ImmutableNodeContent";
 
@@ -20,7 +19,7 @@ let counter = 0;
 
 export class ImmutableNodeFactory implements NodeFactory {
   scope: Symbol;
-  private readonly createId: () => NodeId;
+  private readonly createId: () => string;
 
   blockId() {
     return NodeId.create(this.createId() + "[" + ++counter + "]");
@@ -32,7 +31,7 @@ export class ImmutableNodeFactory implements NodeFactory {
 
   constructor(
     scope: Symbol = IDENTITY_SCOPE,
-    createId = () => uuidv4().slice(-2),
+    createId = () => "", //uuidv4().slice(-2),
     readonly opts: NodeFactoryOptions = {},
   ) {
     this.scope = scope;

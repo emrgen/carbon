@@ -74,7 +74,6 @@ enum UpdateDependent {
   Parent = 4,
 }
 
-// NOTE: it is internal to the state and actions. it should not be used outside of it.
 //draft of a state is used to prepare a new state before commit
 export class ImmutableDraft implements Draft {
   private readonly state: ImmutableState;
@@ -220,7 +219,7 @@ export class ImmutableDraft implements Draft {
     // console.log('updated state', updated.toArray().map(n => n.toString()).join(', '))
     updated.freeze();
     // nodeMap.contracts(2);
-    // nodeMap.freeze();
+    nodeMap.freeze();
     after.freeze();
     marks.freeze();
 
@@ -359,6 +358,8 @@ export class ImmutableDraft implements Draft {
       return;
     }
 
+    // printNode(this.state.nodeMap.get(NodeId.create("[169]"))!);
+
     const actions = this.pm.normalize(node.clone(deepCloneMap));
     if (!isEmpty(actions)) {
       console.log("normalizing", node.name, node.id.toString(), actions);
@@ -366,6 +367,9 @@ export class ImmutableDraft implements Draft {
         action.execute(this);
       });
     }
+
+    // console.log(this.state.nodeMap.get(NodeId.create("[169]"))!.isFrozen);
+    // printNode(this.state.nodeMap.get(NodeId.create("[169]"))!);
 
     this.unstable.remove(node.id);
     if (this.unstable.size > 0) {
@@ -820,6 +824,7 @@ export class ImmutableDraft implements Draft {
     }
 
     const node = this.unfreeze(nodeId);
+
     console.log(
       "parent",
       node.parentId?.toString(),
@@ -1074,6 +1079,7 @@ export class ImmutableDraft implements Draft {
     }
 
     const { path } = node;
+
     root.unfreeze(path, this.nodeMap);
 
     // get the unfrozen node
@@ -1177,13 +1183,6 @@ class Transformer {
 
   // update content is valid only for textContainer and text nodes
   updateContent(node: Node, content: Node[] | string) {
-    console.log(
-      p14("%c[trap]"),
-      "color:green",
-      "content",
-      node.key,
-      node.textContent,
-    );
     const oldText = node.textContent;
     const oldChildren = node.children;
     node.updateContent(content);

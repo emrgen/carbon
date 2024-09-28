@@ -1,24 +1,8 @@
 import { Node } from "@emrgen/carbon-core";
 import { entries } from "lodash";
 
-export const printNode = (
-  node: JSON | Node,
-  logger = console.log.bind(console),
-) => {
-  if (node instanceof Node) {
-    return printNode({
-      ...node.toJSON(),
-    });
-  }
-
-  const nodes: Record<
-    string,
-    {
-      name: string;
-      text?: string;
-      id?: string;
-    }
-  > = {};
+export const printNode = (node: Node, logger = console.log.bind(console)) => {
+  const nodes: Record<string, Node> = {};
 
   const collect = (ids: number[], index: number, node: any) => {
     const chainIds = [...ids, index];
@@ -40,7 +24,7 @@ export const printNode = (
     // console.log(node.props);
 
     if (node.name === "text") {
-      line += `\`${node.text}\``;
+      line += `\`${node.textContent}\``;
     } else {
       line += node.name;
     }

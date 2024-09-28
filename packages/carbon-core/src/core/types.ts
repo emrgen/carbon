@@ -5,6 +5,7 @@ import { InputRule } from "./Rules";
 import { PinnedSelection } from "./PinnedSelection";
 import { PointedSelection } from "./PointedSelection";
 import { NodeContentData } from "./NodeContent";
+import { cloneDeep } from "lodash";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {}
@@ -86,6 +87,14 @@ export interface SelectionBounds {
 }
 
 export type SerializedNode = string;
+
+export const shallowCloneMap = (data: NodeContentData) => {
+  return {
+    ...data,
+    props: cloneDeep(data.props),
+    children: data.children.slice(),
+  };
+};
 
 export const deepCloneMap = (data: NodeContentData) => {
   return {
