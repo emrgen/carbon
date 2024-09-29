@@ -3,10 +3,15 @@ import { MarkSet } from "./Mark";
 import { Node } from "./Node";
 import { InlineNode } from "./InlineNode";
 import { last } from "lodash";
+import { identity } from "lodash";
 import { deepCloneMap } from "./types";
 import { cloneFrozenNode } from "./types";
 import { Pin } from "./Pin";
 import { LocalClassPath } from "./NodeProps";
+import { StepOffset } from "./Step";
+import { Step } from "./Step";
+import { IndexMapper } from "./IndexMap";
+import { IndexMap } from "./IndexMap";
 
 // utility class for text blocks
 // title is a text block
@@ -15,17 +20,34 @@ import { LocalClassPath } from "./NodeProps";
 // when merging text blocks, you are merging the inline content along with the content marks
 export class TextBlock {
   private readonly node: Node;
+  private readonly mapper: IndexMapper;
 
   static from(node: Node) {
-    return new TextBlock(node.clone(deepCloneMap));
+    const clone = node.clone(deepCloneMap);
+
+    return new TextBlock(clone, IndexMapper.empty());
   }
 
-  constructor(node: Node) {
-    if (!node.isTextContainer) {
+  static empty() {
+    return new TextBlock(Node.IDENTITY, IndexMapper.empty());
+  }
+
+  private constructor(node: Node, mapper: IndexMapper) {
+    if (!node.isTextContainer && !node.eq(Node.IDENTITY)) {
+      console.error(node.toJSON());
       throw new Error("can not create text block from non text block node");
     }
 
     this.node = node;
+    this.mapper = mapper;
+  }
+
+  get isDefault() {
+    return this.node.eq(Node.IDENTITY);
+  }
+
+  get type() {
+    return this.node.type;
   }
 
   get textContent() {
@@ -35,6 +57,231 @@ export class TextBlock {
   intoContent() {
     return this.node.unwrap();
   }
+
+  // mapStep maps the original location to the current location after the text block has been modified
+  mapStep(from: number): number {
+    return this.mapper.map(IndexMap.DEFAULT, from);
+  }
+
+  // remove content from a text block from a given range
+  remove(from: StepOffset, to: StepOffset): TextBlock {
+    // split at the start and end of the range
+    // remove the content between the split
+    return this;
+  }
+
+  // split a text block at a given range and return the new text blocks
+  split(start: StepOffset): [TextBlock, TextBlock, TextBlock];
+  split(start: StepOffset, end: StepOffset): [TextBlock, TextBlock, TextBlock];
+  split(
+    start: StepOffset,
+    end?: StepOffset,
+  ): [TextBlock, TextBlock, TextBlock] {
+    if (end) {
+      const [prev, next] = this.split(end);
+      if (!prev.node.eq(Node.IDENTITY)) {
+        const [first, second] = prev.split(start);
+        return [first, second, next];
+      } else {
+        return [TextBlock.empty(), TextBlock.empty(), next];
+      }
+    }
+
+    if (this.node.isVoid) {
+      return [this.clone(), this.clone(), TextBlock.empty()];
+    }
+
+    const down = Step.create(this.node, start).down();
+    if ((down.isAtStart || down.isAtEnd) && down.node.parent?.eq(this.node)) {
+      const { index } = down.node;
+      const prev = this.node.children.slice(0, index + 1);
+      const next = this.node.children.slice(index + 1);
+
+      const prevNode = this.node.clone((data) => {
+        return {
+          ...data,
+          children: prev,
+        };
+      });
+
+      const nextNode = this.node.clone((data) => {
+        return {
+          ...data,
+          children: next,
+        };
+      });
+
+      const prevMapper = this.mapper.clone();
+      prevMapper.add(
+        IndexMap.create(
+          start,
+          prevNode.children.reduce((acc, curr) => acc - curr.stepSize, 0),
+        ),
+      );
+      const nextMapper = this.mapper.clone();
+      nextMapper.add(
+        IndexMap.create(
+          start,
+          nextNode.children.reduce((acc, curr) => acc - curr.stepSize, 0),
+        ),
+      );
+
+      return [
+        new TextBlock(prevNode, prevMapper),
+        new TextBlock(nextNode, nextMapper),
+        TextBlock.empty(),
+      ];
+    }
+
+    // the offset is within an inline node, the inline node should be split
+    if (!down.node.parent?.eq(this.node)) {
+      throw new Error("split target not found");
+    }
+
+    const { index } = down.node;
+    const prev = this.node.children.slice(0, index);
+    const next = this.node.children.slice(index + 1);
+    const [before, after] = InlineNode.from(down.node).split(down.offset - 1);
+
+    const prevNode = this.node.clone((data) => {
+      return {
+        ...data,
+        children: [...prev, before],
+      };
+    });
+
+    const nextNode = this.node.clone((data) => {
+      return {
+        ...data,
+        children: [after, ...next],
+      };
+    });
+
+    const prevMapper = this.mapper.clone();
+    const nextMapper = this.mapper.clone();
+
+    prevMapper.add(
+      IndexMap.create(
+        start,
+        prevNode.children.reduce(
+          (acc, curr) => acc - curr.stepSize,
+          before.stepSize,
+        ),
+      ),
+    );
+
+    nextMapper.add(
+      IndexMap.create(
+        start,
+        nextNode.children.reduce(
+          (acc, curr) => acc - curr.stepSize,
+          after.stepSize,
+        ),
+      ),
+    );
+
+    // console.log("xxx", prevNode.toJSON(), prevNode.isTextContainer);
+    // console.log("xxx", nextNode.toJSON(), nextNode.isTextContainer);
+
+    return [
+      new TextBlock(prevNode, prevMapper),
+      new TextBlock(nextNode, nextMapper),
+      TextBlock.empty(),
+    ];
+  }
+
+  // insert content into a text block at a given range
+  insert(at: StepOffset, nodes: Node | Node[]): TextBlock {
+    const content = Array.isArray(nodes) ? nodes : [nodes];
+    const stepSize = content.reduce((acc, curr) => acc + curr.stepSize, 0);
+
+    // check if the target offset is at the start of the text block
+    if (0 < at && at <= 2) {
+      const mapper = this.mapper.clone();
+      mapper.add(IndexMap.create(at, stepSize));
+      const children = [...content, ...this.node.children];
+      const node = this.node.clone((data) => {
+        return {
+          ...data,
+          children,
+        };
+      });
+      children.forEach((child) => {
+        child.setParent(node).setParentId(node.id);
+      });
+      return new TextBlock(node, mapper);
+    }
+
+    if (this.node.stepSize - 2 <= at && at < this.node.stepSize) {
+      const mapper = this.mapper.clone();
+      mapper.add(IndexMap.create(at, stepSize));
+      const children = [...this.node.children, ...content];
+      const node = this.node.clone((data) => {
+        return {
+          ...data,
+          children,
+        };
+      });
+      children.forEach((child) => {
+        child.setParent(node).setParentId(node.id);
+      });
+
+      return new TextBlock(node, mapper);
+    }
+
+    const down = Step.create(this.node, at).down();
+    if ((down.isAtStart || down.isAtEnd) && down.node.parent?.eq(this.node)) {
+      const mapper = this.mapper.clone();
+      mapper.add(IndexMap.create(at, stepSize));
+      const { index } = down.node;
+      const prev = this.node.children.slice(0, index + 1);
+      const next = this.node.children.slice(index + 1);
+
+      const children = [...prev, ...content, ...next];
+      const node = this.node.clone((data) => {
+        return {
+          ...data,
+          children,
+        };
+      });
+
+      children.forEach((child) => {
+        child.setParent(node).setParentId(node.id);
+      });
+
+      return new TextBlock(node, mapper);
+    }
+
+    // check if the target offset is within an inline node
+    // split the inline node at the target offset and insert the content
+    const { index } = down.node;
+    const prev = this.node.children.slice(0, index);
+    const next = this.node.children.slice(index + 1);
+    const [before, after] = InlineNode.from(down.node).split(down.offset - 1);
+
+    const children = [...prev, before, ...content, after, ...next];
+    const node = this.node.clone((data) => {
+      return {
+        ...data,
+        children,
+      };
+    });
+
+    children.forEach((child) => {
+      child.setParent(node).setParentId(node.id);
+    });
+
+    const mapper = this.mapper.clone();
+    mapper.add(IndexMap.create(at + 1, stepSize));
+
+    return new TextBlock(node, mapper);
+  }
+
+  normalize(): TextBlock {
+    return this;
+  }
+
+  // --------------------------------
 
   // merge adjacent text nodes with the same marks
   normalizeContent() {
@@ -250,5 +497,12 @@ export class TextBlock {
 
   toString(): string {
     return classString(this)(this.node.toJSON());
+  }
+
+  private clone() {
+    return new TextBlock(
+      this.node.type.schema.factory.clone(this.node, identity),
+      this.mapper.clone(),
+    );
   }
 }

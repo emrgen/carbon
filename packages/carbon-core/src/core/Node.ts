@@ -207,7 +207,7 @@ export class Node extends EventEmitter implements IntoNodeId {
   // starting from left of <a> to end of </a>
   // if total focus size is needed for a block is
   // (the sum of focus size of all children - (size - 1)) + 2
-  get stepCount(): number {
+  get stepSize(): number {
     // two steps to enter and exit the text node
     if (this.isText) return this.textContent.length + 2;
     if (this.isInlineAtom && this.isFocusable) {
@@ -224,7 +224,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     // two steps to enter and exit the block
-    return this.children.map((n) => n.stepCount).reduce((s, n) => s + n, 2);
+    return this.children.map((n) => n.stepSize).reduce((s, n) => s + n, 2);
   }
 
   // focus steps count within the node

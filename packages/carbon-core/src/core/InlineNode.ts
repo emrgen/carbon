@@ -1,5 +1,6 @@
 import { Node } from "./Node";
 import { MarkSet } from "./Mark";
+import { Step } from "./Step";
 
 export class InlineNode {
   private readonly node: Node;
@@ -48,6 +49,8 @@ export class InlineNode {
 
     return [prev, next];
   }
+
+  splitAtStep(step: Step) {}
 
   merge(other: Node): Node[] {
     const { node } = this;

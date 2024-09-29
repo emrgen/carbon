@@ -7,6 +7,10 @@ export function splitTextBlock(
   end: Pin,
   app: Carbon,
 ): [Node[], Node[], Node[]] {
+  if (!start.node.eq(end.node)) {
+    throw new Error("start and end nodes are not same");
+  }
+
   const startPin = start.down()!.leftAlign;
   const endPin = end.down()!.leftAlign;
 

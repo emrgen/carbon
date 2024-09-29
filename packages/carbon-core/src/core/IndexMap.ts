@@ -1,6 +1,6 @@
 // +1 = node added within index map
 // -1 = node removed from index map
-type IndexMapOp = 1 | -1;
+type IndexMapOp = number;
 
 // IndexMap maps indexes to new indexes
 export class IndexMap {
@@ -11,6 +11,10 @@ export class IndexMap {
   op: IndexMapOp = 1;
 
   static DEFAULT = new IndexMap(1000000000, 1);
+
+  static create(offset: number, op: IndexMapOp): IndexMap {
+    return new IndexMap(offset, op);
+  }
 
   get isDefault() {
     return this === IndexMap.DEFAULT;
@@ -48,6 +52,10 @@ export class IndexMap {
       // index is after this map
       return index - op;
     }
+  }
+
+  clone() {
+    return new IndexMap(this.offset, this.op);
   }
 }
 
@@ -124,6 +132,10 @@ export class IndexMapper {
     }
 
     return index;
+  }
+
+  clone() {
+    return new IndexMapper(this.mappers.map((m) => m.clone()));
   }
 }
 

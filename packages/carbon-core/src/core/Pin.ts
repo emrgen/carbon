@@ -2,7 +2,6 @@ import { Optional, Predicate } from "@emrgen/types";
 import { classString } from "./Logger";
 import { Node } from "./Node";
 import { Point } from "./Point";
-import { clamp } from "../utils/clamp";
 import { Maps } from "./types";
 import { NodeMapGet } from "./NodeMap";
 import { Focus } from "./Focus";
@@ -76,7 +75,7 @@ export class Pin {
   }
 
   static toAfter(node: Node): Pin {
-    return Pin.create(node, node.size + 1, node.stepCount);
+    return Pin.create(node, node.size + 1, node.stepSize);
   }
 
   static toStartOf(node: Node): Optional<Pin> {
@@ -104,7 +103,7 @@ export class Pin {
       })!;
       if (!target) return null;
       if (target.isText) {
-        return Pin.create(target, target.size, target.stepCount - 1);
+        return Pin.create(target, target.size, target.stepSize - 1);
       }
 
       return Pin.create(target, 0, 1);
@@ -120,7 +119,7 @@ export class Pin {
       return Pin.create(child, 0, 1);
     }
 
-    return Pin.create(child, child.focusSize, child.stepCount - 1);
+    return Pin.create(child, child.focusSize, child.stepSize - 1);
   }
 
   static create(node: Node, offset: number, steps: number = -1) {
@@ -134,7 +133,7 @@ export class Pin {
       );
     }
 
-    if (steps != -1 && node.stepCount - 1 < steps) {
+    if (steps != -1 && node.stepSize - 1 < steps) {
       throw new Error(
         `node: ${node.name} does not have the provided steps: ${steps}`,
       );
@@ -245,6 +244,16 @@ export class Pin {
     return Focus.create(this.node, this.offset).rightAlign.pin();
   }
 
+  focused(): Pin {
+    const down = this.down();
+    const focus = Focus.create(down.node, down.offset).pin();
+    return Pin.create(this.node, focus.offset, focus.steps);
+  }
+
+  unfocused(): Pin {
+    return Pin.create(this.node, this.offset, -1);
+  }
+
   // lift pin to the parent (possibly to the text block)
   // NOTE: up looses the precise location information when the pin is between two inline nodes
   // by default it will be aligned to the left node when the pin is in the middle of the two inline nodes
@@ -274,6 +283,7 @@ export class Pin {
   // if the pin is at the end of the isolate node it will be aligned to the next node
   down() {
     if (this.isDown) {
+      console.log(this.toString());
       return this;
     }
 
@@ -287,7 +297,9 @@ export class Pin {
       return down;
     }
 
+    console.log(this.toString());
     const focus = Focus.create(this.node, this.offset).down();
+    console.log(focus.toString());
 
     return Pin.create(focus.node, focus.offset, focus.offset + 1);
   }
@@ -350,151 +362,11 @@ export class Pin {
   }
 
   // move the pin by distance through focusable nodes
+  // each step can be considered as one right key press
+  // tries to move as much as possible
   moveBy(distance: number): Optional<Pin> {
     const down = this.down();
     return Focus.create(down.node, down.offset).moveBy(distance).pin();
-  }
-
-  // each step can be considered as one right key press
-  // tries to move as much as possible
-  private moveForwardBy(distance: number): Optional<Pin> {
-    if (distance === 0) {
-      return this.clone();
-    }
-
-    let { node, offset } = this;
-    distance = offset + distance; //+ (node.isEmpty ? 1 : 0);
-
-    let prev: Node = node;
-    let curr: Optional<Node> = node;
-    let focusSize: number = 0;
-    // console.log('start pos', curr.id.toString(), offset, distance);
-
-    while (prev && curr) {
-      const isSameBlock =
-        !prev.eq(curr) && prev.closestBlock.eq(curr.closestBlock);
-      if (!prev.closestBlock.eq(curr.closestBlock)) {
-        distance -= 1;
-      } else if (
-        !prev.eq(curr) &&
-        (prev.isZero || curr.isZero) &&
-        isSameBlock
-      ) {
-        // distance -= 1;
-      }
-      // console.log('=>',curr.id.toString(), curr.size, distance);
-
-      focusSize = curr.isZero ? (isSameBlock ? 0 : 1) : curr.focusSize;
-      console.log(focusSize, curr.id, curr.name);
-      if (distance <= focusSize) {
-        // console.log(curr.id, curr.focusSize, offset);
-        break;
-      }
-      // if curr is Empty it will have -
-      distance -= focusSize;
-      // console.log(curr.id.key, curr.focusSize);
-      prev = curr;
-
-      curr = curr.next(
-        (n) => {
-          return n.isFocusable;
-        },
-        {
-          skip: (n) => {
-            return n.isIsolate;
-          },
-        },
-      );
-    }
-
-    // console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);
-
-    if (!curr) {
-      return Pin.create(prev, prev.focusSize, prev.stepCount);
-    }
-
-    distance = clamp(distance, 0, curr.focusSize);
-
-    // if the current node is inline atom and the distance is within the atom
-    if (curr.isInlineAtom && distance) {
-      return Pin.create(curr, curr.focusSize, curr.stepCount);
-    }
-
-    console.log("x");
-    return Pin.create(curr, distance, distance + 1);
-  }
-
-  // each step can be considered as one left key press
-  private moveBackwardBy(distance: number): Optional<Pin> {
-    if (distance === 0) {
-      return this.clone();
-    }
-
-    let { node, offset } = this;
-    // if (node.isZero && offset === 1) {
-    //   distance += 1;
-    // }
-
-    distance = node.focusSize - offset + distance;
-
-    let prev: Node = node;
-    let curr: Optional<Node> = node;
-    let focusSize: number = 0;
-    // let blockChanged = false;
-    while (prev && curr) {
-      const isSameBlock =
-        !prev.eq(curr) && prev.closestBlock.eq(curr.closestBlock);
-      if (!prev.closestBlock.eq(curr.closestBlock)) {
-        distance -= 1;
-        // blockChanged = true;
-      } else if (
-        !prev.eq(curr) &&
-        (prev.isZero || curr.isZero) &&
-        prev.closestBlock?.eq(curr.closestBlock)
-      ) {
-        distance -= 1;
-        // blockChanged = false;
-      }
-      // console.log('=>', curr.id.toString(), curr.size, distance);
-
-      focusSize = curr.isZero ? 0 : curr.focusSize;
-      // console.log(focusSize, curr.id, curr.name);
-      if (distance <= focusSize) {
-        // console.log(curr.id, curr.focusSize, offset);
-        break;
-      }
-      // if curr is Empty it will have -
-      distance -= focusSize;
-      // console.log(curr.id.key, curr.focusSize);
-      prev = curr;
-      let nextCurr = curr.prev((n) => n.isFocusable, {
-        skip: (n) => {
-          return n.isIsolate;
-        },
-      });
-
-      console.log("change curr", curr?.id.toString(), nextCurr?.id.toString());
-
-      curr = nextCurr;
-    }
-
-    // console.log(curr?.id.toString(), prev.id.toString(), curr?.size, distance);
-
-    if (!curr) {
-      return Pin.create(prev, 0, 1);
-    }
-
-    distance = clamp(distance, 0, curr.focusSize);
-    // if the current node is inline atom and the distance is within the atom
-    if (curr.isInlineAtom && distance) {
-      return Pin.create(curr, 0, 1);
-    }
-
-    return Pin.create(
-      curr,
-      curr.focusSize - distance,
-      // curr.stepCount - distance - 1,
-    );
   }
 
   map<B>(fn: Maps<Pin, B>) {

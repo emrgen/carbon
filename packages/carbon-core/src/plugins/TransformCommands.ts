@@ -1850,11 +1850,7 @@ export class TransformCommands extends BeforePlugin {
     if (endTextBlock.eq(startTextBlock)) {
       const down = start.down();
       let after: Optional<PinnedSelection> = null;
-      if (down?.node.isZero) {
-        // if after left aligning the pin is at start of a inlineAtomWrapper node
-      } else {
-        after = selection.collapseToStart();
-      }
+      after = selection.collapseToStart();
       console.log(
         deleteGroup.ids.map((id) => id.toString()),
         deleteGroup.ranges,
@@ -2022,7 +2018,7 @@ export class TransformCommands extends BeforePlugin {
       start.node.focusSize,
     );
 
-    // NOTE: clone the nodes to avoid mutation
+    // NOTE: clone the nodes to avoid mutation of the original nodes
     const nextContent = TextBlock.from(end.node)
       .removeContent(0, end.offset)
       .map((n) => n.clone(deepCloneWithNewId));
@@ -2100,60 +2096,12 @@ export class TransformCommands extends BeforePlugin {
           !node.isVoid
         ) {
           rangeAction.push(...this.removeNodeCommands(node.children));
-          // MAYBE: may be insert a default empty node to keep the text node filled all the time.
-          // const children = node.children;
-          // if (children.length===0) {
-          //   // const textNode = react.schema.text("");
-          //   // actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
-          // } if (children.length === 1) {
-          //   if (!node.firstChild!.isEmpty) {
-          //     const textNode = react.schema.text("");
-          //     actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
-          //   }
-          // } else {
-          //   const textNode = react.schema.text("");
-          //   actions.push(SetContentAction.create(node.id, BlockContent.create(textNode!)))
-          // }
           return;
         }
 
         if (start.offset === end.offset) {
           return;
         }
-
-        // const startDown = start.down().rightAlign;
-        // const endDown = end.down().leftAlign;
-        // console.log("startDown", startDown.toString());
-        // console.log("endDown", endDown.toString());
-        // console.log(
-        //   EmptyInline.isPrefix(startDown.node),
-        //   EmptyInline.isSuffix(endDown.node),
-        // );
-        //
-        // if (
-        //   EmptyInline.isPrefix(startDown.node) &&
-        //   EmptyInline.isSuffix(endDown.node)
-        // ) {
-        //   const startNode = startDown.node.parent!;
-        //   const endNode = endDown.node.parent!;
-        //   console.log(startNode.id.toString(), endNode.id.toString());
-        //   let nodes: Node[] = [];
-        //   if (startNode.eq(endNode)) {
-        //     nodes = [startNode];
-        //   } else {
-        //     nodes = takeUpto(startNode.nextSiblings, (n) =>
-        //       n.eq(endNode),
-        //     ).concat([endNode]);
-        //   }
-        //
-        //   console.log(
-        //     "nodes",
-        //     nodes.map((n) => n.id.toString()),
-        //   );
-        //
-        //   rangeAction.push(...this.removeNodeCommands([startNode, ...nodes]));
-        //   return;
-        // }
 
         console.log("start/end", start.toString(), end.toString());
         const content = TextBlock.from(node).removeContent(
@@ -2166,6 +2114,10 @@ export class TransformCommands extends BeforePlugin {
         }
 
         rangeAction.push(SetContentAction.create(node.id, nodes));
+      } else {
+        throw new Error(
+          "delete group ranges should not span across text blocks",
+        );
       }
     });
 
@@ -2456,8 +2408,10 @@ export class TransformCommands extends BeforePlugin {
     const { app } = tr;
     const actions: CarbonAction[] = [];
     // check if prev and next can be merged
-    const pin = Pin.toEndOf(prev)!.down().leftAlign.up();
-    const after = PinnedSelection.fromPin(pin);
+    const pin = Pin.toEndOf(prev)!.leftAlign.up();
+    // TODO: use TextBlock.merge() to merge text nodes and then find the new pin
+    let after = PinnedSelection.fromPin(pin);
+    console.log("XX", after.toString());
 
     const moveActions: CarbonAction[] = [];
     const removeActions: CarbonAction[] = [];
@@ -2476,6 +2430,8 @@ export class TransformCommands extends BeforePlugin {
           insertActions.push(
             SetContentAction.create(prev.id, children.map(cloneFrozenNode)),
           );
+          // TODO: this is a hack, use TextBlock.merge() to merge text nodes and find the new pin
+          // after = PinnedSelection.fromPin(Pin.create(pin.node, 0));
         } else {
           insertActions.push(
             SetContentAction.create(

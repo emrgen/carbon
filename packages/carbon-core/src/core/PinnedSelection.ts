@@ -405,6 +405,11 @@ export class PinnedSelection {
 
       const { anchorNode, anchorOffset, focusNode, focusOffset } = domSelection;
 
+      if (anchorOffset < 0 || focusOffset < 0) {
+        console.error(p14("%c[error]"), "color:red", "negative offset");
+        return false;
+      }
+
       // let node = anchorNode
       // while (node = node?.parentElement) {
       // 	console.log(node)
@@ -508,7 +513,7 @@ export class PinnedSelection {
 
   intoDomSelection(store: NodeStore): Optional<DomSelection> {
     const { head, tail } = this;
-    // console.log('Selection.intoDomSelection', range?.toString());
+    console.log("Selection.intoDomSelection", this?.toString());
     // console.debug(p14('%c[DEBUG]'), 'color:magenta', p30('intoDomSelection'), range.toString());
 
     const focus = head.down();

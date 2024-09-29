@@ -8,6 +8,8 @@ import { last } from "lodash";
 import { takeBefore } from "../utils/array";
 import { Pin } from "./Pin";
 
+export type FocusOffset = number;
+
 // by default everything happens at down level
 export class Focus {
   static create(node: Node, offset: number) {
@@ -43,7 +45,7 @@ export class Focus {
 
   constructor(
     readonly node: Node,
-    readonly offset: number,
+    readonly offset: FocusOffset,
   ) {}
 
   get leftAlign(): Focus {

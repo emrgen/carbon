@@ -82,9 +82,9 @@ export class ImmutableNode extends Node {
   }
 
   // FIXME: cache is causing issues with the undo/redo of emoji. Need to investigate.
-  // override get stepCount(): number {
+  // override get stepSize(): number {
   //   return StepCache.get(this.contentKey, () => {
-  //     return super.stepCount;
+  //     return super.stepSize;
   //   });
   // }
 

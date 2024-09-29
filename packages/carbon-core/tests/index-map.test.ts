@@ -1,8 +1,32 @@
-import {expect, test} from 'vitest'
-import {IndexMap, IndexMapper} from "../src/core/IndexMap";
-import {range} from "lodash";
+import { expect, test } from "vitest";
+import { IndexMap, IndexMapper } from "../src/core/IndexMap";
+import { range } from "lodash";
 
-test('index-map', t => {
+test("step map", (t) => {
+  const mapper = new IndexMapper();
+  const identity = IndexMap.DEFAULT;
+  mapper.add(identity);
+
+  expect(mapper.map(identity, 0)).toBe(0);
+  expect(mapper.map(identity, 10)).toBe(10);
+
+  // 5 nodes inserted at index 10
+  const m1 = new IndexMap(10, 5);
+  mapper.add(m1);
+  expect(mapper.map(identity, 9)).toBe(9);
+  expect(mapper.map(identity, 10)).toBe(15);
+  // indexes within the m1 range does not change wrt m1
+  expect(mapper.map(m1, 14)).toBe(14);
+
+  // 5 nodes inserted at index 15
+  const m2 = new IndexMap(15, 5);
+  mapper.add(m2);
+  expect(mapper.map(identity, 10)).toBe(20);
+  expect(mapper.map(identity, 10)).toBe(20);
+  expect(mapper.map(identity, 15)).toBe(25);
+});
+
+test("index-map", (t) => {
   const mapper = new IndexMapper();
 
   const identity = IndexMap.DEFAULT;
@@ -10,17 +34,17 @@ test('index-map', t => {
   expect(mapper.map(identity, 0)).toBe(0);
   expect(mapper.map(identity, 10)).toBe(10);
 
-  // 10 nodes inserted at index 10
+  // 1 nodes inserted at index 10
   const m1 = new IndexMap(10, 1);
   mapper.add(m1);
+  expect(mapper.map(identity, 9)).toBe(9);
   expect(mapper.map(identity, 10)).toBe(11);
   expect(mapper.map(m1, 0)).toBe(0);
   expect(mapper.map(m1, 10)).toBe(10);
   expect(mapper.map(m1, 20)).toBe(20);
   expect(mapper.map(m1, 21)).toBe(21);
 
-  range(9).forEach(i => mapper.add(new IndexMap(11 + i, 1)));
-
+  range(9).forEach((i) => mapper.add(new IndexMap(11 + i, 1)));
 
   expect(mapper.map(identity, 0)).toBe(0);
 
@@ -49,7 +73,7 @@ test('index-map', t => {
   // 2 nodes removed at index 15
   const m3 = new IndexMap(15, -1);
   mapper.add(m3);
-  range(1).forEach(i => mapper.add(new IndexMap(16 + i, -1)));
+  range(1).forEach((i) => mapper.add(new IndexMap(16 + i, -1)));
 
   // all indexes before 15 are unchanged
   expect(mapper.map(identity, 0)).toBe(0);
@@ -62,7 +86,7 @@ test('index-map', t => {
   expect(mapper.map(identity, 16)).toBe(25);
 });
 
-test('find previous index map', () => {
+test("find previous index map", () => {
   const mapper = new IndexMapper();
   const m1 = IndexMap.DEFAULT;
   mapper.add(m1);

@@ -19,7 +19,7 @@ export const collectSteps = (node: Node, depth = 0) => {
       name: node.name,
       depth,
       start: 0,
-      end: node.stepCount,
+      end: node.stepSize,
     },
     ...steps,
   ];

@@ -4,13 +4,15 @@ import { Predicate } from "@emrgen/types";
 import { classString } from "./Logger";
 import { Pin } from "./Pin";
 
+export type StepOffset = number;
+
 export class Step {
   constructor(
     readonly node: Node,
-    readonly offset: number,
+    readonly offset: StepOffset,
   ) {}
 
-  static create(node: Node, offset: number) {
+  static create(node: Node, offset: StepOffset) {
     return new Step(node, offset);
   }
 
@@ -19,7 +21,7 @@ export class Step {
   }
 
   static toEndOf(node: Node) {
-    return new Step(node, node.stepCount - 1);
+    return new Step(node, node.stepSize - 1);
   }
 
   static toBefore(node: Node) {
@@ -27,7 +29,7 @@ export class Step {
   }
 
   static toAfter(node: Node) {
-    return new Step(node, node.stepCount);
+    return new Step(node, node.stepSize);
   }
 
   pin(): Optional<Pin> {
@@ -41,19 +43,27 @@ export class Step {
     return null;
   }
 
+  get isAtStart() {
+    return this.offset === 1;
+  }
+
+  get isAtEnd() {
+    return this.offset === this.node.stepSize - 1;
+  }
+
   get isBefore() {
     return this.offset === 0;
   }
 
   get isAfter() {
-    return this.offset === this.node.stepCount;
+    return this.offset === this.node.stepSize;
   }
 
   get leftAlign() {
     if (this.isBefore) {
       const prevSibling = this.node.prevSibling;
       if (prevSibling) {
-        return new Step(prevSibling, prevSibling.stepCount);
+        return new Step(prevSibling, prevSibling.stepSize);
       } else {
         return Step.toStartOf(this.node.parent!);
       }
@@ -81,7 +91,7 @@ export class Step {
       return this;
     }
 
-    const stepCount = this.node.stepCount;
+    const stepCount = this.node.stepSize;
     if (this.offset === stepCount || this.offset === 0) {
       return this;
     }
@@ -90,10 +100,10 @@ export class Step {
     for (let i = 0; i < this.node.size; i++) {
       const child = this.node.child(i);
       if (child) {
-        if (child.stepCount >= steps) {
+        if (child.stepSize >= steps) {
           return new Step(child, steps).down();
         }
-        steps -= child.stepCount;
+        steps -= child.stepSize;
       }
     }
 
@@ -107,7 +117,7 @@ export class Step {
     }
 
     const steps = this.node.prevSiblings.reduce(
-      (sc, n) => sc + n.stepCount,
+      (sc, n) => sc + n.stepSize,
       this.offset,
     );
 
@@ -119,15 +129,15 @@ export class Step {
     return Step.create(parent, steps + 1).up(fn);
   }
 
-  moveBy(steps: number): Step {
+  moveBy(steps: StepOffset): Step {
     if (steps === 0) {
       return this;
     }
     return steps > 0 ? this.moveForwardBy(steps) : this.moveBackwardBy(-steps);
   }
 
-  private moveForwardBy(steps: number): Step {
-    const stepCount = this.node.stepCount;
+  private moveForwardBy(steps: StepOffset): Step {
+    const stepCount = this.node.stepSize;
     if (this.offset + steps === stepCount) {
       return Step.toAfter(this.node);
     }
@@ -149,10 +159,10 @@ export class Step {
     for (let i = index + 1; i < size; i++) {
       const child = this.node.child(i);
       if (child) {
-        if (child.stepCount >= steps) {
+        if (child.stepSize >= steps) {
           return new Step(child, steps);
         }
-        steps -= child.stepCount;
+        steps -= child.stepSize;
       }
     }
 
@@ -162,12 +172,12 @@ export class Step {
     }
     const pPos = Step.toBefore(parent);
     const childDistance = pPos.childDistance(this.node);
-    const newOffset = childDistance + this.offset + steps - parent.stepCount;
+    const newOffset = childDistance + this.offset + steps - parent.stepSize;
 
     return Step.toAfter(parent).moveBy(newOffset);
   }
 
-  private moveBackwardBy(steps: number): Step {
+  private moveBackwardBy(steps: StepOffset): Step {
     if (this.offset === steps) {
       return Step.toBefore(this.node);
     }
@@ -195,10 +205,10 @@ export class Step {
     for (let i = index + 1; i < size; i++) {
       const child = this.node.child(i);
       if (child) {
-        if (child.stepCount >= steps) {
+        if (child.stepSize >= steps) {
           return new Step(child, steps);
         }
-        steps -= child.stepCount;
+        steps -= child.stepSize;
       }
     }
 
@@ -208,7 +218,7 @@ export class Step {
     }
     const pPos = Step.toBefore(parent);
     const childDistance = pPos.childDistance(this.node);
-    const newOffset = childDistance + this.offset + steps - parent.stepCount;
+    const newOffset = childDistance + this.offset + steps - parent.stepSize;
 
     return Step.toAfter(parent).moveBy(newOffset);
   }
@@ -221,7 +231,7 @@ export class Step {
     let steps = 1;
     const found = this.node.children.find((child, index) => {
       if (child.eq(node)) return true;
-      steps += child.stepCount - 1;
+      steps += child.stepSize - 1;
     });
 
     if (!found) {

@@ -151,7 +151,6 @@ export class ImmutableState implements State {
   produce(fn: (state: ImmutableDraft) => void, opts: ProduceOpts): State {
     const { origin, pm, schema, type } = opts;
     const { marks } = this;
-    console.log("creating new draft", this.nodeMap.isFrozen);
     const draft = new ImmutableDraft(this, origin, type, pm, schema, marks);
     return draft.produce(fn);
   }

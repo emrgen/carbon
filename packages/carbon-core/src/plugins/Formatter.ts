@@ -11,6 +11,7 @@ import {
   State,
   Transaction,
 } from "@emrgen/carbon-core";
+import { PinnedSelection } from "@emrgen/carbon-core";
 import { PluginEmitter } from "../core/PluginEmitter";
 import { PluginState } from "../core/PluginState";
 import { Optional, With } from "@emrgen/types";
@@ -126,7 +127,12 @@ export class FormatterPlugin extends BeforePlugin {
 
     preventAndStopCtx(ctx);
     fn(cmd, blockSelection.isEmpty ? selection : blockSelection);
-    cmd?.select(selection)?.dispatch();
+    const { head, tail } = selection;
+    const after = PinnedSelection.create(
+      tail.down().node.isZero ? tail : tail.unfocused(),
+      head.down().node.isZero ? head : head.unfocused(),
+    );
+    cmd?.select(after)?.dispatch();
   }
 
   bold(tr: Transaction, selection: Selection | BlockSelection) {
