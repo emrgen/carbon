@@ -4,6 +4,7 @@ import { Node } from "./Node";
 import { InlineNode } from "./InlineNode";
 import { last } from "lodash";
 import { identity } from "lodash";
+import { clamp } from "lodash";
 import { deepCloneMap } from "./types";
 import { cloneFrozenNode } from "./types";
 import { Pin } from "./Pin";
@@ -12,6 +13,7 @@ import { StepOffset } from "./Step";
 import { Step } from "./Step";
 import { IndexMapper } from "./IndexMap";
 import { IndexMap } from "./IndexMap";
+import { Optional } from "@emrgen/types";
 
 // utility class for text blocks
 // title is a text block
@@ -19,11 +21,12 @@ import { IndexMap } from "./IndexMap";
 // when you type in a text block, you are typing in the inline content
 // when merging text blocks, you are merging the inline content along with the content marks
 export class TextBlock {
-  private readonly node: Node;
-  private readonly mapper: IndexMapper;
+  readonly node: Node;
+  readonly mapper: IndexMapper;
 
   static from(node: Node) {
     const clone = node.clone(deepCloneMap);
+    clone.setParent(null).setParentId(null);
 
     return new TextBlock(clone, IndexMapper.empty());
   }
@@ -54,6 +57,10 @@ export class TextBlock {
     return this.node.textContent;
   }
 
+  get children() {
+    return this.node.children;
+  }
+
   intoContent() {
     return this.node.unwrap();
   }
@@ -63,11 +70,41 @@ export class TextBlock {
     return this.mapper.map(IndexMap.DEFAULT, from);
   }
 
+  // the steps are used to find the new location of the pin after the text block has been modified
+  // the pin is used to represent the cursor position in the text block
+  mapPin(pin: Pin): Optional<Pin> {
+    const down = pin.down();
+    let steps = pin.steps;
+    if (down.node.isZero && down.offset === 1) {
+      steps -= 1;
+    }
+
+    const { node } = pin;
+    if (node.isTextContainer && node.isVoid) {
+      return Pin.create(node, 0, 1);
+    }
+
+    steps = clamp(steps, 1, this.node.stepSize - 2);
+
+    return Step.create(node, steps).down().pin()?.up();
+  }
+
+  replaceContent(content: Node[]) {
+    return TextBlock.from(this.cloneNode(this.node, content));
+  }
+
   // remove content from a text block from a given range
   remove(from: StepOffset, to: StepOffset): TextBlock {
+    const [prev, middle, next] = this.split(from, to);
+
+    // console.log(prev.textContent, middle.textContent, next.textContent);
+
     // split at the start and end of the range
     // remove the content between the split
-    return this;
+    const children = [...prev.node.children, ...next.node.children];
+    const node = this.cloneNode(this.node, children);
+
+    return TextBlock.from(node);
   }
 
   // split a text block at a given range and return the new text blocks
@@ -81,6 +118,12 @@ export class TextBlock {
       const [prev, next] = this.split(end);
       if (!prev.node.eq(Node.IDENTITY)) {
         const [first, second] = prev.split(start);
+        // console.log(
+        //   "xxxx",
+        //   first.textContent,
+        //   second.textContent,
+        //   next.textContent,
+        // );
         return [first, second, next];
       } else {
         return [TextBlock.empty(), TextBlock.empty(), next];
@@ -94,22 +137,12 @@ export class TextBlock {
     const down = Step.create(this.node, start).down();
     if ((down.isAtStart || down.isAtEnd) && down.node.parent?.eq(this.node)) {
       const { index } = down.node;
-      const prev = this.node.children.slice(0, index + 1);
-      const next = this.node.children.slice(index + 1);
+      const atStart = down.isAtStart;
+      const prev = this.node.children.slice(0, index + (atStart ? 0 : 1));
+      const next = this.node.children.slice(index + (atStart ? 0 : 1));
 
-      const prevNode = this.node.clone((data) => {
-        return {
-          ...data,
-          children: prev,
-        };
-      });
-
-      const nextNode = this.node.clone((data) => {
-        return {
-          ...data,
-          children: next,
-        };
-      });
+      const prevNode = this.cloneNode(this.node, prev);
+      const nextNode = this.cloneNode(this.node, next);
 
       const prevMapper = this.mapper.clone();
       prevMapper.add(
@@ -125,6 +158,8 @@ export class TextBlock {
           nextNode.children.reduce((acc, curr) => acc - curr.stepSize, 0),
         ),
       );
+
+      // console.log(prevNode.textContent, "-", nextNode.textContent);
 
       return [
         new TextBlock(prevNode, prevMapper),
@@ -143,19 +178,8 @@ export class TextBlock {
     const next = this.node.children.slice(index + 1);
     const [before, after] = InlineNode.from(down.node).split(down.offset - 1);
 
-    const prevNode = this.node.clone((data) => {
-      return {
-        ...data,
-        children: [...prev, before],
-      };
-    });
-
-    const nextNode = this.node.clone((data) => {
-      return {
-        ...data,
-        children: [after, ...next],
-      };
-    });
+    const prevNode = this.cloneNode(this.node, [...prev, before]);
+    const nextNode = this.cloneNode(this.node, [after, ...next]);
 
     const prevMapper = this.mapper.clone();
     const nextMapper = this.mapper.clone();
@@ -200,15 +224,8 @@ export class TextBlock {
       const mapper = this.mapper.clone();
       mapper.add(IndexMap.create(at, stepSize));
       const children = [...content, ...this.node.children];
-      const node = this.node.clone((data) => {
-        return {
-          ...data,
-          children,
-        };
-      });
-      children.forEach((child) => {
-        child.setParent(node).setParentId(node.id);
-      });
+      const node = this.cloneNode(this.node, children);
+
       return new TextBlock(node, mapper);
     }
 
@@ -216,21 +233,26 @@ export class TextBlock {
       const mapper = this.mapper.clone();
       mapper.add(IndexMap.create(at, stepSize));
       const children = [...this.node.children, ...content];
-      const node = this.node.clone((data) => {
-        return {
-          ...data,
-          children,
-        };
-      });
-      children.forEach((child) => {
-        child.setParent(node).setParentId(node.id);
-      });
+      const node = this.cloneNode(this.node, children);
 
       return new TextBlock(node, mapper);
     }
 
     const down = Step.create(this.node, at).down();
-    if ((down.isAtStart || down.isAtEnd) && down.node.parent?.eq(this.node)) {
+    if (down.isBefore || (down.isAtStart && down.node.parent?.eq(this.node))) {
+      const mapper = this.mapper.clone();
+      mapper.add(IndexMap.create(at, stepSize));
+      const { index } = down.node;
+      const prev = this.node.children.slice(0, index);
+      const next = this.node.children.slice(index);
+
+      const children = [...prev, ...content, ...next];
+      const node = this.cloneNode(this.node, children);
+
+      return new TextBlock(node, mapper);
+    }
+
+    if ((down.isAfter || down.isAtEnd) && down.node.parent?.eq(this.node)) {
       const mapper = this.mapper.clone();
       mapper.add(IndexMap.create(at, stepSize));
       const { index } = down.node;
@@ -238,16 +260,7 @@ export class TextBlock {
       const next = this.node.children.slice(index + 1);
 
       const children = [...prev, ...content, ...next];
-      const node = this.node.clone((data) => {
-        return {
-          ...data,
-          children,
-        };
-      });
-
-      children.forEach((child) => {
-        child.setParent(node).setParentId(node.id);
-      });
+      const node = this.cloneNode(this.node, children);
 
       return new TextBlock(node, mapper);
     }
@@ -260,16 +273,7 @@ export class TextBlock {
     const [before, after] = InlineNode.from(down.node).split(down.offset - 1);
 
     const children = [...prev, before, ...content, after, ...next];
-    const node = this.node.clone((data) => {
-      return {
-        ...data,
-        children,
-      };
-    });
-
-    children.forEach((child) => {
-      child.setParent(node).setParentId(node.id);
-    });
+    const node = this.cloneNode(this.node, children);
 
     const mapper = this.mapper.clone();
     mapper.add(IndexMap.create(at + 1, stepSize));
@@ -278,7 +282,23 @@ export class TextBlock {
   }
 
   normalize(): TextBlock {
-    return this;
+    const children = this.normalizeContent();
+    const node = this.cloneNode(this.node, children);
+    return new TextBlock(node, this.mapper.clone());
+  }
+
+  // clone node with new children
+  private cloneNode(node: Node, children: Node[]): Node {
+    const clone = node.clone((data) => ({
+      ...data,
+      children,
+    }));
+
+    children.forEach((child) => {
+      child.setParent(clone).setParentId(clone.id);
+    });
+
+    return clone;
   }
 
   // --------------------------------
@@ -308,6 +328,7 @@ export class TextBlock {
         const currMarks = MarkSet.from(curr.marks);
         const prevClass = prev.props.get(LocalClassPath);
         const currClass = curr.props.get(LocalClassPath);
+
         if (
           prevMarks.eq(currMarks) &&
           prevClass === currClass &&
@@ -418,8 +439,6 @@ export class TextBlock {
     )!;
     const endNode = endDown?.node.closest((n) => n.parent?.isTextContainer!)!;
 
-    console.log(startDown?.node.id.toString(), endDown?.node.id.toString());
-    console.log(startNode.id.toString(), endNode.id.toString());
     if (startNode.eq(endNode)) {
       if (startNode.isInlineAtom) {
         return this.node.children.filter((n) => !n.eq(startNode));
@@ -504,5 +523,9 @@ export class TextBlock {
       this.node.type.schema.factory.clone(this.node, identity),
       this.mapper.clone(),
     );
+  }
+
+  resetMapper() {
+    return new TextBlock(this.node, IndexMapper.empty());
   }
 }

@@ -69,8 +69,13 @@ export class Point {
     return new Point(nodeId, PointAt.Inside);
   }
 
-  static create(nodeId: IntoNodeId, at: PointAt, offset: number = 0) {
-    return new Point(nodeId, at, offset);
+  static create(
+    nodeId: IntoNodeId,
+    at: PointAt,
+    offset: number = 0,
+    steps: number = -1,
+  ) {
+    return new Point(nodeId, at, offset, steps);
   }
 
   constructor(
@@ -98,7 +103,7 @@ export class Point {
   }
 
   clone() {
-    return Point.create(this.nodeId.clone(), this.at, this.offset);
+    return Point.create(this.nodeId.clone(), this.at, this.offset, this.steps);
   }
 
   toString() {

@@ -12,6 +12,10 @@ interface SchemaSpec {
   nodes: Record<NodeName, NodeSpec>;
 }
 
+interface TextNodeOpts {
+  props?: Record<string, any>;
+}
+
 // ref: prosemirror-model/src/schema.js
 export class Schema {
   nodes: Record<NodeName, NodeType>;
@@ -70,7 +74,7 @@ export class Schema {
     return type;
   }
 
-  text(text: string, json = {}): Optional<Node> {
+  text(text: string, json: TextNodeOpts = {}): Optional<Node> {
     return this.node("text", { text, ...json });
   }
 

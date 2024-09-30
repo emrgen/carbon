@@ -41,3 +41,4 @@ export * from "./PluginEmitter";
 export * from "./PluginState";
 export * from "./Step";
 export * from "./Focus";
+export * from "./TextBlock";

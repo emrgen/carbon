@@ -220,6 +220,9 @@ export class PinnedSelection {
     readonly nodes: Node[],
     readonly origin = ActionOrigin.Unknown,
   ) {
+    if (tail.steps === -1 || head.steps === -1) {
+      console.error("PinnedSelection: invalid selection, one pin is identity");
+    }
     if (tail.eq(Pin.IDENTITY) && !tail.eq(head)) {
       throw new Error(
         "PinnedSelection: invalid selection, one pin is identity and another is not",

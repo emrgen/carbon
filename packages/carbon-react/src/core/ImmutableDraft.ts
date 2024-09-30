@@ -287,8 +287,9 @@ export class ImmutableDraft implements Draft {
     }
     this.updateSelectionProps();
 
+    // collect the marks from the selection head node
     if (!this.state.selection.unpin().eq(this.selection)) {
-      // this.collectMarks();
+      this.collectMarks();
     }
 
     // remove deleted nodes from changed list

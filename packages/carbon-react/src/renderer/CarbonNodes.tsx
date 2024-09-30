@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { useCarbon } from "../hooks/useCarbon";
+import { useCarbon } from "../hooks/index";
 import {
   LocalHtmlAttrPath,
   Mark,
@@ -136,9 +136,12 @@ const InnerElement: ForwardRefRenderFunction<
     return {};
   }, [key]);
 
+  const isBold = node.props.get(MarksPath)?.some((m) => m.name === "bold");
+
   return (
     <Tag ref={ref} data-name={name} {...customProps} {...attributes}>
-      {children}
+      {isBold ? <b>{children}</b> : children}
+      {/*{children}*/}
     </Tag>
   );
 };

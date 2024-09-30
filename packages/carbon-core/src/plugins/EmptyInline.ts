@@ -120,6 +120,22 @@ export class EmptyInline extends InlineAtom {
     w.write("");
   }
 
+  static leftAlign(pin: Pin): Pin {
+    if (pin.node.isZero) {
+      return Pin.create(pin.node, 0);
+    }
+
+    return pin;
+  }
+
+  static rightAlign(pin: Pin): Pin {
+    if (pin.node.isZero) {
+      return Pin.create(pin.node, 1);
+    }
+
+    return pin;
+  }
+
   static is(node: Node): boolean {
     return node.name === "empty";
   }

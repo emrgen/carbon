@@ -80,7 +80,7 @@ export const mention = (name: string) => {
       [ContenteditablePath]: false,
       [SuppressContenteditableWarningPath]: true,
       [AtomContentPath]: `@${name}`,
-      [AtomSizePath]: name.length + 1,
+      [AtomSizePath]: 1,
     }),
   ]);
 };

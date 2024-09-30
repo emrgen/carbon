@@ -3,6 +3,8 @@ import { Optional } from "@emrgen/types";
 import { Predicate } from "@emrgen/types";
 import { classString } from "./Logger";
 import { Pin } from "./Pin";
+import { Focus } from "./Focus";
+import { Align } from "./Focus";
 
 export type StepOffset = number;
 
@@ -32,12 +34,30 @@ export class Step {
     return new Step(node, node.stepSize);
   }
 
+  // convert the step to pin
   pin(): Optional<Pin> {
     const down = this.down();
-    const { node } = down;
+    const { node, offset } = down;
     if (node.isText || node.isVoid || node.isZero || node.isInline) {
       // console.log("pin", down.node.id.toString(), down.offset);
-      return Pin.create(down.node, down.offset - 1, down.offset);
+      return Pin.create(node, offset - 1, offset).markAlign(
+        !node.isVoid && down.offset === 1 ? Align.Right : Align.Left,
+      );
+    }
+
+    return null;
+  }
+
+  // convert the step to focus
+  focus(): Optional<Focus> {
+    const down = this.down();
+    if (down.offset === 0 || down.offset === down.node.stepSize) return null;
+
+    const { node, offset } = down;
+    if (node.isText || node.isVoid || node.isZero || node.isInline) {
+      return Focus.create(node, offset - 1).markAlign(
+        !node.isVoid && down.offset === 1 ? Align.Right : Align.Left,
+      );
     }
 
     return null;
@@ -255,4 +275,29 @@ export class Step {
       offset: this.offset,
     };
   }
+
+  // // push the steps as far as possible
+  // adjust(node: Node) {
+  //   if (!this.node.eq(node)) {
+  //     throw new Error("Node mismatch");
+  //   }
+  //
+  //   if (this.offset === 0) return Step.toBefore(node);
+  //   let offset = this.offset - 1;
+  //   for (let i = 0, size = node.size; i < size; i++) {
+  //     const child = node.child(i);
+  //     if (child) {
+  //       if (child.stepSize >= offset) {
+  //         return new Step(child, offset);
+  //       }
+  //       offset -= child.stepSize;
+  //     }
+  //   }
+  //
+  //   if (node.isVoid) {
+  //     return Step.toEndOf(node);
+  //   }
+  //
+  //   return Step.toAfter();
+  // }
 }

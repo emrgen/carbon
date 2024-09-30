@@ -6,14 +6,14 @@ import {
   EventContext,
   EventHandlerMap,
   Mark,
+  PinnedSelection,
   preventAndStopCtx,
   Selection,
   State,
   Transaction,
 } from "@emrgen/carbon-core";
-import { PinnedSelection } from "@emrgen/carbon-core";
-import { PluginEmitter } from "../core/PluginEmitter";
-import { PluginState } from "../core/PluginState";
+import { PluginEmitter } from "../core/index";
+import { PluginState } from "../core/index";
 import { Optional, With } from "@emrgen/types";
 
 // add formatter commands to the CarbonCommands interface

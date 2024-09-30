@@ -10,8 +10,15 @@ import { Pin } from "./Pin";
 
 export type FocusOffset = number;
 
-// by default everything happens at down level
+export enum Align {
+  Left = "left",
+  Right = "right",
+}
+
+// NOTE: by default everything happens at down level
 export class Focus {
+  align: Align = Align.Left;
+
   static create(node: Node, offset: number) {
     return new Focus(node, offset);
   }
@@ -36,11 +43,13 @@ export class Focus {
     const focusable = node.find((n) => n.isFocusable, {
       order: "post",
       direction: "backward",
-    });
+    })!;
+
     if (!focusable) {
       return null;
     }
-    return new Focus(focusable, focusable.focusSize);
+
+    return Focus.create(focusable, focusable.focusSize);
   }
 
   constructor(
@@ -48,9 +57,16 @@ export class Focus {
     readonly offset: FocusOffset,
   ) {}
 
+  markAlign(align: Align) {
+    this.align = align;
+    return this;
+  }
+
   get leftAlign(): Focus {
-    if (this.node.isTextContainer && this.node.isVoid) return this;
-    if (this.node.isZero) return Focus.create(this.node, 0);
+    if (this.node.isTextContainer && this.node.isVoid)
+      return this.markAlign(Align.Left);
+    if (this.node.isZero)
+      return Focus.create(this.node, 0).markAlign(Align.Left);
 
     if (this.offset === 0) {
       const textBlock = this.node.closest((n) => n.isTextContainer);
@@ -67,18 +83,22 @@ export class Focus {
         textBlock &&
         prevTextBlock?.eq(textBlock)
       ) {
-        return Focus.create(prevFocusable, prevFocusable.focusSize);
+        return Focus.create(prevFocusable, prevFocusable.focusSize).markAlign(
+          Align.Left,
+        );
       }
     }
 
     console.log("leftAlign", this.toString());
 
-    return this;
+    return this.markAlign(Align.Left);
   }
 
   get rightAlign() {
-    if (this.node.isTextContainer && this.node.isVoid) return this;
-    if (this.node.isZero) return Focus.create(this.node, 1);
+    if (this.node.isTextContainer && this.node.isVoid)
+      return this.markAlign(Align.Right);
+    if (this.node.isZero)
+      return Focus.create(this.node, 1).markAlign(Align.Right);
 
     if (this.offset === this.node.focusSize) {
       let blocker = false;
@@ -88,11 +108,13 @@ export class Focus {
       });
 
       if (!blocker && nextFocusable) {
-        return Focus.create(nextFocusable, 0);
+        return Focus.create(nextFocusable, 0)
+          .markAlign(Align.Right)
+          .markAlign(Align.Right);
       }
     }
 
-    return this;
+    return this.markAlign(Align.Right);
   }
 
   get isAtStart() {
@@ -107,7 +129,9 @@ export class Focus {
 
   pin() {
     const down = this.down();
-    return Pin.create(down.node, down.offset, down.offset + 1);
+    return Pin.create(down.node, down.offset, down.offset + 1).markAlign(
+      this.align,
+    );
   }
 
   step() {
@@ -129,7 +153,7 @@ export class Focus {
     const previous = takeBefore(leaves, (n) => n.eq(this.node));
     const offset = previous.reduce((acc, n) => acc + n.focusSize, this.offset);
 
-    return new Focus(textBlock, offset);
+    return new Focus(textBlock, offset).markAlign(this.align);
   }
 
   get isUp() {
@@ -151,7 +175,7 @@ export class Focus {
     }
 
     const lastLeaf = last(leaves)!;
-    return Focus.create(lastLeaf!, lastLeaf!.focusSize);
+    return Focus.create(lastLeaf!, lastLeaf!.focusSize).markAlign(this.align);
   }
 
   get isDown() {
@@ -169,20 +193,18 @@ export class Focus {
   // moveBy returns a down focus at the new position
   moveBy(distance: number, skip: Predicate<Node> = (n) => n.isIsolate): Focus {
     if (distance === 0) return this;
-    let down = this.down();
+    // pin movement happens at down level
+    const down = this.down();
 
     // down = distance > 0 ? down.rightAlign : down.leftAlign;
-
-    const pin =
-      distance > 0
-        ? down.moveForwardBy(distance, skip)
-        : down.moveBackwardBy(-distance, skip);
 
     // if (distance > 0 && pin.rightAlign.node.isZero) {
     //   return Focus.create(pin.rightAlign.node, 1);
     // }
 
-    return pin;
+    return distance > 0
+      ? down.moveForwardBy(distance, skip)
+      : down.moveBackwardBy(-distance, skip);
   }
 
   private moveForwardBy(distance: number, skip: Predicate<Node>) {
@@ -296,10 +318,11 @@ export class Focus {
     return classString(this)({
       id: this.node.id.toString(),
       offset: this.offset,
+      align: this.align,
     });
   }
 
   toJSON() {
-    return { id: this.node.id.toJSON(), steps: this.offset };
+    return { id: this.node.id.toJSON(), steps: this.offset, align: this.align };
   }
 }

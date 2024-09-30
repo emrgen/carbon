@@ -212,4 +212,8 @@ export class MarkSet {
   toString() {
     return JSON.stringify(this.map((m) => m.toJSON()));
   }
+
+  static eq(marks1: Mark[], marks2: Mark[]) {
+    return MarkSet.from(marks1).eq(MarkSet.from(marks2));
+  }
 }

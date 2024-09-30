@@ -5,9 +5,9 @@ import { Point } from "./Point";
 import { Maps } from "./types";
 import { NodeMapGet } from "./NodeMap";
 import { Focus } from "./Focus";
+import { Align } from "./Focus";
 import { Step } from "./Step";
-
-export const IDENTITY_OFFSET = -1;
+import { printNode } from "../utils/print";
 
 // materialized pin is a pin that is not a reference to a i
 export class Pin {
@@ -22,6 +22,8 @@ export class Pin {
   // number of steps to reach the location
   // when steps is null use offset to calculate the location
   steps: number;
+
+  align: Align = Align.Left;
 
   static NULL = new Pin(Node.NULL, 0, 0);
 
@@ -79,47 +81,12 @@ export class Pin {
   }
 
   static toStartOf(node: Node): Optional<Pin> {
-    if (node.isEmpty || node.isBlockAtom) {
-      const target = node.find((n) => n.isTextContainer || n.isLeaf);
-      return Pin.create(target!, 0, 1);
-    }
-
-    if ((node.isInlineAtom && !node.isIsolate) || node.isZero) {
-      return Pin.create(node, 0, 1);
-    }
-
-    const target = node.find((n) => n.isFocusable, { order: "post" });
-    if (!target) return null;
-
-    return Pin.create(target, 0, 1);
+    return Focus.toStartOf(node)?.pin().up();
   }
 
   // return a down pin
   static toEndOf(node: Node): Optional<Pin> {
-    if (node.isEmpty) {
-      const target = node.find((n) => n.isFocusable, {
-        order: "post",
-        direction: "backward",
-      })!;
-      if (!target) return null;
-      if (target.isText) {
-        return Pin.create(target, target.size, target.stepSize - 1);
-      }
-
-      return Pin.create(target, 0, 1);
-    }
-
-    const child = node.find((n) => n.isFocusable, {
-      order: "post",
-      direction: "backward",
-    });
-    if (!child) return null;
-
-    if (child.isTextContainer && child.isVoid) {
-      return Pin.create(child, 0, 1);
-    }
-
-    return Pin.create(child, child.focusSize, child.stepSize - 1);
+    return Focus.toEndOf(node)?.pin().up();
   }
 
   static create(node: Node, offset: number, steps: number = -1) {
@@ -134,8 +101,9 @@ export class Pin {
     }
 
     if (steps != -1 && node.stepSize - 1 < steps) {
+      printNode(node);
       throw new Error(
-        `node: ${node.name} does not have the provided steps: ${steps}`,
+        `node: ${node.name} does not have the provided steps: ${steps}}`,
       );
     }
 
@@ -225,6 +193,14 @@ export class Pin {
     );
   }
 
+  get isLeftAligned(): boolean {
+    return this.align === Align.Left;
+  }
+
+  get isRightAligned(): boolean {
+    return this.align === Align.Right;
+  }
+
   // NOTE: cursor move between two inline nodes within the same text container block
   // has no visual difference and the offset w.r.t the text container block is the same
   // aligns pin to the left when it is in the middle of the two text blocks
@@ -242,6 +218,23 @@ export class Pin {
   get rightAlign(): Pin {
     console.assert(this.isDown, "Pin.rightAlign: pin is not down pin");
     return Focus.create(this.node, this.offset).rightAlign.pin();
+  }
+
+  markAlign(align: Align): Pin {
+    this.align = align;
+    return this;
+  }
+
+  get focus() {
+    return Focus.create(this.node, this.offset);
+  }
+
+  get step(): Optional<Step> {
+    if (this.steps !== -1) {
+      return Step.create(this.node, this.steps);
+    }
+
+    return null;
   }
 
   focused(): Pin {
@@ -374,9 +367,11 @@ export class Pin {
   }
 
   eq(other: Pin) {
-    if (!this.node.eq(other.node)) return false;
+    if (!this.node.eq(other.node)) {
+      return false;
+    }
     if (this.steps !== -1 && this.steps === other.steps) return true;
-    // console.log('Pin.eq', this.toString(), other.toString());
+    // console.log("Pin.eq", this.toString(), other.toString());
     return this.offset === other.offset;
   }
 
@@ -390,6 +385,8 @@ export class Pin {
 
   toString() {
     const { node, offset, steps } = this;
-    return classString(this)(`${node.id.toString()}/${offset}/${steps}`);
+    return classString(this)(
+      `${node.id.toString()}/${offset}/${steps}/${this.align}`,
+    );
   }
 }
