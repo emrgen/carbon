@@ -5,8 +5,8 @@ import { InlineNode } from "./InlineNode";
 import { last } from "lodash";
 import { identity } from "lodash";
 import { clamp } from "lodash";
-import { deepCloneMap } from "./types";
 import { cloneFrozenNode } from "./types";
+import { Maps } from "./types";
 import { Pin } from "./Pin";
 import { LocalClassPath } from "./NodeProps";
 import { StepOffset } from "./Step";
@@ -14,6 +14,7 @@ import { Step } from "./Step";
 import { IndexMapper } from "./IndexMap";
 import { IndexMap } from "./IndexMap";
 import { Optional } from "@emrgen/types";
+import { NodeContentData } from "./NodeContent";
 
 // utility class for text blocks
 // title is a text block
@@ -25,7 +26,7 @@ export class TextBlock {
   readonly mapper: IndexMapper;
 
   static from(node: Node) {
-    const clone = node.clone(deepCloneMap);
+    const clone = node.type.schema.factory.clone(node, identity);
     clone.setParent(null).setParentId(null);
 
     return new TextBlock(clone, IndexMapper.empty());
@@ -79,7 +80,7 @@ export class TextBlock {
       steps -= 1;
     }
 
-    const { node } = pin;
+    const { node } = this;
     if (node.isTextContainer && node.isVoid) {
       return Pin.create(node, 0, 1);
     }
@@ -130,6 +131,14 @@ export class TextBlock {
       }
     }
 
+    if (start <= 1) {
+      return [TextBlock.empty(), this.clone(), TextBlock.empty()];
+    }
+
+    if (start >= this.node.stepSize - 1) {
+      return [this.clone(), TextBlock.empty(), TextBlock.empty()];
+    }
+
     if (this.node.isVoid) {
       return [this.clone(), this.clone(), TextBlock.empty()];
     }
@@ -178,8 +187,14 @@ export class TextBlock {
     const next = this.node.children.slice(index + 1);
     const [before, after] = InlineNode.from(down.node).split(down.offset - 1);
 
-    const prevNode = this.cloneNode(this.node, [...prev, before]);
-    const nextNode = this.cloneNode(this.node, [after, ...next]);
+    const prevNode = this.cloneNode(
+      this.node,
+      [...prev, before].filter(identity),
+    );
+    const nextNode = this.cloneNode(
+      this.node,
+      [after, ...next].filter(identity) as Node[],
+    );
 
     const prevMapper = this.mapper.clone();
     const nextMapper = this.mapper.clone();
@@ -194,15 +209,17 @@ export class TextBlock {
       ),
     );
 
-    nextMapper.add(
-      IndexMap.create(
-        start,
-        nextNode.children.reduce(
-          (acc, curr) => acc - curr.stepSize,
-          after.stepSize,
+    if (after) {
+      nextMapper.add(
+        IndexMap.create(
+          start,
+          nextNode.children.reduce(
+            (acc, curr) => acc - curr.stepSize,
+            after.stepSize,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // console.log("xxx", prevNode.toJSON(), prevNode.isTextContainer);
     // console.log("xxx", nextNode.toJSON(), nextNode.isTextContainer);
@@ -518,9 +535,14 @@ export class TextBlock {
     return classString(this)(this.node.toJSON());
   }
 
-  private clone() {
+  clone(
+    map: Maps<
+      Omit<NodeContentData, "children">,
+      Omit<NodeContentData, "children">
+    > = identity,
+  ) {
     return new TextBlock(
-      this.node.type.schema.factory.clone(this.node, identity),
+      this.node.type.schema.factory.clone(this.node, map),
       this.mapper.clone(),
     );
   }

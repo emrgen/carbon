@@ -36,7 +36,7 @@ export class Focus {
     if (!focusable) {
       return null;
     }
-    return new Focus(focusable, 0);
+    return new Focus(focusable, 0).markAlign(Align.Right);
   }
 
   static toEndOf(node: Node) {
@@ -49,7 +49,7 @@ export class Focus {
       return null;
     }
 
-    return Focus.create(focusable, focusable.focusSize);
+    return Focus.create(focusable, focusable.focusSize).markAlign(Align.Left);
   }
 
   constructor(
@@ -169,7 +169,8 @@ export class Focus {
     const leaves = this.node.descendants((n) => n.isFocusable);
     for (const leaf of leaves) {
       if (offset <= leaf.focusSize) {
-        return new Focus(leaf, offset);
+        const focus = new Focus(leaf, offset);
+        return this.rightAlign ? focus.rightAlign : focus;
       }
       offset -= leaf.focusSize;
     }
@@ -253,7 +254,9 @@ export class Focus {
       return Focus.create(curr, curr.focusSize);
     }
 
-    return Focus.create(curr, distance);
+    return Focus.create(curr, distance).markAlign(
+      distance === 0 ? Align.Right : Align.Left,
+    );
   }
 
   private moveBackwardBy(distance: number, skip: Predicate<Node>) {
@@ -294,10 +297,13 @@ export class Focus {
 
     distance = clamp(distance, 0, curr.focusSize);
     if (curr.isAtom && distance) {
-      return Focus.create(curr, 0);
+      return Focus.create(curr, 0).markAlign(Align.Right);
     }
 
-    return Focus.create(curr, curr.focusSize - distance);
+    const remaining = curr.focusSize - distance;
+    return Focus.create(curr, remaining).markAlign(
+      remaining === 0 ? Align.Right : Align.Left,
+    );
   }
 
   isBeforeOf(of: Focus): boolean {

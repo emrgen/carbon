@@ -11,6 +11,7 @@ import {
 } from "@emrgen/carbon-core";
 import { NodeFactoryOptions } from "@emrgen/carbon-core";
 import { Fragment } from "@emrgen/carbon-core";
+import { MarksPath } from "@emrgen/carbon-core";
 import { identity, isArray, isEmpty } from "lodash";
 import { ImmutableNode } from "./ImmutableNode";
 import { ImmutableNodeContent } from "./ImmutableNodeContent";
@@ -53,6 +54,9 @@ export class ImmutableNodeFactory implements NodeFactory {
     const props = isEmpty(json.props)
       ? type.props.clone()
       : type.props.clone().merge(json.props);
+    if (!props.get(MarksPath)) {
+      props.set(MarksPath, []);
+    }
     const nodeId = id ? NodeId.deserialize(id)! : this.blockId();
     const nodes = children.map((n) => schema.nodeFromJSON(n)) as Node[];
 

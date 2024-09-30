@@ -5,6 +5,7 @@ import { cloneDeep } from "lodash";
 import { entries } from "lodash";
 import { isEqual } from "lodash";
 import { keys } from "lodash";
+import { isString } from "lodash";
 import { Node } from "./Node";
 
 export type NodePropsJson = Record<string, any>;
@@ -90,20 +91,26 @@ export class PlainNodeProps implements NodeProps {
   }
 
   map() {
-    const entries: any = {};
-    this.collectEntries(this.props, "", entries);
-    return entries;
+    const kv: any = {};
+    this.collectEntries(this.props, "", kv);
+
+    return entries(kv).reduce((acc, [key, value]) => {
+      return {
+        ...acc,
+        [key.slice(1)]: value,
+      };
+    }, {});
   }
 
-  private collectEntries(json: any, path: string, entries: any) {
+  private collectEntries(json: any, path: string, kv: any) {
     for (const [key, value] of Object.entries(json)) {
       if (isArray(value)) {
-        entries[path + "/" + key] = value;
-        this.collectEntries(value, path + "/" + key, entries);
+        kv[path + "/" + key] = value;
+        this.collectEntries(value, path + "/" + key, kv);
       } else if (typeof value === "object") {
-        this.collectEntries(value, path + "/" + key, entries);
+        this.collectEntries(value, path + "/" + key, kv);
       } else {
-        entries[path + "/" + key] = value;
+        kv[path + "/" + key] = value;
       }
     }
   }
@@ -148,13 +155,30 @@ export class PlainNodeProps implements NodeProps {
   diff(other: NodeProps): NodeProps {
     const diff: any = {};
     for (const [key, value] of entries(other.map())) {
-      const selfValue = this.get<typeof value>(key);
+      const selfValue = this.get<typeof value>(key, this.defaultValue(value));
+      console.log(key, value);
       if (!isEqual(value, selfValue)) {
         diff[key] = value;
       }
     }
 
     return PlainNodeProps.create(diff);
+  }
+
+  defaultValue(value: any) {
+    if (isString(value)) {
+      return "";
+    }
+
+    if (isArray(value)) {
+      return [];
+    }
+
+    if (typeof value === "object") {
+      return {};
+    }
+
+    return null;
   }
 
   isEmpty(): boolean {

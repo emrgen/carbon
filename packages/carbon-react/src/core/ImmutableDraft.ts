@@ -54,16 +54,8 @@ import { HasFocusPath } from "@emrgen/carbon-core";
 import { PlainNodeProps } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { ImmutableState } from "./ImmutableState";
-import {
-  first,
-  flatten,
-  identity,
-  isArray,
-  isEmpty,
-  isString,
-  reduce,
-} from "lodash";
-import { before } from "lodash";
+import { first, flatten, identity, isArray, isEmpty, isString } from "lodash";
+import { reduce } from "lodash";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
 import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
 
@@ -872,6 +864,7 @@ export class ImmutableDraft implements Draft {
       default:
         throw new Error("Invalid mark action");
     }
+    console.log("-----", marks.toArray());
   }
 
   updateSelection(selection: PointedSelection) {
@@ -886,6 +879,7 @@ export class ImmutableDraft implements Draft {
     const before = this.state.selection.unpin();
     this.changes.add(SelectionChange.create(before, selection));
     this.actions.add(SelectAction.create(before, selection));
+    console.log("update draft selection", selection.toString());
   }
 
   // update selected node props
@@ -1234,20 +1228,10 @@ class Transformer {
   }
 
   updateProps(node: Node, props: NodePropsJson) {
-    console.log(p14("%c[trap]"), "color:green", "update", node.key);
-    const diff = node.props.diff(PlainNodeProps.create(props));
+    console.log(p14("%c[trap]"), "color:green", "update", node.key, props);
+    const diff = node.props.diff(PlainNodeProps.create(props)).toJSON();
 
-    if (diff.isEmpty()) {
-      const before = reduce(
-        props,
-        (acc, _, k) => {
-          // NOTE: we are only interested in the props that are changed
-          // even if it was undefined before, we need to track it as before value
-          acc[k] = node.props.get(k);
-          return acc;
-        },
-        {},
-      );
+    if (isEmpty(diff)) {
       // console.log("same props", before, props);
       // console.warn(
       //   "unnecessary props update detected. possibly the node is immutable",
@@ -1255,10 +1239,21 @@ class Transformer {
       return false;
     }
 
+    const before = reduce(
+      props,
+      (acc, _, k) => {
+        // NOTE: we are only interested in the props that are changed
+        // even if it was undefined before, we need to track it as before value
+        acc[k] = node.props.get(k);
+        return acc;
+      },
+      {},
+    );
+
     this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
     this.changes.add(UpdateChange.create(node.id, node.path, before, props));
 
-    // console.log("UPDATING props", props, before);
+    console.log("UPDATING props", props, before);
 
     node.updateProps(props);
 

@@ -9,11 +9,11 @@ import { Align } from "./Focus";
 import { Step } from "./Step";
 import { printNode } from "../utils/print";
 
-// materialized pin is a pin that is not a reference to a i
+// materialized pin is a pin that is not a reference to a title or inline node
 export class Pin {
   // focus node
   // mostly the node is a block node
-  // down pin is a pin that is pointing to a leaf node (eg. text node)
+  // down pin is a pin that is pointing to a leaf node (e.g. text node)
   node: Node;
   // focus offset
   // it allows to point to a location within the node
@@ -54,21 +54,21 @@ export class Pin {
       );
     }
 
-    return Pin.create(node, offset, steps);
+    return Pin.create(node, offset, steps).markAlign(point.align);
   }
 
   // return a down pin
   static fromDom(node: Node, offset: number): Optional<Pin> {
-    // if (node.isZero) {
-    //   offset = 1;
-    // }
-
     if (node.isFocusable) {
-      const focus = Focus.create(node, offset);
+      const focus = Focus.create(node, offset).markAlign(
+        offset === 0 ? Align.Right : Align.Left,
+      );
       const step = Step.create(node, focus.offset + 1).up((n) =>
         n.eq(focus.node),
       );
-      return Pin.create(focus.node, focus.offset, step.offset);
+      return Pin.create(focus.node, focus.offset, step.offset).markAlign(
+        focus.align,
+      );
     }
   }
 
@@ -81,15 +81,20 @@ export class Pin {
   }
 
   static toStartOf(node: Node): Optional<Pin> {
-    return Focus.toStartOf(node)?.pin().up();
+    return Focus.toStartOf(node)?.pin();
   }
 
   // return a down pin
   static toEndOf(node: Node): Optional<Pin> {
-    return Focus.toEndOf(node)?.pin().up();
+    return Focus.toEndOf(node)?.pin();
   }
 
-  static create(node: Node, offset: number, steps: number = -1) {
+  static create(
+    node: Node,
+    offset: number,
+    steps: number = -1,
+    align = Align.Left,
+  ): Pin {
     if (!node.isFocusable && !node.hasFocusable) {
       throw new Error(`node is not focusable: ${node.name}`);
     }
@@ -107,20 +112,27 @@ export class Pin {
       );
     }
 
-    return new Pin(node, offset, steps);
+    return new Pin(node, offset, steps, align);
   }
 
   // NOTE: use it very cautiously and sparingly
   // use it when you want to create a pin that is points to a location which is will exist in the future
   // for example when you want to create a pin to the end of the node that is not created yet
   static future(node: Node, offset: number, steps: number = -1): Pin {
+    console.log("xxx");
     return new Pin(node, offset, steps);
   }
 
-  private constructor(node: Node, offset: number, steps: number) {
+  private constructor(
+    node: Node,
+    offset: number,
+    steps: number,
+    align: Align = Align.Left,
+  ) {
     this.node = node;
     this.offset = offset;
     this.steps = steps;
+    this.align = align;
 
     if (
       !this.node.eq(Node.NULL) &&
@@ -140,14 +152,6 @@ export class Pin {
     return this.eq(Pin.NULL);
   }
 
-  get isStepped() {
-    return this.steps !== null;
-  }
-
-  get isFocused() {
-    return this.offset !== null;
-  }
-
   get point(): Point {
     if (this.eq(Pin.IDENTITY)) {
       return Point.IDENTITY;
@@ -157,7 +161,7 @@ export class Pin {
       return Point.NULL;
     }
 
-    return Point.atOffset(this.node.id, this.offset, this.steps);
+    return Point.atOffset(this.node.id, this.offset, this.steps, this.align);
   }
 
   get isAtStart(): boolean {
@@ -191,14 +195,6 @@ export class Pin {
       (node.isInline && node.isLeaf) ||
       node.isInlineAtom
     );
-  }
-
-  get isLeftAligned(): boolean {
-    return this.align === Align.Left;
-  }
-
-  get isRightAligned(): boolean {
-    return this.align === Align.Right;
   }
 
   // NOTE: cursor move between two inline nodes within the same text container block
@@ -255,13 +251,16 @@ export class Pin {
     if (this.isUp) {
       return this;
     }
+
     console.assert(this.isDown, "Pin.up: pin is not down pin");
     const { node, offset, steps } = this;
 
     const focus = Focus.create(node, offset).up();
     const step = Step.create(node, steps).up((n) => n.eq(focus.node));
 
-    return Pin.create(focus.node, focus.offset, step.offset);
+    return Pin.create(focus.node, focus.offset, step.offset).markAlign(
+      this.align,
+    );
   }
 
   get isUp() {
@@ -276,13 +275,16 @@ export class Pin {
   // if the pin is at the end of the isolate node it will be aligned to the next node
   down() {
     if (this.isDown) {
-      console.log(this.toString());
       return this;
     }
 
     // return PIN_DOWN_CACHE.get(this.node.id.toString() + this.offset, () => {
     if (this.steps !== -1) {
       const step = Step.create(this.node, this.steps).down();
+      // console.log(
+      //   Step.create(this.node, this.steps).toString(),
+      //   step.toString(),
+      // );
       // NOTE: as the pin was valid before it should be valid after down
       const down = step.pin()!;
       console.assert(down, "Pin.down: down pin is null");
@@ -327,7 +329,7 @@ export class Pin {
     if (firstInline?.isZero && this.offset <= 1) return true;
 
     // console.log(first.toString(), this.toString());
-    return Pin.create(firstTextBlock, 0, -1).eq(this);
+    return Pin.create(firstTextBlock, 0, 1, Align.Right).eq(this);
   }
 
   // check if pin is at the end of the provide node
@@ -337,7 +339,8 @@ export class Pin {
       order: "post",
     });
     if (!last) return false;
-    return Pin.create(last, last.focusSize).eq(this);
+    console.log(Pin.create(last, last.focusSize).toString(), this.toString());
+    return Pin.create(last, last.focusSize, last.focusSize + 1).eq(this);
   }
 
   // move the pin to the start of next matching node
@@ -359,7 +362,8 @@ export class Pin {
   // tries to move as much as possible
   moveBy(distance: number): Optional<Pin> {
     const down = this.down();
-    return Focus.create(down.node, down.offset).moveBy(distance).pin();
+    const focus = Focus.create(down.node, down.offset);
+    return focus.moveBy(distance).pin();
   }
 
   map<B>(fn: Maps<Pin, B>) {
@@ -372,7 +376,7 @@ export class Pin {
     }
     if (this.steps !== -1 && this.steps === other.steps) return true;
     // console.log("Pin.eq", this.toString(), other.toString());
-    return this.offset === other.offset;
+    return this.offset === other.offset && this.align === other.align;
   }
 
   clone() {

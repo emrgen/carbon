@@ -650,9 +650,9 @@ const data = node("carbon", [
         title([
           text("123"),
           mention("ankita"),
-          node("empty"),
+          text("123"),
           mention("avira"),
-          node("empty"),
+          text("123"),
         ]),
       ]),
       section([title([text("123456789")])]),

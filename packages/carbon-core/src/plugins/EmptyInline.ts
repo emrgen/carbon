@@ -69,6 +69,7 @@ export class EmptyInline extends InlineAtom {
           }
 
           const pin = Pin.toStartOf(nextFocusable)!;
+          console.log("[EmptyInline] right", pin.toString());
           const after = PinnedSelection.fromPin(pin)!;
           ctx.cmd.Select(after).Dispatch();
         }

@@ -177,6 +177,8 @@ export class PinnedSelection {
     const tail = Pin.fromDom(anchorNode, anchorOffset);
     const head = Pin.fromDom(focusNode, focusOffset);
 
+    console.log(tail?.toString());
+
     if (!tail || !head) {
       console.warn(p14("%c[error]"), "color:red", "Pin.fromDom failed");
       // throw new Error('Pin.fromDom failed');
@@ -394,6 +396,7 @@ export class PinnedSelection {
     //   console.log("dom selection", window.getSelection());
     // }
 
+    console.log("syncDom", this.toString());
     try {
       const domSelection = this.intoDomSelection(store);
       // console.log("Selection.syncDom:", domSelection);
@@ -522,6 +525,14 @@ export class PinnedSelection {
     const focus = head.down();
     const anchor = tail.down();
 
+    console.log(
+      "intoDomSelection",
+      head.toString(),
+      tail.toString(),
+      anchor.toString(),
+      focus.toString(),
+    );
+
     if (!focus || !anchor) return;
 
     // console.log(anchor.node.id.toString(), anchor.offset);
@@ -636,8 +647,9 @@ export class PinnedSelection {
 
   moveHead(distance: number): Optional<PinnedSelection> {
     let { tail, head } = this;
-    const focus = head.moveBy(distance) as any;
+    const focus = head.moveBy(distance);
     if (!focus || !head) return;
+    console.log("xxx", focus.toString());
     return PinnedSelection.create(tail, focus);
   }
 

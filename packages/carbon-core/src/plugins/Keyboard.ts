@@ -92,7 +92,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
         // move the head to the start of the current node
         const { head } = selection;
-        const pinAtStart = Pin.toStartOf(head.node)!;
+        const pinAtStart = Pin.toStartOf(head.node)!.up();
         const after = PinnedSelection.fromPin(pinAtStart);
         if (!after) {
           return;
@@ -222,9 +222,7 @@ export class KeyboardPlugin extends AfterPlugin {
       delete: (event) => this.delete(event),
       shiftDelete: (event) => this.delete(event),
 
-      backspace: (e) => {
-        this.backspace(e.cmd, e);
-      },
+      backspace: (e) => this.backspace(e.cmd, e),
       shiftBackspace: (e) => e.cmd.keyboard.backspace(e),
       ctrlBackspace: skipKeyEvent,
       cmdBackspace: skipKeyEvent,
@@ -250,6 +248,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
     const { head } = selection;
 
+    console.log("backspace", !selection.isCollapsed, selection.toString());
     // delete node selection if any
     if (!selection.isCollapsed || blockSelection.isActive) {
       tr.transform.delete(selection, { fall: "before" })?.Dispatch();

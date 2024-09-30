@@ -476,6 +476,10 @@ export class Node extends EventEmitter implements IntoNodeId {
     return this.type.isText;
   }
 
+  get childrenIds() {
+    return this.children.map((n) => n.id);
+  }
+
   nodeId(): NodeId {
     return this.id;
   }
