@@ -317,30 +317,12 @@ export class Pin {
 
   // check if pin is at the start of the provided node
   isAtStartOfNode(node: Node): boolean {
-    const firstTextBlock = node.find(
-      (n) => n.hasFocusable && n.isTextContainer,
-      {
-        order: "post",
-      },
-    );
-
-    if (!firstTextBlock) return false;
-    const firstInline = firstTextBlock.firstChild;
-    if (firstInline?.isZero && this.offset <= 1) return true;
-
-    // console.log(first.toString(), this.toString());
-    return Pin.create(firstTextBlock, 0, 1, Align.Right).eq(this);
+    return this.down().eq(Pin.toStartOf(node)!);
   }
 
   // check if pin is at the end of the provide node
   isAtEndOfNode(node: Node): boolean {
-    const last = node.find((n) => n.hasFocusable, {
-      direction: "backward",
-      order: "post",
-    });
-    if (!last) return false;
-    console.log(Pin.create(last, last.focusSize).toString(), this.toString());
-    return Pin.create(last, last.focusSize, last.focusSize + 1).eq(this);
+    return this.down().eq(Pin.toEndOf(node)!);
   }
 
   // move the pin to the start of next matching node

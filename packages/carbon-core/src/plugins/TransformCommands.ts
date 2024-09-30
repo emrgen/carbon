@@ -1658,15 +1658,17 @@ export class TransformCommands extends BeforePlugin {
           rightNodes,
         );
 
-        startTextBlock = TextBlock.from(pin.node).replaceContent(prev.children);
+        startTextBlock = TextBlock.from(pin.node)
+          .replaceContent(prev.children)
+          .normalize();
 
         setContentCommands.push(
           SetContentAction.create(pin.node.id, startTextBlock.children),
         );
 
-        endTextBlock = TextBlock.from(parentBlock).replaceContent(
-          after.children,
-        );
+        endTextBlock = TextBlock.from(parentBlock)
+          .replaceContent(after.children)
+          .normalize();
 
         setContentCommands.push(
           SetContentAction.create(parentBlock.id, endTextBlock.children),
@@ -2595,17 +2597,20 @@ export class TransformCommands extends BeforePlugin {
 
       if (prev.isVoid) {
         const { children } = next;
-        const textBlock = TextBlock.from(prev).replaceContent(
-          children.map(cloneFrozenNode),
-        );
+        const textBlock = TextBlock.from(prev)
+          .replaceContent(children.map(cloneFrozenNode))
+          .normalize();
         insertActions.push(
           SetContentAction.create(prev.id, textBlock.children),
         );
         after = PinnedSelection.fromPin(Pin.toStartOf(textBlock.node)!);
       } else {
-        const textBlock = TextBlock.from(prev).replaceContent(
-          [...prev.children, ...next.children].map(cloneFrozenNode),
-        );
+        const textBlock = TextBlock.from(prev)
+          .replaceContent(
+            [...prev.children, ...next.children].map(cloneFrozenNode),
+          )
+          .normalize();
+        debugger;
         insertActions.push(
           SetContentAction.create(prev.id, textBlock.children),
         );

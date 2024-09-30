@@ -139,10 +139,10 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         if (!ctx.app.runtime.selectionchange) {
           return;
         }
-        const selection = PinnedSelection.fromDom(ctx.app.store);
-        if (!selection) return;
+        const domSel = PinnedSelection.fromDom(ctx.app.store);
+        if (!domSel) return;
 
-        const { head, tail } = selection;
+        const { head, tail } = domSel;
         const headIsolating = head.node.closest((n) => n.isIsolate);
         const tailIsolating = tail.node.closest((n) => n.isIsolate);
         if (!headIsolating || !tailIsolating) return;
@@ -150,12 +150,12 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         if (headIsolating.eq(tailIsolating)) {
           ctx.cmd
             .SelectBlocks([])
-            .Select(selection, ActionOrigin.UserInput)
+            .Select(domSel.selection, ActionOrigin.UserInput)
             .Dispatch();
           return;
         }
 
-        if (selection.isForward) {
+        if (domSel.selection.isForward) {
           const prevFocusable = headIsolating.prev((n) => {
             return (
               n.isFocusable &&
@@ -178,7 +178,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           }
         }
 
-        if (selection.isBackward) {
+        if (domSel.selection.isBackward) {
           const nextFocusable = headIsolating.next((n) => {
             return (
               n.isFocusable &&

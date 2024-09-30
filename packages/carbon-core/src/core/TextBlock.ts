@@ -381,7 +381,7 @@ export class TextBlock {
       const prev = acc[acc.length - 1] as Node;
 
       // if both are empty nodes, skip the current node
-      if (prev.isZero && curr.isZero) {
+      if (curr.isZero && (prev.isZero || prev.isFocusable)) {
         return acc;
       }
 
