@@ -56,13 +56,13 @@ export class TextPlugin extends NodePlugin {
   handlers(): EventHandlerMap {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-        preventAndStopCtx(ctx);
+        // preventAndStopCtx(ctx);
         const { app, currentNode, cmd } = ctx;
         const { selection } = app.state;
         // @ts-ignore
         const { data, key } = ctx.event.nativeEvent;
 
-        cmd.transform.insertText(selection, data ?? key).Dispatch();
+        // cmd.transform.insertText(selection, data ?? key).Dispatch();
       },
       mouseUp: (ctx: EventContext<MouseEvent>) => {
         const { app, cmd, currentNode } = ctx;

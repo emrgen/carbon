@@ -64,11 +64,14 @@ export class Mention extends InlineAtom {
   }
 
   encode(w: Writer, ne: NodeEncoder, node: Node) {
-    const text = node.props.get<string>(AtomContentPath) ?? "";
+    console.log("xxx");
+    const text = node.child(0)?.props.get<string>(AtomContentPath) ?? "";
     w.write(text);
   }
 
   encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
-    w.write(`<span class="mention">${node.props.get(AtomContentPath)}</span>`);
+    w.write(
+      `<span class="mention">${node.child(0)?.props.get(AtomContentPath)}</span>`,
+    );
   }
 }

@@ -66,6 +66,7 @@ export class Pin {
       const step = Step.create(node, focus.offset + 1).up((n) =>
         n.eq(focus.node),
       );
+
       return Pin.create(focus.node, focus.offset, step.offset).markAlign(
         focus.align,
       );
@@ -119,7 +120,6 @@ export class Pin {
   // use it when you want to create a pin that is points to a location which is will exist in the future
   // for example when you want to create a pin to the end of the node that is not created yet
   static future(node: Node, offset: number, steps: number = -1): Pin {
-    console.log("xxx");
     return new Pin(node, offset, steps);
   }
 

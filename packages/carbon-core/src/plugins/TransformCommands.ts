@@ -544,6 +544,7 @@ export class TransformCommands extends BeforePlugin {
       // if (!native) {
       // 	ctx.event.preventDefault();
       // }
+
       const { head } = selection;
       if (selection.head.node.isEmpty) {
         const textNode = tr.app.schema.text(text, {
@@ -557,6 +558,7 @@ export class TransformCommands extends BeforePlugin {
         );
       } else {
         const { start } = selection;
+        console.log(start.node.type.spec.code);
         const down = start.down();
 
         if (down.node.isZero) {
@@ -582,14 +584,6 @@ export class TransformCommands extends BeforePlugin {
           }
           const after = PinnedSelection.fromPin(pin);
           tr.Select(after);
-        } else if (start.node.type.spec.code) {
-          // const textNode = tr.app.schema.text(text, {
-          //   props: { [MarksPath]: tr.state.marks.toArray() },
-          // })!;
-          // const after = PinnedSelection.fromPin(
-          //   Pin.future(start.node, start.offset + text.length),
-          // );
-          // tr.Insert(Point.toAfter(start.node.id), textNode).Select(after);
         } else {
           console.log("inserting text", text);
           const textNode = tr.app.schema.text(text, {
@@ -760,41 +754,28 @@ export class TransformCommands extends BeforePlugin {
       startTitleBlock.eq(endTitleBlock) &&
       sliceStartTitle.eq(sliceEndTitle)
     ) {
-      const beforeCursorTextContent = [
-        ...TextBlock.from(startTitleBlock).removeContent(
-          start.offset,
-          startTitleBlock.focusSize,
-        ),
-        ...sliceStartTitle.children,
-      ];
+      const prevBlock = TextBlock.from(startTitleBlock)
+        .remove(start.steps, startTitleBlock.stepSize)
+        .append(sliceStartTitle.children)
+        .normalize();
 
-      const pinOffset = reduce(
-        beforeCursorTextContent,
-        (acc, n) => {
-          if (n.isZero && n.prevSibling) {
-            return acc;
-          }
-          return acc + n.focusSize;
-        },
-        0,
-      );
-      const after = PinnedSelection.fromPin(
-        Pin.future(start.node!, pinOffset)!,
-      );
+      let pin = Pin.toEndOf(prevBlock.node)!.down();
+      if (pin.node.isZero) {
+        pin = pin.moveBy(-1)!;
+      }
+      const after = PinnedSelection.fromPin(pin);
 
-      const afterCursorTextContent = TextBlock.from(startTitleBlock)
-        .removeContent(0, end.offset)
-        .map((n) => n.clone(deepCloneWithNewId));
+      const nextBlock = TextBlock.from(startTitleBlock)
+        .replaceContent(
+          startTitleBlock.children.map((n) => n.clone(deepCloneWithNewId)),
+        )
+        .remove(0, end.steps);
 
-      console.log(beforeCursorTextContent, afterCursorTextContent);
+      console.log(prevBlock.node.textContent, nextBlock.node.textContent);
 
-      tr.SetContent(
-        start.node.id,
-        TextBlock.normalizeNodeContent([
-          ...beforeCursorTextContent,
-          ...afterCursorTextContent,
-        ]),
-      );
+      const textBlock = prevBlock.append(nextBlock.children).normalize();
+
+      tr.SetContent(start.node.id, textBlock.children);
 
       // destination title block is empty, change the parent name
       if (startTitleBlock.isEmpty) {
@@ -2645,7 +2626,6 @@ export class TransformCommands extends BeforePlugin {
             [...prev.children, ...next.children].map(cloneFrozenNode),
           )
           .normalize();
-        debugger;
         insertActions.push(
           SetContentAction.create(prev.id, textBlock.children),
         );

@@ -550,4 +550,10 @@ export class TextBlock {
   resetMapper() {
     return new TextBlock(this.node, IndexMapper.empty());
   }
+
+  append(children: Node[]) {
+    return TextBlock.from(
+      this.cloneNode(this.node, [...this.node.children, ...children]),
+    );
+  }
 }

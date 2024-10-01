@@ -301,10 +301,9 @@ export class ClipboardPlugin extends AfterPlugin {
 
       const spans = spanMap.get(n.id);
       spans?.forEach((span) => {
-        const content = TextBlock.from(n).removeContent(
-          span.start.offset,
-          span.end.offset,
-        );
+        const content = TextBlock.from(n)
+          .remove(span.start.steps, span.end.steps)
+          .normalize();
         console.log(
           "remove content",
           start.node.textContent,
@@ -312,7 +311,7 @@ export class ClipboardPlugin extends AfterPlugin {
           end.offset,
         );
 
-        n.updateContent(content);
+        n.updateContent(content.children);
       });
 
       return false;
