@@ -108,7 +108,8 @@ export class Point {
     return (
       this.nodeId.eq(other.nodeId) &&
       this.at === other.at &&
-      this.offset === other.offset
+      this.offset === other.offset &&
+      this.steps === other.steps
     );
   }
 

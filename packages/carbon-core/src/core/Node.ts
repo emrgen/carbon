@@ -43,6 +43,7 @@ export type TraverseOptions = {
   // checks parent with the predicate before moving to parent siblings
   parent?: boolean;
   gotoParent: boolean;
+  boundary: Predicate<Node>;
   skip: Predicate<Node>;
 };
 
@@ -637,7 +638,13 @@ export class Node extends EventEmitter implements IntoNodeId {
     gotoParent = true,
   ): Optional<Node> {
     const options = merge(
-      { order: "post", direction: "backward", skip: noop, parent: false },
+      {
+        order: "post",
+        direction: "backward",
+        skip: noop,
+        parent: false,
+        boundary: no,
+      },
       opts,
     ) as TraverseOptions;
     // if (options.skip(this)) return
@@ -659,7 +666,9 @@ export class Node extends EventEmitter implements IntoNodeId {
     if (found) return found;
 
     // no siblings have the target, maybe we want to go above and beyond
-    if (!gotoParent || !this.parent) return null;
+    if (!gotoParent || !this.parent || options.boundary(this.parent)) {
+      return null;
+    }
 
     // check if parent is the target
     if (options.parent && fn(this.parent)) return this.parent;

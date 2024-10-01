@@ -874,7 +874,7 @@ export class ImmutableDraft implements Draft {
       );
     }
 
-    // console.log("update selection", selection.isInline);
+    console.log("update selection", selection.toString());
     this.selection = selection;
     const before = this.state.selection.unpin();
     this.changes.add(SelectionChange.create(before, selection));

@@ -1,7 +1,6 @@
-import {Optional} from "@emrgen/types";
+import { Optional } from "@emrgen/types";
 import {
   ActionOrigin,
-  BlockSelection,
   Draft,
   Node,
   NodeId,
@@ -10,31 +9,45 @@ import {
   NodePropsJson,
   NodeType,
   Point,
-  PointAt,
-  PointedSelection, Schema,
-  SelectedPath,
-  State, TxType
+  PointedSelection,
+  Schema,
+  State,
+  TxType,
 } from "@emrgen/carbon-core";
-import {SolidNodeMap} from "./NodeMap";
-import {isArray} from "lodash";
-import {p14} from "@emrgen/carbon-core/src/core/Logger";
+import { MarkSet } from "@emrgen/carbon-core";
+import { Mark } from "@emrgen/carbon-core";
+import { MarkAction } from "@emrgen/carbon-core";
+import { BlockSelection } from "@emrgen/carbon-core";
+import { PointAt } from "@emrgen/carbon-core";
+import { p14 } from "@emrgen/carbon-core";
+import { SelectedPath } from "@emrgen/carbon-core";
+import { SolidNodeMap } from "./NodeMap";
+import { isArray } from "lodash";
+import * as console from "node:console";
 
 export class SolidDraft implements Draft {
-
   changes: NodeMap = SolidNodeMap.empty();
   deleted: NodeMap = SolidNodeMap.empty();
   contentChanged: NodeIdSet = NodeIdSet.empty();
   selected: NodeIdSet = NodeIdSet.empty();
+  marks: MarkSet;
 
-  constructor(private state: State, readonly origin: ActionOrigin, readonly type: TxType, readonly schema: Schema) {
+  constructor(
+    private state: State,
+    readonly origin: ActionOrigin,
+    readonly type: TxType,
+    readonly schema: Schema,
+    marks: MarkSet,
+  ) {
     this.schema = schema;
-    state.blockSelection.blocks.forEach(node => {
+    this.marks = marks.clone();
+    state.blockSelection.blocks.forEach((node) => {
       this.selected.add(node.id);
     });
   }
 
   insertText(at: Point, text: string): void {
-      throw new Error("Method not implemented.");
+    throw new Error("Method not implemented.");
   }
 
   get nodeMap(): NodeMap {
@@ -55,19 +68,19 @@ export class SolidDraft implements Draft {
   }
 
   commit() {
-    this.deleted.forEach(node => {
+    this.deleted.forEach((node) => {
       this.nodeMap.delete(node.id);
-    })
-    this.contentChanged.forEach(id => {
+    });
+    this.contentChanged.forEach((id) => {
       const node = this.nodeMap.get(id);
       if (!node) {
         throw new Error(`Node ${id.toString()} not found`);
       }
-      console.log('[updated content]', node.key, node)
-      node.contentVersion = node.contentVersion + 1
+      console.log("[updated content]", node.key, node);
+      node.contentVersion = node.contentVersion + 1;
     });
 
-    const selected = this.selected.nodes(this.nodeMap)
+    const selected = this.selected.nodes(this.nodeMap);
     this.state.blockSelection = BlockSelection.create(selected);
   }
 
@@ -85,7 +98,7 @@ export class SolidDraft implements Draft {
 
   parent(from: NodeId | Node): Optional<Node> {
     if (from instanceof Node) {
-      const {parentId} = from;
+      const { parentId } = from;
       if (!parentId) {
         return null;
       }
@@ -102,24 +115,35 @@ export class SolidDraft implements Draft {
   }
 
   change(nodeId: NodeId, type: NodeType): void {
-    console.log(p14('%c[trap]'), "color:green", 'change', nodeId.toString(), type.name);
+    console.log(
+      p14("%c[trap]"),
+      "color:green",
+      "change",
+      nodeId.toString(),
+      type.name,
+    );
     const node = this.get(nodeId);
     if (!node) {
       throw new Error(`Node ${nodeId.toString()} not found`);
     }
 
     node.changeType(type);
-
   }
 
   move(to: Point, nodeId: NodeId): void {
-    console.log(p14('%c[trap]'), "color:green", 'move', to.toString(), nodeId.toString());
+    console.log(
+      p14("%c[trap]"),
+      "color:green",
+      "move",
+      to.toString(),
+      nodeId.toString(),
+    );
     const node = this.get(nodeId);
     if (!node) {
       throw new Error(`Node ${nodeId.toString()} not found`);
     }
 
-    const {parent} = node;
+    const { parent } = node;
     if (!parent) {
       throw new Error(`Parent of ${node.id.toString()} not found`);
     }
@@ -129,7 +153,7 @@ export class SolidDraft implements Draft {
   }
 
   insert(at: Point, node: Node, type: "create" | "move" = "create") {
-    console.log('[trap] insert', at.toString(), node.toString());
+    console.log("[trap] insert", at.toString(), node.toString());
 
     const refNode = this.get(at.nodeId);
     if (!refNode) {
@@ -140,7 +164,7 @@ export class SolidDraft implements Draft {
       throw new Error(`Parent of ${refNode.id.toString()} not found`);
     }
 
-    node.all(n => {
+    node.all((n) => {
       this.nodeMap.set(n.id, n);
       this.deleted.isDeleted(n.id);
     });
@@ -164,50 +188,90 @@ export class SolidDraft implements Draft {
   }
 
   private insertBefore(node: Node, refNode: Node) {
-    console.log(p14('%c[trap]'), "color:green", 'insertBefore', node.toString(), refNode.toString());
+    console.log(
+      p14("%c[trap]"),
+      "color:green",
+      "insertBefore",
+      node.toString(),
+      refNode.toString(),
+    );
     const parent = this.parent(refNode);
     if (!parent) {
       throw new Error(`Parent of ${refNode.id.toString()} not found`);
     }
 
     const index = refNode.index;
-    console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())
+    console.log(
+      "# adding new child node",
+      "parent",
+      parent.id.toString(),
+      "index",
+      index,
+      "node",
+      node.id.toString(),
+    );
     parent.insert(node, index);
     this.contentChanged.add(parent.id);
   }
 
   private insertAfter(node: Node, refNode: Node) {
-    console.log(p14('%c[trap]'), "color:green", 'insertAfter', node.toString(), refNode.toString());
+    console.log(
+      p14("%c[trap]"),
+      "color:green",
+      "insertAfter",
+      node.toString(),
+      refNode.toString(),
+    );
     const parent = this.parent(refNode);
     if (!parent) {
       throw new Error(`Parent of ${refNode.id.toString()} not found`);
     }
 
     const index = refNode.index;
-    console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())
+    console.log(
+      "# adding new child node",
+      "parent",
+      parent.id.toString(),
+      "index",
+      index,
+      "node",
+      node.id.toString(),
+    );
     parent.insert(node, index + 1);
     this.contentChanged.add(parent.id);
   }
 
   private prepend(node: Node, parent: Node) {
-    console.log(p14('%c[trap]'), "color:green", 'prepend', node.toString(), parent.toString());
+    console.log(
+      p14("%c[trap]"),
+      "color:green",
+      "prepend",
+      node.toString(),
+      parent.toString(),
+    );
     parent.insert(node, 0);
     this.contentChanged.add(parent.id);
   }
 
   private append(node: Node, parent: Node) {
-    console.log(p14('%c[trap]'), "color:green", 'append', node.toString(), parent.toString());
+    console.log(
+      p14("%c[trap]"),
+      "color:green",
+      "append",
+      node.toString(),
+      parent.toString(),
+    );
     parent.insert(node, parent.children.length);
     this.contentChanged.add(parent.id);
   }
 
   remove(nodeId: NodeId): void {
-    console.log(p14('%c[trap]'), "color:green", 'remove', nodeId.toString());
+    console.log(p14("%c[trap]"), "color:green", "remove", nodeId.toString());
     const node = this.get(nodeId);
     if (!node) {
       throw new Error(`Node ${nodeId.toString()} not found`);
     }
-    console.log(p14('%c[trap]'), "color:green", 'remove', node.toString());
+    console.log(p14("%c[trap]"), "color:green", "remove", node.toString());
     const parent = this.parent(node);
     if (!parent) {
       throw new Error(`Parent of ${node.id.toString()} not found`);
@@ -215,31 +279,31 @@ export class SolidDraft implements Draft {
 
     parent.remove(node);
     this.contentChanged.add(parent.id);
-    node.all(n => {
+    node.all((n) => {
       this.deleted.set(n.id, n);
-    })
+    });
   }
 
-  updateContent(nodeId: NodeId, content: Node[]|string): void {
-    console.log('[trap] updateContent', nodeId.toString(), content);
+  updateContent(nodeId: NodeId, content: Node[] | string): void {
+    console.log("[trap] updateContent", nodeId.toString(), content);
     const node = this.state.nodeMap.get(nodeId);
     if (!node) {
       throw new Error(`Node ${nodeId.toString()} not found`);
     }
 
     if (isArray(content)) {
-      content.forEach(n => {
-        n.all(child => {
+      content.forEach((n) => {
+        n.all((child) => {
           this.nodeMap.set(child.id, child);
-        })
-      })
+        });
+      });
     }
 
     node.updateContent(content);
   }
 
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
-    console.log('[trap] updateProps', nodeId.toString(), props);
+    console.log("[trap] updateProps", nodeId.toString(), props);
     if (this.deleted.has(nodeId)) {
       return;
     }
@@ -260,13 +324,15 @@ export class SolidDraft implements Draft {
   }
 
   updateSelection(selection: PointedSelection): void {
-    console.log('updateSelection', selection.toString());
+    console.log("updateSelection", selection.toString());
     const pinned = selection.pin(this.nodeMap);
     if (!pinned) {
-      throw new Error('Invalid selection');
+      throw new Error("Invalid selection");
     }
     this.state.selection = pinned;
 
     this.state.isSelectionChanged = true;
   }
+
+  updateMark(action: MarkAction, mark: Mark): void {}
 }

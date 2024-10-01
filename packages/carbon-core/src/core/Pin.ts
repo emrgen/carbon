@@ -206,7 +206,9 @@ export class Pin {
       "before leftAlign",
       Focus.create(this.node, this.offset).toString(),
     );
-    return Focus.create(this.node, this.offset).leftAlign.pin();
+    return Focus.create(this.node, this.offset)
+      .markAlign(this.align)
+      .leftAlign.pin();
   }
 
   // aligns pin to the right when it is in the middle of the two inline nodes, can be text, atomWrapper etc.
@@ -310,6 +312,9 @@ export class Pin {
   // check if pin is after the provided pin
   isAfterOf(of: Pin): boolean {
     if (this.node.eq(of.node)) {
+      if (this.offset === of.offset) {
+        return this.steps > of.steps;
+      }
       return this.offset > of.offset;
     }
     return this.node.after(of.node);
@@ -356,7 +361,7 @@ export class Pin {
     if (!this.node.eq(other.node)) {
       return false;
     }
-    if (this.steps !== -1 && this.steps === other.steps) return true;
+    if (this.steps !== -1 && this.steps !== other.steps) return false;
     // console.log("Pin.eq", this.toString(), other.toString());
     return this.offset === other.offset && this.align === other.align;
   }

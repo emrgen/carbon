@@ -144,7 +144,13 @@ export class ChangeManager extends NodeTopicEmitter {
     // console.log('mounted', this.changes.size, this.changes.toArray().map(n => n.toString()));
 
     // sync the selection if the content is synced
-    // console.log('mounted', this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
+    console.log(
+      "mounted",
+      this.updated.toArray().map((n) => n.toString()),
+      node.id.toString(),
+      this.isContentSynced,
+      this.isSelectionDirty,
+    );
     if (this.isContentSynced) {
       // console.log("content synced, selection dirty:", this.isSelectionDirty);
       // NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick

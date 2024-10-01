@@ -29,6 +29,7 @@ export class CodeTitle extends TitlePlugin {
     return {
       ...super.spec(),
       tag: "code",
+      code: true,
     };
   }
 

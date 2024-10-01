@@ -63,18 +63,27 @@ export class Focus {
   }
 
   get leftAlign(): Focus {
-    if (this.node.isTextContainer && this.node.isVoid)
+    // WARNING: right align assumes that the focus is at down level
+    // if the focus is at up level, it will cause an infinite loop
+    console.assert(this.isDown, "leftAlign: focus should be at down level");
+    if (this.node.isTextContainer && this.node.isVoid) {
       return this.markAlign(Align.Left);
-    if (this.node.isZero)
+    }
+
+    if (this.node.isZero) {
       return Focus.create(this.node, 0).markAlign(Align.Left);
+    }
 
     if (this.offset === 0) {
       const textBlock = this.node.closest((n) => n.isTextContainer);
       let blocker = false;
-      const prevFocusable = this.node.prev((n) => {
-        blocker = n.isAtom || n.isIsolate;
-        return n.isFocusable;
-      });
+      const prevFocusable = this.node.prev(
+        (n) => {
+          blocker = blocker || (n.isAtom && !n.hasFocusable) || n.isIsolate;
+          return n.isFocusable;
+        },
+        { boundary: (n) => !!textBlock?.eq(n) },
+      );
       const prevTextBlock = prevFocusable?.closest((n) => n.isTextContainer);
 
       if (
@@ -91,21 +100,35 @@ export class Focus {
 
     console.log("leftAlign", this.toString());
 
-    return this.markAlign(Align.Left);
+    return this;
   }
 
   get rightAlign() {
-    if (this.node.isTextContainer && this.node.isVoid)
+    // WARNING: right align assumes that the focus is at down level
+    // if the focus is at up level, it will cause an infinite loop
+    console.assert(this.isDown, "rightAlign: focus should be at down level");
+    if (this.node.isTextContainer && this.node.isVoid) {
       return this.markAlign(Align.Right);
-    if (this.node.isZero)
+    }
+
+    if (this.node.isZero) {
       return Focus.create(this.node, 1).markAlign(Align.Right);
+    }
 
     if (this.offset === this.node.focusSize) {
+      const textBlock = this.node.closest((n) => n.isTextContainer);
       let blocker = false;
-      const nextFocusable = this.node.next((n) => {
-        blocker = n.isAtom || n.isIsolate || n.isBlock;
-        return n.isFocusable;
-      });
+      const nextFocusable = this.node.next(
+        (n) => {
+          blocker =
+            blocker ||
+            (n.isAtom && !n.hasFocusable) ||
+            n.isIsolate ||
+            n.isBlock;
+          return n.isFocusable;
+        },
+        { boundary: (n) => !!textBlock?.eq(n) },
+      );
 
       if (!blocker && nextFocusable) {
         return Focus.create(nextFocusable, 0)
@@ -170,7 +193,7 @@ export class Focus {
     for (const leaf of leaves) {
       if (offset <= leaf.focusSize) {
         const focus = new Focus(leaf, offset);
-        return this.rightAlign ? focus.rightAlign : focus;
+        return focus.rightAlign ? focus.rightAlign : focus;
       }
       offset -= leaf.focusSize;
     }

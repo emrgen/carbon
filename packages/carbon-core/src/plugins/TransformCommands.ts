@@ -560,7 +560,36 @@ export class TransformCommands extends BeforePlugin {
         const down = start.down();
 
         if (down.node.isZero) {
-          throw Error("invalid selection");
+          // replace the zero node with text node
+          const textNode = tr.app.schema.text(text, {
+            props: { [MarksPath]: tr.state.marks.toArray() },
+          })!;
+          const children = start.node.children
+            .map((n) => {
+              if (n.eq(down.node)) {
+                return textNode;
+              }
+              return n;
+            })
+            .map(cloneFrozenNode);
+
+          tr.SetContent(start.node.id, children);
+
+          const textBlock = TextBlock.from(start.node).replaceContent(children);
+          const pin = textBlock.mapPin(start)?.moveBy(text.length);
+          if (!pin) {
+            throw Error("invalid pin");
+          }
+          const after = PinnedSelection.fromPin(pin);
+          tr.Select(after);
+        } else if (start.node.type.spec.code) {
+          // const textNode = tr.app.schema.text(text, {
+          //   props: { [MarksPath]: tr.state.marks.toArray() },
+          // })!;
+          // const after = PinnedSelection.fromPin(
+          //   Pin.future(start.node, start.offset + text.length),
+          // );
+          // tr.Insert(Point.toAfter(start.node.id), textNode).Select(after);
         } else {
           console.log("inserting text", text);
           const textNode = tr.app.schema.text(text, {
@@ -936,7 +965,7 @@ export class TransformCommands extends BeforePlugin {
       topSliceDepth - 1,
     );
 
-    // limit the move targets span
+    // boundary the move targets span
     targets.nodes.forEach((nodes, index) => {
       // console.log('INDEX', index, index <= mergeBlockLimit, maxMergeDepth < index)
       if (maxMergeDepth < index || index <= mergeBlockLimit) {
@@ -1935,7 +1964,13 @@ export class TransformCommands extends BeforePlugin {
       }
 
       printNode(deleteInfo.startNode.node);
-      const pin = deleteInfo.startNode.mapPin(start);
+      console.log(
+        "start",
+        start.toString(),
+        start.down().leftAlign.up().toString(),
+      );
+
+      const pin = deleteInfo.startNode.mapPin(start.down().leftAlign.up());
       if (!pin) {
         console.error("failed to find pin");
         return;
