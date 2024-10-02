@@ -65,7 +65,7 @@ export class ImmutableNode extends Node {
       key,
       () => {
         const { children = [] } = parent;
-        return findIndex(children, (n) => {
+        return findIndex(children, (n, i) => {
           return this.id.eq(n.id);
         });
       },
@@ -120,7 +120,7 @@ export class ImmutableNode extends Node {
     super.changeType(type);
   }
 
-  override insert(node: Node, index: number) {
+  override insert(node: ImmutableNode, index: number) {
     if (this.isFrozen) {
       throw new Error(
         `cannot insert node on frozen node: ${this.id.toString()}`,
@@ -230,6 +230,7 @@ export class ImmutableNode extends Node {
       if (!child) {
         throw new Error(`child not found at ${index}`);
       }
+
       const mutableChild = child.unfreeze(rest, map);
       mutable.replace(index, mutableChild);
 
@@ -262,10 +263,6 @@ export class ImmutableNode extends Node {
 
     clone.renderVersion = this.renderVersion;
     clone.contentVersion = this.contentVersion;
-
-    clone.indexMapper = this.indexMapper;
-    clone.indexMap = this.indexMap;
-    clone.mappedIndex = this.mappedIndex;
 
     return clone;
   }

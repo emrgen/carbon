@@ -18,6 +18,12 @@ export interface Draft {
   marks: MarkSet;
   // nodeMap: NodeMap;
 
+  // used to verify and prepare the actions before apply
+  get(id: NodeId): Optional<Node>;
+
+  // get the parent of the node
+  parent(from: NodeId | Node): Optional<Node>;
+
   // produce creates a new draft and pass to the fn to update the draft
   // if the fn fails then the draft is rolled back to the previous state
   // if the fn succeeds then the draft is committed and the new state is returned
@@ -41,10 +47,4 @@ export interface Draft {
   updateContent(nodeId: NodeId, content: Node[] | string): void;
 
   updateSelection(selection: PointedSelection): void;
-
-  // used to verify and prepare the actions before apply
-  get(id: NodeId): Optional<Node>;
-
-  // get the parent of the node
-  parent(from: NodeId | Node): Optional<Node>;
 }

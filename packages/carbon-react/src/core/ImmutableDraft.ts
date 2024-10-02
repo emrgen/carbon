@@ -107,12 +107,13 @@ export class ImmutableDraft implements Draft {
     this.changes = new StateChanges();
     this.actions = new StateActions([], type);
     this.tm = new Transformer(this.changes, this.actions);
-    this.schema = schema;
-    this.marks = marks.clone();
     this.nodeMap = ImmutableNodeMap.from(state.nodeMap);
     this.updated = new NodeIdSet();
     this.selection = state.selection.unpin(origin);
     state.blockSelection.blocks.forEach((n) => this.selected.add(n.id));
+
+    this.schema = schema;
+    this.marks = marks.clone();
   }
 
   private addContentChanged(id: NodeId) {
@@ -146,16 +147,16 @@ export class ImmutableDraft implements Draft {
     this.nodeMap.delete(id);
   }
 
-  get(id: NodeId): Optional<Node> {
+  public get(id: NodeId): Optional<Node> {
     return this.nodeMap.get(id);
   }
 
-  parent(from: NodeId | Node): Optional<Node> {
+  public parent(from: NodeId | Node): Optional<Node> {
     return this.nodeMap.parent(from);
   }
 
-  // produce a new state from the draft
-  produce(fn: (producer: ImmutableDraft) => void): CoreState {
+  // produce a new state from the draft or reject the draft
+  public produce(fn: (producer: ImmutableDraft) => void): CoreState {
     const { scope } = this.state;
     const oldScope = StateScope.current();
     try {
@@ -585,7 +586,7 @@ export class ImmutableDraft implements Draft {
     const node = this.unfreeze(nodeId);
     const { parent } = node;
     if (!parent) {
-      throw new Error("Cannot move node that does not have a parent");
+      throw new Error("Cannot move node that does not have a parent at source");
     }
 
     this.actions.add(MoveNodeAction.create(nodeLocation(node)!, to, nodeId));
@@ -601,7 +602,7 @@ export class ImmutableDraft implements Draft {
     this.insertBy(to, node, "move");
   }
 
-  private insertBy(at: Point, node: Node, type: "create" | "move" = "create") {
+  private insertBy(at: Point, node: Node, type: "create" | "move") {
     if (!this.drafting) {
       throw new Error(
         "Cannot insert node to a draft that is already committed",
@@ -640,6 +641,14 @@ export class ImmutableDraft implements Draft {
       console.log("INSERTED", n.id.toString(), n.parentId?.toString());
       this.addInserted(n);
     });
+  }
+
+  private insertAtEnd(parentId: NodeId, node: Node) {
+    const parent = this.unfreeze(parentId);
+    this.tm.insert(node, parent, parent.size);
+    this.addUpdated(parent.id);
+    this.addContentChanged(parent.id);
+    const block = node.closestBlock;
   }
 
   private insertBefore(refId: NodeId, node: Node) {

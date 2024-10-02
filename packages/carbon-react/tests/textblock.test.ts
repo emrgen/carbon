@@ -1,7 +1,7 @@
 import { test } from "vitest";
 import { expect } from "vitest";
 import { createCarbon } from "./utils";
-import { Step, TextBlock } from "@emrgen/carbon-core";
+import { Step, TitleNode } from "@emrgen/carbon-core";
 import { Focus } from "@emrgen/carbon-core";
 import { printNode } from "@emrgen/carbon-core";
 import { mention } from "@emrgen/carbon-blocks";
@@ -60,7 +60,7 @@ test("text block remove", () => {
   const carbon = createCarbon();
   const title = carbon.content.type.schema.type("title")?.default();
   const schema = carbon.content.type.schema;
-  const tb = TextBlock.from(title!);
+  const tb = TitleNode.from(title!);
   const tb1 = tb.insert(1, schema.text("hello")!);
   const tb2 = tb1.insert(7, schema.text("world")!);
 
@@ -85,7 +85,7 @@ test("text block insert between mention and text", () => {
   const carbon = createCarbon();
   const title = carbon.content.type.schema.type("title")?.default();
   const schema = carbon.content.type.schema;
-  const tb = TextBlock.from(title!);
+  const tb = TitleNode.from(title!);
 
   const tb1 = tb
     .insert(1, schema.node("mention", mention("hello"))!)

@@ -12,7 +12,7 @@ import {
   PluginManager,
   preventAndStopCtx,
   SetContentAction,
-  TextBlock,
+  TitleNode,
   Writer,
 } from "@emrgen/carbon-core";
 import { Pin } from "@emrgen/carbon-core";
@@ -120,7 +120,7 @@ export class CodeTitle extends TitlePlugin {
       children: content,
     }));
 
-    if (TextBlock.isSimilarContent(node.children, sanitized.children)) {
+    if (TitleNode.isSimilarContent(node.children, sanitized.children)) {
       return node;
     }
 
@@ -130,7 +130,7 @@ export class CodeTitle extends TitlePlugin {
   override normalize(node: Node): CarbonAction[] {
     const content = CodeTitle.highlightContent(node);
     //
-    if (TextBlock.isSimilarContent(node.children, content)) {
+    if (TitleNode.isSimilarContent(node.children, content)) {
       return [];
     }
 

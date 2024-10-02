@@ -15,7 +15,7 @@ import {
   PointedSelection,
   preventAndStopCtx,
   SetContentAction,
-  TextBlock,
+  TitleNode,
   Writer,
 } from "@emrgen/carbon-core";
 
@@ -133,7 +133,7 @@ export class TitlePlugin extends NodePlugin {
     // console.log(
     //   node.children.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
     // );
-    const content = TextBlock.from(node).normalizeContent();
+    const content = TitleNode.from(node).normalizeContent();
     const { children } = node;
     if (
       content.length === children.length &&

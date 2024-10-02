@@ -18,11 +18,11 @@ import {
   preventAndStopCtx,
   RemoteDataAsPath,
   SetContentAction,
+  TitleNode,
   UnstablePath,
 } from "@emrgen/carbon-core";
 import { isConvertible } from "../utils";
 import { NumberedList } from "./NumberedList";
-import { TextBlock } from "@emrgen/carbon-core/src/core/TextBlock";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {}
@@ -152,7 +152,7 @@ export class ChangeName extends BeforePlugin {
         const action = SetContentAction.create(titleNode.id, []);
         cmd.Add(action);
       } else {
-        const content = TextBlock.from(titleNode).removeContent(
+        const content = TitleNode.from(titleNode).removeContent(
           0,
           match[1].length - 1,
         );
@@ -200,7 +200,7 @@ export class ChangeName extends BeforePlugin {
         return;
       }
 
-      const content = TextBlock.from(start.node).removeContent(
+      const content = TitleNode.from(start.node).removeContent(
         0,
         match[1].length - 1,
       );

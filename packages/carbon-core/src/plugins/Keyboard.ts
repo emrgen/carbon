@@ -21,7 +21,7 @@ import {
   insertAfterAction,
   nodeLocation,
   preventAndStopCtx,
-  TextBlock,
+  TitleNode,
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { NodeBTree } from "../core/BTree";
@@ -289,7 +289,7 @@ export class KeyboardPlugin extends AfterPlugin {
         const after = PinnedSelection.fromPin(pin);
 
         // merge the text content of the previous text block and the current text block
-        const content = TextBlock.normalizeNodeContent([
+        const content = TitleNode.normalizeNodeContent([
           ...prevVisibleTextBlock.children.map((n) => n.clone()),
           ...textBlock.children.map((n) => n.clone()),
         ]);

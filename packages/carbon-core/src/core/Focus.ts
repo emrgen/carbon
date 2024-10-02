@@ -98,8 +98,6 @@ export class Focus {
       }
     }
 
-    console.log("leftAlign", this.toString());
-
     return this;
   }
 

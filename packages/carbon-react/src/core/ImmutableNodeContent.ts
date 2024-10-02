@@ -53,6 +53,8 @@ export class ImmutableNodeContent implements NodeContent {
     return this.content.parentId;
   }
 
+  // get the parent node from the cache or Scope using the parentId
+  // the parent can be non-null only if the node is mutable state within the draft
   get parent(): Optional<Node> {
     const { parent } = this.content;
     if (parent) return parent;
@@ -167,7 +169,6 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   addLink(name: string, node: Node) {
-    console.log("xxxxxxxxxxx", node, node.name);
     this.content.links[name] = node;
   }
 

@@ -8,6 +8,7 @@ import { NodeMap } from "./NodeMap";
 // NodeStore is a store for the nodes and their rendered HTML elements
 export class NodeStore {
   private elementMap: Map<string, HTMLElement> = new Map();
+  // this map is used to resolve the node from the HTML element and find out the selection nodes
   private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
 
   constructor(private readonly app: Carbon) {}

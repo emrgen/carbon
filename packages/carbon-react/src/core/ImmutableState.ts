@@ -96,13 +96,6 @@ export class ImmutableState implements State {
 
   get isSelectionChanged() {
     const eq = this.previous?.selection.eq(this.selection);
-    console.log(
-      "isSelectionChanged",
-      eq,
-      this.selection.origin,
-      this.previous?.selection.toString(),
-      this.selection.toString(),
-    );
     return !(eq && this.selection.origin === ActionOrigin.DomSelectionChange);
   }
 

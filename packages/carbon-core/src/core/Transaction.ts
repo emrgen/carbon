@@ -31,7 +31,7 @@ import { UpdateMarkAction } from "./actions/index";
 import { UpdatePropsAction } from "./actions/index";
 import { NodeBTree } from "./BTree";
 import { NodeIdSet } from "./BSet";
-import { TextBlock } from "./TextBlock";
+import { TitleNode } from "./TitleNode";
 
 let _id = 0;
 const getId = () => String(_id++);
@@ -45,8 +45,8 @@ export class Transaction {
 
   // track the end and start block of the transaction
   // this is useful for combining multiple actions like delete -> insert, delete -> paste
-  startNode: Optional<TextBlock>;
-  endNode: Optional<TextBlock>;
+  startNode: Optional<TitleNode>;
+  endNode: Optional<TitleNode>;
 
   private _committed: boolean = false;
   private _dispatched: boolean = false;

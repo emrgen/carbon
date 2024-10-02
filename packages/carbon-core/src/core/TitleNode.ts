@@ -1,5 +1,6 @@
 import { classString } from "./Logger";
 import { MarkSet } from "./Mark";
+import { Mark } from "./Mark";
 import { Node } from "./Node";
 import { InlineNode } from "./InlineNode";
 import { last } from "lodash";
@@ -17,11 +18,10 @@ import { Optional } from "@emrgen/types";
 import { NodeContentData } from "./NodeContent";
 
 // utility class for text blocks
-// title is a text block
 // a text block contains inline children like text, links, hashtags, mentions, etc
 // when you type in a text block, you are typing in the inline content
 // when merging text blocks, you are merging the inline content along with the content marks
-export class TextBlock {
+export class TitleNode {
   readonly node: Node;
   readonly mapper: IndexMapper;
 
@@ -29,11 +29,11 @@ export class TextBlock {
     const clone = node.type.schema.factory.clone(node, identity);
     clone.setParent(null).setParentId(null);
 
-    return new TextBlock(clone, IndexMapper.empty());
+    return new TitleNode(clone, IndexMapper.empty());
   }
 
   static empty() {
-    return new TextBlock(Node.IDENTITY, IndexMapper.empty());
+    return new TitleNode(Node.IDENTITY, IndexMapper.empty());
   }
 
   private constructor(node: Node, mapper: IndexMapper) {
@@ -62,6 +62,21 @@ export class TextBlock {
     return this.node.children;
   }
 
+  // split the content and return a new text block
+  splitInp(offset: number) {
+    if (offset <= 1 || offset >= this.node.stepSize - 1) {
+      return this;
+    }
+
+    const down = Step.create(this.node, offset).down();
+
+    if (down.isBefore || down.isAtEnd) {
+      return this;
+    }
+  }
+
+  // ------------------------------
+
   intoContent() {
     return this.node.unwrap();
   }
@@ -76,6 +91,8 @@ export class TextBlock {
   mapPin(pin: Pin): Optional<Pin> {
     const down = pin.down();
     let steps = pin.steps;
+    // if the focus is on the right side of the node,
+    // the steps should be reduced by 1 to put the focus at the start of the zero node
     if (down.node.isZero && down.offset === 1) {
       steps -= 1;
     }
@@ -90,12 +107,16 @@ export class TextBlock {
     return Step.create(node, steps).down().pin()?.up();
   }
 
+  mark(from: number, to: number, mark: Mark) {
+    return this;
+  }
+
   replaceContent(content: Node[]) {
-    return TextBlock.from(this.cloneNode(this.node, content));
+    return TitleNode.from(this.cloneNode(this.node, content));
   }
 
   // remove content from a text block from a given range
-  remove(from: StepOffset, to: StepOffset): TextBlock {
+  remove(from: StepOffset, to: StepOffset): TitleNode {
     const [prev, middle, next] = this.split(from, to);
 
     // console.log(prev.textContent, middle.textContent, next.textContent);
@@ -105,16 +126,16 @@ export class TextBlock {
     const children = [...prev.node.children, ...next.node.children];
     const node = this.cloneNode(this.node, children);
 
-    return TextBlock.from(node);
+    return TitleNode.from(node);
   }
 
   // split a text block at a given range and return the new text blocks
-  split(start: StepOffset): [TextBlock, TextBlock, TextBlock];
-  split(start: StepOffset, end: StepOffset): [TextBlock, TextBlock, TextBlock];
+  split(start: StepOffset): [TitleNode, TitleNode, TitleNode];
+  split(start: StepOffset, end: StepOffset): [TitleNode, TitleNode, TitleNode];
   split(
     start: StepOffset,
     end?: StepOffset,
-  ): [TextBlock, TextBlock, TextBlock] {
+  ): [TitleNode, TitleNode, TitleNode] {
     if (end) {
       const [prev, next] = this.split(end);
       if (!prev.node.eq(Node.IDENTITY)) {
@@ -127,20 +148,20 @@ export class TextBlock {
         // );
         return [first, second, next];
       } else {
-        return [TextBlock.empty(), TextBlock.empty(), next];
+        return [TitleNode.empty(), TitleNode.empty(), next];
       }
     }
 
     if (start <= 1) {
-      return [TextBlock.empty(), this.clone(), TextBlock.empty()];
+      return [TitleNode.empty(), this.clone(), TitleNode.empty()];
     }
 
     if (start >= this.node.stepSize - 1) {
-      return [this.clone(), TextBlock.empty(), TextBlock.empty()];
+      return [this.clone(), TitleNode.empty(), TitleNode.empty()];
     }
 
     if (this.node.isVoid) {
-      return [this.clone(), this.clone(), TextBlock.empty()];
+      return [this.clone(), this.clone(), TitleNode.empty()];
     }
 
     const down = Step.create(this.node, start).down();
@@ -171,9 +192,9 @@ export class TextBlock {
       // console.log(prevNode.textContent, "-", nextNode.textContent);
 
       return [
-        new TextBlock(prevNode, prevMapper),
-        new TextBlock(nextNode, nextMapper),
-        TextBlock.empty(),
+        new TitleNode(prevNode, prevMapper),
+        new TitleNode(nextNode, nextMapper),
+        TitleNode.empty(),
       ];
     }
 
@@ -225,14 +246,14 @@ export class TextBlock {
     // console.log("xxx", nextNode.toJSON(), nextNode.isTextContainer);
 
     return [
-      new TextBlock(prevNode, prevMapper),
-      new TextBlock(nextNode, nextMapper),
-      TextBlock.empty(),
+      new TitleNode(prevNode, prevMapper),
+      new TitleNode(nextNode, nextMapper),
+      TitleNode.empty(),
     ];
   }
 
   // insert content into a text block at a given range
-  insert(at: StepOffset, nodes: Node | Node[]): TextBlock {
+  insert(at: StepOffset, nodes: Node | Node[]): TitleNode {
     const content = Array.isArray(nodes) ? nodes : [nodes];
     const stepSize = content.reduce((acc, curr) => acc + curr.stepSize, 0);
 
@@ -243,7 +264,7 @@ export class TextBlock {
       const children = [...content, ...this.node.children];
       const node = this.cloneNode(this.node, children);
 
-      return new TextBlock(node, mapper);
+      return new TitleNode(node, mapper);
     }
 
     if (this.node.stepSize - 2 <= at && at < this.node.stepSize) {
@@ -252,7 +273,7 @@ export class TextBlock {
       const children = [...this.node.children, ...content];
       const node = this.cloneNode(this.node, children);
 
-      return new TextBlock(node, mapper);
+      return new TitleNode(node, mapper);
     }
 
     const down = Step.create(this.node, at).down();
@@ -266,7 +287,7 @@ export class TextBlock {
       const children = [...prev, ...content, ...next];
       const node = this.cloneNode(this.node, children);
 
-      return new TextBlock(node, mapper);
+      return new TitleNode(node, mapper);
     }
 
     if ((down.isAfter || down.isAtEnd) && down.node.parent?.eq(this.node)) {
@@ -279,7 +300,7 @@ export class TextBlock {
       const children = [...prev, ...content, ...next];
       const node = this.cloneNode(this.node, children);
 
-      return new TextBlock(node, mapper);
+      return new TitleNode(node, mapper);
     }
 
     // check if the target offset is within an inline node
@@ -295,13 +316,13 @@ export class TextBlock {
     const mapper = this.mapper.clone();
     mapper.add(IndexMap.create(at + 1, stepSize));
 
-    return new TextBlock(node, mapper);
+    return new TitleNode(node, mapper);
   }
 
-  normalize(): TextBlock {
+  normalize(): TitleNode {
     const children = this.normalizeContent();
     const node = this.cloneNode(this.node, children);
-    return new TextBlock(node, this.mapper.clone());
+    return new TitleNode(node, this.mapper.clone());
   }
 
   // clone node with new children
@@ -324,7 +345,7 @@ export class TextBlock {
   normalizeContent() {
     const { children } = this.node;
 
-    return TextBlock.normalizeNodeContent(children, this.node);
+    return TitleNode.normalizeNodeContent(children, this.node);
   }
 
   static normalizeNodeContent(content: Node[], parent?: Node) {
@@ -541,18 +562,18 @@ export class TextBlock {
       Omit<NodeContentData, "children">
     > = identity,
   ) {
-    return new TextBlock(
+    return new TitleNode(
       this.node.type.schema.factory.clone(this.node, map),
       this.mapper.clone(),
     );
   }
 
   resetMapper() {
-    return new TextBlock(this.node, IndexMapper.empty());
+    return new TitleNode(this.node, IndexMapper.empty());
   }
 
   append(children: Node[]) {
-    return TextBlock.from(
+    return TitleNode.from(
       this.cloneNode(this.node, [...this.node.children, ...children]),
     );
   }

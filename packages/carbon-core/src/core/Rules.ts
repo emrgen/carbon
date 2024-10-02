@@ -74,8 +74,7 @@ export class BeforeInputRuleHandler {
     // console.log('before input', node.id.toString(), node.textContent);
 
     // console.log(`"${text}"`, node.id.toString(), node.textContent);
-    const done = this.rules.some((rule) => rule.execute(ctx, text));
-    return done;
+    return this.rules.some((rule) => rule.execute(ctx, text));
   }
 
   protected getText(head: Pin, node: Node, insertText: string) {

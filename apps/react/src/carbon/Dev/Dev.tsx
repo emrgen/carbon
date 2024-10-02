@@ -471,7 +471,7 @@ const data = node("carbon", [
       //   node("codeLine", [title([text("  console.log('hello world')")])]),
       //   node("codeLine", [title([text("}")])]),
       // ]),
-      //
+
       // node("codeMirror", [], {
       //   ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
       // }),

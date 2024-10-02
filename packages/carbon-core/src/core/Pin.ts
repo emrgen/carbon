@@ -202,10 +202,6 @@ export class Pin {
   // aligns pin to the left when it is in the middle of the two text blocks
   // Validity: valid for down pin only
   get leftAlign(): Pin {
-    console.log(
-      "before leftAlign",
-      Focus.create(this.node, this.offset).toString(),
-    );
     return Focus.create(this.node, this.offset)
       .markAlign(this.align)
       .leftAlign.pin();

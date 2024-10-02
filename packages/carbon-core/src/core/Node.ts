@@ -412,6 +412,7 @@ export class Node extends EventEmitter implements IntoNodeId {
   }
 
   // TODO: user IndexMapper to optimize index caching and avoid array traverse for finding index
+  // use immutable btree with fractional cascading
   get index(): number {
     const parent = this.parent;
     if (!parent) {
@@ -420,7 +421,8 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     const { children = [] } = parent;
-    return findIndex(children as Node[], (n) => {
+    return findIndex(children as Node[], (n, i) => {
+      console.log("indexing", i);
       return this.id.comp(n.id) === 0;
     });
   }
@@ -530,8 +532,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     const selfParents = reverse(this.chain);
     const nodeParents = reverse(other.chain);
-    // console.log(selfParents.map(n => `${n.id.key}:${n.index}`));
-    // console.log(nodeParents.map(n => `${n.id.key}:${n.index}`));
+    // console.log(selfParents.map((n) => `${n.id.key}:${n.index}`));
+    // console.log(nodeParents.map((n) => `${n.id.key}:${n.index}`));
 
     const depth = Math.min(selfParents.length, nodeParents.length);
     for (let i = 0; i < depth; i += 1) {
@@ -686,10 +688,15 @@ export class Node extends EventEmitter implements IntoNodeId {
     gotoParent = true,
   ): Optional<Node> {
     const options = merge(
-      { order: "post", direction: "forward", skip: noop, parent: false },
+      {
+        order: "post",
+        direction: "forward",
+        skip: noop,
+        parent: false,
+        boundary: no,
+      },
       opts,
     ) as TraverseOptions;
-    // if (options.skip(this)) return
 
     const sibling = this.nextSibling;
     let found: Optional<Node> = null;
@@ -707,7 +714,8 @@ export class Node extends EventEmitter implements IntoNodeId {
     if (found) return found;
 
     // no siblings have the target, maybe we want to go above and beyond
-    if (!gotoParent || !this.parent) return null;
+    if (!gotoParent || !this.parent || options.boundary(this.parent))
+      return null;
 
     // check if parent is the target
     if (options.parent && fn(this.parent)) return this.parent;
