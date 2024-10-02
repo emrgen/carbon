@@ -1,12 +1,10 @@
 import {
-  ActionOrigin,
   BeforePlugin,
   BlockSelection,
   Carbon,
   EventContext,
   EventHandlerMap,
   Mark,
-  PinnedSelection,
   preventAndStopCtx,
   Selection,
   State,
@@ -127,12 +125,12 @@ export class FormatterPlugin extends BeforePlugin {
 
     preventAndStopCtx(ctx);
     fn(cmd, blockSelection.isEmpty ? selection : blockSelection);
-    const { head, tail } = selection;
-    const after = PinnedSelection.create(
-      tail.down().node.isZero ? tail : tail.unfocused(),
-      head.down().node.isZero ? head : head.unfocused(),
-    );
-    cmd?.select(after)?.dispatch();
+    // const { head, tail } = selection;
+    // const after = PinnedSelection.create(
+    //   tail.down().node.isZero ? tail : tail.unfocused(),
+    //   head.down().node.isZero ? head : head.unfocused(),
+    // );
+    cmd?.Dispatch();
   }
 
   bold(tr: Transaction, selection: Selection | BlockSelection) {
@@ -178,9 +176,7 @@ export class FormatterPlugin extends BeforePlugin {
   toggle(tr: Transaction, mark: Mark) {
     const { selection, blockSelection } = tr.state;
     if (blockSelection.isEmpty) {
-      return tr.action
-        .format(selection, mark)
-        .select(selection, ActionOrigin.UserInput);
+      return tr.action.format(selection, mark);
     } else {
       return tr.action.format(blockSelection, mark);
     }
@@ -189,9 +185,7 @@ export class FormatterPlugin extends BeforePlugin {
   remove(tr: Transaction, mark: Mark, exact = false) {
     const { selection, blockSelection } = tr.state;
     if (blockSelection.isEmpty) {
-      return tr.transform
-        ?.removeMark(selection, mark)
-        ?.select(selection, ActionOrigin.UserInput);
+      return tr.transform?.removeMark(selection, mark);
     } else {
       return tr.transform.removeMark(blockSelection, mark);
     }

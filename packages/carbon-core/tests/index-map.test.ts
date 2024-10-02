@@ -97,6 +97,6 @@ test("find previous index map", () => {
   mapper.add(new IndexMap(10, 1));
   mapper.add(new IndexMap(10, 1));
 
-  // find current index of a node (index 11) with current mapper identity
+  // find current index of a node (index 11) with current startMapper identity
   expect(mapper.map(m1, 11)).toBe(14);
 });

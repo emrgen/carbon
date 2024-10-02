@@ -21,22 +21,31 @@ export class IndexMap {
   }
 
   constructor(offset: number, op: IndexMapOp) {
-    if (offset < 0) {
-      throw Error("IndexMap ref offset must be positive");
-    }
-
+    // if (offset < 0) {
+    //   throw Error("IndexMap ref offset must be positive");
+    // }
+    //
     this.offset = offset;
     this.op = op;
   }
 
   map(index: number): number {
     const { offset, op } = this;
-    if (index < offset) {
-      // index is before this map
-      return index;
+    if (index < 0) {
+      if (offset < index) {
+        return index;
+      } else {
+        // console.log("mapping", index, offset, op, index + op);
+        return index + op;
+      }
     } else {
-      // index is within this map
-      return index + op;
+      if (index < offset) {
+        // index is before this map
+        return index;
+      } else {
+        // index is within this map
+        return index + op;
+      }
     }
   }
 
@@ -64,7 +73,7 @@ export class IndexMapper {
   mappers: IndexMap[] = [];
 
   static empty() {
-    return new IndexMapper([]);
+    return new IndexMapper([IndexMap.DEFAULT]);
   }
 
   static from(maps: IndexMap[]) {
@@ -110,6 +119,7 @@ export class IndexMapper {
     if (i === undefined) {
       throw new Error("IndexMap not found");
     }
+
     for (++i; i < mappers.length; ++i) {
       const mapper = mappers[i];
       console.debug("mapping", i, mapper, index, mapper.map(index));

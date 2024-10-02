@@ -11,7 +11,6 @@ import {
 
 import { Optional } from "@emrgen/types";
 import {
-  ActionOrigin,
   BeforePlugin,
   BlockSelection,
   Carbon,
@@ -38,6 +37,7 @@ import {
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
 import { deepCloneMap } from "@emrgen/carbon-core";
+import { ActionOrigin } from "@emrgen/carbon-core";
 import { SelectionPatch } from "../core/index";
 import { NodeId } from "../core/index";
 import { NodeType } from "../core/index";
@@ -169,33 +169,53 @@ export class TransformCommands extends BeforePlugin {
         return;
       }
 
-      throw new Error("Not implemented");
+      const { start, end } = selection.pin(tr.state.nodeMap)!;
 
-      // const { start, end } = selection.pin(tr.state.nodeMap)!;
+      if (start.node.eq(end.node)) {
+        const [prev, middle, next] = TitleNode.from(start.node)
+          .replaceContent(
+            start.node.children.map((n) => n.clone(deepCloneWithNewId)),
+          )
+          .split(start.steps, end.steps);
+        const leaves = middle.children.filter((child) => child.isFocusable);
+        if (leaves.some((n) => !MarkSet.from(n.marks).has(mark))) {
+          leaves.forEach((n) => {
+            if (!MarkSet.from(n.marks).has(mark)) {
+              const marks = MarkSet.from(n.marks).toggle(mark).toArray();
+              n.updateProps({ [MarksPath]: marks });
+            }
+          });
+        } else {
+          // add marks to all leaves
+          leaves.forEach((n) => {
+            const marks = MarkSet.from(n.marks).toggle(mark).toArray();
+            n.updateProps({ [MarksPath]: marks });
+          });
+        }
 
-      // if (start.node.eq(end.node)) {
-      //   const [prev, middle, next] = TitleNode.from(start.node)
-      //     .replaceContent(
-      //       start.node.children.map((n) => n.clone(deepCloneWithNewId)),
-      //     )
-      //     .split(start.steps, end.steps);
-      //   middle.children.forEach((child) => {
-      //     const marks = MarkSet.from(child.marks).toggle(mark).toArray();
-      //     child.updateProps({ [MarksPath]: marks });
-      //   });
-      //
-      //   const textBlock = TitleNode.from(start.node)
-      //     .replaceContent(
-      //       [prev.children, middle.children, next.children].flat(),
-      //     )
-      //     .normalize();
-      //
-      //   printNode(textBlock.node);
-      //   tr.SetContent(start.node.id, textBlock.children);
-      // }
-      //
-      // console.log("xxxxxxxxxxx");
-      // return tr;
+        const textBlock = TitleNode.from(start.node)
+          .replaceContent(
+            [prev.children, middle.children, next.children].flat(),
+          )
+          .normalize();
+
+        printNode(textBlock.node);
+
+        const startStep = start.steps;
+        const endStepFromEnd = end.steps - end.node.stepSize;
+        const endSteps = textBlock.stepSize + textBlock.mapStep(endStepFromEnd);
+
+        const startPin = Pin.create(textBlock.node, start.offset, startStep);
+        const endPin = Pin.create(textBlock.node, end.offset, endSteps);
+        const after = PinnedSelection.create(startPin, endPin);
+
+        tr.SetContent(start.node.id, textBlock.children).Select(
+          after,
+          ActionOrigin.UserInput,
+        );
+
+        return tr;
+      }
 
       // console.log("Format selection", selection, mark);
       // const { start, end } = selection.pin(tr.state.nodeMap)!;
@@ -617,24 +637,23 @@ export class TransformCommands extends BeforePlugin {
             props: { [MarksPath]: tr.state.marks.toArray() },
           })!;
           console.log(start.steps, tr.state.marks);
+          const startStepFromEnd = start.steps - start.node.stepSize;
+          // FIXME: handle text block merge offset changes properly
           const startText = TitleNode.from(head.node.clone(deepCloneMap))
-            .insert(start.steps, textNode)
-            .resetMapper()
+            .insertInp(start.steps, textNode)
             .normalize();
 
-          const merges =
-            down.node.type.spec.mergeable &&
-            MarkSet.eq(down.node.marks, textNode.marks);
+          // const merges =
+          //   down.node.type.spec.mergeable &&
+          //   MarkSet.eq(down.node.marks, textNode.marks);
 
-          console.log(merges, down.offset, down.node.textContent);
-
+          const steps =
+            startText.stepSize + startText.mapStep(startStepFromEnd);
           const pin = startText.mapPin(
             Pin.create(
               startText.node,
               start.offset + textNode.focusSize,
-              start.steps +
-                textNode.stepSize +
-                (merges ? -2 : down.offset > 0 ? 0 : -2),
+              steps,
             ),
           );
 

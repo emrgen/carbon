@@ -128,10 +128,12 @@ export class ImmutableDraft implements Draft {
   }
 
   private addUpdated(id: NodeId) {
+    // console.log("ADD UPDATED", id.toString());
     this.updated.add(id);
   }
 
   private removeUpdated(id: NodeId) {
+    // console.log("REMOVE UPDATED", id.toString());
     this.updated.remove(id);
   }
 
@@ -641,14 +643,6 @@ export class ImmutableDraft implements Draft {
       console.log("INSERTED", n.id.toString(), n.parentId?.toString());
       this.addInserted(n);
     });
-  }
-
-  private insertAtEnd(parentId: NodeId, node: Node) {
-    const parent = this.unfreeze(parentId);
-    this.tm.insert(node, parent, parent.size);
-    this.addUpdated(parent.id);
-    this.addContentChanged(parent.id);
-    const block = node.closestBlock;
   }
 
   private insertBefore(refId: NodeId, node: Node) {

@@ -23,27 +23,41 @@ import { NodeContentData } from "./NodeContent";
 // when merging text blocks, you are merging the inline content along with the content marks
 export class TitleNode {
   readonly node: Node;
-  readonly mapper: IndexMapper;
+  readonly startMapper: IndexMapper;
+  readonly endMapper: IndexMapper;
 
   static from(node: Node) {
     const clone = node.type.schema.factory.clone(node, identity);
     clone.setParent(null).setParentId(null);
 
-    return new TitleNode(clone, IndexMapper.empty());
+    return new TitleNode(clone, IndexMapper.empty(), IndexMapper.empty());
   }
 
   static empty() {
-    return new TitleNode(Node.IDENTITY, IndexMapper.empty());
+    return new TitleNode(
+      Node.IDENTITY,
+      IndexMapper.empty(),
+      IndexMapper.empty(),
+    );
   }
 
-  private constructor(node: Node, mapper: IndexMapper) {
+  private constructor(
+    node: Node,
+    startMapper: IndexMapper = IndexMapper.empty(),
+    endMapper: IndexMapper = IndexMapper.empty(),
+  ) {
     if (!node.isTextContainer && !node.eq(Node.IDENTITY)) {
       console.error(node.toJSON());
       throw new Error("can not create text block from non text block node");
     }
 
     this.node = node;
-    this.mapper = mapper;
+    this.startMapper = startMapper;
+    this.endMapper = endMapper;
+  }
+
+  get stepSize() {
+    return this.node.stepSize;
   }
 
   get isDefault() {
@@ -70,9 +84,186 @@ export class TitleNode {
 
     const down = Step.create(this.node, offset).down();
 
-    if (down.isBefore || down.isAtEnd) {
+    if (down.isBefore || down.isAtEnd || down.isAtStart || down.isAfter) {
       return this;
     }
+
+    // the offset falls within an inline node
+    const { index } = down.node;
+
+    const [before, after] = InlineNode.from(down.node).split(down.offset - 1);
+
+    // printNode(before);
+    // printNode(after);
+
+    const prev = this.node.children.slice(0, index);
+    const next = this.node.children.slice(index + 1);
+
+    const children = [...prev, before, after, ...next];
+
+    const startMapper = this.startMapper.clone();
+    startMapper.add(IndexMap.create(offset + 1, 2));
+
+    const endMapper = this.endMapper.clone();
+    console.log(offset - 1 - this.node.stepSize, -2);
+    endMapper.add(IndexMap.create(offset - 1 - this.node.stepSize, -2));
+
+    return new TitleNode(
+      this.cloneNode(this.node, children),
+      startMapper,
+      endMapper,
+    );
+  }
+
+  insertInp(offset: number, node: Node) {
+    if (offset <= 1) {
+      return this.prepend([node]);
+    }
+
+    if (offset >= this.node.stepSize - 1) {
+      return this.append([node]);
+    }
+
+    const down = Step.create(this.node, offset).down();
+
+    if (down.isBefore || down.isAtStart) {
+      const { index } = down.node;
+      const prev = this.node.children.slice(0, index);
+      const next = this.node.children.slice(index);
+      const children = [...prev, node, ...next];
+
+      const startMapper = this.startMapper.clone();
+      startMapper.add(
+        IndexMap.create(offset + (down.isAtStart ? 1 : 2), node.stepSize),
+      );
+
+      const endMapper = this.startMapper.clone();
+      endMapper.add(
+        IndexMap.create(
+          offset - (down.isAtStart ? 1 : 2) - this.node.stepSize,
+          -node.stepSize,
+        ),
+      );
+
+      return new TitleNode(
+        this.cloneNode(this.node, children),
+        startMapper,
+        endMapper,
+      );
+    }
+
+    if (down.isAfter || down.isAtEnd) {
+      const { index } = down.node;
+      const prev = this.node.children.slice(0, index + 1);
+      const next = this.node.children.slice(index + 1);
+      const children = [...prev, node, ...next];
+
+      const startMapper = this.startMapper.clone();
+      startMapper.add(
+        IndexMap.create(offset + (down.isAtEnd ? 1 : 2), node.stepSize),
+      );
+
+      const endMapper = this.endMapper.clone();
+      endMapper.add(
+        IndexMap.create(
+          offset - (down.isAtEnd ? 1 : 2) - this.node.stepSize,
+          -node.stepSize,
+        ),
+      );
+
+      return new TitleNode(
+        this.cloneNode(this.node, children),
+        startMapper,
+        endMapper,
+      );
+    }
+
+    return this.splitInp(offset).insertInp(offset + 1, node);
+  }
+
+  removeInp(from: number, to: number) {
+    if (from === to) {
+      return this;
+    }
+
+    const d1 = Step.create(this.node, from).down();
+    const d2 = Step.create(this.node, to).down();
+
+    if (
+      d1.node.eq(d2.node) &&
+      (d1.isBefore || d1.isAtStart) &&
+      (d2.isAfter || d2.isAtEnd)
+    ) {
+      const { index } = d1.node;
+      const prev = this.node.children.slice(0, index);
+      const next = this.node.children.slice(index + 1);
+      const children = [...prev, ...next];
+
+      const startMapper = this.startMapper.clone();
+      console.log(from, -d1.node.stepSize);
+      startMapper.add(IndexMap.create(from, -d1.node.stepSize));
+
+      const endMapper = this.endMapper.clone();
+      endMapper.add(
+        IndexMap.create(from - this.node.stepSize, -d1.node.stepSize),
+      );
+
+      return new TitleNode(
+        this.cloneNode(this.node, children),
+        startMapper,
+        endMapper,
+      );
+    }
+
+    if ((d1.isAfter || d1.isAtEnd) && (d2.isBefore || d2.isAtStart)) {
+      const { index: index1 } = d1.node;
+      const { index: index2 } = d2.node;
+      const prev = this.node.children.slice(0, index1 + 1);
+      const next = this.node.children.slice(index2);
+      const children = [...prev, ...next];
+      const middle = this.node.children.slice(index1 + 1, index2);
+
+      const stepSize = middle.reduce((acc, curr) => acc + curr.stepSize, 0);
+      const startMapper = this.startMapper.clone();
+      startMapper.add(IndexMap.create(from, -stepSize));
+
+      const endMapper = this.endMapper.clone();
+      endMapper.add(IndexMap.create(from - this.node.stepSize, +stepSize));
+
+      return new TitleNode(
+        this.cloneNode(this.node, children),
+        startMapper,
+        endMapper,
+      );
+    }
+
+    if ((d1.isBefore || d1.isAtStart) && (d2.isBefore || d2.isAtStart)) {
+      const { index: index1 } = d1.node;
+      const { index: index2 } = d2.node;
+      const prev = this.node.children.slice(0, index1);
+      const next = this.node.children.slice(index2 + 1);
+      const children = [...prev, ...next];
+      const middle = this.node.children.slice(index1, index2);
+
+      const stepSize = middle.reduce((acc, curr) => acc + curr.stepSize, 0);
+      const startMapper = this.startMapper.clone();
+      startMapper.add(IndexMap.create(from, -stepSize));
+
+      const endMapper = this.endMapper.clone();
+      endMapper.add(IndexMap.create(from - this.node.stepSize, +stepSize));
+
+      return new TitleNode(
+        this.cloneNode(this.node, children),
+        startMapper,
+        endMapper,
+      );
+    }
+
+    const title = this.splitInp(to).splitInp(from);
+    const newFrom = title.mapStep(from);
+    const newTo = title.node.stepSize + title.mapStep(to - this.node.stepSize);
+
+    return title.removeInp(newFrom, newTo);
   }
 
   // ------------------------------
@@ -82,8 +273,12 @@ export class TitleNode {
   }
 
   // mapStep maps the original location to the current location after the text block has been modified
-  mapStep(from: number): number {
-    return this.mapper.map(IndexMap.DEFAULT, from);
+  mapStep(step: number): number {
+    if (step >= 0) {
+      return this.startMapper.map(IndexMap.DEFAULT, step);
+    } else {
+      return this.endMapper.map(IndexMap.DEFAULT, step);
+    }
   }
 
   // the steps are used to find the new location of the pin after the text block has been modified
@@ -174,14 +369,14 @@ export class TitleNode {
       const prevNode = this.cloneNode(this.node, prev);
       const nextNode = this.cloneNode(this.node, next);
 
-      const prevMapper = this.mapper.clone();
+      const prevMapper = this.startMapper.clone();
       prevMapper.add(
         IndexMap.create(
           start,
           prevNode.children.reduce((acc, curr) => acc - curr.stepSize, 0),
         ),
       );
-      const nextMapper = this.mapper.clone();
+      const nextMapper = this.startMapper.clone();
       nextMapper.add(
         IndexMap.create(
           start,
@@ -217,8 +412,8 @@ export class TitleNode {
       [after, ...next].filter(identity) as Node[],
     );
 
-    const prevMapper = this.mapper.clone();
-    const nextMapper = this.mapper.clone();
+    const prevMapper = this.startMapper.clone();
+    const nextMapper = this.startMapper.clone();
 
     prevMapper.add(
       IndexMap.create(
@@ -259,7 +454,7 @@ export class TitleNode {
 
     // check if the target offset is at the start of the text block
     if (0 < at && at <= 2) {
-      const mapper = this.mapper.clone();
+      const mapper = this.startMapper.clone();
       mapper.add(IndexMap.create(at, stepSize));
       const children = [...content, ...this.node.children];
       const node = this.cloneNode(this.node, children);
@@ -268,7 +463,7 @@ export class TitleNode {
     }
 
     if (this.node.stepSize - 2 <= at && at < this.node.stepSize) {
-      const mapper = this.mapper.clone();
+      const mapper = this.startMapper.clone();
       mapper.add(IndexMap.create(at, stepSize));
       const children = [...this.node.children, ...content];
       const node = this.cloneNode(this.node, children);
@@ -278,8 +473,6 @@ export class TitleNode {
 
     const down = Step.create(this.node, at).down();
     if (down.isBefore || (down.isAtStart && down.node.parent?.eq(this.node))) {
-      const mapper = this.mapper.clone();
-      mapper.add(IndexMap.create(at, stepSize));
       const { index } = down.node;
       const prev = this.node.children.slice(0, index);
       const next = this.node.children.slice(index);
@@ -287,12 +480,12 @@ export class TitleNode {
       const children = [...prev, ...content, ...next];
       const node = this.cloneNode(this.node, children);
 
+      const mapper = this.startMapper.clone();
+      mapper.add(IndexMap.create(at + 1, stepSize));
       return new TitleNode(node, mapper);
     }
 
     if ((down.isAfter || down.isAtEnd) && down.node.parent?.eq(this.node)) {
-      const mapper = this.mapper.clone();
-      mapper.add(IndexMap.create(at, stepSize));
       const { index } = down.node;
       const prev = this.node.children.slice(0, index + 1);
       const next = this.node.children.slice(index + 1);
@@ -300,6 +493,8 @@ export class TitleNode {
       const children = [...prev, ...content, ...next];
       const node = this.cloneNode(this.node, children);
 
+      const mapper = this.startMapper.clone();
+      mapper.add(IndexMap.create(at, stepSize));
       return new TitleNode(node, mapper);
     }
 
@@ -313,7 +508,8 @@ export class TitleNode {
     const children = [...prev, before, ...content, after, ...next];
     const node = this.cloneNode(this.node, children);
 
-    const mapper = this.mapper.clone();
+    const mapper = this.startMapper.clone();
+    mapper.add(IndexMap.create(at + 1, 2));
     mapper.add(IndexMap.create(at + 1, stepSize));
 
     return new TitleNode(node, mapper);
@@ -322,7 +518,7 @@ export class TitleNode {
   normalize(): TitleNode {
     const children = this.normalizeContent();
     const node = this.cloneNode(this.node, children);
-    return new TitleNode(node, this.mapper.clone());
+    return new TitleNode(node, this.startMapper.clone());
   }
 
   // clone node with new children
@@ -564,7 +760,7 @@ export class TitleNode {
   ) {
     return new TitleNode(
       this.node.type.schema.factory.clone(this.node, map),
-      this.mapper.clone(),
+      this.startMapper.clone(),
     );
   }
 
@@ -572,9 +768,30 @@ export class TitleNode {
     return new TitleNode(this.node, IndexMapper.empty());
   }
 
-  append(children: Node[]) {
-    return TitleNode.from(
-      this.cloneNode(this.node, [...this.node.children, ...children]),
+  append(node: Node[]) {
+    const children = [...this.node.children, ...node];
+    const stepSize = node.reduce((acc, curr) => acc + curr.stepSize, 0);
+    const endMapper = this.endMapper.clone();
+    endMapper.add(IndexMap.create(-2, -stepSize));
+
+    return new TitleNode(
+      this.cloneNode(this.node, children),
+      this.startMapper,
+      endMapper,
+    );
+  }
+
+  private prepend(node: Node[]) {
+    const children = [...node, ...this.node.children];
+    const stepSize = node.reduce((acc, curr) => acc + curr.stepSize, 0);
+
+    const startMapper = this.startMapper.clone();
+    startMapper.add(IndexMap.create(2, stepSize));
+
+    return new TitleNode(
+      this.cloneNode(this.node, children),
+      startMapper,
+      this.endMapper,
     );
   }
 }
