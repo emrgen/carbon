@@ -248,7 +248,9 @@ export default function SelectionTracker() {
               aria-label={"strike"}
               icon={<RxCross2 />}
               onClick={() => {
-                app.cmd.formatter.remove(Mark.background("x"))?.dispatch();
+                app.cmd.formatter
+                  .toggle(Mark.background("transparent"))
+                  ?.dispatch();
               }}
             />
           </HStack>
