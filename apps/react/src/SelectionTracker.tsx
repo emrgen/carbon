@@ -1,6 +1,11 @@
-import { EmptyInline, Mark } from "@emrgen/carbon-core";
+import { EmptyInline, Mark, Node } from "@emrgen/carbon-core";
 import { EventsOut } from "@emrgen/carbon-core";
-import React, { useEffect, useMemo, useState } from "react";
+import { PinnedSelection } from "@emrgen/carbon-core";
+import { TitleNode } from "@emrgen/carbon-core";
+import { MarkSet } from "@emrgen/carbon-core";
+import React, { useMemo, useState } from "react";
+import { useEffect } from "react";
+import { useCallback } from "react";
 import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 import {
   Box,
@@ -15,11 +20,61 @@ import { debounce } from "lodash";
 import { TbItalic } from "react-icons/tb";
 import { RxCross2 } from "react-icons/rx";
 
+// This function is used to collect all the marks in a selection
+const collectMarks = (selection: PinnedSelection) => {
+  const { start, end } = selection;
+
+  const leaves: Node[] = [];
+
+  const [a, startBlock] = TitleNode.from(start.node).split(start.steps);
+  const [endBlock, b] = TitleNode.from(end.node).split(end.steps);
+
+  startBlock.children.forEach((n) => {
+    leaves.push(n);
+  });
+
+  endBlock.children.forEach((n) => {
+    leaves.push(n);
+  });
+
+  if (!start.node.eq(end.node)) {
+    start.node.next(
+      (n) => {
+        if (n.eq(end.node)) {
+          return true;
+        }
+        if (n.isFocusable) {
+          leaves.push(n);
+        }
+        return false;
+      },
+      { order: "pre" },
+    );
+  }
+
+  const markSet = MarkSet.from([]);
+
+  leaves.some((n) => {
+    const marks = n.marks;
+    marks.forEach((m) => {
+      markSet.add(m);
+    });
+  });
+
+  return markSet;
+};
+
 export default function SelectionTracker() {
   const app = useCarbon();
   const [showContextMenu, setShowContextMenu] = useState(false);
   const overlay = useCarbonOverlay();
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const [marks, setMarks] = useState<MarkSet>(MarkSet.from([]));
+
+  const hideContextMenu = useCallback(() => {
+    setShowContextMenu(false);
+    setMarks(MarkSet.from([]));
+  }, [setMarks]);
 
   useEffect(() => {
     const onChange = debounce((e) => {
@@ -34,29 +89,26 @@ export default function SelectionTracker() {
 
       const { head, tail } = state.selection;
       const headDown = head.down();
-      // console.log(
-      //   "xx",
-      //   head.toString(),
-      //   headDown.leftAlign.up().toString(),
-      //   headDown.rightAlign.up().toString(),
-      // );
+
       const tailDown = tail.down();
       if (
         head.eq(tail) ||
         (headDown.node.eq(tailDown.node) && EmptyInline.is(headDown.node))
       ) {
-        setShowContextMenu(false);
+        hideContextMenu();
         return;
       }
 
       // don't show context menu if the selection is in the document title
       if (head.node.parent?.isDocument || tail.node.parent?.isDocument) {
-        setShowContextMenu(false);
+        hideContextMenu();
         return;
       }
 
       const selection = window.getSelection();
       if (selection && !state.selection.isCollapsed) {
+        const marks = collectMarks(state.selection);
+        setMarks(marks);
         const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
         if (state.selection.isForward) {
           const range = new Range();
@@ -76,7 +128,7 @@ export default function SelectionTracker() {
           setShowContextMenu(true);
         }
       } else {
-        setShowContextMenu(false);
+        hideContextMenu();
         setRect(null);
       }
     }, 100);
@@ -86,21 +138,23 @@ export default function SelectionTracker() {
       if (!app.committed) return;
       const { selection } = state;
       if (selection.isCollapsed) {
-        setShowContextMenu(false);
+        hideContextMenu();
         return;
       }
     };
 
-    app.on(EventsOut.selectionUpdated, onSelectionUpdate);
+    app.on(EventsOut.contentUpdated, onChange);
     app.contentElement?.addEventListener("mouseup", onChange);
     app.contentElement?.addEventListener("keyup", onChange);
 
     return () => {
-      app.off(EventsOut.selectionUpdated, onSelectionUpdate);
-      app.contentElement?.removeEventListener("mouseup", onChange);
-      app.contentElement?.removeEventListener("keyup", onChange);
+      app.off(EventsOut.contentUpdated, onChange);
+      // app.contentElement?.removeEventListener("mouseup", onChange);
+      // app.contentElement?.removeEventListener("keyup", onChange);
     };
-  }, [app, overlay]);
+  }, [app, hideContextMenu, overlay]);
+
+  console.log("marks", marks);
 
   const contextMenu = useMemo(() => {
     if (!showContextMenu) return null;
@@ -119,6 +173,7 @@ export default function SelectionTracker() {
           overflow={"visible"}
         >
           <HStack
+            pos={"relative"}
             align={"center"}
             h={"full"}
             p={1}
@@ -126,12 +181,13 @@ export default function SelectionTracker() {
             borderRadius={"md"}
             boxShadow={"0 3px 10px rgba(0,0,0,0.2)"}
             justify={"space-between"}
-            w={"190px"}
-            spacing={0}
+            w={"200px"}
+            spacing={1}
           >
             <ContextButton
               aria-label={"bold"}
               icon={<BiBold />}
+              bg={marks.has(Mark.BOLD) ? "gray.100" : "transparent"}
               onClick={() => {
                 app.cmd.formatter.toggle(Mark.BOLD)?.dispatch();
               }}
@@ -139,6 +195,7 @@ export default function SelectionTracker() {
             <ContextButton
               aria-label={"italic"}
               icon={<TbItalic />}
+              bg={marks.has(Mark.ITALIC) ? "gray.100" : "transparent"}
               onClick={() => {
                 app.cmd.formatter.toggle(Mark.ITALIC)?.dispatch();
               }}
@@ -146,6 +203,7 @@ export default function SelectionTracker() {
             <ContextButton
               aria-label={"underline"}
               icon={<BiUnderline />}
+              bg={marks.has(Mark.UNDERLINE) ? "gray.100" : "transparent"}
               onClick={() => {
                 app.cmd.formatter.toggle(Mark.UNDERLINE)?.dispatch();
               }}
@@ -153,6 +211,7 @@ export default function SelectionTracker() {
             <ContextButton
               aria-label={"strike"}
               icon={<BiStrikethrough />}
+              bg={marks.has(Mark.STRIKE) ? "gray.100" : "transparent"}
               onClick={() => {
                 app.cmd.formatter.toggle(Mark.STRIKE)?.dispatch();
               }}
@@ -160,6 +219,11 @@ export default function SelectionTracker() {
             <ContextButton
               aria-label={"strike"}
               icon={<Circle size={4} bg={"#ffce26"} />}
+              bg={
+                marks.has(Mark.background("#ffce26"))
+                  ? "gray.100"
+                  : "transparent"
+              }
               onClick={() => {
                 app.cmd.formatter
                   .toggle(Mark.background("#ffce26"))
@@ -169,6 +233,11 @@ export default function SelectionTracker() {
             <ContextButton
               aria-label={"strike"}
               icon={<Circle size={4} bg={"#8ae0ff"} />}
+              bg={
+                marks.has(Mark.background("#8ae0ff"))
+                  ? "gray.100"
+                  : "transparent"
+              }
               onClick={() => {
                 app.cmd.formatter
                   .toggle(Mark.background("#8ae0ff"))
@@ -186,7 +255,7 @@ export default function SelectionTracker() {
         </Box>
       </Portal>
     );
-  }, [showContextMenu, overlay.ref, rect, app.cmd.formatter]);
+  }, [showContextMenu, overlay.ref, rect, app.cmd.formatter, marks]);
 
   return (
     <>
