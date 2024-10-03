@@ -5,7 +5,7 @@ export * from "./plugins";
 export * from "./core/types";
 export * from "./core/actions";
 export * from "./core/InlineNode";
-export * from "./core/TextBlock";
+export * from "./core/TitleNode";
 
 export * from "./utils/split";
 export * from "./utils/key";

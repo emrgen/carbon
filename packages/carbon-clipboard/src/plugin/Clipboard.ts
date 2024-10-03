@@ -20,15 +20,19 @@ import {
   Slice,
   SliceNode,
   TextWriter,
+  TitleNode,
 } from "@emrgen/carbon-core";
 
 import { Optional } from "@emrgen/types";
 import { identity, isEmpty } from "lodash";
 import { setClipboard } from "../clipboard";
 import { parseClipboard } from "../parser/parse";
-import { TextBlock } from "@emrgen/carbon-core/src/core/TextBlock";
+
 import BTree from "sorted-btree";
 import { CarbonCodec } from "@emrgen/carbon-codec";
+
+let cache: any = null;
+let clipboard: any = null;
 
 export class ClipboardPlugin extends AfterPlugin {
   name = "clipboard";
@@ -121,16 +125,26 @@ export class ClipboardPlugin extends AfterPlugin {
         const { app } = ctx;
         preventAndStopCtx(ctx);
         const { selection } = app;
+        if (cache) {
+          app.cmd.transform.paste(selection, cache.clone())?.Dispatch();
+          return;
+        }
+
         parseClipboard(ctx.app.schema).then((slice) => {
           if (isEmpty(slice)) {
+            cache = null;
             console.log("failed to parse clipboard data");
             return;
           }
+          cache = slice;
 
           printNode(slice.root);
 
-          app.cmd.transform.paste(selection, slice)?.Dispatch();
+          app.cmd.transform.paste(selection, slice.clone())?.Dispatch();
         });
+      },
+      keyUp: (ctx: EventContext<any>) => {
+        cache = null;
       },
     };
   }
@@ -256,8 +270,10 @@ export class ClipboardPlugin extends AfterPlugin {
     );
 
     // collect spans that falls outside the selection, so that we can remove them later
-    deleteGroup.addRange(NodeSpan.create(Pin.toStartOf(start.node)!, start));
-    deleteGroup.addRange(NodeSpan.create(end, Pin.toEndOf(end.node)!));
+    deleteGroup.addRange(
+      NodeSpan.create(Pin.toStartOf(start.node)?.up()!, start),
+    );
+    deleteGroup.addRange(NodeSpan.create(end, Pin.toEndOf(end.node)?.up()!));
 
     // console.log(deleteGroup.ids.map(id => id.toString()));
     // console.log(deleteGroup.ranges);
@@ -289,10 +305,9 @@ export class ClipboardPlugin extends AfterPlugin {
 
       const spans = spanMap.get(n.id);
       spans?.forEach((span) => {
-        const content = TextBlock.from(n).removeContent(
-          span.start.offset,
-          span.end.offset,
-        );
+        const content = TitleNode.from(n)
+          .remove(span.start.steps, span.end.steps)
+          .normalize();
         console.log(
           "remove content",
           start.node.textContent,
@@ -300,7 +315,7 @@ export class ClipboardPlugin extends AfterPlugin {
           end.offset,
         );
 
-        n.updateContent(content);
+        n.updateContent(content.children);
       });
 
       return false;

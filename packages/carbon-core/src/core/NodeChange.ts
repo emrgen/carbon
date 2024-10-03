@@ -1,24 +1,22 @@
 import { Optional } from "@emrgen/types";
 import { PointedSelection } from "./PointedSelection";
-import {
-  CarbonAction,
-  Draft,
-  InsertNodeAction,
-  NodeData,
-  NodeId,
-  NodeIdComparator,
-  NodeIdSet,
-  NodePropsJson,
-  Path,
-  RemoveNodeAction,
-  SelectAction,
-  SetContentAction,
-  TxType,
-  UpdatePropsAction,
-} from "@emrgen/carbon-core";
 import BTree from "sorted-btree";
 import { last, uniqBy } from "lodash";
 import dayjs from "dayjs";
+import { SetContentAction } from "./actions/index";
+import { InsertNodeAction } from "./actions/index";
+import { RemoveNodeAction } from "./actions/index";
+import { CarbonAction } from "./actions/index";
+import { TxType } from "./actions/index";
+import { SelectAction } from "./actions/index";
+import { UpdatePropsAction } from "./actions/index";
+import { NodeId } from "./NodeId";
+import { NodeIdComparator } from "./NodeId";
+import { NodeIdSet } from "./BSet";
+import { Path } from "./Node";
+import { NodePropsJson } from "./NodeProps";
+import { Draft } from "./Draft";
+import { NodeData } from "./NodeContent";
 
 const CONTENT_ACTIONS = [SetContentAction, InsertNodeAction, RemoveNodeAction];
 
@@ -192,7 +190,6 @@ export class StateActions {
 
   optimize(): StateActions {
     return this;
-
     // reduce prop updates
     const propActions: BTree<NodeId, UpdatePropsAction[]> = new BTree(
       undefined,

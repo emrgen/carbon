@@ -7,9 +7,11 @@ import { CarbonAction } from "./actions/types";
 import { CarbonMessageFormat } from "./MessageBus";
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginState } from "./PluginState";
-import { PluginManager, StateActions } from "@emrgen/carbon-core";
+import { PluginManager } from "./PluginManager";
 import { NodeEncoder, Writer } from "./Encoder";
+import { StateActions } from "./NodeChange";
 import { identity } from "lodash";
+import { PlainNodeProps } from "./NodeProps";
 
 export enum PluginType {
   Node,
@@ -45,7 +47,9 @@ export abstract class CarbonPlugin {
   destroy(app: Carbon) {}
 
   spec(): NodeSpec {
-    return {};
+    return {
+      content: "block*",
+    };
   }
 
   // initialize the node with default styles and attributes
@@ -111,6 +115,8 @@ export abstract class CarbonPlugin {
   // subscribe(editor:Editor) { }
   // unsubscribe(editor:Editor) { }
   // publish(editor:Editor) { }
+
+  decorate(node: Node, props: PlainNodeProps) {}
 }
 
 export class NodePlugin extends CarbonPlugin {

@@ -48,7 +48,7 @@ export class UpdatePropsAction implements CarbonAction {
 
     console.log("update props", before, this.after);
 
-    this.before = before;
+    this.before = before ?? {};
     draft.updateProps(nodeId, this.after);
   }
 

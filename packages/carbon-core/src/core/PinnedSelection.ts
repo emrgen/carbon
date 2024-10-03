@@ -28,7 +28,11 @@ export class PinnedSelection {
   static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
 
   // map dom selection to editor selection
-  static fromDom(store: NodeStore, align = false): Optional<PinnedSelection> {
+  static fromDom(store: NodeStore): Optional<{
+    head: Pin;
+    tail: Pin;
+    selection: PinnedSelection;
+  }> {
     const domSelection = window.getSelection();
     // console.log(
     //   "ANCHOR TEXT",
@@ -50,7 +54,15 @@ export class PinnedSelection {
       focusNode: focusEl,
       focusOffset,
     } = domSelection;
-    // console.log(p14('%c[info]'), 'color:pink', p30('Selection.fromDom'), anchorEl, focusEl, anchorOffset, focusOffset);
+    // console.log(
+    //   p14("%c[info]"),
+    //   "color:pink",
+    //   p30("Selection.fromDom"),
+    //   anchorEl,
+    //   focusEl,
+    //   anchorOffset,
+    //   focusOffset,
+    // );
 
     // console.log(store.nodeMap.nodes().map(n => `${n.key}:${n.parent?.key}`).join(' > '))
     let resolvedAnchorNode = store.resolve(anchorEl, anchorOffset);
@@ -101,7 +113,7 @@ export class PinnedSelection {
       if (anchorNode.after(focusNode)) {
         anchorNode = anchorNode.prev((n) => n.isFocusable);
         if (anchorNode) {
-          anchorOffset = anchorNode.size;
+          anchorOffset = anchorNode.focusSize;
         } else {
           console.error("should not reach here");
         }
@@ -156,22 +168,30 @@ export class PinnedSelection {
     // if (anchorNode.isAtom) { anchorOffset = constrain(anchorOffset, 0, 1) }
     // if (focusNode.isAtom) { focusOffset = constrain(focusOffset, 0, 1) }
 
-    // console.log(anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
-    const tail = Pin.fromDom(anchorNode, anchorOffset, align)?.up();
-    const head = Pin.fromDom(focusNode, focusOffset, align)?.up();
-    // console.log(tail?.toString(), head?.toString());
+    // console.log(
+    //   anchorNode.id.toString(),
+    //   focusNode.id.toString(),
+    //   anchorOffset,
+    //   focusOffset,
+    // );
+    const tail = Pin.fromDom(anchorNode, anchorOffset);
+    const head = Pin.fromDom(focusNode, focusOffset);
 
     if (!tail || !head) {
       console.warn(p14("%c[error]"), "color:red", "Pin.fromDom failed");
       // throw new Error('Pin.fromDom failed');
-      return;
+      return null;
     }
 
     // console.info(p14('%c[info]'), 'color:pink', p30('fromDom:afterOffsetModify'), anchorNode.id.toString(), focusNode.id.toString(), anchorOffset, focusOffset);
     const selection = PinnedSelection.create(tail, head);
     // console.log(p14('%c[info]'), 'color:pink', p30('fromDom:Selection'), selection.toString());
 
-    return selection;
+    return {
+      head,
+      tail,
+      selection,
+    };
   }
 
   static fromPin(pin: Pin): PinnedSelection {
@@ -191,7 +211,7 @@ export class PinnedSelection {
     head: Pin,
     origin = ActionOrigin.Unknown,
   ): PinnedSelection {
-    return new PinnedSelection(tail, head, [], origin);
+    return new PinnedSelection(tail.up(), head.up(), [], origin);
   }
 
   private constructor(
@@ -200,6 +220,9 @@ export class PinnedSelection {
     readonly nodes: Node[],
     readonly origin = ActionOrigin.Unknown,
   ) {
+    if (tail.steps === -1 || head.steps === -1) {
+      console.error("PinnedSelection: invalid selection, one pin is identity");
+    }
     if (tail.eq(Pin.IDENTITY) && !tail.eq(head)) {
       throw new Error(
         "PinnedSelection: invalid selection, one pin is identity and another is not",
@@ -207,8 +230,10 @@ export class PinnedSelection {
     }
 
     // ensure that the selection is valid
-    console.assert(tail.node.isTextContainer);
-    console.assert(head.node.isTextContainer);
+    if (!tail.eq(Pin.NULL) && !tail.eq(head)) {
+      console.assert(tail.node.isTextContainer);
+      console.assert(head.node.isTextContainer);
+    }
   }
 
   get blocks(): Node[] {
@@ -297,6 +322,26 @@ export class PinnedSelection {
     return head.isAfterOf(tail);
   }
 
+  get leftAlign(): PinnedSelection {
+    const { tail, head } = this;
+    const downTail = tail.down();
+    const downHead = head.down();
+    return PinnedSelection.create(
+      downTail.leftAlign.up(),
+      downHead.leftAlign.up(),
+    );
+  }
+
+  get rightAlign(): PinnedSelection {
+    const { tail, head } = this;
+    const downTail = tail.down();
+    const downHead = head.down();
+    return PinnedSelection.create(
+      downTail.rightAlign.up(),
+      downHead.rightAlign.up(),
+    );
+  }
+
   // bounds return coordinate bound of the selection in the dom
   bounds(store: NodeStore): SelectionBounds {
     const { head } = this;
@@ -334,10 +379,10 @@ export class PinnedSelection {
     return { head: null, tail: null };
   }
 
-  syncDom(store: NodeStore) {
+  syncDom(store: NodeStore): boolean {
     if (this.isInvalid) {
       console.warn("skipped invalid selection sync");
-      return;
+      return false;
     }
 
     // if (this.isDomInSync(store)) {
@@ -351,24 +396,37 @@ export class PinnedSelection {
 
     try {
       const domSelection = this.intoDomSelection(store);
-      // console.log('Selection.syncDom:', domSelection);
+      // console.log("Selection.syncDom:", domSelection);
       if (!domSelection) {
         console.log(
           p14("%c[error]"),
           "color:red",
           "failed to map selection to dom",
         );
-        return;
+        return false;
       }
 
       const { anchorNode, anchorOffset, focusNode, focusOffset } = domSelection;
+
+      if (anchorOffset < 0 || focusOffset < 0) {
+        console.error(p14("%c[error]"), "color:red", "negative offset");
+        return false;
+      }
 
       // let node = anchorNode
       // while (node = node?.parentElement) {
       // 	console.log(node)
       // }
 
-      // console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
+      // console.log(
+      //   p14("%c[info]"),
+      //   "color:pink",
+      //   p30("selection.setBaseAndExtent"),
+      //   anchorNode,
+      //   anchorOffset,
+      //   focusNode,
+      //   focusOffset,
+      // );
 
       // Ref: https://stackoverflow.com/a/779785/4556425
       // https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
@@ -379,8 +437,17 @@ export class PinnedSelection {
         selection?.focusNode === focusNode &&
         selection?.anchorOffset === anchorOffset &&
         selection?.focusOffset === focusOffset;
+
       if (!inSync) {
-        // console.log(p14('%c[info]'), 'color:pink', p30('selection.setBaseAndExtent'), anchorNode, anchorOffset, focusNode, focusOffset);
+        // console.log(
+        //   p14("%c[info]"),
+        //   "color:pink",
+        //   p30("selection.setBaseAndExtent"),
+        //   anchorNode,
+        //   anchorOffset,
+        //   focusNode,
+        //   focusOffset,
+        // );
         selection?.setBaseAndExtent(
           anchorNode,
           anchorOffset,
@@ -399,7 +466,7 @@ export class PinnedSelection {
       // NOTE: maybe not needed in production
       // verify if the selection is successfully set
       const pinnedSelection = PinnedSelection.fromDom(store);
-      const domSel = pinnedSelection?.intoDomSelection(store);
+      const domSel = pinnedSelection?.selection.intoDomSelection(store);
       console.assert(
         domSel?.anchorNode === domSelection.anchorNode,
         "failed to sync anchorNode",
@@ -416,10 +483,14 @@ export class PinnedSelection {
         domSel?.focusOffset === domSelection.focusOffset,
         "failed to sync focus offset",
       );
-      // console.log('Selection.syncDom:', this.toString(), domSel)
+      // console.log("Selection.syncDom:", this.toString(), domSel);
+
+      return inSync;
     } catch (err) {
       console.error(err);
     }
+
+    return false;
   }
 
   isDomInSync(store: NodeStore) {
@@ -445,7 +516,7 @@ export class PinnedSelection {
 
   intoDomSelection(store: NodeStore): Optional<DomSelection> {
     const { head, tail } = this;
-    // console.log('Selection.intoDomSelection', range?.toString());
+    // console.log("Selection.intoDomSelection", this?.toString());
     // console.debug(p14('%c[DEBUG]'), 'color:magenta', p30('intoDomSelection'), range.toString());
 
     const focus = head.down();
@@ -453,6 +524,7 @@ export class PinnedSelection {
 
     if (!focus || !anchor) return;
 
+    // console.log(anchor.node.id.toString(), anchor.offset);
     let anchorNode: any = store.element(anchor.node.id);
     let focusNode: any = store.element(focus.node.id);
 
@@ -477,7 +549,7 @@ export class PinnedSelection {
     // 	headOffset = 11
     // }
 
-    // console.log('nativeSelection', anchorNode.id.toString(), anchorNode);
+    // console.log("nativeSelection", anchorNode.id.toString(), anchorNode);
     // console.log(focusNode.firstChild?.firstChild ?? focusNode.firstChild ?? focusNode, headOffset);
     // console.log(anchorNode.firstChild?.firstChild ?? anchorNode.firstChild ?? anchorNode, tailOffset);
 
@@ -487,6 +559,26 @@ export class PinnedSelection {
     if (!head.node.isBlock || !head.node.isAtom) {
       focusNode = focusNode.firstChild ?? focusNode;
     }
+
+    if (!anchor.node?.isFocusable) {
+      console.warn(
+        p14("%c[error]"),
+        "color:red",
+        "tailNode is not focusable",
+        anchorNode,
+      );
+    }
+
+    if (!focus.node?.isFocusable) {
+      console.warn(
+        p14("%c[error]"),
+        "color:red",
+        "headNode is not focusable",
+        focusNode,
+      );
+    }
+
+    // console.log("anchorNode", anchorNode);
 
     // find focusable dom nodes
     return {
@@ -544,8 +636,9 @@ export class PinnedSelection {
 
   moveHead(distance: number): Optional<PinnedSelection> {
     let { tail, head } = this;
-    const focus = head.moveBy(distance) as any;
+    const focus = head.moveBy(distance);
     if (!focus || !head) return;
+    console.log("xxx", focus.toString());
     return PinnedSelection.create(tail, focus);
   }
 

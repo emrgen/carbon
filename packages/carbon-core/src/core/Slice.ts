@@ -1,6 +1,7 @@
 import { Node, Path } from "./Node";
-import { CodeTokenClassPath, Fragment } from "@emrgen/carbon-core";
 import { flatten, zip } from "lodash";
+import { Fragment } from "./Fragment";
+import { LocalClassPath } from "./NodeProps";
 
 // Slice represents a selection of nodes in the editor
 // it is used to store the current selection and to copy and paste nodes
@@ -72,7 +73,7 @@ export class Slice {
   transformCodeNodes(nodes: Node[]) {
     return nodes.map((n) => {
       n.updateProps({
-        [CodeTokenClassPath]: "",
+        [LocalClassPath]: "",
       });
 
       if (n.type.name === "codeTitle") {

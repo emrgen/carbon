@@ -3,14 +3,17 @@ import {
   AtomContentPath,
   AtomSizePath,
   EventHandlerMap,
+  LocalClassPath,
   Node,
+  NodeEncoder,
   NodeSpec,
   Pin,
   PinnedSelection,
   preventAndStopCtx,
+  Writer,
 } from "@emrgen/carbon-core";
 
-// <EmptyInline><IsolateInlineAtom><EmptyInline>
+// <Text/><EmptyInline/><Text/><Mention><EmptyInline/></Mention/>
 
 export class EmptyInline extends InlineAtom {
   name = "empty";
@@ -23,60 +26,60 @@ export class EmptyInline extends InlineAtom {
       props: {
         [AtomSizePath]: 1,
         [AtomContentPath]: "\u200B",
+        [LocalClassPath]: "empty-zero-width-space",
       },
     };
   }
 
   keydown(): EventHandlerMap {
     return {
+      left: (ctx) => {
+        const { selection } = ctx;
+        if (selection.isCollapsed) {
+          preventAndStopCtx(ctx);
+          const { head } = selection;
+          const down = head.down()?.leftAlign;
+
+          console.log(down?.node.name, down?.node.id.toString());
+          const prevFocusable = down?.node.prev((n) => {
+            console.log("prev", n.name, n.toString());
+            return n.isFocusable;
+          });
+
+          if (!prevFocusable) {
+            console.log("no focusable found");
+            return;
+          }
+
+          const pin = Pin.toEndOf(prevFocusable)!;
+          const after = PinnedSelection.fromPin(pin)!;
+          ctx.cmd.Select(after).Dispatch();
+        }
+      },
       right: (ctx) => {
-        const { currentNode } = ctx;
-        const selection = EmptyInline.normalizeSelection(ctx.selection);
-        const { start } = selection;
-        const down = start.down().rightAlign;
+        const { currentNode, selection } = ctx;
+        const down = selection.head.down();
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
 
-          const nextFocusable = down.node.next((n) => n.isFocusable);
+          const nextFocusable = down?.node.next((n) => n.isFocusable);
           if (!nextFocusable) {
             console.log("no focusable found");
             return;
           }
 
           const pin = Pin.toStartOf(nextFocusable)!;
+          console.log("[EmptyInline] right", pin.toString());
           const after = PinnedSelection.fromPin(pin)!;
           ctx.cmd.Select(after).Dispatch();
         }
       },
-      left: (ctx) => {
-        const { currentNode } = ctx;
-        const selection = EmptyInline.normalizeSelection(ctx.selection);
-        const { start } = selection;
-        const down = start.down().leftAlign;
-
-        if (selection.isCollapsed) {
-          preventAndStopCtx(ctx);
-          const prevFocusable = down.node.prev((n) => {
-            console.log("prev", n.name, n);
-            return n.isFocusable;
-          });
-          if (!prevFocusable) {
-            console.log("no focusable found");
-            return;
-          }
-
-          const pin = Pin.toStartOf(prevFocusable)!;
-          const after = PinnedSelection.fromPin(pin)!;
-          ctx.cmd.Select(after).Dispatch();
-        }
-      },
-
       shiftRight: (ctx) => {
         preventAndStopCtx(ctx);
 
         const { selection } = ctx;
-        const head = EmptyInline.normalizePin(selection.head).down().rightAlign;
-        const nextFocusable = head.node.next((n) => n.isFocusable);
+        const head = selection.head.down()?.rightAlign;
+        const nextFocusable = head?.node.next((n) => n.isFocusable);
         if (!nextFocusable) {
           console.log("no focusable found");
           return;
@@ -88,40 +91,47 @@ export class EmptyInline extends InlineAtom {
       },
 
       shiftLeft: (ctx) => {
-        preventAndStopCtx(ctx);
-
         const { selection } = ctx;
-        const head = EmptyInline.normalizePin(selection.head).down().leftAlign;
-        const prevFocusable = head.node.prev((n) => n.isFocusable);
+        preventAndStopCtx(ctx);
+        const { head } = selection;
+        const down = head.down()?.leftAlign;
+
+        console.log(down?.node.name, down?.node.id.toString());
+        const prevFocusable = down?.node.prev((n) => {
+          return n.isFocusable;
+        });
+
         if (!prevFocusable) {
           console.log("no focusable found");
           return;
         }
 
-        const pin = Pin.toStartOf(prevFocusable)!;
-        const after = PinnedSelection.create(selection.tail, pin);
+        const pin = Pin.toEndOf(prevFocusable)!;
+        const after = PinnedSelection.create(selection.tail, pin)!;
         ctx.cmd.Select(after).Dispatch();
       },
     };
   }
 
-  static normalizeSelection(selection: PinnedSelection): PinnedSelection {
-    const { tail, head } = selection;
-    const t = EmptyInline.normalizePin(tail);
-    const h = EmptyInline.normalizePin(head);
-    return PinnedSelection.create(t, h);
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write("");
   }
 
-  // normalize pin to the nearest focusable node away from the inlineAtomIsolate
-  static normalizePin(pin: Pin): Pin {
-    const down = pin.down();
-    if (EmptyInline.isPrefix(down.node)) {
-      return Pin.toStartOf(down.node)!.up()!;
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write("");
+  }
+
+  static leftAlign(pin: Pin): Pin {
+    if (pin.node.isZero) {
+      return Pin.create(pin.node, 0);
     }
 
-    if (EmptyInline.isSuffix(down.node)) {
-      // debugger;
-      return Pin.toEndOf(down.node)!.up()!;
+    return pin;
+  }
+
+  static rightAlign(pin: Pin): Pin {
+    if (pin.node.isZero) {
+      return Pin.create(pin.node, 1);
     }
 
     return pin;
@@ -129,25 +139,5 @@ export class EmptyInline extends InlineAtom {
 
   static is(node: Node): boolean {
     return node.name === "empty";
-  }
-
-  static isPrefix(node: Node): boolean {
-    const { nextSibling } = node;
-    return <boolean>(
-      (node.name === "empty" &&
-        nextSibling?.isIsolate &&
-        nextSibling?.isInlineAtom &&
-        node.parent?.type.isInlineAtomWrapper)
-    );
-  }
-
-  static isSuffix(node: Node): boolean {
-    const { prevSibling } = node;
-    return <boolean>(
-      (node.name === "empty" &&
-        prevSibling?.isIsolate &&
-        prevSibling?.isInlineAtom &&
-        node.parent?.type.isInlineAtomWrapper)
-    );
   }
 }

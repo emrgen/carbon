@@ -3,10 +3,10 @@ import {
   BlockSelection,
   ChangeNameAction,
   cloneFrozenNode,
+  deepCloneMap,
   Draft,
   EmptyPlaceholderPath,
   FocusedPlaceholderPath,
-  HasFocusPath,
   InsertChange,
   InsertNodeAction,
   isPassiveHidden,
@@ -50,18 +50,12 @@ import {
   UpdateChange,
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
+import { HasFocusPath } from "@emrgen/carbon-core";
+import { PlainNodeProps } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { ImmutableState } from "./ImmutableState";
-import {
-  first,
-  flatten,
-  identity,
-  isArray,
-  isEmpty,
-  isEqual,
-  isString,
-  reduce,
-} from "lodash";
+import { first, flatten, identity, isArray, isEmpty, isString } from "lodash";
+import { reduce } from "lodash";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
 import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
 
@@ -72,7 +66,6 @@ enum UpdateDependent {
   Parent = 4,
 }
 
-// NOTE: it is internal to the state and actions. it should not be used outside of it.
 //draft of a state is used to prepare a new state before commit
 export class ImmutableDraft implements Draft {
   private readonly state: ImmutableState;
@@ -85,6 +78,8 @@ export class ImmutableDraft implements Draft {
   private origin: ActionOrigin;
   private pm: PluginManager;
   private selection: PointedSelection;
+
+  // private decorations: NodeIdMap = new NodeIdMap();
 
   private selected: NodeIdSet = NodeIdSet.empty();
   private updated: NodeIdSet; // tracks changed nodes
@@ -112,12 +107,13 @@ export class ImmutableDraft implements Draft {
     this.changes = new StateChanges();
     this.actions = new StateActions([], type);
     this.tm = new Transformer(this.changes, this.actions);
-    this.schema = schema;
-    this.marks = marks.clone();
     this.nodeMap = ImmutableNodeMap.from(state.nodeMap);
     this.updated = new NodeIdSet();
     this.selection = state.selection.unpin(origin);
     state.blockSelection.blocks.forEach((n) => this.selected.add(n.id));
+
+    this.schema = schema;
+    this.marks = marks.clone();
   }
 
   private addContentChanged(id: NodeId) {
@@ -132,10 +128,12 @@ export class ImmutableDraft implements Draft {
   }
 
   private addUpdated(id: NodeId) {
+    // console.log("ADD UPDATED", id.toString());
     this.updated.add(id);
   }
 
   private removeUpdated(id: NodeId) {
+    // console.log("REMOVE UPDATED", id.toString());
     this.updated.remove(id);
   }
 
@@ -144,22 +142,25 @@ export class ImmutableDraft implements Draft {
     this.nodeMap.set(node.id, node);
   }
 
-  private addRemoved(id: NodeId) {
-    // console.log("ADD REMOVED", id.toString());
+  private addRemoved(node: Node) {
+    // console.log("ADD REMOVED", node.id.toString());
+    const { parentId, id } = node;
+    // remove the node from the map if the parent of the node matches with the parent id in the map node
     this.nodeMap.delete(id);
   }
 
-  get(id: NodeId): Optional<Node> {
+  public get(id: NodeId): Optional<Node> {
     return this.nodeMap.get(id);
   }
 
-  parent(from: NodeId | Node): Optional<Node> {
+  public parent(from: NodeId | Node): Optional<Node> {
     return this.nodeMap.parent(from);
   }
 
-  // produce a new state from the draft
-  produce(fn: (producer: ImmutableDraft) => void): CoreState {
+  // produce a new state from the draft or reject the draft
+  public produce(fn: (producer: ImmutableDraft) => void): CoreState {
     const { scope } = this.state;
+    const oldScope = StateScope.current();
     try {
       // console.log('[SCOPE]', scope.toString())
       StateScope.put(scope, this.nodeMap);
@@ -178,7 +179,10 @@ export class ImmutableDraft implements Draft {
       StateScope.put(scope, this.state.nodeMap);
       console.error(e);
       this.dispose();
+      console.log("rejected commit");
       return this.state;
+    } finally {
+      StateScope.set(oldScope);
     }
   }
 
@@ -209,7 +213,7 @@ export class ImmutableDraft implements Draft {
 
     // console.log('updated state', updated.toArray().map(n => n.toString()).join(', '))
     updated.freeze();
-    nodeMap.contracts(2);
+    // nodeMap.contracts(2);
     nodeMap.freeze();
     after.freeze();
     marks.freeze();
@@ -230,6 +234,24 @@ export class ImmutableDraft implements Draft {
       marks,
     });
 
+    // traverse all nodes within the selection and collect decorations
+    const { start, end } = after;
+    const startDown = start.down();
+    const endDown = end.down();
+    const nodes: Node[] = [startDown.node, endDown.node];
+    startDown.node.next((n) => {
+      if (n.id.eq(endDown.node.id)) return true;
+      nodes.push(n);
+      return false;
+    });
+
+    // collect decorations from the selected nodes
+    // const decorations: NodeIdMap<PlainNodeProps> = new NodeIdMap();
+    // nodes.forEach((n) => {
+    //   const props = this.pm.decoration(n);
+    //   decorations.set(n.id, props);
+    // });
+
     return newState.freeze();
   }
 
@@ -244,6 +266,7 @@ export class ImmutableDraft implements Draft {
     // remove deleted nodes from unstable node before normalization
     this.unstable.toArray().forEach((id) => {
       if (this.nodeMap.isDeleted(id)) {
+        console.log("REMOVING DELETED NODE", id.toString());
         this.unstable.remove(id);
       }
     });
@@ -259,6 +282,7 @@ export class ImmutableDraft implements Draft {
     }
     this.updateSelectionProps();
 
+    // collect the marks from the selection head node
     if (!this.state.selection.unpin().eq(this.selection)) {
       this.collectMarks();
     }
@@ -268,7 +292,7 @@ export class ImmutableDraft implements Draft {
     this.updated.toArray().forEach((id) => {
       // console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
       if (this.nodeMap.isDeleted(id)) {
-        console.log("REMOVED", id.toString());
+        // console.log("REMOVED", id.toString());
         this.removeUpdated(id);
         return;
       }
@@ -326,23 +350,22 @@ export class ImmutableDraft implements Draft {
     const nodes = sortNodesByDepth(unstable).reverse();
     const node = first(nodes);
     if (!node) {
-      console.warn("no unstable node not found");
+      // console.warn("no unstable node not found");
       return;
     }
 
-    const actions = this.pm.normalize(node);
+    // printNode(this.state.nodeMap.get(NodeId.create("[169]"))!);
+
+    const actions = this.pm.normalize(node.clone(deepCloneMap));
     if (!isEmpty(actions)) {
-      console.debug("normalizing", node.name, node.id.toString(), actions);
+      console.log("normalizing", node.name, node.id.toString(), actions);
       actions.forEach((action) => {
         action.execute(this);
       });
-
-      console.log(
-        actions,
-        actions.map((a) => a.toString()),
-        "actions normalized",
-      );
     }
+
+    // console.log(this.state.nodeMap.get(NodeId.create("[169]"))!.isFrozen);
+    // printNode(this.state.nodeMap.get(NodeId.create("[169]"))!);
 
     this.unstable.remove(node.id);
     if (this.unstable.size > 0) {
@@ -353,7 +376,8 @@ export class ImmutableDraft implements Draft {
     this.normalizeSchema();
   }
 
-  // normalize unstable nodes by inserting missing nodes as per the schema
+  // TODO: normalize unstable nodes by inserting missing nodes as per the schema
+  // we keep the schema consistent by inserting missing nodes
   private normalizeSchema() {
     console.debug("normalizing schema");
     // this.contentChanged.nodes(this.nodeMap).forEach(node => {
@@ -376,6 +400,7 @@ export class ImmutableDraft implements Draft {
   }
 
   updateContent(nodeId: NodeId, content: Node[] | string) {
+    console.debug("update content", nodeId.toString(), content);
     if (!this.drafting) {
       throw new Error(
         "Cannot update content on a draft that is already committed",
@@ -388,8 +413,7 @@ export class ImmutableDraft implements Draft {
       return;
     }
 
-    node.descendants().forEach((n) => this.addRemoved(n.id));
-
+    node.descendants().forEach((n) => this.addRemoved(n));
     // update state
     this.tm.updateContent(node, content);
     if (isArray(content)) {
@@ -437,13 +461,11 @@ export class ImmutableDraft implements Draft {
       newChildren.forEach((n) => nodeIdSet.add(n.id));
       oldChildren.forEach((n) => {
         if (!nodeIdSet.has(n.id)) {
-          console.log("REMOVING", n.id.toString());
-          this.addRemoved(n.id);
+          this.addRemoved(n);
         }
       });
       newChildren.forEach((n) => {
         this.addInserted(n);
-        // console.log("INSERTED", n.id.toString());
       });
       this.addUpdated(nodeId);
       this.addContentChanged(nodeId);
@@ -464,13 +486,13 @@ export class ImmutableDraft implements Draft {
         const textNode = node.type.schema.text(text)!;
         this.updateContent(node.id, [textNode]);
       } else {
-        console.log(
-          "INSERTING TEXT",
-          text,
-          offset,
-          node.textContent,
-          marks.toString(),
-        );
+        // console.log(
+        //   "INSERTING TEXT",
+        //   text,
+        //   offset,
+        //   node.textContent,
+        //   marks.toString(),
+        // );
 
         // find text node and insert text at the offset
         // if the marks match with the text node, insert the text only
@@ -566,7 +588,7 @@ export class ImmutableDraft implements Draft {
     const node = this.unfreeze(nodeId);
     const { parent } = node;
     if (!parent) {
-      throw new Error("Cannot move node that does not have a parent");
+      throw new Error("Cannot move node that does not have a parent at source");
     }
 
     this.actions.add(MoveNodeAction.create(nodeLocation(node)!, to, nodeId));
@@ -582,7 +604,7 @@ export class ImmutableDraft implements Draft {
     this.insertBy(to, node, "move");
   }
 
-  private insertBy(at: Point, node: Node, type: "create" | "move" = "create") {
+  private insertBy(at: Point, node: Node, type: "create" | "move") {
     if (!this.drafting) {
       throw new Error(
         "Cannot insert node to a draft that is already committed",
@@ -590,7 +612,7 @@ export class ImmutableDraft implements Draft {
     }
     // NOTE: this will skip insertion w.r.t. the deleted nodes
     if (this.nodeMap.isDeleted(at.nodeId)) {
-      node.all((n) => this.addRemoved(n.id));
+      node.all((n) => this.addRemoved(n));
       return;
     }
 
@@ -598,10 +620,6 @@ export class ImmutableDraft implements Draft {
     if (type === "create") {
       this.actions.add(InsertNodeAction.create(at, node.id, node.toJSON()));
     }
-
-    // mark moved/inserted nodes as inserted ones
-    // these will not be rendered explicitly
-    node.all((n) => this.addInserted(n));
 
     // console.debug('inserting new item')
     switch (at.at) {
@@ -618,6 +636,13 @@ export class ImmutableDraft implements Draft {
         this.append(at.nodeId, node);
         break;
     }
+
+    // mark moved/inserted nodes as inserted ones
+    // these will not be rendered explicitly
+    node.all((n) => {
+      console.log("INSERTED", n.id.toString(), n.parentId?.toString());
+      this.addInserted(n);
+    });
   }
 
   private insertBefore(refId: NodeId, node: Node) {
@@ -739,7 +764,7 @@ export class ImmutableDraft implements Draft {
 
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
-    node.all((n) => this.addRemoved(n.id));
+    node.all((n) => this.addRemoved(n));
 
     // if parent title is empty, set placeholder from parent
     if (parent.isTextContainer && parent.isEmpty) {
@@ -795,6 +820,7 @@ export class ImmutableDraft implements Draft {
     }
 
     const node = this.unfreeze(nodeId);
+
     console.log(
       "parent",
       node.parentId?.toString(),
@@ -841,6 +867,7 @@ export class ImmutableDraft implements Draft {
       default:
         throw new Error("Invalid mark action");
     }
+    console.log("-----", marks.toArray());
   }
 
   updateSelection(selection: PointedSelection) {
@@ -850,16 +877,16 @@ export class ImmutableDraft implements Draft {
       );
     }
 
-    // console.log("update selection", selection.isInline);
+    console.log("update selection", selection.toString());
     this.selection = selection;
     const before = this.state.selection.unpin();
     this.changes.add(SelectionChange.create(before, selection));
     this.actions.add(SelectAction.create(before, selection));
+    console.log("update draft selection", selection.toString());
   }
 
   // update selected node props
   private updateSelectionProps() {
-    const selection = this.selection;
     const prevSelection = this.state.selection;
 
     // update empty placeholder of the previous head node
@@ -892,8 +919,8 @@ export class ImmutableDraft implements Draft {
     }
 
     // update focus placeholder of the current head node
-    if (!selection.isInvalid && selection.isCollapsed) {
-      const { head } = selection;
+    if (!this.selection.isInvalid && this.selection.isCollapsed) {
+      const { head } = this.selection;
       if (this.nodeMap.isDeleted(head.nodeId)) return;
 
       const node = this.unfreeze(head.nodeId);
@@ -914,32 +941,47 @@ export class ImmutableDraft implements Draft {
       }
     }
 
+    const selection = this.selection.pin(this.nodeMap);
     // update focus marker if needed
-    if (this.state.selection.tail.node.id.eq(this.selection.tail.nodeId)) {
+    const downHead = this.state.selection.tail.down()?.node;
+    if (downHead && selection?.head.node.eq(downHead)) {
       return;
     }
 
     if (!prevSelection.isInvalid) {
-      const { tail } = prevSelection.unpin();
-      if (!this.nodeMap.isDeleted(tail.nodeId)) {
-        const node = this.unfreeze(tail.nodeId);
-        if (this.nodeMap.isDeleted(node.id)) return;
-        node.updateProps({
-          [HasFocusPath]: "",
-        });
-        this.addUpdated(node.id);
+      const head = prevSelection.head.down();
+      if (head) {
+        const headId = head.node.id;
+        if (!this.nodeMap.isDeleted(headId)) {
+          const node = this.unfreeze(headId);
+          if (this.nodeMap.isDeleted(node.id)) return;
+          node.updateProps({
+            [HasFocusPath]: "",
+          });
+
+          this.addUpdated(node.id);
+        }
       }
     }
 
     // console.log('Selection', this.selection.head.eq(Point.IDENTITY))
     if (!this.selection.isInvalid) {
-      const node = this.unfreeze(this.selection.tail.nodeId);
-      node.updateProps({
-        [HasFocusPath]: true,
-      });
-      this.addUpdated(node.id);
+      if (selection) {
+        const head = selection.head.down();
+        if (head) {
+          const headId = head.node.id;
+          const node = this.unfreeze(headId);
+          node.updateProps({
+            [HasFocusPath]: true,
+          });
+
+          this.addUpdated(node.id);
+        }
+      }
     }
   }
+
+  private updateFocusMarker() {}
 
   private collectMarks() {
     const { selection } = this;
@@ -953,7 +995,7 @@ export class ImmutableDraft implements Draft {
     const { start, end } = pinnedSelection;
     if (selection.isCollapsed) {
       let downPin = start.down();
-      if (downPin.offset === 0 && downPin.node.prevSiblings.length === 0) {
+      if (downPin?.offset === 0 && downPin?.node.prevSiblings.length === 0) {
         this.marks = MarkSet.empty();
       } else {
         downPin = downPin.leftAlign;
@@ -1035,6 +1077,7 @@ export class ImmutableDraft implements Draft {
     }
 
     const { path } = node;
+
     root.unfreeze(path, this.nodeMap);
 
     // get the unfrozen node
@@ -1065,13 +1108,13 @@ class Transformer {
   ) {}
 
   changeType(node: Node, type: NodeType) {
-    console.log(
-      p14("%c[trap]"),
-      "color:green",
-      "change type",
-      node.id.toString(),
-      node.renderVersion,
-    );
+    // console.log(
+    //   p14("%c[trap]"),
+    //   "color:green",
+    //   "change type",
+    //   node.id.toString(),
+    //   node.renderVersion,
+    // );
     this.changes.add(NameChange.create(node.id, node.type.name, type.name));
     // this.actions.add(ChangeNameAction.withBefore(node.id, node.type.name, type.name));
     node.changeType(type);
@@ -1138,13 +1181,6 @@ class Transformer {
 
   // update content is valid only for textContainer and text nodes
   updateContent(node: Node, content: Node[] | string) {
-    console.log(
-      p14("%c[trap]"),
-      "color:green",
-      "content",
-      node.key,
-      node.textContent,
-    );
     const oldText = node.textContent;
     const oldChildren = node.children;
     node.updateContent(content);
@@ -1195,7 +1231,17 @@ class Transformer {
   }
 
   updateProps(node: Node, props: NodePropsJson) {
-    console.log(p14("%c[trap]"), "color:green", "update", node.key);
+    console.log(p14("%c[trap]"), "color:green", "update", node.key, props);
+    const diff = node.props.diff(PlainNodeProps.create(props)).toJSON();
+
+    if (isEmpty(diff)) {
+      // console.log("same props", before, props);
+      // console.warn(
+      //   "unnecessary props update detected. possibly the node is immutable",
+      // );
+      return false;
+    }
+
     const before = reduce(
       props,
       (acc, _, k) => {
@@ -1207,18 +1253,10 @@ class Transformer {
       {},
     );
 
-    if (isEqual(before, props)) {
-      console.log("same props", before, props);
-      console.warn(
-        "unnecessary props update detected. possibly the node is immutable",
-      );
-      return false;
-    }
-
     this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
     this.changes.add(UpdateChange.create(node.id, node.path, before, props));
 
-    // console.log("UPDATING props", props, before);
+    console.log("UPDATING props", props, before);
 
     node.updateProps(props);
 

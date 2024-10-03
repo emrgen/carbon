@@ -19,8 +19,9 @@ import { Node } from "./Node";
 import { CarbonAction } from "./actions/types";
 import { EventsIn } from "./Event";
 import { CarbonCommand } from "./CarbonCommand";
-import { StateActions } from "@emrgen/carbon-core";
 import { Service } from "./Service";
+import { StateActions } from "./NodeChange";
+import { PlainNodeProps } from "./NodeProps";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -169,9 +170,9 @@ export class PluginManager {
             keyDownEvent.event.nativeEvent,
           );
         });
-        if (handler) {
-          console.log("before", p.name, handler[0], handler[1]);
-        }
+        // if (handler) {
+        //   console.log("before", p.name, handler[0], handler[1]);
+        // }
         handler?.[1]?.(keyDownEvent);
       });
 
@@ -206,9 +207,9 @@ export class PluginManager {
           );
         });
 
-        // if (handler) {
-        //   console.log("after", p.name, handler[0], handler[1]);
-        // }
+        if (handler) {
+          console.log("after", p.name, handler[0], handler[1]);
+        }
 
         handler?.[1]?.(keyDownEvent);
         return keyDownEvent.stopped;
@@ -250,5 +251,13 @@ export class PluginManager {
   // filter plugins by type
   private filter(plugins: CarbonPlugin[], type: PluginType) {
     return plugins.filter((p) => p.type === type);
+  }
+
+  decoration(node: Node): PlainNodeProps {
+    const props = PlainNodeProps.empty();
+    for (const p of this.plugins) {
+      p.decorate(node, props);
+    }
+    return props;
   }
 }

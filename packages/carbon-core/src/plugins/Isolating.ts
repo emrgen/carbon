@@ -1,14 +1,13 @@
 import {
   ActionOrigin,
-  AfterPlugin, ContenteditablePath,
+  AfterPlugin,
   EventContext,
-  EventHandlerMap, LocalContenteditablePath,
+  EventHandlerMap,
   Pin,
-  PinnedSelection, SuppressContenteditableWarningPath,
-  UserSelectPath
+  PinnedSelection,
 } from "../core";
-import {preventAndStopCtx, Node} from "@emrgen/carbon-core";
-import {Optional} from "@emrgen/types";
+import { Node, preventAndStopCtx } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
 
 export const createIsolatingPlugin = () => {
   new IsolateSelectionPlugin();
@@ -32,8 +31,8 @@ export class IsolateSelectionPlugin extends AfterPlugin {
       // TODO: may be mark all the isolating nodes as non-focusable
       // selecting within a isolating node
       _selectionchange: (ctx: EventContext<Event>) => {
-        const {selection, cmd} = ctx;
-        const {start, end, head, tail} = selection;
+        const { selection, cmd } = ctx;
+        const { start, end, head, tail } = selection;
         if (selection.isCollapsed) return;
 
         if (this.isMouseDown) {
@@ -43,29 +42,41 @@ export class IsolateSelectionPlugin extends AfterPlugin {
 
         const headIsolating = head.node.closest((n) => n.isIsolate);
         const tailIsolating = tail.node.closest((n) => n.isIsolate);
-        console.log(tailIsolating, headIsolating)
+        console.log(tailIsolating, headIsolating);
         if (!headIsolating && !tailIsolating) return;
 
-        if (headIsolating && tailIsolating && !headIsolating.eq(tailIsolating)) {
+        if (
+          headIsolating &&
+          tailIsolating &&
+          !headIsolating.eq(tailIsolating)
+        ) {
           preventAndStopCtx(ctx);
           // keep the selection outside the child isolating node
           if (headIsolating.parents.some((n) => n.eq(tailIsolating))) {
             if (selection.isForward) {
               const prevFocusable = headIsolating.prev((n) => n.isFocusable, {
-                skip: n => n.isIsolate
+                skip: (n) => n.isIsolate,
               });
               if (prevFocusable) {
                 const headPin = Pin.toEndOf(prevFocusable)!;
-                const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+                const newSelection = PinnedSelection.create(
+                  tail,
+                  headPin,
+                  ActionOrigin.UserInput,
+                );
                 cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
               }
             } else {
               const nextFocusable = headIsolating.next((n) => n.isFocusable, {
-                skip: n => n.isIsolate
+                skip: (n) => n.isIsolate,
               });
               if (nextFocusable) {
                 const headPin = Pin.toStartOf(nextFocusable)!;
-                const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+                const newSelection = PinnedSelection.create(
+                  tail,
+                  headPin,
+                  ActionOrigin.UserInput,
+                );
                 cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
               }
             }
@@ -76,16 +87,23 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           preventAndStopCtx(ctx);
           if (selection.isForward) {
             const headPin = Pin.toEndOf(tailIsolating)!;
-            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            const newSelection = PinnedSelection.create(
+              tail,
+              headPin,
+              ActionOrigin.UserInput,
+            );
             cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
           } else {
             const headPin = Pin.toStartOf(tailIsolating)!;
-            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            const newSelection = PinnedSelection.create(
+              tail,
+              headPin,
+              ActionOrigin.UserInput,
+            );
             cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
           }
           return;
         }
-
 
         // keep the selection inside the tail isolating node
         if (tailIsolating && !headIsolating) {
@@ -108,10 +126,10 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         this.isMouseDown = true;
         const onMouseUp = () => {
           this.isMouseDown = false;
-          document.removeEventListener('mouseup', onMouseUp);
-        }
+          document.removeEventListener("mouseup", onMouseUp);
+        };
 
-        document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener("mouseup", onMouseUp);
 
         this.startIsolate = ctx.targetNode?.closest((n) => n.isIsolate);
         this.selection = ctx.app.selection.clone();
@@ -121,63 +139,83 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         if (!ctx.app.runtime.selectionchange) {
           return;
         }
-        const selection = PinnedSelection.fromDom(ctx.app.store);
-        if (!selection) return;
+        const domSel = PinnedSelection.fromDom(ctx.app.store);
+        if (!domSel) return;
 
-        const {head, tail} = selection;
+        const { head, tail } = domSel;
         const headIsolating = head.node.closest((n) => n.isIsolate);
         const tailIsolating = tail.node.closest((n) => n.isIsolate);
         if (!headIsolating || !tailIsolating) return;
 
         if (headIsolating.eq(tailIsolating)) {
-          ctx.cmd.SelectBlocks([]).Select(selection, ActionOrigin.UserInput).Dispatch();
+          ctx.cmd
+            .SelectBlocks([])
+            .Select(domSel.selection, ActionOrigin.UserInput)
+            .Dispatch();
           return;
         }
 
-
-        if (selection.isForward) {
+        if (domSel.selection.isForward) {
           const prevFocusable = headIsolating.prev((n) => {
-            return n.isFocusable && !!n.closest((n) => n.isIsolate)?.eq(tailIsolating);
+            return (
+              n.isFocusable &&
+              !!n.closest((n) => n.isIsolate)?.eq(tailIsolating)
+            );
           });
 
           if (prevFocusable) {
             const headPin = Pin.toEndOf(prevFocusable)!;
-            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
-            ctx.cmd.SelectBlocks([]).Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            const newSelection = PinnedSelection.create(
+              tail,
+              headPin,
+              ActionOrigin.UserInput,
+            );
+            ctx.cmd
+              .SelectBlocks([])
+              .Select(newSelection, ActionOrigin.UserInput)
+              .Dispatch();
             return;
           }
         }
 
-        if (selection.isBackward) {
+        if (domSel.selection.isBackward) {
           const nextFocusable = headIsolating.next((n) => {
-            return n.isFocusable && !!n.closest((n) => n.isIsolate)?.eq(tailIsolating);
+            return (
+              n.isFocusable &&
+              !!n.closest((n) => n.isIsolate)?.eq(tailIsolating)
+            );
           });
 
           if (nextFocusable) {
             const headPin = Pin.toStartOf(nextFocusable)!;
-            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
-            ctx.cmd.SelectBlocks([]).Select(newSelection, ActionOrigin.UserInput).Dispatch();
+            const newSelection = PinnedSelection.create(
+              tail,
+              headPin,
+              ActionOrigin.UserInput,
+            );
+            ctx.cmd
+              .SelectBlocks([])
+              .Select(newSelection, ActionOrigin.UserInput)
+              .Dispatch();
             return;
           }
         }
-      }
+      },
     };
   }
 
   keydown(): EventHandlerMap {
     return {
       down: (e: EventContext<KeyboardEvent>) => {
-        console.log('down isolating')
+        console.log("down isolating");
       },
-      up: (e: EventContext<KeyboardEvent>) => {
-
-      },
+      up: (e: EventContext<KeyboardEvent>) => {},
       shiftUp: (e: EventContext<KeyboardEvent>) => {
         if (e.app.selection.isBlock) return;
         const { selection, currentNode } = e;
         const { head, tail } = selection;
 
-        // cursor can move to the previous focusable node
+        // cursor can moveBy to the previous focusable node
         const prevFocusable = head.node.prev((n) => n.isFocusable);
         if (!prevFocusable) return;
 
@@ -188,7 +226,11 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           const firstFocusable = currentNode.find((n) => n.isFocusable);
           if (firstFocusable) {
             const headPin = Pin.toStartOf(firstFocusable)!;
-            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            const newSelection = PinnedSelection.create(
+              tail,
+              headPin,
+              ActionOrigin.UserInput,
+            );
             e.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
           }
           return;
@@ -196,7 +238,10 @@ export class IsolateSelectionPlugin extends AfterPlugin {
 
         // or only if the current node is inside the previous isolating node
         const prevIsolating = prevFocusable.closest((n) => n.isIsolate);
-        if (prevIsolating && !currentNode.parents.some((n) => n.eq(prevIsolating))) {
+        if (
+          prevIsolating &&
+          !currentNode.parents.some((n) => n.eq(prevIsolating))
+        ) {
           this.prevent(e);
           return;
         }
@@ -206,7 +251,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         const { selection } = e;
         const { head, tail } = selection;
 
-        // cursor can move to the next focusable node
+        // cursor can moveBy to the next focusable node
         const nextFocusable = head.node.next((n) => n.isFocusable);
         if (!nextFocusable) return;
 
@@ -214,12 +259,18 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         const isolating = head.node.closest((n) => n.isIsolate);
         if (isolating && !nextFocusable.parents.some((n) => n.eq(isolating))) {
           this.prevent(e);
-          const lastFocusable = isolating.find((n) => n.isFocusable, { direction: 'backward' });
+          const lastFocusable = isolating.find((n) => n.isFocusable, {
+            direction: "backward",
+          });
           if (!lastFocusable?.eq(head.node)) return;
 
           const headPin = Pin.toEndOf(isolating)!;
           if (headPin) {
-            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            const newSelection = PinnedSelection.create(
+              tail,
+              headPin,
+              ActionOrigin.UserInput,
+            );
             e.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
           }
           return;

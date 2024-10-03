@@ -40,7 +40,7 @@ export class CodeLine extends CarbonPlugin {
   handlers(): EventHandlerMap {
     return {
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-        console.log("beforeInput", ctx.type, ctx.event.key, ctx);
+        // console.log("beforeInput", ctx.type, ctx.event.key, ctx);
       },
     };
   }
@@ -53,7 +53,7 @@ export class CodeLine extends CarbonPlugin {
 
         const { selection, cmd } = ctx;
         const { start } = selection;
-        console.log("tab", ctx.type, ctx.event.key, ctx);
+        // console.log("tab", ctx.type, ctx.event.key, ctx);
         if (selection.isCollapsed) {
           cmd.transform.insertText(selection, "  ").Dispatch();
         }
@@ -72,6 +72,6 @@ class BeforeInputHandler extends BeforePlugin {
   }
 
   beforeInput(ctx: EventContext<KeyboardEvent>) {
-    console.log("beforeInput", ctx.type, ctx.event.key, ctx);
+    // console.log("beforeInput", ctx.type, ctx.event.key, ctx);
   }
 }

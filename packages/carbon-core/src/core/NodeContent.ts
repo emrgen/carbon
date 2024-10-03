@@ -1,13 +1,10 @@
 import { Node, Path } from "./Node";
-import { Optional } from "@emrgen/types";
+import { Optional, With } from "@emrgen/types";
 import { NodeId } from "./NodeId";
-import {
-  NodeMap,
-  NodeProps,
-  NodePropsJson,
-  NodeType,
-  With,
-} from "@emrgen/carbon-core";
+import { NodePropsJson } from "./NodeProps";
+import { NodeProps } from "./NodeProps";
+import { NodeType } from "./NodeType";
+import { NodeMap } from "./NodeMap";
 
 // this is the data that is used to create a node
 export interface NodeData {
@@ -226,6 +223,7 @@ export class PlainNodeContent implements NodeContent {
   }
 
   updateProps(props: NodePropsJson) {
+    const newProps = this.props.fromJSON(props);
     this.props.merge(props);
   }
 

@@ -23,7 +23,7 @@ export class Dnd extends EventEmitter {
   isDragging: boolean = false;
   isMouseDown: any;
 
-  // accceptor: Acceptor = (receiver, child, at) => {}
+  // acceptor: Acceptor = (receiver, child, at) => {}
 
   constructor(readonly app: Carbon) {
     super();

@@ -1,35 +1,38 @@
-import {CarbonPlugin, EventContext, EventHandlerMap, NodeSpec} from "@emrgen/carbon-core";
+import {
+  CarbonPlugin,
+  EventContext,
+  EventHandlerMap,
+  NodeSpec,
+} from "@emrgen/carbon-core";
 
 export class CodeMirror extends CarbonPlugin {
-
-  name = 'codeMirror';
+  name = "codeMirror";
 
   spec(): NodeSpec {
     return {
-      group: 'content',
-      content: 'codeLine+',
+      group: "content",
+      content: "codeLine+",
       isolate: true,
       blockSelectable: true,
       rectSelectable: true,
       draggable: true,
       dragHandle: true,
-      props:{
-        local:{
-          html:{
+      props: {
+        local: {
+          html: {
             contentEditable: false,
             suppressContentEditableWarning: true,
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    };
   }
 
   keydown(): EventHandlerMap {
     return {
       shiftTab: (ctx: EventContext<KeyboardEvent>) => {
-        console.log('xxxxxxxx')
         ctx.stopPropagation();
-      }
-    }
+      },
+    };
   }
 }

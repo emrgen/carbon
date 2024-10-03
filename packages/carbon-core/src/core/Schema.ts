@@ -5,10 +5,15 @@ import { Node } from "./Node";
 import { MarkType, NodeType } from "./NodeType";
 import { Maps, NodeName } from "./types";
 import { Mark, MarkProps } from "./Mark";
-import { NodeContentData, NodeFactory } from "@emrgen/carbon-core";
+import { NodeFactory } from "./Factory";
+import { NodeContentData } from "./NodeContent";
 
 interface SchemaSpec {
   nodes: Record<NodeName, NodeSpec>;
+}
+
+interface TextNodeOpts {
+  props?: Record<string, any>;
 }
 
 // ref: prosemirror-model/src/schema.js
@@ -69,7 +74,7 @@ export class Schema {
     return type;
   }
 
-  text(text: string, json = {}): Optional<Node> {
+  text(text: string, json: TextNodeOpts = {}): Optional<Node> {
     return this.node("text", { text, ...json });
   }
 
@@ -130,8 +135,6 @@ export interface NodeSpec {
 
   // the node can be treated as a standalone document
   document?: boolean;
-  // inline atom wrapper wraps the inline atom with two empty text nodes
-  inlineAtomWrapper?: boolean;
 
   inlineSelectable?: boolean;
   blockSelectable?: boolean;

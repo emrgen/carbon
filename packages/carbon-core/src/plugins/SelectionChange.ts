@@ -6,8 +6,6 @@ import {
 } from "@emrgen/carbon-core";
 import { p12, p14 } from "../core/Logger";
 import { EventHandlerMap } from "../core/types";
-import { State } from "../core/State";
-import { Decoration } from "../core/Decoration";
 import { MouseSelection } from "./MouseSelection";
 import { KeyboardSelection } from "./KeyboardSelection";
 
@@ -97,11 +95,6 @@ export class SelectionChangePlugin extends AfterPlugin {
     blockSelection.blocks.forEach((block) => {
       cmd.Update(block.id, { [SelectedPath]: false });
     });
-  }
-
-  // TODO: decorate selected nodes with halo
-  decoration(state: State): Decoration[] {
-    return [];
   }
 
   plugins(): CarbonPlugin[] {

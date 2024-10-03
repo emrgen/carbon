@@ -1,40 +1,60 @@
 import {
+  AtomContentPath,
   CarbonPlugin,
   EventContext,
   EventHandlerMap,
   InlineAtom,
+  LocalClassPath,
+  Node,
+  NodeEncoder,
   NodeSpec,
+  Writer,
 } from "@emrgen/carbon-core";
+import { ContenteditablePath } from "@emrgen/carbon-core";
+import { AtomicText } from "../AtomicText";
 
-export class Mention extends CarbonPlugin {
+export class Mention extends InlineAtom {
   name = "mention";
 
   override spec(): NodeSpec {
     return {
       group: "inline",
-      content: "empty mentionAtom empty",
+      content: "atomicText",
       inline: true,
+      atom: true,
+      // isolate: true,
       mergeable: false,
-      inlineAtomWrapper: true,
-      // inlineSelectable: true,
-      focusable: false,
+      // hint that the node is not focusable (cursor can't be placed wrt this node)
+      // focusable: true,
       tag: "span",
+      props: {
+        [LocalClassPath]: "mention",
+        [ContenteditablePath]: false,
+      },
     };
   }
 
   plugins(): CarbonPlugin[] {
-    return [new MentionAtom()];
+    return [new AtomicText()];
   }
 
   override handlers(): EventHandlerMap {
     return {
       mouseUp: this.onMouseUp,
       mouseMove: this.onMouseMove,
+      mouseDown: this.onMouseDown,
     };
+  }
+
+  onMouseDown(ctx: EventContext<MouseEvent>) {
+    // move the cursor to the end of the mention
+    console.log("mention mousedown");
+    // ctx.app.parkCursor();
   }
 
   onMouseUp(ctx: EventContext<MouseEvent>) {
     // move the cursor to the end of the mention
+    console.log("mention mouseup");
   }
 
   onMouseMove(ctx: EventContext<MouseEvent>) {
@@ -42,24 +62,16 @@ export class Mention extends CarbonPlugin {
     console.log("mention mousemove");
     // preventAndStopCtx(ctx);
   }
-}
 
-export class MentionAtom extends InlineAtom {
-  name = "mentionAtom";
+  encode(w: Writer, ne: NodeEncoder, node: Node) {
+    console.log("xxx");
+    const text = node.child(0)?.props.get<string>(AtomContentPath) ?? "";
+    w.write(text);
+  }
 
-  override spec(): NodeSpec {
-    return {
-      ...super.spec(),
-      focusable: false,
-      isolate: true,
-      atom: true,
-      props: {
-        local: {
-          html: {
-            contentEditable: false,
-          },
-        },
-      },
-    };
+  encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
+    w.write(
+      `<span class="mention">${node.child(0)?.props.get(AtomContentPath)}</span>`,
+    );
   }
 }

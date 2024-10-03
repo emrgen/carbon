@@ -1,8 +1,8 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vitest/config'
+// @vitest-environment jsdom
+
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  test: {
-    // ...
-  },
-})
+  test: {},
+});

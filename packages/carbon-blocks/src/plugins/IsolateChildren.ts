@@ -1,9 +1,13 @@
-import {BeforePlugin, EventContext, EventHandlerMap, preventAndStopCtx} from "@emrgen/carbon-core";
+import {
+  BeforePlugin,
+  EventContext,
+  EventHandlerMap,
+  preventAndStopCtx,
+} from "@emrgen/carbon-core";
 
 // do not let the cursor move between the title and the content
 export class IsolateChildren extends BeforePlugin {
-
-  name = 'isolateChildren';
+  name = "isolateChildren";
 
   keydown(): EventHandlerMap {
     return {
@@ -12,7 +16,7 @@ export class IsolateChildren extends BeforePlugin {
       right: this.right,
       shiftLeft: this.shiftLeft,
       shiftRight: this.shiftRight,
-    }
+    };
   }
 
   backspace = (ctx: EventContext<KeyboardEvent>) => {
@@ -22,7 +26,7 @@ export class IsolateChildren extends BeforePlugin {
       return;
     }
     this.preventAtContentStart(ctx);
-  }
+  };
 
   left = (ctx: EventContext<KeyboardEvent>) => {
     if (!ctx.app.state.blockSelection.isEmpty) return;
@@ -31,7 +35,7 @@ export class IsolateChildren extends BeforePlugin {
       return;
     }
     this.preventAtContentStart(ctx);
-  }
+  };
 
   right = (ctx: EventContext<KeyboardEvent>) => {
     if (!ctx.app.state.blockSelection.isEmpty) return;
@@ -40,30 +44,29 @@ export class IsolateChildren extends BeforePlugin {
       return;
     }
     this.preventAtTitleEnd(ctx);
-  }
+  };
 
   shiftLeft = (ctx: EventContext<KeyboardEvent>) => {
     if (!ctx.app.state.blockSelection.isEmpty) return;
     this.preventAtContentStart(ctx);
-  }
+  };
 
   shiftRight = (ctx: EventContext<KeyboardEvent>) => {
     if (!ctx.app.state.blockSelection.isEmpty) return;
     this.preventAtTitleEnd(ctx);
-  }
+  };
 
   preventAtContentStart(e) {
     if (this.isAtStartOfChildren(e)) {
-      preventAndStopCtx(e)
+      preventAndStopCtx(e);
     }
   }
 
   preventAtTitleEnd(e) {
     if (this.isAtEndOfTitle(e)) {
-      // preventAndStopCtx(e)
+      preventAndStopCtx(e);
     }
   }
-
 
   isAtStartOfChildren(e) {
     const { app } = e;
@@ -78,6 +81,7 @@ export class IsolateChildren extends BeforePlugin {
   isAtEndOfTitle(e) {
     const { app } = e;
     const isolating = this.isolatingNode(e);
+    console.log(isolating);
     if (!isolating) return false;
     const titleNode = isolating.firstChild;
     if (!titleNode) return false;
@@ -91,5 +95,4 @@ export class IsolateChildren extends BeforePlugin {
     const { head } = selection;
     return head.node.closest((n) => n.type.spec.isolateContent);
   }
-
 }

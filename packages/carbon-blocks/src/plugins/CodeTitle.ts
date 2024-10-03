@@ -1,11 +1,10 @@
-import { TitlePlugin } from "@emrgen/carbon-blocks";
 import {
   CarbonAction,
-  CodeTokenClassPath,
   EventContext,
   EventHandler,
   EventHandlerMap,
   InlineNode,
+  LocalClassPath,
   Mark,
   MarksPath,
   Node,
@@ -13,14 +12,18 @@ import {
   PluginManager,
   preventAndStopCtx,
   SetContentAction,
-  TextBlock,
+  TitleNode,
   Writer,
 } from "@emrgen/carbon-core";
+import { Pin } from "@emrgen/carbon-core";
+import { PinnedSelection } from "@emrgen/carbon-core";
+import { splitTextBlock } from "@emrgen/carbon-core";
 import prism from "prismjs";
 import { Optional } from "@emrgen/types";
 import { cloneDeep, identity, uniq } from "lodash";
 import { diffArrays } from "diff";
 import "prismjs/components/prism-go";
+import { TitlePlugin } from "./Title";
 
 export class CodeTitle extends TitlePlugin {
   name = "codeTitle";
@@ -29,6 +32,7 @@ export class CodeTitle extends TitlePlugin {
     return {
       ...super.spec(),
       tag: "code",
+      code: true,
     };
   }
 
@@ -40,10 +44,26 @@ export class CodeTitle extends TitlePlugin {
         const { selection } = app.state;
         // @ts-ignore
         const { data, key } = event.nativeEvent;
-        const { start } = selection;
-        cmd.transform.insertText(selection, data ?? key, false)?.Dispatch();
+        this.insertText(ctx, data ?? key);
+        // const { start } = selection;
+        // cmd.transform.insertText(selection, data ?? key, false)?.Dispatch();
       },
     };
+  }
+
+  insertText(ctx: EventContext<any>, text: string) {
+    const { app, cmd } = ctx;
+    if (app.selection.isCollapsed) {
+      const { selection } = app.state;
+      const { start } = selection;
+      const pin = Pin.future(start.node, start.offset + text.length);
+      const after = PinnedSelection.fromPin(pin);
+      const textContent = start.node.textContent;
+      const [prev, _, next] = splitTextBlock(start, start, app);
+      const textNode = app.schema.text(text)!;
+      const nodes = [...prev, textNode, ...next].filter(Boolean);
+      cmd.SetContent(start.node, nodes).Select(after).Dispatch();
+    }
   }
 
   override keydown(): Partial<EventHandler> {
@@ -100,7 +120,7 @@ export class CodeTitle extends TitlePlugin {
       children: content,
     }));
 
-    if (TextBlock.isSimilarContent(node.children, sanitized.children)) {
+    if (TitleNode.isSimilarContent(node.children, sanitized.children)) {
       return node;
     }
 
@@ -110,7 +130,7 @@ export class CodeTitle extends TitlePlugin {
   override normalize(node: Node): CarbonAction[] {
     const content = CodeTitle.highlightContent(node);
     //
-    if (TextBlock.isSimilarContent(node.children, content)) {
+    if (TitleNode.isSimilarContent(node.children, content)) {
       return [];
     }
 
@@ -158,7 +178,7 @@ export class CodeTitle extends TitlePlugin {
         return schema.text(n.content, {
           props: {
             [MarksPath]: n.marks.map((m) => m.toJSON()),
-            [CodeTokenClassPath]: `token ${n.token}`,
+            [LocalClassPath]: `token ${n.token}`,
           },
         });
       })
@@ -420,7 +440,7 @@ const compareNodeToken = (a: Node, b: MarkLightToken) => {
     }
   }
 
-  return a.props.get(CodeTokenClassPath) === `token ${b.token}`;
+  return a.props.get(LocalClassPath) === `token ${b.token}`;
 };
 
 const compareMarkLightToken = (a: MarkLightToken, b: MarkLightToken) => {

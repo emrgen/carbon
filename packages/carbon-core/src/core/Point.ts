@@ -1,6 +1,7 @@
 import { IntoNodeId, NodeId } from "./NodeId";
 import { classString } from "./Logger";
 import { Maps } from "./types";
+import { Align } from "./Focus";
 
 export enum PointAt {
   Start = "start",
@@ -19,6 +20,11 @@ export class Point {
 
   // valid when point is within a node
   offset: number;
+
+  // carrying precise location information
+  steps: number;
+
+  align: Align;
 
   static IDENTITY = new Point(NodeId.IDENTITY, PointAt.Inside, 0);
   static NULL = new Point(NodeId.NULL, PointAt.Inside, 0);
@@ -48,12 +54,17 @@ export class Point {
   }
 
   // point to before start of the node children
-  static atOffset(nodeId: IntoNodeId, offset: number = 0) {
-    return new Point(nodeId, PointAt.Start, offset);
+  static atOffset(
+    nodeId: IntoNodeId,
+    offset: number = 0,
+    steps: number = -1,
+    align: Align = Align.Left,
+  ) {
+    return new Point(nodeId, PointAt.Start, offset, steps, align);
   }
 
   static toBefore(nodeId: IntoNodeId) {
-    return new Point(nodeId, PointAt.Before);
+    return new Point(nodeId, PointAt.Before, 0, 0);
   }
 
   // point to after the id
@@ -66,14 +77,27 @@ export class Point {
     return new Point(nodeId, PointAt.Inside);
   }
 
-  static create(nodeId: IntoNodeId, at: PointAt, offset: number = 0) {
-    return new Point(nodeId, at, offset);
+  static create(
+    nodeId: IntoNodeId,
+    at: PointAt,
+    offset: number = 0,
+    steps: number = -1,
+  ) {
+    return new Point(nodeId, at, offset, steps);
   }
 
-  constructor(nodeId: IntoNodeId, at: PointAt, offset: number = -1) {
+  constructor(
+    nodeId: IntoNodeId,
+    at: PointAt,
+    offset: number = 0,
+    steps: number = -1,
+    align: Align = Align.Left,
+  ) {
     this.nodeId = nodeId.nodeId();
     this.at = at;
     this.offset = offset;
+    this.steps = steps;
+    this.align = align;
   }
 
   map<B>(fn: Maps<Point, B>) {
@@ -84,17 +108,20 @@ export class Point {
     return (
       this.nodeId.eq(other.nodeId) &&
       this.at === other.at &&
-      this.offset === other.offset
+      this.offset === other.offset &&
+      this.steps === other.steps
     );
   }
 
   clone() {
-    return Point.create(this.nodeId.clone(), this.at, this.offset);
+    return Point.create(this.nodeId.clone(), this.at, this.offset, this.steps);
   }
 
   toString() {
-    const { nodeId, at, offset } = this;
-    return classString(this)(`${nodeId.toString()}/${at}/${offset}`);
+    const { nodeId, at, offset, steps, align } = this;
+    return classString(this)(
+      `${nodeId.toString()}/${at}/${offset}/${steps}/${align}`,
+    );
   }
 
   toJSON() {
@@ -102,6 +129,7 @@ export class Point {
       id: this.nodeId.toString(),
       at: this.at,
       offset: this.offset,
+      align: this.align,
     };
   }
 

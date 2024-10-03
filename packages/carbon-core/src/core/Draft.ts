@@ -1,17 +1,15 @@
-import {
-  Mark,
-  MarkAction,
-  MarkSet,
-  Node,
-  NodeId,
-  NodePropsJson,
-  NodeType,
-  Point,
-  PointedSelection,
-  Schema,
-  State,
-} from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { Schema } from "./Schema";
+import { MarkSet } from "./Mark";
+import { Mark } from "./Mark";
+import { State } from "./State";
+import { Point } from "./Point";
+import { NodeId } from "./NodeId";
+import { NodeType } from "./NodeType";
+import { NodePropsJson } from "./NodeProps";
+import { MarkAction } from "./actions/index";
+import { PointedSelection } from "./PointedSelection";
+import { Node } from "./Node";
 
 // Draft is responsible for producing a state after a Transaction
 // Actions delegate the state update to the draft
@@ -19,6 +17,12 @@ export interface Draft {
   schema: Schema;
   marks: MarkSet;
   // nodeMap: NodeMap;
+
+  // used to verify and prepare the actions before apply
+  get(id: NodeId): Optional<Node>;
+
+  // get the parent of the node
+  parent(from: NodeId | Node): Optional<Node>;
 
   // produce creates a new draft and pass to the fn to update the draft
   // if the fn fails then the draft is rolled back to the previous state
@@ -43,10 +47,4 @@ export interface Draft {
   updateContent(nodeId: NodeId, content: Node[] | string): void;
 
   updateSelection(selection: PointedSelection): void;
-
-  // used to verify and prepare the actions before apply
-  get(id: NodeId): Optional<Node>;
-
-  // get the parent of the node
-  parent(from: NodeId | Node): Optional<Node>;
 }

@@ -10,7 +10,7 @@ import { p12, p14, pad } from "./Logger";
 import { last } from "lodash";
 import { preventAndStop } from "../utils/event";
 import { CustomEvent } from "./CustomEvent";
-import { ChangeManager } from "@emrgen/carbon-core";
+import { ChangeManager } from "./ChangeManager";
 
 const selectionKeys: string[] = ["left", "right", "shift+left", "shift+right"];
 
@@ -158,19 +158,19 @@ export class EventManager {
 
     // create a pinned selection from dom selection
     // NOTE: this is a normalized and valid selection for the editor
-    let selection = PinnedSelection.fromDom(app.store);
+    let domSelection = PinnedSelection.fromDom(app.store);
     if (
       this.prevEvents
         .map((a) => a.type as string)
         .some((a) => ["mouseDown"].includes(a))
     ) {
-      selection = PinnedSelection.fromDom(app.store, true);
+      domSelection = PinnedSelection.fromDom(app.store);
     }
-
-    // console.log(selection?.toString());
 
     // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
     // console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
+
+    const { selection, head } = domSelection ?? {};
 
     if (["selectionchange"].includes(type)) {
       console.log(
@@ -215,7 +215,8 @@ export class EventManager {
     }
 
     // start node corresponds to focus point in DOM
-    const node = selection.head.down().node;
+    const node = head!.node;
+
     if (!node) {
       console.error(
         p12("%c[invalid]"),
@@ -263,6 +264,7 @@ export class EventManager {
       // console.log('onEvent:', event);
     }
 
+    // console.log(type, editorEvent.selection.toString(), node.name);
     this.pm.onEvent(editorEvent);
     if (groupOpen) {
       // console.groupEnd();
@@ -271,7 +273,7 @@ export class EventManager {
     // if the transaction is not committed, discard it
     if (editorEvent.transaction && !editorEvent.transaction.committed) {
       this.app.committed = true;
-      console.log(
+      console.warn(
         p14("%c[skipped]"),
         "color:#ffcc006e",
         "Discarded transaction",

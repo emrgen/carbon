@@ -95,7 +95,7 @@ export const TabsComp = (props: RendererProps) => {
     [app, tabs],
   );
 
-  console.log("active node id", activeTabNode.id.toString(), activeTabId);
+  // console.log("active node id", activeTabNode.id.toString(), activeTabId);
 
   return (
     <CarbonBlock node={tabs} ref={ref} custom={connectors}>

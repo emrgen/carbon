@@ -1,4 +1,4 @@
-import { Node, sortNodes } from "@emrgen/carbon-core";
+import { Node } from "./Node";
 
 // separated block selection from pinned/pointed selection
 // because its a different concept and it's not clear how to combine them
@@ -7,6 +7,8 @@ import { Node, sortNodes } from "@emrgen/carbon-core";
 // should we have a separate block selection and a separate pointed selection?
 // how to have block selection and pointed selection at the same time, are we allowed to do that?
 // how to reset block selection without resetting pointed selection?
+import { sortNodes } from "../utils/node";
+
 export class BlockSelection {
   readonly blocks: Node[];
 

@@ -3,12 +3,13 @@ import { useEffect } from "react";
 import {
   blockPresetPlugins,
   emoji,
-  mention,
   node,
   section,
   text,
   title,
 } from "@emrgen/carbon-blocks";
+import { mention } from "@emrgen/carbon-blocks";
+import { empty } from "@emrgen/carbon-blocks";
 import {
   Extension,
   ReactRenderer,
@@ -29,6 +30,8 @@ import {
   StylePath,
   TitlePath,
 } from "@emrgen/carbon-core";
+import { ContenteditablePath } from "@emrgen/carbon-core";
+import { SuppressContenteditableWarningPath } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
@@ -468,7 +471,7 @@ const data = node("carbon", [
       //   node("codeLine", [title([text("  console.log('hello world')")])]),
       //   node("codeLine", [title([text("}")])]),
       // ]),
-      //
+
       // node("codeMirror", [], {
       //   ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
       // }),
@@ -642,10 +645,41 @@ const data = node("carbon", [
       //   node("stack", [section([title([text("section 3")])])]),
       // ]),
 
+      section([title([text("time"), mention("today"), node("empty")])]),
+      section([
+        title([
+          text("123"),
+          mention("ankita"),
+          text("123"),
+          mention("avira"),
+          text("123"),
+        ]),
+      ]),
+      section([title([text("123456789")])]),
       section([title([emoji("🖐️")])]),
       section([
-        title([mention("subhasis"), mention("bubun"), mention("bappa")]),
+        title([
+          empty({
+            [ContenteditablePath]: true,
+            [SuppressContenteditableWarningPath]: true,
+          }),
+
+          mention("123"),
+          empty({
+            [ContenteditablePath]: true,
+            [SuppressContenteditableWarningPath]: true,
+          }),
+
+          mention("bubun"),
+          text("abc"),
+          mention("bappa"),
+          empty({
+            [ContenteditablePath]: true,
+            [SuppressContenteditableWarningPath]: true,
+          }),
+        ]),
       ]),
+      section([title([text("section 1")])]),
       section([title([text("section 1")])]),
       // node("pageLink", [], {
       //   [LinkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdMsdf",
@@ -787,14 +821,14 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
-      // console.debug(
-      //   "changes",
-      //   state.changes.patch,
-      //   Array.from(state.changes.dataMap.values()),
-      // );
+      console.debug(
+        "changes",
+        state.changes.patch,
+        Array.from(state.changes.dataMap.values()),
+      );
       console.debug(
         "actions",
-        state.actions.actions.map((a) => a.toJSON()),
+        state.actions.optimize().actions.map((a) => a.toJSON()),
       );
       // printNode(state.content);
       state.content.all((node) => {

@@ -1,62 +1,54 @@
-import {
-  ActionOrigin,
-  EventContext,
-  EventHandler,
-  SelectAction,
-  StateActions,
-  Transaction,
-  TxType
-} from "../core";
+import { EventContext, EventHandler, StateActions, TxType } from "../core";
 import { AfterPlugin } from "../core/CarbonPlugin";
-import { last } from "lodash";
 
 export class HistoryPlugin extends AfterPlugin {
-  name = 'history';
+  name = "history";
 
   undoStack: StateActions[] = [];
   redoStack: StateActions[] = [];
 
   keydown(): Partial<EventHandler> {
     return {
-      'cmd_z': this.undo.bind(this),
-      'cmd_shift_z': this.redo.bind(this)
+      cmd_z: this.undo.bind(this),
+      cmd_shift_z: this.redo.bind(this),
     };
   }
 
   undo(ctx: EventContext<Event>) {
     ctx.event.preventDefault();
-    if (this.undoStack.length === 0) return
+    if (this.undoStack.length === 0) return;
 
-    StateActions.compress(this.undoStack)
+    StateActions.compress(this.undoStack);
 
-    const tx = this.undoStack.pop()!
-    const inverse = tx.inverse()
-    console.log('undo', inverse);
-    const {cmd} = ctx;
-    inverse.actions.forEach(action => {
+    const tx = this.undoStack.pop()!;
+    const inverse = tx.inverse();
+    console.log("undo", inverse);
+    const { cmd } = ctx;
+    inverse.actions.forEach((action) => {
+      console.log(action);
       cmd.Add(action);
-    })
-    cmd.WithType(TxType.Undo)
+    });
+    cmd.WithType(TxType.Undo);
     cmd.Dispatch();
 
-    ctx.app.emit('history.undo', tx);
+    ctx.app.emit("history.undo", tx);
   }
 
   redo(ctx: EventContext<Event>) {
     ctx.event.preventDefault();
-    if (this.redoStack.length === 0) return
+    if (this.redoStack.length === 0) return;
 
-    const tx = this.redoStack.pop()!
-    const inverse = tx.inverse()
-    console.log('redo', inverse);
-    const {cmd} = ctx;
-    inverse.actions.forEach(action => {
+    const tx = this.redoStack.pop()!;
+    const inverse = tx.inverse();
+    console.log("redo", inverse);
+    const { cmd } = ctx;
+    inverse.actions.forEach((action) => {
       cmd.Add(action);
-    })
-    cmd.WithType(TxType.Redo)
+    });
+    cmd.WithType(TxType.Redo);
     cmd.Dispatch();
 
-    ctx.app.emit('history.redo', tx);
+    ctx.app.emit("history.redo", tx);
   }
 
   transaction(tr: StateActions): void {

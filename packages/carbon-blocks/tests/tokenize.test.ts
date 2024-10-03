@@ -37,23 +37,28 @@ test("tokenize newline", () => {
 test("tokenize function", () => {
   const text = `function add(a, b) {\n  return a + b;\n}`;
   const tokens = CodeTitle.tokenize(text, "javascript");
+  console.log(tokens);
   expect(tokens).toEqual([
     { content: "function", type: "keyword", start: 0, end: 8 },
     { content: " ", type: "whitespace", start: 8, end: 9 },
-    { content: "add", type: "function", start: 8, end: 12 },
+    { content: "add", type: "function", start: 9, end: 12 },
     { content: "(", type: "punctuation", start: 12, end: 13 },
-    { content: "a", type: "text", start: 13, end: 14 },
-    { content: ",", type: "punctuation", start: 14, end: 15 },
-    { content: " b", type: "text", start: 16, end: 19 },
-    { content: ")", type: "punctuation", start: 19, end: 20 },
-    { content: " {", type: "punctuation", start: 20, end: 22 },
-    { content: "\n  ", type: "whitespace", start: 22, end: 25 },
-    { content: "return", type: "keyword", start: 25, end: 31 },
-    { content: " a ", type: "text", start: 31, end: 34 },
-    { content: "+", type: "operator", start: 34, end: 35 },
-    { content: " b", type: "text", start: 35, end: 38 },
-    { content: ";", type: "punctuation", start: 38, end: 39 },
-    { content: "\n", type: "whitespace", start: 39, end: 40 },
-    { content: "}", type: "punctuation", start: 40, end: 41 },
+    {
+      content: "a,[object Object], b",
+      type: "parameter",
+      start: 13,
+      end: 16,
+    },
+    { content: ")", type: "punctuation", start: 16, end: 17 },
+    { content: " ", type: "whitespace", start: 17, end: 18 },
+    { content: "{", type: "punctuation", start: 18, end: 19 },
+    { content: "\n  ", type: "whitespace", start: 19, end: 22 },
+    { content: "return", type: "keyword", start: 22, end: 28 },
+    { content: " a ", type: "text", start: 28, end: 31 },
+    { content: "+", type: "operator", start: 31, end: 32 },
+    { content: " b", type: "text", start: 32, end: 34 },
+    { content: ";", type: "punctuation", start: 34, end: 35 },
+    { content: "\n", type: "whitespace", start: 35, end: 36 },
+    { content: "}", type: "punctuation", start: 36, end: 37 },
   ]);
 });

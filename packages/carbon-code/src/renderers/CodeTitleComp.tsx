@@ -7,7 +7,6 @@ import {
 export const CodeTitleComp = (props: RendererProps) => {
   const { node } = props;
   const handleMouseDown = () => {
-    console.log("xxxxxxxxxxxxxxx");
     // node.updateNode({ isEmpty: false });
   };
   return (

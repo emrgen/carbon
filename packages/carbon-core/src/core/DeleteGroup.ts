@@ -1,14 +1,17 @@
 import { NodeIdSet } from "./BSet";
 import { NodeSpan, Span } from "./Span";
 import { NodeId } from "./NodeId";
+import { PinnedSelection } from "./PinnedSelection";
 
 export class SelectionPatch {
   ids: NodeIdSet = new NodeIdSet();
   ranges: Span[] = [];
 
   static default() {
-    return new SelectionPatch();
+    return new SelectionPatch(PinnedSelection.IDENTITY);
   }
+
+  constructor(readonly selection: PinnedSelection) {}
 
   addRange(range: Span) {
     if (!range.isCollapsed) {
@@ -45,7 +48,7 @@ export class DeletePatch extends SelectionPatch {
   ranges: NodeSpan[] = [];
 
   static default() {
-    return new DeletePatch();
+    return new DeletePatch(PinnedSelection.IDENTITY);
   }
 
   override addRange(range: NodeSpan) {

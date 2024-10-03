@@ -1,4 +1,4 @@
-import { Node } from "@emrgen/carbon-core";
+import { Node } from "./Node";
 
 export class Block {
   static isText(node: Node) {

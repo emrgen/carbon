@@ -7,6 +7,7 @@ import {
   Point,
 } from "@emrgen/carbon-core";
 import { Optional, Predicate } from "@emrgen/types";
+import { identity } from "lodash";
 
 export class ImmutableNodeMap implements NodeMap {
   // recent insertions
@@ -39,7 +40,7 @@ export class ImmutableNodeMap implements NodeMap {
 
   constructor(parent?: ImmutableNodeMap) {
     if (parent && !parent._frozen) {
-      // throw new Error("Parent map must be frozen");
+      throw new Error("Parent map must be frozen");
     }
 
     this._parent = parent || null;
@@ -98,7 +99,6 @@ export class ImmutableNodeMap implements NodeMap {
   }
 
   set(key: NodeId, value: Node) {
-    // console.log('setting node map entry', key.toString())
     // once deleted we can't set it back within the same map
     this._deleted.delete(key);
     this._map.set(key, value);
@@ -132,10 +132,8 @@ export class ImmutableNodeMap implements NodeMap {
 
   // delete the node from the map
   delete(key: NodeId) {
-    // console.log("deleting", key.toString(), this.get(key));
     this._deleted.set(key, this.get(key)!);
     this._map.delete(key);
-    // console.log('delete', key.toString(), this.get(key));
   }
 
   // find the index of the given node
@@ -206,11 +204,19 @@ export class ImmutableNodeMap implements NodeMap {
   }
 
   freeze() {
-    // if (this._frozen) return;
-    // this._frozen = true;
-    // this._map.freeze();
-    // this._size = this._map.size + (this._parent?.size || 0);
-    // Object.freeze(this);
+    if (this._frozen) return;
+    this._frozen = true;
+
+    this._map.freeze();
+    this._deleted.freeze();
+    Object.freeze(this._parents);
+    Object.freeze(this._children);
+
+    this._size = this._map.size + (this._parent?.size || 0);
+    this._map.forEach((node, k) => {
+      node.freeze(identity);
+    });
+    Object.freeze(this);
   }
 
   children(key: NodeId): NodeId[] {
@@ -225,6 +231,7 @@ export class ImmutableNodeMap implements NodeMap {
     return children?.filter((id) => !this.isDeleted(id)) || [];
   }
 
+  // TODO: this was designed to allow insert wrt adjacent nodes like notion
   insert(at: Point, childId: NodeId): void {
     switch (at.at) {
       case "start":

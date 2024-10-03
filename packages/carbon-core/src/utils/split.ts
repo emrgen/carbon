@@ -1,5 +1,5 @@
 import { Carbon, Node, Pin } from "../core";
-import { takeBefore } from "./array";
+import { takeBefore, takeUpto } from "./array";
 import { EmptyInline } from "@emrgen/carbon-core";
 
 export function splitTextBlock(
@@ -7,29 +7,37 @@ export function splitTextBlock(
   end: Pin,
   app: Carbon,
 ): [Node[], Node[], Node[]] {
-  const startPin = start.down()!;
-  const endPin = end.down()!;
+  if (!start.node.eq(end.node)) {
+    throw new Error("start and end nodes are not same");
+  }
+
+  const startPin = start.down()!.leftAlign;
+  const endPin = end.down()!.leftAlign;
 
   if (EmptyInline.is(startPin.node) && EmptyInline.is(endPin.node)) {
+    const startNode = startPin.node!;
+    const endNode = endPin.node!;
     if (startPin.eq(endPin)) {
-      console.log("xxxxxxxxxxx");
-      const node = startPin.node.parent!;
-      if (EmptyInline.isPrefix(startPin.node)) {
-        console.log("prefix", node.name);
-        return [
-          node.prevSiblings.map((n) => n.clone()),
-          [],
-          [node.clone(), ...node.nextSiblings.map((n) => n.clone())],
-        ];
-      }
-      if (EmptyInline.isSuffix(startPin.node)) {
-        console.log("suffix");
-        return [
-          [...node.prevSiblings.map((n) => n.clone()), node.clone()],
-          [],
-          node.nextSiblings.map((n) => n.clone()),
-        ];
-      }
+      return [
+        [
+          ...startNode.prevSiblings.map((n) => n.clone()),
+          startNode.type.default()!,
+        ],
+        [],
+        [startNode.clone(), ...startNode.nextSiblings.map((n) => n.clone())],
+      ];
+    } else {
+      return [
+        [
+          ...startNode.prevSiblings.map((n) => n.clone()),
+          startNode.type.default()!,
+        ],
+        [
+          startNode.type.default()!,
+          ...takeUpto(startNode.nextSiblings, (n) => n.eq(endNode)),
+        ],
+        [endNode.clone(), ...endNode.nextSiblings.map((n) => n.clone())],
+      ];
     }
   }
 

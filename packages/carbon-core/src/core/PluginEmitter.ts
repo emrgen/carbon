@@ -1,7 +1,5 @@
-import EventEmitter from "events";
-import { CarbonPlugin, NodeId } from "@emrgen/carbon-core";
-import { cloneDeep, merge } from "lodash";
-import { NodeEmitter, NodeTopicEmitter } from "./NodeEmitter";
+import { NodeTopicEmitter } from "./NodeEmitter";
+import { CarbonPlugin } from "./CarbonPlugin";
 
 // message passing between plugins
 // TODO: this is a temporary experimental solution, we need to find a better way to do this

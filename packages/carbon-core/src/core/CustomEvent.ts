@@ -1,4 +1,4 @@
-import { Node } from "@emrgen/carbon-core";
+import { Node } from "./Node";
 
 export class CustomEvent {
   static create(type: string, node: Node, event: any) {

@@ -1,6 +1,6 @@
-import { Transaction } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { last } from "lodash";
+import { Transaction } from "./Transaction";
 
 // a transaction tree is a tree of transactions that can be rolled back and committed
 // it can be used to create time travel functionality

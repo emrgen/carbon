@@ -46,7 +46,11 @@ export class NodeId implements IntoNodeId {
   }
 
   comp(other: NodeId) {
-    return this.id.localeCompare(other.id);
+    try {
+      return this.id.localeCompare(other.id);
+    } catch (e) {
+      throw new Error(`NodeId: ${this.id} and ${other.id} are not comparable`);
+    }
   }
 
   clone() {

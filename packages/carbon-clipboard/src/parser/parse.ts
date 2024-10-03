@@ -4,6 +4,9 @@ import { fixContentMatch, parseText } from "./text";
 import { isEmpty, sortBy } from "lodash";
 import { parseHtml } from "./html";
 
+let cache: any = null;
+let clipboard: any = null;
+
 export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
   return new Promise((resolve, reject) => {
     navigator.clipboard.read().then((data) => {
@@ -39,7 +42,7 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                             startNode,
                             endNode,
                           );
-                          printNode(slice.root);
+                          // printNode(slice.root);
                           resolve(slice);
                           done(true);
                         })
@@ -97,7 +100,7 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                             return;
                           }
 
-                          console.log("slice", root.toJSON());
+                          // console.log("slice", root.toJSON());
 
                           const slice = Slice.from(root);
                           resolve(slice);

@@ -1,5 +1,5 @@
-import { CarbonPlugin } from "@emrgen/carbon-core";
 import { entries, isEmpty } from "lodash";
+import { CarbonPlugin } from "./CarbonPlugin";
 
 type ServiceMap = Record<string, Record<string, Function>>;
 

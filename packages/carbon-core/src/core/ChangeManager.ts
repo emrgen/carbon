@@ -3,13 +3,13 @@ import { NodeIdSet } from "./BSet";
 import { Carbon } from "./Carbon";
 import { Node } from "./Node";
 import { NodeTopicEmitter } from "./NodeEmitter";
-import { SelectionManager } from "./SelectionManager";
-import { TransactionManager } from "./TransactionManager";
 import { EventsOut } from "./Event";
 import { Transaction } from "./Transaction";
 import { PluginManager } from "./PluginManager";
-import { ActionOrigin, State, StateActions } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { StateActions } from "./NodeChange";
+import { State } from "./State";
+import { ActionOrigin } from "./actions/types";
 
 export enum NodeChangeType {
   update = "update",
@@ -34,8 +34,6 @@ export class ChangeManager extends NodeTopicEmitter {
 
   constructor(
     private readonly app: Carbon,
-    private readonly sm: SelectionManager,
-    private readonly tm: TransactionManager,
     private readonly pm: PluginManager,
   ) {
     super();
@@ -146,7 +144,13 @@ export class ChangeManager extends NodeTopicEmitter {
     // console.log('mounted', this.changes.size, this.changes.toArray().map(n => n.toString()));
 
     // sync the selection if the content is synced
-    // console.log('mounted', this.state.runtime.updatedNodeIds.toArray().map(n => n.toString()), node.id.toString(), this.isContentSynced, this.isStateSynced, this.state.isSelectionDirty);
+    console.log(
+      "mounted",
+      this.updated.toArray().map((n) => n.toString()),
+      node.id.toString(),
+      this.isContentSynced,
+      this.isSelectionDirty,
+    );
     if (this.isContentSynced) {
       // console.log("content synced, selection dirty:", this.isSelectionDirty);
       // NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
@@ -176,7 +180,7 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   private updateContent() {
-    console.group("syncing:  content");
+    console.groupCollapsed("syncing:  content");
     // console.group('syncing: content')
     const updatedNodeIds = this.updated;
 
@@ -221,7 +225,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
   private updateSelection(cb: Function) {
     const selection = this.state.selection;
-    // console.log("syncing: selection", this.state.selection.toJSON(), this.state.selection.isInline);
+    console.log("syncing: selection", this.state.selection.toString());
     if (!this.app.ready) {
       // console.log('react not ready');
       return;

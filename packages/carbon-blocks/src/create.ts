@@ -4,6 +4,8 @@ import {
   EmojiPath,
   NodeId,
 } from "@emrgen/carbon-core";
+import { ContenteditablePath } from "@emrgen/carbon-core";
+import { SuppressContenteditableWarningPath } from "@emrgen/carbon-core";
 
 export const text = (text: string = "", props = {}) => ({
   name: "text",
@@ -52,6 +54,11 @@ export const node = (
   props,
 });
 
+export const empty = (props = {}) => ({
+  name: "empty",
+  props,
+});
+
 export const title = (children: any[] = []) => ({
   name: "title",
   children,
@@ -65,12 +72,16 @@ export const section = (children: any[] = [], props = {}) => ({
 
 export const mention = (name: string) => {
   return node("mention", [
-    node("empty"),
-    node("mentionAtom", [], {
+    // node("empty", [], {
+    //   [ContenteditablePath]: false,
+    //   [SuppressContenteditableWarningPath]: false,
+    // }),
+    node(`atomicText`, [], {
+      [ContenteditablePath]: false,
+      [SuppressContenteditableWarningPath]: true,
       [AtomContentPath]: `@${name}`,
-      [AtomSizePath]: name.length + 1,
+      [AtomSizePath]: 1,
     }),
-    node("empty"),
   ]);
 };
 

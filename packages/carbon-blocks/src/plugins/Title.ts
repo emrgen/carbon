@@ -5,21 +5,22 @@ import {
   EventContext,
   EventHandler,
   EventHandlerMap,
+  InlineNode,
   MarksPath,
   Node,
+  NodeEncoder,
   NodePlugin,
   NodeSpec,
   Point,
   PointedSelection,
   preventAndStopCtx,
   SetContentAction,
+  TitleNode,
+  Writer,
 } from "@emrgen/carbon-core";
 
 import { TextPlugin } from "./Text";
 import { flatten, identity } from "lodash";
-import { NodeEncoder, Writer } from "@emrgen/carbon-core/src/core/Encoder";
-import { TextBlock } from "@emrgen/carbon-core/src/core/TextBlock";
-import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
 
 // title is a block content that can be used as a title for a block
 export class TitlePlugin extends NodePlugin {
@@ -31,7 +32,6 @@ export class TitlePlugin extends NodePlugin {
     return {
       group: "",
       content: "inline*",
-      focusable: true,
       attrs: {
         html: {
           suppressContentEditableWarning: true,
@@ -129,7 +129,11 @@ export class TitlePlugin extends NodePlugin {
   }
 
   override normalize(node: Node): CarbonAction[] {
-    const content = TextBlock.from(node).normalizeContent();
+    return [];
+    // console.log(
+    //   node.children.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
+    // );
+    const content = TitleNode.from(node).normalizeContent();
     const { children } = node;
     if (
       content.length === children.length &&
@@ -138,11 +142,11 @@ export class TitlePlugin extends NodePlugin {
       return [];
     }
 
-    console.log(
-      "NORMALIZE",
-      content.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
-      children.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
-    );
+    // console.log(
+    //   "NORMALIZE",
+    //   content.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
+    //   children.map((n) => [n.textContent, n.marks.map((m) => m.toJSON())]),
+    // );
 
     return [SetContentAction.withBefore(node, children, content)];
   }

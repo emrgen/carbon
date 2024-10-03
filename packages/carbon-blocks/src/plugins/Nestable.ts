@@ -15,6 +15,8 @@ import {
   Transaction,
   Writer,
 } from "@emrgen/carbon-core";
+import { Focus } from "@emrgen/carbon-core";
+import { EmptyInline } from "@emrgen/carbon-core";
 import { isNestableNode } from "../utils";
 import { Optional } from "@emrgen/types";
 
@@ -124,7 +126,16 @@ export class NestablePlugin extends AfterPlugin {
         if (!head) return;
 
         // console.log(listNode?.id.toString(), listNode?.name, head.toString(), Pin.toStartOf(listNode)?.toJSON());
-        const atStart = Pin.toStartOf(listNode)?.eq(head);
+        console.log(
+          Pin.toStartOf(listNode)?.toString(),
+          head.down().toString(),
+          head.toString(),
+        );
+
+        const atStart = Focus.toStartOf(listNode)
+          ?.pin()
+          ?.eq(EmptyInline.leftAlign(head.down()));
+
         // console.log(atStart, Pin.toStartOf(listNode)?.node.name, head.node.name);
 
         if (!atStart) return;

@@ -49,6 +49,7 @@ export enum EventsOut {
   transaction = "transaction",
   transactionCommit = "transaction:commit",
   mounted = "mounted",
+  unmounted = "unmounted",
   nodeInserted = "nodeInserted",
 }
 

@@ -2,11 +2,10 @@ import { Bound, Optional } from "@emrgen/types";
 import { EventContext } from "./EventContext";
 import { Node } from "./Node";
 import { InputRule } from "./Rules";
-import {
-  NodeContentData,
-  PinnedSelection,
-  PointedSelection,
-} from "@emrgen/carbon-core";
+import { PinnedSelection } from "./PinnedSelection";
+import { PointedSelection } from "./PointedSelection";
+import { NodeContentData } from "./NodeContent";
+import { cloneDeep } from "lodash";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {}
@@ -89,10 +88,28 @@ export interface SelectionBounds {
 
 export type SerializedNode = string;
 
+export const shallowCloneMap = (data: NodeContentData) => {
+  return {
+    ...data,
+    props: cloneDeep(data.props),
+    children: data.children.slice(),
+  };
+};
+
 export const deepCloneMap = (data: NodeContentData) => {
   return {
     ...data,
     children: data.children.map((n) => n.clone(deepCloneMap)),
+  };
+};
+
+export const deepCloneWithNewId = (data: NodeContentData) => {
+  const factory = data.type.schema.factory;
+  const id = data.type.isBlock ? factory.blockId() : factory.textId();
+  return {
+    ...data,
+    id,
+    children: data.children.map((n) => n.clone(deepCloneWithNewId)),
   };
 };
 

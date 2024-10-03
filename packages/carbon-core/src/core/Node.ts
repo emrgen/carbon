@@ -34,7 +34,8 @@ import {
 } from "./NodeProps";
 import { no, yes } from "./types";
 import EventEmitter from "events";
-import { Mark, NodeMap } from "@emrgen/carbon-core";
+import { Mark } from "./Mark";
+import { NodeMap } from "./NodeMap";
 
 export type TraverseOptions = {
   order: "pre" | "post";
@@ -42,6 +43,7 @@ export type TraverseOptions = {
   // checks parent with the predicate before moving to parent siblings
   parent?: boolean;
   gotoParent: boolean;
+  boundary: Predicate<Node>;
   skip: Predicate<Node>;
 };
 
@@ -203,38 +205,41 @@ export class Node extends EventEmitter implements IntoNodeId {
     return false;
   }
 
-  // starting from left of <a> to before of </a>
-  // if total focus size is needed for a block, need to add 1
-  // used in Position
-  // get stepSize() {
-  // 	if (this.stepSizeCache) {
-  // 		return this.stepSizeCache
-  // 	}
+  // starting from left of <a> to end of </a>
+  // if total focus size is needed for a block is
+  // (the sum of focus size of all children - (size - 1)) + 2
+  get stepSize(): number {
+    // two steps to enter and exit the text node
+    if (this.isText) return this.textContent.length + 2;
+    if (this.isInlineAtom && this.isFocusable) {
+      return this.focusSize + 2;
+    }
 
-  // 	if (this.isText) {
-  // 		this.stepSizeCache = this.size
-  // 	} else if (this.isVoid) {
-  // 		this.stepSizeCache = 2
-  // 	} else if (this.isAtom) {
-  // 		this.stepSizeCache = 1
-  // 	} else {
-  // 		this.stepSizeCache = 2 + this.children.reduce((s, ch) => s + ch.stepSize, 0);
-  // 	}
+    if ((this.isBlock && this.isVoid) || this.isZero) {
+      return 3;
+    }
 
-  // 	return this.stepSizeCache;
-  // }
+    // once step to cross the block
+    if (this.isIsolate) {
+      return 1;
+    }
+
+    // two steps to enter and exit the block
+    return this.children.map((n) => n.stepSize).reduce((s, n) => s + n, 2);
+  }
 
   // focus steps count within the node
   // start and end locations are within the node
   get focusSize(): number {
-    if (this.isInlineAtom) {
+    if (this.isZero) return 1;
+
+    if (this.isInlineAtom && this.isFocusable) {
       return this.props.get(AtomSizePath) ?? this.textContent.length;
     }
-    // if (this.isEmpty && this.isInline) return 1
     // if (this.isEmpty || this.isInlineAtom) return 1;
     // if (this.isBlockAtom) return 0;
     if (this.isText) return this.textContent.length;
-    if (this.isInline) return this.textContent.length;
+    // if (this.isInline) return this.textContent.length;
 
     // focus size is the sum of focus size of all children
     return this.children.reduce((fs, n) => {
@@ -259,11 +264,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   // focus can be within the node(ex: text node), excluding any child node
   get isFocusable(): boolean {
-    if (this.isInlineAtom && !this.isIsolate) return true;
-    // if (this.isText) return true;
+    if (this.type.isFocusable) return true;
     if (this.parents.some((n) => n.isAtom && n.isBlock)) return false;
     return (
-      ((this.isTextContainer && this.isEmpty) || this.type.isFocusable) &&
+      ((this.isTextContainer && this.isVoid) || this.type.isFocusable) &&
       !this.isCollapseHidden
     );
   }
@@ -408,6 +412,7 @@ export class Node extends EventEmitter implements IntoNodeId {
   }
 
   // TODO: user IndexMapper to optimize index caching and avoid array traverse for finding index
+  // use immutable btree with fractional cascading
   get index(): number {
     const parent = this.parent;
     if (!parent) {
@@ -416,7 +421,8 @@ export class Node extends EventEmitter implements IntoNodeId {
     }
 
     const { children = [] } = parent;
-    return findIndex(children as Node[], (n) => {
+    return findIndex(children as Node[], (n, i) => {
+      console.log("indexing", i);
       return this.id.comp(n.id) === 0;
     });
   }
@@ -473,6 +479,10 @@ export class Node extends EventEmitter implements IntoNodeId {
     return this.type.isText;
   }
 
+  get childrenIds() {
+    return this.children.map((n) => n.id);
+  }
+
   nodeId(): NodeId {
     return this.id;
   }
@@ -522,8 +532,8 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     const selfParents = reverse(this.chain);
     const nodeParents = reverse(other.chain);
-    // console.log(selfParents.map(n => `${n.id.key}:${n.index}`));
-    // console.log(nodeParents.map(n => `${n.id.key}:${n.index}`));
+    // console.log(selfParents.map((n) => `${n.id.key}:${n.index}`));
+    // console.log(nodeParents.map((n) => `${n.id.key}:${n.index}`));
 
     const depth = Math.min(selfParents.length, nodeParents.length);
     for (let i = 0; i < depth; i += 1) {
@@ -630,7 +640,13 @@ export class Node extends EventEmitter implements IntoNodeId {
     gotoParent = true,
   ): Optional<Node> {
     const options = merge(
-      { order: "post", direction: "backward", skip: noop, parent: false },
+      {
+        order: "post",
+        direction: "backward",
+        skip: noop,
+        parent: false,
+        boundary: no,
+      },
       opts,
     ) as TraverseOptions;
     // if (options.skip(this)) return
@@ -648,12 +664,13 @@ export class Node extends EventEmitter implements IntoNodeId {
     if (found) return found;
 
     // pass the search role to prev sibling
-    console.log("check in prev sigbling", sibling?.name);
     found = sibling?.prev(fn, options, false);
     if (found) return found;
 
     // no siblings have the target, maybe we want to go above and beyond
-    if (!gotoParent || !this.parent) return null;
+    if (!gotoParent || !this.parent || options.boundary(this.parent)) {
+      return null;
+    }
 
     // check if parent is the target
     if (options.parent && fn(this.parent)) return this.parent;
@@ -671,10 +688,15 @@ export class Node extends EventEmitter implements IntoNodeId {
     gotoParent = true,
   ): Optional<Node> {
     const options = merge(
-      { order: "post", direction: "forward", skip: noop, parent: false },
+      {
+        order: "post",
+        direction: "forward",
+        skip: noop,
+        parent: false,
+        boundary: no,
+      },
       opts,
     ) as TraverseOptions;
-    // if (options.skip(this)) return
 
     const sibling = this.nextSibling;
     let found: Optional<Node> = null;
@@ -692,7 +714,8 @@ export class Node extends EventEmitter implements IntoNodeId {
     if (found) return found;
 
     // no siblings have the target, maybe we want to go above and beyond
-    if (!gotoParent || !this.parent) return null;
+    if (!gotoParent || !this.parent || options.boundary(this.parent))
+      return null;
 
     // check if parent is the target
     if (options.parent && fn(this.parent)) return this.parent;
@@ -806,7 +829,12 @@ export class Node extends EventEmitter implements IntoNodeId {
   updateContent(content: Node[] | string) {
     // console.log('updateContent', this.id.toString(), this.textContent, this.children.map(n => n.textContent));
     if (isArray(content)) {
-      const nodes = content.map((n) => n.setParent(this).setParentId(this.id));
+      const nodes = content.map((n) => {
+        if (n.isFrozen) {
+          throw new Error("cannot update frozen node");
+        }
+        return n.setParent(this).setParentId(this.id);
+      });
       this.content.updateContent(nodes);
     } else {
       this.content.updateContent(content);

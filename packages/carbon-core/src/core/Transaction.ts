@@ -1,6 +1,6 @@
 import { flatten, identity, isArray, isFunction } from "lodash";
 
-import { With } from "@emrgen/types";
+import { Optional, With } from "@emrgen/types";
 import { Carbon } from "./Carbon";
 import { p14 } from "./Logger";
 import { Mark } from "./Mark";
@@ -11,39 +11,45 @@ import { PluginManager } from "./PluginManager";
 import { Point } from "./Point";
 import { PointedSelection } from "./PointedSelection";
 import { SelectionManager } from "./SelectionManager";
-import {
-  cloneFrozenNode,
-  NodeBTree,
-  NodeIdSet,
-  NodePropsJson,
-  TransactionManager,
-  UpdateMarkAction,
-} from "@emrgen/carbon-core";
-import { ChangeNameAction } from "./actions/ChangeNameAction";
-import { UpdatePropsAction } from "./actions/UpdatePropsAction";
+
 import { ActionOrigin, CarbonAction, TxType } from "./actions/types";
 import { NodeName } from "./types";
+import { cloneFrozenNode } from "./types";
 import { insertNodesActions } from "../utils/action";
 import { ActivatedPath, SelectedPath } from "./NodeProps";
-import { SetContentAction } from "./actions/SetContentAction";
-import { SelectAction } from "./actions/SelectAction";
-import { RemoveNodeAction } from "./actions/RemoveNodeAction";
-import { MoveNodeAction } from "./actions/MoveNodeAction";
+import { NodePropsJson } from "./NodeProps";
 import { CarbonCommand, PluginCommand } from "./CarbonCommand";
 import { Draft } from "./Draft";
 import dayjs from "dayjs";
+import { TransactionManager } from "./TransactionManager";
+import { SelectAction } from "./actions/index";
+import { SetContentAction } from "./actions/index";
+import { RemoveNodeAction } from "./actions/index";
+import { MoveNodeAction } from "./actions/index";
+import { ChangeNameAction } from "./actions/index";
+import { UpdateMarkAction } from "./actions/index";
+import { UpdatePropsAction } from "./actions/index";
+import { NodeBTree } from "./BTree";
+import { NodeIdSet } from "./BSet";
+import { TitleNode } from "./TitleNode";
 
 let _id = 0;
 const getId = () => String(_id++);
 
 export class Transaction {
-  readonly id: string;
   time = dayjs().unix();
   type: TxType = TxType.TwoWay;
+  readonly id: string;
   private actions: CarbonAction[] = [];
+  lastSelection: PointedSelection;
+
+  // track the end and start block of the transaction
+  // this is useful for combining multiple actions like delete -> insert, delete -> paste
+  startNode: Optional<TitleNode>;
+  endNode: Optional<TitleNode>;
+
   private _committed: boolean = false;
   private _dispatched: boolean = false;
-  lastSelection: PointedSelection;
 
   private readOnly = false;
 
@@ -313,6 +319,11 @@ export class Transaction {
     // })
     // console.groupEnd();
 
+    // console.log(
+    //   "dispatching transaction",
+    //   this.id,
+    //   this.actions.map((a) => a.toString()),
+    // );
     this.tm.dispatch(this);
     return this;
   }
@@ -335,7 +346,11 @@ export class Transaction {
 
       for (const action of this.actions) {
         console.log(p14("%c[command]"), "color:white", action.toString());
-        action.execute(draft);
+        try {
+          action.execute(draft);
+        } catch (e) {
+          console.log(e);
+        }
       }
       // normalize after transaction command
       // this way the merge will happen before the final selection

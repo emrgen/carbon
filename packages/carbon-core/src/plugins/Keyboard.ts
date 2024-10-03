@@ -1,6 +1,6 @@
 import { EventHandlerMap } from "../core/types";
-import { AfterPlugin, CarbonPlugin } from "../core/CarbonPlugin";
-import { EventContext } from "../core/EventContext";
+import { AfterPlugin, CarbonPlugin } from "../core/index";
+import { EventContext } from "../core/index";
 import { SelectionCommands } from "./SelectionCommands";
 import { IsolateSelectionPlugin } from "./Isolating";
 import { TransformCommands } from "./TransformCommands";
@@ -19,9 +19,10 @@ import {
 import {
   hasSameIsolate,
   insertAfterAction,
+  nodeLocation,
   preventAndStopCtx,
+  TitleNode,
 } from "@emrgen/carbon-core";
-import { nodeLocation } from "../utils/location";
 import { Optional } from "@emrgen/types";
 import { NodeBTree } from "../core/BTree";
 
@@ -78,6 +79,30 @@ export class KeyboardPlugin extends AfterPlugin {
       cmd_b: preventAndStopCtx,
       cmd_i: preventAndStopCtx,
       cmd_u: preventAndStopCtx,
+      // FIXME: this is not triggering on linux
+      // not tested on windows, max
+      "cmd+left": (ctx: EventContext<KeyboardEvent>) => {
+        debugger;
+        const { app, cmd } = ctx;
+        const { selection, blockSelection } = app.state;
+
+        if (blockSelection.isActive) {
+          return;
+        }
+
+        // move the head to the start of the current node
+        const { head } = selection;
+        const pinAtStart = Pin.toStartOf(head.node)!.up();
+        const after = PinnedSelection.fromPin(pinAtStart);
+        if (!after) {
+          return;
+        }
+        if (pinAtStart.eq(head)) {
+          return;
+        }
+
+        cmd.Select(after).Dispatch();
+      },
       esc: (ctx: EventContext<KeyboardEvent>) => {
         const { app, cmd, currentNode } = ctx;
         const { selection, blockSelection } = app.state;
@@ -173,7 +198,7 @@ export class KeyboardPlugin extends AfterPlugin {
       shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
         const { app, event, currentNode, cmd } = ctx;
 
-        event.preventDefault();
+        preventAndStopCtx(ctx);
         const { selection, blockSelection } = app.state;
         if (blockSelection.isActive) {
           if (selection.blocks.length) {
@@ -197,9 +222,7 @@ export class KeyboardPlugin extends AfterPlugin {
       delete: (event) => this.delete(event),
       shiftDelete: (event) => this.delete(event),
 
-      backspace: (e) => {
-        this.backspace(e.cmd, e);
-      },
+      backspace: (e) => this.backspace(e.cmd, e),
       shiftBackspace: (e) => e.cmd.keyboard.backspace(e),
       ctrlBackspace: skipKeyEvent,
       cmdBackspace: skipKeyEvent,
@@ -225,6 +248,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
     const { head } = selection;
 
+    console.log("backspace", !selection.isCollapsed, selection.toString());
     // delete node selection if any
     if (!selection.isCollapsed || blockSelection.isActive) {
       tr.transform.delete(selection, { fall: "before" })?.Dispatch();
@@ -232,6 +256,8 @@ export class KeyboardPlugin extends AfterPlugin {
     }
 
     // console.log("1111111", head.isAtStartOfNode(head.node), head, head.node);
+    // if cursor is at the start of the text block merge with the previous text block
+
     if (head.isAtStartOfNode(head.node)) {
       const { start } = selection;
       const textBlock = start.node.chain.find((n) => n.isTextContainer);
@@ -252,16 +278,21 @@ export class KeyboardPlugin extends AfterPlugin {
         console.log(prevTextBlock, prevVisibleTextBlock);
 
         if (!prevVisibleTextBlock) return;
-        const after = PinnedSelection.fromPin(
-          Pin.create(
-            prevVisibleTextBlock,
-            prevVisibleTextBlock.textContent.length,
-          ),
-        );
-        console.log("------------");
-        const textContent =
-          prevVisibleTextBlock.textContent + textBlock.textContent;
-        const textNode = app.schema.text(textContent)!;
+        const pin = Pin.create(
+          prevVisibleTextBlock,
+          prevVisibleTextBlock.textContent.length,
+        )
+          ?.down()
+          ?.leftAlign.up();
+        if (!pin) return; // should not happen
+
+        const after = PinnedSelection.fromPin(pin);
+
+        // merge the text content of the previous text block and the current text block
+        const content = TitleNode.normalizeNodeContent([
+          ...prevVisibleTextBlock.children.map((n) => n.clone()),
+          ...textBlock.children.map((n) => n.clone()),
+        ]);
 
         const at = Point.toAfter(prevVisibleBlock.id);
         const moveActions = textBlock?.nextSiblings
@@ -271,13 +302,14 @@ export class KeyboardPlugin extends AfterPlugin {
             return MoveNodeAction.create(nodeLocation(n)!, at, n.id);
           });
 
-        if (prevVisibleTextBlock.isEmpty && !textNode.isEmpty) {
+        // remove the placeholder if the previous text block is empty
+        if (prevVisibleTextBlock.isEmpty && !content.length) {
           tr.Update(prevVisibleTextBlock.id, {
             [PlaceholderPath]: "",
           });
         }
 
-        tr.SetContent(prevVisibleTextBlock.id, [textNode])
+        tr.SetContent(prevVisibleTextBlock.id, content)
           .Add(moveActions)
           .Remove(nodeLocation(textBlock.parent!)!, textBlock.parent!)
           .Select(after)
@@ -291,28 +323,20 @@ export class KeyboardPlugin extends AfterPlugin {
       }
 
       // HOT
-      console.log("merge text block", prevTextBlock.name, textBlock.name);
+      console.log(
+        "merge text block",
+        prevTextBlock.name,
+        textBlock.name,
+        prevTextBlock.id.toString(),
+      );
       tr.transform.merge(prevTextBlock, textBlock)?.Dispatch();
       return;
     }
 
-    // 	event.stopPropagation()
-    // 	if (node.isBlockAtom) {
-    // 		const found = node.chain.reverse().find(n => n.isBlockAtom)
-    // 		if (!found) return
-    // 		// final caret position can be above or below
-    // 		const beforeSel = selection.moveStart(-1);
-    // 		if (beforeSel) {
-    // 			editor.tr
-    // 				.add(DeleteCommand.create([node.id]))
-    // 				.select(beforeSel.collapseToHead())
-    // 				.Dispatch()
-    // 		}
-    // 		return
-    // 	}
-
     // console.log('Keyboard.backspace',deleteSel.toString());
-    const deleteSel = selection.moveStart(-1);
+    const deleteSel = selection.leftAlign.moveStart(-1);
+    if (!deleteSel) return;
+
     console.log("deleteSel", deleteSel?.toString());
     if (!deleteSel) return;
     tr.transform.delete(deleteSel)?.Dispatch();

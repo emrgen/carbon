@@ -20,10 +20,7 @@ import {
   Transaction,
   Writer,
 } from "@emrgen/carbon-core";
-import {
-  encodeHtmlNestableChildren,
-  encodeNestableChildren,
-} from "@emrgen/carbon-blocks";
+import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {

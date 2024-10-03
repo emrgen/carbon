@@ -3,21 +3,19 @@ import {
   EventContext,
   EventHandlerMap,
   Node,
+  NodeEncoder,
   NodeSpec,
   preventAndStopCtx,
+  Writer,
 } from "@emrgen/carbon-core";
-import { NodeEncoder, Writer } from "@emrgen/carbon-core/src/core/Encoder";
-import {
-  encodeHtmlNestableChildren,
-  encodeNestableChildren,
-} from "@emrgen/carbon-blocks";
+import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
 
 export class PagePlugin extends CarbonPlugin {
   name = "document";
 
   spec(): NodeSpec {
     return {
-      group: "",
+      group: "block",
       content: "title content*",
       splits: true,
       splitName: "section",

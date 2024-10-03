@@ -1,30 +1,30 @@
+import { ActionOrigin, TextWriter } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
-import { Node } from "./Node";
 import { EventEmitter } from "events";
+import { first } from "lodash";
 import { querySelector } from "../utils/domElement";
-import { State } from "./State";
+import { BlockSelection } from "./BlockSelection";
+import { CarbonCommand } from "./CarbonCommand";
+import { CarbonPlugin, PluginType } from "./CarbonPlugin";
 import { ChangeManager } from "./ChangeManager";
-import { EventsIn, EventsOut } from "./Event";
 import { CustomEvent } from "./CustomEvent";
+import { NodeEncoder, TreeEncoder, Writer } from "./Encoder";
+import { EventsIn, EventsOut } from "./Event";
 import { EventManager } from "./EventManager";
+import { Node } from "./Node";
 import { NodeStore } from "./NodeStore";
 import { PinnedSelection } from "./PinnedSelection";
+import { PluginEmitter } from "./PluginEmitter";
 import { PluginManager } from "./PluginManager";
+import { PluginStates } from "./PluginState";
+import { RuntimeState } from "./RuntimeState";
 import { Schema } from "./Schema";
 import { SelectionManager } from "./SelectionManager";
+import { Service } from "./Service";
+import { State } from "./State";
 import { Transaction } from "./Transaction";
 import { TransactionManager } from "./TransactionManager";
 import { With } from "./types";
-import { first } from "lodash";
-import { CarbonPlugin, PluginType } from "./CarbonPlugin";
-import { RuntimeState } from "./RuntimeState";
-import { PluginEmitter } from "./PluginEmitter";
-import { PluginStates } from "./PluginState";
-import { CarbonCommand } from "./CarbonCommand";
-import { ActionOrigin, TextWriter } from "@emrgen/carbon-core";
-import { BlockSelection } from "./BlockSelection";
-import { NodeEncoder, TreeEncoder, Writer } from "./Encoder";
-import { Service } from "./Service";
 
 export class Carbon extends EventEmitter {
   private readonly pm: PluginManager;
@@ -78,10 +78,10 @@ export class Carbon extends EventEmitter {
     this.sm = new SelectionManager(this);
 
     this.tm = new TransactionManager(this, pm, this.sm, (state, tr) => {
-      this.updateState(state, tr);
+      return this.updateState(state, tr);
     });
 
-    this.change = new ChangeManager(this, this.sm, this.tm, pm);
+    this.change = new ChangeManager(this, pm);
     this.em = new EventManager(this, pm, this.change);
 
     this.commands = pm.commands();
@@ -238,9 +238,14 @@ export class Carbon extends EventEmitter {
     this.emit(EventsOut.mounted);
   }
 
+  unmounted() {
+    this.ready = false;
+    this.emit(EventsOut.unmounted);
+  }
+
   // all events are emitted through this method
   onEvent(type: EventsIn, event: any) {
-    // emit event to external application
+    // emit event to external listeners
     this.emit(type, event);
 
     // if cursor is parked, ignore selection change
@@ -265,14 +270,14 @@ export class Carbon extends EventEmitter {
     }
   }
 
-  private updateState(state: State, tr: Transaction) {
+  private updateState(state: State, tr: Transaction): boolean {
     if (
       !state.isContentChanged &&
       !state.isSelectionChanged &&
       !state.isMarksChanged
     ) {
       console.warn("new state is not dirty");
-      return;
+      return false;
     }
 
     if (
@@ -284,11 +289,13 @@ export class Carbon extends EventEmitter {
         state.content.renderVersion,
         this.state.content.contentVersion,
       );
-      return;
+
+      return false;
     }
 
     // keep three previous states
     this.state = state.activate();
+
     // console.log(
     //   "updateState",
     //   this.state.content.textContent,
@@ -296,6 +303,7 @@ export class Carbon extends EventEmitter {
     //   this.state.isSelectionChanged,
     // );
 
+    // console.log("updateState", state.content.textContent);
     this.em.onEventOut(
       EventsOut.updateView,
       CustomEvent.create("updateView", this.state.content, {
@@ -304,6 +312,7 @@ export class Carbon extends EventEmitter {
     );
     this.change.update(state, tr);
     this.emit(EventsOut.transactionCommit, tr);
+    return true;
   }
 
   blur() {
@@ -352,6 +361,7 @@ export class Carbon extends EventEmitter {
       const cmd = this.cmd;
       tick?.(cmd);
       cmd.Dispatch();
+      console.log("xxxxxxxxxx");
       // if (!tr) return
       // if (tr instanceof Transaction) {
       // 	// tr.onTick = true;

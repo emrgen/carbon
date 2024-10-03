@@ -12,7 +12,7 @@ $lineHeight = 28px
 // background #eee
 
 .carbon-app
-    font-family: Arial, Helvetica, sans-serif
+    font-family: Helvetica, sans-serif
     margin: 0 auto
     // position absolute
     // position relative
@@ -904,6 +904,10 @@ span[data-name=text] {
         &[data-active=true]
             background: #ddd
 
+[data-name="callout"] > [data-type=content] > [data-name="title"]
+    padding: 0 2px
+    line-height: $lineHeight
+
 [data-name="callout"][data-as=h1]
 [data-name="callout"][data-as=h2],
 [data-name="callout"][data-as=h3],
@@ -1532,14 +1536,6 @@ a[data-name="text"]
     &:hover
         background: #ddd
 
-//[data-name=emoji]
-[data-name=mention]
-    border-radius: 4px;
-    font-size: 14px;
-    color: #999;
-[data-name=mentionAtom]
-    -webkit-user-modify: read-only
-
 [data-name=title]
     span:last-child
         margin-right: 0
@@ -1686,3 +1682,44 @@ a[data-name="text"]
 //.attribute-type-status
 //    font-size 13px
 
+//[data-name=mention]
+//    background red;
+
+//[data-focused=true]
+//    background teal
+
+//[data-name=emoji]
+[data-name=mention]
+    border-radius: 8px;
+    //font-size: 14px;
+    color: #888;
+    background #eee
+    padding 1px 0px
+    margin 0 1px
+    cursor pointer;
+    position relative;
+
+    [data-name=empty]
+        position absolute;
+        left 50%
+        //margin 0
+        //padding 0 2px
+        //background red
+        caret-color transparent
+        &::selection
+            background: transparent
+
+    [data-name=atomicText]::first-letter
+        color red
+        font-size 20px
+
+[data-name=mention]:has([data-focused=true])
+    box-shadow inset 0 0 0 1px #aaa
+
+[data-name=empty]
+    //background red
+    padding-left 1px
+    //margin 0 1px
+
+//[data-name=mention]
+//    -webkit-user-modify: read-only

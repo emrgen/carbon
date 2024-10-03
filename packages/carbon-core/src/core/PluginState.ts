@@ -1,6 +1,6 @@
-import { CarbonPlugin } from "@emrgen/carbon-core";
 import { cloneDeep, merge } from "lodash";
-import {Optional} from "@emrgen/types";
+import { Optional } from "@emrgen/types";
+import { CarbonPlugin } from "./CarbonPlugin";
 
 export class PluginStates {
   states: Map<string, PluginState> = new Map();
@@ -20,8 +20,7 @@ export class PluginStates {
 export class PluginState {
   store: Record<string, any> = {};
 
-  constructor(private readonly states: Map<string, PluginState> = new Map()) {
-  }
+  constructor(private readonly states: Map<string, PluginState> = new Map()) {}
 
   plugin(name: string): Optional<ReadPluginState> {
     const state = this.states.get(name);
@@ -49,8 +48,7 @@ export class PluginState {
 }
 
 export class ReadPluginState {
-  constructor(private readonly state: PluginState) {
-  }
+  constructor(private readonly state: PluginState) {}
 
   get(key: string) {
     return this.state.get(key);

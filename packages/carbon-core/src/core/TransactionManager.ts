@@ -13,7 +13,7 @@ export class TransactionManager {
     readonly app: Carbon,
     readonly pm: PluginManager,
     readonly sm: SelectionManager,
-    readonly updateState: (state: State, tr: Transaction) => void,
+    readonly updateState: (state: State, tr: Transaction) => boolean,
   ) {}
 
   private get state() {
@@ -31,7 +31,6 @@ export class TransactionManager {
 
   unlock(tr: Transaction) {
     // console.groupEnd();
-    // console.log("unlocking...", this._locked?.id, tr.id);
     this.currentTr = null;
     this.processTransactions();
   }
@@ -44,6 +43,7 @@ export class TransactionManager {
     this.processTransactions();
   }
 
+  // process transactions in the queue and update the state
   private processTransactions() {
     const { app, state } = this;
 
@@ -51,6 +51,10 @@ export class TransactionManager {
     // normalizer transactions are allowed to commit even with pending selection events
     while (this.transactions.length) {
       if (this.currentTr) {
+        console.log(
+          "waiting for current transaction to finish",
+          this.currentTr.id,
+        );
         return;
       }
 
@@ -79,55 +83,13 @@ export class TransactionManager {
       app.committed = true;
 
       if (app.state !== state) {
+        console.log("committing transaction", tr.id);
         this.lock(tr);
-        this.updateState(state, tr);
+        // if failed to update the state, then unlock the transaction
+        if (!this.updateState(state, tr)) {
+          this.unlock(tr);
+        }
       }
     }
   }
-
-  // private updateTransactionEffects(tr: Transaction) {
-  // 	if (tr.updatesContent) {
-  // 		this.commitContent();
-  // 	}
-
-  // 	if (tr.updatesNodeState) {
-  // 		this.commitNodeStates();
-  // 	}
-
-  // 	if (tr.updatesSelection) {
-  // 		this.commitSelection();
-  // 	}
-
-  // 	// update dom to reflect the state changes
-  // 	this.react.emit(EventsOut.change, this.state);
-  // }
-
-  private updateDecorations() {
-    // console.log('######', this.state.decorations.size);
-    // if (!this.state.decorations.length && !this.s)
-    // this.state.decorations.forEach(d => this.store.get(d.targetId)?.markForDecoration())
-    // this.state.decorations.clear();
-    // if (this.selection.isInvalid) return
-    // this.pm.decoration(this);
-    // this.state.decorations.forEach(d => {
-    // 	console.log('decorating', d.targetId, this.store.get(d.targetId)?.name);
-    // 	this.store.get(d.targetId)?.markForDecoration()
-    // });
-    // this.commitContent()
-  }
-
-  // getDecoration(node: Node): Optional<Decoration> {
-  // 	return this.state.decorations.get(Span.around(node));
-  // }
-
-  // addDecoration(...decorations: Decoration[]) {
-  // 	each(decorations, decoration => {
-  // 		const entry = this.state.decorations.get(decoration.span);
-  // 		if (entry) {
-  // 			entry.merge(decoration)
-  // 		} else {
-  // 			this.state.decorations.set(decoration.span, decoration)
-  // 		}
-  // 	})
-  // }
 }

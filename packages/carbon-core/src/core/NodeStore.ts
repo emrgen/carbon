@@ -1,12 +1,14 @@
 import { Optional } from "@emrgen/types";
 import { NodeId } from "./NodeId";
 import { Node } from "./Node";
-import { Carbon, NodeMap } from "@emrgen/carbon-core";
 import { clamp } from "lodash";
+import { Carbon } from "./Carbon";
+import { NodeMap } from "./NodeMap";
 
 // NodeStore is a store for the nodes and their rendered HTML elements
 export class NodeStore {
   private elementMap: Map<string, HTMLElement> = new Map();
+  // this map is used to resolve the node from the HTML element and find out the selection nodes
   private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
 
   constructor(private readonly app: Carbon) {}
@@ -87,7 +89,7 @@ export class NodeStore {
     // if (el.nodeType === document.TEXT_NODE) {
     //   console.log("text node", el);
     // }
-    //
+
     do {
       node = this.elementToNodeMap.get(el);
       // if el is a text node and no carbon node is found

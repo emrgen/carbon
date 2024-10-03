@@ -143,10 +143,6 @@ export class NodeType {
     return !!this.spec.document;
   }
 
-  get isInlineAtomWrapper() {
-    return !!this.spec.inlineAtomWrapper;
-  }
-
   get isBlockSelectable() {
     return !!this.spec.blockSelectable;
   }
