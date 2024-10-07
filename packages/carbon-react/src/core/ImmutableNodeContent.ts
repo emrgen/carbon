@@ -56,11 +56,8 @@ export class ImmutableNodeContent implements NodeContent {
   // get the parent node from the cache or Scope using the parentId
   // the parent can be non-null only if the node is mutable state within the draft
   get parent(): Optional<Node> {
-    const { parent } = this.content;
-    if (parent) return parent;
-    const map = StateScope.get();
     if (!this.parentId) return null;
-    return map.get(this.parentId);
+    return this.content.parent ?? StateScope.get().get(this.parentId);
   }
 
   get children(): Node[] {

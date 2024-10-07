@@ -25,19 +25,18 @@ const collectMarks = (selection: PinnedSelection) => {
   const { start, end } = selection;
 
   const leaves: Node[] = [];
-
-  const [a, startBlock] = TitleNode.from(start.node).split(start.steps);
-  const [endBlock, b] = TitleNode.from(end.node).split(end.steps);
-
-  startBlock.children.forEach((n) => {
-    leaves.push(n);
-  });
-
-  endBlock.children.forEach((n) => {
-    leaves.push(n);
-  });
-
   if (!start.node.eq(end.node)) {
+    const [, startBlock] = TitleNode.from(start.node).split(start.steps);
+    const [endBlock] = TitleNode.from(end.node).split(end.steps);
+
+    startBlock.children.forEach((n) => {
+      leaves.push(n);
+    });
+
+    endBlock.children.forEach((n) => {
+      leaves.push(n);
+    });
+
     start.node.next(
       (n) => {
         if (n.eq(end.node)) {
@@ -50,6 +49,11 @@ const collectMarks = (selection: PinnedSelection) => {
       },
       { order: "pre" },
     );
+  } else {
+    const [, middle] = TitleNode.from(start.node).split(start.steps, end.steps);
+    middle.children.forEach((n) => {
+      leaves.push(n);
+    });
   }
 
   const markSet = MarkSet.from([]);

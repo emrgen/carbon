@@ -36,6 +36,8 @@ import { no, yes } from "./types";
 import EventEmitter from "events";
 import { Mark } from "./Mark";
 import { NodeMap } from "./NodeMap";
+import { NodeView } from "./NodeView";
+import { NODE_CACHE } from "./CarbonCache";
 
 export type TraverseOptions = {
   order: "pre" | "post";
@@ -161,6 +163,10 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   get marks() {
     return this.props.get(MarksPath, []).map((m) => Mark.fromJSON(m));
+  }
+
+  get view(): NodeView {
+    return NODE_CACHE.get(this.contentKey, () => new NodeView(this));
   }
 
   get key() {

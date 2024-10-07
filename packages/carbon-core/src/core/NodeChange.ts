@@ -590,3 +590,8 @@ export class NodeDataMap extends BTree<NodeId, NodeData> {
     return new NodeDataMap(undefined, NodeIdComparator);
   }
 }
+
+const tree =  new BTree(
+  undefined,
+  NodeIdComparator,
+);

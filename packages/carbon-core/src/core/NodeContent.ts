@@ -39,9 +39,9 @@ export interface NodeContentData {
   linkName: string;
   links: Record<string, Node>;
   props: NodeProps;
-  // track the version of the content that requires a re-render
+  // track if the node requires a re-render
   renderVersion?: number;
-  // track the version of the content, this is used to structural changes(useful for various caching and optimizations)
+  // track the structural changes(useful for various caching and optimizations)
   contentVersion?: number;
 }
 

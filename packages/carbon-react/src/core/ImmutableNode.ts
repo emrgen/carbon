@@ -38,18 +38,6 @@ export class ImmutableNode extends Node {
 
   override get index(): number {
     return this.getIndex();
-
-    // return super.index;
-
-    // console.debug('## called index', this.id.toString())
-    // const parent = this.parent as ImmutableNode;
-    // if (!parent) {
-    //   return -1
-    // }
-    // // console.log('getting index', this.id.toString(), this.isFrozen, parent.isFrozen)
-    // const index = parent.indexMapper.map(this.indexMap, this.mappedIndex);
-    // console.debug('found index', this.id.toString(), index)
-    // return index;
   }
 
   private getIndex() {
@@ -206,6 +194,7 @@ export class ImmutableNode extends Node {
 
   // @mutates
   unfreeze(path: Path, map: NodeMap): MutableNode {
+    // TODO: this is expensive for nodes with many children, need to optimize
     const mutable = this.isFrozen ? this.clone(shallowCloneMap) : this;
     map.put(mutable);
 
@@ -242,7 +231,8 @@ export class ImmutableNode extends Node {
   freeze(fn: With<Node>): Node {
     if (this.isFrozen) return this;
 
-    // unlink from parent when freezing
+    // unlink from parent when freezing,
+    // this will force the get parent to use the scope
     this.setParent(null);
     this.content.freeze(fn);
     this.props.freeze();

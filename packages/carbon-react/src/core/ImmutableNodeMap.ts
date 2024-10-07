@@ -190,8 +190,11 @@ export class ImmutableNodeMap implements NodeMap {
     return ret;
   }
 
-  contracts(depth = 2) {
-    if (depth == 0) {
+  // contraction should create smaller chunks of nodes in near past and larger chunks in far past
+  // this is to avoid creating large chunks of nodes in the near past and keep the contract operation fast
+  // we can use leveldb style compaction to compact the maps in the near past and keep the far past as is to avoid unnecessary compaction
+  contracts(maxDepth = 2) {
+    if (maxDepth == 0) {
       this._parent?.forEach((v, k) => {
         if (!this._map.has(k)) {
           this._map.set(k, v);
@@ -199,7 +202,7 @@ export class ImmutableNodeMap implements NodeMap {
       });
       this._parent = null;
     } else {
-      this._parent?.contracts(depth - 1);
+      this._parent?.contracts(maxDepth - 1);
     }
   }
 
