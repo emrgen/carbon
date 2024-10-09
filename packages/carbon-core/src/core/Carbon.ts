@@ -25,6 +25,7 @@ import { State } from "./State";
 import { Transaction } from "./Transaction";
 import { TransactionManager } from "./TransactionManager";
 import { With } from "./types";
+import { CarbonDom } from "./CarbonDom";
 
 export class Carbon extends EventEmitter {
   private readonly pm: PluginManager;
@@ -46,6 +47,7 @@ export class Carbon extends EventEmitter {
   state: State;
   store: NodeStore;
   runtime: RuntimeState;
+  dom: CarbonDom;
 
   change: ChangeManager;
 
@@ -72,6 +74,7 @@ export class Carbon extends EventEmitter {
     // NOTE: without the state activation the node map is not updated with state nodes
     this.state = state.activate();
     this.runtime = new RuntimeState();
+    this.dom = new CarbonDom(this);
 
     this.store = new NodeStore(this);
 
@@ -248,20 +251,21 @@ export class Carbon extends EventEmitter {
     // emit event to external listeners
     this.emit(type, event);
 
-    // if cursor is parked, ignore selection change
-    if (type === EventsIn.selectionchange) {
-      const selection = window.getSelection();
-      if (selection) {
-        const { anchorNode, focusNode } = selection;
-        if (
-          anchorNode === this.cursorParkingElement &&
-          focusNode === this.cursorParkingElement
-        ) {
-          console.log("selectionchange: cursorRest");
-          return;
-        }
-      }
-    }
+    // // if cursor is parked, ignore selection change
+    // if (type === EventsIn.selectionchange) {
+    //   const selection = window.getSelection();
+    //   console.log(event);
+    //   if (selection) {
+    //     const { anchorNode, focusNode } = selection;
+    //     if (
+    //       anchorNode === this.cursorParkingElement &&
+    //       focusNode === this.cursorParkingElement
+    //     ) {
+    //       console.log("selectionchange: cursorRest");
+    //       return;
+    //     }
+    //   }
+    // }
 
     if (type === EventsIn.custom) {
       this.em.onCustomEvent(type, event);

@@ -23,7 +23,6 @@ import { p14 } from "@emrgen/carbon-core";
 import { SelectedPath } from "@emrgen/carbon-core";
 import { SolidNodeMap } from "./NodeMap";
 import { isArray } from "lodash";
-import * as console from "node:console";
 
 export class SolidDraft implements Draft {
   changes: NodeMap = SolidNodeMap.empty();
@@ -31,6 +30,8 @@ export class SolidDraft implements Draft {
   contentChanged: NodeIdSet = NodeIdSet.empty();
   selected: NodeIdSet = NodeIdSet.empty();
   marks: MarkSet;
+
+  private updated = NodeIdSet.empty();
 
   constructor(
     private state: State,
@@ -82,6 +83,7 @@ export class SolidDraft implements Draft {
 
     const selected = this.selected.nodes(this.nodeMap);
     this.state.blockSelection = BlockSelection.create(selected);
+    this.state.updated = this.updated;
   }
 
   // use the changes to revert the state
@@ -153,7 +155,7 @@ export class SolidDraft implements Draft {
   }
 
   insert(at: Point, node: Node, type: "create" | "move" = "create") {
-    console.log("[trap] insert", at.toString(), node.toString());
+    // console.log("[trap] insert", at.toString(), node.toString());
 
     const refNode = this.get(at.nodeId);
     if (!refNode) {
@@ -168,6 +170,8 @@ export class SolidDraft implements Draft {
       this.nodeMap.set(n.id, n);
       this.deleted.isDeleted(n.id);
     });
+
+    this.updated.add(node.id);
 
     // const index = refNode.index;
     // console.log('# adding new child node', 'parent', parent.id.toString(), 'index', index, 'node', node.id.toString())

@@ -32,6 +32,7 @@ export class TitlePlugin extends NodePlugin {
     return {
       group: "",
       content: "inline*",
+      tag: "p",
       attrs: {
         html: {
           suppressContentEditableWarning: true,

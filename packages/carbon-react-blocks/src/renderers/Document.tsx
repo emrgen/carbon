@@ -173,9 +173,10 @@ export const DocumentComp = (props: RendererProps) => {
           app.onEvent(EventsIn.scroll, e as any);
         }}
       >
-        <button className={"document-mode-toggle"} onClick={handleToggleMode}>
-          Toggle Mode
-        </button>
+        {/*<button className={"document-mode-toggle"} onClick={handleToggleMode}>*/}
+        {/*  Toggle Mode*/}
+        {/*</button>*/}
+
         {image.src && (
           <div className="carbon-page-picture">
             <div className="carbon-page-picture-overlay">

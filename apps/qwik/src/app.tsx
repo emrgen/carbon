@@ -1,14 +1,12 @@
-import { $, component$, useStore } from "@builder.io/qwik";
+import { component$ } from "@builder.io/qwik";
+import { $ } from "@builder.io/qwik";
+import { useStore } from "@builder.io/qwik";
 import "./app.css";
-import {
-  corePresetPlugins,
-  Node,
-  NodeData,
-  PluginManager,
-  Schema,
-} from "@emrgen/carbon-core";
+import { corePresetPlugins, Node } from "@emrgen/carbon-core";
+import { PluginManager } from "@emrgen/carbon-core";
+import { Schema } from "@emrgen/carbon-core";
+import { NodeData } from "@emrgen/carbon-core";
 import { blockPresetPlugins } from "@emrgen/carbon-blocks";
-
 import { ImmutableNodeFactory } from "@emrgen/carbon-react";
 import { Predicate } from "@emrgen/types";
 
@@ -21,7 +19,6 @@ const content: Node = schema
   .type("section")
   .create([
     schema.type("title").create([schema.text("Hello, World! 1")!])!,
-
     schema
       .type("section")
       .create([
@@ -46,9 +43,9 @@ const Block = {
 
 export const App = component$(() => {
   // const count = useSignal(content);
-  const root = useStore(content.data);
+  const root = useStore({ name: "section", children: [] });
 
-  // const change = new EventEmitter()
+  // const change = new EventEmitter();
   // useContextProvider(ChangeContext, change);
 
   const onChange = $(() => {
@@ -68,7 +65,7 @@ export const App = component$(() => {
         Click Me
       </button>
       <div class={"carbon-app"}>
-        <Renderer node={root} />
+        <Section node={content} />
       </div>
     </div>
   );
@@ -81,9 +78,9 @@ interface RendererProps {
 const Section = component$((props: RendererProps) => {
   return (
     <div data-id={props.node.id} data-name={props.node.name}>
-      {props.node.children?.map((child) => (
-        <Renderer node={child} key={child.id} />
-      ))}
+      {/*{props.node.children?.map((child) => (*/}
+      {/*  <Renderer node={child} key={child.id} />*/}
+      {/*))}*/}
     </div>
   );
 });

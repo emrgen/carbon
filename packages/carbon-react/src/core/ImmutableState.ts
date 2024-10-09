@@ -53,6 +53,7 @@ export class ImmutableState implements State {
     // when the state is activated for the first time
     if (!nodeMap.size) {
       content.all((n) => {
+        // console.info(n.id.toString());
         nodeMap.set(n.id, n);
         state.updated.add(n.id);
       });

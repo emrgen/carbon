@@ -13,4 +13,5 @@ export class RuntimeState {
   selectionchange: boolean = false;
   selection: Optional<PinnedSelection>;
   marks: MarkSet = new MarkSet();
+  windowSelection: Optional<Selection>;
 }

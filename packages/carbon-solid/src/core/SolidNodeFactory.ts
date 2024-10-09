@@ -1,20 +1,26 @@
-import {Maps, Node, NodeContentData, NodeFactory, NodeId, PlainNodeProps, Schema} from "@emrgen/carbon-core";
-import {Optional} from "@emrgen/types";
-import {isEmpty} from "lodash";
-import { v4 as uuidv4 } from 'uuid';
-import {SolidNodeContent} from "./SolidNodeContent";
-import {SolidNode} from "./SolidNode";
-import {SolidNodeProps} from "./SolidProps";
+import {
+  Maps,
+  Node,
+  NodeContentData,
+  NodeFactory,
+  NodeId,
+  PlainNodeProps,
+  Schema,
+} from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
+import { isEmpty } from "lodash";
+import { SolidNodeContent } from "./SolidNodeContent";
+import { SolidNode } from "./SolidNode";
 
 let counter = 0;
 
 export class SolidNodeFactory implements NodeFactory {
   blockId() {
-    return NodeId.create(uuidv4().slice(-10) + '[' + ++counter + ']');
+    return NodeId.create("[" + ++counter + "]");
   }
 
   textId() {
-    return NodeId.create(uuidv4().slice(-10) + '(' + ++counter + ')');
+    return NodeId.create("(" + ++counter + ")");
   }
 
   create(json: any, schema: Schema): Optional<Node> {
@@ -24,9 +30,11 @@ export class SolidNodeFactory implements NodeFactory {
       throw new Error(`Node Plugin is not registered ${name}`);
     }
 
-    const properties = isEmpty(json.props) ? type.props : type.props.merge(json.props);
+    const properties = isEmpty(json.props)
+      ? type.props
+      : type.props.merge(json.props);
     const props = PlainNodeProps.create(properties.toJSON());
-    props.set('local/html/suppressContentEditableWarning', false)
+    props.set("local/html/suppressContentEditableWarning", false);
 
     const nodeId = id ? NodeId.deserialize(id)! : this.textId();
     const nodes = children.map((n: any) => schema.nodeFromJSON(n));
@@ -39,7 +47,7 @@ export class SolidNodeFactory implements NodeFactory {
       parentId: null,
       parent: null,
       links: {},
-      linkName: '',
+      linkName: "",
     });
 
     const node = new SolidNode(content);
@@ -51,20 +59,27 @@ export class SolidNodeFactory implements NodeFactory {
     return node;
   }
 
-  clone(node: Node, map: Maps<Omit<NodeContentData, 'children'>, Omit<NodeContentData, 'children'>>): Node {
-    const clone = new SolidNode(SolidNodeContent.create({
-      ...map(node.unwrap()),
-      children: node.children.map(n => this.clone(n, map))
-    }));
+  clone(
+    node: Node,
+    map: Maps<
+      Omit<NodeContentData, "children">,
+      Omit<NodeContentData, "children">
+    >,
+  ): Node {
+    const clone = new SolidNode(
+      SolidNodeContent.create({
+        ...map(node.unwrap()),
+        children: node.children.map((n) => this.clone(n, map)),
+      }),
+    );
 
     // update children parent
-    clone.children.forEach(n => {
+    clone.children.forEach((n) => {
       n.setParentId(clone.id);
       n.setParent(clone);
     });
 
-
-    console.debug('setting parent to be null', node.id.toString())
+    console.debug("setting parent to be null", node.id.toString());
     // clone.setParent(null);
     // clone.setParentId(null);
 

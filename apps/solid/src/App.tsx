@@ -1,5 +1,4 @@
 import "./App.css";
-import { noop } from "lodash";
 
 import {
   CarbonContext,
@@ -30,6 +29,8 @@ import {
   SelectedPath,
   State,
 } from "@emrgen/carbon-core";
+import { Point } from "@emrgen/carbon-core";
+import { Pin } from "@emrgen/carbon-core";
 import {
   createContext,
   createEffect,
@@ -37,7 +38,6 @@ import {
   For,
   onCleanup,
   onMount,
-  useContext,
 } from "solid-js";
 import { createMutable } from "solid-js/store";
 
@@ -61,7 +61,7 @@ const content = schema.nodeFromJSON(data)!;
 // @ts-ignore
 window.content = content;
 
-const state = SolidState.create(
+const state: State = SolidState.create(
   content,
   PinnedSelection.NULL,
   BlockSelection.empty(),
@@ -72,15 +72,15 @@ const app = new Carbon(state, schema, pm);
 // @ts-ignore
 window.app = app;
 
-console.log = noop;
-console.info = noop;
-console.debug = noop;
-console.warn = noop;
-console.error = noop;
-console.group = noop;
-console.groupCollapsed = noop;
-console.groupEnd = noop;
-console.time = noop;
+// console.log = noop;
+// console.info = noop;
+// console.debug = noop;
+// console.warn = noop;
+// console.error = noop;
+// console.group = noop;
+// console.groupCollapsed = noop;
+// console.groupEnd = noop;
+// console.time = noop;
 
 const DndContext = createContext<any>(null);
 
@@ -91,8 +91,12 @@ function App() {
       title([text(`lorem ipsum ${count()}`)]),
     )!;
     const section = schema.nodeFromJSON(node("section", [titleNode]))!;
-    app.content.insert(section, 0);
-    setCount(count() + 1);
+    // app.content.insert(section, 0);
+    app.cmd
+      .Insert(Point.toAfter(app.content.child(0)?.firstChild!), section)
+      .Select(PinnedSelection.fromPin(Pin.toStartOf(section)!)!)
+      .Dispatch();
+    // setCount(count() + 1);
   };
 
   const [count, setCount] = createSignal(0);
@@ -214,13 +218,14 @@ function App() {
 
 const useRegister = (node: Node) => {
   const app = useCarbon();
-  const dnd = useContext(DndContext);
+  // const dnd = useContext(DndContext);
 
   return (el: HTMLElement) => {
+    console.log("registering", node.id.toString(), el);
     app.store.register(node, el);
-    if (dnd.observer) {
-      dnd.observer.observe(el);
-    }
+    // if (dnd.observer) {
+    //   dnd.observer.observe(el);
+    // }
   };
 };
 

@@ -82,7 +82,7 @@ export class TransactionManager {
       // associate the state with the transaction so that it can be used by plugins
       app.committed = true;
 
-      if (app.state !== state) {
+      if (!app.state.eq(state)) {
         console.log("committing transaction", tr.id);
         this.lock(tr);
         // if failed to update the state, then unlock the transaction

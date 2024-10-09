@@ -1,5 +1,6 @@
 import { Optional } from "@emrgen/types";
 import { classString, p14 } from "./Logger";
+import { p30 } from "./Logger";
 import { Node } from "./Node";
 import { Pin } from "./Pin";
 import { PointedSelection } from "./PointedSelection";
@@ -11,6 +12,7 @@ import { NodeBTree, NodeMap, sortNodes } from "@emrgen/carbon-core";
 import { flatten } from "lodash";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { takeBefore } from "../utils/array";
+import { CarbonDom } from "./CarbonDom";
 
 enum HTMLNodeType {
   TEXT = 3,
@@ -28,12 +30,15 @@ export class PinnedSelection {
   static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
 
   // map dom selection to editor selection
-  static fromDom(store: NodeStore): Optional<{
+  static fromDom(
+    store: NodeStore,
+    dom: CarbonDom,
+  ): Optional<{
     head: Pin;
     tail: Pin;
     selection: PinnedSelection;
   }> {
-    const domSelection = window.getSelection();
+    // const domSelection = window.getSelection();
     // console.log(
     //   "ANCHOR TEXT",
     //   `"${domSelection?.anchorNode?.textContent}"`,
@@ -43,7 +48,7 @@ export class PinnedSelection {
     //   debugger;
     // }
 
-    if (!domSelection) {
+    if (!dom.selection) {
       console.warn(p14("%c[error]"), "color:red", "window selection is EMPTY");
       return null;
     }
@@ -53,7 +58,7 @@ export class PinnedSelection {
       anchorOffset,
       focusNode: focusEl,
       focusOffset,
-    } = domSelection;
+    } = dom.selection;
     // console.log(
     //   p14("%c[info]"),
     //   "color:pink",
@@ -343,9 +348,9 @@ export class PinnedSelection {
   }
 
   // bounds return coordinate bound of the selection in the dom
-  bounds(store: NodeStore): SelectionBounds {
+  bounds(store: NodeStore, dom: CarbonDom): SelectionBounds {
     const { head } = this;
-    const selection = window.getSelection();
+    const { selection } = dom;
     if (!selection) {
       console.error("Selection.cursorPosition: selection is null");
       return { head: null, tail: null };
@@ -379,7 +384,7 @@ export class PinnedSelection {
     return { head: null, tail: null };
   }
 
-  syncDom(store: NodeStore): boolean {
+  syncDom(store: NodeStore, dom: CarbonDom): boolean {
     if (this.isInvalid) {
       console.warn("skipped invalid selection sync");
       return false;
@@ -430,7 +435,7 @@ export class PinnedSelection {
 
       // Ref: https://stackoverflow.com/a/779785/4556425
       // https://github.com/duo-land/duo/blob/dev/packages/selection/src/plugins/SyncDomSelection.ts
-      const selection = window.getSelection();
+      const { selection } = dom;
 
       const inSync =
         selection?.anchorNode === anchorNode &&
@@ -439,21 +444,26 @@ export class PinnedSelection {
         selection?.focusOffset === focusOffset;
 
       if (!inSync) {
-        // console.log(
-        //   p14("%c[info]"),
-        //   "color:pink",
-        //   p30("selection.setBaseAndExtent"),
-        //   anchorNode,
-        //   anchorOffset,
-        //   focusNode,
-        //   focusOffset,
-        // );
+        console.log(
+          p14("%c[info]"),
+          "color:pink",
+          p30("selection.setBaseAndExtent"),
+          anchorNode,
+          anchorOffset,
+          focusNode,
+          focusOffset,
+        );
         selection?.setBaseAndExtent(
           anchorNode,
           anchorOffset,
           focusNode,
           focusOffset,
         );
+        // const range = new Range();
+        // range.setStart(anchorNode, anchorOffset);
+        // range.setEnd(focusNode, focusOffset);
+        // selection?.removeAllRanges();
+        // selection?.addRange(range);
       }
 
       // NOTE: this works by fires two selectionchange event
@@ -465,24 +475,24 @@ export class PinnedSelection {
 
       // NOTE: maybe not needed in production
       // verify if the selection is successfully set
-      const pinnedSelection = PinnedSelection.fromDom(store);
-      const domSel = pinnedSelection?.selection.intoDomSelection(store);
-      console.assert(
-        domSel?.anchorNode === domSelection.anchorNode,
-        "failed to sync anchorNode",
-      );
-      console.assert(
-        domSel?.focusNode === domSelection.focusNode,
-        "failed to sync focusNode",
-      );
-      console.assert(
-        domSel?.anchorOffset === domSelection.anchorOffset,
-        "failed to sync anchor offset",
-      );
-      console.assert(
-        domSel?.focusOffset === domSelection.focusOffset,
-        "failed to sync focus offset",
-      );
+      // const pinnedSelection = PinnedSelection.fromDom(store, dom);
+      // const domSel = pinnedSelection?.selection.intoDomSelection(store);
+      // console.assert(
+      //   domSel?.anchorNode === domSelection.anchorNode,
+      //   "failed to sync anchorNode",
+      // );
+      // console.assert(
+      //   domSel?.focusNode === domSelection.focusNode,
+      //   "failed to sync focusNode",
+      // );
+      // console.assert(
+      //   domSel?.anchorOffset === domSelection.anchorOffset,
+      //   "failed to sync anchor offset",
+      // );
+      // console.assert(
+      //   domSel?.focusOffset === domSelection.focusOffset,
+      //   "failed to sync focus offset",
+      // );
       // console.log("Selection.syncDom:", this.toString(), domSel);
 
       return inSync;
@@ -493,7 +503,7 @@ export class PinnedSelection {
     return false;
   }
 
-  isDomInSync(store: NodeStore) {
+  isDomInSync(store: NodeStore, dom: CarbonDom) {
     const domSelection = this.intoDomSelection(store);
     if (!domSelection) {
       console.error(
@@ -505,7 +515,7 @@ export class PinnedSelection {
     }
 
     const { anchorNode, anchorOffset, focusNode, focusOffset } = domSelection;
-    const selection = window.getSelection();
+    const { selection } = dom;
     return (
       selection?.anchorNode === anchorNode &&
       selection?.focusNode === focusNode &&

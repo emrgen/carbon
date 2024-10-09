@@ -158,19 +158,12 @@ export class EventManager {
 
     // create a pinned selection from dom selection
     // NOTE: this is a normalized and valid selection for the editor
-    let domSelection = PinnedSelection.fromDom(app.store);
-    if (
-      this.prevEvents
-        .map((a) => a.type as string)
-        .some((a) => ["mouseDown"].includes(a))
-    ) {
-      domSelection = PinnedSelection.fromDom(app.store);
-    }
+    let selectionInfo = PinnedSelection.fromDom(app.store, app.dom);
 
     // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
     // console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
 
-    const { selection, head } = domSelection ?? {};
+    const { selection, head } = selectionInfo ?? {};
 
     if (["selectionchange"].includes(type)) {
       console.log(
@@ -204,7 +197,7 @@ export class EventManager {
       console.log(
         p14("%c[sync-check]"),
         "color:#ffcc006e",
-        selection.isDomInSync(app.store),
+        selection.isDomInSync(app.store, app.dom),
       );
 
       // console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');

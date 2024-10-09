@@ -11,16 +11,22 @@ import {
   prevent,
   preventAndStop,
 } from "@emrgen/carbon-core";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon} from "@emrgen/carbon-react";
+import {
+  CarbonBlock,
+  CarbonNodeChildren,
+  CarbonNodeContent,
+  RendererProps,
+  useCarbon,
+} from "@emrgen/carbon-react";
 import {
   useCombineConnectors,
   useConnectorsToProps,
   useDndRegion,
   useDroppable,
   useNonDraggable,
-  useRectSelectionSurface
+  useRectSelectionSurface,
 } from "@emrgen/carbon-dragon-react";
-import {DocumentContext} from "@emrgen/carbon-react-blocks";
+import { DocumentContext } from "@emrgen/carbon-react-blocks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
@@ -37,7 +43,7 @@ export const DocumentComp = (props: RendererProps) => {
   const nonDraggable = useNonDraggable({ node, ref });
   const selectionSurface = useRectSelectionSurface({ node, ref });
   const connectors = useConnectorsToProps(
-    useCombineConnectors(selectionSurface, dndRegion, nonDraggable)
+    useCombineConnectors(selectionSurface, dndRegion, nonDraggable),
   );
 
   useEffect(() => {
@@ -59,7 +65,7 @@ export const DocumentComp = (props: RendererProps) => {
 
       connectors.onMouseDown(e);
     },
-    [node.lastChild, app, connectors]
+    [node.lastChild, app, connectors],
   );
 
   const handleClick = useCallback(
@@ -95,7 +101,7 @@ export const DocumentComp = (props: RendererProps) => {
           .Dispatch();
       }
     },
-    [app, node.lastChild]
+    [app, node.lastChild],
   );
 
   // scroll to bottom on transaction if cursor is below the screen
@@ -104,7 +110,7 @@ export const DocumentComp = (props: RendererProps) => {
     const onTransaction = (tr: any) => {
       const el = ref.current;
       if (!el) return;
-      const { head } = app.selection.bounds(app.store);
+      const { head } = app.selection.bounds(app.store, app.dom);
       if (!head) return;
       const { bottom, top } = head;
       // console.log(bottom, el.offsetHeight, el.scrollHeight, el.scrollTop);
@@ -156,7 +162,7 @@ export const DocumentComp = (props: RendererProps) => {
             // },
             onBlur: (e) => app.emit("document:blur", e as any),
             onFocus: (e) => app.emit("document:focus", e as any),
-            className: 'fastype-document',
+            className: "fastype-document",
           }}
         >
           <CarbonNodeContent node={node} />

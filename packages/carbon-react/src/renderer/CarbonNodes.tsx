@@ -342,7 +342,8 @@ export const CarbonChildren = (props: RendererProps) => {
   return <>{children}</>;
 };
 
-// render node by name
+// WARNING: don't register this component in RenderManager, it will cause infinite loop
+// this is a renders the appropriate component registered in the RenderManager
 export const InnerCarbonNode = (props: RendererProps) => {
   const rm = useRenderManager();
   const { node } = useNodeChange(props);
@@ -368,7 +369,7 @@ export const InnerCarbonNode = (props: RendererProps) => {
   console.warn(
     "No component found for",
     node.name,
-    "fall back to CarbonDefaultNode",
+    "falling back to CarbonDefaultNode",
   );
 
   return <CarbonDefaultNode {...props} node={node} />;
@@ -434,7 +435,7 @@ export const CarbonNodeChildren = (props: RendererProps) => {
   return useMemo(() => {
     if (node.children.length < 2) return null;
 
-    const children = node.children.slice(1).map((n) => {
+    const children = node.view.children.nodes.slice(1).map((n) => {
       // console.debug('CarbonChildren', n.name, n.id.toString());
       return <CarbonNode node={n} key={n.key} />;
     });

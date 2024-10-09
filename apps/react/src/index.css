@@ -45,3 +45,7 @@ span[data-name=text] {
   /*color: #000;*/
   /*letter-spacing: 0.04em;*/
 }
+
+[data-name=document] {
+  padding: 0 10px;
+}

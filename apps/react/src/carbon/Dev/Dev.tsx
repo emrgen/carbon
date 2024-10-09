@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useEffect } from "react";
+import { useCallback } from "react";
 
 import {
   blockPresetPlugins,
@@ -36,7 +38,6 @@ import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { flattenDeep, noop } from "lodash";
-import SelectionTracker from "../../SelectionTracker";
 import { PathTracker } from "../../PathTracker";
 import {
   commentEditorComp,
@@ -47,6 +48,7 @@ import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
 import { boardPlugins } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
+import { Box } from "@chakra-ui/react";
 
 function is_env_development() {
   // @ts-ignore
@@ -801,14 +803,14 @@ const renderers = [
 
 const renderManager = RenderManager.from(renderers);
 
-// console.log = noop;
+console.log = noop;
 // console.info = noop;
-// console.debug = noop;
-// console.warn = noop;
-// console.error = noop;
-// console.group = noop;
-// console.groupCollapsed = noop;
-// console.groupEnd = noop;
+console.debug = noop;
+console.warn = noop;
+console.error = noop;
+console.group = noop;
+console.groupCollapsed = noop;
+console.groupEnd = noop;
 console.time = noop;
 
 // localStorage.setItem('carbon:content', JSON.stringify(data));
@@ -830,6 +832,7 @@ export default function Dev() {
         "actions",
         state.actions.optimize().actions.map((a) => a.toJSON()),
       );
+      console.info(state.content.child(0)?.size);
       // printNode(state.content);
       state.content.all((node) => {
         // console.log(node.id.toString(), node.name, node.properties.toKV());
@@ -852,12 +855,66 @@ export default function Dev() {
   //   <></>
   // )
 
+  const [addingItem, setAddingItem] = useState(false);
+
+  const startAddingItem = useCallback(() => {
+    setAddingItem(true);
+  }, []);
+
+  const stopAddingItem = useCallback(() => {
+    setAddingItem(false);
+  }, []);
+
+  useEffect(() => {
+    let interval: any;
+    // const title = app.state.content.child(0)?.firstChild!;
+    // const selection = PinnedSelection.fromPin(Pin.toStartOf(title)!)!;
+    if (addingItem) {
+      // app.cmd.Select(selection).dispatch();
+      // interval = setInterval(() => {
+      //   const children = app.state.content.child(0)?.children!;
+      //   const node =
+      //     children[
+      //       clamp(Math.floor(Math.random() * 30), 0, children.length - 1)
+      //     ];
+      //   console.log(node.toString());
+      //   const newNode = app.schema.nodeFromJSON(
+      //     section([title([text("new section " + random(1, 100))])]),
+      //   )!;
+      //
+      //   const selection = PinnedSelection.fromPin(Pin.toStartOf(newNode)!)!;
+      //   app.cmd
+      //     .Insert(Point.toBefore(node.id!)!, newNode)
+      //     .Select(selection)
+      //     .dispatch();
+      // }, 2);
+    }
+
+    if (!addingItem) {
+      clearInterval(interval);
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [addingItem, app]);
+
+  useEffect(() => {
+    document.addEventListener("mousedown", startAddingItem);
+    document.addEventListener("mouseup", stopAddingItem);
+
+    return () => {
+      document.removeEventListener("mousedown", startAddingItem);
+      document.removeEventListener("mouseup", stopAddingItem);
+    };
+  }, [startAddingItem, stopAddingItem]);
+
   return (
-    <div className={"carbon-app-container"}>
+    <Box className={"carbon-app-container"}>
       <CarbonApp app={app} renderManager={renderManager}>
-        <SelectionTracker />
+        {/*<SelectionTracker />*/}
         <PathTracker />
       </CarbonApp>
-    </div>
+    </Box>
   );
 }

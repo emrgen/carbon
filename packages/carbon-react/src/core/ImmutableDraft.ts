@@ -3,7 +3,6 @@ import {
   BlockSelection,
   ChangeNameAction,
   cloneFrozenNode,
-  deepCloneMap,
   Draft,
   EmptyPlaceholderPath,
   FocusedPlaceholderPath,
@@ -235,16 +234,16 @@ export class ImmutableDraft implements Draft {
     });
 
     // traverse all nodes within the selection and collect decorations
-    const { start, end } = after;
-    const startDown = start.down();
-    const endDown = end.down();
-    const nodes: Node[] = [startDown.node, endDown.node];
-    startDown.node.next((n) => {
-      if (n.id.eq(endDown.node.id)) return true;
-      nodes.push(n);
-      return false;
-    });
-
+    // const { start, end } = after;
+    // const startDown = start.down();
+    // const endDown = end.down();
+    // const nodes: Node[] = [startDown.node]
+    // if (!startDown.node.eq(endDown.node)) {
+    //   startDown.node.next((n) => {
+    //     nodes.push(n);
+    //     return n.id.eq(endDown.node.id);
+    //   });
+    // }
     // collect decorations from the selected nodes
     // const decorations: NodeIdMap<PlainNodeProps> = new NodeIdMap();
     // nodes.forEach((n) => {
@@ -356,13 +355,15 @@ export class ImmutableDraft implements Draft {
 
     // printNode(this.state.nodeMap.get(NodeId.create("[169]"))!);
 
-    const actions = this.pm.normalize(node.clone(deepCloneMap));
-    if (!isEmpty(actions)) {
-      console.log("normalizing", node.name, node.id.toString(), actions);
-      actions.forEach((action) => {
-        action.execute(this);
-      });
-    }
+    // TODO: normalizing a large node with deepClone is extremely expensive. OPTIMIZE
+    console.log("normalizing", node.id.toString(), node.name);
+    // const actions = this.pm.normalize(node);
+    // if (!isEmpty(actions)) {
+    //   console.log("normalizing", node.name, node.id.toString(), actions);
+    //   actions.forEach((action) => {
+    //     action.execute(this);
+    //   });
+    // }
 
     // console.log(this.state.nodeMap.get(NodeId.create("[169]"))!.isFrozen);
     // printNode(this.state.nodeMap.get(NodeId.create("[169]"))!);
@@ -719,11 +720,11 @@ export class ImmutableDraft implements Draft {
     target: Optional<Node>,
     path: string = EmptyPlaceholderPath,
   ) {
-    const placeholder = source.props.get<string>(path) ?? " ";
+    const placeholder = source.props.get<string>(path) ?? "";
     if (target) {
       if (path === EmptyPlaceholderPath) {
         this.tm.updateProps(target, {
-          [PlaceholderPath]: source.firstChild?.isEmpty ? placeholder : " ",
+          [PlaceholderPath]: source.firstChild?.isEmpty ? placeholder : "",
         });
       } else {
         this.tm.updateProps(target, {
@@ -907,12 +908,12 @@ export class ImmutableDraft implements Draft {
             [PlaceholderPath]:
               parent.props.get<string>(EmptyPlaceholderPath) ?? " ",
           });
-          console.log(
-            "updated empty placeholder",
-            node.key,
-            parent.props.get<string>(EmptyPlaceholderPath),
-            parent.name,
-          );
+          // console.log(
+          //   "updated empty placeholder",
+          //   node.key,
+          //   parent.props.get<string>(EmptyPlaceholderPath),
+          //   parent.name,
+          // );
           this.addUpdated(node.id);
         }
       }

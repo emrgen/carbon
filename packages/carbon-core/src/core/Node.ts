@@ -166,7 +166,10 @@ export class Node extends EventEmitter implements IntoNodeId {
   }
 
   get view(): NodeView {
-    return NODE_CACHE.get(this.contentKey, () => new NodeView(this));
+    return NODE_CACHE.get(this.contentKey, () => {
+      // console.log(`NODE VIEW CREATED for: ${this.name}`, this.key);
+      return new NodeView(this);
+    });
   }
 
   get key() {
@@ -428,7 +431,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     const { children = [] } = parent;
     return findIndex(children as Node[], (n, i) => {
-      console.log("indexing", i);
+      // console.log("indexing", i);
       return this.id.comp(n.id) === 0;
     });
   }

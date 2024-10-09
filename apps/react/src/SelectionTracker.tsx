@@ -158,8 +158,6 @@ export default function SelectionTracker() {
     };
   }, [app, hideContextMenu, overlay]);
 
-  console.log("marks", marks);
-
   const contextMenu = useMemo(() => {
     if (!showContextMenu) return null;
     if (!overlay.ref.current) return null;

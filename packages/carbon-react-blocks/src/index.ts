@@ -22,8 +22,8 @@ import { TabComp, TabsComp } from "./renderers/TabComp";
 import FrameComp from "./renderers/Frame";
 import { BlockContentComp } from "./renderers/BlockContent";
 
-import "./dnd.styl";
-import "./style.styl";
+// import "./dnd.styl";
+// import "./style.styl";
 import { Modal } from "./renderers/Modal";
 import HintComp from "./renderers/Hint";
 import MCQComp from "./renderers/MCQ";
