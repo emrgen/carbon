@@ -99,9 +99,9 @@ export const TabsComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={tabs} ref={ref} custom={connectors}>
-      <div className={"carbon-tab-header"}>
+      <div className={"ctabs__header"}>
         {!tabs.isVoid && (
-          <div className={"carbon-tab-names"}>
+          <div className={"ctab__names"}>
             {children.map((tab) => {
               return (
                 <TabTitleComp
@@ -129,16 +129,11 @@ export const TabsComp = (props: RendererProps) => {
           +
         </div>
       </div>
-      <div className={"carbon-tab-content"}>
-        {!activeTabNode.id.eq(NodeId.IDENTITY) && (
-          <CarbonNode node={activeTabNode} key={activeTabNode.key} />
-        )}
-        {/*{tabs.children.map(tab => {*/}
-        {/*  return (*/}
-        {/*    <CarbonNode node={tab} key={tab.key}/>*/}
-        {/*  )*/}
-        {/*})}*/}
-      </div>
+
+      {!activeTabNode.id.eq(NodeId.IDENTITY) && (
+        <CarbonNode node={activeTabNode} key={activeTabNode.key} />
+      )}
+
       {selection.SelectionHalo}
     </CarbonBlock>
   );
@@ -283,9 +278,9 @@ const TabTitleComp = (props: TabTitleProps) => {
   }, [isActive, isRenaming]);
 
   return (
-    <div className={"carbon-tab-name"} {...attributes} data-id={tab.key}>
+    <div className={"ctab__header"} {...attributes} data-id={tab.key}>
       <div
-        className={"carbon-tab-name-view"}
+        className={"ctab__name"}
         onMouseUp={(e) => {
           stop(e);
           if (activeTabId !== tab.id.toString()) {
@@ -306,9 +301,10 @@ const TabTitleComp = (props: TabTitleProps) => {
           <span className={"carbon-tab-name-placeholder"}>Untitled</span>
         )}
       </div>
+
       {isRenaming && (
         <div
-          className={"carbon-tab-name-edit"}
+          className={"ctab__name-input"}
           onMouseDown={stop}
           onKeyDown={stop}
           onKeyUp={stop}

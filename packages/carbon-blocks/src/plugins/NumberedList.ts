@@ -41,6 +41,7 @@ export class NumberedList extends Section {
           },
           html: {
             suppressContentEditableWarning: true,
+            className: "cnl",
           },
         },
         remote: {

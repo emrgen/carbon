@@ -1,21 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import {
-  ListNumberPath, Node,
-} from "@emrgen/carbon-core";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-  useDragDropRectSelectHalo
-} from "@emrgen/carbon-dragon-react";
+import React, { useMemo, useRef } from "react";
+import { Node } from "@emrgen/carbon-core";
+import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
 import { Optional } from "@emrgen/types";
 import {
   CarbonBlock,
-  CarbonChildren,
   CarbonNodeChildren,
   CarbonNodeContent,
   RendererProps,
-  useSelectionHalo
 } from "@emrgen/carbon-react";
 
 // TODO: This is a hack to get the list number. May be should be stored in the node properties.
@@ -37,31 +28,38 @@ const listNumber = (node: Node, parent: Optional<Node>): number => {
   }
 
   return -1;
-}
-
+};
 
 export const NumberedListComp = (props: RendererProps) => {
   const { node, parent, custom } = props;
   const ref = useRef(null);
- const {connectors, SelectionHalo} = useDragDropRectSelectHalo({ref, node})
+  const { connectors, SelectionHalo } = useDragDropRectSelectHalo({
+    ref,
+    node,
+  });
 
   const beforeContent = useMemo(() => {
-    return (<label
-      contentEditable="false"
-      suppressContentEditableWarning
-      className="carbon-numberList__label"
-    >
-      {listNumber(node, node.parent) + "."}
-    </label>)
-  },[node]);
+    return (
+      <label
+        contentEditable="false"
+        suppressContentEditableWarning
+        className="cnl__label"
+      >
+        {listNumber(node, node.parent) + "."}
+      </label>
+    );
+  }, [node]);
 
   return (
     <CarbonBlock {...props} custom={connectors} ref={ref}>
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
+        wrap={true}
+        className={"ctiw"}
+        custom={{ className: "cnl__ti" }}
       />
-      <CarbonNodeChildren node={node}/>
+      <CarbonNodeChildren node={node} wrap={true} className="cnest" />
       {SelectionHalo}
     </CarbonBlock>
   );

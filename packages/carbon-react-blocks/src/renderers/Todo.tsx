@@ -57,10 +57,10 @@ export default function TodoComp(props: RendererProps) {
         node={node}
         beforeContent={beforeContent}
         wrap={true}
-        className={'ctiw'}
-        custom={{className: 'ctdl_ti'}}
+        className={"ctiw"}
+        custom={{ className: "ctdl__ti" }}
       />
-      <CarbonNodeChildren node={node}  className={'cnest'}/>
+      <CarbonNodeChildren node={node} className={"cnest"} />
       {selection.SelectionHalo}
     </CarbonBlock>
   );

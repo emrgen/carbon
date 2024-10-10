@@ -38,6 +38,7 @@ import {
 } from "@emrgen/carbon-core";
 import { deepCloneMap } from "@emrgen/carbon-core";
 import { ActionOrigin } from "@emrgen/carbon-core";
+import { EmptyPlaceholderPath } from "@emrgen/carbon-core";
 import { SelectionPatch } from "../core/index";
 import { NodeId } from "../core/index";
 import { NodeType } from "../core/index";
@@ -1461,6 +1462,16 @@ export class TransformCommands extends BeforePlugin {
     const isAtBlockStart = pin.isAtStartOfNode(splitBlock);
     if (isAtBlockStart) {
       const emptyBlock = splitType.default();
+
+      // set the placeholder text of the fist child if it is a text container
+      const placeholder = emptyBlock?.props.get<string>(
+        EmptyPlaceholderPath,
+        "",
+      );
+      if (placeholder && emptyBlock?.firstChild?.isTextContainer) {
+        emptyBlock.firstChild?.props.set(PlaceholderPath, placeholder);
+      }
+
       if (!emptyBlock) {
         console.error(
           "failed to create emptyBlock of type",

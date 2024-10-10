@@ -22,7 +22,6 @@ import { useNodeChange, useRenderManager } from "../hooks";
 import { RendererProps } from "./ReactRenderer";
 import { merge } from "lodash";
 import { identity } from "lodash";
-import { kebabCase } from "lodash";
 import { is_env_development } from "../env";
 
 export const JustEmpty = (props: RendererProps) => {
@@ -86,8 +85,10 @@ const InnerElement: ForwardRefRenderFunction<
     const { style = {}, tag, ...rest } = custom;
     const remoteStyle = node.props.get("remote/html/style") ?? {};
     const localStyle = node.props.get("local/html/style") ?? {};
-    const localAttrs = node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
-    const remoteAttrs = node.props.get<Record<string, any>>(RemoteHtmlAttrPath) ?? {};
+    const localAttrs =
+      node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
+    const remoteAttrs =
+      node.props.get<Record<string, any>>(RemoteHtmlAttrPath) ?? {};
     const className = node.props.get<string>(LocalClassPath, "");
 
     for (const [k, v] of Object.entries(localAttrs)) {
@@ -134,7 +135,7 @@ const InnerElement: ForwardRefRenderFunction<
     if (is_env_development()) {
       return {
         // "data-version": renderVersion,
-        // "data-id": key,
+        "data-id": key,
         // "data-parent": node.parent?.key,
       };
     }
@@ -275,8 +276,10 @@ const InnerCarbonText = (props: RendererProps) => {
   }, [marks, tag]);
 
   const attrs = useMemo(() => {
-    const localAttrs = node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
-    const remoteAttrs = node.props.get<Record<string, any>>(RemoteHtmlAttrPath) ?? {};
+    const localAttrs =
+      node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
+    const remoteAttrs =
+      node.props.get<Record<string, any>>(RemoteHtmlAttrPath) ?? {};
 
     return {
       ...localAttrs,
@@ -314,10 +317,7 @@ const InnerCarbonBlock: ForwardRefRenderFunction<
 
   const tag = useMemo(() => {
     return (
-      custom?.tag ??
-      node.type.spec.tag ??
-      node.props.get(TagPath) ??
-      "div"
+      custom?.tag ?? node.type.spec.tag ?? node.props.get(TagPath) ?? "div"
     );
   }, [custom?.tag, node]);
 

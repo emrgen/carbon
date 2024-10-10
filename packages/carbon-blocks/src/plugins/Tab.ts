@@ -89,6 +89,7 @@ export class TabGroup extends CarbonPlugin {
           html: {
             contentEditable: false,
             suppressContentEditableWarning: true,
+            className: "ctabs",
           },
           style: {},
         },
@@ -240,6 +241,7 @@ export class Tab extends CarbonPlugin {
           html: {
             contentEditable: true,
             suppressContentEditableWarning: true,
+            className: "ctab__content",
           },
         },
       },

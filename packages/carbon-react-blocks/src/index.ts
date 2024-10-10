@@ -38,6 +38,9 @@ import { PageLinkComp } from "./renderers/PageLink";
 import { MentionComp } from "./renderers/Mention";
 import { AtomicText } from "./renderers/AtomicText";
 
+// import "./dnd.styl";
+import "./style.styl";
+
 export const blockPresetRenderers = [
   ReactRenderer.create("document", DocumentComp),
   ReactRenderer.create("h1", HeaderComp),

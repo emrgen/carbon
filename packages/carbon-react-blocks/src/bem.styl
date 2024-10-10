@@ -1,3 +1,5 @@
+@import "bem_tabs.styl"
+
 $lineHeight = 26px
 
 .croot
@@ -14,6 +16,7 @@ $lineHeight = 26px
 
 // block
 .cbl
+.cnl
 .ctdl
 .cse
   margin-top 2px
@@ -30,6 +33,7 @@ $lineHeight = 26px
 //title
 .cse__ti
 .cbl__ti
+.cnl_ti
 .ctdl_ti
 .ccout__ti
 .ch1__ti
@@ -41,10 +45,11 @@ $lineHeight = 26px
 
   //position: relative
 
+// placeholder
 .placeholder
   position absolute
   content attr(placeholder)
-  left 0px
+  left 0
   top 0
   pointer-events: none
   user-select none
@@ -55,8 +60,18 @@ $lineHeight = 26px
   @extend .placeholder
 
 .cbl__ti:after
-    @extend .placeholder
-    left 28px
+  @extend .placeholder
+  left 28px
+
+.cnl__ti:after
+  @extend .placeholder
+  left 28px
+
+.ctdl__ti:after
+  @extend .placeholder
+  left 28px
+
+// placeholder end
 
 // title wrapper
 .ctiw
@@ -77,18 +92,31 @@ $lineHeight = 26px
   user-select: none
   position absolute
   left 0
-  font-size 0.5em
+  font-size 0.75em
 
 // todo list
-.ctdl_ti
-  display flex
+.ctdl__ti
+  margin-left: 28px
+  flex 1
 
 .ctdl__checkbox
-  margin-right 8px
-  margin-left: 4px;
   display flex
-  align-items center
+  padding 6px 7px
+  position absolute;
 
+.cnl__ti
+  margin-left: 28px
+  flex 1
+
+.cnl__label
+  width 28px;
+  display flex
+  justify-content end
+  padding-right 8px;
+  user-select: none
+  position absolute;
+
+// callout
 .ccout
   background: #FBF3DB;
   padding: 10px 16px
@@ -153,6 +181,7 @@ $lineHeight = 26px
 
 // header end
 
+// code
 pre
   white-space pre-wrap
   font-size 0.9em
@@ -162,3 +191,16 @@ pre
   background #f8f8f8
   border-radius 4px
   border 1px solid #ddd
+// code end
+
+/*custom scrollbars for document*/
+.document-wrapper::-webkit-scrollbar {
+  width: 10px;
+  background-color: #f5f5f5;
+}
+
+/*thumb radius*/
+.document-wrapper::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 10px;
+}

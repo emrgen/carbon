@@ -36,7 +36,7 @@ import { SuppressContenteditableWarningPath } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { flattenDeep, noop } from "lodash";
+import { flattenDeep } from "lodash";
 import { PathTracker } from "../../PathTracker";
 import {
   commentEditorComp,
@@ -805,15 +805,15 @@ const renderers = [
 
 const renderManager = RenderManager.from(renderers);
 
-console.log = noop;
+// console.log = noop;
 // console.info = noop;
-console.debug = noop;
-console.warn = noop;
-console.error = noop;
-console.group = noop;
-console.groupCollapsed = noop;
-console.groupEnd = noop;
-console.time = noop;
+// console.debug = noop;
+// console.warn = noop;
+// console.error = noop;
+// console.group = noop;
+// console.groupCollapsed = noop;
+// console.groupEnd = noop;
+// console.time = noop;
 
 // localStorage.setItem('carbon:content', JSON.stringify(data));
 
