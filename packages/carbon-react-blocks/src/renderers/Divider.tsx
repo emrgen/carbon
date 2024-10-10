@@ -44,7 +44,7 @@ export default function DividerComp(props: RendererProps) {
       ref={ref}
     >
       <div
-        className="divider"
+        className="cdiv__line"
         contentEditable="false"
         suppressContentEditableWarning
       ></div>

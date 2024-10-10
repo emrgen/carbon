@@ -5,22 +5,22 @@ import {
   CarbonNodeContent,
   RendererProps,
 } from "@emrgen/carbon-react";
-import { CarbonNode } from "@emrgen/carbon-react";
 import { CarbonNodeChildren } from "@emrgen/carbon-react";
 
 export const NestableComp = (props: RendererProps) => {
-  const { node } = props;
+  const { node, custom } = props;
   const ref = useRef(null);
   // const {connectors, SelectionHalo} = useDragDropRectSelectHalo({node, ref});
 
-  if (node.size === 1) {
-    return <CarbonNode node={node.child(0)!} />;
-  }
-
   return (
-    <CarbonBlock node={node}>
-      <CarbonNodeContent node={node} />
-      <CarbonNodeChildren node={node} />
+    <CarbonBlock node={node} custom={custom}>
+      <CarbonNodeContent node={node} custom={{ className: "cse__ti" }} />
+      <CarbonNodeChildren
+        node={node}
+        className={"cnest"}
+        wrap={true}
+        // custom={{ className: "cse__ch" }}
+      />
       {/*{SelectionHalo}*/}
     </CarbonBlock>
   );

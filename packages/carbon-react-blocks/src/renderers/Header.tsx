@@ -6,10 +6,11 @@ import {
   CarbonNodeContent,
   RendererProps,
 } from "@emrgen/carbon-react";
+import { CarbonNode } from "@emrgen/carbon-react";
 import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
 
 export const HeaderComp = (props: RendererProps) => {
-  const { node } = props;
+  const { node, custom } = props;
   const ref = useRef(null);
   const { connectors, SelectionHalo } = useDragDropRectSelectHalo({
     node,
@@ -17,13 +18,19 @@ export const HeaderComp = (props: RendererProps) => {
   });
 
   return (
-    <CarbonBlock
-      node={node}
-      ref={ref}
-      custom={{ ...connectors, id: node.id.toString() }}
-    >
-      <CarbonNodeContent node={node} />
-      <CarbonNodeChildren node={node} />
+    <CarbonBlock node={node} ref={ref} custom={{ ...connectors, ...custom }}>
+      {node.size === 1 ? (
+        <CarbonNode
+          node={node.child(0)!}
+          custom={{ className: "c" + node.name + "__ti" }}
+        />
+      ) : (
+        <CarbonNodeContent
+          node={node}
+          custom={{ className: "c" + node.name + "__ti" }}
+        />
+      )}
+      <CarbonNodeChildren node={node} wrap={true} className={"cnest"} />
       {SelectionHalo}
     </CarbonBlock>
   );

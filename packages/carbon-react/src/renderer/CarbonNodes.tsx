@@ -17,9 +17,12 @@ import {
   RemoteHtmlAttrPath,
   TagPath,
 } from "@emrgen/carbon-core";
+import { LocalClassPath } from "@emrgen/carbon-core";
 import { useNodeChange, useRenderManager } from "../hooks";
 import { RendererProps } from "./ReactRenderer";
 import { merge } from "lodash";
+import { identity } from "lodash";
+import { kebabCase } from "lodash";
 import { is_env_development } from "../env";
 
 export const JustEmpty = (props: RendererProps) => {
@@ -80,11 +83,13 @@ const InnerElement: ForwardRefRenderFunction<
   const ref = useRef<HTMLElement>(null);
 
   const attributes = useMemo(() => {
-    const { style = {}, ...rest } = custom;
+    const { style = {}, tag, ...rest } = custom;
     const remoteStyle = node.props.get("remote/html/style") ?? {};
     const localStyle = node.props.get("local/html/style") ?? {};
     const localAttrs = node.props.get(LocalHtmlAttrPath) ?? {};
     const remoteAttrs = node.props.get(RemoteHtmlAttrPath) ?? {};
+    const className = node.props.get(LocalClassPath, "") ?? "";
+
     for (const [k, v] of Object.entries(localAttrs)) {
       if (v === null || v === undefined || v === "") {
         delete localAttrs[k];
@@ -104,6 +109,7 @@ const InnerElement: ForwardRefRenderFunction<
       ...remoteAttrs,
       ...(Object.keys(style).length ? { style: styles } : {}),
       ...rest,
+      className: [className, custom.className].filter(identity).join(" "),
     };
   }, [custom, node]);
 
@@ -139,7 +145,7 @@ const InnerElement: ForwardRefRenderFunction<
   const isBold = node.props.get(MarksPath)?.some((m) => m.name === "bold");
 
   return (
-    <Tag ref={ref} data-name={name} {...customProps} {...attributes}>
+    <Tag ref={ref} data-name={kebabCase(name)} {...customProps} {...attributes}>
       {isBold ? <b>{children}</b> : children}
       {/*{children}*/}
     </Tag>
@@ -147,7 +153,7 @@ const InnerElement: ForwardRefRenderFunction<
 };
 
 export const CarbonElement = memo(forwardRef(InnerElement), (prev, next) => {
-  return prev.node.key === next.node.key;
+  return prev.node.key === next.node.key && prev.custom === next.custom;
 });
 
 export const RawText = memo(function RT(props: RendererProps) {
@@ -383,7 +389,7 @@ export const InnerCarbonNode = (props: RendererProps) => {
 };
 
 export const CarbonNode = memo(InnerCarbonNode, (prev, next) => {
-  return prev.node.key === next.node.key;
+  return prev.node.key === next.node.key && prev.custom === next.custom;
 });
 
 // default node for carbon editor with text and block
@@ -400,7 +406,15 @@ export const CarbonDefaultNode = (props: RendererProps) => {
 
 // render first node a content
 export const CarbonNodeContent = (props: RendererProps) => {
-  const { node, beforeContent, afterContent, custom, wrapper } = props;
+  const {
+    node,
+    beforeContent,
+    afterContent,
+    custom,
+    wrapper,
+    wrap,
+    className,
+  } = props;
 
   const content = useMemo(() => {
     const { children = [] } = node;
@@ -416,8 +430,12 @@ export const CarbonNodeContent = (props: RendererProps) => {
     return null;
   }
 
+  if (!wrap) {
+    return <CarbonNode node={content} custom={custom} key={content.key} />;
+  }
+
   return (
-    <div data-type="content" {...wrapper}>
+    <div {...wrapper} className={className}>
       {beforeContent}
       <CarbonNode node={content} custom={custom} key={content.key} />
       {afterContent}
@@ -431,17 +449,20 @@ interface ChildrenSegmentProps {
 
 // render children except first node
 export const CarbonNodeChildren = (props: RendererProps) => {
-  const { node } = props;
+  const { node, wrap, custom, className } = props;
   return useMemo(() => {
     if (node.children.length < 2) return null;
 
     const children = node.view.children.nodes.slice(1).map((n) => {
       // console.debug('CarbonChildren', n.name, n.id.toString());
-      return <CarbonNode node={n} key={n.key} />;
+      return <CarbonNode node={n} key={n.key} custom={custom} />;
     });
 
     // console.debug('CarbonNodeChildren', node.name, children.length);
+    if (!wrap) {
+      return <>{children}</>;
+    }
 
-    return <div data-type="children">{children}</div>;
-  }, [node]);
+    return <div className={className}>{children}</div>;
+  }, [node, wrap, custom, className]);
 };

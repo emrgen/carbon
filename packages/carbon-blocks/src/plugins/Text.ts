@@ -34,14 +34,12 @@ export class TextPlugin extends NodePlugin {
       focusable: true,
       mergeable: true,
       tag: "span",
-      attrs: {
-        html: {
-          // spellCheck: true,
-          // contentEditable: true,
-          suppressContentEditableWarning: true,
-        },
-        node: {
-          // link: '#'
+      props: {
+        local: {
+          html: {
+            suppressContentEditableWarning: true,
+            id: "ct",
+          },
         },
       },
     };

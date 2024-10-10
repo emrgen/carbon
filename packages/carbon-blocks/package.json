@@ -19,6 +19,8 @@
     "@uidotdev/usehooks": "^2.4.1",
     "compare-urls": "^4.1.0",
     "diff": "^5.2.0",
+    "is-hotkey": "^0.2.0",
+    "prismjs": "^1.29.0",
     "react-icons": "^4.10.1"
   },
   "devDependencies": {

@@ -9,6 +9,7 @@ export class BulletedList extends Section {
     return {
       ...super.spec(),
       splitName: "bulletList",
+      tag: "div",
       info: {
         title: "Bulleted List",
         description: "Create a bulleted list",
@@ -24,6 +25,7 @@ export class BulletedList extends Section {
           },
           html: {
             suppressContentEditableWarning: true,
+            className: "cbl",
           },
         },
       },

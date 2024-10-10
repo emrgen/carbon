@@ -13,8 +13,9 @@ import {
   Writer,
 } from "@emrgen/carbon-core";
 import { isEqual } from "lodash";
-import { isKeyHotkey } from "is-hotkey";
+// import { isKeyHotkey } from "is-hotkey";
 import { CodeTitle } from "./CodeTitle";
+import { isKeyHotkey } from "is-hotkey";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {}

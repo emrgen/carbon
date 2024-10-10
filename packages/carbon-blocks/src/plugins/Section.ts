@@ -57,11 +57,9 @@ export class Section extends NodePlugin {
           },
           html: {
             suppressContentEditableWarning: true,
+            className: "cse",
           },
         },
-        // plugin: {
-        //   'tag': 'p'
-        // }
       },
     };
   }

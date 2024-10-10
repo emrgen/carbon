@@ -1,9 +1,13 @@
-import {Carbon, CarbonPlugin, Node, NodeEncoder, NodeSpec, SerializedNode, Writer} from "@emrgen/carbon-core";
-import { identity } from "lodash";
+import {
+  CarbonPlugin,
+  Node,
+  NodeEncoder,
+  NodeSpec,
+  Writer,
+} from "@emrgen/carbon-core";
 
 export class CarbonRoot extends CarbonPlugin {
-
-  name = 'carbon';
+  name = "carbon";
 
   spec(): NodeSpec {
     return {
@@ -14,22 +18,22 @@ export class CarbonRoot extends CarbonPlugin {
         local: {
           html: {
             suppressContentEditableWarning: true,
-          }
-        }
-      }
-    }
+            className: "croot",
+          },
+        },
+      },
+    };
   }
 
   encode(w: Writer, ne: NodeEncoder, node: Node) {
-    node.children.forEach(child => {
+    node.children.forEach((child) => {
       ne.encode(w, child);
     });
   }
 
   encodeHtml(w: Writer, ne: NodeEncoder, node: Node) {
-    node.children.forEach(child => {
+    node.children.forEach((child) => {
       ne.encodeHtml(w, child);
     });
   }
-
 }

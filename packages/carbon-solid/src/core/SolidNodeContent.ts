@@ -1,23 +1,35 @@
 import {
-  Mark,
   Node,
   NodeContent,
-  NodeContentData, NodeData,
+  NodeContentData,
+  NodeData,
   NodeId,
+  NodeMap,
+  NodeProps,
   NodePropsJson,
   NodeType,
-  NodeProps, NodeMap, Path,
+  Path,
 } from "@emrgen/carbon-core";
-import {createMutable, Store, unwrap} from "solid-js/store";
-import {Optional} from "@emrgen/types";
-import {each, reduce} from "lodash";
-
+import { createMutable, Store, unwrap } from "solid-js/store";
+import { Optional } from "@emrgen/types";
 
 export class SolidNodeContent implements NodeContent {
   protected content: Store<NodeContentData>;
 
   static create(data: NodeContentData): SolidNodeContent {
-    const {id, type, children = [], textContent, parent, parentId, props, links = {}, linkName = '', renderVersion = 0, contentVersion= 0 } = data;
+    const {
+      id,
+      type,
+      children = [],
+      textContent,
+      parent,
+      parentId,
+      props,
+      links = {},
+      linkName = "",
+      renderVersion = 0,
+      contentVersion = 0,
+    } = data;
     const store = createMutable<NodeContentData>({
       id,
       type,
@@ -35,7 +47,7 @@ export class SolidNodeContent implements NodeContent {
     return new SolidNodeContent(id, store);
   }
 
-  constructor(id: NodeId, store: SolidNodeContent['content']) {
+  constructor(id: NodeId, store: SolidNodeContent["content"]) {
     this.content = store;
   }
 
@@ -57,16 +69,16 @@ export class SolidNodeContent implements NodeContent {
 
   get data(): NodeData {
     const unwrap = this.unwrap();
-    const { parent,id, parentId, type,children, ...rest} = unwrap;
+    const { parent, id, parentId, type, children, ...rest } = unwrap;
 
     return {
       ...rest,
       id: id.toString(),
       parentId: parentId?.toString(),
       name: type.name,
-      children: children.map(child => child.data),
+      children: children.map((child) => child.data),
       links: {},
-    }
+    };
   }
 
   get id(): NodeId {
@@ -91,7 +103,7 @@ export class SolidNodeContent implements NodeContent {
     }
 
     // console.log("textContent is not available for non-text nodes")
-    return this.children.map(child => child.textContent).join("");
+    return this.children.map((child) => child.textContent).join("");
   }
 
   get children(): Node[] {
@@ -107,14 +119,14 @@ export class SolidNodeContent implements NodeContent {
   }
 
   get props(): NodeProps {
-    return this.content.props
+    return this.content.props;
   }
 
   get size(): number {
     if (this.type.isText) {
-      return this.textContent.length
+      return this.textContent.length;
     }
-    return this.children.length
+    return this.children.length;
   }
 
   child(index: number): Node {
@@ -123,10 +135,10 @@ export class SolidNodeContent implements NodeContent {
 
   unwrap(): NodeContentData {
     // console.log('unwrap', this.id.toString())
-    const content =  unwrap(this.content);
+    const content = unwrap(this.content);
     return {
       ...content,
-    }
+    };
   }
 
   setParentId(parentId: Optional<NodeId>): NodeContent {
@@ -149,7 +161,7 @@ export class SolidNodeContent implements NodeContent {
   }
 
   remove(node: Node): void {
-    const index = this.children.findIndex(child => child.eq(node))
+    const index = this.children.findIndex((child) => child.eq(node));
     if (index === -1) {
       throw new Error("Node is not found");
     }
@@ -165,7 +177,8 @@ export class SolidNodeContent implements NodeContent {
       throw new Error("Cannot insert text into non-text node");
     }
 
-    this.content.textContent = this.textContent.slice(0, index) + text + this.textContent.slice(index);
+    this.content.textContent =
+      this.textContent.slice(0, index) + text + this.textContent.slice(index);
   }
 
   removeText(offset: number, length: number): void {
@@ -173,13 +186,14 @@ export class SolidNodeContent implements NodeContent {
       throw new Error("Cannot remove text from non-text node");
     }
 
-    this.content.textContent = this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
+    this.content.textContent =
+      this.textContent.slice(0, offset) +
+      this.textContent.slice(offset + length);
   }
 
   addLink(name: string, node: Node): void {
     this.content.links[name] = node;
   }
-
 
   removeLink(name: string): Optional<Node> {
     return undefined;
@@ -208,5 +222,4 @@ export class SolidNodeContent implements NodeContent {
   unfreeze(path: Path, map: NodeMap): NodeContent {
     throw new Error("Method not implemented.");
   }
-
 }

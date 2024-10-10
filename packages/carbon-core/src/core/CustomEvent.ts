@@ -10,4 +10,6 @@ export class CustomEvent {
     readonly node: Node,
     readonly event: any,
   ) {}
+
+  preventDefault() {}
 }

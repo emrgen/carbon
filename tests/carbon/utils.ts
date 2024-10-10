@@ -18,7 +18,7 @@ export const getDocContent = async (page: Page) => {
 };
 
 export const focusDocTitle = async (page: Page) => {
-  await page.click(".carbon-document > [data-type=content]");
+  await page.click(".cdoc > [data-type=content]");
 };
 
 export class CarbonPage {
@@ -40,7 +40,7 @@ export class CarbonPage {
   }
 
   async focusDocTitle() {
-    await this.page.click(".carbon-document > [data-type=content]");
+    await this.page.click(".cdoc > [data-type=content]");
   }
 
   async getDocContent() {

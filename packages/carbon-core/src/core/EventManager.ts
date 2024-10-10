@@ -80,6 +80,15 @@ export class EventManager {
   }
 
   onEvent(type: EventsIn, event: Event | CustomEvent) {
+    if (this.cm.pendingSelectionCounter) {
+      event.preventDefault();
+    }
+
+    if (this.cm.pendingSelectionCounter && type !== EventsIn.selectionchange) {
+      console.info("skip event", type, "pending selection");
+      return;
+    }
+
     this.beforeEvent(type, event);
     const { app } = this;
     // console.log(type, event);

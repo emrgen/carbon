@@ -29,6 +29,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
   promiseState: PromiseState;
   tr: Optional<Transaction>;
+  pendingSelectionCounter: number = 0;
 
   private interval: any;
 
@@ -280,7 +281,11 @@ export class ChangeManager extends NodeTopicEmitter {
         app.blur();
         return;
       }
-      selection.syncDom(app.store, app.dom);
+      this.pendingSelectionCounter += 1;
+      requestAnimationFrame(() => {
+        selection.syncDom(app.store, app.dom);
+        this.pendingSelectionCounter -= 1;
+      });
     } catch (error) {
       this.promiseState.reject?.(error);
     }

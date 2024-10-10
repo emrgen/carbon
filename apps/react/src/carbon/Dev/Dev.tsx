@@ -29,7 +29,6 @@ import {
   ModePath,
   NodeId,
   State,
-  StylePath,
   TitlePath,
 } from "@emrgen/carbon-core";
 import { ContenteditablePath } from "@emrgen/carbon-core";
@@ -164,28 +163,28 @@ const data = node("carbon", [
       //   ],
       //   {},
       // ),
-
-      node(
-        "partial",
-        [
-          title([
-            text("Summary", {
-              [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
-            }),
-          ]),
-          //  long lorem text
-          section([
-            title([
-              text(
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard m is simply dummy text of the printing and typesetting industry.",
-              ),
-            ]),
-          ]),
-        ],
-        {
-          [StylePath]: {},
-        },
-      ),
+      //
+      // node(
+      //   "partial",
+      //   [
+      //     title([
+      //       text("Summary", {
+      //         [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
+      //       }),
+      //     ]),
+      //     //  long lorem text
+      //     section([
+      //       title([
+      //         text(
+      //           "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard m is simply dummy text of the printing and typesetting industry.",
+      //         ),
+      //       ]),
+      //     ]),
+      //   ],
+      //   {
+      //     [StylePath]: {},
+      //   },
+      // ),
 
       section([title([text("question title")])]),
 
@@ -681,8 +680,11 @@ const data = node("carbon", [
           }),
         ]),
       ]),
-      section([title([text("section 1")])]),
-      section([title([text("section 1")])]),
+      section([
+        title([text("section 1")]),
+        section([title([text("section 1")])]),
+      ]),
+
       // node("pageLink", [], {
       //   [LinkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdMsdf",
       // }),

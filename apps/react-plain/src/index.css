@@ -40,7 +40,6 @@ body, html {
   height: 100%;
   width: 100%;
   overflow: auto;
-  font-size: 13px;
 }
 
 /*custom scrollbars for document*/

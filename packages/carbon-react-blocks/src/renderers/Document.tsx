@@ -17,7 +17,6 @@ import {
   CarbonBlock,
   CarbonNode,
   CarbonNodeChildren,
-  CarbonNodeContent,
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
@@ -83,6 +82,7 @@ export const DocumentComp = (props: RendererProps) => {
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       app.emit("document:cursor:show");
+
       if (!isEditable) return;
       const lastChildId = node.lastChild?.id;
       if (!lastChildId) return;
@@ -91,7 +91,7 @@ export const DocumentComp = (props: RendererProps) => {
       if (!lastChild) return;
       const bound = lastElement?.getBoundingClientRect();
       if (!bound) return;
-      // console.log(bound, e, e.clientY, bound.bottom);
+      // console.info(bound, e, e.clientY, bound.bottom);
 
       if (e.clientY > bound.bottom) {
         if (lastChild.name === "section" && lastChild.isEmpty) {
@@ -185,7 +185,7 @@ export const DocumentComp = (props: RendererProps) => {
           </div>
         )}
 
-        {!image.src && <div className="carbon-document-empty-picture" />}
+        {!image.src && <div className="cdoc__empty-picture" />}
 
         <CarbonBlock
           node={node}
@@ -200,12 +200,15 @@ export const DocumentComp = (props: RendererProps) => {
             },
             // onBlur: (e) => app.emit('document:blur', e as any),
             // onFocus: (e) => app.emit('document:focus', e as any),
-            className: "carbon-document",
+            className: "cdoc",
             contentEditable: isEditable,
             suppressContentEditableWarning: true,
           }}
         >
-          <CarbonNodeContent node={node} />
+          <CarbonNode
+            node={node.child(0)!}
+            custom={{ className: "cdoc__ti" }}
+          />
           {!pageProps.eq(Node.NULL) && <CarbonNode node={pageProps} />}
           {/*<CarbonProps node={node} />*/}
           <CarbonNodeChildren node={node} />

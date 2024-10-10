@@ -1,6 +1,6 @@
 import { ActionOrigin, ActionType, CarbonAction } from "./types";
 import { PointedSelection } from "../PointedSelection";
-import { classString, p12, p14 } from "../Logger";
+import { classString, p12 } from "../Logger";
 import { Draft } from "../Draft";
 
 export class SelectAction implements CarbonAction {
@@ -43,21 +43,21 @@ export class SelectAction implements CarbonAction {
     after: PointedSelection,
     origin: ActionOrigin,
   ) {
-    if (
-      before.eq(after) &&
-      origin !== ActionOrigin.UserInput &&
-      origin !== ActionOrigin.Normalizer &&
-      origin !== ActionOrigin.UserSelectionChange
-    ) {
-      console.info(
-        p14("%c[info]"),
-        "color:pink",
-        "before and after selection same",
-        before.toJSON(),
-        after.toJSON(),
-      );
-      return;
-    }
+    // if (
+    //   before.eq(after) &&
+    //   origin !== ActionOrigin.UserInput &&
+    //   origin !== ActionOrigin.Normalizer &&
+    //   origin !== ActionOrigin.UserSelectionChange
+    // ) {
+    //   console.info(
+    //     p14("%c[info]"),
+    //     "color:pink",
+    //     "before and after selection same",
+    //     before.toJSON(),
+    //     after.toJSON(),
+    //   );
+    //   return;
+    // }
 
     // this is just a sanity check
     const selection = after.pin(draft);
