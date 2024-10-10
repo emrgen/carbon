@@ -59,6 +59,11 @@ export class Collapsible extends NodePlugin {
         order: 6,
       },
       props: {
+        local: {
+          html: {
+            className: "collapsible",
+          },
+        },
         remote: {
           // html: { "data-as": "h3" },
           state: {},

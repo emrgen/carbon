@@ -135,7 +135,7 @@ const InnerElement: ForwardRefRenderFunction<
     if (is_env_development()) {
       return {
         // "data-version": renderVersion,
-        "data-id": key,
+        // "data-id": key,
         // "data-parent": node.parent?.key,
       };
     }

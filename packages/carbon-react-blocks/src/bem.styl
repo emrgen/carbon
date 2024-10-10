@@ -1,9 +1,12 @@
 @import "bem_tabs.styl"
 
 $lineHeight = 26px
+$selectionHaloColor = #accef78d
 
 .croot
   width: 100%;
+  ::selection
+    background: $selectionHaloColor
 
 .cdoc
   flex 1
@@ -43,7 +46,7 @@ $lineHeight = 26px
   flex 1
   padding 0 2px
 
-  //position: relative
+//position: relative
 
 // placeholder
 .placeholder
@@ -115,6 +118,22 @@ $lineHeight = 26px
   padding-right 8px;
   user-select: none
   position absolute;
+
+.collapsible__ti
+  margin-left: 28px
+  flex 1
+
+.collapsible__control
+  display flex
+  position absolute;
+  padding 6px 2px
+  margin 0 2px
+  cursor pointer
+  border-radius 6px
+  &:hover
+    background #f5f5f5
+.collapsible[data-collapsed="true"] .cnest
+  display none
 
 // callout
 .ccout
@@ -191,7 +210,15 @@ pre
   background #f8f8f8
   border-radius 4px
   border 1px solid #ddd
+
 // code end
+
+.mention
+  background: #efefef
+  padding: 2px 0
+  border-radius: 8px
+  margin: 0 2px
+  cursor pointer
 
 /*custom scrollbars for document*/
 .document-wrapper::-webkit-scrollbar {
