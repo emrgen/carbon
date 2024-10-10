@@ -22,6 +22,7 @@ import { useNodeChange, useRenderManager } from "../hooks";
 import { RendererProps } from "./ReactRenderer";
 import { merge } from "lodash";
 import { identity } from "lodash";
+import { uniq } from "lodash";
 import { is_env_development } from "../env";
 
 export const JustEmpty = (props: RendererProps) => {
@@ -110,7 +111,7 @@ const InnerElement: ForwardRefRenderFunction<
       ...remoteAttrs,
       ...(Object.keys(style).length ? { style: styles } : {}),
       ...rest,
-      className: [className, custom.className].filter(identity).join(" "),
+      className: uniq([className, custom.className]).filter(identity).join(" "),
     };
   }, [custom, node]);
 

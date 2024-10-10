@@ -516,9 +516,146 @@ export class TitleNode {
   }
 
   normalize(): TitleNode {
-    const children = this.normalizeContent();
-    const node = this.cloneNode(this.node, children);
-    return new TitleNode(node, this.startMapper.clone());
+    const { children } = this.node;
+    // const children = this.normalizeContent();
+    // const node = this.cloneNode(this.node, children);
+    // return new TitleNode(node, this.startMapper.clone());
+    return this.normalizeMarks().normalizeInlineEmpty();
+  }
+
+  // merge adjacent text nodes with the same marks and update the index mapper
+  normalizeMarks() {
+    const startMapper = this.startMapper.clone();
+    const endMapper = this.endMapper.clone();
+    const parent = this.node;
+
+    let offset = 2;
+
+    const nodes =
+      this.children.reduce((acc, curr, index) => {
+        // FIXME: this is a hack to remove the class from the title node
+        if (parent?.name === "title" && !curr.isZero && !curr.isInlineAtom) {
+          curr.updateProps({ [LocalClassPath]: "" });
+        }
+
+        if (index === 0) {
+          offset += curr.stepSize;
+          return [curr];
+        }
+
+        const prev = acc[acc.length - 1];
+        const prevMarks = MarkSet.from(prev.marks);
+        const currMarks = MarkSet.from(curr.marks);
+        const prevClass = prev.props.get(LocalClassPath);
+        const currClass = curr.props.get(LocalClassPath);
+
+        if (
+          prevMarks.eq(currMarks) &&
+          prevClass === currClass &&
+          !prev.isIsolate &&
+          !curr.isIsolate &&
+          !curr.isInlineAtom
+        ) {
+          acc.pop();
+
+          const newNodes = InlineNode.from(prev).merge(curr);
+          // the steps after the merged nodes should be reduced by the 2 step size
+          startMapper.add(IndexMap.create(offset, -2));
+          // from end the steps should be reduced by 2 step size
+          endMapper.add(IndexMap.create(offset - parent.stepSize - 1, 2));
+
+          acc.push(...newNodes);
+          offset += curr.stepSize;
+
+          return acc;
+        }
+
+        offset += curr.stepSize;
+        return [...acc, curr];
+      }, [] as Node[]) ?? [];
+
+    return new TitleNode(
+      this.cloneNode(this.node, nodes),
+      startMapper,
+      endMapper,
+    );
+  }
+
+  normalizeInlineEmpty() {
+    const normalize = () => {
+      const result = this.node.children.reduce((acc, curr, index) => {
+        if (index === 0) {
+          // if the first node is an inline atom wrapper, add an empty node before it
+          if (TitleNode.isNonFocusableInlineAtom(curr)) {
+            const empty = curr.type.schema.type("empty")?.default();
+            if (!empty) {
+              throw new Error("empty node not found");
+            }
+            return [empty, curr];
+          }
+
+          return [curr];
+        }
+
+        const prev = acc[acc.length - 1] as Node;
+
+        // if both are empty nodes, skip the current node
+        if (curr.isZero && (prev.isZero || prev.isFocusable)) {
+          return acc;
+        }
+
+        // if the previous node is an empty node and the current node is focusable,
+        // replace the empty node with the current node
+        if (prev.isZero && curr.isFocusable) {
+          return [...acc.slice(0, -1), curr];
+        }
+
+        // if both are not inline atom wrappers, add an empty node between them
+        if (
+          TitleNode.isNonFocusableInlineAtom(prev) &&
+          TitleNode.isNonFocusableInlineAtom(curr)
+        ) {
+          const empty = curr.type.schema.type("empty")?.default();
+          if (!empty) {
+            throw new Error("empty node not found");
+          }
+          return [...acc, empty, curr];
+        }
+
+        return [...acc, curr];
+      }, [] as Node[]);
+
+      if (result.length) {
+        const lastNode = last(result)!;
+        const secondLastNode = result[result.length - 2];
+        if (
+          secondLastNode &&
+          !TitleNode.isNonFocusableInlineAtom(secondLastNode) &&
+          lastNode.isZero
+        ) {
+          return result.slice(0, -1);
+        }
+
+        if (result.length === 1 && lastNode.isZero) {
+          return [];
+        }
+
+        if (TitleNode.isNonFocusableInlineAtom(lastNode)) {
+          const empty = last(result)?.type.schema.type("empty")?.default();
+          if (!empty) {
+            throw new Error("empty node not found");
+          }
+          return [...result, empty];
+        }
+      }
+      return result;
+    };
+
+    return new TitleNode(
+      this.cloneNode(this.node, normalize()),
+      this.startMapper,
+      this.endMapper,
+    );
   }
 
   // clone node with new children

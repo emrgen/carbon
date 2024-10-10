@@ -203,7 +203,7 @@ export class TransformCommands extends BeforePlugin {
 
         printNode(textBlock.node);
 
-        const startStep = start.steps;
+        const startStep = textBlock.mapStep(start.steps);
         const endStepFromEnd = end.steps - end.node.stepSize;
         const endSteps = textBlock.stepSize + textBlock.mapStep(endStepFromEnd);
 
