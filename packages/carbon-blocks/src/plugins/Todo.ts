@@ -35,6 +35,7 @@ export class Todo extends Section {
           },
           html: {
             suppressContentEditableWarning: true,
+            className: 'ctdl'
           },
         },
         remote: {

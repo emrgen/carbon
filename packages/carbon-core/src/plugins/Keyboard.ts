@@ -82,7 +82,6 @@ export class KeyboardPlugin extends AfterPlugin {
       // FIXME: this is not triggering on linux
       // not tested on windows, max
       "cmd+left": (ctx: EventContext<KeyboardEvent>) => {
-        debugger;
         const { app, cmd } = ctx;
         const { selection, blockSelection } = app.state;
 

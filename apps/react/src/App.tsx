@@ -7,6 +7,7 @@ import { FastEditor } from "./fastype/FastEditor";
 import "./fastype/fastype.styl";
 import TestText from "./carbon/Test/Text";
 import { Grouped } from "./carbon/Poc/Grouped";
+import './react-bem.styl'
 
 function App() {
   return (

@@ -21,7 +21,7 @@ indent_size = 2
 
 [*{.styl,scss,css}]
 indent_style = space
-indent_size = 4
+indent_size = 2
 
 # Tab indentation (no size specified)
 [Makefile]

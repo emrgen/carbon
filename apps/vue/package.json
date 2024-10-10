@@ -9,10 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^0.0.2",
-    "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-blocks": "workspace:*",
-    "@emrgen/carbon-vue": "workspace:*"
+    "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-vue": "workspace:*",
+    "vue": "^3.5.11"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.2",

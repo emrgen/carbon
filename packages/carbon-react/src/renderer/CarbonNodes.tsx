@@ -77,18 +77,18 @@ const InnerElement: ForwardRefRenderFunction<
   any,
   Omit<RendererProps, "ref">
 > = (props, forwardedRef) => {
-  const { tag: Tag = "div", node, children, custom = {} } = props;
+  const { tag: Tag = "div", node, children, custom = {} as any } = props;
   const { key, name, renderVersion } = node;
   const editor = useCarbon();
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLElement>(null!);
 
   const attributes = useMemo(() => {
     const { style = {}, tag, ...rest } = custom;
     const remoteStyle = node.props.get("remote/html/style") ?? {};
     const localStyle = node.props.get("local/html/style") ?? {};
-    const localAttrs = node.props.get(LocalHtmlAttrPath) ?? {};
-    const remoteAttrs = node.props.get(RemoteHtmlAttrPath) ?? {};
-    const className = node.props.get(LocalClassPath, "") ?? "";
+    const localAttrs = node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
+    const remoteAttrs = node.props.get<Record<string, any>>(RemoteHtmlAttrPath) ?? {};
+    const className = node.props.get<string>(LocalClassPath, "");
 
     for (const [k, v] of Object.entries(localAttrs)) {
       if (v === null || v === undefined || v === "") {
@@ -153,7 +153,7 @@ const InnerElement: ForwardRefRenderFunction<
 };
 
 export const CarbonElement = memo(forwardRef(InnerElement), (prev, next) => {
-  return prev.node.key === next.node.key && prev.custom === next.custom;
+  return prev.node.key === next.node.key;
 });
 
 export const RawText = memo(function RT(props: RendererProps) {
@@ -275,8 +275,8 @@ const InnerCarbonText = (props: RendererProps) => {
   }, [marks, tag]);
 
   const attrs = useMemo(() => {
-    const localAttrs = node.props.get(LocalHtmlAttrPath) ?? {};
-    const remoteAttrs = node.props.get(RemoteHtmlAttrPath) ?? {};
+    const localAttrs = node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
+    const remoteAttrs = node.props.get<Record<string, any>>(RemoteHtmlAttrPath) ?? {};
 
     return {
       ...localAttrs,
@@ -314,13 +314,12 @@ const InnerCarbonBlock: ForwardRefRenderFunction<
 
   const tag = useMemo(() => {
     return (
-      props.tag ??
       custom?.tag ??
       node.type.spec.tag ??
       node.props.get(TagPath) ??
       "div"
     );
-  }, [custom?.tag, props.tag, node]);
+  }, [custom?.tag, node]);
 
   return (
     <CarbonElement node={node} tag={tag} ref={ref} custom={custom}>
@@ -389,7 +388,7 @@ export const InnerCarbonNode = (props: RendererProps) => {
 };
 
 export const CarbonNode = memo(InnerCarbonNode, (prev, next) => {
-  return prev.node.key === next.node.key && prev.custom === next.custom;
+  return prev.node.key === next.node.key;
 });
 
 // default node for carbon editor with text and block

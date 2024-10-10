@@ -8,6 +8,7 @@ export type RenderComponent = (props: RendererProps) => VNode;
 export interface RendererProps {
 	node: Node;
 	children?: any;
+  custom?: Record<string, any>;
 	[key: string]: any;
 }
 

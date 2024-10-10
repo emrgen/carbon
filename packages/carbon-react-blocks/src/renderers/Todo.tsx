@@ -36,7 +36,7 @@ export default function TodoComp(props: RendererProps) {
   const beforeContent = useMemo(() => {
     return (
       <div
-        className="carbon-todo__control"
+        className="ctdl__checkbox"
         contentEditable="false"
         suppressContentEditableWarning
         onMouseDown={preventAndStop}
@@ -57,8 +57,10 @@ export default function TodoComp(props: RendererProps) {
         node={node}
         beforeContent={beforeContent}
         wrap={true}
+        className={'ctiw'}
+        custom={{className: 'ctdl_ti'}}
       />
-      <CarbonNodeChildren node={node} />
+      <CarbonNodeChildren node={node}  className={'cnest'}/>
       {selection.SelectionHalo}
     </CarbonBlock>
   );

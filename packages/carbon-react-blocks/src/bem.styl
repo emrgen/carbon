@@ -1,7 +1,6 @@
 $lineHeight = 26px
 
 .croot
-
 .cdoc
   flex 1
   padding 0 80px
@@ -12,6 +11,7 @@ $lineHeight = 26px
 
 // block
 .cbl
+.ctdl
 .cse
   margin-top 2px
   position relative;
@@ -27,13 +27,15 @@ $lineHeight = 26px
 //title
 .cse__ti
 .cbl__ti
+.ctdl_ti
 .ccout__ti
 .ch1__ti
 .ch2__ti
 .ch3__ti
 .ch4__ti
   padding 0 2px
-  //flex 1
+
+//flex 1
 
 // title wrapper
 .ctiw
@@ -43,17 +45,28 @@ $lineHeight = 26px
 
 // nested children
 .cnest
-  margin-left 20px
+  margin-left 26px
 
 // bullet list
-.cbl
-  padding-left: 30px
+.cbl__ti
+  padding-left: 28px
 
 .cbl__marker
   padding 0 10px
   user-select: none
   position absolute
   left 0
+  font-size 0.5em
+
+// todo list
+.ctdl_ti
+  display flex
+
+.ctdl__checkbox
+  margin-right 8px
+  margin-left: 4px;
+  display flex
+  align-items center
 
 .ccout
   background: #FBF3DB;
@@ -77,15 +90,28 @@ $lineHeight = 26px
   height: 2px
   width: 100%
   background: #eee
+
 // divider end
 
 // header
 .ch1
-  margin-top 0.67em
-  margin-bottom 0
+  margin-top 0.8em
+  margin-bottom 0.3em
+
+.ch2
+  margin-top 0.7em
+  margin-bottom 0.3em
+
+.ch3
+  margin-top 0.6em
+  margin-bottom 0.3em
+
+.ch4
+  margin-top 0.6em
+  margin-bottom 0.3em
 
 .ch1__ti
-  font-size: 2em
+  font-size: 2.2em
   font-weight: bold
   line-height: 1.2em
 
@@ -103,4 +129,5 @@ $lineHeight = 26px
   font-size: 1.2em
   font-weight: bold
   line-height: 1.2em
+
 // header end

@@ -37,7 +37,7 @@ export const BulletedListComp = (props: RendererProps) => {
         custom={{ className: "cbl__ti" }}
         className={"ctiw"}
       />
-      <CarbonNodeChildren node={node} />
+      <CarbonNodeChildren node={node} wrap={true} className={'cnest'}/>
       {SelectionHalo}
     </CarbonBlock>
   );
