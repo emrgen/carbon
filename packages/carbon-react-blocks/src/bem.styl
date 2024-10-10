@@ -5,6 +5,7 @@ $selectionHaloColor = #accef78d
 
 .croot
   width: 100%;
+
   ::selection
     background: $selectionHaloColor
 
@@ -18,7 +19,7 @@ $selectionHaloColor = #accef78d
   white-space pre-wrap
 
 // block
-.cbl
+.bullet-list
 .cnl
 .ctdl
 .cse
@@ -27,17 +28,19 @@ $selectionHaloColor = #accef78d
   line-height: $lineHeight
 
 // document title
-.cdoc__ti
+.cdoc > .title
   font-size 2.5em
   font-weight bold
   line-height 40px
   margin-bottom 20px
+.document > .cnest
+  margin-left 0
 
 //title
 .cse__ti
-.cbl__ti
-.cnl_ti
-.ctdl_ti
+.bullet-list
+.todo
+.collapsible__ti
 .ccout__ti
 .ch1__ti
 .ch2__ti
@@ -45,6 +48,9 @@ $selectionHaloColor = #accef78d
 .ch4__ti
   flex 1
   padding 0 2px
+  .title
+    flex 1
+    padding 0 2px
 
 //position: relative
 
@@ -59,20 +65,8 @@ $selectionHaloColor = #accef78d
   opacity: 0.4
   padding-left: 1px;
 
-.cse__ti:after
+.section > .title:after
   @extend .placeholder
-
-.cbl__ti:after
-  @extend .placeholder
-  left 28px
-
-.cnl__ti:after
-  @extend .placeholder
-  left 28px
-
-.ctdl__ti:after
-  @extend .placeholder
-  left 28px
 
 // placeholder end
 
@@ -87,24 +81,32 @@ $selectionHaloColor = #accef78d
   margin-left 26px
 
 // bullet list
-.cbl__ti
-  margin-left: 28px
+.bullet-list > .ctiw > .title
+  margin-left: 26px
 
-.cbl__marker
-  padding 0 10px
+.bullet-list > .ctiw > .title:after
+  @extend .placeholder
+  left 28px
+
+.bullet-list__marker
+  padding 0 8px
   user-select: none
   position absolute
   left 0
-  font-size 0.75em
+  font-size 0.6em
 
 // todo list
-.ctdl__ti
-  margin-left: 28px
+.todo > .ctiw > .title
+  margin-left: 26px
   flex 1
 
-.ctdl__checkbox
+.todo > .ctiw > .title:after
+  @extend .placeholder
+  left 28px
+
+.todo__checkbox
   display flex
-  padding 6px 7px
+  padding 6px 6px
   position absolute;
 
 .cnl__ti
@@ -119,7 +121,7 @@ $selectionHaloColor = #accef78d
   user-select: none
   position absolute;
 
-.collapsible__ti
+.collapsible > .ctiw > .title
   margin-left: 28px
   flex 1
 
@@ -130,8 +132,10 @@ $selectionHaloColor = #accef78d
   margin 0 2px
   cursor pointer
   border-radius 6px
+
   &:hover
     background #f5f5f5
+
 .collapsible[data-collapsed="true"]
   .cnest
   .collapsible-empty-content
@@ -216,16 +220,43 @@ pre
 // code end
 
 .collapsible[data-as="h1"]
+  margin-top 0.8em;
+
   .collapsible__ti
     @extend .ch1__ti
+
   .collapsible__control
     font-size 1.3em
     margin-top 6px;
 
 .collapsible[data-as="h2"]
+  margin-top 0.6em;
+
   .collapsible__ti
     @extend .ch2__ti
 
+  .collapsible__control
+    font-size 1.1em
+    margin-top 2px;
+
+.collapsible[data-as="h3"]
+  margin-top 0.6em;
+
+  .collapsible__ti
+    @extend .ch3__ti
+
+  .collapsible__control
+    font-size 1.1em
+
+.collapsible[data-as="h4"]
+  margin-top 0.6em;
+
+  .collapsible__ti
+    @extend .ch4__ti
+
+  .collapsible__control
+    font-size 1em
+    margin-top -2px;
 
 .mention
   background: #efefef
@@ -245,5 +276,6 @@ pre
   background-color: #aaa;
   border-radius: 10px;
 }
+
 .empty-zero-width-space
   font-stretch expanded

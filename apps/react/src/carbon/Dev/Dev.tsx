@@ -48,6 +48,7 @@ import { databaseRenderers } from "@emrgen/carbon-database-react";
 import { boardPlugins } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
 import { Box } from "@chakra-ui/react";
+import SelectionTracker from "../../SelectionTracker";
 
 function is_env_development() {
   // @ts-ignore
@@ -914,7 +915,7 @@ export default function Dev() {
   return (
     <Box className={"carbon-app-container"}>
       <CarbonApp app={app} renderManager={renderManager}>
-        {/*<SelectionTracker />*/}
+        <SelectionTracker />
         <PathTracker />
       </CarbonApp>
     </Box>

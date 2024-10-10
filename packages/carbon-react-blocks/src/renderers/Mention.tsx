@@ -18,8 +18,6 @@ export const MentionComp = (props: RendererProps) => {
       node={node}
       custom={{ onClick: handleOnClick, onMouseDown: preventAndStop }}
     >
-      {/*<span data-name={"text"}>{node.props.get(AtomContentPath) ?? ""}</span>*/}
-      {/*{!!node.children.length && <CarbonChildren node={node} />}*/}
       <CarbonChildren node={node} />
     </CarbonBlock>
   );

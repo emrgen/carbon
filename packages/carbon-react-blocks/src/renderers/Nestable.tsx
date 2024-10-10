@@ -14,13 +14,8 @@ export const NestableComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node} custom={custom}>
-      <CarbonNodeContent node={node} custom={{ className: "cse__ti" }} />
-      <CarbonNodeChildren
-        node={node}
-        className={"cnest"}
-        wrap={true}
-        // custom={{ className: "cse__ch" }}
-      />
+      <CarbonNodeContent node={node} />
+      <CarbonNodeChildren node={node} />
       {/*{SelectionHalo}*/}
     </CarbonBlock>
   );

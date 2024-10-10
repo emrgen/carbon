@@ -15,10 +15,8 @@ import {
   Point,
   TxType,
 } from "@emrgen/carbon-core";
-import {
-  MdOutlineKeyboardArrowDown,
-  MdOutlineKeyboardArrowRight,
-} from "react-icons/md";
+import { MdOutlineKeyboardArrowDown } from "react-icons/md";
+import { MdKeyboardArrowRight } from "react-icons/md";
 import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
 
 export default function CollapsibleListComp(props: RendererProps) {
@@ -80,11 +78,7 @@ export default function CollapsibleListComp(props: RendererProps) {
       }}
       onClick={() => handleToggle(app)}
     >
-      {isCollapsed ? (
-        <MdOutlineKeyboardArrowRight />
-      ) : (
-        <MdOutlineKeyboardArrowDown />
-      )}
+      {isCollapsed ? <MdKeyboardArrowRight /> : <MdOutlineKeyboardArrowDown />}
     </div>
   );
 

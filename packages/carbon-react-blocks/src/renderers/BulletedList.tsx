@@ -21,7 +21,7 @@ export const BulletedListComp = (props: RendererProps) => {
       <div
         contentEditable="false"
         suppressContentEditableWarning
-        className="cbl__marker"
+        className="bullet-list__marker"
       >
         ●
       </div>
@@ -34,10 +34,8 @@ export const BulletedListComp = (props: RendererProps) => {
         node={node}
         beforeContent={beforeContent}
         wrap={true}
-        custom={{ className: "cbl__ti" }}
-        className={"ctiw"}
       />
-      <CarbonNodeChildren node={node} wrap={true} className={'cnest'}/>
+      <CarbonNodeChildren node={node} />
       {SelectionHalo}
     </CarbonBlock>
   );

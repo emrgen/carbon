@@ -18,11 +18,14 @@ import {
   TagPath,
 } from "@emrgen/carbon-core";
 import { LocalClassPath } from "@emrgen/carbon-core";
+import { LocalStylePath } from "@emrgen/carbon-core";
+import { RemoteStylePath } from "@emrgen/carbon-core";
 import { useNodeChange, useRenderManager } from "../hooks";
 import { RendererProps } from "./ReactRenderer";
 import { merge } from "lodash";
 import { identity } from "lodash";
 import { uniq } from "lodash";
+import { kebabCase } from "lodash";
 import { is_env_development } from "../env";
 
 export const JustEmpty = (props: RendererProps) => {
@@ -84,13 +87,11 @@ const InnerElement: ForwardRefRenderFunction<
 
   const attributes = useMemo(() => {
     const { style = {}, tag, ...rest } = custom;
-    const remoteStyle = node.props.get("remote/html/style") ?? {};
-    const localStyle = node.props.get("local/html/style") ?? {};
-    const localAttrs =
-      node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
-    const remoteAttrs =
-      node.props.get<Record<string, any>>(RemoteHtmlAttrPath) ?? {};
-    const className = node.props.get<string>(LocalClassPath, "");
+    const remoteStyle = node.props.get(RemoteStylePath, {});
+    const localStyle = node.props.get(LocalStylePath, {});
+    const localAttrs = node.props.get(LocalHtmlAttrPath, {});
+    const remoteAttrs = node.props.get(RemoteHtmlAttrPath, {});
+    const className = node.props.get(LocalClassPath, "");
 
     for (const [k, v] of Object.entries(localAttrs)) {
       if (v === null || v === undefined || v === "") {
@@ -111,7 +112,9 @@ const InnerElement: ForwardRefRenderFunction<
       ...remoteAttrs,
       ...(Object.keys(style).length ? { style: styles } : {}),
       ...rest,
-      className: uniq([className, custom.className]).filter(identity).join(" "),
+      className: uniq([className, custom.className, kebabCase(node.name)])
+        .filter(identity)
+        .join(" "),
     };
   }, [custom, node]);
 
@@ -147,7 +150,12 @@ const InnerElement: ForwardRefRenderFunction<
   const isBold = node.props.get(MarksPath)?.some((m) => m.name === "bold");
 
   return (
-    <Tag ref={ref} {...customProps} {...attributes}>
+    <Tag
+      ref={ref}
+      // data-name={}
+      {...customProps}
+      {...attributes}
+    >
       {isBold ? <b>{children}</b> : children}
       {/*{children}*/}
     </Tag>
@@ -218,8 +226,9 @@ export const useMarks = (marks: Mark[]) => {
             background: "#f4f4f4",
             padding: "0.2em 0.2em",
             borderRadius: "3px",
+            boxShadow: "0 0 0 1px #ddd inset",
             fontFamily:
-              "Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
+              "Geist Mono, Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
             color: "#c7254e",
           });
           break;
@@ -406,15 +415,7 @@ export const CarbonDefaultNode = (props: RendererProps) => {
 
 // render first node a content
 export const CarbonNodeContent = (props: RendererProps) => {
-  const {
-    node,
-    beforeContent,
-    afterContent,
-    custom,
-    wrapper,
-    wrap,
-    className,
-  } = props;
+  const { node, beforeContent, afterContent, custom, wrapper, wrap } = props;
 
   const content = useMemo(() => {
     const { children = [] } = node;
@@ -435,7 +436,7 @@ export const CarbonNodeContent = (props: RendererProps) => {
   }
 
   return (
-    <div {...wrapper} className={className}>
+    <div className={`ctiw`} {...wrapper}>
       {beforeContent}
       <CarbonNode node={content} custom={custom} key={content.key} />
       {afterContent}
@@ -458,11 +459,6 @@ export const CarbonNodeChildren = (props: RendererProps) => {
       return <CarbonNode node={n} key={n.key} custom={custom} />;
     });
 
-    // console.debug('CarbonNodeChildren', node.name, children.length);
-    if (!wrap) {
-      return <>{children}</>;
-    }
-
-    return <div className={className}>{children}</div>;
-  }, [node, wrap, custom, className]);
+    return <div className={"cnest"}>{children}</div>;
+  }, [node, custom]);
 };

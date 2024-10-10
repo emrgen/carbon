@@ -36,6 +36,7 @@ export class TitlePlugin extends NodePlugin {
       attrs: {
         html: {
           suppressContentEditableWarning: true,
+          className: "ti",
         },
       },
     };
