@@ -20,6 +20,7 @@ import {
   Transaction,
   Writer,
 } from "@emrgen/carbon-core";
+import { ActionOrigin } from "@emrgen/carbon-core";
 import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
 
 declare module "@emrgen/carbon-core" {
@@ -92,11 +93,11 @@ export class Collapsible extends NodePlugin {
   }
 
   expand(tr: Transaction, node: Node, path = CollapsedPath) {
-    tr.Update(node.id, { [path]: false });
+    tr.Update(node.id, { [path]: false }, ActionOrigin.UserInput);
   }
 
   collapse(tr: Transaction, node: Node, path = CollapsedPath) {
-    tr.Update(node.id, { [path]: true });
+    tr.Update(node.id, { [path]: true }, ActionOrigin.UserInput);
   }
 
   plugins(): CarbonPlugin[] {

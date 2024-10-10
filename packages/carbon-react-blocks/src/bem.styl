@@ -132,8 +132,10 @@ $selectionHaloColor = #accef78d
   border-radius 6px
   &:hover
     background #f5f5f5
-.collapsible[data-collapsed="true"] .cnest
-  display none
+.collapsible[data-collapsed="true"]
+  .cnest
+  .collapsible-empty-content
+    display none
 
 // callout
 .ccout
@@ -212,6 +214,18 @@ pre
   border 1px solid #ddd
 
 // code end
+
+.collapsible[data-as="h1"]
+  .collapsible__ti
+    @extend .ch1__ti
+  .collapsible__control
+    font-size 1.3em
+    margin-top 6px;
+
+.collapsible[data-as="h2"]
+  .collapsible__ti
+    @extend .ch2__ti
+
 
 .mention
   background: #efefef
