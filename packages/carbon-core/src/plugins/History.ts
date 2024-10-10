@@ -54,14 +54,14 @@ export class HistoryPlugin extends AfterPlugin {
   transaction(tr: StateActions): void {
     // window.tr = tr;
     if (tr.type !== TxType.OneWay && !tr.selectionOnly) {
-      // if (tr.type === TxType.Undo) {
-      //   this.redoStack.push(tr);
-      // } else if (tr.type === TxType.Redo) {
-      //   this.undoStack.push(tr);
-      // } else {
-      //   this.undoStack.push(tr);
-      //   this.redoStack = [];
-      // }
+      if (tr.type === TxType.Undo) {
+        this.redoStack.push(tr);
+      } else if (tr.type === TxType.Redo) {
+        this.undoStack.push(tr);
+      } else {
+        this.undoStack.push(tr);
+        this.redoStack = [];
+      }
     } else {
       // console.log('skip transaction undo', tr);
     }
