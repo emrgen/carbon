@@ -36,7 +36,6 @@ export class Callout extends CarbonPlugin {
           },
           html: {
             suppressContentEditableWarning: true,
-            className: "ccout",
           },
         },
       },

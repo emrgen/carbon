@@ -20,9 +20,10 @@ $selectionHaloColor = #accef78d
 
 // block
 .bullet-list
-.cnl
-.ctdl
-.cse
+.number-list
+.todo
+.collapsible
+.section
   margin-top 2px
   position relative;
   line-height: $lineHeight
@@ -33,26 +34,22 @@ $selectionHaloColor = #accef78d
   font-weight bold
   line-height 40px
   margin-bottom 20px
+
 .document > .cnest
   margin-left 0
 
 //title
-.cse__ti
 .bullet-list
+.number-list
 .todo
-.collapsible__ti
-.ccout__ti
-.ch1__ti
-.ch2__ti
-.ch3__ti
-.ch4__ti
-  flex 1
-  padding 0 2px
-  .title
+.collapsible
+.callout
+  > .ctiw > .title
     flex 1
     padding 0 2px
-
-//position: relative
+.section > .title
+  flex 1
+  padding 0 2px
 
 // placeholder
 .placeholder
@@ -65,11 +62,6 @@ $selectionHaloColor = #accef78d
   opacity: 0.4
   padding-left: 1px;
 
-.section > .title:after
-  @extend .placeholder
-
-// placeholder end
-
 // title wrapper
 .ctiw
   line-height $lineHeight
@@ -80,13 +72,17 @@ $selectionHaloColor = #accef78d
 .cnest
   margin-left 26px
 
+// section
+.section > .title:after
+  @extend .placeholder
+
 // bullet list
 .bullet-list > .ctiw > .title
   margin-left: 26px
 
 .bullet-list > .ctiw > .title:after
   @extend .placeholder
-  left 28px
+  left 26px
 
 .bullet-list__marker
   padding 0 8px
@@ -102,28 +98,20 @@ $selectionHaloColor = #accef78d
 
 .todo > .ctiw > .title:after
   @extend .placeholder
-  left 28px
+  left 26px
 
 .todo__checkbox
   display flex
   padding 6px 6px
   position absolute;
 
-.cnl__ti
-  margin-left: 28px
-  flex 1
-
-.cnl__label
-  width 28px;
-  display flex
-  justify-content end
-  padding-right 8px;
-  user-select: none
-  position absolute;
-
 .collapsible > .ctiw > .title
-  margin-left: 28px
+  margin-left: 26px
   flex 1
+
+.collapsible > .ctiw > .title:after
+  @extend .placeholder
+  left 26px
 
 .collapsible__control
   display flex
@@ -141,8 +129,21 @@ $selectionHaloColor = #accef78d
   .collapsible-empty-content
     display none
 
+.cnl__ti
+  margin-left: 28px
+  flex 1
+
+.cnl__label
+  width 28px;
+  display flex
+  justify-content end
+  padding-right 8px;
+  user-select: none
+  position absolute;
+
+
 // callout
-.ccout
+.callout
   background: #FBF3DB;
   padding: 10px 16px
   border-radius 4px
@@ -168,41 +169,53 @@ $selectionHaloColor = #accef78d
 // divider end
 
 // header
-.ch1
+.h-1
   margin-top 0.8em
   margin-bottom 0.3em
 
-.ch2
+.h-2
   margin-top 0.7em
   margin-bottom 0.3em
 
-.ch3
+.h-3
   margin-top 0.6em
   margin-bottom 0.3em
 
-.ch4
+.h-4
   margin-top 0.6em
   margin-bottom 0.3em
 
-.ch1__ti
-  font-size: 2.2em
-  font-weight: bold
-  line-height: 1.2em
+.h1__title
+  font-size 2.2em
+  font-weight bold
+  line-height 1.2em
 
-.ch2__ti
+.h-1 > .title
+  @extend .h1__title
+
+.h2__title
   font-size: 1.6em
   font-weight: bold
   line-height: 1.2em
 
-.ch3__ti
+.h-2 > .title
+  @extend .h2__title
+
+.h3__title
   font-size: 1.4em
   font-weight: bold
   line-height: 1.2em
 
-.ch4__ti
+.h-3 > .title
+  @extend .h3__title
+
+.h4__title
   font-size: 1.2em
   font-weight: bold
   line-height: 1.2em
+
+.h-4 > .title
+  @extend .h4__title
 
 // header end
 
@@ -222,8 +235,9 @@ pre
 .collapsible[data-as="h1"]
   margin-top 0.8em;
 
-  .collapsible__ti
-    @extend .ch1__ti
+  .ctiw > .title
+    @extend .h1__title
+    margin-bottom 0.1em;
 
   .collapsible__control
     font-size 1.3em
@@ -232,8 +246,9 @@ pre
 .collapsible[data-as="h2"]
   margin-top 0.6em;
 
-  .collapsible__ti
-    @extend .ch2__ti
+  .ctiw > .title
+    @extend .h2__title
+    margin-bottom 0.1em;
 
   .collapsible__control
     font-size 1.1em
@@ -242,8 +257,8 @@ pre
 .collapsible[data-as="h3"]
   margin-top 0.6em;
 
-  .collapsible__ti
-    @extend .ch3__ti
+  .ctiw > .title
+    @extend .h3__title
 
   .collapsible__control
     font-size 1.1em
@@ -251,8 +266,8 @@ pre
 .collapsible[data-as="h4"]
   margin-top 0.6em;
 
-  .collapsible__ti
-    @extend .ch4__ti
+  .ctiw > .title
+    @extend .h4__title
 
   .collapsible__control
     font-size 1em

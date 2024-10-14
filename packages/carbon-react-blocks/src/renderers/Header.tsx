@@ -20,17 +20,11 @@ export const HeaderComp = (props: RendererProps) => {
   return (
     <CarbonBlock node={node} ref={ref} custom={{ ...connectors, ...custom }}>
       {node.size === 1 ? (
-        <CarbonNode
-          node={node.child(0)!}
-          custom={{ className: "c" + node.name + "__ti" }}
-        />
+        <CarbonNode node={node.child(0)!} />
       ) : (
-        <CarbonNodeContent
-          node={node}
-          custom={{ className: "c" + node.name + "__ti" }}
-        />
+        <CarbonNodeContent node={node} />
       )}
-      <CarbonNodeChildren node={node} wrap={true} className={"cnest"} />
+      <CarbonNodeChildren node={node} />
       {SelectionHalo}
     </CarbonBlock>
   );

@@ -20,8 +20,8 @@ import { CarbonAction } from "./actions/types";
 import { EventsIn } from "./Event";
 import { CarbonCommand } from "./CarbonCommand";
 import { Service } from "./Service";
-import { StateActions } from "./NodeChange";
 import { PlainNodeProps } from "./NodeProps";
+import { Carbon } from "./Carbon";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -221,7 +221,7 @@ export class PluginManager {
     console.groupEnd();
   }
 
-  onTransaction(tr: StateActions) {
+  onTransaction(tr: Carbon) {
     each(this.before, (p) => p.transaction(tr));
     each(this.after, (p) => p.transaction(tr));
   }

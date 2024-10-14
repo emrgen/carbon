@@ -61,12 +61,17 @@ export class Collapsible extends NodePlugin {
       },
       props: {
         local: {
+          placeholder: {
+            // TODO: This is a hack to get the correct placeholder for empty section
+            // not empty placeholder is not removed from node props.
+            empty: "Collapsible",
+            focused: "Press / for commands",
+          },
           html: {
             className: "collapsible",
           },
         },
         remote: {
-          // html: { "data-as": "h3" },
           state: {},
         },
       },

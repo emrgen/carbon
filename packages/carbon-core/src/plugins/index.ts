@@ -9,6 +9,7 @@ import { ActionPlugin } from "./Action";
 import { Runtime } from "./Runtime";
 import { MarkPlugin } from "./Mark";
 import { EmptyInline } from "./EmptyInline";
+import { RewritePlugin } from "./Rewrite";
 
 export const corePresetPlugins: CarbonPlugin[] = [
   new SelectionChangePlugin(),
@@ -21,6 +22,7 @@ export const corePresetPlugins: CarbonPlugin[] = [
   new Runtime(),
   new MarkPlugin(),
   new EmptyInline(),
+  new RewritePlugin(),
 ];
 
 export * from "./TransformCommands";

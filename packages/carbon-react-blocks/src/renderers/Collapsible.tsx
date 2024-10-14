@@ -92,12 +92,10 @@ export default function CollapsibleListComp(props: RendererProps) {
         node={node}
         beforeContent={beforeContent}
         wrap={true}
-        className={"ctiw"}
-        custom={{ className: "collapsible__ti" }}
       />
 
       {node.size > 1 ? (
-        <CarbonNodeChildren node={node} wrap={true} className={"cnest"} />
+        <CarbonNodeChildren node={node} />
       ) : (
         <div
           className="collapsible-empty-content"

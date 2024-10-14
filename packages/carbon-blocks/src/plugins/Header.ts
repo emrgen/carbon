@@ -68,7 +68,6 @@ export class Heading extends NodePlugin {
           },
           html: {
             suppressContentEditableWarning: true,
-            className: "ch" + this.level,
           },
         },
       },
