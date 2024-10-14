@@ -396,13 +396,22 @@ export class TransformCommands extends BeforePlugin {
       console.log(cmd);
     } else {
       const { head } = selection;
-      const offset = head.offset + text.length;
-      const after = PointedSelection.fromPoint(
-        Point.atOffset(head.nodeId, offset),
-      );
+      const { startNode } = cmd;
+      if (startNode) {
+        const titleNode = TitleNode.from(cmd.startNode!);
+        const textNode = cmd.app.schema.text(text)!;
+        const textBlock = titleNode.insertInp(head.steps, textNode);
+        const steps =
+          textBlock.node.stepSize +
+          textBlock.mapStep(head.steps - titleNode.node.stepSize);
+        const pin = Pin.create(textBlock.node, textNode.focusSize, steps);
+        const after = PinnedSelection.fromPin(pin);
 
-      cmd.Add(InsertTextAction.create(head, text));
-      cmd.Select(after, ActionOrigin.UserInput);
+        cmd.Add(InsertTextAction.create(head, text));
+        cmd.Select(after, ActionOrigin.UserInput);
+      } else {
+        cmd.Select(selection, ActionOrigin.UserInput);
+      }
     }
   }
 
@@ -1843,7 +1852,6 @@ export class TransformCommands extends BeforePlugin {
     if (endTextBlock.eq(startTextBlock)) {
       const down = start.down();
       // after = PinnedSelection.fromPin(selection.start.unfocused());
-      console.log("--------------");
       if (down.node.isZero) {
       }
       console.log(
@@ -1873,6 +1881,7 @@ export class TransformCommands extends BeforePlugin {
       console.log("Final pin", pin.toString());
       const after = PinnedSelection.fromPin(pin);
 
+      tr.SetStartNode(deleteInfo.startNode.node);
       tr.Select(after!, ActionOrigin.UserInput);
 
       return tr;

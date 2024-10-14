@@ -169,7 +169,7 @@ export class ChangeManager extends NodeTopicEmitter {
     clearInterval(this.interval);
     const tr = this.actions.shift();
     if (tr) {
-      this.pm.onTransaction(this.app);
+      this.pm.onTransaction(this.app, tr);
       this.app.emit(EventsOut.transaction, tr);
       this.app.emit(EventsOut.changed, this.state);
     }

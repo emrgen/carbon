@@ -31,7 +31,6 @@ import { UpdateMarkAction } from "./actions/index";
 import { UpdatePropsAction } from "./actions/index";
 import { NodeBTree } from "./BTree";
 import { NodeIdSet } from "./BSet";
-import { TitleNode } from "./TitleNode";
 
 let _id = 0;
 const getId = () => String(_id++);
@@ -45,8 +44,8 @@ export class Transaction {
 
   // track the end and start block of the transaction
   // this is useful for combining multiple actions like delete -> insert, delete -> paste
-  startNode: Optional<TitleNode>;
-  endNode: Optional<TitleNode>;
+  startNode: Optional<Node>;
+  endNode: Optional<Node>;
 
   private _committed: boolean = false;
   private _dispatched: boolean = false;
@@ -114,6 +113,14 @@ export class Transaction {
     // 	const select = a as SelectAction;
     // 	return select.before.eq(select.after) && select.before.isBlock && select.after.isBlock;
     // });
+  }
+
+  SetStartNode(node: Node) {
+    this.startNode = node;
+  }
+
+  SetEndNode(node: Node) {
+    this.endNode = node;
   }
 
   // removes old selection if any and selects new selection

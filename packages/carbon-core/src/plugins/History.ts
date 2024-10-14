@@ -1,4 +1,5 @@
 import { EventContext, EventHandler, StateActions, TxType } from "../core";
+import { Carbon } from "../core";
 import { AfterPlugin } from "../core/CarbonPlugin";
 
 export class HistoryPlugin extends AfterPlugin {
@@ -51,7 +52,7 @@ export class HistoryPlugin extends AfterPlugin {
     ctx.app.emit("history.redo", tx);
   }
 
-  transaction(tr: StateActions): void {
+  transaction(_: Carbon, tr: StateActions): void {
     // window.tr = tr;
     if (tr.type !== TxType.OneWay && !tr.selectionOnly) {
       if (tr.type === TxType.Undo) {

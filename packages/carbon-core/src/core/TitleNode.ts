@@ -115,7 +115,7 @@ export class TitleNode {
     );
   }
 
-  insertInp(offset: number, node: Node) {
+  insertInp(offset: number, node: Node): TitleNode {
     if (offset <= 1) {
       return this.prepend([node]);
     }

@@ -22,6 +22,7 @@ import { CarbonCommand } from "./CarbonCommand";
 import { Service } from "./Service";
 import { PlainNodeProps } from "./NodeProps";
 import { Carbon } from "./Carbon";
+import { StateActions } from "./NodeChange";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -221,9 +222,9 @@ export class PluginManager {
     console.groupEnd();
   }
 
-  onTransaction(tr: Carbon) {
-    each(this.before, (p) => p.transaction(tr));
-    each(this.after, (p) => p.transaction(tr));
+  onTransaction(app: Carbon, tr: StateActions) {
+    each(this.before, (p) => p.transaction(app, tr));
+    each(this.after, (p) => p.transaction(app, tr));
   }
 
   // normalize node as per the schema defined by plugins

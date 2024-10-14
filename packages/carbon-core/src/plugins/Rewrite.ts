@@ -1,9 +1,11 @@
 // Things needed to change a node type (e.g. from paragraph to heading):
-import { BeforePlugin, Node } from "../core/index";
-import { EventContext } from "../core/index";
+import { BeforePlugin } from "../core/index";
 import { Pin } from "../core/index";
 import { Carbon } from "../core/index";
 import { TitleNode } from "../core/index";
+import { PinnedSelection } from "../core/index";
+import { StateActions } from "../core/index";
+import { TxType } from "../core/index";
 
 export class RewritePlugin extends BeforePlugin {
   name = "changeName";
@@ -12,19 +14,17 @@ export class RewritePlugin extends BeforePlugin {
 
   constructor() {
     super();
-    this.inputRules = new BeforeInputRewriteRuleHandler([]);
+    this.inputRules = new BeforeInputRewriteRuleHandler([
+      new RewriteInputRule(/-->/g, this.changeText("-->", "XX")),
+      new RewriteInputRule(/->/g, this.changeText("->", "~>")),
+      new RewriteInputRule(/=>$/g, this.changeText("=>", "$>")),
+    ]);
   }
 
-  // handlers(): Partial<EventHandler> {
-  //   return {
-  //     beforeInput: (ctx: EventContext<KeyboardEvent>) => {
-  //       this.checkInputRules(ctx);
-  //     },
-  //   };
-  // }
-
-  transaction(app: Carbon) {
-    this.checkInputRules(app);
+  transaction(app: Carbon, tx: StateActions) {
+    if (tx.type !== TxType.Undo) {
+      this.checkInputRules(app);
+    }
   }
 
   checkInputRules(app: Carbon) {
@@ -36,8 +36,13 @@ export class RewritePlugin extends BeforePlugin {
     this.inputRules.execute(app, head);
   }
 
-  // change -> to ⥟
-  changeText(ctx: EventContext<KeyboardEvent>, block: Node, from: string) {}
+  changeText(from: string, to: string) {
+    return (app: Carbon, pin: Pin, text: string) => {
+      const tail = pin.moveBy(-from.length)!;
+      const selection = PinnedSelection.create(tail, pin);
+      app.cmd.transform.insertText(selection, to).dispatch();
+    };
+  }
 }
 
 class BeforeInputRewriteRuleHandler {
@@ -45,8 +50,7 @@ class BeforeInputRewriteRuleHandler {
 
   execute(app: Carbon, pin: Pin): boolean {
     const text = this.getText(pin);
-    console.log("-------------------------- text", text);
-    return this.rules.some((rule) => rule.execute(app, text));
+    return this.rules.some((rule) => rule.execute(app, pin, text));
   }
 
   protected getText(head: Pin): string {
@@ -57,7 +61,7 @@ class BeforeInputRewriteRuleHandler {
   }
 }
 
-type RewriteInputHandler = (app: Carbon, regex: RegExp, text: string) => void;
+type RewriteInputHandler = (app: Carbon, pin: Pin, text: string) => void;
 
 class RewriteInputRule {
   constructor(
@@ -65,9 +69,9 @@ class RewriteInputRule {
     readonly handler: RewriteInputHandler,
   ) {}
 
-  execute(app: Carbon, text: string): boolean {
+  execute(app: Carbon, pin: Pin, text: string): boolean {
     if (this.regex.test(text)) {
-      this.handler(app, this.regex, text);
+      this.handler(app, pin, text);
       return true;
     }
 

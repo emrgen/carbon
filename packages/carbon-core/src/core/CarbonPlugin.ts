@@ -11,6 +11,7 @@ import { PluginManager } from "./PluginManager";
 import { NodeEncoder, Writer } from "./Encoder";
 import { identity } from "lodash";
 import { PlainNodeProps } from "./NodeProps";
+import { StateActions } from "./NodeChange";
 
 export enum PluginType {
   Node,
@@ -88,7 +89,7 @@ export abstract class CarbonPlugin {
     return {};
   }
 
-  transaction(app: Carbon) {}
+  transaction(app: Carbon, tr: StateActions) {}
 
   // normalize the node based on schema
   normalize(node: Node): CarbonAction[] {
