@@ -8,7 +8,7 @@ import { StateActions } from "../core/index";
 import { TxType } from "../core/index";
 
 export class RewritePlugin extends BeforePlugin {
-  name = "changeName";
+  name = "rewriter";
 
   inputRules: BeforeInputRewriteRuleHandler;
 
@@ -16,8 +16,8 @@ export class RewritePlugin extends BeforePlugin {
     super();
     this.inputRules = new BeforeInputRewriteRuleHandler([
       new RewriteInputRule(/-->/g, this.changeText("-->", "XX")),
-      new RewriteInputRule(/->/g, this.changeText("->", "~>")),
-      new RewriteInputRule(/=>$/g, this.changeText("=>", "$>")),
+      new RewriteInputRule(/->/g, this.changeText("->", "→")),
+      new RewriteInputRule(/=>$/g, this.changeText("=>", "⇒")),
     ]);
   }
 
