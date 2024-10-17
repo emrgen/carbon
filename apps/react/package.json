@@ -18,6 +18,7 @@
     "@emrgen/carbon-board-react": "workspace:*",
     "@emrgen/carbon-clipboard": "workspace:*",
     "@emrgen/carbon-code": "workspace:*",
+    "@emrgen/carbon-cell": "workspace:*",
     "@emrgen/carbon-comment-editor": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-database": "workspace:*",

@@ -1,3 +1,5 @@
+$active-cell-color = #dde6f1
+
 [data-name=cell]
     width 100%
     //display flex
@@ -6,62 +8,93 @@
     //margin 10px 0
     margin 22px 0
 
+    .cell-code-wrapper
+        flex 1
+        position relative;
+        border-radius 6px
+        [data-name=codeMirror]
+            margin 0
+            border-radius 0!important
 
-    [data-name=codeMirror]
-        margin 0
-        border-radius 0!important
     [data-name=cellView]
         min-height 34px
         background #fff
-        border 1px solid #eee
         z-index 100
+        flex 1
+    .cm-editor
+        background #ededed
+        border-radius 4px
+        padding 0 0 0 0!important
+        &.cm-focused
+            background $active-cell-color
+    &[data-focused=true]
+        .cm-editor
+            background $active-cell-color
 
 .carbon-cell-container
     display flex
-    flex-direction row
+    flex-direction column
     gap 2px
     position: relative;
     z-index 1
     &:hover .carbon-cell-handle
         opacity 1
         z-index 2
-        //.carbon-cell-insert-before,
-        //.carbon-cell-insert-after
-        //    z-index 3
 
+.carbon-cell-handle[data-focused=true]
+    opacity 1
+    z-index 2
+
+.cell-view-handle
+    padding-top 6px;
+    user-select none
+.cell-code-handle
+    padding-top 3px;
+    user-select none
 
 .carbon-cell-handle
+    position absolute;
     opacity 0
-    position: absolute;
     top 0
-    right 100%
     height 100%
+    right 100%
     width: 20px;
+    display flex;
     //margin-right: 3px;
     border-right 2px solid #fff
     transition opacity 0.2s
     background #eee
     color #aaa
     text-align center
+    justify-content center
     cursor pointer
     border-radius 4px
+    &:hover
+        background: #ddd
+    .cell-code-handle
+        flex 1
     .carbon-cell-insert-before,
     .carbon-cell-insert-after
         position: absolute;
+        display flex
         width 18px
         height 18px
         background: #eee;
         border-radius 4px
         cursor pointer
         left 0
+        justify-content center
+        align-items center
         z-index 1
         &:hover
             background: #ddd
 
     .carbon-cell-insert-after
         top calc(100% + 2px)
+        z-index 10
     .carbon-cell-insert-before
-        bottom calc(100% + 2px)
+        top -20px
+        z-index 5
 
 .carbon-cell-insert-before
     border-radius 4px
@@ -73,8 +106,34 @@
     user-select none
 
 .carbon-cell-view
-    flex 1
     display flex
-    flex-direction column
+    flex-direction row
     border-radius 4px
-    overflow hidden
+    position relative;
+    width 100%;
+.carbon-cell-code
+    position relative;
+    display flex
+    width 100%;
+
+.carbon-cell-compute-button
+    position absolute;
+    right 4px
+    top 3px
+    z-index 100
+    border-radius 4px
+    padding 4px
+    cursor pointer
+    color #aaa
+    &:hover
+        color #000
+.cell-view
+    padding 6px 10px
+    h1
+        margin 0
+        font-size 20px
+        font-weight 500
+    h2
+        margin 0
+        font-size 16px
+        font-weight 500

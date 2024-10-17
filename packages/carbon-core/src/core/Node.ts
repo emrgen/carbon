@@ -107,6 +107,20 @@ export class Node extends EventEmitter implements IntoNodeId {
     }),
   );
 
+  static SKIP = new Node(
+    PlainNodeContent.create({
+      id: NodeId.SKIP,
+      type: NodeType.SKIP,
+      parentId: null,
+      parent: null,
+      textContent: "",
+      children: [],
+      linkName: "",
+      links: {},
+      props: PlainNodeProps.empty(),
+    }),
+  );
+
   // don't use this constructor directly, use NodeFactory
   constructor(content: NodeContent) {
     super();

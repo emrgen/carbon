@@ -28,6 +28,7 @@ export class Point {
 
   static IDENTITY = new Point(NodeId.IDENTITY, PointAt.Inside, 0);
   static NULL = new Point(NodeId.NULL, PointAt.Inside, 0);
+  static SKIP = new Point(NodeId.SKIP, PointAt.Inside, 0);
 
   get isIdentity() {
     return this.eq(Point.IDENTITY);

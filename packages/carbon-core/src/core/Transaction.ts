@@ -162,6 +162,8 @@ export class Transaction {
     this.lastSelection = after;
     after.origin = origin;
 
+    console.log(selection.toString(), after.toString());
+
     return this.Add(
       SelectAction.create(this.state.selection.unpin(), after, origin),
     );

@@ -920,6 +920,7 @@ export class ImmutableDraft implements Draft {
     }
 
     // update focus placeholder of the current head node
+    // skipped selection will not update the focus placeholder
     if (!this.selection.isInvalid && this.selection.isCollapsed) {
       const { head } = this.selection;
       if (this.nodeMap.isDeleted(head.nodeId)) return;

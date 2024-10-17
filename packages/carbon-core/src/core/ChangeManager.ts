@@ -278,7 +278,9 @@ export class ChangeManager extends NodeTopicEmitter {
 
       if (selection.isInvalid) {
         console.warn("skipped invalid selection sync");
-        app.blur();
+        if (!selection.isSkip) {
+          app.blur();
+        }
         return;
       }
       this.pendingSelectionCounter += 1;

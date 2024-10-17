@@ -4,8 +4,8 @@ import "./code.styl";
 import { CodeBox } from "./plugins/CodeBox";
 import { CodeLine } from "./plugins/CodeLine";
 import { CodeLineComp } from "./renderers/CodeLine";
-import { CodeMirrorComp } from "./renderers/codeMirror";
-import { CodeMirror } from "./plugins/CodeMirror";
+import { CodeMirrorComp } from "./renderers/CodeMirror";
+import { CodeMirror, CodeMirrorContentPath } from "./plugins/CodeMirror";
 import { CodeBoxComp } from "./renderers/CodeBox";
 import { CodeTitleComp } from "./renderers/CodeTitleComp";
 
@@ -18,3 +18,6 @@ export const codeExtension: Extension = {
     ReactRenderer.create("codeMirror", CodeMirrorComp),
   ],
 };
+
+export { CodeMirrorContentPath };
+export * from "./hooks";

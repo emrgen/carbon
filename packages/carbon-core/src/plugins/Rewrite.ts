@@ -29,11 +29,11 @@ export class RewritePlugin extends BeforePlugin {
 
   checkInputRules(app: Carbon) {
     const { selection } = app;
-    if (!selection.isCollapsed) return;
-
-    const { head } = selection;
-
-    this.inputRules.execute(app, head);
+    // if (!selection.isCollapsed || selection.isIdentity) return;
+    //
+    // const { head } = selection;
+    //
+    // this.inputRules.execute(app, head);
   }
 
   changeText(from: string, to: string) {

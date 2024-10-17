@@ -22,8 +22,8 @@ import { TabComp, TabsComp } from "./renderers/TabComp";
 import FrameComp from "./renderers/Frame";
 import { BlockContentComp } from "./renderers/BlockContent";
 
-// import "./dnd.styl";
-// import "./style.styl";
+import "./dnd.styl";
+import "./style.styl";
 import "./bem.styl";
 import { Modal } from "./renderers/Modal";
 import HintComp from "./renderers/Hint";
@@ -37,9 +37,6 @@ import { BookmarkComp } from "./renderers/Bookmark";
 import { PageLinkComp } from "./renderers/PageLink";
 import { MentionComp } from "./renderers/Mention";
 import { AtomicText } from "./renderers/AtomicText";
-
-// import "./dnd.styl";
-import "./style.styl";
 
 export const blockPresetRenderers = [
   ReactRenderer.create("document", DocumentComp),

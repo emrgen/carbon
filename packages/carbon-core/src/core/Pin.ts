@@ -29,9 +29,19 @@ export class Pin {
 
   static IDENTITY = new Pin(Node.IDENTITY, 0, 0);
 
+  static SKIP = new Pin(Node.SKIP, 0, 0);
+
   static fromPoint(point: Point, store: NodeMapGet): Optional<Pin> {
     if (point.eq(Point.IDENTITY)) {
       return Pin.IDENTITY;
+    }
+
+    if (point.eq(Point.NULL)) {
+      return Pin.NULL;
+    }
+
+    if (point.eq(Point.SKIP)) {
+      return Pin.SKIP;
     }
 
     if (!point.isStart) return;
@@ -159,6 +169,10 @@ export class Pin {
 
     if (this.eq(Pin.NULL)) {
       return Point.NULL;
+    }
+
+    if (this.eq(Pin.SKIP)) {
+      return Point.SKIP;
     }
 
     return Point.atOffset(this.node.id, this.offset, this.steps, this.align);

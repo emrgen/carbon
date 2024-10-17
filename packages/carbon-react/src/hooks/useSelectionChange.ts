@@ -7,6 +7,7 @@ export const useSelectionChange = () => {
 
   useEffect(() => {
     const onSelectionChange = (event: Event) => {
+      console.log(event);
       app.onEvent(EventsIn.selectionchange, event);
     };
 

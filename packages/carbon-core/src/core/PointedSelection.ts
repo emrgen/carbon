@@ -11,8 +11,10 @@ export class PointedSelection {
 
   static IDENTITY = new PointedSelection(Point.IDENTITY, Point.IDENTITY);
 
+  static SKIP = new PointedSelection(Point.SKIP, Point.SKIP);
+
   get isInvalid() {
-    return this.isNull || this.isIdentity;
+    return this.isNull || this.isIdentity || this.isSkip;
   }
 
   static fromPoint(point: Point): PointedSelection {
@@ -47,6 +49,10 @@ export class PointedSelection {
     return this.eq(PointedSelection.NUll);
   }
 
+  get isSkip() {
+    return this.eq(PointedSelection.SKIP);
+  }
+
   get isCollapsed() {
     return this.tail.eq(this.head);
   }
@@ -54,6 +60,10 @@ export class PointedSelection {
   pin(nodeMap: NodeMapGet): Optional<PinnedSelection> {
     if (this.isNull) {
       return PinnedSelection.NULL;
+    }
+
+    if (this.isSkip) {
+      return PinnedSelection.SKIP;
     }
 
     const { tail, head, origin } = this;

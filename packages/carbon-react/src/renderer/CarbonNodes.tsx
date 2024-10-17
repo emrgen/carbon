@@ -139,7 +139,7 @@ const InnerElement: ForwardRefRenderFunction<
     if (is_env_development()) {
       return {
         // "data-version": renderVersion,
-        // "data-id": key,
+        "data-id": key,
         // "data-parent": node.parent?.key,
       };
     }
@@ -150,12 +150,7 @@ const InnerElement: ForwardRefRenderFunction<
   const isBold = node.props.get(MarksPath)?.some((m) => m.name === "bold");
 
   return (
-    <Tag
-      ref={ref}
-      // data-name={}
-      {...customProps}
-      {...attributes}
-    >
+    <Tag ref={ref} data-name={node.type.name} {...customProps} {...attributes}>
       {isBold ? <b>{children}</b> : children}
       {/*{children}*/}
     </Tag>

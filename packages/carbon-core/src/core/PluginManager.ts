@@ -49,6 +49,8 @@ export class PluginManager {
 
   constructor(plugins: CarbonPlugin[]) {
     const flattened = this.flatten(plugins);
+
+    console.log(new Set(flattened.map((p) => p.name)));
     // console.log(flattened)
     this.after = this.filter(flattened, PluginType.After);
     this.before = this.filter(flattened, PluginType.Before);

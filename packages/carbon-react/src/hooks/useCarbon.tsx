@@ -1,12 +1,15 @@
 import { createContext, useContext } from "react";
-import {Carbon} from "@emrgen/carbon-core";
+import { Carbon } from "@emrgen/carbon-core";
+import { EventTrackerProvider } from "./useEventTracker";
 
 const InnerCarbonContext = createContext<Carbon>(null!);
 
 export const CarbonContext = ({ app, children }) => {
   return (
     <InnerCarbonContext.Provider value={app}>
-      <div className="carbon-app">{children}</div>
+      <EventTrackerProvider>
+        <div className="carbon-app">{children}</div>
+      </EventTrackerProvider>
     </InnerCarbonContext.Provider>
   );
 };

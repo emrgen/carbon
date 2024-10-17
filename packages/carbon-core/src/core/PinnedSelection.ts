@@ -29,6 +29,8 @@ export class PinnedSelection {
 
   static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
 
+  static SKIP = new PinnedSelection(Pin.SKIP, Pin.SKIP, []);
+
   // map dom selection to editor selection
   static fromDom(
     store: NodeStore,
@@ -289,12 +291,17 @@ export class PinnedSelection {
   }
 
   get isInvalid() {
+    if (this.isSkip) return true; // skip selection
     return (
       this.tail.isNull ||
       this.head.isNull ||
       this.tail.isIdentity ||
       this.head.isIdentity
     );
+  }
+
+  get isSkip() {
+    return this.eq(PinnedSelection.SKIP);
   }
 
   // for block selection the

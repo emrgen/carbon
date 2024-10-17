@@ -5,6 +5,8 @@ import {
   NodeSpec,
 } from "@emrgen/carbon-core";
 
+export const CodeMirrorContentPath = "remote/state/codemirror";
+
 export class CodeMirror extends CarbonPlugin {
   name = "codeMirror";
 

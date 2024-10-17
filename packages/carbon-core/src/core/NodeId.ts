@@ -15,6 +15,8 @@ export class NodeId implements IntoNodeId {
 
   static IDENTITY = new NodeId(IdentityId);
 
+  static SKIP: NodeId = NodeId.create("0000000002");
+
   get isDefault() {
     return this.eq(NodeId.IDENTITY);
   }

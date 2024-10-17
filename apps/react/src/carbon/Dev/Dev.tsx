@@ -17,8 +17,8 @@ import {
   ReactRenderer,
   RendererProps,
   RenderManager,
-  useCreateCarbon,
 } from "@emrgen/carbon-react";
+import { useCreateCarbon } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
   ActivatedPath,
@@ -35,6 +35,8 @@ import { ContenteditablePath } from "@emrgen/carbon-core";
 import { SuppressContenteditableWarningPath } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
+import { cellPlugin, cellRenderer } from "@emrgen/carbon-cell";
+import { ModuleContext } from "@emrgen/carbon-cell";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { flattenDeep } from "lodash";
 import { PathTracker } from "../../PathTracker";
@@ -478,24 +480,11 @@ const data = node("carbon", [
       //   ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
       // }),
 
-      // node("cell", [
-      //   node('cellView'),
-      //   node("codeMirror", [], {
-      //   }),
-      // ]),
-      //
-      // node("cell", [
-      //   node('cellView'),
-      //   node("codeMirror", [], {
-      //   }),
-      // ]),
-      //
-      // node("cell", [
-      //   node('cellView'),
-      //   node("codeMirror", [], {
-      //   }),
-      // ]),
-      //
+      node("cell", [node("cellView"), node("cellCode", [], {})]),
+
+      node("cell", [node("cellView"), node("cellCode", [], {})]),
+
+      // node("cell", [node("cellView"), node("codeMirror", [], {})]),
 
       // section([title([text("section 1")])]),
 
@@ -779,7 +768,7 @@ const plugins = [
   commentEditorPlugin,
   // flashPlugin,
   ...codeExtension.plugins!,
-  // cellPlugin,
+  cellPlugin,
   // ...questionExtension.plugins!,
   new ClipboardPlugin(),
   ...databasePlugins,
@@ -800,7 +789,7 @@ const renderers = [
   ...attrRenderers,
   ...databaseRenderers,
   ...boardRenderers,
-  // ...cellRenderer,
+  ...cellRenderer,
   // ...questionExtension.renderers!,
 ];
 
@@ -914,10 +903,12 @@ export default function Dev() {
 
   return (
     <Box className={"carbon-app-container"}>
-      <CarbonApp app={app} renderManager={renderManager}>
-        <SelectionTracker />
-        <PathTracker />
-      </CarbonApp>
+      <ModuleContext>
+        <CarbonApp app={app} renderManager={renderManager}>
+          <SelectionTracker />
+          <PathTracker />
+        </CarbonApp>
+      </ModuleContext>
     </Box>
   );
 }
