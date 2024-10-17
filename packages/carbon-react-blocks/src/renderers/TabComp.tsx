@@ -97,6 +97,10 @@ export const TabsComp = (props: RendererProps) => {
 
   // console.log("active node id", activeTabNode.id.toString(), activeTabId);
 
+  useEffect(() => {
+    console.log("tabs", tabs);
+  }, [tabs]);
+
   return (
     <CarbonBlock node={tabs} ref={ref} custom={connectors}>
       <div className={"ctabs__header"}>

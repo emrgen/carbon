@@ -2,6 +2,7 @@ import { ActionOrigin, TextWriter } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { EventEmitter } from "events";
 import { first } from "lodash";
+import { isFunction } from "lodash";
 import { querySelector } from "../utils/domElement";
 import { BlockSelection } from "./BlockSelection";
 import { CarbonCommand } from "./CarbonCommand";
@@ -362,18 +363,10 @@ export class Carbon extends EventEmitter {
     if (this.ticks.length) {
       const tick = first(this.ticks);
       this.ticks = this.ticks.slice(1);
-      const cmd = this.cmd;
-      tick?.(cmd);
-      cmd.Dispatch();
-      console.log("xxxxxxxxxx");
-      // if (!tr) return
-      // if (tr instanceof Transaction) {
-      // 	// tr.onTick = true;
-      // 	tr.Dispatch();
-      // } else if (isFunction(tr)) {
-      // 	(tr as Function)(this);
-      // 	return true;
-      // }
+      this.tm.unlock(tr);
+      if (isFunction(tick)) {
+        tick(this.cmd);
+      }
       return true;
     } else {
       this.tm.unlock(tr);

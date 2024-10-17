@@ -4,6 +4,7 @@ import { Carbon } from "@emrgen/carbon-core";
 import { EventEmitter } from "events";
 import { Runtime } from "@observablehq/runtime";
 import { Optional } from "@emrgen/types";
+import { CodeCellValuePath } from "../constants";
 
 //
 export class Module extends EventEmitter {
@@ -47,4 +48,13 @@ export class Module extends EventEmitter {
   }
 
   compute() {}
+
+  redefine(node: Node) {
+    const { parent } = node;
+    console.log(
+      "xxxxxxxxxxxxx",
+      parent?.child(1)?.props.get(CodeCellValuePath, ""),
+    );
+    console.log("redefine variable");
+  }
 }

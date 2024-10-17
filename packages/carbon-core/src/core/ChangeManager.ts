@@ -174,7 +174,7 @@ export class ChangeManager extends NodeTopicEmitter {
       this.app.emit(EventsOut.changed, this.state);
     }
 
-    // console.log('PROCESSING NEXT TICK')
+    console.log("PROCESSING NEXT TICK");
     this.app.processTick(this.tr!);
 
     // this.promiseState.resolve?.();

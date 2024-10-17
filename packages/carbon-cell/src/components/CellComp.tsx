@@ -1,34 +1,20 @@
 import { RendererProps, useCarbon } from "@emrgen/carbon-react";
 import { CarbonBlock } from "@emrgen/carbon-react";
+import { CarbonNode } from "@emrgen/carbon-react";
 import { CollapsedPath, preventAndStop } from "@emrgen/carbon-core";
 import { HasFocusPath } from "@emrgen/carbon-core";
 import { stop } from "@emrgen/carbon-core";
-import { useRef } from "react";
-import { useEffect } from "react";
 import { useMemo } from "react";
 import { useCallback } from "react";
+import { useEffect } from "react";
 import { CellViewComp } from "./CellViewComp";
-import { CellCodeComp } from "./CellCodeComp";
-import { useCodeEditor } from "../hooks/useCodeEditor";
-import { CodeCellValuePath } from "../constants";
-import { useModule } from "../hooks/useModule";
 import { HiDotsVertical } from "react-icons/hi";
+import { useModule } from "../hooks/useModule";
 
 export const CellComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
-
   const mod = useModule();
-  const ref = useRef();
-  const { setContainer, view } = useCodeEditor(
-    node.child(1)!,
-    node.child(1)!.props.get(CodeCellValuePath),
-    ref,
-  );
-
-  useEffect(() => {
-    setContainer(ref.current);
-  }, [ref, setContainer]);
 
   useEffect(() => {
     mod.add(node);
@@ -45,12 +31,18 @@ export const CellComp = (props: RendererProps) => {
   const handleToggleCell = useCallback(
     (e) => {
       preventAndStop(e);
-      app.cmd.collapsible.toggle(node).dispatch();
-      setTimeout(() => {
-        view?.focus();
-      }, 100);
+      app.cmd.collapsible
+        .toggle(node)
+        .Dispatch()
+        .Then(() => {
+          // if the cell is collapsed, focus the cell after expanding
+          if (isCollapsed) {
+            console.log("focus cell");
+            mod.emit(`expand:${node.id.toString()}`, node);
+          }
+        });
     },
-    [app, node, view],
+    [app, isCollapsed, mod, node],
   );
 
   return (
@@ -84,10 +76,7 @@ export const CellComp = (props: RendererProps) => {
           <div className={"carbon-cell-handle"} data-focused={isFocused()}>
             <div className={"cell-code-handle"}>{"{}"}</div>
           </div>
-          <CellCodeComp
-            node={node.child(1)!}
-            onMount={(el) => (ref.current = el)}
-          />
+          <CarbonNode node={node.child(1)!} />
         </div>
       </div>
     </CarbonBlock>

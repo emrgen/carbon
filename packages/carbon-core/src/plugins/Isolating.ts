@@ -139,7 +139,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         if (!ctx.app.runtime.selectionchange) {
           return;
         }
-        const domSel = PinnedSelection.fromDom(ctx.app.store);
+        const domSel = PinnedSelection.fromDom(ctx.app.store, ctx.app.dom);
         if (!domSel) return;
 
         const { head, tail } = domSel;

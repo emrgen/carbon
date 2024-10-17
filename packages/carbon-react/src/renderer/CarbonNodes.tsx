@@ -362,6 +362,11 @@ export const InnerCarbonNode = (props: RendererProps) => {
   //   console.log('CarbonNode', node.name, node.id.toString(), node.toJSON());
   // })
 
+  if (!node) {
+    console.error(props);
+    throw Error("Node is undefined");
+  }
+
   // const component = useMemo(() => {
   const name = (node.props.get(NamePath) ?? node.name) as string;
   const RegisteredComponent = rm.component(name);
