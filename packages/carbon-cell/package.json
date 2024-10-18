@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
+    "@codemirror/lang-markdown": "^6.3.0",
     "@codemirror/language": "^6.10.1",
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.25.1",
@@ -28,9 +29,12 @@
     "@types/lodash": "^4.14.191",
     "@uidotdev/usehooks": "^2.4.1",
     "@uiw/react-codemirror": "^4.21.20",
+    "acorn": "^8.13.0",
     "codemirror": "^6.0.1",
+    "dompurify": "^3.1.7",
     "emoji-regex": "^10.2.1",
     "is-hotkey": "^0.2.0",
+    "jsdom": "^25.0.1",
     "lodash": "^4.17.21",
     "marked": "^12.0.0",
     "react-icons": "^4.10.1"

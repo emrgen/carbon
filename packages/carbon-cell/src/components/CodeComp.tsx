@@ -7,20 +7,23 @@ import { useEffect } from "react";
 import { preventAndStop } from "@emrgen/carbon-core";
 import { PinnedSelection } from "@emrgen/carbon-core";
 import { NodeId } from "@emrgen/carbon-core";
-import { HasFocusPath } from "@emrgen/carbon-core";
 import { Node } from "@emrgen/carbon-core";
+import { ActionOrigin } from "@emrgen/carbon-core";
+import { HasFocusPath } from "@emrgen/carbon-core";
 import { PiPlayBold } from "react-icons/pi";
-import { isKeyHotkey } from "is-hotkey";
 import { useModule } from "../hooks/useModule";
 import { CodeCellValuePath } from "../constants";
-import { javascript } from "@codemirror/lang-javascript";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "codemirror";
+import { basicSetup } from "codemirror";
 import { ViewUpdate } from "@codemirror/view";
+import { highlightActiveLine } from "@codemirror/view";
+import { isKeyHotkey } from "is-hotkey";
+import { javascript } from "@codemirror/lang-javascript";
 
-const extensions = [javascript()];
+const extensions = [javascript(), EditorView.lineWrapping];
 
-export const CellCodeComp = (props: RendererProps) => {
+export const CodeComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
   const ref = useRef();
@@ -30,24 +33,34 @@ export const CellCodeComp = (props: RendererProps) => {
   const [parentId] = useState(node.parent?.id.toString()!);
   const [view, setView] = useState<EditorView | null>(null);
 
+  // useEffect(() => {
+  //   mod.redefine(NodeId.create(parentId));
+  // }, [mod, parentId]);
+
   // focus should set the cell focus status
   const onFocused = useCallback(() => {
+    if (app.store.get(NodeId.create(parentId))?.props.get(HasFocusPath)) return;
     app.cmd
       .Update(NodeId.create(parentId), {
         [HasFocusPath]: true,
       })
-      .Select(PinnedSelection.SKIP)
+      .Select(PinnedSelection.SKIP, ActionOrigin.UserInput)
       .Dispatch();
   }, [app, parentId]);
 
   // blur should remove the cell focus status
   const onBlur = useCallback(() => {
+    if (!app.store.get(NodeId.create(parentId))?.props.get(HasFocusPath))
+      return;
     app.cmd
       .Update(NodeId.create(parentId), {
         [HasFocusPath]: false,
       })
-      .Dispatch();
-  }, [app, parentId]);
+      .Dispatch()
+      .Then(() => {
+        mod.redefine(NodeId.create(parentId));
+      });
+  }, [app, mod, parentId]);
 
   // when the cell is unmounted, remove the focus status
   useEffect(() => {
@@ -58,15 +71,16 @@ export const CellCodeComp = (props: RendererProps) => {
 
   const onUpdate = useCallback(
     (editor: ViewUpdate) => {
-      console.log(editor);
       if (editor.docChanged) {
         const nodeId = NodeId.create(id);
-        app.cmd
-          .update(nodeId, {
-            [CodeCellValuePath]: editor.state.doc.toString(),
-          })
-          .Select(PinnedSelection.SKIP)
-          .Dispatch();
+        const parentID = NodeId.create(parentId);
+        const parent = app.store.get(parentID);
+
+        const tr = app.cmd.update(nodeId, {
+          [CodeCellValuePath]: editor.state.doc.toString(),
+        });
+
+        tr.Select(PinnedSelection.SKIP, ActionOrigin.UserInput).Dispatch();
       }
 
       if (editor.focusChanged) {
@@ -77,14 +91,19 @@ export const CellCodeComp = (props: RendererProps) => {
         }
       }
     },
-    [app, id, onFocused, onBlur],
+    [id, parentId, app, onFocused, onBlur],
   );
 
   const createEditorView = useCallback(
     (parent: HTMLElement) => {
       const state = EditorState.create({
         doc: value,
-        extensions: [...extensions, EditorView.updateListener.of(onUpdate)],
+        extensions: [
+          ...extensions,
+          EditorView.updateListener.of(onUpdate),
+          basicSetup,
+          highlightActiveLine(),
+        ],
       });
 
       return new EditorView({
@@ -92,7 +111,7 @@ export const CellCodeComp = (props: RendererProps) => {
         parent,
       });
     },
-    [onUpdate, value],
+    [value, onUpdate],
   );
 
   useEffect(() => {
@@ -106,7 +125,6 @@ export const CellCodeComp = (props: RendererProps) => {
 
   useEffect(() => {
     const onExpand = (parent: Node) => {
-      console.log("-------------------------------", "onExpand");
       view?.focus();
     };
     const expandEvent = `expand:${parentId}`;
@@ -121,17 +139,25 @@ export const CellCodeComp = (props: RendererProps) => {
     <div
       className={"cell-code-wrapper"}
       onKeyDown={(e) => {
+        console.log("keydown", e);
         if (isKeyHotkey("ctrl+s", e)) {
           preventAndStop(e);
           // find variable identity and redefine
-          mod.redefine(node);
+          console.log("save", parentId, NodeId.create(parentId));
+          mod.redefine(NodeId.create(parentId));
         }
       }}
+      onFocus={(e) => e.stopPropagation()}
     >
       <CarbonBlock node={node} ref={ref} />
       <div
         className={"carbon-cell-compute-button"}
         onMouseDown={preventAndStop}
+        onMouseUp={(e) => {
+          preventAndStop(e);
+          // find variable identity and redefine
+          mod.redefine(NodeId.create(parentId));
+        }}
       >
         <PiPlayBold />
       </div>

@@ -334,23 +334,11 @@ const InnerCarbonBlock: ForwardRefRenderFunction<
 };
 
 export const CarbonBlock = memo(forwardRef(InnerCarbonBlock), (prev, next) => {
+  if (next.node.name === "cell") {
+    console.log("CarbonBlock", next.node.name, prev.node.key, next.node.key);
+  }
   return prev.node.key === next.node.key;
 });
-
-// render children of a node
-export const CarbonChildren = (props: RendererProps) => {
-  const { node } = props;
-
-  if (node.isVoid) {
-    return <CarbonEmpty node={node} />;
-  }
-
-  const children = node.children.map((n) => {
-    // console.log('CarbonChildren', n.name, n.id.toString());
-    return <CarbonNode node={n} key={n.key} />;
-  });
-  return <>{children}</>;
-};
 
 // WARNING: don't register this component in RenderManager, it will cause infinite loop
 // this is a renders the appropriate component registered in the RenderManager
@@ -411,6 +399,21 @@ export const CarbonDefaultNode = (props: RendererProps) => {
       <CarbonChildren node={node} />
     </Component>
   );
+};
+
+// render children of a node
+export const CarbonChildren = (props: RendererProps) => {
+  const { node } = props;
+
+  if (node.isVoid) {
+    return <CarbonEmpty node={node} />;
+  }
+
+  const children = node.children.map((n) => {
+    // console.log('CarbonChildren', n.name, n.id.toString());
+    return <CarbonNode node={n} key={n.id.toString()} />;
+  });
+  return <>{children}</>;
 };
 
 // render first node a content

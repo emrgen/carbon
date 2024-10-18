@@ -1,14 +1,12 @@
-import { useCarbon } from "@emrgen/carbon-react";
-import { Module } from "../core/Module";
+import { CellModule } from "../core/CellModule";
 import { createContext } from "react";
 import { useState } from "react";
 import { useContext } from "react";
 
-const InnerModuleContext = createContext<Module>(null!);
+const InnerModuleContext = createContext<CellModule>(null!);
 
-export const ModuleContext = ({ children }) => {
-  const app = useCarbon();
-  const [module] = useState(() => new Module(app));
+export const ModuleContext = ({ children, app }) => {
+  const [module] = useState<CellModule>(new CellModule(app));
 
   return (
     <InnerModuleContext.Provider value={module}>

@@ -484,6 +484,10 @@ const data = node("carbon", [
 
       node("cell", [node("cellView"), node("cellCode", [], {})]),
 
+      node("cell", [node("cellView"), node("cellCode", [], {})]),
+
+      node("cell", [node("cellView"), node("cellCode", [], {})]),
+
       // node("cell", [node("cellView"), node("codeMirror", [], {})]),
 
       // section([title([text("section 1")])]),
@@ -903,7 +907,7 @@ export default function Dev() {
 
   return (
     <Box className={"carbon-app-container"}>
-      <ModuleContext>
+      <ModuleContext app={app}>
         <CarbonApp app={app} renderManager={renderManager}>
           <SelectionTracker />
           <PathTracker />

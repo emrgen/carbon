@@ -240,6 +240,7 @@ export const PropLink = "link/props";
 export const BackgroundImagePath = "remote/state/backgroundImage";
 export const MediaReadyPath = "local/state/media/ready";
 export const LocalVideoInfoPath = "local/state/video/info";
+export const LocalDirtyCounterPath = "local/state/dirty/counter";
 
 export enum DocModes {
   View = "view",

@@ -8,6 +8,7 @@ export class Cell extends CarbonPlugin {
       group: "content",
       content: "cellView cellCode",
       isolate: true,
+      sandbox: true,
       props: {
         local: {
           placeholder: {
