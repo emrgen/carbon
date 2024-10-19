@@ -153,7 +153,7 @@ const ResultInner = (props) => {
         <div className={"cell-loading"} data-loading={pending} />
         {!error && cell?.codeType === "css" && result !== NOT_LOADED && (
           <div className={"cell-view-css"}>
-            <ObjectViewer data={"CSS"} />
+            <ObjectViewer data={"<style>"} />
           </div>
         )}
         {!!error && <div className={"cell-view-error"}>{error}</div>}

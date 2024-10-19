@@ -96,7 +96,8 @@ export const CodeInner = (props: RendererProps) => {
 
   // blur should remove the cell focus status
   const onBlur = useCallback(() => {
-    if (!app.store.get(nodeId)?.props.get(HasFocusPath)) {
+    const node = app.store.get(nodeId)!;
+    if (!node.props.get(HasFocusPath)) {
       return {
         Then: noop,
       };
@@ -138,6 +139,13 @@ export const CodeInner = (props: RendererProps) => {
         } else {
           onBlur();
           setTimeout(() => {
+            const node = app.store.get(nodeId)!;
+            const nextCodeType = node.props.get(
+              CodeCellCodeTypePath,
+              "javascript",
+            );
+            // if the code type is changed, before the blur, skip the redefine
+            if (codeType !== nextCodeType) return;
             // redefine the variable when the cell is blurred
             redefine(value, codeType);
           }, 100);

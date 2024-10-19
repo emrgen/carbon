@@ -75,14 +75,17 @@ export class CellModule extends EventEmitter {
 
       this.define(cell);
       this.printStats();
+      return null;
     } catch (err) {
       console.error(err);
       this.emit("error:" + cellId, err);
       // if the cell is already defined, update the cell error
       if (cell) {
+        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         cell.error = err;
         this.rejected(cell);
       }
+      return err;
     }
   }
 

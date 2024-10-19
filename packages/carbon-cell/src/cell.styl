@@ -4,12 +4,14 @@ $cell-code-color = #f5f5f5
 [data-name=cell]
     position relative;
     flex-direction column
-    width 100%
+    width calc(100% + 20px)
+    left -10px
     margin 6px 0
     &:hover
         .carbon-cell-handle
             background #ddd
-
+        .cell-view-handle
+            opacity 1
     .cell-code-wrapper
         flex 1
         position relative;
@@ -43,7 +45,7 @@ $cell-code-color = #f5f5f5
 .carbon-cell-container
     display flex
     flex-direction column
-    gap 2px
+    gap 1px
     position: relative;
     z-index 1
     &:hover .carbon-cell-handle
@@ -54,7 +56,9 @@ $cell-code-color = #f5f5f5
     opacity 1
     z-index 2
     background #ddd
-
+    &:hover
+        .cell-view-handle
+            opacity 1
 [data-name=cell][data-focused=true]
     .cm-activeLine.cm-line
         position relative;
@@ -68,13 +72,20 @@ $cell-code-color = #f5f5f5
         left 0
         top 10%
         border-radius 4px
+    .cell-view-handle
+        opacity 1
 
 .cell-view-handle
+    opacity 0
     padding-top 8px;
     user-select none
+    transition all 0.2s
 .cell-code-handle
+    display flex
     padding-top 3px;
     user-select none
+    justify-content center
+    font-weight bold
 
 .carbon-cell-handle
     position absolute;
@@ -84,7 +95,7 @@ $cell-code-color = #f5f5f5
     width: 20px;
     display flex;
     border-right 2px solid #fff // create a gap between cell and the handle
-    transition opacity 0.2s
+    transition all 0.2s
     background transparent
     color #aaa
     text-align center
@@ -118,6 +129,7 @@ $cell-code-color = #f5f5f5
         top -20px
         z-index 5
 
+
 .carbon-cell-insert-before
     border-radius 4px
     background: rgba(238, 238, 238, 0.75);
@@ -134,11 +146,14 @@ $cell-code-color = #f5f5f5
     position relative;
     flex 1
     //width 100%;
-    //padding 0 10px
+    padding 0 10px
+
 .carbon-cell-code
     position relative;
     display flex
     width 100%;
+    .carbon-cell-code
+        border-bottom-left-radius 0
 
 .carbon-cell-compute-button
     position absolute;
@@ -171,6 +186,12 @@ $cell-code-color = #f5f5f5
         margin 4px 0 10px 0
         padding 0
         font-weight 500
+    h3
+        font-size 1.2em
+        line-height 20px
+        margin 4px 0 10px 0
+        padding 0
+        font-weight 500
     p
         line-height 20px
         margin-bottom 2px;
@@ -186,14 +207,14 @@ $cell-code-color = #f5f5f5
 
 .cell-view-error
     color red
-    //font-size 14px
     font-weight 500
     padding 4px 2px
     margin 0
 
 .cell-view-result
-    padding: 4px 2px
     width 100%;
+    border-radius 4px
+    overflow hidden
 
     input[type=text]
         width 100%
@@ -212,7 +233,7 @@ $cell-code-color = #f5f5f5
     display flex
     position relative;
     min-height 31px
-    padding 0 10px
+    //padding 0 0px
     align-items center
     .cell-loading[data-loading=true]
         position absolute;

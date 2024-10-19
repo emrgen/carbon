@@ -12,13 +12,15 @@ import { Code } from "./Code";
 import { Result } from "./Result";
 import { CodeCellCodeTypePath } from "../constants";
 import { CodeCellCodeValuePath } from "../constants";
+import { BsTextParagraph } from "react-icons/bs";
+import { DiCssTricks } from "react-icons/di";
 
 const codeTypes = ["javascript", "markdown", "html", "css"];
 const codeIcons = {
   javascript: "{}",
-  html: "H",
-  markdown: "M",
-  css: "C",
+  html: "<>",
+  markdown: <BsTextParagraph />,
+  css: <DiCssTricks />,
 };
 
 export const CellComp = (props: RendererProps) => {
@@ -57,25 +59,37 @@ export const CellComp = (props: RendererProps) => {
   );
 
   const rotateCodeType = useCallback(() => {
+    const nid = NodeId.create(nodeId);
+    const node = app.store.get(nid);
+    const cell = mod.cell(nodeId);
+    const code = node?.props.get(CodeCellCodeValuePath, "") ?? "";
+    const prevCodeType =
+      node?.props.get(CodeCellCodeTypePath, "javascript") ?? "javascript";
     const index = codeTypes.indexOf(codeType);
     const next = (index + 1) % codeTypes.length;
-    setCodeType(codeTypes[next]);
-    const nid = NodeId.create(nodeId);
-    app.cmd
-      .Update(nid, {
-        [CodeCellCodeTypePath]: codeTypes[next],
-      })
-      .Dispatch()
-      .Then(() => {
-        const node = app.store.get(nid);
-        if (node) {
-          mod.redefine(
-            node.id.toString(),
-            node.props.get(CodeCellCodeValuePath, ""),
-            codeTypes[next],
-          );
-        }
-      });
+    const nextCodeType = codeTypes[next];
+
+    const update = () => {
+      app.cmd
+        .Update(nid, {
+          [CodeCellCodeTypePath]: nextCodeType,
+        })
+        .Dispatch()
+        .Then(() => {
+          if (node) {
+            mod.redefine(nodeId, code, codeTypes[next]);
+          }
+          setCodeType(codeTypes[next]);
+        });
+      setCodeType(nextCodeType);
+    };
+    // if the code is changed, redefine the cell before changing the code type
+    // if (cell?.code !== node?.props.get(CodeCellCodeValuePath, "")) {
+    //   console.log("xxxxxxxxxxxxxxxxxxxxx");
+    //   mod.redefine(nodeId, code, nextCodeType);
+    // }
+    update();
+    console.log("----------------------------");
   }, [app, mod, codeType, nodeId]);
 
   return (
