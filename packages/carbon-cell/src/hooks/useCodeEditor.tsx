@@ -3,7 +3,7 @@ import { ViewPlugin } from "@codemirror/view";
 import { ViewUpdate } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
 import { useCallback } from "react";
-import { CodeCellValuePath } from "../constants";
+import { CodeCellCodeValuePath } from "../constants";
 import { useCarbon } from "@emrgen/carbon-react";
 import { Node } from "@emrgen/carbon-core";
 import { PinnedSelection } from "@emrgen/carbon-core";
@@ -19,7 +19,7 @@ export const useCodeEditor = (node: Node, value, editor) => {
     (code: string) => {
       app.cmd
         .update(node, {
-          [CodeCellValuePath]: code,
+          [CodeCellCodeValuePath]: code,
         })
         .Select(PinnedSelection.SKIP)
         .Dispatch();

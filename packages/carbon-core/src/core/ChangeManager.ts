@@ -62,6 +62,8 @@ export class ChangeManager extends NodeTopicEmitter {
   // 2. sync the selection
   // 3. sync the node state
   update(state: State, tr: Transaction, timeout: number = 1000) {
+    console.log("PUSHING TRANSACTION", this.actions.length);
+
     if (this.actions.length) {
       this.actions.push(state.actions);
       console.log("pending transaction change update", this.actions.length);
@@ -84,7 +86,6 @@ export class ChangeManager extends NodeTopicEmitter {
 
     this.tr = tr;
 
-    // console.log('update', isContentChanged, isSelectionChanged);
     if (isContentChanged) {
       this.updated.clear();
       this.updated = state.updated.clone();
@@ -117,7 +118,7 @@ export class ChangeManager extends NodeTopicEmitter {
   }
 
   mounted(node: Node, changeType: NodeChangeType) {
-    // console.log('changes size', this.updated.size)
+    // console.log("changes size", this.updated.size);
     // if (this.counter > this.stateCounter) {
     //   console.log('mounted: old transaction sync still in progress', this.counter, counter);
     //   return;
@@ -145,13 +146,13 @@ export class ChangeManager extends NodeTopicEmitter {
     // console.log('mounted', this.changes.size, this.changes.toArray().map(n => n.toString()));
 
     // sync the selection if the content is synced
-    console.log(
-      "mounted",
-      this.updated.toArray().map((n) => n.toString()),
-      node.id.toString(),
-      this.isContentSynced,
-      this.isSelectionDirty,
-    );
+    // console.log(
+    //   "mounted",
+    //   this.updated.toArray().map((n) => n.toString()),
+    //   node.id.toString(),
+    //   this.isContentSynced,
+    //   this.isSelectionDirty,
+    // );
     if (this.isContentSynced) {
       // console.log("content synced, selection dirty:", this.isSelectionDirty);
       // NOTE: if the last transaction did not update the selection, we can go ahead and process the next tick
@@ -167,6 +168,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
   private onTransaction() {
     clearInterval(this.interval);
+    console.log("SHIFTING TRANSACTION", this.actions.length);
     const tr = this.actions.shift();
     if (tr) {
       this.pm.onTransaction(this.app, tr);
@@ -174,7 +176,7 @@ export class ChangeManager extends NodeTopicEmitter {
       this.app.emit(EventsOut.changed, this.state);
     }
 
-    console.log("PROCESSING NEXT TICK");
+    // console.log("PROCESSING NEXT TICK");
     this.app.processTick(this.tr!);
 
     // this.promiseState.resolve?.();
@@ -247,7 +249,7 @@ export class ChangeManager extends NodeTopicEmitter {
   // this must be called after the dom is updated
   private syncSelection() {
     try {
-      // console.log('syncSelection', this.state.selection.toString()	);
+      console.log("syncSelection", this.state.selection.toString());
       if (!this.app.enabled) {
         console.log("skipped: selection sync disabled");
         return;

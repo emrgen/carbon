@@ -61,6 +61,7 @@ export class ImmutableNode extends Node {
     );
   }
 
+  // key is used for react no node change hint
   override get key() {
     return `${this.id.toString()}/${this.renderVersion}/${this.contentVersion}`;
   }

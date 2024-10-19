@@ -480,15 +480,10 @@ const data = node("carbon", [
       //   ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
       // }),
 
-      node("cell", [node("cellView"), node("cellCode", [], {})]),
-
-      node("cell", [node("cellView"), node("cellCode", [], {})]),
-
-      node("cell", [node("cellView"), node("cellCode", [], {})]),
-
-      node("cell", [node("cellView"), node("cellCode", [], {})]),
-
-      // node("cell", [node("cellView"), node("codeMirror", [], {})]),
+      node("sandbox", [node("cell")]),
+      node("sandbox", [node("cell")]),
+      node("sandbox", [node("cell")]),
+      node("sandbox", [node("cell")]),
 
       // section([title([text("section 1")])]),
 
@@ -828,7 +823,7 @@ export default function Dev() {
         "actions",
         state.actions.optimize().actions.map((a) => a.toJSON()),
       );
-      console.info(state.content.child(0)?.size);
+      // console.info(state.content.child(0)?.size);
       // printNode(state.content);
       state.content.all((node) => {
         // console.log(node.id.toString(), node.name, node.properties.toKV());

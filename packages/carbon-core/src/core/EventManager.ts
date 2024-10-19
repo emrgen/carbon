@@ -203,11 +203,11 @@ export class EventManager {
 
     // new dom selection is same as exiting editor.selection then skip
     if (type === EventsIn.selectionchange && isSelectionUnchanged) {
-      console.log(
-        p14("%c[sync-check]"),
-        "color:#ffcc006e",
-        selection.isDomInSync(app.store, app.dom),
-      );
+      // console.log(
+      //   p14("%c[sync-check]"),
+      //   "color:#ffcc006e",
+      //   selection.isDomInSync(app.store, app.dom),
+      // );
 
       // console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
       console.log(p14("%c●"), "color:#ffcc006e");

@@ -83,6 +83,7 @@ export class ImmutableDraft implements Draft {
   private selected: NodeIdSet = NodeIdSet.empty();
   private updated: NodeIdSet; // tracks changed nodes
   private contentChanged: NodeIdSet = NodeIdSet.empty(); // tracks nodes with content changes
+  private propsChanged: NodeIdSet = NodeIdSet.empty(); // tracks nodes with props changes
   private unstable: NodeIdSet = NodeIdSet.empty();
 
   private readonly changes: StateChanges;
@@ -305,10 +306,35 @@ export class ImmutableDraft implements Draft {
       });
     });
 
-    // console.log('updated', this.updated.toArray().map(n => n.toString()).join(', '))
+    // console.log(
+    //   ">>> updated",
+    //   this.updated
+    //     .toArray()
+    //     .map((n) => n.toString())
+    //     .join(", "),
+    // );
+    // console.log(
+    //   ">>> contentChanged",
+    //   this.contentChanged
+    //     .toArray()
+    //     .map((n) => n.toString())
+    //     .join(", "),
+    // );
+    //
+    // console.log(
+    //   ">>> propsChanged",
+    //   this.propsChanged
+    //     .toArray()
+    //     .map((n) => n.toString())
+    //     .join(", "),
+    // );
+
     const dirty = this.updated.clone();
     this.updated.nodes(this.nodeMap).forEach((node) => {
       node.parents.forEach((parent) => {
+        if (parent.name === "sandbox") {
+          return;
+        }
         dirty.add(parent.id);
       });
     });
@@ -356,7 +382,7 @@ export class ImmutableDraft implements Draft {
     // printNode(this.state.nodeMap.get(NodeId.create("[169]"))!);
 
     // TODO: normalizing a large node with deepClone is extremely expensive. OPTIMIZE
-    console.log("normalizing", node.id.toString(), node.name);
+    // console.log("normalizing", node.id.toString(), node.name);
     // const actions = this.pm.normalize(node);
     // if (!isEmpty(actions)) {
     //   console.log("normalizing", node.name, node.id.toString(), actions);
@@ -830,8 +856,10 @@ export class ImmutableDraft implements Draft {
     );
 
     this.tm.updateProps(node, props);
-    console.log("[render version]", node.id.toString(), node.renderVersion);
     this.addUpdated(node.id);
+    this.propsChanged.add(node.id);
+
+    console.log("[render version]", node.id.toString(), node.renderVersion);
 
     if (props[MarksPath] && node.isInline) {
       this.addContentChanged(node.parentId!);

@@ -1,1 +1,2 @@
-export const CodeCellValuePath = "remove/state/codeCell";
+export const CodeCellCodeValuePath = "remove/state/cell/code/value";
+export const CodeCellCodeTypePath = "remove/state/cell/code/type";

@@ -19,7 +19,7 @@ export function blocksBelowCommonNode(
   startNode: Node,
   endNode: Node,
 ): [Node, Node] {
-  // calculate dependencies
+  // calculate inputs
   const tailChain = startNode.chain.filter((n) => n.isBlock);
   const headChain = endNode.chain.filter((n) => n.isBlock);
   const commonChainLen = Math.min(headChain.length, tailChain.length);

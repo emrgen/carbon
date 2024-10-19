@@ -1,6 +1,5 @@
 import { Optional } from "@emrgen/types";
 import { classString, p14 } from "./Logger";
-import { p30 } from "./Logger";
 import { Node } from "./Node";
 import { Pin } from "./Pin";
 import { PointedSelection } from "./PointedSelection";
@@ -451,15 +450,15 @@ export class PinnedSelection {
         selection?.focusOffset === focusOffset;
 
       if (!inSync) {
-        console.log(
-          p14("%c[info]"),
-          "color:pink",
-          p30("selection.setBaseAndExtent"),
-          anchorNode,
-          anchorOffset,
-          focusNode,
-          focusOffset,
-        );
+        // console.log(
+        //   p14("%c[info]"),
+        //   "color:pink",
+        //   p30("selection.setBaseAndExtent"),
+        //   anchorNode,
+        //   anchorOffset,
+        //   focusNode,
+        //   focusOffset,
+        // );
         selection?.setBaseAndExtent(
           anchorNode,
           anchorOffset,

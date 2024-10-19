@@ -1,0 +1,106 @@
+$literal-color = #418cbf
+
+.carbon-object-view
+  font-family "Geist Mono", sans-serif
+  padding-top 2px;
+  font-size 15px
+  overflow auto
+  white-space nowrap
+
+.carbon-object-view
+  &::-webkit-scrollbar {
+    height: 6px;
+    //background teal
+  }
+
+  &::-webkit-scrollbar-track {
+    //background-color: red;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #ddd;
+    //border: 2px solid transparent;
+    background-clip: content-box;
+    border-radius 4px
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #a8bbbf;
+  }
+
+.cov-expander
+  margin-right 2px;
+  padding-bottom 4px;
+
+//.cov-string
+//  line-height inherit
+
+// array style
+.cov-array
+  display flex
+.cov-array-initial
+  display flex
+  align-items center
+  cursor pointer;
+.cov-object-constructor
+  margin-right 5px;
+.cov-array-content
+  display flex
+.cov-array-content-expanded
+  position relative;
+  flex-direction column
+  padding-left 14px;
+.cov-array-element
+  display flex
+  flex-direction row
+  margin-right 4px;
+.cov-array-index
+  color #999
+  margin-right 5px
+.cov-array-content-collapsed
+  display flex
+
+//  object style
+.cov-object-initial
+  display flex
+  align-items center
+  cursor pointer;
+.cov-object-constructor
+  margin-right 5px;
+.con-object-content
+  display flex
+  flex-direction column
+  padding-left 14px;
+.cov-object-key
+  color #999
+  margin-right 4px;
+.cov-object-property
+  display flex
+  flex-direction row
+  margin-right 4px;
+.cov-object-content
+  display flex
+  flex-direction column
+  padding-left 14px;
+.cov-object-element
+  display flex
+  flex-direction row
+  margin-right 4px;
+.cov-object-content-expanded
+  position relative;
+  flex-direction column
+  padding-left 14px;
+.cov-object-content-collapsed
+  display flex
+
+.cov-number, .cov-string, .cov-symbol
+  color $literal-color
+
+.cov-boolean-true
+    color #3db53d
+.cov-boolean-false
+    color #f45a80
+.cov-null
+    color #f45a80
+.cov-undefined
+    color #f45a80

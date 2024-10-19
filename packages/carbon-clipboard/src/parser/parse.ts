@@ -28,11 +28,11 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                   item
                     .getType(type)
                     .then((blob) => {
-                      console.log("web application/carbon", blob);
+                      // console.log("web application/carbon", blob);
                       blob
                         .text()
                         .then((text) => {
-                          console.log("web application/carbon", text);
+                          // console.log("web application/carbon", text);
                           const { root, start, end } = JSON.parse(text);
                           const rootNode = schema.nodeFromJSON(root)!;
                           const startNode = schema.nodeFromJSON(start)!;
@@ -64,7 +64,6 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                         .text()
                         .then((text) => {
                           console.log("text/html", text);
-
                           const nodes = parseHtml(text);
                           const root = createCarbonSlice(nodes, schema);
                           if (!root) {

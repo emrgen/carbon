@@ -304,9 +304,7 @@ export class Pin {
       return down;
     }
 
-    console.log(this.toString());
     const focus = Focus.create(this.node, this.offset).down();
-    console.log(focus.toString());
 
     return Pin.create(focus.node, focus.offset, focus.offset + 1);
   }

@@ -334,9 +334,6 @@ const InnerCarbonBlock: ForwardRefRenderFunction<
 };
 
 export const CarbonBlock = memo(forwardRef(InnerCarbonBlock), (prev, next) => {
-  if (next.node.name === "cell") {
-    console.log("CarbonBlock", next.node.name, prev.node.key, next.node.key);
-  }
   return prev.node.key === next.node.key;
 });
 

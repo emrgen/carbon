@@ -473,7 +473,6 @@ export class TransformCommands extends BeforePlugin {
         );
       } else {
         const { start } = selection;
-        console.log(start.node.type.spec.code);
         const down = start.down();
 
         if (down.node.isZero) {
@@ -500,11 +499,10 @@ export class TransformCommands extends BeforePlugin {
           const after = PinnedSelection.fromPin(pin);
           tr.Select(after);
         } else {
-          console.log("inserting text", text);
+          // console.log("inserting text", text);
           const textNode = tr.app.schema.text(text, {
             props: { [MarksPath]: tr.state.marks.toArray() },
           })!;
-          console.log(start.steps, tr.state.marks);
           const startStepFromEnd = start.steps - start.node.stepSize;
           // FIXME: handle text block merge offset changes properly
           const startText = TitleNode.from(head.node.clone(deepCloneMap))
@@ -525,15 +523,15 @@ export class TransformCommands extends BeforePlugin {
             ),
           );
 
-          console.log(start.offset, pin?.toString());
+          // console.log(start.offset, pin?.toString());
           if (!pin) {
             throw Error("invalid pin");
           }
           const after = PinnedSelection.fromPin(pin!);
-          console.log(after.toString());
+          // console.log(after.toString());
 
-          console.log(tr.state.marks);
-          printNode(startText.node);
+          // console.log(tr.state.marks);
+          // printNode(startText.node);
 
           tr.SetContent(head.node.id, startText.children);
           tr.Select(after, ActionOrigin.UserInput);
@@ -2298,7 +2296,7 @@ export class TransformCommands extends BeforePlugin {
 
     if (startBlock.eq(endBlock)) {
       if (startBlock.isTextContainer) {
-        console.log(start.toString(), end.toString());
+        // console.log(start.toString(), end.toString());
         selectedGroup.addRange(Span.create(start, end));
       } else if (startBlock.type.isAtom) {
         // is it required???
