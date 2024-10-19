@@ -49,7 +49,7 @@ export class CellModule extends EventEmitter {
 
     const cell = this.cells.get(cellId);
     if (cell && cell.code === code && cell.codeType === type && !cell.error) {
-      console.log("code is the same", cellId, code, cell);
+      // console.log("code is the same", cellId, code, cell);
       return;
     }
 

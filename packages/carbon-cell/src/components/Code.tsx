@@ -15,6 +15,7 @@ import { useModule } from "../hooks/useModule";
 import { CodeCellCodeValuePath } from "../constants";
 import { CodeCellCodeTypePath } from "../constants";
 import { EditorState } from "@codemirror/state";
+import { Prec } from "@codemirror/state";
 import { EditorView } from "codemirror";
 import { basicSetup } from "codemirror";
 import { ViewUpdate } from "@codemirror/view";
@@ -77,6 +78,7 @@ export const CodeInner = (props: RendererProps) => {
     },
     [node, mod, nodeId],
     (prev, next) => {
+      // @ts-ignore
       return isEqualType(prev[0], next[0]);
     },
   );
@@ -172,6 +174,22 @@ export const CodeInner = (props: RendererProps) => {
           EditorView.updateListener.of(onUpdate),
           basicSetup,
           highlightActiveLine(),
+          Prec.highest(
+            EditorView.domEventHandlers({
+              keydown(event) {
+                console.log(event);
+                if (event.shiftKey && event.key === "Enter") {
+                  console.log("Mod+/ keydown!", event);
+                  event.stopPropagation();
+                  event.preventDefault();
+                  redefine(
+                    app.store.get(nodeId)?.props.get(CodeCellCodeValuePath, ""),
+                    codeType,
+                  );
+                }
+              },
+            }),
+          ),
         ],
       });
 
@@ -180,7 +198,7 @@ export const CodeInner = (props: RendererProps) => {
         parent,
       });
     },
-    [onUpdate, codeType],
+    [onUpdate, codeType, nodeId, redefine, app],
   );
 
   useCustomCompareEffect(

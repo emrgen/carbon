@@ -252,8 +252,6 @@ const ResultView = (props) => {
     );
   }
 
-  console.log(cell, cell?.hasName());
-
   return (
     <div className={"cell-html-result"}>
       {cell?.hasName() && <div>{cellName} = </div>}

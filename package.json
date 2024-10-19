@@ -37,6 +37,8 @@
     "@emrgen/carbon-blocks": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/types": "workspace:*",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
     "command-line-args": "^5.2.1",
     "lodash": "^4.17.21"
   },

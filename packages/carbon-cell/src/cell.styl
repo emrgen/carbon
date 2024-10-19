@@ -1,4 +1,4 @@
-$active-cell-color = #dde6f1
+$active-cell-color = #e3e9f3
 $cell-code-color = #f5f5f5
 
 [data-name=cell]
@@ -37,6 +37,8 @@ $cell-code-color = #f5f5f5
     &[data-focused=true]
         .cm-editor
             background $active-cell-color
+    .cm-activeLine.cm-line
+        background: transparent!important
 
 .carbon-cell-container
     display flex
@@ -53,8 +55,19 @@ $cell-code-color = #f5f5f5
     z-index 2
     background #ddd
 
-//.cm-activeLine.cm-line
-//    background red
+[data-name=cell][data-focused=true]
+    .cm-activeLine.cm-line
+        position relative;
+        background: transparent!important
+    .cm-activeLine.cm-line::before
+        background #aaa
+        width 4px
+        height 80%
+        content: ''
+        position absolute
+        left 0
+        top 10%
+        border-radius 4px
 
 .cell-view-handle
     padding-top 8px;
@@ -180,6 +193,7 @@ $cell-code-color = #f5f5f5
 
 .cell-view-result
     padding: 4px 2px
+    width 100%;
 
     input[type=text]
         width 100%
