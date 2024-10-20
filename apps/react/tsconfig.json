@@ -9,7 +9,7 @@
     ],
     "allowJs": false,
     "skipLibCheck": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -24,6 +24,9 @@
       // "@emrgen/*": ["../../packages/*/src"]
     },
     "rootDir": "src"
+  },
+  "ts-node": {
+    "esm": true
   },
   "include": [
     "src/**/*.t(s|sx)"

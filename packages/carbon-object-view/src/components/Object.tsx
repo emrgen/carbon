@@ -5,7 +5,7 @@ import { BsFillCaretRightFill } from "react-icons/bs";
 import { isPlainObject } from "lodash";
 import { ProtoView } from "./Proto";
 
-export const ObjectView = ({ data }) => {
+export const ObjectView = ({ data, propName }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -17,11 +17,12 @@ export const ObjectView = ({ data }) => {
         className={"cov-object-initial"}
         onClick={() => setExpanded((e) => !e)}
       >
+        {propName && <span className={"cov-object-key"}>{propName}:</span>}
         <div className={"cov-expander"}>
           <BsFillCaretRightFill fontSize={"12px"} />
         </div>
         <span className={"cov-object-constructor"}>
-          {data.constructor.name}
+          {data.constructor?.name}
         </span>
         <span className={"cov-left-brace"}>{"{"}</span>
       </div>
@@ -31,8 +32,7 @@ export const ObjectView = ({ data }) => {
           {Object.keys(data).map((key, index) => {
             return (
               <div key={index} className={"cov-object-element"}>
-                <span className={"cov-object-key"}>{key}:</span>
-                <NodeView data={data[key]} />
+                <NodeView data={data[key]} propName={key} isIndex={false} />
               </div>
             );
           })}
@@ -50,8 +50,8 @@ export const ObjectView = ({ data }) => {
           {Object.keys(data).map((key, index) => {
             return (
               <div key={index} className={"cov-object-element"}>
-                <span className={"cov-object-key"}>{key}:</span>
-                <NodeInitial data={data[key]} />
+                {/*<span className={"cov-object-key"}>{key}:</span>*/}
+                <NodeInitial data={data[key]} propName={key} isIndex={false} />
                 {index + 1 !== Object.keys(data).length && (
                   <span className={"cov-comma"}>,</span>
                 )}

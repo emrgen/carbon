@@ -41,7 +41,7 @@ const data = [
 export const ObjectViewer = (props: ObjectViewProps) => {
   return (
     <div className={"carbon-object-view"}>
-      <NodeView data={props.data} />
+      <NodeView data={props.data} propName={""} isIndex={false} />
     </div>
   );
 };

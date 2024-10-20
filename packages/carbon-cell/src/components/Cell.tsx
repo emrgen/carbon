@@ -14,6 +14,7 @@ import { CodeCellCodeTypePath } from "../constants";
 import { CodeCellCodeValuePath } from "../constants";
 import { BsTextParagraph } from "react-icons/bs";
 import { DiCssTricks } from "react-icons/di";
+import { useCustomCompareEffect } from "react-use";
 
 const codeTypes = ["javascript", "markdown", "html", "css"];
 const codeIcons = {
@@ -56,6 +57,17 @@ export const CellComp = (props: RendererProps) => {
       });
     },
     [app, isCollapsed, mod, node],
+  );
+
+  useCustomCompareEffect(
+    () => {
+      const codeType = node.props.get(CodeCellCodeTypePath, "javascript");
+      mod.redefine(nodeId, node.props.get(CodeCellCodeValuePath, ""), codeType);
+    },
+    [node, mod],
+    (prev, next) => {
+      return prev[0].eq(next[0]);
+    },
   );
 
   const rotateCodeType = useCallback(() => {

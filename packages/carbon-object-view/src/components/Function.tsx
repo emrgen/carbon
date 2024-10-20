@@ -50,10 +50,18 @@ function serializeConsoleLog(...args) {
   return result.join(" ");
 }
 
-export const FunctionView = ({ data }) => {
+export const FunctionView = ({
+  data,
+  propName,
+  isIndex,
+  isGenerator = false,
+}) => {
+  const keyClass = isIndex ? "cov-array-key" : "cov-object-key";
+
   return (
     <div className={"cov-function"}>
-      <span className={"cov-function-key"}>f</span>
+      {propName && <span className={keyClass}>{propName}:</span>}
+      <span className={"cov-function-key"}>f{isGenerator ? "*" : ""}</span>
       <span className={"cov-function-arguments"}>({getParamNames(data)})</span>
     </div>
   );

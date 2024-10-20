@@ -9,7 +9,10 @@ import { preventAndStop } from "@emrgen/carbon-core";
 import { PinnedSelection } from "@emrgen/carbon-core";
 import { Node } from "@emrgen/carbon-core";
 import { ActionOrigin } from "@emrgen/carbon-core";
+import { FocusOnInsertPath } from "@emrgen/carbon-core";
 import { HasFocusPath } from "@emrgen/carbon-core";
+import { Point } from "@emrgen/carbon-core";
+import { Pin } from "@emrgen/carbon-core";
 import { PiPlayBold } from "react-icons/pi";
 import { useModule } from "../hooks/useModule";
 import { CodeCellCodeValuePath } from "../constants";
@@ -18,15 +21,15 @@ import { EditorState } from "@codemirror/state";
 import { Prec } from "@codemirror/state";
 import { EditorView } from "codemirror";
 import { basicSetup } from "codemirror";
-import { ViewUpdate } from "@codemirror/view";
+import { keymap, ViewUpdate } from "@codemirror/view";
 import { highlightActiveLine } from "@codemirror/view";
-import { isKeyHotkey } from "is-hotkey";
 import { javascript } from "@codemirror/lang-javascript";
 import { noop } from "lodash";
 import { useCustomCompareEffect } from "react-use";
 import { markdown } from "@codemirror/lang-markdown";
 import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
+import { indentWithTab } from "@codemirror/commands";
 
 const isEqualCode = (prev: Node, next: Node) => {
   return (
@@ -182,10 +185,30 @@ export const CodeInner = (props: RendererProps) => {
           EditorView.updateListener.of(onUpdate),
           basicSetup,
           highlightActiveLine(),
+          keymap.of([indentWithTab]),
           Prec.highest(
             EditorView.domEventHandlers({
               keydown(event) {
                 console.log(event);
+
+                // insert new line
+                if (event.ctrlKey && event.shiftKey && event.key === "Enter") {
+                  console.log("xxxxxxxxxxxx");
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const parent = app.store.get(nodeId)?.parent;
+                  const section = app.schema.type("section").default();
+                  console.log(parent);
+                  const after = PinnedSelection.fromPin(
+                    Pin.toStartOf(section!)!,
+                  );
+                  app.cmd
+                    .Insert(Point.toAfter(parent!), section!)
+                    .Select(after, ActionOrigin.UserInput)
+                    .Dispatch();
+                  return;
+                }
+
                 if (event.shiftKey && event.key === "Enter") {
                   console.log("Mod+/ keydown!", event);
                   event.stopPropagation();
@@ -194,7 +217,32 @@ export const CodeInner = (props: RendererProps) => {
                     app.store.get(nodeId)?.props.get(CodeCellCodeValuePath, ""),
                     codeType,
                   );
+                  return;
                 }
+
+                if (event.ctrlKey && event.key === "s") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  redefine(
+                    app.store.get(nodeId)?.props.get(CodeCellCodeValuePath, ""),
+                    codeType,
+                  );
+                  return;
+                }
+
+                // move the cursor to the next block
+                // if (event.shiftKey && event.key === "Tab") {
+                //   event.preventDefault();
+                //   event.stopPropagation();
+                //   const node = app.store.get(nodeId);
+                //   if (!node) return;
+                //   const found = node.next((n) => n.isFocusable);
+                //   if (!found) return;
+                //   const after = PinnedSelection.fromPin(Pin.toStartOf(found)!);
+                //   app.cmd.Select(after, ActionOrigin.UserInput).Dispatch();
+                //
+                //   return;
+                // }
               },
             }),
           ),
@@ -240,16 +288,26 @@ export const CodeInner = (props: RendererProps) => {
     };
   }, [view, mod, nodeId]);
 
+  useEffect(() => {
+    const firstMount = app.store
+      .get(nodeId)
+      ?.props.get(FocusOnInsertPath, false);
+    if (firstMount) {
+      view?.focus();
+      setTimeout(() => {
+        app.cmd
+          .Update(nodeId, {
+            [FocusOnInsertPath]: false,
+          })
+          .Dispatch();
+      }, 1000);
+    }
+  }, [view, app, nodeId]);
+
   return (
     <div
       className={"cell-code-wrapper"}
-      onKeyDown={(e) => {
-        if (isKeyHotkey("ctrl+s", e)) {
-          preventAndStop(e);
-          // find variable identity and redefine
-          redefine(value, codeType);
-        }
-      }}
+      onKeyDown={(e) => e.stopPropagation()}
       onFocus={(e) => e.stopPropagation()}
     >
       <div className={"editor-container"} ref={ref} />

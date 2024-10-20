@@ -103,7 +103,7 @@ const ResultInner = (props) => {
   // listen to the cell events
   useEffect(() => {
     const onFulfill = (cell: Cell) => {
-      console.log("fulfilled", cell.uniqId, cell.name, cell.result, cell);
+      // console.log("fulfilled", cell.uniqId, cell.name, cell.result, cell);
       setCell(cell);
       updateResult(cell.result);
       setError("");
@@ -111,13 +111,13 @@ const ResultInner = (props) => {
     };
 
     const onPending = (cell: Cell) => {
-      console.log("pending", cell.name);
+      // console.log("pending", cell.name);
       setPending(true);
       setCell(cell);
     };
 
     const onReject = (cell: Cell) => {
-      console.log("rejected", cell.name, cell.error);
+      // console.log("rejected", cell.name, cell.error);
       setCell(cell);
       setError(cell.error.toString());
       updateResult(null);

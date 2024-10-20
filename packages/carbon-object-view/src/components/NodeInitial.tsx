@@ -1,36 +1,31 @@
 import { useMemo } from "react";
 import { isArray } from "lodash";
 import { isObject } from "lodash";
-import { isNumber } from "lodash";
-import { isString } from "lodash";
-import { isSymbol } from "lodash";
 import { isFunction } from "lodash";
 import { FunctionView } from "./Function";
+import { isLiteral } from "./utils";
+import { isGenerator } from "./utils";
+import { Literal } from "./Literal";
 
-export const NodeInitial = ({ data }) => {
+export const NodeInitial = ({ data, propName, isIndex }) => {
   return useMemo(() => {
-    if (isNumber(data)) {
-      return <span className={"cov-number"}>{data}</span>;
+    if (isLiteral(data)) {
+      return <Literal data={data} propName={propName} isIndex={isIndex} />;
     }
 
-    if (isString(data)) {
-      return <span className={"cov-string"}>{data}</span>;
-    }
-
-    if (isSymbol(data)) {
-      return <span className={"cov-symbol"}>{data.toString()}</span>;
-    }
-
-    if (data === null) {
-      return <span className={"cov-null"}>null</span>;
-    }
-
-    if (data === undefined) {
-      return <span className={"cov-undefined"}>undefined</span>;
+    if (isGenerator(data)) {
+      return <span>Generator</span>;
     }
 
     if (isFunction(data)) {
-      return <FunctionView data={data} />;
+      return (
+        <FunctionView
+          data={data}
+          propName={propName}
+          isIndex={isIndex}
+          isGenerator={isGenerator(data)}
+        />
+      );
     }
 
     if (data === true || data === false) {
@@ -46,7 +41,7 @@ export const NodeInitial = ({ data }) => {
     }
 
     if (isObject(data)) {
-      return <span>{data.constructor.name}</span>;
+      return <span>{data.constructor?.name}</span>;
     }
 
     return <span>FAILED!</span>;

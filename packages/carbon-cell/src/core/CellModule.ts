@@ -7,7 +7,7 @@ import { isHtmlElement } from "../utils";
 import { viewCellName } from "../utils";
 import { isUnnamedCell } from "../utils";
 import { isViewCell } from "../utils";
-import { marked } from "marked";
+import { marked } from "marked"; //
 
 //
 export class CellModule extends EventEmitter {
@@ -70,6 +70,12 @@ export class CellModule extends EventEmitter {
       const cell = Cell.fromCode(this, cellId, code, type);
       if (!cell) {
         console.error("failed to create from code", cellId, code);
+        const oldCell = this.cells.get(cellId);
+        if (oldCell) {
+          oldCell.delete();
+        }
+        this.cells.delete(cellId);
+        this.emit("deleted:" + cellId, oldCell);
         return;
       }
 
@@ -191,12 +197,12 @@ export class CellModule extends EventEmitter {
 
   private defineFresh(cell: Cell) {
     const { id, name, inputs, definition } = cell;
-    console.log("define fresh", name, definition);
+    // console.log("define fresh", name, definition);
     cell.variable = this.module
       .variable({
         fulfilled: (value: any) => {
           if (cell.deleted) return;
-          console.log("FULFILLED", cell.codeType, cell.uniqId, cell.id, value);
+          // console.log("FULFILLED", cell.codeType, cell.uniqId, cell.id, value);
           cell.result = value;
           if (isHtmlElement(value)) {
             // @ts-ignore
@@ -223,12 +229,12 @@ export class CellModule extends EventEmitter {
           // }
 
           this.fulfilled(cell);
-          console.log(
-            "%cREADY",
-            "background:teal;color:white;",
-            `${name} => `,
-            value,
-          );
+          // console.log(
+          //   "%cREADY",
+          //   "background:teal;color:white;",
+          //   `${name} => `,
+          //   value,
+          // );
         },
         rejected: (err: any) => {
           if (cell.deleted) return;
@@ -558,7 +564,7 @@ const factory = {
     console.log("block statement", body, code);
     const blockBody = code.slice(body.start + 1, body.end - 1);
     // no need to return the block statement as the return is within the block body
-    return this.define(name, deps, `${blockBody}`);
+    return this.define(name, deps, `${blockBody}`, ast);
   },
   TaggedTemplateExpression(
     name: string,
@@ -571,12 +577,38 @@ const factory = {
     return this.define(name, deps, `return (${tagBody})`);
   },
   Identifier(name: string, deps: string[], ast: any, code: string) {
-    return this.define(name, deps, `return ${ast.body.name}`);
+    return this.define(name, deps, `return ${ast.body.name}`, ast);
+  },
+  YieldExpression(name: string, deps: string[], ast: any, code: string) {
+    return this.define(name, deps, `${code}`, ast);
+  },
+  ClassExpression(name: string, deps: string[], ast: any, code: string) {
+    return this.define(name, deps, `return (${code})`, ast);
+  },
+  NewExpression(name: string, deps: string[], ast: any, code: string) {
+    const { body } = ast;
+    console.log("block statement", body, code);
+    const blockBody = code.slice(body.start, body.end);
+    return this.define(name, deps, `return ${blockBody}`, ast);
+  },
+
+  SequenceExpression(name: string, deps: string[], ast: any, code: string) {
+    const { body } = ast;
+    const { expressions } = body;
+    const endNode = expressions[expressions.length - 1];
+    const blockBody = code.slice(endNode.start, endNode.end);
+    return this.define(name, deps, `return ${blockBody}`, ast);
+  },
+
+  MemberExpression(name: string, deps: string[], ast: any, code: string) {
+    const { body } = ast;
+    const blockBody = code.slice(body.start, body.end);
+    return this.define(name, deps, `return ${blockBody}`, ast);
   },
 
   // create a function definition combining the name, inputs and body
-  define(name: string, inputs: string[], body: string) {
-    const fnStr = `return function ${!!name ? `_${name}` : ""} ( ${inputs.join(",")} ) {\n  ${body} \n} `;
+  define(name: string, inputs: string[], body: string, opts?: any) {
+    const fnStr = `return ${opts?.async ? "async" : ""} function ${opts?.generator ? "*" : ""} ${!!name ? `_${name}` : ""} ( ${inputs.join(",")} ) {\n  ${body} \n} `;
     console.log("factory defined =>", fnStr);
     return new Function(fnStr)();
   },

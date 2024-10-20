@@ -21,6 +21,8 @@ import {
   TitleNode,
   UnstablePath,
 } from "@emrgen/carbon-core";
+import { FocusOnInsertPath } from "@emrgen/carbon-core";
+import { ActionOrigin } from "@emrgen/carbon-core";
 import { isConvertible } from "../utils";
 import { NumberedList } from "./NumberedList";
 
@@ -236,11 +238,18 @@ export class ChangeName extends BeforePlugin {
       ctx.stopPropagation();
 
       const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
-      const divider = app.schema.type(name).default();
-      if (!divider) {
+      let newNode = app.schema.type(name).default();
+      if (!newNode) {
         console.error("failed to create divider node");
         return;
       }
+
+      let insertNode = newNode;
+      if (insertNode.isSandbox) {
+        insertNode = app.schema.type("sandbox").create([newNode])!;
+      }
+
+      console.log("inserting", newNode);
 
       const match = text.match(regex);
       if (match === null) {
@@ -259,7 +268,15 @@ export class ChangeName extends BeforePlugin {
         cmd.Add(action);
       }
 
-      cmd.Add(insertBeforeAction(block, divider)).Select(after).Dispatch();
+      app.parkCursor();
+      cmd
+        .Add(insertBeforeAction(block, insertNode))
+        .Update(newNode, {
+          [FocusOnInsertPath]: true,
+        })
+        .Select(PinnedSelection.SKIP, ActionOrigin.UserInput)
+        // .Select(after)
+        .Dispatch();
     };
   }
 

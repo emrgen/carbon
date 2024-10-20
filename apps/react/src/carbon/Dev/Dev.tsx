@@ -61,7 +61,7 @@ const data = node("carbon", [
   node(
     "document",
     [
-      title([text("I am a frame title")]),
+      title([text("Document Title")]),
 
       // node(
       //   "sqCanvas",

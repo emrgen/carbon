@@ -73,7 +73,11 @@ export const ProtoView = ({ data }) => {
             return (
               <div key={index} className={"cov-object-element"}>
                 <span className={"cov-object-key"}>{key}:</span>
-                <NodeView data={descriptors[key]} />
+                <NodeView
+                  data={descriptors[key]}
+                  propName={key}
+                  isIndex={false}
+                />
               </div>
             );
           })}

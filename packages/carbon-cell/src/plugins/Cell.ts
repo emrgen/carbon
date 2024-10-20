@@ -6,6 +6,7 @@ export class Cell extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: "content block",
+      sandbox: true,
       // content: "cellView cellCode",
       props: {
         local: {

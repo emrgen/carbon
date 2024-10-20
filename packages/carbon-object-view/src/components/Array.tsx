@@ -33,8 +33,7 @@ export const ArrayView = (props) => {
             {data.map((d, index) => {
               return (
                 <div key={index} className={"cov-array-element"}>
-                  <span className={"cov-array-index"}>{index}:</span>
-                  <NodeView data={d} />
+                  <NodeView data={d} propName={index} isIndex={true} />
                 </div>
               );
             })}
