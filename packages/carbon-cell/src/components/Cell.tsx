@@ -15,6 +15,7 @@ import { CodeCellCodeValuePath } from "../constants";
 import { BsTextParagraph } from "react-icons/bs";
 import { DiCssTricks } from "react-icons/di";
 import { useCustomCompareEffect } from "react-use";
+import { BiPlus } from "react-icons/bi";
 
 const codeTypes = ["javascript", "markdown", "html", "css"];
 const codeIcons = {
@@ -79,10 +80,7 @@ export const CellComp = (props: RendererProps) => {
   const rotateCodeType = useCallback(() => {
     const nid = NodeId.fromString(nodeId);
     const node = app.store.get(nid);
-    const cell = mod.cell(nodeId);
     const code = node?.props.get(CodeCellCodeValuePath, "") ?? "";
-    const prevCodeType =
-      node?.props.get(CodeCellCodeTypePath, "javascript") ?? "javascript";
     const index = codeTypes.indexOf(codeType);
     const next = (index + 1) % codeTypes.length;
     const nextCodeType = codeTypes[next];
@@ -101,17 +99,35 @@ export const CellComp = (props: RendererProps) => {
         });
       setCodeType(nextCodeType);
     };
-    // if the code is changed, redefine the cell before changing the code type
-    // if (cell?.code !== node?.props.get(CodeCellCodeValuePath, "")) {
-    //   console.log("xxxxxxxxxxxxxxxxxxxxx");
-    //   mod.redefine(nodeId, code, nextCodeType);
-    // }
     update();
-    console.log("----------------------------");
   }, [app, mod, codeType, nodeId]);
+
+  const handleInsertNeighbour = useCallback(
+    (e) => {
+      if (e.shiftKey) {
+        // console.log("insert above");
+        app.cmd.inserter
+          .insertBeforeDefault(node.parent!, "section")
+          ?.dispatch();
+      } else {
+        // console.log("insert below");
+        app.cmd.inserter
+          .insertAfterDefault(node.parent!, "section")
+          ?.Dispatch();
+      }
+    },
+    [app, node],
+  );
 
   return (
     <CarbonBlock node={node}>
+      <div
+        className={"cell-insert-neighbour"}
+        onClick={handleInsertNeighbour}
+        onMouseDown={handleInsertNeighbour}
+      >
+        <BiPlus />
+      </div>
       <div
         className={"carbon-cell-container"}
         onKeyUp={stop}

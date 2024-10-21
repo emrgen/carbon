@@ -1,0 +1,51 @@
+{
+  "name": "tinyquiz",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^2.10.3",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@emrgen/carbon-attributes": "workspace:*",
+    "@emrgen/carbon-board": "workspace:*",
+    "@emrgen/carbon-board-react": "workspace:*",
+    "@emrgen/carbon-cell": "workspace:*",
+    "@emrgen/carbon-clipboard": "workspace:*",
+    "@emrgen/carbon-code": "workspace:*",
+    "@emrgen/carbon-comment-editor": "workspace:*",
+    "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-database": "workspace:*",
+    "@emrgen/carbon-database-react": "workspace:*",
+    "@emrgen/carbon-object-view": "workspace:*",
+    "@emrgen/carbon-react": "workspace:*",
+    "@emrgen/carbon-react-blocks": "workspace:*",
+    "@emrgen/carbon-sheet": "workspace:*",
+    "@emrgen/carbon-utils": "workspace:*",
+    "@emrgen/fastype-core": "workspace:*",
+    "@emrgen/types": "workspace:*",
+    "firebase": "^10.14.1",
+    "framer-motion": "^11.11.9",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.11.1",
+    "@types/react": "^18.3.10",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "eslint": "^9.11.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.12",
+    "globals": "^15.9.0",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.7.0",
+    "vite": "^5.4.8"
+  }
+}

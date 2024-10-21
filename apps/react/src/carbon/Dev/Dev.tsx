@@ -58,7 +58,7 @@ import SelectionTracker from "../../SelectionTracker";
 
 function is_env_development() {
   // @ts-ignore
-  return import.meta.env.VITE_MODE === "dev";
+  return import.meta?.env?.VITE_MODE === "dev";
 }
 
 const data = node("carbon", [

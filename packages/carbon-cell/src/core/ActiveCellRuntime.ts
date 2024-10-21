@@ -56,6 +56,7 @@ export class ActiveCellRuntime extends EventEmitter {
     );
     console.log(
       "Variables",
+      // @ts-ignore
       vars.map((v) => v._name),
     );
   }
@@ -259,7 +260,7 @@ export class ActiveCellRuntime extends EventEmitter {
       const variable = this.defineFresh(cell);
       if (before.variable) {
         // NOTE: deleting the cell will also delete the variable
-        before.delete(before.variable === variable);
+        before.delete(true);
       }
     } else if (before.name === cell.name) {
       // NOTE: as the name are the same, we can redefine the variable with the same name

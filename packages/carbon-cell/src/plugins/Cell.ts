@@ -24,7 +24,7 @@ export class Cell extends CarbonPlugin {
   }
 
   plugins(): CarbonPlugin[] {
-    return [new CellView(), new CellCode()];
+    return [];
   }
 }
 
