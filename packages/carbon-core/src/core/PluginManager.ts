@@ -92,8 +92,8 @@ export class PluginManager {
     return CarbonCommand.from(this.plugins);
   }
 
-  services() {
-    return Service.from(this.plugins);
+  services(app: Carbon) {
+    return Service.from(app, this.plugins);
   }
 
   sanitize(node: Node): Optional<Node> {

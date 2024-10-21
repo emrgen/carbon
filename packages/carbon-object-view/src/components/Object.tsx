@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NodeView } from "./Node";
 import { NodeInitial } from "./NodeInitial";
 import { BsFillCaretRightFill } from "react-icons/bs";
-import {isPlainObject, sortBy} from "lodash";
+import { isPlainObject, sortBy } from "lodash";
 import { ProtoView } from "./Proto";
 import { isGetterProp } from "./utils";
 import { isSetterProp } from "./utils";
@@ -45,8 +45,6 @@ export const ObjectView = ({ data, propName, parentProps = new Set() }) => {
       [name]: value,
     };
   }, {});
-
-  console.log("xxxx", parentProps);
 
   return (
     <div

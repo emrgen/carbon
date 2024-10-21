@@ -9,3 +9,5 @@ export const cellRenderer = [ReactRenderer.create("cell", CellComp)];
 
 export * from "./plugins/Cell";
 export * from "./hooks/useActiveCellRuntime";
+export * from "./core/Nodes";
+export * from "./core/ActiveCellRuntime";

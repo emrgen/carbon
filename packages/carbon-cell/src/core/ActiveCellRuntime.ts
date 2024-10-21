@@ -9,7 +9,7 @@ import { viewCellName } from "../utils";
 import { isUnnamedCell } from "../utils";
 import { isViewCell } from "../utils";
 import { isString } from "lodash";
-import {Nodes} from "./Nodes"; //
+import { Nodes } from "./Nodes"; //
 
 //
 export class ActiveCellRuntime extends EventEmitter {
@@ -17,8 +17,8 @@ export class ActiveCellRuntime extends EventEmitter {
   runtime: Runtime;
   module: Module;
 
-  // cellId -> Cell
-  cells: Map<string, Cell> = new Map();
+  // cellId -> ActiveCell
+  cells: Map<string, ActiveCell> = new Map();
 
   observedNodes: Set<string> = new Set();
 
@@ -29,10 +29,16 @@ export class ActiveCellRuntime extends EventEmitter {
     // define a hidden module variable
     // this.module.variable(true).define("_module", [], () => this.module);
 
+    console.log("--------------------------------------------");
     // define a hidden module variable for observed nodes
-    this.redefineFromConfig('_cell_nodes','Nodes', ['Carbon', 'observedIds'], (Carbon, observedIds) => {
-      return new Nodes(Carbon, observedIds)
-    });
+    this.redefineFromConfig(
+      "_cell_nodes",
+      "Nodes",
+      ["Carbon", "observedIds"],
+      (Carbon, observedIds) => {
+        return new Nodes(Carbon, observedIds);
+      },
+    );
   }
 
   result(cellId: string) {
@@ -48,22 +54,37 @@ export class ActiveCellRuntime extends EventEmitter {
       // @ts-ignore
       (v) => v._observer.toString() !== "Symbol(no-observer)",
     );
-    console.log('Variables',vars.map(v => v._name));
+    console.log(
+      "Variables",
+      vars.map((v) => v._name),
+    );
   }
 
   observeNode(nodeId: string) {
     this.observedNodes.add(nodeId);
-    this.redefine('observedIds', '_observed_ids', `${JSON.stringify(Array.from(this.observedNodes))}`, 'javascript', true);
+    this.redefine(
+      "observedIds",
+      "_observed_ids",
+      `${JSON.stringify(Array.from(this.observedNodes))}`,
+      "javascript",
+      true,
+    );
   }
 
   unobserveNode(nodeId: string) {
     this.observedNodes.delete(nodeId);
-    this.redefine('observedIds', '_observed_ids', `${JSON.stringify(Array.from(this.observedNodes))}`, 'javascript', true);
+    this.redefine(
+      "observedIds",
+      "_observed_ids",
+      `${JSON.stringify(Array.from(this.observedNodes))}`,
+      "javascript",
+      true,
+    );
   }
 
   redefineFromConfig(cellId, name, deps: string[], definition: Function) {
-    const cell = Cell.fromConfig(this, cellId, name, deps, definition);
-    this.define(cell)
+    const cell = ActiveCell.fromConfig(this, cellId, name, deps, definition);
+    this.define(cell);
   }
 
   // observe a node via a custom variable named `node_${nodeId}`
@@ -81,7 +102,7 @@ export class ActiveCellRuntime extends EventEmitter {
       "javascript",
       true,
     );
-    
+
     this.observeNode(nodeId);
   }
 
@@ -124,7 +145,7 @@ export class ActiveCellRuntime extends EventEmitter {
 
     try {
       // find the cell id add create a variable
-      const cell = Cell.fromCode(this, name, cellId, code, type);
+      const cell = ActiveCell.fromCode(this, name, cellId, code, type);
       if (!cell) {
         console.error("failed to create from code", cellId, code);
         const oldCell = this.cells.get(cellId);
@@ -152,7 +173,7 @@ export class ActiveCellRuntime extends EventEmitter {
   }
 
   // define a new cell, if old cell with same id exists redefine it
-  private define(cell: Cell) {
+  private define(cell: ActiveCell) {
     const { id, name, inputs, definition } = cell;
     const before = this.cells.get(id);
     console.log(
@@ -162,8 +183,8 @@ export class ActiveCellRuntime extends EventEmitter {
       definition.toString(),
     );
 
-    if (cell.name === 'Nodes') {
-      console.log('Nodes', cell);
+    if (cell.name === "Nodes") {
+      console.log("Nodes", cell);
     }
     // define a new variable
     if (before) {
@@ -179,19 +200,19 @@ export class ActiveCellRuntime extends EventEmitter {
     this.emit("defined:" + cell.id, cell);
   }
 
-  onDefine(cellId: string, cb: (cell: Cell) => void) {
+  onDefine(cellId: string, cb: (cell: ActiveCell) => void) {
     this.on("defined:" + cellId, cb);
   }
 
-  offDefine(cellId: string, cb: (cell: Cell) => void) {
+  offDefine(cellId: string, cb: (cell: ActiveCell) => void) {
     this.off("defined:" + cellId, cb);
   }
 
-  onDelete(cellId: string, cb: (cell: Cell) => void) {
+  onDelete(cellId: string, cb: (cell: ActiveCell) => void) {
     this.on("deleted:" + cellId, cb);
   }
 
-  offDelete(cellId: string, cb: (cell: Cell) => void) {
+  offDelete(cellId: string, cb: (cell: ActiveCell) => void) {
     this.off("deleted:" + cellId, cb);
   }
 
@@ -203,31 +224,31 @@ export class ActiveCellRuntime extends EventEmitter {
     this.off("error:" + cellId, cb);
   }
 
-  onFulfilled(cellId: string, cb: (cell: Cell) => void) {
+  onFulfilled(cellId: string, cb: (cell: ActiveCell) => void) {
     this.on(`fulfilled:${cellId}`, cb);
   }
 
-  offFulfilled(cellId: string, cb: (cell: Cell) => void) {
+  offFulfilled(cellId: string, cb: (cell: ActiveCell) => void) {
     this.off(`fulfilled:${cellId}`, cb);
   }
 
-  onRejected(cellId: string, cb: (cell: Cell) => void) {
+  onRejected(cellId: string, cb: (cell: ActiveCell) => void) {
     this.on(`rejected:${cellId}`, cb);
   }
 
-  offRejected(cellId: string, cb: (cell: Cell) => void) {
+  offRejected(cellId: string, cb: (cell: ActiveCell) => void) {
     this.off(`rejected:${cellId}`, cb);
   }
 
-  onPending(cellId: string, cb: (cell: Cell) => void) {
+  onPending(cellId: string, cb: (cell: ActiveCell) => void) {
     this.on(`pending:${cellId}`, cb);
   }
 
-  offPending(cellId: string, cb: (cell: Cell) => void) {
+  offPending(cellId: string, cb: (cell: ActiveCell) => void) {
     this.off(`pending:${cellId}`, cb);
   }
 
-  private replace(before: Cell, cell: Cell) {
+  private replace(before: ActiveCell, cell: ActiveCell) {
     // if before.name is different from cell.name
     if (
       before.name === null ||
@@ -253,9 +274,9 @@ export class ActiveCellRuntime extends EventEmitter {
     }
   }
 
-  private defineFresh(cell: Cell) {
+  private defineFresh(cell: ActiveCell) {
     const { id, name, inputs, definition } = cell;
-    console.log("define fresh", name, definition);
+    // console.log("define fresh", name, definition);
     cell.variable = this.module
       .variable({
         fulfilled: (value: any) => {
@@ -274,7 +295,7 @@ export class ActiveCellRuntime extends EventEmitter {
           // if (cell.isViewOf()) {
           //   const name = cell.name?.replace("__view_", "");
           //
-          //   const view = Cell.fromCode(
+          //   const view = ActiveCell.fromCode(
           //     this,
           //     randomCellId(),
           //     `${name} = Generators.input(${cell.name})`,
@@ -317,15 +338,15 @@ export class ActiveCellRuntime extends EventEmitter {
     console.log("destroy module");
   }
 
-  private fulfilled(cell: Cell) {
+  private fulfilled(cell: ActiveCell) {
     this.emit(`fulfilled:${cell.id}`, cell);
   }
 
-  private rejected(cell: Cell) {
+  private rejected(cell: ActiveCell) {
     this.emit(`rejected:${cell.id}`, cell);
   }
 
-  private pending(cell: Cell) {
+  private pending(cell: ActiveCell) {
     this.emit(`pending:${cell.id}`, cell);
   }
 
@@ -346,7 +367,7 @@ interface CellProps {
 }
 
 let counter = 0;
-export class Cell extends EventEmitter {
+export class ActiveCell extends EventEmitter {
   uniqId: number;
   // this is a cell id
   // NOTE: not the same as the variable id
@@ -362,7 +383,7 @@ export class Cell extends EventEmitter {
 
   mod: ActiveCellRuntime;
 
-  outputs: Cell[] = [];
+  outputs: ActiveCell[] = [];
 
   result: any;
   error: any;
@@ -372,12 +393,17 @@ export class Cell extends EventEmitter {
 
   deleted: boolean = false;
 
-
-  static fromConfig(mod: ActiveCellRuntime, cellId: string, name, deps: string[], definition: Function) {
-    return new Cell({
+  static fromConfig(
+    mod: ActiveCellRuntime,
+    cellId: string,
+    name,
+    deps: string[],
+    definition: Function,
+  ) {
+    return new ActiveCell({
       id: cellId,
       name: name,
-      code: '',
+      code: "",
       codeType: "javascript",
       ast: undefined,
       inputs: deps,
@@ -392,7 +418,7 @@ export class Cell extends EventEmitter {
     id: string,
     code: string | Function,
     type: string,
-  ): Optional<Cell> {
+  ): Optional<ActiveCell> {
     try {
       if (isString(code) && type === "markdown") {
         const cellName = nextUnnamedCellName();
@@ -401,7 +427,7 @@ export class Cell extends EventEmitter {
           return md`${code}`;
         };
 
-        return new Cell({
+        return new ActiveCell({
           id,
           name: cellName,
           code,
@@ -420,7 +446,7 @@ export class Cell extends EventEmitter {
           return html`${code}`;
         };
 
-        return new Cell({
+        return new ActiveCell({
           id,
           name: cellName,
           code,
@@ -441,7 +467,7 @@ export class Cell extends EventEmitter {
           </style>`;
         };
 
-        return new Cell({
+        return new ActiveCell({
           id,
           name: cellName,
           code,
@@ -487,7 +513,7 @@ export class Cell extends EventEmitter {
         return undefined;
       }
 
-      return new Cell({
+      return new ActiveCell({
         id,
         name: cellName,
         code: code.toString(),
@@ -578,11 +604,11 @@ export class Cell extends EventEmitter {
     return this.ast?.id?.name;
   }
 
-  connectOutput(cell: Cell) {
+  connectOutput(cell: ActiveCell) {
     this.outputs.push(cell);
   }
 
-  disconnectOutput(cell: Cell) {
+  disconnectOutput(cell: ActiveCell) {
     const index = this.outputs.indexOf(cell);
     if (index > -1) {
       this.outputs.splice(index, 1);
@@ -605,7 +631,6 @@ export class Cell extends EventEmitter {
   isFulfilled() {
     return !!this.variable?._promise.done;
   }
-
 }
 
 // factory for creating variable definitions
@@ -685,7 +710,7 @@ const factory = {
   // create a function definition combining the name, inputs and body
   define(name: string, inputs: string[], body: string, opts?: any) {
     const fnStr = `return ${opts?.async ? "async" : ""} function ${opts?.generator ? "*" : ""} ${!!name ? `_${name}` : ""} ( ${inputs.join(",")} ) {\n  ${body} \n} `;
-    console.log("factory defined =>", fnStr);
+    // console.log("factory defined =>", fnStr);
     return new Function(fnStr)();
   },
 };

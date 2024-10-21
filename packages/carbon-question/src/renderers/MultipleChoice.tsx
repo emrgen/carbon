@@ -69,7 +69,7 @@ export const MultipleChoiceOptionComp = (props: RendererProps) => {
           {index}
         </div>
         <CarbonChildren node={props.node} />
-        <div className={"mcq-answer-checkbox"}>
+        <div className={"mcq-answer-checkbox"} contentEditable={false}>
           <input
             type={"checkbox"}
             onChange={updateSelected}

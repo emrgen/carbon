@@ -9,7 +9,7 @@ import { isFunction } from "lodash";
 import { isNumber } from "lodash";
 import { isString } from "lodash";
 import { isObject } from "lodash";
-import { Cell } from "../core/ActiveCellRuntime";
+import { ActiveCell } from "../core/ActiveCellRuntime";
 import { Optional } from "@emrgen/types";
 import { isHtmlElement } from "../utils";
 import { isScriptElement } from "../utils";
@@ -29,7 +29,7 @@ const ResultInner = (props) => {
   const mod = useActiveCellRuntime();
 
   const [nodeId] = useState(node.id.toString());
-  const [cell, setCell] = useState<Optional<Cell>>(
+  const [cell, setCell] = useState<Optional<ActiveCell>>(
     mod.cell(node.id.toString()),
   );
   const [result, setResult] = useState<any>(NOT_LOADED);
@@ -70,14 +70,14 @@ const ResultInner = (props) => {
 
   // listen to the cell events from the module
   useEffect(() => {
-    const onDefine = (cell: Cell) => {
+    const onDefine = (cell: ActiveCell) => {
       setError("");
       setCell(cell);
       setCellName(cell.name);
       setPending(false);
     };
 
-    const onDelete = (cell: Cell) => {
+    const onDelete = (cell: ActiveCell) => {
       setCellName("");
       setError("");
       setCell(null);
@@ -104,7 +104,7 @@ const ResultInner = (props) => {
 
   // listen to the cell events
   useEffect(() => {
-    const onFulfill = (cell: Cell) => {
+    const onFulfill = (cell: ActiveCell) => {
       // console.log("fulfilled", cell.uniqId, cell.name, cell.result, cell);
       setCell(cell);
       updateResult(cell.result);
@@ -112,13 +112,13 @@ const ResultInner = (props) => {
       setPending(false);
     };
 
-    const onPending = (cell: Cell) => {
+    const onPending = (cell: ActiveCell) => {
       // console.log("pending", cell.name);
       setPending(true);
       setCell(cell);
     };
 
-    const onReject = (cell: Cell) => {
+    const onReject = (cell: ActiveCell) => {
       // console.log("rejected", cell.name, cell.error);
       setCell(cell);
       setError(cell.error.toString());
@@ -136,7 +136,7 @@ const ResultInner = (props) => {
     };
   }, [cell, mod, nodeId]);
 
-  console.log("cell result", cell, cell?.result, result, error);
+  // console.log("cell result", cell, cell?.result, result, error);
 
   return (
     <div className={"carbon-cell-view"}>

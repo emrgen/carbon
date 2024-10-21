@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import { useCallback } from "react";
-import { useMemo } from "react";
 
 import {
   blockPresetPlugins,
@@ -22,7 +21,8 @@ import {
 import { useCreateCarbon } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
-  ActivatedPath, Carbon,
+  ActivatedPath,
+  Carbon,
   ColorPath,
   corePresetPlugins,
   Mark,
@@ -38,6 +38,7 @@ import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
 import { cellPlugin, cellRenderer } from "@emrgen/carbon-cell";
 import { ActiveCellRuntimeContext } from "@emrgen/carbon-cell";
+import { ActiveCellRuntime } from "@emrgen/carbon-cell";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { flattenDeep } from "lodash";
 import { PathTracker } from "../../PathTracker";
@@ -51,6 +52,7 @@ import { databaseRenderers } from "@emrgen/carbon-database-react";
 import { boardPlugins } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
 import { questionExtension } from "@emrgen/carbon-question";
+import { ObservableQuestions } from "@emrgen/carbon-question";
 import { Box } from "@chakra-ui/react";
 import SelectionTracker from "../../SelectionTracker";
 
@@ -499,13 +501,13 @@ const data = node("carbon", [
       ]),
 
       node("question", [
-          title([text("question title")]),
-          node("mcq", [
-            node("mcqOption", [title([text("option 1")])]),
-            node("mcqOption", [title([text("option 2")])]),
-            node("mcqOption", [title([text("option 3")])]),
-            node("mcqOption", [title([text("option 4")])]),
-          ]),
+        title([text("question title")]),
+        node("mcq", [
+          node("mcqOption", [title([text("option 1")])]),
+          node("mcqOption", [title([text("option 2")])]),
+          node("mcqOption", [title([text("option 3")])]),
+          node("mcqOption", [title([text("option 4")])]),
+        ]),
       ]),
 
       section([title([text("section 1")])]),
@@ -839,7 +841,11 @@ const renderManager = RenderManager.from(renderers);
 
 export default function Dev() {
   const app = useCreateCarbon("dev", data, flattenDeep(plugins));
-
+  const [runtime] = useState<ActiveCellRuntime>(() => {
+    return new ActiveCellRuntime({
+      Carbon: app,
+    });
+  });
   // @ts-ignore
   window.app = app;
 
@@ -933,22 +939,23 @@ export default function Dev() {
 
   return (
     <Box className={"carbon-app-container"}>
-      <ActiveCellRuntimeContext builtins={{ Carbon: app }}>
-        <CarbonApp app={app} renderManager={renderManager}>
-          <SelectionTracker />
-          <PathTracker />
-        </CarbonApp>
+      <ActiveCellRuntimeContext runtime={runtime}>
+        <ObservableQuestions>
+          <CarbonApp app={app} renderManager={renderManager}>
+            <SelectionTracker />
+            <PathTracker />
+          </CarbonApp>
+        </ObservableQuestions>
       </ActiveCellRuntimeContext>
     </Box>
   );
 }
 
-class Nodes{
+class Nodes {
   app: Carbon;
   observedIds: Array<string> = [];
   constructor(app: Carbon, observedIds: Array<string>) {
     this.app = app;
     this.observedIds = observedIds;
   }
-
 }

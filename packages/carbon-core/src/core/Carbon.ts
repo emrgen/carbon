@@ -89,7 +89,7 @@ export class Carbon extends EventEmitter {
     this.em = new EventManager(this, pm, this.change);
 
     this.commands = pm.commands();
-    this.service = pm.services();
+    this.service = pm.services(this);
     // this.chain = new CarbonCommandChain(this, this.tm, this.pm, this.sm);
 
     this.enabled = true;

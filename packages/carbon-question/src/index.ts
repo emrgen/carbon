@@ -23,4 +23,5 @@ export const questionExtension: Extension = {
   ],
 };
 
-export * from './observable/Questions';
+export * from "./observable/Questions";
+export * from "./observable/ObservableQuestions";

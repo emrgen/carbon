@@ -1,15 +1,12 @@
 import { ActiveCellRuntime } from "../core/ActiveCellRuntime";
 import { createContext } from "react";
-import { useState } from "react";
 import { useContext } from "react";
 
 const InnerActiveCellRuntimeContext = createContext<ActiveCellRuntime>(null!);
 
-export const ActiveCellRuntimeContext = ({ children, builtins }) => {
-  const [module] = useState<ActiveCellRuntime>(new ActiveCellRuntime(builtins));
-
+export const ActiveCellRuntimeContext = ({ children, runtime }) => {
   return (
-    <InnerActiveCellRuntimeContext.Provider value={module}>
+    <InnerActiveCellRuntimeContext.Provider value={runtime}>
       {children}
     </InnerActiveCellRuntimeContext.Provider>
   );

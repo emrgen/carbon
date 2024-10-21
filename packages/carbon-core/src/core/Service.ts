@@ -1,10 +1,13 @@
 import { entries, isEmpty } from "lodash";
 import { CarbonPlugin } from "./CarbonPlugin";
+import { Carbon } from "./Carbon";
 
 type ServiceMap = Record<string, Record<string, Function>>;
 
+// Service is a proxy object that allows plugins to access each other's services
+// the services are bound to the plugin instance and accessed via the plugin name
 export class Service {
-  static from(plugins: CarbonPlugin[]) {
+  static from(app: Carbon, plugins: CarbonPlugin[]) {
     const services = plugins.reduce((acc, plugin) => {
       const services = plugin.services();
       if (isEmpty(services)) return acc;
@@ -13,7 +16,7 @@ export class Service {
         (acc, [name, service]) => {
           return {
             ...acc,
-            [name]: (...args: any) => service.bind(plugin)(...args),
+            [name]: (...args: any) => service.bind(plugin)(app, ...args),
           };
         },
         {} as Record<string, Function>,

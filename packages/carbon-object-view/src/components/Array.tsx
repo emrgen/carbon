@@ -8,7 +8,7 @@ interface ArrayProps {
 }
 
 export const ArrayView = (props) => {
-  const { data } = props;
+  const { data, propName } = props;
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -20,6 +20,7 @@ export const ArrayView = (props) => {
         className={"cov-array-initial"}
         onClick={() => setExpanded((e) => !e)}
       >
+        {propName && <span className={"cov-object-key"}>{propName}:</span>}
         <div className={"cov-expander"}>
           <BsFillCaretRightFill fontSize={"12px"} />
         </div>
@@ -33,7 +34,7 @@ export const ArrayView = (props) => {
             {data.map((d, index) => {
               return (
                 <div key={index} className={"cov-array-element"}>
-                  <NodeView data={d} propName={index} isIndex={true} />
+                  <NodeView data={d} propName={`${index}`} isIndex={true} />
                 </div>
               );
             })}
@@ -49,7 +50,7 @@ export const ArrayView = (props) => {
             data.map((d, index) => {
               return (
                 <div key={index} className={"cov-array-element"}>
-                  <NodeInitial data={d} />
+                  <NodeInitial data={d} propName={""} isIndex={false} />
                   {index + 1 !== data.length && (
                     <span className={"cov-comma"}>,</span>
                   )}
