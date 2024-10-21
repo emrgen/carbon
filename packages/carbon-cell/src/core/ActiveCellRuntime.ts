@@ -8,7 +8,8 @@ import { isHtmlElement } from "../utils";
 import { viewCellName } from "../utils";
 import { isUnnamedCell } from "../utils";
 import { isViewCell } from "../utils";
-import { isString } from "lodash"; //
+import { isString } from "lodash";
+import {Nodes} from "./Nodes"; //
 
 //
 export class ActiveCellRuntime extends EventEmitter {
@@ -19,12 +20,19 @@ export class ActiveCellRuntime extends EventEmitter {
   // cellId -> Cell
   cells: Map<string, Cell> = new Map();
 
+  observedNodes: Set<string> = new Set();
+
   constructor(builtins: Record<string, any> = {}) {
     super();
     this.runtime = new Runtime(Object.assign(new Library(), builtins));
     this.module = this.runtime.module();
     // define a hidden module variable
     // this.module.variable(true).define("_module", [], () => this.module);
+
+    // define a hidden module variable for observed nodes
+    this.redefineFromConfig('_cell_nodes','Nodes', ['Carbon', 'observedIds'], (Carbon, observedIds) => {
+      return new Nodes(Carbon, observedIds)
+    });
   }
 
   result(cellId: string) {
@@ -40,11 +48,26 @@ export class ActiveCellRuntime extends EventEmitter {
       // @ts-ignore
       (v) => v._observer.toString() !== "Symbol(no-observer)",
     );
-    console.log(vars);
+    console.log('Variables',vars.map(v => v._name));
+  }
+
+  observeNode(nodeId: string) {
+    this.observedNodes.add(nodeId);
+    this.redefine('observedIds', '_observed_ids', `${JSON.stringify(Array.from(this.observedNodes))}`, 'javascript', true);
+  }
+
+  unobserveNode(nodeId: string) {
+    this.observedNodes.delete(nodeId);
+    this.redefine('observedIds', '_observed_ids', `${JSON.stringify(Array.from(this.observedNodes))}`, 'javascript', true);
+  }
+
+  redefineFromConfig(cellId, name, deps: string[], definition: Function) {
+    const cell = Cell.fromConfig(this, cellId, name, deps, definition);
+    this.define(cell)
   }
 
   // observe a node via a custom variable named `node_${nodeId}`
-  observeNode(nodeId: string) {
+  redefineNode(nodeId: string) {
     console.log(
       "redefine",
       nodeId,
@@ -58,6 +81,8 @@ export class ActiveCellRuntime extends EventEmitter {
       "javascript",
       true,
     );
+    
+    this.observeNode(nodeId);
   }
 
   redefine(
@@ -137,6 +162,9 @@ export class ActiveCellRuntime extends EventEmitter {
       definition.toString(),
     );
 
+    if (cell.name === 'Nodes') {
+      console.log('Nodes', cell);
+    }
     // define a new variable
     if (before) {
       this.replace(before, cell);
@@ -344,6 +372,20 @@ export class Cell extends EventEmitter {
 
   deleted: boolean = false;
 
+
+  static fromConfig(mod: ActiveCellRuntime, cellId: string, name, deps: string[], definition: Function) {
+    return new Cell({
+      id: cellId,
+      name: name,
+      code: '',
+      codeType: "javascript",
+      ast: undefined,
+      inputs: deps,
+      definition: definition,
+      mod,
+    });
+  }
+
   static fromCode(
     mod: ActiveCellRuntime,
     name: string,
@@ -441,7 +483,7 @@ export class Cell extends EventEmitter {
         : code;
 
       if (!definition) {
-        console.error("DEFINITION NOT FOUND", ast);
+        console.error("DEFINITION NOT FOUND", ast.body.type, ast);
         return undefined;
       }
 
@@ -563,6 +605,7 @@ export class Cell extends EventEmitter {
   isFulfilled() {
     return !!this.variable?._promise.done;
   }
+
 }
 
 // factory for creating variable definitions
@@ -597,10 +640,10 @@ const factory = {
     ast: any,
     code: string,
   ) {
-    this.Expression(name, deps, ast, code);
+    return this.Expression(name, deps, ast, code);
   },
   FunctionExpression(name: string, deps: string[], ast: any, code: string) {
-    this.Expression(name, deps, ast, code);
+    return this.Expression(name, deps, ast, code);
   },
   BinaryExpression(name: string, deps: string[], ast: any, code: string) {
     this.Expression(name, deps, ast, code);
@@ -611,13 +654,13 @@ const factory = {
     ast: any,
     code: string,
   ) {
-    this.Expression(name, deps, ast, code);
+    return this.Expression(name, deps, ast, code);
   },
   NewExpression(name: string, deps: string[], ast: any, code: string) {
-    this.Expression(name, deps, ast, code);
+    return this.Expression(name, deps, ast, code);
   },
   MemberExpression(name: string, deps: string[], ast: any, code: string) {
-    this.Expression(name, deps, ast, code);
+    return this.Expression(name, deps, ast, code);
   },
   ChainExpression(name: string, deps: string[], ast: any, code: string) {
     return this.Expression(name, deps, ast, code);

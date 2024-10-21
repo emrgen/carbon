@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BsFillCaretRightFill } from "react-icons/bs";
-import { isPlainObject } from "lodash";
+import {isPlainObject, sortBy} from "lodash";
 import { isEmpty } from "lodash";
 import { NodeView } from "./Node";
 import { isGetterProp } from "./utils";
@@ -13,6 +13,8 @@ import { Literal } from "./Literal";
 export const ProtoView = ({ data, propName, parentProps = new Set() }) => {
   const [expanded, setExpanded] = useState(false);
 
+  // NOTE: proto is the __proto__ of the object and can have many fields overridden by child object
+  // so the overwriting fields become undefined and causes Error: Cannot access derived fields of undefined
   const proto = Object.getPrototypeOf(data);
   if (isLiteral(proto)) {
     if (isEmpty(proto)) {
@@ -21,8 +23,7 @@ export const ProtoView = ({ data, propName, parentProps = new Set() }) => {
     return <Literal data={proto} propName={propName} isIndex={false} />;
   }
 
-  const props = Object.getOwnPropertyNames(proto);
-  console.log(proto, props);
+  const props = sortBy(Object.getOwnPropertyNames(proto));
 
   const descriptors = props.reduce((props, name) => {
     const descriptor = Object.getOwnPropertyDescriptor(proto, name);

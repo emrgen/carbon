@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NodeView } from "./Node";
 import { NodeInitial } from "./NodeInitial";
 import { BsFillCaretRightFill } from "react-icons/bs";
-import { isPlainObject } from "lodash";
+import {isPlainObject, sortBy} from "lodash";
 import { ProtoView } from "./Proto";
 import { isGetterProp } from "./utils";
 import { isSetterProp } from "./utils";
@@ -12,7 +12,7 @@ import { AiFillCaretDown } from "react-icons/ai";
 export const ObjectView = ({ data, propName, parentProps = new Set() }) => {
   const [expanded, setExpanded] = useState(false);
 
-  const props = Object.getOwnPropertyNames(data);
+  const props = sortBy(Object.getOwnPropertyNames(data));
 
   const descriptors = props.reduce((props, name) => {
     const descriptor = Object.getOwnPropertyDescriptor(data, name);

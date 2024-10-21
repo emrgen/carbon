@@ -22,3 +22,5 @@ export const questionExtension: Extension = {
     // ReactRenderer.create("questionDescription", QuestionDescriptionComp),
   ],
 };
+
+export * from './observable/Questions';

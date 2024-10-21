@@ -12,8 +12,15 @@ export const QuestionComp = (props: RendererProps) => {
   const runtime = useActiveCellRuntime();
 
   useEffect(() => {
-    runtime.observeNode(node.id.toString());
+    runtime.redefineNode(node.id.toString());
   }, [node, runtime]);
+
+  useEffect(() => {
+    runtime.observeNode(node.id.toString());
+    return () => {
+      runtime.unobserveNode(node.id.toString());
+    };
+  }, []);
 
   return (
     <CarbonBlock {...props}>

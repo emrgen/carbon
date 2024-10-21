@@ -135,6 +135,6 @@ export class Point {
   }
 
   static fromJSON(json: any) {
-    return Point.create(NodeId.create(json.id), json.at, json.offset);
+    return Point.create(NodeId.fromString(json.id), json.at, json.offset);
   }
 }

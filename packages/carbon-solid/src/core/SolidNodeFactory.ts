@@ -16,11 +16,11 @@ let counter = 0;
 
 export class SolidNodeFactory implements NodeFactory {
   blockId() {
-    return NodeId.create("[" + ++counter + "]");
+    return NodeId.fromString("[" + ++counter + "]");
   }
 
   textId() {
-    return NodeId.create("(" + ++counter + ")");
+    return NodeId.fromString("(" + ++counter + ")");
   }
 
   create(json: any, schema: Schema): Optional<Node> {

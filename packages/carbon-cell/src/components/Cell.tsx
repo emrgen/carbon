@@ -77,7 +77,7 @@ export const CellComp = (props: RendererProps) => {
   );
 
   const rotateCodeType = useCallback(() => {
-    const nid = NodeId.create(nodeId);
+    const nid = NodeId.fromString(nodeId);
     const node = app.store.get(nid);
     const cell = mod.cell(nodeId);
     const code = node?.props.get(CodeCellCodeValuePath, "") ?? "";

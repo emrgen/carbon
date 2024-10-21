@@ -23,7 +23,7 @@ export class NodeStore {
 
   get(entry: string | NodeId | HTMLElement | Element): Optional<Node> {
     if (typeof entry === "string") {
-      entry = NodeId.create(entry);
+      entry = NodeId.fromString(entry);
     }
 
     const nodeId = entry;
@@ -37,7 +37,7 @@ export class NodeStore {
   // get the rendered HTML element for the node
   element(nodeId: string | NodeId): Optional<HTMLElement> {
     if (typeof nodeId === "string") {
-      nodeId = NodeId.create(nodeId);
+      nodeId = NodeId.fromString(nodeId);
     }
 
     const el = this.elementMap.get(nodeId.id);

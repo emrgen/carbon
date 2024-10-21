@@ -22,7 +22,7 @@ import {
 import { useCreateCarbon } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import {
-  ActivatedPath,
+  ActivatedPath, Carbon,
   ColorPath,
   corePresetPlugins,
   Mark,
@@ -498,6 +498,16 @@ const data = node("carbon", [
         ]),
       ]),
 
+      node("question", [
+          title([text("question title")]),
+          node("mcq", [
+            node("mcqOption", [title([text("option 1")])]),
+            node("mcqOption", [title([text("option 2")])]),
+            node("mcqOption", [title([text("option 3")])]),
+            node("mcqOption", [title([text("option 4")])]),
+          ]),
+      ]),
+
       section([title([text("section 1")])]),
 
       node("sandbox", [node("cell")]),
@@ -921,17 +931,9 @@ export default function Dev() {
     };
   }, [startAddingItem, stopAddingItem]);
 
-  const Nodes = useMemo(() => {
-    return {
-      get(id: string) {
-        return app.store.get(NodeId.create(id));
-      },
-    };
-  }, [app]);
-
   return (
     <Box className={"carbon-app-container"}>
-      <ActiveCellRuntimeContext builtins={{ Nodes, Carbon: app }}>
+      <ActiveCellRuntimeContext builtins={{ Carbon: app }}>
         <CarbonApp app={app} renderManager={renderManager}>
           <SelectionTracker />
           <PathTracker />
@@ -939,4 +941,14 @@ export default function Dev() {
       </ActiveCellRuntimeContext>
     </Box>
   );
+}
+
+class Nodes{
+  app: Carbon;
+  observedIds: Array<string> = [];
+  constructor(app: Carbon, observedIds: Array<string>) {
+    this.app = app;
+    this.observedIds = observedIds;
+  }
+
 }

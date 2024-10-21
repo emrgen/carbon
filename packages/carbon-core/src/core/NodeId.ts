@@ -15,7 +15,7 @@ export class NodeId implements IntoNodeId {
 
   static IDENTITY = new NodeId(IdentityId);
 
-  static SKIP: NodeId = NodeId.create("0000000002");
+  static SKIP: NodeId = NodeId.fromString("0000000002");
 
   get isDefault() {
     return this.eq(NodeId.IDENTITY);
@@ -33,7 +33,7 @@ export class NodeId implements IntoNodeId {
     return new NodeId(id);
   }
 
-  static create(id: string) {
+  static fromString(id: string) {
     return new NodeId(id);
   }
 
@@ -56,7 +56,7 @@ export class NodeId implements IntoNodeId {
   }
 
   clone() {
-    return NodeId.create(this.id);
+    return NodeId.fromString(this.id);
   }
 
   toString() {

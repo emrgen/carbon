@@ -8,11 +8,11 @@ let counter = 0;
 
 export class VueNodeFactory implements NodeFactory {
   blockId() {
-    return NodeId.create(uuidv4().slice(-10) + '[' + ++counter + ']');
+    return NodeId.fromString(uuidv4().slice(-10) + '[' + ++counter + ']');
   }
 
   textId() {
-    return NodeId.create(uuidv4().slice(-10) + '(' + ++counter + ')');
+    return NodeId.fromString(uuidv4().slice(-10) + '(' + ++counter + ')');
   }
 
   create(json: any, schema: Schema): Optional<Node> {
