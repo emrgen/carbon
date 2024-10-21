@@ -26,6 +26,7 @@ export class PagePlugin extends CarbonPlugin {
       document: true,
       pasteBoundary: true,
       tag: "main",
+      observable: true,
       props: {
         local: {
           placeholder: {

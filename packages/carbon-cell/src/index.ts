@@ -8,4 +8,4 @@ export const cellPlugin = new Cell();
 export const cellRenderer = [ReactRenderer.create("cell", CellComp)];
 
 export * from "./plugins/Cell";
-export * from "./hooks/useModule";
+export * from "./hooks/useActiveCellRuntime";

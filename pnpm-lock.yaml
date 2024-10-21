@@ -225,7 +225,7 @@ importers:
         version: 11.2.6(@emotion/is-prop-valid@1.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       geist:
         specifier: ^1.3.1
-        version: 1.3.1(next@13.5.7(@babel/core@7.25.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        version: 1.3.1(next@13.5.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -839,6 +839,9 @@ importers:
       '@observablehq/runtime':
         specifier: ^5.9.9
         version: 5.9.9
+      '@observablehq/stdlib':
+        specifier: ^5.8.8
+        version: 5.8.8
       '@react-icons/all-files':
         specifier: ^4.1.0
         version: 4.1.0(react@18.3.1)
@@ -1590,6 +1593,31 @@ importers:
       react:
         specifier: ^18.3.1
         version: 18.3.1
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.6.3
+
+  packages/carbon-event:
+    dependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      event:
+        specifier: ^1.0.0
+        version: 1.0.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -6010,6 +6038,9 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
+  event@1.0.0:
+    resolution: {integrity: sha512-/q6sbFBp32KzPv3nDAt3eio279pruEGP8JSvDpdHy7dhuQAYW1pvaDMq+vKm8+JS8PO5erorCP71sMpStZErgA==}
+
   eventemitter3@4.0.7:
     resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
 
@@ -6923,6 +6954,12 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
+  method@1.0.2:
+    resolution: {integrity: sha512-0BxVo2fPZK1gOfbQ7V8MWyiNLB+8dv8rREcOeQHnZdPZgUbdzXUUiqPszm8DY8sTk1ewWyloU6QSMUwF5+jc6Q==}
+
+  method@2.0.0:
+    resolution: {integrity: sha512-JqK3SsKDlfW1+6HzlDcpsOBPyEA+gzKUN/3OG3yc6mvbcF/OyKd+OVJRht4TFABOpXV6IQVcc2kt1u5fWNjFCg==}
+
   methods@1.1.2:
     resolution: {integrity: sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==}
     engines: {node: '>= 0.6'}
@@ -7667,6 +7704,9 @@ packages:
 
   reduce-configs@1.0.0:
     resolution: {integrity: sha512-/JCYSgL/QeXXsq0Lv/7kOZfqvof7vyzHWfyNQPt3c6vc73mU4WRyT8RJ6ZH5Ci08vUOqXwk7jkZy6BycHTDD9w==}
+
+  reducible@1.0.6:
+    resolution: {integrity: sha512-sH74nXS0dz8nQ4qtDpolj9u2nOwoyIg0f8+TQM1bHllTQw95e9hGSBq5Dn0nFTXkJ1VEJ5rTb2UazDhN+KXX9Q==}
 
   reflect.getprototypeof@1.0.6:
     resolution: {integrity: sha512-fmfw4XgoDke3kdI6h4xcUz1dG8uaiv5q9gcEwLS4Pnth2kxT+GZ7YehS1JTMGBQmtV7Y4GFGbs2re2NqhdozUg==}
@@ -12195,6 +12235,11 @@ snapshots:
 
   etag@1.8.1: {}
 
+  event@1.0.0:
+    dependencies:
+      method: 1.0.2
+      reducible: 1.0.6
+
   eventemitter3@4.0.7: {}
 
   events@3.3.0: {}
@@ -12433,7 +12478,7 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
-  geist@1.3.1(next@13.5.7(@babel/core@7.25.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
+  geist@1.3.1(next@13.5.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
     dependencies:
       next: 13.5.7(@babel/core@7.25.8)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
@@ -13120,6 +13165,10 @@ snapshots:
   merge-stream@2.0.0: {}
 
   merge2@1.4.1: {}
+
+  method@1.0.2: {}
+
+  method@2.0.0: {}
 
   methods@1.1.2: {}
 
@@ -13933,6 +13982,10 @@ snapshots:
   reduce-configs@1.0.0:
     dependencies:
       browserslist: 4.24.0
+
+  reducible@1.0.6:
+    dependencies:
+      method: 2.0.0
 
   reflect.getprototypeof@1.0.6:
     dependencies:

@@ -14,7 +14,7 @@ import { HasFocusPath } from "@emrgen/carbon-core";
 import { Point } from "@emrgen/carbon-core";
 import { Pin } from "@emrgen/carbon-core";
 import { PiPlayBold } from "react-icons/pi";
-import { useModule } from "../hooks/useModule";
+import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
 import { CodeCellCodeValuePath } from "../constants";
 import { CodeCellCodeTypePath } from "../constants";
 import { EditorState } from "@codemirror/state";
@@ -49,7 +49,7 @@ export const CodeInner = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
   const ref = createRef<HTMLDivElement>();
-  const mod = useModule();
+  const mod = useActiveCellRuntime();
   const [defaultValue] = useState(node.props.get(CodeCellCodeValuePath, ""));
   const [value, setValue] = useState(
     node.props.get(CodeCellCodeValuePath, "javascript"),
@@ -65,8 +65,8 @@ export const CodeInner = (props: RendererProps) => {
   }, [node]);
 
   const redefine = useCallback(
-    (value, type) => {
-      mod.redefine(nodeId.toString(), value, type);
+    ({ code, type, forced = false }) => {
+      mod.redefine("", nodeId.toString(), code, type, forced);
     },
     [mod, nodeId],
   );
@@ -74,6 +74,7 @@ export const CodeInner = (props: RendererProps) => {
   useCustomCompareEffect(
     () => {
       mod.redefine(
+        "",
         nodeId.toString(),
         node.props.get(CodeCellCodeValuePath, ""),
         node.props.get(CodeCellCodeTypePath, "javascript"),
@@ -150,7 +151,7 @@ export const CodeInner = (props: RendererProps) => {
             // if the code type is changed, before the blur, skip the redefine
             if (codeType !== nextCodeType) return;
             // redefine the variable when the cell is blurred
-            redefine(value, codeType);
+            redefine({ code: value, type: codeType });
           }, 100);
         }
       }
@@ -213,20 +214,25 @@ export const CodeInner = (props: RendererProps) => {
                   console.log("Mod+/ keydown!", event);
                   event.stopPropagation();
                   event.preventDefault();
-                  redefine(
-                    app.store.get(nodeId)?.props.get(CodeCellCodeValuePath, ""),
-                    codeType,
-                  );
+                  redefine({
+                    code: app.store
+                      .get(nodeId)
+                      ?.props.get(CodeCellCodeValuePath, ""),
+                    type: codeType,
+                  });
                   return;
                 }
 
                 if (event.ctrlKey && event.key === "s") {
                   event.preventDefault();
                   event.stopPropagation();
-                  redefine(
-                    app.store.get(nodeId)?.props.get(CodeCellCodeValuePath, ""),
-                    codeType,
-                  );
+                  redefine({
+                    code: app.store
+                      .get(nodeId)
+                      ?.props.get(CodeCellCodeValuePath, ""),
+                    type: codeType,
+                    forced: true,
+                  });
                   return;
                 }
 
@@ -317,7 +323,7 @@ export const CodeInner = (props: RendererProps) => {
         onMouseUp={(e) => {
           preventAndStop(e);
           // find variable identity and redefine
-          redefine(value, codeType);
+          redefine({ code: value, type: codeType, forced: true });
         }}
       >
         <PiPlayBold />

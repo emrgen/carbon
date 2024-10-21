@@ -1,32 +1,24 @@
-
-import './question.styl'
+import "./question.styl";
 import { Question } from "./plugins/Question";
-import {QuestionTitleComp} from "./renderers/QuestionTitle";
-import {Extension} from "@emrgen/carbon-react";
-import {ReactRenderer} from "@emrgen/carbon-react";
-import {QuestionComp} from "./renderers/Question";
-import {QuestionTitle} from "./plugins/QuestionTitle";
-import {QuestionDescription} from "./plugins/QuestionDescription";
-import {QuestionExplanation} from "./plugins/QuestionExplanation";
-import {QuestionType} from "./plugins/QuestionType";
-import {MultipleChoiceComp, MultipleChoiceOptionComp} from "./renderers/MultipleChoice";
-import {QuestionDescriptionComp} from "./renderers/QuestionDescription";
+import { Extension } from "@emrgen/carbon-react";
+import { ReactRenderer } from "@emrgen/carbon-react";
+import { QuestionComp } from "./renderers/Question";
+import { HintsComp } from "./renderers/Hints";
+import { ExplanationsComp } from "./renderers/Explanations";
+import { MultipleChoiceQuestionComp } from "./renderers/MultipleChoice";
+import { MultipleChoiceOptionComp } from "./renderers/MultipleChoice";
 
 export const questionExtension: Extension = {
-  plugins: [
-    new Question(),
-    new QuestionTitle(),
-    new QuestionDescription(),
-    new QuestionType(),
-    new QuestionExplanation(),
-  ],
+  plugins: [new Question()],
   renderers: [
-    ReactRenderer.create('question', QuestionComp),
-    ReactRenderer.create('questionTitle', QuestionTitleComp),
-    ReactRenderer.create('questionDescription', QuestionDescriptionComp),
-    ReactRenderer.create('multipleChoice', MultipleChoiceComp),
-    ReactRenderer.create('multipleChoiceOption', MultipleChoiceOptionComp),
-  ]
+    ReactRenderer.create("question", QuestionComp),
+    ReactRenderer.create("hints", HintsComp),
+    ReactRenderer.create("explanations", ExplanationsComp),
+
+    ReactRenderer.create("mcq", MultipleChoiceQuestionComp),
+    ReactRenderer.create("mcqOption", MultipleChoiceOptionComp),
+
+    // ReactRenderer.create("questionTitle", QuestionTitleComp),
+    // ReactRenderer.create("questionDescription", QuestionDescriptionComp),
+  ],
 };
-
-

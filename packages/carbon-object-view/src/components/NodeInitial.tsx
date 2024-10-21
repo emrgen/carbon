@@ -5,6 +5,7 @@ import { isFunction } from "lodash";
 import { FunctionView } from "./Function";
 import { isLiteral } from "./utils";
 import { isGenerator } from "./utils";
+import { isProxy } from "./utils";
 import { Literal } from "./Literal";
 
 export const NodeInitial = ({ data, propName, isIndex }) => {
@@ -13,11 +14,15 @@ export const NodeInitial = ({ data, propName, isIndex }) => {
       return <Literal data={data} propName={propName} isIndex={isIndex} />;
     }
 
+    if (isProxy(data)) {
+      return <Literal data={"[Proxy]"} propName={propName} isIndex={false} />;
+    }
+
     if (isGenerator(data)) {
       return <span>Generator</span>;
     }
 
-    if (isFunction(data)) {
+    if (!isProxy(data) && isFunction(data)) {
       return (
         <FunctionView
           data={data}

@@ -1,7 +1,38 @@
-import {CarbonPlugin, EventContext, EventHandlerMap} from "@emrgen/carbon-core";
+import { CarbonPlugin } from "@emrgen/carbon-core";
+import { EventHandlerMap } from "@emrgen/carbon-core";
+
+export class MultipleChoiceQuestion extends CarbonPlugin {
+  name = "mcq";
+
+  spec() {
+    return {
+      group: "",
+      content: "mcqOption+",
+      inlineSelectable: true,
+      blockSelectable: true,
+      isolate: true,
+      props: {
+        local: {
+          html: {
+            contentEditable: false,
+            suppressContentEditableWarning: true,
+          },
+          placeholder: {
+            empty: "Question Title",
+            focused: "Question Title",
+          },
+        },
+      },
+    };
+  }
+
+  plugins(): CarbonPlugin[] {
+    return [new MultipleChoiceOption()];
+  }
+}
 
 export class MultipleChoiceOption extends CarbonPlugin {
-  name = "multipleChoiceOption";
+  name = "mcqOption";
 
   spec() {
     return {
@@ -10,7 +41,7 @@ export class MultipleChoiceOption extends CarbonPlugin {
       inlineSelectable: true,
       blockSelectable: true,
       splits: true,
-      splitName: "multipleChoiceOption",
+      splitName: "mcqOption",
       depends: {
         prev: true,
         next: true,
@@ -24,10 +55,10 @@ export class MultipleChoiceOption extends CarbonPlugin {
           placeholder: {
             empty: "",
             focused: "",
-          }
+          },
         },
-      }
-    }
+      },
+    };
   }
 
   keydown(): EventHandlerMap {
@@ -44,6 +75,6 @@ export class MultipleChoiceOption extends CarbonPlugin {
       //     return true;
       //   }
       // }
-    }
+    };
   }
 }

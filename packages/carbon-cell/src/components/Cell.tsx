@@ -7,7 +7,7 @@ import { NodeId } from "@emrgen/carbon-core";
 import { useMemo } from "react";
 import { useCallback } from "react";
 import { useState } from "react";
-import { useModule } from "../hooks/useModule";
+import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
 import { Code } from "./Code";
 import { Result } from "./Result";
 import { CodeCellCodeTypePath } from "../constants";
@@ -27,7 +27,7 @@ const codeIcons = {
 export const CellComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
-  const mod = useModule();
+  const mod = useActiveCellRuntime();
   const [codeType, setCodeType] = useState(
     node.props.get(CodeCellCodeTypePath, "javascript"),
   );
@@ -62,10 +62,16 @@ export const CellComp = (props: RendererProps) => {
   useCustomCompareEffect(
     () => {
       const codeType = node.props.get(CodeCellCodeTypePath, "javascript");
-      mod.redefine(nodeId, node.props.get(CodeCellCodeValuePath, ""), codeType);
+      mod.redefine(
+        "",
+        nodeId,
+        node.props.get(CodeCellCodeValuePath, ""),
+        codeType,
+      );
     },
     [node, mod],
     (prev, next) => {
+      // @ts-ignore
       return prev[0].eq(next[0]);
     },
   );
@@ -89,7 +95,7 @@ export const CellComp = (props: RendererProps) => {
         .Dispatch()
         .Then(() => {
           if (node) {
-            mod.redefine(nodeId, code, codeTypes[next]);
+            mod.redefine("", nodeId, code, codeTypes[next]);
           }
           setCodeType(codeTypes[next]);
         });

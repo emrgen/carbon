@@ -242,6 +242,7 @@ export const MediaReadyPath = "local/state/media/ready";
 export const LocalVideoInfoPath = "local/state/video/info";
 export const LocalDirtyCounterPath = "local/state/dirty/counter";
 export const FocusOnInsertPath = "local/state/focusOnInsert";
+export const SelectedOptionsPath = "remote/state/selected/options";
 
 export enum DocModes {
   View = "view",

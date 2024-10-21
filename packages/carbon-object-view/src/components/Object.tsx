@@ -4,9 +4,49 @@ import { NodeInitial } from "./NodeInitial";
 import { BsFillCaretRightFill } from "react-icons/bs";
 import { isPlainObject } from "lodash";
 import { ProtoView } from "./Proto";
+import { isGetterProp } from "./utils";
+import { isSetterProp } from "./utils";
+import { isFunctionProp } from "./utils";
+import { AiFillCaretDown } from "react-icons/ai";
 
-export const ObjectView = ({ data, propName }) => {
+export const ObjectView = ({ data, propName, parentProps = new Set() }) => {
   const [expanded, setExpanded] = useState(false);
+
+  const props = Object.getOwnPropertyNames(data);
+
+  const descriptors = props.reduce((props, name) => {
+    const descriptor = Object.getOwnPropertyDescriptor(data, name);
+    let value = "";
+
+    if (parentProps.has(name)) {
+      value = "[circular]";
+    }
+
+    if (parentProps.has(name)) {
+      value = "[circular]";
+    }
+
+    if (isGetterProp(descriptor)) {
+      value = "[getter]";
+    }
+
+    if (isSetterProp(descriptor)) {
+      value = "[setter]";
+    }
+
+    if (isFunctionProp(descriptor)) {
+      value = "f()";
+    }
+
+    parentProps.add(name);
+
+    return {
+      ...props,
+      [name]: value,
+    };
+  }, {});
+
+  console.log("xxxx", parentProps);
 
   return (
     <div
@@ -19,7 +59,11 @@ export const ObjectView = ({ data, propName }) => {
       >
         {propName && <span className={"cov-object-key"}>{propName}:</span>}
         <div className={"cov-expander"}>
-          <BsFillCaretRightFill fontSize={"12px"} />
+          {expanded ? (
+            <AiFillCaretDown />
+          ) : (
+            <BsFillCaretRightFill fontSize={"12px"} />
+          )}
         </div>
         <span className={"cov-object-constructor"}>
           {data.constructor?.name}
@@ -29,17 +73,22 @@ export const ObjectView = ({ data, propName }) => {
 
       {expanded && (
         <div className={"cov-object-content-expanded"}>
-          {Object.keys(data).map((key, index) => {
+          {Object.keys(descriptors).map((key, index) => {
             return (
               <div key={index} className={"cov-object-element"}>
                 <NodeView data={data[key]} propName={key} isIndex={false} />
               </div>
             );
           })}
+
           {!isPlainObject(data) && (
             <div className={"cov-object-element"}>
-              <span className={"cov-object-key"}>{"<prototype>"}:</span>
-              <ProtoView data={data} />
+              {/*<span className={"cov-object-key"}>{"<prototype>"}:</span>*/}
+              <ProtoView
+                data={data}
+                propName={"<prototype>"}
+                parentProps={new Set(Object.getOwnPropertyNames(data))}
+              />
             </div>
           )}
         </div>

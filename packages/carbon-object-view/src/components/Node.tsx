@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { FunctionView } from "./Function";
 import { isLiteral } from "./utils";
 import { isGenerator } from "./utils";
+import { isProxy } from "./utils";
 import { Literal } from "./Literal";
 
 export const NodeView = ({ data, propName, isIndex }) => {
@@ -15,7 +16,15 @@ export const NodeView = ({ data, propName, isIndex }) => {
       return <Literal data={data} propName={propName} isIndex={false} />;
     }
 
-    if (isFunction(data)) {
+    if (isProxy(data)) {
+      return <Literal data={"[Proxy]"} propName={propName} isIndex={false} />;
+    }
+
+    if (isGenerator(data)) {
+      return <Literal data={"f*()"} propName={propName} isIndex={false} />;
+    }
+
+    if (!isProxy(data) && isFunction(data)) {
       return (
         <FunctionView
           data={data}
@@ -35,7 +44,7 @@ export const NodeView = ({ data, propName, isIndex }) => {
     }
 
     return JSON.stringify(data, null, 2);
-  }, [data, propName]);
+  }, [data, isIndex, propName]);
 
   return <div className={"cov-node"}>{view}</div>;
 };

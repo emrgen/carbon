@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import { useCallback } from "react";
+import { useMemo } from "react";
 
 import {
   blockPresetPlugins,
@@ -36,7 +37,7 @@ import { SuppressContenteditableWarningPath } from "@emrgen/carbon-core";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { codeExtension } from "@emrgen/carbon-code";
 import { cellPlugin, cellRenderer } from "@emrgen/carbon-cell";
-import { ModuleContext } from "@emrgen/carbon-cell";
+import { ActiveCellRuntimeContext } from "@emrgen/carbon-cell";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { flattenDeep } from "lodash";
 import { PathTracker } from "../../PathTracker";
@@ -49,6 +50,7 @@ import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
 import { boardPlugins } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
+import { questionExtension } from "@emrgen/carbon-question";
 import { Box } from "@chakra-ui/react";
 import SelectionTracker from "../../SelectionTracker";
 
@@ -456,17 +458,17 @@ const data = node("carbon", [
       //
       // section([title([text("section 1")])]),
 
-      node(
-        "code",
-        [
-          node("codeTitle", [
-            text(`func main() {
-  fmt.Println("Hello, Go!")
-}`),
-          ]),
-        ],
-        {},
-      ),
+      //       node(
+      //         "code",
+      //         [
+      //           node("codeTitle", [
+      //             text(`func main() {
+      //   fmt.Println("Hello, Go!")
+      // }`),
+      //           ]),
+      //         ],
+      //         {},
+      //       ),
 
       section([title([text("section 1")])]),
 
@@ -479,6 +481,24 @@ const data = node("carbon", [
       // node("codeMirror", [], {
       //   ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
       // }),
+
+      node("question", [
+        title([text("question title")]),
+        node("mcq", [
+          node("mcqOption", [title([text("option 1")])]),
+          node("mcqOption", [title([text("option 2")])]),
+          node("mcqOption", [title([text("option 3")])]),
+          node("mcqOption", [title([text("option 4")])]),
+        ]),
+        node("hints", [
+          node("hint", [
+            title([text("hint 1")]),
+            section([title([text("hint content")])]),
+          ]),
+        ]),
+      ]),
+
+      section([title([text("section 1")])]),
 
       node("sandbox", [node("cell")]),
       node("sandbox", [node("cell")]),
@@ -778,6 +798,7 @@ const plugins = [
   //   ]
   // }
   // extensions1,
+  ...questionExtension.plugins!,
 ];
 
 const renderers = [
@@ -789,7 +810,7 @@ const renderers = [
   ...databaseRenderers,
   ...boardRenderers,
   ...cellRenderer,
-  // ...questionExtension.renderers!,
+  ...questionExtension.renderers!,
 ];
 
 const renderManager = RenderManager.from(renderers);
@@ -900,14 +921,22 @@ export default function Dev() {
     };
   }, [startAddingItem, stopAddingItem]);
 
+  const Nodes = useMemo(() => {
+    return {
+      get(id: string) {
+        return app.store.get(NodeId.create(id));
+      },
+    };
+  }, [app]);
+
   return (
     <Box className={"carbon-app-container"}>
-      <ModuleContext app={app}>
+      <ActiveCellRuntimeContext builtins={{ Nodes, Carbon: app }}>
         <CarbonApp app={app} renderManager={renderManager}>
           <SelectionTracker />
           <PathTracker />
         </CarbonApp>
-      </ModuleContext>
+      </ActiveCellRuntimeContext>
     </Box>
   );
 }

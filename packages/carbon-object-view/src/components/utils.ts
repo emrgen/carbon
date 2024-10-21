@@ -1,8 +1,26 @@
 import { isNumber } from "lodash";
 import { isString } from "lodash";
 import { isSymbol } from "lodash";
+import { isObject } from "lodash";
+
+export const isGetterProp = (descriptor) => {
+  return "get" in descriptor;
+};
+
+export const isSetterProp = (descriptor) => {
+  return "set" in descriptor;
+};
+
+export const isAccessorProp = (descriptor) => {
+  return isGetterProp(descriptor) || isSetterProp(descriptor);
+};
+
+export const isFunctionProp = (descriptor) => {
+  return "value" in descriptor && typeof descriptor.value === "function";
+};
 
 export const isLiteral = (data) => {
+  if (isObject(data)) return false;
   return (
     isNumber(data) ||
     isString(data) ||
@@ -14,6 +32,10 @@ export const isLiteral = (data) => {
   );
 };
 
+export const isProxy = (data) => {
+  return isObject(data) && data["isProxy"];
+};
+
 export function isGenerator(fn) {
-  return fn.constructor.name === "GeneratorFunction";
+  return fn?.constructor?.name === "GeneratorFunction";
 }

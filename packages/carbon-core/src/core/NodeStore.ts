@@ -21,7 +21,11 @@ export class NodeStore {
     return Array.from(this.elementMap.values());
   }
 
-  get(entry: NodeId | HTMLElement | Element): Optional<Node> {
+  get(entry: string | NodeId | HTMLElement | Element): Optional<Node> {
+    if (typeof entry === "string") {
+      entry = NodeId.create(entry);
+    }
+
     const nodeId = entry;
     if (nodeId instanceof NodeId) {
       return this.nodeMap.get(nodeId);
@@ -31,7 +35,11 @@ export class NodeStore {
   }
 
   // get the rendered HTML element for the node
-  element(nodeId: NodeId): Optional<HTMLElement> {
+  element(nodeId: string | NodeId): Optional<HTMLElement> {
+    if (typeof nodeId === "string") {
+      nodeId = NodeId.create(nodeId);
+    }
+
     const el = this.elementMap.get(nodeId.id);
     if (el) {
       return el;

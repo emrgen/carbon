@@ -3,15 +3,17 @@ import { useRef } from "react";
 import { memo } from "react";
 import { useMemo } from "react";
 import { useEffect } from "react";
-import { useModule } from "../hooks/useModule";
+import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
 import { isArray } from "lodash";
 import { isFunction } from "lodash";
 import { isNumber } from "lodash";
 import { isString } from "lodash";
 import { isObject } from "lodash";
-import { Cell } from "../core/CellModule";
+import { Cell } from "../core/ActiveCellRuntime";
 import { Optional } from "@emrgen/types";
 import { isHtmlElement } from "../utils";
+import { isScriptElement } from "../utils";
+import { isStyleElement } from "../utils";
 import createDOMPurify from "dompurify";
 import { ObjectViewer } from "@emrgen/carbon-object-view";
 import { HiDotsVertical } from "react-icons/hi";
@@ -24,7 +26,7 @@ const NOT_LOADED = "__NOT_LOADED__";
 
 const ResultInner = (props) => {
   const { node, onToggle } = props;
-  const mod = useModule();
+  const mod = useActiveCellRuntime();
 
   const [nodeId] = useState(node.id.toString());
   const [cell, setCell] = useState<Optional<Cell>>(
@@ -134,7 +136,7 @@ const ResultInner = (props) => {
     };
   }, [cell, mod, nodeId]);
 
-  // console.log("cell result", cell, cell?.result, result, error);
+  console.log("cell result", cell, cell?.result, result, error);
 
   return (
     <div className={"carbon-cell-view"}>
@@ -151,11 +153,34 @@ const ResultInner = (props) => {
       </div>
       <div className={"cell-result"}>
         <div className={"cell-loading"} data-loading={pending} />
-        {!error && cell?.codeType === "css" && result !== NOT_LOADED && (
-          <div className={"cell-view-css"}>
-            <ObjectViewer data={"<style>"} />
-          </div>
-        )}
+        {!error &&
+          cell?.codeType === "css" &&
+          result !== NOT_LOADED &&
+          isStyleElement(result) && (
+            <div className={"cell-view-css"}>
+              <ObjectViewer data={"<style>"} />
+            </div>
+          )}
+
+        {/*show hidden script */}
+        {!error &&
+          cell?.codeType === "html" &&
+          result !== NOT_LOADED &&
+          isScriptElement(result) && (
+            <div className={"cell-view-html"}>
+              <ObjectViewer data={`<script>`} />
+            </div>
+          )}
+
+        {!error &&
+          cell?.codeType === "html" &&
+          result !== NOT_LOADED &&
+          isStyleElement(result) && (
+            <div className={"cell-view-html"}>
+              <ObjectViewer data={`<style>`} />
+            </div>
+          )}
+
         {!!error && <div className={"cell-view-error"}>{error}</div>}
         {cell && !error && result !== NOT_LOADED && (
           <div className={"cell-view-result"}>
@@ -197,6 +222,28 @@ const ResultView = (props) => {
   }, [html, ref, result]);
 
   // console.dir(result);
+
+  if (result === true) {
+    return (
+      <CellResultView
+        cell={cell}
+        name={cellName}
+        result={"true"}
+        color={"#00b894"}
+      />
+    );
+  }
+
+  if (result === false) {
+    return (
+      <CellResultView
+        cell={cell}
+        name={cellName}
+        result={"false"}
+        color={"#f45a80"}
+      />
+    );
+  }
 
   if (result === null) {
     return (

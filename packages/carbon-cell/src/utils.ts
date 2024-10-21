@@ -30,3 +30,11 @@ export const isHtmlElement = (res) => {
     res instanceof HTMLLinkElement
   );
 };
+
+export const isStyleElement = (res) => {
+  return res instanceof HTMLStyleElement;
+};
+
+export const isScriptElement = (res) => {
+  return res instanceof HTMLScriptElement;
+};

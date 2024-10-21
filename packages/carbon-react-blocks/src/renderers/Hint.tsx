@@ -1,34 +1,32 @@
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon} from "@emrgen/carbon-react";
-import React, {useCallback, useRef} from "react";
+import { CarbonBlock, RendererProps, useCarbon } from "@emrgen/carbon-react";
+import { CarbonChildren } from "@emrgen/carbon-react";
+import React, { useCallback, useRef } from "react";
 import {
   ActionOrigin,
   Carbon,
-  CollapsedPath, CollapsedPathLocal,
-  ContenteditablePath, isContentEditable,
-  Node,
+  CollapsedPathLocal,
+  isContentEditable,
   Pin,
   PinnedSelection,
   Point,
-  TxType
+  TxType,
 } from "@emrgen/carbon-core";
-import {MdOutlineKeyboardArrowDown, MdOutlineKeyboardArrowRight} from "react-icons/md";
-import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
-import {Optional} from "@emrgen/types";
-import {useDocument} from "../hooks";
-import {BiBulb} from "react-icons/bi";
-import {FaLightbulb, FaRegCheckCircle, FaRegCircle, FaRegLightbulb} from "react-icons/fa";
-import {ViewedPath} from "@emrgen/carbon-blocks";
+import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
+import { Optional } from "@emrgen/types";
+import { useDocument } from "../hooks";
+import { FaLightbulb, FaRegCheckCircle, FaRegLightbulb } from "react-icons/fa";
+import { ViewedPath } from "@emrgen/carbon-blocks";
 
 const isParentContentEditable = (el: HTMLElement) => {
   let node: Optional<HTMLElement> = el;
   while (node) {
-    console.log(el, el.getAttribute('contentEditable'))
-    if (el.getAttribute('contentEditable') === 'true') return true;
+    console.log(el, el.getAttribute("contentEditable"));
+    if (el.getAttribute("contentEditable") === "true") return true;
     node = node.parentNode as HTMLElement;
   }
 
   return false;
-}
+};
 
 export default function HintComp(props: RendererProps) {
   const { node } = props;
@@ -37,32 +35,37 @@ export default function HintComp(props: RendererProps) {
   const document = useDocument();
 
   const ref = useRef(null);
-  const {connectors, SelectionHalo} = useDragDropRectSelectHalo({node, ref})
+  const { connectors, SelectionHalo } = useDragDropRectSelectHalo({
+    node,
+    ref,
+  });
 
   const isCollapsed = node.props.get<boolean>(CollapsedPathLocal, false);
 
   // insert a new section as child of this collapsible
-  const handleInsert = useCallback((app: Carbon) => {
-    const section = app.schema.type("section").default()!;
-    const at = Point.toAfter(node.child(0)!.id);
+  const handleInsert = useCallback(
+    (app: Carbon) => {
+      const section = app.schema.type("section").default()!;
+      const at = Point.toAfter(node.child(0)!.id);
 
-    app.cmd
-      .Insert(at, section)
-      .Select(
-        PinnedSelection.fromPin(Pin.toStartOf(section)!),
-        ActionOrigin.UserInput
-      )
-      .Dispatch();
-  }, [node]);
+      app.cmd
+        .Insert(at, section)
+        .Select(
+          PinnedSelection.fromPin(Pin.toStartOf(section)!),
+          ActionOrigin.UserInput,
+        )
+        .Dispatch();
+    },
+    [node],
+  );
 
   // toggle collapsed state
   const handleToggle = useCallback(() => {
-    const {cmd, selection} = app;
-    cmd
-      .Update(node.id, {
-        [CollapsedPathLocal]: !isCollapsed,
-        [ViewedPath]: true,
-      })
+    const { cmd, selection } = app;
+    cmd.Update(node.id, {
+      [CollapsedPathLocal]: !isCollapsed,
+      [ViewedPath]: true,
+    });
 
     // if currently not collapsed, next state will be collapsed
     // so select the first child otherwise the current selection may not be valid
@@ -72,7 +75,7 @@ export default function HintComp(props: RendererProps) {
       cmd.Select(selection);
     }
 
-    cmd.WithType(TxType.OneWay)
+    cmd.WithType(TxType.OneWay);
     cmd.Dispatch();
   }, [app, node, isCollapsed]);
 
@@ -83,10 +86,8 @@ export default function HintComp(props: RendererProps) {
         handleToggle();
       }
     },
-    [document, handleToggle]
+    [document, handleToggle],
   );
-
-
 
   const beforeContent = (
     <div
@@ -99,15 +100,11 @@ export default function HintComp(props: RendererProps) {
       }}
       onClick={() => handleToggle()}
     >
-      {isCollapsed ? (
-        <FaRegLightbulb />
-      ) : (
-        <FaLightbulb />
-      )}
+      {isCollapsed ? <FaRegLightbulb /> : <FaLightbulb />}
     </div>
   );
 
-  const isViewed = node.props.get<boolean>(ViewedPath, false)
+  const isViewed = node.props.get<boolean>(ViewedPath, false);
 
   const afterContent = (
     <div
@@ -116,7 +113,7 @@ export default function HintComp(props: RendererProps) {
       suppressContentEditableWarning
       data-viewed={isViewed}
     >
-      {isViewed && <FaRegCheckCircle /> }
+      {isViewed && <FaRegCheckCircle />}
     </div>
   );
 
@@ -126,27 +123,7 @@ export default function HintComp(props: RendererProps) {
       custom={{ "data-collapsed": isCollapsed, ...connectors }}
       ref={ref}
     >
-      <CarbonNodeContent
-        node={node}
-        beforeContent={beforeContent}
-        afterContent={afterContent}
-        key={node.renderVersion}
-        wrapper={{ onMouseDown: handleContentClick }}
-      />
-
-      {node.size > 1 ? (
-        <CarbonNodeChildren node={node} />
-      ) : (
-        <div
-          className="hint-insert-section"
-          contentEditable="false"
-          suppressContentEditableWarning
-          onClick={() => handleInsert(app)}
-        >
-          Click to insert.
-        </div>
-      )}
-
+      <CarbonChildren node={node} />
       {SelectionHalo}
     </CarbonBlock>
   );

@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
+import { useEffect } from "react";
 
 import {
   ActionOrigin,
@@ -27,6 +28,7 @@ import {
   useNonDraggable,
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon-react";
+import { useActiveCellRuntime } from "@emrgen/carbon-cell";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
@@ -34,6 +36,7 @@ export const DocumentComp = (props: RendererProps) => {
 
   const app = useCarbon();
   const { store } = app;
+  const runtime = useActiveCellRuntime();
 
   const ref = useRef<Element>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);

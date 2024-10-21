@@ -34,6 +34,10 @@ export class Service {
     const { services } = this;
     return new Proxy(this, {
       get: (target, prop) => {
+        if (prop === "isProxy") {
+          return true;
+        }
+
         const propName = prop.toString();
         const plugin = services[propName];
 

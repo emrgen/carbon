@@ -424,6 +424,10 @@ export class Transaction {
     const proxy = new Proxy(self, {
       get: (target, prop) => {
         const propName = prop.toString();
+        if (prop === "isProxy") {
+          return true;
+        }
+
         if (Reflect.has(target, prop)) {
           if (["Pop"].includes(propName)) {
             return Reflect.get(target, prop);

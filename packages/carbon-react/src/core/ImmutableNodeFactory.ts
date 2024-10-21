@@ -23,11 +23,11 @@ export class ImmutableNodeFactory implements NodeFactory {
   private readonly createId: () => string;
 
   blockId() {
-    return NodeId.create(this.createId() + "[" + ++counter + "]");
+    return NodeId.create(this.createId() + "" + ++counter + "");
   }
 
   textId() {
-    return NodeId.create(this.createId() + "(" + ++counter + ")");
+    return NodeId.create(this.createId() + "_" + ++counter + "");
   }
 
   constructor(

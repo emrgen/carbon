@@ -1,16 +1,17 @@
 import { EventEmitter } from "events";
 import { Module, Runtime, Variable } from "@observablehq/runtime";
 import { parseCell, peekId } from "@observablehq/parser";
+import { Library } from "@observablehq/stdlib";
 import { Optional } from "@emrgen/types";
 import { nextUnnamedCellName } from "../utils";
 import { isHtmlElement } from "../utils";
 import { viewCellName } from "../utils";
 import { isUnnamedCell } from "../utils";
 import { isViewCell } from "../utils";
-import { marked } from "marked"; //
+import { isString } from "lodash"; //
 
 //
-export class CellModule extends EventEmitter {
+export class ActiveCellRuntime extends EventEmitter {
   // cache the views of the cells
   runtime: Runtime;
   module: Module;
@@ -18,11 +19,12 @@ export class CellModule extends EventEmitter {
   // cellId -> Cell
   cells: Map<string, Cell> = new Map();
 
-  constructor() {
+  constructor(builtins: Record<string, any> = {}) {
     super();
-    this.runtime = new Runtime();
+    this.runtime = new Runtime(Object.assign(new Library(), builtins));
     this.module = this.runtime.module();
-    this.module.variable(true).define("_module", [], () => this.module);
+    // define a hidden module variable
+    // this.module.variable(true).define("_module", [], () => this.module);
   }
 
   result(cellId: string) {
@@ -41,14 +43,44 @@ export class CellModule extends EventEmitter {
     console.log(vars);
   }
 
-  redefine(cellId: string, code: string, type: string) {
+  // observe a node via a custom variable named `node_${nodeId}`
+  observeNode(nodeId: string) {
+    console.log(
+      "redefine",
+      nodeId,
+      "node_" + nodeId,
+      `Carbon.store.get(${nodeId})`,
+    );
+    this.redefine(
+      "node_" + nodeId,
+      nodeId,
+      `Carbon.store.get('${nodeId}')`,
+      "javascript",
+      true,
+    );
+  }
+
+  redefine(
+    name: string,
+    cellId: string,
+    code: string | Function,
+    type: string,
+    force: boolean = false,
+  ) {
     // check if the code is the same as the cache code for the node
     // const cache = this.cache.get(cellId);
     // if (code === cache) return;
     // this.cache.set(cellId, code);
 
     const cell = this.cells.get(cellId);
-    if (cell && cell.code === code && cell.codeType === type && !cell.error) {
+    // for force update, delete the cell and redefine anyway
+    if (
+      !force &&
+      cell &&
+      cell.code === code &&
+      cell.codeType === type &&
+      !cell.error
+    ) {
       // console.log("code is the same", cellId, code, cell);
       return;
     }
@@ -67,7 +99,7 @@ export class CellModule extends EventEmitter {
 
     try {
       // find the cell id add create a variable
-      const cell = Cell.fromCode(this, cellId, code, type);
+      const cell = Cell.fromCode(this, name, cellId, code, type);
       if (!cell) {
         console.error("failed to create from code", cellId, code);
         const oldCell = this.cells.get(cellId);
@@ -87,7 +119,6 @@ export class CellModule extends EventEmitter {
       this.emit("error:" + cellId, err);
       // if the cell is already defined, update the cell error
       if (cell) {
-        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         cell.error = err;
         this.rejected(cell);
       }
@@ -173,15 +204,14 @@ export class CellModule extends EventEmitter {
     if (
       before.name === null ||
       before.name === undefined ||
-      before.name !== cell.name ||
+      before.name != cell.name ||
       before.codeType !== cell.codeType
     ) {
+      const variable = this.defineFresh(cell);
       if (before.variable) {
-        console.log("DELETED", before.uniqId, before.name);
         // NOTE: deleting the cell will also delete the variable
-        before.delete();
+        before.delete(before.variable === variable);
       }
-      this.defineFresh(cell);
     } else if (before.name === cell.name) {
       // NOTE: as the name are the same, we can redefine the variable with the same name
       // internal Runtime will keep the same variable with all the references intact
@@ -197,7 +227,7 @@ export class CellModule extends EventEmitter {
 
   private defineFresh(cell: Cell) {
     const { id, name, inputs, definition } = cell;
-    // console.log("define fresh", name, definition);
+    console.log("define fresh", name, definition);
     cell.variable = this.module
       .variable({
         fulfilled: (value: any) => {
@@ -251,6 +281,8 @@ export class CellModule extends EventEmitter {
         },
       })
       .define(name, inputs, definition);
+
+    return cell.variable;
   }
 
   destroy() {
@@ -282,7 +314,7 @@ interface CellProps {
   ast: any;
   inputs: string[];
   definition: Function;
-  mod: CellModule;
+  mod: ActiveCellRuntime;
 }
 
 let counter = 0;
@@ -300,7 +332,7 @@ export class Cell extends EventEmitter {
 
   variable: Optional<Variable>;
 
-  mod: CellModule;
+  mod: ActiveCellRuntime;
 
   outputs: Cell[] = [];
 
@@ -313,17 +345,18 @@ export class Cell extends EventEmitter {
   deleted: boolean = false;
 
   static fromCode(
-    mod: CellModule,
+    mod: ActiveCellRuntime,
+    name: string,
     id: string,
-    code: string,
+    code: string | Function,
     type: string,
   ): Optional<Cell> {
     try {
-      if (type === "markdown") {
+      if (isString(code) && type === "markdown") {
         const cellName = nextUnnamedCellName();
-        const deps = ["html"];
-        const definition = (html) => {
-          return html`${marked(code)}`;
+        const deps = ["md"];
+        const definition = (md) => {
+          return md`${code}`;
         };
 
         return new Cell({
@@ -338,7 +371,7 @@ export class Cell extends EventEmitter {
         });
       }
 
-      if (type === "html") {
+      if (isString(code) && type === "html") {
         const cellName = nextUnnamedCellName();
         const deps = ["html"];
         const definition = (html) => {
@@ -357,7 +390,7 @@ export class Cell extends EventEmitter {
         });
       }
 
-      if (type === "css") {
+      if (isString(code) && type === "css") {
         const cellName = nextUnnamedCellName();
         const deps = ["html"];
         const definition = (html) => {
@@ -389,7 +422,7 @@ export class Cell extends EventEmitter {
         return undefined;
       }
 
-      let cellName = peekId(code);
+      let cellName = name || peekId(code);
       // when the
       if (this.isViewOf(ast)) {
         cellName = viewCellName(cellName);
@@ -403,7 +436,9 @@ export class Cell extends EventEmitter {
       }
 
       const deps = ast.references.map((arg: any) => arg.name);
-      const definition = this.defFromAst(cellName, deps, ast, code);
+      const definition = isString(code)
+        ? this.defFromAst(cellName, deps, ast, code)
+        : code;
 
       if (!definition) {
         console.error("DEFINITION NOT FOUND", ast);
@@ -413,7 +448,7 @@ export class Cell extends EventEmitter {
       return new Cell({
         id,
         name: cellName,
-        code,
+        code: code.toString(),
         codeType: type,
         ast,
         inputs: deps,
@@ -515,11 +550,14 @@ export class Cell extends EventEmitter {
   // delete removes the internal variable and outputs
   // deleting the variable may cause delayed dirty events.
   // to check if the promise result is for deleted cell, the cell is marked as deleted and the promise is ignored
-  delete() {
+  delete(deleteVariable: boolean = true) {
+    console.log("DELETED", this.uniqId, this.name);
     this.mod.cells.delete(this.id);
-    this.variable?.delete();
     this.outputs.forEach((cell) => cell.delete());
     this.deleted = true;
+    if (deleteVariable) {
+      this.variable?.delete();
+    }
   }
 
   isFulfilled() {
@@ -533,6 +571,21 @@ const factory = {
     const { body } = ast;
     return () => body.value;
   },
+  BlockStatement(name: string, deps: string[], ast: any, code: string) {
+    const { body } = ast;
+    const blockBody = code.slice(body.start + 1, body.end - 1);
+    // no need to return the block statement as the return is within the block body
+    return this.define(name, deps, `${blockBody}`, ast);
+  },
+  Identifier(name: string, deps: string[], ast: any, code: string) {
+    return this.define(name, deps, `return ${ast.body.name}`, ast);
+  },
+  YieldExpression(name: string, deps: string[], ast: any, code: string) {
+    return this.define(name, deps, `${code}`, ast);
+  },
+  ClassExpression(name: string, deps: string[], ast: any, code: string) {
+    return this.define(name, deps, `return (${code})`, ast);
+  },
   CallExpression(name: string, deps: string[], ast: any, code: string) {
     const { body } = ast;
     const fnBody = code.slice(body.start, body.end);
@@ -544,27 +597,13 @@ const factory = {
     ast: any,
     code: string,
   ) {
-    const { body } = ast;
-    const fnBody = code.slice(body.start, body.end);
-    return this.define(name, deps, `return (${fnBody})`);
+    this.Expression(name, deps, ast, code);
   },
   FunctionExpression(name: string, deps: string[], ast: any, code: string) {
-    const { body } = ast;
-    const fnBody = code.slice(body.start, body.end);
-    return this.define(name, deps, `return (${fnBody})`);
+    this.Expression(name, deps, ast, code);
   },
-
   BinaryExpression(name: string, deps: string[], ast: any, code: string) {
-    const { body } = ast;
-    const fnBody = code.slice(body.start, body.end);
-    return this.define(name, deps, `return (${fnBody})`);
-  },
-  BlockStatement(name: string, deps: string[], ast: any, code: string) {
-    const { body } = ast;
-    console.log("block statement", body, code);
-    const blockBody = code.slice(body.start + 1, body.end - 1);
-    // no need to return the block statement as the return is within the block body
-    return this.define(name, deps, `${blockBody}`, ast);
+    this.Expression(name, deps, ast, code);
   },
   TaggedTemplateExpression(
     name: string,
@@ -572,22 +611,22 @@ const factory = {
     ast: any,
     code: string,
   ) {
-    const { body } = ast;
-    const tagBody = code.slice(body.start, body.end);
-    return this.define(name, deps, `return (${tagBody})`);
-  },
-  Identifier(name: string, deps: string[], ast: any, code: string) {
-    return this.define(name, deps, `return ${ast.body.name}`, ast);
-  },
-  YieldExpression(name: string, deps: string[], ast: any, code: string) {
-    return this.define(name, deps, `${code}`, ast);
-  },
-  ClassExpression(name: string, deps: string[], ast: any, code: string) {
-    return this.define(name, deps, `return (${code})`, ast);
+    this.Expression(name, deps, ast, code);
   },
   NewExpression(name: string, deps: string[], ast: any, code: string) {
+    this.Expression(name, deps, ast, code);
+  },
+  MemberExpression(name: string, deps: string[], ast: any, code: string) {
+    this.Expression(name, deps, ast, code);
+  },
+  ChainExpression(name: string, deps: string[], ast: any, code: string) {
+    return this.Expression(name, deps, ast, code);
+  },
+  ArrayExpression(name: string, deps: string[], ast: any, code: string) {
+    return this.Expression(name, deps, ast, code);
+  },
+  Expression(name: string, deps: string[], ast: any, code: string) {
     const { body } = ast;
-    console.log("block statement", body, code);
     const blockBody = code.slice(body.start, body.end);
     return this.define(name, deps, `return ${blockBody}`, ast);
   },
@@ -597,12 +636,6 @@ const factory = {
     const { expressions } = body;
     const endNode = expressions[expressions.length - 1];
     const blockBody = code.slice(endNode.start, endNode.end);
-    return this.define(name, deps, `return ${blockBody}`, ast);
-  },
-
-  MemberExpression(name: string, deps: string[], ast: any, code: string) {
-    const { body } = ast;
-    const blockBody = code.slice(body.start, body.end);
     return this.define(name, deps, `return ${blockBody}`, ast);
   },
 

@@ -19,9 +19,7 @@ import { Insert } from "./plugins/Inserter";
 import { Modal } from "./plugins/Modal";
 import { TabGroup } from "./plugins/Tab";
 import { HStack } from "./plugins/HStack";
-import { Hint, ViewedPath } from "./plugins/Hint";
-import { MCQ } from "./plugins/MCQ";
-import { Question } from "./plugins/Question";
+import { ViewedPath } from "./plugins/Hint";
 import {
   EndPath,
   Scale,
@@ -68,9 +66,6 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Frame(),
   new Insert(),
   new Modal(),
-  new Hint(),
-  new MCQ(),
-  new Question(),
   new Scale(),
   new Button(),
   new Partial(),

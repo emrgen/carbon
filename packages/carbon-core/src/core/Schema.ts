@@ -126,6 +126,7 @@ export interface NodeSpec {
   zero?: boolean;
   options?: boolean;
   mergeable?: boolean;
+  observable?: boolean;
   // when the node content match is not valid
   // the new node will be inserted or the current node will be unwrapped based on the consistency
   consistency?: "insert" | "remove";

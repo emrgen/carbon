@@ -125,6 +125,10 @@ export class PluginCommand {
   proxy() {
     return new Proxy(this, {
       get: (target, prop) => {
+        if (prop === "isProxy") {
+          return true;
+        }
+
         if (prop in target) return target[prop];
         const command = target.commands[prop.toString()];
         if (!command) {

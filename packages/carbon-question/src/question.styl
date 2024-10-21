@@ -3,15 +3,60 @@ $quoteColor = #555
 $lineHeight = 26px
 
 [data-name=question]
+    position relative;
     margin-top 20px
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     line-height: $lineHeight
+    //background #eac54f
+    //padding 16px 10 10px 10px
+    > [data-name=title]
+        font-size 18px
+        font-weight 600
+        margin-bottom 10px
 
     > [data-type=content]
         padding 10px 0
-        
-    padding 10px 0
-    //background: #eee;
+    .cq__right-content
+        position absolute;
+        left 100%
+        top 0
+        padding 2px
+        display flex
+        gap 4px
+        height 22px
+        flex-direction column
+        margin-left 20px;
+        background red
+        min-width 100px
+        .cq__marks
+            border-radius 4px
+            background #ddd
+            font-size 12px
+            font-weight bold
+            user-select none
+            line-height 8px
+            padding 4px
+            display flex
+        .cq__id
+            opacity 0.5;
+            top 0;
+            font-size 12px
+            display flex
+            align-items center
+            gap 6px
+            padding 3px 4px
+            border-radius 4px
+            line-height 8px
+            z-index 10
+            user-select none
+            cursor pointer
+            background #ddd
+            transition background-color 0.2s, opacity 0.2s
+            &:hover
+                opacity 1;
+                background #ddd
+            &:active
+                background #ccc
     border-radius 4px
     .question__footer
         display flex
@@ -38,47 +83,56 @@ $lineHeight = 26px
     font-size 18px
     font-weight 600
 
-    .title-wrapper
-        padding-bottom 10px
-    [data-name=title]
-        &:after
-            display none
+        .title-wrapper
+            padding-bottom 10px
+        [data-name=title]
+            &:after
+                display none
 
-[data-name=questionDescription]
-    .description-wrapper
-        padding-bottom 10px
 
-    [data-name=description]
-        &:after
-            display none
-
-[data-name=multipleChoice]
-    margin: 10px 0;
-
-    [data-name=multipleChoiceOption]
-        padding 5px
-        margin 6px 0
-        border 1px solid #ddd
-        border-radius 3px
-        background: #eee;
-        .multiple-choice-option
+[data-name=mcq]
+    margin-top 20px;
+    .mcq-container
+        display flex
+        flex-direction column
+        width 100%;
+        gap 10px
+[data-name=mcqOption]
+    padding 5px
+    border 1px solid #ddd
+    border-radius 3px
+    background: #fafafa;
+    .multiple-choice-option
+        display flex
+        gap 10px
+        .multiple-choice-option__input
+            font-weight bold
+            margin 0
+            padding 0
+            width 24px
+            height 24px
+            border 2px solid #8c95a1
+            border-radius 3px
+            background: #fff
+            cursor pointer
             display flex
-            gap 10px
-            .multiple-choice-option__input
-                font-weight bold
-                margin 0
-                padding 0
-                width 24px
-                height 24px
-                border 2px solid #8c95a1
-                border-radius 3px
-                background: #fff
-                cursor pointer
-                display flex
-                justify-content center
-                align-items center
-                user-select none
+            justify-content center
+            align-items center
+            user-select none
                 
         [data-name=title]
             flex 1
+.hints
+    //padding 10px
+    //background #eee
+.hint
+    > [data-name=title]
+        padding 0 2px
+        font-size 14px
+        font-weight 600
 
+    .cnest
+        margin-left 0
+.mcq-answer-checkbox
+    padding 0 6px
+// add hint

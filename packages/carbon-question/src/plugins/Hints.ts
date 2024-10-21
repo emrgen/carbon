@@ -1,47 +1,51 @@
+// import { Collapsible } from "./Collapsible";
 import { NodeSpec } from "@emrgen/carbon-core";
+import { CarbonPlugin } from "@emrgen/carbon-core";
 import { EventHandlerMap } from "@emrgen/carbon-core";
 import { EventContext } from "@emrgen/carbon-core";
 import { preventAndStopCtx } from "@emrgen/carbon-core";
-import { CarbonPlugin } from "@emrgen/carbon-core";
-import { Hints } from "./Hints";
-import { Explanations } from "./Explanations";
-import { MultipleChoiceQuestion } from "./MultipleChoiceQuestion";
 
-export class Question extends CarbonPlugin {
-  name = "question";
+export const ViewedPath = "local/state/viewed";
+
+export class Hints extends CarbonPlugin {
+  name = "hints";
 
   spec(): NodeSpec {
     return {
-      group: "content",
-      content: "title content* hints* explanations*",
-      // splits: true,
-      splitName: "section",
-      inlineSelectable: true,
-      collapsible: true,
+      group: "",
       isolate: true,
-      document: true,
-      observable: true,
-      attrs: {
-        html: {
-          contentEditable: true,
-          suppressContentEditableWarning: true,
-        },
-        node: {
-          collapsed: false,
+      content: "hint+",
+      props: {
+        local: {
+          html: {
+            contentEditable: false,
+            suppressContentEditableWarning: true,
+          },
         },
       },
     };
   }
 
   plugins(): CarbonPlugin[] {
-    return [new Hints(), new Explanations(), new MultipleChoiceQuestion()];
+    return [new Hint()];
+  }
+}
+
+export class Hint extends CarbonPlugin {
+  name = "hint";
+
+  spec(): NodeSpec {
+    return {
+      group: "",
+      content: "title content*",
+    };
   }
 
   keydown(): EventHandlerMap {
     return {
       enter(ctx: EventContext<KeyboardEvent>) {
         const { app, selection, currentNode } = ctx;
-        console.log("[Enter] Question");
+        console.log("[Enter] Hint");
         // if selection is within the collapsible node title split the collapsible node
         if (
           selection.inSameNode &&
