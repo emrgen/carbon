@@ -33,7 +33,7 @@ export function Login() {
 
   useEffect(() => {
     if (user.id) {
-      navigate("/");
+      navigate("/app");
     }
   }, [ navigate, user ]);
 

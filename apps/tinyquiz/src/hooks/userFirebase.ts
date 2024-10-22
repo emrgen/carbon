@@ -8,17 +8,16 @@ import {useMemo} from "react";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBMAtvrWUxR38jTyp9o7G3qg9cmZ1j_Fl0",
-  authDomain: "selo-93606.firebaseapp.com",
-  projectId: "selo-93606",
-  storageBucket: "selo-93606.appspot.com",
-  messagingSenderId: "725569073423",
-  appId: "1:725569073423:web:c18f08e115b74377870e7a",
-  measurementId: "G-GQED5CX2KJ",
+  apiKey: "AIzaSyDX8KVx277H_yUmwzy9bvQd8BfBy3C_bI4",
+  authDomain: "tinyquizio.firebaseapp.com",
+  projectId: "tinyquizio",
+  storageBucket: "tinyquizio.appspot.com",
+  messagingSenderId: "55044959139",
+  appId: "1:55044959139:web:7a23bd947775e0bc2f0816",
+  measurementId: "G-EKW2TKGKW1"
 };
-
 // singleton pattern to initialize firebase app
-let firebaseApp: FirebaseApp;
+let firebaseApp: FirebaseApp = null as any;
 
 export const useFirebase = () => {
   if (!firebaseApp) {

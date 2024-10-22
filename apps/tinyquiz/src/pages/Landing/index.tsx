@@ -94,7 +94,7 @@ export function Landing() {
               whiteSpace={"nowrap"}
               ml={4}
             >
-              <Text fontSize={"lg"}>is getting ready...</Text>
+              <Text fontSize={"lg"}>is preparing</Text>
             </Box>
           </HStack>
         </Box>

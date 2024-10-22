@@ -1,5 +1,4 @@
 import { Box } from "@chakra-ui/react";
-import { useFirebase } from "@/hooks/userFirebase.ts";
 import { useRecoilState } from "recoil";
 import { userState } from "@/pages/atom.ts";
 import { useCallback, useEffect, useState } from "react";
@@ -14,6 +13,7 @@ import { toServiceUrl } from "@/service_url.ts";
 import { User } from "@/types.ts";
 import axios from "axios";
 import "./App.styl";
+import {useFirebase} from "./hooks/userFirebase";
 
 export default function App() {
   useFirebase();
