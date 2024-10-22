@@ -8,6 +8,7 @@ import {
   Circle,
   Flex,
   HStack,
+  Square,
   Stack,
   Tooltip,
 } from "@chakra-ui/react";
@@ -15,8 +16,11 @@ import React from "react";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { BiUser } from "react-icons/bi";
 import { FiUsers } from "react-icons/fi";
+import { GrLogout } from "react-icons/gr";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
+import { Logout } from "../components/Account/Logout";
+import { useLogout } from "../components/Account/useLogout";
 import { userState } from "./atom";
 
 interface AppSidebarProps {
@@ -28,6 +32,7 @@ export const AppSidebar = (props: AppSidebarProps) => {
   const navigate = useNavigate();
   const [ { isOpen } ] = useRecoilState(sidebarState);
   const [ user, setUser ] = useRecoilState(userState);
+  const handleLogout = useLogout();
 
   return (
     <Sidebar activeKey={activeKey}>
@@ -107,7 +112,31 @@ export const AppSidebar = (props: AppSidebarProps) => {
         <Box position={"absolute"} bottom={2} w={"full"} fontWeight={"bold"}>
           <SidebarItem
             pathPrefix={"/account"}
-            label={user.username}
+            label={
+              isOpen ?
+                <HStack justifyContent={"space-between"}>
+                  <Flex>{user.username}</Flex>
+                  <Tooltip
+                    label={"Logout"}
+                    openDelay={400}
+                    borderRadius={2}
+                    arrowSize={10}
+                    hasArrow={true}
+                    placement={"right"}
+                  >
+                    <Square
+                      p={2}
+                      onClick={handleLogout}
+                      pos={"relative"}
+                      left={"4px"}
+                    >
+                      <GrLogout />
+                    </Square>
+                  </Tooltip>
+                </HStack> :
+                ""
+
+            }
             icon={<BiUser />}
           />
         </Box>
