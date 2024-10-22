@@ -21,6 +21,7 @@ import { ObjectViewer } from "@emrgen/carbon-object-view";
 import { HiDotsVertical } from "react-icons/hi";
 import { preventAndStop } from "@emrgen/carbon-core";
 import { HasFocusPath } from "@emrgen/carbon-core";
+import { ViewStylePath } from "../constants";
 
 const DOMPurify = createDOMPurify(window);
 
@@ -226,6 +227,8 @@ const ResultView = (props) => {
         //   console.log("html", html);
         //   return;
         // }
+
+        // result.setAttribute("style", node.props.get(ViewStylePath, {}));
         if (el.hasChildNodes()) {
           el.removeChild(el.firstChild!);
         }
@@ -329,6 +332,7 @@ const ResultView = (props) => {
     <div className={"cell-html-result"}>
       {cell?.hasName() && <div>{cellName} = </div>}
       <div
+        style={node.props.get(ViewStylePath, {})}
         // @ts-ignore
         ref={ref}
         className={node.id.toString()}

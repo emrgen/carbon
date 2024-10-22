@@ -73,11 +73,17 @@ export const title = (children: any[] | any = []) => {
   };
 };
 
-export const section = (children: any[] = [], props = {}) => ({
-  name: "section",
-  children,
-  props,
-});
+export const section = (children: any[] | any = [], props = {}) => {
+  if (!Array.isArray(children)) {
+    children = [children];
+  }
+
+  return {
+    name: "section",
+    children,
+    props,
+  };
+};
 
 export const mention = (name: string) => {
   return node("mention", [
