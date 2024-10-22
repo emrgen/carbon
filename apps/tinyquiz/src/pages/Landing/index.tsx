@@ -26,7 +26,7 @@ export function Landing() {
   return (
     <Stack w="full">
       <Box boxShadow={"0 0 0 1px #000"}>
-        <Box w="1000px" margin={"0 auto"}>
+        <Box w={"90%"} maxW={"1000px"} margin={"0 auto"}>
           <header>
             <HStack justify={"space-between"} py={1} minH={"56px"}>
               <Flex>
@@ -71,7 +71,7 @@ export function Landing() {
         </Box>
       </Box>
 
-      <Box w="1000px" margin={"0 auto"}>
+      <Box w={"90%"} maxW={"1000px"} margin={"0 auto"} mt={5}>
         {/* image */}
         <Box
           w="full"
