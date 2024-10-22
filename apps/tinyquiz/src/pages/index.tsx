@@ -1,8 +1,9 @@
-import { useSidebarActiveKey } from "../hooks/useActiveKey";
+import { Box } from "@chakra-ui/react";
+import { Route, Routes } from "react-router-dom";
 import { Layout } from "../components/Layout/index";
 import { LayoutContent } from "../components/Layout/LayoutContent/index";
-import { Route, Routes } from "react-router-dom";
-import { Box } from "@chakra-ui/react";
+import { useSidebarActiveKey } from "../hooks/useActiveKey";
+import TinyQuiz from "../TinyQuiz/TinyQuiz";
 import { AppSidebar } from "./Sidebar";
 import "./pages.styl";
 
@@ -13,16 +14,12 @@ export function Main() {
     <Layout sidebar={<AppSidebar activeKey={activeKey} />}>
       <LayoutContent>
         <Routes>
-          {/*<Route path="/posts" element={<LazyPosts />} />*/}
-
-          {/*dashboard*/}
+          {/* dashboard*/}
           <Route path="/" element={<Box />} />
 
-          {/*users*/}
-          {/*<Route path="/member" element={<Members />} />*/}
-          {/*<Route path="/account" element={<LazyAccount />} />*/}
+          <Route path="/app" element={<TinyQuiz />} />
 
-          {/*<Route path="/settings" element={<Settings />} />*/}
+          {/* <Route path="/settings" element={<Settings />} />*/}
         </Routes>
       </LayoutContent>
     </Layout>

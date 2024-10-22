@@ -9,6 +9,7 @@ export const Routes = {
   "/quiz": "quiz",
   "/question": "question",
   "/account": "account",
+  "/app": "app",
 };
 
 export function useSidebarActiveKey() {

@@ -1,34 +1,46 @@
-import "./App.styl";
-import { useState } from "react";
 import { Box } from "@chakra-ui/react";
-import { blockPresetPlugins, node } from "@emrgen/carbon-blocks";
-import { title } from "@emrgen/carbon-blocks";
-import { text } from "@emrgen/carbon-blocks";
-import { section } from "@emrgen/carbon-blocks";
-import { RenderManager } from "@emrgen/carbon-react";
-import { useCreateCarbon } from "@emrgen/carbon-react";
-import { ReactRenderer } from "@emrgen/carbon-react";
-import { CarbonPlugin } from "@emrgen/carbon-core";
-import { NodeId } from "@emrgen/carbon-core";
-import { corePresetPlugins } from "@emrgen/carbon-core";
-import { ModePath } from "@emrgen/carbon-core";
-import { ActivatedPath } from "@emrgen/carbon-core";
-import { TitlePath } from "@emrgen/carbon-core";
-import { MarksPath } from "@emrgen/carbon-core";
-import { Mark } from "@emrgen/carbon-core";
-import { CollapsedPath } from "@emrgen/carbon-core";
-import { CarbonApp } from "@emrgen/carbon-utils";
-import { ActiveCellRuntimeContext } from "@emrgen/carbon-cell";
-import { ActiveCellRuntime } from "@emrgen/carbon-cell";
-import { cellPlugin } from "@emrgen/carbon-cell";
-import { cellRenderer } from "@emrgen/carbon-cell";
-import { flattenDeep } from "lodash";
-import { ObservableQuestions } from "@emrgen/carbon-question";
-import { questionExtension } from "@emrgen/carbon-question";
-import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
+import {
+  blockPresetPlugins,
+  node,
+  section,
+  text,
+  title,
+} from "@emrgen/carbon-blocks";
+import {
+  ActiveCellRuntime,
+  ActiveCellRuntimeContext,
+  cellPlugin,
+  cellRenderer,
+} from "@emrgen/carbon-cell";
+import {
+  CodeCellCodeValuePath,
+  ViewStylePath,
+} from "@emrgen/carbon-cell/src/constants";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { CodeCellCodeValuePath } from "@emrgen/carbon-cell/src/constants";
-import { ViewStylePath } from "@emrgen/carbon-cell/src/constants";
+import {
+  ActivatedPath,
+  CarbonPlugin,
+  CollapsedPath,
+  corePresetPlugins,
+  Mark,
+  MarksPath,
+  ModePath,
+  NodeId,
+  TitlePath,
+} from "@emrgen/carbon-core";
+import {
+  ObservableQuestions,
+  questionExtension,
+} from "@emrgen/carbon-question";
+import {
+  ReactRenderer,
+  RenderManager,
+  useCreateCarbon,
+} from "@emrgen/carbon-react";
+import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
+import { CarbonApp } from "@emrgen/carbon-utils";
+import { flattenDeep } from "lodash";
+import { useState } from "react";
 
 const plugins: (CarbonPlugin | CarbonPlugin[])[] = [
   corePresetPlugins,
@@ -46,22 +58,22 @@ const renderers: (ReactRenderer | ReactRenderer[])[] = [
 const renderManager = RenderManager.from(flattenDeep(renderers));
 
 export default function TinyQuiz() {
-  const [data] = useState(() => {
+  const [ data ] = useState(() => {
     const data = node("carbon", [
       node(
         "document",
         [
-          title([text("Welcome to TinyQuiz!")]),
-          section(title([text("A platform to create and share quizzes.")])),
+          title([ text("Welcome to TinyQuiz!") ]),
+          section(title([ text("A platform to create and share quizzes.") ])),
 
           node("callout", [
             text("Moye Moye", {
-              [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
+              [MarksPath]: [ Mark.BOLD ].map((m) => m.toJSON()),
             }),
             node("section", [
               title(
                 text(
-                  `"Moye Moye" is a song by Serbian singer Teya Dora, also known as Teodora Pavlovska. The song's actual title is "Moje More", but the song's clip has "Moye Moye" written on it. The song's meaning is "my bad dream".`,
+                  "\"Moye Moye\" is a song by Serbian singer Teya Dora, also known as Teodora Pavlovska. The song's actual title is \"Moje More\", but the song's clip has \"Moye Moye\" written on it. The song's meaning is \"my bad dream\".",
                 ),
               ),
             ]),
@@ -74,7 +86,7 @@ export default function TinyQuiz() {
                 section([
                   title([
                     text("MAC", {
-                      [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
+                      [MarksPath]: [ Mark.BOLD ].map((m) => m.toJSON()),
                     }),
                     text(
                       " can refer to a line of Apple computers, a hardware identifier for devices on a network, or a data center infrastructure management software",
@@ -93,7 +105,7 @@ export default function TinyQuiz() {
                 section([
                   title([
                     text("Linux ", {
-                      [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
+                      [MarksPath]: [ Mark.BOLD ].map((m) => m.toJSON()),
                     }),
                     text(
                       " is an open-source operating system (OS) that's used on many devices, including smartphones, computers, and supercomputers",
@@ -111,7 +123,7 @@ export default function TinyQuiz() {
                 section([
                   title([
                     text("Windows ", {
-                      [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
+                      [MarksPath]: [ Mark.BOLD ].map((m) => m.toJSON()),
                     }),
                     text(
                       " is an operating system (OS) developed by Microsoft that allows users to use a compute",
@@ -124,7 +136,7 @@ export default function TinyQuiz() {
               },
             ),
           ]),
-          node("h2", [title("Active Cell")]),
+          node("h2", [ title("Active Cell") ]),
           node("sandbox", [
             node("cell", [], {
               [CollapsedPath]: true,
@@ -145,7 +157,7 @@ export default function TinyQuiz() {
             }),
           ]),
           section(title([])),
-          node("h4", [title("Diagrams")]),
+          node("h4", [ title("Diagrams") ]),
           node("sandbox", [
             node("cell", [], {
               [CollapsedPath]: true,
@@ -224,7 +236,7 @@ mermaid\`gantt
     return data;
   });
   const app = useCreateCarbon("tinyquiz.io", data, flattenDeep(plugins));
-  const [runtime] = useState<ActiveCellRuntime>(() => {
+  const [ runtime ] = useState<ActiveCellRuntime>(() => {
     return new ActiveCellRuntime({
       Carbon: app,
     });
@@ -238,7 +250,7 @@ mermaid\`gantt
       <ActiveCellRuntimeContext runtime={runtime}>
         <ObservableQuestions>
           <CarbonApp app={app} renderManager={renderManager}>
-            {/*<SelectionTracker />*/}
+            {/* <SelectionTracker />*/}
           </CarbonApp>
         </ObservableQuestions>
       </ActiveCellRuntimeContext>

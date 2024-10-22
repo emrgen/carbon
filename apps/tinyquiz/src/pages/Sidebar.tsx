@@ -2,7 +2,15 @@ import { CompanyIcon } from "@/components/CompanyIcon";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { sidebarState } from "@/components/Layout/Sidebar/atom.ts";
 import { SidebarItem } from "@/components/Layout/Sidebar/SidebarItem";
-import { Box, Circle, Flex, HStack, Stack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Circle,
+  Flex,
+  HStack,
+  Stack,
+  Tooltip,
+} from "@chakra-ui/react";
 import React from "react";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { BiUser } from "react-icons/bi";
@@ -56,6 +64,30 @@ export const AppSidebar = (props: AppSidebarProps) => {
         className={"sidebar-content"}
         spacing={1}
       >
+        <Tooltip>
+          <Flex px={isOpen ? 4 : 2} w={"full"} mb={4} mt={4}>
+            <Button
+              variant={"outline"}
+              size={"sm"}
+              w={"full"}
+              padding={"2 0"}
+              lineHeight={1}
+              fontSize={"14px"}
+              h={7}
+              colorScheme={"black"}
+              _hover={{
+                boxShadow: "0 0 0 2px #ddd",
+              }}
+              _active={{
+                boxShadow: "0 0 0 1px #000",
+              }}
+              onClick={() => navigate("/app")}
+            >
+              {isOpen ? "Create" : "+"}
+            </Button>
+          </Flex>
+        </Tooltip>
+
         <SidebarItem
           pathPrefix={"/"}
           label="Dashboard"
@@ -71,6 +103,7 @@ export const AppSidebar = (props: AppSidebarProps) => {
           icon={<FiUsers />}
         />
 
+        {/* <SidebarItem pathPrefix={"/app"} label="Logout" icon={<BiUser />} />*/}
         <Box position={"absolute"} bottom={2} w={"full"} fontWeight={"bold"}>
           <SidebarItem
             pathPrefix={"/account"}
