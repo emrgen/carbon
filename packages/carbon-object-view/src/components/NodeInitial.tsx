@@ -42,13 +42,25 @@ export const NodeInitial = ({ data, propName, isIndex }) => {
     }
 
     if (isArray(data)) {
-      return <span>Array({data.length})</span>;
+      return (
+        <Literal
+          data={`Array(${data.length})`}
+          propName={propName}
+          isIndex={isIndex}
+        />
+      );
     }
 
     if (isObject(data)) {
-      return <span>{data.constructor?.name}</span>;
+      return (
+        <Literal
+          data={data.constructor?.name}
+          propName={propName}
+          isIndex={isIndex}
+        />
+      );
     }
 
     return <span>FAILED!</span>;
-  }, [data]);
+  }, [data, isIndex, propName]);
 };

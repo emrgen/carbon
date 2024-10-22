@@ -6,6 +6,7 @@ import {
 } from "@emrgen/carbon-core";
 import { ContenteditablePath } from "@emrgen/carbon-core";
 import { SuppressContenteditableWarningPath } from "@emrgen/carbon-core";
+import { isString } from "lodash";
 
 export const text = (text: string = "", props = {}) => ({
   name: "text",
@@ -59,10 +60,18 @@ export const empty = (props = {}) => ({
   props,
 });
 
-export const title = (children: any[] = []) => ({
-  name: "title",
-  children,
-});
+export const title = (children: any[] | any = []) => {
+  if (isString(children)) {
+    children = [text(children)];
+  } else if (!Array.isArray(children)) {
+    children = [children];
+  }
+
+  return {
+    name: "title",
+    children,
+  };
+};
 
 export const section = (children: any[] = [], props = {}) => ({
   name: "section",

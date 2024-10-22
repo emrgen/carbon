@@ -6,7 +6,7 @@ import { PinnedSelection } from "./PinnedSelection";
 import { Node } from "./Node";
 import { ActionOrigin } from "./actions/types";
 import { EventsIn, EventsOut } from "./Event";
-import { p12, p14, pad } from "./Logger";
+import { p12, p14 } from "./Logger";
 import { last } from "lodash";
 import { preventAndStop } from "../utils/event";
 import { CustomEvent } from "./CustomEvent";
@@ -173,17 +173,6 @@ export class EventManager {
     // console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
 
     const { selection, head } = selectionInfo ?? {};
-
-    if (["selectionchange"].includes(type)) {
-      console.log(
-        pad(
-          `%c >>> ${type}: ${(event as any).key ?? selection?.toString()}`,
-          100,
-        ),
-        "background:#ffcc006e",
-      );
-    }
-
     // NOTE: editor cannot process event without active selection
     if (!selection) {
       console.error(
@@ -193,6 +182,13 @@ export class EventManager {
       );
 
       return;
+    }
+
+    if ("selectionchange" === type) {
+      console.log(
+        `%c >>> ${type}: ${(event as any).key ?? selection.toString()}`,
+        "background:#ffcc006e",
+      );
     }
 
     const isSelectionUnchanged = app.selection.eq(selection);

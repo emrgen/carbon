@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BsFillCaretRightFill } from "react-icons/bs";
-import {isPlainObject, sortBy} from "lodash";
+import { isPlainObject, sortBy } from "lodash";
 import { isEmpty } from "lodash";
 import { NodeView } from "./Node";
 import { isGetterProp } from "./utils";
@@ -64,6 +64,7 @@ export const ProtoView = ({ data, propName, parentProps = new Set() }) => {
         className={"cov-object-initial"}
         onClick={() => setExpanded((e) => !e)}
       >
+        {propName && <span className={"cov-object-key"}>{propName}:</span>}
         <div className={"cov-expander"}>
           {expanded ? (
             <AiFillCaretDown />

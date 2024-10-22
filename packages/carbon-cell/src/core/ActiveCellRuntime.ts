@@ -252,20 +252,21 @@ export class ActiveCellRuntime extends EventEmitter {
   private replace(before: ActiveCell, cell: ActiveCell) {
     // if before.name is different from cell.name
     if (
-      before.name === null ||
-      before.name === undefined ||
+      // before.name === null ||
+      // before.name === undefined ||
       before.name != cell.name ||
       before.codeType !== cell.codeType
     ) {
       const variable = this.defineFresh(cell);
       if (before.variable) {
+        console.log("deleting", before.id, before.name);
         // NOTE: deleting the cell will also delete the variable
         before.delete(true);
       }
     } else if (before.name === cell.name) {
       // NOTE: as the name are the same, we can redefine the variable with the same name
       // internal Runtime will keep the same variable with all the references intact
-      console.log("replacing", before.name, cell.name);
+      console.log("replacing", before.id, before.name, cell.name);
       // redefine the cell, will keep the same variable
       cell.variable = this.module.redefine(
         cell.name,

@@ -9,6 +9,7 @@ export enum EventsIn {
   mouseUp = "mouseUp",
   mouseMove = "mouseMove",
   mouseOver = "mouseOver",
+  mouseEnter = "mouseEnter",
   mouseOut = "mouseOut",
   scroll = "scroll",
 

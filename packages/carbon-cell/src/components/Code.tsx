@@ -194,7 +194,6 @@ export const CodeInner = (props: RendererProps) => {
 
                 // insert new line
                 if (event.ctrlKey && event.shiftKey && event.key === "Enter") {
-                  console.log("xxxxxxxxxxxx");
                   event.preventDefault();
                   event.stopPropagation();
                   const parent = app.store.get(nodeId)?.parent;
@@ -278,7 +277,7 @@ export const CodeInner = (props: RendererProps) => {
     [ref, codeType, createEditor, node],
     (prev, next) => {
       // @ts-ignore
-      return prev[0].current === next[0].current && prev[1] === next[1];
+      return prev[1] === next[1];
     },
   );
 

@@ -9,6 +9,8 @@ import { isFunction } from "lodash";
 import { isNumber } from "lodash";
 import { isString } from "lodash";
 import { isObject } from "lodash";
+import { isPlainObject } from "lodash";
+import { cloneDeep } from "lodash";
 import { ActiveCell } from "../core/ActiveCellRuntime";
 import { Optional } from "@emrgen/types";
 import { isHtmlElement } from "../utils";
@@ -64,7 +66,11 @@ const ResultInner = (props) => {
     if (isFunction(res)) {
       setResult(() => res);
     } else {
-      setResult(res);
+      if (isPlainObject(res)) {
+        setResult(cloneDeep(res));
+      } else {
+        setResult(res);
+      }
     }
   };
 
@@ -122,6 +128,7 @@ const ResultInner = (props) => {
       // console.log("rejected", cell.name, cell.error);
       setCell(cell);
       setError(cell.error.toString());
+      console.log("DELETE", cell.id, cell.name);
       updateResult(null);
       setPending(false);
     };
@@ -208,6 +215,12 @@ const ResultView = (props) => {
   useEffect(() => {
     if (isHtmlElement(result)) {
       if (ref.current) {
+        // if (
+        //   result.parentNode &&
+        //   !getClassNames(result.parentNode).includes(node.id.toString())
+        // ) {
+        //   return;
+        // }
         const el = ref.current;
         // if (html && el.children.length === 0) {
         //   console.log("html", html);
@@ -219,7 +232,7 @@ const ResultView = (props) => {
         el.appendChild(result);
       }
     }
-  }, [html, ref, result]);
+  }, [html, node, ref, result]);
 
   // console.dir(result);
 
@@ -272,7 +285,6 @@ const ResultView = (props) => {
   }
 
   if (isString(result)) {
-    console.log("string", result);
     return <div>{result}</div>;
   }
 
@@ -299,12 +311,27 @@ const ResultView = (props) => {
     );
   }
 
+  console.log(node.id.toString(), result, result.parentNode);
+
+  // if (
+  //   isHtmlElement(result) &&
+  //   !getClassNames(result.parentNode).includes(node.id.toString())
+  // ) {
+  //   console.log(getClassNames(result), node.id.toString());
+  //   return (
+  //     <div className={"cell-result-object"}>
+  //       <ObjectViewer data={result} />
+  //     </div>
+  //   );
+  // }
+
   return (
     <div className={"cell-html-result"}>
       {cell?.hasName() && <div>{cellName} = </div>}
       <div
         // @ts-ignore
         ref={ref}
+        className={node.id.toString()}
         key={node.id.toString()}
         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }}
       />
@@ -321,4 +348,9 @@ const CellResultView = (props) => {
       <div style={{ color }}>{props.result}</div>
     </div>
   );
+};
+
+const getClassNames = (el) => {
+  if (!el) return [];
+  return el.getAttribute("class").split(" ");
 };
