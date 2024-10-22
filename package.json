@@ -20,7 +20,8 @@
     "e2e": "playwright test --reporter=list",
     "clean": "find . -name \"node_modules\" -type d -prune -exec rm -rf '{}' + && find . -name \"pnpm-lock.yaml\" -type f -prune -exec rm -rf '{}' +",
     "bump": "node ./scripts/bumpversion.ts",
-    "release": "pnpm publish --recursive --registry https://npm.pkg.github.com"
+    "release": "pnpm publish --recursive --registry https://npm.pkg.github.com",
+    "sync": "cd apps/tinyquiz && pnpm sync"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.3",

@@ -51,20 +51,9 @@ export default function TinyQuiz() {
       node(
         "document",
         [
-          title([text("Welcome to TinyQuiz")]),
+          title([text("Welcome to TinyQuiz!")]),
           section(title([text("A platform to create and share quizzes.")])),
-          // node("h1", [title("Blocks")]),
-          // node("divider"),
-          // node("h2", [title("Headers")]),
-          // node("h1", [title("Header 1")]),
-          // node("h2", [title("Header 2")]),
-          // node("h3", [title("Header 3")]),
-          // node("h4", [title("Header 4")]),
-          //
-          // node("h2", [title("Text")]),
-          // section([title(text("This is a text block."))]),
-          //
-          // node("h2", [title("Callout")]),
+
           node("callout", [
             text("Moye Moye", {
               [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
@@ -241,6 +230,7 @@ mermaid\`gantt
     });
   });
 
+  // @ts-expect-error - Expose app to the window for debugging
   window.app = app;
 
   return (

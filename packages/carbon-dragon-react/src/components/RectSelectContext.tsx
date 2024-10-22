@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { RectSelectorContext } from "../hooks/useRectSelector";
-import { Carbon, State, EventsOut, Transaction } from "@emrgen/carbon-core";
+import { EventsOut, State } from "@emrgen/carbon-core";
 import { createPortal } from "react-dom";
 import { useDndMonitor, useDragRect } from "../hooks";
 import { throttle } from "lodash";
 import { CarbonDragHandleId } from "./DraggableHandle";
-import {useCarbon} from "@emrgen/carbon-react";
-import {DndEvent, RectSelect, RectSelectAreaId} from "@emrgen/carbon-dragon";
+import { useCarbon } from "@emrgen/carbon-react";
+import { DndEvent, RectSelect, RectSelectAreaId } from "@emrgen/carbon-dragon";
 
 export function RectSelectContext(props) {
   const app = useCarbon();
@@ -23,13 +23,13 @@ export function RectSelectContext(props) {
   useEffect(() => {
     const onChanged = (state: State) => {
       // console.log('####################1')
-      setIsBlockSelection(state.blockSelection.isActive)
+      setIsBlockSelection(state.blockSelection.isActive);
     };
 
     const onSelectStart = (e) => {
       // console.log('####################2')
       // setIsBlockSelection(false)
-    }
+    };
 
     app.on(EventsOut.changed, onChanged);
     // app.on('selectstart', onSelectStart)
@@ -51,7 +51,7 @@ export function RectSelectContext(props) {
         setIsDragging(true);
       }
     },
-    [rectSelector]
+    [rectSelector],
   );
 
   // select nodes based on the drag rect
@@ -68,7 +68,7 @@ export function RectSelectContext(props) {
     return (e: DndEvent) => {
       e.event.preventDefault();
       throttledHandler(e);
-    }
+    };
   }, [onDragRectProgress, rectSelector]);
 
   const onDragEnd = useCallback(
@@ -84,7 +84,7 @@ export function RectSelectContext(props) {
         setIsDragging(false);
       }
     },
-    [app.selection, onDragRectStop, rectSelector]
+    [onDragRectStop, rectSelector],
   );
 
   useDndMonitor({
@@ -113,17 +113,15 @@ export function RectSelectContext(props) {
     };
   }, [app, rectSelector]);
 
-
   useEffect(() => {
     const onHideCursor = () => {
       setIsSelecting(true);
       // console.log('hide cursor');
-
-    }
+    };
     const onShowCursor = () => {
       // console.log("show cursor");
       setIsSelecting(false);
-    }
+    };
 
     app.on("document:cursor:hide", onHideCursor);
     app.on("document:cursor:show", onShowCursor);
