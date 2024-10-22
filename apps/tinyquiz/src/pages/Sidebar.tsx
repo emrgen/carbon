@@ -1,12 +1,13 @@
-import { CompanyIcon } from "@/components/CompanyIcon";
 import { Sidebar } from "@/components/Layout/Sidebar";
 import { sidebarState } from "@/components/Layout/Sidebar/atom.ts";
 import { SidebarItem } from "@/components/Layout/Sidebar/SidebarItem";
 import {
   Box,
   Button,
+  Center,
   Circle,
   Flex,
+  Heading,
   HStack,
   Square,
   Stack,
@@ -21,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { Logout } from "../components/Account/Logout";
 import { useLogout } from "../components/Account/useLogout";
+import { CompanyIcon } from "../components/CompanyIcon";
 import { userState } from "./atom";
 
 interface AppSidebarProps {
@@ -36,13 +38,12 @@ export const AppSidebar = (props: AppSidebarProps) => {
 
   return (
     <Sidebar activeKey={activeKey}>
-      <Flex
+      <HStack
         pt={4}
         pb={2}
         px={4}
         w="full"
         userSelect={"none"}
-        justify={"space-between"}
         as={isOpen ? HStack : Stack}
         align={"center"}
         // bg={'#eee'}
@@ -51,7 +52,7 @@ export const AppSidebar = (props: AppSidebarProps) => {
       >
         <Circle
           size={6}
-          bg="#000"
+          // bg="#000"
           color={"#fff"}
           onClick={() => {
             return navigate("/");
@@ -60,7 +61,12 @@ export const AppSidebar = (props: AppSidebarProps) => {
         >
           <CompanyIcon />
         </Circle>
-      </Flex>
+        {isOpen &&
+          <Center flex={1}>
+            <Heading size={"md"}>TinyQuiz</Heading>
+          </Center>
+        }
+      </HStack>
 
       <Stack
         overflow={"auto"}

@@ -1,5 +1,5 @@
 import { userState } from "@/pages/atom.ts";
-import { emailValidator, passwordValidator } from "@/utils/form_validator.ts";
+import { passwordValidator } from "@/utils/form_validator.ts";
 import {
   Box,
   Button,
@@ -23,6 +23,7 @@ import { Field, Formik } from "formik";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
+import { emailValidator } from "../../utils/form_validator";
 
 export function Login() {
   const navigate = useNavigate();
@@ -112,40 +113,41 @@ export function Login() {
 
             /* and other goodies */
           }) => {
-            return <form onSubmit={handleSubmit}>
-              <Box rounded={"lg"} bg={bg} boxShadow={"lg"} p={8}>
-                <Stack spacing={4}>
-                  <FormControl
-                    id="email"
-                    isInvalid={Boolean(errors.email) && touched.email}
-                  >
-                    <FormLabel>Email</FormLabel>
-                    <Field
-                      as={Input}
-                      type="text"
+            return (
+              <form onSubmit={handleSubmit}>
+                <Box rounded={"lg"} bg={bg} boxShadow={"lg"} p={8}>
+                  <Stack spacing={4}>
+                    <FormControl
                       id="email"
-                      name="email"
-                      isDisabled={isSubmitting}
-                      validate={emailValidator}
-                    />
-                  </FormControl>
+                      isInvalid={Boolean(errors.email) && touched.email}
+                    >
+                      <FormLabel>Email</FormLabel>
+                      <Field
+                        as={Input}
+                        type="text"
+                        id="email"
+                        name="email"
+                        isDisabled={isSubmitting}
+                        validate={emailValidator}
+                      />
+                    </FormControl>
 
-                  <FormControl
-                    id="password"
-                    isInvalid={Boolean(errors.password) && touched.password}
-                  >
-                    <FormLabel>Password</FormLabel>
-                    <Field
-                      as={Input}
-                      type="password"
+                    <FormControl
                       id="password"
-                      name="password"
-                      isDisabled={isSubmitting}
-                      validate={passwordValidator}
-                    />
-                  </FormControl>
-                  <Stack spacing={10}>
-                    {/* <Stack
+                      isInvalid={Boolean(errors.password) && touched.password}
+                    >
+                      <FormLabel>Password</FormLabel>
+                      <Field
+                        as={Input}
+                        type="password"
+                        id="password"
+                        name="password"
+                        isDisabled={isSubmitting}
+                        validate={passwordValidator}
+                      />
+                    </FormControl>
+                    <Stack spacing={10}>
+                      {/* <Stack
                       direction={{ base: "column", sm: "row" }}
                       align={"start"}
                       justify={"space-between"}
@@ -160,87 +162,89 @@ export function Login() {
                       </Field>
                     </Stack> */}
 
-                    <Stack spacing={4} mt={4}>
-                      <Button
-                        bg={"black"}
-                        color={"white"}
-                        _hover={{
-                          bg: "black",
-                        }}
-                        type="submit"
-                        isDisabled={isSubmitting}
-                        isLoading={isSubmitting}
-                      >
-                        Sign in
-                      </Button>
+                      <Stack spacing={4} mt={4}>
+                        <Button
+                          bg={"black"}
+                          color={"white"}
+                          _hover={{
+                            bg: "black",
+                          }}
+                          type="submit"
+                          isDisabled={isSubmitting}
+                          isLoading={isSubmitting}
+                        >
+                          Sign in
+                        </Button>
 
-                      {/* google provider with icon */}
-                      <Button
-                      // leftIcon={<FaGoogle />}
-                        variant={"outline"}
-                        onClick={() => {
-                          const auth = getAuth();
-                          const provider = new GoogleAuthProvider();
-                          // show google sign in popup
-                          signInWithPopup(auth, provider)
-                            .then((result) => {
-                            // This gives you a Google Access Token. You can use it to access the Google API.
-                              const credential =
-                                GoogleAuthProvider.credentialFromResult(result);
-                              if (credential === null) {
-                                throw new Error(
-                                  "Failed to get credential from result",
-                                );
-                              }
-                              const token = credential.accessToken!;
-                              localStorage.setItem("token", token);
-                              const user = result.user;
+                        {/* google provider with icon */}
+                        <Button
+                          // leftIcon={<FaGoogle />}
+                          variant={"outline"}
+                          onClick={() => {
+                            const auth = getAuth();
+                            const provider = new GoogleAuthProvider();
+                            // show google sign in popup
+                            signInWithPopup(auth, provider)
+                              .then((result) => {
+                                // This gives you a Google Access Token. You can use it to access the Google API.
+                                const credential =
+                                  GoogleAuthProvider.credentialFromResult(
+                                    result,
+                                  );
+                                if (credential === null) {
+                                  throw new Error(
+                                    "Failed to get credential from result",
+                                  );
+                                }
+                                const token = credential.accessToken!;
+                                localStorage.setItem("token", token);
+                                const user = result.user;
 
-                              setUser({
-                                id: user.uid,
-                                email: user.email ?? "",
-                                username: user.displayName ?? "",
+                                setUser({
+                                  id: user.uid,
+                                  email: user.email ?? "",
+                                  username: user.displayName ?? "",
+                                });
+                              })
+                              .catch((error) => {
+                                toast({
+                                  title: "Failed to sign in with Google",
+                                  description: error.message,
+                                  status: "error",
+                                  duration: 9000,
+                                  isClosable: true,
+                                  position: "top-right",
+                                });
                               });
-                            })
-                            .catch((error) => {
-                              toast({
-                                title: "Failed to sign in with Google",
-                                description: error.message,
-                                status: "error",
-                                duration: 9000,
-                                isClosable: true,
-                                position: "top-right",
-                              });
-                            });
-                        }}
-                        isDisabled={isSubmitting}
-                      >
-                        Sign in with Google
-                      </Button>
+                          }}
+                          isDisabled={isSubmitting}
+                        >
+                          Sign in with Google
+                        </Button>
 
-                      <Text
-                        color={"gray.500"}
-                        fontSize={"sm"}
-                        textAlign={"center"}
-                      >
-                        or
-                      </Text>
-                      <Button
-                        variant={"outline"}
-                        onClick={() => {
-                          navigate("/register");
-                        }}
-                        isDisabled={isSubmitting}
-                      >
-                        Sign up
-                      </Button>
+                        <Text
+                          color={"gray.500"}
+                          fontSize={"sm"}
+                          textAlign={"center"}
+                        >
+                          or
+                        </Text>
+                        <Button
+                          variant={"outline"}
+                          onClick={() => {
+                            navigate("/register");
+                          }}
+                          isDisabled={isSubmitting}
+                        >
+                          Sign up
+                        </Button>
+                      </Stack>
                     </Stack>
                   </Stack>
-                </Stack>
-              </Box>
-            </form>;
-          }
-          }
+                </Box>
+              </form>
+            );
+          }}
         </Formik>
       </Stack>
     </Flex>

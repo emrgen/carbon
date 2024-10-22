@@ -1,4 +1,3 @@
-import { CompanyIcon } from "@/components/CompanyIcon.tsx";
 import {
   Box,
   Flex,
@@ -7,10 +6,12 @@ import {
   IconButton,
   Square,
   Stack,
+  Text,
   Tooltip,
 } from "@chakra-ui/react";
 import { BiLogInCircle } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
+import { CompanyIcon } from "../../components/CompanyIcon";
 import { LandingContent } from "./LandingContent";
 
 const disabledStyles = {
@@ -31,7 +32,7 @@ export function Landing() {
               <Flex>
                 <Square
                   size={10}
-                  bg={"#000"}
+                  // bg={"#000"}
                   color={"#fff"}
                   fontSize={"xl"}
                   userSelect={"none"}
@@ -75,7 +76,6 @@ export function Landing() {
         <Box
           w="full"
           h="400px"
-          a
           bg={"#000"}
           color={"#fff"}
           display={"flex"}
@@ -83,9 +83,20 @@ export function Landing() {
           justifyContent={"center"}
           gap={10}
         >
-          <Heading size={"4xl"} fontFamily={"Geist Sans, Helvetica"}>
-            TinyQuiz
-          </Heading>
+          <HStack alignItems={"end"} overflow={"visible"} pos={"relative"}>
+            <Heading size={"4xl"} fontFamily={"Geist Sans, Helvetica"}>
+              TinyQuiz
+            </Heading>
+            <Box
+              pb={1}
+              pos={"absolute"}
+              left={"100%"}
+              whiteSpace={"nowrap"}
+              ml={4}
+            >
+              <Text fontSize={"lg"}>is getting ready...</Text>
+            </Box>
+          </HStack>
         </Box>
 
         <LandingContent />

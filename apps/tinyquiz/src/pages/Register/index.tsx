@@ -1,3 +1,4 @@
+import { userState } from "@/pages/atom.ts";
 import {
   Box,
   Button,
@@ -11,31 +12,49 @@ import {
   useColorModeValue,
   useToast,
 } from "@chakra-ui/react";
-import {useNavigate} from "react-router-dom";
-import {useRecoilState} from "recoil";
-import {useEffect} from "react";
-import {userState} from "@/pages/atom.ts";
-import {Field, Formik} from "formik";
-import {createUserWithEmailAndPassword, getAuth, updateProfile, User,} from "@firebase/auth";
-import {emailValidator, passwordValidator, usernameValidator} from "../../utils/form_validator.ts";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  updateProfile,
+  User,
+} from "@firebase/auth";
+import { Field, Formik } from "formik";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useRecoilState } from "recoil";
+import {
+  emailValidator,
+  passwordValidator,
+} from "../../utils/form_validator.ts";
 
 export function Register() {
   const navigate = useNavigate();
-  const [user, setUser] = useRecoilState(userState);
+  const [ user, setUser ] = useRecoilState(userState);
   const bg = useColorModeValue("white", "gray.700");
   const formBg = useColorModeValue("gray.50", "gray.800");
   const toast = useToast();
 
   useEffect(() => {
-    if (user.id) navigate("/");
-  }, [navigate, user]);
+    if (user.id) {
+      navigate("/");
+    }
+  }, [ navigate, user ]);
 
   return (
-    <Flex minH={"100vh"} align={"center"} justify={"center"} bg={formBg} transform={'translateY(-15%)'}>
+    <Flex
+      minH={"100vh"}
+      align={"center"}
+      justify={"center"}
+      bg={formBg}
+      transform={"translateY(-15%)"}
+    >
       <Formik
-        initialValues={{username: "", email: "", password: ""}}
-        onSubmit={(values: { username: string; email: string; password: string; }, {setSubmitting}) => {
-          const {username, email, password} = values;
+        initialValues={{ username: "", email: "", password: "" }}
+        onSubmit={(
+          values: { username: string; email: string; password: string },
+          { setSubmitting },
+        ) => {
+          const { username, email, password } = values;
           console.log(username, email, password);
 
           const auth = getAuth();
@@ -87,15 +106,16 @@ export function Register() {
         }}
       >
         {({
-            // values,
-            errors,
-            touched,
-            // handleChange,
-            // handleBlur,
-            handleSubmit,
-            isSubmitting,
-            /* and other goodies */
-          }) => (
+          // values,
+          errors,
+          touched,
+          // handleChange,
+          // handleBlur,
+          handleSubmit,
+          isSubmitting,
+
+          /* and other goodies */
+        }) =>
           <form onSubmit={handleSubmit}>
             <Stack
               spacing={8}
@@ -112,7 +132,7 @@ export function Register() {
                 <Stack spacing={4}>
                   <FormControl
                     id="username"
-                    isInvalid={!!errors.username && touched.username}
+                    isInvalid={Boolean(errors.username) && touched.username}
                   >
                     <FormLabel>Username</FormLabel>
                     <Field
@@ -124,7 +144,7 @@ export function Register() {
                   </FormControl>
                   <FormControl
                     id="email"
-                    isInvalid={!!errors.email && touched.email}
+                    isInvalid={Boolean(errors.email) && touched.email}
                   >
                     <FormLabel>Email</FormLabel>
                     <Field
@@ -138,7 +158,7 @@ export function Register() {
 
                   <FormControl
                     id="password"
-                    isInvalid={!!errors.password && touched.password}
+                    isInvalid={Boolean(errors.password) && touched.password}
                   >
                     <FormLabel>Password</FormLabel>
                     <Field
@@ -156,7 +176,7 @@ export function Register() {
                         bg={"black"}
                         color={"white"}
                         _hover={{
-                          bg: "black"
+                          bg: "black",
                         }}
                         type="submit"
                         isLoading={isSubmitting}
@@ -185,7 +205,7 @@ export function Register() {
               </Box>
             </Stack>
           </form>
-        )}
+        }
       </Formik>
     </Flex>
   );
