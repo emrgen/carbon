@@ -47,3 +47,5 @@ cypress
 .vscode
 
 fonts
+
+apps/tinyquiz
