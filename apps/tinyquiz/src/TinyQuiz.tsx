@@ -44,7 +44,7 @@ const renderers: (ReactRenderer | ReactRenderer[])[] = [
 ];
 const renderManager = RenderManager.from(flattenDeep(renderers));
 
-export default function App() {
+export default function TinyQuiz() {
   const [data] = useState(() => {
     const data = node("carbon", [
       node(
@@ -62,12 +62,12 @@ export default function App() {
           node("h4", [title("Header 4")]),
 
           node("h2", [title("Text")]),
-          section([text("This is a text block.")]),
+          section([title(text("This is a text block."))]),
 
           node("h2", [title("Callout")]),
           node("callout", [
             text("Laws of Motion", {
-              [MarksPath]: [Mark.BOLD],
+              [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
             }),
             node("numberList", [
               title(
@@ -96,7 +96,7 @@ export default function App() {
                 section([
                   title([
                     text("MAC", {
-                      [MarksPath]: [Mark.BOLD],
+                      [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
                     }),
                     text(
                       " can refer to a line of Apple computers, a hardware identifier for devices on a network, or a data center infrastructure management software",
@@ -115,7 +115,7 @@ export default function App() {
                 section([
                   title([
                     text("Linux ", {
-                      [MarksPath]: [Mark.BOLD],
+                      [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
                     }),
                     text(
                       " is an open-source operating system (OS) that's used on many devices, including smartphones, computers, and supercomputers",
@@ -133,7 +133,7 @@ export default function App() {
                 section([
                   title([
                     text("Windows ", {
-                      [MarksPath]: [Mark.BOLD],
+                      [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
                     }),
                     text(
                       " is an operating system (OS) developed by Microsoft that allows users to use a compute",
@@ -191,14 +191,15 @@ export default function App() {
     });
   });
 
-  // @ts-expect-error - Expose app to the window for debugging
   window.app = app;
 
   return (
     <Box className={"carbon-app-container"}>
       <ActiveCellRuntimeContext runtime={runtime}>
         <ObservableQuestions>
-          <CarbonApp app={app} renderManager={renderManager}></CarbonApp>
+          <CarbonApp app={app} renderManager={renderManager}>
+            {/*<SelectionTracker />*/}
+          </CarbonApp>
         </ObservableQuestions>
       </ActiveCellRuntimeContext>
     </Box>

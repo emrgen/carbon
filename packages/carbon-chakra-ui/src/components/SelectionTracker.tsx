@@ -68,7 +68,7 @@ const collectMarks = (selection: PinnedSelection) => {
   return markSet;
 };
 
-export default function SelectionTracker() {
+export function SelectionTracker() {
   const app = useCarbon();
   const [showContextMenu, setShowContextMenu] = useState(false);
   const overlay = useCarbonOverlay();
@@ -261,18 +261,7 @@ export default function SelectionTracker() {
     );
   }, [showContextMenu, overlay.ref, rect, app.cmd.formatter, marks]);
 
-  return (
-    <>
-      {contextMenu}
-      {/*{selections.map((s, i) => {*/}
-      {/*  return (*/}
-      {/*    <div className="carbon-selection-tracker__item" key={i}>*/}
-      {/*      {`${i}: tail: ${s.tail.node.id.toString()}/${s.tail.offset} => head: ${s.head.node.id.toString()}/${s.head.offset}`}*/}
-      {/*    </div>*/}
-      {/*  );*/}
-      {/*})}*/}
-    </>
-  );
+  return <>{contextMenu}</>;
 }
 
 const ContextButton = (props: IconButtonProps) => {

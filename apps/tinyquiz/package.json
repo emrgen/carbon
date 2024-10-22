@@ -26,6 +26,7 @@
     "@emrgen/carbon-database-react": "workspace:*",
     "@emrgen/carbon-object-view": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
+    "@emrgen/carbon-question": "workspace:*",
     "@emrgen/carbon-react-blocks": "workspace:*",
     "@emrgen/carbon-sheet": "workspace:*",
     "@emrgen/carbon-utils": "workspace:*",

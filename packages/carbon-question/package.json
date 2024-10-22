@@ -11,6 +11,7 @@
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
+    "@emrgen/carbon-cell": "workspace:*",
     "@react-icons/all-files": "^4.1.0",
     "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",

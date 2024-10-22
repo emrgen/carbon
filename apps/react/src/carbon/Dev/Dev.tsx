@@ -54,7 +54,6 @@ import { boardRenderers } from "@emrgen/carbon-board-react";
 import { questionExtension } from "@emrgen/carbon-question";
 import { ObservableQuestions } from "@emrgen/carbon-question";
 import { Box } from "@chakra-ui/react";
-import SelectionTracker from "../../SelectionTracker";
 
 function is_env_development() {
   // @ts-ignore
