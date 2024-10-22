@@ -1,11 +1,11 @@
 import { ActionOrigin, TextWriter } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { EventEmitter } from "events";
-import { first } from "lodash";
-import { isFunction } from "lodash";
+import { first, isFunction } from "lodash";
 import { querySelector } from "../utils/domElement";
 import { BlockSelection } from "./BlockSelection";
 import { CarbonCommand } from "./CarbonCommand";
+import { CarbonDom } from "./CarbonDom";
 import { CarbonPlugin, PluginType } from "./CarbonPlugin";
 import { ChangeManager } from "./ChangeManager";
 import { CustomEvent } from "./CustomEvent";
@@ -26,7 +26,6 @@ import { State } from "./State";
 import { Transaction } from "./Transaction";
 import { TransactionManager } from "./TransactionManager";
 import { With } from "./types";
-import { CarbonDom } from "./CarbonDom";
 
 export class Carbon extends EventEmitter {
   private readonly pm: PluginManager;

@@ -1,5 +1,5 @@
-import {Carbon, Predicate, Node, yes} from "@emrgen/carbon-core";
-import {identity} from "lodash";
+import { Carbon, Node, Predicate, yes } from "@emrgen/carbon-core";
+import { identity } from "lodash";
 
 export class Nodes {
   app: Carbon;
@@ -11,13 +11,18 @@ export class Nodes {
 
   // get the nodes from the store
   filter(fn: Predicate<Node> = yes): Array<Node> {
-    return (this.ids.map(id => this.app.store.get(id))
-      .filter(identity)
-      .filter((node: Node) => fn(node)) ?? []) as Array<Node>;
+    return (
+      (
+        this.ids.map((id) => this.app.store.get(id)).filter(identity) as Node[]
+      ).filter((node) => fn(node)) ?? []
+    );
   }
 
-  into<T>(fn: (app:Carbon, nodes: Node[]) => T, filter: Predicate<Node> = yes): T {
+  into<T>(
+    fn: (app: Carbon, nodes: Node[]) => T,
+    filter: Predicate<Node> = yes,
+  ): T {
     const nodes = this.filter(filter);
-    return fn(this.app,nodes);
+    return fn(this.app, nodes);
   }
 }

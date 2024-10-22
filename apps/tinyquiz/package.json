@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "rsbuild dev",
-    "build": "rsbuild build",
+    "dev": "vite dev",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync": "vite build && firebase deploy"

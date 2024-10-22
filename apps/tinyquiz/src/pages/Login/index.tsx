@@ -1,3 +1,5 @@
+import { userState } from "@/pages/atom.ts";
+import { emailValidator, passwordValidator } from "@/utils/form_validator.ts";
 import {
   Box,
   Button,
@@ -11,23 +13,28 @@ import {
   useColorModeValue,
   useToast,
 } from "@chakra-ui/react";
-import {useEffect} from "react";
-import {useNavigate} from "react-router-dom";
-import {useRecoilState} from "recoil";
-import {Field, Formik} from "formik";
-import {userState} from "@/pages/atom.ts";
-import {getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup,} from "@firebase/auth";
-import {emailValidator, passwordValidator} from "@/utils/form_validator.ts";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "@firebase/auth";
+import { Field, Formik } from "formik";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useRecoilState } from "recoil";
 
 export function Login() {
   const navigate = useNavigate();
-  const [user, setUser] = useRecoilState(userState);
+  const [ user, setUser ] = useRecoilState(userState);
   const bg = useColorModeValue("white", "gray.700");
   const toast = useToast();
 
   useEffect(() => {
-    if (user.id) navigate("/");
-  }, [navigate, user]);
+    if (user.id) {
+      navigate("/");
+    }
+  }, [ navigate, user ]);
 
   return (
     <Flex
@@ -35,7 +42,7 @@ export function Login() {
       align={"center"}
       justify={"center"}
       bg={useColorModeValue("gray.50", "gray.800")}
-      transform={'translateY(-15%)'}
+      transform={"translateY(-15%)"}
       // avoid flicker on back press when logged in
       opacity={user.id ? 0 : 1}
     >
@@ -48,8 +55,11 @@ export function Login() {
             email: "",
             password: "",
           }}
-          onSubmit={(values: { email: string; password: string; }, {setSubmitting}) => {
-            const {email, password} = values;
+          onSubmit={(
+            values: { email: string; password: string },
+            { setSubmitting },
+          ) => {
+            const { email, password } = values;
             const auth = getAuth();
             signInWithEmailAndPassword(auth, email, password)
               .then((userCredential) => {
@@ -92,21 +102,22 @@ export function Login() {
           }}
         >
           {({
-              // values,
-              errors,
-              touched,
-              // handleChange,
-              // handleBlur,
-              handleSubmit,
-              isSubmitting,
-              /* and other goodies */
-            }) => (
-            <form onSubmit={handleSubmit}>
+            // values,
+            errors,
+            touched,
+            // handleChange,
+            // handleBlur,
+            handleSubmit,
+            isSubmitting,
+
+            /* and other goodies */
+          }) => {
+            return <form onSubmit={handleSubmit}>
               <Box rounded={"lg"} bg={bg} boxShadow={"lg"} p={8}>
                 <Stack spacing={4}>
                   <FormControl
                     id="email"
-                    isInvalid={!!errors.email && touched.email}
+                    isInvalid={Boolean(errors.email) && touched.email}
                   >
                     <FormLabel>Email</FormLabel>
                     <Field
@@ -121,7 +132,7 @@ export function Login() {
 
                   <FormControl
                     id="password"
-                    isInvalid={!!errors.password && touched.password}
+                    isInvalid={Boolean(errors.password) && touched.password}
                   >
                     <FormLabel>Password</FormLabel>
                     <Field
@@ -165,7 +176,7 @@ export function Login() {
 
                       {/* google provider with icon */}
                       <Button
-                        // leftIcon={<FaGoogle />}
+                      // leftIcon={<FaGoogle />}
                         variant={"outline"}
                         onClick={() => {
                           const auth = getAuth();
@@ -173,12 +184,12 @@ export function Login() {
                           // show google sign in popup
                           signInWithPopup(auth, provider)
                             .then((result) => {
-                              // This gives you a Google Access Token. You can use it to access the Google API.
+                            // This gives you a Google Access Token. You can use it to access the Google API.
                               const credential =
                                 GoogleAuthProvider.credentialFromResult(result);
                               if (credential === null) {
                                 throw new Error(
-                                  "Failed to get credential from result"
+                                  "Failed to get credential from result",
                                 );
                               }
                               const token = credential.accessToken!;
@@ -227,8 +238,9 @@ export function Login() {
                   </Stack>
                 </Stack>
               </Box>
-            </form>
-          )}
+            </form>;
+          }
+          }
         </Formik>
       </Stack>
     </Flex>

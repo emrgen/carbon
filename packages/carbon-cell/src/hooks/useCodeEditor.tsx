@@ -1,13 +1,11 @@
-import { useCodeMirror } from "@uiw/react-codemirror";
-import { ViewPlugin } from "@codemirror/view";
-import { ViewUpdate } from "@codemirror/view";
 import { javascript } from "@codemirror/lang-javascript";
+import { ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { Node, PinnedSelection } from "@emrgen/carbon-core";
+import { useCarbon } from "@emrgen/carbon-react";
+import { useCodeMirror } from "@uiw/react-codemirror";
+import { EditorView } from "codemirror";
 import { useCallback } from "react";
 import { CodeCellCodeValuePath } from "../constants";
-import { useCarbon } from "@emrgen/carbon-react";
-import { Node } from "@emrgen/carbon-core";
-import { PinnedSelection } from "@emrgen/carbon-core";
-import { EditorView } from "codemirror";
 
 const extensions = [javascript(), EditorView.lineWrapping];
 

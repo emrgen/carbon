@@ -119,7 +119,7 @@ export default tseslint.config(
       // Strict Mode - for ES6, never use strict.
       strict: [ERROR, "never"],
 
-      "@typescript-eslint/no-explicit-any": WARN,
+      "@typescript-eslint/no-explicit-any": OFF,
 
       // Variables
       "init-declarations": [ERROR, "always"],
@@ -147,7 +147,7 @@ export default tseslint.config(
       "no-sync": WARN,
 
       // ECMAScript 6 support
-      "arrow-body-style": [ERROR, "always"],
+      "arrow-body-style": [OFF, "always"],
       "arrow-parens": [ERROR, "always"],
       "arrow-spacing": [ERROR, { before: true, after: true }],
       "constructor-super": ERROR,

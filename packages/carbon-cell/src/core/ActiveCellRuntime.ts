@@ -1,15 +1,17 @@
-import { EventEmitter } from "events";
-import { Module, Runtime, Variable } from "@observablehq/runtime";
-import { parseCell, peekId } from "@observablehq/parser";
-import { Library } from "@observablehq/stdlib";
 import { Optional } from "@emrgen/types";
-import { nextUnnamedCellName } from "../utils";
-import { isHtmlElement } from "../utils";
-import { viewCellName } from "../utils";
-import { isUnnamedCell } from "../utils";
-import { isViewCell } from "../utils";
+import { parseCell, peekId } from "@observablehq/parser";
+import { Module, Runtime, Variable } from "@observablehq/runtime";
+import { Library } from "@observablehq/stdlib";
+import { EventEmitter } from "events";
 import { isString } from "lodash";
-import { Nodes } from "./Nodes"; //
+import {
+  isHtmlElement,
+  isUnnamedCell,
+  isViewCell,
+  nextUnnamedCellName,
+  viewCellName,
+} from "../utils";
+import { Nodes } from "./Nodes";
 
 //
 export class ActiveCellRuntime extends EventEmitter {

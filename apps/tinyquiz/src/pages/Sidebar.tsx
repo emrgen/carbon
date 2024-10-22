@@ -1,13 +1,15 @@
+import { CompanyIcon } from "@/components/CompanyIcon";
+import { Sidebar } from "@/components/Layout/Sidebar";
+import { sidebarState } from "@/components/Layout/Sidebar/atom.ts";
+import { SidebarItem } from "@/components/Layout/Sidebar/SidebarItem";
+import { Box, Circle, Flex, HStack, Stack } from "@chakra-ui/react";
 import React from "react";
 import { AiOutlineDashboard } from "react-icons/ai";
-import { Circle, Flex, HStack, Stack } from "@chakra-ui/react";
-import { Sidebar } from "@/components/Layout/Sidebar";
-import { SidebarItem } from "@/components/Layout/Sidebar/SidebarItem";
-import { useNavigate } from "react-router-dom";
+import { BiUser } from "react-icons/bi";
 import { FiUsers } from "react-icons/fi";
-import { sidebarState } from "@/components/Layout/Sidebar/atom.ts";
+import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
-import { CompanyIcon } from "@/components/CompanyIcon.tsx";
+import { userState } from "./atom";
 
 interface AppSidebarProps {
   activeKey: string;
@@ -17,6 +19,7 @@ export const AppSidebar = (props: AppSidebarProps) => {
   const { activeKey } = props;
   const navigate = useNavigate();
   const [ { isOpen } ] = useRecoilState(sidebarState);
+  const [ user, setUser ] = useRecoilState(userState);
 
   return (
     <Sidebar activeKey={activeKey}>
@@ -60,11 +63,21 @@ export const AppSidebar = (props: AppSidebarProps) => {
           path={"/"}
         />
 
+        <SidebarItem pathPrefix={"/quiz"} label="Quizes" icon={<FiUsers />} />
+
         <SidebarItem
-          pathPrefix={"/member"}
-          label="Members"
+          pathPrefix={"/question"}
+          label="Questions"
           icon={<FiUsers />}
         />
+
+        <Box position={"absolute"} bottom={2} w={"full"} fontWeight={"bold"}>
+          <SidebarItem
+            pathPrefix={"/account"}
+            label={user.username}
+            icon={<BiUser />}
+          />
+        </Box>
       </Stack>
     </Sidebar>
   );
