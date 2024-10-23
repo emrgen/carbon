@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  getActiveTab,
+  getActiveTabId,
+  getRenamingTabId,
+  getTabTitle,
+  setRenamingTabId,
+} from "@emrgen/carbon-blocks";
 import {
   EventsOut,
   Node,
@@ -6,7 +12,7 @@ import {
   onEnter,
   TitlePath,
 } from "@emrgen/carbon-core";
-import { first } from "lodash";
+import { stop } from "@emrgen/carbon-core/src/utils/event";
 import {
   useCombineConnectors,
   useConnectorsToProps,
@@ -22,14 +28,8 @@ import {
   useNodeState,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
-import {
-  getActiveTab,
-  getActiveTabId,
-  getRenamingTabId,
-  getTabTitle,
-  setRenamingTabId,
-} from "@emrgen/carbon-blocks";
-import { stop } from "@emrgen/carbon-core/src/utils/event";
+import { first } from "lodash";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export const TabsComp = (props: RendererProps) => {
   const { node: tabs } = props;
@@ -199,16 +199,13 @@ export const TabComp = (props: RendererProps) => {
     [app, isSelecting, node],
   );
 
-  const onMouseOut = useCallback(
-    (e) => {
-      // if (!node.props.get(ContenteditablePath)) return
-      // app.cmd.Update(node.id, {
-      //   [ContenteditablePath]: false,
-      // }).Dispatch();
-      // console.log('tab mouse out', e)
-    },
-    [app, node],
-  );
+  const onMouseOut = useCallback((e) => {
+    // if (!node.props.get(ContenteditablePath)) return
+    // app.cmd.Update(node.id, {
+    //   [ContenteditablePath]: false,
+    // }).Dispatch();
+    // console.log('tab mouse out', e)
+  }, []);
 
   return (
     <CarbonBlock {...props} ref={ref} custom={{ ...attributes, onMouseOver }}>
@@ -311,6 +308,7 @@ const TabTitleComp = (props: TabTitleProps) => {
           onBeforeInput={stop}
         >
           <input
+            type={"text"}
             value={tabTitle}
             onChange={handleTabNameChange}
             onMouseUp={(e) => {
