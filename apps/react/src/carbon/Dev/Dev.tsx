@@ -1,59 +1,63 @@
-import { useState } from "react";
-import { useEffect } from "react";
-import { useCallback } from "react";
+import { Box } from "@chakra-ui/react";
+import { attrRenderers } from "@emrgen/carbon-attributes";
 
 import {
   blockPresetPlugins,
   emoji,
+  empty,
+  mention,
   node,
   section,
   text,
   title,
 } from "@emrgen/carbon-blocks";
-import { mention } from "@emrgen/carbon-blocks";
-import { empty } from "@emrgen/carbon-blocks";
+import { boardPlugins } from "@emrgen/carbon-board";
+import { boardRenderers } from "@emrgen/carbon-board-react";
 import {
-  Extension,
-  ReactRenderer,
-  RendererProps,
-  RenderManager,
-} from "@emrgen/carbon-react";
-import { useCreateCarbon } from "@emrgen/carbon-react";
-import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
+  ActiveCellRuntime,
+  ActiveCellRuntimeContext,
+  cellPlugin,
+  cellRenderer,
+} from "@emrgen/carbon-cell";
+import { SelectionTracker } from "@emrgen/carbon-chakra-ui";
+import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
+import { codeExtension } from "@emrgen/carbon-code";
+import {
+  commentEditorComp,
+  commentEditorPlugin,
+} from "@emrgen/carbon-comment-editor";
 import {
   ActivatedPath,
   Carbon,
   ColorPath,
+  ContenteditablePath,
   corePresetPlugins,
   Mark,
   MarksPath,
   ModePath,
   NodeId,
   State,
+  SuppressContenteditableWarningPath,
   TitlePath,
 } from "@emrgen/carbon-core";
-import { ContenteditablePath } from "@emrgen/carbon-core";
-import { SuppressContenteditableWarningPath } from "@emrgen/carbon-core";
-import { CarbonApp } from "@emrgen/carbon-utils";
-import { codeExtension } from "@emrgen/carbon-code";
-import { cellPlugin, cellRenderer } from "@emrgen/carbon-cell";
-import { ActiveCellRuntimeContext } from "@emrgen/carbon-cell";
-import { ActiveCellRuntime } from "@emrgen/carbon-cell";
-import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { flattenDeep } from "lodash";
-import { PathTracker } from "../../PathTracker";
-import {
-  commentEditorComp,
-  commentEditorPlugin,
-} from "@emrgen/carbon-comment-editor";
-import { attrRenderers } from "@emrgen/carbon-attributes";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
-import { boardPlugins } from "@emrgen/carbon-board";
-import { boardRenderers } from "@emrgen/carbon-board-react";
-import { questionExtension } from "@emrgen/carbon-question";
-import { ObservableQuestions } from "@emrgen/carbon-question";
-import { Box } from "@chakra-ui/react";
+import {
+  ObservableQuestions,
+  questionExtension,
+} from "@emrgen/carbon-question";
+import {
+  Extension,
+  ReactRenderer,
+  RendererProps,
+  RenderManager,
+  useCreateCarbon,
+} from "@emrgen/carbon-react";
+import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
+import { CarbonApp } from "@emrgen/carbon-utils";
+import { flattenDeep } from "lodash";
+import { useCallback, useEffect, useState } from "react";
+import { PathTracker } from "../../PathTracker";
 
 function is_env_development() {
   // @ts-ignore

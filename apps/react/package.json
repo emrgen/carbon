@@ -5,7 +5,7 @@
   "type": "module",
   "license": "All rights reserved to the authors",
   "scripts": {
-    "dev": "rsbuild dev",
+    "dev": "vite dev",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -13,6 +13,8 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "@emrgen/carbon-question": "workspace:*",
+    "@emrgen/carbon-chakra-ui": "workspace:*",
     "@emrgen/carbon-attributes": "workspace:*",
     "@emrgen/carbon-board": "workspace:*",
     "@emrgen/carbon-board-react": "workspace:*",

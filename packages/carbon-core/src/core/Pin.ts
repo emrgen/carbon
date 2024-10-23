@@ -1,13 +1,12 @@
 import { Optional, Predicate } from "@emrgen/types";
+import { printNode } from "../utils/print";
+import { Align, Focus } from "./Focus";
 import { classString } from "./Logger";
 import { Node } from "./Node";
-import { Point } from "./Point";
-import { Maps } from "./types";
 import { NodeMapGet } from "./NodeMap";
-import { Focus } from "./Focus";
-import { Align } from "./Focus";
+import { Point } from "./Point";
 import { Step } from "./Step";
-import { printNode } from "../utils/print";
+import { Maps } from "./types";
 
 // materialized pin is a pin that is not a reference to a title or inline node
 export class Pin {
@@ -81,6 +80,19 @@ export class Pin {
         focus.align,
       );
     }
+
+    // NOTE: when the node is not focusable but has focusable children
+    if (node.hasFocusable) {
+      if (offset === 0) {
+        const focusable = node.find((n) => n.isFocusable, { order: "pre" });
+        if (!focusable) {
+          return null;
+        }
+        return Pin.fromDom(focusable, offset);
+      }
+    }
+
+    throw new Error(`node is not focusable: ${node.name}`);
   }
 
   static toBefore(node: Node): Pin {
