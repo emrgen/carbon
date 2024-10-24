@@ -1,8 +1,11 @@
 import {
   CarbonPlugin,
+  EventContext,
+  EventHandlerMap,
   Node,
   NodeEncoder,
   NodeSpec,
+  preventAndStopCtx,
   Writer,
 } from "@emrgen/carbon-core";
 import { encodeNestableChildren } from "./Nestable";
@@ -15,11 +18,13 @@ export class Callout extends CarbonPlugin {
       group: "content nestable",
       content: "title content*",
       splits: true,
+      splitInside: true,
       splitName: "section",
       insert: true,
       inlineSelectable: true,
       draggable: true,
       dragHandle: true,
+      weakEnd: true,
       rectSelectable: true,
       blockSelectable: true,
       info: {
@@ -38,6 +43,24 @@ export class Callout extends CarbonPlugin {
             suppressContentEditableWarning: true,
           },
         },
+      },
+    };
+  }
+
+  keydown(): EventHandlerMap {
+    return {
+      enter(ctx: EventContext<KeyboardEvent>) {
+        const { app, selection, currentNode } = ctx;
+        console.log("[Enter] callout");
+        // if selection is within the collapsible node title split the collapsible node
+        if (
+          selection.inSameNode &&
+          selection.start.node.parent?.eq(currentNode) &&
+          !currentNode.isEmpty
+        ) {
+          preventAndStopCtx(ctx);
+          app.cmd.collapsible.split(selection)?.Dispatch();
+        }
       },
     };
   }

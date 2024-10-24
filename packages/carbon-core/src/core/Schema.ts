@@ -1,12 +1,12 @@
 import { Optional } from "@emrgen/types";
 import { each, identity, keys } from "lodash";
 import { ContentMatch } from "./ContentMatch";
+import { NodeFactory } from "./Factory";
+import { Mark, MarkProps } from "./Mark";
 import { Node } from "./Node";
+import { NodeContentData } from "./NodeContent";
 import { MarkType, NodeType } from "./NodeType";
 import { Maps, NodeName } from "./types";
-import { Mark, MarkProps } from "./Mark";
-import { NodeFactory } from "./Factory";
-import { NodeContentData } from "./NodeContent";
 
 interface SchemaSpec {
   nodes: Record<NodeName, NodeSpec>;
@@ -127,6 +127,8 @@ export interface NodeSpec {
   options?: boolean;
   mergeable?: boolean;
   observable?: boolean;
+  weakEnd?: boolean;
+  splitInside?: boolean;
   // when the node content match is not valid
   // the new node will be inserted or the current node will be unwrapped based on the consistency
   consistency?: "insert" | "remove";
@@ -141,6 +143,11 @@ export interface NodeSpec {
   blockSelectable?: boolean;
   rectSelectable?: boolean;
 
+  split?: {
+    inside?: boolean; // default false
+    name?: string;
+    end?: boolean;
+  };
   // last empty children stays within on enter
   // only backspace can unwrap the last child
   collapsible?: boolean;

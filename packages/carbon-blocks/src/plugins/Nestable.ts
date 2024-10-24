@@ -2,8 +2,10 @@ import {
   ActionOrigin,
   AfterPlugin,
   CollapsedPath,
+  EmptyInline,
   EventContext,
   EventHandlerMap,
+  Focus,
   moveNodesActions,
   Node,
   NodeEncoder,
@@ -15,10 +17,8 @@ import {
   Transaction,
   Writer,
 } from "@emrgen/carbon-core";
-import { Focus } from "@emrgen/carbon-core";
-import { EmptyInline } from "@emrgen/carbon-core";
-import { isNestableNode } from "../utils";
 import { Optional } from "@emrgen/types";
+import { isNestableNode } from "../utils";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {
@@ -140,6 +140,13 @@ export class NestablePlugin extends AfterPlugin {
 
         if (!atStart) return;
         const parentList = listNode.parents.find(isNestableNode);
+
+        // TODO: this is just a temporary fix
+        // user node spec should be used to determine if the node should be unwrapped
+        if (parentList?.name === "callout") {
+          return;
+        }
+
         // change to section
         if (listNode.name !== "section") {
           preventAndStopCtx(ctx);
