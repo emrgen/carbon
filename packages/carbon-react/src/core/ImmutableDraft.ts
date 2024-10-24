@@ -6,6 +6,7 @@ import {
   Draft,
   EmptyPlaceholderPath,
   FocusedPlaceholderPath,
+  HasFocusPath,
   InsertChange,
   InsertNodeAction,
   isPassiveHidden,
@@ -26,6 +27,7 @@ import {
   p14,
   Pin,
   PlaceholderPath,
+  PlainNodeProps,
   PluginManager,
   Point,
   PointAt,
@@ -49,14 +51,19 @@ import {
   UpdateChange,
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
-import { HasFocusPath } from "@emrgen/carbon-core";
-import { PlainNodeProps } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
-import { ImmutableState } from "./ImmutableState";
-import { first, flatten, identity, isArray, isEmpty, isString } from "lodash";
-import { reduce } from "lodash";
-import { ImmutableNodeMap } from "./ImmutableNodeMap";
 import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
+import { Optional } from "@emrgen/types";
+import {
+  first,
+  flatten,
+  identity,
+  isArray,
+  isEmpty,
+  isString,
+  reduce,
+} from "lodash";
+import { ImmutableNodeMap } from "./ImmutableNodeMap";
+import { ImmutableState } from "./ImmutableState";
 
 enum UpdateDependent {
   None = 0,
@@ -787,6 +794,8 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot remove node that does not have a parent");
     }
 
+    this.updateDependents(node, UpdateDependent.Next);
+
     this.tm.remove(node, parent);
 
     this.addUpdated(parent.id);
@@ -821,6 +830,7 @@ export class ImmutableDraft implements Draft {
     );
 
     this.updateDependents(node, UpdateDependent.Next);
+    this.updateDependents(node, UpdateDependent.Prev);
     this.tm.changeType(node, type);
 
     if (node.isContainer && node.firstChild?.isEmpty) {
@@ -836,7 +846,7 @@ export class ImmutableDraft implements Draft {
   updateProps(nodeId: NodeId, props: Partial<NodePropsJson>) {
     if (!this.drafting) {
       throw new Error(
-        "Cannot change name on a draft that is already committed",
+        "Cannot update props on a draft that is already committed",
       );
     }
 

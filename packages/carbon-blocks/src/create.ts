@@ -1,12 +1,12 @@
 import {
   AtomContentPath,
   AtomSizePath,
+  ContenteditablePath,
   EmojiPath,
   NodeId,
+  SuppressContenteditableWarningPath,
 } from "@emrgen/carbon-core";
-import { ContenteditablePath } from "@emrgen/carbon-core";
-import { SuppressContenteditableWarningPath } from "@emrgen/carbon-core";
-import { isString } from "lodash";
+import { isEmpty, isString } from "lodash";
 
 export const text = (text: string = "", props = {}) => ({
   name: "text",
@@ -61,10 +61,14 @@ export const empty = (props = {}) => ({
 });
 
 export const title = (children: any[] | any = []) => {
-  if (isString(children)) {
-    children = [text(children)];
-  } else if (!Array.isArray(children)) {
-    children = [children];
+  if (isEmpty(children)) {
+    children = [];
+  } else {
+    if (isString(children)) {
+      children = [text(children)];
+    } else if (!Array.isArray(children)) {
+      children = [children];
+    }
   }
 
   return {
@@ -74,7 +78,9 @@ export const title = (children: any[] | any = []) => {
 };
 
 export const section = (children: any[] | any = [], props = {}) => {
-  if (!Array.isArray(children)) {
+  if (isEmpty(children)) {
+    children = [title()];
+  } else if (!Array.isArray(children)) {
     children = [children];
   }
 

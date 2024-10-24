@@ -1,16 +1,16 @@
-import { Carbon } from "./Carbon";
-import { EventContext, EventOrigin } from "./EventContext";
-import { PluginManager } from "./PluginManager";
 import { isKeyHotkey } from "is-hotkey";
-import { PinnedSelection } from "./PinnedSelection";
-import { Node } from "./Node";
-import { ActionOrigin } from "./actions/types";
-import { EventsIn, EventsOut } from "./Event";
-import { p12, p14 } from "./Logger";
 import { last } from "lodash";
 import { preventAndStop } from "../utils/event";
-import { CustomEvent } from "./CustomEvent";
+import { ActionOrigin } from "./actions/types";
+import { Carbon } from "./Carbon";
 import { ChangeManager } from "./ChangeManager";
+import { CustomEvent } from "./CustomEvent";
+import { EventsIn, EventsOut } from "./Event";
+import { EventContext, EventOrigin } from "./EventContext";
+import { p12, p14 } from "./Logger";
+import { Node } from "./Node";
+import { PinnedSelection } from "./PinnedSelection";
+import { PluginManager } from "./PluginManager";
 
 const selectionKeys: string[] = ["left", "right", "shift+left", "shift+right"];
 
@@ -80,8 +80,10 @@ export class EventManager {
   }
 
   onEvent(type: EventsIn, event: Event | CustomEvent) {
+    // NOTE: prevent default for all events if there is a pending selection change
     if (this.cm.pendingSelectionCounter) {
       event.preventDefault();
+      return;
     }
 
     if (this.cm.pendingSelectionCounter && type !== EventsIn.selectionchange) {

@@ -234,7 +234,7 @@ export function FloatingStyleMenu() {
               icon={<BsSubscript />}
               bg={marks.has(Mark.SUBSCRIPT) ? "gray.100" : "transparent"}
               onClick={() => {
-                app.cmd.formatter.toggle(Mark.SUPERSCRIPT)?.dispatch();
+                app.cmd.formatter.toggle(Mark.SUBSCRIPT)?.dispatch();
               }}
             />
             <ContextButton

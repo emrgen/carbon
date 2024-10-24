@@ -1,3 +1,16 @@
+import {
+  LocalClassPath,
+  LocalHtmlAttrPath,
+  LocalStylePath,
+  Mark,
+  MarkSet,
+  MarksPath,
+  NamePath,
+  RemoteHtmlAttrPath,
+  RemoteStylePath,
+  TagPath,
+} from "@emrgen/carbon-core";
+import { identity, kebabCase, merge, uniq } from "lodash";
 import React, {
   forwardRef,
   ForwardRefRenderFunction,
@@ -7,26 +20,10 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { useCarbon } from "../hooks/index";
-import {
-  LocalHtmlAttrPath,
-  Mark,
-  MarkSet,
-  MarksPath,
-  NamePath,
-  RemoteHtmlAttrPath,
-  TagPath,
-} from "@emrgen/carbon-core";
-import { LocalClassPath } from "@emrgen/carbon-core";
-import { LocalStylePath } from "@emrgen/carbon-core";
-import { RemoteStylePath } from "@emrgen/carbon-core";
-import { useNodeChange, useRenderManager } from "../hooks";
-import { RendererProps } from "./ReactRenderer";
-import { merge } from "lodash";
-import { identity } from "lodash";
-import { uniq } from "lodash";
-import { kebabCase } from "lodash";
 import { is_env_development } from "../env";
+import { useNodeChange, useRenderManager } from "../hooks";
+import { useCarbon } from "../hooks/index";
+import { RendererProps } from "./ReactRenderer";
 
 export const JustEmpty = (props: RendererProps) => {
   if (props.node.isText) {
@@ -461,4 +458,2098 @@ export const CarbonNodeChildren = (props: RendererProps) => {
 
     return <div className={"cnest"}>{children}</div>;
   }, [node, custom]);
+};
+
+const a = {
+  id: "1111111111",
+  name: "carbon",
+  children: [
+    {
+      id: "151",
+      name: "document",
+      children: [
+        {
+          id: "152",
+          name: "title",
+          children: [
+            {
+              id: "153",
+              name: "text",
+              text: "Document Title",
+              links: {},
+              props: {
+                local: {
+                  html: { suppressContentEditableWarning: true, id: "ct" },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "154",
+          name: "timeline",
+          children: [
+            {
+              id: "155",
+              name: "title",
+              children: [
+                {
+                  id: "303",
+                  name: "text",
+                  text: "Install @chakra-ui/react",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: {
+                remote: { state: { marks: [] } },
+                local: { html: { placeholder: " " } },
+              },
+            },
+            {
+              id: "306",
+              name: "section",
+              children: [
+                {
+                  id: "305",
+                  name: "title",
+                  children: [
+                    {
+                      id: "420",
+                      name: "text",
+                      text: "install chakra following the commad",
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            suppressContentEditableWarning: true,
+                            id: "ct",
+                          },
+                        },
+                        remote: { state: { marks: [] } },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    remote: { state: { marks: [] } },
+                    local: { html: { placeholder: " ", "data-focused": true } },
+                  },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  placeholder: { empty: "", focused: "Press / for commands" },
+                  html: {
+                    suppressContentEditableWarning: true,
+                    className: "cse",
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "157",
+          name: "timeline",
+          children: [
+            {
+              id: "158",
+              name: "title",
+              children: [
+                {
+                  id: "159",
+                  name: "text",
+                  text: "Add snippets",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+            {
+              id: "421",
+              name: "section",
+              children: [
+                {
+                  id: "422",
+                  name: "title",
+                  children: [
+                    {
+                      id: "438",
+                      name: "text",
+                      text: "Snippets are pre-built components that you can use to build your UI faster.",
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            suppressContentEditableWarning: true,
+                            id: "ct",
+                          },
+                        },
+                        remote: { state: { marks: [] } },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    remote: { state: { marks: [] } },
+                    local: { html: { placeholder: " ", "data-focused": true } },
+                  },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  placeholder: { empty: "", focused: "Press / for commands" },
+                  html: {
+                    suppressContentEditableWarning: true,
+                    className: "cse",
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "160",
+          name: "timeline",
+          children: [
+            {
+              id: "161",
+              name: "title",
+              children: [
+                {
+                  id: "162",
+                  name: "text",
+                  text: "Setup provider",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+            {
+              id: "439",
+              name: "section",
+              children: [
+                {
+                  id: "440",
+                  name: "title",
+                  children: [
+                    {
+                      id: "458",
+                      name: "text",
+                      text: "Wrap your application with the Provider component generated in the components/ui/provider component at the root of your application.",
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            suppressContentEditableWarning: true,
+                            id: "ct",
+                          },
+                        },
+                        remote: { state: { marks: [] } },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    remote: { state: { marks: [] } },
+                    local: { html: { placeholder: " ", "data-focused": true } },
+                  },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  placeholder: { empty: "", focused: "Press / for commands" },
+                  html: {
+                    suppressContentEditableWarning: true,
+                    className: "cse",
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "163",
+          name: "section",
+          children: [
+            {
+              id: "164",
+              name: "title",
+              children: [
+                {
+                  id: "165",
+                  name: "text",
+                  text: "question title",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "166",
+          name: "section",
+          children: [
+            {
+              id: "167",
+              name: "title",
+              children: [
+                {
+                  id: "168",
+                  name: "text",
+                  text: "question",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "169",
+                  name: "text",
+                  text: " ",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "170",
+                  name: "text",
+                  text: "title",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: {
+                      state: {
+                        marks: [
+                          {
+                            name: "link",
+                            props: { href: "http://localhost:3000" },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { html: { style: { color: "red" } }, state: { marks: [] } },
+          },
+        },
+        {
+          id: "171",
+          name: "section",
+          children: [
+            {
+              id: "172",
+              name: "title",
+              children: [
+                {
+                  id: "173",
+                  name: "text",
+                  text: "question",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "174",
+                  name: "text",
+                  text: " ",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "175",
+                  name: "text",
+                  text: "italic bold",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: {
+                      state: { marks: [{ name: "bold" }, { name: "italic" }] },
+                    },
+                  },
+                },
+                {
+                  id: "176",
+                  name: "text",
+                  text: " ",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "177",
+                  name: "text",
+                  text: "colored",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: {
+                      state: {
+                        marks: [{ name: "color", props: { color: "red" } }],
+                      },
+                    },
+                  },
+                },
+                {
+                  id: "178",
+                  name: "text",
+                  text: " ",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "179",
+                  name: "text",
+                  text: "background",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: {
+                      state: {
+                        marks: [
+                          { name: "background", props: { color: "#fb8500" } },
+                        ],
+                      },
+                    },
+                  },
+                },
+                {
+                  id: "180",
+                  name: "text",
+                  text: " ",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "181",
+                  name: "text",
+                  text: "code",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [{ name: "code" }] } },
+                  },
+                },
+                {
+                  id: "182",
+                  name: "text",
+                  text: " ",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "183",
+                  name: "text",
+                  text: "sub",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [{ name: "subscript" }] } },
+                  },
+                },
+                {
+                  id: "184",
+                  name: "text",
+                  text: "strike",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [{ name: "strike" }] } },
+                  },
+                },
+                {
+                  id: "185",
+                  name: "text",
+                  text: "super",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [{ name: "superscript" }] } },
+                  },
+                },
+                {
+                  id: "186",
+                  name: "text",
+                  text: " ",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "187",
+                  name: "text",
+                  text: "underline",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [{ name: "underline" }] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "188",
+          name: "tabs",
+          children: [
+            {
+              id: "189",
+              name: "tab",
+              children: [
+                {
+                  id: "190",
+                  name: "section",
+                  children: [
+                    {
+                      id: "191",
+                      name: "title",
+                      children: [
+                        {
+                          id: "192",
+                          name: "text",
+                          text: "tab 1 content",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      placeholder: {
+                        empty: "",
+                        focused: "Press / for commands",
+                      },
+                      html: {
+                        suppressContentEditableWarning: true,
+                        className: "cse",
+                      },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  html: {
+                    contentEditable: true,
+                    suppressContentEditableWarning: true,
+                    className: "ctab__content",
+                  },
+                  state: { activated: true },
+                },
+                remote: {
+                  state: { title: "tab 11 some big title", marks: [] },
+                },
+              },
+            },
+            {
+              id: "193",
+              name: "tab",
+              children: [
+                {
+                  id: "194",
+                  name: "section",
+                  children: [
+                    {
+                      id: "195",
+                      name: "title",
+                      children: [
+                        {
+                          id: "196",
+                          name: "text",
+                          text: "tab 2 content",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      placeholder: {
+                        empty: "",
+                        focused: "Press / for commands",
+                      },
+                      html: {
+                        suppressContentEditableWarning: true,
+                        className: "cse",
+                      },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  html: {
+                    contentEditable: true,
+                    suppressContentEditableWarning: true,
+                    className: "ctab__content",
+                  },
+                },
+                remote: { state: { title: "tab 12 medium", marks: [] } },
+              },
+            },
+            {
+              id: "197",
+              name: "tab",
+              children: [
+                {
+                  id: "198",
+                  name: "section",
+                  children: [
+                    {
+                      id: "199",
+                      name: "title",
+                      children: [
+                        {
+                          id: "200",
+                          name: "text",
+                          text: "tab 3 content",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      placeholder: {
+                        empty: "",
+                        focused: "Press / for commands",
+                      },
+                      html: {
+                        suppressContentEditableWarning: true,
+                        className: "cse",
+                      },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  html: {
+                    contentEditable: true,
+                    suppressContentEditableWarning: true,
+                    className: "ctab__content",
+                  },
+                },
+                remote: { state: { title: "tab 13", marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              html: {
+                contentEditable: false,
+                suppressContentEditableWarning: true,
+                className: "ctabs",
+              },
+              style: {},
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "201",
+          name: "section",
+          children: [
+            {
+              id: "202",
+              name: "title",
+              children: [
+                {
+                  id: "203",
+                  name: "text",
+                  text: "section 1",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "204",
+          name: "question",
+          children: [
+            {
+              id: "205",
+              name: "title",
+              children: [
+                {
+                  id: "206",
+                  name: "text",
+                  text: "question title",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+            {
+              id: "207",
+              name: "mcq",
+              children: [
+                {
+                  id: "208",
+                  name: "mcqOption",
+                  children: [
+                    {
+                      id: "209",
+                      name: "title",
+                      children: [
+                        {
+                          id: "210",
+                          name: "text",
+                          text: "option 1",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: {
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                      placeholder: { empty: "", focused: "" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "211",
+                  name: "mcqOption",
+                  children: [
+                    {
+                      id: "212",
+                      name: "title",
+                      children: [
+                        {
+                          id: "213",
+                          name: "text",
+                          text: "option 2",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: {
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                      placeholder: { empty: "", focused: "" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "214",
+                  name: "mcqOption",
+                  children: [
+                    {
+                      id: "215",
+                      name: "title",
+                      children: [
+                        {
+                          id: "216",
+                          name: "text",
+                          text: "option 3",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: {
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                      placeholder: { empty: "", focused: "" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "217",
+                  name: "mcqOption",
+                  children: [
+                    {
+                      id: "218",
+                      name: "title",
+                      children: [
+                        {
+                          id: "219",
+                          name: "text",
+                          text: "option 4",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: {
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                      placeholder: { empty: "", focused: "" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  html: {
+                    contentEditable: false,
+                    suppressContentEditableWarning: true,
+                  },
+                  placeholder: {
+                    empty: "Question Title",
+                    focused: "Question Title",
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+            {
+              id: "220",
+              name: "hints",
+              children: [
+                {
+                  id: "221",
+                  name: "hint",
+                  children: [
+                    {
+                      id: "222",
+                      name: "title",
+                      children: [
+                        {
+                          id: "223",
+                          name: "text",
+                          text: "hint 1",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                    {
+                      id: "224",
+                      name: "section",
+                      children: [
+                        {
+                          id: "225",
+                          name: "title",
+                          children: [
+                            {
+                              id: "226",
+                              name: "text",
+                              text: "hint content",
+                              links: {},
+                              props: {
+                                local: {
+                                  html: {
+                                    suppressContentEditableWarning: true,
+                                    id: "ct",
+                                  },
+                                },
+                                remote: { state: { marks: [] } },
+                              },
+                            },
+                          ],
+                          links: {},
+                          props: { remote: { state: { marks: [] } } },
+                        },
+                      ],
+                      links: {},
+                      props: {
+                        local: {
+                          placeholder: {
+                            empty: "",
+                            focused: "Press / for commands",
+                          },
+                          html: {
+                            suppressContentEditableWarning: true,
+                            className: "cse",
+                          },
+                        },
+                        remote: { state: { marks: [] } },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: { remote: { state: { marks: [] } } },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  html: {
+                    contentEditable: false,
+                    suppressContentEditableWarning: true,
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "227",
+          name: "question",
+          children: [
+            {
+              id: "228",
+              name: "title",
+              children: [
+                {
+                  id: "229",
+                  name: "text",
+                  text: "question title",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+            {
+              id: "230",
+              name: "mcq",
+              children: [
+                {
+                  id: "231",
+                  name: "mcqOption",
+                  children: [
+                    {
+                      id: "232",
+                      name: "title",
+                      children: [
+                        {
+                          id: "233",
+                          name: "text",
+                          text: "option 1",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: {
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                      placeholder: { empty: "", focused: "" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "234",
+                  name: "mcqOption",
+                  children: [
+                    {
+                      id: "235",
+                      name: "title",
+                      children: [
+                        {
+                          id: "236",
+                          name: "text",
+                          text: "option 2",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: {
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                      placeholder: { empty: "", focused: "" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "237",
+                  name: "mcqOption",
+                  children: [
+                    {
+                      id: "238",
+                      name: "title",
+                      children: [
+                        {
+                          id: "239",
+                          name: "text",
+                          text: "option 3",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: {
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                      placeholder: { empty: "", focused: "" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "240",
+                  name: "mcqOption",
+                  children: [
+                    {
+                      id: "241",
+                      name: "title",
+                      children: [
+                        {
+                          id: "242",
+                          name: "text",
+                          text: "option 4",
+                          links: {},
+                          props: {
+                            local: {
+                              html: {
+                                suppressContentEditableWarning: true,
+                                id: "ct",
+                              },
+                            },
+                            remote: { state: { marks: [] } },
+                          },
+                        },
+                      ],
+                      links: {},
+                      props: { remote: { state: { marks: [] } } },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: {
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                      placeholder: { empty: "", focused: "" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  html: {
+                    contentEditable: false,
+                    suppressContentEditableWarning: true,
+                  },
+                  placeholder: {
+                    empty: "Question Title",
+                    focused: "Question Title",
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "243",
+          name: "section",
+          children: [
+            {
+              id: "244",
+              name: "title",
+              children: [
+                {
+                  id: "245",
+                  name: "text",
+                  text: "section 1",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "246",
+          name: "sandbox",
+          children: [
+            {
+              id: "247",
+              name: "cell",
+              children: [],
+              links: {},
+              props: {
+                local: {
+                  placeholder: {
+                    empty: "Cell",
+                    focused: "Press / for commands",
+                  },
+                  html: {
+                    suppressContentEditableWarning: true,
+                    contentEditable: false,
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "248",
+          name: "sandbox",
+          children: [
+            {
+              id: "249",
+              name: "cell",
+              children: [],
+              links: {},
+              props: {
+                local: {
+                  placeholder: {
+                    empty: "Cell",
+                    focused: "Press / for commands",
+                  },
+                  html: {
+                    suppressContentEditableWarning: true,
+                    contentEditable: false,
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "250",
+          name: "sandbox",
+          children: [
+            {
+              id: "251",
+              name: "cell",
+              children: [],
+              links: {},
+              props: {
+                local: {
+                  placeholder: {
+                    empty: "Cell",
+                    focused: "Press / for commands",
+                  },
+                  html: {
+                    suppressContentEditableWarning: true,
+                    contentEditable: false,
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "252",
+          name: "sandbox",
+          children: [
+            {
+              id: "253",
+              name: "cell",
+              children: [],
+              links: {},
+              props: {
+                local: {
+                  placeholder: {
+                    empty: "Cell",
+                    focused: "Press / for commands",
+                  },
+                  html: {
+                    suppressContentEditableWarning: true,
+                    contentEditable: false,
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: { remote: { state: { marks: [] } } },
+        },
+        {
+          id: "254",
+          name: "section",
+          children: [
+            {
+              id: "255",
+              name: "title",
+              children: [
+                {
+                  id: "256",
+                  name: "text",
+                  text: "123456",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [{ name: "bold" }] } },
+                  },
+                },
+                {
+                  id: "257",
+                  name: "text",
+                  text: "78",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "258",
+          name: "section",
+          children: [
+            {
+              id: "259",
+              name: "title",
+              children: [
+                {
+                  id: "260",
+                  name: "text",
+                  text: "ab",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "261",
+                  name: "text",
+                  text: "cdefgh",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [{ name: "bold" }] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "262",
+          name: "section",
+          children: [
+            {
+              id: "263",
+              name: "title",
+              children: [
+                {
+                  id: "264",
+                  name: "text",
+                  text: "time",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "265",
+                  name: "mention",
+                  children: [
+                    {
+                      id: "266",
+                      name: "atomicText",
+                      children: [],
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            contentEditable: false,
+                            suppressContentEditableWarning: true,
+                          },
+                        },
+                        remote: {
+                          state: {
+                            atom: { content: "@today", size: 1 },
+                            marks: [],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: { className: "mention", contentEditable: false },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "267",
+                  name: "empty",
+                  children: [],
+                  links: {},
+                  props: {
+                    remote: {
+                      state: { atom: { size: 1, content: "​" }, marks: [] },
+                    },
+                    local: { html: { className: "empty-zero-width-space" } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "268",
+          name: "section",
+          children: [
+            {
+              id: "269",
+              name: "title",
+              children: [
+                {
+                  id: "270",
+                  name: "text",
+                  text: "123",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "271",
+                  name: "mention",
+                  children: [
+                    {
+                      id: "272",
+                      name: "atomicText",
+                      children: [],
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            contentEditable: false,
+                            suppressContentEditableWarning: true,
+                          },
+                        },
+                        remote: {
+                          state: {
+                            atom: { content: "@ankita", size: 1 },
+                            marks: [],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: { className: "mention", contentEditable: false },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "273",
+                  name: "text",
+                  text: "123",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "274",
+                  name: "mention",
+                  children: [
+                    {
+                      id: "275",
+                      name: "atomicText",
+                      children: [],
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            contentEditable: false,
+                            suppressContentEditableWarning: true,
+                          },
+                        },
+                        remote: {
+                          state: {
+                            atom: { content: "@avira", size: 1 },
+                            marks: [],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: { className: "mention", contentEditable: false },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "276",
+                  name: "text",
+                  text: "123",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "277",
+          name: "section",
+          children: [
+            {
+              id: "278",
+              name: "title",
+              children: [
+                {
+                  id: "279",
+                  name: "text",
+                  text: "123456789",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "280",
+          name: "section",
+          children: [
+            {
+              id: "281",
+              name: "title",
+              children: [
+                {
+                  id: "282",
+                  name: "emoji",
+                  children: [],
+                  links: {},
+                  props: {
+                    remote: {
+                      state: {
+                        emoji: "🖐️",
+                        atom: { content: "🖐️", size: 3 },
+                        marks: [],
+                      },
+                    },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "283",
+          name: "section",
+          children: [
+            {
+              id: "284",
+              name: "title",
+              children: [
+                {
+                  id: "285",
+                  name: "empty",
+                  children: [],
+                  links: {},
+                  props: {
+                    remote: {
+                      state: { atom: { size: 1, content: "​" }, marks: [] },
+                    },
+                    local: {
+                      html: {
+                        className: "empty-zero-width-space",
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                    },
+                  },
+                },
+                {
+                  id: "286",
+                  name: "mention",
+                  children: [
+                    {
+                      id: "287",
+                      name: "atomicText",
+                      children: [],
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            contentEditable: false,
+                            suppressContentEditableWarning: true,
+                          },
+                        },
+                        remote: {
+                          state: {
+                            atom: { content: "@123", size: 1 },
+                            marks: [],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: { className: "mention", contentEditable: false },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "288",
+                  name: "empty",
+                  children: [],
+                  links: {},
+                  props: {
+                    remote: {
+                      state: { atom: { size: 1, content: "​" }, marks: [] },
+                    },
+                    local: {
+                      html: {
+                        className: "empty-zero-width-space",
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                    },
+                  },
+                },
+                {
+                  id: "289",
+                  name: "mention",
+                  children: [
+                    {
+                      id: "290",
+                      name: "atomicText",
+                      children: [],
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            contentEditable: false,
+                            suppressContentEditableWarning: true,
+                          },
+                        },
+                        remote: {
+                          state: {
+                            atom: { content: "@bubun", size: 1 },
+                            marks: [],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: { className: "mention", contentEditable: false },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "291",
+                  name: "text",
+                  text: "abc",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "292",
+                  name: "mention",
+                  children: [
+                    {
+                      id: "293",
+                      name: "atomicText",
+                      children: [],
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            contentEditable: false,
+                            suppressContentEditableWarning: true,
+                          },
+                        },
+                        remote: {
+                          state: {
+                            atom: { content: "@bappa", size: 1 },
+                            marks: [],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: {
+                    local: {
+                      html: { className: "mention", contentEditable: false },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+                {
+                  id: "294",
+                  name: "empty",
+                  children: [],
+                  links: {},
+                  props: {
+                    remote: {
+                      state: { atom: { size: 1, content: "​" }, marks: [] },
+                    },
+                    local: {
+                      html: {
+                        className: "empty-zero-width-space",
+                        contentEditable: true,
+                        suppressContentEditableWarning: true,
+                      },
+                    },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+        {
+          id: "295",
+          name: "section",
+          children: [
+            {
+              id: "296",
+              name: "title",
+              children: [
+                {
+                  id: "297",
+                  name: "text",
+                  text: "section 1",
+                  links: {},
+                  props: {
+                    local: {
+                      html: { suppressContentEditableWarning: true, id: "ct" },
+                    },
+                    remote: { state: { marks: [] } },
+                  },
+                },
+              ],
+              links: {},
+              props: { remote: { state: { marks: [] } } },
+            },
+            {
+              id: "298",
+              name: "section",
+              children: [
+                {
+                  id: "299",
+                  name: "title",
+                  children: [
+                    {
+                      id: "300",
+                      name: "text",
+                      text: "section 1",
+                      links: {},
+                      props: {
+                        local: {
+                          html: {
+                            suppressContentEditableWarning: true,
+                            id: "ct",
+                          },
+                        },
+                        remote: { state: { marks: [] } },
+                      },
+                    },
+                  ],
+                  links: {},
+                  props: { remote: { state: { marks: [] } } },
+                },
+              ],
+              links: {},
+              props: {
+                local: {
+                  placeholder: { empty: "", focused: "Press / for commands" },
+                  html: {
+                    suppressContentEditableWarning: true,
+                    className: "cse",
+                  },
+                },
+                remote: { state: { marks: [] } },
+              },
+            },
+          ],
+          links: {},
+          props: {
+            local: {
+              placeholder: { empty: "", focused: "Press / for commands" },
+              html: { suppressContentEditableWarning: true, className: "cse" },
+            },
+            remote: { state: { marks: [] } },
+          },
+        },
+      ],
+      links: {},
+      props: {
+        local: {
+          placeholder: { empty: "Untitled", focused: "Untitled" },
+          html: {
+            spellCheck: false,
+            contentEditable: true,
+            suppressContentEditableWarning: true,
+          },
+          state: { mode: "edit" },
+        },
+        remote: { state: { marks: [] } },
+      },
+    },
+  ],
+  links: {},
+  props: {
+    local: {
+      html: { suppressContentEditableWarning: true, className: "croot" },
+    },
+    remote: { state: { marks: [] } },
+  },
 };

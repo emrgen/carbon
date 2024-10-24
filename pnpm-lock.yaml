@@ -187,6 +187,9 @@ importers:
       '@emrgen/carbon-object-view':
         specifier: workspace:*
         version: link:../../packages/carbon-object-view
+      '@emrgen/carbon-plugin-timeline':
+        specifier: workspace:*
+        version: link:../../packages/carbon-plugin-timeline
       '@emrgen/carbon-question':
         specifier: workspace:*
         version: link:../../packages/carbon-question
@@ -234,7 +237,7 @@ importers:
         version: 11.2.6(@emotion/is-prop-valid@1.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       geist:
         specifier: ^1.3.1
-        version: 1.3.1(next@13.5.7(@babel/core@7.25.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        version: 1.3.1(next@13.5.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -508,6 +511,9 @@ importers:
       '@emrgen/carbon-object-view':
         specifier: workspace:*
         version: link:../../packages/carbon-object-view
+      '@emrgen/carbon-plugin-timeline':
+        specifier: workspace:*
+        version: link:../../packages/carbon-plugin-timeline
       '@emrgen/carbon-question':
         specifier: workspace:*
         version: link:../../packages/carbon-question
@@ -1885,6 +1891,31 @@ importers:
         specifier: ^5.4.5
         version: 5.6.3
 
+  packages/carbon-file-tree:
+    dependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      event:
+        specifier: ^1.0.0
+        version: 1.0.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.6.3
+
   packages/carbon-flash:
     dependencies:
       '@emrgen/carbon-core':
@@ -1961,6 +1992,52 @@ importers:
       vite:
         specifier: ^4.1.4
         version: 4.5.5(@types/node@20.17.0)(stylus@0.64.0)(terser@5.36.0)
+
+  packages/carbon-plugin-timeline:
+    dependencies:
+      '@chakra-ui/react':
+        specifier: ^2.8.2
+        version: 2.10.3(@emotion/react@11.13.3(@types/react@18.3.12)(react@18.3.1))(@emotion/styled@11.13.0(@emotion/react@11.13.3(@types/react@18.3.12)(react@18.3.1))(@types/react@18.3.12)(react@18.3.1))(@types/react@18.3.12)(framer-motion@11.11.9(@emotion/is-prop-valid@1.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/carbon-dragon-react':
+        specifier: workspace:*
+        version: link:../carbon-dragon-react
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.12
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@types/react':
+        specifier: ^18.0.27
+        version: 18.3.12
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.3.1
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.6.3
 
   packages/carbon-question:
     dependencies:
@@ -3507,6 +3584,40 @@ importers:
       vite:
         specifier: ^5.2.11
         version: 5.4.10(@types/node@20.17.0)(stylus@0.64.0)(terser@5.36.0)
+
+  packages/zcarbon-plugin-template:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.12
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@types/react':
+        specifier: ^18.0.27
+        version: 18.3.12
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.3.1
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.6.3
 
 packages:
 
@@ -7989,8 +8100,8 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  electron-to-chromium@1.5.44:
-    resolution: {integrity: sha512-Lz3POUa7wANQA8G+9btKAdH+cqkfWCBdkotvQZJVOqRXMYGm1tTD835Z01iCjWpEBf0RInPBWuPfzhGbxOCULw==}
+  electron-to-chromium@1.5.45:
+    resolution: {integrity: sha512-vOzZS6uZwhhbkZbcRyiy99Wg+pYFV5hk+5YaECvx0+Z31NR3Tt5zS6dze2OepT6PCTzVzT0dIJItti+uAW5zmw==}
 
   elliptic@6.5.7:
     resolution: {integrity: sha512-ESVCtTwiA+XhY3wyh24QqRGBoP3rEdDUl3EDUUo9tft074fi19IrdpH7hLCMMP3CIj7jb3W96rn8lt/BqIlt5Q==}
@@ -17374,7 +17485,7 @@ snapshots:
   browserslist@4.24.2:
     dependencies:
       caniuse-lite: 1.0.30001669
-      electron-to-chromium: 1.5.44
+      electron-to-chromium: 1.5.45
       node-releases: 2.0.18
       update-browserslist-db: 1.1.1(browserslist@4.24.2)
 
@@ -18146,7 +18257,7 @@ snapshots:
     dependencies:
       jake: 10.9.2
 
-  electron-to-chromium@1.5.44: {}
+  electron-to-chromium@1.5.45: {}
 
   elliptic@6.5.7:
     dependencies:
@@ -19299,7 +19410,7 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
-  geist@1.3.1(next@13.5.7(@babel/core@7.25.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
+  geist@1.3.1(next@13.5.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
     dependencies:
       next: 13.5.7(@babel/core@7.25.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 

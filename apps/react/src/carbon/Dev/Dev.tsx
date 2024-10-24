@@ -43,6 +43,10 @@ import {
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
 import {
+  timelinePlugin,
+  timelineRenderer,
+} from "@emrgen/carbon-plugin-timeline";
+import {
   ObservableQuestions,
   questionExtension,
 } from "@emrgen/carbon-question";
@@ -69,6 +73,10 @@ const data = node("carbon", [
     "document",
     [
       title([text("Document Title")]),
+
+      node("timeline", [title([text("Install @chakra-ui/react")])]),
+      node("timeline", [title([text("Add snippets")])]),
+      node("timeline", [title([text("Setup provider")])]),
 
       // node(
       //   "sqCanvas",
@@ -792,6 +800,7 @@ const plugins = [
   // }
   // extensions1,
   ...questionExtension.plugins!,
+  timelinePlugin,
 ];
 
 const renderers = [
@@ -804,9 +813,10 @@ const renderers = [
   ...boardRenderers,
   ...cellRenderer,
   ...questionExtension.renderers!,
+  timelineRenderer,
 ];
 
-const renderManager = RenderManager.from(renderers);
+const renderManager = RenderManager.from(flattenDeep(renderers));
 
 // console.log = noop;
 // console.info = noop;

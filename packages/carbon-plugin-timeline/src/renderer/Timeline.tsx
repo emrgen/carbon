@@ -7,17 +7,16 @@ import {
   RendererProps,
 } from "@emrgen/carbon-react";
 import { Optional } from "@emrgen/types";
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
-// TODO: This is a hack to get the list number. May be should be stored in the node properties.
-const listNumber = (node: Node, parent: Optional<Node>): number => {
+const timelineNumber = (node: Node, parent: Optional<Node>): number => {
   if (!parent) {
     return 1;
   }
 
   let result = 0;
   for (const child of parent?.children) {
-    if (child.name === "numberList") {
+    if (child.name === "timeline") {
       result += 1;
       if (child.eq(node)) {
         return result;
@@ -30,36 +29,44 @@ const listNumber = (node: Node, parent: Optional<Node>): number => {
   return -1;
 };
 
-export const NumberedListComp = (props: RendererProps) => {
+export const TimelineComp = (props: RendererProps) => {
   const { node } = props;
   const ref = useRef(null);
   const { connectors, SelectionHalo } = useDragDropRectSelectHalo({
     ref,
     node,
   });
+  const nodeNumber = useMemo(() => timelineNumber(node, node.parent), [node]);
 
   const beforeContent = useMemo(() => {
     return (
       <label
         contentEditable="false"
         suppressContentEditableWarning
-        className="cnl__label"
+        className="carbon-timeline-index"
       >
-        {listNumber(node, node.parent) + "."}
+        {nodeNumber}
       </label>
     );
-  }, [node]);
+  }, [nodeNumber]);
+
+  useEffect(() => {
+    console.log("TimelineComp", node.key, nodeNumber);
+  }, [node, nodeNumber]);
 
   return (
     <CarbonBlock {...props} custom={connectors} ref={ref}>
+      {node.nextSibling?.name === node.name && (
+        <div className={"timeline-connector"} contentEditable={false} />
+      )}
+
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
         wrap={true}
         className={"ctiw"}
-        custom={{ className: "cnl__ti" }}
       />
-      <CarbonNodeChildren node={node} wrap={true} className="cnest" />
+      <CarbonNodeChildren node={node} />
       {SelectionHalo}
     </CarbonBlock>
   );

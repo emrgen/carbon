@@ -1,10 +1,12 @@
 import {
+  ActionOrigin,
   BeforeInputRuleHandler,
   BeforeInputRuleInlineHandler,
   BeforePlugin,
   EventContext,
   EventHandler,
   EventHandlerMap,
+  FocusOnInsertPath,
   InputRule,
   insertBeforeAction,
   Mark,
@@ -21,8 +23,6 @@ import {
   TitleNode,
   UnstablePath,
 } from "@emrgen/carbon-core";
-import { FocusOnInsertPath } from "@emrgen/carbon-core";
-import { ActionOrigin } from "@emrgen/carbon-core";
 import { isConvertible } from "../utils";
 import { NumberedList } from "./NumberedList";
 
@@ -38,6 +38,10 @@ export class ChangeName extends BeforePlugin {
 
   titleInputRules = new BeforeInputRuleHandler([
     //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberList')),
+    new InputRule(
+      /^(\/timeline\s)(.)*/,
+      this.tryChangeName("timeline", ["nestable"]),
+    ),
     new InputRule(/^(\[]\s)(.)*/, this.tryChangeName("todo", ["nestable"])),
     new InputRule(/^(#\s)(.)*/, this.tryChangeName("h1", ["nestable"])),
     new InputRule(/^(##\s)(.)*/, this.tryChangeName("h2", ["nestable"])),

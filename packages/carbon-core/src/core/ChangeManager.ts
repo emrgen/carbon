@@ -1,15 +1,15 @@
+import { Optional } from "@emrgen/types";
 import { identity } from "lodash";
+import { ActionOrigin } from "./actions/types";
 import { NodeIdSet } from "./BSet";
 import { Carbon } from "./Carbon";
-import { Node } from "./Node";
-import { NodeTopicEmitter } from "./NodeEmitter";
 import { EventsOut } from "./Event";
-import { Transaction } from "./Transaction";
-import { PluginManager } from "./PluginManager";
-import { Optional } from "@emrgen/types";
+import { Node } from "./Node";
 import { StateActions } from "./NodeChange";
+import { NodeTopicEmitter } from "./NodeEmitter";
+import { PluginManager } from "./PluginManager";
 import { State } from "./State";
-import { ActionOrigin } from "./actions/types";
+import { Transaction } from "./Transaction";
 
 export enum NodeChangeType {
   update = "update",
@@ -285,6 +285,7 @@ export class ChangeManager extends NodeTopicEmitter {
         }
         return;
       }
+
       this.pendingSelectionCounter += 1;
       requestAnimationFrame(() => {
         selection.syncDom(app.store, app.dom);
