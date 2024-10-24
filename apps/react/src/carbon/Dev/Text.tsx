@@ -1,6 +1,6 @@
 import { attrRenderers } from "@emrgen/carbon-attributes";
 import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
-import { SelectionTracker } from "@emrgen/carbon-chakra-ui";
+import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codeExtension } from "@emrgen/carbon-code";
 import {
@@ -68,7 +68,7 @@ export default function Text() {
   return (
     <div className={"carbon-app-container"}>
       <CarbonApp app={app} renderManager={renderManager}>
-        <SelectionTracker />
+        <FloatingStyleMenu />
         <PathTracker />
       </CarbonApp>
     </div>

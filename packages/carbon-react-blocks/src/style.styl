@@ -716,17 +716,19 @@ span[data-name=text] {
 [data-name=pageTree]
   margin 10px 0
   font-size 15px
-  padding 10px 0
+  padding 10px 10px
   background #fafafa
   border: 2px dashed blue
 
+  > .cnest
+    margin-left 0;
   [data-name=title]:before
     display none
 
   [data-type=children]
     padding-top 4px
 
-[data-name=pageTree] > [data-type=content]
+[data-name=pageTree] > [data-name=title]
   font-size 13px
   margin 0 10px
   display flex
@@ -746,16 +748,16 @@ span[data-name=text] {
 
 [data-name=pageTreeItem]
   border-radius: 4px
-  padding: 0 4px
+  padding: 0 0px
 
-  & > [data-type=children]
-    padding-left: 20px
+  & > .cnest
+    padding-left: 0
 
-  & > [data-type=content]
+  & > .ctiw
     position relative
     line-height: $lineHeight
     display: flex
-    align-items: center
+    //align-items: center
     padding-left: 4px;
     gap 4px
 
@@ -831,7 +833,7 @@ span[data-name=text] {
       opacity 1
 
   .carbon-collapsible__empty
-    padding-left 24px
+    padding-left 30px
     color: #ccc
     font-size: 14px
     line-height: $lineHeight

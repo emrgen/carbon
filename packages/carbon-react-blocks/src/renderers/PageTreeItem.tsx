@@ -1,15 +1,29 @@
-import { useCallback, useMemo } from "react";
 import {
-  Carbon, 
-  Node, preventAndStop, OpenedPath, Point,
+  BlockEvent,
+  PageTreeItemName,
+  PageTreeName,
+} from "@emrgen/carbon-blocks";
+import {
+  Carbon,
+  Node,
+  OpenedPath,
+  Point,
+  preventAndStop,
 } from "@emrgen/carbon-core";
+import {
+  CarbonBlock,
+  CarbonNodeChildren,
+  CarbonNodeContent,
+  RendererProps,
+  useCarbon,
+  useNodeOpened,
+} from "@emrgen/carbon-react";
+import { useCallback, useMemo } from "react";
 
 import { HiOutlinePlus } from "react-icons/hi";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useCarbon, useNodeOpened} from "@emrgen/carbon-react";
-import {BlockEvent, PageTreeItemName, PageTreeName} from "@emrgen/carbon-blocks";
 
-const getPageTree = (n: Node) => n.closest(n => n.type.name === PageTreeName);
+const getPageTree = (n: Node) => n.closest((n) => n.type.name === PageTreeName);
 
 export const PageTreeItemComp = (props: RendererProps) => {
   const { node } = props;
@@ -17,9 +31,12 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
 
-  const handleToggle = useCallback((app: Carbon) => {
-    app.cmd.collapsible.toggle(node).Dispatch();
-  }, [node]);
+  const handleToggle = useCallback(
+    (app: Carbon) => {
+      app.cmd.collapsible.toggle(node).Dispatch();
+    },
+    [node],
+  );
 
   // insert a new section as child of this collapsible and open it
   const handleInsert = useCallback(
@@ -30,9 +47,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
       const pageTree = getPageTree(node);
       if (!pageTree) return;
 
-      cmd
-        .pageTree.close(pageTree)
-        .pageTreeItem.expand(node);
+      cmd.pageTree.close(pageTree).pageTreeItem.expand(node);
 
       const item = app.schema.type(PageTreeItemName).default()!;
       item.updateProps({
@@ -47,7 +62,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
         })
         .Dispatch();
     },
-    [app, node]
+    [app, node],
   );
 
   const handleOpenDocument = useCallback(
@@ -59,22 +74,25 @@ export const PageTreeItemComp = (props: RendererProps) => {
         return;
       }
 
-      app.cmd
-        .pageTree.close(pageTree)
+      app.cmd.pageTree
+        .close(pageTree)
         .pageTreeItem.open(node)
         .Then(() => {
           return () => app.emit(BlockEvent.openDocument, { node });
         })
         .Dispatch();
     },
-    [app, node]
+    [app, node],
   );
 
   const beforeContent = useMemo(() => {
     return (
       <>
         <div
-          className={"carbon-collapsible__control" + (isCollapsed ? " collapsed" : " expanded")}
+          className={
+            "carbon-collapsible__control" +
+            (isCollapsed ? " collapsed" : " expanded")
+          }
           contentEditable="false"
           suppressContentEditableWarning
           onMouseDown={(e) => {
@@ -83,7 +101,9 @@ export const PageTreeItemComp = (props: RendererProps) => {
           }}
           onClick={() => handleToggle(app)}
         >
-          <MdOutlineKeyboardArrowRight className={'page-tree-open-close-icon'}/>
+          <MdOutlineKeyboardArrowRight
+            className={"page-tree-open-close-icon"}
+          />
         </div>
         <div
           className="add-child-file"
@@ -108,6 +128,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
           node={node}
           beforeContent={beforeContent}
           // custom={{ onClick: handleOpenDocument }}
+          wrap={true}
         />
       )}
       {node.isEmpty && (

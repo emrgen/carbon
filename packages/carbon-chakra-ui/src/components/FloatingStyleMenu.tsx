@@ -1,12 +1,3 @@
-import { EmptyInline, Mark, Node } from "@emrgen/carbon-core";
-import { EventsOut } from "@emrgen/carbon-core";
-import { PinnedSelection } from "@emrgen/carbon-core";
-import { TitleNode } from "@emrgen/carbon-core";
-import { MarkSet } from "@emrgen/carbon-core";
-import React, { useMemo, useState } from "react";
-import { useEffect } from "react";
-import { useCallback } from "react";
-import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 import {
   Box,
   Circle,
@@ -15,10 +6,22 @@ import {
   IconButtonProps,
   Portal,
 } from "@chakra-ui/react";
-import { BiBold, BiStrikethrough, BiUnderline } from "react-icons/bi";
+import {
+  EmptyInline,
+  EventsOut,
+  Mark,
+  MarkSet,
+  Node,
+  PinnedSelection,
+  TitleNode,
+} from "@emrgen/carbon-core";
+import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 import { debounce } from "lodash";
-import { TbItalic } from "react-icons/tb";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { BiBold, BiStrikethrough, BiUnderline } from "react-icons/bi";
+import { BsSubscript, BsSuperscript } from "react-icons/bs";
 import { RxCross2 } from "react-icons/rx";
+import { TbItalic } from "react-icons/tb";
 
 // This function is used to collect all the marks in a selection
 const collectMarks = (selection: PinnedSelection) => {
@@ -68,7 +71,7 @@ const collectMarks = (selection: PinnedSelection) => {
   return markSet;
 };
 
-export function SelectionTracker() {
+export function FloatingStyleMenu() {
   const app = useCarbon();
   const [showContextMenu, setShowContextMenu] = useState(false);
   const overlay = useCarbonOverlay();
@@ -216,6 +219,22 @@ export function SelectionTracker() {
               bg={marks.has(Mark.STRIKE) ? "gray.100" : "transparent"}
               onClick={() => {
                 app.cmd.formatter.toggle(Mark.STRIKE)?.dispatch();
+              }}
+            />
+            <ContextButton
+              aria-label={"strike"}
+              icon={<BsSuperscript />}
+              bg={marks.has(Mark.SUPERSCRIPT) ? "gray.100" : "transparent"}
+              onClick={() => {
+                app.cmd.formatter.toggle(Mark.SUPERSCRIPT)?.dispatch();
+              }}
+            />
+            <ContextButton
+              aria-label={"strike"}
+              icon={<BsSubscript />}
+              bg={marks.has(Mark.SUBSCRIPT) ? "gray.100" : "transparent"}
+              onClick={() => {
+                app.cmd.formatter.toggle(Mark.SUPERSCRIPT)?.dispatch();
               }}
             />
             <ContextButton

@@ -19,7 +19,7 @@ import {
   cellPlugin,
   cellRenderer,
 } from "@emrgen/carbon-cell";
-import { SelectionTracker } from "@emrgen/carbon-chakra-ui";
+import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codeExtension } from "@emrgen/carbon-code";
 import {
@@ -283,28 +283,6 @@ const data = node("carbon", [
 
       // node("collapsible", [title([text("question title")])]),
 
-      // node('question', [
-      //   node('questionTitle', [
-      //     section([title([text('question title')])]),
-      //   ]),
-      //   node('questionDescription', [
-      //     section([title([text('question description')])]),
-      //   ]),
-      //   node('questionType', [
-      //     node('multipleChoice', [
-      //       node('multipleChoiceOption', [
-      //         title([text('option 1')]),
-      //       ]),
-      //       node('multipleChoiceOption', [
-      //         title([text('option 2')]),
-      //       ]),
-      //       node('multipleChoiceOption', [
-      //         title([text('option 3')]),
-      //       ]),
-      //     ])
-      //   ])
-      // ]),
-
       // node('flashCard', [
       //   title([text('flash card title')]),
       // ]),
@@ -558,7 +536,7 @@ const data = node("carbon", [
       //       node("pageTreeItem", [title([text("Thermodynamics")])]),
       //       node("pageTreeItem", [title([text("Electromagnetism")])]),
       //     ],
-      //     {}
+      //     {},
       //     // { node: { collapsed: false }, state: { selected: true } }
       //   ),
       //   node("pageTreeItem", [title([text("Mathematics")])]),
@@ -843,7 +821,10 @@ const renderManager = RenderManager.from(renderers);
 // localStorage.setItem('carbon:content', JSON.stringify(data));
 
 export default function Dev() {
-  const app = useCreateCarbon("dev", data, flattenDeep(plugins));
+  const [content] = useState(() => {
+    return data;
+  });
+  const app = useCreateCarbon("dev", content, flattenDeep(plugins));
   const [runtime] = useState<ActiveCellRuntime>(() => {
     return new ActiveCellRuntime({
       Carbon: app,
@@ -945,7 +926,7 @@ export default function Dev() {
       <ActiveCellRuntimeContext runtime={runtime}>
         <ObservableQuestions>
           <CarbonApp app={app} renderManager={renderManager}>
-            <SelectionTracker />
+            <FloatingStyleMenu />
             <PathTracker />
           </CarbonApp>
         </ObservableQuestions>
