@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-code",
+  "name": "@emrgen/carbon-codemirror",
   "version": "0.0.5",
   "type": "module",
   "main": "src/index.ts",
@@ -11,6 +11,7 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
+    "@codemirror/commands": "^6.7.1",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/language": "^6.10.1",
     "@codemirror/state": "^6.4.1",
@@ -36,6 +37,7 @@
     "lodash": "^4.17.21",
     "prismjs": "^1.29.0",
     "react-icons": "^4.10.1",
+    "react-use": "^17.5.1",
     "recoil": "^0.7.7",
     "vitest": "^0.34.6"
   },

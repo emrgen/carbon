@@ -1,35 +1,28 @@
-import { RendererProps } from "@emrgen/carbon-react";
-import { useCarbon } from "@emrgen/carbon-react";
-import { useCallback } from "react";
-import { useState } from "react";
-import { createRef } from "react";
-import { memo } from "react";
-import { useEffect } from "react";
-import { preventAndStop } from "@emrgen/carbon-core";
-import { PinnedSelection } from "@emrgen/carbon-core";
-import { Node } from "@emrgen/carbon-core";
-import { ActionOrigin } from "@emrgen/carbon-core";
-import { FocusOnInsertPath } from "@emrgen/carbon-core";
-import { HasFocusPath } from "@emrgen/carbon-core";
-import { Point } from "@emrgen/carbon-core";
-import { Pin } from "@emrgen/carbon-core";
-import { PiPlayBold } from "react-icons/pi";
-import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
-import { CodeCellCodeValuePath } from "../constants";
-import { CodeCellCodeTypePath } from "../constants";
-import { EditorState } from "@codemirror/state";
-import { Prec } from "@codemirror/state";
-import { EditorView } from "codemirror";
-import { basicSetup } from "codemirror";
-import { keymap, ViewUpdate } from "@codemirror/view";
-import { highlightActiveLine } from "@codemirror/view";
-import { javascript } from "@codemirror/lang-javascript";
-import { noop } from "lodash";
-import { useCustomCompareEffect } from "react-use";
-import { markdown } from "@codemirror/lang-markdown";
+import { indentWithTab } from "@codemirror/commands";
 import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
-import { indentWithTab } from "@codemirror/commands";
+import { javascript } from "@codemirror/lang-javascript";
+import { markdown } from "@codemirror/lang-markdown";
+import { EditorState, Prec } from "@codemirror/state";
+import { highlightActiveLine, keymap, ViewUpdate } from "@codemirror/view";
+import {
+  ActionOrigin,
+  FocusOnInsertPath,
+  HasFocusPath,
+  Node,
+  Pin,
+  PinnedSelection,
+  Point,
+  preventAndStop,
+} from "@emrgen/carbon-core";
+import { RendererProps, useCarbon } from "@emrgen/carbon-react";
+import { basicSetup, EditorView } from "codemirror";
+import { noop } from "lodash";
+import { createRef, memo, useCallback, useEffect, useState } from "react";
+import { PiPlayBold } from "react-icons/pi";
+import { useCustomCompareEffect } from "react-use";
+import { CodeCellCodeTypePath, CodeCellCodeValuePath } from "../constants";
+import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
 
 const isEqualCode = (prev: Node, next: Node) => {
   return (
@@ -281,18 +274,7 @@ export const CodeInner = (props: RendererProps) => {
     },
   );
 
-  useEffect(() => {
-    const onExpand = (parent: Node) => {
-      view?.focus();
-    };
-    const expandEvent = `expand:${nodeId}`;
-    mod.on(expandEvent, onExpand);
-
-    return () => {
-      mod.off(expandEvent, onExpand);
-    };
-  }, [view, mod, nodeId]);
-
+  // focus the editor when the cell is mounted
   useEffect(() => {
     const firstMount = app.store
       .get(nodeId)
@@ -309,6 +291,17 @@ export const CodeInner = (props: RendererProps) => {
     }
   }, [view, app, nodeId]);
 
+  useEffect(() => {
+    const onExpand = (parent: Node) => {
+      view?.focus();
+    };
+    const expandEvent = `expand:${nodeId}`;
+    mod.on(expandEvent, onExpand);
+
+    return () => {
+      mod.off(expandEvent, onExpand);
+    };
+  }, [view, mod, nodeId]);
   return (
     <div
       className={"cell-code-wrapper"}

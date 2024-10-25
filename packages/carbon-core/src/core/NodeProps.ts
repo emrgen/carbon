@@ -1,11 +1,13 @@
-import { isArray } from "lodash";
-import { get } from "lodash";
-import { set } from "lodash";
-import { cloneDeep } from "lodash";
-import { entries } from "lodash";
-import { isEqual } from "lodash";
-import { keys } from "lodash";
-import { isString } from "lodash";
+import {
+  cloneDeep,
+  entries,
+  get,
+  isArray,
+  isEqual,
+  isString,
+  keys,
+  set,
+} from "lodash";
 import { Node } from "./Node";
 
 export type NodePropsJson = Record<string, any>;
@@ -243,6 +245,7 @@ export const LocalVideoInfoPath = "local/state/video/info";
 export const LocalDirtyCounterPath = "local/state/dirty/counter";
 export const FocusOnInsertPath = "local/state/focusOnInsert";
 export const SelectedOptionsPath = "remote/state/selected/options";
+export const CodeValuePath = "remote/state/code/value";
 
 export enum DocModes {
   View = "view",

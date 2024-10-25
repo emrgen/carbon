@@ -19,7 +19,7 @@
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.25.1",
     "@emrgen/carbon-attributes": "workspace:*",
-    "@emrgen/carbon-code": "workspace:*",
+    "@emrgen/carbon-codemirror": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/carbon-dragon-react": "workspace:*",

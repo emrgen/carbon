@@ -1,19 +1,13 @@
-import {
-  CarbonPlugin,
-  EventContext,
-  EventHandlerMap,
-  NodeSpec,
-} from "@emrgen/carbon-core";
+import { CarbonPlugin, EventHandlerMap, NodeSpec } from "@emrgen/carbon-core";
 
 export const CodeMirrorContentPath = "remote/state/codemirror";
 
 export class CodeMirror extends CarbonPlugin {
-  name = "codeMirror";
+  name = "codemirror";
 
   spec(): NodeSpec {
     return {
       group: "content",
-      content: "codeLine+",
       isolate: true,
       blockSelectable: true,
       rectSelectable: true,
@@ -31,10 +25,6 @@ export class CodeMirror extends CarbonPlugin {
   }
 
   keydown(): EventHandlerMap {
-    return {
-      shiftTab: (ctx: EventContext<KeyboardEvent>) => {
-        ctx.stopPropagation();
-      },
-    };
+    return {};
   }
 }

@@ -186,7 +186,7 @@ export function FloatingStyleMenu() {
             borderRadius={"md"}
             boxShadow={"0 3px 10px rgba(0,0,0,0.2)"}
             justify={"space-between"}
-            w={"200px"}
+            w={`${30 * 9}px`}
             spacing={1}
           >
             <ContextButton

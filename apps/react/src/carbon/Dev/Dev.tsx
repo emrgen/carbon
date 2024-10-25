@@ -21,7 +21,7 @@ import {
 } from "@emrgen/carbon-cell";
 import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { codeExtension } from "@emrgen/carbon-code";
+import { codemirrorExtension } from "@emrgen/carbon-codemirror";
 import {
   commentEditorComp,
   commentEditorPlugin,
@@ -51,8 +51,6 @@ import {
   questionExtension,
 } from "@emrgen/carbon-question";
 import {
-  Extension,
-  ReactRenderer,
   RendererProps,
   RenderManager,
   useCreateCarbon,
@@ -73,6 +71,8 @@ const data = node("carbon", [
     "document",
     [
       title([text("Document Title")]),
+
+      node("codemirror"),
 
       node("timeline", [title([text("Install @chakra-ui/react")])]),
       node("timeline", [title([text("Add snippets")])]),
@@ -777,9 +777,9 @@ const ImageComp = (props: RendererProps) => {
   );
 };
 
-const extensions1: Extension = {
-  renderers: [ReactRenderer.create("image", ImageComp)],
-};
+// const extensions1: Extension = {
+//   renderers: [ReactRenderer.create("image", ImageComp)],
+// };
 
 const plugins = [
   ...corePresetPlugins,
@@ -787,7 +787,7 @@ const plugins = [
   // carbonUtilPlugins,
   commentEditorPlugin,
   // flashPlugin,
-  ...codeExtension.plugins!,
+  ...codemirrorExtension.plugins!,
   cellPlugin,
   // ...questionExtension.plugins!,
   new ClipboardPlugin(),
@@ -807,7 +807,7 @@ const renderers = [
   ...blockPresetRenderers,
   commentEditorComp,
   // flashComp,
-  ...codeExtension.renderers!,
+  ...codemirrorExtension.renderers!,
   ...attrRenderers,
   ...databaseRenderers,
   ...boardRenderers,

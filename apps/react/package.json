@@ -5,6 +5,7 @@
   "type": "module",
   "license": "All rights reserved to the authors",
   "scripts": {
+    "rdev": "rsbuild dev",
     "dev": "vite dev",
     "build": "tsc && vite build",
     "preview": "vite preview"
@@ -20,7 +21,7 @@
     "@emrgen/carbon-cell": "workspace:*",
     "@emrgen/carbon-chakra-ui": "workspace:*",
     "@emrgen/carbon-clipboard": "workspace:*",
-    "@emrgen/carbon-code": "workspace:*",
+    "@emrgen/carbon-codemirror": "workspace:*",
     "@emrgen/carbon-comment-editor": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-database": "workspace:*",
