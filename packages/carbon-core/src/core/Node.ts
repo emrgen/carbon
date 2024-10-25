@@ -1,3 +1,5 @@
+import { Optional, Predicate, With } from "@emrgen/types";
+import EventEmitter from "events";
 import {
   findIndex,
   first,
@@ -8,9 +10,9 @@ import {
   noop,
   reverse,
 } from "lodash";
-
-import { Optional, Predicate, With } from "@emrgen/types";
+import { NODE_CACHE } from "./CarbonCache";
 import { classString } from "./Logger";
+import { Mark } from "./Mark";
 import {
   NodeContent,
   NodeContentData,
@@ -18,7 +20,7 @@ import {
   PlainNodeContent,
 } from "./NodeContent";
 import { IntoNodeId, NodeId } from "./NodeId";
-import { NodeType } from "./NodeType";
+import { NodeMap } from "./NodeMap";
 import {
   ActivatedPath,
   AtomContentPath,
@@ -32,12 +34,9 @@ import {
   PlainNodeProps,
   SelectedPath,
 } from "./NodeProps";
-import { no, yes } from "./types";
-import EventEmitter from "events";
-import { Mark } from "./Mark";
-import { NodeMap } from "./NodeMap";
+import { NodeType } from "./NodeType";
 import { NodeView } from "./NodeView";
-import { NODE_CACHE } from "./CarbonCache";
+import { no, yes } from "./types";
 
 export type TraverseOptions = {
   order: "pre" | "post";
@@ -54,6 +53,10 @@ const nextKey = () => key++;
 
 export type Path = (number | string)[];
 export type MutableNode = Node;
+
+export interface NodeJSONOption {
+  props?: Record<string, any>;
+}
 
 export class Node extends EventEmitter implements IntoNodeId {
   protected content: NodeContent;
@@ -910,15 +913,17 @@ export class Node extends EventEmitter implements IntoNodeId {
     });
   }
 
-  toJSON() {
+  toJSON(option?: NodeJSONOption) {
     const { id, type, children, textContent, props } = this;
     const links = Object.entries(this.links).reduce(
       (acc, [k, v]) => {
-        acc[k] = v.toJSON();
+        acc[k] = v.toJSON(option);
         return acc;
       },
       {} as Record<string, string>,
     );
+
+    const propsCone = props.clone().delete("local");
 
     if (this.isText) {
       return {
@@ -933,9 +938,9 @@ export class Node extends EventEmitter implements IntoNodeId {
     return {
       id: id.toString(),
       name: type.name,
-      children: children.map((n) => n.toJSON()),
+      children: children.map((n) => n.toJSON(option)),
       links,
-      props: props.toJSON(),
+      props: propsCone.toJSON(),
     };
   }
 

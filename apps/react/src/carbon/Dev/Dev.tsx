@@ -19,7 +19,10 @@ import {
   cellPlugin,
   cellRenderer,
 } from "@emrgen/carbon-cell";
-import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui";
+import {
+  DocumentSaveStatus,
+  FloatingStyleMenu,
+} from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codemirrorExtension } from "@emrgen/carbon-codemirror";
 import {
@@ -54,7 +57,7 @@ import {
 import {
   RendererProps,
   RenderManager,
-  useCreateCarbon,
+  useCreateCachedCarbon,
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import { CarbonApp } from "@emrgen/carbon-utils";
@@ -848,7 +851,7 @@ export default function Dev() {
   const [content] = useState(() => {
     return data;
   });
-  const app = useCreateCarbon("dev", content, flattenDeep(plugins));
+  const app = useCreateCachedCarbon("dev", content, flattenDeep(plugins));
   const [runtime] = useState<ActiveCellRuntime>(() => {
     return new ActiveCellRuntime({
       Carbon: app,
@@ -946,10 +949,13 @@ export default function Dev() {
   }, [startAddingItem, stopAddingItem]);
 
   return (
-    <Box className={"carbon-app-container"}>
+    <Box className={"carbon-app-container"} pos={"relative"}>
       <ActiveCellRuntimeContext runtime={runtime}>
         <ObservableQuestions>
           <CarbonApp app={app} renderManager={renderManager}>
+            <Box pos={"absolute"} right={8} top={6}>
+              <DocumentSaveStatus />
+            </Box>
             <FloatingStyleMenu />
             <PathTracker />
           </CarbonApp>

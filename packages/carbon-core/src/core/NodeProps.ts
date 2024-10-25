@@ -22,6 +22,8 @@ export interface NodeProps {
 
   set(path: string, value: any): void;
 
+  delete(path: string): NodeProps;
+
   merge(other: NodeProps | NodePropsJson): NodeProps;
 
   fromJSON(json: NodePropsJson): NodeProps;
@@ -123,6 +125,20 @@ export class PlainNodeProps implements NodeProps {
 
   set(path: string, value: any): void {
     set(this.props, this.dotPath(path), value);
+  }
+
+  delete(path: string): this {
+    const parts = path.split("/");
+    const key = parts.pop();
+    if (!key) {
+      return this;
+    }
+    const parent = parts.length ? get(this.props, parts.join("/")) : this.props;
+    if (parent) {
+      delete parent[key];
+    }
+
+    return this;
   }
 
   merge(other: NodeProps | NodePropsJson): NodeProps {

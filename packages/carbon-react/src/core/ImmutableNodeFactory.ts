@@ -1,33 +1,36 @@
-import { Optional } from "@emrgen/types";
-
 import {
+  Fragment,
   IDENTITY_SCOPE,
   Maps,
+  MarksPath,
   Node,
   NodeContentData,
   NodeFactory,
+  NodeFactoryOptions,
   NodeId,
   Schema,
 } from "@emrgen/carbon-core";
-import { NodeFactoryOptions } from "@emrgen/carbon-core";
-import { Fragment } from "@emrgen/carbon-core";
-import { MarksPath } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
 import { identity, isArray, isEmpty } from "lodash";
 import { ImmutableNode } from "./ImmutableNode";
 import { ImmutableNodeContent } from "./ImmutableNodeContent";
 
 let counter = 0;
 
+const shortId = () => {
+  return Math.random().toString(36).substr(2, 9);
+};
+
 export class ImmutableNodeFactory implements NodeFactory {
   scope: Symbol;
   private readonly createId: () => string;
 
   blockId() {
-    return NodeId.fromString(this.createId() + "" + ++counter + "");
+    return NodeId.fromString(this.createId() + "" + shortId() + "");
   }
 
   textId() {
-    return NodeId.fromString(this.createId() + "_" + ++counter + "");
+    return NodeId.fromString(this.createId() + "_" + shortId() + "");
   }
 
   constructor(

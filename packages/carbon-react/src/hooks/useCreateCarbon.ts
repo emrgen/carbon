@@ -1,21 +1,22 @@
-import { flatten } from "lodash";
+import {
+  Carbon,
+  CarbonPlugin,
+  EventsOut,
+  NodeJSON,
+  PinnedSelection,
+  PluginManager,
+  Schema,
+} from "@emrgen/carbon-core";
+import { flatten, throttle } from "lodash";
 import { useEffect, useState } from "react";
+import { ImmutableState } from "../core";
+import { ImmutableNodeFactory } from "../core/ImmutableNodeFactory";
 import {
   CarbonDefaultNode,
   Extension,
   ReactRenderer,
   RenderManager,
 } from "../renderer";
-import {
-  Carbon,
-  CarbonPlugin,
-  NodeJSON,
-  PinnedSelection,
-  PluginManager,
-  Schema,
-} from "@emrgen/carbon-core";
-import { ImmutableState } from "../core";
-import { ImmutableNodeFactory } from "../core/ImmutableNodeFactory";
 
 export interface InitNodeJSON extends Omit<NodeJSON, "id"> {
   id?: string;
@@ -129,21 +130,38 @@ export const useCreateCachedCarbon = (
   // }, [react, extensions, isLoaded])
 
   useEffect(() => {
-    const onChange = (state: ImmutableState) => {
+    // save to local storage on change with throttle of 5 seconds
+    const saveState = throttle(() => {
+      app.emit("external:saving");
+      const state = app.state;
       localStorage.setItem(
         "carbon:content",
-        JSON.stringify(state.content.toJSON()),
+        JSON.stringify(
+          state.content.toJSON({
+            props: {},
+          }),
+        ),
       );
       localStorage.setItem(
         "carbon:selection",
         JSON.stringify(state.selection.toJSON()),
       );
+
+      setTimeout(() => {
+        app.emit("external:saved", state);
+      }, 500);
       // saveDoc(state);
+    }, 5000);
+
+    const onChange = () => {
+      app.emit("external:changed");
+      saveState();
     };
-    app.on("changed", onChange);
+
+    app.on(EventsOut.contentUpdated, onChange);
 
     return () => {
-      app.off("changed", onChange);
+      app.off(EventsOut.contentUpdated, onChange);
     };
   }, [app]);
 

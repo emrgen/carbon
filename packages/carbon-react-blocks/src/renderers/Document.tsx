@@ -1,5 +1,4 @@
-import React, { useCallback, useMemo, useRef } from "react";
-import { useEffect } from "react";
+import { useActiveCellRuntime } from "@emrgen/carbon-cell";
 
 import {
   ActionOrigin,
@@ -13,14 +12,6 @@ import {
   preventAndStop,
   PropLink,
 } from "@emrgen/carbon-core";
-import { DocumentContext, useNodeImage } from "../hooks";
-import {
-  CarbonBlock,
-  CarbonNode,
-  CarbonNodeChildren,
-  RendererProps,
-  useCarbon,
-} from "@emrgen/carbon-react";
 import {
   useCombineConnectors,
   useConnectorsToProps,
@@ -28,7 +19,15 @@ import {
   useNonDraggable,
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon-react";
-import { useActiveCellRuntime } from "@emrgen/carbon-cell";
+import {
+  CarbonBlock,
+  CarbonNode,
+  CarbonNodeChildren,
+  RendererProps,
+  useCarbon,
+} from "@emrgen/carbon-react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { DocumentContext, useNodeImage } from "../hooks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
@@ -77,10 +76,10 @@ export const DocumentComp = (props: RendererProps) => {
     ),
   );
 
-  const isEditable = useMemo(
-    () => node.props.get<string>(ModePath, "view") === "edit",
-    [node],
-  );
+  const isEditable = useMemo(() => {
+    const editable = node.props.get<string>(ModePath, "view") === "edit";
+    return true;
+  }, [node]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {

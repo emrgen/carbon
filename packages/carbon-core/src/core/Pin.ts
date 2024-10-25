@@ -90,6 +90,32 @@ export class Pin {
         }
         return Pin.fromDom(focusable, offset);
       }
+
+      if (offset === node.focusSize) {
+        const focusable = node.find((n) => n.isFocusable, { order: "post" });
+        if (!focusable) {
+          return null;
+        }
+        return Pin.fromDom(focusable, focusable.focusSize);
+      }
+
+      let found: Optional<Node> = null;
+      let remaining = offset;
+      node.preorder((n) => {
+        if (n.isFocusable && n.focusSize >= remaining) {
+          found = n;
+          return true;
+        }
+        if (n.isFocusable && n.focusSize < remaining) {
+          remaining -= n.focusSize;
+          return false;
+        }
+
+        return false;
+      });
+
+      if (!found) return null;
+      return Pin.fromDom(found, remaining);
     }
 
     throw new Error(`node is not focusable: ${node.name}`);
