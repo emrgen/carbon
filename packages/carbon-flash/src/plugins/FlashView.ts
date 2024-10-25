@@ -14,6 +14,7 @@ export class FlashView extends CarbonPlugin {
       group: "",
       content: "title content*",
       isolate: true,
+      pasteBoundary: true,
       props: {
         local: {
           html: {

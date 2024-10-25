@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
-import { DndContextProvider } from "../hooks/useDndContext";
-import {DndController} from "./DndController";
-import { State, EventsOut, Node, Transaction } from "@emrgen/carbon-core";
-import { sortBy } from "lodash";
-import {useCarbon} from "@emrgen/carbon-react";
-import {Dnd} from "@emrgen/carbon-dragon";
+import { EventsOut, State } from "@emrgen/carbon-core";
+import { Dnd } from "@emrgen/carbon-dragon";
+import { useCarbon } from "@emrgen/carbon-react";
+import { useEffect, useState } from "react";
+import { DndContextProvider } from "../hooks/index";
+import { DndController } from "./DndController";
 
 // manages node drag drop context
 export const DndContext = (props) => {
@@ -13,30 +12,20 @@ export const DndContext = (props) => {
   // @ts-ignore
   window.fastDnd = dnd;
 
-  const onChange = useCallback(
-    (state: State) => {
-      if (state.isContentChanged) {
-        dnd.isDirty = true;
-        // console.log('update dnd context');
-        const nodes = app.state.updated.nodes(state.nodeMap);
-        const ancestor = sortBy(nodes, n => n.depth).pop();
-        if (ancestor) {
-          // console.log('refresh: refreshing dnd bounds');
-          dnd.refresh(ancestor);
-        }
-      }
-    },
-    [app.state.updated, dnd]
-  );
-
+  // mark dnd as dirty when content changes
+  // this is necessary to update the draggables and droppables when mouse moves
   useEffect(() => {
+    const onChange = (state: State) => {
+      if (state.isContentChanged) {
+        dnd.onUpdated();
+      }
+    };
+
     app.on(EventsOut.changed, onChange);
     return () => {
       app.off(EventsOut.changed, onChange);
     };
-  }, [app, onChange]);
-
-
+  }, [dnd, app]);
 
   return (
     <DndContextProvider value={dnd}>

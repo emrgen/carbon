@@ -1,18 +1,11 @@
+import { EventsIn, Node, NodeId, State } from "@emrgen/carbon-core";
+import { DndEvent, elementBound, RectStyle } from "@emrgen/carbon-dragon";
+import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 import { Optional, RawPoint } from "@emrgen/types";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDndContext } from "../hooks/useDndContext";
-import {
-  EventsIn,
-  Node,
-  NodeId,
-  Transaction,
-  prevent,
-  State
-} from "@emrgen/carbon-core";
-import { DraggableHandle } from "./DraggableHandle";
 import { throttle } from "lodash";
-import {useCarbon, useCarbonOverlay} from "@emrgen/carbon-react";
-import {DndEvent, elementBound, RectStyle} from "@emrgen/carbon-dragon";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDndContext } from "../hooks/index";
+import { DraggableHandle } from "./DraggableHandle";
 
 export function DndController() {
   const app = useCarbon();
@@ -25,7 +18,7 @@ export function DndController() {
     useState<Optional<RectStyle>>(null);
   const [isDragging, setIsDragging] = useState(dnd.isDragging);
   const [draggedNode, setDraggedNode] = useState<Optional<Node>>(
-    dnd.draggedNode
+    dnd.draggedNode,
   );
   const { showOverlay, hideOverlay } = useCarbonOverlay();
 
@@ -35,12 +28,12 @@ export function DndController() {
       setDragHandleNode(null);
       dnd.isDirty = true;
       dnd.draggedNodeId = null;
-    }
+    };
 
-    app.on(EventsIn.scroll, handleScroll)
+    app.on(EventsIn.scroll, handleScroll);
     return () => {
-      app.off(EventsIn.scroll, handleScroll)
-    }
+      app.off(EventsIn.scroll, handleScroll);
+    };
   }, [app, dnd]);
 
   useEffect(() => {
@@ -57,7 +50,8 @@ export function DndController() {
   const onMouseIn = useCallback(
     (node: Node) => {
       if (!portalPosition) return;
-      if (!node.type.isDraggable || dragHandleNode?.eq(node) || dnd.isMouseDown) return;
+      if (!node.type.isDraggable || dragHandleNode?.eq(node) || dnd.isMouseDown)
+        return;
       const el = app.store.element(node.id);
       if (!el) return;
 
@@ -85,7 +79,7 @@ export function DndController() {
       setShowDragHandle(true);
       setDragHandleNode(node);
     },
-    [dragHandleNode, dnd.isMouseDown, dnd.region, app.store, portalPosition]
+    [dragHandleNode, dnd.isMouseDown, dnd.region, app.store, portalPosition],
   );
 
   // reset drag handle
@@ -102,14 +96,14 @@ export function DndController() {
     (nodeId: NodeId) => {
       resetDragHandle();
     },
-    [resetDragHandle]
+    [resetDragHandle],
   );
 
   const onKeyDown = useCallback(
     (e) => {
       resetDragHandle();
     },
-    [resetDragHandle]
+    [resetDragHandle],
   );
 
   const onDragStart = useCallback(
@@ -118,11 +112,11 @@ export function DndController() {
       setDraggedNode(e.node);
       setShowDragHandle(true);
       app.disable();
-      console.log('----------');
+      console.log("----------");
       dnd.draggedNodeId = e.node.id;
       showOverlay(e.id.toString());
     },
-    [app, dnd, showOverlay]
+    [app, dnd, showOverlay],
   );
 
   const onDragEnd = useCallback(
@@ -131,18 +125,14 @@ export function DndController() {
       app.enable();
       hideOverlay();
     },
-    [resetDragHandle, app, hideOverlay]
+    [resetDragHandle, app, hideOverlay],
   );
 
-  const onChange = useCallback(
-    (state: State) => {
-      if (state.isContentChanged) {
-        // resetDragHandle();
-      }
-    },
-    []
-  );
-
+  const onChange = useCallback((state: State) => {
+    if (state.isContentChanged) {
+      // resetDragHandle();
+    }
+  }, []);
 
   const onEditorMouseOver = useCallback((e) => {
     // setShowDragHandle(true);
@@ -200,18 +190,18 @@ export function DndController() {
   // console.log(isDragging)
   return (
     <>
-    <div className="carbon-dnd-portal" ref={portalRef}>
-      {(
-        <DraggableHandle
-          node={dragHandleNode ?? Node.IDENTITY}
-          style={{
-            ...dragHandlePosition,
-            opacity: dragHandleOpacity,
-            pointerEvens: dragHandleOpacity ? "auto" : "none",
-          }}
-        />
-      )}
-    </div>
+      <div className="carbon-dnd-portal" ref={portalRef}>
+        {
+          <DraggableHandle
+            node={dragHandleNode ?? Node.IDENTITY}
+            style={{
+              ...dragHandlePosition,
+              opacity: dragHandleOpacity,
+              pointerEvens: dragHandleOpacity ? "auto" : "none",
+            }}
+          />
+        }
+      </div>
 
       {/* {isDragging && (
         <div

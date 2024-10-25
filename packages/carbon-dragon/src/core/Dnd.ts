@@ -1,9 +1,9 @@
+import { Carbon, Node, NodeId, Point } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import EventEmitter from "events";
 import { throttle } from "lodash";
-import { DndNodeStore } from "./DndStore";
-import { Carbon, Node, NodeId, Point } from "@emrgen/carbon-core";
 import { DndEvent } from "../types";
+import { DndNodeStore } from "./DndStore";
 
 type Acceptor = (receiver: Node, child: Node, at: Point) => boolean;
 
@@ -19,29 +19,34 @@ export class Dnd extends EventEmitter {
   portal: Optional<HTMLElement>;
   region: Optional<HTMLElement>;
 
+  // initially marked as dirty to force a refresh on first mouse move
   isDirty = true;
   isDragging: boolean = false;
   isMouseDown: any;
+  private mouseOverTarget: Optional<Node>;
 
   // acceptor: Acceptor = (receiver, child, at) => {}
 
   constructor(readonly app: Carbon) {
     super();
     this.onUpdated = this.onUpdated.bind(this);
+
     this.onMountDraggable = this.onMountDraggable.bind(this);
     this.onUnmountDraggable = this.onUnmountDraggable.bind(this);
     this.onMountDroppable = this.onMountDroppable.bind(this);
     this.onUnmountDroppable = this.onUnmountDroppable.bind(this);
+
     this.onDragStart = this.onDragStart.bind(this);
     this.onDragMove = this.onDragMove.bind(this);
     this.onDragEnd = this.onDragEnd.bind(this);
+
     this.onMouseMove = throttle(this.onMouseMove.bind(this), 100); // throttled mouse move handler
     this.onMouseOver = this.onMouseOver.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
   }
 
-  onUpdated(node: Node) {
+  onUpdated() {
     this.isDirty = true;
   }
 
@@ -98,17 +103,23 @@ export class Dnd extends EventEmitter {
 
   // start showing drag handles on hover on draggable
   onMouseMove(node: Node, e: MouseEvent) {
+    if (this.isDirty) {
+      // refresh draggables and droppables
+    } else {
+    }
+
     this.showDragHandle(node, e);
   }
 
   // start showing drag handles on hover on draggable
   onMouseOut(node: Node, e: MouseEvent) {
-    // console.log('XXX', 'mouse out');
-    // this.hideDragHandle(node, e);
+    this.hideDragHandle(node, e);
   }
 
   refresh(node: Node) {
+    console.log("xxxxxxxxxxxxxxxxxx");
     return;
+
     // console.log('show drag handle', node.id.toString());
     const { app, draggables, draggedNodeId } = this;
     const document = node.chain.find((n) => n.isDocument);

@@ -1,98 +1,99 @@
-import { Optional, BBox } from "@emrgen/types";
-import BTree from "sorted-btree";
-import { NodeR3Tree } from './NodeR3Tree';
+import { Node, NodeId, NodeIdMap } from "@emrgen/carbon-core";
+import { BBox, Optional } from "@emrgen/types";
+import { NodeR3Tree } from "./NodeR3Tree";
 import { elementBound } from "./utils";
-import { Node, NodeId, NodeIdComparator } from "@emrgen/carbon-core";
 
 // store for nodes and their rendered HTML elements with collision detection
 export class DndNodeStore {
-	private nodeMap: BTree<NodeId, Node> = new BTree(undefined, NodeIdComparator);
-	private elementMap: BTree<NodeId, HTMLElement> = new BTree(undefined, NodeIdComparator);
-	private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
-	private rtree: NodeR3Tree = new NodeR3Tree();
+  private rtree: NodeR3Tree = new NodeR3Tree();
+  private nodeMap: NodeIdMap<Node> = new NodeIdMap();
+  private elementMap: NodeIdMap<HTMLElement> = new NodeIdMap();
+  private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
+  private scrollPos: NodeIdMap<{ left: number; top: number }> = new NodeIdMap();
 
-	get size() {
-		return this.rtree.all().length;
-	}
+  get size() {
+    return this.rtree.all().length;
+  }
 
-	collides(box: BBox): Node[] {
-		return this.rtree.searchNodes(box);
-	}
+  collides(box: BBox): Node[] {
+    return this.rtree.searchNodes(box);
+  }
 
   //FIXME: this is a extremely expensive operation
   // currently its happening on every render cycle
-	refresh(scrollTop: number, scrollLeft: number) {
-		this.rtree.clear();
-		this.entries().forEach(e => {
-			// console.warn('refresh', e.node.id.toString(), e.el, elementBound(e.el!).top);
-			this.rtree.add(e.node, elementBound(e.el!, {left: scrollLeft, top: scrollTop}));
-		})
-	}
+  refresh(scrollTop: number, scrollLeft: number) {
+    this.rtree.clear();
+    this.entries().forEach((e) => {
+      // console.warn('refresh', e.node.id.toString(), e.el, elementBound(e.el!).top);
+      this.rtree.add(
+        e.node,
+        elementBound(e.el!, { left: scrollLeft, top: scrollTop }),
+      );
+    });
+  }
 
-	private entries() {
-		return this.nodes().map(n => ({ node: n, el: this.element(n.id) }));
-	}
+  private entries() {
+    return this.nodes().map((n) => ({ node: n, el: this.element(n.id) }));
+  }
 
-	private nodes() {
-		return Array.from(this.nodeMap.values());
-	}
+  private nodes() {
+    return Array.from(this.nodeMap.values());
+  }
 
-	private element(id: NodeId): Optional<HTMLElement> {
-		return this.elementMap.get(id)
-	}
+  private element(id: NodeId): Optional<HTMLElement> {
+    return this.elementMap.get(id);
+  }
 
-	reset() {
-		this.nodeMap.clear();
-		this.elementMap.clear();
-		this.rtree.clear();
-		this.elementToNodeMap = new WeakMap();
-	}
+  reset() {
+    this.nodeMap.clear();
+    this.elementMap.clear();
+    this.rtree.clear();
+    this.elementToNodeMap = new WeakMap();
+  }
 
-	get(entry: NodeId | HTMLElement): Optional<Node> {
-		if (entry instanceof NodeId) {
-			return this.nodeMap.get(entry);
-		} else {
-			return this.elementToNodeMap.get(entry as HTMLElement);
-		}
-	}
+  get(entry: NodeId | HTMLElement): Optional<Node> {
+    if (entry instanceof NodeId) {
+      return this.nodeMap.get(entry);
+    } else {
+      return this.elementToNodeMap.get(entry as HTMLElement);
+    }
+  }
 
-	put(node: Node) {
-		this.nodeMap.delete(node.id);
-		this.nodeMap.set(node.id, node);
-	}
+  put(node: Node) {
+    this.nodeMap.delete(node.id);
+    this.nodeMap.set(node.id, node);
+  }
 
-	has(node: Node): boolean {
-		return this.nodeMap.has(node.id);
-	}
+  has(node: Node): boolean {
+    return this.nodeMap.has(node.id);
+  }
 
-	// connect the node to the rendered HTML element
-	register(node: Node, el: HTMLElement) {
-    return
-		if (!el) {
-			console.error(`Registering empty dom node for ${node.id.toString()}`);
-			return
-		}
-		const { id } = node;
-		// remove old reference first
-		// other part of the id will eventually be added while rendering
-		this.delete(node)
-		this.nodeMap.set(id, node);
-		this.elementMap.set(id, el);
-		this.elementToNodeMap.set(el, node);
-		this.rtree.add(node, elementBound(el));
-	}
+  // connect the node to the rendered HTML element
+  register(node: Node, el: HTMLElement) {
+    if (!el) {
+      console.error(`Registering empty dom node for ${node.id.toString()}`);
+      return;
+    }
+    const { id } = node;
+    // remove old reference first
+    // other part of the id will eventually be added while rendering
+    this.delete(node);
+    this.nodeMap.set(id, node);
+    this.elementMap.set(id, el);
+    this.elementToNodeMap.set(el, node);
+    this.rtree.add(node, elementBound(el));
+  }
 
-	// remove the node and related element,  from the store
-	delete(node: Node) {
-		const { id } = node;
-		const el = this.elementMap.get(id);
-		if (el) {
-			this.elementToNodeMap.delete(el);
-		}
+  // remove the node and related element,  from the store
+  delete(node: Node) {
+    const { id } = node;
+    const el = this.elementMap.get(id);
+    if (el) {
+      this.elementToNodeMap.delete(el);
+    }
 
-		this.nodeMap.delete(id);
-		this.elementMap.delete(id);
-		this.rtree.remove(node);
-	}
-
+    this.nodeMap.delete(id);
+    this.elementMap.delete(id);
+    this.rtree.remove(node);
+  }
 }

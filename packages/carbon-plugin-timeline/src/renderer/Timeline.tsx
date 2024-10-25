@@ -7,7 +7,7 @@ import {
   RendererProps,
 } from "@emrgen/carbon-react";
 import { Optional } from "@emrgen/types";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 
 const timelineNumber = (node: Node, parent: Optional<Node>): number => {
   if (!parent) {
@@ -49,10 +49,6 @@ export const TimelineComp = (props: RendererProps) => {
       </label>
     );
   }, [nodeNumber]);
-
-  useEffect(() => {
-    console.log("TimelineComp", node.key, nodeNumber);
-  }, [node, nodeNumber]);
 
   return (
     <CarbonBlock {...props} custom={connectors} ref={ref}>

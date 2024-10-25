@@ -1,21 +1,20 @@
-import { RendererProps, useCarbon } from "@emrgen/carbon-react";
-import { CarbonBlock } from "@emrgen/carbon-react";
-import { CollapsedPath, preventAndStop } from "@emrgen/carbon-core";
-import { HasFocusPath } from "@emrgen/carbon-core";
-import { stop } from "@emrgen/carbon-core";
-import { NodeId } from "@emrgen/carbon-core";
-import { useMemo } from "react";
-import { useCallback } from "react";
-import { useState } from "react";
-import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
-import { Code } from "./Code";
-import { Result } from "./Result";
-import { CodeCellCodeTypePath } from "../constants";
-import { CodeCellCodeValuePath } from "../constants";
+import {
+  CollapsedPath,
+  HasFocusPath,
+  NodeId,
+  preventAndStop,
+  stop,
+} from "@emrgen/carbon-core";
+import { CarbonBlock, RendererProps, useCarbon } from "@emrgen/carbon-react";
+import { useCallback, useMemo, useState } from "react";
+import { BiPlus } from "react-icons/bi";
 import { BsTextParagraph } from "react-icons/bs";
 import { DiCssTricks } from "react-icons/di";
 import { useCustomCompareEffect } from "react-use";
-import { BiPlus } from "react-icons/bi";
+import { CodeCellCodeTypePath, CodeCellCodeValuePath } from "../constants";
+import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
+import { Code } from "./Code";
+import { Result } from "./Result";
 
 const codeTypes = ["javascript", "markdown", "html", "css"];
 const codeIcons = {
@@ -121,11 +120,7 @@ export const CellComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node}>
-      <div
-        className={"cell-insert-neighbour"}
-        onClick={handleInsertNeighbour}
-        onMouseDown={handleInsertNeighbour}
-      >
+      <div className={"cell-insert-neighbour"} onClick={handleInsertNeighbour}>
         <BiPlus />
       </div>
       <div

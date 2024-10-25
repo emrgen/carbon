@@ -141,7 +141,7 @@ export class ActiveCellRuntime extends EventEmitter {
       }
 
       this.cells.delete(cellId);
-      this.printStats();
+      // this.printStats();
       this.emit("deleted:" + cellId, cell);
       return;
     }
@@ -161,7 +161,7 @@ export class ActiveCellRuntime extends EventEmitter {
       }
 
       this.define(cell);
-      this.printStats();
+      // this.printStats();
       return null;
     } catch (err) {
       console.error(err);

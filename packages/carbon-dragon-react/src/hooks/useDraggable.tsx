@@ -1,7 +1,7 @@
-import { MutableRefObject, useCallback, useEffect, useState } from "react";
-import { useDndContext } from "./useDndContext";
 import { Node } from "@emrgen/carbon-core";
 import { DndEvent, getEventPosition } from "@emrgen/carbon-dragon";
+import { MutableRefObject, useCallback, useEffect, useState } from "react";
+import { useDndContext } from "./useDndContext";
 
 export interface UseFastDraggableProps {
   node: Node;
@@ -23,6 +23,7 @@ export const useDraggable = (props: UseFastDraggableProps) => {
 
   const onMouseMove = useCallback(
     (e) => {
+      // TODO: this is redundant, we should detect the target node using elementFromPoint
       dnd.onMouseMove(node, e);
     },
     [dnd, node],

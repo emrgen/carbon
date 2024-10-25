@@ -1,16 +1,17 @@
-import { flatten, identity, isEmpty, last } from "lodash";
-import { ContentMatch } from "./ContentMatch";
 import { Optional } from "@emrgen/types";
-import { CarbonAction } from "./actions/index";
-import { MoveNodeAction } from "./actions/index";
-import { Point } from "./Point";
-import { getContentMatch } from "../utils/content_match";
-import { MatchAction } from "../utils/content_match";
-import { findMatchingActions } from "../utils/content_match";
-import { findMatchingNodes } from "../utils/content_match";
-import { nodeLocation } from "../utils/location";
+import { flatten, identity, isEmpty, last } from "lodash";
 import { insertNodesActions } from "../utils/action";
+import {
+  findMatchingActions,
+  findMatchingNodes,
+  getContentMatch,
+  MatchAction,
+} from "../utils/content_match";
+import { nodeLocation } from "../utils/location";
+import { CarbonAction, MoveNodeAction } from "./actions/index";
+import { ContentMatch } from "./ContentMatch";
 import { Node } from "./Node";
+import { Point } from "./Point";
 
 interface MoveNodesResult {
   actions: CarbonAction[];

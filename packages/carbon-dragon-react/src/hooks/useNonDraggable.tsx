@@ -1,6 +1,6 @@
-import { MutableRefObject, useCallback, useEffect } from "react";
-import { useDndContext } from "./useDndContext";
 import { Node } from "@emrgen/carbon-core";
+import { MutableRefObject, useCallback } from "react";
+import { useDndContext } from "./useDndContext";
 
 export interface UseNonDraggableProps {
   node: Node;
@@ -13,16 +13,17 @@ export const useNonDraggable = (props: UseNonDraggableProps) => {
 
   const onMouseMove = useCallback(
     (e) => {
+      // TODO: this is redundant, we should detect the target node using elementFromPoint
       dnd.onMouseMove(node, e);
     },
-    [dnd, node]
+    [dnd, node],
   );
 
   const onMouseOver = useCallback(
     (e) => {
       dnd.onMouseOver(node, e);
     },
-    [dnd, node]
+    [dnd, node],
   );
 
   return {

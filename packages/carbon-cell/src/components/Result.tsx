@@ -1,27 +1,22 @@
-import { useState } from "react";
-import { useRef } from "react";
-import { memo } from "react";
-import { useMemo } from "react";
-import { useEffect } from "react";
-import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
-import { isArray } from "lodash";
-import { isFunction } from "lodash";
-import { isNumber } from "lodash";
-import { isString } from "lodash";
-import { isObject } from "lodash";
-import { isPlainObject } from "lodash";
-import { cloneDeep } from "lodash";
-import { ActiveCell } from "../core/ActiveCellRuntime";
-import { Optional } from "@emrgen/types";
-import { isHtmlElement } from "../utils";
-import { isScriptElement } from "../utils";
-import { isStyleElement } from "../utils";
-import createDOMPurify from "dompurify";
+import { HasFocusPath, preventAndStop } from "@emrgen/carbon-core";
 import { ObjectViewer } from "@emrgen/carbon-object-view";
+import { Optional } from "@emrgen/types";
+import createDOMPurify from "dompurify";
+import {
+  cloneDeep,
+  isArray,
+  isFunction,
+  isNumber,
+  isObject,
+  isPlainObject,
+  isString,
+} from "lodash";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { HiDotsVertical } from "react-icons/hi";
-import { preventAndStop } from "@emrgen/carbon-core";
-import { HasFocusPath } from "@emrgen/carbon-core";
 import { ViewStylePath } from "../constants";
+import { ActiveCell } from "../core/ActiveCellRuntime";
+import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
+import { isHtmlElement, isScriptElement, isStyleElement } from "../utils";
 
 const DOMPurify = createDOMPurify(window);
 
@@ -297,7 +292,6 @@ const ResultView = (props) => {
   }
 
   if (isFunction(result)) {
-    console.log("function", cell);
     return (
       <div className={"cell-result-name-view"}>
         {cell.hasName() && <div>{cell.name} = </div>}
@@ -314,7 +308,7 @@ const ResultView = (props) => {
     );
   }
 
-  console.log(node.id.toString(), result, result.parentNode);
+  // console.log(node.id.toString(), result, result.parentNode);
 
   // if (
   //   isHtmlElement(result) &&
