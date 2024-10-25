@@ -355,7 +355,7 @@ export const InnerCarbonNode = (props: RendererProps) => {
 
   if (RegisteredComponent) {
     if (RegisteredComponent === CarbonNode) {
-      console.warn(
+      throw Error(
         `${node.name} is registered as CarbonNode, this will fall back to CarbonDefaultNode`,
       );
     } else {

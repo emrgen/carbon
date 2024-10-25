@@ -1,22 +1,13 @@
 import {
-  each,
-  first,
-  flatten,
-  last,
-  merge,
-  reduce,
-  reverse,
-  sortBy,
-} from "lodash";
-
-import { Optional } from "@emrgen/types";
-import {
+  ActionOrigin,
   BeforePlugin,
   BlockSelection,
   Carbon,
   CarbonAction,
   cloneFrozenNode,
+  deepCloneMap,
   deepCloneWithNewId,
+  EmptyPlaceholderPath,
   Fragment,
   getContentMatch,
   hasSameIsolate,
@@ -36,36 +27,47 @@ import {
   SetContentAction,
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
-import { deepCloneMap } from "@emrgen/carbon-core";
-import { ActionOrigin } from "@emrgen/carbon-core";
-import { EmptyPlaceholderPath } from "@emrgen/carbon-core";
-import { SelectionPatch } from "../core/index";
-import { NodeId } from "../core/index";
-import { NodeType } from "../core/index";
-import { Transaction } from "../core/index";
-import { ChangeNameAction } from "../core/index";
-import { InsertNodeAction } from "../core/index";
-import { RemoveNodeAction } from "../core/index";
-import { TitleNode } from "../core/index";
+
+import { Optional } from "@emrgen/types";
+import {
+  each,
+  first,
+  flatten,
+  last,
+  merge,
+  reduce,
+  reverse,
+  sortBy,
+} from "lodash";
+import { InsertTextAction } from "../core/actions/InsertTextAction";
+import { ContentMatch } from "../core/ContentMatch";
+import {
+  ChangeNameAction,
+  InsertNodeAction,
+  NodeId,
+  NodeType,
+  RemoveNodeAction,
+  SelectionPatch,
+  TitleNode,
+  Transaction,
+} from "../core/index";
 import { p14 } from "../core/Logger";
 import { Node } from "../core/Node";
+import { NodeColumn } from "../core/NodeColumn";
 import { Pin } from "../core/Pin";
 import { Point } from "../core/Point";
-import { Span } from "../core/Span";
 import { Slice } from "../core/Slice";
+import { Span } from "../core/Span";
 import { NodeName } from "../core/types";
-import { takeAfter, takeBefore, takeUntil } from "../utils/array";
-import { blocksBelowCommonNode } from "../utils/findNodes";
-import { nodeLocation } from "../utils/location";
-import { splitTextBlock } from "../utils/split";
 import {
   insertBeforeAction,
   moveNodesActions,
   removeNodesActions,
 } from "../utils/action";
-import { InsertTextAction } from "../core/actions/InsertTextAction";
-import { ContentMatch } from "../core/ContentMatch";
-import { NodeColumn } from "../core/NodeColumn";
+import { takeAfter, takeBefore, takeUntil } from "../utils/array";
+import { blocksBelowCommonNode } from "../utils/findNodes";
+import { nodeLocation } from "../utils/location";
+import { splitTextBlock } from "../utils/split";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -1112,7 +1114,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     if (start.isAtStartOfNode(commonNode!) && end.isAtEndOfNode(commonNode)) {
-      if (commonNode.isCollapsible) {
+      if (commonNode.isCollapsed || commonNode.type.spec.split?.inside) {
         const textBlock = commonNode.child(0)!;
         const at = Point.toAfter(textBlock.id);
         const block = app.schema.type(textBlock.type.splitName)?.default();
@@ -1493,6 +1495,11 @@ export class TransformCommands extends BeforePlugin {
         return;
       }
 
+      // place the new split inside the splitBlock
+      if (splitBlock.type.spec.split?.inside) {
+        return;
+      }
+
       const after = selection.clone();
       tr.Add(insertBeforeAction(splitBlock, emptyBlock)).Select(after);
       return;
@@ -1561,6 +1568,7 @@ export class TransformCommands extends BeforePlugin {
           );
           return;
         }
+
         parentBlock.insert(firstNode, parentBlock.size);
         // move the split node next siblings to root node
         // only if spit pos === 'out'

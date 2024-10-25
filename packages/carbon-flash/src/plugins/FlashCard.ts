@@ -1,4 +1,6 @@
-import {NodePlugin, NodeSpec} from "@emrgen/carbon-core";
+import { CarbonPlugin, NodePlugin, NodeSpec } from "@emrgen/carbon-core";
+import { FlashAnswer } from "./FlashAnswer";
+import { FlashView } from "./FlashView";
 
 export class FlashCard extends NodePlugin {
   name = "flashCard";
@@ -11,11 +13,15 @@ export class FlashCard extends NodePlugin {
       props: {
         local: {
           placeholder: {
-            empty: 'Untitled Flash Card',
-            focused: '',
+            empty: "Untitled Flash Card",
+            focused: "",
           },
-        }
-      }
-    }
+        },
+      },
+    };
+  }
+
+  plugins(): CarbonPlugin[] {
+    return [new FlashView(), new FlashAnswer()];
   }
 }

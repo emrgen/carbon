@@ -1,4 +1,5 @@
 import {
+  ActionOrigin,
   BeforePlugin,
   CarbonPlugin,
   CollapsedPath,
@@ -20,7 +21,6 @@ import {
   Transaction,
   Writer,
 } from "@emrgen/carbon-core";
-import { ActionOrigin } from "@emrgen/carbon-core";
 import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
 
 declare module "@emrgen/carbon-core" {
@@ -205,7 +205,7 @@ export class Collapsible extends NodePlugin {
       const focusPoint = Pin.toStartOf(title!);
       const after = PinnedSelection.fromPin(focusPoint!);
 
-      if (title.parent?.isDocument) {
+      if (title.parent?.isIsolate) {
         const sectionTitle = app.schema.clone(title, (n) => {
           return {
             ...n,

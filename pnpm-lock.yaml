@@ -184,6 +184,9 @@ importers:
       '@emrgen/carbon-database-react':
         specifier: workspace:*
         version: link:../../packages/carbon-database-react
+      '@emrgen/carbon-flash':
+        specifier: workspace:*
+        version: link:../../packages/carbon-flash
       '@emrgen/carbon-object-view':
         specifier: workspace:*
         version: link:../../packages/carbon-object-view
@@ -1927,19 +1930,31 @@ importers:
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
+      '@emrgen/carbon-react-blocks':
+        specifier: workspace:*
+        version: link:../carbon-react-blocks
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
-      '@types/lodash':
-        specifier: ^4.14.191
-        version: 4.17.12
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
     devDependencies:
       '@emrgen/eslint-config-custom':
         specifier: workspace:*
         version: link:../eslint-config-custom
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.12
       '@types/react':
         specifier: ^18.0.27
         version: 18.3.12

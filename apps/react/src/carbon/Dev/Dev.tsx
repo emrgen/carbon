@@ -42,6 +42,7 @@ import {
 } from "@emrgen/carbon-core";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
+import { flashPlugin, flashRenderers } from "@emrgen/carbon-flash";
 import {
   timelinePlugin,
   timelineRenderer,
@@ -71,6 +72,17 @@ const data = node("carbon", [
     "document",
     [
       title([text("Document Title")]),
+
+      node("flashCard", [
+        node("flashView", [
+          title([text("question")]),
+          section([title([text("flash card content")])]),
+        ]),
+        node("flashAnswer", [
+          title([text("answer")]),
+          section([title([text("flash card content")])]),
+        ]),
+      ]),
 
       node("codemirror"),
 
@@ -801,6 +813,7 @@ const plugins = [
   // extensions1,
   ...questionExtension.plugins!,
   timelinePlugin,
+  flashPlugin,
 ];
 
 const renderers = [
@@ -814,6 +827,7 @@ const renderers = [
   ...cellRenderer,
   ...questionExtension.renderers!,
   timelineRenderer,
+  flashRenderers,
 ];
 
 const renderManager = RenderManager.from(flattenDeep(renderers));
