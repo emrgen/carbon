@@ -53,9 +53,10 @@ export class Dnd extends EventEmitter {
   }
 
   onUpdated() {
-    this.isDirty = true;
     const { contentUpdated } = this.app.state;
-    console.log(contentUpdated.size);
+    if (contentUpdated.size !== 0) {
+      this.isDirty = true;
+    }
     contentUpdated.forEach((nodeId) => {
       this.updatedNodeIds.add(nodeId);
     });
@@ -66,7 +67,7 @@ export class Dnd extends EventEmitter {
   }
 
   onUnmountDraggable(node: Node) {
-    this.draggables.delete(node);
+    this.draggables.delete(node.id);
   }
 
   onMountDroppable(node: Node, el: HTMLElement) {
@@ -74,7 +75,7 @@ export class Dnd extends EventEmitter {
   }
 
   onUnmountDroppable(node: Node) {
-    this.containers.delete(node);
+    this.containers.delete(node.id);
   }
 
   onMouseDown(node: Node, event) {
@@ -154,6 +155,9 @@ export class Dnd extends EventEmitter {
         this.refreshBound(node);
       }
     });
+
+    this.updatedNodeIds.clear();
+    console.log("---------------------");
   }
 
   private refreshBound(node: Node) {
@@ -225,7 +229,6 @@ export class Dnd extends EventEmitter {
     const hitNode = existing[0]!;
     // console.log(hitNode.name, hitNode.depth, hitNode.id.toString())
     if (draggedNodeId?.eq(hitNode.id)) {
-      console.log("cancelled");
       return;
     }
 

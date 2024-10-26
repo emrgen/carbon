@@ -16,12 +16,16 @@ export class Divider extends NodePlugin {
       group: "content nestable",
       atom: true,
       isolate: true,
-      inlineSelectable: true,
-      draggable: true,
-      dragHandle: true,
-      rectSelectable: true,
-      blockSelectable: true,
       insert: true,
+      dnd: {
+        handle: true,
+        draggable: true,
+      },
+      selection: {
+        block: true,
+        inline: true,
+        rect: true,
+      },
       info: {
         title: "Divider",
         description: "A horizontal line to separate content",
