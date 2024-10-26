@@ -12,6 +12,7 @@ import {
   corePresetPlugins,
   ModePath,
   NodeId,
+  StylePath,
 } from "@emrgen/carbon-core";
 import { designPlugin, designRenderers } from "@emrgen/carbon-design";
 import { timelineRenderer } from "@emrgen/carbon-plugin-timeline";
@@ -49,9 +50,43 @@ const renderManager = RenderManager.from(flattenDeep(renderers));
 export function Design() {
   const [data] = useState(() => {
     const content = node("carbon", [
-      node("deBoard", [node("deShape")], {
-        [ModePath]: "edit",
-      }),
+      node(
+        "deBoard",
+        [
+          node("deShape"),
+          node("deShape", [], {
+            [StylePath]: {
+              left: "300px",
+            },
+          }),
+          node("deShape", [], {
+            [StylePath]: {
+              top: "300px",
+              left: "300px",
+            },
+          }),
+          node("deShape", [], {
+            [StylePath]: {
+              left: "500px",
+            },
+          }),
+          node("deShape", [], {
+            [StylePath]: {
+              left: "300px",
+              top: "500px",
+            },
+          }),
+          node("deShape", [], {
+            [StylePath]: {
+              left: "500px",
+              top: "300px",
+            },
+          }),
+        ],
+        {
+          [ModePath]: "edit",
+        },
+      ),
     ]);
 
     // @ts-expect-error - Expose app to the window for debugging

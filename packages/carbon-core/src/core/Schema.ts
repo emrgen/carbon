@@ -138,6 +138,9 @@ export interface NodeSpec {
 
   // the node can be treated as a standalone document
   document?: boolean;
+  // last empty children stays within on enter
+  // only backspace can unwrap the last child
+  collapsible?: boolean;
 
   inlineSelectable?: boolean;
   blockSelectable?: boolean;
@@ -148,9 +151,7 @@ export interface NodeSpec {
     name?: string;
     end?: boolean;
   };
-  // last empty children stays within on enter
-  // only backspace can unwrap the last child
-  collapsible?: boolean;
+
   selection?: {
     inline?: boolean;
     block?: boolean;
@@ -161,6 +162,9 @@ export interface NodeSpec {
     handle?: boolean;
     draggable?: boolean;
     container?: boolean;
+    // top level dnd region
+    // no higher dnd region can be found
+    region?: boolean;
     // same as rect selectable
     selectable?: boolean;
     // by default this will be evaluated using content match
@@ -181,6 +185,12 @@ export interface NodeSpec {
     prev?: boolean;
     next?: boolean;
     children?: boolean;
+  };
+
+  transform?: {
+    translate?: string; // x, y, xy
+    resize?: string; // x, y, lt, rt, lb, rb, lx, rx, ty, by, xy
+    rotate?: boolean; // true, false
   };
   focusable?: boolean;
   draggable?: boolean;
