@@ -1,9 +1,6 @@
-import { test } from "vitest";
-import { expect } from "vitest";
+import { printNode, printSteps, TitleNode } from "@emrgen/carbon-core";
+import { expect, test } from "vitest";
 import { createCarbon } from "./utils";
-import { TitleNode } from "@emrgen/carbon-core";
-import { printNode } from "@emrgen/carbon-core";
-import { printSteps } from "@emrgen/carbon-core";
 
 test("title block split", () => {
   const carbon = createCarbon();
@@ -107,7 +104,6 @@ test("title block insert text", () => {
 });
 
 test("title block remove text", () => {
-  console.log("============================");
   const carbon = createCarbon();
   const title = carbon.content.type.schema.type("title")?.default();
   const schema = carbon.content.type.schema;

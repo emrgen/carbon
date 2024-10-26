@@ -197,7 +197,13 @@ export class ImmutableDraft implements Draft {
   private commit(depth: number): ImmutableState {
     this.prepare();
 
-    const { state, updated, selection, marks } = this;
+    const {
+      state,
+      updated,
+      contentChanged: contentUpdated,
+      selection,
+      marks,
+    } = this;
 
     const nodeMap =
       this.nodeMap.current.size === 0 ? state.nodeMap : this.nodeMap;
@@ -220,6 +226,7 @@ export class ImmutableDraft implements Draft {
 
     // console.log('updated state', updated.toArray().map(n => n.toString()).join(', '))
     updated.freeze();
+    contentUpdated.freeze();
     // nodeMap.contracts(2);
     nodeMap.freeze();
     after.freeze();
@@ -236,6 +243,7 @@ export class ImmutableDraft implements Draft {
       blockSelection,
       nodeMap,
       updated: updated,
+      contentUpdated: contentUpdated,
       changes: this.changes.optimize(),
       actions: this.actions.optimize(),
       marks,

@@ -2,11 +2,11 @@ import { Optional } from "@emrgen/types";
 import { cloneDeep, each, isArray } from "lodash";
 import { ContentMatch } from "./ContentMatch";
 import { Node } from "./Node";
+import { NodeAttrsJSON } from "./NodeAttrs";
+import { NodeProps, PlainNodeProps } from "./NodeProps";
+import { NodeStateJSON } from "./NodeState";
 import { NodeSpec, Schema } from "./Schema";
 import { NodeJSON, NodeName } from "./types";
-import { NodeAttrsJSON } from "./NodeAttrs";
-import { NodeStateJSON } from "./NodeState";
-import { NodeProps, PlainNodeProps } from "./NodeProps";
 
 interface InitNodeJSON extends Omit<NodeJSON, "id"> {
   id?: string;
@@ -195,6 +195,14 @@ export class NodeType {
 
   get isDraggable() {
     return !!this.spec.draggable;
+  }
+
+  get dnd() {
+    return this.spec.dnd;
+  }
+
+  get isDropContainer() {
+    return !!this.spec.dropContainer;
   }
 
   get isInlineSelectable() {

@@ -1,8 +1,8 @@
 import { Optional } from "@emrgen/types";
-import { NodeId } from "./NodeId";
-import { Node } from "./Node";
 import { clamp } from "lodash";
 import { Carbon } from "./Carbon";
+import { Node } from "./Node";
+import { NodeId } from "./NodeId";
 import { NodeMap } from "./NodeMap";
 
 // NodeStore is a store for the nodes and their rendered HTML elements
@@ -10,6 +10,8 @@ export class NodeStore {
   private elementMap: Map<string, HTMLElement> = new Map();
   // this map is used to resolve the node from the HTML element and find out the selection nodes
   private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
+
+  private deletedNodes: Set<string> = new Set();
 
   constructor(private readonly app: Carbon) {}
 
@@ -75,6 +77,7 @@ export class NodeStore {
 
     this.elementMap.set(id.toString(), el);
     this.elementToNodeMap.set(el, node);
+    this.deletedNodes.delete(id.toString());
   }
 
   // remove the node from the store
@@ -84,8 +87,18 @@ export class NodeStore {
     if (el) {
       this.elementToNodeMap.delete(el);
     }
-
     this.elementMap.delete(id.toString());
+    this.deletedNodes.add(id.toString());
+  }
+
+  deleted(nodeId: string | NodeId): Optional<Node> {
+    if (typeof nodeId === "string") {
+      nodeId = NodeId.fromString(nodeId);
+    }
+
+    return this.deletedNodes.has(nodeId.toString())
+      ? this.nodeMap.get(nodeId)
+      : null;
   }
 
   // resolve the node from the HTML element
@@ -154,6 +167,20 @@ export class NodeStore {
       node: cnode,
       offset,
     };
+  }
+
+  resolveNode(el: Element): Optional<Node> {
+    let node: Optional<Node>;
+    do {
+      node = this.elementToNodeMap.get(<HTMLElement>el);
+      if (node) {
+        break;
+      } else {
+        el = el.parentNode as HTMLElement;
+      }
+    } while (el);
+
+    return node;
   }
 
   clear() {

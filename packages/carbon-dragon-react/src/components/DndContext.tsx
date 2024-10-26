@@ -13,7 +13,7 @@ export const DndContext = (props) => {
   window.fastDnd = dnd;
 
   // mark dnd as dirty when content changes
-  // this is necessary to update the draggables and droppables when mouse moves
+  // this is necessary to update the draggables and containers when mouse moves
   useEffect(() => {
     const onChange = (state: State) => {
       if (state.isContentChanged) {

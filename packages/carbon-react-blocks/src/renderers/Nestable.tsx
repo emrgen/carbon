@@ -1,25 +1,20 @@
-import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent,
   RendererProps,
+  useSelectionHalo,
 } from "@emrgen/carbon-react";
-import { useRef } from "react";
 
 export const NestableComp = (props: RendererProps) => {
   const { node, custom } = props;
-  const ref = useRef(null);
-  const { connectors, SelectionHalo } = useDragDropRectSelectHalo({
-    node,
-    ref,
-  });
+  const { SelectionHalo } = useSelectionHalo(props);
 
   return (
-    <CarbonBlock node={node} custom={custom}>
+    <CarbonBlock {...props}>
       <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
-      {/*{SelectionHalo}*/}
+      {SelectionHalo}
     </CarbonBlock>
   );
 };

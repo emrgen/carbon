@@ -1,5 +1,3 @@
-import { useActiveCellRuntime } from "@emrgen/carbon-cell";
-
 import {
   ActionOrigin,
   EventsIn,
@@ -16,7 +14,6 @@ import {
   useCombineConnectors,
   useConnectorsToProps,
   useDndRegion,
-  useNonDraggable,
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon-react";
 import {
@@ -31,22 +28,18 @@ import { DocumentContext, useNodeImage } from "../hooks";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
-  // const  = node.props.get("document");
 
   const app = useCarbon();
-  const { store } = app;
-  const runtime = useActiveCellRuntime();
-
   const ref = useRef<Element>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const dndRegion = useDndRegion({ node, ref });
-  const nonDraggable = useNonDraggable({ node, ref });
   const selectionSurface = useRectSelectionSurface({ node, ref });
 
   useEffect(() => {
     app.emit("document:mounted", node);
   }, [app, node]);
 
+  // hide cursor when it's below the last child of the document during mouse down
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       const lastChild = node.lastChild as Node;
@@ -72,7 +65,6 @@ export const DocumentComp = (props: RendererProps) => {
       },
       selectionSurface,
       dndRegion,
-      nonDraggable,
     ),
   );
 

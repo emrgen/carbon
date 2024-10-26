@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDndContext } from "../hooks/index";
 import { DraggableHandle } from "./DraggableHandle";
 
+// dnd controller is responsible for managing drag and drop events
 export function DndController() {
   const app = useCarbon();
   const dnd = useDndContext();
@@ -50,8 +51,14 @@ export function DndController() {
   const onMouseIn = useCallback(
     (node: Node) => {
       if (!portalPosition) return;
-      if (!node.type.isDraggable || dragHandleNode?.eq(node) || dnd.isMouseDown)
+      if (
+        !node.type.dnd?.draggable ||
+        dragHandleNode?.eq(node) ||
+        dnd.isMouseDown
+      ) {
         return;
+      }
+
       const el = app.store.element(node.id);
       if (!el) return;
 
@@ -59,20 +66,18 @@ export function DndController() {
       if (!region) return;
       const bound = elementBound(el);
 
-      // console.log(node.name, node.type.dragHandle);
-      if (node.type.dragHandle) {
-        // console.log("onMouseIn", node.id.toString(), bound);
+      if (node.type.dnd?.handle) {
         setDragHandlePosition({
           left: bound.left - portalPosition.x - 50,
-          top: bound.top - portalPosition.y + 4,
-          width: 0,
-          height: 20,
+          top: bound.top - portalPosition.y,
+          minWidth: 48,
+          height: 24,
         });
       } else {
         setDragHandlePosition({
           left: bound.left - portalPosition.x,
           top: bound.top - portalPosition.y,
-          width: bound.right - bound.left,
+          minWidth: bound.right - bound.left,
           height: bound.bottom - bound.top,
         });
       }
@@ -112,7 +117,6 @@ export function DndController() {
       setDraggedNode(e.node);
       setShowDragHandle(true);
       app.disable();
-      console.log("----------");
       dnd.draggedNodeId = e.node.id;
       showOverlay(e.id.toString());
     },

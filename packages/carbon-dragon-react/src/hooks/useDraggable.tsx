@@ -21,27 +21,7 @@ export const useDraggable = (props: UseFastDraggableProps) => {
     }
   }, [dnd, node, ref]);
 
-  const onMouseMove = useCallback(
-    (e) => {
-      // TODO: this is redundant, we should detect the target node using elementFromPoint
-      dnd.onMouseMove(node, e);
-    },
-    [dnd, node],
-  );
-
-  const onMouseOver = useCallback(
-    (e) => {
-      // console.warn("onMouseOver", e.target, e.currentTarget);
-      dnd.onMouseOver(node, e);
-    },
-    [dnd, node],
-  );
-
   return {
-    listeners: {
-      onMouseMove,
-      onMouseOver,
-    },
     attributes: {},
   };
 };

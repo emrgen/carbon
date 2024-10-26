@@ -2,10 +2,11 @@ import { Node } from '@emrgen/carbon-core';
 import { Optional } from '@emrgen/types';
 
 export interface RectStyle {
-	left: number;
-	top: number;
-	width: number;
-	height: number
+	left?: number;
+	top?: number;
+	minWidth?: number;
+	width?: number;
+	height?: number
 }
 
 export type NodeEventListener = (e) => any;

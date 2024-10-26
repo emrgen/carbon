@@ -1,7 +1,7 @@
 import { Node, NodeId, NodeIdMap } from "@emrgen/carbon-core";
 import { BBox, Optional } from "@emrgen/types";
 import { NodeR3Tree } from "./NodeR3Tree";
-import { elementBound } from "./utils";
+import { domRectToBound, elementBound } from "./utils";
 
 // store for nodes and their rendered HTML elements with collision detection
 export class DndNodeStore {
@@ -17,6 +17,13 @@ export class DndNodeStore {
 
   collides(box: BBox): Node[] {
     return this.rtree.searchNodes(box);
+  }
+
+  clear() {
+    this.rtree.clear();
+    this.nodeMap.clear();
+    this.elementMap.clear();
+    this.elementToNodeMap = new WeakMap();
   }
 
   //FIXME: this is a extremely expensive operation
@@ -69,31 +76,31 @@ export class DndNodeStore {
   }
 
   // connect the node to the rendered HTML element
-  register(node: Node, el: HTMLElement) {
+  register(node: Node, el: HTMLElement, rect?: DOMRect) {
     if (!el) {
       console.error(`Registering empty dom node for ${node.id.toString()}`);
       return;
     }
+
     const { id } = node;
     // remove old reference first
     // other part of the id will eventually be added while rendering
-    this.delete(node);
+    this.delete(id);
     this.nodeMap.set(id, node);
     this.elementMap.set(id, el);
     this.elementToNodeMap.set(el, node);
-    this.rtree.add(node, elementBound(el));
+    this.rtree.add(node, rect ? domRectToBound(rect) : elementBound(el));
   }
 
   // remove the node and related element,  from the store
-  delete(node: Node) {
-    const { id } = node;
-    const el = this.elementMap.get(id);
+  delete(nodeId: NodeId) {
+    const el = this.elementMap.get(nodeId);
     if (el) {
       this.elementToNodeMap.delete(el);
     }
 
-    this.nodeMap.delete(id);
-    this.elementMap.delete(id);
-    this.rtree.remove(node);
+    this.nodeMap.delete(nodeId);
+    this.elementMap.delete(nodeId);
+    this.rtree.remove(nodeId);
   }
 }

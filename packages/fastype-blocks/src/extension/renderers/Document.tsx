@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useRef } from "react";
-
 import {
   ActionOrigin,
   EventsIn,
@@ -12,21 +10,21 @@ import {
   preventAndStop,
 } from "@emrgen/carbon-core";
 import {
+  useCombineConnectors,
+  useConnectorsToProps,
+  useDndRegion,
+  useDroppable,
+  useRectSelectionSurface,
+} from "@emrgen/carbon-dragon-react";
+import {
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent,
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDndRegion,
-  useDroppable,
-  useNonDraggable,
-  useRectSelectionSurface,
-} from "@emrgen/carbon-dragon-react";
 import { DocumentContext } from "@emrgen/carbon-react-blocks";
+import { useCallback, useEffect, useRef } from "react";
 
 export const DocumentComp = (props: RendererProps) => {
   const { node } = props;
@@ -40,10 +38,9 @@ export const DocumentComp = (props: RendererProps) => {
   useDroppable({ node, ref });
 
   const dndRegion = useDndRegion({ node, ref });
-  const nonDraggable = useNonDraggable({ node, ref });
   const selectionSurface = useRectSelectionSurface({ node, ref });
   const connectors = useConnectorsToProps(
-    useCombineConnectors(selectionSurface, dndRegion, nonDraggable),
+    useCombineConnectors(selectionSurface, dndRegion),
   );
 
   useEffect(() => {

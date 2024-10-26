@@ -185,6 +185,7 @@ export interface NodeSpec {
   focusable?: boolean;
   draggable?: boolean;
   dragHandle?: boolean;
+
   insert?: boolean;
   // node is a embedded element
   // it can be a video, audio, external react

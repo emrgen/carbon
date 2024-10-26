@@ -12,8 +12,8 @@ import {
   StateScope,
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
-import { ImmutableNodeMap } from "./ImmutableNodeMap";
 import { ImmutableDraft } from "./ImmutableDraft";
+import { ImmutableNodeMap } from "./ImmutableNodeMap";
 
 interface StateProps {
   scope: Symbol;
@@ -23,6 +23,7 @@ interface StateProps {
   blockSelection?: BlockSelection;
   nodeMap: ImmutableNodeMap;
   updated?: NodeIdSet;
+  contentUpdated?: NodeIdSet;
   changes?: StateChanges;
   actions?: StateActions;
   counter?: number;
@@ -38,6 +39,7 @@ export class ImmutableState implements State {
   blockSelection: BlockSelection;
   nodeMap: ImmutableNodeMap;
   updated: NodeIdSet;
+  contentUpdated: NodeIdSet;
   changes: StateChanges;
   actions: StateActions;
 
@@ -70,6 +72,7 @@ export class ImmutableState implements State {
       selection,
       nodeMap,
       updated = NodeIdSet.empty(),
+      contentUpdated = NodeIdSet.empty(),
       changes = StateChanges.empty(),
       actions = StateActions.empty(),
       blockSelection = BlockSelection.empty(),
@@ -88,6 +91,7 @@ export class ImmutableState implements State {
     // keep track of which nodes have been updated
     this.nodeMap = nodeMap;
     this.updated = updated;
+    this.contentUpdated = contentUpdated;
 
     // keep track of changes and actions that have been applied to the state
     this.changes = changes;
