@@ -1,3 +1,4 @@
+import { DndEvent } from "@emrgen/carbon-dragon";
 import { CSSProperties, useEffect, useState } from "react";
 import { DesignBoard, SelectEvent } from "../core/DesignBoard";
 import { abs, min } from "../utils";
@@ -7,12 +8,12 @@ export const useRectSelector = (board: DesignBoard) => {
   const [isSelecting, setIsSelecting] = useState(false);
 
   useEffect(() => {
-    const onSelectStart = (e: SelectEvent) => {
+    const onSelectStart = (e: DndEvent) => {
       setStyle({
         display: "block",
         position: "absolute",
-        left: e.x,
-        top: e.y,
+        left: e.position.startX,
+        top: e.position.startY,
         width: 0,
         height: 0,
         border: "1px dashed #000",
@@ -21,13 +22,14 @@ export const useRectSelector = (board: DesignBoard) => {
       setIsSelecting(true);
     };
 
-    const onSelectMove = (e: SelectEvent) => {
+    const onSelectMove = (e: DndEvent) => {
+      const { position: p } = e;
       setStyle((style) => ({
         ...style,
-        left: min(e.x, e.ix),
-        top: min(e.y, e.iy),
-        width: abs(e.x - e.ix),
-        height: abs(e.y - e.iy),
+        left: min(p.startX, p.endX),
+        top: min(p.startY, p.endY),
+        width: abs(p.startX - p.endX),
+        height: abs(p.startY - p.endY),
       }));
     };
 

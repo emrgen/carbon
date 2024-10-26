@@ -1,4 +1,6 @@
 import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
+import { Element } from "./Element";
+import { Transformer } from "./Transformer";
 
 export class Design extends CarbonPlugin {
   name = "deBoard";
@@ -15,46 +17,6 @@ export class Design extends CarbonPlugin {
   }
 
   plugins(): CarbonPlugin[] {
-    return [new DesignShape()];
-  }
-}
-
-export class DesignShape extends CarbonPlugin {
-  name = "deShape";
-  spec(): NodeSpec {
-    return {
-      group: "deContent deElement",
-      dnd: {
-        draggable: true,
-      },
-      transform: {
-        rotate: true,
-        translate: "xy",
-        resize: "xy",
-      },
-      props: {
-        local: {
-          html: {
-            className: "de-element",
-            contentEditable: false,
-            suppressContentEditableWarning: true,
-          },
-        },
-        remote: {
-          html: {
-            style: {
-              display: "block",
-              position: "absolute",
-              top: "100px",
-              left: "100px",
-              width: "100px",
-              height: "100px",
-              background: "rgba(0, 0, 0, 0.2)",
-              borderRadius: "6px",
-            },
-          },
-        },
-      },
-    };
+    return [new Element(), new Transformer()];
   }
 }

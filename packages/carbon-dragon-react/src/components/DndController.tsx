@@ -202,6 +202,7 @@ export function DndController() {
               ...dragHandlePosition,
               opacity: dragHandleOpacity,
               pointerEvens: dragHandleOpacity ? "auto" : "none",
+              cursor: dragHandleOpacity ? "grab" : "default",
             }}
           />
         }

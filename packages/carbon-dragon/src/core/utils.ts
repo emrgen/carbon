@@ -1,9 +1,10 @@
-import { BBox, Bound, RawPoint } from "@emrgen/types";
+import { BBox, Bound, NodeRect, RawPoint } from "@emrgen/types";
+import { MouseEvent } from "react";
 import { DndEvent } from "../types";
 
 const { min, max, abs } = Math;
 
-export const getEventPosition = (from: MouseEvent, to: MouseEvent) => {
+export const getEventPosition = <E extends MouseEvent>(from: E, to: E) => {
   const { clientX: startX, clientY: startY } = from;
   const { clientX: endX, clientY: endY } = to;
   return {
@@ -96,6 +97,15 @@ export const boxFromPoints = (p1: RawPoint, p2: RawPoint): BBox => {
   };
 };
 
+export const boxFromNodeRect = (box: NodeRect): BBox => {
+  return {
+    minX: min(box.x1, box.x2),
+    minY: min(box.y1, box.y2),
+    maxX: max(box.x1, box.x2),
+    maxY: max(box.y1, box.y2),
+  };
+};
+
 // find box from dnd event
 export const boundFromFastDndEvent = (event: Pick<DndEvent, "position">) => {
   const { sp, ep } = pointsFromFastDndEvent(event);
@@ -118,5 +128,25 @@ export const adjustBox = (box: BBox, adjust = { left: 0, top: 0 }): BBox => {
     minY: minY + adjust.top,
     maxX: maxX + adjust.left,
     maxY: maxY + adjust.top,
+  };
+};
+
+export const boundFromBounds = (bounds: Bound[]): Bound => {
+  const left = min(...bounds.map((b) => b.left));
+  const top = min(...bounds.map((b) => b.top));
+  const right = max(...bounds.map((b) => b.right));
+  const bottom = max(...bounds.map((b) => b.bottom));
+
+  return {
+    left,
+    top,
+    right,
+    bottom,
+    maxX: right,
+    minX: left,
+    minY: top,
+    maxY: bottom,
+    x: (left + right) / 2,
+    y: (top + bottom) / 2,
   };
 };

@@ -53,30 +53,31 @@ export function Design() {
       node(
         "deBoard",
         [
-          node("deShape"),
-          node("deShape", [], {
+          node("deTransformer"),
+          node("deTransformer", [], {
             [StylePath]: {
               left: "300px",
             },
           }),
-          node("deShape", [], {
+          node("deTransformer", [], {
             [StylePath]: {
               top: "300px",
               left: "300px",
             },
           }),
-          node("deShape", [], {
+          node("deTransformer", [], {
             [StylePath]: {
               left: "500px",
+              transform: "rotateZ(45deg)",
             },
           }),
-          node("deShape", [], {
+          node("deTransformer", [], {
             [StylePath]: {
               left: "300px",
               top: "500px",
             },
           }),
-          node("deShape", [], {
+          node("deTransformer", [], {
             [StylePath]: {
               left: "500px",
               top: "300px",

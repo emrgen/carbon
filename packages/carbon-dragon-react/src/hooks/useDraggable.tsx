@@ -68,6 +68,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
           id: id ?? node.id,
           state: initState,
           position: getEventPosition(activatorEvent, event),
+          dragged: isDragging,
         };
         if (isDragging) {
           dnd.onDragEnd(dndEvent);
@@ -137,12 +138,13 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 };
 
 interface UseTrackDragProps {
+  // overlay ref
+  ref: MutableRefObject<any>;
   node: Node;
   distance: number;
   isDisabled?: boolean;
-  ref: MutableRefObject<any>;
   onMouseDown(node: Node, event: MouseEvent): void;
-  onMouseUp(node: Node, event: DndEvent, isDragging: boolean): void;
+  onMouseUp(node: Node, event: DndEvent): void;
   onDragStart(event: DndEvent): void;
   onDragMove(event: DndEvent): void;
   onDragEnd(event: DndEvent): void;
@@ -160,6 +162,7 @@ export const useTrackDrag = (props: UseTrackDragProps) => {
     onDragEnd,
     ref,
   } = props;
+
   const onMouseDownHandler = useCallback(
     (event) => {
       let initState = {};
@@ -181,12 +184,13 @@ export const useTrackDrag = (props: UseTrackDragProps) => {
           id: node.id,
           state: initState,
           position: getEventPosition(activatorEvent, event),
+          dragged: isDragging,
         };
         if (isDragging) {
           onDragEnd(dndEvent);
         }
 
-        onMouseUp(node, dndEvent, isDragging);
+        onMouseUp(node, dndEvent);
         isDragging = false;
         window.removeEventListener("mousemove", _onMouseMove);
         window.removeEventListener("mouseup", _onMouseUp);

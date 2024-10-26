@@ -1,14 +1,17 @@
 import {
+  BSet,
   Carbon,
   Node,
+  NodeId,
   NodeIdMap,
   NodeIdSet,
   NodeTopicEmitter,
 } from "@emrgen/carbon-core";
-import { elementBound, NodeR3Tree } from "@emrgen/carbon-dragon";
-import { BBox } from "@emrgen/types";
+import { DndEvent, elementBound, NodeR3Tree } from "@emrgen/carbon-dragon";
+import { BBox, NodeRect } from "@emrgen/types";
 import { EventEmitter } from "events";
 import { identity } from "lodash";
+import { MouseEvent } from "react";
 import { max, min } from "../utils";
 
 export interface SelectEvent {
@@ -25,132 +28,75 @@ export class DesignBoard extends EventEmitter {
   activeNodes: NodeIdSet = new NodeIdSet();
 
   selectedNodes: NodeIdSet = new NodeIdSet();
-  beforeSelectedNodes: NodeIdSet = new NodeIdSet();
-  withinSelectionRect: NodeIdSet = new NodeIdSet();
+  withinSelectionNodes: NodeIdSet = new NodeIdSet();
 
   bus: NodeTopicEmitter = new NodeTopicEmitter();
 
   // elements
   elements: NodeIdMap<Node> = new NodeIdMap();
   isDirty: boolean = false;
+
+  // rtree for node bounds(axis-aligned bounding box)
   rtree: NodeR3Tree = new NodeR3Tree();
+  // node bounds cache, the axis-aligned bounding box
+  nodeBound: NodeIdMap<BBox> = new NodeIdMap();
+  // node rect cache, the actual transformed rect
+  nodeRect: NodeIdMap<NodeRect> = new NodeIdMap();
 
   // mouse drag selection
   mouseDownPosition: { x: number; y: number } = { x: 0, y: 0 };
   isMouseDown: boolean = false;
   isDragging: boolean = false;
 
+  get selectedNodesBound() {
+    const bound = this.selectedNodes
+      .map((nodeId) => this.nodeBound.get(nodeId))
+      .filter(identity) as BBox[];
+
+    return {
+      minX: min(...bound.map((b) => b.minX)),
+      minY: min(...bound.map((b) => b.minY)),
+      maxX: max(...bound.map((b) => b.maxX)),
+      maxY: max(...bound.map((b) => b.maxY)),
+    };
+  }
   constructor(readonly app: Carbon) {
     super();
 
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
+    this.onSelectionStart = this.onSelectionStart.bind(this);
+    this.onSelectionMove = this.onSelectionMove.bind(this);
+    this.onSelectionEnd = this.onSelectionEnd.bind(this);
   }
 
-  // start mouse selection process
-  // actual selection will start when mouse move more than 5px
-  onMouseDown(e: MouseEvent) {
-    this.mouseDownPosition = { x: e.clientX, y: e.clientY };
-    this.isMouseDown = true;
+  onMouseUp(node: Node, event: DndEvent) {
+    if (!event.dragged) {
+      this.selectNodes([]);
+      this.emit("select:end", event);
+    }
   }
 
   // track mouse selection rect
-  onMouseMove(e: MouseEvent) {
+  onSelectionStart(event: DndEvent) {
     if (this.isDirty) {
       this.refreshBounds();
       this.isDirty = false;
     }
-    if (this.isDragging) {
-      const event = {
-        event: e,
-        x: e.clientX,
-        y: e.clientY,
-        ix: this.mouseDownPosition.x,
-        iy: this.mouseDownPosition.y,
-        dx: e.clientX - this.mouseDownPosition.x,
-        dy: e.clientY - this.mouseDownPosition.y,
-      };
-      this.emit("select:move", event);
+    this.emit("select:start", event);
 
-      const rect = {
-        minX: min(event.x, event.ix),
-        minY: min(event.y, event.iy),
-        maxX: max(event.x, event.ix),
-        maxY: max(event.y, event.iy),
-      };
+    const rect = dndEventToRect(event);
+    const within = this.updateSelectingNodes(rect);
+    this.emitNodeEvents(within.added, "within:selecting:rect", event);
+    this.emitNodeEvents(within.removed, "outside:selecting:rect", event);
 
-      const { added, removed } = this.updateWithinSelectionRect(rect);
-      (
-        added
-          .map((nodeId) => this.app.store.get(nodeId))
-          .filter(identity) as Node[]
-      ).forEach((node) => {
-        this.bus.emit(node, "within:select:rect");
-      });
-      (
-        removed
-          .map((nodeId) => this.app.store.get(nodeId))
-          .filter(identity) as Node[]
-      ).forEach((node) => {
-        this.bus.emit(node, "outside:select:rect");
-      });
+    this.updateSelectingNodes(rect);
+  }
 
-      if (this.beforeSelectedNodes.size === 0) {
-        this.updateSelection(rect);
-      }
-
-      return;
-    }
-    if (this.isMouseDown) {
-      const dx = e.clientX - this.mouseDownPosition.x;
-      const dy = e.clientY - this.mouseDownPosition.y;
-      if (
-        !this.isDragging &&
-        (dx > 5 || dy > 5 || dx < -5 || dy < -5 || dx * dx + dy * dy > 25)
-      ) {
-        this.beforeSelectedNodes = this.selectedNodes.clone();
-        this.isDragging = true;
-
-        const event = {
-          event: e,
-          x: e.clientX,
-          y: e.clientY,
-          ix: this.mouseDownPosition.x,
-          iy: this.mouseDownPosition.y,
-          dx: e.clientX - this.mouseDownPosition.x,
-          dy: e.clientY - this.mouseDownPosition.y,
-        };
-        this.emit("select:start", event);
-
-        const rect = {
-          minX: min(event.x, event.ix),
-          minY: min(event.y, event.iy),
-          maxX: max(event.x, event.ix),
-          maxY: max(event.y, event.iy),
-        };
-
-        const { added, removed } = this.updateWithinSelectionRect(rect);
-        (
-          added
-            .map((nodeId) => this.app.store.get(nodeId))
-            .filter(identity) as Node[]
-        ).forEach((node) => {
-          this.bus.emit(node, "within:select:rect");
-        });
-        (
-          removed
-            .map((nodeId) => this.app.store.get(nodeId))
-            .filter(identity) as Node[]
-        ).forEach((node) => {
-          this.bus.emit(node, "outside:select:rect");
-        });
-
-        if (this.beforeSelectedNodes.size === 0) {
-          this.updateSelection(rect);
-        }
-      }
-    }
+  onSelectionMove(event: DndEvent) {
+    const rect = dndEventToRect(event);
+    this.emit("select:move", event);
+    const within = this.updateSelectingNodes(rect);
+    this.emitNodeEvents(within.added, "within:selecting:rect", event);
+    this.emitNodeEvents(within.removed, "outside:selecting:rect", event);
   }
 
   refreshBounds() {
@@ -163,16 +109,33 @@ export class DesignBoard extends EventEmitter {
     });
   }
 
-  updateWithinSelectionRect(rect: BBox) {
+  // end mouse selection
+  onSelectionEnd(event: DndEvent) {
+    console.log(this.isDragging);
+    this.emitNodeEvents(
+      this.withinSelectionNodes,
+      "outside:selecting:rect",
+      event,
+    );
+    const rect = dndEventToRect(event);
+
+    this.updateSelection(rect);
+    this.emit("select:end", event);
+    this.withinSelectionNodes.clear();
+    this.isMouseDown = false;
+    this.isDragging = false;
+  }
+
+  updateSelectingNodes(rect: BBox) {
     const selectedNodes = this.rtree.search(rect);
     const nodes = selectedNodes.map((node) => node.data);
-    const before = this.withinSelectionRect;
+
+    const before = this.withinSelectionNodes;
     const after = NodeIdSet.fromIds(nodes.map((node) => node.id));
 
     const removed = before.sub(after);
     const added = after.sub(before);
-
-    this.withinSelectionRect = NodeIdSet.fromIds(nodes.map((node) => node.id));
+    this.withinSelectionNodes = NodeIdSet.fromIds(nodes.map((node) => node.id));
 
     return {
       added: added,
@@ -180,82 +143,39 @@ export class DesignBoard extends EventEmitter {
     };
   }
 
-  // end mouse selection
-  onMouseUp(e: MouseEvent) {
-    const event = {
-      event: e,
-      x: e.clientX,
-      y: e.clientY,
-      ix: this.mouseDownPosition.x,
-      iy: this.mouseDownPosition.y,
-      dx: e.clientX - this.mouseDownPosition.x,
-      dy: e.clientY - this.mouseDownPosition.y,
-    };
-    this.emit("select:end", event);
-
-    if (!this.isDragging) {
-      this.selectNodes([]);
-    } else {
-      this.updateSelection({
-        minX: min(event.x, event.ix),
-        minY: min(event.y, event.iy),
-        maxX: max(event.x, event.ix),
-        maxY: max(event.y, event.iy),
-      });
-    }
-
-    this.withinSelectionRect.map((nodeId) => {
-      const node = this.app.store.get(nodeId);
-      if (node) {
-        this.bus.emit(node, "outside:select:rect");
-      }
-    });
-
-    this.withinSelectionRect.clear();
-    this.isMouseDown = false;
-    this.isDragging = false;
-  }
-
   updateSelection(rect: BBox) {
     const selectedNodes = this.rtree.search(rect);
     const nodes = selectedNodes.map((node) => node.data);
     this.selectNodes(nodes);
   }
-
   onMountElement(node: Node) {
     this.isDirty = true;
     this.elements.set(node.id, node);
     const el = this.app.store.element(node.id);
     if (el) {
-      this.rtree.add(node, elementBound(el));
+      const rect = elementBound(el);
+      this.rtree.add(node, rect);
+      // this.nodeRect.set(node.id, rect);
+      this.nodeBound.set(node.id, rect);
     }
   }
 
   onUnmountElement(node: Node) {
     this.elements.delete(node.id);
     this.rtree.remove(node.id);
+    this.nodeRect.delete(node.id);
+    this.nodeBound.delete(node.id);
   }
 
   selectNodes(nodes: Node[]) {
     const nodeIds = NodeIdSet.fromIds(nodes.map((node) => node.id));
     const selected = nodeIds.sub(this.selectedNodes);
     const deselected = this.selectedNodes.sub(nodeIds);
+    this.selectedNodes = nodeIds;
 
-    deselected.forEach((nodeId) => this.selectedNodes.remove(nodeId));
-    selected.forEach((nodeId) => this.selectedNodes.add(nodeId));
-
-    selected.forEach((nodeId) => {
-      const node = this.app.store.get(nodeId);
-      if (node) {
-        this.bus.emit(node, "select");
-      }
-    });
-    deselected.forEach((nodeId) => {
-      const node = this.app.store.get(nodeId);
-      if (node) {
-        this.bus.emit(node, "deselect");
-      }
-    });
+    console.log("selected", selected, "deselected", deselected);
+    this.emitNodeEvents(selected, "select", null);
+    this.emitNodeEvents(deselected, "deselect", null);
   }
 
   deselectNodes(nodes: Node[]) {
@@ -305,4 +225,25 @@ export class DesignBoard extends EventEmitter {
       }
     });
   }
+
+  emitNodeEvents(nodeIds: BSet<NodeId>, eventName: string, event) {
+    nodeIds.forEach((nodeId) => {
+      const node = this.app.store.get(nodeId);
+      if (node) {
+        console.log("emit", node.id.toString(), eventName);
+        this.bus.emit(node, eventName, event);
+      }
+    });
+  }
+}
+
+function dndEventToRect(event: DndEvent): BBox {
+  const { position: p } = event;
+
+  return {
+    minX: min(p.endX, p.startX),
+    minY: min(p.endY, p.startY),
+    maxX: max(p.endX, p.startX),
+    maxY: max(p.endY, p.startY),
+  };
 }

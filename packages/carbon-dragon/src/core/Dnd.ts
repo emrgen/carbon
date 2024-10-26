@@ -7,7 +7,7 @@ import { DndNodeStore } from "./DndStore";
 
 type Acceptor = (receiver: Node, child: Node, at: Point) => boolean;
 
-export class Dnd extends EventEmitter {
+export class Dnd<E = MouseEvent> extends EventEmitter {
   // nodes that can be dragged
   draggables: DndNodeStore = new DndNodeStore();
   // nodes that can be dropped on
@@ -101,7 +101,7 @@ export class Dnd extends EventEmitter {
     this.emit("drag:move", e);
   }
 
-  onDragEnd(e: DndEvent) {
+  onDragEnd(e: DndEvent<E>) {
     // console.log('drag-end');
     this.app.dragging = false;
     this.isDragging = false;

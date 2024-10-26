@@ -6,11 +6,20 @@ export type VNode = any;
 export type RenderComponent = (props: RendererProps) => VNode;
 
 export interface RendererProps {
-	node: Node;
-	children?: any;
+  node: Node;
+  children?: any;
   custom?: Record<string, any>;
-	[key: string]: any;
+  comp?: (prev: RendererProps, next: RendererProps) => boolean;
+  [key: string]: any;
 }
+
+// Default render prop comparator used in carbon nodes
+export const defaultRenderPropComparator = (
+  prev: RendererProps,
+  next: RendererProps,
+) => {
+  return prev.node.key === next.node.key;
+};
 
 export class ReactRenderer {
   name: string;
@@ -38,7 +47,7 @@ export class RenderManager {
 
   static create(
     renderers: ReactRenderer[],
-    fallback: RenderComponent
+    fallback: RenderComponent,
   ): RenderManager {
     const rendererMap = new Map<string, RenderComponent>();
     renderers.forEach((r) => {
@@ -48,7 +57,10 @@ export class RenderManager {
     return new RenderManager(rendererMap, fallback);
   }
 
-  constructor(renderers: Map<string, RenderComponent>, fallback: RenderComponent) {
+  constructor(
+    renderers: Map<string, RenderComponent>,
+    fallback: RenderComponent,
+  ) {
     this.renderers = renderers;
     this.fallback = fallback;
   }
@@ -57,4 +69,3 @@ export class RenderManager {
     return this.renderers.get(name) ?? this.fallback;
   }
 }
-
