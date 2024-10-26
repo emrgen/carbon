@@ -1,0 +1,1 @@
+export const { abs, min, max } = Math;

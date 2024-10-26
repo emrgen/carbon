@@ -57,6 +57,7 @@ export class ImmutableNodeFactory implements NodeFactory {
     const props = isEmpty(json.props)
       ? type.props.clone()
       : type.props.clone().merge(json.props);
+
     if (!props.get(MarksPath)) {
       props.set(MarksPath, []);
     }

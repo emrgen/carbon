@@ -1,26 +1,25 @@
-import { Optional } from "@emrgen/types";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useDndMonitor } from "../hooks/useDndMonitor";
-import { useDraggableHandle } from "../hooks/useDraggable";
-import { useDragRect } from "../hooks/useDragRect";
+import { isNestableNode } from "@emrgen/carbon-blocks";
 import {
   ActionOrigin,
   EventsIn,
-  EventsOut,
   Node,
   nodeLocation,
   PinnedSelection,
   Point,
   preventAndStop,
 } from "@emrgen/carbon-core";
+import { CustomEvent } from "@emrgen/carbon-core/src/core/CustomEvent";
+import { DndEvent, elementBound } from "@emrgen/carbon-dragon";
+import { useCarbon, useNodeState } from "@emrgen/carbon-react";
+import { Optional } from "@emrgen/types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { HiOutlinePlus } from "react-icons/hi";
 import { PiDotsSixVerticalBold } from "react-icons/pi";
 import { useDndContext } from "../hooks";
-import { isNestableNode } from "@emrgen/carbon-blocks";
-import { CustomEvent } from "@emrgen/carbon-core/src/core/CustomEvent";
-import { useCarbon, useNodeState } from "@emrgen/carbon-react";
-import { DndEvent, elementBound } from "@emrgen/carbon-dragon";
+import { useDndMonitor } from "../hooks/useDndMonitor";
+import { useDraggableHandle } from "../hooks/useDraggable";
+import { useDragRect } from "../hooks/useDragRect";
 
 export interface FastDragHandleProps {
   node: Node;
@@ -54,19 +53,6 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
     overlay: false,
   });
-
-  useEffect(() => {
-    const onChange = (state) => {
-      if (state.isContentChanged) {
-        // console.log('changed........')
-        // setShow(false);
-      }
-    };
-    app.on(EventsOut.changed, onChange);
-    return () => {
-      app.off(EventsOut.changed, onChange);
-    };
-  }, [app]);
 
   useEffect(() => {
     const onMouseMove = (e) => {
@@ -112,7 +98,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         maxY: y + 10,
       };
 
-      const hits = dnd.droppables.collides(bound);
+      const hits = dnd.containers.collides(bound);
       return hits[0];
     },
     [app, dnd],
@@ -307,7 +293,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (isDragging) {
         preventAndStop(e.event);
       } else {
-        if (node.type.dragHandle) {
+        if (node.type.dnd?.handle) {
           app.parkCursor();
           app.cmd
             .Select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput)
@@ -323,13 +309,16 @@ export function DraggableHandle(props: FastDragHandleProps) {
     [app],
   );
 
-  const onMouseDown = useCallback((node: Node, e) => {
-    if (e.id !== CarbonDragHandleId) return;
-    app.onEvent(
-      EventsIn.dragDown,
-      CustomEvent.create(EventsIn.dragDown, node, e.event),
-    );
-  }, []);
+  const onMouseDown = useCallback(
+    (node: Node, e) => {
+      if (e.id !== CarbonDragHandleId) return;
+      app.onEvent(
+        EventsIn.dragDown,
+        CustomEvent.create(EventsIn.dragDown, node, e.event),
+      );
+    },
+    [app],
+  );
 
   useDndMonitor({
     onDragStart,
@@ -380,18 +369,18 @@ export function DraggableHandle(props: FastDragHandleProps) {
     <div
       className="carbon-node-handle"
       data-target-name={node?.name}
-      data-drag-handle={node?.type.dragHandle}
+      data-drag-handle={!!node?.type.dnd?.handle}
       {...attributes}
       style={{ ...style, display: show ? "flex" : "none" }}
     >
-      {!node?.type.dragHandle && (
+      {!node?.type.dnd?.handle && (
         <div
           className="carbon-drag-handle-cover"
           ref={handleRef}
           {...listeners}
         />
       )}
-      {node?.type.dragHandle && (
+      {node?.type.dnd?.handle && (
         <>
           <div
             className="carbon-add-handle"

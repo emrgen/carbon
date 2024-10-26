@@ -1,4 +1,8 @@
 import {
+  encodeHtmlNestableChildren,
+  encodeNestableChildren,
+} from "@emrgen/carbon-blocks";
+import {
   Carbon,
   CarbonAction,
   CarbonPlugin,
@@ -12,10 +16,6 @@ import {
 import { Optional } from "@emrgen/types";
 
 import { TitlePlugin } from "./Title";
-import {
-  encodeHtmlNestableChildren,
-  encodeNestableChildren,
-} from "@emrgen/carbon-blocks";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
@@ -37,6 +37,11 @@ export class Section extends NodePlugin {
       inlineSelectable: true,
       draggable: true,
       dragHandle: true,
+      dnd: {
+        handle: true,
+        draggable: true,
+        container: true,
+      },
       rectSelectable: true,
       blockSelectable: true,
       insert: true,

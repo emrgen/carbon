@@ -184,6 +184,9 @@ importers:
       '@emrgen/carbon-database-react':
         specifier: workspace:*
         version: link:../../packages/carbon-database-react
+      '@emrgen/carbon-design':
+        specifier: workspace:*
+        version: link:../../packages/carbon-design
       '@emrgen/carbon-flash':
         specifier: workspace:*
         version: link:../../packages/carbon-flash
@@ -1642,6 +1645,58 @@ importers:
         specifier: ^5.4.5
         version: 5.6.3
 
+  packages/carbon-design:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/carbon-dragon':
+        specifier: workspace:*
+        version: link:../carbon-dragon
+      '@emrgen/carbon-dragon-react':
+        specifier: workspace:*
+        version: link:../carbon-dragon-react
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.12
+      events:
+        specifier: ^3.3.0
+        version: 3.3.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@types/react':
+        specifier: ^18.0.27
+        version: 18.3.12
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.3.1
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.6.3
+
   packages/carbon-diamond:
     dependencies:
       '@emrgen/carbon-core':
@@ -1791,6 +1846,46 @@ importers:
       react:
         specifier: ^18.3.1
         version: 18.3.1
+      sorted-btree:
+        specifier: ^1.8.0
+        version: 1.8.1
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.6.3
+
+  packages/carbon-dragonfly:
+    dependencies:
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.12
+    devDependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      events:
+        specifier: ^3.3.0
+        version: 3.3.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      lru-cache:
+        specifier: ^10.0.0
+        version: 10.4.3
+      rbush:
+        specifier: ^3.0.1
+        version: 3.0.1
+      rbush-3d:
+        specifier: ^0.0.4
+        version: 0.0.4
       sorted-btree:
         specifier: ^1.8.0
         version: 1.8.1
@@ -1958,6 +2053,40 @@ importers:
       '@types/lodash':
         specifier: ^4.14.191
         version: 4.17.12
+      '@types/react':
+        specifier: ^18.0.27
+        version: 18.3.12
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.3.1
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.6.3
+
+  packages/carbon-flow:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.12
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
       '@types/react':
         specifier: ^18.0.27
         version: 18.3.12

@@ -48,11 +48,18 @@ export class Heading extends NodePlugin {
       insert: true,
       splits: true,
       splitName: "section",
-      inlineSelectable: true,
-      blockSelectable: true,
-      draggable: true,
-      dragHandle: true,
-      rectSelectable: true,
+      split: {
+        name: "section",
+      },
+      dnd: {
+        draggable: true,
+        container: true,
+        handle: true,
+      },
+      selection: {
+        inline: true,
+        rect: true,
+      },
       info: {
         title: `Heading ${this.level}`,
         description: this.description(),

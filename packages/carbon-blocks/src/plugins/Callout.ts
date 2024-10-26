@@ -21,12 +21,20 @@ export class Callout extends CarbonPlugin {
       splitInside: true,
       splitName: "section",
       insert: true,
-      inlineSelectable: true,
-      draggable: true,
-      dragHandle: true,
       weakEnd: true,
-      rectSelectable: true,
-      blockSelectable: true,
+      split: {
+        name: "section",
+      },
+      dnd: {
+        draggable: true,
+        container: true,
+        handle: true,
+      },
+      selection: {
+        block: true,
+        inline: true,
+        rect: true,
+      },
       info: {
         title: "Callout",
         description: "Write a callout",

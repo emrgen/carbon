@@ -1,23 +1,25 @@
-import { Carbon, Node, NodeId, Point } from "@emrgen/carbon-core";
+import { Carbon, Node, NodeId, NodeIdSet, Point } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import EventEmitter from "events";
-import { throttle } from "lodash";
+import { identity, throttle } from "lodash";
 import { DndEvent } from "../types";
 import { DndNodeStore } from "./DndStore";
 
 type Acceptor = (receiver: Node, child: Node, at: Point) => boolean;
 
-export class Dnd extends EventEmitter {
+export class Dnd<E = MouseEvent> extends EventEmitter {
   // nodes that can be dragged
   draggables: DndNodeStore = new DndNodeStore();
   // nodes that can be dropped on
-  droppables: DndNodeStore = new DndNodeStore();
+  containers: DndNodeStore = new DndNodeStore();
 
   draggedNodeId: Optional<NodeId>;
   draggedNode: Optional<Node>;
 
   portal: Optional<HTMLElement>;
   region: Optional<HTMLElement>;
+
+  updatedNodeIds: NodeIdSet = new NodeIdSet();
 
   // initially marked as dirty to force a refresh on first mouse move
   isDirty = true;
@@ -41,13 +43,23 @@ export class Dnd extends EventEmitter {
     this.onDragEnd = this.onDragEnd.bind(this);
 
     this.onMouseMove = throttle(this.onMouseMove.bind(this), 100); // throttled mouse move handler
-    this.onMouseOver = this.onMouseOver.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
+
+    // mark all nodes dirty
+    this.app.content.all((n) => {
+      this.updatedNodeIds.add(n.id);
+    });
   }
 
   onUpdated() {
-    this.isDirty = true;
+    const { contentUpdated } = this.app.state;
+    if (contentUpdated.size !== 0) {
+      this.isDirty = true;
+    }
+    contentUpdated.forEach((nodeId) => {
+      this.updatedNodeIds.add(nodeId);
+    });
   }
 
   onMountDraggable(node: Node, el: HTMLElement) {
@@ -55,15 +67,15 @@ export class Dnd extends EventEmitter {
   }
 
   onUnmountDraggable(node: Node) {
-    this.draggables.delete(node);
+    this.draggables.delete(node.id);
   }
 
   onMountDroppable(node: Node, el: HTMLElement) {
-    this.droppables.register(node, el);
+    this.containers.register(node, el);
   }
 
   onUnmountDroppable(node: Node) {
-    this.droppables.delete(node);
+    this.containers.delete(node.id);
   }
 
   onMouseDown(node: Node, event) {
@@ -89,7 +101,7 @@ export class Dnd extends EventEmitter {
     this.emit("drag:move", e);
   }
 
-  onDragEnd(e: DndEvent) {
+  onDragEnd(e: DndEvent<E>) {
     // console.log('drag-end');
     this.app.dragging = false;
     this.isDragging = false;
@@ -97,27 +109,133 @@ export class Dnd extends EventEmitter {
     this.emit("drag:end", e);
   }
 
-  onMouseOver(node: Node, e: MouseEvent) {
-    this.showDragHandle(node, e);
-  }
-
-  // start showing drag handles on hover on draggable
+  // show drag handles on hover on draggable
+  // TODO: handle container scroll
   onMouseMove(node: Node, e: MouseEvent) {
+    // check if the state is dirty and refresh the draggables and containers
     if (this.isDirty) {
-      // refresh draggables and droppables
-    } else {
+      console.log("DIRTY", "will refresh the bounds");
+      this.refreshDirtyBounds();
+      this.isDirty = false;
     }
 
+    // console.log("show drag handle", node.id.toString());
     this.showDragHandle(node, e);
   }
 
   // start showing drag handles on hover on draggable
-  onMouseOut(node: Node, e: MouseEvent) {
-    this.hideDragHandle(node, e);
+  // onMouseOut(node: Node, e: MouseEvent) {
+  //   this.hideDragHandle(node, e);
+  // }
+
+  // TODO: optimize this later
+  private refreshDirtyBounds() {
+    this.draggables.clear();
+    const updated = this.updatedNodeIds
+      .map((id) => this.app.store.get(id))
+      .filter(identity) as Node[];
+    const deleted = NodeIdSet.fromIds(
+      updated.filter((n) => this.app.store.deleted(n?.id)).map((n) => n.id),
+    );
+
+    const nodes = updated.filter((n) => !deleted.has(n.id));
+    deleted.forEach((id) => {
+      this.draggables.delete(id);
+    });
+
+    // const done = new NodeIdSet()
+    // nodes.forEach((node) => {
+    //   if (done.has(node.id)) {
+    //     return;
+    //   }
+    // });
+
+    this.app.content.all((node) => {
+      if (node.isBlock && node.type.dnd?.draggable) {
+        this.refreshBound(node);
+      }
+    });
+
+    this.updatedNodeIds.clear();
+    console.log("---------------------");
+  }
+
+  private refreshBound(node: Node) {
+    const el = this.app.store.element(node.id);
+    if (el) {
+      // console.log(
+      //   "refreshing bounds",
+      //   node.name,
+      //   node.id.toString(),
+      //   node.textContent,
+      // );
+      const bound = el.getBoundingClientRect();
+      if (node.type.dnd?.container) {
+        this.containers.register(node, el, bound);
+      }
+
+      if (node.type.dnd?.draggable) {
+        this.draggables.register(node, el, bound);
+      }
+    }
+  }
+
+  private showDragHandle(node: Node, e) {
+    const { draggables, draggedNodeId } = this;
+    const { clientX: x, clientY: y } = e;
+    const target = document.elementsFromPoint(x, y);
+    let draggableBlock: Optional<Node> = null;
+    // for (let el of target) {
+    //   const targetNode = this.app.store.resolveNode(el);
+    //   if (targetNode?.isBlock && targetNode.type.dnd?.handle) {
+    //     draggableBlock = targetNode;
+    //     break;
+    //   }
+    // }
+    //
+    // if (draggableBlock) {
+    //   if (draggedNodeId?.eq(draggableBlock.id)) {
+    //     return;
+    //   }
+    //
+    //   this.onOverNodeWithHandle(draggableBlock);
+    //   return;
+    // }
+
+    const hit: Node[] = [];
+    const bound = { minX: x - 2, minY: y - 1, maxX: x + 2, maxY: y + 1 };
+    if (node.isDocument) {
+      const { paddingLeft = "0", paddingRight = "0" } =
+        window.getComputedStyle(this.app.store.element(node.id)!) ?? {};
+      bound.minX = x - parseInt(paddingRight) - 100;
+      bound.maxX = x + parseInt(paddingLeft) + 100;
+    }
+
+    const collision = draggables.collides(bound);
+    hit.push(...collision);
+
+    // if the hit node is not in the store(may be deleted), ignore it
+    const existing = hit.filter((n) => {
+      return this.app.store.get(n.id);
+    });
+
+    // console.log(hit)
+    console.warn(existing.map((n) => n.id.toString()));
+    if (existing.length == 0) {
+      this.resetDraggedNode();
+      return;
+    }
+
+    const hitNode = existing[0]!;
+    // console.log(hitNode.name, hitNode.depth, hitNode.id.toString())
+    if (draggedNodeId?.eq(hitNode.id)) {
+      return;
+    }
+
+    this.onOverNodeWithHandle(hitNode);
   }
 
   refresh(node: Node) {
-    console.log("xxxxxxxxxxxxxxxxxx");
     return;
 
     // console.log('show drag handle', node.id.toString());
@@ -140,7 +258,7 @@ export class Dnd extends EventEmitter {
     if (this.isDirty) {
       // console.log('update draggable', this.draggables);
       this.draggables.refresh(scrollTop, scrollLeft);
-      this.droppables.refresh(scrollTop, scrollLeft);
+      this.containers.refresh(scrollTop, scrollLeft);
       this.isDirty = false;
     }
 
@@ -150,7 +268,7 @@ export class Dnd extends EventEmitter {
     };
   }
 
-  private showDragHandle(node: Node, e: MouseEvent) {
+  private _showDragHandle(node: Node, e: MouseEvent) {
     // console.log('show drag handle', node.id.toString());
     const { app, draggables, draggedNodeId } = this;
     const scrollPos = this.refresh(node);
@@ -174,7 +292,10 @@ export class Dnd extends EventEmitter {
     }
 
     // console.log(hit)
-    // console.warn(hit.map(n => n.id.toString()), this.draggables.has(node))
+    console.warn(
+      hit.map((n) => n.id.toString()),
+      this.draggables.has(node),
+    );
     if (hit.length == 0) {
       this.resetDraggedNode();
       return;
@@ -188,12 +309,14 @@ export class Dnd extends EventEmitter {
     }
 
     // console.log('draggableHover', hitNode.id.toString(),);
-    this.setDraggedNode(hitNode);
+    this.onOverNodeWithHandle(hitNode);
   }
 
-  private setDraggedNode(node: Node) {
-    const { app, draggedNodeId } = this;
-    if (draggedNodeId) {
+  // emit events when mouse is over a draggable node
+  // the listener can use this event to show drag handles
+  private onOverNodeWithHandle(node: Node) {
+    const { draggedNodeId } = this;
+    if (!draggedNodeId?.eq(node.id)) {
       this.emit("mouse:out", this.draggedNodeId);
     }
     this.emit("mouse:in", node);

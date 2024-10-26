@@ -62,8 +62,6 @@ export class ChangeManager extends NodeTopicEmitter {
   // 2. sync the selection
   // 3. sync the node state
   update(state: State, tr: Transaction, timeout: number = 1000) {
-    console.log("PUSHING TRANSACTION", this.actions.length);
-
     if (this.actions.length) {
       this.actions.push(state.actions);
       console.log("pending transaction change update", this.actions.length);
@@ -168,7 +166,6 @@ export class ChangeManager extends NodeTopicEmitter {
 
   private onTransaction() {
     clearInterval(this.interval);
-    console.log("SHIFTING TRANSACTION", this.actions.length);
     const tr = this.actions.shift();
     if (tr) {
       this.pm.onTransaction(this.app, tr);

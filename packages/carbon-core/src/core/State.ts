@@ -1,15 +1,15 @@
-import { NodeIdSet } from "./BSet";
-import { ActionOrigin, TxType } from "./actions/types";
-import { Node } from "./Node";
-import { PinnedSelection } from "./PinnedSelection";
-import { NodeMap } from "./NodeMap";
-import { Draft } from "./Draft";
-import { StateActions, StateChanges } from "./NodeChange";
-import { BlockSelection } from "./BlockSelection";
 import { Optional } from "@emrgen/types";
+import { ActionOrigin, TxType } from "./actions/types";
+import { BlockSelection } from "./BlockSelection";
+import { NodeIdSet } from "./BSet";
+import { Draft } from "./Draft";
+import { MarkSet } from "./Mark";
+import { Node } from "./Node";
+import { StateActions, StateChanges } from "./NodeChange";
+import { NodeMap } from "./NodeMap";
+import { PinnedSelection } from "./PinnedSelection";
 import { PluginManager } from "./PluginManager";
 import { Schema } from "./Schema";
-import { MarkSet } from "./Mark";
 
 export interface ProduceOpts {
   origin: ActionOrigin;
@@ -28,6 +28,7 @@ export interface State {
   nodeMap: NodeMap;
   // these are the nodes that need to be updated in the UI
   updated: NodeIdSet;
+  contentUpdated: NodeIdSet;
   changes: StateChanges;
   actions: StateActions;
 

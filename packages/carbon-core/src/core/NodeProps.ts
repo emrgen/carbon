@@ -144,9 +144,9 @@ export class PlainNodeProps implements NodeProps {
   merge(other: NodeProps | NodePropsJson): NodeProps {
     const props = this.toJSON();
     if (other.isNodeProps) {
-      this.traverse(other.toJSON(), props);
+      this.traverse(other.map(), props);
     } else {
-      this.traverse(other, props);
+      this.traverse(PlainNodeProps.create(other).map(), props);
     }
 
     return PlainNodeProps.create(props);
