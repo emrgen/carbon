@@ -1,21 +1,23 @@
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
-import { PointedSelection } from "../PointedSelection";
-import { classString, p12 } from "../Logger";
 import { Draft } from "../Draft";
+import { classString, p12 } from "../Logger";
+import { PointedSelection } from "../PointedSelection";
+import { ActionOrigin, ActionType, CarbonAction } from "./types";
 
 export class SelectAction implements CarbonAction {
   static create(
     before: PointedSelection,
     after: PointedSelection,
     origin: ActionOrigin = ActionOrigin.UserInput,
+    undoable = true,
   ) {
-    return new SelectAction(before, after, origin);
+    return new SelectAction(before, after, origin, undoable);
   }
 
   constructor(
     readonly before: PointedSelection,
     readonly after: PointedSelection,
     readonly origin: ActionOrigin,
+    readonly undoable = true,
   ) {}
 
   // this will update the carbon selection state or schedule a selection change after the ui update

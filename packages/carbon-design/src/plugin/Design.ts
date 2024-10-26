@@ -49,7 +49,7 @@ export class DesignShape extends CarbonPlugin {
               left: "100px",
               width: "100px",
               height: "100px",
-              background: "red",
+              background: "rgba(0, 0, 0, 0.2)",
               borderRadius: "6px",
             },
           },

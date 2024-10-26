@@ -12,7 +12,7 @@ export const BoardContext = ({
 }) => {
   return (
     <InnerBoardContext.Provider value={board}>
-      {children}
+      {board && children}
     </InnerBoardContext.Provider>
   );
 };

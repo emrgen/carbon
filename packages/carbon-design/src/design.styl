@@ -1,3 +1,5 @@
+$selected-border-color = #1e1f22
+
 [data-name="deBoard"]
   position absolute;
   top 0;
@@ -11,7 +13,7 @@
   background-position: -19px -19px;
 
 //.de-element
-  //opacity 0.5
+//  opacity 0.5
 
 .carbon-transformer
   position absolute
@@ -21,7 +23,22 @@
   height calc(100% + 4px)
   border 2px solid transparent
   &:hover
-    border-color teal
+    border-color $selected-border-color
+
+.border-1px-solid
+  border 1px solid $selected-border-color
+  top -1px
+  left -1px
+  width calc(100% + 2px)
+  height calc(100% + 2px)
+
+.de-board--rect-selecting
+  .carbon-transformer:not(.de-element--selected):hover
+    @extend .border-1px-solid
+
+.de-board--rect-selecting
+  .carbon-transformer.de-element--within-select-rect:not(.de-element--selected)
+    @extend .border-1px-solid
 
 .carbon-transformer.de-element--selected
-    border-color teal
+    border-color $selected-border-color
