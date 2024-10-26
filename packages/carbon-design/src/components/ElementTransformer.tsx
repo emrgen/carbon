@@ -1,10 +1,12 @@
 import { Node } from "@emrgen/carbon-core";
+import { DndEvent } from "@emrgen/carbon-dragon";
+import { useTrackDrag } from "@emrgen/carbon-dragon-react";
 import {
-  MouseEvent,
   ReactNode,
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useBoard } from "../hook/useBoard";
@@ -16,19 +18,35 @@ interface ElementTransformerProps {
 
 export const ElementTransformer = (props: ElementTransformerProps) => {
   const { children, node } = props;
+  const ref = useRef<HTMLDivElement>();
   const board = useBoard();
   const [selected, setSelected] = useState(false);
   const [active, setActive] = useState(false);
   const [withinSelectRect, setWithinSelectRect] = useState(false);
 
+  const { listeners } = useTrackDrag({
+    node,
+    ref,
+    distance: 5,
+    onDragEnd(event: DndEvent) {},
+    onDragStart(event: DndEvent) {},
+    onDragMove(event: DndEvent) {
+      console.log("drag move", event);
+    },
+    onMouseDown(node: Node, event: MouseEvent) {},
+    onMouseUp(node: Node, event: DndEvent, isDragging: boolean) {},
+  });
+
   const handleMouseDown = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation();
       board.selectNodes([node]);
+      listeners.onMouseDown(e);
     },
-    [board, node],
+    [board, node, listeners],
   );
 
+  // Subscribe to node events to update the selected state
   useEffect(() => {
     const onSelect = () => setSelected(true);
     const onDeselect = () => setSelected(false);
@@ -67,5 +85,9 @@ export const ElementTransformer = (props: ElementTransformerProps) => {
     };
   }, [selected, active, withinSelectRect, handleMouseDown]);
 
-  return <div {...attrs}>{children}</div>;
+  return (
+    <div {...attrs} ref={ref}>
+      {children}
+    </div>
+  );
 };

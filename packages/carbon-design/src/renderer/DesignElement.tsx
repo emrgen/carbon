@@ -1,6 +1,6 @@
 import { CarbonBlock, RendererProps } from "@emrgen/carbon-react";
 import { useEffect } from "react";
-import { ElementTransformer } from "../components/Resizer";
+import { ElementTransformer } from "../components/ElementTransformer";
 import { useBoard } from "../hook/useBoard";
 
 export const DesignElement = (props: RendererProps) => {

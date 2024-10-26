@@ -1653,6 +1653,9 @@ importers:
       '@emrgen/carbon-dragon':
         specifier: workspace:*
         version: link:../carbon-dragon
+      '@emrgen/carbon-dragon-react':
+        specifier: workspace:*
+        version: link:../carbon-dragon-react
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../carbon-react
@@ -16250,7 +16253,7 @@ snapshots:
       svelte: 4.2.19
       svelte-hmr: 0.16.0(svelte@4.2.19)
       vite: 5.4.10(@types/node@20.17.0)(stylus@0.64.0)(terser@5.36.0)
-      vitefu: 0.2.5(vite@5.4.10(@types/node@20.17.0)(stylus@0.64.0)(terser@5.36.0))
+      vitefu: 0.2.5(vite@5.4.10(@types/node@20.17.0)(terser@5.36.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -23713,7 +23716,7 @@ snapshots:
       solid-js: 1.9.3
       solid-refresh: 0.6.3(solid-js@1.9.3)
       vite: 5.4.10(@types/node@20.17.0)(stylus@0.64.0)(terser@5.36.0)
-      vitefu: 0.2.5(vite@5.4.10(@types/node@20.17.0)(stylus@0.64.0)(terser@5.36.0))
+      vitefu: 0.2.5(vite@5.4.10(@types/node@20.17.0)(terser@5.36.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -23750,7 +23753,7 @@ snapshots:
       stylus: 0.64.0
       terser: 5.36.0
 
-  vitefu@0.2.5(vite@5.4.10(@types/node@20.17.0)(stylus@0.64.0)(terser@5.36.0)):
+  vitefu@0.2.5(vite@5.4.10(@types/node@20.17.0)(terser@5.36.0)):
     optionalDependencies:
       vite: 5.4.10(@types/node@20.17.0)(stylus@0.64.0)(terser@5.36.0)
 
