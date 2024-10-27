@@ -110,7 +110,7 @@ export const useCreateCachedCarbon = (
 ) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [app, setApp] = useState(() => {
-    const savedDoc = localStorage.getItem("carbon:content");
+    const savedDoc = localStorage.getItem(name + ":carbon:content");
     if (savedDoc) {
       return createCarbon(name, JSON.parse(savedDoc), plugins);
     }
@@ -135,7 +135,7 @@ export const useCreateCachedCarbon = (
       app.emit("external:saving");
       const state = app.state;
       localStorage.setItem(
-        "carbon:content",
+        name + ":carbon:content",
         JSON.stringify(
           state.content.toJSON({
             props: {},
@@ -143,7 +143,7 @@ export const useCreateCachedCarbon = (
         ),
       );
       localStorage.setItem(
-        "carbon:selection",
+        name + ":carbon:selection",
         JSON.stringify(state.selection.toJSON()),
       );
 
@@ -163,7 +163,7 @@ export const useCreateCachedCarbon = (
     return () => {
       app.off(EventsOut.contentUpdated, onChange);
     };
-  }, [app]);
+  }, [app, name]);
 
   return app;
 };

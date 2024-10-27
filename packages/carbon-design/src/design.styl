@@ -8,7 +8,7 @@ $selected-border-color = #236af4
   height 100%
   overflow hidden
   background #fff
-  background-image: radial-gradient(black 1px, transparent 0);
+  background-image: radial-gradient(#999 1px, transparent 0);
   background-size: 40px 40px;
   background-position: -19px -19px;
 
@@ -19,7 +19,7 @@ $selected-border-color = #236af4
   //width calc(100% + 4px)
   //height calc(100% + 4px)
   border 2px solid transparent
-  background rgba(239, 112, 112, 0.58) !important
+  //background rgba(239, 112, 112, 0.58) !important
 
   &:hover
     border 2px solid $selected-border-color
@@ -55,12 +55,11 @@ $selected-border-color = #236af4
   position absolute;
   top 0;
   left 0;
-  background rgba(0, 0, 0, 0.6)
+  //background rgba(0, 0, 0, 0.6)
   z-index 1000
-  &.de-board--selecting
-    width 100%;
-    height 100%;
-    cursor crosshair
+  width 100%;
+  height 100%;
+  cursor crosshair
 
 
 

@@ -397,7 +397,7 @@ export class TransformCommands extends BeforePlugin {
 
       console.log(cmd);
     } else {
-      const { head } = selection;
+      const { head } = selection; 
       const { startNode } = cmd;
       if (startNode) {
         const titleNode = TitleNode.from(cmd.startNode!);

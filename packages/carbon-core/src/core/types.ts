@@ -1,11 +1,12 @@
 import { Bound, Optional } from "@emrgen/types";
+import { cloneDeep } from "lodash";
 import { EventContext } from "./EventContext";
 import { Node } from "./Node";
-import { InputRule } from "./Rules";
+import { NodeContentData } from "./NodeContent";
+import { NodeId } from "./NodeId";
 import { PinnedSelection } from "./PinnedSelection";
 import { PointedSelection } from "./PointedSelection";
-import { NodeContentData } from "./NodeContent";
-import { cloneDeep } from "lodash";
+import { InputRule } from "./Rules";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {}
@@ -53,6 +54,7 @@ export interface EventHandler {
 }
 
 export type NodeWatcher = (node: Node, ...args: any) => void;
+export type NodeIdWatcher = (nodeId: NodeId, ...args: any) => void;
 export type EventHandlerFn = (ctx: EventContext<any>) => void;
 export type EventHandlerMap = Partial<EventHandler>;
 export type InputRules = Array<InputRule>;

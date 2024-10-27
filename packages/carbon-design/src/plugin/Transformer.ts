@@ -21,7 +21,10 @@ export class Transformer extends CarbonPlugin {
             className: "de-element",
             contentEditable: false,
             suppressContentEditableWarning: true,
-
+          },
+        },
+        remote: {
+          html: {
             style: {
               display: "block",
               top: "100px",

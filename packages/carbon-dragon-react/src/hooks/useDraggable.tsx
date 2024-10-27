@@ -49,7 +49,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 
   const onMouseDown = useCallback(
     (event) => {
-      let initState = {};
+      let initState = {} as any;
       // preventAndStop(event)
       // console.log("mouse down", ref.current, event.target);
       if (isDisabled) return;
@@ -69,6 +69,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
           state: initState,
           position: getEventPosition(activatorEvent, event),
           dragged: isDragging,
+          setState(state: any) {},
         };
         if (isDragging) {
           dnd.onDragEnd(dndEvent);
@@ -90,6 +91,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
             id: id ?? node.id,
             state: initState,
             position,
+            setState(state: any) {},
           });
           return;
         }
@@ -112,6 +114,9 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
             id: id ?? node.id,
             state: initState,
             position: getEventPosition(activatorEvent, activatorEvent),
+            setState(state: any) {
+              initState = state;
+            },
           });
         }
       };
@@ -150,7 +155,9 @@ interface UseTrackDragProps {
   onDragEnd(event: DndEvent): void;
 }
 
-export const useTrackDrag = (props: UseTrackDragProps) => {
+export function useTrackDrag<T extends Record<string, any>>(
+  props: UseTrackDragProps,
+) {
   const {
     node,
     distance,
@@ -165,7 +172,7 @@ export const useTrackDrag = (props: UseTrackDragProps) => {
 
   const onMouseDownHandler = useCallback(
     (event) => {
-      let initState = {};
+      let initState: T = {} as T;
       // preventAndStop(event)
       // console.log("mouse down", ref.current, event.target);
       if (isDisabled) return;
@@ -173,6 +180,7 @@ export const useTrackDrag = (props: UseTrackDragProps) => {
       onMouseDown(node, event);
       // console.log(ref.current, event.target)
       let isDragging = false;
+      let state = {};
 
       const activatorEvent = event;
 
@@ -185,6 +193,7 @@ export const useTrackDrag = (props: UseTrackDragProps) => {
           state: initState,
           position: getEventPosition(activatorEvent, event),
           dragged: isDragging,
+          setState(state: T) {},
         };
         if (isDragging) {
           onDragEnd(dndEvent);
@@ -206,6 +215,7 @@ export const useTrackDrag = (props: UseTrackDragProps) => {
             id: node.id,
             state: initState,
             position,
+            setState(state: T) {},
           });
           return;
         }
@@ -228,6 +238,9 @@ export const useTrackDrag = (props: UseTrackDragProps) => {
             id: node.id,
             state: initState,
             position: getEventPosition(activatorEvent, activatorEvent),
+            setState(state: T) {
+              initState = state;
+            },
           });
         }
       };
@@ -261,4 +274,4 @@ export const useTrackDrag = (props: UseTrackDragProps) => {
       "data-draggable": true,
     },
   };
-};
+}

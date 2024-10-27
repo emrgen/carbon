@@ -31,7 +31,6 @@ export class ActiveCellRuntime extends EventEmitter {
     // define a hidden module variable
     // this.module.variable(true).define("_module", [], () => this.module);
 
-    console.log("--------------------------------------------");
     // define a hidden module variable for observed nodes
     this.redefineFromConfig(
       "_cell_nodes",
@@ -179,16 +178,13 @@ export class ActiveCellRuntime extends EventEmitter {
   private define(cell: ActiveCell) {
     const { id, name, inputs, definition } = cell;
     const before = this.cells.get(id);
-    console.log(
-      "%ccell",
-      "background:green;color:white;",
-      id,
-      definition.toString(),
-    );
+    // console.log(
+    //   "%ccell",
+    //   "background:green;color:white;",
+    //   id,
+    //   definition.toString(),
+    // );
 
-    if (cell.name === "Nodes") {
-      console.log("Nodes", cell);
-    }
     // define a new variable
     if (before) {
       this.replace(before, cell);
