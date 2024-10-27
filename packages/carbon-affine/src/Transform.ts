@@ -1,32 +1,63 @@
 import { Affine } from './Affine'
+import { Point } from './types'
+import { cloneDeep } from 'lodash'
 
 // This class is a wrapper around Affine that allows you to chain transformations.
-// all transformation are of form: scale -> rotate -> translate
 export class Transform {
-  mats: Affine[] = []
 
-  constructor() {
-    this.mats.push(new Affine([1, 0, 0, 0, 1, 0]))
+  static from(mat: Affine) {
+    return new Transform(mat)
+  }
+
+  constructor(readonly matrix: Affine = Affine.IDENTITY) {
   }
 
   translate(x: number, y: number) {
-    this.mats.push(this.mats[this.mats.length - 1].translate(x, y))
+    return Transform.from(this.matrix.translate(x, y))
   }
 
   rotate(angle: number, cx?: number, cy?: number) {
     if (cx === undefined || cy === undefined) {
-      this.mats.push(this.mats[this.mats.length - 1].rotate(angle))
+      const mat = this.matrix.rotate(angle)
+      return Transform.from(mat)
     } else {
-      this.mats.push(this.mats[this.mats.length - 1].translate(cx, cy).rotate(angle).translate(-cx, -cy))
+      const mat = this.matrix.translate(cx, cy).rotate(angle).translate(-cx, -cy)
+      return Transform.from(mat)
     }
   }
 
   scale(x: number, y: number, cx?: number, cy?: number) {
     if (cx === undefined || cy === undefined) {
-      this.mats.push(this.mats[this.mats.length - 1].scale(x, y))
+      const mat = this.matrix.scale(x, y)
+      return Transform.from(mat)
     } else {
-      this.mats.push(this.mats[this.mats.length - 1].translate(cx, cy).scale(x, y).translate(-cx, -cy))
+      const mat = this.matrix.translate(cx, cy).scale(x, y).translate(-cx, -cy)
+      return Transform.from(mat);
     }
   }
 
+  // apply transformation to a point or an array of points
+  apply<T extends (Point | Point[])>(v: T): T {
+    if (Array.isArray(v)) {
+      return v.map(p => this.apply(p)) as T
+    } else {
+      return this.matrix.apply(v) as T
+    }
+  }
+
+  toSVG() {
+    return this.toCSS()
+  }
+
+  toCSS() {
+    return this.matrix.toCSS()
+  }
+
+  toString() {
+    return `Transform(${this.matrix.toArray().join(', ')})`
+  }
+
+  clone() {
+    return new Transform(cloneDeep(this.matrix))
+  }
 }
