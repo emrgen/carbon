@@ -46,7 +46,7 @@ test('dot product of two vectors', () => {
 test('angle between two vectors', () => {
   const v1 = Vector.of(1, 0)
   const v2 = Vector.of(0, 1)
-  const r = v1.angle(v2)
+  const r = v1.angleBetween(v2)
   expect(r).toBeCloseTo(Math.PI / 2)
 })
 
@@ -79,7 +79,7 @@ test('get the size of a vector', () => {
 
 test('get the rotation of a vector', () => {
   const v = Vector.of(1, 1)
-  const r = v.rotation()
+  const r = v.angle()
   expect(r).toBeCloseTo(Math.PI / 4)
 })
 

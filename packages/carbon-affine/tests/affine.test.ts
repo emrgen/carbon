@@ -61,6 +61,16 @@ test('inverse translate', () => {
   expect(r.y).toBeCloseTo(-3);
 })
 
+
+test('rotate a vector', () => {
+  const m1 = Affine.rotate(Math.PI / 2)
+  const v1 = Vector.of(1, 1)
+  const p1 = v1.transform(m1)
+
+  expect(p1.x).toBeCloseTo(-1)
+  expect(p1.y).toBeCloseTo(1)
+});
+
 test('toCSS', () => {
   const af = Affine.scale(2, 2).rotate(Math.PI / 4).translate(2, 3);
   const css = af.toCSS()

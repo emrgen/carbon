@@ -1,5 +1,8 @@
-import { isInteger } from "lodash";
-import { Point, Radian } from "./types";
+import { clamp, isInteger } from "lodash";
+import { Radian } from "./types";
+import { Point, IPoint } from "./Point";
+import { Vector } from "./Vector";
+import { UNIT_MAX, UINT_MIN } from "./contant";
 
 export class Affine {
 
@@ -52,6 +55,14 @@ export class Affine {
     ])
   }
 
+  static transform(a: Affine, b: IPoint) {
+    const mat = a.mat
+    return {
+      x: mat[0] * b.x + mat[1] * b.y + mat[2],
+      y: mat[3] * b.x + mat[4] * b.y + mat[5]
+    }
+  }
+
   constructor(readonly mat: [number, number, number, number, number, number]) {}
 
   translate(x: number, y: number) {
@@ -62,8 +73,16 @@ export class Affine {
     return this.mul(Affine.rotate(angle));
   }
 
-  scale(x: number, y: number) {
-    return this.mul(Affine.scale(x, y));
+  // NOTE: scale happens wrt the origin (0, 0) in object local coordinate system
+  scale(sx: number, sy: number) {
+    // clamp to avoid scale to zero
+    sx = clamp(sx, -UINT_MIN, UNIT_MAX)
+    sy = clamp(sy, -UINT_MIN, UNIT_MAX)
+    return this.mul(Affine.scale(sx, sy));
+  }
+
+  origin()  {
+    return this.apply({ x: 0, y: 0 })
   }
 
   mul(b: Affine) {
@@ -86,15 +105,11 @@ export class Affine {
   }
 
   // apply transformation to a point or an array of points
-  apply<T extends (Point | Point[])>(v: T): T {
+  apply<T extends (IPoint | IPoint[])>(v: T): T {
     if (Array.isArray(v)) {
       return v.map(p => this.apply(p)) as T
     } else {
-      const a = this.mat
-      return {
-        x: a[0] * v.x + a[1] * v.y + a[2],
-        y: a[3] * v.x + a[4] * v.y + a[5]
-      } as T
+      return Affine.transform(this, v) as T
     }
   }
 

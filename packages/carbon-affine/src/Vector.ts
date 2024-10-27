@@ -1,3 +1,4 @@
+import { Affine } from './Affine';
 import { Radian } from './types'
 
 export class Vector {
@@ -55,12 +56,17 @@ export class Vector {
     return b.scale(this.dot(b) / b.dot(b))
   }
 
-  angle(b: Vector) {
-    return b.rotation() - this.rotation()
+  angleBetween(b: Vector) {
+    return b.angle() - this.angle()
   }
   
-  rotation(): number {
+  angle(): number {
     return Math.atan(this.y / this.x)
+  }
+
+  transform(matrix: Affine): Vector {
+    const p = matrix.apply(this);
+    return Vector.of(p.x, p.y);
   }
 
   // magnitude
