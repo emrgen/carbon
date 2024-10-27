@@ -51,25 +51,31 @@ export class Shaper {
 
   // dx, dy are the distance of the mouse move
   resize(dx: number, dy: number, ref: ResizeRef, ratio: ResizeRatio): Affine {
+    if (ref === ResizeRef.CENTER) {
+      dx *= 2
+      dy *= 2
+    }
+
     // get the reference point in the current coordinate system
     const {x: lcx, y: lcy} = this.tm.apply(this.refPoint(ref));
     // get the current size of the shape
     const {width: lcw, height: lch} = this.currentSize();
     // calculate the scaling factor in x and y direction
     const {x: ldsx, y: ldsy} = this.tm.apply({x: dx, y: dy});
-    const lsx = ldsx + lcx;
-    const lsy = ldsy + lcy;
+
+    const lsx = ldsx + lcw;
+    const lsy = ldsy + lch;
 
     switch (ratio) {
       case ResizeRatio.FREE:
-        return this.tm.scale(lsx / lcw, lsy / lch).matrix;
+        return this.tm.scale(lsx / lcw, lsy / lch, lcx, lcy).matrix;
       case ResizeRatio.KEEP:
-        const s = Math.max(lsx / lcw, lsy / lch);
-        return this.tm.scale(s, s).matrix;
+        const s = Math.max(lsx / lcw, lsy / lch, lcx, lcy);
+        return this.tm.scale(s, s, lcx, lcy).matrix;
       case ResizeRatio.KEEP_X:
-        return this.tm.scale(lsx / lcw, 1).matrix;
+        return this.tm.scale(lsx / lcw, 1, lcx, lcy).matrix;
       case ResizeRatio.KEEP_Y:
-        return this.tm.scale(1, lsy / lch).matrix;
+        return this.tm.scale(1, lsy / lch, lcx, lcy).matrix;
     }
   }
 
@@ -99,7 +105,7 @@ export class Shaper {
 
   // get the current size of the shape after transformation
   private currentSize() {
-    const { x, y } = this.tm.apply({ x: 1, y: 1 });
+    const { x, y } = this.tm.apply({ x: 2, y: 2 });
     return { width: x, height: y };
   }
 }
