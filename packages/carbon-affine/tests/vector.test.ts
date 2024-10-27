@@ -71,4 +71,36 @@ test('project a vector', () => {
   expect(r.y).toBeCloseTo(3.5)
 })
 
+test('get the size of a vector', () => {
+  const v = Vector.of(3, 4)
+  const r = v.size()
+  expect(r).toBeCloseTo(5)
+})
+
+test('get the rotation of a vector', () => {
+  const v = Vector.of(1, 1)
+  const r = v.rotation()
+  expect(r).toBeCloseTo(Math.PI / 4)
+})
+
+test('get the vector from an angle', () => {
+  const v = Vector.fromAngle(Math.PI / 4)
+  expect(v.x).toBeCloseTo(1 / Math.sqrt(2))
+  expect(v.y).toBeCloseTo(1 / Math.sqrt(2))
+})
+
+test('get the vector from an array', () => {
+  const v = Vector.fromArray([1, 2])
+  expect(v.x).toBeCloseTo(1)
+  expect(v.y).toBeCloseTo(2)
+})
+
+test('get the vector from an object', () => {
+  const v = Vector.fromObject({ x: 1, y: 2 })
+  expect(v.x).toBeCloseTo(1)
+  expect(v.y).toBeCloseTo(2)
+})
+
+
+
 

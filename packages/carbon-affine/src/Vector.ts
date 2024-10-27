@@ -9,6 +9,18 @@ export class Vector {
     return new Vector(x, y)
   }
 
+  static fromAngle(angle: Radian) {
+    return Vector.of(Math.cos(angle), Math.sin(angle)).norm()
+  }
+
+  static fromArray(arr: [number, number]) {
+    return new Vector(arr[0], arr[1])
+  }
+
+  static fromObject(obj: { x: number, y: number }) {
+    return new Vector(obj.x, obj.y)
+  }
+
   constructor(readonly x: number, readonly y: number) {}
 
   scale(f: number) {
@@ -46,7 +58,7 @@ export class Vector {
   angle(b: Vector) {
     return b.rotation() - this.rotation()
   }
-
+  
   rotation(): number {
     return Math.atan(this.y / this.x)
   }
