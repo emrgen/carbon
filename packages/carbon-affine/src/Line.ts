@@ -1,9 +1,9 @@
-import { IPoint, Point } from './Point';
-import { Affine } from './Affine';
-import { abs } from './utils';
+import { Affine } from "./Affine";
+import { IPoint, Point } from "./Point";
+import { abs } from "./utils";
+import { Vector } from "./Vector";
 
 export class Line {
-
   // get the intersection point of two lines
   static intersection(l1: Line, l2: Line): IPoint | undefined {
     const x1 = l1.start.x;
@@ -26,7 +26,7 @@ export class Line {
     if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
       return {
         x: x1 + t * (x2 - x1),
-        y: y1 + t * (y2 - y1)
+        y: y1 + t * (y2 - y1),
       };
     }
 
@@ -41,14 +41,17 @@ export class Line {
     return new Line(Point.ORIGIN, point);
   }
 
-  static fromPoints(start: IPoint|IPoint[], end: IPoint) {
+  static fromPoints(start: IPoint | IPoint[], end: IPoint) {
     if (Array.isArray(start)) {
       return new Line(start[0], start[1]);
     }
     return new Line(start, end);
   }
 
-  constructor(readonly start: IPoint, readonly end: IPoint) {}
+  constructor(
+    readonly start: IPoint,
+    readonly end: IPoint,
+  ) {}
 
   get length() {
     return Math.hypot(this.end.x - this.start.x, this.end.y - this.start.y);
@@ -69,21 +72,18 @@ export class Line {
   get center() {
     return {
       x: (this.start.x + this.end.x) / 2,
-      y: (this.start.y + this.end.y) / 2
-    }
+      y: (this.start.y + this.end.y) / 2,
+    };
   }
 
   transform(tm: Affine): Line {
-    console.log(this.start, this.end);
-    console.log('X', tm.apply(this.start), tm.apply(this.end));
-    
     return new Line(tm.apply(this.start), tm.apply(this.end));
   }
 
   angleBetween(line: Line) {
     return Math.acos(
       (this.end.x - this.start.x) * (line.end.x - line.start.x) +
-      (this.end.y - this.start.y) * (line.end.y - line.start.y)
+        (this.end.y - this.start.y) * (line.end.y - line.start.y),
     );
   }
 
@@ -100,7 +100,9 @@ export class Line {
     const x0 = p.x;
     const y0 = p.y;
 
-    return Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / this.length;
+    return (
+      Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / this.length
+    );
   }
 
   // get the distance from a point to a line segment
@@ -117,10 +119,13 @@ export class Line {
       return Math.hypot(x1 - x0, y1 - y0);
     }
 
-    const t = Math.max(0, Math.min(1, ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2));
+    const t = Math.max(
+      0,
+      Math.min(1, ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2),
+    );
     const projection = {
       x: x1 + t * (x2 - x1),
-      y: y1 + t * (y2 - y1)
+      y: y1 + t * (y2 - y1),
     };
 
     return Math.hypot(projection.x - x0, projection.y - y0);
@@ -140,10 +145,13 @@ export class Line {
       return this.start;
     }
 
-    const t = Math.max(0, Math.min(1, ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2));
+    const t = Math.max(
+      0,
+      Math.min(1, ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2),
+    );
     return {
       x: x1 + t * (x2 - x1),
-      y: y1 + t * (y2 - y1)
+      y: y1 + t * (y2 - y1),
     };
   }
 
@@ -155,4 +163,24 @@ export class Line {
     return new Line(this.end, p);
   }
 
+  vector() {
+    return Vector.of(this.end.x - this.start.x, this.end.y - this.start.y);
+  }
+
+  moveEnd(dx: number, dy: number) {
+    return new Line(this.start, {
+      x: this.end.x + dx,
+      y: this.end.y + dy,
+    });
+  }
+
+  moveStart(dx: number, dy: number) {
+    return new Line(
+      {
+        x: this.start.x + dx,
+        y: this.start.y + dy,
+      },
+      this.end,
+    );
+  }
 }
