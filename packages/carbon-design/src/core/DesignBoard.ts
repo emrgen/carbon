@@ -5,7 +5,7 @@ import {
   NodeId,
   NodeIdMap,
   NodeIdSet,
-  NodeTopicEmitter,
+  NodeIdTopicEmitter,
 } from "@emrgen/carbon-core";
 import { DndEvent, elementBound, NodeR3Tree } from "@emrgen/carbon-dragon";
 import { BBox, NodeRect } from "@emrgen/types";
@@ -30,7 +30,7 @@ export class DesignBoard extends EventEmitter {
   selectedNodes: NodeIdSet = new NodeIdSet();
   withinSelectionNodes: NodeIdSet = new NodeIdSet();
 
-  bus: NodeTopicEmitter = new NodeTopicEmitter();
+  bus: NodeIdTopicEmitter = new NodeIdTopicEmitter();
 
   // elements
   elements: NodeIdMap<Node> = new NodeIdMap();
@@ -49,15 +49,15 @@ export class DesignBoard extends EventEmitter {
   isDragging: boolean = false;
 
   get selectedNodesBound() {
-    const bound = this.selectedNodes
+    const bounds = this.selectedNodes
       .map((nodeId) => this.nodeBound.get(nodeId))
       .filter(identity) as BBox[];
 
     return {
-      minX: min(...bound.map((b) => b.minX)),
-      minY: min(...bound.map((b) => b.minY)),
-      maxX: max(...bound.map((b) => b.maxX)),
-      maxY: max(...bound.map((b) => b.maxY)),
+      minX: min(...bounds.map((b) => b.minX)),
+      minY: min(...bounds.map((b) => b.minY)),
+      maxX: max(...bounds.map((b) => b.maxX)),
+      maxY: max(...bounds.map((b) => b.maxY)),
     };
   }
   constructor(readonly app: Carbon) {
@@ -71,7 +71,6 @@ export class DesignBoard extends EventEmitter {
   onMouseUp(node: Node, event: DndEvent) {
     if (!event.dragged) {
       this.selectNodes([]);
-      this.emit("select:end", event);
     }
   }
 
@@ -152,6 +151,7 @@ export class DesignBoard extends EventEmitter {
     this.isDirty = true;
     this.elements.set(node.id, node);
     const el = this.app.store.element(node.id);
+
     if (el) {
       const rect = elementBound(el);
       this.rtree.add(node, rect);
@@ -173,9 +173,10 @@ export class DesignBoard extends EventEmitter {
     const deselected = this.selectedNodes.sub(nodeIds);
     this.selectedNodes = nodeIds;
 
-    console.log("selected", selected, "deselected", deselected);
+    // console.log("selected", selected, "deselected", deselected);
     this.emitNodeEvents(selected, "select", null);
     this.emitNodeEvents(deselected, "deselect", null);
+    this.emit("selectionchanged");
   }
 
   deselectNodes(nodes: Node[]) {
@@ -183,10 +184,7 @@ export class DesignBoard extends EventEmitter {
     const deselected = this.selectedNodes.sub(new NodeIdSet(nodeIds));
     deselected.forEach((nodeId) => this.selectedNodes.remove(nodeId));
     deselected.forEach((nodeId) => {
-      const node = this.app.store.get(nodeId);
-      if (node) {
-        this.bus.emit(node, "deselect");
-      }
+      this.bus.emit(nodeId, "deselect");
     });
   }
 
@@ -199,17 +197,11 @@ export class DesignBoard extends EventEmitter {
     activated.forEach((nodeId) => this.activeNodes.add(nodeId));
 
     activated.forEach((nodeId) => {
-      const node = this.app.store.get(nodeId);
-      if (node) {
-        this.bus.emit(node, "activate");
-      }
+      this.bus.emit(nodeId, "activate");
     });
 
     deactivated.forEach((nodeId) => {
-      const node = this.app.store.get(nodeId);
-      if (node) {
-        this.bus.emit(node, "deactivate");
-      }
+      this.bus.emit(nodeId, "deactivate");
     });
   }
 
@@ -219,20 +211,13 @@ export class DesignBoard extends EventEmitter {
     deactivated.forEach((nodeId) => this.activeNodes.remove(nodeId));
 
     deactivated.forEach((nodeId) => {
-      const node = this.app.store.get(nodeId);
-      if (node) {
-        this.bus.emit(node, "deactivate");
-      }
+      this.bus.emit(nodeId, "deactivate");
     });
   }
 
   emitNodeEvents(nodeIds: BSet<NodeId>, eventName: string, event) {
     nodeIds.forEach((nodeId) => {
-      const node = this.app.store.get(nodeId);
-      if (node) {
-        console.log("emit", node.id.toString(), eventName);
-        this.bus.emit(node, eventName, event);
-      }
+      this.bus.emit(nodeId, eventName, event);
     });
   }
 }

@@ -44,8 +44,8 @@ export const BoardOverlayProvider = ({ children }) => {
 
   return (
     <InnerBoardOverlayContext.Provider value={value}>
-      <BoardOverlay ref={ref} />
       {children}
+      <BoardOverlay ref={ref} />
     </InnerBoardOverlayContext.Provider>
   );
 };

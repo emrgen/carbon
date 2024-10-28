@@ -7,11 +7,11 @@ import {
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SelectionGroup } from "../components/SelectionGroup";
 import { DesignBoard } from "../core/DesignBoard";
 import { BoardContext, useBoard } from "../hook/useBoard";
-import { BoardOverlayProvider } from "../hook/useOverlay";
+import { BoardOverlayProvider, useBoardOverlay } from "../hook/useOverlay";
 import { useRectSelector } from "../hook/useRectSelector";
 
 export const DesignBoardComp = (props: RendererProps) => {
@@ -32,6 +32,14 @@ const DesignSelectionStage = (props: RendererProps) => {
   const { node } = props;
   const board = useBoard();
   const ref = useRef<any>();
+  const overlay = useBoardOverlay();
+  const [showGroup, setShowGroup] = useState(false);
+
+  // console.log(
+  //   fromString(
+  //     toCSS(compose(translate(100 - 50, 100 - 50 + 72), rotateDEG(45))),
+  //   ),
+  // );
 
   const { style, isSelecting } = useRectSelector(board);
 
@@ -41,18 +49,31 @@ const DesignSelectionStage = (props: RendererProps) => {
     distance: 5,
     onDragStart(event: DndEvent) {
       board.onSelectionStart(event);
+      overlay.showOverlay();
     },
     onDragMove(event: DndEvent) {
       board.onSelectionMove(event);
     },
     onDragEnd(event: DndEvent) {
       board.onSelectionEnd(event);
+      overlay.hideOverlay();
     },
     onMouseDown(node: Node, event: MouseEvent) {},
     onMouseUp(node: Node, event: DndEvent) {
       board.onMouseUp(node, event);
     },
   });
+
+  useEffect(() => {
+    const onSelectionChanged = () => {
+      setShowGroup(board.selectedNodes.size > 1);
+    };
+
+    board.on("selectionchanged", onSelectionChanged);
+    return () => {
+      board.off("selectionchanged", onSelectionChanged);
+    };
+  }, [board]);
 
   return (
     <>
@@ -67,7 +88,7 @@ const DesignSelectionStage = (props: RendererProps) => {
         </CarbonBlock>
       </div>
       <div className={"de-board--selector"} style={style}></div>
-      <SelectionGroup />
+      {showGroup && <SelectionGroup />}
     </>
   );
 };

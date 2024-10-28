@@ -44,11 +44,14 @@ export const DocumentSaveStatus = () => {
       bg={"#eee"}
       size={6}
       borderRadius={4}
-      pos={"relative"}
+      pos={"fixed"}
+      top={4}
+      right={4}
+      className={"sync-status"}
     >
       {!isSaving && isChanged && <BiSync color={"red"} />}
       {isSaving && <Spinner size={"xs"} />}
-      {!isChanged && isSaved && <BiSync color={"green"} />}
+      {!isSaving && !isChanged && isSaved && <BiSync color={"green"} />}
     </Square>
   );
 };

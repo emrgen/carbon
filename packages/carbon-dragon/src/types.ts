@@ -19,12 +19,13 @@ interface ToString {
   toString(): string;
 }
 
-export interface DndEvent<E = MouseEvent> {
+export interface DndEvent<S = any, E = MouseEvent> {
   activatorEvent: E;
   event: E;
   node: Node;
   id: ToString;
-  state?: any;
+  setState(state: any): void;
+  state?: S;
   dragged?: boolean;
 
   position: {

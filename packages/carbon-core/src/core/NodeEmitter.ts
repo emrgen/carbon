@@ -1,9 +1,9 @@
+import { EventEmitter } from "events";
 import { each } from "lodash";
 import BTree from "sorted-btree";
 import { Node } from "./Node";
 import { NodeId, NodeIdComparator } from "./NodeId";
-import { NodeWatcher } from "./types";
-import { EventEmitter } from "events";
+import { NodeIdWatcher, NodeWatcher } from "./types";
 
 const nodeIdType = (n: any) => n instanceof NodeId || n instanceof Node;
 
@@ -60,6 +60,44 @@ export class NodeTopicEmitter {
     // emit wildcard event
     if (event !== "*") {
       this.emit(node, "*", ...args);
+    }
+  }
+}
+
+export class NodeIdTopicEmitter {
+  private listeners: Map<string | symbol, BTree<NodeId, Set<NodeIdWatcher>>> =
+    new Map();
+
+  on(nodeId: NodeId, event: string | symbol, cb: NodeIdWatcher) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new BTree(undefined, NodeIdComparator));
+    }
+    const listeners = this.listeners.get(event)?.get(nodeId) ?? new Set();
+    listeners.add(cb);
+
+    this.listeners.get(event)?.set(nodeId, listeners);
+  }
+
+  off(nodeId: NodeId, event: string | symbol, cb: NodeIdWatcher) {
+    this.listeners.get(event)?.get(nodeId)?.delete(cb);
+  }
+
+  // unsubscribe from all events
+  offAll(nodeId: NodeId) {
+    this.listeners.forEach((events, event) => {
+      events.get(nodeId)?.clear();
+    });
+  }
+
+  emit(nodeId: NodeId, event: string | symbol, ...args: any[]) {
+    const listeners = this.listeners.get(event)?.get(nodeId);
+    listeners?.forEach((cb) => {
+      cb(nodeId, ...args);
+    });
+
+    // emit wildcard event
+    if (event !== "*") {
+      this.emit(nodeId, "*", ...args);
     }
   }
 }

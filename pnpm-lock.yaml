@@ -268,6 +268,9 @@ importers:
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.14(ts-node@10.9.2(@types/node@20.17.0)(typescript@5.6.3))
+      transformation-matrix:
+        specifier: ^2.16.1
+        version: 2.16.1
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@20.17.0)(typescript@5.6.3)
@@ -721,22 +724,22 @@ importers:
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      transformation-matrix:
+        specifier: ^2.16.1
+        version: 2.16.1
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
       '@types/lodash':
         specifier: ^4.14.191
         version: 4.17.12
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      vitest:
-        specifier: ^0.34.6
-        version: 0.34.6(jsdom@25.0.1)(playwright@1.48.1)(stylus@0.64.0)(terser@5.36.0)
-    devDependencies:
-      '@emrgen/eslint-config-custom':
-        specifier: workspace:*
-        version: link:../eslint-config-custom
       '@types/react':
         specifier: ^18.0.27
         version: 18.3.12
@@ -752,6 +755,9 @@ importers:
       typescript:
         specifier: ^5.4.5
         version: 5.6.3
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(jsdom@25.0.1)(playwright@1.48.1)(stylus@0.64.0)(terser@5.36.0)
 
   packages/carbon-attributes:
     dependencies:
@@ -1714,6 +1720,12 @@ importers:
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
+      transformation-matrix:
+        specifier: ^2.16.1
+        version: 2.16.1
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(jsdom@25.0.1)(playwright@1.48.1)(stylus@0.64.0)(terser@5.36.0)
     devDependencies:
       '@emrgen/eslint-config-custom':
         specifier: workspace:*
@@ -3769,7 +3781,11 @@ importers:
 
   packages/tsconfig: {}
 
-  packages/types: {}
+  packages/types:
+    dependencies:
+      vite:
+        specifier: ^5.2.11
+        version: 5.4.10(@types/node@20.17.0)(stylus@0.64.0)(terser@5.36.0)
 
   packages/zcarbon-plugin-template:
     dependencies:
@@ -12325,6 +12341,9 @@ packages:
     resolution: {integrity: sha512-tk2G5R2KRwBd+ZN0zaEXpmzdKyOYksXwywulIX95MBODjSzMIuQnQ3m8JxgbhnL1LeVo7lqQKsYa1O3Htl7K5g==}
     engines: {node: '>=18'}
 
+  transformation-matrix@2.16.1:
+    resolution: {integrity: sha512-tdtC3wxVEuzU7X/ydL131Q3JU5cPMEn37oqVLITjRDSDsnSHVFzW2JiCLfZLIQEgWzZHdSy3J6bZzvKEN24jGA==}
+
   tree-dump@1.0.2:
     resolution: {integrity: sha512-dpev9ABuLWdEubk+cIaI9cHwRNNDjkBBLXTwI4UCUFdQ5xXKqNXoK4FEciw/vxf+NQ7Cb7sGUyeUtORvHIdRXQ==}
     engines: {node: '>=10.0'}
@@ -18710,7 +18729,7 @@ snapshots:
       eslint: 7.32.0
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 2.7.1(eslint-plugin-import@2.31.0(eslint@7.32.0))(eslint@7.32.0)
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@7.32.0)(typescript@5.6.3))(eslint-import-resolver-typescript@2.7.1(eslint-plugin-import@2.31.0(eslint@7.32.0))(eslint@7.32.0))(eslint@7.32.0)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@7.32.0)(typescript@5.6.3))(eslint-import-resolver-typescript@2.7.1)(eslint@7.32.0)
       eslint-plugin-jsx-a11y: 6.10.1(eslint@7.32.0)
       eslint-plugin-react: 7.31.8(eslint@7.32.0)
       eslint-plugin-react-hooks: 4.6.2(eslint@7.32.0)
@@ -18778,7 +18797,7 @@ snapshots:
     dependencies:
       debug: 4.3.7
       eslint: 7.32.0
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@7.32.0)(typescript@5.6.3))(eslint-import-resolver-typescript@2.7.1(eslint-plugin-import@2.31.0(eslint@7.32.0))(eslint@7.32.0))(eslint@7.32.0)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@7.32.0)(typescript@5.6.3))(eslint-import-resolver-typescript@2.7.1)(eslint@7.32.0)
       glob: 7.2.3
       is-glob: 4.0.3
       resolve: 1.22.8
@@ -18859,7 +18878,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@5.62.0(eslint@7.32.0)(typescript@5.6.3))(eslint-import-resolver-typescript@2.7.1(eslint-plugin-import@2.31.0(eslint@7.32.0))(eslint@7.32.0))(eslint@7.32.0):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@5.62.0(eslint@7.32.0)(typescript@5.6.3))(eslint-import-resolver-typescript@2.7.1)(eslint@7.32.0):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -23437,6 +23456,8 @@ snapshots:
   tr46@5.0.0:
     dependencies:
       punycode: 2.3.1
+
+  transformation-matrix@2.16.1: {}
 
   tree-dump@1.0.2(tslib@2.8.0):
     dependencies:
