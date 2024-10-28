@@ -1,4 +1,9 @@
 import { clamp } from "lodash";
+import {
+  compose,
+  fromDefinition,
+  fromTransformAttribute,
+} from "transformation-matrix";
 import { UINT_MIN, UNIT_MAX } from "./contant";
 import { IPoint } from "./Point";
 import { Radian } from "./types";
@@ -27,8 +32,10 @@ export class Affine {
         parseFloat(mat[6]),
       ]);
     } else {
-      // TODO: check for other css transformation functions like translate, rotate, scale
-      throw new Error("Not implemented");
+      const { a, b, c, d, e, f } = compose(
+        fromDefinition(fromTransformAttribute(css)),
+      );
+      return new Affine([a, b, c, d, e, f]);
     }
   }
 
@@ -45,6 +52,14 @@ export class Affine {
 
   static scale(x: number, y: number) {
     return new Affine([x, 0, 0, 0, y, 0]);
+  }
+
+  static flipX() {
+    return new Affine([-1, 0, 0, 0, 1, 0]);
+  }
+
+  static flipY() {
+    return new Affine([1, 0, 0, 0, -1, 0]);
   }
 
   static mul(a: Affine, b: Affine) {
@@ -116,12 +131,20 @@ export class Affine {
     return this.mul(Affine.scale(sx, sy));
   }
 
+  flipX() {
+    return this.mul(Affine.flipX());
+  }
+
+  flipY() {
+    return this.mul(Affine.flipY());
+  }
+
   origin() {
     return this.apply({ x: 0, y: 0 });
   }
 
-  mul(b: Affine) {
-    return Affine.mul(this, b);
+  mul(...b: Affine[]) {
+    return b.reduce((acc, m) => Affine.mul(acc, m), this);
   }
 
   inverse() {

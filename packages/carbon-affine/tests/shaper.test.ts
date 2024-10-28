@@ -212,8 +212,8 @@ test("rotate a vector after translation and rotation", () => {
 
   const m = sp.rotate(Math.PI / 4);
   const p2 = m.apply({ x: 1, y: 1 });
-  // expect(p2.x).toBeCloseTo(1);
-  // expect(p2.y).toBeCloseTo(4);
+  expect(p2.x).toBeCloseTo(1);
+  expect(p2.y).toBeCloseTo(4);
 });
 
 test("resize a vector after translation and rotation", () => {

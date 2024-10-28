@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@emrgen/carbon-core": "workspace:*",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "transformation-matrix": "^2.16.1"
   },
   "devDependencies": {
     "@emrgen/eslint-config-custom": "workspace:*",

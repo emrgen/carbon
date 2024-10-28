@@ -99,7 +99,8 @@ export class Transform {
     return this.matrix;
   }
 
-  add(af: Affine) {
-    return new Transform(this.matrix.mul(af));
+  add(...b: Affine[]) {
+    const af = b.reduce((acc, m) => Affine.mul(acc, m), this.matrix);
+    return Transform.from(af);
   }
 }
