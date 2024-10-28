@@ -58,7 +58,31 @@ test("insert at a location, 200, 200", () => {
   );
   console.log(resize2.into().toCSS());
 
-  console.log("center", resize2.center());
+  const resize3 = resize.resize(
+    50,
+    0,
+    Anchor.TOP_LEFT,
+    Handle.BOTTOM_RIGHT,
+    ResizeRatio.FREE,
+  );
+  console.log(resize3.into().toCSS());
+  expect(resize3.into().toCSS()).toBe(
+    Affine.fromCSS(
+      "matrix(47.85534, 47.85534, -72.85534, 72.85534, 225.00000, 200.00000)",
+    ).toCSS(),
+  );
 
-  console.log(resize2.into().toCSS());
+  const resize4 = resize.resize(
+    50,
+    50,
+    Anchor.LEFT,
+    Handle.RIGHT,
+    ResizeRatio.FREE,
+  );
+  console.log(resize4.into().toCSS());
+  expect(resize4.into().toCSS()).toBe(
+    Affine.fromCSS(
+      "matrix(60.35534, 60.35534, -85.35534, 85.35534, 225.00000, 225.00000)",
+    ).toCSS(),
+  );
 });
