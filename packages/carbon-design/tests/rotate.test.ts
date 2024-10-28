@@ -1,19 +1,5 @@
-import {
-  applyToPoint,
-  compose,
-  rotateDEG,
-  translate,
-} from "transformation-matrix";
-import { expect, test } from "vitest";
-import { TransformSpec } from "../src/core/Affine";
-
-const spec: TransformSpec = {
-  cx: 0,
-  cy: 0,
-  w: 80,
-  h: 60,
-  angle: 0,
-};
+import {applyToPoint, compose, rotateDEG, translate,} from "transformation-matrix";
+import {expect, test} from "vitest";
 
 test("rotate by 45 degree", () => {
   const point = applyToPoint(rotateDEG(45), { x: 40, y: 30 });

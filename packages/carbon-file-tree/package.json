@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-event",
+  "name": "@emrgen/carbon-file-tree",
   "version": "0.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
