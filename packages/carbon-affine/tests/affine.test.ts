@@ -1,6 +1,5 @@
 import { expect, test } from "vitest";
 import { Affine, Vector } from "../src/index";
-import { Shaper } from "../src/Shaper";
 
 test("find the current affine from a shape", () => {
   const af = Affine.fromSize(100, 100);
@@ -8,18 +7,17 @@ test("find the current affine from a shape", () => {
 });
 
 test("resize after from size", () => {
-  const af = Shaper.from(Affine.fromSize(20, 20)).translate(100, 0);
-  const v1 = af.apply({ x: 1, y: 0 });
-  console.log(v1);
-  const v2 = af.into().inverse().apply({ x: 125, y: 0 });
-  console.log(v2);
-
-  const v3 = af.apply(v2);
-  console.log(v3);
-
-  console.log(Affine.fromSize(10, 10).inverse().apply({ x: 5, y: 0 }));
-  console.log(Affine.fromSize(20, 20).inverse().apply({ x: 25, y: 0 }));
-
+  // const af = Shaper.from(Affine.fromSize(20, 20)).translate(100, 0);
+  // const v1 = af.apply({ x: 1, y: 0 });
+  // console.log(v1);
+  // const v2 = af.into().inverse().apply({ x: 125, y: 0 });
+  // console.log(v2);
+  //
+  // const v3 = af.apply(v2);
+  // console.log(v3);
+  //
+  // console.log(Affine.fromSize(10, 10).inverse().apply({ x: 5, y: 0 }));
+  // console.log(Affine.fromSize(20, 20).inverse().apply({ x: 25, y: 0 }));
   // expect(resize.mat).toStrictEqual([100, 0, 0, 0, 100, 0]);
 });
 
@@ -57,10 +55,8 @@ test("chain transformations", () => {
 
 test("rotate and translate", () => {
   const m = Affine.translate(2, 3).rotate(Math.PI / 4);
-  console.log(m.toCSS());
   const v = Vector.of(1, 0);
   const p = m.apply(v);
-  console.log(p);
   expect(p.x).toBeCloseTo(2.707);
   expect(p.y).toBeCloseTo(3.707);
 });

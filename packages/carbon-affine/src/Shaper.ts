@@ -303,4 +303,16 @@ export class Shaper {
   center() {
     return this.tm.apply({ x: 0, y: 0 });
   }
+
+  toCSS() {
+    return this.tm.matrix.toCSS();
+  }
+
+  xAxis() {
+    return this.tm.matrix.xAxis();
+  }
+
+  yAxis() {
+    return this.tm.matrix.yAxis();
+  }
 }

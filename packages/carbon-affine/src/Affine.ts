@@ -7,7 +7,8 @@ import {
 import { UINT_MIN, UNIT_MAX } from "./contant";
 import { IPoint } from "./Point";
 import { Radian } from "./types";
-import { abs } from "./utils";
+import { abs, considerZero } from "./utils";
+import { Vector } from "./Vector";
 
 type AffineMatrix = [number, number, number, number, number, number];
 
@@ -190,7 +191,9 @@ export class Affine {
   }
 
   toCSS() {
-    const els = this.mat.map((n) => n.toFixed(5));
+    const els = this.mat
+      .map(considerZero)
+      .map((n) => (n == -n ? abs(n).toFixed(5) : n.toFixed(5)));
     return `matrix(${els[0]}, ${els[3]}, ${els[1]}, ${els[4]}, ${els[2]}, ${els[5]})`;
   }
 
@@ -204,5 +207,13 @@ export class Affine {
 
   eq(af: Affine) {
     return this.mat.every((n, i) => n.toFixed(5) === af.mat[i].toString(5));
+  }
+
+  xAxis() {
+    return Vector.UX.transform(this);
+  }
+
+  yAxis() {
+    return Vector.UY.transform(this);
   }
 }
