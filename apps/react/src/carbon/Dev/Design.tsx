@@ -1,6 +1,12 @@
 import { Box } from "@chakra-ui/react";
 import { blockPresetPlugins, node } from "@emrgen/carbon-blocks";
-import { ActiveCellRuntime, cellRenderer } from "@emrgen/carbon-cell";
+import {
+  ActiveCellRuntime,
+  ActiveCellRuntimeContext,
+  cellRenderer,
+} from "@emrgen/carbon-cell";
+import { DocumentSaveStatus } from "@emrgen/carbon-chakra-ui/src/components/DocumentSaveStatus";
+import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui/src/components/FloatingStyleMenu";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import {
   CarbonPlugin,
@@ -9,7 +15,7 @@ import {
   NodeId,
   StylePath,
 } from "@emrgen/carbon-core";
-import { Affine, designPlugin, designRenderers } from "@emrgen/carbon-design";
+import { designPlugin, designRenderers } from "@emrgen/carbon-design";
 import { timelineRenderer } from "@emrgen/carbon-plugin-timeline";
 import { questionExtension } from "@emrgen/carbon-question";
 import {
@@ -18,17 +24,10 @@ import {
   useCreateCachedCarbon,
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
+import { CarbonApp } from "@emrgen/carbon-utils/src/components/CarbonAppDocument";
 import { flattenDeep } from "lodash";
-import { CSSProperties, useState } from "react";
+import { useState } from "react";
 import "./desing.styl";
-import {
-  applyToPoint,
-  compose,
-  rotateDEG,
-  scale,
-  toCSS,
-  translate,
-} from "transformation-matrix";
 
 const plugins: (CarbonPlugin | CarbonPlugin[])[] = [
   corePresetPlugins,
@@ -110,46 +109,14 @@ export function Design() {
     });
   });
 
-  const [poc1Style] = useState({
-    position: "absolute",
-    width: 100,
-    height: 100,
-    background: "red",
-    transform: toCSS(compose(translate(100, 100), rotateDEG(45))),
-  });
-
-  const [poc2Style] = useState<CSSProperties>({
-    position: "absolute",
-    width: 100,
-    height: 100,
-    background: "blue",
-    transform: toCSS(compose(translate(200, 200), rotateDEG(0, 50, 100))),
-  });
-  window.app = app;
-
-  const tm = Affine.fromCSS(poc2Style);
-
-  const p = applyToPoint(compose(scale(2, 2, 200, 200 - 70.71)), {
-    x: 200,
-    y: 200,
-  });
-  console.log(p);
-
-  tm.translate(100, 100).rotate(45).translate(100, 0).scale(1, 1);
-  // console.log(tm.toCSS());
-
   return (
     <Box className={"carbon-app-container"}>
-      <Box style={poc1Style}>12</Box>
-      <Box style={poc2Style}>12</Box>
-
-      {/*<Box bg={"red"} style={tm.toCSS()} />*/}
-      {/*<ActiveCellRuntimeContext runtime={runtime}>*/}
-      {/*  <CarbonApp app={app} renderManager={renderManager}>*/}
-      {/*    <FloatingStyleMenu />*/}
-      {/*    <DocumentSaveStatus />*/}
-      {/*  </CarbonApp>*/}
-      {/*</ActiveCellRuntimeContext>*/}
+      <ActiveCellRuntimeContext runtime={runtime}>
+        <CarbonApp app={app} renderManager={renderManager}>
+          <FloatingStyleMenu />
+          <DocumentSaveStatus />
+        </CarbonApp>
+      </ActiveCellRuntimeContext>
     </Box>
   );
 }

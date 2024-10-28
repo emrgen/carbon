@@ -87,6 +87,10 @@ export class Affine {
 
   constructor(readonly mat: AffineMatrix) {}
 
+  get angle() {
+    return Math.atan2(this.mat[1], this.mat[0]);
+  }
+
   // r -> s -> t
   // need to be careful about the order
   // when applying the transformation to a point the order is t -> s -> r

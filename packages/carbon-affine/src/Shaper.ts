@@ -3,6 +3,7 @@ import { Line } from "./Line";
 import { IPoint } from "./Point";
 import { Transform } from "./Transform";
 import { Radian } from "./types";
+import { max, min } from "./utils";
 
 export enum Location {
   CENTER = "center",
@@ -308,11 +309,45 @@ export class Shaper {
     return this.tm.matrix.toCSS();
   }
 
+  // get the style for the shape
+  // it is intended to be used in the style attribute of the element
+  toStyle() {
+    const { x, y } = this.center();
+    const { width, height } = this.size();
+    const angle = this.angle();
+    return {
+      left: `-${width / 2}px`,
+      top: `-${height / 2}px`,
+      transform: `translate(${x}px, ${y}px) rotateZ(${angle}rad)`,
+    };
+  }
+
+  boundRect(): IPoint[] {
+    const points: IPoint[] = [
+      this.pointAt(Location.TOP_LEFT),
+      this.pointAt(Location.TOP_RIGHT),
+      this.pointAt(Location.BOTTOM_LEFT),
+      this.pointAt(Location.BOTTOM_RIGHT),
+    ];
+
+    const globalPoints = points.map((p) => this.tm.apply(p));
+    return {
+      lx: min(...globalPoints.map((p) => p.x)),
+      ly: min(...globalPoints.map((p) => p.y)),
+      rx: max(...globalPoints.map((p) => p.x)),
+      ry: max(...globalPoints.map((p) => p.y)),
+    };
+  }
+
   xAxis() {
     return this.tm.matrix.xAxis();
   }
 
   yAxis() {
     return this.tm.matrix.yAxis();
+  }
+
+  angle() {
+    return Line.UX.transform(this.tm.matrix).angle;
   }
 }

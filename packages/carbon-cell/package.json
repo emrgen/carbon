@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@codemirror/commands": "^6.7.1",
-    "@codemirror/lang-css": "github:codemirror/lang-css",
-    "@codemirror/lang-html": "github:codemirror/lang-html",
+    "@codemirror/lang-css": "^6.3.0",
+    "@codemirror/lang-html": "^6.4.9",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-markdown": "^6.3.0",
     "@codemirror/language": "^6.10.1",

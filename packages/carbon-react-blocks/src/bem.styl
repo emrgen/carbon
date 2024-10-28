@@ -1,6 +1,6 @@
 @import "bem_tabs.styl"
 
-$lineHeight = 26px
+$lineHeight = 28px
 $selectionHaloColor = #accef78d
 
 .croot
@@ -10,9 +10,10 @@ $selectionHaloColor = #accef78d
     background: $selectionHaloColor
 .document-wrapper
   overflow auto
+  background #fff
+
 .cdoc
   flex 1
-  //padding 0 80px
   padding 0 calc(50% - 400px)
   padding-top: 40px;
 
@@ -84,10 +85,10 @@ $selectionHaloColor = #accef78d
 
 .bullet-list > .ctiw > .title:after
   @extend .placeholder
-  left 26px
 
 .bullet-list__marker
-  padding 0 8px
+  line-height $lineHeight
+  padding 3px 8px
   user-select: none
   position absolute
   left 0
@@ -104,7 +105,7 @@ $selectionHaloColor = #accef78d
 
 .todo__checkbox
   display flex
-  padding 6px 6px
+  padding 8px 6px
   position absolute;
 
 .collapsible > .ctiw > .title
@@ -138,6 +139,7 @@ $selectionHaloColor = #accef78d
 .cnl__label
   width 28px;
   display flex
+  line-height 30px
   justify-content end
   padding-right 8px;
   user-select: none
