@@ -59,11 +59,23 @@ export class Vector {
   }
 
   angleBetween(b: Vector) {
+    // console.log(b.angle(), this.angle());
     return b.angle() - this.angle();
   }
 
   divide(b: Vector) {
     return Vector.of(this.x / b.x, this.y / b.y);
+  }
+
+  factorOf(b: Vector) {
+    const angle = this.angleBetween(b);
+    if (angle === 0) {
+      return this.size() / b.size();
+    } else if (angle === Math.PI) {
+      return -this.size() / b.size();
+    }
+
+    throw new Error("the two vectors are not in the same direction");
   }
 
   angle(): number {
@@ -99,5 +111,13 @@ export class Vector {
 
   toObject(): { x: number; y: number } {
     return { x: this.x, y: this.y };
+  }
+
+  unit() {
+    return this.norm();
+  }
+
+  multiply(number: number) {
+    return Vector.of(this.x * number, this.y * number);
   }
 }

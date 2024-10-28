@@ -5,6 +5,9 @@ import { Vector } from "./Vector";
 
 export class Line {
   // get the intersection point of two lines
+  static UX = Line.fromPoints(Point.ORIGIN, { x: 1, y: 0 });
+  static UY = Line.fromPoints(Point.ORIGIN, { x: 0, y: 1 });
+
   static intersection(l1: Line, l2: Line): IPoint | undefined {
     const x1 = l1.start.x;
     const y1 = l1.start.y;
@@ -153,6 +156,13 @@ export class Line {
       x: x1 + t * (x2 - x1),
       y: y1 + t * (y2 - y1),
     };
+  }
+
+  projection(on: Vector): Vector {
+    const v = this.vector();
+    const unit = on.unit();
+    const dot = unit.dot(on);
+    return unit.scale(dot);
   }
 
   prevLine(p: Point) {

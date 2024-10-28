@@ -1,9 +1,26 @@
 import { expect, test } from "vitest";
 import { Affine, Vector } from "../src/index";
+import { Shaper } from "../src/Shaper";
 
 test("find the current affine from a shape", () => {
   const af = Affine.fromSize(100, 100);
   expect(af.mat).toStrictEqual([50, 0, 0, 0, 50, 0]);
+});
+
+test("resize after from size", () => {
+  const af = Shaper.from(Affine.fromSize(20, 20)).translate(100, 0);
+  const v1 = af.apply({ x: 1, y: 0 });
+  console.log(v1);
+  const v2 = af.into().inverse().apply({ x: 125, y: 0 });
+  console.log(v2);
+
+  const v3 = af.apply(v2);
+  console.log(v3);
+
+  console.log(Affine.fromSize(10, 10).inverse().apply({ x: 5, y: 0 }));
+  console.log(Affine.fromSize(20, 20).inverse().apply({ x: 25, y: 0 }));
+
+  // expect(resize.mat).toStrictEqual([100, 0, 0, 0, 100, 0]);
 });
 
 test("translate a point by 2, 3", () => {

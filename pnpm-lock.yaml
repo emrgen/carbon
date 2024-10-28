@@ -724,22 +724,19 @@ importers:
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
       '@types/lodash':
         specifier: ^4.14.191
         version: 4.17.12
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      vitest:
-        specifier: ^0.34.6
-        version: 0.34.6(jsdom@25.0.1)(playwright@1.48.1)(stylus@0.64.0)(terser@5.36.0)
-    devDependencies:
-      '@emrgen/eslint-config-custom':
-        specifier: workspace:*
-        version: link:../eslint-config-custom
       '@types/react':
         specifier: ^18.0.27
         version: 18.3.12
@@ -755,6 +752,9 @@ importers:
       typescript:
         specifier: ^5.4.5
         version: 5.6.3
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(jsdom@25.0.1)(playwright@1.48.1)(stylus@0.64.0)(terser@5.36.0)
 
   packages/carbon-attributes:
     dependencies:

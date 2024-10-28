@@ -161,9 +161,11 @@ export class Shaper {
     // final size after transformation
 
     // console.log("anchorLine", anchorLine);
-    // console.log(anchorLine.transform(tm));
-    // console.log(anchorLine.transform(tm).moveEnd(dx, dy));
-    // console.log(anchorLine.transform(tm).moveEnd(dx, dy).transform(ivm));
+    // console.log(anchorLine.transform(tm.matrix));
+    // console.log(anchorLine.transform(tm.matrix).moveEnd(dx, dy));
+    // console.log(
+    //   anchorLine.transform(tm.matrix).moveEnd(dx, dy).transform(ivm.matrix),
+    // );
 
     const after = anchorLine
       .transform(tm.matrix)
@@ -181,10 +183,10 @@ export class Shaper {
       anchor,
       handle,
     );
+
+    // console.log("scales", lsx, lsy);
+
     const { x: lax, y: lay } = anchorPoint;
-
-    // console.log("resize", lsx, lsy, lax, lay, before, after);
-
     switch (ratio) {
       case ResizeRatio.FREE:
         return Shaper.from(this.tm.scale(lsx, lsy, lax, lay));
