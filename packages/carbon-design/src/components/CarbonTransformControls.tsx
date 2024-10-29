@@ -12,7 +12,9 @@ import {
 import { Node } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { Draggable } from "@emrgen/carbon-dragon-react";
-import { useMemo } from "react";
+import { CSSProperties, useMemo } from "react";
+import { useBoardOverlay } from "../hook/useOverlay";
+import { tooSmall } from "../utils";
 
 export type TransformHandler = (
   type: TransformType,
@@ -32,9 +34,6 @@ interface CarbonTransformControlsProps {
 export const CarbonTransformControls = (
   props: CarbonTransformControlsProps,
 ) => {
-  const { node, affine, onTransformStart, onTransformMove, onTransformEnd } =
-    props;
-
   return (
     <>
       <TransformerHandle
@@ -101,13 +100,21 @@ export const CarbonTransformControls = (
         handle={TransformHandle.BOTTOM_RIGHT}
       />
 
-      <TransformerHandle
-        {...props}
-        className={"rotate-handle"}
-        type={TransformType.ROTATE}
-        anchor={TransformAnchor.CENTER}
-        handle={TransformHandle.CENTER}
-      />
+      {/*<TransformerHandle*/}
+      {/*  {...props}*/}
+      {/*  className={"rotate-bottom-handle"}*/}
+      {/*  type={TransformType.ROTATE}*/}
+      {/*  anchor={TransformAnchor.CENTER}*/}
+      {/*  handle={TransformHandle.BOTTOM}*/}
+      {/*/>*/}
+
+      {/*<TransformerHandle*/}
+      {/*  {...props}*/}
+      {/*  className={"rotate-bottom-right-handle"}*/}
+      {/*  type={TransformType.ROTATE}*/}
+      {/*  anchor={TransformAnchor.CENTER}*/}
+      {/*  handle={TransformHandle.BOTTOM_RIGHT}*/}
+      {/*/>*/}
     </>
   );
 };
@@ -137,6 +144,8 @@ const TransformerHandle = (props: TransformerHandleProps) => {
     onTransformEnd,
   } = props;
 
+  const overlay = useBoardOverlay();
+
   // use affine to get the position of the handle
 
   const position = useMemo(() => {
@@ -144,13 +153,13 @@ const TransformerHandle = (props: TransformerHandleProps) => {
     if (type === TransformType.SCALE) {
       point = getPoint(toLocation(handle));
     } else {
-      const offset = Line.fromPoint({ x: 36, y: 0 }).transform(
+      const offset = Line.fromPoint(getPoint(toLocation(handle))).transform(
         affine.inverse(),
       ).length;
       point = { x: 0, y: 1 + offset };
     }
 
-    return handleTransformation(affine, point);
+    return handleTransformation(affine, type, handle, point);
   }, [affine, handle, type]);
 
   return (
@@ -159,6 +168,7 @@ const TransformerHandle = (props: TransformerHandleProps) => {
       style={position}
       className={className}
       onDragStart={(event) => {
+        overlay.showOverlay();
         onTransformStart(type, anchor, handle, event);
       }}
       onDragMove={(event) => {
@@ -166,20 +176,58 @@ const TransformerHandle = (props: TransformerHandleProps) => {
       }}
       onDragEnd={(event) => {
         onTransformEnd(type, anchor, handle, event);
+        overlay.hideOverlay();
       }}
-    />
+    >
+      <div
+        className="transform-handle"
+        style={{
+          display: tooSmall(Shaper.from(affine).size()) ? "none" : "block",
+        }}
+      />
+    </Draggable>
   );
 };
 
-const handleTransformation = (affine: Affine, handlePoint: IPoint) => {
+const isAlongX = (handle: TransformHandle) => {
+  return handle === TransformHandle.LEFT || handle === TransformHandle.RIGHT;
+};
+
+const isAlongY = (handle: TransformHandle) => {
+  return handle === TransformHandle.TOP || handle === TransformHandle.BOTTOM;
+};
+
+const handleTransformation = (
+  affine: Affine,
+  type: TransformType,
+  handle: TransformHandle,
+  handlePoint: IPoint,
+) => {
   const point = affine.apply(handlePoint);
+  const { x, y } = point;
 
   const sp = Shaper.from(Affine.translate(point.x, point.y)).rotate(
     affine.angle,
   );
-  const { x, y } = point;
 
-  return {
+  const style: CSSProperties = {
     transform: `translate(${x}px, ${y}px) rotateZ(${affine.angle}rad)`,
   };
+
+  const height = isAlongX(handle)
+    ? Shaper.from(affine).size().height + "px"
+    : "";
+  const width = isAlongY(handle) ? Shaper.from(affine).size().width + "px" : "";
+
+  if (height && type === TransformType.SCALE) {
+    style.height = height;
+    style.top = `-${parseInt(height) / 2}px`;
+  }
+
+  if (width && type === TransformType.SCALE) {
+    style.width = width;
+    style.left = `-${parseInt(width) / 2}px`;
+  }
+
+  return style;
 };

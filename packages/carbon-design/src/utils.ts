@@ -1,8 +1,10 @@
+import { Affine } from "@emrgen/carbon-affine";
 import {
   ActionOrigin,
   Node,
   StylePath,
   Transaction,
+  TransformStatePath,
 } from "@emrgen/carbon-core";
 import { CSSProperties } from "react";
 
@@ -10,6 +12,14 @@ export const { abs, min, max } = Math;
 
 export const getNodeStyle = (node: Node) => {
   return node.props.get<CSSProperties>(StylePath, {});
+};
+
+export const getNodeTransform = (node: Node) => {
+  const css = node.props.get<string>(
+    TransformStatePath,
+    Affine.IDENTITY.toCSS(),
+  );
+  return Affine.fromCSS(css);
 };
 
 export const getNodePosition = (node: Node) => {
@@ -36,4 +46,8 @@ export const updatePosition = (
     },
     origin,
   );
+};
+
+export const tooSmall = ({ width, height }) => {
+  return width <= 4 || height <= 4;
 };

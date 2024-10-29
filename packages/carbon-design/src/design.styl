@@ -11,12 +11,18 @@ $selected-border-color = #236af4
   background-image: radial-gradient(#999 1px, transparent 0);
   background-size: 40px 40px;
   background-position: -19px -19px;
+  user-select none
+
 .de-board--selection-area
   position absolute;
   top 0;
   left 0
   width 100%
   height 100%
+  user-select none
+
+.de-element--selected-border
+  box-shadow inset 0 0 0 1px $selected-border-color, 0 0 0 1px $selected-border-color
 
 .de-transformer
   position absolute
@@ -24,11 +30,12 @@ $selected-border-color = #236af4
   //left -2px
   //width calc(100% + 4px)
   //height calc(100% + 4px)
-  border 2px solid transparent
+  //border 2px solid transparent
+  user-select none
   //background rgba(239, 112, 112, 0.58) !important
 
   &:hover
-    border 2px solid $selected-border-color
+    @extend .de-element--selected-border
 
 //padding 2px
 
@@ -41,7 +48,7 @@ $selected-border-color = #236af4
 
 
 .de-transformer.de-element--selected
-  border 2px solid $selected-border-color
+  @extend .de-element--selected-border
 
 .de-board--rect-selecting
   .de-transformer:not(.de-element--selected):hover
@@ -63,65 +70,98 @@ $selected-border-color = #236af4
   z-index 1000
   width 100%;
   height 100%;
+  user-select none
   //cursor grabbing
 
+.resize-bottom-handle
+.resize-top-handle
+.resize-left-handle
+.resize-right-handle
+.resize-top-left-handle
+.resize-top-right-handle
+.resize-bottom-left-handle
+.resize-bottom-right-handle
+.rotate-bottom-handle
+  position absolute;
+  transition color .1s linear,background-color .1s linear
+  box-shadow 0 0 4px 1px rgba(57, 76, 96, .15), 0 0 0 1px rgba(43, 59, 74, .3)
+  z-index 1000
+  user-select none
+  background #fff
+  &:hover
+    background $selected-border-color
 
 .resize-top-handle
 .resize-bottom-handle
-  position absolute;
   left -11px
-  top -2px
-  width 22px
-  height 4px
-  //cursor s-resize
-  background #fff
+  top -8px
   border-radius 3px
-  z-index 1000
-  box-shadow 0 0 0 1px $selected-border-color
-
+  height 16px
+  background transparent
+  box-shadow none
+  justify-content center
+  align-items center
+  display flex
+  .transform-handle
+    top: 50%;
+    width 22px
+    height 6px
+    border-radius 3px
+    background #fff
+    cursor grab
+    box-shadow 0 0 4px 1px rgba(57, 76, 96, .15), 0 0 0 1px rgba(43, 59, 74, .3)
+    &:hover
+      background $selected-border-color
+  &:hover
+    background transparent
 
 .resize-left-handle
 .resize-right-handle
-  position absolute;
   top -11px
-  left -2px
-  width 4px
-  height 22px
-  //cursor e-resize
-  background #fff
+  left -8px
+  width 16px
   border-radius 3px
-  z-index 1000
-  box-shadow 0 0 0 1px $selected-border-color
+  background transparent
+  box-shadow none
+  display flex
+  align-items center
+  justify-content center
+  .transform-handle
+    top: 50%;
+    width 6px
+    height 22px
+    border-radius 3px
+    background #fff
+    cursor grab
+    box-shadow 0 0 4px 1px rgba(57, 76, 96, .15), 0 0 0 1px rgba(43, 59, 74, .3)
+    &:hover
+      background $selected-border-color
+  &:hover
+    background transparent
 
 .resize-top-left-handle
 .resize-top-right-handle
 .resize-bottom-left-handle
 .resize-bottom-right-handle
-  position absolute;
-  left -4px
-  top -4px
-  width 8px
-  height 8px
-  //cursor nwse-resize
-  background #fff
+  left -5px
+  top -5px
+  width 10px
+  height 10px
   border-radius 5px
-  z-index 1000
-  box-shadow 0 0 0 1px $selected-border-color
+  z-index 2000
 
-.rotate-handle
+.rotate-bottom-right-handle
+.rotate-bottom-handle
   position absolute;
-  left -10px
-  top -10px
-  height 20px;
-  width 20px
-  box-shadow 0 0 0 1px $selected-border-color
+  left -8px
+  top -8px
+  height 16px;
+  width 16px
   border-radius 50%;
   cursor grab
-  background #fff
-  z-index 1000
-
 
 .de-board--selector
+  opacity 0
   border 1px dashed $selected-border-color
   user-select none
 

@@ -35,10 +35,6 @@ export class Point {
     return tm.apply(this);
   }
 
-  static from(p: { x: number; y: number }) {
-    return new Point(p.x, p.y);
-  }
-
   move(dx: number, dy: number) {
     return new Point(this.x + dx, this.y + dy);
   }

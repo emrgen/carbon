@@ -1,4 +1,11 @@
 import { Box } from "@chakra-ui/react";
+import {
+  Affine,
+  ResizeRatio,
+  TransformAnchor,
+  TransformHandle,
+} from "@emrgen/carbon-affine";
+import { Shaper } from "@emrgen/carbon-affine/src/Shaper";
 import { blockPresetPlugins, node } from "@emrgen/carbon-blocks";
 import {
   ActiveCellRuntime,
@@ -13,6 +20,7 @@ import {
   ModePath,
   NodeId,
   StylePath,
+  TransformStatePath,
 } from "@emrgen/carbon-core";
 import { designPlugin, designRenderers } from "@emrgen/carbon-design";
 import { timelineRenderer } from "@emrgen/carbon-plugin-timeline";
@@ -20,7 +28,7 @@ import { questionExtension } from "@emrgen/carbon-question";
 import {
   ReactRenderer,
   RenderManager,
-  useCreateCachedCarbon,
+  useCreateCarbon,
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import { CarbonApp } from "@emrgen/carbon-utils/src/components/CarbonAppDocument";
@@ -51,14 +59,28 @@ export function Design() {
         "deBoard",
         [
           node("deTransformer", [], {
+            [TransformStatePath]: Shaper.from(Affine.fromSize(100, 100))
+              .translate(400, 200)
+              .resize(
+                200,
+                100,
+                TransformAnchor.CENTER,
+                TransformHandle.BOTTOM,
+                ResizeRatio.FREE,
+              )
+              .toCSS(),
             [StylePath]: {
               background: "pink",
+              opacity: 0.5,
             },
           }),
           node("deTransformer", [], {
+            [TransformStatePath]: Shaper.from(Affine.fromSize(100, 100))
+              .translate(200, 400)
+              .toCSS(),
             [StylePath]: {
-              left: "300px",
-              background: "pink",
+              background: "#aea",
+              opacity: 0.5,
             },
           }),
           node("deTransformer", [], {
@@ -101,7 +123,7 @@ export function Design() {
 
     return content;
   });
-  const app = useCreateCachedCarbon("design", data, flattenDeep(plugins));
+  const app = useCreateCarbon("design", data, flattenDeep(plugins));
   const [runtime] = useState<ActiveCellRuntime>(() => {
     return new ActiveCellRuntime({
       Carbon: app,

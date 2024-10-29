@@ -77,10 +77,6 @@ export class Shaper {
     handle: TransformHandle,
     ratio: ResizeRatio,
   ): Shaper {
-    const af = this.tm.matrix;
-    const rotation = af.rotation();
-    const base = af.mul(rotation.inverse());
-
     const tm = this.tm;
     const ivm = tm.inverse();
 
@@ -91,14 +87,6 @@ export class Shaper {
     // initial size
     const before = anchorLine.vector();
     // final size after transformation
-
-    // console.log("anchorLine", anchorLine);
-    // console.log(anchorLine.transform(tm.matrix));
-    // console.log(anchorLine.transform(tm.matrix).moveEnd(dx, dy));
-    // console.log(
-    //   anchorLine.transform(tm.matrix).moveEnd(dx, dy).transform(ivm.matrix),
-    // );
-
     const after = anchorLine
       .transform(tm.matrix)
       .moveEnd(dx, dy)
@@ -107,7 +95,6 @@ export class Shaper {
 
     // scale factor, some of them could be Infinity
     const scale = after.divide(before);
-    // console.log(scale);
     // normalize the scale factor based on the anchor and handle
     const { sx: lsx, sy: lsy } = this.normalize(
       scale.x,
@@ -115,8 +102,6 @@ export class Shaper {
       anchor,
       handle,
     );
-
-    // console.log("scales", lsx, lsy);
 
     const { x: lax, y: lay } = anchorPoint;
     switch (ratio) {
@@ -190,21 +175,6 @@ export class Shaper {
     return Shaper.from(this.tm.flipY());
   }
 
-  toHandle(anchor: TransformAnchor) {
-    if (anchor === TransformAnchor.CENTER) {
-      throw new Error("Cannot convert center anchor to handle");
-    }
-
-    return toHandle(anchor);
-  }
-
-  toAnchor(handle: TransformHandle) {
-    if (handle === TransformHandle.CENTER) {
-      throw new Error("Cannot convert center handle to anchor");
-    }
-    return toAnchor(handle);
-  }
-
   // get the current size of the shape after transformation
   size() {
     const width = Line.fromPoints(
@@ -239,14 +209,54 @@ export class Shaper {
     const { x, y } = this.center();
     const { width, height } = this.size();
     const angle = this.angle();
+    // let transform = ``;
+    // if (x || y) {
+    //   if (!x) {
+    //     transform += `translateY(${y}px)`;
+    //   }
+    //
+    //   if (!y) {
+    //     transform += `translateX(${x}px)`;
+    //   }
+    //
+    //   if (x && y) {
+    //     transform += `translate(${x}px, ${y}px)`;
+    //   }
+    // }
+    //
+    // if (angle) {
+    //   transform += ` rotateZ(${angle}rad)`;
+    // }
+
     return {
       left: `-${width / 2}px`,
       top: `-${height / 2}px`,
+      width: `${width}px`,
+      height: `${height}px`,
       transform: `translate(${x}px, ${y}px) rotateZ(${angle}rad)`,
     };
   }
 
-  boundRect(): IPoint[] {
+  resizeTo(
+    width: number,
+    height: number,
+    anchor: TransformAnchor,
+    handle: TransformHandle,
+  ) {
+    const size = this.size();
+    const sx = width / size.width;
+    const sy = height / size.height;
+
+    const { sx: nxs, sy: nsy } = this.normalize(sx, sy, anchor, handle);
+
+    const { x: ax, y: ay } = getPoint(toLocation(anchor));
+
+    console.log(sx, width, size.width, ax, ay);
+
+    return Shaper.from(this.tm.scale(nxs, nsy, ax, ay));
+  }
+
+  boundRect() {
     const points: IPoint[] = [
       getPoint(Location.TOP_LEFT),
       getPoint(Location.TOP_RIGHT),
@@ -273,5 +283,9 @@ export class Shaper {
 
   angle() {
     return Line.UX.transform(this.tm.matrix).angle;
+  }
+
+  static is(shaper: any) {
+    return shaper instanceof Shaper;
   }
 }

@@ -34,7 +34,7 @@ const DesignSelectionStage = (props: RendererProps) => {
       <div className={"de-board-content"}>
         <CarbonBlock {...props} ref={ref}>
           <RectSelector node={node} />
-          {node.children.slice(0, 1).map((child) => {
+          {node.children.slice(0, 2).map((child) => {
             return <CarbonNode node={child} key={child.key} />;
           })}
           {/*<CarbonChildren node={node} />*/}

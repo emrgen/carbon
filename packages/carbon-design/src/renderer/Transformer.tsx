@@ -6,7 +6,7 @@ import {
   TransformHandle,
   TransformType,
 } from "@emrgen/carbon-affine";
-import { Node, NodeId, StylePath } from "@emrgen/carbon-core";
+import { Node, NodeId, TransformStatePath } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { useMakeDraggable } from "@emrgen/carbon-dragon-react";
 import {
@@ -28,7 +28,7 @@ import { CarbonTransformControls } from "../components/CarbonTransformControls";
 import { useBoard } from "../hook/useBoard";
 import { useElement } from "../hook/useElement";
 import { useBoardOverlay } from "../hook/useOverlay";
-import { getNodeStyle } from "../utils";
+import { getNodeTransform, max } from "../utils";
 
 interface ElementTransformerProps {
   node: Node;
@@ -43,72 +43,63 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   const ref = useRef<HTMLDivElement>();
   const styleRef = useRef<CSSProperties>();
   const board = useBoard();
+  const [dragging, setDragging] = useState(false);
+  const [transforming, setTransforming] = useState(false);
   const [selected, setSelected] = useState(false);
   const [active, setActive] = useState(false);
   const [withinSelectRect, setWithinSelectRect] = useState(false);
   const [distance, setDistance] = useState(5);
 
-  const transformerStyle = useMemo(() => getNodeStyle(node), [node]);
-  const [style, setStyle] = useState<CSSProperties>(() => getNodeStyle(node));
-  const [affine, setAffine] = useState<Affine>(Affine.IDENTITY);
-
-  useEffect(() => {
-    setStyle(getNodeStyle(node));
-  }, [node]);
+  const [affine, setAffine] = useState<Affine>(getNodeTransform(node));
+  const transformerStyle = useMemo(
+    () => Shaper.from(getNodeTransform(node)).toStyle(),
+    [node],
+  );
+  const [style, setStyle] = useState<CSSProperties>(() =>
+    Shaper.from(getNodeTransform(node)).toStyle(),
+  );
 
   const onDragStart = useCallback(
     (event: DndEvent) => {
-      console.log("drag start");
-      const { left = 0, top = 0 } = node.props.get<CSSProperties>(
-        StylePath,
-        {},
-      );
       event.setState({
-        left: parseInt(left?.toString()) || 0,
-        top: parseInt(top?.toString()) || 0,
+        shaper: Shaper.from(getNodeTransform(node)),
       });
-
-      // console.log();
-
+      setDragging(true);
       overlay.showOverlay();
     },
     [node, overlay],
   );
 
-  const onDragMove = useCallback(
-    (event: DndEvent) => {
-      console.log("moving....");
-      const {
-        state,
-        position: { deltaX: dx, deltaY: dy },
-      } = event;
-      const { left: x = 0, top: y = 0 } = state ?? {};
-      const newStyle = {
-        ...style,
-        left: x + dx + "px",
-        top: y + dy + "px",
-      };
-
-      if (ref.current) {
-        ref.current.style.left = newStyle.left;
-        ref.current.style.top = newStyle.top;
-      }
-
-      // setStyle(newStyle);
-      styleRef.current = newStyle;
-    },
-    [style],
-  );
+  const onDragMove = useCallback((event: DndEvent) => {
+    const { shaper } = event.state;
+    const {
+      position: { deltaX: dx, deltaY: dy },
+    } = event;
+    const newStyle = shaper.translate(dx, dy).toStyle();
+    if (ref.current) {
+      ref.current.style.left = newStyle.left;
+      ref.current.style.top = newStyle.top;
+      ref.current.style.transform = newStyle.transform;
+    }
+  }, []);
 
   const onDragEnd = useCallback(
     (event: DndEvent) => {
-      console.log("drag end");
+      const { shaper } = event.state;
+      if (!Shaper.is(shaper)) return;
+
+      const {
+        position: { deltaX: dx, deltaY: dy },
+      } = event;
+      const transform = shaper.translate(dx, dy);
+      setDragging(false);
+      setAffine(transform.affine());
+
       overlay.hideOverlay();
       // update the element style
       app.cmd
         .Update(node.id, {
-          [`${StylePath}/left`]: styleRef.current?.left,
-          [`${StylePath}/top`]: styleRef.current?.top,
+          [TransformStatePath]: transform.toCSS(),
         })
         .Dispatch();
     },
@@ -138,18 +129,15 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     const onGroupDragStart = (nodeId: NodeId, event: DndEvent) => {
       // save the current transformation matrix
       event.setState({
-        left: parseInt(transformerStyle.left?.toString() || "0"),
-        top: parseInt(transformerStyle.top?.toString() || "0"),
+        shaper: Shaper.from(getNodeTransform(node)),
       });
     };
 
     const onGroupDragMove = (nodeId: NodeId, event: DndEvent) => {
-      const { left, top } = event.state;
+      const { shaper } = event.state;
       const { deltaX: dx, deltaY: dy } = event.position;
       setStyle((style) => ({
-        ...style,
-        left: left + dx + "px",
-        top: top + dy + "px",
+        ...shaper.translate(dx, dy).toStyle(),
       }));
     };
 
@@ -207,13 +195,6 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     };
   }, [selected, active, withinSelectRect, listeners]);
 
-  // merge the transformer style with the local style
-  // when the transformer is dragged the local style will be updated
-  // on drag end the transformer style will be updated using a transaction
-  const styleProps = useMemo(() => {
-    return merge(cloneDeep(transformerStyle), style);
-  }, [transformerStyle, style]);
-
   // console.log("styleProps", styleProps);
 
   const onTransformStart = (
@@ -221,19 +202,98 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     anchor: TransformAnchor,
     handle: TransformHandle,
     event: DndEvent,
-  ) => {};
+  ) => {
+    console.log(type, event);
+    setTransforming(true);
+    event.setState({
+      shaper: Shaper.from(getNodeTransform(node)),
+    });
+  };
   const onTransformMove = (
     type: TransformType,
     anchor: TransformAnchor,
     handle: TransformHandle,
     event: DndEvent,
-  ) => {};
+  ) => {
+    console.log(type, anchor, handle, event);
+    if (type === TransformType.ROTATE) {
+    } else {
+      const { shaper: before } = event.state;
+      if (!Shaper.is(before)) return;
+      const { deltaX: dx, deltaY: dy } = event.position;
+      let after = before.resize(dx, dy, anchor, handle, ResizeRatio.FREE);
+      const { width, height } = after.size();
+
+      const w = max(4, width);
+      const h = max(4, height);
+      if (w <= 4 || h <= 4) {
+        after = before.resizeTo(w, h, anchor, handle);
+      }
+
+      const style = after.toStyle();
+      if (ref.current) {
+        ref.current.style.left = style.left;
+        ref.current.style.top = style.top;
+        ref.current.style.transform = style.transform;
+        ref.current.style.width = style.width;
+        ref.current.style.height = style.height;
+      }
+
+      console.log("moving", after.size());
+    }
+  };
   const onTransformEnd = (
     type: TransformType,
     anchor: TransformAnchor,
     handle: TransformHandle,
     event: DndEvent,
-  ) => {};
+  ) => {
+    console.log(type, event);
+    setTransforming(false);
+    if (type === TransformType.ROTATE) {
+    } else {
+      const { shaper: before } = event.state;
+      if (!Shaper.is(before)) return;
+      const size = before.size();
+      const { deltaX: dx, deltaY: dy } = event.position;
+      let after = before.resize(dx, dy, anchor, handle, ResizeRatio.FREE);
+      const { width, height } = after.size();
+
+      const w = max(4, width);
+      const h = max(4, height);
+      if (w <= 4 || h <= 4) {
+        after = before.resizeTo(w, h, anchor, handle);
+      }
+
+      setAffine(after.affine());
+      overlay.hideOverlay();
+
+      const style = after.toStyle();
+      if (ref.current) {
+        ref.current.style.left = style.left;
+        ref.current.style.top = style.top;
+        ref.current.style.transform = style.transform;
+        ref.current.style.width = style.width;
+        ref.current.style.height = style.height;
+      }
+
+      // update the element style
+      app.cmd
+        .Update(node.id, {
+          [TransformStatePath]: after.toCSS(),
+        })
+        .Dispatch();
+    }
+  };
+
+  // merge the transformer style with the local style
+  // when the transformer is dragged the local style will be updated
+  // on drag end the transformer style will be updated using a transaction
+  const styleProps = useMemo(() => {
+    return merge(cloneDeep(transformerStyle), style);
+  }, [transformerStyle, style]);
+
+  console.log(styleProps);
 
   return (
     <div className={"de-transformer-element"}>
@@ -246,23 +306,15 @@ export const TransformerComp = (props: ElementTransformerProps) => {
           return defaultRenderPropComparator(p, n) && p.custom === n.custom;
         }}
       ></CarbonBlock>
-      <CarbonTransformControls
-        affine={Shaper.from(Affine.fromSize(100, 100))
-          .translate(400, 400)
-          .resize(
-            25,
-            25,
-            TransformAnchor.CENTER,
-            TransformHandle.BOTTOM_RIGHT,
-            ResizeRatio.FREE,
-          )
-          .rotate(Math.PI / 4)
-          .affine()}
-        node={node}
-        onTransformStart={onTransformStart}
-        onTransformMove={onTransformMove}
-        onTransformEnd={onTransformEnd}
-      />
+      {selected && !dragging && !transforming && (
+        <CarbonTransformControls
+          affine={affine}
+          node={node}
+          onTransformStart={onTransformStart}
+          onTransformMove={onTransformMove}
+          onTransformEnd={onTransformEnd}
+        />
+      )}
     </div>
   );
 };

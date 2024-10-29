@@ -29,7 +29,7 @@ export const Draggable = (props: DraggableProps) => {
   } = props;
   const ref = useRef<HTMLDivElement>(null);
 
-  useMakeDraggable({
+  const { listeners } = useMakeDraggable({
     node,
     ref,
     distance: 4,
@@ -51,7 +51,7 @@ export const Draggable = (props: DraggableProps) => {
   });
 
   return (
-    <div className={className} style={style} ref={ref}>
+    <div className={className} style={style} ref={ref} {...listeners}>
       {children}
     </div>
   );
