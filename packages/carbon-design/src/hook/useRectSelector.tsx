@@ -3,12 +3,18 @@ import { CSSProperties, useEffect, useState } from "react";
 import { DesignBoard, SelectEvent } from "../core/DesignBoard";
 import { abs, min } from "../utils";
 
-export const useRectSelector = (board: DesignBoard) => {
+export const useRectSelector = (
+  board: DesignBoard,
+  rectRef: React.MutableRefObject<any>,
+) => {
   const [style, setStyle] = useState<CSSProperties>({});
   const [isSelecting, setIsSelecting] = useState(false);
 
   useEffect(() => {
     const onSelectStart = (e: DndEvent) => {
+      if (rectRef.current) {
+        rectRef.current;
+      }
       setStyle({
         display: "block",
         position: "absolute",
@@ -16,26 +22,25 @@ export const useRectSelector = (board: DesignBoard) => {
         top: e.position.startY,
         width: 0,
         height: 0,
-        border: "1px dashed #000",
         pointerEvents: "none",
+        opacity: 1,
       });
       setIsSelecting(true);
     };
 
     const onSelectMove = (e: DndEvent) => {
       const { position: p } = e;
-      setStyle((style) => ({
-        ...style,
-        left: min(p.startX, p.endX),
-        top: min(p.startY, p.endY),
-        width: abs(p.startX - p.endX),
-        height: abs(p.startY - p.endY),
-      }));
+      if (rectRef.current) {
+        rectRef.current.style.left = min(p.startX, p.endX) + "px";
+        rectRef.current.style.top = min(p.startY, p.endY) + "px";
+        rectRef.current.style.width = abs(p.startX - p.endX) + "px";
+        rectRef.current.style.height = abs(p.startY - p.endY) + "px";
+      }
     };
 
     const onSelectEnd = (e: SelectEvent) => {
       setStyle({
-        display: "none",
+        opacity: 0,
       });
       setIsSelecting(false);
     };
@@ -49,7 +54,7 @@ export const useRectSelector = (board: DesignBoard) => {
       board.off("select:move", onSelectMove);
       board.off("select:end", onSelectEnd);
     };
-  }, [board]);
+  }, [board, rectRef]);
 
   return {
     style,

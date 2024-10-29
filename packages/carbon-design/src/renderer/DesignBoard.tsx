@@ -1,18 +1,15 @@
-import { Node } from "@emrgen/carbon-core";
-import { DndEvent } from "@emrgen/carbon-dragon";
-import { useMakeDraggable } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNode,
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
-import { useEffect, useRef, useState } from "react";
-import { SelectionGroup } from "../components/SelectionGroup";
+import { useRef, useState } from "react";
+import { BoardHelpers } from "../components/BoardHelpers";
+import { RectSelector } from "../components/RectSelector";
 import { DesignBoard } from "../core/DesignBoard";
-import { BoardContext, useBoard } from "../hook/useBoard";
-import { BoardOverlayProvider, useBoardOverlay } from "../hook/useOverlay";
-import { useRectSelector } from "../hook/useRectSelector";
+import { BoardContext } from "../hook/useBoard";
+import { BoardOverlayProvider } from "../hook/useOverlay";
 
 export const DesignBoardComp = (props: RendererProps) => {
   const { node } = props;
@@ -30,68 +27,20 @@ export const DesignBoardComp = (props: RendererProps) => {
 
 const DesignSelectionStage = (props: RendererProps) => {
   const { node } = props;
-  const board = useBoard();
   const ref = useRef<any>();
-  const overlay = useBoardOverlay();
-  const [showGroup, setShowGroup] = useState(false);
-
-  // console.log(
-  //   fromString(
-  //     toCSS(compose(translate(100 - 50, 100 - 50 + 72), rotateDEG(45))),
-  //   ),
-  // );
-
-  const { style, isSelecting } = useRectSelector(board);
-
-  const { listeners } = useMakeDraggable({
-    node,
-    ref,
-    distance: 5,
-    onDragStart(event: DndEvent) {
-      board.onSelectionStart(event);
-      overlay.showOverlay();
-    },
-    onDragMove(event: DndEvent) {
-      board.onSelectionMove(event);
-    },
-    onDragEnd(event: DndEvent) {
-      board.onSelectionEnd(event);
-      overlay.hideOverlay();
-    },
-    onMouseDown(node: Node, event: MouseEvent) {},
-    onMouseUp(node: Node, event: DndEvent) {
-      board.onMouseUp(node, event);
-    },
-  });
-
-  useEffect(() => {
-    const onSelectionChanged = () => {
-      setShowGroup(board.selectedNodes.size > 1);
-    };
-
-    board.on("selectionchanged", onSelectionChanged);
-    return () => {
-      board.off("selectionchanged", onSelectionChanged);
-    };
-  }, [board]);
 
   return (
     <>
-      <div
-        className={
-          "de-board-content " + (isSelecting ? "de-board--rect-selecting" : "")
-        }
-        {...listeners}
-      >
+      <div className={"de-board-content"}>
         <CarbonBlock {...props} ref={ref}>
+          <RectSelector node={node} />
           {node.children.slice(0, 1).map((child) => {
             return <CarbonNode node={child} key={child.key} />;
           })}
           {/*<CarbonChildren node={node} />*/}
         </CarbonBlock>
+        <BoardHelpers node={node} />
       </div>
-      <div className={"de-board--selector"} style={style}></div>
-      {showGroup && <SelectionGroup />}
     </>
   );
 };

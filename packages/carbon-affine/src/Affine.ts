@@ -88,7 +88,11 @@ export class Affine {
   constructor(readonly mat: AffineMatrix) {}
 
   get angle() {
-    return Math.atan2(this.mat[1], this.mat[0]);
+    return Math.atan2(this.mat[3], this.mat[4]);
+  }
+
+  get scaleX() {
+    return;
   }
 
   // r -> s -> t

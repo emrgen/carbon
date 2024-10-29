@@ -1,6 +1,8 @@
 import {
   Affine,
   getPoint,
+  IPoint,
+  Line,
   Shaper,
   toLocation,
   TransformAnchor,
@@ -122,23 +124,6 @@ interface TransformerHandleProps {
   onTransformEnd: TransformHandler;
 }
 
-const handleTransformation = (affine: Affine, handle: TransformHandle) => {
-  const point = affine.apply(getPoint(toLocation(handle)));
-  if (handle === TransformHandle.BOTTOM) {
-    console.log(point);
-  }
-
-  const sp = Shaper.from(Affine.translate(point.x, point.y)).rotate(
-    affine.angle,
-    // 200,
-    // 200,
-  );
-
-  return {
-    transform: sp.toCSS(),
-  };
-};
-
 const TransformerHandle = (props: TransformerHandleProps) => {
   const {
     className,
@@ -155,8 +140,18 @@ const TransformerHandle = (props: TransformerHandleProps) => {
   // use affine to get the position of the handle
 
   const position = useMemo(() => {
-    return handleTransformation(affine, handle);
-  }, [affine, handle]);
+    let point!: IPoint;
+    if (type === TransformType.SCALE) {
+      point = getPoint(toLocation(handle));
+    } else {
+      const offset = Line.fromPoint({ x: 36, y: 0 }).transform(
+        affine.inverse(),
+      ).length;
+      point = { x: 0, y: 1 + offset };
+    }
+
+    return handleTransformation(affine, point);
+  }, [affine, handle, type]);
 
   return (
     <Draggable
@@ -174,4 +169,17 @@ const TransformerHandle = (props: TransformerHandleProps) => {
       }}
     />
   );
+};
+
+const handleTransformation = (affine: Affine, handlePoint: IPoint) => {
+  const point = affine.apply(handlePoint);
+
+  const sp = Shaper.from(Affine.translate(point.x, point.y)).rotate(
+    affine.angle,
+  );
+  const { x, y } = point;
+
+  return {
+    transform: `translate(${x}px, ${y}px) rotateZ(${affine.angle}rad)`,
+  };
 };

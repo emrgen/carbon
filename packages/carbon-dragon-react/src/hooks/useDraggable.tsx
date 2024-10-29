@@ -1,6 +1,12 @@
 import { Node } from "@emrgen/carbon-core";
 import { DndEvent, getEventPosition } from "@emrgen/carbon-dragon";
-import { MutableRefObject, useCallback, useEffect, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useDndContext } from "./useDndContext";
 
 export interface UseFastDraggableProps {
@@ -155,6 +161,8 @@ interface UseTrackDragProps {
   onDragEnd(event: DndEvent): void;
 }
 
+let counter = 0;
+
 export function useMakeDraggable<T extends Record<string, any>>(
   props: UseTrackDragProps,
 ) {
@@ -174,13 +182,14 @@ export function useMakeDraggable<T extends Record<string, any>>(
     (event) => {
       let initState: T = {} as T;
       // preventAndStop(event)
-      // console.log("mouse down", ref.current, event.target);
       if (isDisabled) return;
-      if (ref.current !== event.target) return;
+      if (ref.current !== event.target) {
+        return;
+      }
+      // event.stopPropagation();
       onMouseDown(node, event);
       // console.log(ref.current, event.target)
       let isDragging = false;
-      let state = {};
 
       const activatorEvent = event;
 
@@ -221,9 +230,7 @@ export function useMakeDraggable<T extends Record<string, any>>(
         }
 
         // check if the drag start can be activated
-        if (distance === 0) {
-          isDragging = true;
-        } else if (
+        if (
           Math.pow(position.deltaX, 2) + Math.pow(position.deltaY, 2) >
           Math.pow(distance, 2)
         ) {
@@ -266,12 +273,15 @@ export function useMakeDraggable<T extends Record<string, any>>(
     ],
   );
 
-  return {
-    listeners: {
-      onMouseDown: onMouseDownHandler,
-    },
-    attributes: {
-      "data-draggable": true,
-    },
-  };
+  return useMemo(
+    () => ({
+      listeners: {
+        onMouseDown: onMouseDownHandler,
+      },
+      attributes: {
+        "data-draggable": true,
+      },
+    }),
+    [onMouseDownHandler],
+  );
 }

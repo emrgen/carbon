@@ -11,7 +11,6 @@ import { DndEvent } from "@emrgen/carbon-dragon";
 import { useMakeDraggable } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
-  CarbonChildren,
   defaultRenderPropComparator,
   useCarbon,
 } from "@emrgen/carbon-react";
@@ -41,12 +40,13 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   useElement(props);
   const app = useCarbon();
   const overlay = useBoardOverlay();
-  const ref = useRef();
+  const ref = useRef<HTMLDivElement>();
   const styleRef = useRef<CSSProperties>();
   const board = useBoard();
   const [selected, setSelected] = useState(false);
   const [active, setActive] = useState(false);
   const [withinSelectRect, setWithinSelectRect] = useState(false);
+  const [distance, setDistance] = useState(5);
 
   const transformerStyle = useMemo(() => getNodeStyle(node), [node]);
   const [style, setStyle] = useState<CSSProperties>(() => getNodeStyle(node));
@@ -56,12 +56,9 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     setStyle(getNodeStyle(node));
   }, [node]);
 
-  // during dragging this hook will not re-evaluate as no dependencies changes
-  const { listeners } = useMakeDraggable<{ left: number; top: number }>({
-    node,
-    ref,
-    distance: 5,
-    onDragStart(event: DndEvent) {
+  const onDragStart = useCallback(
+    (event: DndEvent) => {
+      console.log("drag start");
       const { left = 0, top = 0 } = node.props.get<CSSProperties>(
         StylePath,
         {},
@@ -71,11 +68,16 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         top: parseInt(top?.toString()) || 0,
       });
 
-      console.log();
+      // console.log();
 
       overlay.showOverlay();
     },
-    onDragMove(event: DndEvent<{ left: number; top: number }>) {
+    [node, overlay],
+  );
+
+  const onDragMove = useCallback(
+    (event: DndEvent) => {
+      console.log("moving....");
       const {
         state,
         position: { deltaX: dx, deltaY: dy },
@@ -87,10 +89,20 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         top: y + dy + "px",
       };
 
-      setStyle(newStyle);
+      if (ref.current) {
+        ref.current.style.left = newStyle.left;
+        ref.current.style.top = newStyle.top;
+      }
+
+      // setStyle(newStyle);
       styleRef.current = newStyle;
     },
-    onDragEnd(event: DndEvent) {
+    [style],
+  );
+
+  const onDragEnd = useCallback(
+    (event: DndEvent) => {
+      console.log("drag end");
       overlay.hideOverlay();
       // update the element style
       app.cmd
@@ -100,21 +112,26 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         })
         .Dispatch();
     },
-    onMouseDown(node: Node, event: MouseEvent) {},
-    onMouseUp(node: Node, event: DndEvent) {},
-  });
+    [app, node, overlay],
+  );
 
-  const handleMouseDown = useCallback(
-    (e: MouseEvent) => {
-      e.stopPropagation();
+  // during dragging this hook will not re-evaluate as no dependencies changes
+  const { listeners } = useMakeDraggable<{ left: number; top: number }>({
+    node,
+    ref,
+    distance,
+    onDragStart: onDragStart,
+    onDragMove: onDragMove,
+    onDragEnd: onDragEnd,
+    onMouseDown(node: Node, event: MouseEvent) {
+      event.preventDefault();
+      event.stopPropagation();
       if (!board.selectedNodes.has(node.id)) {
         board.selectNodes([node]);
       }
-
-      listeners.onMouseDown(e);
     },
-    [board, node, listeners],
-  );
+    onMouseUp(node: Node, event: DndEvent) {},
+  });
 
   // subscribe to group drag events
   useEffect(() => {
@@ -156,7 +173,9 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     const onDeselect = () => setSelected(false);
     const onActive = () => setActive(true);
     const onInactive = () => setActive(false);
-    const onWithinSelectRect = () => setWithinSelectRect(true);
+    const onWithinSelectRect = () => {
+      setWithinSelectRect(true);
+    };
     const onOutsideSelectRect = () => setWithinSelectRect(false);
 
     board.bus.on(node.id, "select", onSelect);
@@ -184,9 +203,9 @@ export const TransformerComp = (props: ElementTransformerProps) => {
 
     return {
       className: classes.join(" "),
-      onMouseDown: handleMouseDown,
+      ...listeners,
     };
-  }, [selected, active, withinSelectRect, handleMouseDown]);
+  }, [selected, active, withinSelectRect, listeners]);
 
   // merge the transformer style with the local style
   // when the transformer is dragged the local style will be updated
@@ -218,7 +237,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
 
   return (
     <div className={"de-transformer-element"}>
-      <CarbonChildren node={node} />
+      {/*<CarbonChildren node={node} />*/}
       <CarbonBlock
         ref={ref}
         node={node}
@@ -237,7 +256,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
             TransformHandle.BOTTOM_RIGHT,
             ResizeRatio.FREE,
           )
-          // .rotate(Math.PI / 4)
+          .rotate(Math.PI / 4)
           .affine()}
         node={node}
         onTransformStart={onTransformStart}

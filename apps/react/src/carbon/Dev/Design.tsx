@@ -5,7 +5,6 @@ import {
   ActiveCellRuntimeContext,
   cellRenderer,
 } from "@emrgen/carbon-cell";
-import { DocumentSaveStatus } from "@emrgen/carbon-chakra-ui/src/components/DocumentSaveStatus";
 import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui/src/components/FloatingStyleMenu";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import {
@@ -114,7 +113,7 @@ export function Design() {
       <ActiveCellRuntimeContext runtime={runtime}>
         <CarbonApp app={app} renderManager={renderManager}>
           <FloatingStyleMenu />
-          <DocumentSaveStatus />
+          {/*<DocumentSaveStatus />*/}
         </CarbonApp>
       </ActiveCellRuntimeContext>
     </Box>

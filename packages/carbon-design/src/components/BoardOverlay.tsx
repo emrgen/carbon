@@ -1,18 +1,29 @@
-import React, {
-  ForwardedRef,
-  forwardRef,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { EventEmitter } from "events";
+import React, { useEffect, useMemo, useState } from "react";
 import { useBoard } from "../hook/useBoard";
-import { useBoardOverlay } from "../hook/useOverlay";
 
-const InnerBoardOverlay = (props, forwardedRef: ForwardedRef<any>) => {
-  const { visible } = useBoardOverlay();
+export interface BoardOverlayProps {
+  bus: EventEmitter;
+}
 
+export const BoardOverlay = (props: BoardOverlayProps) => {
+  const { bus } = props;
   const board = useBoard();
+  const [visible, setVisible] = useState(false);
   const [selecting, setSelecting] = useState(false);
+
+  useEffect(() => {
+    console.log(bus.listeners("show").length);
+    const onShow = () => setVisible(true);
+    const onHide = () => setVisible(false);
+    bus.on("show", onShow);
+    bus.on("hide", onHide);
+
+    return () => {
+      bus.off("show", onShow);
+      bus.off("hide", onHide);
+    };
+  }, [bus]);
 
   useEffect(() => {
     const onSelectStart = () => setSelecting(true);
@@ -33,12 +44,11 @@ const InnerBoardOverlay = (props, forwardedRef: ForwardedRef<any>) => {
     return {
       className: classes.join(" "),
       style: {
-        display: visible ? "block" : "none",
+        opacity: visible ? 1 : 0,
+        zIndex: visible ? 100 : -1,
       },
     };
   }, [selecting, visible]);
 
-  return <div {...attrs} ref={forwardedRef}></div>;
+  return <div {...attrs}></div>;
 };
-
-export const BoardOverlay = forwardRef(InnerBoardOverlay);
