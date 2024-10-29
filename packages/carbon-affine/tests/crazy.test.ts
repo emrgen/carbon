@@ -1,11 +1,22 @@
 import { expect, test } from "vitest";
-import { Affine } from "../src/index";
-import { Anchor, Handle, ResizeRatio, Shaper } from "../src/Shaper";
+import {
+  Affine,
+  ResizeRatio,
+  Shaper,
+  TransformAnchor,
+  TransformHandle,
+} from "../src/index";
 
 test("insert and move, resize, rotate", () => {
   const sp = Shaper.from(Affine.fromSize(10, 10).scale(5, 5))
     .translate(100, 100)
-    .resize(20, 1, Anchor.LEFT, Handle.RIGHT, ResizeRatio.FREE);
+    .resize(
+      20,
+      1,
+      TransformAnchor.LEFT,
+      TransformHandle.RIGHT,
+      ResizeRatio.FREE,
+    );
 
   // console.log(sp.toCSS());
   expect(sp.toCSS()).toBe(
@@ -38,7 +49,13 @@ test("insert and move, resize, rotate", () => {
     ).toCSS(),
   );
 
-  const sp5 = sp4.resize(1, 50, Anchor.CENTER, Handle.RIGHT, ResizeRatio.FREE);
+  const sp5 = sp4.resize(
+    1,
+    50,
+    TransformAnchor.CENTER,
+    TransformHandle.RIGHT,
+    ResizeRatio.FREE,
+  );
   // console.log(sp5.toCSS());
   expect(sp5.toCSS()).toBe(
     Affine.fromCSS(

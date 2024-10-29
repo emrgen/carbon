@@ -1,9 +1,9 @@
 import { Node } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
-import { useTrackDrag } from "@emrgen/carbon-dragon-react";
+import { useMakeDraggable } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
-  CarbonChildren,
+  CarbonNode,
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
@@ -43,7 +43,7 @@ const DesignSelectionStage = (props: RendererProps) => {
 
   const { style, isSelecting } = useRectSelector(board);
 
-  const { listeners } = useTrackDrag({
+  const { listeners } = useMakeDraggable({
     node,
     ref,
     distance: 5,
@@ -84,7 +84,10 @@ const DesignSelectionStage = (props: RendererProps) => {
         {...listeners}
       >
         <CarbonBlock {...props} ref={ref}>
-          <CarbonChildren node={node} />
+          {node.children.slice(0, 1).map((child) => {
+            return <CarbonNode node={child} key={child.key} />;
+          })}
+          {/*<CarbonChildren node={node} />*/}
         </CarbonBlock>
       </div>
       <div className={"de-board--selector"} style={style}></div>

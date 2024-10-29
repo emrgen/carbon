@@ -1,6 +1,6 @@
 import { ActionOrigin, Node, NodeId, NodeIdMap } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
-import { useTrackDrag } from "@emrgen/carbon-dragon-react";
+import { useMakeDraggable } from "@emrgen/carbon-dragon-react";
 import { useCarbon } from "@emrgen/carbon-react";
 import { clamp, identity } from "lodash";
 import { CSSProperties, useEffect, useRef, useState } from "react";
@@ -39,7 +39,7 @@ export const SelectionGroup = (props: SelectionGroupProps) => {
     };
   }, [board]);
 
-  const { listeners } = useTrackDrag<{ left: number }>({
+  const { listeners } = useMakeDraggable<{ left: number }>({
     node: Node.IDENTITY,
     ref,
     distance,

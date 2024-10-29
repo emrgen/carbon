@@ -71,10 +71,12 @@
     "npm:@vitejs/plugin-vue@^4.5.2": "4.6.2_vite@4.5.5__@types+node@20.17.1__stylus@0.59.0_vue@3.5.12__typescript@4.9.5_@types+node@20.17.1_stylus@0.59.0_typescript@4.9.5",
     "npm:acorn@^8.13.0": "8.14.0",
     "npm:ajv@7": "7.2.4",
+    "npm:async@^3.2.6": "3.2.6",
     "npm:autoprefixer@^10.4.16": "10.4.20_postcss@8.4.47",
     "npm:autosize@^6.0.1": "6.0.1",
     "npm:axios@^1.7.7": "1.7.7",
     "npm:browser-dtector@^4.1.0": "4.1.0",
+    "npm:chalk@^5.3.0": "5.3.0",
     "npm:codemirror@^6.0.1": "6.0.1_@codemirror+language@6.10.3_@codemirror+state@6.4.1_@codemirror+view@6.34.1",
     "npm:command-line-args@^5.2.1": "5.2.1",
     "npm:compare-urls@^4.1.0": "4.1.0",
@@ -142,6 +144,7 @@
     "npm:react-use@^17.5.1": "17.5.1_react@18.3.1_react-dom@18.3.1__react@18.3.1_tslib@2.8.0",
     "npm:react@^18.3.1": "18.3.1",
     "npm:recoil@~0.7.7": "0.7.7_react@18.3.1",
+    "npm:rxjs@^7.8.1": "7.8.1",
     "npm:semver@^7.6.2": "7.6.3",
     "npm:solid-js@^1.8.7": "1.9.3_seroval@1.1.1",
     "npm:sorted-btree@^1.8.0": "1.8.1",
@@ -7081,6 +7084,9 @@
         "supports-color@7.2.0"
       ]
     },
+    "chalk@5.3.0": {
+      "integrity": "sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w=="
+    },
     "char-regex@1.0.2": {
       "integrity": "sha512-kWWXztvZ5SBQV+eRgKFeh8q5sLuZY2+8WUIzlxWVTg+oGwY14qylx1KbKzHd8P6ZYkAg0xyIDU9JMHhyJMZ1jw=="
     },
@@ -9996,7 +10002,7 @@
         "lodash",
         "mute-stream",
         "run-async",
-        "rxjs",
+        "rxjs@6.6.7",
         "string-width@4.2.3",
         "strip-ansi@6.0.1",
         "through"
@@ -13445,6 +13451,12 @@
         "tslib@1.14.1"
       ]
     },
+    "rxjs@7.8.1": {
+      "integrity": "sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==",
+      "dependencies": [
+        "tslib@2.8.0"
+      ]
+    },
     "sade@1.8.1": {
       "integrity": "sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==",
       "dependencies": [
@@ -15729,6 +15741,8 @@
             "npm:@types/react@^18.3.3",
             "npm:@vitejs/plugin-react@^3.1.0",
             "npm:ajv@7",
+            "npm:async@^3.2.6",
+            "npm:chalk@^5.3.0",
             "npm:diff@^5.2.0",
             "npm:events@^3.3.0",
             "npm:framer-motion@11.2.6",
@@ -15740,6 +15754,7 @@
             "npm:react-router-dom@^6.23.1",
             "npm:react@^18.3.1",
             "npm:recoil@~0.7.7",
+            "npm:rxjs@^7.8.1",
             "npm:tailwindcss@^3.4.3",
             "npm:transformation-matrix@^2.16.1",
             "npm:ts-node@^10.9.2",

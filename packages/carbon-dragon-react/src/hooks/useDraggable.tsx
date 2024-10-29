@@ -155,7 +155,7 @@ interface UseTrackDragProps {
   onDragEnd(event: DndEvent): void;
 }
 
-export function useTrackDrag<T extends Record<string, any>>(
+export function useMakeDraggable<T extends Record<string, any>>(
   props: UseTrackDragProps,
 ) {
   const {

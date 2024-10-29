@@ -2,90 +2,21 @@ import { Affine } from "./Affine";
 import { Line } from "./Line";
 import { IPoint } from "./Point";
 import { Transform } from "./Transform";
-import { Radian } from "./types";
-import { max, min } from "./utils";
-
-export enum Location {
-  CENTER = "center",
-  TOP = "top",
-  BOTTOM = "bottom",
-  LEFT = "left",
-  RIGHT = "right",
-  TOP_LEFT = "top-left",
-  TOP_RIGHT = "top-right",
-  BOTTOM_LEFT = "bottom-left",
-  BOTTOM_RIGHT = "bottom-right",
-}
-
-export enum Anchor {
-  CENTER = "anchor-center",
-  TOP_LEFT = "anchor-top-left",
-  TOP_RIGHT = "anchor-top-right",
-  BOTTOM_LEFT = "anchor-bottom-left",
-  BOTTOM_RIGHT = "anchor-bottom-right",
-  TOP = "anchor-top",
-  BOTTOM = "anchor-bottom",
-  LEFT = "anchor-left",
-  RIGHT = "anchor-right",
-}
-
-export enum Handle {
-  CENTER = "handle-center",
-  TOP_LEFT = "handle-top-left",
-  TOP_RIGHT = "handle-top-right",
-  BOTTOM_LEFT = "handle-bottom-left",
-  BOTTOM_RIGHT = "handle-bottom-right",
-  TOP = "handle-top",
-  BOTTOM = "handle-bottom",
-  LEFT = "handle-left",
-  RIGHT = "handle-right",
-}
-
-function toLocation(anchor: Anchor | Handle): Location {
-  return isAnchor(anchor)
-    ? (anchor.replace("anchor-", "") as Location)
-    : (anchor.replace("handle-", "") as Location);
-}
-
-function isHandle(anchor: Anchor | Handle): anchor is Handle {
-  return anchor.includes("handle");
-}
-
-export function isAnchor(anchor: Anchor | Handle): anchor is Anchor {
-  return !isHandle(anchor);
-}
-
-export function toAnchor(handle: Handle | Anchor): Anchor {
-  if (isAnchor(handle)) {
-    return handle;
-  }
-  return handle.replace("handle", "anchor") as Anchor;
-}
-
-export function toHandle(anchor: Handle | Anchor): Handle {
-  if (isHandle(anchor)) {
-    return anchor;
-  }
-  return anchor.replace("anchor", "handle") as Handle;
-}
-
-export enum ResizeRatio {
-  FREE = "free",
-  KEEP = "keep",
-  KEEP_X = "keep-x",
-  KEEP_Y = "keep-y",
-}
-
-const DEFAULT_SIZE = 2;
+import { Radian, Scale } from "./types";
+import {
+  getPoint,
+  Location,
+  max,
+  min,
+  ResizeRatio,
+  toLocation,
+  TransformAnchor,
+  TransformHandle,
+} from "./utils";
 
 // initial shape is a square with the center at (0, 0) and the side length is 2
 export class Shaper {
   private readonly tm: Transform;
-
-  static LEFT = -DEFAULT_SIZE / 2;
-  static RIGHT = DEFAULT_SIZE / 2;
-  static TOP = -DEFAULT_SIZE / 2;
-  static BOTTOM = DEFAULT_SIZE / 2;
 
   static IDENTITY = Shaper.from(Transform.from(Affine.IDENTITY));
 
@@ -109,13 +40,13 @@ export class Shaper {
     }
   }
 
-  into() {
+  affine() {
     return this.tm.matrix;
   }
 
   // dx, dy are the distance of the mouse move
   translate(dx: number, dy: number): Shaper {
-    // restore the rotation -> translate -> rotate again
+    // remove scale -> remove rotate -> translate -> rotate -> rescale
     const af = this.tm.matrix;
     const { rotation, scaling } = af.decompose();
     const mat = af
@@ -129,7 +60,7 @@ export class Shaper {
   }
 
   rotate(angle: Radian, cx?: number, cy?: number): Shaper {
-    // inverse -> rotate -> restore
+    // remove scale -> rotate -> rescale
     const scaling = this.tm.matrix.scaling();
     const tm = this.tm
       .add(scaling.inverse())
@@ -140,10 +71,10 @@ export class Shaper {
 
   // dx, dy are the distance of the mouse move
   resize(
-    dx: number,
-    dy: number,
-    anchor: Anchor,
-    handle: Handle,
+    dx: Scale,
+    dy: Scale,
+    anchor: TransformAnchor,
+    handle: TransformHandle,
     ratio: ResizeRatio,
   ): Shaper {
     const af = this.tm.matrix;
@@ -174,11 +105,11 @@ export class Shaper {
       .transform(ivm.matrix)
       .vector();
 
-    // scale factor
+    // scale factor, some of them could be Infinity
     const scale = after.divide(before);
     // console.log(scale);
     // normalize the scale factor based on the anchor and handle
-    const { sx: lsx, sy: lsy } = this.normalizeScales(
+    const { sx: lsx, sy: lsy } = this.normalize(
       scale.x,
       scale.y,
       anchor,
@@ -201,81 +132,74 @@ export class Shaper {
     }
   }
 
-  private normalizeScales(
+  private normalize(
     sx: number,
     sy: number,
-    anchor: Anchor,
-    handle: Handle,
+    anchor: TransformAnchor,
+    handle: TransformHandle,
   ) {
-    if (handle === Handle.CENTER) {
+    if (handle === TransformHandle.CENTER) {
       switch (anchor) {
-        case Anchor.TOP_LEFT:
-        case Anchor.TOP_RIGHT:
-        case Anchor.BOTTOM_LEFT:
-        case Anchor.BOTTOM_RIGHT:
+        case TransformAnchor.TOP_LEFT:
+        case TransformAnchor.TOP_RIGHT:
+        case TransformAnchor.BOTTOM_LEFT:
+        case TransformAnchor.BOTTOM_RIGHT:
           return { sx, sy };
-        case Anchor.TOP:
-        case Anchor.BOTTOM:
+        case TransformAnchor.TOP:
+        case TransformAnchor.BOTTOM:
           return { sx: 1, sy };
-        case Anchor.LEFT:
-        case Anchor.RIGHT:
+        case TransformAnchor.LEFT:
+        case TransformAnchor.RIGHT:
           return { sx, sy: 1 };
       }
     }
 
-    if (handle === Handle.TOP || handle === Handle.BOTTOM) {
+    if (handle === TransformHandle.TOP || handle === TransformHandle.BOTTOM) {
       return { sx: 1, sy };
     }
 
-    if (handle === Handle.LEFT || handle === Handle.RIGHT) {
+    if (handle === TransformHandle.LEFT || handle === TransformHandle.RIGHT) {
       return { sx, sy: 1 };
+    }
+
+    if (sx === Infinity) {
+      sx = 1;
+    }
+
+    if (sy === Infinity) {
+      sy = 1;
     }
 
     return { sx, sy };
   }
 
   // get the reference point at the beginning in the local coordinate system
-  private anchorPoint(anchor: Anchor) {
-    return this.pointAt(toLocation(anchor));
+  private anchorPoint(anchor: TransformAnchor) {
+    return getPoint(toLocation(anchor));
   }
 
-  private handlePoint(handle: Handle) {
-    return this.pointAt(toLocation(handle));
+  private handlePoint(handle: TransformHandle) {
+    return getPoint(toLocation(handle));
   }
 
-  private pointAt(location: Location) {
-    switch (location) {
-      case Location.CENTER:
-        return { x: 0, y: 0 };
-      case Location.TOP_LEFT:
-        return { x: Shaper.LEFT, y: Shaper.TOP };
-      case Location.TOP_RIGHT:
-        return { x: Shaper.RIGHT, y: Shaper.TOP };
-      case Location.BOTTOM_LEFT:
-        return { x: Shaper.LEFT, y: Shaper.BOTTOM };
-      case Location.BOTTOM_RIGHT:
-        return { x: Shaper.RIGHT, y: Shaper.BOTTOM };
-      case Location.TOP:
-        return { x: 0, y: Shaper.TOP };
-      case Location.BOTTOM:
-        return { x: 0, y: Shaper.BOTTOM };
-      case Location.LEFT:
-        return { x: Shaper.LEFT, y: 0 };
-      case Location.RIGHT:
-        return { x: Shaper.RIGHT, y: 0 };
-    }
+  flipX(): Shaper {
+    return Shaper.from(this.tm.flipX());
   }
 
-  toHandle(anchor: Anchor) {
-    if (anchor === Anchor.CENTER) {
+  flipY(): Shaper {
+    return Shaper.from(this.tm.flipY());
+  }
+
+  toHandle(anchor: TransformAnchor) {
+    if (anchor === TransformAnchor.CENTER) {
       throw new Error("Cannot convert center anchor to handle");
     }
 
     return toHandle(anchor);
   }
 
-  toAnchor(handle: Handle) {
-    if (handle === Handle.CENTER) {
+  toAnchor(handle: TransformHandle) {
+    if (handle === TransformHandle.CENTER) {
       throw new Error("Cannot convert center handle to anchor");
     }
     return toAnchor(handle);
@@ -284,12 +208,12 @@ export class Shaper {
   // get the current size of the shape after transformation
   size() {
     const width = Line.fromPoints(
-      this.pointAt(Location.LEFT),
-      this.pointAt(Location.RIGHT),
+      getPoint(Location.LEFT),
+      getPoint(Location.RIGHT),
     ).transform(this.tm.matrix).length;
     const height = Line.fromPoints(
-      this.pointAt(Location.TOP),
-      this.pointAt(Location.BOTTOM),
+      getPoint(Location.TOP),
+      getPoint(Location.BOTTOM),
     ).transform(this.tm.matrix).length;
     return {
       width,
@@ -324,10 +248,10 @@ export class Shaper {
 
   boundRect(): IPoint[] {
     const points: IPoint[] = [
-      this.pointAt(Location.TOP_LEFT),
-      this.pointAt(Location.TOP_RIGHT),
-      this.pointAt(Location.BOTTOM_LEFT),
-      this.pointAt(Location.BOTTOM_RIGHT),
+      getPoint(Location.TOP_LEFT),
+      getPoint(Location.TOP_RIGHT),
+      getPoint(Location.BOTTOM_LEFT),
+      getPoint(Location.BOTTOM_RIGHT),
     ];
 
     const globalPoints = points.map((p) => this.tm.apply(p));

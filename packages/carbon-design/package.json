@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-affine": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/carbon-dragon-react": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",

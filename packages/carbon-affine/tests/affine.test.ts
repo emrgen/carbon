@@ -156,3 +156,33 @@ test("rotate a vector", () => {
   expect(p1.x).toBeCloseTo(-1);
   expect(p1.y).toBeCloseTo(1);
 });
+
+test("flip a vector", () => {
+  const sp = Affine.flipX();
+  const p1 = sp.apply({ x: 1, y: 1 });
+  expect(p1.x).toBeCloseTo(-1);
+  expect(p1.y).toBeCloseTo(1);
+});
+
+test("flip a vector after translate", () => {
+  const af = Affine.translate(2, 0).flipX();
+  const p1 = af.apply({ x: 1, y: 1 });
+  expect(p1.x).toBeCloseTo(1);
+  expect(p1.y).toBeCloseTo(1);
+
+  const p2 = af.apply({ x: -1, y: 1 });
+  expect(p2.x).toBeCloseTo(3);
+  expect(p2.y).toBeCloseTo(1);
+});
+
+test("flip a vector after rotate", () => {
+  const af = Affine.rotate(Math.PI / 2).flipX();
+  console.log(Affine.rotate(Math.PI / 2).mat, af.mat);
+  const p1 = af.apply({ x: 1, y: 1 });
+  expect(p1.x).toBeCloseTo(-1);
+  expect(p1.y).toBeCloseTo(-1);
+
+  const p2 = af.apply({ x: -1, y: 1 });
+  expect(p2.x).toBeCloseTo(-1);
+  expect(p2.y).toBeCloseTo(1);
+});

@@ -1,6 +1,12 @@
 import { expect, test } from "vitest";
-import { Affine, Vector } from "../src/index";
-import { Anchor, Handle, ResizeRatio, Shaper } from "../src/Shaper";
+import {
+  Affine,
+  ResizeRatio,
+  Shaper,
+  TransformAnchor,
+  TransformHandle,
+  Vector,
+} from "../src/index";
 
 const old = Affine.translate(10, 0)
   .rotate(Math.PI / 4)
@@ -25,7 +31,13 @@ test("translate a old vector", () => {
 test("resize at zero wrt ref", () => {
   {
     const p1 = sp
-      .resize(2, 2, Anchor.CENTER, Handle.BOTTOM_RIGHT, ResizeRatio.FREE)
+      .resize(
+        2,
+        2,
+        TransformAnchor.CENTER,
+        TransformHandle.BOTTOM_RIGHT,
+        ResizeRatio.FREE,
+      )
       .apply({ x: 1, y: 1 });
     expect(p1.x).toBeCloseTo(3);
     expect(p1.y).toBeCloseTo(3);
@@ -33,7 +45,13 @@ test("resize at zero wrt ref", () => {
 
   {
     // resize wrt left should not change the x coordinate of left side
-    const m = sp.resize(2, 2, Anchor.LEFT, Handle.RIGHT, ResizeRatio.FREE);
+    const m = sp.resize(
+      2,
+      2,
+      TransformAnchor.LEFT,
+      TransformHandle.RIGHT,
+      ResizeRatio.FREE,
+    );
     const p2 = m.apply({ x: 1, y: 1 });
     expect(p2.x).toBeCloseTo(3);
     expect(p2.y).toBeCloseTo(1);
@@ -43,7 +61,13 @@ test("resize at zero wrt ref", () => {
 
   {
     // resize wrt right should not change the x coordinate of right side
-    const m = sp.resize(-2, 2, Anchor.RIGHT, Handle.LEFT, ResizeRatio.FREE);
+    const m = sp.resize(
+      -2,
+      2,
+      TransformAnchor.RIGHT,
+      TransformHandle.LEFT,
+      ResizeRatio.FREE,
+    );
     const p2 = m.apply({ x: -1, y: 1 });
     expect(p2.x).toBeCloseTo(-3);
     expect(p2.y).toBeCloseTo(1);
@@ -53,7 +77,13 @@ test("resize at zero wrt ref", () => {
 
   {
     // resize wrt top should not change the y coordinate of top side
-    const m = sp.resize(2, 2, Anchor.TOP, Handle.BOTTOM, ResizeRatio.FREE);
+    const m = sp.resize(
+      2,
+      2,
+      TransformAnchor.TOP,
+      TransformHandle.BOTTOM,
+      ResizeRatio.FREE,
+    );
     const p2 = m.apply({ x: 1, y: 1 });
     expect(p2.x).toBeCloseTo(1);
     expect(p2.y).toBeCloseTo(3);
@@ -63,7 +93,13 @@ test("resize at zero wrt ref", () => {
 
   {
     // resize wrt bottom should not change the y coordinate of bottom side
-    const m = sp.resize(2, -2, Anchor.BOTTOM, Handle.TOP, ResizeRatio.FREE);
+    const m = sp.resize(
+      2,
+      -2,
+      TransformAnchor.BOTTOM,
+      TransformHandle.TOP,
+      ResizeRatio.FREE,
+    );
     const p1 = m.apply({ x: 1, y: -1 });
     expect(p1.x).toBeCloseTo(1);
     expect(p1.y).toBeCloseTo(-3);
@@ -76,8 +112,8 @@ test("resize at zero wrt ref", () => {
     const m = sp.resize(
       2,
       2,
-      Anchor.TOP_LEFT,
-      Handle.BOTTOM_RIGHT,
+      TransformAnchor.TOP_LEFT,
+      TransformHandle.BOTTOM_RIGHT,
       ResizeRatio.FREE,
     );
     const p1 = m.apply({ x: 1, y: 1 });
@@ -99,8 +135,8 @@ test("resize at zero wrt ref", () => {
     const m = sp.resize(
       -2,
       2,
-      Anchor.TOP_RIGHT,
-      Handle.BOTTOM_LEFT,
+      TransformAnchor.TOP_RIGHT,
+      TransformHandle.BOTTOM_LEFT,
       ResizeRatio.FREE,
     );
     const p1 = m.apply({ x: -1, y: 1 });
@@ -122,8 +158,8 @@ test("resize at zero wrt ref", () => {
     const m = sp.resize(
       2,
       -2,
-      Anchor.BOTTOM_LEFT,
-      Handle.TOP_RIGHT,
+      TransformAnchor.BOTTOM_LEFT,
+      TransformHandle.TOP_RIGHT,
       ResizeRatio.FREE,
     );
     const p1 = m.apply({ x: 1, y: -1 });
@@ -145,8 +181,8 @@ test("resize at zero wrt ref", () => {
     const m = sp.resize(
       -2,
       -2,
-      Anchor.BOTTOM_RIGHT,
-      Handle.TOP_LEFT,
+      TransformAnchor.BOTTOM_RIGHT,
+      TransformHandle.TOP_LEFT,
       ResizeRatio.FREE,
     );
     const p1 = m.apply({ x: -1, y: -1 });
@@ -174,8 +210,8 @@ test("translate and resize", () => {
   const m = Shaper.from(Affine.translate(3, 4)).resize(
     2,
     2,
-    Anchor.CENTER,
-    Handle.BOTTOM_RIGHT,
+    TransformAnchor.CENTER,
+    TransformHandle.BOTTOM_RIGHT,
     ResizeRatio.FREE,
   );
   const p1 = m.apply({ x: 1, y: 1 });
@@ -225,8 +261,8 @@ test("resize a vector after translation and rotation", () => {
   const m = sp.resize(
     2,
     2,
-    Anchor.CENTER,
-    Handle.BOTTOM_RIGHT,
+    TransformAnchor.CENTER,
+    TransformHandle.BOTTOM_RIGHT,
     ResizeRatio.FREE,
   );
   const p2 = m.apply({ x: 1, y: 1 });
@@ -247,3 +283,17 @@ test("resize a vector after translation and rotation", () => {
 //   const { width, height } = sp.size();
 //   console.log(width, height);
 // });
+
+test("flip a vector", () => {
+  const sp = Shaper.default().flipX();
+  const p1 = sp.apply({ x: 1, y: 1 });
+  expect(p1.x).toBeCloseTo(-1);
+  expect(p1.y).toBeCloseTo(1);
+});
+
+test("flip a vector after translation", () => {
+  const sp = Shaper.default().translate(2, 3).flipX();
+  const p1 = sp.apply({ x: 1, y: 1 });
+  expect(p1.x).toBeCloseTo(1);
+  expect(p1.y).toBeCloseTo(4);
+});

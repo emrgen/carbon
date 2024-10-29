@@ -55,32 +55,54 @@ $selected-border-color = #236af4
   position absolute;
   top 0;
   left 0;
-  //background rgba(0, 0, 0, 0.6)
+  background rgba(0, 0, 0, 0.02)
   z-index 1000
   width 100%;
   height 100%;
   cursor crosshair
 
 
+.resize-top-handle
+.resize-bottom-handle
+  position absolute;
+  left -11px
+  top -2px
+  width 22px
+  height 4px
+  cursor s-resize
+  background #fff
+  border-radius 3px
+  z-index 1000
+  box-shadow 0 0 0 1px $selected-border-color
 
 
+.resize-left-handle
+.resize-right-handle
+  position absolute;
+  top -11px
+  left -2px
+  width 4px
+  height 22px
+  cursor e-resize
+  background #fff
+  border-radius 3px
+  z-index 1000
+  box-shadow 0 0 0 1px $selected-border-color
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+.resize-top-left-handle
+.resize-top-right-handle
+.resize-bottom-left-handle
+.resize-bottom-right-handle
+  position absolute;
+  left -4px
+  top -4px
+  width 8px
+  height 8px
+  cursor nwse-resize
+  background #fff
+  border-radius 5px
+  z-index 1000
+  box-shadow 0 0 0 1px $selected-border-color
 
 
 

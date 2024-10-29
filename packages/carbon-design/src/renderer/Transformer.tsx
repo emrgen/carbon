@@ -1,6 +1,14 @@
+import {
+  Affine,
+  ResizeRatio,
+  Shaper,
+  TransformAnchor,
+  TransformHandle,
+  TransformType,
+} from "@emrgen/carbon-affine";
 import { Node, NodeId, StylePath } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
-import { useTrackDrag } from "@emrgen/carbon-dragon-react";
+import { useMakeDraggable } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonChildren,
@@ -17,6 +25,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { CarbonTransformControls } from "../components/CarbonTransformControls";
 import { useBoard } from "../hook/useBoard";
 import { useElement } from "../hook/useElement";
 import { useBoardOverlay } from "../hook/useOverlay";
@@ -41,13 +50,14 @@ export const TransformerComp = (props: ElementTransformerProps) => {
 
   const transformerStyle = useMemo(() => getNodeStyle(node), [node]);
   const [style, setStyle] = useState<CSSProperties>(() => getNodeStyle(node));
+  const [affine, setAffine] = useState<Affine>(Affine.IDENTITY);
 
   useEffect(() => {
     setStyle(getNodeStyle(node));
   }, [node]);
 
   // during dragging this hook will not re-evaluate as no dependencies changes
-  const { listeners } = useTrackDrag<{ left: number; top: number }>({
+  const { listeners } = useMakeDraggable<{ left: number; top: number }>({
     node,
     ref,
     distance: 5,
@@ -62,6 +72,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       });
 
       console.log();
+
       overlay.showOverlay();
     },
     onDragMove(event: DndEvent<{ left: number; top: number }>) {
@@ -105,43 +116,10 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     [board, node, listeners],
   );
 
-  // subscribe to transformation events
-  useEffect(() => {
-    const onTransformStart = (nodeId: NodeId, event: DndEvent) => {};
-    const onTransformMove = (nodeId: NodeId, event: DndEvent) => {};
-    const onTransformEnd = (nodeId: NodeId, event: DndEvent) => {};
-
-    board.bus.on(node.id, "transform:start", onTransformStart);
-    board.bus.on(node.id, "transform:move", onTransformMove);
-    board.bus.on(node.id, "transform:end", onTransformEnd);
-
-    return () => {
-      board.bus.off(node.id, "transform:start", onTransformStart);
-      board.bus.off(node.id, "transform:move", onTransformMove);
-      board.bus.off(node.id, "transform:end", onTransformEnd);
-    };
-  }, [board.bus, node.id]);
-
-  // subscribe to group transformation events
-  useEffect(() => {
-    const onGroupTransformStart = (nodeId: NodeId, event: DndEvent) => {};
-    const onGroupTransformMove = (nodeId: NodeId, event: DndEvent) => {};
-    const onGroupTransformEnd = (nodeId: NodeId, event: DndEvent) => {};
-
-    board.bus.on(node.id, "group:transform:start", onGroupTransformStart);
-    board.bus.on(node.id, "group:transform:move", onGroupTransformMove);
-    board.bus.on(node.id, "group:transform:end", onGroupTransformEnd);
-
-    return () => {
-      board.bus.off(node.id, "group:transform:start", onGroupTransformStart);
-      board.bus.off(node.id, "group:transform:move", onGroupTransformMove);
-      board.bus.off(node.id, "group:transform:end", onGroupTransformEnd);
-    };
-  }, [board.bus, node.id]);
-
   // subscribe to group drag events
   useEffect(() => {
     const onGroupDragStart = (nodeId: NodeId, event: DndEvent) => {
+      // save the current transformation matrix
       event.setState({
         left: parseInt(transformerStyle.left?.toString() || "0"),
         top: parseInt(transformerStyle.top?.toString() || "0"),
@@ -219,17 +197,53 @@ export const TransformerComp = (props: ElementTransformerProps) => {
 
   // console.log("styleProps", styleProps);
 
+  const onTransformStart = (
+    type: TransformType,
+    anchor: TransformAnchor,
+    handle: TransformHandle,
+    event: DndEvent,
+  ) => {};
+  const onTransformMove = (
+    type: TransformType,
+    anchor: TransformAnchor,
+    handle: TransformHandle,
+    event: DndEvent,
+  ) => {};
+  const onTransformEnd = (
+    type: TransformType,
+    anchor: TransformAnchor,
+    handle: TransformHandle,
+    event: DndEvent,
+  ) => {};
+
   return (
-    // @ts-ignore
-    <CarbonBlock
-      ref={ref}
-      node={node}
-      custom={{ ...attrs, style: styleProps }}
-      comp={(p, n) => {
-        return defaultRenderPropComparator(p, n) && p.custom === n.custom;
-      }}
-    >
+    <div className={"de-transformer-element"}>
       <CarbonChildren node={node} />
-    </CarbonBlock>
+      <CarbonBlock
+        ref={ref}
+        node={node}
+        custom={{ ...attrs, style: styleProps }}
+        comp={(p, n) => {
+          return defaultRenderPropComparator(p, n) && p.custom === n.custom;
+        }}
+      ></CarbonBlock>
+      <CarbonTransformControls
+        affine={Shaper.from(Affine.fromSize(100, 100))
+          .translate(400, 400)
+          .resize(
+            25,
+            25,
+            TransformAnchor.CENTER,
+            TransformHandle.BOTTOM_RIGHT,
+            ResizeRatio.FREE,
+          )
+          // .rotate(Math.PI / 4)
+          .affine()}
+        node={node}
+        onTransformStart={onTransformStart}
+        onTransformMove={onTransformMove}
+        onTransformEnd={onTransformEnd}
+      />
+    </div>
   );
 };

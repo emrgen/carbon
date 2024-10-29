@@ -7,8 +7,16 @@ export interface IPoint {
 
 export class Point {
   static ORIGIN = new Point(0, 0);
-  static UNIT_X = new Point(1, 0);
-  static UNIT_Y = new Point(0, 1);
+  static UX = new Point(1, 0);
+  static UY = new Point(0, 1);
+
+  static from(p: IPoint) {
+    return new Point(p.x, p.y);
+  }
+
+  static create(x: number, y: number) {
+    return new Point(x, y);
+  }
 
   constructor(
     readonly x: number,

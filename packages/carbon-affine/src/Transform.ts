@@ -61,6 +61,14 @@ export class Transform {
     }
   }
 
+  flipX() {
+    return Transform.from(this.matrix.flipX());
+  }
+
+  flipY() {
+    return Transform.from(this.matrix.flipY());
+  }
+
   // get the origin point after the transformation
   origin(): IPoint {
     return this.matrix.origin();
@@ -95,7 +103,7 @@ export class Transform {
     return new Transform(this.matrix.inverse());
   }
 
-  into() {
+  affine() {
     return this.matrix;
   }
 
