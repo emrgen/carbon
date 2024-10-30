@@ -160,20 +160,16 @@ const TransformerHandle = (props: TransformerHandleProps) => {
     onTransformMove,
     onTransformEnd,
   } = props;
-  if (className === "resize-top-right-handle") {
-    console.log("resize-top-right-handle", hideHandle);
-  }
 
   const overlay = useBoardOverlay();
 
   // use affine to get the position of the handle
-
   const position = useMemo(() => {
     let point!: IPoint;
     if (type === TransformType.SCALE) {
       point = getPoint(toLocation(handle));
     } else {
-      const offset = Line.fromPoint(getPoint(toLocation(handle))).transform(
+      const offset = Line.fromPoint(getPoint(handle)).transform(
         affine.inverse(),
       ).length;
       point = { x: 0, y: 1 + offset };

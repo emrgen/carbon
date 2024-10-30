@@ -151,7 +151,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 interface UseTrackDragProps {
   // overlay ref
   ref: MutableRefObject<any>;
-  refCheck: (ref: any, target: any) => boolean;
+  refCheck?: (ref: any, target: any) => boolean;
   node: Node;
   distance: number;
   isDisabled?: boolean;

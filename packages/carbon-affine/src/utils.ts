@@ -76,6 +76,7 @@ export enum Location {
   BOTTOM_RIGHT = "bottom-right",
 }
 
+// NOTE: enum values must be opaque and should not be used directly for calculations outside of this file
 export enum TransformAnchor {
   CENTER = "anchor-center",
   TOP_LEFT = "anchor-top-left",
@@ -88,6 +89,7 @@ export enum TransformAnchor {
   RIGHT = "anchor-right",
 }
 
+// NOTE: enum values must be opaque and should not be used directly for calculations outside of this file
 export enum TransformHandle {
   CENTER = "handle-center",
   TOP_LEFT = "handle-top-left",
@@ -105,7 +107,17 @@ const RIGHT = 1;
 const TOP = -1;
 const BOTTOM = 1;
 
-export function getPoint(location: Location) {
+export function getPoint(
+  location: Location | TransformHandle | TransformAnchor,
+) {
+  if (isAnchor(location)) {
+    location = toHandle(location);
+  }
+
+  if (isHandle(location)) {
+    location = toLocation(location);
+  }
+
   switch (location) {
     case Location.CENTER:
       return { x: 0, y: 0 };

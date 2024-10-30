@@ -28,7 +28,7 @@ import { questionExtension } from "@emrgen/carbon-question";
 import {
   ReactRenderer,
   RenderManager,
-  useCreateCarbon,
+  useCreateCachedCarbon,
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import { CarbonApp } from "@emrgen/carbon-utils/src/components/CarbonAppDocument";
@@ -123,7 +123,7 @@ export function Design() {
 
     return content;
   });
-  const app = useCreateCarbon("design", data, flattenDeep(plugins));
+  const app = useCreateCachedCarbon("design", data, flattenDeep(plugins));
   const [runtime] = useState<ActiveCellRuntime>(() => {
     return new ActiveCellRuntime({
       Carbon: app,

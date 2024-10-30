@@ -41,6 +41,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   const app = useCarbon();
   const overlay = useBoardOverlay();
   const ref = useRef<HTMLDivElement>();
+  const elementRef = useRef<any>();
   const styleRef = useRef<CSSProperties>();
   const board = useBoard();
   const [dragging, setDragging] = useState(false);
@@ -80,6 +81,12 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       ref.current.style.left = newStyle.left;
       ref.current.style.top = newStyle.top;
       ref.current.style.transform = newStyle.transform;
+    }
+
+    if (elementRef.current) {
+      elementRef.current.style.left = newStyle.left;
+      elementRef.current.style.top = newStyle.top;
+      elementRef.current.style.transform = newStyle.transform;
     }
   }, []);
 
@@ -234,9 +241,16 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       if (ref.current) {
         ref.current.style.left = style.left;
         ref.current.style.top = style.top;
-        ref.current.style.transform = style.transform;
         ref.current.style.width = style.width;
         ref.current.style.height = style.height;
+        ref.current.style.transform = style.transform;
+      }
+      if (elementRef.current) {
+        elementRef.current.style.left = style.left;
+        elementRef.current.style.top = style.top;
+        elementRef.current.style.width = style.width;
+        elementRef.current.style.height = style.height;
+        elementRef.current.style.transform = style.transform;
       }
 
       console.log("moving", after.size());
@@ -277,6 +291,14 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         ref.current.style.height = style.height;
       }
 
+      if (elementRef.current) {
+        elementRef.current.style.left = style.left;
+        elementRef.current.style.top = style.top;
+        elementRef.current.style.width = style.width;
+        elementRef.current.style.height = style.height;
+        elementRef.current.style.transform = style.transform;
+      }
+
       // update the element style
       app.cmd
         .Update(node.id, {
@@ -298,6 +320,11 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   return (
     <div className={"de-transformer-element"}>
       {/*<CarbonChildren node={node} />*/}
+      <div
+        className={"de-element-check"}
+        ref={elementRef}
+        style={Shaper.from(affine).toStyle()}
+      ></div>
       <CarbonBlock
         ref={ref}
         node={node}

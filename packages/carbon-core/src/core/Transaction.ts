@@ -1,36 +1,34 @@
-import { flatten, identity, isArray, isFunction } from "lodash";
-
 import { Optional, With } from "@emrgen/types";
+import dayjs from "dayjs";
+import { flatten, identity, isArray, isFunction } from "lodash";
+import { insertNodesActions } from "../utils/action";
+import {
+  ChangeNameAction,
+  MoveNodeAction,
+  RemoveNodeAction,
+  SelectAction,
+  SetContentAction,
+  UpdateMarkAction,
+  UpdatePropsAction,
+} from "./actions/index";
+import { ActionOrigin, CarbonAction, TxType } from "./actions/types";
+import { NodeIdSet } from "./BSet";
+import { NodeBTree } from "./BTree";
 import { Carbon } from "./Carbon";
+import { CarbonCommand, PluginCommand } from "./CarbonCommand";
+import { Draft } from "./Draft";
 import { p14 } from "./Logger";
 import { Mark } from "./Mark";
 import { Node } from "./Node";
 import { IntoNodeId, NodeId } from "./NodeId";
+import { ActivatedPath, NodePropsJson, SelectedPath } from "./NodeProps";
 import { PinnedSelection } from "./PinnedSelection";
 import { PluginManager } from "./PluginManager";
 import { Point } from "./Point";
 import { PointedSelection } from "./PointedSelection";
 import { SelectionManager } from "./SelectionManager";
-
-import { ActionOrigin, CarbonAction, TxType } from "./actions/types";
-import { NodeName } from "./types";
-import { cloneFrozenNode } from "./types";
-import { insertNodesActions } from "../utils/action";
-import { ActivatedPath, SelectedPath } from "./NodeProps";
-import { NodePropsJson } from "./NodeProps";
-import { CarbonCommand, PluginCommand } from "./CarbonCommand";
-import { Draft } from "./Draft";
-import dayjs from "dayjs";
 import { TransactionManager } from "./TransactionManager";
-import { SelectAction } from "./actions/index";
-import { SetContentAction } from "./actions/index";
-import { RemoveNodeAction } from "./actions/index";
-import { MoveNodeAction } from "./actions/index";
-import { ChangeNameAction } from "./actions/index";
-import { UpdateMarkAction } from "./actions/index";
-import { UpdatePropsAction } from "./actions/index";
-import { NodeBTree } from "./BTree";
-import { NodeIdSet } from "./BSet";
+import { cloneFrozenNode, NodeName } from "./types";
 
 let _id = 0;
 const getId = () => String(_id++);
@@ -161,9 +159,6 @@ export class Transaction {
     const after = selection.unpin();
     this.lastSelection = after;
     after.origin = origin;
-
-    // console.log(selection.toString(), after.toString());
-
     return this.Add(
       SelectAction.create(this.state.selection.unpin(), after, origin),
     );
@@ -222,7 +217,6 @@ export class Transaction {
     props: Partial<NodePropsJson>,
     origin = this.origin,
   ): Transaction {
-    // console.log("Update", nodeRef, props, origin);
     this.Add(UpdatePropsAction.create(nodeRef, props, origin));
     return this;
   }
