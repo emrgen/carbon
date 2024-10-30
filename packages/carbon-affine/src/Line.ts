@@ -51,6 +51,10 @@ export class Line {
     return new Line(start, end);
   }
 
+  static is(line: any): line is Line {
+    return line instanceof Line;
+  }
+
   constructor(
     readonly start: IPoint,
     readonly end: IPoint,
@@ -69,7 +73,7 @@ export class Line {
   }
 
   get angle() {
-    return Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
+    return Math.atan2((this.end.y - this.start.y) , (this.end.x - this.start.x));
   }
 
   get center() {
@@ -84,10 +88,7 @@ export class Line {
   }
 
   angleBetween(line: Line) {
-    return Math.acos(
-      (this.end.x - this.start.x) * (line.end.x - line.start.x) +
-        (this.end.y - this.start.y) * (line.end.y - line.start.y),
-    );
+    return this.angle - line.angle;
   }
 
   intersects(line: Line) {

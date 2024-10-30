@@ -1,3 +1,4 @@
+import { clamp } from "lodash";
 import { Degree, Radian } from "./types";
 
 export function toRad(deg: Degree): Radian {
@@ -110,12 +111,12 @@ const BOTTOM = 1;
 export function getPoint(
   location: Location | TransformHandle | TransformAnchor,
 ) {
-  if (isAnchor(location)) {
-    location = toHandle(location);
+  if (isAnchor(location as any)) {
+    location = toHandle(location as any);
   }
 
-  if (isHandle(location)) {
-    location = toLocation(location);
+  if (isHandle(location as any)) {
+    location = toLocation(location as any);
   }
 
   switch (location) {
@@ -138,4 +139,14 @@ export function getPoint(
     case Location.RIGHT:
       return { x: RIGHT, y: 0 };
   }
+
+  throw new Error(`Invalid location: ${location}`);
+}
+
+export function clampScale(scale: number, min: number, max: number) {
+  if (scale === 0)  return min
+  if (scale > 0) return clamp(scale, min, max);
+  if (scale < 0) return clamp(scale, -max ,-min);
+
+  return scale;
 }

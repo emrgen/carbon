@@ -13,7 +13,6 @@ export const BoardOverlay = (props: BoardOverlayProps) => {
   const [selecting, setSelecting] = useState(false);
 
   useEffect(() => {
-    console.log(bus.listeners("show").length);
     const onShow = () => setVisible(true);
     const onHide = () => setVisible(false);
     bus.on("show", onShow);

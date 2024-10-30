@@ -4,10 +4,10 @@ import {
   fromDefinition,
   fromTransformAttribute,
 } from "transformation-matrix";
-import { UINT_MIN, UNIT_MAX } from "./contant";
+import { UINT_MIN, UINT_MAX } from "./contant";
 import { IPoint } from "./Point";
 import { Radian } from "./types";
-import { abs, considerZero } from "./utils";
+import { abs, clampScale, considerZero } from "./utils";
 import { Vector } from "./Vector";
 
 type AffineMatrix = [number, number, number, number, number, number];
@@ -135,9 +135,10 @@ export class Affine {
   // NOTE: scale happens wrt the origin (0, 0) in object local coordinate system
   scale(sx: number, sy: number) {
     // clamp to avoid scale to zero
-    sx = clamp(sx, -UINT_MIN, UNIT_MAX);
-    sy = clamp(sy, -UINT_MIN, UNIT_MAX);
-    return this.mul(Affine.scale(sx, sy));
+    const sax = clampScale(sx, UINT_MIN, UINT_MAX);
+    const say = clampScale(sy, UINT_MIN, UINT_MAX);
+    
+    return this.mul(Affine.scale(sax, say));
   }
 
   flipX() {

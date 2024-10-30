@@ -108,7 +108,7 @@ export class Shaper {
       case ResizeRatio.FREE:
         return Shaper.from(this.tm.scale(lsx, lsy, lax, lay));
       case ResizeRatio.KEEP:
-        const s = Math.max(lsx, lsy, lax, lay);
+        const s = Math.max(lsx, lsy);
         return Shaper.from(this.tm.scale(s, s, lax, lay));
       case ResizeRatio.KEEP_X:
         return Shaper.from(this.tm.scale(lsx, 1, lax, lay));
@@ -208,7 +208,7 @@ export class Shaper {
   toStyle() {
     const { x, y } = this.center();
     const { width, height } = this.size();
-    const angle = this.angle();
+    const angle = this.angle;
     // let transform = ``;
     // if (x || y) {
     //   if (!x) {
@@ -251,7 +251,7 @@ export class Shaper {
 
     const { x: ax, y: ay } = getPoint(toLocation(anchor));
 
-    console.log(sx, width, size.width, ax, ay);
+    console.log('resizeTo', sx, width, size.width, ax, ay);
 
     return Shaper.from(this.tm.scale(nxs, nsy, ax, ay));
   }
@@ -281,7 +281,7 @@ export class Shaper {
     return this.tm.matrix.yAxis();
   }
 
-  angle() {
+  get angle() {
     return Line.UX.transform(this.tm.matrix).angle;
   }
 

@@ -67,7 +67,7 @@ export function Design() {
                 TransformAnchor.CENTER,
                 TransformHandle.BOTTOM,
                 ResizeRatio.FREE,
-              )
+              ).rotate(Math.PI / 4)
               .toCSS(),
             [StylePath]: {
               background: "pink",

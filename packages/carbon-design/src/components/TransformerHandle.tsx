@@ -4,10 +4,12 @@ import {
   IPoint,
   Line,
   Shaper,
+  toDeg,
   toLocation,
   TransformAnchor,
   TransformHandle,
   TransformType,
+  Vector,
 } from "@emrgen/carbon-affine";
 import { Node } from "@emrgen/carbon-core";
 import { Draggable } from "@emrgen/carbon-dragon-react";
@@ -20,7 +22,7 @@ interface TransformerHandleProps {
   hideHandle?: boolean;
   hideAll?: boolean;
   node: Node;
-  affine: Affine;
+  shaper: Shaper;
   type: TransformType;
   anchor: TransformAnchor;
   handle: TransformHandle;
@@ -35,7 +37,7 @@ export const TransformerHandle = (props: TransformerHandleProps) => {
     hideHandle,
     hideAll,
     node,
-    affine,
+    shaper,
     type,
     anchor,
     handle,
@@ -53,13 +55,13 @@ export const TransformerHandle = (props: TransformerHandleProps) => {
       point = getPoint(toLocation(handle));
     } else {
       const offset = Line.fromPoint(getPoint(handle)).transform(
-        affine.inverse(),
+        shaper.affine().inverse(),
       ).length;
-      point = { x: 0, y: 1 + 50 / Shaper.from(affine).size().height };
+      point = { x: 0, y: 1 + 50 / shaper.size().height };
     }
 
-    return handleTransformation(affine, type, handle, point);
-  }, [affine, handle, type]);
+    return handleTransformation(shaper, type, handle, point);
+  }, [shaper, handle, type]);
 
   if (hideAll) return null;
 
@@ -107,26 +109,28 @@ const isAlongY = (handle: TransformHandle) => {
 };
 
 const handleTransformation = (
-  affine: Affine,
+  shaper: Shaper,
   type: TransformType,
   handle: TransformHandle,
   handlePoint: IPoint,
 ) => {
-  const point = affine.apply(handlePoint);
+  const point = shaper.apply(handlePoint);
   const { x, y } = point;
 
   const sp = Shaper.from(Affine.translate(point.x, point.y)).rotate(
-    affine.angle,
+    shaper.angle,
   );
 
+  const before = Line.fromPoint(handlePoint);
+  const after = before.transform(shaper.affine());
+  const angle = -before.angleBetween(after);
+
   const style: CSSProperties = {
-    transform: `translate(${x}px, ${y}px) rotateZ(${affine.angle}rad)`,
+    transform: `translate(${x}px, ${y}px) rotateZ(${angle}rad)`,
   };
 
-  const height = isAlongX(handle)
-    ? Shaper.from(affine).size().height + "px"
-    : "";
-  const width = isAlongY(handle) ? Shaper.from(affine).size().width + "px" : "";
+  const height = isAlongX(handle) ? shaper.size().height + "px" : "";
+  const width = isAlongY(handle) ? shaper.size().width + "px" : "";
 
   if (height && type === TransformType.SCALE) {
     style.height = height;

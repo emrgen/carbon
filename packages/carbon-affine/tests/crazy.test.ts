@@ -65,7 +65,7 @@ test("insert and move, resize, rotate", () => {
 
   console.log(sp5.size());
   console.log(sp5.center());
-  console.log(sp5.angle());
+  console.log(sp5.angle);
 
   const sp6 = sp5.translate(0, -100);
   // console.log(sp6.toCSS());

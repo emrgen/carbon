@@ -20,7 +20,7 @@ export type TransformHandler = (
 
 interface CarbonTransformControlsProps {
   node: Node;
-  affine: Affine;
+  shaper: Shaper;
   onTransformStart: TransformHandler;
   onTransformMove: TransformHandler;
   onTransformEnd: TransformHandler;
@@ -29,7 +29,7 @@ interface CarbonTransformControlsProps {
 export const CarbonTransformControls = (
   props: CarbonTransformControlsProps,
 ) => {
-  const size = Shaper.from(props.affine).size();
+  const size = props.shaper.size();
 
   return (
     <>
