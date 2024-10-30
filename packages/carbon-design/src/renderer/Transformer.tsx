@@ -168,9 +168,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     const onDeselect = () => setSelected(false);
     const onActive = () => setActive(true);
     const onInactive = () => setActive(false);
-    const onWithinSelectRect = () => {
-      setWithinSelectRect(true);
-    };
+    const onWithinSelectRect = () => setWithinSelectRect(true);
     const onOutsideSelectRect = () => setWithinSelectRect(false);
 
     board.bus.on(node.id, "select", onSelect);
@@ -228,7 +226,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       const { shaper: before } = event.state;
       if (!Shaper.is(before)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
-      let after = before.resize(dx, dy, anchor, handle, ResizeRatio.FREE);
+      let after = before.resize(dx, dy, anchor, handle, ResizeRatio.KEEP);
       const { width, height } = after.size();
 
       const w = max(4, width);
@@ -270,7 +268,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       if (!Shaper.is(before)) return;
       const size = before.size();
       const { deltaX: dx, deltaY: dy } = event.position;
-      let after = before.resize(dx, dy, anchor, handle, ResizeRatio.FREE);
+      let after = before.resize(dx, dy, anchor, handle, ResizeRatio.KEEP);
       const { width, height } = after.size();
 
       const w = max(4, width);
