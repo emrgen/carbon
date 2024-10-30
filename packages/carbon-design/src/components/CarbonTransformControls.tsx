@@ -13,8 +13,9 @@ import { Node } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { Draggable } from "@emrgen/carbon-dragon-react";
 import { CSSProperties, useMemo } from "react";
+import { MIN_SIZE_CORNER_SHOW, MIN_SIZE_SIDE_SHOW } from "../contants";
 import { useBoardOverlay } from "../hook/useOverlay";
-import { tooSmall } from "../utils";
+import { bothTooSmall, tooSmall, tooSmallHeight } from "../utils";
 
 export type TransformHandler = (
   type: TransformType,
@@ -34,10 +35,14 @@ interface CarbonTransformControlsProps {
 export const CarbonTransformControls = (
   props: CarbonTransformControlsProps,
 ) => {
+  const size = Shaper.from(props.affine).size();
+
   return (
     <>
       <TransformerHandle
         {...props}
+        hideHandle={tooSmall(size, MIN_SIZE_SIDE_SHOW, MIN_SIZE_SIDE_SHOW)}
+        hideAll={tooSmallHeight(size, MIN_SIZE_CORNER_SHOW)}
         className={"resize-bottom-handle"}
         type={TransformType.SCALE}
         anchor={TransformAnchor.TOP}
@@ -46,14 +51,17 @@ export const CarbonTransformControls = (
 
       <TransformerHandle
         {...props}
+        hideHandle={tooSmall(size)}
+        hideAll={tooSmall(size, 10, 10)}
         className={"resize-top-right-handle"}
         type={TransformType.SCALE}
-        anchor={TransformAnchor.TOP_RIGHT}
-        handle={TransformHandle.BOTTOM_LEFT}
+        anchor={TransformAnchor.BOTTOM_LEFT}
+        handle={TransformHandle.TOP_RIGHT}
       />
 
       <TransformerHandle
         {...props}
+        hideHandle={tooSmall(size, 30, 30)}
         className={"resize-left-handle"}
         type={TransformType.SCALE}
         anchor={TransformAnchor.RIGHT}
@@ -64,12 +72,13 @@ export const CarbonTransformControls = (
         {...props}
         className={"resize-bottom-right-handle"}
         type={TransformType.SCALE}
-        anchor={TransformAnchor.BOTTOM_RIGHT}
-        handle={TransformHandle.TOP_LEFT}
+        anchor={TransformAnchor.TOP_LEFT}
+        handle={TransformHandle.BOTTOM_RIGHT}
       />
 
       <TransformerHandle
         {...props}
+        hideHandle={tooSmall(size, 30, 30)}
         className={"resize-top-handle"}
         type={TransformType.SCALE}
         anchor={TransformAnchor.BOTTOM}
@@ -79,13 +88,15 @@ export const CarbonTransformControls = (
       <TransformerHandle
         {...props}
         className={"resize-bottom-left-handle"}
+        hideAll={tooSmall(size, 10, 10)}
         type={TransformType.SCALE}
-        anchor={TransformAnchor.BOTTOM_LEFT}
-        handle={TransformHandle.TOP_RIGHT}
+        anchor={TransformAnchor.TOP_RIGHT}
+        handle={TransformHandle.BOTTOM_LEFT}
       />
 
       <TransformerHandle
         {...props}
+        hideHandle={tooSmall(size, 30, 30)}
         className={"resize-right-handle"}
         type={TransformType.SCALE}
         anchor={TransformAnchor.LEFT}
@@ -94,10 +105,12 @@ export const CarbonTransformControls = (
 
       <TransformerHandle
         {...props}
+        hideHandle={tooSmall(size)}
+        hideAll={bothTooSmall(size)}
         className={"resize-top-left-handle"}
         type={TransformType.SCALE}
-        anchor={TransformAnchor.TOP_LEFT}
-        handle={TransformHandle.BOTTOM_RIGHT}
+        anchor={TransformAnchor.BOTTOM_RIGHT}
+        handle={TransformHandle.TOP_LEFT}
       />
 
       {/*<TransformerHandle*/}
@@ -121,6 +134,8 @@ export const CarbonTransformControls = (
 
 interface TransformerHandleProps {
   className: string;
+  hideHandle?: boolean;
+  hideAll?: boolean;
   node: Node;
   affine: Affine;
   type: TransformType;
@@ -134,6 +149,8 @@ interface TransformerHandleProps {
 const TransformerHandle = (props: TransformerHandleProps) => {
   const {
     className,
+    hideHandle,
+    hideAll,
     node,
     affine,
     type,
@@ -143,6 +160,9 @@ const TransformerHandle = (props: TransformerHandleProps) => {
     onTransformMove,
     onTransformEnd,
   } = props;
+  if (className === "resize-top-right-handle") {
+    console.log("resize-top-right-handle", hideHandle);
+  }
 
   const overlay = useBoardOverlay();
 
@@ -162,9 +182,19 @@ const TransformerHandle = (props: TransformerHandleProps) => {
     return handleTransformation(affine, type, handle, point);
   }, [affine, handle, type]);
 
+  if (hideAll) return null;
+
   return (
     <Draggable
       node={node}
+      refCheck={(ref, target) => {
+        let current = target;
+        while (current) {
+          if (current === ref) return true;
+          current = current?.parentElement;
+        }
+        return false;
+      }}
       style={position}
       className={className}
       onDragStart={(event) => {
@@ -182,7 +212,7 @@ const TransformerHandle = (props: TransformerHandleProps) => {
       <div
         className="transform-handle"
         style={{
-          display: tooSmall(Shaper.from(affine).size()) ? "none" : "block",
+          display: hideHandle ? "none" : "block",
         }}
       />
     </Draggable>

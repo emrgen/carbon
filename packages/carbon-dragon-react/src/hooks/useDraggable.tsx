@@ -151,6 +151,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 interface UseTrackDragProps {
   // overlay ref
   ref: MutableRefObject<any>;
+  refCheck: (ref: any, target: any) => boolean;
   node: Node;
   distance: number;
   isDisabled?: boolean;
@@ -167,6 +168,7 @@ export function useMakeDraggable<T extends Record<string, any>>(
   props: UseTrackDragProps,
 ) {
   const {
+    refCheck = (ref, target) => ref === target,
     node,
     distance,
     isDisabled,
@@ -183,7 +185,7 @@ export function useMakeDraggable<T extends Record<string, any>>(
       let initState: T = {} as T;
       // preventAndStop(event)
       if (isDisabled) return;
-      if (ref.current !== event.target) {
+      if (!refCheck(ref.current, event.target)) {
         return;
       }
       // event.stopPropagation();

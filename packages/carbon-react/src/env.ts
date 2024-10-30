@@ -1,13 +1,17 @@
 export const is_env_development = () => {
  return true
+
   // @ts-ignore
-  if (!import.meta?.env) {
+  const {env} = import.meta as any ?? {}
+
+  if (!env) {
     return false;
   }
-  // @ts-ignore
-  return import.meta?.env?.VITE_MODE === "dev";
+
+  return env?.VITE_MODE === "dev";
 };
 
 export const environment = () => {
-  return process?.env?.VITE_MODE;
+  const {env} = process ??{}
+  return env?.VITE_MODE;
 };

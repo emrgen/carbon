@@ -4,6 +4,7 @@ import { CSSProperties, ReactNode, useRef } from "react";
 import { useMakeDraggable } from "../hooks/index";
 
 interface DraggableProps {
+  refCheck?: (ref: any, target?: any) => boolean;
   node: Node;
   className?: string;
   style?: CSSProperties;
@@ -17,6 +18,7 @@ interface DraggableProps {
 
 export const Draggable = (props: DraggableProps) => {
   const {
+    refCheck = (ref, target) => ref === target,
     children,
     className,
     style,
@@ -32,6 +34,7 @@ export const Draggable = (props: DraggableProps) => {
   const { listeners } = useMakeDraggable({
     node,
     ref,
+    refCheck,
     distance: 4,
     onDragEnd(event: DndEvent): void {
       onDragEnd?.(event);

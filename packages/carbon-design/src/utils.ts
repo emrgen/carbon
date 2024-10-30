@@ -48,6 +48,18 @@ export const updatePosition = (
   );
 };
 
-export const tooSmall = ({ width, height }) => {
-  return width <= 4 || height <= 4;
+export const bothTooSmall = ({ width, height }, w = 4, h = 4) => {
+  return width <= w && height <= h;
+};
+
+export const tooSmall = ({ width, height }, w = 4, h = 4) => {
+  return width <= w || height <= h;
+};
+
+export const tooSmallWidth = ({ width }, w = 4) => {
+  return width <= w;
+};
+
+export const tooSmallHeight = ({ height }, h = 4) => {
+  return height <= h;
 };

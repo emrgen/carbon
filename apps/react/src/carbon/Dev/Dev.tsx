@@ -65,11 +65,6 @@ import { flattenDeep } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { PathTracker } from "../../PathTracker";
 
-function is_env_development() {
-  // @ts-ignore
-  return import.meta?.env?.VITE_MODE === "dev";
-}
-
 const data = node("carbon", [
   node(
     "document",
