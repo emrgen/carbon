@@ -8,7 +8,7 @@ Accepted
 
 ## Context
 
-Editor is changes the document. The changes are driven by the user initiated events.
+Editor changes the document. The changes are driven by the user initiated events.
 
 ## Decision
 
