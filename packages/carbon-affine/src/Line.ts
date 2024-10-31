@@ -213,4 +213,13 @@ export class Line {
       this.end,
     );
   }
+
+  // shift the line parallel to the given line
+  shiftTo(point: IPoint): Line {
+    const v = this.vector().norm().multiply(this.length);
+    return new Line(point, {
+      x: point.x + v.x,
+      y: point.y + v.y,
+    });
+  }
 }

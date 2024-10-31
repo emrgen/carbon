@@ -16,3 +16,17 @@ test("test line extend end", () => {
   expect(extended.end.x).toBeCloseTo(17.071067811865476);
   expect(extended.end.y).toBeCloseTo(17.071067811865476);
 });
+
+test("test line intersection", () => {
+  const line1 = new Line({ x: 0, y: 0 }, { x: 10, y: 10 });
+  const line2 = new Line({ x: 0, y: 10 }, { x: 10, y: 0 });
+  const intersection = Line.intersection(line1, line2);
+  expect(intersection).toEqual({ x: 5, y: 5 });
+});
+
+test("test line intersection", () => {
+  const line1 = new Line({ x: 0, y: 0 }, { x: 10, y: 10 });
+  const line2 = new Line({ x: 0, y: 12 }, { x: 10, y: 12 });
+  const intersection = Line.intersection(line1, line2);
+  expect(intersection).toEqual(undefined);
+});

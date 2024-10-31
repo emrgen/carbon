@@ -70,14 +70,13 @@ export class Shaper {
     return Shaper.from(tm);
   }
 
-  // dx, dy are the distance of the mouse move
-  resize(
-    dx: Scale,
-    dy: Scale,
+  scaleFromDelta(
+    dx: number,
+    dy: number,
     anchor: TransformAnchor,
     handle: TransformHandle,
     ratio: ResizeRatio,
-  ): Shaper {
+  ) {
     const tm = this.tm;
     const ivm = tm.inverse();
 
@@ -106,16 +105,17 @@ export class Shaper {
       lsx = sx;
       lsy = sy;
     } else if (ratio === ResizeRatio.KEEP) {
+      // FIXME: the calculation is correct but the result is causing the shape to be shaky when resizing
       const tmp = anchorLine.transform(tm.matrix);
+      const tmpVector = tmp.vector().norm();
       const change = Line.fromPoints(
         tmp.end,
         Point.from(tmp.end).move(dx, dy),
       ).projection(tmp.vector());
-      const delta = change.factorOf(tmp.vector().norm());
+      const delta = change.factorOf(tmpVector);
       const after = tmp.extendEnd(delta).transform(ivm.matrix).vector();
       // scale factor, some of them could be Infinity
       const scale = after.divide(before);
-      console.log(scale);
       // normalize the scale factor based on the anchor and handle
       const { sx, sy } = this.normalize(scale.x, scale.y, anchor, handle);
       lsx = sx;
@@ -123,16 +123,31 @@ export class Shaper {
     }
 
     const { x: lax, y: lay } = anchorPoint;
-    switch (ratio) {
-      case ResizeRatio.FREE:
-        return Shaper.from(this.tm.scale(lsx, lsy, lax, lay));
-      case ResizeRatio.KEEP:
-        return Shaper.from(this.tm.scale(lsx, lsy, lax, lay));
-      case ResizeRatio.KEEP_X:
-        return Shaper.from(this.tm.scale(lsx, 1, lax, lay));
-      case ResizeRatio.KEEP_Y:
-        return Shaper.from(this.tm.scale(1, lsy, lax, lay));
-    }
+
+    return { sx: lsx, sy: lsy, ax: lax, ay: lay };
+  }
+
+  scale(sx: Scale, sy: Scale, cx: number, cy: number) {
+    return Shaper.from(this.tm.scale(sx, sy, cx, cy));
+  }
+
+  // dx, dy are the distance of the mouse move
+  resize(
+    dx: number,
+    dy: number,
+    anchor: TransformAnchor,
+    handle: TransformHandle,
+    ratio: ResizeRatio,
+  ): Shaper {
+    const { sx, sy, ax, ay } = this.scaleFromDelta(
+      dx,
+      dy,
+      anchor,
+      handle,
+      ratio,
+    );
+
+    return Shaper.from(this.tm.scale(sx, sy, ax, ay));
   }
 
   private normalize(
@@ -227,24 +242,6 @@ export class Shaper {
     const { x, y } = this.center();
     const { width, height } = this.size();
     const angle = this.angle;
-    // let transform = ``;
-    // if (x || y) {
-    //   if (!x) {
-    //     transform += `translateY(${y}px)`;
-    //   }
-    //
-    //   if (!y) {
-    //     transform += `translateX(${x}px)`;
-    //   }
-    //
-    //   if (x && y) {
-    //     transform += `translate(${x}px, ${y}px)`;
-    //   }
-    // }
-    //
-    // if (angle) {
-    //   transform += ` rotateZ(${angle}rad)`;
-    // }
 
     return {
       left: `-${width / 2}px`,

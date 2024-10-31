@@ -144,9 +144,9 @@ export function getPoint(
 }
 
 export function clampScale(scale: number, min: number, max: number) {
-  if (scale === 0)  return min
+  if (scale === 0) return min;
   if (scale > 0) return clamp(scale, min, max);
-  if (scale < 0) return clamp(scale, -max ,-min);
+  if (scale < 0) return clamp(scale, -max, -min);
 
   return scale;
 }

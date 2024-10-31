@@ -13,8 +13,9 @@ import {
 } from "@emrgen/carbon-affine";
 import { Node } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
-import { isArray, round } from "lodash";
+import { isNumber, round } from "lodash";
 import { ReactNode, useRef, useState } from "react";
+import { max } from "../utils";
 import { CarbonTransformControls } from "./CarbonTransformControls";
 import { ShowCurrentAngleHint } from "./ShowCurrentAngleHint";
 
@@ -51,8 +52,8 @@ interface OuterBoundProps {
   children?: ReactNode;
 }
 
-const sp = Shaper.from(Affine.fromSize(250, 100)).translate(400, 800);
-const sp1 = Shaper.from(Affine.fromSize(300, 200)).translate(400, 800);
+const sp = Shaper.from(Affine.fromSize(250, 100)).translate(600, 600);
+const sp1 = Shaper.from(Affine.fromSize(300, 200)).translate(600, 600);
 
 const points = [
   getPoint(TransformAnchor.TOP_LEFT),
@@ -80,18 +81,47 @@ const OuterBound = (props: OuterBoundProps) => {
   ) => {
     console.log(type, event);
     setTransforming(true);
+
+    const sides = adjacentSides(handle).map((side) =>
+      side.transform(shaper.affine()),
+    );
+    const anchorPoint = shaper.apply(getPoint(anchor));
+    // move sides to points and check the scales, the maximum scaling is the allowed scaling
+    const scales = points.map((p) => {
+      const scales = sides.map((side) => {
+        const before = side.distance(anchorPoint);
+        const shifted = side.shiftTo(p);
+        const after = shifted.distance(anchorPoint);
+
+        console.log(
+          "point",
+          p,
+          "shifted",
+          shifted,
+          "before",
+          before,
+          "after",
+          after,
+        );
+
+        return after / before;
+      });
+
+      return max(...scales);
+    });
+
+    const minScale = max(...scales);
+
+    console.log("Min scale", minScale);
+
     event.setState({
       shaper: shaper,
-      originLines: [
-        Line.fromPoint(getPoint(Location.TOP_LEFT)).extendStart(99999),
-        Line.fromPoint(getPoint(Location.BOTTOM_RIGHT)).extendStart(99999),
-        Line.fromPoint(getPoint(Location.TOP_RIGHT)).extendStart(99999),
-        Line.fromPoint(getPoint(Location.BOTTOM_LEFT)).extendStart(99999),
-      ],
+      minScale,
       beforeLine: Line.fromPoint(getPoint(handle)).transform(shaper.affine()),
       angleLine: Line.fromPoint(getPoint(Location.BOTTOM)),
     });
   };
+
   const onTransformMove = (
     type: TransformType,
     anchor: TransformAnchor,
@@ -99,15 +129,9 @@ const OuterBound = (props: OuterBoundProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const {
-        beforeLine: before,
-        shaper,
-        angleLine,
-        originLines,
-      } = event.state;
+      const { beforeLine: before, shaper, angleLine, minScale } = event.state;
       if (!Line.is(before)) return;
       if (!Line.is(angleLine)) return;
-      if (!isArray(originLines) && originLines.length !== 4) return;
       const { deltaX: dx, deltaY: dy } = event.position;
 
       // check what is the allowed scaling while avoiding originLine collision
@@ -122,32 +146,37 @@ const OuterBound = (props: OuterBoundProps) => {
         ref.current.style.transform = style.transform;
       }
 
-      // if (angleHintRef.current) {
-      //   // calculate the angle hint (some weird math)
-      //   let hintAngle = round(toDeg(after.angle)) - 90;
-      //   if (hintAngle < -180) {
-      //     hintAngle = (360 + hintAngle) % 360;
-      //   }
-      //
-      //   angleHintRef.current.innerText = `${hintAngle}°`;
-      //   angleHintRef.current.style.left = `${event.position.endX + 40}px`;
-      //   angleHintRef.current.style.top = `${event.position.endY + 40}px`;
-      // }
+      if (angleHintRef.current) {
+        let hintAngle = round(toDeg(after.angle)) - 90;
+        if (hintAngle < -180) {
+          hintAngle = (360 + hintAngle) % 360;
+        }
+
+        angleHintRef.current.innerText = `${hintAngle}°`;
+        angleHintRef.current.style.left = `${event.position.endX + 40}px`;
+        angleHintRef.current.style.top = `${event.position.endY + 40}px`;
+      }
     } else {
-      const { shaper: before, originLines } = event.state;
+      const { shaper: before, minScale } = event.state as {
+        shaper: Shaper;
+        originLines: Line[];
+        minScale: number;
+      };
       if (!Shaper.is(before)) return;
-      if (!isArray(originLines) && originLines.length !== 4) return;
+      if (!isNumber(minScale)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
-      let after = before.resize(dx, dy, anchor, handle, ResizeRatio.KEEP);
+
+      const change = before.scaleFromDelta(
+        dx,
+        dy,
+        anchor,
+        handle,
+        ResizeRatio.KEEP,
+      );
+      const sx = max(change.sx, minScale);
+      const sy = max(change.sy, minScale);
+      let after = before.scale(sx, sy, change.ax, change.ay);
       // check what is the allowed scaling while avoiding originLine collision
-      const { width, height } = after.size();
-
-      // const w = max(4, width);
-      //   const h = max(4, height);
-      //   if (w <= 4 || h <= 4) {
-      //     after = before.resizeTo(w, h, anchor, handle);
-      // }
-
       const style = after.toStyle();
       if (ref.current) {
         ref.current.style.left = style.left;
@@ -224,6 +253,7 @@ const OuterBound = (props: OuterBoundProps) => {
         style={{
           position: "absolute",
           border: "1px solid black",
+          background: "rgba(100, 0, 0, 0.5)",
           ...style,
         }}
       >
@@ -242,6 +272,85 @@ const OuterBound = (props: OuterBoundProps) => {
     </>
   );
 };
+
+function adjacentSides(handle: TransformHandle): Line[] {
+  switch (handle) {
+    case TransformHandle.TOP:
+      return [
+        Line.fromPoints(
+          getPoint(Location.TOP_LEFT),
+          getPoint(Location.TOP_RIGHT),
+        ),
+      ];
+    case TransformHandle.RIGHT:
+      return [
+        Line.fromPoints(
+          getPoint(Location.TOP_RIGHT),
+          getPoint(Location.BOTTOM_RIGHT),
+        ),
+      ];
+    case TransformHandle.BOTTOM:
+      return [
+        Line.fromPoints(
+          getPoint(Location.BOTTOM_LEFT),
+          getPoint(Location.BOTTOM_RIGHT),
+        ),
+      ];
+    case TransformHandle.LEFT:
+      return [
+        Line.fromPoints(
+          getPoint(Location.TOP_LEFT),
+          getPoint(Location.BOTTOM_LEFT),
+        ),
+      ];
+    case TransformHandle.TOP_LEFT:
+      return [
+        Line.fromPoints(
+          getPoint(Location.TOP_LEFT),
+          getPoint(Location.TOP_RIGHT),
+        ),
+        Line.fromPoints(
+          getPoint(Location.TOP_LEFT),
+          getPoint(Location.BOTTOM_LEFT),
+        ),
+      ];
+    case TransformHandle.TOP_RIGHT:
+      return [
+        Line.fromPoints(
+          getPoint(Location.TOP_RIGHT),
+          getPoint(Location.TOP_LEFT),
+        ),
+        Line.fromPoints(
+          getPoint(Location.TOP_RIGHT),
+          getPoint(Location.BOTTOM_RIGHT),
+        ),
+      ];
+    case TransformHandle.BOTTOM_RIGHT:
+      return [
+        Line.fromPoints(
+          getPoint(Location.BOTTOM_RIGHT),
+          getPoint(Location.TOP_RIGHT),
+        ),
+        Line.fromPoints(
+          getPoint(Location.BOTTOM_RIGHT),
+          getPoint(Location.BOTTOM_LEFT),
+        ),
+      ];
+    case TransformHandle.BOTTOM_LEFT:
+      return [
+        Line.fromPoints(
+          getPoint(Location.BOTTOM_LEFT),
+          getPoint(Location.TOP_LEFT),
+        ),
+        Line.fromPoints(
+          getPoint(Location.BOTTOM_LEFT),
+          getPoint(Location.BOTTOM_RIGHT),
+        ),
+      ];
+  }
+
+  return [];
+}
 
 interface InnerBoundProps {
   node: Node;
