@@ -73,7 +73,7 @@ export class Line {
   }
 
   get angle() {
-    return Math.atan2((this.end.y - this.start.y) , (this.end.x - this.start.x));
+    return Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
   }
 
   get center() {
@@ -93,6 +93,25 @@ export class Line {
 
   intersects(line: Line) {
     return Line.intersection(this, line) !== undefined;
+  }
+
+  extendEnd(length: number) {
+    const v = this.vector().norm();
+    return new Line(this.start, {
+      x: this.end.x + v.x * length,
+      y: this.end.y + v.y * length,
+    });
+  }
+
+  extendStart(length: number) {
+    const v = this.vector().norm();
+    return new Line(
+      {
+        x: this.start.x - v.x * length,
+        y: this.start.y - v.y * length,
+      },
+      this.end,
+    );
   }
 
   // get the distance from a point to a line
@@ -162,7 +181,7 @@ export class Line {
   projection(on: Vector): Vector {
     const v = this.vector();
     const unit = on.unit();
-    const dot = unit.dot(on);
+    const dot = unit.dot(v);
     return unit.scale(dot);
   }
 

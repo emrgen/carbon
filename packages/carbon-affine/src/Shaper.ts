@@ -1,6 +1,6 @@
 import { Affine } from "./Affine";
 import { Line } from "./Line";
-import { IPoint } from "./Point";
+import { IPoint, Point } from "./Point";
 import { Transform } from "./Transform";
 import { Radian, Scale } from "./types";
 import {
@@ -85,32 +85,49 @@ export class Shaper {
     const anchorPoint = this.anchorPoint(anchor);
     const handlePoint = this.handlePoint(handle);
     const anchorLine = Line.fromPoints(anchorPoint, handlePoint);
+
+    let lsx = 1;
+    let lsy = 1;
     // initial size
     const before = anchorLine.vector();
-    // final size after transformation
-    const after = anchorLine
-      .transform(tm.matrix)
-      .moveEnd(dx, dy)
-      .transform(ivm.matrix)
-      .vector();
 
-    // scale factor, some of them could be Infinity
-    const scale = after.divide(before);
-    // normalize the scale factor based on the anchor and handle
-    const { sx: lsx, sy: lsy } = this.normalize(
-      scale.x,
-      scale.y,
-      anchor,
-      handle,
-    );
+    if (ratio === ResizeRatio.FREE) {
+      // final size after transformation
+      const after = anchorLine
+        .transform(tm.matrix)
+        .moveEnd(dx, dy)
+        .transform(ivm.matrix)
+        .vector();
+
+      // scale factor, some of them could be Infinity
+      const scale = after.divide(before);
+      // normalize the scale factor based on the anchor and handle
+      const { sx, sy } = this.normalize(scale.x, scale.y, anchor, handle);
+      lsx = sx;
+      lsy = sy;
+    } else if (ratio === ResizeRatio.KEEP) {
+      const tmp = anchorLine.transform(tm.matrix);
+      const change = Line.fromPoints(
+        tmp.end,
+        Point.from(tmp.end).move(dx, dy),
+      ).projection(tmp.vector());
+      const delta = change.factorOf(tmp.vector().norm());
+      const after = tmp.extendEnd(delta).transform(ivm.matrix).vector();
+      // scale factor, some of them could be Infinity
+      const scale = after.divide(before);
+      console.log(scale);
+      // normalize the scale factor based on the anchor and handle
+      const { sx, sy } = this.normalize(scale.x, scale.y, anchor, handle);
+      lsx = sx;
+      lsy = sy;
+    }
 
     const { x: lax, y: lay } = anchorPoint;
     switch (ratio) {
       case ResizeRatio.FREE:
         return Shaper.from(this.tm.scale(lsx, lsy, lax, lay));
       case ResizeRatio.KEEP:
-        const s = Math.max(lsx, lsy);
-        return Shaper.from(this.tm.scale(s, s, lax, lay));
+        return Shaper.from(this.tm.scale(lsx, lsy, lax, lay));
       case ResizeRatio.KEEP_X:
         return Shaper.from(this.tm.scale(lsx, 1, lax, lay));
       case ResizeRatio.KEEP_Y:

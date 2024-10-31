@@ -1,3 +1,4 @@
+import { round } from "lodash";
 import { Affine } from "./Affine";
 import { Radian } from "./types";
 
@@ -69,9 +70,11 @@ export class Vector {
 
   factorOf(b: Vector) {
     const angle = this.angleBetween(b);
+    console.log("angle", angle, this.norm(), b.norm());
+    console.log(round(angle, 4) === -Math.PI, round(angle, 4), -Math.PI);
     if (angle === 0) {
       return this.size() / b.size();
-    } else if (angle === Math.PI) {
+    } else if (round(angle, 4) === -round(Math.PI, 4)) {
       return -this.size() / b.size();
     }
 
@@ -79,7 +82,8 @@ export class Vector {
   }
 
   angle(): number {
-    return Math.atan(this.y / this.x);
+    const angle = Math.atan2(this.y, this.x);
+    return angle < 0 ? angle + Math.PI * 2 : angle;
   }
 
   transform(matrix: Affine): Vector {

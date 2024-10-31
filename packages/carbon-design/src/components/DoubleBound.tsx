@@ -13,7 +13,7 @@ import {
 } from "@emrgen/carbon-affine";
 import { Node } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
-import { round } from "lodash";
+import { isArray, round } from "lodash";
 import { ReactNode, useRef, useState } from "react";
 import { CarbonTransformControls } from "./CarbonTransformControls";
 import { ShowCurrentAngleHint } from "./ShowCurrentAngleHint";
@@ -34,7 +34,6 @@ interface DoubleBoundProps {
 // outer bound should be draggable
 // while resizing, rotating, dragging the outer bound, outer bound should not overlap with inner bound
 // while resizing, rotating, dragging the inner bound, the overlapping should hide the overlapped region
-//
 export const DoubleBound = (props: DoubleBoundProps) => {
   const { node } = props;
 
@@ -62,6 +61,8 @@ const points = [
   getPoint(TransformAnchor.BOTTOM_LEFT),
 ].map((p) => sp.apply(p));
 
+function findNewSize() {}
+
 const OuterBound = (props: OuterBoundProps) => {
   const { node, children } = props;
   const ref = useRef<any>();
@@ -81,6 +82,12 @@ const OuterBound = (props: OuterBoundProps) => {
     setTransforming(true);
     event.setState({
       shaper: shaper,
+      originLines: [
+        Line.fromPoint(getPoint(Location.TOP_LEFT)).extendStart(99999),
+        Line.fromPoint(getPoint(Location.BOTTOM_RIGHT)).extendStart(99999),
+        Line.fromPoint(getPoint(Location.TOP_RIGHT)).extendStart(99999),
+        Line.fromPoint(getPoint(Location.BOTTOM_LEFT)).extendStart(99999),
+      ],
       beforeLine: Line.fromPoint(getPoint(handle)).transform(shaper.affine()),
       angleLine: Line.fromPoint(getPoint(Location.BOTTOM)),
     });
@@ -92,35 +99,47 @@ const OuterBound = (props: OuterBoundProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const { beforeLine: before, shaper, angleLine } = event.state;
+      const {
+        beforeLine: before,
+        shaper,
+        angleLine,
+        originLines,
+      } = event.state;
       if (!Line.is(before)) return;
       if (!Line.is(angleLine)) return;
+      if (!isArray(originLines) && originLines.length !== 4) return;
       const { deltaX: dx, deltaY: dy } = event.position;
+
+      // check what is the allowed scaling while avoiding originLine collision
+
       const after = before.moveEnd(dx, dy);
       const angle = toRad(round(toDeg(after.angleBetween(before))));
       const style = shaper.rotate(angle).toStyle();
+
       if (ref.current) {
         ref.current.style.left = style.left;
         ref.current.style.top = style.top;
         ref.current.style.transform = style.transform;
       }
 
-      if (angleHintRef.current) {
-        // calculate the angle hint (some weird math)
-        let hintAngle = round(toDeg(after.angle)) - 90;
-        if (hintAngle < -180) {
-          hintAngle = (360 + hintAngle) % 360;
-        }
-
-        angleHintRef.current.innerText = `${hintAngle}°`;
-        angleHintRef.current.style.left = `${event.position.endX + 40}px`;
-        angleHintRef.current.style.top = `${event.position.endY + 40}px`;
-      }
+      // if (angleHintRef.current) {
+      //   // calculate the angle hint (some weird math)
+      //   let hintAngle = round(toDeg(after.angle)) - 90;
+      //   if (hintAngle < -180) {
+      //     hintAngle = (360 + hintAngle) % 360;
+      //   }
+      //
+      //   angleHintRef.current.innerText = `${hintAngle}°`;
+      //   angleHintRef.current.style.left = `${event.position.endX + 40}px`;
+      //   angleHintRef.current.style.top = `${event.position.endY + 40}px`;
+      // }
     } else {
-      const { shaper: before } = event.state;
+      const { shaper: before, originLines } = event.state;
       if (!Shaper.is(before)) return;
+      if (!isArray(originLines) && originLines.length !== 4) return;
       const { deltaX: dx, deltaY: dy } = event.position;
-      let after = before.resize(dx, dy, anchor, handle, ResizeRatio.FREE);
+      let after = before.resize(dx, dy, anchor, handle, ResizeRatio.KEEP);
+      // check what is the allowed scaling while avoiding originLine collision
       const { width, height } = after.size();
 
       // const w = max(4, width);
@@ -167,7 +186,7 @@ const OuterBound = (props: OuterBoundProps) => {
       if (!Shaper.is(before)) return;
       const size = before.size();
       const { deltaX: dx, deltaY: dy } = event.position;
-      const after = before.resize(dx, dy, anchor, handle, ResizeRatio.FREE);
+      const after = before.resize(dx, dy, anchor, handle, ResizeRatio.KEEP);
 
       const style = after.toStyle();
       setShaper(after);
