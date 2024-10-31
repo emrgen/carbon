@@ -1,9 +1,9 @@
-import {ReactRenderer} from "@emrgen/carbon-react";
-import {Design} from "./plugin/Design";
+import { ReactRenderer } from "@emrgen/carbon-react";
+import { Design } from "./plugin/Design";
 import "./design.styl";
-import {DesignBoardComp} from "./renderer/DesignBoard";
-import {ElementComp} from "./renderer/ElementComp";
-import {TransformerComp} from "./renderer/Transformer";
+import { DesignBoardComp } from "./renderer/DesignBoard";
+import { ElementComp } from "./renderer/ElementComp";
+import { TransformerComp } from "./renderer/Transformer";
 
 export * from "./contants";
 
@@ -14,3 +14,5 @@ export const designRenderers = [
   ReactRenderer.create("deElement", ElementComp),
   ReactRenderer.create("deTransformer", TransformerComp),
 ];
+
+export * from "./components/DoubleBound";

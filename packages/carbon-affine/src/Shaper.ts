@@ -62,6 +62,7 @@ export class Shaper {
   rotate(angle: Radian, cx?: number, cy?: number): Shaper {
     // remove scale -> rotate -> rescale
     const scaling = this.tm.matrix.scaling();
+    // find the untransformed center
     const tm = this.tm
       .add(scaling.inverse())
       .rotate(angle, cx, cy)
@@ -251,7 +252,7 @@ export class Shaper {
 
     const { x: ax, y: ay } = getPoint(toLocation(anchor));
 
-    console.log('resizeTo', sx, width, size.width, ax, ay);
+    console.log("resizeTo", sx, width, size.width, ax, ay);
 
     return Shaper.from(this.tm.scale(nxs, nsy, ax, ay));
   }
