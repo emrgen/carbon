@@ -35,7 +35,7 @@ export const CarbonTransformControls = (
     <>
       <TransformerHandle
         {...props}
-        hideHandle={tooSmall(size, MIN_SIZE_SIDE_SHOW, MIN_SIZE_SIDE_SHOW)}
+        hideHandle={tooSmall(size, 40, 10)}
         hideAll={tooSmallHeight(size, MIN_SIZE_CORNER_SHOW)}
         className={"resize-bottom-handle"}
         type={TransformType.SCALE}
@@ -55,7 +55,7 @@ export const CarbonTransformControls = (
 
       <TransformerHandle
         {...props}
-        hideHandle={tooSmall(size, 30, 30)}
+        hideHandle={tooSmall(size, 10, 40)}
         className={"resize-left-handle"}
         type={TransformType.SCALE}
         anchor={TransformAnchor.RIGHT}
@@ -72,7 +72,7 @@ export const CarbonTransformControls = (
 
       <TransformerHandle
         {...props}
-        hideHandle={tooSmall(size, 30, 30)}
+        hideHandle={tooSmall(size, 40, 10)}
         className={"resize-top-handle"}
         type={TransformType.SCALE}
         anchor={TransformAnchor.BOTTOM}
@@ -90,7 +90,7 @@ export const CarbonTransformControls = (
 
       <TransformerHandle
         {...props}
-        hideHandle={tooSmall(size, 30, 30)}
+        hideHandle={tooSmall(size, 10, 40)}
         className={"resize-right-handle"}
         type={TransformType.SCALE}
         anchor={TransformAnchor.LEFT}

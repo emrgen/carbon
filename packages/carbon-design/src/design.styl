@@ -160,6 +160,15 @@ $selected-border-color = #236af4
   width 16px
   border-radius 50%;
   cursor grab
+  align-content: center
+  justify-content: center
+  &:after
+    content '⤾'
+    position absolute;
+    top 50%;
+    left 50%;
+    transform translate(-50%, -50%)
+
 
 .de-board--selector
   opacity 0
