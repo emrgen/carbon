@@ -6,6 +6,7 @@ import {
 } from "@emrgen/carbon-react";
 import { useRef, useState } from "react";
 import { BoardHelpers } from "../components/BoardHelpers";
+import { DoubleBound } from "../components/DoubleBound";
 import { RectSelector } from "../components/RectSelector";
 import { DesignBoard } from "../core/DesignBoard";
 import { BoardContext } from "../hook/useBoard";
@@ -39,6 +40,7 @@ const DesignSelectionStage = (props: RendererProps) => {
           })}
           {/*<CarbonChildren node={node} />*/}
         </CarbonBlock>
+        <DoubleBound node={node} />
         <BoardHelpers node={node} />
       </div>
     </>

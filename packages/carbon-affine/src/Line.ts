@@ -73,7 +73,7 @@ export class Line {
   }
 
   get angle() {
-    return Math.atan2((this.end.y - this.start.y) , (this.end.x - this.start.x));
+    return Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
   }
 
   get center() {
@@ -81,6 +81,13 @@ export class Line {
       x: (this.start.x + this.end.x) / 2,
       y: (this.start.y + this.end.y) / 2,
     };
+  }
+
+  projection(on: Vector): Vector {
+    const v = this.vector();
+    const unit = on.unit();
+    const dot = unit.dot(v);
+    return unit.scale(dot);
   }
 
   transform(tm: Affine): Line {
@@ -93,6 +100,29 @@ export class Line {
 
   intersects(line: Line) {
     return Line.intersection(this, line) !== undefined;
+  }
+
+  intersection(line: Line) {
+    return Line.intersection(this, line);
+  }
+
+  extendEnd(length: number) {
+    const v = this.vector().norm();
+    return new Line(this.start, {
+      x: this.end.x + v.x * length,
+      y: this.end.y + v.y * length,
+    });
+  }
+
+  extendStart(length: number) {
+    const v = this.vector().norm();
+    return new Line(
+      {
+        x: this.start.x - v.x * length,
+        y: this.start.y - v.y * length,
+      },
+      this.end,
+    );
   }
 
   // get the distance from a point to a line
@@ -159,11 +189,8 @@ export class Line {
     };
   }
 
-  projection(on: Vector): Vector {
-    const v = this.vector();
-    const unit = on.unit();
-    const dot = unit.dot(on);
-    return unit.scale(dot);
+  projectionPoint(p: IPoint) {
+    return this.extendEnd(1e8).extendStart(1e8).closestPoint(p);
   }
 
   prevLine(p: Point) {
@@ -178,14 +205,14 @@ export class Line {
     return Vector.of(this.end.x - this.start.x, this.end.y - this.start.y);
   }
 
-  moveEnd(dx: number, dy: number) {
+  moveEndBy(dx: number, dy: number) {
     return new Line(this.start, {
       x: this.end.x + dx,
       y: this.end.y + dy,
     });
   }
 
-  moveStart(dx: number, dy: number) {
+  moveStartBy(dx: number, dy: number) {
     return new Line(
       {
         x: this.start.x + dx,
@@ -193,5 +220,55 @@ export class Line {
       },
       this.end,
     );
+  }
+
+  moveEndTo(point: IPoint) {
+    return new Line(this.start, point);
+  }
+
+  moveStartTo(point: IPoint) {
+    return new Line(point, this.end);
+  }
+
+  onSameSide(p1: IPoint, p2: IPoint) {
+    const { start, end } = this;
+    const { x: x1, y: y1 } = start;
+    const { x: x2, y: y2 } = end;
+    const { x: x3, y: y3 } = p1;
+    const { x: x4, y: y4 } = p2;
+
+    return !(
+      ((x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1)) *
+        ((x2 - x1) * (y4 - y1) - (y2 - y1) * (x4 - x1)) <
+      0
+    );
+  }
+
+  pointLength(refPoint: IPoint) {
+    return Math.hypot(this.start.x - refPoint.x, this.start.y - refPoint.y);
+  }
+
+  pointAtLength(len: number) {
+    const lenRatio = len / this.length;
+    return {
+      x: this.start.x + (this.end.x - this.start.x) * lenRatio,
+      y: this.start.y + (this.end.y - this.start.y) * lenRatio,
+    };
+  }
+
+  // shift the line parallel to the given line
+  shiftTo(point: IPoint): Line {
+    const v = this.vector().norm().multiply(this.length);
+    return new Line(point, {
+      x: point.x + v.x,
+      y: point.y + v.y,
+    });
+  }
+
+  middle(): IPoint {
+    return {
+      x: (this.start.x + this.end.x) / 2,
+      y: (this.start.y + this.end.y) / 2,
+    };
   }
 }

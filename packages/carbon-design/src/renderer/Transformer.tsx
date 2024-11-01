@@ -1,15 +1,14 @@
 import {
-  Affine,
   getPoint,
+  Line,
+  Location,
   ResizeRatio,
   Shaper,
+  toDeg,
+  toRad,
   TransformAnchor,
   TransformHandle,
   TransformType,
-  Line,
-  toDeg,
-  toRad,
-  Location,
 } from "@emrgen/carbon-affine";
 import { Node, NodeId, TransformStatePath } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
@@ -19,7 +18,7 @@ import {
   defaultRenderPropComparator,
   useCarbon,
 } from "@emrgen/carbon-react";
-import { after, cloneDeep, merge, round } from "lodash";
+import { cloneDeep, merge, round } from "lodash";
 import {
   CSSProperties,
   ReactNode,
@@ -30,11 +29,11 @@ import {
   useState,
 } from "react";
 import { CarbonTransformControls } from "../components/CarbonTransformControls";
+import { ShowCurrentAngleHint } from "../components/ShowCurrentAngleHint";
 import { useBoard } from "../hook/useBoard";
 import { useElement } from "../hook/useElement";
 import { useBoardOverlay } from "../hook/useOverlay";
-import { getNodeTransform, max } from "../utils";
-import { ShowCurrentAngleHint } from "../components/ShowCurrentAngleHint";
+import { getNodeTransform } from "../utils";
 
 interface ElementTransformerProps {
   node: Node;
@@ -236,7 +235,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       if (!Line.is(before)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
-      const after = before.moveEnd(dx, dy);
+      const after = before.moveEndBy(dx, dy);
       const angle = toRad(round(toDeg(after.angleBetween(before))));
       const style = shaper.rotate(angle).toStyle();
       if (ref.current) {
@@ -266,13 +265,6 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       if (!Shaper.is(before)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       let after = before.resize(dx, dy, anchor, handle, ResizeRatio.FREE);
-      const { width, height } = after.size();
-
-      // const w = max(4, width);
-      //   const h = max(4, height);
-      //   if (w <= 4 || h <= 4) {
-      //     after = before.resizeTo(w, h, anchor, handle);
-      // }
 
       const style = after.toStyle();
       if (ref.current) {
@@ -282,6 +274,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         ref.current.style.height = style.height;
         ref.current.style.transform = style.transform;
       }
+
       if (elementRef.current) {
         elementRef.current.style.left = style.left;
         elementRef.current.style.top = style.top;
@@ -298,14 +291,14 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     handle: TransformHandle,
     event: DndEvent,
   ) => {
-    console.log('stop', type, event);
+    console.log("stop", type, event);
     if (type === TransformType.ROTATE) {
       const { beforeLine: startLine, shaper } = event.state;
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
-      const currLine = startLine.moveEnd(dx, dy);
+      const currLine = startLine.moveEndBy(dx, dy);
       const angle = toRad(round(toDeg(currLine.angleBetween(startLine))));
-      const after = shaper.rotate(angle)
+      const after = shaper.rotate(angle);
       const style = after.toStyle();
       if (ref.current) {
         ref.current.style.left = style.left;
@@ -321,7 +314,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
 
       setShaper(after);
       overlay.hideOverlay();
-       app.cmd
+      app.cmd
         .Update(node.id, {
           [TransformStatePath]: after.toCSS(),
         })

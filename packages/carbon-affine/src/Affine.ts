@@ -1,10 +1,9 @@
-import { clamp } from "lodash";
 import {
   compose,
   fromDefinition,
   fromTransformAttribute,
 } from "transformation-matrix";
-import { UINT_MIN, UINT_MAX } from "./contant";
+import { UINT_MAX, UINT_MIN } from "./contant";
 import { IPoint } from "./Point";
 import { Radian } from "./types";
 import { abs, clampScale, considerZero } from "./utils";
@@ -137,7 +136,7 @@ export class Affine {
     // clamp to avoid scale to zero
     const sax = clampScale(sx, UINT_MIN, UINT_MAX);
     const say = clampScale(sy, UINT_MIN, UINT_MAX);
-    
+
     return this.mul(Affine.scale(sax, say));
   }
 

@@ -144,9 +144,52 @@ export function getPoint(
 }
 
 export function clampScale(scale: number, min: number, max: number) {
-  if (scale === 0)  return min
+  if (scale === 0) return min;
   if (scale > 0) return clamp(scale, min, max);
-  if (scale < 0) return clamp(scale, -max ,-min);
+  if (scale < 0) return clamp(scale, -max, -min);
 
   return scale;
 }
+
+export function isSide(location: Location | TransformHandle | TransformAnchor) {
+  if (isAnchor(location as any)) {
+    location = toHandle(location as any);
+  }
+
+  if (isHandle(location as any)) {
+    location = toLocation(location as any);
+  }
+
+  return (
+    location === Location.TOP ||
+    location === Location.BOTTOM ||
+    location === Location.LEFT ||
+    location === Location.RIGHT
+  );
+}
+
+export function isCorner(
+  location: Location | TransformHandle | TransformAnchor,
+) {
+  if (isAnchor(location as any)) {
+    location = toHandle(location as any);
+  }
+
+  if (isHandle(location as any)) {
+    location = toLocation(location as any);
+  }
+
+  return (
+    location === Location.TOP_LEFT ||
+    location === Location.TOP_RIGHT ||
+    location === Location.BOTTOM_LEFT ||
+    location === Location.BOTTOM_RIGHT
+  );
+}
+
+export const cornerPoints = [
+  getPoint(Location.TOP_LEFT),
+  getPoint(Location.TOP_RIGHT),
+  getPoint(Location.BOTTOM_RIGHT),
+  getPoint(Location.BOTTOM_LEFT),
+];
