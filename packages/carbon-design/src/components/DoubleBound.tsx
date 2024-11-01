@@ -119,29 +119,52 @@ const OuterBound = (props: OuterBoundProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const { beforeLine: before, shaper, angleLine, minScale } = event.state;
-      if (!Line.is(before)) return;
+      const { beforeLine, shaper, angleLine } = event.state;
+      if (!Shaper.is(shaper)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
 
       // check what is the allowed scaling while avoiding originLine collision
+      const afterLine = beforeLine.moveEndBy(dx, dy);
+      const angle = toRad(round(toDeg(afterLine.angleBetween(beforeLine))));
+      const after = shaper.rotate(angle);
+      const centerPoint = after.apply(getPoint(Location.CENTER));
+      const { width, height } = after.size();
+      const sides = boundSidesFromCorners(
+        cornerPoints.map((p) => after.apply(p)),
+      );
 
-      const after = before.moveEndBy(dx, dy);
-      const angle = toRad(round(toDeg(after.angleBetween(before))));
-      const style = shaper.rotate(angle).toStyle();
+      // shift the sides to the inner bound corner points and check the scales.
+      // the maximum scaling is the allowed scaling
+      const scales = sides.map((side, i) => {
+        const scales = points.map((p) => {
+          const shifted = side.shiftTo(p);
+          const distance = 2 * shifted.distance(centerPoint);
+          if (i % 2) {
+            return distance / width;
+          } else {
+            return distance / height;
+          }
+        });
+
+        return max(scales) as number;
+      });
+      const minScale = max([...scales, 1]) as number;
+
+      const afterScale = after.scale(minScale, minScale, 0, 0);
+
+      const style = afterScale.toStyle();
 
       if (ref.current) {
         ref.current.style.left = style.left;
         ref.current.style.top = style.top;
+        ref.current.style.width = style.width;
+        ref.current.style.height = style.height;
         ref.current.style.transform = style.transform;
       }
 
       if (angleHintRef.current) {
-        let hintAngle = round(toDeg(after.angle)) - 90;
-        if (hintAngle < -180) {
-          hintAngle = (360 + hintAngle) % 360;
-        }
-
+        const hintAngle = round(toDeg(after.angle));
         angleHintRef.current.innerText = `${hintAngle}°`;
         angleHintRef.current.style.left = `${event.position.endX + 40}px`;
         angleHintRef.current.style.top = `${event.position.endY + 40}px`;
@@ -490,9 +513,10 @@ const InnerBound = (props: InnerBoundProps) => {
 
       // check what is the allowed scaling while avoiding originLine collision
 
-      const after = before.moveEndBy(dx, dy);
-      const angle = toRad(round(toDeg(after.angleBetween(before))));
-      const style = shaper.rotate(angle).toStyle();
+      const afterLine = before.moveEndBy(dx, dy);
+      const angle = toRad(round(toDeg(afterLine.angleBetween(before))));
+      const after = shaper.rotate(angle);
+      const style = after.toStyle();
 
       if (ref.current) {
         ref.current.style.left = style.left;
@@ -501,11 +525,7 @@ const InnerBound = (props: InnerBoundProps) => {
       }
 
       if (angleHintRef.current) {
-        let hintAngle = round(toDeg(after.angle)) - 90;
-        if (hintAngle < -180) {
-          hintAngle = (360 + hintAngle) % 360;
-        }
-
+        let hintAngle = round(toDeg(after.angle));
         angleHintRef.current.innerText = `${hintAngle}°`;
         angleHintRef.current.style.left = `${event.position.endX + 40}px`;
         angleHintRef.current.style.top = `${event.position.endY + 40}px`;
@@ -825,6 +845,8 @@ function anchorLines(anchor: TransformAnchor): Line[] {
   return [];
 }
 
+// NOTE: first and third lines are horizontal, second and fourth lines are vertical
+// this fact is used by the dependent functions
 function boundSidesFromCorners(corners: IPoint[]): Line[] {
   return [
     Line.fromPoints(corners[0], corners[1]),
