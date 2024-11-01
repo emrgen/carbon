@@ -30,3 +30,18 @@ test("test line intersection", () => {
   const intersection = Line.intersection(line1, line2);
   expect(intersection).toEqual(undefined);
 });
+
+test("test closest point on line", () => {
+  const line = new Line({ x: 0, y: 0 }, { x: 10, y: 0 });
+  const point = { x: 20, y: 1 };
+  const closest = line.closestPoint(point);
+  expect(closest).toEqual({ x: 10, y: 0 });
+});
+
+test("test projection point on line", () => {
+  const line = new Line({ x: 0, y: 0 }, { x: 10, y: 0 });
+  const point = { x: 20, y: 1 };
+  const closest = line.projectionPoint(point);
+  expect(closest.x).toBeCloseTo(20);
+  expect(closest.y).toBeCloseTo(0);
+});

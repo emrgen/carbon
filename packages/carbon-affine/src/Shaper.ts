@@ -94,7 +94,7 @@ export class Shaper {
       // final size after transformation
       const after = anchorLine
         .transform(tm.matrix)
-        .moveEnd(dx, dy)
+        .moveEndBy(dx, dy)
         .transform(ivm.matrix)
         .vector();
 

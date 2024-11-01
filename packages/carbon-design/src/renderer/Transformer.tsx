@@ -235,7 +235,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       if (!Line.is(before)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
-      const after = before.moveEnd(dx, dy);
+      const after = before.moveEndBy(dx, dy);
       const angle = toRad(round(toDeg(after.angleBetween(before))));
       const style = shaper.rotate(angle).toStyle();
       if (ref.current) {
@@ -296,7 +296,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       const { beforeLine: startLine, shaper } = event.state;
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
-      const currLine = startLine.moveEnd(dx, dy);
+      const currLine = startLine.moveEndBy(dx, dy);
       const angle = toRad(round(toDeg(currLine.angleBetween(startLine))));
       const after = shaper.rotate(angle);
       const style = after.toStyle();

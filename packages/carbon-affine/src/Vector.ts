@@ -62,7 +62,7 @@ export class Vector {
 
   angleBetween(b: Vector) {
     // console.log(b.angle(), this.angle());
-    return b.angle() - this.angle();
+    return b.angle - this.angle;
   }
 
   divide(b: Vector) {
@@ -80,7 +80,7 @@ export class Vector {
     throw new Error("the two vectors are not in the same direction");
   }
 
-  angle(): number {
+  get angle(): number {
     const angle = Math.atan2(this.y, this.x);
     return angle;
     // return angle < 0 ? angle + Math.PI * 2 : angle;
