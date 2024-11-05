@@ -531,7 +531,7 @@ export class ActiveCell extends EventEmitter {
   }
 
   static defFromAst(name, deps, ast: any, code: string): Optional<Function> {
-    const { type, body } = ast;
+    const { body } = ast;
     console.log(
       `%c${body.type}`,
       "color:white;background:#ffcc006e;font-weight:bold;",
@@ -540,7 +540,7 @@ export class ActiveCell extends EventEmitter {
 
     const createDefinition = factory[body.type];
     if (!createDefinition) {
-      console.error("MISSING DEFINITION FACTORY FOR:", body.type);
+      console.error("MISSING DEFINITION FACTORY FOR:", body.type, factory);
       return undefined;
     }
 
@@ -661,7 +661,7 @@ const factory = {
     return this.Expression(name, deps, ast, code);
   },
   BinaryExpression(name: string, deps: string[], ast: any, code: string) {
-    this.Expression(name, deps, ast, code);
+    return this.Expression(name, deps, ast, code);
   },
   TaggedTemplateExpression(
     name: string,

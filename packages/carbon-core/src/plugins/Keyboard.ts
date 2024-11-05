@@ -475,11 +475,11 @@ export class KeyboardPlugin extends AfterPlugin {
       console.log("no text block...");
       const lastBlock = last(blocks) as Node;
       const paragraph = app.schema.type("paragraph")?.default();
-      if (!section) return false;
+      if (!paragraph) return false;
 
-      const after = PinnedSelection.fromPin(Pin.toStartOf(section)!)!;
+      const after = PinnedSelection.fromPin(Pin.toStartOf(paragraph)!)!;
       cmd
-        .Add(insertAfterAction(lastBlock, section))
+        .Add(insertAfterAction(lastBlock, paragraph))
         .Select(after, ActionOrigin.UserInput)
         .Dispatch();
 

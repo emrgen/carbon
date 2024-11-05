@@ -26,6 +26,7 @@ $selectionHaloColor = #accef78d
 .number-list
 .todo
 .collapsible
+.callout
 .paragraph
   margin-top 2px
   position relative;
@@ -305,3 +306,19 @@ pre
 
 .empty-zero-width-space
   font-stretch expanded
+
+[data-name=button][data-size=lg] .carbon-button
+  font-size 1.1em
+  padding 0.5em 1em
+
+[data-name=plainText]
+  display flex
+  justify-content center
+  text-align center
+  &:after
+    content: attr(placeholder)
+    color white
+    opacity 0.5
+    user-select none
+    z-index 1
+    pointer-events none

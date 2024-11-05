@@ -1,25 +1,33 @@
-import { CarbonRoot } from "./plugins/CarbonRoot";
 import { CarbonPlugin } from "@emrgen/carbon-core";
 import { NestablePlugin, PagePlugin, Section } from "./plugins";
-import { Divider } from "./plugins/Divider";
-import { Header } from "./plugins/Header";
-import { Collapsible } from "./plugins/Collapsible";
+import { Attributes } from "./plugins/Attributes";
+import { BlockContent } from "./plugins/BlockContent";
+import { Bookmark } from "./plugins/Bookmark";
 import { BulletedList } from "./plugins/BulletedList";
-import { NumberedList } from "./plugins/NumberedList";
-import { ChangeName } from "./plugins/ChangeName";
-import { Equation } from "./plugins/Equation";
-import { Todo } from "./plugins/Todo";
-import { Quote } from "./plugins/Quote";
+import { Button } from "./plugins/Button";
 import { Callout } from "./plugins/Callout";
+import { CarbonRoot } from "./plugins/CarbonRoot";
+import { ChangeName } from "./plugins/ChangeName";
+import { Code } from "./plugins/Code";
+import { Collapsible } from "./plugins/Collapsible";
+import { Divider } from "./plugins/Divider";
+import { Emoji } from "./plugins/Emoji";
+import { Equation } from "./plugins/Equation";
+import { Frame } from "./plugins/Frame";
+import { Header } from "./plugins/Header";
+import { ViewedPath } from "./plugins/Hint";
+import { HStack } from "./plugins/HStack";
+import { ImagePlugin } from "./plugins/ImagePlugin";
+import { Insert } from "./plugins/Inserter";
+import { Mention } from "./plugins/Mention";
+import { Modal } from "./plugins/Modal";
+import { NumberedList } from "./plugins/NumberedList";
 import { PageLink } from "./plugins/PageLink";
 import { PageTree } from "./plugins/PageTree";
-import { BlockContent } from "./plugins/BlockContent";
-import { Frame } from "./plugins/Frame";
-import { Insert } from "./plugins/Inserter";
-import { Modal } from "./plugins/Modal";
-import { TabGroup } from "./plugins/Tab";
-import { HStack } from "./plugins/HStack";
-import { ViewedPath } from "./plugins/Hint";
+import { Partial } from "./plugins/Partial";
+import { PlainTextPlugin } from "./plugins/PlainText";
+import { Quote } from "./plugins/Quote";
+import { Sandbox } from "./plugins/Sandbox";
 import {
   EndPath,
   Scale,
@@ -27,15 +35,8 @@ import {
   StepPath,
   ValuePath,
 } from "./plugins/Scale";
-import { Button } from "./plugins/Button";
-import { ImagePlugin } from "./plugins/ImagePlugin";
-import { Partial } from "./plugins/Partial";
-import { Code } from "./plugins/Code";
-import { Emoji } from "./plugins/Emoji";
-import { Mention } from "./plugins/Mention";
-import { Bookmark } from "./plugins/Bookmark";
-import { Attributes } from "./plugins/Attributes";
-import { Sandbox } from "./plugins/Sandbox";
+import { TabGroup } from "./plugins/Tab";
+import { Todo } from "./plugins/Todo";
 
 export * from "./create";
 
@@ -75,6 +76,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Bookmark(),
   new Attributes(),
   new Sandbox(),
+  new PlainTextPlugin(),
 ];
 
 export * from "./events";

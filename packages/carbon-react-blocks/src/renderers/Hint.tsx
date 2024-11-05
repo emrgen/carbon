@@ -36,7 +36,7 @@ export default function HintComp(props: RendererProps) {
   const { node } = props;
   const app = useCarbon();
 
-  const document = useDocument();
+  const { doc } = useDocument();
 
   const ref = useRef(null);
   const { connectors, SelectionHalo } = useDragDropRectSelectHalo({
@@ -86,11 +86,11 @@ export default function HintComp(props: RendererProps) {
   // prevent click if content is editable
   const handleContentClick = useCallback(
     (e: React.MouseEvent) => {
-      if (!isContentEditable(document)) {
+      if (!isContentEditable(doc)) {
         handleToggle();
       }
     },
-    [document, handleToggle],
+    [doc, handleToggle],
   );
 
   const beforeContent = (

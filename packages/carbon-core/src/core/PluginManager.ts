@@ -1,5 +1,4 @@
 import { Optional } from "@emrgen/types";
-import { EventHandlerMap, NodeName } from "./types";
 
 import { isKeyHotkey } from "is-hotkey";
 import {
@@ -13,16 +12,17 @@ import {
   uniqBy,
   values,
 } from "lodash";
-import { EventContext } from "./EventContext";
-import { CarbonPlugin, PluginType } from "./CarbonPlugin";
-import { Node } from "./Node";
 import { CarbonAction } from "./actions/types";
-import { EventsIn } from "./Event";
-import { CarbonCommand } from "./CarbonCommand";
-import { Service } from "./Service";
-import { PlainNodeProps } from "./NodeProps";
 import { Carbon } from "./Carbon";
+import { CarbonCommand } from "./CarbonCommand";
+import { CarbonPlugin, PluginType } from "./CarbonPlugin";
+import { EventsIn } from "./Event";
+import { EventContext } from "./EventContext";
+import { Node } from "./Node";
 import { StateActions } from "./NodeChange";
+import { PlainNodeProps } from "./NodeProps";
+import { Service } from "./Service";
+import { EventHandlerMap, NodeName } from "./types";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -143,7 +143,7 @@ export class PluginManager {
 
     if (!event.stopped) {
       currentNode?.chain.some((n) => {
-        // console.log(n.name, event.type, node?.chain.length);
+        // console.log(n.name, event.type, n?.chain.length);
         event.changeNode(n);
         this.nodePlugin(n.name)?.handlers()[camelCase(event.type)]?.(event);
         return event.stopped;

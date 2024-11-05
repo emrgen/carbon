@@ -69,8 +69,7 @@ export const DocumentComp = (props: RendererProps) => {
   );
 
   const isEditable = useMemo(() => {
-    const editable = node.props.get<string>(ModePath, "view") === "edit";
-    return true;
+    return node.props.get<string>(ModePath, "view") === "edit";
   }, [node]);
 
   const handleClick = useCallback(
@@ -104,11 +103,11 @@ export const DocumentComp = (props: RendererProps) => {
         prevent(e);
         const at = Point.toAfter(lastChild.id);
         const paragraph = app.schema.type("paragraph").default();
-        if (!section) return;
-        const after = PinnedSelection.fromPin(Pin.toStartOf(section)!);
+        if (!paragraph) return;
+        const after = PinnedSelection.fromPin(Pin.toStartOf(paragraph)!);
         app.cmd
           .SelectBlocks([])
-          .Insert(at, section)
+          .Insert(at, paragraph)
           .Select(after, ActionOrigin.UserInput)
           .Dispatch();
       }

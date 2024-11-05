@@ -19,10 +19,7 @@ import {
   cellPlugin,
   cellRenderer,
 } from "@emrgen/carbon-cell";
-import {
-  DocumentSaveStatus,
-  FloatingStyleMenu,
-} from "@emrgen/carbon-chakra-ui";
+import { FloatingStyleMenu, ToggleViewMode } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codemirrorExtension } from "@emrgen/carbon-codemirror";
 import {
@@ -60,7 +57,7 @@ import {
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { PathTracker } from "../../PathTracker";
 
 const data = node("carbon", [
@@ -82,7 +79,19 @@ const data = node("carbon", [
       //   ]),
       // ]),
 
+      node("continue", [
+        node("button", [node("plainText", [text("continued")])], {
+          ["local/html/data-size"]: "lg",
+        }),
+      ]),
+
       node("codemirror"),
+
+      node("continue", [
+        node("button", [node("plainText", [text("continued")])], {
+          ["local/html/data-size"]: "lg",
+        }),
+      ]),
 
       // node("timeline", [title([text("Install @chakra-ui/react")])]),
       // node("timeline", [title([text("Add snippets")])]),
@@ -215,7 +224,11 @@ const data = node("carbon", [
       // ),
 
       paragraph([title([text("question title")])]),
-
+      node("continue", [
+        node("button", [node("plainText", [text("continued")])], {
+          ["local/html/data-size"]: "lg",
+        }),
+      ]),
       // node(
       //   "table",
       //   [],
@@ -867,11 +880,7 @@ export default function Dev() {
         "actions",
         state.actions.optimize().actions.map((a) => a.toJSON()),
       );
-      // console.info(state.content.child(0)?.size);
-      // printNode(state.content);
-      state.content.all((node) => {
-        // console.log(node.id.toString(), node.name, node.properties.toKV());
-      });
+      state.content.all((node) => {});
     };
 
     app.on("changed", onChange);
@@ -880,70 +889,6 @@ export default function Dev() {
     };
   }, [app]);
 
-  // useEffect(() => {
-  //   debugger;
-  //   const pin = Pin.toEndOf(app.state.content)!;
-  //   // const after = PinnedSelection.fromPin(pin)!;
-  // }, [app]);
-
-  // return (
-  //   <></>
-  // )
-
-  const [addingItem, setAddingItem] = useState(false);
-
-  const startAddingItem = useCallback(() => {
-    setAddingItem(true);
-  }, []);
-
-  const stopAddingItem = useCallback(() => {
-    setAddingItem(false);
-  }, []);
-
-  useEffect(() => {
-    let interval: any;
-    // const title = app.state.content.child(0)?.firstChild!;
-    // const selection = PinnedSelection.fromPin(Pin.toStartOf(title)!)!;
-    if (addingItem) {
-      // app.cmd.Select(selection).dispatch();
-      // interval = setInterval(() => {
-      //   const children = app.state.content.child(0)?.children!;
-      //   const node =
-      //     children[
-      //       clamp(Math.floor(Math.random() * 30), 0, children.length - 1)
-      //     ];
-      //   console.log(node.toString());
-      //   const newNode = app.schema.nodeFromJSON(
-      //     paragraph([title([text("new section " + random(1, 100))])]),
-      //   )!;
-      //
-      //   const selection = PinnedSelection.fromPin(Pin.toStartOf(newNode)!)!;
-      //   app.cmd
-      //     .Insert(Point.toBefore(node.id!)!, newNode)
-      //     .Select(selection)
-      //     .dispatch();
-      // }, 2);
-    }
-
-    if (!addingItem) {
-      clearInterval(interval);
-    }
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [addingItem, app]);
-
-  useEffect(() => {
-    document.addEventListener("mousedown", startAddingItem);
-    document.addEventListener("mouseup", stopAddingItem);
-
-    return () => {
-      document.removeEventListener("mousedown", startAddingItem);
-      document.removeEventListener("mouseup", stopAddingItem);
-    };
-  }, [startAddingItem, stopAddingItem]);
-
   return (
     <Box className={"carbon-app-container"} pos={"relative"}>
       <ActiveCellRuntimeContext runtime={runtime}>
@@ -951,7 +896,9 @@ export default function Dev() {
           <ObservableQuestions>
             <CarbonApp app={app} renderManager={renderManager}>
               <Box pos={"absolute"} right={8} top={6}>
-                <DocumentSaveStatus />
+                {/*<DocumentSaveStatus />*/}
+                {/* eslint-disable-next-line react/jsx-no-undef */}
+                {<ToggleViewMode />}
               </Box>
               <FloatingStyleMenu />
               <PathTracker />
@@ -966,6 +913,7 @@ export default function Dev() {
 class Nodes {
   app: Carbon;
   observedIds: Array<string> = [];
+
   constructor(app: Carbon, observedIds: Array<string>) {
     this.app = app;
     this.observedIds = observedIds;

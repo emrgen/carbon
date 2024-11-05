@@ -138,3 +138,20 @@ $lineHeight = 26px
 .mcq-answer-checkbox
     padding 0 6px
 // add hint
+
+.continue
+    display flex
+    justify-content center
+    .continue-button
+        padding 6px 12px
+        border-radius 4px
+        background: #eee
+        font-size 15px
+        font-weight bold
+        transition background-color 0.2s
+        cursor default;
+        &:hover
+            background: #ddd
+
+[data-visible=false]
+    display none

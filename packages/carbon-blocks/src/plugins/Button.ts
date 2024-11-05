@@ -1,4 +1,9 @@
-import {CarbonPlugin, EventHandlerMap, NodeSpec, preventAndStopCtx} from "@emrgen/carbon-core";
+import {
+  CarbonPlugin,
+  EventHandlerMap,
+  NodeSpec,
+  preventAndStopCtx,
+} from "@emrgen/carbon-core";
 
 export class Button extends CarbonPlugin {
   name = "button";
@@ -6,30 +11,31 @@ export class Button extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: "content",
-      content: "title",
+      content: "plainText",
       isolate: true,
       props: {
         local: {
           placeholder: {
-            empty: 'Untitled',
+            empty: "Untitled",
+            focused: "Untitled",
           },
           html: {
             contentEditable: false,
-          }
+          },
         },
-      }
-    }
+      },
+    };
   }
 
   handlers(): EventHandlerMap {
     return {
-      click: (ctx) => {}
-    }
+      click: (ctx) => {},
+    };
   }
 
   keydown(): EventHandlerMap {
     return {
       enter: preventAndStopCtx,
-    }
+    };
   }
 }

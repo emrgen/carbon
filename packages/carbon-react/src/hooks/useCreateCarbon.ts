@@ -151,7 +151,7 @@ export const useCreateCachedCarbon = (
         app.emit("external:saved", state);
       }, 500);
       // saveDoc(state);
-    }, 5000);
+    }, 1000);
 
     const onChange = () => {
       app.emit("external:changed");

@@ -468,6 +468,12 @@ export class ImmutableDraft implements Draft {
 
     // for text container update empty placeholder
     if (node.isTextContainer && isArray(content)) {
+      console.log(
+        "-----",
+        content.length === 0,
+        this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ??
+          "",
+      );
       this.tm.updateProps(node, {
         [PlaceholderPath]:
           content.length === 0
@@ -1304,7 +1310,7 @@ class Transformer {
     this.actions.add(UpdatePropsAction.withBefore(node.id, before, props));
     this.changes.add(UpdateChange.create(node.id, node.path, before, props));
 
-    console.log("UPDATING props", props, before);
+    console.log("UPDATING props", before, props);
 
     node.updateProps(props);
 

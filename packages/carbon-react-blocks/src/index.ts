@@ -30,6 +30,7 @@ import { PageLinkComp } from "./renderers/PageLink";
 import { PageTreeComp } from "./renderers/PageTree";
 import { PageTreeItemComp } from "./renderers/PageTreeItem";
 import { PartialComp } from "./renderers/PartialComp";
+import { PlainText } from "./renderers/PlainText";
 import { QuestionComp } from "./renderers/Question";
 import { QuoteComp } from "./renderers/Quote";
 import ScaleComp from "./renderers/Scale";
@@ -87,6 +88,7 @@ export const blockPresetRenderers = [
   ReactRenderer.create("atomicText", AtomicText),
   ReactRenderer.create("bookmark", BookmarkComp),
   ReactRenderer.create("pageLink", PageLinkComp),
+  ReactRenderer.create("plainText", PlainText),
   // ReactRenderer.create("empty", EmptyInline),
 ];
 

@@ -213,6 +213,7 @@ export class Collapsible extends NodePlugin {
           };
         });
 
+        // replace default title with existing title
         section.remove(section.child(0)!);
         section.insert(sectionTitle, 0);
         // section.replace(section.child(0)!, sectionTitle);

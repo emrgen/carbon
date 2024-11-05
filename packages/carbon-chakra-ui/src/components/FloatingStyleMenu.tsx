@@ -95,8 +95,12 @@ export function FloatingStyleMenu() {
       }
 
       const { head, tail } = state.selection;
-      const headDown = head.down();
+      if (head.node.name === "plainText") {
+        hideContextMenu();
+        return;
+      }
 
+      const headDown = head.down();
       const tailDown = tail.down();
       if (
         head.eq(tail) ||

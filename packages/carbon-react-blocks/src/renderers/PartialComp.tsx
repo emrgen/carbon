@@ -1,23 +1,23 @@
 import {
+  CollapsedPathLocal,
+  ModePath,
+  Pin,
+  PinnedSelection,
+} from "@emrgen/carbon-core";
+import {
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent,
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
-import {
-  CollapsedPathLocal,
-  ModePath,
-  Pin,
-  PinnedSelection,
-} from "@emrgen/carbon-core";
-import { useDocument } from "../hooks/useDocument";
 import { useCallback } from "react";
+import { useDocument } from "../hooks/useDocument";
 
 export const PartialComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
-  const doc = useDocument();
+  const { doc } = useDocument();
 
   const isEditing = doc.props.get<string>(ModePath, "view") === "edit";
   const isCollapsed = node.props.get(CollapsedPathLocal, true);
