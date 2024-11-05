@@ -446,8 +446,9 @@ span[data-name=text] {
     user-select none
     opacity: 0.4
     padding-left: 1px;
+    line-height 32px
 
-// [data-name=section] > [data-type=content] > [data-name=title]
+// [data-name=paragraph] > [data-type=content] > [data-name=title]
 // 	&:after
 // 		display: none
 
@@ -971,7 +972,7 @@ span[data-name=text] {
 // 	font-size: 13px
 
 
-// [data-name=section]::after
+// [data-name=paragraph]::after
 // 	content "hello"
 // position absolute
 // right 0
@@ -1109,10 +1110,10 @@ span[data-name=text] {
   user-select none
   box-shadow 0 0 0 1px #eee
 
-[data-name=section]
+[data-name=paragraph]
   //padding 0 2px
 
-  > [data-name=section]
+  > [data-name=paragraph]
     margin-left 20px
 
 
@@ -1464,7 +1465,7 @@ span[data-name=text] {
 [data-name="background"]
   padding 2px 0
 
-[data-name=section],
+[data-name=paragraph],
 [data-name=collapsible],
 [data-name=bulletList],
 [data-name=numberList],

@@ -174,7 +174,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       const width = right - left;
       const height = bottom - top;
       const offset =
-        !to.nodeId.eq(hitNode.id) && hitNode.name == "section" ? 30 : 0;
+        !to.nodeId.eq(hitNode.id) && hitNode.name == "paragraph" ? 30 : 0;
       if (to.isBefore) {
         // drop before the hit node
         console.log(x, y);
@@ -340,7 +340,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     app.focus();
     if (e.shiftKey) {
       const after = PinnedSelection.fromNodes([]);
-      app.cmd.inserter.insertBeforeDefault(node, "section")?.Dispatch();
+      app.cmd.inserter.insertBeforeDefault(node, "paragraph")?.Dispatch();
       return;
     }
 
@@ -362,7 +362,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     //   return;
     // }
 
-    app.cmd.inserter.insertAfterDefault(node, "section").Dispatch();
+    app.cmd.inserter.insertAfterDefault(node, "paragraph").Dispatch();
   };
 
   return (

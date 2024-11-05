@@ -1,14 +1,10 @@
-import { section, title } from "@emrgen/carbon-blocks";
-import { text } from "@emrgen/carbon-blocks";
-import { node } from "@emrgen/carbon-blocks";
-import { createCarbon } from "./utils";
-import { nameOffset } from "./utils";
+import { node, text, title } from "@emrgen/carbon-blocks";
 import { Focus } from "@emrgen/carbon-core";
-import { test } from "vitest";
-import { expect } from "vitest";
+import { expect, test } from "vitest";
+import { createCarbon, nameOffset } from "./utils";
 
 test("move focus across titles", () => {
-  const json = section([title([text("abc")]), title([text("def")])]);
+  const json = paragraph([title([text("abc")]), title([text("def")])]);
 
   const app = createCarbon(json);
 
@@ -24,11 +20,11 @@ test("move focus across titles", () => {
 });
 
 test("move focus across non-void and void title", () => {
-  const json = node("section", [
+  const json = node("paragraph", [
     title([text("abc")]),
-    section([title([text("def")])]),
-    section([title()]),
-    section([title([text("ghi")])]),
+    paragraph([title([text("def")])]),
+    paragraph([title()]),
+    paragraph([title([text("ghi")])]),
   ]);
 
   const app = createCarbon(json);
@@ -50,11 +46,11 @@ test("move focus across non-void and void title", () => {
 });
 
 test("move focus across multiple void title", () => {
-  const json = node("section", [
+  const json = node("paragraph", [
     title([]),
-    section([title([])]),
-    section([title()]),
-    section([title([])]),
+    paragraph([title([])]),
+    paragraph([title()]),
+    paragraph([title([])]),
   ]);
   const app = createCarbon(json);
 

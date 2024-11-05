@@ -18,7 +18,7 @@ export class PagePlugin extends CarbonPlugin {
       group: "block",
       content: "title content*",
       splits: true,
-      splitName: "section",
+      splitName: "paragraph",
       inlineSelectable: true,
       collapsible: true,
       isolate: true,
@@ -92,7 +92,7 @@ export class PagePlugin extends CarbonPlugin {
   // 		const {schema} = editor;
   // 		const at = Point.toWithin(node);
   // 		const para = schema.node('paragraph');
-  // 		const child = schema.node('section', { content: [para]});
+  // 		const child = schema.node('paragraph', { content: [para]});
   // 		return InsertCommand.create(at, Fragment.fromNode(child!))//.dispatch(true)
   // 	}
 

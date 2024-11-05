@@ -47,9 +47,9 @@ export class Heading extends NodePlugin {
       content: "title content*",
       insert: true,
       splits: true,
-      splitName: "section",
+      splitName: "paragraph",
       split: {
-        name: "section",
+        name: "paragraph",
       },
       dnd: {
         draggable: true,

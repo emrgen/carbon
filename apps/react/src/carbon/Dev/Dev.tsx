@@ -7,7 +7,7 @@ import {
   empty,
   mention,
   node,
-  section,
+  paragraph,
   text,
   title,
 } from "@emrgen/carbon-blocks";
@@ -30,9 +30,7 @@ import {
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
 import {
-  ActivatedPath,
   Carbon,
-  ColorPath,
   ContenteditablePath,
   corePresetPlugins,
   Mark,
@@ -41,7 +39,6 @@ import {
   NodeId,
   State,
   SuppressContenteditableWarningPath,
-  TitlePath,
 } from "@emrgen/carbon-core";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
@@ -72,48 +69,43 @@ const data = node("carbon", [
     [
       title([text("Document Title")]),
 
-      section([title([text("question title")])]),
-      section([title([text("question title")])]),
-      section([title([text("question title")])]),
-      section([title([text("question title")])]),
-      section([title([text("question title")])]),
-      section([title([text("question title")])]),
+      paragraph([title([text("question title")])]),
 
-      node("flashCard", [
-        node("flashView", [
-          title([text("question")]),
-          section([title([text("flash card content")])]),
-        ]),
-        node("flashAnswer", [
-          title([text("answer")]),
-          section([title([text("flash card content")])]),
-        ]),
-      ]),
+      // node("flashCard", [
+      //   node("flashView", [
+      //     title([text("question")]),
+      //     paragraph([title([text("flash card content")])]),
+      //   ]),
+      //   node("flashAnswer", [
+      //     title([text("answer")]),
+      //     paragraph([title([text("flash card content")])]),
+      //   ]),
+      // ]),
 
       node("codemirror"),
 
-      node("timeline", [title([text("Install @chakra-ui/react")])]),
-      node("timeline", [title([text("Add snippets")])]),
-      node("timeline", [title([text("Setup provider")])]),
+      // node("timeline", [title([text("Install @chakra-ui/react")])]),
+      // node("timeline", [title([text("Add snippets")])]),
+      // node("timeline", [title([text("Setup provider")])]),
 
       // node(
       //   "sqCanvas",
       //   [
-      //     node("sqNote", [section([title([text("add a note")])])], {
+      //     node("sqNote", [paragraph([title([text("add a note")])])], {
       //       [StylePath]: {
       //         left: 100,
       //         top: 100,
       //       },
       //       [ContenteditablePath]: false,
       //     }),
-      //     node("sqNote", [section([title([text("add a note")])])], {
+      //     node("sqNote", [paragraph([title([text("add a note")])])], {
       //       [StylePath]: {
       //         left: 120,
       //         top: 200,
       //       },
       //       // [ContenteditablePath]: false,
       //     }),
-      //     node("sqNote", [section([title([text("add a note")])])], {
+      //     node("sqNote", [paragraph([title([text("add a note")])])], {
       //       [StylePath]: {
       //         left: 460,
       //         top: 50,
@@ -125,10 +117,10 @@ const data = node("carbon", [
       //       "sqColumn",
       //       [
       //         node("sqTitle", [text("column 1")]),
-      //         node("sqNote", [section([title([text("add a note 1")])])], {
+      //         node("sqNote", [paragraph([title([text("add a note 1")])])], {
       //           [ContenteditablePath]: false,
       //         }),
-      //         node("sqNote", [section([title([text("add a note 2")])])], {
+      //         node("sqNote", [paragraph([title([text("add a note 2")])])], {
       //           [ContenteditablePath]: false,
       //         }),
       //       ],
@@ -160,7 +152,7 @@ const data = node("carbon", [
       //       "sqHeading",
       //       [
       //         node("h3", [title([text("heading 1")])]),
-      //         section([title([text("section 1")])]),
+      //         paragraph([title([text("section 1")])]),
       //       ],
       //       {
       //         [StylePath]: {
@@ -209,7 +201,7 @@ const data = node("carbon", [
       //       }),
       //     ]),
       //     //  long lorem text
-      //     section([
+      //     paragraph([
       //       title([
       //         text(
       //           "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard m is simply dummy text of the printing and typesetting industry.",
@@ -222,7 +214,7 @@ const data = node("carbon", [
       //   },
       // ),
 
-      section([title([text("question title")])]),
+      paragraph([title([text("question title")])]),
 
       // node(
       //   "table",
@@ -254,12 +246,12 @@ const data = node("carbon", [
       //   },
       // ),
 
-      section(
+      paragraph(
         [
           title([
             text("question"),
             text(" "),
-            text("title", {
+            text("link", {
               [MarksPath]: [Mark.link("http://localhost:3000")].map((m) =>
                 m.toJSON(),
               ),
@@ -268,10 +260,10 @@ const data = node("carbon", [
         ],
         {
           // [BackgroundPath]: "#fb8500",
-          [ColorPath]: "red",
+          // [ColorPath]: "red",
         },
       ),
-      section([
+      paragraph([
         title([
           text("question"),
           text(" "),
@@ -338,18 +330,18 @@ const data = node("carbon", [
       //
       // node('hint', [
       //   title([text('hint 1')]),
-      //   section([title([text('hint content')])]),
+      //   paragraph([title([text('hint content')])]),
       // ]),
       // node('hint', [
       //   title([text('hint 2')]),
-      //   section([title([text('hint content')])]),
+      //   paragraph([title([text('hint content')])]),
       // ]),
       // node('hint', [
       //   title([text('hint 3')]),
-      //   section([title([text('hint content')])]),
+      //   paragraph([title([text('hint content')])]),
       // ]),
 
-      // section([title([
+      // paragraph([title([
       //   text("section 1"),
       //   text(" bold", {
       //     'remote/state/marks/bold': Mark.BOLD,
@@ -377,95 +369,96 @@ const data = node("carbon", [
       //   // }),
       // ])]),
 
-      // section([title([])]),
-      // section([title([text("section 3")])]),
+      // paragraph([title([])]),
+      // paragraph([title([text("section 3")])]),
 
-      // node("commentEditor", [section([title([text("add a comment")])])]),
+      // node("commentEditor", [paragraph([title([text("add a comment")])])]),
 
-      // section([title([text("section 3")])]),
+      // paragraph([title([text("section 3")])]),
       // node("hstack", [
-      //   node("stack", [section([title([text("section 1")])])]),
-      //   node("stack", [section([title([text("section 2")])])]),
-      //   node("stack", [section([title([text("section 3")])])]),
+      //   node("stack", [paragraph([title([text("section 1")])])]),
+      //   node("stack", [paragraph([title([text("section 2")])])]),
+      //   node("stack", [paragraph([title([text("section 3")])])]),
       // ]),
-      // section([title([text("section 543")])]),
+      // paragraph([title([text("section 543")])]),
       // node("hstack", [
-      //   node("stack", [section([title([text("section 1")])])]),
-      //   node("stack", [section([title([text("section 2")])])]),
-      //   node("stack", [section([title([text("section 3")])])]),
+      //   node("stack", [paragraph([title([text("section 1")])])]),
+      //   node("stack", [paragraph([title([text("section 2")])])]),
+      //   node("stack", [paragraph([title([text("section 3")])])]),
       // ]),
-      // section([title([text("section 4")])]),
+      // paragraph([title([text("section 4")])]),
       // title([]),
       // node('frame', [
       //   title([text('frame title')]),
-      //   section([title([text('frame section')])]),
+      //   paragraph([title([text('frame section')])]),
       // ]),
-      // section([title([text("section 1")])]),
+      // paragraph([title([text("section 1")])]),
       // node('frame', [
       //   title([text('frame title')]),
-      //   section([title([text('frame section')])]),
+      //   paragraph([title([text('frame section')])]),
       // ]),
-      // section([title([text("section 2")])]),
-      // section([title([text("section 3")])]),
+      // paragraph([title([text("section 2")])]),
+      // paragraph([title([text("section 3")])]),
       // node('frame', [
       //   title([text('frame title 1')]),
-      //   section([title([text('frame section')])]),
+      //   paragraph([title([text('frame section')])]),
       //   node('frame', [
       //     title([text('frame title 2')]),
-      //     section([title([text('frame section')])]),
+      //     paragraph([title([text('frame section')])]),
       //   ]),
       // ]),
-      // section([title([text("section 4")])]),
+      // paragraph([title([text("section 4")])]),
       // block({
       //   name: 'modal', children: [
       //     title([text('modal title')]),
-      //     section([title([text('modal content')])]),
-      //     section([title([text('modal content')])]),
-      //     section([title([text('modal content')])]),
+      //     paragraph([title([text('modal content')])]),
+      //     paragraph([title([text('modal content')])]),
+      //     paragraph([title([text('modal content')])]),
       //   ],
       //   links: {
       //     'header': node('title', [text('modal header')]),
       //     'footer': node('title', [text('modal footer')]),
       //   }
       // }),
-      // section([title([text("section 3")])]),
-      node("tabs", [
-        node(
-          "tab",
-          [
-            // node("title", [text("tab 1")]),
-            section([title([text("tab 1 content")])]),
-          ],
-          {
-            [ActivatedPath]: true,
-            [TitlePath]: "tab 11 some big title",
-          },
-        ),
-        node(
-          "tab",
-          [
-            // node("title", [text("tab 2")]),
-            section([title([text("tab 2 content")])]),
-          ],
-          {
-            [TitlePath]: "tab 12 medium",
-          },
-        ),
-        node(
-          "tab",
-          [
-            // node("title", [text("tab 3")]),
-            section([title([text("tab 3 content")])]),
-          ],
-          {
-            [TitlePath]: "tab 13",
-          },
-        ),
-      ]),
+      // paragraph([title([text("section 3")])]),
+
+      // node("tabs", [
+      //   node(
+      //     "tab",
+      //     [
+      //       // node("title", [text("tab 1")]),
+      //       paragraph([title([text("tab 1 content")])]),
+      //     ],
+      //     {
+      //       [ActivatedPath]: true,
+      //       [TitlePath]: "tab 11 some big title",
+      //     },
+      //   ),
+      //   node(
+      //     "tab",
+      //     [
+      //       // node("title", [text("tab 2")]),
+      //       paragraph([title([text("tab 2 content")])]),
+      //     ],
+      //     {
+      //       [TitlePath]: "tab 12 medium",
+      //     },
+      //   ),
+      //   node(
+      //     "tab",
+      //     [
+      //       // node("title", [text("tab 3")]),
+      //       paragraph([title([text("tab 3 content")])]),
+      //     ],
+      //     {
+      //       [TitlePath]: "tab 13",
+      //     },
+      //   ),
+      // ]),
 
       // // node("blockContent"),
       //
-      // section([title([text("section 1")])]),
+      // paragraph([title([text("section 1")])]),
 
       //       node(
       //         "code",
@@ -479,7 +472,7 @@ const data = node("carbon", [
       //         {},
       //       ),
 
-      section([title([text("section 1")])]),
+      paragraph([title([text("section 1")])]),
 
       // node("codeBox", [
       //   node("codeLine", [title([text("function foo() {")])]),
@@ -502,7 +495,7 @@ const data = node("carbon", [
         node("hints", [
           node("hint", [
             title([text("hint 1")]),
-            section([title([text("hint content")])]),
+            paragraph([title([text("hint content")])]),
           ]),
         ]),
       ]),
@@ -517,14 +510,14 @@ const data = node("carbon", [
         ]),
       ]),
 
-      section([title([text("section 1")])]),
+      paragraph([title([text("section 1")])]),
 
       node("sandbox", [node("cell")]),
       node("sandbox", [node("cell")]),
       node("sandbox", [node("cell")]),
       node("sandbox", [node("cell")]),
 
-      // section([title([text("section 1")])]),
+      // paragraph([title([text("section 1")])]),
 
       // node("code", [
       //   node("codeLine", [title([text("function foo() {")])]),
@@ -570,7 +563,7 @@ const data = node("carbon", [
       //   node("pageTreeItem", [title([text("Economics")])]),
       // ]),
 
-      node("section", [
+      node("paragraph", [
         title([
           text("123456", {
             [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
@@ -578,7 +571,7 @@ const data = node("carbon", [
           text("78"),
         ]),
       ]),
-      node("section", [
+      node("paragraph", [
         title([
           text("ab", {}),
           text("cdefgh", {
@@ -586,76 +579,76 @@ const data = node("carbon", [
           }),
         ]),
       ]),
-      // section([
+      // paragraph([
       //   title([text("abc")]),
       //   node("hstack", [
-      //     node("stack", [section([title([text("section 1")])])]),
-      //     node("stack", [section([title([text("section 2")])])]),
-      //     node("stack", [section([title([text("section 3")])])]),
+      //     node("stack", [paragraph([title([text("section 1")])])]),
+      //     node("stack", [paragraph([title([text("section 2")])])]),
+      //     node("stack", [paragraph([title([text("section 3")])])]),
       //   ]),
-      //   section([
+      //   paragraph([
       //     title([text("def")]),
-      //     section([
+      //     paragraph([
       //       title([text("ghi")]),
       //
-      //       section([
+      //       paragraph([
       //         title([text("abc")]),
-      //         section([
+      //         paragraph([
       //           title([text("pqr")]),
       //         ]),
-      //         section([
+      //         paragraph([
       //           title([text("mno")]),
       //         ]),
       //       ]),
       //       node("hstack", [
-      //         node("stack", [section([title([text("section 1")])])]),
-      //         node("stack", [section([title([text("section 2")])])]),
-      //         node("stack", [section([title([text("section 3")])])]),
+      //         node("stack", [paragraph([title([text("section 1")])])]),
+      //         node("stack", [paragraph([title([text("section 2")])])]),
+      //         node("stack", [paragraph([title([text("section 3")])])]),
       //       ]),
-      //       section([title([text("uvw")])]),
+      //       paragraph([title([text("uvw")])]),
       //
       //     ]),
-      //     section([title([text("stu")])]),
+      //     paragraph([title([text("stu")])]),
       //   ]),
-      //   section([title([text("def")])]),
+      //   paragraph([title([text("def")])]),
       // ]),
-      // section([title([text("ghi")])]),
+      // paragraph([title([text("ghi")])]),
 
-      // section([
+      // paragraph([
       //   title([text("123")]),
-      //   section([
+      //   paragraph([
       //     title([text("1239")]),
-      //     section([
+      //     paragraph([
       //       title([text("1238")]),
-      //       section([title([text("1237")])]),
+      //       paragraph([title([text("1237")])]),
       //     ]),
-      //     section([title([text("1236")])]),
+      //     paragraph([title([text("1236")])]),
       //   ]),
-      //   section([title([text("1235")])]),
+      //   paragraph([title([text("1235")])]),
       // ]),
-      // section([title([text("1234")])]),
+      // paragraph([title([text("1234")])]),
       //
-      // section([
+      // paragraph([
       //   title([text("abc")]),
-      //   section([
+      //   paragraph([
       //     title([text("def")]),
-      //     section([
+      //     paragraph([
       //       title([text("ghi")]),
-      //       section([title([text("jkl")])]),
+      //       paragraph([title([text("jkl")])]),
       //     ]),
-      //     section([title([text("mno")])]),
+      //     paragraph([title([text("mno")])]),
       //   ]),
-      //   section([title([text("pqr")])]),
+      //   paragraph([title([text("pqr")])]),
       // ]),
-      // section([title([text("stu")])]),
+      // paragraph([title([text("stu")])]),
       //
       // node(
-      //   "section",
+      //   "paragraph",
       //   [
       //     title([text("abcdef")]),
       //     node(
       //       "todo",
-      //       [title([text("pqrst")]), section([title([text("section")])])],
+      //       [title([text("pqrst")]), paragraph([title([text("paragraph")])])],
       //       {}
       //     ),
       //     node('numberList', [
@@ -669,13 +662,13 @@ const data = node("carbon", [
       // ),
 
       // node("hstack", [
-      //   node("stack", [section([title([text("section 1")])])]),
-      //   node("stack", [section([title([text("section 2")])])]),
-      //   node("stack", [section([title([text("section 3")])])]),
+      //   node("stack", [paragraph([title([text("section 1")])])]),
+      //   node("stack", [paragraph([title([text("section 2")])])]),
+      //   node("stack", [paragraph([title([text("section 3")])])]),
       // ]),
 
-      section([title([text("time"), mention("today"), node("empty")])]),
-      section([
+      paragraph([title([text("time"), mention("today"), node("empty")])]),
+      paragraph([
         title([
           text("123"),
           mention("ankita"),
@@ -684,9 +677,9 @@ const data = node("carbon", [
           text("123"),
         ]),
       ]),
-      section([title([text("123456789")])]),
-      section([title([emoji("🖐️")])]),
-      section([
+      paragraph([title([text("123456789")])]),
+      paragraph([title([emoji("🖐️")])]),
+      paragraph([
         title([
           empty({
             [ContenteditablePath]: true,
@@ -708,9 +701,9 @@ const data = node("carbon", [
           }),
         ]),
       ]),
-      section([
+      paragraph([
         title([text("section 1")]),
-        section([title([text("section 1")])]),
+        paragraph([title([text("section 1")])]),
       ]),
 
       // node("pageLink", [], {
@@ -921,7 +914,7 @@ export default function Dev() {
       //     ];
       //   console.log(node.toString());
       //   const newNode = app.schema.nodeFromJSON(
-      //     section([title([text("new section " + random(1, 100))])]),
+      //     paragraph([title([text("new section " + random(1, 100))])]),
       //   )!;
       //
       //   const selection = PinnedSelection.fromPin(Pin.toStartOf(newNode)!)!;

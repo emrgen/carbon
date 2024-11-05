@@ -37,7 +37,7 @@ export const data = node("carbon", [
     [
       title([text("I am a frame title")]),
       ...range(800).map((a) =>
-        node("section", [title([text("I am a section title")])]),
+        node("paragraph", [title([text("I am a section title")])]),
       ),
     ],
     {

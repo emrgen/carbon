@@ -1,7 +1,7 @@
 import { test } from "vitest";
 
 test("put the pin at the start of inline", () => {
-  // const json = section([
+  // const json = paragraph([
   //   title([node("bold", [node("italic", [text("01234")])]), text("5678")]),
   // ]);
   // const app = createCarbon(json);

@@ -32,7 +32,7 @@ export const data = node("carbon", [
     "document",
     [
       title([text("I am a frame title")]),
-      node("section", [title([text("I am a section title")])]),
+      node("paragraph", [title([text("I am a paragraph title")])]),
     ],
     {
       [ModePath]: "edit",

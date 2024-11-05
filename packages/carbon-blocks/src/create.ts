@@ -77,7 +77,7 @@ export const title = (children: any[] | any = []) => {
   };
 };
 
-export const section = (children: any[] | any = [], props = {}) => {
+export const paragraph = (children: any[] | any = [], props = {}) => {
   if (isEmpty(children)) {
     children = [title()];
   } else if (!Array.isArray(children)) {
@@ -85,7 +85,7 @@ export const section = (children: any[] | any = [], props = {}) => {
   }
 
   return {
-    name: "section",
+    name: "paragraph",
     children,
     props,
   };
@@ -93,10 +93,6 @@ export const section = (children: any[] | any = [], props = {}) => {
 
 export const mention = (name: string) => {
   return node("mention", [
-    // node("empty", [], {
-    //   [ContenteditablePath]: false,
-    //   [SuppressContenteditableWarningPath]: false,
-    // }),
     node(`atomicText`, [], {
       [ContenteditablePath]: false,
       [SuppressContenteditableWarningPath]: true,

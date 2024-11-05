@@ -1,14 +1,10 @@
-import { section, title } from "@emrgen/carbon-blocks";
-import { text } from "@emrgen/carbon-blocks";
-import { node } from "@emrgen/carbon-blocks";
-import { mention } from "@emrgen/carbon-blocks";
+import { mention, node, text, title } from "@emrgen/carbon-blocks";
+import { expect, test } from "vitest";
 import { createCarbon } from "./utils";
-import { test } from "vitest";
-import { expect } from "vitest";
 
 const json = node("callout", [
   title([text("t")]),
-  section([
+  paragraph([
     title([
       node("empty"),
       mention("hello"),

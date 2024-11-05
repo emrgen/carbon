@@ -1,6 +1,4 @@
-import { CarbonBlock, RendererProps, useCarbon } from "@emrgen/carbon-react";
-import { CarbonChildren } from "@emrgen/carbon-react";
-import React, { useCallback, useRef } from "react";
+import { ViewedPath } from "@emrgen/carbon-blocks";
 import {
   ActionOrigin,
   Carbon,
@@ -12,10 +10,16 @@ import {
   TxType,
 } from "@emrgen/carbon-core";
 import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
+import {
+  CarbonBlock,
+  CarbonChildren,
+  RendererProps,
+  useCarbon,
+} from "@emrgen/carbon-react";
 import { Optional } from "@emrgen/types";
-import { useDocument } from "../hooks";
+import React, { useCallback, useRef } from "react";
 import { FaLightbulb, FaRegCheckCircle, FaRegLightbulb } from "react-icons/fa";
-import { ViewedPath } from "@emrgen/carbon-blocks";
+import { useDocument } from "../hooks";
 
 const isParentContentEditable = (el: HTMLElement) => {
   let node: Optional<HTMLElement> = el;
@@ -42,16 +46,16 @@ export default function HintComp(props: RendererProps) {
 
   const isCollapsed = node.props.get<boolean>(CollapsedPathLocal, false);
 
-  // insert a new section as child of this collapsible
+  // insert a new paragraph as child of this collapsible
   const handleInsert = useCallback(
     (app: Carbon) => {
-      const section = app.schema.type("section").default()!;
+      const paragraph = app.schema.type("paragraph").default()!;
       const at = Point.toAfter(node.child(0)!.id);
 
       app.cmd
-        .Insert(at, section)
+        .Insert(at, paragraph)
         .Select(
-          PinnedSelection.fromPin(Pin.toStartOf(section)!),
+          PinnedSelection.fromPin(Pin.toStartOf(paragraph)!),
           ActionOrigin.UserInput,
         )
         .Dispatch();

@@ -397,7 +397,7 @@ export class TransformCommands extends BeforePlugin {
 
       console.log(cmd);
     } else {
-      const { head } = selection; 
+      const { head } = selection;
       const { startNode } = cmd;
       if (startNode) {
         const titleNode = TitleNode.from(cmd.startNode!);
@@ -1229,7 +1229,7 @@ export class TransformCommands extends BeforePlugin {
       ],
     };
 
-    const section = app.schema.nodeFromJSON(json);
+    const paragraph = app.schema.nodeFromJSON(json);
     if (!section) {
       throw Error("failed to create section");
     }
@@ -1466,7 +1466,7 @@ export class TransformCommands extends BeforePlugin {
     console.log("[SPLIT AT PIN]");
     const { app } = tr;
     const { selection } = app;
-    const { splitType = app.schema.type("section") } = opts;
+    const { splitType = app.schema.type("paragraph") } = opts;
 
     const isAtBlockStart = pin.isAtStartOfNode(splitBlock);
     if (isAtBlockStart) {

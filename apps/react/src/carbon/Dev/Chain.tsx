@@ -5,7 +5,7 @@ export const Dummy = () => {
 // import {range} from "lodash";
 // import {useEffect} from "react";
 //
-// import {blockPresetPlugins, node, text, title, section} from "@emrgen/carbon-blocks";
+// import {blockPresetPlugins, node, text, title, paragraph} from "@emrgen/carbon-blocks";
 // import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon, ImmutableNodeFactory} from "@emrgen/carbon-react";
 // import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
 // import {
@@ -217,7 +217,7 @@ export const Dummy = () => {
 // }
 //
 // // register the renderer
-// ctx.component("section", sectionRenderer);
+// ctx.component("paragraph", sectionRenderer);
 // ctx.component("title", titleRenderer);
 // ctx.component("text", textRenderer);
 //
@@ -234,11 +234,11 @@ export const Dummy = () => {
 //
 //
 // const para = (content: string = 'x') => {
-//   return schema.nodeFromJSON(node("section", [title([text(content)])]));
+//   return schema.nodeFromJSON(node("paragraph", [title([text(content)])]));
 // }
 //
 // //@ts-ignore
-// window.section = section;
+// window.paragraph = section;
 //
 // //@ts-ignore
 // window.insert = (parent: Node, node: Node) => {

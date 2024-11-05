@@ -1,17 +1,9 @@
 import "./App.css";
-
-import {
-  CarbonContext,
-  RendererProps,
-  SolidNodeFactory,
-  SolidState,
-  useCarbon,
-} from "@emrgen/carbon-solid";
 import {
   blockPresetPlugins,
   carbon,
   node,
-  section,
+  paragraph,
   text,
   title,
 } from "@emrgen/carbon-blocks";
@@ -22,15 +14,23 @@ import {
   corePresetPlugins,
   LocalHtmlAttrPath,
   Node,
+  Pin,
   PinnedSelection,
   PluginManager,
+  Point,
   preventAndStop,
   Schema,
   SelectedPath,
   State,
 } from "@emrgen/carbon-core";
-import { Point } from "@emrgen/carbon-core";
-import { Pin } from "@emrgen/carbon-core";
+
+import {
+  CarbonContext,
+  RendererProps,
+  SolidNodeFactory,
+  SolidState,
+  useCarbon,
+} from "@emrgen/carbon-solid";
 import {
   createContext,
   createEffect,
@@ -50,9 +50,9 @@ const schema = new Schema(specs, new SolidNodeFactory());
 const data = carbon([
   node("document", [
     title([]),
-    section([title([text("section 1")])]),
-    section([title([text("section 2")])]),
-    section([title([text("section 3")])]),
+    paragraph([title([text("paragraph 1")])]),
+    paragraph([title([text("section 2")])]),
+    paragraph([title([text("section 3")])]),
   ]),
 ]);
 
@@ -90,7 +90,7 @@ function App() {
     const titleNode = schema.nodeFromJSON(
       title([text(`lorem ipsum ${count()}`)]),
     )!;
-    const section = schema.nodeFromJSON(node("section", [titleNode]))!;
+    const section = schema.nodeFromJSON(node("paragraph", [titleNode]))!;
     // app.content.insert(section, 0);
     app.cmd
       .Insert(Point.toAfter(app.content.child(0)?.firstChild!), section)

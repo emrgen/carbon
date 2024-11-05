@@ -1,10 +1,11 @@
-import { EventHandlerMap } from "../core/types";
-import { AfterPlugin, CarbonPlugin } from "../core/index";
-import { EventContext } from "../core/index";
-import { SelectionCommands } from "./SelectionCommands";
-import { IsolateSelectionPlugin } from "./Isolating";
-import { TransformCommands } from "./TransformCommands";
-import { skipKeyEvent } from "../utils/key";
+import {
+  hasSameIsolate,
+  insertAfterAction,
+  nodeLocation,
+  preventAndStopCtx,
+  TitleNode,
+} from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
 import { first, last } from "lodash";
 import {
   ActionOrigin,
@@ -16,15 +17,13 @@ import {
   Point,
   Transaction,
 } from "../core";
-import {
-  hasSameIsolate,
-  insertAfterAction,
-  nodeLocation,
-  preventAndStopCtx,
-  TitleNode,
-} from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
 import { NodeBTree } from "../core/BTree";
+import { AfterPlugin, CarbonPlugin, EventContext } from "../core/index";
+import { EventHandlerMap } from "../core/types";
+import { skipKeyEvent } from "../utils/key";
+import { IsolateSelectionPlugin } from "./Isolating";
+import { SelectionCommands } from "./SelectionCommands";
+import { TransformCommands } from "./TransformCommands";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
@@ -475,7 +474,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
       console.log("no text block...");
       const lastBlock = last(blocks) as Node;
-      const section = app.schema.type("section")?.default();
+      const paragraph = app.schema.type("paragraph")?.default();
       if (!section) return false;
 
       const after = PinnedSelection.fromPin(Pin.toStartOf(section)!)!;

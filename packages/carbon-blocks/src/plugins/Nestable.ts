@@ -54,7 +54,7 @@ export class NestablePlugin extends AfterPlugin {
     if (head.node.parent?.eq(tail.node.parent!)) {
       const { parent } = head.node;
       if (head.node.parent?.name === name) {
-        tr.Change(parent.id, "section");
+        tr.Change(parent.id, "paragraph");
       } else {
         tr.Change(parent.id, name);
       }
@@ -147,15 +147,15 @@ export class NestablePlugin extends AfterPlugin {
           return;
         }
 
-        // change to section
-        if (listNode.name !== "section") {
+        // change to paragraph
+        if (listNode.name !== "paragraph") {
           preventAndStopCtx(ctx);
           if (listNode.isCollapsed) {
             cmd.Update(listNode.id, { node: { collapsed: false } });
           }
 
           cmd
-            .Change(listNode.id, "section")
+            .Change(listNode.id, "paragraph")
             .Select(PinnedSelection.fromPin(selection.head));
 
           cmd.Dispatch();
@@ -191,7 +191,7 @@ export class NestablePlugin extends AfterPlugin {
         if (!atStart) return;
         const nextSibling = listNode.nextSibling;
 
-        if (listNode.name !== "section") {
+        if (listNode.name !== "paragraph") {
           ctx.event.preventDefault();
           ctx.event.stopPropagation();
           return;
@@ -225,7 +225,7 @@ export class NestablePlugin extends AfterPlugin {
           return;
         }
 
-        if (listNode.name !== "section") {
+        if (listNode.name !== "paragraph") {
           console.log(
             `enter on node: ${listNode.name} => ${listNode.id.toString()}`,
             isNestableNode(listNode),
@@ -233,7 +233,7 @@ export class NestablePlugin extends AfterPlugin {
 
           preventAndStopCtx(ctx);
           cmd
-            .Change(listNode.id, "section")
+            .Change(listNode.id, "paragraph")
             .Select(PinnedSelection.fromPin(Pin.toStartOf(listNode)!))
             .Dispatch();
           return;

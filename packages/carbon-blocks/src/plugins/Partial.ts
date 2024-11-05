@@ -7,7 +7,7 @@ export class Partial extends Collapsible {
   override spec(): NodeSpec {
     return {
       ...super.spec(),
-      content: "title (section|bulletList|numberList)*",
+      content: "title (paragraph|bulletList|numberList)*",
     };
   }
 }

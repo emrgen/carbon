@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Mark, prevent, preventAndStop, State } from "@emrgen/carbon-core";
+import {
+  useCombineConnectors,
+  useConnectorsToProps,
+  useDragDropRectSelect,
+} from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -7,12 +12,7 @@ import {
   useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon-react";
-import { Mark, prevent, preventAndStop, State } from "@emrgen/carbon-core";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export const CommentEditorComp = (props: RendererProps) => {
   const { node } = props;
@@ -30,12 +30,12 @@ export const CommentEditorComp = (props: RendererProps) => {
     (e) => {
       prevent(e);
       const { lastChild } = node;
-      if (lastChild && lastChild.name === "section" && lastChild.isEmpty) {
+      if (lastChild && lastChild.name === "paragraph" && lastChild.isEmpty) {
         app.cmd.selection.collapseAtStartOf(lastChild).dispatch();
         return;
       }
 
-      app.cmd.inserter.appendDefault(node, "section").dispatch();
+      app.cmd.inserter.appendDefault(node, "paragraph").dispatch();
     },
     [app, node],
   );

@@ -18,7 +18,7 @@ export class HStack extends CarbonPlugin {
     return {
       group: "content",
       content: "stack stack+",
-      replaceName: "section",
+      replaceName: "paragraph",
       rectSelectable: true,
       blockSelectable: true,
     };

@@ -1,27 +1,13 @@
-import React, { useEffect, useRef } from "react";
+import { Stack } from "@chakra-ui/react";
+import { paragraph, text, title } from "@emrgen/carbon-blocks";
+
+import { useCreateCarbon } from "@emrgen/carbon-react";
+
+import { BlockMenu } from "@emrgen/carbon-utils";
 
 import { Fastype } from "@emrgen/fastype-core";
-import {
-  Transaction,
-} from "@emrgen/carbon-core";
-import {
-  blockPresetPlugins,
-  node,
-  section,
-  text,
-  title,
-} from "@emrgen/carbon-blocks";
-
-import {useCreateCarbon} from "@emrgen/carbon-react";
-
-import { BlockMenu, carbonUtilPlugins } from "@emrgen/carbon-utils";
-import { fastypeBlocks } from "@emrgen/fastype-blocks";
-import { fastypeDatabase } from "@emrgen/fastype-database";
-import { Box, Spinner, Stack } from "@chakra-ui/react";
-import TimeTravel from "./TimeTravel";
-import { json } from "stream/consumers";
-import FastTree from "./FastTree";
-import { cloneDeep } from 'lodash';
+import { cloneDeep } from "lodash";
+import React, { useEffect, useRef } from "react";
 
 const extensions = [
   // extensionPresets,
@@ -44,7 +30,7 @@ const data = {
         // {
         //   name: "divider",
         // },
-        section([
+        paragraph([
           title([
             text("I am "),
             text("carbon", { node: { marks: { bold: true } } }),
@@ -86,7 +72,7 @@ const data = {
         // }),
       ],
       props: {
-        'remote/node': {
+        "remote/node": {
           picture: {
             src: "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg",
           },
@@ -97,7 +83,6 @@ const data = {
 };
 
 export function FastEditor({ name = "carbon" }) {
-
   const app = useCreateCarbon(name, Object.freeze(cloneDeep(data)), extensions);
 
   const editorRef = useRef(null);
@@ -112,23 +97,23 @@ export function FastEditor({ name = "carbon" }) {
   };
 
   useEffect(() => {
-  //   const onTransaction = (tr: Transaction) => {
-  //     const nodes = tr.react.content.descendants();
-  //     const els = nodes.map((n) => ({id: n.id.toString(), el: tr.react.store.element(n.id)}));
-  //     if (els.some((n) => !n.el)) {
-  //       console.error("missing node", els);
-  //     }
-  //   }
-  //
-  //   react.on("transaction", onTransaction);
-  //   return () => {
-  //     react.off("transaction", onTransaction);
-  //   };
+    //   const onTransaction = (tr: Transaction) => {
+    //     const nodes = tr.react.content.descendants();
+    //     const els = nodes.map((n) => ({id: n.id.toString(), el: tr.react.store.element(n.id)}));
+    //     if (els.some((n) => !n.el)) {
+    //       console.error("missing node", els);
+    //     }
+    //   }
+    //
+    //   react.on("transaction", onTransaction);
+    //   return () => {
+    //     react.off("transaction", onTransaction);
+    //   };
   }, [app]);
 
   return (
-    <Stack h="full"  w="full">
-      <Stack className="fast-editor" flex={1} >
+    <Stack h="full" w="full">
+      <Stack className="fast-editor" flex={1}>
         <Fastype app={app}>
           {/* <FastypeCursor react={react} /> */}
           <BlockMenu />

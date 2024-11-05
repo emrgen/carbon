@@ -1,9 +1,6 @@
-import { Carbon,  Node, SerializedNode } from "@emrgen/carbon-core";
-import { isString } from 'lodash';
-
 // export const serializeNestableNode = (react: Carbon, node: Node, prefix = '', suffix = ''): SerializedNode => {
 //   if (node.isVoid) {
-//     throw Error('section is missing title child');
+//     throw Error('paragraph is missing title child');
 //   }
 //   const { children } = node;
 //   const contentNode = children[0] as Node;

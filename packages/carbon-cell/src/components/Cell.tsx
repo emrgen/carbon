@@ -106,12 +106,12 @@ export const CellComp = (props: RendererProps) => {
       if (e.shiftKey) {
         // console.log("insert above");
         app.cmd.inserter
-          .insertBeforeDefault(node.parent!, "section")
+          .insertBeforeDefault(node.parent!, "paragraph")
           ?.dispatch();
       } else {
         // console.log("insert below");
         app.cmd.inserter
-          .insertAfterDefault(node.parent!, "section")
+          .insertAfterDefault(node.parent!, "paragraph")
           ?.Dispatch();
       }
     },

@@ -9,7 +9,7 @@
 //     [
 //       title([text("Carbon "), text("document")]),
 //       node("divider"),
-//       node("section", [title([text("section 1.2")])]),
+//       node("paragraph", [title([text("paragraph 1.2")])]),
 //     ],
 //     {
 //       node: {

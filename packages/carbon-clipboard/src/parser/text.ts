@@ -148,7 +148,7 @@ const transformer = {
   },
 
   space(root: any) {
-    return section([title()]);
+    return paragraph([title()]);
   },
   code(root: any) {
     return node("code", [node("codeLine", [text(root.text)])], {
@@ -171,7 +171,7 @@ const transformer = {
 
   paragraph(root: any) {
     const { tokens = [] } = root;
-    return section(this.transform(tokens));
+    return paragraph(this.transform(tokens));
   },
 
   link(root: any) {
@@ -227,7 +227,7 @@ const transformer = {
   },
 
   html(root: { text: string }) {
-    return section([text(root.text)]);
+    return paragraph([text(root.text)]);
   },
 
   // inline nodes
@@ -302,8 +302,8 @@ export const node = (
   };
 };
 
-export const section = (children: any[]) => {
-  return node("section", children);
+export const paragraph = (children: any[]) => {
+  return node("paragraph", children);
 };
 
 export const title = (children: any[] = []) => {

@@ -6,7 +6,7 @@ test("create carbon editor", () => {
     carbon(id: "carbon")
       document
         title
-        section
+        paragraph
           title
             | i am a text
   `;
@@ -17,7 +17,7 @@ test("create carbon editor", () => {
 const carbon = (...args: any[]) => {
   const template = args[0];
   const params = args.slice(1);
-  
+
   const lines = template
     .join("")
     .split("\n")

@@ -126,7 +126,7 @@
 //     }
 //
 //     // if back spaced at the beginning of the line
-//     // convert to section
+//     // convert to paragraph
 //     if (e.key == "Backspace") {
 //       const textarea = e.target as HTMLTextAreaElement;
 //       const { selectionStart, selectionEnd } = textarea;
@@ -134,12 +134,12 @@
 //
 //       if (selectionStart == 0 && selectionEnd == 0) {
 //         preventAndStop(e);
-//         // NOTE: when the text area is removed in section the onBlur is not called.
+//         // NOTE: when the text area is removed in paragraph the onBlur is not called.
 //         // so we need to enable the editor here.
 //         react.enable();
 //
 //         const { tr } = react;
-//         tr.Change(parent.id, parent.name, "section");
+//         tr.Change(parent.id, parent.name, "paragraph");
 //         tr.Update(parent.id, { node: { typeChanged: true } });
 //         tr.Select(
 //           PinnedSelection.fromPin(Pin.toStartOf(parent)!),

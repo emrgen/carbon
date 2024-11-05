@@ -153,7 +153,7 @@ export class NodeType {
   }
 
   get splitName() {
-    return this.spec.splitName ?? "section";
+    return this.spec.splitName ?? "paragraph";
   }
 
   get replaceName() {

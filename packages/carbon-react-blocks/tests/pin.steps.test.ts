@@ -1,14 +1,11 @@
-import { expect, test } from "vitest";
-import { section, title } from "@emrgen/carbon-blocks";
-import { text } from "@emrgen/carbon-blocks";
-import { node } from "@emrgen/carbon-blocks";
-import { createCarbon } from "./utils";
-import { nameOffset } from "./utils";
+import { node, text, title } from "@emrgen/carbon-blocks";
 import { Step } from "@emrgen/carbon-core";
+import { expect, test } from "vitest";
+import { createCarbon, nameOffset } from "./utils";
 
 const json = node("callout", [
   title([text("abc")]),
-  section([title([text("def")])]),
+  paragraph([title([text("def")])]),
 ]);
 const app = createCarbon(json);
 

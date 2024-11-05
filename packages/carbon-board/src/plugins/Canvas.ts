@@ -1,3 +1,4 @@
+import { TitlePlugin } from "@emrgen/carbon-blocks";
 import {
   CarbonPlugin,
   IntoNodeId,
@@ -5,11 +6,10 @@ import {
   SelectedPath,
   Transaction,
 } from "@emrgen/carbon-core";
-import { TitlePlugin } from "@emrgen/carbon-blocks";
-import { Link } from "./Link";
-import { Heading } from "./Heading";
-import { Video } from "./Video";
 import { Comment } from "./Comment";
+import { Heading } from "./Heading";
+import { Link } from "./Link";
+import { Video } from "./Video";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {
@@ -124,7 +124,7 @@ export class Note extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: "sqItem sqColumnItem sqCard",
-      content: "(section | todo | bulletList)+",
+      content: "(paragraph | todo | bulletList)+",
       isolate: true,
       props: {
         local: {

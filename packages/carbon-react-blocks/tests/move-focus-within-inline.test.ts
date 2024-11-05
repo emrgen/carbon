@@ -1,18 +1,11 @@
-import { section, title } from "@emrgen/carbon-blocks";
-import { text } from "@emrgen/carbon-blocks";
-import { node } from "@emrgen/carbon-blocks";
-import { createCarbon } from "./utils";
-import { nameOffset } from "./utils";
-import { Focus } from "@emrgen/carbon-core";
-import { MarksPath } from "@emrgen/carbon-core";
-import { Mark } from "@emrgen/carbon-core";
-import { test } from "vitest";
-import { expect } from "vitest";
-import { Bold } from "./marks";
-import { Italic } from "./marks";
+import { node, text, title } from "@emrgen/carbon-blocks";
+import { Focus, Mark, MarksPath } from "@emrgen/carbon-core";
+import { expect, test } from "vitest";
+import { Bold, Italic } from "./marks";
+import { createCarbon, nameOffset } from "./utils";
 
 test("move focus within text", () => {
-  const json = section([
+  const json = paragraph([
     title([
       text("title", {
         [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
@@ -47,7 +40,7 @@ test("move focus within text", () => {
 });
 
 test("move focus within text marks", () => {
-  const json = section([
+  const json = paragraph([
     title([
       node("bold", [text("title")]),
       text("world"),
@@ -76,7 +69,7 @@ test("move focus within text marks", () => {
 });
 
 test("move focus within text from empty to empty", () => {
-  const json = section([
+  const json = paragraph([
     title([node("empty"), node("empty"), node("empty"), node("empty")]),
   ]);
 
@@ -114,7 +107,7 @@ test("move focus within text from empty to empty", () => {
 });
 
 // test("move focus within text between atoms", () => {
-//   const json = section([
+//   const json = paragraph([
 //     title([
 //       node("empty"),
 //       mention("hello"),

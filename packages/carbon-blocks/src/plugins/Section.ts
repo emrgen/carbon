@@ -19,21 +19,21 @@ import { TitlePlugin } from "./Title";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
-    section: {
+    paragraph: {
       insert: (after: Node) => Optional<Transaction>;
     };
   }
 }
 
 export class Section extends NodePlugin {
-  name = "section";
+  name = "paragraph";
 
   spec(): NodeSpec {
     return {
       group: "content nestable",
       content: "title content*",
       splits: true,
-      splitName: "section",
+      splitName: "paragraph",
       inlineSelectable: true,
       draggable: true,
       dragHandle: true,
@@ -47,15 +47,15 @@ export class Section extends NodePlugin {
       insert: true,
       info: {
         title: "Text",
-        description: "Just start typing to create a new section",
-        icon: "section",
-        tags: ["text", "section", "paragraph", "p"],
+        description: "Just start typing to create a new paragraph",
+        icon: "paragraph",
+        tags: ["text", "paragraph", "paragraph", "p"],
         order: 1,
       },
       props: {
         local: {
           placeholder: {
-            // TODO: This is a hack to get the correct placeholder for empty section
+            // TODO: This is a hack to get the correct placeholder for empty paragraph
             // not empty placeholder is not removed from node props.
             empty: "",
             focused: "Press / for commands",
@@ -102,7 +102,7 @@ export class Section extends NodePlugin {
   }
 
   normalize(node: Node): CarbonAction[] {
-    console.log("normalize section", node.children.length);
+    console.log("normalize paragraph", node.children.length);
     console.warn("normalize section", node.children.length);
     if (node.isEmpty) {
       // const actions = SetContentAction.create(node.firstChild!, [
@@ -122,7 +122,7 @@ export class Section extends NodePlugin {
 
     const prevSibling = node.prevSibling;
     if (prevSibling) {
-      if (prevSibling?.name === "section") {
+      if (prevSibling?.name === "paragraph") {
         writer.write("\n\n");
       } else {
         writer.write("\n");

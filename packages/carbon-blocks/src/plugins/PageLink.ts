@@ -7,7 +7,7 @@ export class PageLink extends CarbonPlugin {
     return {
       group: "content",
       content: "title",
-      splitName: "section",
+      splitName: "paragraph",
       inlineSelectable: true,
       isolate: true,
       draggable: true,

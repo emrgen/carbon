@@ -239,6 +239,9 @@ export const useClassName = (marks: Mark[]) => {
         case "code":
           classes.push("code");
           break;
+        case "link":
+          classes.push("carbon-link");
+          break;
       }
     }, {});
 
@@ -248,7 +251,7 @@ export const useClassName = (marks: Mark[]) => {
 
 export const useTag = (marks: Mark[]) => {
   return useMemo(() => {
-    if (MarkSet.from(marks).has(Mark.link(""))) {
+    if (MarkSet.from(marks).get(Mark.link("").name)) {
       return "a";
     }
     return "span";
@@ -266,16 +269,14 @@ const InnerCarbonText = (props: RendererProps) => {
 
   const nodeProps = useMemo(() => {
     const props = {};
-    if (tag === "a") {
-      const link = MarkSet.from(marks).get(Mark.link("").name);
-      if (link) {
-        props["href"] = link.props?.href ?? "#";
-        props["target"] = "_blank";
-      }
+    const link = MarkSet.from(marks).get(Mark.link("").name);
+    if (link) {
+      props["href"] = link.props?.href ?? "#";
+      props["target"] = "_blank";
     }
 
     return props;
-  }, [marks, tag]);
+  }, [marks]);
 
   const attrs = useMemo(() => {
     const localAttrs =

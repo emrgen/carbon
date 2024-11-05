@@ -1,10 +1,14 @@
-import { Carbon, NodeSpec } from "@emrgen/carbon-core";
-import { EventHandlerMap } from "@emrgen/carbon-core";
-import { EventContext } from "@emrgen/carbon-core";
-import { preventAndStopCtx } from "@emrgen/carbon-core";
-import { CarbonPlugin, Node } from "@emrgen/carbon-core";
-import { Hints } from "./Hints";
+import {
+  Carbon,
+  CarbonPlugin,
+  EventContext,
+  EventHandlerMap,
+  Node,
+  NodeSpec,
+  preventAndStopCtx,
+} from "@emrgen/carbon-core";
 import { Explanations } from "./Explanations";
+import { Hints } from "./Hints";
 import { MCQ } from "./MCQ";
 
 declare module "@emrgen/carbon-core" {
@@ -29,12 +33,16 @@ export class Question extends CarbonPlugin {
       group: "content",
       content: "title content* hints* explanations*",
       // splits: true,
-      splitName: "section",
+      splitName: "paragraph",
       inlineSelectable: true,
       collapsible: true,
       isolate: true,
       document: true,
       observable: true,
+      dnd: {
+        draggable: true,
+        handle: true,
+      },
       attrs: {
         html: {
           contentEditable: true,

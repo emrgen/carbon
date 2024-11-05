@@ -6,7 +6,7 @@ export class Heading extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: "sqItem sqColumnItem sqCard",
-      content: "section (section)*",
+      content: "paragraph (paragraph)*",
       isolate: true,
       props: {
         local: {

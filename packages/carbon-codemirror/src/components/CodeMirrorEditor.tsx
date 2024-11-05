@@ -79,7 +79,7 @@ export const CodeMirrorEditor = (props: RendererProps) => {
                   event.preventDefault();
                   event.stopPropagation();
                   const parent = app.store.get(nodeId);
-                  const section = app.schema.type("section").default();
+                  const section = app.schema.type("paragraph").default();
                   console.log(parent);
                   const after = PinnedSelection.fromPin(
                     Pin.toStartOf(section!)!,

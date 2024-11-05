@@ -77,7 +77,7 @@ export const DocumentComp = (props: RendererProps) => {
       // console.log(bound, e, e.clientY, bound.bottom);
 
       if (e.clientY > bound.bottom) {
-        if (lastChild.name === "section" && lastChild.isEmpty) {
+        if (lastChild.name === "paragraph" && lastChild.isEmpty) {
           const textBlock = lastChild.find((n) => n.isTextContainer);
           if (textBlock) {
             const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
@@ -89,8 +89,8 @@ export const DocumentComp = (props: RendererProps) => {
         }
         prevent(e);
         const at = Point.toAfter(lastChild.id);
-        const section = app.schema.type("section").default();
-        if (!section) return;
+        const paragraph = app.schema.type("paragraph").default();
+        if (!paragraph) return;
         const after = PinnedSelection.fromPin(Pin.toStartOf(section)!);
         app.tr
           .Insert(at, section)

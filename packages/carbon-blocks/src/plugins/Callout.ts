@@ -19,11 +19,11 @@ export class Callout extends CarbonPlugin {
       content: "title content*",
       splits: true,
       splitInside: true,
-      splitName: "section",
+      splitName: "paragraph",
       insert: true,
       weakEnd: true,
       split: {
-        name: "section",
+        name: "paragraph",
       },
       dnd: {
         draggable: true,

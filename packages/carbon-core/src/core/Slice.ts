@@ -1,6 +1,6 @@
-import { Node, Path } from "./Node";
 import { flatten, zip } from "lodash";
 import { Fragment } from "./Fragment";
+import { Node, Path } from "./Node";
 import { LocalClassPath } from "./NodeProps";
 
 // Slice represents a selection of nodes in the editor
@@ -68,7 +68,7 @@ export class Slice {
     this.root.updateContent(removeCodeNodes);
   }
 
-  // FIXME: replace code>codeTitle with section>title otherwise the paste is creating a code block
+  // FIXME: replace code>codeTitle with paragraph>title otherwise the paste is creating a code block
   // also remove all CodeTClassPathLocal from the children
   transformCodeNodes(nodes: Node[]) {
     return nodes.map((n) => {
@@ -87,7 +87,7 @@ export class Slice {
       if (n.type.name === "code") {
         return n.type.schema.nodeFromJSON({
           id: n.id.toString(),
-          name: "section",
+          name: "paragraph",
           children: this.transformCodeNodes(n.children),
         });
       }

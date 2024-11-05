@@ -15,7 +15,7 @@ export class Quote extends CarbonPlugin {
       group: "content nestable",
       content: "title content*",
       splits: true,
-      splitName: "section",
+      splitName: "paragraph",
       insert: true,
       inlineSelectable: true,
       draggable: true,

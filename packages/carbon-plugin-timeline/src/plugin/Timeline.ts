@@ -14,7 +14,7 @@ export class Timeline extends CarbonPlugin {
       group: "content nestable",
       content: "title content*",
       splits: true,
-      splitName: "section",
+      splitName: "paragraph",
       insert: true,
       collapsible: true,
       pasteBoundary: true,

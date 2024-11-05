@@ -1,12 +1,4 @@
 import {
-  CarbonBlock,
-  CarbonNodeChildren,
-  CarbonNodeContent,
-  RendererProps,
-  useCarbon,
-} from "@emrgen/carbon-react";
-import { useCallback, useRef } from "react";
-import {
   ActionOrigin,
   Carbon,
   CollapsedPath,
@@ -15,9 +7,19 @@ import {
   Point,
   TxType,
 } from "@emrgen/carbon-core";
-import { MdOutlineKeyboardArrowDown } from "react-icons/md";
-import { MdKeyboardArrowRight } from "react-icons/md";
 import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
+import {
+  CarbonBlock,
+  CarbonNodeChildren,
+  CarbonNodeContent,
+  RendererProps,
+  useCarbon,
+} from "@emrgen/carbon-react";
+import { useCallback, useRef } from "react";
+import {
+  MdKeyboardArrowRight,
+  MdOutlineKeyboardArrowDown,
+} from "react-icons/md";
 
 export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
@@ -30,16 +32,16 @@ export default function CollapsibleListComp(props: RendererProps) {
     ref,
   });
 
-  // insert a new section as child of this collapsible
+  // insert a new paragraph as child of this collapsible
   const handleInsert = useCallback(
     (app: Carbon) => {
-      const section = app.schema.type("section").default()!;
+      const paragraph = app.schema.type("paragraph").default()!;
       const at = Point.toAfter(node.child(0)!.id);
 
       app.cmd
-        .Insert(at, section)
+        .Insert(at, paragraph)
         .Select(
-          PinnedSelection.fromPin(Pin.toStartOf(section)!),
+          PinnedSelection.fromPin(Pin.toStartOf(paragraph)!),
           ActionOrigin.UserInput,
         )
         .Dispatch();

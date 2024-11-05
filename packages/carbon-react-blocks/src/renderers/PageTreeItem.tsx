@@ -38,7 +38,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
     [node],
   );
 
-  // insert a new section as child of this collapsible and open it
+  // insert a new paragraph as child of this collapsible and open it
   const handleInsert = useCallback(
     (e) => {
       preventAndStop(e);

@@ -352,8 +352,8 @@ export const ImageComp = () => {
 //               if (e.key === "Enter") {
 //                 e.preventDefault();
 //                 react.enable()
-//                 const section = react.schema.nodes.section.default();
-//                 if (!section) return;
+//                 const paragraph = react.schema.nodes.paragraph.default();
+//                 if (!paragraph) return;
 //                 react.tr
 //                   .insert(Point.toAfter(node.id), section)
 //                   .select(

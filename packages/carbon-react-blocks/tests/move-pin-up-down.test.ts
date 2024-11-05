@@ -1,12 +1,10 @@
-import { section, title } from "@emrgen/carbon-blocks";
-import { text } from "@emrgen/carbon-blocks";
-import { createCarbon } from "./utils";
-import { nameOffset } from "./utils";
+import { text, title } from "@emrgen/carbon-blocks";
 import { Focus } from "@emrgen/carbon-core";
 import { expect, test } from "vitest";
+import { createCarbon, nameOffset } from "./utils";
 
 test("move focus up", () => {
-  const json = section([title([text("hello"), text("world")])]);
+  const json = paragraph([title([text("hello"), text("world")])]);
 
   const app = createCarbon(json);
 
@@ -24,7 +22,7 @@ test("move focus up", () => {
 });
 
 test("move focus down", () => {
-  const json = section([title([text("hello"), text("world")])]);
+  const json = paragraph([title([text("hello"), text("world")])]);
 
   const app = createCarbon(json);
 

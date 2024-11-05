@@ -20,7 +20,6 @@ import {
 } from "@emrgen/carbon-core";
 
 import { TextPlugin } from "./Text";
-import { flatten, identity } from "lodash";
 
 // title is a block content that can be used as a title for a block
 export class TitlePlugin extends NodePlugin {
@@ -81,27 +80,25 @@ export class TitlePlugin extends NodePlugin {
           return;
         }
         const { head } = selection;
+        const { steps } = head;
         const down = head.down();
         const marks = down.node.props.get(MarksPath, []);
         console.log(down.isAtEnd, down.node.textContent, marks);
         if (down.isAtEnd && down.node.isInline) {
           preventAndStopCtx(ctx);
+          const startStepFromEnd = head.steps - head.node.stepSize;
           const textNode = app.schema.text(" ")!;
-          const content = flatten([
-            down.node.prevSiblings,
-            down.node,
-            textNode,
-            down.node.nextSiblings,
-          ]).filter(identity) as Node[];
-          console.log(down.node.textContent, content);
+          const titleNode = TitleNode.from(head.node.clone(deepCloneMap))
+            .insertInp(head.steps, textNode)
+            .normalize();
+          const steps =
+            titleNode.stepSize + titleNode.mapStep(startStepFromEnd);
+
           app.cmd
-            .SetContent(
-              currentNode,
-              content.map((n) => n.clone(deepCloneMap)),
-            )
+            .SetContent(head.node, titleNode.children)
             .Select(
               PointedSelection.fromPoint(
-                Point.atOffset(head.node.id, head.offset + 1),
+                Point.atOffset(head.node.id, head.offset + 1, steps),
               ),
             )
             .Dispatch();

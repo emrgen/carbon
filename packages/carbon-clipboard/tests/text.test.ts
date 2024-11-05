@@ -1,13 +1,13 @@
 import { expect, test } from "vitest";
-import { node, parseText, section, text, title } from "../src/parser/text";
+import { node, paragraph, parseText, text, title } from "../src/parser/text";
 
 test("parse plain space", () => {
   const content = "a \n\n b ";
   const res = parseText(content);
   expect(res).toMatchObject([
-    section([title([text("a ")])]),
-    section([title([])]),
-    section([title([text(" b ")])]),
+    paragraph([title([text("a ")])]),
+    paragraph([title([])]),
+    paragraph([title([text(" b ")])]),
   ]);
 });
 
@@ -22,7 +22,7 @@ test("parse header", () => {
 test("parse paragraph", () => {
   const content = "hello";
   const res = parseText(content);
-  expect(res).toMatchObject([section([title([text("hello")])])]);
+  expect(res).toMatchObject([paragraph([title([text("hello")])])]);
 });
 
 test("parse code  ", () => {
@@ -41,7 +41,7 @@ test("parse paragraph", () => {
   const actual = parseText(content);
 
   expect(actual).toMatchObject([
-    section([
+    paragraph([
       title([
         node("codespan", [text("const")]),
         text(" fn = () => "),
@@ -66,7 +66,7 @@ test("parse bullet list", () => {
       node("bulletList", [title([text("c")])]),
       node("bulletList", [title([text("d")])]),
     ]),
-    section([title([])]),
+    paragraph([title([])]),
   ]);
 });
 
@@ -85,7 +85,7 @@ test("parse ordered list", () => {
       node("numberList", [title([text("c")])]),
       node("numberList", [title([text("d")])]),
     ]),
-    section([title([])]),
+    paragraph([title([])]),
   ]);
 });
 
@@ -120,7 +120,7 @@ test("parse mixed list", () => {
       node("bulletList", [title([text("c")])]),
     ]),
     node("numberList", [title([text("d")])]),
-    // section([title([])]),
+    // paragraph([title([])]),
   ]);
 });
 
@@ -136,7 +136,7 @@ test("parse checkbox", () => {
       title([text("b")]),
       node("checkList", [title([text("c")])]),
     ]),
-    section([title([])]),
+    paragraph([title([])]),
   ]);
 });
 
@@ -145,7 +145,7 @@ test("parse link", () => {
   const res = parseText(content);
 
   expect(res).toMatchObject([
-    section([
+    paragraph([
       title([
         node("link", [text("he"), node("bold", [text("llo")])], {
           "remote/state/link/href": "https://google.com",
@@ -160,7 +160,7 @@ test("parse italic", () => {
   const res = parseText(content);
 
   expect(res).toMatchObject([
-    section([
+    paragraph([
       title([
         text("he"),
         node("italic", [text("llo")]),
@@ -176,7 +176,7 @@ test("parse blockquote", () => {
   const content = `> hello world`;
   const actual = parseText(content);
   expect(actual).toMatchObject([
-    node("quote", [section([title([text("hello world")])])]),
+    node("quote", [paragraph([title([text("hello world")])])]),
   ]);
 });
 
@@ -184,7 +184,7 @@ test("parse image", () => {
   const content = `![title](https://local.image) ![title](https://remote.image)`;
   const actual = parseText(content);
   expect(actual).toMatchObject([
-    section([
+    paragraph([
       node("image", [], {
         "remote/state/image/src": "https://local.image",
       }),
@@ -200,7 +200,7 @@ test("parse html", () => {
   const actual = parseText(content);
   expect(actual).toMatchObject([
     node("h1", [title([text("Hello")])]),
-    section([title([text("<h2>Heading 2</h2>")])]),
+    paragraph([title([text("<h2>Heading 2</h2>")])]),
   ]);
 });
 
@@ -208,7 +208,7 @@ test("parse codespan", () => {
   const content = `codespan \`console.log('codespan')\``;
   const actual = parseText(content);
   expect(actual).toMatchObject([
-    section([
+    paragraph([
       title([
         text("codespan "),
         node("codespan", [text("console.log('codespan')")]),

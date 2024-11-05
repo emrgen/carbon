@@ -12,10 +12,10 @@ import {
   preventAndStopCtx,
   Writer,
 } from "@emrgen/carbon-core";
+import { isKeyHotkey } from "is-hotkey";
 import { isEqual } from "lodash";
 // import { isKeyHotkey } from "is-hotkey";
 import { CodeTitle } from "./CodeTitle";
-import { isKeyHotkey } from "is-hotkey";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {}
@@ -75,7 +75,7 @@ export class Code extends CarbonPlugin {
               Pin.future(currentNode.firstChild!, 0),
             )!;
             app.cmd
-              .Change(currentNode, "section")
+              .Change(currentNode, "paragraph")
               .Change(currentNode.firstChild!, "title")
               .SetContent(currentNode.firstChild!, content)
               .Select(after)

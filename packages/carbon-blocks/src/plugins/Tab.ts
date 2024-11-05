@@ -231,7 +231,7 @@ export class Tab extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: "",
-      content: "section content*",
+      content: "paragraph content*",
       isolate: true,
       collapsible: true,
       // isolateContent: true,

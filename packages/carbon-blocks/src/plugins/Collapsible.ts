@@ -43,7 +43,7 @@ export class Collapsible extends NodePlugin {
       group: "content nestable",
       content: "title content*",
       splits: true,
-      splitName: "section",
+      splitName: "paragraph",
       insert: true,
       collapsible: true,
       inlineSelectable: true,
@@ -62,7 +62,7 @@ export class Collapsible extends NodePlugin {
       props: {
         local: {
           placeholder: {
-            // TODO: This is a hack to get the correct placeholder for empty section
+            // TODO: This is a hack to get the correct placeholder for empty paragraph
             // not empty placeholder is not removed from node props.
             empty: "Collapsible",
             focused: "Press / for commands",
@@ -178,7 +178,7 @@ export class Collapsible extends NodePlugin {
           if (currentNode.child(0)?.isEmpty) {
             preventAndStopCtx(ctx);
 
-            cmd.transform.change(currentNode, "section");
+            cmd.transform.change(currentNode, "paragraph");
             if (currentNode.firstChild?.isEmpty) {
               cmd.update(currentNode.firstChild.id, { [PlaceholderPath]: "" });
             }
@@ -231,7 +231,7 @@ export class Collapsible extends NodePlugin {
 
     if (selection.isCollapsed && start.isAtEndOfNode(title)) {
       const section = app.schema
-        .type(isCollapsed ? splitBlock.type.splitName : "section")
+        .type(isCollapsed ? splitBlock.type.splitName : "paragraph")
         .default();
       if (!section) {
         throw Error("failed to create default node for type" + splitBlock.name);

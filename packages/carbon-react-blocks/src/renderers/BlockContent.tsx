@@ -1,16 +1,27 @@
-import {title} from "@emrgen/carbon-blocks";
-import {CarbonBlock, CarbonNode, InitNodeJSON, RendererProps, useCarbon, useSelectionHalo} from "@emrgen/carbon-react";
-import {useCallback, useEffect, useRef, useState} from "react";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
-import {Optional} from "@emrgen/types";
-import {EventsOut, State,Node} from "@emrgen/carbon-core";
+import { title } from "@emrgen/carbon-blocks";
+import { EventsOut, Node, State } from "@emrgen/carbon-core";
+import {
+  useCombineConnectors,
+  useConnectorsToProps,
+  useDragDropRectSelect,
+} from "@emrgen/carbon-dragon-react";
+import {
+  CarbonBlock,
+  CarbonNode,
+  InitNodeJSON,
+  RendererProps,
+  useCarbon,
+  useSelectionHalo,
+} from "@emrgen/carbon-react";
+import { Optional } from "@emrgen/types";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const createBlockContentItem = (id: string, content?: string) => {
   return {
-    name: "section",
+    name: "paragraph",
     attrs: {
       node: { tag: "a" },
-      html: { href: '#' + id },
+      html: { href: "#" + id },
     },
     content: [title([{ name: "text", text: content ?? "Untitled" }])],
   };
@@ -28,93 +39,94 @@ export function BlockContentComp(props: RendererProps) {
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
   const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection)
+    useCombineConnectors(dragDropRect, selection),
   );
 
   const [content, setContent] = useState<Optional<Node>>(null);
 
-  const updateContent = useCallback((content: Node) => {
+  const updateContent = useCallback(
+    (content: Node) => {
+      // const getHeaderType = (node: Node): Optional<NodeType> => {
+      //   const { type } = node;
+      //   const as = node.props.html["data-as"] ?? "";
+      //   const asType = type.schema.nodes[as];
+      //   if (type.groups.includes("heading")) {
+      //     return type
+      //   }
+      //   if (asType?.groups.includes("heading")) {
+      //     return asType
+      //   }
+      //
+      //   return null
+      // }
 
-    // const getHeaderType = (node: Node): Optional<NodeType> => {
-    //   const { type } = node;
-    //   const as = node.props.html["data-as"] ?? "";
-    //   const asType = type.schema.nodes[as];
-    //   if (type.groups.includes("heading")) {
-    //     return type
-    //   }
-    //   if (asType?.groups.includes("heading")) {
-    //     return asType
-    //   }
-    //
-    //   return null
-    // }
+      // const traverse = (node: Node, content: InitNodeJSON) => {
+      //   if (isHeaderNode(node)) {
+      //     const item = createBlockContentItem(node.id.toString(), node.firstChild?.textContent ?? 'Untitled')
+      //     content.children?.push(item)
+      //     node.children.forEach(n => {
+      //       traverse(n, item);
+      //     })
+      //     console.log('-> found a header node', node.id.toString());
+      //   } else {
+      //     node.children.forEach(n => {
+      //       traverse(n, content)
+      //     })
+      //   }
+      // }
 
-    // const traverse = (node: Node, content: InitNodeJSON) => {
-    //   if (isHeaderNode(node)) {
-    //     const item = createBlockContentItem(node.id.toString(), node.firstChild?.textContent ?? 'Untitled')
-    //     content.children?.push(item)
-    //     node.children.forEach(n => {
-    //       traverse(n, item);
-    //     })
-    //     console.log('-> found a header node', node.id.toString());
-    //   } else {
-    //     node.children.forEach(n => {
-    //       traverse(n, content)
-    //     })
-    //   }
-    // }
+      const blockContentNode: InitNodeJSON = {
+        name: "stack",
+        children: [],
+        level: 0,
+      };
+      // build the block content tree
 
-    const blockContentNode: InitNodeJSON = {
-      name: 'stack',
-      children: [],
-      level: 0
-    }
-    // build the block content tree
+      const { children } = content;
+      let prevHeaderLevel = 1;
+      const levelStack = [blockContentNode];
+      const peek = () => levelStack[levelStack.length - 1] as InitNodeJSON;
+      const pop = () => {
+        if (levelStack.length == 1) return peek();
+        return levelStack.pop() as InitNodeJSON;
+      };
 
-    const { children } = content;
-    let prevHeaderLevel = 1;
-    const levelStack = [blockContentNode];
-    const peek = () => levelStack[levelStack.length - 1] as InitNodeJSON;
-    const pop = () => {
-      if (levelStack.length == 1) return peek()
-      return levelStack.pop() as InitNodeJSON;
-    }
-
-    // for (const ch of children) {
-    //   const type = getHeaderType(ch)
-    //   if (type) {
-    //     const level = (react.plugin(type.name) as Heading).level ?? 0;
-    //     if (level == 0) continue;
-    //
-    //     while (level <= prevHeaderLevel) {
-    //       prevHeaderLevel = pop().level
-    //     }
-    //
-    //     if (level < prevHeaderLevel) {
-    //
-    //     } else if (level === prevHeaderLevel) {
-    //       // peek().children.push(createBlockContentItem(ch.id.toString(), ch.firstChild?.textContent))
-    //     }
-    //
-    //     prevHeaderLevel = level
-    //   }
-    // }
-  }, [app.content, app.schema]);
-
+      // for (const ch of children) {
+      //   const type = getHeaderType(ch)
+      //   if (type) {
+      //     const level = (react.plugin(type.name) as Heading).level ?? 0;
+      //     if (level == 0) continue;
+      //
+      //     while (level <= prevHeaderLevel) {
+      //       prevHeaderLevel = pop().level
+      //     }
+      //
+      //     if (level < prevHeaderLevel) {
+      //
+      //     } else if (level === prevHeaderLevel) {
+      //       // peek().children.push(createBlockContentItem(ch.id.toString(), ch.firstChild?.textContent))
+      //     }
+      //
+      //     prevHeaderLevel = level
+      //   }
+      // }
+    },
+    [app.content, app.schema],
+  );
 
   useEffect(() => {
     const onChange = (state: State) => {
       if (state.isContentChanged) {
         const parentId = node.parent?.id;
-        if (!parentId) return
-        const parent = state.nodeMap.get(parentId)
-        let childrenUpdated = false
-        parent?.preorder(n => {
+        if (!parentId) return;
+        const parent = state.nodeMap.get(parentId);
+        let childrenUpdated = false;
+        parent?.preorder((n) => {
           if (state.updated.has(n.id)) {
-            childrenUpdated = true
+            childrenUpdated = true;
           }
-          return childrenUpdated
-        })
+          return childrenUpdated;
+        });
 
         if (parent && childrenUpdated) {
           updateContent(parent);
@@ -129,8 +141,8 @@ export function BlockContentComp(props: RendererProps) {
   }, [app, updateContent]);
 
   useEffect(() => {
-    const parent = node.parent
-    if (!parent) return
+    const parent = node.parent;
+    if (!parent) return;
     updateContent(parent);
   }, [updateContent]);
 

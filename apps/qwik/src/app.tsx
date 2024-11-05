@@ -1,12 +1,13 @@
-import { component$ } from "@builder.io/qwik";
-import { $ } from "@builder.io/qwik";
-import { useStore } from "@builder.io/qwik";
+import { $, component$, useStore } from "@builder.io/qwik";
 import "./app.css";
-import { corePresetPlugins, Node } from "@emrgen/carbon-core";
-import { PluginManager } from "@emrgen/carbon-core";
-import { Schema } from "@emrgen/carbon-core";
-import { NodeData } from "@emrgen/carbon-core";
 import { blockPresetPlugins } from "@emrgen/carbon-blocks";
+import {
+  corePresetPlugins,
+  Node,
+  NodeData,
+  PluginManager,
+  Schema,
+} from "@emrgen/carbon-core";
 import { ImmutableNodeFactory } from "@emrgen/carbon-react";
 import { Predicate } from "@emrgen/types";
 
@@ -16,11 +17,11 @@ const pm = new PluginManager(plugins);
 const schema = new Schema(pm.specs, new ImmutableNodeFactory());
 
 const content: Node = schema
-  .type("section")
+  .type("paragraph")
   .create([
     schema.type("title").create([schema.text("Hello, World! 1")!])!,
     schema
-      .type("section")
+      .type("paragraph")
       .create([
         schema.type("title").create([schema.text("Hello, World! 2")!])!,
       ])!,
@@ -43,7 +44,7 @@ const Block = {
 
 export const App = component$(() => {
   // const count = useSignal(content);
-  const root = useStore({ name: "section", children: [] });
+  const root = useStore({ name: "paragraph", children: [] });
 
   // const change = new EventEmitter();
   // useContextProvider(ChangeContext, change);
@@ -119,7 +120,7 @@ const Text = component$((props: RendererProps) => {
 
 const Renderer = component$((props: RendererProps) => {
   switch (props.node.name) {
-    case "section":
+    case "paragraph":
       return <Section node={props.node} />;
     case "title":
       return <Title node={props.node} />;
