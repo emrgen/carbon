@@ -27,7 +27,7 @@ export const printNode = (node: Node, logger = console.log.bind(console)) => {
     // console.log(node.props);
 
     if (node.name === "text") {
-      line += `\`${node.textContent ?? node.text ?? ""}\``;
+      line += `\`${(node as Node).textContent ?? (node as { text: string }).text ?? ""}\``;
     } else {
       line += node.name;
     }

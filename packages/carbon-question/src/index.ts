@@ -1,12 +1,13 @@
 import "./question.styl";
+import { Extension, ReactRenderer } from "@emrgen/carbon-react";
 import { Question } from "./plugins/Question";
-import { Extension } from "@emrgen/carbon-react";
-import { ReactRenderer } from "@emrgen/carbon-react";
-import { QuestionComp } from "./renderers/Question";
-import { HintsComp } from "./renderers/Hints";
 import { ExplanationsComp } from "./renderers/Explanations";
-import { MultipleChoiceQuestionComp } from "./renderers/MultipleChoice";
-import { MultipleChoiceOptionComp } from "./renderers/MultipleChoice";
+import { HintsComp } from "./renderers/Hints";
+import {
+  MultipleChoiceOptionComp,
+  MultipleChoiceQuestionComp,
+} from "./renderers/MultipleChoice";
+import { QuestionComp } from "./renderers/Question";
 
 export const questionExtension: Extension = {
   plugins: [new Question()],
@@ -25,3 +26,4 @@ export const questionExtension: Extension = {
 
 export * from "./observable/Questions";
 export * from "./observable/ObservableQuestions";
+export * from "./observable/ObservableNodes";

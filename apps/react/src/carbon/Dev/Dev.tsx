@@ -51,13 +51,14 @@ import {
   timelineRenderer,
 } from "@emrgen/carbon-plugin-timeline";
 import {
+  ObservableNodes,
   ObservableQuestions,
   questionExtension,
 } from "@emrgen/carbon-question";
 import {
   RendererProps,
   RenderManager,
-  useCreateCachedCarbon,
+  useCreateCarbon,
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import { CarbonApp } from "@emrgen/carbon-utils";
@@ -853,7 +854,7 @@ export default function Dev() {
   const [content] = useState(() => {
     return data;
   });
-  const app = useCreateCachedCarbon("dev", content, flattenDeep(plugins));
+  const app = useCreateCarbon("dev", content, flattenDeep(plugins));
   const [runtime] = useState<ActiveCellRuntime>(() => {
     return new ActiveCellRuntime({
       Carbon: app,
@@ -953,15 +954,17 @@ export default function Dev() {
   return (
     <Box className={"carbon-app-container"} pos={"relative"}>
       <ActiveCellRuntimeContext runtime={runtime}>
-        <ObservableQuestions>
-          <CarbonApp app={app} renderManager={renderManager}>
-            <Box pos={"absolute"} right={8} top={6}>
-              <DocumentSaveStatus />
-            </Box>
-            <FloatingStyleMenu />
-            <PathTracker />
-          </CarbonApp>
-        </ObservableQuestions>
+        <ObservableNodes>
+          <ObservableQuestions>
+            <CarbonApp app={app} renderManager={renderManager}>
+              <Box pos={"absolute"} right={8} top={6}>
+                <DocumentSaveStatus />
+              </Box>
+              <FloatingStyleMenu />
+              <PathTracker />
+            </CarbonApp>
+          </ObservableQuestions>
+        </ObservableNodes>
       </ActiveCellRuntimeContext>
     </Box>
   );

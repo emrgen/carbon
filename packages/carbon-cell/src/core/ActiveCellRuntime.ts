@@ -11,7 +11,6 @@ import {
   nextUnnamedCellName,
   viewCellName,
 } from "../utils";
-import { Nodes } from "./Nodes";
 
 //
 export class ActiveCellRuntime extends EventEmitter {
@@ -30,16 +29,6 @@ export class ActiveCellRuntime extends EventEmitter {
     this.module = this.runtime.module();
     // define a hidden module variable
     // this.module.variable(true).define("_module", [], () => this.module);
-
-    // define a hidden module variable for observed nodes
-    this.redefineFromConfig(
-      "_cell_nodes",
-      "Nodes",
-      ["Carbon", "observedIds"],
-      (Carbon, observedIds) => {
-        return new Nodes(Carbon, observedIds);
-      },
-    );
   }
 
   result(cellId: string) {
@@ -64,6 +53,7 @@ export class ActiveCellRuntime extends EventEmitter {
 
   observeNode(nodeId: string) {
     this.observedNodes.add(nodeId);
+    // define the observedIds reactive variable
     this.redefine(
       "observedIds",
       "_observed_ids",

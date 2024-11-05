@@ -11,3 +11,4 @@ export * from "./plugins/Cell";
 export * from "./hooks/useActiveCellRuntime";
 export * from "./core/Nodes";
 export * from "./core/ActiveCellRuntime";
+export * from "./components/Observable";

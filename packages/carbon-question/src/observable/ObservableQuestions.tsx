@@ -2,11 +2,12 @@ import { Nodes, useActiveCellRuntime } from "@emrgen/carbon-cell";
 import { useEffect } from "react";
 import { Questions } from "./Questions";
 
+// observable deps: observedIds -> Nodes -> Questions
 export const ObservableQuestions = (props) => {
   const runtime = useActiveCellRuntime();
 
   useEffect(() => {
-    // create an Observable from the Questions Nodes
+    // create an Observable from the Question Nodes
     runtime.redefineFromConfig(
       `_cell_questions`,
       "Questions",

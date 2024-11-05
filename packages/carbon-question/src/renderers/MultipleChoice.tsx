@@ -1,15 +1,16 @@
+import { useActiveCellRuntime } from "@emrgen/carbon-cell";
+import {
+  CheckedPath,
+  SelectedOptionsPath,
+} from "@emrgen/carbon-core/src/core/NodeProps";
 import {
   CarbonBlock,
   CarbonChildren,
   RendererProps,
+  useCarbon,
 } from "@emrgen/carbon-react";
-import { useCarbon } from "@emrgen/carbon-react";
-import { useCallback } from "react";
-import { CheckedPath } from "@emrgen/carbon-core/src/core/NodeProps";
-import { LocalDirtyCounterPath } from "@emrgen/carbon-core/src/core/NodeProps";
-import { SelectedOptionsPath } from "@emrgen/carbon-core/src/core/NodeProps";
-import { useActiveCellRuntime } from "@emrgen/carbon-cell";
 import { uniq } from "lodash";
+import { useCallback } from "react";
 
 export const MultipleChoiceQuestionComp = (props: RendererProps) => {
   const { node } = props;
@@ -49,8 +50,8 @@ export const MultipleChoiceOptionComp = (props: RendererProps) => {
         .Update(node, {
           [CheckedPath]: e.target.checked,
         })
+        // update the parent node with the selected options
         .Update(parent, {
-          [LocalDirtyCounterPath]: Date.now().toString(),
           [SelectedOptionsPath]: uniq(selected),
         })
         .Dispatch();
