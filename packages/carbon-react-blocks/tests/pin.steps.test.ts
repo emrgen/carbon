@@ -1,4 +1,4 @@
-import { node, text, title } from "@emrgen/carbon-blocks";
+import { node, paragraph, text, title } from "@emrgen/carbon-blocks";
 import { Step } from "@emrgen/carbon-core";
 import { expect, test } from "vitest";
 import { createCarbon, nameOffset } from "./utils";
@@ -42,7 +42,7 @@ test("pin step forwards down", () => {
   expect(nameOffset(pos.moveBy(13).down())).toBe("text:4");
   expect(nameOffset(pos.moveBy(14).down())).toBe("text:5");
   expect(nameOffset(pos.moveBy(15).down())).toBe("title:7");
-  expect(nameOffset(pos.moveBy(16).down())).toBe("section:9");
+  expect(nameOffset(pos.moveBy(16).down())).toBe("paragraph:9");
   expect(nameOffset(pos.moveBy(17).down())).toBe("callout:18");
 });
 
@@ -60,7 +60,7 @@ test("pin step backwards", () => {
 test("pin step backwards down", () => {
   const pos = Step.toEndOf(app.content);
   expect(nameOffset(pos)).toBe("callout:17");
-  expect(nameOffset(pos.moveBy(0).down())).toBe("section:9");
+  expect(nameOffset(pos.moveBy(0).down())).toBe("paragraph:9");
   expect(nameOffset(pos.moveBy(-1).down())).toBe("title:7");
   expect(nameOffset(pos.moveBy(-2).down())).toBe("text:5");
   expect(nameOffset(pos.moveBy(-3).down())).toBe("text:4");

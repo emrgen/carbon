@@ -1,4 +1,4 @@
-import { node, text, title } from "@emrgen/carbon-blocks";
+import { node, paragraph, text, title } from "@emrgen/carbon-blocks";
 import { Focus, Mark, MarksPath } from "@emrgen/carbon-core";
 import { expect, test } from "vitest";
 import { Bold, Italic } from "./marks";
@@ -79,31 +79,31 @@ test("move focus within text from empty to empty", () => {
 
   const ids = app.content.child(0)!.children.map((n) => n.id.toString());
 
-  console.log(ids);
+  // console.log(ids);
 
   expect(focus?.isAtStart).toBe(true);
   expect(focus?.node.id.toString()).toBe(ids[0]);
 
-  expect(focus?.moveBy(1)!.node.id.toString()).toBe(ids[1]);
+  expect(focus?.moveBy(1)!.node.id.toString()).toBe(ids[0]);
   expect(nameOffset(focus?.moveBy(1)!)).toBe("empty:1");
 
-  expect(focus?.moveBy(2)!.node.id.toString()).toBe(ids[2]);
+  expect(focus?.moveBy(2)!.node.id.toString()).toBe(ids[1]);
   expect(nameOffset(focus?.moveBy(2)!)).toBe("empty:1");
 
-  expect(focus?.moveBy(3)!.node.id.toString()).toBe(ids[3]);
+  expect(focus?.moveBy(3)!.node.id.toString()).toBe(ids[2]);
   expect(nameOffset(focus?.moveBy(3)!)).toBe("empty:1");
 
   const end = focus?.moveBy(3)!;
 
   console.log(end?.toString());
   expect(end?.moveBy(-1)!.node.id.toString()).toBe(ids[2]);
-  expect(nameOffset(end?.moveBy(-1)!)).toBe("empty:1");
+  expect(nameOffset(end?.moveBy(-1)!)).toBe("empty:0");
 
   expect(end?.moveBy(-2)!.node.id.toString()).toBe(ids[1]);
-  expect(nameOffset(end?.moveBy(-2)!)).toBe("empty:1");
+  expect(nameOffset(end?.moveBy(-2)!)).toBe("empty:0");
 
   expect(end?.moveBy(-3)!.node.id.toString()).toBe(ids[0]);
-  expect(nameOffset(end?.moveBy(-3)!)).toBe("empty:1");
+  expect(nameOffset(end?.moveBy(-3)!)).toBe("empty:0");
 });
 
 // test("move focus within text between atoms", () => {

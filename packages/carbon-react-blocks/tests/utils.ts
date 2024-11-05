@@ -1,17 +1,30 @@
+import { blockPresetPlugins } from "@emrgen/carbon-blocks";
 import {
   Carbon,
+  CarbonPlugin,
   corePresetPlugins,
+  Node,
+  NodeId,
+  Pin,
   PinnedSelection,
   PluginManager,
   Schema,
 } from "@emrgen/carbon-core";
-import { CarbonPlugin } from "@emrgen/carbon-core";
-import { Node } from "@emrgen/carbon-core";
-import { Pin } from "@emrgen/carbon-core";
-import { blockPresetPlugins } from "@emrgen/carbon-blocks";
 import { ImmutableNodeFactory, ImmutableState } from "@emrgen/carbon-react";
 
+let counter = 0;
+class CustomFactory extends ImmutableNodeFactory {
+  blockId() {
+    return NodeId.fromString(`[${counter++}]`);
+  }
+
+  textId() {
+    return NodeId.fromString(`[${counter++}]`);
+  }
+}
+
 export const createCarbon = (json: any, extraPlugins: CarbonPlugin[] = []) => {
+  counter = 0;
   const plugins = [
     ...corePresetPlugins,
     ...blockPresetPlugins,
@@ -22,7 +35,7 @@ export const createCarbon = (json: any, extraPlugins: CarbonPlugin[] = []) => {
   const scope = Symbol("test");
 
   const specs = pm.specs;
-  const schema = new Schema(specs, new ImmutableNodeFactory(scope, () => ""));
+  const schema = new Schema(specs, new CustomFactory(scope, () => ""));
 
   const root = schema.nodeFromJSON(json)!;
   const state = ImmutableState.create(scope, root, PinnedSelection.IDENTITY);

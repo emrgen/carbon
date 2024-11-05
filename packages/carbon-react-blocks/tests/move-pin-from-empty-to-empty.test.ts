@@ -1,4 +1,4 @@
-import { mention, node, text, title } from "@emrgen/carbon-blocks";
+import { mention, node, paragraph, text, title } from "@emrgen/carbon-blocks";
 import { expect, test } from "vitest";
 import { createCarbon } from "./utils";
 

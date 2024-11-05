@@ -1,4 +1,4 @@
-import { node, text, title } from "@emrgen/carbon-blocks";
+import { node, paragraph, text, title } from "@emrgen/carbon-blocks";
 import { Focus } from "@emrgen/carbon-core";
 import { expect, test } from "vitest";
 import { createCarbon, nameOffset } from "./utils";

@@ -1230,16 +1230,16 @@ export class TransformCommands extends BeforePlugin {
     };
 
     const paragraph = app.schema.nodeFromJSON(json);
-    if (!section) {
+    if (!paragraph) {
       throw Error("failed to create section");
     }
 
     const at = Point.toAfter(splitBlock.id);
-    const focusPoint = Pin.toStartOf(section!);
+    const focusPoint = Pin.toStartOf(paragraph!);
     const after = PinnedSelection.fromPin(focusPoint!);
 
     tr.SetContent(start.node.id, leftNodes)
-      .Insert(at, section!)
+      .Insert(at, paragraph!)
       .Select(after)
       .Dispatch();
 
