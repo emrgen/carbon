@@ -1,6 +1,7 @@
 import { MarksPath, Node, printNode, Schema, Slice } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { flatten, isEmpty, sortBy } from "lodash";
+import { parseEmoji } from "./emoji";
 import { parseHtml } from "./html";
 import { fixContentMatch, parseText } from "./text";
 
@@ -65,7 +66,9 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                         .then((text) => {
                           console.log("text/html", text);
                           const nodes = parseHtml(text);
+                          console.log(JSON.stringify(nodes, null, 2));
                           const root = createCarbonSlice(nodes, schema);
+                          console.log(root?.toJSON());
                           if (!root) {
                             failed("failed to parse html");
                             return;
@@ -172,14 +175,21 @@ export const createCarbonSlice = (clipNodes: any[], schema: Schema) => {
 };
 
 export const transformProcessParsedHtml = (nodes: any[]) => {
-  return nodes.map((n) => {
-    return transformParsedHtmlNode(n);
-  });
+  return flatten(
+    nodes.map((n) => {
+      return transformParsedHtmlNode(n);
+    }),
+  );
 };
 
 export const transformParsedHtmlNode = (node: any) => {
   // flatten the inline nodes
   const { metadata } = node;
+
+  if (node.name === "text") {
+    console.log("parsed text", parseEmoji(node.text));
+    return parseEmoji(node.text);
+  }
 
   // if the node has children, we need to this must be a mark node
   if (
@@ -192,6 +202,7 @@ export const transformParsedHtmlNode = (node: any) => {
     });
 
     return children.map((n) => {
+      console.log(n.props, node.props);
       return {
         ...n,
         props: {
@@ -203,6 +214,11 @@ export const transformParsedHtmlNode = (node: any) => {
     });
   }
 
+  console.log(
+    "node",
+    JSON.parse(JSON.stringify(node)),
+    node.children?.map(transformParsedHtmlNode),
+  );
   return {
     ...node,
     children: flatten(node.children?.map(transformParsedHtmlNode) ?? []),

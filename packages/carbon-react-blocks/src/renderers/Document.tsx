@@ -98,7 +98,6 @@ export const DocumentComp = (props: RendererProps) => {
               .SelectBlocks([])
               .Select(after, ActionOrigin.UserInput)
               .Dispatch();
-            console.log("######################");
           }
           return;
         }

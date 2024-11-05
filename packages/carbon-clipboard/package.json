@@ -12,10 +12,11 @@
   },
   "dependencies": {
     "@emrgen/carbon-attributes": "workspace:*",
-    "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-codec": "workspace:*",
+    "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
     "device-detector-js": "^3.0.3",
+    "emoji-regex": "^10.4.0",
     "lodash": "^4.17.21",
     "marked": "^12.0.0",
     "node-html-markdown": "^1.3.0",

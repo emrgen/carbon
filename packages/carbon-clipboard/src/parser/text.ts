@@ -115,6 +115,7 @@ export const fixContentMatch = (schema: Schema, node: Node) => {
     schema.nodeFromJSON({
       name: node.name,
       children: matched,
+      props: node.props,
     })!,
   ];
 };
