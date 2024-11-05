@@ -1,4 +1,12 @@
-import { lexer, Token, TokensList } from "marked";
+import {
+  Fragment,
+  Mark,
+  MarksPath,
+  MatchResult,
+  Node,
+  Schema,
+} from "@emrgen/carbon-core";
+import { ContentMatch } from "@emrgen/carbon-core/src/core/ContentMatch";
 import {
   first,
   flatten,
@@ -9,8 +17,7 @@ import {
   last,
   takeWhile,
 } from "lodash";
-import { Fragment, MatchResult, Node, Schema } from "@emrgen/carbon-core";
-import { ContentMatch } from "@emrgen/carbon-core/src/core/ContentMatch";
+import { lexer, Token, TokensList } from "marked";
 
 // parse: markdown(text) -> carbon content json
 export const parseText = (text: string) => {
@@ -223,22 +230,54 @@ const transformer = {
   },
 
   // inline nodes
-  codespan: (root: any) => {
-    return node("codespan", [text(root.raw.slice(1, -1))]);
-  },
   text(root: any) {
     const { tokens = [] } = root;
     if (tokens.length > 0) {
       return flatten(tokens.map((t) => this[t.type](t)));
     }
+
+    // check if the text has emoji
+
     return text(root.raw);
-    // return text(root.raw);
+  },
+  codespan: (root: any) => {
+    return node(
+      "codespan",
+      [text(root.raw.slice(1, -1))],
+      {
+        [MarksPath]: [Mark.CODE].map((m) => m.toJSON()),
+      },
+      {
+        type: "inline",
+        group: "inline mark",
+      },
+    );
   },
   em(root: any) {
-    return node("italic", this.transform(root.tokens));
+    return node(
+      "italic",
+      this.transform(root.tokens),
+      {
+        [MarksPath]: [Mark.ITALIC].map((m) => m.toJSON()),
+      },
+      {
+        type: "inline",
+        group: "inline mark",
+      },
+    );
   },
   strong(root: any) {
-    return node("bold", this.transform(root.tokens));
+    return node(
+      "bold",
+      this.transform(root.tokens),
+      {
+        [MarksPath]: [Mark.BOLD].map((m) => m.toJSON()),
+      },
+      {
+        type: "inline",
+        group: "inline mark",
+      },
+    );
   },
 };
 
@@ -248,11 +287,17 @@ const isInlineNode = (node: { name: string }) => {
 
 const isBlockNode = (node) => !isInlineNode(node);
 
-export const node = (name: string, children: any[] = [], props = {}) => {
+export const node = (
+  name: string,
+  children: any[] = [],
+  props = {},
+  metadata = {},
+) => {
   return {
     name,
     children,
     props,
+    metadata,
   };
 };
 

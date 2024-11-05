@@ -1,8 +1,8 @@
-import { Node, printNode, Schema, Slice } from "@emrgen/carbon-core";
+import { MarksPath, Node, printNode, Schema, Slice } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
-import { fixContentMatch, parseText } from "./text";
-import { isEmpty, sortBy } from "lodash";
+import { flatten, isEmpty, sortBy } from "lodash";
 import { parseHtml } from "./html";
+import { fixContentMatch, parseText } from "./text";
 
 let cache: any = null;
 let clipboard: any = null;
@@ -169,4 +169,53 @@ export const createCarbonSlice = (clipNodes: any[], schema: Schema) => {
     console.error("failed to create carbon slice", e);
     return null;
   }
+};
+
+export const transformProcessParsedHtml = (nodes: any[]) => {
+  return nodes.map((n) => {
+    return transformParsedHtmlNode(n);
+  });
+};
+
+export const transformParsedHtmlNode = (node: any) => {
+  // flatten the inline nodes
+  const { metadata } = node;
+
+  // if the node has children, we need to this must be a mark node
+  if (
+    metadata &&
+    metadata.type === "inline" &&
+    metadata.group?.includes("mark")
+  ) {
+    const children = node.children.map((n) => {
+      return transformParsedHtmlNode(n);
+    });
+
+    return children.map((n) => {
+      return {
+        ...n,
+        props: {
+          ...n.props,
+          ...node.props,
+          [MarksPath]: mergeMarks([n, node]),
+        },
+      };
+    });
+  }
+
+  return {
+    ...node,
+    children: flatten(node.children?.map(transformParsedHtmlNode) ?? []),
+  };
+};
+
+const mergeMarks = (nodes: any[]) => {
+  const marks: any[] = [];
+  nodes.forEach((n) => {
+    if (n.props?.[MarksPath]) {
+      marks.push(...n.props[MarksPath]);
+    }
+  });
+
+  return marks;
 };

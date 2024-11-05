@@ -2,7 +2,10 @@ import { Node } from "@emrgen/carbon-core";
 import { entries } from "lodash";
 
 export const printNode = (node: Node, logger = console.log.bind(console)) => {
-  const nodes: Record<string, Node> = {};
+  const nodes: Record<
+    string,
+    Node | { name: string; textContent?: string; text?: string; id: string }
+  > = {};
 
   const collect = (ids: number[], index: number, node: any) => {
     const chainIds = [...ids, index];
@@ -24,7 +27,7 @@ export const printNode = (node: Node, logger = console.log.bind(console)) => {
     // console.log(node.props);
 
     if (node.name === "text") {
-      line += `\`${node.textContent}\``;
+      line += `\`${node.textContent ?? node.text ?? ""}\``;
     } else {
       line += node.name;
     }
