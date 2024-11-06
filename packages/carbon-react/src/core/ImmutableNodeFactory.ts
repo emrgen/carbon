@@ -9,6 +9,7 @@ import {
   NodeFactoryOptions,
   NodeId,
   Schema,
+  TitleNode,
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { identity, isArray, isEmpty } from "lodash";
@@ -80,11 +81,15 @@ export class ImmutableNodeFactory implements NodeFactory {
       }
     }
 
+    const normalized = type.groups.includes("title")
+      ? TitleNode.normalizeNodeContent(nodes)
+      : nodes;
+
     const content = ImmutableNodeContent.create(scope, {
       id: nodeId,
       type,
       props,
-      children: nodes,
+      children: normalized,
       textContent: text,
       links: {},
       linkName: "",

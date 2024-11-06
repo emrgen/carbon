@@ -29,7 +29,7 @@ export class TitlePlugin extends NodePlugin {
 
   override spec(): NodeSpec {
     return {
-      group: "",
+      group: "title",
       content: "inline*",
       tag: "p",
       attrs: {
