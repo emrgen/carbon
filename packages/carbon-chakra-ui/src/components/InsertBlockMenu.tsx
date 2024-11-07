@@ -9,10 +9,12 @@ import {
   Text,
 } from "@chakra-ui/react";
 import {
+  Fragment,
   Node,
   NodeType,
   Pin,
   PinnedSelection,
+  Point,
   preventAndStop,
 } from "@emrgen/carbon-core";
 import { useCarbon } from "@emrgen/carbon-react";
@@ -101,17 +103,38 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       if (!parent) return;
 
       const { tr } = app;
-      tr.Change(parent?.id, type.name);
-      tr.SetContent(parent.child(0)!.id, []);
-      tr.Update(parent.id, {
-        node: { typeChanged: true },
-      });
-      if (type.isAtom && type.isBlock) {
-        app.parkCursor();
-      } else if (!type.isAtom && parent.child(0)?.find((n) => n.hasFocusable)) {
-        tr.Select(PinnedSelection.fromPin(Pin.future(parent.child(0)!, 0)!)!);
+
+      // check if the parent block can be changed to the selected block
+      const match = type.contentMatch.matchFragment(
+        Fragment.from(parent.children),
+      );
+      if (match) {
+        tr.Change(parent?.id, type.name);
+        tr.SetContent(node.id, []);
+        tr.Update(parent.id, {
+          node: { typeChanged: true },
+        });
+        if (type.isAtom && type.isBlock) {
+          app.parkCursor();
+        } else if (
+          !type.isAtom &&
+          parent.child(0)?.find((n) => n.hasFocusable)
+        ) {
+          tr.Select(PinnedSelection.fromPin(Pin.future(parent.child(0)!, 0)!)!);
+        }
+
+        tr.Dispatch();
+        return;
       }
 
+      // if the parent block can't be changed to the selected block, insert the block before the parent block
+      const block = type.default();
+      if (!block) return;
+      const after = PinnedSelection.fromPin(Pin.future(node, 0))!;
+
+      tr.Insert(Point.toBefore(parent.id), block);
+      tr.SetContent(node.id, []);
+      tr.Select(after);
       tr.Dispatch();
     },
     [app, node],
