@@ -7,7 +7,7 @@ import {
 } from "@emrgen/carbon-react";
 
 export const NestableComp = (props: RendererProps) => {
-  const { node, custom } = props;
+  const { node } = props;
   const { SelectionHalo } = useSelectionHalo(props);
 
   return (

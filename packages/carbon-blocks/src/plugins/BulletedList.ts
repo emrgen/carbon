@@ -1,15 +1,22 @@
 import { Node, NodeEncoder, NodeSpec, Writer } from "@emrgen/carbon-core";
-import { Section } from "./Section";
 import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
+import { Section } from "./Section";
 
 export class BulletedList extends Section {
   name = "bulletList";
 
+  static create<T>(): BulletedList {
+    return new BulletedList();
+  }
+
   spec(): NodeSpec {
     return {
       ...super.spec(),
-      splitName: "bulletList",
       tag: "div",
+      splitName: "bulletList",
+      split: {
+        name: "bulletList",
+      },
       info: {
         title: "Bulleted List",
         description: "Create a bulleted list",

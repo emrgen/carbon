@@ -187,7 +187,7 @@ export const transformParsedHtmlNode = (node: any) => {
   const { metadata } = node;
 
   if (node.name === "text") {
-    console.log("parsed text", parseEmoji(node.text));
+    // console.log("parsed text", parseEmoji(node.text));
     return parseEmoji(node.text);
   }
 
@@ -214,11 +214,11 @@ export const transformParsedHtmlNode = (node: any) => {
     });
   }
 
-  console.log(
-    "node",
-    JSON.parse(JSON.stringify(node)),
-    node.children?.map(transformParsedHtmlNode),
-  );
+  // console.log(
+  //   "node",
+  //   JSON.parse(JSON.stringify(node)),
+  //   node.children?.map(transformParsedHtmlNode),
+  // );
   return {
     ...node,
     children: flatten(node.children?.map(transformParsedHtmlNode) ?? []),

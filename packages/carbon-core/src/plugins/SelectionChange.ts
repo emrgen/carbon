@@ -6,8 +6,8 @@ import {
 } from "@emrgen/carbon-core";
 import { p12, p14 } from "../core/Logger";
 import { EventHandlerMap } from "../core/types";
-import { MouseSelection } from "./MouseSelection";
 import { KeyboardSelection } from "./KeyboardSelection";
+import { MouseSelection } from "./MouseSelection";
 
 let count = 0;
 
@@ -64,7 +64,11 @@ export class SelectionChangePlugin extends AfterPlugin {
           return;
         }
 
-        if (app.focused && after.eq(before) && after.isDomInSync(app.store)) {
+        if (
+          app.focused &&
+          after.eq(before) &&
+          after.isDomInSync(app.store, app.dom)
+        ) {
           console.warn(p14("%c[duplicate]"), "color:grey", before, after);
           return;
         }
@@ -77,14 +81,14 @@ export class SelectionChangePlugin extends AfterPlugin {
         // });
 
         cmd.Select(after);
-        // if (ctx.app.state.blockSelection.isActive) {
-        //   this.removeBlockSelection(ctx);
-        // }
+        if (ctx.app.state.blockSelection.isActive) {
+          this.removeBlockSelection(ctx);
+        }
         cmd.Dispatch();
       },
       selectstart: (ctx: EventContext<Event>) => {
-        this.removeBlockSelection(ctx);
-        ctx.cmd.Dispatch();
+        // this.removeBlockSelection(ctx);
+        // ctx.cmd.Dispatch();
       },
     };
   }

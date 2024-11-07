@@ -295,9 +295,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       } else {
         if (node.type.dnd?.handle) {
           app.parkCursor();
-          app.cmd
-            .Select(PinnedSelection.fromNodes(node), ActionOrigin.UserInput)
-            ?.Dispatch();
+          app.cmd.SelectBlocks([node.id])?.Dispatch();
         }
       }
 

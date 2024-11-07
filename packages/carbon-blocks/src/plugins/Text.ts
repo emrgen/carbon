@@ -13,8 +13,8 @@ import {
   Transaction,
 } from "@emrgen/carbon-core";
 import { NodeEncoder, Writer } from "@emrgen/carbon-core/src/core/Encoder";
-import { isEmpty } from "lodash";
 import compareUrls from "compare-urls";
+import { isEmpty } from "lodash";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
@@ -26,6 +26,10 @@ declare module "@emrgen/carbon-core" {
 
 export class TextPlugin extends NodePlugin {
   name = "text";
+
+  static create<T>(): TextPlugin {
+    return new TextPlugin();
+  }
 
   spec(): NodeSpec {
     return {

@@ -28,6 +28,10 @@ declare module "@emrgen/carbon-core" {
 export class Section extends NodePlugin {
   name = "paragraph";
 
+  static create<T>(): Section {
+    return new Section();
+  }
+
   spec(): NodeSpec {
     return {
       group: "content nestable",

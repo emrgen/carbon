@@ -151,8 +151,9 @@ const transformer = {
     return paragraph([title()]);
   },
   code(root: any) {
-    return node("code", [node("codeLine", [text(root.text)])], {
+    return node("code", [title([text(root.text)])], {
       "remote/state/code/lang": root.lang ?? "",
+      "remote/state/code/value": root.text,
     });
   },
 

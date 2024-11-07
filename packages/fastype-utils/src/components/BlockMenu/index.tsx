@@ -1,30 +1,25 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Carbon,
-  Node,
-  NodeType,
-  preventAndStop,
-  PinnedSelection,
-  Pin,
-  Point,
-} from "@emrgen/carbon-core";
-import { blockIcons, useBlockMenu } from "@emrgen/carbon-utils";
-import { useOverflowDetector } from "react-detectable-overflow";
-
-import {
+  Box,
   HStack,
-  Stack,
   List,
   ListItem,
   Portal,
   Square,
+  Stack,
   Text,
-  Flex,
-  Box,
 } from "@chakra-ui/react";
-import { first, sortBy, values, xorBy } from "lodash";
-import { node } from "@emrgen/carbon-blocks";
+import {
+  Carbon,
+  Node,
+  NodeType,
+  Pin,
+  PinnedSelection,
+  preventAndStop,
+} from "@emrgen/carbon-core";
+import { blockIcons, useBlockMenu } from "@emrgen/carbon-utils";
 import { Optional } from "@emrgen/types";
+import { sortBy, values } from "lodash";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 interface BlockMenuProps {
   app: Carbon;
@@ -50,11 +45,11 @@ export function BlockMenu(props: BlockMenuProps) {
           ?.toLowerCase()
           .includes(searchText.toLowerCase());
         const tagMatch = b.spec?.info?.tags?.some((tag) =>
-          tag.toLowerCase().includes(searchText.toLowerCase())
+          tag.toLowerCase().includes(searchText.toLowerCase()),
         );
         return (tagMatch || nameMatch) && b.name !== node?.name;
-      })
-      return sortBy(blocks, 'spec.info.order', 'spec.info.title');
+      });
+    return sortBy(blocks, "spec.info.order", "spec.info.title");
   }, [app.schema.nodes, node, searchText]);
 
   // reset active index when blocks change
@@ -81,7 +76,7 @@ export function BlockMenu(props: BlockMenuProps) {
       // setSearchText(node.textContent.slice(1));
       // setNode(node.parent);
     },
-    [plugin]
+    [plugin],
   );
 
   const onHide = useCallback((node: Node) => {
@@ -97,7 +92,7 @@ export function BlockMenu(props: BlockMenuProps) {
       if (!node) return;
 
       const { tr } = app;
-      tr.Change(node?.id, type.name)
+      tr.Change(node?.id, type.name);
       tr.SetContent(node.child(0)!.id, []);
       tr.Update(node.id, {
         node: { typeChanged: true },
@@ -114,7 +109,7 @@ export function BlockMenu(props: BlockMenuProps) {
 
       tr.Dispatch();
     },
-    [app, node]
+    [app, node],
   );
 
   const onSelect = useCallback(
@@ -124,7 +119,7 @@ export function BlockMenu(props: BlockMenuProps) {
       if (!selected) return;
       handleSelect(selected);
     },
-    [activeIndex, blocks, handleSelect]
+    [activeIndex, blocks, handleSelect],
   );
 
   const onScroll = useCallback(
@@ -133,11 +128,11 @@ export function BlockMenu(props: BlockMenuProps) {
         setActiveIndex((i) => (i > 0 ? i - 1 : 0));
       } else {
         setActiveIndex((i) =>
-          i < blocks.length - 1 ? i + 1 : blocks.length - 1
+          i < blocks.length - 1 ? i + 1 : blocks.length - 1,
         );
       }
     },
-    [blocks.length]
+    [blocks.length],
   );
 
   useBlockMenu({ app, onShow, onHide, onSelect, onScroll });
@@ -202,7 +197,7 @@ const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
     ref.current.scrollTop = scrollTop;
   }, [scrollTop]);
 
-  console.log(blocks.map(b => b.name));
+  console.log(blocks.map((b) => b.name));
 
   return (
     <Box

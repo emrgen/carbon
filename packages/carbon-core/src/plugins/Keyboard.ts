@@ -525,7 +525,7 @@ export class KeyboardPlugin extends AfterPlugin {
 
     // delete node selection if any
     if (!blockSelection.isEmpty) {
-      cmd.transform.delete(selection, { fall: "after" })?.Dispatch();
+      cmd.transform.delete(blockSelection)?.Dispatch();
       return;
     }
 

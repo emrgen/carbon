@@ -1,17 +1,17 @@
+import { NodeBTree, NodeMap, sortNodes } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { flatten } from "lodash";
+import { takeBefore } from "../utils/array";
+import { blocksBelowCommonNode } from "../utils/findNodes";
+import { ActionOrigin } from "./actions";
+import { CarbonDom } from "./CarbonDom";
 import { classString, p14 } from "./Logger";
 import { Node } from "./Node";
+import { NodeStore } from "./NodeStore";
 import { Pin } from "./Pin";
 import { PointedSelection } from "./PointedSelection";
-import { NodeStore } from "./NodeStore";
 import { DomSelection } from "./Span";
 import { SelectionBounds } from "./types";
-import { ActionOrigin } from "./actions";
-import { NodeBTree, NodeMap, sortNodes } from "@emrgen/carbon-core";
-import { flatten } from "lodash";
-import { blocksBelowCommonNode } from "../utils/findNodes";
-import { takeBefore } from "../utils/array";
-import { CarbonDom } from "./CarbonDom";
 
 enum HTMLNodeType {
   TEXT = 3,
@@ -29,6 +29,8 @@ export class PinnedSelection {
   static IDENTITY = new PinnedSelection(Pin.IDENTITY, Pin.IDENTITY, []);
 
   static SKIP = new PinnedSelection(Pin.SKIP, Pin.SKIP, []);
+
+  static BLUR = PinnedSelection.SKIP;
 
   // map dom selection to editor selection
   static fromDom(
@@ -724,5 +726,9 @@ export class PinnedSelection {
   freeze() {
     Object.freeze(this);
     return this;
+  }
+
+  static is(selection: any) {
+    return selection instanceof PinnedSelection;
   }
 }

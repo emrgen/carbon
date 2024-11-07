@@ -100,7 +100,10 @@ declare module "@emrgen/carbon-core" {
       deleteText(pin: Pin, text: string, opts?: InsertPos): Transaction;
       remove(node: Node): Optional<Transaction>;
       move(nodes: Node | Node[], to: Point): Transaction;
-      delete(selection?: PinnedSelection, opts?: DeleteOpts): Transaction;
+      delete(
+        selection?: PinnedSelection | BlockSelection,
+        opts?: DeleteOpts,
+      ): Transaction;
       split(
         node: Node,
         selection?: PinnedSelection,
@@ -1724,7 +1727,7 @@ export class TransformCommands extends BeforePlugin {
     // if next sibling is there after the delete nodes find fillbefore types
     // otherwise just find
 
-    // if all nodes are deleted, we need dont fix the schema constraints here.
+    // if all nodes are deleted, we need to fix the schema constraints here.
     // instead we will fix it in the normalization step
     if (nodes.length !== parent.children.length) {
       const startNode = first(nodes)!;
@@ -1802,13 +1805,17 @@ export class TransformCommands extends BeforePlugin {
 
     tr.Add(deleteActions).Add(insertActions).SelectBlocks([]);
 
-    if (after) {
-      tr.Select(after, ActionOrigin.UserInput);
-    } else {
-      tr.Select(
-        PinnedSelection.fromPin(Pin.toStartOf(tr.app.store.get(NodeId.ROOT)!)!),
-        ActionOrigin.UserInput,
-      );
+    // if (after) {
+    //   tr.Select(after, ActionOrigin.UserInput);
+    // } else {
+    //   tr.Select(
+    //     PinnedSelection.fromPin(Pin.toStartOf(tr.app.store.get(NodeId.ROOT)!)!),
+    //     ActionOrigin.UserInput,
+    //   );
+    // }
+
+    if (!after) {
+      tr.Select(PinnedSelection.BLUR, ActionOrigin.UserInput);
     }
 
     return tr;
@@ -1822,15 +1829,18 @@ export class TransformCommands extends BeforePlugin {
   // delete nodes within selection
   delete(
     tr: Transaction,
-    selection: PinnedSelection = tr.app.selection,
+    selection: PinnedSelection | BlockSelection,
     opts?: DeleteOpts,
   ): Optional<Transaction> {
     const { app } = tr;
-    const { blockSelection } = app.state;
-    if (blockSelection.isActive) {
-      const { blocks } = blockSelection;
+    if (BlockSelection.is(selection)) {
+      const { blocks } = selection;
       const { parent } = blocks[0];
       return this.deleteNodes(tr, parent!, blocks, opts);
+    }
+
+    if (!PinnedSelection.is(selection)) {
+      return;
     }
 
     if (selection.isCollapsed) {

@@ -80,7 +80,7 @@ const data = node("carbon", [
       // ]),
 
       node("continue", [
-        node("button", [node("plainText", [text("continued")])], {
+        node("button", [node("plainText", [text("continue")])], {
           ["local/html/data-size"]: "lg",
         }),
       ]),
@@ -88,7 +88,7 @@ const data = node("carbon", [
       node("codemirror"),
 
       node("continue", [
-        node("button", [node("plainText", [text("continued")])], {
+        node("button", [node("plainText", [text("continue")])], {
           ["local/html/data-size"]: "lg",
         }),
       ]),
@@ -225,7 +225,7 @@ const data = node("carbon", [
 
       paragraph([title([text("question title")])]),
       node("continue", [
-        node("button", [node("plainText", [text("continued")])], {
+        node("button", [node("plainText", [text("continue")])], {
           ["local/html/data-size"]: "lg",
         }),
       ]),
@@ -871,6 +871,12 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
+      if (!state.selection.isSkip) {
+        const head = app.store.element(state.selection.head.node.id);
+        head?.scrollIntoView({ behavior: "auto", block: "nearest" });
+      }
+
+      // console.log(state.selection.bounds())
       console.debug(
         "changes",
         state.changes.patch,
