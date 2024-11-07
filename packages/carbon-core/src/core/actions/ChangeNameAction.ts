@@ -1,10 +1,12 @@
+import { Draft } from "@emrgen/carbon-core";
 import { classString } from "../Logger";
 import { NodeId } from "../NodeId";
 import { NodeName } from "../types";
 import { ActionOrigin, ActionType, CarbonAction } from "./types";
-import { Draft } from "@emrgen/carbon-core";
 
 export class ChangeNameAction implements CarbonAction {
+  readonly type = ActionType.rename;
+
   static create(
     nodeId: NodeId,
     to: NodeName,

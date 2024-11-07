@@ -1,6 +1,3 @@
-import { IntoNodeId, NodeId } from "../NodeId";
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
-import { Optional } from "@emrgen/types";
 import {
   classString,
   deepCloneMap,
@@ -8,12 +5,17 @@ import {
   Node,
   NodeData,
 } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
 import { isArray } from "lodash";
+import { IntoNodeId, NodeId } from "../NodeId";
+import { ActionOrigin, ActionType, CarbonAction } from "./types";
 
 export type Content = string | NodeData[] | Node[];
 
 // NOTE: it can be transformed into combination of InsertNode/RemoveNode/InsertText/RemoveText action
 export class SetContentAction implements CarbonAction {
+  readonly type = ActionType.content;
+
   before: Optional<Content>;
 
   static create(

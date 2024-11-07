@@ -1,5 +1,6 @@
 import {
   ActionOrigin,
+  ActionType,
   CarbonAction,
   Draft,
   Mark,
@@ -9,6 +10,8 @@ import dayjs from "dayjs";
 
 // NOTE: it can be transformed into SetContent action
 export class InsertTextAction implements CarbonAction {
+  readonly type = ActionType.insert;
+
   time: number = dayjs().unix();
 
   static create(

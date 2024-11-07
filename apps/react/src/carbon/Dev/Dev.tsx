@@ -19,7 +19,11 @@ import {
   cellPlugin,
   cellRenderer,
 } from "@emrgen/carbon-cell";
-import { FloatingStyleMenu, ToggleViewMode } from "@emrgen/carbon-chakra-ui";
+import {
+  FloatingStyleMenu,
+  InsertBlockMenu,
+  ToggleViewMode,
+} from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codemirrorExtension } from "@emrgen/carbon-codemirror";
 import {
@@ -55,7 +59,7 @@ import {
   useCreateCarbon,
 } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
-import { CarbonApp } from "@emrgen/carbon-utils";
+import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
 import { useEffect, useState } from "react";
 import { PathTracker } from "../../PathTracker";
@@ -808,7 +812,7 @@ const ImageComp = (props: RendererProps) => {
 const plugins = [
   ...corePresetPlugins,
   ...blockPresetPlugins,
-  // carbonUtilPlugins,
+  carbonUtilPlugins,
   commentEditorPlugin,
   // flashPlugin,
   ...codemirrorExtension.plugins!,
@@ -908,6 +912,7 @@ export default function Dev() {
               </Box>
               <FloatingStyleMenu />
               <PathTracker />
+              <InsertBlockMenu />
             </CarbonApp>
           </ObservableQuestions>
         </ObservableNodes>

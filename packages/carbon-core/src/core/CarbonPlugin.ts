@@ -1,17 +1,17 @@
 import { Optional } from "@emrgen/types";
+import { identity } from "lodash";
+import { CarbonAction } from "./actions/types";
 import { Carbon } from "./Carbon";
+import { NodeEncoder, Writer } from "./Encoder";
+import { CarbonMessageFormat } from "./MessageBus";
 import { Node } from "./Node";
+import { StateActions } from "./NodeChange";
+import { PlainNodeProps } from "./NodeProps";
+import { PluginEmitter } from "./PluginEmitter";
+import { PluginManager } from "./PluginManager";
+import { PluginState } from "./PluginState";
 import { NodeSpec } from "./Schema";
 import { EventHandlerMap, PluginName } from "./types";
-import { CarbonAction } from "./actions/types";
-import { CarbonMessageFormat } from "./MessageBus";
-import { PluginEmitter } from "./PluginEmitter";
-import { PluginState } from "./PluginState";
-import { PluginManager } from "./PluginManager";
-import { NodeEncoder, Writer } from "./Encoder";
-import { identity } from "lodash";
-import { PlainNodeProps } from "./NodeProps";
-import { StateActions } from "./NodeChange";
 
 export enum PluginType {
   Node,
@@ -44,7 +44,9 @@ export abstract class CarbonPlugin {
     this.state = state;
   }
 
-  destroy(app: Carbon) {}
+  created() {}
+
+  beforeDestroy() {}
 
   spec(): NodeSpec {
     return {

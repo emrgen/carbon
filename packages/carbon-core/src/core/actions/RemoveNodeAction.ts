@@ -1,15 +1,17 @@
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
-import { Point } from "../Point";
-import { NodeId } from "../NodeId";
-import { classString } from "../Logger";
-import { Node } from "../Node";
-import { InsertNodeAction } from "./InsertNodeAction";
-import { NodeJSON } from "../types";
 import { Optional } from "@emrgen/types";
 import { Draft } from "../Draft";
+import { classString } from "../Logger";
+import { Node } from "../Node";
+import { NodeId } from "../NodeId";
+import { Point } from "../Point";
+import { NodeJSON } from "../types";
+import { InsertNodeAction } from "./InsertNodeAction";
+import { ActionOrigin, ActionType, CarbonAction } from "./types";
 
 // action to remove a node by id
 export class RemoveNodeAction implements CarbonAction {
+  readonly type = ActionType.remove;
+
   private node: Optional<NodeJSON>;
 
   static fromNode(

@@ -8,6 +8,8 @@ import { Draft } from "../Draft";
 export interface CarbonAction {
   origin: ActionOrigin;
 
+  type: ActionType;
+
   undoable?: boolean;
 
   execute(draft: Draft): void;

@@ -105,6 +105,10 @@ export class Carbon extends EventEmitter {
       p.init(this, this.pluginBus, state);
     });
 
+    this.pm.plugins.forEach((p) => {
+      p.created();
+    });
+
     // create a string encoder
     const plugins: CarbonPlugin[] = this.pm.plugins.filter(
       (p) => p.type === PluginType.Node,

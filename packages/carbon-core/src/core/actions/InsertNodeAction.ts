@@ -1,13 +1,15 @@
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
-import { Point } from "../Point";
-import { classString } from "../Logger";
-import { RemoveNodeAction } from "./RemoveNodeAction";
-import { Node } from "../Node";
-import { NodeJSON } from "../types";
-import { NodeId } from "../NodeId";
 import { Draft } from "../Draft";
+import { classString } from "../Logger";
+import { Node } from "../Node";
+import { NodeId } from "../NodeId";
+import { Point } from "../Point";
+import { NodeJSON } from "../types";
+import { RemoveNodeAction } from "./RemoveNodeAction";
+import { ActionOrigin, ActionType, CarbonAction } from "./types";
 
 export class InsertNodeAction implements CarbonAction {
+  readonly type = ActionType.insert;
+
   static fromNode(
     at: Point,
     node: Node,

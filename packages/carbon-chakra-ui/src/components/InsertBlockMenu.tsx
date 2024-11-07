@@ -9,29 +9,28 @@ import {
   Text,
 } from "@chakra-ui/react";
 import {
-  Carbon,
   Node,
   NodeType,
   Pin,
   PinnedSelection,
   preventAndStop,
 } from "@emrgen/carbon-core";
+import { useCarbon } from "@emrgen/carbon-react";
 import { blockIcons, useBlockMenu } from "@emrgen/carbon-utils";
 import { Optional } from "@emrgen/types";
 import { sortBy, values } from "lodash";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-interface BlockMenuProps {
-  app: Carbon;
-}
+interface BlockMenuProps {}
 
-export function BlockMenu(props: BlockMenuProps) {
-  const { app } = props;
+export function InsertBlockMenu(props: BlockMenuProps) {
+  const app = useCarbon();
 
   const [position, setPosition] = useState({ left: 0, top: 0 });
   const [show, setShow] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [node, setNode] = useState<Optional<Node>>(null);
+  const [pluginState, setPluginState] = useState(new Map());
   const [activeIndex, setActiveIndex] = useState(0);
   const ref = React.useRef<HTMLDivElement>(null);
   const plugin = app.plugin("blockMenu");
@@ -40,6 +39,7 @@ export function BlockMenu(props: BlockMenuProps) {
   const blocks = useMemo(() => {
     const blocks = values(app.schema.nodes)
       .filter((n) => n.spec.insert)
+      .filter((n) => n.name !== node?.parent?.name)
       .filter((b) => {
         const nameMatch = b.spec?.info?.title
           ?.toLowerCase()
@@ -47,6 +47,7 @@ export function BlockMenu(props: BlockMenuProps) {
         const tagMatch = b.spec?.info?.tags?.some((tag) =>
           tag.toLowerCase().includes(searchText.toLowerCase()),
         );
+
         return (tagMatch || nameMatch) && b.name !== node?.name;
       });
     return sortBy(blocks, "spec.info.order", "spec.info.title");
@@ -58,54 +59,58 @@ export function BlockMenu(props: BlockMenuProps) {
   }, [blocks]);
 
   const onShow = useCallback(
-    (node: Node, el: HTMLElement) => {
+    (node: Node, state: Map<string, any>) => {
       if (!plugin) return;
       const siblings = node.prevSiblings.map((n) => n.name);
       const parent = node.parent;
       if (!parent) return;
+      const el = app.store.element(node.id);
+      if (!el) return;
+
       const { left, top } = el.getBoundingClientRect();
 
       let height = parseInt(window.getComputedStyle(el).height);
       isNaN(height) && (height = 20);
-
       setPosition({ left, top: top + height + 4 });
       setShow(true);
-      // const { checked } = plugin?.state;
-      // checked.set(node.id.toString(), false);
-      // plugin.setState({ visible: true, checked });
-      // setSearchText(node.textContent.slice(1));
-      // setNode(node.parent);
+      setSearchText(node.textContent.slice(1));
+      setNode(node);
+      setPluginState(state);
+      // TODO: check if this can be removed and done in a better way
+      state.set("visible", true);
     },
-    [plugin],
+    [app, plugin],
   );
 
-  const onHide = useCallback((node: Node) => {
+  const onHide = useCallback(() => {
+    if (!node) return;
     setPosition({ left: 0, top: 0 });
     setShow(false);
     setSearchText("");
     setNode(null);
-  }, []);
+    // TODO: check if this can be removed and done in a better way
+    pluginState.set("visible", false);
+    pluginState.get("checked")?.set(node.id.toString(), true);
+  }, [node, pluginState]);
 
   const handleSelect = useCallback(
     (type: NodeType) => {
       setShow(false);
       if (!node) return;
+      const { parent } = node;
+      if (!parent) return;
 
       const { tr } = app;
-      tr.Change(node?.id, type.name);
-      tr.SetContent(node.child(0)!.id, []);
-      tr.Update(node.id, {
+      tr.Change(parent?.id, type.name);
+      tr.SetContent(parent.child(0)!.id, []);
+      tr.Update(parent.id, {
         node: { typeChanged: true },
-        // html: { "data-as": type.name },
       });
       if (type.isAtom && type.isBlock) {
         app.parkCursor();
-        // tr.selectNodes(node.id);
-      } else if (!type.isAtom && node.child(0)?.find((n) => n.hasFocusable)) {
-        tr.Select(PinnedSelection.fromPin(Pin.future(node.child(0)!, 0)!)!);
+      } else if (!type.isAtom && parent.child(0)?.find((n) => n.hasFocusable)) {
+        tr.Select(PinnedSelection.fromPin(Pin.future(parent.child(0)!, 0)!)!);
       }
-
-      // console.log(window.getSelection());
 
       tr.Dispatch();
     },
@@ -132,14 +137,21 @@ export function BlockMenu(props: BlockMenuProps) {
         );
       }
     },
-    [blocks.length],
+    [blocks],
   );
+
+  useEffect(() => {
+    if (blocks.length === 0) {
+      onHide();
+    }
+  }, [blocks, onHide]);
 
   useBlockMenu({ app, onShow, onHide, onSelect, onScroll });
 
+  console.log(show, blocks);
   return (
     <Portal>
-      {show && blocks.length > 0 && (
+      {show && (
         <Stack
           ref={ref}
           className="carbon-block-menu"

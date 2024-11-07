@@ -1,30 +1,26 @@
 import { Carbon, Node } from "@emrgen/carbon-core";
-import { useRecoilState } from 'recoil';
-import { activeBlockMenuTarget, activeBlockMenuTargetText } from "../atoms";
-import { useEffect } from 'react';
+import { useEffect } from "react";
 import { BlockMenuCmd } from "../types";
 
 export interface UseBlockMenuProps {
   app: Carbon;
-  onShow: (node: Node, el: HTMLElement) => void;
-  onHide: (node: Node, el: HTMLElement) => void;
+  onShow: (node: Node, state) => void;
+  onHide: (node: Node, state) => void;
   onSelect: (node: Node, el: HTMLElement) => void;
-  onScroll: (direction: 'up' | 'down') => void;
+  onScroll: (direction: "up" | "down") => void;
 }
 
 export const useBlockMenu = (props: UseBlockMenuProps) => {
   const { app, onShow, onHide, onSelect, onScroll } = props;
 
-
   useEffect(() => {
     const handleScrollUp = (e: Event) => {
-      onScroll('up');
+      onScroll("up");
     };
 
     const handleScrollDown = (e: Event) => {
-      onScroll('down');
+      onScroll("down");
     };
-
 
     app.on(BlockMenuCmd.scrollDown, handleScrollDown);
     app.on(BlockMenuCmd.scrollUp, handleScrollUp);
@@ -40,4 +36,4 @@ export const useBlockMenu = (props: UseBlockMenuProps) => {
       app.off(BlockMenuCmd.hide, onHide);
     };
   }, [app, onHide, onScroll, onSelect, onShow]);
-}
+};

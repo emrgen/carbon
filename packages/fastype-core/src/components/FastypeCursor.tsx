@@ -1,16 +1,12 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Box, ChakraProvider } from "@chakra-ui/react";
-import { TrBus } from "../core/TrBus";
+import { Box } from "@chakra-ui/react";
 import {
+  addClass,
   Carbon,
   EventsOut,
-  Transaction,
-  addClass,
   removeClass,
-  State
+  State,
 } from "@emrgen/carbon-core";
-import { CarbonApp } from "@emrgen/carbon-utils";
-import { BlockMenu, PorterOverlay } from "@emrgen/fastype-utils";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const blinkClass = "fastype-cursor--blinking";
 const focusClass = "fastype-cursor--focused";
@@ -31,18 +27,18 @@ export const FastypeCursor = (props: CustomCursorProps) => {
   });
 
   const updateCursorPosition = useCallback(() => {
-      const { head } = app.selection.bounds(app.store);
-      if (!head) return;
-      const { x, y, width, height } = head;
-      setBound((style) => {
-        return {
-          ...style,
-          left: x - 1,
-          top: y,
-          height: height,
-        };
-      });
-    }, [app, setBound]);
+    const { head } = app.selection.bounds(app.store, app.dom);
+    if (!head) return;
+    const { x, y, width, height } = head;
+    setBound((style) => {
+      return {
+        ...style,
+        left: x - 1,
+        top: y,
+        height: height,
+      };
+    });
+  }, [app, setBound]);
 
   useEffect(() => {
     const timeouts: any[] = [];
@@ -51,7 +47,7 @@ export const FastypeCursor = (props: CustomCursorProps) => {
       const cursor = ref.current;
       if (state.blockSelection.isActive) {
         addClass(cursor, `hidden`);
-        return
+        return;
       } else {
         removeClass(cursor, `hidden`);
       }
@@ -99,7 +95,7 @@ export const FastypeCursor = (props: CustomCursorProps) => {
 
     const onHideCursor = () => {
       addClass(cursor, `hidden`);
-    }
+    };
 
     const onShowCursor = () => {
       setTimeout(() => {
