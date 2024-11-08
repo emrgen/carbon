@@ -4,6 +4,8 @@ import { PointedSelection } from "../PointedSelection";
 import { ActionOrigin, ActionType, CarbonAction } from "./types";
 
 export class SelectAction implements CarbonAction {
+  readonly type = ActionType.select;
+
   static create(
     before: PointedSelection,
     after: PointedSelection,

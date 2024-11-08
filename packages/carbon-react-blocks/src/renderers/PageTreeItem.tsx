@@ -5,8 +5,13 @@ import {
 } from "@emrgen/carbon-blocks";
 import {
   Carbon,
+  ContenteditablePath,
+  FocusEditablePath,
+  LocalDirtyCounterPath,
   Node,
   OpenedPath,
+  Pin,
+  PinnedSelection,
   Point,
   preventAndStop,
 } from "@emrgen/carbon-core";
@@ -20,7 +25,7 @@ import {
 } from "@emrgen/carbon-react";
 import { useCallback, useMemo } from "react";
 
-import { HiOutlinePlus } from "react-icons/hi";
+import { HiOutlinePencil, HiOutlinePlus } from "react-icons/hi";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 
 const getPageTree = (n: Node) => n.closest((n) => n.type.name === PageTreeName);
@@ -30,6 +35,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const activated = useNodeOpened(props);
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
+  const isContentEditable = node.firstChild?.props.get(ContenteditablePath);
 
   const handleToggle = useCallback(
     (app: Carbon) => {
@@ -50,6 +56,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
       cmd.pageTree.close(pageTree).pageTreeItem.expand(node);
 
       const item = app.schema.type(PageTreeItemName).default()!;
+      item.firstChild?.updateContent([app.schema.text("Untitled")!]);
       item.updateProps({
         [OpenedPath]: true,
       });
@@ -61,6 +68,33 @@ export const PageTreeItemComp = (props: RendererProps) => {
           return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });
         })
         .Dispatch();
+    },
+    [app, node],
+  );
+
+  const handleEditName = useCallback(
+    (e) => {
+      preventAndStop(e);
+      const { cmd } = app;
+      cmd
+        .Update(node.firstChild!, {
+          [ContenteditablePath]: true,
+          [FocusEditablePath]: true,
+        })
+        .Update(node, {
+          [LocalDirtyCounterPath]: new Date().getTime(),
+        });
+
+      if (!node.firstChild?.isEmpty) {
+        cmd.Select(
+          PinnedSelection.create(
+            Pin.toStartOf(node.firstChild!)!,
+            Pin.toEndOf(node.firstChild!)!,
+          )!,
+        );
+      } else {
+      }
+      cmd.Dispatch();
     },
     [app, node],
   );
@@ -90,7 +124,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
       <>
         <div
           className={
-            "carbon-collapsible__control" +
+            "page-tree__collapsible_control" +
             (isCollapsed ? " collapsed" : " expanded")
           }
           contentEditable="false"
@@ -105,6 +139,16 @@ export const PageTreeItemComp = (props: RendererProps) => {
             className={"page-tree-open-close-icon"}
           />
         </div>
+      </>
+    );
+  }, [app, handleToggle, isCollapsed]);
+
+  const afterContent = useMemo(() => {
+    return (
+      <>
+        <div className="edit-file-name" onClick={handleEditName}>
+          <HiOutlinePencil />
+        </div>
         <div
           className="add-child-file"
           onClick={handleInsert}
@@ -114,7 +158,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
         </div>
       </>
     );
-  }, [app, handleInsert, handleToggle, isCollapsed]);
+  }, [handleEditName, handleInsert]);
 
   return (
     <CarbonBlock
@@ -123,26 +167,14 @@ export const PageTreeItemComp = (props: RendererProps) => {
         ...activated.attributes,
       }}
     >
-      {!node.isEmpty && (
-        <CarbonNodeContent
-          node={node}
-          beforeContent={beforeContent}
-          // custom={{ onClick: handleOpenDocument }}
-          wrap={true}
-        />
-      )}
-      {node.isEmpty && (
-        <div data-type="content" onMouseDown={stop}>
-          {beforeContent}
-          <div
-            data-name="title"
-            onClick={handleOpenDocument}
-            onMouseDown={stop}
-          >
-            <span>Untitled</span>
-          </div>
-        </div>
-      )}
+      <CarbonNodeContent
+        node={node}
+        beforeContent={beforeContent}
+        afterContent={afterContent}
+        // custom={{ onClick: handleOpenDocument }}
+        wrap={true}
+      />
+
       {/* <CarbonNodeContent node={node} beforeContent={beforeContent} custom={{contentEditable: isActive}}/> */}
       {!isCollapsed && <CarbonNodeChildren node={node} />}
       {!isCollapsed && node.size === 1 && (

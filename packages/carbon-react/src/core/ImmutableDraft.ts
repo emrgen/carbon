@@ -496,10 +496,8 @@ export class ImmutableDraft implements Draft {
                 ?.props.get<string>(EmptyPlaceholderPath) ?? "")
             : " ",
       });
-      // if (updated) {
       this.addUpdated(parent.id);
       this.addContentChanged(parent.id);
-      // }
     } else if (node.isTextContainer && isArray(content)) {
       const oldChildren = node.children;
       const newChildren = content;

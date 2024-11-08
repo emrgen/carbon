@@ -263,7 +263,7 @@ span[data-name=text] {
   top 0
   left 0
   background: $selectionHaloColor
-  border-radius: 2px
+  border-radius: 4px
   pointer-events: none
 
 //animation halo-animation 0.1s ease-in forwards
@@ -711,135 +711,6 @@ span[data-name=text] {
   //  padding 0 80px
   //  padding-top: 40px;
 
-
-[data-name=pageTree]
-  margin 10px 0
-  font-size 15px
-  padding 10px 10px
-  background #fafafa
-  border: 2px dashed blue
-
-  > .cnest
-    margin-left 0;
-  [data-name=title]:before
-    display none
-
-  [data-type=children]
-    padding-top 4px
-
-[data-name=pageTree] > [data-name=title]
-  font-size 13px
-  margin 0 10px
-  display flex
-
-  [data-name=title]
-    line-height 14px
-    padding: 2px 4px
-    font-weight bold
-    color #aaa
-    cursor pointer
-
-    &:hover
-      background: #eee;
-      color #555
-      border-radius 4px
-
-
-[data-name=pageTreeItem]
-  border-radius: 4px
-  padding: 0 0px
-
-  & > .cnest
-    padding-left: 0
-
-  & > .ctiw
-    position relative
-    line-height: $lineHeight
-    display: flex
-    //align-items: center
-    padding-left: 4px;
-    gap 4px
-
-    &:hover
-      background: #eee;
-
-    [data-name=title]
-      flex 1
-      display: flex
-      color: #666
-      //cursor pointer
-      //user-select: none
-      overflow: hidden
-      justify-content: flex-start
-      align-items: flex-start
-      line-height $lineHeight
-
-      span
-        display: inline-block
-        left: 0
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-
-    .carbon-collapsible__control
-      color: #aaa
-      background: transparent;
-      width 20px
-      height: 20px
-      display: flex
-      align-items: center
-      justify-content: center
-      padding 0px
-      border-radius: 4px
-
-      .page-tree-open-close-icon
-        transition transform 0.2s
-
-      &.collapsed > .page-tree-open-close-icon
-        transform: rotate(0deg)
-
-      &.expanded > .page-tree-open-close-icon
-        transform: rotate(90deg)
-
-      &:hover
-        background: #ddd
-        color #666
-
-    .add-child-file
-      position absolute
-      z-index: 1
-      top: 50%
-      right: 4px
-      width: 20px
-      height: 20px
-      transform: translate(0%, -50%)
-      display: flex
-      align-items: center
-      justify-content: center
-      cursor: pointer
-      //user-select: none
-      border-radius: 4px
-      color: #aaa
-      opacity 0
-      font-size: 14px
-
-      &:hover
-        background: #ddd
-        color #666
-
-  & > [data-type=content]:hover
-    .add-child-file
-      opacity 1
-
-  .carbon-collapsible__empty
-    padding-left 30px
-    color: #ccc
-    font-size: 14px
-    line-height: $lineHeight
-    user-select: none
-
-  &[data-opened=true] > [data-type=content] > [data-name=title]
-    color: #000 !important
 
 .carbon-overlay
   position absolute

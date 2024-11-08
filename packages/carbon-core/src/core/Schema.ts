@@ -185,6 +185,7 @@ export interface NodeSpec {
     prev?: boolean;
     next?: boolean;
     children?: boolean;
+    parent?: boolean;
   };
 
   transform?: {

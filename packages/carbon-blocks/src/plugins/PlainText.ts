@@ -3,10 +3,12 @@ import {
   EventContext,
   EventHandler,
   EventHandlerMap,
+  LocalDirtyCounterPath,
   Node,
   NodeEncoder,
   NodePlugin,
   NodeSpec,
+  PinnedSelection,
   preventAndStopCtx,
   Writer,
 } from "@emrgen/carbon-core";
@@ -22,11 +24,16 @@ export class PlainTextPlugin extends NodePlugin {
   override spec(): NodeSpec {
     return {
       group: "",
-      content: "inline*",
+      content: "inline",
       splits: false,
+      updates: {
+        parent: true,
+      },
       props: {
         local: {
-          html: {},
+          html: {
+            suppressContentEditableWarning: true,
+          },
         },
       },
     };
@@ -49,7 +56,13 @@ export class PlainTextPlugin extends NodePlugin {
         const { selection } = app.state;
         // @ts-ignore
         const { data, key } = event.nativeEvent;
-        cmd.transform.insertText(selection, data ?? key, false)?.Dispatch();
+        const container = selection.head.node.closest((n) => n.isContainer)!;
+        cmd
+          .Update(container, {
+            [LocalDirtyCounterPath]: new Date().getTime(),
+          })
+          .transform.insertText(selection, data ?? key, false)
+          ?.Dispatch();
       },
       input: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
@@ -70,6 +83,44 @@ export class PlainTextPlugin extends NodePlugin {
       "ctrl+a": (ctx: EventContext<KeyboardEvent>) => {
         // preventAndStopCtx(ctx);
         // console.log("xxx");
+      },
+      delete: (ctx: EventContext<KeyboardEvent>) => {
+        preventAndStopCtx(ctx);
+        const { app, cmd } = ctx;
+        const { selection } = app.state;
+        const container = selection.head.node.closest((n) => n.isContainer)!;
+        const end = selection.end.moveBy(1);
+        const deleteSelection = PinnedSelection.create(end!, selection.start);
+        cmd
+          .Update(container, {
+            [LocalDirtyCounterPath]: new Date().getTime(),
+          })
+          .transform.delete(deleteSelection)
+          ?.Dispatch();
+      },
+      backspace: (ctx: EventContext<KeyboardEvent>) => {
+        preventAndStopCtx(ctx);
+        const { app, cmd } = ctx;
+        const { selection } = app.state;
+        if (selection.isCollapsed) {
+          const container = selection.head.node.closest((n) => n.isContainer)!;
+          const start = selection.start.moveBy(-1);
+          const deleteSelection = PinnedSelection.create(start!, selection.end);
+          cmd
+            .Update(container, {
+              [LocalDirtyCounterPath]: new Date().getTime(),
+            })
+            .transform.delete(deleteSelection)
+            ?.Dispatch();
+        } else {
+          const container = selection.head.node.closest((n) => n.isContainer)!;
+          cmd
+            .Update(container, {
+              [LocalDirtyCounterPath]: new Date().getTime(),
+            })
+            .transform.delete(selection)
+            ?.Dispatch();
+        }
       },
     };
   }

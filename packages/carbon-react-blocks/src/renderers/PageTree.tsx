@@ -20,7 +20,7 @@ export const PageTreeComp = (props: RendererProps) => {
   );
 
   const content = useMemo(() => {
-    if (node.firstChild?.name === "title") {
+    if (node.firstChild?.name === "plainText") {
       return (
         <>
           <CarbonNodeContent

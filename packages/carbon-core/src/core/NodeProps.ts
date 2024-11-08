@@ -125,6 +125,7 @@ export class PlainNodeProps implements NodeProps {
 
   set(path: string, value: any): void {
     set(this.props, this.dotPath(path), value);
+    console.log(this.props);
   }
 
   delete(path: string): this {
@@ -218,6 +219,7 @@ export const HasFocusPath = "local/html/data-focused";
 export const UserSelectPath = "local/html/data-user-select";
 export const SuppressContenteditableWarningPath =
   "local/html/suppressContentEditableWarning";
+export const FocusEditablePath = "local/state/focusEditable";
 export const ContenteditablePath = "local/html/contentEditable";
 export const ActivatedPath = "local/state/activated";
 export const LocalContenteditablePath = "local/state/contentEditable";

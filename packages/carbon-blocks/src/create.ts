@@ -60,6 +60,10 @@ export const empty = (props = {}) => ({
   props,
 });
 
+export const plainText = (textContent: string = "", props = {}) => {
+  return node("plainText", [text(textContent)], props);
+};
+
 export const title = (children: any[] | any = []) => {
   if (isEmpty(children)) {
     children = [];

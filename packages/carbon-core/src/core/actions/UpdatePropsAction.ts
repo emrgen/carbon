@@ -1,11 +1,12 @@
-import { classString } from "../Logger";
-import { IntoNodeId, NodeId } from "../NodeId";
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
-import { NodePropsJson } from "../NodeProps";
 import { Draft } from "@emrgen/carbon-core";
 import { keys } from "lodash";
+import { classString } from "../Logger";
+import { IntoNodeId, NodeId } from "../NodeId";
+import { NodePropsJson } from "../NodeProps";
+import { ActionOrigin, ActionType, CarbonAction } from "./types";
 
 export class UpdatePropsAction implements CarbonAction {
+  readonly type = ActionType.props;
   before: Partial<NodePropsJson>;
 
   static create(

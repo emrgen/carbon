@@ -1,0 +1,130 @@
+[data-name=pageTree]
+[data-name=pageTreeItem]
+  position: relative;
+
+[data-name=pageTree]
+  margin 10px 0
+  font-size 14px
+  padding 6px 10px
+  background #fafafa
+  border: 2px dashed blue
+  &> .ctiw
+    font-size 12px
+    color #aaa
+    cursor pointer;
+    font-weight bold
+    &:hover
+      color #666
+      font-weight bold
+
+  &> .cnest
+    margin-left 0;
+  [data-name=title]:before
+    display none
+
+  [data-type=children]
+    padding-top 4px
+
+
+[data-name=pageTreeItem]
+  border-radius: 4px
+  .ctiw
+    width full
+    position relative
+    display: flex
+    align-items: center
+    padding: 4px 6px;
+    border-radius 4px
+    //height 28px
+    &:hover
+      background: #f0f0f0
+  //.cnest
+  //  padding-left: 0
+
+  [data-name=plainText]
+    flex 1
+    color: #666
+    overflow: hidden
+    justify-content: flex-start
+    margin-left 4px
+    cursor: pointer
+    line-height 22px
+    &:hover
+      color: #000
+      cursor: pointer
+    &[contenteditable=true]
+      cursor: text
+    &:after
+      color #555
+      line-height 22px
+
+    span
+      display: inline-block
+      left: 0
+      white-space: nowrap!important;
+      text-overflow: ellipsis;
+      overflow: hidden;
+
+  .page-tree__collapsible_control
+    color: #aaa
+    background: transparent;
+    width 20px
+    height 20px
+    display: flex
+    align-items: center
+    justify-content: center
+    padding 0
+    border-radius: 4px
+    cursor pointer;
+
+    .page-tree-open-close-icon
+      transition transform 0.2s
+
+    &.collapsed > .page-tree-open-close-icon
+      transform: rotate(0deg)
+
+    &.expanded > .page-tree-open-close-icon
+      transform: rotate(90deg)
+
+    &:hover
+      background: #ddd
+      color #666
+
+  .add-child-file, .edit-file-name
+    z-index: 1
+    width: 20px
+    height: 20px
+    display: flex
+    align-items: center
+    justify-content: center
+    cursor: pointer
+    border-radius: 4px
+    color: #aaa
+    opacity 0
+    font-size: 14px
+    margin-left 4px;
+
+    &:hover
+      background: #ddd
+      color #666
+
+  [data-empty="true"]
+    font-size: 14px
+    line-height: 20px
+    user-select: none
+    background transparent
+
+  & > .ctiw:hover
+    .add-child-file, .edit-file-name
+      opacity 1
+
+  .carbon-collapsible__empty
+    padding-left 28px
+    color: #ccc
+    font-size: 14px
+    line-height: $lineHeight
+    user-select: none
+
+  //&[data-opened=true] > [data-type=content] > [data-name=title]
+  //  color: #000 !important
+

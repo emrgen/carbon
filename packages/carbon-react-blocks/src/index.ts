@@ -6,6 +6,7 @@ import { BlockContentComp } from "./renderers/BlockContent";
 import "./dnd.styl";
 import "./style.styl";
 import "./bem.styl";
+import "./pageTree.styl";
 import { BookmarkComp } from "./renderers/Bookmark";
 import { BulletedListComp } from "./renderers/BulletedList";
 import { ButtonComp } from "./renderers/Button";

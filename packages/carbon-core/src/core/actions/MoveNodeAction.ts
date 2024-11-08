@@ -1,12 +1,14 @@
-import { NodeId } from "../NodeId";
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
-import { Point } from "../Point";
-import { classString } from "../Logger";
 import { Draft } from "@emrgen/carbon-core";
+import { classString } from "../Logger";
+import { NodeId } from "../NodeId";
+import { Point } from "../Point";
+import { ActionOrigin, ActionType, CarbonAction } from "./types";
 
 // a node can be moved to a new location, relative to another node
 // the node can be moved before, after, or inside the target node at start or end
 export class MoveNodeAction implements CarbonAction {
+  readonly type = ActionType.move;
+
   static create(
     from: Point,
     to: Point,

@@ -1,35 +1,31 @@
 import {
+  CarbonAction,
   CarbonPlugin,
   EventContext,
   EventHandlerMap,
+  Fragment,
+  insertNodesActions,
+  Node,
   NodeSpec,
-  preventAndStopCtx,
   Pin,
   PinnedSelection,
-  CarbonAction,
-  Node,
-  InsertNodeAction,
   Point,
-  SelectAction,
   PointedSelection,
-  Fragment,
-  insertNodesActions
+  preventAndStopCtx,
+  SelectAction,
 } from "@emrgen/carbon-core";
-import {node} from "@emrgen/carbon-blocks";
 
-declare module '@emrgen/carbon-core' {
-  interface Transaction {
-  }
+declare module "@emrgen/carbon-core" {
+  interface Transaction {}
 }
 
 export class CommentEditor extends CarbonPlugin {
-
-  name = 'commentEditor';
+  name = "commentEditor";
 
   spec(): NodeSpec {
     return {
-      group: 'content',
-      content: 'content+',
+      group: "content",
+      content: "content+",
       isolate: true,
       draggable: true,
       dragHandle: true,
@@ -41,27 +37,27 @@ export class CommentEditor extends CarbonPlugin {
           html: {
             contentEditable: true,
             suppressContentEditableWarning: true,
-            placeholder: 'Add a comment...',
+            placeholder: "Add a comment...",
           },
-        }
-      }
-    }
+        },
+      },
+    };
   }
 
   keydown(): EventHandlerMap {
     return {
       ctrl_a: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
-        const {currentNode, cmd} = ctx;
-        const isolated = currentNode.closest(n => n.isIsolate);
+        const { currentNode, cmd } = ctx;
+        const isolated = currentNode.closest((n) => n.isIsolate);
         if (isolated) {
-          const start = Pin.toStartOf(isolated)!
-          const end = Pin.toEndOf(isolated)!
+          const start = Pin.toStartOf(isolated)!;
+          const end = Pin.toEndOf(isolated)!;
           const selection = PinnedSelection.create(start, end);
           cmd.action.select(selection).dispatch();
         }
-      }
-    }
+      },
+    };
   }
 
   normalize(node: Node): CarbonAction[] {
@@ -76,17 +72,20 @@ export class CommentEditor extends CarbonPlugin {
 const fillAndFocus = (node: Node) => {
   const fragment = node.type.contentMatch.fillAfter(Fragment.default(), 0);
   const actions: CarbonAction[] = [];
-  const {nodes = []} = fragment;
+  const { nodes = [] } = fragment;
   actions.push(...insertNodesActions(Point.atOffset(node)!, nodes));
-  nodes.some(n => {
-    const focusable = n.find(n => n.isFocusable);
+  nodes.some((n) => {
+    const focusable = n.find((n) => n.isFocusable);
     if (focusable) {
-      actions.push(SelectAction.create(PointedSelection.IDENTITY, PinnedSelection.fromPin(Pin.toStartOf(focusable)!).unpin()))
+      actions.push(
+        SelectAction.create(
+          PointedSelection.IDENTITY,
+          PinnedSelection.fromPin(Pin.toStartOf(focusable)!).unpin(),
+        ),
+      );
       return true;
     }
-  })
+  });
 
   return actions;
-}
-
-
+};

@@ -144,7 +144,7 @@ export function BlockContentComp(props: RendererProps) {
     const parent = node.parent;
     if (!parent) return;
     updateContent(parent);
-  }, [updateContent]);
+  }, [node.parent, updateContent]);
 
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>

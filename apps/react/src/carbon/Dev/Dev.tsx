@@ -8,6 +8,7 @@ import {
   mention,
   node,
   paragraph,
+  plainText,
   text,
   title,
 } from "@emrgen/carbon-blocks";
@@ -32,6 +33,7 @@ import {
 } from "@emrgen/carbon-comment-editor";
 import {
   Carbon,
+  CollapsedPath,
   ContenteditablePath,
   corePresetPlugins,
   Mark,
@@ -70,7 +72,26 @@ const data = node("carbon", [
     [
       title([text("Document Title")]),
 
-      paragraph([title([text("question title")])]),
+      paragraph([plainText("question title")]),
+      node("pageTree", [
+        plainText("Favorites"),
+        node(
+          "pageTreeItem",
+          [
+            plainText("Computer Science"),
+            node("pageTreeItem", [plainText("Algorithms")]),
+            node("pageTreeItem", [plainText("Data Structures")]),
+            node("pageTreeItem", [plainText("Operating Systems")]),
+          ],
+          { [CollapsedPath]: false },
+        ),
+        node("pageTreeItem", [
+          plainText("Electrical Engineering"),
+          node("pageTreeItem", [plainText("Circuits")]),
+          node("pageTreeItem", [plainText("Digital Logic")]),
+          node("pageTreeItem", [plainText("Microprocessors")]),
+        ]),
+      ]),
 
       // node("flashCard", [
       //   node("flashView", [
@@ -540,27 +561,6 @@ const data = node("carbon", [
       //   node("codeLine", [title([text("function foo() {")])]),
       //   node("codeLine", [title([text("  console.log('hello world')")])]),
       //   node("codeLine", [title([text("}")])]),
-      // ]),
-
-      // node("pageTree", [
-      //   title([text("Favorites")]),
-      //   node(
-      //     "pageTreeItem",
-      //     [
-      //       title([text("Computer Science")]),
-      //       node("pageTreeItem", [title([text("Algorithms")])]),
-      //       node("pageTreeItem", [title([text("Data Structures")])]),
-      //       node("pageTreeItem", [title([text("Operating Systems")])]),
-      //     ],
-      //     {[CollapsedPath]: false}
-      //   ),
-      //   node("pageTreeItem",
-      //     [
-      //       title([text("Electrical Engineering")]),
-      //       node("pageTreeItem", [title([text("Circuits")])]),
-      //       node("pageTreeItem", [title([text("Digital Logic")])]),
-      //       node("pageTreeItem", [title([text("Microprocessors")])]),
-      //     ]),
       // ]),
 
       // node("pageTree", [
