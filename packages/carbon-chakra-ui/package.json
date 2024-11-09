@@ -13,8 +13,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
-    "@emrgen/carbon-attributes": "workspace:*",
-    "@emrgen/carbon-cell": "workspace:*",
+    "@emrgen/carbon-media": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/carbon-dragon-react": "workspace:*",

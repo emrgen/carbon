@@ -1,8 +1,8 @@
+import { Node } from "@emrgen/carbon-core";
+import { DndEvent } from "@emrgen/carbon-dragon";
+import { throttle } from "lodash";
 import { useEffect } from "react";
 import { useDndContext } from "./useDndContext";
-import { Node } from "@emrgen/carbon-core";
-import { throttle } from "lodash";
-import { DndEvent } from "@emrgen/carbon-dragon";
 
 interface FastDndMonitor {
   onDragStart?(e: DndEvent): void;
@@ -47,17 +47,25 @@ export const useDndMonitor = (props: FastDndMonitor) => {
     };
 
     dnd.on("drag:start", handleDragStart);
-    dnd.on("drag:moveBy", handleDragMove);
+    dnd.on("drag:move", handleDragMove);
     dnd.on("drag:end", handleDragEnd);
     dnd.on("mouse:down", handleMouseDown);
     dnd.on("mouse:up", handleMouseUp);
 
     return () => {
       dnd.off("drag:start", handleDragStart);
-      dnd.off("drag:moveBy", handleDragMove);
+      dnd.off("drag:move", handleDragMove);
       dnd.off("drag:end", handleDragEnd);
       dnd.off("mouse:down", handleMouseDown);
       dnd.off("mouse:up", handleMouseUp);
     };
-  }, [dnd, onDragStart, onDragMove, onDragEnd, onMouseDown, onMouseUp]);
+  }, [
+    dnd,
+    onDragStart,
+    onDragMove,
+    onDragEnd,
+    onMouseDown,
+    onMouseUp,
+    options,
+  ]);
 };

@@ -29,7 +29,7 @@ export function ResizableContainer(props: MediaViewProps) {
   const [initialSize, setInitialSize] = useState({ width: 0, height: 0 });
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
-  const [documentWidth, setDocumentWidth] = useState(0);
+  const [documentWidth, setDocumentWidth] = useState(2000);
 
   const [opacity, setOpacity] = React.useState(0);
 
@@ -63,9 +63,9 @@ export function ResizableContainer(props: MediaViewProps) {
     setDocumentWidth(parentWidth);
   }, [app.store, node.parents]);
 
-  useEffect(() => {
-    updateDocumentWidth();
-  }, [updateDocumentWidth]);
+  // useEffect(() => {
+  //   updateDocumentWidth();
+  // }, [updateDocumentWidth]);
 
   useEffect(() => {
     app.on("react:mounted", updateDocumentWidth);
@@ -81,26 +81,25 @@ export function ResizableContainer(props: MediaViewProps) {
   //   };
   // }, [react.store, node.parents, updateDocumentWidth]);
 
-  const onDragStart = useCallback(
-    (e: DndEvent) => {
-      const { position } = e;
-      setInitialSize({
-        width: ref.current?.offsetWidth ?? 0,
-        height: ref.current?.offsetHeight ?? 0,
-      });
-    },
-    [ref],
-  );
+  const onDragStart = useCallback((e: DndEvent) => {
+    const { position, setState } = e;
+    console.log("xxxxxxxxxx");
+    setState({
+      width: ref.current?.offsetWidth ?? 0,
+      height: ref.current?.offsetHeight ?? 0,
+    });
+  }, []);
 
   const onDragMove = useCallback(
     (e: DndEvent) => {
       if (!node.id.eq(e.node.id)) return;
-      const { position } = e;
-      const { width, height } = initialSize;
+      const { position, state } = e;
+      const { width, height } = state;
       const { deltaX, deltaY } = position;
       const dx = roundInOffset(2 * deltaX, 50);
       const dy = roundInOffset(deltaY, 50);
-      // console.log("dx", dx, "dy", dy, documentWidth);
+
+      console.log("dx", dx, "dy", dy, documentWidth, width, height);
 
       if (e.id === "media-left-resizer") {
         const nw = clamp(roundInOffset(width - dx, 50), 100, documentWidth);
@@ -111,9 +110,9 @@ export function ResizableContainer(props: MediaViewProps) {
       } else if (e.id === "media-right-resizer") {
         const nw = clamp(roundInOffset(width + dx, 50), 100, documentWidth);
         setWidth(nw);
-        if (height / nw > aspectRatio) {
-          setHeight(nw * aspectRatio);
-        }
+        // if (height / nw > aspectRatio) {
+        setHeight(nw * aspectRatio);
+        // }
       } else if (e.id === "media-bottom-resizer") {
         const nh = clamp(
           roundInOffset(height + dy, 50),
@@ -131,13 +130,13 @@ export function ResizableContainer(props: MediaViewProps) {
   const onDragEnd = useCallback(
     (e: DndEvent) => {
       if (!node.id.eq(e.node.id)) return;
-      app.tr
+      app.cmd
         .Update(node.id, {
           node: { width, height },
         })
         .Dispatch();
     },
-    [app.tr, height, node.id, width],
+    [app, height, node.id, width],
   );
 
   useDndMonitor({
@@ -148,18 +147,16 @@ export function ResizableContainer(props: MediaViewProps) {
 
   return (
     <Flex
-      // top={0}
       position={"relative"}
-      // height={height ? height + "px" : node.props.node.height ? node.props.node.height + "px" : "60px"}
-      width={width ? width + "px" : "full"}
-      // justifyContent={node.props.node.justifyContent ?? "center"}
+      left={"50%"}
+      transform={"translateX(-50%)"}
+      width={width ? width : "120%"}
       transition={"width 0.3s, height 0.3s"}
-      // bg="red"
     >
       <Flex
+        pos={"relative"}
         ref={ref}
         top={0}
-        pos={"absolute"}
         onMouseOver={() => setOpacity(1)}
         onMouseOut={() => setOpacity(0)}
         height={height ? height + "px" : "full"}

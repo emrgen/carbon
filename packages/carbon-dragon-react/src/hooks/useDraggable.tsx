@@ -42,6 +42,7 @@ export interface UseDraggableHandleProps extends UseFastDraggableProps {
   onStart?(state: any, position: DndEvent["position"]): void;
 }
 
+// create a draggable handle event listener
 export const useDraggableHandle = (props: UseDraggableHandleProps) => {
   const { id, node, disabled, ref, activationConstraint = {}, onStart } = props;
   const { distance = 0 } = activationConstraint;
@@ -57,11 +58,11 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
     (event) => {
       let initState = {} as any;
       // preventAndStop(event)
-      // console.log("mouse down", ref.current, event.target);
+      console.log("mouse down", ref.current, event.target);
       if (isDisabled) return;
       if (ref.current !== event.target) return;
       dnd.onMouseDown(node, event);
-      // console.log(ref.current, event.target)
+      console.log(ref.current, event.target);
       let isDragging = false;
 
       const activatorEvent = event;
@@ -88,6 +89,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       };
 
       const onMouseMove = (event: MouseEvent) => {
+        console.log("xxx");
         const position = getEventPosition(activatorEvent, event);
         if (isDragging) {
           dnd.onDragMove({

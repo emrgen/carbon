@@ -21,6 +21,7 @@ import {
   cellRenderer,
 } from "@emrgen/carbon-cell";
 import {
+  carbonChakraRenderers,
   FloatingStyleMenu,
   InsertBlockMenu,
   ToggleViewMode,
@@ -856,6 +857,7 @@ const renderers = [
   timelineRenderer,
   flashRenderers,
   mediaRenderers,
+  carbonChakraRenderers,
 ];
 
 const renderManager = RenderManager.from(flattenDeep(renderers));

@@ -10,3 +10,6 @@ export const mediaRenderers = [
   ReactRenderer.create("image", ImageComp),
   ReactRenderer.create("video", VideoComp),
 ];
+
+export * from "./plugin/Image";
+export * from "./plugin/Video";

@@ -12,11 +12,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { preventAndStop, stop } from "@emrgen/carbon-core";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon-react";
+import { ImageSrcPath } from "@emrgen/carbon-media";
 import {
   CarbonBlock,
   RendererProps,
@@ -36,10 +32,23 @@ const CaptionPath = "remote/state/caption";
 
 export function ImageComp(props: RendererProps) {
   const { node } = props;
+  const { SelectionHalo } = useSelectionHalo(props);
+
+  return (
+    <>
+      <CarbonBlock {...props}>
+        <ImageContent node={node} />
+      </CarbonBlock>
+    </>
+  );
+}
+
+const ImageContent = (props: RendererProps) => {
+  const { node } = props;
   const app = useCarbon();
+  const imageSrc = node.props.get(ImageSrcPath, "");
   const [ready, setReady] = useState(false);
   const caption = node.props.get(CaptionPath, "");
-
   const ref = useRef<HTMLDivElement>(null);
   const boundRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -47,10 +56,10 @@ export function ImageComp(props: RendererProps) {
   const { ref: overlayRef } = useCarbonOverlay();
 
   const selection = useSelectionHalo(props);
-  const dragDropRect = useDragDropRectSelect({ node, ref });
-  const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection),
-  );
+  // const dragDropRect = useDragDropRectSelect({ node, ref });
+  // const connectors = useConnectorsToProps(
+  //   useCombineConnectors(dragDropRect, selection),
+  // );
 
   const [aspectRatio, setAspectRatio] = useState(9 / 16);
 
@@ -86,12 +95,9 @@ export function ImageComp(props: RendererProps) {
     [app],
   );
 
-  const onClick = useCallback(
-    (e) => {
-      // preventAndStop(e);
-    },
-    [app.tr],
-  );
+  const onClick = useCallback((e) => {
+    // preventAndStop(e);
+  }, []);
 
   const updatePopover = useMemo(() => {
     // console.log(overlayRef, ref);
@@ -201,131 +207,112 @@ export function ImageComp(props: RendererProps) {
       </Box>,
       overlayRef.current!,
     );
-  }, [app.tr, node.id, boundRef, overlayRef, updater]);
+  }, [app, node.id, boundRef, overlayRef, updater]);
 
   useEffect(() => {
     if (!imageRef.current) return;
     const { width, height } = imageRef.current;
     setAspectRatio(height / width);
-
-    // if (!node.props.node.height) {
-    //   app.tr
-    //     .Update(node.id, {
-    //       node: {
-    //         height: height,
-    //       },
-    //     })
-    //     .Dispatch();
-    // }
   }, [app, imageRef, node]);
+
+  console.log(ready);
 
   return (
     <>
-      <CarbonBlock {...props} custom={{ ...connectors, onClick }} ref={ref}>
-        {updater.isOpen && updatePopover}
-
-        <ResizableContainer
-          node={node}
-          enable={ready}
-          aspectRatio={aspectRatio}
-          boundedComponent={
-            image.src && (
-              <Box pos={"absolute"} h="full" w="full" ref={boundRef}>
-                <Flex
-                  className="image-controls"
-                  pos={"absolute"}
-                  top={0}
-                  right={0}
-                  mr={1}
-                  mt={1}
-                >
-                  <IconButton
-                    colorScheme={"facebook"}
-                    size={"sm"}
-                    aria-label="Search database"
-                    icon={<TbStatusChange />}
-                    onMouseDown={preventAndStop}
-                    onClick={(e) => {
-                      preventAndStop(e);
-                      updater.onOpen();
-                    }}
-                  />
-                </Flex>
-              </Box>
-            )
-          }
-        >
-          <Box
-            className="image-container"
-            pos={"relative"}
-            onClick={handleClick}
-            bg={ready ? "" : "#eee"}
-            h={node.props.node.src && !ready ? "100%" : "auto"}
-            // boxShadow={ready ? "0 0 0px 20px red" : ""}
-          >
-            <>
-              {!image.src && (
-                <Flex
-                  ref={boundRef}
-                  className="image-overlay"
+      {updater.isOpen && updatePopover}
+      <ResizableContainer
+        node={node}
+        enable={ready}
+        aspectRatio={aspectRatio}
+        width={"120%"}
+        boundedComponent={
+          imageSrc && (
+            <Box pos={"absolute"} h="full" w="full" ref={boundRef}>
+              <Flex
+                className="image-controls"
+                pos={"absolute"}
+                top={0}
+                right={0}
+                mr={1}
+                mt={1}
+              >
+                <IconButton
+                  colorScheme={"facebook"}
+                  size={"sm"}
+                  aria-label="Search database"
+                  icon={<TbStatusChange />}
+                  onMouseDown={preventAndStop}
                   onClick={(e) => {
-                    stop(e);
-                    // app.tr.selectNodes([node.id]).Dispatch();
+                    preventAndStop(e);
                     updater.onOpen();
                   }}
+                />
+              </Flex>
+            </Box>
+          )
+        }
+      >
+        <Box
+          className="image-container"
+          pos={"relative"}
+          onClick={handleClick}
+          bg={ready ? "" : "#eee"}
+          h={imageSrc && !ready ? "100%" : "auto"}
+        >
+          <>
+            {!imageSrc && (
+              <Flex
+                ref={boundRef}
+                className="image-overlay"
+                onClick={(e) => {
+                  stop(e);
+                  // app.tr.selectNodes([node.id]).Dispatch();
+                  updater.onOpen();
+                }}
+              >
+                <Square
+                  size={12}
+                  borderRadius={4}
+                  // border={"1px solid #ddd"}
+                  // bg={"#fff"}
+                  fontSize={26}
+                  color={"#aaa"}
                 >
-                  <Square
-                    size={12}
-                    borderRadius={4}
-                    // border={"1px solid #ddd"}
-                    // bg={"#fff"}
-                    fontSize={26}
-                    color={"#aaa"}
-                  >
-                    <RxImage />
-                  </Square>
-                  <Text>Click to add image</Text>
-                </Flex>
-              )}
+                  <RxImage />
+                </Square>
+                <Text>Click to add image</Text>
+              </Flex>
+            )}
 
-              {image.src && (
-                <>
-                  <LazyLoadImage
-                    src={node.props.node.src}
-                    alt=""
-                    onLoad={(e) => {
-                      setReady(true);
-                      console.log(e);
-                    }}
-                    placeholder={<Center color="#aaa">Image loading...</Center>}
-                  />
-                  {/* <Image
-                    src={node.attrs.node.src}
-                    alt=""
-                    className="fastype-hidden-image"
-                    pos={"absolute"}
-                    boxShadow={ready ? "0 0 0px 20px red" : ""}
-                    // opacity={"0"}
-                    ref={imageRef}
-                  /> */}
-                  <Spinner
-                    pos={"absolute"}
-                    bottom={0}
-                    right={0}
-                    zIndex={10}
-                    size="sm"
-                    m={2}
-                    color="#555"
-                    display={image.src ? (ready ? "none" : "block") : "none"}
-                  />
-                </>
-              )}
-            </>
-            {selection.SelectionHalo}
-          </Box>
-        </ResizableContainer>
+            {imageSrc && (
+              <>
+                <LazyLoadImage
+                  src={imageSrc}
+                  alt=""
+                  onLoad={(e) => {
+                    setReady(true);
+                    console.log(e);
+                  }}
+                  placeholder={<Center color="#aaa">Image loading...</Center>}
+                />
+                <Spinner
+                  pos={"absolute"}
+                  bottom={0}
+                  right={0}
+                  zIndex={10}
+                  size="sm"
+                  m={2}
+                  color="#555"
+                  display={imageSrc ? (ready ? "none" : "block") : "none"}
+                />
+              </>
+            )}
+          </>
+          {selection.SelectionHalo}
+        </Box>
+      </ResizableContainer>
 
-        {/* {caption && (
+      {/* {caption && (
           <Input
             value={node.attrs.node.caption}
             px={1}
@@ -377,7 +364,6 @@ export function ImageComp(props: RendererProps) {
             }}
           />
         )} */}
-      </CarbonBlock>
     </>
   );
-}
+};
