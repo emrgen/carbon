@@ -5,7 +5,9 @@ import {
   skipKeyEvent,
 } from "@emrgen/carbon-core";
 
-export class ImagePlugin extends NodePlugin {
+export const ImageSrcPath = "remote/state/image/src";
+
+export class Image extends NodePlugin {
   name = "image";
 
   spec(): NodeSpec {

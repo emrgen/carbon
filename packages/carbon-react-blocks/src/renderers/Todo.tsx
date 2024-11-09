@@ -1,5 +1,9 @@
-import React, { useCallback, useMemo, useRef } from "react";
 import { CheckedPath, preventAndStop, stop } from "@emrgen/carbon-core";
+import {
+  useCombineConnectors,
+  useConnectorsToProps,
+  useDragDropRectSelect,
+} from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -8,13 +12,9 @@ import {
   useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon-react";
+import React, { useCallback, useMemo, useRef } from "react";
 
-export default function TodoComp(props: RendererProps) {
+export function TodoComp(props: RendererProps) {
   const { node, custom } = props;
   const app = useCarbon();
   const ref = useRef(null);

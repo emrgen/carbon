@@ -22,7 +22,6 @@ import FrameComp from "./renderers/Frame";
 import { HeaderComp } from "./renderers/Header";
 import HintComp from "./renderers/Hint";
 import { HStackComp } from "./renderers/HStackComp";
-import ImageComp from "./renderers/ImageComp";
 import MCQComp from "./renderers/MCQ";
 import { MentionComp } from "./renderers/Mention";
 import { Modal } from "./renderers/Modal";
@@ -38,7 +37,7 @@ import ScaleComp from "./renderers/Scale";
 import { TabComp, TabsComp } from "./renderers/TabComp";
 import { ColumnComp, RowComp, TableComp } from "./renderers/Table";
 import TitleComp from "./renderers/TitleComp";
-import TodoComp from "./renderers/Todo";
+import { TodoComp } from "./renderers/Todo";
 
 export const blockPresetRenderers = [
   ReactRenderer.create("document", DocumentComp),
@@ -56,7 +55,6 @@ export const blockPresetRenderers = [
   ReactRenderer.create("equation", EquationComp),
   ReactRenderer.create("hstack", HStackComp),
   ReactRenderer.create("stack", HStackComp),
-  ReactRenderer.create("image", ImageComp),
   // Renderer.create('video', VideoComp),
   ReactRenderer.create("todo", TodoComp),
   ReactRenderer.create("quote", QuoteComp),

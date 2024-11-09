@@ -181,7 +181,6 @@ export class PageTreeItem extends CarbonPlugin {
           cmd.Update(currentNode, {
             [LocalDirtyCounterPath]: new Date().getTime(),
           });
-
           cmd.Dispatch();
         }
       },

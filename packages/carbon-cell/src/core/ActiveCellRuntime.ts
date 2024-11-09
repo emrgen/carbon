@@ -81,12 +81,12 @@ export class ActiveCellRuntime extends EventEmitter {
 
   // observe a node via a custom variable named `node_${nodeId}`
   redefineNode(nodeId: string) {
-    console.log(
-      "redefine",
-      nodeId,
-      "node_" + nodeId,
-      `Carbon.store.get(${nodeId})`,
-    );
+    // console.log(
+    //   "redefine",
+    //   nodeId,
+    //   "node_" + nodeId,
+    //   `Carbon.store.get(${nodeId})`,
+    // );
     this.redefine(
       "node_" + nodeId,
       nodeId,
@@ -247,14 +247,14 @@ export class ActiveCellRuntime extends EventEmitter {
     ) {
       const variable = this.defineFresh(cell);
       if (before.variable) {
-        console.log("deleting", before.id, before.name);
+        // console.log("deleting", before.id, before.name);
         // NOTE: deleting the cell will also delete the variable
         before.delete(true);
       }
     } else if (before.name === cell.name) {
       // NOTE: as the name are the same, we can redefine the variable with the same name
       // internal Runtime will keep the same variable with all the references intact
-      console.log("replacing", before.id, before.name, cell.name);
+      // console.log("replacing", before.id, before.name, cell.name);
       // redefine the cell, will keep the same variable
       cell.variable = this.module.redefine(
         cell.name,
@@ -532,11 +532,11 @@ export class ActiveCell extends EventEmitter {
 
   static defFromAst(name, deps, ast: any, code: string): Optional<Function> {
     const { body } = ast;
-    console.log(
-      `%c${body.type}`,
-      "color:white;background:#ffcc006e;font-weight:bold;",
-      ast,
-    );
+    // console.log(
+    //   `%c${body.type}`,
+    //   "color:white;background:#ffcc006e;font-weight:bold;",
+    //   ast,
+    // );
 
     const createDefinition = factory[body.type];
     if (!createDefinition) {

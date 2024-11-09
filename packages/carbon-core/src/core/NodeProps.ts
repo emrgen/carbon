@@ -125,7 +125,6 @@ export class PlainNodeProps implements NodeProps {
 
   set(path: string, value: any): void {
     set(this.props, this.dotPath(path), value);
-    console.log(this.props);
   }
 
   delete(path: string): this {

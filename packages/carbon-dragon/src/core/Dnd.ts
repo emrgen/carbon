@@ -53,11 +53,11 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
   }
 
   onUpdated() {
-    const { contentUpdated } = this.app.state;
-    if (contentUpdated.size !== 0) {
+    const { updated } = this.app.state;
+    if (updated.size !== 0) {
       this.isDirty = true;
     }
-    contentUpdated.forEach((nodeId) => {
+    updated.forEach((nodeId) => {
       this.updatedNodeIds.add(nodeId);
     });
   }

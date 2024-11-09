@@ -1,4 +1,3 @@
-import { Carbon } from "@emrgen/carbon-core";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -12,12 +11,9 @@ export const PageTreeComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
 
-  const handleToggleCollapse = useCallback(
-    (app: Carbon) => {
-      app.cmd.collapsible.toggle(node).Dispatch();
-    },
-    [node],
-  );
+  const handleToggleCollapse = useCallback(() => {
+    app.cmd.collapsible.toggle(node).Dispatch();
+  }, [app.cmd.collapsible, node]);
 
   const content = useMemo(() => {
     if (node.firstChild?.name === "plainText") {
@@ -26,7 +22,7 @@ export const PageTreeComp = (props: RendererProps) => {
           <CarbonNodeContent
             node={node}
             key={node.key}
-            custom={{ onClick: () => handleToggleCollapse(app) }}
+            wrapper={{ onClick: handleToggleCollapse, "data-test": 123 }}
             wrap={true}
           />
           {!node.isCollapsed && <CarbonNodeChildren node={node} />}
@@ -35,7 +31,7 @@ export const PageTreeComp = (props: RendererProps) => {
     } else {
       return <CarbonNodeChildren node={node} />;
     }
-  }, [app, handleToggleCollapse, node]);
+  }, [handleToggleCollapse, node]);
 
   const onMouseDown = useCallback((e) => {
     // preventAndStop(e);

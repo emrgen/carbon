@@ -1291,6 +1291,8 @@ span[data-name=text] {
     user-select none
     font-weight bold
     caret-color #fff
+    &[contenteditable=false]
+      cursor: pointer;
 
 [data-name=explain]
   padding 5px 10px
@@ -1308,8 +1310,6 @@ span[data-name=text] {
     background: #eee;
     font-weight bold;
     border-radius 2px
-
-  //color #aaa
 
   > [data-type=children]
     padding-left: 0

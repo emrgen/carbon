@@ -14,7 +14,7 @@ $selectionHaloColor = #accef78d
 
 .cdoc
   flex 1
-  padding 0 calc(50% - 400px)
+  padding 0 calc(50% - 360px)
   padding-top: 40px;
   > div
     scroll-margin-bottom 100px
@@ -309,14 +309,15 @@ pre
 .empty-zero-width-space
   font-stretch expanded
 
+[data-name=continue]
+  position relative;
 [data-name=button][data-size=lg] .carbon-button
   font-size 1.1em
   padding 0.5em 1em
+  border-radius 50px
 
 [data-name=plainText]
   display flex
-  justify-content center
-  text-align center
   &:after
     content: attr(placeholder)
     color white
@@ -324,3 +325,5 @@ pre
     user-select none
     z-index 1
     pointer-events none
+[data-name=continue] [data-name=plainText]
+  justify-content center

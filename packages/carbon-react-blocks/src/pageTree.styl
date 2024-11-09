@@ -13,12 +13,14 @@
     color #aaa
     cursor pointer;
     font-weight bold
+    user-select none;
     &:hover
       color #666
       font-weight bold
 
   &> .cnest
     margin-left 0;
+
   [data-name=title]:before
     display none
 
@@ -38,12 +40,12 @@
     //height 28px
     &:hover
       background: #f0f0f0
-  //.cnest
-  //  padding-left: 0
+  .cnest
+    margin-left: 16px
 
   [data-name=plainText]
     flex 1
-    color: #666
+    color: #000
     overflow: hidden
     justify-content: flex-start
     margin-left 4px
@@ -64,6 +66,7 @@
       white-space: nowrap!important;
       text-overflow: ellipsis;
       overflow: hidden;
+      min-width 1px;
 
   .page-tree__collapsible_control
     color: #aaa

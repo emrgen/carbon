@@ -146,6 +146,13 @@ export interface NodeSpec {
   blockSelectable?: boolean;
   rectSelectable?: boolean;
 
+  normalize?: {
+    // what to do when the node is empty
+    empty: "remove" | "unwrap" | "insert";
+    // fix invalid content match by
+    match?: "remove" | "unwrap" | "insert";
+  };
+
   split?: {
     inside?: boolean; // default false
     name?: string;

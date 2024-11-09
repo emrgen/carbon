@@ -1,3 +1,9 @@
+import { Flex } from "@chakra-ui/react";
+import { clamp } from "@emrgen/carbon-core";
+
+import { DndEvent } from "@emrgen/carbon-dragon";
+import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
+import { RendererProps, useCarbon } from "@emrgen/carbon-react";
 import React, {
   ReactNode,
   useCallback,
@@ -5,12 +11,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Flex } from "@chakra-ui/react";
-
-import { DndEvent } from "@emrgen/carbon-dragon";
-import { RendererProps, useCarbon } from "@emrgen/carbon-react";
-import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
-import { clamp } from "@emrgen/carbon-core";
 
 interface MediaViewProps extends RendererProps {
   aspectRatio?: number;
@@ -22,7 +22,7 @@ const roundInOffset = (size: number, offset: number) => {
   return Math.round(size / offset) * offset;
 };
 
-export function MediaView(props: MediaViewProps) {
+export function ResizableContainer(props: MediaViewProps) {
   const { node, enable, aspectRatio = 0.681944444, boundedComponent } = props;
   const app = useCarbon();
   const ref = useRef<HTMLDivElement>(null);

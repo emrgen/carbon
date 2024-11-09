@@ -17,7 +17,6 @@ import { Frame } from "./plugins/Frame";
 import { Header } from "./plugins/Header";
 import { ViewedPath } from "./plugins/Hint";
 import { HStack } from "./plugins/HStack";
-import { ImagePlugin } from "./plugins/ImagePlugin";
 import { Insert } from "./plugins/Inserter";
 import { Mention } from "./plugins/Mention";
 import { Modal } from "./plugins/Modal";
@@ -52,8 +51,6 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new ChangeName(),
   new Equation(),
   new HStack(),
-  new ImagePlugin(),
-  // new Video(),
   new Todo(),
   new Quote(),
   new Callout(),

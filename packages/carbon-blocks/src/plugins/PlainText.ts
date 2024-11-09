@@ -84,6 +84,8 @@ export class PlainTextPlugin extends NodePlugin {
         // preventAndStopCtx(ctx);
         // console.log("xxx");
       },
+      up: (ctx) => preventAndStopCtx(ctx),
+      down: (ctx) => preventAndStopCtx(ctx),
       delete: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
         const { app, cmd } = ctx;

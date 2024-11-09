@@ -1,27 +1,19 @@
-import { Extension } from "@emrgen/carbon-react";
-import { TodoComp } from "./renderers/Todo";
-import { Callout } from "./renderers/Callout";
-import {SeparatorComp} from "./renderers/Separator";
+import { Extension, ReactRenderer } from "@emrgen/carbon-react";
 import { Separator } from "./plugins/Separator";
-// import { VideoComp } from "./renderers/Video";
-import { ImageComp } from "./renderers/Image";
-import { EquationComp } from "./renderers/Equation";
+import { Callout } from "./renderers/Callout";
 import { DocumentComp } from "./renderers/Document";
-import { ReactRenderer } from "@emrgen/carbon-react";
+import { EquationComp } from "./renderers/Equation";
+// import { VideoComp } from "./renderers/Video";
+import { SeparatorComp } from "./renderers/Separator";
+import { TodoComp } from "./renderers/Todo";
 
 export const fastypeBlocks: Extension = {
-  plugins: [
-    new Separator()
-  ],
+  plugins: [new Separator()],
   renderers: [
-    ReactRenderer.create('todo', TodoComp),
-    ReactRenderer.create('callout', Callout),
-    ReactRenderer.create('separator', SeparatorComp),
-    // Renderer.create('video', VideoComp),
-    ReactRenderer.create('image', ImageComp),
-    ReactRenderer.create('equation', EquationComp),
-    // Renderer.create('code', CodeComp),
-    ReactRenderer.create('document', DocumentComp),
-  ]
-}
-
+    ReactRenderer.create("todo", TodoComp),
+    ReactRenderer.create("callout", Callout),
+    ReactRenderer.create("separator", SeparatorComp),
+    ReactRenderer.create("equation", EquationComp),
+    ReactRenderer.create("document", DocumentComp),
+  ],
+};

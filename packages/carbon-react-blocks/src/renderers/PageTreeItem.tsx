@@ -21,6 +21,7 @@ import {
   CarbonNodeContent,
   RendererProps,
   useCarbon,
+  useNodeChange,
   useNodeOpened,
 } from "@emrgen/carbon-react";
 import { useCallback, useMemo } from "react";
@@ -36,6 +37,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const app = useCarbon();
   const isCollapsed = node.isCollapsed;
   const isContentEditable = node.firstChild?.props.get(ContenteditablePath);
+  useNodeChange({ node: node.firstChild! });
 
   const handleToggle = useCallback(
     (app: Carbon) => {
@@ -130,10 +132,13 @@ export const PageTreeItemComp = (props: RendererProps) => {
           contentEditable="false"
           suppressContentEditableWarning
           onMouseDown={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            preventAndStop(e);
           }}
-          onClick={() => handleToggle(app)}
+          onClick={(e) => {
+            preventAndStop(e);
+            handleToggle(app);
+          }}
+          style={{ opacity: isContentEditable ? 0 : 1 }}
         >
           <MdOutlineKeyboardArrowRight
             className={"page-tree-open-close-icon"}
@@ -170,12 +175,11 @@ export const PageTreeItemComp = (props: RendererProps) => {
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}
-        afterContent={afterContent}
+        afterContent={isContentEditable ? null : afterContent}
         // custom={{ onClick: handleOpenDocument }}
         wrap={true}
       />
 
-      {/* <CarbonNodeContent node={node} beforeContent={beforeContent} custom={{contentEditable: isActive}}/> */}
       {!isCollapsed && <CarbonNodeChildren node={node} />}
       {!isCollapsed && node.size === 1 && (
         <div className="carbon-collapsible__empty">No page inside</div>

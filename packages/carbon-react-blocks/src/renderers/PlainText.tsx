@@ -19,7 +19,7 @@ export const PlainText = (props: RendererProps) => {
   }, [node.props]);
 
   return (
-    <CarbonBlock node={node} ref={ref}>
+    <CarbonBlock {...props} ref={ref}>
       <CarbonChildren node={node} />
     </CarbonBlock>
   );

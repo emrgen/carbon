@@ -1,12 +1,18 @@
-import { NodePlugin, NodeSpec, EventHandler, skipKeyEvent, Node, SerializedNode, Carbon } from '@emrgen/carbon-core';
+import {
+  EventHandler,
+  NodePlugin,
+  NodeSpec,
+  skipKeyEvent,
+} from "@emrgen/carbon-core";
+
+export const VideoSrcPath = "remote/state/video/src";
 
 export class Video extends NodePlugin {
-
-  name = 'video';
+  name = "video";
 
   spec(): NodeSpec {
     return {
-      group: 'content',
+      group: "content",
       atom: true,
       isolate: true,
       inlineSelectable: true,
@@ -16,10 +22,10 @@ export class Video extends NodePlugin {
       rectSelectable: true,
       blockSelectable: true,
       info: {
-        title: 'Video',
-        description: 'Insert a video',
-        icon: 'video',
-        tags: ['video', 'movie', 'film'],
+        title: "Video",
+        description: "Insert a video",
+        icon: "video",
+        tags: ["video", "movie", "film"],
       },
       attrs: {
         html: {
@@ -29,14 +35,14 @@ export class Video extends NodePlugin {
       },
       state: {
         focused: true,
-      }
-    }
+      },
+    };
   }
 
   keydown(): Partial<EventHandler> {
     return {
-      tab: skipKeyEvent
-    }
+      tab: skipKeyEvent,
+    };
   }
 
   // serialize(react: Carbon, node: Node): SerializedNode {
@@ -46,5 +52,4 @@ export class Video extends NodePlugin {
   //     children: [],
   //   }
   // }
-
 }

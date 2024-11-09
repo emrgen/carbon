@@ -171,7 +171,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
 
   useBlockMenu({ app, onShow, onHide, onSelect, onScroll });
 
-  console.log(show, blocks);
+  // console.log(show, blocks);
   return (
     <Portal>
       {show && (

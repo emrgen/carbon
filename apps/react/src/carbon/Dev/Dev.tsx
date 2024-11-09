@@ -46,6 +46,7 @@ import {
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
 import { flashPlugin, flashRenderers } from "@emrgen/carbon-flash";
+import { mediaPlugins, mediaRenderers } from "@emrgen/carbon-media";
 import {
   timelinePlugin,
   timelineRenderer,
@@ -72,7 +73,16 @@ const data = node("carbon", [
     [
       title([text("Document Title")]),
 
-      paragraph([plainText("question title")]),
+      node("image", [], {
+        "remote/state/image/src":
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPcbdS5mvBeNcpLWmbEfpSP7LGa3Nae-Lwew&s",
+      }),
+
+      node("video", [], {
+        "remote/state/image/src": "https://remote.image",
+      }),
+
+      paragraph([title(text("question title"))]),
       node("pageTree", [
         plainText("Favorites"),
         node(
@@ -810,6 +820,7 @@ const ImageComp = (props: RendererProps) => {
 // };
 
 const plugins = [
+  mediaPlugins,
   ...corePresetPlugins,
   ...blockPresetPlugins,
   carbonUtilPlugins,
@@ -844,6 +855,7 @@ const renderers = [
   ...questionExtension.renderers!,
   timelineRenderer,
   flashRenderers,
+  mediaRenderers,
 ];
 
 const renderManager = RenderManager.from(flattenDeep(renderers));
