@@ -37,6 +37,9 @@ export const DocumentComp = (props: RendererProps) => {
 
   useEffect(() => {
     app.emit("document:mounted", node);
+    return () => {
+      app.emit("document:unmounted", node);
+    };
   }, [app, node]);
 
   // hide cursor when it's below the last child of the document during mouse down

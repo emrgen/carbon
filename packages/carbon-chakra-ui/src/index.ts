@@ -1,3 +1,5 @@
+import './chakra.styl';
+
 import { ReactRenderer } from "@emrgen/carbon-react";
 import { ImageComp } from "./components/plugins/Image";
 

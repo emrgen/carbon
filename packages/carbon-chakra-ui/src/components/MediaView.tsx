@@ -4,6 +4,7 @@ import { clamp } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
 import { RendererProps, useCarbon } from "@emrgen/carbon-react";
+import { useDocument } from '@emrgen/carbon-react-blocks';
 import React, {
   ReactNode,
   useCallback,
@@ -22,17 +23,27 @@ const roundInOffset = (size: number, offset: number) => {
   return Math.round(size / offset) * offset;
 };
 
+const snapValue = (value: number, snapTo: number, minOffset: number, maxOffset: number) => {
+  if (snapTo + minOffset < value && value < snapTo + maxOffset) {
+    return snapTo;
+  }
+
+  return value
+}
+
 export function ResizableContainer(props: MediaViewProps) {
   const { node, enable, aspectRatio = 0.681944444, boundedComponent } = props;
   const app = useCarbon();
+  const {doc} = useDocument();
+
   const ref = useRef<HTMLDivElement>(null);
   const [initialSize, setInitialSize] = useState({ width: 0, height: 0 });
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
-  const [documentWidth, setDocumentWidth] = useState(2000);
+  const [documentWidth, setDocumentWidth] = useState(1000);
+  const [documentPadding, setDocumentPadding] = useState(0);
 
   const [opacity, setOpacity] = React.useState(0);
-
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -58,32 +69,29 @@ export function ResizableContainer(props: MediaViewProps) {
     if (!document) return;
     const docEl = app.store.element(document.id);
     if (!docEl) return;
-    const parentWidth = docEl.offsetWidth ?? 0;
+    const parentWidth = docEl.getBoundingClientRect().width;
+    const {paddingLeft} = window.getComputedStyle(docEl)
 
+    setDocumentPadding(parseInt(paddingLeft.toString().replace("px", "")));
     setDocumentWidth(parentWidth);
   }, [app.store, node.parents]);
 
-  // useEffect(() => {
-  //   updateDocumentWidth();
-  // }, [updateDocumentWidth]);
-
   useEffect(() => {
-    app.on("react:mounted", updateDocumentWidth);
+    app.on("document:mounted", updateDocumentWidth);
     return () => {
-      app.off("react:mounted", updateDocumentWidth);
+      app.off("document:mounted", updateDocumentWidth);
     };
   }, [app, updateDocumentWidth]);
 
-  // useEffect(() => {
-  //   window.addEventListener("resize", updateDocumentWidth);
-  //   return () => {
-  //     window.removeEventListener("resize", updateDocumentWidth);
-  //   };
-  // }, [react.store, node.parents, updateDocumentWidth]);
+  useEffect(() => {
+    window.addEventListener("resize", updateDocumentWidth);
+    return () => {
+      window.removeEventListener("resize", updateDocumentWidth);
+    };
+  }, [updateDocumentWidth]);
 
   const onDragStart = useCallback((e: DndEvent) => {
     const { position, setState } = e;
-    console.log("xxxxxxxxxx");
     setState({
       width: ref.current?.offsetWidth ?? 0,
       height: ref.current?.offsetHeight ?? 0,
@@ -102,29 +110,28 @@ export function ResizableContainer(props: MediaViewProps) {
       console.log("dx", dx, "dy", dy, documentWidth, width, height);
 
       if (e.id === "media-left-resizer") {
-        const nw = clamp(roundInOffset(width - dx, 50), 100, documentWidth);
+        console.log("left resizer", dx, width, documentWidth, documentPadding);
+        let nw = clamp(roundInOffset(width - dx, 50), 100, documentWidth);
+        nw = snapValue(nw, documentWidth - 2 * documentPadding, -40, 50);
+        nw = snapValue(nw, documentWidth, -60, 10);
         setWidth(nw);
-        if (height / nw > aspectRatio) {
-          setHeight(nw * aspectRatio);
-        }
-      } else if (e.id === "media-right-resizer") {
-        const nw = clamp(roundInOffset(width + dx, 50), 100, documentWidth);
-        setWidth(nw);
-        // if (height / nw > aspectRatio) {
         setHeight(nw * aspectRatio);
-        // }
+      } else if (e.id === "media-right-resizer") {
+        let nw = clamp(roundInOffset(width + dx, 50), 100, documentWidth);
+        nw = snapValue(nw, documentWidth - 2 * documentPadding, -40, 50);
+        nw = snapValue(nw, documentWidth, -60, 10);
+        setWidth(nw);
+        setHeight(nw * aspectRatio);
       } else if (e.id === "media-bottom-resizer") {
-        const nh = clamp(
+        let nh = clamp(
           roundInOffset(height + dy, 50),
           100,
           aspectRatio * width,
         );
-        if (nh / width < aspectRatio) {
-          setHeight(nh);
-        }
+        setHeight(nh);
       }
     },
-    [aspectRatio, documentWidth, initialSize, node.id],
+    [aspectRatio, documentPadding, documentWidth, node.id],
   );
 
   const onDragEnd = useCallback(
@@ -150,8 +157,14 @@ export function ResizableContainer(props: MediaViewProps) {
       position={"relative"}
       left={"50%"}
       transform={"translateX(-50%)"}
-      width={width ? width : "120%"}
+      width={width ? width + 'px' : "full"}
+      height={height ? height + "px" : "full"}
+      minH={"100px"}
+      maxW={documentWidth ? documentWidth + "px" : "full"}
+      maxH={documentWidth ? documentWidth * aspectRatio + "px" : "full"}
       transition={"width 0.3s, height 0.3s"}
+      borderRadius={4}
+      overflow={"hidden"}
     >
       <Flex
         pos={"relative"}
@@ -159,13 +172,10 @@ export function ResizableContainer(props: MediaViewProps) {
         top={0}
         onMouseOver={() => setOpacity(1)}
         onMouseOut={() => setOpacity(0)}
-        height={height ? height + "px" : "full"}
-        width={width ? width + "px" : "full"}
+        width={"full"}
         alignItems={"center"}
         overflow={"hidden"}
-        maxW={documentWidth ? documentWidth + "px" : "full"}
         transition={"width 0.3s, height 0.3s"}
-        // boxShadow={"0 0 0 10px rgba(0,0,0,0.1)"}
         className="media-view-bound"
       >
         {boundedComponent}

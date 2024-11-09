@@ -11,7 +11,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { preventAndStop, stop } from "@emrgen/carbon-core";
+import { preventAndStop, stop, prevent } from "@emrgen/carbon-core";
 import { ImageSrcPath } from "@emrgen/carbon-media";
 import {
   CarbonBlock,
@@ -56,11 +56,6 @@ const ImageContent = (props: RendererProps) => {
   const { ref: overlayRef } = useCarbonOverlay();
 
   const selection = useSelectionHalo(props);
-  // const dragDropRect = useDragDropRectSelect({ node, ref });
-  // const connectors = useConnectorsToProps(
-  //   useCombineConnectors(dragDropRect, selection),
-  // );
-
   const [aspectRatio, setAspectRatio] = useState(9 / 16);
 
   const handleClick = (e) => {
@@ -94,10 +89,6 @@ const ImageContent = (props: RendererProps) => {
     },
     [app],
   );
-
-  const onClick = useCallback((e) => {
-    // preventAndStop(e);
-  }, []);
 
   const updatePopover = useMemo(() => {
     // console.log(overlayRef, ref);
@@ -224,39 +215,38 @@ const ImageContent = (props: RendererProps) => {
         node={node}
         enable={ready}
         aspectRatio={aspectRatio}
-        width={"120%"}
-        boundedComponent={
-          imageSrc && (
-            <Box pos={"absolute"} h="full" w="full" ref={boundRef}>
-              <Flex
-                className="image-controls"
-                pos={"absolute"}
-                top={0}
-                right={0}
-                mr={1}
-                mt={1}
-              >
-                <IconButton
-                  colorScheme={"facebook"}
-                  size={"sm"}
-                  aria-label="Search database"
-                  icon={<TbStatusChange />}
-                  onMouseDown={preventAndStop}
-                  onClick={(e) => {
-                    preventAndStop(e);
-                    updater.onOpen();
-                  }}
-                />
-              </Flex>
-            </Box>
-          )
-        }
+        // boundedComponent={
+        //   imageSrc && (
+        //     <Box pos={"absolute"} h="full" w="full" ref={boundRef}>
+        //       <Flex
+        //         className="image-controls"
+        //         pos={"absolute"}
+        //         top={0}
+        //         right={0}
+        //         mr={1}
+        //         mt={1}
+        //       >
+        //         <IconButton
+        //           colorScheme={"facebook"}
+        //           size={"sm"}
+        //           aria-label="Search database"
+        //           icon={<TbStatusChange />}
+        //           onMouseDown={preventAndStop}
+        //           onClick={(e) => {
+        //             preventAndStop(e);
+        //             updater.onOpen();
+        //           }}
+        //         />
+        //       </Flex>
+        //     </Box>
+        //   )
+        // }
       >
         <Box
           className="image-container"
           pos={"relative"}
           onClick={handleClick}
-          bg={ready ? "" : "#eee"}
+          bg={ready ? "red" : "#eee"}
           h={imageSrc && !ready ? "100%" : "auto"}
         >
           <>
@@ -293,9 +283,10 @@ const ImageContent = (props: RendererProps) => {
                     setReady(true);
                     console.log(e);
                   }}
+                  onMouseDown={prevent}
                   placeholder={<Center color="#aaa">Image loading...</Center>}
                 />
-                <Spinner
+                {!ready&& <Spinner
                   pos={"absolute"}
                   bottom={0}
                   right={0}
@@ -303,8 +294,8 @@ const ImageContent = (props: RendererProps) => {
                   size="sm"
                   m={2}
                   color="#555"
-                  display={imageSrc ? (ready ? "none" : "block") : "none"}
-                />
+                  display={imageSrc ? (ready ? "block" : "block") : "none"}
+                />}
               </>
             )}
           </>
