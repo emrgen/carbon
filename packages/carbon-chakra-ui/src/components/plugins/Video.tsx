@@ -1,8 +1,8 @@
 import {
   Box,
   Button,
-  Flex,
   Input,
+  Spinner,
   Stack,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -13,14 +13,13 @@ import {
   RendererProps,
   useCarbon,
   useCarbonOverlay,
-  useDimensions,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
 import { Form, Formik } from "formik";
-import { isEmpty } from "lodash";
-import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import { CSSProperties, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import ReactPlayer from "react-player";
+import { normalizeSizeStyle } from "../../utils";
 
 import { ResizableContainer } from "../ResizableContainer";
 
@@ -44,24 +43,11 @@ const VideoContent = (props: RendererProps) => {
   const { ref: overlayRef } = useCarbonOverlay();
 
   const boundRef = useRef<any>(null);
-  const ref = useRef<any>(null);
   const [height, setHeight] = useState(style.height);
-  const dimensions = useDimensions(ref, true);
   const [ready, setReady] = useState(false);
   const videoUrl = node.props.get(VideoSrcPath, "");
 
-  console.log(dimensions);
-
   const selection = useSelectionHalo(props);
-
-  useEffect(() => {
-    if (isEmpty(dimensions)) return;
-    console.log("dimensions", dimensions);
-    const width = dimensions?.width ?? 150;
-    setHeight(width * (9 / 16));
-  }, [dimensions]);
-
-  console.log("height", height);
 
   const updatePopover = useMemo(() => {
     if (!overlayRef.current) return null;
@@ -149,42 +135,80 @@ const VideoContent = (props: RendererProps) => {
   }, [overlayRef, videoUrl, updater, app, node]);
 
   return (
-    <ResizableContainer node={node} enable={ready} aspectRatio={9 / 16}>
-      <Flex pos="absolute" w="full" h="full" top={0} left={0} bg="#eee"></Flex>
-      {selection.SelectionHalo}
-    </ResizableContainer>
+    <ResizableContainer
+      node={node}
+      enable={ready}
+      aspectRatio={1}
+      render={({ width, height }) => {
+        console.log("width", width, "height", height);
+        return (
+          <CarbonVideoPlayer
+            src={videoUrl}
+            ready={ready}
+            setReady={setReady}
+            height={height ?? width * (9 / 16)}
+          />
+        );
+      }}
+    ></ResizableContainer>
   );
 };
 
 interface CarbonVideoPlayerProps {
   src: string;
   ready: boolean;
+  height: number | string;
   setReady: (ready: boolean) => void;
 }
 
 const CarbonVideoPlayer = (props: CarbonVideoPlayerProps) => {
-  const { src, setReady, ready } = props;
+  const { src, setReady, ready, height } = props;
 
   return (
-    <ReactPlayer
-      onReady={() => {
-        setReady(true);
-      }}
-      url={src}
-      controls
-      width={"100%"}
-      height={"120%"}
-      // get the length of the video
-      // onDuration={(duration) => console.log("onDuration", duration)}
-      // onProgress={throttle(
-      //   (progress) => console.log("onProgress", progress),
-      //   1000
-      // )}
-      config={{
-        youtube: {
-          playerVars: {},
-        },
-      }}
+    <Box w={"full"} h={height} bg={"#eee"}>
+      <CarbonVideoLoading ready={ready} />
+      <ReactPlayer
+        onReady={() => {
+          setReady(true);
+        }}
+        url={src}
+        controls
+        width={"100%"}
+        height={normalizeSizeStyle(height)}
+        // get the length of the video
+        // onDuration={(duration) => console.log("onDuration", duration)}
+        // onProgress={throttle(
+        //   (progress) => console.log("onProgress", progress),
+        //   1000
+        // )}
+        config={{
+          youtube: {
+            playerVars: {},
+          },
+        }}
+      />
+    </Box>
+  );
+};
+
+interface CarbonVideoLoadingProps {
+  ready: boolean;
+}
+
+const CarbonVideoLoading = (props: CarbonVideoLoadingProps) => {
+  const { ready } = props;
+
+  return (
+    <Spinner
+      pos={"absolute"}
+      bottom={0}
+      right={0}
+      zIndex={10}
+      // bg={"#eee"}
+      size="sm"
+      m={2}
+      color="#555"
+      display={ready ? "none" : "block"}
     />
   );
 };

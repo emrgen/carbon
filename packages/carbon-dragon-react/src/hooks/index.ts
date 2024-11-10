@@ -15,3 +15,4 @@ export * from './useRectSelector';
 export * from './useNonDraggable';
 export * from './useDragDropRectSelect';
 export * from './useDragDropRectSelectHalo';
+export * from './useMakeDraggable';

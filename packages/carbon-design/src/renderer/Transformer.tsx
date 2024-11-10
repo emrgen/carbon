@@ -70,7 +70,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
 
   const onDragStart = useCallback(
     (event: DndEvent) => {
-      event.setState({
+      event.setInitState({
         shaper: Shaper.from(getNodeTransform(node)),
       });
       setDragging(true);
@@ -143,7 +143,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   useEffect(() => {
     const onGroupDragStart = (nodeId: NodeId, event: DndEvent) => {
       // save the current transformation matrix
-      event.setState({
+      event.setInitState({
         shaper: Shaper.from(getNodeTransform(node)),
       });
     };
@@ -218,7 +218,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   ) => {
     console.log(type, event);
     setTransforming(true);
-    event.setState({
+    event.setInitState({
       shaper: Shaper.from(getNodeTransform(node)),
       beforeLine: Line.fromPoint(getPoint(handle)).transform(shaper.affine()),
       angleLine: Line.fromPoint(getPoint(Location.BOTTOM)),

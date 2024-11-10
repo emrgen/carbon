@@ -1,24 +1,26 @@
 import { Flex } from "@chakra-ui/react";
-import { clamp } from "@emrgen/carbon-core";
+import { clamp, Node, StylePath } from "@emrgen/carbon-core";
 
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
 import { RendererProps, useCarbon } from "@emrgen/carbon-react";
 import { useDocument } from "@emrgen/carbon-react-blocks";
 import React, {
-  ReactNode,
+  CSSProperties,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
+import useResizeObserver from "use-resize-observer";
+import { normalizeSizeStyle } from "../utils";
 
 interface MediaViewProps extends RendererProps {
-  width?: number | string;
-  height?: number | string;
+  minWidth?: number;
+  minHeight?: number;
   aspectRatio?: number;
   enable?: boolean;
-  boundedComponent?: ReactNode;
+  render?: (props: { width: number; height?: number }) => React.ReactNode;
 }
 
 const roundInOffset = (size: number, offset: number) => {
@@ -38,16 +40,31 @@ const snapValue = (
   return value;
 };
 
+const getStyle = (node: Node) => {
+  return node.props.get<CSSProperties>(StylePath, {});
+};
+
 export const ResizableContainer = (props: MediaViewProps) => {
-  const { node, enable, aspectRatio = 0.681944444, boundedComponent } = props;
+  const {
+    node,
+    enable,
+    aspectRatio = 0.681944444,
+    minHeight = 100,
+    minWidth,
+  } = props;
   const app = useCarbon();
   const { doc } = useDocument();
 
+  const { ref: resizeObserverRef, ...dimensions } =
+    useResizeObserver<HTMLDivElement>();
   const ref = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(props.width ?? 0);
-  const [height, setHeight] = useState(props.height ?? 0);
+
+  const [style, setStyle] = useState<CSSProperties>(() => getStyle(node));
+  const [width, setWidth] = useState(style.width ?? "full");
+  const [height, setHeight] = useState(style.height ?? "auto");
   const [documentWidth, setDocumentWidth] = useState(1000);
   const [documentPadding, setDocumentPadding] = useState(0);
+  const [fullWidth, setFullWidth] = useState(false);
 
   const [opacity, setOpacity] = React.useState(0);
   const leftRef = useRef<HTMLDivElement>(null);
@@ -70,6 +87,10 @@ export const ResizableContainer = (props: MediaViewProps) => {
     id: "media-bottom-resizer",
   });
 
+  useEffect(() => {
+    resizeObserverRef(ref.current);
+  }, [resizeObserverRef, ref]);
+
   const updateDocumentWidth = useCallback(() => {
     const document = node.parents.find((n) => n.isDocument);
     if (!document) return;
@@ -78,9 +99,12 @@ export const ResizableContainer = (props: MediaViewProps) => {
     const parentWidth = docEl.getBoundingClientRect().width;
     const { paddingLeft } = window.getComputedStyle(docEl);
 
-    setDocumentPadding(parseInt(paddingLeft.toString().replace("px", "")));
+    setDocumentPadding(parseInt(paddingLeft.toString()));
     setDocumentWidth(parentWidth);
-  }, [app.store, node.parents]);
+    if (fullWidth) {
+      setWidth(parentWidth);
+    }
+  }, [app.store, fullWidth, node]);
 
   useEffect(() => {
     app.on("document:mounted", updateDocumentWidth);
@@ -98,8 +122,8 @@ export const ResizableContainer = (props: MediaViewProps) => {
 
   const onDragStart = useCallback(
     (e: DndEvent) => {
-      const { position, setState } = e;
-      setState({
+      const { setInitState } = e;
+      setInitState({
         width: ref?.current?.offsetWidth ?? 0,
         height: ref?.current?.offsetHeight ?? 0,
       });
@@ -110,40 +134,47 @@ export const ResizableContainer = (props: MediaViewProps) => {
   const onDragMove = useCallback(
     (e: DndEvent) => {
       if (!node.id.eq(e.node.id)) return;
-      const { position, state } = e;
-      const { width, height } = state;
-      const { deltaX, deltaY } = position;
-      const dx = 2 * deltaX;
-      const dy = 2 * deltaY;
+      const { position, initState, prevState, setPrevState } = e;
+      const { width, height } = initState;
+      const { width: pw, height: ph } = prevState;
+      const { deltaX: dx, deltaY: dy } = position;
+      let nw = width;
+      let nh = height;
 
       // console.log("dx", dx, "dy", dy, documentWidth, width, height);
 
       if (e.id === "media-left-resizer") {
         console.log("left resizer", dx, width, documentWidth, documentPadding);
-        let nw = clamp(roundInOffset(width - dx, 50), 100, documentWidth);
-        nw = snapValue(nw, documentWidth - 2 * documentPadding, -40, 50);
+        nw = clamp(roundInOffset(width - 2 * dx, 50), 100, documentWidth);
+        nw = snapValue(nw, documentWidth - 2 * documentPadding, -30, 30);
         nw = snapValue(nw, documentWidth, -60, 10);
+        if (nw === pw) return;
+
         setWidth(nw);
         setHeight(nw * aspectRatio);
       } else if (e.id === "media-right-resizer") {
-        let nw = clamp(roundInOffset(width + dx, 50), 100, documentWidth);
+        nw = clamp(roundInOffset(width + 2 * dx, 50), 100, documentWidth);
         nw = snapValue(nw, documentWidth - 2 * documentPadding, -30, 30);
         nw = snapValue(nw, documentWidth, -30, 10);
+        if (nw === pw) return;
+
         if (nw === documentWidth - 2 * documentPadding) {
           setWidth("full");
-          // setHeight("auto");
+          setHeight("auto");
+        } else if (nw === documentWidth) {
+          setWidth(nw);
+          setHeight(360);
         } else {
           setWidth(nw);
-          setHeight(nw * aspectRatio);
+          setHeight("auto");
         }
+        setFullWidth(nw === documentWidth);
       } else if (e.id === "media-bottom-resizer") {
-        let nh = clamp(
-          roundInOffset(height + dy, 50),
-          100,
-          aspectRatio * width,
-        );
+        nh = clamp(roundInOffset(height + dy, 50), 100, aspectRatio * width);
         setHeight(nh);
       }
+
+      setPrevState({ width: nw, height: nh });
     },
     [aspectRatio, documentPadding, documentWidth, node.id],
   );
@@ -173,27 +204,30 @@ export const ResizableContainer = (props: MediaViewProps) => {
       position={"relative"}
       left={"50%"}
       transform={"translateX(-50%)"}
-      width={width ? width + "px" : "full"}
-      height={height ? height + "px" : "full"}
-      minH={"100px"}
-      maxW={documentWidth ? documentWidth + "px" : "full"}
+      width={normalizeSizeStyle(width)}
+      height={normalizeSizeStyle(height)}
+      maxW={normalizeSizeStyle(documentWidth)}
+      minH={minHeight + "px"}
       maxH={documentWidth ? documentWidth * aspectRatio + "px" : "full"}
       transition={"width 0.3s, height 0.3s"}
       borderRadius={4}
       overflow={"hidden"}
+      onMouseOver={() => setOpacity(1)}
+      onMouseLeave={() => setOpacity(0)}
     >
       <Flex
         pos={"relative"}
-        top={0}
-        onMouseOver={() => setOpacity(1)}
-        onMouseOut={() => setOpacity(0)}
-        width={"full"}
-        alignItems={"center"}
-        overflow={"hidden"}
-        transition={"width 0.3s, height 0.3s"}
-        className="media-view-bound"
+        h={"full"}
+        w={"full"}
+        flex={1}
+        alignItems={width === documentWidth ? "center" : "auto"}
       >
-        {boundedComponent}
+        {props.render &&
+          dimensions?.width &&
+          props.render({
+            width: dimensions.width,
+            height: height === "auto" ? undefined : dimensions.height,
+          })}
         {props.children}
         {enable && (
           <>
@@ -231,23 +265,25 @@ export const ResizableContainer = (props: MediaViewProps) => {
               {...rightHandle.listeners}
               {...rightHandle.attributes}
             />
-            <Flex
-              ref={bottomRef}
-              pos={"absolute"}
-              bottom={2}
-              left={"50%"}
-              w={"50px"}
-              h={"6px"}
-              bg={"rgba(0,0,0,0.5)"}
-              borderRadius={4}
-              transform={"translate(-50%,0)"}
-              cursor={"ns-resize"}
-              border={"1px solid rgba(255,255,255,0.8)"}
-              opacity={opacity ? 1 : 0}
-              transition={"opacity 0.2s ease-in-out"}
-              {...bottomHandle.listeners}
-              {...bottomHandle.attributes}
-            />
+            {documentWidth === width && (
+              <Flex
+                ref={bottomRef}
+                pos={"absolute"}
+                bottom={2}
+                left={"50%"}
+                w={"50px"}
+                h={"6px"}
+                bg={"rgba(0,0,0,0.5)"}
+                borderRadius={4}
+                transform={"translate(-50%,0)"}
+                cursor={"ns-resize"}
+                border={"1px solid rgba(255,255,255,0.8)"}
+                opacity={opacity ? 1 : 0}
+                transition={"opacity 0.2s ease-in-out"}
+                {...bottomHandle.listeners}
+                {...bottomHandle.attributes}
+              />
+            )}
           </>
         )}
       </Flex>

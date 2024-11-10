@@ -56,7 +56,7 @@ export const SelectionGroup = (props: SelectionGroupProps) => {
         getData,
       };
 
-      event.setState(state);
+      event.setInitState(state);
       board.selectedNodes.forEach((nodeId) => {
         board.bus.emit(nodeId, "group:drag:start", {
           ...event,

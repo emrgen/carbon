@@ -104,7 +104,7 @@ const OuterBound = (props: OuterBoundProps) => {
 
     console.log("Min scale", minScale);
 
-    event.setState({
+    event.setInitState({
       shaper: shaper,
       minScale,
       beforeLine: Line.fromPoint(getPoint(handle)).transform(shaper.affine()),
@@ -490,7 +490,7 @@ const InnerBound = (props: InnerBoundProps) => {
 
     console.log(scaleLimits);
 
-    event.setState({
+    event.setInitState({
       shaper: shaper,
       scaleLimits,
       startPoint: shaper.apply(getPoint(handle)),

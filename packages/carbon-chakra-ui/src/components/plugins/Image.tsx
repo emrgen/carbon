@@ -1,5 +1,4 @@
 import {
-  Box,
   Center,
   Flex,
   Spinner,
@@ -44,7 +43,7 @@ const ImageContent = (props: RendererProps) => {
     node.props.get<CSSProperties>(StylePath, {}),
   );
   const imageSrc = node.props.get(ImageSrcPath, "");
-  const [ready, setReady] = useState(true);
+  const [ready, setReady] = useState(false);
   const caption = node.props.get(CaptionPath, "");
   const ref = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -98,31 +97,18 @@ const ImageContent = (props: RendererProps) => {
 
   return (
     <ResizableContainer
-      width={style.width ?? 0}
-      height={style.height ?? 0}
+      // width={style.width ?? 0}
+      // height={style.height ?? 0}
       node={node}
       enable={ready}
       aspectRatio={aspectRatio}
     >
-      <Box
-        className="image-container"
-        pos={"relative"}
-        onClick={handleClick}
-        bg={ready ? "red" : "#eee"}
-        h={"full"}
-        w={"full"}
-      >
-        {/*{!imageSrc && (*/}
-        {/*  <CarbonImageLoading*/}
-        {/*    src={imageSrc}*/}
-        {/*    ready={ready}*/}
-        {/*    setReady={setReady}*/}
-        {/*  />*/}
-        {/*)}*/}
-        {/*{imageSrc && (*/}
-        {/*  <CarbonLazyImage src={imageSrc} ready={ready} setReady={setReady} />*/}
-        {/*)}*/}
-      </Box>
+      {!imageSrc && (
+        <CarbonImageLoading src={imageSrc} ready={ready} setReady={setReady} />
+      )}
+      {imageSrc && (
+        <CarbonLazyImage src={imageSrc} ready={ready} setReady={setReady} />
+      )}
     </ResizableContainer>
   );
 };
