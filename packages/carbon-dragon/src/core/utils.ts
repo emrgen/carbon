@@ -4,7 +4,31 @@ import { DndEvent } from "../types";
 
 const { min, max, abs } = Math;
 
-export const domRect = (el: HTMLElement) => el.getBoundingClientRect();
+export interface ElementRect {
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+  x: number;
+  y: number;
+  right: number;
+  bottom: number;
+}
+
+export const domRect = (el: HTMLElement): ElementRect => {
+  const rect = el.getBoundingClientRect();
+
+  return {
+    width: rect.width,
+    height: rect.height,
+    top: rect.top,
+    left: rect.left,
+    x: rect.x,
+    y: rect.y,
+    right: rect.right,
+    bottom: rect.bottom,
+  };
+};
 
 export const getEventPosition = <E extends MouseEvent>(from: E, to: E) => {
   const { clientX: startX, clientY: startY } = from;

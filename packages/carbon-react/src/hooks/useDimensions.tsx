@@ -1,38 +1,13 @@
-import { domRect, elementBound } from "@emrgen/carbon-dragon";
-import { useState, useCallback, useLayoutEffect, Ref, RefObject, useEffect } from "react";
-export interface DimensionObject {
-  width: number;
-  height: number;
-  top: number;
-  left: number;
-  x: number;
-  y: number;
-  right: number;
-  bottom: number;
-}
+import { domRect, ElementRect } from "@emrgen/carbon-dragon";
+import { RefObject, useEffect, useLayoutEffect, useState } from "react";
 
-export type UseDimensionsHook = {} | DimensionObject
-
-function getDimensionObject(node: HTMLElement): DimensionObject {
-  const rect = node.getBoundingClientRect();
-
-  return {
-    width: rect.width,
-    height: rect.height,
-    top: rect.top,
-    left: rect.left,
-    x: rect.x,
-    y: rect.y,
-    right: rect.right,
-    bottom: rect.bottom,
-  };
-}
+export type UseDimensionsHook = ElementRect | null;
 
 export function useDimensions(
   ref: RefObject<HTMLElement>,
   liveMeasure = true,
 ): UseDimensionsHook {
-  const [dimensions, setDimensions] = useState({});
+  const [dimensions, setDimensions] = useState<ElementRect | null>(null);
   const [node, setNode] = useState<HTMLElement>(null!);
 
   useEffect(() => {
@@ -64,4 +39,3 @@ export function useDimensions(
 
   return dimensions;
 }
-

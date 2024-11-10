@@ -4,10 +4,8 @@ import { clamp } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
 import { RendererProps, useCarbon } from "@emrgen/carbon-react";
-import { useDocument } from '@emrgen/carbon-react-blocks';
+import { useDocument } from "@emrgen/carbon-react-blocks";
 import React, {
-  forwardRef,
-  ForwardRefRenderFunction,
   ReactNode,
   useCallback,
   useEffect,
@@ -16,9 +14,8 @@ import React, {
 } from "react";
 
 interface MediaViewProps extends RendererProps {
-  ref: any;
-  width?: number;
-  height?: number;
+  width?: number | string;
+  height?: number | string;
   aspectRatio?: number;
   enable?: boolean;
   boundedComponent?: ReactNode;
@@ -28,20 +25,25 @@ const roundInOffset = (size: number, offset: number) => {
   return Math.round(size / offset) * offset;
 };
 
-const snapValue = (value: number, snapTo: number, minOffset: number, maxOffset: number) => {
+const snapValue = (
+  value: number,
+  snapTo: number,
+  minOffset: number,
+  maxOffset: number,
+) => {
   if (snapTo + minOffset < value && value < snapTo + maxOffset) {
     return snapTo;
   }
 
-  return value
-}
+  return value;
+};
 
-export const InnerResizableContainer = (props: MediaViewProps, ref: any) => {
+export const ResizableContainer = (props: MediaViewProps) => {
   const { node, enable, aspectRatio = 0.681944444, boundedComponent } = props;
   const app = useCarbon();
   const { doc } = useDocument();
 
-  const [initialSize, setInitialSize] = useState({ width: 0, height: 0 });
+  const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(props.width ?? 0);
   const [height, setHeight] = useState(props.height ?? 0);
   const [documentWidth, setDocumentWidth] = useState(1000);
@@ -94,13 +96,16 @@ export const InnerResizableContainer = (props: MediaViewProps, ref: any) => {
     };
   }, [updateDocumentWidth]);
 
-  const onDragStart = useCallback((e: DndEvent) => {
-    const { position, setState } = e;
-    setState({
-      width: ref.current?.offsetWidth ?? 0,
-      height: ref.current?.offsetHeight ?? 0,
-    });
-  }, []);
+  const onDragStart = useCallback(
+    (e: DndEvent) => {
+      const { position, setState } = e;
+      setState({
+        width: ref?.current?.offsetWidth ?? 0,
+        height: ref?.current?.offsetHeight ?? 0,
+      });
+    },
+    [ref],
+  );
 
   const onDragMove = useCallback(
     (e: DndEvent) => {
@@ -108,10 +113,10 @@ export const InnerResizableContainer = (props: MediaViewProps, ref: any) => {
       const { position, state } = e;
       const { width, height } = state;
       const { deltaX, deltaY } = position;
-      const dx = roundInOffset(2 * deltaX, 50);
-      const dy = roundInOffset(deltaY, 50);
+      const dx = 2 * deltaX;
+      const dy = 2 * deltaY;
 
-      console.log("dx", dx, "dy", dy, documentWidth, width, height);
+      // console.log("dx", dx, "dy", dy, documentWidth, width, height);
 
       if (e.id === "media-left-resizer") {
         console.log("left resizer", dx, width, documentWidth, documentPadding);
@@ -122,10 +127,15 @@ export const InnerResizableContainer = (props: MediaViewProps, ref: any) => {
         setHeight(nw * aspectRatio);
       } else if (e.id === "media-right-resizer") {
         let nw = clamp(roundInOffset(width + dx, 50), 100, documentWidth);
-        nw = snapValue(nw, documentWidth - 2 * documentPadding, -40, 50);
-        nw = snapValue(nw, documentWidth, -60, 10);
-        setWidth(nw);
-        setHeight(nw * aspectRatio);
+        nw = snapValue(nw, documentWidth - 2 * documentPadding, -30, 30);
+        nw = snapValue(nw, documentWidth, -30, 10);
+        if (nw === documentWidth - 2 * documentPadding) {
+          setWidth("full");
+          // setHeight("auto");
+        } else {
+          setWidth(nw);
+          setHeight(nw * aspectRatio);
+        }
       } else if (e.id === "media-bottom-resizer") {
         let nh = clamp(
           roundInOffset(height + dy, 50),
@@ -158,6 +168,8 @@ export const InnerResizableContainer = (props: MediaViewProps, ref: any) => {
 
   return (
     <Flex
+      className={"resizable-container"}
+      ref={ref}
       position={"relative"}
       left={"50%"}
       transform={"translateX(-50%)"}
@@ -172,7 +184,6 @@ export const InnerResizableContainer = (props: MediaViewProps, ref: any) => {
     >
       <Flex
         pos={"relative"}
-        ref={ref}
         top={0}
         onMouseOver={() => setOpacity(1)}
         onMouseOut={() => setOpacity(0)}
@@ -243,5 +254,3 @@ export const InnerResizableContainer = (props: MediaViewProps, ref: any) => {
     </Flex>
   );
 };
-
-export const ResizableContainer = forwardRef<HTMLDivElement, MediaViewProps>(InnerResizableContainer);

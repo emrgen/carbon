@@ -27,10 +27,12 @@ export class Video extends NodePlugin {
         icon: "video",
         tags: ["video", "movie", "film"],
       },
-      attrs: {
-        html: {
-          suppressContentEditableWarning: true,
-          contentEditable: false,
+      props: {
+        local: {
+          html: {
+            suppressContentEditableWarning: true,
+            contentEditable: false,
+          },
         },
       },
       state: {
