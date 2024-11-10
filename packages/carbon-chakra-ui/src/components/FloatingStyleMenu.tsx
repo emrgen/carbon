@@ -282,7 +282,7 @@ export function FloatingStyleMenu() {
         </Box>
       </Portal>
     );
-  }, [showContextMenu, overlay.ref, rect, app.cmd.formatter, marks]);
+  }, [showContextMenu, overlay.ref, rect, app, marks]);
 
   return <>{contextMenu}</>;
 }

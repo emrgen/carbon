@@ -29,10 +29,12 @@ import { ResizableContainer } from "../ResizableContainer";
 
 export function VideoComp(props: RendererProps) {
   const { node } = props;
+  const { SelectionHalo } = useSelectionHalo(props);
 
   return (
     <CarbonBlock {...props}>
       <VideoContent node={node} />
+      {SelectionHalo}
     </CarbonBlock>
   );
 }
@@ -50,8 +52,6 @@ const VideoContent = (props: RendererProps) => {
   const [height, setHeight] = useState(style.height);
   const [ready, setReady] = useState(false);
   const videoUrl = node.props.get(VideoSrcPath, "");
-
-  const selection = useSelectionHalo(props);
 
   const updatePopover = useMemo(() => {
     if (!overlayRef.current) return null;
