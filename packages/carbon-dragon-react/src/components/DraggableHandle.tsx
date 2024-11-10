@@ -1,6 +1,5 @@
 import { isNestableNode } from "@emrgen/carbon-blocks";
 import {
-  ActionOrigin,
   EventsIn,
   Node,
   nodeLocation,
@@ -75,9 +74,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
           CustomEvent.create(EventsIn.dragStart, e.node, e.event),
         );
         app.enable(() => {
-          app.cmd
-            .Select(PinnedSelection.fromNodes(e.node!), ActionOrigin.UserInput)
-            .Dispatch();
+          app.cmd.SelectBlocks([]).Dispatch();
         });
       }
     },

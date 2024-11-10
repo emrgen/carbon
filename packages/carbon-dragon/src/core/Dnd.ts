@@ -1,9 +1,10 @@
 import { Carbon, Node, NodeId, NodeIdSet, Point } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
+import { Optional, Predicate } from "@emrgen/types";
 import EventEmitter from "events";
-import { identity, throttle } from "lodash";
+import { throttle } from "lodash";
 import { DndEvent } from "../types";
 import { DndNodeStore } from "./DndStore";
+import { domRect } from "./utils";
 
 type Acceptor = (receiver: Node, child: Node, at: Point) => boolean;
 
@@ -112,14 +113,6 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
   // show drag handles on hover on draggable
   // TODO: handle container scroll
   onMouseMove(node: Node, e: MouseEvent) {
-    // check if the state is dirty and refresh the draggables and containers
-    if (this.isDirty) {
-      console.log("DIRTY", "will refresh the bounds");
-      this.refreshDirtyBounds();
-      this.isDirty = false;
-    }
-
-    // console.log("show drag handle", node.id.toString());
     this.showDragHandle(node, e);
   }
 
@@ -128,180 +121,53 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
   //   this.hideDragHandle(node, e);
   // }
 
-  // TODO: optimize this later
-  private refreshDirtyBounds() {
-    this.draggables.clear();
-    const updated = this.updatedNodeIds
-      .map((id) => this.app.store.get(id))
-      .filter(identity) as Node[];
-    const deleted = NodeIdSet.fromIds(
-      updated.filter((n) => this.app.store.deleted(n?.id)).map((n) => n.id),
-    );
-
-    const nodes = updated.filter((n) => !deleted.has(n.id));
-    deleted.forEach((id) => {
-      this.draggables.delete(id);
-    });
-
-    this.app.content.all((node) => {
-      if (node.isBlock) {
-        this.refreshBound(node);
-      }
-    });
-
-    this.updatedNodeIds.clear();
-  }
-
-  private refreshBound(node: Node) {
-    const el = this.app.store.element(node.id);
-    if (el) {
-      // console.log(
-      //   "refreshing bounds",
-      //   node.name,
-      //   node.id.toString(),
-      //   node.textContent,
-      // );
-      const bound = el.getBoundingClientRect();
-      if (node.type.dnd?.container) {
-        console.log("xxxxxxxxxx");
-        this.containers.register(node, el, bound);
-      }
-
-      if (node.type.dnd?.draggable) {
-        this.draggables.register(node, el, bound);
-      }
-    }
-  }
-
-  private showDragHandle(node: Node, e) {
-    const { draggables, draggedNodeId } = this;
+  private showDragHandle(node: Node, e: MouseEvent) {
+    const { draggedNodeId } = this;
     const { clientX: x, clientY: y } = e;
-    const target = document.elementsFromPoint(x, y);
-    let draggableBlock: Optional<Node> = null;
-    // for (let el of target) {
-    //   const targetNode = this.app.store.resolveNode(el);
-    //   if (targetNode?.isBlock && targetNode.type.dnd?.handle) {
-    //     draggableBlock = targetNode;
-    //     break;
-    //   }
-    // }
-    //
-    // if (draggableBlock) {
-    //   if (draggedNodeId?.eq(draggableBlock.id)) {
-    //     return;
-    //   }
-    //
-    //   this.onOverNodeWithHandle(draggableBlock);
-    //   return;
-    // }
+    let hitNode = this.findHitNode(x, y, (n) => hasHandle(n) || n.isDocument);
 
-    const hit: Node[] = [];
-    const bound = { minX: x - 2, minY: y - 1, maxX: x + 2, maxY: y + 1 };
-    if (node.isDocument) {
-      const { paddingLeft = "0", paddingRight = "0" } =
-        window.getComputedStyle(this.app.store.element(node.id)!) ?? {};
-      bound.minX = x - parseInt(paddingRight) - 100;
-      bound.maxX = x + parseInt(paddingLeft) + 100;
+    if (hitNode?.isDocument) {
+      // check if the cursor is in the document padding area
+      const docEl = this.app.store.element(hitNode.id)!;
+      const rect = domRect(docEl);
+      const style = window.getComputedStyle(docEl) ?? {};
+      const { paddingLeft = "0", paddingRight = "0" } = style;
+
+      // check if the cursor is in the padding area of the document
+      if (rect.left < x && x < rect.left + parseInt(paddingLeft)) {
+        hitNode = this.findHitNode(x + parseInt(paddingLeft), y, hasHandle);
+      } else if (rect.right - parseInt(paddingRight) < x && x < rect.right) {
+        hitNode = this.findHitNode(x - parseInt(paddingRight), y, hasHandle);
+      }
     }
 
-    const collision = draggables.collides(bound);
-    hit.push(...collision);
+    if (!hitNode) {
+      this.resetDraggedNode();
+      return;
+    }
 
-    // if the hit node is not in the store(may be deleted), ignore it
-    const existing = hit.filter((n) => {
-      return this.app.store.get(n.id);
+    // show drag handle on the hit node
+    this.onOverNodeWithHandle(hitNode);
+  }
+
+  // find the node under the cursor, that satisfies the predicate
+  findHitNode(x: number, y: number, fn: Predicate<Node>) {
+    const { app } = this;
+    const hits = document.elementsFromPoint(x, y);
+    const el = hits.find((el) => {
+      const node = app.store.get(el);
+      if (node && fn(node)) {
+        return node;
+      }
+
+      return null;
     });
 
-    // console.log(hit)
-    console.warn(existing.map((n) => n.id.toString()));
-    if (existing.length == 0) {
-      this.resetDraggedNode();
-      return;
+    if (el) {
+      return app.store.get(el);
     }
 
-    const hitNode = existing[0]!;
-    // console.log(hitNode.name, hitNode.depth, hitNode.id.toString())
-    if (draggedNodeId?.eq(hitNode.id)) {
-      return;
-    }
-
-    this.onOverNodeWithHandle(hitNode);
-  }
-
-  refresh(node: Node) {
-    return;
-
-    // console.log('show drag handle', node.id.toString());
-    const { app, draggables, draggedNodeId } = this;
-    const document = node.chain.find((n) => n.isDocument);
-    if (!document) {
-      return;
-    }
-
-    const doc = app.store.element(document!.id);
-    const docParent = doc?.parentNode as HTMLElement;
-
-    if (!docParent) {
-      return;
-    }
-
-    const { scrollTop, scrollLeft } = docParent;
-
-    // console.warn('mouse in', node.id.toString(), this.isDirty)
-    if (this.isDirty) {
-      // console.log('update draggable', this.draggables);
-      this.draggables.refresh(scrollTop, scrollLeft);
-      this.containers.refresh(scrollTop, scrollLeft);
-      this.isDirty = false;
-    }
-
-    return {
-      scrollTop,
-      scrollLeft,
-    };
-  }
-
-  private _showDragHandle(node: Node, e: MouseEvent) {
-    // console.log('show drag handle', node.id.toString());
-    const { app, draggables, draggedNodeId } = this;
-    const scrollPos = this.refresh(node);
-    if (!scrollPos) return;
-    const { scrollTop, scrollLeft } = scrollPos;
-
-    const { clientX: x, clientY } = e;
-    const y = clientY + scrollTop;
-
-    const bound1 = { minX: x + 90, minY: y - 1, maxX: x + 100, maxY: y + 1 };
-    const bound2 = { minX: x - 2, minY: y - 1, maxX: x + 2, maxY: y + 1 };
-    const collision = draggables.collides(bound1);
-    // console.log('draggables',draggables.all());
-    const hit: Node[] = [];
-    if (collision.length != 0) {
-      hit.push(...collision);
-    } else {
-      const collision = draggables.collides(bound2);
-      hit.push(...collision);
-    }
-
-    // console.log(hit)
-    console.warn(
-      hit.map((n) => n.id.toString()),
-      this.draggables.has(node),
-    );
-    if (hit.length == 0) {
-      this.resetDraggedNode();
-      return;
-    }
-
-    const hitNode = hit[0]!;
-    // console.log(hitNode.name, hitNode.depth, hitNode.id.toString())
-    if (draggedNodeId?.eq(hitNode.id)) {
-      // console.log('cancelled')
-      return;
-    }
-
-    // console.log('draggableHover', hitNode.id.toString(),);
-    this.onOverNodeWithHandle(hitNode);
+    return null;
   }
 
   // emit events when mouse is over a draggable node
@@ -334,4 +200,8 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
       this.draggedNodeId = null;
     }
   }
+}
+
+function hasHandle(node: Node) {
+  return !!node.type.dnd?.handle;
 }
