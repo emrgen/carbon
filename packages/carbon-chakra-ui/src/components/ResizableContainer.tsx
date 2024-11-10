@@ -49,7 +49,7 @@ export const ResizableContainer = (props: MediaViewProps) => {
     node,
     enable,
     aspectRatio = 0.681944444,
-    minHeight = 100,
+    minHeight = 70,
     minWidth,
   } = props;
   const app = useCarbon();
@@ -216,9 +216,11 @@ export const ResizableContainer = (props: MediaViewProps) => {
       onMouseLeave={() => setOpacity(0)}
     >
       <Flex
+        className={"resizable-content"}
         pos={"relative"}
         h={"full"}
         w={"full"}
+        minH={minHeight + "px"}
         flex={1}
         alignItems={width === documentWidth ? "center" : "auto"}
       >

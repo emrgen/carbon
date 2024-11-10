@@ -127,15 +127,17 @@ const CarbonImageLoading = (props: CarbonLazyImageProps) => {
         onClick={(e) => {
           stop(e);
         }}
+        h={"full"}
+        w={"full"}
+        minH={"inherit"}
+        cursor={"pointer"}
+        transition={"background 0.3s, color 0.3s"}
+        _hover={{
+          bg: "rgba(0,0,0,0.1)",
+          color: "#999",
+        }}
       >
-        <Square
-          size={12}
-          borderRadius={4}
-          // border={"1px solid #ddd"}
-          // bg={"#fff"}
-          fontSize={26}
-          color={"#aaa"}
-        >
+        <Square size={12} borderRadius={4} fontSize={26} color={"#aaa"}>
           <RxImage />
         </Square>
         <Text>Click to add image</Text>

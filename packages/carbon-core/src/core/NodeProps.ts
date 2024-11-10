@@ -261,8 +261,12 @@ export const PropLink = "link/props";
 export const BackgroundImagePath = "remote/state/backgroundImage";
 export const MediaReadyPath = "local/state/media/ready";
 export const LocalVideoInfoPath = "local/state/video/info";
+// dirty counter for local changes to force re-render
 export const LocalDirtyCounterPath = "local/state/dirty/counter";
-export const FocusOnInsertPath = "local/state/focusOnInsert";
+// focus on insert
+export const FocusOnInsertPath = "local/state/insert/focus";
+// show node options on insert
+export const OptionsOnInsertPath = "local/state/insert/options";
 export const SelectedOptionsPath = "remote/state/selected/options";
 export const CodeValuePath = "remote/state/code/value";
 

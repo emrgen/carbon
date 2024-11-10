@@ -2,6 +2,7 @@ import {
   EventHandler,
   NodePlugin,
   NodeSpec,
+  OptionsOnInsertPath,
   skipKeyEvent,
 } from "@emrgen/carbon-core";
 
@@ -15,12 +16,24 @@ export class Image extends NodePlugin {
       group: "content",
       atom: true,
       isolate: true,
-      inlineSelectable: true,
       draggable: true,
       dragHandle: true,
       insert: true,
-      rectSelectable: true,
-      blockSelectable: true,
+      change: {
+        in: {
+          props: {
+            [OptionsOnInsertPath]: true,
+          },
+        },
+      },
+      dnd: {
+        handle: true,
+        draggable: true,
+      },
+      selection: {
+        block: true,
+        rect: true,
+      },
       info: {
         title: "Image",
         description: "Insert an image",

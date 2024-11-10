@@ -1,9 +1,12 @@
 import {
   Box,
   Button,
+  Flex,
   Input,
   Spinner,
+  Square,
   Stack,
+  Text,
   useDisclosure,
 } from "@chakra-ui/react";
 import { stop, StylePath } from "@emrgen/carbon-core";
@@ -18,6 +21,7 @@ import {
 import { Form, Formik } from "formik";
 import { CSSProperties, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { RxImage } from "react-icons/rx";
 import ReactPlayer from "react-player";
 import { normalizeSizeStyle } from "../../utils";
 
@@ -141,6 +145,9 @@ const VideoContent = (props: RendererProps) => {
       aspectRatio={1}
       render={({ width, height }) => {
         console.log("width", width, "height", height);
+        if (!videoUrl) {
+          return <CarbonVideoEmpty />;
+        }
         return (
           <CarbonVideoPlayer
             src={videoUrl}
@@ -151,6 +158,35 @@ const VideoContent = (props: RendererProps) => {
         );
       }}
     ></ResizableContainer>
+  );
+};
+
+interface CarbonVideoEmptyProps {}
+
+const CarbonVideoEmpty = (props: CarbonVideoEmptyProps) => {
+  return (
+    <>
+      <Flex
+        className="image-overlay"
+        onClick={(e) => {
+          stop(e);
+        }}
+        h={"full"}
+        w={"full"}
+        minH={"inherit"}
+        cursor={"pointer"}
+        transition={"background 0.3s, color 0.3s"}
+        _hover={{
+          bg: "rgba(0,0,0,0.1)",
+          color: "#999",
+        }}
+      >
+        <Square size={12} borderRadius={4} fontSize={26} color={"#aaa"}>
+          <RxImage />
+        </Square>
+        <Text>Click to add video</Text>
+      </Flex>
+    </>
   );
 };
 

@@ -15,12 +15,15 @@ export class Video extends NodePlugin {
       group: "content",
       atom: true,
       isolate: true,
-      inlineSelectable: true,
-      draggable: true,
-      dragHandle: true,
       insert: true,
-      rectSelectable: true,
-      blockSelectable: true,
+      dnd: {
+        handle: true,
+        draggable: true,
+      },
+      selection: {
+        block: true,
+        rect: true,
+      },
       info: {
         title: "Video",
         description: "Insert a video",

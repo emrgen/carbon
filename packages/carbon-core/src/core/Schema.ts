@@ -153,6 +153,13 @@ export interface NodeSpec {
     match?: "remove" | "unwrap" | "insert";
   };
 
+  change?: {
+    in?: {
+      props?: Record<string, any>;
+      effect?: "replace" | "insertBefore" | "insertAfter"; // default replace
+    };
+  };
+
   split?: {
     inside?: boolean; // default false
     name?: string;
