@@ -6,6 +6,8 @@ import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
 import { RendererProps, useCarbon } from "@emrgen/carbon-react";
 import { useDocument } from '@emrgen/carbon-react-blocks';
 import React, {
+  forwardRef,
+  ForwardRefRenderFunction,
   ReactNode,
   useCallback,
   useEffect,
@@ -14,6 +16,9 @@ import React, {
 } from "react";
 
 interface MediaViewProps extends RendererProps {
+  ref: any;
+  width?: number;
+  height?: number;
   aspectRatio?: number;
   enable?: boolean;
   boundedComponent?: ReactNode;
@@ -31,15 +36,14 @@ const snapValue = (value: number, snapTo: number, minOffset: number, maxOffset: 
   return value
 }
 
-export function ResizableContainer(props: MediaViewProps) {
+export const InnerResizableContainer = (props: MediaViewProps, ref: any) => {
   const { node, enable, aspectRatio = 0.681944444, boundedComponent } = props;
   const app = useCarbon();
-  const {doc} = useDocument();
+  const { doc } = useDocument();
 
-  const ref = useRef<HTMLDivElement>(null);
   const [initialSize, setInitialSize] = useState({ width: 0, height: 0 });
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(props.width ?? 0);
+  const [height, setHeight] = useState(props.height ?? 0);
   const [documentWidth, setDocumentWidth] = useState(1000);
   const [documentPadding, setDocumentPadding] = useState(0);
 
@@ -70,7 +74,7 @@ export function ResizableContainer(props: MediaViewProps) {
     const docEl = app.store.element(document.id);
     if (!docEl) return;
     const parentWidth = docEl.getBoundingClientRect().width;
-    const {paddingLeft} = window.getComputedStyle(docEl)
+    const { paddingLeft } = window.getComputedStyle(docEl);
 
     setDocumentPadding(parseInt(paddingLeft.toString().replace("px", "")));
     setDocumentWidth(parentWidth);
@@ -157,7 +161,7 @@ export function ResizableContainer(props: MediaViewProps) {
       position={"relative"}
       left={"50%"}
       transform={"translateX(-50%)"}
-      width={width ? width + 'px' : "full"}
+      width={width ? width + "px" : "full"}
       height={height ? height + "px" : "full"}
       minH={"100px"}
       maxW={documentWidth ? documentWidth + "px" : "full"}
@@ -238,4 +242,6 @@ export function ResizableContainer(props: MediaViewProps) {
       </Flex>
     </Flex>
   );
-}
+};
+
+export const ResizableContainer = forwardRef<HTMLDivElement, MediaViewProps>(InnerResizableContainer);

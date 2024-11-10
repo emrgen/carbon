@@ -4,6 +4,8 @@ import { DndEvent } from "../types";
 
 const { min, max, abs } = Math;
 
+export const domRect = (el: HTMLElement) => el.getBoundingClientRect();
+
 export const getEventPosition = <E extends MouseEvent>(from: E, to: E) => {
   const { clientX: startX, clientY: startY } = from;
   const { clientX: endX, clientY: endY } = to;

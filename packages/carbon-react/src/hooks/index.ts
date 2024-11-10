@@ -14,3 +14,4 @@ export * from "./useCarbonMounted";
 export * from "./useNodeWatcher";
 export * from "./useRenderManager";
 export * from "./useEventTracker";
+export * from "./useDimensions";
