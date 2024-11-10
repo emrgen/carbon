@@ -92,10 +92,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
       const belBound = elementBound(el!);
 
       const bound = {
-        minX: x - 10,
-        minY: y - 10,
-        maxX: x + 10,
-        maxY: y + 10,
+        minX: x - 5,
+        minY: y - 5,
+        maxX: x + 5,
+        maxY: y + 5,
       };
 
       const hits = dnd.containers.collides(bound);
@@ -148,19 +148,24 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (!hitNode) {
         return;
       }
+
+      console.log("hit node", hitNode?.id.toString());
       if (hitNode?.id.eq(node.id)) {
         return;
       }
 
+      console.log("hit node", hitNode?.id.toString());
       if (hitNode.isDocument) {
         return;
       }
+
+      console.log("hit node", hitNode?.id.toString());
       const isChildren = hitNode.chain.some((n) => n.eq(node));
       if (isChildren) {
         return;
       }
 
-      // console.log("hits", hitNode?.id.toString());
+      console.log("hits", hitNode?.id.toString());
       const to = findDropPosition(e, hitNode);
       const from = nodeLocation(node)!;
       if (!to) return;
@@ -177,7 +182,6 @@ export function DraggableHandle(props: FastDragHandleProps) {
         !to.nodeId.eq(hitNode.id) && hitNode.name == "paragraph" ? 30 : 0;
       if (to.isBefore) {
         // drop before the hit node
-        console.log(x, y);
         const beforeNode = hitNode.prevSibling;
 
         if (beforeNode) {
@@ -252,16 +256,14 @@ export function DraggableHandle(props: FastDragHandleProps) {
       app.enable(() => {
         app.parkCursor();
 
-        const { tr } = app;
+        const { cmd } = app;
         const after = PinnedSelection.fromNodes(node);
 
-        tr.Move(from, to, node.id).Select(
-          PinnedSelection.fromNodes(node),
-          ActionOrigin.UserInput,
-        );
-        tr.Select(after, ActionOrigin.NoSync);
-        tr.Dispatch();
+        cmd.Move(from, to, node.id);
+        cmd.SelectBlocks([node.id]);
+        cmd.Dispatch();
       });
+      console.log("drag end");
     },
     [app, findDropPosition, findHitNode],
   );

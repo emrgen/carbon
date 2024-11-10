@@ -77,6 +77,7 @@ export class DndNodeStore {
 
   // connect the node to the rendered HTML element
   register(node: Node, el: HTMLElement, rect?: DOMRect) {
+    console.log(node.name, el);
     if (!el) {
       console.error(`Registering empty dom node for ${node.id.toString()}`);
       return;

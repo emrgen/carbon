@@ -93,8 +93,6 @@ const ImageContent = (props: RendererProps) => {
     setAspectRatio(height / width);
   }, [app, imageRef, node]);
 
-  console.log(ready);
-
   return (
     <ResizableContainer
       // width={style.width ?? 0}

@@ -332,12 +332,14 @@ export class Carbon extends EventEmitter {
   }
 
   enable(fn?: Function) {
+    const isEnable = this.enabled;
     this.enabled = true;
     console.log("enable");
-
     if (fn) {
       fn();
-      this.disable();
+      if (!isEnable) {
+        this.disable();
+      }
     }
   }
 

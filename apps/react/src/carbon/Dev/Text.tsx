@@ -1,6 +1,9 @@
 import { attrRenderers } from "@emrgen/carbon-attributes";
 import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
-import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui";
+import {
+  carbonChakraRenderers,
+  FloatingStyleMenu,
+} from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codemirrorExtension } from "@emrgen/carbon-codemirror";
 import {
@@ -10,6 +13,7 @@ import {
 import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
+import { mediaPlugins } from "@emrgen/carbon-media";
 import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
 import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import { CarbonApp } from "@emrgen/carbon-utils";
@@ -33,6 +37,8 @@ export const data = node("carbon", [
     [
       title([text("I am a frame title")]),
       node("paragraph", [title([text("I am a paragraph title")])]),
+      node("paragraph", [title([text("another paragraph title")])]),
+      node("image"),
     ],
     {
       [ModePath]: "edit",
@@ -49,6 +55,7 @@ const plugins = [
   ...codemirrorExtension.plugins!,
   ...databasePlugins,
   commentEditorPlugin,
+  mediaPlugins,
   new ClipboardPlugin(),
 ];
 
@@ -58,9 +65,10 @@ const renderers = [
   ...attrRenderers,
   ...databaseRenderers,
   commentEditorComp,
+  carbonChakraRenderers,
 ];
 
-const renderManager = RenderManager.from(renderers);
+const renderManager = RenderManager.from(flattenDeep(renderers));
 
 export default function Text() {
   const app = useCreateCarbon("dev", data, flattenDeep(plugins));

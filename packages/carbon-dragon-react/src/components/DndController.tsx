@@ -128,6 +128,7 @@ export function DndController() {
       resetDragHandle();
       app.enable();
       hideOverlay();
+      console.log("xxxxxxxxxxx drag end");
     },
     [resetDragHandle, app, hideOverlay],
   );

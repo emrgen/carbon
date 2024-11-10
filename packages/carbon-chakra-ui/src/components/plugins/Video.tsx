@@ -144,7 +144,6 @@ const VideoContent = (props: RendererProps) => {
       enable={ready}
       aspectRatio={1}
       render={({ width, height }) => {
-        console.log("width", width, "height", height);
         if (!videoUrl) {
           return <CarbonVideoEmpty />;
         }

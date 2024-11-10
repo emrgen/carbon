@@ -1,17 +1,18 @@
-import { CarbonBlock, RendererProps, useCarbon } from "@emrgen/carbon-react";
-import { useCallback, useRef } from "react";
 import { preventAndStop } from "@emrgen/carbon-core";
-import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
+import {
+  CarbonBlock,
+  RendererProps,
+  useCarbon,
+  useSelectionHalo,
+} from "@emrgen/carbon-react";
+import { useCallback, useRef } from "react";
 
 export default function DividerComp(props: RendererProps) {
   const app = useCarbon();
   const { node } = props;
 
   const ref = useRef(null);
-  const { connectors, SelectionHalo } = useDragDropRectSelectHalo({
-    node,
-    ref,
-  });
+  const { SelectionHalo } = useSelectionHalo(props);
 
   const handleClick = useCallback(
     (e, app) => {
@@ -39,7 +40,6 @@ export default function DividerComp(props: RendererProps) {
       custom={{
         onClick: (e) => handleClick(e, app),
         onMouseDown: handleMouseDown,
-        ...connectors,
       }}
       ref={ref}
     >

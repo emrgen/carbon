@@ -143,21 +143,13 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
       this.draggables.delete(id);
     });
 
-    // const done = new NodeIdSet()
-    // nodes.forEach((node) => {
-    //   if (done.has(node.id)) {
-    //     return;
-    //   }
-    // });
-
     this.app.content.all((node) => {
-      if (node.isBlock && node.type.dnd?.draggable) {
+      if (node.isBlock) {
         this.refreshBound(node);
       }
     });
 
     this.updatedNodeIds.clear();
-    console.log("---------------------");
   }
 
   private refreshBound(node: Node) {
@@ -171,6 +163,7 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
       // );
       const bound = el.getBoundingClientRect();
       if (node.type.dnd?.container) {
+        console.log("xxxxxxxxxx");
         this.containers.register(node, el, bound);
       }
 
@@ -278,7 +271,6 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
     const { clientX: x, clientY } = e;
     const y = clientY + scrollTop;
 
-    // console.log(x, y);
     const bound1 = { minX: x + 90, minY: y - 1, maxX: x + 100, maxY: y + 1 };
     const bound2 = { minX: x - 2, minY: y - 1, maxX: x + 2, maxY: y + 1 };
     const collision = draggables.collides(bound1);
