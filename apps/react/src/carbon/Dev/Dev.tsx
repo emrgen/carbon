@@ -21,6 +21,7 @@ import {
   cellRenderer,
 } from "@emrgen/carbon-cell";
 import {
+  BlockContextMenu,
   carbonChakraRenderers,
   FloatingStyleMenu,
   InsertBlockMenu,
@@ -927,6 +928,7 @@ export default function Dev() {
               <FloatingStyleMenu />
               <PathTracker />
               <InsertBlockMenu />
+              <BlockContextMenu />
             </CarbonApp>
           </ObservableQuestions>
         </ObservableNodes>

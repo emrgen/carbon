@@ -1,7 +1,7 @@
-import { RefObject, createContext, useContext, useRef, useState } from "react";
-import {EventEmitter} from "events";
-import { Optional } from '@emrgen/types';
-import {Node, preventAndStop} from "@emrgen/carbon-core";
+import { Node, preventAndStop } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
+import { EventEmitter } from "events";
+import { createContext, RefObject, useContext, useRef, useState } from "react";
 
 const InnerCarbonOverlayContext = createContext<{
   ref: RefObject<HTMLDivElement>;
@@ -10,6 +10,7 @@ const InnerCarbonOverlayContext = createContext<{
   overlay: EventEmitter;
   showOverlay(id?: string): void;
   hideOverlay(): void;
+  onClick?(e: any): void;
 }>({} as any);
 
 export const CarbonOverlayContext = ({ children }) => {
@@ -17,7 +18,7 @@ export const CarbonOverlayContext = ({ children }) => {
   const downRef = useRef<any>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [emitter] = useState(() => new EventEmitter());
-  const [id, setId] = useState('');
+  const [id, setId] = useState("");
   const [node, setNode] = useState<Optional<Node>>(null);
 
   return (
@@ -39,21 +40,22 @@ export const CarbonOverlayContext = ({ children }) => {
     >
       <div
         className="carbon-overlay"
-        data-target={node?.name ?? ''}
+        data-target={node?.name ?? ""}
         data-id={id}
         ref={ref}
         style={{
-          opacity: showOverlay ? 1 : 0,
+          // opacity: showOverlay ? 1 : 0,
           zIndex: showOverlay ? 100 : -100,
+          // background: "rgba(0, 0, 0, 0.2)",
         }}
         onMouseDown={(e) => {
           downRef.current = e.target;
           preventAndStop(e);
         }}
         onClick={(e) => {
-          preventAndStop(e);
+          // preventAndStop(e);
           if (downRef.current !== e.target) return;
-          downRef.current = null
+          downRef.current = null;
           setShowOverlay(false);
           emitter.emit("click", e);
         }}

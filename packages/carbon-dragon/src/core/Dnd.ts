@@ -80,11 +80,13 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
   }
 
   onMouseDown(node: Node, event) {
+    console.log("mouse-down");
     this.isMouseDown = true;
     this.emit("mouse:down", node, event);
   }
 
   onMouseUp(node: Node, event: DndEvent, isDragging: boolean) {
+    console.log("mouse-up");
     this.isMouseDown = false;
     this.emit("mouse:up", node, event, isDragging);
   }
@@ -122,9 +124,12 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
   // }
 
   private showDragHandle(node: Node, e: MouseEvent) {
-    const { draggedNodeId } = this;
     const { clientX: x, clientY: y } = e;
-    let hitNode = this.findHitNode(x, y, (n) => hasHandle(n) || n.isDocument);
+    let hitNode = this.findHitNode(
+      x + 300, // find node at x + 300 to avoid flickering when the cursor is on the drag handle
+      y,
+      (n) => hasHandle(n) || n.isDocument,
+    );
 
     if (hitNode?.isDocument) {
       // check if the cursor is in the document padding area

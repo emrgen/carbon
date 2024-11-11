@@ -230,10 +230,6 @@ export class Transaction {
     const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map((n) =>
       n.nodeId(),
     );
-    console.log(
-      "selectNodes",
-      selectIds.map((id) => id.toString()),
-    );
     selectIds.forEach((id) => {
       this.Update(id, { [SelectedPath]: true }, origin);
     });
@@ -243,7 +239,6 @@ export class Transaction {
 
   private deselectNodes(nodes: Node[], origin = this.origin): Transaction {
     nodes.forEach((node) => {
-      console.log("xxx deselecting", node.id.toString());
       if (node.props.get(SelectedPath)) {
         this.Update(node.id, { [SelectedPath]: false }, origin);
       }

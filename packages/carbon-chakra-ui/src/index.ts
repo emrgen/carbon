@@ -1,4 +1,4 @@
-import './chakra.styl';
+import "./chakra.styl";
 
 import { ReactRenderer } from "@emrgen/carbon-react";
 import { ImageComp } from "./components/plugins/Image";
@@ -8,8 +8,9 @@ export * from "./components/FloatingStyleMenu";
 export * from "./components/DocumentSaveStatus";
 export * from "./components/ToggleViewMode";
 export * from "./components/InsertBlockMenu";
+export * from "./components/BlockContextMenu";
 
 export const carbonChakraRenderers = [
   ReactRenderer.create("image", ImageComp),
-  ReactRenderer.create("video", VideoComp)
+  ReactRenderer.create("video", VideoComp),
 ];

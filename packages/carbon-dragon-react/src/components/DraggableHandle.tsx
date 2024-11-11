@@ -291,17 +291,22 @@ export function DraggableHandle(props: FastDragHandleProps) {
       // react.focus();
       if (isDragging) {
         preventAndStop(e.event);
+
+        app.onEvent(
+          EventsIn.dragUp,
+          CustomEvent.create(EventsIn.dragDown, node, e.event),
+        );
       } else {
         if (node.type.dnd?.handle) {
           app.parkCursor();
           app.cmd.SelectBlocks([node.id])?.Dispatch();
+          app.emit("show:context:menu", {
+            node,
+            event: e.event,
+            placement: "left",
+          });
         }
       }
-
-      app.onEvent(
-        EventsIn.dragUp,
-        CustomEvent.create(EventsIn.dragDown, node, e.event),
-      );
     },
     [app],
   );

@@ -1,6 +1,12 @@
-import { Node } from "@emrgen/carbon-core";
+import { Node, preventAndStop } from "@emrgen/carbon-core";
 import { DndEvent, getEventPosition } from "@emrgen/carbon-dragon";
-import { MutableRefObject, useCallback, useEffect, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useDndContext } from "./useDndContext";
 
 export interface UseFastDraggableProps {
@@ -41,6 +47,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
   const { id, node, disabled, ref, activationConstraint = {}, onStart } = props;
   const { distance = 0 } = activationConstraint;
   const [isDisabled, setIsDisabled] = useState(disabled);
+  const refId = useRef<string>(Math.random().toString(16).slice(6));
 
   useEffect(() => {
     setIsDisabled(disabled);
@@ -50,14 +57,15 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 
   const onMouseDown = useCallback(
     (event) => {
+      // mousedown on a draggable handle should not trigger have any other effect than dragging
+      preventAndStop(event);
       let initState = {} as any;
       let prevState = {} as any;
-      // preventAndStop(event)
-      console.log("mouse down", ref.current, event.target);
+      let mouseUpped = { current: false };
+      // console.log("mouse down", ref.current, event.target, refId.current);
       if (isDisabled) return;
       if (ref.current !== event.target) return;
       dnd.onMouseDown(node, event);
-      console.log(ref.current, event.target);
       let isDragging = false;
 
       const activatorEvent = event;
@@ -75,17 +83,22 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
           setInitState(state: any) {},
           setPrevState(state: any) {},
         };
+
         if (isDragging) {
           dnd.onDragEnd(dndEvent);
         }
 
         dnd.onMouseUp(node, dndEvent, isDragging);
+        mouseUpped.current = true;
         isDragging = false;
         window.removeEventListener("mousemove", onMouseMove);
         window.removeEventListener("mouseup", onMouseUp);
       };
 
       const onMouseMove = (event: MouseEvent) => {
+        console.log("ref id", ref.current, refId.current);
+        if (mouseUpped.current) return;
+
         const position = getEventPosition(activatorEvent, event);
         if (isDragging) {
           dnd.onDragMove({

@@ -80,7 +80,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   );
 
   const onDragMove = useCallback((event: DndEvent) => {
-    const { shaper } = event.state;
+    const { shaper } = event.initState;
     const {
       position: { deltaX: dx, deltaY: dy },
     } = event;
@@ -100,7 +100,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
 
   const onDragEnd = useCallback(
     (event: DndEvent) => {
-      const { shaper } = event.state;
+      const { shaper } = event.initState;
       if (!Shaper.is(shaper)) return;
 
       const {
@@ -122,7 +122,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   );
 
   // during dragging this hook will not re-evaluate as no dependencies changes
-  const { listeners } = useMakeDraggable<{ left: number; top: number }>({
+  const { listeners } = useMakeDraggable({
     node,
     ref,
     distance,
@@ -149,7 +149,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     };
 
     const onGroupDragMove = (nodeId: NodeId, event: DndEvent) => {
-      const { shaper } = event.state;
+      const { shaper } = event.initState;
       const { deltaX: dx, deltaY: dy } = event.position;
       setStyle((style) => ({
         ...shaper.translate(dx, dy).toStyle(),
@@ -231,7 +231,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const { beforeLine: before, shaper, angleLine } = event.state;
+      const { beforeLine: before, shaper, angleLine } = event.initState;
       if (!Line.is(before)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -261,7 +261,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         angleHintRef.current.style.top = `${event.position.endY + 40}px`;
       }
     } else {
-      const { shaper: before } = event.state;
+      const { shaper: before } = event.initState;
       if (!Shaper.is(before)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       let after = before.resize(dx, dy, anchor, handle, ResizeRatio.FREE);
@@ -293,7 +293,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   ) => {
     console.log("stop", type, event);
     if (type === TransformType.ROTATE) {
-      const { beforeLine: startLine, shaper } = event.state;
+      const { beforeLine: startLine, shaper } = event.initState;
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       const currLine = startLine.moveEndBy(dx, dy);
@@ -320,7 +320,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         })
         .Dispatch();
     } else {
-      const { shaper: before } = event.state;
+      const { shaper: before } = event.initState;
       if (!Shaper.is(before)) return;
       const size = before.size();
       const { deltaX: dx, deltaY: dy } = event.position;

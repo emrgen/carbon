@@ -119,7 +119,7 @@ const OuterBound = (props: OuterBoundProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const { beforeLine, shaper, angleLine } = event.state;
+      const { beforeLine, shaper, angleLine } = event.initState;
       if (!Shaper.is(shaper)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -170,7 +170,7 @@ const OuterBound = (props: OuterBoundProps) => {
         angleHintRef.current.style.top = `${event.position.endY + 40}px`;
       }
     } else {
-      const { shaper: before, minScale } = event.state as {
+      const { shaper: before, minScale } = event.initState as {
         shaper: Shaper;
         originLines: Line[];
         minScale: number;
@@ -209,7 +209,7 @@ const OuterBound = (props: OuterBoundProps) => {
   ) => {
     console.log("stop", type, event);
     if (type === TransformType.ROTATE) {
-      const { beforeLine: startLine, shaper } = event.state;
+      const { beforeLine: startLine, shaper } = event.initState;
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       const currLine = startLine.moveEndBy(dx, dy);
@@ -224,7 +224,7 @@ const OuterBound = (props: OuterBoundProps) => {
 
       setShaper(after);
     } else {
-      const { shaper: before } = event.state;
+      const { shaper: before } = event.initState;
       if (!Shaper.is(before)) return;
       const size = before.size();
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -371,7 +371,9 @@ interface InnerBoundProps {
   node: Node;
 }
 
-const sp3 = Shaper.from(Affine.fromSize(450, 400)).translate(600, 600);
+const sp3 = Shaper.from(Affine.fromSize(450, 400))
+  .rotate(Math.PI / 4)
+  .translate(600, 600);
 const sp4 = Shaper.from(Affine.fromSize(300, 300))
   .translate(600, 630)
   .rotate(Math.PI / 4);
@@ -506,7 +508,12 @@ const InnerBound = (props: InnerBoundProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const { beforeLine: before, shaper, angleLine, minScale } = event.state;
+      const {
+        beforeLine: before,
+        shaper,
+        angleLine,
+        minScale,
+      } = event.initState;
       if (!Line.is(before)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -535,7 +542,7 @@ const InnerBound = (props: InnerBoundProps) => {
         shaper: before,
         scaleLimits,
         startPoint,
-      } = event.state as {
+      } = event.initState as {
         shaper: Shaper;
         originLines: Line[];
         scaleLimits: {
@@ -678,7 +685,7 @@ const InnerBound = (props: InnerBoundProps) => {
   ) => {
     console.log("stop", type, event);
     if (type === TransformType.ROTATE) {
-      const { beforeLine: startLine, shaper } = event.state;
+      const { beforeLine: startLine, shaper } = event.initState;
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       const currLine = startLine.moveEndBy(dx, dy);
@@ -693,7 +700,7 @@ const InnerBound = (props: InnerBoundProps) => {
 
       setShaper(after);
     } else {
-      const { shaper: before } = event.state;
+      const { shaper: before } = event.initState;
       if (!Shaper.is(before)) return;
       const size = before.size();
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -713,6 +720,8 @@ const InnerBound = (props: InnerBoundProps) => {
 
     setTransforming(false);
   };
+
+  console.log(sp3.affine().translation());
 
   return (
     <>
@@ -744,6 +753,35 @@ const InnerBound = (props: InnerBoundProps) => {
         />
       ))}
       <div
+        style={{
+          position: "absolute",
+          ...sp3.toStyle(),
+          background: "rgba(0,0,0,0.1)",
+          overflow: "hidden",
+        }}
+      >
+        <img
+          style={{
+            zIndex: 1000,
+            position: "absolute",
+            height: "100%",
+            width: "100%",
+          }}
+          src={
+            "https://ecard.enter-media.org/upload/iblock/e82/e8228ce009c54730db55885ae4ee5faa.jpg"
+          }
+          alt={"asf"}
+        />
+      </div>
+      <div
+        style={{
+          zIndex: 1000,
+          position: "absolute",
+          ...shaper.toStyle(),
+          // boxShadow: "0 0 0 1000px rgba(0,0,0,0.4)",
+        }}
+      />
+      <div
         ref={ref}
         style={{
           position: "absolute",
@@ -752,6 +790,8 @@ const InnerBound = (props: InnerBoundProps) => {
           ...style,
         }}
       />
+      <div className={"visible-image"}></div>
+
       {!transforming && (
         <CarbonTransformControls
           shaper={shaper}
