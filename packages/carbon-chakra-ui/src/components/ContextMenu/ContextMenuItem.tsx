@@ -41,7 +41,7 @@ export const ContextMenuItem = (props: ContextMenuItemProps) => {
           <Text
             color={"#aaa"}
             fontFamily={"Geist Mono, monospace"}
-            fontSize={"13px"}
+            fontSize={"12px"}
           >
             {item.shortcut ?? ""}
           </Text>

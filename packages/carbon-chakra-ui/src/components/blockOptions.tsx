@@ -32,6 +32,17 @@ export const blockMenu = injectId({
       type: "group",
       items: [
         {
+          type: "search",
+          onClick: () => {
+            console.log("Delete");
+          },
+        },
+      ],
+    },
+    {
+      type: "group",
+      items: [
+        {
           type: "option",
           label: "Delete",
           icon: <BsTrash3 />,
