@@ -890,7 +890,7 @@ export default function Dev() {
 
   useEffect(() => {
     const onChange = (state: State) => {
-      if (!state.selection.isSkip) {
+      if (!state.selection.isSkip && !state.blockSelection.isActive) {
         const head = app.store.element(state.selection.head.node.id);
         head?.scrollIntoView({ behavior: "auto", block: "nearest" });
       }

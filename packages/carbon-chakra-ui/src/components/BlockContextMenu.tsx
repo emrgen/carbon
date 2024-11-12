@@ -4,81 +4,11 @@ import { domRect } from "@emrgen/carbon-dragon";
 import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { BsTrash3 } from "react-icons/bs";
+import { blockMenu } from "./blockOptions";
 import { ContextMenu } from "./ContextMenu/ContextMenu";
 import { ContextMenuGroup } from "./ContextMenu/ContextMenuGroup";
 import { ContextMenuItem } from "./ContextMenu/ContextMenuItem";
 import { ContextMenuContext } from "./ContextMenu/useContextMenu";
-
-const injectId = (item) => {
-  return {
-    ...item,
-    id: randomId(),
-    items: item?.items?.map(injectId),
-  };
-};
-
-const randomId = () => {
-  return Math.random().toString(36).substring(7);
-};
-
-const menu = injectId({
-  type: "menu",
-  placement: "left-start",
-  items: [
-    {
-      type: "group",
-      items: [
-        {
-          type: "option",
-          label: "Delete",
-          icon: <BsTrash3 />,
-          onClick: () => {
-            console.log("delete");
-          },
-        },
-      ],
-    },
-    {
-      type: "group",
-      items: [
-        {
-          type: "option",
-          label: "123",
-          onClick: () => {
-            console.log("123");
-          },
-        },
-        {
-          type: "option",
-          label: "123",
-          onClick: () => {
-            console.log("123");
-          },
-        },
-      ],
-    },
-    {
-      type: "group",
-      items: [
-        {
-          type: "option",
-          label: "123",
-          onClick: () => {
-            console.log("123");
-          },
-        },
-        {
-          type: "option",
-          label: "123",
-          onClick: () => {
-            console.log("123");
-          },
-        },
-      ],
-    },
-  ],
-});
 
 export const BlockContextMenu = () => {
   const app = useCarbon();
@@ -137,7 +67,7 @@ export const BlockContextMenu = () => {
   const contextMenu = useMemo(() => {
     return (
       <ContextMenuContext>
-        <ContextMenuNode show={show} blockRef={blockRef} item={menu} />
+        <ContextMenuNode show={show} blockRef={blockRef} item={blockMenu} />
       </ContextMenuContext>
     );
   }, [blockRef, show]);
@@ -181,7 +111,8 @@ const ContextMenuNode = (props: ContextMenuNodeProps) => {
 
   if (type === "option") {
     return (
-      <ContextMenuItem item={item}>
+      <ContextMenuItem item={item} shortcut={item.shortcut}>
+        {item.icon}
         <Text>{item.label}</Text>
       </ContextMenuItem>
     );

@@ -35,6 +35,10 @@ const findPlacementPosition = (
     } else if (left + width > window.innerWidth) {
       left = rect.right;
     }
+
+    if (top < 0) {
+      top = 10;
+    }
   }
 
   return {

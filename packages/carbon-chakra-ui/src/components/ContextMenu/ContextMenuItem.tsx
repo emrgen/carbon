@@ -1,15 +1,16 @@
-import { Box, HStack, StackProps } from "@chakra-ui/react";
+import { Box, HStack, StackProps, Text } from "@chakra-ui/react";
 import { merge } from "lodash";
 import { ReactNode, useMemo, useRef } from "react";
 
 interface ContextMenuItemProps extends StackProps {
   item: any;
+  shortcut?: string;
   children: ReactNode | ReactNode[];
   subMenu?: ReactNode;
   depth?: number;
 }
 export const ContextMenuItem = (props: ContextMenuItemProps) => {
-  const { children, subMenu, ...rest } = props;
+  const { children, subMenu, item, ...rest } = props;
   const ref = useRef<HTMLElement>(null);
 
   const style = useMemo(() => {
@@ -18,8 +19,9 @@ export const ContextMenuItem = (props: ContextMenuItemProps) => {
       h: "28px",
       cursor: "pointer",
       userSelect: "none",
+      ...(item.style ?? {}),
     });
-  }, [rest]);
+  }, [item, rest]);
 
   return (
     <>
@@ -33,7 +35,16 @@ export const ContextMenuItem = (props: ContextMenuItemProps) => {
           alignItems={"center"}
           borderRadius={4}
         >
-          {children}
+          <HStack flex={1} spacing={3}>
+            {children}
+          </HStack>
+          <Text
+            color={"#aaa"}
+            fontFamily={"Geist Mono, monospace"}
+            fontSize={"13px"}
+          >
+            {item.shortcut ?? ""}
+          </Text>
         </HStack>
       </Box>
     </>
