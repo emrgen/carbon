@@ -1,0 +1,82 @@
+import { Box, BoxProps, Placement } from "@chakra-ui/react";
+import { domRect } from "@emrgen/carbon-dragon";
+import { ReactNode, useEffect, useState } from "react";
+
+interface ContextMenuProps {
+  placementRef: HTMLElement | null;
+  children: ReactNode[] | ReactNode;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onOpen?: () => void;
+  placement?: Placement;
+  align?: "center" | "start" | "end";
+  trigger?: React.ReactNode;
+}
+
+const width = 240;
+
+const findPlacementPosition = (
+  el: HTMLElement,
+  placement: Placement,
+  align: ContextMenuProps["align"],
+) => {
+  const rect = domRect(el);
+  let left = rect.left - 2;
+  let top = rect.top;
+  let transform = `translateX(-100%)`;
+
+  // by default place on the right of the element
+  if (placement === "auto") {
+  }
+
+  if (placement === "left-start") {
+    if (left - width < 0) {
+      transform = `translateX(0)`; // move to right
+    } else if (left + width > window.innerWidth) {
+      left = rect.right;
+    }
+  }
+
+  return {
+    top,
+    left,
+    transform,
+  };
+};
+
+export const ContextMenu = (props: ContextMenuProps) => {
+  const {
+    children,
+    isOpen,
+    placementRef,
+    placement = "left",
+    align = "start",
+  } = props;
+  const [style, setStyle] = useState<BoxProps>({});
+
+  useEffect(() => {
+    if (!placementRef) {
+      return;
+    }
+
+    setStyle(findPlacementPosition(placementRef, placement, align));
+  }, [align, placement, placementRef]);
+
+  return (
+    <Box
+      pos={"absolute"}
+      w={isOpen ? width + "px" : 0}
+      bg={"#fff"}
+      opacity={isOpen ? 1 : 0}
+      {...style}
+      borderRadius={4}
+      boxShadow={
+        "rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px"
+      }
+      zIndex={1000}
+      fontSize={"sm"}
+    >
+      {children}
+    </Box>
+  );
+};

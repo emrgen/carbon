@@ -1,9 +1,13 @@
-import { Box } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 import { ShowContextMenuEvent } from "@emrgen/carbon-blocks";
 import { domRect } from "@emrgen/carbon-dragon";
 import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { BsTrash3 } from "react-icons/bs";
+import { ContextMenu } from "./ContextMenu/ContextMenu";
+import { ContextMenuGroup } from "./ContextMenu/ContextMenuGroup";
+import { ContextMenuItem } from "./ContextMenu/ContextMenuItem";
 
 export const BlockContextMenu = () => {
   const app = useCarbon();
@@ -16,10 +20,12 @@ export const BlockContextMenu = () => {
   const [show, setShow] = useState(false);
   const [anchorPosition, setAnchorPosition] = useState({ x: 0, y: 0 });
   const [style, setStyle] = useState({});
+  const [blockRef, setBlockRef] = useState<HTMLElement | null>(null);
 
   // hide overlay on click outside the block context menu
   useEffect(() => {
     const onClickOverlay = (e: MouseEvent) => {
+      console.log("xxxxxxxxxxxxxxxx");
       setShow(false);
     };
 
@@ -35,6 +41,8 @@ export const BlockContextMenu = () => {
       e.event.preventDefault();
       const el = app.store.element(node.id);
       if (!el) return;
+      setBlockRef(el);
+
       const rect = domRect(el);
       showOverlay();
       setAnchorPosition({
@@ -56,22 +64,39 @@ export const BlockContextMenu = () => {
     };
   }, [app, showOverlay]);
 
-  const ContextMenu = useMemo(() => {
+  const contextMenu = useMemo(() => {
     return (
-      <Box
-        className={"carbon-block-context-menu"}
-        pos={"absolute"}
-        w={100}
-        h={100}
-        bg={"red"}
-        {...style}
-        display={show ? "block" : "none"}
-        zIndex={1000}
+      <ContextMenu
+        isOpen={show}
+        placementRef={blockRef}
+        placement={"left-start"}
+        align={"start"}
       >
-        123123
-      </Box>
+        <ContextMenuGroup>
+          <ContextMenuItem _hover={{ color: "crimson" }}>
+            <BsTrash3 />
+            <Text>Delete</Text>
+          </ContextMenuItem>
+        </ContextMenuGroup>
+        <ContextMenuGroup>
+          <ContextMenuItem>
+            <Text>123</Text>
+          </ContextMenuItem>
+          <ContextMenuItem>
+            <Text>123</Text>
+          </ContextMenuItem>
+        </ContextMenuGroup>
+        <ContextMenuGroup>
+          <ContextMenuItem>
+            <Text>123</Text>
+          </ContextMenuItem>
+          <ContextMenuItem>
+            <Text>123</Text>
+          </ContextMenuItem>
+        </ContextMenuGroup>
+      </ContextMenu>
     );
-  }, [show, style]);
+  }, [blockRef, show]);
 
-  return <>{createPortal(<>{ContextMenu}</>, document.body)}</>;
+  return <>{createPortal(<>{contextMenu}</>, document.body)}</>;
 };
