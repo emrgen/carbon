@@ -52,7 +52,7 @@ export const ContextMenu = (props: ContextMenuProps) => {
     placement = "left",
     align = "start",
   } = props;
-  const [style, setStyle] = useState<BoxProps>({});
+  const [style, setStyle] = useState<BoxProps>({ left: "-1000px" });
 
   useEffect(() => {
     if (!placementRef) {

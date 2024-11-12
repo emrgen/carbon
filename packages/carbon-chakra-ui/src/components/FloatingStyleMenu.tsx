@@ -160,8 +160,8 @@ export function FloatingStyleMenu() {
 
     return () => {
       app.off(EventsOut.contentUpdated, onChange);
-      // app.contentElement?.removeEventListener("mouseup", onChange);
-      // app.contentElement?.removeEventListener("keyup", onChange);
+      app.contentElement?.removeEventListener("mouseup", onChange);
+      app.contentElement?.removeEventListener("keyup", onChange);
     };
   }, [app, hideContextMenu, overlay]);
 
