@@ -16457,7 +16457,7 @@
           ]
         }
       },
-      "packages/carbon-react-blocks": {
+      "packages/carbon-blocks-react": {
         "packageJson": {
           "dependencies": [
             "npm:@types/lodash@^4.14.191",

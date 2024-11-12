@@ -5,6 +5,7 @@ import {
   RendererProps,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
+import { BlockOptions } from "../components/BlockOptions/mod";
 
 export const NestableComp = (props: RendererProps) => {
   const { node } = props;
@@ -15,6 +16,7 @@ export const NestableComp = (props: RendererProps) => {
       <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
       {SelectionHalo}
+      <BlockOptions node={node} />
     </CarbonBlock>
   );
 };

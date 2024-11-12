@@ -21,19 +21,36 @@ const findPlacementPosition = (
   align: ContextMenuProps["align"],
 ) => {
   const rect = domRect(el);
-  let left = rect.left - 2;
+  let left = rect.left;
   let top = rect.top;
-  let transform = `translateX(-100%)`;
+  let transform = `translateX(0)`;
 
   // by default place on the right of the element
   if (placement === "auto") {
   }
 
   if (placement === "left-start") {
+    left -= 30;
     if (left - width < 0) {
       transform = `translateX(0)`; // move to right
+      left = rect.left;
     } else if (left + width > window.innerWidth) {
       left = rect.right;
+      transform = `translateX(-100%)`; // move to left
+    }
+
+    if (top < 0) {
+      top = 10;
+    }
+  }
+
+  if (placement === "right-start") {
+    left = rect.right + 10;
+    if (left + width > window.innerWidth) {
+      transform = `translateX(-100%)`; // move to left
+      left -= 10;
+    } else {
+      transform = `translateX(0)`; // move to right
     }
 
     if (top < 0) {

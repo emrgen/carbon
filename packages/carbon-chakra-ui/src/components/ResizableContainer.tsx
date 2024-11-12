@@ -4,7 +4,7 @@ import { clamp, Node, StylePath } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
 import { RendererProps, useCarbon } from "@emrgen/carbon-react";
-import { useDocument } from "@emrgen/carbon-react-blocks";
+import { useDocument } from "@emrgen/carbon-blocks-react";
 import React, {
   CSSProperties,
   useCallback,

@@ -303,7 +303,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
           app.emit("show:context:menu", {
             node,
             event: e.event,
-            placement: "left",
+            placement: "left-start",
           });
         }
       }

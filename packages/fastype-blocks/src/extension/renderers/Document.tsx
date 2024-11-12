@@ -23,7 +23,7 @@ import {
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
-import { DocumentContext } from "@emrgen/carbon-react-blocks";
+import { DocumentContext } from "@emrgen/carbon-blocks-react";
 import { useCallback, useEffect, useRef } from "react";
 
 export const DocumentComp = (props: RendererProps) => {

@@ -1,4 +1,4 @@
-import { Text } from "@chakra-ui/react";
+import { Placement, Text } from "@chakra-ui/react";
 import { ShowContextMenuEvent } from "@emrgen/carbon-blocks";
 import { domRect } from "@emrgen/carbon-dragon";
 import { useCarbon, useCarbonOverlay } from "@emrgen/carbon-react";
@@ -20,8 +20,8 @@ export const BlockContextMenu = () => {
   } = useCarbonOverlay();
   const [show, setShow] = useState(false);
   const [anchorPosition, setAnchorPosition] = useState({ x: 0, y: 0 });
-  const [style, setStyle] = useState({});
   const [blockRef, setBlockRef] = useState<HTMLElement | null>(null);
+  const [placement, setPlacement] = useState<Placement>("auto");
 
   // hide overlay on click outside the block context menu
   useEffect(() => {
@@ -37,24 +37,19 @@ export const BlockContextMenu = () => {
 
   useEffect(() => {
     const showContextMenu = (e: ShowContextMenuEvent) => {
-      const { node, event } = e;
+      const { node, event, placement } = e;
       e.event.preventDefault();
       const el = app.store.element(node.id);
       if (!el) return;
-      setBlockRef(el);
-
       const rect = domRect(el);
+
+      setPlacement(placement);
+      setBlockRef(el);
       showOverlay();
       setAnchorPosition({
         x: rect.left,
         y: rect.top,
       });
-      setStyle({
-        top: rect.top,
-        left: rect.left - 10,
-        transform: `translateX(-100%)`,
-      });
-      // get the
       setShow(true);
     };
 
@@ -67,31 +62,38 @@ export const BlockContextMenu = () => {
   const contextMenu = useMemo(() => {
     return (
       <ContextMenuContext>
-        <ContextMenuNode show={show} blockRef={blockRef} item={blockMenu} />
+        <ContextMenuNode
+          show={show}
+          blockRef={blockRef}
+          item={blockMenu}
+          placement={placement}
+        />
       </ContextMenuContext>
     );
-  }, [blockRef, show]);
+  }, [blockRef, placement, show]);
 
-  return <>{createPortal(<>{contextMenu}</>, document.body)}</>;
+  return (
+    <>
+      {overlayRef.current &&
+        createPortal(<>{contextMenu}</>, overlayRef.current!)}
+    </>
+  );
 };
 
 interface ContextMenuNodeProps {
   show?: boolean;
   blockRef: HTMLElement | null;
   item: any;
+  placement?: Placement;
 }
 
 const ContextMenuNode = (props: ContextMenuNodeProps) => {
-  const { show, blockRef, item } = props;
+  const { show, blockRef, item, placement = "auto" } = props;
   const { type } = item;
 
   if (type === "menu") {
     return (
-      <ContextMenu
-        isOpen={show}
-        placementRef={blockRef}
-        placement={item.placement}
-      >
+      <ContextMenu isOpen={show} placementRef={blockRef} placement={placement}>
         {item.items.map((item) => {
           return <ContextMenuNode key={item.id} item={item} blockRef={null} />;
         })}

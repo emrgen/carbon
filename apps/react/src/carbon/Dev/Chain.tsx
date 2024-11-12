@@ -7,7 +7,7 @@ export const Dummy = () => {
 //
 // import {blockPresetPlugins, node, text, title, paragraph} from "@emrgen/carbon-blocks";
 // import {ReactRenderer, RendererProps, RenderManager, useCreateCarbon, ImmutableNodeFactory} from "@emrgen/carbon-react";
-// import {blockPresetRenderers} from "@emrgen/carbon-react-blocks";
+// import {blockPresetRenderers} from "@emrgen/carbon-blocks-react";
 // import {
 //   CollapsedPath,
 //   corePresetPlugins,

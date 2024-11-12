@@ -1,4 +1,10 @@
 import {
+  LocalVideoInfoPath,
+  MediaReadyPath,
+  stop,
+  VideoPath,
+} from "@emrgen/carbon-core";
+import {
   CarbonBlock,
   CarbonNodeContent,
   RendererProps,
@@ -6,16 +12,10 @@ import {
   useNodeActivated,
   useNodeSelected,
 } from "@emrgen/carbon-react";
-import { useSquareBoard } from "../context";
-import {
-  LocalVideoInfoPath,
-  MediaReadyPath,
-  stop,
-  VideoPath,
-} from "@emrgen/carbon-core";
+import { useLinkInfo } from "@emrgen/carbon-blocks-react";
 import { useCallback } from "react";
 import ReactPlayer from "react-player";
-import { useLinkInfo } from "@emrgen/carbon-react-blocks";
+import { useSquareBoard } from "../context";
 
 export const Video = (props: RendererProps) => {
   const { node } = props;

@@ -12,6 +12,7 @@ import {
   text,
   title,
 } from "@emrgen/carbon-blocks";
+import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { boardPlugins } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
 import {
@@ -63,7 +64,6 @@ import {
   RenderManager,
   useCreateCarbon,
 } from "@emrgen/carbon-react";
-import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
 import { useEffect, useState } from "react";

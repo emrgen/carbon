@@ -95,3 +95,4 @@ export * from "./renderers/Document";
 
 export * from "./hooks";
 export * from "./components/renderAttrs";
+export * from "./components/BlockOptions/BlockOptions";

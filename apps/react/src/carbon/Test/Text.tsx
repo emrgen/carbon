@@ -1,6 +1,5 @@
 import { blockPresetPlugins, node, title } from "@emrgen/carbon-blocks";
-import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
-import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
+import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 
 import {
   CarbonPlugin,
@@ -8,6 +7,7 @@ import {
   ModePath,
   NodeId,
 } from "@emrgen/carbon-core";
+import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
 

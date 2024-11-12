@@ -1,4 +1,4 @@
-# @emrgen/carbon-react-blocks
+# @emrgen/carbon-blocks-react
 
 ## 0.0.6
 

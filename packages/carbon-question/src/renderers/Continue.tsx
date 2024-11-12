@@ -6,7 +6,7 @@ import {
   useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
-import { useDocument } from "@emrgen/carbon-react-blocks";
+import { useDocument } from "@emrgen/carbon-blocks-react";
 import { useCallback } from "react";
 
 export const ContinueComp = (props: RendererProps) => {

@@ -33,7 +33,7 @@
     "@emrgen/carbon-plugin-timeline": "workspace:*",
     "@emrgen/carbon-question": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
-    "@emrgen/carbon-react-blocks": "workspace:*",
+    "@emrgen/carbon-blocks-react": "workspace:*",
     "@emrgen/carbon-sheet": "workspace:*",
     "@emrgen/carbon-utils": "workspace:*",
     "@emrgen/fastype-core": "workspace:*",

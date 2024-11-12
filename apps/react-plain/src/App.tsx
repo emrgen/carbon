@@ -16,9 +16,9 @@ import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
 import "./App.css";
 import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
-import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { flattenDeep, noop, range } from "lodash";
+import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { useEffect } from "react";
 
 console.log = noop;

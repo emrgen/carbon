@@ -205,9 +205,9 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../../packages/carbon-react
-      '@emrgen/carbon-react-blocks':
+      '@emrgen/carbon-blocks-react':
         specifier: workspace:*
-        version: link:../../packages/carbon-react-blocks
+        version: link:../../packages/carbon-blocks-react
       '@emrgen/carbon-sheet':
         specifier: workspace:*
         version: link:../../packages/carbon-sheet
@@ -366,9 +366,9 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../../packages/carbon-react
-      '@emrgen/carbon-react-blocks':
+      '@emrgen/carbon-blocks-react':
         specifier: workspace:*
-        version: link:../../packages/carbon-react-blocks
+        version: link:../../packages/carbon-blocks-react
       '@emrgen/carbon-sheet':
         specifier: workspace:*
         version: link:../../packages/carbon-sheet
@@ -544,9 +544,9 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../../packages/carbon-react
-      '@emrgen/carbon-react-blocks':
+      '@emrgen/carbon-blocks-react':
         specifier: workspace:*
-        version: link:../../packages/carbon-react-blocks
+        version: link:../../packages/carbon-blocks-react
       '@emrgen/carbon-sheet':
         specifier: workspace:*
         version: link:../../packages/carbon-sheet
@@ -984,9 +984,9 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../carbon-react
-      '@emrgen/carbon-react-blocks':
+      '@emrgen/carbon-blocks-react':
         specifier: workspace:*
-        version: link:../carbon-react-blocks
+        version: link:../carbon-blocks-react
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
@@ -2098,9 +2098,9 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../carbon-react
-      '@emrgen/carbon-react-blocks':
+      '@emrgen/carbon-blocks-react':
         specifier: workspace:*
-        version: link:../carbon-react-blocks
+        version: link:../carbon-blocks-react
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
@@ -2433,7 +2433,7 @@ importers:
         specifier: ^0.34.6
         version: 0.34.6(jsdom@25.0.1)(playwright@1.48.2)(stylus@0.64.0)(terser@5.36.0)
 
-  packages/carbon-react-blocks:
+  packages/carbon-blocks-react:
     dependencies:
       '@emrgen/carbon-attributes':
         specifier: workspace:*
@@ -3219,9 +3219,9 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../carbon-react
-      '@emrgen/carbon-react-blocks':
+      '@emrgen/carbon-blocks-react':
         specifier: workspace:*
-        version: link:../carbon-react-blocks
+        version: link:../carbon-blocks-react
       '@emrgen/carbon-utils':
         specifier: workspace:*
         version: link:../carbon-utils

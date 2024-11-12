@@ -30,9 +30,9 @@ import {
   RenderManager,
   useCreateCachedCarbon,
 } from "@emrgen/carbon-react";
-import { blockPresetRenderers } from "@emrgen/carbon-react-blocks";
 import { CarbonApp } from "@emrgen/carbon-utils/src/components/CarbonAppDocument";
 import { flattenDeep } from "lodash";
+import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { useState } from "react";
 import "./desing.styl";
 
@@ -67,7 +67,8 @@ export function Design() {
                 TransformAnchor.CENTER,
                 TransformHandle.BOTTOM,
                 ResizeRatio.FREE,
-              ).rotate(Math.PI / 4)
+              )
+              .rotate(Math.PI / 4)
               .toCSS(),
             [StylePath]: {
               background: "pink",
