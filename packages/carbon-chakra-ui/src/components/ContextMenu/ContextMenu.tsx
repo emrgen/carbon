@@ -59,15 +59,27 @@ export const ContextMenu = (props: ContextMenuProps) => {
       return;
     }
 
+    if (!isOpen) {
+      setStyle((s) => ({
+        ...s,
+        left: "-1000px",
+      }));
+      return;
+    }
+
     setStyle(findPlacementPosition(placementRef, placement, align));
-  }, [align, placement, placementRef]);
+  }, [align, placement, placementRef, isOpen]);
+
+  console.log("style", style, isOpen);
 
   return (
     <Box
       pos={"absolute"}
-      w={isOpen ? width + "px" : 0}
+      w={width + "px"}
+      overflow={"hidden"}
       bg={"#fff"}
       opacity={isOpen ? 1 : 0}
+      transition={"opacity 0.2s"}
       {...style}
       borderRadius={4}
       boxShadow={

@@ -8,6 +8,77 @@ import { BsTrash3 } from "react-icons/bs";
 import { ContextMenu } from "./ContextMenu/ContextMenu";
 import { ContextMenuGroup } from "./ContextMenu/ContextMenuGroup";
 import { ContextMenuItem } from "./ContextMenu/ContextMenuItem";
+import { ContextMenuContext } from "./ContextMenu/useContextMenu";
+
+const injectId = (item) => {
+  return {
+    ...item,
+    id: randomId(),
+    items: item?.items?.map(injectId),
+  };
+};
+
+const randomId = () => {
+  return Math.random().toString(36).substring(7);
+};
+
+const menu = injectId({
+  type: "menu",
+  placement: "left-start",
+  items: [
+    {
+      type: "group",
+      items: [
+        {
+          type: "option",
+          label: "Delete",
+          icon: <BsTrash3 />,
+          onClick: () => {
+            console.log("delete");
+          },
+        },
+      ],
+    },
+    {
+      type: "group",
+      items: [
+        {
+          type: "option",
+          label: "123",
+          onClick: () => {
+            console.log("123");
+          },
+        },
+        {
+          type: "option",
+          label: "123",
+          onClick: () => {
+            console.log("123");
+          },
+        },
+      ],
+    },
+    {
+      type: "group",
+      items: [
+        {
+          type: "option",
+          label: "123",
+          onClick: () => {
+            console.log("123");
+          },
+        },
+        {
+          type: "option",
+          label: "123",
+          onClick: () => {
+            console.log("123");
+          },
+        },
+      ],
+    },
+  ],
+});
 
 export const BlockContextMenu = () => {
   const app = useCarbon();
@@ -25,7 +96,6 @@ export const BlockContextMenu = () => {
   // hide overlay on click outside the block context menu
   useEffect(() => {
     const onClickOverlay = (e: MouseEvent) => {
-      console.log("xxxxxxxxxxxxxxxx");
       setShow(false);
     };
 
@@ -66,37 +136,56 @@ export const BlockContextMenu = () => {
 
   const contextMenu = useMemo(() => {
     return (
-      <ContextMenu
-        isOpen={show}
-        placementRef={blockRef}
-        placement={"left-start"}
-        align={"start"}
-      >
-        <ContextMenuGroup>
-          <ContextMenuItem _hover={{ color: "crimson" }}>
-            <BsTrash3 />
-            <Text>Delete</Text>
-          </ContextMenuItem>
-        </ContextMenuGroup>
-        <ContextMenuGroup>
-          <ContextMenuItem>
-            <Text>123</Text>
-          </ContextMenuItem>
-          <ContextMenuItem>
-            <Text>123</Text>
-          </ContextMenuItem>
-        </ContextMenuGroup>
-        <ContextMenuGroup>
-          <ContextMenuItem>
-            <Text>123</Text>
-          </ContextMenuItem>
-          <ContextMenuItem>
-            <Text>123</Text>
-          </ContextMenuItem>
-        </ContextMenuGroup>
-      </ContextMenu>
+      <ContextMenuContext>
+        <ContextMenuNode show={show} blockRef={blockRef} item={menu} />
+      </ContextMenuContext>
     );
   }, [blockRef, show]);
 
   return <>{createPortal(<>{contextMenu}</>, document.body)}</>;
+};
+
+interface ContextMenuNodeProps {
+  show?: boolean;
+  blockRef: HTMLElement | null;
+  item: any;
+}
+
+const ContextMenuNode = (props: ContextMenuNodeProps) => {
+  const { show, blockRef, item } = props;
+  const { type } = item;
+
+  if (type === "menu") {
+    return (
+      <ContextMenu
+        isOpen={show}
+        placementRef={blockRef}
+        placement={item.placement}
+      >
+        {item.items.map((item) => {
+          return <ContextMenuNode key={item.id} item={item} blockRef={null} />;
+        })}
+      </ContextMenu>
+    );
+  }
+
+  if (type === "group") {
+    return (
+      <ContextMenuGroup>
+        {item.items.map((item) => {
+          return <ContextMenuNode key={item.id} item={item} blockRef={null} />;
+        })}
+      </ContextMenuGroup>
+    );
+  }
+
+  if (type === "option") {
+    return (
+      <ContextMenuItem item={item}>
+        <Text>{item.label}</Text>
+      </ContextMenuItem>
+    );
+  }
+
+  return null;
 };
