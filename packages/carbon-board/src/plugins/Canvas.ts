@@ -171,7 +171,6 @@ export class Title extends TitlePlugin {
     return {
       ...super.spec(),
       group: "",
-      isolate: true,
       props: {
         local: {
           html: {

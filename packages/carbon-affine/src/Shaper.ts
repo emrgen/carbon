@@ -250,7 +250,7 @@ export class Shaper {
 
     const {sx, sy} = {sx: scaling.mat[0], sy: scaling.mat[4]};
     const {angle} = rotation;
- 
+
     let rotate = "";
     if (angle !== 0) {
       rotate = `rotateZ(${angle}rad)`;
@@ -287,8 +287,6 @@ export class Shaper {
     const { sx: nxs, sy: nsy } = this.normalize(sx, sy, anchor, handle);
 
     const { x: ax, y: ay } = getPoint(toLocation(anchor));
-
-    console.log("resizeTo", sx, width, size.width, ax, ay);
 
     return Shaper.from(this.tm.scale(nxs, nsy, ax, ay));
   }

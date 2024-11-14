@@ -177,7 +177,7 @@ test("flip a vector after translate", () => {
 
 test("flip a vector after rotate", () => {
   const af = Affine.rotate(Math.PI / 2).flipX();
-  console.log(Affine.rotate(Math.PI / 2).mat, af.mat);
+  // console.log(Affine.rotate(Math.PI / 2).mat, af.mat);
   const p1 = af.apply({ x: 1, y: 1 });
   expect(p1.x).toBeCloseTo(-1);
   expect(p1.y).toBeCloseTo(-1);

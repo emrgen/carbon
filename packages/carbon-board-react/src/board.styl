@@ -190,10 +190,11 @@ $dot-color = rgba(100, 100, 100, 0.05);
         background: #eee;
 
     .sq-column-content
-        [data-type=children]
-            display flex
-            flex-direction column
-            gap 10px
+      >.cnest
+          display flex
+          flex-direction column
+          gap 10px
+          margin: 0
 
 [data-name=sqImage]
     @extend .sq-card

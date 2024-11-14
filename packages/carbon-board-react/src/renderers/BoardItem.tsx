@@ -7,7 +7,7 @@ import { useBoardElement } from "../hooks/useBoardElement";
 
 export const BoardItem = (props: RendererProps) => {
   const { node } = props;
-  const { attributes, listeners } = useBoardElement({ node });
+  const { attributes, listeners } = useBoardElement(props);
   return (
     <CarbonBlock
       node={node}

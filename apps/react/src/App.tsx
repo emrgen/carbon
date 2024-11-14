@@ -11,6 +11,7 @@ import TestText from "./carbon/Test/Text";
 import { FastEditor } from "./fastype/FastEditor";
 
 import "./fastype/fastype.styl";
+import { Board } from "./carbon/Dev/Board";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Dev />} />
         <Route path="/design" element={<Design />} />
+        <Route path="/board" element={<Board />} />
         <Route path="/affine" element={<AffineExp />} />
         {/*<Route path="/chain" element={<Chain />} />*/}
         <Route path="/text" element={<Text />} />
