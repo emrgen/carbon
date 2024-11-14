@@ -27,7 +27,6 @@ interface BlockMenuProps {}
 
 export function InsertBlockMenu(props: BlockMenuProps) {
   const app = useCarbon();
-
   const [position, setPosition] = useState({ left: 0, top: 0 });
   const [show, setShow] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -35,6 +34,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
   const [pluginState, setPluginState] = useState(new Map());
   const [activeIndex, setActiveIndex] = useState(0);
   const ref = React.useRef<HTMLDivElement>(null);
+  const bodyRef = React.useRef<HTMLElement>(window.document.body);
   const plugin = app.plugin("blockMenu");
 
   // filter blocks by search text
@@ -173,7 +173,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
 
   // console.log(show, blocks);
   return (
-    <Portal>
+    <Portal containerRef={bodyRef}>
       {show && (
         <Stack
           ref={ref}
@@ -182,6 +182,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
           boxShadow={"0 2px 12px 0 #ddd"}
           borderRadius={4}
           maxH={300}
+          zIndex={10000}
           pos={"fixed"}
           bg={"white"}
           onMouseDown={preventAndStop}
