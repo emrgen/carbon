@@ -14,6 +14,7 @@ interface ContextMenuProps {
   align?: "center" | "start" | "end";
   trigger?: React.ReactNode;
   menu?: any;
+  subMenu?: boolean;
 }
 
 export const ContextMenu = (props: ContextMenuProps) => {
@@ -23,12 +24,10 @@ export const ContextMenu = (props: ContextMenuProps) => {
     placementRef,
     placement = "left",
     align = "start",
-    menu,
+    subMenu = false,
   } = props;
   const [style, setStyle] = useState<BoxProps>({ left: "-1000px" });
   const ref = useRef<HTMLDivElement>(null);
-
-  console.log(menuHeight(menu));
 
   useEffect(() => {
     if (!placementRef) {
@@ -43,11 +42,9 @@ export const ContextMenu = (props: ContextMenuProps) => {
       return;
     }
 
-    setStyle(findPlacementPosition(placementRef, placement, align));
+    setStyle(findPlacementPosition(placementRef, placement, align, subMenu));
     setTimeout(() => {}, 100);
-  }, [align, placement, placementRef, isOpen]);
-
-  console.log("style", style, isOpen);
+  }, [align, placement, placementRef, isOpen, subMenu]);
 
   return (
     <Box
@@ -75,18 +72,23 @@ const findPlacementPosition = (
   el: HTMLElement,
   placement: Placement,
   align: ContextMenuProps["align"],
+  subMenu: boolean,
 ) => {
   const rect = domRect(el);
   let left = rect.left;
   let top = rect.top;
   let transform = `translateX(0)`;
 
+  console.log(placement);
+
   // by default place on the right of the element
   if (placement === "auto") {
   }
 
   if (placement === "left-start") {
-    left -= 30;
+    left -= subMenu ? 0 : 30;
+    transform = `translateX(-100%)`; // move to left
+
     if (left - width < 0) {
       transform = `translateX(0)`; // move to right
       left = rect.left;
@@ -101,10 +103,11 @@ const findPlacementPosition = (
   }
 
   if (placement === "right-start") {
-    left = rect.right + 10;
+    left = rect.right + (subMenu ? 0 : 10);
     if (left + width > window.innerWidth) {
+      left = rect.left;
       transform = `translateX(-100%)`; // move to left
-      left -= 10;
+      left -= subMenu ? 0 : 10;
     } else {
       transform = `translateX(0)`; // move to right
     }

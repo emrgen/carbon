@@ -1,6 +1,8 @@
 import { Box, HStack, StackProps, Text } from "@chakra-ui/react";
-import { merge } from "lodash";
-import { ReactNode, useMemo, useRef } from "react";
+import { isEmpty, merge } from "lodash";
+import { ReactNode, useCallback, useMemo, useRef } from "react";
+import { MdKeyboardArrowRight } from "react-icons/md";
+import { useContextMenu } from "./useContextMenu";
 
 interface ContextMenuItemProps extends StackProps {
   item: any;
@@ -10,8 +12,9 @@ interface ContextMenuItemProps extends StackProps {
   depth?: number;
 }
 export const ContextMenuItem = (props: ContextMenuItemProps) => {
-  const { children, subMenu, item, ...rest } = props;
+  const { children, item, ...rest } = props;
   const ref = useRef<HTMLElement>(null);
+  const menu = useContextMenu();
 
   const style = useMemo(() => {
     return merge(rest, {
@@ -23,9 +26,33 @@ export const ContextMenuItem = (props: ContextMenuItemProps) => {
     });
   }, [item, rest]);
 
+  const showChildItems = useCallback(() => {
+    if (!ref.current) {
+      return;
+    }
+
+    const { stack, setStack } = menu;
+
+    if (stack.length && stack[stack.length - 1]?.item.id === item.id) {
+      return;
+    }
+
+    // pop all items at same depth or higher
+    while (stack.length && stack[stack.length - 1].item.depth >= item.depth) {
+      stack.pop();
+    }
+    console.log(item);
+    setStack([...stack, { item, parent: ref.current }]);
+  }, [item, menu]);
+
   return (
     <>
-      <Box {...style} ref={ref} className={"menu-item"}>
+      <Box
+        {...style}
+        ref={ref}
+        className={"menu-item"}
+        onMouseOver={showChildItems}
+      >
         <HStack
           h={"full"}
           px={2}
@@ -44,6 +71,7 @@ export const ContextMenuItem = (props: ContextMenuItemProps) => {
             fontSize={"12px"}
           >
             {item.shortcut ?? ""}
+            {!isEmpty(item.items) && <MdKeyboardArrowRight fontSize={"16px"} />}
           </Text>
         </HStack>
       </Box>

@@ -210,7 +210,7 @@ export const useMarks = (marks: Mark[]) => {
         case "background":
           merge(style, {
             background: mark.props?.color ?? "default",
-            // padding: "0.1em 0.1em",
+            padding: "2px 2px",
           });
           break;
         case "code":

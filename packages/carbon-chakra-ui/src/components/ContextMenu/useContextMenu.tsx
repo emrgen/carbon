@@ -1,9 +1,9 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { ContextMenuNode } from "./ContextMenuNode";
 
 interface StackEntry {
-  parent: any;
-  node: ReactNode;
-  parentElement: HTMLElement;
+  item: any;
+  parent: HTMLElement;
 }
 
 interface ContextMenuContextProps {
@@ -16,8 +16,46 @@ export const InnerContextMenuContext = createContext<ContextMenuContextProps>({
   setStack: () => {},
 });
 
-export const ContextMenuContext = ({ children }) => {
+export const ContextMenuContext = ({ children, isOpen, showSubMenu }) => {
   const [stack, setStack] = useState<StackEntry[]>([]);
+
+  const subMenus = useMemo(() => {
+    const menus = stack
+      .filter((i) => i.item.items)
+      .map((entry) => {
+        return {
+          menu: {
+            id: entry.item.id + "-sub-menu",
+            type: "menu",
+            items: entry.item.items,
+          },
+          parent: entry.parent,
+        };
+      });
+
+    return menus.map((entry, index) => {
+      const { menu, parent } = entry;
+
+      return (
+        <ContextMenuNode
+          key={menu.id}
+          isOpen={true}
+          blockRef={parent}
+          item={menu}
+          placement={"right-start"}
+          searchText={""}
+          onSearch={() => {}}
+          subMenu={true}
+        />
+      );
+    });
+  }, [stack]);
+
+  useEffect(() => {
+    if (!showSubMenu || !isOpen) {
+      setStack([]);
+    }
+  }, [isOpen, showSubMenu]);
 
   return (
     <InnerContextMenuContext.Provider
@@ -27,7 +65,7 @@ export const ContextMenuContext = ({ children }) => {
       }}
     >
       {children}
-      {stack}
+      {subMenus}
     </InnerContextMenuContext.Provider>
   );
 };

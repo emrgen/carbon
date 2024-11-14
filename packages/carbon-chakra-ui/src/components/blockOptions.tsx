@@ -1,7 +1,8 @@
+import { Square } from "@chakra-ui/react";
 import { BiColorFill } from "react-icons/bi";
 import { BsTrash3 } from "react-icons/bs";
 import { RxCopy } from "react-icons/rx";
-import { TbStatusChange } from "react-icons/tb";
+import { TbBrandCarbon, TbStatusChange } from "react-icons/tb";
 
 const injectId = (item, depth = 0) => {
   return {
@@ -23,6 +24,39 @@ enum BlockOption {
   Change = "Change",
   Color = "Color",
 }
+
+const defaultBackground = {
+  name: "Default",
+  value: "white",
+};
+
+const defaultTextColor = {
+  name: "Default",
+  value: "black",
+};
+
+const colors = [
+  {
+    name: "Ivory",
+    value: "#FBF4DB",
+  },
+  {
+    name: "Yellow",
+    value: "#ffce26",
+  },
+  {
+    name: "Orange",
+    value: "orange",
+  },
+  {
+    name: "Red",
+    value: "#FF4545",
+  },
+  {
+    name: "Purple",
+    value: "#AA5486",
+  },
+];
 
 export const blockMenu = injectId({
   type: "menu",
@@ -87,9 +121,49 @@ export const blockMenu = injectId({
           type: "option",
           label: "Color",
           icon: <BiColorFill />,
-          onClick: () => {
-            console.log("color");
-          },
+          items: [
+            {
+              type: "group",
+              label: "Text Color",
+              items: ([defaultTextColor, ...colors] as any).map((color) => {
+                return {
+                  type: "option",
+                  label: `${color.name} Text`,
+                  icon: <TbBrandCarbon color={color.value} fontSize={"20px"} />,
+                  style: {
+                    _hover: {},
+                  },
+                  onClick: () => {
+                    console.log("Red");
+                  },
+                };
+              }),
+            },
+            {
+              type: "group",
+              label: "Background Color",
+              items: ([defaultBackground, ...colors] as any).map((color) => {
+                return {
+                  type: "option",
+                  label: `${color.name} Background`,
+                  icon: (
+                    <Square
+                      size={5}
+                      bg={color.value}
+                      borderRadius={3}
+                      border={"1px solid #eee"}
+                    />
+                  ),
+                  style: {
+                    _hover: {},
+                  },
+                  onClick: () => {
+                    console.log("Red");
+                  },
+                };
+              }),
+            },
+          ],
         },
       ],
     },
