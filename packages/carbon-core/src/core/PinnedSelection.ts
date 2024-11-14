@@ -5,7 +5,7 @@ import { takeBefore } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { ActionOrigin } from "./actions";
 import { CarbonDom } from "./CarbonDom";
-import { classString, p14 } from "./Logger";
+import { classString, p14, p30 } from "./Logger";
 import { Node } from "./Node";
 import { NodeStore } from "./NodeStore";
 import { Pin } from "./Pin";
@@ -380,13 +380,13 @@ export class PinnedSelection {
 
       return this.isForward
         ? {
-            head: endRange.getClientRects()[0],
-            tail: startRange.getClientRects()[0],
-          }
+          head: endRange.getClientRects()[0],
+          tail: startRange.getClientRects()[0],
+        }
         : {
-            head: startRange.getClientRects()[0],
-            tail: endRange.getClientRects()[0],
-          };
+          head: startRange.getClientRects()[0],
+          tail: endRange.getClientRects()[0],
+        };
     }
 
     return { head: null, tail: null };
@@ -451,27 +451,30 @@ export class PinnedSelection {
         selection?.anchorOffset === anchorOffset &&
         selection?.focusOffset === focusOffset;
 
-      if (!inSync) {
+      if (!inSync || this.origin === ActionOrigin.UserInput) {
         // console.log(
         //   p14("%c[info]"),
-        //   "color:pink",
+        //   "color:red",
         //   p30("selection.setBaseAndExtent"),
         //   anchorNode,
         //   anchorOffset,
         //   focusNode,
         //   focusOffset,
         // );
-        selection?.setBaseAndExtent(
-          anchorNode,
-          anchorOffset,
-          focusNode,
-          focusOffset,
-        );
-        // const range = new Range();
-        // range.setStart(anchorNode, anchorOffset);
-        // range.setEnd(focusNode, focusOffset);
-        // selection?.removeAllRanges();
-        // selection?.addRange(range);
+        if (!inSync) {
+          selection?.setBaseAndExtent(
+            anchorNode,
+            anchorOffset,
+            focusNode,
+            focusOffset,
+          );
+        } else {
+          const range = new Range();
+          range.setStart(anchorNode, anchorOffset);
+          range.setEnd(focusNode, focusOffset);
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+        }
       }
 
       // NOTE: this works by fires two selectionchange event
@@ -615,7 +618,7 @@ export class PinnedSelection {
       return node;
     }
 
-    for (let i = 0; i < node.childNodes.length; i++) {
+    for (let i = 0;i < node.childNodes.length;i++) {
       const found = this.findTextNode(node.childNodes[i] as HTMLElement);
       if (found) return found;
     }
