@@ -34,11 +34,23 @@ export class SquareBoardState extends NodeTopicEmitter {
     return new SquareBoardState(app);
   }
 
+  deselectItems(cmd: Transaction, items: NodeBTree) {
+    items.forEach((n) => {
+      cmd.Update(n.id, { [SelectedPath]: false });
+    });
+  }
+
+  selectItem(cmd: Transaction, node: Node) {
+    cmd.Update(node.id, { [SelectedPath]: true });
+    this.selectedItems.set(node.id, node);
+  }
+
   activateItem(
     cmd: Transaction,
     node: Node,
     currentNode: Optional<Node>,
     editable = true,
+    select = true,
   ) {
     cmd.Update(node.id, {
       [ActivatedPath]: true,
@@ -53,22 +65,25 @@ export class SquareBoardState extends NodeTopicEmitter {
       (t) => t.type.name === "sqTitle",
     );
 
-    if (closestNode?.name === "sqTitle") {
-      const { firstChild } = node;
-      const tail = Pin.toEndOf(firstChild!)!;
-      const head = Pin.toStartOf(firstChild!)!;
-      const after = PinnedSelection.create(head, tail);
-      cmd.Select(after, ActionOrigin.UserInput);
-    } else if (closestNode?.name === "sqDescription") {
-      const pin = Pin.toEndOf(closestNode)!;
-      const after = PinnedSelection.fromPin(pin);
-      cmd.Select(after, ActionOrigin.UserInput);
-    } else {
-      // select the title node fully for certain types of nodes
-      const pin = Pin.toEndOf(node)!;
-      if (pin.node.name !== "sqTitle") {
+    // if select flag is true, add selection to the Transaction
+    if (select) {
+      if (closestNode?.name === "sqTitle") {
+        const { firstChild } = node;
+        const tail = Pin.toEndOf(firstChild!)!;
+        const head = Pin.toStartOf(firstChild!)!;
+        const after = PinnedSelection.create(head, tail);
+        cmd.Select(after, ActionOrigin.UserInput);
+      } else if (closestNode?.name === "sqDescription") {
+        const pin = Pin.toEndOf(closestNode)!;
         const after = PinnedSelection.fromPin(pin);
         cmd.Select(after, ActionOrigin.UserInput);
+      } else {
+        // select the title node fully for certain types of nodes
+        const pin = Pin.toEndOf(node)!;
+        if (pin.node.name !== "sqTitle") {
+          const after = PinnedSelection.fromPin(pin);
+          cmd.Select(after, ActionOrigin.UserInput);
+        }
       }
     }
   }
@@ -82,6 +97,15 @@ export class SquareBoardState extends NodeTopicEmitter {
       [ContenteditablePath]: false,
     });
     cmd.Select(PinnedSelection.IDENTITY);
+  }
+
+  deactivateItems(cmd: Transaction, items: NodeBTree) {
+    items.forEach((n) => {
+      cmd.Update(n.id, {
+        [ActivatedPath]: false,
+        [ContenteditablePath]: false,
+      });
+    });
   }
 
   onBoardClick(e: KeyboardEvent, node: Node) {
@@ -110,7 +134,6 @@ export class SquareBoardState extends NodeTopicEmitter {
 
     cmd.Dispatch();
     events.forEach(({ node, event }) => this.emit(node, event));
-
     console.log(events);
   }
 
@@ -129,6 +152,7 @@ export class SquareBoardState extends NodeTopicEmitter {
       el = el.parentElement;
     }
 
+    // if the clicked node is already active, do nothing
     if (activeItem) {
       if (activeItem.eq(node)) {
         return;
@@ -141,6 +165,7 @@ export class SquareBoardState extends NodeTopicEmitter {
         this.activeComment = null;
       }
 
+      // deactivate the current active node
       cmd.Update(activeItem.id, {
         [ActivatedPath]: false,
         [ContenteditablePath]: false,
@@ -149,6 +174,7 @@ export class SquareBoardState extends NodeTopicEmitter {
       this.activeItem = null;
     }
 
+    //
     if (selectedItems.has(node.id) && selectedItems.size === 1) {
       this.activateItem(cmd, node, currentNode);
       cmd.Dispatch();
@@ -165,11 +191,12 @@ export class SquareBoardState extends NodeTopicEmitter {
       this.activeComment = null;
     }
 
-    // mark the clicked node as selected
+    // mark the already selected items as deselected
     selectedItems.forEach((n) => {
       cmd.Update(n, { [SelectedPath]: false });
       events.push({ node: n, event: "deselect" });
     });
+    // mark the clicked node as selected
     cmd.Update(node.id, { [SelectedPath]: true }).Dispatch();
     events.push({ node: node, event: "select" });
 
@@ -186,21 +213,22 @@ export class SquareBoardState extends NodeTopicEmitter {
     }
 
     // let the event pass to parent event handlers
-    if (
-      selectedItems.length > 1 ||
-      selectedItems.length === 0 ||
-      !selectedItems.has(parent.id)
-    ) {
-      return;
-    }
+    // if (
+    //   selectedItems.length > 1 ||
+    //   selectedItems.length === 0 ||
+    //   !selectedItems.has(parent.id)
+    // ) {
+    //   return;
+    // }
 
     stop(e);
     const { cmd } = app;
     if (!this.activeItem?.eq(parent)) {
-      if (this.activeItem) {
-        this.deactivateItem(cmd, this.activeItem);
-      }
-      this.activateItem(cmd, parent, null, false);
+      this.deactivateItem(cmd, this.activeItem);
+      this.deselectItems(cmd, selectedItems);
+
+      this.selectItem(cmd, parent);
+      this.activateItem(cmd, parent, null, false, false);
 
       if (this.activeComment) {
         cmd.Update(this.activeComment.firstChild!, {
@@ -216,6 +244,8 @@ export class SquareBoardState extends NodeTopicEmitter {
       const pin = Pin.toEndOf(commentLine)!;
       const after = PinnedSelection.fromPin(pin);
       cmd.Select(after, ActionOrigin.UserInput);
+      console.log("dispatching", cmd);
+
       cmd.Dispatch();
     } else {
       if (this.activeComment) {
@@ -234,6 +264,10 @@ export class SquareBoardState extends NodeTopicEmitter {
     }
   }
 
+  onReplyComment(e, comment: Node) {
+
+  }
+
   onSendComment(e, commentLine: Node) {
     const { selectedItems, app, activeItem } = this;
     const { parent } = commentLine;
@@ -245,15 +279,15 @@ export class SquareBoardState extends NodeTopicEmitter {
       .Dispatch();
   }
 
-  onDoubleClick(e: KeyboardEvent, item: NodeId) {}
+  onDoubleClick(e: KeyboardEvent, item: NodeId) { }
 
-  onMouseDown(e: KeyboardEvent, item: NodeId) {}
+  onMouseDown(e: KeyboardEvent, item: NodeId) { }
 
-  onMouseUp(e: KeyboardEvent, item: NodeId) {}
+  onMouseUp(e: KeyboardEvent, item: NodeId) { }
 
-  onMouseMove(e: KeyboardEvent, item: NodeId) {}
+  onMouseMove(e: KeyboardEvent, item: NodeId) { }
 
-  onMouseEnter(e: KeyboardEvent, item: NodeId) {}
+  onMouseEnter(e: KeyboardEvent, item: NodeId) { }
 
-  onMouseLeave(e: KeyboardEvent, item: NodeId) {}
+  onMouseLeave(e: KeyboardEvent, item: NodeId) { }
 }

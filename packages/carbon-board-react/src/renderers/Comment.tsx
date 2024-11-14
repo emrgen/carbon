@@ -27,7 +27,7 @@ export const Comment = (props: RendererProps) => {
       // insert new commentLine node
       // select the commentLine node
 
-      cmd.inserter.insertAfter(node.lastChild!, commentLine);
+      cmd.inserter.insertAfter(node.lastChild!, commentLine)?.Dispatch();
     },
     [app, node.lastChild],
   );
@@ -39,7 +39,7 @@ export const Comment = (props: RendererProps) => {
   return (
     <CarbonBlock node={node} custom={{ ...attributes, ...listeners }}>
       <CarbonChildren node={node} />
-      <div className={"sq-comment-reply"} onClick={handleReply}>
+      <div className={"sq-comment-reply"} onClick={handleReply} contentEditable={false}>
         Reply
       </div>
     </CarbonBlock>

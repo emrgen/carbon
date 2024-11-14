@@ -280,6 +280,10 @@ export class ChangeManager extends NodeTopicEmitter {
         if (!selection.isSkip) {
           app.blur();
         }
+
+        if (selection.isSkip) {
+          app.parkCursor();
+        }
         return;
       }
 

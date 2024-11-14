@@ -175,7 +175,7 @@ const data = node("carbon", [
             ],
             {
               [StylePath]: {
-                left: 1400,
+                left: 400,
                 top: 250,
               },
             },
@@ -225,7 +225,7 @@ export const Board = () => {
     <Box className={"carbon-board-app-container"} pos={"relative"}>
       <CarbonApp app={app} renderManager={renderManager}>
         <FloatingStyleMenu />
-        <PathTracker />
+        <PathTracker style={{top: 40}}/>
         <InsertBlockMenu />
         <BlockContextMenu />
       </CarbonApp>
