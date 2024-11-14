@@ -29,7 +29,7 @@ export class NodeId implements IntoNodeId {
     return this.id;
   }
 
-  static deserialize(id: string): Optional<NodeId> {
+  static deserialize(id: string): NodeId {
     return new NodeId(id);
   }
 
