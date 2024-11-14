@@ -98,10 +98,12 @@ export class Affine {
   // need to be careful about the order
   // when applying the transformation to a point the order is t -> s -> r
   decompose() {
-    const rotation = this.rotation();
-    const map = this.mul(rotation.inverse());
+    const translation = this.translation();
+    const map = this.mul(translation.inverse());
     const scaling = map.scaling();
-    const translation = map.translation();
+    const rotation = map.mul(scaling.inverse())
+
+    // const translation = map.translation();
     return { translation, rotation, scaling };
   }
 
@@ -113,13 +115,13 @@ export class Affine {
 
   // return the scaling matrix
   scaling(): Affine {
-    const [a, b, c, d, e, f] = this.mat;
+    const [a,,,, e,] = this.mat;
     return new Affine([a, 0, 0, 0, e, 0]);
   }
 
   // return the translation matrix
   translation(): Affine {
-    const [a, b, c, d, e, f] = this.mat;
+    const [,, c,,, f] = this.mat;
     return new Affine([1, 0, c, 0, 1, f]);
   }
 

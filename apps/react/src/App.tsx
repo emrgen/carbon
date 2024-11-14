@@ -3,6 +3,7 @@ import { Design } from "./carbon/Dev/Design";
 import Dev from "./carbon/Dev/Dev";
 import { ObjectView } from "./carbon/Dev/ObjectView";
 import Text from "./carbon/Dev/Text";
+import {AffineExp} from "./carbon/Dev/Affine";
 import { Grouped } from "./carbon/Poc/Grouped";
 import "./react-bem.styl";
 import Sheet from "./carbon/Sheet";
@@ -17,6 +18,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Dev />} />
         <Route path="/design" element={<Design />} />
+        <Route path="/affine" element={<AffineExp />} />
         {/*<Route path="/chain" element={<Chain />} />*/}
         <Route path="/text" element={<Text />} />
         <Route path="/object-viewer" element={<ObjectView />} />

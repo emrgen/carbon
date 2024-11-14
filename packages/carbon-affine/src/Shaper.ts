@@ -127,7 +127,7 @@ export class Shaper {
     return { sx: lsx, sy: lsy, ax: lax, ay: lay };
   }
 
-  scale(sx: Scale, sy: Scale, cx: number, cy: number) {
+  scale(sx: Scale, sy: Scale, cx?: number, cy?: number) {
     return Shaper.from(this.tm.scale(sx, sy, cx, cy));
   }
 
@@ -224,6 +224,11 @@ export class Shaper {
     };
   }
 
+  scaling() {
+    const scaling = this.tm.matrix.scaling();
+    return { sx: scaling.mat[0], sy: scaling.mat[4] };
+  }
+
   apply<T extends IPoint | IPoint[]>(v: T): T {
     return this.tm.apply(v);
   }
@@ -241,14 +246,31 @@ export class Shaper {
   toStyle() {
     const { x, y } = this.center();
     const { width, height } = this.size();
-    const angle = this.angle;
+    const {scaling, rotation} = this.affine().decompose();
+
+    const {sx, sy} = {sx: scaling.mat[0], sy: scaling.mat[4]};
+    const {angle} = rotation;
+ 
+    let rotate = "";
+    if (angle !== 0) {
+      rotate = `rotateZ(${angle}rad)`;
+    }
+
+    // NOTE: the flipX and flipY are composed of (scaleX, scaleY, rotateZ)
+    if (sx < 0) {
+      rotate += " scaleX(-1)";
+    }
+
+    if (sy < 0) {
+      rotate += " scaleY(-1)";
+    }
 
     return {
       left: `-${width / 2}px`,
       top: `-${height / 2}px`,
       width: `${width}px`,
       height: `${height}px`,
-      transform: `translate(${x}px, ${y}px) rotateZ(${angle}rad)`,
+      transform: `translate(${x}px, ${y}px) ${rotate}`,
     };
   }
 
