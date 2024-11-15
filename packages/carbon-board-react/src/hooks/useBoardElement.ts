@@ -52,7 +52,7 @@ export const useBoardElement = (props: RendererProps) => {
       listeners: {
         onClick: (e) => {
           stop(e);
-          board.onClick(e, node);
+          board.onNodeClick(e, node);
         },
         onMouseDown: (e) => {
           stop(e);

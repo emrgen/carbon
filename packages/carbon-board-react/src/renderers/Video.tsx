@@ -62,7 +62,7 @@ export const Video = (props: RendererProps) => {
       custom={{
         onClick: (e) => {
           stop(e);
-          board.onClick(e, node);
+          board.onNodeClick(e, node);
         },
         onMouseDown: (e) => {
           stop(e);

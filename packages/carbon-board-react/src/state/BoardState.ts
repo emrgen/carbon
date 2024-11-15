@@ -34,18 +34,18 @@ export class SquareBoardState extends NodeTopicEmitter {
     return new SquareBoardState(app);
   }
 
-  deselectItems(cmd: Transaction, items: NodeBTree) {
+  private deselectItems(cmd: Transaction, items: NodeBTree) {
     items.forEach((n) => {
       cmd.Update(n.id, { [SelectedPath]: false });
     });
   }
 
-  selectItem(cmd: Transaction, node: Node) {
+  private selectItem(cmd: Transaction, node: Node) {
     cmd.Update(node.id, { [SelectedPath]: true });
     this.selectedItems.set(node.id, node);
   }
 
-  activateItem(
+  private activateItem(
     cmd: Transaction,
     node: Node,
     currentNode: Optional<Node>,
@@ -88,7 +88,7 @@ export class SquareBoardState extends NodeTopicEmitter {
     }
   }
 
-  deactivateItem(cmd: Transaction, node: Optional<Node>) {
+  private deactivateItem(cmd: Transaction, node: Optional<Node>) {
     if (!node) {
       return;
     }
@@ -99,7 +99,7 @@ export class SquareBoardState extends NodeTopicEmitter {
     cmd.Select(PinnedSelection.IDENTITY);
   }
 
-  deactivateItems(cmd: Transaction, items: NodeBTree) {
+  private deactivateItems(cmd: Transaction, items: NodeBTree) {
     items.forEach((n) => {
       cmd.Update(n.id, {
         [ActivatedPath]: false,
@@ -108,6 +108,8 @@ export class SquareBoardState extends NodeTopicEmitter {
     });
   }
 
+  // deselect the node if it is selected
+  // deactivate the node if it is active
   onBoardClick(e: KeyboardEvent, node: Node) {
     const { selectedItems, app, activeItem } = this;
     const { cmd } = app;
@@ -137,7 +139,9 @@ export class SquareBoardState extends NodeTopicEmitter {
     console.log(events);
   }
 
-  onClick(e: KeyboardEvent, node: Node) {
+  // select the node if it is not selected
+  // activate the node if already selected and not active
+  onNodeClick(e: KeyboardEvent, node: Node) {
     const { selectedItems, app, activeItem } = this;
     const { cmd } = app;
     const events: { node: Node; event: string }[] = [];

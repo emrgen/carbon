@@ -3,7 +3,7 @@ import { DndEvent, getEventPosition } from "@emrgen/carbon-dragon";
 import { MutableRefObject, useCallback, useMemo } from "react";
 
 interface UseTrackDragProps {
-  // overlay ref
+  // drag handle ref
   ref: MutableRefObject<any>;
   refCheck?: (ref: any, target: any) => boolean;
   node: Node;
@@ -17,31 +17,21 @@ interface UseTrackDragProps {
 }
 
 export function useMakeDraggable(props: UseTrackDragProps) {
-  const {
-    refCheck = (ref, target) => ref === target,
-    node,
-    distance,
-    isDisabled,
-    onMouseDown,
-    onMouseUp,
-    onDragMove,
-    onDragStart,
-    onDragEnd,
-    ref,
-  } = props;
+  const { refCheck = (ref, target) => ref.current === target } = props;
 
   const onMouseDownHandler = useCallback(
     (event) => {
-      let initState: any = {};
-      let prevState: any = {};
-      // preventAndStop(event)
-      if (isDisabled) return;
-      if (!refCheck(ref.current, event.target)) {
+      if (props.isDisabled) return;
+      if (!refCheck(props.ref.current, event.target)) {
         return;
       }
-      // event.stopPropagation();
-      onMouseDown(node, event);
-      // console.log(ref.current, event.target)
+
+      const { node, distance } = props;
+      // let the parent handle the event if it wants to (eg. for stopping propagation)
+      props.onMouseDown(node, event);
+
+      let initState: any = {};
+      let prevState: any = {};
       let isDragging = false;
 
       const activatorEvent = event;
@@ -56,15 +46,15 @@ export function useMakeDraggable(props: UseTrackDragProps) {
           prevState: prevState,
           position: getEventPosition(activatorEvent, event),
           dragged: isDragging,
-          setInitState(state: any) {},
-          setPrevState(state: any) {},
+          setInitState(state: any) { },
+          setPrevState(state: any) { },
         };
 
         if (isDragging) {
-          onDragEnd(dndEvent);
+          props.onDragEnd(dndEvent);
         }
 
-        onMouseUp(node, dndEvent);
+        props.onMouseUp(node, dndEvent);
         isDragging = false;
         window.removeEventListener("mousemove", _onMouseMove);
         window.removeEventListener("mouseup", _onMouseUp);
@@ -73,7 +63,7 @@ export function useMakeDraggable(props: UseTrackDragProps) {
       const _onMouseMove = (event: MouseEvent) => {
         const position = getEventPosition(activatorEvent, event);
         if (isDragging) {
-          onDragMove({
+          props.onDragMove({
             activatorEvent,
             event,
             node,
@@ -100,7 +90,7 @@ export function useMakeDraggable(props: UseTrackDragProps) {
         }
 
         if (isDragging) {
-          onDragStart({
+          props.onDragStart({
             activatorEvent,
             event,
             node,
@@ -125,18 +115,7 @@ export function useMakeDraggable(props: UseTrackDragProps) {
         window.removeEventListener("mouseup", _onMouseUp);
       };
     },
-    [
-      distance,
-      isDisabled,
-      node,
-      onDragEnd,
-      onDragMove,
-      onDragStart,
-      onMouseDown,
-      onMouseUp,
-      ref,
-      refCheck,
-    ],
+    [props, refCheck],
   );
 
   return useMemo(
