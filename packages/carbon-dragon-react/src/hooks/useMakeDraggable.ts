@@ -4,7 +4,7 @@ import { MutableRefObject, useCallback, useMemo } from "react";
 
 interface UseTrackDragProps {
   // drag handle ref
-  ref: MutableRefObject<any>;
+  handleRef: MutableRefObject<any>;
   refCheck?: (ref: any, target: any) => boolean;
   node: Node;
   distance: number;
@@ -22,7 +22,7 @@ export function useMakeDraggable(props: UseTrackDragProps) {
   const onMouseDownHandler = useCallback(
     (event) => {
       if (props.isDisabled) return;
-      if (!refCheck(props.ref.current, event.target)) {
+      if (!refCheck(props.handleRef.current, event.target)) {
         return;
       }
 

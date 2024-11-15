@@ -33,7 +33,7 @@ export const Draggable = (props: DraggableProps) => {
 
   const { listeners } = useMakeDraggable({
     node,
-    ref,
+    handleRef: ref,
     refCheck,
     distance: 4,
     onDragEnd(event: DndEvent): void {

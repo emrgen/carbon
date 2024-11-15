@@ -16,7 +16,7 @@ export const RectSelector = ({ node }) => {
 
   const { listeners } = useMakeDraggable({
     node,
-    ref,
+    handleRef: ref,
     distance: 5,
     onDragStart(event: DndEvent) {
       board.onSelectionStart(event);

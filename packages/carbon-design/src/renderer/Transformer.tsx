@@ -124,7 +124,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   // during dragging this hook will not re-evaluate as no dependencies changes
   const { listeners } = useMakeDraggable({
     node,
-    ref,
+    handleRef: ref,
     distance,
     onDragStart: onDragStart,
     onDragMove: onDragMove,

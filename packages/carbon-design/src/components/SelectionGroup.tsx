@@ -41,7 +41,7 @@ export const SelectionGroup = (props: SelectionGroupProps) => {
 
   const { listeners } = useMakeDraggable<{ left: number }>({
     node: Node.IDENTITY,
-    ref,
+    handleRef: ref,
     distance,
     onDragStart(event: DndEvent) {
       const store = new NodeIdMap<any>();
