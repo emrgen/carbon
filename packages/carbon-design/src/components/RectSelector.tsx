@@ -29,9 +29,9 @@ export const RectSelector = ({ node }) => {
       board.onSelectionEnd(event);
       overlay.hideOverlay();
     },
-    onMouseDown(node: Node, event: MouseEvent) {},
-    onMouseUp(node: Node, event: DndEvent) {
-      board.onMouseUp(node, event);
+    onMouseDown(event: DndEvent) {},
+    onMouseUp(event: DndEvent) {
+      board.onMouseUp(event);
     },
   });
 

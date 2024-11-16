@@ -39,7 +39,7 @@ export const SelectionGroup = (props: SelectionGroupProps) => {
     };
   }, [board]);
 
-  const { listeners } = useMakeDraggable<{ left: number }>({
+  const { listeners } = useMakeDraggable({
     node: Node.IDENTITY,
     handleRef: ref,
     distance,
@@ -65,12 +65,12 @@ export const SelectionGroup = (props: SelectionGroupProps) => {
       });
     },
     onDragMove(event: DndEvent) {
-      const { state, position } = event;
+      const { initState, position } = event;
       setStyle((s) => {
         return {
           ...s,
-          left: state.style.left + position.deltaX,
-          top: state.style.top + position.deltaY,
+          left: initState.style.left + position.deltaX,
+          top: initState.style.top + position.deltaY,
         };
       });
 
@@ -78,7 +78,7 @@ export const SelectionGroup = (props: SelectionGroupProps) => {
       board.selectedNodes.forEach((nodeId) => {
         board.bus.emit(nodeId, "group:drag:move", {
           ...event,
-          state: state.getData(nodeId),
+          state: initState.getData(nodeId),
         });
       });
     },
@@ -106,8 +106,8 @@ export const SelectionGroup = (props: SelectionGroupProps) => {
         board.bus.emit(nodeId, "group:drag:end", event);
       });
     },
-    onMouseDown(node: Node, event: MouseEvent) {},
-    onMouseUp(node: Node, event: DndEvent) {},
+    onMouseDown(event: DndEvent) {},
+    onMouseUp(event: DndEvent) {},
   });
 
   return (

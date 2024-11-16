@@ -8,7 +8,7 @@ import {
   NodeIdTopicEmitter,
 } from "@emrgen/carbon-core";
 import { DndEvent, elementBound, NodeR3Tree } from "@emrgen/carbon-dragon";
-import { BBox, NodeRect } from "@emrgen/types";
+import { BBox, RawRect} from "@emrgen/types";
 import { EventEmitter } from "events";
 import { identity } from "lodash";
 import { MouseEvent } from "react";
@@ -41,7 +41,7 @@ export class DesignBoard extends EventEmitter {
   // node bounds cache, the axis-aligned bounding box
   nodeBound: NodeIdMap<BBox> = new NodeIdMap();
   // node rect cache, the actual transformed rect
-  nodeRect: NodeIdMap<NodeRect> = new NodeIdMap();
+  nodeRect: NodeIdMap<RawRect> = new NodeIdMap();
 
   // mouse drag selection
   mouseDownPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -68,7 +68,7 @@ export class DesignBoard extends EventEmitter {
     this.onSelectionEnd = this.onSelectionEnd.bind(this);
   }
 
-  onMouseUp(node: Node, event: DndEvent) {
+  onMouseUp(event: DndEvent) {
     if (!event.dragged) {
       this.selectNodes([]);
     }

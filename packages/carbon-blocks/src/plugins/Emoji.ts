@@ -17,3 +17,5 @@ export class Emoji extends InlineAtom {
     // super.encodeHtml(w, ne, node);
   }
 }
+
+

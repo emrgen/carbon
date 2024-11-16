@@ -129,14 +129,14 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     onDragStart: onDragStart,
     onDragMove: onDragMove,
     onDragEnd: onDragEnd,
-    onMouseDown(node: Node, event: MouseEvent) {
-      event.preventDefault();
-      event.stopPropagation();
+    onMouseDown(e: DndEvent) {
+      e.event.preventDefault();
+      e.event.stopPropagation();
       if (!board.selectedNodes.has(node.id)) {
         board.selectNodes([node]);
       }
     },
-    onMouseUp(node: Node, event: DndEvent) {},
+    onMouseUp(e: DndEvent) {},
   });
 
   // subscribe to group drag events

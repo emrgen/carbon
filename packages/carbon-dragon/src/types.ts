@@ -35,6 +35,8 @@ export interface DndEvent<E = MouseEvent> {
     startY: number;
     endX: number;
     endY: number;
+    x: number;
+    y: number;
     deltaX: number;
     deltaY: number;
   };

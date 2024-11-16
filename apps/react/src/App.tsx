@@ -12,12 +12,14 @@ import { FastEditor } from "./fastype/FastEditor";
 
 import "./fastype/fastype.styl";
 import { Board } from "./carbon/Dev/Board";
+import { DraggableDemo } from "./carbon/Demo/Draggable";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Dev />} />
+        <Route path="/demo/draggable" element={<DraggableDemo />} />
         <Route path="/design" element={<Design />} />
         <Route path="/board" element={<Board />} />
         <Route path="/affine" element={<AffineExp />} />

@@ -38,6 +38,8 @@ export const getEventPosition = <E extends MouseEvent>(from: E, to: E) => {
     startY,
     endX,
     endY,
+    x: endX,
+    y: endY,
     deltaX: endX - startX,
     deltaY: endY - startY,
   };

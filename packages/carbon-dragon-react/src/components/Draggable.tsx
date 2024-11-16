@@ -12,8 +12,8 @@ interface DraggableProps {
   onDragStart?: (event: DndEvent) => void;
   onDragMove?: (event: DndEvent) => void;
   onDragEnd?: (event: DndEvent) => void;
-  onMouseDown?: (node: Node, event: MouseEvent) => void;
-  onMouseUp?: (node: Node, event: DndEvent) => void;
+  onMouseDown?: (event: DndEvent) => void;
+  onMouseUp?: (event: DndEvent) => void;
 }
 
 export const Draggable = (props: DraggableProps) => {
@@ -45,11 +45,11 @@ export const Draggable = (props: DraggableProps) => {
     onDragStart(event: DndEvent): void {
       onDragStart?.(event);
     },
-    onMouseDown(node: Node, event: MouseEvent) {
-      onMouseDown?.(node, event);
+    onMouseDown(event: DndEvent) {
+      onMouseDown?.(event);
     },
-    onMouseUp(node: Node, event: DndEvent): void {
-      onMouseUp?.(node, event);
+    onMouseUp(event: DndEvent): void {
+      onMouseUp?.(event);
     },
   });
 

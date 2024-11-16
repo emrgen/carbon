@@ -16,6 +16,7 @@
     "npm:@codemirror/state@^6.4.1": "6.4.1",
     "npm:@codemirror/view@^6.25.1": "6.34.1",
     "npm:@emoji-mart/data@^1.1.2": "1.2.1",
+    "npm:@emoji-mart/data@^1.2.1": "1.2.1",
     "npm:@emoji-mart/react@^1.1.1": "1.1.1_emoji-mart@5.6.0_react@18.3.1",
     "npm:@emotion/react@^11.11.1": "11.13.3_react@18.3.1",
     "npm:@emotion/react@^11.11.4": "11.13.3_react@18.3.1",
@@ -79,6 +80,7 @@
     "npm:diff@^5.2.0": "5.2.0",
     "npm:dompurify@^3.1.7": "3.1.7",
     "npm:emoji-mart@^5.5.2": "5.6.0",
+    "npm:emoji-mart@^5.6.0": "5.6.0",
     "npm:emoji-picker-react@^4.4.10": "4.12.0_react@18.3.1",
     "npm:emoji-regex@^10.2.1": "10.4.0",
     "npm:emoji-regex@^10.4.0": "10.4.0",
@@ -8281,6 +8283,7 @@
       "packages/carbon-blocks": {
         "packageJson": {
           "dependencies": [
+            "npm:@emoji-mart/data@^1.2.1",
             "npm:@types/is-hotkey@~0.1.10",
             "npm:@types/lodash@^4.14.191",
             "npm:@types/react-dom@^18.0.6",
@@ -8288,6 +8291,7 @@
             "npm:@uidotdev/usehooks@^2.4.1",
             "npm:compare-urls@^4.1.0",
             "npm:diff@^5.2.0",
+            "npm:emoji-mart@^5.6.0",
             "npm:eslint@^7.32.0",
             "npm:is-hotkey@0.2",
             "npm:prismjs@^1.29.0",
