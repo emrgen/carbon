@@ -9,6 +9,7 @@ export * from "./components/DocumentSaveStatus";
 export * from "./components/ToggleViewMode";
 export * from "./components/InsertBlockMenu";
 export * from "./components/BlockContextMenu";
+export * from "./components/EmojiPickerInlineMenu";
 
 export const carbonChakraRenderers = [
   ReactRenderer.create("image", ImageComp),

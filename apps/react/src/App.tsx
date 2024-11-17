@@ -13,6 +13,7 @@ import { FastEditor } from "./fastype/FastEditor";
 import "./fastype/fastype.styl";
 import { Board } from "./carbon/Dev/Board";
 import { DraggableDemo } from "./carbon/Demo/Draggable";
+import { EmojiDemo } from "./carbon/Demo/Emoji";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Dev />} />
         <Route path="/demo/draggable" element={<DraggableDemo />} />
+        <Route path="/demo/emoji" element={<EmojiDemo />} />
         <Route path="/design" element={<Design />} />
         <Route path="/board" element={<Board />} />
         <Route path="/affine" element={<AffineExp />} />

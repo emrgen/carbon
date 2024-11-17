@@ -44,7 +44,7 @@ export interface UseDraggableHandleProps extends UseFastDraggableProps {
 
 // create a draggable handle event listener
 export const useDraggableHandle = (props: UseDraggableHandleProps) => {
-  const { id, node, disabled, ref, activationConstraint = {}, onStart } = props;
+  const { id, node, disabled, ref, activationConstraint = {} } = props;
   const { distance = 0 } = activationConstraint;
   const [isDisabled, setIsDisabled] = useState(disabled);
   const refId = useRef<string>(Math.random().toString(16).slice(6));

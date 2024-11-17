@@ -27,7 +27,7 @@ import { isConvertible } from "../utils";
 import { NumberedList } from "./NumberedList";
 
 declare module "@emrgen/carbon-core" {
-  export interface Transaction {}
+  export interface Transaction { }
 }
 
 // Things needed to change a node type (e.g. from paragraph to heading):
@@ -100,10 +100,11 @@ export class ChangeName extends BeforePlugin {
   checkInputRules(ctx: EventContext<KeyboardEvent>) {
     const { currentNode } = ctx;
     const block = currentNode.closest((n) => n.isContainer)!;
-    if (!isConvertible(block)) return;
-    if (this.titleInputRules.execute(ctx, block)) {
-      console.log("done...");
-      return;
+    if (isConvertible(block)) {
+      if (this.titleInputRules.execute(ctx, block)) {
+        console.log("done...");
+        return;
+      }
     }
 
     if (this.inlineInputRules.execute(ctx, block)) {
@@ -370,5 +371,5 @@ export class ChangeName extends BeforePlugin {
     };
   }
 
-  insertBefore(name: string, groups: string[]) {}
+  insertBefore(name: string, groups: string[]) { }
 }

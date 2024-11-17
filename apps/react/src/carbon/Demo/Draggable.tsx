@@ -1,7 +1,7 @@
 import { Box, Circle, HStack, Switch, Text } from "@chakra-ui/react";
 import { DndEvent, elementBound } from "@emrgen/carbon-dragon";
 import { useMakeDraggable } from "@emrgen/carbon-dragon-react";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 export const DraggableDemo = () => {
   const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
@@ -12,17 +12,17 @@ export const DraggableDemo = () => {
 
   const { listeners } = useMakeDraggable({
     handleRef: ref,
-    onDragStart: (_: DndEvent) => {
+    onDragStart: useCallback((_: DndEvent) => {
       setStartPosition(elementBound(ref.current!));
       setDragging(true);
-    },
-    onDragMove: (event: DndEvent) => {
-      setPosition(event.position);
-    },
-    onDragEnd: (event: DndEvent) => {
-      setEndPosition(event.position);
+    }, []),
+    onDragMove: useCallback((e: DndEvent) => {
+      setPosition(e.position);
+    }, []),
+    onDragEnd: useCallback((e: DndEvent) => {
+      setEndPosition(e.position);
       setDragging(false);
-    },
+    }, []),
   });
 
   return (

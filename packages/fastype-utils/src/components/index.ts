@@ -1,3 +1,3 @@
 export * from './Overlay';
-export * from './EmojiPicker';
+export * from '../../../carbon-chakra-ui/src/components/EmojiPicker';
 export * from './BlockMenu';
