@@ -17,7 +17,7 @@ import {
   Point,
   preventAndStopCtx,
   RemoteDataAsPath,
-  splitTextBlock,
+  TitleNode,
   Transaction,
   Writer,
 } from "@emrgen/carbon-core";
@@ -246,8 +246,11 @@ export class Collapsible extends NodePlugin {
       return;
     }
 
-    const [leftContent, _, rightContent] = splitTextBlock(start, end, app);
-    console.log(leftContent, "xx", rightContent);
+    const [left, _, right] = TitleNode.from(start.node).split(
+      start.steps,
+      end.steps,
+    );
+
     const json = {
       name: splitBlock.isCollapsed
         ? splitBlock.name
@@ -256,7 +259,7 @@ export class Collapsible extends NodePlugin {
       children: [
         {
           name: "title",
-          children: rightContent.map((c) => c.toJSON()),
+          children: right.children,
         },
       ],
     };
@@ -272,7 +275,7 @@ export class Collapsible extends NodePlugin {
     const focusPoint = Pin.toStartOf(section!);
     const after = PinnedSelection.fromPin(focusPoint!);
 
-    tr.SetContent(title.id, leftContent).Insert(at, section!).Select(after);
+    tr.SetContent(title.id, left.children).Insert(at, section!).Select(after);
   }
 
   enter(tr: Transaction, selection: PinnedSelection) {

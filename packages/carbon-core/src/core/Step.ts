@@ -1,10 +1,8 @@
-import { Node } from "./Node";
-import { Optional } from "@emrgen/types";
-import { Predicate } from "@emrgen/types";
+import { Optional, Predicate } from "@emrgen/types";
+import { Align, Focus } from "./Focus";
 import { classString } from "./Logger";
+import { Node } from "./Node";
 import { Pin } from "./Pin";
-import { Focus } from "./Focus";
-import { Align } from "./Focus";
 
 export type StepOffset = number;
 
@@ -45,6 +43,15 @@ export class Step {
       );
     }
 
+    if (node.isInlineAtom && node.isFocusable) {
+      if (offset >= 1) {
+        return Pin.create(node, 1, offset).markAlign(Align.Left);
+      } else {
+        return Pin.create(node, 0, 1).markAlign(Align.Right);
+      }
+    }
+
+    debugger;
     return null;
   }
 

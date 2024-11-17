@@ -1640,8 +1640,6 @@ export class TransformCommands extends BeforePlugin {
 
     const after = PinnedSelection.fromPin(Pin.toStartOf(endTextBlock.node)!);
 
-    console.log("xxxxxxxxxxxxxxx", after.toString());
-
     // console.log("insert point", rootNode?.name, rootNode);
     tr.Insert(rootInsertPoint, rootNode!)
       .Add(moveCommands)
@@ -2561,9 +2559,7 @@ export class TransformCommands extends BeforePlugin {
         after = PinnedSelection.fromPin(Pin.toStartOf(textBlock.node)!);
       } else {
         const textBlock = TitleNode.from(prev)
-          .replaceContent(
-            [...prev.children, ...next.children].map(cloneFrozenNode),
-          )
+          .append(next.children.map(cloneFrozenNode))
           .normalize();
         insertActions.push(
           SetContentAction.create(prev.id, textBlock.children),

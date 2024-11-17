@@ -27,7 +27,6 @@ export const BlockContextMenu = () => {
     const onClickOverlay = (e: MouseEvent) => {
       setIsOpen(false);
       setSearchText("");
-      console.log("xxxxxxxxxx");
     };
 
     overlay.on("click", onClickOverlay);

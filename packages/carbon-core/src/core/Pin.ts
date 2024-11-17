@@ -337,7 +337,12 @@ export class Pin {
       // );
       // NOTE: as the pin was valid before it should be valid after down
       const down = step.pin()!;
-      console.assert(down, "Pin.down: down pin is null");
+      console.assert(
+        down,
+        "Pin.down: down pin is null",
+        step.toString(),
+        this.toString(),
+      );
 
       return down;
     }

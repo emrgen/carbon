@@ -20,7 +20,7 @@ console.log(data);
 // @ts-ignore
 window.ei = EmojiIndex;
 
-const EMOJI_REGEX = /:[a-z_]+:?$/;
+const EMOJI_REGEX = /(:[a-z_]+:|:[a-z_]+)$/;
 
 // change :simple_smile: to 😊
 export class EmojiPickerInline extends BeforePlugin {
@@ -121,15 +121,16 @@ export class EmojiPickerInline extends BeforePlugin {
 
   intoEmoji() {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
-      if (text.trim() !== text) {
+      this.node = ctx.currentNode.closest((n) => n.isTextContainer)!;
+      const match = text.match(regex);
+      const matchText = match![0];
+      if (matchText.trim() !== matchText) {
         this.isVisible && this.hideEmojiPicker();
         return;
       }
 
       this.isVisible = true;
-      this.node = ctx.currentNode.closest((n) => n.isTextContainer)!;
-      const match = text.match(regex);
-      this.showEmojiPicker(ctx.currentNode, match![0]);
+      this.showEmojiPicker(ctx.currentNode, matchText);
     };
   }
 

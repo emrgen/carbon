@@ -4,7 +4,6 @@ import {
   EventHandlerMap,
   Mark,
   Node,
-  PinnedSelection,
   preventAndStopCtx,
   Transaction,
 } from "@emrgen/carbon-core";
@@ -20,18 +19,6 @@ declare module "@emrgen/carbon-core" {
   export interface Service {
     marks: {
       get(node: Node, offset: number): Mark[];
-    };
-  }
-}
-
-declare module "@emrgen/carbon-core" {
-  interface Transaction {
-    collapsible: {
-      split(selection: PinnedSelection): Transaction;
-      enter(selection: PinnedSelection): Transaction;
-      expand(node: Node): Transaction;
-      collapse(node: Node): Transaction;
-      toggle(node: Node, path?: string): Transaction;
     };
   }
 }

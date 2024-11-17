@@ -157,6 +157,9 @@ importers:
       '@emrgen/carbon-attributes':
         specifier: workspace:*
         version: link:../../packages/carbon-attributes
+      '@emrgen/carbon-blocks-react':
+        specifier: workspace:*
+        version: link:../../packages/carbon-blocks-react
       '@emrgen/carbon-board':
         specifier: workspace:*
         version: link:../../packages/carbon-board
@@ -205,9 +208,6 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../../packages/carbon-react
-      '@emrgen/carbon-blocks-react':
-        specifier: workspace:*
-        version: link:../../packages/carbon-blocks-react
       '@emrgen/carbon-sheet':
         specifier: workspace:*
         version: link:../../packages/carbon-sheet
@@ -339,6 +339,9 @@ importers:
       '@emrgen/carbon-attributes':
         specifier: workspace:*
         version: link:../../packages/carbon-attributes
+      '@emrgen/carbon-blocks-react':
+        specifier: workspace:*
+        version: link:../../packages/carbon-blocks-react
       '@emrgen/carbon-board':
         specifier: workspace:*
         version: link:../../packages/carbon-board
@@ -366,9 +369,6 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../../packages/carbon-react
-      '@emrgen/carbon-blocks-react':
-        specifier: workspace:*
-        version: link:../../packages/carbon-blocks-react
       '@emrgen/carbon-sheet':
         specifier: workspace:*
         version: link:../../packages/carbon-sheet
@@ -499,6 +499,9 @@ importers:
       '@emrgen/carbon-attributes':
         specifier: workspace:*
         version: link:../../packages/carbon-attributes
+      '@emrgen/carbon-blocks-react':
+        specifier: workspace:*
+        version: link:../../packages/carbon-blocks-react
       '@emrgen/carbon-board':
         specifier: workspace:*
         version: link:../../packages/carbon-board
@@ -544,9 +547,6 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../../packages/carbon-react
-      '@emrgen/carbon-blocks-react':
-        specifier: workspace:*
-        version: link:../../packages/carbon-blocks-react
       '@emrgen/carbon-sheet':
         specifier: workspace:*
         version: link:../../packages/carbon-sheet
@@ -902,6 +902,73 @@ importers:
         specifier: ^0.34.6
         version: 0.34.6(jsdom@25.0.1)(playwright@1.48.2)(stylus@0.64.0)(terser@5.36.0)
 
+  packages/carbon-blocks-react:
+    dependencies:
+      '@emrgen/carbon-attributes':
+        specifier: workspace:*
+        version: link:../carbon-attributes
+      '@emrgen/carbon-cell':
+        specifier: workspace:*
+        version: link:../carbon-cell
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../carbon-core
+      '@emrgen/carbon-dragon':
+        specifier: workspace:*
+        version: link:../carbon-dragon
+      '@emrgen/carbon-dragon-react':
+        specifier: workspace:*
+        version: link:../carbon-dragon-react
+      '@emrgen/carbon-react':
+        specifier: workspace:*
+        version: link:../carbon-react
+      '@uidotdev/usehooks':
+        specifier: ^2.4.1
+        version: 2.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      katex:
+        specifier: ^0.16.7
+        version: 0.16.11
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-detectable-overflow:
+        specifier: ^0.7.1
+        version: 0.7.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-icons:
+        specifier: ^4.10.1
+        version: 4.12.0(react@18.3.1)
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.13
+      '@types/react':
+        specifier: ^18.0.27
+        version: 18.3.12
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.3.1
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.6.3
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(jsdom@25.0.1)(playwright@1.48.2)(stylus@0.64.0)(terser@5.36.0)
+
   packages/carbon-blocktree:
     dependencies:
       '@emrgen/carbon-core':
@@ -975,6 +1042,9 @@ importers:
 
   packages/carbon-board-react:
     dependencies:
+      '@emrgen/carbon-blocks-react':
+        specifier: workspace:*
+        version: link:../carbon-blocks-react
       '@emrgen/carbon-board':
         specifier: workspace:*
         version: link:../carbon-board
@@ -984,9 +1054,6 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../carbon-react
-      '@emrgen/carbon-blocks-react':
-        specifier: workspace:*
-        version: link:../carbon-blocks-react
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
@@ -2092,15 +2159,15 @@ importers:
 
   packages/carbon-flash:
     dependencies:
+      '@emrgen/carbon-blocks-react':
+        specifier: workspace:*
+        version: link:../carbon-blocks-react
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../carbon-react
-      '@emrgen/carbon-blocks-react':
-        specifier: workspace:*
-        version: link:../carbon-blocks-react
       '@emrgen/types':
         specifier: workspace:*
         version: link:../types
@@ -2423,73 +2490,6 @@ importers:
       react:
         specifier: ^18.3.1
         version: 18.3.1
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
-      typescript:
-        specifier: ^5.4.5
-        version: 5.6.3
-      vitest:
-        specifier: ^0.34.6
-        version: 0.34.6(jsdom@25.0.1)(playwright@1.48.2)(stylus@0.64.0)(terser@5.36.0)
-
-  packages/carbon-blocks-react:
-    dependencies:
-      '@emrgen/carbon-attributes':
-        specifier: workspace:*
-        version: link:../carbon-attributes
-      '@emrgen/carbon-cell':
-        specifier: workspace:*
-        version: link:../carbon-cell
-      '@emrgen/carbon-core':
-        specifier: workspace:*
-        version: link:../carbon-core
-      '@emrgen/carbon-dragon':
-        specifier: workspace:*
-        version: link:../carbon-dragon
-      '@emrgen/carbon-dragon-react':
-        specifier: workspace:*
-        version: link:../carbon-dragon-react
-      '@emrgen/carbon-react':
-        specifier: workspace:*
-        version: link:../carbon-react
-      '@uidotdev/usehooks':
-        specifier: ^2.4.1
-        version: 2.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      katex:
-        specifier: ^0.16.7
-        version: 0.16.11
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      react-detectable-overflow:
-        specifier: ^0.7.1
-        version: 0.7.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react-icons:
-        specifier: ^4.10.1
-        version: 4.12.0(react@18.3.1)
-    devDependencies:
-      '@emrgen/eslint-config-custom':
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      '@emrgen/types':
-        specifier: workspace:*
-        version: link:../types
-      '@types/lodash':
-        specifier: ^4.14.191
-        version: 4.17.13
-      '@types/react':
-        specifier: ^18.0.27
-        version: 18.3.12
-      '@types/react-dom':
-        specifier: ^18.0.6
-        version: 18.3.1
-      eslint:
-        specifier: ^7.32.0
-        version: 7.32.0
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -3207,6 +3207,9 @@ importers:
       '@emrgen/carbon-blocks':
         specifier: workspace:*
         version: link:../carbon-blocks
+      '@emrgen/carbon-blocks-react':
+        specifier: workspace:*
+        version: link:../carbon-blocks-react
       '@emrgen/carbon-core':
         specifier: workspace:*
         version: link:../carbon-core
@@ -3219,9 +3222,6 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../carbon-react
-      '@emrgen/carbon-blocks-react':
-        specifier: workspace:*
-        version: link:../carbon-blocks-react
       '@emrgen/carbon-utils':
         specifier: workspace:*
         version: link:../carbon-utils
