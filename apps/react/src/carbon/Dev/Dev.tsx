@@ -68,6 +68,7 @@ import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
 import { useEffect, useState } from "react";
 import { PathTracker } from "../../PathTracker";
+import "./test.styl";
 
 const data = node("carbon", [
   node(
@@ -875,7 +876,7 @@ const renderManager = RenderManager.from(flattenDeep(renderers));
 
 // localStorage.setItem('carbon:content', JSON.stringify(data));
 
-export default function Dev() {
+export function Dev() {
   const [content] = useState(() => {
     return data;
   });

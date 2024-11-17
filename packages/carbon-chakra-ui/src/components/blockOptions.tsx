@@ -1,5 +1,5 @@
 import { Square } from "@chakra-ui/react";
-import { BiColorFill } from "react-icons/bi";
+import { BiColorFill, BiLink } from "react-icons/bi";
 import { BsTrash3 } from "react-icons/bs";
 import { RxCopy } from "react-icons/rx";
 import { TbBrandCarbon, TbStatusChange } from "react-icons/tb";
@@ -110,6 +110,23 @@ export const blockMenu = injectId({
           },
           onClick: () => {
             console.log("Change");
+          },
+        },
+      ],
+    },
+    {
+      type: "group",
+      items: [
+        {
+          type: "option",
+          label: "Copy link",
+          icon: <BiLink />,
+          shortcut: "Alt+Shift+L",
+          style: {
+            _hover: {},
+          },
+          onClick: () => {
+            console.log("Copy");
           },
         },
       ],

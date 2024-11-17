@@ -1,11 +1,13 @@
 // Things needed to change a node type (e.g. from paragraph to heading):
-import { BeforePlugin } from "../core/index";
-import { Pin } from "../core/index";
-import { Carbon } from "../core/index";
-import { TitleNode } from "../core/index";
-import { PinnedSelection } from "../core/index";
-import { StateActions } from "../core/index";
-import { TxType } from "../core/index";
+import {
+  BeforePlugin,
+  Carbon,
+  Pin,
+  PinnedSelection,
+  StateActions,
+  TitleNode,
+  TxType,
+} from "../core/index";
 
 export class RewritePlugin extends BeforePlugin {
   name = "rewriter";
@@ -15,7 +17,7 @@ export class RewritePlugin extends BeforePlugin {
   constructor() {
     super();
     this.inputRules = new BeforeInputRewriteRuleHandler([
-      new RewriteInputRule(/-->/g, this.changeText("-->", "XX")),
+      new RewriteInputRule(/-->/g, this.changeText("-->", "~>")),
       new RewriteInputRule(/->/g, this.changeText("->", "→")),
       new RewriteInputRule(/=>$/g, this.changeText("=>", "⇒")),
     ]);

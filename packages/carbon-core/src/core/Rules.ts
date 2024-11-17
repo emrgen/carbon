@@ -56,7 +56,15 @@ export class InputRule implements ChangeRule {
 }
 
 export class BeforeInputRuleHandler {
-  constructor(readonly rules: InputRule[]) {}
+  protected skipAfterInput: boolean;
+
+  constructor(
+    readonly rules: InputRule[],
+    opts?: { skipAfterInput?: boolean },
+  ) {
+    const { skipAfterInput = false } = opts ?? {};
+    this.skipAfterInput = skipAfterInput;
+  }
 
   // process the event based on modified node.textContent
   execute(ctx: EventContext<KeyboardEvent>, node: Node): boolean {
@@ -85,7 +93,7 @@ export class BeforeInputRuleHandler {
       return (
         textContent.slice(0, head.offset) +
         insertText +
-        textContent.slice(head.offset)
+        (this.skipAfterInput ? "" : textContent.slice(head.offset))
       );
     }
   }
@@ -99,7 +107,7 @@ export class BeforeInputRuleInlineHandler extends BeforeInputRuleHandler {
       return (
         node.textContent.slice(0, head.offset) +
         insertText +
-        node.textContent.slice(head.offset)
+        (this.skipAfterInput ? "" : node.textContent.slice(head.offset))
       );
     } else {
       return insertText;

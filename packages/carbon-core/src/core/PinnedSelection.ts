@@ -5,7 +5,7 @@ import { takeBefore } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { ActionOrigin } from "./actions";
 import { CarbonDom } from "./CarbonDom";
-import { classString, p14, p30 } from "./Logger";
+import { classString, p14 } from "./Logger";
 import { Node } from "./Node";
 import { NodeStore } from "./NodeStore";
 import { Pin } from "./Pin";
@@ -380,13 +380,13 @@ export class PinnedSelection {
 
       return this.isForward
         ? {
-          head: endRange.getClientRects()[0],
-          tail: startRange.getClientRects()[0],
-        }
+            head: endRange.getClientRects()[0],
+            tail: startRange.getClientRects()[0],
+          }
         : {
-          head: startRange.getClientRects()[0],
-          tail: endRange.getClientRects()[0],
-        };
+            head: startRange.getClientRects()[0],
+            tail: endRange.getClientRects()[0],
+          };
     }
 
     return { head: null, tail: null };
@@ -618,7 +618,7 @@ export class PinnedSelection {
       return node;
     }
 
-    for (let i = 0;i < node.childNodes.length;i++) {
+    for (let i = 0; i < node.childNodes.length; i++) {
       const found = this.findTextNode(node.childNodes[i] as HTMLElement);
       if (found) return found;
     }
@@ -657,7 +657,7 @@ export class PinnedSelection {
 
   moveHead(distance: number): Optional<PinnedSelection> {
     let { tail, head } = this;
-    const focus = head.moveBy(distance);
+    const focus = head.moveBy(distance)?.up();
     if (!focus || !head) return;
     console.log("xxx", focus.toString());
     return PinnedSelection.create(tail, focus);

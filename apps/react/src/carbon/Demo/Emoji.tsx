@@ -2,17 +2,17 @@ import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
 import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import {
   EmojiPickerInlineMenu,
-  FloatingStyleMenu
+  FloatingStyleMenu,
 } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
+import { emojiPlugins } from "@emrgen/carbon-emoji";
 import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
 import { createContext, useContext } from "react";
 import { PathTracker } from "../../PathTracker";
 import "../Dev/test.styl";
-import { emojiPlugins } from "@emrgen/carbon-emoji";
 
 const Person = ({ name }) => {
   const context = useContext(TestContext);
@@ -48,9 +48,7 @@ const plugins = [
   new ClipboardPlugin(),
 ];
 
-const renderers = [
-  ...blockPresetRenderers,
-];
+const renderers = [...blockPresetRenderers];
 
 const renderManager = RenderManager.from(flattenDeep(renderers));
 
@@ -60,7 +58,7 @@ export function EmojiDemo() {
   return (
     <div className={"carbon-app-container"}>
       <CarbonApp app={app} renderManager={renderManager}>
-        <EmojiPickerInlineMenu/>
+        <EmojiPickerInlineMenu />
         <FloatingStyleMenu />
         <PathTracker />
       </CarbonApp>

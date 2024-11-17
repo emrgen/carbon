@@ -68,7 +68,7 @@ export const ContextMenuItem = (props: ContextMenuItemProps) => {
           <Text
             color={"#aaa"}
             fontFamily={"Geist Mono, monospace"}
-            fontSize={"12px"}
+            fontSize={"11px"}
           >
             {item.shortcut ?? ""}
             {!isEmpty(item.items) && <MdKeyboardArrowRight fontSize={"16px"} />}
