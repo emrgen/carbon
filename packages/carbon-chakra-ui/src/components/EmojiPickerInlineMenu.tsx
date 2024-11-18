@@ -3,7 +3,7 @@ import { emoji } from "@emrgen/carbon-blocks";
 import { Pin, PinnedSelection, TitleNode } from "@emrgen/carbon-core";
 import { useCarbon } from "@emrgen/carbon-react";
 import EventEmitter from "events";
-import { round } from "lodash";
+import { noop, round } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EmojiPickerInline } from "./EmojiPickerInline";
 
@@ -13,11 +13,13 @@ export const EmojiPickerInlineMenu = () => {
   const [bus] = useState(new EventEmitter());
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const textRef = useRef("");
+  const onHideRef = useRef<Function | null>(noop);
 
   // listen for show:emoji-picker and hide:emoji-picker events from the app
   useEffect(() => {
     const onShowEmojiPicker = (event) => {
-      const { node, text } = event;
+      const { node, text, onHide } = event;
+      onHideRef.current = onHide;
       console.log("Show emoji", text);
       onOpen();
 
@@ -79,11 +81,19 @@ export const EmojiPickerInlineMenu = () => {
       const emojiNode = app.schema.nodeFromJSON(emoji(emojiText));
       if (!emojiNode) return;
 
+      // hide emoji picker
+      onHideRef.current?.();
+
       // console.log(emojiNode);
       // console.log(textRef.current.length, head.toString(), tail.toString());
       const textBlock = TitleNode.from(head.node);
       const tmp = textBlock.removeInp(tail.steps, head.steps);
-      // console.log("removed emoji match", tmp.textContent, tail.steps, head.steps);
+      // console.log(
+      //   "removed emoji match",
+      //   tmp.textContent,
+      //   tail.steps,
+      //   head.steps,
+      // );
       const titleBlock = tmp.insertInp(tail.steps, emojiNode);
       const endStepFromEnd = head.steps - head.node.stepSize;
       const endSteps = titleBlock.stepSize + titleBlock.mapStep(endStepFromEnd);
@@ -96,14 +106,13 @@ export const EmojiPickerInlineMenu = () => {
       // );
       // console.log(endOffset, endSteps);
       const pin = Pin.create(titleBlock.node, endOffset, endSteps);
-
       const after = PinnedSelection.fromPin(pin)!;
       app.cmd
         .SetContent(head.node, titleBlock.children)
         .Select(after)
         .Dispatch();
     },
-    [app],
+    [app, onHideRef],
   );
 
   return (

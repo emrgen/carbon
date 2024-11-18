@@ -49,6 +49,7 @@ export class EmojiPickerInline extends BeforePlugin {
   keydown(): EventHandlerMap {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
+        console.log("^^^^^^^^^^^^^^^^^^^^^^^");
         if (this.isVisible) {
           preventAndStopCtx(ctx);
           this.navigateEmojiPicker({ event: ctx.event });
@@ -145,10 +146,12 @@ export class EmojiPickerInline extends BeforePlugin {
     this.app.emit("show:emoji-picker", {
       node,
       text,
+      onHide: this.hideEmojiPicker.bind(this),
     });
   }
 
   hideEmojiPicker() {
+    console.log("xxxxxxxxxxxxx");
     this.isVisible = false;
     this.app.emit("hide:emoji-picker", {});
   }

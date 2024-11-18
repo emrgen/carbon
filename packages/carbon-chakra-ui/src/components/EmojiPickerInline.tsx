@@ -38,7 +38,7 @@ export function EmojiPickerInlineInner(props: EmojiPickerProps) {
       bus,
       parent: ref.current,
       data,
-      onEmojiSelect: (emoji) => {
+      onEmojiSelect: (emoji, e) => {
         handleSelect(emoji.native);
       },
       onClickOutside: onClose,
@@ -55,6 +55,7 @@ export function EmojiPickerInlineInner(props: EmojiPickerProps) {
       if (ref.current === null) return;
       // eslint-disable-next-line react-hooks/exhaustive-deps
       ref.current.removeChild(ref.current.children[0]);
+      bus?.removeAllListeners();
       setPicker(null);
     };
   }, [bus, handleSelect, isOpen, onClose, prevPicker]);

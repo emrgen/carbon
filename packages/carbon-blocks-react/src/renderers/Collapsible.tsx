@@ -57,10 +57,14 @@ export default function CollapsibleListComp(props: RendererProps) {
         [CollapsedPath]: !isCollapsed,
       });
       if (!isCollapsed) {
+        const collapsible = app.store.get(node.id);
+        if (!collapsible) return;
         // const {start, end} = selection;
         // const startInTitle = start.node.closest(n => !!node.firstChild?.eq(n));
         // const endInTitle = end.node.closest(n => !!node.firstChild?.eq(n));
-        cmd.Select(PinnedSelection.fromPin(Pin.toStartOf(node.child(0)!)!));
+        cmd.Select(
+          PinnedSelection.fromPin(Pin.toStartOf(collapsible.child(0)!)!),
+        );
       }
 
       cmd.WithType(TxType.OneWay);

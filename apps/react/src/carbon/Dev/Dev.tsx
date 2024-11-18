@@ -24,6 +24,7 @@ import {
 import {
   BlockContextMenu,
   carbonChakraRenderers,
+  EmojiPickerInlineMenu,
   FloatingStyleMenu,
   InsertBlockMenu,
   ToggleViewMode,
@@ -48,6 +49,7 @@ import {
 } from "@emrgen/carbon-core";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
+import { emojiPlugins } from "@emrgen/carbon-emoji";
 import { flashPlugin, flashRenderers } from "@emrgen/carbon-flash";
 import { mediaPlugins, mediaRenderers } from "@emrgen/carbon-media";
 import {
@@ -844,6 +846,7 @@ const plugins = [
   ...questionExtension.plugins!,
   timelinePlugin,
   flashPlugin,
+  emojiPlugins,
 ];
 
 const renderers = [
@@ -930,6 +933,7 @@ export function Dev() {
               <PathTracker />
               <InsertBlockMenu />
               <BlockContextMenu />
+              <EmojiPickerInlineMenu />
             </CarbonApp>
           </ObservableQuestions>
         </ObservableNodes>
