@@ -1,8 +1,6 @@
 import { Node } from "@emrgen/carbon-core";
 import { DndEvent, getEventPosition } from "@emrgen/carbon-dragon";
 import { MutableRefObject, useCallback, useMemo } from "react";
-import { usePrevious } from '@chakra-ui/react';
-import { keys } from "lodash";
 
 interface UseTrackDragProps {
   // drag handle ref
@@ -21,8 +19,21 @@ interface UseTrackDragProps {
 // default ref check function
 const defaultRefCheck = (refEl, target) => refEl === target;
 
+// create a draggable handle event listener that can be used to make any element draggable
+// drop detection and drop handling is not included in this hook and should be handled outside of this hook
 export function useMakeDraggable(props: UseTrackDragProps) {
-  const { refCheck = defaultRefCheck, handleRef, isDisabled, onDragEnd, onDragMove, onDragStart, onMouseDown, onMouseUp, distance = 4, node = Node.IDENTITY } = props;
+  const {
+    refCheck = defaultRefCheck,
+    handleRef,
+    isDisabled,
+    onDragEnd,
+    onDragMove,
+    onDragStart,
+    onMouseDown,
+    onMouseUp,
+    distance = 4,
+    node = Node.IDENTITY,
+  } = props;
 
   const onMouseDownHandler = useCallback(
     (event) => {
@@ -41,8 +52,8 @@ export function useMakeDraggable(props: UseTrackDragProps) {
         prevState: {},
         position: getEventPosition(event, event),
         dragged: false,
-        setInitState(state: any) { },
-        setPrevState(state: any) { },
+        setInitState(state: any) {},
+        setPrevState(state: any) {},
       });
 
       let initState: any = {};
@@ -61,8 +72,8 @@ export function useMakeDraggable(props: UseTrackDragProps) {
           prevState: prevState,
           position: getEventPosition(activatorEvent, event),
           dragged: isDragging,
-          setInitState(state: any) { },
-          setPrevState(state: any) { },
+          setInitState(state: any) {},
+          setPrevState(state: any) {},
         };
 
         if (isDragging) {
@@ -130,22 +141,30 @@ export function useMakeDraggable(props: UseTrackDragProps) {
         window.removeEventListener("mouseup", _onMouseUp);
       };
     },
-    [distance, node, onDragEnd, onDragMove, onDragStart, onMouseDown, onMouseUp, handleRef, isDisabled, refCheck],
+    [
+      distance,
+      node,
+      onDragEnd,
+      onDragMove,
+      onDragStart,
+      onMouseDown,
+      onMouseUp,
+      handleRef,
+      isDisabled,
+      refCheck,
+    ],
   );
 
-  return useMemo(
-    () => {
-      console.log('recreate drag listeners');
-      
-      return {
-        listeners: {
-          onMouseDown: onMouseDownHandler,
-        },
-        attributes: {
-          "data-draggable": true,
-        },
-      }
-    },
-    [onMouseDownHandler],
-  );
+  return useMemo(() => {
+    console.log("recreate drag listeners");
+
+    return {
+      listeners: {
+        onMouseDown: onMouseDownHandler,
+      },
+      attributes: {
+        "data-draggable": true,
+      },
+    };
+  }, [onMouseDownHandler]);
 }

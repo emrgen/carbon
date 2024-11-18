@@ -270,7 +270,7 @@ export class TransformCommands extends BeforePlugin {
         betweenNodes.forEach((node) => {
           if (!MarkSet.from(node.marks).has(mark)) {
             const marks = MarkSet.from(node.marks).toggle(mark).toArray();
-            tr.update(node, { [MarksPath]: marks });
+            tr.Update(node, { [MarksPath]: marks });
           }
         });
 

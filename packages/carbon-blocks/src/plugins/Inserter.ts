@@ -7,11 +7,11 @@ import {
   Pin,
   PinnedSelection,
   Point,
-  Transaction
+  Transaction,
 } from "@emrgen/carbon-core";
-import { Optional } from '@emrgen/types';
+import { Optional } from "@emrgen/types";
 
-declare module '@emrgen/carbon-core' {
+declare module "@emrgen/carbon-core" {
   interface Transaction {
     inserter: {
       insertBeforeDefault(node: Node, name: string): Transaction;
@@ -21,10 +21,9 @@ declare module '@emrgen/carbon-core' {
       insertBefore(ref: Node, node: Node): Transaction;
       insertAfter(ref: Node, node: Node): Transaction;
       insertNodes(at: Point, nodes: Node[]): Transaction;
-    }
+    };
   }
 }
-
 
 export class Insert extends BeforePlugin {
   name = "inserter";
@@ -43,7 +42,7 @@ export class Insert extends BeforePlugin {
   }
 
   insertNodes(tr: Transaction, at: Point, nodes: Node[]) {
-    insertNodesActions(at, nodes).forEach(action => {
+    insertNodesActions(at, nodes).forEach((action) => {
       tr.Add(action);
     });
   }
@@ -60,7 +59,7 @@ export class Insert extends BeforePlugin {
 
   // TODO: check if the node is allowed in the current context
   node(app: Carbon, name: string) {
-    const { selection, cmd} = app;
+    const { selection, cmd } = app;
     if (selection.isInvalid || !selection.isCollapsed) return;
 
     const { start } = selection;
@@ -73,17 +72,19 @@ export class Insert extends BeforePlugin {
       at = Point.toAfter(parent.id);
     }
 
-    cmd.Insert(at, node)
+    cmd.Insert(at, node);
     if (node.hasFocusable) {
-      const after = PinnedSelection.fromPin(Pin.toStartOf(node)!)
-      cmd.Select(after, ActionOrigin.UserInput)
+      const after = PinnedSelection.fromPin(Pin.toStartOf(node)!);
+      cmd.Select(after, ActionOrigin.UserInput);
     }
 
     return cmd;
   }
 
   append(tr: Transaction, node: Node, name: string) {
-    const at = node.isVoid ? Point.atOffset(node.id) : Point.toAfter(node.lastChild!.id);
+    const at = node.isVoid
+      ? Point.atOffset(node.id)
+      : Point.toAfter(node.lastChild!.id);
     const block = tr.app.schema.type(name)?.default();
     if (!block) return;
 
@@ -91,7 +92,9 @@ export class Insert extends BeforePlugin {
   }
 
   prepend(tr: Transaction, node: Node, name: string) {
-    const at = node.isVoid ? Point.atOffset(node.id) : Point.toBefore(node.firstChild!.id);
+    const at = node.isVoid
+      ? Point.atOffset(node.id)
+      : Point.toBefore(node.firstChild!.id);
     const block = tr.app.schema.type(name)?.default();
     if (!block) return;
 
@@ -114,11 +117,15 @@ export class Insert extends BeforePlugin {
     return this.insert(tr, at, block);
   }
 
-  private insert(tr: Transaction, at: Point, node: Node): Optional<Transaction> {
-    tr.Insert(at, node)
+  private insert(
+    tr: Transaction,
+    at: Point,
+    node: Node,
+  ): Optional<Transaction> {
+    tr.Insert(at, node);
     if (node.hasFocusable) {
-      const after = PinnedSelection.fromPin(Pin.toStartOf(node)!)
-      tr.Select(after, ActionOrigin.UserInput)
+      const after = PinnedSelection.fromPin(Pin.toStartOf(node)!);
+      tr.Select(after, ActionOrigin.UserInput);
     }
 
     return tr;

@@ -107,7 +107,7 @@ export const CellComp = (props: RendererProps) => {
         // console.log("insert above");
         app.cmd.inserter
           .insertBeforeDefault(node.parent!, "paragraph")
-          ?.dispatch();
+          ?.Dispatch();
       } else {
         // console.log("insert below");
         app.cmd.inserter

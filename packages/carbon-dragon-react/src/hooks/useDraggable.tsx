@@ -1,4 +1,4 @@
-import { Node, preventAndStop } from "@emrgen/carbon-core";
+import { Node, prevent } from "@emrgen/carbon-core";
 import { DndEvent, getEventPosition } from "@emrgen/carbon-dragon";
 import {
   MutableRefObject,
@@ -43,9 +43,11 @@ export interface UseDraggableHandleProps extends UseFastDraggableProps {
 }
 
 // create a draggable handle event listener
+// this function is very similar to useMakeDraggable,
+// but it's more focused on the handle and the events are dispatched to the dnd context directly
 export const useDraggableHandle = (props: UseDraggableHandleProps) => {
   const { id, node, disabled, ref, activationConstraint = {} } = props;
-  const { distance = 0 } = activationConstraint;
+  const { distance = 4 } = activationConstraint;
   const [isDisabled, setIsDisabled] = useState(disabled);
   const refId = useRef<string>(Math.random().toString(16).slice(6));
 
@@ -58,9 +60,9 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
   const onMouseDown = useCallback(
     (event) => {
       // mousedown on a draggable handle should not trigger have any other effect than dragging
-      preventAndStop(event);
       let initState = {} as any;
       let prevState = {} as any;
+      // using object ref to check if the mouse is up
       let mouseUpped = { current: false };
       // console.log("mouse down", ref.current, event.target, refId.current);
       if (isDisabled) return;
@@ -85,6 +87,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
         };
 
         if (isDragging) {
+          prevent(event);
           dnd.onDragEnd(dndEvent);
         }
 
@@ -96,11 +99,11 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       };
 
       const onMouseMove = (event: MouseEvent) => {
-        console.log("ref id", ref.current, refId.current);
         if (mouseUpped.current) return;
 
         const position = getEventPosition(activatorEvent, event);
         if (isDragging) {
+          prevent(event);
           dnd.onDragMove({
             activatorEvent,
             event,
@@ -128,6 +131,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
         }
 
         if (isDragging) {
+          prevent(event);
           dnd.onDragStart({
             activatorEvent,
             event,
