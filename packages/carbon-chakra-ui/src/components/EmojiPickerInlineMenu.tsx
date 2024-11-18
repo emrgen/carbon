@@ -44,20 +44,28 @@ export const EmojiPickerInlineMenu = () => {
       console.log("searching for emoji", text);
       textRef.current = text;
       setTimeout(() => {
+        console.log("searching for emoji", text);
         bus.emit("search", {}, text.slice(1));
-      }, 0);
+      }, 100);
     };
 
     const onHideEmojiPicker = (event) => {
       onClose();
     };
 
+    const onNavigateEmojiPicker = ({ event }) => {
+      console.log("navigate emoji picker", event);
+      bus.emit("navigate", event.nativeEvent);
+    };
+
     app.on("show:emoji-picker", onShowEmojiPicker);
     app.on("hide:emoji-picker", onHideEmojiPicker);
+    app.on("navigate:emoji-picker", onNavigateEmojiPicker);
 
     return () => {
       app.off("show:emoji-picker", onShowEmojiPicker);
       app.off("hide:emoji-picker", onHideEmojiPicker);
+      app.off("navigate:emoji-picker", onNavigateEmojiPicker);
     };
   }, [app, bus, onClose, onOpen]);
 

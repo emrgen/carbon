@@ -9,6 +9,7 @@ import {
   EventHandlerMap,
   InputRule,
   Node,
+  preventAndStopCtx,
   SetContentAction,
   StateActions,
 } from "@emrgen/carbon-core";
@@ -49,27 +50,32 @@ export class EmojiPickerInline extends BeforePlugin {
     return {
       enter: (ctx: EventContext<KeyboardEvent>) => {
         if (this.isVisible) {
-          this.hideEmojiPicker();
+          preventAndStopCtx(ctx);
+          this.navigateEmojiPicker({ event: ctx.event });
         }
       },
       left: (ctx: EventContext<KeyboardEvent>) => {
         if (this.isVisible) {
-          this.hideEmojiPicker();
+          preventAndStopCtx(ctx);
+          this.navigateEmojiPicker({ event: ctx.event });
         }
       },
       right: (ctx: EventContext<KeyboardEvent>) => {
         if (this.isVisible) {
-          this.hideEmojiPicker();
+          preventAndStopCtx(ctx);
+          this.navigateEmojiPicker({ event: ctx.event });
         }
       },
       up: (ctx: EventContext<KeyboardEvent>) => {
         if (this.isVisible) {
-          this.hideEmojiPicker();
+          preventAndStopCtx(ctx);
+          this.navigateEmojiPicker({ event: ctx.event });
         }
       },
       down: (ctx: EventContext<KeyboardEvent>) => {
         if (this.isVisible) {
-          this.hideEmojiPicker();
+          preventAndStopCtx(ctx);
+          this.navigateEmojiPicker({ event: ctx.event });
         }
       },
       shiftLeft: (ctx: EventContext<KeyboardEvent>) => {
@@ -145,6 +151,10 @@ export class EmojiPickerInline extends BeforePlugin {
   hideEmojiPicker() {
     this.isVisible = false;
     this.app.emit("hide:emoji-picker", {});
+  }
+
+  navigateEmojiPicker(event) {
+    this.app.emit("navigate:emoji-picker", event);
   }
 
   transaction(app: Carbon, tr: StateActions) {

@@ -21,9 +21,7 @@ export class TitleNode {
   readonly endMapper: IndexMapper;
 
   static from(node: Node) {
-    console.log("before --------", node.toJSON());
     const clone = node.type.schema.factory.clone(node, identity);
-    console.log("after --------", clone.toJSON());
     clone.setParent(null).setParentId(null);
 
     return new TitleNode(clone, IndexMapper.empty(), IndexMapper.empty());
@@ -566,10 +564,6 @@ export class TitleNode {
 
   // merge adjacent text nodes with the same marks and update the index mapper
   normalizeMarks() {
-    console.log(
-      "normalize marks",
-      this.children.map((n) => n.toJSON()),
-    );
     const startMapper = this.startMapper.clone();
     const endMapper = this.endMapper.clone();
     const parent = this.node;

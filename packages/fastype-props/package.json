@@ -21,7 +21,6 @@
     "@react-icons/all-files": "^4.1.0",
     "@types/katex": "^0.16.0",
     "@types/lodash": "^4.14.191",
-    "emoji-mart": "^5.5.2",
     "emoji-picker-react": "^4.4.10",
     "emoji-regex": "^10.2.1",
     "framer-motion": "11.2.6",

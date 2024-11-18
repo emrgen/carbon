@@ -5,9 +5,7 @@ import { Picker } from "emoji-mart";
 import EventEmitter from "events";
 import React, { memo, ReactNode, useCallback, useEffect, useRef } from "react";
 
-class EmojiPicker extends Picker {}
-
-console.log(Picker, EmojiPicker);
+console.log(Picker);
 
 interface EmojiPickerProps {
   isOpen: boolean;
@@ -34,7 +32,7 @@ export function EmojiPickerInlineInner(props: EmojiPickerProps) {
 
   useEffect(() => {
     if (ref.current === null) return;
-    // if (prevPicker) return;
+    if (prevPicker) return;
 
     const picker = new Picker({
       bus,
@@ -43,15 +41,15 @@ export function EmojiPickerInlineInner(props: EmojiPickerProps) {
       onEmojiSelect: (emoji) => {
         handleSelect(emoji.native);
       },
-      // onClickOutside: onClose,
+      onClickOutside: onClose,
       previewPosition: "none",
       navPosition: "bottom",
       searchPosition: "none",
       theme: "light",
+      emojiButtonRadius: "6px",
+      emojiSize: 22,
     });
     setPicker(picker);
-
-    console.log("---------------");
 
     return () => {
       if (ref.current === null) return;

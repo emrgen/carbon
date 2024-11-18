@@ -2,7 +2,7 @@ import { attrRenderers } from "@emrgen/carbon-attributes";
 import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
 import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { codeExtension } from "@emrgen/carbon-codemirror";
+import { codemirrorExtension } from "@emrgen/carbon-codemirror";
 import {
   commentEditorComp,
   commentEditorPlugin,
@@ -52,7 +52,7 @@ data.id = NodeId.ROOT.toString();
 const plugins = [
   ...corePresetPlugins,
   ...blockPresetPlugins,
-  ...codeExtension.plugins!,
+  ...codemirrorExtension.plugins!,
   ...databasePlugins,
   commentEditorPlugin,
   new ClipboardPlugin(),
@@ -60,7 +60,7 @@ const plugins = [
 
 const renderers = [
   ...blockPresetRenderers,
-  ...codeExtension.renderers!,
+  ...codemirrorExtension.renderers!,
   ...attrRenderers,
   ...databaseRenderers,
   commentEditorComp,
