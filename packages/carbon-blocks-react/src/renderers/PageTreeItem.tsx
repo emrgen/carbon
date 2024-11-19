@@ -146,7 +146,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
         </div>
       </>
     );
-  }, [app, handleToggle, isCollapsed]);
+  }, [app, handleToggle, isCollapsed, isContentEditable]);
 
   const afterContent = useMemo(() => {
     return (
@@ -165,6 +165,24 @@ export const PageTreeItemComp = (props: RendererProps) => {
     );
   }, [handleEditName, handleInsert]);
 
+  const handleKeyPress = useCallback(
+    (e) => {
+      if (e.key === "Enter") {
+        preventAndStop(e);
+        app.cmd
+          .Update(node.firstChild!, {
+            [ContenteditablePath]: false,
+          })
+          .Update(node, {
+            [LocalDirtyCounterPath]: new Date().getTime(),
+          })
+          .Select(PinnedSelection.SKIP)
+          .Dispatch();
+      }
+    },
+    [app, node],
+  );
+
   return (
     <CarbonBlock
       node={node}
@@ -176,7 +194,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
         node={node}
         beforeContent={beforeContent}
         afterContent={isContentEditable ? null : afterContent}
-        // custom={{ onClick: handleOpenDocument }}
+        custom={{ onKeyDown: handleKeyPress }}
         wrap={true}
       />
 

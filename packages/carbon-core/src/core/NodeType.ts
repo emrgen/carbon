@@ -54,6 +54,7 @@ export class NodeType {
 
   _default: Optional<InitNodeJSON>;
 
+  // placeholder for the default node for various operations
   static IDENTITY = new NodeType("identity", {} as Schema, IDENTITY_NODE_SPEC);
   static NULL = new NodeType("null", {} as Schema, IDENTITY_NODE_SPEC);
   static SKIP = new NodeType("skip", {} as Schema, IDENTITY_NODE_SPEC);
