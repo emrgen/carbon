@@ -10,9 +10,8 @@ import {
   State,
   Transaction,
 } from "@emrgen/carbon-core";
-import { PluginEmitter } from "../core/index";
-import { PluginState } from "../core/index";
 import { Optional, With } from "@emrgen/types";
+import { PluginEmitter, PluginState } from "../core/index";
 
 // add formatter commands to the CarbonCommands interface
 declare module "@emrgen/carbon-core" {
@@ -77,9 +76,8 @@ export class FormatterPlugin extends BeforePlugin {
     app.on("changed", this.onChanged);
   }
 
-  override destroy(app: Carbon) {
-    super.destroy(app);
-    app.off("changed", this.onChanged);
+  override beforeDestroy() {
+    this.app.off("changed", this.onChanged);
   }
 
   onChanged(state: State) {

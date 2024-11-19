@@ -11,6 +11,15 @@ export interface MarkProps {
   user?: User;
 }
 
+const propsKeys = ["color", "href", "user"];
+
+function eqProps(a: MarkProps, b: MarkProps) {
+  if (isEqual(a, b)) return true;
+  return propsKeys.every(
+    (key) => a[key] === b[key] || a[key] == "*" || b[key] == "*",
+  );
+}
+
 export class Mark {
   // type is the name of the mark
   name: string;
@@ -71,8 +80,14 @@ export class Mark {
     this.props = props;
   }
 
+  get isWild() {
+    return this.props && propsKeys.some((key) => this.props?.[key] === "*");
+  }
+
   eq(other: Mark) {
-    return this.name === other.name && isEqual(this.props, other.props);
+    return (
+      this.name === other.name && eqProps(this.props || {}, other.props || {})
+    );
   }
 
   toString() {
@@ -130,6 +145,12 @@ export class MarkSet {
   }
 
   toggle(mark: Mark) {
+    if (mark.isWild) {
+      const similar = this.marks[mark.name];
+      this.remove(similar);
+      return this;
+    }
+
     if (this.has(mark)) {
       const similar = this.marks[mark.name];
       if (similar && !similar.eq(mark)) {

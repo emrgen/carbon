@@ -198,7 +198,7 @@ export function FloatingStyleMenu() {
               icon={<BiBold />}
               bg={marks.has(Mark.BOLD) ? "gray.100" : "transparent"}
               onClick={() => {
-                app.cmd.formatter.toggle(Mark.BOLD)?.dispatch();
+                app.cmd.formatter.toggle(Mark.BOLD)?.Dispatch();
               }}
             />
             <ContextButton
@@ -206,7 +206,7 @@ export function FloatingStyleMenu() {
               icon={<TbItalic />}
               bg={marks.has(Mark.ITALIC) ? "gray.100" : "transparent"}
               onClick={() => {
-                app.cmd.formatter.toggle(Mark.ITALIC)?.dispatch();
+                app.cmd.formatter.toggle(Mark.ITALIC)?.Dispatch();
               }}
             />
             <ContextButton
@@ -214,7 +214,7 @@ export function FloatingStyleMenu() {
               icon={<BiUnderline />}
               bg={marks.has(Mark.UNDERLINE) ? "gray.100" : "transparent"}
               onClick={() => {
-                app.cmd.formatter.toggle(Mark.UNDERLINE)?.dispatch();
+                app.cmd.formatter.toggle(Mark.UNDERLINE)?.Dispatch();
               }}
             />
             <ContextButton
@@ -222,7 +222,7 @@ export function FloatingStyleMenu() {
               icon={<BiStrikethrough />}
               bg={marks.has(Mark.STRIKE) ? "gray.100" : "transparent"}
               onClick={() => {
-                app.cmd.formatter.toggle(Mark.STRIKE)?.dispatch();
+                app.cmd.formatter.toggle(Mark.STRIKE)?.Dispatch();
               }}
             />
             <ContextButton
@@ -230,7 +230,7 @@ export function FloatingStyleMenu() {
               icon={<BsSuperscript />}
               bg={marks.has(Mark.SUPERSCRIPT) ? "gray.100" : "transparent"}
               onClick={() => {
-                app.cmd.formatter.toggle(Mark.SUPERSCRIPT)?.dispatch();
+                app.cmd.formatter.toggle(Mark.SUPERSCRIPT)?.Dispatch();
               }}
             />
             <ContextButton
@@ -238,12 +238,12 @@ export function FloatingStyleMenu() {
               icon={<BsSubscript />}
               bg={marks.has(Mark.SUBSCRIPT) ? "gray.100" : "transparent"}
               onClick={() => {
-                app.cmd.formatter.toggle(Mark.SUBSCRIPT)?.dispatch();
+                app.cmd.formatter.toggle(Mark.SUBSCRIPT)?.Dispatch();
               }}
             />
             <ContextButton
               aria-label={"strike"}
-              icon={<Circle size={4} bg={"#ffce26"} />}
+              icon={<Circle size={4} bg={"#FFEDB0"} />}
               bg={
                 marks.has(Mark.background("#ffce26"))
                   ? "gray.100"
@@ -251,8 +251,8 @@ export function FloatingStyleMenu() {
               }
               onClick={() => {
                 app.cmd.formatter
-                  .toggle(Mark.background("#ffce26"))
-                  ?.dispatch();
+                  .toggle(Mark.background("#FFEDB0"))
+                  ?.Dispatch();
               }}
             />
             <ContextButton
@@ -266,16 +266,14 @@ export function FloatingStyleMenu() {
               onClick={() => {
                 app.cmd.formatter
                   .toggle(Mark.background("#8ae0ff"))
-                  ?.dispatch();
+                  ?.Dispatch();
               }}
             />
             <ContextButton
               aria-label={"strike"}
               icon={<RxCross2 />}
               onClick={() => {
-                app.cmd.formatter
-                  .toggle(Mark.background("transparent"))
-                  ?.dispatch();
+                app.cmd.formatter.toggle(Mark.background("*"))?.Dispatch();
               }}
             />
           </HStack>

@@ -54,7 +54,7 @@ export class CommentEditor extends CarbonPlugin {
           const start = Pin.toStartOf(isolated)!;
           const end = Pin.toEndOf(isolated)!;
           const selection = PinnedSelection.create(start, end);
-          cmd.action.select(selection).dispatch();
+          cmd.Select(selection).Dispatch();
         }
       },
     };
