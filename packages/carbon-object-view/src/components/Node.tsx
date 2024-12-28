@@ -1,15 +1,12 @@
-import { isArray } from "lodash";
-import { isObject } from "lodash";
-import { isFunction } from "lodash";
-import { ArrayView } from "./Array";
-import { ObjectView } from "./Object";
+import { isArray, isFunction, isObject } from "lodash";
 import { useMemo } from "react";
+import { ArrayView } from "./Array";
 import { FunctionView } from "./Function";
-import { isLiteral } from "./utils";
-import { isGenerator } from "./utils";
-import { isProxy } from "./utils";
 import { Literal } from "./Literal";
+import { ObjectView } from "./Object";
+import { isGenerator, isLiteral, isProxy } from "./utils";
 
+// NodeView renders js types for in UI type visualization
 export const NodeView = ({ data, propName, isIndex }) => {
   const view = useMemo(() => {
     if (isLiteral(data)) {

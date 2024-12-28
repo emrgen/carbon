@@ -11,7 +11,7 @@ import {
   isPlainObject,
   isString,
 } from "lodash";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { HiDotsVertical } from "react-icons/hi";
 import { ViewStylePath } from "../constants";
 import { ActiveCell } from "../core/ActiveCellRuntime";
@@ -286,7 +286,11 @@ const ResultView = (props) => {
     return <div>{result}</div>;
   }
 
-  if (cellName && (isArray(result) || isObject(result))) {
+  if (
+    cellName &&
+    (isArray(result) || isObject(result) || isFunction(result)) &&
+    !isHtmlElement(result)
+  ) {
     return (
       <CellResultView
         cell={cell}
@@ -298,15 +302,15 @@ const ResultView = (props) => {
     // return <CellResultView cell={cell} name={cellName} result={`[${res}]`} />;
   }
 
-  if (isFunction(result)) {
-    return (
-      <div className={"cell-result-name-view"}>
-        {cell.hasName() && <div>{cell.name} = </div>}
-        <ObjectViewer data={result} />
-      </div>
-    );
-  }
-
+  // if (isFunction(result)) {
+  //   return (
+  //     <div className={"cell-result-name-view"}>
+  //       {cell.hasName() && <div>{cell.name} = </div>}
+  //       <ObjectViewer data={result} />
+  //     </div>
+  //   );
+  // }
+  //
   if (!isHtmlElement(result) && isObject(result)) {
     return (
       <div className={"cell-result-object"}>
@@ -344,15 +348,25 @@ const ResultView = (props) => {
   );
 };
 
-const CellResultView = (props) => {
-  const { cell, color } = props;
+interface CellResultViewProps {
+  cell: ActiveCell;
+  color?: string;
+  name: string;
+  result: ReactNode;
+}
+
+// CellResultView renders the js type along with cell variable name
+const CellResultView = (props: CellResultViewProps) => {
+  const { cell, color, name, result } = props;
 
   return (
-    <div className={"cell-result-name-view"} onKeyUp={stop} onKeyDown={stop}>
+    <div className={"cell-result-named-view"} onKeyUp={stop} onKeyDown={stop}>
       {cell.hasName() && (
-        <div className={"cell-result-cell-name"}>{props.name} = </div>
+        <div className={"cell-result-cell-name"}>{name} =&nbsp;</div>
       )}
-      <div style={{ color }}>{props.result}</div>
+      <div style={{ color }} className={"cell-result-view-wrapper"}>
+        {result}
+      </div>
     </div>
   );
 };

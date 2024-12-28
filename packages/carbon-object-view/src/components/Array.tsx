@@ -4,10 +4,14 @@ import { NodeView } from "./Node";
 import { NodeInitial } from "./NodeInitial";
 
 interface ArrayProps {
+  propName: string;
   data: Array<any>;
 }
 
-export const ArrayView = (props) => {
+// ArrayView renders a view of collapsible array with elements
+// renders Array as following
+// > Array(4) [1,2,3,4]
+export const ArrayView = (props: ArrayProps) => {
   const { data, propName } = props;
   const [expanded, setExpanded] = useState(false);
 
@@ -23,6 +27,7 @@ export const ArrayView = (props) => {
         className={"cov-array-initial"}
         onClick={(e) => {
           e.preventDefault();
+          e.stopPropagation();
           setExpanded((e) => !e);
         }}
       >
