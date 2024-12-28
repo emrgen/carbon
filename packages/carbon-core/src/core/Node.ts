@@ -465,8 +465,8 @@ export class Node extends EventEmitter implements IntoNodeId {
     return this.id.eq(NodeId.ROOT);
   }
 
-  get isDocument(): boolean {
-    return this.type.isDocument;
+  get isPage(): boolean {
+    return this.type.isPage;
   }
 
   get isInline(): boolean {
@@ -874,7 +874,6 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   // @mutates
   updateProps(props: NodePropsJson) {
-    console.debug("updateProps", this.key, props);
     this.content.updateProps(props);
 
     return this;
@@ -923,7 +922,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       {} as Record<string, string>,
     );
 
-    const propsCone = props.clone().delete("local");
+    const propsCone = props.clone(); //.delete("local");
 
     if (this.isText) {
       return {

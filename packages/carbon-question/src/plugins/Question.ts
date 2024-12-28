@@ -37,7 +37,7 @@ export class Question extends CarbonPlugin {
       inlineSelectable: true,
       collapsible: true,
       isolate: true,
-      document: true,
+      page: true,
       observable: true,
       dnd: {
         draggable: true,

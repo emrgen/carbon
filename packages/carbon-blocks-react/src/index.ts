@@ -40,7 +40,7 @@ import TitleComp from "./renderers/TitleComp";
 import { TodoComp } from "./renderers/Todo";
 
 export const blockPresetRenderers = [
-  ReactRenderer.create("document", DocumentComp),
+  ReactRenderer.create("page", DocumentComp),
   ReactRenderer.create("h1", HeaderComp),
   ReactRenderer.create("h2", HeaderComp),
   ReactRenderer.create("h3", HeaderComp),

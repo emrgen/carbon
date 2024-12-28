@@ -1,5 +1,5 @@
-import { expect, test } from "@playwright/test";
 import { TextWriter } from "@emrgen/carbon-core";
+import { expect, test } from "@playwright/test";
 import { CarbonPage, getDocContent } from "./utils";
 
 test.beforeEach(async ({ page }, testInfo) => {
@@ -16,15 +16,15 @@ test("add title to the document", async ({ page }) => {
   expect(docContent).toBe("# Doc title\n\nHello World!");
 
   await carbonPage.enter();
-  await carbonPage.type("document content");
+  await carbonPage.type("page content");
   docContent = await carbonPage.getDocContent();
-  expect(docContent).toBe("# Doc title\n\nHello World!\n\ndocument content");
+  expect(docContent).toBe("# Doc title\n\nHello World!\n\npage content");
 });
 
 test("add number list to the document", async ({ page }) => {
   const carbonPage = new CarbonPage(page);
 
-  await page.keyboard.type("document content");
+  await page.keyboard.type("page content");
   await page.keyboard.press("Enter");
 
   await page.keyboard.type("1. first item");
@@ -41,12 +41,12 @@ test("add number list to the document", async ({ page }) => {
 
   // FIXME: wrong encoding
   expect(docContent).toBe(
-    "# Doc title\n\ndocument content\n1. first item\n1. second item\n1. third item",
+    "# Doc title\n\npage content\n1. first item\n1. second item\n1. third item",
   );
 });
 
 test("add bullet list to the document", async ({ page }) => {
-  await page.keyboard.type("document content");
+  await page.keyboard.type("page content");
   await page.keyboard.press("Enter");
 
   await page.keyboard.type("- first item");
@@ -61,14 +61,14 @@ test("add bullet list to the document", async ({ page }) => {
 
   const docContent = await page.evaluate(() => {
     const app = window.app;
-    const doc = app.content.find((n) => n.isDocument);
+    const doc = app.content.find((n) => n.isPage);
 
     const writer = new TextWriter();
     return app.encode(writer, doc!).toString();
   });
 
   expect(docContent).toBe(
-    "Doc title\ndocument content\n- first item\n- second item\n- third item\n",
+    "Doc title\npage content\n- first item\n- second item\n- third item\n",
   );
 });
 
@@ -83,7 +83,7 @@ test("add nested number list to the document", async ({ page }) => {
 
   const docContent = await page.evaluate(() => {
     const app = window.app;
-    const doc = app.content.find((n) => n.isDocument);
+    const doc = app.content.find((n) => n.isPage);
 
     const writer = new TextWriter();
     return app.encode(writer, doc!).toString();

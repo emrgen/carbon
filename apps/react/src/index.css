@@ -46,6 +46,6 @@ span[data-name=text] {
   /*letter-spacing: 0.04em;*/
 }
 
-[data-name=document] {
+[data-name=page] {
   padding: 0 10px;
 }

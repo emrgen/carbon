@@ -252,7 +252,7 @@ export const Dummy = () => {
 //
 //
 // const s = para('hello world')!;
-// const root = document.querySelector('#chain')!;
+// const root = page.querySelector('#chain')!;
 //
 // // ctx.mount(root, s);
 //

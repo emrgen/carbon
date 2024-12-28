@@ -379,13 +379,13 @@ export class ImmutableDraft implements Draft {
 
   // WARNING: inefficient implementation for validation of ideas only
   private normalize() {
-    console.debug(
-      "unstable nodes",
-      this.unstable
-        .toArray()
-        .map((n) => n.toString())
-        .join(", "),
-    );
+    // console.debug(
+    //   "unstable nodes",
+    //   this.unstable
+    //     .toArray()
+    //     .map((n) => n.toString())
+    //     .join(", "),
+    // );
     const unstable = this.unstable.nodes(this.nodeMap);
     const nodes = sortNodesByDepth(unstable).reverse();
     const node = first(nodes);

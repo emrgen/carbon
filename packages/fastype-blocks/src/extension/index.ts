@@ -3,7 +3,6 @@ import { Separator } from "./plugins/Separator";
 import { Callout } from "./renderers/Callout";
 import { DocumentComp } from "./renderers/Document";
 import { EquationComp } from "./renderers/Equation";
-// import { VideoComp } from "./renderers/Video";
 import { SeparatorComp } from "./renderers/Separator";
 import { TodoComp } from "./renderers/Todo";
 
@@ -14,6 +13,6 @@ export const fastypeBlocks: Extension = {
     ReactRenderer.create("callout", Callout),
     ReactRenderer.create("separator", SeparatorComp),
     ReactRenderer.create("equation", EquationComp),
-    ReactRenderer.create("document", DocumentComp),
+    ReactRenderer.create("page", DocumentComp),
   ],
 };

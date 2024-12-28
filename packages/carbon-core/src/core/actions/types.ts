@@ -52,4 +52,5 @@ export enum ActionType {
   props = "props",
   content = "content",
   rename = "rename",
+  mark = "mark",
 }

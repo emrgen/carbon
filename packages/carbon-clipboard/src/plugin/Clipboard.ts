@@ -1,3 +1,4 @@
+import { CarbonCodec } from "@emrgen/carbon-codec";
 import {
   AfterPlugin,
   blocksBelowCommonNode,
@@ -25,11 +26,10 @@ import {
 
 import { Optional } from "@emrgen/types";
 import { identity, isEmpty } from "lodash";
-import { setClipboard } from "../clipboard";
-import { parseClipboard } from "../parser/parse";
 
 import BTree from "sorted-btree";
-import { CarbonCodec } from "@emrgen/carbon-codec";
+import { setClipboard } from "../clipboard";
+import { parseClipboard } from "../parser/parse";
 
 let cache: any = null;
 let clipboard: any = null;
@@ -194,8 +194,8 @@ export class ClipboardPlugin extends AfterPlugin {
           ) ?? []);
 
     const type = app.schema.type(SliceNode.kind);
-    // extract document content matching nodes
-    if (!startNode.isDocument) {
+    // extract page content matching nodes
+    if (!startNode.isPage) {
       const match = findMatchingNodes(matches, type.contentMatch, nodes, []);
 
       if (!match.validEnd) {

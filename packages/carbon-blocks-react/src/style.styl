@@ -94,8 +94,8 @@ $lineHeight = 28px
     img
       width: 100%
 
-[data-name=document],
-[data-as=document]
+[data-name=page],
+[data-as=page]
   font-size 15px
   position relative
   outline none
@@ -108,8 +108,8 @@ $lineHeight = 28px
 
 @container (min-width: 800px)
 {
-[data-name=document],
-[data-as=document] {
+[data-name=page],
+[data-as=page] {
   padding-left: 100px
   padding-right: 100px
   min-height: 100%
@@ -119,8 +119,8 @@ $lineHeight = 28px
 
 @container (min-width: 1000px)
 {
-[data-name=document],
-[data-as=document] {
+[data-name=page],
+[data-as=page] {
   padding-left: calc(50% - 360px)
   padding-right: calc(50% - 360px)
   min-height: 100%
@@ -178,13 +178,13 @@ $lineHeight = 28px
   color: teal !important;
 }
 
-[data-name=document] > [data-type="content"]
+[data-name=page] > [data-type="content"]
   padding: 0 16px 10px 16px
 
-[data-name=document] > [data-type="children"]
+[data-name=page] > [data-type="children"]
   padding: 0 16px 10px 16px
 
-[data-name=document] > [data-type="content"] > [data-name="title"]
+[data-name=page] > [data-type="content"] > [data-name="title"]
   font-size: 40px
   line-height: 46px
   font-weight: bold
@@ -704,8 +704,8 @@ span[data-name=text] {
 //  padding: 10px
 //  gap 10px
 
-  //[data-name=document],
-  //[data-as=document]
+  //[data-name=page],
+  //[data-as=page]
   //  flex 1
   //  padding 0 80px
   //  padding-top: 40px;
@@ -1269,7 +1269,7 @@ span[data-name=text] {
     &[data-selected=true]
       box-shadow inset 0 0 0 2px #555
 
-[data-name=document][contenteditable=false]
+[data-name=page][contenteditable=false]
   [data-name=mcq] > [data-type=content],
   [data-name=hint] > [data-type=content]
     cursor pointer
@@ -1646,7 +1646,7 @@ a[data-name="text"]
 //[data-name=mention]
 //    -webkit-user-modify: read-only
 
-//.document-title
+//.page-title
 //  font-size 24px
 //  font-weight bold
 //  margin-bottom 10px

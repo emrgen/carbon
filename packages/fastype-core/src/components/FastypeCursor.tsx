@@ -103,15 +103,15 @@ export const FastypeCursor = (props: CustomCursorProps) => {
       }, 100);
     };
 
-    app.on("document:blur", onBlur);
-    app.on("document:focus", onFocus);
-    app.on("document:cursor:hide", onHideCursor);
-    app.on("document:cursor:show", onShowCursor);
+    app.on("page:blur", onBlur);
+    app.on("page:focus", onFocus);
+    app.on("page:cursor:hide", onHideCursor);
+    app.on("page:cursor:show", onShowCursor);
     return () => {
-      app.off("document:blur", onBlur);
-      app.off("document:focus", onFocus);
-      app.off("document:cursor:hide", onHideCursor);
-      app.off("document:cursor:show", onShowCursor);
+      app.off("page:blur", onBlur);
+      app.off("page:focus", onFocus);
+      app.off("page:cursor:hide", onHideCursor);
+      app.off("page:cursor:show", onShowCursor);
     };
   }, [app, ref]);
 

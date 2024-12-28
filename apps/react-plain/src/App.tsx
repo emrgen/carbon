@@ -33,7 +33,7 @@ console.time = noop;
 
 export const data = node("carbon", [
   node(
-    "document",
+    "page",
     [
       title([text("I am a frame title")]),
       ...range(800).map((a) =>

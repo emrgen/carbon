@@ -1,6 +1,5 @@
-import { Page } from "@playwright/test";
-
 import { Carbon } from "@emrgen/carbon-core";
+import { Page } from "@playwright/test";
 
 declare global {
   interface Window {
@@ -11,14 +10,14 @@ declare global {
 export const getDocContent = async (page: Page) => {
   return await page.evaluate(() => {
     const app = window.app;
-    const doc = app.content.find((n) => n.isDocument);
+    const doc = app.content.find((n) => n.isPage);
 
     return app.markdown(doc!);
   });
 };
 
 export const focusDocTitle = async (page: Page) => {
-  await page.click(".cdoc > [data-type=content]");
+  await page.click(".cpage > [data-type=content]");
 };
 
 export class CarbonPage {
@@ -40,13 +39,13 @@ export class CarbonPage {
   }
 
   async focusDocTitle() {
-    await this.page.click(".cdoc > [data-type=content]");
+    await this.page.click(".cpage > [data-type=content]");
   }
 
   async getDocContent() {
     return await this.page.evaluate(() => {
       const app = window.app;
-      const doc = app.content.find((n) => n.isDocument);
+      const doc = app.content.find((n) => n.isPage);
 
       return app.markdown(doc!);
     });

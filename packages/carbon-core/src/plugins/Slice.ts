@@ -1,9 +1,9 @@
 import {CarbonPlugin, Node, NodeEncoder, NodeSpec, Writer} from "../core";
 
 /**
- * Slice is a special node that represents a selection of nodes in the document.
+ * Slice is a special node that represents a selection of nodes in the page.
  * It is used to represent the selection in the editor and to copy and paste content.
- * The content of a slice is a list of nodes that are selected in the document.
+ * The content of a slice is a list of nodes that are selected in the page.
  **/
 export class SliceNode extends CarbonPlugin {
   static kind = "slice";

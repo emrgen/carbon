@@ -286,9 +286,16 @@ const ResultView = (props) => {
     return <div>{result}</div>;
   }
 
-  if (isArray(result)) {
-    const res = result.map((r) => r.toString()).join(", ");
-    return <CellResultView cell={cell} name={cellName} result={`[${res}]`} />;
+  if (cellName && (isArray(result) || isObject(result))) {
+    return (
+      <CellResultView
+        cell={cell}
+        name={cellName}
+        result={<ObjectViewer data={result} />}
+      />
+    );
+
+    // return <CellResultView cell={cell} name={cellName} result={`[${res}]`} />;
   }
 
   if (isFunction(result)) {
@@ -342,7 +349,9 @@ const CellResultView = (props) => {
 
   return (
     <div className={"cell-result-name-view"} onKeyUp={stop} onKeyDown={stop}>
-      {cell.hasName() && <div>{props.name} = </div>}
+      {cell.hasName() && (
+        <div className={"cell-result-cell-name"}>{props.name} = </div>
+      )}
       <div style={{ color }}>{props.result}</div>
     </div>
   );

@@ -13,7 +13,7 @@ export const ToggleViewMode = () => {
   const [isEditable, setIsEditable] = useState(false);
 
   useEffect(() => {
-    const node = app.content.find((n) => n.name === "document");
+    const node = app.content.find((n) => n.isPage);
     if (!node) return;
     setIsEditable(node?.props.get(ModePath) === "edit");
   }, [app]);
@@ -58,7 +58,7 @@ export const ToggleViewMode = () => {
   );
 
   const handleToggleMode = useCallback(() => {
-    const node = app.content.find((n) => n.name === "document");
+    const node = app.content.find((n) => n.isPage);
     if (!node) return;
 
     const { cmd } = app;

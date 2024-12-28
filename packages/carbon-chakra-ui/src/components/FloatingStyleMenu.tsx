@@ -110,8 +110,8 @@ export function FloatingStyleMenu() {
         return;
       }
 
-      // don't show context menu if the selection is in the document title
-      if (head.node.parent?.isDocument || tail.node.parent?.isDocument) {
+      // don't show context menu if the selection is in the page title
+      if (head.node.parent?.isPage || tail.node.parent?.isPage) {
         hideContextMenu();
         return;
       }

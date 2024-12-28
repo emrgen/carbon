@@ -31,7 +31,7 @@ export class ImmutableBTreeContent {
   // }
   //
   // insert(node: Node, index: number): void {
-  //   if (this.type.isDocument) {
+  //   if (this.type.isPage) {
   //     node.fractionIndex = this.getFractionIndex(index);
   //   }
   // }

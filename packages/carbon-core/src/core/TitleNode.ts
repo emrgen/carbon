@@ -119,7 +119,6 @@ export class TitleNode {
     }
 
     const down = Step.create(this.node, stepOffset).down();
-
     if (down.isBefore || down.isAtStart) {
       const { index } = down.node;
       const prev = this.node.children.slice(0, index);
@@ -964,12 +963,12 @@ export class TitleNode {
   private prepend(node: Node[]) {
     const children = [...node, ...this.node.children];
     const stepSize = node.reduce((acc, curr) => acc + curr.stepSize, 0);
-
+    const startStep = this.node.isVoid ? 1 : 2;
     const startMapper = this.startMapper.clone();
-    startMapper.add(IndexMap.create(2, stepSize));
+    startMapper.add(IndexMap.create(startStep, stepSize));
 
     const endMapper = this.endMapper.clone();
-    endMapper.add(IndexMap.create(2 - this.stepSize - 1, -stepSize));
+    endMapper.add(IndexMap.create(startStep - this.stepSize - 1, -stepSize));
 
     return new TitleNode(
       this.cloneNode(this.node, children),

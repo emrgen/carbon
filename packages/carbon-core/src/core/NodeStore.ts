@@ -107,7 +107,7 @@ export class NodeStore {
     let node: Optional<Node>;
 
     // if el is a text node
-    // if (el.nodeType === document.TEXT_NODE) {
+    // if (el.nodeType === page.TEXT_NODE) {
     //   console.log("text node", el);
     // }
 

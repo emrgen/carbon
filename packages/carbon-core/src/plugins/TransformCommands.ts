@@ -396,9 +396,6 @@ export class TransformCommands extends BeforePlugin {
 
       cmd.Add(InsertTextAction.create(head.point, text));
       cmd.Select(after, ActionOrigin.UserInput);
-      console.log(after.toString());
-
-      console.log(cmd);
     } else {
       const { head } = selection;
       const { startNode } = cmd;
@@ -406,9 +403,10 @@ export class TransformCommands extends BeforePlugin {
         const titleNode = TitleNode.from(cmd.startNode!);
         const textNode = cmd.app.schema.text(text)!;
         const textBlock = titleNode.insertInp(head.steps, textNode);
-        const steps =
-          textBlock.node.stepSize +
-          textBlock.mapStep(head.steps - titleNode.node.stepSize);
+        const mappedStep = textBlock.mapStep(
+          head.steps - titleNode.node.stepSize,
+        );
+        const steps = textBlock.node.stepSize + mappedStep;
         const pin = Pin.create(textBlock.node, textNode.focusSize, steps);
         const after = PinnedSelection.fromPin(pin);
 
@@ -696,7 +694,7 @@ export class TransformCommands extends BeforePlugin {
       if (startTitleBlock.isEmpty) {
         const parent = sliceStartTitle.parent!;
         const target = start.node.parent!;
-        const name = parent.isDocument ? parent.type.splitName : parent.name;
+        const name = parent.isPage ? parent.type.splitName : parent.name;
         if (target.name === parent.type.splitName) {
           tr.Add(ChangeNameAction.create(target.id, name));
         }
@@ -901,7 +899,7 @@ export class TransformCommands extends BeforePlugin {
     //   endBlockDepth -= 1;
     // }
 
-    // * Note: is some situations endBlock can be document node and the children will be document content slice
+    // * Note: is some situations endBlock can be page node and the children will be page content slice
     while (endBlockLimit < endBlockDepth) {
       const nodes =
         endBlock.children
@@ -959,7 +957,7 @@ export class TransformCommands extends BeforePlugin {
     // NOTE: change the startTitleBlock parent to sliceStartTitle parent
     if (startTitleBlock.isEmpty) {
       const parent = sliceStartTitle.parent!;
-      const name = parent.isDocument ? parent.type.splitName : parent.name;
+      const name = parent.isPage ? parent.type.splitName : parent.name;
       const target = start.node.parent!;
 
       // TODO: check if parent and name has same content match
@@ -2079,6 +2077,8 @@ export class TransformCommands extends BeforePlugin {
     const textBlock = TitleNode.from(start.node)
       .replaceContent([...prevBlock.children, ...nextBlock.children])
       .normalize();
+
+    tr.SetStartNode(textBlock.node);
 
     tr.Add(
       SetContentAction.withBefore(

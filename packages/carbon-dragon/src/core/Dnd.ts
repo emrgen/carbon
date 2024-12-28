@@ -128,17 +128,17 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
     let hitNode = this.findHitNode(
       x + 300, // find node at x + 300 to avoid flickering when the cursor is on the drag handle
       y,
-      (n) => hasHandle(n) || n.isDocument,
+      (n) => hasHandle(n) || n.isPage,
     );
 
-    if (hitNode?.isDocument) {
-      // check if the cursor is in the document padding area
+    if (hitNode?.isPage) {
+      // check if the cursor is in the page padding area
       const docEl = this.app.store.element(hitNode.id)!;
       const rect = domRect(docEl);
       const style = window.getComputedStyle(docEl) ?? {};
       const { paddingLeft = "0", paddingRight = "0" } = style;
 
-      // check if the cursor is in the padding area of the document
+      // check if the cursor is in the padding area of the page
       if (rect.left < x && x < rect.left + parseInt(paddingLeft)) {
         hitNode = this.findHitNode(x + parseInt(paddingLeft), y, hasHandle);
       } else if (rect.right - parseInt(paddingRight) < x && x < rect.right) {

@@ -152,7 +152,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       }
 
       console.log("hit node", hitNode?.id.toString());
-      if (hitNode.isDocument) {
+      if (hitNode.isPage) {
         return;
       }
 
@@ -224,7 +224,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       setShowDropHint(false);
 
       if (!hitNode) return;
-      if (hitNode.isDocument) return;
+      if (hitNode.isPage) return;
       if (hitNode?.id.eq(node.id)) {
         // hide drop hint
         return;

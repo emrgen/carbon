@@ -12,7 +12,7 @@ $selectionHaloColor = #accef78d
   overflow auto
   background #fff
 
-.cdoc
+.cpage
   flex 1
   padding 0 calc(50% - 360px)
   padding-top: 80px;
@@ -34,8 +34,8 @@ $selectionHaloColor = #accef78d
   position relative;
   line-height: $lineHeight
 
-// document title
-.cdoc > .title
+// page title
+.cpage > .title
   font-size 2.5em
   font-weight bold
   line-height 40px
@@ -43,7 +43,7 @@ $selectionHaloColor = #accef78d
   [data-name=emoji]
     margin 0 4px
 
-.document > .cnest
+.cpage > .cnest
   margin-left 0
 
 //title
@@ -299,7 +299,7 @@ pre
   margin: 0 2px
   cursor pointer
 
-/*custom scrollbars for document*/
+/*custom scrollbars for page*/
 .document-wrapper::-webkit-scrollbar {
   width: 10px;
   background-color: #f5f5f5;

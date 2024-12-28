@@ -5,8 +5,6 @@ import { Picker } from "emoji-mart";
 import EventEmitter from "events";
 import React, { memo, ReactNode, useCallback, useEffect, useRef } from "react";
 
-console.log(Picker);
-
 interface EmojiPickerProps {
   isOpen: boolean;
   onClose: () => void;

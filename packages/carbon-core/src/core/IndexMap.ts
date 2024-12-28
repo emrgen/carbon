@@ -122,7 +122,6 @@ export class IndexMapper {
 
     for (++i; i < mappers.length; ++i) {
       const mapper = mappers[i];
-      console.debug("mapping", i, mapper, index, mapper.map(index));
       index = mapper.map(index);
     }
 

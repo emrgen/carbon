@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./react-bem.styl";
 
 import "./fastype/fastype.styl";
-import { LazyDev, LazyEmojiDemo } from "./carbon/index";
+import { LazyBoard, LazyDev, LazyEmojiDemo } from "./carbon/index";
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
         {/*<Route path="/demo/draggable" element={<LazyDraggableDemo />} />*/}
         <Route path="/demo/emoji" element={<LazyEmojiDemo />} />
         {/*<Route path="/design" element={<LazyDesign />} />*/}
-        {/*<Route path="/board" element={<LazyBoard />} />*/}
+        <Route path="/board" element={<LazyBoard />} />
         {/*<Route path="/affine" element={<AffineExp />} />*/}
         {/*<Route path="/chain" element={<Chain />} />*/}
         {/*<Route path="/text" element={<Text />} />*/}

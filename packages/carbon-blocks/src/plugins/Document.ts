@@ -11,7 +11,7 @@ import {
 import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
 
 export class PagePlugin extends CarbonPlugin {
-  name = "document";
+  name = "page";
 
   spec(): NodeSpec {
     return {
@@ -23,7 +23,7 @@ export class PagePlugin extends CarbonPlugin {
       collapsible: true,
       isolate: true,
       sandbox: true,
-      document: true,
+      page: true,
       pasteBoundary: true,
       tag: "main",
       observable: true,
@@ -37,6 +37,7 @@ export class PagePlugin extends CarbonPlugin {
             focused: "Untitled",
           },
           html: {
+            className: "cpage",
             spellCheck: false,
             contentEditable: true,
             suppressContentEditableWarning: true,
@@ -56,7 +57,7 @@ export class PagePlugin extends CarbonPlugin {
     return {
       // mouseMove: throttle((ctx) => {
       //   const { event, app } = ctx;
-      //   const el = document.elementFromPoint(event.clientX, event.clientY);
+      //   const el = page.elementFromPoint(event.clientX, event.clientY);
       //   if (el) {
       //     const node = app.store.get(el);
       //     if (node) {

@@ -1,5 +1,6 @@
 import { attrRenderers } from "@emrgen/carbon-attributes";
 import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
+import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import {
   carbonChakraRenderers,
   FloatingStyleMenu,
@@ -17,7 +18,6 @@ import { mediaPlugins } from "@emrgen/carbon-media";
 import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
-import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { createContext, useContext } from "react";
 import "./test.styl";
 import { PathTracker } from "../../PathTracker";
@@ -33,7 +33,7 @@ const TestContext = createContext<any>(null);
 
 export const data = node("carbon", [
   node(
-    "document",
+    "page",
     [
       title([text("I am a frame title")]),
       node("paragraph", [title([text("I am a paragraph title")])]),

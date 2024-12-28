@@ -1,3 +1,4 @@
+import { DocumentContext } from "@emrgen/carbon-blocks-react";
 import {
   ActionOrigin,
   EventsIn,
@@ -23,7 +24,6 @@ import {
   RendererProps,
   useCarbon,
 } from "@emrgen/carbon-react";
-import { DocumentContext } from "@emrgen/carbon-blocks-react";
 import { useCallback, useEffect, useRef } from "react";
 
 export const DocumentComp = (props: RendererProps) => {
@@ -44,7 +44,7 @@ export const DocumentComp = (props: RendererProps) => {
   );
 
   useEffect(() => {
-    app.emit("document:mounted", node);
+    app.emit("page:mounted", node);
   }, [app, node]);
 
   const handleMouseDown = useCallback(
@@ -56,7 +56,7 @@ export const DocumentComp = (props: RendererProps) => {
       if (!bound) return;
 
       if (e.clientY > bound.bottom) {
-        app.emit("document:cursor:hide");
+        app.emit("page:cursor:hide");
         preventAndStop(e);
       }
 
@@ -67,7 +67,7 @@ export const DocumentComp = (props: RendererProps) => {
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
-      app.emit("document:cursor:show");
+      app.emit("page:cursor:show");
 
       const lastChild = node.lastChild as Node;
       const lastElement = app.store.element(lastChild?.id!);
@@ -91,9 +91,9 @@ export const DocumentComp = (props: RendererProps) => {
         const at = Point.toAfter(lastChild.id);
         const paragraph = app.schema.type("paragraph").default();
         if (!paragraph) return;
-        const after = PinnedSelection.fromPin(Pin.toStartOf(section)!);
+        const after = PinnedSelection.fromPin(Pin.toStartOf(paragraph)!);
         app.tr
-          .Insert(at, section)
+          .Insert(at, paragraph)
           .Select(after, ActionOrigin.UserInput)
           .Dispatch();
       }
@@ -138,14 +138,14 @@ export const DocumentComp = (props: RendererProps) => {
         }}
       >
         {/* {picture.src && (
-        <div className="carbon-document-picture">
-          <div className="carbon-document-picture-overlay">
-            <img src={picture.src} alt="document picture" />
+        <div className="carbon-page-picture">
+          <div className="carbon-page-picture-overlay">
+            <img src={picture.src} alt="page picture" />
           </div>
         </div>
       )}
       {!picture.src && (
-          <div className="carbon-document-empty-picture"/>
+          <div className="carbon-page-empty-picture"/>
         )} */}
         <CarbonBlock
           node={node}
@@ -157,9 +157,9 @@ export const DocumentComp = (props: RendererProps) => {
             // onScroll: (e) => {
             //   react.emit(EventsIn.scroll, e as any);
             // },
-            onBlur: (e) => app.emit("document:blur", e as any),
-            onFocus: (e) => app.emit("document:focus", e as any),
-            className: "fastype-document",
+            onBlur: (e) => app.emit("page:blur", e as any),
+            onFocus: (e) => app.emit("page:focus", e as any),
+            className: "fastype-page",
           }}
         >
           <CarbonNodeContent node={node} />

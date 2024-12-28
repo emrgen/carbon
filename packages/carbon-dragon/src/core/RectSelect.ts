@@ -1,8 +1,3 @@
-import { Optional } from "@emrgen/types";
-import EventEmitter from "events";
-import { identity, last, sortBy, throttle, uniq } from "lodash";
-import { DndNodeStore } from "./DndStore";
-import { adjustBox, boundFromFastDndEvent } from "./utils";
 import {
   ActionOrigin,
   BSet,
@@ -12,7 +7,12 @@ import {
   NodeId,
   NodeIdSet,
 } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
+import EventEmitter from "events";
+import { identity, last, sortBy, throttle, uniq } from "lodash";
 import { DndEvent } from "../types";
+import { DndNodeStore } from "./DndStore";
+import { adjustBox, boundFromFastDndEvent } from "./utils";
 
 // Events emitted by RectSelector
 export enum RectSelectorEvent {
@@ -25,7 +25,7 @@ export enum RectSelectorEvent {
 
 // RectSelect is a selection manager that uses a rectangular selection box
 // this manages many nested selection sub-systems such as:
-// - selection within a document
+// - selection within a page
 // - selection within a canvas
 // - selection within a node in a canvas (the rect selection box is drawn inside the node)
 export class RectSelect extends EventEmitter {
@@ -80,7 +80,7 @@ export class RectSelect extends EventEmitter {
 
     // this.react.blur();
     if (this.isDirty) {
-      const document = node.chain.find((n) => n.isDocument);
+      const document = node.chain.find((n) => n.isPage);
       if (!document) {
         return;
       }
@@ -115,7 +115,7 @@ export class RectSelect extends EventEmitter {
       "current selection",
       app.selection.blocks.map((n) => n.id),
     );
-    const document = node.chain.find((n) => n.isDocument);
+    const document = node.chain.find((n) => n.isPage);
     if (!document) {
       return;
     }

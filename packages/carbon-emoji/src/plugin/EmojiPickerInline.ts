@@ -1,4 +1,3 @@
-import data from "@emoji-mart/data";
 import {
   ActionType,
   BeforeInputRuleHandler,
@@ -15,8 +14,6 @@ import {
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { EmojiIndex } from "../EmojiIndex";
-
-console.log(data);
 
 // @ts-ignore
 window.ei = EmojiIndex;

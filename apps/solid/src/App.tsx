@@ -48,7 +48,7 @@ const { specs } = pm;
 const schema = new Schema(specs, new SolidNodeFactory());
 
 const data = carbon([
-  node("document", [
+  node("page", [
     title([]),
     paragraph([title([text("paragraph 1")])]),
     paragraph([title([text("section 2")])]),
@@ -147,7 +147,7 @@ function App() {
     const el = app.store.element(node.id);
     el?.focus();
 
-    // dnd.viewport = document.querySelector('body')!;
+    // dnd.viewport = page.querySelector('body')!;
     // dnd.options = {
     //   root: dnd.viewport!,
     //   threshold: 0,

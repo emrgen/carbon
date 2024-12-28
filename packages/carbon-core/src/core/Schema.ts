@@ -136,8 +136,8 @@ export interface NodeSpec {
   // toDOM?: (node: Node) => [string, any];
   // fromDOM?: (dom: Node) => NodeJSON;
 
-  // the node can be treated as a standalone document
-  document?: boolean;
+  // the node can be treated as a standalone page
+  page?: boolean;
   // last empty children stays within on enter
   // only backspace can unwrap the last child
   collapsible?: boolean;

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { NodeView } from "./Node";
 import { BsFillCaretRightFill } from "react-icons/bs";
+import { NodeView } from "./Node";
 import { NodeInitial } from "./NodeInitial";
 
 interface ArrayProps {
@@ -14,11 +14,17 @@ export const ArrayView = (props) => {
   return (
     <div
       className={"cov-array"}
-      style={{ display: expanded ? "block" : "flex" }}
+      style={{
+        display: "flex",
+        flexDirection: expanded ? "column" : "row",
+      }}
     >
       <div
         className={"cov-array-initial"}
-        onClick={() => setExpanded((e) => !e)}
+        onClick={(e) => {
+          e.preventDefault();
+          setExpanded((e) => !e);
+        }}
       >
         {propName && <span className={"cov-object-key"}>{propName}:</span>}
         <div className={"cov-expander"}>

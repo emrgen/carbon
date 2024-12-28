@@ -21,7 +21,7 @@ const data = {
   name: "carbon",
   children: [
     {
-      name: "document",
+      name: "page",
       children: [
         {
           name: "title",

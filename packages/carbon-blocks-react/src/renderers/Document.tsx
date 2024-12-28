@@ -36,13 +36,13 @@ export const DocumentComp = (props: RendererProps) => {
   const selectionSurface = useRectSelectionSurface({ node, ref });
 
   useEffect(() => {
-    app.emit("document:mounted", node);
+    app.emit("page:mounted", node);
     return () => {
-      app.emit("document:unmounted", node);
+      app.emit("page:unmounted", node);
     };
   }, [app, node]);
 
-  // hide cursor when it's below the last child of the document during mouse down
+  // hide cursor when it's below the last child of the page during mouse down
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       const lastChild = node.lastChild as Node;
@@ -52,7 +52,7 @@ export const DocumentComp = (props: RendererProps) => {
       if (!bound) return;
 
       if (e.clientY > bound.bottom) {
-        app.emit("document:cursor:hide");
+        app.emit("page:cursor:hide");
         preventAndStop(e);
       }
     },
@@ -77,7 +77,7 @@ export const DocumentComp = (props: RendererProps) => {
 
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
-      app.emit("document:cursor:show");
+      app.emit("page:cursor:show");
 
       if (!isEditable) return;
       const lastChildId = node.lastChild?.id;
@@ -189,9 +189,9 @@ export const DocumentComp = (props: RendererProps) => {
               // console.log(e.target.scrollTop);
               app.emit(EventsIn.scroll, e as any);
             },
-            // onBlur: (e) => app.emit('document:blur', e as any),
-            // onFocus: (e) => app.emit('document:focus', e as any),
-            className: "cdoc",
+            // onBlur: (e) => app.emit('page:blur', e as any),
+            // onFocus: (e) => app.emit('page:focus', e as any),
+            className: "cpage",
             contentEditable: isEditable,
             suppressContentEditableWarning: true,
           }}

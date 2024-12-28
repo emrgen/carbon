@@ -25,7 +25,7 @@ const TestContext = createContext<any>(null);
 
 export const data = node("carbon", [
   node(
-    "document",
+    "page",
     [
       title([text("Emoji")]),
       node("paragraph", [title([text("type :smile: to see 😊")])]),

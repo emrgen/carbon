@@ -113,7 +113,7 @@ export class Collapsible extends NodePlugin {
     return {
       ctrl_shift_e: (ctx: EventContext<KeyboardEvent>) => {
         const { currentNode } = ctx;
-        if (currentNode.name === "document") {
+        if (currentNode.name === "page") {
           return;
         }
         ctx.event.preventDefault();
@@ -128,7 +128,7 @@ export class Collapsible extends NodePlugin {
 
       ctrl_shift_c: (ctx: EventContext<KeyboardEvent>) => {
         const { currentNode } = ctx;
-        if (currentNode.name === "document") {
+        if (currentNode.name === "page") {
           return;
         }
         ctx.event.preventDefault();
@@ -180,7 +180,7 @@ export class Collapsible extends NodePlugin {
 
             cmd.transform.change(currentNode, "paragraph");
             if (currentNode.firstChild?.isEmpty) {
-              cmd.update(currentNode.firstChild.id, { [PlaceholderPath]: "" });
+              cmd.Update(currentNode.firstChild.id, { [PlaceholderPath]: "" });
             }
             cmd.Dispatch();
           }
@@ -238,7 +238,6 @@ export class Collapsible extends NodePlugin {
         throw Error("failed to create default node for type" + splitBlock.name);
       }
 
-      const at = Point.toAfter(title.id);
       const after = PinnedSelection.fromPin(Pin.toStartOf(section)!);
       tr.Add(
         insertAfterAction(isCollapsed ? splitBlock : title, section!),

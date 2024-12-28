@@ -1,17 +1,16 @@
+import { isPlainObject, sortBy } from "lodash";
 import { useState } from "react";
+import { AiFillCaretDown } from "react-icons/ai";
+import { BsFillCaretRightFill } from "react-icons/bs";
 import { NodeView } from "./Node";
 import { NodeInitial } from "./NodeInitial";
-import { BsFillCaretRightFill } from "react-icons/bs";
-import { isPlainObject, sortBy } from "lodash";
 import { ProtoView } from "./Proto";
-import { isGetterProp } from "./utils";
-import { isSetterProp } from "./utils";
-import { isFunctionProp } from "./utils";
-import { AiFillCaretDown } from "react-icons/ai";
+import { isFunctionProp, isGetterProp, isSetterProp } from "./utils";
 
 export const ObjectView = ({ data, propName, parentProps = new Set() }) => {
   const [expanded, setExpanded] = useState(false);
 
+  // Get the properties of the object
   const props = sortBy(Object.getOwnPropertyNames(data));
 
   const descriptors = props.reduce((props, name) => {
@@ -53,7 +52,10 @@ export const ObjectView = ({ data, propName, parentProps = new Set() }) => {
     >
       <div
         className={"cov-object-initial"}
-        onClick={() => setExpanded((e) => !e)}
+        onClick={(e) => {
+          e.preventDefault();
+          setExpanded((e) => !e);
+        }}
       >
         {propName && <span className={"cov-object-key"}>{propName}:</span>}
         <div className={"cov-expander"}>

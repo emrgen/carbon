@@ -6,5 +6,5 @@ export const isNestableNode = (node: Node) => {
 
 // TODO: check if the current schema of the node allows conversion to the target type
 export const isConvertible = (node: Node) => {
-  return !node.isDocument && isNestableNode(node);
+  return !node.isPage && isNestableNode(node);
 };

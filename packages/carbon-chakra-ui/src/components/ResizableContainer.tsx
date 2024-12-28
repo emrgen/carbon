@@ -1,10 +1,10 @@
 import { Flex } from "@chakra-ui/react";
+import { useDocument } from "@emrgen/carbon-blocks-react";
 import { clamp, Node, StylePath } from "@emrgen/carbon-core";
 
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
 import { RendererProps, useCarbon } from "@emrgen/carbon-react";
-import { useDocument } from "@emrgen/carbon-blocks-react";
 import React, {
   CSSProperties,
   useCallback,
@@ -92,7 +92,7 @@ export const ResizableContainer = (props: MediaViewProps) => {
   }, [resizeObserverRef, ref]);
 
   const updateDocumentWidth = useCallback(() => {
-    const document = node.parents.find((n) => n.isDocument);
+    const document = node.parents.find((n) => n.isPage);
     if (!document) return;
     const docEl = app.store.element(document.id);
     if (!docEl) return;
@@ -107,9 +107,9 @@ export const ResizableContainer = (props: MediaViewProps) => {
   }, [app.store, fullWidth, node]);
 
   useEffect(() => {
-    app.on("document:mounted", updateDocumentWidth);
+    app.on("page:mounted", updateDocumentWidth);
     return () => {
-      app.off("document:mounted", updateDocumentWidth);
+      app.off("page:mounted", updateDocumentWidth);
     };
   }, [app, updateDocumentWidth]);
 

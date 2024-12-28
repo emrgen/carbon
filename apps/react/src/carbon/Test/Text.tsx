@@ -12,7 +12,7 @@ import { CarbonApp } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
 
 const data = node("carbon", [
-  node("document", [title()], {
+  node("page", [title()], {
     [ModePath]: "edit",
   }),
 ]);

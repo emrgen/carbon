@@ -141,8 +141,8 @@ export class NodeType {
     return !!this.spec.container;
   }
 
-  get isDocument() {
-    return !!this.spec.document;
+  get isPage() {
+    return !!this.spec.page;
   }
 
   get isBlockSelectable() {

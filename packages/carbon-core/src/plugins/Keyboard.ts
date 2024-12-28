@@ -111,7 +111,7 @@ export class KeyboardPlugin extends AfterPlugin {
             (n) => n.isBlockSelectable,
           );
           if (parentIsolate) {
-            if (parentIsolate.isDocument) return;
+            if (parentIsolate.isPage) return;
             cmd.SelectBlocks([parentIsolate.id]).Dispatch();
           }
           return;
@@ -567,7 +567,7 @@ export class KeyboardPlugin extends AfterPlugin {
     }
 
     const block = prevSelectableBlock(currentNode, true);
-    if (!block || block.isDocument) return;
+    if (!block || block.isPage) return;
 
     const lastNode = last(blocks) as Node;
     if (block.isIsolate && lastNode.parents.some((n) => n.eq(block))) {

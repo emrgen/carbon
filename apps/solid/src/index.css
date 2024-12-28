@@ -7,7 +7,7 @@
         margin: 10px 0;
     }
 }
-[data-name=document] {
+[data-name=page] {
     outline: none;
     box-shadow: 0 0 0 1px #ddd;
     padding: 10px 20px;

@@ -5,9 +5,9 @@
 //
 // const data = node("carbon", [
 //   node(
-//     "document",
+//     "page",
 //     [
-//       title([text("Carbon "), text("document")]),
+//       title([text("Carbon "), text("page")]),
 //       node("divider"),
 //       node("paragraph", [title([text("paragraph 1.2")])]),
 //     ],

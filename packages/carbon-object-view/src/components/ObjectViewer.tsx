@@ -38,6 +38,7 @@ const data = [
   document.createElementNS("http://www.w3.org/2000/svg", "svg"),
 ];
 
+// ObjectViewer component is used to display the object in a tree structure.
 export const ObjectViewer = (props: ObjectViewProps) => {
   return (
     <div className={"carbon-object-view"}>

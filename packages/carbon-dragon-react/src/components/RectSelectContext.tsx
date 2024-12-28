@@ -123,12 +123,12 @@ export function RectSelectContext(props) {
       setIsSelecting(false);
     };
 
-    app.on("document:cursor:hide", onHideCursor);
-    app.on("document:cursor:show", onShowCursor);
+    app.on("page:cursor:hide", onHideCursor);
+    app.on("page:cursor:show", onShowCursor);
 
     return () => {
-      app.off("document:cursor:hide", onHideCursor);
-      app.off("document:cursor:show", onShowCursor);
+      app.off("page:cursor:hide", onHideCursor);
+      app.off("page:cursor:show", onShowCursor);
     };
   }, [app]);
 

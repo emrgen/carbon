@@ -34,7 +34,7 @@ body, html {
 
 }
 
-[data-name=document] {
+[data-name=page] {
   padding: 10px;
   position: absolute;
   height: 100%;
@@ -42,14 +42,14 @@ body, html {
   overflow: auto;
 }
 
-/*custom scrollbars for document*/
-[data-name=document]::-webkit-scrollbar {
+/*custom scrollbars for page*/
+[data-name=page]::-webkit-scrollbar {
   width: 10px;
   background-color: #f5f5f5;
 }
 
 /*thumb radius*/
-[data-name=document]::-webkit-scrollbar-thumb {
+[data-name=page]::-webkit-scrollbar-thumb {
   background-color: #aaa;
   border-radius: 10px;
 }

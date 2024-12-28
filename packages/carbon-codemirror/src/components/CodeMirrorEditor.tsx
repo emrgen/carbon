@@ -39,7 +39,7 @@ export const CodeMirrorEditor = (props: RendererProps) => {
       if (editor.docChanged) {
         // update the cell code value
         app.cmd
-          .update(nodeId, {
+          .Update(nodeId, {
             [CodeValuePath]: value,
           })
           .Select(PinnedSelection.SKIP, ActionOrigin.UserInput)

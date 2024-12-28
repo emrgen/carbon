@@ -122,7 +122,7 @@ export const CodeInner = (props: RendererProps) => {
         // update the cell code value
         setValue(value);
         app.cmd
-          .update(nodeId, {
+          .Update(nodeId, {
             [CodeCellCodeValuePath]: value,
           })
           .Select(PinnedSelection.SKIP, ActionOrigin.UserInput)

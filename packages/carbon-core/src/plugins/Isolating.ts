@@ -1,3 +1,5 @@
+import { Node, preventAndStopCtx } from "@emrgen/carbon-core";
+import { Optional } from "@emrgen/types";
 import {
   ActionOrigin,
   AfterPlugin,
@@ -6,8 +8,6 @@ import {
   Pin,
   PinnedSelection,
 } from "../core";
-import { Node, preventAndStopCtx } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
 
 export const createIsolatingPlugin = () => {
   new IsolateSelectionPlugin();
@@ -120,7 +120,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           return;
         }
 
-        // NOTE: because document is isolating, this code block is not needed
+        // NOTE: because page is isolating, this code block is not needed
       },
       mouseDown: (ctx) => {
         this.isMouseDown = true;

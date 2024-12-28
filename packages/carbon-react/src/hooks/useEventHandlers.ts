@@ -1,7 +1,7 @@
+import { EventsIn, StateScope } from "@emrgen/carbon-core";
 import { camelCase } from "lodash";
 import { useEffect, useMemo } from "react";
 import { useCarbon } from "./useCarbon";
-import { EventsIn, StateScope } from "@emrgen/carbon-core";
 
 // listen for dom event
 const defaultEvents: EventsIn[] = [
@@ -72,7 +72,7 @@ export const useEventListeners = (events: EventsIn[] = defaultEvents) => {
 
   useEffect(() => {
     const onWindowResize = () => {
-      app.emit("document:resize");
+      app.emit("page:resize");
       app.emit("react:resize");
     };
 

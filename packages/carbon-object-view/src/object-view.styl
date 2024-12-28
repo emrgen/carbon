@@ -35,12 +35,16 @@ $literal-color = #418cbf
 //.cov-string
 //  line-height inherit
 
+.cov-node
+  padding-top 2px;
+
 // array style
 .cov-array
   display flex
 .cov-array-initial
   display flex
   align-items center
+  //line-height 28px
   cursor pointer;
 .cov-object-constructor
   margin-right 5px;
@@ -54,11 +58,15 @@ $literal-color = #418cbf
   display flex
   flex-direction row
   margin-right 4px;
+  &:last-of-type
+    margin-right 0!important
 .cov-array-index
   color #999
   margin-right 5px
 .cov-array-content-collapsed
   display flex
+  align-items center
+  line-height 100%
 
 //  object style
 .cov-object-initial

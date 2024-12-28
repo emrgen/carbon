@@ -3,81 +3,50 @@ import { attrRenderers } from "@emrgen/carbon-attributes";
 
 import {
   blockPresetPlugins,
-  emoji,
-  empty,
-  mention,
   node,
   paragraph,
-  plainText,
   text,
   title,
 } from "@emrgen/carbon-blocks";
 import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import { boardPlugins, CardsCountPath, CommentedByPath } from "@emrgen/carbon-board";
-import { boardRenderers } from "@emrgen/carbon-board-react";
 import {
-  ActiveCellRuntime,
-  ActiveCellRuntimeContext,
-  cellPlugin,
-  cellRenderer,
-} from "@emrgen/carbon-cell";
+  boardPlugins,
+  CardsCountPath,
+  CommentedByPath,
+} from "@emrgen/carbon-board";
+import { boardRenderers } from "@emrgen/carbon-board-react";
+import { cellRenderer } from "@emrgen/carbon-cell";
 import {
   BlockContextMenu,
   carbonChakraRenderers,
   FloatingStyleMenu,
   InsertBlockMenu,
-  ToggleViewMode,
 } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { codemirrorExtension } from "@emrgen/carbon-codemirror";
-import {
-  commentEditorComp,
-  commentEditorPlugin,
-} from "@emrgen/carbon-comment-editor";
 import {
   BackgroundImagePath,
-  Carbon,
-  CollapsedPath,
   ContenteditablePath,
   corePresetPlugins,
   ImagePath,
-  Mark,
-  MarksPath,
   ModePath,
   NodeId,
-  State,
   StylePath,
-  SuppressContenteditableWarningPath,
   TitlePath,
   VideoPath,
 } from "@emrgen/carbon-core";
-import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
-import { flashPlugin, flashRenderers } from "@emrgen/carbon-flash";
+import { flashRenderers } from "@emrgen/carbon-flash";
 import { mediaPlugins, mediaRenderers } from "@emrgen/carbon-media";
-import {
-  timelinePlugin,
-  timelineRenderer,
-} from "@emrgen/carbon-plugin-timeline";
-import {
-  ObservableNodes,
-  ObservableQuestions,
-  questionExtension,
-} from "@emrgen/carbon-question";
-import {
-  RendererProps,
-  RenderManager,
-  useCreateCarbon,
-} from "@emrgen/carbon-react";
+import { timelineRenderer } from "@emrgen/carbon-plugin-timeline";
+import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
 import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
-import { useEffect, useState } from "react";
 import { PathTracker } from "../../PathTracker";
-import './board.styl';
+import "./board.styl";
 
 const data = node("carbon", [
   node(
-    "document",
+    "page",
     [
       title([text("Document Title")]),
       node(
@@ -225,7 +194,7 @@ export const Board = () => {
     <Box className={"carbon-board-app-container"} pos={"relative"}>
       <CarbonApp app={app} renderManager={renderManager}>
         <FloatingStyleMenu />
-        <PathTracker style={{top: 40}}/>
+        <PathTracker style={{ top: 40 }} />
         <InsertBlockMenu />
         <BlockContextMenu />
       </CarbonApp>

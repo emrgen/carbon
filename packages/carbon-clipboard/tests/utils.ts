@@ -1,3 +1,4 @@
+import { blockPresetPlugins, node, title } from "@emrgen/carbon-blocks";
 import {
   Carbon,
   corePresetPlugins,
@@ -5,7 +6,6 @@ import {
   PluginManager,
   Schema,
 } from "@emrgen/carbon-core";
-import { blockPresetPlugins, node, title } from "@emrgen/carbon-blocks";
 import { ImmutableNodeFactory, ImmutableState } from "@emrgen/carbon-react";
 
 export const createCarbon = () => {
@@ -13,7 +13,7 @@ export const createCarbon = () => {
   const { specs } = pm;
   const scope = Symbol("test");
   const schema = new Schema(specs, new ImmutableNodeFactory(scope));
-  const json = node("carbon", [node("document", [title()])]);
+  const json = node("carbon", [node("page", [title()])]);
   const content = schema.nodeFromJSON(json)!;
   const state = ImmutableState.create(scope, content, PinnedSelection.IDENTITY);
 

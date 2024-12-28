@@ -1,5 +1,6 @@
 import {
   ActionOrigin,
+  ActionType,
   CarbonAction,
   classString,
   Draft,
@@ -9,6 +10,8 @@ import {
 export type MarkAction = "add" | "remove";
 
 export class UpdateMarkAction implements CarbonAction {
+  type = ActionType.mark;
+
   static create(
     action: MarkAction,
     mark: Mark,
