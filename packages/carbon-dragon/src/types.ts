@@ -24,10 +24,10 @@ export interface DndEvent<E = MouseEvent> {
   event: E;
   node: Node;
   id: ToString;
-  setInitState(state: any): void;
-  setPrevState(state: any): void;
-  initState?: any;
-  prevState?: any;
+  setInitState(key: any, value: any): void;
+  setPrevState(key: any, value: any): void;
+  getInitState: (key: string) => any;
+  getPrevState: (key: string) => any;
   dragged?: boolean;
 
   position: {

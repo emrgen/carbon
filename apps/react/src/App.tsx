@@ -2,15 +2,17 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./react-bem.styl";
 
 import "./fastype/fastype.styl";
-import { LazyBoard, LazyDev, LazyEmojiDemo } from "./carbon/index";
+import { MMap } from "./carbon/Demo/MMap";
+import { LazyBoard, LazyDesign, LazyDev, LazyEmojiDemo } from "./carbon/index";
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/demo/map" element={<MMap />} />
         {/*<Route path="/demo/draggable" element={<LazyDraggableDemo />} />*/}
         <Route path="/demo/emoji" element={<LazyEmojiDemo />} />
-        {/*<Route path="/design" element={<LazyDesign />} />*/}
+        <Route path="/design" element={<LazyDesign />} />
         <Route path="/board" element={<LazyBoard />} />
         {/*<Route path="/affine" element={<AffineExp />} />*/}
         {/*<Route path="/chain" element={<Chain />} />*/}

@@ -54,18 +54,19 @@ export const SelectionGroup = (props: SelectionGroupProps) => {
         style,
         store: new NodeIdMap(),
         getData,
+        setData,
       };
 
-      event.setInitState(state);
+      event.setInitState(Node.IDENTITY.toString(), state);
       board.selectedNodes.forEach((nodeId) => {
         board.bus.emit(nodeId, "group:drag:start", {
           ...event,
-          setState: setData(nodeId),
         });
       });
     },
     onDragMove(event: DndEvent) {
-      const { initState, position } = event;
+      const { position } = event;
+      const initState = event.getInitState(Node.IDENTITY.toString());
       setStyle((s) => {
         return {
           ...s,

@@ -42,25 +42,29 @@ export function useMakeDraggable(props: UseTrackDragProps) {
         return;
       }
 
-      // let the parent handle the event if it wants to (eg. for stopping propagation)
-      onMouseDown?.({
-        activatorEvent: event,
-        event,
-        node,
-        id: node.id,
-        initState: {},
-        prevState: {},
-        position: getEventPosition(event, event),
-        dragged: false,
-        setInitState(state: any) {},
-        setPrevState(state: any) {},
-      });
-
       let initState: any = {};
       let prevState: any = {};
       let isDragging = false;
 
       const activatorEvent = event;
+
+      // let the parent handle the event if it wants to (e.g. for stopping propagation)
+      onMouseDown?.({
+        activatorEvent: event,
+        event,
+        node,
+        id: node.id,
+        position: getEventPosition(event, event),
+        dragged: false,
+        getInitState(k) {},
+        getPrevState(k) {},
+        setInitState(k, state: any) {
+          initState[k] = state;
+        },
+        setPrevState(k, state: any) {
+          prevState[k] = state;
+        },
+      });
 
       const _onMouseUp = (event: MouseEvent) => {
         const dndEvent = {
@@ -68,12 +72,21 @@ export function useMakeDraggable(props: UseTrackDragProps) {
           event,
           node,
           id: node.id,
-          initState: initState,
-          prevState: prevState,
           position: getEventPosition(activatorEvent, event),
           dragged: isDragging,
-          setInitState(state: any) {},
-          setPrevState(state: any) {},
+          getInitState(k) {
+            return initState[k];
+          },
+          getPrevState(k) {
+            return prevState[k];
+          },
+          setInitState(k, state: any) {
+            initState[k] = state;
+          },
+          setPrevState(k, state: any) {
+            prevState[k] = state;
+          },
+          initState,
         };
 
         if (isDragging) {
@@ -94,14 +107,18 @@ export function useMakeDraggable(props: UseTrackDragProps) {
             event,
             node,
             id: node.id,
-            initState: initState,
-            prevState: prevState,
             position,
-            setInitState(state: any) {
-              initState = state;
+            getInitState(k) {
+              return initState[k];
             },
-            setPrevState(state: any) {
-              prevState = state;
+            getPrevState(k) {
+              return prevState[k];
+            },
+            setInitState(k, state: any) {
+              initState[k] = state;
+            },
+            setPrevState(k, state: any) {
+              prevState[k] = state;
             },
           });
           return;
@@ -121,13 +138,18 @@ export function useMakeDraggable(props: UseTrackDragProps) {
             event,
             node,
             id: node.id,
-            initState: initState,
             position: getEventPosition(activatorEvent, activatorEvent),
-            setInitState(state: any) {
-              initState = state;
+            getInitState(k) {
+              return initState[k];
             },
-            setPrevState(state: any) {
-              prevState = state;
+            getPrevState(k) {
+              return prevState[k];
+            },
+            setInitState(k, state: any) {
+              initState[k] = state;
+            },
+            setPrevState(k, state: any) {
+              prevState[k] = state;
             },
           });
         }
@@ -156,8 +178,6 @@ export function useMakeDraggable(props: UseTrackDragProps) {
   );
 
   return useMemo(() => {
-    console.log("recreate drag listeners");
-
     return {
       listeners: {
         onMouseDown: onMouseDownHandler,

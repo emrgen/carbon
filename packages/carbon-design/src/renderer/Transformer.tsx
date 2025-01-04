@@ -56,6 +56,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   const [active, setActive] = useState(false);
   const [withinSelectRect, setWithinSelectRect] = useState(false);
   const [distance, setDistance] = useState(5);
+  const [nodeId] = useState(node.id.toString());
 
   const [shaper, setShaper] = useState<Shaper>(
     Shaper.from(getNodeTransform(node)),
@@ -70,37 +71,40 @@ export const TransformerComp = (props: ElementTransformerProps) => {
 
   const onDragStart = useCallback(
     (event: DndEvent) => {
-      event.setInitState({
+      event.setInitState("x" + nodeId, {
         shaper: Shaper.from(getNodeTransform(node)),
       });
       setDragging(true);
       overlay.showOverlay();
     },
-    [node, overlay],
+    [node, nodeId, overlay],
   );
 
-  const onDragMove = useCallback((event: DndEvent) => {
-    const { shaper } = event.initState;
-    const {
-      position: { deltaX: dx, deltaY: dy },
-    } = event;
-    const newStyle = shaper.translate(dx, dy).toStyle();
-    if (ref.current) {
-      ref.current.style.left = newStyle.left;
-      ref.current.style.top = newStyle.top;
-      ref.current.style.transform = newStyle.transform;
-    }
+  const onDragMove = useCallback(
+    (event: DndEvent) => {
+      const { shaper } = event.getInitState("x" + nodeId);
+      const {
+        position: { deltaX: dx, deltaY: dy },
+      } = event;
+      const newStyle = shaper.translate(dx, dy).toStyle();
+      if (ref.current) {
+        ref.current.style.left = newStyle.left;
+        ref.current.style.top = newStyle.top;
+        ref.current.style.transform = newStyle.transform;
+      }
 
-    if (elementRef.current) {
-      elementRef.current.style.left = newStyle.left;
-      elementRef.current.style.top = newStyle.top;
-      elementRef.current.style.transform = newStyle.transform;
-    }
-  }, []);
+      if (elementRef.current) {
+        elementRef.current.style.left = newStyle.left;
+        elementRef.current.style.top = newStyle.top;
+        elementRef.current.style.transform = newStyle.transform;
+      }
+    },
+    [nodeId],
+  );
 
   const onDragEnd = useCallback(
     (event: DndEvent) => {
-      const { shaper } = event.initState;
+      const { shaper } = event.getInitState("x" + nodeId);
       if (!Shaper.is(shaper)) return;
 
       const {
@@ -118,7 +122,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         })
         .Dispatch();
     },
-    [app, node, overlay],
+    [app, node, nodeId, overlay],
   );
 
   // during dragging this hook will not re-evaluate as no dependencies changes
@@ -143,21 +147,33 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   useEffect(() => {
     const onGroupDragStart = (nodeId: NodeId, event: DndEvent) => {
       // save the current transformation matrix
-      event.setInitState({
+      event.setInitState(node.id.toString(), {
         shaper: Shaper.from(getNodeTransform(node)),
       });
     };
 
     const onGroupDragMove = (nodeId: NodeId, event: DndEvent) => {
-      const { shaper } = event.initState;
+      const { shaper } = event.getInitState(node.id.toString());
       const { deltaX: dx, deltaY: dy } = event.position;
+      const after = shaper.translate(dx, dy);
+
       setStyle((style) => ({
-        ...shaper.translate(dx, dy).toStyle(),
+        ...after.toStyle(),
       }));
+      setShaper(after);
     };
 
     // no need to update the node style here as it will be updated by the group
-    const onGroupDragEnd = (nodeId: NodeId, event: DndEvent) => {};
+    const onGroupDragEnd = (nodeId: NodeId, event: DndEvent) => {
+      const { shaper } = event.getInitState(node.id.toString());
+      const { deltaX: dx, deltaY: dy } = event.position;
+      const after = shaper.translate(dx, dy);
+      app.cmd
+        .Update(node.id, {
+          [TransformStatePath]: after.toCSS(),
+        })
+        .Dispatch();
+    };
 
     board.bus.on(node.id, "group:drag:start", onGroupDragStart);
     board.bus.on(node.id, "group:drag:move", onGroupDragMove);
@@ -218,7 +234,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   ) => {
     console.log(type, event);
     setTransforming(true);
-    event.setInitState({
+    event.setInitState(nodeId, {
       shaper: Shaper.from(getNodeTransform(node)),
       beforeLine: Line.fromPoint(getPoint(handle)).transform(shaper.affine()),
       angleLine: Line.fromPoint(getPoint(Location.BOTTOM)),
@@ -231,7 +247,11 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const { beforeLine: before, shaper, angleLine } = event.initState;
+      const {
+        beforeLine: before,
+        shaper,
+        angleLine,
+      } = event.getInitState(nodeId);
       if (!Line.is(before)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -261,7 +281,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         angleHintRef.current.style.top = `${event.position.endY + 40}px`;
       }
     } else {
-      const { shaper: before } = event.initState;
+      const { shaper: before } = event.getInitState(nodeId);
       if (!Shaper.is(before)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       let after = before.resize(dx, dy, anchor, handle, ResizeRatio.FREE);
@@ -293,7 +313,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   ) => {
     console.log("stop", type, event);
     if (type === TransformType.ROTATE) {
-      const { beforeLine: startLine, shaper } = event.initState;
+      const { beforeLine: startLine, shaper } = event.getInitState(nodeId);
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       const currLine = startLine.moveEndBy(dx, dy);
@@ -320,7 +340,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
         })
         .Dispatch();
     } else {
-      const { shaper: before } = event.initState;
+      const { shaper: before } = event.getInitState(nodeId);
       if (!Shaper.is(before)) return;
       const size = before.size();
       const { deltaX: dx, deltaY: dy } = event.position;

@@ -104,7 +104,7 @@ const OuterBound = (props: OuterBoundProps) => {
 
     console.log("Min scale", minScale);
 
-    event.setInitState({
+    event.setInitState(node.id.toString(), {
       shaper: shaper,
       minScale,
       beforeLine: Line.fromPoint(getPoint(handle)).transform(shaper.affine()),
@@ -119,7 +119,9 @@ const OuterBound = (props: OuterBoundProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const { beforeLine, shaper, angleLine } = event.initState;
+      const { beforeLine, shaper, angleLine } = event.getInitState(
+        node.id.toString(),
+      );
       if (!Shaper.is(shaper)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -170,11 +172,14 @@ const OuterBound = (props: OuterBoundProps) => {
         angleHintRef.current.style.top = `${event.position.endY + 40}px`;
       }
     } else {
-      const { shaper: before, minScale } = event.initState as {
+      const { shaper: before, minScale } = event.getInitState(
+        node.id.toString(),
+      ) as {
         shaper: Shaper;
         originLines: Line[];
         minScale: number;
       };
+      console.log("xxxxxxxxxxxxxxxxxxxxxxx", before, node.id.toString(), event);
       if (!Shaper.is(before)) return;
       if (!isNumber(minScale)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -199,6 +204,7 @@ const OuterBound = (props: OuterBoundProps) => {
         ref.current.style.transform = style.transform;
       }
     }
+    console.log("xxxxxxxxxxxxxxxxxxxxxxx");
   };
 
   const onTransformEnd = (
@@ -209,7 +215,9 @@ const OuterBound = (props: OuterBoundProps) => {
   ) => {
     console.log("stop", type, event);
     if (type === TransformType.ROTATE) {
-      const { beforeLine: startLine, shaper } = event.initState;
+      const { beforeLine: startLine, shaper } = event.getInitState(
+        node.id.toString(),
+      );
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       const currLine = startLine.moveEndBy(dx, dy);
@@ -224,7 +232,7 @@ const OuterBound = (props: OuterBoundProps) => {
 
       setShaper(after);
     } else {
-      const { shaper: before } = event.initState;
+      const { shaper: before } = event.getInitState(node.id.toString());
       if (!Shaper.is(before)) return;
       const size = before.size();
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -492,7 +500,7 @@ const InnerBound = (props: InnerBoundProps) => {
 
     console.log(scaleLimits);
 
-    event.setInitState({
+    event.setInitState(node.id.toString(), {
       shaper: shaper,
       scaleLimits,
       startPoint: shaper.apply(getPoint(handle)),
@@ -513,7 +521,7 @@ const InnerBound = (props: InnerBoundProps) => {
         shaper,
         angleLine,
         minScale,
-      } = event.initState;
+      } = event.getInitState(node.id.toString());
       if (!Line.is(before)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -542,7 +550,7 @@ const InnerBound = (props: InnerBoundProps) => {
         shaper: before,
         scaleLimits,
         startPoint,
-      } = event.initState as {
+      } = event.getInitState(node.id.toString()) as {
         shaper: Shaper;
         originLines: Line[];
         scaleLimits: {
@@ -685,7 +693,9 @@ const InnerBound = (props: InnerBoundProps) => {
   ) => {
     console.log("stop", type, event);
     if (type === TransformType.ROTATE) {
-      const { beforeLine: startLine, shaper } = event.initState;
+      const { beforeLine: startLine, shaper } = event.getInitState(
+        node.id.toString(),
+      );
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       const currLine = startLine.moveEndBy(dx, dy);
@@ -700,7 +710,7 @@ const InnerBound = (props: InnerBoundProps) => {
 
       setShaper(after);
     } else {
-      const { shaper: before } = event.initState;
+      const { shaper: before } = event.getInitState(node.id.toString());
       if (!Shaper.is(before)) return;
       const size = before.size();
       const { deltaX: dx, deltaY: dy } = event.position;
