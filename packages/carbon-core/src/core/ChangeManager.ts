@@ -284,6 +284,7 @@ export class ChangeManager extends NodeTopicEmitter {
       }
 
       this.pendingSelectionCounter += 1;
+
       requestAnimationFrame(() => {
         selection.syncDom(app.store, app.dom);
         this.pendingSelectionCounter -= 1;

@@ -82,9 +82,10 @@ export class NodeColumn {
     };
   }
 
-  // insert the slice nodes
+  // insert the slice of nodes
   // NOTE: only works for case 1 and 2
   // https://www.notion.so/paste-so-many-damn-cases-f7ef4f8160034836b6eafdcd92589486
+  // connect left nodes with right nodes
   static pasteInsertActions(
     left: NodeColumn,
     right: NodeColumn,
@@ -361,7 +362,7 @@ export class NodeColumn {
     const at = Point.toAfter(before);
     const contentMatch = getContentMatch(before);
     if (!contentMatch) {
-      debugger;
+      throw Error("failed to get content match fro before nodes");
     }
     const matches: Node[] = [];
     const match = findMatchingNodes(matches, contentMatch, nodes, after);
@@ -413,11 +414,11 @@ export class NodeColumn {
       [],
     );
     if (!matches.match) {
-      throw new Error("failed to find a valid end");
+      throw new Error("failed to find a match for move");
     }
 
     if (!matches.match.validEnd) {
-      throw new Error("failed to find a valid end");
+      throw new Error("failed to find a valid end for move");
     }
 
     return {
