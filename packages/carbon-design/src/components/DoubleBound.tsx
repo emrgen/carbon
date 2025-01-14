@@ -179,7 +179,7 @@ const OuterBound = (props: OuterBoundProps) => {
         originLines: Line[];
         minScale: number;
       };
-      console.log("xxxxxxxxxxxxxxxxxxxxxxx", before, node.id.toString(), event);
+
       if (!Shaper.is(before)) return;
       if (!isNumber(minScale)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -204,7 +204,6 @@ const OuterBound = (props: OuterBoundProps) => {
         ref.current.style.transform = style.transform;
       }
     }
-    console.log("xxxxxxxxxxxxxxxxxxxxxxx");
   };
 
   const onTransformEnd = (

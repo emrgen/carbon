@@ -150,6 +150,8 @@ export class Shaper {
     return Shaper.from(this.tm.scale(sx, sy, ax, ay));
   }
 
+  // normalize the scale factor based on the anchor and handle
+  // bounds the scale factor within the range of [0, 1]
   private normalize(
     sx: number,
     sy: number,
@@ -246,10 +248,10 @@ export class Shaper {
   toStyle() {
     const { x, y } = this.center();
     const { width, height } = this.size();
-    const {scaling, rotation} = this.affine().decompose();
+    const { scaling, rotation } = this.affine().decompose();
 
-    const {sx, sy} = {sx: scaling.mat[0], sy: scaling.mat[4]};
-    const {angle} = rotation;
+    const { sx, sy } = { sx: scaling.mat[0], sy: scaling.mat[4] };
+    const { angle } = rotation;
 
     let rotate = "";
     if (angle !== 0) {

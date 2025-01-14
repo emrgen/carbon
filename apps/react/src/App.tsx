@@ -3,6 +3,7 @@ import "./react-bem.styl";
 
 import "./fastype/fastype.styl";
 import { MMap } from "./carbon/Demo/MMap";
+import { AffineExp } from "./carbon/Dev/Affine";
 import { LazyBoard, LazyDesign, LazyDev, LazyEmojiDemo } from "./carbon/index";
 
 function App() {
@@ -14,7 +15,7 @@ function App() {
         <Route path="/demo/emoji" element={<LazyEmojiDemo />} />
         <Route path="/design" element={<LazyDesign />} />
         <Route path="/board" element={<LazyBoard />} />
-        {/*<Route path="/affine" element={<AffineExp />} />*/}
+        <Route path="/affine" element={<AffineExp />} />
         {/*<Route path="/chain" element={<Chain />} />*/}
         {/*<Route path="/text" element={<Text />} />*/}
         {/*<Route path="/object-viewer" element={<ObjectView />} />*/}

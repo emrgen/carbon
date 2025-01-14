@@ -6,4 +6,3 @@ export * from './Point';
 export * from './Line';
 export * from './types';
 export * from './utils';
-export * from './utils';
