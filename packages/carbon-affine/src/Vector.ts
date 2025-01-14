@@ -3,6 +3,7 @@ import { Affine } from "./Affine";
 import { Radian } from "./types";
 import { abs, considerZero } from "./utils";
 
+// vector in 2D space
 export class Vector {
   static UX = Vector.of(1, 0);
   static UY = Vector.of(0, 1);
@@ -28,11 +29,14 @@ export class Vector {
     readonly y: number,
   ) {}
 
+  get angle(): number {
+    return Math.atan2(this.y, this.x);
+  }
+
   scale(f: number) {
     return Vector.of(this.x * f, this.y * f);
   }
 
-  // radian
   rotate(angle: Radian) {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
@@ -54,6 +58,10 @@ export class Vector {
 
   dot(b: Vector) {
     return this.x * b.x + this.y * b.y;
+  }
+
+  cross(b: Vector) {
+    return this.x * b.y - this.y * b.x;
   }
 
   project(b: Vector) {
@@ -80,12 +88,6 @@ export class Vector {
     throw new Error("the two vectors are not in the same direction");
   }
 
-  get angle(): number {
-    const angle = Math.atan2(this.y, this.x);
-    return angle;
-    // return angle < 0 ? angle + Math.PI * 2 : angle;
-  }
-
   transform(matrix: Affine): Vector {
     const p = matrix.apply(this);
     return Vector.of(p.x, p.y);
@@ -106,7 +108,7 @@ export class Vector {
   }
 
   toString(): string {
-    return `Vector(x: ${this.x}, y:{this.y})`;
+    return `Vector(x: ${this.x}, y:${this.y})`;
   }
 
   toArray(): [number, number] {

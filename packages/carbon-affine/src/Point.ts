@@ -10,6 +10,10 @@ export class Point {
   static UX = new Point(1, 0);
   static UY = new Point(0, 1);
 
+  static of(x: number, y: number) {
+    return new Point(x, y);
+  }
+
   static from(p: IPoint) {
     return new Point(p.x, p.y);
   }

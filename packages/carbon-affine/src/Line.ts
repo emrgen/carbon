@@ -1,12 +1,30 @@
+import { Optional } from "@emrgen/types";
 import { Affine } from "./Affine";
+import { UINT_MIN } from "./contant";
 import { IPoint, Point } from "./Point";
 import { abs } from "./utils";
 import { Vector } from "./Vector";
 
+// line in 2D space
 export class Line {
   // get the intersection point of two lines
   static UX = Line.fromPoints(Point.ORIGIN, { x: 1, y: 0 });
   static UY = Line.fromPoints(Point.ORIGIN, { x: 0, y: 1 });
+
+  static of(x: number, y: number) {
+    return new Line(Point.ORIGIN, { x, y });
+  }
+
+  static fromPoint(point: IPoint) {
+    return new Line(Point.ORIGIN, point);
+  }
+
+  static fromPoints(start: IPoint | IPoint[], end: IPoint) {
+    if (Array.isArray(start)) {
+      return new Line(start[0], start[1]);
+    }
+    return new Line(start, end);
+  }
 
   static intersection(l1: Line, l2: Line): IPoint | undefined {
     const x1 = l1.start.x;
@@ -34,21 +52,6 @@ export class Line {
     }
 
     return undefined;
-  }
-
-  static of(x: number, y: number) {
-    return new Line(Point.ORIGIN, { x, y });
-  }
-
-  static fromPoint(point: IPoint) {
-    return new Line(Point.ORIGIN, point);
-  }
-
-  static fromPoints(start: IPoint | IPoint[], end: IPoint) {
-    if (Array.isArray(start)) {
-      return new Line(start[0], start[1]);
-    }
-    return new Line(start, end);
   }
 
   static is(line: any): line is Line {
@@ -102,7 +105,7 @@ export class Line {
     return Line.intersection(this, line) !== undefined;
   }
 
-  intersection(line: Line) {
+  intersection(line: Line): Optional<IPoint> {
     return Line.intersection(this, line);
   }
 
@@ -174,11 +177,13 @@ export class Line {
     const x0 = p.x;
     const y0 = p.y;
 
+    // length of the line segment
     const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
-    if (l2 === 0) {
+    if (Math.abs(l2) < UINT_MIN) {
       return this.start;
     }
 
+    // projection of point on the line segment
     const t = Math.max(
       0,
       Math.min(1, ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2),
@@ -189,6 +194,7 @@ export class Line {
     };
   }
 
+  // get the point on the line that is closest to the given point
   projectionPoint(p: IPoint) {
     return this.extendEnd(1e8).extendStart(1e8).closestPoint(p);
   }
@@ -201,10 +207,12 @@ export class Line {
     return new Line(this.end, p);
   }
 
+  // get the vector of the line
   vector() {
     return Vector.of(this.end.x - this.start.x, this.end.y - this.start.y);
   }
 
+  // move the line by the given distance
   moveEndBy(dx: number, dy: number) {
     return new Line(this.start, {
       x: this.end.x + dx,
@@ -244,10 +252,17 @@ export class Line {
     );
   }
 
+  // get the factor of the point on the line
   pointLength(refPoint: IPoint) {
+    // check if the point is on the line
+    if (this.distance(refPoint) < UINT_MIN) {
+      return 0;
+    }
+
     return Math.hypot(this.start.x - refPoint.x, this.start.y - refPoint.y);
   }
 
+  // get the point on the line at the given length
   pointAtLength(len: number) {
     const lenRatio = len / this.length;
     return {
@@ -257,6 +272,7 @@ export class Line {
   }
 
   // shift the line parallel to the given line
+  // after the shift the start point of the line will be at the given point and the length will be the same
   shiftTo(point: IPoint): Line {
     const v = this.vector().norm().multiply(this.length);
     return new Line(point, {
@@ -265,6 +281,7 @@ export class Line {
     });
   }
 
+  // get the middle point of the line
   middle(): IPoint {
     return {
       x: (this.start.x + this.end.x) / 2,

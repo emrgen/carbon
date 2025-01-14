@@ -9,8 +9,10 @@ import { Radian } from "./types";
 import { abs, clampScale, considerZero } from "./utils";
 import { Vector } from "./Vector";
 
+// affine transformation matrix, 2x3 matrix
 type AffineMatrix = [number, number, number, number, number, number];
 
+// affine transformation matrix
 export class Affine {
   static IDENTITY = new Affine([1, 0, 0, 0, 1, 0]);
 
@@ -18,10 +20,14 @@ export class Affine {
     return Affine.scale(width / 2, height / 2);
   }
 
+  // create an affine transformation matrix from a CSS transform string
+  // assuming the string is a matrix or a combination of translate, rotate, scale
+  // TODO: this is not a complete implementation of the CSS transform
   static fromCSS(css: string) {
     const mat = css.match(
       /matrix\(([^,]+), ([^,]+), ([^,]+), ([^,]+), ([^,]+), ([^,]+)\)/,
     );
+
     if (mat) {
       return new Affine([
         parseFloat(mat[1]),
@@ -60,6 +66,10 @@ export class Affine {
 
   static flipY() {
     return new Affine([1, 0, 0, 0, -1, 0]);
+  }
+
+  static skew(angleX: Radian, angleY: Radian) {
+    return new Affine([1, Math.tan(angleY), 0, Math.tan(angleX), 1, 0]);
   }
 
   static mul(a: Affine, b: Affine) {
@@ -101,7 +111,7 @@ export class Affine {
     const translation = this.translation();
     const map = this.mul(translation.inverse());
     const scaling = map.scaling();
-    const rotation = map.mul(scaling.inverse())
+    const rotation = map.mul(scaling.inverse());
 
     // const translation = map.translation();
     return { translation, rotation, scaling };
@@ -115,13 +125,13 @@ export class Affine {
 
   // return the scaling matrix
   scaling(): Affine {
-    const [a,,,, e,] = this.mat;
+    const [a, , , , e] = this.mat;
     return new Affine([a, 0, 0, 0, e, 0]);
   }
 
   // return the translation matrix
   translation(): Affine {
-    const [,, c,,, f] = this.mat;
+    const [, , c, , , f] = this.mat;
     return new Affine([1, 0, c, 0, 1, f]);
   }
 
@@ -148,6 +158,10 @@ export class Affine {
 
   flipY() {
     return this.mul(Affine.flipY());
+  }
+
+  skew(angleX: Radian, angleY: Radian) {
+    return this.mul(Affine.skew(angleX, angleY));
   }
 
   origin() {
@@ -178,6 +192,8 @@ export class Affine {
     return arr.map((n) => (-n == n ? abs(n) : n)) as AffineMatrix;
   }
 
+  // check if the matrix has an inverse
+  // TODO: check if the determinant is zero
   hasInverse() {
     const a = this.mat;
     return a[0] * a[4] - a[1] * a[3] !== 0;

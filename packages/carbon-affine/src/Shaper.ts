@@ -245,6 +245,8 @@ export class Shaper {
 
   // get the style for the shape
   // it is intended to be used in the style attribute of the element
+  // the shape is centered at (0, 0) in the local coordinate system
+  // this method is necessary to get the correct style for the shape without affecting the children with scaling
   toStyle() {
     const { x, y } = this.center();
     const { width, height } = this.size();
@@ -267,6 +269,7 @@ export class Shaper {
       rotate += " scaleY(-1)";
     }
 
+    // combine the size, position, and rotation to get the final style
     return {
       left: `-${width / 2}px`,
       top: `-${height / 2}px`,
