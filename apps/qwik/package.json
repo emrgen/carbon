@@ -14,7 +14,7 @@
     "@emrgen/carbon-qwik": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
     "typescript": "^5.4.5",
-    "vite": "^5.4.8"
+    "vite":"^6.0.7"
   },
   "dependencies": {
     "@builder.io/qwik": "^1.9.1"

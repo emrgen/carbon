@@ -1,5 +1,4 @@
 import { Flex } from "@chakra-ui/react";
-import { useDocument } from "@emrgen/carbon-blocks-react";
 import { clamp, Node, StylePath } from "@emrgen/carbon-core";
 
 import { DndEvent } from "@emrgen/carbon-dragon";
@@ -53,7 +52,6 @@ export const ResizableContainer = (props: MediaViewProps) => {
     minWidth,
   } = props;
   const app = useCarbon();
-  const { doc } = useDocument();
 
   const { ref: resizeObserverRef, ...dimensions } =
     useResizeObserver<HTMLDivElement>();
@@ -123,7 +121,7 @@ export const ResizableContainer = (props: MediaViewProps) => {
   const onDragStart = useCallback(
     (e: DndEvent) => {
       const { setInitState } = e;
-      setInitState({
+      setInitState("resizable-container", {
         width: ref?.current?.offsetWidth ?? 0,
         height: ref?.current?.offsetHeight ?? 0,
       });
@@ -134,9 +132,9 @@ export const ResizableContainer = (props: MediaViewProps) => {
   const onDragMove = useCallback(
     (e: DndEvent) => {
       if (!node.id.eq(e.node.id)) return;
-      const { position, initState, prevState, setPrevState } = e;
-      const { width, height } = initState;
-      const { width: pw, height: ph } = prevState;
+      const { position, getInitState, getPrevState, setPrevState } = e;
+      const { width, height } = getInitState("resizable-container");
+      const { width: pw, height: ph } = getPrevState("resizable-container");
       const { deltaX: dx, deltaY: dy } = position;
       let nw = width;
       let nh = height;
@@ -174,7 +172,7 @@ export const ResizableContainer = (props: MediaViewProps) => {
         setHeight(nh);
       }
 
-      setPrevState({ width: nw, height: nh });
+      setPrevState("resizable-container", { width: nw, height: nh });
     },
     [aspectRatio, documentPadding, documentWidth, node.id],
   );

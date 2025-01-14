@@ -59,7 +59,7 @@ export const TabsComp = (props: RendererProps) => {
       }
       // console.log('handleActiveTabChange', tab)
       const { cmd } = app;
-      cmd.tabs.openTab(tabs, tab).dispatch();
+      cmd.tabs.openTab(tabs, tab).Dispatch();
     },
     [app, tabs, activeTabId],
   );
@@ -77,7 +77,7 @@ export const TabsComp = (props: RendererProps) => {
         }
 
         if (firstTab) {
-          app.cmd.tabs.openTab(tabs, firstTab).dispatch();
+          app.cmd.tabs.openTab(tabs, firstTab).Dispatch();
         }
       }
     };
@@ -90,7 +90,7 @@ export const TabsComp = (props: RendererProps) => {
 
   const handleAddNewTab = useCallback(
     (e) => {
-      app.cmd.tabs.create(tabs).dispatch();
+      app.cmd.tabs.create(tabs).Dispatch();
     },
     [app, tabs],
   );
@@ -114,11 +114,11 @@ export const TabsComp = (props: RendererProps) => {
                   onStartRenaming={(tab) => {
                     const { cmd } = app;
                     setRenamingTabId(cmd, tabs, tab.id.toString());
-                    cmd.dispatch();
+                    cmd.Dispatch();
                   }}
                   onStopRenaming={(tab) => {
                     const { cmd } = app;
-                    setRenamingTabId(cmd, tabs, "").dispatch();
+                    setRenamingTabId(cmd, tabs, "").Dispatch();
                   }}
                 />
               );
@@ -239,10 +239,10 @@ const TabTitleComp = (props: TabTitleProps) => {
   const updateTabName = useCallback(
     (value) => {
       app.cmd
-        .update(tab, {
+        .Update(tab, {
           [TitlePath]: value,
         })
-        .dispatch();
+        .Dispatch();
     },
     [app, tab],
   );

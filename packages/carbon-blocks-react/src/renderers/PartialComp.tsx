@@ -27,7 +27,7 @@ export const PartialComp = (props: RendererProps) => {
     const after = PinnedSelection.fromPin(Pin.toEndOf(node.firstChild!)!);
 
     cmd.Update(node.id, { [CollapsedPathLocal]: !isCollapsed });
-    cmd.select(after).dispatch();
+    cmd.Select(after).Dispatch();
   }, [app, node, isCollapsed]);
 
   return (

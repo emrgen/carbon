@@ -1,9 +1,9 @@
 import { Node } from "@emrgen/carbon-core";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { BlockMenuCmd } from "../types";
-import { activeBlockMenuTarget, activeBlockMenuTargetText } from "../atoms";
+import { useCarbon } from "@emrgen/carbon-react";
+import React, { useEffect } from "react";
 import { useRecoilState } from "recoil";
-import {useCarbon} from "@emrgen/carbon-react";
+import { activeBlockMenuTarget, activeBlockMenuTargetText } from "../atoms";
+import { BlockMenuCmd } from "../types";
 
 const BlockNameRegex = /^\/(.*)$/;
 
@@ -36,7 +36,6 @@ export function BlockMenu() {
   useEffect(() => {
     console.log("target", target);
   }, [target]);
-
 
   return <div className="carbon-block-menu">{targetText}</div>;
 }

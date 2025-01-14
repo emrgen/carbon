@@ -1,9 +1,6 @@
 import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
 import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import {
-  EmojiPickerInlineMenu,
-  FloatingStyleMenu,
-} from "@emrgen/carbon-chakra-ui";
+import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
 import { emojiPlugins } from "@emrgen/carbon-emoji";
@@ -58,7 +55,7 @@ export function EmojiDemo() {
   return (
     <div className={"carbon-app-container"}>
       <CarbonApp app={app} renderManager={renderManager}>
-        <EmojiPickerInlineMenu />
+        {/*<EmojiPickerInlineMenu />*/}
         <FloatingStyleMenu />
         <PathTracker />
       </CarbonApp>

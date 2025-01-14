@@ -8,17 +8,18 @@
     "lint": "eslint *.ts*"
   },
   "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
     "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/types": "workspace:*",
     "@types/lodash": "^4.14.191",
     "lodash": "^4.17.21",
-    "@emrgen/types": "workspace:*",
     "minisearch": "^7.1.0"
   },
   "devDependencies": {
+    "@emrgen/eslint-config-custom": "workspace:*",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.6",
     "eslint": "^7.32.0",
-    "@emrgen/eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",
     "typescript": "^5.4.5"
   }

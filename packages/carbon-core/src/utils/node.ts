@@ -1,34 +1,39 @@
-import { Node } from "../core";
-import { takeBefore, takeUpto } from './array';
+import { Node } from "../core/Node";
+import { takeBefore, takeUpto } from "./array";
 
 export const nodePath = (start: Node, end: Node) => {
   const commonNode = start.commonNode(end);
-  return takeUpto(start.chain, n => n.eq(commonNode)).concat(takeBefore(end.chain, n => n.eq(commonNode)));
-}
+  return takeUpto(start.chain, (n) => n.eq(commonNode)).concat(
+    takeBefore(end.chain, (n) => n.eq(commonNode)),
+  );
+};
 
 export const hasParent = (node: Node, parent: Node) => {
-  return node.chain.some(n => n.eq(parent));
-}
+  return node.chain.some((n) => n.eq(parent));
+};
 
 export type NodeSorter = (a: Node, b: Node) => number;
-export type SortNodesBy = 'path' | 'depth' | 'type' | 'index' | NodeSorter;
+export type SortNodesBy = "path" | "depth" | "type" | "index" | NodeSorter;
 const NodeNullSorter: NodeSorter = (a, b) => 0;
 
-export const sortNodes = (nodes: Node[], by: SortNodesBy = NodeNullSorter): Node[] => {
+export const sortNodes = (
+  nodes: Node[],
+  by: SortNodesBy = NodeNullSorter,
+): Node[] => {
   switch (by) {
-    case 'path':
+    case "path":
       return sortNodesByPath(nodes);
-    case 'depth':
+    case "depth":
       return sortNodesByDepth(nodes);
-    case 'index':
+    case "index":
       return sortNodesByIndex(nodes);
     default:
       return nodes.sort(by as NodeSorter);
   }
-}
+};
 
 export const sortNodesByIndex = (nodes: Node[]): Node[] => {
-  const paths = nodes.map(n => ({
+  const paths = nodes.map((n) => ({
     node: n,
     index: n.index,
   }));
@@ -45,13 +50,12 @@ export const sortNodesByIndex = (nodes: Node[]): Node[] => {
     return 0;
   });
 
-  return paths.map(p => p.node);
-
-}
+  return paths.map((p) => p.node);
+};
 
 // sort nodes by depth in the tree, less deep nodes will be first
 export const sortNodesByDepth = (nodes: Node[]): Node[] => {
-  const paths = nodes.map(n => ({
+  const paths = nodes.map((n) => ({
     node: n,
     depth: n.depth,
   }));
@@ -68,12 +72,12 @@ export const sortNodesByDepth = (nodes: Node[]): Node[] => {
     return 0;
   });
 
-  return paths.map(p => p.node);
-}
+  return paths.map((p) => p.node);
+};
 
 // TODO: optimize this
 export const sortNodesByPath = (nodes: Node[]): Node[] => {
-  const paths = nodes.map(n => ({
+  const paths = nodes.map((n) => ({
     node: n,
     path: n.path,
   }));
@@ -81,7 +85,11 @@ export const sortNodesByPath = (nodes: Node[]): Node[] => {
   paths.sort((a, b) => {
     const aPath = a.path;
     const bPath = b.path;
-    for (let i = 0, size = Math.min(aPath.length, bPath.length); i < size; i++) {
+    for (
+      let i = 0, size = Math.min(aPath.length, bPath.length);
+      i < size;
+      i++
+    ) {
       if (aPath[i] < bPath[i]) {
         return -1;
       }
@@ -102,13 +110,12 @@ export const sortNodesByPath = (nodes: Node[]): Node[] => {
     return 0;
   });
 
-  return paths.map(p => p.node);
-}
-
+  return paths.map((p) => p.node);
+};
 
 export const hasSameIsolate = (a: Node, b: Node): boolean => {
-  const aIsolate = a.parent?.closest(n => n.isIsolate)!
-  const bIsolate = b.parent?.closest(n => n.isIsolate)!
+  const aIsolate = a.parent?.closest((n) => n.isIsolate)!;
+  const bIsolate = b.parent?.closest((n) => n.isIsolate)!;
 
-  return aIsolate.eq(bIsolate)
-}
+  return aIsolate.eq(bIsolate);
+};

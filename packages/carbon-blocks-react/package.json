@@ -17,7 +17,6 @@
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/carbon-dragon-react": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
-    "@emrgen/carbon-cell": "workspace:*",
     "@uidotdev/usehooks": "^2.4.1",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",

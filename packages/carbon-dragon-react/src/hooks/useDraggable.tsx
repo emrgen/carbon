@@ -72,6 +72,15 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 
       const activatorEvent = event;
 
+      const getInitState = (k) => initState[k];
+      const getPrevState = (k) => prevState[k];
+      const setInitState = (k, state) => {
+        initState[k] = state;
+      };
+      const setPrevState = (k, state) => {
+        prevState[k] = state;
+      };
+
       const onMouseUp = (event: MouseEvent) => {
         const dndEvent = {
           activatorEvent,
@@ -82,8 +91,10 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
           prevState: prevState,
           position: getEventPosition(activatorEvent, event),
           dragged: isDragging,
-          setInitState(state: any) {},
-          setPrevState(state: any) {},
+          getInitState,
+          getPrevState,
+          setInitState,
+          setPrevState,
         };
 
         if (isDragging) {
@@ -109,13 +120,11 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
             event,
             node,
             id: id ?? node.id,
-            initState: initState,
-            prevState: prevState,
             position,
-            setInitState(state: any) {},
-            setPrevState(state: any) {
-              prevState = state;
-            },
+            getInitState,
+            getPrevState,
+            setInitState,
+            setPrevState,
           });
           return;
         }
@@ -137,15 +146,11 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
             event,
             node,
             id: id ?? node.id,
-            initState: initState,
-            prevState: prevState,
             position: getEventPosition(activatorEvent, activatorEvent),
-            setInitState(state: any) {
-              initState = state;
-            },
-            setPrevState(state: any) {
-              prevState = state;
-            },
+            getInitState,
+            getPrevState,
+            setInitState,
+            setPrevState,
           });
         }
       };

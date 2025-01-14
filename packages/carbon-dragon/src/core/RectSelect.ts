@@ -239,7 +239,7 @@ export class RectSelect extends EventEmitter {
   onUnmountRectSelectable(node: Node) {
     // if (this.isSelecting) return
     // console.log('<-', node.name, node.id.toString());
-    this.selectables.delete(node);
+    this.selectables.delete(node.id);
   }
 
   onMountFocusable() {}
