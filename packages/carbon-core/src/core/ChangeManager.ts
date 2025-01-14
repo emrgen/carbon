@@ -25,12 +25,14 @@ interface PromiseState {
  */
 export class ChangeManager extends NodeTopicEmitter {
   readonly actions: StateActions[] = [];
+
+  tr: Optional<Transaction>;
   updated: NodeIdSet = NodeIdSet.empty();
 
-  promiseState: PromiseState;
-  tr: Optional<Transaction>;
+  // track the pending selection sync count
   pendingSelectionCounter: number = 0;
 
+  // debug
   private interval: any;
 
   constructor(
@@ -38,8 +40,6 @@ export class ChangeManager extends NodeTopicEmitter {
     private readonly pm: PluginManager,
   ) {
     super();
-
-    this.promiseState = {};
   }
 
   private get state() {
@@ -62,19 +62,10 @@ export class ChangeManager extends NodeTopicEmitter {
   // 2. sync the selection
   // 3. sync the node state
   update(state: State, tr: Transaction, timeout: number = 1000) {
-    if (this.actions.length) {
-      this.actions.push(state.actions);
-      console.log("pending transaction change update", this.actions.length);
-      return;
-    }
-
-    this.actions.push(state.actions);
     const { isContentChanged, isSelectionChanged } = this.state;
-
     // console.log('isSelectionChanged', isSelectionChanged)
     // console.log('isContentChanged', isContentChanged)
 
-    // console.log('updating transaction effect', tr);
     // console.log('update', isContentDirty, isNodeStateDirty, isSelectionDirty);
     // if nothing is dirty, then there is nothing to do
     if (!isContentChanged && !isSelectionChanged && !state.isMarksChanged) {
@@ -82,8 +73,16 @@ export class ChangeManager extends NodeTopicEmitter {
       return;
     }
 
+    if (this.actions.length) {
+      this.actions.push(state.actions);
+      console.log("pending transaction change update", this.actions.length);
+      return;
+    }
+
+    this.actions.push(state.actions);
     this.tr = tr;
 
+    // clear previous transaction dom sync tracking
     if (isContentChanged) {
       this.updated.clear();
       this.updated = state.updated.clone();
@@ -112,7 +111,6 @@ export class ChangeManager extends NodeTopicEmitter {
     if (state.isMarksChanged) {
       this.onTransaction();
     }
-    // });
   }
 
   mounted(node: Node, changeType: NodeChangeType) {
@@ -290,7 +288,7 @@ export class ChangeManager extends NodeTopicEmitter {
         this.pendingSelectionCounter -= 1;
       });
     } catch (error) {
-      this.promiseState.reject?.(error);
+      console.error("syncSelection", error);
     }
   }
 }

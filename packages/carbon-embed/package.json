@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-plugin-template",
+  "name": "@emrgen/carbon-embed",
   "version": "0.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
