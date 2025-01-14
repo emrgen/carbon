@@ -107,7 +107,7 @@ const ResultInner = (props) => {
   // listen to the cell events
   useEffect(() => {
     const onFulfill = (cell: ActiveCell) => {
-      // console.log("fulfilled", cell.uniqId, cell.name, cell.result, cell);
+      console.log("fulfilled", cell.uniqId, cell.name, cell.result, cell);
       setCell(cell);
       updateResult(cell.result);
       setError("");

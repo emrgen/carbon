@@ -4,7 +4,9 @@ import "./react-bem.styl";
 import "./fastype/fastype.styl";
 import { MMap } from "./carbon/Demo/MMap";
 import { AffineExp } from "./carbon/Dev/Affine";
+import Text from "./carbon/Dev/Text";
 import { LazyBoard, LazyDesign, LazyDev, LazyEmojiDemo } from "./carbon/index";
+import TestText from "./carbon/Test/Text";
 
 function App() {
   return (
@@ -17,14 +19,14 @@ function App() {
         <Route path="/board" element={<LazyBoard />} />
         <Route path="/affine" element={<AffineExp />} />
         {/*<Route path="/chain" element={<Chain />} />*/}
-        {/*<Route path="/text" element={<Text />} />*/}
+        <Route path="/text" element={<Text />} />
         {/*<Route path="/object-viewer" element={<ObjectView />} />*/}
         {/*<Route path="/poc/grouped" element={<Grouped />} />*/}
-        {/*<Route path="/test" element={<TestText />} />*/}
+        <Route path="/test" element={<TestText />} />
         {/*<Route path="/sheet" element={<Sheet />} />*/}
         {/*<Route path="/question" element={<Question />} />*/}
         {/*<Route path="/fastype" element={<FastEditor name="fastype-test" />} />*/}
-        {/* <Route path="/test" element={<Test />} /> */}
+        {/*<Route path="/test" element={<Test />} />*/}
         <Route path="/" element={<LazyDev />} />
       </Routes>
     </Router>

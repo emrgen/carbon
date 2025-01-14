@@ -1,7 +1,6 @@
-import { isNumber } from "lodash";
-import { isString } from "lodash";
-import { isSymbol } from "lodash";
-import { isObject } from "lodash";
+import { isNumber, isObject, isString, isSymbol } from "lodash";
+
+export const PAGE_SIZE = 10;
 
 export const isGetterProp = (descriptor) => {
   return "get" in descriptor;

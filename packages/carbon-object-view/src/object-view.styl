@@ -35,35 +35,56 @@ $literal-color = #418cbf
 //.cov-string
 //  line-height inherit
 
+.cov-show-more
+  color #999
+  cursor pointer
+  margin-left 5px
+  user-select none
+  padding-bottom 3px;
+  padding-top 6px
+  font-size 14px
+  &:hover
+    color #666
+  &.cov-show-more__object-fields
+    padding-left 16px
+
 .cov-node
   padding-top 2px;
 
 // array style
 .cov-array
   display flex
+
 .cov-array-initial
   display flex
   align-items center
   //line-height 28px
   cursor pointer;
+
 .cov-object-constructor
   margin-right 5px;
   user-select none
+
 .cov-array-content
   display flex
+
 .cov-array-content-expanded
   position relative;
   flex-direction column
   padding-left 14px;
+
 .cov-array-element
   display flex
   flex-direction row
   margin-right 4px;
+
   &:last-of-type
-    margin-right 0!important
+    margin-right 0 !important
+
 .cov-array-index
   color #999
   margin-right 5px
+
 .cov-array-content-collapsed
   display flex
   align-items center
@@ -74,29 +95,36 @@ $literal-color = #418cbf
   display flex
   align-items center
   cursor pointer;
+
 .con-object-content
   display flex
   flex-direction column
   padding-left 14px;
+
 .cov-object-key
   color #999
   margin-right 4px;
+
 .cov-object-property
   display flex
   flex-direction row
   margin-right 4px;
+
 .cov-object-content
   display flex
   flex-direction column
   padding-left 14px;
+
 .cov-object-element
   display flex
   flex-direction row
   margin-right 4px;
+
 .cov-object-content-expanded
   position relative;
   flex-direction column
   padding-left 20px;
+
 .cov-object-content-collapsed
   display flex
 
@@ -104,10 +132,13 @@ $literal-color = #418cbf
   color $literal-color
 
 .cov-boolean-true
-    color #3db53d
+  color #3db53d
+
 .cov-boolean-false
-    color #f45a80
+  color #f45a80
+
 .cov-null
-    color #f45a80
+  color #f45a80
+
 .cov-undefined
-    color #f45a80
+  color #f45a80
