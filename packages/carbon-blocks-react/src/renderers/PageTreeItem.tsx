@@ -33,7 +33,7 @@ import { HiOutlinePencil, HiOutlinePlus } from "react-icons/hi";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 
 const getPageTree = (n: Node) => n.closest((n) => n.type.name === PageTreeName);
-const getPageTreeGroup = (n: Node) =>
+export const getPageTreeGroup = (n: Node) =>
   n.closest((n) => n.type.name === PageTreeGroupName);
 
 export const PageTreeItemComp = (props: RendererProps) => {
@@ -57,9 +57,6 @@ export const PageTreeItemComp = (props: RendererProps) => {
       preventAndStop(e);
       const { cmd } = app;
 
-      const pageTree = getPageTree(node);
-      if (!pageTree) return;
-
       cmd.pageTreeItem.expand(node);
 
       const item = app.schema.type(PageTreeItemName).default()!;
@@ -69,6 +66,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
       cmd.Insert(at, item);
 
       const pageTreeGroup = getPageTreeGroup(node);
+      console.log("pageTreeGroup", pageTreeGroup);
       if (pageTreeGroup) {
         // open the path
         cmd.Update(item, {

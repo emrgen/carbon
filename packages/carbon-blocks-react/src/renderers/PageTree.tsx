@@ -1,6 +1,8 @@
-import { PageTreeItemName } from "@emrgen/carbon-blocks";
+import { BlockEvent, PageTreeItemName } from "@emrgen/carbon-blocks";
 import {
+  ActiveChildPath,
   AddPagePath,
+  NodeId,
   OpenedPath,
   PinnedSelection,
   Point,
@@ -16,6 +18,7 @@ import {
 } from "@emrgen/carbon-react";
 import { useCallback, useMemo } from "react";
 import { HiOutlinePlus } from "react-icons/hi";
+import { getPageTreeGroup } from "./PageTreeItem";
 
 export const PageTreeComp = (props: RendererProps) => {
   const { node } = props;
@@ -46,7 +49,36 @@ export const PageTreeComp = (props: RendererProps) => {
       const at = Point.toAfter(node.lastChild!.id);
       cmd.Insert(at, item).Select(PinnedSelection.SKIP);
 
-      cmd.Dispatch();
+      const pageTreeGroup = getPageTreeGroup(node);
+      if (pageTreeGroup) {
+        // open the path
+        cmd.Update(item, {
+          [OpenedPath]: true,
+        });
+
+        const openedPath = pageTreeGroup.props.get(
+          ActiveChildPath,
+          NodeId.IDENTITY,
+        );
+
+        const openedNodeId = NodeId.fromObject(openedPath);
+        console.log("closing", openedNodeId.toString());
+        // close the previously opened path
+        if (!openedNodeId.eq(NodeId.IDENTITY)) {
+          cmd.Update(openedNodeId, {
+            [OpenedPath]: false,
+          });
+        }
+
+        // set the active child path
+        cmd.Update(pageTreeGroup, {
+          [ActiveChildPath]: item.id,
+        });
+      }
+
+      cmd.Dispatch().Then(() => {
+        app.emit(BlockEvent.openDocument, { node: item });
+      });
     },
     [app, node],
   );

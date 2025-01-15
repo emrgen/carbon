@@ -1,6 +1,7 @@
 [data-name=pageTree]
 [data-name=pageTreeItem]
   position: relative;
+  user-select none
 
 .button-style
   z-index: 1
@@ -137,6 +138,9 @@
     padding 0
     border-radius: 4px
     cursor pointer;
+    &:hover
+      background: #ddd
+      color #666
 
     .page-tree-open-close-icon
       transition transform 0.2s

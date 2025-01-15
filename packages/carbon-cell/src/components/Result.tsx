@@ -107,7 +107,11 @@ const ResultInner = (props) => {
   // listen to the cell events
   useEffect(() => {
     const onFulfill = (cell: ActiveCell) => {
-      console.log("fulfilled", cell.uniqId, cell.name, cell.result, cell);
+      console.log(
+        `CELL: evaluated. ID: ${cell.uniqId}, Name: ${cell.name}, Result:`,
+        cell.result,
+        cell,
+      );
       setCell(cell);
       updateResult(cell.result);
       setError("");
@@ -124,7 +128,7 @@ const ResultInner = (props) => {
       // console.log("rejected", cell.name, cell.error);
       setCell(cell);
       setError(cell.error.toString());
-      console.log("DELETE", cell.id, cell.name);
+      console.log(`CELL: deleted. ID: ${cell.uniqId}, Name: ${cell.name}`);
       updateResult(null);
       setPending(false);
     };
