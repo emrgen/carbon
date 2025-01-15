@@ -287,7 +287,19 @@ export class Collapsible extends NodePlugin {
       return;
     }
 
-    writer.write("\n\n");
+    const { prevSibling } = node;
+    if (prevSibling) {
+      if (
+        prevSibling?.name === "collapsible" ||
+        (prevSibling?.name === "title" &&
+          prevSibling?.parent?.name === "collapsible")
+      ) {
+        writer.write("\n");
+      } else {
+        writer.write("\n\n");
+      }
+    }
+
     if (node.firstChild) {
       writer.write(writer.meta.get("indent") ?? "");
       encoder.encode(writer, node.firstChild);

@@ -12,6 +12,7 @@ export * from "./utils/key";
 export * from "./utils/location";
 export * from "./utils/node";
 export * from "./utils/event";
+export * from "./utils/array";
 export * from "./utils/action";
 export * from "./utils/clamp";
 export * from "./utils/htmlAttrs";

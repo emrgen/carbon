@@ -104,12 +104,11 @@ export class PagePlugin extends CarbonPlugin {
   // }
 
   encode(w: Writer, ne: NodeEncoder, node: Node) {
-    const { children, firstChild } = node;
+    const { firstChild } = node;
     if (firstChild) {
       w.write("# ");
       ne.encode(w, firstChild);
     }
-    w.write("\n");
 
     encodeNestableChildren(w, ne, node, "");
   }

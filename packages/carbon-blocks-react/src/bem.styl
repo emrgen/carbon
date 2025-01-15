@@ -53,12 +53,16 @@ $selectionHaloColor = #accef78d
 .todo
 .collapsible
 .callout
+.quote
   > .ctiw > .title
     flex 1
     padding 2px
-.paragraph > .title
-  flex 1
-  padding 2px
+
+.quote
+.paragraph
+  > .title
+    flex 1
+    padding 2px
 
 // placeholder
 .placeholder
@@ -151,6 +155,12 @@ $selectionHaloColor = #accef78d
   user-select: none
   position absolute;
 
+
+.quote
+  > .cnest
+    margin-left 0
+    > .number-list
+      padding-left 0;
 
 // callout
 .callout

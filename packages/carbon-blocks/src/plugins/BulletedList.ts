@@ -42,8 +42,17 @@ export class BulletedList extends Section {
   encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     const prevSibling = node.prevSibling;
     if (prevSibling) {
-      writer.write("\n");
+      if (
+        prevSibling?.name === "bulletList" ||
+        (prevSibling?.name === "title" &&
+          prevSibling?.parent?.name === "bulletList")
+      ) {
+        writer.write("\n");
+      } else {
+        writer.write("\n\n");
+      }
     }
+
     if (node.firstChild) {
       writer.write(writer.meta.get("indent") ?? "");
       writer.write("- ");

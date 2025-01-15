@@ -1,7 +1,12 @@
-import { Node, NodeEncoder, NodeSpec, Writer } from "@emrgen/carbon-core";
+import {
+  Node,
+  NodeEncoder,
+  NodeSpec,
+  takeUntil,
+  Writer,
+} from "@emrgen/carbon-core";
+import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
 import { Section } from "./Section";
-import { encodeNestableChildren } from "./Nestable";
-import { encodeHtmlNestableChildren } from "./Nestable";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {}
@@ -54,21 +59,32 @@ export class NumberedList extends Section {
   }
 
   static listNumber(node: Node): number {
-    // const prevSiblings = takeUpto(node.prevSiblings.slice().reverse(), (n: Node) => n.name !== this.name);
-    // console.log(prevSiblings, node.prevSiblings, node.name, node.prevSiblings.map(n => n.name));
-    return 1; //prevSiblings.length;
+    const prevSiblings = takeUntil(
+      node.prevSiblings.slice().reverse(),
+      (n: Node) => n.name !== "numberList",
+    );
+    return prevSiblings.length;
   }
 
   encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     const prevSibling = node.prevSibling;
+
     if (prevSibling) {
-      writer.write("\n");
+      if (
+        prevSibling?.name === "numberList" ||
+        (prevSibling?.name === "title" &&
+          prevSibling?.parent?.name === "numberList")
+      ) {
+        writer.write("\n");
+      } else {
+        writer.write("\n\n");
+      }
     }
 
     const listNumber = NumberedList.listNumber(node);
     if (node.firstChild) {
       writer.write(writer.meta.get("indent") ?? "");
-      writer.write(`${listNumber}. `);
+      writer.write(`${listNumber + 1}. `);
       encoder.encode(writer, node.firstChild);
     }
 

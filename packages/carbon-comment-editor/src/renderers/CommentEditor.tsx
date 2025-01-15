@@ -31,11 +31,11 @@ export const CommentEditorComp = (props: RendererProps) => {
       prevent(e);
       const { lastChild } = node;
       if (lastChild && lastChild.name === "paragraph" && lastChild.isEmpty) {
-        app.cmd.selection.collapseAtStartOf(lastChild).dispatch();
+        app.cmd.selection.collapseAtStartOf(lastChild).Dispatch();
         return;
       }
 
-      app.cmd.inserter.appendDefault(node, "paragraph").dispatch();
+      app.cmd.inserter.appendDefault(node, "paragraph").Dispatch();
     },
     [app, node],
   );
@@ -47,7 +47,7 @@ export const CommentEditorComp = (props: RendererProps) => {
       // find the last child
       // if its a nestable toggle it
       // else insert a new item with that name
-      app.cmd.nestable.toggle(name).dispatch();
+      app.cmd.nestable.toggle(name).Dispatch();
     },
     [app],
   );
@@ -57,9 +57,9 @@ export const CommentEditorComp = (props: RendererProps) => {
       preventAndStop(e);
       const { blockSelection, selection } = app.state;
       if (blockSelection.isEmpty && selection.isCollapsed) {
-        app.cmd.marks.toggle(mark)?.dispatch();
+        app.cmd.marks.toggle(mark)?.Dispatch();
       } else {
-        app.cmd.formatter.toggle(mark)?.dispatch();
+        app.cmd.formatter.toggle(mark)?.Dispatch();
       }
     },
     [app],

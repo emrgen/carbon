@@ -43,7 +43,6 @@ test("add multilevel bullet list to the document", async ({ page }) => {
   await carbonPage.press("Backspace");
 
   const docContent = await carbonPage.getDocContent();
-  console.log(docContent);
 
   expect(docContent).toBe(`# Doc title
 

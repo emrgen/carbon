@@ -7,6 +7,8 @@ declare global {
   }
 }
 
+const DELAY = 0;
+
 export const getDocContent = async (page: Page) => {
   return await page.evaluate(() => {
     const app = window.app;
@@ -30,16 +32,16 @@ export class CarbonPage {
   }
 
   async open() {
-    await this.page.goto("http://localhost:4321/test");
+    await this.page.goto("http://localhost:4321/");
   }
 
   async addTitle(text: string) {
     await this.focusDocTitle();
-    await this.page.keyboard.type(text);
+    await this.page.keyboard.type(text, { delay: 50 });
   }
 
   async focusDocTitle() {
-    await this.page.click(".cpage > [data-type=content]");
+    await this.page.click(".cpage > [data-name=title]");
   }
 
   async getDocContent() {
@@ -52,52 +54,52 @@ export class CarbonPage {
   }
 
   async enter() {
-    await this.page.keyboard.press("Enter");
+    await this.page.keyboard.press("Enter", { delay: DELAY });
   }
 
   async tab() {
-    await this.page.keyboard.press("Tab");
+    await this.page.keyboard.press("Tab", { delay: DELAY });
   }
 
   async type(text: string) {
-    await this.page.keyboard.type(text);
+    await this.page.keyboard.type(text, { delay: DELAY });
   }
 
   async press(key: string) {
-    await this.page.keyboard.press(key);
+    await this.page.keyboard.press(key, { delay: DELAY });
   }
 
   async repeat(key: string, times = 1, press = false) {
     for (let i = 0; i < times; i++) {
       if (press) {
-        await this.page.keyboard.press(key);
+        await this.page.keyboard.press(key, { delay: DELAY });
       } else {
-        await this.page.keyboard.type(key);
+        await this.page.keyboard.type(key, { delay: DELAY });
       }
     }
   }
 
   async arrowRight(count = 1) {
     for (let i = 0; i < count; i++) {
-      await this.page.keyboard.press("ArrowRight");
+      await this.page.keyboard.press("ArrowRight", { delay: DELAY });
     }
   }
 
   async arrowLeft(count = 1) {
     for (let i = 0; i < count; i++) {
-      await this.page.keyboard.press("ArrowLeft");
+      await this.page.keyboard.press("ArrowLeft", { delay: DELAY });
     }
   }
 
   async insertBulletList(text: string) {
-    await this.page.keyboard.type(`- ${text}`);
+    await this.page.keyboard.type(`- ${text}`, { delay: DELAY });
   }
 
   async insertNumberedList(text: string) {
-    await this.page.keyboard.type(`1. ${text}`);
+    await this.page.keyboard.type(`1. ${text}`, { delay: DELAY });
   }
 
   async insertTodo(text: string) {
-    await this.page.keyboard.type(`[] ${text}`);
+    await this.page.keyboard.type(`[] ${text}`, { delay: DELAY });
   }
 }

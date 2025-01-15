@@ -126,11 +126,7 @@ export class Section extends NodePlugin {
 
     const prevSibling = node.prevSibling;
     if (prevSibling) {
-      if (prevSibling?.name === "paragraph") {
-        writer.write("\n\n");
-      } else {
-        writer.write("\n");
-      }
+      writer.write("\n\n");
     }
 
     if (node.firstChild) {

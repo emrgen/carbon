@@ -97,12 +97,23 @@ export class Heading extends NodePlugin {
 
   encode(w: Writer, ne: NodeEncoder, node: Node) {
     const { level } = this;
-    w.write("\n\n");
+
+    const { prevSibling } = node;
+    if (prevSibling && !Heading.isHeading(prevSibling)) {
+      w.write("\n");
+    }
+
+    if (prevSibling) {
+      w.write("\n");
+    }
+
     w.write("#".repeat(level) + " ");
     const { firstChild } = node;
     if (firstChild) {
       ne.encode(w, firstChild);
     }
+
+    // w.write("\n");
 
     encodeNestableChildren(w, ne, node, "");
   }

@@ -35,6 +35,7 @@ export interface State {
   isContentChanged: boolean;
   isSelectionChanged: boolean;
   isMarksChanged: boolean;
+  isLargeContent: boolean;
 
   // try to create a new state or fail and return the previous state
   produce(fn: (state: Draft) => void, opts: ProduceOpts): State;

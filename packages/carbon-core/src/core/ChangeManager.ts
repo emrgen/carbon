@@ -283,10 +283,15 @@ export class ChangeManager extends NodeTopicEmitter {
 
       this.pendingSelectionCounter += 1;
 
-      requestAnimationFrame(() => {
+      if (this.tr?.state.isLargeContent) {
+        requestAnimationFrame(() => {
+          selection.syncDom(app.store, app.dom);
+          this.pendingSelectionCounter -= 1;
+        });
+      } else {
         selection.syncDom(app.store, app.dom);
         this.pendingSelectionCounter -= 1;
-      });
+      }
     } catch (error) {
       console.error("syncSelection", error);
     }

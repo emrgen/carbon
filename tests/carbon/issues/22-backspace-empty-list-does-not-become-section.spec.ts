@@ -15,10 +15,10 @@ test("backspace-empty-list-does-not-become-paragraph.spec", async ({
   await carbonPage.enter();
   await carbonPage.insertBulletList("list 1");
   await carbonPage.repeat("Backspace", 7, true);
-  await carbonPage.type("another section");
+  await carbonPage.type("another paragraph");
 
   const docContent = await carbonPage.getDocContent();
   expect(docContent).toBe(
-    "# Doc title\n\nsimple section text\n\nanother section",
+    "# Doc title\n\nsimple paragraph text\n\nanother paragraph",
   );
 });

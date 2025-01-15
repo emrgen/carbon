@@ -7,18 +7,12 @@ import {
   commentEditorComp,
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
-import {
-  corePresetPlugins,
-  ModePath,
-  NodeId,
-  State,
-} from "@emrgen/carbon-core";
+import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
 import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import { flattenDeep, noop } from "lodash";
-import { useEffect } from "react";
 
 console.log = noop;
 // console.info = noop;
@@ -60,18 +54,18 @@ const renderers = [
 const renderManager = RenderManager.from(renderers);
 
 export function Empty() {
-  const app = useCreateCarbon("dev", data, flattenDeep(plugins));
+  const app = useCreateCarbon("test/empty", data, flattenDeep(plugins));
 
-  useEffect(() => {
-    const onUpdate = (state: State) => {
-      console.info(state.content.child(0)?.size);
-    };
-
-    app.on("changed", onUpdate);
-    return () => {
-      app.off("changed", onUpdate);
-    };
-  }, [app]);
+  // useEffect(() => {
+  //   const onUpdate = (state: State) => {
+  //     console.info(state.content.child(0)?.size);
+  //   };
+  //
+  //   app.on("changed", onUpdate);
+  //   return () => {
+  //     app.off("changed", onUpdate);
+  //   };
+  // }, [app]);
 
   return <CarbonApp app={app} renderManager={renderManager}></CarbonApp>;
 }

@@ -8,10 +8,9 @@ import {
   NodeSpec,
   Writer,
 } from "@emrgen/carbon-core";
+import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
 import { Section } from "./Section";
 import { Switch } from "./Switch";
-import { encodeNestableChildren } from "./Nestable";
-import { encodeHtmlNestableChildren } from "./Nestable";
 
 export class Todo extends Section {
   name = "todo";
@@ -35,7 +34,7 @@ export class Todo extends Section {
           },
           html: {
             suppressContentEditableWarning: true,
-            className: 'ctdl'
+            className: "ctdl",
           },
         },
         remote: {
@@ -73,10 +72,16 @@ export class Todo extends Section {
   encode(writer: Writer, encoder: NodeEncoder, node: Node) {
     const checked = node.props.get(CheckedPath);
     const { prevSibling } = node;
-    if (prevSibling?.name === node.name) {
-      writer.write("\n");
-    } else {
-      writer.write("\n\n");
+
+    if (prevSibling) {
+      if (
+        prevSibling?.name === "todo" ||
+        (prevSibling?.name === "title" && prevSibling?.parent?.name === "todo")
+      ) {
+        writer.write("\n");
+      } else {
+        writer.write("\n\n");
+      }
     }
 
     if (node.firstChild) {
