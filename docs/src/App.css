@@ -1,0 +1,22 @@
+#root {
+  margin: 0 auto;
+  width: 100%;
+}
+
+[data-type="children"] {
+  padding-left: 1rem;
+}
+
+ul {
+  padding: 0;
+}
+
+ul li::marker {
+  color: #0070f3;
+}
+
+[data-name="bulletList"] {
+  &::marker {
+    content: '•';
+  }
+}

@@ -837,12 +837,7 @@ const plugins = [
   new ClipboardPlugin(),
   ...databasePlugins,
   ...boardPlugins,
-  // {
-  //   plugins: [
-  //     new BlockTree(),
-  //   ]
-  // }
-  // extensions1,
+
   ...questionExtension.plugins!,
   timelinePlugin,
   flashPlugin,
