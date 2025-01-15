@@ -15,7 +15,7 @@ import {
 
 import { TextPlugin } from "./Text";
 
-// title is a block content that can be used as a title for a block
+// PlainText plugin
 export class PlainTextPlugin extends NodePlugin {
   name = "plainText";
 

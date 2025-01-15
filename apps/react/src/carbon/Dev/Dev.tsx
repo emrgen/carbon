@@ -22,12 +22,10 @@ import {
   cellRenderer,
 } from "@emrgen/carbon-cell";
 import {
-  BlockContextMenu,
   carbonChakraRenderers,
   EmojiPickerInlineMenu,
   FloatingStyleMenu,
   InsertBlockMenu,
-  ToggleViewMode,
 } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codemirrorExtension } from "@emrgen/carbon-codemirror";
@@ -36,7 +34,6 @@ import {
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
 import {
-  Carbon,
   CollapsedPath,
   ContenteditablePath,
   corePresetPlugins,
@@ -537,31 +534,31 @@ const data = node("carbon", [
       //   ["remote/state/codemirror"]: `function foo() {\n  console.log('hello world')\n}`,
       // }),
 
-      node("question", [
-        title([text("question title")]),
-        node("mcq", [
-          node("mcqOption", [title([text("option 1")])]),
-          node("mcqOption", [title([text("option 2")])]),
-          node("mcqOption", [title([text("option 3")])]),
-          node("mcqOption", [title([text("option 4")])]),
-        ]),
-        node("hints", [
-          node("hint", [
-            title([text("hint 1")]),
-            paragraph([title([text("hint content")])]),
-          ]),
-        ]),
-      ]),
-
-      node("question", [
-        title([text("question title")]),
-        node("mcq", [
-          node("mcqOption", [title([text("option 1")])]),
-          node("mcqOption", [title([text("option 2")])]),
-          node("mcqOption", [title([text("option 3")])]),
-          node("mcqOption", [title([text("option 4")])]),
-        ]),
-      ]),
+      // node("question", [
+      //   title([text("question title")]),
+      //   node("mcq", [
+      //     node("mcqOption", [title([text("option 1")])]),
+      //     node("mcqOption", [title([text("option 2")])]),
+      //     node("mcqOption", [title([text("option 3")])]),
+      //     node("mcqOption", [title([text("option 4")])]),
+      //   ]),
+      //   node("hints", [
+      //     node("hint", [
+      //       title([text("hint 1")]),
+      //       paragraph([title([text("hint content")])]),
+      //     ]),
+      //   ]),
+      // ]),
+      //
+      // node("question", [
+      //   title([text("question title")]),
+      //   node("mcq", [
+      //     node("mcqOption", [title([text("option 1")])]),
+      //     node("mcqOption", [title([text("option 2")])]),
+      //     node("mcqOption", [title([text("option 3")])]),
+      //     node("mcqOption", [title([text("option 4")])]),
+      //   ]),
+      // ]),
 
       paragraph([title([text("section 1")])]),
 
@@ -922,12 +919,12 @@ export function Dev() {
               <Box pos={"absolute"} right={8} top={6}>
                 {/*<DocumentSaveStatus />*/}
                 {/* eslint-disable-next-line react/jsx-no-undef */}
-                {<ToggleViewMode />}
+                {/*{<ToggleViewMode />}*/}
               </Box>
               <FloatingStyleMenu />
               <PathTracker />
               <InsertBlockMenu />
-              <BlockContextMenu />
+              {/*<BlockContextMenu />*/}
               <EmojiPickerInlineMenu />
             </CarbonApp>
           </ObservableQuestions>
@@ -935,14 +932,4 @@ export function Dev() {
       </ActiveCellRuntimeContext>
     </Box>
   );
-}
-
-class Nodes {
-  app: Carbon;
-  observedIds: Array<string> = [];
-
-  constructor(app: Carbon, observedIds: Array<string>) {
-    this.app = app;
-    this.observedIds = observedIds;
-  }
 }

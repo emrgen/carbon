@@ -22,6 +22,7 @@
     "@emrgen/carbon-utils": "workspace:*",
     "@uidotdev/usehooks": "^2.4.1",
     "emoji-mart": "^5.6.0",
+    "events": "^3.3.0",
     "formik": "^2.4.3",
     "katex": "^0.16.7",
     "lodash": "^4.17.21",

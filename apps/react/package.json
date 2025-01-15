@@ -15,6 +15,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@emrgen/carbon-affine": "workspace:*",
+    "@emrgen/carbon-ui": "workspace:*",
     "@emrgen/carbon-attributes": "workspace:*",
     "@emrgen/carbon-blocks-react": "workspace:*",
     "@emrgen/carbon-board": "workspace:*",

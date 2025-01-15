@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./react-bem.styl";
 
 import "./fastype/fastype.styl";
+import { SidebarLayout } from "./carbon/Dev/SidebarLayout";
 import { LazyDev } from "./carbon/index";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         {/*<Route path="/question" element={<Question />} />*/}
         {/*<Route path="/fastype" element={<FastEditor name="fastype-test" />} />*/}
         {/*<Route path="/test" element={<Test />} />*/}
+        <Route path="/sidebar" element={<SidebarLayout />} />
         <Route path="/" element={<LazyDev />} />
       </Routes>
     </Router>
