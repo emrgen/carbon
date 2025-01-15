@@ -1,14 +1,17 @@
 import {
   BlockEvent,
+  PageTreeGroupName,
   PageTreeItemName,
   PageTreeName,
 } from "@emrgen/carbon-blocks";
 import {
+  ActiveChildPath,
   Carbon,
   ContenteditablePath,
   FocusEditablePath,
   LocalDirtyCounterPath,
   Node,
+  NodeId,
   OpenedPath,
   Pin,
   PinnedSelection,
@@ -30,6 +33,8 @@ import { HiOutlinePencil, HiOutlinePlus } from "react-icons/hi";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 
 const getPageTree = (n: Node) => n.closest((n) => n.type.name === PageTreeName);
+const getPageTreeGroup = (n: Node) =>
+  n.closest((n) => n.type.name === PageTreeGroupName);
 
 export const PageTreeItemComp = (props: RendererProps) => {
   const { node } = props;
@@ -55,21 +60,44 @@ export const PageTreeItemComp = (props: RendererProps) => {
       const pageTree = getPageTree(node);
       if (!pageTree) return;
 
-      cmd.pageTree.close(pageTree).pageTreeItem.expand(node);
+      cmd.pageTreeItem.expand(node);
 
       const item = app.schema.type(PageTreeItemName).default()!;
       item.firstChild?.updateContent([app.schema.text("Untitled")!]);
-      item.updateProps({
-        [OpenedPath]: true,
-      });
 
-      const at = Point.toAfter(node.child(0)!.id);
-      cmd
-        .Insert(at, item)
-        .Then(() => {
-          return () => app.emit(BlockEvent.openDocumentOverlay, { node: item });
-        })
-        .Dispatch();
+      const at = Point.toAfter(node.lastChild!.id);
+      cmd.Insert(at, item);
+
+      const pageTreeGroup = getPageTreeGroup(node);
+      if (pageTreeGroup) {
+        // open the path
+        cmd.Update(item, {
+          [OpenedPath]: true,
+        });
+
+        const openedPath = pageTreeGroup.props.get(
+          ActiveChildPath,
+          NodeId.IDENTITY,
+        );
+
+        const openedNodeId = NodeId.fromObject(openedPath);
+        console.log("closing", openedNodeId.toString());
+        // close the previously opened path
+        if (!openedNodeId.eq(NodeId.IDENTITY)) {
+          cmd.Update(openedNodeId, {
+            [OpenedPath]: false,
+          });
+        }
+
+        // set the active child path
+        cmd.Update(pageTreeGroup, {
+          [ActiveChildPath]: item.id,
+        });
+      }
+
+      cmd.Dispatch().Then(() => {
+        app.emit(BlockEvent.openDocument, { node });
+      });
     },
     [app, node],
   );
@@ -104,19 +132,43 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const handleOpenDocument = useCallback(
     (e) => {
       preventAndStop(e);
-      const pageTree = getPageTree(node);
-      if (!pageTree) {
-        console.warn("page tree not found for node", node.id.toString());
+      const pageTreeGroup = getPageTreeGroup(node);
+      if (!pageTreeGroup) {
+        console.warn("page tree group not found for node", node.id.toString());
         return;
       }
 
-      app.cmd.pageTree
-        .close(pageTree)
-        .pageTreeItem.open(node)
-        .Then(() => {
-          return () => app.emit(BlockEvent.openDocument, { node });
-        })
-        .Dispatch();
+      const { cmd } = app;
+
+      if (pageTreeGroup) {
+        // open the path
+        cmd.Update(node, {
+          [OpenedPath]: true,
+        });
+
+        const openedPath = pageTreeGroup.props.get(
+          ActiveChildPath,
+          NodeId.IDENTITY,
+        );
+
+        const openedNodeId = NodeId.fromObject(openedPath);
+
+        // close the previously opened path
+        if (!openedNodeId.eq(NodeId.IDENTITY) && !openedNodeId.eq(node.id)) {
+          cmd.Update(openedNodeId, {
+            [OpenedPath]: false,
+          });
+        }
+
+        // set the active child path
+        cmd.Update(pageTreeGroup, {
+          [ActiveChildPath]: node.id,
+        });
+      }
+
+      cmd.Dispatch().Then(() => {
+        app.emit(BlockEvent.openDocument, { node });
+      });
     },
     [app, node],
   );
@@ -194,7 +246,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
         node={node}
         beforeContent={beforeContent}
         afterContent={isContentEditable ? null : afterContent}
-        custom={{ onKeyDown: handleKeyPress }}
+        custom={{ onKeyDown: handleKeyPress, onClick: handleOpenDocument }}
         wrap={true}
       />
 

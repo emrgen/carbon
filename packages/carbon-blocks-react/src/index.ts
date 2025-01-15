@@ -28,6 +28,7 @@ import { Modal } from "./renderers/Modal";
 import { NumberedListComp } from "./renderers/NumberedList";
 import { PageLinkComp } from "./renderers/PageLink";
 import { PageTreeComp } from "./renderers/PageTree";
+import { PageTreeGroupComp } from "./renderers/PageTreeGroup";
 import { PageTreeItemComp } from "./renderers/PageTreeItem";
 import { PartialComp } from "./renderers/PartialComp";
 import { PlainText } from "./renderers/PlainText";
@@ -67,6 +68,7 @@ export const blockPresetRenderers = [
   ReactRenderer.create("carbon", CarbonComp),
   ReactRenderer.create("pageTree", PageTreeComp),
   ReactRenderer.create("pageTreeItem", PageTreeItemComp),
+  ReactRenderer.create("pageTreeGroup", PageTreeGroupComp),
   ReactRenderer.create("tabs", TabsComp),
   ReactRenderer.create("tab", TabComp),
   ReactRenderer.create("tagsAttr", () => 1),

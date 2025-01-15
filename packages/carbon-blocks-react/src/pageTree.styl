@@ -2,23 +2,57 @@
 [data-name=pageTreeItem]
   position: relative;
 
+.button-style
+  z-index: 1
+  width: 20px
+  height: 20px
+  align-items: center
+  justify-content: center
+  cursor: pointer
+  border-radius: 4px
+  color: #aaa
+  opacity 0
+  font-size: 14px
+  margin-left 4px;
+  //display: none
+
+  &:hover
+    background: #ddd
+    color #666
+
 [data-name=pageTree]
-  margin 10px 0
+  margin 4px 0
   font-size 14px
-  padding 6px
-  background #fafafa
-  &> .ctiw
+  padding 0 6px
+
+  & > .ctiw
     font-size 12px
     color #aaa
     cursor pointer;
     font-weight bold
     user-select none;
-    padding 0 6px
+    padding 4px 6px
+    border-radius 4px
+    display flex
+    justify-content space-between
+    align-items center
+
     &:hover
       color #666
+      background #f0f0f0
       font-weight bold
 
-  &> .cnest
+    // toggle visibility of the add child file button
+
+    > .add-child-file
+      @extend .button-style
+
+    &:hover
+      .add-child-file
+        opacity 1
+        display flex
+
+  & > .cnest
     margin-left 0;
 
   [data-name=title]:before
@@ -33,6 +67,10 @@
 
 [data-name=pageTreeItem]
   border-radius: 4px
+
+  &[data-opened=true] > .ctiw
+    background: #f0f0f0
+
   .ctiw
     width full
     position relative
@@ -41,28 +79,21 @@
     padding: 4px;
     border-radius 4px
     //height 28px
+
     &:hover
       background: #f0f0f0
 
-
     // hide the add child and edit file name buttons by default
+
     .add-child-file, .edit-file-name
-      z-index: 1
-      width: 20px
-      height: 20px
-      align-items: center
-      justify-content: center
-      cursor: pointer
-      border-radius: 4px
-      color: #aaa
-      opacity 0
-      font-size: 14px
-      margin-left 4px;
-      display: none
+      @extend .button-style
+
     // show the add child and edit file name buttons on hover
+
     &:hover
       > .add-child-file, > .edit-file-name
         display flex
+        opacity 1
 
   .cnest
     margin-left: 16px
@@ -75,11 +106,14 @@
     margin-left 4px
     cursor: pointer
     line-height 22px
+
     &:hover
       color: #000
       cursor: pointer
+
     &[contenteditable=true]
       cursor: text
+
     &:after
       color #555
       line-height 22px
@@ -87,7 +121,7 @@
     span
       display: inline-block
       left: 0
-      white-space: nowrap!important;
+      white-space: nowrap !important;
       text-overflow: ellipsis;
       overflow: hidden;
       min-width 1px;
@@ -113,19 +147,12 @@
     &.expanded > .page-tree-open-close-icon
       transform: rotate(90deg)
 
-    &:hover
-      background: #ddd
-      color #666
-
   [data-empty="true"]
     font-size: 14px
     line-height: 20px
     user-select: none
     background transparent
 
-  & > .ctiw:hover
-    .add-child-file, .edit-file-name
-      opacity 1
 
   .carbon-collapsible__empty
     padding-left 28px
@@ -134,6 +161,6 @@
     line-height: $lineHeight
     user-select: none
 
-  //&[data-opened=true] > [data-type=content] > [data-name=title]
-  //  color: #000 !important
+//&[data-opened=true] > [data-type=content] > [data-name=title]
+//  color: #000 !important
 

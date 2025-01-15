@@ -31,6 +31,7 @@ import {
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
 import {
+  AddPagePath,
   CollapsedPath,
   corePresetPlugins,
   ModePath,
@@ -85,23 +86,56 @@ const page = node(
 
 const layout = node("sidebarLayout", [
   node("sidebar", [
-    node("pageTree", [
-      plainText("Favorites"),
-      node("pageTreeItem", [
-        plainText("Computer Science"),
-        node("pageTreeItem", [plainText("Algorithms")]),
-        node("pageTreeItem", [plainText("Data Structures")]),
-        node("pageTreeItem", [plainText("Operating Systems")]),
-      ]),
+    node("pageTreeGroup", [
       node(
-        "pageTreeItem",
+        "pageTree",
         [
-          plainText("Electrical Engineering"),
-          node("pageTreeItem", [plainText("Circuits")], {}),
-          node("pageTreeItem", [plainText("Digital Logic")], {}),
-          node("pageTreeItem", [plainText("Microprocessors")], {}),
+          plainText("Favorites"),
+          node("pageTreeItem", [
+            plainText("Computer Science"),
+            node("pageTreeItem", [plainText("Algorithms")]),
+            node("pageTreeItem", [plainText("Data Structures")]),
+            node("pageTreeItem", [plainText("Operating Systems")]),
+          ]),
+          node(
+            "pageTreeItem",
+            [
+              plainText("Electrical Engineering"),
+              node("pageTreeItem", [plainText("Circuits")], {}),
+              node("pageTreeItem", [plainText("Digital Logic")], {}),
+              node("pageTreeItem", [plainText("Microprocessors")], {}),
+            ],
+            { [CollapsedPath]: false },
+          ),
         ],
-        { [CollapsedPath]: false },
+        {
+          [AddPagePath]: true,
+        },
+      ),
+      node(
+        "pageTree",
+        [
+          plainText("Private"),
+          node("pageTreeItem", [
+            plainText("Computer Science"),
+            node("pageTreeItem", [plainText("Algorithms")]),
+            node("pageTreeItem", [plainText("Data Structures")]),
+            node("pageTreeItem", [plainText("Operating Systems")]),
+          ]),
+          node(
+            "pageTreeItem",
+            [
+              plainText("Electrical Engineering"),
+              node("pageTreeItem", [plainText("Circuits")], {}),
+              node("pageTreeItem", [plainText("Digital Logic")], {}),
+              node("pageTreeItem", [plainText("Microprocessors")], {}),
+            ],
+            { [CollapsedPath]: false },
+          ),
+        ],
+        {
+          [AddPagePath]: true,
+        },
       ),
     ]),
   ]),

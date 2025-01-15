@@ -14,12 +14,14 @@ import {
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
 
+export const PageTreeGroupName = "pageTreeGroup";
 export const PageTreeName = "pageTree";
 export const PageTreeItemName = "pageTreeItem";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
     pageTree: {
+      expand(node: Node): Transaction;
       close(node: Node): Transaction;
       toggle(node: Node): Transaction;
     };
@@ -55,7 +57,17 @@ export class PageTree extends CarbonPlugin {
   commands(): Record<string, Function> {
     return {
       close: this.closeAll,
+      toggle: this.toggle,
+      expand: this.expand,
     };
+  }
+
+  toggle(tr: Transaction, node: Node) {
+    return tr.collapsible.toggle(node);
+  }
+
+  expand(tr: Transaction, node: Node) {
+    return tr.collapsible.expand(node);
   }
 
   closeAll(tr: Transaction, node: Node) {
@@ -67,7 +79,7 @@ export class PageTree extends CarbonPlugin {
   }
 
   plugins(): CarbonPlugin[] {
-    return [new PageTreeItem()];
+    return [new PageTreeGroup(), new PageTreeItem()];
   }
 }
 
@@ -185,6 +197,16 @@ export class PageTreeItem extends CarbonPlugin {
           cmd.Dispatch();
         }
       },
+    };
+  }
+}
+
+export class PageTreeGroup extends CarbonPlugin {
+  name = "pageTreeGroup";
+
+  spec(): NodeSpec {
+    return {
+      content: "pageTree*",
     };
   }
 }

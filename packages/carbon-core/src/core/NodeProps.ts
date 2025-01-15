@@ -228,6 +228,7 @@ export const VisiblePath = "remote/state/visible";
 export const RenderPath = "local/state/render";
 export const OpenedPath = "local/state/opened";
 export const CollapsedPath = "remote/state/collapsed";
+export const AddPagePath = "local/state/add/page";
 export const CollapsedPathLocal = "local/state/collapsed";
 export const HoveredPath = "local/state/hovered";
 export const SelectedPath = "local/state/selected";
@@ -268,6 +269,7 @@ export const FocusOnInsertPath = "local/state/insert/focus";
 // show node options on insert
 export const OptionsOnInsertPath = "local/state/insert/options";
 export const SelectedOptionsPath = "remote/state/selected/options";
+export const ActiveChildPath = "local/state/active/child";
 export const CodeValuePath = "remote/state/code/value";
 
 export enum DocModes {

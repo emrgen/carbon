@@ -1,5 +1,3 @@
-import { Optional } from "@emrgen/types";
-
 const NullId = "0000000000";
 const IdentityId = "0000000001";
 
@@ -35,6 +33,10 @@ export class NodeId implements IntoNodeId {
 
   static fromString(id: string) {
     return new NodeId(id);
+  }
+
+  static fromObject(obj: { id: string }) {
+    return new NodeId(obj.id);
   }
 
   private constructor(readonly id: string) {}
