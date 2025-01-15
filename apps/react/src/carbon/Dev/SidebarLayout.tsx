@@ -87,22 +87,22 @@ const layout = node("sidebarLayout", [
   node("sidebar", [
     node("pageTree", [
       plainText("Favorites"),
+      node("pageTreeItem", [
+        plainText("Computer Science"),
+        node("pageTreeItem", [plainText("Algorithms")]),
+        node("pageTreeItem", [plainText("Data Structures")]),
+        node("pageTreeItem", [plainText("Operating Systems")]),
+      ]),
       node(
         "pageTreeItem",
         [
-          plainText("Computer Science"),
-          node("pageTreeItem", [plainText("Algorithms")]),
-          node("pageTreeItem", [plainText("Data Structures")]),
-          node("pageTreeItem", [plainText("Operating Systems")]),
+          plainText("Electrical Engineering"),
+          node("pageTreeItem", [plainText("Circuits")], {}),
+          node("pageTreeItem", [plainText("Digital Logic")], {}),
+          node("pageTreeItem", [plainText("Microprocessors")], {}),
         ],
         { [CollapsedPath]: false },
       ),
-      node("pageTreeItem", [
-        plainText("Electrical Engineering"),
-        node("pageTreeItem", [plainText("Circuits")]),
-        node("pageTreeItem", [plainText("Digital Logic")]),
-        node("pageTreeItem", [plainText("Microprocessors")]),
-      ]),
     ]),
   ]),
   node("layoutContent", [page]),

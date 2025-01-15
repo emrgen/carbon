@@ -98,6 +98,7 @@ export class PageTreeItem extends CarbonPlugin {
             collapsed: true,
           },
         },
+        [CollapsedPath]: true,
       },
     };
   }

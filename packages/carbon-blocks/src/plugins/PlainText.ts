@@ -105,6 +105,9 @@ export class PlainTextPlugin extends NodePlugin {
         const { app, cmd } = ctx;
         const { selection } = app.state;
         if (selection.isCollapsed) {
+          if (selection.start.isAtStart) {
+            return;
+          }
           const container = selection.head.node.closest((n) => n.isContainer)!;
           const start = selection.start.moveBy(-1);
           const deleteSelection = PinnedSelection.create(start!, selection.end);

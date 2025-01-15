@@ -1,3 +1,4 @@
+import { PinnedSelection } from "@emrgen/carbon-core";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -12,8 +13,8 @@ export const PageTreeComp = (props: RendererProps) => {
   const app = useCarbon();
 
   const handleToggleCollapse = useCallback(() => {
-    app.cmd.collapsible.toggle(node).Dispatch();
-  }, [app.cmd.collapsible, node]);
+    app.cmd.Select(PinnedSelection.SKIP).collapsible.toggle(node).Dispatch();
+  }, [app, node]);
 
   const content = useMemo(() => {
     if (node.firstChild?.name === "plainText") {

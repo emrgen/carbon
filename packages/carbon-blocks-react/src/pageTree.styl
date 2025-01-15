@@ -27,6 +27,9 @@
   [data-type=children]
     padding-top 4px
 
+    &:hover
+      background: #ddd
+      color #666
 
 [data-name=pageTreeItem]
   border-radius: 4px
@@ -40,6 +43,27 @@
     //height 28px
     &:hover
       background: #f0f0f0
+
+
+    // hide the add child and edit file name buttons by default
+    .add-child-file, .edit-file-name
+      z-index: 1
+      width: 20px
+      height: 20px
+      align-items: center
+      justify-content: center
+      cursor: pointer
+      border-radius: 4px
+      color: #aaa
+      opacity 0
+      font-size: 14px
+      margin-left 4px;
+      display: none
+    // show the add child and edit file name buttons on hover
+    &:hover
+      > .add-child-file, > .edit-file-name
+        display flex
+
   .cnest
     margin-left: 16px
 
@@ -88,24 +112,6 @@
 
     &.expanded > .page-tree-open-close-icon
       transform: rotate(90deg)
-
-    &:hover
-      background: #ddd
-      color #666
-
-  .add-child-file, .edit-file-name
-    z-index: 1
-    width: 20px
-    height: 20px
-    display: flex
-    align-items: center
-    justify-content: center
-    cursor: pointer
-    border-radius: 4px
-    color: #aaa
-    opacity 0
-    font-size: 14px
-    margin-left 4px;
 
     &:hover
       background: #ddd
