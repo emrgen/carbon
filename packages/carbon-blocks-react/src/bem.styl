@@ -221,6 +221,15 @@ $selectionHaloColor = #accef78d
 
 // header
 .h-1
+.h-2
+.h-3
+.h-4
+  > .title
+    padding 2px
+    &:after
+      padding-left 2px
+
+.h-1
   margin-top 0.8em
   margin-bottom 0.3em
 
@@ -263,6 +272,8 @@ $selectionHaloColor = #accef78d
 
 .h-3 > .title
   @extend .h3__title
+  &:after
+    top -3px
 
 .h4__title
   font-size: 1.2em
@@ -271,7 +282,8 @@ $selectionHaloColor = #accef78d
 
 .h-4 > .title
   @extend .h4__title
-
+  &:after
+    top -3px
 // header end
 
 // code

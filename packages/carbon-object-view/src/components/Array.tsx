@@ -74,12 +74,15 @@ export const ArrayView = (props: ArrayProps) => {
               );
             })}
           </div>
-          <span className={"cov-right-bracket"}>]</span>
           {expanded && showMore && (
-            <div className={"cov-show-more"} onClick={handleShowMore}>
+            <div
+              className={"cov-show-more cov-show-more__array-items"}
+              onClick={handleShowMore}
+            >
               ...more
             </div>
           )}
+          <span className={"cov-right-bracket"}>]</span>
         </>
       )}
 
