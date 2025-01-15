@@ -89,6 +89,10 @@ export class BlockMenuPlugin extends BeforePlugin {
 
     const { checked } = this;
 
+    if (title.parent?.isPage) {
+      return;
+    }
+
     if (title.isEmpty) {
       checked.delete(title.id.toString());
       if (this.visible) {

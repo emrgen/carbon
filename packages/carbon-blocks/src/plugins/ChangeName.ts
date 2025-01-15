@@ -1,5 +1,4 @@
 import {
-  ActionOrigin,
   BeforeInputRuleHandler,
   BeforeInputRuleInlineHandler,
   BeforePlugin,
@@ -27,7 +26,7 @@ import { isConvertible } from "../utils";
 import { NumberedList } from "./NumberedList";
 
 declare module "@emrgen/carbon-core" {
-  export interface Transaction { }
+  export interface Transaction {}
 }
 
 // Things needed to change a node type (e.g. from paragraph to heading):
@@ -279,8 +278,8 @@ export class ChangeName extends BeforePlugin {
         .Update(newNode, {
           [FocusOnInsertPath]: true,
         })
-        .Select(PinnedSelection.SKIP, ActionOrigin.UserInput)
-        // .Select(after)
+        // .Select(PinnedSelection.SKIP, ActionOrigin.UserInput)
+        .Select(after)
         .Dispatch();
     };
   }
@@ -371,5 +370,5 @@ export class ChangeName extends BeforePlugin {
     };
   }
 
-  insertBefore(name: string, groups: string[]) { }
+  insertBefore(name: string, groups: string[]) {}
 }

@@ -115,8 +115,6 @@ enum DndLayout {
 export interface NodeSpec {
   name?: string;
   // TODO: splitName should be enough to check if the node is splittable
-  splits?: boolean;
-  splitName?: string;
   content?: string;
   marks?: string;
   group?: string;
@@ -125,6 +123,8 @@ export interface NodeSpec {
   tag?: string;
   zero?: boolean;
   options?: boolean;
+  focusable?: boolean;
+  insert?: boolean;
   mergeable?: boolean;
   observable?: boolean;
   weakEnd?: boolean;
@@ -141,10 +141,6 @@ export interface NodeSpec {
   // last empty children stays within on enter
   // only backspace can unwrap the last child
   collapsible?: boolean;
-
-  inlineSelectable?: boolean;
-  blockSelectable?: boolean;
-  rectSelectable?: boolean;
 
   normalize?: {
     // what to do when the node is empty
@@ -207,11 +203,7 @@ export interface NodeSpec {
     resize?: string; // x, y, lt, rt, lb, rb, lx, rx, ty, by, xy
     rotate?: boolean; // true, false
   };
-  focusable?: boolean;
-  draggable?: boolean;
-  dragHandle?: boolean;
 
-  insert?: boolean;
   // node is a embedded element
   // it can be a video, audio, external react
   embedded?: boolean;
