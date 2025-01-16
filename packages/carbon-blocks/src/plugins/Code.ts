@@ -27,12 +27,12 @@ export class Code extends CarbonPlugin {
   spec(): NodeSpec {
     return {
       group: "content",
-      content: "codeTitle",
+      content: "title",
       blockSelectable: true,
       rectSelectable: true,
       draggable: true,
       dragHandle: true,
-      tag: "pre",
+      tag: "div",
       props: {
         local: {
           placeholder: {

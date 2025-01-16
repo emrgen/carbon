@@ -120,11 +120,14 @@ export const ResizableContainer = (props: MediaViewProps) => {
 
   const onDragStart = useCallback(
     (e: DndEvent) => {
-      const { setInitState } = e;
-      setInitState("resizable-container", {
+      const { setInitState, setPrevState } = e;
+      const state = {
         width: ref?.current?.offsetWidth ?? 0,
         height: ref?.current?.offsetHeight ?? 0,
-      });
+      };
+
+      setInitState("resizable-container", state);
+      setPrevState("resizable-container", state);
     },
     [ref],
   );
@@ -215,6 +218,7 @@ export const ResizableContainer = (props: MediaViewProps) => {
     >
       <Flex
         className={"resizable-content"}
+        // userSelect={"none"} // prevent content selection
         pos={"relative"}
         h={"full"}
         w={"full"}

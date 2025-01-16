@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { stop } from "@emrgen/carbon-core/src/utils/event";
 import {
   CarbonBlock,
   CarbonChildren,
@@ -6,7 +6,7 @@ import {
   useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
-import { stop } from "@emrgen/carbon-core/src/utils/event";
+import React, { useRef } from "react";
 
 export const CodeComp = (props: RendererProps) => {
   const { node } = props;

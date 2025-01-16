@@ -34,7 +34,6 @@ import {
   commentEditorPlugin,
 } from "@emrgen/carbon-comment-editor";
 import {
-  CollapsedPath,
   ContenteditablePath,
   corePresetPlugins,
   Mark,
@@ -74,6 +73,9 @@ const data = node("carbon", [
     "page",
     [
       title([text("Elixir")]),
+
+      node("code", [title(text("function name(){}"))], {}),
+
       // node("video", [], {
       //   "remote/state/video/src":
       //     "https://www.youtube.com/watch?v=srNoYnGhXAg&pp=ygUEc29uZw%3D%3D",
@@ -85,36 +87,6 @@ const data = node("carbon", [
       // }),
 
       paragraph([title(text("question title"))]),
-      node("pageTree", [
-        plainText("Favorites"),
-        node(
-          "pageTreeItem",
-          [
-            plainText("Computer Science"),
-            node("pageTreeItem", [plainText("Algorithms")]),
-            node("pageTreeItem", [plainText("Data Structures")]),
-            node("pageTreeItem", [plainText("Operating Systems")]),
-          ],
-          { [CollapsedPath]: false },
-        ),
-        node("pageTreeItem", [
-          plainText("Electrical Engineering"),
-          node("pageTreeItem", [plainText("Circuits")]),
-          node("pageTreeItem", [plainText("Digital Logic")]),
-          node("pageTreeItem", [plainText("Microprocessors")]),
-        ]),
-      ]),
-
-      // node("flashCard", [
-      //   node("flashView", [
-      //     title([text("question")]),
-      //     paragraph([title([text("flash card content")])]),
-      //   ]),
-      //   node("flashAnswer", [
-      //     title([text("answer")]),
-      //     paragraph([title([text("flash card content")])]),
-      //   ]),
-      // ]),
 
       node("continue", [
         node("button", [node("plainText", [text("continue")])], {
@@ -568,12 +540,6 @@ const data = node("carbon", [
       node("sandbox", [node("cell")]),
 
       // paragraph([title([text("section 1")])]),
-
-      // node("code", [
-      //   node("codeLine", [title([text("function foo() {")])]),
-      //   node("codeLine", [title([text("  console.log('hello world')")])]),
-      //   node("codeLine", [title([text("}")])]),
-      // ]),
 
       // node("pageTree", [
       //   title([text("Private")]),

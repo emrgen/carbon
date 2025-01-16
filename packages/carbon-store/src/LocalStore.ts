@@ -5,10 +5,15 @@ import { Document, Space, Store } from "./Store";
 const STORE_KEY = "carbon-store";
 const SPACE_KEY = "carbon-space";
 const DOC_KEY = "carbon-doc";
+const SPACE_CONTENT_KEY = "carbon-space-content";
+const DOC_META_KEY = "carbon-doc-meta";
 
 const getSpaceKey = (spaceId: string) => `${SPACE_KEY}:${spaceId}`;
+const getDocMetaKey = (docId: string) => `${DOC_KEY}:${docId}/${DOC_META_KEY}`;
 const getDocKey = (spaceId: string, docId: string) =>
   `${SPACE_KEY}:${spaceId}/${DOC_KEY}:${docId}`;
+const getSpaceContentKey = (spaceId: string) =>
+  `${SPACE_KEY}:${spaceId}/${SPACE_CONTENT_KEY}`;
 
 export class LocalStore implements Store {
   createSpace(spaceId?: string): Space {
@@ -60,22 +65,35 @@ export class LocalSpace implements Space {
     this.name = spaceId;
   }
 
+  // create a child space
   createSpace(name: string): Space {
     throw new Error("Method not implemented.");
   }
 
-  createDocument(docId?: string, content?: string): Document {
-    const doc = new LocalDoc(this, docId || uuidv4(), "Untitled");
+  createDocument(parentId: string, docId: string, content?: string): Document {
+    const doc = new LocalDoc(this, parentId, docId || uuidv4(), "Untitled");
 
-    // Save the doc
+    // save the doc
     const docs = this.getDocuments();
     docs[doc.id] = {
+      parentId: doc.parentId,
       id: doc.id,
       spaceId: this.id,
       title: doc.title,
       content: content ?? "{}",
     };
     this.saveDocuments(docs);
+
+    // update the space content
+    const spaceContent = this.getSpaceContent();
+    if (!spaceContent[parentId]) {
+      spaceContent[parentId] = [];
+    }
+
+    spaceContent[parentId].push(doc.id);
+    this.saveSpaceContentLocal(spaceContent);
+
+    this.saveDocumentMeta(doc.id, { id: doc.id, title: doc.title });
 
     return doc;
   }
@@ -89,16 +107,49 @@ export class LocalSpace implements Space {
     localStorage.setItem(getSpaceKey(this.id), JSON.stringify(docs));
   }
 
+  private getSpaceContent(): JSON {
+    return this.getSpaceContentLocal();
+  }
+
+  getChildrenMeta(parentId: string): { id: string; title: string }[] {
+    const docs = this.getSpaceContentLocal();
+    const children = docs[parentId] || [];
+    return children.map((childId) => {
+      const doc = this.getDocumentMeta(childId);
+      return { id: doc.id, title: doc.title };
+    });
+  }
+
+  private getDocumentMeta(docId: string): { id: string; title: string } {
+    const doc = localStorage.getItem(getDocMetaKey(docId));
+    return doc ? JSON.parse(doc) : { id: docId, title: "Untitled" };
+  }
+
+  private saveDocumentMeta(docId: string, meta: { id: string; title: string }) {
+    localStorage.setItem(getDocMetaKey(docId), JSON.stringify(meta));
+  }
+
+  private getSpaceContentLocal(): JSON {
+    return JSON.parse(
+      localStorage.getItem(getSpaceContentKey(this.id)) || "{}",
+    );
+  }
+
+  private saveSpaceContentLocal(content: JSON) {
+    localStorage.setItem(getSpaceContentKey(this.id), JSON.stringify(content));
+  }
+
   getDocument(docId: string): Optional<Document> {
     const docs = this.getDocuments();
     const doc = docs[docId];
 
-    return doc ? new LocalDoc(this, doc.id, doc.title) : null;
+    return doc ? new LocalDoc(this, doc.parentId, doc.id, doc.title) : null;
   }
 }
 
 interface ILocalDoc {
   spaceId: string;
+  parentId: string;
   id: string;
   title: string;
   content: string;
@@ -107,10 +158,12 @@ interface ILocalDoc {
 export class LocalDoc implements Document {
   space: Space;
   id: string;
+  parentId: string;
   title: string;
 
-  constructor(space: Space, id: string, title: string) {
+  constructor(space: Space, parentId: string, id: string, title: string) {
     this.space = space;
+    this.parentId = parentId;
     this.id = id;
     this.title = title;
   }
@@ -123,10 +176,16 @@ export class LocalDoc implements Document {
   update(title: string, content: string): void {
     this.setDocument({
       id: this.id,
+      parentId: this.parentId,
       spaceId: this.space.id,
       title,
       content,
     });
+
+    localStorage.setItem(
+      getDocMetaKey(this.id),
+      JSON.stringify({ id: this.id, title }),
+    );
   }
 
   private getDocument(): Optional<ILocalDoc> {

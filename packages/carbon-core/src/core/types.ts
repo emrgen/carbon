@@ -4,6 +4,7 @@ import { EventContext } from "./EventContext";
 import { Node } from "./Node";
 import { NodeContentData } from "./NodeContent";
 import { NodeId } from "./NodeId";
+import { Pin } from "./Pin";
 import { PinnedSelection } from "./PinnedSelection";
 import { PointedSelection } from "./PointedSelection";
 import { InputRule } from "./Rules";
@@ -133,4 +134,14 @@ export interface JSONNode {
   text?: string;
   attrs?: Record<string, any>;
   data?: Record<string, any>;
+}
+
+export interface SelectionPosition {
+  node: globalThis.Node;
+  offset: number;
+}
+
+export interface SelectionMapper {
+  fromPin(pin: Pin): Optional<SelectionPosition>;
+  intoPin(pos: SelectionPosition): Optional<Pin>;
 }

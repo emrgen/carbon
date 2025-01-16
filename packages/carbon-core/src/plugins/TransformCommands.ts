@@ -2526,15 +2526,6 @@ export class TransformCommands extends BeforePlugin {
       throw new Error("can't merge isolated nodes");
     }
 
-    const { app } = tr;
-    const { selection } = app.state;
-    const actions: CarbonAction[] = [];
-    // check if prev and next can be merged
-    // const pin =
-    // TODO: use TextBlock.merge() to merge text nodes and then find the new pin
-    // let after = PinnedSelection.fromPin(pin);
-    // console.log("XX", after.toString());
-
     const moveActions: CarbonAction[] = [];
     const removeActions: CarbonAction[] = [];
     const insertActions: CarbonAction[] = [];
@@ -2577,20 +2568,29 @@ export class TransformCommands extends BeforePlugin {
       }
     }
 
-    // merge children
-    const at = Point.toAfter(prev.id);
+    // merge children of next to prev
     const { nextSiblings = [] } = next;
     if (nextSiblings.length) {
-      moveActions.push(...moveNodesActions(at, nextSiblings));
+      const match = getContentMatch(prev);
+      // if the nextSiblings satisfy the contentMatch of prev move the nextSiblings
+      if (match.matchFragment(Fragment.from(nextSiblings))?.validEnd) {
+        const at = Point.toAfter(prev.id);
+        moveActions.push(...moveNodesActions(at, nextSiblings));
+      } else {
+        const { parent } = next;
+        if (!parent) return;
+        const at = Point.toAfter(parent.id);
+        // TODO: otherwise check if nextSiblings can be unwrapped to keep the schema valid
+        // if the nextSiblings can't be moved, insert them after the next node
+        console.log("nextSiblings", nextSiblings);
+        moveActions.push(...moveNodesActions(at, nextSiblings));
+      }
     }
 
-    // console.log(next.parent?.id.toString(), next.id.toString());
-
+    // remove the next node
     removeActions.push(
       RemoveNodeAction.fromNode(nodeLocation(next.parent!)!, next.parent!),
     );
-
-    // console.log('Selection', after.toString());
 
     tr.Add(moveActions)
       .Add(removeActions)

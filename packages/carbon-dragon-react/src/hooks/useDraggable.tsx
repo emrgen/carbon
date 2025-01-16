@@ -1,4 +1,4 @@
-import { Node, prevent } from "@emrgen/carbon-core";
+import { Node, prevent, preventAndStop } from "@emrgen/carbon-core";
 import { DndEvent, getEventPosition } from "@emrgen/carbon-dragon";
 import {
   MutableRefObject,
@@ -47,7 +47,7 @@ export interface UseDraggableHandleProps extends UseFastDraggableProps {
 // but it's more focused on the handle and the events are dispatched to the dnd context directly
 export const useDraggableHandle = (props: UseDraggableHandleProps) => {
   const { id, node, disabled, ref, activationConstraint = {} } = props;
-  const { distance = 4 } = activationConstraint;
+  const { distance = 2 } = activationConstraint;
   const [isDisabled, setIsDisabled] = useState(disabled);
   const refId = useRef<string>(Math.random().toString(16).slice(6));
 
@@ -68,6 +68,8 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       if (isDisabled) return;
       if (ref.current !== event.target) return;
       dnd.onMouseDown(node, event);
+      // prevent default behavior like text selection, image dragging, etc
+      prevent(event);
       let isDragging = false;
 
       const activatorEvent = event;
@@ -76,6 +78,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       const getPrevState = (k) => prevState[k];
       const setInitState = (k, state) => {
         initState[k] = state;
+        prevState[k] = state;
       };
       const setPrevState = (k, state) => {
         prevState[k] = state;
@@ -98,7 +101,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
         };
 
         if (isDragging) {
-          prevent(event);
+          preventAndStop(event);
           dnd.onDragEnd(dndEvent);
         }
 

@@ -13,9 +13,11 @@ export interface Space {
   // create child space
   createSpace(name: string): Space;
   // create document within the space
-  createDocument(docId?: string, content?: string): Document;
+  createDocument(parentId: string, docId: string, content?: string): Document;
   // get document by name
   getDocument(docId: string): Optional<Document>;
+  // get all children meta
+  getChildrenMeta(parentId: string): { id: string; title: string }[];
 }
 
 export interface Document {
