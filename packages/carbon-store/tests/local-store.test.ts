@@ -7,7 +7,7 @@ test("find the current affine from a shape", () => {
   const space = store.createSpace(uuidv4());
   expect(space).toBeDefined();
 
-  const d1 = space.createDocument();
+  const d1 = space.createDocument(space.id, uuidv4());
   expect(d1).toBeDefined();
 
   const d1Content1 = JSON.stringify({
@@ -23,4 +23,9 @@ test("find the current affine from a shape", () => {
   });
   d1.update("title", d1Content2);
   expect(d1.json()).toEqual(d1Content2);
+
+  const d2 = space.createDocument(d1.id, uuidv4());
+  expect(d2).toBeDefined();
+
+  console.log(space.getChildrenMeta(space.id));
 });

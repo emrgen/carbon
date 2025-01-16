@@ -7,6 +7,7 @@ import { CarbonMessageFormat } from "./MessageBus";
 import { Node } from "./Node";
 import { StateActions } from "./NodeChange";
 import { PlainNodeProps } from "./NodeProps";
+import { Pin } from "./Pin";
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginManager } from "./PluginManager";
 import { PluginState } from "./PluginState";
@@ -119,6 +120,10 @@ export abstract class CarbonPlugin {
   // publish(editor:Editor) { }
 
   decorate(node: Node, props: PlainNodeProps) {}
+
+  pinFromDom(dom: HTMLElement, offset: number): Optional<Pin> {
+    return null;
+  }
 }
 
 export class NodePlugin extends CarbonPlugin {
