@@ -111,9 +111,35 @@ export class TitlePlugin extends NodePlugin {
 
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);
+          this.insertText(ctx, "\n");
+        }
+      },
+      enter: (ctx: EventContext<KeyboardEvent>) => {
+        if (ctx.currentNode.parent?.type.isCode) {
+          this.insertText(ctx, "\n");
+        }
+      },
+      tab: (ctx: EventContext<KeyboardEvent>) => {
+        if (ctx.currentNode.parent?.type.isCode) {
+          // TODO: insert extra tab to match indentation
+          const { selection } = ctx;
+          const { start, end } = selection;
+          const { textContent } = ctx.currentNode;
+          // const { offset };
+          if (selection.isCollapsed) {
+            this.insertText(ctx, `\t`);
+          } else {
+            console.error("not implemented");
+          }
         }
       },
     };
+  }
+
+  protected insertText(ctx: EventContext<KeyboardEvent>, text: string) {
+    preventAndStopCtx(ctx);
+    const { app, cmd } = ctx;
+    cmd.transform.insertText(app.state.selection, text, false)?.Dispatch();
   }
 
   onTextInsert(ctx: EventContext<KeyboardEvent>) {

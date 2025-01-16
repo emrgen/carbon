@@ -15,6 +15,7 @@ import {
   Point,
   preventAndStopCtx,
   Transaction,
+  withinCodeBlock,
   Writer,
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
@@ -204,6 +205,10 @@ export class NestablePlugin extends AfterPlugin {
           return;
         }
 
+        if (withinCodeBlock(currentNode)) {
+          return;
+        }
+
         // when the cursor is at start of the empty node
         const listNode = currentNode.closest(isNestableNode);
         if (!listNode) return;
@@ -250,6 +255,7 @@ export class NestablePlugin extends AfterPlugin {
       },
       // push the
       tab: (ctx: EventContext<KeyboardEvent>) => {
+        if (withinCodeBlock(ctx.currentNode)) return;
         preventAndStopCtx(ctx);
         const { app, currentNode, cmd } = ctx;
         const { selection } = app;

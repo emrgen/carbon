@@ -9,20 +9,18 @@ import {
   MarksPath,
   Node,
   NodeEncoder,
+  Pin,
+  PinnedSelection,
   PluginManager,
   preventAndStopCtx,
   SetContentAction,
+  splitTextBlock,
   TitleNode,
   Writer,
 } from "@emrgen/carbon-core";
-import { Pin } from "@emrgen/carbon-core";
-import { PinnedSelection } from "@emrgen/carbon-core";
-import { splitTextBlock } from "@emrgen/carbon-core";
-import prism from "prismjs";
 import { Optional } from "@emrgen/types";
-import { cloneDeep, identity, uniq } from "lodash";
 import { diffArrays } from "diff";
-import "prismjs/components/prism-go";
+import { cloneDeep, identity, uniq } from "lodash";
 import { TitlePlugin } from "./Title";
 
 export class CodeTitle extends TitlePlugin {
@@ -51,7 +49,7 @@ export class CodeTitle extends TitlePlugin {
     };
   }
 
-  insertText(ctx: EventContext<any>, text: string) {
+  protected insertText(ctx: EventContext<KeyboardEvent>, text: string) {
     const { app, cmd } = ctx;
     if (app.selection.isCollapsed) {
       const { selection } = app.state;
@@ -137,9 +135,10 @@ export class CodeTitle extends TitlePlugin {
     return [SetContentAction.withBefore(node, node.children, content)];
   }
 
+  // highlight the content of the code title node
   static highlightContent(node: Node): Node[] {
     const { marks, textContent } = CodeTitle.segregate(node);
-    const tokens = CodeTitle.tokenize(textContent, "go");
+    const tokens = CodeTitle.tokenize(textContent);
     const markLightTokens = CodeTitle.applyTokenMarks(
       textContent,
       tokens,
@@ -343,57 +342,59 @@ export class CodeTitle extends TitlePlugin {
     // console.log("text content", `"${textContent}"`);
     // console.log(prism.tokenize(textContent, prism.languages[language]));
 
-    return prism.tokenize(textContent, prism.languages[language]).reduce(
-      (acc, tok) => {
-        const { tokens, offset } = acc;
-        if (typeof tok === "string") {
-          if (tok.trim() === "") {
-            return {
-              tokens: [
-                ...tokens,
-                {
-                  content: tok,
-                  type: "whitespace",
-                  start: offset,
-                  end: offset + tok.length,
-                },
-              ],
-              offset: offset + tok.length,
-            };
-          }
+    // return prism.tokenize(textContent, prism.languages[language]).reduce(
+    //   (acc, tok) => {
+    //     const { tokens, offset } = acc;
+    //     if (typeof tok === "string") {
+    //       if (tok.trim() === "") {
+    //         return {
+    //           tokens: [
+    //             ...tokens,
+    //             {
+    //               content: tok,
+    //               type: "whitespace",
+    //               start: offset,
+    //               end: offset + tok.length,
+    //             },
+    //           ],
+    //           offset: offset + tok.length,
+    //         };
+    //       }
+    //
+    //       return {
+    //         tokens: [
+    //           ...tokens,
+    //           {
+    //             content: tok,
+    //             type: "text",
+    //             start: offset,
+    //             end: offset + tok.length,
+    //           },
+    //         ],
+    //         offset: offset + tok.length,
+    //       };
+    //     }
+    //
+    //     return {
+    //       tokens: [
+    //         ...acc.tokens,
+    //         {
+    //           content: tok.content.toString(),
+    //           type: tok.type,
+    //           start: offset,
+    //           end: offset + tok.content.length,
+    //         },
+    //       ],
+    //       offset: offset + tok.content.length,
+    //     };
+    //   },
+    //   {
+    //     tokens: [] as HighlightToken[],
+    //     offset: 0,
+    //   },
+    // ).tokens;
 
-          return {
-            tokens: [
-              ...tokens,
-              {
-                content: tok,
-                type: "text",
-                start: offset,
-                end: offset + tok.length,
-              },
-            ],
-            offset: offset + tok.length,
-          };
-        }
-
-        return {
-          tokens: [
-            ...acc.tokens,
-            {
-              content: tok.content.toString(),
-              type: tok.type,
-              start: offset,
-              end: offset + tok.content.length,
-            },
-          ],
-          offset: offset + tok.content.length,
-        };
-      },
-      {
-        tokens: [] as HighlightToken[],
-        offset: 0,
-      },
-    ).tokens;
+    return [];
   }
 }
 

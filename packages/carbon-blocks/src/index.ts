@@ -83,6 +83,7 @@ export * from "./plugins/PageTree";
 export * from "./plugins/Tab";
 export * from "./plugins/Tab";
 export * from "./plugins/Bookmark";
+export * from "./plugins/CodeTitle";
 export * from "./types";
 
 export { StartPath, EndPath, StepPath, ValuePath, ViewedPath };

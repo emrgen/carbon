@@ -1,4 +1,5 @@
 import { Node } from "@emrgen/carbon-core";
+import { ReactNode } from "react";
 import { CarbonDefaultNode } from "./CarbonNodes";
 
 export type VNode = any;
@@ -8,6 +9,8 @@ export type RenderComponent = (props: RendererProps) => VNode;
 export interface RendererProps {
   node: Node;
   children?: any;
+  before?: ReactNode;
+  after?: ReactNode;
   custom?: Record<string, any>;
   comp?: (prev: RendererProps, next: RendererProps) => boolean;
   [key: string]: any;

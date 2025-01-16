@@ -145,6 +145,10 @@ export class NodeType {
     return !!this.spec.page;
   }
 
+  get isCode() {
+    return !!this.spec.code;
+  }
+
   get isBlockSelectable() {
     return !!this.spec.blockSelectable;
   }
