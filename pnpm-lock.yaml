@@ -2857,6 +2857,9 @@ importers:
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(jsdom@25.0.1)(playwright@1.49.1)(stylus@0.64.0)(terser@5.37.0)
     devDependencies:
       '@emrgen/eslint-config-custom':
         specifier: workspace:*
