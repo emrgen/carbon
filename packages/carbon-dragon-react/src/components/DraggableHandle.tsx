@@ -299,7 +299,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
       } else {
         if (node.type.dnd?.handle) {
           app.parkCursor();
-          app.cmd.SelectBlocks([node.id])?.Dispatch();
+          app.cmd
+            .SelectBlocks([node.id])
+            ?.Select(PinnedSelection.SKIP)
+            .Dispatch();
           app.emit("show:context:menu", {
             node,
             event: e.event,

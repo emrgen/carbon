@@ -1,24 +1,26 @@
+import { useDragDropRectSelect } from "@emrgen/carbon-dragon-react";
 
+import {
+  CarbonBlock,
+  CarbonNodeChildren,
+  CarbonNodeContent,
+  RendererProps,
+  useSelectionHalo,
+} from "@emrgen/carbon-react";
 import { useRef } from "react";
-
-import {CarbonBlock, CarbonNodeChildren, CarbonNodeContent, RendererProps, useSelectionHalo} from "@emrgen/carbon-react";
-import {useCombineConnectors, useConnectorsToProps, useDragDropRectSelect} from "@emrgen/carbon-dragon-react";
 
 export const QuoteComp = (props: RendererProps) => {
   const { node } = props;
   const ref = useRef(null);
 
-  const selection = useSelectionHalo(props);
-  const dragDropRect = useDragDropRectSelect({ node, ref });
-  const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection)
-  );
+  useDragDropRectSelect({ node, ref });
+  const { SelectionHalo } = useSelectionHalo(props);
 
   return (
-    <CarbonBlock node={node} ref={ref} custom={connectors}>
+    <CarbonBlock node={node} ref={ref}>
       <CarbonNodeContent node={node} />
       <CarbonNodeChildren node={node} />
-      {selection.SelectionHalo}
+      {SelectionHalo}
     </CarbonBlock>
   );
 };

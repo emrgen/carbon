@@ -38,16 +38,16 @@ export class Section extends NodePlugin {
       content: "title content*",
       splits: true,
       splitName: "paragraph",
-      inlineSelectable: true,
-      draggable: true,
-      dragHandle: true,
       dnd: {
-        handle: true,
         draggable: true,
+        handle: true,
         container: true,
       },
-      rectSelectable: true,
-      blockSelectable: true,
+      selection: {
+        rect: true,
+        block: true,
+        inline: true,
+      },
       insert: true,
       info: {
         title: "Text",

@@ -6,6 +6,7 @@ import {
   NodeComparator,
   NodeId,
   NodeIdSet,
+  PinnedSelection,
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import EventEmitter from "events";
@@ -101,7 +102,7 @@ export class RectSelect extends EventEmitter {
     console.log("onDragStart", e.node.name);
   }
 
-  // select nodes colliding with the selection box
+  // select nodes colliding with the selection rect box defined by the drag event
   onDragMove(e: DndEvent) {
     this.emit(RectSelectorEvent.DragMove, e);
 
@@ -111,16 +112,12 @@ export class RectSelect extends EventEmitter {
     // // can not move block while inline selection is active
     // console.log(selection.isInline);
     // if (selection.isInline) return;
-    console.log(
-      "current selection",
-      app.selection.blocks.map((n) => n.id),
-    );
-    const document = node.chain.find((n) => n.isPage);
-    if (!document) {
+    const page = node.chain.find((n) => n.isPage);
+    if (!page) {
       return;
     }
 
-    const doc = app.store.element(document!.id);
+    const doc = app.store.element(page!.id);
     const docParent = doc?.parentNode as HTMLElement;
 
     if (!docParent) {
@@ -135,7 +132,7 @@ export class RectSelect extends EventEmitter {
           top: scrollTop,
         }),
       )
-      .filter((n) => n.type.spec.rectSelectable);
+      .filter((n) => n.type.spec.selection?.rect);
 
     if (collides.length === 0) {
       if (this.noSelectionChange([])) return;
@@ -197,6 +194,7 @@ export class RectSelect extends EventEmitter {
     // select all nodes start from higher level
     const selectedIds = selectedMap.toArray().map((n) => n.id);
     if (this.noSelectionChange(selectedIds)) return;
+
     this.selectNodes(selectedIds);
   }
 
@@ -205,17 +203,15 @@ export class RectSelect extends EventEmitter {
     origin: ActionOrigin = ActionOrigin.UserSelectionChange,
   ) {
     const set = new NodeIdSet(ids);
-    // console.log('selectNodes', set.map(id => id.toString()));
     const { app } = this;
     const idList = set.toArray();
     if (this.noSelectionChange(idList)) return;
-    app.cmd.SelectBlocks(idList).Dispatch();
-    // app.cmd.Select(PointedSelection.fromNodes(idList)).Dispatch();
+    app.cmd.SelectBlocks(idList).Select(PinnedSelection.SKIP).Dispatch();
   }
 
   private noSelectionChange(ids: NodeId[]) {
     const map = new NodeIdSet(ids);
-    const { blocks } = this.app.selection;
+    const { blocks } = this.app.blockSelection;
     return ids.length === blocks.length && blocks.every((n) => map.has(n.id));
   }
 

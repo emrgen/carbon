@@ -451,6 +451,10 @@ export class PinnedSelection {
         selection?.anchorOffset === anchorOffset &&
         selection?.focusOffset === focusOffset;
 
+      // NOTE: this is a hack to prevent selection flickering,
+      // when the selection is set by the user, we don't want to set it again, just update the internal state
+      // because it will cause the selection to flicker
+      // if the selection is not in sync, then set it again
       if (!inSync || this.origin === ActionOrigin.UserInput) {
         // console.log(
         //   p14("%c[info]"),
@@ -461,6 +465,7 @@ export class PinnedSelection {
         //   focusNode,
         //   focusOffset,
         // );
+
         if (!inSync) {
           selection?.setBaseAndExtent(
             anchorNode,

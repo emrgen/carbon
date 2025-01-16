@@ -44,14 +44,23 @@ export class Collapsible extends NodePlugin {
       content: "title content*",
       splits: true,
       splitName: "paragraph",
+      split: {
+        name: "paragraph",
+        inside: true,
+      },
       insert: true,
       collapsible: true,
-      inlineSelectable: true,
-      draggable: true,
-      dragHandle: true,
-      rectSelectable: true,
-      blockSelectable: true,
       pasteBoundary: true,
+      dnd: {
+        draggable: true,
+        container: true,
+        handle: true,
+      },
+      selection: {
+        block: true,
+        inline: true,
+        rect: true,
+      },
       info: {
         title: "Toggle List",
         description: "Create a toggle list",

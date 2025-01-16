@@ -1,6 +1,11 @@
+import { preventAndStop } from "@emrgen/carbon-core/src/utils/event";
+import {
+  boundFromPoints,
+  DndEvent,
+  pointsFromFastDndEvent,
+} from "@emrgen/carbon-dragon";
 import { Optional, RawPoint } from "@emrgen/types";
 import { useCallback, useState } from "react";
-import {boundFromPoints, DndEvent, pointsFromFastDndEvent} from "@emrgen/carbon-dragon";
 
 interface UseDragRectProps {
   offset?: number;
@@ -29,7 +34,7 @@ export const useDragRect = (props?: UseDragRectProps) => {
             <div
               style={dragRect ?? {}}
               className="carbon-selector"
-              onMouseUp={stop}
+              onMouseUp={preventAndStop}
             />
           )}
 
@@ -47,7 +52,7 @@ export const useDragRect = (props?: UseDragRectProps) => {
   );
 
   const onDragRectProgress = useCallback((e: DndEvent) => {
-    const {sp, ep} = pointsFromFastDndEvent(e)
+    const { sp, ep } = pointsFromFastDndEvent(e);
     setDragRect(boundFromPoints(sp, ep));
     setCursorPoint(ep);
   }, []);

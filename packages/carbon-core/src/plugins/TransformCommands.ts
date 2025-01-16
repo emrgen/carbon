@@ -582,7 +582,9 @@ export class TransformCommands extends BeforePlugin {
       tr.Insert(Point.toAfter(lastNode.id), sliceClone.nodes);
 
       if (sliceClone.isBlockSelection) {
-        tr.SelectBlocks(sliceClone.nodes.map((n) => n.id));
+        tr.SelectBlocks(sliceClone.nodes.map((n) => n.id)).Select(
+          PinnedSelection.SKIP,
+        );
       } else if (focusNode) {
         tr.SelectBlocks([]).Select(
           PinnedSelection.fromPin(Pin.toEndOf(focusNode)!),
@@ -622,7 +624,7 @@ export class TransformCommands extends BeforePlugin {
         }
       }
 
-      return tr;
+      return tr.Select(PinnedSelection.SKIP);
     }
 
     const { start: startTitle, end: endTitle } = sliceClone;

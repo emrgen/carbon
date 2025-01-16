@@ -195,18 +195,9 @@ export class EventManager {
 
     const isSelectionUnchanged = app.selection.eq(selection);
     let isDomSelectionChanged = false;
-    if (type === EventsIn.selectionchange) {
-      // isDomSelectionChanged = !selection.isDomInSync(app.store);
-    }
 
     // new dom selection is same as exiting editor.selection then skip
     if (type === EventsIn.selectionchange && isSelectionUnchanged) {
-      // console.log(
-      //   p14("%c[sync-check]"),
-      //   "color:#ffcc006e",
-      //   selection.isDomInSync(app.store, app.dom),
-      // );
-
       // console.log(p14('%c[skipped]'), 'color:#ffcc006e', 'EventManager.onEvent selectionchange');
       console.log(p14("%c●"), "color:#ffcc006e");
       if (!isDomSelectionChanged) {
@@ -281,81 +272,7 @@ export class EventManager {
       );
       return;
     }
-
-    // this.afterEvent(editorEvent);
   }
-
-  // clickTimer: any = null
-  // beforeEvent(type: EventsIn, event: Event): EventsIn {
-  // 	const { react } = this;
-  // 	const { selection } = react;
-  // 	if (isKeyHotkey('shift+left')(event)) {
-  // 		if (selection.isCollapsed && selection.head.isAtDocStart) {
-  // 			event.preventDefault()
-  // 			return EventsIn.noop
-  // 		}
-  // 	}
-
-  // 	if (isKeyHotkey('shift+right')(event)) {
-  // 		if (selection.isCollapsed && selection.head.isAtDocEnd) {
-  // 			event.preventDefault()
-  // 			return EventsIn.noop
-  // 		}
-  // 	}
-
-  // 	if (isKeyHotkey('right')(event)) {
-  // 		if (selection.isCollapsed && selection.head.isAtDocEnd) {
-  // 			event.preventDefault()
-  // 			return EventsIn.noop
-  // 		}
-  // 	}
-
-  // 	if (isKeyHotkey('left')(event)) {
-  // 		// if (selection.isCollapsed && selection.head.isAtDocStart) {
-  // 		// 	event.preventDefault()
-  // 		// 	return EditorEventsIn.noop
-  // 		// }
-  // 	}
-
-  // 	if (type === EventsIn.blur) {
-  // 		react.state.updateSelection(PinnedSelection.default(react.content), this.runtime.origin, true)
-  // 		// this.focused = false
-  // 		return EventsIn.noop
-  // 	}
-
-  // 	if (type === EventsIn.focus) {
-  // 		// this.focused = true
-  // 	}
-
-  // 	// handle custom double/triple clicks
-  // 	if (type === EventsIn.mouseDown) {
-  // 		clearTimeout(this.clickTimer);
-  // 		this.clickTimer = setTimeout(() => {
-  // 			this.clicks = 0
-  // 		}, 400)
-
-  // 		const clicks = ++this.clicks;
-
-  // 		if (clicks >= 3) {
-  // 			this.clicks = 0;
-  // 			return EventsIn.tripleclick;
-  // 		}
-
-  // 		if (clicks > 1) {
-  // 			// event.preventDefault()
-  // 			return EventsIn.doubleclick;
-  // 		}
-  // 	}
-
-  // 	return type;
-  // }
-
-  // afterEvent(event: EditorEvent<Event>) {
-  // 	const { type } = event;
-  // 	if (type === EventsIn.mouseUp) {
-  // 		// this.normalize();
-  // 	}
-  // }
 
   // set the origin of the command based on the event type
   private updateCommandOrigin(type: EventsIn, event: Event, force = false) {

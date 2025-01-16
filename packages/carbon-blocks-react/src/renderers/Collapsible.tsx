@@ -7,13 +7,14 @@ import {
   Point,
   TxType,
 } from "@emrgen/carbon-core";
-import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
+import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent,
   RendererProps,
   useCarbon,
+  useSelectionHalo,
 } from "@emrgen/carbon-react";
 import { useCallback, useRef } from "react";
 import {
@@ -27,10 +28,8 @@ export default function CollapsibleListComp(props: RendererProps) {
   const isCollapsed = node.isCollapsed;
 
   const ref = useRef(null);
-  const { connectors, SelectionHalo } = useDragDropRectSelectHalo({
-    node,
-    ref,
-  });
+  const { SelectionHalo } = useSelectionHalo({ node });
+  useRectSelectable({ node, ref });
 
   // insert a new paragraph as child of this collapsible
   const handleInsert = useCallback(
@@ -91,7 +90,7 @@ export default function CollapsibleListComp(props: RendererProps) {
   return (
     <CarbonBlock
       {...props}
-      custom={{ "data-collapsed": isCollapsed, ...connectors }}
+      custom={{ "data-collapsed": isCollapsed }}
       ref={ref}
     >
       <CarbonNodeContent

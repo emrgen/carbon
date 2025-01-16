@@ -17,11 +17,16 @@ export class Quote extends CarbonPlugin {
       splits: true,
       splitName: "paragraph",
       insert: true,
-      inlineSelectable: true,
-      draggable: true,
-      dragHandle: true,
-      rectSelectable: true,
-      blockSelectable: true,
+      dnd: {
+        draggable: true,
+        handle: true,
+        container: true,
+      },
+      selection: {
+        rect: true,
+        block: true,
+        inline: true,
+      },
       info: {
         title: "Quote",
         description: "Write a quote",

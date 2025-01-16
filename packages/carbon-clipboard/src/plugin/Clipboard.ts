@@ -126,7 +126,7 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStopCtx(ctx);
         const { selection } = app;
         if (cache) {
-          app.cmd.transform.paste(selection, cache.clone())?.Dispatch();
+          app.cmd.transform.paste(selection, cache.clone()).Dispatch();
           return;
         }
 
@@ -140,7 +140,7 @@ export class ClipboardPlugin extends AfterPlugin {
 
           printNode(slice.root);
 
-          app.cmd.transform.paste(selection, slice.clone())?.Dispatch();
+          app.cmd.transform.paste(selection, slice.clone()).Dispatch();
         });
       },
       keyUp: (ctx: EventContext<any>) => {

@@ -274,15 +274,18 @@ export class ChangeManager extends NodeTopicEmitter {
       }
 
       if (selection.isInvalid) {
-        console.warn("skipped invalid selection sync");
         if (!selection.isSkip) {
+          console.warn("skipped invalid selection sync");
           app.blur();
+          return;
         }
+
         return;
       }
 
       this.pendingSelectionCounter += 1;
 
+      // start using the requestAnimationFrame for large content
       if (this.tr?.state.isLargeContent) {
         requestAnimationFrame(() => {
           selection.syncDom(app.store, app.dom);

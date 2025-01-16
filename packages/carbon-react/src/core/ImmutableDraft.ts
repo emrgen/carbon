@@ -99,6 +99,8 @@ export class ImmutableDraft implements Draft {
   private tm: Transformer;
 
   private drafting = true;
+  // check if any updated node had a large content
+  private isLargeContent: boolean = false;
 
   constructor(
     state: ImmutableState,
@@ -247,6 +249,7 @@ export class ImmutableDraft implements Draft {
       changes: this.changes.optimize(),
       actions: this.actions.optimize(),
       marks,
+      isLargeContent: this.isLargeContent,
     });
 
     // traverse all nodes within the selection and collect decorations
@@ -736,6 +739,9 @@ export class ImmutableDraft implements Draft {
     this.addContentChanged(parent.id);
     const block = node.closestBlock;
     this.updatePlaceholder(block.parent!, block, EmptyPlaceholderPath);
+    if (parent.size > 600) {
+      this.isLargeContent = true;
+    }
   }
 
   private prepend(parentId: NodeId, node: Node) {

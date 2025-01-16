@@ -1,9 +1,5 @@
 import { CheckedPath, preventAndStop, stop } from "@emrgen/carbon-core";
-import {
-  useCombineConnectors,
-  useConnectorsToProps,
-  useDragDropRectSelect,
-} from "@emrgen/carbon-dragon-react";
+import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -20,10 +16,7 @@ export function TodoComp(props: RendererProps) {
   const ref = useRef(null);
 
   const selection = useSelectionHalo(props);
-  const dragDropRect = useDragDropRectSelect({ node, ref });
-  const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection),
-  );
+  useRectSelectable({ node, ref });
 
   const isChecked = useMemo(() => {
     return !!node.props.get(CheckedPath);
@@ -52,7 +45,7 @@ export function TodoComp(props: RendererProps) {
   }, [handleClick, isChecked]);
 
   return (
-    <CarbonBlock {...props} ref={ref} custom={{ ...connectors, ...custom }}>
+    <CarbonBlock {...props} ref={ref} custom={{ ...custom }}>
       <CarbonNodeContent
         node={node}
         beforeContent={beforeContent}

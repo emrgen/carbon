@@ -28,6 +28,7 @@ interface StateProps {
   actions?: StateActions;
   counter?: number;
   marks?: MarkSet;
+  isLargeContent?: boolean;
 }
 
 export class ImmutableState implements State {
@@ -42,6 +43,7 @@ export class ImmutableState implements State {
   contentUpdated: NodeIdSet;
   changes: StateChanges;
   actions: StateActions;
+  isLargeContent: boolean;
 
   static create(
     scope: Symbol,
@@ -77,6 +79,7 @@ export class ImmutableState implements State {
       actions = StateActions.empty(),
       blockSelection = BlockSelection.empty(),
       marks = MarkSet.empty(),
+      isLargeContent = false,
     } = props;
 
     // scope and previous state
@@ -92,6 +95,7 @@ export class ImmutableState implements State {
     this.nodeMap = nodeMap;
     this.updated = updated;
     this.contentUpdated = contentUpdated;
+    this.isLargeContent = isLargeContent;
 
     // keep track of changes and actions that have been applied to the state
     this.changes = changes;

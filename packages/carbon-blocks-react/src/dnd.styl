@@ -192,10 +192,6 @@
     user-select: none
     z-index 999999999
 
-.carbon-node-handle[data-target-name=paragraph]
-    transform: translate(0px, 4px)
-    width 50px
-
 .carbon-node-handle[data-target-name=h1],
 .carbon-node-handle[data-target-as=h1]
     transform: translate(-4px, 10px)
@@ -215,17 +211,23 @@
 .carbon-node-handle[data-target-name=divider]
     transform: translate(-4px, -8px)
 
-.carbon-node-handle[data-target-name=numberList]
-    transform: translate(4px, 0px)
-    width 56px
-
+.carbon-node-handle[data-target-name=paragraph],
+.carbon-node-handle[data-target-name=collapsible],
 .carbon-node-handle[data-target-name=bulletList]
-    transform: translate(0px, 0px)
-    width 56px
+    transform: translate(-4px, 4px)
+    width 50px
+
+.carbon-node-handle[data-target-name=numberList]
+    transform: translate(-4px, 4px)
+    width 55px
 
 .carbon-node-handle[data-target-name=todo]
-    transform: translate(px, 0px)
+    transform: translate(-4px, 4px)
     width 56px
+
+.carbon-node-handle[data-target-name=callout]
+    transform: translate(0px, 12px)
+    width 50px
 
 $selection-color = hsla(213, 82%, 82%, 0.5)
 // [data-selected=true]

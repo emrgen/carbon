@@ -58,11 +58,7 @@ import {
   useCreateCarbon,
 } from "@emrgen/carbon-react";
 import { CarbonUI } from "@emrgen/carbon-ui";
-import {
-  CarbonApp,
-  carbonUtilPlugins,
-  ScrollIntoView,
-} from "@emrgen/carbon-utils";
+import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
 import { useEffect, useState } from "react";
 import { PathTracker } from "../../PathTracker";
@@ -252,7 +248,7 @@ export function SidebarLayout() {
               <InsertBlockMenu />
               {/*<BlockContextMenu />*/}
               <EmojiPickerInlineMenu />
-              <ScrollIntoView />
+              {/*<ScrollIntoView />*/}
             </CarbonApp>
           </ObservableQuestions>
         </ObservableNodes>

@@ -207,7 +207,7 @@ export class NodeType {
   }
 
   get isInlineSelectable() {
-    return !!this.spec.inlineSelectable;
+    return !!(this.spec.selection?.inline || this.spec.inlineSelectable);
   }
 
   get isSandbox() {
