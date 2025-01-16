@@ -436,14 +436,13 @@ export class KeyboardPlugin extends AfterPlugin {
   // handles enter event
   enter(ctx: EventContext<KeyboardEvent>) {
     console.log("Enter event...");
-    preventAndStopCtx(ctx);
+
     const { app, cmd } = ctx;
     const { selection, blockSelection } = app.state;
-    const { start, end } = selection;
-    const { node } = start;
 
     // put the cursor at the end of the first text block
     if (!blockSelection.isEmpty) {
+      preventAndStopCtx(ctx);
       console.log("node selection...");
       const { blocks } = blockSelection;
       console.log(blocks.map((n) => n.id.toString()));
@@ -488,6 +487,13 @@ export class KeyboardPlugin extends AfterPlugin {
 
     // const splitBlock = node.closest(n => n.canSplit);
     // node.chain.forEach(n => console.log(n.name, n.groups));
+
+    const { start, end } = selection;
+    const { node } = start;
+
+    // if (selection.isCollapsed && withinCodeBlock(node)) {
+    //   return;
+    // }
 
     // find the split block in the chain
     const splitBlock = node.closest((n) => n.type.splits);

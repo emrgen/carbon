@@ -1,8 +1,15 @@
-import React, { useCallback, useMemo } from "react";
-import {CarbonBlock, CarbonChildren, RendererProps} from "@emrgen/carbon-react";
+import {
+  CarbonBlock,
+  CarbonChildren,
+  EmptySpan,
+  RendererProps,
+} from "@emrgen/carbon-react";
+import React from "react";
 
 export default function TitleComp(props: RendererProps) {
   const { node, custom } = props;
+  const { textContent } = node;
+
   return (
     <CarbonBlock {...props} custom={custom}>
       <CarbonChildren {...props} />
@@ -10,6 +17,8 @@ export default function TitleComp(props: RendererProps) {
       {/* <div className="carbon-ai-suggested">
         <CarbonChildren node={cloned} />
       </div> */}
+
+      {!!textContent?.endsWith("\n") && <EmptySpan />}
     </CarbonBlock>
   );
 }

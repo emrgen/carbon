@@ -328,15 +328,61 @@ $selectionHaloColor = #accef78d
 // code
 pre
   white-space pre-wrap
-  font-size 0.9em
   line-height 1.5em
   //padding 10px
   margin 0
   background #f8f8f8
   border-radius 4px
-  //border 1px solid #ddd
+  font-family "Geist Mono", monospace
 
-// code end
+[data-name=code]
+  tab-size 2;
+  position relative;
+  > .title
+    color transparent
+    z-index 2
+
+select#carbon-code-themes
+  position absolute;
+  width 200px
+  height 20px
+  top 6px
+  right 6px
+  z-index 1
+  border-radius 4px
+  outline none
+  padding-right 6px;
+
+.carbon-code-block-highlight pre
+  position absolute;
+  width 100%;
+  height 100%;
+  top 0px;
+  left 0
+  padding: 24px 20px
+  code
+    font-size 15px
+    font-family "Geist Mono", monospace
+
+.shiki.github-light
+  background #eee!important
+
+.carbon-pre-highlight
+  position absolute;
+  padding: 24px 20px
+  top 0
+  left 0
+  width 100%;
+  z-index 1
+
+.carbon-code-highlight
+  pointer-events none
+  user-select none
+  font-family "Geist Mono", monospace
+  font-size 15px
+
+.token-line
+  display: block
 
 .collapsible[data-as="h1"]
   margin-top 0.8em;
@@ -425,3 +471,6 @@ pre
 
 [data-name=continue] [data-name=plainText]
   justify-content center
+
+[contenteditable=true]
+  -webkit-user-modify: read-write-plaintext-only

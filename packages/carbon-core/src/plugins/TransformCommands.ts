@@ -433,7 +433,6 @@ export class TransformCommands extends BeforePlugin {
     if (!selection.isCollapsed) {
       const aligned = selection.rightAlign;
       tr.transform.delete(aligned);
-      const { lastSelection } = tr;
       const action = tr.Pop();
       console.log(action);
       if (action instanceof SelectAction) {

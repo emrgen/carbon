@@ -1,6 +1,10 @@
 import { Node } from "../core/Node";
 import { takeBefore, takeUpto } from "./array";
 
+export const withinCodeBlock = (node: Node) => {
+  return node.closest((n) => n.isContainer)?.type.isCode;
+};
+
 export const nodePath = (start: Node, end: Node) => {
   const commonNode = start.commonNode(end);
   return takeUpto(start.chain, (n) => n.eq(commonNode)).concat(

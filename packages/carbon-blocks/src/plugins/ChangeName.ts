@@ -219,7 +219,6 @@ export class ChangeName extends BeforePlugin {
 
       cmd.SetContent(start.node, content);
       cmd.Change(block.id, type);
-      cmd.Change(block.firstChild!, "codeTitle");
       cmd.Update(block.id, { node: { typeChanged: true } });
       cmd.Update(block.firstChild!, {
         [UnstablePath]: Math.random().toString(36).slice(2, 12),

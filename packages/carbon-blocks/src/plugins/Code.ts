@@ -2,6 +2,7 @@ import {
   CarbonPlugin,
   ClassPathLocal,
   cloneFrozenNode,
+  CodeThemeNamePath,
   EventContext,
   EventHandlerMap,
   Node,
@@ -15,7 +16,6 @@ import {
 import { isKeyHotkey } from "is-hotkey";
 import { isEqual } from "lodash";
 // import { isKeyHotkey } from "is-hotkey";
-import { CodeTitle } from "./CodeTitle";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {}
@@ -28,11 +28,16 @@ export class Code extends CarbonPlugin {
     return {
       group: "content",
       content: "title",
-      blockSelectable: true,
-      rectSelectable: true,
-      draggable: true,
-      dragHandle: true,
       tag: "div",
+      selection: {
+        block: true,
+        inline: true,
+      },
+      dnd: {
+        draggable: true,
+        handle: true,
+      },
+      code: true,
       props: {
         local: {
           placeholder: {
@@ -43,12 +48,9 @@ export class Code extends CarbonPlugin {
             suppressContentEditableWarning: true,
           },
         },
+        [CodeThemeNamePath]: "catppuccin-latte",
       },
     };
-  }
-
-  plugins(): CarbonPlugin[] {
-    return [new CodeTitle()];
   }
 
   keydown(): EventHandlerMap {

@@ -271,6 +271,7 @@ export const OptionsOnInsertPath = "local/state/insert/options";
 export const SelectedOptionsPath = "remote/state/selected/options";
 export const ActiveChildPath = "local/state/active/child";
 export const CodeValuePath = "remote/state/code/value";
+export const CodeThemeNamePath = "remote/state/code/theme";
 
 export enum DocModes {
   View = "view",

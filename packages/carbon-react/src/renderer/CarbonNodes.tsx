@@ -25,6 +25,14 @@ import { useNodeChange, useRenderManager } from "../hooks";
 import { useCarbon } from "../hooks/index";
 import { defaultRenderPropComparator, RendererProps } from "./ReactRenderer";
 
+export const EmptySpan = () => {
+  return (
+    <span>
+      <br />
+    </span>
+  );
+};
+
 export const JustEmpty = (props: RendererProps) => {
   if (props.node.isText) {
     return <br />;
@@ -401,7 +409,7 @@ export const CarbonDefaultNode = (props: RendererProps) => {
 
 // render children of a node
 export const CarbonChildren = (props: RendererProps) => {
-  const { node } = props;
+  const { node, custom } = props;
 
   if (node.isVoid) {
     return <CarbonEmpty node={node} />;
@@ -409,14 +417,16 @@ export const CarbonChildren = (props: RendererProps) => {
 
   const children = node.children.map((n) => {
     // console.log('CarbonChildren', n.name, n.id.toString());
-    return <CarbonNode node={n} key={n.id.toString()} />;
+    return <CarbonNode node={n} key={n.id.toString()} custom={custom} />;
   });
+
   return <>{children}</>;
 };
 
 // render first node a content
 export const CarbonNodeContent = (props: RendererProps) => {
-  const { node, beforeContent, afterContent, custom, wrapper, wrap } = props;
+  const { node, beforeContent, afterContent, custom, wrapper, wrap, ...rest } =
+    props;
 
   const content = useMemo(() => {
     const { children = [] } = node;
@@ -433,13 +443,15 @@ export const CarbonNodeContent = (props: RendererProps) => {
   }
 
   if (!wrap) {
-    return <CarbonNode node={content} custom={custom} key={content.key} />;
+    return (
+      <CarbonNode node={content} custom={custom} key={content.key} {...rest} />
+    );
   }
 
   return (
     <div className={`ctiw`} {...wrapper}>
       {beforeContent}
-      <CarbonNode node={content} custom={custom} key={content.key} />
+      <CarbonNode node={content} custom={custom} key={content.key} {...rest} />
       {afterContent}
     </div>
   );
