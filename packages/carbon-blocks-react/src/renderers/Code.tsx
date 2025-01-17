@@ -39,6 +39,8 @@ export const CodeComp = (props: RendererProps) => {
       <CarbonChildren node={node} />
       <CodeContentComp node={node.child(0)!} themeName={themeName} />
       <select
+        contentEditable={false}
+        suppressContentEditableWarning={true}
         name="carbon-code-themes"
         id="carbon-code-themes"
         onChange={(e) => {
