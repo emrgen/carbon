@@ -1,6 +1,6 @@
 import { RendererProps, useNodeChangeObserver } from "@emrgen/carbon-react";
 import { toJsxRuntime } from "hast-util-to-jsx-runtime";
-import React, { Fragment, useEffect, useLayoutEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import type { BundledLanguage } from "shiki/bundle/web";
 import { codeToHast } from "shiki/bundle/web";
@@ -20,29 +20,53 @@ export const CodeContentComp = (props: CodeContentProps) => {
       contentEditable={false}
       suppressContentEditableWarning={true}
     >
-      <CodeBlock content={node.textContent} themeName={themeName} lang={"ts"} />
+      <CodeBlock
+        id={node.id.toString()}
+        content={node.textContent}
+        themeName={themeName}
+        lang={"ts"}
+      />
     </div>
   );
 };
 
-export function CodeBlock({
+// cache the code blocks after they are highlighted
+// NOTE: without this, the code blocks will be re-highlighted on every render
+// which causes a flicker effect
+const elsMap = new Map<string, JSX.Element>();
+const contentMap = new Map<string, string>();
+
+const codeKey = (id: string, themeName: string) => `${id}-${themeName}`;
+
+function CodeBlock({
+  id,
   content,
   lang,
   themeName,
 }: {
+  id: string;
   content: string;
   lang: BundledLanguage;
   themeName: string;
 }) {
-  const [nodes, setNodes] = useState<any>([]);
+  const [els, setEls] = useState<JSX.Element | null>(null);
+  const key = codeKey(id, themeName);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    // If the content and the theme is the same, don't re-highlight.
+    if (contentMap.has(key) && contentMap.get(key) === content) {
+      return;
+    }
 
-  useLayoutEffect(() => {
-    highlight(content, themeName, lang).then(setNodes);
-  }, [lang, content, themeName]);
+    highlight(content, themeName, lang).then((nodes) => {
+      elsMap[key] = nodes;
+      setEls(nodes);
+    });
 
-  return nodes ?? <p>Loading...</p>;
+    contentMap.set(key, content);
+  }, [lang, content, themeName, key]);
+
+  return elsMap[key] || els || null;
 }
 
 export async function highlight(
@@ -54,6 +78,8 @@ export async function highlight(
     lang,
     theme: themeName,
   });
+
+  console.log(out);
 
   return toJsxRuntime(out, {
     Fragment,
