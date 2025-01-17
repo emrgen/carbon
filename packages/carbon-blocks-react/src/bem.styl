@@ -342,6 +342,40 @@ pre
     color transparent
     z-index 2
 
+// enable line numbers
+[data-name=code].line-number
+  > .title
+    padding-left 36px
+  &.line-numbers-2 > .title
+    padding-left: 46px;
+  .carbon-code-block-highlight
+    code {
+      counter-reset: step;
+      counter-increment: step 0;
+    }
+
+    code .line::before {
+      content: counter(step);
+      counter-increment: step;
+      width: 16px;
+      margin-right: 20px;
+      display: inline-block;
+      text-align: right;
+      color: rgba(115,138,148,.4)
+      font-family "Geist Mono", monospace
+      //background red
+    }
+
+    &.line-numbers-2 code .line::before {
+      width: 26px;
+    }
+
+    &.line-numbers-3 code .line::before {
+      width: 36px;
+    }
+
+
+
 select#carbon-code-themes
   user-select none
   position absolute;
@@ -358,6 +392,7 @@ select#carbon-code-themes
   user-select none
   ::selection
     background: transparent
+
   pre
     position absolute;
     width 100%;
@@ -365,6 +400,7 @@ select#carbon-code-themes
     top 0px;
     left 0
     padding: 24px 20px
+
   code
     font-size 15px
     font-family "Geist Mono", monospace
@@ -479,3 +515,6 @@ select#carbon-code-themes
 
 [contenteditable=true]
   -webkit-user-modify: read-write-plaintext-only
+
+.newline
+  display block

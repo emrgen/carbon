@@ -33,15 +33,17 @@ const data = node("carbon", [
     [
       title([text("Elixir")]),
 
+      // paragraph([title(text("question title"))]),
+
+      node("code", [title([text("function name(){1}\n")])], {}),
+
       paragraph([title(text("question title"))]),
 
-      node("code", [title(text("function name(){}"))], {}),
-
-      paragraph([
-        title(text("question title")),
-        paragraph([title(text("question 1"))]),
-        paragraph([title(text("question 2"))]),
-      ]),
+      // paragraph([
+      //   title(text("question title")),
+      //   paragraph([title(text("question 1"))]),
+      //   paragraph([title(text("question 2"))]),
+      // ]),
     ],
     {
       [ModePath]: "edit",

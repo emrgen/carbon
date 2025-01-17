@@ -25,6 +25,7 @@ import { HStackComp } from "./renderers/HStackComp";
 import MCQComp from "./renderers/MCQ";
 import { MentionComp } from "./renderers/Mention";
 import { Modal } from "./renderers/Modal";
+import { Newline } from "./renderers/Newline";
 import { NumberedListComp } from "./renderers/NumberedList";
 import { PageLinkComp } from "./renderers/PageLink";
 import { PageTreeComp } from "./renderers/PageTree";
@@ -56,7 +57,6 @@ export const blockPresetRenderers = [
   ReactRenderer.create("equation", EquationComp),
   ReactRenderer.create("hstack", HStackComp),
   ReactRenderer.create("stack", HStackComp),
-  // Renderer.create('video', VideoComp),
   ReactRenderer.create("todo", TodoComp),
   ReactRenderer.create("quote", QuoteComp),
   ReactRenderer.create("callout", CalloutComp),
@@ -90,6 +90,7 @@ export const blockPresetRenderers = [
   ReactRenderer.create("bookmark", BookmarkComp),
   ReactRenderer.create("pageLink", PageLinkComp),
   ReactRenderer.create("plainText", PlainText),
+  ReactRenderer.create("newline", Newline),
   // ReactRenderer.create("empty", EmptyInline),
 ];
 

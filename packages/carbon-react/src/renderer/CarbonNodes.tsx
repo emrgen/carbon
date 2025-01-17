@@ -27,7 +27,7 @@ import { defaultRenderPropComparator, RendererProps } from "./ReactRenderer";
 
 export const EmptySpan = () => {
   return (
-    <span>
+    <span data-newline-empty={true}>
       <br />
     </span>
   );

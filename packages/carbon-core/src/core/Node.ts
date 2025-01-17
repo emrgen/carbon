@@ -258,6 +258,7 @@ export class Node extends EventEmitter implements IntoNodeId {
   // start and end locations are within the node
   get focusSize(): number {
     if (this.isZero) return 1;
+    // if (this.name === "newline") return 1;
 
     if (this.isInlineAtom && this.isFocusable) {
       return this.props.get(AtomSizePath) ?? this.textContent.length;

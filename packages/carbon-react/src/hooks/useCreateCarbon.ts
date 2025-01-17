@@ -38,6 +38,7 @@ export const createCarbon = (
   const { specs } = pm;
   const schema = new Schema(specs, new ImmutableNodeFactory(scope));
   const content = schema.nodeFromJSON(json);
+  console.log(content?.toJSON());
 
   if (!content) {
     throw new Error("Failed to parse react content");

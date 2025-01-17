@@ -1,22 +1,48 @@
 import { RendererProps, useNodeChangeObserver } from "@emrgen/carbon-react";
 import { toJsxRuntime } from "hast-util-to-jsx-runtime";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import type { BundledLanguage } from "shiki/bundle/web";
 import { codeToHast } from "shiki/bundle/web";
 
+export const getLineNumberClass = (lineNumber: number) => {
+  if (lineNumber < 10) {
+    return "line-numbers-1";
+  } else if (lineNumber < 100) {
+    return "line-numbers-2";
+  } else {
+    return "line-numbers-3";
+  }
+};
+
 interface CodeContentProps extends RendererProps {
   themeName?: string;
+  onChangeLineNumber?: (lineNumber: number) => void;
 }
 
 // TODO: use custom tokenization for code blocks, to include text formatting.
 export const CodeContentComp = (props: CodeContentProps) => {
+  const { onChangeLineNumber } = props;
   const { node } = useNodeChangeObserver(props);
   const { themeName = "github-dark" } = props;
 
+  const lineNumber = useMemo(() => {
+    return node.textContent.split("\n").length;
+  }, [node.textContent]);
+
+  useEffect(() => {
+    if (onChangeLineNumber) {
+      onChangeLineNumber(lineNumber);
+    }
+  }, [lineNumber, onChangeLineNumber]);
+
+  const lineNumberClass = useMemo(() => {
+    return getLineNumberClass(lineNumber);
+  }, [lineNumber]);
+
   return (
     <div
-      className={"carbon-code-block-highlight"}
+      className={"carbon-code-block-highlight " + lineNumberClass}
       contentEditable={false}
       suppressContentEditableWarning={true}
     >
@@ -78,8 +104,6 @@ export async function highlight(
     lang,
     theme: themeName,
   });
-
-  console.log(out);
 
   return toJsxRuntime(out, {
     Fragment,

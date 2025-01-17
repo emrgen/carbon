@@ -10,6 +10,8 @@ export default function TitleComp(props: RendererProps) {
   const { node, custom } = props;
   const { textContent } = node;
 
+  console.log("TitleComp", node.size);
+
   return (
     <CarbonBlock {...props} custom={custom}>
       <CarbonChildren {...props} />

@@ -44,7 +44,6 @@ export class TitleNode {
       console.error(node.toJSON());
       throw new Error("can not create text block from non text block node");
     }
-
     this.node = node;
     this.startMapper = startMapper;
     this.endMapper = endMapper;
@@ -174,6 +173,7 @@ export class TitleNode {
     return this.splitInp(stepOffset).insertInp(stepOffset + 1, node);
   }
 
+  // remove from a text block from a given range and return the new text block
   removeInp(from: number, to: number): TitleNode {
     if (from === to) {
       return this;
@@ -612,6 +612,17 @@ export class TitleNode {
         return [...acc, curr];
       }, [] as Node[]) ?? [];
 
+    // insert an extra empty span at the end of the text block if the last node ends with a newline
+    const lastNode = last(nodes);
+    if (lastNode?.textContent.endsWith("\n")) {
+      const empty = lastNode.type.schema.type("empty")?.default();
+      if (!empty) {
+        throw new Error("empty node not found");
+      }
+      console.info("xxxxxxxxxxxxxxxxxxxxxxxxx");
+      // nodes.push(empty);
+    }
+
     return new TitleNode(
       this.cloneNode(this.node, nodes),
       startMapper,
@@ -619,7 +630,7 @@ export class TitleNode {
     );
   }
 
-  normalizeInlineEmpty() {
+  private normalizeInlineEmpty() {
     const normalize = () => {
       const result = this.node.children.reduce((acc, curr, index) => {
         if (index === 0) {
@@ -686,6 +697,7 @@ export class TitleNode {
           return [...result, empty];
         }
       }
+
       return result;
     };
 
@@ -719,8 +731,10 @@ export class TitleNode {
     return TitleNode.normalizeNodeContent(children, this.node);
   }
 
+  // normalize the content of a text block
   static normalizeNodeContent(content: Node[], parent?: Node) {
     // merge adjacent text nodes with the same marks
+    let size = content.length;
     const nodes =
       content.reduce((acc, curr, index) => {
         // FIXME: this is a hack to remove the class from the title node
@@ -731,6 +745,13 @@ export class TitleNode {
         if (index === 0) {
           return [curr];
         }
+
+        // // handle newline within the text block
+        // if (index !== size - 1 && curr.name === "newline") {
+        //   return acc;
+        // } else if (index === size - 1 && curr.name === "newline") {
+        //   return [...acc, curr];
+        // }
 
         const prev = acc[acc.length - 1];
         const prevMarks = MarkSet.from(prev.marks);

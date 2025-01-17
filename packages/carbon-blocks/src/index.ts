@@ -20,6 +20,7 @@ import { HStack } from "./plugins/HStack";
 import { Insert } from "./plugins/Inserter";
 import { Mention } from "./plugins/Mention";
 import { Modal } from "./plugins/Modal";
+import { NewlinePlugin } from "./plugins/Newline";
 import { NumberedList } from "./plugins/NumberedList";
 import { PageLink } from "./plugins/PageLink";
 import { PageTree } from "./plugins/PageTree";
@@ -74,6 +75,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Attributes(),
   new Sandbox(),
   new PlainTextPlugin(),
+  new NewlinePlugin(),
 ];
 
 export * from "./events";

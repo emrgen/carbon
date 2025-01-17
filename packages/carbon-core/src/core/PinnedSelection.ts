@@ -1,4 +1,4 @@
-import { NodeBTree, NodeMap, sortNodes } from "@emrgen/carbon-core";
+import { NodeBTree, NodeMap, p30, sortNodes } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { flatten } from "lodash";
 import { takeBefore } from "../utils/array";
@@ -62,15 +62,15 @@ export class PinnedSelection {
       focusNode: focusEl,
       focusOffset,
     } = dom.selection;
-    // console.log(
-    //   p14("%c[info]"),
-    //   "color:pink",
-    //   p30("Selection.fromDom"),
-    //   anchorEl,
-    //   focusEl,
-    //   anchorOffset,
-    //   focusOffset,
-    // );
+    console.log(
+      p14("%c[info]"),
+      "color:pink",
+      p30("Selection.fromDom"),
+      anchorEl,
+      focusEl,
+      anchorOffset,
+      focusOffset,
+    );
 
     // console.log(store.nodeMap.nodes().map(n => `${n.key}:${n.parent?.key}`).join(' > '))
     let resolvedAnchorNode = store.resolve(anchorEl, anchorOffset);
@@ -78,7 +78,7 @@ export class PinnedSelection {
     anchorOffset = resolvedAnchorNode.offset;
     // console.log(
     //   "anchorNode path",
-    //   anchorNode?.chain.map((n) => n.key).join(" > "),
+    //   anchorNode?.chain.map((n) => n.name).join(" > "),
     //   anchorEl,
     // );
 
@@ -89,6 +89,31 @@ export class PinnedSelection {
     // console.log(anchorEl, anchorNode, anchorOffset);
     // console.log(anchorNode);
     // console.log(focusNode);
+
+    console.log(anchorEl, anchorEl?.nodeType);
+    if (
+      anchorNode?.textContent.endsWith("\n") &&
+      anchorEl?.nodeType === HTMLNodeType.ELEMENT &&
+      (anchorEl as HTMLElement).getAttribute("data-newline-empty")
+    ) {
+      const title = anchorNode?.closest((n) => n.isTextContainer);
+      if (title && title.size) {
+        anchorNode = title.lastChild!;
+        anchorOffset = anchorNode?.size;
+      }
+    }
+
+    if (
+      focusNode?.textContent.endsWith("\n") &&
+      focusEl?.nodeType === HTMLNodeType.ELEMENT &&
+      (focusEl as HTMLElement).getAttribute("data-newline-empty")
+    ) {
+      const title = anchorNode?.closest((n) => n.isTextContainer);
+      if (title && title.size) {
+        focusNode = title.lastChild!;
+        focusOffset = focusNode?.size;
+      }
+    }
 
     if (!focusNode || !anchorNode) {
       console.warn(p14("%c[error]"), "color:red", "Editor.resolveNode failed");

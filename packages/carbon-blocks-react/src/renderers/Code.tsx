@@ -6,10 +6,11 @@ import {
   useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
-import React, { useRef } from "react";
+import { isEqual } from "lodash";
+import React, { useCallback, useRef, useState } from "react";
 
 import { themes } from "tm-themes";
-import { CodeContentComp } from "./CodeContent";
+import { CodeContentComp, getLineNumberClass } from "./CodeContent";
 
 const themeNames = themes.map((theme) => theme.name);
 
@@ -26,8 +27,12 @@ export const CodeComp = (props: RendererProps) => {
   const app = useCarbon();
   const ref = useRef(null);
   const { attributes, SelectionHalo } = useSelectionHalo(props);
+  const [lineNumberClass, setLineNumberClass] = useState("line-numbers-1");
 
-  console.log(getThemeName(node));
+  const onChangeLineNumber = useCallback((lineNumber: number) => {
+    console.log("lineNumber", lineNumber, getLineNumberClass(lineNumber));
+    setLineNumberClass(getLineNumberClass(lineNumber));
+  }, []);
 
   return (
     <CarbonBlock
@@ -39,10 +44,20 @@ export const CodeComp = (props: RendererProps) => {
           caretColor:
             getThemeType(getThemeName(node)) === "dark" ? "white" : "black",
         },
+        className: lineNumberClass,
+      }}
+      comp={(prev, next) => {
+        return (
+          prev.node.key === next.node.key && isEqual(prev.custom, next.custom)
+        );
       }}
     >
       <CarbonChildren node={node} />
-      <CodeContentComp node={node.child(0)!} themeName={getThemeName(node)} />
+      <CodeContentComp
+        node={node.child(0)!}
+        themeName={getThemeName(node)}
+        onChangeLineNumber={onChangeLineNumber}
+      />
       <select
         contentEditable={false}
         suppressContentEditableWarning={true}

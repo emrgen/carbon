@@ -562,7 +562,20 @@ export class KeyboardPlugin extends AfterPlugin {
   up(ctx: EventContext<KeyboardEvent>) {
     const { app, currentNode, cmd } = ctx;
     const { blockSelection } = app;
-    if (blockSelection.isEmpty) return;
+    if (blockSelection.isEmpty) {
+      // check if no prev focusable node exists
+      const { end } = ctx.selection;
+      if (end.isAtStartOfNode(end.node)) {
+        const prev = end.node.prev((n) => n.isFocusable);
+        if (!prev) {
+          preventAndStopCtx(ctx);
+          return;
+        }
+      }
+
+      return;
+    }
+
     preventAndStopCtx(ctx);
 
     const { blocks } = blockSelection;
@@ -587,7 +600,20 @@ export class KeyboardPlugin extends AfterPlugin {
     const { app, currentNode, cmd } = ctx;
     const { blockSelection } = app;
     console.log("down", blockSelection.blocks);
-    if (blockSelection.isEmpty) return;
+
+    // check if at the end of the last possible focusable node
+    if (blockSelection.isEmpty) {
+      const { end } = ctx.selection;
+      if (end.isAtEndOfNode(end.node)) {
+        const next = end.node.next((n) => n.isFocusable);
+        if (!next) {
+          preventAndStopCtx(ctx);
+          return;
+        }
+      }
+
+      return;
+    }
 
     preventAndStopCtx(ctx);
 
@@ -601,7 +627,6 @@ export class KeyboardPlugin extends AfterPlugin {
     const lastNode = last(blocks) as Node;
     console.log(blocks);
     const block = nextSelectableBlock(currentNode, !lastNode.isIsolate);
-    console.log("nextContainerBlock", block);
     if (!block) return;
 
     const firstNode = first(blocks) as Node;

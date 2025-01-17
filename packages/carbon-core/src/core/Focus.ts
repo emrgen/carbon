@@ -1,12 +1,10 @@
-import { Node } from "./Node";
-import { Step } from "./Step";
-import { Optional } from "@emrgen/types";
-import { Predicate } from "@emrgen/types";
-import { classString } from "./Logger";
-import { clamp } from "lodash";
-import { last } from "lodash";
+import { Optional, Predicate } from "@emrgen/types";
+import { clamp, last } from "lodash";
 import { takeBefore } from "../utils/array";
+import { classString } from "./Logger";
+import { Node } from "./Node";
 import { Pin } from "./Pin";
+import { Step } from "./Step";
 
 export type FocusOffset = number;
 
@@ -245,6 +243,8 @@ export class Focus {
       if (!prev.closestBlock.eq(curr.closestBlock)) {
         distance -= 1;
       }
+
+      console.log(curr.name, curr.focusSize);
 
       focusSize = curr.focusSize;
       if (distance <= focusSize) {
