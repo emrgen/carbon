@@ -87,11 +87,12 @@ export class ClipboardPlugin extends AfterPlugin {
         const { event, app, cmd } = ctx;
         preventAndStop(event);
         const slice = this.slice(app);
-        console.log("slice", slice, slice.isBlockSelection);
+        console.log("slice", slice.toJSON(), slice.isBlockSelection);
         console.log("slice content =>", slice.root.textContent);
 
         slice.normalize();
 
+        console.log("normalized slice", slice.toJSON(), slice.isBlockSelection);
         if (!slice.isEmpty) {
           const writer = new TextWriter();
           app.encode(writer, slice.root);
@@ -126,7 +127,7 @@ export class ClipboardPlugin extends AfterPlugin {
         preventAndStopCtx(ctx);
         const { selection } = app;
         if (cache) {
-          app.cmd.transform.paste(selection, cache.clone()).Dispatch();
+          const cmd = app.cmd.transform.paste(selection, cache.clone());
           return;
         }
 
@@ -161,6 +162,7 @@ export class ClipboardPlugin extends AfterPlugin {
       });
 
       const rootNode = app.schema.type("slice").create(cloned)!;
+      console.log(rootNode.toJSON());
 
       const first = rootNode.firstChild!;
       const last = rootNode.lastChild!;

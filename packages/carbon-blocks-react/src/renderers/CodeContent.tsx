@@ -15,7 +15,11 @@ export const CodeContentComp = (props: CodeContentProps) => {
   const { themeName = "github-dark" } = props;
 
   return (
-    <div className={"carbon-code-block-highlight"}>
+    <div
+      className={"carbon-code-block-highlight"}
+      contentEditable={false}
+      suppressContentEditableWarning={true}
+    >
       <CodeBlock content={node.textContent} themeName={themeName} lang={"ts"} />
     </div>
   );

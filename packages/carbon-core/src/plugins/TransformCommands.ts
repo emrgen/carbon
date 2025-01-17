@@ -623,7 +623,7 @@ export class TransformCommands extends BeforePlugin {
         }
       }
 
-      return tr.Select(PinnedSelection.SKIP);
+      return tr.Select(PinnedSelection.IDENTITY);
     }
 
     const { start: startTitle, end: endTitle } = sliceClone;

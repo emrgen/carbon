@@ -76,22 +76,6 @@ export class Slice {
         [LocalClassPath]: "",
       });
 
-      if (n.type.name === "codeTitle") {
-        return n.type.schema.nodeFromJSON({
-          id: n.id.toString(),
-          name: "title",
-          children: this.transformCodeNodes(n.children),
-        });
-      }
-
-      if (n.type.name === "code") {
-        return n.type.schema.nodeFromJSON({
-          id: n.id.toString(),
-          name: "paragraph",
-          children: this.transformCodeNodes(n.children),
-        });
-      }
-
       return n.clone((data) => ({
         ...data,
         children: this.transformCodeNodes(data.children),
