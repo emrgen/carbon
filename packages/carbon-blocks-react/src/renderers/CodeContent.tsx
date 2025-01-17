@@ -4,6 +4,7 @@ import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
 import { codeToHast } from "shiki";
 import type { BundledLanguage } from "shiki/bundle/web";
+import { R } from "shiki/types/index.d.mjs";
 
 export const getLineNumberClass = (lineNumber: number) => {
   if (lineNumber < 10) {
@@ -22,7 +23,7 @@ interface CodeContentProps extends RendererProps {
 }
 
 // TODO: use custom tokenization for code blocks, to include text formatting.
-export const CodeContentComp = (props: CodeContentProps) => {
+export const CodeHighlight = (props: CodeContentProps) => {
   const { onChangeLineNumber } = props;
   const { node } = useNodeChangeObserver(props);
   const { themeName = "github-dark", language = "ts" } = props;
@@ -108,9 +109,55 @@ export async function highlight(
     theme: themeName,
   });
 
-  return toJsxRuntime(out, {
+  const transformed = transformRoot(out);
+
+  return toJsxRuntime(transformed, {
     Fragment,
     jsx,
     jsxs,
   }) as JSX.Element;
+}
+
+function transformRoot(root: R) {
+  return {
+    ...root,
+    children: root.children.map(transformNode),
+  };
+}
+
+function transformNode(node: any) {
+  if (node.type === "element" && node.tagName === "code") {
+    let lineNumber = 1;
+    return {
+      ...node,
+      children: node.children.map((line, index) => {
+        if (line.value === "\n") {
+          lineNumber += 1;
+          return line;
+        }
+
+        return transformLine(line, lineNumber);
+      }),
+    };
+  }
+
+  if (node.children) {
+    return {
+      ...node,
+      children: node.children.map(transformNode),
+    };
+  }
+
+  return node;
+}
+
+// Highlight the matching lines
+function transformLine(line: any, lineNumber: number) {
+  return {
+    ...line,
+    properties: {
+      ...line.properties,
+      id: [2, 3, 4].includes(lineNumber) ? "line-highlight" : "",
+    },
+  };
 }

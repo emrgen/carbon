@@ -17,6 +17,8 @@
     "@emrgen/carbon-dragon": "workspace:*",
     "@emrgen/carbon-dragon-react": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
+    "@shikijs/core": "^1.27.2",
+    "@types/hast": "^3.0.4",
     "@uidotdev/usehooks": "^2.4.1",
     "hast-util-to-jsx-runtime": "^2.3.2",
     "katex": "^0.16.7",

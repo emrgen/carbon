@@ -79,7 +79,7 @@ export class RectSelect extends EventEmitter {
     this.emit(RectSelectorEvent.DragStart, e);
     this.isSelecting = true;
 
-    // this.react.blur();
+    this.app.cmd.Select(PinnedSelection.IDENTITY).Dispatch();
     if (this.isDirty) {
       const document = node.chain.find((n) => n.isPage);
       if (!document) {
@@ -133,6 +133,8 @@ export class RectSelect extends EventEmitter {
         }),
       )
       .filter((n) => n.type.spec.selection?.rect);
+
+    console.log("collides", collides.length);
 
     if (collides.length === 0) {
       if (this.noSelectionChange([])) return;
@@ -217,7 +219,8 @@ export class RectSelect extends EventEmitter {
 
   onDragEnd(e: DndEvent) {
     const { selected, app } = this;
-    // console.log('selected', selected.size);
+    // console.log("selected", selected.size);
+    this.app.parkCursor();
 
     // this.editor.focus()
     console.log("onDragEnd", e.node.name);
@@ -227,7 +230,7 @@ export class RectSelect extends EventEmitter {
 
   onMountRectSelectable(node: Node, el: HTMLElement) {
     // if (this.isSelecting) return
-    // console.log('->', node.name, node.id.toString(), el);
+    console.log("->", node.name, node.id.toString(), el);
     this.selectables.register(node, el);
     // console.log(this.selectables.size);
   }

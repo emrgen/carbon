@@ -32,6 +32,7 @@ export class Code extends CarbonPlugin {
       selection: {
         block: true,
         inline: true,
+        rect: true,
       },
       dnd: {
         draggable: true,

@@ -906,6 +906,12 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../carbon-react
+      '@shikijs/core':
+        specifier: ^1.27.2
+        version: 1.27.2
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
       '@uidotdev/usehooks':
         specifier: ^2.4.1
         version: 2.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

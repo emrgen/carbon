@@ -1,4 +1,4 @@
-import { preventAndStop } from "@emrgen/carbon-core/src/utils/event";
+import { prevent } from "@emrgen/carbon-core/src/utils/event";
 import {
   boundFromPoints,
   DndEvent,
@@ -6,6 +6,7 @@ import {
 } from "@emrgen/carbon-dragon";
 import { Optional, RawPoint } from "@emrgen/types";
 import { useCallback, useState } from "react";
+import { useDndMonitor } from "./useDndMonitor";
 
 interface UseDragRectProps {
   offset?: number;
@@ -25,6 +26,12 @@ export const useDragRect = (props?: UseDragRectProps) => {
   const [dragRect, setDragRect] = useState<Optional<RectProps>>(null);
   const [cursorPoint, setCursorPoint] = useState<Optional<RawPoint>>(null);
 
+  useDndMonitor({
+    onDragEnd(e: DndEvent) {
+      setDragRect(null);
+    },
+  });
+
   const isDragging = !!dragRect;
   const DragRectComp = (
     <>
@@ -34,7 +41,10 @@ export const useDragRect = (props?: UseDragRectProps) => {
             <div
               style={dragRect ?? {}}
               className="carbon-selector"
-              onMouseUp={preventAndStop}
+              onMouseUp={(e) => {
+                prevent(e);
+              }}
+              onMouseMove={prevent}
             />
           )}
 

@@ -81,10 +81,10 @@ const data = node("carbon", [
       //     "https://www.youtube.com/watch?v=srNoYnGhXAg&pp=ygUEc29uZw%3D%3D",
       // }),
 
-      // node("image", [], {
-      //   "remote/state/image/src":
-      //     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPcbdS5mvBeNcpLWmbEfpSP7LGa3Nae-Lwew&s",
-      // }),
+      node("image", [], {
+        "remote/state/image/src":
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPcbdS5mvBeNcpLWmbEfpSP7LGa3Nae-Lwew&s",
+      }),
 
       paragraph([title(text("question title"))]),
 

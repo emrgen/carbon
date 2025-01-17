@@ -48,12 +48,18 @@ export const CarbonOverlayContext = ({ children }) => {
           zIndex: showOverlay ? 100 : -100,
           // background: "rgba(0, 0, 0, 0.2)",
         }}
+        onMouseMove={(e) => {
+          e.preventDefault();
+        }}
         onMouseDown={(e) => {
           downRef.current = e.target;
           preventAndStop(e);
         }}
+        // hide overlay on click
         onClick={(e) => {
           // preventAndStop(e);
+          // if the mouse down target is not the same as the mouse up target,
+          // then it's not a click on the overlay
           if (downRef.current !== e.target) return;
           downRef.current = null;
           setShowOverlay(false);

@@ -305,6 +305,12 @@ export class Transaction {
       throw new Error("transaction can have only one select action");
     }
 
+    // if there is no select action, add a skip select action
+    // this is useful for transaction that only updates the content and want to blur the selection
+    if (selectActions.length === 0) {
+      this.Select(PinnedSelection.SKIP);
+    }
+
     if (this._dispatched) {
       console.warn("skipped: transaction already dispatched");
       return this;

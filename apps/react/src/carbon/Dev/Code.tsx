@@ -37,7 +37,13 @@ const data = node("carbon", [
 
       node(
         "code",
-        [title([text("function name () {\n\tconsole.log('hello carbon);\n}")])],
+        [
+          title([
+            text(`function name () {\n\tconsole.log('hello carbon);\n}
+
+name();`),
+          ]),
+        ],
         {},
       ),
 

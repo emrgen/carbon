@@ -692,6 +692,9 @@ export class ImmutableDraft implements Draft {
       console.log("INSERTED", n.id.toString(), n.parentId?.toString());
       this.addInserted(n);
     });
+    if (node.props.get(SelectedPath, false)) {
+      this.selected.add(node.id);
+    }
   }
 
   private insertBefore(refId: NodeId, node: Node) {

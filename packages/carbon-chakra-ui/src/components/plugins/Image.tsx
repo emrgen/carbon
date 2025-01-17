@@ -95,8 +95,8 @@ const ImageContent = (props: RendererProps) => {
 
   return (
     <ResizableContainer
-      width={style.width ?? 0}
-      height={style.height ?? 0}
+      // width={style.width ?? 0}
+      // height={style.height ?? 0}
       node={node}
       enable={ready}
       aspectRatio={aspectRatio}

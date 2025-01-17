@@ -1,5 +1,5 @@
 import { Flex } from "@chakra-ui/react";
-import { clamp, Node, StylePath } from "@emrgen/carbon-core";
+import { clamp, Node, prevent, SizePath, StylePath } from "@emrgen/carbon-core";
 
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { useDndMonitor, useDraggableHandle } from "@emrgen/carbon-dragon-react";
@@ -60,8 +60,8 @@ export const ResizableContainer = (props: MediaViewProps) => {
   const [style, setStyle] = useState<CSSProperties>(() => getStyle(node));
   const [width, setWidth] = useState(style.width ?? "full");
   const [height, setHeight] = useState(style.height ?? "auto");
-  const [documentWidth, setDocumentWidth] = useState(1000);
-  const [documentPadding, setDocumentPadding] = useState(0);
+  const [documentWidth, setDocumentWidth] = useState(2560);
+  const [documentPadding, setDocumentPadding] = useState(920);
   const [fullWidth, setFullWidth] = useState(false);
 
   const [opacity, setOpacity] = React.useState(0);
@@ -73,16 +73,19 @@ export const ResizableContainer = (props: MediaViewProps) => {
     node,
     ref: leftRef,
     id: "media-left-resizer",
+    onMouseDown: prevent,
   });
   const rightHandle = useDraggableHandle({
     node,
     ref: rightRef,
     id: "media-right-resizer",
+    onMouseDown: prevent,
   });
   const bottomHandle = useDraggableHandle({
     node,
     ref: bottomRef,
     id: "media-bottom-resizer",
+    onMouseDown: prevent,
   });
 
   useEffect(() => {
@@ -90,11 +93,12 @@ export const ResizableContainer = (props: MediaViewProps) => {
   }, [resizeObserverRef, ref]);
 
   const updateDocumentWidth = useCallback(() => {
+    console.log("xxxxxxxxxxxxxxxxxxx");
     const document = node.parents.find((n) => n.isPage);
     if (!document) return;
     const docEl = app.store.element(document.id);
     if (!docEl) return;
-    const parentWidth = docEl.getBoundingClientRect().width;
+    const parentWidth = docEl.scrollWidth;
     const { paddingLeft } = window.getComputedStyle(docEl);
 
     setDocumentPadding(parseInt(paddingLeft.toString()));
@@ -102,6 +106,11 @@ export const ResizableContainer = (props: MediaViewProps) => {
     if (fullWidth) {
       setWidth(parentWidth);
     }
+    console.log(
+      "document width",
+      parentWidth,
+      parseInt(paddingLeft.toString()),
+    );
   }, [app.store, fullWidth, node]);
 
   useEffect(() => {
@@ -145,7 +154,6 @@ export const ResizableContainer = (props: MediaViewProps) => {
       // console.log("dx", dx, "dy", dy, documentWidth, width, height);
 
       if (e.id === "media-left-resizer") {
-        console.log("left resizer", dx, width, documentWidth, documentPadding);
         nw = clamp(roundInOffset(width - 2 * dx, 50), 100, documentWidth);
         nw = snapValue(nw, documentWidth - 2 * documentPadding, -30, 30);
         nw = snapValue(nw, documentWidth, -60, 10);
@@ -185,7 +193,7 @@ export const ResizableContainer = (props: MediaViewProps) => {
       if (!node.id.eq(e.node.id)) return;
       app.cmd
         .Update(node.id, {
-          node: { width, height },
+          [SizePath]: { width, height },
         })
         .Dispatch();
     },

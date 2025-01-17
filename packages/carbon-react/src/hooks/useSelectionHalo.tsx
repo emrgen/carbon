@@ -1,4 +1,4 @@
-import { Node, SelectedPath } from "@emrgen/carbon-core";
+import { Node, SelectedPath, SizePath } from "@emrgen/carbon-core";
 import { useMemo } from "react";
 import { useNodeState } from "./useNodeState";
 
@@ -17,12 +17,16 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
       parent.props.get(SelectedPath),
     );
 
+    const style = node.props.get(SizePath, { width: "full", height: "full" }); // get the size of the node
+    const { width = "full", height } = style;
+
     return (
       <>
         {!parentSelected && isSelected && (
           <div
             className={`carbon-selection-halo ${className ?? ""}`}
             data-target={node.name}
+            style={style}
           />
         )}
       </>

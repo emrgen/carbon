@@ -48,8 +48,11 @@ $selectionHaloColor = #accef78d
   margin-bottom 20px
 
   // placeholder
+
   &:after
-    top 8px // related to height of the page title
+    top 8px
+
+  // related to height of the page title
 
   [data-name=emoji]
     margin 0 4px
@@ -104,6 +107,7 @@ $selectionHaloColor = #accef78d
 // bullet list
 .bullet-list > .ctiw > .title
   margin-left: 26px
+
   &:after
     padding-left 2px;
 
@@ -122,6 +126,7 @@ $selectionHaloColor = #accef78d
 .todo > .ctiw > .title
   margin-left: 26px
   flex 1
+
   &:after
     padding-left 2px;
 
@@ -135,6 +140,7 @@ $selectionHaloColor = #accef78d
   display flex
   padding 8px 2px
   position absolute;
+
   input[type=checkbox]
     appearance none
     margin 0
@@ -143,9 +149,11 @@ $selectionHaloColor = #accef78d
     width 1.1em
     border-radius 2px
     cursor pointer
+
     &:checked
       background #0073e6
       border-color #0073e6
+
     &:before
       content ""
       display block
@@ -173,8 +181,10 @@ $selectionHaloColor = #accef78d
   border-radius 6px
   height 32px
   width 24px
+
   svg
     z-index 10
+
   &:before
     position absolute;
     content ""
@@ -214,6 +224,7 @@ $selectionHaloColor = #accef78d
 .quote
   > .title:after
     top -2px
+
   > .cnest
     margin-left 0
 
@@ -227,6 +238,7 @@ $selectionHaloColor = #accef78d
   border-radius 4px
   box-shadow 0 0 0 2px #f4d999 inset
   margin: 10px 0
+
   > .title:after
     padding-left 2px
     top -2px
@@ -265,6 +277,7 @@ $selectionHaloColor = #accef78d
 .h-4
   > .title
     padding 2px
+
     &:after
       padding-left 2px
 
@@ -323,6 +336,7 @@ $selectionHaloColor = #accef78d
   @extend .h4__title
   &:after
     top -3px
+
 // header end
 
 // code
@@ -338,16 +352,19 @@ pre
 [data-name=code]
   tab-size 2;
   position relative;
+
   > .title
     color transparent
     z-index 2
 
 // enable line numbers
-[data-name=code].line-number
+[data-name=code]//.line-number
   > .title
-    padding-left 36px
+    padding-left 56px
+
   &.line-numbers-2 > .title
-    padding-left: 46px;
+    padding-left: 66px;
+
   .carbon-code-block-highlight
     code {
       counter-reset: step;
@@ -361,9 +378,9 @@ pre
       margin-right: 20px;
       display: inline-block;
       text-align: right;
-      color: rgba(115,138,148,.4)
+      color: rgba(115, 138, 148, .4)
       font-family "Geist Mono", monospace
-      //background red
+      font-size 14px
     }
 
     &.line-numbers-2 code .line::before {
@@ -373,8 +390,6 @@ pre
     &.line-numbers-3 code .line::before {
       width: 36px;
     }
-
-
 
 select#carbon-code-themes
   user-select none
@@ -392,7 +407,9 @@ select#carbon-code-themes
   color #aaa
 
 .carbon-code-block-highlight
+  width 100%
   user-select none
+
   ::selection
     background: transparent
 
@@ -405,11 +422,28 @@ select#carbon-code-themes
     padding: 24px 20px
 
   code
+    display block
+    width 100%;
     font-size 15px
     font-family "Geist Mono", monospace
 
+  #line-highlight
+    position relative;
+    z-index 1;
+    &:after
+      content ''
+      position absolute;
+      width 100%;
+      height calc(100% + 4px)
+      left 0;
+      top -2px;
+      background: #eee
+      border-radius: 4px
+      opacity 0.1;
+      z-index -1
+
 .shiki.github-light
-  background #eee!important
+  background #eee !important
 
 .carbon-pre-highlight
   position absolute;

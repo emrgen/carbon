@@ -1,4 +1,5 @@
 import { CodeLanguagePath, CodeThemeNamePath, Node } from "@emrgen/carbon-core";
+import { useDragDropRectSelect } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonChildren,
@@ -12,7 +13,7 @@ import { grammars } from "tm-grammars";
 
 import { themes } from "tm-themes";
 
-import { CodeContentComp, getLineNumberClass } from "./CodeContent";
+import { CodeHighlight, getLineNumberClass } from "./CodeContent";
 
 const themeNames = themes.map((theme) => theme.name);
 
@@ -34,11 +35,12 @@ export const CodeComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
   const ref = useRef(null);
-  const { attributes, SelectionHalo } = useSelectionHalo(props);
   const [lineNumberClass, setLineNumberClass] = useState("line-numbers-1");
 
+  const { attributes, SelectionHalo } = useSelectionHalo(props);
+  useDragDropRectSelect({ node, ref });
+
   const onChangeLineNumber = useCallback((lineNumber: number) => {
-    console.log("lineNumber", lineNumber, getLineNumberClass(lineNumber));
     setLineNumberClass(getLineNumberClass(lineNumber));
   }, []);
 
@@ -61,7 +63,7 @@ export const CodeComp = (props: RendererProps) => {
       }}
     >
       <CarbonChildren node={node} />
-      <CodeContentComp
+      <CodeHighlight
         node={node.child(0)!}
         themeName={getThemeName(node)}
         language={getLangName(node)}

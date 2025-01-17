@@ -39,6 +39,7 @@ export interface UseDraggableHandleProps extends UseFastDraggableProps {
     distance?: number;
   };
 
+  onMouseDown?(event: MouseEvent): void;
   onStart?(state: any, position: DndEvent["position"]): void;
 }
 
@@ -47,7 +48,7 @@ export interface UseDraggableHandleProps extends UseFastDraggableProps {
 // but it's more focused on the handle and the events are dispatched to the dnd context directly
 export const useDraggableHandle = (props: UseDraggableHandleProps) => {
   const { id, node, disabled, ref, activationConstraint = {} } = props;
-  const { distance = 2 } = activationConstraint;
+  const { distance = 4 } = activationConstraint;
   const [isDisabled, setIsDisabled] = useState(disabled);
   const refId = useRef<string>(Math.random().toString(16).slice(6));
 
@@ -59,6 +60,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
 
   const onMouseDown = useCallback(
     (event) => {
+      props.onMouseDown?.(event);
       // mousedown on a draggable handle should not trigger have any other effect than dragging
       let initState = {} as any;
       let prevState = {} as any;
@@ -69,7 +71,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       if (ref.current !== event.target) return;
       dnd.onMouseDown(node, event);
       // prevent default behavior like text selection, image dragging, etc
-      prevent(event);
+      // prevent(event);
       let isDragging = false;
 
       const activatorEvent = event;
@@ -85,6 +87,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       };
 
       const onMouseUp = (event: MouseEvent) => {
+        prevent(event);
         const dndEvent = {
           activatorEvent,
           event,
@@ -113,6 +116,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       };
 
       const onMouseMove = (event: MouseEvent) => {
+        prevent(event);
         if (mouseUpped.current) return;
 
         const position = getEventPosition(activatorEvent, event);
@@ -166,7 +170,7 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
         window.removeEventListener("mouseup", onMouseUp);
       };
     },
-    [distance, dnd, id, isDisabled, node, ref],
+    [distance, dnd, id, isDisabled, node, props, ref],
   );
 
   return {
