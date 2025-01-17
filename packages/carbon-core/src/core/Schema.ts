@@ -129,6 +129,8 @@ export interface NodeSpec {
   observable?: boolean;
   weakEnd?: boolean;
   splitInside?: boolean;
+  // the node can behave like a list item, allowing wrapping, unwrapping, pushed into prev sibling etc.
+  nestable?: boolean;
   // when the node content match is not valid
   // the new node will be inserted or the current node will be unwrapped based on the consistency
   consistency?: "insert" | "remove";

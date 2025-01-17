@@ -933,6 +933,9 @@ importers:
       shiki:
         specifier: ^1.27.2
         version: 1.27.2
+      tm-grammars:
+        specifier: ^1.22.7
+        version: 1.22.7
       tm-themes:
         specifier: ^1.9.8
         version: 1.9.8
@@ -1261,7 +1264,7 @@ importers:
         version: 2.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       emoji-mart:
         specifier: ^5.6.0
-        version: link:../../../emoji-mart/packages/emoji-mart
+        version: 5.6.0
       events:
         specifier: ^3.3.0
         version: 3.3.0
@@ -12757,6 +12760,9 @@ packages:
   tldts@6.1.71:
     resolution: {integrity: sha512-LQIHmHnuzfZgZWAf2HzL83TIIrD8NhhI0DVxqo9/FdOd4ilec+NTNZOlDZf7EwrTNoutccbsHjvWHYXLAtvxjw==}
     hasBin: true
+
+  tm-grammars@1.22.7:
+    resolution: {integrity: sha512-WsCyP8NUE4ICyoe6UM0LyZtyEItELcitPaDoGexRHPeUO4mOmE0/gogV4NKVt1f64M69s2/0r0ynosGFnQqeMQ==}
 
   tm-themes@1.9.8:
     resolution: {integrity: sha512-XbsuHkBCRBAt/MYXYFDHLfBH70SHa55TwJ50Qsw5UE6w9s12RDNNFyA3wkljkJw/LTG1F672QaO3BOMcIGBfJQ==}
@@ -24510,6 +24516,8 @@ snapshots:
   tldts@6.1.71:
     dependencies:
       tldts-core: 6.1.71
+
+  tm-grammars@1.22.7: {}
 
   tm-themes@1.9.8: {}
 

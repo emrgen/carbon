@@ -272,6 +272,7 @@ export const SelectedOptionsPath = "remote/state/selected/options";
 export const ActiveChildPath = "local/state/active/child";
 export const CodeValuePath = "remote/state/code/value";
 export const CodeThemeNamePath = "remote/state/code/theme";
+export const CodeLanguagePath = "remote/state/code/language";
 
 export enum DocModes {
   View = "view",

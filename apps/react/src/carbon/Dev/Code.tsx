@@ -35,7 +35,11 @@ const data = node("carbon", [
 
       // paragraph([title(text("question title"))]),
 
-      node("code", [title([text("function name(){1}\n")])], {}),
+      node(
+        "code",
+        [title([text("function name () {\n\tconsole.log('hello carbon);\n}")])],
+        {},
+      ),
 
       paragraph([title(text("question title"))]),
 

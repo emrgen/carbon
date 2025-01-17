@@ -2,6 +2,7 @@ import {
   CarbonPlugin,
   ClassPathLocal,
   cloneFrozenNode,
+  CodeLanguagePath,
   CodeThemeNamePath,
   EventContext,
   EventHandlerMap,
@@ -15,7 +16,6 @@ import {
 } from "@emrgen/carbon-core";
 import { isKeyHotkey } from "is-hotkey";
 import { isEqual } from "lodash";
-// import { isKeyHotkey } from "is-hotkey";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {}
@@ -48,7 +48,8 @@ export class Code extends CarbonPlugin {
             suppressContentEditableWarning: true,
           },
         },
-        [CodeThemeNamePath]: "catppuccin-latte",
+        [CodeThemeNamePath]: "catppuccin-frappe",
+        [CodeLanguagePath]: "javascript",
       },
     };
   }

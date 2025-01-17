@@ -2,8 +2,8 @@ import { RendererProps, useNodeChangeObserver } from "@emrgen/carbon-react";
 import { toJsxRuntime } from "hast-util-to-jsx-runtime";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { jsx, jsxs } from "react/jsx-runtime";
+import { codeToHast } from "shiki";
 import type { BundledLanguage } from "shiki/bundle/web";
-import { codeToHast } from "shiki/bundle/web";
 
 export const getLineNumberClass = (lineNumber: number) => {
   if (lineNumber < 10) {
@@ -17,6 +17,7 @@ export const getLineNumberClass = (lineNumber: number) => {
 
 interface CodeContentProps extends RendererProps {
   themeName?: string;
+  language?: string;
   onChangeLineNumber?: (lineNumber: number) => void;
 }
 
@@ -24,7 +25,7 @@ interface CodeContentProps extends RendererProps {
 export const CodeContentComp = (props: CodeContentProps) => {
   const { onChangeLineNumber } = props;
   const { node } = useNodeChangeObserver(props);
-  const { themeName = "github-dark" } = props;
+  const { themeName = "github-dark", language = "ts" } = props;
 
   const lineNumber = useMemo(() => {
     return node.textContent.split("\n").length;
@@ -50,7 +51,7 @@ export const CodeContentComp = (props: CodeContentProps) => {
         id={node.id.toString()}
         content={node.textContent}
         themeName={themeName}
-        lang={"ts"}
+        lang={language}
       />
     </div>
   );
@@ -62,7 +63,8 @@ export const CodeContentComp = (props: CodeContentProps) => {
 const elsMap = new Map<string, JSX.Element>();
 const contentMap = new Map<string, string>();
 
-const codeKey = (id: string, themeName: string) => `${id}-${themeName}`;
+const codeKey = (id: string, lang: string, themeName: string) =>
+  `${id}:${lang}:${themeName}`;
 
 function CodeBlock({
   id,
@@ -76,7 +78,7 @@ function CodeBlock({
   themeName: string;
 }) {
   const [els, setEls] = useState<JSX.Element | null>(null);
-  const key = codeKey(id, themeName);
+  const key = codeKey(id, lang, themeName);
 
   useEffect(() => {
     // If the content and the theme is the same, don't re-highlight.
@@ -95,6 +97,7 @@ function CodeBlock({
   return elsMap[key] || els || null;
 }
 
+// TODO: use language loader to load the all tm languages.
 export async function highlight(
   code: string,
   themeName: string,

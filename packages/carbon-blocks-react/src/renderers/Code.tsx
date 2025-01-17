@@ -1,4 +1,4 @@
-import { CodeThemeNamePath, Node } from "@emrgen/carbon-core";
+import { CodeLanguagePath, CodeThemeNamePath, Node } from "@emrgen/carbon-core";
 import {
   CarbonBlock,
   CarbonChildren,
@@ -8,14 +8,22 @@ import {
 } from "@emrgen/carbon-react";
 import { isEqual } from "lodash";
 import React, { useCallback, useRef, useState } from "react";
+import { grammars } from "tm-grammars";
 
 import { themes } from "tm-themes";
+
 import { CodeContentComp, getLineNumberClass } from "./CodeContent";
 
 const themeNames = themes.map((theme) => theme.name);
 
+const langNames = grammars.map((lang) => lang.name);
+
 const getThemeName = (node: Node) => {
   return node.props.get(CodeThemeNamePath, "github-dark");
+};
+
+const getLangName = (node: Node) => {
+  return node.props.get(CodeLanguagePath, "ts");
 };
 
 const getThemeType = (themeName: string) => {
@@ -56,6 +64,7 @@ export const CodeComp = (props: RendererProps) => {
       <CodeContentComp
         node={node.child(0)!}
         themeName={getThemeName(node)}
+        language={getLangName(node)}
         onChangeLineNumber={onChangeLineNumber}
       />
       <select
@@ -67,15 +76,15 @@ export const CodeComp = (props: RendererProps) => {
           e.stopPropagation();
           app.cmd
             .Update(node, {
-              [CodeThemeNamePath]: e.target.value,
+              [CodeLanguagePath]: e.target.value,
             })
             .Dispatch();
         }}
-        value={node.props.get(CodeThemeNamePath)}
+        value={node.props.get(CodeLanguagePath, "ts")}
       >
-        {themeNames.map((themeName) => (
-          <option key={themeName} value={themeName}>
-            {themeName}
+        {langNames.map((name) => (
+          <option key={name} value={name}>
+            {name}
           </option>
         ))}
       </select>
