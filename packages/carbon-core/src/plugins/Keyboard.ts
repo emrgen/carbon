@@ -234,7 +234,16 @@ export class KeyboardPlugin extends AfterPlugin {
       "ctrl+a": (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
         const { cmd, selection } = ctx;
-        cmd.selection.selectAll(selection).Dispatch();
+        const { start, end } = selection;
+        if (start.isAtStartOfNode(start.node) && end.isAtEndOfNode(end.node)) {
+          cmd.selection.selectAll(selection).Dispatch();
+        } else {
+          const after = PinnedSelection.create(
+            start.moveToStart(),
+            end.moveToEnd(),
+          );
+          cmd.Select(after).Dispatch();
+        }
       },
     };
   }

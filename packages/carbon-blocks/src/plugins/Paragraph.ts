@@ -25,11 +25,11 @@ declare module "@emrgen/carbon-core" {
   }
 }
 
-export class Section extends NodePlugin {
+export class Paragraph extends NodePlugin {
   name = "paragraph";
 
-  static create<T>(): Section {
-    return new Section();
+  static create<T>(): Paragraph {
+    return new Paragraph();
   }
 
   spec(): NodeSpec {

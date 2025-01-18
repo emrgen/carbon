@@ -1,5 +1,5 @@
 import { CarbonPlugin } from "@emrgen/carbon-core";
-import { NestablePlugin, PagePlugin, Section } from "./plugins";
+import { NestablePlugin, PagePlugin, Paragraph } from "./plugins";
 import { Attributes } from "./plugins/Attributes";
 import { BlockContent } from "./plugins/BlockContent";
 import { Bookmark } from "./plugins/Bookmark";
@@ -41,7 +41,7 @@ import { Todo } from "./plugins/Todo";
 export * from "./create";
 
 export const blockPresetPlugins: CarbonPlugin[] = [
-  new Section(),
+  new Paragraph(),
   new Divider(),
   new Header(),
   new PagePlugin(),

@@ -9,10 +9,10 @@ import {
   Writer,
 } from "@emrgen/carbon-core";
 import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
-import { Section } from "./Section";
+import { Paragraph } from "./Paragraph";
 import { Switch } from "./Switch";
 
-export class Todo extends Section {
+export class Todo extends Paragraph {
   name = "todo";
 
   spec(): NodeSpec {

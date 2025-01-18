@@ -1,8 +1,8 @@
 import { Node, NodeEncoder, NodeSpec, Writer } from "@emrgen/carbon-core";
 import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
-import { Section } from "./Section";
+import { Paragraph } from "./Paragraph";
 
-export class BulletedList extends Section {
+export class BulletedList extends Paragraph {
   name = "bulletList";
 
   static create<T>(): BulletedList {

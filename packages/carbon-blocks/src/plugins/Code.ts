@@ -29,6 +29,7 @@ export class Code extends CarbonPlugin {
       group: "content",
       content: "title",
       tag: "div",
+      code: true,
       selection: {
         block: true,
         inline: true,
@@ -38,7 +39,14 @@ export class Code extends CarbonPlugin {
         draggable: true,
         handle: true,
       },
-      code: true,
+      insert: true,
+      info: {
+        title: "Code",
+        description: "Just start typing to create a new code block",
+        icon: "code",
+        tags: ["code", "code block", "code", "pre"],
+        order: 10,
+      },
       props: {
         local: {
           placeholder: {
@@ -48,6 +56,7 @@ export class Code extends CarbonPlugin {
           html: {
             suppressContentEditableWarning: true,
           },
+          Lock,
         },
         [CodeThemeNamePath]: "catppuccin-frappe",
         [CodeLanguagePath]: "javascript",

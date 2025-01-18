@@ -6,13 +6,13 @@ import {
   Writer,
 } from "@emrgen/carbon-core";
 import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
-import { Section } from "./Section";
+import { Paragraph } from "./Paragraph";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {}
 }
 
-export class NumberedList extends Section {
+export class NumberedList extends Paragraph {
   static kind = "numberList";
 
   name = "numberList";

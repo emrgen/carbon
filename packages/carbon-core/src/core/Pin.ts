@@ -381,6 +381,14 @@ export class Pin {
     return this.down().eq(Pin.toEndOf(node)!);
   }
 
+  moveToStart(): Pin {
+    return Pin.toStartOf(this.node) ?? this;
+  }
+
+  moveToEnd(): Pin {
+    return Pin.toEndOf(this.node) ?? this;
+  }
+
   // move the pin to the start of next matching node
   moveToStartOfNext(fn: Predicate<Node>): Optional<Pin> {
     const next = this.node.next(fn);

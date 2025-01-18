@@ -38,6 +38,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
   const plugin = app.plugin("blockMenu");
 
   // filter blocks by search text
+  // TODO: use minisearch library to improve search performance and match results
   const blocks = useMemo(() => {
     const blocks = values(app.schema.nodes)
       .filter((n) => n.spec.insert)
