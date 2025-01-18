@@ -16,6 +16,7 @@ import {
   preventAndStopCtx,
   SetContentAction,
   TitleNode,
+  withinCodeBlock,
   Writer,
 } from "@emrgen/carbon-core";
 
@@ -108,6 +109,15 @@ export class TitlePlugin extends NodePlugin {
         const { app } = ctx;
         const { selection, blockSelection } = app.state;
         if (blockSelection.isActive) return;
+
+        if (withinCodeBlock(ctx.currentNode)) {
+          const splitBlock = selection.start.node.closest((n) => n.type.splits);
+          if (splitBlock) {
+            preventAndStopCtx(ctx);
+            app.cmd.transform.split(splitBlock, selection).Dispatch();
+            return;
+          }
+        }
 
         if (selection.isCollapsed) {
           preventAndStopCtx(ctx);

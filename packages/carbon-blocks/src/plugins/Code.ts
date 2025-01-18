@@ -30,6 +30,7 @@ export class Code extends CarbonPlugin {
       content: "title",
       tag: "div",
       code: true,
+      splits: true,
       selection: {
         block: true,
         inline: true,
@@ -38,6 +39,9 @@ export class Code extends CarbonPlugin {
       dnd: {
         draggable: true,
         handle: true,
+      },
+      split: {
+        name: "paragraph",
       },
       insert: true,
       info: {
