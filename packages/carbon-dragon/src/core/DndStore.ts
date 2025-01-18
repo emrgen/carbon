@@ -82,6 +82,8 @@ export class DndNodeStore {
       return;
     }
 
+    console.log("register rtree item", node.id.toString(), el);
+
     const { id } = node;
     // remove old reference first
     // other part of the id will eventually be added while rendering

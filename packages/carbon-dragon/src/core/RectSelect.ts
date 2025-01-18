@@ -5,6 +5,7 @@ import {
   Node,
   NodeComparator,
   NodeId,
+  NodeIdMap,
   NodeIdSet,
   PinnedSelection,
 } from "@emrgen/carbon-core";
@@ -39,6 +40,7 @@ export class RectSelect extends EventEmitter {
   private isDirty: boolean = true;
   private isSelecting: boolean = false;
   disabled = false;
+  private mountedSelectables: NodeIdMap<HTMLElement> = new NodeIdMap();
 
   constructor(readonly app: Carbon) {
     super();
@@ -78,6 +80,18 @@ export class RectSelect extends EventEmitter {
     // this.locked = true
     this.emit(RectSelectorEvent.DragStart, e);
     this.isSelecting = true;
+
+    if (this.mountedSelectables.size) {
+      this.selectables.reset();
+      this.mountedSelectables.forEach((el, id) => {
+        const node = app.store.get(id);
+        if (node) {
+          this.selectables.register(node, el);
+        }
+      });
+
+      this.mountedSelectables.clear();
+    }
 
     this.app.cmd.Select(PinnedSelection.IDENTITY).Dispatch();
     if (this.isDirty) {
@@ -230,14 +244,18 @@ export class RectSelect extends EventEmitter {
 
   onMountRectSelectable(node: Node, el: HTMLElement) {
     // if (this.isSelecting) return
-    console.log("->", node.name, node.id.toString(), el);
-    this.selectables.register(node, el);
+    // console.log("->", node.name, node.id.toString(), el);
+    if (this.isSelecting) {
+      this.selectables.register(node, el);
+    } else {
+      this.mountedSelectables.set(node.id, el);
+    }
     // console.log(this.selectables.size);
   }
 
   onUnmountRectSelectable(node: Node) {
     // if (this.isSelecting) return
-    // console.log('<-', node.name, node.id.toString());
+    // console.log("<-", node.name, node.id.toString());
     this.selectables.delete(node.id);
   }
 

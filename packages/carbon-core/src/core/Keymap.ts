@@ -109,6 +109,10 @@ export class Keymap {
     return this;
   }
 
+  to() {
+    return this.toString();
+  }
+
   toString() {
     return `${this.keys.join(",")},${this.eventPhase}`;
   }

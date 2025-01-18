@@ -31,7 +31,7 @@ export const getActiveTabId = (node: Node) => {
 };
 
 export const setActiveTabId = (cmd: Transaction, node: Node, tabId: string) => {
-  cmd.update(node, {
+  cmd.Update(node, {
     [ActiveTabIdPath]: tabId,
   });
   return cmd;
@@ -50,7 +50,7 @@ export const setRenamingTabId = (
   node: Node,
   tabId: string,
 ) => {
-  cmd.update(node, {
+  cmd.Update(node, {
     [RenamingTabIdPath]: tabId,
   });
 
@@ -190,7 +190,7 @@ export class TabGroup extends CarbonPlugin {
             const focus = Pin.toStartOf(activeTab);
             if (!focus) return;
             const after = PinnedSelection.fromPin(focus);
-            cmd.action.select(after).dispatch();
+            cmd.action.select(after).Dispatch();
           }
         }
       },
@@ -208,7 +208,7 @@ export class TabGroup extends CarbonPlugin {
             const focus = Pin.toEndOf(activeTab);
             if (!focus) return;
             const after = PinnedSelection.fromPin(focus);
-            cmd.action.select(after).dispatch();
+            cmd.action.select(after).Dispatch();
           }
         }
       },
@@ -274,7 +274,7 @@ export class Tab extends CarbonPlugin {
             preventAndStopCtx(ctx);
             ctx.cmd.tabs
               .remove(ctx.currentNode.parent!, ctx.currentNode)
-              .dispatch();
+              .Dispatch();
           }
         }
       },

@@ -235,7 +235,10 @@ export class KeyboardPlugin extends AfterPlugin {
         preventAndStopCtx(ctx);
         const { cmd, selection } = ctx;
         const { start, end } = selection;
-        if (start.isAtStartOfNode(start.node) && end.isAtEndOfNode(end.node)) {
+        if (
+          (start.isAtStartOfNode(start.node) && end.isAtEndOfNode(end.node)) ||
+          (selection.isCollapsed && start.node.isEmpty)
+        ) {
           cmd.selection.selectAll(selection).Dispatch();
         } else {
           const after = PinnedSelection.create(

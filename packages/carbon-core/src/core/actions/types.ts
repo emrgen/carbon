@@ -25,6 +25,7 @@ export type NormalizeAction =
   | RemoveNodeAction
   | MoveNodeAction;
 
+// TxType is used to determine the type of transaction
 export enum TxType {
   OneWay = "OneWay",
   TwoWay = "TwoWay",
@@ -44,6 +45,7 @@ export enum ActionOrigin {
   Runtime = "Runtime", // runtime commands has meaning only during runtime
 }
 
+// ActionType is used to determine the type of action
 export enum ActionType {
   move = "move",
   select = "select",

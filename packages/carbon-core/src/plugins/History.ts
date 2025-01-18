@@ -1,6 +1,11 @@
-import { EventContext, EventHandler, StateActions, TxType } from "../core";
-import { Carbon } from "../core";
-import { AfterPlugin } from "../core/CarbonPlugin";
+import {
+  AfterPlugin,
+  Carbon,
+  EventContext,
+  EventHandler,
+  StateActions,
+  TxType,
+} from "../core";
 
 export class HistoryPlugin extends AfterPlugin {
   name = "history";
@@ -10,8 +15,11 @@ export class HistoryPlugin extends AfterPlugin {
 
   keydown(): Partial<EventHandler> {
     return {
+      // [Keymap.linux("ctrl_z").to()]: this.undo.bind(this),
+      ctrl_z: this.undo.bind(this),
       cmd_z: this.undo.bind(this),
       cmd_shift_z: this.redo.bind(this),
+      ctrl_shift_z: this.redo.bind(this),
     };
   }
 
@@ -52,6 +60,7 @@ export class HistoryPlugin extends AfterPlugin {
     ctx.app.emit("history.redo", tx);
   }
 
+  // merge text insert only transactions with
   transaction(_: Carbon, tr: StateActions): void {
     // window.tr = tr;
     if (tr.type !== TxType.OneWay && !tr.selectionOnly) {
