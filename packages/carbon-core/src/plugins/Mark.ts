@@ -53,7 +53,7 @@ export class MarkPlugin extends BeforePlugin {
   toggleMark(e: EventContext<any>) {
     return (mark: Mark) => {
       preventAndStopCtx(e);
-      e.cmd.marks.toggle(mark)?.Dispatch();
+      e.cmd.marks.toggle(mark)?.Select(e.selection).Dispatch();
     };
   }
 }

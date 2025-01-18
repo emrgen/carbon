@@ -233,7 +233,7 @@ export class TransformCommands extends BeforePlugin {
             return true;
           }
 
-          if (next.isFocusable) {
+          if (next.isFocusable && !next.isTextContainer) {
             betweenNodes.push(next);
           }
 
@@ -467,6 +467,7 @@ export class TransformCommands extends BeforePlugin {
         const textNode = tr.app.schema.text(text, {
           props: { [MarksPath]: tr.state.marks.toArray() },
         })!;
+
         tr.SetContent(head.node.id, [textNode]);
         tr.Select(
           PinnedSelection.fromPin(
