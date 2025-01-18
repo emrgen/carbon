@@ -1,11 +1,14 @@
 import {
   CarbonPlugin,
+  EmptyPlaceholderPath,
   EventContext,
   EventHandlerMap,
+  FocusedPlaceholderPath,
   Node,
   NodeEncoder,
   NodeSpec,
   preventAndStopCtx,
+  RemoteDataAsPath,
   Writer,
 } from "@emrgen/carbon-core";
 import { encodeNestableChildren } from "./Nestable";
@@ -68,6 +71,33 @@ export class Callout extends CarbonPlugin {
         ) {
           preventAndStopCtx(ctx);
           app.cmd.collapsible.split(selection)?.Dispatch();
+        }
+      },
+      backspace: (ctx: EventContext<KeyboardEvent>) => {
+        const { selection, currentNode, cmd } = ctx;
+
+        // change callout props datka-as
+        if (
+          selection.isCollapsed &&
+          selection.head.isAtStartOfNode(currentNode) &&
+          currentNode.name === this.name &&
+          currentNode.props.get(RemoteDataAsPath, "").match(/h[1-9]/)
+        ) {
+          ctx.stopPropagation();
+          console.log(
+            "xxxxxxxxxxxxxxx",
+            this.props.get(FocusedPlaceholderPath),
+          );
+          ctx.cmd
+            .Update(currentNode, {
+              [RemoteDataAsPath]: "",
+              [FocusedPlaceholderPath]: this.props.get(FocusedPlaceholderPath),
+              [EmptyPlaceholderPath]: this.props.get(EmptyPlaceholderPath),
+            })
+            .Select(selection)
+            .Dispatch();
+
+          return;
         }
       },
     };

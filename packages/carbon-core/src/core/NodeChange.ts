@@ -1,22 +1,21 @@
 import { Optional } from "@emrgen/types";
-import { PointedSelection } from "./PointedSelection";
-import BTree from "sorted-btree";
-import { last, uniqBy } from "lodash";
 import dayjs from "dayjs";
-import { SetContentAction } from "./actions/index";
-import { InsertNodeAction } from "./actions/index";
-import { RemoveNodeAction } from "./actions/index";
-import { CarbonAction } from "./actions/index";
-import { TxType } from "./actions/index";
-import { SelectAction } from "./actions/index";
-import { UpdatePropsAction } from "./actions/index";
-import { NodeId } from "./NodeId";
-import { NodeIdComparator } from "./NodeId";
-import { NodeIdSet } from "./BSet";
-import { Path } from "./Node";
-import { NodePropsJson } from "./NodeProps";
+import { last, uniqBy } from "lodash";
+import BTree from "sorted-btree";
+import {
+  CarbonAction,
+  InsertNodeAction,
+  RemoveNodeAction,
+  SelectAction,
+  SetContentAction,
+  TxType,
+} from "./actions/index";
 import { Draft } from "./Draft";
+import { Path } from "./Node";
 import { NodeData } from "./NodeContent";
+import { NodeId, NodeIdComparator } from "./NodeId";
+import { NodePropsJson } from "./NodeProps";
+import { PointedSelection } from "./PointedSelection";
 
 const CONTENT_ACTIONS = [SetContentAction, InsertNodeAction, RemoveNodeAction];
 
@@ -191,61 +190,61 @@ export class StateActions {
   optimize(): StateActions {
     return this;
     // reduce prop updates
-    const propActions: BTree<NodeId, UpdatePropsAction[]> = new BTree(
-      undefined,
-      NodeIdComparator,
-    );
-    const removedNodes: NodeIdSet = NodeIdSet.empty();
-
-    this.actions.forEach((action) => {
-      if (action instanceof UpdatePropsAction) {
-        const nodeId = action.nodeId;
-        let actions = propActions.get(nodeId);
-        if (!actions) {
-          actions = [];
-          propActions.set(nodeId, actions);
-        }
-        actions.push(action);
-      }
-
-      if (action instanceof RemoveChange) {
-        removedNodes.add(action.nodeId);
-      }
-    });
-
-    const actions = this.actions.filter((action) => {
-      if (action instanceof UpdatePropsAction) {
-        return false;
-      }
-
-      return true;
-    });
-
-    removedNodes.forEach((nodeId) => {
-      propActions.delete(nodeId);
-    });
-
-    // optimize prop updates
-    propActions.forEach((propAction, nodeId) => {
-      const optimized = propAction.reduce(
-        (prev, curr) => {
-          return {
-            before: { ...prev.before, ...curr.before },
-            after: { ...prev.after, ...curr.after },
-          };
-        },
-        {
-          before: {},
-          after: {},
-        },
-      );
-
-      actions.push(
-        UpdatePropsAction.withBefore(nodeId, optimized.before, optimized.after),
-      );
-    });
-
-    return new StateActions(actions, this.type);
+    // const propActions: BTree<NodeId, UpdatePropsAction[]> = new BTree(
+    //   undefined,
+    //   NodeIdComparator,
+    // );
+    // const removedNodes: NodeIdSet = NodeIdSet.empty();
+    //
+    // this.actions.forEach((action) => {
+    //   if (action instanceof UpdatePropsAction) {
+    //     const nodeId = action.nodeId;
+    //     let actions = propActions.get(nodeId);
+    //     if (!actions) {
+    //       actions = [];
+    //       propActions.set(nodeId, actions);
+    //     }
+    //     actions.push(action);
+    //   }
+    //
+    //   if (action instanceof RemoveChange) {
+    //     removedNodes.add(action.nodeId);
+    //   }
+    // });
+    //
+    // const actions = this.actions.filter((action) => {
+    //   if (action instanceof UpdatePropsAction) {
+    //     return false;
+    //   }
+    //
+    //   return true;
+    // });
+    //
+    // removedNodes.forEach((nodeId) => {
+    //   propActions.delete(nodeId);
+    // });
+    //
+    // // optimize prop updates
+    // propActions.forEach((propAction, nodeId) => {
+    //   const optimized = propAction.reduce(
+    //     (prev, curr) => {
+    //       return {
+    //         before: { ...prev.before, ...curr.before },
+    //         after: { ...prev.after, ...curr.after },
+    //       };
+    //     },
+    //     {
+    //       before: {},
+    //       after: {},
+    //     },
+    //   );
+    //
+    //   actions.push(
+    //     UpdatePropsAction.withBefore(nodeId, optimized.before, optimized.after),
+    //   );
+    // });
+    //
+    // return new StateActions(actions, this.type);
   }
 }
 
@@ -591,7 +590,4 @@ export class NodeDataMap extends BTree<NodeId, NodeData> {
   }
 }
 
-const tree =  new BTree(
-  undefined,
-  NodeIdComparator,
-);
+const tree = new BTree(undefined, NodeIdComparator);

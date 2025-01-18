@@ -170,7 +170,7 @@ $selectionHaloColor = #accef78d
 
 .collapsible > .ctiw > .title:after
   @extend .placeholder
-  left 26px
+  left 2px
 
 .collapsible__control
   display flex
@@ -306,7 +306,7 @@ $selectionHaloColor = #accef78d
 .h-1 > .title
   @extend .h1__title
   &:after
-    top 4px
+    top 5px
 
 .h2__title
   font-size: 1.6em
@@ -325,7 +325,7 @@ $selectionHaloColor = #accef78d
 .h-3 > .title
   @extend .h3__title
   &:after
-    top -3px
+    top -2px
 
 .h4__title
   font-size: 1.2em
@@ -358,7 +358,8 @@ pre
     z-index 2
 
 // enable line numbers
-[data-name=code]//.line-number
+[data-name=code] //.line-number
+
   > .title
     padding-left 56px
 
@@ -441,6 +442,7 @@ select#carbon-code-themes
   #line-highlight
     position relative;
     z-index 1;
+
     &:after
       content ''
       position absolute;
@@ -473,16 +475,36 @@ select#carbon-code-themes
 .token-line
   display: block
 
+.callout[data-as="h1"]
+  > .title
+    @extend .h1__title
+    margin-bottom 0.1em;
+    margin-top 0;
+
+    &:after
+      top 4px
+
 .collapsible[data-as="h1"]
-  margin-top 0.8em;
+  margin-top 1em;
 
   .ctiw > .title
     @extend .h1__title
+    margin-top 0;
     margin-bottom 0.1em;
+    &:after
+      top 5px
 
   .collapsible__control
     font-size 1.3em
-    margin-top 6px;
+    margin-top 4px;
+
+.callout[data-as="h2"]
+  > .title
+    @extend .h2__title
+    margin-bottom 0.1em;
+    margin-top 0;
+    &:after
+      top -1px
 
 .collapsible[data-as="h2"]
   margin-top 0.6em;
@@ -494,6 +516,12 @@ select#carbon-code-themes
   .collapsible__control
     font-size 1.1em
     margin-top 2px;
+
+.callout[data-as="h3"]
+  > .title
+    @extend .h3__title
+    margin-bottom 0.1em;
+    margin-top 0;
 
 .collapsible[data-as="h3"]
   margin-top 0.6em;

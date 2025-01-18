@@ -39,17 +39,19 @@ import { NodeView } from "./NodeView";
 import { no, yes } from "./types";
 
 export type TraverseOptions = {
+  // pre-order or post-order traversal
   order: "pre" | "post";
+  // forward or backward traversal
   direction: "forward" | "backward";
   // checks parent with the predicate before moving to parent siblings
   parent?: boolean;
+  // checks if the node is a boundary for the traversal
   gotoParent: boolean;
+  // stop the traversal if the predicate returns true
   boundary: Predicate<Node>;
+  // skip the node if the predicate returns true
   skip: Predicate<Node>;
 };
-
-let key = 0;
-const nextKey = () => key++;
 
 export type Path = (number | string)[];
 export type MutableNode = Node;

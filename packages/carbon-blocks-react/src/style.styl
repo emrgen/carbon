@@ -144,12 +144,10 @@ $lineHeight = 28px
   // padding: 1px 0
   //margin-top 2px
   // background rgba(168, 225, 255, 0.316)
-
   //> [data-type=children]
   //  padding-left 20px
   //position relative
   //line-height: $lineHeight
-
   //[data-type="content"]
   //  line-height $lineHeight
   //  // padding-left: 2px
@@ -160,11 +158,9 @@ $lineHeight = 28px
   //  [data-name=title]
   //    padding 0 2px
   //    flex 1
-
-//[data-name=collapsible]
-//    [data-type=content]
-//        display flex
-
+  //[data-name=collapsible]
+  //    [data-type=content]
+  //        display flex
 [data-name=numberList][data-as=h1]
   [data-type=content]
     padding-left: 20px
@@ -277,7 +273,7 @@ span[data-name=text] {
 }
 
 [data-selected=true]
-  caret-color: transparent!important;
+  caret-color: transparent !important;
 
   ::selection
     background: transparent
@@ -539,14 +535,14 @@ span[data-name=text] {
   &[data-as] > [data-type=children]
     padding-left 0
 
-//[data-name=callout]
-//  position relative
-//  padding: 10px 10px
-//  margin: 10px 0
-//  background: #FBF3DB
-//  border: 2px solid #f4d999
-//  border-radius: 4px
-//  line-height: $lineHeight
+  //[data-name=callout]
+  //  position relative
+  //  padding: 10px 10px
+  //  margin: 10px 0
+  //  background: #FBF3DB
+  //  border: 2px solid #f4d999
+  //  border-radius: 4px
+  //  line-height: $lineHeight
 
   &[data-as] > [data-type=content]
     padding-top 0
@@ -561,8 +557,10 @@ span[data-name=text] {
   //background: rgb(247, 246, 243)
   border-radius: 4px
   font-family "Geist Mono", monospace
+
   .title
     padding: 24px 20px
+
   > .title:after
     top -5px
 
@@ -697,11 +695,11 @@ span[data-name=text] {
 //  padding: 10px
 //  gap 10px
 
-  //[data-name=page],
-  //[data-as=page]
-  //  flex 1
-  //  padding 0 80px
-  //  padding-top: 40px;
+//[data-name=page],
+//[data-as=page]
+//  flex 1
+//  padding 0 80px
+//  padding-top: 40px;
 
 
 .carbon-overlay
@@ -1040,7 +1038,16 @@ span[data-name=text] {
   left 0
   width 100%
   height 100%
-  padding 10px
+  padding 16px
+
+  > .title
+    line-height $lineHeight
+    padding 2px
+
+    &:after
+      top -2px
+  > .cnest
+    margin-left 0
 
 //background: red;
 
@@ -1283,6 +1290,7 @@ span[data-name=text] {
     user-select none
     font-weight bold
     caret-color #fff
+
     &[contenteditable=false]
       cursor: pointer;
 
@@ -1598,8 +1606,6 @@ a[data-name="text"]
 
 //[data-focused=true]
 //    background teal
-
-
 
 
 [data-name=mention]

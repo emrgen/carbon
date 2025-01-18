@@ -3,8 +3,10 @@ import {
   BeforePlugin,
   CarbonPlugin,
   CollapsedPath,
+  EmptyPlaceholderPath,
   EventContext,
   EventHandler,
+  FocusedPlaceholderPath,
   insertAfterAction,
   insertBeforeAction,
   Node,
@@ -174,7 +176,13 @@ export class Collapsible extends NodePlugin {
           ctx.cmd
             .Update(currentNode, {
               [RemoteDataAsPath]: "",
+              [EmptyPlaceholderPath]: this.props.get(EmptyPlaceholderPath, ""),
+              [FocusedPlaceholderPath]: this.props.get(
+                FocusedPlaceholderPath,
+                "",
+              ),
             })
+            .Select(selection)
             .Dispatch();
 
           return;

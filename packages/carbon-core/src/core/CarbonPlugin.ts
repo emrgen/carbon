@@ -6,7 +6,7 @@ import { NodeEncoder, Writer } from "./Encoder";
 import { CarbonMessageFormat } from "./MessageBus";
 import { Node } from "./Node";
 import { StateActions } from "./NodeChange";
-import { PlainNodeProps } from "./NodeProps";
+import { NodeProps, PlainNodeProps } from "./NodeProps";
 import { Pin } from "./Pin";
 import { PluginEmitter } from "./PluginEmitter";
 import { PluginManager } from "./PluginManager";
@@ -38,11 +38,13 @@ export abstract class CarbonPlugin {
   protected bus!: PluginEmitter;
   protected state!: PluginState;
   protected app!: Carbon;
+  props: NodeProps = new PlainNodeProps();
 
   init(app: Carbon, bus: PluginEmitter, state: PluginState) {
     this.app = app;
     this.bus = bus;
     this.state = state;
+    this.props = PlainNodeProps.create(this.spec().props ?? {});
   }
 
   created() {}

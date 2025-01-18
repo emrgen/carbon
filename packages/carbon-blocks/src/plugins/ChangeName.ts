@@ -2,9 +2,11 @@ import {
   BeforeInputRuleHandler,
   BeforeInputRuleInlineHandler,
   BeforePlugin,
+  EmptyPlaceholderPath,
   EventContext,
   EventHandler,
   EventHandlerMap,
+  FocusedPlaceholderPath,
   FocusOnInsertPath,
   InputRule,
   insertBeforeAction,
@@ -166,9 +168,17 @@ export class ChangeName extends BeforePlugin {
         cmd.Add(action);
       }
 
-      if (name.match(/h[1-9]/) && changeNode.name === "collapsible") {
+      // update the node type by changing the name
+      if (
+        (name.match(/h[1-9]/) && changeNode.name === "collapsible") ||
+        changeNode.name === "callout"
+      ) {
         cmd.Update(changeNode, {
           [RemoteDataAsPath]: name,
+          [EmptyPlaceholderPath]:
+            this.app.plugin(name)?.props.get(EmptyPlaceholderPath, "") ?? "",
+          [FocusedPlaceholderPath]:
+            this.app.plugin(name)?.props.get(FocusedPlaceholderPath, "") ?? "",
         });
       } else {
         cmd.Update(changeNode, {

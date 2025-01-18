@@ -227,13 +227,14 @@ export class TransformCommands extends BeforePlugin {
       // find all the leaves between start and end
       const betweenNodes: Node[] = [];
 
+      // find all the nodes between start and end
       start.node.next(
         (next) => {
           if (next.eq(end.node)) {
             return true;
           }
 
-          if (next.isFocusable && !next.isTextContainer) {
+          if (next.isFocusable && next.isInline) {
             betweenNodes.push(next);
           }
 
@@ -241,6 +242,7 @@ export class TransformCommands extends BeforePlugin {
         },
         {
           order: "pre",
+          skip: (n) => n.isIsolate,
         },
       );
 
