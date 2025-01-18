@@ -34,6 +34,7 @@ import {
   AddPagePath,
   CollapsedPath,
   corePresetPlugins,
+  Keymap,
   ModePath,
   NodeId,
   State,
@@ -214,6 +215,8 @@ export function SidebarLayout() {
 
   // @ts-ignore
   window.app = app;
+  // @ts-ignore
+  window.Keymap = Keymap;
 
   useEffect(() => {
     const onChange = (state: State) => {

@@ -369,9 +369,16 @@ pre
     code {
       counter-reset: step;
       counter-increment: step 0;
+      //padding-left 30px
     }
 
+    span
+      position relative;
+
     code .line::before {
+      //position absolute
+      //top -4pxd
+      //left -36px
       content: counter(step);
       counter-increment: step;
       width: 16px;
@@ -383,8 +390,12 @@ pre
       font-size 14px
     }
 
+    &.line-numbers-2 code {
+      //padding-left 40px;
+    }
+
     &.line-numbers-2 code .line::before {
-      width: 26px;
+      width: 26px
     }
 
     &.line-numbers-3 code .line::before {
