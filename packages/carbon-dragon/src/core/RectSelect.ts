@@ -82,7 +82,7 @@ export class RectSelect extends EventEmitter {
     this.isSelecting = true;
 
     if (this.mountedSelectables.size) {
-      this.selectables.reset();
+      // this.selectables.reset();
       this.mountedSelectables.forEach((el, id) => {
         const node = app.store.get(id);
         if (node) {
@@ -151,6 +151,10 @@ export class RectSelect extends EventEmitter {
     console.log("collides", collides.length);
 
     if (collides.length === 0) {
+      this.selectables.entries().forEach((e) => {
+        console.log("unselect", e.node.name, e.node.id.toString(), e.el);
+      });
+
       if (this.noSelectionChange([])) return;
       this.selectNodes([]);
       return;
@@ -162,11 +166,17 @@ export class RectSelect extends EventEmitter {
       return;
     }
 
-    const ordered = sortBy(collides, (n) => n.depth);
+    const getDepth = (n: Node) => {
+      return n.parents.filter((p) => p.name !== "sandbox").length;
+    };
+
+    const ordered = sortBy(collides, getDepth);
 
     // select lowest sibling
     const minDepthNode = last(ordered)! as Node;
-    const topLevelNodes = ordered.filter((n) => n.depth === minDepthNode.depth);
+    const topLevelNodes = ordered.filter(
+      (n) => getDepth(n) === getDepth(minDepthNode),
+    );
     const topLevelNodeParents = uniq(
       topLevelNodes
         .map((n) => {
@@ -244,7 +254,7 @@ export class RectSelect extends EventEmitter {
 
   onMountRectSelectable(node: Node, el: HTMLElement) {
     // if (this.isSelecting) return
-    // console.log("->", node.name, node.id.toString(), el);
+    console.log("->", node.name, node.id.toString(), el);
     if (this.isSelecting) {
       this.selectables.register(node, el);
     } else {

@@ -39,7 +39,7 @@ export class DndNodeStore {
     });
   }
 
-  private entries() {
+  entries() {
     return this.nodes().map((n) => ({ node: n, el: this.element(n.id) }));
   }
 
@@ -52,6 +52,7 @@ export class DndNodeStore {
   }
 
   reset() {
+    debugger;
     this.nodeMap.clear();
     this.elementMap.clear();
     this.rtree.clear();
@@ -100,6 +101,8 @@ export class DndNodeStore {
     if (el) {
       this.elementToNodeMap.delete(el);
     }
+
+    console.log("delete rtree item", nodeId.toString(), el);
 
     this.nodeMap.delete(nodeId);
     this.elementMap.delete(nodeId);

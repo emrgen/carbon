@@ -76,10 +76,12 @@ const data = node("carbon", [
 
       node("code", [title(text("function name(){}"))], {}),
 
-      node("video", [], {
-        "remote/state/video/src":
-          "https://www.youtube.com/watch?v=srNoYnGhXAg&pp=ygUEc29uZw%3D%3D",
-      }),
+      node("sandbox", [
+        node("video", [], {
+          "remote/state/video/src":
+            "https://www.youtube.com/watch?v=srNoYnGhXAg&pp=ygUEc29uZw%3D%3D",
+        }),
+      ]),
 
       node("image", [], {
         "remote/state/image/src":
