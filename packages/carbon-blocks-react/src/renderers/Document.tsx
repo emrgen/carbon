@@ -202,7 +202,7 @@ export const DocumentComp = (props: RendererProps) => {
           />
           {!pageProps.eq(Node.NULL) && <CarbonNode node={pageProps} />}
           {/*<CarbonProps node={node} />*/}
-          <CarbonNodeChildren node={node} />
+          <CarbonNodeChildren node={node} wrap={false} />
         </CarbonBlock>
       </div>
     </DocumentContext>

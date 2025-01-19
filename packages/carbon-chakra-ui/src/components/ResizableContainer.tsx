@@ -93,7 +93,6 @@ export const ResizableContainer = (props: MediaViewProps) => {
   }, [resizeObserverRef, ref]);
 
   const updateDocumentWidth = useCallback(() => {
-    console.log("xxxxxxxxxxxxxxxxxxx");
     const document = node.parents.find((n) => n.isPage);
     if (!document) return;
     const docEl = app.store.element(document.id);
@@ -106,11 +105,6 @@ export const ResizableContainer = (props: MediaViewProps) => {
     if (fullWidth) {
       setWidth(parentWidth);
     }
-    console.log(
-      "document width",
-      parentWidth,
-      parseInt(paddingLeft.toString()),
-    );
   }, [app.store, fullWidth, node]);
 
   useEffect(() => {
@@ -228,8 +222,8 @@ export const ResizableContainer = (props: MediaViewProps) => {
         className={"resizable-content"}
         // userSelect={"none"} // prevent content selection
         pos={"relative"}
-        h={"full"}
-        w={"full"}
+        // w={dimensions.width}
+        // h={height === "auto" ? undefined : dimensions.height}
         minH={minHeight + "px"}
         flex={1}
         alignItems={width === documentWidth ? "center" : "auto"}

@@ -29,6 +29,7 @@ export class Quote extends CarbonPlugin {
       },
       info: {
         title: "Quote",
+        shortcut: "|",
         description: "Write a quote",
         icon: "quote",
         tags: [
@@ -42,13 +43,15 @@ export class Quote extends CarbonPlugin {
           "citation",
         ],
       },
-      attrs: {
-        node: {
-          focusPlaceholder: "Quote",
-          emptyPlaceholder: "",
-        },
-        html: {
-          suppressContentEditableWarning: true,
+      props: {
+        local: {
+          placeholder: {
+            empty: "Empty quote",
+            focused: "",
+          },
+          html: {
+            suppressContentEditableWarning: true,
+          },
         },
       },
     };

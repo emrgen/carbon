@@ -234,7 +234,7 @@ $selectionHaloColor = #accef78d
 // callout
 .callout
   background: #FBF3DB;
-  padding: 10px 16px
+  padding: 12px
   border-radius 4px
   box-shadow 0 0 0 2px #f4d999 inset
   margin: 10px 0
@@ -311,31 +311,33 @@ $selectionHaloColor = #accef78d
 .h2__title
   font-size: 1.6em
   font-weight: bold
-  line-height: 1.2em
+  line-height: 1.4em
   margin-top 0.6em;
 
 .h-2 > .title
   @extend .h2__title
+  &:after
+    top 2px
 
 .h3__title
   font-size: 1.4em
   font-weight: bold
-  line-height: 1.2em
+  line-height: 1.3em
 
 .h-3 > .title
   @extend .h3__title
   &:after
-    top -2px
+    top -1px
 
 .h4__title
   font-size: 1.2em
   font-weight: bold
-  line-height: 1.2em
+  line-height: 1.4em
 
 .h-4 > .title
   @extend .h4__title
   &:after
-    top -3px
+    top -2px
 
 // header end
 
@@ -504,7 +506,7 @@ select#carbon-code-themes
     margin-bottom 0.1em;
     margin-top 0;
     &:after
-      top -1px
+      top 1px
 
 .collapsible[data-as="h2"]
   margin-top 0.6em;
@@ -522,6 +524,7 @@ select#carbon-code-themes
     @extend .h3__title
     margin-bottom 0.1em;
     margin-top 0;
+
 
 .collapsible[data-as="h3"]
   margin-top 0.6em;
@@ -594,3 +597,11 @@ select#carbon-code-themes
 
 .newline
   display block
+
+.image
+  background #eee
+  border-radius 4px
+
+.video
+  //background #eee
+  border-radius 4px

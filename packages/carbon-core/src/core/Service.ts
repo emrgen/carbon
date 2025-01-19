@@ -45,7 +45,6 @@ export class Service {
         const plugin = services[propName];
 
         if (!plugin) {
-          console.log(services);
           throw new Error(`Service ${propName} not found`);
         }
 

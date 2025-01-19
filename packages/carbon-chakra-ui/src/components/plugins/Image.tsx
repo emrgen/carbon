@@ -1,12 +1,14 @@
 import {
   Center,
   Flex,
+  Image,
   Spinner,
   Square,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { prevent, preventAndStop, stop, StylePath } from "@emrgen/carbon-core";
+import { prevent, preventAndStop, stop } from "@emrgen/carbon-core";
+import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import { ImageSrcPath } from "@emrgen/carbon-media";
 import {
   CarbonBlock,
@@ -15,7 +17,7 @@ import {
   useCarbonOverlay,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
-import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { RxImage } from "react-icons/rx";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { ResizableContainer } from "../ResizableContainer";
@@ -24,11 +26,13 @@ const CaptionPath = "remote/state/caption";
 
 export function ImageComp(props: RendererProps) {
   const { node } = props;
+  const ref = useRef<HTMLDivElement>(null);
   const { SelectionHalo } = useSelectionHalo(props);
+  useRectSelectable({ ref, node });
 
   return (
     <>
-      <CarbonBlock {...props}>
+      <CarbonBlock {...props} ref={ref}>
         <ImageContent node={node} />
         {SelectionHalo}
       </CarbonBlock>
@@ -39,12 +43,13 @@ export function ImageComp(props: RendererProps) {
 const ImageContent = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
-  const [style, setStyle] = useState<CSSProperties>(() =>
-    node.props.get<CSSProperties>(StylePath, {}),
-  );
-  const imageSrc = node.props.get(ImageSrcPath, "");
+  // const [style, setStyle] = useState<CSSProperties>(() =>
+  //   node.props.get<CSSProperties>(StylePath, {}),
+  // );
+
   const [ready, setReady] = useState(false);
   const caption = node.props.get(CaptionPath, "");
+  const imageSrc = node.props.get(ImageSrcPath, "");
   const ref = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const boundRef = useRef<HTMLDivElement>(null);
@@ -52,18 +57,18 @@ const ImageContent = (props: RendererProps) => {
   const updater = useDisclosure();
   const { ref: overlayRef } = useCarbonOverlay();
 
-  const selection = useSelectionHalo(props);
+  // const selection = useSelectionHalo(props);
   const [aspectRatio, setAspectRatio] = useState(9 / 16);
 
-  const handleClick = (e) => {
-    preventAndStop(e);
-
-    app.emit(
-      "show:options:menu",
-      node.id,
-      ref.current?.getBoundingClientRect(),
-    );
-  };
+  // const handleClick = (e) => {
+  //   preventAndStop(e);
+  //
+  //   app.emit(
+  //     "show:options:menu",
+  //     node.id,
+  //     ref.current?.getBoundingClientRect(),
+  //   );
+  // };
 
   const alignImage = useCallback(
     (align) => {
@@ -93,21 +98,34 @@ const ImageContent = (props: RendererProps) => {
     setAspectRatio(height / width);
   }, [app, imageRef, node]);
 
+  useEffect(() => {
+    return () => {
+      console.log("unmounted image");
+    };
+  }, []);
+
   return (
-    <ResizableContainer
-      // width={style.width ?? 0}
-      // height={style.height ?? 0}
-      node={node}
-      enable={ready}
-      aspectRatio={aspectRatio}
-    >
-      {!imageSrc && (
-        <CarbonImageLoading src={imageSrc} ready={ready} setReady={setReady} />
-      )}
-      {imageSrc && (
-        <CarbonLazyImage src={imageSrc} ready={ready} setReady={setReady} />
-      )}
-    </ResizableContainer>
+    <>
+      <ResizableContainer
+        // width={style.width ?? 0}
+        // height={style.height ?? 0}
+        node={node}
+        enable={true}
+        aspectRatio={aspectRatio}
+      >
+        {!imageSrc && (
+          <CarbonImageLoading
+            src={imageSrc}
+            ready={ready}
+            setReady={setReady}
+          />
+        )}
+        {imageSrc && (
+          <Image loading="lazy" src={imageSrc} />
+          // <CarbonLazyImage src={imageSrc} ready={ready} setReady={setReady} />
+        )}
+      </ResizableContainer>
+    </>
   );
 };
 
@@ -119,28 +137,26 @@ interface CarbonLazyImageProps {
 
 const CarbonImageLoading = (props: CarbonLazyImageProps) => {
   return (
-    <>
-      <Flex
-        className="image-overlay"
-        onClick={(e) => {
-          stop(e);
-        }}
-        h={"full"}
-        w={"full"}
-        minH={"inherit"}
-        cursor={"pointer"}
-        transition={"background 0.3s, color 0.3s"}
-        _hover={{
-          bg: "rgba(0,0,0,0.1)",
-          color: "#999",
-        }}
-      >
-        <Square size={12} borderRadius={4} fontSize={26} color={"#aaa"}>
-          <RxImage />
-        </Square>
-        <Text>Click to add image</Text>
-      </Flex>
-    </>
+    <Flex
+      className="image-overlay"
+      onClick={(e) => {
+        stop(e);
+      }}
+      h={"full"}
+      w={"full"}
+      minH={"inherit"}
+      cursor={"pointer"}
+      transition={"background 0.3s, color 0.3s"}
+      _hover={{
+        bg: "rgba(0,0,0,0.1)",
+        color: "#999",
+      }}
+    >
+      <Square size={12} borderRadius={4} fontSize={26} color={"#aaa"}>
+        <RxImage />
+      </Square>
+      <Text>Click to add image</Text>
+    </Flex>
   );
 };
 

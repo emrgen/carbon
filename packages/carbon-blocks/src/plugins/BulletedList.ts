@@ -19,6 +19,7 @@ export class BulletedList extends Paragraph {
       },
       info: {
         title: "Bulleted List",
+        shortcut: "-",
         description: "Create a bulleted list",
         icon: "bulletList",
         tags: ["bulleted list", "unordered list", "list", "ul", "unordered"],

@@ -235,6 +235,7 @@ export interface NodeSpec {
 export interface NodeInfo {
   title?: string;
   description?: string;
+  shortcut?: string;
   icon?: string;
   tags?: string[];
   order?: number;

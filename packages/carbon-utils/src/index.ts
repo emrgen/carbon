@@ -1,4 +1,5 @@
 import { BlockMenuPlugin } from "./plugins";
+import "./carbon-utils.styl";
 
 export * from "./components";
 export * from "./plugins";

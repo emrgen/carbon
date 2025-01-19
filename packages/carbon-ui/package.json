@@ -10,6 +10,7 @@
   "dependencies": {
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/carbon-react": "workspace:*",
+    "@emrgen/carbon-utils": "workspace:*",
     "@emrgen/types": "workspace:*",
     "@types/lodash": "^4.14.191",
     "lodash": "^4.17.21",

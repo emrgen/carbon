@@ -1,3 +1,4 @@
+import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNode,
@@ -11,6 +12,7 @@ import { useRef } from "react";
 export const HeaderComp = (props: RendererProps) => {
   const { node, custom } = props;
   const ref = useRef(null);
+  useRectSelectable({ node, ref });
   const { SelectionHalo } = useSelectionHalo(props);
 
   return (

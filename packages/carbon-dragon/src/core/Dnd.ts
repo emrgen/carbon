@@ -80,13 +80,13 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
   }
 
   onMouseDown(node: Node, event) {
-    console.log("mouse-down");
+    // console.log("mouse-down");
     this.isMouseDown = true;
     this.emit("mouse:down", node, event);
   }
 
   onMouseUp(node: Node, event: DndEvent, isDragging: boolean) {
-    console.log("mouse-up");
+    // console.log("mouse-up");
     this.isMouseDown = false;
     this.emit("mouse:up", node, event, isDragging);
   }

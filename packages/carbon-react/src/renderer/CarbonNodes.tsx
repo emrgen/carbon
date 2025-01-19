@@ -461,9 +461,13 @@ interface ChildrenSegmentProps {
   nodes: Node[];
 }
 
+interface CarbonChildrenSegmentProps extends RendererProps {
+  wrap?: boolean;
+}
+
 // render children except first node
 export const CarbonNodeChildren = (props: RendererProps) => {
-  const { node, wrap, custom, className } = props;
+  const { node, wrap = true, custom, className } = props;
   return useMemo(() => {
     if (node.children.length < 2) return null;
 
@@ -472,6 +476,6 @@ export const CarbonNodeChildren = (props: RendererProps) => {
       return <CarbonNode node={n} key={n.key} custom={custom} />;
     });
 
-    return <div className={"cnest"}>{children}</div>;
-  }, [node, custom]);
+    return wrap ? <div className={"cnest"}>{children}</div> : children;
+  }, [wrap, node, custom]);
 };

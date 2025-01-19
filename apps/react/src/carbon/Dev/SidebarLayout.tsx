@@ -62,7 +62,6 @@ import { CarbonUI } from "@emrgen/carbon-ui";
 import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
 import { useEffect, useState } from "react";
-import { PathTracker } from "../../PathTracker";
 import "./test.styl";
 
 const page = node(
@@ -72,7 +71,21 @@ const page = node(
 
     paragraph([title(text("question title"))]),
 
-    paragraph([title([text("section 1")])]),
+    // paragraph([title([text("section 1")])]),
+
+    // node("image", [], {
+    //   "remote/state/image/src":
+    //     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPcbdS5mvBeNcpLWmbEfpSP7LGa3Nae-Lwew&s",
+    // }),
+
+    node("sandbox", [
+      node("video", [], {
+        "remote/state/video/src":
+          "https://www.youtube.com/watch?v=GBR6pHZ68Ho&t=249s",
+      }),
+    ]),
+
+    // node("video"),
   ],
   {
     [ModePath]: "edit",
@@ -247,7 +260,6 @@ export function SidebarLayout() {
             <CarbonApp app={app} renderManager={renderManager}>
               <Box pos={"absolute"} right={8} top={6}></Box>
               <FloatingStyleMenu />
-              <PathTracker />
               <InsertBlockMenu />
               {/*<BlockContextMenu />*/}
               <EmojiPickerInlineMenu />

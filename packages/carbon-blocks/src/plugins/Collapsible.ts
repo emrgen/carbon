@@ -65,6 +65,7 @@ export class Collapsible extends NodePlugin {
       },
       info: {
         title: "Toggle List",
+        shortcut: ">",
         description: "Create a toggle list",
         icon: "toggleList",
         tags: ["toggle list", "toggle", "collapsible", "list"],

@@ -46,6 +46,7 @@ export class Code extends CarbonPlugin {
       insert: true,
       info: {
         title: "Code",
+        shortcut: "```",
         description: "Just start typing to create a new code block",
         icon: "code",
         tags: ["code", "code block", "code", "pre"],

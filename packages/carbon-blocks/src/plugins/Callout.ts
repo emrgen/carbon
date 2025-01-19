@@ -40,6 +40,7 @@ export class Callout extends CarbonPlugin {
       },
       info: {
         title: "Callout",
+        shortcut: ">>",
         description: "Write a callout",
         icon: "callout",
         tags: ["callout", "side note"],
@@ -76,7 +77,7 @@ export class Callout extends CarbonPlugin {
       backspace: (ctx: EventContext<KeyboardEvent>) => {
         const { selection, currentNode, cmd } = ctx;
 
-        // change callout props datka-as
+        // change callout props data-as
         if (
           selection.isCollapsed &&
           selection.head.isAtStartOfNode(currentNode) &&
@@ -84,10 +85,7 @@ export class Callout extends CarbonPlugin {
           currentNode.props.get(RemoteDataAsPath, "").match(/h[1-9]/)
         ) {
           ctx.stopPropagation();
-          console.log(
-            "xxxxxxxxxxxxxxx",
-            this.props.get(FocusedPlaceholderPath),
-          );
+
           ctx.cmd
             .Update(currentNode, {
               [RemoteDataAsPath]: "",

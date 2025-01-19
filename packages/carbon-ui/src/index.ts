@@ -13,6 +13,6 @@ export const CarbonUI = {
   renderers: [
     ReactRenderer.create("sidebarLayout", SidebarLayoutComp),
     ReactRenderer.create("sidebar", SidebarComp),
-    ReactRenderer.create("sidebarContent", LayoutContentComp),
+    ReactRenderer.create("layoutContent", LayoutContentComp),
   ],
 };

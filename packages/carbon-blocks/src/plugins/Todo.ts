@@ -21,6 +21,7 @@ export class Todo extends Paragraph {
       splitName: "todo",
       info: {
         title: "To-do List",
+        shortcut: "[]",
         description: "Create a to-do list",
         icon: "todo",
         tags: ["to-do list", "todo", "checkbox", "checklist"],

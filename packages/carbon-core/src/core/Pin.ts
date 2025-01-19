@@ -373,7 +373,9 @@ export class Pin {
 
   // check if pin is at the start of the provided node
   isAtStartOfNode(node: Node): boolean {
-    return this.down().eq(Pin.toStartOf(node)!);
+    const a = this.down();
+    const b = Pin.toStartOf(node);
+    return a.eq(b!);
   }
 
   // check if pin is at the end of the provide node
@@ -420,7 +422,9 @@ export class Pin {
     if (!this.node.eq(other.node)) {
       return false;
     }
+
     if (this.steps !== -1 && this.steps !== other.steps) return false;
+    if (this.steps === other.steps) return true;
     // console.log("Pin.eq", this.toString(), other.toString());
     return this.offset === other.offset && this.align === other.align;
   }

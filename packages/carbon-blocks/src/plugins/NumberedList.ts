@@ -26,6 +26,7 @@ export class NumberedList extends Paragraph {
       },
       info: {
         title: "Numbered List",
+        shortcut: "1.",
         description: "Create a numbered list",
         icon: "numberList",
         tags: [

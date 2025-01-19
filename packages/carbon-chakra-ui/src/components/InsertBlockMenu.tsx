@@ -244,7 +244,7 @@ const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
         setScrolled(true);
       }}
     >
-      <List ref={listRef} px={2} py={2} w={"300px"}>
+      <List ref={listRef} px={2} py={2} w={"300px"} spacing={1}>
         {blocks.map((b, index) => {
           return (
             <ListItem
@@ -262,33 +262,41 @@ const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
               // _hover={{ bg: "#eee" }}
               _active={{ bg: "#ddd" }}
               bg={activeIndex === index ? "#eee" : "#fff"}
-              p={1}
+              px={2}
+              py={1.5}
+              borderRadius={4}
               pos="relative"
             >
               <HStack>
                 <Square
-                  size={12}
+                  // size={12}
                   borderRadius={4}
-                  border={
-                    index === activeIndex ? "1px solid #ddd" : "1px solid #eee"
-                  }
-                  bg={"#fff"}
-                  fontSize={20}
+                  // border={
+                  //   index === activeIndex ? "1px solid #ddd" : "1px solid #eee"
+                  // }
+                  // bg={"#fff"}
+                  fontSize={18}
                   color={"#555"}
                 >
                   {blockIcons[b.name] ?? ""}
                 </Square>
-                <Stack spacing={0} flex={1} overflow={"hidden"}>
-                  <Text>{b.spec.info.title}</Text>
+                <HStack
+                  spacing={0}
+                  flex={1}
+                  overflow={"hidden"}
+                  justifyContent={"space-between"}
+                >
+                  <Text fontSize={13}>{b.spec.info.title}</Text>
                   <Text
                     fontSize={13}
                     overflow={"hidden"}
                     whiteSpace={"nowrap"}
                     textOverflow={"ellipsis"}
+                    color={"#aaa"}
                   >
-                    {b.spec.info.description}
+                    {b.spec.info.shortcut}
                   </Text>
-                </Stack>
+                </HStack>
               </HStack>
             </ListItem>
           );

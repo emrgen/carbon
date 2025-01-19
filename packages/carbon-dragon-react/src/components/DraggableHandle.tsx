@@ -345,7 +345,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
     app.focus();
     if (e.shiftKey) {
       const after = PinnedSelection.fromNodes([]);
-      app.cmd.inserter.insertBeforeDefault(node, "paragraph")?.Dispatch();
+      app.cmd.inserter
+        .insertBeforeDefault(node, "paragraph")
+        ?.SelectBlocks([])
+        .Dispatch();
       return;
     }
 
@@ -367,7 +370,10 @@ export function DraggableHandle(props: FastDragHandleProps) {
     //   return;
     // }
 
-    app.cmd.inserter.insertAfterDefault(node, "paragraph").Dispatch();
+    app.cmd.inserter
+      .insertAfterDefault(node, "paragraph")
+      .SelectBlocks([])
+      .Dispatch();
   };
 
   return (

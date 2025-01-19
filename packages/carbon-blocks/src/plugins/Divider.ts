@@ -28,6 +28,7 @@ export class Divider extends NodePlugin {
       },
       info: {
         title: "Divider",
+        shortcut: "---",
         description: "A horizontal line to separate content",
         icon: "divider",
         tags: ["divider", "line", "horizontal line"],
