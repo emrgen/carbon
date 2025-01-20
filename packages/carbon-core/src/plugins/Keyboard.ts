@@ -397,11 +397,13 @@ export class KeyboardPlugin extends AfterPlugin {
     const firstNode = first(blocks) as Node;
     const block = prevSelectableBlock(firstNode, true);
     if (!block) {
+      debugger;
       return;
     }
 
     const lastNode = last(blocks) as Node;
     if (block.isIsolate && lastNode.parents.some((n) => n.eq(block))) {
+      debugger;
       return;
     }
 
@@ -572,7 +574,7 @@ export class KeyboardPlugin extends AfterPlugin {
   }
 
   up(ctx: EventContext<KeyboardEvent>) {
-    const { app, currentNode, cmd } = ctx;
+    const { app, cmd } = ctx;
     const { blockSelection } = app;
     if (blockSelection.isEmpty) {
       // check if no prev focusable node exists
@@ -592,12 +594,16 @@ export class KeyboardPlugin extends AfterPlugin {
 
     const { blocks } = blockSelection;
     if (blocks.length > 1) {
-      const lastNode = first(blocks) as Node;
-      cmd.SelectBlocks([lastNode.id]).Dispatch();
+      console.log(blocks.map((b) => [b.id.toString()]));
+      const firstNode = first(blocks) as Node;
+      cmd.SelectBlocks([firstNode.id]).Dispatch();
+      debugger;
       return;
     }
 
-    const block = prevSelectableBlock(currentNode, true);
+    const firstNode = first(blocks) as Node;
+
+    const block = prevSelectableBlock(firstNode, true);
     if (!block || block.isPage) return;
 
     const lastNode = last(blocks) as Node;
@@ -694,5 +700,11 @@ const nextSelectableBlock = (node: Node, within = false, parent = false) => {
     if (found) return found;
   }
 
-  return node?.next((n) => n.isBlockSelectable, { order: "pre", parent });
+  return node?.next(
+    (n) => {
+      console.log("next selectable", n.name, n.id.toString());
+      return n.isBlockSelectable;
+    },
+    { order: "pre", parent },
+  );
 };

@@ -1,6 +1,6 @@
+import { Fragment } from "./Fragment";
 import { NodeType } from "./NodeType";
 import { NodeName } from "./types";
-import { Fragment } from "./Fragment";
 
 type MatchEdge = { type: NodeType; next: ContentMatch };
 
@@ -99,8 +99,9 @@ export class ContentMatch {
       types: readonly NodeType[],
     ): Fragment | null {
       let finished = match.matchFragment(after, startIndex);
-      if (finished && (!toEnd || finished.validEnd))
+      if (finished && (!toEnd || finished.validEnd)) {
         return Fragment.from(types.map((tp) => tp.createAndFill()!));
+      }
 
       for (let i = 0; i < match.next.length; i++) {
         let { type, next } = match.next[i];

@@ -83,7 +83,7 @@ export class DndNodeStore {
       return;
     }
 
-    console.log("register rtree item", node.id.toString(), el);
+    // console.log("register rtree item", node.id.toString(), el);
 
     const { id } = node;
     // remove old reference first
@@ -102,7 +102,7 @@ export class DndNodeStore {
       this.elementToNodeMap.delete(el);
     }
 
-    console.log("delete rtree item", nodeId.toString(), el);
+    // console.log("delete rtree item", nodeId.toString(), el);
 
     this.nodeMap.delete(nodeId);
     this.elementMap.delete(nodeId);

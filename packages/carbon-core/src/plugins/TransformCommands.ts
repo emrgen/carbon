@@ -1715,6 +1715,11 @@ export class TransformCommands extends BeforePlugin {
       return tr;
     }
 
+    console.log(
+      "nodes",
+      nodes.map((n) => n.name),
+    );
+
     const deleteActions: CarbonAction[] = [];
     const insertActions: CarbonAction[] = [];
     reverse(nodes.slice()).forEach((node) => {
@@ -1737,8 +1742,7 @@ export class TransformCommands extends BeforePlugin {
       const match = parent.type.contentMatch.matchFragment(
         Fragment.from(prevSiblings),
       );
-      const { nodes: createNodes } =
-        match?.fillBefore(Fragment.from(nextSiblings), true) ?? Fragment.EMPTY;
+
       console.log(
         "prevSiblings",
         prevSiblings.map((n) => n.id.toString()),
@@ -1747,6 +1751,10 @@ export class TransformCommands extends BeforePlugin {
         "nextSiblings",
         nextSiblings.map((n) => n.id.toString()),
       );
+
+      const { nodes: createNodes } =
+        match?.fillBefore(Fragment.from(nextSiblings), true) ?? Fragment.EMPTY;
+
       console.log(
         "createNodes to be inserted",
         createNodes.map((n) => [n.name, n.key, n]),
@@ -1835,10 +1843,11 @@ export class TransformCommands extends BeforePlugin {
     const { app } = tr;
     if (BlockSelection.is(selection)) {
       const { blocks } = selection;
-      const { parent } = blocks[0];
       const mapped = blocks.map((b) =>
         b.parent?.name === "sandbox" ? b.parent : b,
       );
+
+      const { parent } = mapped[0];
       return this.deleteNodes(tr, parent!, mapped, opts);
     }
 

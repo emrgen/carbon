@@ -150,7 +150,7 @@ export class NodeType {
   }
 
   get isBlockSelectable() {
-    return !!this.spec.blockSelectable;
+    return !!this.spec.selection?.block;
   }
 
   get splits() {

@@ -254,7 +254,7 @@ export class RectSelect extends EventEmitter {
 
   onMountRectSelectable(node: Node, el: HTMLElement) {
     // if (this.isSelecting) return
-    console.log("->", node.name, node.id.toString(), el);
+    // console.log("->", node.name, node.id.toString(), el);
     if (this.isSelecting) {
       this.selectables.register(node, el);
     } else {
