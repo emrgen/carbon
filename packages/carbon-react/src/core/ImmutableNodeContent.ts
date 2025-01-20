@@ -99,6 +99,11 @@ export class ImmutableNodeContent implements NodeContent {
     return this.children[index];
   }
 
+  setLinkName(name: string) {
+    this.content.linkName = name;
+    return this;
+  }
+
   setParentId(parentId: NodeId) {
     this.content.parentId = parentId;
     return this;

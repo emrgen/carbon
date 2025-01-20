@@ -16,6 +16,7 @@ export class Video extends NodePlugin {
       atom: true,
       isolate: true,
       insert: true,
+      sandbox: true,
       dnd: {
         handle: true,
         draggable: true,

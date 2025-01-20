@@ -1,10 +1,9 @@
-import { Node, Path } from "./Node";
 import { Optional, With } from "@emrgen/types";
+import { Node, Path } from "./Node";
 import { NodeId } from "./NodeId";
-import { NodePropsJson } from "./NodeProps";
-import { NodeProps } from "./NodeProps";
-import { NodeType } from "./NodeType";
 import { NodeMap } from "./NodeMap";
+import { NodeProps, NodePropsJson } from "./NodeProps";
+import { NodeType } from "./NodeType";
 
 // this is the data that is used to create a node
 export interface NodeData {
@@ -52,6 +51,8 @@ export interface NodeContent extends NodeContentData, MutableNodeContent {
   unwrap(): NodeContentData;
 
   child(index: number): Optional<Node>;
+
+  setLinkName(name: string): void;
 }
 
 export interface MutableNodeContent {
@@ -200,6 +201,10 @@ export class PlainNodeContent implements NodeContent {
     this.content.textContent =
       this.textContent.slice(0, offset) +
       this.textContent.slice(offset + length);
+  }
+
+  setLinkName(name: string) {
+    this.content.linkName = name;
   }
 
   setParent(parent: Optional<Node>) {

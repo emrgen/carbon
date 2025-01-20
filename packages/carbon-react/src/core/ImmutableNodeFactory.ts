@@ -12,7 +12,7 @@ import {
   TitleNode,
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
-import { identity, isArray, isEmpty } from "lodash";
+import { entries, identity, isArray, isEmpty } from "lodash";
 import { ImmutableNode } from "./ImmutableNode";
 import { ImmutableNodeContent } from "./ImmutableNodeContent";
 
@@ -65,6 +65,18 @@ export class ImmutableNodeFactory implements NodeFactory {
     const nodeId = id ? NodeId.deserialize(id)! : this.blockId();
     const nodes = children.map((n) => schema.nodeFromJSON(n)) as Node[];
 
+    // inject props linked node if not exists for sandbox
+    if (type.isSandbox && !links["props"]) {
+      links["props"] = {
+        name: "props",
+      };
+    }
+
+    const linked = entries(links).reduce((obj, [name, json]) => {
+      obj[name] = schema.nodeFromJSON(json);
+      return obj;
+    }, {});
+
     if (nodes.filter(identity).length !== children.length) {
       throw new Error(
         `Failed to create children. Check if all expected node Plugins are registered.`,
@@ -91,7 +103,7 @@ export class ImmutableNodeFactory implements NodeFactory {
       props,
       children: normalized,
       textContent: text,
-      links: {},
+      links: linked,
       linkName: "",
       parentId: null,
       parent: null,
@@ -105,7 +117,7 @@ export class ImmutableNodeFactory implements NodeFactory {
       imn.mappedIndex = i;
     });
 
-    Object.entries(links).forEach(([name, json]) => {
+    entries(links).forEach(([name, json]) => {
       const child = schema.nodeFromJSON(json);
       if (!child) {
         throw new Error(`Node Plugin is not registered ${name}`);

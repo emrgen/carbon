@@ -230,6 +230,7 @@ export class Transaction {
     const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map((n) =>
       n.nodeId(),
     );
+
     selectIds.forEach((id) => {
       this.Update(id, { [SelectedPath]: true }, origin);
     });

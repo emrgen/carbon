@@ -235,6 +235,7 @@ export class ImmutableDraft implements Draft {
     marks.freeze();
 
     const selected = this.selected.nodes(this.nodeMap);
+    console.log(selected);
     const blockSelection = BlockSelection.create(selected);
 
     const newState = new ImmutableState({
@@ -315,10 +316,15 @@ export class ImmutableDraft implements Draft {
         return;
       }
 
-      // remove the hidden nodes
       this.node(id, (node) => {
+        // remove the hidden nodes
         if (isPassiveHidden(node) || node.isCollapseHidden) {
           console.debug("removing hidden node", node.name, node.id.toString());
+          this.removeUpdated(id);
+        }
+
+        // remove the sandbox nodes
+        if (node.type.isSandbox) {
           this.removeUpdated(id);
         }
       });
@@ -350,7 +356,9 @@ export class ImmutableDraft implements Draft {
     const dirty = this.updated.clone();
     this.updated.nodes(this.nodeMap).forEach((node) => {
       node.parents.forEach((parent) => {
-        if (parent.name === "sandbox") {
+        if (parent.isSandbox) {
+          debugger;
+          // dirty.add(parent.links["props"].id);
           return;
         }
         dirty.add(parent.id);
@@ -878,13 +886,18 @@ export class ImmutableDraft implements Draft {
     }
 
     const node = this.unfreeze(nodeId);
+    if (node?.type.isSandbox) {
+      const propsNode = this.unfreeze(node.links["props"].id);
+      this.tm.updateProps(propsNode, props);
+      this.addUpdated(propsNode.id);
+    }
 
-    console.log(
-      "parent",
-      node.parentId?.toString(),
-      node.parent?.name,
-      node.parent?.id.toString(),
-    );
+    // console.log(
+    //   "parent",
+    //   node.parentId?.toString(),
+    //   node.parent?.name,
+    //   node.parent?.id.toString(),
+    // );
 
     this.tm.updateProps(node, props);
     this.addUpdated(node.id);

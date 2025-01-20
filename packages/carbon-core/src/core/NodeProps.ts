@@ -49,7 +49,7 @@ export class PlainNodeProps implements NodeProps {
   }
 
   static create(json: NodePropsJson) {
-    return new PlainNodeProps(json);
+    return new PlainNodeProps(cloneDeep(json));
   }
 
   get isNodeProps() {

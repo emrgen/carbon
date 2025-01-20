@@ -12,6 +12,7 @@ import {
   StateScope,
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
+import { values } from "lodash";
 import { ImmutableDraft } from "./ImmutableDraft";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
 
@@ -60,6 +61,10 @@ export class ImmutableState implements State {
         // console.info(n.id.toString());
         nodeMap.set(n.id, n);
         state.updated.add(n.id);
+        values(n.links).forEach((n) => {
+          nodeMap.set(n.id, n);
+          state.updated.add(n.id);
+        });
       });
     }
 

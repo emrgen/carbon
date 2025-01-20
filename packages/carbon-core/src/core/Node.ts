@@ -815,8 +815,15 @@ export class Node extends EventEmitter implements IntoNodeId {
     return nodes;
   }
 
+  setLinkName(name: string) {
+    this.content.setLinkName(name);
+    return this;
+  }
+
   // @mutates
   addLink(name: string, node: Node) {
+    node.setParent(this).setParentId(this.id);
+    node.setLinkName(name);
     this.content.addLink(name, node);
   }
 

@@ -11,13 +11,13 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { prevent, preventAndStop, stop } from "@emrgen/carbon-core";
-import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import { ImageSrcPath } from "@emrgen/carbon-media";
 import {
   CarbonBlock,
   RendererProps,
   useCarbon,
   useCarbonOverlay,
+  useNodeChange,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
 import { Form, Formik } from "formik";
@@ -31,19 +31,37 @@ const CaptionPath = "remote/state/caption";
 
 export function ImageComp(props: RendererProps) {
   const { node } = props;
-  const ref = useRef<HTMLDivElement>(null);
-  const { SelectionHalo } = useSelectionHalo(props);
-  useRectSelectable({ ref, node });
 
   return (
     <>
-      <CarbonBlock {...props} ref={ref}>
+      <CarbonBlock {...props}>
         <ImageContent node={node} />
-        {SelectionHalo}
+        <ImageProps node={node} />
       </CarbonBlock>
     </>
   );
 }
+
+const ImageProps = (props: RendererProps) => {
+  const { node } = props;
+  const ref = useRef<HTMLDivElement>(null);
+  const { node: linkedProps } = useNodeChange({
+    node: node.links["props"]!,
+  });
+
+  const { SelectionHalo } = useSelectionHalo({
+    node: linkedProps,
+    parentSelectionCheck: false,
+  });
+
+  // useRectSelectable({ ref, node: linkedProps });
+
+  return (
+    <CarbonBlock node={linkedProps} ref={ref}>
+      {SelectionHalo}
+    </CarbonBlock>
+  );
+};
 
 const ImageContent = (props: RendererProps) => {
   const { node } = props;

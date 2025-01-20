@@ -193,7 +193,11 @@ export class ChangeManager extends NodeTopicEmitter {
     const updatedNodes = updatedNodeIds
       .map((n) => this.store.get(n))
       .filter(identity) as Node[];
-    // console.log("updatedNodes", updatedNodes.map(n => n.id.toString()), updatedNodeIds.toArray().map(n => n.toString()));
+    console.log(
+      "updatedNodes",
+      updatedNodes.map((n) => n.id.toString()),
+      updatedNodeIds.toArray().map((n) => n.toString()),
+    );
 
     // sort the nodes by depth so that we can update the children first
     updatedNodes.sort((a, b) => {
@@ -210,7 +214,7 @@ export class ChangeManager extends NodeTopicEmitter {
 
     console.log(
       "publish to ui",
-      updatedNodes.map((n) => n.key),
+      updatedNodes.map((n) => `${n.name} - ${n.key}`),
     );
     updatedNodes
       // .filter(n => updatedNodeIds.has(n.id))

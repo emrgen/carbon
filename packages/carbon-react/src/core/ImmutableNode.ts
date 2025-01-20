@@ -8,14 +8,14 @@ import {
   NodePropsJson,
   NodeType,
   Path,
+  shallowCloneMap,
   With,
 } from "@emrgen/carbon-core";
-import { shallowCloneMap } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
-import { findIndex, identity, isString } from "lodash";
-import { ImmutableNodeContent } from "./ImmutableNodeContent";
-import { IndexMap, IndexMapper } from "@emrgen/carbon-core/src/core/IndexMap";
 import { CarbonCache } from "@emrgen/carbon-core/src/core/CarbonCache";
+import { IndexMap, IndexMapper } from "@emrgen/carbon-core/src/core/IndexMap";
+import { Optional } from "@emrgen/types";
+import { entries, findIndex, identity, isString } from "lodash";
+import { ImmutableNodeContent } from "./ImmutableNodeContent";
 
 export class ImmutableNode extends Node {
   scope: Symbol;
@@ -63,7 +63,7 @@ export class ImmutableNode extends Node {
 
   // key is used for react no node change hint
   override get key() {
-    if (this.name === "sandbox") {
+    if (this.isSandbox) {
       return `${this.id.toString()}`;
     }
 
@@ -253,7 +253,14 @@ export class ImmutableNode extends Node {
     map: (node: NodeContentData) => NodeContentData = identity,
   ): Node {
     const data = map(this.content.unwrap());
+    data.links = entries(this.links).reduce((acc, [name, node]) => {
+      acc[name] = node.clone(map);
+      console.log(node.props.toJSON());
+      return acc;
+    }, {});
+
     const content = new ImmutableNodeContent(this.scope, data);
+
     const clone = ImmutableNode.create(this.scope, content);
 
     clone.renderVersion = this.renderVersion;

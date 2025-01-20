@@ -594,10 +594,8 @@ export class KeyboardPlugin extends AfterPlugin {
 
     const { blocks } = blockSelection;
     if (blocks.length > 1) {
-      console.log(blocks.map((b) => [b.id.toString()]));
       const firstNode = first(blocks) as Node;
       cmd.SelectBlocks([firstNode.id]).Dispatch();
-      debugger;
       return;
     }
 
@@ -617,7 +615,6 @@ export class KeyboardPlugin extends AfterPlugin {
   down(ctx: EventContext<KeyboardEvent>) {
     const { app, currentNode, cmd } = ctx;
     const { blockSelection } = app;
-    console.log("down", blockSelection.blocks);
 
     // check if at the end of the last possible focusable node
     if (blockSelection.isEmpty) {

@@ -22,7 +22,6 @@ export class PagePlugin extends CarbonPlugin {
       inlineSelectable: true,
       collapsible: true,
       isolate: true,
-      sandbox: true,
       page: true,
       pasteBoundary: true,
       tag: "main",

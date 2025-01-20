@@ -111,10 +111,6 @@ export class Insert extends BeforePlugin {
 
   after(tr: Transaction, node: Node, name: string) {
     let at = Point.toAfter(node.id);
-    // TODO: create better check than this
-    if (node.parent?.name === "sandbox") {
-      at = Point.toAfter(node.parent.id);
-    }
 
     const block = tr.app.schema.type(name)?.default();
     if (!block) return;

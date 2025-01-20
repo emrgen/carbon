@@ -10,13 +10,13 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { stop, StylePath } from "@emrgen/carbon-core";
-import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import { VideoSrcPath } from "@emrgen/carbon-media";
 import {
   CarbonBlock,
   RendererProps,
   useCarbon,
   useCarbonOverlay,
+  useNodeChange,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
 import { Form, Formik } from "formik";
@@ -29,17 +29,35 @@ import { ResizableContainer } from "../ResizableContainer";
 
 export function VideoComp(props: RendererProps) {
   const { node } = props;
-  const ref = useRef<HTMLDivElement>(null);
-  const { SelectionHalo } = useSelectionHalo(props);
-  useRectSelectable({ node, ref });
 
   return (
-    <CarbonBlock node={node} ref={ref}>
+    <CarbonBlock node={node}>
       <VideoContent node={node} />
-      {SelectionHalo}
+      <VideoProps node={node} />
     </CarbonBlock>
   );
 }
+
+const VideoProps = (props: RendererProps) => {
+  const { node } = props;
+  const ref = useRef<HTMLDivElement>(null);
+  const { node: linkedProps } = useNodeChange({
+    node: node.links["props"]!,
+  });
+
+  const { SelectionHalo } = useSelectionHalo({
+    node: linkedProps,
+    parentSelectionCheck: false,
+  });
+
+  // useRectSelectable({ ref, node: linkedProps });
+
+  return (
+    <CarbonBlock node={linkedProps} ref={ref}>
+      {SelectionHalo}
+    </CarbonBlock>
+  );
+};
 
 const VideoContent = (props: RendererProps) => {
   const { node } = props;

@@ -303,6 +303,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
             .SelectBlocks([node.id])
             ?.Select(PinnedSelection.SKIP)
             .Dispatch();
+
           app.emit("show:context:menu", {
             node,
             event: e.event,

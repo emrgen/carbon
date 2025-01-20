@@ -24,8 +24,8 @@ import { NumberedList } from "./plugins/NumberedList";
 import { PageLink } from "./plugins/PageLink";
 import { PageTree } from "./plugins/PageTree";
 import { PlainTextPlugin } from "./plugins/PlainText";
+import { Props } from "./plugins/Props";
 import { Quote } from "./plugins/Quote";
-import { Sandbox } from "./plugins/Sandbox";
 import {
   EndPath,
   Scale,
@@ -66,9 +66,10 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Code(),
   new Emoji(),
   new Mention(),
+  new Props(),
   new Bookmark(),
   new Attributes(),
-  new Sandbox(),
+  new Props(),
   new PlainTextPlugin(),
   new NewlinePlugin(),
 ];

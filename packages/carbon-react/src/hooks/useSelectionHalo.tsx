@@ -5,24 +5,25 @@ import { useNodeState } from "./useNodeState";
 interface UseSelectionHaloProps {
   node: Node;
   className?: string;
+  parentSelectionCheck?: boolean;
 }
 
 // creates a selection halo around the selected node
 export const useSelectionHalo = (props: UseSelectionHaloProps) => {
-  const { node, className } = props;
+  const { node, className, parentSelectionCheck = true } = props;
   const { isSelected, isActive, attributes } = useNodeState(props);
 
   const SelectionHalo = useMemo(() => {
-    const parentSelected = node.parents.some((parent) =>
-      parent.props.get(SelectedPath),
-    );
+    const parentNotSelected =
+      !node.parents.some((parent) => parent.props.get(SelectedPath)) ||
+      !parentSelectionCheck;
 
     const style = node.props.get(SizePath, { width: "full", height: "full" }); // get the size of the node
     const { width = "full", height } = style;
 
     return (
       <>
-        {!parentSelected && isSelected && (
+        {parentNotSelected && isSelected && (
           <div
             className={`carbon-selection-halo ${className ?? ""}`}
             data-target={node.name}

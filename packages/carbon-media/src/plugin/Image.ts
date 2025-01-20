@@ -19,6 +19,7 @@ export class Image extends NodePlugin {
       draggable: true,
       dragHandle: true,
       insert: true,
+      sandbox: true,
       change: {
         in: {
           props: {

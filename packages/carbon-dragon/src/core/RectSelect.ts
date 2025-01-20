@@ -14,7 +14,7 @@ import EventEmitter from "events";
 import { identity, last, sortBy, throttle, uniq } from "lodash";
 import { DndEvent } from "../types";
 import { DndNodeStore } from "./DndStore";
-import { adjustBox, boundFromFastDndEvent } from "./utils";
+import { adjustBox, boundFromFastDndEvent } from "./utils"; // Events emitted by RectSelector
 
 // Events emitted by RectSelector
 export enum RectSelectorEvent {
@@ -167,7 +167,7 @@ export class RectSelect extends EventEmitter {
     }
 
     const getDepth = (n: Node) => {
-      return n.parents.filter((p) => p.name !== "sandbox").length;
+      return n.depth;
     };
 
     const ordered = sortBy(collides, getDepth);
