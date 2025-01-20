@@ -606,6 +606,7 @@ select#carbon-code-themes
   //background #eee
   border-radius 4px
 
+.video,
 .image
   .props
     position absolute;
@@ -615,3 +616,7 @@ select#carbon-code-themes
     //opacity 0.1;
     top 0;
     left 0;
+    cursor pointer;
+    z-index -1;
+  .props[data-selected=true]
+    z-index 1

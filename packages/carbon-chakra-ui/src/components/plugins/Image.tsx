@@ -36,7 +36,6 @@ export function ImageComp(props: RendererProps) {
     <>
       <CarbonBlock {...props}>
         <ImageContent node={node} />
-        <ImageProps node={node} />
       </CarbonBlock>
     </>
   );
@@ -49,7 +48,7 @@ const ImageProps = (props: RendererProps) => {
     node: node.links["props"]!,
   });
 
-  const { SelectionHalo } = useSelectionHalo({
+  const { SelectionHalo, attributes } = useSelectionHalo({
     node: linkedProps,
     parentSelectionCheck: false,
   });
@@ -57,7 +56,11 @@ const ImageProps = (props: RendererProps) => {
   // useRectSelectable({ ref, node: linkedProps });
 
   return (
-    <CarbonBlock node={linkedProps} ref={ref}>
+    <CarbonBlock
+      node={linkedProps}
+      ref={ref}
+      custom={{ ...attributes, ...props.custom }}
+    >
       {SelectionHalo}
     </CarbonBlock>
   );
@@ -181,6 +184,19 @@ const ImageContent = (props: RendererProps) => {
         />
       )}
       {updateImage}
+      <ImageProps
+        node={node}
+        custom={{
+          onClick: (e) => {
+            stop(e);
+            if (!imageSrc) {
+              showOverlay(node.id.toString());
+              updater.onOpen();
+            }
+            app.cmd.SelectBlocks([]).Dispatch();
+          },
+        }}
+      />
     </>
   );
 };
@@ -198,6 +214,7 @@ const CarbonImageEmpty = (props: CarbonLazyImageProps) => {
       pos={"absolute"}
       className="image-overlay"
       onClick={(e) => {
+        console.log(e);
         stop(e);
         props.onClick?.(e);
       }}
@@ -289,7 +306,9 @@ const useImageUrlUpdate = ({
         left={"50%"}
         bg="white"
         transform={"translate(-50%,0)"}
-        boxShadow={"0 0 10px 0 #aaa"}
+        boxShadow={
+          "rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px"
+        }
         borderRadius={6}
         p={4}
         zIndex={1001}
