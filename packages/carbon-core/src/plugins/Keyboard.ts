@@ -210,6 +210,14 @@ export class KeyboardPlugin extends AfterPlugin {
           return;
         }
 
+        const { start } = selection;
+        if (
+          start.isAtStartOfNode(start.node) &&
+          !start.node.prev((n) => n.isFocusable)
+        ) {
+          return;
+        }
+
         const after = selection.moveHead(-1);
         cmd.Select(after!).Dispatch();
       },
@@ -239,7 +247,7 @@ export class KeyboardPlugin extends AfterPlugin {
           (start.isAtStartOfNode(start.node) && end.isAtEndOfNode(end.node)) ||
           (selection.isCollapsed && start.node.isEmpty)
         ) {
-          cmd.selection.selectAll(selection).Dispatch();
+          cmd.selection.selectPageContent(selection).Dispatch();
         } else {
           const after = PinnedSelection.create(
             start.moveToStart(),

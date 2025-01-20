@@ -1,4 +1,3 @@
-import { BeforePlugin } from "../core/CarbonPlugin";
 import {
   ActionOrigin,
   Node,
@@ -6,6 +5,7 @@ import {
   PinnedSelection,
   Transaction,
 } from "@emrgen/carbon-core";
+import { BeforePlugin } from "../core/CarbonPlugin";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {
@@ -14,7 +14,7 @@ declare module "@emrgen/carbon-core" {
       collapseToHead(selection: PinnedSelection): Transaction;
       collapseToStart(selection: PinnedSelection): Transaction;
       collapseAtStartOf(node: Node): Transaction;
-      selectAll(selection: PinnedSelection): Transaction;
+      selectPageContent(selection: PinnedSelection): Transaction;
     };
   }
 }
@@ -32,13 +32,13 @@ export class SelectionCommands extends BeforePlugin {
       collapseToHead: this.collapseToHead,
       collapseToStart: this.collapseToStart,
       collapseAtStartOf: this.collapseAtStartOf,
-      selectAll: this.selectAll,
+      selectPageContent: this.selectPageContent,
     };
   }
 
   collapseToTail(tr: Transaction, selection: PinnedSelection) {
     const normalized = selection.normalize();
-    tr.select(normalized.collapseToTail());
+    tr.Select(normalized.collapseToTail());
   }
 
   collapseToHead(tr: Transaction, selection: PinnedSelection) {
@@ -57,14 +57,18 @@ export class SelectionCommands extends BeforePlugin {
     tr.Select(after, ActionOrigin.UserInput);
   }
 
-  selectAll(tr: Transaction, selection: PinnedSelection) {
+  selectPageContent(tr: Transaction, selection: PinnedSelection) {
     const { tail, head } = selection;
     const commonNode = tail.node.commonNode(head.node);
     const isolate = commonNode?.closest((n) => n.isIsolate);
     if (!isolate) return;
 
-    const from = Pin.toStartOf(isolate);
+    let from = Pin.toStartOf(isolate);
     const to = Pin.toEndOf(isolate);
+    if (isolate.isPage) {
+      from = Pin.toStartOf(isolate.firstChild?.nextSibling!);
+    }
+
     if (!from || !to) return;
     tr.Select(PinnedSelection.create(from, to));
   }
