@@ -20,14 +20,7 @@ import {
   useSelectionHalo,
 } from "@emrgen/carbon-react";
 import { Form, Formik } from "formik";
-import {
-  CSSProperties,
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { RxVideo } from "react-icons/rx";
 import ReactPlayer from "react-player";
@@ -48,28 +41,59 @@ export function VideoComp(props: RendererProps) {
   );
 }
 
-const VideoContentInner = (props: RendererProps) => {
+const VideoContent = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
   const updater = useDisclosure();
   const [style, setStyle] = useState<CSSProperties>(() =>
     node.props.get<CSSProperties>(StylePath, {}),
   );
-  const { ref: overlayRef, showOverlay, hideOverlay } = useCarbonOverlay();
+  const {
+    ref: overlayRef,
+    showOverlay,
+    hideOverlay,
+    overlay,
+  } = useCarbonOverlay();
 
   const boundRef = useRef<any>(null);
+  const formRef = useRef<any>(null);
   const [height, setHeight] = useState(style.height);
   const [ready, setReady] = useState(false);
   const videoUrl = node.props.get(VideoSrcPath, "");
 
+  useEffect(() => {
+    const onHide = () => {
+      updater.onClose();
+    };
+    overlay.on("hide", onHide);
+    return () => {
+      overlay.off("hide", onHide);
+    };
+  }, [overlay, updater]);
+
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.focus();
+    }
+  }, [formRef, updater]);
+
   const updatePopover = useMemo(() => {
     if (!overlayRef.current) return null;
     if (!boundRef.current) return null;
+    if (!updater.isOpen) return null;
+
     const { left, top, width, height } =
       boundRef.current?.getBoundingClientRect();
 
     return createPortal(
-      <Box pos={"absolute"} w={width} h={height} left={left} top={top}>
+      <Box
+        pos={"absolute"}
+        w={width}
+        h={height}
+        left={left}
+        top={top}
+        display={updater.isOpen ? "block" : "none"}
+      >
         <Box
           contentEditable={false}
           suppressContentEditableWarning
@@ -125,7 +149,8 @@ const VideoContentInner = (props: RendererProps) => {
               <Form>
                 <Stack w={300} spacing={4}>
                   <Input
-                    // autoFocus
+                    ref={formRef}
+                    autoFocus
                     placeholder="Video URL"
                     size="sm"
                     id="url"
@@ -152,19 +177,13 @@ const VideoContentInner = (props: RendererProps) => {
       </Box>,
       overlayRef.current,
     );
-  }, [overlayRef, videoUrl, updater, hideOverlay, app, node]);
-
-  useEffect(() => {
-    return () => {
-      console.log("unmounted video");
-    };
-  }, []);
+  }, [overlayRef, videoUrl, updater, hideOverlay, app, node, formRef]);
 
   return (
     <>
       <ResizableContainer
         node={node}
-        enable={true}
+        enable={ready}
         aspectRatio={9 / 16}
         render={({ width, height }) => {
           if (!videoUrl) {
@@ -177,6 +196,7 @@ const VideoContentInner = (props: RendererProps) => {
               />
             );
           }
+
           return (
             <CarbonVideoPlayer
               src={videoUrl}
@@ -206,14 +226,10 @@ const VideoContentInner = (props: RendererProps) => {
           bg={"red"}
         />
       )}
-      {updatePopover}
+      {updater.isOpen && updatePopover}
     </>
   );
 };
-
-export const VideoContent = memo(VideoContentInner, (prev, next) => {
-  return prev.node.key === next.node.key;
-});
 
 interface CarbonVideoPlayerProps {
   src: string;
@@ -313,34 +329,3 @@ const CarbonVideoEmpty = (props: CarbonVideoEmptyProps) => {
     </>
   );
 };
-
-/*
-*
-      {/* {!videoUrl && (
-        <Box w="full">
-          <Flex
-            className="video-overlay"
-            onClick={() => {
-              updater.onOpen();
-            }}
-            ref={boundRef}
-          >
-            <Square size={12} borderRadius={4} fontSize={26} color={"#aaa"}>
-              <RxVideo />
-            </Square>
-            <Text>Click to add video</Text>
-          </Flex>
-          <Spinner
-            pos={"absolute"}
-            bottom={0}
-            right={0}
-            zIndex={10}
-            // bg={"#eee"}
-            size="sm"
-            m={2}
-            color="#555"
-            display={videoUrl ? (ready ? "none" : "block") : "none"}
-          />
-          {selection.SelectionHalo}
-        </Box>
-      )} */

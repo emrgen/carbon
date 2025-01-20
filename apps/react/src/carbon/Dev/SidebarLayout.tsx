@@ -72,18 +72,20 @@ const page = node(
     paragraph([title(text("question title"))]),
 
     // paragraph([title([text("section 1")])]),
-
-    // node("image", [], {
-    //   "remote/state/image/src":
-    //     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPcbdS5mvBeNcpLWmbEfpSP7LGa3Nae-Lwew&s",
-    // }),
+    node("sandbox", [
+      node("image", [], {
+        "remote/state/image/src":
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPcbdS5mvBeNcpLWmbEfpSP7LGa3Nae-Lwew&s",
+      }),
+    ]),
+    node("sandbox", [node("image", [], {})]),
 
     node("sandbox", [
       node("video", [], {
-        "remote/state/video/src":
-          "https://www.youtube.com/watch?v=GBR6pHZ68Ho&t=249s",
+        "remote/state/video/src": "https://www.youtube.com/watch?v=-IkEMMKSqcw",
       }),
     ]),
+    node("sandbox", [node("video", [], {})]),
 
     // node("video"),
   ],

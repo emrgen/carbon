@@ -1836,7 +1836,10 @@ export class TransformCommands extends BeforePlugin {
     if (BlockSelection.is(selection)) {
       const { blocks } = selection;
       const { parent } = blocks[0];
-      return this.deleteNodes(tr, parent!, blocks, opts);
+      const mapped = blocks.map((b) =>
+        b.parent?.name === "sandbox" ? b.parent : b,
+      );
+      return this.deleteNodes(tr, parent!, mapped, opts);
     }
 
     if (!PinnedSelection.is(selection)) {

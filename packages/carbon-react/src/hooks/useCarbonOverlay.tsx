@@ -1,7 +1,15 @@
 import { Node, preventAndStop } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { EventEmitter } from "events";
-import { createContext, RefObject, useContext, useRef, useState } from "react";
+import {
+  createContext,
+  RefObject,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { usePrevious } from "react-use";
 
 const InnerCarbonOverlayContext = createContext<{
   ref: RefObject<HTMLDivElement>;
@@ -20,6 +28,15 @@ export const CarbonOverlayContext = ({ children }) => {
   const [emitter] = useState(() => new EventEmitter());
   const [id, setId] = useState("");
   const [node, setNode] = useState<Optional<Node>>(null);
+  const prevShowOverlay = usePrevious(showOverlay);
+
+  useEffect(() => {
+    if (showOverlay && !prevShowOverlay) {
+      emitter.emit("show");
+    } else if (!showOverlay && prevShowOverlay) {
+      emitter.emit("hide");
+    }
+  }, [emitter, prevShowOverlay, showOverlay]);
 
   return (
     <InnerCarbonOverlayContext.Provider

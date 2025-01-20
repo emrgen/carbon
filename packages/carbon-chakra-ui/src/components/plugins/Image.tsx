@@ -1,9 +1,12 @@
 import {
+  Box,
+  Button,
   Center,
   Flex,
-  Image,
+  Input,
   Spinner,
   Square,
+  Stack,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -17,7 +20,9 @@ import {
   useCarbonOverlay,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
+import { Form, Formik } from "formik";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { RxImage } from "react-icons/rx";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import { ResizableContainer } from "../ResizableContainer";
@@ -55,7 +60,31 @@ const ImageContent = (props: RendererProps) => {
   const boundRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const updater = useDisclosure();
-  const { ref: overlayRef } = useCarbonOverlay();
+  const {
+    ref: overlayRef,
+    showOverlay,
+    hideOverlay,
+    overlay,
+  } = useCarbonOverlay();
+
+  useEffect(() => {
+    const onHide = () => {
+      updater.onClose();
+    };
+    overlay.on("hide", onHide);
+    return () => {
+      overlay.off("hide", onHide);
+    };
+  }, [overlay, updater]);
+
+  const updateImage = useImageUrlUpdate({
+    app,
+    overlayRef,
+    boundRef,
+    node,
+    updater,
+    hideOverlay,
+  });
 
   // const selection = useSelectionHalo(props);
   const [aspectRatio, setAspectRatio] = useState(9 / 16);
@@ -106,25 +135,34 @@ const ImageContent = (props: RendererProps) => {
 
   return (
     <>
-      <ResizableContainer
-        // width={style.width ?? 0}
-        // height={style.height ?? 0}
-        node={node}
-        enable={true}
-        aspectRatio={aspectRatio}
-      >
+      <ResizableContainer node={node} enable={ready} aspectRatio={aspectRatio}>
         {!imageSrc && (
-          <CarbonImageLoading
+          <CarbonImageEmpty
             src={imageSrc}
             ready={ready}
             setReady={setReady}
+            onClick={() => {
+              updater.onOpen();
+              showOverlay(node.id.toString());
+            }}
           />
         )}
         {imageSrc && (
-          <Image loading="lazy" src={imageSrc} />
-          // <CarbonLazyImage src={imageSrc} ready={ready} setReady={setReady} />
+          // <Image loading="lazy" src={imageSrc} />
+          <CarbonLazyImage src={imageSrc} ready={ready} setReady={setReady} />
         )}
       </ResizableContainer>
+      {!imageSrc && (
+        <Box
+          ref={boundRef}
+          pos={"absolute"}
+          top={0}
+          w={"full"}
+          h="full"
+          zIndex={-1}
+        />
+      )}
+      {updateImage}
     </>
   );
 };
@@ -133,14 +171,17 @@ interface CarbonLazyImageProps {
   src: string;
   ready: boolean;
   setReady: (ready: boolean) => void;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
-const CarbonImageLoading = (props: CarbonLazyImageProps) => {
+const CarbonImageEmpty = (props: CarbonLazyImageProps) => {
   return (
     <Flex
+      pos={"absolute"}
       className="image-overlay"
       onClick={(e) => {
         stop(e);
+        props.onClick?.(e);
       }}
       h={"full"}
       w={"full"}
@@ -191,32 +232,42 @@ const CarbonLazyImage = (props: CarbonLazyImageProps) => {
   );
 };
 
-/*
-
-const updatePopover = () => {
-  // console.log(overlayRef, ref);
+const useImageUrlUpdate = ({
+  app,
+  overlayRef,
+  boundRef,
+  node,
+  updater,
+  hideOverlay,
+}) => {
+  const formRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.focus();
+    }
+  }, [formRef, updater]);
 
   if (!overlayRef.current) return null;
   if (!boundRef.current) return null;
   const { left, top, width, height } =
     boundRef.current?.getBoundingClientRect();
 
-  // console.log("updatePopover", left, top, width, height);
-
   return createPortal(
     <Box
+      className={"image-updater"}
       pos={"absolute"}
       w={width + "px"}
       h={height + "px"}
       left={left}
       top={top}
       zIndex={1000}
+      display={updater.isOpen ? "block" : "none"}
     >
       <Box
         contentEditable={false}
         suppressContentEditableWarning
         pos={"absolute"}
-        bottom={"100%"}
+        top={"100%"}
         left={"50%"}
         bg="white"
         transform={"translate(-50%,0)"}
@@ -248,14 +299,11 @@ const updatePopover = () => {
 
             setTimeout(() => {
               updater.onClose();
+              hideOverlay();
               actions.setSubmitting(false);
-              app.tr
+              app.cmd
                 .Update(node.id, {
-                  node: {
-                    src: values.src,
-                    // height:
-                    //   boundRef.current ? boundRef.current?.offsetWidth * (9 / 16) : 200,
-                  },
+                  [ImageSrcPath]: values.src,
                 })
                 .Dispatch();
             }, 1000);
@@ -272,15 +320,6 @@ const updatePopover = () => {
                   name="src"
                   autoComplete="off"
                   onChange={props.handleChange}
-                />
-                <Input
-                  autoFocus
-                  placeholder="Image URL"
-                  size="sm"
-                  id="src"
-                  name="src"
-                  autoComplete="off"
-                  // onChange={props.handleChange}
                 />
                 <Button
                   colorScheme="blue"
@@ -301,6 +340,8 @@ const updatePopover = () => {
     </Box>,
     overlayRef.current!,
   );
-}
+};
 
-*/
+interface CarbonImageEmptyProps {
+  onClick?: (e: React.MouseEvent) => void;
+}
