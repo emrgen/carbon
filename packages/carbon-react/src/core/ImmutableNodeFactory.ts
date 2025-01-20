@@ -123,7 +123,6 @@ export class ImmutableNodeFactory implements NodeFactory {
         throw new Error(`Node Plugin is not registered ${name}`);
       }
 
-      console.log("addLink", name, child.id, child.name);
       node.addLink(name, child);
     });
 

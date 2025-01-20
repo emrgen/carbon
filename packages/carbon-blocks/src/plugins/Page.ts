@@ -9,6 +9,7 @@ import {
   Writer,
 } from "@emrgen/carbon-core";
 import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
+import { PageProps } from "./PageProps";
 
 export class PagePlugin extends CarbonPlugin {
   name = "page";
@@ -47,9 +48,7 @@ export class PagePlugin extends CarbonPlugin {
   }
 
   plugins(): CarbonPlugin[] {
-    return [
-      // new IsolatingPlugin()
-    ];
+    return [new PageProps()];
   }
 
   handlers(): EventHandlerMap {

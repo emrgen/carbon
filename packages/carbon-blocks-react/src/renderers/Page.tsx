@@ -3,12 +3,12 @@ import {
   EventsIn,
   ModePath,
   Node,
+  PagePropLink,
   Pin,
   PinnedSelection,
   Point,
   prevent,
   preventAndStop,
-  PropLink,
 } from "@emrgen/carbon-core";
 import {
   useCombineConnectors,
@@ -26,7 +26,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { DocumentContext, useNodeImage } from "../hooks";
 
-export const DocumentComp = (props: RendererProps) => {
+export const PageComp = (props: RendererProps) => {
   const { node } = props;
 
   const app = useCarbon();
@@ -156,7 +156,7 @@ export const DocumentComp = (props: RendererProps) => {
   }, [app, isEditable, node]);
 
   const pageProps = useMemo(() => {
-    return node.links[PropLink] ?? Node.NULL;
+    return node.links[PagePropLink] ?? Node.NULL;
   }, [node]);
 
   return (
@@ -200,8 +200,9 @@ export const DocumentComp = (props: RendererProps) => {
             node={node.child(0)!}
             custom={{ className: "cdoc__ti" }}
           />
+
           {!pageProps.eq(Node.NULL) && <CarbonNode node={pageProps} />}
-          {/*<CarbonProps node={node} />*/}
+
           <CarbonNodeChildren node={node} wrap={false} />
         </CarbonBlock>
       </div>

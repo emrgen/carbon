@@ -259,7 +259,6 @@ export const UnstablePath = "local/state/unstable";
 export const ModePath = "local/state/mode";
 export const AtomSizePath = "remote/state/atom/size";
 export const AtomContentPath = "remote/state/atom/content";
-export const PropLink = "link/props";
 export const BackgroundImagePath = "remote/state/backgroundImage";
 export const MediaReadyPath = "local/state/media/ready";
 export const LocalVideoInfoPath = "local/state/video/info";
@@ -274,6 +273,8 @@ export const ActiveChildPath = "local/state/active/child";
 export const CodeValuePath = "remote/state/code/value";
 export const CodeThemeNamePath = "remote/state/code/theme";
 export const CodeLanguagePath = "remote/state/code/language";
+
+export const PagePropLink = "pageProps";
 
 export enum DocModes {
   View = "view",

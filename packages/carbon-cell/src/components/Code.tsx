@@ -15,7 +15,7 @@ import {
   Point,
   preventAndStop,
 } from "@emrgen/carbon-core";
-import { RendererProps, useCarbon } from "@emrgen/carbon-react";
+import { RendererProps, useCarbon, useNodeChange } from "@emrgen/carbon-react";
 import { basicSetup, EditorView } from "codemirror";
 import { noop } from "lodash";
 import { createRef, memo, useCallback, useEffect, useState } from "react";
@@ -39,10 +39,13 @@ const isEqualType = (prev: Node, next: Node) => {
 };
 
 export const CodeInner = (props: RendererProps) => {
-  const { node } = props;
   const app = useCarbon();
   const ref = createRef<HTMLDivElement>();
   const mod = useActiveCellRuntime();
+
+  // watch for prop change in linked props node
+  const { node } = useNodeChange({ node: props.node });
+
   const [defaultValue] = useState(node.props.get(CodeCellCodeValuePath, ""));
   const [value, setValue] = useState(
     node.props.get(CodeCellCodeValuePath, "javascript"),
@@ -119,6 +122,7 @@ export const CodeInner = (props: RendererProps) => {
       const value = editor.state.doc.toString();
 
       if (editor.docChanged) {
+        console.log("xxxx");
         // update the cell code value
         setValue(value);
         app.cmd
@@ -279,15 +283,16 @@ export const CodeInner = (props: RendererProps) => {
     const firstMount = app.store
       .get(nodeId)
       ?.props.get(FocusOnInsertPath, false);
+    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", firstMount);
     if (firstMount) {
       view?.focus();
-      setTimeout(() => {
-        app.cmd
-          .Update(nodeId, {
-            [FocusOnInsertPath]: false,
-          })
-          .Dispatch();
-      }, 1000);
+      // setTimeout(() => {
+      //   app.cmd
+      //     .Update(nodeId, {
+      //       [FocusOnInsertPath]: false,
+      //     })
+      //     .Dispatch();
+      // }, 1000);
     }
   }, [view, app, nodeId]);
 
@@ -314,6 +319,7 @@ export const CodeInner = (props: RendererProps) => {
         onMouseDown={preventAndStop}
         onMouseUp={(e) => {
           preventAndStop(e);
+          console.log("value", value);
           // find variable identity and redefine
           redefine({ code: value, type: codeType, forced: true });
         }}

@@ -1,5 +1,5 @@
 import { CarbonPlugin } from "@emrgen/carbon-core";
-import { NestablePlugin, PagePlugin, Paragraph } from "./plugins";
+import { NestablePlugin, Paragraph } from "./plugins";
 import { Attributes } from "./plugins/Attributes";
 import { Bookmark } from "./plugins/Bookmark";
 import { BulletedList } from "./plugins/BulletedList";
@@ -21,7 +21,9 @@ import { Mention } from "./plugins/Mention";
 import { Modal } from "./plugins/Modal";
 import { NewlinePlugin } from "./plugins/Newline";
 import { NumberedList } from "./plugins/NumberedList";
+import { PagePlugin } from "./plugins/Page";
 import { PageLink } from "./plugins/PageLink";
+import { PageProps } from "./plugins/PageProps";
 import { PageTree } from "./plugins/PageTree";
 import { PlainTextPlugin } from "./plugins/PlainText";
 import { Props } from "./plugins/Props";
@@ -72,6 +74,7 @@ export const blockPresetPlugins: CarbonPlugin[] = [
   new Props(),
   new PlainTextPlugin(),
   new NewlinePlugin(),
+  new PageProps(),
 ];
 
 export * from "./events";

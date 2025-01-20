@@ -1,4 +1,4 @@
-import { HasFocusPath, preventAndStop } from "@emrgen/carbon-core";
+import { HasFocusPath } from "@emrgen/carbon-core";
 import { ObjectViewer } from "@emrgen/carbon-object-view";
 import { Optional } from "@emrgen/types";
 import createDOMPurify from "dompurify";
@@ -12,7 +12,6 @@ import {
   isString,
 } from "lodash";
 import { memo, ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { HiDotsVertical } from "react-icons/hi";
 import { ViewStylePath } from "../constants";
 import { ActiveCell } from "../core/ActiveCellRuntime";
 import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
@@ -23,7 +22,8 @@ const DOMPurify = createDOMPurify(window);
 const NOT_LOADED = "__NOT_LOADED__";
 
 const ResultInner = (props) => {
-  const { node, onToggle } = props;
+  const { onToggle, node } = props;
+
   const mod = useActiveCellRuntime();
 
   const [nodeId] = useState(node.id.toString());
@@ -59,6 +59,7 @@ const ResultInner = (props) => {
   }, [mod, nodeId]);
 
   const updateResult = (res) => {
+    console.log("result => xxxxxx");
     if (isFunction(res)) {
       setResult(() => res);
     } else {
@@ -147,17 +148,17 @@ const ResultInner = (props) => {
 
   return (
     <div className={"carbon-cell-view"}>
-      <div
-        className={"carbon-cell-handle"}
-        onClick={onToggle}
-        onMouseDown={preventAndStop}
-        data-focused={isFocused}
-      >
-        <div className={"cell-view-handle"}>
-          <HiDotsVertical />
-          {/*{isCollapsed ? <PiEyeClosed /> : <CgEye />}*/}
-        </div>
-      </div>
+      {/*<div*/}
+      {/*  className={"carbon-cell-handle"}*/}
+      {/*  onClick={onToggle}*/}
+      {/*  onMouseDown={preventAndStop}*/}
+      {/*  data-focused={isFocused}*/}
+      {/*>*/}
+      {/*  <div className={"cell-view-handle"}>*/}
+      {/*    <HiDotsVertical />*/}
+      {/*    /!*{isCollapsed ? <PiEyeClosed /> : <CgEye />}*!/*/}
+      {/*  </div>*/}
+      {/*</div>*/}
       <div className={"cell-result"}>
         <div className={"cell-loading"} data-loading={pending} />
         {!error &&

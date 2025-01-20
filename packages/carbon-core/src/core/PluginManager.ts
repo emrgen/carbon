@@ -162,7 +162,7 @@ export class PluginManager {
     const keyDownEvent = <EventContext<any>>EventContext.fromContext(event);
     const { currentNode } = keyDownEvent;
 
-    console.group("onKeyDown", event);
+    console.groupCollapsed("onKeyDown", event);
 
     const processKeyDown = () => {
       each(this.before, (p: CarbonPlugin) => {

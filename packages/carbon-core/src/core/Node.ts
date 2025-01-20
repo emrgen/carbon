@@ -1,6 +1,7 @@
 import { Optional, Predicate, With } from "@emrgen/types";
 import EventEmitter from "events";
 import {
+  entries,
   findIndex,
   first,
   identity,
@@ -512,6 +513,14 @@ export class Node extends EventEmitter implements IntoNodeId {
     return this.children.map((n) => n.id);
   }
 
+  get linkedProps(): Optional<Node> {
+    return this.links["props"];
+  }
+
+  linked(name: string): Optional<Node> {
+    return this.links[name];
+  }
+
   nodeId(): NodeId {
     return this.id;
   }
@@ -924,7 +933,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   toJSON(option?: NodeJSONOption) {
     const { id, type, children, textContent, props } = this;
-    const links = Object.entries(this.links).reduce(
+    const links = entries(this.links).reduce(
       (acc, [k, v]) => {
         acc[k] = v.toJSON(option);
         return acc;

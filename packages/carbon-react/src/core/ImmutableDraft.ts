@@ -61,6 +61,7 @@ import {
   isEmpty,
   isString,
   reduce,
+  values,
 } from "lodash";
 import { ImmutableNodeMap } from "./ImmutableNodeMap";
 import { ImmutableState } from "./ImmutableState";
@@ -357,7 +358,6 @@ export class ImmutableDraft implements Draft {
     this.updated.nodes(this.nodeMap).forEach((node) => {
       node.parents.forEach((parent) => {
         if (parent.isSandbox) {
-          debugger;
           // dirty.add(parent.links["props"].id);
           return;
         }
@@ -699,7 +699,9 @@ export class ImmutableDraft implements Draft {
     node.all((n) => {
       console.log("INSERTED", n.id.toString(), n.parentId?.toString());
       this.addInserted(n);
+      values(n.links).forEach((n) => this.addInserted(n));
     });
+
     if (node.props.get(SelectedPath, false)) {
       this.selected.add(node.id);
     }

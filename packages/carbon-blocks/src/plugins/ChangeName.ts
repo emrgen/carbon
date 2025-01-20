@@ -250,17 +250,33 @@ export class ChangeName extends BeforePlugin {
       ctx.event.preventDefault();
       ctx.stopPropagation();
 
-      const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
+      let after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0));
       let newNode = app.schema.type(name).default();
       if (!newNode) {
         console.error("failed to create divider node");
         return;
       }
 
-      let insertNode = newNode;
-      if (insertNode.isSandbox) {
-        insertNode = app.schema.type("sandbox").create([newNode])!;
+      if (newNode.type.isSandbox) {
+        after = PinnedSelection.SKIP;
       }
+
+      newNode.updateProps({
+        [FocusOnInsertPath]: true,
+      });
+
+      if (newNode.type.isSandbox) {
+        newNode.linkedProps?.updateProps({
+          [FocusOnInsertPath]: true,
+        });
+      }
+
+      console.log(newNode.linkedProps?.props.toJSON());
+
+      let insertNode = newNode;
+      // if (insertNode.isSandbox) {
+      //   insertNode = app.schema.type("sandbox").create([newNode])!;
+      // }
 
       console.log("inserting", newNode);
 
@@ -281,15 +297,8 @@ export class ChangeName extends BeforePlugin {
         cmd.Add(action);
       }
 
-      app.parkCursor();
-      cmd
-        .Add(insertBeforeAction(block, insertNode))
-        .Update(newNode, {
-          [FocusOnInsertPath]: true,
-        })
-        // .Select(PinnedSelection.SKIP, ActionOrigin.UserInput)
-        .Select(after)
-        .Dispatch();
+      // app.parkCursor();
+      cmd.Add(insertBeforeAction(block, insertNode)).Select(after).Dispatch();
     };
   }
 

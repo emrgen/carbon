@@ -255,7 +255,6 @@ export class ImmutableNode extends Node {
     const data = map(this.content.unwrap());
     data.links = entries(this.links).reduce((acc, [name, node]) => {
       acc[name] = node.clone(map);
-      console.log(node.props.toJSON());
       return acc;
     }, {});
 

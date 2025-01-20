@@ -3,6 +3,7 @@ import "./react-bem.styl";
 
 import "./fastype/fastype.styl";
 import { Code } from "./carbon/Dev/Code";
+import { PageProps } from "./carbon/Dev/Props";
 import { SidebarLayout } from "./carbon/Dev/SidebarLayout";
 import { LazyDev } from "./carbon/index";
 
@@ -26,6 +27,7 @@ function App() {
         {/*<Route path="/fastype" element={<FastEditor name="fastype-test" />} />*/}
         {/*<Route path="/test" element={<Test />} />*/}
         <Route path="/sidebar" element={<SidebarLayout />} />
+        <Route path="/props" element={<PageProps />} />
         <Route path="/code" element={<Code />} />
         <Route path="/" element={<LazyDev />} />
       </Routes>

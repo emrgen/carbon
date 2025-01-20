@@ -8,7 +8,6 @@ import {
   mention,
   node,
   paragraph,
-  plainText,
   text,
   title,
 } from "@emrgen/carbon-blocks";
@@ -76,33 +75,31 @@ const data = node("carbon", [
 
       node("code", [title(text("function name(){}"))], {}),
 
-      node("sandbox", [
-        node("video", [], {
-          "remote/state/video/src":
-            "https://www.youtube.com/watch?v=srNoYnGhXAg&pp=ygUEc29uZw%3D%3D",
-        }),
-      ]),
-
-      node("image", [], {
-        "remote/state/image/src":
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPcbdS5mvBeNcpLWmbEfpSP7LGa3Nae-Lwew&s",
-      }),
-
-      paragraph([title(text("question title"))]),
-
-      node("continue", [
-        node("button", [node("plainText", [text("continue")])], {
-          ["local/html/data-size"]: "lg",
-        }),
-      ]),
-
-      node("codemirror"),
-
-      node("continue", [
-        node("button", [node("plainText", [text("continue")])], {
-          ["local/html/data-size"]: "lg",
-        }),
-      ]),
+      // node("video", [], {
+      //   "remote/state/video/src":
+      //     "https://www.youtube.com/watch?v=srNoYnGhXAg&pp=ygUEc29uZw%3D%3D",
+      // }),
+      //
+      // node("image", [], {
+      //   "remote/state/image/src":
+      //     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPcbdS5mvBeNcpLWmbEfpSP7LGa3Nae-Lwew&s",
+      // }),
+      //
+      // paragraph([title(text("question title"))]),
+      //
+      // node("continue", [
+      //   node("button", [node("plainText", [text("continue")])], {
+      //     ["local/html/data-size"]: "lg",
+      //   }),
+      // ]),
+      //
+      // node("codemirror"),
+      //
+      // node("continue", [
+      //   node("button", [node("plainText", [text("continue")])], {
+      //     ["local/html/data-size"]: "lg",
+      //   }),
+      // ]),
 
       // node("timeline", [title([text("Install @chakra-ui/react")])]),
       // node("timeline", [title([text("Add snippets")])]),
@@ -234,12 +231,12 @@ const data = node("carbon", [
       //   },
       // ),
 
-      paragraph([title([text("question title")])]),
-      node("continue", [
-        node("button", [node("plainText", [text("continue")])], {
-          ["local/html/data-size"]: "lg",
-        }),
-      ]),
+      // paragraph([title([text("question title")])]),
+      // node("continue", [
+      //   node("button", [node("plainText", [text("continue")])], {
+      //     ["local/html/data-size"]: "lg",
+      //   }),
+      // ]),
       // node(
       //   "table",
       //   [],
@@ -270,58 +267,54 @@ const data = node("carbon", [
       //   },
       // ),
 
-      paragraph(
-        [
-          title([
-            text("question"),
-            text(" "),
-            text("link", {
-              [MarksPath]: [Mark.link("http://localhost:3000")].map((m) =>
-                m.toJSON(),
-              ),
-            }),
-          ]),
-        ],
-        {
-          // [BackgroundPath]: "#fb8500",
-          // [ColorPath]: "red",
-        },
-      ),
-      paragraph([
-        title([
-          text("question"),
-          text(" "),
-          text("italic bold", {
-            [MarksPath]: [Mark.BOLD, Mark.ITALIC].map((m) => m.toJSON()),
-          }),
-          text(" "),
-          text("colored", {
-            [MarksPath]: [Mark.color("red")].map((m) => m.toJSON()),
-          }),
-          text(" "),
-          text("background", {
-            [MarksPath]: [Mark.background("#fb8500")].map((m) => m.toJSON()),
-          }),
-          text(" "),
-          text("code", {
-            [MarksPath]: [Mark.CODE].map((m) => m.toJSON()),
-          }),
-          text(" "),
-          text("sub", {
-            [MarksPath]: [Mark.SUBSCRIPT].map((m) => m.toJSON()),
-          }),
-          text("strike", {
-            [MarksPath]: [Mark.STRIKE].map((m) => m.toJSON()),
-          }),
-          text("super", {
-            [MarksPath]: [Mark.SUPERSCRIPT].map((m) => m.toJSON()),
-          }),
-          text(" "),
-          text("underline", {
-            [MarksPath]: [Mark.UNDERLINE].map((m) => m.toJSON()),
-          }),
-        ]),
-      ]),
+      // paragraph(
+      //   [
+      //     title([
+      //       text("question"),
+      //       text(" "),
+      //       text("link", {
+      //         [MarksPath]: [Mark.link("http://localhost:3000")].map((m) =>
+      //           m.toJSON(),
+      //         ),
+      //       }),
+      //     ]),
+      //   ],
+      // ),
+      // paragraph([
+      //   title([
+      //     text("question"),
+      //     text(" "),
+      //     text("italic bold", {
+      //       [MarksPath]: [Mark.BOLD, Mark.ITALIC].map((m) => m.toJSON()),
+      //     }),
+      //     text(" "),
+      //     text("colored", {
+      //       [MarksPath]: [Mark.color("red")].map((m) => m.toJSON()),
+      //     }),
+      //     text(" "),
+      //     text("background", {
+      //       [MarksPath]: [Mark.background("#fb8500")].map((m) => m.toJSON()),
+      //     }),
+      //     text(" "),
+      //     text("code", {
+      //       [MarksPath]: [Mark.CODE].map((m) => m.toJSON()),
+      //     }),
+      //     text(" "),
+      //     text("sub", {
+      //       [MarksPath]: [Mark.SUBSCRIPT].map((m) => m.toJSON()),
+      //     }),
+      //     text("strike", {
+      //       [MarksPath]: [Mark.STRIKE].map((m) => m.toJSON()),
+      //     }),
+      //     text("super", {
+      //       [MarksPath]: [Mark.SUPERSCRIPT].map((m) => m.toJSON()),
+      //     }),
+      //     text(" "),
+      //     text("underline", {
+      //       [MarksPath]: [Mark.UNDERLINE].map((m) => m.toJSON()),
+      //     }),
+      //   ]),
+      // ]),
 
       // node("collapsible", [title([text("question title")])]),
 
@@ -536,10 +529,10 @@ const data = node("carbon", [
 
       paragraph([title([text("section 1")])]),
 
-      node("sandbox", [node("cell")]),
-      node("sandbox", [node("cell")]),
-      node("sandbox", [node("cell")]),
-      node("sandbox", [node("cell")]),
+      node("cell"),
+      node("cell"),
+      node("cell"),
+      node("cell"),
 
       // paragraph([title([text("section 1")])]),
 
@@ -726,7 +719,7 @@ const data = node("carbon", [
       //   "https://momentum.photos/img/605ec0cd-c21b-420d-9ec7-f1a63d69cafd.jpg?momo_cache_bg_uuid=a63a8845-920b-4562-ba44-d3d5228261c9",
     },
     // {
-    //   [PropLink]: node(
+    //   [PagePropLink]: node(
     //     "attributes",
     //     [
     //       attribute({

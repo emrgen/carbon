@@ -309,7 +309,7 @@ export class Transaction {
     // if there is no select action, add a skip select action
     // this is useful for transaction that only updates the content and want to blur the selection
     if (selectActions.length === 0) {
-      this.Select(PinnedSelection.SKIP);
+      // this.Select(PinnedSelection.SKIP);
     }
 
     if (this._dispatched) {

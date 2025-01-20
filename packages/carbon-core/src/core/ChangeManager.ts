@@ -91,7 +91,9 @@ export class ChangeManager extends NodeTopicEmitter {
       this.interval = setTimeout(() => {
         console.error(
           "syncing: content timeout",
-          this.updated.nodes(this.state.nodeMap).map((n) => n.key),
+          this.updated
+            .nodes(this.state.nodeMap)
+            .map((n) => `${n.name}:${n.key}`),
         );
         this.updated.clear();
       }, 2000);

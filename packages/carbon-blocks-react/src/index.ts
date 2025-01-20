@@ -1,5 +1,4 @@
 import { CarbonText, ReactRenderer } from "@emrgen/carbon-react";
-import { DocumentComp, NestableComp } from "./renderers";
 import { AtomicText } from "./renderers/AtomicText";
 import { BlockContentComp } from "./renderers/BlockContent";
 
@@ -25,9 +24,12 @@ import { HStackComp } from "./renderers/HStackComp";
 import MCQComp from "./renderers/MCQ";
 import { MentionComp } from "./renderers/Mention";
 import { Modal } from "./renderers/Modal";
+import { NestableComp } from "./renderers/Nestable";
 import { Newline } from "./renderers/Newline";
 import { NumberedListComp } from "./renderers/NumberedList";
+import { PageComp } from "./renderers/Page";
 import { PageLinkComp } from "./renderers/PageLink";
+import { PageProps } from "./renderers/PageProps";
 import { PageTreeComp } from "./renderers/PageTree";
 import { PageTreeGroupComp } from "./renderers/PageTreeGroup";
 import { PageTreeItemComp } from "./renderers/PageTreeItem";
@@ -42,7 +44,8 @@ import TitleComp from "./renderers/TitleComp";
 import { TodoComp } from "./renderers/Todo";
 
 export const blockPresetRenderers = [
-  ReactRenderer.create("page", DocumentComp),
+  ReactRenderer.create("page", PageComp),
+  ReactRenderer.create("pageProps", PageProps),
   ReactRenderer.create("h1", HeaderComp),
   ReactRenderer.create("h2", HeaderComp),
   ReactRenderer.create("h3", HeaderComp),
@@ -94,7 +97,7 @@ export const blockPresetRenderers = [
   // ReactRenderer.create("empty", EmptyInline),
 ];
 
-export * from "./renderers/Document";
+export * from "./renderers/Page";
 
 export * from "./hooks";
 export * from "./components/renderAttrs";
