@@ -9,6 +9,9 @@ export class Props extends CarbonPlugin {
     return {
       group: "linked",
       content: "",
+      selection: {
+        rect: true,
+      },
       props: {},
     };
   }

@@ -10,6 +10,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { stop, StylePath } from "@emrgen/carbon-core";
+import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import { VideoSrcPath } from "@emrgen/carbon-media";
 import {
   CarbonBlock,
@@ -41,19 +42,19 @@ export function VideoComp(props: RendererProps) {
 const VideoProps = (props: RendererProps) => {
   const { node } = props;
   const ref = useRef<HTMLDivElement>(null);
-  const { node: linkedProps } = useNodeChange({
+  const { node: linkNode } = useNodeChange({
     node: node.links["props"]!,
   });
 
-  const { SelectionHalo } = useSelectionHalo({
-    node: linkedProps,
+  const { SelectionHalo, attributes } = useSelectionHalo({
+    node: linkNode,
     parentSelectionCheck: false,
   });
 
-  // useRectSelectable({ ref, node: linkedProps });
+  useRectSelectable({ ref, node: linkNode });
 
   return (
-    <CarbonBlock node={linkedProps} ref={ref}>
+    <CarbonBlock node={linkNode} ref={ref} custom={{ ...attributes }}>
       {SelectionHalo}
     </CarbonBlock>
   );

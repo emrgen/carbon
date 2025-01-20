@@ -32,7 +32,7 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
         )}
       </>
     );
-  }, [className, isSelected, node]);
+  }, [className, isSelected, node, parentSelectionCheck]);
 
   return {
     SelectionHalo,

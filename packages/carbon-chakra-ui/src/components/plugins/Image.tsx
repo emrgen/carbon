@@ -11,6 +11,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { prevent, preventAndStop, stop } from "@emrgen/carbon-core";
+import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import { ImageSrcPath } from "@emrgen/carbon-media";
 import {
   CarbonBlock,
@@ -44,20 +45,20 @@ export function ImageComp(props: RendererProps) {
 const ImageProps = (props: RendererProps) => {
   const { node } = props;
   const ref = useRef<HTMLDivElement>(null);
-  const { node: linkedProps } = useNodeChange({
+  const { node: linkNode } = useNodeChange({
     node: node.links["props"]!,
   });
 
   const { SelectionHalo, attributes } = useSelectionHalo({
-    node: linkedProps,
+    node: linkNode,
     parentSelectionCheck: false,
   });
 
-  // useRectSelectable({ ref, node: linkedProps });
+  useRectSelectable({ ref, node: linkNode });
 
   return (
     <CarbonBlock
-      node={linkedProps}
+      node={linkNode}
       ref={ref}
       custom={{ ...attributes, ...props.custom }}
     >
