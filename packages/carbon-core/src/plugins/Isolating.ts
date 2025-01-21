@@ -216,7 +216,11 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         const { head, tail } = selection;
 
         // cursor can moveBy to the previous focusable node
-        const prevFocusable = head.node.prev((n) => n.isFocusable);
+        const prevFocusable = head.node.prev(
+          (n) => n.isFocusable,
+          {},
+          !head.node.parent?.isPage, // for page, we don't want to go to the other page
+        );
         if (!prevFocusable) return;
 
         // but only if it's not inside same isolating node as the current one

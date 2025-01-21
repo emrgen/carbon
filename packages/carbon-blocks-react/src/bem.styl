@@ -70,6 +70,8 @@ $selectionHaloColor = #accef78d
   > .ctiw > .title
     flex 1
     padding 2px
+    &:after
+      padding-left 2px;
 
 .quote
 .paragraph
@@ -477,7 +479,15 @@ select#carbon-code-themes
 .token-line
   display: block
 
-.callout[data-as="h1"]
+.ccout__icon
+  display flex
+  align-items center
+  margin-right 8px
+  img
+    scale 1.1
+
+.callout[data-as="h1"],
+.callout[data-as="h1"] > .ctiw
   > .title
     @extend .h1__title
     margin-bottom 0.1em;
@@ -500,7 +510,8 @@ select#carbon-code-themes
     font-size 1.3em
     margin-top 4px;
 
-.callout[data-as="h2"]
+.callout[data-as="h2"],
+.callout[data-as="h2"] > .ctiw
   > .title
     @extend .h2__title
     margin-bottom 0.1em;
@@ -519,7 +530,8 @@ select#carbon-code-themes
     font-size 1.1em
     margin-top 2px;
 
-.callout[data-as="h3"]
+.callout[data-as="h3"],
+.callout[data-as="h3"] > .ctiw
   > .title
     @extend .h3__title
     margin-bottom 0.1em;
@@ -535,7 +547,7 @@ select#carbon-code-themes
   .collapsible__control
     font-size 1.1em
 
-.collapsible[data-as="h4"]
+.callout[data-as="h4"]
   margin-top 0.6em;
 
   .ctiw > .title

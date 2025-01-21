@@ -1,8 +1,9 @@
 import "./chakra.styl";
 
 import { ReactRenderer } from "@emrgen/carbon-react";
+import { CalloutComp } from "./components/plugins/Callout";
 import { ImageComp } from "./components/plugins/Image";
-import {MediaComp} from "./components/plugins/Media";
+import { MediaComp } from "./components/plugins/Media";
 import { VideoComp } from "./components/plugins/Video";
 
 export * from "./components/FloatingStyleMenu";
@@ -17,4 +18,5 @@ export const carbonChakraRenderers = [
   ReactRenderer.create("image", ImageComp),
   ReactRenderer.create("video", VideoComp),
   ReactRenderer.create("media", MediaComp),
+  ReactRenderer.create("callout", CalloutComp),
 ];

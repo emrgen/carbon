@@ -35,10 +35,12 @@ export abstract class CarbonPlugin {
 
   name: PluginName = "";
 
+  // default props for the node
+  props: NodeProps = new PlainNodeProps();
+
   protected bus!: PluginEmitter;
   protected state!: PluginState;
   protected app!: Carbon;
-  props: NodeProps = new PlainNodeProps();
 
   init(app: Carbon, bus: PluginEmitter, state: PluginState) {
     this.app = app;

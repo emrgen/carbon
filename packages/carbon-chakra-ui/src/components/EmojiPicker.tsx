@@ -1,37 +1,27 @@
-import React from "react";
+import {
+  Box,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Portal,
+} from "@chakra-ui/react";
 
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverFooter,
-  PopoverArrow,
-  PopoverCloseButton,
-  PopoverAnchor,
-  Button,
-  Portal,
-  Box,
-  BoxProps,
-  PopoverArrowProps,
-  PopoverProps,
-} from "@chakra-ui/react";
-
 import { preventAndStop, stop } from "@emrgen/carbon-core";
+import React from "react";
 
 interface EmojiPickerProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (emoji: string) => void;
   children?: React.ReactNode;
+  theme?: "light" | "dark";
 }
 
 export function EmojiPicker(props: EmojiPickerProps) {
-  const { isOpen, onClose, onSelect } = props;
+  const { isOpen, onClose, onSelect, theme } = props;
 
   const handleSelect = (emoji) => {
     console.log(emoji);
@@ -49,13 +39,18 @@ export function EmojiPicker(props: EmojiPickerProps) {
           h="full"
           position={"fixed"}
           onClick={onClose}
-          onBlur={e => {
+          onBlur={(e) => {
             preventAndStop(e);
             onClose();
           }}
         >
           <PopoverContent onClick={stop}>
-            <Picker data={data} onEmojiSelect={handleSelect} autoFocus />
+            <Picker
+              data={data["en"]}
+              onEmojiSelect={handleSelect}
+              autoFocus
+              theme={theme}
+            />
           </PopoverContent>
         </Box>
       </Portal>

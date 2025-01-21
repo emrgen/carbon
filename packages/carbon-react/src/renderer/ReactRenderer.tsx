@@ -16,6 +16,13 @@ export interface RendererProps {
   [key: string]: any;
 }
 
+export const customRenderPropComparator = (
+  prev: RendererProps,
+  next: RendererProps,
+) => {
+  return prev.node.key === next.node.key && prev.custom === next.custom;
+};
+
 // Default render prop comparator used in carbon nodes
 export const defaultRenderPropComparator = (
   prev: RendererProps,

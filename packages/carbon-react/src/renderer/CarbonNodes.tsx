@@ -144,13 +144,14 @@ const InnerElement: ForwardRefRenderFunction<
     if (is_env_development()) {
       return {
         // "data-version": renderVersion,
-        "data-id": key,
+        // "data-id": node.id.toString(),
+        "data-key": key,
         // "data-parent": node.parent?.key,
       };
     }
 
     return {};
-  }, [key]);
+  }, [key, node]);
 
   const isBold = node.props.get(MarksPath)?.some((m) => m.name === "bold");
 

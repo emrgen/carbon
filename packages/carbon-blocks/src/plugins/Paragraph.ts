@@ -66,7 +66,6 @@ export class Paragraph extends NodePlugin {
           },
           html: {
             suppressContentEditableWarning: true,
-            className: "cse",
           },
         },
       },

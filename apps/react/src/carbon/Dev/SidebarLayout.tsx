@@ -56,7 +56,7 @@ import {
 import {
   RendererProps,
   RenderManager,
-  useCreateCarbon,
+  useCreateCachedCarbon,
 } from "@emrgen/carbon-react";
 import { CarbonUI } from "@emrgen/carbon-ui";
 import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
@@ -69,9 +69,10 @@ const page = node(
   [
     title([text("Elixir")]),
 
+    node("callout", [title([text("callout title")])], {}),
+
     paragraph([title(text("question title"))]),
 
-    // paragraph([title([text("section 1")])]),
     node("image", [], {
       "remote/state/image/src":
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPcbdS5mvBeNcpLWmbEfpSP7LGa3Nae-Lwew&s",
@@ -218,7 +219,7 @@ export function SidebarLayout() {
   const [content] = useState(() => {
     return data;
   });
-  const app = useCreateCarbon("dev", content, flattenDeep(plugins));
+  const app = useCreateCachedCarbon("sidebar", content, flattenDeep(plugins));
   const [runtime] = useState<ActiveCellRuntime>(() => {
     return new ActiveCellRuntime({
       Carbon: app,

@@ -586,9 +586,9 @@ export class KeyboardPlugin extends AfterPlugin {
     const { blockSelection } = app;
     if (blockSelection.isEmpty) {
       // check if no prev focusable node exists
-      const { end } = ctx.selection;
-      if (end.isAtStartOfNode(end.node)) {
-        const prev = end.node.prev((n) => n.isFocusable);
+      const { start } = ctx.selection;
+      if (start.isAtStartOfNode(start.node)) {
+        const prev = start.node.prev((n) => n.isFocusable);
         if (!prev) {
           preventAndStopCtx(ctx);
           return;
