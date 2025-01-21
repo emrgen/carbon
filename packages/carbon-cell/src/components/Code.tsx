@@ -122,7 +122,6 @@ export const CodeInner = (props: RendererProps) => {
       const value = editor.state.doc.toString();
 
       if (editor.docChanged) {
-        console.log("xxxx");
         // update the cell code value
         setValue(value);
         app.cmd

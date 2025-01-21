@@ -33,30 +33,31 @@ export function VideoComp(props: RendererProps) {
 
   return (
     <CarbonBlock node={node}>
-      <VideoContent node={node} />
       <VideoProps node={node} />
     </CarbonBlock>
   );
 }
 
 const VideoProps = (props: RendererProps) => {
-  const { node } = props;
   const ref = useRef<HTMLDivElement>(null);
-  const { node: linkNode } = useNodeChange({
-    node: node.links["props"]!,
+  const { node } = useNodeChange({
+    node: props.node.linkedProps!,
   });
 
   const { SelectionHalo, attributes } = useSelectionHalo({
-    node: linkNode,
+    node: node,
     parentSelectionCheck: false,
   });
 
-  useRectSelectable({ ref, node: linkNode });
+  useRectSelectable({ ref, node: node });
 
   return (
-    <CarbonBlock node={linkNode} ref={ref} custom={{ ...attributes }}>
-      {SelectionHalo}
-    </CarbonBlock>
+    <>
+      <VideoContent node={node} />
+      <CarbonBlock node={node} ref={ref} custom={{ ...attributes }}>
+        {SelectionHalo}
+      </CarbonBlock>
+    </>
   );
 };
 

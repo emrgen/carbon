@@ -12,7 +12,7 @@ import {
   TitleNode,
 } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
-import { entries, identity, isArray, isEmpty } from "lodash";
+import { cloneDeep, entries, identity, isArray, isEmpty } from "lodash";
 import { ImmutableNode } from "./ImmutableNode";
 import { ImmutableNodeContent } from "./ImmutableNodeContent";
 
@@ -69,6 +69,7 @@ export class ImmutableNodeFactory implements NodeFactory {
     if (type.isSandbox && !links["props"]) {
       links["props"] = {
         name: "props",
+        props: cloneDeep(json.props ?? {}),
       };
     }
 

@@ -8,6 +8,7 @@ import {
   EventHandlerMap,
   FocusedPlaceholderPath,
   FocusOnInsertPath,
+  HasFocusPath,
   InputRule,
   insertBeforeAction,
   Mark,
@@ -268,6 +269,7 @@ export class ChangeName extends BeforePlugin {
       if (newNode.type.isSandbox) {
         newNode.linkedProps?.updateProps({
           [FocusOnInsertPath]: true,
+          [HasFocusPath]: true,
         });
       }
 

@@ -1,11 +1,11 @@
 import {
   ActionOrigin,
+  BeforePlugin,
   Node,
   Pin,
   PinnedSelection,
   Transaction,
 } from "@emrgen/carbon-core";
-import { BeforePlugin } from "../core/CarbonPlugin";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {
@@ -18,10 +18,6 @@ declare module "@emrgen/carbon-core" {
     };
   }
 }
-
-type Commands = {
-  [key: string]: Function | Commands;
-};
 
 export class SelectionCommands extends BeforePlugin {
   name = "selection";
@@ -44,12 +40,12 @@ export class SelectionCommands extends BeforePlugin {
   collapseToHead(tr: Transaction, selection: PinnedSelection) {
     // const dr = react.cmd.transform.delete()
     const normalized = selection.normalize();
-    tr.select(normalized.collapseToHead());
+    tr.Select(normalized.collapseToHead());
   }
 
   collapseToStart(tr: Transaction, selection: PinnedSelection) {
     const normalized = selection.normalize();
-    tr.select(normalized.collapseToStart());
+    tr.Select(normalized.collapseToStart());
   }
 
   collapseAtStartOf(tr: Transaction, node: Node) {
