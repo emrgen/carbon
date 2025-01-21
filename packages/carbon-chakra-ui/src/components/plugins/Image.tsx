@@ -45,34 +45,30 @@ export function ImageComp(props: RendererProps) {
 const ImageProps = (props: RendererProps) => {
   const { node } = props;
   const ref = useRef<HTMLDivElement>(null);
-  const { node: linkNode } = useNodeChange({
-    node: node.links["props"]!,
-  });
 
   const { SelectionHalo, attributes } = useSelectionHalo({
-    node: linkNode,
+    node,
     parentSelectionCheck: false,
   });
 
-  useRectSelectable({ ref, node: linkNode });
+  useRectSelectable({ ref, node });
 
   return (
-    <CarbonBlock
-      node={linkNode}
-      ref={ref}
-      custom={{ ...attributes, ...props.custom }}
-    >
-      {SelectionHalo}
-    </CarbonBlock>
+    <>
+      <CarbonBlock
+        node={node}
+        ref={ref}
+        custom={{ ...attributes, ...props.custom }}
+      >
+        {SelectionHalo}
+      </CarbonBlock>
+    </>
   );
 };
 
 const ImageContent = (props: RendererProps) => {
-  const { node } = props;
   const app = useCarbon();
-  // const [style, setStyle] = useState<CSSProperties>(() =>
-  //   node.props.get<CSSProperties>(StylePath, {}),
-  // );
+  const { node } = useNodeChange({ node: props.node.linkedProps! });
 
   const [ready, setReady] = useState(false);
   const caption = node.props.get(CaptionPath, "");

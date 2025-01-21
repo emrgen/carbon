@@ -33,28 +33,29 @@ export function VideoComp(props: RendererProps) {
 
   return (
     <CarbonBlock node={node}>
-      <VideoProps node={node} />
+      <VideoContent node={node} />
     </CarbonBlock>
   );
 }
 
 const VideoProps = (props: RendererProps) => {
+  const { node } = props;
   const ref = useRef<HTMLDivElement>(null);
-  const { node } = useNodeChange({
-    node: props.node.linkedProps!,
-  });
 
   const { SelectionHalo, attributes } = useSelectionHalo({
-    node: node,
+    node,
     parentSelectionCheck: false,
   });
 
-  useRectSelectable({ ref, node: node });
+  useRectSelectable({ ref, node });
 
   return (
     <>
-      <VideoContent node={node} />
-      <CarbonBlock node={node} ref={ref} custom={{ ...attributes }}>
+      <CarbonBlock
+        node={node}
+        ref={ref}
+        custom={{ ...attributes, ...props.custom }}
+      >
         {SelectionHalo}
       </CarbonBlock>
     </>
@@ -62,7 +63,7 @@ const VideoProps = (props: RendererProps) => {
 };
 
 const VideoContent = (props: RendererProps) => {
-  const { node } = props;
+  const { node } = useNodeChange({ node: props.node.linkedProps! });
   const app = useCarbon();
   const updater = useDisclosure();
   const [style, setStyle] = useState<CSSProperties>(() =>
@@ -247,6 +248,21 @@ const VideoContent = (props: RendererProps) => {
         />
       )}
       {updater.isOpen && updatePopover}
+      <VideoProps
+        node={node}
+        custom={{
+          onClick: (e) => {
+            stop(e);
+            console.log("xxxxxxxxxx");
+            if (!videoUrl) {
+              console.log("xxxxxxxxxxxxxxxxxxx");
+              showOverlay(node.id.toString());
+              updater.onOpen();
+            }
+            app.cmd.SelectBlocks([]).Dispatch();
+          },
+        }}
+      />
     </>
   );
 };
