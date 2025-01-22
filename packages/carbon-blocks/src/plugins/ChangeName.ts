@@ -239,6 +239,10 @@ export class ChangeName extends BeforePlugin {
     };
   }
 
+  // change a node into a cell node.
+  // inject linkedProps to the node because cell node is a sandbox node.
+  changeIntoCell() {}
+
   insertDividerBefore(name: string, groups: string[]) {
     return (ctx: EventContext<KeyboardEvent>, regex: RegExp, text: string) => {
       const { currentNode, app, cmd } = ctx;
@@ -299,7 +303,7 @@ export class ChangeName extends BeforePlugin {
         cmd.Add(action);
       }
 
-      // app.parkCursor();
+      app.parkCursor();
       cmd.Add(insertBeforeAction(block, insertNode)).Select(after).Dispatch();
     };
   }

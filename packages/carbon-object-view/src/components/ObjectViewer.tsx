@@ -3,6 +3,7 @@ import { NodeView } from "./Node";
 
 export interface ObjectViewProps {
   data: Object;
+  field?: string;
 }
 
 // class Name {
@@ -40,9 +41,10 @@ export interface ObjectViewProps {
 
 // ObjectViewer component is used to display the object in a tree structure.
 export const ObjectViewer = (props: ObjectViewProps) => {
+  const { data, field = "" } = props;
   return (
     <div className={"carbon-object-view"}>
-      <NodeView data={props.data} propName={""} isIndex={false} />
+      <NodeView data={props.data} propName={field} isIndex={false} />
     </div>
   );
 };

@@ -186,8 +186,6 @@ export const CodeInner = (props: RendererProps) => {
           Prec.highest(
             EditorView.domEventHandlers({
               keydown(event) {
-                console.log(event);
-
                 // insert new line
                 if (event.ctrlKey && event.shiftKey && event.key === "Enter") {
                   event.preventDefault();
@@ -282,16 +280,8 @@ export const CodeInner = (props: RendererProps) => {
     const firstMount = app.store
       .get(nodeId)
       ?.props.get(FocusOnInsertPath, false);
-    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", firstMount);
     if (firstMount) {
       view?.focus();
-      // setTimeout(() => {
-      //   app.cmd
-      //     .Update(nodeId, {
-      //       [FocusOnInsertPath]: false,
-      //     })
-      //     .Dispatch();
-      // }, 1000);
     }
   }, [view, app, nodeId]);
 

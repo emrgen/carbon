@@ -1,5 +1,5 @@
 import { Optional } from "@emrgen/types";
-import { cloneDeep, each, isArray } from "lodash";
+import { cloneDeep, each, entries, isArray } from "lodash";
 import { ContentMatch } from "./ContentMatch";
 import { Node } from "./Node";
 import { NodeAttrsJSON } from "./NodeAttrs";
@@ -255,9 +255,15 @@ export class NodeType {
 
   private removeNodeId(json: NodeJSON): InitNodeJSON {
     const { id, ...rest } = json;
+    const links = entries(rest.links ?? {}).reduce((obj, [name, json]) => {
+      obj[name] = this.removeNodeId(json);
+      return obj;
+    }, {});
+
     return {
       ...rest,
       children: json.children?.map((c) => this.removeNodeId(c)),
+      links,
     };
   }
 

@@ -125,7 +125,7 @@ export class PinnedSelection {
     ) {
       console.warn(
         p14("%c[error]"),
-        "color:red",
+        "color:orange",
         "anchorNode or focusNode is not text container",
         anchorNode.name,
         focusNode.name,

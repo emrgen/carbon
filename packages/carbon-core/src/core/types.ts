@@ -77,6 +77,7 @@ export interface NodeJSON extends Record<string, any> {
   name: string;
   id: string;
   children?: NodeJSON[];
+  links?: Record<string, NodeJSON>;
   text?: string;
   attrs?: Record<string, any>;
 }

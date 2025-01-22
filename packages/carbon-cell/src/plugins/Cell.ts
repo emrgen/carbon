@@ -8,6 +8,15 @@ export class Cell extends CarbonPlugin {
       group: "content block",
       sandbox: true,
       // content: "cellView cellCode",
+      insert: true,
+      dnd: {
+        draggable: true,
+        handle: true,
+      },
+      selection: {
+        block: true,
+        rect: true,
+      },
       props: {
         local: {
           placeholder: {

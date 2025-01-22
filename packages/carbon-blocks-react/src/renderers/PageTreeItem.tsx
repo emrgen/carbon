@@ -233,6 +233,10 @@ export const PageTreeItemComp = (props: RendererProps) => {
     [app, node],
   );
 
+  const handleMouseDown = useCallback((e) => {
+    e.stopPropagation();
+  }, []);
+
   return (
     <CarbonBlock
       node={node}
@@ -244,8 +248,11 @@ export const PageTreeItemComp = (props: RendererProps) => {
         node={node}
         beforeContent={beforeContent}
         afterContent={isContentEditable ? null : afterContent}
-        custom={{ onKeyDown: handleKeyPress, onClick: handleOpenDocument }}
-        wrap={true}
+        custom={{
+          onKeyDown: handleKeyPress,
+          onClick: handleOpenDocument,
+          onMouseDown: handleMouseDown,
+        }}
       />
 
       {!isCollapsed && <CarbonNodeChildren node={node} />}

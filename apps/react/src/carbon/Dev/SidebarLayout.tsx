@@ -2,6 +2,7 @@ import { Box } from "@chakra-ui/react";
 import { attrRenderers } from "@emrgen/carbon-attributes";
 
 import {
+  BlockEvent,
   blockPresetPlugins,
   node,
   paragraph,
@@ -249,6 +250,17 @@ export function SidebarLayout() {
     app.on("changed", onChange);
     return () => {
       app.off("changed", onChange);
+    };
+  }, [app]);
+
+  useEffect(() => {
+    const onOpenDocument = () => {
+      console.log("open document event");
+    };
+
+    app.on(BlockEvent.openDocument, onOpenDocument);
+    return () => {
+      app.off(BlockEvent.openDocument, onOpenDocument);
     };
   }, [app]);
 

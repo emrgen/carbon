@@ -366,7 +366,7 @@ const CellResultView = (props: CellResultViewProps) => {
 
   return (
     <div className={"cell-result-named-view"} onKeyUp={stop} onKeyDown={stop}>
-      {cell.hasName() && (
+      {cell.hasName() && name && (
         <div className={"cell-result-cell-name"}>{name} =&nbsp;</div>
       )}
       <div style={{ color }} className={"cell-result-view-wrapper"}>

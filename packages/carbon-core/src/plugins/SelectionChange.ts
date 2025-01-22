@@ -49,7 +49,7 @@ export class SelectionChangePlugin extends AfterPlugin {
         if (before.isInvalid) {
           console.warn(
             p12("%c[invalid]"),
-            "color:red",
+            "color:orange",
             "before selection is invalid",
             app.ready,
           );
@@ -58,7 +58,7 @@ export class SelectionChangePlugin extends AfterPlugin {
         if (after.isInvalid) {
           console.error(
             p14("%c[error]"),
-            "color:red",
+            "color:orange",
             "failed to ge pinned selection, after selection is invalid",
           );
           return;

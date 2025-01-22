@@ -20,7 +20,6 @@ $lineHeight = 28px
   // padding: 0
   outline none
   // overflow: auto;
-  white-space: pre-wrap;
   //height: 400px
   width 100%
   flex: 1
@@ -260,6 +259,7 @@ span[data-name=text] {
   background: $selectionHaloColor
   border-radius: 4px
   pointer-events: none
+  z-index: 1;
 
 //animation halo-animation 0.1s ease-in forwards
 
@@ -419,14 +419,14 @@ span[data-name=text] {
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2)
       border-radius: 4px
 
-.katex
-  display: block
-  text-align: center
-  white-space: nowrap
-
-  .katex-html
-    display: block
-    position relative
+//.katex
+//  display: block
+//  text-align: center
+//  white-space: nowrap
+//
+//  .katex-html
+//    display: block
+//    position relative
 
 [data-name="title"]
   position relative

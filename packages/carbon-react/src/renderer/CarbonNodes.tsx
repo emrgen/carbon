@@ -426,8 +426,15 @@ export const CarbonChildren = (props: RendererProps) => {
 
 // render first node a content
 export const CarbonNodeContent = (props: RendererProps) => {
-  const { node, beforeContent, afterContent, custom, wrapper, wrap, ...rest } =
-    props;
+  const {
+    node,
+    beforeContent,
+    afterContent,
+    custom,
+    wrapper,
+    wrap = !!afterContent || !!beforeContent,
+    ...rest
+  } = props;
 
   const content = useMemo(() => {
     const { children = [] } = node;

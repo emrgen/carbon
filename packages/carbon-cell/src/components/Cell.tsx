@@ -10,8 +10,9 @@ import {
   RendererProps,
   useCarbon,
   useNodeChange,
+  useSelectionHalo,
 } from "@emrgen/carbon-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BsTextParagraph } from "react-icons/bs";
 import { DiCssTricks } from "react-icons/di";
 import { useCustomCompareEffect } from "react-use";
@@ -31,6 +32,15 @@ const codeIcons = {
 export const CellComp = (props: RendererProps) => {
   const { node } = props;
   const app = useCarbon();
+  const mod = useActiveCellRuntime();
+
+  useEffect(() => {
+    return () => {
+      if (node.linkedProps) {
+        mod.delete(node.linkedProps.id.toString());
+      }
+    };
+  }, [node, mod]);
 
   const handleInsertNeighbour = useCallback(
     (e) => {
@@ -51,9 +61,6 @@ export const CellComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node}>
-      {/*<div className={"cell-insert-neighbour"} onClick={handleInsertNeighbour}>*/}
-      {/*  <BiPlus />*/}
-      {/*</div>*/}
       <CodeCellWrapper node={node.linkedProps!} />
     </CarbonBlock>
   );
@@ -63,6 +70,9 @@ const CodeCellWrapper = (props: RendererProps) => {
   const app = useCarbon();
   const mod = useActiveCellRuntime();
   const { node } = useNodeChange({ node: props.node });
+  const ref = useRef(null);
+  // useRectSelectable({ node, ref });
+  const { SelectionHalo, attributes } = useSelectionHalo({ node });
 
   const [codeType, setCodeType] = useState(
     node.props.get(CodeCellCodeTypePath, "javascript"),
@@ -137,7 +147,7 @@ const CodeCellWrapper = (props: RendererProps) => {
   );
 
   return (
-    <CarbonBlock node={node}>
+    <CarbonBlock node={node} ref={ref} custom={attributes}>
       <div
         className={"carbon-cell-container"}
         onKeyUp={stop}
@@ -162,6 +172,7 @@ const CodeCellWrapper = (props: RendererProps) => {
         {/*  <Code node={node} />*/}
         {/*</div>*/}
       </div>
+      {SelectionHalo}
     </CarbonBlock>
   );
 };

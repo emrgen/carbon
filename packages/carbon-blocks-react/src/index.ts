@@ -24,7 +24,7 @@ import { HStackComp } from "./renderers/HStackComp";
 import MCQComp from "./renderers/MCQ";
 import { MentionComp } from "./renderers/Mention";
 import { Modal } from "./renderers/Modal";
-import { NestableComp } from "./renderers/Nestable";
+import { ParagraphComp } from "./renderers/Nestable";
 import { Newline } from "./renderers/Newline";
 import { NumberedListComp } from "./renderers/NumberedList";
 import { PageComp } from "./renderers/Page";
@@ -50,7 +50,7 @@ export const blockPresetRenderers = [
   ReactRenderer.create("h2", HeaderComp),
   ReactRenderer.create("h3", HeaderComp),
   ReactRenderer.create("h4", HeaderComp),
-  ReactRenderer.create("paragraph", NestableComp),
+  ReactRenderer.create("paragraph", ParagraphComp),
   ReactRenderer.create("title", TitleComp),
   ReactRenderer.create("text", CarbonText),
   ReactRenderer.create("divider", DividerComp),

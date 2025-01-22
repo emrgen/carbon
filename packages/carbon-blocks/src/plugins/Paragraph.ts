@@ -38,6 +38,7 @@ export class Paragraph extends NodePlugin {
       content: "title content*",
       splits: true,
       splitName: "paragraph",
+      insert: true,
       dnd: {
         draggable: true,
         handle: true,
@@ -48,7 +49,6 @@ export class Paragraph extends NodePlugin {
         block: true,
         inline: true,
       },
-      insert: true,
       info: {
         title: "Text",
         description: "Just start typing to create a new paragraph",

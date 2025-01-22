@@ -36,7 +36,12 @@ export class ActiveCellRuntime extends EventEmitter {
   }
 
   delete(cellId: string) {
+    const cell = this.cells.get(cellId);
     this.cells.delete(cellId);
+    // delete the cell output variable
+    if (cell) {
+      cell.delete(true);
+    }
   }
 
   printStats() {
@@ -126,7 +131,7 @@ export class ActiveCellRuntime extends EventEmitter {
     if (code === "") {
       // invalidate old cell
       if (cell && cell.variable) {
-        cell.delete();
+        cell.delete(true);
       }
 
       this.cells.delete(cellId);
@@ -238,7 +243,7 @@ export class ActiveCellRuntime extends EventEmitter {
   }
 
   private replace(before: ActiveCell, cell: ActiveCell) {
-    // if before.name is different from cell.name
+    // if before.name is bot different from cell.name
     if (
       // before.name === null ||
       // before.name === undefined ||
@@ -249,6 +254,7 @@ export class ActiveCellRuntime extends EventEmitter {
       if (before.variable) {
         // console.log("deleting", before.id, before.name);
         // NOTE: deleting the cell will also delete the variable
+        // TODO: check for better approach
         before.delete(true);
       }
     } else if (before.name === cell.name) {

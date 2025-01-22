@@ -15,6 +15,7 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
 
   const SelectionHalo = useMemo(() => {
     const parentNotSelected =
+      node.parent?.isSandbox ||
       !node.parents.some((parent) => parent.props.get(SelectedPath)) ||
       !parentSelectionCheck;
 

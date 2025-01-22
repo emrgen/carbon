@@ -8,7 +8,7 @@ import {
 } from "@emrgen/carbon-react";
 import { useRef } from "react";
 
-export const NestableComp = (props: RendererProps) => {
+export const ParagraphComp = (props: RendererProps) => {
   const { node } = props;
   const ref = useRef(null);
   useDragDropRectSelect({ node, ref });

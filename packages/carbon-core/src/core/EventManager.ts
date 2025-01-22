@@ -177,7 +177,7 @@ export class EventManager {
     const { selection, head } = selectionInfo ?? {};
     // NOTE: editor cannot process event without active selection
     if (!selection) {
-      console.error(
+      console.warn(
         p12("%c[invalid]"),
         "color:grey",
         `${type}: event with empty selection`,
