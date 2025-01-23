@@ -11,6 +11,8 @@ export class RuntimeError extends Error {
   }
 }
 
+export const NEXT_VERSION_ERROR = new RuntimeError("calculating next version");
+
 export function generatorish(value) {
   return (
     value &&
