@@ -8,7 +8,7 @@ import { NodeMap } from "./NodeMap";
 // NodeStore is a store for the nodes and their rendered HTML elements
 export class NodeStore {
   private elementMap: Map<string, HTMLElement> = new Map();
-  // this map is used to resolve the node from the HTML element and find out the selection nodes
+  // this map is used to fulfilled the node from the HTML element and find out the selection nodes
   private elementToNodeMap: WeakMap<HTMLElement, Node> = new WeakMap();
 
   private deletedNodes: Set<string> = new Set();
@@ -101,7 +101,7 @@ export class NodeStore {
       : null;
   }
 
-  // resolve the node from the HTML element
+  // fulfilled the node from the HTML element
   resolve(el: any, offset: number): { node: Optional<Node>; offset: number } {
     if (!el) return { node: null, offset };
     let node: Optional<Node>;

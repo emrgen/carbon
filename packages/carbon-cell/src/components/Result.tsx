@@ -59,7 +59,6 @@ const ResultInner = (props) => {
   }, [mod, nodeId]);
 
   const updateResult = (res) => {
-    console.log("result => xxxxxx");
     if (isFunction(res)) {
       setResult(() => res);
     } else {
@@ -74,6 +73,7 @@ const ResultInner = (props) => {
   // listen to the cell events from the module
   useEffect(() => {
     const onDefine = (cell: ActiveCell) => {
+      console.log("redefined", cell);
       setError("");
       setCell(cell);
       setCellName(cell.name);
@@ -126,10 +126,10 @@ const ResultInner = (props) => {
     };
 
     const onReject = (cell: ActiveCell) => {
-      // console.log("rejected", cell.name, cell.error);
+      console.log("rejected", cell.name, cell.error);
       setCell(cell);
       setError(cell.error.toString());
-      console.log(`CELL: deleted. ID: ${cell.uniqId}, Name: ${cell.name}`);
+      console.log(`CELL: failed. ID: ${cell.uniqId}, Name: ${cell.name}`);
       updateResult(null);
       setPending(false);
     };
@@ -205,6 +205,7 @@ const ResultInner = (props) => {
     </div>
   );
 };
+
 export const Result = memo(ResultInner, (prev, next) => {
   return prev.node.eq(next.node) && prev.onToggle === next.onToggle;
 });

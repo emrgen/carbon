@@ -17,6 +17,13 @@ export class Cell extends CarbonPlugin {
         block: true,
         rect: true,
       },
+      info: {
+        title: "Cell",
+        description: "Just a cell",
+        icon: "cell",
+        tags: ["cell"],
+        order: 100,
+      },
       props: {
         local: {
           placeholder: {

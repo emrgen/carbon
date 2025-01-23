@@ -9,6 +9,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import {
+  FocusOnInsertPath,
   Fragment,
   Node,
   NodeType,
@@ -112,9 +113,6 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       if (match) {
         tr.Change(parent?.id, type.name);
         tr.SetContent(node.id, []);
-        tr.Update(parent.id, {
-          node: { typeChanged: true },
-        });
         if (type.isAtom && type.isBlock) {
           app.parkCursor();
         } else if (
@@ -132,6 +130,12 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       const block = type.default();
       if (!block) return;
       const after = PinnedSelection.fromPin(Pin.future(node, 0))!;
+
+      if (type.isSandbox) {
+        block.linkedProps?.updateProps({
+          [FocusOnInsertPath]: true,
+        });
+      }
 
       tr.Insert(Point.toBefore(parent.id), block);
       tr.SetContent(node.id, []);

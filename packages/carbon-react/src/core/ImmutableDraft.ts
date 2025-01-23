@@ -167,7 +167,7 @@ export class ImmutableDraft implements Draft {
     return this.nodeMap.parent(from);
   }
 
-  // produce a new state from the draft or reject the draft
+  // produce a new state from the draft or rejected the draft
   public produce(fn: (producer: ImmutableDraft) => void): CoreState {
     const { scope } = this.state;
     const oldScope = StateScope.current();

@@ -182,6 +182,7 @@ export class ActiveCellRuntime extends EventEmitter {
 
     // define a new variable
     if (before) {
+      cell.redefined = true;
       this.replace(before, cell);
     } else {
       this.defineFresh(cell);
@@ -250,6 +251,7 @@ export class ActiveCellRuntime extends EventEmitter {
       before.name != cell.name ||
       before.codeType !== cell.codeType
     ) {
+      debugger;
       const variable = this.defineFresh(cell);
       if (before.variable) {
         // console.log("deleting", before.id, before.name);
@@ -262,6 +264,8 @@ export class ActiveCellRuntime extends EventEmitter {
       // internal Runtime will keep the same variable with all the references intact
       // console.log("replacing", before.id, before.name, cell.name);
       // redefine the cell, will keep the same variable
+      // before.variable.delete();
+      // cell.variable = this.defineFresh(cell);
       cell.variable = this.module.redefine(
         cell.name,
         cell.inputs,
@@ -276,9 +280,10 @@ export class ActiveCellRuntime extends EventEmitter {
     cell.variable = this.module
       .variable({
         fulfilled: (value: any) => {
-          if (cell.deleted) return;
+          if (cell.deleted && !cell.redefined) return;
           // console.log("FULFILLED", cell.codeType, cell.uniqId, cell.id, value);
           cell.result = value;
+          cell.redefined = false;
           if (isHtmlElement(value)) {
             // @ts-ignore
             cell.html = value.outerHTML;
@@ -374,6 +379,7 @@ export class ActiveCell extends EventEmitter {
   ast: any;
   inputs: string[];
   definition: Function;
+  redefined: boolean = true;
 
   variable: Optional<Variable>;
 
@@ -499,6 +505,8 @@ export class ActiveCell extends EventEmitter {
         cellName = nextUnnamedCellName();
       }
 
+      console.log(code, ast);
+
       const deps = ast.references.map((arg: any) => arg.name);
       const definition = isString(code)
         ? this.defFromAst(cellName, deps, ast, code)
@@ -617,7 +625,7 @@ export class ActiveCell extends EventEmitter {
   delete(deleteVariable: boolean = true) {
     console.log("DELETED", this.uniqId, this.name);
     this.mod.cells.delete(this.id);
-    this.outputs.forEach((cell) => cell.delete());
+    this.outputs.forEach((cell) => cell.delete(true));
     this.deleted = true;
     if (deleteVariable) {
       this.variable?.delete();
@@ -706,7 +714,7 @@ const factory = {
   // create a function definition combining the name, inputs and body
   define(name: string, inputs: string[], body: string, opts?: any) {
     const fnStr = `return ${opts?.async ? "async" : ""} function ${opts?.generator ? "*" : ""} ${!!name ? `_${name}` : ""} ( ${inputs.join(",")} ) {\n  ${body} \n} `;
-    // console.log("factory defined =>", fnStr);
+    console.log("factory defined =>", fnStr, opts);
     return new Function(fnStr)();
   },
 };

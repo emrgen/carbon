@@ -1,5 +1,6 @@
 import { AiOutlinePicture } from "react-icons/ai";
 import { BsCodeSquare, BsDistributeHorizontal } from "react-icons/bs";
+import { CgTag } from "react-icons/cg";
 import { FcTodoList } from "react-icons/fc";
 import { IoToggleOutline } from "react-icons/io5";
 import { LuFrame } from "react-icons/lu";
@@ -18,6 +19,7 @@ import { VscListSelection } from "react-icons/vsc";
 
 export const blockIcons = {
   paragraph: <PiTextAaBold />,
+  cell: <CgTag />,
   collapsible: <IoToggleOutline />,
   numberList: <TbListNumbers />,
   bulletList: <PiListBulletsBold />,

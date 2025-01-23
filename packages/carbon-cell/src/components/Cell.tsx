@@ -35,6 +35,7 @@ export const CellComp = (props: RendererProps) => {
   const mod = useActiveCellRuntime();
 
   useEffect(() => {
+    console.log("mounting cell", node.id.toString());
     return () => {
       if (node.linkedProps) {
         mod.delete(node.linkedProps.id.toString());

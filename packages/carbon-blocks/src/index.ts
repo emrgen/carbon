@@ -1,6 +1,7 @@
 import { CarbonPlugin } from "@emrgen/carbon-core";
 import { NestablePlugin, Paragraph } from "./plugins";
 import { Attributes } from "./plugins/Attributes";
+import { BlockContent } from "./plugins/BlockContent";
 import { Bookmark } from "./plugins/Bookmark";
 import { BulletedList } from "./plugins/BulletedList";
 import { Button } from "./plugins/Button";
@@ -21,7 +22,7 @@ import { Mention } from "./plugins/Mention";
 import { Modal } from "./plugins/Modal";
 import { NewlinePlugin } from "./plugins/Newline";
 import { NumberedList } from "./plugins/NumberedList";
-import { PagePlugin } from "./plugins/Page";
+import { Page } from "./plugins/Page";
 import { PageLink } from "./plugins/PageLink";
 import { PageProps } from "./plugins/PageProps";
 import { PageTree } from "./plugins/PageTree";
@@ -41,40 +42,41 @@ import { Todo } from "./plugins/Todo";
 export * from "./create";
 
 export const blockPresetPlugins: CarbonPlugin[] = [
-  new Paragraph(),
-  new Divider(),
-  new Header(),
-  new PagePlugin(),
-  new NestablePlugin(),
-  new Collapsible(),
-  new BulletedList(),
-  new NumberedList(),
-  new ChangeName(),
-  new Equation(),
-  new HStack(),
-  new Todo(),
-  new Quote(),
-  new Callout(),
-  new PageLink(),
   // new Table(),
-  new CarbonRoot(),
-  new PageTree(),
-  new TabGroup(),
-  new Frame(),
-  new Insert(),
-  new Modal(),
-  new Scale(),
-  new Button(),
-  new Code(),
-  new Emoji(),
-  new Mention(),
-  new Props(),
-  new Bookmark(),
   new Attributes(),
-  new Props(),
-  new PlainTextPlugin(),
+  new Bookmark(),
+  new BulletedList(),
+  new Button(),
+  new Callout(),
+  new CarbonRoot(),
+  new ChangeName(),
+  new Code(),
+  new Collapsible(),
+  new Divider(),
+  new Emoji(),
+  new Equation(),
+  new Frame(),
+  new HStack(),
+  new Header(),
+  new Insert(),
+  new Mention(),
+  new Modal(),
+  new NestablePlugin(),
   new NewlinePlugin(),
+  new NumberedList(),
+  new PageLink(),
+  new Page(),
   new PageProps(),
+  new PageTree(),
+  new Paragraph(),
+  new PlainTextPlugin(),
+  new Props(),
+  new Props(),
+  new Quote(),
+  new Scale(),
+  new TabGroup(),
+  new Todo(),
+  new BlockContent(),
 ];
 
 export * from "./events";

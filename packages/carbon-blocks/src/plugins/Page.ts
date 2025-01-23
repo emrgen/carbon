@@ -11,7 +11,7 @@ import {
 import { encodeHtmlNestableChildren, encodeNestableChildren } from "./Nestable";
 import { PageProps } from "./PageProps";
 
-export class PagePlugin extends CarbonPlugin {
+export class Page extends CarbonPlugin {
   name = "page";
 
   spec(): NodeSpec {

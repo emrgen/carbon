@@ -42,6 +42,7 @@ export const CodeInner = (props: RendererProps) => {
   const app = useCarbon();
   const ref = createRef<HTMLDivElement>();
   const mod = useActiveCellRuntime();
+  const [mounted, setMounted] = useState(false);
 
   // watch for prop change in linked props node
   const { node } = useNodeChange({ node: props.node });
@@ -55,6 +56,17 @@ export const CodeInner = (props: RendererProps) => {
   const [codeType, setCodeType] = useState(
     node.props.get(CodeCellCodeTypePath, "javascript"),
   );
+
+  useEffect(() => {
+    const onMount = () => {
+      setMounted(true);
+    };
+
+    app.on("page:mounted", onMount);
+    return () => {
+      app.off("page:mounted", onMount);
+    };
+  }, [app]);
 
   useEffect(() => {
     setCodeType(node.props.get(CodeCellCodeTypePath, "javascript"));
@@ -186,6 +198,8 @@ export const CodeInner = (props: RendererProps) => {
           Prec.highest(
             EditorView.domEventHandlers({
               keydown(event) {
+                // console.log(event);
+
                 // insert new line
                 if (event.ctrlKey && event.shiftKey && event.key === "Enter") {
                   event.preventDefault();
