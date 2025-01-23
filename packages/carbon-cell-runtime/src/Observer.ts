@@ -3,6 +3,7 @@ import { Variable } from "./Variable";
 import { RuntimeError } from "./x";
 
 // Observer is a class that wraps a resolve and reject function
+// single emitter multiple listeners
 export class Observer {
   private readonly resolves: Function[] = [];
   private readonly rejects: Function[] = [];

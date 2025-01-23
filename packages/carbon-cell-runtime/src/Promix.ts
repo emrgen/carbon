@@ -27,7 +27,7 @@ export class PromiseVersion {
   ) {}
 
   get version() {
-    return `${this.id}@${this.major}.${this.minor}`;
+    return `${this.id}#${this.major}.${this.minor}`;
   }
 
   next() {
@@ -49,7 +49,7 @@ type Unwrap<T extends any[]> = {
 };
 
 // Promix is a promise wrapper that allows you to resolve or reject the wrapped promise
-export class Promix<T> implements PromiseLike<T> {
+export class Promix<T = unknown> implements PromiseLike<T> {
   pid: PromiseVersion;
 
   fulfilled: (value: T | PromiseLike<T>) => Promix<T>;
@@ -61,8 +61,6 @@ export class Promix<T> implements PromiseLike<T> {
   static default<T>(id?: string) {
     return new Promix<T>(noop, id);
   }
-
-  static withTimeout<T>(timeout: number, id?: string) {}
 
   static of<T = unknown>(
     executor: Executor<T>,
@@ -85,24 +83,38 @@ export class Promix<T> implements PromiseLike<T> {
     });
   }
 
-  static race(values: Array<PromiseLike<any>>) {
-    return Promix.of((resolve, reject) => {
-      Promise.race(Promix.mapToPromises(values)).then(resolve, reject);
-    });
-  }
-
+  static any<T extends readonly unknown[] | []>(
+    values: T,
+  ): Promix<Awaited<T[number]>>;
   static any<T>(values: Iterable<T | PromiseLike<T>>): Promix<Awaited<T>> {
     return Promix.of((resolve, reject) => {
       Promise.any(Promix.mapToPromises(values)).then(resolve, reject);
     });
   }
 
-  static all<T extends any[]>(values: [...T]): Promix<Unwrap<T>>;
+  static all<T extends any[]>(
+    values: [...T],
+    id?: string,
+    major?: number,
+  ): Promix<Unwrap<T>>;
   static all<T>(values: Set<T>): Promix<T[]>;
-  static all<T>(values: Iterable<T | PromiseLike<T>>): Promix<Awaited<T>[]> {
-    return Promix.of((resolve, reject) => {
-      Promise.all(values).then(resolve, reject);
-    });
+  static all<T>(
+    values: Iterable<T | PromiseLike<T>>,
+    id?: string,
+    major?: number,
+  ): Promix<Awaited<T>[]>;
+  static all<T>(
+    values: Iterable<T | PromiseLike<T>>,
+    id?: string,
+    major?: number,
+  ): Promix<Awaited<T>[]> {
+    return Promix.of(
+      (resolve, reject) => {
+        Promise.all(values).then(resolve, reject);
+      },
+      id,
+      major,
+    );
   }
 
   static allSettled(values: Array<PromiseLike<any>>) {
@@ -111,8 +123,38 @@ export class Promix<T> implements PromiseLike<T> {
     });
   }
 
+  static race<T extends any[]>(values: [...T]): Promix<Awaited<T>>;
+  static race<T>(values: Iterable<T | PromiseLike<T>>): Promix<Awaited<T>> {
+    return Promix.of((resolve, reject) => {
+      Promise.race(Promix.mapToPromises(values)).then(resolve, reject);
+    });
+  }
+
+  static timeout<T>(
+    promise: PromiseLike<T>,
+    timeout: number,
+    message: string = "",
+  ) {
+    const expired = new Promise<string>((resolve, reject) => {
+      setTimeout(() => {
+        resolve(message);
+      }, timeout);
+    });
+
+    return Promix.race([promise, expired]);
+  }
+
+  static delay<T = boolean>(timeout: number, value?: T) {
+    if (value === undefined) {
+      value = true as T;
+    }
+    return new Promix<T>((resolve) => {
+      setTimeout(() => resolve(value), timeout);
+    });
+  }
+
   // reject or resolve the first promise that resolves
-  static first(promises: Array<PromiseLike<any>>) {
+  static first<T>(values: Iterable<T | PromiseLike<T>>) {
     return Promix.of((resolve, reject) => {
       const onfulfilled = (value: any) => {
         resolve?.(value);
@@ -121,30 +163,33 @@ export class Promix<T> implements PromiseLike<T> {
       const onrejected = (error: any) => {
         reject?.(error);
       };
-
-      promises.forEach((promise) => {
-        promise.then(onfulfilled, onrejected);
-      });
+      for (const value of values) {
+        Promix.toPromise(value).then(onfulfilled, onrejected);
+      }
     });
   }
 
   private static mapToPromises<T>(values: Iterable<T | PromiseLike<T>>) {
-    return Array.from(values).map(Promix.toPromise);
+    const promises: Promise<T>[] = [];
+    for (const value of values) {
+      promises.push(Promix.toPromise(value));
+    }
+    return promises;
   }
 
-  private static toPromise<T>(value: T | PromiseLike<T>) {
+  private static toPromise<T>(value: T | PromiseLike<T>): Promise<T> {
     if (Promix.is(value)) {
       return value.promise;
     }
 
     if (isObject(value) && "then" in value) {
-      return value;
+      return value as Promise<T>;
     }
 
     return Promise.resolve(value);
   }
 
-  static is(value: any) {
+  static is<T>(value: T | PromiseLike<T>): value is Promix<T> {
     return value instanceof Promix;
   }
 
@@ -210,15 +255,21 @@ export class Promix<T> implements PromiseLike<T> {
   then<TResult1 = T, TResult2 = Promix<TResult1>>(
     onfulfilled?: OnFulfilled<T, TResult1>,
     onrejected?: OnRejected<TResult2>,
-  ): Promix<TResult1 | TResult2> {
+  ): Promix<TResult1> {
     // this.promise.then(onfulfilled, onrejected);
-    return Promix.of(
+    return Promix.of<TResult1>(
       (y, n) => {
         // resolve the promise with the onfulfilled value
         const resolve = (value: T) => {
           if (onfulfilled) {
             const res = onfulfilled(value);
-            y(res);
+            if (Promix.is(res)) {
+              res.promise.then(y, n);
+            } else if (isObject(res) && "then" in res) {
+              res.then(y, n);
+            } else {
+              y(res);
+            }
           }
         };
 
@@ -238,12 +289,32 @@ export class Promix<T> implements PromiseLike<T> {
 
   // register a callback to be called when the promise is rejected
   catch(onrejected?: With<any>) {
-    return this.then(noop, onrejected);
+    return this.then(undefined, onrejected);
   }
 
   // register a callback to be called when the promise is resolved or rejected
   finally(onfinally?: () => void) {
-    this.promise.finally(onfinally);
+    return Promix.of<never>(
+      (y, n) => {
+        this.promise.finally(() => {
+          // onfinally?.();
+          if (onfinally) {
+            y(undefined as never);
+          }
+        });
+      },
+      this.id,
+      this.major,
+      this.minor + 1,
+    );
+  }
+
+  // create a derived promise with next minor version
+  all<T extends any[]>(values: [...T]): Promix<Unwrap<T>>;
+  all<T>(values: Set<T>): Promix<T[]>;
+  all<T>(values: Iterable<T | PromiseLike<T>>): Promix<Awaited<T>[]>;
+  all(values: Iterable<T | PromiseLike<T>>) {
+    return Promix.all(values, this.id, this.major + 1);
   }
 
   // create a derived promise with next major version
@@ -255,5 +326,9 @@ export class Promix<T> implements PromiseLike<T> {
       this.id,
       this.major + 1,
     );
+  }
+
+  run<T>(executor: Executor<T>) {
+    return Promix.of<T>(executor, this.id, this.major + 1);
   }
 }
