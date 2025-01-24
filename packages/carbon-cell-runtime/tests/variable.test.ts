@@ -17,11 +17,11 @@ test("test promised", async (t) => {
   const b = a.then((x) => x * 2);
   expect(await b).toBe(84);
 
-  expect(b.version).toBe("x#0.1");
+  expect(b.key).toBe("x#0");
 
   const c = a.then((x) => x + 1);
 
-  expect(c.version).toBe("x#0.1");
+  expect(c.key).toBe("x#0");
 
   expect(await c).toBe(43);
 
@@ -63,7 +63,7 @@ test("test next promise", async (t) => {
   const p2 = p.then((x) => x * 2);
 
   expect(await p2).toBe(20);
-  expect(p2.version).toBe("x#0.1");
+  expect(p2.key).toBe("x#0");
 
   const p3 = p2.next((y, n) => {
     y(30);
@@ -94,13 +94,13 @@ test("test promise tree", async (t) => {
   const e = Promix.all([a, c, d]).then(([x, y, z]) => x + y + z);
 
   const createLogger = (pass, ...vars: Promix<number>[]) => {
-    console.log("-------------------------------");
-    console.log("pass:", pass);
-    vars.forEach((v, i) => {
-      v.then((x) => {
-        console.log(String.fromCharCode("a".charCodeAt(0) + i), ":", x);
-      });
-    });
+    // console.log("-------------------------------");
+    // console.log("pass:", pass);
+    // vars.forEach((v, i) => {
+    //   v.then((x) => {
+    //     console.log(String.fromCharCode("a".charCodeAt(0) + i), ":", x);
+    //   });
+    // });
   };
 
   // pass 1
@@ -111,14 +111,14 @@ test("test promise tree", async (t) => {
 
   // when a becomes dirty, it needs to update all its dependents and recomputed
   // first update the dependencies
-  const a1 = a.then((x) => x + 10);
+  const a1 = Promix.default<number>("a");
   const c1 = c.all([a1, b]).then(([x, y]) => x + y);
   const d1 = d.all([a1, b]).then(([x, y]) => x * y);
   const e1 = e.all([a1, c1, d1]).then(([x, y, z]) => x + y + z);
 
   // pass 2
   createLogger("2", a1, b, c1, d1, e1);
-  a1.fulfilled(10);
+  a1.fulfilled(20);
   expect(await e1).toBe(20 + (await c1) + (await d1));
 
   // create a new variable
@@ -178,3 +178,9 @@ test(
     // timeout: 10000,
   },
 );
+
+test("test promix catch", async () => {
+  Promix.of((_, n) => {
+    n("xxx");
+  }).catch((x) => Promix.resolve(0));
+});

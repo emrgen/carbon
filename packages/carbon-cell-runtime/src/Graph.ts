@@ -1,26 +1,58 @@
 interface NodeId {
   id: string;
+  version: number;
 }
 
 export class Graph<T extends NodeId> {
   nodes: Map<string, T> = new Map();
-  edges: Map<string, Set<string>> = new Map();
+  outgoing: Map<string, Set<string>> = new Map();
   incoming: Map<string, Set<string>> = new Map();
 
-  addNode(...node: T[]) {
-    for (const n of node) {
+  version: number = 0
+
+  variables(): T[] {
+    return Array.from(this.nodes.values());
+  }
+
+  inputs(node: T): T[] {
+    const inputs: T[] = [];
+    for (const from of this.incoming.get(node.id) ?? []) {
+      inputs.push(this.nodes.get(from)!);
+    }
+    return inputs;
+  }
+
+  outputs(node: T): T[] {
+    const outputs: T[] = [];
+    for (const to of this.outgoing.get(node.id) ?? []) {
+      outputs.push(this.nodes.get(to)!);
+    }
+    return outputs;
+  }
+
+  node(node: T): T | undefined {
+    return this.nodes.get(node.id);
+  }
+
+  addNode(...nodes: T[]) {
+    for (const n of nodes) {
       this.nodes.set(n.id, n);
-      this.edges.set(n.id, this.edges.get(n.id) ?? new Set());
+      this.outgoing.set(n.id, this.outgoing.get(n.id) ?? new Set());
       this.incoming.set(n.id, this.incoming.get(n.id) ?? new Set());
+      this.version = Math.max(this.version, n.version)
     }
   }
 
   addEdge(from: T, to: T) {
-    if (!this.edges.has(from.id)) {
-      this.edges.set(from.id, new Set());
+    if (from.id === to.id) {
+      return;
     }
 
-    this.edges.get(from.id)!.add(to.id);
+    if (!this.outgoing.has(from.id)) {
+      this.outgoing.set(from.id, new Set());
+    }
+
+    this.outgoing.get(from.id)!.add(to.id);
 
     if (!this.incoming.has(to.id)) {
       this.incoming.set(to.id, new Set());
@@ -30,11 +62,21 @@ export class Graph<T extends NodeId> {
 
   removeNode(node: T) {
     this.nodes.delete(node.id);
-    this.edges.delete(node.id);
-    this.edges.forEach((edges, from) => {
-      edges.delete(node.id);
+
+    const outgoing = Array.from(this.outgoing.get(node.id)??[]);
+    const incoming = Array.from(this.incoming.get(node.id)??[]);
+
+    // remove the node from the incoming edges for dependent nodes
+    incoming.forEach((from) => {
+      this.outgoing.get(from)?.delete(node.id);
     });
 
+    // remove the node from the outgoing edges for dependencies
+    outgoing.forEach((to) => {
+      this.incoming.get(to)?.delete(node.id);
+    });
+
+    this.outgoing.delete(node.id);
     this.incoming.delete(node.id);
   }
 
@@ -51,7 +93,7 @@ export class Graph<T extends NodeId> {
     const roots: T[] = [];
     const incoming = new Map<string, number>();
     for (const node of nodes) {
-      for (const to of this.edges.get(node.id)!) {
+      for (const to of this.outgoing.get(node.id)!) {
         incoming.set(to, (incoming.get(to) ?? 0) + 1);
       }
     }
@@ -69,6 +111,7 @@ export class Graph<T extends NodeId> {
     // check if the graph has a cycle, if nodes is empty, check the whole graph
     if (nodes.length === 0) {
       const components = this.components();
+      // console.log(components);
       return components.some((c) => {
         if (this.cycle(Array.from(c.values()))) {
           return true;
@@ -93,8 +136,8 @@ export class Graph<T extends NodeId> {
       const node = queue.shift()!;
       visited++;
 
-      if (this.edges.has(node.id)) {
-        for (const to of this.edges.get(node.id)!) {
+      if (this.outgoing.has(node.id)) {
+        for (const to of this.outgoing.get(node.id)!) {
           const count = indegree.get(to)! - 1;
           if (count === 0) {
             queue.push(this.nodes.get(to)!);
@@ -108,7 +151,63 @@ export class Graph<T extends NodeId> {
     return visited !== nodes.length;
   }
 
-  // topological sort of the graph starting from the dirty nodes
+  topologicalRoots(dirty: Iterable<T>): T[] {
+    const components = this.components();
+    const nodeToComponent = new Map<string, number>();
+    for (let i = 0; i < components.length; i++) {
+      for (const node of components[i].values()) {
+        nodeToComponent.set(node.id, i);
+      }
+    }
+
+    const dirtyGroups = new Map<number, T[]>();
+    for (const node of dirty) {
+      const component = nodeToComponent.get(node.id);
+      if (component === undefined) {
+        continue;
+      }
+
+      if (!dirtyGroups.has(component)) {
+        dirtyGroups.set(component, []);
+      }
+      dirtyGroups.get(component)!.push(node);
+    }
+
+    const roots: T[] = [];
+    for (const [index, nodes] of dirtyGroups) {
+      const componentNodes = Array.from(components[index].values());
+      if (!this.cycle(componentNodes)) {
+        roots.push(...this.topologicalSortRoots(nodes));
+      }
+    }
+
+    return roots;
+  }
+
+  private topologicalSortRoots(nodes: T[]): T[] {
+    const connected = this.connected(nodes);
+    const incoming = new Map<string, number>();
+    for (const node of connected.values()) {
+      for (const to of this.outgoing.get(node.id)!) {
+        incoming.set(to, (incoming.get(to) ?? 0) + 1);
+      }
+    }
+
+    // find the dirty nodes without incoming outgoing
+    const queue: T[] = [];
+    for (const node of nodes) {
+      const id = node.id;
+      if (!incoming.get(id)) {
+        queue.push(node);
+      }
+    }
+
+    return queue;
+  }
+
+  // return the nodes in the order they need to be recomputed
+  // all nodes connected to the dirty nodes are included in the result
+  // no upstream nodes are excluded from the result
   topological(dirty: Iterable<T>): T[] {
     const components = this.components();
     const nodeToComponent = new Map<string, number>();
@@ -132,27 +231,29 @@ export class Graph<T extends NodeId> {
     }
 
     const sorted: T[] = [];
-    for (const nodes of dirtyGroups.values()) {
-      sorted.push(...this.topologicalSort(nodes));
+    for (const [index, nodes] of dirtyGroups) {
+      const componentNodes = Array.from(components[index].values());
+      if (!this.cycle(componentNodes)) {
+        sorted.push(...this.topologicalSort(nodes));
+      }
     }
 
     return sorted;
   }
 
+  // safety: assume the graph has no cycle, as this is a private method
+  // and called only by topological method which checks for cycles
   private topologicalSort(nodes: T[]): T[] {
-    // check if the graph has a cycle
-    if (this.cycle(nodes)) {
-      return [];
-    }
-
-    // find the connected nodes to the dirty nodes
+    // console.log('topo',nodes.map((n) => n.id));
     const connected = this.connected(nodes);
     const incoming = new Map<string, number>();
-    for (const [id] of connected) {
-      incoming.set(id, this.incoming.get(id)?.size ?? 0);
+    for (const node of connected.values()) {
+      for (const to of this.outgoing.get(node.id)!) {
+        incoming.set(to, (incoming.get(to) ?? 0) + 1);
+      }
     }
 
-    // find the dirty nodes without incoming edges
+    // find the dirty nodes without incoming outgoing
     const queue: T[] = [];
     for (const node of nodes) {
       const id = node.id;
@@ -161,16 +262,17 @@ export class Graph<T extends NodeId> {
       }
     }
 
+    // console.log('queue',queue.map((n) => n.id));
     // topological sort
     let i = 0;
     while (i < queue.length) {
       const node = queue[i];
       const id = node.id;
-      if (this.edges.has(id)) {
-        for (const to of this.edges.get(id)!) {
+      if (this.outgoing.has(id)) {
+        for (const to of this.outgoing.get(id)!) {
           const count = incoming.get(to)! - 1;
           if (count === 0) {
-            queue.push(connected.get(to)!);
+            queue.push(this.nodes.get(to)!);
           } else {
             incoming.set(to, count);
           }
@@ -188,8 +290,8 @@ export class Graph<T extends NodeId> {
     while (queue.length > 0) {
       const node = queue.shift()!;
       connected.set(node.id, node);
-      if (this.edges.has(node.id)) {
-        for (const to of this.edges.get(node.id)!) {
+      if (this.outgoing.has(node.id)) {
+        for (const to of this.outgoing.get(node.id)!) {
           if (!connected.has(to)) {
             queue.push(this.nodes.get(to)!);
           }
@@ -207,7 +309,7 @@ export class Graph<T extends NodeId> {
       components.ranks.set(id, 0);
     }
 
-    for (const [from, to] of this.edges) {
+    for (const [from, to] of this.outgoing) {
       for (const t of to) {
         components.union(from, t);
       }
@@ -216,7 +318,9 @@ export class Graph<T extends NodeId> {
     // console.log(components.components());
 
     return Array.from(components.components()).map(([_, nodes]) => {
-      return new Map(Array.from(nodes.values()).map((id) => [id, this.nodes.get(id)!]));
+      return new Map(
+        Array.from(nodes.values()).map((id) => [id, this.nodes.get(id)!]),
+      );
     });
   }
 
@@ -224,7 +328,7 @@ export class Graph<T extends NodeId> {
   //   const queue = this.roots();
   //   const order: T[] = [];
   //   const incoming = new Map<string, number>();
-  //   for (const [_, to] of this.edges) {
+  //   for (const [_, to] of this.outgoing) {
   //     for (const t of to) {
   //       incoming.set(t, (incoming.get(t) ?? 0) + 1);
   //     }
@@ -233,8 +337,8 @@ export class Graph<T extends NodeId> {
   //   while (queue.length > 0) {
   //     const node = queue.shift()!;
   //     order.push(node);
-  //     if (this.edges.has(node.id)) {
-  //       for (const to of this.edges.get(node.id)!) {
+  //     if (this.outgoing.has(node.id)) {
+  //       for (const to of this.outgoing.get(node.id)!) {
   //         const count = incoming.get(to)! - 1;
   //         if (count === 0) {
   //           queue.push(this.nodes.get(to)!);
@@ -302,5 +406,4 @@ class Components {
 
     return components;
   }
-
 }

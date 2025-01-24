@@ -180,7 +180,7 @@ export class ContentMatch {
     return null;
   }
 
-  /// The number of outgoing edges this node has in the finite
+  /// The number of outgoing outgoing this node has in the finite
   /// automaton that describes the content expression.
   get edgeCount() {
     return this.next.length;
@@ -353,7 +353,7 @@ type Edge = { term: NodeType | undefined; to: number | undefined };
 
 /// Construct an NFA from an expression as returned by the parser. The
 /// NFA is represented as an array of states, which are themselves
-/// arrays of edges, which are `{term, to}` objects. The first state is
+/// arrays of outgoing, which are `{term, to}` objects. The first state is
 /// the entry state and the last node is the success state.
 ///
 /// Note that unlike typical NFAs, the edge ordering in this one is
@@ -432,7 +432,7 @@ function cmp(a: number, b: number) {
   return b - a;
 }
 
-// Get the set of nodes reachable by null edges from `node`. Omit
+// Get the set of nodes reachable by null outgoing from `node`. Omit
 // nodes with only a single null-out-edge, since they may lead to
 // needless duplicated nodes.
 function nullFrom(nfa: Edge[][], node: number): readonly number[] {

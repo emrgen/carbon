@@ -3,7 +3,7 @@ import { With } from "./x";
 
 type Executor<T> = (
   resolve: (value: T | PromiseLike<T>) => void,
-  reject?: (reason?: any) => void,
+  reject: (reason?: any) => void,
 ) => void;
 
 type OnFulfilled<T, TResult1> =
@@ -16,30 +16,25 @@ type OnRejected<TResult2> =
   | null;
 
 export class PromiseVersion {
-  static of(id: string, major = 0, minor = 0) {
-    return new PromiseVersion(id, major, minor);
+  static of(id: string, version = 0) {
+    return new PromiseVersion(id, version);
   }
 
   constructor(
     readonly id: string,
-    readonly major = 0,
-    readonly minor = 0,
+    readonly version = 0,
   ) {}
 
-  get version() {
-    return `${this.id}#${this.major}.${this.minor}`;
+  get key() {
+    return `${this.id}#${this.version}`;
   }
 
   next() {
-    return new PromiseVersion(this.id, this.major + 1);
-  }
-
-  nextMinor() {
-    return new PromiseVersion(this.id, this.major, this.minor + 1);
+    return new PromiseVersion(this.id, this.version + 1);
   }
 
   toString() {
-    return this.version;
+    return this.key;
   }
 }
 
@@ -58,29 +53,32 @@ export class Promix<T = unknown> implements PromiseLike<T> {
 
   private state: "pending" | "fulfilled" | "rejected" = "pending";
 
-  static default<T>(id?: string) {
-    return new Promix<T>(noop, id);
+  static default<T>(id?: string, version?: number) {
+    return new Promix<T>(noop, id, version);
   }
 
-  static of<T = unknown>(
-    executor: Executor<T>,
-    id?: string,
-    major = 0,
-    minor = 0,
-  ) {
-    return new Promix<T>(executor, id, major, minor);
+  static of<T = unknown>(executor: Executor<T>, id?: string, version?: number) {
+    return new Promix<T>(executor, id, version);
   }
 
-  static resolve<T>(value: T | PromiseLike<T>, id?: string) {
-    return new Promix<T>((resolve) => {
-      Promix.toPromise(value).then(resolve);
-    });
+  static resolve<T>(value: T | PromiseLike<T>, id?: string, version?: number) {
+    return new Promix<T>(
+      (resolve) => {
+        Promix.toPromise(value).then(resolve);
+      },
+      id,
+      version,
+    );
   }
 
-  static reject<T>(error: T) {
-    return new Promix<T>((_, reject) => {
-      reject?.(error);
-    });
+  static reject<T>(error: T, id?: string, version?: number) {
+    return new Promix<T>(
+      (_, reject) => {
+        reject?.(error);
+      },
+      id,
+      version,
+    );
   }
 
   static any<T extends readonly unknown[] | []>(
@@ -95,25 +93,25 @@ export class Promix<T = unknown> implements PromiseLike<T> {
   static all<T extends any[]>(
     values: [...T],
     id?: string,
-    major?: number,
+    version?: number,
   ): Promix<Unwrap<T>>;
   static all<T>(values: Set<T>): Promix<T[]>;
   static all<T>(
     values: Iterable<T | PromiseLike<T>>,
     id?: string,
-    major?: number,
+    version?: number,
   ): Promix<Awaited<T>[]>;
   static all<T>(
     values: Iterable<T | PromiseLike<T>>,
     id?: string,
-    major?: number,
+    version?: number,
   ): Promix<Awaited<T>[]> {
     return Promix.of(
       (resolve, reject) => {
         Promise.all(values).then(resolve, reject);
       },
       id,
-      major,
+      version,
     );
   }
 
@@ -193,27 +191,23 @@ export class Promix<T = unknown> implements PromiseLike<T> {
     return value instanceof Promix;
   }
 
+  get key() {
+    return this.pid.key;
+  }
+
   get id() {
     return this.pid.id;
-  }
-
-  get major() {
-    return this.pid.major;
-  }
-
-  get minor() {
-    return this.pid.minor;
   }
 
   get version() {
     return this.pid.version;
   }
 
-  constructor(executor: Executor<T>, id = "", major = 0, minor = 0) {
+  constructor(executor: Executor<T>, id = "", version = 0) {
     this.fulfilled = () => this;
     this.rejected = () => this;
 
-    this.pid = new PromiseVersion(id, major, minor);
+    this.pid = new PromiseVersion(id, version);
 
     this.promise = new Promise((resolve, reject) => {
       this.state = "pending";
@@ -230,10 +224,10 @@ export class Promix<T = unknown> implements PromiseLike<T> {
         return this;
       };
 
-      if (minor === 0) {
-        this.fulfilled = fulfilled;
-        this.rejected = rejected;
-      }
+      // if (minor === 0) {
+      this.fulfilled = fulfilled;
+      this.rejected = rejected;
+      // }
 
       executor(fulfilled, rejected);
     });
@@ -282,14 +276,15 @@ export class Promix<T = unknown> implements PromiseLike<T> {
         this.promise.then(resolve, reject);
       },
       this.id,
-      this.major,
-      this.minor + 1,
+      this.version,
     );
   }
 
   // register a callback to be called when the promise is rejected
   catch(onrejected?: With<any>) {
-    return this.then(undefined, onrejected);
+    return Promix.of<any>((resolve, reject) => {
+      this.promise.catch(onrejected).then(resolve, reject);
+    });
   }
 
   // register a callback to be called when the promise is resolved or rejected
@@ -304,8 +299,7 @@ export class Promix<T = unknown> implements PromiseLike<T> {
         });
       },
       this.id,
-      this.major,
-      this.minor + 1,
+      this.version,
     );
   }
 
@@ -314,21 +308,20 @@ export class Promix<T = unknown> implements PromiseLike<T> {
   all<T>(values: Set<T>): Promix<T[]>;
   all<T>(values: Iterable<T | PromiseLike<T>>): Promix<Awaited<T>[]>;
   all(values: Iterable<T | PromiseLike<T>>) {
-    return Promix.all(values, this.id, this.major + 1);
+    const x = Promix.all(values, this.id, this.version + 1);
+    // this.catch(x.rejected);
+
+    return x;
   }
 
   // create a derived promise with next major version
-  next<T>(executor: Executor<T>) {
+  next<T>(executor: Executor<T> = noop, version?: number) {
     return Promix.of<T>(
       (y, n) => {
         executor(y, n);
       },
       this.id,
-      this.major + 1,
+      version ?? this.version + 1,
     );
-  }
-
-  run<T>(executor: Executor<T>) {
-    return Promix.of<T>(executor, this.id, this.major + 1);
   }
 }
