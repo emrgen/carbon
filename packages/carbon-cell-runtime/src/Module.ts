@@ -1,7 +1,7 @@
+import { noop } from "lodash";
 import { SemVer } from "semver";
 import { Runtime } from "./Runtime";
 import { Variable, VariableId, VariableName } from "./Variable";
-import { RuntimeError } from "./x";
 
 // ModuleNameVersion is a string that represents a module name and version
 // e.g. "module@1" or "module@1.0" or "module@1.0.0"
@@ -25,23 +25,32 @@ export class Module {
     return new Module(runtime, id, name, version);
   }
 
-  constructor(runtime: Runtime, id: string, name: string, version: string) {
+  constructor(runtime: Runtime, uid: string, name: string, version: string) {
     this.runtime = runtime;
-    this.id = id;
+    this.id = uid;
     this.name = name;
     this.version = new SemVer(version);
   }
 
+  get uid() {
+    return `${this.name}@${this.version.toString()}-${this.id}`;
+  }
+
+  get graph() {
+    return this.runtime.graph;
+  }
+
+  // variable by id
+  variable(id: string) {
+    return this.variables.get(id);
+  }
+
   // create a new variable with the given definition
   // if the variable already exists, redefine it
-  define(id: string, name: string, inputs: string[], def: Function) {
-    if (this.variableByNames.has(id)) {
-      this.redefine(id, name, inputs, def);
-      return this.variableByNames.get(id);
-    }
-
-    if (this.variableByNames.has(name)) {
-      throw RuntimeError.of(`Variable ${name} defined more than once`);
+  define(id: string, name: string, dependencies: string[], def: Function) {
+    if (this.variables.has(id)) {
+      this.redefine(id, name, dependencies, def);
+      return this.variables.get(id);
     }
 
     // create a new variable with the given definition
@@ -49,68 +58,45 @@ export class Module {
       module: this,
       id,
       name,
-      inputs,
+      dependencies,
       definition: def,
+      version: this.graph.version + 1,
     });
 
     if (!this.variableByNames.has(name)) {
       this.variableByNames.set(name, []);
     }
 
+    // allow multiple variables with the same name
+    // we can throw an error during runtime if the variable is used in computation
     this.variableByNames.get(name)?.push(variable);
     this.variables.set(id, variable);
+
+    this.runtime.onCreate(variable);
 
     return variable;
   }
 
   // redefine a variable with the given definition
   // optionally change the name, inputs, or definition
-  redefine(id: string, name?: string, inputs?: string[], def?: Function) {
-    if (!name && !inputs && !def) {
-      return;
-    }
-
+  redefine(id: string, name: string = "", inputs: string[] = [], def: Function = noop) {
     const variable = this.variables.get(id);
     if (variable) {
-      if (!name) {
-        name = variable.name;
-      }
-
-      if (!inputs) {
-        inputs = variable.inputs.map((v) => v.name);
-      }
-
-      if (!def) {
-        def = variable.definition;
-      }
-
+      this.runtime.onRemove(variable);
+      variable.version = this.graph.version + 1;
       variable.redefine(name, inputs, def);
+      this.runtime.onCreate(variable);
     }
   }
 
-  // delete a variable by name or id
+  // delete a variable by id
   delete(id: string) {
-    {
-      const variable = this.variables.get(id);
-      if (variable) {
-        variable.delete({ module: true });
-        this.variableByNames.delete(id);
-        return;
-      }
+    const variable = this.variables.get(id);
+    if (variable) {
+      this.runtime.onRemove(variable);
+      variable.delete({ module: true });
+      this.variableByNames.delete(id);
+      return;
     }
-
-    {
-      const variable = this.variables.get(id);
-      if (variable) {
-        variable.delete({ module: true });
-        const variables = this.variableByNames.get(variable.name);
-        this.variableByNames.set(variable.name, variables?.filter((v) => v.id !== id) ?? []);
-      }
-    }
-  }
-
-  // variable by id
-  variable(id: string) {
-    return this.variables.get(id);
   }
 }

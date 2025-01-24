@@ -13,7 +13,7 @@ interface VariableProps {
   id: string;
   name: string;
   version: number;
-  inputs: string[];
+  dependencies: string[];
   definition: Function;
 }
 
@@ -24,8 +24,14 @@ export class Variable {
   version: number = 0;
 
   name: VariableName;
-  inputs: string[] = [];
+  dependencies: string[] = [];
   definition: Function;
+
+  // this has higher priority than the connection in the graph
+  // this are updated when the variable is updated, created or deleted
+  // runtime graph is updated based on these variables
+  inputs: Variable[] = [];
+  outputs: Variable[] = [];
 
   error: RuntimeError | null = null;
   value: any;
@@ -40,12 +46,16 @@ export class Variable {
     return new Variable(props);
   }
 
+  static randomName() {
+    return `unnamed_${randomString(10)}`;
+  }
+
   constructor(props: VariableProps) {
-    const { module, id, name, inputs, definition, version } = props;
+    const { module, id, name, dependencies, definition, version } = props;
     this.module = module;
     this.id = id;
     this.name = name;
-    this.inputs = inputs;
+    this.dependencies = dependencies;
     this.definition = definition;
     this.promise = Promix.default(id, version);
   }
@@ -58,10 +68,10 @@ export class Variable {
     return this.module.runtime;
   }
 
-  redefine(name: string, inputs: string[], definition: Function) {
+  redefine(name: string, dependencies: string[], definition: Function) {
     // if the name has changed, unlink from the outputs
     this.name = name;
-    this.inputs = inputs;
+    this.dependencies = dependencies;
     this.definition = definition;
   }
 
@@ -84,21 +94,33 @@ export class Variable {
   // compute the variable value from inputs
   // if the variable is a generator, run the generator once
   compute(inputs: Variable[]) {
+    console.log("computing:", this.id, "=>", this.key);
+
     if (this.generator !== noop) {
       return this.generate(this.generator);
     }
 
-    // make sure the variables have intended names
-    if (!inputs.every((input, i) => input.name === this.inputs[i])) {
-      return Promix.reject(RuntimeError.of("Input variable names do not match for " + this.key));
-    }
-
     // ensure all inputs are fulfilled
-    if (inputs.some((input) => input.error)) {
-      return Promix.reject(RuntimeError.of("Input variable has error for " + this.key));
+    const error = inputs.some((input) => input.error);
+    if (error) {
+      return Promix.resolve(error);
     }
 
-    const args = inputs.map((input) => input.value);
+    const inputMap = new Map(inputs.map((input) => [input.name, input]));
+    // make sure the input variables have matching names
+    const missing = inputs.find((input, i) => !inputMap.has(input.name));
+    if (missing) {
+      return Promix.resolve(RuntimeError.notDefined(missing.name));
+    }
+
+    // get the input variable values in order by name
+    const deps = this.dependencies.map((name) => inputMap.get(name)).filter(Boolean) as Variable[];
+    if (deps.length !== this.dependencies.length) {
+      return Promix.resolve(RuntimeError.of(`Variable ${this.name} has missing dependencies`));
+    }
+
+    // get the values of the input variables
+    const args = deps.map((input) => input.value);
     return Promix.resolve(this.definition(...args));
   }
 
@@ -117,6 +139,8 @@ export class Variable {
             this.generated = undefined;
           } else {
             this.generated = value;
+            // if the generator is not done, add it to the runtime for recomputation
+            this.runtime.generators.add(this);
             y(value);
           }
         });

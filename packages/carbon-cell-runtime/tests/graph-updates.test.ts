@@ -76,7 +76,7 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
   const roots: Promix<any>[] = G.topologicalRoots(dirty);
   const nodes = G.topological(dirty);
 
-  const order: Promix<any>[] = [];
+  const pending: Promix<any>[] = [];
 
   const calculate = (next, inputs) => {
     // compute the variable value from inputs
@@ -111,7 +111,7 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
 
         console.log("computed:", next.id, "=>", next.key);
       });
-      order.push(done);
+      pending.push(done);
     } else {
       console.log(
         node.id,
@@ -122,10 +122,10 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
         // console.log("found root", next.id, next.version);
         const done = next.then(() => Promix.all(inputs).then((ip) => calculate(next, ip)));
         // done
-        order.push(done);
+        pending.push(done);
       } else {
         const done = next.all(inputs).then((ip) => calculate(next, ip));
-        order.push(done);
+        pending.push(done);
       }
     }
 
@@ -140,7 +140,7 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
 
   return {
     roots: newRoots,
-    pending: order,
+    pending: pending,
   };
 }
 

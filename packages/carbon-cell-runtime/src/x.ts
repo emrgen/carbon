@@ -5,6 +5,10 @@ export class RuntimeError extends Error {
     return new RuntimeError(message);
   }
 
+  static notDefined(name: string) {
+    return new RuntimeError(`${name} is not defined`);
+  }
+
   constructor(message: string) {
     super(message);
     this.name = "RuntimeError";
@@ -14,11 +18,7 @@ export class RuntimeError extends Error {
 export const NEXT_VERSION_ERROR = new RuntimeError("calculating next version");
 
 export function generatorish(value) {
-  return (
-    value &&
-    typeof value.next === "function" &&
-    typeof value.return === "function"
-  );
+  return value && typeof value.next === "function" && typeof value.return === "function";
 }
 
 export const randomString = (length: number = 10) => {
