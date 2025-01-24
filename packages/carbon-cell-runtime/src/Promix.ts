@@ -1,19 +1,10 @@
 import { isObject, noop } from "lodash";
 import { With } from "./x";
 
-type Executor<T> = (
-  resolve: (value: T | PromiseLike<T>) => void,
-  reject: (reason?: any) => void,
-) => void;
+type Executor<T> = (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void;
 
-type OnFulfilled<T, TResult1> =
-  | ((value: T) => TResult1 | PromiseLike<TResult1>)
-  | undefined
-  | null;
-type OnRejected<TResult2> =
-  | ((reason: any) => TResult2 | PromiseLike<TResult2>)
-  | undefined
-  | null;
+type OnFulfilled<T, TResult1> = ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null;
+type OnRejected<TResult2> = ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null;
 
 export class PromiseVersion {
   static of(id: string, version = 0) {
@@ -44,6 +35,8 @@ type Unwrap<T extends any[]> = {
 };
 
 // Promix is a promise wrapper that allows you to resolve or reject the wrapped promise
+// it also adds id and version to the promise
+// Promix can be resolved or rejected with the promix object itself
 export class Promix<T = unknown> implements PromiseLike<T> {
   pid: PromiseVersion;
 
@@ -81,31 +74,17 @@ export class Promix<T = unknown> implements PromiseLike<T> {
     );
   }
 
-  static any<T extends readonly unknown[] | []>(
-    values: T,
-  ): Promix<Awaited<T[number]>>;
+  static any<T extends readonly unknown[] | []>(values: T): Promix<Awaited<T[number]>>;
   static any<T>(values: Iterable<T | PromiseLike<T>>): Promix<Awaited<T>> {
     return Promix.of((resolve, reject) => {
       Promise.any(Promix.mapToPromises(values)).then(resolve, reject);
     });
   }
 
-  static all<T extends any[]>(
-    values: [...T],
-    id?: string,
-    version?: number,
-  ): Promix<Unwrap<T>>;
+  static all<T extends any[]>(values: [...T], id?: string, version?: number): Promix<Unwrap<T>>;
   static all<T>(values: Set<T>): Promix<T[]>;
-  static all<T>(
-    values: Iterable<T | PromiseLike<T>>,
-    id?: string,
-    version?: number,
-  ): Promix<Awaited<T>[]>;
-  static all<T>(
-    values: Iterable<T | PromiseLike<T>>,
-    id?: string,
-    version?: number,
-  ): Promix<Awaited<T>[]> {
+  static all<T>(values: Iterable<T | PromiseLike<T>>, id?: string, version?: number): Promix<Awaited<T>[]>;
+  static all<T>(values: Iterable<T | PromiseLike<T>>, id?: string, version?: number): Promix<Awaited<T>[]> {
     return Promix.of(
       (resolve, reject) => {
         Promise.all(values).then(resolve, reject);
@@ -128,11 +107,7 @@ export class Promix<T = unknown> implements PromiseLike<T> {
     });
   }
 
-  static timeout<T>(
-    promise: PromiseLike<T>,
-    timeout: number,
-    message: string = "",
-  ) {
+  static timeout<T>(promise: PromiseLike<T>, timeout: number, message: string = "") {
     const expired = new Promise<string>((resolve, reject) => {
       setTimeout(() => {
         resolve(message);
@@ -291,7 +266,7 @@ export class Promix<T = unknown> implements PromiseLike<T> {
   finally(onfinally?: () => void) {
     return Promix.of<never>(
       (y, n) => {
-        this.promise.finally(() => {
+        this.promise.catch(n).finally(() => {
           // onfinally?.();
           if (onfinally) {
             y(undefined as never);
@@ -308,10 +283,7 @@ export class Promix<T = unknown> implements PromiseLike<T> {
   all<T>(values: Set<T>): Promix<T[]>;
   all<T>(values: Iterable<T | PromiseLike<T>>): Promix<Awaited<T>[]>;
   all(values: Iterable<T | PromiseLike<T>>) {
-    const x = Promix.all(values, this.id, this.version + 1);
-    // this.catch(x.rejected);
-
-    return x;
+    return Promix.all(values, this.id, this.version + 1);
   }
 
   // create a derived promise with next major version

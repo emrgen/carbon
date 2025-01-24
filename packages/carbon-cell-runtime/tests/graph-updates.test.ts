@@ -57,10 +57,6 @@ test("test unreachable nodes", async (t) => {
   const cn = G.node(c);
   cn?.fulfilled(RuntimeError.of("b is missing"));
 
-  // cn?.then((e) => {
-  //   console.log("rejected", e.toString());
-  // });
-
   await Promix.allSettled(roots5.pending);
   console.log("--------");
 

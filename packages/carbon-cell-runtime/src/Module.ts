@@ -11,12 +11,15 @@ export type ModuleNameVersion = string;
 export class Module {
   runtime: Runtime;
 
+  // global unique id of the module, auto generated at the runtime
   id: string;
+  // name of the module
   name: string;
+  // version of the module
   version: SemVer;
 
-  variableNames: Map<VariableName, Variable> = new Map();
-  variableIds: Map<VariableId, Variable> = new Map();
+  variables: Map<VariableId, Variable> = new Map();
+  variableByNames: Map<VariableName, Variable[]> = new Map();
 
   static create(runtime: Runtime, id: string, name: string, version: string) {
     return new Module(runtime, id, name, version);
@@ -32,12 +35,12 @@ export class Module {
   // create a new variable with the given definition
   // if the variable already exists, redefine it
   define(id: string, name: string, inputs: string[], def: Function) {
-    if (this.variableNames.has(id)) {
+    if (this.variableByNames.has(id)) {
       this.redefine(id, name, inputs, def);
-      return this.variableNames.get(id);
+      return this.variableByNames.get(id);
     }
 
-    if (this.variableNames.has(name)) {
+    if (this.variableByNames.has(name)) {
       throw RuntimeError.of(`Variable ${name} defined more than once`);
     }
 
@@ -50,8 +53,12 @@ export class Module {
       definition: def,
     });
 
-    this.variableNames.set(name, variable);
-    this.variableIds.set(id, variable);
+    if (!this.variableByNames.has(name)) {
+      this.variableByNames.set(name, []);
+    }
+
+    this.variableByNames.get(name)?.push(variable);
+    this.variables.set(id, variable);
 
     return variable;
   }
@@ -63,13 +70,8 @@ export class Module {
       return;
     }
 
-    const variable = this.variableNames.get(id);
-
+    const variable = this.variables.get(id);
     if (variable) {
-      if (name && variable.name !== name && this.variableNames.has(name)) {
-        throw RuntimeError.of(`Variable ${name} defined more than once`);
-      }
-
       if (!name) {
         name = variable.name;
       }
@@ -89,25 +91,26 @@ export class Module {
   // delete a variable by name or id
   delete(id: string) {
     {
-      const variable = this.variableIds.get(id);
+      const variable = this.variables.get(id);
       if (variable) {
         variable.delete({ module: true });
-        this.variableNames.delete(id);
+        this.variableByNames.delete(id);
         return;
       }
     }
 
     {
-      const variable = this.variableNames.get(id);
+      const variable = this.variables.get(id);
       if (variable) {
         variable.delete({ module: true });
-        this.variableNames.delete(variable.id);
+        const variables = this.variableByNames.get(variable.name);
+        this.variableByNames.set(variable.name, variables?.filter((v) => v.id !== id) ?? []);
       }
     }
   }
 
-  // variable by name or id
+  // variable by id
   variable(id: string) {
-    return this.variableNames.get(id) || this.variableIds.get(id);
+    return this.variables.get(id);
   }
 }
