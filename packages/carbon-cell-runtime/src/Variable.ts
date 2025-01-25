@@ -1,8 +1,8 @@
-import { noop } from "lodash";
-import { Cell } from "./Cell";
-import { Module } from "./Module";
-import { Promix } from "./Promix";
-import { generatorish, randomString, RuntimeError } from "./x";
+import {noop} from "lodash";
+import {Cell} from "./Cell";
+import {Module} from "./Module";
+import {Promix} from "./Promix";
+import {generatorish, randomString, RuntimeError} from "./x";
 
 export type VariableName = string;
 export type VariableId = string;
@@ -32,7 +32,7 @@ export class Variable {
 
   // if the variable is a generator
   generated: any = undefined;
-  generator: { next: Function; return: Function } = { next: noop, return: noop };
+  generator: { next: Function; return: Function } = {next: noop, return: noop};
   done: Promix<any> = noopPromix;
 
   static create(props: VariableProps) {
@@ -44,7 +44,7 @@ export class Variable {
   }
 
   constructor(props: VariableProps) {
-    const { module, cell } = props;
+    const {module, cell} = props;
     this.module = module;
     this.cell = cell;
     this.promise = Promix.default(this.id, this.version);
@@ -103,10 +103,12 @@ export class Variable {
     );
   }
 
-  import(modules: Module[]) {}
+  import(modules: Module[]) {
+  }
 
   // schedule an update waiting for the input promises to fulfilled if not already fulfilled
-  precompute(clock: number) {}
+  precompute(clock: number) {
+  }
 
   // compute the variable value from inputs
   // if the variable is a generator, run the generator once
@@ -165,15 +167,19 @@ export class Variable {
       return Promix.resolve(this.generated);
     }
 
-    return Promix.resolve(this.generator.next(this.generated)).then(({ value, done }) => {
+    return Promix.resolve(this.generator.next(this.generated)).then(({value, done}) => {
       if (done) {
-        this.done.fulfilled(this.generated);
-        return this.generated;
+        return Promise.resolve(value).then(v => {
+          this.done.fulfilled(v);
+          return this.generated
+        })
       } else {
-        this.generated = value;
-        // if the generator is not done, add it to the runtime for recomputation
-        this.runtime.generators.add(this);
-        return value;
+        return Promise.resolve(value).then(v => {
+          this.generated = v;
+          // if the generator is not done, add it to the runtime for recomputation
+          this.runtime.generators.add(this);
+          return v;
+        })
       }
     });
   }
@@ -187,15 +193,17 @@ export class Variable {
       this.generator = value;
       // run the generator once
       return Promix.of<any>((y, n) => {
-        return Promix.resolve(value.next(this.generated)).then(({ value, done }) => {
+        return Promix.resolve(value.next(this.generated)).then(({value, done}) => {
           if (done) {
             this.done.fulfilled(this.generated);
             this.generated = undefined;
           } else {
-            this.generated = value;
-            // if the generator is not done, add it to the runtime for recomputation
-            this.runtime.generators.add(this);
-            y(value);
+            Promise.resolve(value).then(v => {
+              this.generated = v;
+              // if the generator is not done, add it to the runtime for recomputation
+              this.runtime.generators.add(this);
+              y(value);
+            })
           }
         });
       });

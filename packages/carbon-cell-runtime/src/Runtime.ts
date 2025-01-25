@@ -238,6 +238,7 @@ export class Runtime extends EventEmitter {
   }
 
   generate() {
+    console.log(this.graph.outgoing)
     const { roots, pending, circular } = this.precompute(Array.from(this.generators));
     this.generators.clear();
     roots.forEach((v) => {
@@ -248,6 +249,8 @@ export class Runtime extends EventEmitter {
           v.promise.fulfilled(v);
         });
     });
+
+    console.log("pending", pending.map(p => p.id))
 
     this.promise.all(pending).then(() => {
       this.computing = false;

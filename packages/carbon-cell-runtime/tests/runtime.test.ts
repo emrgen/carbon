@@ -121,6 +121,16 @@ test("create a single variable", async (t) => {
 
   console.log("8---------------------------------------------------");
 
+  mod.define(Cell.create({
+    id: "b1",
+    name: "b",
+    code: "(a) => a + 10",
+    dependencies: ["a"],
+    definition: function(a) {
+      return a + 10
+    }
+  }))
+
   mod.define(
     Cell.create({
       id: "a1",
@@ -131,9 +141,13 @@ test("create a single variable", async (t) => {
         yield 1;
         yield 2;
         yield 3;
+        let i = 0
+        // while (true) {
+        //   yield Promises.delay(500, i++)
+        // }
       },
     }),
   );
 
-  await Promises.delay(100);
+  await Promises.delay(4000);
 });

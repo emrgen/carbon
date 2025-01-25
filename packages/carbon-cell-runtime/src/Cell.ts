@@ -10,7 +10,6 @@ interface CellProps {
   dependencies?: string[];
   definition?: Function;
 }
-
 export class Cell {
   id: string;
   name: string;
@@ -19,15 +18,16 @@ export class Cell {
   hash: string;
   dependencies: string[];
   definition: Function;
-
   static create(props: CellProps) {
     return new Cell(props);
   }
 
+  static parse() {}
+
   static undefinedName() {
     return `unnamed_${randomString(10)}`;
   }
-
+  
   constructor(props: CellProps) {
     const { id, name = Cell.undefinedName(), version = 0, code = "", definition = noop, dependencies = [] } = props;
     this.id = id;

@@ -71,6 +71,7 @@ export class Module {
 
     // console.log("define", id, name, variable.dependencies);
     this.connect(variable);
+    console.log(variable.id, variable.outputs.map(v => v.id))
 
     this.runtime.onCreate(variable);
 
@@ -136,6 +137,10 @@ export class Module {
       if (v.dependencies.includes(variable.name)) {
         v.inputs.push(variable);
         v.inputs = uniqBy(v.inputs, "id");
+
+        // conect the output
+        variable.outputs.push(v)
+        variable.outputs = uniqBy(variable.outputs, 'id')
       }
     });
   }
