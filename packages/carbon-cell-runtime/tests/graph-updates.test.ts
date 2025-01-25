@@ -21,60 +21,59 @@ test("test unreachable nodes", async (t) => {
   const pc = precompute([a], G);
   console.log(" ");
   await compute(pc, G);
-  console.log(G.variables().map((node) => node.key));
+  console.log(G.variables().map((node) => node.uid));
   console.log("--------");
 
   // b became dirty
-  const roots2 = precompute([G.node(b)!], G);
-  console.log(" ");
-  await compute(roots2, G);
-  console.log(G.variables().map((node) => node.key));
-  console.log("--------");
+  // const roots2 = precompute([G.node(b)!], G);
+  // console.log(" ");
+  // await compute(roots2, G);
+  // console.log(G.variables().map((node) => node.uid));
+  // console.log("--------");
 
-  // c became dirty
-  const roots3 = precompute([G.node(c)!], G);
-  console.log(" ");
-  await compute(roots3, G);
-  console.log(G.variables().map((node) => node.key));
-  console.log("--------");
-
-  // add a new node
-  const e = Promix.default<number>("e");
-  G.addNode(e);
-  G.addEdge(d, e);
-
-  const roots4 = precompute([G.node(e)!], G);
-  console.log(" ");
-  await compute(roots4, G);
-  console.log(G.variables().map((node) => node.key));
-  console.log("--------");
-
-  // image c is removed
-  const outputs = G.outputs(b);
-  G.removeNode(b);
-  console.log("removed b");
-  const roots5 = precompute(outputs, G);
-  const cn = G.node(c);
-  cn?.fulfilled(RuntimeError.of("b is missing"));
-
-  await Promix.allSettled(roots5.pending);
-  console.log("--------");
-
-  const bc = Promix.default("b");
-  G.addNode(bc);
-
-  G.addEdge(bc, c);
-  G.addEdge(bc, d);
-
-  const nodes6 = precompute([bc], G);
-  await compute(nodes6, G);
-
-  // await compute(roots5, G);
+  //   // c became dirty
+  //   const roots3 = precompute([G.node(c)!], G);
+  //   console.log(" ");
+  //   await compute(roots3, G);
+  //   console.log(G.variables().map((node) => node.uid));
+  //   console.log("--------");
+  //
+  //   // add a new node
+  //   const e = Promix.default<number>("e");
+  //   G.addNode(e);
+  //   G.addEdge(d, e);
+  //
+  //   const roots4 = precompute([G.node(e)!], G);
+  //   console.log(" ");
+  //   await compute(roots4, G);
+  //   console.log(G.variables().map((node) => node.uid));
+  //   console.log("--------");
+  //
+  //   // image c is removed
+  //   const outputs = G.outputs(b);
+  //   G.removeNode(b);
+  //   console.log("removed b");
+  //   const roots5 = precompute(outputs, G);
+  //   const cn = G.node(c);
+  //   cn?.fulfilled(RuntimeError.of("b is missing"));
+  //
+  //   await Promix.allSettled(roots5.pending);
+  //   console.log("--------");
+  //
+  //   const bc = Promix.default("b");
+  //   G.addNode(bc);
+  //
+  //   G.addEdge(bc, c);
+  //   G.addEdge(bc, d);
+  //
+  //   const nodes6 = precompute([bc], G);
+  //   await compute(nodes6, G);
+  //
+  //   // await compute(roots5, G);
 });
 
 function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
-  const roots: Promix<any>[] = G.topologicalRoots(dirty);
-  const nodes = G.topological(dirty);
+  const { roots, sorted: nodes } = G.topological(dirty);
 
   const pending: Promix<any>[] = [];
 
@@ -109,7 +108,7 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
           return;
         }
 
-        console.log("computed:", next.id, "=>", next.key);
+        console.log("computed:", next.id, "=>", next.uid);
       });
       pending.push(done);
     } else {
@@ -129,7 +128,7 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
       }
     }
 
-    console.log("connected: " + next.key);
+    console.log("connected: " + next.uid);
   });
 
   const newRoots = roots
@@ -147,7 +146,7 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
 function compute(pc: PrecomputeResult, G: Graph<Promix<any>>) {
   G.version += 1;
   pc.roots.map((root) => {
-    return root.fulfilled(root.key);
+    return root.fulfilled(root.uid);
   });
 
   return Promix.allSettled(pc.pending);

@@ -17,11 +17,11 @@ test("test promised", async (t) => {
   const b = a.then((x) => x * 2);
   expect(await b).toBe(84);
 
-  expect(b.key).toBe("x#0");
+  expect(b.uid).toBe("x#0");
 
   const c = a.then((x) => x + 1);
 
-  expect(c.key).toBe("x#0");
+  expect(c.uid).toBe("x#0");
 
   expect(await c).toBe(43);
 
@@ -34,21 +34,13 @@ test("test Promix.any", async (t) => {
   const an = Promise.any([Promise.reject(1), Promise.resolve(2)]);
   expect(await an).toBe(2);
 
-  const any = Promix.any([
-    Promix.reject(1),
-    Promix.resolve(2),
-    Promix.resolve("3"),
-  ]);
+  const any = Promix.any([Promix.reject(1), Promix.resolve(2), Promix.resolve("3")]);
 
   expect(await any).toBe(2);
 });
 
 test("test Promix.all", async (t) => {
-  const all = Promix.all([
-    Promix.resolve(1),
-    Promix.resolve(2),
-    Promix.resolve(3),
-  ]);
+  const all = Promix.all([Promix.resolve(1), Promix.resolve(2), Promix.resolve(3)]);
 
   expect(await all).toEqual([1, 2, 3]);
 });
@@ -63,7 +55,7 @@ test("test next promise", async (t) => {
   const p2 = p.then((x) => x * 2);
 
   expect(await p2).toBe(20);
-  expect(p2.key).toBe("x#0");
+  expect(p2.uid).toBe("x#0");
 
   const p3 = p2.next((y, n) => {
     y(30);

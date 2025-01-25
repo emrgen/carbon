@@ -9,6 +9,10 @@ export class RuntimeError extends Error {
     return new RuntimeError(`${name} is not defined`);
   }
 
+  static circularDependency(name: string) {
+    return new RuntimeError(`circular dependency detected: ${name}`);
+  }
+
   constructor(message: string) {
     super(message);
     this.name = "RuntimeError";

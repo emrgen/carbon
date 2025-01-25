@@ -1,5 +1,6 @@
-import { noop } from "lodash";
+import { uniqBy } from "lodash";
 import { SemVer } from "semver";
+import { Cell } from "./Cell";
 import { Runtime } from "./Runtime";
 import { Variable, VariableId, VariableName } from "./Variable";
 
@@ -47,20 +48,16 @@ export class Module {
 
   // create a new variable with the given definition
   // if the variable already exists, redefine it
-  define(id: string, name: string, dependencies: string[], def: Function) {
+  define(cell: Cell) {
+    const { id, name } = cell;
     if (this.variables.has(id)) {
-      this.redefine(id, name, dependencies, def);
-      return this.variables.get(id);
+      return this.redefine(cell);
     }
 
     // create a new variable with the given definition
     const variable = Variable.create({
       module: this,
-      id,
-      name,
-      dependencies,
-      definition: def,
-      version: this.graph.version + 1,
+      cell,
     });
 
     if (!this.variableByNames.has(name)) {
@@ -72,6 +69,9 @@ export class Module {
     this.variableByNames.get(name)?.push(variable);
     this.variables.set(id, variable);
 
+    // console.log("define", id, name, variable.dependencies);
+    this.connect(variable);
+
     this.runtime.onCreate(variable);
 
     return variable;
@@ -79,14 +79,30 @@ export class Module {
 
   // redefine a variable with the given definition
   // optionally change the name, inputs, or definition
-  redefine(id: string, name: string = "", inputs: string[] = [], def: Function = noop) {
-    const variable = this.variables.get(id);
-    if (variable) {
-      this.runtime.onRemove(variable);
-      variable.version = this.graph.version + 1;
-      variable.redefine(name, inputs, def);
-      this.runtime.onCreate(variable);
+  redefine(cell: Cell) {
+    const variable = this.variables.get(cell.id);
+    if (!variable) {
+      return this.define(cell);
     }
+
+    // if the cell has not changed, we just need to recompute
+    if (variable.cell.eq(cell)) {
+      console.log("redefine", cell.id, cell.name, "no change");
+      variable.version += 1;
+      this.runtime.dirty.add(variable);
+      return variable;
+    }
+
+    this.runtime.onRemove(variable);
+    this.disconnect(variable);
+
+    variable.version = this.graph.version + 1;
+    variable.redefine(cell);
+
+    this.connect(variable);
+    this.runtime.onCreate(variable);
+
+    return variable;
   }
 
   // delete a variable by id
@@ -94,9 +110,35 @@ export class Module {
     const variable = this.variables.get(id);
     if (variable) {
       this.runtime.onRemove(variable);
+      this.disconnect(variable);
       variable.delete({ module: true });
       this.variableByNames.delete(id);
-      return;
     }
   }
+
+  // connect the variable with the module local variables
+  private connect(variable: Variable) {
+    // console.log(variable.name, variable.dependencies);
+    variable.inputs = variable.dependencies
+      .map((name) => {
+        return this.variableByNames.get(name);
+      })
+      .filter(Boolean)
+      .flat() as Variable[];
+
+    variable.inputs.forEach((v) => {
+      v.outputs.push(variable);
+      v.outputs = uniqBy(v.outputs, "id");
+    });
+
+    this.variables.forEach((v) => {
+      if (v.id === variable.id) return;
+      if (v.dependencies.includes(variable.name)) {
+        v.inputs.push(variable);
+        v.inputs = uniqBy(v.inputs, "id");
+      }
+    });
+  }
+
+  private disconnect(variable: Variable) {}
 }

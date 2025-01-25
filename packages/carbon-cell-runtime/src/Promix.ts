@@ -65,7 +65,7 @@ export class Promix<T = unknown> implements PromiseLike<T> {
   }
 
   static reject<T>(error: T, id?: string, version?: number) {
-    return new Promix<T>(
+    return new Promix<never>(
       (_, reject) => {
         reject?.(error);
       },
@@ -88,6 +88,9 @@ export class Promix<T = unknown> implements PromiseLike<T> {
     return Promix.of(
       (resolve, reject) => {
         Promise.all(values).then(resolve, reject);
+        // .catch((a) => {
+        //   console.log("xxxxxxxxxxxxY", a);
+        // });
       },
       id,
       version,
@@ -95,8 +98,8 @@ export class Promix<T = unknown> implements PromiseLike<T> {
   }
 
   static allSettled(values: Array<PromiseLike<any>>) {
-    return Promix.of((resolve) => {
-      Promise.allSettled(Promix.mapToPromises(values)).then(resolve);
+    return Promix.of((resolve, reject) => {
+      Promise.allSettled(Promix.mapToPromises(values)).then(resolve).catch(reject);
     });
   }
 
@@ -166,7 +169,7 @@ export class Promix<T = unknown> implements PromiseLike<T> {
     return value instanceof Promix;
   }
 
-  get key() {
+  get uid() {
     return this.pid.key;
   }
 
@@ -288,12 +291,6 @@ export class Promix<T = unknown> implements PromiseLike<T> {
 
   // create a derived promise with next major version
   next<T>(executor: Executor<T> = noop, version?: number) {
-    return Promix.of<T>(
-      (y, n) => {
-        executor(y, n);
-      },
-      this.id,
-      version ?? this.version + 1,
-    );
+    return Promix.of<T>(executor, this.id, version ?? this.version + 1);
   }
 }
