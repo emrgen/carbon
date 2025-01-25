@@ -51,7 +51,8 @@ export class Variable {
 
     this.fulfilled = this.fulfilled.bind(this);
     this.rejected = this.rejected.bind(this);
-    this.generate = this.generate.bind(this);
+    this.compute = this.compute.bind(this);
+    this.generateFirst = this.generateFirst.bind(this);
   }
 
   get id() {
@@ -116,20 +117,20 @@ export class Variable {
     console.log("computing:", this.id, "=>", this.cell.code);
 
     if (this.generator.return !== noop) {
-      this.done.fulfilled(this.generated);
+      return this.done.fulfilled(this.generated);
     }
 
     // ensure all inputs are fulfilled
     const error = inputs.find((input) => input.error);
     if (error) {
-      return Promix.reject(error.error).catch(this.rejected);
+      return Promix.reject(error.error, this.id, this.version).catch(this.rejected);
     }
 
     const inputMap = new Map(inputs.map((input) => [input.name, input]));
     // make sure the input variables have matching names
     const missing = this.dependencies.find((name, i) => !inputMap.has(name));
     if (missing) {
-      return Promix.reject(RuntimeError.notDefined(missing)).catch(this.rejected);
+      return Promix.reject(RuntimeError.notDefined(missing), this.id, this.version)//.catch(this.rejected);
     }
 
     // get the input variable values in order by name
@@ -140,10 +141,9 @@ export class Variable {
 
     // get the values of the input variables
     const args = deps.map((input) => input.value);
-    return Promix.resolve(this.cell.definition(...args))
-      .catch(this.rejected)
-      .then(this.generate)
-      .then(this.fulfilled);
+
+    return Promise.resolve(this.cell.definition(...args))
+    // .then(this.generateFirst, this.rejected).catch(c => console.log(c))
   }
 
   // mark the variable as rejected with an error
@@ -151,6 +151,8 @@ export class Variable {
     this.error = error;
     this.value = undefined;
     this.runtime.emit("rejected", this.cell, error.toString());
+    this.promise.fulfilled(this)
+    return this
   }
 
   // mark the variable as fulfilled with a value
@@ -158,15 +160,35 @@ export class Variable {
     this.value = value;
     this.error = undefined;
     this.runtime.emit("fulfilled", this.cell, value);
-    return value;
+    this.promise.fulfilled(this)
+    return this;
   }
 
   // run the generator once and save the value at the generated field
+
+
+  // if value is a generator, run the generator once
+  generateFirst(value: any) {
+    if (generatorish(value)) {
+      this.done = Promix.default(this.id, this.version).then(() => {
+        value.return();
+      });
+
+      this.generator = value;
+      return this.generate()
+    }
+
+    return Promix.resolve(value);
+  }
+
   generateNext() {
     if (this.done.isFulfilled) {
       return Promix.resolve(this.generated);
     }
+    return this.generate()
+  }
 
+  generate() {
     return Promix.resolve(this.generator.next(this.generated)).then(({value, done}) => {
       if (done) {
         return Promise.resolve(value).then(v => {
@@ -182,33 +204,5 @@ export class Variable {
         })
       }
     });
-  }
-
-  generate(value: any) {
-    if (generatorish(value)) {
-      this.done = Promix.default(this.id, this.version).then(() => {
-        value.return();
-      });
-
-      this.generator = value;
-      // run the generator once
-      return Promix.of<any>((y, n) => {
-        return Promix.resolve(value.next(this.generated)).then(({value, done}) => {
-          if (done) {
-            this.done.fulfilled(this.generated);
-            this.generated = undefined;
-          } else {
-            Promise.resolve(value).then(v => {
-              this.generated = v;
-              // if the generator is not done, add it to the runtime for recomputation
-              this.runtime.generators.add(this);
-              y(value);
-            })
-          }
-        });
-      });
-    }
-
-    return Promix.resolve(value);
   }
 }

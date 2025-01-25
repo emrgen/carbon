@@ -87,10 +87,7 @@ export class Promix<T = unknown> implements PromiseLike<T> {
   static all<T>(values: Iterable<T | PromiseLike<T>>, id?: string, version?: number): Promix<Awaited<T>[]> {
     return Promix.of(
       (resolve, reject) => {
-        Promise.all(values).then(resolve, reject);
-        // .catch((a) => {
-        //   console.log("xxxxxxxxxxxxY", a);
-        // });
+        Promise.all(values).catch(reject).then(resolve)
       },
       id,
       version,

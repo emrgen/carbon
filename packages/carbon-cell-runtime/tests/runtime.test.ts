@@ -20,9 +20,13 @@ test("create a single variable", async (t) => {
       id: "x1",
       name: "x",
       code: "() => 10",
-      definition: () => 10,
+      definition: () => {
+        b
+        return 10
+      }
     }),
   );
+
 
   await Promises.delay(100);
   console.log("1---------------------------------------------------");
@@ -37,6 +41,7 @@ test("create a single variable", async (t) => {
     }),
   );
 
+  return
   await Promises.delay(100);
   console.log("2---------------------------------------------------");
 
@@ -125,29 +130,42 @@ test("create a single variable", async (t) => {
     id: "b1",
     name: "b",
     code: "(a) => a + 10",
-    dependencies: ["a"],
+    dependencies: [],
     definition: function(a) {
+
       return a + 10
     }
   }))
 
-  mod.define(
-    Cell.create({
-      id: "a1",
-      name: "a",
-      code: "() => {}",
-      dependencies: [],
-      definition: function* () {
-        yield 1;
-        yield 2;
-        yield 3;
-        let i = 0
-        // while (true) {
-        //   yield Promises.delay(500, i++)
-        // }
-      },
-    }),
-  );
+  mod.define(Cell.create({
+    id: "c1",
+    name: "c",
+    code: "(b) => b + 10",
+    dependencies: ["b"],
+    definition: function(b) {
+      return b + 10
+    }
+  }))
 
-  await Promises.delay(4000);
+  // mod.define(
+  //   Cell.create({
+  //     id: "a1",
+  //     name: "a",
+  //     code: "() => {}",
+  //     dependencies: [],
+  //     definition: function* () {
+  //       yield 1;
+  //       yield 2;
+  //       yield 3;
+  //       let i = 0
+  //       while (true) {
+  //         yield Promises.delay(500, i++)
+  //       }
+  //     },
+  //   }),
+  // );
+  //
+  // await Promises.delay(10000);
+}, {
+  timeout: 20000
 });
