@@ -1,14 +1,21 @@
-import {EventEmitter} from "events";
-import {find, noop} from "lodash";
-import {SemVer} from "semver";
-import {Graph} from "./Graph";
-import {Module, ModuleNameVersion} from "./Module";
-import {Promises} from "./Promises";
-import {Promix} from "./Promix";
-import {Variable, VariableName} from "./Variable";
-import {RuntimeError} from "./x";
+import { EventEmitter } from "events";
+import { entries, find, noop } from "lodash";
+import { SemVer } from "semver";
+import { Cell } from "./Cell";
+import { Graph } from "./Graph";
+import { Module, ModuleNameVersion, ModuleVariableId, ModuleVariableName } from "./Module";
+import { Promises } from "./Promises";
+import { Promix } from "./Promix";
+import { Variable, VariableName } from "./Variable";
+import { RuntimeError } from "./x";
 
-// Think a whole notebook as a runtime
+interface Builtins {
+  [name: string]: any;
+}
+
+const LOG = 0;
+
+// Think a whole notebook as a runtime.
 export class Runtime extends EventEmitter {
   id: string;
   version: SemVer;
@@ -16,18 +23,16 @@ export class Runtime extends EventEmitter {
   // each variable refresh updates the version
   clock: number = 0;
 
+  graph: Graph<Variable>;
+
   // save the module using moduleName@version as key
   modules: Map<ModuleNameVersion, Module> = new Map();
 
-  graph: Graph<Variable>;
-
-  // multiple modules may have variable with same name
-  // variable defined later will overwrite the previous one
-  // deleting a variable will reveal the previous one
-  variables: Map<VariableName, Variable> = new Map();
+  // one module may have variable with same name
+  variables: Map<ModuleVariableId, Variable> = new Map();
 
   // generated from variables map
-  variablesByName: Map<string, Variable[]> = new Map();
+  moduleVariables: Map<ModuleVariableName, Variable[]> = new Map();
 
   created: Set<Variable> = new Set();
 
@@ -37,19 +42,45 @@ export class Runtime extends EventEmitter {
   // generators that are dirty and need to be recomputed
   generators: Set<Variable> = new Set();
 
+  builtin: Module;
+  builtinVariables: Map<VariableName, Variable> = new Map();
+
   computing: boolean = false;
 
   promise: Promix<any> = Promix.default("runtime");
 
-  static create(id: string, version: string) {
-    return new Runtime(id, version);
+  static create(id: string, version: string, builtins?: Builtins) {
+    return new Runtime(id, version, builtins);
   }
 
-  constructor(id: string, version: string) {
+  constructor(id: string, version: string, builtins: Builtins = {}) {
     super();
     this.id = id;
     this.version = new SemVer(version);
     this.graph = new Graph();
+
+    const mod = Module.create(this, "mod:builtinId", "mod:builtinName", "0.0.1");
+
+    // create builtins variables
+    entries(builtins).forEach(([name, value]) => {
+      const cell = Cell.create({
+        id: "builtin/" + name,
+        name,
+        code: `() => ${value}`,
+        dependencies: [],
+        definition: () => value,
+        builtin: true,
+      });
+
+      const variable = mod.define(cell);
+      this.builtinVariables.set(name, variable);
+    });
+
+    this.builtin = mod;
+  }
+
+  variable(id: string) {
+    return this.variables.get(id);
   }
 
   // create a new module with the given name and version
@@ -62,16 +93,20 @@ export class Runtime extends EventEmitter {
     }
 
     const mod = Module.create(this, id, name, version);
-    this.modules.set(id, mod);
+
+    // import the builtins from the runtime
+    this.builtinVariables.forEach((variable) => {
+      mod.import(variable.cell.name, variable.cell.name, this.builtin);
+    });
 
     return mod;
   }
 
   onCreate(variable: Variable) {
-    this.variables.set(variable.name, variable);
+    this.variables.set(variable.id, variable);
     this.created.add(variable);
 
-    console.log("=>", variable.id);
+    LOG && console.log("=>", variable.id);
     this.graph.addNode(variable);
 
     variable.inputs.forEach((input) => {
@@ -100,8 +135,7 @@ export class Runtime extends EventEmitter {
     if (this.dirty.size === 0 && this.created.size === 0) {
       return;
     }
-
-    console.log(this.computing)
+    LOG && console.log(this.computing);
     if (this.computing) {
       this.promise = this.promise.then(() => {
         this.recompute();
@@ -109,14 +143,15 @@ export class Runtime extends EventEmitter {
       return;
     }
 
-    console.log("----------------\n> recomputing\n----------------");
+    LOG && console.log("----------------\n> recomputing\n----------------");
 
-    console.log(
-      "created:",
-      Array.from(this.created).map((v) => v.uid),
-      "dirty",
-      Array.from(this.dirty).map((v) => v.uid),
-    );
+    LOG &&
+      console.log(
+        "created:",
+        Array.from(this.created).map((v) => v.uid),
+        "dirty",
+        Array.from(this.dirty).map((v) => v.uid),
+      );
 
     // add the created variables to the dirty set
     this.created.forEach((variable) => {
@@ -124,27 +159,26 @@ export class Runtime extends EventEmitter {
     });
     this.created.clear();
 
-    const {roots, pending, circular} = this.precompute(Array.from(this.dirty));
+    const { roots, pending, sorted, circular } = this.precompute(Array.from(this.dirty));
     this.dirty.clear();
 
-    console.log(
-      "roots",
-      roots.map((v) => v.id),
-      "pending",
-      pending.map((v) => v.id),
-      "circular",
-      circular.map((v) => v.id),
-    );
+    LOG &&
+      console.log(
+        "roots",
+        roots.map((v) => v.id),
+        "pending",
+        pending.map((v) => v.id),
+        "circular",
+        circular.map((v) => v.id),
+      );
 
-    this.compute(roots, pending, circular);
+    this.compute(roots, sorted, circular, pending);
   }
 
   // connect the dirty variables and find out the roots
   precompute(dirty: Variable[]) {
-    console.log("----------------\n> precomputing\n----------------");
-    this.computing = true;
-
-    const {roots, sorted, circular} = this.graph.topological(dirty);
+    LOG && console.log("----------------\n> precomputing\n----------------");
+    const { roots, sorted, circular } = this.graph.topological(dirty);
 
     this.dirty.clear();
 
@@ -157,8 +191,10 @@ export class Runtime extends EventEmitter {
     // connect the nodes with the inputs
     // NOTE: computation is not done here
     sorted.forEach((node) => {
-      node.promise = node.promise.next(noop)
-      // node.promise.catch(node.rejected)
+      if (node.promise.isPending) {
+        node.rejected(RuntimeError.recalculating(node.name), node.promise.version);
+      }
+      node.promise = node.promise.next(noop);
 
       if (isRoot(node)) {
         pending.push(node.promise);
@@ -166,106 +202,132 @@ export class Runtime extends EventEmitter {
       }
 
       const inputs = this.graph.inputs(node).map((input) => input.promise);
-      console.log(
-        node.id,
-        this.graph.inputs(node).map((n) => n.id),
-      );
       // console.log("before", node.id, node.promise.id);
       // console.log("after", node.id, node.promise.id);
 
       // const fulfilled = (value) => {
       //   return node.promise.fulfilled(node);
       // };
-      const done = node.promise
-        .all(inputs)//.catch(e => console.log(e))
-        .then((inputs) => {
-          console.log(inputs)
-          return node.compute(inputs)
-        })
-      // .then(node.fulfilled, node.rejected);
+      const done = node.promise.all(inputs).then((v) => {
+        node.compute(v, node.promise.version);
+      });
       pending.push(done);
 
-      console.log(
-        "connected",
-        node.id,
-        "<-",
-        inputs.map((input) => input.id),
-      );
+      LOG &&
+        console.log(
+          "connected:",
+          node.id,
+          "<-",
+          inputs.map((input) => input.id),
+        );
     });
+
+    // pending.forEach((p) => {
+    //   const v = this.variable(p.id);
+    //   if (!v) return;
+    //   v.promise = p;
+    // });
 
     // then connect the dirty variables
     return {
       roots,
       pending,
+      sorted,
       circular,
     };
   }
 
   // compute the roots
-  compute(roots: Variable[], pending: Promix<any>[], circular: Variable[]) {
-    console.log("----------------\n> compute\n----------------");
+  compute(roots: Variable[], sorted: Variable[], circular: Variable[], pending: Promix<any>[]) {
+    LOG && console.log("----------------\n> compute\n----------------");
     this.computing = true;
+
+    sorted.forEach((p) => p.pending());
 
     // if there are circular dependencies, mark them with error
     circular.forEach((variable) => {
-      console.log("circular", variable.id);
-      variable.rejected(RuntimeError.circularDependency(variable.id));
-      variable.promise.rejected(variable.error);
+      LOG && console.log("circular", variable.id);
+      variable.rejected(RuntimeError.circularDependency(variable.name), variable.promise.version);
+      // console.log("circular", variable.error);
+      // variable.promise.rejected(variable.error);
+    });
+
+    // find conflicting names
+    const names = sorted.reduce((acc, v) => {
+      if (!acc.has(v.name)) {
+        acc.set(v.name, []);
+      }
+
+      acc.get(v.name)!.push(v);
+      return acc;
+    }, new Map<string, Variable[]>());
+
+    // if there are conflicting names, mark them with error
+    names.forEach((vs) => {
+      if (vs.length > 1) {
+        vs.forEach((v) => {
+          v.rejected(RuntimeError.duplicateDefinition(v.cell.name), v.promise.version);
+        });
+        roots.splice(roots.indexOf(vs[0]), 1);
+      }
     });
 
     // fulfill the roots with the computed inputs, if no
     roots.forEach((root) => {
-      console.log("root", root.id);
+      LOG && console.log("root", root.id);
       const inputs = this.graph.inputs(root).map((input) => input.promise);
-      Promise.all(inputs)
-        .then(x => {
-          const r = root.compute(x)
-          console.log('root computed', r)
-          return r
-        }).then(x =>{
-        console.log('before fullfill', x)
-          return x
-      }).then(v => root.fulfilled, root.rejected)
+      Promise.all(inputs).then((v) => root.compute(v, root.promise.version));
     });
 
-    console.log('pending', pending.map(p => p.id))
-    Promise.all(pending).catch(console.log)
-    this.promise = Promise.all(pending).catch(a => console.log('XXX')).then(() => {
-      this.computing = false;
+    // this will allow next recompute to begin even before the current one is finished
+    this.computing = false;
+
+    LOG &&
+      console.log(
+        "pending",
+        pending.map((p) => p.id),
+      );
+
+    this.promise = Promix.all(pending).then(() => {
       this.postcompute();
-    }).catch(a => {
-      console.log('xxx')
-    })
+    });
   }
 
   // if there were generators, run them
   postcompute() {
     Promises.delay(0).then(() => {
-      console.log("----------------\n> postcompute\n----------------");
+      LOG && console.log("----------------\n> postcompute\n----------------");
       if (this.generators.size) {
-        console.log("running generators");
-        // this.generate();
+        LOG && console.log("running generators");
+        this.generate();
         // Promises.delay(0).then(() => this.recompute());
       }
     });
   }
 
   generate() {
-    console.log(this.graph.outgoing)
-    const {roots, pending, circular} = this.precompute(Array.from(this.generators));
+    LOG && console.log("----------------\n> generate\n----------------");
+    LOG &&
+      console.log(
+        "generators",
+        Array.from(this.generators).map((v) => v.id),
+      );
+    const { roots, pending, circular } = this.precompute(Array.from(this.generators));
     this.generators.clear();
+
+    this.computing = true;
     roots.forEach((variable) => {
-      variable
-        .generateNext()
-        .then(variable.fulfilled)
+      variable.generateNext();
     });
 
     // console.log("pending", pending.map(p => p.id))
 
-    this.promise.all(pending).then(() => {
-      this.computing = false;
-      this.postcompute();
-    });
+    this.computing = false;
+    this.promise = this.promise.then(() =>
+      Promix.all(pending).then(() => {
+        this.postcompute();
+      }),
+    );
 
     // const {} = this.compute(roots, sorted, circular);
   }

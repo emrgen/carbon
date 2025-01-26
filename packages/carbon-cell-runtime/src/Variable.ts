@@ -1,13 +1,15 @@
-import {noop} from "lodash";
-import {Cell} from "./Cell";
-import {Module} from "./Module";
-import {Promix} from "./Promix";
-import {generatorish, randomString, RuntimeError} from "./x";
+import { noop } from "lodash";
+import { Cell } from "./Cell";
+import { Module, ModuleVariableId, ModuleVariableName } from "./Module";
+import { Promix } from "./Promix";
+import { generatorish, randomString, RuntimeError } from "./x";
 
 export type VariableName = string;
 export type VariableId = string;
 
 const noopPromix = Promix.default("noop");
+
+const LOG = 0;
 
 interface VariableProps {
   module: Module;
@@ -32,8 +34,9 @@ export class Variable {
 
   // if the variable is a generator
   generated: any = undefined;
-  generator: { next: Function; return: Function } = {next: noop, return: noop};
+  generator: { next: Function; return: Function } = { next: noop, return: noop };
   done: Promix<any> = noopPromix;
+  fulfilledVersion: number = 0;
 
   static create(props: VariableProps) {
     return new Variable(props);
@@ -43,10 +46,19 @@ export class Variable {
     return `unnamed_${randomString(10)}`;
   }
 
+  static id(moduleId: string, variableId: string): ModuleVariableId {
+    return `${moduleId}/${variableId}`;
+  }
+
+  static fullName(moduleId: string, variableName: string): ModuleVariableName {
+    return `${moduleId}:${variableName}`;
+  }
+
   constructor(props: VariableProps) {
-    const {module, cell} = props;
+    const { module, cell } = props;
     this.module = module;
-    this.cell = cell;
+    this.cell = cell.with(module);
+
     this.promise = Promix.default(this.id, this.version);
 
     this.fulfilled = this.fulfilled.bind(this);
@@ -56,7 +68,7 @@ export class Variable {
   }
 
   get id() {
-    return this.cell.id;
+    return Variable.id(this.module.id, this.cell.id);
   }
 
   get version() {
@@ -68,15 +80,19 @@ export class Variable {
   }
 
   get name() {
-    return this.cell.name;
+    return Variable.fullName(this.module.id, this.cell.name);
   }
 
   get uid() {
-    return `${this.module.id}/${this.name}@${this.version}`;
+    return `${this.name}@${this.version}`;
   }
 
   get dependencies() {
     return this.cell.dependencies;
+  }
+
+  get builtin() {
+    return this.cell.builtin;
   }
 
   get runtime() {
@@ -84,7 +100,7 @@ export class Variable {
   }
 
   redefine(cell: Cell) {
-    this.cell = cell;
+    this.cell = cell.with(this.module);
   }
 
   // break all links before leaving
@@ -104,21 +120,22 @@ export class Variable {
     );
   }
 
-  import(modules: Module[]) {
-  }
+  import(modules: Module[]) {}
 
   // schedule an update waiting for the input promises to fulfilled if not already fulfilled
-  precompute(clock: number) {
-  }
+  precompute(clock: number) {}
 
   // compute the variable value from inputs
   // if the variable is a generator, run the generator once
-  compute(inputs: Variable[]) {
-    console.log("computing:", this.id, "=>", this.cell.code);
+  compute(inputs: Variable[], version: number) {
+    LOG && console.log("computing:", this.id, "=>", this.cell.code);
 
-    if (this.generator.return !== noop) {
-      return this.done.fulfilled(this.generated);
-    }
+    // if (inputs.length) {
+    //   console.log(
+    //     "deps",
+    //     inputs.map((v) => v.value ?? v.error?.toString()),
+    //   );
+    // }
 
     // ensure all inputs are fulfilled
     const error = inputs.find((input) => input.error);
@@ -127,45 +144,77 @@ export class Variable {
     }
 
     const inputMap = new Map(inputs.map((input) => [input.name, input]));
+    // console.log(inputs, this.cell.dependencies);
     // make sure the input variables have matching names
     const missing = this.dependencies.find((name, i) => !inputMap.has(name));
     if (missing) {
-      return Promix.reject(RuntimeError.notDefined(missing), this.id, this.version)//.catch(this.rejected);
+      return Promix.reject(RuntimeError.notDefined(missing.split(":")[1]), this.id, this.version).catch(this.rejected);
     }
 
     // get the input variable values in order by name
     const deps = this.dependencies.map((name) => inputMap.get(name)).filter(Boolean) as Variable[];
     if (deps.length !== this.dependencies.length) {
-      return Promix.reject(RuntimeError.of(`Variable ${this.name} has missing dependencies`));
+      return Promix.reject(RuntimeError.of(`Variable ${this.cell.name} has missing dependencies`));
     }
 
     // get the values of the input variables
     const args = deps.map((input) => input.value);
 
-    return Promise.resolve(this.cell.definition(...args))
-    // .then(this.generateFirst, this.rejected).catch(c => console.log(c))
+    try {
+      const res = this.cell.definition(...args);
+      // console.log(res);
+      return Promise.resolve(res)
+        .then(this.generateFirst)
+        .then((v) => this.fulfilled(v, version))
+        .catch(this.rejected);
+    } catch (e) {
+      return Promix.reject(e, this.id, this.version).catch((v) => this.rejected(v, version));
+    }
+  }
+
+  pending() {
+    this.runtime.emit("pending", this.module, this.cell);
   }
 
   // mark the variable as rejected with an error
-  rejected(error: RuntimeError) {
+  rejected(error: RuntimeError, version: number = this.promise.version) {
+    if (this.fulfilledVersion >= version) {
+      return this;
+    }
+    // console.log("rejected", this.promise.version, version, this.fulfilledVersion);
+    this.fulfilledVersion = version;
+
+    if (this.promise.version !== version) {
+      return this.promise.fulfilled(this);
+    }
+
     this.error = error;
     this.value = undefined;
-    this.runtime.emit("rejected", this.cell, error.toString());
-    this.promise.fulfilled(this)
-    return this
+    this.runtime.emit("rejected", this);
+    this.promise.fulfilled(this);
+    return this;
   }
 
   // mark the variable as fulfilled with a value
-  fulfilled(value: any) {
+  fulfilled(value: any, version: number = this.promise.version) {
+    if (this.fulfilledVersion >= version) {
+      return this;
+    }
+    // console.log("fulfilled", this.promise.version, version, this.fulfilledVersion);
+    this.fulfilledVersion = version;
+
+    if (this.promise.version !== version) {
+      return this.promise.fulfilled(this);
+    }
+
     this.value = value;
     this.error = undefined;
-    this.runtime.emit("fulfilled", this.cell, value);
-    this.promise.fulfilled(this)
+    !this.builtin && this.runtime.emit("fulfilled", this);
+    this.promise.fulfilled(this);
     return this;
   }
 
   // run the generator once and save the value at the generated field
-
 
   // if value is a generator, run the generator once
   generateFirst(value: any) {
@@ -175,7 +224,7 @@ export class Variable {
       });
 
       this.generator = value;
-      return this.generate()
+      return this.generate();
     }
 
     return Promix.resolve(value);
@@ -185,23 +234,25 @@ export class Variable {
     if (this.done.isFulfilled) {
       return Promix.resolve(this.generated);
     }
-    return this.generate()
+    return this.generate().then(this.fulfilled);
   }
 
+  // run the generator once and save the value at the generated field
   generate() {
-    return Promix.resolve(this.generator.next(this.generated)).then(({value, done}) => {
+    return Promix.resolve(this.generator.next(this.generated)).then(({ value, done }) => {
       if (done) {
-        return Promise.resolve(value).then(v => {
+        return Promise.resolve(value).then((v) => {
           this.done.fulfilled(v);
-          return this.generated
-        })
+          return this.generated;
+        });
       } else {
-        return Promise.resolve(value).then(v => {
+        return Promise.resolve(value).then((v) => {
           this.generated = v;
-          // if the generator is not done, add it to the runtime for recomputation
+          // if the generator is not done, add it to the runtime for computation
+          LOG && console.log("adding generator", this.id);
           this.runtime.generators.add(this);
           return v;
-        })
+        });
       }
     });
   }

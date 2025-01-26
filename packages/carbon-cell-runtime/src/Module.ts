@@ -2,11 +2,16 @@ import { uniqBy } from "lodash";
 import { SemVer } from "semver";
 import { Cell } from "./Cell";
 import { Runtime } from "./Runtime";
-import { Variable, VariableId, VariableName } from "./Variable";
+import { Variable } from "./Variable";
+import { randomString } from "./x";
+
+const LOG = false;
 
 // ModuleNameVersion is a string that represents a module name and version
 // e.g. "module@1" or "module@1.0" or "module@1.0.0"
 export type ModuleNameVersion = string;
+export type ModuleVariableId = string; // `${moduleId}/${variableId}`;
+export type ModuleVariableName = string; // `${moduleId}@${variableName}`;
 
 // Module represents a collection of variables
 export class Module {
@@ -18,9 +23,6 @@ export class Module {
   name: string;
   // version of the module
   version: SemVer;
-
-  variables: Map<VariableId, Variable> = new Map();
-  variableByNames: Map<VariableName, Variable[]> = new Map();
 
   static create(runtime: Runtime, id: string, name: string, version: string) {
     return new Module(runtime, id, name, version);
@@ -41,16 +43,75 @@ export class Module {
     return this.runtime.graph;
   }
 
+  get variables() {
+    return this.runtime.variables;
+  }
+
+  get moduleVariables() {
+    return this.runtime.moduleVariables;
+  }
+
+  value(name: string): Variable | undefined {
+    const fullName = Variable.fullName(this.id, name);
+    const variables = this.moduleVariables.get(fullName);
+    if (!variables) return;
+
+    if (variables.length > 1) {
+      console.error("multiple variables with the same name", name);
+      return;
+    }
+
+    return variables[0];
+  }
+
+  builtin(name: string) {
+    return this.runtime.builtinVariables.get(name);
+  }
+
   // variable by id
   variable(id: string) {
-    return this.variables.get(id);
+    return this.variables.get(Variable.id(this.id, id));
+  }
+
+  derive(id: string, name: string, injects: (string | { name: string; alias: string })[], fromModule: Module) {
+    const mod = Module.create(this.runtime, id, name, fromModule.version.toString());
+    injects.forEach((inject) => {
+      if (typeof inject === "string") {
+        mod.import(inject, inject, fromModule);
+      } else {
+        mod.import(inject.name, inject.alias, fromModule);
+      }
+    });
+
+    return mod;
+  }
+
+  import(name: string, alias: string, module: Module) {
+    // check if the variable exists in the module
+    const variable = module.value(name);
+    if (!variable) {
+      console.error("variable not found", name);
+      return;
+    }
+
+    const cell = Cell.create({
+      id: `imported/${module.id}/${randomString(10)}`,
+      name: alias,
+      code: `(x) => x`,
+      dependencies: [Variable.fullName(module.id, name)],
+      definition: (x) => x,
+      builtin: variable?.builtin,
+    });
+
+    return this.define(cell);
   }
 
   // create a new variable with the given definition
   // if the variable already exists, redefine it
   define(cell: Cell) {
-    const { id, name } = cell;
-    if (this.variables.has(id)) {
+    const fullId = Variable.id(this.id, cell.id);
+    const fullName = Variable.fullName(this.id, cell.name);
+    if (this.variables.has(fullId)) {
       return this.redefine(cell);
     }
 
@@ -60,18 +121,21 @@ export class Module {
       cell,
     });
 
-    if (!this.variableByNames.has(name)) {
-      this.variableByNames.set(name, []);
+    if (!this.moduleVariables.has(fullName)) {
+      this.moduleVariables.set(fullName, []);
     }
 
     // allow multiple variables with the same name
     // we can throw an error during runtime if the variable is used in computation
-    this.variableByNames.get(name)?.push(variable);
-    this.variables.set(id, variable);
+    this.moduleVariables.get(fullName)?.push(variable);
 
     // console.log("define", id, name, variable.dependencies);
     this.connect(variable);
-    console.log(variable.id, variable.outputs.map(v => v.id))
+    LOG &&
+      console.log(
+        variable.id,
+        variable.outputs.map((v) => v.id),
+      );
 
     this.runtime.onCreate(variable);
 
@@ -80,15 +144,46 @@ export class Module {
 
   // redefine a variable with the given definition
   // optionally change the name, inputs, or definition
-  redefine(cell: Cell) {
-    const variable = this.variables.get(cell.id);
+  redefine(cell: Cell): Variable {
+    const fullId = Variable.id(this.id, cell.id);
+    const variable = this.variables.get(fullId);
     if (!variable) {
       return this.define(cell);
     }
 
+    if (variable.builtin) {
+      console.error("builtin variable cannot be redefined");
+      return variable;
+    }
+
+    // if the cell code has changed but the name is same we refine and keep the old connections
+    if (variable.name === cell.name) {
+      LOG && console.log("redefine", cell.id, cell.name, "same name");
+      const newVariable = Variable.create({
+        module: this,
+        cell,
+      });
+
+      // keep the old connections
+      newVariable.inputs = [...variable.inputs];
+      newVariable.outputs = [...variable.outputs];
+
+      // update the graph with the old variable removed
+      this.runtime.onRemove(variable);
+      // update the graph with the new variable added
+      this.runtime.onCreate(newVariable);
+
+      const gname = Variable.fullName(this.id, cell.name);
+      const namedVariables = this.moduleVariables.get(gname) ?? [];
+      this.moduleVariables.set(gname, uniqBy([newVariable, ...namedVariables], "id"));
+      this.variables.set(fullId, newVariable);
+
+      return newVariable;
+    }
+
     // if the cell has not changed, we just need to recompute
     if (variable.cell.eq(cell)) {
-      console.log("redefine", cell.id, cell.name, "no change");
+      LOG && console.log("redefine", cell.id, cell.name, "no change");
       variable.version += 1;
       this.runtime.dirty.add(variable);
       return variable;
@@ -108,12 +203,17 @@ export class Module {
 
   // delete a variable by id
   delete(id: string) {
-    const variable = this.variables.get(id);
+    const fullId = Variable.id(this.id, id);
+    const variable = this.variables.get(fullId);
+
+    // builtin variables cannot be deleted
+    if (variable?.builtin) return;
+
     if (variable) {
       this.runtime.onRemove(variable);
       this.disconnect(variable);
       variable.delete({ module: true });
-      this.variableByNames.delete(id);
+      this.moduleVariables.delete(fullId);
     }
   }
 
@@ -121,15 +221,13 @@ export class Module {
   private connect(variable: Variable) {
     // console.log(variable.name, variable.dependencies);
     variable.inputs = variable.dependencies
-      .map((name) => {
-        return this.variableByNames.get(name);
-      })
+      .map((name) => this.moduleVariables.get(name))
       .filter(Boolean)
       .flat() as Variable[];
 
-    variable.inputs.forEach((v) => {
-      v.outputs.push(variable);
-      v.outputs = uniqBy(v.outputs, "id");
+    variable.inputs.forEach((input) => {
+      input.outputs.push(variable);
+      input.outputs = uniqBy(input.outputs, "id");
     });
 
     this.variables.forEach((v) => {
@@ -138,9 +236,9 @@ export class Module {
         v.inputs.push(variable);
         v.inputs = uniqBy(v.inputs, "id");
 
-        // conect the output
-        variable.outputs.push(v)
-        variable.outputs = uniqBy(variable.outputs, 'id')
+        // connect the output
+        variable.outputs.push(v);
+        variable.outputs = uniqBy(variable.outputs, "id");
       }
     });
   }
