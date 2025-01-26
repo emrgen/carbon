@@ -1,3 +1,4 @@
+import lodash from "lodash";
 import { expect, test } from "vitest";
 import { Cell } from "../src/Cell";
 import { Promises } from "../src/Promises";
@@ -483,6 +484,7 @@ test("builtin variables", async (t) => {
 test("builtin Promises", async (t) => {
   const builtins = {
     Promises: Promises,
+    _: lodash,
   };
 
   const runtime = Runtime.create("test", "0.0.1", builtins);
@@ -501,12 +503,79 @@ test("builtin Promises", async (t) => {
 
   await Promises.delay(110);
   expect(m1.variable("x1")!.value).toBe(10);
+
+  m1.define(
+    Cell.create({
+      id: "y1",
+      name: "y",
+      code: "(_) => _.range(4)",
+      dependencies: ["_"],
+      definition: function* (_) {
+        let i = 1;
+        while (true) {
+          yield Promises.delay(10, _.range(i));
+          if (++i > 2) break;
+        }
+      },
+    }),
+  );
+
+  await Promises.delay(100);
+});
+
+test("duplicate-1 definition fixed later", async (t) => {
+  const runtime = Runtime.create("test", "0.0.1");
+  const m1 = runtime.define("m1", "m1", "0.0.1");
+  registerListeners(runtime);
+
+  m1.define(
+    Cell.create({
+      id: "y1",
+      name: "y",
+      code: "(x) => x",
+      dependencies: ["x"],
+      definition: (x) => x,
+    }),
+  );
+
+  m1.define(
+    Cell.create({
+      id: "x1",
+      name: "x",
+      code: "() => 10",
+      definition: () => 10,
+    }),
+  );
+
+  m1.define(
+    Cell.create({
+      id: "x2",
+      name: "x",
+      code: "() => 20",
+      definition: () => 20,
+    }),
+  );
+
+  await Promises.delay(100);
+
+  m1.define(
+    Cell.create({
+      id: "x2",
+      name: "z",
+      code: "() => 20",
+      definition: () => 20,
+    }),
+  );
+
+  await Promises.delay(100);
+  expect(m1.variable("x2")!.value).toBe(20);
+  expect(m1.variable("x1")!.value).toBe(m1.variable("y1")!.value);
 });
 
 function registerListeners(runtime: Runtime) {
   runtime
     .on("fulfilled", (v) => {
-      console.log("fulfilled:", v.id, "=>", v.value, v.builtin);
+      console.log("fulfilled:", v.id, "=>", v.value);
     })
     .on("rejected", (v) => {
       console.log("rejected:", v.id, "=>", v.error?.toString());

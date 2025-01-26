@@ -18,24 +18,31 @@ interface VariableProps {
 
 // reactive variable
 export class Variable {
+  // parent module
   module: Module;
 
+  // encapsulated a variables definition
   cell: Cell;
 
   // this has higher priority than the connection in the graph
-  // this are updated when the variable is updated, created or deleted
+  // this are updated when the variable is created, redefined or deleted
   // runtime graph is updated based on these variables
   inputs: Variable[] = [];
   outputs: Variable[] = [];
 
+  // promise that resolves when the variable calculation is done
+  // the calculation is done when all inputs are fulfilled
+  // the calculation can result in an error or a value
+  promise: Promix<Variable>;
   error: RuntimeError | undefined;
   value: any;
-  promise: Promix<Variable>;
 
   // if the variable is a generator
-  generated: any = undefined;
   generator: { next: Function; return: Function } = { next: noop, return: noop };
+  generated: any = undefined;
+  // similar to done channel in go
   done: Promix<any> = noopPromix;
+  // version of the variable calculation
   fulfilledVersion: number = 0;
 
   static create(props: VariableProps) {
@@ -83,10 +90,6 @@ export class Variable {
     return Variable.fullName(this.module.id, this.cell.name);
   }
 
-  get uid() {
-    return `${this.name}@${this.version}`;
-  }
-
   get dependencies() {
     return this.cell.dependencies;
   }
@@ -119,8 +122,6 @@ export class Variable {
       }),
     );
   }
-
-  import(modules: Module[]) {}
 
   // schedule an update waiting for the input promises to fulfilled if not already fulfilled
   precompute(clock: number) {}

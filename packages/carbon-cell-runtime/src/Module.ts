@@ -156,6 +156,14 @@ export class Module {
       return variable;
     }
 
+    // if the cell has not changed, we just need to recompute
+    if (variable.cell.eq(cell)) {
+      LOG && console.log("redefine", cell.id, cell.name, "no change");
+      variable.version += 1;
+      this.runtime.dirty.add(variable);
+      return variable;
+    }
+
     // if the cell code has changed but the name is same we refine and keep the old connections
     if (variable.name === cell.name) {
       LOG && console.log("redefine", cell.id, cell.name, "same name");
@@ -181,14 +189,7 @@ export class Module {
       return newVariable;
     }
 
-    // if the cell has not changed, we just need to recompute
-    if (variable.cell.eq(cell)) {
-      LOG && console.log("redefine", cell.id, cell.name, "no change");
-      variable.version += 1;
-      this.runtime.dirty.add(variable);
-      return variable;
-    }
-
+    // name of the variable has changed
     this.runtime.onRemove(variable);
     this.disconnect(variable);
 

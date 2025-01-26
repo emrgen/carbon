@@ -127,6 +127,22 @@ export class Runtime extends EventEmitter {
       this.dirty.add(output);
     });
 
+    variable.inputs.forEach((input) => {
+      if (input.promise.isPending) {
+        this.dirty.add(input);
+      }
+    });
+
+    // if there were multiple variable with same name they become dirty
+    const variables = this.moduleVariables.get(variable.name);
+    if (variables) {
+      const remaining = variables.filter((v) => v.id !== variable.id);
+      this.moduleVariables.set(variable.name, remaining);
+      remaining.forEach((v) => {
+        this.dirty.add(v);
+      });
+    }
+
     Promises.delay(0).then(() => this.recompute());
   }
 
@@ -148,9 +164,9 @@ export class Runtime extends EventEmitter {
     LOG &&
       console.log(
         "created:",
-        Array.from(this.created).map((v) => v.uid),
+        Array.from(this.created).map((v) => v.id),
         "dirty",
-        Array.from(this.dirty).map((v) => v.uid),
+        Array.from(this.dirty).map((v) => v.id),
       );
 
     // add the created variables to the dirty set
