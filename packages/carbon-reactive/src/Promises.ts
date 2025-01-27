@@ -13,9 +13,11 @@ export class Promises {
     });
   }
 
-  static tick(timeout: number) {
-    return new Promise<void>((resolve) => {
-      setTimeout(resolve, timeout);
+  static tick<T>(timeout: number, fn: T | (() => T)) {
+    return new Promise<T>((resolve) => {
+      setTimeout(() => {
+        resolve(isFunction(fn) ? fn() : fn);
+      }, timeout);
     });
   }
 

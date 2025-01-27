@@ -47,7 +47,7 @@ export class Runtime extends EventEmitter {
   // mutable variables store
   mutable: Mutable;
 
-  computing: boolean = false;
+  connecting: boolean = false;
 
   promise: Promix<any> = Promix.default("runtime");
 
@@ -154,7 +154,11 @@ export class Runtime extends EventEmitter {
   }
 
   tryRecompute() {
-    if (this.dirty.size === 0 && this.generators.size === 0) return;
+    if (this.dirty.size === 0 && this.generators.size === 0) {
+      // console.log("nothing to recompute");
+      return;
+    }
+
     LOG &&
       console.log(
         "try dirty",
@@ -162,10 +166,7 @@ export class Runtime extends EventEmitter {
       );
 
     Promises.delay(0).then(() => {
-      if (this.computing) {
-        console.log("not computing", this.computing);
-        this.tryRecompute();
-      } else {
+      if (!this.connecting) {
         this.generate().then(() => this.recompute());
       }
     });
@@ -180,7 +181,7 @@ export class Runtime extends EventEmitter {
       return;
     }
 
-    this.computing = true;
+    // console.log("recompute", this.dirty.size);
 
     LOG &&
       console.log(
@@ -206,6 +207,7 @@ export class Runtime extends EventEmitter {
 
   // connect the dirty variables and find out the roots
   precompute(dirty: Variable[]) {
+    this.connecting = true;
     LOG && console.log("----------------\n> precomputing\n----------------");
     const { roots, sorted, circular } = this.graph.topological(dirty);
 
@@ -257,6 +259,7 @@ export class Runtime extends EventEmitter {
     //   v.promise = p;
     // });
 
+    this.connecting = false;
     // then connect the dirty variables
     return {
       roots,
@@ -307,16 +310,18 @@ export class Runtime extends EventEmitter {
       });
     });
 
+    // console.log(
+    //   "done computing",
+    //   roots.map((v) => v.id),
+    // );
     // this will allow next recompute to begin even before the current one is finished
-    this.computing = false;
-
     LOG &&
       console.log(
         "pending",
         pending.map((p) => p.id),
       );
 
-    Promise.all(pending).then(() => {
+    return Promise.all(pending).then(() => {
       this.tryRecompute();
     });
   }
@@ -327,8 +332,6 @@ export class Runtime extends EventEmitter {
       return Promise.resolve();
     }
 
-    this.computing = true;
-
     LOG &&
       console.log(
         "generators",
@@ -338,7 +341,10 @@ export class Runtime extends EventEmitter {
     this.generators.clear();
 
     roots.forEach((variable) => {
-      variable.generateNext();
+      // console.log("generate root", variable.id);
+      variable.generateNext().then(() => {
+        this.tryRecompute();
+      });
     });
 
     circular.forEach((variable) => {
@@ -346,8 +352,6 @@ export class Runtime extends EventEmitter {
       variable.rejected(RuntimeError.circularDependency(variable.name), variable.promise.version);
     });
 
-    return Promix.all(pending).then(() => {
-      this.computing = false;
-    });
+    return Promise.resolve(1);
   }
 }

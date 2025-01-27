@@ -41,7 +41,7 @@ export class Variable {
   generator: { next: Function; return: Function } = { next: noop, return: noop };
   generated: any = undefined;
   // similar to done channel in go
-  done: Promix<any> = noopPromix;
+  done = false;
   // version of the variable calculation
   fulfilledVersion: number = 0;
 
@@ -72,6 +72,7 @@ export class Variable {
     this.rejected = this.rejected.bind(this);
     this.compute = this.compute.bind(this);
     this.generateFirst = this.generateFirst.bind(this);
+    this.addDirty = this.addDirty.bind(this);
   }
 
   get id() {
@@ -162,9 +163,10 @@ export class Variable {
     const args = deps.map((input) => input.value);
 
     try {
-      const res = this.cell.definition(...args);
+      const res = this.cell.definition.bind(this)(...args);
       return Promise.resolve(res)
         .then(this.generateFirst)
+        .then(this.addDirty)
         .then((v) => this.fulfilled(v, version))
         .catch(this.rejected);
     } catch (e) {
@@ -177,12 +179,9 @@ export class Variable {
   // if value is a generator, run the generator once
   generateFirst(value: any) {
     if (generatorish(value)) {
-      this.done = Promix.default(this.id, this.version).then(() => {
-        value.return();
-      });
-
+      console.log("generateFirst", value);
       this.generator = value;
-      return this.generate().catch(error);
+      return this.generate();
     }
 
     return Promix.resolve(value);
@@ -190,13 +189,17 @@ export class Variable {
 
   generateNext() {
     try {
-      if (this.done.isFulfilled) {
-        return Promix.resolve(this.generated);
-      }
-      return this.generate().then(this.fulfilled);
+      return this.generate().then(this.addDirty).then(this.fulfilled);
     } catch (e) {
       return Promix.reject(e, this.id, this.version).catch(this.rejected);
     }
+  }
+
+  addDirty(value) {
+    if (this.generator.next !== noop && !this.done) {
+      this.runtime.generators.add(this);
+    }
+    return value;
   }
 
   // run the generator once and save the value at the generated field
@@ -206,7 +209,11 @@ export class Variable {
         .then(({ value, done }) => {
           if (done) {
             return Promise.resolve(value).then((v) => {
-              this.done.fulfilled(v);
+              this.done = true;
+              if (value !== undefined) {
+                this.generated = v;
+              }
+
               return this.generated;
             });
           } else {
@@ -214,7 +221,7 @@ export class Variable {
             return Promise.resolve(value).then((v) => {
               this.generated = v;
               // if the generator is not done, add it to the runtime for computation
-              this.runtime.generators.add(this);
+              // this.runtime.generators.add(this);
               return v;
             });
           }
@@ -243,6 +250,7 @@ export class Variable {
 
     this.error = error;
     this.value = undefined;
+    this.generator = { next: noop, return: noop };
     this.runtime.emit("rejected", this);
     this.promise.fulfilled(this);
     return this;

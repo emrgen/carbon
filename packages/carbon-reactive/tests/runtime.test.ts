@@ -19,7 +19,7 @@ test(
   async (t) => {
     const runtime = Runtime.create("test", "0.0.1");
     const mod = runtime.define("1", "mod", "0.0.1");
-    registerListeners(runtime);
+    // registerListeners(runtime);
 
     mod.define(
       Cell.create({
@@ -576,76 +576,41 @@ test("duplicate-1 definition fixed later", async (t) => {
   expect(m1.variable("x1")!.value).toBe(m1.variable("y1")!.value);
 });
 
-// test("mutable definition", async (t) => {
-//   const runtime = Runtime.create("test", "0.0.1", {
-//     Mutable: "123",
-//   });
-//   const m1 = runtime.define("m1", "m1", "0.0.1");
-//   registerListeners(runtime);
-//
-//   m1.define(
-//     Cell.create({
-//       id: "x1",
-//       name: "x",
-//       code: "() => 10",
-//       dependencies: ["Mutable", "z"],
-//       definition: (Mutable) => {
-//         if (!Mutable.variables.has("m1/x1")) {
-//           Mutable.define("m1/x1", 0);
-//         }
-//
-//         return Mutable.accessor("m1/x1")["m1/x1"];
-//       },
-//     }),
-//   );
-//
-//   m1.define(
-//     Cell.create({
-//       id: "z1",
-//       name: "z",
-//       code: "() => 10",
-//       dependencies: ["x"],
-//       definition: (x) => {
-//         return x + 10;
-//       },
-//     }),
-//   );
-//
-//   m1.define(
-//     Cell.create({
-//       id: "y1",
-//       name: "y",
-//       code: "() => 10",
-//       dependencies: ["Mutable"],
-//       definition: function* (Mutable) {
-//         let i = 1;
-//         while (true) {
-//           yield Promises.delay(100, i);
-//           Mutable.accessor("m1/x1")["m1/x1"] = i;
-//           if (++i > 13) break;
-//         }
-//       },
-//     }),
-//   );
-//
-//   await Promises.delay(2000);
-//
-//   m1.define(
-//     Cell.create({
-//       id: "x1",
-//       name: "x",
-//       code: "() => 10",
-//       dependencies: ["Mutable"],
-//       definition: (Mutable) => {
-//         if (!Mutable.variables.has("m1/x1")) {
-//           Mutable.define("m1/x1", 0);
-//         }
-//
-//         return Mutable.accessor("m1/x1")["m1/x1"];
-//       },
-//     }),
-//   );
-//
-//   await Promises.delay(100);
-//   // expect(m1.variable("x")!.value).toBe(10);
-// });
+test("generators run with different time", async (t) => {
+  const runtime = Runtime.create("test", "0.0.1");
+  const m1 = runtime.define("m1", "m1", "0.0.1");
+  // registerListeners(runtime);
+
+  m1.define(
+    Cell.create({
+      id: "x1",
+      name: "x",
+      code: "() => 10",
+      definition: function* () {
+        let i = 0;
+        while (true) {
+          yield Promises.delay(20, i++);
+        }
+      },
+    }),
+  );
+
+  m1.define(
+    Cell.create({
+      id: "y1",
+      name: "y",
+      code: "(x) => x + 10",
+      dependencies: [],
+      definition: function* (x) {
+        let i = 0;
+        while (true) {
+          yield Promises.delay(10, i++);
+        }
+      },
+    }),
+  );
+
+  await Promises.delay(100);
+
+  expect(m1.variable("x1")!.value).not.toBe(m1.variable("y1")!.value);
+});

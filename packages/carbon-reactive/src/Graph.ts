@@ -127,10 +127,9 @@ export class Graph<T extends NodeId> {
       }
     }
 
+
     // console.log('queue',queue.map((n) => n.id));
     // topological sort
-    let i = 0;
-    let visited = 0;
     const roots = Array.from(queue);
 
     // will include the roots as well
@@ -138,7 +137,6 @@ export class Graph<T extends NodeId> {
 
     while (queue.length) {
       const node = queue.shift()!;
-      visited++;
       pending.push(node)
 
       const id = node.id;
@@ -152,7 +150,6 @@ export class Graph<T extends NodeId> {
           }
         }
       }
-      i++;
     }
 
     const pendingSet = new Set(pending.map((n) => n.id));
@@ -204,41 +201,6 @@ export class Graph<T extends NodeId> {
       );
     });
   }
-
-  // unreachable(): T[] {
-  //   const queue = this.roots();
-  //   const order: T[] = [];
-  //   const incoming = new Map<string, number>();
-  //   for (const [_, to] of this.outgoing) {
-  //     for (const t of to) {
-  //       incoming.set(t, (incoming.get(t) ?? 0) + 1);
-  //     }
-  //   }
-  //
-  //   while (queue.length > 0) {
-  //     const node = queue.shift()!;
-  //     order.push(node);
-  //     if (this.outgoing.has(node.id)) {
-  //       for (const to of this.outgoing.get(node.id)!) {
-  //         const count = incoming.get(to)! - 1;
-  //         if (count === 0) {
-  //           queue.push(this.nodes.get(to)!);
-  //         } else {
-  //           incoming.set(to, count);
-  //         }
-  //       }
-  //     }
-  //   }
-  //
-  //   const unreachable: T[] = [];
-  //   for (const [id, node] of this.nodes) {
-  //     if (!order.includes(node)) {
-  //       unreachable.push(node);
-  //     }
-  //   }
-  //
-  //   return unreachable;
-  // }
 
   print() {}
 }

@@ -50,4 +50,8 @@ export class Mutable {
       },
     });
   }
+
+  toString() {
+    return `Mutable(${Array.from(this.variables.keys())})`;
+  }
 }

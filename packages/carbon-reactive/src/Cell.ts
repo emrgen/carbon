@@ -24,6 +24,15 @@ export class Cell {
   definition: Function;
   builtin: boolean;
 
+  static from(id: string, name: string, deps: string[], define: Function) {
+    return Cell.create({
+      id,
+      name,
+      dependencies: deps,
+      definition: define,
+    });
+  }
+
   static create(props: CellProps) {
     return new Cell(props);
   }
@@ -41,7 +50,7 @@ export class Cell {
       id,
       name = Cell.undefinedName(),
       version = 0,
-      code = "",
+      code = randomString(5), // this is for convenience
       definition = noop,
       dependencies = [],
       builtin = false,
