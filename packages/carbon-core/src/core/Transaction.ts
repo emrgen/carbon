@@ -75,22 +75,14 @@ export class Transaction {
   }
 
   get textInsertOnly() {
-    return this.actions.every(
-      (a) => a instanceof SetContentAction || a instanceof SelectAction,
-    );
+    return this.actions.every((a) => a instanceof SetContentAction || a instanceof SelectAction);
   }
 
   get selectionOnly() {
     return this.actions.every((a) => a instanceof SelectAction);
   }
 
-  static create(
-    carbon: Carbon,
-    cmd: CarbonCommand,
-    tm: TransactionManager,
-    pm: PluginManager,
-    sm: SelectionManager,
-  ) {
+  static create(carbon: Carbon, cmd: CarbonCommand, tm: TransactionManager, pm: PluginManager, sm: SelectionManager) {
     return new Transaction(carbon, cmd, tm, pm, sm);
   }
 
@@ -152,24 +144,15 @@ export class Transaction {
     return this;
   }
 
-  Select(
-    selection: PinnedSelection | PointedSelection,
-    origin = this.origin,
-  ): Transaction {
+  Select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
     const after = selection.unpin();
     this.lastSelection = after;
     after.origin = origin;
-    return this.Add(
-      SelectAction.create(this.state.selection.unpin(), after, origin),
-    );
+    return this.Add(SelectAction.create(this.state.selection.unpin(), after, origin));
   }
 
   // can be called for textContainer only
-  SetContent(
-    nodeRef: IntoNodeId,
-    after: Node[] | string,
-    origin = this.origin,
-  ): Transaction {
+  SetContent(nodeRef: IntoNodeId, after: Node[] | string, origin = this.origin): Transaction {
     if (isArray(after)) {
       after = after.map(cloneFrozenNode);
     }
@@ -186,12 +169,7 @@ export class Transaction {
     return this.Add(RemoveNodeAction.fromNode(at, ref.nodeId(), origin));
   }
 
-  Move(
-    from: Point,
-    to: Point,
-    ref: IntoNodeId,
-    origin = this.origin,
-  ): Transaction {
+  Move(from: Point, to: Point, ref: IntoNodeId, origin = this.origin): Transaction {
     return this.Add(MoveNodeAction.create(from, to, ref.nodeId(), origin));
   }
 
@@ -199,11 +177,7 @@ export class Transaction {
     return this.Add(ChangeNameAction.create(ref.nodeId(), to, origin));
   }
 
-  Mark(
-    action: "add" | "remove",
-    mark: Mark | Mark[],
-    origin = this.origin,
-  ): Transaction {
+  Mark(action: "add" | "remove", mark: Mark | Mark[], origin = this.origin): Transaction {
     if (isArray(mark)) {
       mark.forEach((m) => this.Add(UpdateMarkAction.create(action, m, origin)));
       return this;
@@ -212,24 +186,15 @@ export class Transaction {
     return this.Add(UpdateMarkAction.create(action, mark, origin));
   }
 
-  Update(
-    nodeRef: IntoNodeId,
-    props: Partial<NodePropsJson>,
-    origin = this.origin,
-  ): Transaction {
+  Update(nodeRef: IntoNodeId, props: Partial<NodePropsJson>, origin = this.origin): Transaction {
     this.Add(UpdatePropsAction.create(nodeRef, props, origin));
     return this;
   }
 
   // previously selected nodes will be deselected
   // previously active nodes will be deactivated
-  private selectNodes(
-    ids: NodeId | NodeId[] | Node[],
-    origin = this.origin,
-  ): Transaction {
-    const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map((n) =>
-      n.nodeId(),
-    );
+  private selectNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+    const selectIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map((n) => n.nodeId());
 
     selectIds.forEach((id) => {
       this.Update(id, { [SelectedPath]: true }, origin);
@@ -248,13 +213,8 @@ export class Transaction {
     return this;
   }
 
-  private activateNodes(
-    ids: NodeId | NodeId[] | Node[],
-    origin = this.origin,
-  ): Transaction {
-    const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(
-      (n) => n.nodeId(),
-    );
+  private activateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+    const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map((n) => n.nodeId());
     activateIds.forEach((id) => {
       this.Update(id, { [ActivatedPath]: true }, origin);
     });
@@ -262,13 +222,8 @@ export class Transaction {
     return this;
   }
 
-  private deactivateNodes(
-    ids: NodeId | NodeId[] | Node[],
-    origin = this.origin,
-  ): Transaction {
-    const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map(
-      (n) => n.nodeId(),
-    );
+  private deactivateNodes(ids: NodeId | NodeId[] | Node[], origin = this.origin): Transaction {
+    const activateIds = ((isArray(ids) ? ids : [ids]) as IntoNodeId[]).map((n) => n.nodeId());
     activateIds.forEach((id) => {
       this.Update(id, { [ActivatedPath]: false }, origin);
     });
@@ -284,9 +239,7 @@ export class Transaction {
   // adds command to transaction
   Add(action: CarbonAction | CarbonAction[]): Transaction {
     if (this.dispatched) {
-      throw new Error(
-        "can not add actions to dispatched transaction: " + this.id,
-      );
+      throw new Error("can not add actions to dispatched transaction: " + this.id);
     }
 
     flatten([action]).forEach((a) => this.actions.push(a));

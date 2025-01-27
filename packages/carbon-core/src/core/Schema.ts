@@ -38,16 +38,11 @@ export class Schema {
       const contentExpr = nodeType.spec.content;
       const markExpr = nodeType.spec.marks;
       if (!nodeType) {
-        throw new Error(
-          `NodeType is not found for ${nodeName}. check if the node plugin is added`,
-        );
+        throw new Error(`NodeType is not found for ${nodeName}. check if the node plugin is added`);
       }
       if (contentExpr) {
         if (!contextExprCache[contentExpr]) {
-          contextExprCache[contentExpr] = ContentMatch.parse(
-            contentExpr,
-            this.nodes,
-          );
+          contextExprCache[contentExpr] = ContentMatch.parse(contentExpr, this.nodes);
         }
 
         nodeType.contentMatch = contextExprCache[contentExpr];
@@ -86,13 +81,7 @@ export class Schema {
     return new Mark(name, props);
   }
 
-  clone(
-    node: Node,
-    map: Maps<
-      Omit<NodeContentData, "children">,
-      Omit<NodeContentData, "children">
-    > = identity,
-  ): Node {
+  clone(node: Node, map: Maps<Omit<NodeContentData, "children">, Omit<NodeContentData, "children">> = identity): Node {
     return this.factory.clone(node, map);
   }
 
@@ -168,6 +157,10 @@ export interface NodeSpec {
     inline?: boolean;
     block?: boolean;
     rect?: boolean;
+  };
+  control?: {
+    insert?: boolean;
+    collapse?: boolean;
   };
   dnd?: {
     // same as drag handle

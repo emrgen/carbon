@@ -21,9 +21,6 @@ export class Runtime extends EventEmitter {
   id: string;
   version: SemVer;
 
-  // each variable refresh updates the version
-  clock: number = 0;
-
   graph: Graph<Variable>;
 
   // save the module using moduleName@version as key
@@ -47,6 +44,7 @@ export class Runtime extends EventEmitter {
   // mutable variables store
   mutable: Mutable;
 
+  // connecting is true when the runtime is connecting the variables
   connecting: boolean = false;
 
   promise: Promix<any> = Promix.default("runtime");
@@ -173,7 +171,7 @@ export class Runtime extends EventEmitter {
   }
 
   // recompute the dirty variables and their dependencies
-  recompute() {
+  private recompute() {
     LOG && console.log("----------------\n> recomputing\n----------------");
     if (this.dirty.size === 0) {
       // if no dirty variables tryRecompute (to process pending generators)

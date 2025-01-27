@@ -1,22 +1,7 @@
-import {
-  hasSameIsolate,
-  insertAfterAction,
-  nodeLocation,
-  preventAndStopCtx,
-  TitleNode,
-} from "@emrgen/carbon-core";
+import { hasSameIsolate, insertAfterAction, nodeLocation, preventAndStopCtx, TitleNode } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { first, last } from "lodash";
-import {
-  ActionOrigin,
-  MoveNodeAction,
-  Node,
-  Pin,
-  PinnedSelection,
-  PlaceholderPath,
-  Point,
-  Transaction,
-} from "../core";
+import { ActionOrigin, MoveNodeAction, Node, Pin, PinnedSelection, PlaceholderPath, Point, Transaction } from "../core";
 import { NodeBTree } from "../core/BTree";
 import { AfterPlugin, CarbonPlugin, EventContext } from "../core/index";
 import { EventHandlerMap } from "../core/types";
@@ -66,11 +51,7 @@ export class KeyboardPlugin extends AfterPlugin {
   }
 
   plugins(): CarbonPlugin[] {
-    return [
-      new SelectionCommands(),
-      new IsolateSelectionPlugin(),
-      new TransformCommands(),
-    ];
+    return [new SelectionCommands(), new IsolateSelectionPlugin(), new TransformCommands()];
   }
 
   keydown(): EventHandlerMap {
@@ -107,9 +88,7 @@ export class KeyboardPlugin extends AfterPlugin {
         if (blockSelection.isActive) {
           const { blocks } = blockSelection;
           const lastNode = last(blocks) as Node;
-          const parentIsolate = lastNode.parents.find(
-            (n) => n.isBlockSelectable,
-          );
+          const parentIsolate = lastNode.parents.find((n) => n.isBlockSelectable);
           if (parentIsolate) {
             if (parentIsolate.isPage) return;
             cmd.SelectBlocks([parentIsolate.id]).Dispatch();
@@ -181,9 +160,7 @@ export class KeyboardPlugin extends AfterPlugin {
             return;
           }
 
-          const block = currentNode.find(
-            (n) => !n.eq(currentNode) && n.isContainer,
-          );
+          const block = currentNode.find((n) => !n.eq(currentNode) && n.isContainer);
           if (!block) return;
           cmd.SelectBlocks([block.id]).Dispatch();
           return;
@@ -211,10 +188,7 @@ export class KeyboardPlugin extends AfterPlugin {
         }
 
         const { start } = selection;
-        if (
-          start.isAtStartOfNode(start.node) &&
-          !start.node.prev((n) => n.isFocusable)
-        ) {
+        if (start.isAtStartOfNode(start.node) && !start.node.prev((n) => n.isFocusable)) {
           return;
         }
 
@@ -249,10 +223,7 @@ export class KeyboardPlugin extends AfterPlugin {
         ) {
           cmd.selection.selectPageContent(selection).Dispatch();
         } else {
-          const after = PinnedSelection.create(
-            start.moveToStart(),
-            end.moveToEnd(),
-          );
+          const after = PinnedSelection.create(start.moveToStart(), end.moveToEnd());
           cmd.Select(after).Dispatch();
         }
       },
@@ -279,29 +250,19 @@ export class KeyboardPlugin extends AfterPlugin {
     if (head.isAtStartOfNode(head.node)) {
       const { start } = selection;
       const textBlock = start.node.chain.find((n) => n.isTextContainer);
-      const prevTextBlock = textBlock?.prev(
-        (n) => !n.isIsolate && n.isTextContainer,
-        { skip: (n) => n.isIsolate },
-      );
+      const prevTextBlock = textBlock?.prev((n) => !n.isIsolate && n.isTextContainer, { skip: (n) => n.isIsolate });
       if (!prevTextBlock || !textBlock) {
         console.log("no prev text block found");
         return;
       }
 
       if (prevTextBlock.isCollapseHidden) {
-        const prevVisibleBlock = prevTextBlock.closest(
-          (n) => !n.isCollapseHidden,
-        )!;
+        const prevVisibleBlock = prevTextBlock.closest((n) => !n.isCollapseHidden)!;
         const prevVisibleTextBlock = prevVisibleBlock?.child(0)!;
         console.log(prevTextBlock, prevVisibleTextBlock);
 
         if (!prevVisibleTextBlock) return;
-        const pin = Pin.create(
-          prevVisibleTextBlock,
-          prevVisibleTextBlock.textContent.length,
-        )
-          ?.down()
-          ?.leftAlign.up();
+        const pin = Pin.create(prevVisibleTextBlock, prevVisibleTextBlock.textContent.length)?.down()?.leftAlign.up();
         if (!pin) return; // should not happen
 
         const after = PinnedSelection.fromPin(pin);
@@ -341,12 +302,7 @@ export class KeyboardPlugin extends AfterPlugin {
       }
 
       // HOT
-      console.log(
-        "merge text block",
-        prevTextBlock.name,
-        textBlock.name,
-        prevTextBlock.id.toString(),
-      );
+      console.log("merge text block", prevTextBlock.name, textBlock.name, prevTextBlock.id.toString());
       tr.transform.merge(prevTextBlock, textBlock)?.Dispatch();
       return;
     }
@@ -441,11 +397,7 @@ export class KeyboardPlugin extends AfterPlugin {
     const firstNode = first(blocks) as Node;
     const selectedParentIsolate = firstNode.parents.find((n) => n.isIsolate);
     const blockParentIsolate = block.parents.find((n) => n.isIsolate);
-    if (
-      selectedParentIsolate &&
-      blockParentIsolate &&
-      !selectedParentIsolate.eq(blockParentIsolate)
-    ) {
+    if (selectedParentIsolate && blockParentIsolate && !selectedParentIsolate.eq(blockParentIsolate)) {
       return;
     }
 
@@ -499,10 +451,7 @@ export class KeyboardPlugin extends AfterPlugin {
       if (!paragraph) return false;
 
       const after = PinnedSelection.fromPin(Pin.toStartOf(paragraph)!)!;
-      cmd
-        .Add(insertAfterAction(lastBlock, paragraph))
-        .Select(after, ActionOrigin.UserInput)
-        .Dispatch();
+      cmd.Add(insertAfterAction(lastBlock, paragraph)).Select(after, ActionOrigin.UserInput).Dispatch();
 
       return;
     }
@@ -566,10 +515,7 @@ export class KeyboardPlugin extends AfterPlugin {
     if (head.isAtEndOfNode(currentNode)) {
       const { start } = selection;
       const textBlock = start.node.chain.find((n) => n.isTextContainer);
-      const nextTextBlock = textBlock?.next(
-        (n) => !n.isIsolate && n.isTextContainer,
-        { skip: (n) => n.isIsolate },
-      );
+      const nextTextBlock = textBlock?.next((n) => !n.isIsolate && n.isTextContainer, { skip: (n) => n.isIsolate });
       if (!nextTextBlock || !textBlock) return;
 
       cmd.transform.merge(textBlock, nextTextBlock)?.Dispatch();

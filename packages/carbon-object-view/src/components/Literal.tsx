@@ -1,9 +1,7 @@
-import { isNumber } from "lodash";
-import { isString } from "lodash";
-import { isSymbol } from "lodash";
+import { isNumber, isString, isSymbol } from "lodash";
 import { useMemo } from "react";
 
-export const Literal = ({ data, propName, isIndex }) => {
+export const Literal = ({ data, propName, isIndex, root }) => {
   const view = useMemo(() => {
     if (isNumber(data)) {
       return <span className={"cov-number"}>{data}</span>;
@@ -26,11 +24,7 @@ export const Literal = ({ data, propName, isIndex }) => {
     }
 
     if (data === true || data === false) {
-      return (
-        <span className={"cov-boolean-" + data.toString()}>
-          {data.toString()}
-        </span>
-      );
+      return <span className={"cov-boolean-" + data.toString()}>{data.toString()}</span>;
     }
   }, [data]);
 
@@ -38,7 +32,12 @@ export const Literal = ({ data, propName, isIndex }) => {
 
   return (
     <div className={"cov-literal"}>
-      {propName && <span className={keyClass}>{propName}:</span>}
+      {!root && propName && <span className={keyClass}>{propName}:</span>}
+      {root && propName && (
+        <span className={keyClass} id={root ? "cov-root-name" : ""}>
+          {propName} ={" "}
+        </span>
+      )}
       <span className={"cov-literal-value"}>{view}</span>
     </div>
   );

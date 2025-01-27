@@ -1,17 +1,5 @@
-import {
-  CollapsedPath,
-  HasFocusPath,
-  NodeId,
-  preventAndStop,
-  stop,
-} from "@emrgen/carbon-core";
-import {
-  CarbonBlock,
-  RendererProps,
-  useCarbon,
-  useNodeChange,
-  useSelectionHalo,
-} from "@emrgen/carbon-react";
+import { CollapsedPath, HasFocusPath, NodeId, preventAndStop, stop } from "@emrgen/carbon-core";
+import { CarbonBlock, RendererProps, useCarbon, useNodeChange, useSelectionHalo } from "@emrgen/carbon-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BsTextParagraph } from "react-icons/bs";
 import { DiCssTricks } from "react-icons/di";
@@ -47,14 +35,10 @@ export const CellComp = (props: RendererProps) => {
     (e) => {
       if (e.shiftKey) {
         // console.log("insert above");
-        app.cmd.inserter
-          .insertBeforeDefault(node.parent!, "paragraph")
-          ?.Dispatch();
+        app.cmd.inserter.insertBeforeDefault(node.parent!, "paragraph")?.Dispatch();
       } else {
         // console.log("insert below");
-        app.cmd.inserter
-          .insertAfterDefault(node.parent!, "paragraph")
-          ?.Dispatch();
+        app.cmd.inserter.insertAfterDefault(node.parent!, "paragraph")?.Dispatch();
       }
     },
     [app, node],
@@ -75,20 +59,13 @@ const CodeCellWrapper = (props: RendererProps) => {
   // useRectSelectable({ node, ref });
   const { SelectionHalo, attributes } = useSelectionHalo({ node });
 
-  const [codeType, setCodeType] = useState(
-    node.props.get(CodeCellCodeTypePath, "javascript"),
-  );
+  const [codeType, setCodeType] = useState(node.props.get(CodeCellCodeTypePath, "javascript"));
   const [nodeId] = useState(node.id.toString());
 
   useCustomCompareEffect(
     () => {
       const codeType = node.props.get(CodeCellCodeTypePath, "javascript");
-      mod.redefine(
-        "",
-        nodeId,
-        node.props.get(CodeCellCodeValuePath, ""),
-        codeType,
-      );
+      mod.redefine("", nodeId, node.props.get(CodeCellCodeValuePath, ""), codeType);
     },
     [node, mod],
     (prev, next) => {
@@ -125,9 +102,12 @@ const CodeCellWrapper = (props: RendererProps) => {
   const isFocused = useMemo(() => {
     return node.props.get(HasFocusPath, false);
   }, [node]);
+
   const isCollapsed = useMemo(() => {
     return node.props.get(CollapsedPath, false);
   }, [node]);
+
+  console.log(isCollapsed);
 
   const handleToggleCell = useCallback(
     (e) => {
@@ -149,13 +129,9 @@ const CodeCellWrapper = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node} ref={ref} custom={attributes}>
-      <div
-        className={"carbon-cell-container"}
-        onKeyUp={stop}
-        onBeforeInput={stop}
-      >
+      <div className={"carbon-cell-container"} onKeyUp={stop} onBeforeInput={stop}>
         <Result node={node} onToggle={handleToggleCell} />
-        <Code node={node} />
+        {!isCollapsed && <Code node={node} />}
         {/*<div*/}
         {/*  className={"carbon-cell-code"}*/}
         {/*  style={{*/}

@@ -126,11 +126,7 @@ export class EventManager {
     if (!app.enabled) {
       if (type === EventsIn.selectstart) {
         event.preventDefault();
-        console.log(
-          p14("%c[skipped]"),
-          "color:#ffcc006e",
-          "editor is disabled for events",
-        );
+        console.log(p14("%c[skipped]"), "color:#ffcc006e", "editor is disabled for events");
       }
       console.log("app: disabled, skip event processing", type);
       return;
@@ -144,10 +140,7 @@ export class EventManager {
     }
 
     // when block selection is active
-    if (
-      type !== EventsIn.selectionchange &&
-      app.state.blockSelection.isActive
-    ) {
+    if (type !== EventsIn.selectionchange && app.state.blockSelection.isActive) {
       const lastNode = last(app.blockSelection.blocks) as Node;
       this.updateCommandOrigin(type, event);
 
@@ -177,20 +170,13 @@ export class EventManager {
     const { selection, head } = selectionInfo ?? {};
     // NOTE: editor cannot process event without active selection
     if (!selection) {
-      console.warn(
-        p12("%c[invalid]"),
-        "color:grey",
-        `${type}: event with empty selection`,
-      );
+      console.warn(p12("%c[invalid]"), "color:grey", `${type}: event with empty selection`);
 
       return;
     }
 
     if ("selectionchange" === type) {
-      console.log(
-        `%c >>> ${type}: ${(event as any).key ?? selection.toString()}`,
-        "background:#ffcc006e",
-      );
+      console.log(`%c >>> ${type}: ${(event as any).key ?? selection.toString()}`, "background:#ffcc006e");
     }
 
     const isSelectionUnchanged = app.selection.eq(selection);
@@ -264,12 +250,7 @@ export class EventManager {
     // if the transaction is not committed, discard it
     if (editorEvent.transaction && !editorEvent.transaction.committed) {
       this.app.committed = true;
-      console.warn(
-        p14("%c[skipped]"),
-        "color:#ffcc006e",
-        "Discarded transaction",
-        type,
-      );
+      console.warn(p14("%c[skipped]"), "color:#ffcc006e", "Discarded transaction", type);
       return;
     }
   }

@@ -4,13 +4,7 @@ import { Module, Runtime, Variable } from "@observablehq/runtime";
 import { Library } from "@observablehq/stdlib";
 import { EventEmitter } from "events";
 import { isString } from "lodash";
-import {
-  isHtmlElement,
-  isUnnamedCell,
-  isViewCell,
-  nextUnnamedCellName,
-  viewCellName,
-} from "../utils";
+import { isHtmlElement, isUnnamedCell, isViewCell, nextUnnamedCellName, viewCellName } from "../utils";
 
 //
 export class ActiveCellRuntime extends EventEmitter {
@@ -92,24 +86,12 @@ export class ActiveCellRuntime extends EventEmitter {
     //   "node_" + nodeId,
     //   `Carbon.store.get(${nodeId})`,
     // );
-    this.redefine(
-      "node_" + nodeId,
-      nodeId,
-      `Carbon.store.get('${nodeId}')`,
-      "javascript",
-      true,
-    );
+    this.redefine("node_" + nodeId, nodeId, `Carbon.store.get('${nodeId}')`, "javascript", true);
 
     this.observeNode(nodeId);
   }
 
-  redefine(
-    name: string,
-    cellId: string,
-    code: string | Function,
-    type: string,
-    force: boolean = false,
-  ) {
+  redefine(name: string, cellId: string, code: string | Function, type: string, force: boolean = false) {
     // check if the code is the same as the cache code for the node
     // const cache = this.cache.get(cellId);
     // if (code === cache) return;
@@ -117,13 +99,7 @@ export class ActiveCellRuntime extends EventEmitter {
 
     const cell = this.cells.get(cellId);
     // for force update, delete the cell and redefine anyway
-    if (
-      !force &&
-      cell &&
-      cell.code === code &&
-      cell.codeType === type &&
-      !cell.error
-    ) {
+    if (!force && cell && cell.code === code && cell.codeType === type && !cell.error) {
       // console.log("code is the same", cellId, code, cell);
       return;
     }
@@ -251,7 +227,6 @@ export class ActiveCellRuntime extends EventEmitter {
       before.name != cell.name ||
       before.codeType !== cell.codeType
     ) {
-      debugger;
       const variable = this.defineFresh(cell);
       if (before.variable) {
         // console.log("deleting", before.id, before.name);
@@ -266,11 +241,7 @@ export class ActiveCellRuntime extends EventEmitter {
       // redefine the cell, will keep the same variable
       // before.variable.delete();
       // cell.variable = this.defineFresh(cell);
-      cell.variable = this.module.redefine(
-        cell.name,
-        cell.inputs,
-        cell.definition,
-      );
+      cell.variable = this.module.redefine(cell.name, cell.inputs, cell.definition);
     }
   }
 
@@ -395,13 +366,7 @@ export class ActiveCell extends EventEmitter {
 
   deleted: boolean = false;
 
-  static fromConfig(
-    mod: ActiveCellRuntime,
-    cellId: string,
-    name,
-    deps: string[],
-    definition: Function,
-  ) {
+  static fromConfig(mod: ActiveCellRuntime, cellId: string, name, deps: string[], definition: Function) {
     return new ActiveCell({
       id: cellId,
       name: name,
@@ -508,9 +473,7 @@ export class ActiveCell extends EventEmitter {
       console.log(code, ast);
 
       const deps = ast.references.map((arg: any) => arg.name);
-      const definition = isString(code)
-        ? this.defFromAst(cellName, deps, ast, code)
-        : code;
+      const definition = isString(code) ? this.defFromAst(cellName, deps, ast, code) : code;
 
       if (!definition) {
         console.error("DEFINITION NOT FOUND", ast.body.type, ast);
@@ -593,11 +556,7 @@ export class ActiveCell extends EventEmitter {
   }
 
   hasName(): boolean {
-    return (
-      !isUnnamedCell(this.name) &&
-      !isViewCell(this.name) &&
-      this.codeType === "javascript"
-    );
+    return !isUnnamedCell(this.name) && !isViewCell(this.name) && this.codeType === "javascript";
   }
 
   isViewOf(): boolean {
@@ -663,12 +622,7 @@ const factory = {
     const fnBody = code.slice(body.start, body.end);
     return this.define(name, deps, `return (${fnBody})`);
   },
-  ArrowFunctionExpression(
-    name: string,
-    deps: string[],
-    ast: any,
-    code: string,
-  ) {
+  ArrowFunctionExpression(name: string, deps: string[], ast: any, code: string) {
     return this.Expression(name, deps, ast, code);
   },
   FunctionExpression(name: string, deps: string[], ast: any, code: string) {
@@ -677,12 +631,7 @@ const factory = {
   BinaryExpression(name: string, deps: string[], ast: any, code: string) {
     return this.Expression(name, deps, ast, code);
   },
-  TaggedTemplateExpression(
-    name: string,
-    deps: string[],
-    ast: any,
-    code: string,
-  ) {
+  TaggedTemplateExpression(name: string, deps: string[], ast: any, code: string) {
     return this.Expression(name, deps, ast, code);
   },
   NewExpression(name: string, deps: string[], ast: any, code: string) {

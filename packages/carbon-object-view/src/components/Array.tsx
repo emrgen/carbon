@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { AiFillCaretDown } from "react-icons/ai";
 import { BsFillCaretRightFill } from "react-icons/bs";
 import { NodeView } from "./Node";
 import { NodeInitial } from "./NodeInitial";
@@ -7,13 +8,14 @@ import { PAGE_SIZE } from "./utils";
 interface ArrayProps {
   propName: string;
   data: Array<any>;
+  root?: boolean;
 }
 
 // ArrayView renders a view of collapsible array with elements
 // renders Array as following
 // > Array(4) [1,2,3,4]
 export const ArrayView = (props: ArrayProps) => {
-  const { data, propName } = props;
+  const { data, propName, root } = props;
   const [expanded, setExpanded] = useState(false);
 
   const [slice, setSlice] = useState(data.slice(0, PAGE_SIZE));
@@ -55,9 +57,14 @@ export const ArrayView = (props: ArrayProps) => {
           setExpanded((e) => !e);
         }}
       >
-        {propName && <span className={"cov-object-key"}>{propName}:</span>}
+        {!root && propName && <span className={"cov-object-key"}>{propName}:</span>}
+        {root && propName && (
+          <span className={"cov-object-key"} id={root ? "cov-root-name" : ""}>
+            {propName} ={" "}
+          </span>
+        )}
         <div className={"cov-expander"}>
-          <BsFillCaretRightFill fontSize={"12px"} />
+          {expanded ? <AiFillCaretDown /> : <BsFillCaretRightFill fontSize={"12px"} />}
         </div>
         <span className={"cov-object-constructor"}>Array({slice.length})</span>
         <span className={"cov-left-bracket"}>[</span>
@@ -69,16 +76,13 @@ export const ArrayView = (props: ArrayProps) => {
             {slice.map((d, index) => {
               return (
                 <div key={index} className={"cov-array-element"}>
-                  <NodeView data={d} propName={`${index}`} isIndex={true} />
+                  <NodeView data={d} propName={`${index}`} isIndex={true} root={false} />
                 </div>
               );
             })}
           </div>
           {expanded && showMore && (
-            <div
-              className={"cov-show-more cov-show-more__array-items"}
-              onClick={handleShowMore}
-            >
+            <div className={"cov-show-more cov-show-more__array-items"} onClick={handleShowMore}>
               ...more
             </div>
           )}
@@ -94,9 +98,7 @@ export const ArrayView = (props: ArrayProps) => {
               return (
                 <div key={index} className={"cov-array-element"}>
                   <NodeInitial data={d} propName={""} isIndex={false} />
-                  {index + 1 !== data.length && (
-                    <span className={"cov-comma"}>,</span>
-                  )}
+                  {index + 1 !== data.length && <span className={"cov-comma"}>,</span>}
                 </div>
               );
             })

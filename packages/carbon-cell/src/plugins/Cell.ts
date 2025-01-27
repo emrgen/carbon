@@ -9,6 +9,10 @@ export class Cell extends CarbonPlugin {
       sandbox: true,
       // content: "cellView cellCode",
       insert: true,
+      control: {
+        insert: true,
+        collapse: true,
+      },
       dnd: {
         draggable: true,
         handle: true,

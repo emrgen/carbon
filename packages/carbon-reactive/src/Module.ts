@@ -51,6 +51,7 @@ export class Module {
     return this.runtime.moduleVariables;
   }
 
+  // recompute the variable with the given name
   recompute(name: string) {
     const variable = this.value(name);
     if (!variable) return;
@@ -59,7 +60,7 @@ export class Module {
     this.runtime.tryRecompute();
   }
 
-  value(name: string): Variable | undefined {
+  private value(name: string): Variable | undefined {
     const fullName = Variable.fullName(this.id, name);
     const variables = this.moduleVariables.get(fullName);
     if (!variables) return;
@@ -72,6 +73,7 @@ export class Module {
     return variables[0];
   }
 
+  // builtin variable by name
   builtin(name: string) {
     return this.runtime.builtinVariables.get(name);
   }
@@ -94,6 +96,7 @@ export class Module {
     return mod;
   }
 
+  // import a variable from another module
   import(name: string, alias: string, module: Module) {
     // check if the variable exists in the module
     const variable = module.value(name);

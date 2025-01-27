@@ -42,25 +42,19 @@ function serializeConsoleLog(...args) {
   }
 
   // Serialize remaining arguments
-  let formattedArgs = args.map((arg) =>
-    typeof arg === "string" ? arg : JSON.stringify(arg),
-  );
+  let formattedArgs = args.map((arg) => (typeof arg === "string" ? arg : JSON.stringify(arg)));
   result.push(...formattedArgs);
 
   return result.join(" ");
 }
 
-export const FunctionView = ({
-  data,
-  propName,
-  isIndex,
-  isGenerator = false,
-}) => {
+export const FunctionView = ({ data, propName, isIndex, isGenerator = false, root }) => {
   const keyClass = isIndex ? "cov-array-key" : "cov-object-key";
 
   return (
     <div className={"cov-function"}>
-      {propName && <span className={keyClass}>{propName}:</span>}
+      {!root && propName && <span className={keyClass}>{propName}:</span>}
+      {root && propName && <span className={keyClass} id={root ? "cov-root-name":''}>{propName} =&nbsp;</span>}
       <span className={"cov-function-key"}>f{isGenerator ? "*" : ""}</span>
       <span className={"cov-function-arguments"}>({getParamNames(data)})</span>
     </div>
@@ -72,9 +66,7 @@ const ARGUMENT_NAMES = /([^\s,]+)/g;
 
 function getParamNames(func) {
   const fnStr = func.toString().replace(STRIP_COMMENTS, "");
-  let result = fnStr
-    .slice(fnStr.indexOf("(") + 1, fnStr.indexOf(")"))
-    .match(ARGUMENT_NAMES);
+  let result = fnStr.slice(fnStr.indexOf("(") + 1, fnStr.indexOf(")")).match(ARGUMENT_NAMES);
   if (result === null) result = [];
   return result.join(", ");
 }

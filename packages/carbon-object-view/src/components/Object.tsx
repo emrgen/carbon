@@ -7,7 +7,7 @@ import { NodeInitial } from "./NodeInitial";
 import { ProtoView } from "./Proto";
 import { isFunctionProp, isGetterProp, isSetterProp, PAGE_SIZE } from "./utils";
 
-export const ObjectView = ({ data, propName }) => {
+export const ObjectView = ({ data, propName, root }) => {
   const [expanded, setExpanded] = useState(false);
 
   const [descriptors, setDescriptors] = useState({});
@@ -79,10 +79,7 @@ export const ObjectView = ({ data, propName }) => {
   console.log(slice);
 
   return (
-    <div
-      className={"cov-object"}
-      style={{ display: expanded ? "block" : "flex" }}
-    >
+    <div className={"cov-object"} style={{ display: expanded ? "block" : "flex" }}>
       <div
         className={"cov-object-initial"}
         onClick={(e) => {
@@ -90,17 +87,16 @@ export const ObjectView = ({ data, propName }) => {
           setExpanded((e) => !e);
         }}
       >
-        {propName && <span className={"cov-object-key"}>{propName}:</span>}
+        {!root && propName && <span className={"cov-object-key"}>{propName}:</span>}
+        {root && propName && (
+          <span className={"cov-object-key"} id={"cov-root-name"}>
+            {propName} ={" "}
+          </span>
+        )}
         <div className={"cov-expander"}>
-          {expanded ? (
-            <AiFillCaretDown />
-          ) : (
-            <BsFillCaretRightFill fontSize={"12px"} />
-          )}
+          {expanded ? <AiFillCaretDown /> : <BsFillCaretRightFill fontSize={"12px"} />}
         </div>
-        <span className={"cov-object-constructor"}>
-          {data.constructor?.name}
-        </span>
+        <span className={"cov-object-constructor"}>{data.constructor?.name}</span>
         <span className={"cov-left-brace"}>{"{"}</span>
       </div>
 
@@ -109,7 +105,7 @@ export const ObjectView = ({ data, propName }) => {
           {slice.map((key, index) => {
             return (
               <div key={index} className={"cov-object-element"}>
-                <NodeView data={data[key]} propName={key} isIndex={false} />
+                <NodeView data={data[key]} propName={key} isIndex={false} root={false} />
               </div>
             );
           })}
@@ -117,11 +113,7 @@ export const ObjectView = ({ data, propName }) => {
           {!isPlainObject(data) && (
             <div className={"cov-object-element"}>
               {/*<span className={"cov-object-key"}>{"<prototype>"}:</span>*/}
-              <ProtoView
-                data={data}
-                propName={"<prototype>"}
-                parentProps={new Set(Object.getOwnPropertyNames(data))}
-              />
+              <ProtoView data={data} propName={"<prototype>"} parentProps={new Set(Object.getOwnPropertyNames(data))} />
             </div>
           )}
         </div>
@@ -134,19 +126,14 @@ export const ObjectView = ({ data, propName }) => {
               <div key={index} className={"cov-object-element"}>
                 {/*<span className={"cov-object-key"}>{key}:</span>*/}
                 <NodeInitial data={data[key]} propName={key} isIndex={false} />
-                {index + 1 !== Object.keys(data).length && (
-                  <span className={"cov-comma"}>,</span>
-                )}
+                {index + 1 !== Object.keys(data).length && <span className={"cov-comma"}>,</span>}
               </div>
             );
           })}
         </div>
       )}
       {expanded && showMore && (
-        <div
-          className={"cov-show-more cov-show-more__object-fields"}
-          onClick={handleShowMore}
-        >
+        <div className={"cov-show-more cov-show-more__object-fields"} onClick={handleShowMore}>
           ...more
         </div>
       )}

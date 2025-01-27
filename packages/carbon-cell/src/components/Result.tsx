@@ -2,15 +2,7 @@ import { HasFocusPath } from "@emrgen/carbon-core";
 import { ObjectViewer } from "@emrgen/carbon-object-view";
 import { Optional } from "@emrgen/types";
 import createDOMPurify from "dompurify";
-import {
-  cloneDeep,
-  isArray,
-  isFunction,
-  isNumber,
-  isObject,
-  isPlainObject,
-  isString,
-} from "lodash";
+import { cloneDeep, isArray, isFunction, isNumber, isObject, isPlainObject, isString } from "lodash";
 import { memo, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { ViewStylePath } from "../constants";
 import { ActiveCell } from "../core/ActiveCellRuntime";
@@ -27,9 +19,7 @@ const ResultInner = (props) => {
   const mod = useActiveCellRuntime();
 
   const [nodeId] = useState(node.id.toString());
-  const [cell, setCell] = useState<Optional<ActiveCell>>(
-    mod.cell(node.id.toString()),
-  );
+  const [cell, setCell] = useState<Optional<ActiveCell>>(mod.cell(node.id.toString()));
   const [result, setResult] = useState<any>(NOT_LOADED);
   const [error, setError] = useState<string>("");
   const [html, setHtml] = useState<Optional<string>>(null);
@@ -108,11 +98,7 @@ const ResultInner = (props) => {
   // listen to the cell events
   useEffect(() => {
     const onFulfill = (cell: ActiveCell) => {
-      console.log(
-        `CELL: evaluated. ID: ${cell.uniqId}, Name: ${cell.name}, Result:`,
-        cell.result,
-        cell,
-      );
+      console.log(`CELL: evaluated. ID: ${cell.uniqId}, Name: ${cell.name}, Result:`, cell.result, cell);
       setCell(cell);
       updateResult(cell.result);
       setError("");
@@ -161,44 +147,29 @@ const ResultInner = (props) => {
       {/*</div>*/}
       <div className={"cell-result"}>
         <div className={"cell-loading"} data-loading={pending} />
-        {!error &&
-          cell?.codeType === "css" &&
-          result !== NOT_LOADED &&
-          isStyleElement(result) && (
-            <div className={"cell-view-css"}>
-              <ObjectViewer data={"<style>"} />
-            </div>
-          )}
+        {!error && cell?.codeType === "css" && result !== NOT_LOADED && isStyleElement(result) && (
+          <div className={"cell-view-css"}>
+            <ObjectViewer data={"<style>"} />
+          </div>
+        )}
 
         {/*show hidden script */}
-        {!error &&
-          cell?.codeType === "html" &&
-          result !== NOT_LOADED &&
-          isScriptElement(result) && (
-            <div className={"cell-view-html"}>
-              <ObjectViewer data={`<script>`} />
-            </div>
-          )}
+        {!error && cell?.codeType === "html" && result !== NOT_LOADED && isScriptElement(result) && (
+          <div className={"cell-view-html"}>
+            <ObjectViewer data={`<script>`} />
+          </div>
+        )}
 
-        {!error &&
-          cell?.codeType === "html" &&
-          result !== NOT_LOADED &&
-          isStyleElement(result) && (
-            <div className={"cell-view-html"}>
-              <ObjectViewer data={`<style>`} />
-            </div>
-          )}
+        {!error && cell?.codeType === "html" && result !== NOT_LOADED && isStyleElement(result) && (
+          <div className={"cell-view-html"}>
+            <ObjectViewer data={`<style>`} />
+          </div>
+        )}
 
         {!!error && <div className={"cell-view-error"}>{error}</div>}
         {cell && !error && result !== NOT_LOADED && (
           <div className={"cell-view-result"}>
-            <ResultView
-              cell={cell}
-              cellName={cellName}
-              result={result}
-              node={node}
-              html={html}
-            />
+            <ResultView cell={cell} cellName={cellName} result={result} node={node} html={html} />
           </div>
         )}
       </div>
@@ -240,12 +211,15 @@ const ResultView = (props) => {
 
   // console.dir(result);
 
+  const objectName = cell.hasName() ? cellName : "";
+  const view = <ObjectViewer data={result} field={objectName} root={true} />;
+
   if (result === true) {
     return (
       <CellResultView
         cell={cell}
         name={cellName}
-        result={"true"}
+        result={<ObjectViewer data={"true"} field={objectName} root={true} />}
         color={"#00b894"}
       />
     );
@@ -256,7 +230,7 @@ const ResultView = (props) => {
       <CellResultView
         cell={cell}
         name={cellName}
-        result={"false"}
+        result={<ObjectViewer data={"false"} field={objectName} root={true} />}
         color={"#f45a80"}
       />
     );
@@ -267,7 +241,7 @@ const ResultView = (props) => {
       <CellResultView
         cell={cell}
         name={cellName}
-        result={"null"}
+        result={<ObjectViewer data={"null"} field={objectName} root={true} />}
         color={"#f45a80"}
       />
     );
@@ -278,32 +252,22 @@ const ResultView = (props) => {
       <CellResultView
         cell={cell}
         name={cellName}
-        result={"undefined"}
+        result={<ObjectViewer data={"undefined"} field={objectName} root={true} />}
         color={"#f45a80"}
       />
     );
   }
 
   if (isNumber(result)) {
-    return <CellResultView cell={cell} name={cellName} result={result} />;
+    return <CellResultView cell={cell} name={objectName} result={view} />;
   }
 
   if (isString(result)) {
     return <div>{result}</div>;
   }
 
-  if (
-    cellName &&
-    (isArray(result) || isObject(result) || isFunction(result)) &&
-    !isHtmlElement(result)
-  ) {
-    return (
-      <CellResultView
-        cell={cell}
-        name={cellName}
-        result={<ObjectViewer data={result} />}
-      />
-    );
+  if (cellName && (isArray(result) || isObject(result) || isFunction(result)) && !isHtmlElement(result)) {
+    return <CellResultView cell={cell} name={objectName} result={view} />;
 
     // return <CellResultView cell={cell} name={cellName} result={`[${res}]`} />;
   }
@@ -367,9 +331,7 @@ const CellResultView = (props: CellResultViewProps) => {
 
   return (
     <div className={"cell-result-named-view"} onKeyUp={stop} onKeyDown={stop}>
-      {cell.hasName() && name && (
-        <div className={"cell-result-cell-name"}>{name} =&nbsp;</div>
-      )}
+      {/*{cell.hasName() && name && <div className={"cell-result-cell-name"}>{name} =&nbsp;</div>}*/}
       <div style={{ color }} className={"cell-result-view-wrapper"}>
         {result}
       </div>

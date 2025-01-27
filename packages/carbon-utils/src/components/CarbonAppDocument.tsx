@@ -1,6 +1,4 @@
 import { Carbon } from "@emrgen/carbon-core";
-import { ReactNode, useEffect, useRef } from "react";
-import { RecoilRoot } from "recoil";
 import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon-react";
 import {
   CarbonChangeContext,
@@ -11,6 +9,8 @@ import {
   RenderManager,
   RenderManagerContext,
 } from "@emrgen/carbon-react";
+import { ReactNode, useEffect, useRef } from "react";
+import { RecoilRoot } from "recoil";
 
 interface CarbonAppProps {
   app: Carbon;
@@ -37,30 +37,31 @@ export function CarbonApp(props: CarbonAppProps) {
 
   return (
     <CarbonContext app={app}>
-      <CarbonOverlayContext>
-        <DndContext>
-          <RenderManagerContext manager={props.renderManager}>
-            <RecoilRoot>
-              <CarbonEvents>
-                <div
-                  ref={ref}
-                  className="carbon-app-cursor-rest"
-                  contentEditable={true}
-                  suppressContentEditableWarning
-                  // onKeyDown={preventAndStop}
-                  // onKeyUp={preventAndStop}
-                ></div>
-                <CarbonChangeContext>
+      <CarbonChangeContext>
+        <CarbonOverlayContext>
+          <DndContext>
+            <RenderManagerContext manager={props.renderManager}>
+              <RecoilRoot>
+                <CarbonEvents>
+                  <div
+                    ref={ref}
+                    className="carbon-app-cursor-rest"
+                    contentEditable={true}
+                    suppressContentEditableWarning
+                    // onKeyDown={preventAndStop}
+                    // onKeyUp={preventAndStop}
+                  ></div>
+
                   <RectSelectContext>
                     <CarbonContent />
                     {children}
                   </RectSelectContext>
-                </CarbonChangeContext>
-              </CarbonEvents>
-            </RecoilRoot>
-          </RenderManagerContext>
-        </DndContext>
-      </CarbonOverlayContext>
+                </CarbonEvents>
+              </RecoilRoot>
+            </RenderManagerContext>
+          </DndContext>
+        </CarbonOverlayContext>
+      </CarbonChangeContext>
     </CarbonContext>
   );
 }

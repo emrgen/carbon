@@ -1,6 +1,8 @@
 import { isNestableNode } from "@emrgen/carbon-blocks";
 import {
+  CollapsedPath,
   EventsIn,
+  FocusOnInsertPath,
   Node,
   nodeLocation,
   PinnedSelection,
@@ -14,6 +16,7 @@ import { Optional } from "@emrgen/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { HiOutlinePlus } from "react-icons/hi";
+import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { PiDotsSixVerticalBold } from "react-icons/pi";
 import { useDndContext } from "../hooks";
 import { useDndMonitor } from "../hooks/useDndMonitor";
@@ -29,15 +32,21 @@ export const CarbonDragHandleId = "carbon-drag-handle";
 
 export function DraggableHandle(props: FastDragHandleProps) {
   const { node, style } = props;
+  const app = useCarbon();
   const [show, setShow] = useState(false);
   const [showDropHint, setShowDropHint] = useState(false);
   const [dropHintStyle, setDropHintStyle] = useState({} as any);
   const { attributes } = useNodeState({ node });
   const dnd = useDndContext();
-
-  const app = useCarbon();
+  const [collapsed, setCollapsed] = useState(() => {
+    return app.store.get(node.id)?.linkedProps?.props.get(CollapsedPath, false) ?? false;
+  });
 
   const handleRef = useRef(null);
+
+  useEffect(() => {
+    setCollapsed(app.store.get(node.id)?.linkedProps?.props.get(CollapsedPath, false) ?? false);
+  }, [app, node]);
 
   const { listeners } = useDraggableHandle({
     id: CarbonDragHandleId,
@@ -69,10 +78,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const onDragStart = useCallback(
     (e: DndEvent) => {
       if (e.id === CarbonDragHandleId) {
-        app.onEvent(
-          EventsIn.dragStart,
-          CustomEvent.create(EventsIn.dragStart, e.node, e.event),
-        );
+        app.onEvent(EventsIn.dragStart, CustomEvent.create(EventsIn.dragStart, e.node, e.event));
         app.enable(() => {
           app.cmd.SelectBlocks([]).Dispatch();
         });
@@ -175,8 +181,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       let { top, bottom, left, right, x, y } = elementBound(hitElement!);
       const width = right - left;
       const height = bottom - top;
-      const offset =
-        !to.nodeId.eq(hitNode.id) && hitNode.name == "paragraph" ? 30 : 0;
+      const offset = !to.nodeId.eq(hitNode.id) && hitNode.name == "paragraph" ? 30 : 0;
       if (to.isBefore) {
         // drop before the hit node
         const beforeNode = hitNode.prevSibling;
@@ -242,11 +247,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
       // setShowDropHint(false);
       const from = nodeLocation(node)!;
       const to = findDropPosition(e, hitNode);
-      if (
-        !to ||
-        from.eq(to) ||
-        (to.isBefore && hitNode.prevSibling?.id.eq(node.id))
-      ) {
+      if (!to || from.eq(to) || (to.isBefore && hitNode.prevSibling?.id.eq(node.id))) {
         return;
       }
 
@@ -292,17 +293,11 @@ export function DraggableHandle(props: FastDragHandleProps) {
       if (isDragging) {
         preventAndStop(e.event);
 
-        app.onEvent(
-          EventsIn.dragUp,
-          CustomEvent.create(EventsIn.dragDown, node, e.event),
-        );
+        app.onEvent(EventsIn.dragUp, CustomEvent.create(EventsIn.dragDown, node, e.event));
       } else {
         if (node.type.dnd?.handle) {
           app.parkCursor();
-          app.cmd
-            .SelectBlocks([node.id])
-            ?.Select(PinnedSelection.SKIP)
-            .Dispatch();
+          app.cmd.SelectBlocks([node.id])?.Select(PinnedSelection.SKIP).Dispatch();
 
           app.emit("show:context:menu", {
             node,
@@ -318,10 +313,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
   const onMouseDown = useCallback(
     (node: Node, e) => {
       if (e.id !== CarbonDragHandleId) return;
-      app.onEvent(
-        EventsIn.dragDown,
-        CustomEvent.create(EventsIn.dragDown, node, e.event),
-      );
+      app.onEvent(EventsIn.dragDown, CustomEvent.create(EventsIn.dragDown, node, e.event));
     },
     [app],
   );
@@ -346,10 +338,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
     app.focus();
     if (e.shiftKey) {
       const after = PinnedSelection.fromNodes([]);
-      app.cmd.inserter
-        .insertBeforeDefault(node, "paragraph")
-        ?.SelectBlocks([])
-        .Dispatch();
+      app.cmd.inserter.insertBeforeDefault(node, "paragraph")?.SelectBlocks([]).Dispatch();
       return;
     }
 
@@ -371,11 +360,28 @@ export function DraggableHandle(props: FastDragHandleProps) {
     //   return;
     // }
 
-    app.cmd.inserter
-      .insertAfterDefault(node, "paragraph")
-      .SelectBlocks([])
-      .Dispatch();
+    app.cmd.inserter.insertAfterDefault(node, "paragraph").SelectBlocks([]).Dispatch();
   };
+
+  const handleToggleCollapse = useCallback(
+    (e) => {
+      preventAndStop(e);
+      if (node.isSandbox) {
+        app.cmd.collapsible
+          .toggle(app.store.get(node.id)!.linkedProps!)
+          .Update(node.id, {
+            [FocusOnInsertPath]: true,
+          })
+          .Dispatch()
+          .Then(() => {
+            setCollapsed((c) => !c);
+          });
+      } else {
+        throw new Error("Cannot collapse non-sandbox node");
+      }
+    },
+    [app, node],
+  );
 
   return (
     <div
@@ -385,30 +391,20 @@ export function DraggableHandle(props: FastDragHandleProps) {
       {...attributes}
       style={{ ...style, display: show ? "flex" : "none" }}
     >
-      {!node?.type.dnd?.handle && (
-        <div
-          className="carbon-drag-handle-cover"
-          ref={handleRef}
-          {...listeners}
-        />
-      )}
+      {!node?.type.dnd?.handle && <div className="carbon-drag-handle-cover" ref={handleRef} {...listeners} />}
       {node?.type.dnd?.handle && (
         <>
-          <div
-            className="carbon-add-handle"
-            onClick={handleInsertNode}
-            onMouseDown={preventAndStop}
-          >
+          <div className="carbon-add-handle" onClick={handleInsertNode} onMouseDown={preventAndStop}>
             <HiOutlinePlus />
           </div>
-          <div
-            className="carbon-drag-handle"
-            onKeyDown={(e) => console.log(e)}
-            ref={handleRef}
-            {...listeners}
-          >
+          <div className="carbon-drag-handle" onKeyDown={(e) => console.log(e)} ref={handleRef} {...listeners}>
             <PiDotsSixVerticalBold />
           </div>
+          {node.type.spec.control?.collapse && (
+            <div className="carbon-add-handle" onClick={handleToggleCollapse} onMouseDown={preventAndStop}>
+              {collapsed ? <LuChevronRight /> : <LuChevronDown />}
+            </div>
+          )}
         </>
       )}
       {createPortal(<>{DragRectComp}</>, document.body)}
