@@ -4,6 +4,16 @@ import { Cell } from "../src/Cell";
 import { Promises } from "../src/Promises";
 import { Runtime } from "../src/Runtime";
 
+function registerListeners(runtime: Runtime) {
+  runtime
+    .on("fulfilled", (v) => {
+      console.log("fulfilled:", v.id, "=>", v.value);
+    })
+    .on("rejected", (v) => {
+      console.log("rejected:", v.id, "=>", v.error?.toString());
+    });
+}
+
 test(
   "create a single variable",
   async (t) => {
@@ -312,10 +322,9 @@ test("create constant variable", async (t) => {
 test("import variable from another module", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
   const m1 = runtime.define("m1", "m1", "0.0.1");
-  const m2 = runtime.define("m1", "m2", "0.0.1");
-  registerListeners(runtime);
+  const m2 = runtime.define("m2", "m2", "0.0.1");
+  // registerListeners(runtime);
 
-  m2.import("x", "y", m1);
   m1.define(
     Cell.create({
       id: "x1",
@@ -338,35 +347,26 @@ test("import variable from another module", async (t) => {
   await Promises.delay(100);
   expect(m1.variable("x1")!.value).toBe(20);
 
-  // m1.define(
-  //   Cell.create({
-  //     id: "z1",
-  //     name: "z",
-  //     code: "() => 20",
-  //     definition: function* () {
-  //       let i = 1;
-  //       while (true) {
-  //         yield Promises.delay(100, i++);
-  //       }
-  //     },
-  //   }),
-  // );
+  const m2y = m2.import("x", "y", m1);
 
-  // m1.define(
-  //   Cell.create({
-  //     id: "z1",
-  //     name: "z",
-  //     code: "() => 2",
-  //     definition: function* () {
-  //       let i = 10;
-  //       while (true) {
-  //         yield Promises.delay(100, i++);
-  //       }
-  //     },
-  //   }),
-  // );
+  m1.define(
+    Cell.create({
+      id: "z1",
+      name: "z",
+      code: "() => 20",
+      definition: function* () {
+        let i = 1;
+        while (true) {
+          yield Promises.delay(10, i++);
+          if (i > 3) break;
+        }
+      },
+    }),
+  );
 
-  await Promises.delay(2000);
+  await Promises.delay(100);
+  expect(m1.variable("z1")!.value).toBe(3);
+  expect(m2y!.value).toBe(20);
 });
 
 test("duplicate definition", async (t) => {
@@ -492,7 +492,7 @@ test("builtin Promises", async (t) => {
 
   const runtime = Runtime.create("test", "0.0.1", builtins);
   const m1 = runtime.define("m1", "m1", "0.0.1");
-  registerListeners(runtime);
+  // registerListeners(runtime);
 
   m1.define(
     Cell.create({
@@ -517,13 +517,14 @@ test("builtin Promises", async (t) => {
         let i = 1;
         while (true) {
           yield Promises.delay(10, _.range(i));
-          if (++i > 3) break;
+          if (++i > 2) break;
         }
       },
     }),
   );
 
-  await Promises.delay(1000);
+  await Promises.delay(100);
+  expect(m1.variable("y1")!.value).toEqual([0, 1]);
 });
 
 test("duplicate-1 definition fixed later", async (t) => {
@@ -648,13 +649,3 @@ test("duplicate-1 definition fixed later", async (t) => {
 //   await Promises.delay(100);
 //   // expect(m1.variable("x")!.value).toBe(10);
 // });
-
-function registerListeners(runtime: Runtime) {
-  runtime
-    .on("fulfilled", (v) => {
-      console.log("fulfilled:", v.id, "=>", v.value);
-    })
-    .on("rejected", (v) => {
-      console.log("rejected:", v.id, "=>", v.error?.toString());
-    });
-}

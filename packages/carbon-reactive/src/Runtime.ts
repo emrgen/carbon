@@ -316,7 +316,9 @@ export class Runtime extends EventEmitter {
         pending.map((p) => p.id),
       );
 
-    this.promise = this.promise.then(() => Promise.all(pending));
+    Promise.all(pending).then(() => {
+      this.tryRecompute();
+    });
   }
 
   generate() {
@@ -337,6 +339,11 @@ export class Runtime extends EventEmitter {
 
     roots.forEach((variable) => {
       variable.generateNext();
+    });
+
+    circular.forEach((variable) => {
+      variable.promise = variable.promise.next(noop);
+      variable.rejected(RuntimeError.circularDependency(variable.name), variable.promise.version);
     });
 
     return Promix.all(pending).then(() => {
