@@ -4,6 +4,7 @@ import { SemVer } from "semver";
 import { Cell } from "./Cell";
 import { Graph } from "./Graph";
 import { Module, ModuleNameVersion, ModuleVariableId, ModuleVariableName } from "./Module";
+import { Mutable } from "./Mutable";
 import { Promises } from "./Promises";
 import { Promix } from "./Promix";
 import { Variable, VariableName } from "./Variable";
@@ -34,8 +35,6 @@ export class Runtime extends EventEmitter {
   // generated from variables map
   moduleVariables: Map<ModuleVariableName, Variable[]> = new Map();
 
-  created: Set<Variable> = new Set();
-
   // variables that are dirty and need to be recomputed
   dirty: Set<Variable> = new Set();
 
@@ -44,6 +43,9 @@ export class Runtime extends EventEmitter {
 
   builtin: Module;
   builtinVariables: Map<VariableName, Variable> = new Map();
+
+  // mutable variables store
+  mutable: Mutable;
 
   computing: boolean = false;
 
@@ -58,6 +60,7 @@ export class Runtime extends EventEmitter {
     this.id = id;
     this.version = new SemVer(version);
     this.graph = new Graph();
+    this.mutable = new Mutable(this);
 
     const mod = Module.create(this, "mod:builtinId", "mod:builtinName", "0.0.1");
 
@@ -67,12 +70,13 @@ export class Runtime extends EventEmitter {
         id: "builtin/" + name,
         name,
         code: `() => ${value}`,
-        dependencies: [],
         definition: () => value,
         builtin: true,
       });
 
       const variable = mod.define(cell);
+      variable.fulfilled(value);
+
       this.builtinVariables.set(name, variable);
     });
 
@@ -104,7 +108,10 @@ export class Runtime extends EventEmitter {
 
   onCreate(variable: Variable) {
     this.variables.set(variable.id, variable);
-    this.created.add(variable);
+    this.moduleVariables.set(variable.name, this.moduleVariables.get(variable.name) || []);
+    this.moduleVariables.get(variable.name)!.push(variable);
+
+    this.dirty.add(variable);
 
     LOG && console.log("=>", variable.id);
     this.graph.addNode(variable);
@@ -117,11 +124,21 @@ export class Runtime extends EventEmitter {
       this.graph.addEdge(variable, output);
     });
 
-    Promises.delay(0).then(() => this.recompute());
+    this.tryRecompute();
   }
 
   onRemove(variable: Variable) {
     this.variables.delete(variable.name);
+    // if there were multiple variable with same name they become dirty
+    const variables = this.moduleVariables.get(variable.name);
+    if (variables) {
+      const remaining = variables.filter((v) => v.id !== variable.id);
+      this.moduleVariables.set(variable.name, remaining);
+      remaining.forEach((v) => {
+        this.dirty.add(v);
+      });
+    }
+
     this.graph.removeNode(variable);
     variable.outputs.forEach((output) => {
       this.dirty.add(output);
@@ -133,47 +150,43 @@ export class Runtime extends EventEmitter {
       }
     });
 
-    // if there were multiple variable with same name they become dirty
-    const variables = this.moduleVariables.get(variable.name);
-    if (variables) {
-      const remaining = variables.filter((v) => v.id !== variable.id);
-      this.moduleVariables.set(variable.name, remaining);
-      remaining.forEach((v) => {
-        this.dirty.add(v);
-      });
-    }
+    this.tryRecompute();
+  }
 
-    Promises.delay(0).then(() => this.recompute());
+  tryRecompute() {
+    if (this.dirty.size === 0 && this.generators.size === 0) return;
+    LOG &&
+      console.log(
+        "try dirty",
+        Array.from(this.dirty).map((v) => v.id + " " + v.cell.code),
+      );
+
+    Promises.delay(0).then(() => {
+      if (this.computing) {
+        console.log("not computing", this.computing);
+        this.tryRecompute();
+      } else {
+        this.generate().then(() => this.recompute());
+      }
+    });
   }
 
   // recompute the dirty variables and their dependencies
   recompute() {
-    if (this.dirty.size === 0 && this.created.size === 0) {
-      return;
-    }
-    LOG && console.log(this.computing);
-    if (this.computing) {
-      this.promise = this.promise.then(() => {
-        this.recompute();
-      });
+    LOG && console.log("----------------\n> recomputing\n----------------");
+    if (this.dirty.size === 0) {
+      // if no dirty variables tryRecompute (to process pending generators)
+      this.tryRecompute();
       return;
     }
 
-    LOG && console.log("----------------\n> recomputing\n----------------");
+    this.computing = true;
 
     LOG &&
       console.log(
-        "created:",
-        Array.from(this.created).map((v) => v.id),
         "dirty",
         Array.from(this.dirty).map((v) => v.id),
       );
-
-    // add the created variables to the dirty set
-    this.created.forEach((variable) => {
-      this.dirty.add(variable);
-    });
-    this.created.clear();
 
     const { roots, pending, sorted, circular } = this.precompute(Array.from(this.dirty));
     this.dirty.clear();
@@ -196,8 +209,6 @@ export class Runtime extends EventEmitter {
     LOG && console.log("----------------\n> precomputing\n----------------");
     const { roots, sorted, circular } = this.graph.topological(dirty);
 
-    this.dirty.clear();
-
     const pending: Promix<any>[] = [];
 
     const isRoot = (node) => {
@@ -206,33 +217,35 @@ export class Runtime extends EventEmitter {
 
     // connect the nodes with the inputs
     // NOTE: computation is not done here
-    sorted.forEach((node) => {
-      if (node.promise.isPending) {
-        node.rejected(RuntimeError.recalculating(node.name), node.promise.version);
+    sorted.forEach((variable) => {
+      // if the variable is pending from previous computation, reject it
+      if (variable.promise.isPending) {
+        variable.rejected(RuntimeError.recalculating(variable.name), variable.promise.version);
       }
-      node.promise = node.promise.next(noop);
+      variable.promise = variable.promise.next(noop);
 
-      if (isRoot(node)) {
-        pending.push(node.promise);
+      if (isRoot(variable)) {
+        pending.push(variable.promise);
         return;
       }
 
-      const inputs = this.graph.inputs(node).map((input) => input.promise);
+      const inputs = this.graph.inputs(variable).map((input) => input.promise);
       // console.log("before", node.id, node.promise.id);
       // console.log("after", node.id, node.promise.id);
 
       // const fulfilled = (value) => {
       //   return node.promise.fulfilled(node);
       // };
-      const done = node.promise.all(inputs).then((v) => {
-        node.compute(v, node.promise.version);
+
+      const done = variable.promise.all(inputs).then((v) => {
+        return variable.compute(v, variable.promise.version);
       });
       pending.push(done);
 
       LOG &&
         console.log(
           "connected:",
-          node.id,
+          variable.id,
           "<-",
           inputs.map((input) => input.id),
         );
@@ -256,16 +269,14 @@ export class Runtime extends EventEmitter {
   // compute the roots
   compute(roots: Variable[], sorted: Variable[], circular: Variable[], pending: Promix<any>[]) {
     LOG && console.log("----------------\n> compute\n----------------");
-    this.computing = true;
 
     sorted.forEach((p) => p.pending());
 
     // if there are circular dependencies, mark them with error
     circular.forEach((variable) => {
-      LOG && console.log("circular", variable.id);
+      // console.log("circular", variable.id);
+      variable.promise = variable.promise.next(noop);
       variable.rejected(RuntimeError.circularDependency(variable.name), variable.promise.version);
-      // console.log("circular", variable.error);
-      // variable.promise.rejected(variable.error);
     });
 
     // find conflicting names
@@ -290,9 +301,10 @@ export class Runtime extends EventEmitter {
 
     // fulfill the roots with the computed inputs, if no
     roots.forEach((root) => {
-      LOG && console.log("root", root.id);
       const inputs = this.graph.inputs(root).map((input) => input.promise);
-      Promise.all(inputs).then((v) => root.compute(v, root.promise.version));
+      Promix.all(inputs).then((v) => {
+        return root.compute(v, root.promise.version);
+      });
     });
 
     // this will allow next recompute to begin even before the current one is finished
@@ -304,25 +316,17 @@ export class Runtime extends EventEmitter {
         pending.map((p) => p.id),
       );
 
-    this.promise = Promix.all(pending).then(() => {
-      this.postcompute();
-    });
-  }
-
-  // if there were generators, run them
-  postcompute() {
-    Promises.delay(0).then(() => {
-      LOG && console.log("----------------\n> postcompute\n----------------");
-      if (this.generators.size) {
-        LOG && console.log("running generators");
-        this.generate();
-        // Promises.delay(0).then(() => this.recompute());
-      }
-    });
+    this.promise = this.promise.then(() => Promise.all(pending));
   }
 
   generate() {
     LOG && console.log("----------------\n> generate\n----------------");
+    if (this.generators.size === 0) {
+      return Promise.resolve();
+    }
+
+    this.computing = true;
+
     LOG &&
       console.log(
         "generators",
@@ -331,20 +335,12 @@ export class Runtime extends EventEmitter {
     const { roots, pending, circular } = this.precompute(Array.from(this.generators));
     this.generators.clear();
 
-    this.computing = true;
     roots.forEach((variable) => {
       variable.generateNext();
     });
 
-    // console.log("pending", pending.map(p => p.id))
-
-    this.computing = false;
-    this.promise = this.promise.then(() =>
-      Promix.all(pending).then(() => {
-        this.postcompute();
-      }),
-    );
-
-    // const {} = this.compute(roots, sorted, circular);
+    return Promix.all(pending).then(() => {
+      this.computing = false;
+    });
   }
 }

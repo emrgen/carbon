@@ -163,13 +163,65 @@ export class Variable {
 
     try {
       const res = this.cell.definition(...args);
-      // console.log(res);
       return Promise.resolve(res)
         .then(this.generateFirst)
         .then((v) => this.fulfilled(v, version))
         .catch(this.rejected);
     } catch (e) {
       return Promix.reject(e, this.id, this.version).catch((v) => this.rejected(v, version));
+    }
+  }
+
+  // run the generator once and save the value at the generated field
+
+  // if value is a generator, run the generator once
+  generateFirst(value: any) {
+    if (generatorish(value)) {
+      this.done = Promix.default(this.id, this.version).then(() => {
+        value.return();
+      });
+
+      this.generator = value;
+      return this.generate().catch(error);
+    }
+
+    return Promix.resolve(value);
+  }
+
+  generateNext() {
+    try {
+      if (this.done.isFulfilled) {
+        return Promix.resolve(this.generated);
+      }
+      return this.generate().then(this.fulfilled);
+    } catch (e) {
+      return Promix.reject(e, this.id, this.version).catch(this.rejected);
+    }
+  }
+
+  // run the generator once and save the value at the generated field
+  generate() {
+    try {
+      return Promix.resolve(this.generator.next(this.generated))
+        .then(({ value, done }) => {
+          if (done) {
+            return Promise.resolve(value).then((v) => {
+              this.done.fulfilled(v);
+              return this.generated;
+            });
+          } else {
+            // runtime dirty generators
+            return Promise.resolve(value).then((v) => {
+              this.generated = v;
+              // if the generator is not done, add it to the runtime for computation
+              this.runtime.generators.add(this);
+              return v;
+            });
+          }
+        })
+        .catch(error);
+    } catch (e) {
+      return Promix.reject(e, this.id, this.version).catch(this.rejected);
     }
   }
 
@@ -214,47 +266,8 @@ export class Variable {
     this.promise.fulfilled(this);
     return this;
   }
+}
 
-  // run the generator once and save the value at the generated field
-
-  // if value is a generator, run the generator once
-  generateFirst(value: any) {
-    if (generatorish(value)) {
-      this.done = Promix.default(this.id, this.version).then(() => {
-        value.return();
-      });
-
-      this.generator = value;
-      return this.generate();
-    }
-
-    return Promix.resolve(value);
-  }
-
-  generateNext() {
-    if (this.done.isFulfilled) {
-      return Promix.resolve(this.generated);
-    }
-    return this.generate().then(this.fulfilled);
-  }
-
-  // run the generator once and save the value at the generated field
-  generate() {
-    return Promix.resolve(this.generator.next(this.generated)).then(({ value, done }) => {
-      if (done) {
-        return Promise.resolve(value).then((v) => {
-          this.done.fulfilled(v);
-          return this.generated;
-        });
-      } else {
-        return Promise.resolve(value).then((v) => {
-          this.generated = v;
-          // if the generator is not done, add it to the runtime for computation
-          LOG && console.log("adding generator", this.id);
-          this.runtime.generators.add(this);
-          return v;
-        });
-      }
-    });
-  }
+function error(e) {
+  console.log(e);
 }

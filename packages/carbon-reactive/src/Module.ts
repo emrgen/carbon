@@ -51,6 +51,14 @@ export class Module {
     return this.runtime.moduleVariables;
   }
 
+  recompute(name: string) {
+    const variable = this.value(name);
+    if (!variable) return;
+
+    this.runtime.dirty.add(variable);
+    this.runtime.tryRecompute();
+  }
+
   value(name: string): Variable | undefined {
     const fullName = Variable.fullName(this.id, name);
     const variables = this.moduleVariables.get(fullName);
@@ -110,7 +118,6 @@ export class Module {
   // if the variable already exists, redefine it
   define(cell: Cell) {
     const fullId = Variable.id(this.id, cell.id);
-    const fullName = Variable.fullName(this.id, cell.name);
     if (this.variables.has(fullId)) {
       return this.redefine(cell);
     }
@@ -120,14 +127,6 @@ export class Module {
       module: this,
       cell,
     });
-
-    if (!this.moduleVariables.has(fullName)) {
-      this.moduleVariables.set(fullName, []);
-    }
-
-    // allow multiple variables with the same name
-    // we can throw an error during runtime if the variable is used in computation
-    this.moduleVariables.get(fullName)?.push(variable);
 
     // console.log("define", id, name, variable.dependencies);
     this.connect(variable);
@@ -158,36 +157,31 @@ export class Module {
 
     // if the cell has not changed, we just need to recompute
     if (variable.cell.eq(cell)) {
-      LOG && console.log("redefine", cell.id, cell.name, "no change");
+      console.log("redefine", cell.id, cell.name, "no change");
       variable.version += 1;
       this.runtime.dirty.add(variable);
       return variable;
     }
 
     // if the cell code has changed but the name is same we refine and keep the old connections
-    if (variable.name === cell.name) {
-      LOG && console.log("redefine", cell.id, cell.name, "same name");
-      const newVariable = Variable.create({
-        module: this,
-        cell,
-      });
-
-      // keep the old connections
-      newVariable.inputs = [...variable.inputs];
-      newVariable.outputs = [...variable.outputs];
-
-      // update the graph with the old variable removed
-      this.runtime.onRemove(variable);
-      // update the graph with the new variable added
-      this.runtime.onCreate(newVariable);
-
-      const gname = Variable.fullName(this.id, cell.name);
-      const namedVariables = this.moduleVariables.get(gname) ?? [];
-      this.moduleVariables.set(gname, uniqBy([newVariable, ...namedVariables], "id"));
-      this.variables.set(fullId, newVariable);
-
-      return newVariable;
-    }
+    // if (variable.name === cell.name) {
+    //   LOG && console.log("redefine", cell.id, cell.name, "same name");
+    //   const newVariable = Variable.create({
+    //     module: this,
+    //     cell,
+    //   });
+    //
+    //   // keep the old connections
+    //   newVariable.inputs = [...variable.inputs];
+    //   newVariable.outputs = [...variable.outputs];
+    //
+    //   // update the graph with the old variable removed
+    //   this.runtime.onRemove(variable);
+    //   // update the graph with the new variable added
+    //   this.runtime.onCreate(newVariable);
+    //
+    //   return newVariable;
+    // }
 
     // name of the variable has changed
     this.runtime.onRemove(variable);
@@ -211,16 +205,14 @@ export class Module {
     if (variable?.builtin) return;
 
     if (variable) {
-      this.runtime.onRemove(variable);
       this.disconnect(variable);
       variable.delete({ module: true });
-      this.moduleVariables.delete(fullId);
+      this.runtime.onRemove(variable);
     }
   }
 
   // connect the variable with the module local variables
   private connect(variable: Variable) {
-    // console.log(variable.name, variable.dependencies);
     variable.inputs = variable.dependencies
       .map((name) => this.moduleVariables.get(name))
       .filter(Boolean)

@@ -50,12 +50,12 @@ export class Cell {
     this.name = name;
     this.version = version;
     this.code = code;
-    this.hash = this.code
-      ? generateHash(`${this.id}/${this.name}/${this.version}/${this.code}`).toString()
-      : `hash_${randomString(10)}`;
     this.dependencies = dependencies;
     this.definition = definition;
     this.builtin = builtin;
+    this.hash = this.code
+      ? generateHash(`${this.id}/${this.name}/${this.version}/${this.code}/${this.dependencies.join(",")}`).toString()
+      : `hash_${randomString(10)}`;
   }
 
   with(module: Module) {
