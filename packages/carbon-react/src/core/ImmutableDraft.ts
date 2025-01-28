@@ -465,7 +465,9 @@ export class ImmutableDraft implements Draft {
       );
       this.tm.updateProps(node, {
         [PlaceholderPath]:
-          content.length === 0 ? (this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ?? "") : " ",
+          content.length === 0
+            ? (this.nodeMap.parent(node)?.props.get<string>(EmptyPlaceholderPath) ?? "")
+            : " ",
       });
     }
 
@@ -475,7 +477,9 @@ export class ImmutableDraft implements Draft {
       if (!parent) return;
       const updated = this.tm.updateProps(parent, {
         [PlaceholderPath]:
-          content.length === 0 ? (this.nodeMap.parent(parent)?.props.get<string>(EmptyPlaceholderPath) ?? "") : " ",
+          content.length === 0
+            ? (this.nodeMap.parent(parent)?.props.get<string>(EmptyPlaceholderPath) ?? "")
+            : " ",
       });
       this.addUpdated(parent.id);
       this.addContentChanged(parent.id);
@@ -536,7 +540,12 @@ export class ImmutableDraft implements Draft {
 
         const { node: downNode } = down;
 
-        console.log("CURRENT NODE", down.node.name, down.node.textContent, down.node.props.get(MarksPath, []));
+        console.log(
+          "CURRENT NODE",
+          down.node.name,
+          down.node.textContent,
+          down.node.props.get(MarksPath, []),
+        );
         const insertTextNode = node.type.schema.text(text, {
           props: {
             [MarksPath]: marks.toArray(),
@@ -724,7 +733,11 @@ export class ImmutableDraft implements Draft {
   }
 
   // update the placeholder of the target node based on the source node placeholder
-  private updatePlaceholder(source: Node, target: Optional<Node>, path: string = EmptyPlaceholderPath) {
+  private updatePlaceholder(
+    source: Node,
+    target: Optional<Node>,
+    path: string = EmptyPlaceholderPath,
+  ) {
     const placeholder = source.props.get<string>(path) ?? "";
     if (target) {
       if (path === EmptyPlaceholderPath) {
@@ -1141,7 +1154,9 @@ class Transformer {
 
   removeText(node: Node, text: string, offset: number) {
     console.log(p14("%c[trap]"), "color:green", "add text", node.key);
-    this.changes.add(TextChange.create(node.id, offset, node.textContent.slice(offset, offset + length), "remove"));
+    this.changes.add(
+      TextChange.create(node.id, offset, node.textContent.slice(offset, offset + length), "remove"),
+    );
 
     node.removeText(offset, text.length);
   }

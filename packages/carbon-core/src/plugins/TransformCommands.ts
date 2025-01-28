@@ -29,16 +29,7 @@ import {
 } from "@emrgen/carbon-core";
 
 import { Optional } from "@emrgen/types";
-import {
-  each,
-  first,
-  flatten,
-  last,
-  merge,
-  reduce,
-  reverse,
-  sortBy,
-} from "lodash";
+import { each, first, flatten, last, merge, reduce, reverse, sortBy } from "lodash";
 import { InsertTextAction } from "../core/actions/InsertTextAction";
 import { ContentMatch } from "../core/ContentMatch";
 import {
@@ -59,11 +50,7 @@ import { Point } from "../core/Point";
 import { Slice } from "../core/Slice";
 import { Span } from "../core/Span";
 import { NodeName } from "../core/types";
-import {
-  insertBeforeAction,
-  moveNodesActions,
-  removeNodesActions,
-} from "../utils/action";
+import { insertBeforeAction, moveNodesActions, removeNodesActions } from "../utils/action";
 import { takeAfter, takeBefore, takeUntil } from "../utils/array";
 import { blocksBelowCommonNode } from "../utils/findNodes";
 import { nodeLocation } from "../utils/location";
@@ -83,32 +70,15 @@ export interface DeleteOpts {
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
     transform: {
-      mark: (
-        selection: PinnedSelection | BlockSelection,
-        mark: Mark,
-      ) => Transaction;
-      removeMark: (
-        selection: PinnedSelection | BlockSelection,
-        mark: Mark,
-      ) => Transaction;
+      mark: (selection: PinnedSelection | BlockSelection, mark: Mark) => Transaction;
+      removeMark: (selection: PinnedSelection | BlockSelection, mark: Mark) => Transaction;
       insert(node: Node, ref: Node, opts?: InsertPos): Transaction;
-      insertText(
-        selection: PinnedSelection,
-        text: string,
-        native?: boolean,
-      ): Transaction;
+      insertText(selection: PinnedSelection, text: string, native?: boolean): Transaction;
       deleteText(pin: Pin, text: string, opts?: InsertPos): Transaction;
       remove(node: Node): Optional<Transaction>;
       move(nodes: Node | Node[], to: Point): Transaction;
-      delete(
-        selection?: PinnedSelection | BlockSelection,
-        opts?: DeleteOpts,
-      ): Transaction;
-      split(
-        node: Node,
-        selection?: PinnedSelection,
-        opts?: SplitOpts,
-      ): Transaction;
+      delete(selection?: PinnedSelection | BlockSelection, opts?: DeleteOpts): Transaction;
+      split(node: Node, selection?: PinnedSelection, opts?: SplitOpts): Transaction;
       wrap(node: Node, name: NodeName): Transaction;
       unwrap(node: Node): Optional<Transaction>;
       change(node: Node, name: NodeName): Optional<Transaction>;
@@ -146,11 +116,7 @@ export class TransformCommands extends BeforePlugin {
     };
   }
 
-  removeMark(
-    tr: Transaction,
-    selection: PinnedSelection | BlockSelection,
-    mark: Mark,
-  ) {
+  removeMark(tr: Transaction, selection: PinnedSelection | BlockSelection, mark: Mark) {
     if (selection instanceof BlockSelection) {
       throw new Error("Not implemented");
     } else {
@@ -163,11 +129,7 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // these are the default formats that can be applied to a node
-  mark(
-    tr: Transaction,
-    selection: PinnedSelection | BlockSelection,
-    mark: Mark,
-  ) {
+  mark(tr: Transaction, selection: PinnedSelection | BlockSelection, mark: Mark) {
     if (selection instanceof BlockSelection) {
       throw new Error("Not implemented");
     } else {
@@ -180,9 +142,7 @@ export class TransformCommands extends BeforePlugin {
       // if the selection is in the same title text block
       if (start.node.eq(end.node)) {
         const [prev, middle, next] = TitleNode.from(start.node)
-          .replaceContent(
-            start.node.children.map((n) => n.clone(deepCloneWithNewId)),
-          )
+          .replaceContent(start.node.children.map((n) => n.clone(deepCloneWithNewId)))
           .split(start.steps, end.steps);
         const leaves = middle.children.filter((child) => child.isFocusable);
         if (leaves.some((n) => !MarkSet.from(n.marks).has(mark))) {
@@ -201,9 +161,7 @@ export class TransformCommands extends BeforePlugin {
         }
 
         const textBlock = TitleNode.from(start.node)
-          .replaceContent(
-            [prev.children, middle.children, next.children].flat(),
-          )
+          .replaceContent([prev.children, middle.children, next.children].flat())
           .normalize();
 
         printNode(textBlock.node);
@@ -216,10 +174,7 @@ export class TransformCommands extends BeforePlugin {
         const endPin = Pin.create(textBlock.node, end.offset, endSteps);
         const after = PinnedSelection.create(startPin, endPin);
 
-        tr.SetContent(start.node.id, textBlock.children).Select(
-          after,
-          ActionOrigin.UserInput,
-        );
+        tr.SetContent(start.node.id, textBlock.children).Select(after, ActionOrigin.UserInput);
 
         return tr;
       }
@@ -247,14 +202,10 @@ export class TransformCommands extends BeforePlugin {
       );
 
       const startNodes = TitleNode.from(start.node)
-        .replaceContent(
-          start.node.children.map((n) => n.clone(deepCloneWithNewId)),
-        )
+        .replaceContent(start.node.children.map((n) => n.clone(deepCloneWithNewId)))
         .split(start.steps);
       const endNodes = TitleNode.from(end.node)
-        .replaceContent(
-          end.node.children.map((n) => n.clone(deepCloneWithNewId)),
-        )
+        .replaceContent(end.node.children.map((n) => n.clone(deepCloneWithNewId)))
         .split(end.steps);
 
       const startLeaves = startNodes[1].children.filter((n) => n.isFocusable);
@@ -354,11 +305,7 @@ export class TransformCommands extends BeforePlugin {
       ?.map((p) => p.point)
       ?.map(PointedSelection.fromPoint);
     if (!selection) {
-      console.error(
-        p14("%c[error]"),
-        "color:red",
-        "failed to create selection from node",
-      );
+      console.error(p14("%c[error]"), "color:red", "failed to create selection from node");
       return;
     }
 
@@ -376,9 +323,7 @@ export class TransformCommands extends BeforePlugin {
 
   private append(tr: Transaction, node: Node, parent: Node): Transaction {
     const { lastChild } = parent;
-    const at = lastChild
-      ? Point.toAfter(lastChild?.id)
-      : Point.atOffset(parent?.id!, 0);
+    const at = lastChild ? Point.toAfter(lastChild?.id) : Point.atOffset(parent?.id!, 0);
     tr.Insert(at, node);
     return tr;
   }
@@ -392,9 +337,7 @@ export class TransformCommands extends BeforePlugin {
       const { head } = selection;
       const offset = head.offset + text.length;
       const steps = head.steps + text.length;
-      const after = PointedSelection.fromPoint(
-        Point.atOffset(head.node.id, offset, steps),
-      );
+      const after = PointedSelection.fromPoint(Point.atOffset(head.node.id, offset, steps));
 
       cmd.Add(InsertTextAction.create(head.point, text));
       cmd.Select(after, ActionOrigin.UserInput);
@@ -405,9 +348,7 @@ export class TransformCommands extends BeforePlugin {
         const titleNode = TitleNode.from(cmd.startNode!);
         const textNode = cmd.app.schema.text(text)!;
         const textBlock = titleNode.insertInp(head.steps, textNode);
-        const mappedStep = textBlock.mapStep(
-          head.steps - titleNode.node.stepSize,
-        );
+        const mappedStep = textBlock.mapStep(head.steps - titleNode.node.stepSize);
         const steps = textBlock.node.stepSize + mappedStep;
         const pin = Pin.create(textBlock.node, textNode.focusSize, steps);
         const after = PinnedSelection.fromPin(pin);
@@ -420,12 +361,7 @@ export class TransformCommands extends BeforePlugin {
     }
   }
 
-  private insertText(
-    tr: Transaction,
-    selection: PinnedSelection,
-    text: string,
-    native = false,
-  ) {
+  private insertText(tr: Transaction, selection: PinnedSelection, text: string, native = false) {
     const { app } = tr;
     const { blockSelection } = app.state;
     if (blockSelection.isActive) {
@@ -442,9 +378,7 @@ export class TransformCommands extends BeforePlugin {
         if (downPin?.node.isZero) {
           const { start } = selection.leftAlign;
           const { offset } = start;
-          const after = PinnedSelection.fromPin(
-            Pin.future(start.node, offset + text.length),
-          );
+          const after = PinnedSelection.fromPin(Pin.future(start.node, offset + text.length));
 
           tr.Add(InsertTextAction.create(start.point, text));
           tr.Add(removeNodesActions([downPin.node]));
@@ -471,11 +405,7 @@ export class TransformCommands extends BeforePlugin {
         })!;
 
         tr.SetContent(head.node.id, [textNode]);
-        tr.Select(
-          PinnedSelection.fromPin(
-            Pin.future(head.node, text.length, text.length + 2),
-          ),
-        );
+        tr.Select(PinnedSelection.fromPin(Pin.future(head.node, text.length, text.length + 2)));
       } else {
         const { start } = selection;
         const down = start.down();
@@ -518,14 +448,9 @@ export class TransformCommands extends BeforePlugin {
           //   down.node.type.spec.mergeable &&
           //   MarkSet.eq(down.node.marks, textNode.marks);
 
-          const steps =
-            startText.stepSize + startText.mapStep(startStepFromEnd);
+          const steps = startText.stepSize + startText.mapStep(startStepFromEnd);
           const pin = startText.mapPin(
-            Pin.create(
-              startText.node,
-              start.offset + textNode.focusSize,
-              steps,
-            ),
+            Pin.create(startText.node, start.offset + textNode.focusSize, steps),
           );
 
           // console.log(start.offset, pin?.toString());
@@ -584,13 +509,9 @@ export class TransformCommands extends BeforePlugin {
       tr.Insert(Point.toAfter(lastNode.id), sliceClone.nodes);
 
       if (sliceClone.isBlockSelection) {
-        tr.SelectBlocks(sliceClone.nodes.map((n) => n.id)).Select(
-          PinnedSelection.SKIP,
-        );
+        tr.SelectBlocks(sliceClone.nodes.map((n) => n.id)).Select(PinnedSelection.SKIP);
       } else if (focusNode) {
-        tr.SelectBlocks([]).Select(
-          PinnedSelection.fromPin(Pin.toEndOf(focusNode)!),
-        );
+        tr.SelectBlocks([]).Select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!));
       }
       return;
     }
@@ -615,14 +536,10 @@ export class TransformCommands extends BeforePlugin {
       } else {
         if (start.eq(end) && start.isAtStartOfNode(container)) {
           const at = Point.toAfter(container?.prevSibling!.id);
-          tr.Insert(at, sliceClone.nodes).SelectBlocks(
-            sliceClone.nodes.map((n) => n.id),
-          );
+          tr.Insert(at, sliceClone.nodes).SelectBlocks(sliceClone.nodes.map((n) => n.id));
         } else {
           const at = Point.toAfter(container.id);
-          tr.Insert(at, sliceClone.nodes).SelectBlocks(
-            sliceClone.nodes.map((n) => n.id),
-          );
+          tr.Insert(at, sliceClone.nodes).SelectBlocks(sliceClone.nodes.map((n) => n.id));
         }
       }
 
@@ -649,11 +566,7 @@ export class TransformCommands extends BeforePlugin {
    * case 3: slice contains multiple blocks
    *
    */
-  private deleteAndPaste(
-    tr: Transaction,
-    selection: PinnedSelection,
-    slice: Slice,
-  ) {
+  private deleteAndPaste(tr: Transaction, selection: PinnedSelection, slice: Slice) {
     const { app } = tr;
     if (app.state.blockSelection.isActive) {
       throw Error("block selection is not supported yet");
@@ -669,10 +582,7 @@ export class TransformCommands extends BeforePlugin {
     const { start: sliceStartTitle, end: sliceEndTitle } = slice;
 
     // early exit for simple case
-    if (
-      startTitleBlock.eq(endTitleBlock) &&
-      sliceStartTitle.eq(sliceEndTitle)
-    ) {
+    if (startTitleBlock.eq(endTitleBlock) && sliceStartTitle.eq(sliceEndTitle)) {
       const prevBlock = TitleNode.from(startTitleBlock)
         .remove(start.steps, startTitleBlock.stepSize)
         .append(sliceStartTitle.children)
@@ -685,9 +595,7 @@ export class TransformCommands extends BeforePlugin {
       const after = PinnedSelection.fromPin(pin);
 
       const nextBlock = TitleNode.from(startTitleBlock)
-        .replaceContent(
-          startTitleBlock.children.map((n) => n.clone(deepCloneWithNewId)),
-        )
+        .replaceContent(startTitleBlock.children.map((n) => n.clone(deepCloneWithNewId)))
         .remove(0, end.steps);
 
       const textBlock = prevBlock.append(nextBlock.children).normalize();
@@ -718,17 +626,13 @@ export class TransformCommands extends BeforePlugin {
     const leftNodes = NodeColumn.create();
     const rightNodes = NodeColumn.create();
 
-    const commonNode = start.node
-      .commonNode(end.node)
-      .closest((n) => n.isContainer)!;
+    const commonNode = start.node.commonNode(end.node).closest((n) => n.isContainer)!;
     let startBlock: Optional<Node> = startTitleBlock.parent!;
     let endBlock: Optional<Node> = endTitleBlock.parent!;
     const startTitleParent = startBlock;
     let startBlockChild: Node = startTitleBlock;
 
-    const pasteBoundary = startTitleBlock.closest(
-      (n) => n.type.isPasteBoundary,
-    )!;
+    const pasteBoundary = startTitleBlock.closest((n) => n.type.isPasteBoundary)!;
     const pasteBoundaryDepth = pasteBoundary.depth;
     let commonNodeDepth = commonNode.depth;
     let startBlockDepth = startBlock.depth;
@@ -746,9 +650,8 @@ export class TransformCommands extends BeforePlugin {
       // NOTE: next siblings of startBlockChild is collected for contentMatch check during merge
       // console.log(startBlockChild.id.toString(), startBlockChild.index ,startBlock!.children.map(n => n.id.toString()))
       const nodes =
-        startBlock!.children
-          .slice(startBlockChild.index)
-          .filter((n) => !deleteGroup.has(n.id)) ?? [];
+        startBlock!.children.slice(startBlockChild.index).filter((n) => !deleteGroup.has(n.id)) ??
+        [];
 
       leftNodes.append(startBlockDepth + 1, nodes);
       startBlockChild = startBlock!;
@@ -765,14 +668,8 @@ export class TransformCommands extends BeforePlugin {
         ...TitleNode.from(startTitleBlock).removeContent(0, start.offset),
         ...sliceStartTitle.children,
       ];
-      const pinOffset = reduce(
-        beforeCursorTextContent,
-        (acc, n) => acc + n.focusSize,
-        0,
-      );
-      const after = PinnedSelection.fromPin(
-        Pin.future(start.node!, pinOffset)!,
-      );
+      const pinOffset = reduce(beforeCursorTextContent, (acc, n) => acc + n.focusSize, 0);
+      const after = PinnedSelection.fromPin(Pin.future(start.node!, pinOffset)!);
 
       console.log(
         "leftNodes",
@@ -806,9 +703,7 @@ export class TransformCommands extends BeforePlugin {
     const taken = new NodeIdSet();
     while (sliceBlock) {
       const children =
-        sliceBlock.children.filter(
-          (n) => !taken.has(n.id) && !n.isTextContainer,
-        ) ?? [];
+        sliceBlock.children.filter((n) => !taken.has(n.id) && !n.isTextContainer) ?? [];
       sliceNodes.append(sliceBlockDepth, children);
 
       taken.add(sliceBlock.id);
@@ -824,19 +719,14 @@ export class TransformCommands extends BeforePlugin {
     // );
 
     // * connect the slice nodes to the left nodes
-    const { actions, targets } = NodeColumn.pasteInsertActions(
-      leftNodes,
-      sliceNodes,
-    );
+    const { actions, targets } = NodeColumn.pasteInsertActions(leftNodes, sliceNodes);
     tr.Add(actions);
 
     const firstUsedDepth = targets.nodes.findIndex((n) => n && n.used);
     // for collapsible startTitleParent, the top slice depth is the depth of the parent
     const topSliceDepth = Math.min(
       firstUsedDepth,
-      startTitleParent.isCollapsible
-        ? startTitleParent!.depth + 1
-        : startTitleParent!.depth,
+      startTitleParent.isCollapsible ? startTitleParent!.depth + 1 : startTitleParent!.depth,
     );
     const entry = targets.nodes[firstUsedDepth];
     // console.log("FIRST USED DEPTH", firstUsedDepth, entry.before.map(n => n.id.toString()));
@@ -880,15 +770,10 @@ export class TransformCommands extends BeforePlugin {
     // collect nodes to be from right of selection upto min(endBlockLimit, sliceRootDepth)
     let endBlockLimit = Math.min(commonNodeDepth, topSliceDepth - 1);
 
-    const [startNode, endNode] = blocksBelowCommonNode(
-      startTitleBlock!,
-      endTitleBlock!,
-    );
+    const [startNode, endNode] = blocksBelowCommonNode(startTitleBlock!, endTitleBlock!);
     const startTopContainer = startNode.closest((n) => n.isContainer)!;
     const endTopContainer = endNode.closest((n) => n.isContainer)!;
-    const isSameParent = endTopContainer.parents.some((n) =>
-      n.eq(startTopContainer),
-    );
+    const isSameParent = endTopContainer.parents.some((n) => n.eq(startTopContainer));
     //
     if (isSameParent) {
       endBlockLimit = mergeBlockLimit;
@@ -950,10 +835,7 @@ export class TransformCommands extends BeforePlugin {
 
     // * update startTitle text content
     const startTextContent = [
-      ...TitleNode.from(startTitleBlock).removeContent(
-        start.offset,
-        start.node.focusSize,
-      ),
+      ...TitleNode.from(startTitleBlock).removeContent(start.offset, start.node.focusSize),
       ...sliceStartTitle.children,
     ];
     tr.Add(SetContentAction.create(start.node, startTextContent));
@@ -989,12 +871,7 @@ export class TransformCommands extends BeforePlugin {
     // tr.Select(docSelection);
   }
 
-  private move(
-    tr: Transaction,
-    app: Carbon,
-    nodes: Node | Node[],
-    to: Point,
-  ): Transaction {
+  private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {
     const moveNodes = Array.isArray(nodes) ? nodes.slice().reverse() : [nodes];
     moveNodes.forEach((n) => {
       tr.Move(nodeLocation(n)!, to, n.id);
@@ -1003,11 +880,7 @@ export class TransformCommands extends BeforePlugin {
   }
 
   // TODO: use transaction to update attrs
-  update(
-    tr: Transaction,
-    node: Node,
-    attrs: Record<string, any>,
-  ): Optional<Transaction> {
+  update(tr: Transaction, node: Node, attrs: Record<string, any>): Optional<Transaction> {
     return tr.Update(node, attrs);
   }
 
@@ -1069,10 +942,7 @@ export class TransformCommands extends BeforePlugin {
     selection: PinnedSelection = tr.app.selection,
     opts?: SplitOpts,
   ) {
-    opts = merge(
-      { side: "bottom", pos: "out", rootType: splitBlock.type },
-      opts,
-    );
+    opts = merge({ side: "bottom", pos: "out", rootType: splitBlock.type }, opts);
     if (selection.isCollapsed) {
       return this.splitAtPin(tr, splitBlock, selection.start, opts);
     } else {
@@ -1096,10 +966,7 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
-    const [startNode, endNode] = blocksBelowCommonNode(
-      startTextBlock!,
-      endTextBlock!,
-    );
+    const [startNode, endNode] = blocksBelowCommonNode(startTextBlock!, endTextBlock!);
     // console.log([startBlock?.id.toString(), endBlock?.id.toString()],startBlock?.parent?.eq(endBlock?.parent));
 
     // startNode and endNode can be textBlock or containerBlock
@@ -1110,11 +977,7 @@ export class TransformCommands extends BeforePlugin {
 
     const commonNode = startNode.commonNode(endNode);
     if (!commonNode) {
-      console.log(
-        p14("%c[failed]"),
-        "color:red",
-        "common node not found, should not reach!",
-      );
+      console.log(p14("%c[failed]"), "color:red", "common node not found, should not reach!");
       return;
     }
 
@@ -1141,9 +1004,7 @@ export class TransformCommands extends BeforePlugin {
         if (!block) {
           throw Error("failed to create block");
         }
-        const afterBlock = app.schema
-          .type(splitBlock.type.splitName)
-          ?.default();
+        const afterBlock = app.schema.type(splitBlock.type.splitName)?.default();
         if (!afterBlock) {
           throw Error("failed to create splitBlock");
         }
@@ -1152,11 +1013,7 @@ export class TransformCommands extends BeforePlugin {
         const after = PinnedSelection.fromPin(focusPoint!);
         const insertAt = Point.toAfter(block.id);
 
-        tr.Add(
-          commonNode.children.map((ch) =>
-            RemoveNodeAction.fromNode(nodeLocation(ch)!, ch),
-          ),
-        )
+        tr.Add(commonNode.children.map((ch) => RemoveNodeAction.fromNode(nodeLocation(ch)!, ch)))
           .Insert(at, block!)
           .Insert(insertAt, afterBlock!)
           .Select(after);
@@ -1168,11 +1025,7 @@ export class TransformCommands extends BeforePlugin {
 
         const focusPoint = Pin.toStartOf(block);
         const after = PinnedSelection.fromPin(focusPoint!);
-        tr.Add(
-          commonNode.children.map((ch) =>
-            RemoveNodeAction.fromNode(nodeLocation(ch)!, ch),
-          ),
-        )
+        tr.Add(commonNode.children.map((ch) => RemoveNodeAction.fromNode(nodeLocation(ch)!, ch)))
           .Insert(at, block!)
           .Select(after);
       }
@@ -1183,29 +1036,13 @@ export class TransformCommands extends BeforePlugin {
 
     // * startBlock !== endBlock
     if (!startTextBlock.eq(endTextBlock)) {
-      this.splitByRangeAcrossBlocks(
-        tr,
-        splitBlock,
-        start,
-        end,
-        startNode,
-        endNode,
-        deleteGroup,
-      );
+      this.splitByRangeAcrossBlocks(tr, splitBlock, start, end, startNode, endNode, deleteGroup);
       return;
     }
 
     // * startBlock === endBlock
     if (startTextBlock.eq(endTextBlock)) {
-      this.splitByRangeWithinTextBlock(
-        tr,
-        splitBlock,
-        start,
-        end,
-        startNode,
-        endNode,
-        deleteGroup,
-      );
+      this.splitByRangeWithinTextBlock(tr, splitBlock, start, end, startNode, endNode, deleteGroup);
       return;
     }
 
@@ -1243,10 +1080,7 @@ export class TransformCommands extends BeforePlugin {
     const focusPoint = Pin.toStartOf(paragraph!);
     const after = PinnedSelection.fromPin(focusPoint!);
 
-    tr.SetContent(start.node.id, leftNodes)
-      .Insert(at, paragraph!)
-      .Select(after)
-      .Dispatch();
+    tr.SetContent(start.node.id, leftNodes).Insert(at, paragraph!).Select(after).Dispatch();
 
     return null;
   }
@@ -1319,13 +1153,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     // 1. move the endBlock to after startBlock
-    tr.Add(
-      MoveNodeAction.create(
-        nodeLocation(endBlock)!,
-        Point.toAfter(startBlock),
-        endBlock.id,
-      ),
-    );
+    tr.Add(MoveNodeAction.create(nodeLocation(endBlock)!, Point.toAfter(startBlock), endBlock.id));
     moveNodeIds.add(endBlock.id);
 
     // this entry is done so that the next siblings of endBlock can move within endBlock
@@ -1335,9 +1163,7 @@ export class TransformCommands extends BeforePlugin {
     // collect nodes to be moved from after end of selection
     while (commonNodeDepth < endBlockDepth) {
       const children =
-        endBlock.nextSiblings.filter(
-          (n) => !deleteGroup.has(n.id) && !moveNodeIds.has(n.id),
-        ) ?? [];
+        endBlock.nextSiblings.filter((n) => !deleteGroup.has(n.id) && !moveNodeIds.has(n.id)) ?? [];
       rightColumn.append(endBlockDepth, children);
 
       // nodes between startBlock and endBlock are to be removed
@@ -1401,18 +1227,14 @@ export class TransformCommands extends BeforePlugin {
       if (endTitleBlock.parent?.eq(endBlock)) {
         // change the name of the endBlock before moving
         if (!endBlock.type.eq(splitBlock.type)) {
-          tr.Add(
-            ChangeNameAction.create(endBlock.id, splitBlock.type.splitName),
-          );
+          tr.Add(ChangeNameAction.create(endBlock.id, splitBlock.type.splitName));
         }
 
         rightColumn.append(endBlockDepth, [endBlock]);
         moveNodeIds.add(endBlock.id);
       } else {
         const children =
-          endBlock.children.filter(
-            (n) => !deleteGroup.has(n.id) && !moveNodeIds.has(n.id),
-          ) ?? [];
+          endBlock.children.filter((n) => !deleteGroup.has(n.id) && !moveNodeIds.has(n.id)) ?? [];
         // NOTE: because the startBlock start as parent of the startTitleBlock we need move the children 1 level deeper
         rightColumn.append(endBlockDepth + 1, children);
         deleteGroup.addId(endBlock.id);
@@ -1462,12 +1284,7 @@ export class TransformCommands extends BeforePlugin {
   // 1. pin is at start of the splitBlock
   // 2. pin is at end of the splitBlock
   // 3. pin is within the splitBlock
-  private splitAtPin(
-    tr: Transaction,
-    splitBlock: Node,
-    pin: Pin,
-    opts: SplitOpts,
-  ) {
+  private splitAtPin(tr: Transaction, splitBlock: Node, pin: Pin, opts: SplitOpts) {
     console.log("[SPLIT AT PIN]");
     const { app } = tr;
     const { selection } = app;
@@ -1478,19 +1295,13 @@ export class TransformCommands extends BeforePlugin {
       const emptyBlock = splitType.default();
 
       // set the placeholder text of the fist child if it is a text container
-      const placeholder = emptyBlock?.props.get<string>(
-        EmptyPlaceholderPath,
-        "",
-      );
+      const placeholder = emptyBlock?.props.get<string>(EmptyPlaceholderPath, "");
       if (placeholder && emptyBlock?.firstChild?.isTextContainer) {
         emptyBlock.firstChild?.props.set(PlaceholderPath, placeholder);
       }
 
       if (!emptyBlock) {
-        console.error(
-          "failed to create emptyBlock of type",
-          opts.splitType?.name,
-        );
+        console.error("failed to create emptyBlock of type", opts.splitType?.name);
         return;
       }
 
@@ -1529,16 +1340,12 @@ export class TransformCommands extends BeforePlugin {
     // need more involved splitting
     // clone all nodes after the cursor up to the splitBlock
     const { node } = pin.down()!;
-    const cloneBlocks = takeUntil(node.chain!, (n) =>
-      n.eq(splitBlock),
-    ).reverse();
+    const cloneBlocks = takeUntil(node.chain!, (n) => n.eq(splitBlock)).reverse();
 
     // depending on option
     // split can insert node inside or outside the splitBlock
     const rootInsertPoint =
-      opts.pos === "out"
-        ? Point.toAfter(splitBlock.id)
-        : Point.toAfter(first(cloneBlocks)?.id!);
+      opts.pos === "out" ? Point.toAfter(splitBlock.id) : Point.toAfter(first(cloneBlocks)?.id!);
 
     // NOTE: creating an empty node.
     // the tile and the children will be updated in the next steps
@@ -1567,10 +1374,7 @@ export class TransformCommands extends BeforePlugin {
         // non leaf node, a container node
         const firstNode = splitNode.type.default();
         if (!firstNode) {
-          console.warn(
-            "failed to create firstNode of type",
-            splitNode.type?.name,
-          );
+          console.warn("failed to create firstNode of type", splitNode.type?.name);
           return;
         }
 
@@ -1578,9 +1382,7 @@ export class TransformCommands extends BeforePlugin {
         // move the split node next siblings to root node
         // only if spit pos === 'out'
         if (opts?.pos === "out") {
-          const moveNodes = splitNode.nextSiblings.filter(
-            (n) => !n.isCollapseHidden,
-          );
+          const moveNodes = splitNode.nextSiblings.filter((n) => !n.isCollapseHidden);
           if (moveNodes.length) {
             let at = Point.toAfter(firstNode.id);
             // console.log("move to ..", firstNode.id.toString(), at.toString());
@@ -1594,28 +1396,15 @@ export class TransformCommands extends BeforePlugin {
         const [leftNodes, _, rightNodes] = splitTextBlock(pin, pin, app);
         const [prev, after] = TitleNode.from(pin.node).split(pin.steps);
 
-        console.log(
-          pin.node.id.toString(),
-          pin.node.name,
-          leftNodes,
-          rightNodes,
-        );
+        console.log(pin.node.id.toString(), pin.node.name, leftNodes, rightNodes);
 
-        startTextBlock = TitleNode.from(pin.node)
-          .replaceContent(prev.children)
-          .normalize();
+        startTextBlock = TitleNode.from(pin.node).replaceContent(prev.children).normalize();
 
-        setContentCommands.push(
-          SetContentAction.create(pin.node.id, startTextBlock.children),
-        );
+        setContentCommands.push(SetContentAction.create(pin.node.id, startTextBlock.children));
 
-        endTextBlock = TitleNode.from(parentBlock)
-          .replaceContent(after.children)
-          .normalize();
+        endTextBlock = TitleNode.from(parentBlock).replaceContent(after.children).normalize();
 
-        setContentCommands.push(
-          SetContentAction.create(parentBlock.id, endTextBlock.children),
-        );
+        setContentCommands.push(SetContentAction.create(parentBlock.id, endTextBlock.children));
       }
 
       // parent must have at least one child
@@ -1643,10 +1432,7 @@ export class TransformCommands extends BeforePlugin {
     const after = PinnedSelection.fromPin(Pin.toStartOf(endTextBlock.node)!);
 
     // console.log("insert point", rootNode?.name, rootNode);
-    tr.Insert(rootInsertPoint, rootNode!)
-      .Add(moveCommands)
-      .Add(setContentCommands)
-      .Select(after);
+    tr.Insert(rootInsertPoint, rootNode!).Add(moveCommands).Add(setContentCommands).Select(after);
   }
 
   // generates move commands for adjacent nodes
@@ -1739,9 +1525,7 @@ export class TransformCommands extends BeforePlugin {
       const endNode = last(nodes)!;
       const prevSiblings = takeBefore(parent.children, (n) => n.eq(startNode));
       const nextSiblings = takeAfter(parent.children, (n) => n.eq(endNode));
-      const match = parent.type.contentMatch.matchFragment(
-        Fragment.from(prevSiblings),
-      );
+      const match = parent.type.contentMatch.matchFragment(Fragment.from(prevSiblings));
 
       console.log(
         "prevSiblings",
@@ -1761,9 +1545,7 @@ export class TransformCommands extends BeforePlugin {
       );
 
       const at = nodeLocation(startNode)!;
-      this.insertNodeCommands(at, createNodes).forEach((action) =>
-        insertActions.push(action),
-      );
+      this.insertNodeCommands(at, createNodes).forEach((action) => insertActions.push(action));
 
       if (createNodes.length) {
         createNodes
@@ -1784,43 +1566,40 @@ export class TransformCommands extends BeforePlugin {
     const firstNode = first(nodes)!;
     const lastNode = last(nodes)!;
     let after: Optional<PinnedSelection> = undefined;
-    // if (!after && fall === 'after') {
-    //   const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
-    //   if (focusNode && hasSameIsolate(focusNode, lastNode)) {
-    //     console.log(hasSameIsolate(focusNode, lastNode), focusNode.name, lastNode.name, focusNode.id.toString(), lastNode.id.toString())
-    //     after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
-    //   }
-    //
-    //   if (!after) {
-    //     const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
-    //     if (focusNode && hasSameIsolate(focusNode, firstNode)) {
-    //       after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
-    //     }
-    //   }
-    // } else if (!after) {
-    //   const focusNode = firstNode.prev(n => n.isFocusable, { order: 'pre' });
-    //   if (focusNode && hasSameIsolate(focusNode, firstNode)) {
-    //     after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
-    //   }
-    //
-    //   if (!after) {
-    //     const focusNode = lastNode.next(n => n.isFocusable, { order: 'pre' });
-    //     if (focusNode && hasSameIsolate(lastNode, focusNode)) {
-    //       after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
-    //     }
-    //   }
-    // }
+    if (!after && fall === "after") {
+      const focusNode = lastNode.next((n) => n.isFocusable, { order: "pre" });
+      if (focusNode && hasSameIsolate(focusNode, lastNode)) {
+        after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+      }
 
-    tr.Add(deleteActions).Add(insertActions).SelectBlocks([]);
+      if (!after) {
+        const focusNode = firstNode.prev((n) => n.isFocusable, { order: "pre" });
+        if (focusNode && hasSameIsolate(focusNode, firstNode)) {
+          after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+        }
+      }
+    } else if (!after) {
+      const focusNode = firstNode.prev((n) => n.isFocusable, { order: "pre" });
+      if (focusNode && hasSameIsolate(focusNode, firstNode)) {
+        after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
+      }
 
-    // if (after) {
-    //   tr.Select(after, ActionOrigin.UserInput);
-    // } else {
-    //   tr.Select(
-    //     PinnedSelection.fromPin(Pin.toStartOf(tr.app.store.get(NodeId.ROOT)!)!),
-    //     ActionOrigin.UserInput,
-    //   );
-    // }
+      if (!after) {
+        const focusNode = lastNode.next((n) => n.isFocusable, { order: "pre" });
+        if (focusNode && hasSameIsolate(lastNode, focusNode)) {
+          after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
+        }
+      }
+    }
+
+    tr.Add(deleteActions);
+
+    if (after) {
+      tr.Select(after, ActionOrigin.UserInput);
+      debugger;
+    } else {
+      tr.Add(insertActions).SelectBlocks([]);
+    }
 
     if (!after) {
       tr.Select(PinnedSelection.BLUR, ActionOrigin.UserInput);
@@ -1890,11 +1669,7 @@ export class TransformCommands extends BeforePlugin {
       }
 
       printNode(deleteInfo.startNode.node);
-      console.log(
-        "start",
-        start.toString(),
-        start.down().leftAlign.up().toString(),
-      );
+      console.log("start", start.toString(), start.down().leftAlign.up().toString());
 
       const pin = deleteInfo.startNode.mapPin(start.down().leftAlign.up());
       if (!pin) {
@@ -1912,10 +1687,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     // startBlock and endBlock are container blocks of tailNode and headNode
-    const [startBlock, endBlock] = blocksBelowCommonNode(
-      startTextBlock,
-      endTextBlock,
-    );
+    const [startBlock, endBlock] = blocksBelowCommonNode(startTextBlock, endTextBlock);
     if (!startBlock || !endBlock) {
       console.log(p14("%c[failed]"), "color:red", "merge nodes are not found");
       return;
@@ -1923,11 +1695,7 @@ export class TransformCommands extends BeforePlugin {
 
     const commonNode = startBlock.commonNode(endBlock);
     if (!commonNode) {
-      console.log(
-        p14("%c[failed]"),
-        "color:red",
-        "common node not found, should not reach!",
-      );
+      console.log(p14("%c[failed]"), "color:red", "common node not found, should not reach!");
       return;
     }
 
@@ -1945,14 +1713,7 @@ export class TransformCommands extends BeforePlugin {
 
     // * startBlock !== endBlock
     if (!startBlock.eq(endBlock)) {
-      return this.deleteAcrossBlock(
-        tr,
-        start,
-        end,
-        startBlock,
-        endBlock,
-        deleteGroup,
-      );
+      return this.deleteAcrossBlock(tr, start, end, startBlock, endBlock, deleteGroup);
     }
 
     return null;
@@ -1976,11 +1737,7 @@ export class TransformCommands extends BeforePlugin {
     }
 
     if (!point || point.isIdentity) {
-      console.error(
-        p14("%c[failed]"),
-        "color:red",
-        "failed to find selection point",
-      );
+      console.error(p14("%c[failed]"), "color:red", "failed to find selection point");
       return;
     }
 
@@ -2031,10 +1788,7 @@ export class TransformCommands extends BeforePlugin {
     while (commonNodeDepth < endBlockDepth) {
       const nodes =
         endBlock.children.filter(
-          (n) =>
-            !moveNodeIds.has(n.id) &&
-            !deleteGroup.has(n.id) &&
-            !n.isTextContainer,
+          (n) => !moveNodeIds.has(n.id) && !deleteGroup.has(n.id) && !n.isTextContainer,
         ) ?? [];
       // console.log('endBlock', endBlock.firstChild?.textContent, nodes.map(n => n.id.toString()));
 
@@ -2051,9 +1805,8 @@ export class TransformCommands extends BeforePlugin {
     while (commonNodeDepth <= startBlockDepth) {
       // NOTE: next siblings of startBlockChild is collected for contentMatch check during merge
       const nodes =
-        startBlock!.children
-          .slice(startBlockChild.index)
-          .filter((n) => !deleteGroup.has(n.id)) ?? [];
+        startBlock!.children.slice(startBlockChild.index).filter((n) => !deleteGroup.has(n.id)) ??
+        [];
       leftColumn.append(startBlockDepth + 1, nodes);
 
       startBlockChild = startBlock!;
@@ -2071,10 +1824,7 @@ export class TransformCommands extends BeforePlugin {
       rightColumn.nodes.map((n) => n.map((n) => [n.id.toString(), n.name])),
     );
 
-    const prevBlock = TitleNode.from(start.node).remove(
-      start.steps,
-      start.node.stepSize - 1,
-    );
+    const prevBlock = TitleNode.from(start.node).remove(start.steps, start.node.stepSize - 1);
 
     const factory = app.schema.factory;
     // NOTE: clone the nodes to avoid mutation of the original nodes
@@ -2092,20 +1842,11 @@ export class TransformCommands extends BeforePlugin {
 
     tr.SetStartNode(textBlock.node);
 
-    tr.Add(
-      SetContentAction.withBefore(
-        start.node.id,
-        start.node.children,
-        textBlock.children,
-      ),
-    );
+    tr.Add(SetContentAction.withBefore(start.node.id, start.node.children, textBlock.children));
 
     const mergeActions = NodeColumn.mergeByMove(leftColumn, rightColumn);
 
-    const { nodeActions, startNode } = this.deleteGroupCommands(
-      app,
-      deleteGroup,
-    );
+    const { nodeActions, startNode } = this.deleteGroupCommands(app, deleteGroup);
 
     tr.Add(mergeActions);
     tr.Add(nodeActions);
@@ -2173,11 +1914,7 @@ export class TransformCommands extends BeforePlugin {
 
       if (start.node.eq(end.node)) {
         // NOTE: if the textBlock becomes empty after delete all text nodes
-        if (
-          start.isAtStartOfNode(node) &&
-          end.isAtEndOfNode(node) &&
-          !node.isVoid
-        ) {
+        if (start.isAtStartOfNode(node) && end.isAtEndOfNode(node) && !node.isVoid) {
           if (start.node.eq(selection.start.node)) {
             startNode = TitleNode.from(
               node.clone((data) => {
@@ -2213,9 +1950,7 @@ export class TransformCommands extends BeforePlugin {
         }
 
         console.log(startStep.offset, endStep.offset);
-        const textBlock = TitleNode.from(node)
-          .remove(startStep.offset, endStep.offset)
-          .normalize();
+        const textBlock = TitleNode.from(node).remove(startStep.offset, endStep.offset).normalize();
         rangeAction.push(SetContentAction.create(node.id, textBlock.children));
 
         if (start.node.eq(selection.start.node)) {
@@ -2237,9 +1972,7 @@ export class TransformCommands extends BeforePlugin {
 
         // rangeAction.push(SetContentAction.create(node.id, nodes));
       } else {
-        throw new Error(
-          "delete group ranges should not span across text blocks",
-        );
+        throw new Error("delete group ranges should not span across text blocks");
       }
     });
 
@@ -2252,11 +1985,7 @@ export class TransformCommands extends BeforePlugin {
     };
   }
 
-  private deleteText(
-    app: Carbon,
-    pin: Pin,
-    text: string,
-  ): Optional<Transaction> {
+  private deleteText(app: Carbon, pin: Pin, text: string): Optional<Transaction> {
     return null;
   }
 
@@ -2367,11 +2096,7 @@ export class TransformCommands extends BeforePlugin {
     // console.log(startNode?.name, startNode.id.toString());
     // handle undefined situation
     if (!startRemoveBlock.parent || !endRemoveBlock.parent) {
-      console.log(
-        p14("%c[failed]"),
-        "color:red",
-        "start/end node parent not found",
-      );
+      console.log(p14("%c[failed]"), "color:red", "start/end node parent not found");
       return collectedInfo();
     }
 
@@ -2382,11 +2107,7 @@ export class TransformCommands extends BeforePlugin {
     const endContainer = endRemoveBlock.closest((n) => n.isContainer);
 
     if (!startContainer || !endContainer) {
-      console.log(
-        p14("%c[failed]"),
-        "color:red",
-        "start/end node container not found",
-      );
+      console.log(p14("%c[failed]"), "color:red", "start/end node container not found");
       return collectedInfo();
     }
 
@@ -2556,17 +2277,13 @@ export class TransformCommands extends BeforePlugin {
         const textBlock = TitleNode.from(prev)
           .replaceContent(children.map(cloneFrozenNode))
           .normalize();
-        insertActions.push(
-          SetContentAction.create(prev.id, textBlock.children),
-        );
+        insertActions.push(SetContentAction.create(prev.id, textBlock.children));
         after = PinnedSelection.fromPin(Pin.toStartOf(textBlock.node)!);
       } else {
         const textBlock = TitleNode.from(prev)
           .append(next.children.map(cloneFrozenNode))
           .normalize();
-        insertActions.push(
-          SetContentAction.create(prev.id, textBlock.children),
-        );
+        insertActions.push(SetContentAction.create(prev.id, textBlock.children));
       }
 
       if (prev.isEmpty && !next.isEmpty) {
@@ -2598,14 +2315,8 @@ export class TransformCommands extends BeforePlugin {
     }
 
     // remove the next node
-    removeActions.push(
-      RemoveNodeAction.fromNode(nodeLocation(next.parent!)!, next.parent!),
-    );
+    removeActions.push(RemoveNodeAction.fromNode(nodeLocation(next.parent!)!, next.parent!));
 
-    tr.Add(moveActions)
-      .Add(removeActions)
-      .Add(insertActions)
-      .Add(updateActions)
-      .Select(after);
+    tr.Add(moveActions).Add(removeActions).Add(insertActions).Add(updateActions).Select(after);
   }
 }

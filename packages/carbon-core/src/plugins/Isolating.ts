@@ -45,11 +45,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         console.log(tailIsolating, headIsolating);
         if (!headIsolating && !tailIsolating) return;
 
-        if (
-          headIsolating &&
-          tailIsolating &&
-          !headIsolating.eq(tailIsolating)
-        ) {
+        if (headIsolating && tailIsolating && !headIsolating.eq(tailIsolating)) {
           preventAndStopCtx(ctx);
           // keep the selection outside the child isolating node
           if (headIsolating.parents.some((n) => n.eq(tailIsolating))) {
@@ -59,11 +55,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
               });
               if (prevFocusable) {
                 const headPin = Pin.toEndOf(prevFocusable)!;
-                const newSelection = PinnedSelection.create(
-                  tail,
-                  headPin,
-                  ActionOrigin.UserInput,
-                );
+                const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
                 cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
               }
             } else {
@@ -72,11 +64,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
               });
               if (nextFocusable) {
                 const headPin = Pin.toStartOf(nextFocusable)!;
-                const newSelection = PinnedSelection.create(
-                  tail,
-                  headPin,
-                  ActionOrigin.UserInput,
-                );
+                const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
                 cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
               }
             }
@@ -87,19 +75,11 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           preventAndStopCtx(ctx);
           if (selection.isForward) {
             const headPin = Pin.toEndOf(tailIsolating)!;
-            const newSelection = PinnedSelection.create(
-              tail,
-              headPin,
-              ActionOrigin.UserInput,
-            );
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
             cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
           } else {
             const headPin = Pin.toStartOf(tailIsolating)!;
-            const newSelection = PinnedSelection.create(
-              tail,
-              headPin,
-              ActionOrigin.UserInput,
-            );
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
             cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
           }
           return;
@@ -148,55 +128,32 @@ export class IsolateSelectionPlugin extends AfterPlugin {
         if (!headIsolating || !tailIsolating) return;
 
         if (headIsolating.eq(tailIsolating)) {
-          ctx.cmd
-            .SelectBlocks([])
-            .Select(domSel.selection, ActionOrigin.UserInput)
-            .Dispatch();
+          ctx.cmd.SelectBlocks([]).Select(domSel.selection, ActionOrigin.UserInput).Dispatch();
           return;
         }
 
         if (domSel.selection.isForward) {
           const prevFocusable = headIsolating.prev((n) => {
-            return (
-              n.isFocusable &&
-              !!n.closest((n) => n.isIsolate)?.eq(tailIsolating)
-            );
+            return n.isFocusable && !!n.closest((n) => n.isIsolate)?.eq(tailIsolating);
           });
 
           if (prevFocusable) {
             const headPin = Pin.toEndOf(prevFocusable)!;
-            const newSelection = PinnedSelection.create(
-              tail,
-              headPin,
-              ActionOrigin.UserInput,
-            );
-            ctx.cmd
-              .SelectBlocks([])
-              .Select(newSelection, ActionOrigin.UserInput)
-              .Dispatch();
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            ctx.cmd.SelectBlocks([]).Select(newSelection, ActionOrigin.UserInput).Dispatch();
             return;
           }
         }
 
         if (domSel.selection.isBackward) {
           const nextFocusable = headIsolating.next((n) => {
-            return (
-              n.isFocusable &&
-              !!n.closest((n) => n.isIsolate)?.eq(tailIsolating)
-            );
+            return n.isFocusable && !!n.closest((n) => n.isIsolate)?.eq(tailIsolating);
           });
 
           if (nextFocusable) {
             const headPin = Pin.toStartOf(nextFocusable)!;
-            const newSelection = PinnedSelection.create(
-              tail,
-              headPin,
-              ActionOrigin.UserInput,
-            );
-            ctx.cmd
-              .SelectBlocks([])
-              .Select(newSelection, ActionOrigin.UserInput)
-              .Dispatch();
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
+            ctx.cmd.SelectBlocks([]).Select(newSelection, ActionOrigin.UserInput).Dispatch();
             return;
           }
         }
@@ -211,7 +168,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
       },
       up: (e: EventContext<KeyboardEvent>) => {},
       shiftUp: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.blockSelection.isActive) return;
         const { selection, currentNode } = e;
         const { head, tail } = selection;
 
@@ -230,11 +187,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
           const firstFocusable = currentNode.find((n) => n.isFocusable);
           if (firstFocusable) {
             const headPin = Pin.toStartOf(firstFocusable)!;
-            const newSelection = PinnedSelection.create(
-              tail,
-              headPin,
-              ActionOrigin.UserInput,
-            );
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
             e.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
           }
           return;
@@ -242,16 +195,13 @@ export class IsolateSelectionPlugin extends AfterPlugin {
 
         // or only if the current node is inside the previous isolating node
         const prevIsolating = prevFocusable.closest((n) => n.isIsolate);
-        if (
-          prevIsolating &&
-          !currentNode.parents.some((n) => n.eq(prevIsolating))
-        ) {
+        if (prevIsolating && !currentNode.parents.some((n) => n.eq(prevIsolating))) {
           this.prevent(e);
           return;
         }
       },
       shiftDown: (e: EventContext<KeyboardEvent>) => {
-        if (e.app.selection.isBlock) return;
+        if (e.app.blockSelection.isActive) return;
         const { selection } = e;
         const { head, tail } = selection;
 
@@ -270,11 +220,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
 
           const headPin = Pin.toEndOf(isolating)!;
           if (headPin) {
-            const newSelection = PinnedSelection.create(
-              tail,
-              headPin,
-              ActionOrigin.UserInput,
-            );
+            const newSelection = PinnedSelection.create(tail, headPin, ActionOrigin.UserInput);
             e.cmd.Select(newSelection, ActionOrigin.UserInput).Dispatch();
           }
           return;
@@ -282,10 +228,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
 
         // or only if the current node is inside the next isolating node
         const nextIsolating = nextFocusable.closest((n) => n.isIsolate);
-        if (
-          nextIsolating &&
-          !head.node.parents.some((n) => n.eq(nextIsolating))
-        ) {
+        if (nextIsolating && !head.node.parents.some((n) => n.eq(nextIsolating))) {
           this.prevent(e);
           return;
         }
@@ -326,7 +269,7 @@ export class IsolateSelectionPlugin extends AfterPlugin {
   }
 
   isExpanded(e: EventContext<KeyboardEvent>) {
-    return !e.app.selection.isCollapsed && !e.app.state.blockSelection.isActive;
+    return !e.app.selection.isCollapsed || e.app.state.blockSelection.isActive;
   }
 
   collapseToHead(e) {}

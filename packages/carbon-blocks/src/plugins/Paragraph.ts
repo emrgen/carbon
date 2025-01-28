@@ -1,7 +1,4 @@
-import {
-  encodeHtmlNestableChildren,
-  encodeNestableChildren,
-} from "@emrgen/carbon-blocks";
+import { encodeHtmlNestableChildren, encodeNestableChildren } from "@emrgen/carbon-blocks";
 import {
   Carbon,
   CarbonAction,
@@ -43,6 +40,7 @@ export class Paragraph extends NodePlugin {
         draggable: true,
         handle: true,
         container: true,
+        move: "xy",
       },
       selection: {
         rect: true,

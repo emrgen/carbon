@@ -1,5 +1,6 @@
 export * from "./Carbon";
 export * from "./CarbonPlugin";
+export * from "./NodeStore";
 export * from "./Transaction";
 export * from "./Service";
 export * from "./ChangeManager";

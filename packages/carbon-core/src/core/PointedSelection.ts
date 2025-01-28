@@ -1,10 +1,10 @@
-import { Point } from "./Point";
 import { Optional } from "@emrgen/types";
-import { PinnedSelection } from "./PinnedSelection";
-import { Pin } from "./Pin";
-import { classString } from "./Logger";
 import { ActionOrigin } from "./actions";
+import { classString } from "./Logger";
 import { NodeMapGet } from "./NodeMap";
+import { Pin } from "./Pin";
+import { PinnedSelection } from "./PinnedSelection";
+import { Point } from "./Point";
 
 export class PointedSelection {
   static NUll = new PointedSelection(Point.NULL, Point.NULL);
@@ -21,11 +21,7 @@ export class PointedSelection {
     return PointedSelection.create(point, point);
   }
 
-  static create(
-    tail: Point,
-    head: Point,
-    origin = ActionOrigin.Unknown,
-  ): PointedSelection {
+  static create(tail: Point, head: Point, origin = ActionOrigin.Unknown): PointedSelection {
     return new PointedSelection(tail, head, origin);
   }
 
@@ -42,15 +38,15 @@ export class PointedSelection {
   }
 
   get isIdentity() {
-    return this.eq(PointedSelection.IDENTITY);
+    return this.head.nodeId.eq(Point.IDENTITY.nodeId) || this.tail.nodeId.eq(Point.IDENTITY.nodeId);
   }
 
   get isNull() {
-    return this.eq(PointedSelection.NUll);
+    return this.head.nodeId.eq(Point.NULL.nodeId) || this.tail.nodeId.eq(Point.NULL.nodeId);
   }
 
   get isSkip() {
-    return this.eq(PointedSelection.SKIP);
+    return this.head.nodeId.eq(Point.SKIP.nodeId) || this.tail.nodeId.eq(Point.SKIP.nodeId);
   }
 
   get isCollapsed() {
@@ -97,11 +93,7 @@ export class PointedSelection {
   }
 
   clone() {
-    return new PointedSelection(
-      this.tail.clone(),
-      this.head.clone(),
-      this.origin,
-    );
+    return new PointedSelection(this.tail.clone(), this.head.clone(), this.origin);
   }
 
   toString() {

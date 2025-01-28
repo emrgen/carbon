@@ -38,7 +38,8 @@ export const JustEmpty = (props: RendererProps) => {
     return <br />;
   }
 
-  // return <span>&shy;</span>;
+  return <span>&shy;</span>;
+  // NOTE: using <br/> is causing issues with focusing empty block selected (with esc) paragraph
   return (
     <span>
       <br />
@@ -81,10 +82,10 @@ const mapName = (name: string, parentName?: string) => {
   return name;
 };
 
-const InnerElement: ForwardRefRenderFunction<
-  any,
-  Omit<RendererProps, "ref">
-> = (props, forwardedRef) => {
+const InnerElement: ForwardRefRenderFunction<any, Omit<RendererProps, "ref">> = (
+  props,
+  forwardedRef,
+) => {
   const { tag: Tag = "div", node, children, custom = {} as any } = props;
   const { key, name, renderVersion } = node;
   const editor = useCarbon();
@@ -228,8 +229,7 @@ export const useMarks = (marks: Mark[]) => {
             padding: "0.2em 0.2em",
             borderRadius: "3px",
             boxShadow: "0 0 0 1px #ddd inset",
-            fontFamily:
-              "Geist Mono, Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
+            fontFamily: "Geist Mono, Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
             color: "#c7254e",
           });
           break;
@@ -288,10 +288,8 @@ const InnerCarbonText = (props: RendererProps) => {
   }, [marks]);
 
   const attrs = useMemo(() => {
-    const localAttrs =
-      node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
-    const remoteAttrs =
-      node.props.get<Record<string, any>>(RemoteHtmlAttrPath) ?? {};
+    const localAttrs = node.props.get<Record<string, any>>(LocalHtmlAttrPath) ?? {};
+    const remoteAttrs = node.props.get<Record<string, any>>(RemoteHtmlAttrPath) ?? {};
 
     return {
       ...localAttrs,
@@ -300,18 +298,8 @@ const InnerCarbonText = (props: RendererProps) => {
   }, [node]);
 
   return (
-    <CarbonElement
-      node={node}
-      tag={tag}
-      custom={{ style, className, ...nodeProps, ...attrs }}
-    >
-      <>
-        {node.isEmpty ? (
-          <CarbonEmpty node={node} parent={parent} />
-        ) : (
-          node.textContent
-        )}
-      </>
+    <CarbonElement node={node} tag={tag} custom={{ style, className, ...nodeProps, ...attrs }}>
+      <>{node.isEmpty ? <CarbonEmpty node={node} parent={parent} /> : node.textContent}</>
     </CarbonElement>
   );
 };
@@ -322,16 +310,14 @@ export const CarbonText = memo(InnerCarbonText, (prev, next) => {
 });
 
 // render block node with div
-const InnerCarbonBlock: ForwardRefRenderFunction<
-  any,
-  Omit<RendererProps, "ref">
-> = (props, ref) => {
+const InnerCarbonBlock: ForwardRefRenderFunction<any, Omit<RendererProps, "ref">> = (
+  props,
+  ref,
+) => {
   const { node, children, custom, comp } = props;
 
   const tag = useMemo(() => {
-    return (
-      custom?.tag ?? node.type.spec.tag ?? node.props.get(TagPath) ?? "div"
-    );
+    return custom?.tag ?? node.type.spec.tag ?? node.props.get(TagPath) ?? "div";
   }, [custom?.tag, node]);
 
   return (
@@ -375,11 +361,7 @@ export const InnerCarbonNode = (props: RendererProps) => {
     }
   }
 
-  console.warn(
-    "No component found for",
-    node.name,
-    "falling back to CarbonDefaultNode",
-  );
+  console.warn("No component found for", node.name, "falling back to CarbonDefaultNode");
 
   return <CarbonDefaultNode {...props} node={node} />;
   // }, [rm, node, props])
@@ -451,9 +433,7 @@ export const CarbonNodeContent = (props: RendererProps) => {
   }
 
   if (!wrap) {
-    return (
-      <CarbonNode node={content} custom={custom} key={content.key} {...rest} />
-    );
+    return <CarbonNode node={content} custom={custom} key={content.key} {...rest} />;
   }
 
   return (

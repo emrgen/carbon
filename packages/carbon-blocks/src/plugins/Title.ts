@@ -55,8 +55,7 @@ export class TitlePlugin extends NodePlugin {
       // insert text node at
       beforeInput: (ctx: EventContext<KeyboardEvent>) => {
         preventAndStopCtx(ctx);
-        const { app, cmd, event } = ctx;
-        const { selection } = app.state;
+        const { cmd, event, selection } = ctx;
         // @ts-ignore
         const { data, key } = event.nativeEvent;
         cmd.transform.insertText(selection, data ?? key, false)?.Dispatch();
@@ -92,15 +91,12 @@ export class TitlePlugin extends NodePlugin {
           const titleNode = TitleNode.from(head.node.clone(deepCloneMap))
             .insertInp(head.steps, textNode)
             .normalize();
-          const steps =
-            titleNode.stepSize + titleNode.mapStep(startStepFromEnd);
+          const steps = titleNode.stepSize + titleNode.mapStep(startStepFromEnd);
 
           app.cmd
             .SetContent(head.node, titleNode.children)
             .Select(
-              PointedSelection.fromPoint(
-                Point.atOffset(head.node.id, head.offset + 1, steps),
-              ),
+              PointedSelection.fromPoint(Point.atOffset(head.node.id, head.offset + 1, steps)),
             )
             .Dispatch();
         }

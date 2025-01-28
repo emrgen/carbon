@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDndMonitor, useDragRect } from "../hooks";
 import { RectSelectorContext } from "../hooks/useRectSelector";
-import { CarbonDragHandleId } from "./DraggableHandle";
+import { CarbonDragHandleId } from "./NodeDragHandle";
 
 export function RectSelectContext(props) {
   const app = useCarbon();

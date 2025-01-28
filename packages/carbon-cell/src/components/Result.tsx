@@ -2,7 +2,15 @@ import { HasFocusPath } from "@emrgen/carbon-core";
 import { ObjectViewer } from "@emrgen/carbon-object-view";
 import { Optional } from "@emrgen/types";
 import createDOMPurify from "dompurify";
-import { cloneDeep, isArray, isFunction, isNumber, isObject, isPlainObject, isString } from "lodash";
+import {
+  cloneDeep,
+  isArray,
+  isFunction,
+  isNumber,
+  isObject,
+  isPlainObject,
+  isString,
+} from "lodash";
 import { memo, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { ViewStylePath } from "../constants";
 import { ActiveCell } from "../core/ActiveCellRuntime";
@@ -98,7 +106,11 @@ const ResultInner = (props) => {
   // listen to the cell events
   useEffect(() => {
     const onFulfill = (cell: ActiveCell) => {
-      console.log(`CELL: evaluated. ID: ${cell.uniqId}, Name: ${cell.name}, Result:`, cell.result, cell);
+      console.log(
+        `CELL: evaluated. ID: ${cell.uniqId}, Name: ${cell.name}, Result:`,
+        cell.result,
+        cell,
+      );
       setCell(cell);
       updateResult(cell.result);
       setError("");
@@ -154,11 +166,14 @@ const ResultInner = (props) => {
         )}
 
         {/*show hidden script */}
-        {!error && cell?.codeType === "html" && result !== NOT_LOADED && isScriptElement(result) && (
-          <div className={"cell-view-html"}>
-            <ObjectViewer data={`<script>`} />
-          </div>
-        )}
+        {!error &&
+          cell?.codeType === "html" &&
+          result !== NOT_LOADED &&
+          isScriptElement(result) && (
+            <div className={"cell-view-html"}>
+              <ObjectViewer data={`<script>`} />
+            </div>
+          )}
 
         {!error && cell?.codeType === "html" && result !== NOT_LOADED && isStyleElement(result) && (
           <div className={"cell-view-html"}>
@@ -266,10 +281,12 @@ const ResultView = (props) => {
     return <CellResultView cell={cell} name={objectName} result={view} />;
   }
 
-  if (cellName && (isArray(result) || isObject(result) || isFunction(result)) && !isHtmlElement(result)) {
+  if (
+    cellName &&
+    (isArray(result) || isObject(result) || isFunction(result)) &&
+    !isHtmlElement(result)
+  ) {
     return <CellResultView cell={cell} name={objectName} result={view} />;
-
-    // return <CellResultView cell={cell} name={cellName} result={`[${res}]`} />;
   }
 
   // if (isFunction(result)) {

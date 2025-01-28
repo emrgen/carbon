@@ -5,7 +5,7 @@ import { Optional, RawPoint } from "@emrgen/types";
 import { throttle } from "lodash";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDndContext } from "../hooks/index";
-import { DraggableHandle } from "./DraggableHandle";
+import { NodeDragHandle } from "./NodeDragHandle";
 
 // dnd controller is responsible for managing drag and drop events
 export function DndController() {
@@ -15,12 +15,9 @@ export function DndController() {
   const [portalPosition, setPortalPosition] = useState<Optional<RawPoint>>();
   const [dragHandleNode, setDragHandleNode] = useState<Optional<Node>>();
   const [showDragHandle, setShowDragHandle] = useState(false);
-  const [dragHandlePosition, setDragHandlePosition] =
-    useState<Optional<RectStyle>>(null);
+  const [dragHandlePosition, setDragHandlePosition] = useState<Optional<RectStyle>>(null);
   const [isDragging, setIsDragging] = useState(dnd.isDragging);
-  const [draggedNode, setDraggedNode] = useState<Optional<Node>>(
-    dnd.draggedNode,
-  );
+  const [draggedNode, setDraggedNode] = useState<Optional<Node>>(dnd.draggedNode);
   const { showOverlay, hideOverlay } = useCarbonOverlay();
 
   // listen to scroll event to reset drag handle
@@ -48,14 +45,11 @@ export function DndController() {
     }
   }, [dnd, portalRef]);
 
+  // show, hide drag handle
   const onMouseIn = useCallback(
     (node: Node) => {
       if (!portalPosition) return;
-      if (
-        !node.type.dnd?.draggable ||
-        dragHandleNode?.eq(node) ||
-        dnd.isMouseDown
-      ) {
+      if (!node.type.dnd?.draggable || dragHandleNode?.eq(node) || dnd.isMouseDown) {
         return;
       }
 
@@ -81,6 +75,7 @@ export function DndController() {
           height: bound.bottom - bound.top,
         });
       }
+
       setShowDragHandle(true);
       setDragHandleNode(node);
     },
@@ -150,12 +145,13 @@ export function DndController() {
     const thMouseIn = throttle(onMouseIn, 100);
     // editor.on(EditorEventsIn.mouseOver, onEditorMouseOver);
     // editor.on(EditorEventsIn.mouseOut, onEditorMouseOut);
-    app.on("changed", onChange);
-    app.on("keyDown", onKeyDown);
+    dnd.on("drag:start", onDragStart);
     dnd.on("mouse:in", thMouseIn);
     dnd.on("mouse:out", onMouseOut);
-    dnd.on("drag:start", onDragStart);
     dnd.on("drag:end", onDragEnd);
+
+    app.on("changed", onChange);
+    app.on("keyDown", onKeyDown);
     dnd.on("hide:drag:handle", resetDragHandle);
     return () => {
       // react.off("mouseIn", onEditorMouseOver);
@@ -186,17 +182,11 @@ export function DndController() {
     return !isDragging && dragHandlePosition && showDragHandle ? 1 : 0;
   }, [isDragging, showDragHandle, dragHandlePosition]);
 
-  // useEffect(() => {
-  //   console.log(isDragging);
-  // }, [isDragging]);
-
-  // console.log(dragHandleOpacity, !isDragging, dragHandleNode, showDragHandle);
-  // console.log(isDragging)
   return (
     <>
       <div className="carbon-dnd-portal" ref={portalRef}>
         {
-          <DraggableHandle
+          <NodeDragHandle
             node={dragHandleNode ?? Node.IDENTITY}
             style={{
               ...dragHandlePosition,
@@ -207,13 +197,6 @@ export function DndController() {
           />
         }
       </div>
-
-      {/* {isDragging && (
-        <div
-          className={"carbon-drag-overlay " + draggedNode?.name ?? ""}
-          onMouseMove={prevent}
-        ></div>
-      )} */}
     </>
   );
 }

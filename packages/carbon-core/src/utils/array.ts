@@ -1,5 +1,5 @@
 // take nodes including the one that matches the predicate
-import { Predicate } from "@emrgen/types";
+import { Optional, Predicate } from "@emrgen/types";
 
 // take nodes including the one that matches the predicate
 export const takeUpto = <T>(arr: T[], fn: Predicate<T>): T[] => {
@@ -31,3 +31,15 @@ export const takeAfter = <T>(arr: T[], fn: Predicate<T>): T[] => {
 
   return arr.slice(index + 1);
 };
+
+// try to map the array and return the first non-null value
+export const findMap = <T, R>(arr: T[], fn: (a: T) => Optional<R>, def: R): R => {
+  for (const a of arr) {
+    const ret = fn(a);
+    if (ret) {
+      return ret;
+    }
+  }
+
+  return def;
+}

@@ -1,13 +1,15 @@
 import { Carbon, Node, NodeId, NodeIdSet, Point } from "@emrgen/carbon-core";
-import { Optional, Predicate } from "@emrgen/types";
+import { Optional } from "@emrgen/types";
 import EventEmitter from "events";
 import { throttle } from "lodash";
 import { DndEvent } from "../types";
+import { nodeFromPoint } from "../utils/hit";
 import { DndNodeStore } from "./DndStore";
 import { domRect } from "./utils";
 
 type Acceptor = (receiver: Node, child: Node, at: Point) => boolean;
 
+// TODO: Dnd should just coordinate the drag events not the drag handles
 export class Dnd<E = MouseEvent> extends EventEmitter {
   // nodes that can be dragged
   draggables: DndNodeStore = new DndNodeStore();
@@ -92,7 +94,7 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
   }
 
   onDragStart(e: DndEvent) {
-    // console.log('drag-start');
+    // console.log("drag-start");
     this.emit("drag:start", e);
     this.app.dragging = true;
     this.isDragging = true;
@@ -100,12 +102,12 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
   }
 
   onDragMove(e: DndEvent) {
-    // console.log('drag-move');
+    // console.log("drag-move");
     this.emit("drag:move", e);
   }
 
   onDragEnd(e: DndEvent<E>) {
-    // console.log('drag-end');
+    console.log("drag-end");
     this.app.dragging = false;
     this.isDragging = false;
     this.draggedNode = null;
@@ -124,8 +126,11 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
   // }
 
   private showDragHandle(node: Node, e: MouseEvent) {
+    const { app } = this;
+    const { store } = app;
     const { clientX: x, clientY: y } = e;
-    let hitNode = this.findHitNode(
+    let hitNode = nodeFromPoint(
+      store,
       x + 300, // find node at x + 300 to avoid flickering when the cursor is on the drag handle
       y,
       (n) => hasHandle(n) || n.isPage,
@@ -133,16 +138,16 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
 
     if (hitNode?.isPage) {
       // check if the cursor is in the page padding area
-      const docEl = this.app.store.element(hitNode.id)!;
+      const docEl = store.element(hitNode.id)!;
       const rect = domRect(docEl);
       const style = window.getComputedStyle(docEl) ?? {};
       const { paddingLeft = "0", paddingRight = "0" } = style;
 
       // check if the cursor is in the padding area of the page
       if (rect.left < x && x < rect.left + parseInt(paddingLeft)) {
-        hitNode = this.findHitNode(x + parseInt(paddingLeft), y, hasHandle);
+        hitNode = nodeFromPoint(store, x + parseInt(paddingLeft), y, hasHandle);
       } else if (rect.right - parseInt(paddingRight) < x && x < rect.right) {
-        hitNode = this.findHitNode(x - parseInt(paddingRight), y, hasHandle);
+        hitNode = nodeFromPoint(store, x - parseInt(paddingRight), y, hasHandle);
       }
     }
 
@@ -155,26 +160,6 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
     this.onOverNodeWithHandle(hitNode);
   }
 
-  // find the node under the cursor, that satisfies the predicate
-  findHitNode(x: number, y: number, fn: Predicate<Node>) {
-    const { app } = this;
-    const hits = document.elementsFromPoint(x, y);
-    const el = hits.find((el) => {
-      const node = app.store.get(el);
-      if (node && fn(node)) {
-        return node;
-      }
-
-      return null;
-    });
-
-    if (el) {
-      return app.store.get(el);
-    }
-
-    return null;
-  }
-
   // emit events when mouse is over a draggable node
   // the listener can use this event to show drag handles
   private onOverNodeWithHandle(node: Node) {
@@ -182,6 +167,7 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
     if (!draggedNodeId?.eq(node.id)) {
       this.emit("mouse:out", this.draggedNodeId);
     }
+
     this.emit("mouse:in", node);
     this.draggedNodeId = node.id;
   }

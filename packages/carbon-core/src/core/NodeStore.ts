@@ -15,14 +15,15 @@ export class NodeStore {
 
   constructor(private readonly app: Carbon) {}
 
-  get nodeMap(): NodeMap {
+  private get nodeMap(): NodeMap {
     return this.app.state.nodeMap;
   }
 
-  elements() {
+  private elements() {
     return Array.from(this.elementMap.values());
   }
 
+  // get the node from the store
   get(entry: string | NodeId | HTMLElement | Element): Optional<Node> {
     if (typeof entry === "string") {
       entry = NodeId.fromString(entry);
@@ -48,17 +49,13 @@ export class NodeStore {
     }
 
     // expensive operation but should be called when the node is not in the store yet
-    const domEl = document.querySelector(
-      `[data-id="${nodeId.toString()}"]`,
-    ) as HTMLElement;
+    const domEl = document.querySelector(`[data-id="${nodeId.toString()}"]`) as HTMLElement;
     const node = this.get(nodeId);
     if (domEl && node) {
       this.register(node, domEl);
     }
 
-    console.error(
-      `NodeStore.element: element not found for ${nodeId.toString()}`,
-    );
+    console.error(`NodeStore.element: element not found for ${nodeId.toString()}`);
     return domEl;
   }
 
@@ -91,14 +88,12 @@ export class NodeStore {
     this.deletedNodes.add(id.toString());
   }
 
-  deleted(nodeId: string | NodeId): Optional<Node> {
+  private deleted(nodeId: string | NodeId): Optional<Node> {
     if (typeof nodeId === "string") {
       nodeId = NodeId.fromString(nodeId);
     }
 
-    return this.deletedNodes.has(nodeId.toString())
-      ? this.nodeMap.get(nodeId)
-      : null;
+    return this.deletedNodes.has(nodeId.toString()) ? this.nodeMap.get(nodeId) : null;
   }
 
   // fulfilled the node from the HTML element
@@ -115,12 +110,7 @@ export class NodeStore {
       node = this.elementToNodeMap.get(el);
       // if el is a text node and no carbon node is found
       // then check if prev or next node is a carbon node
-      if (
-        !node &&
-        el.nodeType === 1 &&
-        el.tagName === "SPAN" &&
-        el.textContent == "\n"
-      ) {
+      if (!node && el.nodeType === 1 && el.tagName === "SPAN" && el.textContent == "\n") {
         const prev = el.previousSibling;
         if (prev) {
           node = this.elementToNodeMap.get(prev);
@@ -169,21 +159,7 @@ export class NodeStore {
     };
   }
 
-  resolveNode(el: Element): Optional<Node> {
-    let node: Optional<Node>;
-    do {
-      node = this.elementToNodeMap.get(<HTMLElement>el);
-      if (node) {
-        break;
-      } else {
-        el = el.parentNode as HTMLElement;
-      }
-    } while (el);
-
-    return node;
-  }
-
-  clear() {
+  private clear() {
     this.elementMap.clear();
     this.elementToNodeMap = new WeakMap();
   }

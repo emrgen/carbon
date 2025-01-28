@@ -17,6 +17,11 @@ export class BulletedList extends Paragraph {
       split: {
         name: "bulletList",
       },
+      dnd: {
+        nestable: true,
+        handle: true,
+        draggable: true,
+      },
       info: {
         title: "Bulleted List",
         shortcut: "-",
@@ -45,8 +50,7 @@ export class BulletedList extends Paragraph {
     if (prevSibling) {
       if (
         prevSibling?.name === "bulletList" ||
-        (prevSibling?.name === "title" &&
-          prevSibling?.parent?.name === "bulletList")
+        (prevSibling?.name === "title" && prevSibling?.parent?.name === "bulletList")
       ) {
         writer.write("\n");
       } else {

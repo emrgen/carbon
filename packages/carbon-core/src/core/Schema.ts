@@ -81,7 +81,10 @@ export class Schema {
     return new Mark(name, props);
   }
 
-  clone(node: Node, map: Maps<Omit<NodeContentData, "children">, Omit<NodeContentData, "children">> = identity): Node {
+  clone(
+    node: Node,
+    map: Maps<Omit<NodeContentData, "children">, Omit<NodeContentData, "children">> = identity,
+  ): Node {
     return this.factory.clone(node, map);
   }
 
@@ -95,10 +98,10 @@ export class Schema {
   }
 }
 
-enum DndLayout {
-  horizontal,
-  vertical,
-  grid,
+export enum DragMove {
+  x = "x",
+  y = "y",
+  xy = "xy",
 }
 
 export interface NodeSpec {
@@ -167,6 +170,8 @@ export interface NodeSpec {
     handle?: boolean;
     draggable?: boolean;
     container?: boolean;
+    // allows to drop the node within even when there is no children
+    nestable?: boolean;
     // top level dnd region
     // no higher dnd region can be found
     region?: boolean;
@@ -176,8 +181,8 @@ export interface NodeSpec {
     accepts?: (parent: Node, child: Node) => boolean;
     // returns draggable node bound
     bound?: NodeName | ((node: Node) => Optional<Node>);
-    // drag direction constraints
-    layout?: DndLayout;
+    // draggables can be moved in x, y, xy direction
+    move?: "x" | "y" | "xy";
   };
 
   // if the depends on node content is updated, the node will be updated as well

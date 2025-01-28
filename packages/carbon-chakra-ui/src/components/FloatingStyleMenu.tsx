@@ -1,11 +1,4 @@
-import {
-  Box,
-  Circle,
-  HStack,
-  IconButton,
-  IconButtonProps,
-  Portal,
-} from "@chakra-ui/react";
+import { Box, Circle, HStack, IconButton, IconButtonProps, Portal } from "@chakra-ui/react";
 import {
   EmptyInline,
   EventsOut,
@@ -84,7 +77,17 @@ export function FloatingStyleMenu() {
   }, [setMarks]);
 
   useEffect(() => {
+    let stop = false;
+    const onMouseUp = (e: MouseEvent) => {
+      stop = false;
+      onChange(e);
+    };
+
     const onChange = debounce((e) => {
+      if (stop) {
+        return;
+      }
+
       const { state } = app;
       if (!app.committed) return;
 
@@ -102,10 +105,7 @@ export function FloatingStyleMenu() {
 
       const headDown = head.down();
       const tailDown = tail.down();
-      if (
-        head.eq(tail) ||
-        (headDown.node.eq(tailDown.node) && EmptyInline.is(headDown.node))
-      ) {
+      if (head.eq(tail) || (headDown.node.eq(tailDown.node) && EmptyInline.is(headDown.node))) {
         hideContextMenu();
         return;
       }
@@ -154,14 +154,20 @@ export function FloatingStyleMenu() {
       }
     };
 
+    const onMouseDown = (e: MouseEvent) => {
+      stop = true;
+    };
+
     app.on(EventsOut.contentUpdated, onChange);
-    app.contentElement?.addEventListener("mouseup", onChange);
     app.contentElement?.addEventListener("keyup", onChange);
+    app.contentElement?.addEventListener("mouseup", onMouseUp);
+    app.contentElement?.addEventListener("mousedown", onMouseDown);
 
     return () => {
       app.off(EventsOut.contentUpdated, onChange);
-      app.contentElement?.removeEventListener("mouseup", onChange);
       app.contentElement?.removeEventListener("keyup", onChange);
+      app.contentElement?.removeEventListener("mouseup", onMouseUp);
+      app.contentElement?.removeEventListener("mousedown", onMouseDown);
     };
   }, [app, hideContextMenu, overlay]);
 
@@ -244,29 +250,17 @@ export function FloatingStyleMenu() {
             <ContextButton
               aria-label={"strike"}
               icon={<Circle size={4} bg={"#FFEDB0"} />}
-              bg={
-                marks.has(Mark.background("#ffce26"))
-                  ? "gray.100"
-                  : "transparent"
-              }
+              bg={marks.has(Mark.background("#ffce26")) ? "gray.100" : "transparent"}
               onClick={() => {
-                app.cmd.formatter
-                  .toggle(Mark.background("#FFEDB0"))
-                  ?.Dispatch();
+                app.cmd.formatter.toggle(Mark.background("#FFEDB0"))?.Dispatch();
               }}
             />
             <ContextButton
               aria-label={"strike"}
               icon={<Circle size={4} bg={"#8ae0ff"} />}
-              bg={
-                marks.has(Mark.background("#8ae0ff"))
-                  ? "gray.100"
-                  : "transparent"
-              }
+              bg={marks.has(Mark.background("#8ae0ff")) ? "gray.100" : "transparent"}
               onClick={() => {
-                app.cmd.formatter
-                  .toggle(Mark.background("#8ae0ff"))
-                  ?.Dispatch();
+                app.cmd.formatter.toggle(Mark.background("#8ae0ff"))?.Dispatch();
               }}
             />
             <ContextButton
@@ -287,13 +281,6 @@ export function FloatingStyleMenu() {
 
 const ContextButton = (props: IconButtonProps) => {
   return (
-    <IconButton
-      size={"xs"}
-      fontSize={"15px"}
-      h={"26px"}
-      w={"26px"}
-      variant={"ghost"}
-      {...props}
-    />
+    <IconButton size={"xs"} fontSize={"15px"} h={"26px"} w={"26px"} variant={"ghost"} {...props} />
   );
 };

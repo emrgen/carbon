@@ -1,3 +1,5 @@
 export * from './core'
 export * from './types'
 export * from './constants'
+export * from './utils/hit'
+export * from './utils/childHit'

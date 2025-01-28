@@ -10,7 +10,13 @@ import {
   preventAndStop,
 } from "@emrgen/carbon-core";
 import { CustomEvent } from "@emrgen/carbon-core/src/core/CustomEvent";
-import { DndEvent, elementBound } from "@emrgen/carbon-dragon";
+import {
+  childHit,
+  DndEvent,
+  elementBound,
+  isDragHitNode,
+  nodeFromPoint,
+} from "@emrgen/carbon-dragon";
 import { useCarbon, useNodeState } from "@emrgen/carbon-react";
 import { Optional } from "@emrgen/types";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -28,21 +34,24 @@ export interface FastDragHandleProps {
   style: any;
 }
 
+const searchDistance = [2, 4, 8, 16, 32, 64, 128];
+
 export const CarbonDragHandleId = "carbon-drag-handle";
 
-export function DraggableHandle(props: FastDragHandleProps) {
+export function NodeDragHandle(props: FastDragHandleProps) {
   const { node, style } = props;
+
   const app = useCarbon();
+  const dnd = useDndContext();
+
+  const handleRef = useRef(null);
   const [show, setShow] = useState(false);
   const [showDropHint, setShowDropHint] = useState(false);
   const [dropHintStyle, setDropHintStyle] = useState({} as any);
   const { attributes } = useNodeState({ node });
-  const dnd = useDndContext();
   const [collapsed, setCollapsed] = useState(() => {
     return app.store.get(node.id)?.linkedProps?.props.get(CollapsedPath, false) ?? false;
   });
-
-  const handleRef = useRef(null);
 
   useEffect(() => {
     setCollapsed(app.store.get(node.id)?.linkedProps?.props.get(CollapsedPath, false) ?? false);
@@ -87,96 +96,102 @@ export function DraggableHandle(props: FastDragHandleProps) {
     [app],
   );
 
+  // find the node that is hit by the drag event
   const findHitNode = useCallback(
     (e: DndEvent) => {
       const { node } = e;
       const { clientX: x, clientY: y } = e.event;
-      const el = app.store.element(node.id);
-      const belBound = elementBound(el!);
+      let container = nodeFromPoint(app.store, x, y, isDragHitNode);
 
-      const bound = {
-        minX: x - 5,
-        minY: y - 5,
-        maxX: x + 5,
-        maxY: y + 5,
-      };
+      // find the child container if the hit is with the page
+      if (container?.isPage) {
+        container = childHit(app.store, container, e.node, x, y, isDragHitNode);
+      }
 
-      const hits = dnd.containers.collides(bound);
-      return hits[0];
+      return container;
     },
-    [app, dnd],
+    [app],
   );
 
   const findDropPosition = useCallback(
     (e: DndEvent, hitNode: Node): Optional<Point> => {
       const firstChild = hitNode.firstChild;
-      const hitTitleElement = app.store.element(firstChild!.id!);
-      const hitElement = app.store.element(hitNode!.id!);
-      const { top, bottom } = elementBound(hitTitleElement!);
-      const elBound = elementBound(hitElement!);
+
       const { clientX, clientY } = e.event;
       const x = clientX;
       const y = clientY;
 
-      let to: Optional<Point> = null;
-      if (y < bottom) {
-        if (y < top + (bottom - top) / 2) {
-          to = Point.toBefore(hitNode);
-          // if (dnd.accepts(hitNode, to)) {
-          //   return to;
-          // }
-        } else {
-          const hasChildren = true; //hitNode.size > 1;
-          if (hasChildren && x > elBound.left + 30 && isNestableNode(hitNode)) {
-            to = Point.toAfter(firstChild?.id!);
-          } else {
-            to = Point.toAfter(hitNode);
-          }
-        }
-      } else {
-        to = Point.toAfter(hitNode);
-      }
+      const hitElement = app.store.element(hitNode!.id!);
+      const elBound = elementBound(hitElement!);
 
-      return to;
+      if (hitNode.firstChild?.isTextContainer) {
+        const hitTitleElement = app.store.element(firstChild!.id!);
+        const { top, bottom } = elementBound(hitTitleElement!);
+
+        let to: Optional<Point> = null;
+        if (y < bottom) {
+          if (y < top + (bottom - top) / 2) {
+            to = Point.toBefore(hitNode);
+            // if (dnd.accepts(hitNode, to)) {
+            //   return to;
+            // }
+          } else {
+            const hasChildren = hitNode.type.dnd?.nestable || hitNode.size > 1;
+            if (hasChildren && x > elBound.left + 30 && isNestableNode(hitNode)) {
+              to = Point.toAfter(firstChild?.id!);
+            } else {
+              to = Point.toAfter(hitNode);
+            }
+          }
+        } else {
+          to = Point.toAfter(hitNode);
+        }
+        return to;
+      } else {
+        if (y < elBound.top + (elBound.bottom - elBound.top) / 2) {
+          return Point.toBefore(hitNode);
+        } else {
+          return Point.toAfter(hitNode);
+        }
+      }
     },
     [app.store],
   );
 
+  // show drop hint when dragging over a container that accepts the dragged node
   const onDragOverNode = useCallback(
     (e: DndEvent) => {
       const { node } = e;
+      const { store } = app;
       const hitNode = findHitNode(e);
-      console.log("hit node", hitNode?.id.toString());
+
       setShowDropHint(false);
       if (!hitNode) {
         return;
       }
 
-      console.log("hit node", hitNode?.id.toString());
-      if (hitNode?.id.eq(node.id)) {
-        return;
-      }
+      // don't show drop hint if the hit node is the same as the dragged node
+      // if (hitNode?.id.eq(node.id)) {
+      //   return;
+      // }
 
-      console.log("hit node", hitNode?.id.toString());
       if (hitNode.isPage) {
         return;
       }
 
-      console.log("hit node", hitNode?.id.toString());
-      const isChildren = hitNode.chain.some((n) => n.eq(node));
+      const isChildren = hitNode.parents.some((n) => n.eq(node));
       if (isChildren) {
         return;
       }
 
-      console.log("hits", hitNode?.id.toString());
       const to = findDropPosition(e, hitNode);
-      const from = nodeLocation(node)!;
       if (!to) return;
-      // if (!to || from.eq(to) || to.isBefore && hitNode.prevSibling?.id.eq(node.id)) {
+      // don't show drop hint if the final drop position is same as the current position
+      // if (!to || from.eq(to) || (to.isBefore && hitNode.prevSibling?.id.eq(node.id))) {
       //   return;
       // }
 
-      const hitElement = app.store.element(to.nodeId);
+      const hitElement = store.element(to.nodeId);
 
       let { top, bottom, left, right, x, y } = elementBound(hitElement!);
       const width = right - left;
@@ -187,7 +202,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         const beforeNode = hitNode.prevSibling;
 
         if (beforeNode) {
-          const beforeElement = app.store.element(beforeNode?.id!);
+          const beforeElement = store.element(beforeNode?.id!);
           const { bottom: beforeBottom = top } = elementBound(beforeElement!);
           top = top - (top - beforeBottom) / 2;
         } else {
@@ -219,7 +234,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
 
       setShowDropHint(true);
     },
-    [app.store, findDropPosition, findHitNode],
+    [app, findDropPosition, findHitNode],
   );
 
   const onDropNode = useCallback(
@@ -229,13 +244,15 @@ export function DraggableHandle(props: FastDragHandleProps) {
       setShowDropHint(false);
 
       if (!hitNode) return;
-      if (hitNode.isPage) return;
+      if (hitNode.isPage) {
+        return;
+      }
       if (hitNode?.id.eq(node.id)) {
         // hide drop hint
         return;
       }
 
-      console.log("dropped on", hitNode?.id.toString());
+      // console.log("dropped on", hitNode?.id.toString());
       // TODO: check if hitNode is a container and drop node is accepted at the drop position
       // check if hit node is within the drop node (this is not allowed)
       const isChildren = hitNode.chain.some((n) => n.eq(node));
@@ -261,7 +278,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
         cmd.SelectBlocks([node.id]);
         cmd.Dispatch();
       });
-      console.log("drag end");
+      // console.log("drag end");
     },
     [app, findDropPosition, findHitNode],
   );
@@ -383,25 +400,42 @@ export function DraggableHandle(props: FastDragHandleProps) {
     [app, node],
   );
 
+  console.log(show);
+
   return (
     <div
       className="carbon-node-handle"
       data-target-name={node?.name}
       data-drag-handle={!!node?.type.dnd?.handle}
       {...attributes}
-      style={{ ...style, display: show ? "flex" : "none" }}
+      style={{ ...style, visibility: show ? "visible" : "hidden" }}
     >
-      {!node?.type.dnd?.handle && <div className="carbon-drag-handle-cover" ref={handleRef} {...listeners} />}
+      {!node?.type.dnd?.handle && (
+        <div className="carbon-drag-handle-cover" ref={handleRef} {...listeners} />
+      )}
       {node?.type.dnd?.handle && (
         <>
-          <div className="carbon-add-handle" onClick={handleInsertNode} onMouseDown={preventAndStop}>
+          <div
+            className="carbon-add-handle"
+            onClick={handleInsertNode}
+            onMouseDown={preventAndStop}
+          >
             <HiOutlinePlus />
           </div>
-          <div className="carbon-drag-handle" onKeyDown={(e) => console.log(e)} ref={handleRef} {...listeners}>
+          <div
+            className="carbon-drag-handle"
+            onKeyDown={(e) => console.log(e)}
+            ref={handleRef}
+            {...listeners}
+          >
             <PiDotsSixVerticalBold />
           </div>
           {node.type.spec.control?.collapse && (
-            <div className="carbon-collapse-handle" onClick={handleToggleCollapse} onMouseDown={preventAndStop}>
+            <div
+              className="carbon-collapse-handle"
+              onClick={handleToggleCollapse}
+              onMouseDown={preventAndStop}
+            >
               {collapsed ? <LuChevronRight /> : <LuChevronDown />}
             </div>
           )}

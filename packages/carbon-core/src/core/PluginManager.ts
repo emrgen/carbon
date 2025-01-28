@@ -1,17 +1,7 @@
 import { Optional } from "@emrgen/types";
 
 import { isKeyHotkey } from "is-hotkey";
-import {
-  camelCase,
-  each,
-  entries,
-  keys,
-  snakeCase,
-  some,
-  sortBy,
-  uniqBy,
-  values,
-} from "lodash";
+import { camelCase, each, entries, keys, snakeCase, some, sortBy, uniqBy, values } from "lodash";
 import { CarbonAction } from "./actions/types";
 import { Carbon } from "./Carbon";
 import { CarbonCommand } from "./CarbonCommand";
@@ -62,18 +52,12 @@ export class PluginManager {
 
     // console.log(keys(this.nodes).length, this.nodes)
     const events = flattened.reduce(
-      (es, p) =>
-        es.concat(keys(p.handlers()).map((k) => camelCase(k)) as EventsIn[]),
+      (es, p) => es.concat(keys(p.handlers()).map((k) => camelCase(k)) as EventsIn[]),
       [] as EventsIn[],
     );
     this.events = new Set(events.concat([EventsIn.keyDown]));
 
-    this.plugins = [
-      ...this.after,
-      ...values(this.nodes),
-      ...this.before,
-      ...this.commandPlugins,
-    ];
+    this.plugins = [...this.after, ...values(this.nodes), ...this.before, ...this.commandPlugins];
   }
 
   private flatten(plugins: CarbonPlugin[]): CarbonPlugin[] {
@@ -113,8 +97,6 @@ export class PluginManager {
 
   // handle incoming events from ui
   onEvent(event: EventContext<Event>) {
-    // console.log(event.type, event);
-
     // keyDown is handled explicitly using Plugin.keydown()
     if (event.type === "keyDown") {
       this.onKeyDown(<EventContext<any>>event);
@@ -126,7 +108,6 @@ export class PluginManager {
     // 	this.handleEvent(afterEvent)
     // }
 
-    // console.log(event.type, event);
     this.handleEvent(event);
   }
 
@@ -135,22 +116,21 @@ export class PluginManager {
   private handleEvent(event: EventContext<Event>) {
     if (event.stopped) return;
 
-    const { currentNode } = event;
-    some(
-      this.before,
-      (p) => event.stopped || p.handlers()[event.type]?.(event),
-    );
+    some(this.before, (p) => event.stopped || p.handlers()[event.type]?.(event));
 
-    if (!event.stopped) {
-      currentNode?.chain.some((n) => {
-        // console.log(n.name, event.type, n?.chain.length);
-        event.changeNode(n);
-        this.nodePlugin(n.name)?.handlers()[camelCase(event.type)]?.(event);
-        return event.stopped;
-      });
+    const { currentNode } = event;
+    if (!currentNode.eq(Node.IDENTITY)) {
+      if (!event.stopped) {
+        currentNode?.chain.some((n) => {
+          // console.log(n.name, event.type, n?.chain.length);
+          event.changeNode(n);
+          this.nodePlugin(n.name)?.handlers()[camelCase(event.type)]?.(event);
+          return event.stopped;
+        });
+      }
+      event.changeNode(currentNode);
     }
 
-    event.changeNode(currentNode);
     some(this.after, (p) => {
       // console.log('after', p.name, event.type, event.stopped)
       return event.stopped || p.handlers()[event.type]?.(event);
@@ -160,7 +140,6 @@ export class PluginManager {
   // methods returned from Plugin.keydown() are executed
   private onKeyDown(event: EventContext<KeyboardEvent>) {
     const keyDownEvent = <EventContext<any>>EventContext.fromContext(event);
-    const { currentNode } = keyDownEvent;
 
     console.groupCollapsed("onKeyDown", event);
 
@@ -169,9 +148,7 @@ export class PluginManager {
         if (keyDownEvent.stopped) return;
         const handlers = p.keydown();
         const handler = entries(handlers).find(([key]) => {
-          return isKeyHotkey(snakeCase(key).replaceAll("_", "+"))(
-            keyDownEvent.event.nativeEvent,
-          );
+          return isKeyHotkey(snakeCase(key).replaceAll("_", "+"))(keyDownEvent.event.nativeEvent);
         });
         // if (handler) {
         //   console.log("before", p.name, handler[0], handler[1]);
@@ -179,35 +156,36 @@ export class PluginManager {
         handler?.[1]?.(keyDownEvent);
       });
 
-      if (!keyDownEvent.stopped) {
-        currentNode?.chain.some((n) => {
-          keyDownEvent.changeNode(n);
-          this.nodePlugin(n.name)?.keydown()[keyDownEvent.type]?.(keyDownEvent);
-          const handlers = (this.nodePlugin(n.type.name)?.keydown() ??
-            {}) as EventHandlerMap;
-          const handler = entries(handlers).find(([key]) => {
-            return isKeyHotkey(snakeCase(key).replaceAll("_", "+"))(
-              keyDownEvent.event.nativeEvent,
-            );
+      const { currentNode } = keyDownEvent;
+      if (!currentNode.eq(Node.IDENTITY)) {
+        if (!keyDownEvent.stopped) {
+          currentNode?.chain.some((n) => {
+            keyDownEvent.changeNode(n);
+            this.nodePlugin(n.name)?.keydown()[keyDownEvent.type]?.(keyDownEvent);
+            const handlers = (this.nodePlugin(n.type.name)?.keydown() ?? {}) as EventHandlerMap;
+            const handler = entries(handlers).find(([key]) => {
+              return isKeyHotkey(snakeCase(key).replaceAll("_", "+"))(
+                keyDownEvent.event.nativeEvent,
+              );
+            });
+            // if (handler) {
+            //   console.log('node', n.name, handler[0], handler[1]);
+            // } else {
+            //   console.log('node', n.name, 'no handler', handlers)
+            // }
+            handler?.[1]?.(keyDownEvent);
+            return keyDownEvent.stopped;
           });
-          // if (handler) {
-          //   console.log('node', n.name, handler[0], handler[1]);
-          // } else {
-          //   console.log('node', n.name, 'no handler', handlers)
-          // }
-          handler?.[1]?.(keyDownEvent);
-          return keyDownEvent.stopped;
-        });
+        }
+
+        if (keyDownEvent.stopped) return;
+        keyDownEvent.changeNode(currentNode);
       }
 
-      if (keyDownEvent.stopped) return;
-      keyDownEvent.changeNode(currentNode);
       some(this.after, (p: CarbonPlugin) => {
         const handlers = p.keydown();
         const handler = entries(handlers).find(([key]) => {
-          return isKeyHotkey(snakeCase(key).replaceAll("_", "+"))(
-            keyDownEvent.event.nativeEvent,
-          );
+          return isKeyHotkey(snakeCase(key).replaceAll("_", "+"))(keyDownEvent.event.nativeEvent);
         });
 
         if (handler) {

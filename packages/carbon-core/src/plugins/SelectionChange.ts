@@ -1,4 +1,4 @@
-import { AfterPlugin, CarbonPlugin, EventContext, SelectedPath } from "@emrgen/carbon-core";
+import { AfterPlugin, CarbonPlugin, EventContext } from "@emrgen/carbon-core";
 import { p12, p14 } from "../core/Logger";
 import { EventHandlerMap } from "../core/types";
 import { KeyboardSelection } from "./KeyboardSelection";
@@ -40,11 +40,20 @@ export class SelectionChangePlugin extends AfterPlugin {
 
         const { selection: before } = app;
         if (before.isInvalid) {
-          console.warn(p12("%c[invalid]"), "color:orange", "before selection is invalid", app.ready);
+          console.warn(
+            p12("%c[invalid]"),
+            "color:orange",
+            "before selection is invalid",
+            app.ready,
+          );
         }
 
         if (after.isInvalid) {
-          console.error(p14("%c[error]"), "color:orange", "failed to ge pinned selection, after selection is invalid");
+          console.error(
+            p14("%c[error]"),
+            "color:orange",
+            "failed to ge pinned selection, after selection is invalid",
+          );
           return;
         }
 
@@ -68,18 +77,19 @@ export class SelectionChangePlugin extends AfterPlugin {
         cmd.Dispatch();
       },
       selectstart: (ctx: EventContext<Event>) => {
-        // this.removeBlockSelection(ctx);
-        // ctx.cmd.Dispatch();
+        this.removeBlockSelection(ctx)?.Then(() => {
+          ctx.app.focus();
+        });
       },
     };
   }
 
   removeBlockSelection(ctx: EventContext<Event>) {
     const { app, cmd } = ctx;
-    const { blockSelection } = app.state;
-    blockSelection.blocks.forEach((block) => {
-      cmd.Update(block.id, { [SelectedPath]: false });
-    });
+    if (app.blockSelection.isActive) {
+      console.debug(p14("[blockSelection]"), "clear");
+      return cmd.SelectBlocks([]).Dispatch();
+    }
   }
 
   plugins(): CarbonPlugin[] {

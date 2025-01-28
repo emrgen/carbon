@@ -139,6 +139,21 @@ export class EventManager {
       return;
     }
 
+    // when block selection is active, there is no dom selection, so cannot create editor selection
+    // if (type == EventsIn.selectstart && app.blockSelection.isActive) {
+    //   const editorEvent = EventContext.create({
+    //     type,
+    //     event,
+    //     app: this.app,
+    //     node: Node.IDENTITY, // no node plugins are executed on this event
+    //     selection: PinnedSelection.IDENTITY,
+    //     origin: EventOrigin.dom,
+    //   });
+    //
+    //   this.pm.onEvent(editorEvent);
+    //   return;
+    // }
+
     // when block selection is active
     if (type !== EventsIn.selectionchange && app.state.blockSelection.isActive) {
       const lastNode = last(app.blockSelection.blocks) as Node;
@@ -165,7 +180,10 @@ export class EventManager {
     let selectionInfo = PinnedSelection.fromDom(app.store, app.dom);
 
     // console.log(app.store.nodeMap.nodes().map(n => `${n.id.toString()}:${n.parent?.id.toString()}`).join(' > '))
-    // console.log('selection path', selection?.head.node.chain.map(n => n.id.toString()).join(' > '))
+    // console.log(
+    //   "selection path",
+    //   selectionInfo?.head.node.chain.map((n) => n.id.toString()).join(" > "),
+    // );
 
     const { selection, head } = selectionInfo ?? {};
     // NOTE: editor cannot process event without active selection
@@ -176,7 +194,10 @@ export class EventManager {
     }
 
     if ("selectionchange" === type) {
-      console.log(`%c >>> ${type}: ${(event as any).key ?? selection.toString()}`, "background:#ffcc006e");
+      console.log(
+        `%c >>> ${type}: ${(event as any).key ?? selection.toString()}`,
+        "background:#ffcc006e",
+      );
     }
 
     const isSelectionUnchanged = app.selection.eq(selection);

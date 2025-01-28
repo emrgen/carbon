@@ -96,10 +96,7 @@ export const PageComp = (props: RendererProps) => {
             const after = PinnedSelection.fromPin(Pin.toStartOf(textBlock)!);
             if (after.eq(app.selection)) return;
             prevent(e);
-            app.cmd
-              .SelectBlocks([])
-              .Select(after, ActionOrigin.UserInput)
-              .Dispatch();
+            app.cmd.SelectBlocks([]).Select(after, ActionOrigin.UserInput).Dispatch();
           }
           return;
         }
@@ -196,10 +193,7 @@ export const PageComp = (props: RendererProps) => {
             suppressContentEditableWarning: true,
           }}
         >
-          <CarbonNode
-            node={node.child(0)!}
-            custom={{ className: "cdoc__ti" }}
-          />
+          <CarbonNode node={node.child(0)!} custom={{ className: "cdoc__ti" }} />
 
           {!pageProps.eq(Node.NULL) && <CarbonNode node={pageProps} />}
 

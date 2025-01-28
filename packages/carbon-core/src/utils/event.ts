@@ -15,9 +15,7 @@ interface EventStoppable {
 }
 
 export function stop<T extends EventStoppable>(event: T): void;
-export function stop<T extends EventStoppable>(
-  fn: Function,
-): (event: T) => void;
+export function stop<T extends EventStoppable>(fn: Function): (event: T) => void;
 
 export function stop<T extends EventStoppable>(
   eventOrFn: T | Function,
@@ -33,9 +31,7 @@ export function stop<T extends EventStoppable>(
 }
 
 export function prevent<T extends EventPreventable>(event: T): void;
-export function prevent<T extends EventPreventable>(
-  fn: Function,
-): (event: T) => void;
+export function prevent<T extends EventPreventable>(fn: Function): (event: T) => void;
 
 export function prevent<T extends EventPreventable>(
   eventOrFn: T | Function,
@@ -53,9 +49,7 @@ export function prevent<T extends EventPreventable>(
   }
 }
 
-export function preventAndStop<T extends EventPreventable & EventStoppable>(
-  event: T,
-) {
+export function preventAndStop<T extends EventPreventable & EventStoppable>(event: T) {
   event.preventDefault();
   event.stopPropagation();
 }

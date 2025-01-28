@@ -198,7 +198,10 @@ export const CodeInner = (props: RendererProps) => {
                   const section = app.schema.type("paragraph").default();
                   console.log(parent);
                   const after = PinnedSelection.fromPin(Pin.toStartOf(section!)!);
-                  app.cmd.Insert(Point.toAfter(parent!), section!).Select(after, ActionOrigin.UserInput).Dispatch();
+                  app.cmd
+                    .Insert(Point.toAfter(parent!), section!)
+                    .Select(after, ActionOrigin.UserInput)
+                    .Dispatch();
                   return;
                 }
 
@@ -271,10 +274,8 @@ export const CodeInner = (props: RendererProps) => {
   useEffect(() => {
     const props = app.store.get(nodeId);
     const firstMount = props?.props.get(FocusOnInsertPath, false);
-    console.log("------------------------------------", firstMount, nodeId.toString());
     if (firstMount) {
       view?.focus();
-      console.log(view, "xxxxxxxxxxxxxxxxx");
     }
   }, [view, app, nodeId]);
 
@@ -320,6 +321,8 @@ export const CodeInner = (props: RendererProps) => {
 
 export const Code = memo(CodeInner, (prev, next) => {
   return (
-    isEqualCode(prev.node, next.node) && isEqualType(prev.node, next.node) && prev.isCollapsed === next.isCollapsed
+    isEqualCode(prev.node, next.node) &&
+    isEqualType(prev.node, next.node) &&
+    prev.isCollapsed === next.isCollapsed
   );
 });

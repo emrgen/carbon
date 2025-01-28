@@ -137,10 +137,6 @@ export class NodeType {
     return !!this.spec.collapsible;
   }
 
-  get isContainer() {
-    return !!this.spec.container;
-  }
-
   get isPage() {
     return !!this.spec.page;
   }
@@ -204,10 +200,6 @@ export class NodeType {
 
   get dnd() {
     return this.spec.dnd;
-  }
-
-  get isDropContainer() {
-    return !!this.spec.dropContainer;
   }
 
   get isInlineSelectable() {
