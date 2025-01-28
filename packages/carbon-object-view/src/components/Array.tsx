@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { AiFillCaretDown } from "react-icons/ai";
 import { BsFillCaretRightFill } from "react-icons/bs";
 import { NodeView } from "./Node";
 import { NodeInitial } from "./NodeInitial";
@@ -63,8 +62,8 @@ export const ArrayView = (props: ArrayProps) => {
             {propName} ={" "}
           </span>
         )}
-        <div className={"cov-expander"}>
-          {expanded ? <AiFillCaretDown /> : <BsFillCaretRightFill fontSize={"12px"} />}
+        <div className={`cov-expander ${expanded ? "expanded" : "collapsed"}`}>
+          <BsFillCaretRightFill fontSize={"12px"} />
         </div>
         <span className={"cov-object-constructor"}>Array({slice.length})</span>
         <span className={"cov-left-bracket"}>[</span>

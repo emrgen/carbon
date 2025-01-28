@@ -1,25 +1,10 @@
 import { Optional, Predicate, With } from "@emrgen/types";
 import EventEmitter from "events";
-import {
-  entries,
-  findIndex,
-  first,
-  identity,
-  isArray,
-  last,
-  merge,
-  noop,
-  reverse,
-} from "lodash";
+import { entries, findIndex, first, identity, isArray, last, merge, noop, reverse } from "lodash";
 import { NODE_CACHE } from "./CarbonCache";
 import { classString } from "./Logger";
 import { Mark } from "./Mark";
-import {
-  NodeContent,
-  NodeContentData,
-  NodeData,
-  PlainNodeContent,
-} from "./NodeContent";
+import { NodeContent, NodeContentData, NodeData, PlainNodeContent } from "./NodeContent";
 import { IntoNodeId, NodeId } from "./NodeId";
 import { NodeMap } from "./NodeMap";
 import {
@@ -296,17 +281,12 @@ export class Node extends EventEmitter implements IntoNodeId {
   get isFocusable(): boolean {
     if (this.type.isFocusable) return true;
     if (this.parents.some((n) => n.isAtom && n.isBlock)) return false;
-    return (
-      ((this.isTextContainer && this.isVoid) || this.type.isFocusable) &&
-      !this.isCollapseHidden
-    );
+    return ((this.isTextContainer && this.isVoid) || this.type.isFocusable) && !this.isCollapseHidden;
   }
 
   // a node that does not avoid to have a focus moved in by arrow keys
   get isSelectable() {
-    const nonSelectable = this.chain.find(
-      (n) => !(n.type.isInlineSelectable || n.isActive),
-    );
+    const nonSelectable = this.chain.find((n) => !(n.type.isInlineSelectable || n.isActive));
     // console.log(nonSelectable);
 
     return !nonSelectable;
@@ -665,18 +645,12 @@ export class Node extends EventEmitter implements IntoNodeId {
     // eslint-disable-next-line no-return-assign
     const collect: Predicate<Node> = (node) => !!(fn(node) && (found = node));
 
-    opts.order === "pre"
-      ? this.preorder(collect, opts)
-      : this.postorder(collect, opts);
+    opts.order === "pre" ? this.preorder(collect, opts) : this.postorder(collect, opts);
     return found;
   }
 
   // NOTE: the parent chain is not searched for the next node
-  prev(
-    fn: Predicate<Node> = yes,
-    opts: Partial<TraverseOptions> = {},
-    gotoParent = true,
-  ): Optional<Node> {
+  prev(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
     const options = merge(
       {
         order: "post",
@@ -695,9 +669,7 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     // check in sibling tree
     if (sibling && !options.skip(sibling)) {
-      options.order == "pre"
-        ? sibling?.preorder(collect, options)
-        : sibling?.postorder(collect, options);
+      options.order == "pre" ? sibling?.preorder(collect, options) : sibling?.postorder(collect, options);
     }
     if (found) return found;
 
@@ -720,11 +692,7 @@ export class Node extends EventEmitter implements IntoNodeId {
   // NOTE: the parent chain is not searched for the next node
   // check if next siblings' tree can fulfill predicate
   // otherwise try parent next
-  next(
-    fn: Predicate<Node> = yes,
-    opts: Partial<TraverseOptions> = {},
-    gotoParent = true,
-  ): Optional<Node> {
+  next(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
     const options = merge(
       {
         order: "post",
@@ -740,9 +708,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     let found: Optional<Node> = null;
     const collect: Predicate<Node> = (node) => !!(fn(node) && (found = node));
     if (sibling && !options.skip(sibling)) {
-      options.order == "pre"
-        ? sibling?.preorder(collect, options)
-        : sibling?.postorder(collect, options);
+      options.order == "pre" ? sibling?.preorder(collect, options) : sibling?.postorder(collect, options);
     }
 
     if (found) return found;
@@ -752,8 +718,7 @@ export class Node extends EventEmitter implements IntoNodeId {
     if (found) return found;
 
     // no siblings have the target, maybe we want to go above and beyond
-    if (!gotoParent || !this.parent || options.boundary(this.parent))
-      return null;
+    if (!gotoParent || !this.parent || options.boundary(this.parent)) return null;
 
     // check if parent is the target
     if (options.parent && fn(this.parent)) return this.parent;
@@ -764,26 +729,16 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   // start walking from the node itself
   // walk preorder, traverse order: node -> children -> ...
-  walk(
-    fn: Predicate<Node> = yes,
-    opts: Partial<TraverseOptions> = {},
-  ): boolean {
+  walk(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}): boolean {
     const { order = "pre", direction = "forward" } = opts;
-    const done =
-      order == "pre" ? this.preorder(fn, opts) : this.postorder(fn, opts);
+    const done = order == "pre" ? this.preorder(fn, opts) : this.postorder(fn, opts);
 
     // without the () brackets this will be wrong
-    return (
-      done ||
-      (direction === "forward" ? !!this.next(fn, opts) : !!this.prev(fn, opts))
-    );
+    return done || (direction === "forward" ? !!this.next(fn, opts) : !!this.prev(fn, opts));
   }
 
   // fn should return true if the target node was found
-  preorder(
-    fn: Predicate<Node> = yes,
-    opts: Partial<TraverseOptions> = {},
-  ): boolean {
+  preorder(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}): boolean {
     const { direction = "forward", skip = no } = opts;
     if (skip(this)) return false;
 
@@ -941,7 +896,7 @@ export class Node extends EventEmitter implements IntoNodeId {
       {} as Record<string, string>,
     );
 
-    const propsCone = props.clone(); //.delete("local");
+    const propsCone = option?.props?.noLocal ? props.clone().delete("local") : props.clone();
 
     if (this.isText) {
       return {

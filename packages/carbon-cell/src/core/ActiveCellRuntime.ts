@@ -1,10 +1,35 @@
 import { Optional } from "@emrgen/types";
 import { parseCell, peekId } from "@observablehq/parser";
 import { Module, Runtime, Variable } from "@observablehq/runtime";
-import { Library } from "@observablehq/stdlib";
+import { Library, observe } from "@observablehq/stdlib";
 import { EventEmitter } from "events";
 import { isString } from "lodash";
 import { isHtmlElement, isUnnamedCell, isViewCell, nextUnnamedCellName, viewCellName } from "../utils";
+
+function width() {
+  return observe(function (change) {
+    const page = document.querySelector(".cpage");
+    if (!page) {
+      change(720);
+      return;
+    }
+
+    const cssWidth = (el) => {
+      const style = window.getComputedStyle(el);
+      return parseFloat(el.clientWidth) - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    };
+
+    var width = change(cssWidth(page));
+    function resized() {
+      var w = cssWidth(page);
+      if (w !== width) change((width = w));
+    }
+    window.addEventListener("resize", resized);
+    return function () {
+      window.removeEventListener("resize", resized);
+    };
+  });
+}
 
 //
 export class ActiveCellRuntime extends EventEmitter {
@@ -19,7 +44,7 @@ export class ActiveCellRuntime extends EventEmitter {
 
   constructor(builtins: Record<string, any> = {}) {
     super();
-    this.runtime = new Runtime(Object.assign(new Library(), builtins));
+    this.runtime = new Runtime(Object.assign(new Library(), { ...builtins, width }));
     this.module = this.runtime.module();
     // define a hidden module variable
     // this.module.variable(true).define("_module", [], () => this.module);

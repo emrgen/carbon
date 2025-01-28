@@ -1,24 +1,11 @@
 import { Box } from "@chakra-ui/react";
 import { attrRenderers } from "@emrgen/carbon-attributes";
 
-import {
-  BlockEvent,
-  blockPresetPlugins,
-  node,
-  paragraph,
-  plainText,
-  text,
-  title,
-} from "@emrgen/carbon-blocks";
+import { BlockEvent, blockPresetPlugins, node, paragraph, plainText, text, title } from "@emrgen/carbon-blocks";
 import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { boardPlugins } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
-import {
-  ActiveCellRuntime,
-  ActiveCellRuntimeContext,
-  cellPlugin,
-  cellRenderer,
-} from "@emrgen/carbon-cell";
+import { ActiveCellRuntime, ActiveCellRuntimeContext, cellPlugin, cellRenderer } from "@emrgen/carbon-cell";
 import {
   carbonChakraRenderers,
   EmojiPickerInlineMenu,
@@ -27,38 +14,16 @@ import {
 } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codemirrorExtension } from "@emrgen/carbon-codemirror";
-import {
-  commentEditorComp,
-  commentEditorPlugin,
-} from "@emrgen/carbon-comment-editor";
-import {
-  AddPagePath,
-  CollapsedPath,
-  corePresetPlugins,
-  Keymap,
-  ModePath,
-  NodeId,
-  State,
-} from "@emrgen/carbon-core";
+import { commentEditorComp, commentEditorPlugin } from "@emrgen/carbon-comment-editor";
+import { AddPagePath, CollapsedPath, corePresetPlugins, Keymap, ModePath, NodeId, State } from "@emrgen/carbon-core";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
 import { emojiPlugins } from "@emrgen/carbon-emoji";
 import { flashPlugin, flashRenderers } from "@emrgen/carbon-flash";
 import { mediaPlugins, mediaRenderers } from "@emrgen/carbon-media";
-import {
-  timelinePlugin,
-  timelineRenderer,
-} from "@emrgen/carbon-plugin-timeline";
-import {
-  ObservableNodes,
-  ObservableQuestions,
-  questionExtension,
-} from "@emrgen/carbon-question";
-import {
-  RendererProps,
-  RenderManager,
-  useCreateCachedCarbon,
-} from "@emrgen/carbon-react";
+import { timelinePlugin, timelineRenderer } from "@emrgen/carbon-plugin-timeline";
+import { ObservableNodes, ObservableQuestions, questionExtension } from "@emrgen/carbon-question";
+import { RendererProps, RenderManager, useCreateCachedCarbon } from "@emrgen/carbon-react";
 import { CarbonUI } from "@emrgen/carbon-ui";
 import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
 import { flattenDeep } from "lodash";
@@ -224,6 +189,9 @@ export function SidebarLayout() {
   const [runtime] = useState<ActiveCellRuntime>(() => {
     return new ActiveCellRuntime({
       Carbon: app,
+      width: () => {
+        return 720;
+      },
     });
   });
 
@@ -235,11 +203,7 @@ export function SidebarLayout() {
   useEffect(() => {
     const onChange = (state: State) => {
       // console.log(state.selection.bounds())
-      console.debug(
-        "changes",
-        state.changes.patch,
-        Array.from(state.changes.dataMap.values()),
-      );
+      console.debug("changes", state.changes.patch, Array.from(state.changes.dataMap.values()));
       console.debug(
         "actions",
         state.actions.optimize().actions.map((a) => a.toJSON()),

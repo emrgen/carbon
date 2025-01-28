@@ -138,7 +138,9 @@ export const useCreateCachedCarbon = (
         name + ":carbon:content",
         JSON.stringify(
           state.content.toJSON({
-            props: {},
+            props: {
+              noLocal: true
+            },
           }),
         ),
       );

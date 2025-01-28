@@ -1,4 +1,5 @@
 import { CollapsedPath, HasFocusPath, NodeId, preventAndStop, stop } from "@emrgen/carbon-core";
+import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import { CarbonBlock, RendererProps, useCarbon, useNodeChange, useSelectionHalo } from "@emrgen/carbon-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BsTextParagraph } from "react-icons/bs";
@@ -56,7 +57,7 @@ const CodeCellWrapper = (props: RendererProps) => {
   const mod = useActiveCellRuntime();
   const { node } = useNodeChange({ node: props.node });
   const ref = useRef(null);
-  // useRectSelectable({ node, ref });
+  useRectSelectable({ node, ref });
   const { SelectionHalo, attributes } = useSelectionHalo({ node });
 
   const [codeType, setCodeType] = useState(node.props.get(CodeCellCodeTypePath, "javascript"));
@@ -65,7 +66,8 @@ const CodeCellWrapper = (props: RendererProps) => {
   useCustomCompareEffect(
     () => {
       const codeType = node.props.get(CodeCellCodeTypePath, "javascript");
-      mod.redefine("", nodeId, node.props.get(CodeCellCodeValuePath, ""), codeType);
+      const name = Math.random().toString();
+      mod.redefine(name, nodeId, node.props.get(CodeCellCodeValuePath, ""), codeType);
     },
     [node, mod],
     (prev, next) => {
@@ -131,7 +133,8 @@ const CodeCellWrapper = (props: RendererProps) => {
     <CarbonBlock node={node} ref={ref} custom={attributes}>
       <div className={"carbon-cell-container"} onKeyUp={stop} onBeforeInput={stop}>
         <Result node={node} onToggle={handleToggleCell} />
-        {!isCollapsed && <Code node={node} />}
+        <Code node={node} isCollapsed={isCollapsed} />
+
         {/*<div*/}
         {/*  className={"carbon-cell-code"}*/}
         {/*  style={{*/}

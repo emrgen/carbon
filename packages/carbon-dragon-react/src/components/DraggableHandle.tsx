@@ -401,7 +401,7 @@ export function DraggableHandle(props: FastDragHandleProps) {
             <PiDotsSixVerticalBold />
           </div>
           {node.type.spec.control?.collapse && (
-            <div className="carbon-add-handle" onClick={handleToggleCollapse} onMouseDown={preventAndStop}>
+            <div className="carbon-collapse-handle" onClick={handleToggleCollapse} onMouseDown={preventAndStop}>
               {collapsed ? <LuChevronRight /> : <LuChevronDown />}
             </div>
           )}

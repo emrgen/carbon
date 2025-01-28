@@ -60,15 +60,15 @@
 [data-name=cell]
   position: relative;
 
-  &:after
-    position absolute;
-    content: attr(data-key)
-    font-size 10px
-    top 6px
-    left 100%
-    color #555
-    display block
-    white-space nowrap
+  //&:after
+  //  position absolute;
+  //  content: attr(data-key)
+  //  font-size 10px
+  //  top 6px
+  //  left 100%
+  //  color #555
+  //  display block
+  //  white-space nowrap
 
 [data-name=page]
   &:after
@@ -158,7 +158,8 @@
     svg
       pointer-events: none
 
-  .carbon-drag-handle
+  .carbon-drag-handle,
+  .carbon-collapse-handle
     cursor: grab
     width 20px
     height: 24px
@@ -180,6 +181,9 @@
 
     svg
       pointer-events: none
+  .carbon-collapse-handle
+    font-size: 17px
+    cursor pointer
 
 .carbon-drag-overlay
   position absolute

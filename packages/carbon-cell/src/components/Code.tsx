@@ -25,17 +25,11 @@ import { CodeCellCodeTypePath, CodeCellCodeValuePath } from "../constants";
 import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
 
 const isEqualCode = (prev: Node, next: Node) => {
-  return (
-    prev.props.get(CodeCellCodeValuePath) ===
-    next.props.get(CodeCellCodeValuePath)
-  );
+  return prev.props.get(CodeCellCodeValuePath) === next.props.get(CodeCellCodeValuePath);
 };
 
 const isEqualType = (prev: Node, next: Node) => {
-  return (
-    prev.props.get(CodeCellCodeTypePath) ===
-    next.props.get(CodeCellCodeTypePath)
-  );
+  return prev.props.get(CodeCellCodeTypePath) === next.props.get(CodeCellCodeTypePath);
 };
 
 export const CodeInner = (props: RendererProps) => {
@@ -48,14 +42,10 @@ export const CodeInner = (props: RendererProps) => {
   const { node } = useNodeChange({ node: props.node });
 
   const [defaultValue] = useState(node.props.get(CodeCellCodeValuePath, ""));
-  const [value, setValue] = useState(
-    node.props.get(CodeCellCodeValuePath, "javascript"),
-  );
+  const [value, setValue] = useState(node.props.get(CodeCellCodeValuePath, "javascript"));
   const [nodeId] = useState(node.id);
   const [view, setView] = useState<EditorView | null>(null);
-  const [codeType, setCodeType] = useState(
-    node.props.get(CodeCellCodeTypePath, "javascript"),
-  );
+  const [codeType, setCodeType] = useState(node.props.get(CodeCellCodeTypePath, "javascript"));
 
   useEffect(() => {
     const onMount = () => {
@@ -98,12 +88,15 @@ export const CodeInner = (props: RendererProps) => {
   // focus should set the cell focus status
   const onFocused = useCallback(() => {
     if (app.store.get(nodeId)?.props.get(HasFocusPath)) return;
-    app.cmd
-      .Update(nodeId, {
-        [HasFocusPath]: true,
-      })
-      .Select(PinnedSelection.SKIP, ActionOrigin.UserInput)
-      .Dispatch();
+    const cmd = app.cmd.Update(nodeId, {
+      [HasFocusPath]: true,
+    });
+    if (app.blockSelection.isActive) {
+      cmd.SelectBlocks([]);
+    } else {
+      cmd.Select(PinnedSelection.SKIP, ActionOrigin.UserInput);
+    }
+    cmd.Dispatch();
   }, [app, nodeId]);
 
   // blur should remove the cell focus status
@@ -152,10 +145,7 @@ export const CodeInner = (props: RendererProps) => {
           onBlur();
           setTimeout(() => {
             const node = app.store.get(nodeId)!;
-            const nextCodeType = node.props.get(
-              CodeCellCodeTypePath,
-              "javascript",
-            );
+            const nextCodeType = node.props.get(CodeCellCodeTypePath, "javascript");
             // if the code type is changed, before the blur, skip the redefine
             if (codeType !== nextCodeType) return;
             // redefine the variable when the cell is blurred
@@ -207,13 +197,8 @@ export const CodeInner = (props: RendererProps) => {
                   const parent = app.store.get(nodeId)?.parent;
                   const section = app.schema.type("paragraph").default();
                   console.log(parent);
-                  const after = PinnedSelection.fromPin(
-                    Pin.toStartOf(section!)!,
-                  );
-                  app.cmd
-                    .Insert(Point.toAfter(parent!), section!)
-                    .Select(after, ActionOrigin.UserInput)
-                    .Dispatch();
+                  const after = PinnedSelection.fromPin(Pin.toStartOf(section!)!);
+                  app.cmd.Insert(Point.toAfter(parent!), section!).Select(after, ActionOrigin.UserInput).Dispatch();
                   return;
                 }
 
@@ -222,9 +207,7 @@ export const CodeInner = (props: RendererProps) => {
                   event.stopPropagation();
                   event.preventDefault();
                   redefine({
-                    code: app.store
-                      .get(nodeId)
-                      ?.props.get(CodeCellCodeValuePath, ""),
+                    code: app.store.get(nodeId)?.props.get(CodeCellCodeValuePath, ""),
                     type: codeType,
                   });
                   return;
@@ -234,9 +217,7 @@ export const CodeInner = (props: RendererProps) => {
                   event.preventDefault();
                   event.stopPropagation();
                   redefine({
-                    code: app.store
-                      .get(nodeId)
-                      ?.props.get(CodeCellCodeValuePath, ""),
+                    code: app.store.get(nodeId)?.props.get(CodeCellCodeValuePath, ""),
                     type: codeType,
                     forced: true,
                   });
@@ -273,10 +254,7 @@ export const CodeInner = (props: RendererProps) => {
   useCustomCompareEffect(
     () => {
       if (!ref.current) return;
-      const view = createEditor(
-        ref.current,
-        node.props.get(CodeCellCodeValuePath, ""),
-      );
+      const view = createEditor(ref.current, node.props.get(CodeCellCodeValuePath, ""));
       setView(view);
       return () => {
         view.destroy();
@@ -291,11 +269,12 @@ export const CodeInner = (props: RendererProps) => {
 
   // focus the editor when the cell is mounted
   useEffect(() => {
-    const firstMount = app.store
-      .get(nodeId)
-      ?.props.get(FocusOnInsertPath, false);
+    const props = app.store.get(nodeId);
+    const firstMount = props?.props.get(FocusOnInsertPath, false);
+    console.log("------------------------------------", firstMount, nodeId.toString());
     if (firstMount) {
       view?.focus();
+      console.log(view, "xxxxxxxxxxxxxxxxx");
     }
   }, [view, app, nodeId]);
 
@@ -312,10 +291,16 @@ export const CodeInner = (props: RendererProps) => {
   }, [view, mod, nodeId]);
   return (
     <div
+      style={{
+        visibility: props.isCollapsed ? "hidden" : "visible",
+        height: props.isCollapsed ? 0 : "auto",
+        position: props.isCollapsed ? "absolute" : "relative",
+      }}
       className={"cell-code-wrapper"}
       onKeyDown={(e) => e.stopPropagation()}
       onFocus={(e) => e.stopPropagation()}
     >
+      {props.isCollapsed ? "isCollapsed" : ""}
       <div className={"editor-container"} ref={ref} />
       <div
         className={"carbon-cell-compute-button"}
@@ -334,5 +319,7 @@ export const CodeInner = (props: RendererProps) => {
 };
 
 export const Code = memo(CodeInner, (prev, next) => {
-  return isEqualCode(prev.node, next.node) && isEqualType(prev.node, next.node);
+  return (
+    isEqualCode(prev.node, next.node) && isEqualType(prev.node, next.node) && prev.isCollapsed === next.isCollapsed
+  );
 });

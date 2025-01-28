@@ -1,13 +1,4 @@
-import {
-  Box,
-  HStack,
-  List,
-  ListItem,
-  Portal,
-  Square,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, HStack, List, ListItem, Portal, Square, Stack, Text } from "@chakra-ui/react";
 import {
   FocusOnInsertPath,
   Fragment,
@@ -45,12 +36,8 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       .filter((n) => n.spec.insert)
       .filter((n) => n.name !== node?.parent?.name)
       .filter((b) => {
-        const nameMatch = b.spec?.info?.title
-          ?.toLowerCase()
-          .includes(searchText.toLowerCase());
-        const tagMatch = b.spec?.info?.tags?.some((tag) =>
-          tag.toLowerCase().includes(searchText.toLowerCase()),
-        );
+        const nameMatch = b.spec?.info?.title?.toLowerCase().includes(searchText.toLowerCase());
+        const tagMatch = b.spec?.info?.tags?.some((tag) => tag.toLowerCase().includes(searchText.toLowerCase()));
 
         return (tagMatch || nameMatch) && b.name !== node?.name;
       });
@@ -107,18 +94,13 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       const { tr } = app;
 
       // check if the parent block can be changed to the selected block
-      const match = type.contentMatch.matchFragment(
-        Fragment.from(parent.children),
-      );
+      const match = type.contentMatch.matchFragment(Fragment.from(parent.children));
       if (match) {
         tr.Change(parent?.id, type.name);
         tr.SetContent(node.id, []);
         if (type.isAtom && type.isBlock) {
           app.parkCursor();
-        } else if (
-          !type.isAtom &&
-          parent.child(0)?.find((n) => n.hasFocusable)
-        ) {
+        } else if (!type.isAtom && parent.child(0)?.find((n) => n.hasFocusable)) {
           tr.Select(PinnedSelection.fromPin(Pin.future(parent.child(0)!, 0)!)!);
         }
 
@@ -129,9 +111,9 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       // if the parent block can't be changed to the selected block, insert the block before the parent block
       const block = type.default();
       if (!block) return;
-      const after = PinnedSelection.fromPin(Pin.future(node, 0))!;
 
       if (type.isSandbox) {
+        console.log("sandboxed", block.linkedProps);
         block.linkedProps?.updateProps({
           [FocusOnInsertPath]: true,
         });
@@ -139,7 +121,14 @@ export function InsertBlockMenu(props: BlockMenuProps) {
 
       tr.Insert(Point.toBefore(parent.id), block);
       tr.SetContent(node.id, []);
-      tr.Select(after);
+
+      if (type.isSandbox) {
+        tr.Select(PinnedSelection.SKIP);
+      } else {
+        const after = PinnedSelection.fromPin(Pin.future(node, 0))!;
+        tr.Select(after);
+      }
+
       tr.Dispatch();
     },
     [app, node],
@@ -160,9 +149,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       if (direction === "up") {
         setActiveIndex((i) => (i > 0 ? i - 1 : 0));
       } else {
-        setActiveIndex((i) =>
-          i < blocks.length - 1 ? i + 1 : blocks.length - 1,
-        );
+        setActiveIndex((i) => (i < blocks.length - 1 ? i + 1 : blocks.length - 1));
       }
     },
     [blocks],
@@ -194,12 +181,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
           contentEditable={false}
           suppressContentEditableWarning={true}
         >
-          <BlockList
-            onSelect={handleSelect}
-            blocks={blocks}
-            activeIndex={activeIndex}
-            onSelectIndex={setActiveIndex}
-          />
+          <BlockList onSelect={handleSelect} blocks={blocks} activeIndex={activeIndex} onSelectIndex={setActiveIndex} />
         </Stack>
       )}
     </Portal>
@@ -222,8 +204,7 @@ const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
     if (!active) return;
 
     const { top, bottom } = active.getBoundingClientRect();
-    const { top: parentTop, bottom: parentBottom } =
-      ref.current.getBoundingClientRect();
+    const { top: parentTop, bottom: parentBottom } = ref.current.getBoundingClientRect();
 
     if (top < parentTop) {
       setScrollTop((s) => s - (parentTop - top) - 4);
@@ -284,12 +265,7 @@ const BlockList = ({ onSelect, blocks, activeIndex, onSelectIndex }) => {
                 >
                   {blockIcons[b.name] ?? ""}
                 </Square>
-                <HStack
-                  spacing={0}
-                  flex={1}
-                  overflow={"hidden"}
-                  justifyContent={"space-between"}
-                >
+                <HStack spacing={0} flex={1} overflow={"hidden"} justifyContent={"space-between"}>
                   <Text fontSize={13}>{b.spec.info.title}</Text>
                   <Text
                     fontSize={13}

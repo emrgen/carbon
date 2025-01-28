@@ -1,9 +1,4 @@
-import {
-  AfterPlugin,
-  CarbonPlugin,
-  EventContext,
-  SelectedPath,
-} from "@emrgen/carbon-core";
+import { AfterPlugin, CarbonPlugin, EventContext, SelectedPath } from "@emrgen/carbon-core";
 import { p12, p14 } from "../core/Logger";
 import { EventHandlerMap } from "../core/types";
 import { KeyboardSelection } from "./KeyboardSelection";
@@ -37,9 +32,7 @@ export class SelectionChangePlugin extends AfterPlugin {
           count = 0;
         }, 1000);
         if (count > 60) {
-          console.error(
-            "selectionchange happening too fast, possible bug detected",
-          );
+          console.error("selectionchange happening too fast, possible bug detected");
           return;
         }
 
@@ -47,28 +40,15 @@ export class SelectionChangePlugin extends AfterPlugin {
 
         const { selection: before } = app;
         if (before.isInvalid) {
-          console.warn(
-            p12("%c[invalid]"),
-            "color:orange",
-            "before selection is invalid",
-            app.ready,
-          );
+          console.warn(p12("%c[invalid]"), "color:orange", "before selection is invalid", app.ready);
         }
 
         if (after.isInvalid) {
-          console.error(
-            p14("%c[error]"),
-            "color:orange",
-            "failed to ge pinned selection, after selection is invalid",
-          );
+          console.error(p14("%c[error]"), "color:orange", "failed to ge pinned selection, after selection is invalid");
           return;
         }
 
-        if (
-          app.focused &&
-          after.eq(before) &&
-          after.isDomInSync(app.store, app.dom)
-        ) {
+        if (app.focused && after.eq(before) && after.isDomInSync(app.store, app.dom)) {
           console.warn(p14("%c[duplicate]"), "color:grey", before, after);
           return;
         }
@@ -84,6 +64,7 @@ export class SelectionChangePlugin extends AfterPlugin {
         if (ctx.app.state.blockSelection.isActive) {
           this.removeBlockSelection(ctx);
         }
+
         cmd.Dispatch();
       },
       selectstart: (ctx: EventContext<Event>) => {

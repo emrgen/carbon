@@ -1,22 +1,25 @@
+import { Node } from "@emrgen/carbon-core";
+import { useCarbon } from "@emrgen/carbon-react";
 import { MutableRefObject, useEffect } from "react";
 import { useRectSelector } from "./useRectSelector";
-import { Node, } from "@emrgen/carbon-core";
-import {useCarbon} from "@emrgen/carbon-react";
 
 interface UseFastSelectableProps {
-	node: Node;
-	ref: MutableRefObject<any>
+  node: Node;
+  ref: MutableRefObject<any>;
 }
 
 // registers rect-selectable
 export const useRectSelectable = (props: UseFastSelectableProps) => {
-	const {node, ref} = props;
-	const rectSelector = useRectSelector();
-	const app = useCarbon();
-	useEffect(() => {
-	  rectSelector.onMountRectSelectable(node, ref.current);
-		return () => {
-			rectSelector.onUnmountRectSelectable(node,);
-		}
-	}, [app.state, node, rectSelector, ref]);
-}
+  const { node, ref } = props;
+  const rectSelector = useRectSelector();
+  const app = useCarbon();
+  useEffect(() => {
+    // if node is props, then select parent sandbox node
+    // TODO: check if parent is a sandbox node
+    const target = node.name === "props" ? node.parent! : node;
+    rectSelector.onMountRectSelectable(target, ref.current);
+    return () => {
+      rectSelector.onUnmountRectSelectable(target);
+    };
+  }, [app.state, node, rectSelector, ref]);
+};
