@@ -1,27 +1,12 @@
 import { Box } from "@chakra-ui/react";
 import { attrRenderers } from "@emrgen/carbon-attributes";
 
-import {
-  blockPresetPlugins,
-  node,
-  paragraph,
-  text,
-  title,
-} from "@emrgen/carbon-blocks";
+import { blockPresetPlugins, node, paragraph, text, title } from "@emrgen/carbon-blocks";
 import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import {
-  boardPlugins,
-  CardsCountPath,
-  CommentedByPath,
-} from "@emrgen/carbon-board";
+import { boardPlugins, CardsCountPath, CommentedByPath } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
 import { cellRenderer } from "@emrgen/carbon-cell";
-import {
-  BlockContextMenu,
-  carbonChakraRenderers,
-  FloatingStyleMenu,
-  InsertBlockMenu,
-} from "@emrgen/carbon-chakra-ui";
+import { BlockContextMenu, carbonChakraRenderers, FloatingStyleMenu, InsertBlockMenu } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import {
   BackgroundImagePath,
@@ -109,19 +94,12 @@ const data = node("carbon", [
             },
             [ImagePath]: `https://png.pngtree.com/element_our/20190530/ourmid/pngtree-correct-icon-image_1267804.jpg`,
           }),
-          node(
-            "sqHeading",
-            [
-              node("h3", [title([text("heading 1")])]),
-              paragraph([title([text("section 1")])]),
-            ],
-            {
-              [StylePath]: {
-                left: 1200,
-                top: 100,
-              },
+          node("sqHeading", [node("h3", [title([text("heading 1")])]), paragraph([title([text("section 1")])])], {
+            [StylePath]: {
+              left: 1200,
+              top: 100,
             },
-          ),
+          }),
           node("sqVideo", [node("sqTitle", [text("video title")])], {
             [StylePath]: {
               left: 2000,
@@ -194,7 +172,7 @@ export const Board = () => {
     <Box className={"carbon-board-app-container"} pos={"relative"}>
       <CarbonApp app={app} renderManager={renderManager}>
         <FloatingStyleMenu />
-        <PathTracker style={{ top: 40 }} />
+        <PathTracker style={{ bottom: 0 }} />
         <InsertBlockMenu />
         <BlockContextMenu />
       </CarbonApp>

@@ -32,16 +32,7 @@ export const PathTracker = (props) => {
   }, [app]);
 
   return (
-    <Box
-      pos={"absolute"}
-      top={0}
-      w={"full"}
-      fontSize={"12px"}
-      px={2}
-      py={1}
-      style={style}
-      zIndex={1000}
-    >
+    <Box pos={"absolute"} top={0} w={"full"} height={10} fontSize={"12px"} px={2} py={1} style={style} zIndex={1000}>
       {names}
     </Box>
   );

@@ -263,7 +263,7 @@ const ResultView = (props) => {
   }
 
   if (isString(result)) {
-    return <div>{result}</div>;
+    return <CellResultView cell={cell} name={objectName} result={view} />;
   }
 
   if (cellName && (isArray(result) || isObject(result) || isFunction(result)) && !isHtmlElement(result)) {

@@ -5,7 +5,7 @@ import "./fastype/fastype.styl";
 import { Code } from "./carbon/Dev/Code";
 import { PageProps } from "./carbon/Dev/Props";
 import { SidebarLayout } from "./carbon/Dev/SidebarLayout";
-import { LazyDev } from "./carbon/index";
+import { LazyBoard, LazyDev } from "./carbon/index";
 
 function App() {
   return (
@@ -15,7 +15,7 @@ function App() {
         {/*<Route path="/demo/draggable" element={<LazyDraggableDemo />} />*/}
         {/*<Route path="/demo/emoji" element={<LazyEmojiDemo />} />*/}
         {/*<Route path="/design" element={<LazyDesign />} />*/}
-        {/*<Route path="/board" element={<LazyBoard />} />*/}
+        <Route path="/board" element={<LazyBoard />} />
         {/*<Route path="/affine" element={<AffineExp />} />*/}
         {/*<Route path="/chain" element={<Chain />} />*/}
         {/*<Route path="/text" element={<Text />} />*/}
