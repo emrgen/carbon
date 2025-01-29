@@ -400,8 +400,6 @@ export function NodeDragHandle(props: FastDragHandleProps) {
     [app, node],
   );
 
-  console.log(show);
-
   return (
     <div
       className="carbon-node-handle"

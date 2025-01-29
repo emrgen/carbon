@@ -1,4 +1,11 @@
-import { AfterPlugin, CarbonPlugin, EventContext } from "@emrgen/carbon-core";
+import {
+  AfterPlugin,
+  Carbon,
+  CarbonPlugin,
+  EventContext,
+  LocalClassPath,
+  StateActions,
+} from "@emrgen/carbon-core";
 import { p12, p14 } from "../core/Logger";
 import { EventHandlerMap } from "../core/types";
 import { KeyboardSelection } from "./KeyboardSelection";
@@ -64,10 +71,6 @@ export class SelectionChangePlugin extends AfterPlugin {
 
         // console.log('SelectionPlugin.selectionchanged',before.toJSON(),after.toJSON());
         console.debug(p14("%c[create]"), "color:green", "select transaction");
-        // this.selected.clear();
-        // after.blocks.forEach(block => {
-        //   this.selected.add(block.id)
-        // });
 
         cmd.Select(after);
         if (ctx.app.state.blockSelection.isActive) {
@@ -94,5 +97,37 @@ export class SelectionChangePlugin extends AfterPlugin {
 
   plugins(): CarbonPlugin[] {
     return [new MouseSelection(), new KeyboardSelection()];
+  }
+
+  _transaction(app: Carbon, tr: StateActions) {
+    const { state } = app;
+    const { selection: after } = state;
+    if (state.previous) {
+      const { selection: before } = state.previous;
+      const { blocks: beforeBlocks } = before;
+      const { blocks: afterBlocks } = after;
+      // find the difference between the two selections
+      const added = afterBlocks.filter((block) => !beforeBlocks.includes(block));
+      const removed = beforeBlocks.filter((block) => !afterBlocks.includes(block));
+
+      if (added.length === 0 && removed.length === 0) {
+        return;
+      }
+
+      const { cmd } = app;
+
+      added.forEach((block) => {
+        cmd.Update(block, {
+          [LocalClassPath]: "selected",
+        });
+      });
+      removed.forEach((block) => {
+        cmd.Update(block, {
+          [LocalClassPath]: "",
+        });
+      });
+
+      cmd.Dispatch();
+    }
   }
 }

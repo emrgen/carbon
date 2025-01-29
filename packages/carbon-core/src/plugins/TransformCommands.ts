@@ -981,6 +981,7 @@ export class TransformCommands extends BeforePlugin {
       return;
     }
 
+    // selection covers the whole common node
     if (start.isAtStartOfNode(commonNode!) && end.isAtEndOfNode(commonNode)) {
       if (commonNode.isCollapsed || commonNode.type.spec.split?.inside) {
         const textBlock = commonNode.child(0)!;
@@ -1097,7 +1098,19 @@ export class TransformCommands extends BeforePlugin {
     const startTopContainer = startTopNode.closest((n) => n.isContainer)!;
     const endTopContainer = endTopNode.closest((n) => n.isContainer)!;
     if (endTopContainer.parents.some((n) => n.eq(startTopContainer))) {
-      this.splitByRangeWithSameTopBlock(
+      if (start.node.parent?.type.isPasteBoundary) {
+        return this.splitByRangeWithinSamePasteBoundary(
+          tr,
+          splitBlock,
+          start,
+          end,
+          startTopNode,
+          endTopNode,
+          deleteGroup,
+        );
+      }
+
+      return this.splitByRangeWithSameTopBlock(
         tr,
         splitBlock,
         start,
@@ -1107,7 +1120,7 @@ export class TransformCommands extends BeforePlugin {
         deleteGroup,
       );
     } else {
-      this.splitByRangeWithDifferentTopBlock(
+      return this.splitByRangeWithDifferentTopBlock(
         tr,
         splitBlock,
         start,
@@ -1118,6 +1131,16 @@ export class TransformCommands extends BeforePlugin {
       );
     }
   }
+
+  private splitByRangeWithinSamePasteBoundary(
+    tr: Transaction,
+    splitBlock: Node,
+    start: Pin,
+    end: Pin,
+    startTopNode: Node,
+    endTopNode: Node,
+    deleteGroup: SelectionPatch,
+  ) {}
 
   private splitByRangeWithSameTopBlock(
     tr: Transaction,
@@ -1134,7 +1157,7 @@ export class TransformCommands extends BeforePlugin {
       console.error("cant merge without commonNode");
       return;
     }
-    console.log("----------------------");
+
     const startTitleBlock = start.node;
     const endTitleBlock = end.node;
     let startBlock: Node = startTitleBlock.parent!;
@@ -1152,9 +1175,15 @@ export class TransformCommands extends BeforePlugin {
       tr.Add(ChangeNameAction.create(endBlock.id, splitBlock.type.splitName));
     }
 
+    const currentAt = nodeLocation(endBlock)!;
     // 1. move the endBlock to after startBlock
-    tr.Add(MoveNodeAction.create(nodeLocation(endBlock)!, Point.toAfter(startBlock), endBlock.id));
-    moveNodeIds.add(endBlock.id);
+    if (startBlock.type.isPasteBoundary) {
+      tr.Add(MoveNodeAction.create(currentAt, Point.toAfter(startBlock.firstChild!), endBlock.id));
+      moveNodeIds.add(endBlock.id);
+    } else {
+      tr.Add(MoveNodeAction.create(currentAt, Point.toAfter(startBlock), endBlock.id));
+      moveNodeIds.add(endBlock.id);
+    }
 
     // this entry is done so that the next siblings of endBlock can move within endBlock
     const lastChild = endBlock.lastChild!;
@@ -1221,6 +1250,24 @@ export class TransformCommands extends BeforePlugin {
     const rightColumn = NodeColumn.create();
     const moveNodeIds = new NodeIdSet();
     console.log("==============================================");
+
+    // when the startBlock is a paste boundary
+    // move the endBlock within the startBlock and unwrap the endBlock within startBlock
+    if (startBlock.type.isPasteBoundary) {
+      tr.Add(
+        MoveNodeAction.create(
+          nodeLocation(endBlock)!,
+          Point.toAfter(startBlock.firstChild!),
+          endBlock.id,
+        ),
+      );
+
+      tr.Add(moveNodesActions(Point.toAfter(endBlock)!, endBlock.firstChild!.nextSiblings));
+      moveNodeIds.add(endBlock.id);
+
+      endBlock = endBlock.parent!;
+      endBlockDepth -= 1;
+    }
 
     // collect nodes to be from right of selection
     while (commonNodeDepth < endBlockDepth) {
@@ -1596,7 +1643,6 @@ export class TransformCommands extends BeforePlugin {
 
     if (after) {
       tr.Select(after, ActionOrigin.UserInput);
-      debugger;
     } else {
       tr.Add(insertActions).SelectBlocks([]);
     }
