@@ -1,6 +1,12 @@
 import { CollapsedPath, HasFocusPath, NodeId, preventAndStop, stop } from "@emrgen/carbon-core";
 import { useRectSelectable } from "@emrgen/carbon-dragon-react";
-import { CarbonBlock, RendererProps, useCarbon, useNodeChange, useSelectionHalo } from "@emrgen/carbon-react";
+import {
+  CarbonBlock,
+  RendererProps,
+  useCarbon,
+  useNodeChange,
+  useSelectionHalo,
+} from "@emrgen/carbon-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BsTextParagraph } from "react-icons/bs";
 import { DiCssTricks } from "react-icons/di";
@@ -108,8 +114,6 @@ const CodeCellWrapper = (props: RendererProps) => {
   const isCollapsed = useMemo(() => {
     return node.props.get(CollapsedPath, false);
   }, [node]);
-
-  console.log(isCollapsed);
 
   const handleToggleCell = useCallback(
     (e) => {

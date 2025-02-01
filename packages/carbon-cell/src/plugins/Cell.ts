@@ -8,7 +8,9 @@ export class Cell extends CarbonPlugin {
       group: "content block",
       sandbox: true,
       // content: "cellView cellCode",
-      insert: true,
+      insert: {
+        focus: true,
+      },
       control: {
         insert: true,
         collapse: true,

@@ -28,10 +28,7 @@ import {
 } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codemirrorExtension } from "@emrgen/carbon-codemirror";
-import {
-  commentEditorComp,
-  commentEditorPlugin,
-} from "@emrgen/carbon-comment-editor";
+import { commentEditorComp, commentEditorPlugin } from "@emrgen/carbon-comment-editor";
 import {
   ContenteditablePath,
   corePresetPlugins,
@@ -47,22 +44,11 @@ import { databaseRenderers } from "@emrgen/carbon-database-react";
 import { emojiPlugins } from "@emrgen/carbon-emoji";
 import { flashPlugin, flashRenderers } from "@emrgen/carbon-flash";
 import { mediaPlugins, mediaRenderers } from "@emrgen/carbon-media";
-import {
-  timelinePlugin,
-  timelineRenderer,
-} from "@emrgen/carbon-plugin-timeline";
-import {
-  ObservableNodes,
-  ObservableQuestions,
-  questionExtension,
-} from "@emrgen/carbon-question";
-import {
-  RendererProps,
-  RenderManager,
-  useCreateCarbon,
-} from "@emrgen/carbon-react";
+import { timelinePlugin, timelineRenderer } from "@emrgen/carbon-plugin-timeline";
+import { ObservableNodes, ObservableQuestions, questionExtension } from "@emrgen/carbon-question";
+import { RendererProps, RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
 import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
-import { flattenDeep } from "lodash";
+import { flattenDeep, noop } from "lodash";
 import { useEffect, useState } from "react";
 import { PathTracker } from "../../PathTracker";
 import "./test.styl";
@@ -659,13 +645,7 @@ const data = node("carbon", [
 
       paragraph([title([text("time"), mention("today"), node("empty")])]),
       paragraph([
-        title([
-          text("123"),
-          mention("ankita"),
-          text("123"),
-          mention("avira"),
-          text("123"),
-        ]),
+        title([text("123"), mention("ankita"), text("123"), mention("avira"), text("123")]),
       ]),
       paragraph([title([text("123456789")])]),
       paragraph([title([emoji("🖐️")])]),
@@ -691,10 +671,7 @@ const data = node("carbon", [
           }),
         ]),
       ]),
-      paragraph([
-        title([text("section 1")]),
-        paragraph([title([text("section 1")])]),
-      ]),
+      paragraph([title([text("section 1")]), paragraph([title([text("section 1")])])]),
 
       // node("pageLink", [], {
       //   [LinkPath]: "https://www.youtube.com/watch?v=rW5oVuxEwdMsdf",
@@ -820,15 +797,15 @@ const renderers = [
 
 const renderManager = RenderManager.from(flattenDeep(renderers));
 
-// console.log = noop;
-// console.info = noop;
-// console.debug = noop;
-// console.warn = noop;
-// console.error = noop;
-// console.group = noop;
-// console.groupCollapsed = noop;
-// console.groupEnd = noop;
-// console.time = noop;
+console.log = noop;
+console.info = noop;
+console.debug = noop;
+console.warn = noop;
+console.error = noop;
+console.group = noop;
+console.groupCollapsed = noop;
+console.groupEnd = noop;
+console.time = noop;
 
 // localStorage.setItem('carbon:content', JSON.stringify(data));
 
@@ -853,11 +830,7 @@ export function Dev() {
       }
 
       // console.log(state.selection.bounds())
-      console.debug(
-        "changes",
-        state.changes.patch,
-        Array.from(state.changes.dataMap.values()),
-      );
+      console.debug("changes", state.changes.patch, Array.from(state.changes.dataMap.values()));
       console.debug(
         "actions",
         state.actions.optimize().actions.map((a) => a.toJSON()),

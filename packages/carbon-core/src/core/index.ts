@@ -45,3 +45,4 @@ export * from "./Focus";
 export * from "./TitleNode";
 export * from "./NodeEmitter";
 export * from "./Keymap";
+export * from "./CustomEvent";

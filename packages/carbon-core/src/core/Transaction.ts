@@ -82,7 +82,13 @@ export class Transaction {
     return this.actions.every((a) => a instanceof SelectAction);
   }
 
-  static create(carbon: Carbon, cmd: CarbonCommand, tm: TransactionManager, pm: PluginManager, sm: SelectionManager) {
+  static create(
+    carbon: Carbon,
+    cmd: CarbonCommand,
+    tm: TransactionManager,
+    pm: PluginManager,
+    sm: SelectionManager,
+  ) {
     return new Transaction(carbon, cmd, tm, pm, sm);
   }
 
@@ -282,6 +288,7 @@ export class Transaction {
     //   this.id,
     //   this.actions.map((a) => a.toString()),
     // );
+
     this.tm.dispatch(this);
     return this;
   }

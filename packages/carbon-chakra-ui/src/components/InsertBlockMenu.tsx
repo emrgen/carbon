@@ -37,7 +37,9 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       .filter((n) => n.name !== node?.parent?.name)
       .filter((b) => {
         const nameMatch = b.spec?.info?.title?.toLowerCase().includes(searchText.toLowerCase());
-        const tagMatch = b.spec?.info?.tags?.some((tag) => tag.toLowerCase().includes(searchText.toLowerCase()));
+        const tagMatch = b.spec?.info?.tags?.some((tag) =>
+          tag.toLowerCase().includes(searchText.toLowerCase()),
+        );
 
         return (tagMatch || nameMatch) && b.name !== node?.name;
       });
@@ -112,7 +114,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       const block = type.default();
       if (!block) return;
 
-      if (type.isSandbox) {
+      if (type.isSandbox && type.spec.insert?.focus) {
         console.log("sandboxed", block.linkedProps);
         block.linkedProps?.updateProps({
           [FocusOnInsertPath]: true,
@@ -122,7 +124,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       tr.Insert(Point.toBefore(parent.id), block);
       tr.SetContent(node.id, []);
 
-      if (type.isSandbox) {
+      if (type.isSandbox && type.spec.insert?.focus) {
         tr.Select(PinnedSelection.SKIP);
       } else {
         const after = PinnedSelection.fromPin(Pin.future(node, 0))!;
@@ -181,7 +183,12 @@ export function InsertBlockMenu(props: BlockMenuProps) {
           contentEditable={false}
           suppressContentEditableWarning={true}
         >
-          <BlockList onSelect={handleSelect} blocks={blocks} activeIndex={activeIndex} onSelectIndex={setActiveIndex} />
+          <BlockList
+            onSelect={handleSelect}
+            blocks={blocks}
+            activeIndex={activeIndex}
+            onSelectIndex={setActiveIndex}
+          />
         </Stack>
       )}
     </Portal>

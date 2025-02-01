@@ -73,7 +73,6 @@ export function RectSelectContext(props) {
 
   const onDragEnd = useCallback(
     (e: DndEvent) => {
-      console.log("xxxxxxxxxx", e);
       if (e.id === RectSelectAreaId) {
         rectSelector.onDragEnd(e);
         e.event.preventDefault();

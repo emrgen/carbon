@@ -38,9 +38,7 @@ export function BlockContentComp(props: RendererProps) {
 
   const selection = useSelectionHalo(props);
   const dragDropRect = useDragDropRectSelect({ node, ref });
-  const connectors = useConnectorsToProps(
-    useCombineConnectors(dragDropRect, selection),
-  );
+  const connectors = useConnectorsToProps(useCombineConnectors(dragDropRect, selection));
 
   const [content, setContent] = useState<Optional<Node>>(null);
 
@@ -138,7 +136,7 @@ export function BlockContentComp(props: RendererProps) {
     return () => {
       app.off(EventsOut.changed, onChange);
     };
-  }, [app, updateContent]);
+  }, [app, node, updateContent]);
 
   useEffect(() => {
     const parent = node.parent;
@@ -148,11 +146,7 @@ export function BlockContentComp(props: RendererProps) {
 
   return (
     <CarbonBlock node={node} ref={ref} custom={connectors}>
-      {!content && (
-        <div className="empty-content-text">
-          Add heading to create a content list
-        </div>
-      )}
+      {!content && <div className="empty-content-text">Add heading to create a content list</div>}
       {content && (
         <div className="content">
           <CarbonNode node={content} />

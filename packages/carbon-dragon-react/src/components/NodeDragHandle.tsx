@@ -1,6 +1,7 @@
 import { isNestableNode } from "@emrgen/carbon-blocks";
 import {
   CollapsedPath,
+  CustomEvent,
   EventsIn,
   FocusOnInsertPath,
   Node,
@@ -9,7 +10,6 @@ import {
   Point,
   preventAndStop,
 } from "@emrgen/carbon-core";
-import { CustomEvent } from "@emrgen/carbon-core/src/core/CustomEvent";
 import {
   childHit,
   DndEvent,
@@ -24,7 +24,6 @@ import { createPortal } from "react-dom";
 import { HiOutlinePlus } from "react-icons/hi";
 import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import { PiDotsSixVerticalBold } from "react-icons/pi";
-import { useDndContext } from "../hooks";
 import { useDndMonitor } from "../hooks/useDndMonitor";
 import { useDraggableHandle } from "../hooks/useDraggable";
 import { useDragRect } from "../hooks/useDragRect";
@@ -34,15 +33,12 @@ export interface FastDragHandleProps {
   style: any;
 }
 
-const searchDistance = [2, 4, 8, 16, 32, 64, 128];
-
 export const CarbonDragHandleId = "carbon-drag-handle";
 
 export function NodeDragHandle(props: FastDragHandleProps) {
   const { node, style } = props;
 
   const app = useCarbon();
-  const dnd = useDndContext();
 
   const handleRef = useRef(null);
   const [show, setShow] = useState(false);
@@ -89,7 +85,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       if (e.id === CarbonDragHandleId) {
         app.onEvent(EventsIn.dragStart, CustomEvent.create(EventsIn.dragStart, e.node, e.event));
         app.enable(() => {
-          app.cmd.SelectBlocks([]).Dispatch();
+          app.cmd.SelectBlocks([]).Select(PinnedSelection.BLUR).Dispatch();
         });
       }
     },
@@ -116,16 +112,17 @@ export function NodeDragHandle(props: FastDragHandleProps) {
   const findDropPosition = useCallback(
     (e: DndEvent, hitNode: Node): Optional<Point> => {
       const firstChild = hitNode.firstChild;
+      const { store } = app;
 
       const { clientX, clientY } = e.event;
       const x = clientX;
       const y = clientY;
 
-      const hitElement = app.store.element(hitNode!.id!);
+      const hitElement = store.element(hitNode!.id!);
       const elBound = elementBound(hitElement!);
 
       if (hitNode.firstChild?.isTextContainer) {
-        const hitTitleElement = app.store.element(firstChild!.id!);
+        const hitTitleElement = store.element(firstChild!.id!);
         const { top, bottom } = elementBound(hitTitleElement!);
 
         let to: Optional<Point> = null;
@@ -155,7 +152,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
         }
       }
     },
-    [app.store],
+    [app],
   );
 
   // show drop hint when dragging over a container that accepts the dragged node
