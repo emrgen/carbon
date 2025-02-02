@@ -6,7 +6,7 @@ import { parseText } from "./text";
 export const parseHtml = (html: string) => {
   const markdown = NodeHtmlMarkdown.translate(html, {});
 
-  console.log("html to markdown\n", markdown);
+  // console.log("html to markdown\n", markdown);
   const nodes = parseText(markdown);
   return transformProcessParsedHtml(nodes);
 };

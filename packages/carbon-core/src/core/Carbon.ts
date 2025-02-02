@@ -62,6 +62,7 @@ export class Carbon extends EventEmitter {
   private ticks: With<Transaction>[];
 
   committed: boolean;
+  now: number;
 
   constructor(state: State, schema: Schema, pm: PluginManager) {
     super();
@@ -110,9 +111,7 @@ export class Carbon extends EventEmitter {
     });
 
     // create a string encoder
-    const plugins: CarbonPlugin[] = this.pm.plugins.filter(
-      (p) => p.type === PluginType.Node,
-    );
+    const plugins: CarbonPlugin[] = this.pm.plugins.filter((p) => p.type === PluginType.Node);
 
     const encoder = TreeEncoder.from<string>();
     this.encoder = {
@@ -160,52 +159,35 @@ export class Carbon extends EventEmitter {
 
   get element(): Optional<HTMLElement> {
     this._element =
-      this._element ??
-      this.store
-        .element(this.content.id)
-        ?.querySelector("[contenteditable=true]");
+      this._element ?? this.store.element(this.content.id)?.querySelector("[contenteditable=true]");
     return this._element;
   }
 
   get portal(): Optional<HTMLElement> {
-    this._portal =
-      this._portal ??
-      (querySelector(".carbon-react > .carbon-portal") as any) ??
-      null;
+    this._portal = this._portal ?? (querySelector(".carbon-react > .carbon-portal") as any) ?? null;
     return this._portal;
   }
 
   get contentElement(): Optional<HTMLElement> {
     this._contentElement =
-      this._contentElement ??
-      (document.querySelector("[data-name=carbon]") as any) ??
-      null;
+      this._contentElement ?? (document.querySelector("[data-name=carbon]") as any) ?? null;
     return this._contentElement;
   }
 
   // return a proxy transaction
   get cmd(): Transaction {
     if (!this.committed) {
-      throw new Error(
-        "cannot create a new command while there is a pending transaction",
-      );
+      throw new Error("cannot create a new command while there is a pending transaction");
     }
     // this.committed = false;
-    return Transaction.create(
-      this,
-      this.commands,
-      this.tm,
-      this.pm,
-      this.sm,
-    ).Proxy();
+    this.now = Date.now();
+    return Transaction.create(this, this.commands, this.tm, this.pm, this.sm).Proxy();
   }
 
   // create a new transaction
   get tr(): Transaction {
     if (!this.committed) {
-      throw new Error(
-        "cannot create a new transaction while there is a pending transaction",
-      );
+      throw new Error("cannot create a new transaction while there is a pending transaction");
     }
     this.committed = false;
     return Transaction.create(this, this.commands, this.tm, this.pm, this.sm);
@@ -279,19 +261,13 @@ export class Carbon extends EventEmitter {
   }
 
   private updateState(state: State, tr: Transaction): boolean {
-    if (
-      !state.isContentChanged &&
-      !state.isSelectionChanged &&
-      !state.isMarksChanged
-    ) {
+    console.log("updateState", Date.now() - this.now);
+    if (!state.isContentChanged && !state.isSelectionChanged && !state.isMarksChanged) {
       console.warn("new state is not dirty");
       return false;
     }
 
-    if (
-      state.eq(this.state) &&
-      state.selection.origin !== ActionOrigin.UserInput
-    ) {
+    if (state.eq(this.state) && state.selection.origin !== ActionOrigin.UserInput) {
       console.warn(
         "skipping ui sync: new state is the same as current",
         state.content.renderVersion,

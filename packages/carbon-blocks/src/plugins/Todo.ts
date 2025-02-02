@@ -58,7 +58,7 @@ export class Todo extends Paragraph {
         const { currentNode, app } = ctx;
         const { selection } = app;
         if (selection.head.node.parent?.eq(currentNode)) {
-          app.tr
+          app.cmd
             .Update(currentNode.id, {
               node: {
                 checked: !currentNode.props.get("node.checked"),

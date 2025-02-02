@@ -147,17 +147,3 @@ export class IndexMapper {
     return new IndexMapper(this.mappers.map((m) => m.clone()));
   }
 }
-
-export class MappedIndex {
-  index: number;
-  map: IndexMap;
-
-  static from(index: number, map: IndexMap) {
-    return new MappedIndex(index, map);
-  }
-
-  constructor(index: number, map: IndexMap) {
-    this.index = index;
-    this.map = map;
-  }
-}

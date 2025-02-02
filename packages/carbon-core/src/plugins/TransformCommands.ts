@@ -372,7 +372,6 @@ export class TransformCommands extends BeforePlugin {
       const aligned = selection.rightAlign;
       tr.transform.delete(aligned);
       const action = tr.Pop();
-      console.log(action);
       if (action instanceof SelectAction) {
         const downPin = selection.start.down()?.rightAlign;
         if (downPin?.node.isZero) {

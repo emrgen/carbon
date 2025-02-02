@@ -39,7 +39,7 @@ export const printNode = (node: Node, logger = console.log.bind(console)) => {
     printLine += line + "\n";
   });
 
-  logger(printLine);
+  // logger(printLine);
 };
 
 export const printSteps = (node: Node, steps = 0, tokens: string[] = []) => {

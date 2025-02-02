@@ -1,15 +1,14 @@
 import { Optional } from "@emrgen/types";
-import { Schema } from "./Schema";
-import { MarkSet } from "./Mark";
-import { Mark } from "./Mark";
-import { State } from "./State";
-import { Point } from "./Point";
-import { NodeId } from "./NodeId";
-import { NodeType } from "./NodeType";
-import { NodePropsJson } from "./NodeProps";
 import { MarkAction } from "./actions/index";
-import { PointedSelection } from "./PointedSelection";
+import { Mark, MarkSet } from "./Mark";
 import { Node } from "./Node";
+import { NodeId } from "./NodeId";
+import { NodePropsJson } from "./NodeProps";
+import { NodeType } from "./NodeType";
+import { Point } from "./Point";
+import { PointedSelection } from "./PointedSelection";
+import { Schema } from "./Schema";
+import { State } from "./State";
 
 // Draft is responsible for producing a state after a Transaction
 // Actions delegate the state update to the draft
@@ -47,4 +46,8 @@ export interface Draft {
   updateContent(nodeId: NodeId, content: Node[] | string): void;
 
   updateSelection(selection: PointedSelection): void;
+
+  insertFragment(at: Point, nodes: Node[]): void;
+
+  removeFragment(from: Point, fragment: Node[]): void;
 }

@@ -1,11 +1,4 @@
-import {
-  AfterPlugin,
-  Carbon,
-  EventContext,
-  EventHandler,
-  StateActions,
-  TxType,
-} from "../core";
+import { AfterPlugin, Carbon, EventContext, EventHandler, StateActions, TxType } from "../core";
 
 export class HistoryPlugin extends AfterPlugin {
   name = "history";
@@ -34,7 +27,6 @@ export class HistoryPlugin extends AfterPlugin {
     console.log("undo", inverse);
     const { cmd } = ctx;
     inverse.actions.forEach((action) => {
-      console.log(action);
       cmd.Add(action);
     });
     cmd.WithType(TxType.Undo);

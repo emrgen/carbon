@@ -1,8 +1,4 @@
-import {
-  InsertNodeAction,
-  MoveNodeAction,
-  RemoveNodeAction,
-} from "@emrgen/carbon-core";
+import { InsertNodeAction, MoveNodeAction, RemoveNodeAction } from "@emrgen/carbon-core";
 import { Draft } from "../Draft";
 
 export interface CarbonAction {
@@ -20,10 +16,7 @@ export interface CarbonAction {
 }
 
 // restrict the normalizer to only these actions so that we can easily reason about the normalizer
-export type NormalizeAction =
-  | InsertNodeAction
-  | RemoveNodeAction
-  | MoveNodeAction;
+export type NormalizeAction = InsertNodeAction | RemoveNodeAction | MoveNodeAction;
 
 // TxType is used to determine the type of transaction
 export enum TxType {
@@ -51,6 +44,8 @@ export enum ActionType {
   select = "select",
   insert = "insert",
   remove = "remove",
+  insertFragment = "insertFragment",
+  removeFragment = "removeFragment",
   props = "props",
   content = "content",
   rename = "rename",

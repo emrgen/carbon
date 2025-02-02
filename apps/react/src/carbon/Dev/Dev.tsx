@@ -48,7 +48,7 @@ import { timelinePlugin, timelineRenderer } from "@emrgen/carbon-plugin-timeline
 import { ObservableNodes, ObservableQuestions, questionExtension } from "@emrgen/carbon-question";
 import { RendererProps, RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
 import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
-import { flattenDeep, noop } from "lodash";
+import { flattenDeep } from "lodash";
 import { useEffect, useState } from "react";
 import { PathTracker } from "../../PathTracker";
 import "./test.styl";
@@ -797,15 +797,15 @@ const renderers = [
 
 const renderManager = RenderManager.from(flattenDeep(renderers));
 
-console.log = noop;
-console.info = noop;
-console.debug = noop;
-console.warn = noop;
-console.error = noop;
-console.group = noop;
-console.groupCollapsed = noop;
-console.groupEnd = noop;
-console.time = noop;
+// console.log = noop;
+// console.info = noop;
+// console.debug = noop;
+// console.warn = noop;
+// console.error = noop;
+// console.group = noop;
+// console.groupCollapsed = noop;
+// console.groupEnd = noop;
+// console.time = noop;
 
 // localStorage.setItem('carbon:content', JSON.stringify(data));
 

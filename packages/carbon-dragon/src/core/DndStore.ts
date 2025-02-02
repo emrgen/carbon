@@ -32,10 +32,7 @@ export class DndNodeStore {
     this.rtree.clear();
     this.entries().forEach((e) => {
       // console.warn('refresh', e.node.id.toString(), e.el, elementBound(e.el!).top);
-      this.rtree.add(
-        e.node,
-        elementBound(e.el!, { left: scrollLeft, top: scrollTop }),
-      );
+      this.rtree.add(e.node, elementBound(e.el!, { left: scrollLeft, top: scrollTop }));
     });
   }
 

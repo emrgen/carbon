@@ -38,11 +38,7 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                           const rootNode = schema.nodeFromJSON(root)!;
                           const startNode = schema.nodeFromJSON(start)!;
                           const endNode = schema.nodeFromJSON(end)!;
-                          const slice = Slice.create(
-                            rootNode,
-                            startNode,
-                            endNode,
-                          );
+                          const slice = Slice.create(rootNode, startNode, endNode);
                           // printNode(slice.root);
                           resolve(slice);
                           done(true);
@@ -64,11 +60,13 @@ export async function parseClipboard(schema: Schema): Promise<Optional<Slice>> {
                       blob
                         .text()
                         .then((text) => {
-                          console.log("text/html", text);
+                          // console.log("text/html", text);
+                          const now = Date.now();
                           const nodes = parseHtml(text);
-                          console.log(JSON.stringify(nodes, null, 2));
+                          console.log("parseHtml", Date.now() - now);
+                          // console.log(JSON.stringify(nodes, null, 2));
                           const root = createCarbonSlice(nodes, schema);
-                          console.log(root?.toJSON());
+                          // console.log(root?.toJSON());
                           if (!root) {
                             failed("failed to parse html");
                             return;
@@ -192,17 +190,13 @@ export const transformParsedHtmlNode = (node: any) => {
   }
 
   // if the node has children, we need to this must be a mark node
-  if (
-    metadata &&
-    metadata.type === "inline" &&
-    metadata.group?.includes("mark")
-  ) {
+  if (metadata && metadata.type === "inline" && metadata.group?.includes("mark")) {
     const children = node.children.map((n) => {
       return transformParsedHtmlNode(n);
     });
 
     return children.map((n) => {
-      console.log(n.props, node.props);
+      // console.log(n.props, node.props);
       return {
         ...n,
         props: {

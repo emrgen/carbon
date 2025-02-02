@@ -584,6 +584,8 @@ export class ImmutableDraft implements Draft {
     }
   }
 
+  insertFragment(at: Point, nodes: Node[]) {}
+
   insert(at: Point, node: Node) {
     this.insertBy(at, node, "create");
   }
@@ -751,6 +753,8 @@ export class ImmutableDraft implements Draft {
       }
     }
   }
+
+  removeFragment(from: Point, fragment: Node[]) {}
 
   remove(nodeId: NodeId) {
     if (!this.drafting) {
@@ -1017,15 +1021,20 @@ export class ImmutableDraft implements Draft {
     } else {
       const startDown = start.down().rightAlign;
       const endDown = end.down().leftAlign;
-      const nodes: Node[] = [startDown.node, endDown.node];
-      startDown.node.next((n) => {
-        if (!n.isInline) {
+      const nodes: Node[] = [startDown.node];
+      if (!startDown.node.eq(endDown.node)) {
+        nodes.push(endDown.node);
+
+        // collect all inline nodes between the start and end nodes
+        startDown.node.next((n) => {
+          if (!n.isInline) {
+            return false;
+          }
+          if (n.id.eq(endDown.node.id)) return true;
+          nodes.push(n);
           return false;
-        }
-        if (n.id.eq(endDown.node.id)) return true;
-        nodes.push(n);
-        return false;
-      });
+        });
+      }
 
       const marks: Record<string, number> = {};
       nodes.forEach((n) => {

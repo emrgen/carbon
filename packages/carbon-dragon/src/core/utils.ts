@@ -51,10 +51,7 @@ export function boundSorter(a: Bound, b: Bound) {
 }
 
 // find the bound of an element
-export function elementBound(
-  el: HTMLElement,
-  adjust = { left: 0, top: 0 },
-): Bound {
+export function elementBound(el: HTMLElement, adjust = { left: 0, top: 0 }): Bound {
   let { left, right, top, bottom } = el.getBoundingClientRect();
 
   left += adjust.left;
