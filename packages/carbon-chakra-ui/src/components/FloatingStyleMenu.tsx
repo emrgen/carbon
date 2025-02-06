@@ -250,7 +250,7 @@ export function FloatingStyleMenu() {
             <ContextButton
               aria-label={"strike"}
               icon={<Circle size={4} bg={"#FFEDB0"} />}
-              bg={marks.has(Mark.background("#ffce26")) ? "gray.100" : "transparent"}
+              bg={marks.has(Mark.background("#FFEDB0")) ? "gray.100" : "transparent"}
               onClick={() => {
                 app.cmd.formatter.toggle(Mark.background("#FFEDB0"))?.Dispatch();
               }}

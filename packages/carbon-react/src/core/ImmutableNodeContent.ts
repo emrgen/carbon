@@ -57,7 +57,7 @@ export class ImmutableNodeContent implements NodeContent {
   // the parent can be non-null only if the node is mutable state within the draft
   get parent(): Optional<Node> {
     if (!this.parentId) return null;
-    return this.content.parent ?? StateScope.get().get(this.parentId);
+    return this.content.parent ?? StateScope.get(this.scope).get(this.parentId);
   }
 
   get children(): Node[] {
@@ -121,17 +121,12 @@ export class ImmutableNodeContent implements NodeContent {
 
   removeText(offset: number, length: number) {
     this.content.textContent =
-      this.textContent.slice(0, offset) +
-      this.textContent.slice(offset + length);
+      this.textContent.slice(0, offset) + this.textContent.slice(offset + length);
   }
 
   insert(node: Node, offset: number) {
     const { children } = this;
-    this.content.children = [
-      ...children.slice(0, offset),
-      node,
-      ...children.slice(offset),
-    ];
+    this.content.children = [...children.slice(0, offset), node, ...children.slice(offset)];
   }
 
   remove(node: Node) {
@@ -155,11 +150,7 @@ export class ImmutableNodeContent implements NodeContent {
     if (typeof content === "string") {
       console.log("updateContent", content, Object.isFrozen(this.content));
       this.content.textContent = content;
-      console.log(
-        "after updateContent",
-        this.textContent,
-        Object.isFrozen(this.content),
-      );
+      console.log("after updateContent", this.textContent, Object.isFrozen(this.content));
       return;
     }
 
@@ -230,9 +221,7 @@ export class ImmutableNodeContent implements NodeContent {
   }
 
   clone(map: Maps<Node, Optional<Node>> = identity): NodeContent {
-    const children = this.children
-      .map((n) => map(n))
-      .filter(identity) as Node[];
+    const children = this.children.map((n) => map(n)).filter(identity) as Node[];
     return new ImmutableNodeContent(this.scope, {
       ...this.content,
       children,

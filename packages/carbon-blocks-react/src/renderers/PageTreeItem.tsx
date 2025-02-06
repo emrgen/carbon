@@ -33,8 +33,7 @@ import { HiOutlinePencil, HiOutlinePlus } from "react-icons/hi";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 
 const getPageTree = (n: Node) => n.closest((n) => n.type.name === PageTreeName);
-export const getPageTreeGroup = (n: Node) =>
-  n.closest((n) => n.type.name === PageTreeGroupName);
+export const getPageTreeGroup = (n: Node) => n.closest((n) => n.type.name === PageTreeGroupName);
 
 export const PageTreeItemComp = (props: RendererProps) => {
   const { node } = props;
@@ -73,10 +72,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
           [OpenedPath]: true,
         });
 
-        const openedPath = pageTreeGroup.props.get(
-          ActiveChildPath,
-          NodeId.IDENTITY,
-        );
+        const openedPath = pageTreeGroup.props.get(ActiveChildPath, NodeId.IDENTITY);
 
         const openedNodeId = NodeId.fromObject(openedPath);
         console.log("closing", openedNodeId.toString());
@@ -100,6 +96,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
     [app, node],
   );
 
+  // set the first child to contenteditable
   const handleEditName = useCallback(
     (e) => {
       preventAndStop(e);
@@ -115,13 +112,10 @@ export const PageTreeItemComp = (props: RendererProps) => {
 
       if (!node.firstChild?.isEmpty) {
         cmd.Select(
-          PinnedSelection.create(
-            Pin.toStartOf(node.firstChild!)!,
-            Pin.toEndOf(node.firstChild!)!,
-          )!,
+          PinnedSelection.create(Pin.toStartOf(node.firstChild!)!, Pin.toEndOf(node.firstChild!)!)!,
         );
-      } else {
       }
+
       cmd.Dispatch();
     },
     [app, node],
@@ -130,6 +124,9 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const handleOpenDocument = useCallback(
     (e) => {
       preventAndStop(e);
+      if (isContentEditable) {
+        return;
+      }
       const pageTreeGroup = getPageTreeGroup(node);
       if (!pageTreeGroup) {
         console.warn("page tree group not found for node", node.id.toString());
@@ -144,10 +141,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
           [OpenedPath]: true,
         });
 
-        const openedPath = pageTreeGroup.props.get(
-          ActiveChildPath,
-          NodeId.IDENTITY,
-        );
+        const openedPath = pageTreeGroup.props.get(ActiveChildPath, NodeId.IDENTITY);
 
         const openedNodeId = NodeId.fromObject(openedPath);
 
@@ -175,10 +169,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
     return (
       <>
         <div
-          className={
-            "page-tree__collapsible_control" +
-            (isCollapsed ? " collapsed" : " expanded")
-          }
+          className={"page-tree__collapsible_control" + (isCollapsed ? " collapsed" : " expanded")}
           contentEditable="false"
           suppressContentEditableWarning
           onMouseDown={(e) => {
@@ -190,9 +181,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
           }}
           style={{ opacity: isContentEditable ? 0 : 1 }}
         >
-          <MdOutlineKeyboardArrowRight
-            className={"page-tree-open-close-icon"}
-          />
+          <MdOutlineKeyboardArrowRight className={"page-tree-open-close-icon"} />
         </div>
       </>
     );
@@ -204,11 +193,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
         <div className="edit-file-name" onClick={handleEditName}>
           <HiOutlinePencil />
         </div>
-        <div
-          className="add-child-file"
-          onClick={handleInsert}
-          onMouseDown={preventAndStop}
-        >
+        <div className="add-child-file" onClick={handleInsert} onMouseDown={preventAndStop}>
           <HiOutlinePlus />
         </div>
       </>

@@ -6,7 +6,7 @@ export class CarbonCache {
     this.cache = new Map();
   }
 
-  get<T>(key: string, fn: () => T, cache = true): T {
+  get<T>(key: string, fn: () => T, cache = true, name = ''): T {
     if (!cache) {
       this.cache.delete(key);
       return fn?.() as T;

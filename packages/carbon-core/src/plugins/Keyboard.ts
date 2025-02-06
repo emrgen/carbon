@@ -119,8 +119,6 @@ export class KeyboardPlugin extends AfterPlugin {
         const { app, cmd } = ctx;
         const { selection, blockSelection } = app.state;
 
-        console.log(blockSelection.blocks);
-
         // nodes selection is visible using halo
         if (blockSelection.isActive) {
           preventAndStopCtx(ctx);

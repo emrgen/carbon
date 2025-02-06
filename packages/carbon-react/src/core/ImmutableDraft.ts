@@ -217,7 +217,7 @@ export class ImmutableDraft implements Draft {
     marks.freeze();
 
     const selected = this.selected.nodes(this.nodeMap);
-    console.log(selected);
+
     const blockSelection = BlockSelection.create(selected);
 
     const newState = new ImmutableState({

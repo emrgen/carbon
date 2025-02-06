@@ -54,10 +54,13 @@ export class ImmutableNode extends Node {
       () => {
         const { children = [] } = parent;
         return findIndex(children, (n, i) => {
+          // console.log("findIndex", i, n.id.toString(), this.id.toString());
           return this.id.eq(n.id);
         });
       },
+      // cache is disabled for unfrozen nodes
       parent.isFrozen,
+      this.name,
     );
   }
 
@@ -83,9 +86,7 @@ export class ImmutableNode extends Node {
 
   override setParent(parent: Optional<Node>) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot set parent on frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot set parent on frozen node: ${this.id.toString()}`);
     }
 
     super.setParent(parent);
@@ -95,9 +96,7 @@ export class ImmutableNode extends Node {
 
   override setParentId(parentId: Optional<NodeId>) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot set parent id on frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot set parent id on frozen node: ${this.id.toString()}`);
     }
 
     return super.setParentId(parentId);
@@ -105,9 +104,7 @@ export class ImmutableNode extends Node {
 
   override changeType(type: NodeType) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot change type on frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot change type on frozen node: ${this.id.toString()}`);
     }
 
     super.changeType(type);
@@ -115,9 +112,7 @@ export class ImmutableNode extends Node {
 
   override insert(node: ImmutableNode, index: number) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot insert node on frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot insert node on frozen node: ${this.id.toString()}`);
       // const indexMap = new IndexMap(index, 1);
       // node.indexMap = indexMap;
       // node.mappedIndex = index;
@@ -129,9 +124,7 @@ export class ImmutableNode extends Node {
 
   override remove(node: Node) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot remove node on frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot remove node on frozen node: ${this.id.toString()}`);
       // const indexMap = new IndexMap(index, -1);
       // this.indexMapper.add(indexMap);
     }
@@ -141,9 +134,7 @@ export class ImmutableNode extends Node {
 
   override insertText(text: string, offset: number) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot insert text on frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot insert text on frozen node: ${this.id.toString()}`);
     }
 
     return super.insertText(text, offset);
@@ -151,9 +142,7 @@ export class ImmutableNode extends Node {
 
   override removeText(offset: number, length: number) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot remove text on frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot remove text on frozen node: ${this.id.toString()}`);
     }
 
     return super.removeText(offset, length);
@@ -161,9 +150,7 @@ export class ImmutableNode extends Node {
 
   override updateContent(content: ImmutableNode[] | string) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot update content on frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot update content on frozen node: ${this.id.toString()}`);
     }
 
     return super.updateContent(content);
@@ -171,9 +158,7 @@ export class ImmutableNode extends Node {
 
   override updateProps(props: NodePropsJson) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot update props on frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot update props on frozen node: ${this.id.toString()}`);
     }
 
     return super.updateProps(props);
@@ -189,9 +174,7 @@ export class ImmutableNode extends Node {
 
   override removeLink(name: string) {
     if (this.isFrozen) {
-      throw new Error(
-        `cannot remove link from frozen node: ${this.id.toString()}`,
-      );
+      throw new Error(`cannot remove link from frozen node: ${this.id.toString()}`);
     }
 
     return super.removeLink(name);
@@ -249,9 +232,7 @@ export class ImmutableNode extends Node {
   }
 
   // clone the content by providing a map function (default is identity)
-  override clone(
-    map: (node: NodeContentData) => NodeContentData = identity,
-  ): Node {
+  override clone(map: (node: NodeContentData) => NodeContentData = identity): Node {
     const data = map(this.content.unwrap());
     data.links = entries(this.links).reduce((acc, [name, node]) => {
       acc[name] = node.clone(map);

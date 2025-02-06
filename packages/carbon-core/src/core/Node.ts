@@ -281,7 +281,9 @@ export class Node extends EventEmitter implements IntoNodeId {
   get isFocusable(): boolean {
     if (this.type.isFocusable) return true;
     if (this.parents.some((n) => n.isAtom && n.isBlock)) return false;
-    return ((this.isTextContainer && this.isVoid) || this.type.isFocusable) && !this.isCollapseHidden;
+    return (
+      ((this.isTextContainer && this.isVoid) || this.type.isFocusable) && !this.isCollapseHidden
+    );
   }
 
   // a node that does not avoid to have a focus moved in by arrow keys
@@ -299,6 +301,7 @@ export class Node extends EventEmitter implements IntoNodeId {
   // if content node i.e. first child is treated as content node
   // check if parent is collapse hidden
   get isCollapseHidden() {
+    if (this.isPage) return false;
     if (this.props.get(CollapseHidden)) return true;
 
     // only collapsed parent can hide a child node
@@ -650,7 +653,11 @@ export class Node extends EventEmitter implements IntoNodeId {
   }
 
   // NOTE: the parent chain is not searched for the next node
-  prev(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
+  prev(
+    fn: Predicate<Node> = yes,
+    opts: Partial<TraverseOptions> = {},
+    gotoParent = true,
+  ): Optional<Node> {
     const options = merge(
       {
         order: "post",
@@ -669,7 +676,9 @@ export class Node extends EventEmitter implements IntoNodeId {
 
     // check in sibling tree
     if (sibling && !options.skip(sibling)) {
-      options.order == "pre" ? sibling?.preorder(collect, options) : sibling?.postorder(collect, options);
+      options.order == "pre"
+        ? sibling?.preorder(collect, options)
+        : sibling?.postorder(collect, options);
     }
     if (found) return found;
 
@@ -692,7 +701,11 @@ export class Node extends EventEmitter implements IntoNodeId {
   // NOTE: the parent chain is not searched for the next node
   // check if next siblings' tree can fulfill predicate
   // otherwise try parent next
-  next(fn: Predicate<Node> = yes, opts: Partial<TraverseOptions> = {}, gotoParent = true): Optional<Node> {
+  next(
+    fn: Predicate<Node> = yes,
+    opts: Partial<TraverseOptions> = {},
+    gotoParent = true,
+  ): Optional<Node> {
     const options = merge(
       {
         order: "post",
@@ -708,7 +721,9 @@ export class Node extends EventEmitter implements IntoNodeId {
     let found: Optional<Node> = null;
     const collect: Predicate<Node> = (node) => !!(fn(node) && (found = node));
     if (sibling && !options.skip(sibling)) {
-      options.order == "pre" ? sibling?.preorder(collect, options) : sibling?.postorder(collect, options);
+      options.order == "pre"
+        ? sibling?.preorder(collect, options)
+        : sibling?.postorder(collect, options);
     }
 
     if (found) return found;

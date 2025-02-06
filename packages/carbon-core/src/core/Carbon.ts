@@ -261,7 +261,7 @@ export class Carbon extends EventEmitter {
   }
 
   private updateState(state: State, tr: Transaction): boolean {
-    console.log("updateState", Date.now() - this.now);
+    // console.log("updateState", Date.now() - this.now);
     if (!state.isContentChanged && !state.isSelectionChanged && !state.isMarksChanged) {
       console.warn("new state is not dirty");
       return false;
