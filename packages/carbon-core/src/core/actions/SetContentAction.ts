@@ -1,10 +1,4 @@
-import {
-  classString,
-  deepCloneMap,
-  Draft,
-  Node,
-  NodeData,
-} from "@emrgen/carbon-core";
+import { classString, deepCloneMap, Draft, Node, NodeData, TxType } from "@emrgen/carbon-core";
 import { Optional } from "@emrgen/types";
 import { isArray } from "lodash";
 import { IntoNodeId, NodeId } from "../NodeId";
@@ -15,6 +9,7 @@ export type Content = string | NodeData[] | Node[];
 // NOTE: it can be transformed into combination of InsertNode/RemoveNode/InsertText/RemoveText action
 export class SetContentAction implements CarbonAction {
   readonly type = ActionType.content;
+  readonly txType: TxType = TxType.TwoWay;
 
   before: Optional<Content>;
 
@@ -52,9 +47,7 @@ export class SetContentAction implements CarbonAction {
     }
 
     if (isArray(after)) {
-      const nodes = after
-        .map((n) => draft.schema.nodeFromJSON(n))
-        .filter((n) => !!n) as Node[];
+      const nodes = after.map((n) => draft.schema.nodeFromJSON(n)).filter((n) => !!n) as Node[];
       if (nodes.length !== after.length) {
         throw new Error("failed to create nodes from: " + after.toString());
       }
@@ -78,12 +71,7 @@ export class SetContentAction implements CarbonAction {
       throw new Error("Cannot invert action without before state");
     }
 
-    return SetContentAction.withBefore(
-      this.nodeId,
-      this.after,
-      this.before,
-      this.origin,
-    );
+    return SetContentAction.withBefore(this.nodeId, this.after, this.before, this.origin);
   }
 
   toString() {

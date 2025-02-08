@@ -5,16 +5,13 @@ import { NodeId } from "../NodeId";
 import { Point } from "../Point";
 import { NodeJSON } from "../types";
 import { RemoveNodeAction } from "./RemoveNodeAction";
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
+import { ActionOrigin, ActionType, CarbonAction, TxType } from "./types";
 
 export class InsertNodeAction implements CarbonAction {
   readonly type = ActionType.insert;
+  readonly txType: TxType = TxType.TwoWay;
 
-  static fromNode(
-    at: Point,
-    node: Node,
-    origin: ActionOrigin = ActionOrigin.UserInput,
-  ) {
+  static fromNode(at: Point, node: Node, origin: ActionOrigin = ActionOrigin.UserInput) {
     return new InsertNodeAction(at, node.id, node.toJSON(), origin);
   }
 

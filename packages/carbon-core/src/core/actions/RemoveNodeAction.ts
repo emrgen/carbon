@@ -6,19 +6,16 @@ import { NodeId } from "../NodeId";
 import { Point } from "../Point";
 import { NodeJSON } from "../types";
 import { InsertNodeAction } from "./InsertNodeAction";
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
+import { ActionOrigin, ActionType, CarbonAction, TxType } from "./types";
 
 // action to remove a node by id
 export class RemoveNodeAction implements CarbonAction {
   readonly type = ActionType.remove;
+  readonly txType: TxType = TxType.TwoWay;
 
   private node: Optional<NodeJSON>;
 
-  static fromNode(
-    at: Point,
-    ref: NodeId | Node,
-    origin: ActionOrigin = ActionOrigin.UserInput,
-  ) {
+  static fromNode(at: Point, ref: NodeId | Node, origin: ActionOrigin = ActionOrigin.UserInput) {
     return new RemoveNodeAction(at, ref.nodeId(), null, origin);
   }
 
@@ -51,9 +48,7 @@ export class RemoveNodeAction implements CarbonAction {
 
     const parent = draft.parent(nodeId);
     if (!parent) {
-      throw new Error(
-        "failed to find target parent from: " + nodeId.toString(),
-      );
+      throw new Error("failed to find target parent from: " + nodeId.toString());
     }
 
     draft.remove(nodeId);

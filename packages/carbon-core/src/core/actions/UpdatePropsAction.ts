@@ -1,4 +1,4 @@
-import { Draft } from "@emrgen/carbon-core";
+import { Draft, TxType } from "@emrgen/carbon-core";
 import { keys } from "lodash";
 import { classString } from "../Logger";
 import { IntoNodeId, NodeId } from "../NodeId";
@@ -7,6 +7,8 @@ import { ActionOrigin, ActionType, CarbonAction } from "./types";
 
 export class UpdatePropsAction implements CarbonAction {
   readonly type = ActionType.props;
+  readonly txType: TxType = TxType.TwoWay;
+
   before: Partial<NodePropsJson>;
 
   static create(
@@ -56,12 +58,7 @@ export class UpdatePropsAction implements CarbonAction {
   inverse(): CarbonAction {
     const { nodeId, after, before } = this;
     console.log("inverse", nodeId, after, before);
-    return UpdatePropsAction.withBefore(
-      nodeId,
-      after,
-      before!,
-      ActionOrigin.UserInput,
-    );
+    return UpdatePropsAction.withBefore(nodeId, after, before!, ActionOrigin.UserInput);
   }
 
   toString() {

@@ -1,4 +1,4 @@
-import { Draft } from "@emrgen/carbon-core";
+import { Draft, TxType } from "@emrgen/carbon-core";
 import { classString } from "../Logger";
 import { NodeId } from "../NodeId";
 import { Point } from "../Point";
@@ -8,6 +8,7 @@ import { ActionOrigin, ActionType, CarbonAction } from "./types";
 // the node can be moved before, after, or inside the target node at start or end
 export class MoveNodeAction implements CarbonAction {
   readonly type = ActionType.move;
+  readonly txType: TxType = TxType.TwoWay;
 
   static create(
     from: Point,

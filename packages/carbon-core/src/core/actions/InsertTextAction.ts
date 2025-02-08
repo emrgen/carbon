@@ -5,12 +5,14 @@ import {
   Draft,
   Mark,
   Point,
+  TxType,
 } from "@emrgen/carbon-core";
 import dayjs from "dayjs";
 
 // NOTE: it can be transformed into SetContent action
 export class InsertTextAction implements CarbonAction {
   readonly type = ActionType.insert;
+  readonly txType: TxType = TxType.TwoWay;
 
   time: number = dayjs().unix();
 

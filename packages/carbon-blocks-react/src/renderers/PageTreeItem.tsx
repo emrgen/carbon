@@ -17,6 +17,7 @@ import {
   PinnedSelection,
   Point,
   preventAndStop,
+  TxType,
 } from "@emrgen/carbon-core";
 import {
   CarbonBlock,
@@ -89,9 +90,15 @@ export const PageTreeItemComp = (props: RendererProps) => {
         });
       }
 
-      cmd.Dispatch().Then(() => {
-        app.emit(BlockEvent.openDocument, { node });
-      });
+      console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxx");
+      debugger;
+
+      cmd
+        .WithType(TxType.OneWay)
+        .Dispatch()
+        .Then(() => {
+          app.emit(BlockEvent.openDocument, { node });
+        });
     },
     [app, node],
   );
@@ -162,7 +169,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
         app.emit(BlockEvent.openDocument, { node });
       });
     },
-    [app, node],
+    [app, isContentEditable, node],
   );
 
   const beforeContent = useMemo(() => {

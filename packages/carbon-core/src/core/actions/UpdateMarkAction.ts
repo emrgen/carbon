@@ -5,18 +5,16 @@ import {
   classString,
   Draft,
   Mark,
+  TxType,
 } from "@emrgen/carbon-core";
 
 export type MarkAction = "add" | "remove";
 
 export class UpdateMarkAction implements CarbonAction {
-  type = ActionType.mark;
+  readonly type = ActionType.mark;
+  readonly txType: TxType = TxType.TwoWay;
 
-  static create(
-    action: MarkAction,
-    mark: Mark,
-    origin: ActionOrigin = ActionOrigin.UserInput,
-  ) {
+  static create(action: MarkAction, mark: Mark, origin: ActionOrigin = ActionOrigin.UserInput) {
     return new UpdateMarkAction(action, mark, origin);
   }
 
@@ -33,11 +31,7 @@ export class UpdateMarkAction implements CarbonAction {
 
   inverse(origin?: ActionOrigin): CarbonAction {
     const { action, mark } = this;
-    return new UpdateMarkAction(
-      action === "add" ? "remove" : "add",
-      mark,
-      origin || this.origin,
-    );
+    return new UpdateMarkAction(action === "add" ? "remove" : "add", mark, origin || this.origin);
   }
 
   toJSON(): any {

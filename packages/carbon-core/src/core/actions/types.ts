@@ -4,6 +4,8 @@ import { Draft } from "../Draft";
 export interface CarbonAction {
   origin: ActionOrigin;
 
+  txType: TxType;
+
   type: ActionType;
 
   undoable?: boolean;

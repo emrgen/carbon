@@ -2,16 +2,13 @@ import { Draft } from "@emrgen/carbon-core";
 import { classString } from "../Logger";
 import { NodeId } from "../NodeId";
 import { NodeName } from "../types";
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
+import { ActionOrigin, ActionType, CarbonAction, TxType } from "./types";
 
 export class ChangeNameAction implements CarbonAction {
   readonly type = ActionType.rename;
+  readonly txType: TxType = TxType.TwoWay;
 
-  static create(
-    nodeId: NodeId,
-    to: NodeName,
-    origin: ActionOrigin = ActionOrigin.UserInput,
-  ) {
+  static create(nodeId: NodeId, to: NodeName, origin: ActionOrigin = ActionOrigin.UserInput) {
     return new ChangeNameAction(nodeId, "", to, origin);
   }
 
@@ -53,17 +50,10 @@ export class ChangeNameAction implements CarbonAction {
   inverse(): CarbonAction {
     const { nodeId, from, to } = this;
     if (!from) {
-      throw new Error(
-        "cant inverse, action is not executed:" + this.toString(),
-      );
+      throw new Error("cant inverse, action is not executed:" + this.toString());
     }
 
-    return ChangeNameAction.withBefore(
-      nodeId,
-      to,
-      from,
-      ActionOrigin.UserInput,
-    );
+    return ChangeNameAction.withBefore(nodeId, to, from, ActionOrigin.UserInput);
   }
 
   toString() {

@@ -1,10 +1,11 @@
 import { Draft } from "../Draft";
 import { classString, p12 } from "../Logger";
 import { PointedSelection } from "../PointedSelection";
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
+import { ActionOrigin, ActionType, CarbonAction, TxType } from "./types";
 
 export class SelectAction implements CarbonAction {
   readonly type = ActionType.select;
+  readonly txType: TxType = TxType.TwoWay;
 
   static create(
     before: PointedSelection,
@@ -28,12 +29,7 @@ export class SelectAction implements CarbonAction {
     // syncs selection with dom depending on `origin`
     // used by commands to inform editor of a selection change
     // the selection might be queued for later update if the editor is not ready
-    if (
-      [
-        ActionOrigin.UserSelectionChange,
-        ActionOrigin.DomSelectionChange,
-      ].includes(origin)
-    ) {
+    if ([ActionOrigin.UserSelectionChange, ActionOrigin.DomSelectionChange].includes(origin)) {
       this.onSelectionChange(draft, before, after, origin);
     } else {
       draft.updateSelection(after);

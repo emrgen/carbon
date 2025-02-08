@@ -8,6 +8,7 @@ import {
   Point,
   preventAndStop,
   stop,
+  TxType,
 } from "@emrgen/carbon-core";
 import {
   CarbonBlock,
@@ -56,10 +57,7 @@ export const PageTreeComp = (props: RendererProps) => {
           [OpenedPath]: true,
         });
 
-        const openedPath = pageTreeGroup.props.get(
-          ActiveChildPath,
-          NodeId.IDENTITY,
-        );
+        const openedPath = pageTreeGroup.props.get(ActiveChildPath, NodeId.IDENTITY);
 
         const openedNodeId = NodeId.fromObject(openedPath);
         console.log("closing", openedNodeId.toString());
@@ -76,9 +74,12 @@ export const PageTreeComp = (props: RendererProps) => {
         });
       }
 
-      cmd.Dispatch().Then(() => {
-        app.emit(BlockEvent.openDocument, { node: item });
-      });
+      cmd
+        .WithType(TxType.OneWay)
+        .Dispatch()
+        .Then(() => {
+          app.emit(BlockEvent.openDocument, { node: item });
+        });
     },
     [app, node],
   );
@@ -94,11 +95,7 @@ export const PageTreeComp = (props: RendererProps) => {
             wrapper={{ onClick: handleToggleCollapse, "data-test": 123 }}
             wrap={true}
             afterContent={
-              <div
-                className="add-child-file"
-                onClick={handleInsert}
-                onMouseDown={preventAndStop}
-              >
+              <div className="add-child-file" onClick={handleInsert} onMouseDown={preventAndStop}>
                 <HiOutlinePlus />
               </div>
             }

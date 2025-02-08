@@ -2,10 +2,11 @@ import { Draft } from "../Draft";
 import { Node } from "../Node";
 import { Point } from "../Point";
 import { NodeJSON } from "../types";
-import { ActionOrigin, ActionType, CarbonAction } from "./types";
+import { ActionOrigin, ActionType, CarbonAction, TxType } from "./types";
 
 export class RemoveFragmentAction implements CarbonAction {
   readonly type = ActionType.removeFragment;
+  readonly txType: TxType = TxType.TwoWay;
 
   static create(at: Point, fragment: Node[], origin: ActionOrigin = ActionOrigin.UserInput) {
     return new RemoveFragmentAction(

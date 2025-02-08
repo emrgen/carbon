@@ -1,9 +1,4 @@
-import {
-  EventHandler,
-  NodePlugin,
-  NodeSpec,
-  skipKeyEvent,
-} from "@emrgen/carbon-core";
+import { EventHandler, NodePlugin, NodeSpec, skipKeyEvent } from "@emrgen/carbon-core";
 
 export const VideoSrcPath = "remote/state/video/src";
 
@@ -15,7 +10,9 @@ export class Video extends NodePlugin {
       group: "content",
       atom: true,
       isolate: true,
-      insert: true,
+      insert: {
+        focus: true,
+      },
       sandbox: true,
       dnd: {
         handle: true,
@@ -30,6 +27,7 @@ export class Video extends NodePlugin {
         description: "Insert a video",
         icon: "video",
         tags: ["video", "movie", "film"],
+        order: 9,
       },
       props: {
         local: {
