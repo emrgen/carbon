@@ -1,19 +1,14 @@
-import { Text, Portal } from "@chakra-ui/react";
-import EventEmitter from "events";
-import { keys } from "lodash";
+import { Portal } from "@chakra-ui/react";
 import {
   createContext,
-  createRef,
   MutableRefObject,
   ReactElement,
-  ReactNode,
   useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 import ReactPlayer from "react-player";
 
 interface ReactPlayerRenderProps {
@@ -25,10 +20,9 @@ interface ReactPlayerContextInnerProps {
   render: ({ src, parentRef }: ReactPlayerRenderProps) => ReactElement | null;
 }
 
-export const ReactPlayerContextInner =
-  createContext<ReactPlayerContextInnerProps>({
-    render: () => null,
-  });
+export const ReactPlayerContextInner = createContext<ReactPlayerContextInnerProps>({
+  render: () => null,
+});
 
 const playerMap = {};
 
@@ -38,7 +32,6 @@ export const ReactPlayerContext = ({ children }) => {
 
   const render = useCallback(
     ({ src, parentRef }: ReactPlayerRenderProps) => {
-      console.log("---------------------------------");
       bus.emit("render", { src, parentRef });
       return null;
     },
@@ -52,7 +45,7 @@ export const ReactPlayerContext = ({ children }) => {
       }}
     >
       {children}
-      <ReactPlayerPrerenderStage bus={bus}  />
+      <ReactPlayerPrerenderStage bus={bus} />
     </ReactPlayerContextInner.Provider>
   );
 };
@@ -61,9 +54,7 @@ interface ReactPlayerPrerenderStageProps {
   bus: QueuedEventEmitter;
 }
 
-const ReactPlayerPrerenderStage = ({
-  bus,
-}: ReactPlayerPrerenderStageProps) => {
+const ReactPlayerPrerenderStage = ({ bus }: ReactPlayerPrerenderStageProps) => {
   const ref = useRef(null);
 
   const parentRefs = useRef<Record<string, MutableRefObject<any>>>({});
@@ -71,8 +62,8 @@ const ReactPlayerPrerenderStage = ({
   const [urls, setUrls] = useState<string[]>([]);
 
   useEffect(() => {
-    console.log('register onRender')
-    const onRender = ({ src, parentRef }:ReactPlayerRenderProps) => {
+    console.log("register onRender");
+    const onRender = ({ src, parentRef }: ReactPlayerRenderProps) => {
       console.log("onRender");
       // if (parentRefs.current[src]?.current === parentRef?.current) {
       //   return;
@@ -85,7 +76,7 @@ const ReactPlayerPrerenderStage = ({
     bus.processQueue();
 
     return () => {
-      console.log('unregister onRender')
+      console.log("unregister onRender");
       bus.off("render", onRender);
     };
   }, [bus, ref]);
@@ -135,7 +126,7 @@ class QueuedEventEmitter {
   private queue: any[];
   private listeners: {};
   private processing: boolean;
-  id = Math.random()
+  id = Math.random();
 
   constructor() {
     this.listeners = {};
@@ -154,7 +145,7 @@ class QueuedEventEmitter {
     if (!this.listeners[event]) {
       return;
     }
-    console.log(this.id, 'off', event, listener)
+    console.log(this.id, "off", event, listener);
     this.listeners[event] = this.listeners[event].filter((l) => l !== listener);
   }
 

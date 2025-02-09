@@ -48,7 +48,6 @@ export function DndController() {
   // show, hide drag handle
   const onMouseIn = useCallback(
     (node: Node) => {
-      console.log("---------------------------------------------");
       if (!portalPosition) return;
       if (!node.type.dnd?.draggable || dragHandleNode?.eq(node) || dnd.isMouseDown) {
         return;

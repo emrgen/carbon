@@ -19,6 +19,7 @@ import {
 } from "@emrgen/carbon-dragon";
 import { useCarbon, useNodeState } from "@emrgen/carbon-react";
 import { Optional } from "@emrgen/types";
+import { clamp } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { HiOutlinePlus } from "react-icons/hi";
@@ -115,18 +116,36 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       const firstChild = hitNode.firstChild;
       const { store } = app;
 
-      const { clientX, clientY } = e.event;
-      const x = clientX;
-      const y = clientY;
-
       const hitElement = store.element(hitNode!.id!);
       const elBound = elementBound(hitElement!);
+
+      const { clientX: x, clientY: y } = e.event;
 
       if (hitNode.firstChild?.isTextContainer) {
         const hitTitleElement = store.element(firstChild!.id!);
         const { top, bottom } = elementBound(hitTitleElement!);
 
-        // return Point.toInside(hitNode);
+        const { clientX, clientY } = e.event;
+        const x = clientX;
+        const y = clamp(clientY, top, bottom);
+
+        if (hitNode.type.dnd?.drop?.within) {
+          if (y <= bottom && y >= top) {
+            let to = Point.toInside(hitNode);
+
+            // divide the node rect into 3 parts vertically
+
+            if (y <= top + 2) {
+              to = Point.toBefore(hitNode);
+            }
+
+            if (y >= bottom - 2) {
+              to = Point.toAfter(firstChild!.id);
+            }
+
+            return to;
+          }
+        }
 
         let to: Optional<Point> = null;
         if (y < bottom) {
@@ -196,7 +215,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       const hitElement = store.element(to.nodeId);
 
       let { top, bottom, left, right, x, y } = elementBound(hitElement!);
-      console.log(hitElement, bottom);
+      console.log(hitElement, left);
       const width = right - left;
       const height = bottom - top;
       const refNode = store.get(to.nodeId);
@@ -223,7 +242,6 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       } else if (to.isAfter) {
         // drop after the hit node
         const afterElement = hitNode.nextSibling ? store.element(hitNode.nextSibling.id) : null;
-        console.log(afterElement);
         if (afterElement) {
           const { top: afterTop = bottom } = elementBound(afterElement);
           bottom = bottom + (afterTop - bottom) / 2;
@@ -239,7 +257,16 @@ export function NodeDragHandle(props: FastDragHandleProps) {
           width: width,
         });
       } else if (to.isWithin) {
-        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        const afterElement = store.element(hitNode.firstChild!.id)!;
+        const { top, left, right, bottom } = elementBound(afterElement);
+        const width = right - left;
+        const height = bottom - top;
+        setDropHintStyle({
+          top: top,
+          left: left,
+          width: width,
+          height: height,
+        });
       }
 
       setShowDropHint(true);
@@ -257,6 +284,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       if (hitNode.isPage) {
         return;
       }
+
       if (hitNode?.id.eq(node.id)) {
         // hide drop hint
         return;
@@ -273,7 +301,12 @@ export function NodeDragHandle(props: FastDragHandleProps) {
 
       // setShowDropHint(false);
       const from = nodeLocation(node)!;
-      const to = findDropPosition(e, hitNode);
+      let to = findDropPosition(e, hitNode);
+      if (to?.isWithin) {
+        const refNode = app.store.get(to.nodeId)!;
+        to = Point.toAfter(refNode.lastChild!.id);
+      }
+
       if (!to || from.eq(to) || (to.isBefore && hitNode.prevSibling?.id.eq(node.id))) {
         return;
       }
@@ -459,7 +492,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
           <div
             className={"carbon-drop-hint " + dropHintClassNames.join(" ")}
             style={{
-              visibility: showDropHint ? "visible" : "hidden",
+              // visibility: showDropHint ? "visible" : "hidden",
               ...dropHintStyle,
               position: "absolute",
             }}
