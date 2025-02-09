@@ -129,7 +129,14 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
     const { app } = this;
     const { store } = app;
     const { clientX: x, clientY: y } = e;
-    let hitNode = nodeFromPoint(
+    let hitNode = nodeFromPoint(store, x, y, (n) => n.isContainer);
+    if (hitNode && !hitNode?.chain.find((n) => n.isPage)) {
+      this.resetDraggedNode();
+      this.onOverNodeWithHandle(hitNode);
+      return;
+    }
+
+    hitNode = nodeFromPoint(
       store,
       x + 300, // find node at x + 300 to avoid flickering when the cursor is on the drag handle
       y,

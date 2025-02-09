@@ -43,6 +43,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
   const handleRef = useRef(null);
   const [show, setShow] = useState(false);
   const [showDropHint, setShowDropHint] = useState(false);
+  const [dropHintClassNames, setDropHintClassNames] = useState<string[]>([]);
   const [dropHintStyle, setDropHintStyle] = useState({} as any);
   const { attributes } = useNodeState({ node });
   const [collapsed, setCollapsed] = useState(() => {
@@ -125,6 +126,8 @@ export function NodeDragHandle(props: FastDragHandleProps) {
         const hitTitleElement = store.element(firstChild!.id!);
         const { top, bottom } = elementBound(hitTitleElement!);
 
+        // return Point.toInside(hitNode);
+
         let to: Optional<Point> = null;
         if (y < bottom) {
           if (y < top + (bottom - top) / 2) {
@@ -133,7 +136,8 @@ export function NodeDragHandle(props: FastDragHandleProps) {
             //   return to;
             // }
           } else {
-            const hasChildren = hitNode.type.dnd?.nestable || hitNode.size > 1;
+            const hasChildren = hitNode.type.dnd?.drop?.nestable || hitNode.size > 1;
+            console.log("hasChildren", hasChildren);
             if (hasChildren && x > elBound.left + 30 && isNestableNode(hitNode)) {
               to = Point.toAfter(firstChild?.id!);
             } else {
@@ -168,9 +172,9 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       }
 
       // don't show drop hint if the hit node is the same as the dragged node
-      // if (hitNode?.id.eq(node.id)) {
-      //   return;
-      // }
+      if (hitNode?.id.eq(node.id)) {
+        return;
+      }
 
       if (hitNode.isPage) {
         return;
@@ -183,17 +187,23 @@ export function NodeDragHandle(props: FastDragHandleProps) {
 
       const to = findDropPosition(e, hitNode);
       if (!to) return;
+      const from = nodeLocation(node)!;
       // don't show drop hint if the final drop position is same as the current position
-      // if (!to || from.eq(to) || (to.isBefore && hitNode.prevSibling?.id.eq(node.id))) {
-      //   return;
-      // }
+      if (!to || from.eq(to) || (to.isBefore && hitNode.prevSibling?.id.eq(node.id))) {
+        return;
+      }
 
       const hitElement = store.element(to.nodeId);
 
       let { top, bottom, left, right, x, y } = elementBound(hitElement!);
+      console.log(hitElement, bottom);
       const width = right - left;
       const height = bottom - top;
-      const offset = !to.nodeId.eq(hitNode.id) && hitNode.name == "paragraph" ? 30 : 0;
+      const refNode = store.get(to.nodeId);
+      const className = `ref-node-${refNode?.name} hit-node-${hitNode.name}`;
+      setDropHintClassNames([to.isBefore ? `before ${className}` : `after ${className}`]);
+
+      // const offset = !to.nodeId.eq(hitNode.id) && hitNode.name == "paragraph" ? 30 : 0;
       if (to.isBefore) {
         // drop before the hit node
         const beforeNode = hitNode.prevSibling;
@@ -207,26 +217,29 @@ export function NodeDragHandle(props: FastDragHandleProps) {
         }
         setDropHintStyle({
           top,
-          left: left + offset,
-          width: width - offset,
+          left: left,
+          width: width,
         });
-      } else {
+      } else if (to.isAfter) {
         // drop after the hit node
-        const afterElement = hitElement?.nextSibling as Optional<HTMLElement>;
+        const afterElement = hitNode.nextSibling ? store.element(hitNode.nextSibling.id) : null;
+        console.log(afterElement);
         if (afterElement) {
           const { top: afterTop = bottom } = elementBound(afterElement);
           bottom = bottom + (afterTop - bottom) / 2;
         }
 
         if (!to.nodeId.eq(hitNode.id)) {
-          bottom = bottom + 1;
+          // bottom = bottom + 1;
         }
 
         setDropHintStyle({
           top: bottom,
-          left: left + offset,
-          width: width - offset,
+          left: left,
+          width: width,
         });
+      } else if (to.isWithin) {
+        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
       }
 
       setShowDropHint(true);
@@ -313,9 +326,10 @@ export function NodeDragHandle(props: FastDragHandleProps) {
           app.parkCursor();
           app.cmd.SelectBlocks([node.id])?.Select(PinnedSelection.SKIP).Dispatch();
 
+          const { event } = e;
           app.emit("show:context:menu", {
+            event,
             node,
-            event: e.event,
             placement: "left-start",
           });
         }
@@ -402,12 +416,13 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       className="carbon-node-handle"
       data-target-name={node?.name}
       data-drag-handle={!!node?.type.dnd?.handle}
-      {...attributes}
       style={{ ...style, visibility: show ? "visible" : "hidden" }}
     >
-      {!node?.type.dnd?.handle && (
-        <div className="carbon-drag-handle-cover" ref={handleRef} {...listeners} />
-      )}
+      {/*if the node is draggable but without a handle use the entire region as handle*/}
+      {/*{(!node?.type.dnd?.handle || node.type.dnd.handleBody) && (*/}
+      {/*  <div className="carbon-drag-handle-cover" ref={handleRef} {...listeners} />*/}
+      {/*)}*/}
+
       {node?.type.dnd?.handle && (
         <>
           <div
@@ -436,13 +451,15 @@ export function NodeDragHandle(props: FastDragHandleProps) {
           )}
         </>
       )}
-      {createPortal(<>{DragRectComp}</>, document.body)}
+
+      {/*{createPortal(<>{DragRectComp}</>, document.body)}*/}
+
       {createPortal(
         <>
           <div
-            className="carbon-drop-hint"
+            className={"carbon-drop-hint " + dropHintClassNames.join(" ")}
             style={{
-              display: showDropHint ? "flex" : "none",
+              visibility: showDropHint ? "visible" : "hidden",
               ...dropHintStyle,
               position: "absolute",
             }}

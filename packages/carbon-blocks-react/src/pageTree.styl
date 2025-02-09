@@ -77,7 +77,7 @@
     position relative
     display: flex
     align-items: center
-    padding: 4px;
+    padding: 4px 4px;
     border-radius 4px
     //height 28px
 
@@ -86,15 +86,25 @@
 
     // hide the add child and edit file name buttons by default
 
-    .add-child-file, .edit-file-name
-      @extend .button-style
+    .page-tree-controls
+      position absolute
+      right 4px
+      top 0
+      height 100%
+      display flex
+      z-index 100
+      align-items center
 
-    // show the add child and edit file name buttons on hover
+      .add-child-file, .edit-file-name
+        @extend .button-style
 
-    &:hover
-      > .add-child-file, > .edit-file-name
-        display flex
-        opacity 1
+      // show the add child and edit file name buttons on hover
+
+      &:hover
+        > .add-child-file, > .edit-file-name
+          font-size 10px
+          display flex
+          opacity 1
 
   .cnest
     margin-left: 16px
@@ -107,6 +117,7 @@
     margin-left 4px
     cursor: pointer
     line-height 22px
+    padding-left 20px;
 
     &:hover
       color: #000
@@ -128,6 +139,7 @@
       min-width 1px;
 
   .page-tree__collapsible_control
+    position absolute;
     color: #aaa
     background: transparent;
     width 20px
@@ -165,6 +177,9 @@
     font-size: 14px
     line-height: $lineHeight
     user-select: none
+
+.after.ref-node-plainText
+  margin-left 8px
 
 //&[data-opened=true] > [data-type=content] > [data-name=title]
 //  color: #000 !important

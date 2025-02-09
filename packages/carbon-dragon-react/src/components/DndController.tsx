@@ -48,6 +48,7 @@ export function DndController() {
   // show, hide drag handle
   const onMouseIn = useCallback(
     (node: Node) => {
+      console.log("---------------------------------------------");
       if (!portalPosition) return;
       if (!node.type.dnd?.draggable || dragHandleNode?.eq(node) || dnd.isMouseDown) {
         return;
@@ -191,8 +192,9 @@ export function DndController() {
             style={{
               ...dragHandlePosition,
               opacity: dragHandleOpacity,
+              // zIndex: dragHandleOpacity ? 1000 : -1,
               pointerEvens: dragHandleOpacity ? "auto" : "none",
-              cursor: dragHandleOpacity ? "grab" : "default",
+              // cursor: dragHandleOpacity ? "grab" : "default",
             }}
           />
         }

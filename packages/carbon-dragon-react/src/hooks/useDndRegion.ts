@@ -10,6 +10,7 @@ export const useDndRegion = (props: UseFastDndRegionProps) => {
 
   const onMouseMove = useCallback(
     (e) => {
+      console.log("onMouseMove");
       dnd.onMouseMove(node, e);
     },
     [dnd, node],

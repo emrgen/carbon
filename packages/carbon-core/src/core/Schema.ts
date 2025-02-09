@@ -166,12 +166,11 @@ export interface NodeSpec {
     collapse?: boolean;
   };
   dnd?: {
+    handleBody?: boolean;
     // same as drag handle
     handle?: boolean;
     draggable?: boolean;
     container?: boolean;
-    // allows to drop the node within even when there is no children
-    nestable?: boolean;
     // top level dnd region
     // no higher dnd region can be found
     region?: boolean;
@@ -183,6 +182,13 @@ export interface NodeSpec {
     bound?: NodeName | ((node: Node) => Optional<Node>);
     // draggables can be moved in x, y, xy direction
     move?: "x" | "y" | "xy";
+    drop?: {
+      before?: boolean;
+      after?: boolean;
+      within?: boolean;
+      // allows to drop the node within even when there is no children
+      nestable?: boolean;
+    };
   };
 
   // if the depends on node content is updated, the node will be updated as well

@@ -13,7 +13,6 @@ import {
 import {
   useCombineConnectors,
   useConnectorsToProps,
-  useDndRegion,
   useRectSelectionSurface,
 } from "@emrgen/carbon-dragon-react";
 import {
@@ -32,7 +31,7 @@ export const PageComp = (props: RendererProps) => {
   const app = useCarbon();
   const ref = useRef<Element>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const dndRegion = useDndRegion({ node, ref });
+
   const selectionSurface = useRectSelectionSurface({ node, ref });
 
   useEffect(() => {
@@ -67,7 +66,6 @@ export const PageComp = (props: RendererProps) => {
         },
       },
       selectionSurface,
-      dndRegion,
     ),
   );
 

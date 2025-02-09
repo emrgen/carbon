@@ -14,6 +14,7 @@ import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { boardPlugins } from "@emrgen/carbon-board";
 import { boardRenderers } from "@emrgen/carbon-board-react";
 import {
+  BlockContextMenu,
   carbonChakraRenderers,
   EmojiPickerInlineMenu,
   FloatingStyleMenu,
@@ -235,7 +236,7 @@ export function Sight() {
         <Box pos={"absolute"} right={8} top={6}></Box>
         <FloatingStyleMenu />
         <InsertBlockMenu />
-        {/*<BlockContextMenu />*/}
+        <BlockContextMenu />
         <EmojiPickerInlineMenu />
         <ScrollIntoView />
       </CarbonApp>

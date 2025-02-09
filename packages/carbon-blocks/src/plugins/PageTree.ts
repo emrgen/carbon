@@ -88,13 +88,23 @@ export class PageTreeItem extends CarbonPlugin {
 
   spec(): NodeSpec {
     return {
-      group: "",
+      group: "nestable",
       content: "plainText pageTreeItem*",
       focusable: true,
       isolate: true,
-      inlineSelectable: true,
-      draggable: true,
-      dragHandle: true,
+      selection: {
+        inline: true,
+      },
+      dnd: {
+        // draggable: true,
+        container: true,
+        drop: {
+          before: true,
+          after: true,
+          within: true,
+          nestable: true,
+        },
+      },
       props: {
         local: {
           placeholder: {

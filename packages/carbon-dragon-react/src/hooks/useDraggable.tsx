@@ -1,12 +1,6 @@
 import { Node, prevent, preventAndStop } from "@emrgen/carbon-core";
 import { DndEvent, getEventPosition } from "@emrgen/carbon-dragon";
-import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { MutableRefObject, useCallback, useEffect, useRef, useState } from "react";
 import { useDndContext } from "./useDndContext";
 
 export interface UseFastDraggableProps {
@@ -64,11 +58,15 @@ export const useDraggableHandle = (props: UseDraggableHandleProps) => {
       // mousedown on a draggable handle should not trigger have any other effect than dragging
       let initState = {} as any;
       let prevState = {} as any;
+
       // using object ref to check if the mouse is up
       let mouseUpped = { current: false };
       // console.log("mouse down", ref.current, event.target, refId.current);
       if (isDisabled) return;
-      if (ref.current !== event.target) return;
+      // debugger;
+      // using object ref to check if the mouse is up
+      // if (ref.current !== event.target) return;
+
       dnd.onMouseDown(node, event);
       // prevent default behavior like text selection, image dragging, etc
       // prevent(event);

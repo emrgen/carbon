@@ -18,9 +18,11 @@ export class BulletedList extends Paragraph {
         name: "bulletList",
       },
       dnd: {
-        nestable: true,
         handle: true,
         draggable: true,
+        drop: {
+          nestable: true,
+        },
       },
       info: {
         title: "Bulleted List",

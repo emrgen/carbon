@@ -10,12 +10,7 @@ import { ContextMenuContext } from "./ContextMenu/useContextMenu";
 
 export const BlockContextMenu = () => {
   const app = useCarbon();
-  const {
-    overlay,
-    showOverlay,
-    hideOverlay,
-    ref: overlayRef,
-  } = useCarbonOverlay();
+  const { overlay, showOverlay, hideOverlay, ref: overlayRef } = useCarbonOverlay();
   const [isOpen, setIsOpen] = useState(false);
   const [anchorPosition, setAnchorPosition] = useState({ x: 0, y: 0 });
   const [blockRef, setBlockRef] = useState<HTMLElement | null>(null);
@@ -38,7 +33,7 @@ export const BlockContextMenu = () => {
   useEffect(() => {
     const showContextMenu = (e: ShowContextMenuEvent) => {
       const { node, event, placement } = e;
-      e.event.preventDefault();
+      event.preventDefault();
       const el = app.store.element(node.id);
       if (!el) return;
       const rect = domRect(el);
@@ -79,9 +74,5 @@ export const BlockContextMenu = () => {
     );
   }, [blockRef, filteredMenu, placement, searchText, isOpen]);
 
-  return (
-    <Portal containerRef={overlayRef}>
-      {overlayRef.current && contextMenu}
-    </Portal>
-  );
+  return <Portal containerRef={overlayRef}>{overlayRef.current && contextMenu}</Portal>;
 };

@@ -8,30 +8,30 @@ import {
   ActiveChildPath,
   Carbon,
   ContenteditablePath,
-  FocusEditablePath,
   LocalDirtyCounterPath,
   Node,
   NodeId,
   OpenedPath,
-  Pin,
   PinnedSelection,
   Point,
   preventAndStop,
   TxType,
 } from "@emrgen/carbon-core";
+import { CarbonDragHandleId, useDraggableHandle } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
+  CarbonNode,
   CarbonNodeChildren,
-  CarbonNodeContent,
   RendererProps,
   useCarbon,
   useNodeChange,
   useNodeOpened,
 } from "@emrgen/carbon-react";
-import { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 
-import { HiOutlinePencil, HiOutlinePlus } from "react-icons/hi";
+import { HiOutlinePlus } from "react-icons/hi";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
+import { SlOptionsVertical } from "react-icons/sl";
 
 const getPageTree = (n: Node) => n.closest((n) => n.type.name === PageTreeName);
 export const getPageTreeGroup = (n: Node) => n.closest((n) => n.type.name === PageTreeGroupName);
@@ -43,6 +43,18 @@ export const PageTreeItemComp = (props: RendererProps) => {
   const isCollapsed = node.isCollapsed;
   const isContentEditable = node.firstChild?.props.get(ContenteditablePath);
   useNodeChange({ node: node.firstChild! });
+
+  const handleRef = useRef(null);
+
+  const { listeners } = useDraggableHandle({
+    id: CarbonDragHandleId,
+    node: node as Node,
+    disabled: !node,
+    ref: handleRef,
+    activationConstraint: {
+      distance: 2,
+    },
+  });
 
   const handleToggle = useCallback(
     (app: Carbon) => {
@@ -90,9 +102,6 @@ export const PageTreeItemComp = (props: RendererProps) => {
         });
       }
 
-      console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxx");
-      debugger;
-
       cmd
         .WithType(TxType.OneWay)
         .Dispatch()
@@ -104,26 +113,39 @@ export const PageTreeItemComp = (props: RendererProps) => {
   );
 
   // set the first child to contenteditable
+  // const handleEditName = useCallback(
+  //   (e) => {
+  //     preventAndStop(e);
+  //     const { cmd } = app;
+  //     cmd
+  //       .Update(node.firstChild!, {
+  //         [ContenteditablePath]: true,
+  //         [FocusEditablePath]: true,
+  //       })
+  //       .Update(node, {
+  //         [LocalDirtyCounterPath]: new Date().getTime(),
+  //       });
+  //
+  //     if (!node.firstChild?.isEmpty) {
+  //       cmd.Select(
+  //         PinnedSelection.create(Pin.toStartOf(node.firstChild!)!, Pin.toEndOf(node.firstChild!)!)!,
+  //       );
+  //     }
+  //
+  //     cmd.Dispatch();
+  //   },
+  //   [app, node],
+  // );
+
   const handleEditName = useCallback(
     (e) => {
       preventAndStop(e);
-      const { cmd } = app;
-      cmd
-        .Update(node.firstChild!, {
-          [ContenteditablePath]: true,
-          [FocusEditablePath]: true,
-        })
-        .Update(node, {
-          [LocalDirtyCounterPath]: new Date().getTime(),
-        });
 
-      if (!node.firstChild?.isEmpty) {
-        cmd.Select(
-          PinnedSelection.create(Pin.toStartOf(node.firstChild!)!, Pin.toEndOf(node.firstChild!)!)!,
-        );
-      }
-
-      cmd.Dispatch();
+      app.emit("show:context:menu", {
+        event: e,
+        node: node,
+        placement: "right-start",
+      });
     },
     [app, node],
   );
@@ -196,14 +218,14 @@ export const PageTreeItemComp = (props: RendererProps) => {
 
   const afterContent = useMemo(() => {
     return (
-      <>
+      <div className={"page-tree-controls"}>
         <div className="edit-file-name" onClick={handleEditName}>
-          <HiOutlinePencil />
+          <SlOptionsVertical />
         </div>
         <div className="add-child-file" onClick={handleInsert} onMouseDown={preventAndStop}>
           <HiOutlinePlus />
         </div>
-      </>
+      </div>
     );
   }, [handleEditName, handleInsert]);
 
@@ -226,7 +248,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
   );
 
   const handleMouseDown = useCallback((e) => {
-    e.stopPropagation();
+    // e.stopPropagation();
   }, []);
 
   return (
@@ -236,16 +258,30 @@ export const PageTreeItemComp = (props: RendererProps) => {
         ...activated.attributes,
       }}
     >
-      <CarbonNodeContent
-        node={node}
-        beforeContent={beforeContent}
-        afterContent={isContentEditable ? null : afterContent}
-        custom={{
-          onKeyDown: handleKeyPress,
-          onClick: handleOpenDocument,
-          onMouseDown: handleMouseDown,
-        }}
-      />
+      <div className={`ctiw`} ref={handleRef} {...listeners}>
+        {beforeContent}
+        <CarbonNode
+          node={node.child(0)!}
+          custom={{
+            onKeyDown: handleKeyPress,
+            onClick: handleOpenDocument,
+            onMouseDown: handleMouseDown,
+          }}
+        />
+        {afterContent}
+      </div>
+
+      {/*<CarbonNodeContent*/}
+      {/*  node={node}*/}
+      {/*  beforeContent={beforeContent}*/}
+      {/*  afterContent={isContentEditable ? null : afterContent}*/}
+      {/*  custom={{*/}
+      {/*    onKeyDown: handleKeyPress,*/}
+      {/*    onClick: handleOpenDocument,*/}
+      {/*    onMouseDown: handleMouseDown,*/}
+      {/*  }}*/}
+      {/*  ref={handleRef}*/}
+      {/*/>*/}
 
       {!isCollapsed && <CarbonNodeChildren node={node} />}
       {!isCollapsed && node.size === 1 && (
