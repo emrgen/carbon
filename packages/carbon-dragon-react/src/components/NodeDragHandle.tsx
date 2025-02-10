@@ -310,7 +310,14 @@ export function NodeDragHandle(props: FastDragHandleProps) {
               });
             }
           } else {
-            console.log("xxxxxxxxxxxxxxxxxxxxxxx");
+            const afterElement = refNode?.nextSibling
+              ? store.element(refNode.nextSibling.id)
+              : null;
+            if (afterElement) {
+              const { top: afterTop } = elementBound(afterElement);
+              bottom += (afterTop - bottom) / 2;
+            }
+
             setDropHintStyle({
               top: bottom,
               left: left,
@@ -326,9 +333,8 @@ export function NodeDragHandle(props: FastDragHandleProps) {
           const beforeElement = store.element(beforeNode?.id!);
           const { bottom: beforeBottom } = elementBound(beforeElement!);
           top = top - (top - beforeBottom) / 2;
-        } else {
-          top = top;
         }
+
         setDropHintStyle({
           top,
           left: left,

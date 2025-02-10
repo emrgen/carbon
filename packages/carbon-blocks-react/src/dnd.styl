@@ -284,14 +284,15 @@ $selection-color = hsla(213, 82%, 82%, 0.5)
   background #6dbafa
   //box-shadow 0 0 0 2px #6dbafa
   width 100%
-  height: 3px
+  height: 2px
   z-index 100
   border-radius 2px
   transform: translate(0, -1px)
   &.within
     background transparent
-    border-radius 4px
-    box-shadow 0 0 0 2px #6dbafa
+    border-radius 3px
+    box-shadow inset 0 0 0 2px #6dbafa
+    transform: translate(0, 0)
 
 [data-dragging=true]
   &:after
