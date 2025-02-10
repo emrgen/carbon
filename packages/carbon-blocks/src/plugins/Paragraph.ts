@@ -41,6 +41,12 @@ export class Paragraph extends NodePlugin {
         handle: true,
         container: true,
         move: "xy",
+        drop: {
+          nestable: {
+            left: 26,
+            default: false,
+          },
+        },
       },
       selection: {
         rect: true,

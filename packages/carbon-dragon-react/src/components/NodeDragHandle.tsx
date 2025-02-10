@@ -142,11 +142,11 @@ export function NodeDragHandle(props: FastDragHandleProps) {
 
             // divide the node rect into 3 parts vertically
 
-            if (y <= top + 2) {
+            if (y <= top + 3) {
               to = Point.toBefore(hitNode);
             }
 
-            if (y >= bottom - 2) {
+            if (y >= bottom - 3) {
               if (hitNode.isCollapsed) {
                 to = Point.toAfter(hitNode);
               } else {
@@ -166,7 +166,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
             //   return to;
             // }
           } else {
-            const hasChildren = hitNode.type.dnd?.drop?.nestable || hitNode.size > 1;
+            const hasChildren = hitNode.type.dnd?.drop?.nestable?.default || hitNode.size > 1;
             const left = hitNode.type.dnd?.drop?.nestable?.left || 30;
             console.log("hasChildren", hasChildren);
             if (hasChildren && x > elBound.left + left && isNestableNode(hitNode)) {
@@ -206,7 +206,6 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       if (hitNode?.id.eq(node.id)) {
         return;
       }
-
       if (hitNode.isPage) {
         return;
       }
@@ -221,6 +220,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       const from = nodeLocation(node)!;
       // don't show drop hint if the final drop position is same as the current position
       if (!to || from.eq(to) || (to.isBefore && hitNode.prevSibling?.id.eq(node.id))) {
+        console.log("xxxxxxxxxxxx", to.nodeId.toString());
         return;
       }
 
@@ -233,6 +233,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       const dropPosition = to.isBefore ? "before" : to.isWithin ? "within" : "after";
       setDropHintClassNames([className, dropPosition]);
 
+      console.log("##########", hitNode?.name);
       // const offset = !to.nodeId.eq(hitNode.id) && hitNode.name == "paragraph" ? 30 : 0;
       if (to.isAfter) {
         if (hitNode.isCollapsible) {
@@ -281,12 +282,41 @@ export function NodeDragHandle(props: FastDragHandleProps) {
             }
           }
         } else {
-          // drop after the hit node
-          setDropHintStyle({
-            top: bottom,
-            left: left,
-            width: width,
-          });
+          if (!refNode?.eq(hitNode)) {
+            // if the hit node is a container and has more than one child
+            if (hitNode.size > 1) {
+              const afterElement = refNode?.nextSibling
+                ? store.element(refNode.nextSibling.id)
+                : null;
+              if (!afterElement) {
+                console.error("after element not found");
+                return;
+              }
+
+              const { top: afterTop, left, right } = elementBound(afterElement);
+              const width = right - left;
+              setDropHintStyle({
+                top: bottom + (afterTop - bottom) / 2,
+                left: left,
+                width: width,
+              });
+            } else {
+              // drop after the hit node
+              console.log("----------------------------");
+              setDropHintStyle({
+                top: bottom,
+                left: left + (hitNode.type.dnd?.drop?.nestable?.left ?? 0),
+                width: width - (hitNode.type.dnd?.drop?.nestable?.left ?? 0),
+              });
+            }
+          } else {
+            console.log("xxxxxxxxxxxxxxxxxxxxxxx");
+            setDropHintStyle({
+              top: bottom,
+              left: left,
+              width: width,
+            });
+          }
         }
       } else if (to.isBefore) {
         // drop before the hit node
@@ -294,10 +324,10 @@ export function NodeDragHandle(props: FastDragHandleProps) {
 
         if (beforeNode) {
           const beforeElement = store.element(beforeNode?.id!);
-          const { bottom: beforeBottom = top } = elementBound(beforeElement!);
+          const { bottom: beforeBottom } = elementBound(beforeElement!);
           top = top - (top - beforeBottom) / 2;
         } else {
-          top = top - 1;
+          top = top;
         }
         setDropHintStyle({
           top,
