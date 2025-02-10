@@ -150,6 +150,10 @@ export class Transaction {
     return this;
   }
 
+  SkipSelect(origin = this.origin): Transaction {
+    return this.Select(PinnedSelection.SKIP, origin);
+  }
+
   Select(selection: PinnedSelection | PointedSelection, origin = this.origin): Transaction {
     const after = selection.unpin();
     this.lastSelection = after;

@@ -1,13 +1,4 @@
-import {
-  cloneDeep,
-  entries,
-  get,
-  isArray,
-  isEqual,
-  isString,
-  keys,
-  set,
-} from "lodash";
+import { cloneDeep, entries, get, isArray, isEqual, isString, keys, set } from "lodash";
 import { Node } from "./Node";
 
 export type NodePropsJson = Record<string, any>;
@@ -216,8 +207,7 @@ export const RemoteDataAsPath = "remote/html/data-as";
 export const PlaceholderPath = "local/html/placeholder";
 export const HasFocusPath = "local/html/data-focused";
 export const UserSelectPath = "local/html/data-user-select";
-export const SuppressContenteditableWarningPath =
-  "local/html/suppressContentEditableWarning";
+export const SuppressContenteditableWarningPath = "local/html/suppressContentEditableWarning";
 export const FocusEditablePath = "local/state/focusEditable";
 export const ContenteditablePath = "local/html/contentEditable";
 export const ActivatedPath = "local/state/activated";
@@ -268,6 +258,7 @@ export const LocalDirtyCounterPath = "local/state/dirty/counter";
 export const FocusOnInsertPath = "local/state/insert/focus";
 // show node options on insert
 export const OptionsOnInsertPath = "local/state/insert/options";
+export const DraggingNodePath = "local/html/data-dragging";
 export const SelectedOptionsPath = "remote/state/selected/options";
 export const ActiveChildPath = "local/state/active/child";
 export const CodeValuePath = "remote/state/code/value";

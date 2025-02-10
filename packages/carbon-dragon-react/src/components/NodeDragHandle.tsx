@@ -2,6 +2,7 @@ import { isNestableNode } from "@emrgen/carbon-blocks";
 import {
   CollapsedPath,
   CustomEvent,
+  DraggingNodePath,
   EventsIn,
   FocusOnInsertPath,
   Node,
@@ -87,7 +88,13 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       if (e.id === CarbonDragHandleId) {
         app.onEvent(EventsIn.dragStart, CustomEvent.create(EventsIn.dragStart, e.node, e.event));
         app.enable(() => {
-          app.cmd.SelectBlocks([]).Select(PinnedSelection.BLUR).Dispatch();
+          app.cmd
+            .Update(e.node, {
+              [DraggingNodePath]: true,
+            })
+            .SelectBlocks([])
+            .Select(PinnedSelection.BLUR)
+            .Dispatch();
         });
       }
     },
@@ -156,8 +163,9 @@ export function NodeDragHandle(props: FastDragHandleProps) {
             // }
           } else {
             const hasChildren = hitNode.type.dnd?.drop?.nestable || hitNode.size > 1;
+            const left = hitNode.type.dnd?.drop?.nestable?.left || 30;
             console.log("hasChildren", hasChildren);
-            if (hasChildren && x > elBound.left + 30 && isNestableNode(hitNode)) {
+            if (hasChildren && x > elBound.left + left && isNestableNode(hitNode)) {
               to = Point.toAfter(firstChild?.id!);
             } else {
               to = Point.toAfter(hitNode);
@@ -340,10 +348,15 @@ export function NodeDragHandle(props: FastDragHandleProps) {
     (e: DndEvent) => {
       if (e.id === CarbonDragHandleId) {
         onDragRectStop(e);
+        app.cmd
+          .Update(e.node, {
+            [DraggingNodePath]: false,
+          })
+          .Dispatch();
         onDropNode(e);
       }
     },
-    [onDragRectStop, onDropNode],
+    [app, onDragRectStop, onDropNode],
   );
 
   const onMouseUp = useCallback(

@@ -187,7 +187,9 @@ export interface NodeSpec {
       after?: boolean;
       within?: boolean;
       // allows to drop the node within even when there is no children
-      nestable?: boolean;
+      nestable?: {
+        left: number;
+      };
     };
   };
 
