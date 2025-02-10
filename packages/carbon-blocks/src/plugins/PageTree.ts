@@ -95,6 +95,7 @@ export class PageTreeItem extends CarbonPlugin {
       selection: {
         inline: true,
       },
+      collapsible: true,
       dnd: {
         // draggable: true,
         container: true,
@@ -102,7 +103,9 @@ export class PageTreeItem extends CarbonPlugin {
           before: true,
           after: true,
           within: true,
-          nestable: true,
+          nestable: {
+            left: 20,
+          },
         },
       },
       props: {

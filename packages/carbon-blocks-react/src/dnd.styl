@@ -282,11 +282,16 @@ $selection-color = hsla(213, 82%, 82%, 0.5)
 
 .carbon-drop-hint
   background #6dbafa
+  //box-shadow 0 0 0 2px #6dbafa
   width 100%
-  height: 4px
+  height: 3px
   z-index 100
   border-radius 2px
-  transform: translate(0, -2px)
+  //transform: translate(0, -2px)
+  &.within
+    background transparent
+    border-radius 4px
+    box-shadow 0 0 0 2px #6dbafa
 
 [data-dragging=true]
   background #f0f0f0

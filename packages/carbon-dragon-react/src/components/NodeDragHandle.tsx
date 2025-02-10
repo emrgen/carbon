@@ -147,7 +147,11 @@ export function NodeDragHandle(props: FastDragHandleProps) {
             }
 
             if (y >= bottom - 2) {
-              to = Point.toAfter(firstChild!.id);
+              if (hitNode.isCollapsed) {
+                to = Point.toAfter(hitNode);
+              } else {
+                to = Point.toAfter(firstChild!.id);
+              }
             }
 
             return to;
@@ -220,18 +224,71 @@ export function NodeDragHandle(props: FastDragHandleProps) {
         return;
       }
 
+      const refNode = store.get(to.nodeId);
       const hitElement = store.element(to.nodeId);
 
-      let { top, bottom, left, right, x, y } = elementBound(hitElement!);
-      console.log(hitElement, left);
-      const width = right - left;
-      const height = bottom - top;
-      const refNode = store.get(to.nodeId);
+      let { top, bottom, left, right } = elementBound(hitElement!);
+      let width = right - left;
       const className = `ref-node-${refNode?.name} hit-node-${hitNode.name}`;
-      setDropHintClassNames([to.isBefore ? `before ${className}` : `after ${className}`]);
+      const dropPosition = to.isBefore ? "before" : to.isWithin ? "within" : "after";
+      setDropHintClassNames([className, dropPosition]);
 
       // const offset = !to.nodeId.eq(hitNode.id) && hitNode.name == "paragraph" ? 30 : 0;
-      if (to.isBefore) {
+      if (to.isAfter) {
+        if (hitNode.isCollapsible) {
+          if (hitNode.isCollapsed) {
+            // drop after the hit node
+            const afterElement = hitNode.nextSibling ? store.element(hitNode.nextSibling.id) : null;
+            if (afterElement) {
+              const secondChildBound = elementBound(afterElement);
+              bottom = secondChildBound.top;
+              left = secondChildBound.left;
+              width = secondChildBound.right - secondChildBound.left;
+            }
+
+            if (!to.nodeId.eq(hitNode.id)) {
+              // bottom = bottom + 1;
+            }
+
+            setDropHintStyle({
+              top: bottom,
+              left: left,
+              width: width,
+            });
+          } else {
+            if (hitNode.size === 1) {
+              setDropHintStyle({
+                top: bottom,
+                left: left + 14,
+                width: width - 14,
+              });
+            } else {
+              const afterElement = refNode?.nextSibling
+                ? store.element(refNode.nextSibling.id)
+                : null;
+              if (!afterElement) {
+                console.error("after element not found");
+                return;
+              }
+              const { top, left, right } = elementBound(afterElement);
+              const width = right - left;
+
+              setDropHintStyle({
+                top: bottom + (top - bottom) / 2,
+                left: left,
+                width: width,
+              });
+            }
+          }
+        } else {
+          // drop after the hit node
+          setDropHintStyle({
+            top: bottom,
+            left: left,
+            width: width,
+          });
+        }
+      } else if (to.isBefore) {
         // drop before the hit node
         const beforeNode = hitNode.prevSibling;
 
@@ -244,23 +301,6 @@ export function NodeDragHandle(props: FastDragHandleProps) {
         }
         setDropHintStyle({
           top,
-          left: left,
-          width: width,
-        });
-      } else if (to.isAfter) {
-        // drop after the hit node
-        const afterElement = hitNode.nextSibling ? store.element(hitNode.nextSibling.id) : null;
-        if (afterElement) {
-          const { top: afterTop = bottom } = elementBound(afterElement);
-          bottom = bottom + (afterTop - bottom) / 2;
-        }
-
-        if (!to.nodeId.eq(hitNode.id)) {
-          // bottom = bottom + 1;
-        }
-
-        setDropHintStyle({
-          top: bottom,
           left: left,
           width: width,
         });
@@ -312,6 +352,9 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       let to = findDropPosition(e, hitNode);
       if (to?.isWithin) {
         const refNode = app.store.get(to.nodeId)!;
+        if (refNode.lastChild!.id.eq(node.id)) {
+          return;
+        }
         to = Point.toAfter(refNode.lastChild!.id);
       }
 
@@ -505,7 +548,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
           <div
             className={"carbon-drop-hint " + dropHintClassNames.join(" ")}
             style={{
-              // visibility: showDropHint ? "visible" : "hidden",
+              visibility: showDropHint ? "visible" : "hidden",
               ...dropHintStyle,
               position: "absolute",
             }}
