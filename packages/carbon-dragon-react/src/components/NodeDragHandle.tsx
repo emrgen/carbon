@@ -295,6 +295,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
               const width = right - left;
               setDropHintStyle({
                 top: bottom + (afterTop - bottom) / 2,
+                height: afterTop - bottom,
                 left: left,
                 width: width,
               });
@@ -302,7 +303,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
               // drop after the hit node
               console.log("----------------------------");
               setDropHintStyle({
-                top: bottom,
+                top: bottom + 1,
                 left: left, // + (hitNode.type.dnd?.drop?.nestable?.left ?? 0),
                 width: width, // -(hitNode.type.dnd?.drop?.nestable?.left ?? 0),
               });

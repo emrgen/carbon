@@ -20,6 +20,7 @@ export class BulletedList extends Paragraph {
       dnd: {
         handle: true,
         draggable: true,
+        container: true,
         drop: {
           nestable: {
             left: 26,
