@@ -20,6 +20,53 @@ export const isDragHitNode = (n: Node) => {
 export const childHit = (
   store: NodeStore,
   parent: Node,
+  x,
+  y,
+  pred: Predicate<Node>,
+): Optional<Node> => {
+  const docEl = store.element(parent.id)!;
+  const rect = elementBound(docEl);
+  const style = window.getComputedStyle(docEl) ?? {};
+  const padding = parseInt(style.paddingLeft) || 0;
+  let found: Optional<Node> = parent;
+  let onLeft = false,
+    onRight = false;
+
+  // check if the cursor is in the left padding area of the page
+  if (found.eq(parent)) {
+    if (rect.left < x && x < rect.left + padding) {
+      x = rect.left + padding + 20;
+      found = nodeFromPoint(store, x, y, isDragHitNode) ?? found;
+      onLeft = true;
+    }
+  }
+
+  // check if the cursor is in the right padding area of the page
+  if (found.eq(parent)) {
+    if (rect.right - padding < x && x < rect.right) {
+      x = rect.right - padding - 20;
+      found = nodeFromPoint(store, x, y, isDragHitNode) ?? found;
+      onRight = true;
+    }
+  }
+
+  // the axis the
+  // search along the y-axis
+  if (found.eq(parent)) {
+    found = searchDown(store, parent, x, y) ?? searchUp(store, parent, x, y) ?? found;
+  }
+
+  // search along the x-axis
+  if (found.eq(parent)) {
+    found = searchLeft(store, parent, x, y) ?? searchRight(store, parent, x, y) ?? found;
+  }
+
+  return found?.eq(parent) ? null : found;
+};
+
+export const pageChildHit = (
+  store: NodeStore,
+  parent: Node,
   node: Node,
   x,
   y,

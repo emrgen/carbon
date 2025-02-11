@@ -284,15 +284,31 @@ $selection-color = hsla(213, 82%, 82%, 0.5)
   background #6dbafa
   //box-shadow 0 0 0 2px #6dbafa
   width 100%
-  height: 2px
+  height: 4px
   z-index 100
   border-radius 2px
-  transform: translate(0, -1px)
+  transform: translate(0, -2px)
+  &.after.ref-node-pageTreeItem,
+  &.before.ref-node-pageTreeItem
+    background #6dbafa
+    height 2px
+    transform: translate(0, -1px)
+    &:after
+      content: ''
+      position absolute
+      top -2px
+      left -2px
+      width 6px
+      height 6px
+      border-radius 4px
+      box-shadow inset 0 0 0 2px #6dbafa
+      background #6dbafa
   &.within
     background transparent
     border-radius 3px
     box-shadow inset 0 0 0 2px #6dbafa
     transform: translate(0, 0)
+
 
 [data-dragging=true]
   &:after

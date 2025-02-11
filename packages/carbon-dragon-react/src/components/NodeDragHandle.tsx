@@ -12,11 +12,11 @@ import {
   preventAndStop,
 } from "@emrgen/carbon-core";
 import {
-  childHit,
   DndEvent,
   elementBound,
   isDragHitNode,
   nodeFromPoint,
+  pageChildHit,
 } from "@emrgen/carbon-dragon";
 import { useCarbon, useNodeState } from "@emrgen/carbon-react";
 import { Optional } from "@emrgen/types";
@@ -110,7 +110,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
 
       // find the child container if the hit is with the page
       if (container?.isPage) {
-        container = childHit(app.store, container, e.node, x, y, isDragHitNode);
+        container = pageChildHit(app.store, container, e.node, x, y, isDragHitNode);
       }
 
       return container;
@@ -168,7 +168,6 @@ export function NodeDragHandle(props: FastDragHandleProps) {
           } else {
             const hasChildren = hitNode.type.dnd?.drop?.nestable?.default || hitNode.size > 1;
             const left = hitNode.type.dnd?.drop?.nestable?.left || 30;
-            console.log("hasChildren", hasChildren);
             if (hasChildren && x > elBound.left + left && isNestableNode(hitNode)) {
               to = Point.toAfter(firstChild?.id!);
             } else {
@@ -220,7 +219,6 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       const from = nodeLocation(node)!;
       // don't show drop hint if the final drop position is same as the current position
       if (!to || from.eq(to) || (to.isBefore && hitNode.prevSibling?.id.eq(node.id))) {
-        console.log("xxxxxxxxxxxx", to.nodeId.toString());
         return;
       }
 
@@ -305,8 +303,8 @@ export function NodeDragHandle(props: FastDragHandleProps) {
               console.log("----------------------------");
               setDropHintStyle({
                 top: bottom,
-                left: left + (hitNode.type.dnd?.drop?.nestable?.left ?? 0),
-                width: width - (hitNode.type.dnd?.drop?.nestable?.left ?? 0),
+                left: left, // + (hitNode.type.dnd?.drop?.nestable?.left ?? 0),
+                width: width, // -(hitNode.type.dnd?.drop?.nestable?.left ?? 0),
               });
             }
           } else {
@@ -316,6 +314,8 @@ export function NodeDragHandle(props: FastDragHandleProps) {
             if (afterElement) {
               const { top: afterTop } = elementBound(afterElement);
               bottom += (afterTop - bottom) / 2;
+            } else {
+              bottom += 1;
             }
 
             setDropHintStyle({
@@ -582,6 +582,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       {createPortal(
         <>
           <div
+            onMouseMove={(e) => e.stopPropagation()}
             className={"carbon-drop-hint " + dropHintClassNames.join(" ")}
             style={{
               visibility: showDropHint ? "visible" : "hidden",
