@@ -142,11 +142,11 @@ export function NodeDragHandle(props: FastDragHandleProps) {
 
             // divide the node rect into 3 parts vertically
 
-            if (y <= top + 3) {
+            if (y <= top + 4) {
               to = Point.toBefore(hitNode);
             }
 
-            if (y >= bottom - 3) {
+            if (y >= bottom - 4) {
               if (hitNode.isCollapsed) {
                 to = Point.toAfter(hitNode);
               } else {
@@ -583,7 +583,11 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       {createPortal(
         <>
           <div
-            onMouseMove={(e) => e.stopPropagation()}
+            onMouseMove={(e) => {
+              if (!dropHintClassNames.includes("within")) {
+                e.stopPropagation();
+              }
+            }}
             className={"carbon-drop-hint " + dropHintClassNames.join(" ")}
             style={{
               visibility: showDropHint ? "visible" : "hidden",

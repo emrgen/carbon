@@ -65,31 +65,31 @@ const page = node(
 const layout = node("sidebarLayout", [
   node("sidebar", [
     node("pageTreeGroup", [
-      node(
-        "pageTree",
-        [
-          plainText("Favorites"),
-          node("pageTreeItem", [
-            plainText("Computer Science"),
-            node("pageTreeItem", [plainText("Algorithms")]),
-            node("pageTreeItem", [plainText("Data Structures")]),
-            node("pageTreeItem", [plainText("Operating Systems")]),
-          ]),
-          node(
-            "pageTreeItem",
-            [
-              plainText("Electrical Engineering"),
-              node("pageTreeItem", [plainText("Circuits")], {}),
-              node("pageTreeItem", [plainText("Digital Logic")], {}),
-              node("pageTreeItem", [plainText("Microprocessors")], {}),
-            ],
-            { [CollapsedPath]: false },
-          ),
-        ],
-        {
-          [AddPagePath]: true,
-        },
-      ),
+      // node(
+      //   "pageTree",
+      //   [
+      //     plainText("Favorites"),
+      //     node("pageTreeItem", [
+      //       plainText("Computer Science"),
+      //       node("pageTreeItem", [plainText("Algorithms")]),
+      //       node("pageTreeItem", [plainText("Data Structures")]),
+      //       node("pageTreeItem", [plainText("Operating Systems")]),
+      //     ]),
+      //     node(
+      //       "pageTreeItem",
+      //       [
+      //         plainText("Electrical Engineering"),
+      //         node("pageTreeItem", [plainText("Circuits")], {}),
+      //         node("pageTreeItem", [plainText("Digital Logic")], {}),
+      //         node("pageTreeItem", [plainText("Microprocessors")], {}),
+      //       ],
+      //       { [CollapsedPath]: false },
+      //     ),
+      //   ],
+      //   {
+      //     [AddPagePath]: true,
+      //   },
+      // ),
       node(
         "pageTree",
         [
