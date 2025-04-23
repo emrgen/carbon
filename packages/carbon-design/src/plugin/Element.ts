@@ -8,6 +8,7 @@ export class Element extends CarbonPlugin {
       group: "deContent deElement",
       dnd: {
         draggable: true,
+        handle: false,
       },
       transform: {
         rotate: true,

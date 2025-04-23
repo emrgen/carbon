@@ -67,7 +67,7 @@ export function DndController() {
           minWidth: 48,
           height: 24,
         });
-      } else {
+      } else if (!node.type.dnd?.noHandle) {
         setDragHandlePosition({
           left: bound.left - portalPosition.x,
           top: bound.top - portalPosition.y,

@@ -9,6 +9,7 @@ export class Transformer extends CarbonPlugin {
       content: "deElement+",
       dnd: {
         draggable: true,
+        noHandle: true,
       },
       transform: {
         rotate: true,

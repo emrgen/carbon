@@ -36,10 +36,8 @@ export class Transform {
     if (cx === undefined || cy === undefined) {
       return Transform.from(this.matrix.rotate(angle));
     } else {
-      const mat = this.matrix
-        .translate(cx, cy)
-        .rotate(angle)
-        .translate(-cx, -cy);
+      // translate to the reference point
+      const mat = this.matrix.translate(cx, cy).rotate(angle).translate(-cx, -cy);
 
       return Transform.from(mat);
     }
@@ -53,10 +51,7 @@ export class Transform {
     } else {
       // console.log(this.matrix.toCSS());
       // console.log(this.matrix.scale(sx, sy).toCSS(), sx, sy);
-      const mat = this.matrix
-        .translate(cx, cy)
-        .scale(sx, sy)
-        .translate(-cx, -cy);
+      const mat = this.matrix.translate(cx, cy).scale(sx, sy).translate(-cx, -cy);
       return Transform.from(mat);
     }
   }

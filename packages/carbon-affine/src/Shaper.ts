@@ -14,7 +14,8 @@ import {
   TransformHandle,
 } from "./utils";
 
-// initial shape is a square with the center at (0, 0) and the side length is 2
+// the initial shape is a 2x2 square with center at (0, 0)
+// the transformations are applied to the shape to get the final shape
 export class Shaper {
   private readonly tm: Transform;
 
@@ -40,6 +41,7 @@ export class Shaper {
     }
   }
 
+  // get the transformation matrix
   affine() {
     return this.tm.matrix;
   }
@@ -63,13 +65,11 @@ export class Shaper {
     // remove scale -> rotate -> rescale
     const scaling = this.tm.matrix.scaling();
     // find the untransformed center
-    const tm = this.tm
-      .add(scaling.inverse())
-      .rotate(angle, cx, cy)
-      .add(scaling);
+    const tm = this.tm.add(scaling.inverse()).rotate(angle, cx, cy).add(scaling);
     return Shaper.from(tm);
   }
 
+  // dx, dy are the distance of the mouse move
   scaleFromDelta(
     dx: number,
     dy: number,
@@ -108,10 +108,9 @@ export class Shaper {
       // FIXME: the calculation is correct but the result is causing the shape to be shaky when resizing
       const tmp = anchorLine.transform(tm.matrix);
       const tmpVector = tmp.vector().norm();
-      const change = Line.fromPoints(
-        tmp.end,
-        Point.from(tmp.end).move(dx, dy),
-      ).projection(tmp.vector());
+      const change = Line.fromPoints(tmp.end, Point.from(tmp.end).move(dx, dy)).projection(
+        tmp.vector(),
+      );
       const delta = change.factorOf(tmpVector);
       const after = tmp.extendEnd(delta).transform(ivm.matrix).vector();
       // scale factor, some of them could be Infinity
@@ -139,25 +138,14 @@ export class Shaper {
     handle: TransformHandle,
     ratio: ResizeRatio,
   ): Shaper {
-    const { sx, sy, ax, ay } = this.scaleFromDelta(
-      dx,
-      dy,
-      anchor,
-      handle,
-      ratio,
-    );
+    const { sx, sy, ax, ay } = this.scaleFromDelta(dx, dy, anchor, handle, ratio);
 
     return Shaper.from(this.tm.scale(sx, sy, ax, ay));
   }
 
   // normalize the scale factor based on the anchor and handle
   // bounds the scale factor within the range of [0, 1]
-  private normalize(
-    sx: number,
-    sy: number,
-    anchor: TransformAnchor,
-    handle: TransformHandle,
-  ) {
+  private normalize(sx: number, sy: number, anchor: TransformAnchor, handle: TransformHandle) {
     if (handle === TransformHandle.CENTER) {
       switch (anchor) {
         case TransformAnchor.TOP_LEFT:
@@ -212,14 +200,12 @@ export class Shaper {
 
   // get the current size of the shape after transformation
   size() {
-    const width = Line.fromPoints(
-      getPoint(Location.LEFT),
-      getPoint(Location.RIGHT),
-    ).transform(this.tm.matrix).length;
-    const height = Line.fromPoints(
-      getPoint(Location.TOP),
-      getPoint(Location.BOTTOM),
-    ).transform(this.tm.matrix).length;
+    const width = Line.fromPoints(getPoint(Location.LEFT), getPoint(Location.RIGHT)).transform(
+      this.tm.matrix,
+    ).length;
+    const height = Line.fromPoints(getPoint(Location.TOP), getPoint(Location.BOTTOM)).transform(
+      this.tm.matrix,
+    ).length;
     return {
       width,
       height,
@@ -279,12 +265,7 @@ export class Shaper {
     };
   }
 
-  resizeTo(
-    width: number,
-    height: number,
-    anchor: TransformAnchor,
-    handle: TransformHandle,
-  ) {
+  resizeTo(width: number, height: number, anchor: TransformAnchor, handle: TransformHandle) {
     const size = this.size();
     const sx = width / size.width;
     const sy = height / size.height;

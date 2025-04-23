@@ -122,6 +122,8 @@ export const CodeInner = (props: RendererProps) => {
     };
   }, [onBlur]);
 
+  // when the cell is out of focus redefine the variable with new definition
+  // this will trigger a re-evaluation of the cell
   const onUpdate = useCallback(
     (editor: ViewUpdate) => {
       const value = editor.state.doc.toString();
@@ -254,6 +256,7 @@ export const CodeInner = (props: RendererProps) => {
     [onUpdate, codeType, nodeId, redefine, app],
   );
 
+  // create the editor view when the component is mounted
   useCustomCompareEffect(
     () => {
       if (!ref.current) return;
@@ -290,6 +293,7 @@ export const CodeInner = (props: RendererProps) => {
       mod.off(expandEvent, onExpand);
     };
   }, [view, mod, nodeId]);
+
   return (
     <div
       style={{

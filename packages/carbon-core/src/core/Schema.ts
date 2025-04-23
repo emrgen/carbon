@@ -169,6 +169,7 @@ export interface NodeSpec {
     handleBody?: boolean;
     // same as drag handle
     handle?: boolean;
+    noHandle?: boolean;
     draggable?: boolean;
     container?: boolean;
     // top level dnd region

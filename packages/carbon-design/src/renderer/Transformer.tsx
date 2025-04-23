@@ -13,21 +13,9 @@ import {
 import { Node, NodeId, TransformStatePath } from "@emrgen/carbon-core";
 import { DndEvent } from "@emrgen/carbon-dragon";
 import { useMakeDraggable } from "@emrgen/carbon-dragon-react";
-import {
-  CarbonBlock,
-  defaultRenderPropComparator,
-  useCarbon,
-} from "@emrgen/carbon-react";
+import { CarbonBlock, defaultRenderPropComparator, useCarbon } from "@emrgen/carbon-react";
 import { cloneDeep, merge, round } from "lodash";
-import {
-  CSSProperties,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { CSSProperties, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CarbonTransformControls } from "../components/CarbonTransformControls";
 import { ShowCurrentAngleHint } from "../components/ShowCurrentAngleHint";
 import { useBoard } from "../hook/useBoard";
@@ -40,6 +28,7 @@ interface ElementTransformerProps {
   children?: ReactNode;
 }
 
+// Transformer transforms the element using the transform state
 export const TransformerComp = (props: ElementTransformerProps) => {
   const { children, node } = props;
   useElement(props);
@@ -58,13 +47,8 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   const [distance, setDistance] = useState(5);
   const [nodeId] = useState(node.id.toString());
 
-  const [shaper, setShaper] = useState<Shaper>(
-    Shaper.from(getNodeTransform(node)),
-  );
-  const transformerStyle = useMemo(
-    () => Shaper.from(getNodeTransform(node)).toStyle(),
-    [node],
-  );
+  const [shaper, setShaper] = useState<Shaper>(Shaper.from(getNodeTransform(node)));
+  const transformerStyle = useMemo(() => Shaper.from(getNodeTransform(node)).toStyle(), [node]);
   const [style, setStyle] = useState<CSSProperties>(() =>
     Shaper.from(getNodeTransform(node)).toStyle(),
   );
@@ -184,7 +168,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       board.bus.off(node.id, "group:drag:move", onGroupDragMove);
       board.bus.off(node.id, "group:drag:end", onGroupDragEnd);
     };
-  }, [board, node, transformerStyle]);
+  }, [app, board, node, transformerStyle]);
 
   // Subscribe to node events to update the selected state
   useEffect(() => {
@@ -240,6 +224,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
       angleLine: Line.fromPoint(getPoint(Location.BOTTOM)),
     });
   };
+
   const onTransformMove = (
     type: TransformType,
     anchor: TransformAnchor,
@@ -247,11 +232,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const {
-        beforeLine: before,
-        shaper,
-        angleLine,
-      } = event.getInitState(nodeId);
+      const { beforeLine: before, shaper, angleLine } = event.getInitState(nodeId);
       if (!Line.is(before)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -386,11 +367,7 @@ export const TransformerComp = (props: ElementTransformerProps) => {
   return (
     <div className={"de-transformer-element"}>
       {/*<CarbonChildren node={node} />*/}
-      <div
-        className={"de-element-check"}
-        ref={elementRef}
-        style={shaper.toStyle()}
-      ></div>
+      <div className={"de-element-check"} ref={elementRef} style={shaper.toStyle()}></div>
       <CarbonBlock
         ref={ref}
         node={node}

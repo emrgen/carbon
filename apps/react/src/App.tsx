@@ -2,10 +2,11 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./react-bem.styl";
 
 import "./fastype/fastype.styl";
+import { AffineExp } from "./carbon/Dev/Affine";
 import { Code } from "./carbon/Dev/Code";
 import { PageProps } from "./carbon/Dev/Props";
 import { SidebarLayout } from "./carbon/Dev/SidebarLayout";
-import { LazyBoard, LazyDev } from "./carbon/index";
+import { LazyBoard, LazyDesign, LazyDev } from "./carbon/index";
 
 function App() {
   return (
@@ -14,9 +15,9 @@ function App() {
         {/*<Route path="/demo/map" element={<MMap />} />*/}
         {/*<Route path="/demo/draggable" element={<LazyDraggableDemo />} />*/}
         {/*<Route path="/demo/emoji" element={<LazyEmojiDemo />} />*/}
-        {/*<Route path="/design" element={<LazyDesign />} />*/}
+        <Route path="/design" element={<LazyDesign />} />
         <Route path="/board" element={<LazyBoard />} />
-        {/*<Route path="/affine" element={<AffineExp />} />*/}
+        <Route path="/affine" element={<AffineExp />} />
         {/*<Route path="/chain" element={<Chain />} />*/}
         {/*<Route path="/text" element={<Text />} />*/}
         {/*<Route path="/object-viewer" element={<ObjectView />} />*/}
