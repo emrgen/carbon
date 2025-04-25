@@ -120,7 +120,17 @@ const bumpPackageVersions = (writeFile = false) => {
     // write new bumped versions to package.json for each package
     const updatedPackages = changedPackages
       .map((name) => {
-        const oldPkg = oldVersionMap[name];
+        if (name.includes("template")) {
+          // skip templates
+          return;
+        }
+
+        const oldPkg = oldVersionMap[name] ?? {
+          name,
+          version: "0.0.0",
+          hash: "x",
+        }
+        console.log(oldPkg, name)
         const pkg = newVersions[name];
         if (!pkg) {
           return {

@@ -1,5 +1,5 @@
 {
-  "name": "@emrgen/carbon-plugin-flow",
+  "name": "@emrgen/carbon-flow",
   "version": "0.0.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/types": "workspace:*",
     "@types/lodash": "^4.14.191",
-    "lodash": "^4.17.21",
-    "@emrgen/types": "workspace:*"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",
