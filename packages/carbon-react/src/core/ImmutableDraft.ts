@@ -164,6 +164,7 @@ export class ImmutableDraft implements Draft {
     const oldScope = StateScope.current();
     try {
       // console.log('[SCOPE]', scope.toString())
+      // temporarily put the node map in the scope for the draft
       StateScope.put(scope, this.nodeMap);
       StateScope.set(scope);
 
@@ -172,6 +173,7 @@ export class ImmutableDraft implements Draft {
 
       // commit the draft with the updated node map
       const state = this.commit(3);
+      // restore the node map in the scope
       StateScope.put(scope, state.nodeMap);
 
       this.dispose();
