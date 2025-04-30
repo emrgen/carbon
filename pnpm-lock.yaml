@@ -1373,7 +1373,7 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0
       sorted-btree:
-        specifier: ^1.8.0
+        specifier: ^1.8.1
         version: 1.8.1
       turndown:
         specifier: ^7.1.3
@@ -2531,46 +2531,6 @@ importers:
         specifier: ^5.4.5
         version: 5.7.3
 
-  packages/carbon-qwik:
-    dependencies:
-      '@emrgen/carbon-core':
-        specifier: workspace:*
-        version: link:../carbon-core
-      '@react-icons/all-files':
-        specifier: ^4.1.0
-        version: 4.1.0(react@18.3.1)
-      '@types/lodash':
-        specifier: ^4.14.191
-        version: 4.17.14
-      emoji-regex:
-        specifier: ^10.2.1
-        version: 10.4.0
-      events:
-        specifier: ^3.3.0
-        version: 3.3.0
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      uuid:
-        specifier: ^9.0.0
-        version: 9.0.1
-    devDependencies:
-      '@emrgen/eslint-config-custom':
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      '@emrgen/types':
-        specifier: workspace:*
-        version: link:../types
-      eslint:
-        specifier: ^7.32.0
-        version: 7.32.0
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
-      typescript:
-        specifier: ^5.4.5
-        version: 5.7.3
-
   packages/carbon-react:
     dependencies:
       '@emrgen/carbon-core':
@@ -2686,110 +2646,6 @@ importers:
 
   packages/carbon-sheet:
     dependencies:
-      '@react-icons/all-files':
-        specifier: ^4.1.0
-        version: 4.1.0(react@18.3.1)
-      '@types/katex':
-        specifier: ^0.16.0
-        version: 0.16.7
-      '@types/lodash':
-        specifier: ^4.14.191
-        version: 4.17.14
-      emoji-regex:
-        specifier: ^10.2.1
-        version: 10.4.0
-      events:
-        specifier: ^3.3.0
-        version: 3.3.0
-      katex:
-        specifier: ^0.16.7
-        version: 0.16.21
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      pixi.js:
-        specifier: ^7.2.4
-        version: 7.4.2
-      prismjs:
-        specifier: ^1.29.0
-        version: 1.29.0
-      react-icons:
-        specifier: ^4.10.1
-        version: 4.12.0(react@18.3.1)
-      recoil:
-        specifier: ^0.7.7
-        version: 0.7.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-    devDependencies:
-      '@emrgen/eslint-config-custom':
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      '@emrgen/types':
-        specifier: workspace:*
-        version: link:../types
-      '@types/react':
-        specifier: ^18.0.27
-        version: 18.3.18
-      '@types/react-dom':
-        specifier: ^18.0.6
-        version: 18.3.5(@types/react@18.3.18)
-      eslint:
-        specifier: ^7.32.0
-        version: 7.32.0
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
-      typescript:
-        specifier: ^5.4.5
-        version: 5.7.3
-
-  packages/carbon-solid:
-    dependencies:
-      '@emrgen/carbon-core':
-        specifier: workspace:*
-        version: link:../carbon-core
-      '@types/lodash':
-        specifier: ^4.14.191
-        version: 4.17.14
-      emoji-regex:
-        specifier: ^10.2.1
-        version: 10.4.0
-      events:
-        specifier: ^3.3.0
-        version: 3.3.0
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      solid-js:
-        specifier: ^1.8.7
-        version: 1.9.4
-      uuid:
-        specifier: ^9.0.0
-        version: 9.0.1
-    devDependencies:
-      '@emrgen/eslint-config-custom':
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      '@emrgen/types':
-        specifier: workspace:*
-        version: link:../types
-      eslint:
-        specifier: ^7.32.0
-        version: 7.32.0
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
-      typescript:
-        specifier: ^5.4.5
-        version: 5.7.3
-
-  packages/carbon-solid-blocks:
-    dependencies:
-      '@emrgen/carbon-solid':
-        specifier: workspace:*
-        version: link:../carbon-solid
       '@react-icons/all-files':
         specifier: ^4.1.0
         version: 4.1.0(react@18.3.1)
@@ -3798,6 +3654,150 @@ importers:
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.7.3
+
+  xpackages/carbon-qwik:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../../packages/carbon-core
+      '@react-icons/all-files':
+        specifier: ^4.1.0
+        version: 4.1.0(react@18.3.1)
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.14
+      emoji-regex:
+        specifier: ^10.2.1
+        version: 10.4.0
+      events:
+        specifier: ^3.3.0
+        version: 3.3.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.7.3
+
+  xpackages/carbon-solid:
+    dependencies:
+      '@emrgen/carbon-core':
+        specifier: workspace:*
+        version: link:../../packages/carbon-core
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.14
+      emoji-regex:
+        specifier: ^10.2.1
+        version: 10.4.0
+      events:
+        specifier: ^3.3.0
+        version: 3.3.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      solid-js:
+        specifier: ^1.8.7
+        version: 1.9.4
+      uuid:
+        specifier: ^9.0.0
+        version: 9.0.1
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.7.3
+
+  xpackages/carbon-solid-blocks:
+    dependencies:
+      '@emrgen/carbon-solid':
+        specifier: workspace:*
+        version: link:../carbon-solid
+      '@react-icons/all-files':
+        specifier: ^4.1.0
+        version: 4.1.0(react@18.3.1)
+      '@types/katex':
+        specifier: ^0.16.0
+        version: 0.16.7
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.14
+      emoji-regex:
+        specifier: ^10.2.1
+        version: 10.4.0
+      events:
+        specifier: ^3.3.0
+        version: 3.3.0
+      katex:
+        specifier: ^0.16.7
+        version: 0.16.21
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      pixi.js:
+        specifier: ^7.2.4
+        version: 7.4.2
+      prismjs:
+        specifier: ^1.29.0
+        version: 1.29.0
+      react-icons:
+        specifier: ^4.10.1
+        version: 4.12.0(react@18.3.1)
+      recoil:
+        specifier: ^0.7.7
+        version: 0.7.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@types/react':
+        specifier: ^18.0.27
+        version: 18.3.18
+      '@types/react-dom':
+        specifier: ^18.0.6
+        version: 18.3.5(@types/react@18.3.18)
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       typescript:
         specifier: ^5.4.5
         version: 5.7.3
