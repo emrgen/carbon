@@ -1,6 +1,6 @@
 {
   "name": "@emrgen/carbon-core",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "license": "All rights reserved to the authors",
@@ -40,7 +40,7 @@
     "hash-it": "^6.0.0",
     "react-dom": "^18.3.1",
     "uuid": "^9.0.0",
-    "vite":"^6.0.7",
+    "vite": "^6.0.7",
     "vite-tsconfig-paths": "^4.2.2"
   }
 }
