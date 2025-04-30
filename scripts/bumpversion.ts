@@ -200,4 +200,4 @@ const bumpPackageVersions = (writeFile = false) => {
 };
 
 bumpPackageVersions(options.write);
-// updatePackagesVersionHashFile();
+updatePackagesVersionHashFile();
