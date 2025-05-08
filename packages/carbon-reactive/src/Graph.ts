@@ -66,12 +66,12 @@ export class Graph<T extends NodeId> {
     const outgoing = Array.from(this.outgoing.get(node.id)??[]);
     const incoming = Array.from(this.incoming.get(node.id)??[]);
 
-    // remove the node from the incoming edges for dependent nodes
+    // remove the node from the incoming edges for upstream nodes
     incoming.forEach((from) => {
       this.outgoing.get(from)?.delete(node.id);
     });
 
-    // remove the node from the outgoing edges for dependencies
+    // remove the node from the outgoing edges for downstream nodes
     outgoing.forEach((to) => {
       this.incoming.get(to)?.delete(node.id);
     });
