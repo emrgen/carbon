@@ -54,8 +54,10 @@ export class PlainNodeProps implements NodeProps {
     this.traverse(props, this.props);
   }
 
+  // copy props from json to props
   protected traverse(json: any, props: any) {
     if (!json) return;
+
     for (const [key, value] of Object.entries(json)) {
       if (key.split("/").length > 1) {
         // console.log("key contains /", key)

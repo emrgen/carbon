@@ -106,7 +106,6 @@ export enum DragMove {
 
 export interface NodeSpec {
   name?: string;
-  // TODO: splitName should be enough to check if the node is splittable
   content?: string;
   marks?: string;
   group?: string;
@@ -143,6 +142,7 @@ export interface NodeSpec {
     match?: "remove" | "unwrap" | "insert";
   };
 
+  // the node can be changed by the user
   change?: {
     in?: {
       props?: Record<string, any>;
@@ -152,8 +152,8 @@ export interface NodeSpec {
 
   split?: {
     inside?: boolean; // default false
-    name?: string;
-    end?: boolean;
+    name?: string; // name of the node to split into
+    end?: boolean; // split at the end of the node
   };
 
   selection?: {
@@ -161,10 +161,12 @@ export interface NodeSpec {
     block?: boolean;
     rect?: boolean;
   };
+
   control?: {
     insert?: boolean;
     collapse?: boolean;
   };
+
   dnd?: {
     handleBody?: boolean;
     // same as drag handle

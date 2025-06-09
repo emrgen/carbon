@@ -35,22 +35,14 @@ export function TodoComp(props: RendererProps) {
         onMouseDown={preventAndStop}
         onInput={preventAndStop}
       >
-        <input
-          type="checkbox"
-          onChange={stop(() => handleClick())}
-          checked={isChecked}
-        />
+        <input type="checkbox" onChange={stop(() => handleClick())} checked={isChecked} />
       </div>
     );
   }, [handleClick, isChecked]);
 
   return (
     <CarbonBlock {...props} ref={ref} custom={{ ...custom }}>
-      <CarbonNodeContent
-        node={node}
-        beforeContent={beforeContent}
-        wrap={true}
-      />
+      <CarbonNodeContent node={node} beforeContent={beforeContent} wrap={true} />
       <CarbonNodeChildren node={node} />
       {selection.SelectionHalo}
     </CarbonBlock>

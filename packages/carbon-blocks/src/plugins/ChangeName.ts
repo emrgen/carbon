@@ -2,6 +2,7 @@ import {
   BeforeInputRuleHandler,
   BeforeInputRuleInlineHandler,
   BeforePlugin,
+  CollapsedPath,
   EmptyPlaceholderPath,
   EventContext,
   EventHandler,
@@ -40,10 +41,7 @@ export class ChangeName extends BeforePlugin {
 
   titleInputRules = new BeforeInputRuleHandler([
     //   new InputRule(/^[0-9]+\.\s(.)*/, this.tryChangeType('numberList')),
-    new InputRule(
-      /^(\/timeline\s)(.)*/,
-      this.tryChangeName("timeline", ["nestable"]),
-    ),
+    new InputRule(/^(\/timeline\s)(.)*/, this.tryChangeName("timeline", ["nestable"])),
     new InputRule(/^(\[]\s)(.)*/, this.tryChangeName("todo", ["nestable"])),
     new InputRule(/^(#\s)(.)*/, this.tryChangeName("h1", ["nestable"])),
     new InputRule(/^(##\s)(.)*/, this.tryChangeName("h2", ["nestable"])),
@@ -51,29 +49,14 @@ export class ChangeName extends BeforePlugin {
     new InputRule(/^(####\s)(.)*/, this.tryChangeName("h4", ["nestable"])),
 
     new InputRule(/^(-\s)(.)*/, this.tryChangeName("bulletList", ["nestable"])),
-    new InputRule(
-      /^(\*\s)(.)*/,
-      this.tryChangeName("bulletList", ["nestable"]),
-    ),
-    new InputRule(
-      /^([0-9]+\.\s)(.)*/,
-      this.tryChangeName("numberList", ["nestable"]),
-    ),
+    new InputRule(/^(\*\s)(.)*/, this.tryChangeName("bulletList", ["nestable"])),
+    new InputRule(/^([0-9]+\.\s)(.)*/, this.tryChangeName("numberList", ["nestable"])),
     new InputRule(/^(\|\s)(.)*/, this.tryChangeName("quote", ["nestable"])),
     new InputRule(/^(>>\s)(.)*/, this.tryChangeName("callout", ["nestable"])),
-    new InputRule(
-      /^(>\s)(.)*/,
-      this.tryChangeName("collapsible", ["nestable"]),
-    ),
+    new InputRule(/^(>\s)(.)*/, this.tryChangeName("collapsible", ["nestable"])),
     new InputRule(/^(```)(.)*/, this.tryChangeIntoCode("code", ["nestable"])),
-    new InputRule(
-      /^(---)(.)*/,
-      this.insertDividerBefore("divider", ["nestable"]),
-    ),
-    new InputRule(
-      /^(===)(.)*/,
-      this.insertDividerBefore("divider", ["nestable"]),
-    ),
+    new InputRule(/^(---)(.)*/, this.insertDividerBefore("divider", ["nestable"])),
+    new InputRule(/^(===)(.)*/, this.insertDividerBefore("divider", ["nestable"])),
     new InputRule(/^(\/cell\s)(.)*/, this.insertDividerBefore("cell", [])),
     // new InputRule(/^(\*\*\*\s)(.)*/, this.insertDividerBefore('separator', ['nestable'])),
   ]);
@@ -133,9 +116,7 @@ export class ChangeName extends BeforePlugin {
 
       preventAndStopCtx(ctx);
 
-      const after = PinnedSelection.fromPin(
-        Pin.future(selection.end.node, 0, 2),
-      );
+      const after = PinnedSelection.fromPin(Pin.future(selection.end.node, 0, 2));
 
       const match = text.match(regex);
       if (match === null) {
@@ -161,23 +142,19 @@ export class ChangeName extends BeforePlugin {
         const action = SetContentAction.create(titleNode.id, []);
         cmd.Add(action);
       } else {
-        const content = TitleNode.from(titleNode).removeContent(
-          0,
-          match[1].length - 1,
-        );
+        const content = TitleNode.from(titleNode).removeContent(0, match[1].length - 1);
         const action = SetContentAction.create(titleNode.id, content);
         cmd.Add(action);
       }
 
       // update the node type by changing the name
       if (
-        (name.match(/h[1-9]/) && changeNode.name === "collapsible") ||
-        changeNode.name === "callout"
+        name.match(/h[1-9]/) &&
+        (changeNode.name === "collapsible" || changeNode.name === "callout")
       ) {
         cmd.Update(changeNode, {
           [RemoteDataAsPath]: name,
-          [EmptyPlaceholderPath]:
-            this.app.plugin(name)?.props.get(EmptyPlaceholderPath, "") ?? "",
+          [EmptyPlaceholderPath]: this.app.plugin(name)?.props.get(EmptyPlaceholderPath, "") ?? "",
           [FocusedPlaceholderPath]:
             this.app.plugin(name)?.props.get(FocusedPlaceholderPath, "") ?? "",
         });
@@ -186,14 +163,14 @@ export class ChangeName extends BeforePlugin {
           [RemoteDataAsPath]: "",
         });
 
-        cmd.Change(changeNode.id, name);
+        cmd.Change(changeNode, name);
       }
 
       // cmd.Change(changeNode.id, name);
-      cmd.Update(changeNode.id, { node: { typeChanged: true } });
+      // cmd.Update(changeNode.id, {});
       // expand collapsed block
       if (changeNode.isCollapsed) {
-        cmd.Update(changeNode.id, { node: { collapsed: false } });
+        cmd.Update(changeNode.id, { [CollapsedPath]: false });
       }
       cmd.Select(after).Dispatch();
     };
@@ -217,10 +194,7 @@ export class ChangeName extends BeforePlugin {
         return;
       }
 
-      const content = TitleNode.from(start.node).removeContent(
-        0,
-        match[1].length - 1,
-      );
+      const content = TitleNode.from(start.node).removeContent(0, match[1].length - 1);
 
       const to = Point.toAfter(block.id);
       const moveNodes = block.children.slice(1);
@@ -348,31 +322,19 @@ export class ChangeName extends BeforePlugin {
         const suffixContent = textContent.slice(endOffset);
         const codeContent = textContent.slice(startOffset + 1, endOffset);
         const { prevSiblings, nextSiblings } = currentNode;
-        const prefixNode = app.schema.text(
-          prefixContent + (prevSiblings.length ? " " : ""),
-          {
-            props: currentNode.props.toJSON(),
-          },
-        )!;
+        const prefixNode = app.schema.text(prefixContent + (prevSiblings.length ? " " : ""), {
+          props: currentNode.props.toJSON(),
+        })!;
         const codeSpan = app.schema.text(codeContent, {
           props: currentNode.props.toJSON(),
         })!;
-        const suffixNode = app.schema.text(
-          (nextSiblings.length ? " " : " ") + suffixContent,
-          {
-            props: currentNode.props.toJSON(),
-          },
-        )!;
+        const suffixNode = app.schema.text((nextSiblings.length ? " " : " ") + suffixContent, {
+          props: currentNode.props.toJSON(),
+        })!;
 
-        const nodes = [prefixNode, codeSpan, suffixNode].filter(
-          (n) => n?.textContent.length,
-        );
+        const nodes = [prefixNode, codeSpan, suffixNode].filter((n) => n?.textContent.length);
 
-        cmd.SetContent(start.node, [
-          ...prevSiblings,
-          ...nodes,
-          ...nextSiblings,
-        ]);
+        cmd.SetContent(start.node, [...prevSiblings, ...nodes, ...nextSiblings]);
 
         const marks = MarkSet.from(currentNode.marks).add(Mark.CODE).toArray();
 
@@ -382,10 +344,7 @@ export class ChangeName extends BeforePlugin {
         cmd.Mark("add", marks);
 
         const after = PointedSelection.fromPoint(
-          Point.atOffset(
-            start.node,
-            start.offset + (prevSiblings.length ? 0 : -1),
-          ),
+          Point.atOffset(start.node, start.offset + (prevSiblings.length ? 0 : -1)),
         );
         cmd.Select(after).Dispatch();
       }

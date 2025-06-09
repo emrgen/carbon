@@ -34,7 +34,7 @@ export enum ActionOrigin {
   Normalizer = "Normalizer", // command originated during normalization phase, these commands will not have any undo companion
   UserInput = "UserInput", // selection at the end of a user input, the selection will be synced after dom update
   NoSync = "NoSync", // selection at the end of a user input, the selection will be synced after dom update
-  UserSelectionChange = "UserSelectionChange", // explicit user selection using arrow keys
+  UserSelectionChange = "UserSelectionChange", // explicit user selection command, forces the selection to be updated after the dom update
   DomSelectionChange = "DomSelectionChange", // implicit user selection by up/down/mouse
   System = "System", // system generated commands (e.g. undo/redo for history plugin)
   Runtime = "Runtime", // runtime commands has meaning only during runtime

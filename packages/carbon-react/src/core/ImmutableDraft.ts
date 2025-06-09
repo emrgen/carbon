@@ -798,6 +798,7 @@ export class ImmutableDraft implements Draft {
     }
   }
 
+  // change the type of the node
   change(nodeId: NodeId, type: NodeType) {
     if (!this.drafting) {
       throw new Error("Cannot change name on a draft that is already committed");

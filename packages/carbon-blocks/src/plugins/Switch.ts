@@ -1,9 +1,4 @@
-import {
-  CarbonPlugin,
-  CheckedPath,
-  Node,
-  Transaction,
-} from "@emrgen/carbon-core";
+import { ActionOrigin, CarbonPlugin, CheckedPath, Node, Transaction } from "@emrgen/carbon-core";
 
 declare module "@emrgen/carbon-core" {
   export interface Node {}
@@ -30,9 +25,12 @@ export class Switch extends CarbonPlugin {
   }
 
   toggle(tr: Transaction, node: Node) {
+    const { selection } = tr.app;
     tr.Update(node.id, {
       [CheckedPath]: !this.isChecked(node),
-    }).Dispatch();
+    })
+      .Select(selection, ActionOrigin.UserSelectionChange)
+      .Dispatch();
   }
 
   on(tr: Transaction, node: Node) {

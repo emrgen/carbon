@@ -22,7 +22,6 @@ export class Callout extends CarbonPlugin {
       content: "title content*",
       splits: true,
       splitInside: true,
-      splitName: "paragraph",
       insert: true,
       weakEnd: true,
       split: {
@@ -48,11 +47,12 @@ export class Callout extends CarbonPlugin {
       props: {
         local: {
           placeholder: {
-            empty: "",
+            empty: "Callout",
             focused: "Press / for commands",
           },
           html: {
             suppressContentEditableWarning: true,
+            className: "cbl",
           },
         },
       },
@@ -111,8 +111,7 @@ export class Callout extends CarbonPlugin {
     if (prevSibling) {
       if (
         prevSibling?.name === "callout" ||
-        (prevSibling?.name === "title" &&
-          prevSibling?.parent?.name === "callout")
+        (prevSibling?.name === "title" && prevSibling?.parent?.name === "callout")
       ) {
         writer.write("\n");
       } else {
