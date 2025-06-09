@@ -5,12 +5,14 @@ import { IPoint, Point } from "./Point";
 import { abs } from "./utils";
 import { Vector } from "./Vector";
 
-// line in 2D space
+// Line in 2D space represents a straight line defined by two points: start and end.
 export class Line {
-  // get the intersection point of two lines
+  // the horizontal line (0, 0) to (1, 0)
   static UX = Line.fromPoints(Point.ORIGIN, { x: 1, y: 0 });
+  // the vertical line (0, 0) to (0, 1)
   static UY = Line.fromPoints(Point.ORIGIN, { x: 0, y: 1 });
 
+  // the line from (0, 0) to (1, 1)
   static of(x: number, y: number) {
     return new Line(Point.ORIGIN, { x, y });
   }
@@ -26,6 +28,8 @@ export class Line {
     return new Line(start, end);
   }
 
+  // get the intersection point of two lines
+  // returns undefined if the lines are parallel or coincident
   static intersection(l1: Line, l2: Line): IPoint | undefined {
     const x1 = l1.start.x;
     const y1 = l1.start.y;
@@ -54,6 +58,7 @@ export class Line {
     return undefined;
   }
 
+  // check if the line is an instance of Line
   static is(line: any): line is Line {
     return line instanceof Line;
   }
@@ -137,9 +142,7 @@ export class Line {
     const x0 = p.x;
     const y0 = p.y;
 
-    return (
-      Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / this.length
-    );
+    return Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / this.length;
   }
 
   // get the distance from a point to a line segment
@@ -156,10 +159,7 @@ export class Line {
       return Math.hypot(x1 - x0, y1 - y0);
     }
 
-    const t = Math.max(
-      0,
-      Math.min(1, ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2),
-    );
+    const t = Math.max(0, Math.min(1, ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2));
     const projection = {
       x: x1 + t * (x2 - x1),
       y: y1 + t * (y2 - y1),
@@ -184,10 +184,7 @@ export class Line {
     }
 
     // projection of point on the line segment
-    const t = Math.max(
-      0,
-      Math.min(1, ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2),
-    );
+    const t = Math.max(0, Math.min(1, ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2));
     return {
       x: x1 + t * (x2 - x1),
       y: y1 + t * (y2 - y1),

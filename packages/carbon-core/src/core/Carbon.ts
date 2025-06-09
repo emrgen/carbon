@@ -62,7 +62,7 @@ export class Carbon extends EventEmitter {
   private ticks: With<Transaction>[];
 
   committed: boolean;
-  now: number;
+  now!: number;
 
   constructor(state: State, schema: Schema, pm: PluginManager) {
     super();

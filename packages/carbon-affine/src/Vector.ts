@@ -64,6 +64,7 @@ export class Vector {
     return this.x * b.y - this.y * b.x;
   }
 
+  // returns the projection of this vector on b
   project(b: Vector) {
     return b.scale(this.dot(b) / b.dot(b));
   }
@@ -77,6 +78,7 @@ export class Vector {
     return Vector.of(this.x / b.x, this.y / b.y);
   }
 
+  // returns the factor of this vector in the direction of b
   factorOf(b: Vector) {
     const angle = this.angleBetween(b);
     if (considerZero(angle) === 0) {
@@ -88,12 +90,13 @@ export class Vector {
     throw new Error("the two vectors are not in the same direction");
   }
 
+  // transform the vector using an affine transformation
   transform(matrix: Affine): Vector {
     const p = matrix.apply(this);
     return Vector.of(p.x, p.y);
   }
 
-  // magnitude
+  // magnitude of the vector
   size(): number {
     return Math.sqrt(this.x * this.x + this.y * this.y);
   }
@@ -103,12 +106,16 @@ export class Vector {
     return Vector.of(this.x / this.size(), this.y / this.size());
   }
 
-  clone(): Vector {
-    return Vector.of(this.x, this.y);
+  unit() {
+    return this.norm();
   }
 
-  toString(): string {
-    return `Vector(x: ${this.x}, y:${this.y})`;
+  multiply(number: number) {
+    return Vector.of(this.x * number, this.y * number);
+  }
+
+  clone(): Vector {
+    return Vector.of(this.x, this.y);
   }
 
   toArray(): [number, number] {
@@ -119,11 +126,7 @@ export class Vector {
     return { x: this.x, y: this.y };
   }
 
-  unit() {
-    return this.norm();
-  }
-
-  multiply(number: number) {
-    return Vector.of(this.x * number, this.y * number);
+  toString(): string {
+    return `Vector(x: ${this.x}, y:${this.y})`;
   }
 }

@@ -62,7 +62,7 @@ export class SelectionCommands extends BeforePlugin {
     let from = Pin.toStartOf(isolate);
     const to = Pin.toEndOf(isolate);
     if (isolate.isPage) {
-      from = Pin.toStartOf(isolate.firstChild?.nextSibling!);
+      from = Pin.toStartOf(isolate.firstChild!);
     }
 
     if (!from || !to) return;
