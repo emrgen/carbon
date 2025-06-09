@@ -16,18 +16,21 @@ interface CarbonAppProps {
   app: Carbon;
   renderManager: RenderManager;
   children?: ReactNode;
+  focusOnMount?: boolean;
 }
 
 export function CarbonApp(props: CarbonAppProps) {
-  const { app, children } = props;
+  const { app, children, focusOnMount = false } = props;
   // @ts-ignore
   window.app = app;
 
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    app.focus();
+    if (focusOnMount) {
+      app.focus();
+    }
     app.mounted();
-  }, [app]);
+  }, [app, focusOnMount]);
 
   useEffect(() => {
     if (ref.current) {

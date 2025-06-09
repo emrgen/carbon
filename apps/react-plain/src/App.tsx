@@ -3,16 +3,8 @@ import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
 import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codemirrorExtension } from "@emrgen/carbon-codemirror";
-import {
-  commentEditorComp,
-  commentEditorPlugin,
-} from "@emrgen/carbon-comment-editor";
-import {
-  corePresetPlugins,
-  ModePath,
-  NodeId,
-  State,
-} from "@emrgen/carbon-core";
+import { commentEditorComp, commentEditorPlugin } from "@emrgen/carbon-comment-editor";
+import { corePresetPlugins, ModePath, NodeId, State } from "@emrgen/carbon-core";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
 import "./App.css";
@@ -21,7 +13,7 @@ import { CarbonApp } from "@emrgen/carbon-utils";
 import { flattenDeep, noop, range } from "lodash";
 import { useEffect } from "react";
 
-console.log = noop;
+// console.log = noop;
 // console.info = noop;
 console.debug = noop;
 console.warn = noop;
@@ -36,9 +28,7 @@ export const data = node("carbon", [
     "page",
     [
       title([text("I am a frame title")]),
-      ...range(800).map((a) =>
-        node("paragraph", [title([text("I am a section title")])]),
-      ),
+      ...range(800).map((a) => node("paragraph", [title([text("I am a section title")])])),
     ],
     {
       [ModePath]: "edit",

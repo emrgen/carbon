@@ -224,6 +224,7 @@ export class Carbon extends EventEmitter {
 
   mounted() {
     this.ready = true;
+    console.log("xxxxxxxxxxxx");
     this.emit(EventsOut.mounted);
   }
 

@@ -1,12 +1,14 @@
 import { Route, Routes } from "react-router-dom";
 import { Empty } from "./Empty";
 import { List } from "./List";
+import { PlainText } from "./PlainText";
 
 export const Demo = () => {
   return (
     <>
       <Routes>
         <Route path="/" element={<Empty />} />
+        <Route path="/plain" element={<PlainText />} />
         <Route path="/list" element={<List />} />
         <Route path="/media" element={<List />} />
         <Route path="/text-style" element={<List />} />

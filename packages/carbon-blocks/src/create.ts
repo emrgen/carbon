@@ -43,12 +43,7 @@ export const attribute = (props = {}) => ({
   props,
 });
 
-export const node = (
-  name: string,
-  children: any[] = [],
-  props = {},
-  links = {},
-) => ({
+export const node = (name: string, children: any[] = [], props = {}, links = {}) => ({
   name,
   children,
   links,
@@ -65,7 +60,9 @@ export const plainText = (textContent: string = "", props = {}) => {
 };
 
 export const title = (children: any[] | any = []) => {
-  if (isEmpty(children)) {
+  if (isString(children)) {
+    children = [text(children)];
+  } else if (isEmpty(children)) {
     children = [];
   } else {
     if (isString(children)) {
@@ -82,7 +79,9 @@ export const title = (children: any[] | any = []) => {
 };
 
 export const paragraph = (children: any[] | any = [], props = {}) => {
-  if (isEmpty(children)) {
+  if (isString(children)) {
+    children = [title(children)];
+  } else if (isEmpty(children)) {
     children = [title()];
   } else if (!Array.isArray(children)) {
     children = [children];

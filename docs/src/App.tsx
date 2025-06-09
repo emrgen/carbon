@@ -10,7 +10,7 @@ export default function App() {
           <NavLink to={"/"}>
             <div className={"demo-name"}>Empty</div>
           </NavLink>
-          <NavLink to={"/text"}>
+          <NavLink to={"/plain"}>
             <div className={"demo-name"}>Plain</div>
           </NavLink>
           <NavLink to={"/list"}>

@@ -1,20 +1,18 @@
 import { attrRenderers } from "@emrgen/carbon-attributes";
-import { blockPresetPlugins, node, title } from "@emrgen/carbon-blocks";
+import { blockPresetPlugins, node, paragraph, title } from "@emrgen/carbon-blocks";
 import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { codemirrorExtension } from "@emrgen/carbon-codemirror";
-import {
-  commentEditorComp,
-  commentEditorPlugin,
-} from "@emrgen/carbon-comment-editor";
+import { commentEditorComp, commentEditorPlugin } from "@emrgen/carbon-comment-editor";
 import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
 import { databasePlugins } from "@emrgen/carbon-database";
 import { databaseRenderers } from "@emrgen/carbon-database-react";
-import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
+import { RenderManager } from "@emrgen/carbon-react";
 import { CarbonApp } from "@emrgen/carbon-utils";
-import { flattenDeep, noop } from "lodash";
+import { noop } from "lodash";
+import { useCreate } from "../create";
 
-console.log = noop;
+// console.log = noop;
 // console.info = noop;
 console.debug = noop;
 console.warn = noop;
@@ -25,7 +23,7 @@ console.groupEnd = noop;
 console.time = noop;
 
 const data = node("carbon", [
-  node("page", [title()], {
+  node("page", [title(), paragraph()], {
     [ModePath]: "edit",
   }),
 ]);
@@ -54,18 +52,7 @@ const renderers = [
 const renderManager = RenderManager.from(renderers);
 
 export function Empty() {
-  const app = useCreateCarbon("test/empty", data, flattenDeep(plugins));
-
-  // useEffect(() => {
-  //   const onUpdate = (state: State) => {
-  //     console.info(state.content.child(0)?.size);
-  //   };
-  //
-  //   app.on("changed", onUpdate);
-  //   return () => {
-  //     app.off("changed", onUpdate);
-  //   };
-  // }, [app]);
+  const app = useCreate(data, plugins);
 
   return <CarbonApp app={app} renderManager={renderManager}></CarbonApp>;
 }

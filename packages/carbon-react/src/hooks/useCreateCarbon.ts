@@ -7,27 +7,18 @@ import {
   PluginManager,
   Schema,
 } from "@emrgen/carbon-core";
-import { flatten, throttle } from "lodash";
+import { flatten, noop, throttle } from "lodash";
 import { useEffect, useState } from "react";
 import { ImmutableState } from "../core";
 import { ImmutableNodeFactory } from "../core/ImmutableNodeFactory";
-import {
-  CarbonDefaultNode,
-  Extension,
-  ReactRenderer,
-  RenderManager,
-} from "../renderer";
+import { CarbonDefaultNode, Extension, ReactRenderer, RenderManager } from "../renderer";
 
 export interface InitNodeJSON extends Omit<NodeJSON, "id"> {
   id?: string;
 }
 
 // create carbon react with extensions
-export const createCarbon = (
-  name: string,
-  json: InitNodeJSON,
-  plugins: CarbonPlugin[] = [],
-) => {
+export const createCarbon = (name: string, json: InitNodeJSON, plugins: CarbonPlugin[] = []) => {
   // const renderers: ReactRenderer[] = flatten(extensions.map(e => e.renderers ?? []));
   // const renderer = RenderManager.create(renderers, CarbonDefaultNode)
 
@@ -48,11 +39,7 @@ export const createCarbon = (
     throw new Error("Failed to sanitize react content");
   }
 
-  const state = ImmutableState.create(
-    scope,
-    sanitized,
-    PinnedSelection.IDENTITY,
-  );
+  const state = ImmutableState.create(scope, sanitized, PinnedSelection.IDENTITY);
   return new Carbon(state.freeze(), schema, pm);
 };
 
@@ -61,22 +48,20 @@ export const useCreateCarbon = (
   name: string,
   json: InitNodeJSON,
   plugins: CarbonPlugin[] = [],
+  onCreate: (app: Carbon) => void = noop,
 ) => {
   const [app] = useState(() => {
-    return createCarbon(name, json, plugins);
+    const app = createCarbon(name, json, plugins);
+    onCreate(app);
+    return app;
   });
 
   return app;
 };
 
-export const useCreateCarbonFromState = (
-  state: ImmutableState,
-  extensions: Extension[] = [],
-) => {
+export const useCreateCarbonFromState = (state: ImmutableState, extensions: Extension[] = []) => {
   const plugins = flatten(extensions.map((e) => e.plugins ?? []));
-  const renderers: ReactRenderer[] = flatten(
-    extensions.map((e) => e.renderers ?? []),
-  );
+  const renderers: ReactRenderer[] = flatten(extensions.map((e) => e.renderers ?? []));
   const renderer = RenderManager.create(renderers, CarbonDefaultNode);
 
   const pm = new PluginManager(plugins);
@@ -139,15 +124,12 @@ export const useCreateCachedCarbon = (
         JSON.stringify(
           state.content.toJSON({
             props: {
-              noLocal: true
+              noLocal: true,
             },
           }),
         ),
       );
-      localStorage.setItem(
-        name + ":carbon:selection",
-        JSON.stringify(state.selection.toJSON()),
-      );
+      localStorage.setItem(name + ":carbon:selection", JSON.stringify(state.selection.toJSON()));
 
       setTimeout(() => {
         app.emit("external:saved", state);

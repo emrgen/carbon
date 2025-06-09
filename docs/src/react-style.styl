@@ -1,9 +1,10 @@
 .cpage
-  font-size: 14px;
+  font-size: 16px;
+  font-family Geist Sans
+  font-weight: 400
 
 p
   margin 0
-
 
 .carbon-app
   width 1080px
@@ -28,7 +29,8 @@ p
   flex-direction column
   gap 6px
 
-.demo-name
+.carbon-demo-header > a {
+  text-decoration: none;
   font-size 14px
   font-weight 600
   color #333
@@ -36,5 +38,29 @@ p
   padding 4px 8px
   border-radius 4px
   cursor pointer;
-  &:hover
-    background-color #ddd
+  &:hover {
+    background-color #eee;
+  }
+}
+
+.carbon-demo-header > a.active {
+  background: #ddd;
+}
+
+//.demo-name
+//  font-size 14px
+//  font-weight 600
+//  color #333
+//  background-color #eee
+//  padding 4px 8px
+//  border-radius 4px
+//  cursor pointer;
+//  &:hover
+//    background-color #ddd
+
+.title:after
+  opacity 0
+  color transparent
+
+.document-wrapper
+  padding 12px 24px
