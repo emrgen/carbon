@@ -1,12 +1,4 @@
-import {
-  Box,
-  Card,
-  CardFooter,
-  Grid,
-  GridItem,
-  Heading,
-  Stack,
-} from "@chakra-ui/react";
+import { Box, Card, CardFooter, Grid, GridItem, Heading, Stack } from "@chakra-ui/react";
 import {
   Affine,
   ResizeRatio,
@@ -46,7 +38,7 @@ const Shape = ({ transform = "", ...rest }) => {
 
 const sp = Shaper.from(Affine.fromSize(50, 50));
 
-const af = sp.translate(135, 100);
+const af = sp.translate(126, 107);
 
 export const AffineExp = () => {
   return (
@@ -55,47 +47,22 @@ export const AffineExp = () => {
         Showing different transformations
       </Heading>
       <Box w={"1080px"} m={"0 auto"}>
-        <Grid
-          templateColumns="repeat(4, 1fr)"
-          templateRows="repeat(4, 1fr)"
-          gap="6"
-        >
+        <Grid templateColumns="repeat(4, 1fr)" templateRows="repeat(4, 1fr)" gap="6">
           <ShapeItem label={"No transform"} style={af.toStyle()} />
-          <ShapeItem
-            label={"Rotate 45° clockwise"}
-            style={af.rotate(toRad(45)).toStyle()}
-          />
-          <ShapeItem
-            label={"Rotate 90° clockwise"}
-            style={af.rotate(toRad(90)).toStyle()}
-          />
-          <ShapeItem
-            label={"Rotate 90° anti-clockwise"}
-            style={af.rotate(toRad(-90)).toStyle()}
-          />
+          <ShapeItem label={"Rotate 45° clockwise"} style={af.rotate(toRad(45)).toStyle()} />
+          <ShapeItem label={"Rotate 90° clockwise"} style={af.rotate(toRad(90)).toStyle()} />
+          <ShapeItem label={"Rotate 90° anti-clockwise"} style={af.rotate(toRad(-90)).toStyle()} />
           <ShapeItem label={"No transform"} style={af.toStyle()} />
           <ShapeItem
             label={"Resize wrt left by 20"}
             style={af
-              .resize(
-                20,
-                0,
-                TransformAnchor.LEFT,
-                TransformHandle.RIGHT,
-                ResizeRatio.KEEP,
-              )
+              .resize(20, 0, TransformAnchor.LEFT, TransformHandle.RIGHT, ResizeRatio.KEEP)
               .toStyle()}
           />
           <ShapeItem
             label={"Resize wrt top by 20"}
             style={af
-              .resize(
-                0,
-                20,
-                TransformAnchor.TOP,
-                TransformHandle.BOTTOM,
-                ResizeRatio.KEEP,
-              )
+              .resize(0, 20, TransformAnchor.TOP, TransformHandle.BOTTOM, ResizeRatio.KEEP)
               .toStyle()}
           />
           <ShapeItem
@@ -111,10 +78,7 @@ export const AffineExp = () => {
               .toStyle()}
           />
           <ShapeItem label={"No transform"} style={af.toStyle()} />
-          <ShapeItem
-            label={"Scale wrt center 2x2"}
-            style={af.scale(2, 2).toStyle()}
-          />
+          <ShapeItem label={"Scale wrt center 2x2"} style={af.scale(2, 2).toStyle()} />
           <ShapeItem
             label={"Scale wrt left-top by 1.5x1.5"}
             style={(() => {
@@ -133,25 +97,13 @@ export const AffineExp = () => {
             style={af.scale(0.5, 0.5, 0.5, 0.5).toStyle()}
           />
           <ShapeItem label={"No transform"} style={af.toStyle()} />
-          <ShapeItem
-            label={"Translate by 20x20"}
-            style={af.translate(20, 20).toStyle()}
-          />
-          <ShapeItem
-            label={"Translate by 50x50"}
-            style={af.translate(50, 50).toStyle()}
-          />
-          <ShapeItem
-            label={"Translate by -50x-50"}
-            style={af.translate(-50, -50).toStyle()}
-          />
+          <ShapeItem label={"Translate by 20x20"} style={af.translate(20, 20).toStyle()} />
+          <ShapeItem label={"Translate by 50x50"} style={af.translate(50, 50).toStyle()} />
+          <ShapeItem label={"Translate by -50x-50"} style={af.translate(-50, -50).toStyle()} />
           <ShapeItem label={"No transform"} style={af.toStyle()} />
           <ShapeItem label={"Flip X"} style={af.flipX().toStyle()} />
           <ShapeItem label={"Flip Y"} style={af.flipY().toStyle()} />
-          <ShapeItem
-            label={"Flip X and Y"}
-            style={af.flipX().flipY().toStyle()}
-          />
+          <ShapeItem label={"Flip X and Y"} style={af.flipX().flipY().toStyle()} />
         </Grid>
       </Box>
     </Stack>
@@ -161,14 +113,12 @@ export const AffineExp = () => {
 const ShapeItem = ({ label, style }) => {
   return (
     <GridItem h="270px">
-      <Stack h={"full"}>
+      <Stack h={"full"} pos={"relative"}>
         <Card flex={1}>
-          <Shape
-            style={style}
-            borderTopRightRadius={10}
-            data-transform={af.toCSS()}
-          />
+          <Shape style={style} borderTopRightRadius={10} data-transform={af.toCSS()} />
           <CardFooter></CardFooter>
+          <Box pos={"absolute"} left={"50%"} w={"1px"} h={"100%"} bg={"teal.100"} />
+          <Box pos={"absolute"} top={"50%"} w={"100%"} h={"1px"} bg={"teal.100"} />
         </Card>
         <Heading textAlign={"center"} size={"sm"} h={12}>
           {label}
