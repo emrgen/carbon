@@ -1,9 +1,5 @@
 import { prevent } from "@emrgen/carbon-core/src/utils/event";
-import {
-  boundFromPoints,
-  DndEvent,
-  pointsFromFastDndEvent,
-} from "@emrgen/carbon-dragon";
+import { boundFromPoints, DndEvent, pointsFromFastDndEvent } from "@emrgen/carbon-dragon";
 import { Optional, RawPoint } from "@emrgen/types";
 import { useCallback, useState } from "react";
 import { useDndMonitor } from "./useDndMonitor";
@@ -12,6 +8,7 @@ interface UseDragRectProps {
   offset?: number;
   overlay?: boolean;
   cursorPos?: boolean;
+  disabled?: boolean;
 }
 
 interface RectProps {
@@ -22,7 +19,7 @@ interface RectProps {
 }
 
 export const useDragRect = (props?: UseDragRectProps) => {
-  const { overlay = false, cursorPos = false } = props ?? {};
+  const { overlay = false, cursorPos = false, disabled = false } = props ?? {};
   const [dragRect, setDragRect] = useState<Optional<RectProps>>(null);
   const [cursorPoint, setCursorPoint] = useState<Optional<RawPoint>>(null);
 
@@ -35,7 +32,7 @@ export const useDragRect = (props?: UseDragRectProps) => {
   const isDragging = !!dragRect;
   const DragRectComp = (
     <>
-      {isDragging && (
+      {isDragging && !disabled && (
         <>
           {overlay && (
             <div

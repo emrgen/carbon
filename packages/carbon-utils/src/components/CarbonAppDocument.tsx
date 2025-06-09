@@ -52,7 +52,7 @@ export function CarbonApp(props: CarbonAppProps) {
                     // onKeyUp={preventAndStop}
                   ></div>
 
-                  <RectSelectContext>
+                  <RectSelectContext disabled={true}>
                     <CarbonContent />
                     {children}
                   </RectSelectContext>

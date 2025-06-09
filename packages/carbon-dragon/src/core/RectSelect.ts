@@ -42,8 +42,12 @@ export class RectSelect extends EventEmitter {
   disabled = false;
   private mountedSelectables: NodeIdMap<HTMLElement> = new NodeIdMap();
 
-  constructor(readonly app: Carbon) {
+  constructor(
+    readonly app: Carbon,
+    disabled: boolean = false,
+  ) {
     super();
+    this.disabled = disabled;
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onDragStart = this.onDragStart.bind(this);
     this.onDragMove = throttle(this.onDragMove.bind(this), 200);
@@ -118,6 +122,8 @@ export class RectSelect extends EventEmitter {
 
   // select nodes colliding with the selection rect box defined by the drag event
   onDragMove(e: DndEvent) {
+    // DISABLED FOR NOW
+    if (this.disabled) return;
     this.emit(RectSelectorEvent.DragMove, e);
 
     const { node } = e;
@@ -174,9 +180,7 @@ export class RectSelect extends EventEmitter {
 
     // select lowest sibling
     const minDepthNode = last(ordered)! as Node;
-    const topLevelNodes = ordered.filter(
-      (n) => getDepth(n) === getDepth(minDepthNode),
-    );
+    const topLevelNodes = ordered.filter((n) => getDepth(n) === getDepth(minDepthNode));
     const topLevelNodeParents = uniq(
       topLevelNodes
         .map((n) => {
@@ -224,10 +228,7 @@ export class RectSelect extends EventEmitter {
     this.selectNodes(selectedIds);
   }
 
-  selectNodes(
-    ids: NodeId[],
-    origin: ActionOrigin = ActionOrigin.UserSelectionChange,
-  ) {
+  selectNodes(ids: NodeId[], origin: ActionOrigin = ActionOrigin.UserSelectionChange) {
     const set = new NodeIdSet(ids);
     const { app } = this;
     const idList = set.toArray();

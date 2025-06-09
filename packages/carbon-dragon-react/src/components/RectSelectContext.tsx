@@ -5,14 +5,21 @@ import { throttle } from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useDndMonitor, useDragRect } from "../hooks";
-import { RectSelectorContext } from "../hooks/useRectSelector";
+import { RectSelectorContext } from "../hooks/index";
 import { CarbonDragHandleId } from "./NodeDragHandle";
 
-export function RectSelectContext(props) {
+interface RectSelectContextProps {
+  children?: React.ReactNode;
+  disabled?: boolean;
+}
+
+export function RectSelectContext(props: RectSelectContextProps) {
+  const { disabled } = props;
   const app = useCarbon();
-  const [rectSelector] = useState(() => new RectSelect(app));
+  const [rectSelector] = useState(() => new RectSelect(app, disabled));
   const { DragRectComp, onDragRectProgress, onDragRectStop } = useDragRect({
     overlay: true,
+    disabled,
   });
 
   const [isSelecting, setIsSelecting] = useState(false);
