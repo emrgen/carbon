@@ -15,39 +15,29 @@ export function considerZero(num: number): number {
 
 export const { abs, min, max } = Math;
 
-function isHandle(
-  anchor: TransformAnchor | TransformHandle,
-): anchor is TransformHandle {
+function isHandle(anchor: TransformAnchor | TransformHandle): anchor is TransformHandle {
   return anchor.includes("handle");
 }
 
-export function isAnchor(
-  anchor: TransformAnchor | TransformHandle,
-): anchor is TransformAnchor {
+export function isAnchor(anchor: TransformAnchor | TransformHandle): anchor is TransformAnchor {
   return !isHandle(anchor);
 }
 
-export function toAnchor(
-  handle: TransformHandle | TransformAnchor,
-): TransformAnchor {
+export function toAnchor(handle: TransformHandle | TransformAnchor): TransformAnchor {
   if (isAnchor(handle)) {
     return handle;
   }
   return handle.replace("handle", "anchor") as TransformAnchor;
 }
 
-export function toHandle(
-  anchor: TransformHandle | TransformAnchor,
-): TransformHandle {
+export function toHandle(anchor: TransformHandle | TransformAnchor): TransformHandle {
   if (isHandle(anchor)) {
     return anchor;
   }
   return anchor.replace("anchor", "handle") as TransformHandle;
 }
 
-export function toLocation(
-  anchor: TransformAnchor | TransformHandle,
-): Location {
+export function toLocation(anchor: TransformAnchor | TransformHandle): Location {
   if (isAnchor(anchor)) {
     return anchor.replace("anchor-", "") as Location;
   }
@@ -108,9 +98,7 @@ const RIGHT = 1;
 const TOP = -1;
 const BOTTOM = 1;
 
-export function getPoint(
-  location: Location | TransformHandle | TransformAnchor,
-) {
+export function getPoint(location: Location | TransformHandle | TransformAnchor) {
   if (isAnchor(location as any)) {
     location = toHandle(location as any);
   }
@@ -143,6 +131,8 @@ export function getPoint(
   throw new Error(`Invalid location: ${location}`);
 }
 
+// Clamp a scale value to a minimum and maximum value such that:
+// the scale is always positive
 export function clampScale(scale: number, min: number, max: number) {
   if (scale === 0) return min;
   if (scale > 0) return clamp(scale, min, max);
@@ -168,9 +158,7 @@ export function isSide(location: Location | TransformHandle | TransformAnchor) {
   );
 }
 
-export function isCorner(
-  location: Location | TransformHandle | TransformAnchor,
-) {
+export function isCorner(location: Location | TransformHandle | TransformAnchor) {
   if (isAnchor(location as any)) {
     location = toHandle(location as any);
   }

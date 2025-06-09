@@ -1,8 +1,4 @@
-import {
-  compose,
-  fromDefinition,
-  fromTransformAttribute,
-} from "transformation-matrix";
+import { compose, fromDefinition, fromTransformAttribute } from "transformation-matrix";
 import { UINT_MAX, UINT_MIN } from "./contant";
 import { IPoint } from "./Point";
 import { Radian } from "./types";
@@ -24,9 +20,7 @@ export class Affine {
   // assuming the string is a matrix or a combination of translate, rotate, scale
   // TODO: this is not a complete implementation of the CSS transform
   static fromCSS(css: string) {
-    const mat = css.match(
-      /matrix\(([^,]+), ([^,]+), ([^,]+), ([^,]+), ([^,]+), ([^,]+)\)/,
-    );
+    const mat = css.match(/matrix\(([^,]+), ([^,]+), ([^,]+), ([^,]+), ([^,]+), ([^,]+)\)/);
 
     if (mat) {
       return new Affine([
@@ -38,9 +32,7 @@ export class Affine {
         parseFloat(mat[6]),
       ]);
     } else {
-      const { a, b, c, d, e, f } = compose(
-        fromDefinition(fromTransformAttribute(css)),
-      );
+      const { a, b, c, d, e, f } = compose(fromDefinition(fromTransformAttribute(css)));
       return new Affine([a, b, c, d, e, f]);
     }
   }
@@ -73,16 +65,16 @@ export class Affine {
   }
 
   static mul(a: Affine, b: Affine) {
-    const matA = a.mat;
-    const matB = b.mat;
+    const ma = a.mat;
+    const mb = b.mat;
 
     return new Affine([
-      matA[0] * matB[0] + matA[1] * matB[3],
-      matA[0] * matB[1] + matA[1] * matB[4],
-      matA[0] * matB[2] + matA[1] * matB[5] + matA[2],
-      matA[3] * matB[0] + matA[4] * matB[3],
-      matA[3] * matB[1] + matA[4] * matB[4],
-      matA[3] * matB[2] + matA[4] * matB[5] + matA[5],
+      ma[0] * mb[0] + ma[1] * mb[3],
+      ma[0] * mb[1] + ma[1] * mb[4],
+      ma[0] * mb[2] + ma[1] * mb[5] + ma[2],
+      ma[3] * mb[0] + ma[4] * mb[3],
+      ma[3] * mb[1] + ma[4] * mb[4],
+      ma[3] * mb[2] + ma[4] * mb[5] + ma[5],
     ]);
   }
 
@@ -96,12 +88,18 @@ export class Affine {
 
   constructor(readonly mat: AffineMatrix) {}
 
+  // return the angle of the transformation
+  // range: [-PI, PI]
   get angle() {
     return Math.atan2(this.mat[3], this.mat[4]);
   }
 
   get scaleX() {
-    return;
+    return Math.sqrt(this.mat[0] * this.mat[0] + this.mat[1] * this.mat[1]);
+  }
+
+  get scaleY() {
+    return Math.sqrt(this.mat[3] * this.mat[3] + this.mat[4] * this.mat[4]);
   }
 
   // r -> s -> t
@@ -160,18 +158,22 @@ export class Affine {
     return this.mul(Affine.flipY());
   }
 
+  // skew transformation
   skew(angleX: Radian, angleY: Radian) {
     return this.mul(Affine.skew(angleX, angleY));
   }
 
-  origin() {
+  // apply the transformation to the origin (0, 0) and return the new point
+  origin(): IPoint {
     return this.apply({ x: 0, y: 0 });
   }
 
+  // merge multiple affine transformations
   mul(...b: Affine[]) {
     return b.reduce((acc, m) => Affine.mul(acc, m), this);
   }
 
+  // return the inverse of the transformation
   inverse() {
     const a = this.mat;
     const det = a[0] * a[4] - a[1] * a[3];
@@ -188,6 +190,7 @@ export class Affine {
     );
   }
 
+  // sanitize the matrix to avoid negative zero values
   sanitize(arr: AffineMatrix) {
     return arr.map((n) => (-n == n ? abs(n) : n)) as AffineMatrix;
   }
@@ -212,15 +215,23 @@ export class Affine {
     return `Affine(${this.mat.join(", ")})`;
   }
 
+  // convert to SVG matrix string
   toSVG() {
     return this.toCSS();
   }
 
+  // directly convert to CSS matrix string, ready to use in SVG or CSS
   toCSS() {
-    const els = this.mat
-      .map(considerZero)
-      .map((n) => (n == -n ? abs(n).toFixed(5) : n.toFixed(5)));
+    const els = this.mat.map(considerZero).map((n) => (n == -n ? abs(n).toFixed(5) : n.toFixed(5)));
     return `matrix(${els[0]}, ${els[3]}, ${els[1]}, ${els[4]}, ${els[2]}, ${els[5]})`;
+  }
+
+  xAxis() {
+    return Vector.UX.transform(this);
+  }
+
+  yAxis() {
+    return Vector.UY.transform(this);
   }
 
   toArray() {
@@ -233,13 +244,5 @@ export class Affine {
 
   eq(af: Affine) {
     return this.mat.every((n, i) => n.toFixed(5) === af.mat[i].toString(5));
-  }
-
-  xAxis() {
-    return Vector.UX.transform(this);
-  }
-
-  yAxis() {
-    return Vector.UY.transform(this);
   }
 }
