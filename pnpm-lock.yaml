@@ -2316,6 +2316,31 @@ importers:
         specifier: ^5.4.5
         version: 5.8.3
 
+  packages/carbon-markdown-stream:
+    dependencies:
+      '@emrgen/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/lodash':
+        specifier: ^4.14.191
+        version: 4.17.17
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+    devDependencies:
+      '@emrgen/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      eslint:
+        specifier: ^7.32.0
+        version: 7.32.0
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.4.5
+        version: 5.8.3
+
   packages/carbon-media:
     dependencies:
       '@emrgen/carbon-core':

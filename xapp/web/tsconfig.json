@@ -1,9 +1,0 @@
-{
-  "extends": "tsconfig/nextjs.json",
-  "compilerOptions": {
-    "noImplicitAny": false,
-    "lib": ["dom", "dom.iterable", "esnext"]
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
-}
