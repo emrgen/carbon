@@ -1,18 +1,9 @@
+import { range } from "lodash";
 import { expect, test } from "vitest";
 import { Cell, Runtime } from "../src/index";
 import { Promises } from "../src/Promises";
 import { MutableAccessor } from "../src/types";
 import { RuntimeError } from "../src/x";
-
-function registerListeners(runtime: Runtime) {
-  runtime
-    .on("fulfilled", (v) => {
-      console.log("fulfilled:", v.id, "=>", v.value);
-    })
-    .on("rejected", (v) => {
-      console.log("rejected:", v.id, "=>", v.error?.toString());
-    });
-}
 
 function watch(runtime: Runtime, id: string) {
   runtime
@@ -76,8 +67,7 @@ test("mutable definition with mutable injection", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
   const mut = runtime.mutable;
   const m = runtime.define("m1", "m1", "0.0.1");
-
-  registerListeners(runtime);
+  // registerListeners(runtime);
 
   mut.define("x", 0);
 
@@ -131,7 +121,7 @@ test("mutable definition with mutable injection", async (t) => {
 
   await Promises.delay(1000);
 
-  expect(m.variable("p1")!.error!.toString()).toBe(RuntimeError.circularDependency().toString());
+  expect(m.variable("p1")!.error).toStrictEqual(RuntimeError.circularDependency("p"));
 });
 
 test("9. mutable update from different cell", async (t) => {
@@ -173,7 +163,7 @@ test("9. mutable update from different cell", async (t) => {
 
 test("10. multiple mutable definitions", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
-  registerListeners(runtime);
+  // registerListeners(runtime);
 
   const m1 = runtime.define("m1", "m1", "0.0.1");
 
@@ -188,18 +178,28 @@ test("10. multiple mutable definitions", async (t) => {
 
 test("11. get/set", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
-  registerListeners(runtime);
 
   const m = runtime.define("m1", "m1", "0.0.1");
-  m.defineMutable(Cell.from("x1", "x", [], () => 10));
-  m.defineMutable(Cell.from("x2", "x", [], () => 20));
+  const x = m.defineMutable(Cell.from("x1", "x", [], () => 0));
+  m.define(Cell.from("y2", "y", ["x"], (x) => x + 1));
+
+  // watch(runtime, x.id);
+
+  const xv = collect(runtime, x.id);
+
+  const accessor = runtime.mutable.accessor(x.name);
+  await Promises.times(5, 10, (count) => {
+    accessor.value = count;
+    runtime.refresh();
+  });
+
+  await expect.poll(() => xv.value).toEqual(range(0, 5));
 });
 
-//   m1.
-test("mutable definition", async (t) => {
+test("12. mutable definition", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
   const m1 = runtime.define("m1", "m1", "0.0.1");
-  registerListeners(runtime);
+  // registerListeners(runtime);
 
   //   m1.define(
   //     Cell.create({

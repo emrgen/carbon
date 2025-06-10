@@ -80,8 +80,13 @@ export class Module {
     return this.runtime.builtinVariables.get(name);
   }
 
-  // variable by id
-  variable(id: string) {
+  // variable by id, optionally return a mutable variable
+  variable(id: string, mutable?: boolean): Variable | undefined {
+    if (mutable) {
+      const mutableId = Mutable.mutableId(id);
+      return this.variables.get(Variable.id(this.id, mutableId));
+    }
+
     return this.variables.get(Variable.id(this.id, id));
   }
 
@@ -130,7 +135,7 @@ export class Module {
   defineMutable(cell: Cell): Variable {
     const { name } = cell;
 
-    const mutableId = Mutable.mutableId(name);
+    const mutableId = Mutable.mutableId(cell.id);
     const mutableName = Mutable.mutableName(name);
 
     // module local id for the mutable variable
@@ -164,10 +169,31 @@ export class Module {
     );
   }
 
+  private findBuiltIn(cell: Cell) {
+    // check if the cell is a builtin variable
+    if (cell.builtin) {
+      const fullName = Variable.fullName(this.id, cell.name);
+      const moduleVariables = this.moduleVariables.get(fullName);
+      if (moduleVariables?.length) {
+        console.error("builtin variable already exists", fullName);
+        return moduleVariables[0];
+      }
+    }
+
+    return null;
+  }
+
   // create a new variable with the given definition
   // if the variable already exists, redefine it
   define(cell: Cell): Variable {
+    const builtIn = this.findBuiltIn(cell);
+    if (builtIn) {
+      return builtIn;
+    }
+
     const fullId = Variable.id(this.id, cell.id);
+    // if the variable with same id already exists
+    // just redefine it: delete and recreate
     if (this.variables.has(fullId)) {
       return this.redefine(cell);
     }
@@ -194,15 +220,15 @@ export class Module {
   // redefine a variable with the given definition
   // optionally change the name, inputs, or definition
   redefine(cell: Cell): Variable {
+    const builtIn = this.findBuiltIn(cell);
+    if (builtIn) {
+      return builtIn;
+    }
+
     const fullId = Variable.id(this.id, cell.id);
     const variable = this.variables.get(fullId);
     if (!variable) {
       return this.define(cell);
-    }
-
-    if (variable.builtin) {
-      console.error("builtin variable cannot be redefined");
-      return variable;
     }
 
     // if the cell has not changed, we just need to recompute

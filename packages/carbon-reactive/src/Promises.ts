@@ -31,8 +31,14 @@ export class Promises {
 
   // A function that resolves when a condition is met
   // It checks the condition at a given interval and resolves with the value
-  static when<T>(condition: () => boolean, fn: T | (() => T), interval = 10) {
-    return new Promise<T>((resolve) => {
+  static when<T>(
+    condition: () => boolean,
+    fn: T | (() => T),
+    interval = 10,
+    timeout: number = 1e6,
+  ) {
+    return new Promise<T>((resolve, reject) => {
+      let elapsed = 0;
       setInterval(() => {
         if (condition()) {
           clearInterval(interval);
@@ -42,7 +48,28 @@ export class Promises {
             resolve(fn);
           }
         }
+        elapsed += interval;
+        if (elapsed >= timeout) {
+          clearInterval(interval);
+          reject(new Error("Timeout exceeded"));
+        }
       }, interval);
+    });
+  }
+
+  // calls a function a given number of times with a delay of 0ms
+  static times(times: number, delay: number, fn: (count: number) => void) {
+    return new Promise<void>((resolve) => {
+      let count = 0;
+      const interval = setInterval(() => {
+        if (count >= times) {
+          clearInterval(interval);
+          resolve();
+        } else {
+          fn(count);
+          count++;
+        }
+      }, delay);
     });
   }
 }

@@ -15,16 +15,8 @@ export class Mutable {
     return isObject(obj) && obj.mutable === true;
   }
 
-  static hiddenId(name: string) {
-    return `hidden/${name}`;
-  }
-
-  static hiddenName(name: string) {
-    return `hidden@${name}`;
-  }
-
-  static mutableId(name: string) {
-    return `mutable/${name}`;
+  static mutableId(id: string) {
+    return `mutable/${id}`;
   }
 
   static mutableName(name: string) {
@@ -47,9 +39,9 @@ export class Mutable {
     this.variables.delete(name);
   }
 
-  // create an accessor for a mutable variable
-  // the accessor is an object with a value property that can be read and written
-  accessor<T>(name: ModuleVariableName): MutableAccessor<T> {
+  // returns a mutable accessor for the given name
+  // the accessor can be used to get and set the value of the mutable variable
+  accessor<T = any>(name: ModuleVariableName): MutableAccessor<T> {
     const that = this;
 
     return {

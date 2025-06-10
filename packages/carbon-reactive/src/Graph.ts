@@ -3,6 +3,7 @@ interface NodeId {
   version: number;
 }
 
+// variable dependency graph used to track the dependencies between all the variables in a runtime
 export class Graph<T extends NodeId> {
   nodes: Map<string, T> = new Map();
   outgoing: Map<string, Set<string>> = new Map();

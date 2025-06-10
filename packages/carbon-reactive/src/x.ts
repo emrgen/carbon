@@ -18,8 +18,8 @@ export class RuntimeError extends Error {
     return new RuntimeError(`${name} is not defined`);
   }
 
-  static circularDependency() {
-    return new RuntimeError("circular definition");
+  static circularDependency(name?: string) {
+    return new RuntimeError("circular definition" + (name ? `: ${name}` : ""));
   }
 
   static recalculating(name: string) {

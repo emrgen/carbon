@@ -15,6 +15,7 @@ interface CellProps {
   builtin?: boolean;
 }
 
+// Cell is a reactive unit of computation that can be defined and used in a module.
 export class Cell {
   id: string;
   name: string;

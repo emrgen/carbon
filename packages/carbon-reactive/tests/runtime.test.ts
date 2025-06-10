@@ -3,16 +3,7 @@ import { expect, test } from "vitest";
 import { Cell } from "../src/Cell";
 import { Promises } from "../src/Promises";
 import { Runtime } from "../src/Runtime";
-
-function registerListeners(runtime: Runtime) {
-  runtime
-    .on("fulfilled", (v) => {
-      console.log("fulfilled:", v.id, "=>", v.value);
-    })
-    .on("rejected", (v) => {
-      console.log("rejected:", v.id, "=>", v.error?.toString());
-    });
-}
+import { RuntimeError } from "../src/x";
 
 test(
   "create a single variable",
@@ -32,9 +23,7 @@ test(
       }),
     );
 
-    await Promises.delay(100);
-    expect(mod.variable("x1")!.value).toBe(10);
-    console.log("1---------------------------------------------------");
+    await expect.poll(() => mod.variable("x1")!.value).toBe(10);
 
     mod.define(
       Cell.create({
@@ -46,9 +35,7 @@ test(
       }),
     );
 
-    await Promises.delay(100);
-    expect(mod.variable("y1")!.value).toBe(20);
-    console.log("2---------------------------------------------------");
+    await expect.poll(() => mod.variable("y1")!.value).toBe(20);
 
     mod.redefine(
       Cell.create({
@@ -59,9 +46,7 @@ test(
       }),
     );
 
-    await Promises.delay(100);
-    expect(mod.variable("x1")!.value).toBe(20);
-    console.log("3---------------------------------------------------");
+    await expect.poll(() => mod.variable("x1")!.value).toBe(20);
 
     mod.redefine(
       Cell.create({
@@ -69,15 +54,13 @@ test(
         name: "z",
         code: "(x, y) => x+y",
         dependencies: ["x", "y"],
-        definition: (x, y) => x + y,
+        definition: (x: any, y: any) => x + y,
       }),
     );
 
-    await Promises.delay(100).then(() => {
+    await Promises.delay(10).then(() => {
       mod.delete("x1");
     });
-
-    console.log("4---------------------------------------------------");
 
     mod.redefine(
       Cell.create({
@@ -88,24 +71,20 @@ test(
       }),
     );
 
-    await Promises.delay(100);
-    expect(mod.variable("x1")!.value).toBe(50);
-    expect(mod.variable("z1")!.value).toBe(110);
-    console.log("5---------------------------------------------------");
-
+    await expect.poll(() => mod.variable("x1")!.value).toBe(50);
     mod.define(
       Cell.create({
         id: "y1",
         name: "y",
         code: "() => x - 10",
         dependencies: ["x", "z"],
-        definition: (x, z) => x - 10,
+        definition: (x: any) => x - 10,
       }),
     );
 
-    await Promises.delay(100);
-    expect(mod.variable("y1")?.error?.toString()).toBe("RuntimeError: circular definition");
-    console.log("6---------------------------------------------------");
+    await expect
+      .poll(() => mod.variable("y1")?.error?.toString())
+      .toBe("RuntimeError: circular definition: y");
 
     mod.define(
       Cell.create({
@@ -113,13 +92,11 @@ test(
         name: "y",
         code: "() => x - 20",
         dependencies: ["x"],
-        definition: (x) => x - 20,
+        definition: (x: any) => x - 20,
       }),
     );
 
-    await Promises.delay(100);
-    expect(mod.variable("y1")!.value).toBe(30);
-    console.log("7---------------------------------------------------");
+    await expect.poll(() => mod.variable("y1")!.value).toBe(30);
 
     mod.define(
       Cell.create({
@@ -127,13 +104,11 @@ test(
         name: "y",
         code: "() => x / 10",
         dependencies: ["x"],
-        definition: (x) => x / 10,
+        definition: (x: any) => x / 10,
       }),
     );
 
-    await Promises.delay(100);
-    expect(mod.variable("y1")!.value).toBe(5);
-    console.log("8---------------------------------------------------");
+    await expect.poll(() => mod.variable("y1")!.value).toBe(5);
 
     mod.define(
       Cell.create({
@@ -215,8 +190,7 @@ test("create Promise variable", async (t) => {
     }),
   );
 
-  await Promises.delay(100);
-  expect(mod.variable("x1")!.value).toBe(10);
+  await expect.poll(() => mod.variable("x1")!.value).toBe(10);
 
   mod.define(
     Cell.create({
@@ -228,8 +202,7 @@ test("create Promise variable", async (t) => {
     }),
   );
 
-  await Promises.delay(100);
-  expect(mod.variable("y1")!.value).toBe(20);
+  await expect.poll(() => mod.variable("y1")!.value).toBe(20);
 
   mod.define(
     Cell.create({
@@ -243,8 +216,7 @@ test("create Promise variable", async (t) => {
     }),
   );
 
-  await Promises.delay(100);
-  expect(mod.variable("z1")!.value).toBe(30);
+  await expect.poll(() => mod.variable("z1")!.value).toBe(30);
 
   mod.define(
     Cell.create({
@@ -258,8 +230,7 @@ test("create Promise variable", async (t) => {
     }),
   );
 
-  await Promises.delay(100);
-  expect(mod.variable("z1")!.value).toBe(-10);
+  await expect.poll(() => mod.variable("z1")!.value).toBe(-10);
 
   mod.define(
     Cell.create({
@@ -271,14 +242,13 @@ test("create Promise variable", async (t) => {
     }),
   );
 
-  await Promises.delay(100);
-  expect(mod.variable("z1")!.value).toBe(10);
+  await expect.poll(() => mod.variable("z1")!.value).toBe(10);
 });
 
 test("create constant variable", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
   const mod = runtime.define("mod", "mod", "0.0.1");
-  registerListeners(runtime);
+  // registerListeners(runtime);
 
   mod.define(
     Cell.create({
@@ -372,7 +342,7 @@ test("import variable from another module", async (t) => {
 test("duplicate definition", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
   const m1 = runtime.define("m1", "m1", "0.0.1");
-  registerListeners(runtime);
+  // registerListeners(runtime);
 
   console.log("xx");
   m1.define(
@@ -449,7 +419,7 @@ test("builtin variables", async (t) => {
   const runtime = Runtime.create("test", "0.0.1", builtins);
   const m1 = runtime.define("m1", "m1", "0.0.1");
   const m2 = runtime.define("m2", "m2", "0.0.1");
-  registerListeners(runtime);
+  // registerListeners(runtime);
 
   m1.define(
     Cell.create({
@@ -494,7 +464,7 @@ test("builtin Promises", async (t) => {
   const m1 = runtime.define("m1", "m1", "0.0.1");
   // registerListeners(runtime);
 
-  m1.define(
+  const x = m1.define(
     Cell.create({
       id: "x1",
       name: "x",
@@ -504,8 +474,7 @@ test("builtin Promises", async (t) => {
     }),
   );
 
-  await Promises.delay(110);
-  expect(m1.variable("x1")!.value).toBe(10);
+  await expect.poll(() => x.value).toBe(10);
 
   m1.define(
     Cell.create({
@@ -523,16 +492,16 @@ test("builtin Promises", async (t) => {
     }),
   );
 
-  await Promises.delay(100);
-  expect(m1.variable("y1")!.value).toEqual([0, 1]);
+  await expect.poll(() => m1.variable("y1")!.value).toEqual([0, 1]);
 });
 
-test("duplicate-1 definition fixed later", async (t) => {
+test("23. duplicate-1 definition fixed later", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
-  const m1 = runtime.define("m1", "m1", "0.0.1");
-  registerListeners(runtime);
+  const m = runtime.define("m1", "m1", "0.0.1");
+  // registerListeners(runtime);
+  const get = (id: string) => m.variable(id)!;
 
-  m1.define(
+  const y = m.define(
     Cell.create({
       id: "y1",
       name: "y",
@@ -542,7 +511,9 @@ test("duplicate-1 definition fixed later", async (t) => {
     }),
   );
 
-  m1.define(
+  await expect.poll(() => y.error).toEqual(RuntimeError.notDefined("x"));
+
+  m.define(
     Cell.create({
       id: "x1",
       name: "x",
@@ -551,7 +522,9 @@ test("duplicate-1 definition fixed later", async (t) => {
     }),
   );
 
-  m1.define(
+  await expect.poll(() => get("y1").value).toEqual(10);
+
+  const x2 = m.define(
     Cell.create({
       id: "x2",
       name: "x",
@@ -560,9 +533,10 @@ test("duplicate-1 definition fixed later", async (t) => {
     }),
   );
 
-  await Promises.delay(100);
+  await expect.poll(() => get("y1").error).toEqual(RuntimeError.duplicateDefinition("x"));
 
-  m1.define(
+  // creating a new variable with the same name id should remove the old one and create a new one
+  m.define(
     Cell.create({
       id: "x2",
       name: "z",
@@ -571,12 +545,11 @@ test("duplicate-1 definition fixed later", async (t) => {
     }),
   );
 
-  await Promises.delay(100);
-  expect(m1.variable("x2")!.value).toBe(20);
-  expect(m1.variable("x1")!.value).toBe(m1.variable("y1")!.value);
+  await expect.poll(() => get("x2").value).toBe(20);
+  await expect.poll(() => get("x1").value).toBe(get("y1").value);
 });
 
-test("generators run with different time", async (t) => {
+test("26. generators run with different time", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
   const m1 = runtime.define("m1", "m1", "0.0.1");
   // registerListeners(runtime);
@@ -589,7 +562,8 @@ test("generators run with different time", async (t) => {
       definition: function* () {
         let i = 0;
         while (true) {
-          yield Promises.delay(20, i++);
+          i += 1;
+          yield Promises.delay(200, "x" + i);
         }
       },
     }),
@@ -604,13 +578,21 @@ test("generators run with different time", async (t) => {
       definition: function* (x) {
         let i = 0;
         while (true) {
-          yield Promises.delay(10, i++);
+          i += 1;
+          yield Promises.delay(100, "y" + i);
         }
       },
     }),
   );
 
-  await Promises.delay(100);
+  // collect values from the fulfilled events
+  const values: number[] = [];
+  runtime.on("fulfilled", (v) => {
+    values.push(v.value);
+  });
 
-  expect(m1.variable("x1")!.value).not.toBe(m1.variable("y1")!.value);
+  await expect
+    .poll(() => values.slice(0, 12))
+    .toStrictEqual(["y1", "x1", "y2", "x2", "y3", "y4", "x3", "y5", "y6", "x4", "y7", "y8"]);
+  await expect.poll(() => m1.variable("x1")!.value).not.toBe(m1.variable("y1")!.value);
 });

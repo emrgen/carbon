@@ -131,7 +131,10 @@ export class Variable {
   precompute(clock: number) {}
 
   // compute the variable value from inputs
-  // if the variable is a generator, run the generator once
+  // if the variable is a generator,
+  // run the generator once,
+  // the first run will mark the generator as dirty,
+  // triggering the runtime to compute it again
   compute(inputs: Variable[], version: number) {
     LOG && console.log("computing:", this.id, "=>", this.cell.code);
 
@@ -202,6 +205,7 @@ export class Variable {
     }
   }
 
+  // marks the generator variable as dirty
   addDirty(value: any) {
     if (this.generator.next !== noop && !this.done) {
       this.runtime.generators.add(this);

@@ -39,6 +39,7 @@ export class Runtime extends EventEmitter {
   generators: Set<Variable> = new Set();
 
   builtin: Module;
+
   builtinVariables: Map<VariableName, Variable> = new Map();
 
   // mutable variables store
@@ -109,7 +110,9 @@ export class Runtime extends EventEmitter {
     this.moduleVariables.set(variable.name, this.moduleVariables.get(variable.name) || []);
     this.moduleVariables.get(variable.name)!.push(variable);
 
-    this.dirty.add(variable);
+    this.moduleVariables.get(variable.name)?.forEach((v) => {
+      this.dirty.add(v);
+    });
 
     LOG && console.log("=>", variable.id);
     this.graph.addNode(variable);
@@ -148,6 +151,18 @@ export class Runtime extends EventEmitter {
       }
     });
 
+    this.tryRecompute();
+  }
+
+  refresh(force?: boolean) {
+    if (force) {
+      console.log("force refresh");
+      return;
+    }
+
+    if (this.dirty.size === 0 && this.generators.size === 0) {
+      return;
+    }
     this.tryRecompute();
   }
 
@@ -237,9 +252,12 @@ export class Runtime extends EventEmitter {
       //   return node.promise.fulfilled(node);
       // };
 
+      // when all inputs are fulfilled, compute the variable
       const done = variable.promise.all(inputs).then((v) => {
         return variable.compute(v, variable.promise.version);
       });
+
+      // collect the pending promises
       pending.push(done);
 
       LOG &&
@@ -277,7 +295,10 @@ export class Runtime extends EventEmitter {
     circular.forEach((variable) => {
       // console.log("circular", variable.id);
       variable.promise = variable.promise.next(noop);
-      variable.rejected(RuntimeError.circularDependency(variable.name), variable.promise.version);
+      variable.rejected(
+        RuntimeError.circularDependency(variable.cell.name),
+        variable.promise.version,
+      );
     });
 
     // find conflicting names
@@ -319,6 +340,7 @@ export class Runtime extends EventEmitter {
         pending.map((p) => p.id),
       );
 
+    // wait for all pending promises to be resolved before trying to recompute again
     return Promise.all(pending).then(() => {
       this.tryRecompute();
     });
@@ -347,7 +369,10 @@ export class Runtime extends EventEmitter {
 
     circular.forEach((variable) => {
       variable.promise = variable.promise.next(noop);
-      variable.rejected(RuntimeError.circularDependency(variable.name), variable.promise.version);
+      variable.rejected(
+        RuntimeError.circularDependency(variable.cell.name),
+        variable.promise.version,
+      );
     });
 
     return Promise.resolve(1);
