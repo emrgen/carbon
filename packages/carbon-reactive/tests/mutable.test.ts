@@ -14,6 +14,42 @@ function registerListeners(runtime: Runtime) {
     });
 }
 
+function watch(runtime: Runtime, id: string) {
+  runtime
+    .on("fulfilled:" + id, (v) => {
+      console.log("fulfilled:", v.id, "=>", v.value);
+    })
+    .on("rejected:" + id, (v) => {
+      console.log("rejected:", v.id, "=>", v.error?.toString());
+    });
+}
+
+function collect(runtime: Runtime, id: string) {
+  const values = {
+    _values: [] as any[],
+    get value() {
+      return this._values;
+    },
+  };
+  runtime.on("fulfilled:" + id, (v) => {
+    values._values.push(v.value);
+  });
+
+  return values;
+}
+
+function resolve(runtime: Runtime, id: string) {
+  return new Promise((resolve, reject) => {
+    runtime
+      .on("fulfilled:" + id, (v) => {
+        resolve(v.value);
+      })
+      .on("rejected:" + id, (v) => {
+        reject(v.error);
+      });
+  });
+}
+
 test("test mutable injection", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
   const m = runtime.mutable;
@@ -62,14 +98,14 @@ test("mutable definition with mutable injection", async (t) => {
 
   // m.define(Cell.from("x2", "x", [], () => 2));
   // // m1.define(Cell.from("z1", "z", ["x"], (x) => x));
-  m.define(Cell.from("a1", "a", ["mutable@x"], (mx) => mx.value));
+  m.define(Cell.from("a1", "a", ["mutable@x"], (arg) => arg.value));
 
   m.define(
-    Cell.from("b1", "b", ["mutable@x"], function* (mx) {
+    Cell.from("b1", "b", ["mutable@x"], function* (arg) {
       let i = 1;
       while (true) {
         yield Promises.tick(200, () => {
-          return (mx.value = i);
+          return (arg.value = i);
         });
 
         if (++i > 13) break;
@@ -98,34 +134,65 @@ test("mutable definition with mutable injection", async (t) => {
   expect(m.variable("p1")!.error!.toString()).toBe(RuntimeError.circularDependency().toString());
 });
 
-test("mutable update from different cell", async (t) => {
+test("9. mutable update from different cell", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
-  registerListeners(runtime);
 
   const m = runtime.define("m1", "m1", "0.0.1");
-  m.defineMutable(Cell.from("x1", "x", [], () => 10));
+  const x = m.defineMutable(Cell.from("x1", "x", [], () => 0));
+  m.defineMutable(Cell.from("y1", "y", [], () => []));
   m.define(Cell.from("a1", "a", ["x"], (x: number) => x + 10));
-  // m.define(
-  //   Cell.from("b1", "b", ["x"], (x: number) => {
-  //     return Promises.delay(200, () => {
-  //       return x;
-  //     });
-  //   }),
-  // );
 
   m.define(
     Cell.from("c1", "c", ["mutable@x"], function* (accessor: MutableAccessor<number>) {
       let i = 1;
       while (true) {
-        yield Promises.tick(200, () => {
+        yield Promises.delay(10, () => {
           const value = (accessor.value = i++);
           return value + 5;
         });
+        if (i == 5) break;
       }
     }),
   );
 
-  await Promises.delay(1000);
+  const d = m.define(
+    Cell.from("d1", "d", ["x", "mutable@y"], (x, my: MutableAccessor<number[]>) => {
+      my.value = [...my.value, x];
+      return my.value;
+    }),
+  );
+
+  const xv = collect(runtime, x.id);
+  const dv = collect(runtime, d.id);
+
+  await expect.poll(() => xv.value).toEqual([0, 1, 2, 3, 4]);
+  await expect
+    .poll(() => dv.value)
+    .toEqual([[0], [0, 1], [0, 1, 2], [0, 1, 2, 3], [0, 1, 2, 3, 4]]);
+});
+
+test("10. multiple mutable definitions", async (t) => {
+  const runtime = Runtime.create("test", "0.0.1");
+  registerListeners(runtime);
+
+  const m1 = runtime.define("m1", "m1", "0.0.1");
+
+  const x = m1.defineMutable(Cell.from("x1", "x", [], () => 10));
+  m1.defineMutable(Cell.from("x2", "x", [], () => 20));
+  m1.define(Cell.from("a1", "a", ["x"], (x: number) => x + 10));
+
+  expect(await resolve(runtime, x.id).catch((r) => r)).toStrictEqual(
+    RuntimeError.duplicateDefinition("x"),
+  );
+});
+
+test("11. get/set", async (t) => {
+  const runtime = Runtime.create("test", "0.0.1");
+  registerListeners(runtime);
+
+  const m = runtime.define("m1", "m1", "0.0.1");
+  m.defineMutable(Cell.from("x1", "x", [], () => 10));
+  m.defineMutable(Cell.from("x2", "x", [], () => 20));
 });
 
 //   m1.

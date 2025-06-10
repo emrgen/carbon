@@ -104,6 +104,7 @@ export class Module {
   }
 
   // import a variable from another module
+  // multiple imports can be done by calling this function multiple times
   import(name: string, alias: string, module: Module) {
     // check if the variable exists in the module
     const variable = module.value(name);
@@ -126,7 +127,7 @@ export class Module {
   }
 
   // define a mutable variable with the given name and value
-  defineMutable(cell: Cell) {
+  defineMutable(cell: Cell): Variable {
     const { name } = cell;
 
     const mutableId = Mutable.mutableId(name);
@@ -153,7 +154,7 @@ export class Module {
 
     // define the immutable part of the mutable variable
     // when the mutable variable is changed, the immutable part will be recomputed
-    this.define(
+    return this.define(
       Cell.from(
         cell.id,
         cell.name,
@@ -165,7 +166,7 @@ export class Module {
 
   // create a new variable with the given definition
   // if the variable already exists, redefine it
-  define(cell: Cell) {
+  define(cell: Cell): Variable {
     const fullId = Variable.id(this.id, cell.id);
     if (this.variables.has(fullId)) {
       return this.redefine(cell);

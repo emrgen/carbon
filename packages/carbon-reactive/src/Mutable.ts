@@ -1,4 +1,4 @@
-import { isObject } from "lodash";
+import { isEqual, isObject } from "lodash";
 import { ModuleVariableName } from "./Module";
 import { Runtime } from "./Runtime";
 import { MutableAccessor } from "./types";
@@ -78,8 +78,20 @@ export class Mutable {
           throw RuntimeError.notDefined(`mutable ${name}`);
         }
 
+        const oldValue = that.variables.get(name);
+        // no change, do nothing
+        if (value === oldValue) {
+          return;
+        }
+
+        // no change, do nothing
+        if (isObject(value) && isObject(oldValue) && isEqual(value, oldValue)) {
+          return;
+        }
+
         that.variables.set(name, value);
 
+        // mark the variable as dirty in the runtime
         const mutableVariable = that.runtime.moduleVariables.get(name);
         mutableVariable?.forEach((variable) => {
           that.runtime.dirty.add(variable);

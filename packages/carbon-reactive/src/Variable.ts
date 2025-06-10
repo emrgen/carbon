@@ -259,6 +259,7 @@ export class Variable {
     this.value = undefined;
     this.generator = { next: noop, return: noop };
     this.runtime.emit("rejected", this);
+    this.runtime.emit("rejected:" + this.id, this);
     this.promise.fulfilled(this);
     return this;
   }
@@ -278,6 +279,7 @@ export class Variable {
     this.value = value;
     this.error = undefined;
     !this.builtin && this.runtime.emit("fulfilled", this);
+    !this.builtin && this.runtime.emit("fulfilled:" + this.id, this);
     this.promise.fulfilled(this);
     return this;
   }

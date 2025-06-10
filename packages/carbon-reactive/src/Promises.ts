@@ -2,7 +2,7 @@ import { isFunction } from "lodash";
 
 export class Promises {
   // A simple delay function that resolves after a given timeout
-  static delay<T = boolean>(timeout: number, value?: T) {
+  static delay<T = boolean>(timeout: number, value?: T | (() => T)) {
     if (value === undefined) {
       value = false as T;
     }
@@ -10,6 +10,11 @@ export class Promises {
     // If the timeout is 0, we can resolve immediately
     return new Promise<T>((resolve) => {
       setTimeout(() => {
+        if (isFunction(value)) {
+          value = (value as () => T)();
+        } else {
+          value = value as T;
+        }
         resolve(value);
       }, timeout);
     });

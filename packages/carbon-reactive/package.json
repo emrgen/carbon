@@ -12,7 +12,7 @@
     "@types/lodash": "^4.14.191",
     "lodash": "^4.17.21",
     "semver": "^7.6.2",
-    "vitest": "^0.34.6"
+    "vitest": "^3.2.3"
   },
   "devDependencies": {
     "@emrgen/eslint-config-custom": "workspace:*",
