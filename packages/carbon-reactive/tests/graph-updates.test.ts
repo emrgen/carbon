@@ -19,10 +19,10 @@ test("test unreachable nodes", async (t) => {
 
   // initial state
   const pc = precompute([a], G);
-  console.log(" ");
+  // console.log(" ");
   await compute(pc, G);
-  console.log(G.variables().map((node) => node.uid));
-  console.log("--------");
+  // console.log(G.variables().map((node) => node.uid));
+  // console.log("--------");
 
   // b became dirty
   // const roots2 = precompute([G.node(b)!], G);
@@ -88,7 +88,7 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
       return;
     }
 
-    console.log("computed:", next.id, "=>", value);
+    // console.log("computed:", next.id, "=>", value);
 
     // update the node with the computed value
     const result = [...inputs, next.key].join(",");
@@ -108,14 +108,14 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
           return;
         }
 
-        console.log("computed:", next.id, "=>", next.uid);
+        // console.log("computed:", next.id, "=>", next.uid);
       });
       pending.push(done);
     } else {
-      console.log(
-        node.id,
-        inputs.map((input) => input.id),
-      );
+      // console.log(
+      //   node.id,
+      //   inputs.map((input) => input.id),
+      // );
 
       if (find(roots, (input) => input.id === next.id)) {
         // console.log("found root", next.id, next.version);
@@ -128,7 +128,7 @@ function precompute(dirty: Promix<any>[], G: Graph<Promix<any>>) {
       }
     }
 
-    console.log("connected: " + next.uid);
+    // console.log("connected: " + next.uid);
   });
 
   const newRoots = roots

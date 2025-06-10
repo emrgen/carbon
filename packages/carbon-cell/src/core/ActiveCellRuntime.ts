@@ -4,7 +4,13 @@ import { Module, Runtime, Variable } from "@observablehq/runtime";
 import { Library, observe } from "@observablehq/stdlib";
 import { EventEmitter } from "events";
 import { isString } from "lodash";
-import { isHtmlElement, isUnnamedCell, isViewCell, nextUnnamedCellName, viewCellName } from "../utils";
+import {
+  isHtmlElement,
+  isUnnamedCell,
+  isViewCell,
+  nextUnnamedCellName,
+  viewCellName,
+} from "../utils";
 
 function width() {
   return observe(function (change) {
@@ -16,7 +22,9 @@ function width() {
 
     const cssWidth = (el) => {
       const style = window.getComputedStyle(el);
-      return parseFloat(el.clientWidth) - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      return (
+        parseFloat(el.clientWidth) - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
+      );
     };
 
     var width = change(cssWidth(page));
@@ -116,7 +124,13 @@ export class ActiveCellRuntime extends EventEmitter {
     this.observeNode(nodeId);
   }
 
-  redefine(name: string, cellId: string, code: string | Function, type: string, force: boolean = false) {
+  redefine(
+    name: string,
+    cellId: string,
+    code: string | Function,
+    type: string,
+    force: boolean = false,
+  ) {
     // check if the code is the same as the cache code for the node
     // const cache = this.cache.get(cellId);
     // if (code === cache) return;
@@ -391,7 +405,13 @@ export class ActiveCell extends EventEmitter {
 
   deleted: boolean = false;
 
-  static fromConfig(mod: ActiveCellRuntime, cellId: string, name, deps: string[], definition: Function) {
+  static fromConfig(
+    mod: ActiveCellRuntime,
+    cellId: string,
+    name,
+    deps: string[],
+    definition: Function,
+  ) {
     return new ActiveCell({
       id: cellId,
       name: name,
@@ -473,12 +493,10 @@ export class ActiveCell extends EventEmitter {
 
       const ast = parseCell(code);
       if (!ast) {
-        console.error("ast not found", code);
         return undefined;
       }
 
       if (!ast.body) {
-        console.error("ast body not found", ast);
         return undefined;
       }
 

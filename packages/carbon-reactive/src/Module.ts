@@ -35,7 +35,7 @@ export class Module {
     return new Module(runtime, id, name, version);
   }
 
-  constructor(runtime: Runtime, uid: string, name: string, version: string) {
+  private constructor(runtime: Runtime, uid: string, name: string, version: string) {
     this.runtime = runtime;
     this.id = uid;
     this.name = name;

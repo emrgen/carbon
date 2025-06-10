@@ -4,30 +4,7 @@ import { Cell, Runtime } from "../src/index";
 import { Promises } from "../src/Promises";
 import { MutableAccessor } from "../src/types";
 import { RuntimeError } from "../src/x";
-
-function watch(runtime: Runtime, id: string) {
-  runtime
-    .on("fulfilled:" + id, (v) => {
-      console.log("fulfilled:", v.id, "=>", v.value);
-    })
-    .on("rejected:" + id, (v) => {
-      console.log("rejected:", v.id, "=>", v.error?.toString());
-    });
-}
-
-function collect(runtime: Runtime, id: string) {
-  const values = {
-    _values: [] as any[],
-    get value() {
-      return this._values;
-    },
-  };
-  runtime.on("fulfilled:" + id, (v) => {
-    values._values.push(v.value);
-  });
-
-  return values;
-}
+import { collect } from "./listerners";
 
 function resolve(runtime: Runtime, id: string) {
   return new Promise((resolve, reject) => {

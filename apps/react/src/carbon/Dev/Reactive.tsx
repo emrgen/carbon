@@ -6,7 +6,8 @@ import { FloatingStyleMenu, InsertBlockMenu } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
 import { RenderManager, useCreateCachedCarbon } from "@emrgen/carbon-react";
-import { Cell, Runtime } from "@emrgen/carbon-reactive";
+import { Cell, Promises, Runtime } from "@emrgen/carbon-reactive";
+import { ReactiveRuntimeContext } from "@emrgen/carbon-reactive-cell";
 import { CarbonApp } from "@emrgen/carbon-utils";
 import lodash, { flattenDeep } from "lodash";
 import { useState } from "react";
@@ -42,6 +43,7 @@ window.Cell = Cell;
 
 const runtime = Runtime.create("test", "0.0.1", {
   _: lodash,
+  Promises: Promises,
   penguins: [
     {
       name: "Emrgen",
@@ -61,8 +63,11 @@ const mod = runtime.define("mid", "test-module", "0.0.1");
 // @ts-ignore
 window.mod = mod;
 
-mod.define(Cell.from("data", "data", ["penguins"], (x) => x));
-mod.define(Cell.from("x", "x", [], () => 10));
+// mod.define(Cell.parse("birds = penguins", { name: "birds" }));
+// mod.define(Cell.parse("x = 10"));
+// mod.define(Cell.parse("y = x+10"));
+// mod.define(Cell.parse("z = {while(1) { yield Promises.delay(1000, x); } }"));
+// mod.define(Cell.parse(`a = z + 10`));
 
 export function Reactive() {
   const [content] = useState(() => {
@@ -74,10 +79,12 @@ export function Reactive() {
 
   return (
     <Box className={"carbon-app-container"} pos={"relative"}>
-      <CarbonApp app={app} renderManager={renderManager}>
-        <FloatingStyleMenu />
-        <InsertBlockMenu />
-      </CarbonApp>
+      <ReactiveRuntimeContext runtime={runtime}>
+        <CarbonApp app={app} renderManager={renderManager}>
+          <FloatingStyleMenu />
+          <InsertBlockMenu />
+        </CarbonApp>
+      </ReactiveRuntimeContext>
     </Box>
   );
 }
