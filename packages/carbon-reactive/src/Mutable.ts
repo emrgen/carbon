@@ -1,29 +1,74 @@
-import { ModuleVariableId } from "./Module";
+import { isObject } from "lodash";
+import { ModuleVariableName } from "./Module";
 import { Runtime } from "./Runtime";
+import { MutableAccessor } from "./types";
 import { RuntimeError } from "./x";
 
+// Mutable is a class that stores mutable variables.
+// Mutable variables can be changed at runtime from any cell
+// and can be accessed from any cell.
 export class Mutable {
-  variables: Map<string, any> = new Map();
+  variables: Map<ModuleVariableName, any> = new Map();
 
-  dirty: Set<ModuleVariableId> = new Set();
+  static isMutable(obj: any): boolean {
+    // @ts-ignore
+    return isObject(obj) && obj.mutable === true;
+  }
+
+  static hiddenId(name: string) {
+    return `hidden/${name}`;
+  }
+
+  static hiddenName(name: string) {
+    return `hidden@${name}`;
+  }
+
+  static mutableId(name: string) {
+    return `mutable/${name}`;
+  }
+
+  static mutableName(name: string) {
+    return `mutable@${name}`;
+  }
 
   constructor(readonly runtime: Runtime) {}
 
-  define(name: string, value: any) {
+  // create a local mutable variable with the given name and value
+  define(name: ModuleVariableName, value: any) {
     this.variables.set(name, value);
-    this.dirty.add(name);
   }
 
-  delete(name: string) {
+  has(name: ModuleVariableName) {
+    return this.variables.has(name);
+  }
+
+  // delete a mutable variable by name
+  delete(name: ModuleVariableName) {
     this.variables.delete(name);
-    this.dirty.delete(name);
   }
 
-  accessor(name: string) {
-    return Object.defineProperty({}, name, {
-      set: (value) => {
-        if (!this.variables.has(name)) {
-          const variable = this.runtime.variables.get(name);
+  // create an accessor for a mutable variable
+  // the accessor is an object with a value property that can be read and written
+  accessor<T>(name: ModuleVariableName): MutableAccessor<T> {
+    const that = this;
+
+    return {
+      mutable: true,
+      get value() {
+        if (!that.variables.has(name)) {
+          const variable = that.runtime.moduleVariables.get(name);
+          console.log(variable);
+          if (variable) {
+            console.log("variable", variable);
+          }
+          throw RuntimeError.notDefined(`mutable ${name}`);
+        }
+
+        return that.variables.get(name);
+      },
+      set value(value: any) {
+        if (!that.variables.has(name)) {
+          const variable = that.runtime.variables.get(name);
           if (variable) {
             if (variable.error) {
               throw variable.error;
@@ -33,22 +78,14 @@ export class Mutable {
           throw RuntimeError.notDefined(`mutable ${name}`);
         }
 
-        this.variables.set(name, value);
-        this.dirty.add(name);
-      },
-      get: () => {
-        if (!this.variables.has(name)) {
-          const variable = this.runtime.moduleVariables.get(name);
-          console.log(variable);
-          if (variable) {
-            console.log("variable", variable);
-          }
-          throw RuntimeError.notDefined(`mutable ${name}`);
-        }
+        that.variables.set(name, value);
 
-        return this.variables.get(name);
+        const mutableVariable = that.runtime.moduleVariables.get(name);
+        mutableVariable?.forEach((variable) => {
+          that.runtime.dirty.add(variable);
+        });
       },
-    });
+    };
   }
 
   toString() {

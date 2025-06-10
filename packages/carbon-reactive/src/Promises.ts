@@ -1,11 +1,13 @@
 import { isFunction } from "lodash";
 
 export class Promises {
+  // A simple delay function that resolves after a given timeout
   static delay<T = boolean>(timeout: number, value?: T) {
     if (value === undefined) {
       value = false as T;
     }
 
+    // If the timeout is 0, we can resolve immediately
     return new Promise<T>((resolve) => {
       setTimeout(() => {
         resolve(value);
@@ -13,7 +15,8 @@ export class Promises {
     });
   }
 
-  static tick<T>(timeout: number, fn: T | (() => T)) {
+  // A simple tick function that resolves after a given timeout
+  static tick<T>(timeout: number, fn: T | (() => T), cancel?: () => boolean) {
     return new Promise<T>((resolve) => {
       setTimeout(() => {
         resolve(isFunction(fn) ? fn() : fn);
@@ -21,6 +24,8 @@ export class Promises {
     });
   }
 
+  // A function that resolves when a condition is met
+  // It checks the condition at a given interval and resolves with the value
   static when<T>(condition: () => boolean, fn: T | (() => T), interval = 10) {
     return new Promise<T>((resolve) => {
       setInterval(() => {

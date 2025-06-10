@@ -9,6 +9,7 @@ interface CellProps {
   version?: number;
   code?: string;
   hash?: string;
+  // fully qualified names of the dependencies with format: moduleId:variableName
   dependencies?: string[];
   definition?: Function;
   builtin?: boolean;
@@ -63,10 +64,13 @@ export class Cell {
     this.definition = definition;
     this.builtin = builtin;
     this.hash = this.code
-      ? generateHash(`${this.id}/${this.name}/${this.version}/${this.code}/${this.dependencies.join(",")}`).toString()
+      ? generateHash(
+          `${this.id}/${this.name}/${this.version}/${this.code}/${this.dependencies.join(",")}`,
+        ).toString()
       : `hash_${randomString(10)}`;
   }
 
+  // inject module id into the dependency names
   with(module: Module) {
     this.dependencies = this.dependencies.map((name) => {
       if (name.split(":").length === 1) {

@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { Cell, Runtime } from "../src/index";
-import { Mutable } from "../src/Mutable";
 import { Promises } from "../src/Promises";
-import { Variable } from "../src/Variable";
+import { MutableAccessor } from "../src/types";
+import { RuntimeError } from "../src/x";
 
 function registerListeners(runtime: Runtime) {
   runtime
@@ -16,83 +16,56 @@ function registerListeners(runtime: Runtime) {
 
 test("test mutable injection", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
+  const m = runtime.mutable;
+  m.define("a", 0);
 
-  const m1 = new Mutable(runtime);
-  m1.define("a", 0);
-  m1.accessor("a")["a"] = 1;
-  expect(m1.variables.get("a")).toEqual(1);
+  const accessor = m.accessor<number>("a");
+  accessor.value = 1;
+  expect(accessor.value).toEqual(1);
 
-  m1.delete("a");
+  accessor.value = 2;
+  expect(accessor.value).toEqual(2);
+
+  accessor.value = 3;
+  expect(accessor.value).toEqual(3);
+
+  m.delete("a");
 
   expect(() => {
-    m1.accessor("a")["a"];
+    accessor.value = 2;
   }).toThrowError("not defined");
 });
 
 test("mutable definition with mutable injection", async (t) => {
   const runtime = Runtime.create("test", "0.0.1");
-  const m1 = runtime.define("m1", "m1", "0.0.1");
+  const mut = runtime.mutable;
+  const m = runtime.define("m1", "m1", "0.0.1");
+
   registerListeners(runtime);
 
-  // hidden variable
-  m1.define(Cell.from("immutable_x1", "immutable x", [], (ix) => ix));
+  mut.define("x", 0);
 
   // visible variable
-  m1.define(
+  m.define(
     Cell.create({
       id: "mutable_x",
-      name: "mutable x",
-      dependencies: ["immutable x"],
-      definition: function (ix) {
-        const that = this as Variable;
-
-        const ret = {
-          current: ix,
-          next: function () {
-            return {
-              value: ret,
-              done: true,
-            };
-          },
-          return: function () {
-            return {
-              value: ret,
-              done: true,
-            };
-          },
-          get value() {
-            return ret.current;
-          },
-          // set the value of the variable x and mark the downstream variables as dirty
-          set value(value) {
-            // console.log("setting mutable x", Variable.fullName(m1.name, "x"), value);
-            // mark the variable x as dirty
-            const variables = that.runtime.moduleVariables.get(Variable.fullName(m1.name, "x"));
-            if (variables) {
-              console.log(variables.map((v) => v.id));
-              variables.forEach((variable) => {
-                that.runtime.dirty.add(variable);
-              });
-            }
-
-            ret.current = value;
-          },
-        };
-
-        return ret;
+      name: "mutable@x",
+      dependencies: [],
+      definition: function () {
+        return mut.accessor<any>("x");
       },
     }),
   );
 
-  // visible variable
-  m1.define(Cell.from("x1", "x", ["mutable x"], (mx) => mx.value));
+  // hidden variable initialized by the initial mutable value
+  m.define(Cell.from("immutable_x", "x", ["mutable@x"], () => mut.accessor<any>("x").value));
 
-  m1.define(Cell.from("x2", "x", [], () => 2));
-  // m1.define(Cell.from("z1", "z", ["x"], (x) => x));
-  m1.define(Cell.from("a1", "a", ["mutable x"], (mx) => mx.value));
+  // m.define(Cell.from("x2", "x", [], () => 2));
+  // // m1.define(Cell.from("z1", "z", ["x"], (x) => x));
+  m.define(Cell.from("a1", "a", ["mutable@x"], (mx) => mx.value));
 
-  m1.define(
-    Cell.from("y1", "y", ["mutable x"], function* (mx) {
+  m.define(
+    Cell.from("b1", "b", ["mutable@x"], function* (mx) {
       let i = 1;
       while (true) {
         yield Promises.tick(200, () => {
@@ -104,11 +77,11 @@ test("mutable definition with mutable injection", async (t) => {
     }),
   );
 
-  m1.define(
-    Cell.from("b1", "b", ["mutable x"], function* (mx) {
+  m.define(
+    Cell.from("c1", "c", ["mutable@x"], function* (mx) {
       let i = 1;
       while (true) {
-        yield Promises.tick(100, () => {
+        yield Promises.tick(200, () => {
           return mx.value;
         });
 
@@ -117,8 +90,40 @@ test("mutable definition with mutable injection", async (t) => {
     }),
   );
 
-  m1.define(Cell.from("p1", "p", ["mutable x", "q"], (mx, q) => mx.value + q));
-  m1.define(Cell.from("q1", "q", ["p"], (p) => p));
+  m.define(Cell.from("p1", "p", ["mutable x", "q"], (mx, q) => mx.value + q));
+  m.define(Cell.from("q1", "q", ["p"], (p) => p));
+
+  await Promises.delay(1000);
+
+  expect(m.variable("p1")!.error!.toString()).toBe(RuntimeError.circularDependency().toString());
+});
+
+test("mutable update from different cell", async (t) => {
+  const runtime = Runtime.create("test", "0.0.1");
+  registerListeners(runtime);
+
+  const m = runtime.define("m1", "m1", "0.0.1");
+  m.defineMutable(Cell.from("x1", "x", [], () => 10));
+  m.define(Cell.from("a1", "a", ["x"], (x: number) => x + 10));
+  // m.define(
+  //   Cell.from("b1", "b", ["x"], (x: number) => {
+  //     return Promises.delay(200, () => {
+  //       return x;
+  //     });
+  //   }),
+  // );
+
+  m.define(
+    Cell.from("c1", "c", ["mutable@x"], function* (accessor: MutableAccessor<number>) {
+      let i = 1;
+      while (true) {
+        yield Promises.tick(200, () => {
+          const value = (accessor.value = i++);
+          return value + 5;
+        });
+      }
+    }),
+  );
 
   await Promises.delay(1000);
 });

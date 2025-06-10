@@ -57,6 +57,7 @@ export class Variable {
     return `${moduleId}/${variableId}`;
   }
 
+  // full name of the variable in the format moduleId:variableName
   static fullName(moduleId: string, variableName: string): ModuleVariableName {
     return `${moduleId}:${variableName}`;
   }
@@ -64,6 +65,8 @@ export class Variable {
   constructor(props: VariableProps) {
     const { module, cell } = props;
     this.module = module;
+
+    // update the cell deps with module id
     this.cell = cell.with(module);
 
     this.promise = Promix.default(this.id, this.version);
@@ -150,7 +153,11 @@ export class Variable {
     // make sure the input variables have matching names
     const missing = this.dependencies.find((name, i) => !inputMap.has(name));
     if (missing) {
-      return Promix.reject(RuntimeError.notDefined(missing.split(":")[1]), this.id, this.version).catch(this.rejected);
+      return Promix.reject(
+        RuntimeError.notDefined(missing.split(":")[1]),
+        this.id,
+        this.version,
+      ).catch(this.rejected);
     }
 
     // get the input variable values in order by name
@@ -179,7 +186,7 @@ export class Variable {
   // if value is a generator, run the generator once
   generateFirst(value: any) {
     if (generatorish(value)) {
-      console.log("generateFirst", value);
+      // console.log("generateFirst", value);
       this.generator = value;
       return this.generate();
     }
@@ -195,7 +202,7 @@ export class Variable {
     }
   }
 
-  addDirty(value) {
+  addDirty(value: any) {
     if (this.generator.next !== noop && !this.done) {
       this.runtime.generators.add(this);
     }

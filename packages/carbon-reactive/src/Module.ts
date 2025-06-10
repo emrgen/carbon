@@ -1,7 +1,9 @@
 import { uniqBy } from "lodash";
 import { SemVer } from "semver";
 import { Cell } from "./Cell";
+import { Mutable } from "./Mutable";
 import { Runtime } from "./Runtime";
+import { MutableAccessor } from "./types";
 import { Variable } from "./Variable";
 import { randomString } from "./x";
 
@@ -11,7 +13,7 @@ const LOG = false;
 // e.g. "module@1" or "module@1.0" or "module@1.0.0"
 export type ModuleNameVersion = string;
 export type ModuleVariableId = string; // `${moduleId}/${variableId}`;
-export type ModuleVariableName = string; // `${moduleId}@${variableName}`;
+export type ModuleVariableName = string; // `${moduleId}:${variableName}`;
 
 // Module represents a collection of variables
 export class Module {
@@ -83,7 +85,12 @@ export class Module {
     return this.variables.get(Variable.id(this.id, id));
   }
 
-  derive(id: string, name: string, injects: (string | { name: string; alias: string })[], fromModule: Module) {
+  derive(
+    id: string,
+    name: string,
+    injects: (string | { name: string; alias: string })[],
+    fromModule: Module,
+  ) {
     const mod = Module.create(this.runtime, id, name, fromModule.version.toString());
     injects.forEach((inject) => {
       if (typeof inject === "string") {
@@ -109,12 +116,51 @@ export class Module {
       id: `imported/${module.id}/${randomString(10)}`,
       name: alias,
       code: `(x) => x`,
+      // fully qualified name of the variable in the module
       dependencies: [Variable.fullName(module.id, name)],
       definition: (x) => x,
       builtin: variable?.builtin,
     });
 
     return this.define(cell);
+  }
+
+  // define a mutable variable with the given name and value
+  defineMutable(cell: Cell) {
+    const { name } = cell;
+
+    const mutableId = Mutable.mutableId(name);
+    const mutableName = Mutable.mutableName(name);
+
+    // module local id for the mutable variable
+    const moduleVariableName = Variable.fullName(this.id, name);
+    const mut = this.runtime.mutable;
+
+    // define a mutable variable with the given name and value
+    mut.define(moduleVariableName, cell.definition());
+
+    // define the mutable part of the mutable variable
+    this.define(
+      Cell.create({
+        id: mutableId,
+        name: mutableName,
+        dependencies: [],
+        definition: function () {
+          return mut.accessor<any>(moduleVariableName);
+        },
+      }),
+    );
+
+    // define the immutable part of the mutable variable
+    // when the mutable variable is changed, the immutable part will be recomputed
+    this.define(
+      Cell.from(
+        cell.id,
+        cell.name,
+        [mutableName],
+        (accessor: MutableAccessor<any>) => accessor.value,
+      ),
+    );
   }
 
   // create a new variable with the given definition
@@ -215,6 +261,7 @@ export class Module {
   }
 
   // connect the variable with the module local variables
+  // imports from other modules are done explicitly using import function
   private connect(variable: Variable) {
     variable.inputs = variable.dependencies
       .map((name) => this.moduleVariables.get(name))

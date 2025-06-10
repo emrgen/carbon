@@ -5,6 +5,11 @@ export class RuntimeError extends Error {
     return new RuntimeError(message);
   }
 
+  static CIRCULAR_DEPENDENCY = RuntimeError.of("circular dependency");
+  static NOT_DEFINED = RuntimeError.of("not defined");
+  static DUPLICATE_DEFINITION = RuntimeError.of("duplicate definition");
+  static REDEFINITION = RuntimeError.of("redefinition");
+
   static duplicateDefinition(name: string) {
     return new RuntimeError(`${name} is defined more than once`);
   }
@@ -13,7 +18,7 @@ export class RuntimeError extends Error {
     return new RuntimeError(`${name} is not defined`);
   }
 
-  static circularDependency(name: string) {
+  static circularDependency() {
     return new RuntimeError("circular definition");
   }
 
@@ -25,9 +30,13 @@ export class RuntimeError extends Error {
     super(message);
     this.name = "RuntimeError";
   }
+
+  toString() {
+    return `${this.name}: ${this.message}`;
+  }
 }
 
-export function generatorish(value) {
+export function generatorish(value: { next: any; return: any }) {
   return value && typeof value.next === "function" && typeof value.return === "function";
 }
 
