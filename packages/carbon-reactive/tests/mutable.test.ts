@@ -220,7 +220,7 @@ test("12. mutable definition", async (t) => {
   //     code: "() => 10",
   //     dependencies: ["Mutable", "z"],
   //     definition: (Mutable) => {
-  //       if (!Mutable.variables.has("m1/x1")) {
+  //       if (!Mutable.variablesById.has("m1/x1")) {
   //         Mutable.define("m1/x1", 0);
   //       }
   //
@@ -256,7 +256,7 @@ test("12. mutable definition", async (t) => {
   //       code: "() => 10",
   //       dependencies: ["Mutable"],
   //       definition: (Mutable) => {
-  //         if (!Mutable.variables.has("m1/x1")) {
+  //         if (!Mutable.variablesById.has("m1/x1")) {
   //           Mutable.define("m1/x1", 0);
   //         }
   //

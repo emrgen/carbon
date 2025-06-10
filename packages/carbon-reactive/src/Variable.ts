@@ -21,12 +21,12 @@ export class Variable {
   // parent module
   module: Module;
 
-  // encapsulated a variables definition
+  // encapsulated a variablesById definition
   cell: Cell;
 
   // this has higher priority than the connection in the graph
   // this are updated when the variable is created, redefined or deleted
-  // runtime graph is updated based on these variables
+  // runtime graph is updated based on these variablesById
   inputs: Variable[] = [];
   outputs: Variable[] = [];
 
@@ -153,7 +153,7 @@ export class Variable {
 
     const inputMap = new Map(inputs.map((input) => [input.name, input]));
     // console.log(inputs, this.cell.dependencies);
-    // make sure the input variables have matching names
+    // make sure the input variablesById have matching names
     const missing = this.dependencies.find((name, i) => !inputMap.has(name));
     if (missing) {
       return Promix.reject(
@@ -169,7 +169,7 @@ export class Variable {
       return Promix.reject(RuntimeError.of(`Variable ${this.cell.name} has missing dependencies`));
     }
 
-    // get the values of the input variables
+    // get the values of the input variablesById
     const args = deps.map((input) => input.value);
 
     try {

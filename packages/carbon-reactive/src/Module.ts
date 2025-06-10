@@ -15,7 +15,7 @@ export type ModuleNameVersion = string;
 export type ModuleVariableId = string; // `${moduleId}/${variableId}`;
 export type ModuleVariableName = string; // `${moduleId}:${variableName}`;
 
-// Module represents a collection of variables
+// Module represents a collection of variablesById
 export class Module {
   runtime: Runtime;
 
@@ -26,6 +26,11 @@ export class Module {
   // version of the module
   version: SemVer;
 
+  variablesById: Map<ModuleVariableId, Variable> = new Map();
+
+  variablesByName: Map<ModuleVariableName, Variable[]> = new Map();
+
+  // create a new module with the given runtime, id, name and version
   static create(runtime: Runtime, id: string, name: string, version: string) {
     return new Module(runtime, id, name, version);
   }
@@ -46,11 +51,11 @@ export class Module {
   }
 
   get variables() {
-    return this.runtime.variables;
+    return this.variablesById;
   }
 
   get moduleVariables() {
-    return this.runtime.moduleVariables;
+    return this.variablesByName;
   }
 
   // recompute the variable with the given name
@@ -64,11 +69,11 @@ export class Module {
 
   private value(name: string): Variable | undefined {
     const fullName = Variable.fullName(this.id, name);
-    const variables = this.moduleVariables.get(fullName);
+    const variables = this.runtime.variablesByName.get(fullName);
     if (!variables) return;
 
     if (variables.length > 1) {
-      console.error("multiple variables with the same name", name);
+      console.error("multiple variablesById with the same name", name);
       return;
     }
 
@@ -84,10 +89,10 @@ export class Module {
   variable(id: string, mutable?: boolean): Variable | undefined {
     if (mutable) {
       const mutableId = Mutable.mutableId(id);
-      return this.variables.get(Variable.id(this.id, mutableId));
+      return this.runtime.variablesById.get(Variable.id(this.id, mutableId));
     }
 
-    return this.variables.get(Variable.id(this.id, id));
+    return this.runtime.variablesById.get(Variable.id(this.id, id));
   }
 
   derive(
@@ -119,7 +124,7 @@ export class Module {
     }
 
     const cell = Cell.create({
-      id: `imported/${module.id}/${randomString(10)}`,
+      id: `imported(${module.id}/${randomString(10)})`,
       name: alias,
       code: `(x) => x`,
       // fully qualified name of the variable in the module
@@ -135,6 +140,8 @@ export class Module {
   defineMutable(cell: Cell): Variable {
     const { name } = cell;
 
+    const hiddenId = Mutable.hiddenId(cell.id);
+    const hiddenName = Mutable.hiddenName(name);
     const mutableId = Mutable.mutableId(cell.id);
     const mutableName = Mutable.mutableName(name);
 
@@ -142,15 +149,22 @@ export class Module {
     const moduleVariableName = Variable.fullName(this.id, name);
     const mut = this.runtime.mutable;
 
-    // define a mutable variable with the given name and value
-    mut.define(moduleVariableName, cell.definition());
+    this.define(
+      Cell.from(hiddenId, hiddenName, cell.dependencies, (...args) => {
+        const value = cell.definition(...args);
+        // define a mutable variable with the given name and value
+        mut.define(moduleVariableName, value);
+
+        return value;
+      }),
+    );
 
     // define the mutable part of the mutable variable
     this.define(
       Cell.create({
         id: mutableId,
         name: mutableName,
-        dependencies: [],
+        dependencies: [hiddenName],
         definition: function () {
           return mut.accessor<any>(moduleVariableName);
         },
@@ -173,7 +187,7 @@ export class Module {
     // check if the cell is a builtin variable
     if (cell.builtin) {
       const fullName = Variable.fullName(this.id, cell.name);
-      const moduleVariables = this.moduleVariables.get(fullName);
+      const moduleVariables = this.runtime.variablesByName.get(fullName);
       if (moduleVariables?.length) {
         console.error("builtin variable already exists", fullName);
         return moduleVariables[0];
@@ -194,7 +208,7 @@ export class Module {
     const fullId = Variable.id(this.id, cell.id);
     // if the variable with same id already exists
     // just redefine it: delete and recreate
-    if (this.variables.has(fullId)) {
+    if (this.runtime.variablesById.has(fullId)) {
       return this.redefine(cell);
     }
 
@@ -212,7 +226,7 @@ export class Module {
         variable.outputs.map((v) => v.id),
       );
 
-    this.runtime.onCreate(variable);
+    this.onCreate(variable);
 
     return variable;
   }
@@ -226,7 +240,7 @@ export class Module {
     }
 
     const fullId = Variable.id(this.id, cell.id);
-    const variable = this.variables.get(fullId);
+    const variable = this.runtime.variablesById.get(fullId);
     if (!variable) {
       return this.define(cell);
     }
@@ -260,14 +274,14 @@ export class Module {
     // }
 
     // name of the variable has changed
-    this.runtime.onRemove(variable);
+    this.onRemove(variable);
     this.disconnect(variable);
 
     variable.version = this.graph.version + 1;
     variable.redefine(cell);
 
     this.connect(variable);
-    this.runtime.onCreate(variable);
+    this.onCreate(variable);
 
     return variable;
   }
@@ -275,23 +289,55 @@ export class Module {
   // delete a variable by id
   delete(id: string) {
     const fullId = Variable.id(this.id, id);
-    const variable = this.variables.get(fullId);
+    const variable = this.runtime.variablesById.get(fullId);
 
-    // builtin variables cannot be deleted
+    // builtin variablesById cannot be deleted
     if (variable?.builtin) return;
 
     if (variable) {
       this.disconnect(variable);
       variable.delete({ module: true });
-      this.runtime.onRemove(variable);
+      this.onRemove(variable);
     }
   }
 
-  // connect the variable with the module local variables
+  onCreate(variable: Variable) {
+    this.runtime.onCreate(variable);
+
+    // connect the variable with the module local variablesById
+    this.variablesById.set(variable.id, variable);
+
+    // connect the variable with the module local variablesByName
+    const fullName = Variable.fullName(this.id, variable.name);
+    if (!this.variablesByName.has(fullName)) {
+      this.variablesByName.set(fullName, []);
+    }
+    this.variablesByName.get(fullName)?.push(variable);
+  }
+
+  onRemove(variable: Variable) {
+    this.runtime.onRemove(variable);
+    // remove the variable from the module local variablesById
+    this.variablesById.delete(variable.id);
+
+    // remove the variable from the module local variablesByName
+    const fullName = Variable.fullName(this.id, variable.name);
+    if (this.variablesByName.has(fullName)) {
+      const variables = this.variablesByName.get(fullName);
+      if (variables) {
+        this.variablesByName.set(
+          fullName,
+          variables.filter((v) => v.id !== variable.id),
+        );
+      }
+    }
+  }
+
+  // connect the variable with the module local variablesById
   // imports from other modules are done explicitly using import function
   private connect(variable: Variable) {
     variable.inputs = variable.dependencies
-      .map((name) => this.moduleVariables.get(name))
+      .map((name) => this.runtime.variablesByName.get(name))
       .filter(Boolean)
       .flat() as Variable[];
 
@@ -300,7 +346,7 @@ export class Module {
       input.outputs = uniqBy(input.outputs, "id");
     });
 
-    this.variables.forEach((v) => {
+    this.runtime.variablesById.forEach((v) => {
       if (v.id === variable.id) return;
       if (v.dependencies.includes(variable.name)) {
         v.inputs.push(variable);

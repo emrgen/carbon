@@ -27,12 +27,12 @@ export class Runtime extends EventEmitter {
   modules: Map<ModuleNameVersion, Module> = new Map();
 
   // one module may have variable with same name
-  variables: Map<ModuleVariableId, Variable> = new Map();
+  variablesById: Map<ModuleVariableId, Variable> = new Map();
 
-  // generated from variables map
-  moduleVariables: Map<ModuleVariableName, Variable[]> = new Map();
+  // generated from variablesById map
+  variablesByName: Map<ModuleVariableName, Variable[]> = new Map();
 
-  // variables that are dirty and need to be recomputed
+  // variablesById that are dirty and need to be recomputed
   dirty: Set<Variable> = new Set();
 
   // generators that are dirty and need to be recomputed
@@ -42,10 +42,10 @@ export class Runtime extends EventEmitter {
 
   builtinVariables: Map<VariableName, Variable> = new Map();
 
-  // mutable variables store
+  // mutable variablesById store
   mutable: Mutable;
 
-  // connecting is true when the runtime is connecting the variables
+  // connecting is true when the runtime is connecting the variablesById
   connecting: boolean = false;
 
   promise: Promix<any> = Promix.default("runtime");
@@ -61,9 +61,9 @@ export class Runtime extends EventEmitter {
     this.graph = new Graph();
     this.mutable = new Mutable(this);
 
-    const mod = Module.create(this, "mod:builtinId", "mod:builtinName", "0.0.1");
+    const mod = Module.create(this, "mod:builtin", "mod:builtin", "0.0.1");
 
-    // create builtins variables
+    // create builtins variablesById
     entries(builtins).forEach(([name, value]) => {
       const cell = Cell.create({
         id: "builtin/" + name,
@@ -83,7 +83,7 @@ export class Runtime extends EventEmitter {
   }
 
   variable(id: string) {
-    return this.variables.get(id);
+    return this.variablesById.get(id);
   }
 
   // create a new module with the given name and version
@@ -97,7 +97,7 @@ export class Runtime extends EventEmitter {
 
     const mod = Module.create(this, id, name, version);
 
-    // import the builtins from the runtime
+    // inject the builtin variable from the runtime into the module
     this.builtinVariables.forEach((variable) => {
       mod.import(variable.cell.name, variable.cell.name, this.builtin);
     });
@@ -106,11 +106,11 @@ export class Runtime extends EventEmitter {
   }
 
   onCreate(variable: Variable) {
-    this.variables.set(variable.id, variable);
-    this.moduleVariables.set(variable.name, this.moduleVariables.get(variable.name) || []);
-    this.moduleVariables.get(variable.name)!.push(variable);
+    this.variablesById.set(variable.id, variable);
+    this.variablesByName.set(variable.name, this.variablesByName.get(variable.name) || []);
+    this.variablesByName.get(variable.name)!.push(variable);
 
-    this.moduleVariables.get(variable.name)?.forEach((v) => {
+    this.variablesByName.get(variable.name)?.forEach((v) => {
       this.dirty.add(v);
     });
 
@@ -129,12 +129,12 @@ export class Runtime extends EventEmitter {
   }
 
   onRemove(variable: Variable) {
-    this.variables.delete(variable.name);
+    this.variablesById.delete(variable.name);
     // if there were multiple variable with same name they become dirty
-    const variables = this.moduleVariables.get(variable.name);
+    const variables = this.variablesByName.get(variable.name);
     if (variables) {
       const remaining = variables.filter((v) => v.id !== variable.id);
-      this.moduleVariables.set(variable.name, remaining);
+      this.variablesByName.set(variable.name, remaining);
       remaining.forEach((v) => {
         this.dirty.add(v);
       });
@@ -185,11 +185,11 @@ export class Runtime extends EventEmitter {
     });
   }
 
-  // recompute the dirty variables and their dependencies
+  // recompute the dirty variablesById and their dependencies
   private recompute() {
     LOG && console.log("----------------\n> recomputing\n----------------");
     if (this.dirty.size === 0) {
-      // if no dirty variables tryRecompute (to process pending generators)
+      // if no dirty variablesById tryRecompute (to process pending generators)
       this.tryRecompute();
       return;
     }
@@ -218,7 +218,7 @@ export class Runtime extends EventEmitter {
     this.compute(roots, sorted, circular, pending);
   }
 
-  // connect the dirty variables and find out the roots
+  // connect the dirty variablesById and find out the roots
   precompute(dirty: Variable[]) {
     this.connecting = true;
     LOG && console.log("----------------\n> precomputing\n----------------");
@@ -276,7 +276,7 @@ export class Runtime extends EventEmitter {
     // });
 
     this.connecting = false;
-    // then connect the dirty variables
+    // then connect the dirty variablesById
     return {
       roots,
       pending,

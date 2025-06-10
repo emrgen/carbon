@@ -138,23 +138,6 @@ const CodeCellWrapper = (props: RendererProps) => {
       <div className={"carbon-cell-container"} onKeyUp={stop} onBeforeInput={stop}>
         <Result node={node} onToggle={handleToggleCell} />
         <Code node={node} isCollapsed={isCollapsed} />
-
-        {/*<div*/}
-        {/*  className={"carbon-cell-code"}*/}
-        {/*  style={{*/}
-        {/*    height: isCollapsed ? "0" : "auto",*/}
-        {/*    overflow: isCollapsed ? "hidden" : "visible",*/}
-        {/*  }}*/}
-        {/*>*/}
-        {/*  <div*/}
-        {/*    className={"carbon-cell-handle"}*/}
-        {/*    data-focused={isFocused}*/}
-        {/*    onClick={rotateCodeType}*/}
-        {/*  >*/}
-        {/*    <div className={"cell-code-handle"}>{codeIcons[codeType]}</div>*/}
-        {/*  </div>*/}
-        {/*  <Code node={node} />*/}
-        {/*</div>*/}
       </div>
       {SelectionHalo}
     </CarbonBlock>

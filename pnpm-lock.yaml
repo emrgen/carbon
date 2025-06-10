@@ -328,6 +328,12 @@ importers:
       '@emrgen/carbon-react':
         specifier: workspace:*
         version: link:../../packages/carbon-react
+      '@emrgen/carbon-reactive':
+        specifier: workspace:*
+        version: link:../../packages/carbon-reactive
+      '@emrgen/carbon-reactive-cell':
+        specifier: workspace:*
+        version: link:../../packages/carbon-reactive-cell
       '@emrgen/carbon-sheet':
         specifier: workspace:*
         version: link:../../packages/carbon-sheet

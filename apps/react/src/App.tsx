@@ -6,12 +6,13 @@ import { AffineExp } from "./carbon/Dev/Affine";
 import { Code } from "./carbon/Dev/Code";
 import { PageProps } from "./carbon/Dev/Props";
 import { SidebarLayout } from "./carbon/Dev/SidebarLayout";
-import { LazyBoard, LazyDesign, LazyDev } from "./carbon/index";
+import { LazyBoard, LazyDesign, LazyDev, LazyReactive } from "./carbon/index";
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/reactive" element={<LazyReactive />} />
         {/*<Route path="/demo/map" element={<MMap />} />*/}
         {/*<Route path="/demo/draggable" element={<LazyDraggableDemo />} />*/}
         {/*<Route path="/demo/emoji" element={<LazyEmojiDemo />} />*/}

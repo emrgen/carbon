@@ -28,14 +28,14 @@ test("test unreachable nodes", async (t) => {
   // const roots2 = precompute([G.node(b)!], G);
   // console.log(" ");
   // await compute(roots2, G);
-  // console.log(G.variables().map((node) => node.uid));
+  // console.log(G.variablesById().map((node) => node.uid));
   // console.log("--------");
 
   //   // c became dirty
   //   const roots3 = precompute([G.node(c)!], G);
   //   console.log(" ");
   //   await compute(roots3, G);
-  //   console.log(G.variables().map((node) => node.uid));
+  //   console.log(G.variablesById().map((node) => node.uid));
   //   console.log("--------");
   //
   //   // add a new node
@@ -46,7 +46,7 @@ test("test unreachable nodes", async (t) => {
   //   const roots4 = precompute([G.node(e)!], G);
   //   console.log(" ");
   //   await compute(roots4, G);
-  //   console.log(G.variables().map((node) => node.uid));
+  //   console.log(G.variablesById().map((node) => node.uid));
   //   console.log("--------");
   //
   //   // image c is removed

@@ -29,3 +29,9 @@ export const LazyBoard = lazy(() =>
     return { default: module.Board };
   }),
 );
+
+export const LazyReactive = lazy(() =>
+  import("./Dev/Reactive").then((module) => {
+    return { default: module.Reactive };
+  }),
+);
