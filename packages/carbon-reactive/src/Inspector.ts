@@ -1,9 +1,7 @@
-import { Runtime } from "./Runtime";
+import { Variable } from "./Variable";
 
 export class Inspector {
-  constructor(readonly runtime: Runtime) {
-    this.runtime = runtime;
-  }
+  constructor(readonly variable: Variable) {}
 
   // connect to the variable with the given id
   // inspect(id: string): Observer {

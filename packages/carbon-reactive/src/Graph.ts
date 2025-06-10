@@ -128,9 +128,9 @@ export class Graph<T extends NodeId> {
       }
     }
 
+    // topological sort using Kahn's algorithm
 
-    // console.log('queue',queue.map((n) => n.id));
-    // topological sort
+    // roots are the nodes with no incoming edges
     const roots = Array.from(queue);
 
     // will include the roots as well

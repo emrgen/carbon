@@ -1,14 +1,10 @@
 import { range } from "lodash";
 
+// RuntimeError class for throwing runtime errors during runtime computation
 export class RuntimeError extends Error {
   static of(message: string) {
     return new RuntimeError(message);
   }
-
-  static CIRCULAR_DEPENDENCY = RuntimeError.of("circular dependency");
-  static NOT_DEFINED = RuntimeError.of("not defined");
-  static DUPLICATE_DEFINITION = RuntimeError.of("duplicate definition");
-  static REDEFINITION = RuntimeError.of("redefinition");
 
   static duplicateDefinition(name: string) {
     return new RuntimeError(`${name} is defined more than once`);
@@ -23,7 +19,7 @@ export class RuntimeError extends Error {
   }
 
   static recalculating(name: string) {
-    return new RuntimeError("recalculating");
+    return new RuntimeError("recalculating: " + name);
   }
 
   constructor(message: string) {
