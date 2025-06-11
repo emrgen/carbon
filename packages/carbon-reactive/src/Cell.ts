@@ -55,8 +55,12 @@ export class Cell {
 
   static noop(name: string) {}
 
+  static hasName(name: string) {
+    return name && !name.startsWith("__unnamed__") && !name.startsWith("__view__");
+  }
+
   static undefinedName() {
-    return `unnamed_${randomString(10)}`;
+    return `__unnamed__${randomString(10)}`;
   }
 
   // parse a cell definition and return a Cell instance

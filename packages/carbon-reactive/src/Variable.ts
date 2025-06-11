@@ -78,6 +78,10 @@ export class Variable {
     this.addDirty = this.addDirty.bind(this);
   }
 
+  get cellId() {
+    return this.cell.id;
+  }
+
   get id() {
     return Variable.id(this.module.id, this.cell.id);
   }
@@ -244,7 +248,8 @@ export class Variable {
   }
 
   pending() {
-    this.runtime.emit("pending", this.module, this.cell);
+    this.runtime.emit("pending", this);
+    this.runtime.emit("pending:" + this.cellId, this);
   }
 
   // mark the variable as rejected with an error
@@ -263,7 +268,7 @@ export class Variable {
     this.value = undefined;
     this.generator = { next: noop, return: noop };
     this.runtime.emit("rejected", this);
-    this.runtime.emit("rejected:" + this.id, this);
+    this.runtime.emit("rejected:" + this.cellId, this);
     this.promise.fulfilled(this);
     return this;
   }
@@ -282,9 +287,9 @@ export class Variable {
 
     this.value = value;
     this.error = undefined;
-    !this.builtin && this.runtime.emit("fulfilled", this);
-    !this.builtin && this.runtime.emit("fulfilled:" + this.id, this);
     this.promise.fulfilled(this);
+    !this.builtin && this.runtime.emit("fulfilled", this);
+    !this.builtin && this.runtime.emit("fulfilled:" + this.cellId, this);
     return this;
   }
 }

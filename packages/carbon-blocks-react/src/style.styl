@@ -525,11 +525,17 @@ span[data-name=text] {
 
 [data-name=quote]
   position relative
-  padding: 2px 10px
+  padding: 2px 14px
   margin: 4px 0
-  border-left: 3px solid $quoteColor
-  // [data-type="content"]
-  // 	line-height: $lineHeight
+
+  &:after
+    position absolute
+    content: ""
+    left: 2px
+    top: 2px
+    width: 3px
+    height: calc(100% - 4px)
+    background: $quoteColor
 
   > [data-type=content]
     padding 0 2px

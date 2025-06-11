@@ -8,14 +8,19 @@
     "lint": "eslint *.ts*"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.191",
-    "lodash": "^4.17.21",
+    "@emrgen/carbon-codemirror": "workspace:*",
+    "@emrgen/carbon-core": "workspace:*",
+    "@emrgen/carbon-dragon-react": "workspace:*",
+    "@emrgen/carbon-react": "workspace:*",
+    "@emrgen/carbon-reactive": "workspace:*",
     "@emrgen/types": "workspace:*",
-    "@emrgen/carbon-core": "workspace:*"
+    "@types/lodash": "^4.14.191",
+    "is-hotkey": "^0.2.0",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
     "@emrgen/eslint-config-custom": "workspace:*",
+    "eslint": "^7.32.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.4.5"
   }

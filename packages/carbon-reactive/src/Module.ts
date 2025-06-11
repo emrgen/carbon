@@ -321,12 +321,11 @@ export class Module {
     this.variablesById.delete(variable.id);
 
     // remove the variable from the module local variablesByName
-    const fullName = Variable.fullName(this.id, variable.name);
-    if (this.variablesByName.has(fullName)) {
-      const variables = this.variablesByName.get(fullName);
+    if (this.variablesByName.has(variable.name)) {
+      const variables = this.variablesByName.get(variable.name);
       if (variables) {
         this.variablesByName.set(
-          fullName,
+          variable.name,
           variables.filter((v) => v.id !== variable.id),
         );
       }

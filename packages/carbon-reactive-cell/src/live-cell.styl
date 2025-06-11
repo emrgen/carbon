@@ -1,0 +1,44 @@
+[data-name=liveCell]
+  position relative
+
+.reactive-cell-editor-wrapper
+  position relative;
+
+  .reactive-cell-status
+    position absolute
+    top 2px
+    right 0
+    bottom 0
+    left 2px
+    height calc(100% - 4px)
+    width 4px
+    border-radius 2px
+
+    // blink animation
+    &.pending
+      background #aaa
+      animation blink 1s infinite
+
+@keyframes blink
+  0%
+    opacity 1
+  50%
+    opacity 0.3
+  100%
+    opacity 1
+
+.carbon-reactive-cell-viewer
+  min-height 32px
+
+.reactive-cell-result
+  position relative
+  padding 0 12px
+  line-height 30px
+  font-size 14px
+  color #333
+
+.reactive-cell-error
+  padding 0 12px
+  color red
+  line-height 30px
+  font-size 14px

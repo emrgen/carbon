@@ -19,7 +19,7 @@ function resolve(runtime: Runtime, id: string) {
 }
 
 test("test mutable injection", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   const m = runtime.mutable;
   m.define("a", 0);
 
@@ -41,7 +41,7 @@ test("test mutable injection", async (t) => {
 });
 
 test("mutable definition with mutable injection", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   const mut = runtime.mutable;
   const m = runtime.define("m1", "m1", "0.0.1");
   // registerListeners(runtime);
@@ -102,7 +102,7 @@ test("mutable definition with mutable injection", async (t) => {
 });
 
 test("9. mutable update from different cell", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
 
   const m = runtime.define("m1", "m1", "0.0.1");
   const x = m.defineMutable(Cell.from("x1", "x", [], () => 0));
@@ -139,7 +139,7 @@ test("9. mutable update from different cell", async (t) => {
 });
 
 test("10. multiple mutable definitions", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   // registerListeners(runtime);
 
   const m1 = runtime.define("m1", "m1", "0.0.1");
@@ -154,7 +154,7 @@ test("10. multiple mutable definitions", async (t) => {
 });
 
 test("11. get/set", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
 
   const m = runtime.define("m1", "m1", "0.0.1");
   const x = m.defineMutable(Cell.from("x1", "x", [], () => 0));
@@ -174,7 +174,7 @@ test("11. get/set", async (t) => {
 });
 
 test("12. mutable definition", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   const m1 = runtime.define("m1", "m1", "0.0.1");
   // registerListeners(runtime);
 

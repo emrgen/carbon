@@ -1,30 +1,45 @@
 import { Box } from "@chakra-ui/react";
 
-import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
+import { blockPresetPlugins, node, title } from "@emrgen/carbon-blocks";
 import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { FloatingStyleMenu, InsertBlockMenu } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
-import { RenderManager, useCreateCachedCarbon } from "@emrgen/carbon-react";
-import { Cell, Promises, Runtime } from "@emrgen/carbon-reactive";
-import { ReactiveRuntimeContext } from "@emrgen/carbon-reactive-cell";
+import { CodeValuePath, corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
+import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
+import { Cell, Runtime } from "@emrgen/carbon-reactive";
+import { LiveCell, LiveCellRenderer, ReactiveRuntimeContext } from "@emrgen/carbon-reactive-cell";
 import { CarbonApp } from "@emrgen/carbon-utils";
+import { Library } from "@observablehq/stdlib";
 import lodash, { flattenDeep } from "lodash";
 import { useState } from "react";
 import "./test.styl";
 
 const data = node("carbon", [
-  node("page", [title([text("Reactive cells")])], {
-    [ModePath]: "edit",
-  }),
+  node(
+    "page",
+    [
+      title("Reactive cells"),
+      node("liveCell", [], {
+        [CodeValuePath]: `x = 1`,
+      }),
+    ],
+    {
+      [ModePath]: "edit",
+    },
+  ),
 ]);
 
 // @ts-ignore
 data.id = NodeId.ROOT.toString();
 
-const plugins = [...corePresetPlugins, ...blockPresetPlugins, new ClipboardPlugin()];
+const plugins = [
+  ...corePresetPlugins,
+  ...blockPresetPlugins,
+  new ClipboardPlugin(),
+  new LiveCell(),
+];
 
-const renderers = [...blockPresetRenderers];
+const renderers = [...blockPresetRenderers, LiveCellRenderer];
 
 const renderManager = RenderManager.from(flattenDeep(renderers));
 
@@ -41,23 +56,16 @@ const renderManager = RenderManager.from(flattenDeep(renderers));
 // @ts-ignore
 window.Cell = Cell;
 
-const runtime = Runtime.create("test", "0.0.1", {
+const builtins = Object.assign(new Library(), {
   _: lodash,
-  Promises: Promises,
-  penguins: [
-    {
-      name: "Emrgen",
-      age: 3,
-      species: "Emperor Penguin",
-    },
-  ],
 });
+const runtime = Runtime.create(builtins);
 // @ts-ignore
 window.runtime = runtime;
 
-runtime.on("fulfilled", (cell) => {
-  console.log(`fulfilled: ${cell.name}`, cell.value);
-});
+// runtime.on("fulfilled", (cell) => {
+//   console.log(`fulfilled: ${cell.name}`, cell.id, cell.value);
+// });
 
 const mod = runtime.define("mid", "test-module", "0.0.1");
 // @ts-ignore
@@ -73,7 +81,7 @@ export function Reactive() {
   const [content] = useState(() => {
     return data;
   });
-  const app = useCreateCachedCarbon("reactive", content, flattenDeep(plugins));
+  const app = useCreateCarbon("reactive", content, flattenDeep(plugins));
   // @ts-ignore
   window.app = app;
 

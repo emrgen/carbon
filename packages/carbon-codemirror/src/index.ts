@@ -2,6 +2,7 @@ import { Extension, ReactRenderer } from "@emrgen/carbon-react";
 
 import "./codemirror.styl";
 import "./codemirror-editor.styl";
+import { CodeMirrorEditor } from "./components/CodeMirrorEditor";
 import { CodeMirror, CodeMirrorContentPath } from "./plugins/CodeMirror";
 import { CodeMirrorComp } from "./renderers/CodeMirror";
 
@@ -10,5 +11,5 @@ export const codemirrorExtension: Extension = {
   renderers: [ReactRenderer.create("codemirror", CodeMirrorComp)],
 };
 
-export { CodeMirrorContentPath };
+export { CodeMirrorContentPath, CodeMirrorEditor };
 export * from "./hooks";

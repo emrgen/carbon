@@ -114,7 +114,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       const block = type.default();
       if (!block) return;
 
-      if (type.isSandbox && type.spec.insert?.focus) {
+      if (type.isSandbox && type.spec.insertFocus) {
         console.log("sandboxed", block.linkedProps);
         block.linkedProps?.updateProps({
           [FocusOnInsertPath]: true,
@@ -124,7 +124,7 @@ export function InsertBlockMenu(props: BlockMenuProps) {
       tr.Insert(Point.toBefore(parent.id), block);
       tr.SetContent(node.id, []);
 
-      if (type.isSandbox && type.spec.insert?.focus) {
+      if (type.isSandbox && type.spec.insertFocus) {
         tr.Select(PinnedSelection.SKIP);
       } else {
         const after = PinnedSelection.fromPin(Pin.future(node, 0))!;

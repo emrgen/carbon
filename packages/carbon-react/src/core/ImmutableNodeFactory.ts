@@ -55,9 +55,7 @@ export class ImmutableNodeFactory implements NodeFactory {
       throw new Error(`Children must be an array`);
     }
 
-    const props = isEmpty(json.props)
-      ? type.props.clone()
-      : type.props.clone().merge(json.props);
+    const props = isEmpty(json.props) ? type.props.clone() : type.props.clone().merge(json.props);
 
     if (!props.get(MarksPath)) {
       props.set(MarksPath, []);
@@ -65,7 +63,7 @@ export class ImmutableNodeFactory implements NodeFactory {
     const nodeId = id ? NodeId.deserialize(id)! : this.blockId();
     const nodes = children.map((n) => schema.nodeFromJSON(n)) as Node[];
 
-    // inject props linked node if not exists for sandbox
+    // NOTE: inject props linked node for node spec with `isSandbox`
     if (type.isSandbox && !links["props"]) {
       links["props"] = {
         name: "props",
@@ -133,10 +131,7 @@ export class ImmutableNodeFactory implements NodeFactory {
   // clone node with new mapped content
   clone(
     node: Node,
-    map: Maps<
-      Omit<NodeContentData, "children">,
-      Omit<NodeContentData, "children">
-    >,
+    map: Maps<Omit<NodeContentData, "children">, Omit<NodeContentData, "children">>,
   ): Node {
     const { scope } = this;
     const clone = ImmutableNode.create(

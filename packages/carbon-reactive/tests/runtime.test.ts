@@ -8,7 +8,7 @@ import { RuntimeError } from "../src/x";
 test(
   "create a single variable",
   async (t) => {
-    const runtime = Runtime.create("test", "0.0.1");
+    const runtime = Runtime.create();
     const mod = runtime.define("1", "mod", "0.0.1");
     // registerListeners(runtime);
 
@@ -175,7 +175,7 @@ test(
 );
 
 test("create Promise variable", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   const mod = runtime.define("1", "mod", "0.0.1");
   // registerListeners(runtime);
 
@@ -246,7 +246,7 @@ test("create Promise variable", async (t) => {
 });
 
 test("create constant variable", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   const mod = runtime.define("mod", "mod", "0.0.1");
   // registerListeners(runtime);
 
@@ -290,7 +290,7 @@ test("create constant variable", async (t) => {
 });
 
 test("import variable from another module", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   const m1 = runtime.define("m1", "m1", "0.0.1");
   const m2 = runtime.define("m2", "m2", "0.0.1");
   // registerListeners(runtime);
@@ -340,7 +340,7 @@ test("import variable from another module", async (t) => {
 });
 
 test("duplicate definition", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   const m1 = runtime.define("m1", "m1", "0.0.1");
   // registerListeners(runtime);
 
@@ -416,7 +416,7 @@ test("builtin variables", async (t) => {
     author: "subhasis",
   };
 
-  const runtime = Runtime.create("test", "0.0.1", builtins);
+  const runtime = Runtime.create(builtins);
   const m1 = runtime.define("m1", "m1", "0.0.1");
   const m2 = runtime.define("m2", "m2", "0.0.1");
   // registerListeners(runtime);
@@ -460,7 +460,7 @@ test("builtin Promises", async (t) => {
     _: lodash,
   };
 
-  const runtime = Runtime.create("test", "0.0.1", builtins);
+  const runtime = Runtime.create(builtins);
   const m1 = runtime.define("m1", "m1", "0.0.1");
   // registerListeners(runtime);
 
@@ -496,7 +496,7 @@ test("builtin Promises", async (t) => {
 });
 
 test("23. duplicate-1 definition fixed later", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   const m = runtime.define("m1", "m1", "0.0.1");
   // registerListeners(runtime);
   const get = (id: string) => m.variable(id)!;
@@ -550,7 +550,7 @@ test("23. duplicate-1 definition fixed later", async (t) => {
 });
 
 test("26. generators run with different time", async (t) => {
-  const runtime = Runtime.create("test", "0.0.1");
+  const runtime = Runtime.create();
   const m1 = runtime.define("m1", "m1", "0.0.1");
   // registerListeners(runtime);
 

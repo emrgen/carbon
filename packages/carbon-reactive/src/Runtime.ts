@@ -18,9 +18,6 @@ const LOG = 0;
 
 // Think a whole notebook as a runtime.
 export class Runtime extends EventEmitter {
-  id: string;
-  version: SemVer;
-
   graph: Graph<Variable>;
 
   // save the module using moduleName@version as key
@@ -50,14 +47,12 @@ export class Runtime extends EventEmitter {
 
   promise: Promix<any> = Promix.default("runtime");
 
-  static create(id: string, version: string, builtins?: Builtins) {
-    return new Runtime(id, version, builtins);
+  static create(builtins?: Builtins) {
+    return new Runtime(builtins);
   }
 
-  constructor(id: string, version: string, builtins: Builtins = {}) {
+  constructor(builtins: Builtins = {}) {
     super();
-    this.id = id;
-    this.version = new SemVer(version);
     this.graph = new Graph();
     this.mutable = new Mutable(this);
 
@@ -80,6 +75,10 @@ export class Runtime extends EventEmitter {
     });
 
     this.builtin = mod;
+  }
+
+  get mod() {
+    return this.builtin;
   }
 
   variable(id: string) {

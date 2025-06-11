@@ -113,6 +113,14 @@ export class ImmutableDraft implements Draft {
     this.selection = state.selection.unpin(origin);
     state.blockSelection.blocks.forEach((n) => this.selected.add(n.id));
 
+    console.log(
+      "selected",
+      this.selected
+        .toArray()
+        .map((n) => n.toString())
+        .join(", "),
+    );
+
     this.schema = schema;
     this.marks = marks.clone();
   }
@@ -831,6 +839,11 @@ export class ImmutableDraft implements Draft {
       throw new Error("Cannot update props on a draft that is already committed");
     }
 
+    console.log(
+      "before",
+      this.selected.map((n) => n.toString()),
+    );
+
     if (this.nodeMap.isDeleted(nodeId)) {
       console.debug("node is deleted", nodeId.toString());
       this.selected.remove(nodeId);
@@ -843,6 +856,7 @@ export class ImmutableDraft implements Draft {
       const propsNode = this.unfreeze(node.links["props"].id);
       this.tm.updateProps(propsNode, props);
       this.addUpdated(propsNode.id);
+      this.propsChanged.add(propsNode.id);
     }
 
     // console.log(
@@ -866,13 +880,18 @@ export class ImmutableDraft implements Draft {
       this.selected.add(nodeId);
     }
 
-    if (props[SelectedPath] !== true) {
+    if (props[SelectedPath] === false) {
       this.selected.remove(nodeId);
     }
 
     if (props[UnstablePath]) {
       this.unstable.add(nodeId);
     }
+
+    console.log(
+      "after",
+      this.selected.map((n) => n.toString()),
+    );
   }
 
   updateMark(action: MarkAction, mark: Mark): void {

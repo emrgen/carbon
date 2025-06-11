@@ -115,7 +115,8 @@ export interface NodeSpec {
   zero?: boolean;
   options?: boolean;
   focusable?: boolean;
-  insert?: boolean | { focus?: boolean };
+  insert?: boolean;
+  insertFocus?: boolean;
   mergeable?: boolean;
   observable?: boolean;
   weakEnd?: boolean;

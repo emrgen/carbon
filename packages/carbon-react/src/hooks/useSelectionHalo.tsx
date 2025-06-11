@@ -20,7 +20,6 @@ export const useSelectionHalo = (props: UseSelectionHaloProps) => {
       !parentSelectionCheck;
 
     const style = node.props.get(SizePath, { width: "full", height: "full" }); // get the size of the node
-    const { width = "full", height } = style;
 
     return (
       <>

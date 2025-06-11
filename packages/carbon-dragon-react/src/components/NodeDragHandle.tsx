@@ -450,7 +450,12 @@ export function NodeDragHandle(props: FastDragHandleProps) {
       } else {
         if (node.type.dnd?.handle) {
           app.parkCursor();
-          app.cmd.SelectBlocks([node.id])?.Select(PinnedSelection.SKIP).Dispatch();
+          if (node.isSandbox) {
+            const linkedProps = app.store.get(node.id)?.linkedProps!;
+            app.cmd.SelectBlocks([linkedProps.id]).Dispatch();
+          } else {
+            app.cmd.SelectBlocks([node.id])?.Select(PinnedSelection.SKIP).Dispatch();
+          }
 
           const { event } = e;
           app.emit("show:context:menu", {
@@ -521,15 +526,20 @@ export function NodeDragHandle(props: FastDragHandleProps) {
     (e) => {
       preventAndStop(e);
       if (node.isSandbox) {
-        app.cmd.collapsible
-          .toggle(app.store.get(node.id)!.linkedProps!)
-          .Update(node.id, {
+        const linkedProps = app.store.get(node.id)?.linkedProps!;
+        // console.log(linkedProps.isCollapsed);
+
+        const cmd = app.cmd.collapsible.toggle(linkedProps);
+
+        if (!linkedProps.isSelected) {
+          cmd.Update(node.id, {
             [FocusOnInsertPath]: true,
-          })
-          .Dispatch()
-          .Then(() => {
-            setCollapsed((c) => !c);
           });
+        }
+
+        cmd.Dispatch().Then(() => {
+          setCollapsed((c) => !c);
+        });
       } else {
         throw new Error("Cannot collapse non-sandbox node");
       }

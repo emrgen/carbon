@@ -12,25 +12,54 @@ import {
   Point,
   yes,
 } from "@emrgen/carbon-core";
-import { RendererProps, useCarbon } from "@emrgen/carbon-react";
+import { useCarbon } from "@emrgen/carbon-react";
 import { basicSetup, EditorView } from "codemirror";
 import { isKeyHotkey } from "is-hotkey";
-import { createRef, useCallback, useEffect, useState } from "react";
+import { createRef, useCallback, useEffect, useRef, useState } from "react";
 import { useCustomCompareEffect } from "react-use";
 
 interface CodeMirrorEditorProps {
+  onChange?: (editor: EditorState) => void;
+  onSave?: (editor: EditorState) => void;
+  onKeyDown?: (event: KeyboardEvent) => void;
   onFocus?: () => void;
   onBlur?: () => void;
   node: Node;
   extensions?: any[];
 }
 
-export const CodeMirrorEditor = (props: RendererProps) => {
-  const { node, onFocus, onBlur } = props;
+export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
+  const { node, onFocus, onBlur, onKeyDown } = props;
   const app = useCarbon();
   const ref = createRef<HTMLDivElement>();
   const [nodeId] = useState(node.id);
   const [view, setView] = useState<EditorView | null>(null);
+
+  const handleKeyDown = useRef<(event: KeyboardEvent) => void>((e) => {
+    onKeyDown?.(e);
+  });
+  const handleFocus = useRef<() => void>(() => {
+    onFocus?.();
+  });
+  const handleBlur = useRef<() => void>(() => {
+    onBlur?.();
+  });
+
+  useEffect(() => {
+    handleKeyDown.current = onKeyDown || ((event) => {});
+  }, [onKeyDown]);
+
+  useEffect(() => {
+    handleFocus.current = onFocus || (() => {});
+  }, [onFocus]);
+
+  useEffect(() => {
+    handleBlur.current = onBlur || (() => {});
+  }, [onBlur]);
+
+  useEffect(() => {
+    // if (node.)
+  }, []);
 
   const onUpdate = useCallback(
     (editor: ViewUpdate) => {
@@ -47,15 +76,15 @@ export const CodeMirrorEditor = (props: RendererProps) => {
       }
 
       // track focus status
-      if (editor.focusChanged) {
-        if (editor.view.hasFocus) {
-          onFocus?.();
-        } else {
-          onBlur?.();
-        }
-      }
+      // if (editor.focusChanged) {
+      //   if (editor.view.hasFocus) {
+      //     onFocus?.();
+      //   } else {
+      //     onBlur?.();
+      //   }
+      // }
     },
-    [app, nodeId, onFocus, onBlur],
+    [app, nodeId],
   );
 
   // create the editor view
@@ -74,22 +103,23 @@ export const CodeMirrorEditor = (props: RendererProps) => {
           Prec.highest(
             EditorView.domEventHandlers({
               keydown(event) {
+                handleKeyDown.current(event);
                 // insert new line
                 if (event.ctrlKey && event.shiftKey && event.key === "Enter") {
                   event.preventDefault();
                   event.stopPropagation();
                   const parent = app.store.get(nodeId);
                   const section = app.schema.type("paragraph").default();
-                  console.log(parent);
-                  const after = PinnedSelection.fromPin(
-                    Pin.toStartOf(section!)!,
-                  );
+
+                  const after = PinnedSelection.fromPin(Pin.toStartOf(section!)!);
                   app.cmd
                     .Insert(Point.toAfter(parent!), section!)
                     .Select(after, ActionOrigin.UserInput)
                     .Dispatch();
                 }
               },
+              focus: () => handleFocus.current(),
+              blur: () => handleBlur.current(),
             }),
           ),
         ],
@@ -100,7 +130,7 @@ export const CodeMirrorEditor = (props: RendererProps) => {
         parent,
       });
     },
-    [onUpdate, nodeId, app],
+    [onUpdate, app, nodeId],
   );
 
   // update the editor view when the node content changes
@@ -119,13 +149,13 @@ export const CodeMirrorEditor = (props: RendererProps) => {
 
   // focus the editor when the cell is mounted
   useEffect(() => {
-    const firstMount = app.store
-      .get(nodeId)
-      ?.props.get(FocusOnInsertPath, false);
+    const firstMount = app.store.get(nodeId)?.props.get(FocusOnInsertPath, false);
+    console.log("firstMount", firstMount);
     if (firstMount) {
       view?.focus();
       setTimeout(() => {
         app.cmd
+          .SelectBlocks([])
           .Update(nodeId, {
             [FocusOnInsertPath]: false,
           })
@@ -144,7 +174,9 @@ export const CodeMirrorEditor = (props: RendererProps) => {
           e.preventDefault();
         }
       }}
-      onFocus={(e) => e.stopPropagation()}
+      onFocus={(e) => {
+        e.stopPropagation();
+      }}
     />
   );
 };
