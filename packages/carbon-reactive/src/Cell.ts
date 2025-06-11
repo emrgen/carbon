@@ -1,8 +1,7 @@
 import { parseCell, peekId } from "@observablehq/parser";
-import { noop } from "lodash";
 import { DefinitionFactory } from "./Definition";
 import { Module } from "./Module";
-import { Variable } from "./Variable";
+import { UNDEFINED_VALUE, Variable } from "./Variable";
 import { randomString } from "./x";
 
 interface CellProps {
@@ -159,7 +158,7 @@ export class Cell {
       name = Cell.undefinedName(),
       version = 0,
       code = randomString(5), // this is for convenience
-      definition = noop,
+      definition = () => UNDEFINED_VALUE,
       dependencies = [],
       builtin = false,
       mutable = false,

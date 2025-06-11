@@ -89,12 +89,9 @@ export class Runtime extends EventEmitter {
     this.builtin = mod;
   }
 
+  // the default module is the builtin module
   get mod() {
     return this.builtin;
-  }
-
-  variable(id: string) {
-    return this.variablesById.get(id);
   }
 
   // create a new module with the given name and version

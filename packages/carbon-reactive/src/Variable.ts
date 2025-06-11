@@ -47,8 +47,6 @@ export class Variable {
   // version of the variable calculation
   fulfilledVersion: number = 0;
 
-  deleted = false;
-
   static create(props: VariableProps) {
     return new Variable(props);
   }
@@ -222,18 +220,9 @@ export class Variable {
   }
 
   // run the generator once and save the value at the generated field
-  private generate() {
-    if (this.deleted) {
-      return Promise.resolve(this.generated);
-    }
-
+  generate() {
     try {
-      const generated = this.generator.next(this.generated);
-      if (!generated) {
-        return Promix.reject("failed generator", this.id, this.version).catch(this.rejected);
-      }
-
-      return Promise.resolve(generated)
+      return Promise.resolve(this.generator.next(this.generated))
         .then(({ value, done }) => {
           if (done) {
             return Promise.resolve(value).then((v) => {
@@ -309,7 +298,6 @@ export class Variable {
   removed() {
     !this.builtin && this.runtime.emit("removed", this);
     !this.builtin && this.runtime.emit("removed:" + this.cellId, this);
-    this.deleted = true;
   }
 }
 
