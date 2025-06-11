@@ -55,7 +55,9 @@ export class Cell {
 
   static noop(name: string) {}
 
-  static hasName(name: string) {
+  static hasName(cell: Cell) {
+    const name = cell.name;
+    // console.log("Checking cell name:", name, !name.startsWith("__unnamed__"));
     return name && !name.startsWith("__unnamed__") && !name.startsWith("__view__");
   }
 
@@ -66,7 +68,6 @@ export class Cell {
   // parse a cell definition and return a Cell instance
   static parse(definition: string, options?: CellParseOptions): Cell {
     const { name, version, id = randomString(10) } = options || {};
-
     let ast: any;
     try {
       ast = parseCell(definition);
@@ -84,9 +85,12 @@ export class Cell {
       });
     }
 
-    if (!ast.body) {
+    console.log(ast);
+    let defBody = ast.body;
+
+    if (!defBody) {
       return Cell.from(id, name || Cell.undefinedName(), [], () => {
-        throw new Error(`Unsupported cell definition type: ${ast.body.type}`);
+        return "";
       });
     }
 
@@ -106,7 +110,23 @@ export class Cell {
       cellName = name ?? `__unnamed__${++cellCounter}`;
     }
 
-    const deps = ast.references.map((arg: any) => arg.name);
+    const deps = ast.references.map((arg: any) => {
+      if (arg.type === "MutableExpression") {
+        definition = definition.replace(`mutable ${arg.id.name}`, `mutable_${arg.id.name}.value`);
+
+        return `mutable_${arg.id.name}`;
+      }
+
+      return arg.name;
+    });
+    // .map((arg: any) => {
+    //   return arg.name;
+    // });
+
+    ast = parseCell(definition);
+
+    console.log(cellName, ast);
+
     const create = DefinitionFactory[ast.body.type];
     if (!create) {
       console.error("MISSING DEFINITION FACTORY FOR:", ast.body.type, DefinitionFactory);

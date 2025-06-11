@@ -1,15 +1,56 @@
+import { stop } from "@emrgen/carbon-core";
+import { ObjectViewer } from "@emrgen/carbon-object-view";
 import { RendererProps } from "@emrgen/carbon-react";
+import { Cell, UNDEFINED_VALUE, Variable } from "@emrgen/carbon-reactive";
 import { cloneDeep, isFunction, isPlainObject } from "lodash";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useReactiveRuntime } from "../hooks/useReactiveRuntime";
 import { useReactiveVariable } from "../hooks/useReactiveVariable";
+import { isHtmlElement } from "../x";
 
 const NOT_LOADED = "__NOT_LOADED__";
 
+const visibleName = (v: Variable) => {
+  const hasName = !v.cell.builtin && Cell.hasName(v.cell);
+  return hasName ? (v.cell.name ?? "") : "";
+};
+
 // ReactiveCellEditor component for editing cell content or results of the cell
 export const ReactiveCellViewer = (props: RendererProps) => {
+  const runtime = useReactiveRuntime();
   const { node } = props;
-  const [result, setResult] = useState<any>(NOT_LOADED);
+  const [result, setResult] = useState<any>(
+    runtime.mod.variable(node.id.toString())?.value ?? UNDEFINED_VALUE,
+  );
+  const [name, setName] = useState<string>(() => {
+    const v = runtime.mod.variable(node.id.toString());
+    return v ? visibleName(v) : "";
+  });
   const [error, setError] = useState<string>("");
+  const [pending, setPending] = useState<boolean>(false);
+  const ref = useRef<any>(null);
+  const [isHtml, setIsHtml] = useState<boolean>(false);
+
+  // attach result to the ref when the component mounts
+  // NOTE: use shadow dom here for safety
+  useEffect(() => {
+    if (ref.current) {
+      const el = ref.current;
+      if (isHtmlElement(result)) {
+        if (el.hasChildNodes()) {
+          el.removeChild(el.firstChild!);
+        }
+        el.appendChild(result);
+        setIsHtml(true);
+      } else {
+        // if the result is not an HTML element, we clear the ref
+        if (el.hasChildNodes()) {
+          el.removeChild(el.firstChild!);
+        }
+        setIsHtml(false);
+      }
+    }
+  }, [node, ref, result]);
 
   const updateResult = useCallback((res) => {
     if (isFunction(res)) {
@@ -22,32 +63,50 @@ export const ReactiveCellViewer = (props: RendererProps) => {
       }
     }
 
+    setIsHtml(false);
     setError("");
   }, []);
 
   useReactiveVariable({
     node,
-    onFulfilled: (cell) => {
-      console.log("Cell fulfilled:", cell.id.toString(), cell.value);
-      updateResult(cell.value);
+    onFulfilled: (v) => {
+      // console.log("Cell fulfilled:", v.id.toString(), v.value);
+      updateResult(v.value);
+      const hasName = !v.cell.builtin && Cell.hasName(v.cell);
+      setName(hasName ? (v.cell.name ?? "") : "");
     },
     onRejected: (cell) => {
-      console.error("Cell rejected:", cell.id.toString(), cell.error);
+      // console.error("Cell rejected:", cell.id.toString(), cell.error);
       updateResult(null);
+      setName("");
       setError((cell.error ?? "").toString());
+    },
+    onPending: () => {
+      setPending(true);
+      setError("");
     },
   });
 
   return (
-    <div className={"carbon-reactive-cell-viewer"}>
+    <div
+      className={"carbon-reactive-cell-viewer"}
+      onMouseMove={stop}
+      onMouseUp={stop}
+      onBeforeInput={stop}
+    >
       <div className={"carbon-reactive-cell-viewer-content"}>
         {result === NOT_LOADED ? (
-          <div className={"reactive-cell-loading"}>Loading...</div>
-        ) : error ? (
+          <div className={"reactive-cell-loading"}></div>
+        ) : error && !pending ? (
           <div className={"reactive-cell-error"}>{error}</div>
         ) : (
           <div className={"reactive-cell-result"}>
-            <CellViewer result={result} />
+            <div
+              className={"reactive-cell-html-viewer"}
+              ref={ref}
+              style={{ visibility: isHtml ? "visible" : "hidden" }}
+            />
+            <CellViewer name={name} result={result} hide={isHtml} />
           </div>
         )}
       </div>
@@ -55,12 +114,18 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   );
 };
 
-const CellViewer = ({ result }: { result: any }) => {
-  if (typeof result === "string") {
-    return <pre>{result}</pre>;
-  } else if (typeof result === "object") {
-    return <pre>{JSON.stringify(result, null, 2)}</pre>;
-  } else {
-    return <span>{String(result)}</span>;
+const CellViewer = ({ name = "x", result, hide }: { name?: string; result: any; hide }) => {
+  if (hide) {
+    return null;
   }
+
+  if (result === UNDEFINED_VALUE) {
+    return <div className={"cell-result-undefined"}></div>;
+  }
+
+  return (
+    <div className={"cell-result-object"}>
+      <ObjectViewer data={result} field={name} />
+    </div>
+  );
 };

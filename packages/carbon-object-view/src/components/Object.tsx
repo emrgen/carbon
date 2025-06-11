@@ -76,8 +76,6 @@ export const ObjectView = ({ data, propName, root }) => {
     setPage(1);
   }, [propKeys]);
 
-  console.log(slice);
-
   return (
     <div className={"cov-object"} style={{ display: expanded ? "block" : "flex" }}>
       <div
@@ -87,7 +85,7 @@ export const ObjectView = ({ data, propName, root }) => {
           setExpanded((e) => !e);
         }}
       >
-        {!root && propName && <span className={"cov-object-key"}>{propName}:</span>}
+        {!root && propName && <span className={"cov-object-key"}>{propName} = </span>}
         {root && propName && (
           <span className={"cov-object-key"} id={"cov-root-name"}>
             {propName} ={" "}
@@ -113,7 +111,11 @@ export const ObjectView = ({ data, propName, root }) => {
           {!isPlainObject(data) && (
             <div className={"cov-object-element"}>
               {/*<span className={"cov-object-key"}>{"<prototype>"}:</span>*/}
-              <ProtoView data={data} propName={"<prototype>"} parentProps={new Set(Object.getOwnPropertyNames(data))} />
+              <ProtoView
+                data={data}
+                propName={"<prototype>"}
+                parentProps={new Set(Object.getOwnPropertyNames(data))}
+              />
             </div>
           )}
         </div>

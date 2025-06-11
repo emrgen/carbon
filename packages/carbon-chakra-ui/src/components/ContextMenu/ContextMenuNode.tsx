@@ -96,7 +96,6 @@ export const ContextMenuNode = (props: ContextMenuNodeProps) => {
       <SearchMenu
         value={searchText}
         onChange={(v) => {
-          console.log(v);
           onSearch?.(v);
         }}
         isOpen={isOpen}

@@ -1,5 +1,6 @@
 [data-name=liveCell]
   position relative
+  margin 10px 0
 
 .reactive-cell-editor-wrapper
   position relative;
@@ -36,6 +37,37 @@
   line-height 30px
   font-size 14px
   color #333
+
+.reactive-cell-html-viewer
+  // beautiful readable font family, sans
+  font-family 'Geist Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif
+  div
+    display flex
+    flex-direction column
+
+  h1
+    font-size 32px
+    margin 0
+    margin-bottom 6px;
+    line-height 1.2
+    font-weight 500
+  h2
+    font-size 24px
+    margin 0
+    margin-bottom 6px;
+    font-weight 500
+
+  form > label
+    font-weight 500
+
+  form > label + div
+    display flex
+    flex-direction row
+    input[type=number]
+      border 1px solid #ccc
+      border-radius 4px
+      padding 2px 4px
+      //margin-right 10px
 
 .reactive-cell-error
   padding 0 12px

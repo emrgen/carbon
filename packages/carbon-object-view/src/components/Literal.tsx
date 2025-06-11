@@ -32,7 +32,7 @@ export const Literal = ({ data, propName, isIndex, root }) => {
 
   return (
     <div className={"cov-literal"}>
-      {!root && propName && <span className={keyClass}>{propName}:</span>}
+      {!root && propName && <span className={keyClass}>{propName} = </span>}
       {root && propName && (
         <span className={keyClass} id={root ? "cov-root-name" : ""}>
           {propName} ={" "}

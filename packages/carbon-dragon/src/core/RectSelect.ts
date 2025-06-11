@@ -115,9 +115,9 @@ export class RectSelect extends EventEmitter {
 
       // this.selectables.refresh(scrollTop, scrollLeft);
       this.isDirty = false;
-      console.log("FastRectSelector initialized");
+      // console.log("FastRectSelector initialized");
     }
-    console.log("onDragStart", e.node.name);
+    // console.log("onDragStart", e.node.name);
   }
 
   // select nodes colliding with the selection rect box defined by the drag event

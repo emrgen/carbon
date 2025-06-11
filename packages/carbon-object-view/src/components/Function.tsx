@@ -53,7 +53,7 @@ export const FunctionView = ({ data, propName, isIndex, isGenerator = false, roo
 
   return (
     <div className={"cov-function"}>
-      {!root && propName && <span className={keyClass}>{propName}:</span>}
+      {!root && propName && <span className={keyClass}>{propName} = </span>}
       {root && propName && <span className={keyClass} id={root ? "cov-root-name":''}>{propName} =&nbsp;</span>}
       <span className={"cov-function-key"}>f{isGenerator ? "*" : ""}</span>
       <span className={"cov-function-arguments"}>({getParamNames(data)})</span>

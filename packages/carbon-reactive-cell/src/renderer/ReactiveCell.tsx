@@ -1,4 +1,4 @@
-import { PinnedSelection, stop } from "@emrgen/carbon-core";
+import { FocusOnInsertPath, PinnedSelection, stop } from "@emrgen/carbon-core";
 import { useRectSelectable } from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
@@ -46,11 +46,16 @@ const ReactiveCellCompInner = (props: ReactiveCellProps) => {
   const { SelectionHalo, attributes, isSelected } = useSelectionHalo({ node });
 
   const onFocus = useCallback(() => {
-    console.log("onFocus", isSelected);
     if (isSelected) {
-      app.cmd.SelectBlocks([]).Select(PinnedSelection.SKIP).Dispatch();
+      app.cmd
+        .Update(node.id, {
+          [FocusOnInsertPath]: false,
+        })
+        .SelectBlocks([])
+        .Select(PinnedSelection.SKIP)
+        .Dispatch();
     }
-  }, [isSelected, app]);
+  }, [isSelected, app, node.id]);
 
   return (
     <CarbonBlock node={node} ref={ref} custom={attributes}>

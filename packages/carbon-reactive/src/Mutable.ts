@@ -28,7 +28,7 @@ export class Mutable {
   }
 
   static mutableName(name: string) {
-    return `mutable@${name}`;
+    return `mutable_${name}`;
   }
 
   constructor(readonly runtime: Runtime) {}

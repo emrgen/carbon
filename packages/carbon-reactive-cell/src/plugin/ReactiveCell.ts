@@ -7,9 +7,8 @@ export class LiveCell extends CarbonPlugin {
     return {
       group: "content",
       sandbox: true,
-      insert: {
-        focus: true,
-      },
+      insert: true,
+      insertFocus: true,
       control: {
         insert: true,
         collapse: true,

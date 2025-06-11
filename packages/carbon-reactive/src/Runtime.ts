@@ -63,8 +63,20 @@ export class Runtime extends EventEmitter {
       const cell = Cell.create({
         id: "builtin/" + name,
         name,
-        code: `() => ${value}`,
-        definition: () => value,
+        code: `() => {
+          if (typeof value === "function") {
+            return value();
+          } else {
+            return value;
+          }
+        }`,
+        definition: () => {
+          if (typeof value === "function") {
+            return value();
+          } else {
+            return value;
+          }
+        },
         builtin: true,
       });
 

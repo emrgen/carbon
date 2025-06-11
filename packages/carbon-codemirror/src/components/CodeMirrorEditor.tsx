@@ -150,17 +150,16 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
   // focus the editor when the cell is mounted
   useEffect(() => {
     const firstMount = app.store.get(nodeId)?.props.get(FocusOnInsertPath, false);
-    console.log("firstMount", firstMount);
     if (firstMount) {
       view?.focus();
-      setTimeout(() => {
-        app.cmd
-          .SelectBlocks([])
-          .Update(nodeId, {
-            [FocusOnInsertPath]: false,
-          })
-          .Dispatch();
-      }, 1000);
+      // setTimeout(() => {
+      //   app.cmd
+      //     .SelectBlocks([])
+      //     .Update(nodeId, {
+      //       [FocusOnInsertPath]: false,
+      //     })
+      //     .Dispatch();
+      // }, 1000);
     }
   }, [view, app, nodeId]);
 

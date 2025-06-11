@@ -174,12 +174,12 @@ export class Module {
     // define the immutable part of the mutable variable
     // when the mutable variable is changed, the immutable part will be recomputed
     return this.define(
-      Cell.from(
-        cell.id,
-        cell.name,
-        [mutableName],
-        (accessor: MutableAccessor<any>) => accessor.value,
-      ),
+      Cell.create({
+        id: cell.id,
+        name: cell.name,
+        dependencies: [mutableName],
+        definition: (accessor: MutableAccessor<any>) => accessor.value,
+      }),
     );
   }
 
@@ -203,6 +203,10 @@ export class Module {
     const builtIn = this.findBuiltIn(cell);
     if (builtIn) {
       return builtIn;
+    }
+
+    if (cell.mutable) {
+      return this.defineMutable(cell);
     }
 
     const fullId = Variable.id(this.id, cell.id);
@@ -239,6 +243,10 @@ export class Module {
       return builtIn;
     }
 
+    if (cell.mutable) {
+      return this.defineMutable(cell);
+    }
+
     const fullId = Variable.id(this.id, cell.id);
     const variable = this.runtime.variablesById.get(fullId);
     if (!variable) {
@@ -249,7 +257,7 @@ export class Module {
     if (variable.cell.eq(cell)) {
       console.log("redefine", cell.id, cell.name, "no change");
       variable.version += 1;
-      this.runtime.dirty.add(variable);
+      // this.runtime.dirty.add(variable);
       return variable;
     }
 

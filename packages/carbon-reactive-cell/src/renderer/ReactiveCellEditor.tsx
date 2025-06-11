@@ -1,7 +1,9 @@
 import { CodeMirrorEditor } from "@emrgen/carbon-codemirror";
+import { preventAndStop } from "@emrgen/carbon-core";
 import { RendererProps } from "@emrgen/carbon-react";
 import isHotkey from "is-hotkey";
 import { useCallback, useMemo } from "react";
+import { PiPlayBold } from "react-icons/pi";
 import { useReactiveRuntime } from "../hooks/useReactiveRuntime";
 import { defineVariable } from "../x";
 
@@ -37,7 +39,19 @@ export const ReactiveCellEditor = (props: ReactiveCellEditorProps) => {
     <div className={"carbon-reactive-cell-editor"}>
       <div className={"carbon-reactive-cell-editor-content"}>
         {!isCollapsed && (
-          <CodeMirrorEditor node={node} onFocus={onFocus} onBlur={onBlur} onKeyDown={onKeydown} />
+          <>
+            <CodeMirrorEditor node={node} onFocus={onFocus} onBlur={onBlur} onKeyDown={onKeydown} />
+            <div
+              className={"carbon-cell-compute-button"}
+              onMouseDown={preventAndStop}
+              onMouseUp={(e) => {
+                preventAndStop(e);
+                defineVariable(runtime, node);
+              }}
+            >
+              <PiPlayBold />
+            </div>
+          </>
         )}
       </div>
     </div>

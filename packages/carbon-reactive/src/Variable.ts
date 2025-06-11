@@ -16,6 +16,8 @@ interface VariableProps {
   cell: Cell;
 }
 
+export const UNDEFINED_VALUE = Symbol("undefined_value");
+
 // reactive variable
 export class Variable {
   // parent module
@@ -35,7 +37,7 @@ export class Variable {
   // the calculation can result in an error or a value
   promise: Promix<Variable>;
   error: RuntimeError | undefined;
-  value: any;
+  value: any = UNDEFINED_VALUE;
 
   // if the variable is a generator
   generator: { next: Function; return: Function } = { next: noop, return: noop };

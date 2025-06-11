@@ -43,9 +43,10 @@ export interface ObjectViewProps {
 // ObjectViewer component is used to display the object in a tree structure.
 export const ObjectViewer = (props: ObjectViewProps) => {
   const { data, field = "", root } = props;
+
   return (
     <div className={"carbon-object-view"}>
-      <NodeView data={props.data} propName={field} isIndex={false} root={root} />
+      <NodeView data={data} propName={field} isIndex={false} root={root} />
     </div>
   );
 };

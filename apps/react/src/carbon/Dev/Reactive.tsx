@@ -5,12 +5,13 @@ import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
 import { FloatingStyleMenu, InsertBlockMenu } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { CodeValuePath, corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
-import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
+import { RenderManager, useCreateCachedCarbon } from "@emrgen/carbon-react";
 import { Cell, Runtime } from "@emrgen/carbon-reactive";
 import { LiveCell, LiveCellRenderer, ReactiveRuntimeContext } from "@emrgen/carbon-reactive-cell";
-import { CarbonApp } from "@emrgen/carbon-utils";
+import { BlockMenuPlugin, CarbonApp } from "@emrgen/carbon-utils";
 import { Library } from "@observablehq/stdlib";
-import lodash, { flattenDeep } from "lodash";
+import * as _ from "lodash";
+import { flattenDeep } from "lodash";
 import { useState } from "react";
 import "./test.styl";
 
@@ -37,6 +38,7 @@ const plugins = [
   ...blockPresetPlugins,
   new ClipboardPlugin(),
   new LiveCell(),
+  new BlockMenuPlugin(),
 ];
 
 const renderers = [...blockPresetRenderers, LiveCellRenderer];
@@ -57,8 +59,9 @@ const renderManager = RenderManager.from(flattenDeep(renderers));
 window.Cell = Cell;
 
 const builtins = Object.assign(new Library(), {
-  _: lodash,
+  _: _,
 });
+console.log(builtins);
 const runtime = Runtime.create(builtins);
 // @ts-ignore
 window.runtime = runtime;
@@ -81,7 +84,7 @@ export function Reactive() {
   const [content] = useState(() => {
     return data;
   });
-  const app = useCreateCarbon("reactive", content, flattenDeep(plugins));
+  const app = useCreateCachedCarbon("reactive", content, flattenDeep(plugins));
   // @ts-ignore
   window.app = app;
 

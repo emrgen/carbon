@@ -52,7 +52,7 @@ test("mutable definition with mutable injection", async (t) => {
   m.define(
     Cell.create({
       id: "mutable_x",
-      name: "mutable@x",
+      name: "mutable_x",
       dependencies: [],
       definition: function () {
         return mut.accessor<any>("x");
@@ -61,14 +61,14 @@ test("mutable definition with mutable injection", async (t) => {
   );
 
   // hidden variable initialized by the initial mutable value
-  m.define(Cell.from("immutable_x", "x", ["mutable@x"], () => mut.accessor<any>("x").value));
+  m.define(Cell.from("immutable_x", "x", ["mutable_x"], () => mut.accessor<any>("x").value));
 
   // m.define(Cell.from("x2", "x", [], () => 2));
   // // m1.define(Cell.from("z1", "z", ["x"], (x) => x));
-  m.define(Cell.from("a1", "a", ["mutable@x"], (arg) => arg.value));
+  m.define(Cell.from("a1", "a", ["mutable_x"], (arg) => arg.value));
 
   m.define(
-    Cell.from("b1", "b", ["mutable@x"], function* (arg) {
+    Cell.from("b1", "b", ["mutable_x"], function* (arg) {
       let i = 1;
       while (true) {
         yield Promises.tick(200, () => {
@@ -81,7 +81,7 @@ test("mutable definition with mutable injection", async (t) => {
   );
 
   m.define(
-    Cell.from("c1", "c", ["mutable@x"], function* (mx) {
+    Cell.from("c1", "c", ["mutable_x"], function* (mx) {
       let i = 1;
       while (true) {
         yield Promises.tick(200, () => {
@@ -93,7 +93,7 @@ test("mutable definition with mutable injection", async (t) => {
     }),
   );
 
-  m.define(Cell.from("p1", "p", ["mutable x", "q"], (mx, q) => mx.value + q));
+  m.define(Cell.from("p1", "p", ["mutable_x", "q"], (mx, q) => mx.value + q));
   m.define(Cell.from("q1", "q", ["p"], (p) => p));
 
   await Promises.delay(1000);
@@ -110,7 +110,7 @@ test("9. mutable update from different cell", async (t) => {
   m.define(Cell.from("a1", "a", ["x"], (x: number) => x + 10));
 
   m.define(
-    Cell.from("c1", "c", ["mutable@x"], function* (accessor: MutableAccessor<number>) {
+    Cell.from("c1", "c", ["mutable_x"], function* (accessor: MutableAccessor<number>) {
       let i = 1;
       while (true) {
         yield Promises.delay(10, () => {

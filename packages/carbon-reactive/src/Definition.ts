@@ -34,6 +34,7 @@ export const DefinitionFactory = {
     return this.Expression(name, deps, ast, code);
   },
   TaggedTemplateExpression(name: string, deps: string[], ast: any, code: string) {
+    console.log(ast, code);
     return this.Expression(name, deps, ast, code);
   },
   NewExpression(name: string, deps: string[], ast: any, code: string) {
@@ -66,7 +67,7 @@ export const DefinitionFactory = {
   Expression(name: string, deps: string[], ast: any, code: string) {
     const { body } = ast;
     const blockBody = code.slice(body.start, body.end);
-    return this.define(name, deps, `return ${blockBody}`, ast);
+    return this.define(name, deps, `return (${blockBody})`, ast);
   },
 
   SequenceExpression(name: string, deps: string[], ast: any, code: string) {
@@ -74,12 +75,12 @@ export const DefinitionFactory = {
     const { expressions } = body;
     const endNode = expressions[expressions.length - 1];
     const blockBody = code.slice(endNode.start, endNode.end);
-    return this.define(name, deps, `return ${blockBody}`, ast);
+    return this.define(name, deps, `return (${blockBody})`, ast);
   },
 
   // create a function definition combining the name, inputs and body
   define(name: string, inputs: string[], body: string, opts?: any) {
-    const fnStr = `return ${opts?.async ? "async" : ""} function ${opts?.generator ? "*" : ""} ${!!name ? `_${name}` : ""} ( ${inputs.join(",")} ) {\n  ${body} \n} `;
+    const fnStr = `return ${opts?.async ? "async" : ""} function ${opts?.generator ? "*" : ""}${!!name ? `_${name}` : ""} ( ${inputs.join(", ")} ) {\n  ${body} \n} `;
     // console.log("factory defined =>", fnStr, opts);
     return new Function(fnStr)();
   },
