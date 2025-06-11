@@ -372,7 +372,7 @@ export class Runtime extends EventEmitter {
     this.generators.clear();
 
     roots.forEach((variable) => {
-      // console.log("generate root", variable.id);
+      // console.log(count++);
       variable.generateNext().then(() => {
         this.tryRecompute();
       });
@@ -389,3 +389,5 @@ export class Runtime extends EventEmitter {
     return Promise.resolve(1);
   }
 }
+
+let count = 0;

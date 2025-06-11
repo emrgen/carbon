@@ -18,7 +18,7 @@ export const defineVariable = (runtime: Runtime, node: Node) => {
     id: node.id.toString(),
   });
 
-  const variable = runtime.mod.define(cell);
+  const variable = runtime.mod.redefine(cell);
   console.log(variable.cell.definition.toString());
   return variable;
 };

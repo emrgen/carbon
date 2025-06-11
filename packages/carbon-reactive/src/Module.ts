@@ -257,29 +257,8 @@ export class Module {
     if (variable.cell.eq(cell)) {
       console.log("redefine", cell.id, cell.name, "no change");
       variable.version += 1;
-      // this.runtime.dirty.add(variable);
       return variable;
     }
-
-    // if the cell code has changed but the name is same we refine and keep the old connections
-    // if (variable.name === cell.name) {
-    //   LOG && console.log("redefine", cell.id, cell.name, "same name");
-    //   const newVariable = Variable.create({
-    //     module: this,
-    //     cell,
-    //   });
-    //
-    //   // keep the old connections
-    //   newVariable.inputs = [...variable.inputs];
-    //   newVariable.outputs = [...variable.outputs];
-    //
-    //   // update the graph with the old variable removed
-    //   this.runtime.onRemove(variable);
-    //   // update the graph with the new variable added
-    //   this.runtime.onCreate(newVariable);
-    //
-    //   return newVariable;
-    // }
 
     // name of the variable has changed
     this.onRemove(variable);
@@ -338,6 +317,8 @@ export class Module {
         );
       }
     }
+
+    variable.removed();
   }
 
   // connect the variable with the module local variablesById
@@ -366,5 +347,9 @@ export class Module {
     });
   }
 
-  private disconnect(variable: Variable) {}
+  private disconnect(variable: Variable) {
+    variable.outputs.forEach((output) => {
+      this.runtime.dirty.add(output);
+    });
+  }
 }
