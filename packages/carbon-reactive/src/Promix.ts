@@ -1,7 +1,10 @@
 import { isObject, noop } from "lodash";
 import { With } from "./x";
 
-type Executor<T> = (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void;
+type Executor<T> = (
+  resolve: (value: T | PromiseLike<T>) => void,
+  reject: (reason?: any) => void,
+) => void;
 
 type OnFulfilled<T, TResult1> = ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null;
 type OnRejected<TResult2> = ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null;
@@ -34,17 +37,18 @@ type Unwrap<T extends any[]> = {
   [K in keyof T]: Awaited<T[K]>;
 };
 
-// Promix is a promise wrapper that allows you to resolve or reject the wrapped promise
-// it also adds id and version to the promise
 // Promix can be resolved or rejected with the promix object itself
+// Promix provides a way to check if the promises is pending, fulfilled or rejected from outside
 export class Promix<T = unknown> implements PromiseLike<T> {
   pid: PromiseVersion;
 
+  private state: "pending" | "fulfilled" | "rejected" = "pending";
+
+  private promise: Promise<T>;
+
+  // callbacks to be called when the promise is resolved or rejected
   fulfilled: (value: T | PromiseLike<T>) => Promix<T>;
   rejected: (error: any) => Promix<T>;
-  promise: Promise<T>;
-
-  private state: "pending" | "fulfilled" | "rejected" = "pending";
 
   static default<T>(id?: string, version?: number) {
     return new Promix<T>(noop, id, version);
@@ -83,8 +87,16 @@ export class Promix<T = unknown> implements PromiseLike<T> {
 
   static all<T extends any[]>(values: [...T], id?: string, version?: number): Promix<Unwrap<T>>;
   static all<T>(values: Set<T>): Promix<T[]>;
-  static all<T>(values: Iterable<T | PromiseLike<T>>, id?: string, version?: number): Promix<Awaited<T>[]>;
-  static all<T>(values: Iterable<T | PromiseLike<T>>, id?: string, version?: number): Promix<Awaited<T>[]> {
+  static all<T>(
+    values: Iterable<T | PromiseLike<T>>,
+    id?: string,
+    version?: number,
+  ): Promix<Awaited<T>[]>;
+  static all<T>(
+    values: Iterable<T | PromiseLike<T>>,
+    id?: string,
+    version?: number,
+  ): Promix<Awaited<T>[]> {
     return Promix.of(
       (resolve, reject) => {
         Promise.all(values).then(resolve).catch(reject);
@@ -199,10 +211,8 @@ export class Promix<T = unknown> implements PromiseLike<T> {
         return this;
       };
 
-      // if (minor === 0) {
       this.fulfilled = fulfilled;
       this.rejected = rejected;
-      // }
 
       executor(fulfilled, rejected);
     });

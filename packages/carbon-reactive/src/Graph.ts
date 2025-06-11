@@ -203,6 +203,57 @@ export class Graph<T extends NodeId> {
     });
   }
 
+  cycles(from: Iterable<T>): T[] {
+    const cycles: Set<T> = new Set();
+
+    const visited = new Set<string>();
+
+    const stack = new Set<string>();
+
+    // Depth-first search to find cycles
+    const dfs = (node: T) => {
+      if (stack.has(node.id)) {
+        cycles.add(node);
+        return;
+      }
+      if (visited.has(node.id)) {
+        return;
+      }
+
+      visited.add(node.id);
+      stack.add(node.id);
+
+      for (const to of this.outgoing.get(node.id) ?? []) {
+        const nextNode = this.nodes.get(to);
+        if (nextNode) {
+          dfs(nextNode);
+        }
+      }
+
+      stack.delete(node.id);
+    };
+
+    for (const node of from) {
+      if (!visited.has(node.id)) {
+        dfs(node);
+      }
+    }
+
+    // find all the nodes that are part of some cycle
+    const cycleNodes = new Set<T>();
+    for (const node of cycles) {
+      cycleNodes.add(node);
+      // also add all the nodes that are reachable from this node
+      const connected = this.connected([node]);
+      for (const connectedNode of connected.values()) {
+        cycleNodes.add(connectedNode);
+      }
+    }
+    
+    // return the nodes that are part of some cycle
+    return Array.from(cycleNodes);
+  }
+
   print() {}
 }
 

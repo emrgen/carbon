@@ -57,7 +57,6 @@ export class Mutable {
       get value() {
         if (!that.variables.has(name)) {
           const variable = that.runtime.variablesByName.get(name);
-          console.log(variable);
           if (variable) {
             console.log("variable", variable);
           }
@@ -98,7 +97,7 @@ export class Mutable {
         });
 
         // request the runtime to update the dirty variables
-        that.runtime.refresh();
+        that.runtime.schedule();
       },
     };
   }

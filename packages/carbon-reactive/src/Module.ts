@@ -63,8 +63,8 @@ export class Module {
     const variable = this.value(name);
     if (!variable) return;
 
-    this.runtime.dirty.add(variable);
-    this.runtime.tryRecompute();
+    this.runtime.markDirty(variable);
+    this.runtime.schedule();
   }
 
   private value(name: string): Variable | undefined {
@@ -78,6 +78,19 @@ export class Module {
     }
 
     return variables[0];
+  }
+
+  // compute the variable with the given id
+  compute(id: string) {
+    const vid = Variable.id(this.id, id);
+    const variable = this.runtime.variablesById.get(vid);
+    if (!variable) {
+      console.error("variable not found", id);
+      return;
+    }
+
+    this.runtime.markDirty(variable);
+    this.runtime.schedule();
   }
 
   // builtin variable by name
@@ -224,12 +237,6 @@ export class Module {
 
     // console.log("define", id, name, variable.dependencies);
     this.connect(variable);
-    LOG &&
-      console.log(
-        variable.id,
-        variable.outputs.map((v) => v.id),
-      );
-
     this.onCreate(variable);
 
     return variable;
@@ -257,14 +264,16 @@ export class Module {
     if (variable.cell.eq(cell)) {
       console.log("redefine", cell.id, cell.name, "no change");
       variable.version += 1;
+      // this.runtime.markDirty(variable);
+      // this.runtime.schedule();
       return variable;
     }
 
     // name of the variable has changed
-    this.onRemove(variable);
+    this.onRemove(variable, true);
     this.disconnect(variable);
 
-    variable.version = this.graph.version + 1;
+    cell.version = variable.version + 1;
     variable.redefine(cell);
 
     this.connect(variable);
@@ -289,8 +298,6 @@ export class Module {
   }
 
   onCreate(variable: Variable) {
-    this.runtime.onCreate(variable);
-
     // connect the variable with the module local variablesById
     this.variablesById.set(variable.id, variable);
 
@@ -300,10 +307,11 @@ export class Module {
       this.variablesByName.set(fullName, []);
     }
     this.variablesByName.get(fullName)?.push(variable);
+
+    this.runtime.onCreate(variable);
   }
 
-  onRemove(variable: Variable) {
-    this.runtime.onRemove(variable);
+  onRemove(variable: Variable, redefine = false) {
     // remove the variable from the module local variablesById
     this.variablesById.delete(variable.id);
 
@@ -318,6 +326,9 @@ export class Module {
       }
     }
 
+    this.runtime.onRemove(variable, redefine);
+
+    variable.stop();
     variable.removed();
   }
 
@@ -349,7 +360,7 @@ export class Module {
 
   private disconnect(variable: Variable) {
     variable.outputs.forEach((output) => {
-      this.runtime.dirty.add(output);
+      this.runtime.markDirty(output);
     });
   }
 }
