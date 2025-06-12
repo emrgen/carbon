@@ -168,6 +168,10 @@ export class Graph<T extends NodeId> {
     const queue = Array.from(from);
     while (queue.length > 0) {
       const node = queue.shift()!;
+      if (!node) {
+        continue;
+        // debugger
+      }
       connected.set(node.id, node);
       if (this.outgoing.has(node.id)) {
         for (const to of this.outgoing.get(node.id)!) {
@@ -249,7 +253,7 @@ export class Graph<T extends NodeId> {
         cycleNodes.add(connectedNode);
       }
     }
-    
+
     // return the nodes that are part of some cycle
     return Array.from(cycleNodes);
   }

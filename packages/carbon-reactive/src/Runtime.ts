@@ -112,11 +112,12 @@ export class Runtime extends EventEmitter {
   }
 
   markDirty(variable: Variable) {
+    variable.version += 1;
     this.dirty.set(variable.id, variable);
   }
 
   // perform runtime specific actions for a new variable is created
-  onCreate(variable: Variable) {
+  onCreate(variable: Variable, redefine = false) {
     this.variablesById.set(variable.id, variable);
     this.variablesByName.set(variable.name, this.variablesByName.get(variable.name) || []);
     this.variablesByName.get(variable.name)!.push(variable);
@@ -135,7 +136,9 @@ export class Runtime extends EventEmitter {
       this.graph.addEdge(variable, output);
     });
 
-    this.schedule();
+    if (!redefine) {
+      this.schedule();
+    }
   }
 
   // perform runtime specific actions for a variable is removed

@@ -14,6 +14,7 @@ interface CellProps {
   dependencies?: string[];
   definition?: Function;
   mutable?: boolean;
+  immutable?: boolean;
   view?: boolean;
   builtin?: boolean;
 }
@@ -37,6 +38,7 @@ export class Cell {
   definition: Function;
   view: boolean;
   mutable: boolean;
+  immutable: boolean;
   builtin: boolean;
 
   static from(id: string, name: string, deps: string[], define: Function) {
@@ -163,6 +165,7 @@ export class Cell {
       dependencies = [],
       builtin = false,
       mutable = false,
+      immutable = false,
       view = false,
     } = props;
     this.id = id;
@@ -172,6 +175,7 @@ export class Cell {
     this.dependencies = dependencies;
     this.definition = definition;
     this.mutable = mutable;
+    this.immutable = immutable;
     this.view = view;
     this.builtin = builtin;
     this.hash = this.code
