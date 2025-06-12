@@ -1,3 +1,4 @@
+import { noop } from "lodash";
 import { RuntimeError } from "./x";
 
 type OnFulfilled<T, TResult1> = ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null;
@@ -12,66 +13,74 @@ export class Promised<T = any> {
   id: string;
   private state: "pending" | "fulfilled" | "rejected" = "pending";
 
+  private value: T | undefined;
+
+  private error: Error | undefined;
+
   private promise: Promise<T>;
 
   // callbacks to be called when the promise is resolved or rejected
-  fulfilled: (value: T) => T | PromiseLike<T>;
-  rejected: (error: any) => Error;
+  fulfilled: (value: T) => Promised<T>;
+  rejected: (error: Error) => Promised<T>;
 
   static create<T = any>(
-    executor: Executor<T>,
+    fulfilled: (value: T) => void,
+    rejected: (error: Error) => void,
     id = "",
-    defaultResolved: T | PromiseLike<T> = undefined as any,
-    defaultRejected: RuntimeError = new RuntimeError("Promise rejected without error"),
   ): Promised<T> {
-    return new Promised<T>(executor, id, defaultResolved, defaultRejected);
+    return new Promised<T>(fulfilled, rejected, id);
   }
 
-  static resolved<T = any>(value: T | PromiseLike<T>, id = ""): Promised<T> {
-    return new Promised<T>(
-      (resolve) => resolve(value),
-      id,
-      value,
-      new RuntimeError("Promise resolved without error"),
-    );
+  static resolved<T = any>(value: T, id = ""): Promised<T> {
+    return new Promised<T>(noop, noop, id).fulfilled(value);
   }
 
   static rejected<T = any>(error: RuntimeError, id = ""): Promised<T> {
-    return new Promised<T>((_, reject) => reject(error), id, undefined as any, error);
+    return new Promised<T>(noop, noop, id).rejected(error);
   }
 
-  constructor(
-    executor: Executor<T>,
-    id = "",
-    defaultResolved: T | PromiseLike<T>,
-    defaultRejected: RuntimeError,
-  ) {
+  constructor(fulfilled: (value: T) => void, rejected: (error: Error) => void, id = "") {
     this.id = id;
-    this.fulfilled = () => defaultResolved;
-    this.rejected = () => defaultRejected;
+    this.fulfilled = () => {
+      return this;
+    };
+    this.rejected = () => {
+      return this;
+    };
+    this.value = undefined;
+    this.error = undefined;
     this.state = "pending";
 
     this.promise = new Promise<T>((resolve, reject) => {
-      const fulfilled = (value: T | PromiseLike<T>) => {
+      const onFulfilled = (value: T) => {
+        if (this.state === "fulfilled") {
+          // console.log("already fulfilled", this.id, value);
+          return this; // already fulfilled, do nothing
+        }
+
+        // console.log("Promised fulfilled", this.id, value);
         this.state = "fulfilled";
+        this.value = value;
         resolve(value);
-        return value;
+        fulfilled(value);
+        return this;
       };
 
-      const rejected = (error: Error) => {
+      const onRejected = (error: Error) => {
+        if (this.state === "rejected") {
+          // console.log("already rejected", this.id, error);
+          return this; // already rejected, do nothing
+        }
+
         this.state = "rejected";
+        this.error = error;
         reject(error);
-        return error;
+        rejected(error);
+        return this;
       };
 
-      this.fulfilled = fulfilled;
-      this.rejected = rejected;
-
-      try {
-        executor(fulfilled, rejected);
-      } catch (error) {
-        rejected(error instanceof Error ? error : new RuntimeError(String(error)));
-      }
+      this.fulfilled = onFulfilled;
+      this.rejected = onRejected;
     });
   }
 
@@ -85,22 +94,5 @@ export class Promised<T = any> {
 
   get isRejected() {
     return this.state === "rejected";
-  }
-
-  then<TResult1 = T, TResult2 = never>(
-    onFulfilled?: OnFulfilled<T, TResult1>,
-    onRejected?: OnRejected<TResult2>,
-  ): Promised<TResult1 | TResult2> {
-    return Promised.create((resolve, reject) => {
-      this.promise.then(onFulfilled, onRejected);
-    }, this.id);
-  }
-
-  catch<TResult = never>(onRejected?: OnRejected<TResult>): Promise<T | TResult> {
-    return this.promise.catch(onRejected);
-  }
-
-  finally(onFinally?: () => void): Promise<T> {
-    return this.promise.finally(onFinally);
   }
 }

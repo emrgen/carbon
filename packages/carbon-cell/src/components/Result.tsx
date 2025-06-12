@@ -124,7 +124,7 @@ const ResultInner = (props) => {
     };
 
     const onReject = (cell: ActiveCell) => {
-      console.log("rejected", cell.name, cell.error);
+      // console.log("rejected", cell.name, cell.error);
       setCell(cell);
       setError(cell.error.toString());
       console.log(`CELL: failed. ID: ${cell.uniqId}, Name: ${cell.name}`);

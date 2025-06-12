@@ -12,7 +12,7 @@ import { BlockMenuPlugin, CarbonApp } from "@emrgen/carbon-utils";
 import { Library } from "@observablehq/stdlib";
 import * as _ from "lodash";
 import { flattenDeep } from "lodash";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./test.styl";
 
 const data = node("carbon", [
@@ -72,9 +72,9 @@ window.runtime = runtime;
 //   console.log(`fulfilled: ${cell.name}`, cell.id, cell.value);
 // });
 
-const mod = runtime.define("mid", "test-module", "0.0.1");
-// @ts-ignore
-window.mod = mod;
+// const mod = runtime.define("mid", "test-module", "0.0.1");
+// // @ts-ignore
+// window.mod = mod;
 
 // mod.define(Cell.parse("birds = penguins", { name: "birds" }));
 // mod.define(Cell.parse("x = 10"));
@@ -89,6 +89,10 @@ export function Reactive() {
   const app = useCreateCachedCarbon("reactive", content, flattenDeep(plugins));
   // @ts-ignore
   window.app = app;
+
+  useEffect(() => {
+    runtime.play();
+  }, []);
 
   return (
     <Box className={"carbon-app-container reactive"} pos={"relative"}>

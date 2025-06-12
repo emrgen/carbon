@@ -247,7 +247,8 @@ export class Module {
   // create a new variable with the given definition
   // if the variable already exists, redefine it
   define(cell: Cell, schedule = true, dirty = true): Variable {
-    // console.log("define", lazy, cell.name);
+    // if (!cell.builtin && cell.name !== "c") return;
+
     const builtIn = this.findBuiltIn(cell);
     if (builtIn) {
       return builtIn;
@@ -304,8 +305,8 @@ export class Module {
       return variable;
     }
 
-    // mark the variables with same id as dirty but don't schedule
-    this.onRemove(variable, false);
+    // remove the variable from existing connections
+    this.onRemove(variable, false, false);
     this.disconnect(variable);
 
     cell.version = variable.version + 1;
@@ -395,8 +396,9 @@ export class Module {
   }
 
   private disconnect(variable: Variable) {
-    variable.outputs.forEach((output) => {
-      this.runtime.markDirty(output);
+    variable.inputs.forEach((input) => {
+      input.outputs = input.outputs.filter((o) => o.id !== variable.id);
+      input.outputs = uniqBy(input.outputs, "id");
     });
   }
 }

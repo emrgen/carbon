@@ -45,7 +45,7 @@ export class Runtime extends EventEmitter {
 
   // connecting is true when the runtime is connecting the variablesById
   connecting: boolean = false;
-  private paused: boolean = false;
+  private paused: boolean = true;
 
   static create(builtins?: Builtins) {
     return new Runtime(builtins);
@@ -121,6 +121,7 @@ export class Runtime extends EventEmitter {
     }
 
     const mod = Module.create(this, id, name, version);
+    this.modules.set(key, mod);
 
     // inject the builtin variable from the runtime into the module
     this.builtinVariables.forEach((variable) => {
@@ -195,6 +196,8 @@ export class Runtime extends EventEmitter {
   // stops the running nodes from being recomputed further
   // creates a new slot for the next recompute
   schedule() {
+    if (this.paused) return;
+
     if (this.dirty.size === 0 && this.generators.size === 0) {
       return;
     }
@@ -226,7 +229,7 @@ export class Runtime extends EventEmitter {
       if (missing) {
         // console.log("missing dependency", v.name, missing);
         const err = RuntimeError.notDefined(last(missing.split(":"))!);
-        v.rejected(err);
+        v.promise.rejected(err);
       }
     });
 
@@ -245,9 +248,9 @@ export class Runtime extends EventEmitter {
       // );
 
       // if some input is builtin and still not resolved, add the input to roots and remove the current dirty variable
-      const unresolvedBuiltins = v.inputs.filter(
-        (i) => i.state === VariableState.UNDEFINED && i.cell.builtin,
-      );
+      const unresolvedBuiltins = v.inputs.filter((i) => {
+        return i.cell.builtin && i.state === VariableState.UNDEFINED;
+      });
 
       if (unresolvedBuiltins.length) {
         roots.delete(v.id);
@@ -268,7 +271,7 @@ export class Runtime extends EventEmitter {
 
     // marks the circular dependencies as rejected
     cycles.forEach((variable) => {
-      variable.rejected(RuntimeError.circularDependency(variable.cell.name));
+      variable.onReject(RuntimeError.circularDependency(variable.cell.name));
     });
   }
 

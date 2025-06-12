@@ -20,8 +20,9 @@ interface VariableProps {
 export enum VariableState {
   UNDEFINED = "undefined",
   DETACHED = "detached", // removed variable, but not deleted from the module
-  SCHEDULED = "scheduled", // scheduled for computation, but not yet computed
   PENDING = "pending", // computation is in progress, inputs are not yet fulfilled
+  PAUSED = "paused", // computation is paused, inputs are fulfilled, but not yet computed
+  COMPUTING = "computing", // scheduled for computation, but not yet computed
   FULFILLED = "fulfilled",
   REJECTED = "rejected",
 }
@@ -51,14 +52,12 @@ export class Variable {
   // this is mainly for debugging purposes
   state: VariableState;
 
-  // runs the generator in the background
-  runner: Promised;
   // similar to done channel in go, one done is set the runner stop running the generator
   done = false;
 
   // if the variable is a generator
   generator: { next: Function; return: Function } = { next: noop, return: noop };
-  generated: any = undefined;
+  generating: boolean = false;
   generatorish: boolean = false;
 
   // version of the variable calculation
@@ -85,18 +84,6 @@ export class Variable {
   }
 
   constructor(props: VariableProps) {
-    const { module, cell } = props;
-    this.module = module;
-
-    // update the cell deps with module id
-    this.cell = cell.with(module);
-
-    this.state = VariableState.UNDEFINED;
-
-    this.promise = Promised.create(noop, this.id);
-    this.runner = Promised.create(noop, this.id);
-    this.controller = new AbortController();
-
     this.pending = this.pending.bind(this);
     this.fulfilled = this.fulfilled.bind(this);
     this.rejected = this.rejected.bind(this);
@@ -105,8 +92,26 @@ export class Variable {
     this.stop = this.stop.bind(this);
     this.onProgress = this.onProgress.bind(this);
 
+    this.onFulfilled = this.onFulfilled.bind(this);
+    this.onReject = this.onReject.bind(this);
+
+    const { module, cell } = props;
+    this.module = module;
+
+    // update the cell deps with module id
+    this.cell = cell.with(module);
+
+    this.state = VariableState.UNDEFINED;
+
+    this.promise = this.createPromise();
+    this.controller = new AbortController();
+
     // this.generateFirst = this.generateFirst.bind(this);
     // this.generateNext = this.generateNext.bind(this);
+  }
+
+  createPromise() {
+    return (this.promise = Promised.create(this.fulfilled, this.rejected, this.id));
   }
 
   get cellId() {
@@ -141,17 +146,22 @@ export class Variable {
     return this.module.runtime;
   }
 
-  // check if the variable is generating
-  get generating() {
-    return !this.controller.signal.aborted && !this.done;
-  }
-
   get aborted() {
     return this.controller.signal.aborted;
   }
 
   redefine(cell: Cell) {
     this.cell = cell.with(this.module);
+    this.state = VariableState.UNDEFINED;
+    this.promise = Promised.create(this.fulfilled, this.rejected, cell.id);
+    this.controller = new AbortController();
+    this.done = false;
+    this.generator = { next: noop, return: noop };
+    this.value = UNDEFINED_VALUE;
+    this.error = undefined;
+    this.fulfilledVersion = -1;
+    this.rejectedVersion = -1;
+    this.pendingVersion = -1;
   }
 
   // break all links before leaving
@@ -177,7 +187,7 @@ export class Variable {
       const cycle = this.findAllNodesInCycle();
       if (cycle.length > 0) {
         cycle.forEach((node) => {
-          node.rejected(RuntimeError.circularDependency(this.cell.name));
+          node.onReject(RuntimeError.circularDependency(this.cell.name));
         });
         return;
       }
@@ -192,14 +202,6 @@ export class Variable {
         if (inputs.every((input) => input.promise.isFulfilled)) {
           output.pending();
           output.stop();
-          // console.log("onProgress", this.id, this.name, "value:", this.value);
-          // console.log(
-          //   "output",
-          //   output.id,
-          //   output.name,
-          //   "inputs:",
-          //   inputs.map((i) => i.name),
-          // );
           output.compute(inputs);
         }
       });
@@ -211,7 +213,7 @@ export class Variable {
       this.outputs.forEach((output) => {
         output.stop();
         output.pending();
-        output.rejected(this.error || RuntimeError.of("Variable computation failed"));
+        output.onReject(this.error || RuntimeError.of("Variable computation failed"));
       });
     }
   }
@@ -250,17 +252,16 @@ export class Variable {
 
   // stop the variable computation, stop the generator if it is a generator
   stop() {
-    if (this.generatorish) {
-      // this.generator.return();
-      // const done = () => ({ value: this.value, done: true });
-      // this.generator = { next: done, return: done };
-      // this.done = true;
-      // this.runner.fulfilled({ value: this.generated, done: true });
-      this.stopGenerating();
-      console.log("--------------------------------", this.value);
-    } else {
-      // cache the last computed value
-      this.promise.fulfilled(this.value);
+    if (this.generating) {
+      debugger;
+      // console.log("stop", this.id, this.name, this.generatorish, this.done);
+      if (this.generatorish) {
+        console.log("---------------------");
+        this.stopGenerating();
+      } else {
+        // cache the last computed value
+        this.promise.fulfilled(this.value);
+      }
     }
   }
 
@@ -277,12 +278,14 @@ export class Variable {
   // the first run will mark the generator as dirty,
   // triggering the runtime to compute it again
   compute(inputs: Variable[]) {
-    // console.log("computing:", this.id, "=>", this.name);
+    this.state = VariableState.COMPUTING;
+    this.promise = this.createPromise();
+    // console.log("computing:", this.id, "=>", this.name, this);
 
     // ensure all inputs are fulfilled
     const error = inputs.find((input) => input.error);
     if (error) {
-      this.rejected(error.error!);
+      this.onReject(error.error!);
       return;
     }
 
@@ -321,45 +324,68 @@ export class Variable {
         if (generatorish(res)) {
           this.generatorish = true;
           this.generator = res;
+          this.generating = true;
           this.startGenerating();
         } else {
-          this.fulfilled(res);
+          // console.log("fulfilled", this.id, this.name, res);
+          this.promise.fulfilled(res);
         }
       });
     } catch (error) {
-      this.rejected(error as Error);
+      this.onReject(error as Error);
     }
   }
 
-  private startGenerating() {
+  private async startGenerating() {
     const signal = (this.controller = new AbortController()).signal;
     let generator = this.generator;
     let generated: any = undefined;
-    console.log("startGenerating", this.id, this.name, generator);
+    // console.log("startGenerating", this.id, this.name, generator);
 
-    // this.runner = Promised.create(async (resolve, reject) => {
-    //   let done = (this.done = false);
-    //   while (!done && !signal.aborted) {
-    //     await Promise.resolve(generator.next(generated))
-    //       .then(({ value, done: isDone }) => {
-    //         this.fulfilled(value);
-    //
-    //         if (isDone) {
-    //           this.done = done = true;
-    //           generated = value;
-    //           resolve({ value, done: true });
-    //         } else {
-    //           // console.log("generator next", this.name, value, isDone);
-    //           generated = value;
-    //           // continue the generator
-    //         }
-    //       })
-    //       .catch(reject);
-    //   }
-    // }, this.id);
+    let done = (this.done = false);
+    let error: any = null;
+    let i = 0;
+    while (!done && !signal.aborted && !error) {
+      await new Promise((proceed, failed) => {
+        // debugger;
+        setTimeout(() => {
+          this.promise = this.createPromise();
+          try {
+            Promise.resolve(generator.next(generated))
+              .then(({ value, done: isDone }) => {
+                // NOTE: the promise is not associated with the generated value anymore.
+                // console.log("generated", i++, this.id, this.name, value, isDone);
+                if (isDone) {
+                  this.done = done = true;
+                  generated = value;
+                } else {
+                  // console.log("generator next", this.name, value, isDone);
+                  generated = value;
+                  // continue the generator
+                }
+                this.promise.fulfilled(value);
+                proceed(value);
+              })
+              .catch((e) => {
+                this.promise.rejected(e as Error);
+                failed(e);
+                error = e;
+              });
+          } catch (e) {
+            this.promise.rejected(e as Error);
+            failed(e);
+            error = e;
+          }
+        }, 0);
+      });
+    }
+
+    this.generating = false;
   }
 
+  // this method exists only for clean semantics
   private stopGenerating() {
+    debugger;
     this.controller.abort();
   }
 
@@ -435,14 +461,13 @@ export class Variable {
   // }
 
   pending() {
-    this.state = VariableState.PENDING;
     this.pendingVersion = this.version;
 
     // this.promise.fulfilled(""); // fulfill the promise with an empty value
     // create a new promise for the next run
-    this.promise = Promised.create(noop, this.id, UNDEFINED_VALUE);
-    this.state = VariableState.PENDING;
+    this.promise = Promised.resolved(UNDEFINED_VALUE, this.id);
     this.value = UNDEFINED_VALUE;
+    this.state = VariableState.PENDING;
     this.error = undefined;
     const done = () => ({ value: this.value, done: true });
     this.generator = { next: done, return: done };
@@ -467,15 +492,30 @@ export class Variable {
     this.fulfilledVersion = this.version;
     this.value = value;
     this.error = undefined;
-    this.promise.fulfilled(value);
     !this.builtin && this.runtime.emit("fulfilled", this);
     !this.builtin && this.runtime.emit("fulfilled:" + this.cellId, this);
     this.onProgress();
     return this;
   }
 
+  onFulfilled(value: any) {
+    // console.log("Variable: onFulfilled", this.id, this.name, value);
+    // if (this.state === VariableState.FULFILLED) {
+    //   return;
+    // }
+    this.promise.fulfilled(value);
+  }
+
+  onReject(error: Error) {
+    // console.error("onReject", this.id, this.name, error);
+    if (this.state === VariableState.REJECTED) {
+      return;
+    }
+    this.promise.rejected(error);
+  }
+
   // mark the variable as rejected with an error
-  rejected(error: Error) {
+  private rejected(error: Error) {
     const variable = this.runtime.variablesById.get(this.id);
     // if (this.version === this.rejectedVersion) {
     //   return variable;
@@ -485,7 +525,7 @@ export class Variable {
     this.error = error;
     this.value = undefined;
     this.generator = { next: noop, return: noop };
-    // this.promise.rejected(error)
+    // this.promise.rejected(error);
     // console.log("rejected", this.id, this.name, error);
     this.runtime.emit("rejected", this);
     this.runtime.emit("rejected:" + this.cellId, this);
