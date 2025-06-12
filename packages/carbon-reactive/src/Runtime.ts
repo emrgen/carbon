@@ -208,10 +208,8 @@ export class Runtime extends EventEmitter {
     // all connected variables are now pending and have no running computation
     dirty.forEach((root) => {
       const inputs = this.graph.inputs(root);
-      const args = inputs.map((input) => input.promise);
-      Promise.all(args).then(() => {
-        return root.compute(inputs);
-      });
+      // if the variable is pending, do not mark it as pending again
+      return root.compute(inputs);
     });
 
     // marks the circular dependencies as rejected

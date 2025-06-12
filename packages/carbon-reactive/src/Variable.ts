@@ -1,4 +1,4 @@
-import { noop } from "lodash";
+import { last, noop } from "lodash";
 import { Cell } from "./Cell";
 import { Module, ModuleVariableId, ModuleVariableName } from "./Module";
 import { Promised } from "./Promised";
@@ -64,6 +64,7 @@ export class Variable {
   // version of the variable calculation
   fulfilledVersion: number = -1;
   rejectedVersion: number = -1;
+  pendingVersion: number = -1;
 
   static create(props: VariableProps) {
     return new Variable(props);
@@ -256,8 +257,9 @@ export class Variable {
     // make sure the input variablesById have matching names
     const missing = this.dependencies.find((name, i) => !inputMap.has(name));
     if (missing) {
-      // return Promise.reject(RuntimeError.notDefined(missing.split(":")[1])).catch(this.rejected);
-      return;
+      return Promise.reject(RuntimeError.notDefined(last(missing.split(":"))!)).catch(
+        this.rejected,
+      );
     }
 
     // get the input variable values in order by name
@@ -331,6 +333,11 @@ export class Variable {
 
   pending() {
     this.state = VariableState.PENDING;
+    if (this.version === this.pendingVersion) {
+      return;
+    }
+
+    this.pendingVersion = this.version;
     this.promise.fulfilled(""); // fulfill the promise with an empty value
     // create a new promise for the next run
     this.promise = Promised.create(noop, this.id, UNDEFINED_VALUE);
@@ -375,7 +382,7 @@ export class Variable {
     this.error = error;
     this.value = undefined;
     this.generator = { next: noop, return: noop };
-    this.promise.fulfilled(error);
+    // this.promise.fulfilled(error);
     this.runtime.emit("rejected", this);
     this.runtime.emit("rejected:" + this.cellId, this);
     this.onProgress();
