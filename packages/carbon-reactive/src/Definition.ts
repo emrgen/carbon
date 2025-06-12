@@ -34,7 +34,6 @@ export const DefinitionFactory = {
     return this.Expression(name, deps, ast, code);
   },
   TaggedTemplateExpression(name: string, deps: string[], ast: any, code: string) {
-    console.log(ast, code);
     return this.Expression(name, deps, ast, code);
   },
   NewExpression(name: string, deps: string[], ast: any, code: string) {

@@ -3,7 +3,7 @@ import { ObjectViewer } from "@emrgen/carbon-object-view";
 import { RendererProps } from "@emrgen/carbon-react";
 import { Cell, UNDEFINED_VALUE, Variable } from "@emrgen/carbon-reactive";
 import { cloneDeep, isFunction, isPlainObject } from "lodash";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useReactiveRuntime } from "../hooks/useReactiveRuntime";
 import { useReactiveVariable } from "../hooks/useReactiveVariable";
 import { isHtmlElement } from "../x";
@@ -33,42 +33,66 @@ export const ReactiveCellViewer = (props: RendererProps) => {
 
   // attach result to the ref when the component mounts
   // NOTE: use shadow dom here for safety
-  useEffect(() => {
-    if (ref.current) {
-      const el = ref.current;
-      if (isHtmlElement(result)) {
-        if (el.hasChildNodes()) {
-          el.removeChild(el.firstChild!);
-        }
-        el.appendChild(result);
-      } else {
-        // if the result is not an HTML element, we clear the ref
-        if (el.hasChildNodes()) {
-          el.removeChild(el.firstChild!);
+  // useEffect(() => {
+  //   if (ref.current) {
+  //     const el = ref.current;
+  //     if (isHtmlElement(result)) {
+  //       if (el.hasChildNodes()) {
+  //         el.removeChild(el.firstChild!);
+  //       }
+  //       el.appendChild(result);
+  //     } else {
+  //       // if the result is not an HTML element, we clear the ref
+  //       if (el.hasChildNodes()) {
+  //         el.removeChild(el.firstChild!);
+  //       }
+  //     }
+  //   }
+  // }, [node, ref, result]);
+
+  const mountResult = useCallback(
+    (result: any) => {
+      if (ref.current) {
+        const el = ref.current;
+        const isHtml = isHtmlElement(result);
+        setIsHtml(isHtml);
+        if (isHtml) {
+          if (el.hasChildNodes()) {
+            el.removeChild(el.firstChild!);
+          }
+          el.appendChild(result);
+        } else {
+          // if the result is not an HTML element, we clear the ref
+          if (el.hasChildNodes()) {
+            el.removeChild(el.firstChild!);
+          }
+          setResult(result);
         }
       }
-    }
-  }, [node, ref, result]);
+    },
+    [ref],
+  );
 
-  const updateResult = useCallback((res) => {
-    if (isFunction(res)) {
-      setResult(() => res);
-    } else {
-      if (isPlainObject(res)) {
-        setResult(cloneDeep(res));
+  const updateResult = useCallback(
+    (res: any) => {
+      setError("");
+      if (isFunction(res)) {
+        mountResult(() => res);
       } else {
-        setResult(res);
+        if (isPlainObject(res)) {
+          mountResult(cloneDeep(res));
+        } else {
+          mountResult(res);
+        }
       }
-    }
-
-    setIsHtml(isHtmlElement(res));
-    setError("");
-  }, []);
+    },
+    [mountResult],
+  );
 
   useReactiveVariable({
     node,
     onFulfilled: (v) => {
-      console.log("Cell fulfilled:", v.id.toString(), v.value);
+      // console.log("Cell fulfilled:", v.id.toString(), v.value);
       updateResult(v.value);
       const hasName = !v.cell.builtin && Cell.hasName(v.cell);
       setName(hasName ? (v.cell.name ?? "") : "");

@@ -127,7 +127,7 @@ export class Module {
 
   // import a variable from another module
   // multiple imports can be done by calling this function multiple times
-  import(name: string, alias: string, module: Module, lazy = false) {
+  import(name: string, alias: string, module: Module, schedule = true, dirty = true) {
     // check if the variable exists in the module
     const variable = module.value(name);
     if (!variable) {
@@ -136,7 +136,7 @@ export class Module {
     }
 
     const cell = Cell.create({
-      id: `imported(${module.id}/${randomString(10)})`,
+      id: `import(${module.id}/${randomString(10)})`,
       name: alias,
       code: `(x) => x`,
       // fully qualified name of the variable in the module
@@ -145,7 +145,7 @@ export class Module {
       builtin: variable?.builtin,
     });
 
-    return this.define(cell, lazy);
+    return this.define(cell, schedule, dirty);
   }
 
   // define a mutable variable with the given name and value
@@ -191,7 +191,7 @@ export class Module {
           return value;
         },
       }),
-      true,
+      false,
     );
 
     // define the mutable part of the mutable variable
@@ -205,7 +205,7 @@ export class Module {
           return mut.accessor<any>(moduleVariableName);
         },
       }),
-      true,
+      false,
     );
 
     // define the immutable part of the mutable variable
@@ -221,9 +221,10 @@ export class Module {
           return mut.accessor<any>(moduleVariableName).value;
         },
       }),
-      true,
+      false,
     );
 
+    // finally schedule the runtime to recompute the dirty variables
     this.runtime.schedule();
 
     return immutable;
@@ -245,7 +246,8 @@ export class Module {
 
   // create a new variable with the given definition
   // if the variable already exists, redefine it
-  define(cell: Cell, lazy = false): Variable {
+  define(cell: Cell, schedule = true, dirty = true): Variable {
+    // console.log("define", lazy, cell.name);
     const builtIn = this.findBuiltIn(cell);
     if (builtIn) {
       return builtIn;
@@ -270,7 +272,7 @@ export class Module {
 
     // console.log("define", id, name, variable.dependencies);
     this.connect(variable);
-    this.onCreate(variable, lazy);
+    this.onCreate(variable, schedule, dirty);
 
     return variable;
   }
@@ -302,14 +304,15 @@ export class Module {
       return variable;
     }
 
-    // name of the variable has changed
-    this.onRemove(variable, true);
+    // mark the variables with same id as dirty but don't schedule
+    this.onRemove(variable, false);
     this.disconnect(variable);
 
     cell.version = variable.version + 1;
     variable.redefine(cell);
 
     this.connect(variable);
+    // mark the variable as dirty and schedule to recompute
     this.onCreate(variable);
 
     return variable;
@@ -330,7 +333,7 @@ export class Module {
     }
   }
 
-  onCreate(variable: Variable, lazy = false) {
+  onCreate(variable: Variable, schedule = true, dirty = true) {
     // connect the variable with the module local variablesById
     this.variablesById.set(variable.id, variable);
 
@@ -341,10 +344,10 @@ export class Module {
     }
     this.variablesByName.get(fullName)?.push(variable);
 
-    this.runtime.onCreate(variable, lazy);
+    this.runtime.onCreate(variable, schedule, dirty);
   }
 
-  onRemove(variable: Variable, lazy = false) {
+  onRemove(variable: Variable, schedule = true, dirty = true) {
     // remove the variable from the module local variablesById
     this.variablesById.delete(variable.id);
 
@@ -359,7 +362,7 @@ export class Module {
       }
     }
 
-    this.runtime.onRemove(variable, lazy);
+    this.runtime.onRemove(variable, schedule, dirty);
 
     variable.stop();
     variable.removed();

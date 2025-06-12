@@ -83,9 +83,7 @@ const OuterBound = (props: OuterBoundProps) => {
     console.log(type, event);
     setTransforming(true);
 
-    const sides = adjacentSides(handle).map((side) =>
-      side.transform(shaper.affine()),
-    );
+    const sides = adjacentSides(handle).map((side) => side.transform(shaper.affine()));
     const anchorPoint = shaper.apply(getPoint(anchor));
     // move sides to points and check the scales, the maximum scaling is the allowed scaling
     const scales = points.map((p) => {
@@ -102,7 +100,7 @@ const OuterBound = (props: OuterBoundProps) => {
 
     const minScale = max(scales);
 
-    console.log("Min scale", minScale);
+    // console.log("Min scale", minScale);
 
     event.setInitState(node.id.toString(), {
       shaper: shaper,
@@ -119,9 +117,7 @@ const OuterBound = (props: OuterBoundProps) => {
     event: DndEvent,
   ) => {
     if (type === TransformType.ROTATE) {
-      const { beforeLine, shaper, angleLine } = event.getInitState(
-        node.id.toString(),
-      );
+      const { beforeLine, shaper, angleLine } = event.getInitState(node.id.toString());
       if (!Shaper.is(shaper)) return;
       if (!Line.is(angleLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
@@ -132,9 +128,7 @@ const OuterBound = (props: OuterBoundProps) => {
       const after = shaper.rotate(angle);
       const centerPoint = after.apply(getPoint(Location.CENTER));
       const { width, height } = after.size();
-      const sides = boundSidesFromCorners(
-        cornerPoints.map((p) => after.apply(p)),
-      );
+      const sides = boundSidesFromCorners(cornerPoints.map((p) => after.apply(p)));
 
       // shift the sides to the inner bound corner points and check the scales.
       // the maximum scaling is the allowed scaling
@@ -172,9 +166,7 @@ const OuterBound = (props: OuterBoundProps) => {
         angleHintRef.current.style.top = `${event.position.endY + 40}px`;
       }
     } else {
-      const { shaper: before, minScale } = event.getInitState(
-        node.id.toString(),
-      ) as {
+      const { shaper: before, minScale } = event.getInitState(node.id.toString()) as {
         shaper: Shaper;
         originLines: Line[];
         minScale: number;
@@ -184,13 +176,7 @@ const OuterBound = (props: OuterBoundProps) => {
       if (!isNumber(minScale)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
 
-      const change = before.scaleFromDelta(
-        dx,
-        dy,
-        anchor,
-        handle,
-        ResizeRatio.KEEP,
-      );
+      const change = before.scaleFromDelta(dx, dy, anchor, handle, ResizeRatio.KEEP);
       const sx = Math.max(change.sx, minScale);
       const sy = Math.max(change.sy, minScale);
       let after = before.scale(sx, sy, change.ax, change.ay);
@@ -214,9 +200,7 @@ const OuterBound = (props: OuterBoundProps) => {
   ) => {
     console.log("stop", type, event);
     if (type === TransformType.ROTATE) {
-      const { beforeLine: startLine, shaper } = event.getInitState(
-        node.id.toString(),
-      );
+      const { beforeLine: startLine, shaper } = event.getInitState(node.id.toString());
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       const currLine = startLine.moveEndBy(dx, dy);
@@ -298,76 +282,32 @@ const OuterBound = (props: OuterBoundProps) => {
 function adjacentSides(handle: TransformHandle): Line[] {
   switch (handle) {
     case TransformHandle.TOP:
-      return [
-        Line.fromPoints(
-          getPoint(Location.TOP_LEFT),
-          getPoint(Location.TOP_RIGHT),
-        ),
-      ];
+      return [Line.fromPoints(getPoint(Location.TOP_LEFT), getPoint(Location.TOP_RIGHT))];
     case TransformHandle.RIGHT:
-      return [
-        Line.fromPoints(
-          getPoint(Location.TOP_RIGHT),
-          getPoint(Location.BOTTOM_RIGHT),
-        ),
-      ];
+      return [Line.fromPoints(getPoint(Location.TOP_RIGHT), getPoint(Location.BOTTOM_RIGHT))];
     case TransformHandle.BOTTOM:
-      return [
-        Line.fromPoints(
-          getPoint(Location.BOTTOM_LEFT),
-          getPoint(Location.BOTTOM_RIGHT),
-        ),
-      ];
+      return [Line.fromPoints(getPoint(Location.BOTTOM_LEFT), getPoint(Location.BOTTOM_RIGHT))];
     case TransformHandle.LEFT:
-      return [
-        Line.fromPoints(
-          getPoint(Location.TOP_LEFT),
-          getPoint(Location.BOTTOM_LEFT),
-        ),
-      ];
+      return [Line.fromPoints(getPoint(Location.TOP_LEFT), getPoint(Location.BOTTOM_LEFT))];
     case TransformHandle.TOP_LEFT:
       return [
-        Line.fromPoints(
-          getPoint(Location.TOP_LEFT),
-          getPoint(Location.TOP_RIGHT),
-        ),
-        Line.fromPoints(
-          getPoint(Location.TOP_LEFT),
-          getPoint(Location.BOTTOM_LEFT),
-        ),
+        Line.fromPoints(getPoint(Location.TOP_LEFT), getPoint(Location.TOP_RIGHT)),
+        Line.fromPoints(getPoint(Location.TOP_LEFT), getPoint(Location.BOTTOM_LEFT)),
       ];
     case TransformHandle.TOP_RIGHT:
       return [
-        Line.fromPoints(
-          getPoint(Location.TOP_RIGHT),
-          getPoint(Location.TOP_LEFT),
-        ),
-        Line.fromPoints(
-          getPoint(Location.TOP_RIGHT),
-          getPoint(Location.BOTTOM_RIGHT),
-        ),
+        Line.fromPoints(getPoint(Location.TOP_RIGHT), getPoint(Location.TOP_LEFT)),
+        Line.fromPoints(getPoint(Location.TOP_RIGHT), getPoint(Location.BOTTOM_RIGHT)),
       ];
     case TransformHandle.BOTTOM_RIGHT:
       return [
-        Line.fromPoints(
-          getPoint(Location.BOTTOM_RIGHT),
-          getPoint(Location.TOP_RIGHT),
-        ),
-        Line.fromPoints(
-          getPoint(Location.BOTTOM_RIGHT),
-          getPoint(Location.BOTTOM_LEFT),
-        ),
+        Line.fromPoints(getPoint(Location.BOTTOM_RIGHT), getPoint(Location.TOP_RIGHT)),
+        Line.fromPoints(getPoint(Location.BOTTOM_RIGHT), getPoint(Location.BOTTOM_LEFT)),
       ];
     case TransformHandle.BOTTOM_LEFT:
       return [
-        Line.fromPoints(
-          getPoint(Location.BOTTOM_LEFT),
-          getPoint(Location.TOP_LEFT),
-        ),
-        Line.fromPoints(
-          getPoint(Location.BOTTOM_LEFT),
-          getPoint(Location.BOTTOM_RIGHT),
-        ),
+        Line.fromPoints(getPoint(Location.BOTTOM_LEFT), getPoint(Location.TOP_LEFT)),
+        Line.fromPoints(getPoint(Location.BOTTOM_LEFT), getPoint(Location.BOTTOM_RIGHT)),
       ];
   }
 
@@ -414,9 +354,7 @@ const InnerBound = (props: InnerBoundProps) => {
     console.log(type, event);
     setTransforming(true);
 
-    const sides = anchorLines(anchor).map((side) =>
-      side.transform(shaper.affine()),
-    );
+    const sides = anchorLines(anchor).map((side) => side.transform(shaper.affine()));
     const boundSides = [
       Line.fromPoints(points2[0], points2[1]),
       Line.fromPoints(points2[1], points2[2]),
@@ -427,10 +365,7 @@ const InnerBound = (props: InnerBoundProps) => {
     // move sides to points and check the scales, the maximum scaling is the allowed scaling
     const scales = sides.map((side, i) => {
       const scales = boundSides.map((bound) => {
-        const point = side
-          .extendStart(1000)
-          .extendEnd(1000)
-          .intersection(bound);
+        const point = side.extendStart(1000).extendEnd(1000).intersection(bound);
 
         // console.log(side, bound, point);
         if (!point) {
@@ -440,20 +375,14 @@ const InnerBound = (props: InnerBoundProps) => {
         const before = side.vector();
         const after = side.moveEndTo(point).vector();
 
-        if (
-          anchor === TransformAnchor.TOP ||
-          anchor === TransformAnchor.BOTTOM
-        ) {
+        if (anchor === TransformAnchor.TOP || anchor === TransformAnchor.BOTTOM) {
           console.log("xxx", after.factorOf(before));
           return {
             sy: after.factorOf(before),
           };
         }
 
-        if (
-          anchor === TransformAnchor.LEFT ||
-          anchor === TransformAnchor.RIGHT
-        ) {
+        if (anchor === TransformAnchor.LEFT || anchor === TransformAnchor.RIGHT) {
           return {
             sx: after.factorOf(before),
           };
@@ -566,13 +495,7 @@ const InnerBound = (props: InnerBoundProps) => {
       let { deltaX: dx, deltaY: dy } = event.position;
       const outerBoundSides = boundSidesFromCorners(points2);
 
-      const change = before.scaleFromDelta(
-        dx,
-        dy,
-        anchor,
-        handle,
-        ResizeRatio.FREE,
-      );
+      const change = before.scaleFromDelta(dx, dy, anchor, handle, ResizeRatio.FREE);
 
       // draw a line from cursor to side and check the intersection
       let sx = (() =>
@@ -587,19 +510,13 @@ const InnerBound = (props: InnerBoundProps) => {
       let after = before.scale(sx, sy, change.ax, change.ay);
       const handlePoint = after.apply(getPoint(handle));
       const outerBoundCenterPoint = sp4.center();
-      const boundSide = boundIntersection(
-        outerBoundSides,
-        outerBoundCenterPoint,
-        handlePoint,
-      );
+      const boundSide = boundIntersection(outerBoundSides, outerBoundCenterPoint, handlePoint);
 
       if (boundSide) {
         // console.log("outsize", boundSide);
         const centerPoint = after.apply(getPoint(Location.CENTER));
         const cursorPoint = { x: startPoint.x + dx, y: startPoint.y + dy };
-        const boundSides = boundSidesFromCorners(
-          cornerPoints.map((p) => after.apply(p)),
-        );
+        const boundSides = boundSidesFromCorners(cornerPoints.map((p) => after.apply(p)));
 
         const pointDistance = (point: IPoint) => {
           // the point will cause the shape to go out of bound
@@ -610,11 +527,7 @@ const InnerBound = (props: InnerBoundProps) => {
           return Line.fromPoints(point, cursorPoint).length;
         };
 
-        const binarySearch = (
-          start: number,
-          end: number,
-          fn: (point: IPoint) => number,
-        ) => {
+        const binarySearch = (start: number, end: number, fn: (point: IPoint) => number) => {
           let startDistance = fn(boundSide.pointAtLength(start));
           let endDistance = fn(boundSide.pointAtLength(end));
           let distance = startDistance;
@@ -644,9 +557,7 @@ const InnerBound = (props: InnerBoundProps) => {
         // find the closest point on the bound side to the cursor that keeps all the corners inside the bound
         // get the reference point what surely on the bound side and inside the bound
         const anchorPoint = after.apply(getPoint(anchor));
-        const refPoint = boundSide.intersection(
-          Line.fromPoints(anchorPoint, handlePoint),
-        );
+        const refPoint = boundSide.intersection(Line.fromPoints(anchorPoint, handlePoint));
         if (!refPoint) {
           console.error("no ref point");
           return;
@@ -656,11 +567,7 @@ const InnerBound = (props: InnerBoundProps) => {
         const cursorProjectionPoint = boundSide.projectionPoint(cursorPoint);
         const projectionLength = boundSide.pointLength(cursorProjectionPoint);
 
-        const anchorOppositePoint = binarySearch(
-          refLength,
-          projectionLength,
-          pointDistance,
-        );
+        const anchorOppositePoint = binarySearch(refLength, projectionLength, pointDistance);
 
         const startHandlePoint = shaper.apply(getPoint(handle));
         const hdx = anchorOppositePoint.x - startHandlePoint.x;
@@ -692,9 +599,7 @@ const InnerBound = (props: InnerBoundProps) => {
   ) => {
     console.log("stop", type, event);
     if (type === TransformType.ROTATE) {
-      const { beforeLine: startLine, shaper } = event.getInitState(
-        node.id.toString(),
-      );
+      const { beforeLine: startLine, shaper } = event.getInitState(node.id.toString());
       if (!Line.is(startLine)) return;
       const { deltaX: dx, deltaY: dy } = event.position;
       const currLine = startLine.moveEndBy(dx, dy);
@@ -827,68 +732,32 @@ function anchorLines(anchor: TransformAnchor): Line[] {
   switch (anchor) {
     case TransformAnchor.TOP:
       return [
-        Line.fromPoints(
-          getPoint(Location.TOP_LEFT),
-          getPoint(Location.BOTTOM_LEFT),
-        ),
-        Line.fromPoints(
-          getPoint(Location.TOP_RIGHT),
-          getPoint(Location.BOTTOM_RIGHT),
-        ),
+        Line.fromPoints(getPoint(Location.TOP_LEFT), getPoint(Location.BOTTOM_LEFT)),
+        Line.fromPoints(getPoint(Location.TOP_RIGHT), getPoint(Location.BOTTOM_RIGHT)),
       ];
     case TransformAnchor.RIGHT:
       return [
-        Line.fromPoints(
-          getPoint(Location.TOP_RIGHT),
-          getPoint(Location.TOP_LEFT),
-        ),
-        Line.fromPoints(
-          getPoint(Location.BOTTOM_RIGHT),
-          getPoint(Location.BOTTOM_LEFT),
-        ),
+        Line.fromPoints(getPoint(Location.TOP_RIGHT), getPoint(Location.TOP_LEFT)),
+        Line.fromPoints(getPoint(Location.BOTTOM_RIGHT), getPoint(Location.BOTTOM_LEFT)),
       ];
     case TransformAnchor.BOTTOM:
       return [
-        Line.fromPoints(
-          getPoint(Location.BOTTOM_LEFT),
-          getPoint(Location.TOP_LEFT),
-        ),
-        Line.fromPoints(
-          getPoint(Location.BOTTOM_RIGHT),
-          getPoint(Location.TOP_RIGHT),
-        ),
+        Line.fromPoints(getPoint(Location.BOTTOM_LEFT), getPoint(Location.TOP_LEFT)),
+        Line.fromPoints(getPoint(Location.BOTTOM_RIGHT), getPoint(Location.TOP_RIGHT)),
       ];
     case TransformAnchor.LEFT:
       return [
-        Line.fromPoints(
-          getPoint(Location.TOP_LEFT),
-          getPoint(Location.TOP_RIGHT),
-        ),
-        Line.fromPoints(
-          getPoint(Location.BOTTOM_LEFT),
-          getPoint(Location.BOTTOM_RIGHT),
-        ),
+        Line.fromPoints(getPoint(Location.TOP_LEFT), getPoint(Location.TOP_RIGHT)),
+        Line.fromPoints(getPoint(Location.BOTTOM_LEFT), getPoint(Location.BOTTOM_RIGHT)),
       ];
     case TransformAnchor.TOP_LEFT:
-      return [
-        anchorLine(getPoint(Location.TOP_RIGHT)),
-        anchorLine(getPoint(Location.BOTTOM_LEFT)),
-      ];
+      return [anchorLine(getPoint(Location.TOP_RIGHT)), anchorLine(getPoint(Location.BOTTOM_LEFT))];
     case TransformAnchor.TOP_RIGHT:
-      return [
-        anchorLine(getPoint(Location.TOP_LEFT)),
-        anchorLine(getPoint(Location.BOTTOM_RIGHT)),
-      ];
+      return [anchorLine(getPoint(Location.TOP_LEFT)), anchorLine(getPoint(Location.BOTTOM_RIGHT))];
     case TransformAnchor.BOTTOM_RIGHT:
-      return [
-        anchorLine(getPoint(Location.BOTTOM_LEFT)),
-        anchorLine(getPoint(Location.TOP_RIGHT)),
-      ];
+      return [anchorLine(getPoint(Location.BOTTOM_LEFT)), anchorLine(getPoint(Location.TOP_RIGHT))];
     case TransformAnchor.BOTTOM_LEFT:
-      return [
-        anchorLine(getPoint(Location.BOTTOM_RIGHT)),
-        anchorLine(getPoint(Location.TOP_LEFT)),
-      ];
+      return [anchorLine(getPoint(Location.BOTTOM_RIGHT)), anchorLine(getPoint(Location.TOP_LEFT))];
   }
 
   return [];

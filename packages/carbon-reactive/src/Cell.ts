@@ -138,9 +138,9 @@ export class Cell {
     deps = deps.filter((d) => !immutables.includes(d));
     // console.log(deps);
 
-    console.log(cellName, definition);
-    console.log(cellName, immutables);
-    console.log(cellName, deps);
+    // console.log(cellName, definition);
+    // console.log(cellName, immutables);
+    // console.log(cellName, deps);
 
     const create = DefinitionFactory[ast.body.type];
     if (!create) {

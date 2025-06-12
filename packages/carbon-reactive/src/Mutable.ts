@@ -93,12 +93,12 @@ export class Mutable {
 
         that.variables.set(name, value);
 
-        console.log("setting mutable", name, value, that.outputsNames.get(name));
+        // console.log("setting mutable", name, value, that.outputsNames.get(name));
         that.outputsNames.get(name)?.forEach((outputName) => {
           // mark the variable as dirty in the runtime
           const mutableVariable = that.runtime.variablesByName.get(outputName);
           mutableVariable?.forEach((variable) => {
-            console.log("marking dirty", name, variable.id.toString());
+            // console.log("marking dirty", name, variable.id.toString());
             that.runtime.markDirty(variable);
           });
         });

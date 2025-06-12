@@ -63,7 +63,7 @@ const ReactiveCellCompInner = (props: ReactiveCellProps) => {
         {/*NOTE: view is received from the parent to avoid re-rendering of the view on editor state change*/}
         {view}
         <div className={"reactive-cell-editor-wrapper"}>
-          <ReactiveCellStatus node={node} />
+          {/*<ReactiveCellStatus node={node} />*/}
           <ReactiveCellEditor node={node} onFocus={onFocus} />
         </div>
       </div>

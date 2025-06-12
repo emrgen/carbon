@@ -63,7 +63,7 @@ const builtins = Object.assign(new Library(), {
   // now: new Library().now,
   _: _,
 });
-console.log(builtins);
+// console.log(builtins);
 const runtime = Runtime.create(builtins);
 // @ts-ignore
 window.runtime = runtime;
@@ -91,7 +91,7 @@ export function Reactive() {
   window.app = app;
 
   return (
-    <Box className={"carbon-app-container"} pos={"relative"}>
+    <Box className={"carbon-app-container reactive"} pos={"relative"}>
       <ReactiveRuntimeContext runtime={runtime}>
         <CarbonApp app={app} renderManager={renderManager}>
           <FloatingStyleMenu />

@@ -5,7 +5,7 @@ import { Cell } from "./Cell";
 import { Graph } from "./Graph";
 import { Module, ModuleNameVersion, ModuleVariableId, ModuleVariableName } from "./Module";
 import { Mutable } from "./Mutable";
-import { Variable, VariableName } from "./Variable";
+import { Variable, VariableName, VariableState } from "./Variable";
 import { RuntimeError } from "./x";
 
 interface Builtins {
@@ -45,6 +45,7 @@ export class Runtime extends EventEmitter {
 
   // connecting is true when the runtime is connecting the variablesById
   connecting: boolean = false;
+  private paused: boolean = false;
 
   static create(builtins?: Builtins) {
     return new Runtime(builtins);
@@ -80,7 +81,7 @@ export class Runtime extends EventEmitter {
       });
 
       // compute the variable in a lazy fation
-      const variable = mod.define(cell, true);
+      const variable = mod.define(cell, false, false);
       this.builtinVariables.set(name, variable);
     });
 
@@ -90,6 +91,24 @@ export class Runtime extends EventEmitter {
   // the default module is the builtin module
   get mod() {
     return this.builtin;
+  }
+
+  pause() {
+    if (this.paused) return;
+    this.paused = true;
+
+    this.variablesById.forEach((v) => {
+      // just stop all variable computations
+      v.stop();
+    });
+  }
+
+  play() {
+    if (!this.paused) return;
+    this.paused = false;
+
+    // schedule the dirty variables to be recomputed
+    this.schedule();
   }
 
   // create a new module with the given name and version
@@ -105,7 +124,7 @@ export class Runtime extends EventEmitter {
 
     // inject the builtin variable from the runtime into the module
     this.builtinVariables.forEach((variable) => {
-      mod.import(variable.cell.name, variable.cell.name, this.builtin, true);
+      mod.import(variable.cell.name, variable.cell.name, this.builtin, false, false);
     });
 
     return mod;
@@ -113,18 +132,21 @@ export class Runtime extends EventEmitter {
 
   markDirty(variable: Variable) {
     variable.version += 1;
+    // console.log("markDirty", variable.name, variable.id, variable.version);
     this.dirty.set(variable.id, variable);
   }
 
   // perform runtime specific actions for a new variable is created
-  onCreate(variable: Variable, redefine = false) {
+  onCreate(variable: Variable, schedule = true, dirty = true) {
     this.variablesById.set(variable.id, variable);
     this.variablesByName.set(variable.name, this.variablesByName.get(variable.name) || []);
     this.variablesByName.get(variable.name)!.push(variable);
 
-    this.variablesByName.get(variable.name)?.forEach((v) => {
-      this.markDirty(v);
-    });
+    if (dirty) {
+      this.variablesByName.get(variable.name)?.forEach((v) => {
+        this.markDirty(v);
+      });
+    }
 
     this.graph.addNode(variable);
 
@@ -136,17 +158,17 @@ export class Runtime extends EventEmitter {
       this.graph.addEdge(variable, output);
     });
 
-    if (!redefine) {
+    if (schedule) {
       this.schedule();
     }
   }
 
   // perform runtime specific actions for a variable is removed
-  onRemove(variable: Variable, redefine = false) {
+  onRemove(variable: Variable, schedule = true, dirty = true) {
     this.variablesById.delete(variable.name);
     // if there were multiple variable with same name they become dirty
     const variables = this.variablesByName.get(variable.name);
-    if (variables) {
+    if (variables && dirty) {
       const remaining = variables.filter((v) => v.id !== variable.id);
       this.variablesByName.set(variable.name, remaining);
       remaining.forEach((v) => {
@@ -165,7 +187,7 @@ export class Runtime extends EventEmitter {
       }
     });
 
-    if (!redefine) {
+    if (schedule) {
       this.schedule();
     }
   }
@@ -182,6 +204,8 @@ export class Runtime extends EventEmitter {
     // variables that are dirty and need to be recomputed
     const dirty = Array.from(this.dirty.values()).filter((v) => v.version !== v.fulfilledVersion);
     this.dirty.clear();
+
+    // console.log("DIRTY", Array.from(roots.values().map((v) => v.name)));
 
     const connected = Array.from(this.graph.connected(dirty).values());
     const cycles = Array.from(this.graph.cycles(dirty).values());
@@ -200,7 +224,7 @@ export class Runtime extends EventEmitter {
 
       const missing = v.dependencies.find((dep) => !this.variablesByName.get(dep)?.length);
       if (missing) {
-        console.log("missing dependency", v.name, missing);
+        // console.log("missing dependency", v.name, missing);
         const err = RuntimeError.notDefined(last(missing.split(":"))!);
         v.rejected(err);
       }
@@ -213,13 +237,27 @@ export class Runtime extends EventEmitter {
     // );
 
     roots.values().forEach((v) => {
-      if (v.inputs.some((vi) => vi.cell.builtin && vi.state === "undefined")) {
-        roots.set(v.id, v);
+      // console.log(
+      //   "inputs",
+      //   v.name,
+      //   v.inputs.map((i) => i.cell.name),
+      //   v.inputs.map((i) => i.state),
+      // );
+
+      // if some input is builtin and still not resolved, add the input to roots and remove the current dirty variable
+      const unresolvedBuiltins = v.inputs.filter(
+        (i) => i.state === VariableState.UNDEFINED && i.cell.builtin,
+      );
+
+      if (unresolvedBuiltins.length) {
         roots.delete(v.id);
+        unresolvedBuiltins.forEach((vi) => {
+          roots.set(vi.name, vi);
+        });
       }
     });
 
-    console.log(roots.values().map((v) => v.name));
+    // console.log("inputs ROOTS", Array.from(roots.values().map((v) => v.name)));
 
     // all connected variables are now pending and have no running computation
     roots.forEach((root) => {

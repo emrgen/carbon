@@ -17,7 +17,7 @@ interface VariableProps {
   cell: Cell;
 }
 
-enum VariableState {
+export enum VariableState {
   UNDEFINED = "undefined",
   DETACHED = "detached", // removed variable, but not deleted from the module
   SCHEDULED = "scheduled", // scheduled for computation, but not yet computed
@@ -65,6 +65,7 @@ export class Variable {
   fulfilledVersion: number = -1;
   rejectedVersion: number = -1;
   pendingVersion: number = -1;
+  private controller: AbortController;
 
   static create(props: VariableProps) {
     return new Variable(props);
@@ -94,6 +95,7 @@ export class Variable {
 
     this.promise = Promised.create(noop, this.id);
     this.runner = Promised.create(noop, this.id);
+    this.controller = new AbortController();
 
     this.pending = this.pending.bind(this);
     this.fulfilled = this.fulfilled.bind(this);
@@ -103,8 +105,8 @@ export class Variable {
     this.stop = this.stop.bind(this);
     this.onProgress = this.onProgress.bind(this);
 
-    this.generateFirst = this.generateFirst.bind(this);
-    this.generateNext = this.generateNext.bind(this);
+    // this.generateFirst = this.generateFirst.bind(this);
+    // this.generateNext = this.generateNext.bind(this);
   }
 
   get cellId() {
@@ -137,6 +139,15 @@ export class Variable {
 
   get runtime() {
     return this.module.runtime;
+  }
+
+  // check if the variable is generating
+  get generating() {
+    return !this.controller.signal.aborted && !this.done;
+  }
+
+  get aborted() {
+    return this.controller.signal.aborted;
   }
 
   redefine(cell: Cell) {
@@ -240,10 +251,12 @@ export class Variable {
   // stop the variable computation, stop the generator if it is a generator
   stop() {
     if (this.generatorish) {
-      this.done = true;
-      this.runner.fulfilled({ value: this.generated, cmd: "done" });
-      const done = () => ({ value: this.value, done: true });
-      this.generator = { next: done, return: done };
+      // this.generator.return();
+      // const done = () => ({ value: this.value, done: true });
+      // this.generator = { next: done, return: done };
+      // this.done = true;
+      // this.runner.fulfilled({ value: this.generated, done: true });
+      this.stopGenerating();
       console.log("--------------------------------", this.value);
     } else {
       // cache the last computed value
@@ -302,87 +315,124 @@ export class Variable {
     try {
       const res = this.cell.definition.bind(this)(...args);
       // console.log(res);
-      Promise.resolve(res).then(this.generateFirst).then(this.fulfilled).catch(this.rejected);
+      // Promise.resolve(res).then(this.generateFirst).then(this.fulfilled).catch(this.rejected);
+      Promise.resolve(res).then((res) => {
+        // start the generator if it is a generator
+        if (generatorish(res)) {
+          this.generatorish = true;
+          this.generator = res;
+          this.startGenerating();
+        } else {
+          this.fulfilled(res);
+        }
+      });
     } catch (error) {
       this.rejected(error as Error);
     }
   }
 
-  // run the generator once and save the value at the generated field
-  private generateFirst(value: any) {
-    if (generatorish(value)) {
-      // console.log("generateFirst", value);
-      this.generatorish = true;
-      this.generator = value;
-      return this.generate();
-    } else {
-      this.generatorish = false;
-    }
+  private startGenerating() {
+    const signal = (this.controller = new AbortController()).signal;
+    let generator = this.generator;
+    let generated: any = undefined;
+    console.log("startGenerating", this.id, this.name, generator);
 
-    return value;
+    // this.runner = Promised.create(async (resolve, reject) => {
+    //   let done = (this.done = false);
+    //   while (!done && !signal.aborted) {
+    //     await Promise.resolve(generator.next(generated))
+    //       .then(({ value, done: isDone }) => {
+    //         this.fulfilled(value);
+    //
+    //         if (isDone) {
+    //           this.done = done = true;
+    //           generated = value;
+    //           resolve({ value, done: true });
+    //         } else {
+    //           // console.log("generator next", this.name, value, isDone);
+    //           generated = value;
+    //           // continue the generator
+    //         }
+    //       })
+    //       .catch(reject);
+    //   }
+    // }, this.id);
   }
+
+  private stopGenerating() {
+    this.controller.abort();
+  }
+
+  // run the generator once and save the value at the generated field
+  // private generateFirst(value: any) {
+  //   if (generatorish(value)) {
+  //     // console.log("generateFirst", value);
+  //     this.generatorish = true;
+  //     this.generator = value;
+  //     return this.generate();
+  //   } else {
+  //     this.generatorish = false;
+  //   }
+  //
+  //   return value;
+  // }
 
   // run the generator next and save the value at the generated field
-  private generateNext() {
-    try {
-      this.version += 1;
-      // create a new promise for the current run.
-      this.promise = Promised.create(noop, this.id, UNDEFINED_VALUE);
-      return this.generate()
-        .then((v) => {
-          console.log("--->", v);
-          this.fulfilled(v);
-        })
-        .catch(this.rejected);
-    } catch (e) {
-      return Promise.reject(e).catch(this.rejected);
-    }
-  }
+  // private generateNext() {
+  //   try {
+  //     this.version += 1;
+  //     // create a new promise for the current run.
+  //     this.promise = Promised.create(noop, this.id, UNDEFINED_VALUE);
+  //     return this.generate().then(this.fulfilled).catch(this.rejected);
+  //   } catch (e) {
+  //     return Promise.reject(e).catch(this.rejected);
+  //   }
+  // }
 
   // run the generator once and save the value at the generated field
-  private generate() {
-    return Promise.resolve(this.generator.next(this.generated))
-      .then(({ value, done }) => {
-        if (value === undefined) {
-          debugger;
-        }
-        return Promise.resolve(value)
-          .then((v) => {
-            if (v != undefined) {
-              this.runner.fulfilled(v);
-            }
-
-            if (done) {
-              // just adding a promise over the value just in case generator returns a promise
-              this.done = true;
-              if (value !== undefined) {
-                this.generated = v;
-              }
-              return this.generated;
-            } else {
-              // console.log("generateNext", this.name, this.cell.definition.toString(), v, done);
-              // if the generator is not done, we need to run it again
-              // run the generator again after a short delay, without blocking the event loop
-              // without this, the generator will run as fast as possible, hanging the event loop
-              const clear = setTimeout(() => this.generateNext(), 1);
-
-              this.runner = Promised.create(noop, this.id).then(({ value, done }) => {
-                clearTimeout(clear);
-                if (done) {
-                  this.done = true;
-                  return (this.generated = value);
-                } else {
-                  return this.generateNext();
-                }
-              });
-
-              return (this.generated = v);
-            }
-          })
-          .catch(this.rejected);
-      })
-      .catch(error);
-  }
+  // private generate() {
+  //   return Promise.resolve(this.generator.next(this.generated))
+  //     .then(({ value, done }) => {
+  //       if (value === undefined) {
+  //         debugger;
+  //       }
+  //       return Promise.resolve(value)
+  //         .then((v) => {
+  //           if (v != undefined) {
+  //             this.runner.fulfilled(v);
+  //           }
+  //
+  //           if (done) {
+  //             // just adding a promise over the value just in case generator returns a promise
+  //             this.done = true;
+  //             if (value !== undefined) {
+  //               this.generated = v;
+  //             }
+  //             return this.generated;
+  //           } else {
+  //             // console.log("generateNext", this.name, this.cell.definition.toString(), v, done);
+  //             // if the generator is not done, we need to run it again
+  //             // run the generator again after a short delay, without blocking the event loop
+  //             // without this, the generator will run as fast as possible, hanging the event loop
+  //             const clear = setTimeout(() => this.generateNext(), 1);
+  //
+  //             this.runner = Promised.create(noop, this.id).then(({ value, done }) => {
+  //               clearTimeout(clear);
+  //               if (done) {
+  //                 this.done = true;
+  //                 return (this.generated = value);
+  //               } else {
+  //                 return this.generateNext();
+  //               }
+  //             });
+  //
+  //             return (this.generated = v);
+  //           }
+  //         })
+  //         .catch(this.rejected);
+  //     })
+  //     .catch(error);
+  // }
 
   pending() {
     this.state = VariableState.PENDING;
@@ -413,7 +463,7 @@ export class Variable {
     //   return variable;
     // }
 
-    console.log(this.id, "value", value, this.builtin);
+    // console.log(this.id, "value", value, this.builtin);
     this.fulfilledVersion = this.version;
     this.value = value;
     this.error = undefined;
