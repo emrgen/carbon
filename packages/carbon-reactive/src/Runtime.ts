@@ -5,7 +5,6 @@ import { Cell } from "./Cell";
 import { Graph } from "./Graph";
 import { Module, ModuleNameVersion, ModuleVariableId, ModuleVariableName } from "./Module";
 import { Mutable } from "./Mutable";
-import { Promix } from "./Promix";
 import { Variable, VariableName } from "./Variable";
 import { RuntimeError } from "./x";
 
@@ -42,10 +41,10 @@ export class Runtime extends EventEmitter {
   // mutable variablesById store
   mutable: Mutable;
 
+  version: number = 0;
+
   // connecting is true when the runtime is connecting the variablesById
   connecting: boolean = false;
-
-  promise: Promix<any> = Promix.default("runtime");
 
   static create(builtins?: Builtins) {
     return new Runtime(builtins);
@@ -174,6 +173,7 @@ export class Runtime extends EventEmitter {
     if (this.dirty.size === 0 && this.generators.size === 0) {
       return;
     }
+    this.version += 1;
 
     // variables that are dirty and need to be recomputed
     const dirty = Array.from(this.dirty.values()).filter((v) => v.version !== v.fulfilledVersion);
@@ -191,10 +191,6 @@ export class Runtime extends EventEmitter {
     // mark all the nodes as pending
     connected.forEach((v) => {
       // if the variable is pending, do not mark it as pending again
-      if (v.state === "pending") {
-        return;
-      }
-
       v.stop();
       v.pending();
     });

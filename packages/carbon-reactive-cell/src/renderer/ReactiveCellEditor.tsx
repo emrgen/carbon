@@ -22,6 +22,7 @@ export const ReactiveCellEditor = (props: ReactiveCellEditorProps) => {
 
   // define the variable when the editor is blurred
   const onBlur = useCallback(() => {
+    // const variable = runtime.variablesById
     defineVariable(runtime, node);
   }, [node, runtime]);
 
@@ -29,7 +30,7 @@ export const ReactiveCellEditor = (props: ReactiveCellEditorProps) => {
     (event: KeyboardEvent) => {
       // define the variable when Ctrl+S or Cmd+S is pressed
       if (isHotkey("mod+s", event)) {
-        defineVariable(runtime, node);
+        defineVariable(runtime, node, true);
       }
     },
     [node, runtime],
@@ -46,7 +47,7 @@ export const ReactiveCellEditor = (props: ReactiveCellEditorProps) => {
               onMouseDown={preventAndStop}
               onMouseUp={(e) => {
                 preventAndStop(e);
-                defineVariable(runtime, node);
+                defineVariable(runtime, node, true);
               }}
             >
               <PiPlayBold />

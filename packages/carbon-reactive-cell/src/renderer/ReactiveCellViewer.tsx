@@ -41,13 +41,11 @@ export const ReactiveCellViewer = (props: RendererProps) => {
           el.removeChild(el.firstChild!);
         }
         el.appendChild(result);
-        setIsHtml(true);
       } else {
         // if the result is not an HTML element, we clear the ref
         if (el.hasChildNodes()) {
           el.removeChild(el.firstChild!);
         }
-        setIsHtml(false);
       }
     }
   }, [node, ref, result]);
@@ -63,14 +61,14 @@ export const ReactiveCellViewer = (props: RendererProps) => {
       }
     }
 
-    setIsHtml(false);
+    setIsHtml(isHtmlElement(res));
     setError("");
   }, []);
 
   useReactiveVariable({
     node,
     onFulfilled: (v) => {
-      console.log("Cell fulfilled:", v.id.toString(), v.value);
+      // console.log("Cell fulfilled:", v.id.toString(), v.value);
       updateResult(v.value);
       const hasName = !v.cell.builtin && Cell.hasName(v.cell);
       setName(hasName ? (v.cell.name ?? "") : "");

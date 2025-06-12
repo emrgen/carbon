@@ -264,8 +264,8 @@ export class Module {
     if (variable.cell.eq(cell)) {
       console.log("redefine", cell.id, cell.name, "no change");
       variable.version += 1;
-      // this.runtime.markDirty(variable);
-      // this.runtime.schedule();
+      this.runtime.markDirty(variable);
+      this.runtime.schedule();
       return variable;
     }
 

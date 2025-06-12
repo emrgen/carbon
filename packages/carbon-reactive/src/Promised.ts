@@ -90,8 +90,10 @@ export class Promised<T = any> {
   then<TResult1 = T, TResult2 = never>(
     onFulfilled?: OnFulfilled<T, TResult1>,
     onRejected?: OnRejected<TResult2>,
-  ): Promise<TResult1 | TResult2> {
-    return this.promise.then(onFulfilled, onRejected);
+  ): Promised<TResult1 | TResult2> {
+    return Promised.create((resolve, reject) => {
+      this.promise.then(onFulfilled, onRejected);
+    }, this.id);
   }
 
   catch<TResult = never>(onRejected?: OnRejected<TResult>): Promise<T | TResult> {
