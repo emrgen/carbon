@@ -62,6 +62,7 @@ const builtins = Object.assign(new Library(), {
   // Promises: new Library().Promises,
   // now: new Library().now,
   _: _,
+  now: 123,
 });
 console.log(builtins);
 const runtime = Runtime.create(builtins);

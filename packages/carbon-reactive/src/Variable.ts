@@ -198,8 +198,8 @@ export class Variable {
       this.stop();
 
       this.outputs.forEach((output) => {
-        output.pending();
         output.stop();
+        output.pending();
         output.rejected(this.error || RuntimeError.of("Variable computation failed"));
       });
     }
@@ -242,7 +242,9 @@ export class Variable {
     if (this.generatorish) {
       this.done = true;
       this.runner.fulfilled({ value: this.generated, cmd: "done" });
-      this.generator = { next: noop, return: noop };
+      const done = () => ({ value: this.value, done: true });
+      this.generator = { next: done, return: done };
+      console.log("--------------------------------", this.value);
     } else {
       // cache the last computed value
       this.promise.fulfilled(this.value);
@@ -326,7 +328,12 @@ export class Variable {
       this.version += 1;
       // create a new promise for the current run.
       this.promise = Promised.create(noop, this.id, UNDEFINED_VALUE);
-      return this.generate().then(this.fulfilled).catch(this.rejected);
+      return this.generate()
+        .then((v) => {
+          console.log("--->", v);
+          this.fulfilled(v);
+        })
+        .catch(this.rejected);
     } catch (e) {
       return Promise.reject(e).catch(this.rejected);
     }
@@ -336,10 +343,13 @@ export class Variable {
   private generate() {
     return Promise.resolve(this.generator.next(this.generated))
       .then(({ value, done }) => {
+        if (value === undefined) {
+          debugger;
+        }
         return Promise.resolve(value)
           .then((v) => {
             if (v != undefined) {
-              // this.runner.fulfilled(v);
+              this.runner.fulfilled(v);
             }
 
             if (done) {
@@ -384,7 +394,8 @@ export class Variable {
     this.state = VariableState.PENDING;
     this.value = UNDEFINED_VALUE;
     this.error = undefined;
-    this.generator = { next: noop, return: noop };
+    const done = () => ({ value: this.value, done: true });
+    this.generator = { next: done, return: done };
     this.runtime.emit("pending", this);
     this.runtime.emit("pending:" + this.cellId, this);
     // this.onProgress();
@@ -402,9 +413,9 @@ export class Variable {
     //   return variable;
     // }
 
+    console.log(this.id, "value", value, this.builtin);
     this.fulfilledVersion = this.version;
     this.value = value;
-    // console.log(this.id, "value", value, this.builtin);
     this.error = undefined;
     this.promise.fulfilled(value);
     !this.builtin && this.runtime.emit("fulfilled", this);
@@ -416,15 +427,16 @@ export class Variable {
   // mark the variable as rejected with an error
   rejected(error: Error) {
     const variable = this.runtime.variablesById.get(this.id);
-    if (this.version === this.rejectedVersion) {
-      return variable;
-    }
+    // if (this.version === this.rejectedVersion) {
+    //   return variable;
+    // }
 
     this.rejectedVersion = this.version;
     this.error = error;
     this.value = undefined;
     this.generator = { next: noop, return: noop };
     // this.promise.rejected(error)
+    // console.log("rejected", this.id, this.name, error);
     this.runtime.emit("rejected", this);
     this.runtime.emit("rejected:" + this.cellId, this);
     this.onProgress();

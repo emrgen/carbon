@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { entries } from "lodash";
+import { entries, last } from "lodash";
 import { SemVer } from "semver";
 import { Cell } from "./Cell";
 import { Graph } from "./Graph";
@@ -193,6 +193,13 @@ export class Runtime extends EventEmitter {
       // if the variable is pending, do not mark it as pending again
       v.stop();
       v.pending();
+
+      const missing = v.dependencies.find((dep) => !this.variablesByName.get(dep)?.length);
+      if (missing) {
+        console.log("missing dependency", v.name, missing);
+        const err = RuntimeError.notDefined(last(missing.split(":"))!);
+        v.rejected(err);
+      }
     });
 
     // console.log(

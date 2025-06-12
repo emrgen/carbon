@@ -68,7 +68,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   useReactiveVariable({
     node,
     onFulfilled: (v) => {
-      // console.log("Cell fulfilled:", v.id.toString(), v.value);
+      console.log("Cell fulfilled:", v.id.toString(), v.value);
       updateResult(v.value);
       const hasName = !v.cell.builtin && Cell.hasName(v.cell);
       setName(hasName ? (v.cell.name ?? "") : "");
@@ -76,14 +76,18 @@ export const ReactiveCellViewer = (props: RendererProps) => {
     onRejected: (cell) => {
       // console.error("Cell rejected:", cell.id.toString(), cell.error);
       updateResult(null);
+      setPending(false);
       setName("");
       setError((cell.error ?? "").toString());
     },
     onPending: () => {
       setPending(true);
       setError("");
+      // setName("");
     },
   });
+
+  // console.log(isHtml, pending, result);
 
   return (
     <div
