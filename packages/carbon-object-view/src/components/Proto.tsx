@@ -1,14 +1,10 @@
+import { isEmpty, isPlainObject, sortBy } from "lodash";
 import { useState } from "react";
-import { BsFillCaretRightFill } from "react-icons/bs";
-import { isPlainObject, sortBy } from "lodash";
-import { isEmpty } from "lodash";
-import { NodeView } from "./Node";
-import { isGetterProp } from "./utils";
-import { isSetterProp } from "./utils";
-import { isFunctionProp } from "./utils";
-import { isLiteral } from "./utils";
 import { AiFillCaretDown } from "react-icons/ai";
+import { BsFillCaretRightFill } from "react-icons/bs";
 import { Literal } from "./Literal";
+import { NodeView } from "./Node";
+import { isFunctionProp, isGetterProp, isLiteral, isSetterProp } from "./utils";
 
 export const ProtoView = ({ data, propName, parentProps = new Set() }) => {
   const [expanded, setExpanded] = useState(false);
@@ -20,7 +16,7 @@ export const ProtoView = ({ data, propName, parentProps = new Set() }) => {
     if (isEmpty(proto)) {
       return null;
     }
-    return <Literal data={proto} propName={propName} isIndex={false} />;
+    return <Literal data={proto} propName={propName} isIndex={false} root={false} />;
   }
 
   const props = sortBy(Object.getOwnPropertyNames(proto));
@@ -56,25 +52,13 @@ export const ProtoView = ({ data, propName, parentProps = new Set() }) => {
   console.log("$$$", proto.constructor?.name ?? "Object", parentProps);
 
   return (
-    <div
-      className={"cov-object"}
-      style={{ display: expanded ? "block" : "flex" }}
-    >
-      <div
-        className={"cov-object-initial"}
-        onClick={() => setExpanded((e) => !e)}
-      >
+    <div className={"cov-object"} style={{ display: expanded ? "block" : "flex" }}>
+      <div className={"cov-object-initial"} onClick={() => setExpanded((e) => !e)}>
         {propName && <span className={"cov-object-key"}>{propName}:</span>}
         <div className={"cov-expander"}>
-          {expanded ? (
-            <AiFillCaretDown />
-          ) : (
-            <BsFillCaretRightFill fontSize={"12px"} />
-          )}
+          {expanded ? <AiFillCaretDown /> : <BsFillCaretRightFill fontSize={"12px"} />}
         </div>
-        <span className={"cov-object-constructor"}>
-          {proto.constructor?.name ?? "Object"}
-        </span>
+        <span className={"cov-object-constructor"}>{proto.constructor?.name ?? "Object"}</span>
         <span className={"cov-left-brace"}>{"{"}</span>
       </div>
       {expanded && (
@@ -82,23 +66,15 @@ export const ProtoView = ({ data, propName, parentProps = new Set() }) => {
           {Object.keys(descriptors).map((key, index) => {
             return (
               <div key={index} className={"cov-object-element"}>
-                <span className={"cov-object-key"}>{key}:</span>
-                <NodeView
-                  data={descriptors[key]}
-                  propName={key}
-                  isIndex={false}
-                />
+                {/*<span className={"cov-object-key"}>{key}:</span>*/}
+                <NodeView data={descriptors[key]} propName={key} isIndex={false} root={false} />
               </div>
             );
           })}
           {!isPlainObject(data.__proto__) && (
             <div className={"cov-object-element"}>
               {/*<span className={"cov-object-key"}>{"<prototype>"}:</span>*/}
-              <ProtoView
-                data={data.__proto__}
-                parentProps={parentProps}
-                propName={'"<prototype>"'}
-              />
+              <ProtoView data={data.__proto__} parentProps={parentProps} propName={"<prototype>"} />
             </div>
           )}
         </div>
@@ -109,11 +85,7 @@ export const ProtoView = ({ data, propName, parentProps = new Set() }) => {
             return (
               <div key={index} className={"cov-object-element"}>
                 <span className={"cov-object-key"}>{key}:</span>
-                <NodeView
-                  data={descriptors[key]}
-                  propName={""}
-                  isIndex={false}
-                />
+                <NodeView data={descriptors[key]} propName={""} isIndex={false} root={false} />
                 {index + 1 !== Object.keys(descriptors).length && (
                   <span className={"cov-comma"}>,</span>
                 )}

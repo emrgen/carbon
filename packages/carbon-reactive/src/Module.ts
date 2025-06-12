@@ -127,7 +127,7 @@ export class Module {
 
   // import a variable from another module
   // multiple imports can be done by calling this function multiple times
-  import(name: string, alias: string, module: Module) {
+  import(name: string, alias: string, module: Module, lazy = false) {
     // check if the variable exists in the module
     const variable = module.value(name);
     if (!variable) {
@@ -145,7 +145,7 @@ export class Module {
       builtin: variable?.builtin,
     });
 
-    return this.define(cell);
+    return this.define(cell, lazy);
   }
 
   // define a mutable variable with the given name and value
@@ -245,7 +245,7 @@ export class Module {
 
   // create a new variable with the given definition
   // if the variable already exists, redefine it
-  define(cell: Cell, redefine = false): Variable {
+  define(cell: Cell, lazy = false): Variable {
     const builtIn = this.findBuiltIn(cell);
     if (builtIn) {
       return builtIn;
@@ -270,7 +270,7 @@ export class Module {
 
     // console.log("define", id, name, variable.dependencies);
     this.connect(variable);
-    this.onCreate(variable, redefine);
+    this.onCreate(variable, lazy);
 
     return variable;
   }
@@ -330,7 +330,7 @@ export class Module {
     }
   }
 
-  onCreate(variable: Variable, redefine = false) {
+  onCreate(variable: Variable, lazy = false) {
     // connect the variable with the module local variablesById
     this.variablesById.set(variable.id, variable);
 
@@ -341,10 +341,10 @@ export class Module {
     }
     this.variablesByName.get(fullName)?.push(variable);
 
-    this.runtime.onCreate(variable, redefine);
+    this.runtime.onCreate(variable, lazy);
   }
 
-  onRemove(variable: Variable, redefine = false) {
+  onRemove(variable: Variable, lazy = false) {
     // remove the variable from the module local variablesById
     this.variablesById.delete(variable.id);
 
@@ -359,7 +359,7 @@ export class Module {
       }
     }
 
-    this.runtime.onRemove(variable, redefine);
+    this.runtime.onRemove(variable, lazy);
 
     variable.stop();
     variable.removed();

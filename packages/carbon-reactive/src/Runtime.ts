@@ -79,8 +79,8 @@ export class Runtime extends EventEmitter {
         builtin: true,
       });
 
-      // compute the variable immediately with no inputs
-      const variable = mod.define(cell);
+      // compute the variable in a lazy fation
+      const variable = mod.define(cell, true);
       this.builtinVariables.set(name, variable);
     });
 
@@ -105,7 +105,7 @@ export class Runtime extends EventEmitter {
 
     // inject the builtin variable from the runtime into the module
     this.builtinVariables.forEach((variable) => {
-      mod.import(variable.cell.name, variable.cell.name, this.builtin);
+      mod.import(variable.cell.name, variable.cell.name, this.builtin, true);
     });
 
     return mod;
@@ -178,6 +178,7 @@ export class Runtime extends EventEmitter {
     }
     this.version += 1;
 
+    const roots = new Map(this.dirty.entries());
     // variables that are dirty and need to be recomputed
     const dirty = Array.from(this.dirty.values()).filter((v) => v.version !== v.fulfilledVersion);
     this.dirty.clear();
@@ -211,8 +212,17 @@ export class Runtime extends EventEmitter {
     //   connected.map((v) => v.name),
     // );
 
+    roots.values().forEach((v) => {
+      if (v.inputs.some((vi) => vi.cell.builtin && vi.state === "undefined")) {
+        roots.set(v.id, v);
+        roots.delete(v.id);
+      }
+    });
+
+    console.log(roots.values().map((v) => v.name));
+
     // all connected variables are now pending and have no running computation
-    dirty.forEach((root) => {
+    roots.forEach((root) => {
       const inputs = this.graph.inputs(root);
       // if the variable is pending, do not mark it as pending again
       return root.compute(inputs);
