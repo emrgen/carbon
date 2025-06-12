@@ -84,7 +84,7 @@ export class Cell {
       });
     }
 
-    console.log(ast);
+    // console.log(ast);
     let defBody = ast.body;
 
     if (!defBody) {
@@ -124,7 +124,8 @@ export class Cell {
 
     ast = parseCell(definition);
 
-    console.log(cellName, ast);
+    console.log(cellName, definition);
+    console.log(cellName, deps);
 
     const create = DefinitionFactory[ast.body.type];
     if (!create) {

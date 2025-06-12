@@ -181,7 +181,14 @@ export class Variable {
         if (inputs.every((input) => input.promise.isFulfilled)) {
           output.pending();
           output.stop();
-          // console.log("fulfilled", this.id, this.name, "value:", this.value);
+          // console.log("onProgress", this.id, this.name, "value:", this.value);
+          // console.log(
+          //   "output",
+          //   output.id,
+          //   output.name,
+          //   "inputs:",
+          //   inputs.map((i) => i.name),
+          // );
           output.compute(inputs);
         }
       });
@@ -292,6 +299,7 @@ export class Variable {
 
     try {
       const res = this.cell.definition.bind(this)(...args);
+      // console.log(res);
       Promise.resolve(res).then(this.generateFirst).then(this.fulfilled).catch(this.rejected);
     } catch (error) {
       this.rejected(error as Error);
@@ -331,7 +339,7 @@ export class Variable {
         return Promise.resolve(value)
           .then((v) => {
             if (v != undefined) {
-              this.runner.fulfilled(v);
+              // this.runner.fulfilled(v);
             }
 
             if (done) {
@@ -386,16 +394,17 @@ export class Variable {
   // mark the variable as fulfilled with a value
   private fulfilled(value: any) {
     this.state = VariableState.FULFILLED;
+    // console.log(this.id, "fulfilled", this.name, "value:", value);
 
     const variable = this.runtime.variablesById.get(this.id);
     // TODO: check if this is working correctly
-    if (this.version === this.fulfilledVersion) {
-      return variable;
-    }
+    // if (this.version === this.fulfilledVersion) {
+    //   return variable;
+    // }
 
     this.fulfilledVersion = this.version;
     this.value = value;
-    // console.log(this.id, "value", value);
+    // console.log(this.id, "value", value, this.builtin);
     this.error = undefined;
     this.promise.fulfilled(value);
     !this.builtin && this.runtime.emit("fulfilled", this);

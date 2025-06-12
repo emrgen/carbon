@@ -1,6 +1,17 @@
 import { expect, test } from "vitest";
 import { Cell } from "../src/index";
 
+test("301. parse Promises", async (t) => {
+  const cell = Cell.parse(`x = Promises.delay(100,1)`, {
+    id: "x1",
+    name: "x",
+  });
+  expect(cell).toBeDefined();
+  expect(cell?.id).toBe("x1");
+  expect(cell?.name).toBe("x");
+  expect(cell?.dependencies).toEqual(["Promises"]);
+});
+
 test("30. parse Literal", async (t) => {
   const cell = Cell.parse(`x = 10`, {
     id: "x1",
