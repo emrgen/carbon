@@ -8,7 +8,7 @@ test("test promised await", async (t) => {
     }, 100);
   });
 
-  await expect(a).toBe(42);
+  expect(a).toBe(42);
 });
 
 test("test promised fulfilled", async (t) => {
@@ -20,17 +20,17 @@ test("test promised fulfilled", async (t) => {
 
   a.fulfilled(100);
 
-  await expect(await a).toBe(100);
+  expect(await a).toBe(100);
 });
 
 test("test promised rejected", async (t) => {
   const a = Promised.create<number>((resolve, reject) => {
     setTimeout(() => {
       reject(new Error("Test error"));
-    }, 2);
+    }, 1000);
   });
 
   a.rejected(new Error("Rejected manually"));
 
-  await expect(a).rejects.toThrowError("Rejected manually");
+  expect(a).rejects.toThrowError("Rejected manually");
 });

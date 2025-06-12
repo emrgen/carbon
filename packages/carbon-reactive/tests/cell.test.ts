@@ -240,3 +240,21 @@ test("58. parse mutable variable", async (t) => {
   expect(cell?.definition()).toBe(10);
   expect(cell?.view).toBe(true);
 });
+
+test("59. parse mutable variable", async (t) => {
+  const cell = Cell.parse(
+    `{
+  var input = DOM.range(0, 4);
+  input.step = 0.1;
+  input.value = len;
+  input.oninput = () => mutable len = input.valueAsNumber;
+  return input;
+}`,
+    {
+      id: "x30",
+    },
+  );
+  // expect(cell).toBeDefined();
+  expect(cell?.id).toBe("x30");
+  // console.log(cell.definition.toString());
+});

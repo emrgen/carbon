@@ -111,22 +111,35 @@ export class Cell {
       cellName = name ?? `__unnamed__${++cellCounter}`;
     }
 
-    const deps = ast.references.map((arg: any) => {
+    const immutables: string[] = [];
+    let deps: string[] = ast.references.map((arg: any, index) => {
       if (arg.type === "MutableExpression") {
-        definition = definition.replace(`mutable ${arg.id.name}`, `mutable_${arg.id.name}.value`);
+        definition = definition.replace(
+          new RegExp(`\\smutable(\\s)+${arg.id.name}`, "ig"),
+          ` mutable_${arg.id.name}.value`,
+        );
+
+        definition = definition.replace(
+          new RegExp(`\\s${arg.id.name}[\\s=,;]`, "ig"),
+          ` mutable_${arg.id.name}.value`,
+        );
+
+        immutables.push(arg.id.name);
 
         return `mutable_${arg.id.name}`;
       }
 
       return arg.name;
     });
-    // .map((arg: any) => {
-    //   return arg.name;
-    // });
 
     ast = parseCell(definition);
 
+    // console.log(immutables);
+    deps = deps.filter((d) => !immutables.includes(d));
+    // console.log(deps);
+
     console.log(cellName, definition);
+    console.log(cellName, immutables);
     console.log(cellName, deps);
 
     const create = DefinitionFactory[ast.body.type];

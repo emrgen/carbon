@@ -1,4 +1,4 @@
-import { uniq, uniqBy } from "lodash";
+import { uniqBy } from "lodash";
 import { SemVer } from "semver";
 import { Cell } from "./Cell";
 import { Mutable } from "./Mutable";
@@ -180,7 +180,7 @@ export class Module {
       Cell.create({
         id: hiddenId,
         name: hiddenName,
-        dependencies: uniq(cell.with(this).dependencies),
+        dependencies: cell.dependencies,
         version: cell.version,
         definition: (...args: any) => {
           const value = cell.definition(...args);
@@ -324,7 +324,6 @@ export class Module {
     if (variable?.builtin) return;
 
     if (variable) {
-      console.log(variable);
       this.disconnect(variable);
       variable.delete({ module: true });
       this.onRemove(variable, redefine);

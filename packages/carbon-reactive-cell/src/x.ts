@@ -27,9 +27,8 @@ export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean 
     return variable;
   }
 
-  const newVariable = runtime.mod.redefine(cell);
-  console.log(newVariable.cell.definition.toString());
-  return newVariable;
+  // console.log(newVariable.cell.definition.toString());
+  return runtime.mod.redefine(cell);
 };
 
 export const isHtmlElement = (res) => {

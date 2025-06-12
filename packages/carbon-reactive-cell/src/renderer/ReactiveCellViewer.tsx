@@ -83,7 +83,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
     onPending: () => {
       setPending(true);
       setError("");
-      // setName("");
+      setName("");
     },
   });
 
