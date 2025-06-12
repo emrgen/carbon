@@ -150,9 +150,9 @@ export class PluginManager {
         const handler = entries(handlers).find(([key]) => {
           return isKeyHotkey(snakeCase(key).replaceAll("_", "+"))(keyDownEvent.event.nativeEvent);
         });
-        // if (handler) {
-        //   console.log("before", p.name, handler[0], handler[1]);
-        // }
+        if (handler) {
+          console.log("before", p.name, handler[0], handler[1]);
+        }
         handler?.[1]?.(keyDownEvent);
       });
 

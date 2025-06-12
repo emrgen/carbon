@@ -59,6 +59,8 @@ const renderManager = RenderManager.from(flattenDeep(renderers));
 window.Cell = Cell;
 
 const builtins = Object.assign(new Library(), {
+  // Promises: new Library().Promises,
+  // now: new Library().now,
   _: _,
 });
 console.log(builtins);

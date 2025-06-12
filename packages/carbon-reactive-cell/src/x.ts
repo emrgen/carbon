@@ -5,7 +5,7 @@ export const nodeCode = (node: Node) => {
   return node.props.get<string>(CodeValuePath);
 };
 
-export const defineVariable = (runtime: Runtime, node: Node) => {
+export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean = false) => {
   const code = nodeCode(node);
 
   // event if the code is empty, we still want to define a cell
@@ -18,9 +18,17 @@ export const defineVariable = (runtime: Runtime, node: Node) => {
     id: node.id.toString(),
   });
 
-  const variable = runtime.mod.define(cell);
-  console.log(variable.cell.definition.toString());
-  return variable;
+  const variable = runtime.mod.variable(node.id.toString());
+  // if the code is the same, we don't need to redefine it
+  if (variable && cell.code === variable.cell.code) {
+    if (recompute) {
+      variable.recompute();
+    }
+    return variable;
+  }
+
+  // console.log(newVariable.cell.definition.toString());
+  return runtime.mod.redefine(cell);
 };
 
 export const isHtmlElement = (res) => {

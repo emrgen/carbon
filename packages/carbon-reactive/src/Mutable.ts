@@ -8,7 +8,8 @@ import { RuntimeError } from "./x";
 // Mutable variablesById can be changed at runtime from any cell
 // and can be accessed from any cell.
 export class Mutable {
-  variables: Map<ModuleVariableName, any> = new Map();
+  private variables: Map<ModuleVariableName, any> = new Map();
+  private outputsNames: Map<ModuleVariableName, string[]> = new Map();
 
   static isMutable(obj: any): boolean {
     // @ts-ignore
@@ -34,8 +35,9 @@ export class Mutable {
   constructor(readonly runtime: Runtime) {}
 
   // create a local mutable variable with the given name and value
-  define(name: ModuleVariableName, value: any) {
+  define(name: ModuleVariableName, value: any, dependents: string[]) {
     this.variables.set(name, value);
+    this.outputsNames.set(name, dependents);
   }
 
   has(name: ModuleVariableName) {
@@ -45,6 +47,7 @@ export class Mutable {
   // delete a mutable variable by name
   delete(name: ModuleVariableName) {
     this.variables.delete(name);
+    this.outputsNames.delete(name);
   }
 
   // returns a mutable accessor for the given name
@@ -57,7 +60,6 @@ export class Mutable {
       get value() {
         if (!that.variables.has(name)) {
           const variable = that.runtime.variablesByName.get(name);
-          console.log(variable);
           if (variable) {
             console.log("variable", variable);
           }
@@ -91,14 +93,18 @@ export class Mutable {
 
         that.variables.set(name, value);
 
-        // mark the variable as dirty in the runtime
-        const mutableVariable = that.runtime.variablesByName.get(name);
-        mutableVariable?.forEach((variable) => {
-          that.runtime.dirty.add(variable);
+        console.log("setting mutable", name, value, that.outputsNames.get(name));
+        that.outputsNames.get(name)?.forEach((outputName) => {
+          // mark the variable as dirty in the runtime
+          const mutableVariable = that.runtime.variablesByName.get(outputName);
+          mutableVariable?.forEach((variable) => {
+            console.log("marking dirty", name, variable.id.toString());
+            that.runtime.markDirty(variable);
+          });
         });
 
         // request the runtime to update the dirty variables
-        that.runtime.refresh();
+        that.runtime.schedule();
       },
     };
   }

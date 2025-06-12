@@ -1,8 +1,7 @@
 import { parseCell, peekId } from "@observablehq/parser";
-import { noop } from "lodash";
 import { DefinitionFactory } from "./Definition";
 import { Module } from "./Module";
-import { Variable } from "./Variable";
+import { UNDEFINED_VALUE, Variable } from "./Variable";
 import { randomString } from "./x";
 
 interface CellProps {
@@ -15,6 +14,7 @@ interface CellProps {
   dependencies?: string[];
   definition?: Function;
   mutable?: boolean;
+  immutable?: boolean;
   view?: boolean;
   builtin?: boolean;
 }
@@ -38,6 +38,7 @@ export class Cell {
   definition: Function;
   view: boolean;
   mutable: boolean;
+  immutable: boolean;
   builtin: boolean;
 
   static from(id: string, name: string, deps: string[], define: Function) {
@@ -85,7 +86,7 @@ export class Cell {
       });
     }
 
-    console.log(ast);
+    // console.log(ast);
     let defBody = ast.body;
 
     if (!defBody) {
@@ -110,22 +111,36 @@ export class Cell {
       cellName = name ?? `__unnamed__${++cellCounter}`;
     }
 
-    const deps = ast.references.map((arg: any) => {
+    const immutables: string[] = [];
+    let deps: string[] = ast.references.map((arg: any, index) => {
       if (arg.type === "MutableExpression") {
-        definition = definition.replace(`mutable ${arg.id.name}`, `mutable_${arg.id.name}.value`);
+        definition = definition.replace(
+          new RegExp(`\\smutable(\\s)+${arg.id.name}`, "ig"),
+          ` mutable_${arg.id.name}.value`,
+        );
+
+        definition = definition.replace(
+          new RegExp(`\\s${arg.id.name}[\\s=,;]`, "ig"),
+          ` mutable_${arg.id.name}.value`,
+        );
+
+        immutables.push(arg.id.name);
 
         return `mutable_${arg.id.name}`;
       }
 
       return arg.name;
     });
-    // .map((arg: any) => {
-    //   return arg.name;
-    // });
 
     ast = parseCell(definition);
 
-    console.log(cellName, ast);
+    // console.log(immutables);
+    deps = deps.filter((d) => !immutables.includes(d));
+    // console.log(deps);
+
+    console.log(cellName, definition);
+    console.log(cellName, immutables);
+    console.log(cellName, deps);
 
     const create = DefinitionFactory[ast.body.type];
     if (!create) {
@@ -159,10 +174,11 @@ export class Cell {
       name = Cell.undefinedName(),
       version = 0,
       code = randomString(5), // this is for convenience
-      definition = noop,
+      definition = () => UNDEFINED_VALUE,
       dependencies = [],
       builtin = false,
       mutable = false,
+      immutable = false,
       view = false,
     } = props;
     this.id = id;
@@ -172,6 +188,7 @@ export class Cell {
     this.dependencies = dependencies;
     this.definition = definition;
     this.mutable = mutable;
+    this.immutable = immutable;
     this.view = view;
     this.builtin = builtin;
     this.hash = this.code

@@ -38,5 +38,5 @@ export const useReactiveVariable = (props: ReactiveVariableProps) => {
       runtime.off(ReactiveEvents.rejected(id), rejected);
       runtime.off(ReactiveEvents.pending(id), pending);
     };
-  }, [node, runtime]);
+  }, [node, onFulfilled, onPending, onRejected, runtime]);
 };

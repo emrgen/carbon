@@ -1,6 +1,17 @@
 import { expect, test } from "vitest";
 import { Cell } from "../src/index";
 
+test("301. parse Promises", async (t) => {
+  const cell = Cell.parse(`x = Promises.delay(100,1)`, {
+    id: "x1",
+    name: "x",
+  });
+  expect(cell).toBeDefined();
+  expect(cell?.id).toBe("x1");
+  expect(cell?.name).toBe("x");
+  expect(cell?.dependencies).toEqual(["Promises"]);
+});
+
 test("30. parse Literal", async (t) => {
   const cell = Cell.parse(`x = 10`, {
     id: "x1",
@@ -228,4 +239,22 @@ test("58. parse mutable variable", async (t) => {
   expect(cell?.dependencies).toEqual([]);
   expect(cell?.definition()).toBe(10);
   expect(cell?.view).toBe(true);
+});
+
+test("59. parse mutable variable", async (t) => {
+  const cell = Cell.parse(
+    `{
+  var input = DOM.range(0, 4);
+  input.step = 0.1;
+  input.value = len;
+  input.oninput = () => mutable len = input.valueAsNumber;
+  return input;
+}`,
+    {
+      id: "x30",
+    },
+  );
+  // expect(cell).toBeDefined();
+  expect(cell?.id).toBe("x30");
+  // console.log(cell.definition.toString());
 });

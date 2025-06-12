@@ -1,12 +1,16 @@
 import { Runtime } from "../src/index";
+import { Variable } from "../src/Variable";
 
 export function registerListeners(runtime: Runtime) {
   runtime
-    .on("fulfilled", (v) => {
-      console.log("fulfilled:", v.id, "=>", v.value);
+    .on("fulfilled", (v: Variable) => {
+      console.log("fulfilled:", v.id, "=>", v.value, v.version);
     })
-    .on("rejected", (v) => {
-      console.log("rejected:", v.id, "=>", v.error?.toString());
+    .on("rejected", (v: Variable) => {
+      console.log("rejected:", v.id, "=>", v.error?.toString(), v.version);
+    })
+    .on("pending", (v: Variable) => {
+      console.log("pending:", v.id, v.cell.name);
     });
 }
 

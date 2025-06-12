@@ -3,7 +3,6 @@ import { SemVer } from "semver";
 import { Cell } from "./Cell";
 import { Mutable } from "./Mutable";
 import { Runtime } from "./Runtime";
-import { MutableAccessor } from "./types";
 import { Variable } from "./Variable";
 import { randomString } from "./x";
 
@@ -63,8 +62,8 @@ export class Module {
     const variable = this.value(name);
     if (!variable) return;
 
-    this.runtime.dirty.add(variable);
-    this.runtime.tryRecompute();
+    this.runtime.markDirty(variable);
+    this.runtime.schedule();
   }
 
   private value(name: string): Variable | undefined {
@@ -78,6 +77,19 @@ export class Module {
     }
 
     return variables[0];
+  }
+
+  // compute the variable with the given id
+  compute(id: string) {
+    const vid = Variable.id(this.id, id);
+    const variable = this.runtime.variablesById.get(vid);
+    if (!variable) {
+      console.error("variable not found", id);
+      return;
+    }
+
+    this.runtime.markDirty(variable);
+    this.runtime.schedule();
   }
 
   // builtin variable by name
@@ -115,7 +127,7 @@ export class Module {
 
   // import a variable from another module
   // multiple imports can be done by calling this function multiple times
-  import(name: string, alias: string, module: Module) {
+  import(name: string, alias: string, module: Module, lazy = false) {
     // check if the variable exists in the module
     const variable = module.value(name);
     if (!variable) {
@@ -133,30 +145,53 @@ export class Module {
       builtin: variable?.builtin,
     });
 
-    return this.define(cell);
+    return this.define(cell, lazy);
   }
 
   // define a mutable variable with the given name and value
   defineMutable(cell: Cell): Variable {
+    console.log("--------------------------------------------");
     const { name } = cell;
 
     const hiddenId = Mutable.hiddenId(cell.id);
     const hiddenName = Mutable.hiddenName(name);
     const mutableId = Mutable.mutableId(cell.id);
     const mutableName = Mutable.mutableName(name);
+    const moduleVariableName = Variable.fullName(this.id, name);
+
+    const mut = this.runtime.mutable;
+    const variable = this.runtime.variablesById.get(Variable.id(this.id, cell.id));
+    // remove the variable if it already exists
+    if (variable && variable.cell.immutable) {
+      mut.delete(moduleVariableName);
+      this.delete(mutableId, true);
+      this.delete(hiddenId, true);
+      this.delete(cell.id, true);
+      cell.version = variable.version + 1;
+    }
 
     // module local id for the mutable variable
-    const moduleVariableName = Variable.fullName(this.id, name);
-    const mut = this.runtime.mutable;
+
+    const dependents: string[] = [moduleVariableName];
+
+    cell.with(this);
 
     this.define(
-      Cell.from(hiddenId, hiddenName, cell.dependencies, (...args) => {
-        const value = cell.definition(...args);
-        // define a mutable variable with the given name and value
-        mut.define(moduleVariableName, value);
+      Cell.create({
+        id: hiddenId,
+        name: hiddenName,
+        dependencies: cell.dependencies,
+        version: cell.version,
+        definition: (...args: any) => {
+          const value = cell.definition(...args);
+          // define a mutable variable with the given name and value
+          console.log("###", moduleVariableName, value);
+          mut.define(moduleVariableName, value, dependents);
 
-        return value;
+          return value;
+        },
       }),
+      true,
     );
 
     // define the mutable part of the mutable variable
@@ -164,23 +199,34 @@ export class Module {
       Cell.create({
         id: mutableId,
         name: mutableName,
+        version: cell.version,
         dependencies: [hiddenName],
         definition: function () {
           return mut.accessor<any>(moduleVariableName);
         },
       }),
+      true,
     );
 
     // define the immutable part of the mutable variable
     // when the mutable variable is changed, the immutable part will be recomputed
-    return this.define(
+    const immutable = this.define(
       Cell.create({
         id: cell.id,
         name: cell.name,
-        dependencies: [mutableName],
-        definition: (accessor: MutableAccessor<any>) => accessor.value,
+        version: cell.version,
+        dependencies: [hiddenName],
+        immutable: true,
+        definition: () => {
+          return mut.accessor<any>(moduleVariableName).value;
+        },
       }),
+      true,
     );
+
+    this.runtime.schedule();
+
+    return immutable;
   }
 
   private findBuiltIn(cell: Cell) {
@@ -199,7 +245,7 @@ export class Module {
 
   // create a new variable with the given definition
   // if the variable already exists, redefine it
-  define(cell: Cell): Variable {
+  define(cell: Cell, lazy = false): Variable {
     const builtIn = this.findBuiltIn(cell);
     if (builtIn) {
       return builtIn;
@@ -224,13 +270,7 @@ export class Module {
 
     // console.log("define", id, name, variable.dependencies);
     this.connect(variable);
-    LOG &&
-      console.log(
-        variable.id,
-        variable.outputs.map((v) => v.id),
-      );
-
-    this.onCreate(variable);
+    this.onCreate(variable, lazy);
 
     return variable;
   }
@@ -257,35 +297,16 @@ export class Module {
     if (variable.cell.eq(cell)) {
       console.log("redefine", cell.id, cell.name, "no change");
       variable.version += 1;
-      // this.runtime.dirty.add(variable);
+      this.runtime.markDirty(variable);
+      this.runtime.schedule();
       return variable;
     }
 
-    // if the cell code has changed but the name is same we refine and keep the old connections
-    // if (variable.name === cell.name) {
-    //   LOG && console.log("redefine", cell.id, cell.name, "same name");
-    //   const newVariable = Variable.create({
-    //     module: this,
-    //     cell,
-    //   });
-    //
-    //   // keep the old connections
-    //   newVariable.inputs = [...variable.inputs];
-    //   newVariable.outputs = [...variable.outputs];
-    //
-    //   // update the graph with the old variable removed
-    //   this.runtime.onRemove(variable);
-    //   // update the graph with the new variable added
-    //   this.runtime.onCreate(newVariable);
-    //
-    //   return newVariable;
-    // }
-
     // name of the variable has changed
-    this.onRemove(variable);
+    this.onRemove(variable, true);
     this.disconnect(variable);
 
-    variable.version = this.graph.version + 1;
+    cell.version = variable.version + 1;
     variable.redefine(cell);
 
     this.connect(variable);
@@ -295,7 +316,7 @@ export class Module {
   }
 
   // delete a variable by id
-  delete(id: string) {
+  delete(id: string, redefine = false) {
     const fullId = Variable.id(this.id, id);
     const variable = this.runtime.variablesById.get(fullId);
 
@@ -305,13 +326,11 @@ export class Module {
     if (variable) {
       this.disconnect(variable);
       variable.delete({ module: true });
-      this.onRemove(variable);
+      this.onRemove(variable, redefine);
     }
   }
 
-  onCreate(variable: Variable) {
-    this.runtime.onCreate(variable);
-
+  onCreate(variable: Variable, lazy = false) {
     // connect the variable with the module local variablesById
     this.variablesById.set(variable.id, variable);
 
@@ -321,10 +340,11 @@ export class Module {
       this.variablesByName.set(fullName, []);
     }
     this.variablesByName.get(fullName)?.push(variable);
+
+    this.runtime.onCreate(variable, lazy);
   }
 
-  onRemove(variable: Variable) {
-    this.runtime.onRemove(variable);
+  onRemove(variable: Variable, lazy = false) {
     // remove the variable from the module local variablesById
     this.variablesById.delete(variable.id);
 
@@ -338,6 +358,11 @@ export class Module {
         );
       }
     }
+
+    this.runtime.onRemove(variable, lazy);
+
+    variable.stop();
+    variable.removed();
   }
 
   // connect the variable with the module local variablesById
@@ -366,5 +391,9 @@ export class Module {
     });
   }
 
-  private disconnect(variable: Variable) {}
+  private disconnect(variable: Variable) {
+    variable.outputs.forEach((output) => {
+      this.runtime.markDirty(output);
+    });
+  }
 }

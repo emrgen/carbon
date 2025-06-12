@@ -1,6 +1,7 @@
-import { noop } from "lodash";
+import { last, noop } from "lodash";
 import { Cell } from "./Cell";
 import { Module, ModuleVariableId, ModuleVariableName } from "./Module";
+import { Promised } from "./Promised";
 import { Promix } from "./Promix";
 import { generatorish, randomString, RuntimeError } from "./x";
 
@@ -16,7 +17,16 @@ interface VariableProps {
   cell: Cell;
 }
 
-export const UNDEFINED_VALUE = Symbol("undefined_value");
+enum VariableState {
+  UNDEFINED = "undefined",
+  DETACHED = "detached", // removed variable, but not deleted from the module
+  SCHEDULED = "scheduled", // scheduled for computation, but not yet computed
+  PENDING = "pending", // computation is in progress, inputs are not yet fulfilled
+  FULFILLED = "fulfilled",
+  REJECTED = "rejected",
+}
+
+export const UNDEFINED_VALUE = Symbol("undefined");
 
 // reactive variable
 export class Variable {
@@ -35,17 +45,26 @@ export class Variable {
   // promise that resolves when the variable calculation is done
   // the calculation is done when all inputs are fulfilled
   // the calculation can result in an error or a value
-  promise: Promix<Variable>;
+  promise: Promised;
   error: RuntimeError | undefined;
   value: any = UNDEFINED_VALUE;
+  // this is mainly for debugging purposes
+  state: VariableState;
+
+  // runs the generator in the background
+  runner: Promised;
+  // similar to done channel in go, one done is set the runner stop running the generator
+  done = false;
 
   // if the variable is a generator
   generator: { next: Function; return: Function } = { next: noop, return: noop };
   generated: any = undefined;
-  // similar to done channel in go
-  done = false;
+  generatorish: boolean = false;
+
   // version of the variable calculation
-  fulfilledVersion: number = 0;
+  fulfilledVersion: number = -1;
+  rejectedVersion: number = -1;
+  pendingVersion: number = -1;
 
   static create(props: VariableProps) {
     return new Variable(props);
@@ -71,13 +90,21 @@ export class Variable {
     // update the cell deps with module id
     this.cell = cell.with(module);
 
-    this.promise = Promix.default(this.id, this.version);
+    this.state = VariableState.UNDEFINED;
 
+    this.promise = Promised.create(noop, this.id);
+    this.runner = Promised.create(noop, this.id);
+
+    this.pending = this.pending.bind(this);
     this.fulfilled = this.fulfilled.bind(this);
     this.rejected = this.rejected.bind(this);
+
     this.compute = this.compute.bind(this);
+    this.stop = this.stop.bind(this);
+    this.onProgress = this.onProgress.bind(this);
+
     this.generateFirst = this.generateFirst.bind(this);
-    this.addDirty = this.addDirty.bind(this);
+    this.generateNext = this.generateNext.bind(this);
   }
 
   get cellId() {
@@ -133,40 +160,128 @@ export class Variable {
     );
   }
 
-  // schedule an update waiting for the input promises to fulfilled if not already fulfilled
-  precompute(clock: number) {}
+  // on compute is called when the variable is computed,
+  onProgress() {
+    if (this.promise.isFulfilled) {
+      const cycle = this.findAllNodesInCycle();
+      if (cycle.length > 0) {
+        cycle.forEach((node) => {
+          node.rejected(RuntimeError.circularDependency(this.cell.name));
+        });
+        return;
+      }
+
+      // console.log(this.id, this.name);
+      const outputs = this.outputs;
+      outputs.forEach((output) => {
+        const inputs = output.inputs;
+        // check for cycles in the output paths
+
+        // if all inputs are fulfilled, run the output variable
+        if (inputs.every((input) => input.promise.isFulfilled)) {
+          output.pending();
+          output.stop();
+          // console.log("onProgress", this.id, this.name, "value:", this.value);
+          // console.log(
+          //   "output",
+          //   output.id,
+          //   output.name,
+          //   "inputs:",
+          //   inputs.map((i) => i.name),
+          // );
+          output.compute(inputs);
+        }
+      });
+    } else if (this.promise.isRejected) {
+      // if the promise is rejected, we need to stop the generator
+      // and mark the variable as rejected
+      this.stop();
+
+      this.outputs.forEach((output) => {
+        output.stop();
+        output.pending();
+        output.rejected(this.error || RuntimeError.of("Variable computation failed"));
+      });
+    }
+  }
+
+  findAllNodesInCycle() {
+    const visited = new Set<Variable>();
+    const stack = new Set<Variable>();
+    const cycle: Variable[] = [];
+
+    const dfs = (node: Variable) => {
+      if (stack.has(node)) {
+        cycle.push(node);
+        return true; // cycle found
+      }
+      if (visited.has(node)) {
+        return false; // already visited
+      }
+
+      visited.add(node);
+      stack.add(node);
+
+      for (const input of node.inputs) {
+        if (dfs(input)) {
+          return true; // cycle found in the input path
+        }
+      }
+
+      stack.delete(node);
+      return false; // no cycle found in this path
+    };
+
+    dfs(this);
+
+    return cycle;
+  }
+
+  // stop the variable computation, stop the generator if it is a generator
+  stop() {
+    if (this.generatorish) {
+      this.done = true;
+      this.runner.fulfilled({ value: this.generated, cmd: "done" });
+      const done = () => ({ value: this.value, done: true });
+      this.generator = { next: done, return: done };
+      console.log("--------------------------------", this.value);
+    } else {
+      // cache the last computed value
+      this.promise.fulfilled(this.value);
+    }
+  }
+
+  // force recompute the variable
+  recompute() {
+    this.version += 1;
+    this.runtime.markDirty(this);
+    this.runtime.schedule();
+  }
 
   // compute the variable value from inputs
   // if the variable is a generator,
   // run the generator once,
   // the first run will mark the generator as dirty,
   // triggering the runtime to compute it again
-  compute(inputs: Variable[], version: number) {
-    LOG && console.log("computing:", this.id, "=>", this.cell.code);
-
-    // if (inputs.length) {
-    //   console.log(
-    //     "deps",
-    //     inputs.map((v) => v.value ?? v.error?.toString()),
-    //   );
-    // }
+  compute(inputs: Variable[]) {
+    // console.log("computing:", this.id, "=>", this.name);
 
     // ensure all inputs are fulfilled
     const error = inputs.find((input) => input.error);
     if (error) {
-      return Promix.reject(error.error, this.id, this.version).catch(this.rejected);
+      this.rejected(error.error!);
+      return;
     }
 
     const inputMap = new Map(inputs.map((input) => [input.name, input]));
-    // console.log(inputs, this.cell.dependencies);
+    // console.log(inputs.map((input) => input));
+
     // make sure the input variablesById have matching names
     const missing = this.dependencies.find((name, i) => !inputMap.has(name));
     if (missing) {
-      return Promix.reject(
-        RuntimeError.notDefined(missing.split(":")[1]),
-        this.id,
-        this.version,
-      ).catch(this.rejected);
+      return Promise.reject(RuntimeError.notDefined(last(missing.split(":"))!)).catch(
+        this.rejected,
+      );
     }
 
     // get the input variable values in order by name
@@ -178,121 +293,163 @@ export class Variable {
     // get the values of the input variablesById
     const args = deps.map((input) => input.value);
 
+    // if any of the input variablesById is undefined, skip the computation
+    if (args.some((arg) => arg === UNDEFINED_VALUE)) {
+      // this.pending();
+      return;
+    }
+
     try {
       const res = this.cell.definition.bind(this)(...args);
-      return Promise.resolve(res)
-        .then(this.generateFirst)
-        .then(this.addDirty)
-        .then((v) => this.fulfilled(v, version))
-        .catch(this.rejected);
-    } catch (e) {
-      return Promix.reject(e, this.id, this.version).catch((v) => this.rejected(v, version));
+      // console.log(res);
+      Promise.resolve(res).then(this.generateFirst).then(this.fulfilled).catch(this.rejected);
+    } catch (error) {
+      this.rejected(error as Error);
     }
   }
 
   // run the generator once and save the value at the generated field
-
-  // if value is a generator, run the generator once
-  generateFirst(value: any) {
+  private generateFirst(value: any) {
     if (generatorish(value)) {
       // console.log("generateFirst", value);
+      this.generatorish = true;
       this.generator = value;
       return this.generate();
+    } else {
+      this.generatorish = false;
     }
 
-    return Promix.resolve(value);
-  }
-
-  generateNext() {
-    try {
-      return this.generate().then(this.addDirty).then(this.fulfilled);
-    } catch (e) {
-      return Promix.reject(e, this.id, this.version).catch(this.rejected);
-    }
-  }
-
-  // marks the generator variable as dirty
-  addDirty(value: any) {
-    if (this.generator.next !== noop && !this.done) {
-      this.runtime.generators.add(this);
-    }
     return value;
   }
 
-  // run the generator once and save the value at the generated field
-  generate() {
+  // run the generator next and save the value at the generated field
+  private generateNext() {
     try {
-      return Promix.resolve(this.generator.next(this.generated))
-        .then(({ value, done }) => {
-          if (done) {
-            return Promise.resolve(value).then((v) => {
+      this.version += 1;
+      // create a new promise for the current run.
+      this.promise = Promised.create(noop, this.id, UNDEFINED_VALUE);
+      return this.generate()
+        .then((v) => {
+          console.log("--->", v);
+          this.fulfilled(v);
+        })
+        .catch(this.rejected);
+    } catch (e) {
+      return Promise.reject(e).catch(this.rejected);
+    }
+  }
+
+  // run the generator once and save the value at the generated field
+  private generate() {
+    return Promise.resolve(this.generator.next(this.generated))
+      .then(({ value, done }) => {
+        if (value === undefined) {
+          debugger;
+        }
+        return Promise.resolve(value)
+          .then((v) => {
+            if (v != undefined) {
+              this.runner.fulfilled(v);
+            }
+
+            if (done) {
+              // just adding a promise over the value just in case generator returns a promise
               this.done = true;
               if (value !== undefined) {
                 this.generated = v;
               }
-
               return this.generated;
-            });
-          } else {
-            // runtime dirty generators
-            return Promise.resolve(value).then((v) => {
-              this.generated = v;
-              // if the generator is not done, add it to the runtime for computation
-              // this.runtime.generators.add(this);
-              return v;
-            });
-          }
-        })
-        .catch(error);
-    } catch (e) {
-      return Promix.reject(e, this.id, this.version).catch(this.rejected);
-    }
+            } else {
+              // console.log("generateNext", this.name, this.cell.definition.toString(), v, done);
+              // if the generator is not done, we need to run it again
+              // run the generator again after a short delay, without blocking the event loop
+              // without this, the generator will run as fast as possible, hanging the event loop
+              const clear = setTimeout(() => this.generateNext(), 1);
+
+              this.runner = Promised.create(noop, this.id).then(({ value, done }) => {
+                clearTimeout(clear);
+                if (done) {
+                  this.done = true;
+                  return (this.generated = value);
+                } else {
+                  return this.generateNext();
+                }
+              });
+
+              return (this.generated = v);
+            }
+          })
+          .catch(this.rejected);
+      })
+      .catch(error);
   }
 
   pending() {
+    this.state = VariableState.PENDING;
+    this.pendingVersion = this.version;
+
+    // this.promise.fulfilled(""); // fulfill the promise with an empty value
+    // create a new promise for the next run
+    this.promise = Promised.create(noop, this.id, UNDEFINED_VALUE);
+    this.state = VariableState.PENDING;
+    this.value = UNDEFINED_VALUE;
+    this.error = undefined;
+    const done = () => ({ value: this.value, done: true });
+    this.generator = { next: done, return: done };
     this.runtime.emit("pending", this);
     this.runtime.emit("pending:" + this.cellId, this);
-  }
-
-  // mark the variable as rejected with an error
-  rejected(error: RuntimeError, version: number = this.promise.version) {
-    if (this.fulfilledVersion >= version) {
-      return this;
-    }
-    // console.log("rejected", this.promise.version, version, this.fulfilledVersion);
-    this.fulfilledVersion = version;
-
-    if (this.promise.version !== version) {
-      return this.promise.fulfilled(this);
-    }
-
-    this.error = error;
-    this.value = undefined;
-    this.generator = { next: noop, return: noop };
-    this.runtime.emit("rejected", this);
-    this.runtime.emit("rejected:" + this.cellId, this);
-    this.promise.fulfilled(this);
+    // this.onProgress();
     return this;
   }
 
   // mark the variable as fulfilled with a value
-  fulfilled(value: any, version: number = this.promise.version) {
-    if (this.fulfilledVersion >= version) {
-      return this;
-    }
-    // console.log("fulfilled", this.promise.version, version, this.fulfilledVersion);
-    this.fulfilledVersion = version;
+  private fulfilled(value: any) {
+    this.state = VariableState.FULFILLED;
+    // console.log(this.id, "fulfilled", this.name, "value:", value);
 
-    if (this.promise.version !== version) {
-      return this.promise.fulfilled(this);
-    }
+    const variable = this.runtime.variablesById.get(this.id);
+    // TODO: check if this is working correctly
+    // if (this.version === this.fulfilledVersion) {
+    //   return variable;
+    // }
 
+    console.log(this.id, "value", value, this.builtin);
+    this.fulfilledVersion = this.version;
     this.value = value;
     this.error = undefined;
-    this.promise.fulfilled(this);
+    this.promise.fulfilled(value);
     !this.builtin && this.runtime.emit("fulfilled", this);
     !this.builtin && this.runtime.emit("fulfilled:" + this.cellId, this);
+    this.onProgress();
     return this;
+  }
+
+  // mark the variable as rejected with an error
+  rejected(error: Error) {
+    const variable = this.runtime.variablesById.get(this.id);
+    // if (this.version === this.rejectedVersion) {
+    //   return variable;
+    // }
+
+    this.rejectedVersion = this.version;
+    this.error = error;
+    this.value = undefined;
+    this.generator = { next: noop, return: noop };
+    // this.promise.rejected(error)
+    // console.log("rejected", this.id, this.name, error);
+    this.runtime.emit("rejected", this);
+    this.runtime.emit("rejected:" + this.cellId, this);
+    this.onProgress();
+    return this;
+  }
+
+  removed() {
+    this.value = UNDEFINED_VALUE;
+    this.error = undefined;
+    this.state = VariableState.UNDEFINED;
+    this.generator = { next: noop, return: noop };
+    !this.builtin && this.runtime.emit("removed", this);
+    !this.builtin && this.runtime.emit("removed:" + this.cellId, this);
   }
 }
 

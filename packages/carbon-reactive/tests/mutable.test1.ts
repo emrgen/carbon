@@ -167,7 +167,7 @@ test("11. get/set", async (t) => {
   const accessor = runtime.mutable.accessor(x.name);
   await Promises.times(5, 10, (count) => {
     accessor.value = count;
-    runtime.refresh();
+    runtime.schedule();
   });
 
   await expect.poll(() => xv.value).toEqual(range(0, 5));
