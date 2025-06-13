@@ -151,7 +151,7 @@ const CellViewer = ({ name = "x", result, hide }: { name?: string; result: any; 
 
   return (
     <div className={"cell-result-object"}>
-      <ObjectViewer data={result} field={name} />
+      <ObjectViewer data={result} field={name} root={true} />
     </div>
   );
 };

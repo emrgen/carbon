@@ -56,7 +56,7 @@ export const ArrayView = (props: ArrayProps) => {
           setExpanded((e) => !e);
         }}
       >
-        {!root && propName && <span className={"cov-object-key"}>{propName} = </span>}
+        {!root && propName && <span className={"cov-object-key"}>{propName}: </span>}
         {root && propName && (
           <span className={"cov-object-key"} id={root ? "cov-root-name" : ""}>
             {propName} ={" "}

@@ -61,12 +61,17 @@ export const FunctionView = ({ data, propName, isIndex, isGenerator = false, isA
   );
 };
 
-const STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/gm;
-const ARGUMENT_NAMES = /([^\s,]+)/g;
+const STRIP_COMMENTS = /\/\/.*$|\/\*[\s\S]*?\*\//mg;
 
-function getParamNames(func) {
-  const fnStr = func.toString().replace(STRIP_COMMENTS, "");
-  let result = fnStr.slice(fnStr.indexOf("(") + 1, fnStr.indexOf(")")).match(ARGUMENT_NAMES);
-  if (result === null) result = [];
-  return result.join(", ");
+function getParamNames(fn) {
+  const fnStr = fn.toString().replace(STRIP_COMMENTS, ''); // remove comments
+  const args = fnStr
+      .match(/^(?:async\s*)?(?:function)?\s*[^\(]*\(\s*([^\)]*)\)/) ||
+    fnStr.match(/^\(?\s*([^\)=>]*)\)?\s*=>/); // arrow function
+
+  if (!args || !args[1]) return [];
+
+  console.log(args)
+
+  return args[1]
 }

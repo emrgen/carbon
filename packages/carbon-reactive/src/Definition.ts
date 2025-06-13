@@ -63,6 +63,11 @@ export const DefinitionFactory = {
   UpdateExpression(name: string, deps: string[], ast: any, code: string) {
     return this.Expression(name, deps, ast, code);
   },
+  AwaitExpression(name: string, deps: string[], ast: any, code: string) {
+    const { body } = ast;
+    const blockBody = code.slice(body.start, body.end);
+    return this.define(name, deps, `return (${blockBody})`, ast);
+  },
   Expression(name: string, deps: string[], ast: any, code: string) {
     const { body } = ast;
     const blockBody = code.slice(body.start, body.end);

@@ -8,7 +8,16 @@ export const Literal = ({ data, propName, isIndex, root }) => {
     }
 
     if (isString(data)) {
-      return <span className={"cov-string"}>{data}</span>;
+      if (hasBreaks(data)) {
+        // If the string has line breaks, display it as a quoted string
+        return (
+          <div className={"cov-string display-quoted"}>
+            <span className={"cov-quoted"}>`{data.split("\n").slice(0, 10).join("\n")}`</span>
+          </div>
+        );
+      }
+
+      return <div className={"cov-string"}>{data}</div>;
     }
 
     if (isSymbol(data)) {
@@ -32,13 +41,17 @@ export const Literal = ({ data, propName, isIndex, root }) => {
 
   return (
     <div className={"cov-literal"}>
-      {!root && propName && <span className={keyClass}>{propName} = </span>}
+      {!root && propName && <span className={keyClass}>{propName}: </span>}
       {root && propName && (
         <span className={keyClass} id={root ? "cov-root-name" : ""}>
           {propName} ={" "}
         </span>
       )}
-      <span className={"cov-literal-value"}>{view}</span>
+      <span className={"cov-literal-value"}> {view}</span>
     </div>
   );
 };
+
+export function hasBreaks(str: string) {
+  return str.includes("\n") || str.includes("\r");
+}

@@ -85,7 +85,7 @@ export const ObjectView = ({ data, propName, root }) => {
           setExpanded((e) => !e);
         }}
       >
-        {!root && propName && <span className={"cov-object-key"}>{propName} = </span>}
+        {!root && propName && <span className={"cov-object-key"}>{propName}: </span>}
         {root && propName && (
           <span className={"cov-object-key"} id={"cov-root-name"}>
             {propName} ={" "}
