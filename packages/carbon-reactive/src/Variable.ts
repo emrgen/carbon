@@ -1,13 +1,10 @@
 import { last, noop } from "lodash";
 import { Cell } from "./Cell";
 import { Module, ModuleVariableId, ModuleVariableName } from "./Module";
-import { Promix } from "./Promix";
 import { generatorish, randomString, RuntimeError } from "./x";
 
 export type VariableName = string;
 export type VariableId = string;
-
-const noopPromix = Promix.default("noop");
 
 const LOG = 0;
 
@@ -286,8 +283,7 @@ export class Variable {
     // ensure all inputs are fulfilled
     const error = inputs.find((input) => input.error);
     if (error) {
-      this.reject(RuntimeError.notDefined(error.cell.name));
-      return;
+      return this.reject(RuntimeError.notDefined(error.cell.name));
     }
 
     const inputMap = new Map(inputs.map((input) => [input.name, input]));
@@ -295,15 +291,13 @@ export class Variable {
     // make sure the input variablesById have matching names
     const missing = this.dependencies.find((name, i) => !inputMap.has(name));
     if (missing) {
-      return Promise.reject(RuntimeError.notDefined(last(missing.split(":"))!)).catch(
-        this.rejected,
-      );
+      return this.reject(RuntimeError.notDefined(last(missing.split(":"))!));
     }
 
     // get the input variable values in order by name
     const deps = this.dependencies.map((name) => inputMap.get(name)).filter(Boolean) as Variable[];
     if (deps.length !== this.dependencies.length) {
-      return Promix.reject(RuntimeError.of(`Variable ${this.cell.name} has missing dependencies`));
+      return this.reject(RuntimeError.of(`Variable ${this.cell.name} has missing dependencies`));
     }
 
     // get the values of the input variablesById

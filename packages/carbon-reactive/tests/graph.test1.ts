@@ -1,15 +1,29 @@
 import { expect, test } from "vitest";
-import { Graph } from "../src/Graph";
-import { Promix } from "../src/Promix";
+import { Graph, NodeId } from "../src/Graph";
+
+class Node implements NodeId {
+  static default(id: string) {
+    return new Node(id);
+  }
+
+  static from(a1: string, a2: number) {
+    return new Node(a1, a2);
+  }
+
+  constructor(
+    readonly id: string,
+    readonly version: number = 0,
+  ) {}
+}
 
 test("test unreachable nodes", async (t) => {
-  const G = new Graph<Promix<any>>();
-  const a = Promix.default<number>("a");
-  const b = Promix.default<number>("b");
-  const c = Promix.default<number>("c");
-  const d = Promix.default<number>("d");
-  const e = Promix.default<number>("e");
-  const f = Promix.default<number>("f");
+  const G = new Graph<Node>();
+  const a = Node.default("a");
+  const b = Node.default("b");
+  const c = Node.default("c");
+  const d = Node.default("d");
+  const e = Node.default("e");
+  const f = Node.default("f");
 
   G.addNode(a, b, c, d, e, f);
   // a -> b, a -> c, d -> e, f
@@ -34,10 +48,10 @@ test("test unreachable nodes", async (t) => {
 });
 
 test("test cycle", async (t) => {
-  const G = new Graph<Promix<any>>();
-  const a = Promix.default<number>("a");
-  const b = Promix.default<number>("b");
-  const c = Promix.default<number>("c");
+  const G = new Graph<Node>();
+  const a = Node.default("a");
+  const b = Node.default("b");
+  const c = Node.default("c");
 
   G.addNode(a, b, c);
   G.addEdge(a, b);
@@ -50,11 +64,11 @@ test("test cycle", async (t) => {
 });
 
 test("test dirty components", async (t) => {
-  const G = new Graph<Promix<any>>();
-  const a = Promix.default<number>("a");
-  const b = Promix.default<number>("b");
-  const c = Promix.default<number>("c");
-  const d = Promix.default<number>("d");
+  const G = new Graph<Node>();
+  const a = Node.default("a");
+  const b = Node.default("b");
+  const c = Node.default("c");
+  const d = Node.default("d");
 
   G.addNode(a, b, c, d);
   G.addEdge(a, b);
@@ -74,12 +88,12 @@ test("test dirty components", async (t) => {
 });
 
 test("test variable dag", async (t) => {
-  const G = new Graph<Promix<any>>();
-  const a = Promix.default<number>("a");
-  const b = Promix.default<number>("b");
-  const c = Promix.default<number>("c");
-  const d = Promix.default<number>("d");
-  const e = Promix.default<number>("e");
+  const G = new Graph<Node>();
+  const a = Node.default("a");
+  const b = Node.default("b");
+  const c = Node.default("c");
+  const d = Node.default("d");
+  const e = Node.default("e");
 
   G.addNode(a, b, c, d, e);
 
@@ -105,12 +119,12 @@ test("test variable dag", async (t) => {
 });
 
 test("test dirty nodes propagation", async (t) => {
-  const G = new Graph<Promix<any>>();
-  const a = Promix.default<number>("a");
-  const b = Promix.default<number>("b");
-  const c = Promix.default<number>("c");
-  const d = Promix.default<number>("d");
-  const e = Promix.default<number>("e");
+  const G = new Graph<Node>();
+  const a = Node.default("a");
+  const b = Node.default("b");
+  const c = Node.default("c");
+  const d = Node.default("d");
+  const e = Node.default("e");
 
   G.addNode(a, b, c, d);
   G.addEdge(a, b);

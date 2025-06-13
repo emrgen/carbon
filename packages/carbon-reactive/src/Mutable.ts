@@ -114,8 +114,8 @@ export class Mutable {
           const mutableVariable = variable.module.variablesByName.get(outputName);
           mutableVariable?.forEach((variable) => {
             // console.log("marking dirty", name, variable.id.toString());
-            variable.pending();
             variable.stop();
+            variable.pending();
             that.runtime.markDirty(variable);
           });
         });

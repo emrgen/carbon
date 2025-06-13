@@ -376,14 +376,6 @@ export class Module {
       return builtIn;
     }
 
-    if (cell.mutable) {
-      return this.defineMutable(cell);
-    }
-
-    if (cell.view) {
-      return this.defineView(cell);
-    }
-
     const fullId = Variable.id(this.id, cell.id);
     const before = this.variablesById.get(fullId);
     // if the variable does not exist, create a new one

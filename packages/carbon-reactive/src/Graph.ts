@@ -1,4 +1,4 @@
-interface NodeId {
+export interface NodeId {
   id: string;
   version: number;
 }

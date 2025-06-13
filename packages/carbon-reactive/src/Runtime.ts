@@ -93,6 +93,11 @@ export class Runtime extends EventEmitter {
     return this.builtin;
   }
 
+  // pause the runtime
+  // which will stop all variable computations and new scheduling
+  // new variables can be created, but they will not be computed
+  // this is useful when you want to stop the runtime temporarily
+  // for example, when you want to inspect the variables or when you want to pause the execution
   pause() {
     if (this.paused) return this;
     this.paused = true;
@@ -105,6 +110,8 @@ export class Runtime extends EventEmitter {
     return this;
   }
 
+  // play the runtime
+  // which will schedule the dirty variables to be recomputed
   play() {
     if (!this.paused) return this;
     this.paused = false;
@@ -136,10 +143,11 @@ export class Runtime extends EventEmitter {
   }
 
   markDirty(variable: Variable) {
-    if (variable.removed) return;
+    if (variable.state.isDetached) return;
+
     variable.version += 1;
-    // console.log("markDirty", variable.name, variable.id, variable.version);
     this.dirty.set(variable.id, variable);
+
     return this;
   }
 
@@ -177,7 +185,6 @@ export class Runtime extends EventEmitter {
 
     this.dirty.clear();
     moduleVariables.forEach((variables, moduleId) => {
-      // console.log("SCHEDULE", moduleId, variables.map((v) => v.name));
       this.scheduleModule(variables);
     });
   }
@@ -275,5 +282,3 @@ export class Runtime extends EventEmitter {
     });
   }
 }
-
-let count = 0;
