@@ -387,7 +387,7 @@ export class Variable {
             failed(e);
             error = e;
           }
-        }, 0);
+        }, 1000);
       });
     }
 
@@ -432,34 +432,33 @@ export class Variable {
   // on compute is called when the variable is computed,
   onSuccess() {
     // if (this.removed) return;
-    if (this.state.isFulfilled) {
-      console.log("onProgress", this.id, this.name, "state:", this.state.value, this.value);
-      const cycle = this.findAllNodesInCycle();
-      if (cycle.length > 0) {
-        cycle.forEach((node) => {
-          node.reject(RuntimeError.circularDependency(this.cell.name));
-        });
-        return;
-      }
-
-      console.log(this.id, this.name);
-      const outputs = this.outputs;
-      outputs.forEach((output) => {
-        if (output.removed) return;
-        const inputs = output.inputs;
-        // check for cycles in the output paths
-
-        console.log(inputs.map((input) => input.state));
-        console.log(inputs.map((input) => input.cell.version));
-        // if all inputs are fulfilled, run the output variable
-        if (inputs.every((input) => input.state.isFulfilled)) {
-          console.log("compute child", this.id, "=>", output.id, output.name);
-          output.stop();
-          output.pending();
-          output.compute();
-        }
+    // console.log("onProgress", this.id, this.name, "state:", this.state.value, this.value);
+    const cycle = this.findAllNodesInCycle();
+    if (cycle.length > 0) {
+      cycle.forEach((node) => {
+        node.reject(RuntimeError.circularDependency(this.cell.name));
       });
+      return;
     }
+
+    // console.log(this.id, this.name);
+    const outputs = this.outputs;
+    last(outputs);
+    outputs.forEach((output) => {
+      if (output.removed) return;
+      const inputs = output.inputs;
+      // check for cycles in the output paths
+
+      console.log(inputs.map((input) => input.state));
+      console.log(inputs.map((input) => input.cell.version));
+      // if all inputs are fulfilled, run the output variable
+      if (inputs.every((input) => input.state.isFulfilled || input.state.isProcessing)) {
+        console.log("compute child", this.id, "=>", output.id, output.name);
+        output.stop();
+        output.pending();
+        output.compute();
+      }
+    });
   }
 
   onError() {

@@ -416,7 +416,7 @@ export class Module {
     });
 
     this.onCreate(after);
-    console.log(after);
+
     this.runtime.schedule();
 
     return after;
