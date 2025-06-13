@@ -3,6 +3,10 @@ export class ReactiveEvents {
     return `pending:${id}`;
   }
 
+  static processing(id: string): string {
+    return `processing:${id}`;
+  }
+
   static fulfilled(id: string): string {
     return `fulfilled:${id}`;
   }

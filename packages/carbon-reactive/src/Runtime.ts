@@ -5,7 +5,7 @@ import { Cell } from "./Cell";
 import { Graph } from "./Graph";
 import { Module, ModuleNameVersion, ModuleVariableId, ModuleVariableName } from "./Module";
 import { Mutable } from "./Mutable";
-import { State, Variable, VariableName } from "./Variable";
+import { Variable, VariableName } from "./Variable";
 import { RuntimeError } from "./x";
 
 interface Builtins {
@@ -248,7 +248,7 @@ export class Runtime extends EventEmitter {
 
       // if some input is builtin and still not resolved, add the input to roots and remove the current dirty variable
       const unresolvedBuiltins = v.inputs.filter((i) => {
-        return i.cell.builtin && i.state1 === State.UNDEFINED;
+        return i.cell.builtin && i.state.isUndefined;
       });
 
       if (unresolvedBuiltins.length) {
@@ -419,7 +419,7 @@ export class Runtime extends EventEmitter {
   //   });
   //
   //   // console.log(
-  //   //   "done computing",
+  //   //   "done processing",
   //   //   roots.map((v) => v.id),
   //   // );
   //   // this will allow next play to begin even before the current one is finished

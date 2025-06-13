@@ -59,10 +59,12 @@ export class Module {
 
   // play the variable with the given name
   recompute(name: string) {
-    const variable = this.value(name);
-    if (!variable) return;
+    const variables = this.variablesByName.get(name);
 
-    this.runtime.markDirty(variable);
+    variables?.forEach((v) => {
+      this.runtime.markDirty(v);
+    });
+
     this.runtime.schedule();
   }
 
@@ -342,16 +344,18 @@ export class Module {
     }
 
     if (cell.mutable) {
-      return this.defineMutable(cell);
+      return;
+      // return this.defineMutable(cell);
     }
 
     if (cell.view) {
-      return this.defineView(cell);
+      return;
+      // return this.defineView(cell);
     }
 
     const fullId = Variable.id(this.id, cell.id);
     // if the variable with same id already exists
-    // just redefine it: delete and recreate
+    // redefine: delete and create a new variable
     if (this.runtime.variablesById.has(fullId)) {
       return this.redefine(cell);
     }
@@ -362,7 +366,6 @@ export class Module {
       cell,
     });
 
-    // console.log("define", id, name, variable.dependencies);
     this.connect(variable);
     this.onCreate(variable, schedule, dirty);
 
@@ -371,7 +374,8 @@ export class Module {
 
   // redefine a variable with the given definition
   // optionally change the name, inputs, or definition
-  redefine(cell: Cell): Variable {
+  private redefine(cell: Cell): Variable {
+    console.log("redefine", cell.id, cell.name, cell.dependencies);
     const builtIn = this.findBuiltIn(cell);
     if (builtIn) {
       return builtIn;
@@ -386,32 +390,36 @@ export class Module {
     }
 
     const fullId = Variable.id(this.id, cell.id);
-    const variable = this.runtime.variablesById.get(fullId);
-    if (!variable) {
+    const before = this.runtime.variablesById.get(fullId);
+    if (!before) {
       return this.define(cell);
     }
 
     // if the cell has not changed, we just need to play
-    if (variable.cell.eq(cell)) {
+    if (before.cell.eq(cell)) {
       console.log("redefine", cell.id, cell.name, "no change");
-      variable.version += 1;
-      this.runtime.markDirty(variable);
+      before.version += 1;
+      this.runtime.markDirty(before);
       this.runtime.schedule();
-      return variable;
+      return before;
     }
 
-    // remove the variable from existing connections
-    this.onRemove(variable, false, false);
-    this.disconnect(variable);
+    // remove the old variable from existing graph
+    this.onRemove(before, false, false);
+    this.disconnect(before);
 
-    cell.version = variable.version + 1;
-    variable.redefine(cell);
+    cell.version = before.version + 1;
+    const after = Variable.create({
+      module: this,
+      cell,
+    });
 
-    this.connect(variable);
-    // mark the variable as dirty and schedule to play
-    this.onCreate(variable);
+    this.connect(after);
+    this.onCreate(after);
 
-    return variable;
+    console.log(after);
+
+    return after;
   }
 
   // delete a variable by id
@@ -423,9 +431,10 @@ export class Module {
     if (variable?.builtin) return;
 
     if (variable) {
+      variable.pause();
       this.disconnect(variable);
-      variable.delete({ module: true });
       this.onRemove(variable, schedule);
+      variable.delete({ module: true });
     }
   }
 
@@ -461,7 +470,7 @@ export class Module {
     this.runtime.onRemove(variable, schedule, dirty);
 
     variable.pause();
-    variable.removed();
+    variable.remove();
   }
 
   // connect the variable with the module local variablesById
@@ -492,8 +501,8 @@ export class Module {
 
   private disconnect(variable: Variable) {
     variable.inputs.forEach((input) => {
-      // input.outputs = input.outputs.filter((o) => o.id !== variable.id);
-      // input.outputs = uniqBy(input.outputs, "id");
+      input.outputs = input.outputs.filter((o) => o.id !== variable.id);
+      input.outputs = uniqBy(input.outputs, "id");
     });
   }
 }

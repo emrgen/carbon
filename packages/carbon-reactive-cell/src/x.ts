@@ -11,7 +11,7 @@ export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean 
   // event if the code is empty, we still want to define a cell
   if (!code) {
     const cell = Cell.from(node.id.toString(), Cell.undefinedName(), [], () => "");
-    return runtime.mod.redefine(cell);
+    return runtime.mod.define(cell);
   }
 
   const cell = Cell.parse(code, {
@@ -28,7 +28,7 @@ export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean 
   }
 
   // console.log(newVariable.cell.definition.toString());
-  return runtime.mod.redefine(cell);
+  return runtime.mod.define(cell);
 };
 
 export const isHtmlElement = (res) => {

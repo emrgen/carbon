@@ -92,7 +92,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   useReactiveVariable({
     node,
     onFulfilled: (v) => {
-      // console.log("Cell fulfilled:", v.id.toString(), v.value);
+      console.log("Cell fulfilled:", v.id.toString(), v.value);
       updateResult(v.value);
       const hasName = !v.cell.builtin && Cell.hasName(v.cell);
       setName(hasName ? (v.cell.name ?? "") : "");
@@ -104,7 +104,8 @@ export const ReactiveCellViewer = (props: RendererProps) => {
       setName("");
       setError((cell.error ?? "").toString());
     },
-    onPending: () => {
+    onProcessing: () => {
+      // console.log("Cell processing:", node.id.toString());
       setPending(true);
       setError("");
       setName("");

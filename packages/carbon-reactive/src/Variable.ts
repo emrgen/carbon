@@ -23,9 +23,10 @@ export const UNDEFINED_VALUE = Symbol("undefined");
 export enum State {
   UNDEFINED = "undefined",
   DETACHED = "detached", // removed variable, but not deleted from the module
+  STOPPED = "stopped", // computation is stopped, inputs are fulfilled, but not yet computed
   PENDING = "pending", // computation is in progress, inputs are not yet fulfilled
   PAUSED = "paused", // computation is paused, inputs are fulfilled, but not yet computed
-  COMPUTING = "computing", // scheduled for computation, but not yet computed
+  PROCESSING = "processing", // scheduled for computation, but not yet computed
   FULFILLED = "fulfilled",
   REJECTED = "rejected",
 }
@@ -37,7 +38,8 @@ class VariableState {
   static detached = new VariableState(State.DETACHED);
   static pending = new VariableState(State.PENDING);
   static paused = new VariableState(State.PAUSED);
-  static computing = new VariableState(State.COMPUTING);
+  static stopped = new VariableState(State.STOPPED);
+  static processing = new VariableState(State.PROCESSING);
   static fulfilled = new VariableState(State.FULFILLED);
   static rejected = new VariableState(State.REJECTED);
 
@@ -45,8 +47,8 @@ class VariableState {
     this.value = value;
   }
 
-  transition(newValue: State) {
-    return new VariableState(newValue);
+  get isStopped() {
+    return this.value === State.STOPPED;
   }
 
   get isUndefined() {
@@ -61,8 +63,12 @@ class VariableState {
     return this.value === State.PAUSED;
   }
 
-  get isComputing() {
-    return this.value === State.COMPUTING;
+  get isDetached() {
+    return this.value === State.DETACHED;
+  }
+
+  get isProcessing() {
+    return this.value === State.PROCESSING;
   }
 
   get isFulfilled() {
@@ -89,6 +95,9 @@ export class Variable {
 
   version: number = 0;
 
+  // if the variable is connected to the graph
+  removed: boolean = false;
+
   // this has higher priority than the connection in the graph
   // this are updated when the variable is created, redefined or deleted
   // runtime graph is updated based on these variablesById
@@ -96,7 +105,6 @@ export class Variable {
   outputs: Variable[] = [];
 
   state: VariableState;
-  state1: State;
 
   // promise that resolves when the variable calculation is done
   // the calculation is done when all inputs are fulfilled
@@ -112,7 +120,6 @@ export class Variable {
   // if the variable is a generator
   private generator = NOOP_GENERATOR;
   private generating: boolean = false;
-  private generatorish: boolean = false;
   private controller: AbortController;
 
   static create(props: VariableProps) {
@@ -140,9 +147,7 @@ export class Variable {
     this.cell = cell.with(module);
 
     this.state = VariableState.undefined;
-    this.state1 = State.UNDEFINED;
 
-    this.promise = Variable.createPromise(this);
     this.controller = new AbortController();
 
     this.pending = this.pending.bind(this);
@@ -152,6 +157,8 @@ export class Variable {
     this.compute = this.compute.bind(this);
     this.pause = this.pause.bind(this);
     this.onProgress = this.onProgress.bind(this);
+
+    this.promise = Variable.createPromise(this);
   }
 
   private static createPromise(variable: Variable) {
@@ -181,18 +188,12 @@ export class Variable {
     return this.cell.builtin;
   }
 
-  get runtime() {
-    return this.module.runtime;
-  }
+  // get runtime() {
+  //   return this.module.runtime;
+  // }
 
-  redefine(cell: Cell) {
-    this.cell = cell.with(this.module);
-    this.state1 = State.UNDEFINED;
-    this.promise = Variable.createPromise(this);
-    this.controller = new AbortController();
-    this.generator = NOOP_GENERATOR;
-    this.value = UNDEFINED_VALUE;
-    this.error = undefined;
+  get emitter() {
+    return this.module.runtime;
   }
 
   // break all links before leaving
@@ -203,58 +204,82 @@ export class Variable {
       return;
     }
 
-    this.redefine(
-      Cell.create({
-        id: this.id,
-        name: Variable.randomName(),
-        version: this.version + 1,
-      }),
-    );
+    this.state = VariableState.detached;
+    this.removed = true;
+    this.generator = NOOP_GENERATOR;
+    this.value = UNDEFINED_VALUE;
+    this.error = undefined;
   }
 
   // force play the variable
   play() {
-    this.runtime.version += 1;
-    this.runtime.markDirty(this);
-    this.runtime.schedule();
+    this.module.recompute(this.name);
   }
 
   // pause the variable computation, pause the generator if it is a generator
   pause() {
+    this.state = VariableState.paused;
     if (this.generating) {
-      debugger;
-      if (this.generatorish) {
-        this.stopGenerating();
-      } else {
-        // cache the last computed value
-        this.resolve(this.value);
-      }
+      this.stopGenerating();
+    } else {
+      // cache the last computed value
+      this.resolve(this.value);
+    }
+  }
+
+  // reset the variable to pending state
+  stop() {
+    this.state = VariableState.stopped;
+    // stop the generator if it is a generator
+    if (this.generating) {
+      this.stopGenerating();
+    } else {
+      this.resolve(UNDEFINED_VALUE);
     }
   }
 
   pending() {
+    console.log("pending", this.id, this.name, this);
+
     this.promise = Promise.resolve(UNDEFINED_VALUE).catch(noop);
     this.resolve = noop;
     this.reject = noop;
 
-    this.value = UNDEFINED_VALUE;
     this.state = VariableState.pending;
+    this.value = UNDEFINED_VALUE;
     this.error = undefined;
-    const done = () => ({ value: this.value, done: true });
-    this.generator = { next: done, return: done };
-    this.runtime.emit("pending", this);
-    this.runtime.emit("pending:" + this.cellId, this);
-    // this.onProgress();
+
+    this.generator = NOOP_GENERATOR;
+
+    this.emitter.emit("pending", this);
+    this.emitter.emit("pending:" + this.cellId, this);
+
     return this;
   }
 
-  removed() {
+  // mark the variable as processing
+  processing() {
+    console.log("processing", this.id, this.name);
+
+    this.emitter.emit("processing", this);
+    this.emitter.emit("processing:" + this.cellId, this);
+
+    return this;
+  }
+
+  // update state for removed variable
+  remove() {
+    console.log("removed", this.id, this.name);
+    this.removed = true;
+
+    this.state = VariableState.detached;
     this.value = UNDEFINED_VALUE;
     this.error = undefined;
-    this.state = VariableState.detached;
+
     this.generator = NOOP_GENERATOR;
-    !this.builtin && this.runtime.emit("removed", this);
-    !this.builtin && this.runtime.emit("removed:" + this.cellId, this);
+
+    !this.builtin && this.emitter.emit("removed", this);
+    !this.builtin && this.emitter.emit("removed:" + this.cellId, this);
   }
 
   // compute the variable value from inputs
@@ -263,9 +288,10 @@ export class Variable {
   // the first run will mark the generator as dirty,
   // triggering the runtime to compute it again
   compute(inputs: Variable[]) {
-    this.state1 = State.COMPUTING;
-    this.promise = Variable.createPromise(this);
     console.log("computing:", this.id, "=>", this.name, this);
+    this.processing();
+
+    this.promise = Variable.createPromise(this);
 
     // ensure all inputs are fulfilled
     const error = inputs.find((input) => input.error);
@@ -307,7 +333,6 @@ export class Variable {
       Promise.resolve(res).then((res) => {
         // start the generator if it is a generator
         if (generatorish(res)) {
-          this.generatorish = true;
           this.generator = res;
           this.generating = true;
           this.startGenerating();
@@ -348,6 +373,8 @@ export class Variable {
                   generated = value;
                   // continue the generator
                 }
+
+                this.processing();
                 this.resolve(value);
                 proceed(value);
               })
@@ -375,25 +402,28 @@ export class Variable {
 
   // mark the variable as fulfilled with a value
   private fulfilled1(value: any) {
-    // console.log(this.id, "fulfilled", this.name, "value:", value);
+    if (this.state.isStopped) return;
+    // console.log(this.id, "fulfilled", this.name, "value:", value, "state:", this.state);
     this.state = VariableState.fulfilled;
     this.value = value;
     this.error = undefined;
-    !this.builtin && this.runtime.emit("fulfilled", this);
-    !this.builtin && this.runtime.emit("fulfilled:" + this.cellId, this);
+    !this.builtin && this.emitter.emit("fulfilled", this);
+    !this.builtin && this.emitter.emit("fulfilled:" + this.cellId, this);
     this.onProgress();
+
     return this;
   }
 
   // mark the variable as rejected with an error
   private rejected1(error: Error) {
+    if (this.state.isStopped) return;
     console.log("rejected", this.id, this.name, error);
     this.state = VariableState.rejected;
     this.error = error;
     this.value = undefined;
     this.generator = NOOP_GENERATOR;
-    this.runtime.emit("rejected", this);
-    this.runtime.emit("rejected:" + this.cellId, this);
+    this.emitter.emit("rejected", this);
+    this.emitter.emit("rejected:" + this.cellId, this);
     this.onProgress();
     return this;
   }
