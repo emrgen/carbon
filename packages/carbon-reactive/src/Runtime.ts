@@ -135,6 +135,7 @@ export class Runtime extends EventEmitter {
     variable.version += 1;
     // console.log("markDirty", variable.name, variable.id, variable.version);
     this.dirty.set(variable.id, variable);
+    return this;
   }
 
   // perform runtime specific actions for a new variable is created
@@ -183,7 +184,7 @@ export class Runtime extends EventEmitter {
     });
 
     variable.inputs.forEach((input) => {
-      if (input.promise.isPending) {
+      if (input.state.isPending) {
         this.markDirty(input);
       }
     });
@@ -205,7 +206,7 @@ export class Runtime extends EventEmitter {
 
     const roots = new Map(this.dirty.entries());
     // variables that are dirty and need to be recomputed
-    const dirty = Array.from(this.dirty.values()).filter((v) => v.version !== v.fulfilledVersion);
+    const dirty = Array.from(this.dirty.values()).filter((v) => v.version === this.version);
     this.dirty.clear();
 
     // console.log("DIRTY", Array.from(roots.values().map((v) => v.name)));
@@ -227,9 +228,7 @@ export class Runtime extends EventEmitter {
 
       const missing = v.dependencies.find((dep) => !this.variablesByName.get(dep)?.length);
       if (missing) {
-        // console.log("missing dependency", v.name, missing);
-        const err = RuntimeError.notDefined(last(missing.split(":"))!);
-        v.promise.rejected(err);
+        v.reject(RuntimeError.notDefined(last(missing.split(":"))!));
       }
     });
 
@@ -244,12 +243,12 @@ export class Runtime extends EventEmitter {
       //   "inputs",
       //   v.name,
       //   v.inputs.map((i) => i.cell.name),
-      //   v.inputs.map((i) => i.state),
+      //   v.inputs.map((i) => i.state1),
       // );
 
       // if some input is builtin and still not resolved, add the input to roots and remove the current dirty variable
       const unresolvedBuiltins = v.inputs.filter((i) => {
-        return i.cell.builtin && i.state === State.UNDEFINED;
+        return i.cell.builtin && i.state1 === State.UNDEFINED;
       });
 
       if (unresolvedBuiltins.length) {
@@ -271,7 +270,7 @@ export class Runtime extends EventEmitter {
 
     // marks the circular dependencies as rejected
     cycles.forEach((variable) => {
-      variable.onReject1(RuntimeError.circularDependency(variable.cell.name));
+      variable.reject(RuntimeError.circularDependency(variable.cell.name));
     });
   }
 
@@ -411,7 +410,7 @@ export class Runtime extends EventEmitter {
   //     }
   //   });
   //
-  //   // fulfill the roots with the computed inputs, if no
+  //   // resolve the roots with the computed inputs, if no
   //   roots.forEach((root) => {
   //     const inputs = this.graph.inputs(root).map((input) => input.promise);
   //     Promix.all(inputs).then((v) => {
