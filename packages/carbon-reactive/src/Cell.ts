@@ -1,4 +1,5 @@
 import { parseCell, peekId } from "@observablehq/parser";
+import { noop } from "lodash";
 import { DefinitionFactory } from "./Definition";
 import { Module } from "./Module";
 import { UNDEFINED_VALUE, Variable } from "./Variable";
@@ -17,6 +18,7 @@ interface CellProps {
   immutable?: boolean;
   view?: boolean;
   builtin?: boolean;
+  dispose?: () => void;
 }
 
 let cellCounter = 0;
@@ -40,6 +42,8 @@ export class Cell {
   mutable: boolean;
   immutable: boolean;
   builtin: boolean;
+
+  dispose: () => void = () => {};
 
   static from(id: string, name: string, deps: string[], define: Function) {
     return Cell.create({
@@ -182,6 +186,7 @@ export class Cell {
       mutable = false,
       immutable = false,
       view = false,
+      dispose = noop,
     } = props;
     this.id = id;
     this.name = name;
@@ -193,6 +198,7 @@ export class Cell {
     this.immutable = immutable;
     this.view = view;
     this.builtin = builtin;
+    this.dispose = dispose;
     this.hash = this.code
       ? generateHash(
           `${this.id}/${this.name}/${this.version}/${this.code}/${this.dependencies.join(",")}`,

@@ -100,12 +100,7 @@ export class Module {
   }
 
   // variable by id, optionally return a mutable variable
-  variable(id: string, mutable?: boolean): Variable | undefined {
-    if (mutable) {
-      const mutableId = Mutable.mutableId(id);
-      return this.variablesById.get(Variable.id(this.id, mutableId));
-    }
-
+  variable(id: string): Variable | undefined {
     return this.variablesById.get(Variable.id(this.id, id));
   }
 
@@ -244,82 +239,82 @@ export class Module {
     return immutable;
   }
 
-  defineView(cell: Cell): Variable {
-    // create a view variable that is derived from the given cell
-    // the view variable will be recomputed when the cell is changed
-    const fullId = Variable.id(this.id, cell.id);
-    const variable = this.variablesById.get(fullId);
+  // defineView(cell: Cell): Variable {
+  // create a view variable that is derived from the given cell
+  // // the view variable will be recomputed when the cell is changed
+  // const fullId = Variable.id(this.id, cell.id);
+  // const variable = this.variablesById.get(fullId);
+  //
+  // const mut = this.runtime.mutable;
+  // const hiddenName = Mutable.hiddenName(cell.name);
+  // const viewVariableId = Mutable.visibleId(cell.id);
+  // const moduleVariableName = Variable.fullName(this.id, cell.name);
+  //
+  // if (variable) {
+  //   mut.delete(moduleVariableName);
+  //   this.delete(cell.id);
+  //   this.delete(viewVariableId);
+  // }
+  //
+  // console.log(cell);
+  //
+  // // inject the module id and name into the cell
+  // // cell.with(this);
+  //
+  // mut.define(moduleVariableName, "", [moduleVariableName]);
+  //
+  // // define the hidden part of the view variable
+  // const viewVariable = this.define(
+  //   Cell.create({
+  //     id: cell.id,
+  //     name: hiddenName,
+  //     dependencies: cell.dependencies,
+  //     version: cell.version,
+  //     definition: (...args: any) => {
+  //       const el = cell.definition(...args);
+  //       const accessor = mut.accessor(moduleVariableName);
+  //       el.oninput = (e: any) => {
+  //         console.log("input", e.target.value);
+  //         mut.accessor(moduleVariableName).value = e.target.value;
+  //       };
+  //
+  //       accessor.value = el.value;
+  //
+  //       return el;
+  //     },
+  //   }),
+  //   false,
+  // );
 
-    const mut = this.runtime.mutable;
-    const hiddenName = Mutable.hiddenName(cell.name);
-    const viewVariableId = Mutable.visibleId(cell.id);
-    const moduleVariableName = Variable.fullName(this.id, cell.name);
+  // const immutableVariable = this.define(
+  //   Cell.create({
+  //     id: viewVariableId,
+  //     name: cell.name,
+  //     version: cell.version,
+  //     dependencies: [hiddenName],
+  //     immutable: true,
+  //     definition: function (hidden) {
+  //       console.log("hidden", hidden);
+  debugger;
+  // return mut.accessor(moduleVariableName).value;
+  // },
+  // }),
+  // false,
+  // );
+  //
+  // mut.add(moduleVariableName, immutableVariable);
 
-    if (variable) {
-      mut.delete(moduleVariableName);
-      this.delete(cell.id);
-      this.delete(viewVariableId);
-    }
-
-    console.log(cell);
-
-    // inject the module id and name into the cell
-    // cell.with(this);
-
-    mut.define(moduleVariableName, "", [moduleVariableName]);
-
-    // define the hidden part of the view variable
-    const viewVariable = this.define(
-      Cell.create({
-        id: cell.id,
-        name: hiddenName,
-        dependencies: cell.dependencies,
-        version: cell.version,
-        definition: (...args: any) => {
-          const el = cell.definition(...args);
-          const accessor = mut.accessor(moduleVariableName);
-          el.oninput = (e: any) => {
-            console.log("input", e.target.value);
-            mut.accessor(moduleVariableName).value = e.target.value;
-          };
-
-          accessor.value = el.value;
-
-          return el;
-        },
-      }),
-      false,
-    );
-
-    // const immutableVariable = this.define(
-    //   Cell.create({
-    //     id: viewVariableId,
-    //     name: cell.name,
-    //     version: cell.version,
-    //     dependencies: [hiddenName],
-    //     immutable: true,
-    //     definition: function (hidden) {
-    //       console.log("hidden", hidden);
-    debugger;
-    // return mut.accessor(moduleVariableName).value;
-    // },
-    // }),
-    // false,
-    // );
-    //
-    // mut.add(moduleVariableName, immutableVariable);
-
-    this.onCreate(viewVariable);
-    this.connect(viewVariable);
-    // this.onCreate(immutableVariable);
-    // this.connect(immutableVariable);
-
-    // console.log(immutableVariable, viewVariable);
-
-    this.runtime.schedule();
-
-    return viewVariable;
-  }
+  // this.onCreate(viewVariable);
+  // this.connect(viewVariable);
+  // // this.onCreate(immutableVariable);
+  // // this.connect(immutableVariable);
+  //
+  // // console.log(immutableVariable, viewVariable);
+  //
+  // this.runtime.schedule();
+  //
+  // return viewVariable;
+  // }
 
   private findBuiltIn(cell: Cell) {
     // check if the cell is a builtin variable

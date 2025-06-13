@@ -183,7 +183,6 @@ export class Graph<T extends NodeId> {
       }
     }
 
-    console.log(connected.size)
     return connected;
   }
 

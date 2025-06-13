@@ -4,3 +4,4 @@ export * from "./Runtime";
 export * from "./Cell";
 export * from "./Promises";
 export * from "./ReactiveEvents";
+export * from "./special";

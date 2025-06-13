@@ -1,8 +1,35 @@
 import { CodeValuePath, Node } from "@emrgen/carbon-core";
-import { Cell, Runtime } from "@emrgen/carbon-reactive";
+import { Cell, createMutable, createViewOf, Module, Runtime } from "@emrgen/carbon-reactive";
 
 export const nodeCode = (node: Node) => {
   return node.props.get<string>(CodeValuePath);
+};
+
+const viewOfVars = new Map<string, boolean>();
+const mutableVars: Map<string, boolean> = new Map();
+
+const defineTrap = (module: Module, cell: Cell) => {
+  // if (viewOfVars.get(cell.id)) {
+  //   removeViewOf(module, cell);
+  //   viewOfVars.set(cell.id, false);
+  // }
+  //
+  // if (mutableVars.has(cell.id)) {
+  //   removeMutable(module, cell);
+  //   mutableVars.delete(cell.id);
+  // }
+
+  if (cell.mutable) {
+    // mutableVars.set(cell.id, true);
+    return createMutable(module, cell);
+  }
+
+  if (cell.view) {
+    // viewOfVars.set(cell.id, true);
+    return createViewOf(module, cell);
+  }
+
+  return module.define(cell);
 };
 
 export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean = false) => {
@@ -11,7 +38,7 @@ export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean 
   // event if the code is empty, we still want to define a cell
   if (!code) {
     const cell = Cell.from(node.id.toString(), Cell.undefinedName(), [], () => "");
-    return runtime.mod.define(cell);
+    return defineTrap(runtime.mod, cell);
   }
 
   try {
@@ -29,7 +56,7 @@ export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean 
     }
 
     // console.log(newVariable.cell.definition.toString());
-    return runtime.mod.define(cell);
+    return defineTrap(runtime.mod, cell);
   } catch (error) {
     console.log(error);
   }

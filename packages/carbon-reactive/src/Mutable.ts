@@ -34,14 +34,6 @@ export class Mutable {
     return `mutable_${name}`;
   }
 
-  static visibleId(id: string) {
-    return `visible/${id}`;
-  }
-
-  static visibleName(name: string) {
-    return `visible_${name}`;
-  }
-
   constructor(readonly runtime: Runtime) {}
 
   add(name: ModuleVariableName, variable: Variable) {
