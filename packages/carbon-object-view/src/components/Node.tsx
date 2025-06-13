@@ -4,7 +4,7 @@ import { ArrayView } from "./Array";
 import { FunctionView } from "./Function";
 import { Literal } from "./Literal";
 import { ObjectView } from "./Object";
-import { isGenerator, isLiteral, isProxy } from "./utils";
+import { isAsyncFunction, isGenerator, isLiteral, isProxy } from "./utils";
 
 // NodeView renders js types for in UI type visualization
 export const NodeView = ({ data, propName, isIndex, root }) => {
@@ -23,7 +23,14 @@ export const NodeView = ({ data, propName, isIndex, root }) => {
 
     if (!isProxy(data) && isFunction(data)) {
       return (
-        <FunctionView data={data} isIndex={isIndex} propName={propName} isGenerator={isGenerator(data)} root={root} />
+        <FunctionView
+          data={data}
+          isIndex={isIndex}
+          propName={propName}
+          isGenerator={isGenerator(data)}
+          isAsync={isAsyncFunction(data)}
+          root={root}
+        />
       );
     }
 

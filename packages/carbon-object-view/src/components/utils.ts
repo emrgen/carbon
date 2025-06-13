@@ -38,3 +38,7 @@ export const isProxy = (data) => {
 export function isGenerator(fn) {
   return fn?.constructor?.name === "GeneratorFunction";
 }
+
+export function isAsyncFunction(fn) {
+  return fn?.constructor?.name === "AsyncFunction";
+}
