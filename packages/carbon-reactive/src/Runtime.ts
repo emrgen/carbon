@@ -241,26 +241,26 @@ export class Runtime extends EventEmitter {
     });
 
     // marks the unfulfilled builtin variables as roots
-    // Array.from(roots.values()).forEach((v) => {
-    //   // console.log(
-    //   //   "inputs",
-    //   //   v.name,
-    //   //   v.inputs.map((i) => i.cell.name),
-    //   //   v.inputs.map((i) => i.state1),
-    //   // );
-    //
-    //   // if some input is builtin and still not resolved, add the input to roots and remove the current dirty variable
-    //   const unresolvedBuiltins = v.inputs.filter((i) => {
-    //     return i.cell.builtin && i.state.isUndefined;
-    //   });
-    //
-    //   if (unresolvedBuiltins.length) {
-    //     dirtyRoots.delete(v.id);
-    //     unresolvedBuiltins.forEach((vi) => {
-    //       dirtyRoots.set(vi.name, vi);
-    //     });
-    //   }
-    // });
+    Array.from(roots.values()).forEach((v) => {
+      // console.log(
+      //   "inputs",
+      //   v.name,
+      //   v.inputs.map((i) => i.cell.name),
+      //   v.inputs.map((i) => i.state1),
+      // );
+
+      // if some input is builtin and still not resolved, add the input to roots and remove the current dirty variable
+      const unresolvedBuiltins = v.inputs.filter((i) => {
+        return i.cell.builtin && i.state.isUndefined;
+      });
+
+      if (unresolvedBuiltins.length) {
+        dirtyRoots.delete(v.id);
+        unresolvedBuiltins.forEach((vi) => {
+          dirtyRoots.set(vi.name, vi);
+        });
+      }
+    });
 
     // console.log(
     //   "inputs ROOTS",

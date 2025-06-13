@@ -493,10 +493,9 @@ export class Module {
     // remove the variable from the module local variablesByName
     const variables = this.variablesByName.get(variable.name);
     if (variables) {
-      this.variablesByName.set(
-        variable.name,
-        variables.filter((v) => v.id !== variable.id),
-      );
+      const newVariables = variables.filter((v) => v.id !== variable.id);
+      this.variablesByName.set(variable.name, newVariables);
+      newVariables.forEach((c) => this.runtime.markDirty(c));
     }
 
     variable.outputs.forEach((output) => {

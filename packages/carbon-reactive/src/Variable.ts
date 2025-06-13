@@ -326,10 +326,8 @@ export class Variable {
     }
 
     try {
-      const res = this.cell.definition.bind(this)(...args);
-      // console.log(res);
-      // Promise.resolve(res).then(this.generateFirst).then(this.fulfilled).catch(this.rejected);
-      Promise.resolve(res).then((res) => {
+      const result = this.cell.definition.bind(this)(...args);
+      Promise.resolve(result).then((res) => {
         // start the generator if it is a generator
         if (generatorish(res)) {
           this.generator = res;
