@@ -14,21 +14,25 @@ export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean 
     return runtime.mod.define(cell);
   }
 
-  const cell = Cell.parse(code, {
-    id: node.id.toString(),
-  });
+  try {
+    const cell = Cell.parse(code, {
+      id: node.id.toString(),
+    });
 
-  const variable = runtime.mod.variable(node.id.toString());
-  // if the code is the same, we don't need to redefine it
-  if (variable && cell.code === variable.cell.code) {
-    if (recompute) {
-      variable.play();
+    const variable = runtime.mod.variable(node.id.toString());
+    // if the code is the same, we don't need to redefine it
+    if (variable && cell.code === variable.cell.code) {
+      if (recompute) {
+        variable.play();
+      }
+      return variable;
     }
-    return variable;
-  }
 
-  // console.log(newVariable.cell.definition.toString());
-  return runtime.mod.define(cell);
+    // console.log(newVariable.cell.definition.toString());
+    return runtime.mod.define(cell);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const isHtmlElement = (res) => {

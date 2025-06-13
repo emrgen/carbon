@@ -291,28 +291,30 @@ export class Module {
       false,
     );
 
-    const immutableVariable = this.define(
-      Cell.create({
-        id: viewVariableId,
-        name: cell.name,
-        version: cell.version,
-        dependencies: [hiddenName],
-        immutable: true,
-        definition: function (hidden) {
-          console.log("hidden", hidden);
-          // debugger;
-          return mut.accessor(moduleVariableName).value;
-        },
-      }),
-      false,
-    );
+    // const immutableVariable = this.define(
+    //   Cell.create({
+    //     id: viewVariableId,
+    //     name: cell.name,
+    //     version: cell.version,
+    //     dependencies: [hiddenName],
+    //     immutable: true,
+    //     definition: function (hidden) {
+    //       console.log("hidden", hidden);
+    debugger;
+    // return mut.accessor(moduleVariableName).value;
+    // },
+    // }),
+    // false,
+    // );
+    //
+    // mut.add(moduleVariableName, immutableVariable);
 
     this.onCreate(viewVariable);
     this.connect(viewVariable);
-    this.onCreate(immutableVariable);
-    this.connect(immutableVariable);
+    // this.onCreate(immutableVariable);
+    // this.connect(immutableVariable);
 
-    console.log(immutableVariable, viewVariable);
+    // console.log(immutableVariable, viewVariable);
 
     this.runtime.schedule();
 
@@ -343,18 +345,10 @@ export class Module {
       return builtIn;
     }
 
-    if (cell.mutable) {
-      return this.defineMutable(cell);
-    }
-
-    if (cell.view) {
-      return this.defineView(cell);
-    }
-
-    const fullId = Variable.id(this.id, cell.id);
+    const before = this.variablesById.get(Variable.id(this.id, cell.id));
     // if the variable with same id already exists
     // redefine: delete and create a new variable
-    if (this.variablesById.has(fullId)) {
+    if (before) {
       return this.redefine(cell);
     }
 
@@ -394,7 +388,7 @@ export class Module {
     const before = this.variablesById.get(fullId);
     // if the variable does not exist, create a new one
     if (!before) {
-      return this.define(cell);
+      throw new Error(`Variable with id ${cell.id} does not exist in module ${this.id}`);
     }
 
     // if the cell has not changed, we just need to play
@@ -426,19 +420,26 @@ export class Module {
   delete(id: string) {
     const fullId = Variable.id(this.id, id);
     const variable = this.variablesById.get(fullId);
+    if (!variable) {
+      console.warn("variable not found", fullId);
+      return;
+    }
 
     // builtin variablesById cannot be deleted
     if (variable?.builtin) return;
 
     if (variable) {
       variable.stop();
-      this.disconnect(variable);
+      variable.detach();
+
       this.onRemove(variable);
       variable.delete({ module: true });
     }
   }
 
   onCreate(variable: Variable, dirty = true) {
+    this.connect(variable);
+
     this.runtime.onCreate(variable);
 
     // connect the variable with the module local variablesById
@@ -451,8 +452,6 @@ export class Module {
         this.runtime.markDirty(v);
       });
     }
-
-    this.connect(variable);
   }
 
   // connect the variable with the module local variablesById
@@ -503,9 +502,9 @@ export class Module {
     });
 
     variable.inputs.forEach((input) => {
-      if (input.state.isPending) {
-        this.runtime.markDirty(input);
-      }
+      // if (input.state.isPending) {
+      //   this.runtime.markDirty(input);
+      // }
     });
 
     this.disconnect(variable);

@@ -93,7 +93,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
     node,
     onFulfilled: (v) => {
       if (v.state.isDetached) return;
-      console.log("Cell fulfilled:", v.id.toString(), v.value);
+      // console.log("Cell fulfilled:", v.id.toString(), v.value);
       updateResult(v.value);
       const hasName = !v.cell.builtin && Cell.hasName(v.cell);
       setName(hasName ? (v.cell.name ?? "") : "");

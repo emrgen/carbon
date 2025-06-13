@@ -216,11 +216,12 @@ export class Runtime extends EventEmitter {
     //   connected.map((v) => v.name),
     // );
 
-    const cycles = this.graph.cycles(variables);
+    const cycles = Array.from(this.graph.cycles(variables));
     // console.log(
-    //   cycles.length,
     //   "cycles variables",
+    //   cycles.length,
     //   cycles.map((v) => v.name),
+    //   variables,
     // );
 
     // marks the circular dependencies as rejected
@@ -228,7 +229,6 @@ export class Runtime extends EventEmitter {
       variable.reject(RuntimeError.circularDependency(variable.cell.name));
     });
 
-    console.log(multipleDefinitions.size);
     multipleDefinitions.forEach((variable) => {
       variable.reject(RuntimeError.duplicateDefinition(variable.cell.name));
     });
@@ -269,7 +269,7 @@ export class Runtime extends EventEmitter {
 
     // all connected variables are now pending and have no running computation
     Array.from(dirtyRoots.values()).forEach((root) => {
-      console.log(root.dependencies);
+      // console.log(root.name, root.dependencies);
       // if the variable is pending, do not mark it as pending again
       return root.compute();
     });

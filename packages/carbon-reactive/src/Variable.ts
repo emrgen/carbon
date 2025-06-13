@@ -55,14 +55,6 @@ class VariableState {
     return this.value === State.UNDEFINED;
   }
 
-  get isPending() {
-    return this.value === State.PENDING;
-  }
-
-  get isPaused() {
-    return this.value === State.PAUSED;
-  }
-
   get isDetached() {
     return this.value === State.DETACHED;
   }
@@ -225,7 +217,7 @@ export class Variable {
 
   // scheduled for computation
   pending() {
-    console.log("pending", this.id, this.name);
+    // console.log("pending", this.id, this.name);
 
     this.promise = Variable.createPromise(this);
 
@@ -251,7 +243,6 @@ export class Variable {
   // update state for removed variable
   detach() {
     console.log("removed", this.id, this.name);
-    this.removed = true;
 
     this.state = VariableState.detached;
     this.value = UNDEFINED_VALUE;
@@ -269,12 +260,12 @@ export class Variable {
   // the first run will mark the generator as dirty,
   // triggering the runtime to compute it again
   compute() {
-    if (this.removed) {
+    if (this.state.isDetached) {
       console.warn("Variable is removed, cannot compute", this.id, this.name);
       return;
     }
 
-    console.log("computing:", this.id, "=>", this.name);
+    // console.log("computing:", this.id, "=>", this.name);
     this.processing();
 
     for (const dep of this.dependencies) {
@@ -300,7 +291,6 @@ export class Variable {
     }
 
     const inputMap = new Map(inputs.map((input) => [input.name, input]));
-    // console.log(inputs.map((input) => input));
 
     // make sure the input variablesById have matching names
     const missing = this.dependencies.find((name, i) => !inputMap.has(name));
@@ -403,13 +393,18 @@ export class Variable {
   private fulfilled(value: any) {
     // if (this.state.isStopped) return;
     if (this.state.isDetached) return;
-    console.log(this.id, "fulfilled", this.name, "value:", value, "state:", this.state);
+    // console.log(this.id, "fulfilled", this.name, "value:", value, "state:", this.state);
     // this.state = VariableState.fulfilled;
     this.value = value;
     this.error = undefined;
     !this.builtin && this.emitter.emit("fulfilled", this);
     !this.builtin && this.emitter.emit("fulfilled:" + this.cellId, this);
-    this.onSuccess();
+
+    if (this.state.isProcessing) {
+      this.onGenerate();
+    } else {
+      this.onSuccess();
+    }
 
     return this;
   }
@@ -418,7 +413,7 @@ export class Variable {
   private rejected(error: Error) {
     // if (this.state.isStopped || this.state.isPending) return;
     if (this.state.isDetached) return;
-    console.log("rejected", this.id, this.name, error.toString());
+    // console.log("rejected", this.id, this.name, error.toString());
     // this.state = VariableState.rejected;
     this.error = error;
     this.value = undefined;
@@ -427,6 +422,11 @@ export class Variable {
     this.emitter.emit("rejected:" + this.cellId, this);
     this.onError();
     return this;
+  }
+
+  onGenerate() {
+    // console.log("onGenerate", this.id, this.name, "state:", this.state.value, this.value);
+    this.onSuccess();
   }
 
   // on compute is called when the variable is computed,
@@ -449,11 +449,8 @@ export class Variable {
       const inputs = output.inputs;
       // check for cycles in the output paths
 
-      console.log(inputs.map((input) => input.state));
-      console.log(inputs.map((input) => input.cell.version));
       // if all inputs are fulfilled, run the output variable
       if (inputs.every((input) => input.state.isFulfilled || input.state.isProcessing)) {
-        console.log("compute child", this.id, "=>", output.id, output.name);
         output.stop();
         output.pending();
         output.compute();
@@ -463,11 +460,17 @@ export class Variable {
 
   onError() {
     this.stop();
+    const cycle = this.findAllNodesInCycle();
+
+    if (cycle.length > 0) {
+      cycle.forEach((node) => {
+        node.reject(RuntimeError.circularDependency(this.cell.name));
+      });
+      return;
+    }
 
     this.outputs.forEach((output) => {
-      output.stop();
-      output.pending();
-      output.compute();
+      output.reject(this.error!);
     });
   }
 
@@ -502,8 +505,4 @@ export class Variable {
 
     return cycle;
   }
-}
-
-function error(e) {
-  console.log(e);
 }
