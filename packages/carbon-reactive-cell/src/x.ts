@@ -22,7 +22,7 @@ export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean 
   // if the code is the same, we don't need to redefine it
   if (variable && cell.code === variable.cell.code) {
     if (recompute) {
-      variable.recompute();
+      variable.play();
     }
     return variable;
   }

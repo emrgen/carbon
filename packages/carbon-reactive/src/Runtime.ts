@@ -5,7 +5,7 @@ import { Cell } from "./Cell";
 import { Graph } from "./Graph";
 import { Module, ModuleNameVersion, ModuleVariableId, ModuleVariableName } from "./Module";
 import { Mutable } from "./Mutable";
-import { Variable, VariableName, VariableState } from "./Variable";
+import { State, Variable, VariableName } from "./Variable";
 import { RuntimeError } from "./x";
 
 interface Builtins {
@@ -98,8 +98,8 @@ export class Runtime extends EventEmitter {
     this.paused = true;
 
     this.variablesById.forEach((v) => {
-      // just stop all variable computations
-      v.stop();
+      // just pause all variable computations
+      v.pause();
     });
   }
 
@@ -194,7 +194,7 @@ export class Runtime extends EventEmitter {
   }
 
   // stops the running nodes from being recomputed further
-  // creates a new slot for the next recompute
+  // creates a new slot for the next play
   schedule() {
     if (this.paused) return;
 
@@ -222,7 +222,7 @@ export class Runtime extends EventEmitter {
     // mark all the nodes as pending
     connected.forEach((v) => {
       // if the variable is pending, do not mark it as pending again
-      v.stop();
+      v.pause();
       v.pending();
 
       const missing = v.dependencies.find((dep) => !this.variablesByName.get(dep)?.length);
@@ -249,7 +249,7 @@ export class Runtime extends EventEmitter {
 
       // if some input is builtin and still not resolved, add the input to roots and remove the current dirty variable
       const unresolvedBuiltins = v.inputs.filter((i) => {
-        return i.cell.builtin && i.state === VariableState.UNDEFINED;
+        return i.cell.builtin && i.state === State.UNDEFINED;
       });
 
       if (unresolvedBuiltins.length) {
@@ -271,12 +271,12 @@ export class Runtime extends EventEmitter {
 
     // marks the circular dependencies as rejected
     cycles.forEach((variable) => {
-      variable.onReject(RuntimeError.circularDependency(variable.cell.name));
+      variable.onReject1(RuntimeError.circularDependency(variable.cell.name));
     });
   }
 
-  // recompute the dirty variablesById and their dependencies
-  // private recompute() {
+  // play the dirty variablesById and their dependencies
+  // private play() {
   //   LOG && console.log("----------------\n> recomputing\n----------------");
   //   if (this.dirty.size === 0) {
   //     // if no dirty variablesById schedule (to process pending generators)
@@ -284,7 +284,7 @@ export class Runtime extends EventEmitter {
   //     return;
   //   }
   //
-  //   // console.log("recompute", this.dirty.size);
+  //   // console.log("play", this.dirty.size);
   //
   //   LOG &&
   //     console.log(
@@ -423,14 +423,14 @@ export class Runtime extends EventEmitter {
   //   //   "done computing",
   //   //   roots.map((v) => v.id),
   //   // );
-  //   // this will allow next recompute to begin even before the current one is finished
+  //   // this will allow next play to begin even before the current one is finished
   //   LOG &&
   //     console.log(
   //       "pending",
   //       pending.map((p) => p.id),
   //     );
   //
-  //   // wait for all pending promises to be resolved before trying to recompute again
+  //   // wait for all pending promises to be resolved before trying to play again
   //   return Promise.all(pending).then(() => {
   //     this.schedule();
   //   });

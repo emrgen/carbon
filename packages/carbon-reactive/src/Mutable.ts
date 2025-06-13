@@ -32,11 +32,19 @@ export class Mutable {
     return `mutable_${name}`;
   }
 
+  static visibleId(id: string) {
+    return `visible/${id}`;
+  }
+
+  static visibleName(name: string) {
+    return `visible_${name}`;
+  }
+
   constructor(readonly runtime: Runtime) {}
 
   // create a local mutable variable with the given name and value
-  define(name: ModuleVariableName, value: any, dependents: string[]) {
-    this.variables.set(name, value);
+  define(name: ModuleVariableName, variable: any, dependents: string[]) {
+    this.variables.set(name, variable);
     this.outputsNames.set(name, dependents);
   }
 
@@ -99,6 +107,8 @@ export class Mutable {
           const mutableVariable = that.runtime.variablesByName.get(outputName);
           mutableVariable?.forEach((variable) => {
             // console.log("marking dirty", name, variable.id.toString());
+            variable.pending();
+            variable.pause();
             that.runtime.markDirty(variable);
           });
         });

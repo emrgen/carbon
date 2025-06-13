@@ -57,7 +57,7 @@ export class Module {
     return this.variablesByName;
   }
 
-  // recompute the variable with the given name
+  // play the variable with the given name
   recompute(name: string) {
     const variable = this.value(name);
     if (!variable) return;
@@ -162,21 +162,26 @@ export class Module {
     const mut = this.runtime.mutable;
     const variable = this.runtime.variablesById.get(Variable.id(this.id, cell.id));
     // remove the variable if it already exists
-    if (variable && variable.cell.immutable) {
-      mut.delete(moduleVariableName);
-      this.delete(mutableId, false);
-      this.delete(hiddenId, false);
-      this.delete(cell.id, false);
-      cell.version = variable.version + 1;
+    if (variable) {
+      if (variable.cell.immutable) {
+        mut.delete(moduleVariableName);
+        this.delete(mutableId, false);
+        this.delete(hiddenId, false);
+        this.delete(cell.id, false);
+        cell.version = variable.version + 1;
+      } else {
+        this.delete(cell.id, true);
+      }
     }
 
     // module local id for the mutable variable
 
     const dependents: string[] = [moduleVariableName];
 
+    // update the cell with the module id and name
     cell.with(this);
 
-    this.define(
+    const hidden = this.define(
       Cell.create({
         id: hiddenId,
         name: hiddenName,
@@ -195,7 +200,7 @@ export class Module {
     );
 
     // define the mutable part of the mutable variable
-    this.define(
+    const mutable = this.define(
       Cell.create({
         id: mutableId,
         name: mutableName,
@@ -224,10 +229,92 @@ export class Module {
       false,
     );
 
-    // finally schedule the runtime to recompute the dirty variables
+    this.onCreate(hidden, false);
+    this.onCreate(mutable, false);
+    this.onCreate(immutable, false);
+    this.connect(hidden);
+    this.connect(mutable);
+    this.connect(immutable);
+
+    // finally schedule the runtime to play the dirty variables
     this.runtime.schedule();
 
     return immutable;
+  }
+
+  defineView(cell: Cell): Variable {
+    // create a view variable that is derived from the given cell
+    // the view variable will be recomputed when the cell is changed
+    const fullId = Variable.id(this.id, cell.id);
+    const variable = this.runtime.variablesById.get(fullId);
+
+    const mut = this.runtime.mutable;
+    const hiddenName = Mutable.hiddenName(cell.name);
+    const viewVariableId = Mutable.visibleId(cell.id);
+    const moduleVariableName = Variable.fullName(this.id, cell.name);
+
+    if (variable) {
+      mut.delete(moduleVariableName);
+      this.delete(cell.id, false);
+      this.delete(viewVariableId, false);
+    }
+
+    console.log(cell);
+
+    // inject the module id and name into the cell
+    // cell.with(this);
+
+    mut.define(moduleVariableName, "", [moduleVariableName]);
+
+    // define the hidden part of the view variable
+    const viewVariable = this.define(
+      Cell.create({
+        id: cell.id,
+        name: hiddenName,
+        dependencies: cell.dependencies,
+        version: cell.version,
+        definition: (...args: any) => {
+          const el = cell.definition(...args);
+          const accessor = mut.accessor(moduleVariableName);
+          el.oninput = (e: any) => {
+            console.log("input", e.target.value);
+            mut.accessor(moduleVariableName).value = e.target.value;
+          };
+
+          accessor.value = el.value;
+
+          return el;
+        },
+      }),
+      false,
+    );
+
+    const immutableVariable = this.define(
+      Cell.create({
+        id: viewVariableId,
+        name: cell.name,
+        version: cell.version,
+        dependencies: [hiddenName],
+        immutable: true,
+        definition: function (hidden) {
+          console.log("hidden", hidden);
+          // debugger;
+          return mut.accessor(moduleVariableName).value;
+        },
+      }),
+      false,
+    );
+
+    // this.onCreate(viewVariable, false);
+    // this.connect(viewVariable);
+    this.onCreate(immutableVariable, false);
+    this.connect(immutableVariable);
+
+    console.log(immutableVariable, viewVariable);
+
+    this.runtime.schedule();
+
+    return viewVariable;
   }
 
   private findBuiltIn(cell: Cell) {
@@ -256,6 +343,10 @@ export class Module {
 
     if (cell.mutable) {
       return this.defineMutable(cell);
+    }
+
+    if (cell.view) {
+      return this.defineView(cell);
     }
 
     const fullId = Variable.id(this.id, cell.id);
@@ -290,13 +381,17 @@ export class Module {
       return this.defineMutable(cell);
     }
 
+    if (cell.view) {
+      return this.defineView(cell);
+    }
+
     const fullId = Variable.id(this.id, cell.id);
     const variable = this.runtime.variablesById.get(fullId);
     if (!variable) {
       return this.define(cell);
     }
 
-    // if the cell has not changed, we just need to recompute
+    // if the cell has not changed, we just need to play
     if (variable.cell.eq(cell)) {
       console.log("redefine", cell.id, cell.name, "no change");
       variable.version += 1;
@@ -313,7 +408,7 @@ export class Module {
     variable.redefine(cell);
 
     this.connect(variable);
-    // mark the variable as dirty and schedule to recompute
+    // mark the variable as dirty and schedule to play
     this.onCreate(variable);
 
     return variable;
@@ -365,7 +460,7 @@ export class Module {
 
     this.runtime.onRemove(variable, schedule, dirty);
 
-    variable.stop();
+    variable.pause();
     variable.removed();
   }
 

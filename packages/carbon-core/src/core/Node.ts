@@ -33,7 +33,7 @@ export type TraverseOptions = {
   parent?: boolean;
   // checks if the node is a boundary for the traversal
   gotoParent: boolean;
-  // stop the traversal if the predicate returns true
+  // pause the traversal if the predicate returns true
   boundary: Predicate<Node>;
   // skip the node if the predicate returns true
   skip: Predicate<Node>;

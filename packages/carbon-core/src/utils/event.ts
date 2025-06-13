@@ -1,7 +1,7 @@
 import { KeyboardEvent } from "react";
 import { EventContext } from "../core";
 
-// export const stop(fn: Function)
+// export const pause(fn: Function)
 
 interface EventPreventable {
   preventDefault(): void;
@@ -17,7 +17,7 @@ interface EventStoppable {
 export function stop<T extends EventStoppable>(event: T): void;
 export function stop<T extends EventStoppable>(fn: Function): (event: T) => void;
 
-// This function is used to stop the propagation of an event or call a function
+// This function is used to pause the propagation of an event or call a function
 export function stop<T extends EventStoppable>(
   eventOrFn: T | Function,
 ): ((event: T) => void) | void {
@@ -51,13 +51,13 @@ export function prevent<T extends EventPreventable>(
   }
 }
 
-// This function is used to prevent default and stop propagation of an event
+// This function is used to prevent default and pause propagation of an event
 export function preventAndStop<T extends EventPreventable & EventStoppable>(event: T) {
   event.preventDefault();
   event.stopPropagation();
 }
 
-// This function is used to prevent default and stop propagation of an event in a context
+// This function is used to prevent default and pause propagation of an event in a context
 export const preventAndStopCtx = (ctx: EventContext<any>) => {
   stop(ctx.event);
   prevent(ctx.event);

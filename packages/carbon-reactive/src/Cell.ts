@@ -97,8 +97,10 @@ export class Cell {
 
     let view = false;
     let cellName = name || peekId(definition);
+
     if (ast?.id?.type === "ViewExpression") {
-      cellName = name ?? `__view__${++cellCounter}`;
+      console.log(ast);
+      cellName = ast.id.id.name ?? `__view__${++cellCounter}`;
       view = true;
     }
 
