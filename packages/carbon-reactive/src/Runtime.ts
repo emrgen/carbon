@@ -269,9 +269,9 @@ export class Runtime extends EventEmitter {
 
     // all connected variables are now pending and have no running computation
     Array.from(dirtyRoots.values()).forEach((root) => {
-      const inputs = this.graph.inputs(root);
+      console.log(root.dependencies);
       // if the variable is pending, do not mark it as pending again
-      return root.compute(inputs);
+      return root.compute();
     });
   }
 }

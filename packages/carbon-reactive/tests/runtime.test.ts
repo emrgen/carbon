@@ -366,15 +366,15 @@ test("24. duplicate definition", async (t) => {
 
   runtime.play();
 
-  // m1.define(
-  //   Cell.create({
-  //     id: "y1",
-  //     name: "y",
-  //     code: "(x) => x",
-  //     dependencies: ["x"],
-  //     definition: (x) => x + 1,
-  //   }),
-  // );
+  m1.define(
+    Cell.create({
+      id: "y1",
+      name: "y",
+      code: "(x) => x",
+      dependencies: ["x"],
+      definition: (x) => x + 1,
+    }),
+  );
 
   // m1.define(
   //   Cell.create({

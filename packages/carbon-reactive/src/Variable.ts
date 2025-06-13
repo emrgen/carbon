@@ -151,12 +151,11 @@ export class Variable {
     this.controller = new AbortController();
 
     this.pending = this.pending.bind(this);
-    this.fulfilled1 = this.fulfilled1.bind(this);
-    this.rejected1 = this.rejected1.bind(this);
+    this.fulfilled = this.fulfilled.bind(this);
+    this.rejected = this.rejected.bind(this);
 
     this.compute = this.compute.bind(this);
     this.stop = this.stop.bind(this);
-    this.onProgress = this.onProgress.bind(this);
 
     this.promise = Variable.createPromise(this);
   }
@@ -165,7 +164,7 @@ export class Variable {
     return (variable.promise = new Promise((y, n) => {
       variable.resolve = y;
       variable.reject = n;
-    }).then(variable.fulfilled1, variable.rejected1));
+    }).then(variable.fulfilled, variable.rejected));
   }
 
   get cellId() {
@@ -187,10 +186,6 @@ export class Variable {
   get builtin() {
     return this.cell.builtin;
   }
-
-  // get runtime() {
-  //   return this.module.runtime;
-  // }
 
   get emitter() {
     return this.module.runtime;
@@ -273,18 +268,34 @@ export class Variable {
   // run the generator once,
   // the first run will mark the generator as dirty,
   // triggering the runtime to compute it again
-  compute(inputs: Variable[]) {
-    console.log("computing:", this.id, "=>", this.name);
+  compute() {
     if (this.removed) {
       console.warn("Variable is removed, cannot compute", this.id, this.name);
       return;
     }
+
+    console.log("computing:", this.id, "=>", this.name);
     this.processing();
+
+    for (const dep of this.dependencies) {
+      const deps = this.module.variablesByName.get(dep) ?? [];
+      if (deps.length > 1) {
+        this.reject(RuntimeError.duplicateDefinition(last(dep.split(":"))!));
+        return;
+      }
+
+      if (deps.length === 0) {
+        this.reject(RuntimeError.notDefined(last(dep.split(":"))!));
+        return;
+      }
+    }
+
+    const inputs = this.inputs;
 
     // ensure all inputs are fulfilled
     const error = inputs.find((input) => input.error);
     if (error) {
-      this.reject(error.error!);
+      this.reject(RuntimeError.notDefined(error.cell.name));
       return;
     }
 
@@ -295,7 +306,7 @@ export class Variable {
     const missing = this.dependencies.find((name, i) => !inputMap.has(name));
     if (missing) {
       return Promise.reject(RuntimeError.notDefined(last(missing.split(":"))!)).catch(
-        this.rejected1,
+        this.rejected,
       );
     }
 
@@ -391,7 +402,7 @@ export class Variable {
   }
 
   // mark the variable as fulfilled with a value
-  private fulfilled1(value: any) {
+  private fulfilled(value: any) {
     // if (this.state.isStopped) return;
     if (this.state.isDetached) return;
     console.log(this.id, "fulfilled", this.name, "value:", value, "state:", this.state);
@@ -400,13 +411,13 @@ export class Variable {
     this.error = undefined;
     !this.builtin && this.emitter.emit("fulfilled", this);
     !this.builtin && this.emitter.emit("fulfilled:" + this.cellId, this);
-    this.onProgress();
+    this.onSuccess();
 
     return this;
   }
 
   // mark the variable as rejected with an error
-  private rejected1(error: Error) {
+  private rejected(error: Error) {
     // if (this.state.isStopped || this.state.isPending) return;
     if (this.state.isDetached) return;
     console.log("rejected", this.id, this.name, error.toString());
@@ -416,12 +427,12 @@ export class Variable {
     this.generator = NOOP_GENERATOR;
     this.emitter.emit("rejected", this);
     this.emitter.emit("rejected:" + this.cellId, this);
-    this.onProgress();
+    this.onError();
     return this;
   }
 
   // on compute is called when the variable is computed,
-  onProgress() {
+  onSuccess() {
     // if (this.removed) return;
     if (this.state.isFulfilled) {
       console.log("onProgress", this.id, this.name, "state:", this.state.value, this.value);
@@ -447,20 +458,20 @@ export class Variable {
           console.log("compute child", this.id, "=>", output.id, output.name);
           output.stop();
           output.pending();
-          output.compute(inputs);
+          output.compute();
         }
       });
-    } else if (this.state.isRejected) {
-      // if the promise is rejected, we need to stop the generator
-      // and mark the variable as rejected
-      this.stop();
-
-      this.outputs.forEach((output) => {
-        output.stop();
-        output.pending();
-        output.reject(this.error || RuntimeError.of("Variable computation failed"));
-      });
     }
+  }
+
+  onError() {
+    this.stop();
+
+    this.outputs.forEach((output) => {
+      output.stop();
+      output.pending();
+      output.compute();
+    });
   }
 
   findAllNodesInCycle() {
