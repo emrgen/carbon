@@ -173,6 +173,7 @@ export class Graph<T extends NodeId> {
         // debugger
       }
       connected.set(node.id, node);
+
       if (this.outgoing.has(node.id)) {
         for (const to of this.outgoing.get(node.id)!) {
           if (!connected.has(to)) {
@@ -182,6 +183,7 @@ export class Graph<T extends NodeId> {
       }
     }
 
+    console.log(connected.size)
     return connected;
   }
 
@@ -207,7 +209,7 @@ export class Graph<T extends NodeId> {
     });
   }
 
-  cycles(from: Iterable<T>): T[] {
+  cycles(from: Iterable<T>): Set<T> {
     const cycles: Set<T> = new Set();
 
     const visited = new Set<string>();
@@ -255,7 +257,7 @@ export class Graph<T extends NodeId> {
     }
 
     // return the nodes that are part of some cycle
-    return Array.from(cycleNodes);
+    return (cycleNodes);
   }
 
   print() {}

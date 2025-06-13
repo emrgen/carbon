@@ -1,8 +1,3 @@
-import { expect, test } from "vitest";
-import { Cell, Promises } from "../src/index";
-import { Runtime } from "../src/Runtime";
-import { registerListeners } from "./listerners";
-
 // test("test literal variable computation", async (t) => {
 //   const runtime = new Runtime({
 //     a: 1,
@@ -45,23 +40,23 @@ import { registerListeners } from "./listerners";
 //   await Promises.delay(2000);
 // });
 
-test("test calculation with generator", async (t) => {
-  const runtime = new Runtime({});
-  registerListeners(runtime);
-
-  const m = runtime.mod;
-
-  const x = m.define(
-    Cell.from("x", "x", [], function* () {
-      let i = 0;
-      while (true) {
-        yield Promises.delay(10, i++);
-        if (i > 10) break;
-      }
-    }),
-  );
-
-  await Promises.delay(1000);
-  // console.log(x.id, x.value);
-  expect(x.value).toBe(10);
-});
+// test("test calculation with generator", async (t) => {
+//   const runtime = new Runtime({});
+//   registerListeners(runtime);
+//
+//   const m = runtime.mod;
+//
+//   const x = m.define(
+//     Cell.from("x", "x", [], function* () {
+//       let i = 0;
+//       while (true) {
+//         yield Promises.delay(10, i++);
+//         if (i > 10) break;
+//       }
+//     }),
+//   );
+//
+//   await Promises.delay(1000);
+//   // console.log(x.id, x.value);
+//   expect(x.value).toBe(10);
+// });

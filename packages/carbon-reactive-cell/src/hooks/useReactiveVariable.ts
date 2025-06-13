@@ -18,7 +18,7 @@ export const useReactiveVariable = (props: ReactiveVariableProps) => {
 
   useEffect(() => {
     const fulfilled = (variable: Variable) => {
-      if (variable.removed) return;
+      if (variable.state.isDetached) return;
       onFulfilled?.(variable);
     };
     const rejected = (cell) => {

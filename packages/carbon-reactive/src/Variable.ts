@@ -155,7 +155,7 @@ export class Variable {
     this.rejected1 = this.rejected1.bind(this);
 
     this.compute = this.compute.bind(this);
-    this.pause = this.pause.bind(this);
+    this.stop = this.stop.bind(this);
     this.onProgress = this.onProgress.bind(this);
 
     this.promise = Variable.createPromise(this);
@@ -216,9 +216,10 @@ export class Variable {
     this.module.recompute(this.name);
   }
 
-  // pause the variable computation, pause the generator if it is a generator
-  pause() {
-    this.state = VariableState.paused;
+  // stop the variable computation, stop the generator if it is a generator
+  // NOTE: variable computation can still happen if the inputs are fulfilled
+  stop() {
+    this.state = VariableState.stopped;
     if (this.generating) {
       this.stopGenerating();
     } else {
@@ -227,29 +228,13 @@ export class Variable {
     }
   }
 
-  // reset the variable to pending state
-  stop() {
-    this.state = VariableState.stopped;
-    // stop the generator if it is a generator
-    if (this.generating) {
-      this.stopGenerating();
-    } else {
-      this.resolve(UNDEFINED_VALUE);
-    }
-  }
-
+  // scheduled for computation
   pending() {
-    console.log("pending", this.id, this.name, this);
+    console.log("pending", this.id, this.name);
 
-    this.promise = Promise.resolve(UNDEFINED_VALUE).catch(noop);
-    this.resolve = noop;
-    this.reject = noop;
+    this.promise = Variable.createPromise(this);
 
     this.state = VariableState.pending;
-    this.value = UNDEFINED_VALUE;
-    this.error = undefined;
-
-    this.generator = NOOP_GENERATOR;
 
     this.emitter.emit("pending", this);
     this.emitter.emit("pending:" + this.cellId, this);
@@ -259,8 +244,9 @@ export class Variable {
 
   // mark the variable as processing
   processing() {
-    console.log("processing", this.id, this.name);
+    // console.log("processing", this.id, this.name);
 
+    this.state = VariableState.processing;
     this.emitter.emit("processing", this);
     this.emitter.emit("processing:" + this.cellId, this);
 
@@ -268,7 +254,7 @@ export class Variable {
   }
 
   // update state for removed variable
-  remove() {
+  detach() {
     console.log("removed", this.id, this.name);
     this.removed = true;
 
@@ -288,10 +274,12 @@ export class Variable {
   // the first run will mark the generator as dirty,
   // triggering the runtime to compute it again
   compute(inputs: Variable[]) {
-    console.log("computing:", this.id, "=>", this.name, this);
+    console.log("computing:", this.id, "=>", this.name);
+    if (this.removed) {
+      console.warn("Variable is removed, cannot compute", this.id, this.name);
+      return;
+    }
     this.processing();
-
-    this.promise = Variable.createPromise(this);
 
     // ensure all inputs are fulfilled
     const error = inputs.find((input) => input.error);
@@ -338,10 +326,12 @@ export class Variable {
           this.startGenerating();
         } else {
           // console.log("fulfilled", this.id, this.name, res);
+          this.state = VariableState.fulfilled;
           this.resolve(res);
         }
       });
     } catch (error) {
+      this.state = VariableState.rejected;
       this.reject(error as Error);
     }
   }
@@ -402,9 +392,10 @@ export class Variable {
 
   // mark the variable as fulfilled with a value
   private fulfilled1(value: any) {
-    if (this.state.isStopped) return;
-    // console.log(this.id, "fulfilled", this.name, "value:", value, "state:", this.state);
-    this.state = VariableState.fulfilled;
+    // if (this.state.isStopped) return;
+    if (this.state.isDetached) return;
+    console.log(this.id, "fulfilled", this.name, "value:", value, "state:", this.state);
+    // this.state = VariableState.fulfilled;
     this.value = value;
     this.error = undefined;
     !this.builtin && this.emitter.emit("fulfilled", this);
@@ -416,9 +407,10 @@ export class Variable {
 
   // mark the variable as rejected with an error
   private rejected1(error: Error) {
-    if (this.state.isStopped) return;
-    console.log("rejected", this.id, this.name, error);
-    this.state = VariableState.rejected;
+    // if (this.state.isStopped || this.state.isPending) return;
+    if (this.state.isDetached) return;
+    console.log("rejected", this.id, this.name, error.toString());
+    // this.state = VariableState.rejected;
     this.error = error;
     this.value = undefined;
     this.generator = NOOP_GENERATOR;
@@ -430,7 +422,9 @@ export class Variable {
 
   // on compute is called when the variable is computed,
   onProgress() {
+    // if (this.removed) return;
     if (this.state.isFulfilled) {
+      console.log("onProgress", this.id, this.name, "state:", this.state.value, this.value);
       const cycle = this.findAllNodesInCycle();
       if (cycle.length > 0) {
         cycle.forEach((node) => {
@@ -439,26 +433,30 @@ export class Variable {
         return;
       }
 
-      // console.log(this.id, this.name);
+      console.log(this.id, this.name);
       const outputs = this.outputs;
       outputs.forEach((output) => {
+        if (output.removed) return;
         const inputs = output.inputs;
         // check for cycles in the output paths
 
+        console.log(inputs.map((input) => input.state));
+        console.log(inputs.map((input) => input.cell.version));
         // if all inputs are fulfilled, run the output variable
         if (inputs.every((input) => input.state.isFulfilled)) {
+          console.log("compute child", this.id, "=>", output.id, output.name);
+          output.stop();
           output.pending();
-          output.pause();
           output.compute(inputs);
         }
       });
     } else if (this.state.isRejected) {
-      // if the promise is rejected, we need to pause the generator
+      // if the promise is rejected, we need to stop the generator
       // and mark the variable as rejected
-      this.pause();
+      this.stop();
 
       this.outputs.forEach((output) => {
-        output.pause();
+        output.stop();
         output.pending();
         output.reject(this.error || RuntimeError.of("Variable computation failed"));
       });

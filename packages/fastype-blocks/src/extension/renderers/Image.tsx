@@ -7,7 +7,7 @@ export const ImageComp = () => {
 //   Point,
 //   RendererProps,
 //   preventAndStop,
-//   pause,
+//   stop,
 //   useCarbon,
 //   useSelectionHalo,
 //   Node,
@@ -141,14 +141,14 @@ export const ImageComp = () => {
 //           borderRadius={6}
 //           p={4}
 //           zIndex={1001}
-//           onBeforeInput={pause}
+//           onBeforeInput={stop}
 //           onKeyUp={(e) => {
-//             pause(e);
+//             stop(e);
 //             if (e.key === "Escape") {
 //               updater.onClose();
 //             }
 //           }}
-//           onKeyDown={pause}
+//           onKeyDown={stop}
 //         >
 //           <Formik
 //             initialValues={{
@@ -203,8 +203,8 @@ export const ImageComp = () => {
 //                     colorScheme="blue"
 //                     size="sm"
 //                     type="submit"
-//                     onMouseDown={pause}
-//                     onClick={pause}
+//                     onMouseDown={stop}
+//                     onClick={stop}
 //                     isLoading={props.isSubmitting}
 //                     cursor={"pointer"}
 //                   >
@@ -286,7 +286,7 @@ export const ImageComp = () => {
 //                   ref={boundRef}
 //                   className="image-overlay"
 //                   onClick={(e) => {
-//                     pause(e);
+//                     stop(e);
 //                     react.tr.selectNodes([node.id]).Dispatch();
 //                     updater.onOpen();
 //                   }}
@@ -346,9 +346,9 @@ export const ImageComp = () => {
 //             value={node.attrs.node.caption}
 //             px={1}
 //             color="#999"
-//             onMouseDown={pause}
+//             onMouseDown={stop}
 //             onKeyDown={(e) => {
-//               pause(e);
+//               stop(e);
 //               if (e.key === "Enter") {
 //                 e.preventDefault();
 //                 react.enable()
@@ -363,7 +363,7 @@ export const ImageComp = () => {
 //                   .Dispatch();
 //               }
 //             }}
-//             onKeyUp={pause}
+//             onKeyUp={stop}
 //             onFocus={() => react.disable()}
 //             onBlur={(e) => {
 //               react.enable()

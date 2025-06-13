@@ -9,7 +9,6 @@ import { RenderManager, useCreateCachedCarbon } from "@emrgen/carbon-react";
 import { Cell, Runtime } from "@emrgen/carbon-reactive";
 import { LiveCell, LiveCellRenderer, ReactiveRuntimeContext } from "@emrgen/carbon-reactive-cell";
 import { BlockMenuPlugin, CarbonApp } from "@emrgen/carbon-utils";
-import { Library } from "@observablehq/stdlib";
 import * as _ from "lodash";
 import { flattenDeep } from "lodash";
 import { useEffect, useState } from "react";
@@ -58,7 +57,7 @@ const renderManager = RenderManager.from(flattenDeep(renderers));
 // @ts-ignore
 window.Cell = Cell;
 
-const builtins = Object.assign(new Library(), {
+const builtins = Object.assign({
   // Promises: new Library().Promises,
   // now: new Library().now,
   _: _,

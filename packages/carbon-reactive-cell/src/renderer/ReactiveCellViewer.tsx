@@ -92,6 +92,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   useReactiveVariable({
     node,
     onFulfilled: (v) => {
+      if (v.state.isDetached) return;
       console.log("Cell fulfilled:", v.id.toString(), v.value);
       updateResult(v.value);
       const hasName = !v.cell.builtin && Cell.hasName(v.cell);
@@ -117,8 +118,8 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   return (
     <div
       className={"carbon-reactive-cell-viewer"}
-      // onMouseMove={pause}
-      // onMouseUp={pause}
+      // onMouseMove={stop}
+      // onMouseUp={stop}
       onBeforeInput={stop}
     >
       <div className={"carbon-reactive-cell-viewer-content"}>

@@ -8,7 +8,7 @@ import { RuntimeError } from "../src/x";
 test(
   "40. create a single variable",
   async (t) => {
-    const runtime = Runtime.create();
+    const runtime = Runtime.create().play();
     const mod = runtime.define("1", "mod", "0.0.1");
     // registerListeners(runtime);
 
@@ -22,8 +22,6 @@ test(
         },
       }),
     );
-
-    await Promises.delay(100);
 
     await expect.poll(() => mod.variable("x1")!.value).toBe(10);
 
@@ -39,9 +37,7 @@ test(
 
     await expect.poll(() => mod.variable("y1")!.value).toBe(20);
 
-    return;
-
-    mod.redefine(
+    mod.define(
       Cell.create({
         id: "x1",
         name: "x",
@@ -52,7 +48,7 @@ test(
 
     await expect.poll(() => mod.variable("x1")!.value).toBe(20);
 
-    mod.redefine(
+    mod.define(
       Cell.create({
         id: "z1",
         name: "z",
@@ -66,7 +62,7 @@ test(
       mod.delete("x1");
     });
 
-    mod.redefine(
+    mod.define(
       Cell.create({
         id: "x1",
         name: "x",
@@ -90,6 +86,7 @@ test(
       .poll(() => mod.variable("y1")?.error?.toString())
       .toBe("RuntimeError: circular definition: y");
 
+    return;
     mod.define(
       Cell.create({
         id: "y1",
@@ -343,7 +340,7 @@ test("import variable from another module", async (t) => {
   expect(m2y!.value).toBe(20);
 });
 
-test("duplicate definition", async (t) => {
+test("24. duplicate definition", async (t) => {
   const runtime = Runtime.create();
   const m1 = runtime.define("m1", "m1", "0.0.1");
   // registerListeners(runtime);
@@ -367,52 +364,54 @@ test("duplicate definition", async (t) => {
     }),
   );
 
-  m1.define(
-    Cell.create({
-      id: "y1",
-      name: "y",
-      code: "(x) => x",
-      dependencies: ["x"],
-      definition: (x) => x + 1,
-    }),
-  );
+  runtime.play();
 
-  m1.define(
-    Cell.create({
-      id: "z1",
-      name: "z",
-      code: "(y) => y",
-      dependencies: ["y"],
-      definition: (y) => y + 10,
-    }),
-  );
+  // m1.define(
+  //   Cell.create({
+  //     id: "y1",
+  //     name: "y",
+  //     code: "(x) => x",
+  //     dependencies: ["x"],
+  //     definition: (x) => x + 1,
+  //   }),
+  // );
 
-  await Promises.delay(100);
-  m1.define(
-    Cell.create({
-      id: "a1",
-      name: "a",
-      code: "(y) => y",
-      dependencies: [],
-      definition: function* () {
-        let i = 0;
-        while (true) {
-          yield Promises.delay(100, i++);
-        }
-      },
-    }),
-  );
-  m1.define(
-    Cell.create({
-      id: "b1",
-      name: "b",
-      code: "(a) => a",
-      dependencies: ["a"],
-      definition: (a) => a + 1,
-    }),
-  );
-
-  await Promises.delay(100);
+  // m1.define(
+  //   Cell.create({
+  //     id: "z1",
+  //     name: "z",
+  //     code: "(y) => y",
+  //     dependencies: ["y"],
+  //     definition: (y) => y + 10,
+  //   }),
+  // );
+  //
+  // await Promises.delay(100);
+  // m1.define(
+  //   Cell.create({
+  //     id: "a1",
+  //     name: "a",
+  //     code: "(y) => y",
+  //     dependencies: [],
+  //     definition: function* () {
+  //       let i = 0;
+  //       while (true) {
+  //         yield Promises.delay(100, i++);
+  //       }
+  //     },
+  //   }),
+  // );
+  // m1.define(
+  //   Cell.create({
+  //     id: "b1",
+  //     name: "b",
+  //     code: "(a) => a",
+  //     dependencies: ["a"],
+  //     definition: (a) => a + 1,
+  //   }),
+  // );
+  //
+  // await Promises.delay(100);
 });
 
 test("builtin variables", async (t) => {

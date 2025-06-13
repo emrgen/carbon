@@ -229,13 +229,14 @@ test("57. parse mutable variable", async (t) => {
   expect(cell?.mutable).toBe(true);
 });
 
-test("58. parse mutable variable", async (t) => {
+test("58. parse viewof variable", async (t) => {
   const cell = Cell.parse(`viewof x = 10`, {
     id: "x29",
   });
   expect(cell).toBeDefined();
   expect(cell?.id).toBe("x29");
-  expect(cell?.name).toBe("__view__1");
+  console.log(cell?.name);
+  expect(cell?.name).toBe("x");
   expect(cell?.dependencies).toEqual([]);
   expect(cell?.definition()).toBe(10);
   expect(cell?.view).toBe(true);

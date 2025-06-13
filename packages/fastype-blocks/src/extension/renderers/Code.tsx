@@ -11,7 +11,7 @@
 //   PinnedSelection,
 //   RendererProps,
 //   preventAndStop,
-//   pause,
+//   stop,
 //   useCarbon,
 //   useNodeChange,
 //   useSelectionHalo,
@@ -108,7 +108,7 @@
 //   }, [node, refText]);
 //
 //   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-//     // pause(e);
+//     // stop(e);
 //     if (e.key == "Tab") {
 //       e.preventDefault();
 //     }
@@ -120,7 +120,7 @@
 //     }
 //
 //     if (e.key == "Escape") {
-//       pause(e);
+//       stop(e);
 //       react.parkCursor();
 //       // react.tr.selectNodes([node.parent!.id]).Dispatch();
 //     }
@@ -151,11 +151,11 @@
 //   };
 //
 //   const handleKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-//     pause(e);
+//     stop(e);
 //   };
 //
 //   const handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-//     pause(e);
+//     stop(e);
 //     const { value } = e.target;
 //     const text = react.schema.text(value)!;
 //     react.enable(() => {
