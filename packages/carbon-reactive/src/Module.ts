@@ -164,9 +164,9 @@ export class Module {
     // remove the variable if it already exists
     if (variable && variable.cell.immutable) {
       mut.delete(moduleVariableName);
-      this.delete(mutableId, true);
-      this.delete(hiddenId, true);
-      this.delete(cell.id, true);
+      this.delete(mutableId, false);
+      this.delete(hiddenId, false);
+      this.delete(cell.id, false);
       cell.version = variable.version + 1;
     }
 
@@ -320,7 +320,7 @@ export class Module {
   }
 
   // delete a variable by id
-  delete(id: string, redefine = false) {
+  delete(id: string, schedule = true) {
     const fullId = Variable.id(this.id, id);
     const variable = this.runtime.variablesById.get(fullId);
 
@@ -330,7 +330,7 @@ export class Module {
     if (variable) {
       this.disconnect(variable);
       variable.delete({ module: true });
-      this.onRemove(variable, redefine);
+      this.onRemove(variable, schedule);
     }
   }
 
@@ -397,8 +397,8 @@ export class Module {
 
   private disconnect(variable: Variable) {
     variable.inputs.forEach((input) => {
-      input.outputs = input.outputs.filter((o) => o.id !== variable.id);
-      input.outputs = uniqBy(input.outputs, "id");
+      // input.outputs = input.outputs.filter((o) => o.id !== variable.id);
+      // input.outputs = uniqBy(input.outputs, "id");
     });
   }
 }

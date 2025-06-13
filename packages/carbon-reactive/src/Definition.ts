@@ -13,6 +13,13 @@ export const DefinitionFactory = {
   Identifier(name: string, deps: string[], ast: any, code: string) {
     return this.define(name, deps, `return ${ast.body.name}`, ast);
   },
+  ImportDeclaration(name: string, deps: string[], ast: any, code: string) {
+    const { body } = ast;
+    const blockBody = code.slice(body.start, body.end);
+    console.log("ImportDeclaration", body, blockBody);
+    // ImportDeclaration is not an expression, so we don't return it
+    // return this.define(name, deps, `${blockBody}`, ast);
+  },
   YieldExpression(name: string, deps: string[], ast: any, code: string) {
     return this.define(name, deps, `${code}`, ast);
   },
@@ -66,6 +73,12 @@ export const DefinitionFactory = {
   AwaitExpression(name: string, deps: string[], ast: any, code: string) {
     const { body } = ast;
     const blockBody = code.slice(body.start, body.end);
+    return this.define(name, deps, `return (${blockBody})`, ast);
+  },
+  ImportExpression(name: string, deps: string[], ast: any, code: string) {
+    const { body } = ast;
+    const blockBody = code.slice(body.start, body.end);
+    console.log("ImportExpression", body, blockBody);
     return this.define(name, deps, `return (${blockBody})`, ast);
   },
   Expression(name: string, deps: string[], ast: any, code: string) {

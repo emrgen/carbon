@@ -71,7 +71,5 @@ function getParamNames(fn) {
 
   if (!args || !args[1]) return [];
 
-  console.log(args)
-
   return args[1]
 }
