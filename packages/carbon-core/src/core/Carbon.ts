@@ -294,6 +294,7 @@ export class Carbon extends EventEmitter {
         state,
       }),
     );
+
     this.change.update(state, tr);
     this.emit(EventsOut.transactionCommit, tr);
     return true;
@@ -352,6 +353,7 @@ export class Carbon extends EventEmitter {
     } else {
       this.tm.unlock(tr);
     }
+
     return false;
   }
 }

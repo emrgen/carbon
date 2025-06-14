@@ -452,7 +452,7 @@ export function NodeDragHandle(props: FastDragHandleProps) {
           app.parkCursor();
           if (node.isSandbox) {
             const linkedProps = app.store.get(node.id)?.linkedProps!;
-            app.cmd.SelectBlocks([linkedProps.id]).Dispatch();
+            app.cmd.SelectBlocks([linkedProps.id]).Select(PinnedSelection.SKIP).Dispatch();
           } else {
             app.cmd.SelectBlocks([node.id])?.Select(PinnedSelection.SKIP).Dispatch();
           }

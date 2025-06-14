@@ -51,7 +51,6 @@ export class Step {
       }
     }
 
-    debugger;
     return null;
   }
 
@@ -143,10 +142,7 @@ export class Step {
       return this;
     }
 
-    const steps = this.node.prevSiblings.reduce(
-      (sc, n) => sc + n.stepSize,
-      this.offset,
-    );
+    const steps = this.node.prevSiblings.reduce((sc, n) => sc + n.stepSize, this.offset);
 
     const { parent } = this.node;
     if (!parent) {

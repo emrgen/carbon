@@ -495,6 +495,8 @@ export class Module {
     });
 
     this.disconnect(variable);
+
+    variable.delete({ module: true });
   }
 
   private disconnect(variable: Variable) {

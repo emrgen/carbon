@@ -91,9 +91,7 @@ export class ChangeManager extends NodeTopicEmitter {
       this.interval = setTimeout(() => {
         console.error(
           "syncing: content timeout",
-          this.updated
-            .nodes(this.state.nodeMap)
-            .map((n) => `${n.name}:${n.key}`),
+          this.updated.nodes(this.state.nodeMap).map((n) => `${n.name}:${n.key}`),
         );
         this.updated.clear();
       }, 2000);
@@ -192,9 +190,7 @@ export class ChangeManager extends NodeTopicEmitter {
     //   }
     // })
 
-    const updatedNodes = updatedNodeIds
-      .map((n) => this.store.get(n))
-      .filter(identity) as Node[];
+    const updatedNodes = updatedNodeIds.map((n) => this.store.get(n)).filter(identity) as Node[];
     console.log(
       "updatedNodes",
       updatedNodes.map((n) => n.id.toString()),
@@ -267,15 +263,8 @@ export class ChangeManager extends NodeTopicEmitter {
 
       const { app } = this;
       const { selection } = this.state;
-      if (
-        !this.state.isSelectionChanged &&
-        selection.origin === ActionOrigin.DomSelectionChange
-      ) {
-        console.log(
-          "skipped: unchanged selection sync",
-          selection.origin,
-          selection.toString(),
-        );
+      if (!this.state.isSelectionChanged && selection.origin === ActionOrigin.DomSelectionChange) {
+        console.log("skipped: unchanged selection sync", selection.origin, selection.toString());
         return;
       }
 

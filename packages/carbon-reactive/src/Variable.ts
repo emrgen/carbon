@@ -228,6 +228,7 @@ export class Variable {
     this.generator = NOOP_GENERATOR;
     this.value = UNDEFINED_VALUE;
     this.error = undefined;
+    this.invalidation.resolve(Math.random());
     this.cell.dispose();
   }
 

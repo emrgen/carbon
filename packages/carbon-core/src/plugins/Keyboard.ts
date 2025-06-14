@@ -383,13 +383,11 @@ export class KeyboardPlugin extends AfterPlugin {
     const firstNode = first(blocks) as Node;
     const block = prevSelectableBlock(firstNode, true);
     if (!block) {
-      debugger;
       return;
     }
 
     const lastNode = last(blocks) as Node;
     if (block.isIsolate && lastNode.parents.some((n) => n.eq(block))) {
-      debugger;
       return;
     }
 

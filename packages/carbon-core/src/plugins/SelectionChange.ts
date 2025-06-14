@@ -42,7 +42,6 @@ export class SelectionChangePlugin extends AfterPlugin {
           console.error("selectionchange happening too fast, possible bug detected");
           return;
         }
-
         const { app, selection: after, cmd } = ctx;
 
         const { selection: before } = app;
