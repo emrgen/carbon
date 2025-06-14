@@ -223,7 +223,7 @@ export class Variable {
   // set the definition to noop
   delete(props?: { module: boolean }) {
     if (!props?.module) {
-      this.module.delete(this.id);
+      this.module.delete(this.cell.id);
       return;
     }
 

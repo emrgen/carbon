@@ -177,7 +177,7 @@ export class Module {
 
     const builtIn = this.findBuiltIn(cell);
     if (builtIn) {
-      this.onRemove(builtIn);
+      this.onRemove(builtIn, { injectBuiltIn: false });
     }
 
     const before = this.variablesById.get(Variable.id(this.id, cell.id));
@@ -208,7 +208,7 @@ export class Module {
     console.log("redefine", cell.id, cell.name, cell.dependencies);
     const builtIn = this.findBuiltIn(cell);
     if (builtIn) {
-      this.onRemove(builtIn);
+      this.onRemove(builtIn, { injectBuiltIn: false });
     }
 
     const fullId = Variable.id(this.id, cell.id);
@@ -228,7 +228,7 @@ export class Module {
     }
 
     // remove the old variable from existing graph
-    this.onRemove(before, false);
+    this.onRemove(before, { injectBuiltIn: true });
 
     cell.version = before.version + 1;
     const after = Variable.create({
@@ -322,12 +322,12 @@ export class Module {
     });
   }
 
-  onRemove(variable: Variable, injectBuiltIn = true) {
+  onRemove(variable: Variable, opts: { injectBuiltIn: boolean }) {
+    const { injectBuiltIn = true } = opts || {};
+
     if (variable.state.isDetached) return;
     variable.stop();
     variable.detach();
-
-    this.runtime.onRemove(variable);
 
     // remove the variable from the module local variablesById
     this.variablesById.delete(variable.id);
@@ -344,12 +344,14 @@ export class Module {
       this.runtime.markDirty(output);
     });
 
+    // if some of the inputs are built-in variables, and has no outputs, remove stop them
     variable.inputs.forEach((input) => {
-      // if (input.state.isPending) {
-      //   this.runtime.markDirty(input);
-      // }
+      if (input.outputs.length === 1 && input.builtin) {
+        input.delete();
+      }
     });
 
+    this.runtime.onRemove(variable);
     this.disconnect(variable);
 
     variable.delete({ module: true });
@@ -361,6 +363,7 @@ export class Module {
     this.variablesById.forEach((v) => {
       if (v.module !== this) return;
       v.cell.dependencies.forEach((dep) => {
+        if (dep !== variable.name) return; // skip self-dependency
         missingDeps.add(dep);
       });
     });
