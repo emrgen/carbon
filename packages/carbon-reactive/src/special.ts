@@ -38,19 +38,6 @@ export const createViewOf = (module: Module, cell: Cell) => {
 
   module.define(
     Cell.create({
-      id: hiddenCellId,
-      name: cell.name,
-      dependencies: [viewOfCellName],
-      version: cell.version,
-      definition: () => {
-        return accessor.value;
-      },
-    }),
-    false,
-  );
-
-  module.define(
-    Cell.create({
       id: cell.id,
       name: viewOfCellName,
       dependencies: cell.dependencies,
@@ -70,6 +57,19 @@ export const createViewOf = (module: Module, cell: Cell) => {
     false,
   );
 
+  module.define(
+    Cell.create({
+      id: hiddenCellId,
+      name: cell.name,
+      dependencies: [viewOfCellName],
+      version: cell.version,
+      definition: () => {
+        return accessor.value;
+      },
+    }),
+    false,
+  );
+
   module.runtime.schedule();
 };
 export const removeViewOf = (module: Module, cell: Cell) => {
@@ -84,8 +84,8 @@ export const createMutable = (module: Module, cell: Cell) => {
   const mutableCellId = mutableId(cell.id);
 
   const dispose = () => {
-    module.delete(hiddenCellId);
-    module.delete(mutableCellId);
+    // module.delete(hiddenCellId);
+    // module.delete(mutableCellId);
   };
 
   const accessor = {
@@ -108,6 +108,20 @@ export const createMutable = (module: Module, cell: Cell) => {
       }
     },
   };
+
+  const immutable = module.define(
+    Cell.create({
+      id: cell.id,
+      name: cell.name,
+      version: cell.version,
+      dependencies: [hiddenCellName],
+      dispose,
+      definition: () => {
+        return accessor.value;
+      },
+    }),
+    false,
+  );
 
   const hidden = module.define(
     Cell.create({
@@ -132,20 +146,6 @@ export const createMutable = (module: Module, cell: Cell) => {
       dependencies: [hiddenCellName],
       definition: function () {
         return accessor;
-      },
-    }),
-    false,
-  );
-
-  const immutable = module.define(
-    Cell.create({
-      id: cell.id,
-      name: cell.name,
-      version: cell.version,
-      dependencies: [hiddenCellName],
-      dispose,
-      definition: () => {
-        return accessor.value;
       },
     }),
     false,

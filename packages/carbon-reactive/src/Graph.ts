@@ -85,7 +85,7 @@ export class Graph<T extends NodeId> {
     const connected = this.connected(nodes);
     const incoming = new Map<string, number>();
     for (const node of connected.values()) {
-      for (const to of this.outgoing.get(node.id)!) {
+      for (const to of this.outgoing.get(node.id)?? []) {
         incoming.set(to, (incoming.get(to) ?? 0) + 1);
       }
     }
@@ -114,7 +114,7 @@ export class Graph<T extends NodeId> {
     const connected = this.connected(nodes);
     const incoming = new Map<string, number>();
     for (const node of connected.values()) {
-      for (const to of this.outgoing.get(node.id)!) {
+      for (const to of this.outgoing.get(node.id)??[]) {
         incoming.set(to, (incoming.get(to) ?? 0) + 1);
       }
     }
@@ -175,7 +175,7 @@ export class Graph<T extends NodeId> {
       connected.set(node.id, node);
 
       if (this.outgoing.has(node.id)) {
-        for (const to of this.outgoing.get(node.id)!) {
+        for (const to of this.outgoing.get(node.id)??[]) {
           if (!connected.has(to)) {
             queue.push(this.nodes.get(to)!);
           }

@@ -416,11 +416,7 @@ export class Module {
     if (variable?.builtin) return;
 
     if (variable) {
-      variable.stop();
-      variable.detach();
-
       this.onRemove(variable);
-      variable.delete({ module: true });
     }
   }
 
@@ -468,6 +464,7 @@ export class Module {
   }
 
   onRemove(variable: Variable) {
+    if (variable.state.isDetached) return;
     variable.stop();
     variable.detach();
 
