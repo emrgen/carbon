@@ -1,6 +1,17 @@
 import { Optional, Predicate, With } from "@emrgen/types";
 import EventEmitter from "events";
-import { entries, findIndex, first, identity, isArray, last, merge, noop, reverse } from "lodash";
+import {
+  entries,
+  findIndex,
+  first,
+  identity,
+  isArray,
+  isEqual,
+  last,
+  merge,
+  noop,
+  reverse,
+} from "lodash";
 import { NODE_CACHE } from "./CarbonCache";
 import { classString } from "./Logger";
 import { Mark } from "./Mark";
@@ -18,6 +29,7 @@ import {
   NodePropsJson,
   OpenedPath,
   PlainNodeProps,
+  RemotePropsPath,
   SelectedPath,
 } from "./NodeProps";
 import { NodeType } from "./NodeType";
@@ -887,10 +899,14 @@ export class Node extends EventEmitter implements IntoNodeId {
 
   eqContent(node: Node): boolean {
     if (this.name !== node.name) return false;
+    if (isEqual(this.props.get(RemotePropsPath), node.props.get(RemotePropsPath))) {
+      return false;
+    }
     if (this.children.length !== node.children.length) return false;
     if (this.children.length === 0) {
       return this.textContent === node.textContent;
     }
+
     return this.children.every((n, i) => n.eqContent(node.children[i]));
   }
 

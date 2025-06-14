@@ -197,6 +197,8 @@ export class PlainNodeProps implements NodeProps {
   }
 }
 
+export const RemotePropsPath = "remote";
+
 // common paths for node props
 export const FamilyLinkPath = "local/state/familyLink";
 export const EmptyPlaceholderPath = "local/placeholder/empty";

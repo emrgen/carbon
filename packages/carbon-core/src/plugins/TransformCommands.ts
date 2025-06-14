@@ -1528,6 +1528,18 @@ export class TransformCommands extends BeforePlugin {
     nodes: Node[],
     opts: DeleteOpts = {},
   ): Optional<Transaction> {
+    // let linkedNodes = nodes.some((n) => n.isLinked);
+    // nodes = nodes.map((n) => {
+    //   if (n.isLinked) {
+    //     return n.parent!;
+    //   } else {
+    //     return n;
+    //   }
+    // });
+    // if (linkedNodes) {
+    //   parent = parent.parent!;
+    // }
+
     // if parents current content is structurally same as default content, dont do anything
     const defaultParent = parent.type.default();
     // console.log('isDefault', parent.toJSON(), defaultParent?.toJSON(), parent.id.toString(), defaultParent?.id.toString());
@@ -1612,6 +1624,7 @@ export class TransformCommands extends BeforePlugin {
     const firstNode = first(nodes)!;
     const lastNode = last(nodes)!;
     let after: Optional<PinnedSelection> = undefined;
+
     if (!after && fall === "after") {
       const focusNode = lastNode.next((n) => n.isFocusable, { order: "pre" });
       if (focusNode && hasSameIsolate(focusNode, lastNode)) {
