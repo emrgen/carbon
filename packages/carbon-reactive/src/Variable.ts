@@ -23,6 +23,7 @@ export enum State {
   STOPPED = "stopped", // computation is stopped, inputs are fulfilled, but not yet computed
   PENDING = "pending", // computation is in progress, inputs are not yet fulfilled
   PAUSED = "paused", // computation is paused, inputs are fulfilled, but not yet computed
+  COMPUTING = "computing", // scheduled for computation, but not yet computed
   PROCESSING = "processing", // scheduled for computation, but not yet computed
   GENERATING = "generating", // generator is running, inputs are fulfilled, but not yet computed
   FULFILLED = "fulfilled",
@@ -37,8 +38,9 @@ class VariableState {
   static pending = new VariableState(State.PENDING);
   static paused = new VariableState(State.PAUSED);
   static stopped = new VariableState(State.STOPPED);
+  static computing = new VariableState(State.COMPUTING); // computing from inputs, but not yet fulfilled
+  static generating = new VariableState(State.GENERATING); // computing within a generator
   static processing = new VariableState(State.PROCESSING);
-  static generating = new VariableState(State.GENERATING); // alias for processing, used for generators
   static fulfilled = new VariableState(State.FULFILLED);
   static rejected = new VariableState(State.REJECTED);
 
@@ -60,6 +62,10 @@ class VariableState {
 
   get isProcessing() {
     return this.value === State.PROCESSING;
+  }
+
+  get isComputing() {
+    return this.value === State.COMPUTING;
   }
 
   get isGenerating() {
@@ -111,8 +117,9 @@ export class Variable {
   // the calculation is done when all inputs are fulfilled
   // the calculation can result in an error or a value
   promise: Promise<any>;
-  // resolve and reject functions for the promise
+  // resolve will call fulfilled to notify the variable is computed
   resolve: (value: any) => void = noop;
+  // reject will call rejected to notify the variable is rejected
   reject: (error: Error) => void = noop;
 
   error: RuntimeError | undefined;
@@ -274,12 +281,10 @@ export class Variable {
   }
 
   // mark the variable as processing
-  processing() {
-    // console.log("processing", this.id, this.name);
-
-    this.state = VariableState.processing;
-    this.emitter.emit("processing", this);
-    this.emitter.emit("processing:" + this.cellId, this);
+  computing() {
+    this.state = VariableState.computing;
+    this.emitter.emit("computing", this);
+    this.emitter.emit("computing:" + this.cellId, this);
 
     return this;
   }
@@ -288,6 +293,14 @@ export class Variable {
     this.state = VariableState.generating;
     this.emitter.emit("generating", this);
     this.emitter.emit("generating:" + this.cellId, this);
+
+    return this;
+  }
+
+  // mark the variable as processing
+  processing() {
+    this.emitter.emit("processing", this);
+    this.emitter.emit("processing:" + this.cellId, this);
 
     return this;
   }
@@ -377,6 +390,7 @@ export class Variable {
       Promise.resolve(result).then((res) => {
         // start the generator if it is a generator
         if (generatorish(res)) {
+          this.state = VariableState.generating;
           this.generator = res;
           this.startGenerating();
         } else {
@@ -404,7 +418,7 @@ export class Variable {
           // create a new promise for the variable
           this.promise = Variable.createPromise(this);
           try {
-            this.generating();
+            this.processing();
             Promise.resolve(generator.next(generated))
               .then(({ value, done: isDone }) => {
                 // if isDone is true, the generator is done and we the generator loop should stop

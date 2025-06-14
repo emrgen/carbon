@@ -6,7 +6,7 @@ import { FloatingStyleMenu, InsertBlockMenu } from "@emrgen/carbon-chakra-ui";
 import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
 import { CodeValuePath, corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
 import { RenderManager, useCreateCachedCarbon } from "@emrgen/carbon-react";
-import { Cell, Runtime } from "@emrgen/carbon-reactive";
+import { Runtime } from "@emrgen/carbon-reactive";
 import { LiveCell, LiveCellRenderer, ReactiveRuntimeContext } from "@emrgen/carbon-reactive-cell";
 import { BlockMenuPlugin, CarbonApp } from "@emrgen/carbon-utils";
 import { Library } from "@observablehq/stdlib";
@@ -42,7 +42,6 @@ const plugins = [
 ];
 
 const renderers = [...blockPresetRenderers, LiveCellRenderer];
-
 const renderManager = RenderManager.from(flattenDeep(renderers));
 
 // console.log = noop;
@@ -55,15 +54,18 @@ const renderManager = RenderManager.from(flattenDeep(renderers));
 // console.groupEnd = noop;
 // console.time = noop;
 
-// @ts-ignore
-window.Cell = Cell;
+// experimental: add a width function to the runtime
+const width = () => {
+  const page = document.querySelector(".cpage.page");
+  console.log(page);
+  if (!page) return window.innerWidth;
+  return page.clientWidth;
+};
 
 const builtins = Object.assign(new Library(), {
-  // Promises: new Library().Promises,
-  // now: new Library().now,
   _: _,
   width: () => {
-    return 720;
+    return width();
   },
 });
 // console.log(builtins);
@@ -71,28 +73,16 @@ const runtime = Runtime.create(builtins);
 // @ts-ignore
 window.runtime = runtime;
 
-// runtime.on("fulfilled", (cell) => {
-//   console.log(`fulfilled: ${cell.name}`, cell.id, cell.value);
-// });
-
-// const mod = runtime.define("mid", "test-module", "0.0.1");
-// // @ts-ignore
-// window.mod = mod;
-
-// mod.define(Cell.parse("birds = penguins", { name: "birds" }));
-// mod.define(Cell.parse("x = 10"));
-// mod.define(Cell.parse("y = x+10"));
-// mod.define(Cell.parse("z = {while(1) { yield Promises.delay(1000, x); } }"));
-// mod.define(Cell.parse(`a = z + 10`));
-
 export function Reactive() {
   const [content] = useState(() => {
     return data;
   });
+
   const app = useCreateCachedCarbon("reactive", content, flattenDeep(plugins));
   // @ts-ignore
   window.app = app;
 
+  // play the runtime after the app is mounted
   useEffect(() => {
     runtime.play();
   }, []);
