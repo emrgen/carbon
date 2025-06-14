@@ -238,6 +238,10 @@ export class Variable {
 
   // force play the variable
   play() {
+    if (this.state.isDetached) {
+      console.warn("Variable is detached, cannot play", this.id, this.name);
+      return;
+    }
     this.module.recompute(this.name);
   }
 
@@ -245,10 +249,11 @@ export class Variable {
   // NOTE: variable computation can still happen if the inputs are fulfilled
   stop() {
     if (this.state.isUndefined) return;
-
     this.state = VariableState.stopped;
+
+    // if the variable is a generator, abort the controller
     if (this.generator) {
-      this.stopGenerating();
+      this.controller.abort();
     } else {
       // cache the last computed value
       this.resolve(this.value);
@@ -313,7 +318,6 @@ export class Variable {
     }
 
     // console.log("computing:", this.id, "=>", this.name);
-    this.processing();
     const inputNames = this.dependencies.filter((d) => d !== "invalidation");
 
     for (const dep of inputNames) {
@@ -368,13 +372,14 @@ export class Variable {
 
     try {
       const result = this.cell.definition.bind(this)(...args);
+
+      this.processing();
       Promise.resolve(result).then((res) => {
         // start the generator if it is a generator
         if (generatorish(res)) {
           this.generator = res;
           this.startGenerating();
         } else {
-          // console.log("fulfilled", this.id, this.name, res);
           this.state = VariableState.fulfilled;
           this.resolve(res);
         }
@@ -386,65 +391,53 @@ export class Variable {
   }
 
   private async startGenerating() {
-    const signal = (this.controller = new AbortController()).signal;
+    const controller = (this.controller = new AbortController());
+    const signal = controller.signal;
     let generator = this.generator;
     let generated: any = undefined;
     // console.log("startGenerating", this.id, this.name, generator);
 
-    let done = false;
     let error: any = null;
-    let i = 0;
-    while (!done && !signal.aborted && !error) {
+    while (!signal.aborted && !error) {
       await new Promise((proceed, failed) => {
         setTimeout(() => {
+          // create a new promise for the variable
           this.promise = Variable.createPromise(this);
           try {
+            this.generating();
             Promise.resolve(generator.next(generated))
               .then(({ value, done: isDone }) => {
-                // NOTE: the promise is not associated with the generated value anymore.
-                // console.log("generated", i++, this.id, this.name, value, isDone);
+                // if isDone is true, the generator is done and we the generator loop should stop
                 if (isDone) {
-                  done = true;
-                  generated = value;
+                  controller.abort();
+                  this.state = VariableState.fulfilled;
                 } else {
-                  // console.log("generator next", this.name, value, isDone);
                   generated = value;
-                  // continue the generator
+                  this.resolve(generated);
                 }
-
-                this.generating();
-                this.resolve(value);
-                proceed(value);
+                proceed(generated);
               })
               .catch((e) => {
+                error = e;
                 this.reject(e as Error);
                 failed(e);
-                error = e;
               });
           } catch (e) {
+            error = e;
             this.reject(e as Error);
             failed(e);
-            error = e;
           }
-        }, 0);
+        }, 1);
       });
     }
 
     this.generator = NOOP_GENERATOR;
   }
 
-  // this method exists only for clean semantics
-  private stopGenerating() {
-    this.controller.abort();
-  }
-
   // mark the variable as fulfilled with a value
   private fulfilled(value: any) {
-    console.log("fulfilled", this.id, this.name, value, this.state);
-    // if (this.state.isStopped) return;
+    // console.log("fulfilled", this.id, this.name, value, this.state);
     if (this.state.isDetached) return;
-    // console.log(this.id, "fulfilled", this.name, "value:", value, "state:", this.state);
-    // this.state = VariableState.fulfilled;
     this.value = value;
     this.error = undefined;
     !this.builtin && this.emitter.emit("fulfilled", this);

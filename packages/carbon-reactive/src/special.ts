@@ -46,7 +46,7 @@ export const createViewOf = (module: Module, cell: Cell) => {
       definition: (...args: any) => {
         const el = cell.definition(...args);
         el.oninput = (e: any) => {
-          accessor.value = e.target.value;
+          accessor.value = el.value;
         };
 
         accessor.value = el.value;

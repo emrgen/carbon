@@ -158,12 +158,11 @@ export class Module {
     return variable;
   }
 
-  private findBuiltIn(cell: Cell) {
-    // check if the cell is a builtin variable
-    const fullName = Variable.fullName(this.id, cell.name);
+  // check if a cell with the given name exists in the module
+  private findBuiltIn(visibleName: string) {
+    const fullName = Variable.fullName(this.id, visibleName);
     const moduleVariables = this.variablesByName.get(fullName);
     if (moduleVariables?.length == 1 && moduleVariables[0].builtin) {
-      console.error("builtin variable already exists", fullName);
       return moduleVariables[0];
     }
 
@@ -175,7 +174,7 @@ export class Module {
   define(cell: Cell, schedule = true, dirty = true): Variable {
     // if (!cell.builtin && cell.name !== "c") return;
 
-    const builtIn = this.findBuiltIn(cell);
+    const builtIn = this.findBuiltIn(cell.name);
     if (builtIn) {
       this.onRemove(builtIn, { injectBuiltIn: false });
     }
@@ -206,7 +205,7 @@ export class Module {
   // optionally change the name, inputs, or definition
   private redefine(cell: Cell): Variable {
     console.log("redefine", cell.id, cell.name, cell.dependencies);
-    const builtIn = this.findBuiltIn(cell);
+    const builtIn = this.findBuiltIn(cell.name);
     if (builtIn) {
       this.onRemove(builtIn, { injectBuiltIn: false });
     }
@@ -260,12 +259,14 @@ export class Module {
   onCreate(variable: Variable, dirty = true) {
     // for built-in variables, skip auto-injection of built-in dependencies
     if (!variable.cell.builtin) {
-      const missingDeps = variable.cell.dependencies.filter((v) => {
-        return !this.variablesByName.get(v)?.length;
-      });
+      const missingDeps = new Set(
+        variable.cell.dependencies.filter((v) => {
+          return !this.variablesByName.get(v)?.length;
+        }),
+      );
       // define built-in variables if they are missing
-      if (missingDeps.length > 0) {
-        const builtinCells = missingDeps
+      if (missingDeps.size > 0) {
+        const builtinCells = Array.from(missingDeps)
           .map((dep) => this.runtime.builtinCells.get(Variable.visibleName(dep))!)
           .filter(Boolean);
         builtinCells.forEach((cell) => {
@@ -322,7 +323,7 @@ export class Module {
     });
   }
 
-  onRemove(variable: Variable, opts: { injectBuiltIn: boolean }) {
+  onRemove(variable: Variable, opts: { injectBuiltIn: boolean } = { injectBuiltIn: true }) {
     const { injectBuiltIn = true } = opts || {};
 
     if (variable.state.isDetached) return;
@@ -371,7 +372,6 @@ export class Module {
     missingDeps.forEach((dep) => {
       // check if the dependency is already defined in the module
       if (dep != variable.name || this.variablesByName.get(dep)?.length) return;
-      console.log("xxxxxxxxxx", dep, variable.name, variable.id);
 
       const builtIn = this.runtime.builtinCells.get(Variable.visibleName(dep));
       if (builtIn) {

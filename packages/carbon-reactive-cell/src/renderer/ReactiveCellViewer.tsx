@@ -3,7 +3,9 @@ import { ObjectViewer } from "@emrgen/carbon-object-view";
 import { RendererProps } from "@emrgen/carbon-react";
 import { Cell, UNDEFINED_VALUE, Variable } from "@emrgen/carbon-reactive";
 import { cloneDeep, isFunction, isPlainObject } from "lodash";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+// import root from "react-shadow";
 import { useReactiveRuntime } from "../hooks/useReactiveRuntime";
 import { useReactiveVariable } from "../hooks/useReactiveVariable";
 import { isHtmlElement } from "../x";
@@ -122,6 +124,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
       // onMouseUp={stop}
       onBeforeInput={stop}
     >
+      {/*<root.div className={"reactive-cell-html-viewer-container"}>*/}
       <div className={"carbon-reactive-cell-viewer-content"}>
         {result === NOT_LOADED ? (
           <div className={"reactive-cell-loading"}></div>
@@ -129,11 +132,13 @@ export const ReactiveCellViewer = (props: RendererProps) => {
           <div className={"reactive-cell-error"}>{error}</div>
         ) : (
           <div className={"reactive-cell-result"}>
+            {/*<ShadowDom>*/}
             <div
               className={"reactive-cell-html-viewer"}
               ref={ref}
               style={{ visibility: isHtml ? "visible" : "hidden" }}
             />
+            {/*</ShadowDom>*/}
             <CellViewer name={name} result={result} hide={isHtml} />
           </div>
         )}
@@ -156,4 +161,18 @@ const CellViewer = ({ name = "x", result, hide }: { name?: string; result: any; 
       <ObjectViewer data={result} field={name} root={true} />
     </div>
   );
+};
+
+const ShadowDom = ({ children }) => {
+  const hostRef = useRef<any>(null);
+  const [shadowRoot, setShadowRoot] = useState(null);
+
+  useEffect(() => {
+    if (hostRef.current && !shadowRoot) {
+      const shadow = hostRef.current.attachShadow({ mode: "open" });
+      setShadowRoot(shadow);
+    }
+  }, [shadowRoot]);
+
+  return <div ref={hostRef}>{shadowRoot && createPortal(children, shadowRoot)}</div>;
 };
