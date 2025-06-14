@@ -136,25 +136,25 @@ export class PinnedSelection {
       (!anchorNode.isTextContainer && !anchorNode.isInline) ||
       (!focusNode.isTextContainer && !focusNode.isInline)
     ) {
-      console.warn(
-        p14("%c[error]"),
-        "color:orange",
-        "anchorNode or focusNode is not text container",
-        anchorNode.name,
-        focusNode.name,
-      );
+      // console.warn(
+      //   p14("%c[error]"),
+      //   "color:orange",
+      //   "anchorNode or focusNode is not text container",
+      //   anchorNode.name,
+      //   focusNode.name,
+      // );
       return;
     }
 
     // NOTE: anchorNode is always valid and pointed to a focusable node
     if (!anchorNode.hasFocusable && !anchorNode.isFocusable) {
-      console.warn(
-        p14("%c[info]"),
-        "color:pink",
-        "anchorNode skips focus",
-        anchorNode.name,
-        focusNode.name,
-      );
+      // console.warn(
+      //   p14("%c[info]"),
+      //   "color:pink",
+      //   "anchorNode skips focus",
+      //   anchorNode.name,
+      //   focusNode.name,
+      // );
       if (anchorNode.after(focusNode)) {
         anchorNode = anchorNode.prev((n) => n.isFocusable);
         if (anchorNode) {

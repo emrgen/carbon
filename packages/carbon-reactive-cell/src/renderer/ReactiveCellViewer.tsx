@@ -121,7 +121,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
     <div
       className={"carbon-reactive-cell-viewer"}
       // onMouseMove={stop}
-      // onMouseUp={stop}
+      onMouseDown={stop}
       onBeforeInput={stop}
     >
       {/*<root.div className={"reactive-cell-html-viewer-container"}>*/}

@@ -1,9 +1,11 @@
 import {
   Carbon,
   CarbonPlugin,
+  EmptyPlaceholderPath,
   EventsOut,
   NodeJSON,
   PinnedSelection,
+  PlaceholderPath,
   PluginManager,
   Schema,
 } from "@emrgen/carbon-core";
@@ -29,6 +31,19 @@ export const createCarbon = (name: string, json: InitNodeJSON, plugins: CarbonPl
   const { specs } = pm;
   const schema = new Schema(specs, new ImmutableNodeFactory(scope));
   const content = schema.nodeFromJSON(json);
+
+  // update the empty placeholder for nodes that have an empty first child
+  content?.all((n) => {
+    if (n.firstChild?.isEmpty) {
+      const placeholder = n.props.get<string>(EmptyPlaceholderPath, " ");
+      console.log(n.name, n.firstChild.name, placeholder);
+      if (placeholder !== " ") {
+        n.firstChild.updateProps({
+          [PlaceholderPath]: placeholder,
+        });
+      }
+    }
+  });
 
   if (!content) {
     throw new Error("Failed to parse react content");

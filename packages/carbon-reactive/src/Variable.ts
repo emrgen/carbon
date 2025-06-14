@@ -387,18 +387,22 @@ export class Variable {
       const result = this.cell.definition.bind(this)(...args);
 
       this.processing();
-      Promise.resolve(result).then((res) => {
-        // start the generator if it is a generator
-        if (generatorish(res)) {
-          this.state = VariableState.generating;
-          this.generator = res;
-          this.startGenerating();
-        } else {
-          this.state = VariableState.fulfilled;
-          this.resolve(res);
-        }
-      });
+      Promise.resolve(result)
+        .then((res) => {
+          console.log("computed:", this.id, "=>", this.name, res, this.value);
+          // start the generator if it is a generator
+          if (generatorish(res)) {
+            this.state = VariableState.generating;
+            this.generator = res;
+            this.startGenerating();
+          } else {
+            this.state = VariableState.fulfilled;
+            this.resolve(res);
+          }
+        })
+        .catch(this.reject);
     } catch (error) {
+      debugger;
       this.state = VariableState.rejected;
       this.reject(error as Error);
     }
@@ -425,6 +429,7 @@ export class Variable {
                 if (isDone) {
                   controller.abort();
                   this.state = VariableState.fulfilled;
+                  this.emitFulfilled();
                 } else {
                   generated = value;
                   this.resolve(generated);
@@ -441,7 +446,7 @@ export class Variable {
             this.reject(e as Error);
             failed(e);
           }
-        }, 1);
+        }, 1000 / 60); // run the generator at 60fps
       });
     }
 
@@ -454,8 +459,8 @@ export class Variable {
     if (this.state.isDetached) return;
     this.value = value;
     this.error = undefined;
-    !this.builtin && this.emitter.emit("fulfilled", this);
-    !this.builtin && this.emitter.emit("fulfilled:" + this.cellId, this);
+
+    this.emitFulfilled();
 
     if (this.state.isGenerating) {
       this.onGenerate();
@@ -466,12 +471,17 @@ export class Variable {
     return this;
   }
 
+  private emitFulfilled() {
+    !this.builtin && this.emitter.emit("fulfilled", this);
+    !this.builtin && this.emitter.emit("fulfilled:" + this.cellId, this);
+  }
+
   // mark the variable as rejected with an error
   private rejected(error: Error) {
     // if (this.state.isStopped || this.state.isPending) return;
     if (this.state.isDetached) return;
     // console.log("rejected", this.id, this.name, error.toString());
-    // this.state = VariableState.rejected;
+    this.state = VariableState.rejected;
     this.error = error;
     this.value = undefined;
     this.generator = NOOP_GENERATOR;

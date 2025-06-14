@@ -1,7 +1,7 @@
 import { isNumber, isString, isSymbol } from "lodash";
 import { useMemo } from "react";
 
-export const Literal = ({ data, propName, isIndex, root }) => {
+export const Literal = ({ data, propName, isIndex, root = false }) => {
   const view = useMemo(() => {
     if (isNumber(data)) {
       return <span className={"cov-number"}>{data}</span>;

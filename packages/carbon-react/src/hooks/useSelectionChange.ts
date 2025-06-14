@@ -1,6 +1,6 @@
+import { EventsIn } from "@emrgen/carbon-core";
 import { useEffect } from "react";
 import { useCarbon } from "./useCarbon";
-import { EventsIn } from "@emrgen/carbon-core";
 
 export const useSelectionChange = () => {
   const app = useCarbon();

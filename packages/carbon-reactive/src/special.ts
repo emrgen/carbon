@@ -84,8 +84,8 @@ export const createMutable = (module: Module, cell: Cell) => {
   const mutableCellId = mutableId(cell.id);
 
   const dispose = () => {
-    // module.delete(hiddenCellId);
-    // module.delete(mutableCellId);
+    module.delete(hiddenCellId);
+    module.delete(mutableCellId);
   };
 
   const accessor = {

@@ -52,6 +52,7 @@ const ReactiveCellCompInner = (props: ReactiveCellProps) => {
   const { SelectionHalo, attributes, isSelected } = useSelectionHalo({ node });
 
   const onFocus = useCallback(() => {
+    console.log("xxx");
     if (isSelected) {
       app.cmd
         .Update(node.id, {
@@ -60,6 +61,9 @@ const ReactiveCellCompInner = (props: ReactiveCellProps) => {
         .SelectBlocks([])
         .Select(PinnedSelection.SKIP)
         .Dispatch();
+    } else if (!app.selection.isSkip) {
+      // put the editor in blur state
+      app.cmd.Select(PinnedSelection.SKIP).Dispatch();
     }
   }, [isSelected, app, node.id]);
 
