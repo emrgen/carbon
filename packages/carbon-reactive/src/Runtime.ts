@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import { entries, last } from "lodash";
+import { entries } from "lodash";
 import { SemVer } from "semver";
 import { Cell } from "./Cell";
 import { Graph } from "./Graph";
@@ -195,6 +195,14 @@ export class Runtime extends EventEmitter {
 
     // console.log("DIRTY", Array.from(roots.values().map((v) => v.name)));
     const connected = Array.from(this.graph.connected(dirty).values());
+
+    // roots can not be in any cycle
+    const roots = this.graph.roots(connected);
+    const dirtyRoots = new Map<string, Variable>();
+    roots.forEach((v) => {
+      dirtyRoots.set(v.id, v);
+    });
+
     // stops the running nodes from being recomputed further
     // mark all the nodes as pending
     connected.forEach((v) => {
@@ -204,7 +212,22 @@ export class Runtime extends EventEmitter {
 
       const missing = v.dependencies.find((dep) => !v.module.variablesByName.get(dep)?.length);
       if (missing) {
-        v.reject(RuntimeError.notDefined(last(missing.split(":"))!));
+        if (missing !== "invalidation") {
+          v.reject(RuntimeError.notDefined(missing));
+        }
+      }
+
+      // if some input is builtin and still not resolved, add the input to roots and remove the current dirty variable
+      const unresolvedBuiltins = v.inputs.filter((i) => {
+        return i.cell.builtin && i.state.isUndefined;
+      });
+
+      // marks the unfulfilled builtin variables as roots
+      if (unresolvedBuiltins.length) {
+        dirtyRoots.delete(v.id);
+        unresolvedBuiltins.forEach((vi) => {
+          dirtyRoots.set(vi.name, vi);
+        });
       }
     });
 
@@ -240,38 +263,9 @@ export class Runtime extends EventEmitter {
       variable.reject(RuntimeError.duplicateDefinition(variable.cell.name));
     });
 
-    // roots can not be in any cycle
-    const roots = this.graph.roots(connected);
-    const dirtyRoots = new Map<string, Variable>();
-    roots.forEach((v) => {
-      dirtyRoots.set(v.id, v);
-    });
-
-    // marks the unfulfilled builtin variables as roots
-    Array.from(roots.values()).forEach((v) => {
-      // console.log(
-      //   "inputs",
-      //   v.name,
-      //   v.inputs.map((i) => i.cell.name),
-      //   v.inputs.map((i) => i.state1),
-      // );
-
-      // if some input is builtin and still not resolved, add the input to roots and remove the current dirty variable
-      const unresolvedBuiltins = v.inputs.filter((i) => {
-        return i.cell.builtin && i.state.isUndefined;
-      });
-
-      if (unresolvedBuiltins.length) {
-        dirtyRoots.delete(v.id);
-        unresolvedBuiltins.forEach((vi) => {
-          dirtyRoots.set(vi.name, vi);
-        });
-      }
-    });
-
     // console.log(
     //   "inputs ROOTS",
-    //   Array.from(roots.values()).map((v) => v.name),
+    //   Array.from(dirtyRoots.values()).map((v) => v.name),
     // );
 
     // all connected variables are now pending and have no running computation

@@ -11,6 +11,7 @@ export class RuntimeError extends Error {
   }
 
   static notDefined(name: string) {
+    debugger
     return new RuntimeError(`${name} is not defined`);
   }
 

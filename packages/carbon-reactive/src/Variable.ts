@@ -1,4 +1,4 @@
-import { last, noop } from "lodash";
+import { noop } from "lodash";
 import { Cell } from "./Cell";
 import { Module, ModuleVariableId, ModuleVariableName } from "./Module";
 import { generatorish, randomString, RuntimeError } from "./x";
@@ -24,6 +24,7 @@ export enum State {
   PENDING = "pending", // computation is in progress, inputs are not yet fulfilled
   PAUSED = "paused", // computation is paused, inputs are fulfilled, but not yet computed
   PROCESSING = "processing", // scheduled for computation, but not yet computed
+  GENERATING = "generating", // generator is running, inputs are fulfilled, but not yet computed
   FULFILLED = "fulfilled",
   REJECTED = "rejected",
 }
@@ -37,6 +38,7 @@ class VariableState {
   static paused = new VariableState(State.PAUSED);
   static stopped = new VariableState(State.STOPPED);
   static processing = new VariableState(State.PROCESSING);
+  static generating = new VariableState(State.PROCESSING); // alias for processing, used for generators
   static fulfilled = new VariableState(State.FULFILLED);
   static rejected = new VariableState(State.REJECTED);
 
@@ -60,6 +62,10 @@ class VariableState {
     return this.value === State.PROCESSING;
   }
 
+  get isGenerating() {
+    return this.value === State.GENERATING;
+  }
+
   get isFulfilled() {
     return this.value === State.FULFILLED;
   }
@@ -72,6 +78,12 @@ class VariableState {
 interface VariableProps {
   module: Module;
   cell: Cell;
+}
+
+interface Invalidation {
+  resolve: (v: any) => void;
+  reject: (e: Error) => void;
+  promise: Promise<unknown>;
 }
 
 // reactive variable
@@ -108,8 +120,9 @@ export class Variable {
 
   // if the variable is a generator
   private generator = NOOP_GENERATOR;
-  private generating: boolean = false;
   private controller: AbortController;
+
+  private invalidation!: Invalidation;
 
   static create(props: VariableProps) {
     return new Variable(props);
@@ -125,7 +138,7 @@ export class Variable {
 
   // full name of the variable in the format moduleId:variableName
   static fullName(moduleId: string, variableName: string): ModuleVariableName {
-    return `${moduleId}:${variableName}`;
+    return variableName;
   }
 
   constructor(props: VariableProps) {
@@ -146,14 +159,36 @@ export class Variable {
     this.compute = this.compute.bind(this);
     this.stop = this.stop.bind(this);
 
+    this.invalidation = Variable.createInvalidation();
     this.promise = Variable.createPromise(this);
   }
 
+  private static createInvalidation() {
+    let _resolve: (v: any) => void = noop;
+    let _reject: (e: Error) => void;
+    const invalidation: Invalidation = {
+      resolve: () => {},
+      reject: () => {},
+      promise: new Promise((resolve, reject) => {
+        _resolve = resolve;
+        _reject = reject;
+      }),
+    };
+
+    invalidation.resolve = _resolve!;
+    invalidation.reject = _reject!;
+
+    return invalidation;
+  }
+
   private static createPromise(variable: Variable) {
-    return (variable.promise = new Promise((y, n) => {
+    variable.invalidation.resolve(Math.random());
+    const promise = new Promise((y, n) => {
       variable.resolve = y;
       variable.reject = n;
-    }).then(variable.fulfilled, variable.rejected));
+    }).then(variable.fulfilled, variable.rejected);
+    variable.invalidation = Variable.createInvalidation();
+    return promise;
   }
 
   get cellId() {
@@ -204,8 +239,10 @@ export class Variable {
   // stop the variable computation, stop the generator if it is a generator
   // NOTE: variable computation can still happen if the inputs are fulfilled
   stop() {
+    if (this.state.isUndefined) return;
+
     this.state = VariableState.stopped;
-    if (this.generating) {
+    if (this.generator) {
       this.stopGenerating();
     } else {
       // cache the last computed value
@@ -216,7 +253,6 @@ export class Variable {
   // scheduled for computation
   pending() {
     // console.log("pending", this.id, this.name);
-
     this.promise = Variable.createPromise(this);
 
     this.state = VariableState.pending;
@@ -234,6 +270,14 @@ export class Variable {
     this.state = VariableState.processing;
     this.emitter.emit("processing", this);
     this.emitter.emit("processing:" + this.cellId, this);
+
+    return this;
+  }
+
+  generating() {
+    this.state = VariableState.generating;
+    this.emitter.emit("generating", this);
+    this.emitter.emit("generating:" + this.cellId, this);
 
     return this;
   }
@@ -265,16 +309,18 @@ export class Variable {
 
     // console.log("computing:", this.id, "=>", this.name);
     this.processing();
+    const inputNames = this.dependencies.filter((d) => d !== "invalidation");
 
-    for (const dep of this.dependencies) {
+    for (const dep of inputNames) {
+      if (dep === "invalidation") continue;
       const deps = this.module.variablesByName.get(dep) ?? [];
       if (deps.length > 1) {
-        this.reject(RuntimeError.duplicateDefinition(last(dep.split(":"))!));
+        this.reject(RuntimeError.duplicateDefinition(dep));
         return;
       }
 
       if (deps.length === 0) {
-        this.reject(RuntimeError.notDefined(last(dep.split(":"))!));
+        this.reject(RuntimeError.notDefined(dep));
         return;
       }
     }
@@ -284,25 +330,30 @@ export class Variable {
     // ensure all inputs are fulfilled
     const error = inputs.find((input) => input.error);
     if (error) {
-      return this.reject(RuntimeError.notDefined(error.cell.name));
+      this.reject(RuntimeError.notDefined(error.cell.name));
+      return;
     }
 
     const inputMap = new Map(inputs.map((input) => [input.name, input]));
 
     // make sure the input variablesById have matching names
-    const missing = this.dependencies.find((name, i) => !inputMap.has(name));
+    const missing = inputNames.find((name, i) => !inputMap.has(name));
     if (missing) {
-      return this.reject(RuntimeError.notDefined(last(missing.split(":"))!));
+      this.reject(RuntimeError.notDefined(missing));
+      return;
     }
 
     // get the input variable values in order by name
-    const deps = this.dependencies.map((name) => inputMap.get(name)).filter(Boolean) as Variable[];
-    if (deps.length !== this.dependencies.length) {
+    const deps = inputNames.map((name) => inputMap.get(name)).filter(Boolean) as Variable[];
+    if (deps.length !== inputNames.length) {
       return this.reject(RuntimeError.of(`Variable ${this.cell.name} has missing dependencies`));
     }
 
     // get the values of the input variablesById
-    const args = deps.map((input) => input.value);
+    const args = this.dependencies.map((name) => {
+      if (name === "invalidation") return this.invalidation.promise;
+      return inputMap.get(name)?.value;
+    }) as any[];
 
     // if any of the input variablesById is undefined, skip the computation
     if (args.some((arg) => arg === UNDEFINED_VALUE)) {
@@ -316,7 +367,6 @@ export class Variable {
         // start the generator if it is a generator
         if (generatorish(res)) {
           this.generator = res;
-          this.generating = true;
           this.startGenerating();
         } else {
           // console.log("fulfilled", this.id, this.name, res);
@@ -341,7 +391,6 @@ export class Variable {
     let i = 0;
     while (!done && !signal.aborted && !error) {
       await new Promise((proceed, failed) => {
-        // debugger;
         setTimeout(() => {
           this.promise = Variable.createPromise(this);
           try {
@@ -358,7 +407,7 @@ export class Variable {
                   // continue the generator
                 }
 
-                this.processing();
+                this.generating();
                 this.resolve(value);
                 proceed(value);
               })
@@ -372,11 +421,11 @@ export class Variable {
             failed(e);
             error = e;
           }
-        }, 1000);
+        }, 0);
       });
     }
 
-    this.generating = false;
+    this.generator = NOOP_GENERATOR;
   }
 
   // this method exists only for clean semantics
@@ -386,6 +435,7 @@ export class Variable {
 
   // mark the variable as fulfilled with a value
   private fulfilled(value: any) {
+    console.log("fulfilled", this.id, this.name, value, this.state);
     // if (this.state.isStopped) return;
     if (this.state.isDetached) return;
     // console.log(this.id, "fulfilled", this.name, "value:", value, "state:", this.state);
@@ -395,7 +445,7 @@ export class Variable {
     !this.builtin && this.emitter.emit("fulfilled", this);
     !this.builtin && this.emitter.emit("fulfilled:" + this.cellId, this);
 
-    if (this.state.isProcessing) {
+    if (this.state.isGenerating) {
       this.onGenerate();
     } else {
       this.onSuccess();
@@ -437,15 +487,13 @@ export class Variable {
     }
 
     // console.log(this.id, this.name);
-    const outputs = this.outputs;
-    last(outputs);
-    outputs.forEach((output) => {
-      if (output.removed) return;
+    this.outputs.forEach((output) => {
+      if (output.state.isDetached) return;
       const inputs = output.inputs;
       // check for cycles in the output paths
 
       // if all inputs are fulfilled, run the output variable
-      if (inputs.every((input) => input.state.isFulfilled || input.state.isProcessing)) {
+      if (inputs.every((input) => input.state.isFulfilled || input.state.isGenerating)) {
         output.stop();
         output.pending();
         output.compute();

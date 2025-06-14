@@ -52,7 +52,6 @@ export class PinnedSelection {
     // }
 
     if (!dom.selection) {
-      debugger;
       console.warn(p14("%c[error]"), "color:red", "window selection is EMPTY");
       return null;
     }
