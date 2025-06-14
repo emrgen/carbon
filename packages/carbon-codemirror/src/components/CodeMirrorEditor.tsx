@@ -1,7 +1,7 @@
 import { indentWithTab } from "@codemirror/commands";
 import { javascript } from "@codemirror/lang-javascript";
 import { EditorState, Prec } from "@codemirror/state";
-import { highlightActiveLine, keymap, ViewUpdate } from "@codemirror/view";
+import { Decoration, keymap, MatchDecorator, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import {
   ActionOrigin,
   CodeValuePath,
@@ -27,6 +27,51 @@ interface CodeMirrorEditorProps {
   node: Node;
   extensions?: any[];
 }
+
+// 1. Your custom keywords
+const customKeywords = ["mutable", "viewof"];
+
+// 2. RegExp to match them
+const keywordRegex = new RegExp(`\\b(${customKeywords.join("|")})\\b`, "g");
+
+const customDeco = Decoration.mark({
+  class: "cm-reactive-keyword", // Custom CSS class for styling
+});
+
+// ✅ Create a MatchDecorator
+const matchDecorator = new MatchDecorator({
+  regexp: keywordRegex,
+  decoration: customDeco,
+  boundary: /\W/, // avoid matching inside other identifiers
+});
+
+// ✅ Create a ViewPlugin to apply it
+const customKeywordHighlighter = ViewPlugin.fromClass(
+  class {
+    constructor(view) {
+      this.decorations = matchDecorator.createDeco(view);
+      console.log(this.decorations);
+    }
+
+    update(update) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = matchDecorator.createDeco(update.view);
+      }
+    }
+  },
+  {
+    decorations: (v) => v.decorations,
+  },
+);
+
+const removeActiveLineOnSelection = EditorView.updateListener.of((update) => {
+  if (update.selectionSet || update.docChanged) {
+    const { main } = update.state.selection;
+    const hasSelection = main.from !== main.to;
+
+    update.view.dom.classList.toggle("no-activeLine", hasSelection);
+  }
+});
 
 export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
   const { node, onFocus, onBlur, onKeyDown } = props;
@@ -98,7 +143,9 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
           ...extensions,
           EditorView.updateListener.of(onUpdate),
           basicSetup,
-          highlightActiveLine(),
+          // highlightActiveLine(),
+          removeActiveLineOnSelection,
+          customKeywordHighlighter,
           keymap.of([indentWithTab]),
           Prec.highest(
             EditorView.domEventHandlers({

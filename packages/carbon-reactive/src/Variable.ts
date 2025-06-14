@@ -307,8 +307,6 @@ export class Variable {
 
   // update state for removed variable
   detach() {
-    console.log("removed", this.id, this.name);
-
     this.state = VariableState.detached;
     this.value = UNDEFINED_VALUE;
     this.error = undefined;
@@ -389,7 +387,7 @@ export class Variable {
       this.processing();
       Promise.resolve(result)
         .then((res) => {
-          console.log("computed:", this.id, "=>", this.name, res, this.value);
+          // console.log("computed:", this.id, "=>", this.name, res, this.value);
           // start the generator if it is a generator
           if (generatorish(res)) {
             this.state = VariableState.generating;
@@ -402,7 +400,6 @@ export class Variable {
         })
         .catch(this.reject);
     } catch (error) {
-      debugger;
       this.state = VariableState.rejected;
       this.reject(error as Error);
     }

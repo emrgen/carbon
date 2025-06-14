@@ -12,6 +12,12 @@ $editor-bg-color = #e3e9f3
   .cm-activeLine.cm-line
     background: transparent!important
 
+  .cm-focused.no-activeLine .cm-activeLine
+    box-shadow none!important
+
+  .cm-focused .cm-activeLine.cm-line
+    box-shadow inset 4px 0 0 0 #ccc
+
   .cm-gutters
     display none !important
 
@@ -26,3 +32,6 @@ $editor-bg-color = #e3e9f3
 
   .token.newline
     white-space pre !important
+
+  .cm-reactive-keyword
+    color #770088
