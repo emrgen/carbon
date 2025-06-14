@@ -5,7 +5,7 @@ import { Cell } from "./Cell";
 import { Graph } from "./Graph";
 import { Module, ModuleNameVersion, ModuleVariableId, ModuleVariableName } from "./Module";
 import { Mutable } from "./Mutable";
-import { Variable, VariableName } from "./Variable";
+import { Variable } from "./Variable";
 import { RuntimeError } from "./x";
 
 interface Builtins {
@@ -34,9 +34,10 @@ export class Runtime extends EventEmitter {
   // generators that are dirty and need to be recomputed
   generators: Set<Variable> = new Set();
 
-  builtin: Module;
+  builtinCells: Map<string, Cell> = new Map();
 
-  builtinVariables: Map<VariableName, Variable> = new Map();
+  // the default module is the builtin module
+  mod: Module;
 
   // mutable variablesById store
   mutable: Mutable;
@@ -56,9 +57,7 @@ export class Runtime extends EventEmitter {
     this.graph = new Graph();
     this.mutable = new Mutable(this);
 
-    const mod = Module.create(this, "mod:builtin", "mod:builtin", "0.0.1");
-
-    // create builtins variablesById
+    // inject the built-in variables into the builtin module
     entries(builtins).forEach(([name, value]) => {
       const cell = Cell.create({
         id: "builtin/" + name,
@@ -81,16 +80,11 @@ export class Runtime extends EventEmitter {
       });
 
       // compute the variable in a lazy fation
-      const variable = mod.define(cell, false, false);
-      this.builtinVariables.set(name, variable);
+      this.builtinCells.set(cell.name, cell);
     });
 
-    this.builtin = mod;
-  }
-
-  // the default module is the builtin module
-  get mod() {
-    return this.builtin;
+    // import the builtin variables into the default module
+    this.mod = this.define("mod:default", "mod:default", "0.0.1");
   }
 
   // pause the runtime
@@ -126,18 +120,13 @@ export class Runtime extends EventEmitter {
   define(id: string, name: string, version: string) {
     const modVersion = new SemVer(version);
     // if the module is already existing, return it
-    const key = `${id}@${modVersion.toString()}`;
+    const key = `${name}@${modVersion.toString()}`;
     if (this.modules.has(key)) {
       return this.modules.get(key) as Module;
     }
 
     const mod = Module.create(this, id, name, version);
     this.modules.set(key, mod);
-
-    // inject the builtin variable from the runtime into the module
-    this.builtinVariables.forEach((variable) => {
-      mod.import(variable.cell.name, variable.cell.name, this.builtin, false, false);
-    });
 
     return mod;
   }
@@ -191,7 +180,7 @@ export class Runtime extends EventEmitter {
 
   // schedule a module to be processed
   scheduleModule(variables: Variable[]) {
-    const dirty = variables.filter((v) => v.version != v.cell.version);
+    const dirty = variables.filter((v) => v.version != v.cell.version && !v.state.isDetached);
 
     // console.log("DIRTY", Array.from(roots.values().map((v) => v.name)));
     const connected = Array.from(this.graph.connected(dirty).values());

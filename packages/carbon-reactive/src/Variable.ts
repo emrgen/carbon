@@ -1,4 +1,4 @@
-import { noop } from "lodash";
+import { last, noop } from "lodash";
 import { Cell } from "./Cell";
 import { Module, ModuleVariableId, ModuleVariableName } from "./Module";
 import { generatorish, randomString, RuntimeError } from "./x";
@@ -38,7 +38,7 @@ class VariableState {
   static paused = new VariableState(State.PAUSED);
   static stopped = new VariableState(State.STOPPED);
   static processing = new VariableState(State.PROCESSING);
-  static generating = new VariableState(State.PROCESSING); // alias for processing, used for generators
+  static generating = new VariableState(State.GENERATING); // alias for processing, used for generators
   static fulfilled = new VariableState(State.FULFILLED);
   static rejected = new VariableState(State.REJECTED);
 
@@ -138,7 +138,11 @@ export class Variable {
 
   // full name of the variable in the format moduleId:variableName
   static fullName(moduleId: string, variableName: string): ModuleVariableName {
-    return variableName;
+    return `${moduleId}:${variableName}`;
+  }
+
+  static visibleName(name: string): string {
+    return last(name.split(":"))!;
   }
 
   constructor(props: VariableProps) {
