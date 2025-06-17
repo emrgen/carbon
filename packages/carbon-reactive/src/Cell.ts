@@ -140,6 +140,11 @@ export class Cell {
 
     ast = parseCell(definition);
 
+    // replace the file names with the remote file urls
+    if (ast.fileAttachments.size > 0) {
+      debugger;
+    }
+
     // console.log(immutables);
     deps = deps.filter((d) => !immutables.includes(d));
     // console.log(deps);

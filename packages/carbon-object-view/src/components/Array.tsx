@@ -82,7 +82,7 @@ export const ArrayView = (props: ArrayProps) => {
           </div>
           {expanded && showMore && (
             <div className={"cov-show-more cov-show-more__array-items"} onClick={handleShowMore}>
-              ...more
+              {data.length > PAGE_SIZE ? `...${data.length - slice.length} more` : ""}
             </div>
           )}
           <span className={"cov-right-bracket"}>]</span>
@@ -102,6 +102,7 @@ export const ArrayView = (props: ArrayProps) => {
               );
             })
           }
+          <span className={"cov-show-more"}> {data.length > PAGE_SIZE ? `...` : ""}</span>
           <span className={"cov-right-bracket"}>]</span>
         </div>
       )}
