@@ -1,7 +1,7 @@
 # Carbon
 A Extendable editor framework.
 
-[Demo](http:://emrgen.github.io/carbon/)
+[Demo](https://emrgen.github.io/carbon/)
 
 # Example 
 ```ts
