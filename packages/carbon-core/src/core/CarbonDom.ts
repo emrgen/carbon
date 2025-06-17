@@ -1,5 +1,5 @@
-import { Optional } from "@emrgen/types";
-import { Carbon } from "./Carbon";
+import {Optional} from "@emrgen/types";
+import {CarbonEditor} from "./CarbonEditor";
 
 export class CarbonDom {
   _selection: Optional<Selection> = window.getSelection();
@@ -8,5 +8,5 @@ export class CarbonDom {
     return this._selection ?? window.getSelection();
   }
 
-  constructor(readonly app: Carbon) {}
+  constructor(readonly app: CarbonEditor) {}
 }

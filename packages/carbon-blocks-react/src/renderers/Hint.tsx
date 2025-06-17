@@ -1,7 +1,7 @@
-import { ViewedPath } from "@emrgen/carbon-blocks";
+import {ViewedPath} from "@emrgen/carbon-blocks";
 import {
   ActionOrigin,
-  Carbon,
+  CarbonEditor,
   CollapsedPathLocal,
   isContentEditable,
   Pin,
@@ -9,17 +9,12 @@ import {
   Point,
   TxType,
 } from "@emrgen/carbon-core";
-import { useDragDropRectSelectHalo } from "@emrgen/carbon-dragon-react";
-import {
-  CarbonBlock,
-  CarbonChildren,
-  RendererProps,
-  useCarbon,
-} from "@emrgen/carbon-react";
-import { Optional } from "@emrgen/types";
-import React, { useCallback, useRef } from "react";
-import { FaLightbulb, FaRegCheckCircle, FaRegLightbulb } from "react-icons/fa";
-import { useDocument } from "../hooks";
+import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
+import {CarbonBlock, CarbonChildren, RendererProps, useCarbon,} from "@emrgen/carbon-react";
+import {Optional} from "@emrgen/types";
+import React, {useCallback, useRef} from "react";
+import {FaLightbulb, FaRegCheckCircle, FaRegLightbulb} from "react-icons/fa";
+import {useDocument} from "../hooks";
 
 const isParentContentEditable = (el: HTMLElement) => {
   let node: Optional<HTMLElement> = el;
@@ -48,7 +43,7 @@ export default function HintComp(props: RendererProps) {
 
   // insert a new paragraph as child of this collapsible
   const handleInsert = useCallback(
-    (app: Carbon) => {
+    (app: CarbonEditor) => {
       const paragraph = app.schema.type("paragraph").default()!;
       const at = Point.toAfter(node.child(0)!.id);
 

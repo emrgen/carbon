@@ -1,4 +1,4 @@
-// export const serializeNestableNode = (react: Carbon, node: Node, prefix = '', suffix = ''): SerializedNode => {
+// export const serializeNestableNode = (react: CarbonEditor, node: Node, prefix = '', suffix = ''): SerializedNode => {
 //   if (node.isVoid) {
 //     throw Error('paragraph is missing title child');
 //   }

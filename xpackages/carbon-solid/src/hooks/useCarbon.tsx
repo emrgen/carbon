@@ -1,10 +1,10 @@
-import { Carbon } from "@emrgen/carbon-core";
-import { createContext, onMount, useContext } from "solid-js";
-import { CarbonEvents } from "../components/index";
+import {CarbonEditor} from "@emrgen/carbon-core";
+import {createContext, onMount, useContext} from "solid-js";
+import {CarbonEvents} from "../components/index";
 
-const InnerCarbonContext = createContext<Carbon>({} as Carbon);
+const InnerCarbonContext = createContext<CarbonEditor>({} as CarbonEditor);
 
-export const CarbonContext = (props: { value: Carbon; children: any }) => {
+export const CarbonContext = (props: { value: CarbonEditor; children: any }) => {
   onMount(() => {
     props.value.mounted();
   });

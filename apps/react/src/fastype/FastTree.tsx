@@ -1,9 +1,9 @@
-import { Box, Textarea } from '@chakra-ui/react'
-import { Carbon, Node } from '@emrgen/carbon-core'
-import React, { useEffect } from 'react'
+import {Box, Textarea} from '@chakra-ui/react'
+import {CarbonEditor, Node} from '@emrgen/carbon-core'
+import React, {useEffect} from 'react'
 
 interface FastTreeProps {
-  app: Carbon
+  app: CarbonEditor
 }
 
 const intoTree = (content: Node) => {

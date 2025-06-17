@@ -1,5 +1,5 @@
 import {
-  Carbon,
+  CarbonEditor,
   CarbonPlugin,
   EmptyPlaceholderPath,
   EventsOut,
@@ -9,11 +9,11 @@ import {
   PluginManager,
   Schema,
 } from "@emrgen/carbon-core";
-import { flatten, noop, throttle } from "lodash";
-import { useEffect, useState } from "react";
-import { ImmutableState } from "../core";
-import { ImmutableNodeFactory } from "../core/ImmutableNodeFactory";
-import { CarbonDefaultNode, Extension, ReactRenderer, RenderManager } from "../renderer";
+import {flatten, noop, throttle} from "lodash";
+import {useEffect, useState} from "react";
+import {ImmutableState} from "../core";
+import {ImmutableNodeFactory} from "../core/ImmutableNodeFactory";
+import {CarbonDefaultNode, Extension, ReactRenderer, RenderManager} from "../renderer";
 
 export interface InitNodeJSON extends Omit<NodeJSON, "id"> {
   id?: string;
@@ -55,7 +55,7 @@ export const createCarbon = (name: string, json: InitNodeJSON, plugins: CarbonPl
   }
 
   const state = ImmutableState.create(scope, sanitized, PinnedSelection.IDENTITY);
-  return new Carbon(state.freeze(), schema, pm);
+  return new CarbonEditor(state.freeze(), schema, pm);
 };
 
 // create carbon react with extensions
@@ -63,7 +63,7 @@ export const useCreateCarbon = (
   name: string,
   json: InitNodeJSON,
   plugins: CarbonPlugin[] = [],
-  onCreate: (app: Carbon) => void = noop,
+  onCreate: (app: CarbonEditor) => void = noop,
 ) => {
   const [app] = useState(() => {
     const app = createCarbon(name, json, plugins);
@@ -83,7 +83,7 @@ export const useCreateCarbonFromState = (state: ImmutableState, extensions: Exte
   const { specs } = pm;
   const schema = new Schema(specs, new ImmutableNodeFactory(state.scope));
 
-  return new Carbon(state.freeze(), schema, pm);
+  return new CarbonEditor(state.freeze(), schema, pm);
 };
 
 // const saveDoc = throttle((state: CarbonState) => {
@@ -107,7 +107,7 @@ export const useCreateCachedCarbon = (
   name: string,
   json: InitNodeJSON,
   plugins: CarbonPlugin[] = [],
-  onCreate: (app: Carbon) => void = noop,
+  onCreate: (app: CarbonEditor) => void = noop,
 ) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [app, setApp] = useState(() => {

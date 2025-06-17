@@ -1,17 +1,17 @@
-import { attrRenderers } from "@emrgen/carbon-attributes";
-import { blockPresetPlugins, node, text, title } from "@emrgen/carbon-blocks";
-import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { codemirrorExtension } from "@emrgen/carbon-codemirror";
-import { commentEditorComp, commentEditorPlugin } from "@emrgen/carbon-comment-editor";
-import { corePresetPlugins, ModePath, NodeId, State } from "@emrgen/carbon-core";
-import { databasePlugins } from "@emrgen/carbon-database";
-import { databaseRenderers } from "@emrgen/carbon-database-react";
+import {attrRenderers} from "@emrgen/carbon-attributes";
+import {blockPresetPlugins, node, text, title} from "@emrgen/carbon-blocks";
+import {blockPresetRenderers} from "@emrgen/carbon-blocks-react";
+import {ClipboardPlugin} from "@emrgen/carbon-clipboard";
+import {codemirrorExtension} from "@emrgen/carbon-codemirror";
+import {commentEditorComp, commentEditorPlugin} from "@emrgen/carbon-comment-editor";
+import {corePresetPlugins, ModePath, NodeId, State} from "@emrgen/carbon-core";
+import {databasePlugins} from "@emrgen/carbon-database";
+import {databaseRenderers} from "@emrgen/carbon-database-react";
 import "./App.css";
-import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
-import { CarbonApp } from "@emrgen/carbon-utils";
-import { flattenDeep, noop, range } from "lodash";
-import { useEffect } from "react";
+import {RenderManager, useCreateCarbon} from "@emrgen/carbon-react";
+import {Carbon} from "@emrgen/carbon-utils";
+import {flattenDeep, noop, range} from "lodash";
+import {useEffect} from "react";
 
 // console.log = noop;
 // console.info = noop;
@@ -75,7 +75,7 @@ export default function App() {
 
   return (
     <div className={"carbon-app-container"}>
-      <CarbonApp app={app} renderManager={renderManager}></CarbonApp>
+      <Carbon app={app} renderManager={renderManager}></Carbon>
     </div>
   );
 }

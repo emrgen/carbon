@@ -1,26 +1,16 @@
-import { Box } from "@chakra-ui/react";
+import {Box} from "@chakra-ui/react";
 
-import {
-  blockPresetPlugins,
-  node,
-  paragraph,
-  text,
-  title,
-} from "@emrgen/carbon-blocks";
-import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import {
-  EmojiPickerInlineMenu,
-  FloatingStyleMenu,
-  InsertBlockMenu,
-} from "@emrgen/carbon-chakra-ui";
-import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
-import { mediaPlugins } from "@emrgen/carbon-media";
-import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
-import { CarbonApp } from "@emrgen/carbon-utils";
-import { flattenDeep } from "lodash";
-import { useState } from "react";
-import { PathTracker } from "../../PathTracker";
+import {blockPresetPlugins, node, paragraph, text, title,} from "@emrgen/carbon-blocks";
+import {blockPresetRenderers} from "@emrgen/carbon-blocks-react";
+import {EmojiPickerInlineMenu, FloatingStyleMenu, InsertBlockMenu,} from "@emrgen/carbon-chakra-ui";
+import {ClipboardPlugin} from "@emrgen/carbon-clipboard";
+import {corePresetPlugins, ModePath, NodeId} from "@emrgen/carbon-core";
+import {mediaPlugins} from "@emrgen/carbon-media";
+import {RenderManager, useCreateCarbon} from "@emrgen/carbon-react";
+import {Carbon} from "@emrgen/carbon-utils";
+import {flattenDeep} from "lodash";
+import {useState} from "react";
+import {PathTracker} from "../../PathTracker";
 import "./test.styl";
 
 const data = node("carbon", [
@@ -80,13 +70,13 @@ export function PageProps() {
 
   return (
     <Box className={"carbon-app-container"} pos={"relative"}>
-      <CarbonApp app={app} renderManager={renderManager}>
+      <Carbon app={app} renderManager={renderManager}>
         <Box pos={"absolute"} right={8} top={6}></Box>
         <FloatingStyleMenu />
         <PathTracker />
         <InsertBlockMenu />
         <EmojiPickerInlineMenu />
-      </CarbonApp>
+      </Carbon>
     </Box>
   );
 }

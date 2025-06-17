@@ -1,11 +1,11 @@
-import { Carbon, Node, Pin } from "../core";
-import { takeBefore, takeUpto } from "./array";
-import { EmptyInline } from "@emrgen/carbon-core";
+import {EmptyInline} from "@emrgen/carbon-core";
+import {CarbonEditor, Node, Pin} from "../core";
+import {takeBefore, takeUpto} from "./array";
 
 export function splitTextBlock(
   start: Pin,
   end: Pin,
-  app: Carbon,
+  app: CarbonEditor,
 ): [Node[], Node[], Node[]] {
   if (!start.node.eq(end.node)) {
     throw new Error("start and end nodes are not same");

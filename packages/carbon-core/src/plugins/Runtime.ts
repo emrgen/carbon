@@ -1,12 +1,12 @@
 import {
   BeforePlugin,
-  Carbon,
+  CarbonEditor,
   CarbonMouseEvent,
   EventContext,
   EventHandlerMap,
   Node,
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
+import {Optional} from "@emrgen/types";
 
 export class Runtime extends BeforePlugin {
   name = "runtime";
@@ -111,7 +111,7 @@ export class Runtime extends BeforePlugin {
     return this.resolveNode(app, target as HTMLElement);
   }
 
-  resolveNode(app: Carbon, target: HTMLElement): Optional<Node> {
+  resolveNode(app: CarbonEditor, target: HTMLElement): Optional<Node> {
     return app.store.resolve(target as HTMLElement, 0).node;
   }
 }

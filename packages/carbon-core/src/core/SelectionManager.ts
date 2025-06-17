@@ -1,10 +1,10 @@
-import { Carbon } from "./Carbon";
-import { PinnedSelection } from "./PinnedSelection";
+import {CarbonEditor} from "./CarbonEditor";
+import {PinnedSelection} from "./PinnedSelection";
 
 export class SelectionManager {
   focused = false;
 
-  constructor(readonly app: Carbon) {}
+  constructor(readonly app: CarbonEditor) {}
 
   private get state() {
     return this.app.state;

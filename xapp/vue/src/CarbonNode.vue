@@ -1,9 +1,9 @@
 <script lang="ts">
 
-import CarbonDefaultNode from "./CarbonDefaultNode.vue";
 import {Node, NodeChangeType} from "@emrgen/carbon-core";
-import CarbonText from "./CarbonText.vue";
 import {Component, h, inject} from "vue";
+import CarbonDefaultNode from "./CarbonDefaultNode.vue";
+import CarbonText from "./CarbonText.vue";
 
 export default {
   name: 'CarbonNode',
@@ -47,7 +47,7 @@ export default {
     onChange(node: Node) {
       console.log('onChange', node.id.toString())
       // console.log('this', this.app)
-      // const app = inject('app') as Carbon;
+      // const app = inject('app') as CarbonEditor;
       this.app.change.mounted(node, NodeChangeType.update);
     }
   },
@@ -56,7 +56,7 @@ export default {
     this.app.change.on(this.node.id, NodeChangeType.update, this.onChange.bind(this));
   },
   beforeUnmount() {
-    // const app = inject('app') as Carbon;
+    // const app = inject('app') as CarbonEditor;
     this.app.change.offAll(this.node.id);
   }
 }

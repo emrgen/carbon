@@ -6,7 +6,7 @@ import {
 } from "@emrgen/carbon-blocks";
 import {
   ActiveChildPath,
-  Carbon,
+  CarbonEditor,
   ContenteditablePath,
   LocalDirtyCounterPath,
   Node,
@@ -17,7 +17,7 @@ import {
   preventAndStop,
   TxType,
 } from "@emrgen/carbon-core";
-import { CarbonDragHandleId, useDraggableHandle } from "@emrgen/carbon-dragon-react";
+import {CarbonDragHandleId, useDraggableHandle} from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNode,
@@ -27,11 +27,11 @@ import {
   useNodeChange,
   useNodeOpened,
 } from "@emrgen/carbon-react";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, {useCallback, useMemo, useRef} from "react";
 
-import { HiOutlinePlus } from "react-icons/hi";
-import { MdOutlineKeyboardArrowRight } from "react-icons/md";
-import { SlOptionsVertical } from "react-icons/sl";
+import {HiOutlinePlus} from "react-icons/hi";
+import {MdOutlineKeyboardArrowRight} from "react-icons/md";
+import {SlOptionsVertical} from "react-icons/sl";
 
 const getPageTree = (n: Node) => n.closest((n) => n.type.name === PageTreeName);
 export const getPageTreeGroup = (n: Node) => n.closest((n) => n.type.name === PageTreeGroupName);
@@ -57,7 +57,7 @@ export const PageTreeItemComp = (props: RendererProps) => {
   });
 
   const handleToggle = useCallback(
-    (app: Carbon) => {
+    (app: CarbonEditor) => {
       app.cmd.collapsible.toggle(node).Dispatch();
     },
     [node],

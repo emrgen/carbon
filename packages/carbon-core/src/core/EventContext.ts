@@ -1,10 +1,10 @@
-import { Carbon } from "./Carbon";
-import { EventsIn } from "./Event";
-import { Node } from "./Node";
-import { PinnedSelection } from "./PinnedSelection";
-import { Optional } from "@emrgen/types";
-import { Service } from "./Service";
-import { Transaction } from "./Transaction";
+import {Optional} from "@emrgen/types";
+import {CarbonEditor} from "./CarbonEditor";
+import {EventsIn} from "./Event";
+import {Node} from "./Node";
+import {PinnedSelection} from "./PinnedSelection";
+import {Service} from "./Service";
+import {Transaction} from "./Transaction";
 
 export enum EventOrigin {
   dom,
@@ -15,14 +15,14 @@ interface EventContextProps<T> {
   origin: EventOrigin;
   type: EventsIn;
   event: T;
-  app: Carbon;
+  app: CarbonEditor;
   node: Node;
   selection: PinnedSelection;
 }
 
 // EventContext is the context of an event that is being handled by the application and its plugins
 export class EventContext<T extends Event> {
-  readonly app: Carbon;
+  readonly app: CarbonEditor;
   // selection is the selection at the time of the event not the current application state selection
   readonly selection: PinnedSelection;
   // targetNode is the node that the event was dispatched to

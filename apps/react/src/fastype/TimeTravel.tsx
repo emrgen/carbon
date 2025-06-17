@@ -1,10 +1,10 @@
-import { Carbon, SelectAction, TransactionNode, TransactionTree } from '@emrgen/carbon-core';
-import React, { useCallback, useEffect } from 'react'
+import {Box, Center, Flex, HStack, Stack} from "@chakra-ui/react";
+import {CarbonEditor, TransactionTree} from '@emrgen/carbon-core';
 import treeify from 'object-treeify';
-import { Box, Center, Flex, HStack, Stack, Textarea } from "@chakra-ui/react";
+import React, {useCallback, useEffect} from 'react'
 
 export interface TimeTravelProps {
-  app: Carbon;
+  app: CarbonEditor;
 }
 
 export default function TimeTravel(props: TimeTravelProps) {

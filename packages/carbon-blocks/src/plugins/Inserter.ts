@@ -1,7 +1,7 @@
 import {
   ActionOrigin,
   BeforePlugin,
-  Carbon,
+  CarbonEditor,
   insertNodesActions,
   Node,
   Pin,
@@ -9,7 +9,7 @@ import {
   Point,
   Transaction,
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
+import {Optional} from "@emrgen/types";
 
 declare module "@emrgen/carbon-core" {
   interface Transaction {
@@ -58,7 +58,7 @@ export class Insert extends BeforePlugin {
   }
 
   // TODO: check if the node is allowed in the current context
-  node(app: Carbon, name: string) {
+  node(app: CarbonEditor, name: string) {
     const { selection, cmd } = app;
     if (selection.isInvalid || !selection.isCollapsed) return;
 

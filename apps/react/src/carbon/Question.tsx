@@ -1,13 +1,13 @@
 // import { blockPresets, node, text, title } from "@emrgen/carbon-blocks";
 //
 // import { questionExtension } from "@emrgen/carbon-question";
-// import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
+// import { Carbon, carbonUtilPlugins } from "@emrgen/carbon-utils";
 //
 // const data = node("carbon", [
 //   node(
 //     "page",
 //     [
-//       title([text("Carbon "), text("page")]),
+//       title([text("CarbonEditor "), text("page")]),
 //       node("divider"),
 //       node("paragraph", [title([text("paragraph 1.2")])]),
 //     ],
@@ -34,7 +34,7 @@
 // export function Question() {
 //   const react = useCreateCarbon('q',data, extensions);
 //
-//   return <CarbonApp react={react} />;
+//   return <Carbon react={react} />;
 // }
 
 export const Question = () => {

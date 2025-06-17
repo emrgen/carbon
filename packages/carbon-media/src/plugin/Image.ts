@@ -64,7 +64,7 @@ export class Image extends NodePlugin {
     };
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
+  // serialize(react: CarbonEditor, node: Node): SerializedNode {
   //   return `![](${node.props.node.src})`;
   // }
 }

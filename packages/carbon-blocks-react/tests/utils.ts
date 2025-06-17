@@ -1,6 +1,6 @@
-import { blockPresetPlugins } from "@emrgen/carbon-blocks";
+import {blockPresetPlugins} from "@emrgen/carbon-blocks";
 import {
-  Carbon,
+  CarbonEditor,
   CarbonPlugin,
   corePresetPlugins,
   Node,
@@ -10,7 +10,7 @@ import {
   PluginManager,
   Schema,
 } from "@emrgen/carbon-core";
-import { ImmutableNodeFactory, ImmutableState } from "@emrgen/carbon-react";
+import {ImmutableNodeFactory, ImmutableState} from "@emrgen/carbon-react";
 
 let counter = 0;
 class CustomFactory extends ImmutableNodeFactory {
@@ -40,7 +40,7 @@ export const createCarbon = (json: any, extraPlugins: CarbonPlugin[] = []) => {
   const root = schema.nodeFromJSON(json)!;
   const state = ImmutableState.create(scope, root, PinnedSelection.IDENTITY);
 
-  return new Carbon(state, schema, pm);
+  return new CarbonEditor(state, schema, pm);
 };
 
 export const nameOffset = (pos: { node: Node; offset: number }) => {

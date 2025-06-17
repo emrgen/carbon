@@ -1,7 +1,7 @@
-import { encodeHtmlNestableChildren, encodeNestableChildren } from "@emrgen/carbon-blocks";
+import {encodeHtmlNestableChildren, encodeNestableChildren} from "@emrgen/carbon-blocks";
 import {
-  Carbon,
   CarbonAction,
+  CarbonEditor,
   CarbonPlugin,
   Node,
   NodeEncoder,
@@ -10,9 +10,9 @@ import {
   SerializedNode,
   Writer,
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
+import {Optional} from "@emrgen/types";
 
-import { TitlePlugin } from "./Title";
+import {TitlePlugin} from "./Title";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
@@ -84,7 +84,7 @@ export class Paragraph extends NodePlugin {
     return [new TitlePlugin()];
   }
 
-  serialize(app: Carbon, node: Node): SerializedNode {
+  serialize(app: CarbonEditor, node: Node): SerializedNode {
     const contentNode = node.child(0);
 
     let ret = contentNode?.textContent;

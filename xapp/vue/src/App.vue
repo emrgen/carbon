@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {blockPresetPlugins} from '@emrgen/carbon-blocks';
-import {Carbon, Node, PinnedSelection, PluginManager, Schema} from '@emrgen/carbon-core';
+import {CarbonEditor, Node, PinnedSelection, PluginManager, Schema} from '@emrgen/carbon-core';
 import {VueNodeFactory, VueState} from '@emrgen/carbon-vue';
 import {provide, reactive, ref} from 'vue';
 import Person from "./Person.vue";
@@ -38,7 +38,7 @@ const content: Node = schema.type('section').create([
 
 const state = VueState.create(content, PinnedSelection.NULL);
 
-const app = new Carbon(state, schema, pm);
+const app = new CarbonEditor(state, schema, pm);
 
 provide('app', app);
 

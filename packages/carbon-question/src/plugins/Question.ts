@@ -1,5 +1,5 @@
 import {
-  Carbon,
+  CarbonEditor,
   CarbonPlugin,
   EventContext,
   EventHandlerMap,
@@ -7,9 +7,9 @@ import {
   NodeSpec,
   preventAndStopCtx,
 } from "@emrgen/carbon-core";
-import { Explanations } from "./Explanations";
-import { Hints } from "./Hints";
-import { MCQ } from "./MCQ";
+import {Explanations} from "./Explanations";
+import {Hints} from "./Hints";
+import {MCQ} from "./MCQ";
 
 declare module "@emrgen/carbon-core" {
   export interface Service {
@@ -57,7 +57,7 @@ export class Question extends CarbonPlugin {
 
   services(): Record<string, Function> {
     return {
-      isAttempted(app: Carbon, node: Node) {
+      isAttempted(app: CarbonEditor, node: Node) {
         // find the possible question types and check if they are attempted
         const found = node.children.find((n) =>
           n.groups.includes("questionType"),
@@ -68,7 +68,7 @@ export class Question extends CarbonPlugin {
         }
         return false;
       },
-      summary(app: Carbon, node: Node) {
+      summary(app: CarbonEditor, node: Node) {
         const found = node.children.find((n) =>
           n.groups.includes("questionType"),
         );

@@ -1,11 +1,11 @@
-import { Carbon, Node, NodeId, NodeIdSet, Point } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
+import {CarbonEditor, Node, NodeId, NodeIdSet, Point} from "@emrgen/carbon-core";
+import {Optional} from "@emrgen/types";
 import EventEmitter from "events";
-import { throttle } from "lodash";
-import { DndEvent } from "../types";
-import { nodeFromPoint } from "../utils/hit";
-import { DndNodeStore } from "./DndStore";
-import { domRect } from "./utils";
+import {throttle} from "lodash";
+import {DndEvent} from "../types";
+import {nodeFromPoint} from "../utils/hit";
+import {DndNodeStore} from "./DndStore";
+import {domRect} from "./utils";
 
 type Acceptor = (receiver: Node, child: Node, at: Point) => boolean;
 
@@ -32,7 +32,7 @@ export class Dnd<E = MouseEvent> extends EventEmitter {
 
   // acceptor: Acceptor = (receiver, child, at) => {}
 
-  constructor(readonly app: Carbon) {
+  constructor(readonly app: CarbonEditor) {
     super();
     this.onUpdated = this.onUpdated.bind(this);
 

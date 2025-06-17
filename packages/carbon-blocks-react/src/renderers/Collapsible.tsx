@@ -1,13 +1,13 @@
 import {
   ActionOrigin,
-  Carbon,
+  CarbonEditor,
   CollapsedPath,
   Pin,
   PinnedSelection,
   Point,
   TxType,
 } from "@emrgen/carbon-core";
-import { useRectSelectable } from "@emrgen/carbon-dragon-react";
+import {useRectSelectable} from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
@@ -16,11 +16,8 @@ import {
   useCarbon,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
-import { useCallback, useRef } from "react";
-import {
-  MdKeyboardArrowRight,
-  MdOutlineKeyboardArrowDown,
-} from "react-icons/md";
+import {useCallback, useRef} from "react";
+import {MdKeyboardArrowRight, MdOutlineKeyboardArrowDown,} from "react-icons/md";
 
 export default function CollapsibleListComp(props: RendererProps) {
   const { node } = props;
@@ -33,7 +30,7 @@ export default function CollapsibleListComp(props: RendererProps) {
 
   // insert a new paragraph as child of this collapsible
   const handleInsert = useCallback(
-    (app: Carbon) => {
+    (app: CarbonEditor) => {
       const paragraph = app.schema.type("paragraph").default()!;
       const at = Point.toAfter(node.child(0)!.id);
 
@@ -50,7 +47,7 @@ export default function CollapsibleListComp(props: RendererProps) {
 
   // toggle collapsed state
   const handleToggle = useCallback(
-    (app: Carbon) => {
+    (app: CarbonEditor) => {
       const { cmd, selection } = app;
       cmd.Update(node.id, {
         [CollapsedPath]: !isCollapsed,

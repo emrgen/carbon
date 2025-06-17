@@ -1,18 +1,18 @@
-import { Optional } from "@emrgen/types";
-import { identity } from "lodash";
-import { CarbonAction } from "./actions/types";
-import { Carbon } from "./Carbon";
-import { NodeEncoder, Writer } from "./Encoder";
-import { CarbonMessageFormat } from "./MessageBus";
-import { Node } from "./Node";
-import { StateActions } from "./NodeChange";
-import { NodeProps, PlainNodeProps } from "./NodeProps";
-import { Pin } from "./Pin";
-import { PluginEmitter } from "./PluginEmitter";
-import { PluginManager } from "./PluginManager";
-import { PluginState } from "./PluginState";
-import { NodeSpec } from "./Schema";
-import { EventHandlerMap, PluginName } from "./types";
+import {Optional} from "@emrgen/types";
+import {identity} from "lodash";
+import {CarbonAction} from "./actions/types";
+import {CarbonEditor} from "./CarbonEditor";
+import {NodeEncoder, Writer} from "./Encoder";
+import {CarbonMessageFormat} from "./MessageBus";
+import {Node} from "./Node";
+import {StateActions} from "./NodeChange";
+import {NodeProps, PlainNodeProps} from "./NodeProps";
+import {Pin} from "./Pin";
+import {PluginEmitter} from "./PluginEmitter";
+import {PluginManager} from "./PluginManager";
+import {PluginState} from "./PluginState";
+import {NodeSpec} from "./Schema";
+import {EventHandlerMap, PluginName} from "./types";
 
 export enum PluginType {
   Node,
@@ -40,9 +40,9 @@ export abstract class CarbonPlugin {
 
   protected bus!: PluginEmitter;
   protected state!: PluginState;
-  protected app!: Carbon;
+  protected app!: CarbonEditor;
 
-  init(app: Carbon, bus: PluginEmitter, state: PluginState) {
+  init(app: CarbonEditor, bus: PluginEmitter, state: PluginState) {
     this.app = app;
     this.bus = bus;
     this.state = state;
@@ -69,7 +69,7 @@ export abstract class CarbonPlugin {
     }));
   }
 
-  default(app: Carbon): Optional<Node> {
+  default(app: CarbonEditor): Optional<Node> {
     return null;
   }
 
@@ -96,7 +96,7 @@ export abstract class CarbonPlugin {
     return {};
   }
 
-  transaction(app: Carbon, tr: StateActions) {}
+  transaction(app: CarbonEditor, tr: StateActions) {}
 
   // normalize the node based on schema
   normalize(node: Node): CarbonAction[] {
@@ -113,7 +113,7 @@ export abstract class CarbonPlugin {
     throw new Error("encodeHtml not implemented for " + this.name);
   }
 
-  onReceive(app: Carbon, msg: CarbonMessageFormat) {
+  onReceive(app: CarbonEditor, msg: CarbonMessageFormat) {
     const { source, dest } = msg;
     if (source.eq(dest)) return true;
   }

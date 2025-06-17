@@ -19,7 +19,7 @@ export const Dummy = () => {
 //   State,
 //   TagPath,
 // } from "@emrgen/carbon-core";
-// import {CarbonApp} from "@emrgen/carbon-utils";
+// import {Carbon} from "@emrgen/carbon-utils";
 // import {
 //   h,
 //   createElement,

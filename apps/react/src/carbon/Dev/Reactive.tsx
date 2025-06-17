@@ -1,18 +1,18 @@
-import { Box } from "@chakra-ui/react";
+import {Box} from "@chakra-ui/react";
 
-import { blockPresetPlugins, node, title } from "@emrgen/carbon-blocks";
-import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import { FloatingStyleMenu, InsertBlockMenu } from "@emrgen/carbon-chakra-ui";
-import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { CodeValuePath, corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
-import { RenderManager, useCreateCachedCarbon } from "@emrgen/carbon-react";
-import { Runtime } from "@emrgen/carbon-reactive";
-import { LiveCell, LiveCellRenderer, ReactiveRuntimeContext } from "@emrgen/carbon-reactive-cell";
-import { BlockMenuPlugin, CarbonApp } from "@emrgen/carbon-utils";
-import { Library } from "@observablehq/stdlib";
+import {blockPresetPlugins, node, title} from "@emrgen/carbon-blocks";
+import {blockPresetRenderers} from "@emrgen/carbon-blocks-react";
+import {FloatingStyleMenu, InsertBlockMenu} from "@emrgen/carbon-chakra-ui";
+import {ClipboardPlugin} from "@emrgen/carbon-clipboard";
+import {CodeValuePath, corePresetPlugins, ModePath, NodeId} from "@emrgen/carbon-core";
+import {RenderManager, useCreateCachedCarbon} from "@emrgen/carbon-react";
+import {Runtime} from "@emrgen/carbon-reactive";
+import {LiveCell, LiveCellRenderer, ReactiveRuntimeContext} from "@emrgen/carbon-reactive-cell";
+import {BlockMenuPlugin, Carbon} from "@emrgen/carbon-utils";
+import {Library} from "@observablehq/stdlib";
 import * as _ from "lodash";
-import { flattenDeep } from "lodash";
-import { useEffect, useState } from "react";
+import {flattenDeep} from "lodash";
+import {useEffect, useState} from "react";
 import "./test.styl";
 
 const data = node("carbon", [
@@ -90,10 +90,10 @@ export function Reactive() {
   return (
     <Box className={"carbon-app-container reactive"} pos={"relative"}>
       <ReactiveRuntimeContext runtime={runtime}>
-        <CarbonApp app={app} renderManager={renderManager}>
+        <Carbon app={app} renderManager={renderManager}>
           <FloatingStyleMenu />
           <InsertBlockMenu />
-        </CarbonApp>
+        </Carbon>
       </ReactiveRuntimeContext>
     </Box>
   );

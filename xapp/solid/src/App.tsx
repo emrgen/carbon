@@ -1,15 +1,8 @@
 import "./App.css";
-import {
-  blockPresetPlugins,
-  carbon,
-  node,
-  paragraph,
-  text,
-  title,
-} from "@emrgen/carbon-blocks";
+import {blockPresetPlugins, carbon, node, paragraph, text, title,} from "@emrgen/carbon-blocks";
 import {
   BlockSelection,
-  Carbon,
+  CarbonEditor,
   CheckedPath,
   corePresetPlugins,
   LocalHtmlAttrPath,
@@ -31,15 +24,8 @@ import {
   SolidState,
   useCarbon,
 } from "@emrgen/carbon-solid";
-import {
-  createContext,
-  createEffect,
-  createSignal,
-  For,
-  onCleanup,
-  onMount,
-} from "solid-js";
-import { createMutable } from "solid-js/store";
+import {createContext, createEffect, createSignal, For, onCleanup, onMount,} from "solid-js";
+import {createMutable} from "solid-js/store";
 
 const plugins = [...corePresetPlugins, ...blockPresetPlugins];
 
@@ -67,7 +53,7 @@ const state: State = SolidState.create(
   BlockSelection.empty(),
 );
 
-const app = new Carbon(state, schema, pm);
+const app = new CarbonEditor(state, schema, pm);
 
 // @ts-ignore
 window.app = app;

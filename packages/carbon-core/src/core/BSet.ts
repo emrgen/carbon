@@ -1,11 +1,11 @@
-import { each, identity } from "lodash";
+import {each, identity} from "lodash";
 import BTree from "sorted-btree";
-import { NodeId, NodeIdComparator } from "./NodeId";
-import { Carbon } from "./Carbon";
-import { Maps } from "./types";
-import { NodeMap } from "./NodeMap";
-import { Node } from "./Node";
-import { classString } from "./Logger";
+import {CarbonEditor} from "./CarbonEditor";
+import {classString} from "./Logger";
+import {Node} from "./Node";
+import {NodeId, NodeIdComparator} from "./NodeId";
+import {NodeMap} from "./NodeMap";
+import {Maps} from "./types";
 
 // A Btree based set
 export class BSet<K> {
@@ -113,9 +113,9 @@ export class BSet<K> {
 
 // Set of deleted Item IDs
 export class DeleteSet extends BSet<NodeId> {
-  app: Carbon;
+  app: CarbonEditor;
 
-  constructor(app: Carbon) {
+  constructor(app: CarbonEditor) {
     super(NodeIdComparator);
     this.app = app;
   }

@@ -3,7 +3,7 @@ import {Button, HStack, Stack} from "@chakra-ui/react";
 import {HashRouter, NavLink} from "react-router-dom";
 import {Pages} from "./Demo/Pages";
 
-// This file is part of the Carbon Design System project
+// This file is part of the CarbonEditor Design System project
 export default function App() {
   return (
     <HashRouter>

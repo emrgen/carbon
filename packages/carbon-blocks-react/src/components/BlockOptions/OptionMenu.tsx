@@ -1,11 +1,11 @@
-import { Carbon, preventAndStop } from "@emrgen/carbon-core";
-import { RendererProps } from "@emrgen/carbon-react";
-import { useCallback } from "react";
-import { SlOptions } from "react-icons/sl";
-import { OptionButton } from "./OptionButton";
+import {CarbonEditor, preventAndStop} from "@emrgen/carbon-core";
+import {RendererProps} from "@emrgen/carbon-react";
+import {useCallback} from "react";
+import {SlOptions} from "react-icons/sl";
+import {OptionButton} from "./OptionButton";
 
 interface OptionMenuProps extends RendererProps {
-  app: Carbon;
+  app: CarbonEditor;
 }
 
 export const OptionMenu = (props: OptionMenuProps) => {

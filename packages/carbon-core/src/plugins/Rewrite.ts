@@ -1,7 +1,7 @@
 // Things needed to change a node type (e.g. from paragraph to heading):
 import {
   BeforePlugin,
-  Carbon,
+  CarbonEditor,
   Pin,
   PinnedSelection,
   StateActions,
@@ -23,13 +23,13 @@ export class RewritePlugin extends BeforePlugin {
     ]);
   }
 
-  transaction(app: Carbon, tx: StateActions) {
+  transaction(app: CarbonEditor, tx: StateActions) {
     if (tx.type !== TxType.Undo) {
       this.checkInputRules(app);
     }
   }
 
-  checkInputRules(app: Carbon) {
+  checkInputRules(app: CarbonEditor) {
     const { selection } = app;
     if (!selection.isCollapsed || selection.isIdentity || selection.isInvalid)
       return;
@@ -40,7 +40,7 @@ export class RewritePlugin extends BeforePlugin {
   }
 
   changeText(from: string, to: string) {
-    return (app: Carbon, pin: Pin, text: string) => {
+    return (app: CarbonEditor, pin: Pin, text: string) => {
       const tail = pin.moveBy(-from.length)!;
       const selection = PinnedSelection.create(tail, pin);
       app.cmd.transform.insertText(selection, to).dispatch();
@@ -51,7 +51,7 @@ export class RewritePlugin extends BeforePlugin {
 class BeforeInputRewriteRuleHandler {
   constructor(readonly rules: RewriteInputRule[]) {}
 
-  execute(app: Carbon, pin: Pin): boolean {
+  execute(app: CarbonEditor, pin: Pin): boolean {
     const text = this.getText(pin);
     return this.rules.some((rule) => rule.execute(app, pin, text));
   }
@@ -64,7 +64,7 @@ class BeforeInputRewriteRuleHandler {
   }
 }
 
-type RewriteInputHandler = (app: Carbon, pin: Pin, text: string) => void;
+type RewriteInputHandler = (app: CarbonEditor, pin: Pin, text: string) => void;
 
 class RewriteInputRule {
   constructor(
@@ -72,7 +72,7 @@ class RewriteInputRule {
     readonly handler: RewriteInputHandler,
   ) {}
 
-  execute(app: Carbon, pin: Pin, text: string): boolean {
+  execute(app: CarbonEditor, pin: Pin, text: string): boolean {
     if (this.regex.test(text)) {
       this.handler(app, pin, text);
       return true;

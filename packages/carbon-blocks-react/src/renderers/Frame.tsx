@@ -1,22 +1,21 @@
-import {useEffect, useMemo, useRef} from "react";
+import {CarbonEditor, ContenteditablePath, Node, State} from "@emrgen/carbon-core";
+import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   CarbonNodeChildren,
   CarbonNodeContent,
   RendererProps,
-  useCarbon,
-  useSelectionHalo
+  useCarbon
 } from "@emrgen/carbon-react";
-import {useDragDropRectSelectHalo} from "@emrgen/carbon-dragon-react";
-import {Carbon, ContenteditablePath, State, Node} from "@emrgen/carbon-core";
+import {useEffect, useRef} from "react";
 
-const makeEditable = (app: Carbon, node: Node) => {
+const makeEditable = (app: CarbonEditor, node: Node) => {
   if (node.props.get(ContenteditablePath)) return
   app.cmd.Update(node.id, {
     [ContenteditablePath]: true,
   }).Dispatch()
 }
-const makeUneditable = (app: Carbon, node: Node) => {
+const makeUneditable = (app: CarbonEditor, node: Node) => {
   if (!node.props.get(ContenteditablePath)) {
     console.log('xxx [makeUneditable] already uneditable', node.props.get(ContenteditablePath), node.renderVersion, ContenteditablePath)
     return

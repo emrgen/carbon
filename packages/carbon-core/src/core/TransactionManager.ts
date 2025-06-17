@@ -1,16 +1,16 @@
-import { PluginManager } from "./PluginManager";
-import { Transaction } from "./Transaction";
-import { SelectionManager } from "./SelectionManager";
-import { Carbon } from "./Carbon";
-import { State } from "./State";
-import { Optional } from "@emrgen/types";
+import {Optional} from "@emrgen/types";
+import {CarbonEditor} from "./CarbonEditor";
+import {PluginManager} from "./PluginManager";
+import {SelectionManager} from "./SelectionManager";
+import {State} from "./State";
+import {Transaction} from "./Transaction";
 
 export class TransactionManager {
   private currentTr: Optional<Transaction>;
   private transactions: Transaction[] = [];
 
   constructor(
-    readonly app: Carbon,
+    readonly app: CarbonEditor,
     readonly pm: PluginManager,
     readonly sm: SelectionManager,
     readonly updateState: (state: State, tr: Transaction) => boolean,

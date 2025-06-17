@@ -1,18 +1,12 @@
-import { Box } from "@chakra-ui/react";
-import {
-  addClass,
-  Carbon,
-  EventsOut,
-  removeClass,
-  State,
-} from "@emrgen/carbon-core";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import {Box} from "@chakra-ui/react";
+import {addClass, CarbonEditor, EventsOut, removeClass, State,} from "@emrgen/carbon-core";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 
 const blinkClass = "fastype-cursor--blinking";
 const focusClass = "fastype-cursor--focused";
 
 interface CustomCursorProps {
-  app: Carbon;
+  app: CarbonEditor;
 }
 
 export const FastypeCursor = (props: CustomCursorProps) => {

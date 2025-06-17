@@ -1,8 +1,4 @@
-import { CarbonPlugin } from "@emrgen/carbon-core";
-import { EventHandlerMap } from "@emrgen/carbon-core";
-import { Node } from "@emrgen/carbon-core";
-import { Carbon } from "@emrgen/carbon-core";
-import { CheckedPath } from "@emrgen/carbon-core";
+import {CarbonEditor, CarbonPlugin, CheckedPath, EventHandlerMap, Node} from "@emrgen/carbon-core";
 
 declare module "@emrgen/carbon-core" {
   export interface Service {
@@ -54,13 +50,13 @@ export class MCQ extends CarbonPlugin {
   }
   services(): Record<string, Function> {
     return {
-      isAttempted(app: Carbon, node: Node) {
+      isAttempted(app: CarbonEditor, node: Node) {
         const options = node.children.filter((n) => n.name === "mcqOption");
         return options.some((option) =>
           app.service.mcqOption.isSelected(option),
         );
       },
-      summary(app: Carbon, node: Node) {
+      summary(app: CarbonEditor, node: Node) {
         const summaries = node.children
           .filter((n) => n.name === "mcqOption")
           .map((n) => app.service.mcqOption.summary(n) as MCQOptionSummary);
@@ -112,10 +108,10 @@ export class MultipleChoiceOption extends CarbonPlugin {
 
   services(): Record<string, Function> {
     return {
-      isSelected(app: Carbon, node: Node) {
+      isSelected(app: CarbonEditor, node: Node) {
         return node.props.get(CheckedPath, false);
       },
-      summary(app: Carbon, node: Node) {
+      summary(app: CarbonEditor, node: Node) {
         return {
           correct: node.props.get(CheckedPath, false),
         };

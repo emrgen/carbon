@@ -1,7 +1,7 @@
 import {
   BeforePlugin,
   BlockSelection,
-  Carbon,
+  CarbonEditor,
   EventContext,
   EventHandlerMap,
   Mark,
@@ -10,8 +10,8 @@ import {
   State,
   Transaction,
 } from "@emrgen/carbon-core";
-import { Optional, With } from "@emrgen/types";
-import { PluginEmitter, PluginState } from "../core/index";
+import {Optional, With} from "@emrgen/types";
+import {PluginEmitter, PluginState} from "../core/index";
 
 // add formatter commands to the CarbonCommands interface
 declare module "@emrgen/carbon-core" {
@@ -71,7 +71,7 @@ export class FormatterPlugin extends BeforePlugin {
     this.onChanged = this.onChanged.bind(this);
   }
 
-  override init(app: Carbon, bus: PluginEmitter, state: PluginState) {
+  override init(app: CarbonEditor, bus: PluginEmitter, state: PluginState) {
     super.init(app, bus, state);
     app.on("changed", this.onChanged);
   }

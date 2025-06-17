@@ -1,15 +1,10 @@
-import { blockPresetPlugins, node, title } from "@emrgen/carbon-blocks";
-import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
+import {blockPresetPlugins, node, title} from "@emrgen/carbon-blocks";
+import {blockPresetRenderers} from "@emrgen/carbon-blocks-react";
 
-import {
-  CarbonPlugin,
-  corePresetPlugins,
-  ModePath,
-  NodeId,
-} from "@emrgen/carbon-core";
-import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
-import { CarbonApp } from "@emrgen/carbon-utils";
-import { flattenDeep } from "lodash";
+import {CarbonPlugin, corePresetPlugins, ModePath, NodeId,} from "@emrgen/carbon-core";
+import {RenderManager, useCreateCarbon} from "@emrgen/carbon-react";
+import {Carbon} from "@emrgen/carbon-utils";
+import {flattenDeep} from "lodash";
 
 const data = node("carbon", [
   node("page", [title()], {
@@ -33,7 +28,7 @@ export default function TestText() {
 
   return (
     <div className={"carbon-app-container"}>
-      <CarbonApp app={app} renderManager={renderManager}></CarbonApp>
+      <Carbon app={app} renderManager={renderManager}></Carbon>
     </div>
   );
 }

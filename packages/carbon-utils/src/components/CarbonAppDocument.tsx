@@ -1,5 +1,5 @@
-import { Carbon } from "@emrgen/carbon-core";
-import { DndContext, RectSelectContext } from "@emrgen/carbon-dragon-react";
+import {CarbonEditor} from "@emrgen/carbon-core";
+import {DndContext, RectSelectContext} from "@emrgen/carbon-dragon-react";
 import {
   CarbonChangeContext,
   CarbonContent,
@@ -9,17 +9,17 @@ import {
   RenderManager,
   RenderManagerContext,
 } from "@emrgen/carbon-react";
-import { ReactNode, useEffect, useRef } from "react";
-import { RecoilRoot } from "recoil";
+import {ReactNode, useEffect, useRef} from "react";
+import {RecoilRoot} from "recoil";
 
 interface CarbonAppProps {
-  app: Carbon;
+  app: CarbonEditor;
   renderManager: RenderManager;
   children?: ReactNode;
   focusOnMount?: boolean;
 }
 
-export function CarbonApp(props: CarbonAppProps) {
+export function Carbon(props: CarbonAppProps) {
   const { app, children, focusOnMount = false } = props;
   // @ts-ignore
   window.app = app;

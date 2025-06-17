@@ -1,4 +1,4 @@
-import { EventHandler, NodePlugin, NodeSpec, skipKeyEvent } from "@emrgen/carbon-core";
+import {EventHandler, NodePlugin, NodeSpec, skipKeyEvent} from "@emrgen/carbon-core";
 
 export const VideoSrcPath = "remote/state/video/src";
 
@@ -49,7 +49,7 @@ export class Video extends NodePlugin {
     };
   }
 
-  // serialize(react: Carbon, node: Node): SerializedNode {
+  // serialize(react: CarbonEditor, node: Node): SerializedNode {
   //   return {
   //     name: node.name,
   //     title: `![](${node.attrs.node.src})`,

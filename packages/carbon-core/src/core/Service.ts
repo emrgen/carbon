@@ -1,13 +1,13 @@
-import { entries, isEmpty } from "lodash";
-import { CarbonPlugin } from "./CarbonPlugin";
-import { Carbon } from "./Carbon";
+import {entries, isEmpty} from "lodash";
+import {CarbonEditor} from "./CarbonEditor";
+import {CarbonPlugin} from "./CarbonPlugin";
 
 type ServiceMap = Record<string, Record<string, Function>>;
 
 // Service is a proxy object that allows plugins to access each other's services
 // the services are bound to the plugin instance and accessed via the plugin name
 export class Service {
-  static from(app: Carbon, plugins: CarbonPlugin[]) {
+  static from(app: CarbonEditor, plugins: CarbonPlugin[]) {
     const services = plugins.reduce((acc, plugin) => {
       const services = plugin.services();
       if (isEmpty(services)) return acc;

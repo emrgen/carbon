@@ -1,4 +1,4 @@
-export * from "./Carbon";
+export * from "./CarbonEditor";
 export * from "./CarbonPlugin";
 export * from "./NodeStore";
 export * from "./Transaction";

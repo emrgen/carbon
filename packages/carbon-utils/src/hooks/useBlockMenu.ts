@@ -1,9 +1,9 @@
-import { Carbon, Node } from "@emrgen/carbon-core";
-import { useEffect } from "react";
-import { BlockMenuCmd } from "../types";
+import {CarbonEditor, Node} from "@emrgen/carbon-core";
+import {useEffect} from "react";
+import {BlockMenuCmd} from "../types";
 
 export interface UseBlockMenuProps {
-  app: Carbon;
+  app: CarbonEditor;
   onShow: (node: Node, state) => void;
   onHide: (node: Node, state) => void;
   onSelect: (node: Node, el: HTMLElement) => void;

@@ -1,15 +1,15 @@
 import {
   AfterPlugin,
-  Carbon,
+  CarbonEditor,
   CarbonPlugin,
   EventContext,
   LocalClassPath,
   StateActions,
 } from "@emrgen/carbon-core";
-import { p12, p14 } from "../core/Logger";
-import { EventHandlerMap } from "../core/types";
-import { KeyboardSelection } from "./KeyboardSelection";
-import { MouseSelection } from "./MouseSelection";
+import {p12, p14} from "../core/Logger";
+import {EventHandlerMap} from "../core/types";
+import {KeyboardSelection} from "./KeyboardSelection";
+import {MouseSelection} from "./MouseSelection";
 
 let count = 0;
 
@@ -98,7 +98,7 @@ export class SelectionChangePlugin extends AfterPlugin {
     return [new MouseSelection(), new KeyboardSelection()];
   }
 
-  _transaction(app: Carbon, tr: StateActions) {
+  _transaction(app: CarbonEditor, tr: StateActions) {
     const { state } = app;
     const { selection: after } = state;
     if (state.previous) {

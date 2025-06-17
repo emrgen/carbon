@@ -1,9 +1,9 @@
-import { Optional } from "@emrgen/types";
-import { clamp } from "lodash";
-import { Carbon } from "./Carbon";
-import { Node } from "./Node";
-import { NodeId } from "./NodeId";
-import { NodeMap } from "./NodeMap";
+import {Optional} from "@emrgen/types";
+import {clamp} from "lodash";
+import {CarbonEditor} from "./CarbonEditor";
+import {Node} from "./Node";
+import {NodeId} from "./NodeId";
+import {NodeMap} from "./NodeMap";
 
 // NodeStore is a store for the nodes and their rendered HTML elements
 export class NodeStore {
@@ -13,7 +13,7 @@ export class NodeStore {
 
   private deletedNodes: Set<string> = new Set();
 
-  constructor(private readonly app: Carbon) {}
+  constructor(private readonly app: CarbonEditor) {}
 
   private get nodeMap(): NodeMap {
     return this.app.state.nodeMap;

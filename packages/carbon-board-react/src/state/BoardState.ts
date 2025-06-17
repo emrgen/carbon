@@ -1,7 +1,7 @@
 import {
   ActionOrigin,
   ActivatedPath,
-  Carbon,
+  CarbonEditor,
   ContenteditablePath,
   Node,
   NodeBTree,
@@ -12,17 +12,17 @@ import {
   stop,
   Transaction,
 } from "@emrgen/carbon-core";
-import { NodeTopicEmitter } from "@emrgen/carbon-core/src/core/NodeEmitter";
-import { KeyboardEvent } from "react";
-import { Optional } from "@emrgen/types";
+import {NodeTopicEmitter} from "@emrgen/carbon-core/src/core/NodeEmitter";
+import {Optional} from "@emrgen/types";
+import {KeyboardEvent} from "react";
 
 export class SquareBoardState extends NodeTopicEmitter {
-  app: Carbon;
+  app: CarbonEditor;
   activeItem: Node | null;
   activeComment: Node | null;
   selectedItems: NodeBTree;
 
-  constructor(app: Carbon) {
+  constructor(app: CarbonEditor) {
     super();
     this.app = app;
     this.activeItem = null;
@@ -30,7 +30,7 @@ export class SquareBoardState extends NodeTopicEmitter {
     this.selectedItems = new NodeBTree();
   }
 
-  static default(app: Carbon) {
+  static default(app: CarbonEditor) {
     return new SquareBoardState(app);
   }
 

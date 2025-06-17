@@ -1,12 +1,12 @@
-import { blockPresetPlugins, node, title } from "@emrgen/carbon-blocks";
+import {blockPresetPlugins, node, title} from "@emrgen/carbon-blocks";
 import {
-  Carbon,
+  CarbonEditor,
   corePresetPlugins,
   PinnedSelection,
   PluginManager,
   Schema,
 } from "@emrgen/carbon-core";
-import { ImmutableNodeFactory, ImmutableState } from "@emrgen/carbon-react";
+import {ImmutableNodeFactory, ImmutableState} from "@emrgen/carbon-react";
 
 export const createCarbon = () => {
   const pm = new PluginManager([...corePresetPlugins, ...blockPresetPlugins]);
@@ -17,5 +17,5 @@ export const createCarbon = () => {
   const content = schema.nodeFromJSON(json)!;
   const state = ImmutableState.create(scope, content, PinnedSelection.IDENTITY);
 
-  return new Carbon(state, schema, pm);
+  return new CarbonEditor(state, schema, pm);
 };

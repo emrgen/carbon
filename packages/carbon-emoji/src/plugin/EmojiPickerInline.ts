@@ -2,7 +2,7 @@ import {
   ActionType,
   BeforeInputRuleHandler,
   BeforePlugin,
-  Carbon,
+  CarbonEditor,
   EventContext,
   EventHandler,
   EventHandlerMap,
@@ -12,8 +12,8 @@ import {
   SetContentAction,
   StateActions,
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
-import { EmojiIndex } from "../EmojiIndex";
+import {Optional} from "@emrgen/types";
+import {EmojiIndex} from "../EmojiIndex";
 
 // @ts-ignore
 window.ei = EmojiIndex;
@@ -155,7 +155,7 @@ export class EmojiPickerInline extends BeforePlugin {
     this.app.emit("navigate:emoji-picker", event);
   }
 
-  transaction(app: Carbon, tr: StateActions) {
+  transaction(app: CarbonEditor, tr: StateActions) {
     const { selection, blockSelection } = app;
     if (blockSelection.isActive) return;
     const { head } = selection;

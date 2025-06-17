@@ -1,7 +1,7 @@
-import { Optional, With } from "@emrgen/types";
+import {Optional, With} from "@emrgen/types";
 import dayjs from "dayjs";
-import { flatten, identity, isArray, isFunction } from "lodash";
-import { insertNodesActions } from "../utils/action";
+import {flatten, identity, isArray, isFunction} from "lodash";
+import {insertNodesActions} from "../utils/action";
 import {
   ChangeNameAction,
   MoveNodeAction,
@@ -11,24 +11,24 @@ import {
   UpdateMarkAction,
   UpdatePropsAction,
 } from "./actions/index";
-import { ActionOrigin, CarbonAction, TxType } from "./actions/types";
-import { NodeIdSet } from "./BSet";
-import { NodeBTree } from "./BTree";
-import { Carbon } from "./Carbon";
-import { CarbonCommand, PluginCommand } from "./CarbonCommand";
-import { Draft } from "./Draft";
-import { p14 } from "./Logger";
-import { Mark } from "./Mark";
-import { Node } from "./Node";
-import { IntoNodeId, NodeId } from "./NodeId";
-import { ActivatedPath, NodePropsJson, SelectedPath } from "./NodeProps";
-import { PinnedSelection } from "./PinnedSelection";
-import { PluginManager } from "./PluginManager";
-import { Point } from "./Point";
-import { PointedSelection } from "./PointedSelection";
-import { SelectionManager } from "./SelectionManager";
-import { TransactionManager } from "./TransactionManager";
-import { cloneFrozenNode, NodeName } from "./types";
+import {ActionOrigin, CarbonAction, TxType} from "./actions/types";
+import {NodeIdSet} from "./BSet";
+import {NodeBTree} from "./BTree";
+import {CarbonCommand, PluginCommand} from "./CarbonCommand";
+import {CarbonEditor} from "./CarbonEditor";
+import {Draft} from "./Draft";
+import {p14} from "./Logger";
+import {Mark} from "./Mark";
+import {Node} from "./Node";
+import {IntoNodeId, NodeId} from "./NodeId";
+import {ActivatedPath, NodePropsJson, SelectedPath} from "./NodeProps";
+import {PinnedSelection} from "./PinnedSelection";
+import {PluginManager} from "./PluginManager";
+import {Point} from "./Point";
+import {PointedSelection} from "./PointedSelection";
+import {SelectionManager} from "./SelectionManager";
+import {TransactionManager} from "./TransactionManager";
+import {cloneFrozenNode, NodeName} from "./types";
 
 let _id = 0;
 const getId = () => String(_id++);
@@ -83,7 +83,7 @@ export class Transaction {
   }
 
   static create(
-    carbon: Carbon,
+    carbon: CarbonEditor,
     cmd: CarbonCommand,
     tm: TransactionManager,
     pm: PluginManager,
@@ -93,7 +93,7 @@ export class Transaction {
   }
 
   constructor(
-    readonly app: Carbon,
+    readonly app: CarbonEditor,
     readonly cmd: CarbonCommand,
     protected readonly tm: TransactionManager,
     protected readonly pm: PluginManager,

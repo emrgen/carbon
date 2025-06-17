@@ -1,18 +1,18 @@
 import {
   BSet,
-  Carbon,
+  CarbonEditor,
   Node,
   NodeId,
   NodeIdMap,
   NodeIdSet,
   NodeIdTopicEmitter,
 } from "@emrgen/carbon-core";
-import { DndEvent, elementBound, NodeR3Tree } from "@emrgen/carbon-dragon";
-import { BBox, RawRect} from "@emrgen/types";
-import { EventEmitter } from "events";
-import { identity } from "lodash";
-import { MouseEvent } from "react";
-import { max, min } from "../utils";
+import {DndEvent, elementBound, NodeR3Tree} from "@emrgen/carbon-dragon";
+import {BBox, RawRect} from "@emrgen/types";
+import {EventEmitter} from "events";
+import {identity} from "lodash";
+import {MouseEvent} from "react";
+import {max, min} from "../utils";
 
 export interface SelectEvent {
   event: MouseEvent;
@@ -60,7 +60,7 @@ export class DesignBoard extends EventEmitter {
       maxY: max(...bounds.map((b) => b.maxY)),
     };
   }
-  constructor(readonly app: Carbon) {
+  constructor(readonly app: CarbonEditor) {
     super();
 
     this.onSelectionStart = this.onSelectionStart.bind(this);

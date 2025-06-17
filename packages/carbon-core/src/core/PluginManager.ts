@@ -1,18 +1,18 @@
-import { Optional } from "@emrgen/types";
+import {Optional} from "@emrgen/types";
 
-import { isKeyHotkey } from "is-hotkey";
-import { camelCase, each, entries, keys, snakeCase, some, sortBy, uniqBy, values } from "lodash";
-import { CarbonAction } from "./actions/types";
-import { Carbon } from "./Carbon";
-import { CarbonCommand } from "./CarbonCommand";
-import { CarbonPlugin, PluginType } from "./CarbonPlugin";
-import { EventsIn } from "./Event";
-import { EventContext } from "./EventContext";
-import { Node } from "./Node";
-import { StateActions } from "./NodeChange";
-import { PlainNodeProps } from "./NodeProps";
-import { Service } from "./Service";
-import { EventHandlerMap, NodeName } from "./types";
+import {isKeyHotkey} from "is-hotkey";
+import {camelCase, each, entries, keys, snakeCase, some, sortBy, uniqBy, values} from "lodash";
+import {CarbonAction} from "./actions/types";
+import {CarbonCommand} from "./CarbonCommand";
+import {CarbonEditor} from "./CarbonEditor";
+import {CarbonPlugin, PluginType} from "./CarbonPlugin";
+import {EventsIn} from "./Event";
+import {EventContext} from "./EventContext";
+import {Node} from "./Node";
+import {StateActions} from "./NodeChange";
+import {PlainNodeProps} from "./NodeProps";
+import {Service} from "./Service";
+import {EventHandlerMap, NodeName} from "./types";
 
 // handles events by executing proper plugin
 export class PluginManager {
@@ -76,7 +76,7 @@ export class PluginManager {
     return CarbonCommand.from(this.plugins);
   }
 
-  services(app: Carbon) {
+  services(app: CarbonEditor) {
     return Service.from(app, this.plugins);
   }
 
@@ -202,7 +202,7 @@ export class PluginManager {
     console.groupEnd();
   }
 
-  onTransaction(app: Carbon, tr: StateActions) {
+  onTransaction(app: CarbonEditor, tr: StateActions) {
     each(this.before, (p) => p.transaction(app, tr));
     each(this.after, (p) => p.transaction(app, tr));
   }

@@ -2,8 +2,8 @@ import {
   ActionOrigin,
   BeforePlugin,
   BlockSelection,
-  Carbon,
   CarbonAction,
+  CarbonEditor,
   cloneFrozenNode,
   deepCloneMap,
   deepCloneWithNewId,
@@ -28,10 +28,10 @@ import {
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
 
-import { Optional } from "@emrgen/types";
-import { each, first, flatten, last, merge, reduce, reverse, sortBy } from "lodash";
-import { InsertTextAction } from "../core/actions/InsertTextAction";
-import { ContentMatch } from "../core/ContentMatch";
+import {Optional} from "@emrgen/types";
+import {each, first, flatten, last, merge, reduce, reverse, sortBy} from "lodash";
+import {InsertTextAction} from "../core/actions/InsertTextAction";
+import {ContentMatch} from "../core/ContentMatch";
 import {
   ChangeNameAction,
   InsertNodeAction,
@@ -42,19 +42,19 @@ import {
   TitleNode,
   Transaction,
 } from "../core/index";
-import { p14 } from "../core/Logger";
-import { Node } from "../core/Node";
-import { NodeColumn } from "../core/NodeColumn";
-import { Pin } from "../core/Pin";
-import { Point } from "../core/Point";
-import { Slice } from "../core/Slice";
-import { Span } from "../core/Span";
-import { NodeName } from "../core/types";
-import { insertBeforeAction, moveNodesActions, removeNodesActions } from "../utils/action";
-import { takeAfter, takeBefore, takeUntil } from "../utils/array";
-import { blocksBelowCommonNode } from "../utils/findNodes";
-import { nodeLocation } from "../utils/location";
-import { splitTextBlock } from "../utils/split";
+import {p14} from "../core/Logger";
+import {Node} from "../core/Node";
+import {NodeColumn} from "../core/NodeColumn";
+import {Pin} from "../core/Pin";
+import {Point} from "../core/Point";
+import {Slice} from "../core/Slice";
+import {Span} from "../core/Span";
+import {NodeName} from "../core/types";
+import {insertBeforeAction, moveNodesActions, removeNodesActions} from "../utils/action";
+import {takeAfter, takeBefore, takeUntil} from "../utils/array";
+import {blocksBelowCommonNode} from "../utils/findNodes";
+import {nodeLocation} from "../utils/location";
+import {splitTextBlock} from "../utils/split";
 
 export interface SplitOpts {
   splitType?: NodeType;
@@ -870,7 +870,7 @@ export class TransformCommands extends BeforePlugin {
     // tr.Select(docSelection);
   }
 
-  private move(tr: Transaction, app: Carbon, nodes: Node | Node[], to: Point): Transaction {
+  private move(tr: Transaction, app: CarbonEditor, nodes: Node | Node[], to: Point): Transaction {
     const moveNodes = Array.isArray(nodes) ? nodes.slice().reverse() : [nodes];
     moveNodes.forEach((n) => {
       tr.Move(nodeLocation(n)!, to, n.id);
@@ -1925,7 +1925,7 @@ export class TransformCommands extends BeforePlugin {
 
   // delete nodes within selection patch
   private deleteGroupCommands(
-    app: Carbon,
+    app: CarbonEditor,
     deleteGroup: SelectionPatch,
   ): {
     rangeAction: CarbonAction[];
@@ -2043,14 +2043,14 @@ export class TransformCommands extends BeforePlugin {
     };
   }
 
-  private deleteText(app: Carbon, pin: Pin, text: string): Optional<Transaction> {
+  private deleteText(app: CarbonEditor, pin: Pin, text: string): Optional<Transaction> {
     return null;
   }
 
   // find node ids to delete for provided selection
   // think of the case what needs to happen when delete is pressed with some selection
   private selectionInfo(
-    app: Carbon,
+    app: CarbonEditor,
     selection: PinnedSelection,
     collectCollapseHidden = false,
   ): SelectionPatch {

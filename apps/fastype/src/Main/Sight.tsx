@@ -1,5 +1,5 @@
-import { Box } from "@chakra-ui/react";
-import { attrRenderers } from "@emrgen/carbon-attributes";
+import {Box} from "@chakra-ui/react";
+import {attrRenderers} from "@emrgen/carbon-attributes";
 
 import {
   BlockEvent,
@@ -10,9 +10,9 @@ import {
   text,
   title,
 } from "@emrgen/carbon-blocks";
-import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import { boardPlugins } from "@emrgen/carbon-board";
-import { boardRenderers } from "@emrgen/carbon-board-react";
+import {blockPresetRenderers} from "@emrgen/carbon-blocks-react";
+import {boardPlugins} from "@emrgen/carbon-board";
+import {boardRenderers} from "@emrgen/carbon-board-react";
 import {
   BlockContextMenu,
   carbonChakraRenderers,
@@ -20,9 +20,9 @@ import {
   FloatingStyleMenu,
   InsertBlockMenu,
 } from "@emrgen/carbon-chakra-ui";
-import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { codemirrorExtension } from "@emrgen/carbon-codemirror";
-import { commentEditorComp, commentEditorPlugin } from "@emrgen/carbon-comment-editor";
+import {ClipboardPlugin} from "@emrgen/carbon-clipboard";
+import {codemirrorExtension} from "@emrgen/carbon-codemirror";
+import {commentEditorComp, commentEditorPlugin} from "@emrgen/carbon-comment-editor";
 import {
   AddPagePath,
   CollapsedPath,
@@ -32,18 +32,18 @@ import {
   NodeId,
   State,
 } from "@emrgen/carbon-core";
-import { databasePlugins } from "@emrgen/carbon-database";
-import { databaseRenderers } from "@emrgen/carbon-database-react";
-import { emojiPlugins } from "@emrgen/carbon-emoji";
-import { flashPlugin, flashRenderers } from "@emrgen/carbon-flash";
-import { mediaPlugins, mediaRenderers } from "@emrgen/carbon-media";
-import { timelinePlugin, timelineRenderer } from "@emrgen/carbon-plugin-timeline";
-import { questionExtension } from "@emrgen/carbon-question";
-import { RendererProps, RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
-import { CarbonUI } from "@emrgen/carbon-ui";
-import { CarbonApp, carbonUtilPlugins, ScrollIntoView } from "@emrgen/carbon-utils";
-import { flattenDeep } from "lodash";
-import { useEffect, useState } from "react";
+import {databasePlugins} from "@emrgen/carbon-database";
+import {databaseRenderers} from "@emrgen/carbon-database-react";
+import {emojiPlugins} from "@emrgen/carbon-emoji";
+import {flashPlugin, flashRenderers} from "@emrgen/carbon-flash";
+import {mediaPlugins, mediaRenderers} from "@emrgen/carbon-media";
+import {timelinePlugin, timelineRenderer} from "@emrgen/carbon-plugin-timeline";
+import {questionExtension} from "@emrgen/carbon-question";
+import {RendererProps, RenderManager, useCreateCarbon} from "@emrgen/carbon-react";
+import {CarbonUI} from "@emrgen/carbon-ui";
+import {Carbon, carbonUtilPlugins, ScrollIntoView} from "@emrgen/carbon-utils";
+import {flattenDeep} from "lodash";
+import {useEffect, useState} from "react";
 import "./test.styl";
 
 const page = node(
@@ -218,14 +218,14 @@ export function Sight() {
 
   return (
     <Box className={"carbon-app-container"} pos={"relative"}>
-      <CarbonApp app={app} renderManager={renderManager}>
+      <Carbon app={app} renderManager={renderManager}>
         <Box pos={"absolute"} right={8} top={6}></Box>
         <FloatingStyleMenu />
         <InsertBlockMenu />
         <BlockContextMenu />
         <EmojiPickerInlineMenu />
         <ScrollIntoView />
-      </CarbonApp>
+      </Carbon>
     </Box>
   );
 }

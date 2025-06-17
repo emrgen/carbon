@@ -1,8 +1,8 @@
-import { createContext, useContext } from "react";
-import { Carbon } from "@emrgen/carbon-core";
-import { EventTrackerProvider } from "./useEventTracker";
+import {CarbonEditor} from "@emrgen/carbon-core";
+import {createContext, useContext} from "react";
+import {EventTrackerProvider} from "./useEventTracker";
 
-const InnerCarbonContext = createContext<Carbon>(null!);
+const InnerCarbonContext = createContext<CarbonEditor>(null!);
 
 export const CarbonContext = ({ app, children }) => {
   return (

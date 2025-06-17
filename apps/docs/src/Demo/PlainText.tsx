@@ -1,17 +1,17 @@
-import { attrRenderers } from "@emrgen/carbon-attributes";
-import { blockPresetPlugins, node, paragraph, title } from "@emrgen/carbon-blocks";
-import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui";
-import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
-import { codemirrorExtension } from "@emrgen/carbon-codemirror";
-import { commentEditorComp, commentEditorPlugin } from "@emrgen/carbon-comment-editor";
-import { corePresetPlugins, ModePath, NodeId } from "@emrgen/carbon-core";
-import { databasePlugins } from "@emrgen/carbon-database";
-import { databaseRenderers } from "@emrgen/carbon-database-react";
-import { RenderManager } from "@emrgen/carbon-react";
-import { CarbonApp } from "@emrgen/carbon-utils";
-import { noop } from "lodash";
-import { useCreate } from "../create";
+import {attrRenderers} from "@emrgen/carbon-attributes";
+import {blockPresetPlugins, node, paragraph, title} from "@emrgen/carbon-blocks";
+import {blockPresetRenderers} from "@emrgen/carbon-blocks-react";
+import {FloatingStyleMenu} from "@emrgen/carbon-chakra-ui";
+import {ClipboardPlugin} from "@emrgen/carbon-clipboard";
+import {codemirrorExtension} from "@emrgen/carbon-codemirror";
+import {commentEditorComp, commentEditorPlugin} from "@emrgen/carbon-comment-editor";
+import {corePresetPlugins, ModePath, NodeId} from "@emrgen/carbon-core";
+import {databasePlugins} from "@emrgen/carbon-database";
+import {databaseRenderers} from "@emrgen/carbon-database-react";
+import {RenderManager} from "@emrgen/carbon-react";
+import {Carbon} from "@emrgen/carbon-utils";
+import {noop} from "lodash";
+import {useCreate} from "../create";
 
 // console.log = noop;
 // console.info = noop;
@@ -67,8 +67,8 @@ export function PlainText() {
   const app = useCreate(data, plugins);
 
   return (
-    <CarbonApp app={app} renderManager={renderManager}>
+    <Carbon app={app} renderManager={renderManager}>
       <FloatingStyleMenu />
-    </CarbonApp>
+    </Carbon>
   );
 }

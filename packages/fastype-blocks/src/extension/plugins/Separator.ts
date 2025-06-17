@@ -1,4 +1,4 @@
-import { Carbon, CarbonPlugin, EventHandler, NodeSpec, skipKeyEvent } from "@emrgen/carbon-core";
+import {CarbonPlugin, EventHandler, NodeSpec, skipKeyEvent} from "@emrgen/carbon-core";
 
 export class Separator extends CarbonPlugin {
 

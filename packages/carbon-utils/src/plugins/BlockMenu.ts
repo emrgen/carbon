@@ -1,13 +1,13 @@
 import {
   ActionType,
   BeforePlugin,
-  Carbon,
+  CarbonEditor,
   EventContext,
   EventHandler,
   preventAndStopCtx,
   StateActions,
 } from "@emrgen/carbon-core";
-import { BlockMenuCmd } from "../types";
+import {BlockMenuCmd} from "../types";
 
 const BlockMenuRegex = /^\/([a-zA-Z0-9\s])*$/;
 
@@ -81,7 +81,7 @@ export class BlockMenuPlugin extends BeforePlugin {
   // check if the inserted text matches any block info entries
   // if it does, show the block menu
   // if it doesn't, hide the block menu
-  transaction(app: Carbon, tr: StateActions) {
+  transaction(app: CarbonEditor, tr: StateActions) {
     const { selection, blockSelection } = app;
     if (blockSelection.isActive) return;
     const { head } = selection;
@@ -135,7 +135,7 @@ export class BlockMenuPlugin extends BeforePlugin {
     this.state.set(key, value);
   }
 
-  onHide(app: Carbon) {
+  onHide(app: CarbonEditor) {
     const { checked } = this;
     this.checked = checked;
     this.visible = false;

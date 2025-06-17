@@ -1,5 +1,5 @@
 import {
-  Carbon,
+  CarbonEditor,
   EventHandler,
   Node,
   NodePlugin,
@@ -52,7 +52,7 @@ export class Divider extends NodePlugin {
     };
   }
 
-  serialize(app: Carbon, node: Node): SerializedNode {
+  serialize(app: CarbonEditor, node: Node): SerializedNode {
     return "---";
   }
 }

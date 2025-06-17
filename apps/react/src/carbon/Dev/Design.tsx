@@ -1,19 +1,11 @@
-import { Box } from "@chakra-ui/react";
-import {
-  Affine,
-  ResizeRatio,
-  TransformAnchor,
-  TransformHandle,
-} from "@emrgen/carbon-affine";
-import { Shaper } from "@emrgen/carbon-affine/src/Shaper";
-import { blockPresetPlugins, node } from "@emrgen/carbon-blocks";
-import {
-  ActiveCellRuntime,
-  ActiveCellRuntimeContext,
-  cellRenderer,
-} from "@emrgen/carbon-cell";
-import { FloatingStyleMenu } from "@emrgen/carbon-chakra-ui/src/components/FloatingStyleMenu";
-import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
+import {Box} from "@chakra-ui/react";
+import {Affine, ResizeRatio, TransformAnchor, TransformHandle,} from "@emrgen/carbon-affine";
+import {Shaper} from "@emrgen/carbon-affine/src/Shaper";
+import {blockPresetPlugins, node} from "@emrgen/carbon-blocks";
+import {blockPresetRenderers} from "@emrgen/carbon-blocks-react";
+import {ActiveCellRuntime, ActiveCellRuntimeContext, cellRenderer,} from "@emrgen/carbon-cell";
+import {FloatingStyleMenu} from "@emrgen/carbon-chakra-ui/src/components/FloatingStyleMenu";
+import {ClipboardPlugin} from "@emrgen/carbon-clipboard";
 import {
   CarbonPlugin,
   corePresetPlugins,
@@ -22,18 +14,13 @@ import {
   StylePath,
   TransformStatePath,
 } from "@emrgen/carbon-core";
-import { designPlugin, designRenderers } from "@emrgen/carbon-design";
-import { timelineRenderer } from "@emrgen/carbon-plugin-timeline";
-import { questionExtension } from "@emrgen/carbon-question";
-import {
-  ReactRenderer,
-  RenderManager,
-  useCreateCachedCarbon,
-} from "@emrgen/carbon-react";
-import { CarbonApp } from "@emrgen/carbon-utils/src/components/CarbonAppDocument";
-import { flattenDeep } from "lodash";
-import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import { useState } from "react";
+import {designPlugin, designRenderers} from "@emrgen/carbon-design";
+import {timelineRenderer} from "@emrgen/carbon-plugin-timeline";
+import {questionExtension} from "@emrgen/carbon-question";
+import {ReactRenderer, RenderManager, useCreateCachedCarbon,} from "@emrgen/carbon-react";
+import {Carbon} from "@emrgen/carbon-utils/src/components/CarbonAppDocument";
+import {flattenDeep} from "lodash";
+import {useState} from "react";
 import "./desing.styl";
 
 const plugins: (CarbonPlugin | CarbonPlugin[])[] = [
@@ -134,10 +121,10 @@ export function Design() {
   return (
     <Box className={"carbon-app-container"}>
       <ActiveCellRuntimeContext runtime={runtime}>
-        <CarbonApp app={app} renderManager={renderManager}>
+        <Carbon app={app} renderManager={renderManager}>
           <FloatingStyleMenu />
           {/*<DocumentSaveStatus />*/}
-        </CarbonApp>
+        </Carbon>
       </ActiveCellRuntimeContext>
     </Box>
   );

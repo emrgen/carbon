@@ -1,16 +1,16 @@
-import { isKeyHotkey } from "is-hotkey";
-import { last } from "lodash";
-import { preventAndStop } from "../utils/event";
-import { ActionOrigin } from "./actions/types";
-import { Carbon } from "./Carbon";
-import { ChangeManager } from "./ChangeManager";
-import { CustomEvent } from "./CustomEvent";
-import { EventsIn, EventsOut } from "./Event";
-import { EventContext, EventOrigin } from "./EventContext";
-import { p12, p14 } from "./Logger";
-import { Node } from "./Node";
-import { PinnedSelection } from "./PinnedSelection";
-import { PluginManager } from "./PluginManager";
+import {isKeyHotkey} from "is-hotkey";
+import {last} from "lodash";
+import {preventAndStop} from "../utils/event";
+import {ActionOrigin} from "./actions/types";
+import {CarbonEditor} from "./CarbonEditor";
+import {ChangeManager} from "./ChangeManager";
+import {CustomEvent} from "./CustomEvent";
+import {EventsIn, EventsOut} from "./Event";
+import {EventContext, EventOrigin} from "./EventContext";
+import {p12, p14} from "./Logger";
+import {Node} from "./Node";
+import {PinnedSelection} from "./PinnedSelection";
+import {PluginManager} from "./PluginManager";
 
 const selectionKeys: string[] = ["left", "right", "shift+left", "shift+right"];
 
@@ -36,7 +36,7 @@ export class EventManager {
   }
 
   constructor(
-    readonly app: Carbon,
+    readonly app: CarbonEditor,
     readonly pm: PluginManager,
     readonly cm: ChangeManager,
   ) {}

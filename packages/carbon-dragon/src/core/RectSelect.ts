@@ -1,7 +1,7 @@
 import {
   ActionOrigin,
   BSet,
-  Carbon,
+  CarbonEditor,
   Node,
   NodeComparator,
   NodeId,
@@ -9,12 +9,12 @@ import {
   NodeIdSet,
   PinnedSelection,
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
+import {Optional} from "@emrgen/types";
 import EventEmitter from "events";
-import { identity, last, sortBy, throttle, uniq } from "lodash";
-import { DndEvent } from "../types";
-import { DndNodeStore } from "./DndStore";
-import { adjustBox, boundFromFastDndEvent } from "./utils"; // Events emitted by RectSelector
+import {identity, last, sortBy, throttle, uniq} from "lodash";
+import {DndEvent} from "../types";
+import {DndNodeStore} from "./DndStore";
+import {adjustBox, boundFromFastDndEvent} from "./utils"; // Events emitted by RectSelector
 
 // Events emitted by RectSelector
 export enum RectSelectorEvent {
@@ -43,7 +43,7 @@ export class RectSelect extends EventEmitter {
   private mountedSelectables: NodeIdMap<HTMLElement> = new NodeIdMap();
 
   constructor(
-    readonly app: Carbon,
+    readonly app: CarbonEditor,
     disabled: boolean = false,
   ) {
     super();

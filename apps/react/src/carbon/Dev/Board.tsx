@@ -1,13 +1,18 @@
-import { Box } from "@chakra-ui/react";
-import { attrRenderers } from "@emrgen/carbon-attributes";
+import {Box} from "@chakra-ui/react";
+import {attrRenderers} from "@emrgen/carbon-attributes";
 
-import { blockPresetPlugins, node, paragraph, text, title } from "@emrgen/carbon-blocks";
-import { blockPresetRenderers } from "@emrgen/carbon-blocks-react";
-import { boardPlugins, CardsCountPath, CommentedByPath } from "@emrgen/carbon-board";
-import { boardRenderers } from "@emrgen/carbon-board-react";
-import { cellRenderer } from "@emrgen/carbon-cell";
-import { BlockContextMenu, carbonChakraRenderers, FloatingStyleMenu, InsertBlockMenu } from "@emrgen/carbon-chakra-ui";
-import { ClipboardPlugin } from "@emrgen/carbon-clipboard";
+import {blockPresetPlugins, node, paragraph, text, title} from "@emrgen/carbon-blocks";
+import {blockPresetRenderers} from "@emrgen/carbon-blocks-react";
+import {boardPlugins, CardsCountPath, CommentedByPath} from "@emrgen/carbon-board";
+import {boardRenderers} from "@emrgen/carbon-board-react";
+import {cellRenderer} from "@emrgen/carbon-cell";
+import {
+  BlockContextMenu,
+  carbonChakraRenderers,
+  FloatingStyleMenu,
+  InsertBlockMenu
+} from "@emrgen/carbon-chakra-ui";
+import {ClipboardPlugin} from "@emrgen/carbon-clipboard";
 import {
   BackgroundImagePath,
   ContenteditablePath,
@@ -19,14 +24,14 @@ import {
   TitlePath,
   VideoPath,
 } from "@emrgen/carbon-core";
-import { databaseRenderers } from "@emrgen/carbon-database-react";
-import { flashRenderers } from "@emrgen/carbon-flash";
-import { mediaPlugins, mediaRenderers } from "@emrgen/carbon-media";
-import { timelineRenderer } from "@emrgen/carbon-plugin-timeline";
-import { RenderManager, useCreateCarbon } from "@emrgen/carbon-react";
-import { CarbonApp, carbonUtilPlugins } from "@emrgen/carbon-utils";
-import { flattenDeep } from "lodash";
-import { PathTracker } from "../../PathTracker";
+import {databaseRenderers} from "@emrgen/carbon-database-react";
+import {flashRenderers} from "@emrgen/carbon-flash";
+import {mediaPlugins, mediaRenderers} from "@emrgen/carbon-media";
+import {timelineRenderer} from "@emrgen/carbon-plugin-timeline";
+import {RenderManager, useCreateCarbon} from "@emrgen/carbon-react";
+import {Carbon, carbonUtilPlugins} from "@emrgen/carbon-utils";
+import {flattenDeep} from "lodash";
+import {PathTracker} from "../../PathTracker";
 import "./board.styl";
 
 const data = node("carbon", [
@@ -170,12 +175,12 @@ export const Board = () => {
 
   return (
     <Box className={"carbon-board-app-container"} pos={"relative"}>
-      <CarbonApp app={app} renderManager={renderManager}>
+      <Carbon app={app} renderManager={renderManager}>
         <FloatingStyleMenu />
         <PathTracker style={{ bottom: 0 }} />
         <InsertBlockMenu />
         <BlockContextMenu />
-      </CarbonApp>
+      </Carbon>
     </Box>
   );
 };

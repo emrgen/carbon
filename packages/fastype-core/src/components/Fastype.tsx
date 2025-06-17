@@ -1,10 +1,10 @@
-import { ChakraProvider } from "@chakra-ui/react";
-import { Carbon } from "@emrgen/carbon-core";
-import { CarbonApp } from "@emrgen/carbon-utils";
-import { ReactNode, useEffect } from "react";
+import {ChakraProvider} from "@chakra-ui/react";
+import {CarbonEditor} from "@emrgen/carbon-core";
+import {Carbon} from "@emrgen/carbon-utils";
+import {ReactNode, useEffect} from "react";
 
 export interface FastypeProps {
-  app: Carbon;
+  app: CarbonEditor;
   children?: ReactNode;
 }
 
@@ -17,9 +17,9 @@ export function Fastype(props: FastypeProps) {
 
   return (
     <ChakraProvider>
-      <CarbonApp app={app} renderManager={{} as any}>
+      <Carbon app={app} renderManager={{} as any}>
         {children}
-      </CarbonApp>
+      </Carbon>
     </ChakraProvider>
   );
 }

@@ -1,7 +1,5 @@
-import {createContext, onCleanup} from "solid-js";
-import {Carbon, EventsIn} from "@emrgen/carbon-core";
-import {useMemo} from "react";
-import {camelCase} from "lodash";
+import {CarbonEditor, EventsIn} from "@emrgen/carbon-core";
+import {onCleanup} from "solid-js";
 import {useCarbon} from "../hooks";
 
 const defaultEvents: EventsIn[] = [
@@ -60,7 +58,7 @@ const eventWrapper = (event) => {
   }
 }
 
-const handlers = (app: Carbon) => {
+const handlers = (app: CarbonEditor) => {
   return defaultEvents.reduce(
     (o, eventType) => ({
       ...o,

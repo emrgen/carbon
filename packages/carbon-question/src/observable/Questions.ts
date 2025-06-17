@@ -1,16 +1,16 @@
-import { Carbon, Node, NodeId } from "@emrgen/carbon-core";
-import { isString } from "lodash";
-import { Optional } from "@emrgen/types";
+import {CarbonEditor, Node, NodeId} from "@emrgen/carbon-core";
+import {Optional} from "@emrgen/types";
+import {isString} from "lodash";
 
 export class Questions {
-  app: Carbon;
+  app: CarbonEditor;
   nodes: Node[];
 
-  static create(app: Carbon, nodes: Node[]) {
+  static create(app: CarbonEditor, nodes: Node[]) {
     return new Questions(app, nodes);
   }
 
-  constructor(app: Carbon, nodes: Node[]) {
+  constructor(app: CarbonEditor, nodes: Node[]) {
     this.app = app;
     this.nodes = nodes;
   }

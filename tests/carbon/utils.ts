@@ -1,9 +1,9 @@
-import { Carbon } from "@emrgen/carbon-core";
-import { Page } from "@playwright/test";
+import {CarbonEditor} from "@emrgen/carbon-core";
+import {Page} from "@playwright/test";
 
 declare global {
   interface Window {
-    app: Carbon;
+    app: CarbonEditor;
   }
 }
 

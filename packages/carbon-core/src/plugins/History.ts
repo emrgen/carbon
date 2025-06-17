@@ -1,4 +1,4 @@
-import { AfterPlugin, Carbon, EventContext, EventHandler, StateActions, TxType } from "../core";
+import {AfterPlugin, CarbonEditor, EventContext, EventHandler, StateActions, TxType} from "../core";
 
 export class HistoryPlugin extends AfterPlugin {
   name = "history";
@@ -53,7 +53,7 @@ export class HistoryPlugin extends AfterPlugin {
   }
 
   // merge text insert only transactions with
-  transaction(_: Carbon, tr: StateActions): void {
+  transaction(_: CarbonEditor, tr: StateActions): void {
     // window.tr = tr;
     if (tr.type !== TxType.OneWay && !tr.selectionOnly) {
       if (tr.type === TxType.Undo) {

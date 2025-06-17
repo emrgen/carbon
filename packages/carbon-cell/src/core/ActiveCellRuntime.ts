@@ -1,9 +1,9 @@
-import { Optional } from "@emrgen/types";
-import { parseCell, peekId } from "@observablehq/parser";
-import { Module, Runtime, Variable } from "@observablehq/runtime";
-import { Library, observe } from "@observablehq/stdlib";
-import { EventEmitter } from "events";
-import { isString } from "lodash";
+import {Optional} from "@emrgen/types";
+import {parseCell, peekId} from "@observablehq/parser";
+import {Module, Runtime, Variable} from "@observablehq/runtime";
+import {Library, observe} from "@observablehq/stdlib";
+import {EventEmitter} from "events";
+import {isString} from "lodash";
 import {
   isHtmlElement,
   isUnnamedCell,
@@ -117,7 +117,7 @@ export class ActiveCellRuntime extends EventEmitter {
     //   "redefine",
     //   nodeId,
     //   "node_" + nodeId,
-    //   `Carbon.store.get(${nodeId})`,
+    //   `CarbonEditor.store.get(${nodeId})`,
     // );
     this.redefine("node_" + nodeId, nodeId, `Carbon.store.get('${nodeId}')`, "javascript", true);
 

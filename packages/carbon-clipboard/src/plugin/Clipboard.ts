@@ -1,8 +1,8 @@
-import { CarbonCodec } from "@emrgen/carbon-codec";
+import {CarbonCodec} from "@emrgen/carbon-codec";
 import {
   AfterPlugin,
   blocksBelowCommonNode,
-  Carbon,
+  CarbonEditor,
   CarbonPlugin,
   DeletePatch,
   EventContext,
@@ -24,12 +24,12 @@ import {
   TitleNode,
 } from "@emrgen/carbon-core";
 
-import { Optional } from "@emrgen/types";
-import { identity, isEmpty } from "lodash";
+import {Optional} from "@emrgen/types";
+import {identity, isEmpty} from "lodash";
 
 import BTree from "sorted-btree";
-import { setClipboard } from "../clipboard";
-import { parseClipboard } from "../parser/parse";
+import {setClipboard} from "../clipboard";
+import {parseClipboard} from "../parser/parse";
 
 let cache: any = null;
 let clipboard: any = null;
@@ -151,7 +151,7 @@ export class ClipboardPlugin extends AfterPlugin {
   }
 
   // slice the selected nodes and remove the nodes outside the selection
-  slice(app: Carbon): Slice {
+  slice(app: CarbonEditor): Slice {
     const { selection, blockSelection } = app.state;
     if (blockSelection.isActive) {
       const { blocks } = blockSelection;

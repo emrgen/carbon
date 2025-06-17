@@ -1,15 +1,15 @@
-import { Optional } from "@emrgen/types";
-import { identity } from "lodash";
-import { ActionOrigin } from "./actions/types";
-import { NodeIdSet } from "./BSet";
-import { Carbon } from "./Carbon";
-import { EventsOut } from "./Event";
-import { Node } from "./Node";
-import { StateActions } from "./NodeChange";
-import { NodeTopicEmitter } from "./NodeEmitter";
-import { PluginManager } from "./PluginManager";
-import { State } from "./State";
-import { Transaction } from "./Transaction";
+import {Optional} from "@emrgen/types";
+import {identity} from "lodash";
+import {ActionOrigin} from "./actions/types";
+import {NodeIdSet} from "./BSet";
+import {CarbonEditor} from "./CarbonEditor";
+import {EventsOut} from "./Event";
+import {Node} from "./Node";
+import {StateActions} from "./NodeChange";
+import {NodeTopicEmitter} from "./NodeEmitter";
+import {PluginManager} from "./PluginManager";
+import {State} from "./State";
+import {Transaction} from "./Transaction";
 
 export enum NodeChangeType {
   update = "update",
@@ -36,7 +36,7 @@ export class ChangeManager extends NodeTopicEmitter {
   private interval: any;
 
   constructor(
-    private readonly app: Carbon,
+    private readonly app: CarbonEditor,
     private readonly pm: PluginManager,
   ) {
     super();
