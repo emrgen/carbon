@@ -1,7 +1,7 @@
 # Carbon
 A Extendable editor framework.
 
-# Demo video
+[Demo](http:://emrgen.github.io/carbon/)
 
 
 
