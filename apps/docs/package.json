@@ -4,6 +4,7 @@
   "version": "0.0.2",
   "type": "module",
   "license": "All rights reserved to the authors",
+  "homepage": "https://emrgen.github.io/carbon",
   "scripts": {
     "rdev": "rsbuild dev",
     "dev": "vite dev",

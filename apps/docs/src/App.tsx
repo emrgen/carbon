@@ -1,12 +1,12 @@
 import "./App.css";
 import {Button, HStack, Stack} from "@chakra-ui/react";
-import {BrowserRouter, NavLink} from "react-router-dom";
+import {HashRouter, NavLink} from "react-router-dom";
 import {Pages} from "./Demo/Pages";
 
 // This file is part of the Carbon Design System project
 export default function App() {
   return (
-    <BrowserRouter basename={"carbon"}>
+    <HashRouter>
       <div className={"carbon-app-container"}>
         <div className={"carbon-demo-header"}>
           <NavLink to={"/richtext"}>
@@ -37,6 +37,6 @@ export default function App() {
           <Pages/>
         </Stack>
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
