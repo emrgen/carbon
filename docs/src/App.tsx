@@ -4,7 +4,7 @@ import { Demo } from "./Demo/Demo";
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={"carbon"}>
       <div className={"carbon-app-container"}>
         <div className={"carbon-demo-header"}>
           <NavLink to={"/"}>
@@ -15,6 +15,9 @@ export default function App() {
           </NavLink>
           <NavLink to={"/list"}>
             <div className={"demo-name"}>List</div>
+          </NavLink>
+          <NavLink to={"/test"}>
+            <div className={"demo-name"}>Empty</div>
           </NavLink>
         </div>
         <Demo />
