@@ -3,8 +3,6 @@ A Extendable editor framework.
 
 [Demo](http:://emrgen.github.io/carbon/)
 
-
-
 # Example 
 ```ts
 const renderManager = RenderManager.from(flattenDeep(renderers));
@@ -17,3 +15,7 @@ export function App() {
   );
 }
 ```
+
+
+## NOTE
+This project is under active development and is not ready for production use.
