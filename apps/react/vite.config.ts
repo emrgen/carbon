@@ -9,5 +9,10 @@ export default defineConfig(({ mode }) => {
       "process.env": {},
     },
     plugins: [react(), nodePolyfills()],
+    esbuild: {
+      supported: {
+        "top-level-await": true,
+      },
+    },
   };
 });

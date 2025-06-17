@@ -107,6 +107,7 @@ export const useCreateCachedCarbon = (
   name: string,
   json: InitNodeJSON,
   plugins: CarbonPlugin[] = [],
+  onCreate: (app: Carbon) => void = noop,
 ) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [app, setApp] = useState(() => {
@@ -114,8 +115,9 @@ export const useCreateCachedCarbon = (
     if (savedDoc) {
       return createCarbon(name, JSON.parse(savedDoc), plugins);
     }
-
-    return createCarbon(name, json, plugins);
+    const app = createCarbon(name, json, plugins);
+    onCreate(app);
+    return app;
   });
 
   // useEffect(() => {

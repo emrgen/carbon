@@ -6,8 +6,7 @@
     "xapps/*",
     "apps/*",
     "packages/*",
-    "xpackages/*",
-    "docs/*"
+    "xpackages/*"
   ],
   "scripts": {
     "lint:all": "eslint --ext .ts,.tsx .",

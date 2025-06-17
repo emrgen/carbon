@@ -28,7 +28,7 @@ export const data = node("carbon", [
     "page",
     [
       title([text("I am a frame title")]),
-      ...range(800).map((a) => node("paragraph", [title([text("I am a section title")])])),
+      ...range(800).map(() => node("paragraph", [title([text("I am a section title")])])),
     ],
     {
       [ModePath]: "edit",
@@ -36,7 +36,8 @@ export const data = node("carbon", [
   ),
 ]);
 
-// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
 data.id = NodeId.ROOT.toString();
 
 const plugins = [

@@ -1,0 +1,77 @@
+.cpage
+  font-size: 16px;
+  font-family Geist Sans
+  font-weight: 400
+
+p
+  margin 0
+
+.pages-container
+  display flex
+  flex-direction column
+  align-items center
+  justify-content flex-start
+  height 100%
+  width 100%
+
+.carbon-app
+  width 1080px
+  height 100%
+  overflow hidden
+
+.document-wrapper
+  position relative
+  width 100%
+
+.carbon-app-container
+  display flex
+  background #eee
+  width 100%
+  position absolute;
+
+
+.carbon-demo-header
+  width 160px
+  display flex
+  padding 10px 10px
+  padding-top: 80px;
+  background-color #f5f5f5
+  border-bottom 1px solid #e0e0e0
+  flex-direction column
+  gap 6px
+
+.carbon-demo-header > a {
+  text-decoration: none;
+  font-size 14px
+  font-weight 600
+  color #333
+  background-color #eee
+  padding 4px 8px
+  //border-radius 4px
+  cursor pointer;
+  &:hover {
+    background-color #eee;
+  }
+}
+
+.carbon-demo-header > a.active {
+  background: #ddd;
+}
+
+//.demo-name
+//  font-size 14px
+//  font-weight 600
+//  color #333
+//  background-color #eee
+//  padding 4px 8px
+//  border-radius 4px
+//  cursor pointer;
+//  &:hover
+//    background-color #ddd
+
+.title:after
+  opacity 0
+  color transparent
+
+.document-wrapper
+  padding 12px 24px
