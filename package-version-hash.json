@@ -11,13 +11,13 @@
   },
   {
     "name": "@emrgen/carbon-blocks",
-    "version": "0.0.12",
-    "hash": "fca34dd2d0b2224eb44091352b0719f3"
+    "version": "0.0.13",
+    "hash": "74a50b2b49983a0c944f8f4eb9ae4619"
   },
   {
     "name": "@emrgen/carbon-blocks-react",
-    "version": "0.0.9",
-    "hash": "f464a6e24ad29bc6885e83888724e589"
+    "version": "0.0.10",
+    "hash": "d59ab8cb77f6fa680613c2346f9fc538"
   },
   {
     "name": "@emrgen/carbon-blocktree",
@@ -36,8 +36,8 @@
   },
   {
     "name": "@emrgen/carbon-cell",
-    "version": "0.0.8",
-    "hash": "65d2f91ee070cc58d96433ed7de702d6"
+    "version": "0.0.9",
+    "hash": "f94200dd24c05c514fe6df9197226678"
   },
   {
     "name": "@emrgen/carbon-chakra-ui",
@@ -56,8 +56,8 @@
   },
   {
     "name": "@emrgen/carbon-codemirror",
-    "version": "0.0.8",
-    "hash": "47a8125bff08008bfcd912761d57bdf6"
+    "version": "0.0.9",
+    "hash": "6f47493548f9e4cbf6e62071e29e23e7"
   },
   {
     "name": "@emrgen/carbon-comment-editor",
@@ -66,8 +66,8 @@
   },
   {
     "name": "@emrgen/carbon-core",
-    "version": "0.0.10",
-    "hash": "afe1414f49f963d9f5c2a92dd034580f"
+    "version": "0.0.11",
+    "hash": "2f147c205c5cb8b3386030f58d7c229e"
   },
   {
     "name": "@emrgen/carbon-database",
@@ -96,8 +96,8 @@
   },
   {
     "name": "@emrgen/carbon-dragon-react",
-    "version": "0.0.8",
-    "hash": "f8f49cb0b2bf28bfe9007320f2967f16"
+    "version": "0.0.9",
+    "hash": "9a88b75c747254cc4ca36c5589f1944c"
   },
   {
     "name": "@emrgen/carbon-dragonfly",
@@ -146,8 +146,8 @@
   },
   {
     "name": "@emrgen/carbon-object-view",
-    "version": "0.0.8",
-    "hash": "d643013e10123da8d930ee0aefcf2ce1"
+    "version": "0.0.9",
+    "hash": "2417e1bdf2952ced33fbff98669187f6"
   },
   {
     "name": "@emrgen/carbon-plugin-template",
@@ -166,18 +166,18 @@
   },
   {
     "name": "@emrgen/carbon-react",
-    "version": "0.0.9",
-    "hash": "1feb8b5ba29ec2dcbcac8a71e7b7abfc"
+    "version": "0.0.10",
+    "hash": "87fc5267b6a5200fe8e4a8a0e9be1ec6"
   },
   {
     "name": "@emrgen/carbon-reactive",
-    "version": "0.0.2",
-    "hash": "135cb542bacb3b574f4adec5474a19dd"
+    "version": "0.0.3",
+    "hash": "a267d6d7e6fa7b2d9c6f42a027ffeab7"
   },
   {
     "name": "@emrgen/carbon-reactive-cell",
-    "version": "0.0.2",
-    "hash": "2de373346bf2ac5e73c3edb599550847"
+    "version": "0.0.3",
+    "hash": "42959b7967e6e0bb1310bbde1605ff55"
   },
   {
     "name": "@emrgen/carbon-sheet",
@@ -201,8 +201,8 @@
   },
   {
     "name": "@emrgen/carbon-ui",
-    "version": "0.0.2",
-    "hash": "87606393ad6ee0b27201a23425950440"
+    "version": "0.0.3",
+    "hash": "5447ae07357dcd1aa081407ff67d363b"
   },
   {
     "name": "@emrgen/carbon-utils",

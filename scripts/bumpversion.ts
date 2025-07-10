@@ -158,8 +158,6 @@ const bumpPackageVersions = (writeFile = false) => {
         //   autoBump = false;
         // }
 
-        packageJson.version = semver.inc(packageJson.version, "patch");
-
         if (writeFile) {
           fs.writeFileSync(
             packageJsonPath,
