@@ -1,7 +1,7 @@
 {
   "name": "@emrgen/carbon-react-editor",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "license": "All rights reserved to the authors",
   "scripts": {

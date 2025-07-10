@@ -1,5 +1,11 @@
 # tsconfig
 
+## 0.0.2
+
+### Patch Changes
+
+- 2d50555: reset all package publish
+
 ## 0.0.1
 
 ### Patch Changes

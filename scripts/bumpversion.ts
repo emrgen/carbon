@@ -158,12 +158,12 @@ const bumpPackageVersions = (writeFile = false) => {
         //   autoBump = false;
         // }
 
-        if (writeFile) {
-          fs.writeFileSync(
-            packageJsonPath,
-            JSON.stringify(packageJson, null, 2),
-          );
-        }
+        // if (writeFile) {
+        //   fs.writeFileSync(
+        //     packageJsonPath,
+        //     JSON.stringify(packageJson, null, 2),
+        //   );
+        // }
 
         return {
           name: pkg.name,
