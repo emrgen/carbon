@@ -1,12 +1,12 @@
-import { expect, test } from "vitest";
-import { Affine, Vector } from "../src/index";
+import {expect, test} from "vitest";
+import {Affine, Vector} from "../src/index";
 
 test("find the current affine from a shape", () => {
   const af = Affine.fromSize(100, 100);
   expect(af.mat).toStrictEqual([50, 0, 0, 0, 50, 0]);
 });
 
-test("resize after from size", () => {
+test("resize after from size--", () => {
   // const af = Shaper.from(Affine.fromSize(20, 20)).translate(100, 0);
   // const v1 = af.apply({ x: 1, y: 0 });
   // console.log(v1);

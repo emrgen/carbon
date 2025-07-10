@@ -1,5 +1,5 @@
-import { clamp } from "lodash";
-import { Degree, Radian } from "./types";
+import {clamp} from "lodash";
+import {Degree, Radian} from "./types";
 
 export function toRad(deg: Degree): Radian {
   return deg / 57.2958;
@@ -15,6 +15,7 @@ export function considerZero(num: number): number {
 
 export const { abs, min, max } = Math;
 
+// isHandle
 function isHandle(anchor: TransformAnchor | TransformHandle): anchor is TransformHandle {
   return anchor.includes("handle");
 }

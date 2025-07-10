@@ -1,152 +1,152 @@
 [
   {
     "name": "@emrgen/carbon-affine",
-    "version": "0.0.1",
-    "hash": "e80d18f50fb44981f0fe0a9e78bf8aee"
+    "version": "0.0.2",
+    "hash": "d15909c9d444a6126c230bb9f4ec7675"
   },
   {
     "name": "@emrgen/carbon-attributes",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "d7ccd6be26aaace32e5acc972adac80a"
   },
   {
     "name": "@emrgen/carbon-blocks",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "hash": "fca34dd2d0b2224eb44091352b0719f3"
   },
   {
     "name": "@emrgen/carbon-blocks-react",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "hash": "f464a6e24ad29bc6885e83888724e589"
   },
   {
     "name": "@emrgen/carbon-blocktree",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "3fe30671c347e7b136dcb8e10e6300ff"
   },
   {
     "name": "@emrgen/carbon-board",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "a70be41045346ad8ee6ae692b7eb3c5c"
   },
   {
     "name": "@emrgen/carbon-board-react",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "hash": "1f1c8b5470afd444eaedb781e9f30ede"
   },
   {
     "name": "@emrgen/carbon-cell",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "hash": "65d2f91ee070cc58d96433ed7de702d6"
   },
   {
     "name": "@emrgen/carbon-chakra-ui",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "hash": "45bc6f25ffa878c845a8bf30b022eb74"
   },
   {
     "name": "@emrgen/carbon-clipboard",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "hash": "3b5dcda30bd77b685baf8cdf9198a76f"
   },
   {
     "name": "@emrgen/carbon-codec",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "0dbfb65e6786524c6431e5d07a52203e"
   },
   {
     "name": "@emrgen/carbon-codemirror",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "hash": "47a8125bff08008bfcd912761d57bdf6"
   },
   {
     "name": "@emrgen/carbon-comment-editor",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "ab276c4c58f8bf8cfd88b9a36a8a732b"
   },
   {
     "name": "@emrgen/carbon-core",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "hash": "afe1414f49f963d9f5c2a92dd034580f"
   },
   {
     "name": "@emrgen/carbon-database",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "2df82ad9aed0b7960904624a678ddaab"
   },
   {
     "name": "@emrgen/carbon-database-react",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "7a56dccd349c3e0d181610f96d394712"
   },
   {
     "name": "@emrgen/carbon-design",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "hash": "39c68cd32b968bef0dca484d06f371e6"
   },
   {
     "name": "@emrgen/carbon-diamond",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   {
     "name": "@emrgen/carbon-dragon",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "hash": "749949d0495fac5fb341a1dbfb263b8f"
   },
   {
     "name": "@emrgen/carbon-dragon-react",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "hash": "f8f49cb0b2bf28bfe9007320f2967f16"
   },
   {
     "name": "@emrgen/carbon-dragonfly",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   {
     "name": "@emrgen/carbon-emoji",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "hash": "1f1d52bbcff4615eb8a5be65fce30c09"
   },
   {
     "name": "@emrgen/carbon-event",
-    "version": "0.0.0",
+    "version": "0.0.2",
     "hash": "c68f0c39702e2f8884c1f814a38a0340"
   },
   {
     "name": "@emrgen/carbon-flash",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "hash": "274126a5f496af71c3821f5898f43ccd"
   },
   {
     "name": "@emrgen/carbon-flow",
-    "version": "0.0.0",
+    "version": "0.0.2",
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   {
     "name": "@emrgen/carbon-flow-react",
-    "version": "0.0.0",
+    "version": "0.0.2",
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   {
     "name": "@emrgen/carbon-graph",
-    "version": "0.0.0",
+    "version": "0.0.2",
     "hash": "195f9e8392df661cc91a3b0e894c33fd"
   },
   {
     "name": "@emrgen/carbon-markdown-stream",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "hash": "7ebcabe737dcd71010f3b8eb94b9006b"
   },
   {
     "name": "@emrgen/carbon-media",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "hash": "df6fc303098b5add4cebb6e815ca6d08"
   },
   {
     "name": "@emrgen/carbon-object-view",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "hash": "d643013e10123da8d930ee0aefcf2ce1"
   },
   {
@@ -156,97 +156,97 @@
   },
   {
     "name": "@emrgen/carbon-plugin-timeline",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "hash": "3671d282fa9bdf053b927b8bf376f1e5"
   },
   {
     "name": "@emrgen/carbon-question",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "hash": "5619d14452c11475b660bd8c16d4d7d0"
   },
   {
     "name": "@emrgen/carbon-react",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "hash": "1feb8b5ba29ec2dcbcac8a71e7b7abfc"
   },
   {
     "name": "@emrgen/carbon-reactive",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "hash": "135cb542bacb3b574f4adec5474a19dd"
   },
   {
     "name": "@emrgen/carbon-reactive-cell",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "hash": "2de373346bf2ac5e73c3edb599550847"
   },
   {
     "name": "@emrgen/carbon-sheet",
-    "version": "0.0.4",
+    "version": "0.0.6",
     "hash": "638c6d56e204885e642b81d42dd97e59"
   },
   {
     "name": "@emrgen/carbon-slate",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "hash": "41c21e90cc82e6eceb64d0a8bcdd40a2"
   },
   {
     "name": "@emrgen/carbon-store",
-    "version": "0.0.3",
+    "version": "0.0.5",
     "hash": "0f07c7015a434d00438606168818ed97"
   },
   {
     "name": "@emrgen/carbon-svelte",
-    "version": "0.0.7",
+    "version": "0.0.9",
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   {
     "name": "@emrgen/carbon-ui",
-    "version": "0.0.0",
+    "version": "0.0.2",
     "hash": "87606393ad6ee0b27201a23425950440"
   },
   {
     "name": "@emrgen/carbon-utils",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "hash": "4aacd4755d42c793871480ede688764f"
   },
   {
     "name": "@emrgen/carbon-vue",
-    "version": "0.0.7",
+    "version": "0.0.9",
     "hash": "11a18efa9a8cd4d0e7f97cdb1dd1c296"
   },
   {
     "name": "@emrgen/fastype-blocks",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "hash": "c8395f7e99dd224f16764cb80661db0f"
   },
   {
     "name": "@emrgen/fastype-core",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "hash": "188693568a664d84ffca5692837402eb"
   },
   {
     "name": "@emrgen/fastype-database",
-    "version": "0.0.7",
+    "version": "0.0.9",
     "hash": "b251f3f353843f85adced0568df9c2c5"
   },
   {
     "name": "@emrgen/fastype-interact",
-    "version": "0.0.7",
+    "version": "0.0.9",
     "hash": "809598e96e0548eaea6308704e3ef7e5"
   },
   {
     "name": "@emrgen/fastype-props",
-    "version": "0.0.7",
+    "version": "0.0.9",
     "hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   {
     "name": "@emrgen/fastype-utils",
-    "version": "0.0.7",
+    "version": "0.0.9",
     "hash": "8fff728e41e15d0f1c5164bbcd203a57"
   },
   {
     "name": "@emrgen/types",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "hash": "52bec6c3bd9e627cfaecdab4476eca72"
   }
 ]

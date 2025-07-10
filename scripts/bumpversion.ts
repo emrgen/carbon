@@ -86,6 +86,7 @@ const updatePackagesVersionHashFile = () => {
 
 const packages = getPackageVersionHash();
 
+
 const bumpPackageVersions = (writeFile = false) => {
   const oldVersions = require(packageVersionHashFilePath);
 
@@ -146,13 +147,18 @@ const bumpPackageVersions = (writeFile = false) => {
         );
         const packageJson = require(packageJsonPath);
         // increment patch version if the current package version is the same as the old version
+        packageJson.version = semver.inc(packageJson.version, "patch");
+
         let autoBump = false;
-        if (packageJson.version === oldPkg.version) {
-          packageJson.version = semver.inc(packageJson.version, "patch");
-          autoBump = true;
-        } else {
-          autoBump = false;
-        }
+        // if (packageJson.version === oldPkg.version) {
+        //   console.log(packageJson.version, semver.inc(packageJson.version, "patch"))
+        //   packageJson.version = semver.inc(packageJson.version, "patch");
+        //   autoBump = true;
+        // } else {
+        //   autoBump = false;
+        // }
+
+        packageJson.version = semver.inc(packageJson.version, "patch");
 
         if (writeFile) {
           fs.writeFileSync(
@@ -200,4 +206,4 @@ const bumpPackageVersions = (writeFile = false) => {
 };
 
 bumpPackageVersions(options.write);
-updatePackagesVersionHashFile();
+// updatePackagesVersionHashFile();
