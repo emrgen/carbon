@@ -1,6 +1,9 @@
 {
   "name": "@emrgen/types",
   "version": "1.0.3",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
