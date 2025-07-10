@@ -1,9 +1,9 @@
-import { parseCell, peekId } from "@observablehq/parser";
-import { noop } from "lodash";
-import { DefinitionFactory } from "./Definition";
-import { Module } from "./Module";
-import { UNDEFINED_VALUE, Variable } from "./Variable";
-import { randomString } from "./x";
+import {parseCell, peekId} from "@observablehq/parser";
+import {noop} from "lodash";
+import {DefinitionFactory} from "./Definition";
+import {Module} from "./Module";
+import {UNDEFINED_VALUE, Variable} from "./Variable";
+import {randomString} from "./x";
 
 interface CellProps {
   id: string;
@@ -103,7 +103,6 @@ export class Cell {
     let cellName = name || peekId(definition);
 
     if (ast?.id?.type === "ViewExpression") {
-      console.log(ast);
       cellName = ast.id.id.name ?? `__view__${++cellCounter}`;
       view = true;
     }

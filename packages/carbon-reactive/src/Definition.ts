@@ -99,7 +99,7 @@ export const DefinitionFactory = {
   define(name: string, inputs: string[], body: string, opts?: any) {
     // console.log(opts)
     const fnStr = `return ${opts?.async ? "async" : ""} function ${opts?.generator ? "*" : ""} ${!!name ? `_${name}` : ""} ( ${inputs.join(", ")} ) {\n  ${body} \n} `;
-    console.log("factory defined =>", fnStr, opts);
+    // console.log("factory defined =>", fnStr, opts);
     return new Function(fnStr)();
   },
 }

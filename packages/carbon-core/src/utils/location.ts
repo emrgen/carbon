@@ -1,6 +1,6 @@
-import { Optional } from '@emrgen/types';
-import { Node } from '../core/Node';
-import { Point } from '../core/Point';
+import {Optional} from '@emrgen/types';
+import {Node} from '../core/Node';
+import {Point} from '../core/Point';
 
 export const nodeLocation = (node: Node, associate: 'before' | 'after' | 'parent' = "before"): Optional<Point> => {
 	if (associate === 'before' && node.prevSibling) {

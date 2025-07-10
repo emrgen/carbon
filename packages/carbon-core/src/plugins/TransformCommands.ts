@@ -1550,19 +1550,14 @@ export class TransformCommands extends BeforePlugin {
         .some((n) => {
           const focusNode = n.find((n) => n.isFocusable, { order: "post" });
           if (focusNode) {
-            tr.Select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!));
             tr.SelectBlocks([]);
+            tr.Select(PinnedSelection.fromPin(Pin.toEndOf(focusNode)!));
             return true;
           }
         });
 
       return tr;
     }
-
-    console.log(
-      "nodes",
-      nodes.map((n) => n.name),
-    );
 
     const deleteActions: CarbonAction[] = [];
     const insertActions: CarbonAction[] = [];
@@ -1573,7 +1568,7 @@ export class TransformCommands extends BeforePlugin {
     // delete children while maintaining parent schema constraints
     // find the content match for fragment before the delete nodes
     // check if after deleting the nodes we need to insert more node to maintain schema constraints
-    // if next sibling is there after the delete nodes find fillbefore types
+    // if next sibling is there after the delete nodes find fill before types
     // otherwise just find
 
     // if all nodes are deleted, we need to fix the schema constraints here.
@@ -1585,22 +1580,22 @@ export class TransformCommands extends BeforePlugin {
       const nextSiblings = takeAfter(parent.children, (n) => n.eq(endNode));
       const match = parent.type.contentMatch.matchFragment(Fragment.from(prevSiblings));
 
-      console.log(
-        "prevSiblings",
-        prevSiblings.map((n) => n.id.toString()),
-      );
-      console.log(
-        "nextSiblings",
-        nextSiblings.map((n) => n.id.toString()),
-      );
+      // console.log(
+      //   "prevSiblings",
+      //   prevSiblings.map((n) => n.id.toString()),
+      // );
+      // console.log(
+      //   "nextSiblings",
+      //   nextSiblings.map((n) => n.id.toString()),
+      // );
 
       const { nodes: createNodes } =
         match?.fillBefore(Fragment.from(nextSiblings), true) ?? Fragment.EMPTY;
 
-      console.log(
-        "createNodes to be inserted",
-        createNodes.map((n) => [n.name, n.key, n]),
-      );
+      // console.log(
+      //   "createNodes to be inserted",
+      //   createNodes.map((n) => [n.name, n.key, n]),
+      // );
 
       const at = nodeLocation(startNode)!;
       this.insertNodeCommands(at, createNodes).forEach((action) => insertActions.push(action));
@@ -1625,38 +1620,41 @@ export class TransformCommands extends BeforePlugin {
     const lastNode = last(nodes)!;
     let after: Optional<PinnedSelection> = undefined;
 
-    if (!after && fall === "after") {
-      const focusNode = lastNode.next((n) => n.isFocusable, { order: "pre" });
+    // look for adjacent focusable node
+    if (fall === "after") {
+      const focusNode = lastNode.nextSibling?.find((n) => n.isFocusable, { order: "pre" });
       if (focusNode && hasSameIsolate(focusNode, lastNode)) {
         after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
       }
 
       if (!after) {
-        const focusNode = firstNode.prev((n) => n.isFocusable, { order: "pre" });
+        const focusNode = firstNode.prevSibling?.find((n) => n.isFocusable, { order: "pre" });
         if (focusNode && hasSameIsolate(focusNode, firstNode)) {
           after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
         }
       }
-    } else if (!after) {
-      const focusNode = firstNode.prev((n) => n.isFocusable, { order: "pre" });
+    }
+
+    if (fall == 'before') {
+      const focusNode = firstNode.prevSibling?.find((n) => n.isFocusable, { order: "pre" });
       if (focusNode && hasSameIsolate(focusNode, firstNode)) {
         after = PinnedSelection.fromPin(Pin.toEndOf(focusNode)!);
       }
 
       if (!after) {
-        const focusNode = lastNode.next((n) => n.isFocusable, { order: "pre" });
+        const focusNode = lastNode.nextSibling?.find((n) => n.isFocusable, { order: "pre" });
         if (focusNode && hasSameIsolate(lastNode, focusNode)) {
           after = PinnedSelection.fromPin(Pin.toStartOf(focusNode)!);
         }
       }
     }
 
-    tr.Add(deleteActions);
+    tr.SelectBlocks([]).Add(deleteActions);
 
     if (after) {
       tr.Select(after, ActionOrigin.UserInput);
     } else {
-      tr.Add(insertActions).SelectBlocks([]);
+      tr.Add(insertActions);
     }
 
     if (!after) {
@@ -1680,8 +1678,9 @@ export class TransformCommands extends BeforePlugin {
     const { app } = tr;
     if (BlockSelection.is(selection)) {
       const { blocks } = selection;
-      const { parent } = blocks[0];
-      return this.deleteNodes(tr, parent!, blocks, opts);
+      const nodes = blocks.map(n => n.isLinked ? n.parent! : n)
+      const parent = nodes[0]?.parent!
+      return this.deleteNodes(tr, parent!, nodes, opts);
     }
 
     if (!PinnedSelection.is(selection)) {

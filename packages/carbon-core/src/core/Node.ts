@@ -1,4 +1,4 @@
-import { Optional, Predicate, With } from "@emrgen/types";
+import {Optional, Predicate, With} from "@emrgen/types";
 import EventEmitter from "events";
 import {
   entries,
@@ -12,12 +12,12 @@ import {
   noop,
   reverse,
 } from "lodash";
-import { NODE_CACHE } from "./CarbonCache";
-import { classString } from "./Logger";
-import { Mark } from "./Mark";
-import { NodeContent, NodeContentData, NodeData, PlainNodeContent } from "./NodeContent";
-import { IntoNodeId, NodeId } from "./NodeId";
-import { NodeMap } from "./NodeMap";
+import {NODE_CACHE} from "./CarbonCache";
+import {classString} from "./Logger";
+import {Mark} from "./Mark";
+import {NodeContent, NodeContentData, NodeData, PlainNodeContent} from "./NodeContent";
+import {IntoNodeId, NodeId} from "./NodeId";
+import {NodeMap} from "./NodeMap";
 import {
   ActivatedPath,
   AtomContentPath,
@@ -32,9 +32,9 @@ import {
   RemotePropsPath,
   SelectedPath,
 } from "./NodeProps";
-import { NodeType } from "./NodeType";
-import { NodeView } from "./NodeView";
-import { no, yes } from "./types";
+import {NodeType} from "./NodeType";
+import {NodeView} from "./NodeView";
+import {no, yes} from "./types";
 
 export type TraverseOptions = {
   // pre-order or post-order traversal
@@ -50,6 +50,8 @@ export type TraverseOptions = {
   // skip the node if the predicate returns true
   skip: Predicate<Node>;
 };
+
+export const SandboxedProps = "props"
 
 export type Path = (number | string)[];
 export type MutableNode = Node;
@@ -509,7 +511,7 @@ export class Node extends EventEmitter implements IntoNodeId {
   }
 
   get linkedProps(): Optional<Node> {
-    return this.links["props"];
+    return this.links[SandboxedProps];
   }
 
   linked(name: string): Optional<Node> {

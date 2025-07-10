@@ -8,13 +8,14 @@ import {
   NodeFactory,
   NodeFactoryOptions,
   NodeId,
+  SandboxedProps,
   Schema,
   TitleNode,
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
-import { cloneDeep, entries, identity, isArray, isEmpty } from "lodash";
-import { ImmutableNode } from "./ImmutableNode";
-import { ImmutableNodeContent } from "./ImmutableNodeContent";
+import {Optional} from "@emrgen/types";
+import {cloneDeep, entries, identity, isArray, isEmpty} from "lodash";
+import {ImmutableNode} from "./ImmutableNode";
+import {ImmutableNodeContent} from "./ImmutableNodeContent";
 
 let counter = 0;
 
@@ -64,9 +65,9 @@ export class ImmutableNodeFactory implements NodeFactory {
     const nodes = children.map((n) => schema.nodeFromJSON(n)) as Node[];
 
     // NOTE: inject props linked node for node spec with `isSandbox`
-    if (type.isSandbox && !links["props"]) {
-      links["props"] = {
-        name: "props",
+    if (type.isSandbox && !links[SandboxedProps]) {
+      links[SandboxedProps] = {
+        name: SandboxedProps,
         props: cloneDeep(json.props ?? {}),
       };
     }

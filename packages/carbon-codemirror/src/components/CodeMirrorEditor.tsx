@@ -1,7 +1,7 @@
-import { indentWithTab } from "@codemirror/commands";
-import { javascript } from "@codemirror/lang-javascript";
-import { EditorState, Prec } from "@codemirror/state";
-import { Decoration, keymap, MatchDecorator, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import {indentWithTab} from "@codemirror/commands";
+import {javascript} from "@codemirror/lang-javascript";
+import {EditorState, Prec} from "@codemirror/state";
+import {Decoration, keymap, MatchDecorator, ViewPlugin, ViewUpdate} from "@codemirror/view";
 import {
   ActionOrigin,
   CodeValuePath,
@@ -12,11 +12,11 @@ import {
   Point,
   yes,
 } from "@emrgen/carbon-core";
-import { useCarbon } from "@emrgen/carbon-react";
-import { basicSetup, EditorView } from "codemirror";
-import { isKeyHotkey } from "is-hotkey";
-import { createRef, useCallback, useEffect, useRef, useState } from "react";
-import { useCustomCompareEffect } from "react-use";
+import {useCarbon} from "@emrgen/carbon-react";
+import {basicSetup, EditorView} from "codemirror";
+import {isKeyHotkey} from "is-hotkey";
+import {createRef, useCallback, useEffect, useRef, useState} from "react";
+import {useCustomCompareEffect} from "react-use";
 
 interface CodeMirrorEditorProps {
   onChange?: (editor: EditorState) => void;
@@ -50,7 +50,6 @@ const customKeywordHighlighter = ViewPlugin.fromClass(
   class {
     constructor(view) {
       this.decorations = matchDecorator.createDeco(view);
-      console.log(this.decorations);
     }
 
     update(update) {

@@ -100,7 +100,7 @@ export class EventManager {
     // }
 
     if (this.cm.actions.length) {
-      console.log("skip event", type, "pending transaction");
+      console.debug("skip event", type, "pending transaction");
       return;
     }
 

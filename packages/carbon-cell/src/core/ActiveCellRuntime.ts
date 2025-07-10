@@ -706,7 +706,7 @@ const factory = {
   // create a function definition combining the name, inputs and body
   define(name: string, inputs: string[], body: string, opts?: any) {
     const fnStr = `return ${opts?.async ? "async" : ""} function ${opts?.generator ? "*" : ""} ${!!name ? `_${name}` : ""} ( ${inputs.join(",")} ) {\n  ${body} \n} `;
-    console.log("factory defined =>", fnStr, opts);
+    // console.log("factory defined =>", fnStr, opts);
     return new Function(fnStr)();
   },
 };

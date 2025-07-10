@@ -1,21 +1,13 @@
-import { HasFocusPath } from "@emrgen/carbon-core";
-import { ObjectViewer } from "@emrgen/carbon-object-view";
-import { Optional } from "@emrgen/types";
+import {HasFocusPath} from "@emrgen/carbon-core";
+import {ObjectViewer} from "@emrgen/carbon-object-view";
+import {Optional} from "@emrgen/types";
 import createDOMPurify from "dompurify";
-import {
-  cloneDeep,
-  isArray,
-  isFunction,
-  isNumber,
-  isObject,
-  isPlainObject,
-  isString,
-} from "lodash";
-import { memo, ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { ViewStylePath } from "../constants";
-import { ActiveCell } from "../core/ActiveCellRuntime";
-import { useActiveCellRuntime } from "../hooks/useActiveCellRuntime";
-import { isHtmlElement, isScriptElement, isStyleElement } from "../utils";
+import {cloneDeep, isArray, isFunction, isNumber, isObject, isPlainObject, isString,} from "lodash";
+import {memo, ReactNode, useEffect, useMemo, useRef, useState} from "react";
+import {ViewStylePath} from "../constants";
+import {ActiveCell} from "../core/ActiveCellRuntime";
+import {useActiveCellRuntime} from "../hooks/useActiveCellRuntime";
+import {isHtmlElement, isScriptElement, isStyleElement} from "../utils";
 
 const DOMPurify = createDOMPurify(window);
 
@@ -71,7 +63,7 @@ const ResultInner = (props) => {
   // listen to the cell events from the module
   useEffect(() => {
     const onDefine = (cell: ActiveCell) => {
-      console.log("redefined", cell);
+      console.debug("redefined", cell);
       setError("");
       setCell(cell);
       setCellName(cell.name);

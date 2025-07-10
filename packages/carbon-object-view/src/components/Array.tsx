@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
-import { BsFillCaretRightFill } from "react-icons/bs";
-import { NodeView } from "./Node";
-import { NodeInitial } from "./NodeInitial";
-import { PAGE_SIZE } from "./utils";
+import {useCallback, useEffect, useState} from "react";
+import {BsFillCaretRightFill} from "react-icons/bs";
+import {NodeView} from "./Node";
+import {NodeInitial} from "./NodeInitial";
+import {PAGE_SIZE} from "./utils";
 
 interface ArrayProps {
   propName: string;
@@ -65,7 +65,7 @@ export const ArrayView = (props: ArrayProps) => {
         <div className={`cov-expander ${expanded ? "expanded" : "collapsed"}`}>
           <BsFillCaretRightFill fontSize={"12px"} />
         </div>
-        <span className={"cov-object-constructor"}>Array({slice.length})</span>
+        <span className={"cov-object-constructor"}>Array({data.length})</span>
         <span className={"cov-left-bracket"}>[</span>
       </div>
 

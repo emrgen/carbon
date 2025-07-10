@@ -51,11 +51,11 @@ import {
   UpdateChange,
   UpdatePropsAction,
 } from "@emrgen/carbon-core";
-import { InlineNode } from "@emrgen/carbon-core/src/core/InlineNode";
-import { Optional } from "@emrgen/types";
-import { first, flatten, identity, isArray, isEmpty, isString, reduce, values } from "lodash";
-import { ImmutableNodeMap } from "./ImmutableNodeMap";
-import { ImmutableState } from "./ImmutableState";
+import {InlineNode} from "@emrgen/carbon-core/src/core/InlineNode";
+import {Optional} from "@emrgen/types";
+import {first, flatten, identity, isArray, isEmpty, isString, reduce, values} from "lodash";
+import {ImmutableNodeMap} from "./ImmutableNodeMap";
+import {ImmutableState} from "./ImmutableState";
 
 enum UpdateDependent {
   None = 0,
@@ -784,6 +784,16 @@ export class ImmutableDraft implements Draft {
     this.updateDependents(node, UpdateDependent.Next);
 
     this.tm.remove(node, parent);
+    node.all(n => {
+      if (this.updated.has(n.id)) {
+        this.updated.remove(n.id);
+      }
+      values(n.links).forEach((link) => {
+        if (this.updated.has(link.id)) {
+          this.updated.remove(link.id);
+        }
+      })
+    })
 
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
@@ -834,6 +844,16 @@ export class ImmutableDraft implements Draft {
     if (this.nodeMap.isDeleted(nodeId)) {
       console.debug("node is deleted", nodeId.toString());
       this.selected.remove(nodeId);
+      return;
+    }
+
+    // NOTE: avoid updating node, that is not there in the document anymore
+    const found = this.get(nodeId);
+    if (!found) {
+      return;
+    }
+    if (found?.path.includes(-1)) {
+      console.error('Target node not found')
       return;
     }
 

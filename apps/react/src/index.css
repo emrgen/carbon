@@ -49,3 +49,7 @@ span[data-name=text] {
 [data-name=page] {
   padding: 0 10px;
 }
+
+.carbon-app-container.reactive [data-name="page"]{
+  padding-top: 20px;
+}
