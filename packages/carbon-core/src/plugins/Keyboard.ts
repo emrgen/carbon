@@ -5,8 +5,8 @@ import {
   preventAndStopCtx,
   TitleNode,
 } from "@emrgen/carbon-core";
-import { Optional } from "@emrgen/types";
-import { first, last } from "lodash";
+import {Optional} from "@emrgen/types";
+import {first, last} from "lodash";
 import {
   ActionOrigin,
   MoveNodeAction,
@@ -17,13 +17,13 @@ import {
   Point,
   Transaction,
 } from "../core";
-import { NodeBTree } from "../core/BTree";
-import { AfterPlugin, CarbonPlugin, EventContext } from "../core/index";
-import { EventHandlerMap } from "../core/types";
-import { skipKeyEvent } from "../utils/key";
-import { IsolateSelectionPlugin } from "./Isolating";
-import { SelectionCommands } from "./SelectionCommands";
-import { TransformCommands } from "./TransformCommands";
+import {NodeBTree} from "../core/BTree";
+import {AfterPlugin, CarbonPlugin, EventContext} from "../core/index";
+import {EventHandlerMap} from "../core/types";
+import {skipKeyEvent} from "../utils/key";
+import {IsolateSelectionPlugin} from "./Isolating";
+import {SelectionCommands} from "./SelectionCommands";
+import {TransformCommands} from "./TransformCommands";
 
 declare module "@emrgen/carbon-core" {
   export interface Transaction {
@@ -442,8 +442,8 @@ export class KeyboardPlugin extends AfterPlugin {
     if (!blockSelection.isEmpty) {
       preventAndStopCtx(ctx);
       console.log("node selection...");
-      const { blocks } = blockSelection;
-      console.log(blocks.map((n) => n.id.toString()));
+      
+      const blocks = blockSelection.blocks.map(n => n.isLinked ? n.parent!:n)
       const lastNode = last(blocks) as Node;
 
       cmd.SelectBlocks([]);
