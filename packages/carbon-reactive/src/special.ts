@@ -10,11 +10,7 @@ const mutableId = (id: string) => `mutable/${id}`;
 const mutableName = (name: string) => `mutable_${name}`;
 
 const parseValue = (el) => {
-<<<<<<< HEAD
   // console.log(el.type)
-=======
-  console.log(el.type, el.value)
->>>>>>> 1b82c2db (fix: live-cell output styles)
   switch (el.type) {
     case "file":
       return el.files[0]

@@ -26,12 +26,12 @@
     "sync": "cd apps/tinyquiz && pnpm sync"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.3",
+    "@changesets/cli": "^2.29.5",
     "@emrgen/eslint-config-custom": "workspace:*",
-    "@playwright/test": "^1.44.1",
-    "@types/node": "^20.12.12",
+    "@playwright/test": "^1.54.0",
+    "@types/node": "^20.19.7",
     "prettier": "latest",
-    "semver": "^7.6.2"
+    "semver": "^7.7.2"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -40,8 +40,8 @@
     "@emrgen/carbon-blocks": "workspace:*",
     "@emrgen/carbon-core": "workspace:*",
     "@emrgen/types": "workspace:*",
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
     "command-line-args": "^5.2.1",
     "lodash": "^4.17.21"
   },
