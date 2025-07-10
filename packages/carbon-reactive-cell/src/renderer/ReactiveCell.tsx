@@ -38,7 +38,10 @@ export const LiveCellComp = (props: RendererProps) => {
 
   return (
     <CarbonBlock node={node}>
-      <ReactiveCellCompInner node={node.linkedProps!} view={<ReactiveCellViewer node={link} />} />
+      <ReactiveCellCompInner node={node.linkedProps!} view={<>
+        <ReactiveCellViewer node={link} />
+        <ReactiveCellStatus node={link} />
+      </>} />
     </CarbonBlock>
   );
 };
@@ -81,7 +84,6 @@ const ReactiveCellCompInner = (props: ReactiveCellProps) => {
         {/*NOTE: view is received from the parent to avoid re-rendering of the view on editor state change*/}
         <div className={"reactive-cell-viewer-wrapper"}>
           {view}
-          <ReactiveCellStatus node={node} />
         </div>
         <div className={"reactive-cell-editor-wrapper"}>
           <ReactiveCellEditor node={node} onFocus={onFocus} />

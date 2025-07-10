@@ -20,18 +20,21 @@ export const useReactiveVariable = (props: ReactiveVariableProps) => {
       if (variable.state.isDetached) return;
       onFulfilled?.(variable);
     };
-    const rejected = (cell) => {
-      onRejected?.(cell);
+    const rejected = (variable: Variable) => {
+      if (variable.state.isDetached) return;
+      onRejected?.(variable);
     };
-    const processing = (cell) => {
-      onProcessing?.(cell);
+    const processing = (variable: Variable) => {
+      if (variable.state.isDetached) return;
+      onProcessing?.(variable);
     };
-    const pending = (cell) => {
-      onPending?.(cell);
+    const pending = (variable: Variable) => {
+      if (variable.state.isDetached) return;
+      onPending?.(variable);
     };
 
     const id = nodeId;
-    console.log("listening", id);
+    // console.log("listening", id);
     runtime.on(ReactiveEvents.fulfilled(id), fulfilled);
     runtime.on(ReactiveEvents.rejected(id), rejected);
     runtime.on(ReactiveEvents.processing(id), processing);

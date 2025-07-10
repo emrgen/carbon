@@ -20,7 +20,7 @@ const visibleName = (v: Variable) => {
 // ReactiveCellEditor component for editing cell content or results of the cell
 export const ReactiveCellViewer = (props: RendererProps) => {
   const runtime = useReactiveRuntime();
-  const { node } = props;
+  const {node} = props;
   const [result, setResult] = useState<any>(
     runtime.mod.variable(node.id.toString())?.value ?? UNDEFINED_VALUE,
   );
@@ -30,7 +30,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   });
   const [error, setError] = useState<string>("");
   const [pending, setPending] = useState<boolean>(false);
-  const ref = useRef<HTMLDivElement|null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
   const [isHtml, setIsHtml] = useState<boolean>(false);
 
   // attach result to the ref when the component mounts
@@ -94,28 +94,34 @@ export const ReactiveCellViewer = (props: RendererProps) => {
     [mountResult],
   );
 
+  const onFulfilled = useCallback((v: Variable) => {
+    if (v.state.isDetached) return;
+    // console.log("Cell fulfilled:", v.id.toString(), v.value);
+    updateResult(v.value);
+    const hasName = !v.cell.builtin && Cell.hasName(v.cell);
+    setName(hasName ? (v.cell.name ?? "") : "");
+  }, [updateResult])
+
+  const onRejected = useCallback((v: Variable) => {
+    // console.error("Cell rejected:", cell.id.toString(), cell.error);
+    updateResult(null);
+    setPending(false);
+    setName("");
+    setError((v.error ?? "").toString());
+  }, [updateResult]);
+
+  const onProcessing = useCallback((v: Variable) => {
+    // console.log("Cell processing:", node.id.toString());
+    setPending(true);
+    setError("");
+    setName("");
+  }, [])
+
   useReactiveVariable({
     nodeId: node.id.toString(),
-    onFulfilled: (v) => {
-      if (v.state.isDetached) return;
-      // console.log("Cell fulfilled:", v.id.toString(), v.value);
-      updateResult(v.value);
-      const hasName = !v.cell.builtin && Cell.hasName(v.cell);
-      setName(hasName ? (v.cell.name ?? "") : "");
-    },
-    onRejected: (cell) => {
-      // console.error("Cell rejected:", cell.id.toString(), cell.error);
-      updateResult(null);
-      setPending(false);
-      setName("");
-      setError((cell.error ?? "").toString());
-    },
-    onProcessing: () => {
-      // console.log("Cell processing:", node.id.toString());
-      setPending(true);
-      setError("");
-      setName("");
-    },
+    onFulfilled,
+    onRejected,
+    onProcessing,
   });
 
   // console.log(isHtml, pending, result);
@@ -139,10 +145,10 @@ export const ReactiveCellViewer = (props: RendererProps) => {
             <div
               className={"reactive-cell-html-viewer"}
               ref={ref}
-              style={{ visibility: isHtml ? "visible" : "hidden" }}
+              style={{visibility: isHtml ? "visible" : "hidden"}}
             />
             {/*</ShadowDom>*/}
-            <CellViewer name={name} result={result} hide={isHtml} />
+            <CellViewer name={name} result={result} hide={isHtml}/>
           </div>
         )}
       </div>
@@ -150,7 +156,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   );
 };
 
-const CellViewer = ({ name = "x", result, hide }: { name?: string; result: any; hide }) => {
+const CellViewer = ({name = "x", result, hide}: { name?: string; result: any; hide }) => {
   if (hide) {
     return null;
   }
@@ -161,18 +167,18 @@ const CellViewer = ({ name = "x", result, hide }: { name?: string; result: any; 
 
   return (
     <div className={"cell-result-object"}>
-      <ObjectViewer data={result} field={name} root={true} />
+      <ObjectViewer data={result} field={name} root={true}/>
     </div>
   );
 };
 
-const ShadowDom = ({ children }) => {
+const ShadowDom = ({children}) => {
   const hostRef = useRef<any>(null);
   const [shadowRoot, setShadowRoot] = useState(null);
 
   useEffect(() => {
     if (hostRef.current && !shadowRoot) {
-      const shadow = hostRef.current.attachShadow({ mode: "open" });
+      const shadow = hostRef.current.attachShadow({mode: "open"});
       setShadowRoot(shadow);
     }
   }, [shadowRoot]);

@@ -2,7 +2,7 @@ import {CodeValuePath, Node} from "@emrgen/carbon-core";
 import {Cell, createMutable, createViewOf, Module, Runtime} from "@emrgen/carbon-reactive";
 
 export const nodeCode = (node: Node) => {
-  return node.props.get<string>(CodeValuePath);
+  return node.props.get<string>(CodeValuePath).trim();
 };
 
 const viewOfVars = new Map<string, boolean>();

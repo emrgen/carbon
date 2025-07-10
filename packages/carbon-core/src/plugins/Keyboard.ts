@@ -442,7 +442,7 @@ export class KeyboardPlugin extends AfterPlugin {
     if (!blockSelection.isEmpty) {
       preventAndStopCtx(ctx);
       console.log("node selection...");
-      
+
       const blocks = blockSelection.blocks.map(n => n.isLinked ? n.parent!:n)
       const lastNode = last(blocks) as Node;
 
@@ -458,13 +458,14 @@ export class KeyboardPlugin extends AfterPlugin {
         }
       }
 
-      const done = lastNode.nextSiblings.some((n) => {
+      const done = lastNode.nextSibling?.find((n) => {
         if (n.hasFocusable) {
           const focusable = n.find((n) => n.isFocusable);
           const pin = Pin.toStartOf(focusable!)!;
           cmd.Select(PinnedSelection.fromPin(pin)).Dispatch();
           return true;
         }
+        return false;
       });
 
       if (done) return true;
