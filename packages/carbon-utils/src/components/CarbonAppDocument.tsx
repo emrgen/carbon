@@ -20,7 +20,7 @@ interface CarbonAppProps {
 }
 
 export function Carbon(props: CarbonAppProps) {
-  const { app, children, focusOnMount = false } = props;
+  const {app, children, focusOnMount = false} = props;
   // @ts-ignore
   window.app = app;
 
@@ -41,29 +41,29 @@ export function Carbon(props: CarbonAppProps) {
   return (
     <CarbonContext app={app}>
       <CarbonChangeContext>
-        <CarbonOverlayContext>
-          <DndContext>
-            <RenderManagerContext manager={props.renderManager}>
-              <RecoilRoot>
-                <CarbonEvents>
-                  <div
-                    ref={ref}
-                    className="carbon-app-cursor-rest"
-                    contentEditable={true}
-                    suppressContentEditableWarning
-                    // onKeyDown={preventAndStop}
-                    // onKeyUp={preventAndStop}
-                  ></div>
+          <CarbonOverlayContext>
+            <DndContext>
+              <RenderManagerContext manager={props.renderManager}>
+                <RecoilRoot>
+                  <CarbonEvents>
+                    <div
+                      ref={ref}
+                      className="carbon-app-cursor-rest"
+                      contentEditable={true}
+                      suppressContentEditableWarning
+                      // onKeyDown={preventAndStop}
+                      // onKeyUp={preventAndStop}
+                    ></div>
 
-                  <RectSelectContext disabled={true}>
-                    <CarbonContent />
-                    {children}
-                  </RectSelectContext>
-                </CarbonEvents>
-              </RecoilRoot>
-            </RenderManagerContext>
-          </DndContext>
-        </CarbonOverlayContext>
+                    <RectSelectContext disabled={true}>
+                      <CarbonContent/>
+                      {children}
+                    </RectSelectContext>
+                  </CarbonEvents>
+                </RecoilRoot>
+              </RenderManagerContext>
+            </DndContext>
+          </CarbonOverlayContext>
       </CarbonChangeContext>
     </CarbonContext>
   );

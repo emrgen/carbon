@@ -31,7 +31,6 @@ import {timelineRenderer} from "@emrgen/carbon-plugin-timeline";
 import {RenderManager, useCreateCarbon} from "@emrgen/carbon-react";
 import {Carbon, carbonUtilPlugins} from "@emrgen/carbon-utils";
 import {flattenDeep} from "lodash";
-import {PathTracker} from "../../PathTracker";
 import "./board.styl";
 
 const data = node("carbon", [
@@ -177,7 +176,7 @@ export const Board = () => {
     <Box className={"carbon-board-app-container"} pos={"relative"}>
       <Carbon app={app} renderManager={renderManager}>
         <FloatingStyleMenu />
-        <PathTracker style={{ bottom: 0 }} />
+        {/*<PathTracker style={{ bottom: 0 }} />*/}
         <InsertBlockMenu />
         <BlockContextMenu />
       </Carbon>

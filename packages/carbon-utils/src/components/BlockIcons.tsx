@@ -1,10 +1,10 @@
-import { AiOutlinePicture } from "react-icons/ai";
-import { BsCodeSquare, BsDistributeHorizontal } from "react-icons/bs";
-import { CgTag } from "react-icons/cg";
-import { FcTodoList } from "react-icons/fc";
-import { IoToggleOutline } from "react-icons/io5";
-import { LuFrame } from "react-icons/lu";
-import { MdFormatQuote } from "react-icons/md";
+import {AiOutlinePicture} from "react-icons/ai";
+import {BsCodeSquare, BsDistributeHorizontal} from "react-icons/bs";
+import {CgTag} from "react-icons/cg";
+import {FcTodoList} from "react-icons/fc";
+import {IoToggleOutline} from "react-icons/io5";
+import {LuFrame} from "react-icons/lu";
+import {MdCode, MdFormatQuote} from "react-icons/md";
 import {
   PiListBulletsBold,
   PiTextAaBold,
@@ -13,9 +13,9 @@ import {
   PiTextHThreeBold,
   PiTextHTwoBold,
 } from "react-icons/pi";
-import { RxDividerHorizontal, RxVideo } from "react-icons/rx";
-import { TbListNumbers, TbMathXDivideY2, TbSection } from "react-icons/tb";
-import { VscListSelection } from "react-icons/vsc";
+import {RxDividerHorizontal, RxVideo} from "react-icons/rx";
+import {TbListNumbers, TbMathXDivideY2, TbSection} from "react-icons/tb";
+import {VscListSelection} from "react-icons/vsc";
 
 export const blockIcons = {
   paragraph: <PiTextAaBold />,
@@ -37,6 +37,7 @@ export const blockIcons = {
   code: <BsCodeSquare />,
   frame: <LuFrame />,
   divider: <RxDividerHorizontal />,
+  liveCell: <MdCode/>,
   separator: (
     <span style={{ transform: "rotate(90deg)" }}>
       <BsDistributeHorizontal />

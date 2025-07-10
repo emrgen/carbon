@@ -8,6 +8,7 @@ import {CodeValuePath, corePresetPlugins, ModePath, NodeId} from "@emrgen/carbon
 import {RenderManager, useCreateCachedCarbon} from "@emrgen/carbon-react";
 import {Runtime} from "@emrgen/carbon-reactive";
 import {LiveCell, LiveCellRenderer, ReactiveRuntimeContext} from "@emrgen/carbon-reactive-cell";
+import {InsertBlockMenu as CarbonInsertBlockMenu} from "@emrgen/carbon-ui";
 import {BlockMenuPlugin, Carbon} from "@emrgen/carbon-utils";
 import {Library} from "@observablehq/stdlib";
 import * as _ from "lodash";
@@ -92,6 +93,7 @@ export function Reactive() {
         <Carbon app={app} renderManager={renderManager}>
           <FloatingStyleMenu />
           <InsertBlockMenu />
+          <CarbonInsertBlockMenu/>
         </Carbon>
       </ReactiveRuntimeContext>
     </Box>

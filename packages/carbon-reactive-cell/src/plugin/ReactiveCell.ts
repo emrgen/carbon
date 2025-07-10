@@ -1,4 +1,4 @@
-import { CarbonPlugin, NodeSpec } from "@emrgen/carbon-core";
+import {CarbonPlugin, NodeSpec} from "@emrgen/carbon-core";
 
 export class LiveCell extends CarbonPlugin {
   name = "liveCell";
@@ -22,7 +22,7 @@ export class LiveCell extends CarbonPlugin {
         rect: true,
       },
       info: {
-        title: "LiveCell",
+        title: "Live Cell",
         description: "LiveCell for reactive programming",
         icon: "liveCell",
         tags: ["cell", "live", "reactive"],

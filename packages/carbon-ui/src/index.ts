@@ -1,12 +1,14 @@
-import { ReactRenderer } from "@emrgen/carbon-react";
-import { LayoutContent } from "./plugin/LayoutContent";
-import { Sidebar } from "./plugin/Sidebar";
-import { SidebarLayout } from "./plugin/SidebarLayout";
-import { LayoutContentComp } from "./renderer/LayoutContent";
-import { SidebarComp } from "./renderer/Sidebar";
-import { SidebarLayoutComp } from "./renderer/SidebarLayout";
+import {ReactRenderer} from "@emrgen/carbon-react";
+import {LayoutContent} from "./plugin/LayoutContent";
+import {Sidebar} from "./plugin/Sidebar";
+import {SidebarLayout} from "./plugin/SidebarLayout";
+import {LayoutContentComp} from "./renderer/LayoutContent";
+import {SidebarComp} from "./renderer/Sidebar";
+import {SidebarLayoutComp} from "./renderer/SidebarLayout";
 
 import "./layout.styl";
+
+export * from "./renderer/InsertBlockMenu"
 
 export const CarbonUI = {
   plugins: [new SidebarLayout(), new Sidebar(), new LayoutContent()],
