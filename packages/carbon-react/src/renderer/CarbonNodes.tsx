@@ -10,7 +10,7 @@ import {
   RemoteStylePath,
   TagPath,
 } from "@emrgen/carbon-core";
-import { identity, kebabCase, merge, uniq } from "lodash";
+import {identity, merge, uniq} from "lodash";
 import React, {
   forwardRef,
   ForwardRefRenderFunction,
@@ -20,10 +20,10 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { is_env_development } from "../env";
-import { useNodeChange, useRenderManager } from "../hooks";
-import { useCarbon } from "../hooks/index";
-import { defaultRenderPropComparator, RendererProps } from "./ReactRenderer";
+import {is_env_development} from "../env";
+import {useNodeChange, useRenderManager} from "../hooks";
+import {useCarbon} from "../hooks/index";
+import {defaultRenderPropComparator, RendererProps} from "./ReactRenderer";
 
 export const EmptySpan = () => {
   return (
@@ -112,16 +112,22 @@ const InnerElement: ForwardRefRenderFunction<any, Omit<RendererProps, "ref">> = 
     }
 
     const styles = merge({}, remoteStyle, localStyle, style ?? {});
-
-    return {
+    const ret = {
       ...localAttrs,
       ...remoteAttrs,
-      ...(Object.keys(style).length ? { style: styles } : {}),
+      ...(Object.keys(style).length ? {style: styles} : {}),
       ...rest,
-      className: uniq([className, custom.className, kebabCase(node.name)])
-        .filter(identity)
-        .join(" "),
-    };
+    }
+
+    const classNames = uniq([className, custom.className, ])
+      .filter(identity)
+      .join(" ")
+
+    if(classNames.trim()) {
+      ret.className = classNames
+    }
+
+    return ret;
   }, [custom, node]);
 
   // connect ref
@@ -152,7 +158,7 @@ const InnerElement: ForwardRefRenderFunction<any, Omit<RendererProps, "ref">> = 
     }
 
     return {};
-  }, [key, node]);
+  }, [key]);
 
   const isBold = node.props.get(MarksPath)?.some((m) => m.name === "bold");
 
@@ -455,7 +461,7 @@ interface CarbonChildrenSegmentProps extends RendererProps {
 
 // render children except first node
 export const CarbonNodeChildren = (props: RendererProps) => {
-  const { node, wrap = true, custom, className } = props;
+  const { node, wrap = true, custom } = props;
   return useMemo(() => {
     if (node.children.length < 2) return null;
 
