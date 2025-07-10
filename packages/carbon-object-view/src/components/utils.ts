@@ -1,6 +1,6 @@
-import { isNumber, isObject, isString, isSymbol } from "lodash";
+import {isNumber, isObject, isString, isSymbol} from "lodash";
 
-export const PAGE_SIZE = 10;
+export const PAGE_SIZE = 16;
 
 export const isGetterProp = (descriptor) => {
   return "get" in descriptor;
@@ -34,6 +34,10 @@ export const isLiteral = (data) => {
 export const isProxy = (data) => {
   return isObject(data) && data["isProxy"];
 };
+
+export const isDate = (data) => {
+  return data instanceof Date;
+}
 
 export function isGenerator(fn) {
   return fn?.constructor?.name === "GeneratorFunction";

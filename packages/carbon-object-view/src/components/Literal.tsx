@@ -1,10 +1,15 @@
-import { isNumber, isString, isSymbol } from "lodash";
-import { useMemo } from "react";
+import dayjs from 'dayjs'
+import {isDate, isNumber, isString, isSymbol} from "lodash";
+import {useMemo} from "react";
 
 export const Literal = ({ data, propName, isIndex, root = false }) => {
   const view = useMemo(() => {
     if (isNumber(data)) {
       return <span className={"cov-number"}>{data}</span>;
+    }
+
+    if (isDate(data)) {
+      return <span className={"cov-date"}>{dayjs(data).format('YYYY-MM-DD')}</span>;
     }
 
     if (isString(data)) {

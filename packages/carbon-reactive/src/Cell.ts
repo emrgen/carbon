@@ -1,5 +1,5 @@
 import {parseCell, peekId} from "@observablehq/parser";
-import {noop} from "lodash";
+import {identity, noop} from "lodash";
 import {DefinitionFactory} from "./Definition";
 import {Module} from "./Module";
 import {UNDEFINED_VALUE, Variable} from "./Variable";
@@ -27,6 +27,7 @@ export interface CellParseOptions {
   id?: string;
   name?: string;
   version?: number;
+  fileUrlResolver?:(name: string) => string;
 }
 
 // Cell is a reactive unit of computation that can be defined and used in a module.
@@ -72,7 +73,7 @@ export class Cell {
 
   // parse a cell definition and return a Cell instance
   static parse(definition: string, options?: CellParseOptions): Cell {
-    const { name, version, id = randomString(10) } = options || {};
+    const { name, version, id = randomString(10), fileUrlResolver = identity } = options || {};
     let ast: any;
     try {
       ast = parseCell(definition);
@@ -141,7 +142,7 @@ export class Cell {
 
     // replace the file names with the remote file urls
     if (ast.fileAttachments.size > 0) {
-      debugger;
+      // debugger;
     }
 
     // console.log(immutables);

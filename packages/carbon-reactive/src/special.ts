@@ -9,6 +9,16 @@ const hiddenName = (name: string) => `hidden_${name}`;
 const mutableId = (id: string) => `mutable/${id}`;
 const mutableName = (name: string) => `mutable_${name}`;
 
+const parseValue = (el) => {
+  // console.log(el.type)
+  switch (el.type) {
+    case "file":
+      return el.files[0]
+    default:
+      return el.value
+  }
+}
+
 export const createViewOf = (module: Module, cell: Cell) => {
   const viewOfCellName = hiddenName(cell.name);
   const hiddenCellId = hiddenId(cell.id);
@@ -49,10 +59,13 @@ export const createViewOf = (module: Module, cell: Cell) => {
       definition: (...args: any) => {
         const el = cell.definition(...args);
         el.oninput = (e: any) => {
-          accessor.value = el.value;
+          accessor.value = parseValue(el)
         };
 
-        accessor.value = el.value;
+        const value = parseValue(el);
+        if (value !== undefined) {
+          accessor.value = value
+        }
 
         return el;
       },

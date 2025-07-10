@@ -1,10 +1,10 @@
-import { isArray, isFunction, isObject } from "lodash";
-import { useMemo } from "react";
-import { ArrayView } from "./Array";
-import { FunctionView } from "./Function";
-import { Literal } from "./Literal";
-import { ObjectView } from "./Object";
-import { isAsyncFunction, isGenerator, isLiteral, isProxy } from "./utils";
+import {isArray, isDate, isFunction, isObject} from "lodash";
+import {useMemo} from "react";
+import {ArrayView} from "./Array";
+import {FunctionView} from "./Function";
+import {Literal} from "./Literal";
+import {ObjectView} from "./Object";
+import {isAsyncFunction, isGenerator, isLiteral, isProxy} from "./utils";
 
 // NodeView renders js types for in UI type visualization
 export const NodeView = ({ data, propName, isIndex, root }) => {
@@ -19,6 +19,10 @@ export const NodeView = ({ data, propName, isIndex, root }) => {
 
     if (isGenerator(data)) {
       return <Literal data={"f*()"} propName={propName} isIndex={false} root={root} />;
+    }
+
+    if (isDate(data)) {
+      return <Literal data={data} propName={propName} isIndex={false} root={root} />;
     }
 
     if (!isProxy(data) && isFunction(data)) {

@@ -57,7 +57,6 @@ const renderManager = RenderManager.from(flattenDeep(renderers));
 // experimental: add a width function to the runtime
 const width = () => {
   const page = document.querySelector(".cpage.page");
-  console.log(page);
   if (!page) return window.innerWidth;
   return page.clientWidth;
 };

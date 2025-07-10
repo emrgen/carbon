@@ -2,7 +2,7 @@ import {CodeValuePath, Node} from "@emrgen/carbon-core";
 import {Cell, createMutable, createViewOf, Module, Runtime} from "@emrgen/carbon-reactive";
 
 export const nodeCode = (node: Node) => {
-  return node.props.get<string>(CodeValuePath).trim();
+  return node.props.get<string>(CodeValuePath, "").trim();
 };
 
 const viewOfVars = new Map<string, boolean>();
@@ -48,6 +48,7 @@ export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean 
     // if the code is the same, we don't need to redefine it
     if (variable && cell.code === variable.cell.code) {
       if (recompute) {
+        console.log('xxxxxxxxxxxx')
         variable.play();
       }
       return variable;

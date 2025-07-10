@@ -23,7 +23,7 @@ export const ReactiveCellEditor = (props: ReactiveCellEditorProps) => {
   // define the variable when the editor is blurred
   const onBlur = useCallback(() => {
     // const variable = runtime.variablesById
-    defineVariable(runtime, node, true);
+    defineVariable(runtime, node, false);
   }, [node, runtime]);
 
   const onKeydown = useCallback(

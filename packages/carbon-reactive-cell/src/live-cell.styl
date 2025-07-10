@@ -2,6 +2,10 @@
   position relative
   margin 10px 0
 
+.carbon-reactive-cell-viewer-content
+  max-width 100%
+  width 100%
+
 .reactive-cell-editor-wrapper
   position relative;
 
@@ -53,7 +57,41 @@
   div
     display flex
     flex-direction column
+    width 100%
 
+  figure, table {
+    margin: 1rem 0;
+  }
+  //p, table, figure, figcaption, h1, h2, h3, h4, h5, h6, .katex-display {
+  //  max-width: 640px;
+  //}
+
+  table
+    width: 100%;
+    border-collapse: collapse;
+    border-color gray
+    thead
+      border-color inherit
+      tr
+        border-bottom: solid 1px #ccc;
+    th, td {
+      padding: 3px 6.5px 3px 0;
+      line-height 20px
+      font-size 14px
+    }
+    th {
+      color: #111;
+      text-align: left;
+      vertical-align: bottom;
+    }
+    tr:not(:last-child) {
+      border-bottom: solid 1px #eee;
+    }
+
+  blockquote
+    display flex
+    flex-direction column
+    padding 10px 16px;
 
   h1
     font-size 32px
@@ -70,6 +108,15 @@
     margin 0
     margin-bottom 6px;
     font-weight 500
+  h4
+    font-size 18px
+    margin 0
+    font-weight 500
+  h5
+    font-size 16px
+    margin 0
+    font-weight 500
+
   ol
     display: flex
     margin 0
@@ -82,6 +129,8 @@
     &:hover
       text-decoration underline
 
+  :where(button, input, optgroup, select, textarea)
+    line-height normal
 
   form
     margin 4px 0
@@ -98,16 +147,31 @@
 
   form > label
     font-weight 500
+    line-height 20px
 
   form > div,
   form > label + div
     display flex
     flex-direction row
-    input[type=number]
+    input[type=number],
+    input[type=search],
+    input[type=tel],
+    input[type=email],
+    input[type=datetime-local],
+    input[type=text],
+    textarea,
+    input
+      outline-offset: 0
       border 1px solid #ccc
       border-radius 4px
       padding 2px 4px
+      &:focus
+        box-shadow none!important
+        border 1px solid #000!important
       //margin-right 10px
+    textarea
+      line-height 26px
+      height 60px
 
 .cov-function-key
   color #ba3174

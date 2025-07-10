@@ -1,13 +1,18 @@
-import { isArray, isFunction, isObject } from "lodash";
-import { useMemo } from "react";
-import { FunctionView } from "./Function";
-import { Literal } from "./Literal";
-import { isGenerator, isLiteral, isProxy } from "./utils";
+import dayjs from 'dayjs'
+import {isArray, isDate, isFunction, isObject} from "lodash";
+import {useMemo} from "react";
+import {FunctionView} from "./Function";
+import {Literal} from "./Literal";
+import {isGenerator, isLiteral, isProxy} from "./utils";
 
 export const NodeInitial = ({ data, propName, isIndex }) => {
   return useMemo(() => {
     if (isLiteral(data)) {
       return <Literal data={data} propName={propName} isIndex={isIndex} />;
+    }
+
+    if (isDate(data)) {
+      return <span className={"cov-date"}>{dayjs(data).format('YYYY-MM-DD')}</span>;
     }
 
     if (isProxy(data)) {

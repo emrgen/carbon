@@ -96,7 +96,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
 
   const onFulfilled = useCallback((v: Variable) => {
     if (v.state.isDetached) return;
-    // console.log("Cell fulfilled:", v.id.toString(), v.value);
+    console.log("Cell fulfilled:", v.id.toString(), v.value);
     updateResult(v.value);
     const hasName = !v.cell.builtin && Cell.hasName(v.cell);
     setName(hasName ? (v.cell.name ?? "") : "");
@@ -129,9 +129,12 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   return (
     <div
       className={"carbon-reactive-cell-viewer"}
-      // onMouseMove={stop}
       onMouseDown={stop}
       onBeforeInput={stop}
+      onKeyDown={stop}
+      onKeyUp={stop}
+      onClick={stop}
+      onBlur={stop}
     >
       {/*<root.div className={"reactive-cell-html-viewer-container"}>*/}
       <div className={"carbon-reactive-cell-viewer-content"}>
