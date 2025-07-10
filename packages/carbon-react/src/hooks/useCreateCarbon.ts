@@ -33,10 +33,10 @@ export const createCarbon = (name: string, json: InitNodeJSON, plugins: CarbonPl
   const content = schema.nodeFromJSON(json);
 
   // update the empty placeholder for nodes that have an empty first child
+  // this will ensure nodes like list: will show `List` placeholder on first render
   content?.all((n) => {
     if (n.firstChild?.isEmpty) {
       const placeholder = n.props.get<string>(EmptyPlaceholderPath, " ");
-      console.log(n.name, n.firstChild.name, placeholder);
       if (placeholder !== " ") {
         n.firstChild.updateProps({
           [PlaceholderPath]: placeholder,

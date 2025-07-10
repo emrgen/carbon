@@ -1,6 +1,6 @@
 import {indentWithTab} from "@codemirror/commands";
 import {javascript} from "@codemirror/lang-javascript";
-import {EditorState, Prec} from "@codemirror/state";
+import {EditorState, Prec, RangeSet} from "@codemirror/state";
 import {Decoration, keymap, MatchDecorator, ViewPlugin, ViewUpdate} from "@codemirror/view";
 import {
   ActionOrigin,
@@ -48,11 +48,13 @@ const matchDecorator = new MatchDecorator({
 // ✅ Create a ViewPlugin to apply it
 const customKeywordHighlighter = ViewPlugin.fromClass(
   class {
+    decorations: RangeSet<Decoration>;
+
     constructor(view) {
       this.decorations = matchDecorator.createDeco(view);
     }
 
-    update(update) {
+    update(update: { docChanged: any; viewportChanged: any; view: EditorView; }) {
       if (update.docChanged || update.viewportChanged) {
         this.decorations = matchDecorator.createDeco(update.view);
       }

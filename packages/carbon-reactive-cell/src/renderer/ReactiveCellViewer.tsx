@@ -1,14 +1,14 @@
-import { stop } from "@emrgen/carbon-core";
-import { ObjectViewer } from "@emrgen/carbon-object-view";
-import { RendererProps } from "@emrgen/carbon-react";
-import { Cell, UNDEFINED_VALUE, Variable } from "@emrgen/carbon-reactive";
-import { cloneDeep, isFunction, isPlainObject } from "lodash";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import {stop} from "@emrgen/carbon-core";
+import {ObjectViewer} from "@emrgen/carbon-object-view";
+import {RendererProps} from "@emrgen/carbon-react";
+import {Cell, UNDEFINED_VALUE, Variable} from "@emrgen/carbon-reactive";
+import {cloneDeep, isFunction, isPlainObject} from "lodash";
+import {useCallback, useEffect, useRef, useState} from "react";
+import {createPortal} from "react-dom";
 // import root from "react-shadow";
-import { useReactiveRuntime } from "../hooks/useReactiveRuntime";
-import { useReactiveVariable } from "../hooks/useReactiveVariable";
-import { isHtmlElement } from "../x";
+import {useReactiveRuntime} from "../hooks/useReactiveRuntime";
+import {useReactiveVariable} from "../hooks/useReactiveVariable";
+import {isHtmlElement} from "../x";
 
 const NOT_LOADED = "__NOT_LOADED__";
 
@@ -30,7 +30,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   });
   const [error, setError] = useState<string>("");
   const [pending, setPending] = useState<boolean>(false);
-  const ref = useRef<any>(null);
+  const ref = useRef<HTMLDivElement|null>(null);
   const [isHtml, setIsHtml] = useState<boolean>(false);
 
   // attach result to the ref when the component mounts
@@ -52,6 +52,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   //   }
   // }, [node, ref, result]);
 
+  // mount html result from cell evaluation
   const mountResult = useCallback(
     (result: any) => {
       if (ref.current) {
@@ -60,7 +61,9 @@ export const ReactiveCellViewer = (props: RendererProps) => {
         setIsHtml(isHtml);
         if (isHtml) {
           if (el.hasChildNodes()) {
-            el.removeChild(el.firstChild!);
+            Array.from(el.children).forEach((child) => {
+              child.remove();
+            })
           }
           el.appendChild(result);
         } else {
@@ -92,7 +95,7 @@ export const ReactiveCellViewer = (props: RendererProps) => {
   );
 
   useReactiveVariable({
-    node,
+    nodeId: node.id.toString(),
     onFulfilled: (v) => {
       if (v.state.isDetached) return;
       // console.log("Cell fulfilled:", v.id.toString(), v.value);

@@ -1,11 +1,11 @@
-import { CodeMirrorEditor } from "@emrgen/carbon-codemirror";
-import { preventAndStop } from "@emrgen/carbon-core";
-import { RendererProps } from "@emrgen/carbon-react";
+import {CodeMirrorEditor} from "@emrgen/carbon-codemirror";
+import {preventAndStop} from "@emrgen/carbon-core";
+import {RendererProps} from "@emrgen/carbon-react";
 import isHotkey from "is-hotkey";
-import { useCallback, useMemo } from "react";
-import { PiPlayBold } from "react-icons/pi";
-import { useReactiveRuntime } from "../hooks/useReactiveRuntime";
-import { defineVariable } from "../x";
+import {useCallback, useMemo} from "react";
+import {PiPlayBold} from "react-icons/pi";
+import {useReactiveRuntime} from "../hooks/useReactiveRuntime";
+import {defineVariable} from "../x";
 
 interface ReactiveCellEditorProps extends RendererProps {
   onFocus?: () => void;
@@ -23,7 +23,7 @@ export const ReactiveCellEditor = (props: ReactiveCellEditorProps) => {
   // define the variable when the editor is blurred
   const onBlur = useCallback(() => {
     // const variable = runtime.variablesById
-    defineVariable(runtime, node);
+    defineVariable(runtime, node, true);
   }, [node, runtime]);
 
   const onKeydown = useCallback(

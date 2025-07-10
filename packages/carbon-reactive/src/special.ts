@@ -1,5 +1,5 @@
-import { Cell } from "./Cell";
-import { Module } from "./Module";
+import {Cell} from "./Cell";
+import {Module} from "./Module";
 
 const immutableId = (id: string) => `immutable/${id}`;
 
@@ -13,8 +13,10 @@ export const createViewOf = (module: Module, cell: Cell) => {
   const viewOfCellName = hiddenName(cell.name);
   const hiddenCellId = hiddenId(cell.id);
 
+  // delete old instance
   const dispose = () => {
     module.delete(hiddenCellId);
+    module.delete(cell.id);
   };
 
   const accessor = {
@@ -42,6 +44,7 @@ export const createViewOf = (module: Module, cell: Cell) => {
       name: viewOfCellName,
       dependencies: cell.dependencies,
       version: cell.version,
+      code: cell.code,
       dispose,
       definition: (...args: any) => {
         const el = cell.definition(...args);
@@ -72,10 +75,6 @@ export const createViewOf = (module: Module, cell: Cell) => {
 
   module.runtime.schedule();
 };
-export const removeViewOf = (module: Module, cell: Cell) => {
-  module.delete(cell.id);
-  module.delete(hiddenId(cell.id));
-};
 
 export const createMutable = (module: Module, cell: Cell) => {
   const hiddenCellId = hiddenId(cell.id);
@@ -86,6 +85,7 @@ export const createMutable = (module: Module, cell: Cell) => {
   const dispose = () => {
     module.delete(hiddenCellId);
     module.delete(mutableCellId);
+    module.delete(cell.id);
   };
 
   const accessor = {
@@ -115,6 +115,7 @@ export const createMutable = (module: Module, cell: Cell) => {
       name: cell.name,
       version: cell.version,
       dependencies: [hiddenCellName],
+      code: cell.code,
       dispose,
       definition: () => {
         return accessor.value;

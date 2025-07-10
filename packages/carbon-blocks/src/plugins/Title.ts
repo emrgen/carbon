@@ -20,7 +20,7 @@ import {
   Writer,
 } from "@emrgen/carbon-core";
 
-import { TextPlugin } from "./Text";
+import {TextPlugin} from "./Text";
 
 // title is a block content that can be used as a title for a block
 export class TitlePlugin extends NodePlugin {
@@ -61,7 +61,6 @@ export class TitlePlugin extends NodePlugin {
         cmd.transform.insertText(selection, data ?? key, false)?.Dispatch();
       },
       input: (ctx: EventContext<KeyboardEvent>) => {
-        console.log("input", ctx.event);
         preventAndStopCtx(ctx);
       },
       dragStart(ctx: EventContext<DragEvent>) {

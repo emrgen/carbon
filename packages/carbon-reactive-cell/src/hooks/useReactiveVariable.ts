@@ -1,10 +1,9 @@
-import { Node } from "@emrgen/carbon-core";
-import { ReactiveEvents, Variable } from "@emrgen/carbon-reactive";
-import { useEffect } from "react";
-import { useReactiveRuntime } from "./useReactiveRuntime";
+import {ReactiveEvents, Variable} from "@emrgen/carbon-reactive";
+import {useEffect} from "react";
+import {useReactiveRuntime} from "./useReactiveRuntime";
 
 interface ReactiveVariableProps {
-  node: Node;
+  nodeId: string;
   onFulfilled?: (cell: Variable) => void;
   onRejected?: (cell: Variable) => void;
   onPending?: (cell: Variable) => void;
@@ -12,7 +11,7 @@ interface ReactiveVariableProps {
 }
 
 export const useReactiveVariable = (props: ReactiveVariableProps) => {
-  const { node, onFulfilled, onPending, onProcessing, onRejected } = props;
+  const { nodeId, onFulfilled, onPending, onProcessing, onRejected } = props;
 
   const runtime = useReactiveRuntime();
 
@@ -31,8 +30,8 @@ export const useReactiveVariable = (props: ReactiveVariableProps) => {
       onPending?.(cell);
     };
 
-    const id = node.id.toString();
-    // console.log("listening", id);
+    const id = nodeId;
+    console.log("listening", id);
     runtime.on(ReactiveEvents.fulfilled(id), fulfilled);
     runtime.on(ReactiveEvents.rejected(id), rejected);
     runtime.on(ReactiveEvents.processing(id), processing);
@@ -45,5 +44,5 @@ export const useReactiveVariable = (props: ReactiveVariableProps) => {
       runtime.off(ReactiveEvents.processing(id), processing);
       runtime.off(ReactiveEvents.pending(id), pending);
     };
-  }, [node, onFulfilled, onPending, onProcessing, onRejected, runtime]);
+  }, [nodeId, onFulfilled, onPending, onProcessing, onRejected, runtime]);
 };

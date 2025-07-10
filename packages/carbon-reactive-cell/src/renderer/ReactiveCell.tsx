@@ -5,7 +5,7 @@ import {
   removeClass,
   stop,
 } from "@emrgen/carbon-core";
-import { useRectSelectable } from "@emrgen/carbon-dragon-react";
+import {useRectSelectable} from "@emrgen/carbon-dragon-react";
 import {
   CarbonBlock,
   RendererProps,
@@ -13,12 +13,12 @@ import {
   useNodeChange,
   useSelectionHalo,
 } from "@emrgen/carbon-react";
-import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { useReactiveRuntime } from "../hooks/useReactiveRuntime";
-import { useReactiveVariable } from "../hooks/useReactiveVariable";
-import { defineVariable } from "../x";
-import { ReactiveCellEditor } from "./ReactiveCellEditor";
-import { ReactiveCellViewer } from "./ReactiveCellViewer";
+import {ReactNode, useCallback, useEffect, useRef, useState} from "react";
+import {useReactiveRuntime} from "../hooks/useReactiveRuntime";
+import {useReactiveVariable} from "../hooks/useReactiveVariable";
+import {defineVariable, removeVariable} from "../x";
+import {ReactiveCellEditor} from "./ReactiveCellEditor";
+import {ReactiveCellViewer} from "./ReactiveCellViewer";
 
 // LiveCell renderer
 export const LiveCellComp = (props: RendererProps) => {
@@ -28,6 +28,12 @@ export const LiveCellComp = (props: RendererProps) => {
 
   useEffect(() => {
     defineVariable(runtime, link);
+  }, [link, runtime]);
+
+  useEffect(() => {
+    return () => {
+      removeVariable(runtime, link)
+    }
   }, [link, runtime]);
 
   return (
@@ -44,6 +50,7 @@ interface ReactiveCellProps extends RendererProps {
 // private inner component for ReactiveCell
 const ReactiveCellCompInner = (props: ReactiveCellProps) => {
   const { view } = props;
+  const runtime = useReactiveRuntime();
   const app = useCarbon();
   // track node changes using useNodeChange hook
   const ref = useRef<HTMLDivElement>(null);
@@ -52,7 +59,6 @@ const ReactiveCellCompInner = (props: ReactiveCellProps) => {
   const { SelectionHalo, attributes, isSelected } = useSelectionHalo({ node });
 
   const onFocus = useCallback(() => {
-    console.log("xxx");
     if (isSelected) {
       app.cmd
         .Update(node.id, {
@@ -66,6 +72,8 @@ const ReactiveCellCompInner = (props: ReactiveCellProps) => {
       app.cmd.Select(PinnedSelection.SKIP).Dispatch();
     }
   }, [isSelected, app, node.id]);
+
+
 
   return (
     <CarbonBlock node={node} ref={ref} custom={attributes}>
@@ -88,7 +96,7 @@ const ReactiveCellStatus = (props: RendererProps) => {
   const [pending, setPending] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useReactiveVariable({
-    node: props.node,
+    nodeId: props.node.id.toString(),
     onFulfilled: (value) => {
       removeClass(ref.current!, "pending");
     },

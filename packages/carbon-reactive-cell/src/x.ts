@@ -1,5 +1,5 @@
-import { CodeValuePath, Node } from "@emrgen/carbon-core";
-import { Cell, createMutable, createViewOf, Module, Runtime } from "@emrgen/carbon-reactive";
+import {CodeValuePath, Node} from "@emrgen/carbon-core";
+import {Cell, createMutable, createViewOf, Module, Runtime} from "@emrgen/carbon-reactive";
 
 export const nodeCode = (node: Node) => {
   return node.props.get<string>(CodeValuePath);
@@ -20,12 +20,10 @@ const defineTrap = (module: Module, cell: Cell) => {
   // }
 
   if (cell.mutable) {
-    // mutableVars.set(cell.id, true);
     return createMutable(module, cell);
   }
 
   if (cell.view) {
-    // viewOfVars.set(cell.id, true);
     return createViewOf(module, cell);
   }
 
@@ -61,6 +59,10 @@ export const defineVariable = (runtime: Runtime, node: Node, recompute: boolean 
     console.log(error);
   }
 };
+
+export const removeVariable = (runtime: Runtime, node: Node, recompute: boolean = false) => {
+  runtime.mod.delete(node.id.toString());
+}
 
 export const isHtmlElement = (res) => {
   return (

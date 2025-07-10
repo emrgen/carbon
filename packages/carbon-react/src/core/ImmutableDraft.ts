@@ -293,10 +293,12 @@ export class ImmutableDraft implements Draft {
     // remove deleted nodes from changed list
     // this will prevent from trying to render deleted nodes
     this.updated.toArray().forEach((id) => {
-      // console.log('checking deleted', id.toString(), this.nodeMap.deleted(id));
       if (this.nodeMap.isDeleted(id)) {
         // console.log("REMOVED", id.toString());
         this.removeUpdated(id);
+        values(this.get(id)?.links).forEach((link) => {
+          this.removeUpdated(link.id)
+        })
         return;
       }
 
@@ -307,7 +309,7 @@ export class ImmutableDraft implements Draft {
           this.removeUpdated(id);
         }
 
-        // remove the sandbox nodes
+        // remove the sandbox nodes, sandbox node updates are reflected by the linked props node
         if (node.type.isSandbox) {
           this.removeUpdated(id);
         }
@@ -784,20 +786,15 @@ export class ImmutableDraft implements Draft {
     this.updateDependents(node, UpdateDependent.Next);
 
     this.tm.remove(node, parent);
-    node.all(n => {
-      if (this.updated.has(n.id)) {
-        this.updated.remove(n.id);
-      }
-      values(n.links).forEach((link) => {
-        if (this.updated.has(link.id)) {
-          this.updated.remove(link.id);
-        }
-      })
-    })
 
     this.addUpdated(parent.id);
     this.addContentChanged(parent.id);
-    node.all((n) => this.addRemoved(n));
+    node.all((n) => {
+      this.addRemoved(n)
+      values(n.links).forEach(link => {
+        this.addRemoved(link)
+      })
+    });
 
     // if parent title is empty, set placeholder from parent
     if (parent.isTextContainer && parent.isEmpty) {
