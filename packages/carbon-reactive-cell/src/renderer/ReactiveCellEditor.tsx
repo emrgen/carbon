@@ -29,7 +29,8 @@ export const ReactiveCellEditor = (props: ReactiveCellEditorProps) => {
   const onKeydown = useCallback(
     (event: KeyboardEvent) => {
       // define the variable when Ctrl+S or Cmd+S is pressed
-      if (isHotkey("mod+s", event)) {
+      if (isHotkey("mod+s", event) || isHotkey("cmd+s", event)) {
+        event.preventDefault()
         defineVariable(runtime, node, true);
       }
     },

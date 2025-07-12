@@ -102,7 +102,7 @@ export const ArrayView = (props: ArrayProps) => {
               );
             })
           }
-          <span className={"cov-show-more"}> {data.length > PAGE_SIZE ? `...` : ""}</span>
+          {data.length > PAGE_SIZE && <span className={"cov-show-more"}> {data.length > PAGE_SIZE ? `...` : ""}</span>}
           <span className={"cov-right-bracket"}>]</span>
         </div>
       )}

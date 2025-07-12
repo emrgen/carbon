@@ -174,6 +174,7 @@ export class Variable {
     this.promise = Variable.createPromise(this);
   }
 
+  // unwrap a promise onto a invalidation object
   private static createInvalidation() {
     let _resolve: (v: any) => void = noop;
     let _reject: (e: Error) => void;
@@ -194,11 +195,14 @@ export class Variable {
 
   private static createPromise(variable: Variable) {
     variable.invalidation.resolve(Math.random());
+    variable.invalidation = Variable.createInvalidation();
+
+  // unwrap a promise onto the variable
     const promise = new Promise((y, n) => {
       variable.resolve = y;
       variable.reject = n;
     }).then(variable.fulfilled, variable.rejected);
-    variable.invalidation = Variable.createInvalidation();
+
     return promise;
   }
 
@@ -371,6 +375,7 @@ export class Variable {
 
     // get the values of the input variablesById
     const args = this.dependencies.map((name) => {
+      // invalidation is a per variable deps that resolves when the varable is deleted
       if (name === "invalidation") return this.invalidation.promise;
       return inputMap.get(name)?.value;
     }) as any[];
