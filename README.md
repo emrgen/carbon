@@ -1,5 +1,5 @@
 # Carbon
-A Extendable editor framework.
+A extendable editor framework.
 
 # Demo video
 
